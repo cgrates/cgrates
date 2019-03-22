@@ -37,7 +37,7 @@ var (
 	stsV1CfgPath string
 	stsV1Cfg     *config.CGRConfig
 	stsV1Rpc     *rpc.Client
-	statConfig   *engine.StatQueueProfile
+	statConfig   *StatQueueWrapper
 	stsV1ConfDIR string //run tests for specific configuration
 )
 
@@ -309,30 +309,33 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	statConfig = &engine.StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TEST_PROFILE1",
-		FilterIDs: []string{"FLTR_1"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
-		QueueLength: 10,
-		TTL:         time.Duration(10) * time.Second,
-		Metrics: []*engine.MetricWithFilters{
-			&engine.MetricWithFilters{
-				MetricID: "*acd",
+	statConfig = &StatQueueWrapper{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TEST_PROFILE1",
+			FilterIDs: []string{"FLTR_1"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-			&engine.MetricWithFilters{
-				MetricID: "*tcd",
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				&engine.MetricWithFilters{
+					MetricID: "*acd",
+				},
+				&engine.MetricWithFilters{
+					MetricID: "*tcd",
+				},
 			},
+			ThresholdIDs: []string{"Val1", "Val2"},
+			Blocker:      true,
+			Stored:       true,
+			Weight:       20,
+			MinItems:     1,
 		},
-		ThresholdIDs: []string{"Val1", "Val2"},
-		Blocker:      true,
-		Stored:       true,
-		Weight:       20,
-		MinItems:     1,
 	}
+
 	if err := stsV1Rpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -341,8 +344,8 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(statConfig, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(statConfig), utils.ToJSON(reply))
+	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(statConfig.StatQueueProfile), utils.ToJSON(reply))
 	}
 }
 
@@ -388,8 +391,8 @@ func testV1STSUpdateStatQueueProfile(t *testing.T) {
 	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(statConfig, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(statConfig), utils.ToJSON(reply))
+	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(statConfig.StatQueueProfile), utils.ToJSON(reply))
 	}
 }
 
@@ -413,34 +416,36 @@ func testV1STSRemoveStatQueueProfile(t *testing.T) {
 }
 
 func testV1STSProcessMetricsWithFilter(t *testing.T) {
-	statConfig = &engine.StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "CustomStatProfile",
-		FilterIDs: []string{"*string:~DistinctVal:RandomVal"}, //custom filter for event
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	statConfig = &StatQueueWrapper{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:    "cgrates.org",
+			ID:        "CustomStatProfile",
+			FilterIDs: []string{"*string:~DistinctVal:RandomVal"}, //custom filter for event
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			QueueLength: 100,
+			TTL:         time.Duration(1) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				&engine.MetricWithFilters{
+					MetricID:  "*acd",
+					FilterIDs: []string{"*rsr::~Usage{*duration}(>10s)"},
+				},
+				&engine.MetricWithFilters{
+					MetricID:  "*tcd",
+					FilterIDs: []string{"*gt:~Usage:5s"},
+				},
+				&engine.MetricWithFilters{
+					MetricID:  "*sum#CustomValue",
+					FilterIDs: []string{"*exists:~CustomValue:", "*gte:~CustomValue:10.0"},
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+			Blocker:      true,
+			Stored:       true,
+			Weight:       20,
+			MinItems:     1,
 		},
-		QueueLength: 100,
-		TTL:         time.Duration(1) * time.Second,
-		Metrics: []*engine.MetricWithFilters{
-			&engine.MetricWithFilters{
-				MetricID:  "*acd",
-				FilterIDs: []string{"*rsr::~Usage{*duration}(>10s)"},
-			},
-			&engine.MetricWithFilters{
-				MetricID:  "*tcd",
-				FilterIDs: []string{"*gt:~Usage:5s"},
-			},
-			&engine.MetricWithFilters{
-				MetricID:  "*sum#CustomValue",
-				FilterIDs: []string{"*exists:~CustomValue:", "*gte:~CustomValue:10.0"},
-			},
-		},
-		ThresholdIDs: []string{"*none"},
-		Blocker:      true,
-		Stored:       true,
-		Weight:       20,
-		MinItems:     1,
 	}
 	//set the custom statProfile
 	var result string
@@ -454,8 +459,8 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "CustomStatProfile"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(statConfig, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(statConfig), utils.ToJSON(reply))
+	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(statConfig.StatQueueProfile), utils.ToJSON(reply))
 	}
 	//verify metrics
 	expectedIDs := []string{"CustomStatProfile"}

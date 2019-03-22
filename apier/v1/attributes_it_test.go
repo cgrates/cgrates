@@ -752,7 +752,7 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 func testAttributeSRemAlsPrf(t *testing.T) {
 	var resp string
 	if err := attrSRPC.Call("ApierV1.RemoveAttributeProfile",
-		&ArgRemoveAttrPrfWrapper{Tenant: alsPrf.Tenant, ID: alsPrf.ID}, &resp); err != nil {
+		&utils.TenantIDWrapper{Tenant: alsPrf.Tenant, ID: alsPrf.ID}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -766,7 +766,7 @@ func testAttributeSRemAlsPrf(t *testing.T) {
 	// remove twice shoud return not found
 	resp = ""
 	if err := attrSRPC.Call("ApierV1.RemoveAttributeProfile",
-		&ArgRemoveAttrPrfWrapper{Tenant: alsPrf.Tenant, ID: alsPrf.ID}, &resp); err.Error() != utils.ErrNotFound.Error() {
+		&utils.TenantIDWrapper{Tenant: alsPrf.Tenant, ID: alsPrf.ID}, &resp); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
 	}
 }

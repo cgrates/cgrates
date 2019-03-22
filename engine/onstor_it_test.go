@@ -1450,13 +1450,6 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 	if err := onStor.SetStatQueueProfile(sq, false); err != nil {
 		t.Error(err)
 	}
-	//get from cache
-	if rcv, err := onStor.GetStatQueueProfile(sq.Tenant,
-		sq.ID, true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(sq, rcv) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(sq), utils.ToJSON(rcv))
-	}
 	//get from database
 	if rcv, err := onStor.GetStatQueueProfile(sq.Tenant,
 		sq.ID, false, false, utils.NonTransactional); err != nil {
@@ -1476,13 +1469,6 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(sleepDelay)
-	//get from cache
-	if rcv, err := onStor.GetStatQueueProfile(sq.Tenant,
-		sq.ID, true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(sq, rcv) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(sq), utils.ToJSON(rcv))
-	}
 	//get from database
 	if rcv, err := onStor.GetStatQueueProfile(sq.Tenant,
 		sq.ID, false, false, utils.NonTransactional); err != nil {
@@ -1493,11 +1479,6 @@ func testOnStorITStatQueueProfile(t *testing.T) {
 	if err := onStor.RemoveStatQueueProfile(sq.Tenant, sq.ID,
 		utils.NonTransactional, false); err != nil {
 		t.Error(err)
-	}
-	//check cache if removed
-	if _, rcvErr := onStor.GetStatQueueProfile(sq.Tenant,
-		sq.ID, false, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
 	}
 	//check database if removed
 	if _, rcvErr := onStor.GetStatQueueProfile(sq.Tenant,
@@ -1536,13 +1517,6 @@ func testOnStorITStatQueue(t *testing.T) {
 	if err := onStor.SetStatQueue(sq); err != nil {
 		t.Error(err)
 	}
-	//get from cache
-	if rcv, err := onStor.GetStatQueue(sq.Tenant,
-		sq.ID, true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(sq, rcv) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(sq), utils.ToJSON(rcv))
-	}
 	//get from database
 	if rcv, err := onStor.GetStatQueue(sq.Tenant,
 		sq.ID, false, false, utils.NonTransactional); err != nil {
@@ -1572,13 +1546,6 @@ func testOnStorITStatQueue(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(sleepDelay)
-	//get from cache
-	if rcv, err := onStor.GetStatQueue(sq.Tenant,
-		sq.ID, true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(sq, rcv) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(sq), utils.ToJSON(rcv))
-	}
 	//get from database
 	if rcv, err := onStor.GetStatQueue(sq.Tenant,
 		sq.ID, false, false, utils.NonTransactional); err != nil {
@@ -1589,11 +1556,6 @@ func testOnStorITStatQueue(t *testing.T) {
 	if err := onStor.RemoveStatQueue(sq.Tenant, sq.ID,
 		utils.NonTransactional); err != nil {
 		t.Error(err)
-	}
-	//check cache if removed
-	if _, rcvErr := onStor.GetStatQueue(sq.Tenant,
-		sq.ID, true, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
 	}
 	//check database if removed
 	if _, rcvErr := onStor.GetStatQueue(sq.Tenant,

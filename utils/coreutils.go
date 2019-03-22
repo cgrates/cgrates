@@ -794,6 +794,16 @@ func (tID *TenantID) TenantID() string {
 	return ConcatenatedKey(tID.Tenant, tID.ID)
 }
 
+type TenantIDWrapper struct {
+	Tenant string
+	ID     string
+	Cache  *string
+}
+
+func (tID *TenantIDWrapper) TenantID() string {
+	return ConcatenatedKey(tID.Tenant, tID.ID)
+}
+
 // RPCCall is a generic method calling RPC on a struct instance
 // serviceMethod is assumed to be in the form InstanceV1.Method
 // where V1Method will become RPC method called on instance
