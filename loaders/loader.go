@@ -25,11 +25,13 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"reflect"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 type openedCSVFile struct {
@@ -39,7 +41,8 @@ type openedCSVFile struct {
 }
 
 func NewLoader(dm *engine.DataManager, cfg *config.LoaderSCfg,
-	timezone string, filterS *engine.FilterS) (ldr *Loader) {
+	timezone string, exitChan chan bool, filterS *engine.FilterS,
+	internalCacheSChan chan rpcclient.RpcClientConnection) (ldr *Loader) {
 	ldr = &Loader{
 		enabled:       cfg.Enabled,
 		tenant:        cfg.Tenant,
@@ -70,6 +73,29 @@ func NewLoader(dm *engine.DataManager, cfg *config.LoaderSCfg,
 			}
 		}
 	}
+	var err error
+	//create cache connection
+	var caches *rpcclient.RpcClientPool
+	if len(cfg.CacheSConns) != 0 {
+		caches, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+			config.CgrConfig().TlsCfg().ClientKey,
+			config.CgrConfig().TlsCfg().ClientCerificate, config.CgrConfig().TlsCfg().CaCertificate,
+			config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
+			config.CgrConfig().GeneralCfg().ConnectTimeout, config.CgrConfig().GeneralCfg().ReplyTimeout,
+			cfg.CacheSConns, internalCacheSChan,
+			config.CgrConfig().GeneralCfg().InternalTtl, false)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<LoaderS> Could not connect to CacheS, error: %s", err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+
+	//add verification in case of nil
+	if caches != nil && reflect.ValueOf(caches).IsNil() {
+		caches = nil
+	}
+	ldr.cacheS = caches
 	return
 }
 
@@ -82,7 +108,6 @@ type Loader struct {
 	tpInDir       string
 	tpOutDir      string
 	lockFilename  string
-	cacheSConns   []*config.HaPoolConfig
 	fieldSep      string
 	dataTpls      map[string][]*config.FCTemplate      // map[loaderType]*config.FCTemplate
 	rdrs          map[string]map[string]*openedCSVFile // map[loaderType]map[fileName]*openedCSVFile for common incremental read
@@ -91,6 +116,7 @@ type Loader struct {
 	dm            *engine.DataManager
 	timezone      string
 	filterS       *engine.FilterS
+	cacheS        rpcclient.RpcClientConnection
 }
 
 func (ldr *Loader) ListenAndServe(exitChan chan struct{}) (err error) {
@@ -247,6 +273,8 @@ func (ldr *Loader) processContent(loaderType string) (err error) {
 
 func (ldr *Loader) storeLoadedData(loaderType string,
 	lds map[string][]LoaderData) (err error) {
+	var ids []string
+	cacheArgs := utils.InitAttrReloadCache()
 	switch loaderType {
 	case utils.MetaAttributes:
 		for _, lDataSet := range lds {
@@ -268,10 +296,13 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 							utils.LoaderS, ldr.ldrID, utils.ToJSON(apf)))
 					continue
 				}
-				if err := ldr.dm.SetAttributeProfile(apf, true, true); err != nil {
+				// get IDs so we can reload in cache
+				ids = append(ids, apf.TenantID())
+				if err := ldr.dm.SetAttributeProfile(apf, true); err != nil {
 					return err
 				}
 			}
+			cacheArgs.AttributeProfileIDs = &ids
 		}
 	case utils.MetaResources:
 		for _, lDataSet := range lds {
@@ -474,5 +505,11 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 		}
 	}
 
+	if ldr.cacheS != nil {
+		var reply string
+		if err = ldr.cacheS.Call(utils.CacheSv1ReloadCache, cacheArgs, &reply); err != nil {
+			return err
+		}
+	}
 	return
 }

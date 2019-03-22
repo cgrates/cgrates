@@ -36,6 +36,9 @@
  	"dispatcher_routes": {"limit": -1, "ttl": "2s"}
 },
 
+"scheduler": {
+	"enabled": true,				
+},
 
 "attributes": {
 	"enabled": false

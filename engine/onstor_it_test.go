@@ -1982,7 +1982,7 @@ func testOnStorITAttributeProfile(t *testing.T) {
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetAttributeProfile(attrProfile, false, true); err != nil {
+	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
 		t.Error(err)
 	}
 	//get from cache
@@ -2007,7 +2007,7 @@ func testOnStorITAttributeProfile(t *testing.T) {
 	}
 	//update
 	attrProfile.Contexts = []string{"con1", "con2", "con3"}
-	if err := onStor.SetAttributeProfile(attrProfile, false, true); err != nil {
+	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(sleepDelay)
@@ -2026,7 +2026,7 @@ func testOnStorITAttributeProfile(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
 	if err := onStor.RemoveAttributeProfile(attrProfile.Tenant,
-		attrProfile.ID, utils.NonTransactional, false, true); err != nil {
+		attrProfile.ID, utils.NonTransactional, false); err != nil {
 		t.Error(err)
 	}
 	//check cache if removed
@@ -2062,19 +2062,12 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.SetAttributeProfile(attrProfile, false, true); err != nil {
+	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
 		t.Error(err)
-	}
-	//check cache
-	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
-		true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
-		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
 	}
 	//check database
 	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
-		false, true, utils.NonTransactional); err != nil {
+		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", attrProfile, rcv)
@@ -2085,19 +2078,12 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 			Substitute: config.NewRSRParsersMustCompile("123.123", true, utils.INFIELD_SEP),
 		},
 	}
-	if err := onStor.SetAttributeProfile(attrProfile, false, true); err != nil {
+	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
 		t.Error(err)
-	}
-	//check cache
-	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
-		true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(attrProfile), utils.ToJSON(rcv))
 	}
 	//check database
 	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
-		false, true, utils.NonTransactional); err != nil {
+		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(attrProfile), utils.ToJSON(rcv))
@@ -2108,15 +2094,8 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 			Substitute: config.NewRSRParsersMustCompile("true", true, utils.INFIELD_SEP),
 		},
 	}
-	if err := onStor.SetAttributeProfile(attrProfile, false, true); err != nil {
+	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
 		t.Error(err)
-	}
-	//check cache
-	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",
-		true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !(reflect.DeepEqual(attrProfile, rcv)) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(attrProfile), utils.ToJSON(rcv))
 	}
 	//check database
 	if rcv, err := onStor.GetAttributeProfile("cgrates.org", "AttrPrf1",

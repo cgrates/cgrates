@@ -66,7 +66,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 			destinationRates, ratingPlans, ratingProfiles,
 			sharedGroups, actions, actionPlans, actionTriggers, accountActions,
 			resLimits, stats, thresholds, filters, suppliers,
-			attrProfiles, chargerProfiles, ``), "", "")
+			attrProfiles, chargerProfiles, ``), "", "", nil)
 	if err := csvr.LoadDestinations(); err != nil {
 		t.Fatal(err)
 	}

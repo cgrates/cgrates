@@ -102,7 +102,7 @@ func (m *Migrator) migrateV1User2AttributeProfile() (err error) {
 		if err := m.dmIN.remV1User(user.GetId()); err != nil {
 			return err
 		}
-		if err := m.dmOut.DataManager().SetAttributeProfile(attr, true, false); err != nil {
+		if err := m.dmOut.DataManager().SetAttributeProfile(attr, true); err != nil {
 			return err
 		}
 		m.stats[utils.User] += 1

@@ -20,8 +20,7 @@ package config
 
 // ApierCfg is the configuration of Apier service
 type ApierCfg struct {
-	CachesConns  []*HaPoolConfig // connections towards Cache
-	DefaultCache string
+	CachesConns []*HaPoolConfig // connections towards Cache
 }
 
 func (aCfg *ApierCfg) loadFromJsonCfg(jsnCfg *ApierJsonCfg) (err error) {
@@ -34,9 +33,6 @@ func (aCfg *ApierCfg) loadFromJsonCfg(jsnCfg *ApierJsonCfg) (err error) {
 			aCfg.CachesConns[idx] = NewDfltHaPoolConfig()
 			aCfg.CachesConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
-	}
-	if jsnCfg.Default_cache != nil {
-		aCfg.DefaultCache = *jsnCfg.Default_cache
 	}
 	return nil
 }

@@ -295,7 +295,7 @@ func (m *Migrator) migrateAttributeProfileFiltersV1() (err error) {
 				attrPrf.Attributes[i].FilterIDs[j] = migrateInlineFilter(fl)
 			}
 		}
-		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true, false); err != nil {
+		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
 			return err
 		}
 		m.stats[utils.RQF] += 1

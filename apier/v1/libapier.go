@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -26,8 +27,8 @@ import (
 // GetCacheOpt receive the apiOpt and compare with default value
 // overwrite the default if it's present
 // visible in ApierV2
-func (v1 *ApierV1) GetCacheOpt(apiOpt *string) string {
-	cacheOpt := v1.Config.ApierCfg().DefaultCache
+func GetCacheOpt(apiOpt *string) string {
+	cacheOpt := config.CgrConfig().GeneralCfg().DefaultCaching
 	if apiOpt != nil && *apiOpt != utils.EmptyString {
 		cacheOpt = *apiOpt
 	}
@@ -37,7 +38,7 @@ func (v1 *ApierV1) GetCacheOpt(apiOpt *string) string {
 // composeArgsReload add the ItemID to AttrReloadCache
 // for a specific CacheID
 func composeArgsReload(args engine.ArgsGetCacheItem) (rpl utils.AttrReloadCache) {
-	rpl = initAttrReloadCache()
+	rpl = utils.InitAttrReloadCache()
 	switch args.CacheID {
 	case utils.CacheResourceProfiles:
 		rpl.ResourceProfileIDs = &[]string{args.ItemID}
@@ -63,30 +64,4 @@ func composeArgsReload(args engine.ArgsGetCacheItem) (rpl utils.AttrReloadCache)
 		rpl.DispatcherProfileIDs = &[]string{args.ItemID}
 	}
 	return
-}
-
-// initAttrReloadCache initialize AttrReloadCache with empty string slice
-func initAttrReloadCache() (rpl utils.AttrReloadCache) {
-	rpl.DestinationIDs = &[]string{}
-	rpl.ReverseDestinationIDs = &[]string{}
-	rpl.RatingPlanIDs = &[]string{}
-	rpl.RatingProfileIDs = &[]string{}
-	rpl.ActionIDs = &[]string{}
-	rpl.ActionPlanIDs = &[]string{}
-	rpl.AccountActionPlanIDs = &[]string{}
-	rpl.ActionTriggerIDs = &[]string{}
-	rpl.SharedGroupIDs = &[]string{}
-	rpl.ResourceProfileIDs = &[]string{}
-	rpl.ResourceIDs = &[]string{}
-	rpl.StatsQueueIDs = &[]string{}
-	rpl.StatsQueueProfileIDs = &[]string{}
-	rpl.ThresholdIDs = &[]string{}
-	rpl.ThresholdProfileIDs = &[]string{}
-	rpl.FilterIDs = &[]string{}
-	rpl.SupplierProfileIDs = &[]string{}
-	rpl.AttributeProfileIDs = &[]string{}
-	rpl.ChargerProfileIDs = &[]string{}
-	rpl.DispatcherProfileIDs = &[]string{}
-	rpl.DispatcherRoutesIDs = &[]string{}
-	return rpl
 }

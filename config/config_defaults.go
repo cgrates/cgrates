@@ -41,6 +41,7 @@ const CGRATES_CFG_JSON = `
 	"default_category": "call",								// default category to consider when missing from requests
 	"default_tenant": "cgrates.org",						// default tenant to consider when missing from requests
 	"default_timezone": "Local",							// default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	"default_caching":"*reload",							// default actions to do when caching items
 	"connect_attempts": 5,									// initial server connect attempts
 	"reconnects": -1,										// number of retries in case of connection lost
 	"connect_timeout": "1s",								// consider connection unsuccessful on timeout, 0 to disable the feature
@@ -751,8 +752,9 @@ const CGRATES_CFG_JSON = `
 
 
 "apier": {	
-	"caches_conns":[],						// connections to CacheS for reloads
-	"default_cache":"",						// default actions to do when caching items(""-default caching by data manager, "*none"-disable caching)
+	"caches_conns":[						// connections to CacheS for reloads
+		{"address": "127.0.0.1:2012", "transport": "*json"},
+	],						
 },
 
 }`

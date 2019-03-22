@@ -25,5 +25,16 @@
 "rals": {
 	"enabled": true,
 },
+
+"scheduler": {
+	"enabled": true,				
+},
+
+"apier": {	
+	"caches_conns":[						// connections to CacheS for reloads
+		{"address": "127.0.0.1:5012", "transport": "*json"},
+	],						
+},
+
 }
  

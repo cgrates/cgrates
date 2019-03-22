@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -37,15 +38,14 @@ func (apierV2 *ApierV2) SetAttributeProfile(extAlsPrfWrp *AttributeWrapper, repl
 	if err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	cacheOpt := apierV2.GetCacheOpt(extAlsPrfWrp.Cache)
-	if err := apierV2.DataManager.SetAttributeProfile(alsPrf, true, cacheOpt == utils.EmptyString); err != nil {
+	if err := apierV2.DataManager.SetAttributeProfile(alsPrf, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	args := engine.ArgsGetCacheItem{
 		CacheID: utils.CacheAttributeProfiles,
 		ItemID:  alsPrf.TenantID(),
 	}
-	if err := apierV2.CallCache(cacheOpt, args); err != nil {
+	if err := apierV2.CallCache(v1.GetCacheOpt(extAlsPrfWrp.Cache), args); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

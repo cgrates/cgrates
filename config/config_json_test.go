@@ -50,6 +50,7 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Default_request_type: utils.StringPointer(utils.META_RATED),
 		Default_category:     utils.StringPointer("call"),
 		Default_tenant:       utils.StringPointer("cgrates.org"),
+		Default_caching:      utils.StringPointer(utils.MetaReload),
 		Default_timezone:     utils.StringPointer("Local"),
 		Connect_attempts:     utils.IntPointer(5),
 		Reconnects:           utils.IntPointer(-1),
@@ -1495,8 +1496,12 @@ func TestDfAnalyzerCfg(t *testing.T) {
 
 func TestDfApierCfg(t *testing.T) {
 	eCfg := &ApierJsonCfg{
-		Caches_conns:  &[]*HaPoolJsonCfg{},
-		Default_cache: utils.StringPointer(utils.EmptyString),
+		Caches_conns: &[]*HaPoolJsonCfg{
+			{
+				Address:   utils.StringPointer("127.0.0.1:2012"),
+				Transport: utils.StringPointer(utils.MetaJSONrpc),
+			},
+		},
 	}
 	if cfg, err := dfCgrJsonCfg.ApierCfgJson(); err != nil {
 		t.Error(err)

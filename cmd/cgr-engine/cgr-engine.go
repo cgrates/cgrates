@@ -903,13 +903,14 @@ func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS,
 }
 
 // loaderService will start and register APIs for LoaderService if enabled
-func startloaderS(cacheS *engine.CacheS, cfg *config.CGRConfig,
-	dm *engine.DataManager, server *utils.Server,
-	exitChan chan bool, filterSChan chan *engine.FilterS) {
+func startloaderS(cfg *config.CGRConfig,
+	dm *engine.DataManager, server *utils.Server, exitChan chan bool,
+	filterSChan chan *engine.FilterS, internalCacheSChan chan rpcclient.RpcClientConnection) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
+
 	ldrS := loaders.NewLoaderService(dm, cfg.LoaderCfg(),
-		cfg.GeneralCfg().DefaultTimezone, filterS)
+		cfg.GeneralCfg().DefaultTimezone, exitChan, filterS, internalCacheSChan)
 	if !ldrS.Enabled() {
 		return
 	}
@@ -961,7 +962,6 @@ func startDispatcherService(internalDispatcherSChan chan *dispatchers.Dispatcher
 		}
 		conns[connID] = connPool
 	}
-
 	dspS, err := dispatchers.NewDispatcherService(dm, cfg, fltrS, attrSConn, conns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.DispatcherS, err.Error()))
@@ -1035,7 +1035,8 @@ func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
 	internalSMGChan, internalAnalyzerSChan chan rpcclient.RpcClientConnection,
-	internalDispatcherSChan chan *dispatchers.DispatcherService, exitChan chan bool) {
+	internalDispatcherSChan chan *dispatchers.DispatcherService, exitChan chan bool,
+	internalCacheSChan chan rpcclient.RpcClientConnection) {
 	select { // Any of the rpc methods will unlock listening to rpc requests
 	case resp := <-internalRaterChan:
 		internalRaterChan <- resp
@@ -1059,6 +1060,8 @@ func startRpc(server *utils.Server, internalRaterChan,
 		internalDispatcherSChan <- dispatcherS
 	case analyzerS := <-internalAnalyzerSChan:
 		internalAnalyzerSChan <- analyzerS
+	case cacheS := <-internalCacheSChan:
+		internalCacheSChan <- cacheS
 	}
 
 	go server.ServeJSON(cfg.ListenCfg().RPCJSONListen)
@@ -1469,14 +1472,14 @@ func main() {
 		go startAnalyzerService(internalAnalyzerSChan, server, exitChan)
 	}
 
-	go startloaderS(cacheS, cfg, dm, server, exitChan, filterSChan)
+	go startloaderS(cfg, dm, server, exitChan, filterSChan, internalCacheSChan)
 
 	// Serve rpc connections
 	go startRpc(server, internalRaterChan, internalCdrSChan,
 		internalRsChan, internalStatSChan,
 		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
 		internalSupplierSChan, internalSMGChan, internalAnalyzerSChan,
-		internalDispatcherSChan, exitChan)
+		internalDispatcherSChan, exitChan, internalCacheSChan)
 	<-exitChan
 
 	if *cpuProfDir != "" { // wait to end cpuProfiling
