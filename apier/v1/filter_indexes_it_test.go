@@ -173,20 +173,22 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl = &engine.ThresholdProfile{
-		Tenant:    tenant,
-		ID:        "TEST_PROFILE1",
-		FilterIDs: []string{"TestFilter"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+	tPrfl = &ThresholdWrapper{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    tenant,
+			ID:        "TEST_PROFILE1",
+			FilterIDs: []string{"TestFilter"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   1,
+			MinSleep:  time.Duration(5 * time.Minute),
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_1", "ACT_2"},
+			Async:     true,
 		},
-		MaxHits:   1,
-		MinSleep:  time.Duration(5 * time.Minute),
-		Blocker:   false,
-		Weight:    20.0,
-		ActionIDs: []string{"ACT_1", "ACT_2"},
-		Async:     true,
 	}
 	if err := tFIdxRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
 		t.Error(err)
@@ -196,8 +198,8 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 	if err := tFIdxRpc.Call("ApierV1.GetThresholdProfile",
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(tPrfl, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", tPrfl, reply)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
 	}
 	if err := tFIdxRpc.Call("ApierV1.RemoveFilterIndexes", &AttrRemFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: tenant}, &result); err != nil {
@@ -270,20 +272,22 @@ func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl = &engine.ThresholdProfile{
-		Tenant:    tenant,
-		ID:        "TEST_PROFILE2",
-		FilterIDs: []string{"TestFilter2"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+	tPrfl = &ThresholdWrapper{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    tenant,
+			ID:        "TEST_PROFILE2",
+			FilterIDs: []string{"TestFilter2"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   1,
+			MinSleep:  time.Duration(5 * time.Minute),
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_1", "ACT_2"},
+			Async:     true,
 		},
-		MaxHits:   1,
-		MinSleep:  time.Duration(5 * time.Minute),
-		Blocker:   false,
-		Weight:    20.0,
-		ActionIDs: []string{"ACT_1", "ACT_2"},
-		Async:     true,
 	}
 	if err := tFIdxRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
 		t.Error(err)
@@ -293,8 +297,8 @@ func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 	if err := tFIdxRpc.Call("ApierV1.GetThresholdProfile",
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(tPrfl, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", tPrfl, reply)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
 	}
 	if err := tFIdxRpc.Call("ApierV1.RemoveFilterIndexes", &AttrRemFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: tenant}, &result); err != nil {

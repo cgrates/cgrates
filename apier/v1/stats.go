@@ -66,11 +66,11 @@ func (apierV1 *ApierV1) SetStatQueueProfile(arg *StatQueueWrapper, reply *string
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueueProfile
-	args := engine.ArgsGetCacheItem{
+	argCache := engine.ArgsGetCacheItem{
 		CacheID: utils.CacheStatQueueProfiles,
 		ItemID:  arg.TenantID(),
 	}
-	if err := apierV1.CallCache(GetCacheOpt(arg.Cache), args); err != nil {
+	if err := apierV1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//compose metrics for StatQueue
@@ -86,11 +86,11 @@ func (apierV1 *ApierV1) SetStatQueueProfile(arg *StatQueueWrapper, reply *string
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueues
-	args = engine.ArgsGetCacheItem{
+	argCache = engine.ArgsGetCacheItem{
 		CacheID: utils.CacheStatQueues,
 		ItemID:  arg.TenantID(),
 	}
-	if err := apierV1.CallCache(GetCacheOpt(arg.Cache), args); err != nil {
+	if err := apierV1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 

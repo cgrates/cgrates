@@ -36,7 +36,7 @@ var (
 	tSv1CfgPath string
 	tSv1Cfg     *config.CGRConfig
 	tSv1Rpc     *rpc.Client
-	tPrfl       *engine.ThresholdProfile
+	tPrfl       *ThresholdWrapper
 	tSv1ConfDIR string //run tests for specific configuration
 )
 
@@ -354,20 +354,22 @@ func testV1TSSetThresholdProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl = &engine.ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "THD_Test",
-		FilterIDs: []string{"*string:Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+	tPrfl = &ThresholdWrapper{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "THD_Test",
+			FilterIDs: []string{"*string:Account:1001"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   -1,
+			MinSleep:  time.Duration(5 * time.Minute),
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_1"},
+			Async:     true,
 		},
-		MaxHits:   -1,
-		MinSleep:  time.Duration(5 * time.Minute),
-		Blocker:   false,
-		Weight:    20.0,
-		ActionIDs: []string{"ACT_1"},
-		Async:     true,
 	}
 	if err := tSv1Rpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
 		t.Error(err)
@@ -377,8 +379,8 @@ func testV1TSSetThresholdProfile(t *testing.T) {
 	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(tPrfl, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", tPrfl, reply)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
 	}
 }
 
@@ -394,15 +396,15 @@ func testV1TSUpdateThresholdProfile(t *testing.T) {
 	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(tPrfl, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", tPrfl, reply)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
 	}
 }
 
 func testV1TSRemoveThresholdProfile(t *testing.T) {
 	var resp string
 	if err := tSv1Rpc.Call("ApierV1.RemoveThresholdProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &resp); err != nil {
+		&utils.TenantIDWrapper{Tenant: "cgrates.org", ID: "THD_Test"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -414,7 +416,7 @@ func testV1TSRemoveThresholdProfile(t *testing.T) {
 		t.Errorf("Recived %s and the error:%+v", utils.ToJSON(sqp), err)
 	}
 	if err := tSv1Rpc.Call("ApierV1.RemoveThresholdProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &resp); err.Error() != utils.ErrNotFound.Error() {
+		&utils.TenantIDWrapper{Tenant: "cgrates.org", ID: "THD_Test"}, &resp); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
 	}
 }
@@ -427,10 +429,12 @@ func testV1TSMaxHits(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl = &engine.ThresholdProfile{
-		Tenant:  "cgrates.org",
-		ID:      "TH3",
-		MaxHits: 3,
+	tPrfl = &ThresholdWrapper{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:  "cgrates.org",
+			ID:      "TH3",
+			MaxHits: 3,
+		},
 	}
 	//set
 	if err := tSv1Rpc.Call("ApierV1.SetThresholdProfile", tPrfl, &reply); err != nil {
@@ -487,7 +491,7 @@ func testV1TSMaxHits(t *testing.T) {
 	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThreshold,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TH3"}, &td); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
+		t.Errorf("Err : %+v \n, td : %+v", err, utils.ToJSON(td))
 	}
 
 }

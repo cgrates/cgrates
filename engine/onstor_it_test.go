@@ -1601,13 +1601,6 @@ func testOnStorITThresholdProfile(t *testing.T) {
 	if err := onStor.SetThresholdProfile(th, true); err != nil {
 		t.Error(err)
 	}
-	//get from cache
-	if rcv, err := onStor.GetThresholdProfile(th.Tenant, th.ID,
-		true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(th, rcv) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
-	}
 	//get from database
 	if rcv, err := onStor.GetThresholdProfile(th.Tenant, th.ID,
 		false, false, utils.NonTransactional); err != nil {
@@ -1627,13 +1620,6 @@ func testOnStorITThresholdProfile(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(sleepDelay)
-	//get from cache
-	if rcv, err := onStor.GetThresholdProfile(th.Tenant, th.ID,
-		true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(th, rcv) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
-	}
 	//get from database
 	if rcv, err := onStor.GetThresholdProfile(th.Tenant, th.ID,
 		false, false, utils.NonTransactional); err != nil {
@@ -1644,11 +1630,6 @@ func testOnStorITThresholdProfile(t *testing.T) {
 	if err := onStor.RemoveThresholdProfile(th.Tenant,
 		th.ID, utils.NonTransactional, false); err != nil {
 		t.Error(err)
-	}
-	//check cache if removed
-	if _, rcvErr := onStor.GetThresholdProfile(th.Tenant,
-		th.ID, true, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
 	}
 	//check database if removed
 	if _, rcvErr := onStor.GetThresholdProfile(th.Tenant,
@@ -1671,13 +1652,6 @@ func testOnStorITThreshold(t *testing.T) {
 	if err := onStor.SetThreshold(th); err != nil {
 		t.Error(err)
 	}
-	//get from cache
-	if rcv, err := onStor.GetThreshold("cgrates.org", "TH1",
-		true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !(reflect.DeepEqual(th, rcv)) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
-	}
 	//get from database
 	if rcv, err := onStor.GetThreshold("cgrates.org", "TH1",
 		false, false, utils.NonTransactional); err != nil {
@@ -1697,13 +1671,6 @@ func testOnStorITThreshold(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(sleepDelay)
-	//get from cache
-	if rcv, err := onStor.GetThreshold("cgrates.org", "TH1",
-		true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !(reflect.DeepEqual(th, rcv)) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(th), utils.ToJSON(rcv))
-	}
 	//get from database
 	if rcv, err := onStor.GetThreshold("cgrates.org", "TH1",
 		false, false, utils.NonTransactional); err != nil {
@@ -1713,11 +1680,6 @@ func testOnStorITThreshold(t *testing.T) {
 	}
 	if err := onStor.RemoveThreshold(th.Tenant, th.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
-	}
-	//check cache if removed
-	if _, rcvErr := onStor.GetThreshold(th.Tenant, th.ID,
-		true, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
 	}
 	//check database if removed
 	if _, rcvErr := onStor.GetThreshold(th.Tenant, th.ID,

@@ -178,19 +178,21 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	tPrfl = &engine.ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TEST_PROFILE1",
-		FilterIDs: []string{"TestFilter"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+	tPrfl = &ThresholdWrapper{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TEST_PROFILE1",
+			FilterIDs: []string{"TestFilter"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MinHits:  1,
+			MaxHits:  -1,
+			MinSleep: time.Duration(5 * time.Minute),
+			Blocker:  false,
+			Weight:   20.0,
+			Async:    true,
 		},
-		MinHits:  1,
-		MaxHits:  -1,
-		MinSleep: time.Duration(5 * time.Minute),
-		Blocker:  false,
-		Weight:   20.0,
-		Async:    true,
 	}
 
 	if err := tFIdxCaRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
@@ -267,18 +269,20 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	tPrfl = &engine.ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TEST_PROFILE1",
-		FilterIDs: []string{"TestFilter2"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+	tPrfl = &ThresholdWrapper{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TEST_PROFILE1",
+			FilterIDs: []string{"TestFilter2"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:  -1,
+			MinSleep: time.Duration(5 * time.Minute),
+			Blocker:  false,
+			Weight:   20.0,
+			Async:    true,
 		},
-		MaxHits:  -1,
-		MinSleep: time.Duration(5 * time.Minute),
-		Blocker:  false,
-		Weight:   20.0,
-		Async:    true,
 	}
 	if err := tFIdxCaRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
 		t.Error(err)

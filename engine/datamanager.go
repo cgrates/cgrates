@@ -423,22 +423,12 @@ func (dm *DataManager) GetThreshold(tenant, id string,
 }
 
 func (dm *DataManager) SetThreshold(th *Threshold) (err error) {
-	if err = dm.DataDB().SetThresholdDrv(th); err != nil {
-		return
-	}
-	if err = dm.CacheDataFromDB(utils.ThresholdPrefix, []string{th.TenantID()}, true); err != nil {
-		return
-	}
-	return
+	return dm.DataDB().SetThresholdDrv(th)
 }
 
 func (dm *DataManager) RemoveThreshold(tenant, id, transactionID string) (err error) {
-	if err = dm.DataDB().RemoveThresholdDrv(tenant, id); err != nil {
-		return
-	}
-	Cache.Remove(utils.CacheThresholds, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(transactionID), transactionID)
-	return
+	return dm.DataDB().RemoveThresholdDrv(tenant, id)
+
 }
 
 func (dm *DataManager) GetThresholdProfile(tenant, id string, cacheRead, cacheWrite bool,
@@ -475,10 +465,6 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 	if err = dm.DataDB().SetThresholdProfileDrv(th); err != nil {
 		return err
 	}
-	if err = dm.CacheDataFromDB(utils.ThresholdProfilePrefix,
-		[]string{th.TenantID()}, true); err != nil {
-		return
-	}
 	if withIndex {
 		if oldTh != nil {
 			var needsRemove bool
@@ -508,8 +494,6 @@ func (dm *DataManager) RemoveThresholdProfile(tenant, id,
 	if err = dm.DataDB().RemThresholdProfileDrv(tenant, id); err != nil {
 		return
 	}
-	Cache.Remove(utils.CacheThresholdProfiles, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(transactionID), transactionID)
 	if oldTh == nil {
 		return utils.ErrNotFound
 	}

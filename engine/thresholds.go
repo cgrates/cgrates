@@ -303,7 +303,14 @@ func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (thresholdsIDs 
 		if t.dirty == nil || t.Hits == t.tPrfl.MaxHits { // one time threshold
 			if err = tS.dm.RemoveThreshold(t.Tenant, t.ID, utils.NonTransactional); err != nil {
 				utils.Logger.Warning(
-					fmt.Sprintf("<ThresholdService> failed removing non-recurrent threshold: %s, error: %s",
+					fmt.Sprintf("<ThresholdService> failed removing from database non-recurrent threshold: %s, error: %s",
+						t.TenantID(), err.Error()))
+				withErrors = true
+			}
+			//since we don't handle in DataManager caching we do a manual remove here
+			if err = tS.dm.CacheDataFromDB(utils.ThresholdPrefix, []string{t.TenantID()}, true); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<ThresholdService> failed removing from cache non-recurrent threshold: %s, error: %s",
 						t.TenantID(), err.Error()))
 				withErrors = true
 			}
