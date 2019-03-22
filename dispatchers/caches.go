@@ -35,7 +35,7 @@ func (dS *DispatcherService) CacheSv1Ping(args *CGREvWithApiKey,
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaCache, args.RouteID,
+	return dS.Dispatch(&args.CGREvent, utils.MetaCaches, args.RouteID,
 		utils.CacheSv1Ping, args.CGREvent, reply)
 }
 
@@ -49,7 +49,7 @@ func (dS *DispatcherService) CacheSv1GetItemIDs(args *ArgsGetCacheItemIDsWithApi
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCache, args.RouteID,
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCaches, args.RouteID,
 		utils.CacheSv1GetItemIDs, &args.ArgsGetCacheItemIDs, reply)
 }
 
@@ -63,7 +63,7 @@ func (dS *DispatcherService) CacheSv1HasItem(args *ArgsGetCacheItemWithApiKey,
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCache, args.RouteID,
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCaches, args.RouteID,
 		utils.CacheSv1HasItem, &args.ArgsGetCacheItem, reply)
 }
 
@@ -77,7 +77,7 @@ func (dS *DispatcherService) CacheSv1GetItemExpiryTime(args *ArgsGetCacheItemWit
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCache, args.RouteID,
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCaches, args.RouteID,
 		utils.CacheSv1GetItemExpiryTime, &args.ArgsGetCacheItem, reply)
 }
 
@@ -91,7 +91,7 @@ func (dS *DispatcherService) CacheSv1RemoveItem(args *ArgsGetCacheItemWithApiKey
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCache, args.RouteID,
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCaches, args.RouteID,
 		utils.CacheSv1RemoveItem, &args.ArgsGetCacheItem, reply)
 }
 
@@ -105,7 +105,7 @@ func (dS *DispatcherService) CacheSv1Clear(args *AttrCacheIDsWithApiKey,
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCache, args.RouteID,
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCaches, args.RouteID,
 		utils.CacheSv1Clear, args.CacheIDs, reply)
 }
 
@@ -118,7 +118,7 @@ func (dS *DispatcherService) CacheSv1FlushCache(args AttrReloadCacheWithApiKey, 
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCache, args.RouteID,
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCaches, args.RouteID,
 		utils.CacheSv1FlushCache, args.AttrReloadCache, reply)
 }
 
@@ -132,7 +132,7 @@ func (dS *DispatcherService) CacheSv1GetCacheStats(args *AttrCacheIDsWithApiKey,
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCache, args.RouteID,
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCaches, args.RouteID,
 		utils.CacheSv1GetCacheStats, args.CacheIDs, reply)
 }
 
@@ -145,7 +145,7 @@ func (dS *DispatcherService) CacheSv1PrecacheStatus(args *AttrCacheIDsWithApiKey
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCache, args.RouteID,
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCaches, args.RouteID,
 		utils.CacheSv1PrecacheStatus, args.CacheIDs, reply)
 }
 
@@ -159,7 +159,7 @@ func (dS *DispatcherService) CacheSv1HasGroup(args *ArgsGetGroupWithApiKey,
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCache, args.RouteID,
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCaches, args.RouteID,
 		utils.CacheSv1HasGroup, args.ArgsGetGroup, reply)
 }
 
@@ -173,7 +173,7 @@ func (dS *DispatcherService) CacheSv1GetGroupItemIDs(args *ArgsGetGroupWithApiKe
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCache, args.RouteID,
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCaches, args.RouteID,
 		utils.CacheSv1GetGroupItemIDs, args.ArgsGetGroup, reply)
 }
 
@@ -187,7 +187,7 @@ func (dS *DispatcherService) CacheSv1RemoveGroup(args *ArgsGetGroupWithApiKey,
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCache, args.RouteID,
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCaches, args.RouteID,
 		utils.CacheSv1RemoveGroup, args.ArgsGetGroup, reply)
 }
 
@@ -200,7 +200,7 @@ func (dS *DispatcherService) CacheSv1ReloadCache(args AttrReloadCacheWithApiKey,
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCache, args.RouteID,
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCaches, args.RouteID,
 		utils.CacheSv1ReloadCache, args.AttrReloadCache, reply)
 }
 
@@ -213,6 +213,6 @@ func (dS *DispatcherService) CacheSv1LoadCache(args AttrReloadCacheWithApiKey, r
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCache, args.RouteID,
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCaches, args.RouteID,
 		utils.CacheSv1LoadCache, args.AttrReloadCache, reply)
 }

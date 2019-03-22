@@ -389,7 +389,8 @@ const (
 	MetaResources                = "*resources"
 	MetaFilters                  = "*filters"
 	MetaCDRs                     = "*cdrs"
-	MetaCache                    = "*cache"
+	MetaCaches                   = "*caches"
+	MetaGuardian                 = "*guardians"
 	Migrator                     = "migrator"
 	UnsupportedMigrationTask     = "unsupported migration task"
 	NoStorDBConnection           = "not connected to StorDB"
@@ -832,6 +833,14 @@ const (
 	CacheSv1LoadCache         = "CacheSv1.LoadCache"
 	CacheSv1FlushCache        = "CacheSv1.FlushCache"
 	CacheSv1Ping              = "CacheSv1.Ping"
+)
+
+// GuardianS APIs
+const (
+	GuardianSv1             = "GuardianSv1"
+	GuardianSv1RemoteLock   = "GuardianSv1.RemoteLock"
+	GuardianSv1RemoteUnlock = "GuardianSv1.RemoteUnlock"
+	GuardianSv1Ping         = "GuardianSv1.Ping"
 )
 
 // Cdrs APIs

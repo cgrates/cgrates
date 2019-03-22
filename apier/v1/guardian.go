@@ -19,21 +19,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"time"
-
 	"github.com/cgrates/cgrates/guardian"
+	"github.com/cgrates/cgrates/utils"
 )
+
+func NewGuardianSv1() *GuardianSv1 {
+	return &GuardianSv1{}
+}
 
 type GuardianSv1 struct{}
 
-type AttrRemoteLock struct {
-	ReferenceID string        // reference ID for this lock if available
-	LockIDs     []string      // List of IDs to obtain lock for
-	Timeout     time.Duration // Automatically unlock on timeout
-}
-
 // RemoteLock will lock a key from remote
-func (self *GuardianSv1) RemoteLock(attr AttrRemoteLock, reply *string) (err error) {
+func (self *GuardianSv1) RemoteLock(attr utils.AttrRemoteLock, reply *string) (err error) {
 	*reply = guardian.Guardian.GuardIDs(attr.ReferenceID, attr.Timeout, attr.LockIDs...)
 	return
 }
@@ -42,4 +39,10 @@ func (self *GuardianSv1) RemoteLock(attr AttrRemoteLock, reply *string) (err err
 func (self *GuardianSv1) RemoteUnlock(refID string, reply *[]string) (err error) {
 	*reply = guardian.Guardian.UnguardIDs(refID)
 	return
+}
+
+// Ping return pong if the service is active
+func (self *GuardianSv1) Ping(ign *utils.CGREvent, reply *string) error {
+	*reply = utils.Pong
+	return nil
 }

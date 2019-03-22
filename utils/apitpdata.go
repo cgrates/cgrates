@@ -1213,6 +1213,12 @@ type TimeInterval struct {
 	End   *time.Time
 }
 
+type AttrRemoteLock struct {
+	ReferenceID string        // reference ID for this lock if available
+	LockIDs     []string      // List of IDs to obtain lock for
+	Timeout     time.Duration // Automatically unlock on timeout
+}
+
 type SMCostFilter struct { //id cu litere mare
 	CGRIDs         []string
 	NotCGRIDs      []string
