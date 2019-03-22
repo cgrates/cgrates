@@ -2319,12 +2319,21 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 	if cgrEvs, err = s.asCGREvents(); err != nil {
 		return utils.NewErrServerError(err)
 	}
+	toRateReqs := engine.MapEvent{
+		utils.META_POSTPAID:      struct{}{},
+		utils.META_PSEUDOPREPAID: struct{}{},
+		utils.META_RATED:         struct{}{},
+	}
 	var withErrors bool
 	for _, cgrEv := range cgrEvs {
+		argsProc := &engine.ArgV2ProcessCDR{CGREvent: *cgrEv,
+			ChargerS:   utils.BoolPointer(false),
+			AttributeS: utils.BoolPointer(false)}
+		if toRateReqs.HasField(engine.NewMapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RequestType)) {
+			argsProc.RALs = utils.BoolPointer(true)
+		}
 		if err = sS.cdrS.Call(utils.CDRsV2ProcessCDR,
-			&engine.ArgV2ProcessCDR{CGREvent: *cgrEv,
-				ChargerS:   utils.BoolPointer(false),
-				AttributeS: utils.BoolPointer(false)}, rply); err != nil {
+			argsProc, rply); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error <%s> posting CDR with CGRID: <%s>",
 					utils.SessionS, err.Error(), cgrID))

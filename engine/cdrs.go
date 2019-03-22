@@ -263,6 +263,17 @@ func (cdrS *CDRServer) processEvent(cgrEv *utils.CGREvent,
 	return
 }
 
+func (cdrS *CDRServer) rateCDRWithErr(cdr *CDR) (ratedCDRs []*CDR) {
+	var err error
+	ratedCDRs, err = cdrS.rateCDR(cdr)
+	if err != nil {
+		cdr.Cost = -1.0 // If there was an error, mark the CDR
+		cdr.ExtraInfo = err.Error()
+		ratedCDRs = []*CDR{cdr}
+	}
+	return
+}
+
 // chrgProcessEvent will process the CGREvent with ChargerS subsystem
 // it is designed to run in it's own goroutine
 func (cdrS *CDRServer) chrgProcessEvent(cgrEv *utils.CGREvent,
@@ -277,13 +288,24 @@ func (cdrS *CDRServer) chrgProcessEvent(cgrEv *utils.CGREvent,
 	}
 	var partExec bool
 	for _, chrgr := range chrgrs {
-		if errProc := cdrS.processEvent(chrgr.CGREvent,
-			attrS, store, export, thdS, statS); errProc != nil {
+		cdr, err := NewMapEvent(chrgr.CGREvent.Event).AsCDR(cdrS.cgrCfg,
+			cgrEv.Tenant, cdrS.cgrCfg.GeneralCfg().DefaultTimezone)
+		if err != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error: %s converting CDR event %+v with %s",
-					utils.CDRs, errProc.Error(), cgrEv, utils.ChargerS))
+				fmt.Sprintf("<%s> error: %s converting event: %+v as CDR",
+					utils.CDRs, err.Error(), cgrEv))
 			partExec = true
 			continue
+		}
+		for _, rtCDR := range cdrS.rateCDRWithErr(cdr) {
+			if errProc := cdrS.processEvent(rtCDR.AsCGREvent(),
+				attrS, store, export, thdS, statS); errProc != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: %s processing CDR event %+v with %s",
+						utils.CDRs, errProc.Error(), cgrEv, utils.ChargerS))
+				partExec = true
+				continue
+			}
 		}
 	}
 	if partExec {
@@ -467,6 +489,7 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDR, reply *string) (err error) {
 type ArgV2ProcessCDR struct {
 	utils.CGREvent
 	AttributeS *bool // control AttributeS processing
+	RALs       *bool // control if we rate the event
 	ChargerS   *bool // control ChargerS processing
 	Store      *bool // control storing of the CDR
 	Export     *bool // control online exports for the CDR
@@ -524,10 +547,38 @@ func (cdrS *CDRServer) V2ProcessCDR(arg *ArgV2ProcessCDR, reply *string) (err er
 		chrgS = *arg.ChargerS
 	}
 	cgrEv := &arg.CGREvent
-	if err = cdrS.processEvent(cgrEv,
-		attrS, store, export, thdS, statS); err != nil {
-		err = utils.NewErrServerError(err)
-		return
+	if arg.RALs != nil && *arg.RALs { // need to rate the event
+		var partExec bool
+		cdr, errProc := NewMapEvent(cgrEv.Event).AsCDR(cdrS.cgrCfg,
+			cgrEv.Tenant, cdrS.cgrCfg.GeneralCfg().DefaultTimezone)
+		if err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s converting event %+v to CDR",
+					utils.CDRs, errProc.Error(), cgrEv))
+			err = utils.ErrPartiallyExecuted
+			return
+		}
+		for _, rtCDR := range cdrS.rateCDRWithErr(cdr) {
+			cgrEv := rtCDR.AsCGREvent()
+			if errProc := cdrS.processEvent(cgrEv,
+				attrS, store, export, thdS, statS); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: %s processing event %+v ",
+						utils.CDRs, errProc.Error(), cgrEv))
+				partExec = true
+				continue
+			}
+		}
+		if partExec {
+			err = utils.ErrPartiallyExecuted
+			return
+		}
+	} else {
+		if err = cdrS.processEvent(cgrEv,
+			attrS, store, export, thdS, statS); err != nil {
+			err = utils.NewErrServerError(err)
+			return
+		}
 	}
 	if chrgS {
 		go cdrS.chrgProcessEvent(cgrEv,
