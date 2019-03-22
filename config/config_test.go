@@ -624,7 +624,7 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 		AttrSConns:              []*HaPoolConfig{},
 		SessionReplicationConns: []*HaPoolConfig{},
 		DebitInterval:           0 * time.Second,
-		StoreSCosts:             true,
+		StoreSCosts:             false,
 		MinCallDuration:         0 * time.Second,
 		MaxCallDuration:         3 * time.Hour,
 		SessionTTL:              0 * time.Second,
@@ -704,7 +704,7 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 			TTL: time.Duration(3 * time.Hour), StaticTTL: false},
 		utils.CacheRPCResponses: &CacheParamCfg{Limit: 0,
 			TTL: time.Duration(2 * time.Second), StaticTTL: false},
-		utils.CacheClosedSessions: &CacheParamCfg{Limit: 0,
+		utils.CacheClosedSessions: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(10 * time.Second), StaticTTL: false},
 	}
 

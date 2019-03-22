@@ -150,7 +150,7 @@ const CGRATES_CFG_JSON = `
 	"dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false}, 						// control dispatcher routes caching
 	"diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false},						// diameter messages caching
 	"rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false},							// RPC responses caching
-	"closed_sessions": {"limit": 0, "ttl": "10s", "static_ttl": false},							// closed sessions cached for CDRs
+	"closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false},							// closed sessions cached for CDRs
 },
 
 
@@ -306,7 +306,7 @@ const CGRATES_CFG_JSON = `
 	"attributes_conns": [],					// connections to AttributeS for altering event fields <""|*internal|127.0.0.1:2013>
 	"session_replication_conns": [],		// replicate sessions towards these session services
 	"debit_interval": "0s",					// interval to perform debits on.
-	"store_session_costs": true,			// enable storing of the session costs within CDRs
+	"store_session_costs": false,			// enable storing of the session costs within CDRs
 	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
 	"session_ttl": "0s",					// time after a session with no updates is terminated, not defined by default

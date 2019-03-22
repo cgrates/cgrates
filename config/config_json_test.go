@@ -155,7 +155,7 @@ func TestCacheJsonCfg(t *testing.T) {
 			Ttl: utils.StringPointer("3h"), Static_ttl: utils.BoolPointer(false)},
 		utils.CacheRPCResponses: &CacheParamJsonCfg{Limit: utils.IntPointer(0),
 			Ttl: utils.StringPointer("2s"), Static_ttl: utils.BoolPointer(false)},
-		utils.CacheClosedSessions: &CacheParamJsonCfg{Limit: utils.IntPointer(0),
+		utils.CacheClosedSessions: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer("10s"), Static_ttl: utils.BoolPointer(false)},
 	}
 
@@ -482,7 +482,7 @@ func TestSmgJsonCfg(t *testing.T) {
 		Attributes_conns:          &[]*HaPoolJsonCfg{},
 		Session_replication_conns: &[]*HaPoolJsonCfg{},
 		Debit_interval:            utils.StringPointer("0s"),
-		Store_session_costs:       utils.BoolPointer(true),
+		Store_session_costs:       utils.BoolPointer(false),
 		Min_call_duration:         utils.StringPointer("0s"),
 		Max_call_duration:         utils.StringPointer("3h"),
 		Session_ttl:               utils.StringPointer("0s"),

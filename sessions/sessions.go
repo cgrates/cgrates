@@ -1290,7 +1290,10 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration) (er
 				// FixMe: make sure refund is reflected inside EventCost
 			}
 			sr.Event[utils.Cost] = sr.EventCost.GetCost()
-			sr.Event[utils.Usage] = sr.EventCost.GetUsage()
+			sr.Event[utils.Usage] = sr.TotalUsage
+		}
+		if sRunIdx == 0 {
+			s.EventStart.Set(utils.Usage, sr.TotalUsage)
 		}
 		if sS.cgrCfg.SessionSCfg().StoreSCosts {
 			if err := sS.storeSCost(s, sRunIdx); err != nil {
@@ -1299,9 +1302,10 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration) (er
 						utils.SessionS, s.CGRID, sRunIdx, err.Error()))
 			}
 		}
-		engine.Cache.Set(utils.CacheClosedSessions, s.CGRID, s,
-			nil, true, utils.NonTransactional)
+
 	}
+	engine.Cache.Set(utils.CacheClosedSessions, s.CGRID, s,
+		nil, true, utils.NonTransactional)
 	s.Unlock()
 	return
 }
