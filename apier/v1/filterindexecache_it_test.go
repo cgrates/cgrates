@@ -504,25 +504,27 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	statConfig = &engine.StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TEST_PROFILE1",
-		FilterIDs: []string{"FLTR_1"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
-		QueueLength: 10,
-		TTL:         time.Duration(10) * time.Second,
-		Metrics: []*engine.MetricWithFilters{
-			&engine.MetricWithFilters{
-				MetricID: "*sum#Val",
+	statConfig = &StatQueueWrapper{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TEST_PROFILE1",
+			FilterIDs: []string{"FLTR_1"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				&engine.MetricWithFilters{
+					MetricID: "*sum#Val",
+				},
+			},
+			ThresholdIDs: []string{"Val1", "Val2"},
+			Blocker:      true,
+			Stored:       true,
+			Weight:       20,
+			MinItems:     1,
 		},
-		ThresholdIDs: []string{"Val1", "Val2"},
-		Blocker:      true,
-		Stored:       true,
-		Weight:       20,
-		MinItems:     1,
 	}
 	if err := tFIdxCaRpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
 		t.Error(err)
@@ -637,25 +639,27 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	statConfig = &engine.StatQueueProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TEST_PROFILE1",
-		FilterIDs: []string{"FLTR_2"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
-		QueueLength: 10,
-		TTL:         time.Duration(10) * time.Second,
-		Metrics: []*engine.MetricWithFilters{
-			&engine.MetricWithFilters{
-				MetricID: "*sum#Val",
+	statConfig = &StatQueueWrapper{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TEST_PROFILE1",
+			FilterIDs: []string{"FLTR_2"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				&engine.MetricWithFilters{
+					MetricID: "*sum#Val",
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+			Blocker:      true,
+			Stored:       true,
+			Weight:       20,
+			MinItems:     1,
 		},
-		ThresholdIDs: []string{"*none"},
-		Blocker:      true,
-		Stored:       true,
-		Weight:       20,
-		MinItems:     1,
 	}
 	if err := tFIdxCaRpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
 		t.Error(err)
@@ -1077,7 +1081,7 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 	//Remove threshold profile that was set form api
-	if err := tFIdxCaRpc.Call("ApierV1.RemoveAttributeProfile", &ArgRemoveAttrPrfWrapper{Tenant: "cgrates.org",
+	if err := tFIdxCaRpc.Call("ApierV1.RemoveAttributeProfile", &utils.TenantIDWrapper{Tenant: "cgrates.org",
 		ID: "TEST_PROFILE1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -1091,7 +1095,7 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 	//Remove threshold profile that was set form tariffplan
-	if err := tFIdxCaRpc.Call("ApierV1.RemoveAttributeProfile", &ArgRemoveAttrPrfWrapper{Tenant: "cgrates.org",
+	if err := tFIdxCaRpc.Call("ApierV1.RemoveAttributeProfile", &utils.TenantIDWrapper{Tenant: "cgrates.org",
 		ID: "ATTR_1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

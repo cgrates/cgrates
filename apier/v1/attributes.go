@@ -93,14 +93,8 @@ func (apierV1 *ApierV1) SetAttributeProfile(alsWrp *AttributeWrapper, reply *str
 	return nil
 }
 
-type ArgRemoveAttrPrfWrapper struct {
-	Tenant string
-	ID     string
-	Cache  *string
-}
-
 //RemoveAttributeProfile remove a specific Attribute Profile
-func (apierV1 *ApierV1) RemoveAttributeProfile(arg *ArgRemoveAttrPrfWrapper, reply *string) error {
+func (apierV1 *ApierV1) RemoveAttributeProfile(arg *utils.TenantIDWrapper, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

@@ -448,29 +448,31 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	statConfig = &engine.StatQueueProfile{
-		Tenant:    tenant,
-		ID:        "TEST_PROFILE1",
-		FilterIDs: []string{"FLTR_1"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
-		QueueLength: 10,
-		TTL:         time.Duration(10) * time.Second,
-		Metrics: []*engine.MetricWithFilters{
-			&engine.MetricWithFilters{
-				MetricID: "*sum",
+	statConfig = &StatQueueWrapper{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:    tenant,
+			ID:        "TEST_PROFILE1",
+			FilterIDs: []string{"FLTR_1"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-			&engine.MetricWithFilters{
-				MetricID: "*acd",
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				&engine.MetricWithFilters{
+					MetricID: "*sum",
+				},
+				&engine.MetricWithFilters{
+					MetricID: "*acd",
+				},
 			},
+			ThresholdIDs: []string{"Val1", "Val2"},
+			Blocker:      true,
+			Stored:       true,
+			Weight:       20,
+			MinItems:     1,
 		},
-		ThresholdIDs: []string{"Val1", "Val2"},
-		Blocker:      true,
-		Stored:       true,
-		Weight:       20,
-		MinItems:     1,
 	}
 	if err := tFIdxRpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
 		t.Error(err)
@@ -480,8 +482,8 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 	if err := tFIdxRpc.Call("ApierV1.GetStatQueueProfile",
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(statConfig, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", statConfig, reply)
+	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", statConfig.StatQueueProfile, reply)
 	}
 	if err := tFIdxRpc.Call("ApierV1.RemoveFilterIndexes", &AttrRemFilterIndexes{
 		ItemType: utils.MetaStats, Tenant: tenant}, &result); err != nil {
@@ -553,29 +555,31 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	statConfig = &engine.StatQueueProfile{
-		Tenant:    tenant,
-		ID:        "TEST_PROFILE2",
-		FilterIDs: []string{"FLTR_2"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
-		QueueLength: 10,
-		TTL:         time.Duration(10) * time.Second,
-		Metrics: []*engine.MetricWithFilters{
-			&engine.MetricWithFilters{
-				MetricID: "*sum",
+	statConfig = &StatQueueWrapper{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:    tenant,
+			ID:        "TEST_PROFILE2",
+			FilterIDs: []string{"FLTR_2"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-			&engine.MetricWithFilters{
-				MetricID: "*acd",
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				&engine.MetricWithFilters{
+					MetricID: "*sum",
+				},
+				&engine.MetricWithFilters{
+					MetricID: "*acd",
+				},
 			},
+			ThresholdIDs: []string{"Val1", "Val2"},
+			Blocker:      true,
+			Stored:       true,
+			Weight:       20,
+			MinItems:     1,
 		},
-		ThresholdIDs: []string{"Val1", "Val2"},
-		Blocker:      true,
-		Stored:       true,
-		Weight:       20,
-		MinItems:     1,
 	}
 	if err := tFIdxRpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
 		t.Error(err)
@@ -585,8 +589,8 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 	if err := tFIdxRpc.Call("ApierV1.GetStatQueueProfile",
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(statConfig, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", statConfig, reply)
+	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", statConfig.StatQueueProfile, reply)
 	}
 	if err := tFIdxRpc.Call("ApierV1.RemoveFilterIndexes", &AttrRemFilterIndexes{
 		ItemType: utils.MetaStats, Tenant: tenant}, &result); err != nil {
@@ -1413,14 +1417,14 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call("ApierV1.RemoveAttributeProfile", &ArgRemoveAttrPrfWrapper{
+	if err := tFIdxRpc.Call("ApierV1.RemoveAttributeProfile", &utils.TenantIDWrapper{
 		Tenant: tenant,
 		ID:     "ApierTest"}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call("ApierV1.RemoveAttributeProfile", &ArgRemoveAttrPrfWrapper{
+	if err := tFIdxRpc.Call("ApierV1.RemoveAttributeProfile", &utils.TenantIDWrapper{
 		Tenant: tenant,
 		ID:     "ApierTest2"}, &result); err != nil {
 		t.Error(err)

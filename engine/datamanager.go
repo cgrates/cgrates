@@ -339,20 +339,12 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue) (err error) {
 	if err != nil {
 		return err
 	}
-	if err = dm.dataDB.SetStoredStatQueueDrv(ssq); err != nil {
-		return
-	}
-	return dm.CacheDataFromDB(utils.StatQueuePrefix, []string{sq.TenantID()}, true)
+	return dm.dataDB.SetStoredStatQueueDrv(ssq)
 }
 
-// RemoveStatQueue removes the StoredStatQueue and clears the cache for StatQueue
+// RemoveStatQueue removes the StoredStatQueue
 func (dm *DataManager) RemoveStatQueue(tenant, id string, transactionID string) (err error) {
-	if err = dm.dataDB.RemStoredStatQueueDrv(tenant, id); err != nil {
-		return
-	}
-	Cache.Remove(utils.CacheStatQueues, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(transactionID), transactionID)
-	return
+	return dm.dataDB.RemStoredStatQueueDrv(tenant, id)
 }
 
 // GetFilter returns
@@ -562,10 +554,6 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 	if err = dm.DataDB().SetStatQueueProfileDrv(sqp); err != nil {
 		return err
 	}
-	if err = dm.CacheDataFromDB(utils.StatQueueProfilePrefix,
-		[]string{sqp.TenantID()}, true); err != nil {
-		return
-	}
 	if withIndex {
 		if oldSts != nil {
 			var needsRemove bool
@@ -595,8 +583,6 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id,
 	if err = dm.DataDB().RemStatQueueProfileDrv(tenant, id); err != nil {
 		return
 	}
-	Cache.Remove(utils.CacheStatQueueProfiles, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(transactionID), transactionID)
 	if oldSts == nil {
 		return utils.ErrNotFound
 	}
