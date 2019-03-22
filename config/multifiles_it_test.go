@@ -111,6 +111,7 @@ func TestMfEnvReaderITRead(t *testing.T) {
 		DefaultReqType:    utils.META_PSEUDOPREPAID,
 		DefaultCategory:   "call",
 		DefaultTenant:     "cgrates.org",
+		DefaultCaching:    utils.MetaReload,
 		DefaultTimezone:   "Local",
 		ConnectAttempts:   3,
 		Reconnects:        -1,

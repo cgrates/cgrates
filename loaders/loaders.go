@@ -25,16 +25,18 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func NewLoaderService(dm *engine.DataManager, ldrsCfg []*config.LoaderSCfg,
-	timezone string, filterS *engine.FilterS) (ldrS *LoaderService) {
+	timezone string, exitChan chan bool, filterS *engine.FilterS,
+	internalCacheSChan chan rpcclient.RpcClientConnection) (ldrS *LoaderService) {
 	ldrS = &LoaderService{ldrs: make(map[string]*Loader)}
 	for _, ldrCfg := range ldrsCfg {
 		if !ldrCfg.Enabled {
 			continue
 		}
-		ldrS.ldrs[ldrCfg.Id] = NewLoader(dm, ldrCfg, timezone, filterS)
+		ldrS.ldrs[ldrCfg.Id] = NewLoader(dm, ldrCfg, timezone, exitChan, filterS, internalCacheSChan)
 	}
 	return
 }

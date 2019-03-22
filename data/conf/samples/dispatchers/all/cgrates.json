@@ -33,6 +33,10 @@
 	"enabled": true,
 },
 
+"scheduler": {
+	"enabled": true,				
+},
+
 "chargers": {
 	"enabled": true,
 	"attributes_conns": [
@@ -78,6 +82,12 @@
 	"rals_conns": [
 		{"address": "*internal"}
 	],
+},
+
+"apier": {	
+	"caches_conns":[						// connections to CacheS for reloads
+		{"address": "127.0.0.1:6012", "transport": "*json"},
+	],						
 },
 
 }

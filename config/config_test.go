@@ -346,6 +346,9 @@ func TestCgrCfgJSONDefaultsGeneral(t *testing.T) {
 	if cgrCfg.GeneralCfg().DefaultTenant != "cgrates.org" {
 		t.Errorf("Expected: cgrates.org, received: %+v", cgrCfg.GeneralCfg().DefaultTenant)
 	}
+	if cgrCfg.GeneralCfg().DefaultCaching != utils.MetaReload {
+		t.Errorf("Expected: *reload, received: %+v", cgrCfg.GeneralCfg().DefaultCaching)
+	}
 	if cgrCfg.GeneralCfg().DefaultTimezone != "Local" {
 		t.Errorf("Expected: Local, received: %+v", cgrCfg.GeneralCfg().DefaultTimezone)
 	}
@@ -1703,8 +1706,9 @@ func TestNewCGRConfigFromPathNotFound(t *testing.T) {
 
 func TestCgrCfgJSONDefaultApierCfg(t *testing.T) {
 	aCfg := &ApierCfg{
-		CachesConns:  []*HaPoolConfig{},
-		DefaultCache: utils.EmptyString,
+		CachesConns: []*HaPoolConfig{
+			{Address: "127.0.0.1:2012", Transport: "*json"},
+		},
 	}
 	if !reflect.DeepEqual(cgrCfg.apier, aCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.apier, aCfg)

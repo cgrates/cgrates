@@ -31,6 +31,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
+	"github.com/cgrates/rpcclient"
 	"github.com/kr/pty"
 )
 
@@ -123,7 +124,7 @@ func StopStartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	return StartEngine(cfgPath, waitEngine)
 }
 
-func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disable_reverse bool) error {
+func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disable_reverse bool, cacheS rpcclient.RpcClientConnection) error {
 	loader := NewTpReader(dm.dataDB, NewFileCSVStorage(utils.CSV_SEP,
 		path.Join(tpPath, utils.DESTINATIONS_CSV),
 		path.Join(tpPath, utils.TIMINGS_CSV),
@@ -145,7 +146,7 @@ func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disable_
 		path.Join(tpPath, utils.AttributesCsv),
 		path.Join(tpPath, utils.ChargersCsv),
 		path.Join(tpPath, utils.DispatchersCsv),
-	), "", timezone)
+	), "", timezone, cacheS)
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}

@@ -188,7 +188,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		if err := fltrMigrator.dmIN.DataManager().SetFilter(Filters); err != nil {
 			t.Error("Error when setting v1 Filters ", err.Error())
 		}
-		if err := fltrMigrator.dmIN.DataManager().SetAttributeProfile(attrProf, false, false); err != nil {
+		if err := fltrMigrator.dmIN.DataManager().SetAttributeProfile(attrProf, false); err != nil {
 			t.Error("Error when setting attribute profile for v1 Filters ", err.Error())
 		}
 		currentVersion := engine.Versions{utils.RQF: 1}

@@ -81,6 +81,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats := engine.GetDefaultEmptyCacheStats()
 	expStats[utils.CacheAccountActionPlans].Items = 3
 	expStats[utils.CacheActionPlans].Items = 1
+	expStats[utils.CacheActions].Items = 1
 	expStats[utils.CacheDestinations].Items = 4
 	args := AttrCacheIDsWithApiKey{
 		DispatcherResource: DispatcherResource{
@@ -93,7 +94,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	if err := dispEngine.RCP.Call(utils.CacheSv1GetCacheStats, args, &rcvStats); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expStats, rcvStats) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
+		t.Errorf("Expecting: %+v, \n received: %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
 	}
 	reply := ""
 	// Simple test that command is executed without errors
@@ -127,7 +128,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	if err := dispEngine.RCP.Call(utils.CacheSv1GetCacheStats, &args, &rcvStats); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expStats, rcvStats) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
+		t.Errorf("Expecting: %+v, \n received: %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
 	}
 }
 
@@ -176,7 +177,7 @@ func testDspChcPrecacheStatus(t *testing.T) {
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, reply) {
-		t.Errorf("Expected: %v , received:%v", utils.ToJSON(expected), utils.ToJSON(reply))
+		t.Errorf("Expected: %v , \n received:%v", utils.ToJSON(expected), utils.ToJSON(reply))
 	}
 }
 

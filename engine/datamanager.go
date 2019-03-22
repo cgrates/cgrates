@@ -287,10 +287,16 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			err = dm.MatchFilterIndexFromKey(utils.CacheDispatcherFilterIndexes, dataID)
 		}
 		if err != nil {
-			return utils.NewCGRError(utils.DataManager,
-				utils.ServerErrorCaps,
-				err.Error(),
-				fmt.Sprintf("error <%s> querying DataManager for category: <%s>, dataID: <%s>", err.Error(), prfx, dataID))
+			if err == utils.ErrNotFound {
+				Cache.Remove(utils.CachePrefixToInstance[prfx], dataID,
+					cacheCommit(utils.NonTransactional), utils.NonTransactional)
+				err = nil
+			} else {
+				return utils.NewCGRError(utils.DataManager,
+					utils.ServerErrorCaps,
+					err.Error(),
+					fmt.Sprintf("error <%s> querying DataManager for category: <%s>, dataID: <%s>", err.Error(), prfx, dataID))
+			}
 		}
 	}
 	return
@@ -1128,18 +1134,13 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWr
 	return
 }
 
-func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex, withCache bool) (err error) {
+func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool) (err error) {
 	oldAP, err := dm.GetAttributeProfile(ap.Tenant, ap.ID, true, false, utils.NonTransactional)
 	if err != nil && err != utils.ErrNotFound {
 		return err
 	}
 	if err = dm.DataDB().SetAttributeProfileDrv(ap); err != nil {
 		return err
-	}
-	if withCache {
-		if err = dm.CacheDataFromDB(utils.AttributeProfilePrefix, []string{ap.TenantID()}, true); err != nil {
-			return
-		}
 	}
 	if withIndex {
 		if oldAP != nil {
@@ -1172,17 +1173,13 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex, with
 	return
 }
 
-func (dm *DataManager) RemoveAttributeProfile(tenant, id string, transactionID string, withIndex, withCache bool) (err error) {
+func (dm *DataManager) RemoveAttributeProfile(tenant, id string, transactionID string, withIndex bool) (err error) {
 	oldAttr, err := dm.GetAttributeProfile(tenant, id, true, false, utils.NonTransactional)
 	if err != nil {
 		return err
 	}
 	if err = dm.DataDB().RemoveAttributeProfileDrv(tenant, id); err != nil {
 		return
-	}
-	if withCache {
-		Cache.Remove(utils.CacheAttributeProfiles, utils.ConcatenatedKey(tenant, id),
-			cacheCommit(transactionID), transactionID)
 	}
 	if oldAttr == nil {
 		return utils.ErrNotFound

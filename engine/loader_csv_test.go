@@ -276,7 +276,7 @@ func init() {
 	csvr = NewTpReader(dm.dataDB, NewStringCSVStorage(',', destinations, timings, rates, destinationRates,
 		ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers,
 		accountActions, resProfiles, stats, thresholds,
-		filters, sppProfiles, attributeProfiles, chargerProfiles, dispatcherProfiles), testTPID, "")
+		filters, sppProfiles, attributeProfiles, chargerProfiles, dispatcherProfiles), testTPID, "", nil)
 
 	if err := csvr.LoadDestinations(); err != nil {
 		log.Print("error in LoadDestinations:", err)

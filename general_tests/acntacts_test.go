@@ -57,7 +57,7 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,false,false,10`
 	csvr := engine.NewTpReader(dbAcntActs.DataDB(), engine.NewStringCSVStorage(',', destinations, timings,
 		rates, destinationRates, ratingPlans, ratingProfiles, sharedGroups,
 		actions, actionPlans, actionTriggers, accountActions,
-		resLimits, stats, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``), "", "")
+		resLimits, stats, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``), "", "", nil)
 	if err := csvr.LoadAll(); err != nil {
 		t.Fatal(err)
 	}

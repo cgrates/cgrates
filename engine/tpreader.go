@@ -25,8 +25,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/structmatcher"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 type TpReader struct {
@@ -62,14 +64,16 @@ type TpReader struct {
 	dpps               []*utils.TenantID // IDs of chargers which need creation based on dispatcherProfiles
 	revDests,
 	acntActionPlans map[string][]string
+	cacheS rpcclient.RpcClientConnection
 }
 
-func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string) *TpReader {
+func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string, cacheS rpcclient.RpcClientConnection) *TpReader {
 	tpr := &TpReader{
 		tpid:     tpid,
 		timezone: timezone,
 		dm:       NewDataManager(db),
 		lr:       lr,
+		cacheS:   cacheS,
 	}
 	tpr.Init()
 	//add *any and *asap timing tag (in case of no timings file)
@@ -1639,7 +1643,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		if err != nil {
 			return err
 		}
-		if err = tpr.dm.SetAttributeProfile(th, true, true); err != nil {
+		if err = tpr.dm.SetAttributeProfile(th, true); err != nil {
 			return err
 		}
 		if verbose {
@@ -2125,7 +2129,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 	}
 	for _, tpTH := range tpr.attributeProfiles {
 		if err = tpr.dm.RemoveAttributeProfile(tpTH.Tenant, tpTH.ID,
-			utils.NonTransactional, false, false); err != nil && err.Error() != utils.ErrNotFound.Error() {
+			utils.NonTransactional, false); err != nil && err.Error() != utils.ErrNotFound.Error() {
 			return err
 		}
 		if verbose {
@@ -2186,5 +2190,126 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 			}
 		}
 	}
+	return
+}
+
+func (tpr *TpReader) ReloadCache(flush, verbose bool) (err error) {
+	if tpr.cacheS == nil {
+		log.Print("Disabled automatic reload")
+		return
+	}
+	// take IDs for each type
+	dstIds, _ := tpr.GetLoadedIds(utils.DESTINATION_PREFIX)
+	revDstIDs, _ := tpr.GetLoadedIds(utils.REVERSE_DESTINATION_PREFIX)
+	rplIds, _ := tpr.GetLoadedIds(utils.RATING_PLAN_PREFIX)
+	rpfIds, _ := tpr.GetLoadedIds(utils.RATING_PROFILE_PREFIX)
+	actIds, _ := tpr.GetLoadedIds(utils.ACTION_PREFIX)
+	aapIDs, _ := tpr.GetLoadedIds(utils.AccountActionPlansPrefix)
+	shgIds, _ := tpr.GetLoadedIds(utils.SHARED_GROUP_PREFIX)
+	rspIDs, _ := tpr.GetLoadedIds(utils.ResourceProfilesPrefix)
+	resIDs, _ := tpr.GetLoadedIds(utils.ResourcesPrefix)
+	aatIDs, _ := tpr.GetLoadedIds(utils.ACTION_TRIGGER_PREFIX)
+	stqIDs, _ := tpr.GetLoadedIds(utils.StatQueuePrefix)
+	stqpIDs, _ := tpr.GetLoadedIds(utils.StatQueueProfilePrefix)
+	trsIDs, _ := tpr.GetLoadedIds(utils.ThresholdPrefix)
+	trspfIDs, _ := tpr.GetLoadedIds(utils.ThresholdProfilePrefix)
+	flrIDs, _ := tpr.GetLoadedIds(utils.FilterPrefix)
+	spfIDs, _ := tpr.GetLoadedIds(utils.SupplierProfilePrefix)
+	apfIDs, _ := tpr.GetLoadedIds(utils.AttributeProfilePrefix)
+	chargerIDs, _ := tpr.GetLoadedIds(utils.ChargerProfilePrefix)
+	dppIDs, _ := tpr.GetLoadedIds(utils.DispatcherProfilePrefix)
+	aps, _ := tpr.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
+
+	//compose Reload Cache argument
+	cacheArgs := utils.AttrReloadCache{
+		ArgsCache: utils.ArgsCache{
+			DestinationIDs:        &dstIds,
+			ReverseDestinationIDs: &revDstIDs,
+			RatingPlanIDs:         &rplIds,
+			RatingProfileIDs:      &rpfIds,
+			ActionIDs:             &actIds,
+			ActionPlanIDs:         &aps,
+			AccountActionPlanIDs:  &aapIDs,
+			SharedGroupIDs:        &shgIds,
+			ResourceProfileIDs:    &rspIDs,
+			ResourceIDs:           &resIDs,
+			ActionTriggerIDs:      &aatIDs,
+			StatsQueueIDs:         &stqIDs,
+			StatsQueueProfileIDs:  &stqpIDs,
+			ThresholdIDs:          &trsIDs,
+			ThresholdProfileIDs:   &trspfIDs,
+			FilterIDs:             &flrIDs,
+			SupplierProfileIDs:    &spfIDs,
+			AttributeProfileIDs:   &apfIDs,
+			ChargerProfileIDs:     &chargerIDs,
+			DispatcherProfileIDs:  &dppIDs},
+		FlushAll: flush,
+	}
+
+	if verbose {
+		log.Print("Reloading cache")
+	}
+	var reply string
+	switch config.CgrConfig().GeneralCfg().DefaultCaching {
+	case utils.META_NONE:
+		return
+	case utils.MetaReload:
+		if err = tpr.cacheS.Call(utils.CacheSv1ReloadCache, cacheArgs, &reply); err != nil {
+			return
+		}
+	case utils.MetaLoad:
+		if err = tpr.cacheS.Call(utils.CacheSv1LoadCache, cacheArgs, &reply); err != nil {
+			return
+		}
+	case utils.MetaRemove:
+		//
+	case utils.MetaClear:
+		if err = tpr.cacheS.Call(utils.CacheSv1FlushCache, cacheArgs, &reply); err != nil {
+			return
+		}
+	}
+
+	// verify if we need to clear indexes
+	var cacheIDs []string
+	if len(apfIDs) != 0 {
+		cacheIDs = append(cacheIDs, utils.CacheAttributeFilterIndexes)
+	}
+	if len(spfIDs) != 0 {
+		cacheIDs = append(cacheIDs, utils.CacheSupplierFilterIndexes)
+	}
+	if len(trspfIDs) != 0 {
+		cacheIDs = append(cacheIDs, utils.CacheThresholdFilterIndexes)
+	}
+	if len(stqpIDs) != 0 {
+		cacheIDs = append(cacheIDs, utils.CacheStatFilterIndexes)
+	}
+	if len(rspIDs) != 0 {
+		cacheIDs = append(cacheIDs, utils.CacheResourceFilterIndexes)
+	}
+	if len(chargerIDs) != 0 {
+		cacheIDs = append(cacheIDs, utils.CacheChargerFilterIndexes)
+	}
+	if len(dppIDs) != 0 {
+		cacheIDs = append(cacheIDs, utils.CacheDispatcherFilterIndexes)
+	}
+	if verbose {
+		log.Print("Clearing indexes")
+	}
+	if err = tpr.cacheS.Call(utils.CacheSv1Clear, cacheIDs, &reply); err != nil {
+		log.Printf("WARNING: Got error on cache clear: %s\n", err.Error())
+	}
+
+	// in case we have action plans reload the scheduler
+	if len(aps) != 0 {
+		if verbose {
+			log.Print("Reloading scheduler")
+		}
+		if err = tpr.cacheS.Call(utils.ApierV1ReloadScheduler, "", &reply); err != nil {
+			log.Printf("WARNING: Got error on scheduler reload: %s\n", err.Error())
+		}
+	}
+
+	// release the reader with it's structures
+	tpr.Init()
 	return
 }

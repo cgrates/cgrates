@@ -33,6 +33,7 @@ type GeneralJsonCfg struct {
 	Default_category     *string
 	Default_tenant       *string
 	Default_timezone     *string
+	Default_caching      *string
 	Connect_attempts     *int
 	Reconnects           *int
 	Connect_timeout      *string
@@ -585,6 +586,5 @@ type AnalyzerSJsonCfg struct {
 }
 
 type ApierJsonCfg struct {
-	Caches_conns  *[]*HaPoolJsonCfg
-	Default_cache *string
+	Caches_conns *[]*HaPoolJsonCfg
 }

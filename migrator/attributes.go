@@ -60,11 +60,11 @@ func (m *Migrator) migrateCurrentAttributeProfile() (err error) {
 		if attrPrf == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true, false); err != nil {
+		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
 			return err
 		}
 		if err := m.dmIN.DataManager().RemoveAttributeProfile(tenant,
-			idg, utils.NonTransactional, false, false); err != nil {
+			idg, utils.NonTransactional, false); err != nil {
 			return err
 		}
 		m.stats[utils.Attributes] += 1
@@ -95,7 +95,7 @@ func (m *Migrator) migrateV1Attributes() (err error) {
 		if err := m.dmOut.DataManager().DataDB().SetAttributeProfileDrv(attrPrf); err != nil {
 			return err
 		}
-		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true, false); err != nil {
+		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
 			return err
 		}
 		m.stats[utils.Attributes] += 1
@@ -134,7 +134,7 @@ func (m *Migrator) migrateV2Attributes() (err error) {
 		if m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true, false); err != nil {
+		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
 			return err
 		}
 		m.stats[utils.Attributes] += 1

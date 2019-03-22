@@ -192,7 +192,7 @@ func (self *ApierV1) LoadDestination(attrs AttrLoadDestination, reply *string) e
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
-		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone)
+		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone, self.CacheS)
 	if loaded, err := dbReader.LoadDestinationsFiltered(attrs.ID); err != nil {
 		return utils.NewErrServerError(err)
 	} else if !loaded {
@@ -216,7 +216,7 @@ func (self *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) err
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
-		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone)
+		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone, self.CacheS)
 	if loaded, err := dbReader.LoadRatingPlansFiltered(attrs.RatingPlanId); err != nil {
 		return utils.NewErrServerError(err)
 	} else if !loaded {
@@ -232,7 +232,7 @@ func (self *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *strin
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
-		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone)
+		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone, self.CacheS)
 	if err := dbReader.LoadRatingProfilesFiltered(&attrs); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -251,7 +251,7 @@ func (self *ApierV1) LoadSharedGroup(attrs AttrLoadSharedGroup, reply *string) e
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
-		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone)
+		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone, self.CacheS)
 	if err := dbReader.LoadSharedGroupsFiltered(attrs.SharedGroupId, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -272,7 +272,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
-		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone)
+		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone, self.CacheS)
 	if err := dbReader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -289,28 +289,10 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	if err := dbReader.WriteToDatabase(attrs.FlushDb, false, false); err != nil {
 		return utils.NewErrServerError(err)
 	}
+	// reload cache
 	utils.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading cache.")
-	for _, prfx := range []string{
-		utils.DESTINATION_PREFIX,
-		utils.REVERSE_DESTINATION_PREFIX,
-		utils.ACTION_PLAN_PREFIX,
-		utils.AccountActionPlansPrefix,
-	} {
-		loadedIDs, _ := dbReader.GetLoadedIds(prfx)
-		if err := self.DataManager.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
-			return utils.NewErrServerError(err)
-		}
-	}
-	aps, _ := dbReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
-
-	// relase tp data
-	dbReader.Init()
-
-	if len(aps) != 0 {
-		sched := self.ServManager.GetScheduler()
-		if sched != nil {
-			sched.Reload()
-		}
+	if err := dbReader.ReloadCache(attrs.FlushDb, true); err != nil {
+		return utils.NewErrServerError(err)
 	}
 
 	*reply = OK
@@ -650,7 +632,7 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
-		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone)
+		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone, self.CacheS)
 	if _, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		return 0, dbReader.LoadAccountActionsFiltered(&attrs)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, attrs.LoadId); err != nil {
@@ -677,9 +659,11 @@ func (self *ApierV1) ReloadScheduler(ignore string, reply *string) error {
 }
 
 func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, reply *string) error {
+	// verify if FolderPath is present
 	if len(attrs.FolderPath) == 0 {
 		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "FolderPath")
 	}
+	// check if exists or is valid
 	if fi, err := os.Stat(attrs.FolderPath); err != nil {
 		if strings.HasSuffix(err.Error(), "no such file or directory") {
 			return utils.ErrInvalidPath
@@ -688,6 +672,8 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	} else if !fi.IsDir() {
 		return utils.ErrInvalidPath
 	}
+
+	// create the TpReader
 	loader := engine.NewTpReader(self.DataManager.DataDB(),
 		engine.NewFileCSVStorage(utils.CSV_SEP,
 			path.Join(attrs.FolderPath, utils.DESTINATIONS_CSV),
@@ -709,7 +695,8 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 			path.Join(attrs.FolderPath, utils.AttributesCsv),
 			path.Join(attrs.FolderPath, utils.ChargersCsv),
 			path.Join(attrs.FolderPath, utils.DispatchersCsv),
-		), "", self.Config.GeneralCfg().DefaultTimezone)
+		), "", self.Config.GeneralCfg().DefaultTimezone, self.CacheS)
+	//Load the data
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -724,32 +711,14 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		}
 	}
 
+	// write data intro Database
 	if err := loader.WriteToDatabase(attrs.FlushDb, false, false); err != nil {
 		return utils.NewErrServerError(err)
 	}
+	// reload cache
 	utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
-	for _, prfx := range []string{
-		utils.DESTINATION_PREFIX,
-		utils.REVERSE_DESTINATION_PREFIX,
-		utils.ACTION_PLAN_PREFIX,
-		utils.AccountActionPlansPrefix,
-	} {
-		loadedIDs, _ := loader.GetLoadedIds(prfx)
-		if err := self.DataManager.CacheDataFromDB(prfx, loadedIDs, true); err != nil {
-			return utils.NewErrServerError(err)
-		}
-	}
-	aps, _ := loader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
-
-	// relase tp data
-	loader.Init()
-
-	if len(aps) != 0 {
-		sched := self.ServManager.GetScheduler()
-		if sched != nil {
-			utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading scheduler.")
-			sched.Reload()
-		}
+	if err := loader.ReloadCache(attrs.FlushDb, true); err != nil {
+		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
 	return nil

@@ -436,7 +436,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		Weight: 20,
 	}
 	//Set AttributeProfile with 2 contexts ( con1 , con2)
-	if err := dataManager.SetAttributeProfile(attrProfile, true, true); err != nil {
+	if err := dataManager.SetAttributeProfile(attrProfile, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes := map[string]utils.StringMap{
@@ -461,7 +461,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 	//Set AttributeProfile with 1 new context (con3)
 	attrProfile.Contexts = []string{"con3"}
 	time.Sleep(50 * time.Millisecond)
-	if err := dataManager.SetAttributeProfile(attrProfile, true, true); err != nil {
+	if err := dataManager.SetAttributeProfile(attrProfile, true); err != nil {
 		t.Error(err)
 	}
 	//check indexes with the new context (con3)
@@ -486,7 +486,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 	}
 
 	if err := dataManager.RemoveAttributeProfile(attrProfile.Tenant,
-		attrProfile.ID, utils.NonTransactional, true, true); err != nil {
+		attrProfile.ID, utils.NonTransactional, true); err != nil {
 		t.Error(err)
 	}
 	//check if index is removed

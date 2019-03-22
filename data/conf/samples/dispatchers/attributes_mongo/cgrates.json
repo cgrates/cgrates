@@ -27,6 +27,9 @@
 	"db_port": 27017,
 },
 
+"scheduler": {
+	"enabled": true,				
+},
 
 "attributes": {
 	"enabled": true
@@ -35,5 +38,12 @@
 "rals": {
 	"enabled": true,
 },
+
+"apier": {	
+	"caches_conns":[						// connections to CacheS for reloads
+		{"address": "127.0.0.1:5012", "transport": "*json"},
+	],						
+},
+
 }
  

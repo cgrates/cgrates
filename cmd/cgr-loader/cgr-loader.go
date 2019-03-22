@@ -303,16 +303,6 @@ func main() {
 		)
 	}
 
-	tpReader := engine.NewTpReader(dm.DataDB(), loader,
-		ldrCfg.LoaderCgrCfg().TpID, ldrCfg.GeneralCfg().DefaultTimezone)
-
-	if err = tpReader.LoadAll(); err != nil {
-		log.Fatal(err)
-	}
-
-	if *dryRun { // We were just asked to parse the data, not saving it
-		return
-	}
 	if len(ldrCfg.LoaderCgrCfg().CachesConns) != 0 { // Init connection to CacheS so we can reload it's data
 		if cacheS, err = rpcclient.NewRpcClient("tcp",
 			ldrCfg.LoaderCgrCfg().CachesConns[0].Address,
@@ -328,109 +318,25 @@ func main() {
 		log.Print("WARNING: automatic cache reloading is disabled!")
 	}
 
+	tpReader := engine.NewTpReader(dm.DataDB(), loader, ldrCfg.LoaderCgrCfg().TpID,
+		ldrCfg.GeneralCfg().DefaultTimezone, cacheS)
+
+	if err = tpReader.LoadAll(); err != nil {
+		log.Fatal(err)
+	}
+
+	if *dryRun { // We were just asked to parse the data, not saving it
+		return
+	}
+
 	if !*remove {
 		// write maps to database
 		if err := tpReader.WriteToDatabase(*flush, *verbose, *disableReverse); err != nil {
 			log.Fatal("Could not write to database: ", err)
 		}
-		var dstIds, revDstIDs, rplIds, rpfIds, actIds, aapIDs, shgIds, rspIDs, resIDs,
-			aatIDs, stqIDs, stqpIDs, trsIDs, trspfIDs, flrIDs, spfIDs, apfIDs, chargerIDs, dppIDs []string
-		if cacheS != nil {
-			dstIds, _ = tpReader.GetLoadedIds(utils.DESTINATION_PREFIX)
-			revDstIDs, _ = tpReader.GetLoadedIds(utils.REVERSE_DESTINATION_PREFIX)
-			rplIds, _ = tpReader.GetLoadedIds(utils.RATING_PLAN_PREFIX)
-			rpfIds, _ = tpReader.GetLoadedIds(utils.RATING_PROFILE_PREFIX)
-			actIds, _ = tpReader.GetLoadedIds(utils.ACTION_PREFIX)
-			aapIDs, _ = tpReader.GetLoadedIds(utils.AccountActionPlansPrefix)
-			shgIds, _ = tpReader.GetLoadedIds(utils.SHARED_GROUP_PREFIX)
-			rspIDs, _ = tpReader.GetLoadedIds(utils.ResourceProfilesPrefix)
-			resIDs, _ = tpReader.GetLoadedIds(utils.ResourcesPrefix)
-			aatIDs, _ = tpReader.GetLoadedIds(utils.ACTION_TRIGGER_PREFIX)
-			stqIDs, _ = tpReader.GetLoadedIds(utils.StatQueuePrefix)
-			stqpIDs, _ = tpReader.GetLoadedIds(utils.StatQueueProfilePrefix)
-			trsIDs, _ = tpReader.GetLoadedIds(utils.ThresholdPrefix)
-			trspfIDs, _ = tpReader.GetLoadedIds(utils.ThresholdProfilePrefix)
-			flrIDs, _ = tpReader.GetLoadedIds(utils.FilterPrefix)
-			spfIDs, _ = tpReader.GetLoadedIds(utils.SupplierProfilePrefix)
-			apfIDs, _ = tpReader.GetLoadedIds(utils.AttributeProfilePrefix)
-			chargerIDs, _ = tpReader.GetLoadedIds(utils.ChargerProfilePrefix)
-			dppIDs, _ = tpReader.GetLoadedIds(utils.DispatcherProfilePrefix)
-		}
-		aps, _ := tpReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
-		// release the reader with it's structures
-		tpReader.Init()
-
-		// Reload scheduler and cache
-		if cacheS != nil {
-			var reply string
-			// Reload cache first since actions could be calling info from within
-			if *verbose {
-				log.Print("Reloading cache")
-			}
-			if err = cacheS.Call(utils.CacheSv1ReloadCache,
-				utils.AttrReloadCache{ArgsCache: utils.ArgsCache{
-					DestinationIDs:        &dstIds,
-					ReverseDestinationIDs: &revDstIDs,
-					RatingPlanIDs:         &rplIds,
-					RatingProfileIDs:      &rpfIds,
-					ActionIDs:             &actIds,
-					ActionPlanIDs:         &aps,
-					AccountActionPlanIDs:  &aapIDs,
-					SharedGroupIDs:        &shgIds,
-					ResourceProfileIDs:    &rspIDs,
-					ResourceIDs:           &resIDs,
-					ActionTriggerIDs:      &aatIDs,
-					StatsQueueIDs:         &stqIDs,
-					StatsQueueProfileIDs:  &stqpIDs,
-					ThresholdIDs:          &trsIDs,
-					ThresholdProfileIDs:   &trspfIDs,
-					FilterIDs:             &flrIDs,
-					SupplierProfileIDs:    &spfIDs,
-					AttributeProfileIDs:   &apfIDs,
-					ChargerProfileIDs:     &chargerIDs,
-					DispatcherProfileIDs:  &dppIDs},
-					FlushAll: *flush,
-				}, &reply); err != nil {
-				log.Printf("WARNING: Got error on cache reload: %s\n", err.Error())
-			}
-			if *verbose {
-				log.Print("Clearing cached indexes")
-			}
-			var cacheIDs []string
-			if len(apfIDs) != 0 {
-				cacheIDs = append(cacheIDs, utils.CacheAttributeFilterIndexes)
-			}
-			if len(spfIDs) != 0 {
-				cacheIDs = append(cacheIDs, utils.CacheSupplierFilterIndexes)
-			}
-			if len(trspfIDs) != 0 {
-				cacheIDs = append(cacheIDs, utils.CacheThresholdFilterIndexes)
-			}
-			if len(stqpIDs) != 0 {
-				cacheIDs = append(cacheIDs, utils.CacheStatFilterIndexes)
-			}
-			if len(rspIDs) != 0 {
-				cacheIDs = append(cacheIDs, utils.CacheResourceFilterIndexes)
-			}
-			if len(chargerIDs) != 0 {
-				cacheIDs = append(cacheIDs, utils.CacheChargerFilterIndexes)
-			}
-			if len(dppIDs) != 0 {
-				cacheIDs = append(cacheIDs, utils.CacheDispatcherFilterIndexes)
-			}
-			if err = cacheS.Call(utils.CacheSv1Clear, cacheIDs, &reply); err != nil {
-				log.Printf("WARNING: Got error on cache clear: %s\n", err.Error())
-			}
-
-			if len(aps) != 0 {
-				if *verbose {
-					log.Print("Reloading scheduler")
-				}
-				if err = cacheS.Call(utils.ApierV1ReloadScheduler, "", &reply); err != nil {
-					log.Printf("WARNING: Got error on scheduler reload: %s\n", err.Error())
-				}
-			}
-
+		// reload cache
+		if err := tpReader.ReloadCache(*flush, *verbose); err != nil {
+			log.Fatal("Could not reload cache: ", err)
 		}
 	} else {
 		if err := tpReader.RemoveFromDatabase(*verbose, *disableReverse); err != nil {
