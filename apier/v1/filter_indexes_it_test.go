@@ -955,24 +955,27 @@ func testV1FIdxSetSupplierProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	splPrf = &engine.SupplierProfile{
-		Tenant:            tenant,
-		ID:                "TEST_PROFILE1",
-		FilterIDs:         []string{"FLTR_1"},
-		Sorting:           "Sort1",
-		SortingParameters: []string{"Param1", "Param2"},
-		Suppliers: []*engine.Supplier{{
-			ID:            "SPL1",
-			RatingPlanIDs: []string{"RP1"},
-			FilterIDs:     []string{"FLTR_1"},
-			AccountIDs:    []string{"Acc"},
-			ResourceIDs:   []string{"Res1", "ResGroup2"},
-			StatIDs:       []string{"Stat1"},
-			Weight:        20,
-			Blocker:       false,
-		}},
-		Weight: 10,
+	splPrf = &SupplierWrapper{
+		SupplierProfile: &engine.SupplierProfile{
+			Tenant:            tenant,
+			ID:                "TEST_PROFILE1",
+			FilterIDs:         []string{"FLTR_1"},
+			Sorting:           "Sort1",
+			SortingParameters: []string{"Param1", "Param2"},
+			Suppliers: []*engine.Supplier{{
+				ID:            "SPL1",
+				RatingPlanIDs: []string{"RP1"},
+				FilterIDs:     []string{"FLTR_1"},
+				AccountIDs:    []string{"Acc"},
+				ResourceIDs:   []string{"Res1", "ResGroup2"},
+				StatIDs:       []string{"Stat1"},
+				Weight:        20,
+				Blocker:       false,
+			}},
+			Weight: 10,
+		},
 	}
+
 	if err := tFIdxRpc.Call("ApierV1.SetSupplierProfile", splPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -981,8 +984,8 @@ func testV1FIdxSetSupplierProfileIndexes(t *testing.T) {
 	if err := tFIdxRpc.Call("ApierV1.GetSupplierProfile",
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(splPrf, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", splPrf, reply)
+	} else if !reflect.DeepEqual(splPrf.SupplierProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", splPrf.SupplierProfile, reply)
 	}
 	if err := tFIdxRpc.Call("ApierV1.RemoveFilterIndexes", &AttrRemFilterIndexes{
 		ItemType: utils.MetaSuppliers, Tenant: tenant}, &result); err != nil {
@@ -1054,23 +1057,25 @@ func testV1FIdxSetSecondSupplierProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	splPrf = &engine.SupplierProfile{
-		Tenant:            tenant,
-		ID:                "TEST_PROFILE2",
-		FilterIDs:         []string{"FLTR_2"},
-		Sorting:           "Sort1",
-		SortingParameters: []string{"Param1", "Param2"},
-		Suppliers: []*engine.Supplier{{
-			ID:            "SPL1",
-			RatingPlanIDs: []string{"RP1"},
-			FilterIDs:     []string{"FLTR_2"},
-			AccountIDs:    []string{"Acc"},
-			ResourceIDs:   []string{"Res1", "ResGroup2"},
-			StatIDs:       []string{"Stat1"},
-			Weight:        20,
-			Blocker:       false,
-		}},
-		Weight: 10,
+	splPrf = &SupplierWrapper{
+		SupplierProfile: &engine.SupplierProfile{
+			Tenant:            tenant,
+			ID:                "TEST_PROFILE2",
+			FilterIDs:         []string{"FLTR_2"},
+			Sorting:           "Sort1",
+			SortingParameters: []string{"Param1", "Param2"},
+			Suppliers: []*engine.Supplier{{
+				ID:            "SPL1",
+				RatingPlanIDs: []string{"RP1"},
+				FilterIDs:     []string{"FLTR_2"},
+				AccountIDs:    []string{"Acc"},
+				ResourceIDs:   []string{"Res1", "ResGroup2"},
+				StatIDs:       []string{"Stat1"},
+				Weight:        20,
+				Blocker:       false,
+			}},
+			Weight: 10,
+		},
 	}
 	if err := tFIdxRpc.Call("ApierV1.SetSupplierProfile", splPrf, &result); err != nil {
 		t.Error(err)
@@ -1080,8 +1085,8 @@ func testV1FIdxSetSecondSupplierProfileIndexes(t *testing.T) {
 	if err := tFIdxRpc.Call("ApierV1.GetSupplierProfile",
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(splPrf, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", splPrf, reply)
+	} else if !reflect.DeepEqual(splPrf.SupplierProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", splPrf.SupplierProfile, reply)
 	}
 	if err := tFIdxRpc.Call("ApierV1.RemoveFilterIndexes", &AttrRemFilterIndexes{
 		ItemType: utils.MetaSuppliers, Tenant: tenant}, &result); err != nil {

@@ -36,7 +36,7 @@ var (
 	splSv1CfgPath string
 	splSv1Cfg     *config.CGRConfig
 	splSv1Rpc     *rpc.Client
-	splPrf        *engine.SupplierProfile
+	splPrf        *SupplierWrapper
 	splSv1ConfDIR string //run tests for specific configuration
 )
 
@@ -736,27 +736,30 @@ func testV1SplSSetSupplierProfiles(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	splPrf = &engine.SupplierProfile{
-		Tenant:            "cgrates.org",
-		ID:                "TEST_PROFILE1",
-		FilterIDs:         []string{"FLTR_1"},
-		Sorting:           "Sort1",
-		SortingParameters: []string{"Param1", "Param2"},
-		Suppliers: []*engine.Supplier{
-			{
-				ID:                 "SPL1",
-				RatingPlanIDs:      []string{"RP1"},
-				FilterIDs:          []string{"FLTR_1"},
-				AccountIDs:         []string{"Acc"},
-				ResourceIDs:        []string{"Res1", "ResGroup2"},
-				StatIDs:            []string{"Stat1"},
-				Weight:             20,
-				Blocker:            false,
-				SupplierParameters: "SortingParameter1",
+	splPrf = &SupplierWrapper{
+		SupplierProfile: &engine.SupplierProfile{
+			Tenant:            "cgrates.org",
+			ID:                "TEST_PROFILE1",
+			FilterIDs:         []string{"FLTR_1"},
+			Sorting:           "Sort1",
+			SortingParameters: []string{"Param1", "Param2"},
+			Suppliers: []*engine.Supplier{
+				{
+					ID:                 "SPL1",
+					RatingPlanIDs:      []string{"RP1"},
+					FilterIDs:          []string{"FLTR_1"},
+					AccountIDs:         []string{"Acc"},
+					ResourceIDs:        []string{"Res1", "ResGroup2"},
+					StatIDs:            []string{"Stat1"},
+					Weight:             20,
+					Blocker:            false,
+					SupplierParameters: "SortingParameter1",
+				},
 			},
+			Weight: 10,
 		},
-		Weight: 10,
 	}
+
 	var result string
 	if err := splSv1Rpc.Call("ApierV1.SetSupplierProfile", splPrf, &result); err != nil {
 		t.Error(err)
@@ -766,8 +769,8 @@ func testV1SplSSetSupplierProfiles(t *testing.T) {
 	if err := splSv1Rpc.Call("ApierV1.GetSupplierProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(splPrf, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", splPrf, reply)
+	} else if !reflect.DeepEqual(splPrf.SupplierProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", splPrf.SupplierProfile, reply)
 	}
 }
 
@@ -848,7 +851,8 @@ func testV1SplSUpdateSupplierProfiles(t *testing.T) {
 
 func testV1SplSRemSupplierProfiles(t *testing.T) {
 	var resp string
-	if err := splSv1Rpc.Call("ApierV1.RemoveSupplierProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err != nil {
+	if err := splSv1Rpc.Call("ApierV1.RemoveSupplierProfile",
+		&utils.TenantIDWrapper{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -859,7 +863,8 @@ func testV1SplSRemSupplierProfiles(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := splSv1Rpc.Call("ApierV1.RemoveSupplierProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err.Error() != utils.ErrNotFound.Error() {
+	if err := splSv1Rpc.Call("ApierV1.RemoveSupplierProfile",
+		&utils.TenantIDWrapper{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
 	}
 }
