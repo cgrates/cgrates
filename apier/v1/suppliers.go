@@ -57,12 +57,25 @@ func (apierV1 *ApierV1) GetSupplierProfileIDs(tenant string, sppPrfIDs *[]string
 	return nil
 }
 
+type SupplierWrapper struct {
+	*engine.SupplierProfile
+	Cache *string
+}
+
 //SetSupplierProfile add a new Supplier configuration
-func (apierV1 *ApierV1) SetSupplierProfile(spp *engine.SupplierProfile, reply *string) error {
-	if missing := utils.MissingStructFields(spp, []string{"Tenant", "ID"}); len(missing) != 0 {
+func (apierV1 *ApierV1) SetSupplierProfile(args *SupplierWrapper, reply *string) error {
+	if missing := utils.MissingStructFields(args.SupplierProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataManager.SetSupplierProfile(spp, true); err != nil {
+	if err := apierV1.DataManager.SetSupplierProfile(args.SupplierProfile, true); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	//handle caching for SupplierProfile
+	argCache := engine.ArgsGetCacheItem{
+		CacheID: utils.CacheSupplierProfiles,
+		ItemID:  args.TenantID(),
+	}
+	if err := apierV1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -70,15 +83,20 @@ func (apierV1 *ApierV1) SetSupplierProfile(spp *engine.SupplierProfile, reply *s
 }
 
 //RemoveSupplierProfile remove a specific Supplier configuration
-func (apierV1 *ApierV1) RemoveSupplierProfile(arg utils.TenantID, reply *string) error {
-	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+func (apierV1 *ApierV1) RemoveSupplierProfile(args *utils.TenantIDWrapper, reply *string) error {
+	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataManager.RemoveSupplierProfile(arg.Tenant, arg.ID, utils.NonTransactional, true); err != nil {
-		if err.Error() != utils.ErrNotFound.Error() {
-			err = utils.NewErrServerError(err)
-		}
-		return err
+	if err := apierV1.DataManager.RemoveSupplierProfile(args.Tenant, args.ID, utils.NonTransactional, true); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	//handle caching for SupplierProfile
+	argCache := engine.ArgsGetCacheItem{
+		CacheID: utils.CacheSupplierProfiles,
+		ItemID:  args.TenantID(),
+	}
+	if err := apierV1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
+		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil

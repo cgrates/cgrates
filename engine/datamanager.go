@@ -1033,9 +1033,6 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 	if err = dm.DataDB().SetSupplierProfileDrv(supp); err != nil {
 		return err
 	}
-	if err = dm.CacheDataFromDB(utils.SupplierProfilePrefix, []string{supp.TenantID()}, true); err != nil {
-		return
-	}
 	if withIndex {
 		if oldSup != nil {
 			var needsRemove bool
@@ -1064,8 +1061,6 @@ func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string, w
 	if err = dm.DataDB().RemoveSupplierProfileDrv(tenant, id); err != nil {
 		return
 	}
-	Cache.Remove(utils.CacheSupplierProfiles, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(transactionID), transactionID)
 	if oldSupp == nil {
 		return utils.ErrNotFound
 	}
