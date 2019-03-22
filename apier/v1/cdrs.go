@@ -40,7 +40,8 @@ func (apier *ApierV1) GetEventCost(attrs utils.AttrGetCallCost, reply *engine.Ev
 			err = utils.NewErrServerError(err)
 		}
 		return err
-	} else if len(cdrs) == 0 {
+	} else if len(cdrs) == 0 ||
+		cdrs[0].CostDetails == nil { // to avoid nil pointer dereference
 		return utils.ErrNotFound
 	} else {
 		*reply = *cdrs[0].CostDetails
