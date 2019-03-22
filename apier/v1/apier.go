@@ -26,7 +26,6 @@ import (
 	"path"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -861,24 +860,6 @@ func (self *ApierV1) RemoveActions(attr AttrRemoveActions, reply *string) error 
 	}
 	*reply = utils.OK
 	return nil
-}
-
-type AttrRemoteLock struct {
-	ReferenceID string        // reference ID for this lock if available
-	LockIDs     []string      // List of IDs to obtain lock for
-	Timeout     time.Duration // Automatically unlock on timeout
-}
-
-// RemoteLock will lock a key from remote
-func (self *ApierV1) RemoteLock(attr AttrRemoteLock, reply *string) (err error) {
-	*reply = guardian.Guardian.GuardIDs(attr.ReferenceID, attr.Timeout, attr.LockIDs...)
-	return
-}
-
-// RemoteUnlock will unlock a key from remote based on reference ID
-func (self *ApierV1) RemoteUnlock(refID string, reply *[]string) (err error) {
-	*reply = guardian.Guardian.UnguardIDs(refID)
-	return
 }
 
 func (v1 *ApierV1) StartService(args servmanager.ArgStartService, reply *string) (err error) {
