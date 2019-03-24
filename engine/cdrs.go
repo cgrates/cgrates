@@ -486,7 +486,7 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDR, reply *string) (err error) {
 	return
 }
 
-type ArgV2ProcessCDR struct {
+type ArgV1ProcessEvent struct {
 	utils.CGREvent
 	AttributeS *bool // control AttributeS processing
 	RALs       *bool // control if we rate the event
@@ -498,13 +498,13 @@ type ArgV2ProcessCDR struct {
 }
 
 // V2ProcessCDR will process the CDR out of CGREvent
-func (cdrS *CDRServer) V2ProcessCDR(arg *ArgV2ProcessCDR, reply *string) (err error) {
+func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (err error) {
 	if arg.CGREvent.ID == "" {
 		arg.CGREvent.ID = utils.GenUUID()
 	}
 	// RPC caching
 	if config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.CDRsV2ProcessCDR, arg.CGREvent.ID)
+		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessEvent, arg.CGREvent.ID)
 		refID := guardian.Guardian.GuardIDs("",
 			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)

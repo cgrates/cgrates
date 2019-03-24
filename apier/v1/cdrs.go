@@ -89,6 +89,11 @@ func (cdrSv1 *CDRsV1) ProcessCDR(cdr *engine.CDR, reply *string) error {
 	return cdrSv1.CDRs.V1ProcessCDR(cdr, reply)
 }
 
+// ProcessCDR will process a CDR in CGRateS internal format
+func (cdrSv1 *CDRsV1) ProcessEvent(arg *engine.ArgV1ProcessEvent, reply *string) error {
+	return cdrSv1.CDRs.V1ProcessEvent(arg, reply)
+}
+
 // ProcessExternalCDR will process a CDR in external format
 func (cdrSv1 *CDRsV1) ProcessExternalCDR(cdr *engine.ExternalCDR, reply *string) error {
 	return cdrSv1.CDRs.V1ProcessExternalCDR(cdr, reply)

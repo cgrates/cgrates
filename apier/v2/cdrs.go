@@ -71,7 +71,3 @@ type CDRsV2 struct {
 func (cdrSv2 *CDRsV2) StoreSessionCost(args *engine.ArgsV2CDRSStoreSMCost, reply *string) error {
 	return cdrSv2.CDRs.V2StoreSessionCost(args, reply)
 }
-
-func (cdrSv2 *CDRsV2) ProcessCDR(arg *engine.ArgV2ProcessCDR, reply *string) error {
-	return cdrSv2.CDRs.V2ProcessCDR(arg, reply)
-}

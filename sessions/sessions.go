@@ -390,8 +390,9 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 		} else {
 			var reply string
 			for _, cgrEv := range cgrEvs {
-				if err = sS.cdrS.Call(utils.CDRsV2ProcessCDR,
-					&engine.ArgV2ProcessCDR{CGREvent: *cgrEv,
+				if err = sS.cdrS.Call(utils.CDRsV1ProcessEvent,
+					&engine.ArgV1ProcessEvent{
+						CGREvent:   *cgrEv,
 						ChargerS:   utils.BoolPointer(false),
 						AttributeS: utils.BoolPointer(false)}, &reply); err != nil {
 					utils.Logger.Warning(
@@ -2308,7 +2309,8 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 		}
 	}
 	if s == nil { // no cached session, CDR will be handled by CDRs
-		return sS.cdrS.Call(utils.CDRsV2ProcessCDR, &engine.ArgV2ProcessCDR{CGREvent: *cgrEv}, rply)
+		return sS.cdrS.Call(utils.CDRsV1ProcessEvent,
+			&engine.ArgV1ProcessEvent{CGREvent: *cgrEv}, rply)
 	}
 
 	// Use previously stored Session to generate CDRs
@@ -2328,14 +2330,15 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 
 	var withErrors bool
 	for _, cgrEv := range cgrEvs {
-		argsProc := &engine.ArgV2ProcessCDR{CGREvent: *cgrEv,
+		argsProc := &engine.ArgV1ProcessEvent{
+			CGREvent:   *cgrEv,
 			ChargerS:   utils.BoolPointer(false),
 			AttributeS: utils.BoolPointer(false)}
 		if unratedReqs.HasField( // order additional rating for unrated request types
 			engine.NewMapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RequestType)) {
 			argsProc.RALs = utils.BoolPointer(true)
 		}
-		if err = sS.cdrS.Call(utils.CDRsV2ProcessCDR,
+		if err = sS.cdrS.Call(utils.CDRsV1ProcessEvent,
 			argsProc, rply); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error <%s> posting CDR with CGRID: <%s>",
