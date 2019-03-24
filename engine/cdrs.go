@@ -233,8 +233,8 @@ func (cdrS *CDRServer) getCostFromRater(cdr *CDR) (*CallCost, error) {
 	return cc, nil
 }
 
-// processEvent will process a CGREvent with the configured subsystems
-func (cdrS *CDRServer) processEvent(cgrEv *utils.CGREvent,
+// attrStoExpThdStat will process a CGREvent with the configured subsystems
+func (cdrS *CDRServer) attrStoExpThdStat(cgrEv *utils.CGREvent,
 	attrS, store, export, thdS, statS bool) (err error) {
 	if attrS {
 		if err = cdrS.attrSProcessEvent(cgrEv); err != nil {
@@ -298,7 +298,7 @@ func (cdrS *CDRServer) chrgProcessEvent(cgrEv *utils.CGREvent,
 			continue
 		}
 		for _, rtCDR := range cdrS.rateCDRWithErr(cdr) {
-			if errProc := cdrS.processEvent(rtCDR.AsCGREvent(),
+			if errProc := cdrS.attrStoExpThdStat(rtCDR.AsCGREvent(),
 				attrS, store, export, thdS, statS); errProc != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing CDR event %+v with %s",
@@ -546,8 +546,18 @@ func (cdrS *CDRServer) V2ProcessCDR(arg *ArgV2ProcessCDR, reply *string) (err er
 	if arg.ChargerS != nil {
 		chrgS = *arg.ChargerS
 	}
+	var ralS bool // by default we don't extra charge the received CDR
+	if arg.RALs != nil {
+		ralS = *arg.RALs
+	}
 	cgrEv := &arg.CGREvent
-	if arg.RALs != nil && *arg.RALs { // need to rate the event
+	if !ralS {
+		if err = cdrS.attrStoExpThdStat(cgrEv,
+			attrS, store, export, thdS, statS); err != nil {
+			err = utils.NewErrServerError(err)
+			return
+		}
+	} else { // we want rating for this CDR
 		var partExec bool
 		cdr, errProc := NewMapEvent(cgrEv.Event).AsCDR(cdrS.cgrCfg,
 			cgrEv.Tenant, cdrS.cgrCfg.GeneralCfg().DefaultTimezone)
@@ -560,7 +570,7 @@ func (cdrS *CDRServer) V2ProcessCDR(arg *ArgV2ProcessCDR, reply *string) (err er
 		}
 		for _, rtCDR := range cdrS.rateCDRWithErr(cdr) {
 			cgrEv := rtCDR.AsCGREvent()
-			if errProc := cdrS.processEvent(cgrEv,
+			if errProc := cdrS.attrStoExpThdStat(cgrEv,
 				attrS, store, export, thdS, statS); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing event %+v ",
@@ -571,12 +581,6 @@ func (cdrS *CDRServer) V2ProcessCDR(arg *ArgV2ProcessCDR, reply *string) (err er
 		}
 		if partExec {
 			err = utils.ErrPartiallyExecuted
-			return
-		}
-	} else {
-		if err = cdrS.processEvent(cgrEv,
-			attrS, store, export, thdS, statS); err != nil {
-			err = utils.NewErrServerError(err)
 			return
 		}
 	}

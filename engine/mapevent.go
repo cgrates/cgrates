@@ -264,9 +264,8 @@ func (me MapEvent) AsCDR(cfg *config.CGRConfig, tnt, tmz string) (cdr *CDR, err 
 				return nil, err
 			}
 		case utils.CostDetails:
-			var canCast bool
-			if cdr.CostDetails, canCast = v.(*EventCost); !canCast {
-				return nil, fmt.Errorf("cannot cast field: %+v to *EventCost", v)
+			if cdr.CostDetails, err = IfaceAsEventCost(v); err != nil {
+				return nil, err
 			}
 		case utils.ExtraInfo, utils.OrderID:
 

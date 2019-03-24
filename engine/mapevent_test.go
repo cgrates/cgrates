@@ -585,7 +585,7 @@ func TestMapEventAsCDR(t *testing.T) {
 		"Usage":       "42s",
 		"PreRated":    "True",
 		"Cost":        "42.3",
-		"CostDetails": ec1,
+		"CostDetails": utils.ToJSON(ec1),
 	}
 	expected = &CDR{
 		CGRID:      "da39a3ee5e6b4b0d3255bfef95601890afd80709",

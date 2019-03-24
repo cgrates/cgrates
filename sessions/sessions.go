@@ -1289,12 +1289,16 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration) (er
 				}
 				// FixMe: make sure refund is reflected inside EventCost
 			}
+			// set cost fields
 			sr.Event[utils.Cost] = sr.EventCost.GetCost()
-			sr.Event[utils.Usage] = sr.TotalUsage
+			sr.Event[utils.CostDetails] = utils.ToJSON(sr.EventCost) // avoid map[string]interface{} when decoding
+			sr.Event[utils.CostSource] = utils.MetaSessionS
 		}
+		// Set Usage field
 		if sRunIdx == 0 {
 			s.EventStart.Set(utils.Usage, sr.TotalUsage)
 		}
+		sr.Event[utils.Usage] = sr.TotalUsage
 		if sS.cgrCfg.SessionSCfg().StoreSCosts {
 			if err := sS.storeSCost(s, sRunIdx); err != nil {
 				utils.Logger.Warning(
@@ -2298,7 +2302,7 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 			fmt.Sprintf("<%s> ProcessCDR called for active session with CGRID: <%s>",
 				utils.SessionS, cgrID))
 		s = ss[0]
-	} else {
+	} else { // try retrieving from closed_sessions within cache
 		if sIface, has := engine.Cache.Get(utils.CacheClosedSessions, cgrID); has {
 			s = sIface.(*Session)
 		}
@@ -2306,6 +2310,7 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 	if s == nil { // no cached session, CDR will be handled by CDRs
 		return sS.cdrS.Call(utils.CDRsV2ProcessCDR, &engine.ArgV2ProcessCDR{CGREvent: *cgrEv}, rply)
 	}
+
 	// Use previously stored Session to generate CDRs
 
 	// update stored event with fields out of CDR
@@ -2315,21 +2320,19 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 		}
 		s.EventStart.Set(k, v) // update previoius field with new one
 	}
+	// create one CGREvent for each session run plus *raw one
 	var cgrEvs []*utils.CGREvent
 	if cgrEvs, err = s.asCGREvents(); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	toRateReqs := engine.MapEvent{
-		utils.META_POSTPAID:      struct{}{},
-		utils.META_PSEUDOPREPAID: struct{}{},
-		utils.META_RATED:         struct{}{},
-	}
+
 	var withErrors bool
 	for _, cgrEv := range cgrEvs {
 		argsProc := &engine.ArgV2ProcessCDR{CGREvent: *cgrEv,
 			ChargerS:   utils.BoolPointer(false),
 			AttributeS: utils.BoolPointer(false)}
-		if toRateReqs.HasField(engine.NewMapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RequestType)) {
+		if unratedReqs.HasField( // order additional rating for unrated request types
+			engine.NewMapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RequestType)) {
 			argsProc.RALs = utils.BoolPointer(true)
 		}
 		if err = sS.cdrS.Call(utils.CDRsV2ProcessCDR,
