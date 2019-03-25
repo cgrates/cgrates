@@ -28,7 +28,7 @@ RUNDIR=$TMP_DIR/run
 PIDFILE=$RUNDIR/cgr-engine.pid
 STACKTRACE=$RUNDIR/$NAME.strace
 ENABLE=true
-DAEMON_OPTS="-config_dir=$TUTFOLDER/etc/cgrates"
+DAEMON_OPTS="-config_path=$TUTFOLDER/etc/cgrates"
 CDREDIR=$TMP_DIR/cdre
 CDRCINDIR=$TMP_DIR/cdrc/in
 CDRCOUTDIR=$TMP_DIR/cdrc/out
