@@ -645,11 +645,6 @@ func (dm *DataManager) SetResource(rs *Resource) (err error) {
 	if err = dm.DataDB().SetResourceDrv(rs); err != nil {
 		return
 	}
-	if err = dm.CacheDataFromDB(
-		utils.CacheInstanceToPrefix[utils.CacheResources],
-		[]string{rs.TenantID()}, true); err != nil {
-		return
-	}
 	return
 }
 
@@ -657,8 +652,6 @@ func (dm *DataManager) RemoveResource(tenant, id, transactionID string) (err err
 	if err = dm.DataDB().RemoveResourceDrv(tenant, id); err != nil {
 		return
 	}
-	Cache.Remove(utils.CacheResources, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(transactionID), transactionID)
 	return
 }
 
@@ -696,11 +689,6 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 	if err = dm.DataDB().SetResourceProfileDrv(rp); err != nil {
 		return err
 	}
-	if err = dm.CacheDataFromDB(utils.ResourceProfilesPrefix,
-		[]string{rp.TenantID()}, true); err != nil {
-		return
-	}
-	//to be implemented in tests
 	if withIndex {
 		if oldRes != nil {
 			var needsRemove bool
@@ -732,8 +720,6 @@ func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, w
 	if err = dm.DataDB().RemoveResourceProfileDrv(tenant, id); err != nil {
 		return
 	}
-	Cache.Remove(utils.CacheResourceProfiles, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(transactionID), transactionID)
 	if oldRes == nil {
 		return utils.ErrNotFound
 	}

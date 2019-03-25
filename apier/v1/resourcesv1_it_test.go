@@ -37,7 +37,7 @@ var (
 	rlsV1Cfg     *config.CGRConfig
 	rlsV1Rpc     *rpc.Client
 	rlsV1ConfDIR string //run tests for specific configuration
-	rlsConfig    *engine.ResourceProfile
+	rlsConfig    *ResourceWrapper
 )
 
 var sTestsRLSV1 = []func(t *testing.T){
@@ -589,22 +589,25 @@ func testV1RsGetResourceProfileBeforeSet(t *testing.T) {
 }
 
 func testV1RsSetResourceProfile(t *testing.T) {
-	rlsConfig = &engine.ResourceProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RES_GR_TEST",
-		FilterIDs: []string{"*string:Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	rlsConfig = &ResourceWrapper{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "RES_GR_TEST",
+			FilterIDs: []string{"*string:Account:1001"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			UsageTTL:          time.Duration(1) * time.Nanosecond,
+			Limit:             10,
+			AllocationMessage: "MessageAllocation",
+			Blocker:           true,
+			Stored:            true,
+			Weight:            20,
+			ThresholdIDs:      []string{"Val1"},
 		},
-		UsageTTL:          time.Duration(1) * time.Nanosecond,
-		Limit:             10,
-		AllocationMessage: "MessageAllocation",
-		Blocker:           true,
-		Stored:            true,
-		Weight:            20,
-		ThresholdIDs:      []string{"Val1"},
 	}
+
 	var result string
 
 	if err := rlsV1Rpc.Call("ApierV1.SetResourceProfile", rlsConfig, &result); err != nil {
@@ -629,8 +632,8 @@ func testV1RsGetResourceProfileAfterSet(t *testing.T) {
 	if err := rlsV1Rpc.Call("ApierV1.GetResourceProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(reply, rlsConfig) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(rlsConfig), utils.ToJSON(reply))
+	} else if !reflect.DeepEqual(reply, rlsConfig.ResourceProfile) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(rlsConfig.ResourceProfile), utils.ToJSON(reply))
 	}
 }
 
@@ -649,8 +652,8 @@ func testV1RsGetResourceProfileAfterUpdate(t *testing.T) {
 	if err := rlsV1Rpc.Call("ApierV1.GetResourceProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(reply, rlsConfig) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(rlsConfig), utils.ToJSON(reply))
+	} else if !reflect.DeepEqual(reply, rlsConfig.ResourceProfile) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(rlsConfig.ResourceProfile), utils.ToJSON(reply))
 	}
 }
 

@@ -1151,13 +1151,6 @@ func testOnStorITResourceProfile(t *testing.T) {
 	if err := onStor.SetResourceProfile(rL, false); err != nil {
 		t.Error(err)
 	}
-	//get from cache
-	if rcv, err := onStor.GetResourceProfile(rL.Tenant, rL.ID,
-		true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rL, rcv) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rL), utils.ToJSON(rcv))
-	}
 	//get from database
 	if rcv, err := onStor.GetResourceProfile(rL.Tenant, rL.ID,
 		false, true, utils.NonTransactional); err != nil {
@@ -1178,13 +1171,6 @@ func testOnStorITResourceProfile(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(sleepDelay)
-	//get from cache
-	if rcv, err := onStor.GetResourceProfile(rL.Tenant, rL.ID,
-		true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rL, rcv) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rL), utils.ToJSON(rcv))
-	}
 	//get from database
 	if rcv, err := onStor.GetResourceProfile(rL.Tenant, rL.ID,
 		false, false, utils.NonTransactional); err != nil {
@@ -1196,11 +1182,6 @@ func testOnStorITResourceProfile(t *testing.T) {
 	if err := onStor.RemoveResourceProfile(rL.Tenant, rL.ID,
 		utils.NonTransactional, false); err != nil {
 		t.Error(err)
-	}
-	//check cache if removed
-	if _, rcvErr := onStor.GetResourceProfile(rL.Tenant, rL.ID,
-		true, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
 	}
 	//check database if removed
 	if _, rcvErr := onStor.GetResourceProfile(rL.Tenant, rL.ID,
@@ -1229,14 +1210,6 @@ func testOnStorITResource(t *testing.T) {
 	if err := onStor.SetResource(res); err != nil {
 		t.Error(err)
 	}
-	//get from cache
-	if rcv, err := onStor.GetResource("cgrates.org", "RL1",
-		true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !(reflect.DeepEqual(res, rcv)) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(res), utils.ToJSON(rcv))
-	}
-
 	//get from database
 	if rcv, err := onStor.GetResource("cgrates.org", "RL1",
 		false, false, utils.NonTransactional); err != nil {
@@ -1256,13 +1229,6 @@ func testOnStorITResource(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(sleepDelay)
-	//get from cache
-	if rcv, err := onStor.GetResource("cgrates.org", "RL1",
-		true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !(reflect.DeepEqual(res, rcv)) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(res), utils.ToJSON(rcv))
-	}
 	//get from database
 	if rcv, err := onStor.GetResource("cgrates.org", "RL1",
 		false, false, utils.NonTransactional); err != nil {
@@ -1273,11 +1239,6 @@ func testOnStorITResource(t *testing.T) {
 
 	if err := onStor.RemoveResource(res.Tenant, res.ID, utils.NonTransactional); err != nil {
 		t.Error(err)
-	}
-	//check cache if removed
-	if _, rcvErr := onStor.GetResource(res.Tenant, res.ID,
-		true, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
 	}
 	//check database if removed
 	if _, rcvErr := onStor.GetResource(res.Tenant, res.ID,
