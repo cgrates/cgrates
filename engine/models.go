@@ -154,7 +154,7 @@ type TpActionTrigger struct {
 	UniqueId               string  `index:"1" re:"\w+"`
 	ThresholdType          string  `index:"2" re:"\*\w+"`
 	ThresholdValue         float64 `index:"3" re:"\d+\.?\d*"`
-	Recurrent              bool    `index:"4" re:"true|false"`
+	Recurrent              bool    `index:"4" re:"true|false|"`
 	MinSleep               string  `index:"5" re:"\d+[smh]?"`
 	ExpiryTime             string  `index:"6" re:""`
 	ActivationTime         string  `index:"7" re:""`

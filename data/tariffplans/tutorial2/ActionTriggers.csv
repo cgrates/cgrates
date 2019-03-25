@@ -1,0 +1,3 @@
+#ID[0],UniqueID[1],ThresholdType[2],ThresholdValue[3],Recurrent[4],MinSleep[5],ExpiryTime[6],ActivationTime[7],BalanceTag[8],BalanceType[9],BalanceCategories[10],BalanceDestinationIDs[11],BalanceRatingSubject[12],BalanceSharedGroup[13],BalanceExpiryTime[14],BalanceTimingIDs[15],BalanceWeight[16],BalanceBlocker[17],BalanceDisabled[18],ActionsID[19],Weight[20]
+STANDARD_TRIGGERS,,*min_balance,2,,,,,,*monetary,,,,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,,*max_balance,100,,,,,,*monetary,,,,,,,,,,DISABLE_ACCOUNT,10
