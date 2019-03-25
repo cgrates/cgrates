@@ -1157,7 +1157,6 @@ func testOnStorITResourceProfile(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rL, rcv) {
 		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(rL), utils.ToJSON(rcv))
-
 	}
 	expectedR := []string{"rsp_cgrates.org:RL_TEST2"}
 	if itm, err := onStor.DataDB().GetKeysForPrefix(utils.ResourceProfilesPrefix); err != nil {

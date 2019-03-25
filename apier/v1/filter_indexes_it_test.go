@@ -149,17 +149,19 @@ func testV1FIdxRpcConn(t *testing.T) {
 //ThresholdProfile
 func testV1FIdxSetThresholdProfile(t *testing.T) {
 	var reply *engine.ThresholdProfile
-	filter = &engine.Filter{
-		Tenant: tenant,
-		ID:     "TestFilter",
-		Rules: []*engine.FilterRule{{
-			FieldName: "Account",
-			Type:      utils.MetaString,
-			Values:    []string{"1001"},
-		}},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "TestFilter",
+			Rules: []*engine.FilterRule{{
+				FieldName: "Account",
+				Type:      utils.MetaString,
+				Values:    []string{"1001"},
+			}},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
 		},
 	}
 	var result string
@@ -247,17 +249,19 @@ func testV1FIdxComputeThresholdsIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 	var reply *engine.ThresholdProfile
-	filter = &engine.Filter{
-		Tenant: tenant,
-		ID:     "TestFilter2",
-		Rules: []*engine.FilterRule{{
-			FieldName: "Account",
-			Type:      utils.MetaString,
-			Values:    []string{"1002"},
-		}},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "TestFilter2",
+			Rules: []*engine.FilterRule{{
+				FieldName: "Account",
+				Type:      utils.MetaString,
+				Values:    []string{"1002"},
+			}},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
 		},
 	}
 
@@ -428,17 +432,19 @@ func testV1FIdxRemoveThresholdProfile(t *testing.T) {
 //StatQueueProfile
 func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 	var reply *engine.StatQueueProfile
-	filter = &engine.Filter{
-		Tenant: tenant,
-		ID:     "FLTR_1",
-		Rules: []*engine.FilterRule{{
-			FieldName: "Account",
-			Type:      utils.MetaString,
-			Values:    []string{"1001"},
-		}},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_1",
+			Rules: []*engine.FilterRule{{
+				FieldName: "Account",
+				Type:      utils.MetaString,
+				Values:    []string{"1001"},
+			}},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
 		},
 	}
 	var result string
@@ -535,17 +541,19 @@ func testV1FIdxComputeStatQueueProfileIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 	var reply *engine.StatQueueProfile
-	filter = &engine.Filter{
-		Tenant: tenant,
-		ID:     "FLTR_2",
-		Rules: []*engine.FilterRule{{
-			FieldName: "Account",
-			Type:      utils.MetaString,
-			Values:    []string{"1001"},
-		}},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_2",
+			Rules: []*engine.FilterRule{{
+				FieldName: "Account",
+				Type:      utils.MetaString,
+				Values:    []string{"1001"},
+			}},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
 		},
 	}
 	var result string
@@ -691,17 +699,19 @@ func testV1FIdxRemoveStatQueueProfile(t *testing.T) {
 //ResourceProfile
 func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 	var reply *engine.ResourceProfile
-	filter = &engine.Filter{
-		Tenant: tenant,
-		ID:     "FLTR_RES_RCFG1",
-		Rules: []*engine.FilterRule{{
-			FieldName: "Account",
-			Type:      utils.MetaString,
-			Values:    []string{"1001"},
-		}},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_RES_RCFG1",
+			Rules: []*engine.FilterRule{{
+				FieldName: "Account",
+				Type:      utils.MetaString,
+				Values:    []string{"1001"},
+			}},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
 		},
 	}
 	var result string
@@ -788,17 +798,19 @@ func testV1FIdxComputeResourceProfileIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 	var reply *engine.StatQueueProfile
-	filter = &engine.Filter{
-		Tenant: tenant,
-		ID:     "FLTR_2",
-		Rules: []*engine.FilterRule{{
-			FieldName: "Account",
-			Type:      utils.MetaString,
-			Values:    []string{"1001"},
-		}},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_2",
+			Rules: []*engine.FilterRule{{
+				FieldName: "Account",
+				Type:      utils.MetaString,
+				Values:    []string{"1001"},
+			}},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
 		},
 	}
 	var result string
@@ -933,19 +945,21 @@ func testV1FIdxRemoveResourceProfile(t *testing.T) {
 //SupplierProfile
 func testV1FIdxSetSupplierProfileIndexes(t *testing.T) {
 	var reply *engine.SupplierProfile
-	filter = &engine.Filter{
-		Tenant: tenant,
-		ID:     "FLTR_1",
-		Rules: []*engine.FilterRule{
-			{
-				FieldName: "Account",
-				Type:      utils.MetaString,
-				Values:    []string{"1001"},
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_1",
+			Rules: []*engine.FilterRule{
+				{
+					FieldName: "Account",
+					Type:      utils.MetaString,
+					Values:    []string{"1001"},
+				},
 			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
 		},
 	}
 	var result string
@@ -1037,17 +1051,19 @@ func testV1FIdxComputeSupplierProfileIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondSupplierProfileIndexes(t *testing.T) {
 	var reply *engine.SupplierProfile
-	filter = &engine.Filter{
-		Tenant: tenant,
-		ID:     "FLTR_2",
-		Rules: []*engine.FilterRule{{
-			FieldName: "Account",
-			Type:      utils.MetaString,
-			Values:    []string{"1001"},
-		}},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_2",
+			Rules: []*engine.FilterRule{{
+				FieldName: "Account",
+				Type:      utils.MetaString,
+				Values:    []string{"1001"},
+			}},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
 		},
 	}
 	var result string
@@ -1190,17 +1206,19 @@ func testV1FIdxRemoveSupplierProfile(t *testing.T) {
 //AttributeProfile
 func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 	var reply *engine.AttributeProfile
-	filter = &engine.Filter{
-		Tenant: tenant,
-		ID:     "FLTR_1",
-		Rules: []*engine.FilterRule{{
-			FieldName: "Account",
-			Type:      utils.MetaString,
-			Values:    []string{"1001"},
-		}},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_1",
+			Rules: []*engine.FilterRule{{
+				FieldName: "Account",
+				Type:      utils.MetaString,
+				Values:    []string{"1001"},
+			}},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
 		},
 	}
 	var result string
@@ -1302,17 +1320,19 @@ func testV1FIdxComputeAttributeProfileIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 	var reply *engine.AttributeProfile
-	filter = &engine.Filter{
-		Tenant: tenant,
-		ID:     "FLTR_2",
-		Rules: []*engine.FilterRule{{
-			FieldName: "Account",
-			Type:      utils.MetaString,
-			Values:    []string{"1001"},
-		}},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_2",
+			Rules: []*engine.FilterRule{{
+				FieldName: "Account",
+				Type:      utils.MetaString,
+				Values:    []string{"1001"},
+			}},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
 		},
 	}
 	var result string

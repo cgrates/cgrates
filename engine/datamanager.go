@@ -381,19 +381,12 @@ func (dm *DataManager) GetFilter(tenant, id string, cacheRead, cacheWrite bool,
 }
 
 func (dm *DataManager) SetFilter(fltr *Filter) (err error) {
-	if err = dm.DataDB().SetFilterDrv(fltr); err != nil {
-		return
-	}
-	return dm.CacheDataFromDB(utils.FilterPrefix, []string{fltr.TenantID()}, true)
+	return dm.DataDB().SetFilterDrv(fltr)
+
 }
 
 func (dm *DataManager) RemoveFilter(tenant, id, transactionID string) (err error) {
-	if err = dm.DataDB().RemoveFilterDrv(tenant, id); err != nil {
-		return
-	}
-	Cache.Remove(utils.CacheFilters, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(transactionID), transactionID)
-	return
+	return dm.DataDB().RemoveFilterDrv(tenant, id)
 }
 
 func (dm *DataManager) GetThreshold(tenant, id string,

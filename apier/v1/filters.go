@@ -23,12 +23,25 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type FilterWrapper struct {
+	*engine.Filter
+	Cache *string
+}
+
 //SetFilter add a new Filter
-func (self *ApierV1) SetFilter(attrs *engine.Filter, reply *string) error {
-	if missing := utils.MissingStructFields(attrs, []string{"Tenant", "ID"}); len(missing) != 0 {
+func (apierV1 *ApierV1) SetFilter(arg *FilterWrapper, reply *string) error {
+	if missing := utils.MissingStructFields(arg.Filter, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.DataManager.SetFilter(attrs); err != nil {
+	if err := apierV1.DataManager.SetFilter(arg.Filter); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	//handle caching for Filter
+	argCache := engine.ArgsGetCacheItem{
+		CacheID: utils.CacheFilters,
+		ItemID:  arg.TenantID(),
+	}
+	if err := apierV1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -36,11 +49,11 @@ func (self *ApierV1) SetFilter(attrs *engine.Filter, reply *string) error {
 }
 
 //GetFilter returns a Filter
-func (self *ApierV1) GetFilter(arg utils.TenantID, reply *engine.Filter) error {
+func (apierV1 *ApierV1) GetFilter(arg utils.TenantID, reply *engine.Filter) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if fltr, err := self.DataManager.GetFilter(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+	if fltr, err := apierV1.DataManager.GetFilter(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -70,15 +83,23 @@ func (apierV1 *ApierV1) GetFilterIDs(tenant string, fltrIDs *[]string) error {
 }
 
 //RemoveFilter  remove a specific filter
-func (self *ApierV1) RemoveFilter(arg utils.TenantID, reply *string) error {
+func (apierV1 *ApierV1) RemoveFilter(arg utils.TenantIDWrapper, reply *string) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.DataManager.RemoveFilter(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
+	if err := apierV1.DataManager.RemoveFilter(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
 		return err
+	}
+	//handle caching for Filter
+	argCache := engine.ArgsGetCacheItem{
+		CacheID: utils.CacheFilters,
+		ItemID:  arg.TenantID(),
+	}
+	if err := apierV1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
