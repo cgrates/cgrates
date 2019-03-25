@@ -2049,13 +2049,6 @@ func testOnStorITChargerProfile(t *testing.T) {
 	if err := onStor.SetChargerProfile(cpp, false); err != nil {
 		t.Error(err)
 	}
-	//get from cache
-	if rcv, err := onStor.GetChargerProfile("cgrates.org", "CPP_1",
-		true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !(reflect.DeepEqual(cpp, rcv)) {
-		t.Errorf("Expecting: %v, received: %v", cpp, rcv)
-	}
 	//get from database
 	if rcv, err := onStor.GetChargerProfile("cgrates.org", "CPP_1",
 		false, false, utils.NonTransactional); err != nil {
@@ -2075,13 +2068,6 @@ func testOnStorITChargerProfile(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(sleepDelay)
-	//get from cache
-	if rcv, err := onStor.GetChargerProfile("cgrates.org", "CPP_1",
-		true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !(reflect.DeepEqual(cpp, rcv)) {
-		t.Errorf("Expecting: %v, received: %v", cpp, rcv)
-	}
 	//get from database
 	if rcv, err := onStor.GetChargerProfile("cgrates.org", "CPP_1",
 		false, false, utils.NonTransactional); err != nil {
@@ -2092,11 +2078,6 @@ func testOnStorITChargerProfile(t *testing.T) {
 	if err := onStor.RemoveChargerProfile(cpp.Tenant, cpp.ID,
 		utils.NonTransactional, false); err != nil {
 		t.Error(err)
-	}
-	//check cache if removed
-	if _, rcvErr := onStor.GetChargerProfile("cgrates.org", "CPP_1",
-		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
 	}
 	//check database if removed
 	if _, rcvErr := onStor.GetChargerProfile("cgrates.org", "CPP_1",

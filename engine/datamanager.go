@@ -1194,9 +1194,6 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 	if err = dm.DataDB().SetChargerProfileDrv(cpp); err != nil {
 		return err
 	}
-	if err = dm.CacheDataFromDB(utils.ChargerProfilePrefix, []string{cpp.TenantID()}, true); err != nil {
-		return
-	}
 	if withIndex {
 		if oldCpp != nil {
 			var needsRemove bool
@@ -1226,8 +1223,6 @@ func (dm *DataManager) RemoveChargerProfile(tenant, id string,
 	if err = dm.DataDB().RemoveChargerProfileDrv(tenant, id); err != nil {
 		return
 	}
-	Cache.Remove(utils.CacheChargerProfiles, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(transactionID), transactionID)
 	if oldCpp == nil {
 		return utils.ErrNotFound
 	}
