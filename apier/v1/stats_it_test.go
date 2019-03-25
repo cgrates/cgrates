@@ -283,19 +283,21 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 
 func testV1STSSetStatQueueProfile(t *testing.T) {
 	var reply *engine.StatQueueProfile
-	filter = &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "FLTR_1",
-		Rules: []*engine.FilterRule{
-			{
-				FieldName: "Account",
-				Type:      "*string",
-				Values:    []string{"1001"},
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_1",
+			Rules: []*engine.FilterRule{
+				{
+					FieldName: "Account",
+					Type:      "*string",
+					Values:    []string{"1001"},
+				},
 			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
 		},
 	}
 	var result string
@@ -361,19 +363,21 @@ func testV1STSGetStatQueueProfileIDs(t *testing.T) {
 
 func testV1STSUpdateStatQueueProfile(t *testing.T) {
 	var result string
-	filter = &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "FLTR_2",
-		Rules: []*engine.FilterRule{
-			{
-				FieldName: "Account",
-				Type:      "*string",
-				Values:    []string{"1001"},
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_2",
+			Rules: []*engine.FilterRule{
+				{
+					FieldName: "Account",
+					Type:      "*string",
+					Values:    []string{"1001"},
+				},
 			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
 		},
 	}
 	if err := stsV1Rpc.Call("ApierV1.SetFilter", filter, &result); err != nil {

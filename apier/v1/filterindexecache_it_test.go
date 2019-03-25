@@ -153,23 +153,25 @@ func testV1FIdxCaProcessEventWithNotFound(t *testing.T) {
 }
 
 func testV1FIdxCaSetThresholdProfile(t *testing.T) {
-	filter = &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "TestFilter",
-		Rules: []*engine.FilterRule{
-			{
-				FieldName: utils.DynamicDataPrefix + utils.Account,
-				Type:      "*string",
-				Values:    []string{"1001"},
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "TestFilter",
+			Rules: []*engine.FilterRule{
+				{
+					FieldName: utils.DynamicDataPrefix + utils.Account,
+					Type:      "*string",
+					Values:    []string{"1001"},
+				},
+				{
+					FieldName: utils.DynamicDataPrefix + utils.EventType,
+					Type:      "*string",
+					Values:    []string{utils.BalanceUpdate},
+				},
 			},
-			{
-				FieldName: utils.DynamicDataPrefix + utils.EventType,
-				Type:      "*string",
-				Values:    []string{utils.BalanceUpdate},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	var result string
@@ -245,23 +247,25 @@ func testV1FIdxCaGetThresholdFromTP(t *testing.T) {
 
 func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 	var result string
-	filter = &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "TestFilter2",
-		Rules: []*engine.FilterRule{
-			{
-				FieldName: utils.DynamicDataPrefix + utils.Account,
-				Type:      "*string",
-				Values:    []string{"1002"},
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "TestFilter2",
+			Rules: []*engine.FilterRule{
+				{
+					FieldName: utils.DynamicDataPrefix + utils.Account,
+					Type:      "*string",
+					Values:    []string{"1002"},
+				},
+				{
+					FieldName: utils.DynamicDataPrefix + utils.EventType,
+					Type:      "*string",
+					Values:    []string{utils.AccountUpdate},
+				},
 			},
-			{
-				FieldName: utils.DynamicDataPrefix + utils.EventType,
-				Type:      "*string",
-				Values:    []string{utils.AccountUpdate},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	if err := tFIdxCaRpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
@@ -323,23 +327,25 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 
 func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 	var result string
-	filter = &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "TestFilter3",
-		Rules: []*engine.FilterRule{
-			{
-				FieldName: utils.DynamicDataPrefix + utils.Account,
-				Type:      "*string",
-				Values:    []string{"1003"},
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "TestFilter3",
+			Rules: []*engine.FilterRule{
+				{
+					FieldName: utils.DynamicDataPrefix + utils.Account,
+					Type:      "*string",
+					Values:    []string{"1003"},
+				},
+				{
+					FieldName: utils.DynamicDataPrefix + utils.EventType,
+					Type:      "*string",
+					Values:    []string{utils.BalanceUpdate},
+				},
 			},
-			{
-				FieldName: utils.DynamicDataPrefix + utils.EventType,
-				Type:      "*string",
-				Values:    []string{utils.BalanceUpdate},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	if err := tFIdxCaRpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
@@ -482,23 +488,25 @@ func testV1FIdxCaGetStatQueuesWithNotFound(t *testing.T) {
 
 func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 	tenant := "cgrates.org"
-	filter = &engine.Filter{
-		Tenant: tenant,
-		ID:     "FLTR_1",
-		Rules: []*engine.FilterRule{
-			{
-				FieldName: utils.DynamicDataPrefix + utils.Account,
-				Type:      "*string",
-				Values:    []string{"1001"},
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: tenant,
+			ID:     "FLTR_1",
+			Rules: []*engine.FilterRule{
+				{
+					FieldName: utils.DynamicDataPrefix + utils.Account,
+					Type:      "*string",
+					Values:    []string{"1001"},
+				},
+				{
+					FieldName: utils.DynamicDataPrefix + utils.EventType,
+					Type:      "*string",
+					Values:    []string{utils.AccountUpdate},
+				},
 			},
-			{
-				FieldName: utils.DynamicDataPrefix + utils.EventType,
-				Type:      "*string",
-				Values:    []string{utils.AccountUpdate},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	var result string
@@ -618,23 +626,25 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 }
 
 func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
-	filter = &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "FLTR_2",
-		Rules: []*engine.FilterRule{
-			{
-				FieldName: utils.DynamicDataPrefix + utils.Account,
-				Type:      "*string",
-				Values:    []string{"1003"},
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_2",
+			Rules: []*engine.FilterRule{
+				{
+					FieldName: utils.DynamicDataPrefix + utils.Account,
+					Type:      "*string",
+					Values:    []string{"1003"},
+				},
+				{
+					FieldName: utils.DynamicDataPrefix + utils.EventType,
+					Type:      "*string",
+					Values:    []string{utils.BalanceUpdate},
+				},
 			},
-			{
-				FieldName: utils.DynamicDataPrefix + utils.EventType,
-				Type:      "*string",
-				Values:    []string{utils.BalanceUpdate},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	var result string
@@ -688,23 +698,25 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 }
 
 func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
-	filter = &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "FLTR_3",
-		Rules: []*engine.FilterRule{
-			{
-				FieldName: utils.DynamicDataPrefix + utils.Account,
-				Type:      "*string",
-				Values:    []string{"1003"},
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_3",
+			Rules: []*engine.FilterRule{
+				{
+					FieldName: utils.DynamicDataPrefix + utils.Account,
+					Type:      "*string",
+					Values:    []string{"1003"},
+				},
+				{
+					FieldName: utils.DynamicDataPrefix + utils.EventType,
+					Type:      "*string",
+					Values:    []string{utils.AccountUpdate},
+				},
 			},
-			{
-				FieldName: utils.DynamicDataPrefix + utils.EventType,
-				Type:      "*string",
-				Values:    []string{utils.AccountUpdate},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	var result string
@@ -837,23 +849,25 @@ func testV1FIdxCaProcessAttributeProfileEventWithNotFound(t *testing.T) {
 }
 
 func testV1FIdxCaSetAttributeProfile(t *testing.T) {
-	filter = &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "TestFilter",
-		Rules: []*engine.FilterRule{
-			{
-				FieldName: utils.DynamicDataPrefix + utils.Account,
-				Type:      "*string",
-				Values:    []string{"1009"},
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "TestFilter",
+			Rules: []*engine.FilterRule{
+				{
+					FieldName: utils.DynamicDataPrefix + utils.Account,
+					Type:      "*string",
+					Values:    []string{"1009"},
+				},
+				{
+					FieldName: utils.DynamicDataPrefix + utils.Destination,
+					Type:      "*string",
+					Values:    []string{"+491511231234"},
+				},
 			},
-			{
-				FieldName: utils.DynamicDataPrefix + utils.Destination,
-				Type:      "*string",
-				Values:    []string{"+491511231234"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	var result string
@@ -928,23 +942,25 @@ func testV1FIdxCaGetAttributeProfileFromTP(t *testing.T) {
 }
 
 func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
-	filter = &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "TestFilter2",
-		Rules: []*engine.FilterRule{
-			{
-				FieldName: utils.DynamicDataPrefix + utils.Account,
-				Type:      "*string",
-				Values:    []string{"2009"},
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "TestFilter2",
+			Rules: []*engine.FilterRule{
+				{
+					FieldName: utils.DynamicDataPrefix + utils.Account,
+					Type:      "*string",
+					Values:    []string{"2009"},
+				},
+				{
+					FieldName: utils.DynamicDataPrefix + utils.Destination,
+					Type:      "*string",
+					Values:    []string{"+492511231234"},
+				},
 			},
-			{
-				FieldName: utils.DynamicDataPrefix + utils.Destination,
-				Type:      "*string",
-				Values:    []string{"+492511231234"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	var result string
@@ -999,23 +1015,25 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 }
 
 func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
-	filter = &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "TestFilter3",
-		Rules: []*engine.FilterRule{
-			{
-				FieldName: utils.DynamicDataPrefix + utils.Account,
-				Type:      "*string",
-				Values:    []string{"3009"},
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "TestFilter3",
+			Rules: []*engine.FilterRule{
+				{
+					FieldName: utils.DynamicDataPrefix + utils.Account,
+					Type:      "*string",
+					Values:    []string{"3009"},
+				},
+				{
+					FieldName: utils.DynamicDataPrefix + utils.Destination,
+					Type:      "*string",
+					Values:    []string{"+492511231234"},
+				},
 			},
-			{
-				FieldName: utils.DynamicDataPrefix + utils.Destination,
-				Type:      "*string",
-				Values:    []string{"+492511231234"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	var result string
@@ -1145,28 +1163,30 @@ func testV1FIdxCaGetResourceProfileWithNotFound(t *testing.T) {
 	}
 }
 func testV1FIdxCaSetResourceProfile(t *testing.T) {
-	filter = &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "FLTR_RES_RCFG1",
-		Rules: []*engine.FilterRule{
-			{
-				FieldName: utils.DynamicDataPrefix + utils.Account,
-				Type:      "*string",
-				Values:    []string{"1001"},
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_RES_RCFG1",
+			Rules: []*engine.FilterRule{
+				{
+					FieldName: utils.DynamicDataPrefix + utils.Account,
+					Type:      "*string",
+					Values:    []string{"1001"},
+				},
+				{
+					FieldName: utils.DynamicDataPrefix + utils.Subject,
+					Type:      "*string",
+					Values:    []string{"1002"},
+				},
+				{
+					FieldName: utils.DynamicDataPrefix + utils.Destination,
+					Type:      "*string",
+					Values:    []string{"1001"},
+				},
 			},
-			{
-				FieldName: utils.DynamicDataPrefix + utils.Subject,
-				Type:      "*string",
-				Values:    []string{"1002"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-			{
-				FieldName: utils.DynamicDataPrefix + utils.Destination,
-				Type:      "*string",
-				Values:    []string{"1001"},
-			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	var result string
@@ -1269,28 +1289,30 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 }
 
 func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
-	filter = &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "FLTR_RES_RCFG2",
-		Rules: []*engine.FilterRule{
-			{
-				FieldName: utils.DynamicDataPrefix + utils.Account,
-				Type:      "*string",
-				Values:    []string{"2002"},
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_RES_RCFG2",
+			Rules: []*engine.FilterRule{
+				{
+					FieldName: utils.DynamicDataPrefix + utils.Account,
+					Type:      "*string",
+					Values:    []string{"2002"},
+				},
+				{
+					FieldName: utils.DynamicDataPrefix + utils.Subject,
+					Type:      "*string",
+					Values:    []string{"2001"},
+				},
+				{
+					FieldName: utils.DynamicDataPrefix + utils.Destination,
+					Type:      "*string",
+					Values:    []string{"2002"},
+				},
 			},
-			{
-				FieldName: utils.DynamicDataPrefix + utils.Subject,
-				Type:      "*string",
-				Values:    []string{"2001"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-			{
-				FieldName: utils.DynamicDataPrefix + utils.Destination,
-				Type:      "*string",
-				Values:    []string{"2002"},
-			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	var result string
@@ -1342,28 +1364,30 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 }
 
 func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
-	filter = &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "FLTR_RES_RCFG3",
-		Rules: []*engine.FilterRule{
-			{
-				FieldName: utils.DynamicDataPrefix + utils.Account,
-				Type:      "*string",
-				Values:    []string{"1002"},
+	filter = &FilterWrapper{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_RES_RCFG3",
+			Rules: []*engine.FilterRule{
+				{
+					FieldName: utils.DynamicDataPrefix + utils.Account,
+					Type:      "*string",
+					Values:    []string{"1002"},
+				},
+				{
+					FieldName: utils.DynamicDataPrefix + utils.Subject,
+					Type:      "*string",
+					Values:    []string{"1001"},
+				},
+				{
+					FieldName: utils.DynamicDataPrefix + utils.Destination,
+					Type:      "*string",
+					Values:    []string{"1002"},
+				},
 			},
-			{
-				FieldName: utils.DynamicDataPrefix + utils.Subject,
-				Type:      "*string",
-				Values:    []string{"1001"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
-			{
-				FieldName: utils.DynamicDataPrefix + utils.Destination,
-				Type:      "*string",
-				Values:    []string{"1002"},
-			},
-		},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
 	var result string

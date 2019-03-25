@@ -24,7 +24,7 @@ func init() {
 	c := &CmdRemoveFilter{
 		name:      "filter_remove",
 		rpcMethod: "ApierV1.RemoveFilter",
-		rpcParams: &utils.TenantID{},
+		rpcParams: &utils.TenantIDWrapper{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -34,7 +34,7 @@ func init() {
 type CmdRemoveFilter struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantID
+	rpcParams *utils.TenantIDWrapper
 	*CommandExecuter
 }
 
@@ -48,7 +48,7 @@ func (self *CmdRemoveFilter) RpcMethod() string {
 
 func (self *CmdRemoveFilter) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantID{}
+		self.rpcParams = &utils.TenantIDWrapper{}
 	}
 	return self.rpcParams
 }
