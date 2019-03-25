@@ -139,8 +139,8 @@ func testCDREProcessCdr(t *testing.T) {
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
 	cdr.ComputeCGRID()
 	var reply string
-	if err := cdreRPC.Call(utils.CDRsV2ProcessCDR,
-		&engine.ArgV2ProcessCDR{CGREvent: *cdr.AsCGREvent()}, &reply); err != nil {
+	if err := cdreRPC.Call(utils.CDRsV1ProcessEvent,
+		&engine.ArgV1ProcessEvent{CGREvent: *cdr.AsCGREvent()}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)

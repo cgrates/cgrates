@@ -241,6 +241,9 @@ func testDiamItDryRun(t *testing.T) {
 		// ============================================
 		// prevent nil pointer dereference
 		// ============================================
+		if diamClnt == nil {
+			t.Fatal("Diameter client should not be nil")
+		}
 		if diamClnt.conn == nil {
 			t.Fatal("Diameter conection should not be nil")
 		}

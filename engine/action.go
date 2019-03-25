@@ -184,7 +184,6 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 			OriginID:    utils.GenUUID(),
 			ExtraFields: make(map[string]string),
 			PreRated:    true,
-			CostDetails: NewBareEventCost(),
 		}
 		cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.SetupTime.String())
 		cdr.Usage = time.Duration(1)

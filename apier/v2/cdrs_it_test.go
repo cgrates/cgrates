@@ -120,7 +120,7 @@ func testV2CDRsLoadTariffPlanFromFolder(t *testing.T) {
 }
 
 func testV2CDRsProcessCDR(t *testing.T) {
-	args := &engine.ArgV2ProcessCDR{
+	args := &engine.ArgV1ProcessEvent{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
@@ -141,7 +141,7 @@ func testV2CDRsProcessCDR(t *testing.T) {
 	}
 
 	var reply string
-	if err := cdrsRpc.Call(utils.CDRsV2ProcessCDR, args, &reply); err != nil {
+	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -219,8 +219,10 @@ func testV2CDRsRateCDRs(t *testing.T) {
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.SetRatingProfile got reply: ", reply)
 	}
-	if err := cdrsRpc.Call(utils.CDRsV1RateCDRs,
-		&utils.RPCCDRsFilter{NotRunIDs: []string{utils.MetaRaw}}, &reply); err != nil {
+	if err := cdrsRpc.Call(utils.CDRsV1RateCDRs, &engine.ArgRateCDRs{
+		RPCCDRsFilter: utils.RPCCDRsFilter{NotRunIDs: []string{utils.MetaRaw}},
+		ChargerS:      utils.BoolPointer(true),
+	}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -270,7 +272,7 @@ func testV2CDRsGetCdrs2(t *testing.T) {
 }
 
 func testV2CDRsUsageNegative(t *testing.T) {
-	argsCdr := &engine.ArgV2ProcessCDR{
+	argsCdr := &engine.ArgV1ProcessEvent{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
@@ -290,7 +292,7 @@ func testV2CDRsUsageNegative(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := cdrsRpc.Call(utils.CDRsV2ProcessCDR, argsCdr, &reply); err != nil {
+	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, argsCdr, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
