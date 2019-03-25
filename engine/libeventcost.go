@@ -20,7 +20,6 @@ package engine
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"time"
 
@@ -392,20 +391,18 @@ func (cbs Accounting) Clone() (cln Accounting) {
 
 // IfaceAsEventCost converts an interface to EventCost
 func IfaceAsEventCost(itm interface{}) (ec *EventCost, err error) {
-	switch itm.(type) {
+	switch otm := itm.(type) {
 	case nil:
 	case *EventCost:
-		ec = itm.(*EventCost)
+		ec = otm
 	case string:
-		ecStr, canCast := itm.(string)
-		if !canCast {
-			return nil, errors.New("cannot cast to string")
-		}
 		var rawEC EventCost
-		if errUnmarshal := json.Unmarshal([]byte(ecStr), &rawEC); errUnmarshal != nil {
+		if errUnmarshal := json.Unmarshal([]byte(otm), &rawEC); errUnmarshal != nil {
 			return nil, fmt.Errorf("JSON cannot unmarshal to *EventCost, err: %s", errUnmarshal.Error())
 		}
 		ec = &rawEC
+	case map[string]interface{}:
+		ec, err = IfaceAsEventCost(utils.ToJSON(otm))
 	default:
 		err = utils.ErrNotConvertibleNoCaps
 	}

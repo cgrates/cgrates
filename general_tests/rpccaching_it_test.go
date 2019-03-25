@@ -692,7 +692,7 @@ func testRPCMethodsCdrsProcessCDR(t *testing.T) {
 	}
 
 	var reply string
-	if err := rpcRpc.Call(utils.CDRsV2ProcessCDR, args, &reply); err != nil {
+	if err := rpcRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -709,7 +709,7 @@ func testRPCMethodsCdrsProcessCDR(t *testing.T) {
 	//change originID so CGRID be different
 	args.Event[utils.OriginID] = "testRPCMethodsProcessCDR2"
 	// we should get response from cache
-	if err := rpcRpc.Call(utils.CDRsV2ProcessCDR, args, &reply); err != nil {
+	if err := rpcRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -726,7 +726,7 @@ func testRPCMethodsCdrsProcessCDR(t *testing.T) {
 	time.Sleep(1*time.Second + 500*time.Millisecond)
 	//change originID so CGRID be different
 	args.Event[utils.OriginID] = "testRPCMethodsProcessCDR3"
-	if err := rpcRpc.Call(utils.CDRsV2ProcessCDR, args, &reply); err != nil {
+	if err := rpcRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)

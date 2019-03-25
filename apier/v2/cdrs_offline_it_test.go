@@ -303,7 +303,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl, thReply)
 	}
 
-	args := &engine.ArgV2ProcessCDR{
+	args := &engine.ArgV1ProcessEvent{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
@@ -321,7 +321,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 		},
 	}
 	//process cdr should trigger balance update event
-	if err := cdrsOfflineRpc.Call(utils.CDRsV2ProcessCDR, args, &reply); err != nil {
+	if err := cdrsOfflineRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)

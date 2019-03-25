@@ -152,8 +152,8 @@ func TestCDRsOnExpHttpCdrReplication(t *testing.T) {
 		PreRated:    true,
 	}
 	var reply string
-	if err := cdrsMasterRpc.Call(utils.CDRsV2ProcessCDR,
-		&engine.ArgV2ProcessCDR{CGREvent: *testCdr1.AsCGREvent()}, &reply); err != nil {
+	if err := cdrsMasterRpc.Call(utils.CDRsV1ProcessEvent,
+		&engine.ArgV1ProcessEvent{CGREvent: *testCdr1.AsCGREvent()}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -275,8 +275,8 @@ func TestCDRsOnExpAMQPReplication(t *testing.T) {
 		PreRated:    true,
 	}
 	var reply string
-	if err := cdrsMasterRpc.Call(utils.CDRsV2ProcessCDR,
-		&engine.ArgV2ProcessCDR{CGREvent: *testCdr.AsCGREvent()}, &reply); err != nil {
+	if err := cdrsMasterRpc.Call(utils.CDRsV1ProcessEvent,
+		&engine.ArgV1ProcessEvent{CGREvent: *testCdr.AsCGREvent()}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
