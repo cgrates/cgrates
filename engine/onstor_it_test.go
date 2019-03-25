@@ -2065,13 +2065,6 @@ func testOnStorITDispatcherProfile(t *testing.T) {
 	if err := onStor.SetDispatcherProfile(dpp, false); err != nil {
 		t.Error(err)
 	}
-	//get from cache
-	if rcv, err := onStor.GetDispatcherProfile("cgrates.org", "Dsp1",
-		true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !(reflect.DeepEqual(dpp, rcv)) {
-		t.Errorf("Expecting: %v, received: %v", dpp, rcv)
-	}
 	//get from database
 	if rcv, err := onStor.GetDispatcherProfile("cgrates.org", "Dsp1",
 		false, false, utils.NonTransactional); err != nil {
@@ -2091,13 +2084,6 @@ func testOnStorITDispatcherProfile(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(sleepDelay)
-	//get from cache
-	if rcv, err := onStor.GetDispatcherProfile("cgrates.org", "Dsp1",
-		true, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !(reflect.DeepEqual(dpp, rcv)) {
-		t.Errorf("Expecting: %v, received: %v", dpp, rcv)
-	}
 	//get from database
 	if rcv, err := onStor.GetDispatcherProfile("cgrates.org", "Dsp1",
 		false, false, utils.NonTransactional); err != nil {
@@ -2108,11 +2094,6 @@ func testOnStorITDispatcherProfile(t *testing.T) {
 	if err := onStor.RemoveDispatcherProfile(dpp.Tenant, dpp.ID,
 		utils.NonTransactional, false); err != nil {
 		t.Error(err)
-	}
-	//check cache if removed
-	if _, rcvErr := onStor.GetDispatcherProfile("cgrates.org", "Dsp1",
-		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
-		t.Error(rcvErr)
 	}
 	//check database if removed
 	if _, rcvErr := onStor.GetDispatcherProfile("cgrates.org", "Dsp1",

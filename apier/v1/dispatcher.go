@@ -62,12 +62,25 @@ func (apierV1 *ApierV1) GetDispatcherProfileIDs(tenant string, dPrfIDs *[]string
 	return nil
 }
 
+type DispatcherWrapper struct {
+	*engine.DispatcherProfile
+	Cache *string
+}
+
 //SetDispatcherProfile add/update a new Dispatcher Profile
-func (apierV1 *ApierV1) SetDispatcherProfile(dpp *engine.DispatcherProfile, reply *string) error {
-	if missing := utils.MissingStructFields(dpp, []string{"Tenant", "ID"}); len(missing) != 0 {
+func (apierV1 *ApierV1) SetDispatcherProfile(args *DispatcherWrapper, reply *string) error {
+	if missing := utils.MissingStructFields(args.DispatcherProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataManager.SetDispatcherProfile(dpp, true); err != nil {
+	if err := apierV1.DataManager.SetDispatcherProfile(args.DispatcherProfile, true); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	//handle caching for DispatcherProfile
+	argCache := engine.ArgsGetCacheItem{
+		CacheID: utils.CacheDispatcherProfiles,
+		ItemID:  args.TenantID(),
+	}
+	if err := apierV1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -75,16 +88,21 @@ func (apierV1 *ApierV1) SetDispatcherProfile(dpp *engine.DispatcherProfile, repl
 }
 
 //RemoveDispatcherProfile remove a specific Dispatcher Profile
-func (apierV1 *ApierV1) RemoveDispatcherProfile(arg *utils.TenantID, reply *string) error {
+func (apierV1 *ApierV1) RemoveDispatcherProfile(arg *utils.TenantIDWrapper, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := apierV1.DataManager.RemoveDispatcherProfile(arg.Tenant,
 		arg.ID, utils.NonTransactional, true); err != nil {
-		if err.Error() != utils.ErrNotFound.Error() {
-			err = utils.NewErrServerError(err)
-		}
-		return err
+		return utils.APIErrorHandler(err)
+	}
+	//handle caching for DispatcherProfile
+	argCache := engine.ArgsGetCacheItem{
+		CacheID: utils.CacheDispatcherProfiles,
+		ItemID:  arg.TenantID(),
+	}
+	if err := apierV1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil

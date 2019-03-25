@@ -1245,9 +1245,6 @@ func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bo
 	if err = dm.DataDB().SetDispatcherProfileDrv(dpp); err != nil {
 		return err
 	}
-	if err = dm.CacheDataFromDB(utils.DispatcherProfilePrefix, []string{dpp.TenantID()}, true); err != nil {
-		return
-	}
 	if withIndex {
 		if oldDpp != nil {
 			for _, ctx := range oldDpp.Subsystems {
@@ -1287,8 +1284,6 @@ func (dm *DataManager) RemoveDispatcherProfile(tenant, id string,
 	if err = dm.DataDB().RemoveDispatcherProfileDrv(tenant, id); err != nil {
 		return
 	}
-	Cache.Remove(utils.CacheDispatcherProfiles, utils.ConcatenatedKey(tenant, id),
-		cacheCommit(transactionID), transactionID)
 	if oldDpp == nil {
 		return utils.ErrNotFound
 	}
