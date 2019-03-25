@@ -22,7 +22,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -174,20 +173,39 @@ func TestSRunDebitReserve6(t *testing.T) {
 	}
 }
 
-func TestSessionAsCGREventsNoSRuns(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+func TestSessionAsCGREventsRawEvent(t *testing.T) {
+	ev := map[string]interface{}{
+		utils.EVENT_NAME:  "TEST_EVENT",
+		utils.ToR:         utils.VOICE,
+		utils.OriginID:    "123451",
+		utils.Account:     "1001",
+		utils.Subject:     "1001",
+		utils.Destination: "1004",
+		utils.Category:    "call",
+		utils.Tenant:      "cgrates.org",
+		utils.RequestType: utils.META_PREPAID,
+		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Cost:        12.12,
+	}
 	s := &Session{
-		CGRID:  "RandomCGRID",
-		Tenant: "cgrates.org",
+		CGRID:      "RandomCGRID",
+		Tenant:     "cgrates.org",
+		EventStart: engine.NewSafEvent(ev),
 	}
-	if cgrEvs, _ := s.AsCGREvents(cfg); cgrEvs != nil {
-		t.Errorf("Expecting: nil, received: %+v", cgrEvs)
+	if cgrEvs, _ := s.asCGREvents(); len(cgrEvs) != 1 {
+		t.Errorf("Expecting: 1, received: %+v", len(cgrEvs))
+	} else if cgrEvs[0].Event[utils.RunID] != utils.MetaRaw {
+		t.Errorf("Expecting: %+v, received: %+v", utils.MetaRaw, cgrEvs[0].Event[utils.RunID])
+	} else if cgrEvs[0].Event[utils.Cost] != 12.12 {
+		t.Errorf("Expecting: %+v, received: %+v", 12.12, cgrEvs[0].Event[utils.Cost])
 	}
+
 }
 
 func TestSessionAsCGREvents(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
-	ev := map[string]interface{}{
+	startEv := map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "123451",
@@ -200,11 +218,28 @@ func TestSessionAsCGREvents(t *testing.T) {
 		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
 		utils.Usage:       time.Duration(2 * time.Second),
-		utils.Cost:        "12.12",
+		utils.Cost:        12.12,
+	}
+	ev := map[string]interface{}{
+		utils.EVENT_NAME:  "TEST_EVENT2",
+		utils.ToR:         utils.VOICE,
+		utils.OriginID:    "123451",
+		utils.Account:     "1001",
+		utils.Subject:     "1001",
+		utils.Destination: "1004",
+		utils.Category:    "call",
+		utils.RunID:       utils.MetaDefault,
+		utils.Tenant:      "cgrates.org",
+		utils.RequestType: utils.META_PREPAID,
+		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Cost:        12.13,
 	}
 	s := &Session{
-		CGRID:  "RandomCGRID",
-		Tenant: "cgrates.org",
+		CGRID:      "RandomCGRID",
+		Tenant:     "cgrates.org",
+		EventStart: engine.NewSafEvent(startEv),
 		SRuns: []*SRun{
 			&SRun{
 				Event:      engine.NewMapEvent(ev),
@@ -213,72 +248,20 @@ func TestSessionAsCGREvents(t *testing.T) {
 		},
 	}
 	//check for some fields if populated correct
-	cgrEvs, err := s.AsCGREvents(cfg)
+	cgrEvs, err := s.asCGREvents()
 	if err != nil {
 		t.Error(err)
-	} else if len(cgrEvs) != 1 {
-		t.Errorf("Expecting: 1, received: %+v", len(cgrEvs))
+	} else if len(cgrEvs) != 2 {
+		t.Errorf("Expecting: 2, received: %+v", len(cgrEvs))
+	}
+	if cgrEvs[0].Event[utils.RunID] != utils.MetaRaw {
+		t.Errorf("Expecting: %+v, received: %+v", utils.MetaRaw, cgrEvs[0].Event[utils.RunID])
 	} else if cgrEvs[0].Event[utils.Cost] != 12.12 {
-		t.Errorf("Expecting: 12.12, received: %+v", cgrEvs[0].Event[utils.Cost])
-	} else if cgrEvs[0].Event[utils.Usage] != time.Duration(2*time.Second) {
-		t.Errorf("Expecting: 2s, received: %+v", cgrEvs[0].Event[utils.Usage])
-	} else if cgrEvs[0].Event[utils.Account] != "1001" {
-		t.Errorf("Expecting: 1001, received: %+v", cgrEvs[0].Event[utils.Account])
+		t.Errorf("Expecting: %+v, received: %+v", 12.12, cgrEvs[0].Event[utils.Cost])
 	}
-}
-
-func TestSessionAsCGREvents2(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
-	ev := map[string]interface{}{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.ToR:         utils.VOICE,
-		utils.OriginID:    "123451",
-		utils.Account:     "1001",
-		utils.Subject:     "1001",
-		utils.Destination: "1004",
-		utils.Category:    "call",
-		utils.Tenant:      "cgrates.org",
-		utils.RequestType: utils.META_PREPAID,
-		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
-		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-		utils.Usage:       time.Duration(2 * time.Second),
-		utils.Cost:        "12.12",
-	}
-	s := &Session{
-		CGRID:  "RandomCGRID",
-		Tenant: "cgrates.org",
-		SRuns: []*SRun{
-			&SRun{
-				Event:      engine.NewMapEvent(ev),
-				TotalUsage: time.Duration(2 * time.Second),
-			},
-			&SRun{
-				Event:      engine.NewMapEvent(ev),
-				TotalUsage: time.Duration(3 * time.Second),
-			},
-			&SRun{
-				Event:      engine.NewMapEvent(ev),
-				TotalUsage: time.Duration(5 * time.Second),
-			},
-		},
-	}
-	//check for some fields if populated correct
-	cgrEvs, err := s.AsCGREvents(cfg)
-	if err != nil {
-		t.Error(err)
-	} else if len(cgrEvs) != 3 {
-		t.Errorf("Expecting: 3, received: %+v", len(cgrEvs))
-	}
-	//verify usage for first SR
-	if cgrEvs[0].Event[utils.Usage] != time.Duration(2*time.Second) {
-		t.Errorf("Expecting: 2s, received: %+v", cgrEvs[0].Event[utils.Usage])
-	}
-	//verify usage for second SR
-	if cgrEvs[1].Event[utils.Usage] != time.Duration(3*time.Second) {
-		t.Errorf("Expecting: 3s, received: %+v", cgrEvs[1].Event[utils.Usage])
-	}
-	//verify usage for third SR
-	if cgrEvs[2].Event[utils.Usage] != time.Duration(5*time.Second) {
-		t.Errorf("Expecting: 5s, received: %+v", cgrEvs[2].Event[utils.Usage])
+	if cgrEvs[1].Event[utils.RunID] != utils.MetaDefault {
+		t.Errorf("Expecting: %+v, received: %+v", utils.MetaRaw, cgrEvs[1].Event[utils.RunID])
+	} else if cgrEvs[1].Event[utils.Cost] != 12.13 {
+		t.Errorf("Expecting: %+v, received: %+v", 12.13, cgrEvs[1].Event[utils.Cost])
 	}
 }
