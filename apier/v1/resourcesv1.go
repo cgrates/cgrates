@@ -107,18 +107,39 @@ func (apierV1 *ApierV1) GetResourceProfileIDs(tenant string, rsPrfIDs *[]string)
 	return nil
 }
 
+type ResourceWrapper struct {
+	*engine.ResourceProfile
+	Cache *string
+}
+
 //SetResourceProfile add a new resource configuration
-func (apierV1 *ApierV1) SetResourceProfile(res *engine.ResourceProfile, reply *string) error {
-	if missing := utils.MissingStructFields(res, []string{"Tenant", "ID"}); len(missing) != 0 {
+func (apierV1 *ApierV1) SetResourceProfile(arg *ResourceWrapper, reply *string) error {
+	if missing := utils.MissingStructFields(arg.ResourceProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := apierV1.DataManager.SetResourceProfile(res, true); err != nil {
+	if err := apierV1.DataManager.SetResourceProfile(arg.ResourceProfile, true); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	//handle caching for ResourceProfile
+	argCache := engine.ArgsGetCacheItem{
+		CacheID: utils.CacheResourceProfiles,
+		ItemID:  arg.TenantID(),
+	}
+	if err := apierV1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	if err := apierV1.DataManager.SetResource(
-		&engine.Resource{Tenant: res.Tenant,
-			ID:     res.ID,
+		&engine.Resource{Tenant: arg.Tenant,
+			ID:     arg.ID,
 			Usages: make(map[string]*engine.ResourceUsage)}); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	//handle caching for Resource
+	argCache = engine.ArgsGetCacheItem{
+		CacheID: utils.CacheResources,
+		ItemID:  arg.TenantID(),
+	}
+	if err := apierV1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -126,14 +147,30 @@ func (apierV1 *ApierV1) SetResourceProfile(res *engine.ResourceProfile, reply *s
 }
 
 //RemoveResourceProfile remove a specific resource configuration
-func (apierV1 *ApierV1) RemoveResourceProfile(arg utils.TenantID, reply *string) error {
+func (apierV1 *ApierV1) RemoveResourceProfile(arg utils.TenantIDWrapper, reply *string) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := apierV1.DataManager.RemoveResourceProfile(arg.Tenant, arg.ID, utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	//handle caching for ResourceProfile
+	argCache := engine.ArgsGetCacheItem{
+		CacheID: utils.CacheResourceProfiles,
+		ItemID:  arg.TenantID(),
+	}
+	if err := apierV1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	if err := apierV1.DataManager.RemoveResource(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	//handle caching for Resource
+	argCache = engine.ArgsGetCacheItem{
+		CacheID: utils.CacheResources,
+		ItemID:  arg.TenantID(),
+	}
+	if err := apierV1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

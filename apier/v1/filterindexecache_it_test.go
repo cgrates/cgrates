@@ -1175,20 +1175,22 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	rlsConfig = &engine.ResourceProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RCFG1",
-		FilterIDs: []string{"FLTR_RES_RCFG1"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	rlsConfig = &ResourceWrapper{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "RCFG1",
+			FilterIDs: []string{"FLTR_RES_RCFG1"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			UsageTTL:          time.Duration(0) * time.Microsecond,
+			AllocationMessage: "Approved",
+			Limit:             10,
+			Blocker:           true,
+			Stored:            true,
+			Weight:            20,
+			ThresholdIDs:      []string{"Val1", "Val2"},
 		},
-		UsageTTL:          time.Duration(0) * time.Microsecond,
-		AllocationMessage: "Approved",
-		Limit:             10,
-		Blocker:           true,
-		Stored:            true,
-		Weight:            20,
-		ThresholdIDs:      []string{"Val1", "Val2"},
 	}
 	if err := tFIdxCaRpc.Call("ApierV1.SetResourceProfile", rlsConfig, &result); err != nil {
 		t.Error(err)
@@ -1297,20 +1299,22 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	rlsConfig = &engine.ResourceProfile{
-		Tenant:    "cgrates.org",
-		ID:        "RCFG1",
-		FilterIDs: []string{"FLTR_RES_RCFG2"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	rlsConfig = &ResourceWrapper{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "RCFG1",
+			FilterIDs: []string{"FLTR_RES_RCFG2"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			UsageTTL:          time.Duration(10) * time.Microsecond,
+			Limit:             10,
+			AllocationMessage: "MessageAllocation",
+			Blocker:           true,
+			Stored:            true,
+			Weight:            20,
+			ThresholdIDs:      []string{"Val1", "Val2"},
 		},
-		UsageTTL:          time.Duration(10) * time.Microsecond,
-		Limit:             10,
-		AllocationMessage: "MessageAllocation",
-		Blocker:           true,
-		Stored:            true,
-		Weight:            20,
-		ThresholdIDs:      []string{"Val1", "Val2"},
 	}
 	if err := tFIdxCaRpc.Call("ApierV1.SetResourceProfile",
 		rlsConfig, &result); err != nil {

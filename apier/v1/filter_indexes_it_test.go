@@ -714,21 +714,23 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	rlsConfig = &engine.ResourceProfile{
-		Tenant:    tenant,
-		ID:        "RCFG1",
-		FilterIDs: []string{"FLTR_RES_RCFG1"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	rlsConfig = &ResourceWrapper{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:    tenant,
+			ID:        "RCFG1",
+			FilterIDs: []string{"FLTR_RES_RCFG1"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			UsageTTL:          time.Duration(10) * time.Microsecond,
+			Limit:             10,
+			AllocationMessage: "MessageAllocation",
+			Blocker:           true,
+			Stored:            true,
+			Weight:            20,
+			ThresholdIDs:      []string{"Val1", "Val2"},
 		},
-		UsageTTL:          time.Duration(10) * time.Microsecond,
-		Limit:             10,
-		AllocationMessage: "MessageAllocation",
-		Blocker:           true,
-		Stored:            true,
-		Weight:            20,
-		ThresholdIDs:      []string{"Val1", "Val2"},
 	}
 	if err := tFIdxRpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
 		t.Error(err)
@@ -809,21 +811,23 @@ func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	rlsConfig = &engine.ResourceProfile{
-		Tenant:    tenant,
-		ID:        "RCFG2",
-		FilterIDs: []string{"FLTR_2"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	rlsConfig = &ResourceWrapper{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:    tenant,
+			ID:        "RCFG2",
+			FilterIDs: []string{"FLTR_2"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			UsageTTL:          time.Duration(10) * time.Microsecond,
+			Limit:             10,
+			AllocationMessage: "MessageAllocation",
+			Blocker:           true,
+			Stored:            true,
+			Weight:            20,
+			ThresholdIDs:      []string{"Val1", "Val2"},
 		},
-		UsageTTL:          time.Duration(10) * time.Microsecond,
-		Limit:             10,
-		AllocationMessage: "MessageAllocation",
-		Blocker:           true,
-		Stored:            true,
-		Weight:            20,
-		ThresholdIDs:      []string{"Val1", "Val2"},
 	}
 	if err := tFIdxRpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
 		t.Error(err)

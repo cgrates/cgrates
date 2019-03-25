@@ -341,9 +341,15 @@ func (rS *ResourceService) StoreResource(r *Resource) (err error) {
 			fmt.Sprintf("<ResourceS> failed saving Resource with ID: %s, error: %s",
 				r.ID, err.Error()))
 		return
-	} else {
-		*r.dirty = false
 	}
+	//since we no longer handle cache in DataManager do here a manul caching
+	if err = rS.dm.CacheDataFromDB(utils.ResourcesPrefix, []string{r.TenantID()}, true); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<ResourceS> failed caching Resource with ID: %s, error: %s",
+				r.TenantID(), err.Error()))
+		return
+	}
+	*r.dirty = false
 	return
 }
 
