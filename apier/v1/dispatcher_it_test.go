@@ -37,7 +37,7 @@ var (
 	dispatcherCfgPath   string
 	dispatcherCfg       *config.CGRConfig
 	dispatcherRPC       *rpc.Client
-	dispatcherProfile   *engine.DispatcherProfile
+	dispatcherProfile   *DispatcherWrapper
 	dispatcherConfigDIR string //run tests for specific configuration
 )
 
@@ -117,13 +117,15 @@ func testDispatcherSSetDispatcherProfile(t *testing.T) {
 		t.Error(err)
 	}
 
-	dispatcherProfile = &engine.DispatcherProfile{
-		Tenant:    "cgrates.org",
-		ID:        "Dsp1",
-		FilterIDs: []string{"*string:Account:1001"},
-		Strategy:  utils.MetaFirst,
-		// Hosts:     []string{"192.168.56.203", "192.168.56.204"},
-		Weight: 20,
+	dispatcherProfile = &DispatcherWrapper{
+		DispatcherProfile: &engine.DispatcherProfile{
+			Tenant:    "cgrates.org",
+			ID:        "Dsp1",
+			FilterIDs: []string{"*string:Account:1001"},
+			Strategy:  utils.MetaFirst,
+			// Hosts:     []string{"192.168.56.203", "192.168.56.204"},
+			Weight: 20,
+		},
 	}
 
 	if err := dispatcherRPC.Call(utils.ApierV1SetDispatcherProfile,
@@ -139,8 +141,8 @@ func testDispatcherSSetDispatcherProfile(t *testing.T) {
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"},
 		&dsp); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(dispatcherProfile, dsp) {
-		t.Errorf("Expecting : %+v, received: %+v", dispatcherProfile, dsp)
+	} else if !reflect.DeepEqual(dispatcherProfile.DispatcherProfile, dsp) {
+		t.Errorf("Expecting : %+v, received: %+v", dispatcherProfile.DispatcherProfile, dsp)
 	}
 }
 
@@ -179,15 +181,15 @@ func testDispatcherSUpdateDispatcherProfile(t *testing.T) {
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"},
 		&dsp); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(dispatcherProfile, dsp) {
-		t.Errorf("Expecting : %+v, received: %+v", dispatcherProfile, dsp)
+	} else if !reflect.DeepEqual(dispatcherProfile.DispatcherProfile, dsp) {
+		t.Errorf("Expecting : %+v, received: %+v", dispatcherProfile.DispatcherProfile, dsp)
 	}
 }
 
 func testDispatcherSRemDispatcherProfile(t *testing.T) {
 	var result string
 	if err := dispatcherRPC.Call(utils.ApierV1RemoveDispatcherProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"},
+		&utils.TenantIDWrapper{Tenant: "cgrates.org", ID: "Dsp1"},
 		&result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -202,7 +204,7 @@ func testDispatcherSRemDispatcherProfile(t *testing.T) {
 	}
 
 	if err := dispatcherRPC.Call(utils.ApierV1RemoveDispatcherProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "Dsp1"},
+		&utils.TenantIDWrapper{Tenant: "cgrates.org", ID: "Dsp1"},
 		&result); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
 	}

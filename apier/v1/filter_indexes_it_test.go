@@ -1658,13 +1658,15 @@ func testV1FIdxGetFilterIndexes4(t *testing.T) {
 func testV1FIdxSetDispatcherProfile(t *testing.T) {
 	var reply string
 	//add a dispatcherProfile for 2 subsystems and verify if the index was created for both
-	dispatcherProfile = &engine.DispatcherProfile{
-		Tenant:     "cgrates.org",
-		ID:         "DSP_Test1",
-		FilterIDs:  []string{"*string:~Account:1001", "*string:~Subject:2012", "*prefix:~RandomField:RandomValue"},
-		Strategy:   utils.MetaFirst,
-		Subsystems: []string{utils.MetaAttributes, utils.MetaSessionS},
-		Weight:     20,
+	dispatcherProfile = &DispatcherWrapper{
+		DispatcherProfile: &engine.DispatcherProfile{
+			Tenant:     "cgrates.org",
+			ID:         "DSP_Test1",
+			FilterIDs:  []string{"*string:~Account:1001", "*string:~Subject:2012", "*prefix:~RandomField:RandomValue"},
+			Strategy:   utils.MetaFirst,
+			Subsystems: []string{utils.MetaAttributes, utils.MetaSessionS},
+			Weight:     20,
+		},
 	}
 
 	if err := tFIdxRpc.Call(utils.ApierV1SetDispatcherProfile,
@@ -1805,11 +1807,13 @@ func testV1FIdxSetDispatcherProfile2(t *testing.T) {
 	var reply string
 	//add a new dispatcherProfile with empty filterIDs
 	//should create an index of type *none:*any:*any for *attributes subsystem
-	dispatcherProfile = &engine.DispatcherProfile{
-		Tenant:     "cgrates.org",
-		ID:         "DSP_Test2",
-		Subsystems: []string{utils.MetaAttributes},
-		Weight:     20,
+	dispatcherProfile = &DispatcherWrapper{
+		DispatcherProfile: &engine.DispatcherProfile{
+			Tenant:     "cgrates.org",
+			ID:         "DSP_Test2",
+			Subsystems: []string{utils.MetaAttributes},
+			Weight:     20,
+		},
 	}
 
 	if err := tFIdxRpc.Call(utils.ApierV1SetDispatcherProfile,
