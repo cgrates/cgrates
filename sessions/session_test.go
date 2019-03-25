@@ -21,6 +21,10 @@ package sessions
 import (
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 //Test1 ExtraDuration 0 and LastUsage < initial
@@ -167,5 +171,114 @@ func TestSRunDebitReserve6(t *testing.T) {
 	// 2m(initial Total) + 2m30s(correction)
 	if sr.TotalUsage != time.Duration(4*time.Minute+30*time.Second) {
 		t.Errorf("Expecting: %+v, received: %+v", time.Duration(4*time.Minute+30*time.Second), sr.TotalUsage)
+	}
+}
+
+func TestSessionAsCGREventsNoSRuns(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	s := &Session{
+		CGRID:  "RandomCGRID",
+		Tenant: "cgrates.org",
+	}
+	if cgrEvs, _ := s.AsCGREvents(cfg); cgrEvs != nil {
+		t.Errorf("Expecting: nil, received: %+v", cgrEvs)
+	}
+}
+
+func TestSessionAsCGREvents(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	ev := map[string]interface{}{
+		utils.EVENT_NAME:  "TEST_EVENT",
+		utils.ToR:         utils.VOICE,
+		utils.OriginID:    "123451",
+		utils.Account:     "1001",
+		utils.Subject:     "1001",
+		utils.Destination: "1004",
+		utils.Category:    "call",
+		utils.Tenant:      "cgrates.org",
+		utils.RequestType: utils.META_PREPAID,
+		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Cost:        "12.12",
+	}
+	s := &Session{
+		CGRID:  "RandomCGRID",
+		Tenant: "cgrates.org",
+		SRuns: []*SRun{
+			&SRun{
+				Event:      engine.NewMapEvent(ev),
+				TotalUsage: time.Duration(2 * time.Second),
+			},
+		},
+	}
+	//check for some fields if populated correct
+	cgrEvs, err := s.AsCGREvents(cfg)
+	if err != nil {
+		t.Error(err)
+	} else if len(cgrEvs) != 1 {
+		t.Errorf("Expecting: 1, received: %+v", len(cgrEvs))
+	} else if cgrEvs[0].Event[utils.Cost] != 12.12 {
+		t.Errorf("Expecting: 12.12, received: %+v", cgrEvs[0].Event[utils.Cost])
+	} else if cgrEvs[0].Event[utils.Usage] != time.Duration(2*time.Second) {
+		t.Errorf("Expecting: 2s, received: %+v", cgrEvs[0].Event[utils.Usage])
+	} else if cgrEvs[0].Event[utils.Account] != "1001" {
+		t.Errorf("Expecting: 1001, received: %+v", cgrEvs[0].Event[utils.Account])
+	}
+}
+
+func TestSessionAsCGREvents2(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	ev := map[string]interface{}{
+		utils.EVENT_NAME:  "TEST_EVENT",
+		utils.ToR:         utils.VOICE,
+		utils.OriginID:    "123451",
+		utils.Account:     "1001",
+		utils.Subject:     "1001",
+		utils.Destination: "1004",
+		utils.Category:    "call",
+		utils.Tenant:      "cgrates.org",
+		utils.RequestType: utils.META_PREPAID,
+		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Cost:        "12.12",
+	}
+	s := &Session{
+		CGRID:  "RandomCGRID",
+		Tenant: "cgrates.org",
+		SRuns: []*SRun{
+			&SRun{
+				Event:      engine.NewMapEvent(ev),
+				TotalUsage: time.Duration(2 * time.Second),
+			},
+			&SRun{
+				Event:      engine.NewMapEvent(ev),
+				TotalUsage: time.Duration(3 * time.Second),
+			},
+			&SRun{
+				Event:      engine.NewMapEvent(ev),
+				TotalUsage: time.Duration(5 * time.Second),
+			},
+		},
+	}
+	//check for some fields if populated correct
+	cgrEvs, err := s.AsCGREvents(cfg)
+	if err != nil {
+		t.Error(err)
+	} else if len(cgrEvs) != 3 {
+		t.Errorf("Expecting: 3, received: %+v", len(cgrEvs))
+	}
+	//verify usage for first SR
+	if cgrEvs[0].Event[utils.Usage] != time.Duration(2*time.Second) {
+		t.Errorf("Expecting: 2s, received: %+v", cgrEvs[0].Event[utils.Usage])
+	}
+	//verify usage for second SR
+	if cgrEvs[1].Event[utils.Usage] != time.Duration(3*time.Second) {
+		t.Errorf("Expecting: 3s, received: %+v", cgrEvs[1].Event[utils.Usage])
+	}
+	//verify usage for third SR
+	if cgrEvs[2].Event[utils.Usage] != time.Duration(5*time.Second) {
+		t.Errorf("Expecting: 5s, received: %+v", cgrEvs[2].Event[utils.Usage])
 	}
 }

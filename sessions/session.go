@@ -233,9 +233,7 @@ type SRun struct {
 // Clone returns the cloned version of SRun
 func (sr *SRun) Clone() (clsr *SRun) {
 	clsr = &SRun{
-		Event: sr.Event.Clone(),
-		// CD:            sr.CD.Clone(),
-		// EventCost:     sr.EventCost.Clone(),
+		Event:         sr.Event.Clone(),
 		ExtraDuration: sr.ExtraDuration,
 		LastUsage:     sr.LastUsage,
 		TotalUsage:    sr.TotalUsage,
