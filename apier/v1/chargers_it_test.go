@@ -37,7 +37,7 @@ var (
 	chargerCfgPath   string
 	chargerCfg       *config.CGRConfig
 	chargerRPC       *rpc.Client
-	chargerProfile   *engine.ChargerProfile
+	chargerProfile   *ChargerWrapper
 	chargerConfigDIR string //run tests for specific configuration
 )
 
@@ -132,17 +132,20 @@ func testChargerSRPCConn(t *testing.T) {
 }
 
 func testChargerSLoadAddCharger(t *testing.T) {
-	chargerProfile := &engine.ChargerProfile{
-		Tenant:    "cgrates.org",
-		ID:        "Charger1",
-		FilterIDs: []string{"*string:~Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+	chargerProfile := &ChargerWrapper{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant:    "cgrates.org",
+			ID:        "Charger1",
+			FilterIDs: []string{"*string:~Account:1001"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+			},
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"ATTR_1001_SIMPLEAUTH"},
+			Weight:       20,
 		},
-		RunID:        utils.MetaDefault,
-		AttributeIDs: []string{"ATTR_1001_SIMPLEAUTH"},
-		Weight:       20,
 	}
+
 	var result string
 	if err := chargerRPC.Call("ApierV1.SetChargerProfile", chargerProfile, &result); err != nil {
 		t.Error(err)
@@ -232,17 +235,19 @@ func testChargerSProcessEvent(t *testing.T) {
 }
 
 func testChargerSSetChargerProfile(t *testing.T) {
-	chargerProfile = &engine.ChargerProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ApierTest",
-		FilterIDs: []string{"*string:~Account:1001", "*string:~Account:1002"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+	chargerProfile = &ChargerWrapper{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ApierTest",
+			FilterIDs: []string{"*string:~Account:1001", "*string:~Account:1002"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"Attr1", "Attr2"},
+			Weight:       20,
 		},
-		RunID:        utils.MetaDefault,
-		AttributeIDs: []string{"Attr1", "Attr2"},
-		Weight:       20,
 	}
 	var result string
 	if err := chargerRPC.Call("ApierV1.SetChargerProfile", chargerProfile, &result); err != nil {
@@ -254,8 +259,8 @@ func testChargerSSetChargerProfile(t *testing.T) {
 	if err := chargerRPC.Call("ApierV1.GetChargerProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(chargerProfile, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", chargerProfile, reply)
+	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", chargerProfile.ChargerProfile, reply)
 	}
 }
 
@@ -281,8 +286,8 @@ func testChargerSUpdateChargerProfile(t *testing.T) {
 	if err := chargerRPC.Call("ApierV1.GetChargerProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(chargerProfile, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", chargerProfile, reply)
+	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", chargerProfile.ChargerProfile, reply)
 	}
 }
 
