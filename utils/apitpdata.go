@@ -473,6 +473,7 @@ type ArgsCache struct {
 	AttributeProfileIDs   *[]string
 	ChargerProfileIDs     *[]string
 	DispatcherProfileIDs  *[]string
+	DispatcherHostIDs     *[]string
 	DispatcherRoutesIDs   *[]string
 }
 
@@ -1201,6 +1202,20 @@ type TPDispatcherProfile struct {
 	StrategyParams     []interface{} // ie for distribution, set here the pool weights
 	Weight             float64
 	Conns              []*TPDispatcherConns
+}
+
+// TPDispatcherHostConn is used in TPDispatcherHost
+type TPDispatcherHostConn struct {
+	Address   string
+	Transport string
+}
+
+// TPDispatcherHostTPDispatcherHost is used in APIs to manage remotely offline DispatcherHost
+type TPDispatcherHost struct {
+	TPid   string
+	Tenant string
+	ID     string
+	Conns  []*TPDispatcherHostConn
 }
 
 type UsageInterval struct {

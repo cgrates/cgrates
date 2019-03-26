@@ -85,3 +85,62 @@ func (self *ApierV1) RemTPDispatcher(attrs *utils.TPTntID, reply *string) error 
 	}
 	return nil
 }
+
+//SetTPDispatcherHost creates a new DispatcherHost within a tariff plan
+func (self *ApierV1) SetTPDispatcherHost(attr *utils.TPDispatcherHost, reply *string) error {
+	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if err := self.StorDb.SetTPDispatcherHosts([]*utils.TPDispatcherHost{attr}); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	*reply = utils.OK
+	return nil
+}
+
+//GetTPDispatcherHost queries specific DispatcherHosts on Tariff plan
+func (self *ApierV1) GetTPDispatcherHost(attr *utils.TPTntID, reply *utils.TPDispatcherHost) error {
+	if missing := utils.MissingStructFields(attr, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if rls, err := self.StorDb.GetTPDispatcherHosts(attr.TPid, attr.Tenant, attr.ID); err != nil {
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	} else {
+		*reply = *rls[0]
+	}
+	return nil
+}
+
+//GetTPDispatcherHostIDs queries dispatcher host identities on specific tariff plan.
+func (self *ApierV1) GetTPDispatcherHostIDs(attrs *AttrGetTPDispatcherIds, reply *[]string) error {
+	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPDispatcherHosts, utils.TPDistinctIds{"id"},
+		nil, &attrs.Paginator); err != nil {
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	} else {
+		*reply = ids
+	}
+	return nil
+}
+
+//RemTPDispatcherHost removes specific DispatcherHost on Tariff plan
+func (self *ApierV1) RemTPDispatcherHost(attrs *utils.TPTntID, reply *string) error {
+	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if err := self.StorDb.RemTpData(utils.TBLTPDispatcherHosts, attrs.TPid,
+		map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
+		return utils.NewErrServerError(err)
+	} else {
+		*reply = utils.OK
+	}
+	return nil
+}

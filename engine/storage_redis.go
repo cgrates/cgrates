@@ -366,7 +366,7 @@ func (rs *RedisStorage) HasDataDrv(category, subject, tenant string) (bool, erro
 	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
 		utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
 		utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix,
-		utils.ChargerProfilePrefix, utils.DispatcherProfilePrefix:
+		utils.ChargerProfilePrefix, utils.DispatcherProfilePrefix, utils.DispatcherHostPrefix:
 		i, err := rs.Cmd("EXISTS", category+utils.ConcatenatedKey(tenant, subject)).Int()
 		return i == 1, err
 	}
@@ -1553,6 +1553,37 @@ func (rs *RedisStorage) SetDispatcherProfileDrv(r *DispatcherProfile) (err error
 
 func (rs *RedisStorage) RemoveDispatcherProfileDrv(tenant, id string) (err error) {
 	key := utils.DispatcherProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	if err = rs.Cmd("DEL", key).Err; err != nil {
+		return
+	}
+	return
+}
+
+func (rs *RedisStorage) GetDispatcherHostDrv(tenant, id string) (r *DispatcherHost, err error) {
+	key := utils.DispatcherHostPrefix + utils.ConcatenatedKey(tenant, id)
+	var values []byte
+	if values, err = rs.Cmd("GET", key).Bytes(); err != nil {
+		if err == redis.ErrRespNil { // did not find the destination
+			err = utils.ErrNotFound
+		}
+		return
+	}
+	if err = rs.ms.Unmarshal(values, &r); err != nil {
+		return
+	}
+	return
+}
+
+func (rs *RedisStorage) SetDispatcherHostDrv(r *DispatcherHost) (err error) {
+	result, err := rs.ms.Marshal(r)
+	if err != nil {
+		return err
+	}
+	return rs.Cmd("SET", utils.DispatcherHostPrefix+utils.ConcatenatedKey(r.Tenant, r.ID), result).Err
+}
+
+func (rs *RedisStorage) RemoveDispatcherHostDrv(tenant, id string) (err error) {
+	key := utils.DispatcherHostPrefix + utils.ConcatenatedKey(tenant, id)
 	if err = rs.Cmd("DEL", key).Err; err != nil {
 		return
 	}

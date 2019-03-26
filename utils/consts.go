@@ -251,6 +251,7 @@ const (
 	AttributeProfilePrefix        = "alp_"
 	ChargerProfilePrefix          = "cpp_"
 	DispatcherProfilePrefix       = "dpp_"
+	DispatcherHostPrefix          = "dph_"
 	ThresholdProfilePrefix        = "thp_"
 	StatQueuePrefix               = "stq_"
 	LOADINST_KEY                  = "load_history"
@@ -386,6 +387,7 @@ const (
 	MetaAttributes               = "*attributes"
 	MetaChargers                 = "*chargers"
 	MetaDispatchers              = "*dispatchers"
+	MetaDispatcherHosts          = "*dispatcher_hosts"
 	MetaResources                = "*resources"
 	MetaFilters                  = "*filters"
 	MetaCDRs                     = "*cdrs"
@@ -907,6 +909,7 @@ const (
 	AttributesCsv         = "Attributes.csv"
 	ChargersCsv           = "Chargers.csv"
 	DispatchersCsv        = "Dispatchers.csv"
+	DispatcherHostsCsv    = " DispatcherHosts.csv"
 )
 
 // Table Name
@@ -934,6 +937,7 @@ const (
 	TBLVersions           = "versions"
 	OldSMCosts            = "sm_costs"
 	TBLTPDispatchers      = "tp_dispatchers"
+	TBLTPDispatcherHosts  = "tp_dispatcher_hosts"
 )
 
 // Cache Name
@@ -960,6 +964,7 @@ const (
 	CacheAttributeProfiles       = "attribute_profiles"
 	CacheChargerProfiles         = "charger_profiles"
 	CacheDispatcherProfiles      = "dispatcher_profiles"
+	CacheDispatcherHosts         = "dispatcher_hosts"
 	CacheDispatchers             = "dispatchers"
 	CacheDispatcherRoutes        = "dispatcher_routes"
 	CacheResourceFilterIndexes   = "resource_filter_indexes"

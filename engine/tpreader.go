@@ -55,13 +55,15 @@ type TpReader struct {
 	attributeProfiles  map[utils.TenantID]*utils.TPAttributeProfile
 	chargerProfiles    map[utils.TenantID]*utils.TPChargerProfile
 	dispatcherProfiles map[utils.TenantID]*utils.TPDispatcherProfile
+	dispatcherHosts    map[utils.TenantID]*utils.TPDispatcherHost
 	resources          []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
 	statQueues         []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
 	thresholds         []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
 	suppliers          []*utils.TenantID // IDs of suppliers which need creation based on sppProfiles
 	attrTntID          []*utils.TenantID // IDs of suppliers which need creation based on attributeProfiles
 	chargers           []*utils.TenantID // IDs of chargers which need creation based on chargerProfiles
-	dpps               []*utils.TenantID // IDs of chargers which need creation based on dispatcherProfiles
+	dpps               []*utils.TenantID // IDs of dispatchers which need creation based on dispatcherProfiles
+	dphs               []*utils.TenantID // IDs of dispatcherHosts which need creation based on dispatcherHosts
 	revDests,
 	acntActionPlans map[string][]string
 	cacheS rpcclient.RpcClientConnection
@@ -135,6 +137,7 @@ func (tpr *TpReader) Init() {
 	tpr.attributeProfiles = make(map[utils.TenantID]*utils.TPAttributeProfile)
 	tpr.chargerProfiles = make(map[utils.TenantID]*utils.TPChargerProfile)
 	tpr.dispatcherProfiles = make(map[utils.TenantID]*utils.TPDispatcherProfile)
+	tpr.dispatcherHosts = make(map[utils.TenantID]*utils.TPDispatcherHost)
 	tpr.filters = make(map[utils.TenantID]*utils.TPFilterProfile)
 	tpr.revDests = make(map[string][]string)
 	tpr.acntActionPlans = make(map[string][]string)
@@ -1287,6 +1290,30 @@ func (tpr *TpReader) LoadDispatcherProfiles() error {
 	return tpr.LoadDispatcherProfilesFiltered("")
 }
 
+func (tpr *TpReader) LoadDispatcherHostsFiltered(tag string) (err error) {
+	rls, err := tpr.lr.GetTPDispatcherHosts(tpr.tpid, "", tag)
+	if err != nil {
+		return err
+	}
+	mapDispatcherHost := make(map[utils.TenantID]*utils.TPDispatcherHost)
+	for _, rl := range rls {
+		mapDispatcherHost[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
+	}
+	tpr.dispatcherHosts = mapDispatcherHost
+	for tntID := range mapDispatcherHost {
+		if has, err := tpr.dm.HasData(utils.DispatcherHostPrefix, tntID.ID, tntID.Tenant); err != nil {
+			return err
+		} else if !has {
+			tpr.dphs = append(tpr.dphs, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
+		}
+	}
+	return nil
+}
+
+func (tpr *TpReader) LoadDispatcherHosts() error {
+	return tpr.LoadDispatcherHostsFiltered("")
+}
+
 func (tpr *TpReader) LoadAll() (err error) {
 	if err = tpr.LoadDestinations(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
@@ -1343,6 +1370,9 @@ func (tpr *TpReader) LoadAll() (err error) {
 		return
 	}
 	if err = tpr.LoadDispatcherProfiles(); err != nil && err.Error() != utils.NotFoundCaps {
+		return
+	}
+	if err = tpr.LoadDispatcherHosts(); err != nil && err.Error() != utils.NotFoundCaps {
 		return
 	}
 	return nil
@@ -1685,6 +1715,19 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 	}
 
 	if verbose {
+		log.Print("DispatcherHosts:")
+	}
+	for _, tpTH := range tpr.dispatcherHosts {
+		th := APItoDispatcherHost(tpTH)
+		if err = tpr.dm.SetDispatcherHost(th); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", th.TenantID())
+		}
+	}
+
+	if verbose {
 		log.Print("Timings:")
 	}
 	for _, t := range tpr.timings {
@@ -1783,6 +1826,8 @@ func (tpr *TpReader) ShowStatistics() {
 	log.Print("ChargerProfiles: ", len(tpr.chargerProfiles))
 	// Dispatcher profiles
 	log.Print("DispatcherProfiles: ", len(tpr.dispatcherProfiles))
+	// Dispatcher Hosts
+	log.Print("DispatcherHosts: ", len(tpr.dispatcherHosts))
 }
 
 // Returns the identities loaded for a specific category, useful for cache reloads
@@ -1920,6 +1965,15 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.dispatcherProfiles))
 		i := 0
 		for k := range tpr.dispatcherProfiles {
+			keys[i] = k.TenantID()
+			i++
+		}
+		return keys, nil
+
+	case utils.DispatcherHostPrefix:
+		keys := make([]string, len(tpr.dispatcherHosts))
+		i := 0
+		for k := range tpr.dispatcherHosts {
 			keys[i] = k.TenantID()
 			i++
 		}
@@ -2160,6 +2214,17 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 			log.Print("\t", tpTH.Tenant)
 		}
 	}
+	if verbose {
+		log.Print("DispatcherHosts:")
+	}
+	for _, tpTH := range tpr.dispatcherHosts {
+		if err = tpr.dm.RemoveDispatcherHost(tpTH.Tenant, tpTH.ID, utils.NonTransactional); err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", tpTH.Tenant)
+		}
+	}
 
 	if verbose {
 		log.Print("Timings:")
@@ -2218,6 +2283,7 @@ func (tpr *TpReader) ReloadCache(flush, verbose bool) (err error) {
 	apfIDs, _ := tpr.GetLoadedIds(utils.AttributeProfilePrefix)
 	chargerIDs, _ := tpr.GetLoadedIds(utils.ChargerProfilePrefix)
 	dppIDs, _ := tpr.GetLoadedIds(utils.DispatcherProfilePrefix)
+	dphIDs, _ := tpr.GetLoadedIds(utils.DispatcherHostPrefix)
 	aps, _ := tpr.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
 
 	//compose Reload Cache argument
@@ -2242,7 +2308,9 @@ func (tpr *TpReader) ReloadCache(flush, verbose bool) (err error) {
 			SupplierProfileIDs:    &spfIDs,
 			AttributeProfileIDs:   &apfIDs,
 			ChargerProfileIDs:     &chargerIDs,
-			DispatcherProfileIDs:  &dppIDs},
+			DispatcherProfileIDs:  &dppIDs,
+			DispatcherHostIDs:     &dphIDs,
+		},
 		FlushAll: flush,
 	}
 

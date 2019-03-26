@@ -487,6 +487,19 @@ func testDiamItCCRInit(t *testing.T) {
 				},
 			}),
 		}})
+	// ============================================
+	// prevent nil pointer dereference
+	// ============================================
+	if diamClnt == nil {
+		t.Fatal("Diameter client should not be nil")
+	}
+	if diamClnt.conn == nil {
+		t.Fatal("Diameter conection should not be nil")
+	}
+	if m == nil {
+		t.Fatal("The mesage to diameter should not be nil")
+	}
+	// ============================================
 	if err := diamClnt.SendMessage(m); err != nil {
 		t.Error(err)
 	}
@@ -562,6 +575,19 @@ func testDiamItCCRUpdate(t *testing.T) {
 				},
 			}),
 		}})
+	// ============================================
+	// prevent nil pointer dereference
+	// ============================================
+	if diamClnt == nil {
+		t.Fatal("Diameter client should not be nil")
+	}
+	if diamClnt.conn == nil {
+		t.Fatal("Diameter conection should not be nil")
+	}
+	if m == nil {
+		t.Fatal("The mesage to diameter should not be nil")
+	}
+	// ============================================
 	if err := diamClnt.SendMessage(m); err != nil {
 		t.Error(err)
 	}
@@ -637,6 +663,19 @@ func testDiamItCCRTerminate(t *testing.T) {
 				},
 			}),
 		}})
+	// ============================================
+	// prevent nil pointer dereference
+	// ============================================
+	if diamClnt == nil {
+		t.Fatal("Diameter client should not be nil")
+	}
+	if diamClnt.conn == nil {
+		t.Fatal("Diameter conection should not be nil")
+	}
+	if m == nil {
+		t.Fatal("The mesage to diameter should not be nil")
+	}
+	// ============================================
 	if err := diamClnt.SendMessage(m); err != nil {
 		t.Error(err)
 	}
@@ -721,6 +760,19 @@ func testDiamItCCRSMS(t *testing.T) {
 				},
 			}),
 		}})
+	// ============================================
+	// prevent nil pointer dereference
+	// ============================================
+	if diamClnt == nil {
+		t.Fatal("Diameter client should not be nil")
+	}
+	if diamClnt.conn == nil {
+		t.Fatal("Diameter conection should not be nil")
+	}
+	if ccr == nil {
+		t.Fatal("The mesage to diameter should not be nil")
+	}
+	// ============================================
 	if err := diamClnt.SendMessage(ccr); err != nil {
 		t.Error(err)
 	}
@@ -798,6 +850,19 @@ func testDiamInitWithSessionDisconnect(t *testing.T) {
 				},
 			}),
 		}})
+	// ============================================
+	// prevent nil pointer dereference
+	// ============================================
+	if diamClnt == nil {
+		t.Fatal("Diameter client should not be nil")
+	}
+	if diamClnt.conn == nil {
+		t.Fatal("Diameter conection should not be nil")
+	}
+	if m == nil {
+		t.Fatal("The mesage to diameter should not be nil")
+	}
+	// ============================================
 	if err := diamClnt.SendMessage(m); err != nil {
 		t.Error(err)
 	}

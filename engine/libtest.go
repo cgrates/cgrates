@@ -146,6 +146,7 @@ func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disable_
 		path.Join(tpPath, utils.AttributesCsv),
 		path.Join(tpPath, utils.ChargersCsv),
 		path.Join(tpPath, utils.DispatchersCsv),
+		path.Join(tpPath, utils.DispatcherHostsCsv),
 	), "", timezone, cacheS)
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
@@ -273,6 +274,10 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 			Groups: 0,
 		},
 		utils.CacheDispatcherProfiles: {
+			Items:  0,
+			Groups: 0,
+		},
+		utils.CacheDispatcherHosts: {
 			Items:  0,
 			Groups: 0,
 		},

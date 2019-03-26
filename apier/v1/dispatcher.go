@@ -108,6 +108,86 @@ func (apierV1 *ApierV1) RemoveDispatcherProfile(arg *utils.TenantIDWrapper, repl
 	return nil
 }
 
+// GetDispatcherHost returns a Dispatcher Host
+func (apierV1 *ApierV1) GetDispatcherHost(arg *utils.TenantID, reply *engine.DispatcherHost) error {
+	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if dpp, err := apierV1.DataManager.GetDispatcherHost(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+		if err.Error() != utils.ErrNotFound.Error() {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	} else {
+		*reply = *dpp
+	}
+	return nil
+}
+
+// GetDispatcherHostIDs returns list of dispatcherHost IDs registered for a tenant
+func (apierV1 *ApierV1) GetDispatcherHostIDs(tenant string, dPrfIDs *[]string) error {
+	prfx := utils.DispatcherHostPrefix + tenant + ":"
+	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	if err != nil {
+		return err
+	}
+	if len(keys) == 0 {
+		return utils.ErrNotFound
+	}
+	retIDs := make([]string, len(keys))
+	for i, key := range keys {
+		retIDs[i] = key[len(prfx):]
+	}
+	*dPrfIDs = retIDs
+	return nil
+}
+
+type DispatcherHostWrapper struct {
+	*engine.DispatcherHost
+	Cache *string
+}
+
+//SetDispatcherHost add/update a new Dispatcher Host
+func (apierV1 *ApierV1) SetDispatcherHost(args *DispatcherHostWrapper, reply *string) error {
+	if missing := utils.MissingStructFields(args.DispatcherHost, []string{"Tenant", "ID"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if err := apierV1.DataManager.SetDispatcherHost(args.DispatcherHost); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	//handle caching for DispatcherProfile
+	argCache := engine.ArgsGetCacheItem{
+		CacheID: utils.CacheDispatcherHosts,
+		ItemID:  args.TenantID(),
+	}
+	if err := apierV1.CallCache(GetCacheOpt(args.Cache), argCache); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	*reply = utils.OK
+	return nil
+}
+
+//RemoveDispatcherHost remove a specific Dispatcher Host
+func (apierV1 *ApierV1) RemoveDispatcherHost(arg *utils.TenantIDWrapper, reply *string) error {
+	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if err := apierV1.DataManager.RemoveDispatcherHost(arg.Tenant,
+		arg.ID, utils.NonTransactional); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	//handle caching for DispatcherProfile
+	argCache := engine.ArgsGetCacheItem{
+		CacheID: utils.CacheDispatcherHosts,
+		ItemID:  arg.TenantID(),
+	}
+	if err := apierV1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	*reply = utils.OK
+	return nil
+}
+
 func NewDispatcherThresholdSv1(dps *dispatchers.DispatcherService) *DispatcherThresholdSv1 {
 	return &DispatcherThresholdSv1{dS: dps}
 }

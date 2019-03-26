@@ -404,3 +404,12 @@ type TPDispatcher struct {
 	Weight             float64 `index:"12" re:"\d+\.?\d*"`
 	CreatedAt          time.Time
 }
+
+type TPDispatcherHost struct {
+	PK        uint   `gorm:"primary_key"`
+	Tpid      string //
+	Tenant    string `index:"0" re:""`
+	ID        string `index:"1" re:""`
+	Address   string `index:"2" re:""`
+	Transport string `index:"3" re:""`
+}
