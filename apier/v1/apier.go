@@ -989,7 +989,7 @@ func (v1 *ApierV1) CallCache(cacheOpt string, args engine.ArgsGetCacheItem) (err
 			return err
 		}
 	case utils.MetaRemove:
-		if err = v1.CacheS.Call(utils.CacheSv1RemoveItem, args, &reply); err != nil {
+		if err = v1.CacheS.Call(utils.CacheSv1RemoveItem, &args, &reply); err != nil {
 			return err
 		}
 	case utils.MetaClear:

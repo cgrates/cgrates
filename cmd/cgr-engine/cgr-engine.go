@@ -1063,8 +1063,6 @@ func startRpc(server *utils.Server, internalRaterChan,
 		internalDispatcherSChan <- dispatcherS
 	case analyzerS := <-internalAnalyzerSChan:
 		internalAnalyzerSChan <- analyzerS
-	case cacheS := <-internalCacheSChan:
-		internalCacheSChan <- cacheS
 	}
 
 	go server.ServeJSON(cfg.ListenCfg().RPCJSONListen)
@@ -1334,8 +1332,9 @@ func main() {
 
 	// init cache
 	cacheS := engine.NewCacheS(cfg, dm)
+	cacheSv1 := v1.NewCacheSv1(cacheS)
 	if !cfg.DispatcherSCfg().Enabled {
-		server.RpcRegister(v1.NewCacheSv1(cacheS)) // before pre-caching so we can check status via API
+		server.RpcRegister(cacheSv1) // before pre-caching so we can check status via API
 	}
 	go func() {
 		if err := cacheS.Precache(); err != nil {
@@ -1366,7 +1365,8 @@ func main() {
 	internalDispatcherSChan := make(chan *dispatchers.DispatcherService, 1)
 	internalAnalyzerSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalCacheSChan := make(chan rpcclient.RpcClientConnection, 1)
-
+	//Add cacheSv1 into channel
+	internalCacheSChan <- cacheSv1
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, dm, exitChan, cacheS)
 

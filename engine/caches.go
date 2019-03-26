@@ -323,6 +323,17 @@ func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 		return
 	}
 
+	//get loadIDs from database for all types
+	loadIDs, err := chS.dm.GetItemLoadIDs(utils.EmptyString, false)
+	if err != nil {
+		return err
+	}
+	cacheLoadIDs := populateCacheLoadIDs(loadIDs, attrs)
+	for key, val := range cacheLoadIDs {
+		Cache.Set(utils.CacheLoadIDs, key, val, nil,
+			cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	}
+
 	*reply = utils.OK
 	return nil
 }
@@ -362,6 +373,16 @@ func (chS *CacheS) V1LoadCache(args utils.AttrReloadCache, reply *string) (err e
 		toStringSlice(args.DispatcherHostIDs),
 	); err != nil {
 		return utils.NewErrServerError(err)
+	}
+	//get loadIDs for all types
+	loadIDs, err := chS.dm.GetItemLoadIDs(utils.EmptyString, false)
+	if err != nil {
+		return err
+	}
+	cacheLoadIDs := populateCacheLoadIDs(loadIDs, args)
+	for key, val := range cacheLoadIDs {
+		Cache.Set(utils.CacheLoadIDs, key, val, nil,
+			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	*reply = utils.OK
 	return nil
@@ -405,7 +426,83 @@ func (chS *CacheS) V1FlushCache(args utils.AttrReloadCache, reply *string) (err 
 	flushCache(utils.CacheDispatcherProfiles, args.DispatcherProfileIDs)
 	flushCache(utils.CacheDispatcherHosts, args.DispatcherHostIDs)
 	flushCache(utils.CacheDispatcherRoutes, args.DispatcherRoutesIDs)
-
+	//get loadIDs for all types
+	loadIDs, err := chS.dm.GetItemLoadIDs(utils.EmptyString, false)
+	if err != nil {
+		return err
+	}
+	cacheLoadIDs := populateCacheLoadIDs(loadIDs, args)
+	for key, val := range cacheLoadIDs {
+		Cache.Set(utils.CacheLoadIDs, key, val, nil,
+			cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	}
 	*reply = utils.OK
+	return
+}
+
+//populateCacheLoadIDs populate cacheLoadIDs based on attrs
+func populateCacheLoadIDs(loadIDs map[string]string, attrs utils.AttrReloadCache) (cacheLoadIDs map[string]string) {
+	cacheLoadIDs = make(map[string]string)
+	//based on IDs of each type populate cacheLoadIDs and add into cache
+	if attrs.DestinationIDs == nil || len(*attrs.DestinationIDs) != 0 {
+		cacheLoadIDs[utils.CacheDestinations] = loadIDs[utils.CacheDestinations]
+	}
+	if attrs.ReverseDestinationIDs == nil || len(*attrs.ReverseDestinationIDs) != 0 {
+		cacheLoadIDs[utils.CacheReverseDestinations] = loadIDs[utils.CacheReverseDestinations]
+	}
+	if attrs.RatingPlanIDs == nil || len(*attrs.RatingPlanIDs) != 0 {
+		cacheLoadIDs[utils.CacheRatingPlans] = loadIDs[utils.CacheRatingPlans]
+	}
+	if attrs.RatingProfileIDs == nil || len(*attrs.RatingProfileIDs) != 0 {
+		cacheLoadIDs[utils.CacheRatingProfiles] = loadIDs[utils.CacheRatingProfiles]
+	}
+	if attrs.ActionIDs == nil || len(*attrs.ActionIDs) != 0 {
+		cacheLoadIDs[utils.CacheActions] = loadIDs[utils.CacheActions]
+	}
+	if attrs.ActionPlanIDs == nil || len(*attrs.ActionPlanIDs) != 0 {
+		cacheLoadIDs[utils.CacheActionPlans] = loadIDs[utils.CacheActionPlans]
+	}
+	if attrs.AccountActionPlanIDs == nil || len(*attrs.AccountActionPlanIDs) != 0 {
+		cacheLoadIDs[utils.CacheAccountActionPlans] = loadIDs[utils.CacheAccountActionPlans]
+	}
+	if attrs.ActionTriggerIDs == nil || len(*attrs.ActionTriggerIDs) != 0 {
+		cacheLoadIDs[utils.CacheActionTriggers] = loadIDs[utils.CacheActionTriggers]
+	}
+	if attrs.SharedGroupIDs == nil || len(*attrs.SharedGroupIDs) != 0 {
+		cacheLoadIDs[utils.CacheSharedGroups] = loadIDs[utils.CacheSharedGroups]
+	}
+	if attrs.ResourceProfileIDs == nil || len(*attrs.ResourceProfileIDs) != 0 {
+		cacheLoadIDs[utils.CacheResourceProfiles] = loadIDs[utils.CacheResourceProfiles]
+	}
+	if attrs.ResourceIDs == nil || len(*attrs.ResourceIDs) != 0 {
+		cacheLoadIDs[utils.CacheResources] = loadIDs[utils.CacheResources]
+	}
+	if attrs.StatsQueueProfileIDs == nil || len(*attrs.StatsQueueProfileIDs) != 0 {
+		cacheLoadIDs[utils.CacheStatQueueProfiles] = loadIDs[utils.CacheStatQueueProfiles]
+	}
+	if attrs.StatsQueueIDs == nil || len(*attrs.StatsQueueIDs) != 0 {
+		cacheLoadIDs[utils.CacheStatQueues] = loadIDs[utils.CacheStatQueues]
+	}
+	if attrs.ThresholdProfileIDs == nil || len(*attrs.ThresholdProfileIDs) != 0 {
+		cacheLoadIDs[utils.CacheThresholdProfiles] = loadIDs[utils.CacheThresholdProfiles]
+	}
+	if attrs.ThresholdIDs == nil || len(*attrs.ThresholdIDs) != 0 {
+		cacheLoadIDs[utils.CacheThresholds] = loadIDs[utils.CacheThresholds]
+	}
+	if attrs.FilterIDs == nil || len(*attrs.FilterIDs) != 0 {
+		cacheLoadIDs[utils.CacheFilters] = loadIDs[utils.CacheFilters]
+	}
+	if attrs.SupplierProfileIDs == nil || len(*attrs.SupplierProfileIDs) != 0 {
+		cacheLoadIDs[utils.CacheSupplierProfiles] = loadIDs[utils.CacheSupplierProfiles]
+	}
+	if attrs.AttributeProfileIDs == nil || len(*attrs.AttributeProfileIDs) != 0 {
+		cacheLoadIDs[utils.CacheAttributeProfiles] = loadIDs[utils.CacheAttributeProfiles]
+	}
+	if attrs.ChargerProfileIDs == nil || len(*attrs.ChargerProfileIDs) != 0 {
+		cacheLoadIDs[utils.CacheChargerProfiles] = loadIDs[utils.CacheChargerProfiles]
+	}
+	if attrs.DispatcherProfileIDs == nil || len(*attrs.DispatcherProfileIDs) != 0 {
+		cacheLoadIDs[utils.CacheDispatcherProfiles] = loadIDs[utils.CacheDispatcherProfiles]
+	}
 	return
 }

@@ -711,6 +711,8 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 			TTL: time.Duration(2 * time.Second), StaticTTL: false},
 		utils.CacheClosedSessions: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(10 * time.Second), StaticTTL: false},
+		utils.CacheLoadIDs: &CacheParamCfg{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 	}
 
 	if !reflect.DeepEqual(eCacheCfg, cgrCfg.CacheCfg()) {
@@ -1709,7 +1711,7 @@ func TestNewCGRConfigFromPathNotFound(t *testing.T) {
 func TestCgrCfgJSONDefaultApierCfg(t *testing.T) {
 	aCfg := &ApierCfg{
 		CachesConns: []*HaPoolConfig{
-			{Address: "127.0.0.1:2012", Transport: "*json"},
+			{Address: utils.MetaInternal},
 		},
 	}
 	if !reflect.DeepEqual(cgrCfg.apier, aCfg) {
