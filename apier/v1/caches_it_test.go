@@ -132,7 +132,7 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 	if err := chcRPC.Call(utils.CacheSv1GetCacheStats, nil, &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expStats, rcvStats) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
+		t.Errorf("Expecting: %+v, \n received: %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
 	}
 	reply := ""
 	// Simple test that command is executed without errors
@@ -155,11 +155,12 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheSupplierProfiles].Items = 2
 	expStats[utils.CacheThresholdProfiles].Items = 1
 	expStats[utils.CacheThresholds].Items = 1
+	expStats[utils.CacheLoadIDs].Items = 20
 
 	if err := chcRPC.Call(utils.CacheSv1GetCacheStats, nil, &rcvStats); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expStats, rcvStats) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
+		t.Errorf("Expecting: %+v,\n received: %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
 	}
 }
 
@@ -207,6 +208,7 @@ func testCacheSReload(t *testing.T) {
 	expStats[utils.CacheSupplierProfiles].Items = 2
 	expStats[utils.CacheThresholdProfiles].Items = 1
 	expStats[utils.CacheThresholds].Items = 1
+	expStats[utils.CacheLoadIDs].Items = 20
 
 	if err := chcRPC.Call(utils.CacheSv1GetCacheStats, nil, &rcvStats); err != nil {
 		t.Error(err)
@@ -370,6 +372,7 @@ func testCacheSPrecacheStatus(t *testing.T) {
 		utils.CacheSupplierFilterIndexes:   utils.MetaReady,
 		utils.CacheChargerFilterIndexes:    utils.MetaReady,
 		utils.CacheDispatcherFilterIndexes: utils.MetaReady,
+		utils.CacheLoadIDs:                 utils.MetaReady,
 	}
 
 	if err := chcRPC.Call(utils.CacheSv1PrecacheStatus, nil, &reply); err != nil {

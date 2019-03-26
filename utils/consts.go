@@ -80,6 +80,7 @@ var (
 		CacheAttributeFilterIndexes:  AttributeFilterIndexes,
 		CacheChargerFilterIndexes:    ChargerFilterIndexes,
 		CacheDispatcherFilterIndexes: DispatcherFilterIndexes,
+		CacheLoadIDs:                 LoadIDPrefix,
 	}
 	CachePrefixToInstance map[string]string // will be built on init
 	PrefixToIndexCache    = map[string]string{
@@ -254,6 +255,7 @@ const (
 	DispatcherHostPrefix          = "dph_"
 	ThresholdProfilePrefix        = "thp_"
 	StatQueuePrefix               = "stq_"
+	LoadIDPrefix                  = "lid_"
 	LOADINST_KEY                  = "load_history"
 	SESSION_MANAGER_SOURCE        = "SMR"
 	MEDIATOR_SOURCE               = "MED"

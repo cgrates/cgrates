@@ -85,9 +85,11 @@ func (apierV1 *ApierV1) SetAttributeProfile(alsWrp *AttributeWrapper, reply *str
 	if err := apierV1.DataManager.SetAttributeProfile(alsWrp.AttributeProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	loadId := map[string]string{utils.AttributeProfilePrefix: utils.UUIDSha1Prefix()}
-	//generez un nou id pentru load_ids
-	//fac update in datadb
+	//generate a loadID for attributeProfile and store it in database
+	loadIDs := map[string]string{utils.CacheAttributeProfiles: utils.UUIDSha1Prefix()}
+	if err := apierV1.DataManager.SetLoadIDs(loadIDs); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	args := engine.ArgsGetCacheItem{
 		CacheID: utils.CacheAttributeProfiles,
 		ItemID:  alsWrp.TenantID(),

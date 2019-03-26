@@ -1409,6 +1409,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		// 	return
 		// }
 	}
+	//generate a loadID
+	loadID := utils.UUIDSha1Prefix()
+	loadIDs := make(map[string]string)
 	if verbose {
 		log.Print("Destinations:")
 	}
@@ -1420,6 +1423,12 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		if verbose {
 			log.Print("\t", d.Id, " : ", d.Prefixes)
 		}
+	}
+	if len(tpr.destinations) != 0 {
+		loadIDs[utils.CacheDestinations] = loadID
+	}
+	if len(tpr.revDests) != 0 {
+		loadIDs[utils.CacheReverseDestinations] = loadID
 	}
 	if verbose {
 		log.Print("Reverse Destinations:")
@@ -1437,6 +1446,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			log.Print("\t", rp.Id)
 		}
 	}
+	if len(tpr.ratingPlans) != 0 {
+		loadIDs[utils.CacheRatingPlans] = loadID
+	}
 	if verbose {
 		log.Print("Rating Profiles:")
 	}
@@ -1448,6 +1460,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		if verbose {
 			log.Print("\t", rp.Id)
 		}
+	}
+	if len(tpr.ratingProfiles) != 0 {
+		loadIDs[utils.CacheRatingProfiles] = loadID
 	}
 	if verbose {
 		log.Print("Action Plans:")
@@ -1490,6 +1505,12 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			log.Println("\t", k)
 		}
 	}
+	if len(tpr.actionPlans) != 0 {
+		loadIDs[utils.CacheActionPlans] = loadID
+	}
+	if len(tpr.acntActionPlans) != 0 {
+		loadIDs[utils.CacheAccountActionPlans] = loadID
+	}
 	if verbose {
 		log.Print("Account Action Plans:")
 		for id, vals := range tpr.acntActionPlans {
@@ -1508,6 +1529,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			log.Println("\t", k)
 		}
 	}
+	if len(tpr.actionsTriggers) != 0 {
+		loadIDs[utils.CacheActionTriggers] = loadID
+	}
 	if verbose {
 		log.Print("Shared Groups:")
 	}
@@ -1520,6 +1544,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			log.Println("\t", k)
 		}
 	}
+	if len(tpr.sharedGroups) != 0 {
+		loadIDs[utils.CacheSharedGroups] = loadID
+	}
 	if verbose {
 		log.Print("Actions:")
 	}
@@ -1531,6 +1558,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		if verbose {
 			log.Println("\t", k)
 		}
+	}
+	if len(tpr.actions) != 0 {
+		loadIDs[utils.CacheActions] = loadID
 	}
 	if verbose {
 		log.Print("Account Actions:")
@@ -1559,6 +1589,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			log.Print("\t", th.TenantID())
 		}
 	}
+	if len(tpr.filters) != 0 {
+		loadIDs[utils.CacheFilters] = loadID
+	}
 	if verbose {
 		log.Print("ResourceProfiles:")
 	}
@@ -1574,6 +1607,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			log.Print("\t", rsp.TenantID())
 		}
 	}
+	if len(tpr.resProfiles) != 0 {
+		loadIDs[utils.CacheResourceProfiles] = loadID
+	}
 	if verbose {
 		log.Print("Resources:")
 	}
@@ -1584,6 +1620,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		if verbose {
 			log.Print("\t", rTid.TenantID())
 		}
+	}
+	if len(tpr.resources) != 0 {
+		loadIDs[utils.CacheResources] = loadID
 	}
 	if verbose {
 		log.Print("StatQueueProfiles:")
@@ -1599,6 +1638,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		if verbose {
 			log.Print("\t", st.TenantID())
 		}
+	}
+	if len(tpr.sqProfiles) != 0 {
+		loadIDs[utils.CacheStatQueueProfiles] = loadID
 	}
 	if verbose {
 		log.Print("StatQueues:")
@@ -1622,6 +1664,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			log.Print("\t", sqTntID.TenantID())
 		}
 	}
+	if len(tpr.statQueues) != 0 {
+		loadIDs[utils.CacheStatQueues] = loadID
+	}
 	if verbose {
 		log.Print("ThresholdProfiles:")
 	}
@@ -1637,6 +1682,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			log.Print("\t", th.TenantID())
 		}
 	}
+	if len(tpr.thProfiles) != 0 {
+		loadIDs[utils.CacheThresholdProfiles] = loadID
+	}
 	if verbose {
 		log.Print("Thresholds:")
 	}
@@ -1648,7 +1696,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			log.Print("\t", thd.TenantID())
 		}
 	}
-
+	if len(tpr.thresholds) != 0 {
+		loadIDs[utils.CacheThresholds] = loadID
+	}
 	if verbose {
 		log.Print("SupplierProfiles:")
 	}
@@ -1664,7 +1714,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			log.Print("\t", th.TenantID())
 		}
 	}
-
+	if len(tpr.sppProfiles) != 0 {
+		loadIDs[utils.CacheSupplierProfiles] = loadID
+	}
 	if verbose {
 		log.Print("AttributeProfiles:")
 	}
@@ -1680,7 +1732,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			log.Print("\t", th.TenantID())
 		}
 	}
-
+	if len(tpr.attributeProfiles) != 0 {
+		loadIDs[utils.CacheAttributeProfiles] = loadID
+	}
 	if verbose {
 		log.Print("ChargerProfiles:")
 	}
@@ -1697,7 +1751,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			log.Print("\t", th.TenantID())
 		}
 	}
-
+	if len(tpr.chargerProfiles) != 0 {
+		loadIDs[utils.CacheChargerProfiles] = loadID
+	}
 	if verbose {
 		log.Print("DispatcherProfiles:")
 	}
@@ -1713,7 +1769,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			log.Print("\t", th.TenantID())
 		}
 	}
-
+	if len(tpr.dispatcherProfiles) != 0 {
+		loadIDs[utils.CacheDispatcherProfiles] = loadID
+	}
 	if verbose {
 		log.Print("DispatcherHosts:")
 	}
@@ -1738,6 +1796,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			log.Print("\t", t.ID)
 		}
 	}
+	if len(tpr.timings) != 0 {
+		loadIDs[utils.CacheTimings] = loadID
+	}
 	if !disable_reverse {
 		if len(tpr.destinations) > 0 {
 			if verbose {
@@ -1755,6 +1816,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 				return err
 			}
 		}
+	}
+	if err = tpr.dm.SetLoadIDs(loadIDs); err != nil {
+		return err
 	}
 	return
 }
@@ -2377,6 +2441,16 @@ func (tpr *TpReader) ReloadCache(flush, verbose bool) (err error) {
 		}
 	}
 
+	//get loadIDs for all types
+	loadIDs, err := tpr.dm.GetItemLoadIDs(utils.EmptyString, false)
+	if err != nil {
+		return err
+	}
+	cacheLoadIDs := populateCacheLoadIDs(loadIDs, cacheArgs)
+	for key, val := range cacheLoadIDs {
+		Cache.Set(utils.CacheLoadIDs, key, val, nil,
+			cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	}
 	// release the reader with it's structures
 	tpr.Init()
 	return

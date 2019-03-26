@@ -291,6 +291,8 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			err = dm.MatchFilterIndexFromKey(utils.CacheChargerFilterIndexes, dataID)
 		case utils.DispatcherFilterIndexes:
 			err = dm.MatchFilterIndexFromKey(utils.CacheDispatcherFilterIndexes, dataID)
+		case utils.LoadIDPrefix:
+			_, err = dm.GetItemLoadIDs(utils.EmptyString, true)
 		}
 		if err != nil {
 			if err == utils.ErrNotFound {
@@ -1347,4 +1349,28 @@ func (dm *DataManager) RemoveDispatcherHost(tenant, id string,
 		return utils.ErrNotFound
 	}
 	return
+}
+
+func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loadIDs map[string]string, err error) {
+	loadIDs, err = dm.DataDB().GetItemLoadIDsDrv(itemIDPrefix)
+	if err != nil {
+		if err == utils.ErrNotFound && cacheWrite {
+			for key, _ := range loadIDs {
+				Cache.Set(utils.CacheLoadIDs, key, nil, nil,
+					cacheCommit(utils.NonTransactional), utils.NonTransactional)
+			}
+		}
+		return nil, err
+	}
+	if cacheWrite {
+		for key, val := range loadIDs {
+			Cache.Set(utils.CacheLoadIDs, key, val, nil,
+				cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		}
+	}
+	return
+}
+
+func (dm *DataManager) SetLoadIDs(loadIDs map[string]string) error {
+	return dm.DataDB().SetLoadIDsDrv(loadIDs)
 }

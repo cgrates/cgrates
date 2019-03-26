@@ -755,7 +755,7 @@ const CGRATES_CFG_JSON = `
 
 "apier": {	
 	"caches_conns":[						// connections to CacheS for reloads
-		{"address": "127.0.0.1:2012", "transport": "*json"},
+		{"address": "*internal"},
 	],						
 },
 

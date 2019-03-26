@@ -161,6 +161,9 @@ func TestCacheJsonCfg(t *testing.T) {
 			Ttl: utils.StringPointer("2s"), Static_ttl: utils.BoolPointer(false)},
 		utils.CacheClosedSessions: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer("10s"), Static_ttl: utils.BoolPointer(false)},
+		utils.CacheLoadIDs: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
+			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
+			Precache: utils.BoolPointer(false)},
 	}
 
 	if gCfg, err := dfCgrJsonCfg.CacheJsonCfg(); err != nil {
@@ -1501,8 +1504,7 @@ func TestDfApierCfg(t *testing.T) {
 	eCfg := &ApierJsonCfg{
 		Caches_conns: &[]*HaPoolJsonCfg{
 			{
-				Address:   utils.StringPointer("127.0.0.1:2012"),
-				Transport: utils.StringPointer(utils.MetaJSONrpc),
+				Address: utils.StringPointer(utils.MetaInternal),
 			},
 		},
 	}
