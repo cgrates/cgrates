@@ -75,6 +75,11 @@ func (apierV1 *ApierV1) SetDispatcherProfile(args *DispatcherWrapper, reply *str
 	if err := apierV1.DataManager.SetDispatcherProfile(args.DispatcherProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	//generate a loadID for attributeProfile and store it in database
+	loadIDs := map[string]string{utils.CacheDispatcherProfiles: utils.UUIDSha1Prefix()}
+	if err := apierV1.DataManager.SetLoadIDs(loadIDs); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	//handle caching for DispatcherProfile
 	argCache := engine.ArgsGetCacheItem{
 		CacheID: utils.CacheDispatcherProfiles,
@@ -94,6 +99,11 @@ func (apierV1 *ApierV1) RemoveDispatcherProfile(arg *utils.TenantIDWrapper, repl
 	}
 	if err := apierV1.DataManager.RemoveDispatcherProfile(arg.Tenant,
 		arg.ID, utils.NonTransactional, true); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	//generate a loadID for attributeProfile and store it in database
+	loadIDs := map[string]string{utils.CacheFilters: utils.UUIDSha1Prefix()}
+	if err := apierV1.DataManager.SetLoadIDs(loadIDs); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile

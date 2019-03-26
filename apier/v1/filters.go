@@ -36,6 +36,11 @@ func (apierV1 *ApierV1) SetFilter(arg *FilterWrapper, reply *string) error {
 	if err := apierV1.DataManager.SetFilter(arg.Filter); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	//generate a loadID for attributeProfile and store it in database
+	loadIDs := map[string]string{utils.CacheFilters: utils.UUIDSha1Prefix()}
+	if err := apierV1.DataManager.SetLoadIDs(loadIDs); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	//handle caching for Filter
 	argCache := engine.ArgsGetCacheItem{
 		CacheID: utils.CacheFilters,
@@ -92,6 +97,11 @@ func (apierV1 *ApierV1) RemoveFilter(arg utils.TenantIDWrapper, reply *string) e
 			err = utils.NewErrServerError(err)
 		}
 		return err
+	}
+	//generate a loadID for attributeProfile and store it in database
+	loadIDs := map[string]string{utils.CacheFilters: utils.UUIDSha1Prefix()}
+	if err := apierV1.DataManager.SetLoadIDs(loadIDs); err != nil {
+		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Filter
 	argCache := engine.ArgsGetCacheItem{

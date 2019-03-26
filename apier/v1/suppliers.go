@@ -70,6 +70,11 @@ func (apierV1 *ApierV1) SetSupplierProfile(args *SupplierWrapper, reply *string)
 	if err := apierV1.DataManager.SetSupplierProfile(args.SupplierProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	//generate a loadID for attributeProfile and store it in database
+	loadIDs := map[string]string{utils.CacheSupplierProfiles: utils.UUIDSha1Prefix()}
+	if err := apierV1.DataManager.SetLoadIDs(loadIDs); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	//handle caching for SupplierProfile
 	argCache := engine.ArgsGetCacheItem{
 		CacheID: utils.CacheSupplierProfiles,
@@ -88,6 +93,11 @@ func (apierV1 *ApierV1) RemoveSupplierProfile(args *utils.TenantIDWrapper, reply
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := apierV1.DataManager.RemoveSupplierProfile(args.Tenant, args.ID, utils.NonTransactional, true); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	//generate a loadID for attributeProfile and store it in database
+	loadIDs := map[string]string{utils.CacheChargerProfiles: utils.UUIDSha1Prefix()}
+	if err := apierV1.DataManager.SetLoadIDs(loadIDs); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for SupplierProfile

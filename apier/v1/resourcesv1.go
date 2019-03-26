@@ -120,6 +120,12 @@ func (apierV1 *ApierV1) SetResourceProfile(arg *ResourceWrapper, reply *string) 
 	if err := apierV1.DataManager.SetResourceProfile(arg.ResourceProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	//generate a loadID for thresholdProfile and store it in database
+	loadID := utils.UUIDSha1Prefix()
+	loadIDs := map[string]string{utils.CacheResourceProfiles: loadID}
+	if err := apierV1.DataManager.SetLoadIDs(loadIDs); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	//handle caching for ResourceProfile
 	argCache := engine.ArgsGetCacheItem{
 		CacheID: utils.CacheResourceProfiles,
@@ -132,6 +138,10 @@ func (apierV1 *ApierV1) SetResourceProfile(arg *ResourceWrapper, reply *string) 
 		&engine.Resource{Tenant: arg.Tenant,
 			ID:     arg.ID,
 			Usages: make(map[string]*engine.ResourceUsage)}); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	loadIDs2 := map[string]string{utils.CacheResources: loadID}
+	if err := apierV1.DataManager.SetLoadIDs(loadIDs2); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Resource

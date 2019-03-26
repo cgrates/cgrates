@@ -41,6 +41,11 @@ func (apierV2 *ApierV2) SetAttributeProfile(extAlsPrfWrp *AttributeWrapper, repl
 	if err := apierV2.DataManager.SetAttributeProfile(alsPrf, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	//generate a loadID for attributeProfile and store it in database
+	loadIDs := map[string]string{utils.CacheAttributeProfiles: utils.UUIDSha1Prefix()}
+	if err := apierV2.DataManager.SetLoadIDs(loadIDs); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	args := engine.ArgsGetCacheItem{
 		CacheID: utils.CacheAttributeProfiles,
 		ItemID:  alsPrf.TenantID(),
