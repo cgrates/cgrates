@@ -65,6 +65,7 @@ var precachedPartitions = utils.StringMap{
 	utils.CacheSupplierFilterIndexes:   true,
 	utils.CacheChargerFilterIndexes:    true,
 	utils.CacheDispatcherFilterIndexes: true,
+	utils.CacheLoadIDs:                 true,
 }
 
 // InitCache will instantiate the cache with specific or default configuraiton

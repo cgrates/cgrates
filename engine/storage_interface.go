@@ -128,6 +128,8 @@ type DataDB interface {
 	GetDispatcherProfileDrv(string, string) (*DispatcherProfile, error)
 	SetDispatcherProfileDrv(*DispatcherProfile) error
 	RemoveDispatcherProfileDrv(string, string) error
+	GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[string]string, err error)
+	SetLoadIDsDrv(loadIDs map[string]string) error
 	GetDispatcherHostDrv(string, string) (*DispatcherHost, error)
 	SetDispatcherHostDrv(*DispatcherHost) error
 	RemoveDispatcherHostDrv(string, string) error
