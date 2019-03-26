@@ -70,6 +70,11 @@ func (apierV1 *ApierV1) SetChargerProfile(arg *ChargerWrapper, reply *string) er
 	if err := apierV1.DataManager.SetChargerProfile(arg.ChargerProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	//generate a loadID for attributeProfile and store it in database
+	loadIDs := map[string]string{utils.CacheChargerProfiles: utils.UUIDSha1Prefix()}
+	if err := apierV1.DataManager.SetLoadIDs(loadIDs); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	//handle caching for ChargerProfile
 	argCache := engine.ArgsGetCacheItem{
 		CacheID: utils.CacheChargerProfiles,

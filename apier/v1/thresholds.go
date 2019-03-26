@@ -102,6 +102,12 @@ func (apierV1 *ApierV1) SetThresholdProfile(args *ThresholdWrapper, reply *strin
 	if err := apierV1.DataManager.SetThresholdProfile(args.ThresholdProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	//generate a loadID for thresholdProfile and store it in database
+	loadID := utils.UUIDSha1Prefix()
+	loadIDs := map[string]string{utils.CacheThresholdProfiles: loadID}
+	if err := apierV1.DataManager.SetLoadIDs(loadIDs); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	//handle caching for ThresholdProfile
 	argCache := engine.ArgsGetCacheItem{
 		CacheID: utils.CacheThresholdProfiles,
@@ -112,6 +118,10 @@ func (apierV1 *ApierV1) SetThresholdProfile(args *ThresholdWrapper, reply *strin
 	}
 	if err := apierV1.DataManager.SetThreshold(&engine.Threshold{Tenant: args.Tenant, ID: args.ID}); err != nil {
 		return err
+	}
+	loadIDs2 := map[string]string{utils.CacheThresholds: loadID}
+	if err := apierV1.DataManager.SetLoadIDs(loadIDs2); err != nil {
+		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Threshold
 	argCache = engine.ArgsGetCacheItem{
