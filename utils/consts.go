@@ -559,6 +559,7 @@ const (
 	MetaLoad                     = "*load"
 	MetaRemove                   = "*remove"
 	MetaClear                    = "*clear"
+	LoadIDs                      = "load_ids"
 )
 
 // Migrator Action
@@ -979,6 +980,7 @@ const (
 	CacheClosedSessions          = "closed_sessions"
 	MetaPrecaching               = "*precaching"
 	MetaReady                    = "*ready"
+	CacheLoadIDs                 = "load_ids"
 )
 
 // Prefix for indexing

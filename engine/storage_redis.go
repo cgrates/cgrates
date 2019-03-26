@@ -1593,3 +1593,28 @@ func (rs *RedisStorage) RemoveDispatcherHostDrv(tenant, id string) (err error) {
 func (rs *RedisStorage) GetStorageType() string {
 	return utils.REDIS
 }
+
+func (rs *RedisStorage) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[string]string, err error) {
+	if itemIDPrefix != "" {
+		fldVal, err := rs.Cmd("HGET", utils.LoadIDs, itemIDPrefix).Str()
+		if err != nil {
+			if err == redis.ErrRespNil {
+				err = utils.ErrNotFound
+			}
+			return nil, err
+		}
+		return map[string]string{itemIDPrefix: fldVal}, nil
+	}
+	loadIDs, err = rs.Cmd("HGETALL", utils.LoadIDs).Map()
+	if err != nil {
+		return nil, err
+	}
+	if len(loadIDs) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return
+}
+
+func (rs *RedisStorage) SetLoadIDsDrv(loadIDs map[string]string) error {
+	return rs.Cmd("HMSET", utils.LoadIDs, loadIDs).Err
+}

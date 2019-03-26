@@ -152,7 +152,8 @@ const CGRATES_CFG_JSON = `
 	"dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false}, 						// control dispatcher routes caching
 	"diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false},						// diameter messages caching
 	"rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false},							// RPC responses caching
-	"closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false},							// closed sessions cached for CDRs
+	"closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false},						// closed sessions cached for CDRs
+	"load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control the load_ids for items
 },
 
 
