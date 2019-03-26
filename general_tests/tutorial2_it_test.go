@@ -28,6 +28,7 @@ import (
 	"time"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
+	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -48,6 +49,7 @@ var sTutTests = []func(t *testing.T){
 	testTutRpcConn,
 	testTutFromFolder,
 	testTutGetCost,
+	testTutAccounts,
 	testTutStopEngine,
 }
 
@@ -237,6 +239,72 @@ func testTutGetCost(t *testing.T) {
 	if err := tutRpc.Call(utils.ApierV1GetCost, attrs, &rply); err == nil ||
 		err.Error() != "SERVER_ERROR: UNAUTHORIZED_DESTINATION" {
 		t.Error("Unexpected nil error received: ", err)
+	}
+	// Per call charges
+	attrs = v1.AttrGetCost{
+		Category:    "call",
+		Subject:     "RPF_SPECIAL_BLC",
+		Destination: "1002",
+		AnswerTime:  "*now",
+		Usage:       "5m",
+	}
+	if err := tutRpc.Call(utils.ApierV1GetCost, attrs, &rply); err != nil {
+		t.Error("Unexpected nil error received: ", err.Error())
+	} else if *rply.Cost != 0.1 {
+		t.Errorf("Unexpected cost received: %f", *rply.Cost)
+	}
+}
+
+func testTutAccounts(t *testing.T) {
+	// make sure Account was created
+	var acnt *engine.Account
+	if err := tutRpc.Call(utils.ApierV2GetAccount,
+		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"},
+		&acnt); err != nil {
+		t.Fatal(err)
+	}
+	if len(acnt.BalanceMap) != 4 ||
+		len(acnt.BalanceMap[utils.MONETARY]) != 1 ||
+		acnt.BalanceMap[utils.MONETARY][0].Value != 10 ||
+		len(acnt.BalanceMap[utils.VOICE]) != 2 ||
+		len(acnt.BalanceMap[utils.SMS]) != 1 ||
+		acnt.BalanceMap[utils.SMS][0].Value != 100 ||
+		len(acnt.BalanceMap[utils.DATA]) != 1 ||
+		acnt.BalanceMap[utils.DATA][0].Value != 1024 ||
+		len(acnt.ActionTriggers) != 2 ||
+		acnt.Disabled {
+		t.Errorf("received account: %s", utils.ToIJSON(acnt))
+	}
+	// test ActionTriggers
+	attrs := &v1.AttrAddBalance{Tenant: "cgrates.org", Account: "1001",
+		BalanceId:   utils.StringPointer(utils.MetaDefault),
+		BalanceType: utils.MONETARY, Value: 101}
+	var reply string
+	if err := tutRpc.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
+	}
+	if err := tutRpc.Call(utils.ApierV2GetAccount,
+		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"},
+		&acnt); err != nil {
+		t.Error(err)
+	} else if !acnt.Disabled {
+		t.Errorf("account: %s", utils.ToIJSON(acnt))
+	}
+	// enable the account again
+	if err := tutRpc.Call(utils.ApierV2SetAccount,
+		v2.AttrSetAccount{
+			Tenant:   "cgrates.org",
+			Account:  "1001",
+			Disabled: utils.BoolPointer(false),
+		}, &reply); err != nil {
+		t.Error(err)
+	}
+	if err := tutRpc.Call(utils.ApierV2GetAccount,
+		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"},
+		&acnt); err != nil {
+		t.Error(err)
+	} else if acnt.Disabled {
+		t.Errorf("account: %s", utils.ToIJSON(acnt))
 	}
 }
 

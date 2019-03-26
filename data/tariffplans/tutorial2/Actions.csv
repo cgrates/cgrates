@@ -1,8 +1,8 @@
 #ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
 TOPUP_RST_MONETARY_10,*topup_reset,,,*default,*monetary,,,,,,,10,10,,,10
-TOPUP_RST_5M_VOICE,*topup_reset,,,,*voice,,DST_10,RPF_SPECIAL_BLC,,,,5m,30,,,10
-TOPUP_RST_10M_VOICE,*topup_reset,,,,*voice,,DST_10,*zero1m,,,,10m,20,,,10
-TOPUP_RST_100_SMS,*topup_reset,,,,*sms,,DST_50,,,,,100,20,,,10
-TOPUP_RST_1024_DATA,*topup_reset,,,,*data,,,,,,,1024,20,,,10
+TOPUP_RST_5M_VOICE,*topup_reset,,,PER_CALL,*voice,,DST_10,RPF_SPECIAL_BLC,,,,10m,10,,,10
+TOPUP_RST_10M_VOICE,*topup_reset,,,FREE_MINS,*voice,,,*zero1m,,,,5m,20,,,10
+TOPUP_RST_100_SMS,*topup_reset,,,FREE_SMSes,*sms,,DST_50,,,,,100,20,,,10
+TOPUP_RST_1024_DATA,*topup_reset,,,FREE_DATA,*data,,,,,,,1024,20,,,10
 LOG_WARNING,*log,,,,,,,,,,,,,,,10
 DISABLE_ACCOUNT,*disable_account,,,,,,,,,,,,,,,10

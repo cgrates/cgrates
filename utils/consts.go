@@ -703,11 +703,14 @@ const (
 	ApierV1GetEventCost             = "ApierV1.GetEventCost"
 	ApierV1LoadTariffPlanFromFolder = "ApierV1.LoadTariffPlanFromFolder"
 	ApierV1GetCost                  = "ApierV1.GetCost"
+	ApierV1SetBalance               = "ApierV1.SetBalance"
 )
 
 const (
 	ApierV2LoadTariffPlanFromFolder = "ApierV2.LoadTariffPlanFromFolder"
 	ApierV2GetCDRs                  = "ApierV2.GetCDRs"
+	ApierV2GetAccount               = "ApierV2.GetAccount"
+	ApierV2SetAccount               = "ApierV2.SetAccount"
 )
 
 // SupplierS APIs

@@ -134,7 +134,7 @@ func testV1AccLoadTarrifPlans(t *testing.T) {
 
 func testV1AccGetAccountAfterLoad(t *testing.T) {
 	var reply *engine.Account
-	if err := accRpc.Call("ApierV2.GetAccount",
+	if err := accRpc.Call(utils.ApierV2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"},
 		&reply); err != nil {
 		t.Error(err)
@@ -266,7 +266,7 @@ func testV1AccSendToThreshold(t *testing.T) {
 	attrs := &v1.AttrAddBalance{Tenant: "cgrates.org", Account: "testAccThreshold",
 		BalanceId:   utils.StringPointer("testAccSetBalance"),
 		BalanceType: "*monetary", Value: 1.5}
-	if err := accRpc.Call("ApierV1.SetBalance", attrs, &reply); err != nil {
+	if err := accRpc.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.SetBalance received: %s", reply)
