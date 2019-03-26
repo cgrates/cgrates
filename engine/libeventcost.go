@@ -21,6 +21,7 @@ package engine
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -404,7 +405,7 @@ func IfaceAsEventCost(itm interface{}) (ec *EventCost, err error) {
 	case map[string]interface{}:
 		ec, err = IfaceAsEventCost(utils.ToJSON(otm))
 	default:
-		err = utils.ErrNotConvertibleNoCaps
+		err = utils.ErrNotConvertibleTF(reflect.TypeOf(otm).String(), "*EventCost")
 	}
 	return
 }

@@ -448,6 +448,25 @@ CREATE TABLE tp_dispatchers (
 );
 
 --
+-- Table structure for table `tp_dispatchers`
+--
+
+DROP TABLE IF EXISTS tp_dispatcher_hosts;
+CREATE TABLE tp_dispatcher_hosts (
+  `pk` int(11) NOT NULL AUTO_INCREMENT,
+  `tpid` varchar(64) NOT NULL,
+  `tenant` varchar(64) NOT NULL,
+  `id` varchar(64) NOT NULL,
+  `address` varchar(64) NOT NULL,
+  `transport` varchar(64) NOT NULL,
+  `created_at` TIMESTAMP,
+  PRIMARY KEY (`pk`),
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `unique_tp_dispatchers_hosts` (`tpid`,`tenant`,
+    `id`,`address`)
+);
+
+--
 -- Table structure for table `versions`
 --
 
