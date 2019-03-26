@@ -1325,6 +1325,39 @@ func (ms *MapStorage) RemoveDispatcherProfileDrv(tenant, id string) (err error) 
 	return
 }
 
+func (ms *MapStorage) GetDispatcherHostDrv(tenant, id string) (r *DispatcherHost, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+	values, ok := ms.dict[utils.DispatcherHostPrefix+utils.ConcatenatedKey(tenant, id)]
+	if !ok {
+		return nil, utils.ErrNotFound
+	}
+	err = ms.ms.Unmarshal(values, &r)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func (ms *MapStorage) SetDispatcherHostDrv(r *DispatcherHost) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	result, err := ms.ms.Marshal(r)
+	if err != nil {
+		return err
+	}
+	ms.dict[utils.DispatcherHostPrefix+utils.ConcatenatedKey(r.Tenant, r.ID)] = result
+	return
+}
+
+func (ms *MapStorage) RemoveDispatcherHostDrv(tenant, id string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	key := utils.DispatcherHostPrefix + utils.ConcatenatedKey(tenant, id)
+	delete(ms.dict, key)
+	return
+}
+
 func (ms *MapStorage) GetVersions(itm string) (vrs Versions, err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()

@@ -2595,3 +2595,73 @@ func APItoDispatcherProfile(tpDPP *utils.TPDispatcherProfile, timezone string) (
 	}
 	return dpp, nil
 }
+
+// TPHosts
+type TPDispatcherHosts []*TPDispatcherHost
+
+func (tps TPDispatcherHosts) AsTPDispatcherHosts() (result []*utils.TPDispatcherHost) {
+	hostsMap := make(map[string]*utils.TPDispatcherHost)
+	for _, tp := range tps {
+		if len(tp.Address) == 0 { // empty addres do not populate conns
+			continue
+		}
+		if len(tp.Transport) == 0 {
+			tp.Transport = utils.MetaJSONrpc
+		}
+		tenantID := utils.ConcatenatedKey(tp.Tenant, tp.ID)
+		if th, has := hostsMap[tenantID]; !has || th == nil {
+			hostsMap[tenantID] = &utils.TPDispatcherHost{
+				TPid:   tp.Tpid,
+				Tenant: tp.Tenant,
+				ID:     tp.ID,
+				Conns: []*utils.TPDispatcherHostConn{
+					{
+						Address:   tp.Address,
+						Transport: tp.Transport,
+					},
+				},
+			}
+			continue
+		}
+		hostsMap[tenantID].Conns = append(hostsMap[tenantID].Conns, &utils.TPDispatcherHostConn{Address: tp.Address, Transport: tp.Transport})
+	}
+	for _, host := range hostsMap {
+		result = append(result, host)
+	}
+	return
+}
+
+func APItoModelTPDispatcherHost(tpDPH *utils.TPDispatcherHost) (mdls TPDispatcherHosts) {
+	if tpDPH == nil {
+		return
+	}
+	mdls = make(TPDispatcherHosts, len(tpDPH.Conns))
+	for i, conn := range tpDPH.Conns {
+		mdls[i] = &TPDispatcherHost{
+			Tpid:      tpDPH.TPid,
+			Tenant:    tpDPH.Tenant,
+			ID:        tpDPH.ID,
+			Address:   conn.Address,
+			Transport: conn.Transport,
+		}
+	}
+	return
+}
+
+func APItoDispatcherHost(tpDPH *utils.TPDispatcherHost) (dpp *DispatcherHost) {
+	if tpDPH == nil {
+		return
+	}
+	dpp = &DispatcherHost{
+		Tenant: tpDPH.Tenant,
+		ID:     tpDPH.ID,
+		Conns:  make([]*DispatcherHostConn, len(tpDPH.Conns)),
+	}
+	for i, conn := range tpDPH.Conns {
+		dpp.Conns[i] = &DispatcherHostConn{
+			Address:   conn.Address,
+			Transport: conn.Transport,
+		}
+	}
+	return
+}

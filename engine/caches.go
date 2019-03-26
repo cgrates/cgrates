@@ -56,6 +56,7 @@ var precachedPartitions = utils.StringMap{
 	utils.CacheAttributeProfiles:       true,
 	utils.CacheChargerProfiles:         true,
 	utils.CacheDispatcherProfiles:      true,
+	utils.CacheDispatcherHosts:         true,
 	utils.CacheDiameterMessages:        true,
 	utils.CacheAttributeFilterIndexes:  true,
 	utils.CacheResourceFilterIndexes:   true,
@@ -316,6 +317,10 @@ func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	if err = chS.reloadCache(utils.DispatcherProfilePrefix, attrs.DispatcherProfileIDs); err != nil {
 		return
 	}
+	// DispatcherHosts
+	if err = chS.reloadCache(utils.DispatcherHostPrefix, attrs.DispatcherHostIDs); err != nil {
+		return
+	}
 
 	*reply = utils.OK
 	return nil
@@ -353,6 +358,7 @@ func (chS *CacheS) V1LoadCache(args utils.AttrReloadCache, reply *string) (err e
 		toStringSlice(args.AttributeProfileIDs),
 		toStringSlice(args.ChargerProfileIDs),
 		toStringSlice(args.DispatcherProfileIDs),
+		toStringSlice(args.DispatcherHostIDs),
 	); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -396,6 +402,7 @@ func (chS *CacheS) V1FlushCache(args utils.AttrReloadCache, reply *string) (err 
 	flushCache(utils.CacheAttributeProfiles, args.AttributeProfileIDs)
 	flushCache(utils.CacheChargerProfiles, args.ChargerProfileIDs)
 	flushCache(utils.CacheDispatcherProfiles, args.DispatcherProfileIDs)
+	flushCache(utils.CacheDispatcherHosts, args.DispatcherHostIDs)
 	flushCache(utils.CacheDispatcherRoutes, args.DispatcherRoutesIDs)
 
 	*reply = utils.OK

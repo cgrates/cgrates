@@ -88,6 +88,9 @@ func (ms *MapStorage) GetTPChargers(tpid, tenant, id string) (attrs []*utils.TPC
 func (ms *MapStorage) GetTPDispatchers(tpid, tenant, id string) (attrs []*utils.TPDispatcherProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
+func (ms *MapStorage) GetTPDispatcherHosts(tpid, tenant, id string) (attrs []*utils.TPDispatcherHost, err error) {
+	return nil, utils.ErrNotImplemented
+}
 
 //implement LoadWriter interface
 func (ms *MapStorage) RemTpData(table, tpid string, args map[string]string) (err error) {
@@ -148,6 +151,9 @@ func (ms *MapStorage) SetTPChargers(cpps []*utils.TPChargerProfile) (err error) 
 	return utils.ErrNotImplemented
 }
 func (ms *MapStorage) SetTPDispatchers(dpps []*utils.TPDispatcherProfile) (err error) {
+	return utils.ErrNotImplemented
+}
+func (ms *MapStorage) SetTPDispatcherHosts(dpps []*utils.TPDispatcherHost) (err error) {
 	return utils.ErrNotImplemented
 }
 

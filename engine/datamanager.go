@@ -52,6 +52,7 @@ var (
 		utils.AttributeProfilePrefix:     true,
 		utils.ChargerProfilePrefix:       true,
 		utils.DispatcherProfilePrefix:    true,
+		utils.DispatcherHostPrefix:       true,
 	}
 	cachePrefixMap = utils.StringMap{
 		utils.DESTINATION_PREFIX:         true,
@@ -75,6 +76,7 @@ var (
 		utils.AttributeProfilePrefix:     true,
 		utils.ChargerProfilePrefix:       true,
 		utils.DispatcherProfilePrefix:    true,
+		utils.DispatcherHostPrefix:       true,
 		utils.AttributeFilterIndexes:     true,
 		utils.ResourceFilterIndexes:      true,
 		utils.StatFilterIndexes:          true,
@@ -109,7 +111,7 @@ func (dm *DataManager) DataDB() DataDB {
 
 func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs,
 	aaPlIDs, atrgIDs, sgIDs, rpIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs,
-	splPrflIDs, alsPrfIDs, cppIDs, dppIDs []string) (err error) {
+	splPrflIDs, alsPrfIDs, cppIDs, dppIDs, dphIDs []string) (err error) {
 	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
 		if dm.cacheCfg == nil {
 			return
@@ -145,6 +147,7 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 			utils.AttributeProfilePrefix:     alsPrfIDs,
 			utils.ChargerProfilePrefix:       cppIDs,
 			utils.DispatcherProfilePrefix:    dppIDs,
+			utils.DispatcherHostPrefix:       dphIDs,
 		} {
 			if err = dm.CacheDataFromDB(key, ids, false); err != nil {
 				return
@@ -271,6 +274,9 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.DispatcherProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetDispatcherProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+		case utils.DispatcherHostPrefix:
+			tntID := utils.NewTenantID(dataID)
+			_, err = dm.GetDispatcherHost(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.AttributeFilterIndexes:
 			err = dm.MatchFilterIndexFromKey(utils.CacheAttributeFilterIndexes, dataID)
 		case utils.ResourceFilterIndexes:
@@ -1294,6 +1300,51 @@ func (dm *DataManager) RemoveDispatcherProfile(tenant, id string,
 				return
 			}
 		}
+	}
+	return
+}
+
+func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrite bool,
+	transactionID string) (dpp *DispatcherHost, err error) {
+	tntID := utils.ConcatenatedKey(tenant, id)
+	if cacheRead {
+		if x, ok := Cache.Get(utils.CacheDispatcherHosts, tntID); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.(*DispatcherHost), nil
+		}
+	}
+	dpp, err = dm.dataDB.GetDispatcherHostDrv(tenant, id)
+	if err != nil {
+		if err == utils.ErrNotFound && cacheWrite {
+			Cache.Set(utils.CacheDispatcherHosts, tntID, nil, nil,
+				cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	if cacheWrite {
+		Cache.Set(utils.CacheDispatcherHosts, tntID, dpp, nil,
+			cacheCommit(transactionID), transactionID)
+	}
+	return
+}
+
+func (dm *DataManager) SetDispatcherHost(dpp *DispatcherHost) (err error) {
+	return dm.DataDB().SetDispatcherHostDrv(dpp)
+}
+
+func (dm *DataManager) RemoveDispatcherHost(tenant, id string,
+	transactionID string) (err error) {
+	oldDpp, err := dm.GetDispatcherHost(tenant, id, true, false, utils.NonTransactional)
+	if err != nil && err != utils.ErrNotFound {
+		return err
+	}
+	if err = dm.DataDB().RemoveDispatcherHostDrv(tenant, id); err != nil {
+		return
+	}
+	if oldDpp == nil {
+		return utils.ErrNotFound
 	}
 	return
 }

@@ -122,3 +122,17 @@ type DispatcherProfiles []*DispatcherProfile
 func (dps DispatcherProfiles) Sort() {
 	sort.Slice(dps, func(i, j int) bool { return dps[i].Weight > dps[j].Weight })
 }
+
+type DispatcherHostConn struct {
+	Address   string
+	Transport string
+}
+type DispatcherHost struct {
+	Tenant string
+	ID     string
+	Conns  []*DispatcherHostConn
+}
+
+func (dP *DispatcherHost) TenantID() string {
+	return utils.ConcatenatedKey(dP.Tenant, dP.ID)
+}

@@ -32,12 +32,26 @@ type CSVStorage struct {
 	sep        rune
 	readerFunc func(string, rune, int) (*csv.Reader, *os.File, error)
 	// file names
-	destinationsFn, ratesFn, destinationratesFn, timingsFn,
-	destinationratetimingsFn, ratingprofilesFn,
-	sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn,
-	accountactionsFn, resProfilesFn, statsFn, thresholdsFn,
-	filterFn, suppProfilesFn, attributeProfilesFn,
-	chargerProfilesFn, dispatcherProfilesFn string
+	destinationsFn           string
+	ratesFn                  string
+	destinationratesFn       string
+	timingsFn                string
+	destinationratetimingsFn string
+	ratingprofilesFn         string
+	sharedgroupsFn           string
+	actionsFn                string
+	actiontimingsFn          string
+	actiontriggersFn         string
+	accountactionsFn         string
+	resProfilesFn            string
+	statsFn                  string
+	thresholdsFn             string
+	filterFn                 string
+	suppProfilesFn           string
+	attributeProfilesFn      string
+	chargerProfilesFn        string
+	dispatcherProfilesFn     string
+	dispatcherHostsFn        string
 }
 
 func NewFileCSVStorage(sep rune,
@@ -46,7 +60,7 @@ func NewFileCSVStorage(sep rune,
 	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn,
 	resProfilesFn, statsFn, thresholdsFn,
 	filterFn, suppProfilesFn, attributeProfilesFn,
-	chargerProfilesFn, dispatcherProfilesFn string) *CSVStorage {
+	chargerProfilesFn, dispatcherProfilesFn, dispatcherHostsFn string) *CSVStorage {
 	return &CSVStorage{
 		sep:                      sep,
 		readerFunc:               openFileCSVStorage,
@@ -69,6 +83,7 @@ func NewFileCSVStorage(sep rune,
 		attributeProfilesFn:      attributeProfilesFn,
 		chargerProfilesFn:        chargerProfilesFn,
 		dispatcherProfilesFn:     dispatcherProfilesFn,
+		dispatcherHostsFn:        dispatcherHostsFn,
 	}
 }
 
@@ -79,14 +94,14 @@ func NewStringCSVStorage(sep rune,
 	accountactionsFn, resProfilesFn, statsFn,
 	thresholdsFn, filterFn, suppProfilesFn,
 	attributeProfilesFn, chargerProfilesFn,
-	dispatcherProfilesFn string) *CSVStorage {
+	dispatcherProfilesFn, dispatcherHostsFn string) *CSVStorage {
 	c := NewFileCSVStorage(sep, destinationsFn, timingsFn,
 		ratesFn, destinationratesFn, destinationratetimingsFn,
 		ratingprofilesFn, sharedgroupsFn, actionsFn,
 		actiontimingsFn, actiontriggersFn, accountactionsFn,
 		resProfilesFn, statsFn, thresholdsFn, filterFn,
-		suppProfilesFn, attributeProfilesFn,
-		chargerProfilesFn, dispatcherProfilesFn)
+		suppProfilesFn, attributeProfilesFn, chargerProfilesFn,
+		dispatcherProfilesFn, dispatcherHostsFn)
 	c.readerFunc = openStringCSVStorage
 	return c
 }
@@ -682,6 +697,33 @@ func (csvs *CSVStorage) GetTPDispatchers(tpid, tenant, id string) ([]*utils.TPDi
 		}
 	}
 	return tpDPPs.AsTPDispatchers(), nil
+}
+
+func (csvs *CSVStorage) GetTPDispatcherHosts(tpid, tenant, id string) ([]*utils.TPDispatcherHost, error) {
+	csvReader, fp, err := csvs.readerFunc(csvs.dispatcherHostsFn, csvs.sep, getColumnCount(TPDispatcherHost{}))
+	if err != nil {
+		// allow writing of the other values
+		return nil, nil
+	}
+	if fp != nil {
+		defer fp.Close()
+	}
+	var tpDDHs TPDispatcherHosts
+	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
+		if err != nil {
+			log.Printf("bad line in %s, %s\n", csvs.dispatcherHostsFn, err.Error())
+			return nil, err
+		}
+		if dpp, err := csvLoad(TPDispatcherHost{}, record); err != nil {
+			log.Print("error loading tpDispatcherHost: ", err)
+			return nil, err
+		} else {
+			dpp := dpp.(TPDispatcherHost)
+			dpp.Tpid = tpid
+			tpDDHs = append(tpDDHs, &dpp)
+		}
+	}
+	return tpDDHs.AsTPDispatcherHosts(), nil
 }
 
 func (csvs *CSVStorage) GetTpIds(colName string) ([]string, error) {

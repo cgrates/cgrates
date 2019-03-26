@@ -503,6 +503,28 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				}
 			}
 		}
+	case utils.MetaDispatcherHosts:
+		for _, lDataSet := range lds {
+			dispModels := make(engine.TPDispatcherHosts, len(lDataSet))
+			for i, ld := range lDataSet {
+				dispModels[i] = new(engine.TPDispatcherHost)
+				if err = utils.UpdateStructWithIfaceMap(dispModels[i], ld); err != nil {
+					return
+				}
+			}
+			for _, tpDsp := range dispModels.AsTPDispatcherHosts() {
+				dsp := engine.APItoDispatcherHost(tpDsp)
+				if ldr.dryRun {
+					utils.Logger.Info(
+						fmt.Sprintf("<%s-%s> DRY_RUN: AttributeProfile: %s",
+							utils.LoaderS, ldr.ldrID, utils.ToJSON(dsp)))
+					continue
+				}
+				if err := ldr.dm.SetDispatcherHost(dsp); err != nil {
+					return err
+				}
+			}
+		}
 	}
 
 	if ldr.cacheS != nil {

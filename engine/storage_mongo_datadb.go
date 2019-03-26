@@ -71,6 +71,7 @@ const (
 	ColCDRs = "cdrs"
 	colCpp  = "charger_profiles"
 	colDpp  = "dispatcher_profiles"
+	colDph  = "dispatcher_hosts"
 )
 
 var (
@@ -619,6 +620,8 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 			result, err = ms.getField2(sctx, colCpp, utils.ChargerProfilePrefix, subject, tntID)
 		case utils.DispatcherProfilePrefix:
 			result, err = ms.getField2(sctx, colDpp, utils.DispatcherProfilePrefix, subject, tntID)
+		case utils.DispatcherHostPrefix:
+			result, err = ms.getField2(sctx, colDph, utils.DispatcherHostPrefix, subject, tntID)
 		case utils.AttributeFilterIndexes:
 			result, err = ms.getField3(sctx, colRFI, utils.AttributeFilterIndexes, "key")
 		case utils.ResourceFilterIndexes:
@@ -677,6 +680,8 @@ func (ms *MongoStorage) HasDataDrv(category, subject, tenant string) (has bool, 
 			count, err = ms.getCol(colCpp).Count(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.DispatcherProfilePrefix:
 			count, err = ms.getCol(colDpp).Count(sctx, bson.M{"tenant": tenant, "id": subject})
+		case utils.DispatcherHostPrefix:
+			count, err = ms.getCol(colDph).Count(sctx, bson.M{"tenant": tenant, "id": subject})
 		default:
 			err = fmt.Errorf("unsupported category in HasData: %s", category)
 		}
@@ -2142,6 +2147,42 @@ func (ms *MongoStorage) SetDispatcherProfileDrv(r *DispatcherProfile) (err error
 func (ms *MongoStorage) RemoveDispatcherProfileDrv(tenant, id string) (err error) {
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(colDpp).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
+		if dr.DeletedCount == 0 {
+			return utils.ErrNotFound
+		}
+		return err
+	})
+}
+
+func (ms *MongoStorage) GetDispatcherHostDrv(tenant, id string) (r *DispatcherHost, err error) {
+	r = new(DispatcherHost)
+	err = ms.query(func(sctx mongo.SessionContext) (err error) {
+		cur := ms.getCol(colDph).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
+		if err := cur.Decode(r); err != nil {
+			r = nil
+			if err == mongo.ErrNoDocuments {
+				return utils.ErrNotFound
+			}
+			return err
+		}
+		return nil
+	})
+	return
+}
+
+func (ms *MongoStorage) SetDispatcherHostDrv(r *DispatcherHost) (err error) {
+	return ms.query(func(sctx mongo.SessionContext) (err error) {
+		_, err = ms.getCol(colDph).UpdateOne(sctx, bson.M{"tenant": r.Tenant, "id": r.ID},
+			bson.M{"$set": r},
+			options.Update().SetUpsert(true),
+		)
+		return err
+	})
+}
+
+func (ms *MongoStorage) RemoveDispatcherHostDrv(tenant, id string) (err error) {
+	return ms.query(func(sctx mongo.SessionContext) (err error) {
+		dr, err := ms.getCol(colDph).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound
 		}
