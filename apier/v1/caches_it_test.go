@@ -361,6 +361,7 @@ func testCacheSPrecacheStatus(t *testing.T) {
 		utils.CacheAttributeProfiles:       utils.MetaReady,
 		utils.CacheChargerProfiles:         utils.MetaReady,
 		utils.CacheDispatcherProfiles:      utils.MetaReady,
+		utils.CacheDispatcherHosts:         utils.MetaReady,
 		utils.CacheDiameterMessages:        utils.MetaReady,
 		utils.CacheAttributeFilterIndexes:  utils.MetaReady,
 		utils.CacheResourceFilterIndexes:   utils.MetaReady,

@@ -115,6 +115,7 @@ func TestLoaderITRemoveLoad(t *testing.T) {
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.AttributesCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ChargersCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DispatchersCsv),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DispatcherHostsCsv),
 	), "", "", nil)
 
 	if err = loader.LoadDestinations(); err != nil {
@@ -169,7 +170,10 @@ func TestLoaderITRemoveLoad(t *testing.T) {
 		t.Error("Failed loading Charger profiles: ", err.Error())
 	}
 	if err = loader.LoadDispatcherProfiles(); err != nil {
-		t.Error("Failed loading Charger profiles: ", err.Error())
+		t.Error("Failed loading Dispatcher profiles: ", err.Error())
+	}
+	if err = loader.LoadDispatcherHosts(); err != nil {
+		t.Error("Failed loading Dispatcher hosts: ", err.Error())
 	}
 	if err := loader.WriteToDatabase(true, false, false); err != nil {
 		t.Error("Could not write data into dataDb: ", err.Error())
@@ -207,6 +211,7 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.AttributesCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ChargersCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DispatchersCsv),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DispatcherHostsCsv),
 	), "", "", nil)
 
 	if err = loader.LoadDestinations(); err != nil {
@@ -261,7 +266,10 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 		t.Error("Failed loading Charger profiles: ", err.Error())
 	}
 	if err = loader.LoadDispatcherProfiles(); err != nil {
-		t.Error("Failed loading Charger profiles: ", err.Error())
+		t.Error("Failed loading Dispatcher profiles: ", err.Error())
+	}
+	if err = loader.LoadDispatcherHosts(); err != nil {
+		t.Error("Failed loading Dispatcher hosts: ", err.Error())
 	}
 	if err := loader.WriteToDatabase(true, false, false); err != nil {
 		t.Error("Could not write data into dataDb: ", err.Error())
@@ -453,6 +461,17 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
+		if !reflect.DeepEqual(dp, rcv) {
+			t.Errorf("Expecting: %v, received: %v", dp, rcv)
+		}
+	}
+
+	for tenatid, dph := range loader.dispatcherHosts {
+		rcv, err := loader.dm.GetDispatcherHost(tenatid.Tenant, tenatid.ID, false, false, utils.NonTransactional)
+		if err != nil {
+			t.Errorf("Failed GetDispatcherHost, tenant: %s, id: %s,  error: %s ", dph.Tenant, dph.ID, err.Error())
+		}
+		dp := APItoDispatcherHost(dph)
 		if !reflect.DeepEqual(dp, rcv) {
 			t.Errorf("Expecting: %v, received: %v", dp, rcv)
 		}

@@ -408,8 +408,8 @@ CREATE INDEX tp_suppliers_unique ON tp_suppliers  ("tpid",  "tenant", "id",
   CREATE INDEX tp_chargers_unique ON tp_chargers  ("tpid",  "tenant", "id",
     "filter_ids","run_id","attribute_ids");
 
-    --
-  -- Table structure for table `tp_chargers`
+  --
+  -- Table structure for table `tp_dispatchers`
   --
 
   DROP TABLE IF EXISTS tp_dispatchers;
@@ -434,6 +434,24 @@ CREATE INDEX tp_suppliers_unique ON tp_suppliers  ("tpid",  "tenant", "id",
   CREATE INDEX tp_dispatchers_ids ON tp_dispatchers (tpid);
   CREATE INDEX tp_dispatchers_unique ON tp_dispatchers  ("tpid",  "tenant", "id",
     "filter_ids","strategy","conn_id","conn_filter_ids");
+
+--
+-- Table structure for table `tp_dispatchers`
+--
+
+  DROP TABLE IF EXISTS tp_dispatcher_hosts;
+  CREATE TABLE tp_dispatcher_hosts (
+  "pk" SERIAL PRIMARY KEY,
+  "tpid" varchar(64) NOT NULL,
+  "tenant" varchar(64) NOT NULL,
+  "id" varchar(64) NOT NULL,
+  "address" varchar(64) NOT NULL,
+  "transport" varchar(64) NOT NULL,
+  "created_at" TIMESTAMP WITH TIME ZONE
+  );
+  CREATE INDEX tp_dispatchers_hosts_ids ON tp_dispatcher_hosts (tpid);
+  CREATE INDEX tp_dispatcher_hosts_unique ON tp_dispatcher_hosts  ("tpid",  "tenant", "id",
+    "address");
 
 --
 -- Table structure for table `versions`

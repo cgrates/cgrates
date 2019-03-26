@@ -217,3 +217,7 @@ func IsNetworkError(err error) bool {
 func ErrPathNotReachable(path string) error {
 	return fmt.Errorf("path:%+q is not reachable", path)
 }
+
+func ErrNotConvertibleTF(from, to string) error {
+	return fmt.Errorf("%s : from: %s to:%s", ErrNotConvertibleNoCaps.Error(), from, to)
+}

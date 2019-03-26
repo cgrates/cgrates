@@ -20,6 +20,8 @@ package engine
 import (
 	"log"
 	"reflect"
+	"sort"
+	"strings"
 	"testing"
 	"time"
 
@@ -268,6 +270,11 @@ cgrates.org,Charger1,*string:Account:1001,2014-07-29T15:00:00Z,*rated,ATTR_1001_
 cgrates.org,D1,*any,*string:Account:1001,2014-07-29T15:00:00Z,*first,,C1,*gt:Usage:10,10,false,192.168.56.203,20
 cgrates.org,D1,,,,*first,,C2,*lt:Usage:10,10,false,192.168.56.204,
 `
+	dispatcherHosts = `
+#Tenant[0],ID[1],Address[2],Transport[3]
+cgrates.org,ALL1,127.0.0.1:2012,*json
+cgrates.org,ALL1,127.0.0.1:3012,*json
+`
 )
 
 var csvr *TpReader
@@ -275,8 +282,8 @@ var csvr *TpReader
 func init() {
 	csvr = NewTpReader(dm.dataDB, NewStringCSVStorage(',', destinations, timings, rates, destinationRates,
 		ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers,
-		accountActions, resProfiles, stats, thresholds,
-		filters, sppProfiles, attributeProfiles, chargerProfiles, dispatcherProfiles), testTPID, "", nil)
+		accountActions, resProfiles, stats, thresholds, filters, sppProfiles, attributeProfiles,
+		chargerProfiles, dispatcherProfiles, dispatcherHosts), testTPID, "", nil)
 
 	if err := csvr.LoadDestinations(); err != nil {
 		log.Print("error in LoadDestinations:", err)
@@ -334,6 +341,9 @@ func init() {
 	}
 	if err := csvr.LoadDispatcherProfiles(); err != nil {
 		log.Print("error in LoadDispatcherProfiles:", err)
+	}
+	if err := csvr.LoadDispatcherHosts(); err != nil {
+		log.Print("error in LoadDispatcherHosts:", err)
 	}
 	csvr.WriteToDatabase(false, false, false)
 	Cache.Clear(nil)
@@ -1621,6 +1631,35 @@ func TestLoadDispatcherProfiles(t *testing.T) {
 	} else if !reflect.DeepEqual(eDispatcherProfiles, csvr.dispatcherProfiles[dppKey]) &&
 		!reflect.DeepEqual(revHosts, csvr.dispatcherProfiles[dppKey]) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eDispatcherProfiles), utils.ToJSON(csvr.dispatcherProfiles[dppKey]))
+	}
+}
+
+func TestLoadDispatcherHosts(t *testing.T) {
+	eDispatcherHosts := &utils.TPDispatcherHost{
+		TPid:   testTPID,
+		Tenant: "cgrates.org",
+		ID:     "ALL1",
+		Conns: []*utils.TPDispatcherHostConn{
+			&utils.TPDispatcherHostConn{
+				Address:   "127.0.0.1:2012",
+				Transport: utils.MetaJSONrpc,
+			},
+			&utils.TPDispatcherHostConn{
+				Address:   "127.0.0.1:3012",
+				Transport: utils.MetaJSONrpc,
+			},
+		},
+	}
+
+	dphKey := utils.TenantID{Tenant: "cgrates.org", ID: "ALL1"}
+	if len(csvr.dispatcherHosts) != 1 {
+		t.Fatalf("Failed to load chargerProfiles: %s", utils.ToIJSON(csvr.chargerProfiles))
+	}
+	sort.Slice(csvr.dispatcherHosts[dphKey].Conns, func(i, j int) bool {
+		return strings.Compare(csvr.dispatcherHosts[dphKey].Conns[i].Address, csvr.dispatcherHosts[dphKey].Conns[j].Address) == -1
+	})
+	if !reflect.DeepEqual(eDispatcherHosts, csvr.dispatcherHosts[dphKey]) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eDispatcherHosts), utils.ToJSON(csvr.dispatcherHosts[dphKey]))
 	}
 }
 

@@ -42,7 +42,7 @@ DR_DATA_2,*any,RT_DATA_1c,*up,4,0,`
 RP_DATA1,DR_DATA_2,TM2,10`
 	ratingProfiles := `cgrates.org,data,*any,2012-01-01T00:00:00Z,RP_DATA1,`
 	csvr := engine.NewTpReader(dataDB.DataDB(), engine.NewStringCSVStorage(',', "", timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		"", "", "", "", "", "", "", "", "", "", "", "", ""), "", "", nil)
+		"", "", "", "", "", "", "", "", "", "", "", "", "", ""), "", "", nil)
 	if err := csvr.LoadTimings(); err != nil {
 		t.Fatal(err)
 	}
@@ -61,7 +61,7 @@ RP_DATA1,DR_DATA_2,TM2,10`
 	csvr.WriteToDatabase(false, false, false)
 	engine.Cache.Clear(nil)
 	dataDB.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	if cachedRPlans := len(engine.Cache.GetItemIDs(utils.CacheRatingPlans, "")); cachedRPlans != 1 {
 		t.Error("Wrong number of cached rating plans found", cachedRPlans)
