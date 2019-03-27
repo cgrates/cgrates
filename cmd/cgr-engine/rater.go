@@ -158,12 +158,9 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	apierRpcV2 := &v2.ApierV2{
 		ApierV1: *apierRpcV1}
 
-	guardianSv1 := v1.NewGuardianSv1()
-
 	server.RpcRegister(responder)
 	server.RpcRegister(apierRpcV1)
 	server.RpcRegister(apierRpcV2)
-	server.RpcRegister(guardianSv1)
 
 	utils.RegisterRpcParams("", &v1.CDRsV1{})
 	utils.RegisterRpcParams("", &v2.CDRsV2{})
@@ -171,7 +168,6 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	utils.RegisterRpcParams("", responder)
 	utils.RegisterRpcParams("", apierRpcV1)
 	utils.RegisterRpcParams("", apierRpcV2)
-	utils.RegisterRpcParams("", guardianSv1)
 	utils.GetRpcParams("")
 	internalRaterChan <- responder // Rater done
 }
