@@ -1210,7 +1210,7 @@ func TestDfLoaderJsonCfg(t *testing.T) {
 				},
 				{
 					Type:      utils.StringPointer(utils.MetaDispatchers),
-					File_name: utils.StringPointer(utils.DispatchersCsv),
+					File_name: utils.StringPointer(utils.DispatcherProfilesCsv),
 					Fields: &[]*FcTemplateJsonCfg{
 						{Tag: utils.StringPointer(utils.Tenant),
 							Field_id:  utils.StringPointer(utils.Tenant),

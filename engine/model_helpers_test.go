@@ -1709,8 +1709,8 @@ func TestAPItoModelTPDispatcher(t *testing.T) {
 			},
 		},
 	}
-	expected := TPDispatchers{
-		&TPDispatcher{
+	expected := TPDispatcherProfiles{
+		&TPDispatcherProfile{
 			Tpid:               "TP1",
 			Tenant:             "cgrates.org",
 			ID:                 "Dsp",
@@ -1724,7 +1724,7 @@ func TestAPItoModelTPDispatcher(t *testing.T) {
 			ConnBlocker:        false,
 			ConnParameters:     "192.168.54.203",
 		},
-		&TPDispatcher{
+		&TPDispatcherProfile{
 			Tpid:           "TP1",
 			Tenant:         "cgrates.org",
 			ID:             "Dsp",
@@ -1734,7 +1734,7 @@ func TestAPItoModelTPDispatcher(t *testing.T) {
 			ConnParameters: "192.168.54.204",
 		},
 	}
-	rcv := APItoModelTPDispatcher(tpDPP)
+	rcv := APItoModelTPDispatcherProfile(tpDPP)
 	if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting : %+v, \n received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}

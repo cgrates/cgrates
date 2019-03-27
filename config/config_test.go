@@ -1391,7 +1391,7 @@ func TestCgrLoaderCfgITDefaults(t *testing.T) {
 				},
 				{
 					Type:     utils.MetaDispatchers,
-					Filename: utils.DispatchersCsv,
+					Filename: utils.DispatcherProfilesCsv,
 					Fields: []*FCTemplate{
 						{Tag: "Tenant",
 							FieldId:   "Tenant",

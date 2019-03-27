@@ -645,7 +645,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*dispatchers",						// data source type
-				"file_name": "Dispatchers.csv",				// file name in the tp_in_dir
+				"file_name": "DispatcherProfiles.csv",				// file name in the tp_in_dir
 				"fields": [
 					{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~0", "mandatory": true},
 					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "~1", "mandatory": true},

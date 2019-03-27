@@ -123,7 +123,7 @@ func testTpDispITPopulate(t *testing.T) {
 			Weight:   10,
 		},
 	}
-	if err := tpDispMigrator.storDBIn.StorDB().SetTPDispatchers(tpDisps); err != nil {
+	if err := tpDispMigrator.storDBIn.StorDB().SetTPDispatcherProfiles(tpDisps); err != nil {
 		t.Error("Error when setting TpDispatchers ", err.Error())
 	}
 	currentVersion := engine.CurrentStorDBVersions()
@@ -141,7 +141,7 @@ func testTpDispITMove(t *testing.T) {
 }
 
 func testTpDispITCheckData(t *testing.T) {
-	result, err := tpDispMigrator.storDBOut.StorDB().GetTPDispatchers("TP1", "cgrates.org", "Dsp1")
+	result, err := tpDispMigrator.storDBOut.StorDB().GetTPDispatcherProfiles("TP1", "cgrates.org", "Dsp1")
 	if err != nil {
 		t.Fatal("Error when getting TpDispatchers ", err.Error())
 	}
@@ -149,7 +149,7 @@ func testTpDispITCheckData(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v",
 			utils.ToJSON(tpDisps[0]), utils.ToJSON(result[0]))
 	}
-	result, err = tpDispMigrator.storDBIn.StorDB().GetTPDispatchers("TP1", "cgrates.org", "Dsp1")
+	result, err = tpDispMigrator.storDBIn.StorDB().GetTPDispatcherProfiles("TP1", "cgrates.org", "Dsp1")
 	if err != utils.ErrNotFound {
 		t.Error(err)
 	}

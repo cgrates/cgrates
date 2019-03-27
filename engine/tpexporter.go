@@ -284,14 +284,14 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	storDataDispatchers, err := self.storDb.GetTPDispatchers(self.tpID, "", "")
+	storDataDispatcherProfiles, err := self.storDb.GetTPDispatcherProfiles(self.tpID, "", "")
 	if err != nil && err.Error() != utils.ErrNotFound.Error() {
 		return err
 	}
-	for _, sd := range storDataDispatchers {
-		sdModels := APItoModelTPDispatcher(sd)
+	for _, sd := range storDataDispatcherProfiles {
+		sdModels := APItoModelTPDispatcherProfile(sd)
 		for _, sdModel := range sdModels {
-			toExportMap[utils.DispatchersCsv] = append(toExportMap[utils.DispatchersCsv], sdModel)
+			toExportMap[utils.DispatcherProfilesCsv] = append(toExportMap[utils.DispatcherProfilesCsv], sdModel)
 		}
 	}
 

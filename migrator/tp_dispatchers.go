@@ -38,13 +38,13 @@ func (m *Migrator) migrateCurrentTPDispatchers() (err error) {
 			return err
 		}
 		for _, id := range ids {
-			dispatchers, err := m.storDBIn.StorDB().GetTPDispatchers(tpid, "", id)
+			dispatchers, err := m.storDBIn.StorDB().GetTPDispatcherProfiles(tpid, "", id)
 			if err != nil {
 				return err
 			}
 			if dispatchers != nil {
 				if m.dryRun != true {
-					if err := m.storDBOut.StorDB().SetTPDispatchers(dispatchers); err != nil {
+					if err := m.storDBOut.StorDB().SetTPDispatcherProfiles(dispatchers); err != nil {
 						return err
 					}
 					for _, dispatcher := range dispatchers {

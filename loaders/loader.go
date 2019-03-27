@@ -480,21 +480,21 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 		}
 	case utils.MetaDispatchers:
 		for _, lDataSet := range lds {
-			dispModels := make(engine.TPDispatchers, len(lDataSet))
+			dispModels := make(engine.TPDispatcherProfiles, len(lDataSet))
 			for i, ld := range lDataSet {
-				dispModels[i] = new(engine.TPDispatcher)
+				dispModels[i] = new(engine.TPDispatcherProfile)
 				if err = utils.UpdateStructWithIfaceMap(dispModels[i], ld); err != nil {
 					return
 				}
 			}
-			for _, tpDsp := range dispModels.AsTPDispatchers() {
+			for _, tpDsp := range dispModels.AsTPDispatcherProfiles() {
 				dsp, err := engine.APItoDispatcherProfile(tpDsp, ldr.timezone)
 				if err != nil {
 					return err
 				}
 				if ldr.dryRun {
 					utils.Logger.Info(
-						fmt.Sprintf("<%s-%s> DRY_RUN: AttributeProfile: %s",
+						fmt.Sprintf("<%s-%s> DRY_RUN: DispatcherProfile: %s",
 							utils.LoaderS, ldr.ldrID, utils.ToJSON(dsp)))
 					continue
 				}
@@ -516,7 +516,7 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				dsp := engine.APItoDispatcherHost(tpDsp)
 				if ldr.dryRun {
 					utils.Logger.Info(
-						fmt.Sprintf("<%s-%s> DRY_RUN: AttributeProfile: %s",
+						fmt.Sprintf("<%s-%s> DRY_RUN: DispatcherHost: %s",
 							utils.LoaderS, ldr.ldrID, utils.ToJSON(dsp)))
 					continue
 				}

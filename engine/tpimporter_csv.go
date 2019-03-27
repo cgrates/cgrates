@@ -59,7 +59,7 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.SuppliersCsv:          (*TPCSVImporter).importSuppliers,
 	utils.AttributesCsv:         (*TPCSVImporter).importAttributeProfiles,
 	utils.ChargersCsv:           (*TPCSVImporter).importChargerProfiles,
-	utils.DispatchersCsv:        (*TPCSVImporter).importDispatcherProfiles,
+	utils.DispatcherProfilesCsv: (*TPCSVImporter).importDispatcherProfiles,
 	utils.DispatcherHostsCsv:    (*TPCSVImporter).importDispatcherHosts,
 }
 
@@ -83,7 +83,7 @@ func (self *TPCSVImporter) Run() error {
 		path.Join(self.DirPath, utils.SuppliersCsv),
 		path.Join(self.DirPath, utils.AttributesCsv),
 		path.Join(self.DirPath, utils.ChargersCsv),
-		path.Join(self.DirPath, utils.DispatchersCsv),
+		path.Join(self.DirPath, utils.DispatcherProfilesCsv),
 		path.Join(self.DirPath, utils.DispatcherHostsCsv),
 	)
 	files, _ := ioutil.ReadDir(self.DirPath)
@@ -357,11 +357,11 @@ func (self *TPCSVImporter) importDispatcherProfiles(fn string) error {
 	if self.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	dpps, err := self.csvr.GetTPDispatchers(self.TPid, "", "")
+	dpps, err := self.csvr.GetTPDispatcherProfiles(self.TPid, "", "")
 	if err != nil {
 		return err
 	}
-	return self.StorDb.SetTPDispatchers(dpps)
+	return self.StorDb.SetTPDispatcherProfiles(dpps)
 }
 
 func (self *TPCSVImporter) importDispatcherHosts(fn string) error {
