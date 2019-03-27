@@ -120,7 +120,7 @@ func (self *ApierV1) GetTPRatingProfileIds(attrs AttrGetTPRatingProfileIds, repl
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRateProfiles,
-		utils.TPDistinctIds{"loadid", "direction", "tenant", "category", "subject"},
+		utils.TPDistinctIds{"loadid", "tenant", "category", "subject"},
 		nil, &attrs.Paginator); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
