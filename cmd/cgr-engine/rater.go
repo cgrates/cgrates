@@ -34,8 +34,10 @@ import (
 func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *engine.CacheS,
 	internalThdSChan, internalStatSChan chan rpcclient.RpcClientConnection,
 	serviceManager *servmanager.ServiceManager, server *utils.Server,
-	dm *engine.DataManager, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, stopHandled *bool,
-	exitChan chan bool, filterSChan chan *engine.FilterS, internalCacheSChan chan rpcclient.RpcClientConnection) {
+	dm *engine.DataManager, loadDb engine.LoadStorage, cdrDb engine.CdrStorage,
+	stopHandled *bool, exitChan chan bool, chS *engine.CacheS, // separate from channel for optimization
+	filterSChan chan *engine.FilterS,
+	cacheSChan chan rpcclient.RpcClientConnection) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
 	var waitTasks []chan struct{}
@@ -43,15 +45,15 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	waitTasks = append(waitTasks, cacheTaskChan)
 	go func() { //Wait for cache load
 		defer close(cacheTaskChan)
-		<-cacheS.GetPrecacheChannel(utils.CacheDestinations)
-		<-cacheS.GetPrecacheChannel(utils.CacheReverseDestinations)
-		<-cacheS.GetPrecacheChannel(utils.CacheRatingPlans)
-		<-cacheS.GetPrecacheChannel(utils.CacheRatingProfiles)
-		<-cacheS.GetPrecacheChannel(utils.CacheActions)
-		<-cacheS.GetPrecacheChannel(utils.CacheActionPlans)
-		<-cacheS.GetPrecacheChannel(utils.CacheAccountActionPlans)
-		<-cacheS.GetPrecacheChannel(utils.CacheActionTriggers)
-		<-cacheS.GetPrecacheChannel(utils.CacheSharedGroups)
+		<-chS.GetPrecacheChannel(utils.CacheDestinations)
+		<-chS.GetPrecacheChannel(utils.CacheReverseDestinations)
+		<-chS.GetPrecacheChannel(utils.CacheRatingPlans)
+		<-chS.GetPrecacheChannel(utils.CacheRatingProfiles)
+		<-chS.GetPrecacheChannel(utils.CacheActions)
+		<-chS.GetPrecacheChannel(utils.CacheActionPlans)
+		<-chS.GetPrecacheChannel(utils.CacheAccountActionPlans)
+		<-chS.GetPrecacheChannel(utils.CacheActionTriggers)
+		<-chS.GetPrecacheChannel(utils.CacheSharedGroups)
 	}()
 
 	var thdS *rpcclient.RpcClientPool
@@ -99,19 +101,19 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	}
 
 	//create cache connection
-	var caches *rpcclient.RpcClientPool
+	var cacheSrpc *rpcclient.RpcClientPool
 	if len(cfg.ApierCfg().CachesConns) != 0 {
 		cachesTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, cachesTaskChan)
 		go func() {
 			defer close(cachesTaskChan)
 			var err error
-			caches, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+			cacheSrpc, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
 				cfg.TlsCfg().ClientKey,
 				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.ApierCfg().CachesConns, internalCacheSChan,
+				cfg.ApierCfg().CachesConns, cacheSChan,
 				cfg.GeneralCfg().InternalTtl, false)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<APIer> Could not connect to CacheS, error: %s", err.Error()))
@@ -120,18 +122,20 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 			}
 		}()
 	}
-	//add verification here
-	if caches != nil && reflect.ValueOf(caches).IsNil() {
-		caches = nil
-	}
 
 	// Wait for all connections to complete before going further
 	for _, chn := range waitTasks {
 		<-chn
 	}
+
 	responder := &engine.Responder{
 		ExitChan:         exitChan,
 		MaxComputedUsage: cfg.RalsCfg().RALsMaxComputedUsage}
+
+	// correct reflect on cacheS since there is no APIer init
+	if cacheSrpc != nil && reflect.ValueOf(cacheSrpc).IsNil() {
+		cacheSrpc = nil
+	}
 	apierRpcV1 := &v1.ApierV1{
 		StorDb:      loadDb,
 		DataManager: dm,
@@ -142,7 +146,8 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		HTTPPoster: engine.NewHTTPPoster(cfg.GeneralCfg().HttpSkipTlsVerify,
 			cfg.GeneralCfg().ReplyTimeout),
 		FilterS: filterS,
-		CacheS:  caches}
+		CacheS:  cacheSrpc}
+
 	if thdS != nil {
 		engine.SetThresholdS(thdS) // temporary architectural fix until we will have separate AccountS
 	}

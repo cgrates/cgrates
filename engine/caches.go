@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -76,7 +77,7 @@ func InitCache(cfg config.CacheCfg) {
 	Cache = ltcache.NewTransCache(cfg.AsTransCacheConfig())
 }
 
-// NewCacheS initializes the Cache service
+// NewCacheS initializes the Cache service and executes the precaching
 func NewCacheS(cfg *config.CGRConfig, dm *DataManager) (c *CacheS) {
 	InitCache(cfg.CacheCfg()) // to make sure we start with correct config
 	c = &CacheS{cfg: cfg, dm: dm,
@@ -104,20 +105,43 @@ func (chS *CacheS) GetPrecacheChannel(chID string) chan struct{} {
 
 // Precache loads data from DataDB into cache at engine start
 func (chS *CacheS) Precache() (err error) {
+	var wg sync.WaitGroup // wait for precache to finish
+	errChan := make(chan error)
+	doneChan := make(chan struct{})
 	for cacheID, cacheCfg := range chS.cfg.CacheCfg() {
 		if !precachedPartitions.HasKey(cacheID) {
 			continue
 		}
 		if cacheCfg.Precache {
-			if err = chS.dm.CacheDataFromDB(
-				utils.CacheInstanceToPrefix[cacheID], nil,
-				false); err != nil {
-				return
-			}
+			wg.Add(1)
+			go func() {
+				errCache := chS.dm.CacheDataFromDB(
+					utils.CacheInstanceToPrefix[cacheID], nil,
+					false)
+				if errCache != nil {
+					errChan <- errCache
+				}
+				close(chS.pcItems[cacheID])
+				wg.Done()
+			}()
 		}
-		close(chS.pcItems[cacheID])
+	}
+	go func() { // report wg.Wait on doneChan
+		wg.Wait()
+		close(doneChan)
+	}()
+	select {
+	case err = <-errChan:
+	case <-doneChan:
 	}
 	return
+}
+
+// APIs start here
+
+// Call gives the ability of CacheS to be passed as internal RPC
+func (chS *CacheS) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	return utils.RPCCall(chS, serviceMethod, args, reply)
 }
 
 type ArgsGetCacheItemIDs struct {

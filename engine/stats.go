@@ -220,7 +220,7 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 }
 
 // Call implements rpcclient.RpcClientConnection interface for internal RPC
-// here for cases when passing StatsService as rpccclient.RpcClientConnection (ie. in ResourceS)
+// here for cases when passing StatsService as rpccclient.RpcClientConnection
 func (ss *StatService) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.RPCCall(ss, serviceMethod, args, reply)
 }

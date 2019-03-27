@@ -903,14 +903,14 @@ func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS,
 }
 
 // loaderService will start and register APIs for LoaderService if enabled
-func startloaderS(cfg *config.CGRConfig,
+func startLoaderS(cfg *config.CGRConfig,
 	dm *engine.DataManager, server *utils.Server, exitChan chan bool,
-	filterSChan chan *engine.FilterS, internalCacheSChan chan rpcclient.RpcClientConnection) {
+	filterSChan chan *engine.FilterS, cacheSChan chan rpcclient.RpcClientConnection) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
 
 	ldrS := loaders.NewLoaderService(dm, cfg.LoaderCfg(),
-		cfg.GeneralCfg().DefaultTimezone, exitChan, filterS, internalCacheSChan)
+		cfg.GeneralCfg().DefaultTimezone, exitChan, filterS, cacheSChan)
 	if !ldrS.Enabled() {
 		return
 	}
@@ -1032,6 +1032,24 @@ func startAnalyzerService(internalAnalyzerSChan chan rpcclient.RpcClientConnecti
 	aSv1 := v1.NewAnalyzerSv1(aS)
 	server.RpcRegister(aSv1)
 	internalAnalyzerSChan <- aSv1
+}
+
+// initCacheS inits the CacheS and starts precaching as well as populating internal channel for RPC conns
+func initCacheS(internalCacheSChan chan rpcclient.RpcClientConnection,
+	server *utils.Server, dm *engine.DataManager, exitChan chan bool) (chS *engine.CacheS) {
+	chS = engine.NewCacheS(cfg, dm)
+	go func() {
+		if err := chS.Precache(); err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> could not init, error: %s", utils.CacheS, err.Error()))
+			exitChan <- true
+		}
+	}()
+
+	if !cfg.DispatcherSCfg().Enabled {
+		server.RpcRegister(v1.NewCacheSv1(chS))
+	}
+	internalCacheSChan <- chS
+	return
 }
 
 func startRpc(server *utils.Server, internalRaterChan,
@@ -1330,22 +1348,6 @@ func main() {
 	// Rpc/http server
 	server := utils.NewServer()
 
-	// init cache
-	cacheS := engine.NewCacheS(cfg, dm)
-	cacheSv1 := v1.NewCacheSv1(cacheS)
-	if !cfg.DispatcherSCfg().Enabled {
-		server.RpcRegister(cacheSv1) // before pre-caching so we can check status via API
-	}
-	go func() {
-		if err := cacheS.Precache(); err != nil {
-			errCGR := err.(*utils.CGRError)
-			errCGR.ActivateLongError()
-			utils.Logger.Crit(fmt.Sprintf("<%s> error: %s on precache",
-				utils.CacheS, err.Error()))
-			exitChan <- true
-		}
-	}()
-
 	if *httpPprofPath != "" {
 		go server.RegisterProfiler(*httpPprofPath)
 	}
@@ -1365,21 +1367,23 @@ func main() {
 	internalDispatcherSChan := make(chan *dispatchers.DispatcherService, 1)
 	internalAnalyzerSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalCacheSChan := make(chan rpcclient.RpcClientConnection, 1)
-	//Add cacheSv1 into channel
-	internalCacheSChan <- cacheSv1
+
+	// init CacheS
+	cacheS := initCacheS(internalCacheSChan, server, dm, exitChan)
+
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, dm, exitChan, cacheS)
-
-	// Start rater service
-	if cfg.RalsCfg().RALsEnabled {
-		go startRater(internalRaterChan, cacheS, internalThresholdSChan,
-			internalStatSChan, srvManager, server, dm, loadDb, cdrDb,
-			&stopHandled, exitChan, filterSChan, internalCacheSChan)
-	}
 
 	// Start Scheduler
 	if cfg.SchedulerCfg().Enabled {
 		go srvManager.StartScheduler(true)
+	}
+
+	// Start RALs
+	if cfg.RalsCfg().RALsEnabled {
+		go startRater(internalRaterChan, cacheS, internalThresholdSChan,
+			internalStatSChan, srvManager, server, dm, loadDb, cdrDb,
+			&stopHandled, exitChan, cacheS, filterSChan, internalCacheSChan)
 	}
 
 	// Start CDR Server
@@ -1475,7 +1479,7 @@ func main() {
 		go startAnalyzerService(internalAnalyzerSChan, server, exitChan)
 	}
 
-	go startloaderS(cfg, dm, server, exitChan, filterSChan, internalCacheSChan)
+	go startLoaderS(cfg, dm, server, exitChan, filterSChan, internalCacheSChan)
 
 	// Serve rpc connections
 	go startRpc(server, internalRaterChan, internalCdrSChan,
