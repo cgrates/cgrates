@@ -18,13 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/apier/v1"
+import v1 "github.com/cgrates/cgrates/apier/v1"
 
 func init() {
 	c := &CmdSetStatQueue{
 		name:      "statqueue_set",
 		rpcMethod: "ApierV1.SetStatQueueProfile",
-		rpcParams: &v1.StatQueueWrapper{},
+		rpcParams: &v1.StatQueueWithCache{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -34,7 +34,7 @@ func init() {
 type CmdSetStatQueue struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.StatQueueWrapper
+	rpcParams *v1.StatQueueWithCache
 	*CommandExecuter
 }
 
@@ -48,7 +48,7 @@ func (self *CmdSetStatQueue) RpcMethod() string {
 
 func (self *CmdSetStatQueue) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.StatQueueWrapper{}
+		self.rpcParams = &v1.StatQueueWithCache{}
 	}
 	return self.rpcParams
 }

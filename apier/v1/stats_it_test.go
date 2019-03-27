@@ -37,7 +37,7 @@ var (
 	stsV1CfgPath string
 	stsV1Cfg     *config.CGRConfig
 	stsV1Rpc     *rpc.Client
-	statConfig   *StatQueueWrapper
+	statConfig   *StatQueueWithCache
 	stsV1ConfDIR string //run tests for specific configuration
 )
 
@@ -283,7 +283,7 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 
 func testV1STSSetStatQueueProfile(t *testing.T) {
 	var reply *engine.StatQueueProfile
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "FLTR_1",
@@ -311,7 +311,7 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	statConfig = &StatQueueWrapper{
+	statConfig = &StatQueueWithCache{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TEST_PROFILE1",
@@ -363,7 +363,7 @@ func testV1STSGetStatQueueProfileIDs(t *testing.T) {
 
 func testV1STSUpdateStatQueueProfile(t *testing.T) {
 	var result string
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "FLTR_2",
@@ -420,7 +420,7 @@ func testV1STSRemoveStatQueueProfile(t *testing.T) {
 }
 
 func testV1STSProcessMetricsWithFilter(t *testing.T) {
-	statConfig = &StatQueueWrapper{
+	statConfig = &StatQueueWithCache{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "CustomStatProfile",

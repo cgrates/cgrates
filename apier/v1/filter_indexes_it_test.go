@@ -149,7 +149,7 @@ func testV1FIdxRpcConn(t *testing.T) {
 //ThresholdProfile
 func testV1FIdxSetThresholdProfile(t *testing.T) {
 	var reply *engine.ThresholdProfile
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "TestFilter",
@@ -175,7 +175,7 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl = &ThresholdWrapper{
+	tPrfl = &ThresholdWithCache{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    tenant,
 			ID:        "TEST_PROFILE1",
@@ -249,7 +249,7 @@ func testV1FIdxComputeThresholdsIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 	var reply *engine.ThresholdProfile
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "TestFilter2",
@@ -276,7 +276,7 @@ func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl = &ThresholdWrapper{
+	tPrfl = &ThresholdWithCache{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    tenant,
 			ID:        "TEST_PROFILE2",
@@ -432,7 +432,7 @@ func testV1FIdxRemoveThresholdProfile(t *testing.T) {
 //StatQueueProfile
 func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 	var reply *engine.StatQueueProfile
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_1",
@@ -458,7 +458,7 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	statConfig = &StatQueueWrapper{
+	statConfig = &StatQueueWithCache{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    tenant,
 			ID:        "TEST_PROFILE1",
@@ -541,7 +541,7 @@ func testV1FIdxComputeStatQueueProfileIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 	var reply *engine.StatQueueProfile
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_2",
@@ -567,7 +567,7 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	statConfig = &StatQueueWrapper{
+	statConfig = &StatQueueWithCache{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    tenant,
 			ID:        "TEST_PROFILE2",
@@ -699,7 +699,7 @@ func testV1FIdxRemoveStatQueueProfile(t *testing.T) {
 //ResourceProfile
 func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 	var reply *engine.ResourceProfile
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_RES_RCFG1",
@@ -724,7 +724,7 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	rlsConfig = &ResourceWrapper{
+	rlsConfig = &ResourceWithCache{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    tenant,
 			ID:        "RCFG1",
@@ -798,7 +798,7 @@ func testV1FIdxComputeResourceProfileIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 	var reply *engine.StatQueueProfile
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_2",
@@ -823,7 +823,7 @@ func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	rlsConfig = &ResourceWrapper{
+	rlsConfig = &ResourceWithCache{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    tenant,
 			ID:        "RCFG2",
@@ -945,7 +945,7 @@ func testV1FIdxRemoveResourceProfile(t *testing.T) {
 //SupplierProfile
 func testV1FIdxSetSupplierProfileIndexes(t *testing.T) {
 	var reply *engine.SupplierProfile
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_1",
@@ -973,7 +973,7 @@ func testV1FIdxSetSupplierProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	splPrf = &SupplierWrapper{
+	splPrf = &SupplierWithCache{
 		SupplierProfile: &engine.SupplierProfile{
 			Tenant:            tenant,
 			ID:                "TEST_PROFILE1",
@@ -1051,7 +1051,7 @@ func testV1FIdxComputeSupplierProfileIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondSupplierProfileIndexes(t *testing.T) {
 	var reply *engine.SupplierProfile
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_2",
@@ -1077,7 +1077,7 @@ func testV1FIdxSetSecondSupplierProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	splPrf = &SupplierWrapper{
+	splPrf = &SupplierWithCache{
 		SupplierProfile: &engine.SupplierProfile{
 			Tenant:            tenant,
 			ID:                "TEST_PROFILE2",
@@ -1206,7 +1206,7 @@ func testV1FIdxRemoveSupplierProfile(t *testing.T) {
 //AttributeProfile
 func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 	var reply *engine.AttributeProfile
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_1",
@@ -1232,7 +1232,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	alsPrf = &AttributeWrapper{
+	alsPrf = &AttributeWithCache{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    tenant,
 			ID:        "ApierTest",
@@ -1320,7 +1320,7 @@ func testV1FIdxComputeAttributeProfileIndexes(t *testing.T) {
 
 func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 	var reply *engine.AttributeProfile
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_2",
@@ -1346,7 +1346,7 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	alsPrf = &AttributeWrapper{
+	alsPrf = &AttributeWithCache{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    tenant,
 			ID:        "ApierTest2",
@@ -1658,7 +1658,7 @@ func testV1FIdxGetFilterIndexes4(t *testing.T) {
 func testV1FIdxSetDispatcherProfile(t *testing.T) {
 	var reply string
 	//add a dispatcherProfile for 2 subsystems and verify if the index was created for both
-	dispatcherProfile = &DispatcherWrapper{
+	dispatcherProfile = &DispatcherWithCache{
 		DispatcherProfile: &engine.DispatcherProfile{
 			Tenant:     "cgrates.org",
 			ID:         "DSP_Test1",
@@ -1807,7 +1807,7 @@ func testV1FIdxSetDispatcherProfile2(t *testing.T) {
 	var reply string
 	//add a new dispatcherProfile with empty filterIDs
 	//should create an index of type *none:*any:*any for *attributes subsystem
-	dispatcherProfile = &DispatcherWrapper{
+	dispatcherProfile = &DispatcherWithCache{
 		DispatcherProfile: &engine.DispatcherProfile{
 			Tenant:     "cgrates.org",
 			ID:         "DSP_Test2",

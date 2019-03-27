@@ -54,13 +54,13 @@ func (apierV1 *ApierV1) GetChargerProfileIDs(tenant string, chPrfIDs *[]string) 
 	return nil
 }
 
-type ChargerWrapper struct {
+type ChargerWithCache struct {
 	*engine.ChargerProfile
 	Cache *string
 }
 
 //SetChargerProfile add/update a new Charger Profile
-func (apierV1 *ApierV1) SetChargerProfile(arg *ChargerWrapper, reply *string) error {
+func (apierV1 *ApierV1) SetChargerProfile(arg *ChargerWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg.ChargerProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

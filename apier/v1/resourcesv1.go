@@ -101,13 +101,13 @@ func (apierV1 *ApierV1) GetResourceProfileIDs(tenant string, rsPrfIDs *[]string)
 	return nil
 }
 
-type ResourceWrapper struct {
+type ResourceWithCache struct {
 	*engine.ResourceProfile
 	Cache *string
 }
 
 //SetResourceProfile add a new resource configuration
-func (apierV1 *ApierV1) SetResourceProfile(arg *ResourceWrapper, reply *string) error {
+func (apierV1 *ApierV1) SetResourceProfile(arg *ResourceWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg.ResourceProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

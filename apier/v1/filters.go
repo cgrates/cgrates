@@ -23,13 +23,13 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type FilterWrapper struct {
+type FilterWithCache struct {
 	*engine.Filter
 	Cache *string
 }
 
 //SetFilter add a new Filter
-func (apierV1 *ApierV1) SetFilter(arg *FilterWrapper, reply *string) error {
+func (apierV1 *ApierV1) SetFilter(arg *FilterWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg.Filter, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
