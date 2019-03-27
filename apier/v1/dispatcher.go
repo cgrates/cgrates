@@ -59,13 +59,13 @@ func (apierV1 *ApierV1) GetDispatcherProfileIDs(tenant string, dPrfIDs *[]string
 	return nil
 }
 
-type DispatcherWrapper struct {
+type DispatcherWithCache struct {
 	*engine.DispatcherProfile
 	Cache *string
 }
 
 //SetDispatcherProfile add/update a new Dispatcher Profile
-func (apierV1 *ApierV1) SetDispatcherProfile(args *DispatcherWrapper, reply *string) error {
+func (apierV1 *ApierV1) SetDispatcherProfile(args *DispatcherWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(args.DispatcherProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

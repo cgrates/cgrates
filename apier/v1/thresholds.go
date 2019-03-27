@@ -89,13 +89,13 @@ func (apierV1 *ApierV1) GetThresholdProfileIDs(tenant string, thPrfIDs *[]string
 	return nil
 }
 
-type ThresholdWrapper struct {
+type ThresholdWithCache struct {
 	*engine.ThresholdProfile
 	Cache *string
 }
 
 // SetThresholdProfile alters/creates a ThresholdProfile
-func (apierV1 *ApierV1) SetThresholdProfile(args *ThresholdWrapper, reply *string) error {
+func (apierV1 *ApierV1) SetThresholdProfile(args *ThresholdWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(args.ThresholdProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

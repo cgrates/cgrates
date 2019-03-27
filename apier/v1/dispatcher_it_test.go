@@ -37,7 +37,7 @@ var (
 	dispatcherCfgPath   string
 	dispatcherCfg       *config.CGRConfig
 	dispatcherRPC       *rpc.Client
-	dispatcherProfile   *DispatcherWrapper
+	dispatcherProfile   *DispatcherWithCache
 	dispatcherConfigDIR string //run tests for specific configuration
 )
 
@@ -117,7 +117,7 @@ func testDispatcherSSetDispatcherProfile(t *testing.T) {
 		t.Error(err)
 	}
 
-	dispatcherProfile = &DispatcherWrapper{
+	dispatcherProfile = &DispatcherWithCache{
 		DispatcherProfile: &engine.DispatcherProfile{
 			Tenant:    "cgrates.org",
 			ID:        "Dsp1",

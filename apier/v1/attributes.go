@@ -60,13 +60,13 @@ func (apierV1 *ApierV1) GetAttributeProfileIDs(tenant string, attrPrfIDs *[]stri
 	return nil
 }
 
-type AttributeWrapper struct {
+type AttributeWithCache struct {
 	*engine.AttributeProfile
 	Cache *string
 }
 
 //SetAttributeProfile add/update a new Attribute Profile
-func (apierV1 *ApierV1) SetAttributeProfile(alsWrp *AttributeWrapper, reply *string) error {
+func (apierV1 *ApierV1) SetAttributeProfile(alsWrp *AttributeWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(alsWrp.AttributeProfile, []string{"Tenant", "ID", "Attributes"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

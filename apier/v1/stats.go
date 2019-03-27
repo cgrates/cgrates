@@ -55,13 +55,13 @@ func (apierV1 *ApierV1) GetStatQueueProfileIDs(tenant string, stsPrfIDs *[]strin
 	return nil
 }
 
-type StatQueueWrapper struct {
+type StatQueueWithCache struct {
 	*engine.StatQueueProfile
 	Cache *string
 }
 
 // SetStatQueueProfile alters/creates a StatQueueProfile
-func (apierV1 *ApierV1) SetStatQueueProfile(arg *StatQueueWrapper, reply *string) error {
+func (apierV1 *ApierV1) SetStatQueueProfile(arg *StatQueueWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg.StatQueueProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

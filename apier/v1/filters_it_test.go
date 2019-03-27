@@ -38,7 +38,7 @@ var (
 	filterCfg       *config.CGRConfig
 	filterRPC       *rpc.Client
 	filterDataDir   = "/usr/share/cgrates"
-	filter          *FilterWrapper
+	filter          *FilterWithCache
 	filterConfigDIR string //run tests for specific configuration
 )
 
@@ -115,7 +115,7 @@ func testFilterGetFilterBeforeSet(t *testing.T) {
 }
 
 func testFilterSetFilter(t *testing.T) {
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "Filter1",

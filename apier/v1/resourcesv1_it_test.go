@@ -37,7 +37,7 @@ var (
 	rlsV1Cfg     *config.CGRConfig
 	rlsV1Rpc     *rpc.Client
 	rlsV1ConfDIR string //run tests for specific configuration
-	rlsConfig    *ResourceWrapper
+	rlsConfig    *ResourceWithCache
 )
 
 var sTestsRLSV1 = []func(t *testing.T){
@@ -589,7 +589,7 @@ func testV1RsGetResourceProfileBeforeSet(t *testing.T) {
 }
 
 func testV1RsSetResourceProfile(t *testing.T) {
-	rlsConfig = &ResourceWrapper{
+	rlsConfig = &ResourceWithCache{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "RES_GR_TEST",

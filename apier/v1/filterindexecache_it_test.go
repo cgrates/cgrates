@@ -153,7 +153,7 @@ func testV1FIdxCaProcessEventWithNotFound(t *testing.T) {
 }
 
 func testV1FIdxCaSetThresholdProfile(t *testing.T) {
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "TestFilter",
@@ -180,7 +180,7 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	tPrfl = &ThresholdWrapper{
+	tPrfl = &ThresholdWithCache{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TEST_PROFILE1",
@@ -247,7 +247,7 @@ func testV1FIdxCaGetThresholdFromTP(t *testing.T) {
 
 func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 	var result string
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "TestFilter2",
@@ -273,7 +273,7 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	tPrfl = &ThresholdWrapper{
+	tPrfl = &ThresholdWithCache{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TEST_PROFILE1",
@@ -327,7 +327,7 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 
 func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 	var result string
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "TestFilter3",
@@ -488,7 +488,7 @@ func testV1FIdxCaGetStatQueuesWithNotFound(t *testing.T) {
 
 func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 	tenant := "cgrates.org"
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: tenant,
 			ID:     "FLTR_1",
@@ -516,7 +516,7 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	statConfig = &StatQueueWrapper{
+	statConfig = &StatQueueWithCache{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TEST_PROFILE1",
@@ -626,7 +626,7 @@ func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 }
 
 func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "FLTR_2",
@@ -653,7 +653,7 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	statConfig = &StatQueueWrapper{
+	statConfig = &StatQueueWithCache{
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TEST_PROFILE1",
@@ -698,7 +698,7 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 }
 
 func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "FLTR_3",
@@ -849,7 +849,7 @@ func testV1FIdxCaProcessAttributeProfileEventWithNotFound(t *testing.T) {
 }
 
 func testV1FIdxCaSetAttributeProfile(t *testing.T) {
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "TestFilter",
@@ -876,7 +876,7 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	alsPrf := &AttributeWrapper{
+	alsPrf := &AttributeWithCache{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TEST_PROFILE1",
@@ -942,7 +942,7 @@ func testV1FIdxCaGetAttributeProfileFromTP(t *testing.T) {
 }
 
 func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "TestFilter2",
@@ -969,7 +969,7 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	alsPrf := &AttributeWrapper{
+	alsPrf := &AttributeWithCache{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TEST_PROFILE1",
@@ -1015,7 +1015,7 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 }
 
 func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "TestFilter3",
@@ -1163,7 +1163,7 @@ func testV1FIdxCaGetResourceProfileWithNotFound(t *testing.T) {
 	}
 }
 func testV1FIdxCaSetResourceProfile(t *testing.T) {
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "FLTR_RES_RCFG1",
@@ -1195,7 +1195,7 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	rlsConfig = &ResourceWrapper{
+	rlsConfig = &ResourceWithCache{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "RCFG1",
@@ -1289,7 +1289,7 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 }
 
 func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "FLTR_RES_RCFG2",
@@ -1321,7 +1321,7 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	rlsConfig = &ResourceWrapper{
+	rlsConfig = &ResourceWithCache{
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "RCFG1",
@@ -1364,7 +1364,7 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 }
 
 func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
-	filter = &FilterWrapper{
+	filter = &FilterWithCache{
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "FLTR_RES_RCFG3",

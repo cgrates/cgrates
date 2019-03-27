@@ -36,7 +36,7 @@ var (
 	splSv1CfgPath string
 	splSv1Cfg     *config.CGRConfig
 	splSv1Rpc     *rpc.Client
-	splPrf        *SupplierWrapper
+	splPrf        *SupplierWithCache
 	splSv1ConfDIR string //run tests for specific configuration
 )
 
@@ -736,7 +736,7 @@ func testV1SplSSetSupplierProfiles(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	splPrf = &SupplierWrapper{
+	splPrf = &SupplierWithCache{
 		SupplierProfile: &engine.SupplierProfile{
 			Tenant:            "cgrates.org",
 			ID:                "TEST_PROFILE1",

@@ -110,7 +110,7 @@ func testAttributeSRPCConn(t *testing.T) {
 }
 
 func testAttributeSSetAlsPrf(t *testing.T) {
-	extAlsPrf := &AttributeWrapper{
+	extAlsPrf := &AttributeWithCache{
 		ExternalAttributeProfile: &engine.ExternalAttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ExternalAttribute",
@@ -136,7 +136,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	alsPrf := &v1.AttributeWrapper{
+	alsPrf := &v1.AttributeWithCache{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ExternalAttribute",
@@ -168,7 +168,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 }
 
 func testAttributeSUpdateAlsPrf(t *testing.T) {
-	extAlsPrf := &AttributeWrapper{
+	extAlsPrf := &AttributeWithCache{
 		ExternalAttributeProfile: &engine.ExternalAttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ExternalAttribute",
@@ -198,7 +198,7 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	alsPrf := &v1.AttributeWrapper{
+	alsPrf := &v1.AttributeWithCache{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ExternalAttribute",

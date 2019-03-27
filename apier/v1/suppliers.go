@@ -54,13 +54,13 @@ func (apierV1 *ApierV1) GetSupplierProfileIDs(tenant string, sppPrfIDs *[]string
 	return nil
 }
 
-type SupplierWrapper struct {
+type SupplierWithCache struct {
 	*engine.SupplierProfile
 	Cache *string
 }
 
 //SetSupplierProfile add a new Supplier configuration
-func (apierV1 *ApierV1) SetSupplierProfile(args *SupplierWrapper, reply *string) error {
+func (apierV1 *ApierV1) SetSupplierProfile(args *SupplierWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(args.SupplierProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

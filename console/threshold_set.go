@@ -24,7 +24,7 @@ func init() {
 	c := &CmdSetThreshold{
 		name:      "threshold_set",
 		rpcMethod: "ApierV1.SetThresholdProfile",
-		rpcParams: &v1.ThresholdWrapper{},
+		rpcParams: &v1.ThresholdWithCache{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -34,7 +34,7 @@ func init() {
 type CmdSetThreshold struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.ThresholdWrapper
+	rpcParams *v1.ThresholdWithCache
 	*CommandExecuter
 }
 
@@ -48,7 +48,7 @@ func (self *CmdSetThreshold) RpcMethod() string {
 
 func (self *CmdSetThreshold) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.ThresholdWrapper{}
+		self.rpcParams = &v1.ThresholdWithCache{}
 	}
 	return self.rpcParams
 }

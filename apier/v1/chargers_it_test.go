@@ -37,7 +37,7 @@ var (
 	chargerCfgPath   string
 	chargerCfg       *config.CGRConfig
 	chargerRPC       *rpc.Client
-	chargerProfile   *ChargerWrapper
+	chargerProfile   *ChargerWithCache
 	chargerConfigDIR string //run tests for specific configuration
 )
 
@@ -132,7 +132,7 @@ func testChargerSRPCConn(t *testing.T) {
 }
 
 func testChargerSLoadAddCharger(t *testing.T) {
-	chargerProfile := &ChargerWrapper{
+	chargerProfile := &ChargerWithCache{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:    "cgrates.org",
 			ID:        "Charger1",
@@ -152,7 +152,7 @@ func testChargerSLoadAddCharger(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	alsPrf = &AttributeWrapper{
+	alsPrf = &AttributeWithCache{
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:   "cgrates.org",
 			ID:       "ATTR_1001_SIMPLEAUTH",
@@ -235,7 +235,7 @@ func testChargerSProcessEvent(t *testing.T) {
 }
 
 func testChargerSSetChargerProfile(t *testing.T) {
-	chargerProfile = &ChargerWrapper{
+	chargerProfile = &ChargerWithCache{
 		ChargerProfile: &engine.ChargerProfile{
 			Tenant:    "cgrates.org",
 			ID:        "ApierTest",
