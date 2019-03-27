@@ -45,8 +45,6 @@ type ServiceManager struct {
 	engineShutdown chan bool
 	cacheS         *engine.CacheS
 	sched          *scheduler.Scheduler
-	rpcChans       map[string]chan rpcclient.RpcClientConnection // services expected to start
-	rpcServices    map[string]rpcclient.RpcClientConnection      // services started
 }
 
 func (srvMngr *ServiceManager) StartScheduler(waitCache bool) error {
