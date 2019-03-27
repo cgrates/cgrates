@@ -25,6 +25,7 @@ import (
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -132,6 +133,8 @@ func testTPChrgsSetTPChrgs(t *testing.T) {
 		AttributeIDs: []string{"Attr1", "Attr2"},
 		Weight:       20,
 	}
+	sort.Strings(tpChrgs.FilterIDs)
+	sort.Strings(tpChrgs.AttributeIDs)
 	var result string
 	if err := tpChrgsRPC.Call("ApierV1.SetTPCharger", tpChrgs, &result); err != nil {
 		t.Error(err)
@@ -144,9 +147,12 @@ func testTPChrgsGetTPChrgsAfterSet(t *testing.T) {
 	var reply *utils.TPChargerProfile
 	if err := tpChrgsRPC.Call("ApierV1.GetTPCharger",
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Chrgs"}, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(tpChrgs, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", tpChrgs, reply)
+		t.Fatal(err)
+	}
+	sort.Strings(reply.FilterIDs)
+	sort.Strings(reply.AttributeIDs)
+	if !reflect.DeepEqual(tpChrgs, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(tpChrgs), utils.ToJSON(reply))
 	}
 }
 
@@ -157,7 +163,7 @@ func testTPChrgsGetTPChrgsIDs(t *testing.T) {
 		&AttrGetTPAttributeProfileIds{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
-		t.Errorf("Expecting: %+v, received: %+v", expectedTPID, result)
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedTPID), utils.ToJSON(result))
 	}
 }
 
@@ -175,9 +181,12 @@ func testTPChrgsGetTPChrgsAfterUpdate(t *testing.T) {
 	var reply *utils.TPChargerProfile
 	if err := tpChrgsRPC.Call("ApierV1.GetTPCharger",
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Chrgs"}, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(tpChrgs, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", tpChrgs, reply)
+		t.Fatal(err)
+	}
+	sort.Strings(reply.FilterIDs)
+	sort.Strings(reply.AttributeIDs)
+	if !reflect.DeepEqual(tpChrgs, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(tpChrgs), utils.ToJSON(reply))
 	}
 }
 

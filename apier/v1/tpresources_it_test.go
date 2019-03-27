@@ -25,6 +25,7 @@ import (
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -141,6 +142,7 @@ func testTPResSetTPResource(t *testing.T) {
 		Weight:            20,
 		ThresholdIDs:      []string{"ValOne", "ValTwo"},
 	}
+	sort.Strings(tpRes.ThresholdIDs)
 	var result string
 	if err := tpResRPC.Call("ApierV1.SetTPResource", tpRes, &result); err != nil {
 		t.Error(err)
@@ -153,8 +155,10 @@ func testTPResGetTPResourceAfterSet(t *testing.T) {
 	var respond *utils.TPResourceProfile
 	if err := tpResRPC.Call("ApierV1.GetTPResource", &utils.TPTntID{TPid: "TPR1", Tenant: "cgrates.org", ID: "ResGroup1"},
 		&respond); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(tpRes, respond) {
+		t.Fatal(err)
+	}
+	sort.Strings(respond.ThresholdIDs)
+	if !reflect.DeepEqual(tpRes, respond) {
 		t.Errorf("Expecting : %+v, received: %+v", tpRes, respond)
 	}
 }
@@ -162,6 +166,7 @@ func testTPResGetTPResourceAfterSet(t *testing.T) {
 func testTPResUpdateTPResource(t *testing.T) {
 	var result string
 	tpRes.FilterIDs = []string{"FLTR_1", "FLTR_STS1"}
+	sort.Strings(tpRes.FilterIDs)
 	if err := tpResRPC.Call("ApierV1.SetTPResource", tpRes, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -173,8 +178,11 @@ func testTPResGetTPResourceAfterUpdate(t *testing.T) {
 	var expectedTPR *utils.TPResourceProfile
 	if err := tpResRPC.Call("ApierV1.GetTPResource", &utils.TPTntID{TPid: "TPR1", Tenant: "cgrates.org", ID: "ResGroup1"},
 		&expectedTPR); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(tpRes, expectedTPR) {
+		t.Fatal(err)
+	}
+	sort.Strings(expectedTPR.FilterIDs)
+	sort.Strings(expectedTPR.ThresholdIDs)
+	if !reflect.DeepEqual(tpRes, expectedTPR) {
 		t.Errorf("Expecting: %+v, received: %+v", tpRes, expectedTPR)
 	}
 }
