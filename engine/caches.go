@@ -112,21 +112,24 @@ func (chS *CacheS) Precache() (err error) {
 		if !precachedPartitions.HasKey(cacheID) {
 			continue
 		}
-		if cacheCfg.Precache {
-			wg.Add(1)
-			go func() {
-				errCache := chS.dm.CacheDataFromDB(
-					utils.CacheInstanceToPrefix[cacheID], nil,
-					false)
-				if errCache != nil {
-					errChan <- errCache
-				}
-				close(chS.pcItems[cacheID])
-				wg.Done()
-			}()
+		if !cacheCfg.Precache {
+			close(chS.pcItems[cacheID]) // no need of precache
+			continue
 		}
+		wg.Add(1)
+		go func(cacheID string) {
+			errCache := chS.dm.CacheDataFromDB(
+				utils.CacheInstanceToPrefix[cacheID], nil,
+				false)
+			if errCache != nil {
+				errChan <- errCache
+			}
+			close(chS.pcItems[cacheID])
+			wg.Done()
+		}(cacheID)
 	}
-	go func() { // report wg.Wait on doneChan
+	time.Sleep(1) // switch context
+	go func() {   // report wg.Wait on doneChan
 		wg.Wait()
 		close(doneChan)
 	}()

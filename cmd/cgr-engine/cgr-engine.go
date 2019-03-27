@@ -1056,8 +1056,8 @@ func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
 	internalSMGChan, internalAnalyzerSChan chan rpcclient.RpcClientConnection,
-	internalDispatcherSChan chan *dispatchers.DispatcherService, exitChan chan bool,
-	internalCacheSChan chan rpcclient.RpcClientConnection) {
+	internalDispatcherSChan chan *dispatchers.DispatcherService,
+	exitChan chan bool) {
 	select { // Any of the rpc methods will unlock listening to rpc requests
 	case resp := <-internalRaterChan:
 		internalRaterChan <- resp
@@ -1486,7 +1486,7 @@ func main() {
 		internalRsChan, internalStatSChan,
 		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
 		internalSupplierSChan, internalSMGChan, internalAnalyzerSChan,
-		internalDispatcherSChan, exitChan, internalCacheSChan)
+		internalDispatcherSChan, exitChan)
 	<-exitChan
 
 	if *cpuProfDir != "" { // wait to end cpuProfiling
