@@ -131,6 +131,7 @@ func testTPAlsPrfSetTPAlsPrf(t *testing.T) {
 			&utils.TPAttribute{
 				FieldName:  "FL1",
 				Substitute: "Al1",
+				FilterIDs:  []string{},
 			},
 		},
 		Weight: 20,
@@ -149,7 +150,7 @@ func testTPAlsPrfGetTPAlsPrfAfterSet(t *testing.T) {
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Attr1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpAlsPrf, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", tpAlsPrf, reply)
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(tpAlsPrf), utils.ToJSON(reply))
 	}
 }
 
@@ -169,10 +170,12 @@ func testTPAlsPrfUpdateTPAlsPrf(t *testing.T) {
 		&utils.TPAttribute{
 			FieldName:  "FL1",
 			Substitute: "Al1",
+			FilterIDs:  []string{},
 		},
 		&utils.TPAttribute{
 			FieldName:  "FL2",
 			Substitute: "Al2",
+			FilterIDs:  []string{},
 		},
 	}
 	var result string
@@ -199,10 +202,12 @@ func testTPAlsPrfGetTPAlsPrfAfterUpdate(t *testing.T) {
 			&utils.TPAttribute{
 				FieldName:  "FL2",
 				Substitute: "Al2",
+				FilterIDs:  []string{},
 			},
 			&utils.TPAttribute{
 				FieldName:  "FL1",
 				Substitute: "Al1",
+				FilterIDs:  []string{},
 			},
 		},
 		Weight: 20,

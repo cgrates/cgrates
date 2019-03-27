@@ -372,6 +372,11 @@ func (self *ApierV1) SetRatingProfile(attrs utils.AttrSetRatingProfile, reply *s
 	if err := self.DataManager.SetRatingProfile(rpfl, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
 	}
+	//generate a loadID for RatingProfile and store it in database
+	loadIDs := map[string]string{utils.CacheRatingProfiles: utils.UUIDSha1Prefix()}
+	if err := self.DataManager.SetLoadIDs(loadIDs); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	*reply = OK
 	return nil
 }
@@ -466,6 +471,11 @@ func (self *ApierV1) SetActions(attrs V1AttrSetActions, reply *string) (err erro
 	}
 	if err := self.DataManager.SetActions(attrs.ActionsId, storeActions, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
+	}
+	//generate a loadID for RatingProfile and store it in database
+	loadIDs := map[string]string{utils.CacheActions: utils.UUIDSha1Prefix()}
+	if err := self.DataManager.SetLoadIDs(loadIDs); err != nil {
+		return utils.APIErrorHandler(err)
 	}
 	*reply = OK
 	return nil
@@ -595,6 +605,11 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err 
 			return errors.New(utils.SchedulerNotRunningCaps)
 		}
 		sched.Reload()
+	}
+	//generate a loadID for RatingProfile and store it in database
+	loadIDs := map[string]string{utils.CacheActionPlans: utils.UUIDSha1Prefix()}
+	if err := self.DataManager.SetLoadIDs(loadIDs); err != nil {
+		return utils.APIErrorHandler(err)
 	}
 	*reply = OK
 	return nil
@@ -773,6 +788,11 @@ func (self *ApierV1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *st
 		*reply = err.Error()
 		return utils.NewErrServerError(err)
 	}
+	//generate a loadID for RatingProfile and store it in database
+	loadIDs := map[string]string{utils.CacheRatingProfiles: utils.UUIDSha1Prefix()}
+	if err := self.DataManager.SetLoadIDs(loadIDs); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	*reply = utils.OK
 	return nil
 }
@@ -858,6 +878,11 @@ func (self *ApierV1) RemoveActions(attr AttrRemoveActions, reply *string) error 
 			*reply = err.Error()
 			return err
 		}
+	}
+	//generate a loadID for RatingProfile and store it in database
+	loadIDs := map[string]string{utils.CacheActions: utils.UUIDSha1Prefix()}
+	if err := self.DataManager.SetLoadIDs(loadIDs); err != nil {
+		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
 	return nil
