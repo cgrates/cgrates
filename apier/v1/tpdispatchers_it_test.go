@@ -129,7 +129,6 @@ func testTPDispatcherSetTPDispatcher(t *testing.T) {
 			ExpiryTime:     "",
 		},
 		Strategy: utils.MetaFirst,
-		Hosts:    []string{"localhost"},
 		Weight:   10,
 	}
 
@@ -163,7 +162,6 @@ func testTPDispatcherGetFilterIds(t *testing.T) {
 }
 
 func testTPDispatcherUpdateTPDispatcher(t *testing.T) {
-	tpDispatcher.Hosts = []string{"localhost", "192.168.56.203"}
 	var result string
 	if err := tpDispatcherRPC.Call("ApierV1.SetTPDispatcher", tpDispatcher, &result); err != nil {
 		t.Error(err)
@@ -184,7 +182,6 @@ func testTPDispatcherGetTPDispatcherAfterUpdate(t *testing.T) {
 			ExpiryTime:     "",
 		},
 		Strategy: utils.MetaFirst,
-		Hosts:    []string{"192.168.56.203", "localhost"},
 		Weight:   10,
 	}
 	if err := tpDispatcherRPC.Call("ApierV1.GetTPDispatcher",

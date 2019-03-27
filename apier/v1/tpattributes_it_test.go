@@ -130,9 +130,7 @@ func testTPAlsPrfSetTPAlsPrf(t *testing.T) {
 		Attributes: []*utils.TPAttribute{
 			&utils.TPAttribute{
 				FieldName:  "FL1",
-				Initial:    "In1",
 				Substitute: "Al1",
-				Append:     true,
 			},
 		},
 		Weight: 20,
@@ -170,15 +168,11 @@ func testTPAlsPrfUpdateTPAlsPrf(t *testing.T) {
 	tpAlsPrf.Attributes = []*utils.TPAttribute{
 		&utils.TPAttribute{
 			FieldName:  "FL1",
-			Initial:    "In1",
 			Substitute: "Al1",
-			Append:     true,
 		},
 		&utils.TPAttribute{
 			FieldName:  "FL2",
-			Initial:    "In2",
 			Substitute: "Al2",
-			Append:     false,
 		},
 	}
 	var result string
@@ -204,15 +198,11 @@ func testTPAlsPrfGetTPAlsPrfAfterUpdate(t *testing.T) {
 		Attributes: []*utils.TPAttribute{
 			&utils.TPAttribute{
 				FieldName:  "FL2",
-				Initial:    "In2",
 				Substitute: "Al2",
-				Append:     false,
 			},
 			&utils.TPAttribute{
 				FieldName:  "FL1",
-				Initial:    "In1",
 				Substitute: "Al1",
-				Append:     true,
 			},
 		},
 		Weight: 20,

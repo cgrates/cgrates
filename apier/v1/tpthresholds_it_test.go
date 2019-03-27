@@ -37,7 +37,7 @@ var (
 	tpThresholdCfg       *config.CGRConfig
 	tpThresholdRPC       *rpc.Client
 	tpThresholdDataDir   = "/usr/share/cgrates"
-	tpThreshold          *utils.TPThreshold
+	tpThreshold          *utils.TPThresholdProfile
 	tpThresholdDelay     int
 	tpThresholdConfigDIR string //run tests for specific configuration
 )
@@ -117,7 +117,7 @@ func testTPThreholdRpcConn(t *testing.T) {
 }
 
 func testTPThreholdGetTPThreholdBeforeSet(t *testing.T) {
-	var reply *utils.TPThreshold
+	var reply *utils.TPThresholdProfile
 	if err := tpThresholdRPC.Call("ApierV1.GetTPThreshold",
 		&utils.TPTntID{TPid: "TH1", Tenant: "cgrates.org", ID: "Threshold"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
@@ -126,7 +126,7 @@ func testTPThreholdGetTPThreholdBeforeSet(t *testing.T) {
 }
 
 func testTPThreholdSetTPThrehold(t *testing.T) {
-	tpThreshold = &utils.TPThreshold{
+	tpThreshold = &utils.TPThresholdProfile{
 		TPid:      "TH1",
 		Tenant:    "cgrates.org",
 		ID:        "Threshold",
@@ -150,7 +150,7 @@ func testTPThreholdSetTPThrehold(t *testing.T) {
 }
 
 func testTPThreholdGetTPThreholdAfterSet(t *testing.T) {
-	var respond *utils.TPThreshold
+	var respond *utils.TPThresholdProfile
 	if err := tpThresholdRPC.Call("ApierV1.GetTPThreshold",
 		&utils.TPTntID{TPid: "TH1", Tenant: "cgrates.org", ID: "Threshold"}, &respond); err != nil {
 		t.Error(err)
@@ -181,7 +181,7 @@ func testTPThreholdUpdateTPThrehold(t *testing.T) {
 }
 
 func testTPThreholdGetTPThreholdAfterUpdate(t *testing.T) {
-	var respond *utils.TPThreshold
+	var respond *utils.TPThresholdProfile
 	if err := tpThresholdRPC.Call("ApierV1.GetTPThreshold",
 		&utils.TPTntID{TPid: "TH1", Tenant: "cgrates.org", ID: "Threshold"}, &respond); err != nil {
 		t.Error(err)
@@ -201,7 +201,7 @@ func testTPThreholdRemTPThrehold(t *testing.T) {
 }
 
 func testTPThreholdGetTPThreholdAfterRemove(t *testing.T) {
-	var reply *utils.TPThreshold
+	var reply *utils.TPThresholdProfile
 	if err := tpThresholdRPC.Call("ApierV1.GetTPThreshold",
 		&utils.TPTntID{TPid: "TH1", Tenant: "cgrates.org", ID: "Threshold"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
