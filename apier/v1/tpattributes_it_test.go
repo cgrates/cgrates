@@ -1,4 +1,4 @@
-// +build offline_tp
+// +build integration
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments

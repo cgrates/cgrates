@@ -1,4 +1,4 @@
-// +build offline_tp
+// +build integration
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -55,6 +55,7 @@ var sTestsTPRatingProfiles = []func(t *testing.T){
 	testTPRatingProfilesGetTPRatingProfilesByLoadId,
 	testTPRatingProfilesUpdateTPRatingProfile,
 	testTPRatingProfilesGetTPRatingProfileAfterUpdate,
+	testTPRatingProfilesGetTPRatingProfileIds,
 	testTPRatingProfilesRemTPRatingProfile,
 	testTPRatingProfilesGetTPRatingProfileAfterRemove,
 	testTPRatingProfilesKillEngine,
@@ -253,6 +254,17 @@ func testTPRatingProfilesGetTPRatingProfileAfterUpdate(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", tpRatingProfile.Subject, respond.Subject)
 	} else if !reflect.DeepEqual(len(tpRatingProfile.RatingPlanActivations), len(respond.RatingPlanActivations)) {
 		t.Errorf("Expecting : %+v, received: %+v", len(tpRatingProfile.RatingPlanActivations), len(respond.RatingPlanActivations))
+	}
+}
+
+func testTPRatingProfilesGetTPRatingProfileIds(t *testing.T) {
+	var respond []string
+	expected := []string{"RPrf:Tenant1:Category:Subject"}
+	if err := tpRatingProfileRPC.Call("ApierV1.GetTPRatingProfileIds",
+		&AttrGetTPRatingProfileIds{TPid: "TPRProf1"}, &respond); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, respond) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, respond)
 	}
 }
 
