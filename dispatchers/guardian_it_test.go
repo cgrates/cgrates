@@ -30,15 +30,12 @@ import (
 
 var sTestsDspGrd = []func(t *testing.T){
 	testDspGrdPing,
+	testDspGrdLock,
 }
 
 //Test start here
 func TestDspGuardianSTMySQL(t *testing.T) {
 	testDsp(t, sTestsDspGrd, "TestDspGuardianS", "all", "all2", "attributes", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
-}
-
-func TestDspGuardianSMongo(t *testing.T) {
-	testDsp(t, sTestsDspGrd, "TestDspGuardianS", "all", "all2", "attributes_mongo", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
 }
 
 func testDspGrdPing(t *testing.T) {
@@ -80,8 +77,6 @@ func testDspGrdLock(t *testing.T) {
 		},
 	}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.Pong {
-		t.Errorf("Received: %s", reply)
 	}
 
 	var unlockReply []string
@@ -95,10 +90,7 @@ func testDspGrdLock(t *testing.T) {
 		},
 	}, &unlockReply); err != nil {
 		t.Error(err)
-	} else if reply != utils.Pong {
-		t.Errorf("Received: %s", reply)
-	}
-	if !reflect.DeepEqual(args.LockIDs, unlockReply) {
+	} else if !reflect.DeepEqual(args.LockIDs, unlockReply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(args.LockIDs), utils.ToJSON(unlockReply))
 	}
 }
