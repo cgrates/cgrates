@@ -23,7 +23,6 @@ import (
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
-	"sort"
 	"testing"
 	"time"
 
@@ -76,7 +75,6 @@ func TestGuardianSIT(t *testing.T) {
 	if err = guardianRPC.Call(utils.GuardianSv1RemoteUnlock, reply, &unlockReply); err != nil {
 		t.Error(err)
 	}
-	sort.Strings(unlockReply)
 	if !reflect.DeepEqual(args.LockIDs, unlockReply) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(args.LockIDs), utils.ToJSON(unlockReply))
 	}
