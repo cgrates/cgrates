@@ -912,7 +912,7 @@ const (
 	AttributesCsv         = "Attributes.csv"
 	ChargersCsv           = "Chargers.csv"
 	DispatchersCsv        = "Dispatchers.csv"
-	DispatcherHostsCsv    = " DispatcherHosts.csv"
+	DispatcherHostsCsv    = "DispatcherHosts.csv"
 )
 
 // Table Name
