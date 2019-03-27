@@ -29,10 +29,7 @@ func (apierV1 *ApierV1) GetChargerProfile(arg utils.TenantID, reply *engine.Char
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if cpp, err := apierV1.DataManager.GetChargerProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
-		if err.Error() != utils.ErrNotFound.Error() {
-			err = utils.NewErrServerError(err)
-		}
-		return err
+		return utils.APIErrorHandler(err)
 	} else {
 		*reply = *cpp
 	}
@@ -70,9 +67,8 @@ func (apierV1 *ApierV1) SetChargerProfile(arg *ChargerWrapper, reply *string) er
 	if err := apierV1.DataManager.SetChargerProfile(arg.ChargerProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	//generate a loadID for attributeProfile and store it in database
-	loadIDs := map[string]string{utils.CacheChargerProfiles: utils.UUIDSha1Prefix()}
-	if err := apierV1.DataManager.SetLoadIDs(loadIDs); err != nil {
+	//generate a loadID for CacheChargerProfiles and store it in database
+	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheChargerProfiles: utils.UUIDSha1Prefix()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ChargerProfile
@@ -94,6 +90,10 @@ func (apierV1 *ApierV1) RemoveChargerProfile(arg utils.TenantIDWrapper, reply *s
 	}
 	if err := apierV1.DataManager.RemoveChargerProfile(arg.Tenant,
 		arg.ID, utils.NonTransactional, true); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	//generate a loadID for CacheChargerProfiles and store it in database
+	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheChargerProfiles: utils.UUIDSha1Prefix()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ChargerProfile

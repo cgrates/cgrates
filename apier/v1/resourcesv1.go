@@ -63,10 +63,7 @@ func (apierV1 *ApierV1) GetResource(arg utils.TenantID, reply *engine.Resource) 
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if res, err := apierV1.DataManager.GetResource(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
-		if err.Error() != utils.ErrNotFound.Error() {
-			err = utils.NewErrServerError(err)
-		}
-		return err
+		return utils.APIErrorHandler(err)
 	} else {
 		*reply = *res
 	}
@@ -79,10 +76,7 @@ func (apierV1 *ApierV1) GetResourceProfile(arg utils.TenantID, reply *engine.Res
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if rcfg, err := apierV1.DataManager.GetResourceProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
-		if err.Error() != utils.ErrNotFound.Error() {
-			err = utils.NewErrServerError(err)
-		}
-		return err
+		return utils.APIErrorHandler(err)
 	} else {
 		*reply = *rcfg
 	}
@@ -120,10 +114,10 @@ func (apierV1 *ApierV1) SetResourceProfile(arg *ResourceWrapper, reply *string) 
 	if err := apierV1.DataManager.SetResourceProfile(arg.ResourceProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	//generate a loadID for thresholdProfile and store it in database
+	//generate a loadID for CacheResourceProfiles and CacheResources and store it in database
+	//make 1 insert for both ResourceProfile and Resources instead of 2
 	loadID := utils.UUIDSha1Prefix()
-	loadIDs := map[string]string{utils.CacheResourceProfiles: loadID}
-	if err := apierV1.DataManager.SetLoadIDs(loadIDs); err != nil {
+	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheResourceProfiles: loadID, utils.CacheResources: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ResourceProfile
@@ -138,10 +132,6 @@ func (apierV1 *ApierV1) SetResourceProfile(arg *ResourceWrapper, reply *string) 
 		&engine.Resource{Tenant: arg.Tenant,
 			ID:     arg.ID,
 			Usages: make(map[string]*engine.ResourceUsage)}); err != nil {
-		return utils.APIErrorHandler(err)
-	}
-	loadIDs2 := map[string]string{utils.CacheResources: loadID}
-	if err := apierV1.DataManager.SetLoadIDs(loadIDs2); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Resource
@@ -173,6 +163,12 @@ func (apierV1 *ApierV1) RemoveResourceProfile(arg utils.TenantIDWrapper, reply *
 		return utils.APIErrorHandler(err)
 	}
 	if err := apierV1.DataManager.RemoveResource(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	//generate a loadID for CacheResourceProfiles and CacheResources and store it in database
+	//make 1 insert for both ResourceProfile and Resources instead of 2
+	loadID := utils.UUIDSha1Prefix()
+	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheResourceProfiles: loadID, utils.CacheResources: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Resource

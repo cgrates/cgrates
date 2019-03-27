@@ -34,10 +34,7 @@ func (apierV1 *ApierV1) GetDispatcherProfile(arg *utils.TenantID, reply *engine.
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if dpp, err := apierV1.DataManager.GetDispatcherProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
-		if err.Error() != utils.ErrNotFound.Error() {
-			err = utils.NewErrServerError(err)
-		}
-		return err
+		return utils.APIErrorHandler(err)
 	} else {
 		*reply = *dpp
 	}
@@ -75,9 +72,8 @@ func (apierV1 *ApierV1) SetDispatcherProfile(args *DispatcherWrapper, reply *str
 	if err := apierV1.DataManager.SetDispatcherProfile(args.DispatcherProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	//generate a loadID for attributeProfile and store it in database
-	loadIDs := map[string]string{utils.CacheDispatcherProfiles: utils.UUIDSha1Prefix()}
-	if err := apierV1.DataManager.SetLoadIDs(loadIDs); err != nil {
+	//generate a loadID for CacheDispatcherProfiles and store it in database
+	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheDispatcherProfiles: utils.UUIDSha1Prefix()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
@@ -101,9 +97,8 @@ func (apierV1 *ApierV1) RemoveDispatcherProfile(arg *utils.TenantIDWrapper, repl
 		arg.ID, utils.NonTransactional, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	//generate a loadID for attributeProfile and store it in database
-	loadIDs := map[string]string{utils.CacheFilters: utils.UUIDSha1Prefix()}
-	if err := apierV1.DataManager.SetLoadIDs(loadIDs); err != nil {
+	//generate a loadID for CacheDispatcherProfiles and store it in database
+	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheDispatcherProfiles: utils.UUIDSha1Prefix()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
@@ -124,10 +119,7 @@ func (apierV1 *ApierV1) GetDispatcherHost(arg *utils.TenantID, reply *engine.Dis
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if dpp, err := apierV1.DataManager.GetDispatcherHost(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
-		if err.Error() != utils.ErrNotFound.Error() {
-			err = utils.NewErrServerError(err)
-		}
-		return err
+		return utils.APIErrorHandler(err)
 	} else {
 		*reply = *dpp
 	}
@@ -165,6 +157,10 @@ func (apierV1 *ApierV1) SetDispatcherHost(args *DispatcherHostWrapper, reply *st
 	if err := apierV1.DataManager.SetDispatcherHost(args.DispatcherHost); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	//generate a loadID for CacheDispatcherHosts and store it in database
+	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheDispatcherHosts: utils.UUIDSha1Prefix()}); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	//handle caching for DispatcherProfile
 	argCache := engine.ArgsGetCacheItem{
 		CacheID: utils.CacheDispatcherHosts,
@@ -184,6 +180,10 @@ func (apierV1 *ApierV1) RemoveDispatcherHost(arg *utils.TenantIDWrapper, reply *
 	}
 	if err := apierV1.DataManager.RemoveDispatcherHost(arg.Tenant,
 		arg.ID, utils.NonTransactional); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	//generate a loadID for CacheDispatcherHosts and store it in database
+	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheDispatcherHosts: utils.UUIDSha1Prefix()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
