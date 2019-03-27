@@ -37,7 +37,7 @@ var (
 	tpResCfg       *config.CGRConfig
 	tpResRPC       *rpc.Client
 	tpResDataDir   = "/usr/share/cgrates"
-	tpRes          *utils.TPResource
+	tpRes          *utils.TPResourceProfile
 	tpResDelay     int
 	tpResConfigDIR string //run tests for specific configuration
 )
@@ -115,7 +115,7 @@ func testTPResRpcConn(t *testing.T) {
 }
 
 func testTPResGetTPResourceBeforeSet(t *testing.T) {
-	var reply *utils.TPResource
+	var reply *utils.TPResourceProfile
 	if err := tpResRPC.Call("ApierV1.GetTPResource",
 		&utils.TPTntID{TPid: "TPR1", Tenant: "cgrates.org", ID: "ResGroup1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
@@ -124,7 +124,7 @@ func testTPResGetTPResourceBeforeSet(t *testing.T) {
 }
 
 func testTPResSetTPResource(t *testing.T) {
-	tpRes = &utils.TPResource{
+	tpRes = &utils.TPResourceProfile{
 		Tenant:    "cgrates.org",
 		TPid:      "TPR1",
 		ID:        "ResGroup1",
@@ -150,7 +150,7 @@ func testTPResSetTPResource(t *testing.T) {
 }
 
 func testTPResGetTPResourceAfterSet(t *testing.T) {
-	var respond *utils.TPResource
+	var respond *utils.TPResourceProfile
 	if err := tpResRPC.Call("ApierV1.GetTPResource", &utils.TPTntID{TPid: "TPR1", Tenant: "cgrates.org", ID: "ResGroup1"},
 		&respond); err != nil {
 		t.Error(err)
@@ -170,7 +170,7 @@ func testTPResUpdateTPResource(t *testing.T) {
 }
 
 func testTPResGetTPResourceAfterUpdate(t *testing.T) {
-	var expectedTPR *utils.TPResource
+	var expectedTPR *utils.TPResourceProfile
 	if err := tpResRPC.Call("ApierV1.GetTPResource", &utils.TPTntID{TPid: "TPR1", Tenant: "cgrates.org", ID: "ResGroup1"},
 		&expectedTPR); err != nil {
 		t.Error(err)
@@ -190,7 +190,7 @@ func testTPResRemTPResource(t *testing.T) {
 }
 
 func testTPResGetTPResourceAfterRemove(t *testing.T) {
-	var respond *utils.TPResource
+	var respond *utils.TPResourceProfile
 	if err := tpResRPC.Call("ApierV1.GetTPResource", &utils.TPTntID{TPid: "TPR1", Tenant: "cgrates.org", ID: "ResGroup1"},
 		&respond); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

@@ -47,7 +47,7 @@ type AttrGetTPRatingProfileByLoadId struct {
 func (self *ApierV1) GetTPRatingProfilesByLoadId(attrs utils.TPRatingProfile, reply *[]*utils.TPRatingProfile) error {
 	mndtryFlds := []string{"TPid", "LoadId"}
 	if len(attrs.Subject) != 0 { // If Subject provided as filter, make all related fields mandatory
-		mndtryFlds = append(mndtryFlds, "Tenant", "Category", "Direction", "Subject")
+		mndtryFlds = append(mndtryFlds, "Tenant", "Category", "Subject")
 	}
 	if missing := utils.MissingStructFields(&attrs, mndtryFlds); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)

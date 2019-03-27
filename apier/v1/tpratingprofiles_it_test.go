@@ -132,24 +132,21 @@ func testTPRatingProfilesGetTPRatingProfileBeforeSet(t *testing.T) {
 
 func testTPRatingProfilesSetTPRatingProfile(t *testing.T) {
 	tpRatingProfile = &utils.TPRatingProfile{
-		TPid:      "TPRProf1",
-		LoadId:    "RPrf",
-		Direction: "*out",
-		Tenant:    "Tenant1",
-		Category:  "Category",
-		Subject:   "Subject",
+		TPid:     "TPRProf1",
+		LoadId:   "RPrf",
+		Tenant:   "Tenant1",
+		Category: "Category",
+		Subject:  "Subject",
 		RatingPlanActivations: []*utils.TPRatingActivation{
 			&utils.TPRatingActivation{
 				ActivationTime:   "2014-07-29T15:00:00Z",
 				RatingPlanId:     "PlanOne",
 				FallbackSubjects: "FallBack",
-				CdrStatQueueIds:  "RandomId",
 			},
 			&utils.TPRatingActivation{
 				ActivationTime:   "2015-07-29T10:00:00Z",
 				RatingPlanId:     "PlanTwo",
 				FallbackSubjects: "FallOut",
-				CdrStatQueueIds:  "RandomIdTwo",
 			},
 		},
 	}
@@ -170,8 +167,6 @@ func testTPRatingProfilesGetTPRatingProfileAfterSet(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", tpRatingProfile.TPid, respond.TPid)
 	} else if !reflect.DeepEqual(tpRatingProfile.LoadId, respond.LoadId) {
 		t.Errorf("Expecting : %+v, received: %+v", tpRatingProfile.LoadId, respond.LoadId)
-	} else if !reflect.DeepEqual(tpRatingProfile.Direction, respond.Direction) {
-		t.Errorf("Expecting : %+v, received: %+v", tpRatingProfile.Direction, respond.Direction)
 	} else if !reflect.DeepEqual(tpRatingProfile.Tenant, respond.Tenant) {
 		t.Errorf("Expecting : %+v, received: %+v", tpRatingProfile.Tenant, respond.Tenant)
 	} else if !reflect.DeepEqual(tpRatingProfile.Category, respond.Category) {
@@ -188,7 +183,7 @@ func testTPRatingProfilesGetTPRatingProfileLoadIds(t *testing.T) {
 	expected := []string{"RPrf"}
 	if err := tpRatingProfileRPC.Call("ApierV1.GetTPRatingProfileLoadIds",
 		&utils.AttrTPRatingProfileIds{TPid: tpRatingProfile.TPid, Tenant: tpRatingProfile.Tenant,
-			Category: tpRatingProfile.Category, Direction: tpRatingProfile.Direction, Subject: tpRatingProfile.Subject}, &result); err != nil {
+			Category: tpRatingProfile.Category, Subject: tpRatingProfile.Subject}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, result) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, result)
@@ -204,8 +199,6 @@ func testTPRatingProfilesGetTPRatingProfilesByLoadId(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", tpRatingProfile.TPid, (*respond)[0].TPid)
 	} else if !reflect.DeepEqual(tpRatingProfile.LoadId, (*respond)[0].LoadId) {
 		t.Errorf("Expecting : %+v, received: %+v", tpRatingProfile.LoadId, (*respond)[0].LoadId)
-	} else if !reflect.DeepEqual(tpRatingProfile.Direction, (*respond)[0].Direction) {
-		t.Errorf("Expecting : %+v, received: %+v", tpRatingProfile.Direction, (*respond)[0].Direction)
 	} else if !reflect.DeepEqual(tpRatingProfile.Tenant, (*respond)[0].Tenant) {
 		t.Errorf("Expecting : %+v, received: %+v", tpRatingProfile.Tenant, (*respond)[0].Tenant)
 	} else if !reflect.DeepEqual(tpRatingProfile.Category, (*respond)[0].Category) {
@@ -224,19 +217,16 @@ func testTPRatingProfilesUpdateTPRatingProfile(t *testing.T) {
 			ActivationTime:   "2014-07-29T15:00:00Z",
 			RatingPlanId:     "PlanOne",
 			FallbackSubjects: "FallBack",
-			CdrStatQueueIds:  "RandomId",
 		},
 		&utils.TPRatingActivation{
 			ActivationTime:   "2015-07-29T10:00:00Z",
 			RatingPlanId:     "PlanTwo",
 			FallbackSubjects: "FallOut",
-			CdrStatQueueIds:  "RandomIdTwo",
 		},
 		&utils.TPRatingActivation{
 			ActivationTime:   "2017-07-29T10:00:00Z",
 			RatingPlanId:     "BackupPlan",
 			FallbackSubjects: "Retreat",
-			CdrStatQueueIds:  "DefenseID",
 		},
 	}
 	if err := tpRatingProfileRPC.Call("ApierV1.SetTPRatingProfile", tpRatingProfile, &result); err != nil {
@@ -255,8 +245,6 @@ func testTPRatingProfilesGetTPRatingProfileAfterUpdate(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", tpRatingProfile.TPid, respond.TPid)
 	} else if !reflect.DeepEqual(tpRatingProfile.LoadId, respond.LoadId) {
 		t.Errorf("Expecting : %+v, received: %+v", tpRatingProfile.LoadId, respond.LoadId)
-	} else if !reflect.DeepEqual(tpRatingProfile.Direction, respond.Direction) {
-		t.Errorf("Expecting : %+v, received: %+v", tpRatingProfile.Direction, respond.Direction)
 	} else if !reflect.DeepEqual(tpRatingProfile.Tenant, respond.Tenant) {
 		t.Errorf("Expecting : %+v, received: %+v", tpRatingProfile.Tenant, respond.Tenant)
 	} else if !reflect.DeepEqual(tpRatingProfile.Category, respond.Category) {
