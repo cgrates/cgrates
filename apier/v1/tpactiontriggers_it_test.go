@@ -92,9 +92,9 @@ func testTPActionTriggersInitCfg(t *testing.T) {
 	config.SetCgrConfig(tpActionTriggerCfg)
 	switch tpActionTriggerConfigDIR {
 	case "tutmongo": // Mongo needs more time to reset db, need to investigate
-		tpActionDelay = 2000
+		tpActionTriggerDelay = 2000
 	default:
-		tpActionDelay = 1000
+		tpActionTriggerDelay = 1000
 	}
 }
 

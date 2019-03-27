@@ -72,6 +72,7 @@ const (
 	colCpp  = "charger_profiles"
 	colDpp  = "dispatcher_profiles"
 	colDph  = "dispatcher_hosts"
+	colLID  = "load_ids"
 )
 
 var (
@@ -2186,6 +2187,40 @@ func (ms *MongoStorage) RemoveDispatcherHostDrv(tenant, id string) (err error) {
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound
 		}
+		return err
+	})
+}
+
+func (ms *MongoStorage) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[string]string, err error) {
+	fop := options.FindOne()
+	if itemIDPrefix != "" {
+		fop.SetProjection(bson.M{itemIDPrefix: 1, "_id": 0})
+	} else {
+		fop.SetProjection(bson.M{"_id": 0})
+	}
+	if err = ms.query(func(sctx mongo.SessionContext) (err error) {
+		cur := ms.getCol(colLID).FindOne(sctx, bson.D{}, fop)
+		if err := cur.Decode(&loadIDs); err != nil {
+			if err == mongo.ErrNoDocuments {
+				return utils.ErrNotFound
+			}
+			return err
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+	if len(loadIDs) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return
+}
+
+func (ms *MongoStorage) SetLoadIDsDrv(loadIDs map[string]string) (err error) {
+	return ms.query(func(sctx mongo.SessionContext) (err error) {
+		_, err = ms.getCol(colLID).UpdateOne(sctx, bson.D{}, bson.M{"$set": loadIDs},
+			options.Update().SetUpsert(true),
+		)
 		return err
 	})
 }
