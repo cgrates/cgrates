@@ -372,9 +372,8 @@ func (self *ApierV1) SetRatingProfile(attrs utils.AttrSetRatingProfile, reply *s
 	if err := self.DataManager.SetRatingProfile(rpfl, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	//generate a loadID for RatingProfile and store it in database
-	loadIDs := map[string]string{utils.CacheRatingProfiles: utils.UUIDSha1Prefix()}
-	if err := self.DataManager.SetLoadIDs(loadIDs); err != nil {
+	//generate a loadID for CacheRatingProfiles and store it in database
+	if err := self.DataManager.SetLoadIDs(map[string]string{utils.CacheRatingProfiles: utils.UUIDSha1Prefix()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = OK
@@ -472,9 +471,8 @@ func (self *ApierV1) SetActions(attrs V1AttrSetActions, reply *string) (err erro
 	if err := self.DataManager.SetActions(attrs.ActionsId, storeActions, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	//generate a loadID for RatingProfile and store it in database
-	loadIDs := map[string]string{utils.CacheActions: utils.UUIDSha1Prefix()}
-	if err := self.DataManager.SetLoadIDs(loadIDs); err != nil {
+	//generate a loadID for CacheActions and store it in database
+	if err := self.DataManager.SetLoadIDs(map[string]string{utils.CacheActions: utils.UUIDSha1Prefix()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = OK
@@ -606,9 +604,8 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err 
 		}
 		sched.Reload()
 	}
-	//generate a loadID for RatingProfile and store it in database
-	loadIDs := map[string]string{utils.CacheActionPlans: utils.UUIDSha1Prefix()}
-	if err := self.DataManager.SetLoadIDs(loadIDs); err != nil {
+	//generate a loadID for CacheActionPlans and store it in database
+	if err := self.DataManager.SetLoadIDs(map[string]string{utils.CacheActionPlans: utils.UUIDSha1Prefix()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = OK
@@ -788,9 +785,8 @@ func (self *ApierV1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *st
 		*reply = err.Error()
 		return utils.NewErrServerError(err)
 	}
-	//generate a loadID for RatingProfile and store it in database
-	loadIDs := map[string]string{utils.CacheRatingProfiles: utils.UUIDSha1Prefix()}
-	if err := self.DataManager.SetLoadIDs(loadIDs); err != nil {
+	//generate a loadID for CacheActionPlans and store it in database
+	if err := self.DataManager.SetLoadIDs(map[string]string{utils.CacheRatingProfiles: utils.UUIDSha1Prefix()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -879,9 +875,8 @@ func (self *ApierV1) RemoveActions(attr AttrRemoveActions, reply *string) error 
 			return err
 		}
 	}
-	//generate a loadID for RatingProfile and store it in database
-	loadIDs := map[string]string{utils.CacheActions: utils.UUIDSha1Prefix()}
-	if err := self.DataManager.SetLoadIDs(loadIDs); err != nil {
+	//generate a loadID for CacheActions and store it in database
+	if err := self.DataManager.SetLoadIDs(map[string]string{utils.CacheActions: utils.UUIDSha1Prefix()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

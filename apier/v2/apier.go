@@ -301,6 +301,10 @@ func (self *ApierV2) SetActions(attrs utils.AttrSetActions, reply *string) error
 	if err := self.DataManager.SetActions(attrs.ActionsId, storeActions, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
 	}
+	//generate a loadID for CacheActions and store it in database
+	if err := self.DataManager.SetLoadIDs(map[string]string{utils.CacheActions: utils.UUIDSha1Prefix()}); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	*reply = utils.OK
 	return nil
 }

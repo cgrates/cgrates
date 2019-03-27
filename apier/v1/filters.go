@@ -36,9 +36,8 @@ func (apierV1 *ApierV1) SetFilter(arg *FilterWrapper, reply *string) error {
 	if err := apierV1.DataManager.SetFilter(arg.Filter); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	//generate a loadID for attributeProfile and store it in database
-	loadIDs := map[string]string{utils.CacheFilters: utils.UUIDSha1Prefix()}
-	if err := apierV1.DataManager.SetLoadIDs(loadIDs); err != nil {
+	//generate a loadID for CacheFilters and store it in database
+	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheFilters: utils.UUIDSha1Prefix()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Filter
@@ -59,10 +58,7 @@ func (apierV1 *ApierV1) GetFilter(arg utils.TenantID, reply *engine.Filter) erro
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if fltr, err := apierV1.DataManager.GetFilter(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
-		if err.Error() != utils.ErrNotFound.Error() {
-			err = utils.NewErrServerError(err)
-		}
-		return err
+		return utils.APIErrorHandler(err)
 	} else {
 		*reply = *fltr
 	}
@@ -93,14 +89,10 @@ func (apierV1 *ApierV1) RemoveFilter(arg utils.TenantIDWrapper, reply *string) e
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := apierV1.DataManager.RemoveFilter(arg.Tenant, arg.ID, utils.NonTransactional); err != nil {
-		if err.Error() != utils.ErrNotFound.Error() {
-			err = utils.NewErrServerError(err)
-		}
-		return err
+		return utils.APIErrorHandler(err)
 	}
-	//generate a loadID for attributeProfile and store it in database
-	loadIDs := map[string]string{utils.CacheFilters: utils.UUIDSha1Prefix()}
-	if err := apierV1.DataManager.SetLoadIDs(loadIDs); err != nil {
+	//generate a loadID for CacheFilters and store it in database
+	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheFilters: utils.UUIDSha1Prefix()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Filter

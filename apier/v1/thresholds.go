@@ -102,10 +102,10 @@ func (apierV1 *ApierV1) SetThresholdProfile(args *ThresholdWrapper, reply *strin
 	if err := apierV1.DataManager.SetThresholdProfile(args.ThresholdProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	//generate a loadID for thresholdProfile and store it in database
+	//generate a loadID for CacheThresholdProfiles and CacheThresholds and store it in database
+	//make 1 insert for both ThresholdProfile and Threshold instead of 2
 	loadID := utils.UUIDSha1Prefix()
-	loadIDs := map[string]string{utils.CacheThresholdProfiles: loadID}
-	if err := apierV1.DataManager.SetLoadIDs(loadIDs); err != nil {
+	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheThresholdProfiles: loadID, utils.CacheThresholds: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ThresholdProfile
@@ -118,10 +118,6 @@ func (apierV1 *ApierV1) SetThresholdProfile(args *ThresholdWrapper, reply *strin
 	}
 	if err := apierV1.DataManager.SetThreshold(&engine.Threshold{Tenant: args.Tenant, ID: args.ID}); err != nil {
 		return err
-	}
-	loadIDs2 := map[string]string{utils.CacheThresholds: loadID}
-	if err := apierV1.DataManager.SetLoadIDs(loadIDs2); err != nil {
-		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Threshold
 	argCache = engine.ArgsGetCacheItem{
@@ -152,6 +148,12 @@ func (apierV1 *ApierV1) RemoveThresholdProfile(args *utils.TenantIDWrapper, repl
 		return utils.APIErrorHandler(err)
 	}
 	if err := apierV1.DataManager.RemoveThreshold(args.Tenant, args.ID, utils.NonTransactional); err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	//generate a loadID for CacheThresholdProfiles and CacheThresholds and store it in database
+	//make 1 insert for both ThresholdProfile and Threshold instead of 2
+	loadID := utils.UUIDSha1Prefix()
+	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheThresholdProfiles: loadID, utils.CacheThresholds: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Threshold

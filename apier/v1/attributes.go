@@ -85,9 +85,8 @@ func (apierV1 *ApierV1) SetAttributeProfile(alsWrp *AttributeWrapper, reply *str
 	if err := apierV1.DataManager.SetAttributeProfile(alsWrp.AttributeProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	//generate a loadID for attributeProfile and store it in database
-	loadIDs := map[string]string{utils.CacheAttributeProfiles: utils.UUIDSha1Prefix()}
-	if err := apierV1.DataManager.SetLoadIDs(loadIDs); err != nil {
+	//generate a loadID for CacheAttributeProfiles and store it in database
+	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheAttributeProfiles: utils.UUIDSha1Prefix()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	args := engine.ArgsGetCacheItem{
@@ -108,10 +107,11 @@ func (apierV1 *ApierV1) RemoveAttributeProfile(arg *utils.TenantIDWrapper, reply
 	}
 	if err := apierV1.DataManager.RemoveAttributeProfile(arg.Tenant, arg.ID,
 		utils.NonTransactional, true); err != nil {
-		if err.Error() != utils.ErrNotFound.Error() {
-			err = utils.NewErrServerError(err)
-		}
-		return err
+		return utils.APIErrorHandler(err)
+	}
+	//generate a loadID for CacheAttributeProfiles and store it in database
+	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheAttributeProfiles: utils.UUIDSha1Prefix()}); err != nil {
+		return utils.APIErrorHandler(err)
 	}
 	args := engine.ArgsGetCacheItem{
 		CacheID: utils.CacheAttributeProfiles,
