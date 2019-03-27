@@ -787,14 +787,40 @@ func TestActionTriggers(t *testing.T) {
 func TestActionResetTriggres(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB",
-		BalanceMap: map[string]Balances{utils.MONETARY: Balances{&Balance{Value: 10}},
-			utils.VOICE: Balances{&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
-				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")}}},
-		UnitCounters: UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{
-			Type: utils.StringPointer(utils.MONETARY)}, ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true},
-			&ActionTrigger{Balance: &BalanceFilter{
-				Type: utils.StringPointer(utils.MONETARY)}, ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true}},
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
+				&Balance{Value: 10},
+			},
+			utils.VOICE: Balances{
+				&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
+				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")},
+			},
+		},
+		UnitCounters: UnitCounters{
+			utils.MONETARY: []*UnitCounter{
+				&UnitCounter{
+					Counters: CounterFilters{
+						&CounterFilter{Value: 1},
+					},
+				},
+			},
+		},
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MONETARY)},
+				ThresholdValue: 2,
+				ActionsID:      "TEST_ACTIONS",
+				Executed:       true,
+			},
+			&ActionTrigger{
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MONETARY)},
+				ThresholdValue: 2,
+				ActionsID:      "TEST_ACTIONS",
+				Executed:       true,
+			},
+		},
 	}
 	resetTriggersAction(ub, nil, nil, nil)
 	if ub.ActionTriggers[0].Executed == true || ub.ActionTriggers[1].Executed == true {
@@ -804,12 +830,26 @@ func TestActionResetTriggres(t *testing.T) {
 
 func TestActionResetTriggresExecutesThem(t *testing.T) {
 	ub := &Account{
-		ID:         "TEST_UB",
-		BalanceMap: map[string]Balances{utils.MONETARY: Balances{&Balance{Value: 10}}},
-		UnitCounters: UnitCounters{utils.MONETARY: []*UnitCounter{
-			&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{
-			Type: utils.StringPointer(utils.MONETARY)}, ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true}},
+		ID: "TEST_UB",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
+				&Balance{Value: 10},
+			},
+		},
+		UnitCounters: UnitCounters{
+			utils.MONETARY: []*UnitCounter{
+				&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1}}},
+			},
+		},
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MONETARY)},
+				ThresholdValue: 2,
+				ActionsID:      "TEST_ACTIONS",
+				Executed:       true,
+			},
+		},
 	}
 	resetTriggersAction(ub, nil, nil, nil)
 	if ub.ActionTriggers[0].Executed == true || ub.BalanceMap[utils.MONETARY][0].GetValue() == 12 {
@@ -820,20 +860,77 @@ func TestActionResetTriggresExecutesThem(t *testing.T) {
 func TestActionResetTriggresActionFilter(t *testing.T) {
 	ub := &Account{
 		ID: "TEST_UB",
-		BalanceMap: map[string]Balances{utils.MONETARY: Balances{
-			&Balance{Value: 10}}, utils.VOICE: Balances{
-			&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
-			&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")}}},
-		UnitCounters: UnitCounters{utils.MONETARY: []*UnitCounter{
-			&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
+				&Balance{Value: 10},
+			},
+			utils.VOICE: Balances{
+				&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
+				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")},
+			},
+		},
+		UnitCounters: UnitCounters{
+			utils.MONETARY: []*UnitCounter{
+				&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1}}},
+			},
+		},
 		ActionTriggers: ActionTriggers{
-			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
-				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true},
-			&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
-				ThresholdValue: 2, ActionsID: "TEST_ACTIONS", Executed: true}},
+			&ActionTrigger{
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MONETARY),
+				},
+				ThresholdValue: 2,
+				ActionsID:      "TEST_ACTIONS",
+				Executed:       true},
+			&ActionTrigger{
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MONETARY),
+				},
+				ThresholdValue: 2,
+				ActionsID:      "TEST_ACTIONS",
+				Executed:       true}},
 	}
 	resetTriggersAction(ub, &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.SMS)}}, nil, nil)
 	if ub.ActionTriggers[0].Executed == false || ub.ActionTriggers[1].Executed == false {
+		t.Error("Reset triggers action failed!")
+	}
+}
+
+func TestActionResetTriggresActionFilter2(t *testing.T) {
+	ub := &Account{
+		ID: "TestActionResetTriggresActionFilter2",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
+				&Balance{Value: 10},
+			},
+			utils.VOICE: Balances{
+				&Balance{Value: 10, Weight: 20, DestinationIDs: utils.NewStringMap("NAT")},
+				&Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")},
+			},
+		},
+		UnitCounters: UnitCounters{
+			utils.MONETARY: []*UnitCounter{
+				&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1}}},
+			},
+		},
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MONETARY),
+				},
+				ThresholdValue: 2,
+				ActionsID:      "TEST_ACTIONS",
+				Executed:       true},
+			&ActionTrigger{
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MONETARY),
+				},
+				ThresholdValue: 2,
+				ActionsID:      "TEST_ACTIONS",
+				Executed:       true}},
+	}
+	resetTriggersAction(ub, &Action{}, nil, nil)
+	if ub.ActionTriggers[0].Executed != false && ub.ActionTriggers[1].Executed != false {
 		t.Error("Reset triggers action failed!")
 	}
 }
