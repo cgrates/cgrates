@@ -838,6 +838,7 @@ func TestApierReloadCache(t *testing.T) {
 	expectedStats[utils.CacheRatingProfiles].Items = 2
 	expectedStats[utils.CacheRatingPlans].Items = 1
 	expectedStats[utils.CacheReverseDestinations].Items = 10
+	expectedStats[utils.CacheLoadIDs].Items = 20
 	if err := rater.Call("CacheSv1.GetCacheStats", nil, &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
@@ -1307,10 +1308,11 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheActionPlans].Items = 7
 	expStats[utils.CacheActions].Items = 6
 	expStats[utils.CacheDestinations].Items = 3
+	expStats[utils.CacheLoadIDs].Items = 17
 	if err := rater.Call("CacheSv1.GetCacheStats", nil, &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expStats, rcvStats) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
+		t.Errorf("Expecting: %+v,\n received: %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
 	}
 	reply := ""
 	// Simple test that command is executed without errors
@@ -1333,6 +1335,7 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheSupplierProfiles].Items = 2
 	expStats[utils.CacheThresholdProfiles].Items = 1
 	expStats[utils.CacheThresholds].Items = 1
+	expStats[utils.CacheLoadIDs].Items = 20
 
 	if err := rater.Call("CacheSv1.GetCacheStats", nil, &rcvStats); err != nil {
 		t.Error(err)

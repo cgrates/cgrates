@@ -129,6 +129,7 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheActionPlans].Items = 7
 	expStats[utils.CacheActions].Items = 6
 	expStats[utils.CacheDestinations].Items = 3
+	expStats[utils.CacheLoadIDs].Items = 17
 	if err := chcRPC.Call(utils.CacheSv1GetCacheStats, nil, &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expStats, rcvStats) {

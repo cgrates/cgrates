@@ -83,6 +83,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats[utils.CacheActionPlans].Items = 1
 	expStats[utils.CacheActions].Items = 1
 	expStats[utils.CacheDestinations].Items = 4
+	expStats[utils.CacheLoadIDs].Items = 17
 	args := AttrCacheIDsWithApiKey{
 		DispatcherResource: DispatcherResource{
 			APIKey: "chc12345",
@@ -124,7 +125,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats[utils.CacheSupplierProfiles].Items = 3
 	expStats[utils.CacheThresholdProfiles].Items = 2
 	expStats[utils.CacheThresholds].Items = 2
-
+	expStats[utils.CacheLoadIDs].Items = 20
 	if err := dispEngine.RCP.Call(utils.CacheSv1GetCacheStats, &args, &rcvStats); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expStats, rcvStats) {
@@ -166,6 +167,7 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.CacheSupplierFilterIndexes:   utils.MetaReady,
 		utils.CacheChargerFilterIndexes:    utils.MetaReady,
 		utils.CacheDispatcherFilterIndexes: utils.MetaReady,
+		utils.CacheLoadIDs:                 utils.MetaReady,
 	}
 
 	if err := dispEngine.RCP.Call(utils.CacheSv1PrecacheStatus, AttrCacheIDsWithApiKey{

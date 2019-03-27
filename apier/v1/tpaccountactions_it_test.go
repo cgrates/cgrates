@@ -121,7 +121,8 @@ func testTPAccActionsRpcConn(t *testing.T) {
 func testTPAccActionsGetTPAccActionBeforeSet(t *testing.T) {
 	var reply *utils.TPAccountActions
 	if err := tpAccActionsRPC.Call("ApierV1.GetTPAccountActions",
-		&AttrGetTPAccountActions{TPid: "TPAcc", AccountActionsId: tpAccActionID}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&AttrGetTPAccountActions{TPid: "TPAcc", AccountActionsId: tpAccActionID}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
@@ -224,7 +225,8 @@ func testTPAccActionsRemTPAccAction(t *testing.T) {
 func testTPAccActionsGetTPAccActionAfterRemove(t *testing.T) {
 	var reply *utils.TPAccountActions
 	if err := tpAccActionsRPC.Call("ApierV1.GetTPAccountActions",
-		&AttrGetTPAccountActions{TPid: "TPAcc", AccountActionsId: tpAccActionID}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&AttrGetTPAccountActions{TPid: "TPAcc", AccountActionsId: tpAccActionID}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

@@ -58,5 +58,11 @@
 	"enabled": true,							// starts User service: <true|false>.
 },
 
+"apier": {	
+	"caches_conns":[						// connections to CacheS for reloads
+		{"address": "127.0.0.1:3012", "transport": "*json"},
+	],						
+},
+
 
 }

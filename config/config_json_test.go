@@ -1504,7 +1504,8 @@ func TestDfApierCfg(t *testing.T) {
 	eCfg := &ApierJsonCfg{
 		Caches_conns: &[]*HaPoolJsonCfg{
 			{
-				Address: utils.StringPointer(utils.MetaInternal),
+				Address:   utils.StringPointer("127.0.0.1:2012"),
+				Transport: utils.StringPointer(utils.MetaJSONrpc),
 			},
 		},
 	}
