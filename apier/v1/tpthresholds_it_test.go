@@ -25,6 +25,7 @@ import (
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -141,6 +142,8 @@ func testTPThreholdSetTPThrehold(t *testing.T) {
 		ActionIDs: []string{"Thresh1", "Thresh2"},
 		Async:     true,
 	}
+	sort.Strings(tpThreshold.FilterIDs)
+	sort.Strings(tpThreshold.ActionIDs)
 	var result string
 	if err := tpThresholdRPC.Call("ApierV1.SetTPThreshold", tpThreshold, &result); err != nil {
 		t.Error(err)
@@ -153,8 +156,11 @@ func testTPThreholdGetTPThreholdAfterSet(t *testing.T) {
 	var respond *utils.TPThresholdProfile
 	if err := tpThresholdRPC.Call("ApierV1.GetTPThreshold",
 		&utils.TPTntID{TPid: "TH1", Tenant: "cgrates.org", ID: "Threshold"}, &respond); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(tpThreshold, respond) {
+		t.Fatal(err)
+	}
+	sort.Strings(respond.FilterIDs)
+	sort.Strings(respond.ActionIDs)
+	if !reflect.DeepEqual(tpThreshold, respond) {
 		t.Errorf("Expecting: %+v, received: %+v", tpThreshold, respond)
 	}
 }
@@ -164,7 +170,7 @@ func testTPThreholdGetTPThreholdIds(t *testing.T) {
 	expectedTPID := []string{"Threshold"}
 	if err := tpThresholdRPC.Call("ApierV1.GetTPThresholdIDs",
 		&AttrGetTPThresholdIds{TPid: tpThreshold.TPid}, &result); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	} else if !reflect.DeepEqual(result, expectedTPID) {
 		t.Errorf("Expecting: %+v, received: %+v", result, expectedTPID)
 	}
@@ -184,8 +190,11 @@ func testTPThreholdGetTPThreholdAfterUpdate(t *testing.T) {
 	var respond *utils.TPThresholdProfile
 	if err := tpThresholdRPC.Call("ApierV1.GetTPThreshold",
 		&utils.TPTntID{TPid: "TH1", Tenant: "cgrates.org", ID: "Threshold"}, &respond); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(tpThreshold, respond) {
+		t.Fatal(err)
+	}
+	sort.Strings(respond.FilterIDs)
+	sort.Strings(respond.ActionIDs)
+	if !reflect.DeepEqual(tpThreshold, respond) {
 		t.Errorf("Expecting: %+v, received: %+v", tpThreshold, respond)
 	}
 }

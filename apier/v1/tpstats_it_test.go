@@ -25,6 +25,8 @@ import (
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
+	"sort"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -145,6 +147,7 @@ func testTPStatsSetTPStat(t *testing.T) {
 		MinItems:     1,
 		ThresholdIDs: []string{"ThreshValue", "ThreshValueTwo"},
 	}
+	sort.Strings(tpStat.ThresholdIDs)
 	var result string
 	if err := tpStatRPC.Call("ApierV1.SetTPStat", tpStat, &result); err != nil {
 		t.Error(err)
@@ -157,8 +160,10 @@ func testTPStatsGetTPStatAfterSet(t *testing.T) {
 	var respond *utils.TPStatProfile
 	if err := tpStatRPC.Call("ApierV1.GetTPStat",
 		&utils.TPTntID{TPid: "TPS1", Tenant: "cgrates.org", ID: "Stat1"}, &respond); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(tpStat, respond) {
+		t.Fatal(err)
+	}
+	sort.Strings(respond.ThresholdIDs)
+	if !reflect.DeepEqual(tpStat, respond) {
 		t.Errorf("Expecting: %+v, received: %+v", tpStat, respond)
 	}
 }
@@ -174,6 +179,9 @@ func testTPStatsUpdateTPStat(t *testing.T) {
 			MetricID: "*averege",
 		},
 	}
+	sort.Slice(tpStat.Metrics, func(i, j int) bool {
+		return strings.Compare(tpStat.Metrics[i].MetricID, tpStat.Metrics[j].MetricID) == -1
+	})
 	if err := tpStatRPC.Call("ApierV1.SetTPStat", tpStat, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -185,8 +193,13 @@ func testTPStatsGetTPStatAfterUpdate(t *testing.T) {
 	var expectedTPS *utils.TPStatProfile
 	if err := tpStatRPC.Call("ApierV1.GetTPStat",
 		&utils.TPTntID{TPid: "TPS1", Tenant: "cgrates.org", ID: "Stat1"}, &expectedTPS); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(tpStat, expectedTPS) {
+		t.Fatal(err)
+	}
+	sort.Strings(expectedTPS.ThresholdIDs)
+	sort.Slice(expectedTPS.Metrics, func(i, j int) bool {
+		return strings.Compare(expectedTPS.Metrics[i].MetricID, expectedTPS.Metrics[j].MetricID) == -1
+	})
+	if !reflect.DeepEqual(tpStat, expectedTPS) {
 		t.Errorf("Expecting: %+v, received: %+v", tpStat, expectedTPS)
 	}
 }
