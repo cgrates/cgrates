@@ -1150,6 +1150,12 @@ func startRpc(server *utils.Server, internalRaterChan,
 	}
 }
 
+func initGuardianSv1(server *utils.Server) {
+	guardianSv1 := v1.NewGuardianSv1()
+	server.RpcRegister(guardianSv1)
+	utils.RegisterRpcParams("", guardianSv1)
+}
+
 func writePid() {
 	utils.Logger.Info(*pidFile)
 	f, err := os.Create(*pidFile)
@@ -1386,6 +1392,11 @@ func main() {
 
 	// init SchedulerS
 	initSchedulerS(internalSchedSChan, srvManager, server)
+
+	// Start GuardianSv1
+	if !cfg.DispatcherSCfg().Enabled {
+		go initGuardianSv1(server)
+	}
 
 	// Start Scheduler
 	if cfg.SchedulerCfg().Enabled {
