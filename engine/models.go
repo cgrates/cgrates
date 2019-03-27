@@ -386,7 +386,7 @@ type TPCharger struct {
 	CreatedAt          time.Time
 }
 
-type TPDispatcher struct {
+type TPDispatcherProfile struct {
 	PK                 uint    `gorm:"primary_key"`
 	Tpid               string  //
 	Tenant             string  `index:"0" re:""`

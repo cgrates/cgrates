@@ -114,7 +114,7 @@ func TestLoaderITRemoveLoad(t *testing.T) {
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.SuppliersCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.AttributesCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ChargersCsv),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DispatchersCsv),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DispatcherProfilesCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DispatcherHostsCsv),
 	), "", "", nil, nil)
 
@@ -210,7 +210,7 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.SuppliersCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.AttributesCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ChargersCsv),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DispatchersCsv),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DispatcherProfilesCsv),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DispatcherHostsCsv),
 	), "", "", nil, nil)
 

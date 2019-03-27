@@ -85,7 +85,7 @@ func (ms *MapStorage) GetTPAttributes(tpid, tenant, id string) (attrs []*utils.T
 func (ms *MapStorage) GetTPChargers(tpid, tenant, id string) (attrs []*utils.TPChargerProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
-func (ms *MapStorage) GetTPDispatchers(tpid, tenant, id string) (attrs []*utils.TPDispatcherProfile, err error) {
+func (ms *MapStorage) GetTPDispatcherProfiles(tpid, tenant, id string) (attrs []*utils.TPDispatcherProfile, err error) {
 	return nil, utils.ErrNotImplemented
 }
 func (ms *MapStorage) GetTPDispatcherHosts(tpid, tenant, id string) (attrs []*utils.TPDispatcherHost, err error) {
@@ -150,7 +150,7 @@ func (ms *MapStorage) SetTPAttributes(attributes []*utils.TPAttributeProfile) (e
 func (ms *MapStorage) SetTPChargers(cpps []*utils.TPChargerProfile) (err error) {
 	return utils.ErrNotImplemented
 }
-func (ms *MapStorage) SetTPDispatchers(dpps []*utils.TPDispatcherProfile) (err error) {
+func (ms *MapStorage) SetTPDispatcherProfiles(dpps []*utils.TPDispatcherProfile) (err error) {
 	return utils.ErrNotImplemented
 }
 func (ms *MapStorage) SetTPDispatcherHosts(dpps []*utils.TPDispatcherHost) (err error) {

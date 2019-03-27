@@ -1131,8 +1131,8 @@ cgrates.org,EVENT1,,,,,,ALL,,10,,,
 	csvRdr.Comment = '#'
 	ldr.rdrs = map[string]map[string]*openedCSVFile{
 		utils.MetaDispatchers: map[string]*openedCSVFile{
-			utils.DispatchersCsv: &openedCSVFile{
-				fileName: utils.DispatchersCsv,
+			utils.DispatcherProfilesCsv: &openedCSVFile{
+				fileName: utils.DispatcherProfilesCsv,
 				rdr:      rdr,
 				csvRdr:   csvRdr,
 			},

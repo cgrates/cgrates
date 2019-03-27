@@ -300,7 +300,7 @@ func main() {
 			path.Join(*dataPath, utils.SuppliersCsv),
 			path.Join(*dataPath, utils.AttributesCsv),
 			path.Join(*dataPath, utils.ChargersCsv),
-			path.Join(*dataPath, utils.DispatchersCsv),
+			path.Join(*dataPath, utils.DispatcherProfilesCsv),
 			path.Join(*dataPath, utils.DispatcherHostsCsv),
 		)
 	}

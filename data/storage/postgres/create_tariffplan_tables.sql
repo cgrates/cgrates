@@ -412,8 +412,8 @@ CREATE INDEX tp_suppliers_unique ON tp_suppliers  ("tpid",  "tenant", "id",
   -- Table structure for table `tp_dispatchers`
   --
 
-  DROP TABLE IF EXISTS tp_dispatchers;
-  CREATE TABLE tp_dispatchers (
+  DROP TABLE IF EXISTS tp_dispatcher_profiles;
+  CREATE TABLE tp_dispatcher_profiles (
   "pk" SERIAL PRIMARY KEY,
   "tpid" varchar(64) NOT NULL,
   "tenant" varchar(64) NOT NULL,
@@ -431,8 +431,8 @@ CREATE INDEX tp_suppliers_unique ON tp_suppliers  ("tpid",  "tenant", "id",
   "weight" decimal(8,2) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
   );
-  CREATE INDEX tp_dispatchers_ids ON tp_dispatchers (tpid);
-  CREATE INDEX tp_dispatchers_unique ON tp_dispatchers  ("tpid",  "tenant", "id",
+  CREATE INDEX tp_dispatcher_profiles_ids ON tp_dispatcher_profiles (tpid);
+  CREATE INDEX tp_dispatcher_profiles_unique ON tp_dispatcher_profiles  ("tpid",  "tenant", "id",
     "filter_ids","strategy","conn_id","conn_filter_ids");
 
 --

@@ -911,7 +911,7 @@ const (
 	SuppliersCsv          = "Suppliers.csv"
 	AttributesCsv         = "Attributes.csv"
 	ChargersCsv           = "Chargers.csv"
-	DispatchersCsv        = "Dispatchers.csv"
+	DispatcherProfilesCsv = "DispatcherProfiles.csv"
 	DispatcherHostsCsv    = "DispatcherHosts.csv"
 )
 
@@ -939,7 +939,7 @@ const (
 	TBLTPChargers         = "tp_chargers"
 	TBLVersions           = "versions"
 	OldSMCosts            = "sm_costs"
-	TBLTPDispatchers      = "tp_dispatchers"
+	TBLTPDispatchers      = "tp_dispatcher_profiles"
 	TBLTPDispatcherHosts  = "tp_dispatcher_hosts"
 )
 

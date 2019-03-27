@@ -1427,7 +1427,7 @@ func (ms *MongoStorage) SetTPChargers(tpCPP []*utils.TPChargerProfile) (err erro
 	})
 }
 
-func (ms *MongoStorage) GetTPDispatchers(tpid, tenant, id string) ([]*utils.TPDispatcherProfile, error) {
+func (ms *MongoStorage) GetTPDispatcherProfiles(tpid, tenant, id string) ([]*utils.TPDispatcherProfile, error) {
 	filter := bson.M{"tpid": tpid}
 	if id != "" {
 		filter["id"] = id
@@ -1457,7 +1457,7 @@ func (ms *MongoStorage) GetTPDispatchers(tpid, tenant, id string) ([]*utils.TPDi
 	return results, err
 }
 
-func (ms *MongoStorage) SetTPDispatchers(tpDPPs []*utils.TPDispatcherProfile) (err error) {
+func (ms *MongoStorage) SetTPDispatcherProfiles(tpDPPs []*utils.TPDispatcherProfile) (err error) {
 	if len(tpDPPs) == 0 {
 		return
 	}

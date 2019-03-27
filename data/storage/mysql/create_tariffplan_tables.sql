@@ -423,8 +423,8 @@ CREATE TABLE tp_chargers (
 -- Table structure for table `tp_dispatchers`
 --
 
-DROP TABLE IF EXISTS tp_dispatchers;
-CREATE TABLE tp_dispatchers (
+DROP TABLE IF EXISTS tp_dispatcher_profiles;
+CREATE TABLE tp_dispatcher_profiles (
   `pk` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
@@ -443,7 +443,7 @@ CREATE TABLE tp_dispatchers (
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_dispatchers` (`tpid`,`tenant`,
+  UNIQUE KEY `unique_tp_dispatcher_profiles` (`tpid`,`tenant`,
     `id`,`filter_ids`,`strategy`,`conn_id`,`conn_filter_ids`)
 );
 

@@ -1270,7 +1270,7 @@ func (tpr *TpReader) LoadChargerProfiles() error {
 }
 
 func (tpr *TpReader) LoadDispatcherProfilesFiltered(tag string) (err error) {
-	rls, err := tpr.lr.GetTPDispatchers(tpr.tpid, "", tag)
+	rls, err := tpr.lr.GetTPDispatcherProfiles(tpr.tpid, "", tag)
 	if err != nil {
 		return err
 	}

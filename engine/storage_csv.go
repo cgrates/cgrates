@@ -672,8 +672,8 @@ func (csvs *CSVStorage) GetTPChargers(tpid, tenant, id string) ([]*utils.TPCharg
 	return tpCPPs.AsTPChargers(), nil
 }
 
-func (csvs *CSVStorage) GetTPDispatchers(tpid, tenant, id string) ([]*utils.TPDispatcherProfile, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.dispatcherProfilesFn, csvs.sep, getColumnCount(TPDispatcher{}))
+func (csvs *CSVStorage) GetTPDispatcherProfiles(tpid, tenant, id string) ([]*utils.TPDispatcherProfile, error) {
+	csvReader, fp, err := csvs.readerFunc(csvs.dispatcherProfilesFn, csvs.sep, getColumnCount(TPDispatcherProfile{}))
 	if err != nil {
 		// allow writing of the other values
 		return nil, nil
@@ -681,22 +681,22 @@ func (csvs *CSVStorage) GetTPDispatchers(tpid, tenant, id string) ([]*utils.TPDi
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpDPPs TPDispatchers
+	var tpDPPs TPDispatcherProfiles
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Printf("bad line in %s, %s\n", csvs.dispatcherProfilesFn, err.Error())
 			return nil, err
 		}
-		if dpp, err := csvLoad(TPDispatcher{}, record); err != nil {
+		if dpp, err := csvLoad(TPDispatcherProfile{}, record); err != nil {
 			log.Print("error loading tpDispatcherProfile: ", err)
 			return nil, err
 		} else {
-			dpp := dpp.(TPDispatcher)
+			dpp := dpp.(TPDispatcherProfile)
 			dpp.Tpid = tpid
 			tpDPPs = append(tpDPPs, &dpp)
 		}
 	}
-	return tpDPPs.AsTPDispatchers(), nil
+	return tpDPPs.AsTPDispatcherProfiles(), nil
 }
 
 func (csvs *CSVStorage) GetTPDispatcherHosts(tpid, tenant, id string) ([]*utils.TPDispatcherHost, error) {

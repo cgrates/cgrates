@@ -180,7 +180,7 @@ type LoadReader interface {
 	GetTPSuppliers(string, string, string) ([]*utils.TPSupplierProfile, error)
 	GetTPAttributes(string, string, string) ([]*utils.TPAttributeProfile, error)
 	GetTPChargers(string, string, string) ([]*utils.TPChargerProfile, error)
-	GetTPDispatchers(string, string, string) ([]*utils.TPDispatcherProfile, error)
+	GetTPDispatcherProfiles(string, string, string) ([]*utils.TPDispatcherProfile, error)
 	GetTPDispatcherHosts(string, string, string) ([]*utils.TPDispatcherHost, error)
 }
 
@@ -204,7 +204,7 @@ type LoadWriter interface {
 	SetTPSuppliers([]*utils.TPSupplierProfile) error
 	SetTPAttributes([]*utils.TPAttributeProfile) error
 	SetTPChargers([]*utils.TPChargerProfile) error
-	SetTPDispatchers([]*utils.TPDispatcherProfile) error
+	SetTPDispatcherProfiles([]*utils.TPDispatcherProfile) error
 	SetTPDispatcherHosts([]*utils.TPDispatcherHost) error
 }
 

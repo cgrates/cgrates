@@ -681,18 +681,18 @@ func (self *SQLStorage) SetTPChargers(tpCPPs []*utils.TPChargerProfile) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTPDispatchers(tpDPPs []*utils.TPDispatcherProfile) error {
+func (self *SQLStorage) SetTPDispatcherProfiles(tpDPPs []*utils.TPDispatcherProfile) error {
 	if len(tpDPPs) == 0 {
 		return nil
 	}
 	tx := self.db.Begin()
 	for _, dpp := range tpDPPs {
 		// Remove previous
-		if err := tx.Where(&TPDispatcher{Tpid: dpp.TPid, ID: dpp.ID}).Delete(TPDispatcher{}).Error; err != nil {
+		if err := tx.Where(&TPDispatcherProfile{Tpid: dpp.TPid, ID: dpp.ID}).Delete(TPDispatcherProfile{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
-		for _, mst := range APItoModelTPDispatcher(dpp) {
+		for _, mst := range APItoModelTPDispatcherProfile(dpp) {
 			if err := tx.Save(&mst).Error; err != nil {
 				tx.Rollback()
 				return err
@@ -1534,8 +1534,8 @@ func (self *SQLStorage) GetTPChargers(tpid, tenant, id string) ([]*utils.TPCharg
 	return arls, nil
 }
 
-func (self *SQLStorage) GetTPDispatchers(tpid, tenant, id string) ([]*utils.TPDispatcherProfile, error) {
-	var dpps TPDispatchers
+func (self *SQLStorage) GetTPDispatcherProfiles(tpid, tenant, id string) ([]*utils.TPDispatcherProfile, error) {
+	var dpps TPDispatcherProfiles
 	q := self.db.Where("tpid = ?", tpid)
 	if len(id) != 0 {
 		q = q.Where("id = ?", id)
@@ -1546,7 +1546,7 @@ func (self *SQLStorage) GetTPDispatchers(tpid, tenant, id string) ([]*utils.TPDi
 	if err := q.Find(&dpps).Error; err != nil {
 		return nil, err
 	}
-	arls := dpps.AsTPDispatchers()
+	arls := dpps.AsTPDispatcherProfiles()
 	if len(arls) == 0 {
 		return arls, utils.ErrNotFound
 	}

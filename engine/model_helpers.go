@@ -2346,9 +2346,9 @@ func APItoChargerProfile(tpCPP *utils.TPChargerProfile, timezone string) (cpp *C
 	return cpp, nil
 }
 
-type TPDispatchers []*TPDispatcher
+type TPDispatcherProfiles []*TPDispatcherProfile
 
-func (tps TPDispatchers) AsTPDispatchers() (result []*utils.TPDispatcherProfile) {
+func (tps TPDispatcherProfiles) AsTPDispatcherProfiles() (result []*utils.TPDispatcherProfile) {
 	mst := make(map[string]*utils.TPDispatcherProfile)
 	filterMap := make(map[string]utils.StringMap)
 	contextMap := make(map[string]utils.StringMap)
@@ -2477,7 +2477,7 @@ func paramsToString(sp []interface{}) (strategy string) {
 	return
 }
 
-func APItoModelTPDispatcher(tpDPP *utils.TPDispatcherProfile) (mdls TPDispatchers) {
+func APItoModelTPDispatcherProfile(tpDPP *utils.TPDispatcherProfile) (mdls TPDispatcherProfiles) {
 	if tpDPP == nil {
 		return
 	}
@@ -2498,7 +2498,7 @@ func APItoModelTPDispatcher(tpDPP *utils.TPDispatcherProfile) (mdls TPDispatcher
 	strategy := paramsToString(tpDPP.StrategyParams)
 
 	if len(tpDPP.Conns) == 0 {
-		return append(mdls, &TPDispatcher{
+		return append(mdls, &TPDispatcherProfile{
 			Tpid:               tpDPP.TPid,
 			Tenant:             tpDPP.Tenant,
 			ID:                 tpDPP.ID,
@@ -2514,7 +2514,7 @@ func APItoModelTPDispatcher(tpDPP *utils.TPDispatcherProfile) (mdls TPDispatcher
 	confilter := strings.Join(tpDPP.Conns[0].FilterIDs, utils.INFIELD_SEP)
 	conparam := paramsToString(tpDPP.Conns[0].Params)
 
-	mdls = append(mdls, &TPDispatcher{
+	mdls = append(mdls, &TPDispatcherProfile{
 		Tpid:               tpDPP.TPid,
 		Tenant:             tpDPP.Tenant,
 		ID:                 tpDPP.ID,
@@ -2534,7 +2534,7 @@ func APItoModelTPDispatcher(tpDPP *utils.TPDispatcherProfile) (mdls TPDispatcher
 	for i := 1; i < len(tpDPP.Conns); i++ {
 		confilter = strings.Join(tpDPP.Conns[i].FilterIDs, utils.INFIELD_SEP)
 		conparam = paramsToString(tpDPP.Conns[i].Params)
-		mdls = append(mdls, &TPDispatcher{
+		mdls = append(mdls, &TPDispatcherProfile{
 			Tpid:   tpDPP.TPid,
 			Tenant: tpDPP.Tenant,
 			ID:     tpDPP.ID,
