@@ -586,5 +586,6 @@ type AnalyzerSJsonCfg struct {
 }
 
 type ApierJsonCfg struct {
-	Caches_conns *[]*HaPoolJsonCfg
+	Caches_conns    *[]*HaPoolJsonCfg
+	Scheduler_conns *[]*HaPoolJsonCfg
 }

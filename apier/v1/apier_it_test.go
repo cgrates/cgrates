@@ -718,10 +718,10 @@ func TestApierLoadAccountActions(t *testing.T) {
 func TestApierReloadScheduler(t *testing.T) {
 	reply := ""
 	// Simple test that command is executed without errors
-	if err := rater.Call("ApierV1.ReloadScheduler", reply, &reply); err != nil {
-		t.Error("Got error on ApierV1.ReloadScheduler: ", err.Error())
+	if err := rater.Call(utils.SchedulerSv1Reload, reply, &reply); err != nil {
+		t.Error("Got error on SchedulerSv1.Reload: ", err.Error())
 	} else if reply != "OK" {
-		t.Error("Calling ApierV1.ReloadScheduler got reply: ", reply)
+		t.Error("Calling SchedulerSv1.Reload got reply: ", reply)
 	}
 }
 
@@ -1308,7 +1308,7 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 	expStats[utils.CacheActionPlans].Items = 7
 	expStats[utils.CacheActions].Items = 6
 	expStats[utils.CacheDestinations].Items = 3
-	expStats[utils.CacheLoadIDs].Items = 17
+	expStats[utils.CacheLoadIDs].Items = 14
 	if err := rater.Call("CacheSv1.GetCacheStats", nil, &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expStats, rcvStats) {
@@ -1621,10 +1621,10 @@ func TestApierReloadCache2(t *testing.T) {
 func TestApierReloadScheduler2(t *testing.T) {
 	reply := ""
 	// Simple test that command is executed without errors
-	if err := rater.Call("ApierV1.ReloadScheduler", reply, &reply); err != nil {
-		t.Error("Got error on ApierV1.ReloadScheduler: ", err.Error())
+	if err := rater.Call(utils.SchedulerSv1Reload, reply, &reply); err != nil {
+		t.Error("Got error on SchedulerSv1.Reload: ", err.Error())
 	} else if reply != utils.OK {
-		t.Error("Calling ApierV1.ReloadScheduler got reply: ", reply)
+		t.Error("Calling SchedulerSv1.Reload got reply: ", reply)
 	}
 }
 
@@ -1707,10 +1707,10 @@ func TestApierStartStopServiceStatus(t *testing.T) {
 	} else if reply != utils.RunningCaps {
 		t.Errorf("Received: <%s>", reply)
 	}
-	if err := rater.Call("ApierV1.ReloadScheduler", reply, &reply); err != nil {
-		t.Error("Got error on ApierV1.ReloadScheduler: ", err.Error())
+	if err := rater.Call(utils.SchedulerSv1Reload, reply, &reply); err != nil {
+		t.Error("Got error on SchedulerSv1.Reload: ", err.Error())
 	} else if reply != utils.OK {
-		t.Error("Calling ApierV1.ReloadScheduler got reply: ", reply)
+		t.Error("Calling SchedulerSv1.Reload got reply: ", reply)
 	}
 }
 
