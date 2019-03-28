@@ -278,7 +278,7 @@ func testAccITSetBalanceWithExtraData2(t *testing.T) {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	} else if len(cdrs[0].ExtraFields) != 2 {
 		t.Error("Unexpected number of ExtraFields returned: ", len(cdrs[0].ExtraFields))
-	} else if cdrs[0].ExtraFields["ActionVal"] != 1.5 {
+	} else if cdrs[0].ExtraFields["ActionVal"] != "1.5" {
 		t.Error("Unexpected value of ExtraFields[ActionVal] returned: ", cdrs[0].ExtraFields["ActionVal"])
 	}
 }
