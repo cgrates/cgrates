@@ -192,10 +192,10 @@ func main() {
 	}
 
 	if *cacheSAddress != dfltCfg.LoaderCgrCfg().CachesConns[0].Address {
-		ldrCfg.LoaderCgrCfg().CachesConns = make([]*config.HaPoolConfig, 0)
+		ldrCfg.LoaderCgrCfg().CachesConns = make([]*config.RemoteHost, 0)
 		if *cacheSAddress != "" {
 			ldrCfg.LoaderCgrCfg().CachesConns = append(ldrCfg.LoaderCgrCfg().CachesConns,
-				&config.HaPoolConfig{
+				&config.RemoteHost{
 					Address:   *cacheSAddress,
 					Transport: *rpcEncoding,
 				})
@@ -203,10 +203,10 @@ func main() {
 	}
 
 	if *schedulerAddress != dfltCfg.LoaderCgrCfg().SchedulerConns[0].Address {
-		ldrCfg.LoaderCgrCfg().SchedulerConns = make([]*config.HaPoolConfig, 0)
+		ldrCfg.LoaderCgrCfg().SchedulerConns = make([]*config.RemoteHost, 0)
 		if *schedulerAddress != "" {
 			ldrCfg.LoaderCgrCfg().SchedulerConns = append(ldrCfg.LoaderCgrCfg().SchedulerConns,
-				&config.HaPoolConfig{Address: *schedulerAddress})
+				&config.RemoteHost{Address: *schedulerAddress})
 		}
 	}
 

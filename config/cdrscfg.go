@@ -27,11 +27,11 @@ type CdrsCfg struct {
 	CDRSExtraFields      []*utils.RSRField // Extra fields to store in CDRs
 	CDRSStoreCdrs        bool              // store cdrs in storDb
 	CDRSSMCostRetries    int
-	CDRSChargerSConns    []*HaPoolConfig
-	CDRSRaterConns       []*HaPoolConfig // address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
-	CDRSAttributeSConns  []*HaPoolConfig // address where to reach the users service: <""|internal|x.y.z.y:1234>
-	CDRSThresholdSConns  []*HaPoolConfig // address where to reach the thresholds service
-	CDRSStatSConns       []*HaPoolConfig
+	CDRSChargerSConns    []*RemoteHost
+	CDRSRaterConns       []*RemoteHost // address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
+	CDRSAttributeSConns  []*RemoteHost // address where to reach the users service: <""|internal|x.y.z.y:1234>
+	CDRSThresholdSConns  []*RemoteHost // address where to reach the thresholds service
+	CDRSStatSConns       []*RemoteHost
 	CDRSOnlineCDRExports []string // list of CDRE templates to use for real-time CDR exports
 }
 
@@ -55,37 +55,37 @@ func (cdrscfg *CdrsCfg) loadFromJsonCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 		cdrscfg.CDRSSMCostRetries = *jsnCdrsCfg.Session_cost_retries
 	}
 	if jsnCdrsCfg.Chargers_conns != nil {
-		cdrscfg.CDRSChargerSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Chargers_conns))
+		cdrscfg.CDRSChargerSConns = make([]*RemoteHost, len(*jsnCdrsCfg.Chargers_conns))
 		for idx, jsnHaCfg := range *jsnCdrsCfg.Chargers_conns {
-			cdrscfg.CDRSChargerSConns[idx] = NewDfltHaPoolConfig()
+			cdrscfg.CDRSChargerSConns[idx] = NewDfltRemoteHost()
 			cdrscfg.CDRSChargerSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCdrsCfg.Rals_conns != nil {
-		cdrscfg.CDRSRaterConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Rals_conns))
+		cdrscfg.CDRSRaterConns = make([]*RemoteHost, len(*jsnCdrsCfg.Rals_conns))
 		for idx, jsnHaCfg := range *jsnCdrsCfg.Rals_conns {
-			cdrscfg.CDRSRaterConns[idx] = NewDfltHaPoolConfig()
+			cdrscfg.CDRSRaterConns[idx] = NewDfltRemoteHost()
 			cdrscfg.CDRSRaterConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCdrsCfg.Attributes_conns != nil {
-		cdrscfg.CDRSAttributeSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Attributes_conns))
+		cdrscfg.CDRSAttributeSConns = make([]*RemoteHost, len(*jsnCdrsCfg.Attributes_conns))
 		for idx, jsnHaCfg := range *jsnCdrsCfg.Attributes_conns {
-			cdrscfg.CDRSAttributeSConns[idx] = NewDfltHaPoolConfig()
+			cdrscfg.CDRSAttributeSConns[idx] = NewDfltRemoteHost()
 			cdrscfg.CDRSAttributeSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCdrsCfg.Thresholds_conns != nil {
-		cdrscfg.CDRSThresholdSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Thresholds_conns))
+		cdrscfg.CDRSThresholdSConns = make([]*RemoteHost, len(*jsnCdrsCfg.Thresholds_conns))
 		for idx, jsnHaCfg := range *jsnCdrsCfg.Thresholds_conns {
-			cdrscfg.CDRSThresholdSConns[idx] = NewDfltHaPoolConfig()
+			cdrscfg.CDRSThresholdSConns[idx] = NewDfltRemoteHost()
 			cdrscfg.CDRSThresholdSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCdrsCfg.Stats_conns != nil {
-		cdrscfg.CDRSStatSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Stats_conns))
+		cdrscfg.CDRSStatSConns = make([]*RemoteHost, len(*jsnCdrsCfg.Stats_conns))
 		for idx, jsnHaCfg := range *jsnCdrsCfg.Stats_conns {
-			cdrscfg.CDRSStatSConns[idx] = NewDfltHaPoolConfig()
+			cdrscfg.CDRSStatSConns[idx] = NewDfltRemoteHost()
 			cdrscfg.CDRSStatSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}

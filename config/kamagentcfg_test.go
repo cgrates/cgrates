@@ -51,7 +51,7 @@ func TestKamAgentCfgloadFromJsonCfg(t *testing.T) {
 },
 }`
 	expected = KamAgentCfg{
-		SessionSConns: []*HaPoolConfig{{Address: "*internal"}},
+		SessionSConns: []*RemoteHost{{Address: "*internal"}},
 		EvapiConns:    []*KamConnCfg{{Address: "127.0.0.1:8448", Reconnects: 5}},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {

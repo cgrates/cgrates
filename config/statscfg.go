@@ -28,7 +28,7 @@ type StatSCfg struct {
 	Enabled             bool
 	IndexedSelects      bool
 	StoreInterval       time.Duration // Dump regularly from cache into dataDB
-	ThresholdSConns     []*HaPoolConfig
+	ThresholdSConns     []*RemoteHost
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 }
@@ -49,9 +49,9 @@ func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
 		}
 	}
 	if jsnCfg.Thresholds_conns != nil {
-		st.ThresholdSConns = make([]*HaPoolConfig, len(*jsnCfg.Thresholds_conns))
+		st.ThresholdSConns = make([]*RemoteHost, len(*jsnCfg.Thresholds_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Thresholds_conns {
-			st.ThresholdSConns[idx] = NewDfltHaPoolConfig()
+			st.ThresholdSConns[idx] = NewDfltRemoteHost()
 			st.ThresholdSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}

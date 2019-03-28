@@ -385,7 +385,7 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 		t.Error(err, aSessions)
 	}
 	argsRepl := ArgsReplicateSessions{
-		Connections: []*config.HaPoolConfig{
+		Connections: []*config.RemoteHost{
 			{
 				Address:     smgRplcSlaveCfg.ListenCfg().RPCJSONListen,
 				Transport:   utils.MetaJSONrpc,
@@ -433,7 +433,7 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 	// recover passive sessions from slave
 	argsRepl = ArgsReplicateSessions{
 		Passive: true,
-		Connections: []*config.HaPoolConfig{
+		Connections: []*config.RemoteHost{
 			{
 				Address:     smgRplcMasterCfg.ListenCfg().RPCJSONListen,
 				Transport:   utils.MetaJSONrpc,

@@ -25,23 +25,23 @@ import (
 )
 
 // Returns the first cached default value for a FreeSWITCHAgent connection
-func NewDfltHaPoolConfig() *HaPoolConfig {
-	if dfltHaPoolConfig == nil {
-		return new(HaPoolConfig) // No defaults, most probably we are building the defaults now
+func NewDfltRemoteHost() *RemoteHost {
+	if dfltRemoteHost == nil {
+		return new(RemoteHost) // No defaults, most probably we are building the defaults now
 	}
-	dfltVal := *dfltHaPoolConfig // Copy the value instead of it's pointer
+	dfltVal := *dfltRemoteHost // Copy the value instead of it's pointer
 	return &dfltVal
 }
 
 // One connection to Rater
-type HaPoolConfig struct {
+type RemoteHost struct {
 	Address     string
 	Transport   string
 	Synchronous bool
 	Tls         bool
 }
 
-func (self *HaPoolConfig) loadFromJsonCfg(jsnCfg *HaPoolJsonCfg) error {
+func (self *RemoteHost) loadFromJsonCfg(jsnCfg *HaPoolJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
@@ -101,15 +101,15 @@ func (self *FsConnCfg) loadFromJsonCfg(jsnCfg *FsConnJsonCfg) error {
 type SessionSCfg struct {
 	Enabled                 bool
 	ListenBijson            string
-	ChargerSConns           []*HaPoolConfig
-	RALsConns               []*HaPoolConfig
-	ResSConns               []*HaPoolConfig
-	ThreshSConns            []*HaPoolConfig
-	StatSConns              []*HaPoolConfig
-	SupplSConns             []*HaPoolConfig
-	AttrSConns              []*HaPoolConfig
-	CDRsConns               []*HaPoolConfig
-	SessionReplicationConns []*HaPoolConfig
+	ChargerSConns           []*RemoteHost
+	RALsConns               []*RemoteHost
+	ResSConns               []*RemoteHost
+	ThreshSConns            []*RemoteHost
+	StatSConns              []*RemoteHost
+	SupplSConns             []*RemoteHost
+	AttrSConns              []*RemoteHost
+	CDRsConns               []*RemoteHost
+	SessionReplicationConns []*RemoteHost
 	DebitInterval           time.Duration
 	StoreSCosts             bool
 	MinCallDuration         time.Duration
@@ -134,65 +134,65 @@ func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		self.ListenBijson = *jsnCfg.Listen_bijson
 	}
 	if jsnCfg.Chargers_conns != nil {
-		self.ChargerSConns = make([]*HaPoolConfig, len(*jsnCfg.Chargers_conns))
+		self.ChargerSConns = make([]*RemoteHost, len(*jsnCfg.Chargers_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Chargers_conns {
-			self.ChargerSConns[idx] = NewDfltHaPoolConfig()
+			self.ChargerSConns[idx] = NewDfltRemoteHost()
 			self.ChargerSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Rals_conns != nil {
-		self.RALsConns = make([]*HaPoolConfig, len(*jsnCfg.Rals_conns))
+		self.RALsConns = make([]*RemoteHost, len(*jsnCfg.Rals_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Rals_conns {
-			self.RALsConns[idx] = NewDfltHaPoolConfig()
+			self.RALsConns[idx] = NewDfltRemoteHost()
 			self.RALsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Resources_conns != nil {
-		self.ResSConns = make([]*HaPoolConfig, len(*jsnCfg.Resources_conns))
+		self.ResSConns = make([]*RemoteHost, len(*jsnCfg.Resources_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Resources_conns {
-			self.ResSConns[idx] = NewDfltHaPoolConfig()
+			self.ResSConns[idx] = NewDfltRemoteHost()
 			self.ResSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Thresholds_conns != nil {
-		self.ThreshSConns = make([]*HaPoolConfig, len(*jsnCfg.Thresholds_conns))
+		self.ThreshSConns = make([]*RemoteHost, len(*jsnCfg.Thresholds_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Thresholds_conns {
-			self.ThreshSConns[idx] = NewDfltHaPoolConfig()
+			self.ThreshSConns[idx] = NewDfltRemoteHost()
 			self.ThreshSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Stats_conns != nil {
-		self.StatSConns = make([]*HaPoolConfig, len(*jsnCfg.Stats_conns))
+		self.StatSConns = make([]*RemoteHost, len(*jsnCfg.Stats_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Stats_conns {
-			self.StatSConns[idx] = NewDfltHaPoolConfig()
+			self.StatSConns[idx] = NewDfltRemoteHost()
 			self.StatSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Suppliers_conns != nil {
-		self.SupplSConns = make([]*HaPoolConfig, len(*jsnCfg.Suppliers_conns))
+		self.SupplSConns = make([]*RemoteHost, len(*jsnCfg.Suppliers_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Suppliers_conns {
-			self.SupplSConns[idx] = NewDfltHaPoolConfig()
+			self.SupplSConns[idx] = NewDfltRemoteHost()
 			self.SupplSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Attributes_conns != nil {
-		self.AttrSConns = make([]*HaPoolConfig, len(*jsnCfg.Attributes_conns))
+		self.AttrSConns = make([]*RemoteHost, len(*jsnCfg.Attributes_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Attributes_conns {
-			self.AttrSConns[idx] = NewDfltHaPoolConfig()
+			self.AttrSConns[idx] = NewDfltRemoteHost()
 			self.AttrSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Cdrs_conns != nil {
-		self.CDRsConns = make([]*HaPoolConfig, len(*jsnCfg.Cdrs_conns))
+		self.CDRsConns = make([]*RemoteHost, len(*jsnCfg.Cdrs_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Cdrs_conns {
-			self.CDRsConns[idx] = NewDfltHaPoolConfig()
+			self.CDRsConns[idx] = NewDfltRemoteHost()
 			self.CDRsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Session_replication_conns != nil {
-		self.SessionReplicationConns = make([]*HaPoolConfig, len(*jsnCfg.Session_replication_conns))
+		self.SessionReplicationConns = make([]*RemoteHost, len(*jsnCfg.Session_replication_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Session_replication_conns {
-			self.SessionReplicationConns[idx] = NewDfltHaPoolConfig()
+			self.SessionReplicationConns[idx] = NewDfltRemoteHost()
 			self.SessionReplicationConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
@@ -249,7 +249,7 @@ func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 
 type FsAgentCfg struct {
 	Enabled       bool
-	SessionSConns []*HaPoolConfig
+	SessionSConns []*RemoteHost
 	SubscribePark bool
 	CreateCdr     bool
 	ExtraFields   RSRParsers
@@ -270,9 +270,9 @@ func (self *FsAgentCfg) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 		self.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Sessions_conns != nil {
-		self.SessionSConns = make([]*HaPoolConfig, len(*jsnCfg.Sessions_conns))
+		self.SessionSConns = make([]*RemoteHost, len(*jsnCfg.Sessions_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
-			self.SessionSConns[idx] = NewDfltHaPoolConfig()
+			self.SessionSConns[idx] = NewDfltRemoteHost()
 			self.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
@@ -338,8 +338,8 @@ func (self *OsipsConnConfig) loadFromJsonCfg(jsnCfg *OsipsConnJsonCfg) error {
 type SmOsipsConfig struct {
 	Enabled                 bool
 	ListenUdp               string
-	RALsConns               []*HaPoolConfig
-	CDRsConns               []*HaPoolConfig
+	RALsConns               []*RemoteHost
+	CDRsConns               []*RemoteHost
 	CreateCdr               bool
 	DebitInterval           time.Duration
 	MinCallDuration         time.Duration
@@ -357,16 +357,16 @@ func (self *SmOsipsConfig) loadFromJsonCfg(jsnCfg *SmOsipsJsonCfg) error {
 		self.ListenUdp = *jsnCfg.Listen_udp
 	}
 	if jsnCfg.Rals_conns != nil {
-		self.RALsConns = make([]*HaPoolConfig, len(*jsnCfg.Rals_conns))
+		self.RALsConns = make([]*RemoteHost, len(*jsnCfg.Rals_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Rals_conns {
-			self.RALsConns[idx] = NewDfltHaPoolConfig()
+			self.RALsConns[idx] = NewDfltRemoteHost()
 			self.RALsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Cdrs_conns != nil {
-		self.CDRsConns = make([]*HaPoolConfig, len(*jsnCfg.Cdrs_conns))
+		self.CDRsConns = make([]*RemoteHost, len(*jsnCfg.Cdrs_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Cdrs_conns {
-			self.CDRsConns[idx] = NewDfltHaPoolConfig()
+			self.CDRsConns[idx] = NewDfltRemoteHost()
 			self.CDRsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
@@ -441,7 +441,7 @@ func (aConnCfg *AsteriskConnCfg) loadFromJsonCfg(jsnCfg *AstConnJsonCfg) error {
 
 type AsteriskAgentCfg struct {
 	Enabled       bool
-	SessionSConns []*HaPoolConfig
+	SessionSConns []*RemoteHost
 	CreateCDR     bool
 	AsteriskConns []*AsteriskConnCfg
 }
@@ -454,9 +454,9 @@ func (aCfg *AsteriskAgentCfg) loadFromJsonCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 		aCfg.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Sessions_conns != nil {
-		aCfg.SessionSConns = make([]*HaPoolConfig, len(*jsnCfg.Sessions_conns))
+		aCfg.SessionSConns = make([]*RemoteHost, len(*jsnCfg.Sessions_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
-			aCfg.SessionSConns[idx] = NewDfltHaPoolConfig()
+			aCfg.SessionSConns[idx] = NewDfltRemoteHost()
 			aCfg.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}

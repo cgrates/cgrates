@@ -205,7 +205,7 @@ func TestCgrCfgCDRC(t *testing.T) {
 			ID:                       utils.META_DEFAULT,
 			Enabled:                  true,
 			DryRun:                   false,
-			CdrsConns:                []*HaPoolConfig{{Address: utils.MetaInternal}},
+			CdrsConns:                []*RemoteHost{{Address: utils.MetaInternal}},
 			CdrFormat:                "csv",
 			FieldSeparator:           rune(','),
 			DataUsageMultiplyFactor:  1024,
@@ -298,7 +298,7 @@ func TestHttpAgentCfg(t *testing.T) {
 			Url:            "/conecto",
 			RequestPayload: utils.MetaUrl,
 			ReplyPayload:   utils.MetaXml,
-			SessionSConns: []*HaPoolConfig{
+			SessionSConns: []*RemoteHost{
 				{Address: utils.MetaInternal}},
 			RequestProcessors: nil,
 		},
@@ -457,7 +457,7 @@ func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
-	eHaPoolcfg := []*HaPoolConfig{}
+	eHaPoolcfg := []*RemoteHost{}
 
 	if cgrCfg.RalsCfg().RALsEnabled != false {
 		t.Errorf("Expecting: false , received: %+v", cgrCfg.RalsCfg().RALsEnabled)
@@ -482,7 +482,7 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 func TestCgrCfgJSONDefaultsScheduler(t *testing.T) {
 	eSchedulerCfg := &SchedulerCfg{
 		Enabled:   false,
-		CDRsConns: []*HaPoolConfig{},
+		CDRsConns: []*RemoteHost{},
 	}
 
 	if !reflect.DeepEqual(cgrCfg.schedulerCfg, eSchedulerCfg) {
@@ -491,7 +491,7 @@ func TestCgrCfgJSONDefaultsScheduler(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
-	eHaPoolCfg := []*HaPoolConfig{}
+	eHaPoolCfg := []*RemoteHost{}
 	var eCdrExtr []*utils.RSRField
 	if cgrCfg.CdrsCfg().CDRSEnabled != false {
 		t.Errorf("Expecting: false , received: %+v", cgrCfg.CdrsCfg().CDRSEnabled)
@@ -505,10 +505,10 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	if cgrCfg.CdrsCfg().CDRSSMCostRetries != 5 {
 		t.Errorf("Expecting: 5 , received: %+v", cgrCfg.CdrsCfg().CDRSSMCostRetries)
 	}
-	if expected := []*HaPoolConfig{{Address: utils.MetaInternal}}; !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSRaterConns, expected) {
+	if expected := []*RemoteHost{{Address: utils.MetaInternal}}; !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSRaterConns, expected) {
 		t.Errorf("Expecting: %+v , received: %+v", expected, cgrCfg.CdrsCfg().CDRSRaterConns)
 	}
-	if expected := []*HaPoolConfig{{Address: utils.MetaInternal}}; !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSChargerSConns, expected) {
+	if expected := []*RemoteHost{{Address: utils.MetaInternal}}; !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSChargerSConns, expected) {
 		t.Errorf("Expecting: %+v , received: %+v", expected, cgrCfg.CdrsCfg().CDRSChargerSConns)
 	}
 	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSAttributeSConns, eHaPoolCfg) {
@@ -546,7 +546,7 @@ func TestCgrCfgJSONLoadCDRS(t *testing.T) {
 	if !cgrCfg.CdrsCfg().CDRSEnabled {
 		t.Errorf("Expecting: true , received: %+v", cgrCfg.CdrsCfg().CDRSEnabled)
 	}
-	expected := []*HaPoolConfig{{Address: utils.MetaInternal}}
+	expected := []*RemoteHost{{Address: utils.MetaInternal}}
 	if !reflect.DeepEqual(cgrCfg.CdrsCfg().CDRSChargerSConns, expected) {
 		t.Errorf("Expecting: %+v , received: %+v", expected, cgrCfg.CdrsCfg().CDRSChargerSConns)
 	}
@@ -614,18 +614,18 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 	eSessionSCfg := &SessionSCfg{
 		Enabled:      false,
 		ListenBijson: "127.0.0.1:2014",
-		ChargerSConns: []*HaPoolConfig{
+		ChargerSConns: []*RemoteHost{
 			{Address: "*internal"}},
-		RALsConns: []*HaPoolConfig{
+		RALsConns: []*RemoteHost{
 			{Address: "*internal"}},
-		CDRsConns: []*HaPoolConfig{
+		CDRsConns: []*RemoteHost{
 			{Address: "*internal"}},
-		ResSConns:               []*HaPoolConfig{},
-		ThreshSConns:            []*HaPoolConfig{},
-		StatSConns:              []*HaPoolConfig{},
-		SupplSConns:             []*HaPoolConfig{},
-		AttrSConns:              []*HaPoolConfig{},
-		SessionReplicationConns: []*HaPoolConfig{},
+		ResSConns:               []*RemoteHost{},
+		ThreshSConns:            []*RemoteHost{},
+		StatSConns:              []*RemoteHost{},
+		SupplSConns:             []*RemoteHost{},
+		AttrSConns:              []*RemoteHost{},
+		SessionReplicationConns: []*RemoteHost{},
 		DebitInterval:           0 * time.Second,
 		StoreSCosts:             false,
 		MinCallDuration:         0 * time.Second,
@@ -724,7 +724,7 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 func TestCgrCfgJSONDefaultsFsAgentConfig(t *testing.T) {
 	eFsAgentCfg := &FsAgentCfg{
 		Enabled: false,
-		SessionSConns: []*HaPoolConfig{
+		SessionSConns: []*RemoteHost{
 			{Address: "*internal"}},
 		SubscribePark:       true,
 		CreateCdr:           false,
@@ -748,7 +748,7 @@ func TestCgrCfgJSONDefaultsFsAgentConfig(t *testing.T) {
 func TestCgrCfgJSONDefaultsKamAgentConfig(t *testing.T) {
 	eKamAgentCfg := &KamAgentCfg{
 		Enabled: false,
-		SessionSConns: []*HaPoolConfig{
+		SessionSConns: []*RemoteHost{
 			{Address: "*internal"}},
 		CreateCdr: false,
 		EvapiConns: []*KamConnCfg{{
@@ -765,7 +765,7 @@ func TestCgrCfgJSONDefaultsKamAgentConfig(t *testing.T) {
 func TestCgrCfgJSONDefaultssteriskAgentCfg(t *testing.T) {
 	eAstAgentCfg := &AsteriskAgentCfg{
 		Enabled: false,
-		SessionSConns: []*HaPoolConfig{
+		SessionSConns: []*RemoteHost{
 			{Address: "*internal"}},
 		CreateCDR: false,
 		AsteriskConns: []*AsteriskConnCfg{
@@ -781,8 +781,8 @@ func TestCgrCfgJSONDefaultssteriskAgentCfg(t *testing.T) {
 
 func TestCgrCfgJSONDefaultFiltersCfg(t *testing.T) {
 	eFiltersCfg := &FilterSCfg{
-		StatSConns:     []*HaPoolConfig{},
-		ResourceSConns: []*HaPoolConfig{},
+		StatSConns:     []*RemoteHost{},
+		ResourceSConns: []*RemoteHost{},
 	}
 	if !reflect.DeepEqual(cgrCfg.filterSCfg, eFiltersCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.filterSCfg, eFiltersCfg)
@@ -793,7 +793,7 @@ func TestCgrCfgJSONDefaultSChargerSCfg(t *testing.T) {
 	eChargerSCfg := &ChargerSCfg{
 		Enabled:             false,
 		IndexedSelects:      true,
-		AttributeSConns:     []*HaPoolConfig{},
+		AttributeSConns:     []*RemoteHost{},
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
 	}
@@ -806,7 +806,7 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 	eResLiCfg := &ResourceSConfig{
 		Enabled:             false,
 		IndexedSelects:      true,
-		ThresholdSConns:     []*HaPoolConfig{},
+		ThresholdSConns:     []*RemoteHost{},
 		StoreInterval:       0,
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
@@ -822,7 +822,7 @@ func TestCgrCfgJSONDefaultStatsCfg(t *testing.T) {
 		Enabled:             false,
 		IndexedSelects:      true,
 		StoreInterval:       0,
-		ThresholdSConns:     []*HaPoolConfig{},
+		ThresholdSConns:     []*RemoteHost{},
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
 	}
@@ -850,12 +850,12 @@ func TestCgrCfgJSONDefaultSupplierSCfg(t *testing.T) {
 		IndexedSelects:      true,
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
-		AttributeSConns:     []*HaPoolConfig{},
-		RALsConns: []*HaPoolConfig{
+		AttributeSConns:     []*RemoteHost{},
+		RALsConns: []*RemoteHost{
 			{Address: "*internal"},
 		},
-		ResourceSConns: []*HaPoolConfig{},
-		StatSConns:     []*HaPoolConfig{},
+		ResourceSConns: []*RemoteHost{},
+		StatSConns:     []*RemoteHost{},
 	}
 	if !reflect.DeepEqual(eSupplSCfg, cgrCfg.supplierSCfg) {
 		t.Errorf("received: %+v, expecting: %+v", eSupplSCfg, cgrCfg.supplierSCfg)
@@ -868,7 +868,7 @@ func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 		Listen:           "127.0.0.1:3868",
 		ListenNet:        "tcp",
 		DictionariesPath: "/usr/share/cgrates/diameter/dict/",
-		SessionSConns: []*HaPoolConfig{
+		SessionSConns: []*RemoteHost{
 			{Address: "*internal"}},
 		OriginHost:        "CGR-DA",
 		OriginRealm:       "cgrates.org",
@@ -992,7 +992,7 @@ func TestRadiusAgentCfg(t *testing.T) {
 		ListenAcct:         "127.0.0.1:1813",
 		ClientSecrets:      map[string]string{utils.META_DEFAULT: "CGRateS.org"},
 		ClientDictionaries: map[string]string{utils.META_DEFAULT: "/usr/share/cgrates/radius/dict/"},
-		SessionSConns:      []*HaPoolConfig{{Address: utils.MetaInternal}},
+		SessionSConns:      []*RemoteHost{{Address: utils.MetaInternal}},
 		RequestProcessors:  nil,
 	}
 	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg, testRA) {
@@ -1036,7 +1036,7 @@ func TestCgrLoaderCfgITDefaults(t *testing.T) {
 			DryRun:       false,
 			RunDelay:     0,
 			LockFileName: ".cgr.lck",
-			CacheSConns: []*HaPoolConfig{
+			CacheSConns: []*RemoteHost{
 				{
 					Address: utils.MetaInternal,
 				},
@@ -1475,8 +1475,8 @@ func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
 		IndexedSelects:      true,
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
-		AttributeSConns:     []*HaPoolConfig{},
-		Conns:               map[string][]*HaPoolConfig{},
+		AttributeSConns:     []*RemoteHost{},
+		Conns:               map[string][]*RemoteHost{},
 	}
 	if !reflect.DeepEqual(cgrCfg.dispatcherSCfg, eDspSCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.dispatcherSCfg, eDspSCfg)
@@ -1489,13 +1489,13 @@ func TestCgrLoaderCfgDefault(t *testing.T) {
 		DataPath:       "./",
 		DisableReverse: false,
 		FieldSeparator: rune(','),
-		CachesConns: []*HaPoolConfig{
+		CachesConns: []*RemoteHost{
 			{
 				Address:   "127.0.0.1:2012",
 				Transport: utils.MetaJSONrpc,
 			},
 		},
-		SchedulerConns: []*HaPoolConfig{
+		SchedulerConns: []*RemoteHost{
 			{
 				Address:   "127.0.0.1:2012",
 				Transport: utils.MetaJSONrpc,
@@ -1535,7 +1535,7 @@ func TestCDRCWithDefault(t *testing.T) {
 			ID:                       utils.META_DEFAULT,
 			Enabled:                  false,
 			DryRun:                   false,
-			CdrsConns:                []*HaPoolConfig{{Address: utils.MetaInternal}},
+			CdrsConns:                []*RemoteHost{{Address: utils.MetaInternal}},
 			CdrFormat:                "csv",
 			FieldSeparator:           rune(','),
 			DataUsageMultiplyFactor:  1024,
@@ -1711,12 +1711,12 @@ func TestNewCGRConfigFromPathNotFound(t *testing.T) {
 
 func TestCgrCfgJSONDefaultApierCfg(t *testing.T) {
 	aCfg := &ApierCfg{
-		CachesConns: []*HaPoolConfig{
+		CachesConns: []*RemoteHost{
 			{
 				Address: utils.MetaInternal,
 			},
 		},
-		SchedulerConns: []*HaPoolConfig{
+		SchedulerConns: []*RemoteHost{
 			{
 				Address: utils.MetaInternal,
 			},

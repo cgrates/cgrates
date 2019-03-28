@@ -104,15 +104,15 @@ func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
 }`
 	expected = SessionSCfg{
 		ListenBijson:            "127.0.0.1:2014",
-		ChargerSConns:           []*HaPoolConfig{},
-		RALsConns:               []*HaPoolConfig{{Address: "*internal"}},
-		ResSConns:               []*HaPoolConfig{},
-		ThreshSConns:            []*HaPoolConfig{},
-		StatSConns:              []*HaPoolConfig{},
-		SupplSConns:             []*HaPoolConfig{},
-		AttrSConns:              []*HaPoolConfig{},
-		CDRsConns:               []*HaPoolConfig{{Address: "*internal"}},
-		SessionReplicationConns: []*HaPoolConfig{},
+		ChargerSConns:           []*RemoteHost{},
+		RALsConns:               []*RemoteHost{{Address: "*internal"}},
+		ResSConns:               []*RemoteHost{},
+		ThreshSConns:            []*RemoteHost{},
+		StatSConns:              []*RemoteHost{},
+		SupplSConns:             []*RemoteHost{},
+		AttrSConns:              []*RemoteHost{},
+		CDRsConns:               []*RemoteHost{{Address: "*internal"}},
+		SessionReplicationConns: []*RemoteHost{},
 		MaxCallDuration:         time.Duration(3 * time.Hour),
 		SessionIndexes:          map[string]bool{},
 		ClientProtocol:          1,
@@ -160,7 +160,7 @@ func TestFsAgentCfgloadFromJsonCfg2(t *testing.T) {
 },
 }`
 	expected = FsAgentCfg{
-		SessionSConns:     []*HaPoolConfig{{Address: "*internal"}},
+		SessionSConns:     []*RemoteHost{{Address: "*internal"}},
 		SubscribePark:     true,
 		MaxWaitConnection: time.Duration(2 * time.Second),
 		ExtraFields:       RSRParsers{},
@@ -212,8 +212,8 @@ func TestFsConnCfgloadFromJsonCfg(t *testing.T) {
 	}
 }
 
-func TestHaPoolConfigloadFromJsonCfg(t *testing.T) {
-	var hpoolcfg, expected HaPoolConfig
+func TestRemoteHostloadFromJsonCfg(t *testing.T) {
+	var hpoolcfg, expected RemoteHost
 	if err := hpoolcfg.loadFromJsonCfg(nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(hpoolcfg, expected) {
@@ -228,7 +228,7 @@ func TestHaPoolConfigloadFromJsonCfg(t *testing.T) {
 		Address:     utils.StringPointer("127.0.0.1:8448"),
 		Synchronous: utils.BoolPointer(true),
 	}
-	expected = HaPoolConfig{
+	expected = RemoteHost{
 		Address:     "127.0.0.1:8448",
 		Synchronous: true,
 	}
@@ -265,7 +265,7 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 }`
 	expected = AsteriskAgentCfg{
 		Enabled:       true,
-		SessionSConns: []*HaPoolConfig{{Address: "*internal"}},
+		SessionSConns: []*RemoteHost{{Address: "*internal"}},
 		AsteriskConns: []*AsteriskConnCfg{{
 			Address:         "127.0.0.1:8088",
 			User:            "cgrates",

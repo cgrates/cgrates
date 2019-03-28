@@ -24,10 +24,10 @@ type SupplierSCfg struct {
 	IndexedSelects      bool
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
-	AttributeSConns     []*HaPoolConfig
-	RALsConns           []*HaPoolConfig
-	ResourceSConns      []*HaPoolConfig
-	StatSConns          []*HaPoolConfig
+	AttributeSConns     []*RemoteHost
+	RALsConns           []*RemoteHost
+	ResourceSConns      []*RemoteHost
+	StatSConns          []*RemoteHost
 }
 
 func (spl *SupplierSCfg) loadFromJsonCfg(jsnCfg *SupplierSJsonCfg) (err error) {
@@ -55,30 +55,30 @@ func (spl *SupplierSCfg) loadFromJsonCfg(jsnCfg *SupplierSJsonCfg) (err error) {
 		spl.PrefixIndexedFields = &pif
 	}
 	if jsnCfg.Attributes_conns != nil {
-		spl.AttributeSConns = make([]*HaPoolConfig, len(*jsnCfg.Attributes_conns))
+		spl.AttributeSConns = make([]*RemoteHost, len(*jsnCfg.Attributes_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Attributes_conns {
-			spl.AttributeSConns[idx] = NewDfltHaPoolConfig()
+			spl.AttributeSConns[idx] = NewDfltRemoteHost()
 			spl.AttributeSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Rals_conns != nil {
-		spl.RALsConns = make([]*HaPoolConfig, len(*jsnCfg.Rals_conns))
+		spl.RALsConns = make([]*RemoteHost, len(*jsnCfg.Rals_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Rals_conns {
-			spl.RALsConns[idx] = NewDfltHaPoolConfig()
+			spl.RALsConns[idx] = NewDfltRemoteHost()
 			spl.RALsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Resources_conns != nil {
-		spl.ResourceSConns = make([]*HaPoolConfig, len(*jsnCfg.Resources_conns))
+		spl.ResourceSConns = make([]*RemoteHost, len(*jsnCfg.Resources_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Resources_conns {
-			spl.ResourceSConns[idx] = NewDfltHaPoolConfig()
+			spl.ResourceSConns[idx] = NewDfltRemoteHost()
 			spl.ResourceSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Stats_conns != nil {
-		spl.StatSConns = make([]*HaPoolConfig, len(*jsnCfg.Stats_conns))
+		spl.StatSConns = make([]*RemoteHost, len(*jsnCfg.Stats_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Stats_conns {
-			spl.StatSConns[idx] = NewDfltHaPoolConfig()
+			spl.StatSConns[idx] = NewDfltRemoteHost()
 			spl.StatSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}

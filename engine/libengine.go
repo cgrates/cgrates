@@ -29,7 +29,7 @@ import (
 )
 
 func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connAttempts, reconnects int,
-	connectTimeout, replyTimeout time.Duration, rpcConnCfgs []*config.HaPoolConfig,
+	connectTimeout, replyTimeout time.Duration, rpcConnCfgs []*config.RemoteHost,
 	internalConnChan chan rpcclient.RpcClientConnection, ttl time.Duration, lazyConnect bool) (*rpcclient.RpcClientPool, error) {
 	var rpcClient *rpcclient.RpcClient
 	var err error

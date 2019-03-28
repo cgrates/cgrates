@@ -36,7 +36,7 @@ var (
 	cgrCfg                   *CGRConfig  // will be shared
 	dfltFsConnConfig         *FsConnCfg  // Default FreeSWITCH Connection configuration, built out of json default configuration
 	dfltKamConnConfig        *KamConnCfg // Default Kamailio Connection configuration
-	dfltHaPoolConfig         *HaPoolConfig
+	dfltRemoteHost           *RemoteHost
 	dfltAstConnCfg           *AsteriskConnCfg
 	dfltLoaderConfig         *LoaderSCfg
 	dfltLoaderDataTypeConfig *LoaderDataType

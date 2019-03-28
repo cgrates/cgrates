@@ -45,7 +45,7 @@ func TestChargerSCfgloadFromJsonCfg(t *testing.T) {
 }`
 	expected = ChargerSCfg{
 		Enabled:             true,
-		AttributeSConns:     []*HaPoolConfig{},
+		AttributeSConns:     []*RemoteHost{},
 		PrefixIndexedFields: &[]string{"index1", "index2"},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {

@@ -27,7 +27,7 @@ type DiameterAgentCfg struct {
 	ListenNet         string // sctp or tcp
 	Listen            string // address where to listen for diameter requests <x.y.z.y:1234>
 	DictionariesPath  string
-	SessionSConns     []*HaPoolConfig // connections towards SMG component
+	SessionSConns     []*RemoteHost // connections towards SMG component
 	OriginHost        string
 	OriginRealm       string
 	VendorId          int
@@ -56,9 +56,9 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separa
 		da.DictionariesPath = *jsnCfg.Dictionaries_path
 	}
 	if jsnCfg.Sessions_conns != nil {
-		da.SessionSConns = make([]*HaPoolConfig, len(*jsnCfg.Sessions_conns))
+		da.SessionSConns = make([]*RemoteHost, len(*jsnCfg.Sessions_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
-			da.SessionSConns[idx] = NewDfltHaPoolConfig()
+			da.SessionSConns[idx] = NewDfltRemoteHost()
 			da.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}

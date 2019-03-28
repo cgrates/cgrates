@@ -75,7 +75,7 @@ func TestLoaderSCfgloadFromJsonCfg(t *testing.T) {
 		Id:             utils.MetaDefault,
 		Tenant:         ten,
 		LockFileName:   ".cgr.lck",
-		CacheSConns:    []*HaPoolConfig{{Address: utils.MetaInternal}},
+		CacheSConns:    []*RemoteHost{{Address: utils.MetaInternal}},
 		FieldSeparator: ",",
 		TpInDir:        "/var/spool/cgrates/loader/in",
 		TpOutDir:       "/var/spool/cgrates/loader/out",

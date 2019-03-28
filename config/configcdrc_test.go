@@ -37,7 +37,7 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 		{
 			ID:                       utils.META_DEFAULT,
 			Enabled:                  false,
-			CdrsConns:                []*HaPoolConfig{{Address: utils.MetaInternal}},
+			CdrsConns:                []*RemoteHost{{Address: utils.MetaInternal}},
 			CdrFormat:                "csv",
 			FieldSeparator:           ',',
 			DataUsageMultiplyFactor:  1024,
@@ -115,7 +115,7 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 		{
 			ID:                       "CDRC-CSV1",
 			Enabled:                  true,
-			CdrsConns:                []*HaPoolConfig{{Address: utils.MetaInternal}},
+			CdrsConns:                []*RemoteHost{{Address: utils.MetaInternal}},
 			CdrFormat:                "csv",
 			FieldSeparator:           ',',
 			DataUsageMultiplyFactor:  1024,
@@ -193,7 +193,7 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 		{
 			ID:                       "CDRC-CSV2",
 			Enabled:                  true,
-			CdrsConns:                []*HaPoolConfig{{Address: utils.MetaInternal}},
+			CdrsConns:                []*RemoteHost{{Address: utils.MetaInternal}},
 			CdrFormat:                "csv",
 			FieldSeparator:           ',',
 			DataUsageMultiplyFactor:  0.000976563,
@@ -255,7 +255,7 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 		{
 			ID:                       "CDRC-CSV3",
 			Enabled:                  true,
-			CdrsConns:                []*HaPoolConfig{{Address: utils.MetaInternal}},
+			CdrsConns:                []*RemoteHost{{Address: utils.MetaInternal}},
 			CdrFormat:                "csv",
 			FieldSeparator:           ',',
 			DataUsageMultiplyFactor:  1024,

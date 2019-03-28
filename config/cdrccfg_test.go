@@ -28,7 +28,7 @@ import (
 
 var cdrcCfg = CdrcCfg{
 	ID:                       utils.MetaDefault,
-	CdrsConns:                []*HaPoolConfig{{Address: utils.MetaInternal}},
+	CdrsConns:                []*RemoteHost{{Address: utils.MetaInternal}},
 	CdrFormat:                "csv",
 	FieldSeparator:           ',',
 	MaxOpenFiles:             1024,

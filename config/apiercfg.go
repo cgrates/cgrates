@@ -20,8 +20,8 @@ package config
 
 // ApierCfg is the configuration of Apier service
 type ApierCfg struct {
-	CachesConns    []*HaPoolConfig // connections towards Cache
-	SchedulerConns []*HaPoolConfig // connections towards Scheduler
+	CachesConns    []*RemoteHost // connections towards Cache
+	SchedulerConns []*RemoteHost // connections towards Scheduler
 }
 
 func (aCfg *ApierCfg) loadFromJsonCfg(jsnCfg *ApierJsonCfg) (err error) {
@@ -29,16 +29,16 @@ func (aCfg *ApierCfg) loadFromJsonCfg(jsnCfg *ApierJsonCfg) (err error) {
 		return
 	}
 	if jsnCfg.Caches_conns != nil {
-		aCfg.CachesConns = make([]*HaPoolConfig, len(*jsnCfg.Caches_conns))
+		aCfg.CachesConns = make([]*RemoteHost, len(*jsnCfg.Caches_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Caches_conns {
-			aCfg.CachesConns[idx] = NewDfltHaPoolConfig()
+			aCfg.CachesConns[idx] = NewDfltRemoteHost()
 			aCfg.CachesConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Scheduler_conns != nil {
-		aCfg.SchedulerConns = make([]*HaPoolConfig, len(*jsnCfg.Scheduler_conns))
+		aCfg.SchedulerConns = make([]*RemoteHost, len(*jsnCfg.Scheduler_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Scheduler_conns {
-			aCfg.SchedulerConns[idx] = NewDfltHaPoolConfig()
+			aCfg.SchedulerConns[idx] = NewDfltRemoteHost()
 			aCfg.SchedulerConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
