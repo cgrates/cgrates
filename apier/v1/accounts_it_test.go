@@ -50,6 +50,8 @@ var (
 		testAccITDebitBalance,
 		testAccITAddBalance,
 		testAccITSetBalance,
+		testAccITSetBalanceWithExtraData,
+		testAccITSetBalanceWithExtraData2,
 		testAccITStopCgrEngine,
 	}
 )
@@ -220,6 +222,64 @@ func testAccITSetBalance(t *testing.T) {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	}
+}
+
+func testAccITSetBalanceWithExtraData(t *testing.T) {
+	extraDataMap := map[string]interface{}{
+		"ExtraField":  "ExtraValue",
+		"ExtraField2": "RandomValue",
+	}
+	var reply string
+	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "testAccITSetBalanceWithExtraData",
+		BalanceId:   utils.StringPointer("testAccITSetBalanceWithExtraData"),
+		BalanceType: "*monetary", Value: 1.5, Cdrlog: utils.BoolPointer(true),
+		ExtraData: &extraDataMap}
+	if err := accRPC.Call("ApierV1.SetBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.SetBalance received: %s", reply)
+	}
+	time.Sleep(50 * time.Millisecond)
+	// verify the cdr from CdrLog
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{Sources: []string{engine.CDRLOG}, Accounts: []string{"testAccITSetBalanceWithExtraData"}}
+	if err := accRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else if len(cdrs[0].ExtraFields) != 2 {
+		t.Error("Unexpected number of ExtraFields returned: ", len(cdrs[0].ExtraFields))
+	}
+}
+
+func testAccITSetBalanceWithExtraData2(t *testing.T) {
+	extraDataMap := map[string]interface{}{
+		"ExtraField": "ExtraValue",
+		"ActionVal":  "~ActionValue",
+	}
+	var reply string
+	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "testAccITSetBalanceWithExtraData2",
+		BalanceId:   utils.StringPointer("testAccITSetBalanceWithExtraData2"),
+		BalanceType: "*monetary", Value: 1.5, Cdrlog: utils.BoolPointer(true),
+		ExtraData: &extraDataMap}
+	if err := accRPC.Call("ApierV1.SetBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.SetBalance received: %s", reply)
+	}
+	time.Sleep(50 * time.Millisecond)
+	// verify the cdr from CdrLog
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{Sources: []string{engine.CDRLOG}, Accounts: []string{"testAccITSetBalanceWithExtraData2"}}
+	if err := accRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else if len(cdrs[0].ExtraFields) != 2 {
+		t.Error("Unexpected number of ExtraFields returned: ", len(cdrs[0].ExtraFields))
+	} else if cdrs[0].ExtraFields["ActionVal"] != 1.5 {
+		t.Error("Unexpected value of ExtraFields[ActionVal] returned: ", cdrs[0].ExtraFields["ActionVal"])
 	}
 }
 

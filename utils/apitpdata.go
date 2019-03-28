@@ -983,6 +983,7 @@ type AttrSetBalance struct {
 	Blocker        *bool
 	Disabled       *bool
 	Cdrlog         *bool
+	ExtraData      *map[string]interface{}
 }
 
 // TPResourceProfile is used in APIs to manage remotely offline ResourceProfile
