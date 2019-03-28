@@ -166,10 +166,25 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 			return
 		}
 		for field, rsr := range template {
-			defaultTemplate[field] = config.NewRSRParsersMustCompile(rsr,
-				true, config.CgrConfig().GeneralCfg().RsrSepatarot)
+			if defaultTemplate[field], err = config.NewRSRParsers(rsr,
+				true, config.CgrConfig().GeneralCfg().RsrSepatarot); err != nil {
+				return
+			}
 		}
 	}
+	//In case that we have extra data we populate default templates
+	mapExtraData, _ := extraData.(map[string]interface{})
+	var strVal string
+	for key, val := range mapExtraData {
+		if strVal, err = utils.IfaceAsString(val); err != nil {
+			return
+		}
+		if defaultTemplate[key], err = config.NewRSRParsers(strVal,
+			true, config.CgrConfig().GeneralCfg().RsrSepatarot); err != nil {
+			return
+		}
+	}
+
 	// set stored cdr values
 	var cdrs []*CDR
 	for _, action := range acs {
