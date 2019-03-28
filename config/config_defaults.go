@@ -714,7 +714,7 @@ const CGRATES_CFG_JSON = `
 		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "127.0.0.1:2012"}
+		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
 },
 
