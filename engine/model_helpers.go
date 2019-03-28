@@ -2661,10 +2661,10 @@ func APItoDispatcherHost(tpDPH *utils.TPDispatcherHost) (dpp *DispatcherHost) {
 	dpp = &DispatcherHost{
 		Tenant: tpDPH.Tenant,
 		ID:     tpDPH.ID,
-		Conns:  make([]*DispatcherHostConn, len(tpDPH.Conns)),
+		Conns:  make([]*config.HaPoolConfig, len(tpDPH.Conns)),
 	}
 	for i, conn := range tpDPH.Conns {
-		dpp.Conns[i] = &DispatcherHostConn{
+		dpp.Conns[i] = &config.HaPoolConfig{
 			Address:   conn.Address,
 			Transport: conn.Transport,
 			TLS:       conn.TLS,

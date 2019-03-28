@@ -21,8 +21,11 @@ package engine
 import (
 	"math/rand"
 	"sort"
+	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 type DispatcherConn struct {
@@ -123,17 +126,39 @@ func (dps DispatcherProfiles) Sort() {
 	sort.Slice(dps, func(i, j int) bool { return dps[i].Weight > dps[j].Weight })
 }
 
+<<<<<<< HEAD
 type DispatcherHostConn struct {
 	Address   string
 	Transport string
 	TLS       bool
 }
+=======
+// DispatcherHost represents one virtual host with po
+>>>>>>> DispatcherHost.GetRPCConnection
 type DispatcherHost struct {
-	Tenant string
-	ID     string
-	Conns  []*DispatcherHostConn
+	Tenant  string
+	ID      string
+	Conns   []*config.HaPoolConfig
+	rpcConn rpcclient.RpcClientConnection
 }
 
-func (dP *DispatcherHost) TenantID() string {
-	return utils.ConcatenatedKey(dP.Tenant, dP.ID)
+func (dH *DispatcherHost) TenantID() string {
+	return utils.ConcatenatedKey(dH.Tenant, dH.ID)
+}
+
+// GetRPCConnection builds or returns the cached connection
+func (dH *DispatcherHost) GetRPCConnection() (rpcConn rpcclient.RpcClientConnection, err error) {
+	if dH.rpcConn == nil {
+		cfg := config.CgrConfig()
+		if dH.rpcConn, err = NewRPCPool(
+			rpcclient.POOL_FIRST,
+			cfg.TlsCfg().ClientKey,
+			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
+			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
+			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
+			dH.Conns, nil, time.Duration(0), false); err != nil {
+			return
+		}
+	}
+	return dH.rpcConn, nil
 }
