@@ -37,7 +37,8 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	dm *engine.DataManager, loadDb engine.LoadStorage, cdrDb engine.CdrStorage,
 	stopHandled *bool, exitChan chan bool, chS *engine.CacheS, // separate from channel for optimization
 	filterSChan chan *engine.FilterS,
-	cacheSChan chan rpcclient.RpcClientConnection) {
+	cacheSChan chan rpcclient.RpcClientConnection,
+	schedulerSChan chan rpcclient.RpcClientConnection) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
 	var waitTasks []chan struct{}
@@ -123,6 +124,29 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		}()
 	}
 
+	//create scheduler connection
+	var schedulerSrpc *rpcclient.RpcClientPool
+	if len(cfg.ApierCfg().SchedulerConns) != 0 {
+		schedulerSTaskChan := make(chan struct{})
+		waitTasks = append(waitTasks, schedulerSTaskChan)
+		go func() {
+			defer close(schedulerSTaskChan)
+			var err error
+			schedulerSrpc, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+				cfg.TlsCfg().ClientKey,
+				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
+				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
+				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
+				cfg.ApierCfg().SchedulerConns, schedulerSChan,
+				cfg.GeneralCfg().InternalTtl, false)
+			if err != nil {
+				utils.Logger.Crit(fmt.Sprintf("<APIer> Could not connect to SchedulerS, error: %s", err.Error()))
+				exitChan <- true
+				return
+			}
+		}()
+	}
+
 	// Wait for all connections to complete before going further
 	for _, chn := range waitTasks {
 		<-chn
@@ -136,6 +160,10 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	if cacheSrpc != nil && reflect.ValueOf(cacheSrpc).IsNil() {
 		cacheSrpc = nil
 	}
+	// correct reflect on schedulerS since there is no APIer init
+	if schedulerSrpc != nil && reflect.ValueOf(schedulerSrpc).IsNil() {
+		schedulerSrpc = nil
+	}
 	apierRpcV1 := &v1.ApierV1{
 		StorDb:      loadDb,
 		DataManager: dm,
@@ -145,8 +173,9 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		ServManager: serviceManager,
 		HTTPPoster: engine.NewHTTPPoster(cfg.GeneralCfg().HttpSkipTlsVerify,
 			cfg.GeneralCfg().ReplyTimeout),
-		FilterS: filterS,
-		CacheS:  cacheSrpc}
+		FilterS:    filterS,
+		CacheS:     cacheSrpc,
+		SchedulerS: schedulerSrpc}
 
 	if thdS != nil {
 		engine.SetThresholdS(thdS) // temporary architectural fix until we will have separate AccountS

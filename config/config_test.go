@@ -1712,8 +1712,12 @@ func TestCgrCfgJSONDefaultApierCfg(t *testing.T) {
 	aCfg := &ApierCfg{
 		CachesConns: []*HaPoolConfig{
 			{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSONrpc,
+				Address: utils.MetaInternal,
+			},
+		},
+		SchedulerConns: []*HaPoolConfig{
+			{
+				Address: utils.MetaInternal,
 			},
 		},
 	}

@@ -699,7 +699,6 @@ const (
 // ApierV1 APIs
 const (
 	ApierV1ComputeFilterIndexes     = "ApierV1.ComputeFilterIndexes"
-	ApierV1ReloadScheduler          = "ApierV1.ReloadScheduler"
 	ApierV1Ping                     = "ApierV1.Ping"
 	ApierV1SetDispatcherProfile     = "ApierV1.SetDispatcherProfile"
 	ApierV1GetDispatcherProfile     = "ApierV1.GetDispatcherProfile"
@@ -864,7 +863,8 @@ const (
 
 // Scheduler
 const (
-	SchedulerPing = "Scheduler.Ping"
+	SchedulerPing      = "Scheduler.Ping"
+	SchedulerSv1Reload = "SchedulerSv1.Reload"
 )
 
 // Cdrc

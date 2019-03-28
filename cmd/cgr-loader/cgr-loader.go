@@ -97,11 +97,12 @@ var (
 	flushStorDB    = cgrLoaderFlags.Bool("flush_stordb", false, "Remove tariff plan data for id from the database")
 	remove         = cgrLoaderFlags.Bool("remove", false, "Will remove instead of adding data from DB")
 
-	err    error
-	dm     *engine.DataManager
-	storDb engine.LoadStorage
-	cacheS rpcclient.RpcClientConnection
-	loader engine.LoadReader
+	err        error
+	dm         *engine.DataManager
+	storDb     engine.LoadStorage
+	cacheS     rpcclient.RpcClientConnection
+	schedulerS rpcclient.RpcClientConnection
+	loader     engine.LoadReader
 )
 
 func main() {
@@ -319,8 +320,21 @@ func main() {
 		log.Print("WARNING: automatic cache reloading is disabled!")
 	}
 
+	if len(ldrCfg.LoaderCgrCfg().SchedulerConns) != 0 { // Init connection to Scheduler so we can reload it's data
+		if schedulerS, err = rpcclient.NewRpcClient("tcp",
+			ldrCfg.LoaderCgrCfg().SchedulerConns[0].Address,
+			ldrCfg.LoaderCgrCfg().SchedulerConns[0].Tls, ldrCfg.TlsCfg().ClientKey,
+			ldrCfg.TlsCfg().ClientCerificate, ldrCfg.TlsCfg().CaCertificate, 3, 3,
+			time.Duration(1*time.Second), time.Duration(5*time.Minute),
+			strings.TrimPrefix(ldrCfg.LoaderCgrCfg().SchedulerConns[0].Transport, utils.Meta),
+			nil, false); err != nil {
+			log.Fatalf("Could not connect to Scheduler: %s", err.Error())
+			return
+		}
+	}
+
 	tpReader := engine.NewTpReader(dm.DataDB(), loader, ldrCfg.LoaderCgrCfg().TpID,
-		ldrCfg.GeneralCfg().DefaultTimezone, cacheS)
+		ldrCfg.GeneralCfg().DefaultTimezone, cacheS, schedulerS)
 
 	if err = tpReader.LoadAll(); err != nil {
 		log.Fatal(err)

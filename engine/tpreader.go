@@ -66,16 +66,19 @@ type TpReader struct {
 	dphs               []*utils.TenantID // IDs of dispatcherHosts which need creation based on dispatcherHosts
 	revDests,
 	acntActionPlans map[string][]string
-	cacheS rpcclient.RpcClientConnection
+	cacheS     rpcclient.RpcClientConnection
+	schedulerS rpcclient.RpcClientConnection
 }
 
-func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string, cacheS rpcclient.RpcClientConnection) *TpReader {
+func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
+	cacheS rpcclient.RpcClientConnection, schedulerS rpcclient.RpcClientConnection) *TpReader {
 	tpr := &TpReader{
-		tpid:     tpid,
-		timezone: timezone,
-		dm:       NewDataManager(db),
-		lr:       lr,
-		cacheS:   cacheS,
+		tpid:       tpid,
+		timezone:   timezone,
+		dm:         NewDataManager(db),
+		lr:         lr,
+		cacheS:     cacheS,
+		schedulerS: schedulerS,
 	}
 	tpr.Init()
 	//add *any and *asap timing tag (in case of no timings file)
@@ -2436,7 +2439,7 @@ func (tpr *TpReader) ReloadCache(flush, verbose bool) (err error) {
 		if verbose {
 			log.Print("Reloading scheduler")
 		}
-		if err = tpr.cacheS.Call(utils.ApierV1ReloadScheduler, "", &reply); err != nil {
+		if err = tpr.schedulerS.Call(utils.SchedulerSv1Reload, "", &reply); err != nil {
 			log.Printf("WARNING: Got error on scheduler reload: %s\n", err.Error())
 		}
 	}

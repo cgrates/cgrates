@@ -18,10 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
+import "github.com/cgrates/cgrates/utils"
+
 func init() {
 	c := &CmdReloadScheduler{
 		name:      "scheduler_reload",
-		rpcMethod: "ApierV1.ReloadScheduler",
+		rpcMethod: utils.SchedulerSv1Reload,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

@@ -62,7 +62,7 @@ cgrates.org,call,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,`
 	csvr := engine.NewTpReader(dataDB3.DataDB(), engine.NewStringCSVStorage(',', destinations, timings, rates,
 		destinationRates, ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers,
 		accountActions, resLimits, stats,
-		thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, ""), "", "", nil)
+		thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, ""), "", "", nil, nil)
 	if err := csvr.LoadDestinations(); err != nil {
 		t.Fatal(err)
 	}

@@ -50,6 +50,7 @@ type ApierV1 struct {
 	HTTPPoster  *engine.HTTPPoster
 	FilterS     *engine.FilterS //Used for CDR Exporter
 	CacheS      rpcclient.RpcClientConnection
+	SchedulerS  rpcclient.RpcClientConnection
 }
 
 func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) error {
@@ -191,7 +192,8 @@ func (self *ApierV1) LoadDestination(attrs AttrLoadDestination, reply *string) e
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
-		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone, self.CacheS)
+		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone,
+		self.CacheS, self.SchedulerS)
 	if loaded, err := dbReader.LoadDestinationsFiltered(attrs.ID); err != nil {
 		return utils.NewErrServerError(err)
 	} else if !loaded {
@@ -215,7 +217,8 @@ func (self *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) err
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
-		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone, self.CacheS)
+		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone,
+		self.CacheS, self.SchedulerS)
 	if loaded, err := dbReader.LoadRatingPlansFiltered(attrs.RatingPlanId); err != nil {
 		return utils.NewErrServerError(err)
 	} else if !loaded {
@@ -231,7 +234,8 @@ func (self *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *strin
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
-		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone, self.CacheS)
+		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone,
+		self.CacheS, self.SchedulerS)
 	if err := dbReader.LoadRatingProfilesFiltered(&attrs); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -250,7 +254,8 @@ func (self *ApierV1) LoadSharedGroup(attrs AttrLoadSharedGroup, reply *string) e
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
-		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone, self.CacheS)
+		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone,
+		self.CacheS, self.SchedulerS)
 	if err := dbReader.LoadSharedGroupsFiltered(attrs.SharedGroupId, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -271,7 +276,8 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
-		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone, self.CacheS)
+		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone,
+		self.CacheS, self.SchedulerS)
 	if err := dbReader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -643,7 +649,8 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
-		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone, self.CacheS)
+		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone,
+		self.CacheS, self.SchedulerS)
 	if _, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		return 0, dbReader.LoadAccountActionsFiltered(&attrs)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, attrs.LoadId); err != nil {
@@ -656,16 +663,6 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 		sched.Reload()
 	}
 	*reply = OK
-	return nil
-}
-
-func (self *ApierV1) ReloadScheduler(ignore string, reply *string) error {
-	sched := self.ServManager.GetScheduler()
-	if sched == nil {
-		return errors.New(utils.SchedulerNotRunningCaps)
-	}
-	sched.Reload()
-	*reply = utils.OK
 	return nil
 }
 
@@ -707,7 +704,8 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 			path.Join(attrs.FolderPath, utils.ChargersCsv),
 			path.Join(attrs.FolderPath, utils.DispatchersCsv),
 			path.Join(attrs.FolderPath, utils.DispatcherHostsCsv),
-		), "", self.Config.GeneralCfg().DefaultTimezone, self.CacheS)
+		), "", self.Config.GeneralCfg().DefaultTimezone,
+		self.CacheS, self.SchedulerS)
 	//Load the data
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)

@@ -1396,7 +1396,7 @@ func main() {
 	if cfg.RalsCfg().RALsEnabled {
 		go startRater(internalRaterChan, cacheS, internalThresholdSChan,
 			internalStatSChan, srvManager, server, dm, loadDb, cdrDb,
-			&stopHandled, exitChan, cacheS, filterSChan, internalCacheSChan)
+			&stopHandled, exitChan, cacheS, filterSChan, internalCacheSChan, internalSchedSChan)
 	}
 
 	// Start CDR Server
