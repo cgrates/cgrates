@@ -1052,6 +1052,12 @@ func initCacheS(internalCacheSChan chan rpcclient.RpcClientConnection,
 	return
 }
 
+func initGuardianSv1(server *utils.Server) {
+	if !cfg.DispatcherSCfg().Enabled {
+		server.RpcRegister(v1.NewGuardianSv1())
+	}
+}
+
 func initSchedulerS(internalCacheSChan chan rpcclient.RpcClientConnection,
 	srvMngr *servmanager.ServiceManager, server *utils.Server) {
 	schdS := servmanager.NewSchedulerS(srvMngr)
@@ -1148,12 +1154,6 @@ func startRpc(server *utils.Server, internalRaterChan,
 			)
 		}
 	}
-}
-
-func initGuardianSv1(server *utils.Server) {
-	guardianSv1 := v1.NewGuardianSv1()
-	server.RpcRegister(guardianSv1)
-	utils.RegisterRpcParams("", guardianSv1)
 }
 
 func writePid() {
@@ -1387,16 +1387,14 @@ func main() {
 	// init CacheS
 	cacheS := initCacheS(internalCacheSChan, server, dm, exitChan)
 
+	// init GuardianSv1
+	initGuardianSv1(server)
+
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, dm, exitChan, cacheS)
 
 	// init SchedulerS
 	initSchedulerS(internalSchedSChan, srvManager, server)
-
-	// Start GuardianSv1
-	if !cfg.DispatcherSCfg().Enabled {
-		go initGuardianSv1(server)
-	}
 
 	// Start Scheduler
 	if cfg.SchedulerCfg().Enabled {
