@@ -1437,7 +1437,8 @@ func TestDfLoaderCfg(t *testing.T) {
 		},
 		Scheduler_conns: &[]*HaPoolJsonCfg{
 			{
-				Address: utils.StringPointer("127.0.0.1:2012"),
+				Address:   utils.StringPointer("127.0.0.1:2012"),
+				Transport: utils.StringPointer(utils.MetaJSONrpc),
 			},
 		},
 	}

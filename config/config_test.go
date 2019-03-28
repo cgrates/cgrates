@@ -1497,7 +1497,8 @@ func TestCgrLoaderCfgDefault(t *testing.T) {
 		},
 		SchedulerConns: []*HaPoolConfig{
 			{
-				Address: "127.0.0.1:2012",
+				Address:   "127.0.0.1:2012",
+				Transport: utils.MetaJSONrpc,
 			},
 		},
 	}
