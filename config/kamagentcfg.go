@@ -40,7 +40,7 @@ func (self *KamConnCfg) loadFromJsonCfg(jsnCfg *KamConnJsonCfg) error {
 // SM-Kamailio config section
 type KamAgentCfg struct {
 	Enabled       bool
-	SessionSConns []*HaPoolConfig
+	SessionSConns []*RemoteHost
 	CreateCdr     bool
 	EvapiConns    []*KamConnCfg
 	Timezone      string
@@ -54,9 +54,9 @@ func (ka *KamAgentCfg) loadFromJsonCfg(jsnCfg *KamAgentJsonCfg) error {
 		ka.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Sessions_conns != nil {
-		ka.SessionSConns = make([]*HaPoolConfig, len(*jsnCfg.Sessions_conns))
+		ka.SessionSConns = make([]*RemoteHost, len(*jsnCfg.Sessions_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
-			ka.SessionSConns[idx] = NewDfltHaPoolConfig()
+			ka.SessionSConns[idx] = NewDfltRemoteHost()
 			ka.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}

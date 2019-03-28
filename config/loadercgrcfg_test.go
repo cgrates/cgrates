@@ -53,8 +53,8 @@ func TestLoaderCgrCfgloadFromJsonCfg(t *testing.T) {
 }`
 	expected = LoaderCgrCfg{
 		FieldSeparator: rune(';'),
-		CachesConns:    []*HaPoolConfig{{Address: "127.0.0.1:2012", Transport: "*json"}},
-		SchedulerConns: []*HaPoolConfig{{Address: "127.0.0.1:2012"}},
+		CachesConns:    []*RemoteHost{{Address: "127.0.0.1:2012", Transport: "*json"}},
+		SchedulerConns: []*RemoteHost{{Address: "127.0.0.1:2012"}},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
 		t.Error(err)

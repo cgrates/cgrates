@@ -43,7 +43,7 @@ func TestFilterSCfgloadFromJsonCfg(t *testing.T) {
 	},
 }`
 	expected = FilterSCfg{
-		StatSConns: []*HaPoolConfig{{Address: "127.0.0.1", Transport: "", Synchronous: true}},
+		StatSConns: []*RemoteHost{{Address: "127.0.0.1", Transport: "", Synchronous: true}},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
 		t.Error(err)

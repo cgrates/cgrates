@@ -29,7 +29,7 @@ type RadiusAgentCfg struct {
 	ListenAcct         string
 	ClientSecrets      map[string]string
 	ClientDictionaries map[string]string
-	SessionSConns      []*HaPoolConfig
+	SessionSConns      []*RemoteHost
 	RequestProcessors  []*RARequestProcessor
 }
 
@@ -66,9 +66,9 @@ func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg, separato
 		}
 	}
 	if jsnCfg.Sessions_conns != nil {
-		self.SessionSConns = make([]*HaPoolConfig, len(*jsnCfg.Sessions_conns))
+		self.SessionSConns = make([]*RemoteHost, len(*jsnCfg.Sessions_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
-			self.SessionSConns[idx] = NewDfltHaPoolConfig()
+			self.SessionSConns[idx] = NewDfltRemoteHost()
 			self.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}

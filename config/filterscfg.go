@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 type FilterSCfg struct {
-	StatSConns     []*HaPoolConfig
-	ResourceSConns []*HaPoolConfig
+	StatSConns     []*RemoteHost
+	ResourceSConns []*RemoteHost
 }
 
 func (fSCfg *FilterSCfg) loadFromJsonCfg(jsnCfg *FilterSJsonCfg) (err error) {
@@ -28,16 +28,16 @@ func (fSCfg *FilterSCfg) loadFromJsonCfg(jsnCfg *FilterSJsonCfg) (err error) {
 		return
 	}
 	if jsnCfg.Stats_conns != nil {
-		fSCfg.StatSConns = make([]*HaPoolConfig, len(*jsnCfg.Stats_conns))
+		fSCfg.StatSConns = make([]*RemoteHost, len(*jsnCfg.Stats_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Stats_conns {
-			fSCfg.StatSConns[idx] = NewDfltHaPoolConfig()
+			fSCfg.StatSConns[idx] = NewDfltRemoteHost()
 			fSCfg.StatSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Resources_conns != nil {
-		fSCfg.ResourceSConns = make([]*HaPoolConfig, len(*jsnCfg.Resources_conns))
+		fSCfg.ResourceSConns = make([]*RemoteHost, len(*jsnCfg.Resources_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Resources_conns {
-			fSCfg.ResourceSConns[idx] = NewDfltHaPoolConfig()
+			fSCfg.ResourceSConns[idx] = NewDfltRemoteHost()
 			fSCfg.ResourceSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}

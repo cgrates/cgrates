@@ -43,7 +43,7 @@ func TestSchedulerCfgloadFromJsonCfg(t *testing.T) {
 }`
 	expected = SchedulerCfg{
 		Enabled:   true,
-		CDRsConns: []*HaPoolConfig{},
+		CDRsConns: []*RemoteHost{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
 		t.Error(err)

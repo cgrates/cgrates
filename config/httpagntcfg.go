@@ -55,7 +55,7 @@ func (hcfgs *HttpAgentCfgs) loadFromJsonCfg(jsnHttpAgntCfg *[]*HttpAgentJsonCfg,
 type HttpAgentCfg struct {
 	ID                string // identifier for the agent, so we can update it's processors
 	Url               string
-	SessionSConns     []*HaPoolConfig
+	SessionSConns     []*RemoteHost
 	RequestPayload    string
 	ReplyPayload      string
 	RequestProcessors []*HttpAgntProcCfg
@@ -98,9 +98,9 @@ func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg, separator stri
 		ca.Url = *jsnCfg.Url
 	}
 	if jsnCfg.Sessions_conns != nil {
-		ca.SessionSConns = make([]*HaPoolConfig, len(*jsnCfg.Sessions_conns))
+		ca.SessionSConns = make([]*RemoteHost, len(*jsnCfg.Sessions_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
-			ca.SessionSConns[idx] = NewDfltHaPoolConfig()
+			ca.SessionSConns[idx] = NewDfltRemoteHost()
 			ca.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}

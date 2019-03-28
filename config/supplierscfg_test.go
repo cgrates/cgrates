@@ -50,10 +50,10 @@ func TestSupplierSCfgloadFromJsonCfg(t *testing.T) {
 }`
 	expected = SupplierSCfg{
 		PrefixIndexedFields: &[]string{"index1", "index2"},
-		AttributeSConns:     []*HaPoolConfig{},
-		RALsConns:           []*HaPoolConfig{{Address: "*internal"}},
-		ResourceSConns:      []*HaPoolConfig{},
-		StatSConns:          []*HaPoolConfig{},
+		AttributeSConns:     []*RemoteHost{},
+		RALsConns:           []*RemoteHost{{Address: "*internal"}},
+		ResourceSConns:      []*RemoteHost{},
+		StatSConns:          []*RemoteHost{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
 		t.Error(err)

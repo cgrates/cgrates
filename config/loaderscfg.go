@@ -37,7 +37,7 @@ type LoaderSCfg struct {
 	DryRun         bool
 	RunDelay       time.Duration
 	LockFileName   string
-	CacheSConns    []*HaPoolConfig
+	CacheSConns    []*RemoteHost
 	FieldSeparator string
 	TpInDir        string
 	TpOutDir       string
@@ -101,9 +101,9 @@ func (self *LoaderSCfg) loadFromJsonCfg(jsnCfg *LoaderJsonCfg, separator string)
 		self.LockFileName = *jsnCfg.Lock_filename
 	}
 	if jsnCfg.Caches_conns != nil {
-		cacheConns := make([]*HaPoolConfig, len(*jsnCfg.Caches_conns))
+		cacheConns := make([]*RemoteHost, len(*jsnCfg.Caches_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Caches_conns {
-			cacheConns[idx] = NewDfltHaPoolConfig()
+			cacheConns[idx] = NewDfltRemoteHost()
 			cacheConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 		self.CacheSConns = cacheConns
@@ -138,7 +138,7 @@ func (self *LoaderSCfg) Clone() *LoaderSCfg {
 	clnLoader.DryRun = self.DryRun
 	clnLoader.RunDelay = self.RunDelay
 	clnLoader.LockFileName = self.LockFileName
-	clnLoader.CacheSConns = make([]*HaPoolConfig, len(self.CacheSConns))
+	clnLoader.CacheSConns = make([]*RemoteHost, len(self.CacheSConns))
 	for idx, cdrConn := range self.CacheSConns {
 		clonedVal := *cdrConn
 		clnLoader.CacheSConns[idx] = &clonedVal

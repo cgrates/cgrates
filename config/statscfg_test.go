@@ -47,7 +47,7 @@ func TestStatSCfgloadFromJsonCfg(t *testing.T) {
 }`
 	expected = StatSCfg{
 		StoreInterval:       time.Duration(time.Second * 2),
-		ThresholdSConns:     []*HaPoolConfig{},
+		ThresholdSConns:     []*RemoteHost{},
 		PrefixIndexedFields: &[]string{"index1", "index2"},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {

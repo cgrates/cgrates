@@ -29,7 +29,7 @@ type CdrcCfg struct {
 	ID                       string              // free-form text identifying this CDRC instance
 	Enabled                  bool                // Enable/Disable the profile
 	DryRun                   bool                // Do not post CDRs to the server
-	CdrsConns                []*HaPoolConfig     // The address where CDRs can be reached
+	CdrsConns                []*RemoteHost       // The address where CDRs can be reached
 	CdrFormat                string              // The type of CDR file to process <*csv|*opensips_flatstore>
 	FieldSeparator           rune                // The separator to use when reading csvs
 	DataUsageMultiplyFactor  float64             // Conversion factor for data usage
@@ -67,9 +67,9 @@ func (self *CdrcCfg) loadFromJsonCfg(jsnCfg *CdrcJsonCfg, separator string) erro
 		self.DryRun = *jsnCfg.Dry_run
 	}
 	if jsnCfg.Cdrs_conns != nil {
-		self.CdrsConns = make([]*HaPoolConfig, len(*jsnCfg.Cdrs_conns))
+		self.CdrsConns = make([]*RemoteHost, len(*jsnCfg.Cdrs_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Cdrs_conns {
-			self.CdrsConns[idx] = NewDfltHaPoolConfig()
+			self.CdrsConns[idx] = NewDfltRemoteHost()
 			self.CdrsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
@@ -158,7 +158,7 @@ func (self *CdrcCfg) Clone() *CdrcCfg {
 	clnCdrc.ID = self.ID
 	clnCdrc.Enabled = self.Enabled
 	clnCdrc.DryRun = self.DryRun
-	clnCdrc.CdrsConns = make([]*HaPoolConfig, len(self.CdrsConns))
+	clnCdrc.CdrsConns = make([]*RemoteHost, len(self.CdrsConns))
 	for idx, cdrConn := range self.CdrsConns {
 		clonedVal := *cdrConn
 		clnCdrc.CdrsConns[idx] = &clonedVal

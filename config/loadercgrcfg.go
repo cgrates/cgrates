@@ -23,8 +23,8 @@ type LoaderCgrCfg struct {
 	DataPath       string
 	DisableReverse bool
 	FieldSeparator rune // The separator to use when reading csvs
-	CachesConns    []*HaPoolConfig
-	SchedulerConns []*HaPoolConfig
+	CachesConns    []*RemoteHost
+	SchedulerConns []*RemoteHost
 }
 
 func (ld *LoaderCgrCfg) loadFromJsonCfg(jsnCfg *LoaderCfgJson) (err error) {
@@ -45,16 +45,16 @@ func (ld *LoaderCgrCfg) loadFromJsonCfg(jsnCfg *LoaderCfgJson) (err error) {
 		ld.FieldSeparator = rune(sepStr[0])
 	}
 	if jsnCfg.Caches_conns != nil {
-		ld.CachesConns = make([]*HaPoolConfig, len(*jsnCfg.Caches_conns))
+		ld.CachesConns = make([]*RemoteHost, len(*jsnCfg.Caches_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Caches_conns {
-			ld.CachesConns[idx] = NewDfltHaPoolConfig()
+			ld.CachesConns[idx] = NewDfltRemoteHost()
 			ld.CachesConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Scheduler_conns != nil {
-		ld.SchedulerConns = make([]*HaPoolConfig, len(*jsnCfg.Scheduler_conns))
+		ld.SchedulerConns = make([]*RemoteHost, len(*jsnCfg.Scheduler_conns))
 		for idx, jsnScheHaCfg := range *jsnCfg.Scheduler_conns {
-			ld.SchedulerConns[idx] = NewDfltHaPoolConfig()
+			ld.SchedulerConns[idx] = NewDfltRemoteHost()
 			ld.SchedulerConns[idx].loadFromJsonCfg(jsnScheHaCfg)
 		}
 	}

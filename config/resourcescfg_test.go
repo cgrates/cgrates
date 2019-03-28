@@ -48,7 +48,7 @@ func TestResourceSConfigloadFromJsonCfg(t *testing.T) {
 	expected = ResourceSConfig{
 		Enabled:             true,
 		StoreInterval:       time.Duration(time.Second),
-		ThresholdSConns:     []*HaPoolConfig{},
+		ThresholdSConns:     []*RemoteHost{},
 		PrefixIndexedFields: &[]string{"index1", "index2"},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {

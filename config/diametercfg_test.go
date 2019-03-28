@@ -57,7 +57,7 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 	expected = DiameterAgentCfg{
 		Listen:           "127.0.0.1:3868",
 		DictionariesPath: "/usr/share/cgrates/diameter/dict/",
-		SessionSConns:    []*HaPoolConfig{{Address: "*internal"}},
+		SessionSConns:    []*RemoteHost{{Address: "*internal"}},
 		OriginHost:       "CGR-DA",
 		OriginRealm:      "cgrates.org",
 		VendorId:         0,

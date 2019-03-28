@@ -617,8 +617,8 @@ func testDspSessionReplicate(t *testing.T) {
 		ArgsReplicateSessions: sessions.ArgsReplicateSessions{
 			CGRID:   "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 			Passive: false,
-			Connections: []*config.HaPoolConfig{
-				&config.HaPoolConfig{
+			Connections: []*config.RemoteHost{
+				&config.RemoteHost{
 					Address:   "127.0.0.1:7012",
 					Transport: utils.MetaJSONrpc,
 				},

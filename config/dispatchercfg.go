@@ -24,8 +24,8 @@ type DispatcherSCfg struct {
 	IndexedSelects      bool
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
-	AttributeSConns     []*HaPoolConfig
-	Conns               map[string][]*HaPoolConfig
+	AttributeSConns     []*RemoteHost
+	Conns               map[string][]*RemoteHost
 }
 
 func (dps *DispatcherSCfg) loadFromJsonCfg(jsnCfg *DispatcherSJsonCfg) (err error) {
@@ -53,21 +53,21 @@ func (dps *DispatcherSCfg) loadFromJsonCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 		dps.PrefixIndexedFields = &pif
 	}
 	if jsnCfg.Attributes_conns != nil {
-		dps.AttributeSConns = make([]*HaPoolConfig, len(*jsnCfg.Attributes_conns))
+		dps.AttributeSConns = make([]*RemoteHost, len(*jsnCfg.Attributes_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Attributes_conns {
-			dps.AttributeSConns[idx] = NewDfltHaPoolConfig()
+			dps.AttributeSConns[idx] = NewDfltRemoteHost()
 			dps.AttributeSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Conns != nil {
-		dps.Conns = make(map[string][]*HaPoolConfig, len(*jsnCfg.Conns))
+		dps.Conns = make(map[string][]*RemoteHost, len(*jsnCfg.Conns))
 		for id, conns := range *jsnCfg.Conns {
 			if conns == nil {
 				continue
 			}
-			Conns := make([]*HaPoolConfig, len(*conns))
+			Conns := make([]*RemoteHost, len(*conns))
 			for idx, jsnHaCfg := range *conns {
-				Conns[idx] = NewDfltHaPoolConfig()
+				Conns[idx] = NewDfltRemoteHost()
 				Conns[idx].loadFromJsonCfg(jsnHaCfg)
 			}
 			dps.Conns[id] = Conns

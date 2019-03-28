@@ -67,7 +67,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 	expected = HttpAgentCfgs{&HttpAgentCfg{
 		ID:             "conecto1",
 		Url:            "/conecto",
-		SessionSConns:  []*HaPoolConfig{{Address: "127.0.0.1:2012", Transport: "*json"}},
+		SessionSConns:  []*RemoteHost{{Address: "127.0.0.1:2012", Transport: "*json"}},
 		RequestPayload: "*url",
 		ReplyPayload:   "*xml",
 		RequestProcessors: []*HttpAgntProcCfg{{
@@ -146,7 +146,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 		&HttpAgentCfg{
 			ID:             "conecto1",
 			Url:            "/conecto",
-			SessionSConns:  []*HaPoolConfig{{Address: "127.0.0.1:2012", Transport: "*json"}},
+			SessionSConns:  []*RemoteHost{{Address: "127.0.0.1:2012", Transport: "*json"}},
 			RequestPayload: "*url",
 			ReplyPayload:   "*xml",
 			RequestProcessors: []*HttpAgntProcCfg{{
@@ -185,7 +185,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 		}, &HttpAgentCfg{
 			ID:             "conecto_xml",
 			Url:            "/conecto_xml",
-			SessionSConns:  []*HaPoolConfig{{Address: "127.0.0.1:2012", Transport: "*json"}},
+			SessionSConns:  []*RemoteHost{{Address: "127.0.0.1:2012", Transport: "*json"}},
 			RequestPayload: "*xml",
 			ReplyPayload:   "*xml",
 			RequestProcessors: []*HttpAgntProcCfg{{
@@ -240,7 +240,7 @@ func TestHttpAgentCfgloadFromJsonCfg(t *testing.T) {
 	expected = HttpAgentCfg{
 		ID:             "conecto1",
 		Url:            "/conecto",
-		SessionSConns:  []*HaPoolConfig{{Address: "127.0.0.1:2012", Transport: "*json"}},
+		SessionSConns:  []*RemoteHost{{Address: "127.0.0.1:2012", Transport: "*json"}},
 		RequestPayload: "*url",
 		ReplyPayload:   "*xml",
 		RequestProcessors: []*HttpAgntProcCfg{{
@@ -264,7 +264,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 	initial := &HttpAgentCfg{
 		ID:             "conecto1",
 		Url:            "/conecto",
-		SessionSConns:  []*HaPoolConfig{{Address: "127.0.0.1:2012", Transport: "*json"}},
+		SessionSConns:  []*RemoteHost{{Address: "127.0.0.1:2012", Transport: "*json"}},
 		RequestPayload: "*url",
 		ReplyPayload:   "*xml",
 		RequestProcessors: []*HttpAgntProcCfg{{
@@ -313,7 +313,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 	expected := &HttpAgentCfg{
 		ID:             "conecto1",
 		Url:            "/conecto",
-		SessionSConns:  []*HaPoolConfig{{Address: "127.0.0.1:2012", Transport: "*json"}},
+		SessionSConns:  []*RemoteHost{{Address: "127.0.0.1:2012", Transport: "*json"}},
 		RequestPayload: "*url",
 		ReplyPayload:   "*xml",
 		RequestProcessors: []*HttpAgntProcCfg{{

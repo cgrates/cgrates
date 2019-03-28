@@ -48,7 +48,7 @@ var (
 )
 
 // NewSReplConns initiates the connections configured for session replication
-func NewSReplConns(conns []*config.HaPoolConfig, reconnects int,
+func NewSReplConns(conns []*config.RemoteHost, reconnects int,
 	connTimeout, replyTimeout time.Duration) (sReplConns []*SReplConn, err error) {
 	sReplConns = make([]*SReplConn, len(conns))
 	for i, replConnCfg := range conns {
@@ -1479,7 +1479,7 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(clnt rpcclient.RpcClientConnection,
 type ArgsReplicateSessions struct {
 	CGRID       string
 	Passive     bool
-	Connections []*config.HaPoolConfig
+	Connections []*config.RemoteHost
 }
 
 // BiRPCv1ReplicateSessions will replicate active sessions to either args.Connections or the internal configured ones

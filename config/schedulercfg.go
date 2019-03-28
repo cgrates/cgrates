@@ -20,7 +20,7 @@ package config
 
 type SchedulerCfg struct {
 	Enabled   bool
-	CDRsConns []*HaPoolConfig
+	CDRsConns []*RemoteHost
 }
 
 func (schdcfg *SchedulerCfg) loadFromJsonCfg(jsnCfg *SchedulerJsonCfg) error {
@@ -32,9 +32,9 @@ func (schdcfg *SchedulerCfg) loadFromJsonCfg(jsnCfg *SchedulerJsonCfg) error {
 	}
 
 	if jsnCfg.Cdrs_conns != nil {
-		schdcfg.CDRsConns = make([]*HaPoolConfig, len(*jsnCfg.Cdrs_conns))
+		schdcfg.CDRsConns = make([]*RemoteHost, len(*jsnCfg.Cdrs_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Cdrs_conns {
-			schdcfg.CDRsConns[idx] = NewDfltHaPoolConfig()
+			schdcfg.CDRsConns[idx] = NewDfltRemoteHost()
 			schdcfg.CDRsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
