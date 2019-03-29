@@ -611,6 +611,7 @@ const (
 	ThresholdsLow  = "thresholds"
 	DispatcherSLow = "dispatchers"
 	AnalyzerSLow   = "analyzers"
+	SchedulerSLow  = "schedulers"
 	LoaderSLow     = "loaders"
 )
 
@@ -863,7 +864,8 @@ const (
 
 // Scheduler
 const (
-	SchedulerPing      = "Scheduler.Ping"
+	SchedulerSv1       = "SchedulerSv1"
+	SchedulerSv1Ping   = "SchedulerSv1.Ping"
 	SchedulerSv1Reload = "SchedulerSv1.Reload"
 )
 

@@ -18,7 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package v1
 
-import "github.com/cgrates/cgrates/servmanager"
+import (
+	"github.com/cgrates/cgrates/servmanager"
+	"github.com/cgrates/cgrates/utils"
+)
 
 func NewSchedulerSv1(schdS *servmanager.SchedulerS) *SchedulerSv1 {
 	return &SchedulerSv1{schdS: schdS}
@@ -32,4 +35,9 @@ type SchedulerSv1 struct {
 // Reload reloads scheduler instructions
 func (schdSv1 *SchedulerSv1) Reload(arg string, reply *string) error {
 	return schdSv1.schdS.V1Reload(arg, reply)
+}
+
+func (schdSv1 *SchedulerSv1) Ping(ign *utils.CGREvent, reply *string) error {
+	*reply = utils.Pong
+	return nil
 }

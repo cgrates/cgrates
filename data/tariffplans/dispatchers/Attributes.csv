@@ -11,3 +11,4 @@ cgrates.org,ATTR_API_SES_AUTH,*auth,*string:~APIKey:ses12345,,,APIMethods,Sessio
 cgrates.org,ATTR_API_RSP_AUTH,*auth,*string:~APIKey:rsp12345,,,APIMethods,Responder.Status&Responder.GetTimeout&Responder.Shutdown&Responder.Ping,false,20
 cgrates.org,ATTR_API_CHC_AUTH,*auth,*string:~APIKey:chc12345,,,APIMethods,CacheSv1.Ping&CacheSv1.GetCacheStats&CacheSv1.LoadCache&CacheSv1.PrecacheStatus&CacheSv1.GetItemIDs&CacheSv1.HasItem&CacheSv1.GetItemExpiryTime&CacheSv1.ReloadCache&CacheSv1.RemoveItem&CacheSv1.FlushCache&CacheSv1.Clear,false,20
 cgrates.org,ATTR_API_GRD_AUTH,*auth,*string:~APIKey:grd12345,,,APIMethods,GuardianSv1.Ping&GuardianSv1.RemoteLock&GuardianSv1.RemoteUnlock,false,20
+cgrates.org,ATTR_API_SCHD_AUTH,*auth,*string:~APIKey:sched12345,,,APIMethods,SchedulerSv1.Ping,false,20
