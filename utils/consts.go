@@ -716,6 +716,7 @@ const (
 	ApierV2GetCDRs                  = "ApierV2.GetCDRs"
 	ApierV2GetAccount               = "ApierV2.GetAccount"
 	ApierV2SetAccount               = "ApierV2.SetAccount"
+	ApierV2CountCDRs                = "ApierV2.CountCDRs"
 )
 
 // SupplierS APIs

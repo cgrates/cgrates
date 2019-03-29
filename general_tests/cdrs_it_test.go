@@ -24,8 +24,11 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
+	"reflect"
 	"testing"
 	"time"
+
+	v1 "github.com/cgrates/cgrates/apier/v1"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -53,6 +56,21 @@ var sTestsCDRsIT = []func(t *testing.T){
 	testV2CDRsGetCdrs2,
 	testV2CDRsProcessCDR3,
 	testV2CDRsGetCdrs3,
+
+	testV2CDRsProcessCDR4,
+	testV2CDRsGetCdrs4,
+
+	testV2CDRsSetStats,
+	testV2CDRsSetThresholdProfile,
+
+	testV2CDRsProcessCDR5,
+	testV2CDRsGetCdrs5,
+	testV2CDRsGetStats1,
+	testV2CDRsGetThreshold1,
+	testV2CDRsProcessCDR6,
+	testV2CDRsGetCdrs5,
+	testV2CDRsGetStats2,
+	testV2CDRsGetThreshold2,
 
 	testV2CDRsKillEngine,
 }
@@ -332,6 +350,320 @@ func testV2CDRsGetCdrs3(t *testing.T) {
 	args = utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"}, OriginIDs: []string{"testV2CDRsProcessCDR3"}}
 	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error("Unexpected error: ", err.Error())
+	}
+}
+
+// Enable Attributes process
+func testV2CDRsProcessCDR4(t *testing.T) {
+	args := &engine.ArgV1ProcessEvent{
+		AttributeS: utils.BoolPointer(true),
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:    "testV2CDRsProcessCDR4",
+				utils.OriginHost:  "192.168.1.1",
+				utils.Source:      "testV2CDRsProcessCDR4",
+				utils.RequestType: utils.META_RATED,
+				utils.Category:    "call",
+				utils.Account:     "testV2CDRsProcessCDR4",
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "+4986517174963",
+				utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:       time.Minute,
+				"field_extr1":     "val_extr1",
+				"fieldextr2":      "valextr2",
+			},
+		},
+	}
+
+	var reply string
+	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+}
+
+func testV2CDRsGetCdrs4(t *testing.T) {
+	var cdrCnt int64
+	req := utils.AttrGetCdrs{Accounts: []string{"testV2CDRsProcessCDR4"}}
+	if err := cdrsRpc.Call(utils.ApierV2CountCDRs, req, &cdrCnt); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if cdrCnt != 2 {
+		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
+	}
+	var cdrs []*engine.ExternalCDR
+	args := utils.RPCCDRsFilter{
+		RunIDs:    []string{utils.MetaRaw},
+		OriginIDs: []string{"testV2CDRsProcessCDR4"},
+	}
+	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
+		t.Fatal("Unexpected error: ", err.Error())
+	}
+	if len(cdrs) != 1 {
+		t.Fatal("Unexpected number of CDRs returned: ", len(cdrs))
+	}
+	if cdrs[0].Cost != -1.0 {
+		t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+	}
+	if rply, has := cdrs[0].ExtraFields["PayPalAccount"]; !has || rply != "paypal@cgrates.org" {
+		t.Errorf("PayPalAccount should be added by AttributeS as: paypal@cgrates.org, have: %s",
+			cdrs[0].ExtraFields["PayPalAccount"])
+	}
+	args = utils.RPCCDRsFilter{
+		RunIDs:    []string{"CustomerCharges"},
+		OriginIDs: []string{"testV2CDRsProcessCDR4"},
+	}
+	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
+		t.Fatal("Unexpected error: ", err.Error())
+	}
+	if len(cdrs) != 1 {
+		t.Fatal("Unexpected number of CDRs returned: ", len(cdrs))
+	}
+	if cdrs[0].Cost != 0.0198 {
+		t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+	}
+	if rply, has := cdrs[0].ExtraFields["PayPalAccount"]; !has || rply != "paypal@cgrates.org" {
+		t.Errorf("PayPalAccount should be added by AttributeS as: paypal@cgrates.org, have: %s",
+			cdrs[0].ExtraFields["PayPalAccount"])
+	}
+}
+
+func testV2CDRsGetCdrs5(t *testing.T) {
+	var cdrCnt int64
+	req := utils.AttrGetCdrs{Accounts: []string{"testV2CDRsProcessCDR5"}}
+	if err := cdrsRpc.Call(utils.ApierV2CountCDRs, req, &cdrCnt); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if cdrCnt != 0 {
+		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
+	}
+	var cdrs []*engine.ExternalCDR
+	args := utils.RPCCDRsFilter{
+		RunIDs:    []string{utils.MetaRaw},
+		OriginIDs: []string{"testV2CDRsProcessCDR5"},
+	}
+	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Fatal("Unexpected error: ", err.Error())
+	}
+	args = utils.RPCCDRsFilter{
+		RunIDs:    []string{"CustomerCharges"},
+		OriginIDs: []string{"testV2CDRsProcessCDR5"},
+	}
+	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Fatal("Unexpected error: ", err.Error())
+	}
+}
+
+func testV2CDRsSetStats(t *testing.T) {
+	var reply *engine.StatQueueProfile
+	if err := cdrsRpc.Call("ApierV1.GetStatQueueProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "STS_PoccessCDR"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	statConfig := &v1.StatQueueWithCache{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:    "cgrates.org",
+			ID:        "STS_PoccessCDR",
+			FilterIDs: []string{"*string:~OriginID:testV2CDRsProcessCDR5"},
+			// QueueLength: 10,
+			Metrics: []*engine.MetricWithFilters{
+				&engine.MetricWithFilters{
+					MetricID: "*sum#Usage",
+				},
+			},
+			ThresholdIDs: []string{utils.META_NONE},
+			Blocker:      true,
+			Stored:       true,
+			Weight:       20,
+			MinItems:     0,
+		},
+	}
+	var result string
+	if err := cdrsRpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := cdrsRpc.Call("ApierV1.GetStatQueueProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "STS_PoccessCDR"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(statConfig.StatQueueProfile), utils.ToJSON(reply))
+	}
+}
+
+func testV2CDRsSetThresholdProfile(t *testing.T) {
+	var actreply string
+
+	// Set Action
+	attrsAA := &utils.AttrSetActions{ActionsId: "ACT_THD_PoccessCDR", Actions: []*utils.TPAction{{Identifier: engine.LOG}}}
+	if err := cdrsRpc.Call("ApierV2.SetActions", attrsAA, &actreply); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error("Got error on ApierV2.SetActions: ", err.Error())
+	} else if actreply != utils.OK {
+		t.Errorf("Calling ApierV2.SetActions received: %s", actreply)
+	}
+
+	// Set Account
+	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "testV2CDRsProcessCDR5"}
+	if err := cdrsRpc.Call("ApierV1.SetAccount", attrsSetAccount, &actreply); err != nil {
+		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
+	} else if actreply != utils.OK {
+		t.Errorf("Calling ApierV1.SetAccount received: %s", actreply)
+	}
+
+	// Set Threshold
+	var reply *engine.ThresholdProfile
+	var result string
+	if err := cdrsRpc.Call("ApierV1.GetThresholdProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_PoccessCDR"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	tPrfl := &v1.ThresholdWithCache{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "THD_PoccessCDR",
+			FilterIDs: []string{"*string:~OriginID:testV2CDRsProcessCDR5"},
+			MaxHits:   -1,
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_THD_PoccessCDR"},
+			Async:     false,
+		},
+	}
+	if err := cdrsRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := cdrsRpc.Call("ApierV1.GetThresholdProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_PoccessCDR"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
+	}
+}
+
+func testV2CDRsProcessCDR5(t *testing.T) {
+	args := &engine.ArgV1ProcessEvent{
+		Store:      utils.BoolPointer(false),
+		StatS:      utils.BoolPointer(false),
+		ThresholdS: utils.BoolPointer(false),
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:    "testV2CDRsProcessCDR5",
+				utils.OriginHost:  "192.168.1.1",
+				utils.Source:      "testV2CDRsProcessCDR5",
+				utils.RequestType: utils.META_RATED,
+				utils.Category:    "call",
+				utils.Account:     "testV2CDRsProcessCDR5",
+				utils.Subject:     "ANY2CNT2",
+				utils.Destination: "+4986517174963",
+				utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:       time.Minute,
+				"field_extr1":     "val_extr1",
+				"fieldextr2":      "valextr2",
+			},
+		},
+	}
+
+	var reply string
+	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+}
+
+func testV2CDRsGetStats1(t *testing.T) {
+	expectedIDs := []string{"STS_PoccessCDR"}
+	var metrics map[string]string
+	expectedMetrics := map[string]string{
+		utils.StatsJoin(utils.MetaSum, utils.Usage): utils.NOT_AVAILABLE,
+	}
+	if err := cdrsRpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	}
+}
+
+func testV2CDRsGetThreshold1(t *testing.T) {
+	expected := []string{"THD_ACNT_1001", "THD_PoccessCDR"}
+	var result []string
+	if err := cdrsRpc.Call("ApierV1.GetThresholdProfileIDs", "cgrates.org", &result); err != nil {
+		t.Error(err)
+	} else if len(expected) != len(result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+	}
+	var td engine.Threshold
+	if err := cdrsRpc.Call(utils.ThresholdSv1GetThreshold,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_PoccessCDR"}, &td); err != nil {
+		t.Error(err)
+	} else if td.Hits != 0 {
+		t.Errorf("received: %+v", td)
+	}
+}
+
+func testV2CDRsProcessCDR6(t *testing.T) {
+	args := &engine.ArgV1ProcessEvent{
+		Store:      utils.BoolPointer(false),
+		StatS:      utils.BoolPointer(true),
+		ThresholdS: utils.BoolPointer(true),
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:    "testV2CDRsProcessCDR5",
+				utils.OriginHost:  "192.168.1.1",
+				utils.Source:      "testV2CDRsProcessCDR5",
+				utils.RequestType: utils.META_RATED,
+				utils.Category:    "call",
+				utils.Account:     "testV2CDRsProcessCDR5",
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "+4986517174963",
+				utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:       time.Minute,
+				"field_extr1":     "val_extr1",
+				"fieldextr2":      "valextr2",
+			},
+		},
+	}
+
+	var reply string
+	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+}
+
+func testV2CDRsGetStats2(t *testing.T) {
+	expectedIDs := []string{"STS_PoccessCDR"}
+	var metrics map[string]string
+	expectedMetrics := map[string]string{
+		utils.StatsJoin(utils.MetaSum, utils.Usage): "60000000000",
+	}
+	if err := cdrsRpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	}
+}
+
+func testV2CDRsGetThreshold2(t *testing.T) {
+	var td engine.Threshold
+	if err := cdrsRpc.Call(utils.ThresholdSv1GetThreshold,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_PoccessCDR"}, &td); err != nil {
+		t.Error(err)
+	} else if td.Hits != 2 { // 2 Chargers
+		t.Errorf("received: %+v", td)
 	}
 }
 
