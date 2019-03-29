@@ -28,7 +28,7 @@ RUNDIR=$TMP_DIR/run
 PIDFILE=$RUNDIR/cgr-engine.pid
 STACKTRACE=$RUNDIR/$NAME.strace
 ENABLE=true
-DAEMON_OPTS="-config_dir=/usr/share/cgrates/tutorials/fs_evsock/cgrates/etc/cgrates"
+DAEMON_OPTS="-config_path=/usr/share/cgrates/tutorials/fs_evsock/cgrates/etc/cgrates"
 CDREDIR=$TMP_DIR/cdre
 
 # Exit if the package is not installed
