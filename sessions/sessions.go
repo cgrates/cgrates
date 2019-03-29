@@ -390,11 +390,15 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 		} else {
 			var reply string
 			for _, cgrEv := range cgrEvs {
-				if err = sS.cdrS.Call(utils.CDRsV1ProcessEvent,
-					&engine.ArgV1ProcessEvent{
-						CGREvent:   *cgrEv,
-						ChargerS:   utils.BoolPointer(false),
-						AttributeS: utils.BoolPointer(false)}, &reply); err != nil {
+				argsProc := &engine.ArgV1ProcessEvent{
+					CGREvent:   *cgrEv,
+					ChargerS:   utils.BoolPointer(false),
+					AttributeS: utils.BoolPointer(false)}
+				if unratedReqs.HasField( // order additional rating for unrated request types
+					engine.NewMapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RequestType)) {
+					argsProc.RALs = utils.BoolPointer(true)
+				}
+				if err = sS.cdrS.Call(utils.CDRsV1ProcessEvent, argsProc, &reply); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf(
 							"<%s> could not post CDR for event %s, err: %s",
