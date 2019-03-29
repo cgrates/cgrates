@@ -412,5 +412,6 @@ type TPDispatcherHost struct {
 	ID        string `index:"1" re:""`
 	Address   string `index:"2" re:""`
 	Transport string `index:"3" re:""`
+	Tls       bool   `index:"4" re:""`
 	CreatedAt time.Time
 }
