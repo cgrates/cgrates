@@ -111,12 +111,64 @@ func TestCDRsOnExpAMQPQueuesCreation(t *testing.T) {
 }
 
 // Connect rpc client to rater
-func TestCDRsOnExpHttpCdrReplication(t *testing.T) {
+func TestCDRsOnExpInitMasterRPC(t *testing.T) {
+	var err error
 	cdrsMasterRpc, err = rpcclient.NewRpcClient("tcp", cdrsMasterCfg.ListenCfg().RPCJSONListen, false, "", "", "", 1, 1,
 		time.Duration(1*time.Second), time.Duration(2*time.Second), "json", nil, false)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
+}
+
+// Disable ExportCDR
+func TestCDRsOnExpDisableOnlineExport(t *testing.T) {
+	// stop RabbitMQ server so we can test reconnects
+	if err := exec.Command("service", "rabbitmq-server", "stop").Run(); err != nil {
+		t.Error(err)
+	}
+	testCdr := &engine.CDR{
+		CGRID:       utils.Sha1("NoOnlineExport", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+		ToR:         utils.VOICE,
+		OriginID:    "TestCDRsOnExpDisableOnlineExport",
+		OriginHost:  "192.168.1.0",
+		Source:      "UNKNOWN",
+		RequestType: utils.META_PSEUDOPREPAID,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "1002",
+		SetupTime:   time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
+		AnswerTime:  time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		Usage:       time.Duration(10) * time.Second,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		RunID:       utils.DEFAULT_RUNID,
+		Cost:        1.201,
+		PreRated:    true,
+	}
+	var reply string
+	if err := cdrsMasterRpc.Call(utils.CDRsV1ProcessEvent,
+		&engine.ArgV1ProcessEvent{
+			CGREvent: *testCdr.AsCGREvent(),
+			Export:   utils.BoolPointer(false),
+		}, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
+	if len(filesInDir) != 0 {
+		t.Fatalf("Should be no files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
+	}
+	// start RabbitMQ server so we can test reconnects
+	if err := exec.Command("service", "rabbitmq-server", "start").Run(); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(5 * time.Second)
+}
+
+func TestCDRsOnExpHttpCdrReplication(t *testing.T) {
 	//add a default charger
 	chargerProfile := &engine.ChargerProfile{
 		Tenant:       "cgrates.org",
@@ -165,7 +217,7 @@ func TestCDRsOnExpHttpCdrReplication(t *testing.T) {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
 	// ToDo: Fix cdr_http to be compatible with rest of processCdr methods
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 	var rcvedCdrs []*engine.ExternalCDR
 	if err := cdrsSlaveRpc.Call(utils.ApierV2GetCDRs,
 		utils.RPCCDRsFilter{CGRIDs: []string{testCdr1.CGRID}, RunIDs: []string{utils.META_DEFAULT}}, &rcvedCdrs); err != nil {
@@ -210,15 +262,18 @@ func TestCDRsOnExpAMQPReplication(t *testing.T) {
 
 	q, err := ch.QueueDeclare("cgrates_cdrs", true, false, false, false, nil)
 	if err != nil {
+		conn.Close()
 		t.Fatal(err)
 	}
 	q1, err := ch.QueueDeclare("queue1", true, false, false, false, nil)
 	if err != nil {
+		conn.Close()
 		t.Fatal(err)
 	}
 
 	msgs, err := ch.Consume(q.Name, "", true, false, false, false, nil)
 	if err != nil {
+		conn.Close()
 		t.Fatal(err)
 	}
 	select {
@@ -234,6 +289,7 @@ func TestCDRsOnExpAMQPReplication(t *testing.T) {
 		t.Error("No message received from RabbitMQ")
 	}
 	if msgs, err = ch.Consume(q1.Name, "consumer", true, false, false, false, nil); err != nil {
+		conn.Close()
 		t.Fatal(err)
 	}
 	select {
@@ -249,6 +305,7 @@ func TestCDRsOnExpAMQPReplication(t *testing.T) {
 		t.Error("No message received from RabbitMQ")
 	}
 	conn.Close()
+	time.Sleep(500 * time.Millisecond)
 	// restart RabbitMQ server so we can test reconnects
 	if err := exec.Command("service", "rabbitmq-server", "restart").Run(); err != nil {
 		t.Error(err)
@@ -276,7 +333,10 @@ func TestCDRsOnExpAMQPReplication(t *testing.T) {
 	}
 	var reply string
 	if err := cdrsMasterRpc.Call(utils.CDRsV1ProcessEvent,
-		&engine.ArgV1ProcessEvent{CGREvent: *testCdr.AsCGREvent()}, &reply); err != nil {
+		&engine.ArgV1ProcessEvent{
+			CGREvent: *testCdr.AsCGREvent(),
+			Export:   utils.BoolPointer(true),
+		}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
