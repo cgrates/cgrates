@@ -638,3 +638,22 @@ func (dS *DispatcherGuardianSv1) RemoteUnlock(attr *dispatchers.AttrRemoteUnlock
 func (dS *DispatcherGuardianSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
 	return dS.dS.GuardianSv1Ping(args, reply)
 }
+
+func NewDispatcherSchedulerSv1(dps *dispatchers.DispatcherService) *DispatcherSchedulerSv1 {
+	return &DispatcherSchedulerSv1{dS: dps}
+}
+
+// Exports RPC from SchedulerSv1
+type DispatcherSchedulerSv1 struct {
+	dS *dispatchers.DispatcherService
+}
+
+// Reload reloads scheduler instructions
+func (dS *DispatcherSchedulerSv1) Reload(attr *dispatchers.StringkWithApiKey, reply *string) (err error) {
+	return dS.dS.SchedulerSv1Reload(attr, reply)
+}
+
+// Ping used to detreminate if component is active
+func (dS *DispatcherSchedulerSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+	return dS.dS.SchedulerSv1Ping(args, reply)
+}

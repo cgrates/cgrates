@@ -167,6 +167,12 @@ type AttrRemoteUnlockWithApiKey struct {
 	RefID string
 }
 
+type StringkWithApiKey struct {
+	DispatcherResource
+	utils.TenantArg
+	Arg string
+}
+
 func ParseStringMap(s string) utils.StringMap {
 	if s == utils.ZERO {
 		return make(utils.StringMap)
