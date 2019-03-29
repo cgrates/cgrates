@@ -271,9 +271,9 @@ cgrates.org,D1,*any,*string:Account:1001,2014-07-29T15:00:00Z,*first,,C1,*gt:Usa
 cgrates.org,D1,,,,*first,,C2,*lt:Usage:10,10,false,192.168.56.204,
 `
 	dispatcherHosts = `
-#Tenant[0],ID[1],Address[2],Transport[3]
-cgrates.org,ALL1,127.0.0.1:2012,*json
-cgrates.org,ALL1,127.0.0.1:3012,*json
+#Tenant[0],ID[1],Address[2],Transport[3],Tls[4]
+cgrates.org,ALL1,127.0.0.1:2012,*json,true
+cgrates.org,ALL1,127.0.0.1:3012,*json,false
 `
 )
 
@@ -1643,10 +1643,12 @@ func TestLoadDispatcherHosts(t *testing.T) {
 			&utils.TPDispatcherHostConn{
 				Address:   "127.0.0.1:2012",
 				Transport: utils.MetaJSONrpc,
+				Tls:       true,
 			},
 			&utils.TPDispatcherHostConn{
 				Address:   "127.0.0.1:3012",
 				Transport: utils.MetaJSONrpc,
+				Tls:       false,
 			},
 		},
 	}

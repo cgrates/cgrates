@@ -2618,12 +2618,17 @@ func (tps TPDispatcherHosts) AsTPDispatcherHosts() (result []*utils.TPDispatcher
 					{
 						Address:   tp.Address,
 						Transport: tp.Transport,
+						Tls:       tp.Tls,
 					},
 				},
 			}
 			continue
 		}
-		hostsMap[tenantID].Conns = append(hostsMap[tenantID].Conns, &utils.TPDispatcherHostConn{Address: tp.Address, Transport: tp.Transport})
+		hostsMap[tenantID].Conns = append(hostsMap[tenantID].Conns, &utils.TPDispatcherHostConn{
+			Address:   tp.Address,
+			Transport: tp.Transport,
+			Tls:       tp.Tls,
+		})
 	}
 	for _, host := range hostsMap {
 		result = append(result, host)
@@ -2643,6 +2648,7 @@ func APItoModelTPDispatcherHost(tpDPH *utils.TPDispatcherHost) (mdls TPDispatche
 			ID:        tpDPH.ID,
 			Address:   conn.Address,
 			Transport: conn.Transport,
+			Tls:       conn.Tls,
 		}
 	}
 	return
@@ -2661,6 +2667,7 @@ func APItoDispatcherHost(tpDPH *utils.TPDispatcherHost) (dpp *DispatcherHost) {
 		dpp.Conns[i] = &DispatcherHostConn{
 			Address:   conn.Address,
 			Transport: conn.Transport,
+			Tls:       conn.Tls,
 		}
 	}
 	return
