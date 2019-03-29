@@ -85,6 +85,7 @@ const (
 	MetaPublishAccount        = "*publish_account"
 	MetaPublishBalance        = "*publish_balance"
 	MetaRemoveSessionCosts    = "*remove_session_costs"
+	MetaRemoveExpired         = "*remove_expired"
 )
 
 func (a *Action) Clone() *Action {
@@ -129,6 +130,7 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		utils.MetaAWSjsonMap:      sendAWS,
 		utils.MetaSQSjsonMap:      sendSQS,
 		MetaRemoveSessionCosts:    removeSessionCosts,
+		MetaRemoveExpired:         removeExpired,
 	}
 	f, exists := actionFuncMap[typ]
 	return f, exists
@@ -999,4 +1001,29 @@ func removeSessionCosts(_ *Account, action *Action, _ Actions, _ interface{}) er
 		}
 	}
 	return cdrStorage.RemoveSMCosts(smcFilter)
+}
+
+func removeExpired(acc *Account, action *Action, _ Actions, extraData interface{}) error {
+	if acc == nil {
+		return fmt.Errorf("nil account for %s action", utils.ToJSON(action))
+	}
+	if _, exists := acc.BalanceMap[action.Balance.GetType()]; !exists {
+		return utils.ErrNotFound
+	}
+	bChain := acc.BalanceMap[action.Balance.GetType()]
+	found := false
+	for i := 0; i < len(bChain); i++ {
+		if bChain[i].IsExpired() {
+			// delete without preserving order
+			bChain[i] = bChain[len(bChain)-1]
+			bChain = bChain[:len(bChain)-1]
+			i -= 1
+			found = true
+		}
+	}
+	acc.BalanceMap[action.Balance.GetType()] = bChain
+	if !found {
+		return utils.ErrNotFound
+	}
+	return nil
 }

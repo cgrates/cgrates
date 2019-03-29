@@ -1734,6 +1734,59 @@ func TestActionRemoveBalance(t *testing.T) {
 	}
 }
 
+func TestActionRemoveExpiredBalance(t *testing.T) {
+	err := dm.DataDB().SetAccount(&Account{
+		ID: "cgrates.org:rembal2",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
+				&Balance{
+					Value: 10,
+				},
+				&Balance{
+					Value:          10,
+					DestinationIDs: utils.NewStringMap("NAT", "RET"),
+					ExpirationDate: time.Date(2025, time.November, 11, 22, 39, 0, 0, time.UTC),
+				},
+				&Balance{
+					Value:          10,
+					DestinationIDs: utils.NewStringMap("NAT", "RET"),
+					ExpirationDate: time.Date(2010, time.November, 11, 22, 39, 0, 0, time.UTC),
+				},
+				&Balance{
+					Value:          10,
+					DestinationIDs: utils.NewStringMap("NAT", "RET"),
+					ExpirationDate: time.Date(2012, time.November, 11, 22, 39, 0, 0, time.UTC),
+				},
+			},
+		},
+		Disabled: true,
+	})
+	if err != nil {
+		t.Error("Error setting account: ", err)
+	}
+	at := &ActionTiming{
+		accountIDs: utils.StringMap{"cgrates.org:rembal2": true},
+		Timing:     &RateInterval{},
+		actions: []*Action{
+			&Action{
+				ActionType: MetaRemoveExpired,
+				Balance: &BalanceFilter{
+					Type: utils.StringPointer(utils.MONETARY),
+				},
+			},
+		},
+	}
+	err = at.Execute(nil, nil)
+	acc, err := dm.DataDB().GetAccount("cgrates.org:rembal2")
+	if err != nil || acc == nil {
+		t.Errorf("Error getting account: %+v: %v", acc, err)
+	}
+	if len(acc.BalanceMap) != 1 ||
+		len(acc.BalanceMap[utils.MONETARY]) != 2 {
+		t.Errorf("Error removing balance: %+v", utils.ToJSON(acc.BalanceMap[utils.MONETARY]))
+	}
+}
+
 func TestActionTransferMonetaryDefault(t *testing.T) {
 	err := dm.DataDB().SetAccount(
 		&Account{
