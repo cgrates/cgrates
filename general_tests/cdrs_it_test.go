@@ -71,6 +71,8 @@ var sTestsCDRsIT = []func(t *testing.T){
 	testV2CDRsGetCdrs5,
 	testV2CDRsGetStats2,
 	testV2CDRsGetThreshold2,
+	testV2CDRsProcessCDR7,
+	testV2CDRsGetCdrs7,
 
 	testV2CDRsKillEngine,
 }
@@ -664,6 +666,83 @@ func testV2CDRsGetThreshold2(t *testing.T) {
 		t.Error(err)
 	} else if td.Hits != 2 { // 2 Chargers
 		t.Errorf("received: %+v", td)
+	}
+}
+
+func testV2CDRsProcessCDR7(t *testing.T) {
+	args := &engine.ArgV1ProcessEvent{
+		Store: utils.BoolPointer(true),
+		RALs:  utils.BoolPointer(true),
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:    "testV2CDRsProcessCDR7",
+				utils.OriginHost:  "192.168.1.1",
+				utils.Source:      "testV2CDRsProcessCDR7",
+				utils.RequestType: utils.META_RATED,
+				utils.Category:    "call",
+				utils.Account:     "testV2CDRsProcessCDR7",
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "+4986517174963",
+				utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:       time.Minute,
+				"field_extr1":     "val_extr1",
+				"fieldextr2":      "valextr2",
+			},
+		},
+	}
+
+	var reply string
+	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+}
+
+func testV2CDRsGetCdrs7(t *testing.T) {
+	var cdrCnt int64
+	req := utils.AttrGetCdrs{Accounts: []string{"testV2CDRsProcessCDR7"}}
+	if err := cdrsRpc.Call(utils.ApierV2CountCDRs, req, &cdrCnt); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if cdrCnt != 2 {
+		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
+	}
+	var cdrs []*engine.ExternalCDR
+	args := utils.RPCCDRsFilter{
+		RunIDs:    []string{utils.MetaRaw},
+		OriginIDs: []string{"testV2CDRsProcessCDR7"},
+	}
+	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
+		t.Fatal("Unexpected error: ", err.Error())
+	}
+	if len(cdrs) != 1 {
+		t.Fatal("Unexpected number of CDRs returned: ", len(cdrs))
+	}
+	if cdrs[0].Cost != 0.0198 {
+		t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+	}
+	if rply, has := cdrs[0].ExtraFields["PayPalAccount"]; !has || rply != "paypal@cgrates.org" {
+		t.Errorf("PayPalAccount should be added by AttributeS as: paypal@cgrates.org, have: %s",
+			cdrs[0].ExtraFields["PayPalAccount"])
+	}
+	args = utils.RPCCDRsFilter{
+		RunIDs:    []string{"CustomerCharges"},
+		OriginIDs: []string{"testV2CDRsProcessCDR7"},
+	}
+	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
+		t.Fatal("Unexpected error: ", err.Error())
+	}
+	if len(cdrs) != 1 {
+		t.Fatal("Unexpected number of CDRs returned: ", len(cdrs))
+	}
+	if cdrs[0].Cost != 0.0198 {
+		t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+	}
+	if rply, has := cdrs[0].ExtraFields["PayPalAccount"]; !has || rply != "paypal@cgrates.org" {
+		t.Errorf("PayPalAccount should be added by AttributeS as: paypal@cgrates.org, have: %s",
+			cdrs[0].ExtraFields["PayPalAccount"])
 	}
 }
 
