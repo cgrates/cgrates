@@ -125,9 +125,7 @@ func (dps DispatcherProfiles) Sort() {
 	sort.Slice(dps, func(i, j int) bool { return dps[i].Weight > dps[j].Weight })
 }
 
-
 // DispatcherHost represents one virtual host used by dispatcher
->>>>>>> Dispatcher with support for dynamic hosts
 type DispatcherHost struct {
 	Tenant  string
 	ID      string
