@@ -1476,7 +1476,6 @@ func TestCgrCfgJSONDefaultDispatcherSCfg(t *testing.T) {
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
 		AttributeSConns:     []*RemoteHost{},
-		Conns:               map[string][]*RemoteHost{},
 	}
 	if !reflect.DeepEqual(cgrCfg.dispatcherSCfg, eDspSCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.dispatcherSCfg, eDspSCfg)

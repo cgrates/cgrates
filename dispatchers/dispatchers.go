@@ -32,13 +32,12 @@ import (
 // NewDispatcherService constructs a DispatcherService
 func NewDispatcherService(dm *engine.DataManager,
 	cfg *config.CGRConfig, fltrS *engine.FilterS,
-	attrS *rpcclient.RpcClientPool,
-	conns map[string]*rpcclient.RpcClientPool) (*DispatcherService, error) {
+	attrS *rpcclient.RpcClientPool) (*DispatcherService, error) {
 	if attrS != nil && reflect.ValueOf(attrS).IsNil() {
 		attrS = nil
 	}
 	return &DispatcherService{dm: dm, cfg: cfg,
-		fltrS: fltrS, attrS: attrS, conns: conns}, nil
+		fltrS: fltrS, attrS: attrS}, nil
 }
 
 // DispatcherService  is the service handling dispatching towards internal components
@@ -47,8 +46,7 @@ type DispatcherService struct {
 	dm    *engine.DataManager
 	cfg   *config.CGRConfig
 	fltrS *engine.FilterS
-	attrS *rpcclient.RpcClientPool            // used for API auth
-	conns map[string]*rpcclient.RpcClientPool // available connections, accessed based on connID
+	attrS *rpcclient.RpcClientPool // used for API auth
 }
 
 // ListenAndServe will initialize the service

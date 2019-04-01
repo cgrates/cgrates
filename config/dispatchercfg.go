@@ -25,7 +25,6 @@ type DispatcherSCfg struct {
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 	AttributeSConns     []*RemoteHost
-	Conns               map[string][]*RemoteHost
 }
 
 func (dps *DispatcherSCfg) loadFromJsonCfg(jsnCfg *DispatcherSJsonCfg) (err error) {
@@ -57,20 +56,6 @@ func (dps *DispatcherSCfg) loadFromJsonCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 		for idx, jsnHaCfg := range *jsnCfg.Attributes_conns {
 			dps.AttributeSConns[idx] = NewDfltRemoteHost()
 			dps.AttributeSConns[idx].loadFromJsonCfg(jsnHaCfg)
-		}
-	}
-	if jsnCfg.Conns != nil {
-		dps.Conns = make(map[string][]*RemoteHost, len(*jsnCfg.Conns))
-		for id, conns := range *jsnCfg.Conns {
-			if conns == nil {
-				continue
-			}
-			Conns := make([]*RemoteHost, len(*conns))
-			for idx, jsnHaCfg := range *conns {
-				Conns[idx] = NewDfltRemoteHost()
-				Conns[idx].loadFromJsonCfg(jsnHaCfg)
-			}
-			dps.Conns[id] = Conns
 		}
 	}
 	return nil

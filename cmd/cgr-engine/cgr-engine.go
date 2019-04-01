@@ -944,25 +944,7 @@ func startDispatcherService(internalDispatcherSChan chan *dispatchers.Dispatcher
 			return
 		}
 	}
-	conns := make(map[string]*rpcclient.RpcClientPool)
-	for connID, haPoolCfg := range cfg.DispatcherSCfg().Conns {
-		var connPool *rpcclient.RpcClientPool
-		if connPool, err = engine.NewRPCPool(
-			rpcclient.POOL_FIRST,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			haPoolCfg, nil, time.Duration(0), false); err != nil {
-			utils.Logger.Crit(
-				fmt.Sprintf("<%s> could not connect to connID: <%s>, err: <%s>",
-					utils.DispatcherS, connID, err.Error()))
-			exitChan <- true
-			return
-		}
-		conns[connID] = connPool
-	}
-	dspS, err := dispatchers.NewDispatcherService(dm, cfg, fltrS, attrSConn, conns)
+	dspS, err := dispatchers.NewDispatcherService(dm, cfg, fltrS, attrSConn)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.DispatcherS, err.Error()))
 		exitChan <- true

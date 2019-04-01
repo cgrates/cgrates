@@ -743,8 +743,6 @@ const CGRATES_CFG_JSON = `
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"attributes_conns": [],					// connections to AttributeS for API authorization, empty to disable auth functionality: <""|*internal|x.y.z.y:1234>
-	"conns": {								// connection pools to use for dispatching requests
-	},
 },
 
 

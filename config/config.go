@@ -687,18 +687,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 		if self.attributeSCfg.Enabled {
 			return fmt.Errorf("<%s> cannot start in tandem with <%s>", utils.DispatcherS, utils.AttributeS)
 		}
-		if len(self.dispatcherSCfg.Conns) == 0 {
-			return fmt.Errorf("<%s> no connections defined", utils.DispatcherS)
-		}
-		for connID, haPool := range self.dispatcherSCfg.Conns {
-			for _, connCfg := range haPool {
-				if connCfg.Address == utils.MetaInternal {
-					return fmt.Errorf(
-						"<%s> connID: <%s> %s connections are not supported",
-						utils.DispatcherS, connID, utils.MetaInternal)
-				}
-			}
-		}
 	}
 	// Scheduler check connection with CDR Server
 	if !self.cdrsCfg.CDRSEnabled {
