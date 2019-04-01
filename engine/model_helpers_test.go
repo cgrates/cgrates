@@ -1639,8 +1639,8 @@ func TestAPItoDispatcherProfile(t *testing.T) {
 		},
 		StrategyParams: []interface{}{},
 		Weight:         20,
-		Conns: []*utils.TPDispatcherConns{
-			&utils.TPDispatcherConns{
+		Hosts: []*utils.TPDispatcherHostProfile{
+			&utils.TPDispatcherHostProfile{
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
@@ -1661,8 +1661,8 @@ func TestAPItoDispatcherProfile(t *testing.T) {
 		},
 		StrategyParams: map[string]interface{}{},
 		Weight:         20,
-		Conns: DispatcherConns{
-			&DispatcherConn{
+		Hosts: DispatcherHostProfiles{
+			&DispatcherHostProfile{
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
@@ -1692,15 +1692,15 @@ func TestAPItoModelTPDispatcher(t *testing.T) {
 		},
 		StrategyParams: []interface{}{},
 		Weight:         20,
-		Conns: []*utils.TPDispatcherConns{
-			&utils.TPDispatcherConns{
+		Hosts: []*utils.TPDispatcherHostProfile{
+			&utils.TPDispatcherHostProfile{
 				ID:        "C1",
 				FilterIDs: []string{},
 				Weight:    10,
 				Params:    []interface{}{"192.168.54.203"},
 				Blocker:   false,
 			},
-			&utils.TPDispatcherConns{
+			&utils.TPDispatcherHostProfile{
 				ID:        "C2",
 				FilterIDs: []string{},
 				Weight:    10,

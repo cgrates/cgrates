@@ -128,7 +128,7 @@ func (dS *DispatcherService) dispatcherForEvent(ev *utils.CGREvent,
 		d = x.(Dispatcher)
 		return
 	}
-	if d, err = newDispatcher(matchedPrlf); err != nil {
+	if d, err = newDispatcher(dS.dm, matchedPrlf); err != nil {
 		return
 	}
 	engine.Cache.Set(utils.CacheDispatchers, tntID, d, nil,
@@ -143,7 +143,7 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string, routeID
 	if errDsp != nil {
 		return utils.NewErrDispatcherS(errDsp)
 	}
-	return d.Dispatch(dS.conns, routeID, serviceMethod, args, reply)
+	return d.Dispatch(routeID, serviceMethod, args, reply)
 }
 
 func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,

@@ -1580,15 +1580,15 @@ func TestLoadDispatcherProfiles(t *testing.T) {
 		},
 		Strategy: "*first",
 		Weight:   20,
-		Conns: []*utils.TPDispatcherConns{
-			&utils.TPDispatcherConns{
+		Hosts: []*utils.TPDispatcherHostProfile{
+			&utils.TPDispatcherHostProfile{
 				ID:        "C1",
 				FilterIDs: []string{"*gt:Usage:10"},
 				Weight:    10,
 				Params:    []interface{}{"192.168.56.203"},
 				Blocker:   false,
 			},
-			&utils.TPDispatcherConns{
+			&utils.TPDispatcherHostProfile{
 				ID:        "C2",
 				FilterIDs: []string{"*lt:Usage:10"},
 				Weight:    10,
@@ -1608,15 +1608,15 @@ func TestLoadDispatcherProfiles(t *testing.T) {
 		},
 		Strategy: "*first",
 		Weight:   20,
-		Conns: []*utils.TPDispatcherConns{
-			&utils.TPDispatcherConns{
+		Hosts: []*utils.TPDispatcherHostProfile{
+			&utils.TPDispatcherHostProfile{
 				ID:        "C2",
 				FilterIDs: []string{"*lt:Usage:10"},
 				Weight:    10,
 				Params:    []interface{}{"192.168.56.204"},
 				Blocker:   false,
 			},
-			&utils.TPDispatcherConns{
+			&utils.TPDispatcherHostProfile{
 				ID:        "C1",
 				FilterIDs: []string{"*gt:Usage:10"},
 				Weight:    10,

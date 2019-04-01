@@ -1182,15 +1182,6 @@ type TPTntID struct {
 	ID     string
 }
 
-// TPDispatcherConns is used in TPDispatcherProfile
-type TPDispatcherConns struct {
-	ID        string
-	FilterIDs []string
-	Weight    float64       // applied in case of multiple connections need to be ordered
-	Params    []interface{} // additional parameters stored for a session
-	Blocker   bool          // no connection after this one
-}
-
 // TPDispatcherProfile is used in APIs to manage remotely offline DispatcherProfile
 type TPDispatcherProfile struct {
 	TPid               string
@@ -1202,7 +1193,24 @@ type TPDispatcherProfile struct {
 	Strategy           string
 	StrategyParams     []interface{} // ie for distribution, set here the pool weights
 	Weight             float64
-	Conns              []*TPDispatcherConns
+	Hosts              []*TPDispatcherHostProfile
+}
+
+// TPDispatcherHostProfile is used in TPDispatcherProfile
+type TPDispatcherHostProfile struct {
+	ID        string
+	FilterIDs []string
+	Weight    float64       // applied in case of multiple connections need to be ordered
+	Params    []interface{} // additional parameters stored for a session
+	Blocker   bool          // no connection after this one
+}
+
+// TPDispatcherHost is used in APIs to manage remotely offline DispatcherHost
+type TPDispatcherHost struct {
+	TPid   string
+	Tenant string
+	ID     string
+	Conns  []*TPDispatcherHostConn
 }
 
 // TPDispatcherHostConn is used in TPDispatcherHost
@@ -1210,14 +1218,6 @@ type TPDispatcherHostConn struct {
 	Address   string
 	Transport string
 	TLS       bool
-}
-
-// TPDispatcherHostTPDispatcherHost is used in APIs to manage remotely offline DispatcherHost
-type TPDispatcherHost struct {
-	TPid   string
-	Tenant string
-	ID     string
-	Conns  []*TPDispatcherHostConn
 }
 
 type UsageInterval struct {

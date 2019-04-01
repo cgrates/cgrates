@@ -74,6 +74,7 @@ var (
 	ErrCDRCNoProfileID          = errors.New("CDRC_PROFILE_WITHOUT_ID")
 	ErrCDRCNoInDir              = errors.New("CDRC_PROFILE_WITHOUT_IN_DIR")
 	ErrNotEnoughParameters      = errors.New("NotEnoughParameters")
+	ErrNotConnected             = errors.New("NOT_CONNECTED")
 	RalsErrorPrfx               = "RALS_ERROR"
 	DispatcherErrorPrefix       = "DISPATCHER_ERROR"
 )

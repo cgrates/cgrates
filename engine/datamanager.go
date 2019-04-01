@@ -18,10 +18,12 @@ package engine
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
+	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -1307,7 +1309,7 @@ func (dm *DataManager) RemoveDispatcherProfile(tenant, id string,
 }
 
 func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrite bool,
-	transactionID string) (dpp *DispatcherHost, err error) {
+	transactionID string) (dH *DispatcherHost, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
 		if x, ok := Cache.Get(utils.CacheDispatcherHosts, tntID); ok {
@@ -1317,7 +1319,7 @@ func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrit
 			return x.(*DispatcherHost), nil
 		}
 	}
-	dpp, err = dm.dataDB.GetDispatcherHostDrv(tenant, id)
+	dH, err = dm.dataDB.GetDispatcherHostDrv(tenant, id)
 	if err != nil {
 		if err == utils.ErrNotFound && cacheWrite {
 			Cache.Set(utils.CacheDispatcherHosts, tntID, nil, nil,
@@ -1325,8 +1327,18 @@ func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrit
 		}
 		return nil, err
 	}
+	cfg := config.CgrConfig()
+	if dH.rpcConn, err = NewRPCPool(
+		rpcclient.POOL_FIRST,
+		cfg.TlsCfg().ClientKey,
+		cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
+		cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
+		cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
+		dH.Conns, nil, time.Duration(0), false); err != nil {
+		return nil, err
+	}
 	if cacheWrite {
-		Cache.Set(utils.CacheDispatcherHosts, tntID, dpp, nil,
+		Cache.Set(utils.CacheDispatcherHosts, tntID, dH, nil,
 			cacheCommit(transactionID), transactionID)
 	}
 	return

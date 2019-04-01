@@ -24,13 +24,13 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestDispatcherConnClone(t *testing.T) {
-	dConn := &DispatcherConn{
+func TestDispatcherHostProfileClone(t *testing.T) {
+	dConn := &DispatcherHostProfile{
 		ID:        "DSP_1",
 		Weight:    30,
 		FilterIDs: []string{"*string:Usage:10"},
 	}
-	eConn := &DispatcherConn{
+	eConn := &DispatcherHostProfile{
 		ID:        "DSP_1",
 		Weight:    30,
 		FilterIDs: []string{"*string:Usage:10"},
@@ -42,13 +42,13 @@ func TestDispatcherConnClone(t *testing.T) {
 	}
 }
 
-func TestDispatcherConnsReorderFromIndex(t *testing.T) {
-	dConns := DispatcherConns{
+func TestDispatcherHostProfilesReorderFromIndex(t *testing.T) {
+	dConns := DispatcherHostProfiles{
 		{ID: "DSP_1", Weight: 30},
 		{ID: "DSP_2", Weight: 20},
 		{ID: "DSP_3", Weight: 10},
 	}
-	eConns := DispatcherConns{
+	eConns := DispatcherHostProfiles{
 		{ID: "DSP_1", Weight: 30},
 		{ID: "DSP_2", Weight: 20},
 		{ID: "DSP_3", Weight: 10},
@@ -56,7 +56,7 @@ func TestDispatcherConnsReorderFromIndex(t *testing.T) {
 	if dConns.ReorderFromIndex(0); !reflect.DeepEqual(eConns, dConns) {
 		t.Errorf("expecting: %+v, received: %+v", eConns, dConns)
 	}
-	dConns = DispatcherConns{
+	dConns = DispatcherHostProfiles{
 		{ID: "DSP_1", Weight: 30},
 		{ID: "DSP_2", Weight: 20},
 		{ID: "DSP_3", Weight: 10},
@@ -64,12 +64,12 @@ func TestDispatcherConnsReorderFromIndex(t *testing.T) {
 	if dConns.ReorderFromIndex(3); !reflect.DeepEqual(eConns, dConns) {
 		t.Errorf("expecting: %+v, received: %+v", eConns, dConns)
 	}
-	dConns = DispatcherConns{
+	dConns = DispatcherHostProfiles{
 		{ID: "DSP_1", Weight: 30},
 		{ID: "DSP_2", Weight: 20},
 		{ID: "DSP_3", Weight: 10},
 	}
-	eConns = DispatcherConns{
+	eConns = DispatcherHostProfiles{
 		{ID: "DSP_3", Weight: 10},
 		{ID: "DSP_1", Weight: 30},
 		{ID: "DSP_2", Weight: 20},
@@ -77,12 +77,12 @@ func TestDispatcherConnsReorderFromIndex(t *testing.T) {
 	if dConns.ReorderFromIndex(2); !reflect.DeepEqual(eConns, dConns) {
 		t.Errorf("expecting: %+v, received: %+v", eConns, dConns)
 	}
-	dConns = DispatcherConns{
+	dConns = DispatcherHostProfiles{
 		{ID: "DSP_1", Weight: 30},
 		{ID: "DSP_2", Weight: 20},
 		{ID: "DSP_3", Weight: 10},
 	}
-	eConns = DispatcherConns{
+	eConns = DispatcherHostProfiles{
 		{ID: "DSP_2", Weight: 20},
 		{ID: "DSP_3", Weight: 10},
 		{ID: "DSP_1", Weight: 30},
@@ -93,13 +93,13 @@ func TestDispatcherConnsReorderFromIndex(t *testing.T) {
 	}
 }
 
-func TestDispatcherConnsShuffle(t *testing.T) {
-	dConns := DispatcherConns{
+func TestDispatcherHostProfilesShuffle(t *testing.T) {
+	dConns := DispatcherHostProfiles{
 		{ID: "DSP_1", Weight: 30},
 		{ID: "DSP_2", Weight: 20},
 		{ID: "DSP_3", Weight: 10},
 	}
-	oConns := DispatcherConns{
+	oConns := DispatcherHostProfiles{
 		{ID: "DSP_1", Weight: 30},
 		{ID: "DSP_2", Weight: 20},
 		{ID: "DSP_3", Weight: 10},
@@ -110,13 +110,13 @@ func TestDispatcherConnsShuffle(t *testing.T) {
 	}
 }
 
-func TestDispatcherConnsSort(t *testing.T) {
-	dConns := DispatcherConns{
+func TestDispatcherHostProfilesSort(t *testing.T) {
+	dConns := DispatcherHostProfiles{
 		{ID: "DSP_3", Weight: 10},
 		{ID: "DSP_2", Weight: 20},
 		{ID: "DSP_1", Weight: 30},
 	}
-	eConns := DispatcherConns{
+	eConns := DispatcherHostProfiles{
 		{ID: "DSP_1", Weight: 30},
 		{ID: "DSP_2", Weight: 20},
 		{ID: "DSP_3", Weight: 10},
@@ -124,14 +124,14 @@ func TestDispatcherConnsSort(t *testing.T) {
 	if dConns.Sort(); !reflect.DeepEqual(eConns, dConns) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eConns), utils.ToJSON(dConns))
 	}
-	dConns = DispatcherConns{
+	dConns = DispatcherHostProfiles{
 		{ID: "DSP_3", Weight: 10},
 		{ID: "DSP_5", Weight: 50},
 		{ID: "DSP_2", Weight: 20},
 		{ID: "DSP_4", Weight: 40},
 		{ID: "DSP_1", Weight: 30},
 	}
-	eConns = DispatcherConns{
+	eConns = DispatcherHostProfiles{
 		{ID: "DSP_5", Weight: 50},
 		{ID: "DSP_4", Weight: 40},
 		{ID: "DSP_1", Weight: 30},
@@ -147,13 +147,13 @@ func TestDispatcherConnsSort(t *testing.T) {
 	}
 }
 
-func TestDispatcherConnsClone(t *testing.T) {
-	dConns := DispatcherConns{
+func TestDispatcherHostProfilesClone(t *testing.T) {
+	dConns := DispatcherHostProfiles{
 		{ID: "DSP_1", Weight: 30},
 		{ID: "DSP_2", Weight: 20},
 		{ID: "DSP_3", Weight: 10, FilterIDs: []string{"*string:Usage:10"}},
 	}
-	eConns := DispatcherConns{
+	eConns := DispatcherHostProfiles{
 		{ID: "DSP_1", Weight: 30},
 		{ID: "DSP_2", Weight: 20},
 		{ID: "DSP_3", Weight: 10, FilterIDs: []string{"*string:Usage:10"}},
@@ -165,8 +165,8 @@ func TestDispatcherConnsClone(t *testing.T) {
 	}
 }
 
-func TestDispatcherConnsConnIDs(t *testing.T) {
-	dConns := DispatcherConns{
+func TestDispatcherHostProfilesConnIDs(t *testing.T) {
+	dConns := DispatcherHostProfiles{
 		{ID: "DSP_5", Weight: 50},
 		{ID: "DSP_4", Weight: 40},
 		{ID: "DSP_1", Weight: 30},
@@ -174,7 +174,7 @@ func TestDispatcherConnsConnIDs(t *testing.T) {
 		{ID: "DSP_3", Weight: 10},
 	}
 	eConnIDs := []string{"DSP_5", "DSP_4", "DSP_1", "DSP_2", "DSP_3"}
-	if dConnIDs := dConns.ConnIDs(); !reflect.DeepEqual(eConnIDs, dConnIDs) {
+	if dConnIDs := dConns.HostIDs(); !reflect.DeepEqual(eConnIDs, dConnIDs) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eConnIDs), utils.ToJSON(dConnIDs))
 	}
 }

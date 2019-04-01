@@ -1152,14 +1152,14 @@ cgrates.org,EVENT1,,,,,,ALL,,10,,,
 		Strategy:       "*weight",
 		StrategyParams: map[string]interface{}{},
 		Weight:         20,
-		Conns: engine.DispatcherConns{
-			&engine.DispatcherConn{
+		Hosts: engine.DispatcherHostProfiles{
+			&engine.DispatcherHostProfile{
 				ID:        "ALL2",
 				FilterIDs: make([]string, 0),
 				Weight:    20,
 				Params:    map[string]interface{}{},
 			},
-			&engine.DispatcherConn{
+			&engine.DispatcherHostProfile{
 				ID:        "ALL",
 				FilterIDs: make([]string, 0),
 				Weight:    10,
@@ -1173,8 +1173,8 @@ cgrates.org,EVENT1,,,,,,ALL,,10,,,
 	if err != nil {
 		t.Fatal(err)
 	}
-	rcv.Conns.Sort()
-	eDisp.Conns.Sort()
+	rcv.Hosts.Sort()
+	eDisp.Hosts.Sort()
 	if !reflect.DeepEqual(eDisp, rcv) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eDisp), utils.ToJSON(rcv))
 	}

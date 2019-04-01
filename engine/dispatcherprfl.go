@@ -21,14 +21,13 @@ package engine
 import (
 	"math/rand"
 	"sort"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
-type DispatcherConn struct {
+type DispatcherHostProfile struct {
 	ID        string
 	FilterIDs []string
 	Weight    float64                // applied in case of multiple connections need to be ordered
@@ -36,8 +35,8 @@ type DispatcherConn struct {
 	Blocker   bool                   // no connection after this one
 }
 
-func (dC *DispatcherConn) Clone() (cln *DispatcherConn) {
-	cln = &DispatcherConn{
+func (dC *DispatcherHostProfile) Clone() (cln *DispatcherHostProfile) {
+	cln = &DispatcherHostProfile{
 		ID:      dC.ID,
 		Weight:  dC.Weight,
 		Blocker: dC.Blocker,
@@ -57,46 +56,46 @@ func (dC *DispatcherConn) Clone() (cln *DispatcherConn) {
 	return
 }
 
-type DispatcherConns []*DispatcherConn
+type DispatcherHostProfiles []*DispatcherHostProfile
 
 // Sort is part of sort interface, sort based on Weight
-func (dConns DispatcherConns) Sort() {
-	sort.Slice(dConns, func(i, j int) bool { return dConns[i].Weight > dConns[j].Weight })
+func (dHPrfls DispatcherHostProfiles) Sort() {
+	sort.Slice(dHPrfls, func(i, j int) bool { return dHPrfls[i].Weight > dHPrfls[j].Weight })
 }
 
 // ReorderFromIndex will consider idx as starting point for the reordered slice
-func (dConns DispatcherConns) ReorderFromIndex(idx int) {
-	initConns := dConns.Clone()
-	for i := 0; i < len(dConns); i++ {
-		if idx > len(dConns)-1 {
+func (dHPrfls DispatcherHostProfiles) ReorderFromIndex(idx int) {
+	initConns := dHPrfls.Clone()
+	for i := 0; i < len(dHPrfls); i++ {
+		if idx > len(dHPrfls)-1 {
 			idx = 0
 		}
-		dConns[i] = initConns[idx]
+		dHPrfls[i] = initConns[idx]
 		idx++
 	}
 	return
 }
 
 // Shuffle will mix the connections in place
-func (dConns DispatcherConns) Shuffle() {
-	rand.Shuffle(len(dConns), func(i, j int) {
-		dConns[i], dConns[j] = dConns[j], dConns[i]
+func (dHPrfls DispatcherHostProfiles) Shuffle() {
+	rand.Shuffle(len(dHPrfls), func(i, j int) {
+		dHPrfls[i], dHPrfls[j] = dHPrfls[j], dHPrfls[i]
 	})
 	return
 }
 
-func (dConns DispatcherConns) Clone() (cln DispatcherConns) {
-	cln = make(DispatcherConns, len(dConns))
-	for i, dConn := range dConns {
-		cln[i] = dConn.Clone()
+func (dHPrfls DispatcherHostProfiles) Clone() (cln DispatcherHostProfiles) {
+	cln = make(DispatcherHostProfiles, len(dHPrfls))
+	for i, dHPrfl := range dHPrfls {
+		cln[i] = dHPrfl.Clone()
 	}
 	return
 }
 
-func (dConns DispatcherConns) ConnIDs() (connIDs []string) {
-	connIDs = make([]string, len(dConns))
-	for i, conn := range dConns {
-		connIDs[i] = conn.ID
+func (dHPrfls DispatcherHostProfiles) HostIDs() (hostIDs []string) {
+	hostIDs = make([]string, len(dHPrfls))
+	for i, hostPrfl := range dHPrfls {
+		hostIDs[i] = hostPrfl.ID
 	}
 	return
 }
@@ -111,7 +110,7 @@ type DispatcherProfile struct {
 	Strategy           string
 	StrategyParams     map[string]interface{} // ie for distribution, set here the pool weights
 	Weight             float64                // used for profile sorting on match
-	Conns              DispatcherConns        // dispatch to these connections
+	Hosts              DispatcherHostProfiles // dispatch to these connections
 }
 
 func (dP *DispatcherProfile) TenantID() string {
@@ -126,19 +125,13 @@ func (dps DispatcherProfiles) Sort() {
 	sort.Slice(dps, func(i, j int) bool { return dps[i].Weight > dps[j].Weight })
 }
 
-<<<<<<< HEAD
-type DispatcherHostConn struct {
-	Address   string
-	Transport string
-	TLS       bool
-}
-=======
-// DispatcherHost represents one virtual host with po
->>>>>>> DispatcherHost.GetRPCConnection
+
+// DispatcherHost represents one virtual host used by dispatcher
+>>>>>>> Dispatcher with support for dynamic hosts
 type DispatcherHost struct {
 	Tenant  string
 	ID      string
-	Conns   []*config.HaPoolConfig
+	Conns   []*config.RemoteHost
 	rpcConn rpcclient.RpcClientConnection
 }
 
@@ -147,18 +140,9 @@ func (dH *DispatcherHost) TenantID() string {
 }
 
 // GetRPCConnection builds or returns the cached connection
-func (dH *DispatcherHost) GetRPCConnection() (rpcConn rpcclient.RpcClientConnection, err error) {
+func (dH *DispatcherHost) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	if dH.rpcConn == nil {
-		cfg := config.CgrConfig()
-		if dH.rpcConn, err = NewRPCPool(
-			rpcclient.POOL_FIRST,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			dH.Conns, nil, time.Duration(0), false); err != nil {
-			return
-		}
+		return utils.ErrNotConnected
 	}
-	return dH.rpcConn, nil
+	return dH.rpcConn.Call(serviceMethod, args, reply)
 }

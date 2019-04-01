@@ -2352,7 +2352,7 @@ func (tps TPDispatcherProfiles) AsTPDispatcherProfiles() (result []*utils.TPDisp
 	mst := make(map[string]*utils.TPDispatcherProfile)
 	filterMap := make(map[string]utils.StringMap)
 	contextMap := make(map[string]utils.StringMap)
-	connsMap := make(map[string]map[string]utils.TPDispatcherConns)
+	connsMap := make(map[string]map[string]utils.TPDispatcherHostProfile)
 	connsFilterMap := make(map[string]map[string]utils.StringMap)
 	for _, tp := range tps {
 		tenantID := (&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()
@@ -2402,11 +2402,11 @@ func (tps TPDispatcherProfiles) AsTPDispatcherProfiles() (result []*utils.TPDisp
 		}
 		if tp.ConnID != "" {
 			if _, has := connsMap[tenantID]; !has {
-				connsMap[tenantID] = make(map[string]utils.TPDispatcherConns)
+				connsMap[tenantID] = make(map[string]utils.TPDispatcherHostProfile)
 			}
 			conn, has := connsMap[tenantID][tp.ConnID]
 			if !has {
-				conn = utils.TPDispatcherConns{
+				conn = utils.TPDispatcherHostProfile{
 					ID:      tp.ConnID,
 					Weight:  tp.ConnWeight,
 					Blocker: tp.ConnBlocker,
@@ -2454,13 +2454,14 @@ func (tps TPDispatcherProfiles) AsTPDispatcherProfiles() (result []*utils.TPDisp
 					conn.FilterIDs = append(conn.FilterIDs, filter)
 				}
 			}
-			result[i].Conns = append(result[i].Conns, &utils.TPDispatcherConns{
-				ID:        conn.ID,
-				FilterIDs: conn.FilterIDs,
-				Weight:    conn.Weight,
-				Params:    conn.Params,
-				Blocker:   conn.Blocker,
-			})
+			result[i].Hosts = append(result[i].Hosts,
+				&utils.TPDispatcherHostProfile{
+					ID:        conn.ID,
+					FilterIDs: conn.FilterIDs,
+					Weight:    conn.Weight,
+					Params:    conn.Params,
+					Blocker:   conn.Blocker,
+				})
 		}
 		i++
 	}
@@ -2497,7 +2498,7 @@ func APItoModelTPDispatcherProfile(tpDPP *utils.TPDispatcherProfile) (mdls TPDis
 
 	strategy := paramsToString(tpDPP.StrategyParams)
 
-	if len(tpDPP.Conns) == 0 {
+	if len(tpDPP.Hosts) == 0 {
 		return append(mdls, &TPDispatcherProfile{
 			Tpid:               tpDPP.TPid,
 			Tenant:             tpDPP.Tenant,
@@ -2511,8 +2512,8 @@ func APItoModelTPDispatcherProfile(tpDPP *utils.TPDispatcherProfile) (mdls TPDis
 		})
 	}
 
-	confilter := strings.Join(tpDPP.Conns[0].FilterIDs, utils.INFIELD_SEP)
-	conparam := paramsToString(tpDPP.Conns[0].Params)
+	confilter := strings.Join(tpDPP.Hosts[0].FilterIDs, utils.INFIELD_SEP)
+	conparam := paramsToString(tpDPP.Hosts[0].Params)
 
 	mdls = append(mdls, &TPDispatcherProfile{
 		Tpid:               tpDPP.TPid,
@@ -2525,24 +2526,24 @@ func APItoModelTPDispatcherProfile(tpDPP *utils.TPDispatcherProfile) (mdls TPDis
 		StrategyParameters: strategy,
 		Weight:             tpDPP.Weight,
 
-		ConnID:         tpDPP.Conns[0].ID,
+		ConnID:         tpDPP.Hosts[0].ID,
 		ConnFilterIDs:  confilter,
-		ConnWeight:     tpDPP.Conns[0].Weight,
-		ConnBlocker:    tpDPP.Conns[0].Blocker,
+		ConnWeight:     tpDPP.Hosts[0].Weight,
+		ConnBlocker:    tpDPP.Hosts[0].Blocker,
 		ConnParameters: conparam,
 	})
-	for i := 1; i < len(tpDPP.Conns); i++ {
-		confilter = strings.Join(tpDPP.Conns[i].FilterIDs, utils.INFIELD_SEP)
-		conparam = paramsToString(tpDPP.Conns[i].Params)
+	for i := 1; i < len(tpDPP.Hosts); i++ {
+		confilter = strings.Join(tpDPP.Hosts[i].FilterIDs, utils.INFIELD_SEP)
+		conparam = paramsToString(tpDPP.Hosts[i].Params)
 		mdls = append(mdls, &TPDispatcherProfile{
 			Tpid:   tpDPP.TPid,
 			Tenant: tpDPP.Tenant,
 			ID:     tpDPP.ID,
 
-			ConnID:         tpDPP.Conns[i].ID,
+			ConnID:         tpDPP.Hosts[i].ID,
 			ConnFilterIDs:  confilter,
-			ConnWeight:     tpDPP.Conns[i].Weight,
-			ConnBlocker:    tpDPP.Conns[i].Blocker,
+			ConnWeight:     tpDPP.Hosts[i].Weight,
+			ConnBlocker:    tpDPP.Hosts[i].Blocker,
 			ConnParameters: conparam,
 		})
 	}
@@ -2558,7 +2559,7 @@ func APItoDispatcherProfile(tpDPP *utils.TPDispatcherProfile, timezone string) (
 		FilterIDs:      make([]string, len(tpDPP.FilterIDs)),
 		Subsystems:     make([]string, len(tpDPP.Subsystems)),
 		StrategyParams: make(map[string]interface{}),
-		Conns:          make(DispatcherConns, len(tpDPP.Conns)),
+		Hosts:          make(DispatcherHostProfiles, len(tpDPP.Hosts)),
 	}
 	for i, fli := range tpDPP.FilterIDs {
 		dpp.FilterIDs[i] = fli
@@ -2571,8 +2572,8 @@ func APItoDispatcherProfile(tpDPP *utils.TPDispatcherProfile, timezone string) (
 			dpp.StrategyParams[strconv.Itoa(i)] = param
 		}
 	}
-	for i, conn := range tpDPP.Conns {
-		dpp.Conns[i] = &DispatcherConn{
+	for i, conn := range tpDPP.Hosts {
+		dpp.Hosts[i] = &DispatcherHostProfile{
 			ID:        conn.ID,
 			Weight:    conn.Weight,
 			Blocker:   conn.Blocker,
@@ -2580,11 +2581,11 @@ func APItoDispatcherProfile(tpDPP *utils.TPDispatcherProfile, timezone string) (
 			Params:    make(map[string]interface{}),
 		}
 		for j, fltr := range conn.FilterIDs {
-			dpp.Conns[i].FilterIDs[j] = fltr
+			dpp.Hosts[i].FilterIDs[j] = fltr
 		}
 		for j, param := range conn.Params {
 			if param != "" {
-				dpp.Conns[i].Params[strconv.Itoa(j)] = param
+				dpp.Hosts[i].Params[strconv.Itoa(j)] = param
 			}
 		}
 	}
@@ -2661,10 +2662,10 @@ func APItoDispatcherHost(tpDPH *utils.TPDispatcherHost) (dpp *DispatcherHost) {
 	dpp = &DispatcherHost{
 		Tenant: tpDPH.Tenant,
 		ID:     tpDPH.ID,
-		Conns:  make([]*config.HaPoolConfig, len(tpDPH.Conns)),
+		Conns:  make([]*config.RemoteHost, len(tpDPH.Conns)),
 	}
 	for i, conn := range tpDPH.Conns {
-		dpp.Conns[i] = &config.HaPoolConfig{
+		dpp.Conns[i] = &config.RemoteHost{
 			Address:   conn.Address,
 			Transport: conn.Transport,
 			TLS:       conn.TLS,
