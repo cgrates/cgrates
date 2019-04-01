@@ -126,7 +126,7 @@ func (dps DispatcherProfiles) Sort() {
 type DispatcherHostConn struct {
 	Address   string
 	Transport string
-	Tls       bool
+	TLS       bool
 }
 type DispatcherHost struct {
 	Tenant string

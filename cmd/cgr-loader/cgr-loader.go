@@ -308,7 +308,7 @@ func main() {
 	if len(ldrCfg.LoaderCgrCfg().CachesConns) != 0 { // Init connection to CacheS so we can reload it's data
 		if cacheS, err = rpcclient.NewRpcClient("tcp",
 			ldrCfg.LoaderCgrCfg().CachesConns[0].Address,
-			ldrCfg.LoaderCgrCfg().CachesConns[0].Tls, ldrCfg.TlsCfg().ClientKey,
+			ldrCfg.LoaderCgrCfg().CachesConns[0].TLS, ldrCfg.TlsCfg().ClientKey,
 			ldrCfg.TlsCfg().ClientCerificate, ldrCfg.TlsCfg().CaCertificate, 3, 3,
 			time.Duration(1*time.Second), time.Duration(5*time.Minute),
 			strings.TrimPrefix(ldrCfg.LoaderCgrCfg().CachesConns[0].Transport, utils.Meta),
@@ -323,7 +323,7 @@ func main() {
 	if len(ldrCfg.LoaderCgrCfg().SchedulerConns) != 0 { // Init connection to Scheduler so we can reload it's data
 		if schedulerS, err = rpcclient.NewRpcClient("tcp",
 			ldrCfg.LoaderCgrCfg().SchedulerConns[0].Address,
-			ldrCfg.LoaderCgrCfg().SchedulerConns[0].Tls, ldrCfg.TlsCfg().ClientKey,
+			ldrCfg.LoaderCgrCfg().SchedulerConns[0].TLS, ldrCfg.TlsCfg().ClientKey,
 			ldrCfg.TlsCfg().ClientCerificate, ldrCfg.TlsCfg().CaCertificate, 3, 3,
 			time.Duration(1*time.Second), time.Duration(5*time.Minute),
 			strings.TrimPrefix(ldrCfg.LoaderCgrCfg().SchedulerConns[0].Transport, utils.Meta),

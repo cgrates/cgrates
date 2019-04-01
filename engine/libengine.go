@@ -44,14 +44,14 @@ func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connA
 			case <-time.After(ttl):
 				return nil, errors.New("TTL triggered")
 			}
-			rpcClient, err = rpcclient.NewRpcClient("", "", rpcConnCfg.Tls, keyPath, certPath, caPath, connAttempts,
+			rpcClient, err = rpcclient.NewRpcClient("", "", rpcConnCfg.TLS, keyPath, certPath, caPath, connAttempts,
 				reconnects, connectTimeout, replyTimeout, rpcclient.INTERNAL_RPC, internalConn, lazyConnect)
 		} else if utils.IsSliceMember([]string{utils.MetaJSONrpc, utils.MetaGOBrpc, ""}, rpcConnCfg.Transport) {
 			codec := utils.GOB
 			if rpcConnCfg.Transport != "" {
 				codec = rpcConnCfg.Transport[1:] // Transport contains always * before codec understood by rpcclient
 			}
-			rpcClient, err = rpcclient.NewRpcClient("tcp", rpcConnCfg.Address, rpcConnCfg.Tls, keyPath, certPath, caPath,
+			rpcClient, err = rpcclient.NewRpcClient("tcp", rpcConnCfg.Address, rpcConnCfg.TLS, keyPath, certPath, caPath,
 				connAttempts, reconnects, connectTimeout, replyTimeout, codec, nil, lazyConnect)
 		} else {
 			return nil, fmt.Errorf("Unsupported transport: <%s>", rpcConnCfg.Transport)

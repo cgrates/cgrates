@@ -1209,7 +1209,7 @@ type TPDispatcherProfile struct {
 type TPDispatcherHostConn struct {
 	Address   string
 	Transport string
-	Tls       bool
+	TLS       bool
 }
 
 // TPDispatcherHostTPDispatcherHost is used in APIs to manage remotely offline DispatcherHost

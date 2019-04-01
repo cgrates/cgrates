@@ -52,7 +52,7 @@ func NewSReplConns(conns []*config.RemoteHost, reconnects int,
 	connTimeout, replyTimeout time.Duration) (sReplConns []*SReplConn, err error) {
 	sReplConns = make([]*SReplConn, len(conns))
 	for i, replConnCfg := range conns {
-		if replCon, err := rpcclient.NewRpcClient("tcp", replConnCfg.Address, replConnCfg.Tls, "", "", "", 0, reconnects,
+		if replCon, err := rpcclient.NewRpcClient("tcp", replConnCfg.Address, replConnCfg.TLS, "", "", "", 0, reconnects,
 			connTimeout, replyTimeout, replConnCfg.Transport[1:], nil, true); err != nil {
 			return nil, err
 		} else {
