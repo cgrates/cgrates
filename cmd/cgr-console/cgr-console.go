@@ -45,7 +45,7 @@ var (
 	certificatePath = cgrConsoleFlags.String("crt_path", "", "path to certificate for tls connection")
 	keyPath         = cgrConsoleFlags.String("key_path", "", "path to key for tls connection")
 	caPath          = cgrConsoleFlags.String("ca_path", "", "path to CA for tls connection(only for self sign certificate)")
-	tls             = cgrConsoleFlags.Bool("tls", false, "Tls connection")
+	tls             = cgrConsoleFlags.Bool("tls", false, "TLS connection")
 	client          *rpcclient.RpcClient
 )
 

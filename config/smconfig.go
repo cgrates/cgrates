@@ -38,7 +38,7 @@ type RemoteHost struct {
 	Address     string
 	Transport   string
 	Synchronous bool
-	Tls         bool
+	TLS         bool
 }
 
 func (self *RemoteHost) loadFromJsonCfg(jsnCfg *HaPoolJsonCfg) error {
@@ -55,7 +55,7 @@ func (self *RemoteHost) loadFromJsonCfg(jsnCfg *HaPoolJsonCfg) error {
 		self.Synchronous = *jsnCfg.Synchronous
 	}
 	if jsnCfg.Tls != nil {
-		self.Tls = *jsnCfg.Tls
+		self.TLS = *jsnCfg.Tls
 	}
 	return nil
 }
