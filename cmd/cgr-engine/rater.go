@@ -55,6 +55,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 		<-chS.GetPrecacheChannel(utils.CacheAccountActionPlans)
 		<-chS.GetPrecacheChannel(utils.CacheActionTriggers)
 		<-chS.GetPrecacheChannel(utils.CacheSharedGroups)
+		<-chS.GetPrecacheChannel(utils.CacheTimings)
 	}()
 
 	var thdS *rpcclient.RpcClientPool
