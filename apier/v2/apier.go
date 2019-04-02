@@ -297,6 +297,8 @@ func (self *ApierV2) SetActions(attrs utils.AttrSetActions, reply *string) error
 				DestinationIDs: utils.StringMapPointer(utils.ParseStringMap(apiAct.DestinationIds)),
 				RatingSubject:  utils.StringPointer(apiAct.RatingSubject),
 				SharedGroups:   utils.StringMapPointer(utils.ParseStringMap(apiAct.SharedGroups)),
+				Categories:     utils.StringMapPointer(utils.ParseStringMap(apiAct.Categories)),
+				TimingIDs:      utils.StringMapPointer(utils.ParseStringMap(apiAct.TimingTags)),
 			},
 		}
 		storeActions[idx] = a
