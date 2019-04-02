@@ -927,6 +927,9 @@ func startDispatcherService(internalDispatcherSChan chan *dispatchers.Dispatcher
 	utils.Logger.Info("Starting CGRateS Dispatcher service.")
 	fltrS := <-filterSChan
 	filterSChan <- fltrS
+	<-cacheS.GetPrecacheChannel(utils.CacheDispatcherProfiles)
+	<-cacheS.GetPrecacheChannel(utils.CacheDispatcherHosts)
+
 	var err error
 	var attrSConn *rpcclient.RpcClientPool
 	if len(cfg.DispatcherSCfg().AttributeSConns) != 0 { // AttributeS connection init
