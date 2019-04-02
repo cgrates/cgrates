@@ -50,17 +50,6 @@
  	"attributes_conns": [
 		{"address": "127.0.0.1:5012", "transport": "*json"},
  	],
-	"conns": {
-		"AttributeS1": [
-			{"address": "127.0.0.1:5012", "transport": "*json"},
-		],
-		"ALL": [
-			{"address": "127.0.0.1:6012", "transport": "*json"},
-		],
-		"ALL2": [
-			{"address": "127.0.0.1:7012", "transport": "*json"},
-		],
-	},
 },
 
 
