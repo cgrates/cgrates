@@ -77,7 +77,7 @@ func NewASR(minItems int, extraParams string, filterIDs []string) (StatMetric, e
 
 // ASRHelper structure
 type AnsweredWithCompress struct {
-	Answered       bool
+	Answered       float64
 	CompressFactor int
 }
 
@@ -125,22 +125,23 @@ func (asr *StatASR) GetFloat64Value() (val float64) {
 
 // AddEvent is part of StatMetric interface
 func (asr *StatASR) AddEvent(ev *utils.CGREvent) (err error) {
-	var answered bool
+	var answered int
 	if at, err := ev.FieldAsTime(utils.AnswerTime,
 		config.CgrConfig().GeneralCfg().DefaultTimezone); err != nil &&
 		err != utils.ErrNotFound {
 		return err
 	} else if !at.IsZero() {
-		answered = true
+		answered = 1
 	}
 
 	if val, has := asr.Events[ev.ID]; !has {
-		asr.Events[ev.ID] = &AnsweredWithCompress{Answered: answered}
+		asr.Events[ev.ID] = &AnsweredWithCompress{Answered: float64(answered)}
 	} else {
+		val.Answered = (val.Answered*float64(val.CompressFactor) + float64(answered)) / float64(val.CompressFactor)
 		val.CompressFactor = val.CompressFactor + 1
 	}
 	asr.Count += 1
-	if answered {
+	if answered == 1 {
 		asr.Answered += 1
 	}
 	asr.val = nil
@@ -152,13 +153,16 @@ func (asr *StatASR) RemEvent(evID string) (err error) {
 	if !has {
 		return utils.ErrNotFound
 	}
-	if val.Answered {
+	ans := 0
+	if val.Answered >= 0.5 {
+		ans = 1
 		asr.Answered -= 1
 	}
 	asr.Count -= 1
 	if val.CompressFactor <= 0 {
 		delete(asr.Events, evID)
 	} else {
+		val.Answered = (val.Answered*float64(val.CompressFactor) - float64(ans)) / (float64(val.CompressFactor - 1))
 		val.CompressFactor = val.CompressFactor - 1
 	}
 	asr.val = nil
@@ -246,6 +250,7 @@ func (acd *StatACD) AddEvent(ev *utils.CGREvent) (err error) {
 	if val, has := acd.Events[ev.ID]; !has {
 		acd.Events[ev.ID] = &DurationWithCompress{Duration: dur}
 	} else {
+		val.Duration = time.Duration((float64(val.Duration.Nanoseconds())*float64(val.CompressFactor) + float64(dur.Nanoseconds())) / float64(val.CompressFactor+1))
 		val.CompressFactor = val.CompressFactor + 1
 	}
 	acd.Count += 1
@@ -343,6 +348,7 @@ func (tcd *StatTCD) AddEvent(ev *utils.CGREvent) (err error) {
 	if val, has := tcd.Events[ev.ID]; !has {
 		tcd.Events[ev.ID] = &DurationWithCompress{Duration: dur}
 	} else {
+		val.Duration = time.Duration((float64(val.Duration.Nanoseconds())*float64(val.CompressFactor) + float64(dur.Nanoseconds())) / float64(val.CompressFactor+1))
 		val.CompressFactor = val.CompressFactor + 1
 	}
 	tcd.Count += 1
@@ -444,6 +450,7 @@ func (acc *StatACC) AddEvent(ev *utils.CGREvent) (err error) {
 	if val, has := acc.Events[ev.ID]; !has {
 		acc.Events[ev.ID] = &StatWithCompress{Stat: cost}
 	} else {
+		val.Stat = (val.Stat*float64(val.CompressFactor) + cost) / float64(val.CompressFactor+1)
 		val.CompressFactor = val.CompressFactor + 1
 	}
 	acc.Count += 1
@@ -537,6 +544,7 @@ func (tcc *StatTCC) AddEvent(ev *utils.CGREvent) (err error) {
 	if val, has := tcc.Events[ev.ID]; !has {
 		tcc.Events[ev.ID] = &StatWithCompress{Stat: cost}
 	} else {
+		val.Stat = (val.Stat*float64(val.CompressFactor) + cost) / float64(val.CompressFactor+1)
 		val.CompressFactor = val.CompressFactor + 1
 	}
 	tcc.Count += 1
@@ -635,6 +643,7 @@ func (pdd *StatPDD) AddEvent(ev *utils.CGREvent) (err error) {
 	if val, has := pdd.Events[ev.ID]; !has {
 		pdd.Events[ev.ID] = &DurationWithCompress{Duration: dur}
 	} else {
+		val.Duration = time.Duration((float64(val.Duration.Nanoseconds())*float64(val.CompressFactor) + float64(dur.Nanoseconds())) / float64(val.CompressFactor+1))
 		val.CompressFactor = val.CompressFactor + 1
 	}
 	pdd.Count += 1
@@ -805,6 +814,7 @@ func (sum *StatSum) AddEvent(ev *utils.CGREvent) (err error) {
 	if v, has := sum.Events[ev.ID]; !has {
 		sum.Events[ev.ID] = &StatWithCompress{Stat: val}
 	} else {
+		v.Stat = (v.Stat*float64(v.CompressFactor) + val) / float64(v.CompressFactor+1)
 		v.CompressFactor = v.CompressFactor + 1
 	}
 	sum.Count += 1
@@ -902,6 +912,7 @@ func (avg *StatAverage) AddEvent(ev *utils.CGREvent) (err error) {
 	if v, has := avg.Events[ev.ID]; !has {
 		avg.Events[ev.ID] = &StatWithCompress{Stat: val}
 	} else {
+		v.Stat = (v.Stat*float64(v.CompressFactor) + val) / float64(v.CompressFactor+1)
 		v.CompressFactor = v.CompressFactor + 1
 	}
 	avg.Count += 1

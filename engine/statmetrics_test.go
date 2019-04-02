@@ -1287,7 +1287,7 @@ func TestASRMarshal(t *testing.T) {
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
 	asr.AddEvent(ev)
 	var nasr StatASR
-	expected := []byte(`{"FilterIDs":["*string:Account:1001"],"Answered":1,"Count":1,"Events":{"EVENT_1":{"Answered":true,"CompressFactor":0}},"MinItems":2}`)
+	expected := []byte(`{"FilterIDs":["*string:Account:1001"],"Answered":1,"Count":1,"Events":{"EVENT_1":{"Answered":1,"CompressFactor":0}},"MinItems":2}`)
 	if b, err := asr.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {

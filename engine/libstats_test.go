@@ -53,8 +53,8 @@ func TestStatRemEventWithID(t *testing.T) {
 				Answered: 1,
 				Count:    2,
 				Events: map[string]*AnsweredWithCompress{
-					"cgrates.org:TestRemEventWithID_1": &AnsweredWithCompress{Answered: true},
-					"cgrates.org:TestRemEventWithID_2": &AnsweredWithCompress{Answered: false},
+					"cgrates.org:TestRemEventWithID_1": &AnsweredWithCompress{Answered: 1},
+					"cgrates.org:TestRemEventWithID_2": &AnsweredWithCompress{Answered: 0},
 				},
 			},
 		},
@@ -96,9 +96,9 @@ func TestStatRemExpired(t *testing.T) {
 				Answered: 2,
 				Count:    3,
 				Events: map[string]*AnsweredWithCompress{
-					"cgrates.org:TestStatRemExpired_1": &AnsweredWithCompress{Answered: true},
-					"cgrates.org:TestStatRemExpired_2": &AnsweredWithCompress{Answered: false},
-					"cgrates.org:TestStatRemExpired_3": &AnsweredWithCompress{Answered: true},
+					"cgrates.org:TestStatRemExpired_1": &AnsweredWithCompress{Answered: 1},
+					"cgrates.org:TestStatRemExpired_2": &AnsweredWithCompress{Answered: 0},
+					"cgrates.org:TestStatRemExpired_3": &AnsweredWithCompress{Answered: 1},
 				},
 			},
 		},
@@ -180,7 +180,7 @@ func TestStatAddStatEvent(t *testing.T) {
 				Answered: 1,
 				Count:    1,
 				Events: map[string]*AnsweredWithCompress{
-					"cgrates.org:TestStatRemExpired_1": &AnsweredWithCompress{Answered: true},
+					"cgrates.org:TestStatRemExpired_1": &AnsweredWithCompress{Answered: 1},
 				},
 			},
 		},
