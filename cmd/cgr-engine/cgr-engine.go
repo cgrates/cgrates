@@ -617,6 +617,7 @@ func startAttributeService(internalAttributeSChan chan rpcclient.RpcClientConnec
 	filterS := <-filterSChan
 	filterSChan <- filterS
 	<-cacheS.GetPrecacheChannel(utils.CacheAttributeProfiles)
+	<-cacheS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes)
 
 	aS, err := engine.NewAttributeService(dm, filterS,
 		cfg.AttributeSCfg().StringIndexedFields,
@@ -652,6 +653,7 @@ func startChargerService(internalChargerSChan chan rpcclient.RpcClientConnection
 	filterS := <-filterSChan
 	filterSChan <- filterS
 	<-cacheS.GetPrecacheChannel(utils.CacheChargerProfiles)
+	<-cacheS.GetPrecacheChannel(utils.CacheChargerFilterIndexes)
 	var attrSConn *rpcclient.RpcClientPool
 	var err error
 	if len(cfg.ChargerSCfg().AttributeSConns) != 0 { // AttributeS connection init
@@ -715,6 +717,7 @@ func startResourceService(internalRsChan chan rpcclient.RpcClientConnection, cac
 	}
 	<-cacheS.GetPrecacheChannel(utils.CacheResourceProfiles)
 	<-cacheS.GetPrecacheChannel(utils.CacheResources)
+	<-cacheS.GetPrecacheChannel(utils.CacheResourceFilterIndexes)
 
 	rS, err := engine.NewResourceService(dm, cfg.ResourceSCfg().StoreInterval,
 		thdSConn, filterS, cfg.ResourceSCfg().StringIndexedFields, cfg.ResourceSCfg().PrefixIndexedFields)
@@ -762,6 +765,7 @@ func startStatService(internalStatSChan chan rpcclient.RpcClientConnection, cach
 	}
 	<-cacheS.GetPrecacheChannel(utils.CacheStatQueueProfiles)
 	<-cacheS.GetPrecacheChannel(utils.CacheStatQueues)
+	<-cacheS.GetPrecacheChannel(utils.CacheStatFilterIndexes)
 
 	sS, err := engine.NewStatService(dm, cfg.StatSCfg().StoreInterval,
 		thdSConn, filterS, cfg.StatSCfg().StringIndexedFields, cfg.StatSCfg().PrefixIndexedFields)
@@ -792,6 +796,7 @@ func startThresholdService(internalThresholdSChan chan rpcclient.RpcClientConnec
 	filterSChan <- filterS
 	<-cacheS.GetPrecacheChannel(utils.CacheThresholdProfiles)
 	<-cacheS.GetPrecacheChannel(utils.CacheThresholds)
+	<-cacheS.GetPrecacheChannel(utils.CacheThresholdFilterIndexes)
 
 	tS, err := engine.NewThresholdService(dm, cfg.ThresholdSCfg().StringIndexedFields,
 		cfg.ThresholdSCfg().PrefixIndexedFields, cfg.ThresholdSCfg().StoreInterval, filterS)
@@ -870,6 +875,7 @@ func startSupplierService(internalSupplierSChan chan rpcclient.RpcClientConnecti
 		}
 	}
 	<-cacheS.GetPrecacheChannel(utils.CacheSupplierProfiles)
+	<-cacheS.GetPrecacheChannel(utils.CacheSupplierFilterIndexes)
 
 	splS, err := engine.NewSupplierService(dm, cfg.GeneralCfg().DefaultTimezone,
 		filterS, cfg.SupplierSCfg().StringIndexedFields,
@@ -929,6 +935,7 @@ func startDispatcherService(internalDispatcherSChan chan *dispatchers.Dispatcher
 	filterSChan <- fltrS
 	<-cacheS.GetPrecacheChannel(utils.CacheDispatcherProfiles)
 	<-cacheS.GetPrecacheChannel(utils.CacheDispatcherHosts)
+	<-cacheS.GetPrecacheChannel(utils.CacheDispatcherFilterIndexes)
 
 	var err error
 	var attrSConn *rpcclient.RpcClientPool
