@@ -54,6 +54,8 @@ var precachedPartitions = utils.StringMap{
 	utils.CacheSupplierProfiles:    true,
 	utils.CacheAttributeProfiles:   true,
 	utils.CacheChargerProfiles:     true,
+	utils.CacheDispatcherProfiles:  true,
+	utils.CacheDispatcherHosts:     true,
 
 	utils.CacheAttributeFilterIndexes:  true,
 	utils.CacheResourceFilterIndexes:   true,
@@ -63,12 +65,10 @@ var precachedPartitions = utils.StringMap{
 	utils.CacheChargerFilterIndexes:    true,
 	utils.CacheDispatcherFilterIndexes: true,
 
-	utils.CacheDispatcherProfiles: true,
-	utils.CacheDispatcherHosts:    true,
-	utils.CacheDiameterMessages:   true,
-	utils.CacheEventResources:     true,
-	utils.CacheTimings:            true,
-	utils.CacheLoadIDs:            true,
+	utils.CacheDiameterMessages: true,
+	utils.CacheEventResources:   true,
+	utils.CacheTimings:          true,
+	utils.CacheLoadIDs:          true,
 }
 
 // InitCache will instantiate the cache with specific or default configuraiton

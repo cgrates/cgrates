@@ -454,6 +454,23 @@ func (self *ApierV1) SetActions(attrs V1AttrSetActions, reply *string) (err erro
 	}
 	storeActions := make(engine.Actions, len(attrs.Actions))
 	for idx, apiAct := range attrs.Actions {
+		var blocker *bool
+		if apiAct.BalanceBlocker != "" {
+			if x, err := strconv.ParseBool(apiAct.BalanceBlocker); err == nil {
+				blocker = &x
+			} else {
+				return err
+			}
+		}
+
+		var disabled *bool
+		if apiAct.BalanceDisabled != "" {
+			if x, err := strconv.ParseBool(apiAct.BalanceDisabled); err == nil {
+				disabled = &x
+			} else {
+				return err
+			}
+		}
 		a := &engine.Action{
 			Id:               attrs.ActionsId,
 			ActionType:       apiAct.Identifier,
@@ -470,6 +487,10 @@ func (self *ApierV1) SetActions(attrs V1AttrSetActions, reply *string) (err erro
 				DestinationIDs: utils.StringMapPointer(utils.ParseStringMap(apiAct.DestinationIds)),
 				RatingSubject:  utils.StringPointer(apiAct.RatingSubject),
 				SharedGroups:   utils.StringMapPointer(utils.ParseStringMap(apiAct.SharedGroups)),
+				Categories:     utils.StringMapPointer(utils.ParseStringMap(apiAct.Categories)),
+				TimingIDs:      utils.StringMapPointer(utils.ParseStringMap(apiAct.TimingTags)),
+				Blocker:        blocker,
+				Disabled:       disabled,
 			},
 		}
 		storeActions[idx] = a
@@ -1014,6 +1035,15 @@ func (v1 *ApierV1) CallCache(cacheOpt string, args engine.ArgsGetCacheItem) (err
 		if err = v1.CacheS.Call(utils.CacheSv1FlushCache, composeArgsReload(args), &reply); err != nil {
 			return err
 		}
+	}
+	return
+}
+
+func (v1 *ApierV1) GetCacheVersions(args string, reply *map[string]string) (err error) {
+	if loadIDs, err := v1.DataManager.GetItemLoadIDs(args, false); err != nil {
+		return err
+	} else {
+		*reply = loadIDs
 	}
 	return
 }
