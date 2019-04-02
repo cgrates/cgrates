@@ -311,6 +311,44 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 	}
 }
 
+func TestApierV2itSetActionWithCategory(t *testing.T) {
+	var reply string
+	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "TestApierV2itSetActionWithCategory"}
+	if err := apierRPC.Call("ApierV1.SetAccount", attrsSetAccount, &reply); err != nil {
+		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
+	}
+
+	argActs1 := utils.AttrSetActions{ActionsId: "TestApierV2itSetActionWithCategory_ACT",
+		Actions: []*utils.TPAction{
+			{Identifier: engine.TOPUP_RESET,
+				BalanceType: utils.MONETARY, Categories: "test", Units: "5.0", Weight: 20.0},
+		}}
+
+	if err := apierRPC.Call("ApierV2.SetActions", argActs1, &reply); err != nil {
+		t.Error(err)
+	}
+
+	attrsEA := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: argActs1.ActionsId}
+	if err := apierRPC.Call("ApierV1.ExecuteAction", attrsEA, &reply); err != nil {
+		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
+	}
+
+	var acnt engine.Account
+	if err := apierRPC.Call("ApierV2.GetAccount", &utils.AttrGetAccount{Tenant: "cgrates.org",
+		Account: "TestApierV2itSetActionWithCategory"}, &acnt); err != nil {
+		t.Error(err)
+	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MONETARY][0].Value != 5.0 {
+		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MONETARY][0])
+	} else if len(acnt.BalanceMap[utils.MONETARY][0].Categories) != 1 &&
+		acnt.BalanceMap[utils.MONETARY][0].Categories["test"] != true {
+		t.Fatalf("Unexpected category received: %+v", utils.ToJSON(acnt))
+	}
+}
+
 func TestApierV2itKillEngine(t *testing.T) {
 	if err := engine.KillEngine(delay); err != nil {
 		t.Error(err)
