@@ -281,6 +281,24 @@ func (self *ApierV2) SetActions(attrs utils.AttrSetActions, reply *string) error
 			}
 		}
 
+		var blocker *bool
+		if apiAct.BalanceBlocker != "" {
+			if x, err := strconv.ParseBool(apiAct.BalanceBlocker); err == nil {
+				blocker = &x
+			} else {
+				return err
+			}
+		}
+
+		var disabled *bool
+		if apiAct.BalanceDisabled != "" {
+			if x, err := strconv.ParseBool(apiAct.BalanceDisabled); err == nil {
+				disabled = &x
+			} else {
+				return err
+			}
+		}
+
 		a := &engine.Action{
 			Id:               attrs.ActionsId,
 			ActionType:       apiAct.Identifier,
@@ -299,6 +317,8 @@ func (self *ApierV2) SetActions(attrs utils.AttrSetActions, reply *string) error
 				SharedGroups:   utils.StringMapPointer(utils.ParseStringMap(apiAct.SharedGroups)),
 				Categories:     utils.StringMapPointer(utils.ParseStringMap(apiAct.Categories)),
 				TimingIDs:      utils.StringMapPointer(utils.ParseStringMap(apiAct.TimingTags)),
+				Blocker:        blocker,
+				Disabled:       disabled,
 			},
 		}
 		storeActions[idx] = a
