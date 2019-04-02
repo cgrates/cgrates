@@ -52,9 +52,9 @@ func TestStatRemEventWithID(t *testing.T) {
 			utils.MetaASR: &StatASR{
 				Answered: 1,
 				Count:    2,
-				Events: map[string]bool{
-					"cgrates.org:TestRemEventWithID_1": true,
-					"cgrates.org:TestRemEventWithID_2": false,
+				Events: map[string]*AnsweredWithCompress{
+					"cgrates.org:TestRemEventWithID_1": &AnsweredWithCompress{Answered: true},
+					"cgrates.org:TestRemEventWithID_2": &AnsweredWithCompress{Answered: false},
 				},
 			},
 		},
@@ -95,10 +95,10 @@ func TestStatRemExpired(t *testing.T) {
 			utils.MetaASR: &StatASR{
 				Answered: 2,
 				Count:    3,
-				Events: map[string]bool{
-					"cgrates.org:TestStatRemExpired_1": true,
-					"cgrates.org:TestStatRemExpired_2": false,
-					"cgrates.org:TestStatRemExpired_3": true,
+				Events: map[string]*AnsweredWithCompress{
+					"cgrates.org:TestStatRemExpired_1": &AnsweredWithCompress{Answered: true},
+					"cgrates.org:TestStatRemExpired_2": &AnsweredWithCompress{Answered: false},
+					"cgrates.org:TestStatRemExpired_3": &AnsweredWithCompress{Answered: true},
 				},
 			},
 		},
@@ -179,8 +179,8 @@ func TestStatAddStatEvent(t *testing.T) {
 			utils.MetaASR: &StatASR{
 				Answered: 1,
 				Count:    1,
-				Events: map[string]bool{
-					"cgrates.org:TestStatRemExpired_1": true,
+				Events: map[string]*AnsweredWithCompress{
+					"cgrates.org:TestStatRemExpired_1": &AnsweredWithCompress{Answered: true},
 				},
 			},
 		},

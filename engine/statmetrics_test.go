@@ -859,7 +859,7 @@ func TestPDDGetValue(t *testing.T) {
 }
 
 func TestDDCGetStringValue(t *testing.T) {
-	ddc, _ := NewDCC(2, "", []string{})
+	ddc, _ := NewDDC(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -901,7 +901,7 @@ func TestDDCGetStringValue(t *testing.T) {
 }
 
 func TestDDCGetFloat64Value(t *testing.T) {
-	ddc, _ := NewDCC(2, "", []string{})
+	ddc, _ := NewDDC(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -1287,7 +1287,7 @@ func TestASRMarshal(t *testing.T) {
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
 	asr.AddEvent(ev)
 	var nasr StatASR
-	expected := []byte(`{"FilterIDs":["*string:Account:1001"],"Answered":1,"Count":1,"Events":{"EVENT_1":true},"MinItems":2}`)
+	expected := []byte(`{"FilterIDs":["*string:Account:1001"],"Answered":1,"Count":1,"Events":{"EVENT_1":{"Answered":true,"CompressFactor":0}},"MinItems":2}`)
 	if b, err := asr.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1307,7 +1307,7 @@ func TestACDMarshal(t *testing.T) {
 			"Usage":      time.Duration(10 * time.Second)}}
 	acd.AddEvent(ev)
 	var nacd StatACD
-	expected := []byte(`{"FilterIDs":[],"Sum":10000000000,"Count":1,"Events":{"EVENT_1":10000000000},"MinItems":2}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":10000000000,"Count":1,"Events":{"EVENT_1":{"Duration":10000000000,"CompressFactor":0}},"MinItems":2}`)
 	if b, err := acd.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1327,7 +1327,7 @@ func TestTCDMarshal(t *testing.T) {
 			"Usage":      time.Duration(10 * time.Second)}}
 	tcd.AddEvent(ev)
 	var ntcd StatTCD
-	expected := []byte(`{"FilterIDs":[],"Sum":10000000000,"Count":1,"Events":{"EVENT_1":10000000000},"MinItems":2}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":10000000000,"Count":1,"Events":{"EVENT_1":{"Duration":10000000000,"CompressFactor":0}},"MinItems":2}`)
 	if b, err := tcd.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1347,7 +1347,7 @@ func TestACCMarshal(t *testing.T) {
 			"Cost":       "12.3"}}
 	acc.AddEvent(ev)
 	var nacc StatACC
-	expected := []byte(`{"FilterIDs":[],"Sum":12.3,"Count":1,"Events":{"EVENT_1":12.3},"MinItems":2}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":12.3,"Count":1,"Events":{"EVENT_1":{"Stat":12.3,"CompressFactor":0}},"MinItems":2}`)
 	if b, err := acc.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1367,7 +1367,7 @@ func TestTCCMarshal(t *testing.T) {
 			"Cost":       "12.3"}}
 	tcc.AddEvent(ev)
 	var ntcc StatTCC
-	expected := []byte(`{"FilterIDs":[],"Sum":12.3,"Count":1,"Events":{"EVENT_1":12.3},"MinItems":2}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":12.3,"Count":1,"Events":{"EVENT_1":{"Stat":12.3,"CompressFactor":0}},"MinItems":2}`)
 	if b, err := tcc.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1388,7 +1388,7 @@ func TestPDDMarshal(t *testing.T) {
 			utils.PDD:    time.Duration(5 * time.Second)}}
 	pdd.AddEvent(ev)
 	var ntdd StatPDD
-	expected := []byte(`{"FilterIDs":[],"Sum":5000000000,"Count":1,"Events":{"EVENT_1":5000000000},"MinItems":2}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":5000000000,"Count":1,"Events":{"EVENT_1":{"Duration":5000000000,"CompressFactor":0}},"MinItems":2}`)
 	if b, err := pdd.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1401,7 +1401,7 @@ func TestPDDMarshal(t *testing.T) {
 }
 
 func TestDCCMarshal(t *testing.T) {
-	ddc, _ := NewDCC(2, "", []string{})
+	ddc, _ := NewDDC(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
 		Event: map[string]interface{}{
 			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -1433,7 +1433,7 @@ func TestStatSumMarshal(t *testing.T) {
 			utils.Destination: "1002"}}
 	statSum.AddEvent(ev)
 	var nstatSum StatSum
-	expected := []byte(`{"FilterIDs":[],"Sum":20,"Events":{"EVENT_1":20},"MinItems":2,"FieldName":"Cost"}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":20,"Count":1,"Events":{"EVENT_1":{"Stat":20,"CompressFactor":0}},"MinItems":2,"FieldName":"Cost"}`)
 	if b, err := statSum.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1456,7 +1456,7 @@ func TestStatAverageMarshal(t *testing.T) {
 			utils.Destination: "1002"}}
 	statAvg.AddEvent(ev)
 	var nstatAvg StatAverage
-	expected := []byte(`{"FilterIDs":[],"Sum":20,"Count":1,"Events":{"EVENT_1":20},"MinItems":2,"FieldName":"Cost"}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":20,"Count":1,"Events":{"EVENT_1":{"Stat":20,"CompressFactor":0}},"MinItems":2,"FieldName":"Cost"}`)
 	if b, err := statAvg.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {

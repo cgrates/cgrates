@@ -1462,10 +1462,10 @@ func testOnStorITStatQueue(t *testing.T) {
 			utils.MetaASR: &StatASR{
 				Answered: 2,
 				Count:    3,
-				Events: map[string]bool{
-					"cgrates.org:ev1": true,
-					"cgrates.org:ev2": true,
-					"cgrates.org:ev3": false,
+				Events: map[string]*AnsweredWithCompress{
+					"cgrates.org:ev1": &AnsweredWithCompress{Answered: true},
+					"cgrates.org:ev2": &AnsweredWithCompress{Answered: true},
+					"cgrates.org:ev3": &AnsweredWithCompress{Answered: false},
 				},
 			},
 		},
@@ -1495,10 +1495,10 @@ func testOnStorITStatQueue(t *testing.T) {
 		utils.MetaASR: &StatASR{
 			Answered: 3,
 			Count:    3,
-			Events: map[string]bool{
-				"cgrates.org:ev1": true,
-				"cgrates.org:ev2": true,
-				"cgrates.org:ev3": true,
+			Events: map[string]*AnsweredWithCompress{
+				"cgrates.org:ev1": &AnsweredWithCompress{Answered: true},
+				"cgrates.org:ev2": &AnsweredWithCompress{Answered: true},
+				"cgrates.org:ev3": &AnsweredWithCompress{Answered: true},
 			},
 		},
 	}

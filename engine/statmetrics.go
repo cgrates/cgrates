@@ -40,7 +40,7 @@ func NewStatMetric(metricID string, minItems int, filterIDs []string) (sm StatMe
 		utils.MetaACC:      NewACC,
 		utils.MetaTCC:      NewTCC,
 		utils.MetaPDD:      NewPDD,
-		utils.MetaDDC:      NewDCC,
+		utils.MetaDDC:      NewDDC,
 		utils.MetaSum:      NewStatSum,
 		utils.MetaAverage:  NewStatAverage,
 		utils.MetaDistinct: NewStatDistinct,
@@ -71,16 +71,22 @@ type StatMetric interface {
 }
 
 func NewASR(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatASR{Events: make(map[string]bool),
+	return &StatASR{Events: make(map[string]*AnsweredWithCompress),
 		MinItems: minItems, FilterIDs: filterIDs}, nil
+}
+
+// ASRHelper structure
+type AnsweredWithCompress struct {
+	Answered       bool
+	CompressFactor int
 }
 
 // ASR implements AverageSuccessRatio metric
 type StatASR struct {
 	FilterIDs []string
 	Answered  float64
-	Count     float64
-	Events    map[string]bool // map[EventTenantID]Answered
+	Count     int64
+	Events    map[string]*AnsweredWithCompress // map[EventTenantID]Answered
 	MinItems  int
 	val       *float64 // cached ASR value
 }
@@ -88,10 +94,10 @@ type StatASR struct {
 // getValue returns asr.val
 func (asr *StatASR) getValue() float64 {
 	if asr.val == nil {
-		if (asr.MinItems > 0 && len(asr.Events) < asr.MinItems) || (asr.Count == 0) {
+		if (asr.MinItems > 0 && asr.Count < int64(asr.MinItems)) || (asr.Count == 0) {
 			asr.val = utils.Float64Pointer(STATS_NA)
 		} else {
-			asr.val = utils.Float64Pointer(utils.Round((asr.Answered / asr.Count * 100),
+			asr.val = utils.Float64Pointer(utils.Round((asr.Answered / float64(asr.Count) * 100.0),
 				config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE))
 		}
 	}
@@ -127,7 +133,12 @@ func (asr *StatASR) AddEvent(ev *utils.CGREvent) (err error) {
 	} else if !at.IsZero() {
 		answered = true
 	}
-	asr.Events[ev.ID] = answered
+
+	if val, has := asr.Events[ev.ID]; !has {
+		asr.Events[ev.ID] = &AnsweredWithCompress{Answered: answered}
+	} else {
+		val.CompressFactor = val.CompressFactor + 1
+	}
 	asr.Count += 1
 	if answered {
 		asr.Answered += 1
@@ -137,15 +148,19 @@ func (asr *StatASR) AddEvent(ev *utils.CGREvent) (err error) {
 }
 
 func (asr *StatASR) RemEvent(evID string) (err error) {
-	answered, has := asr.Events[evID]
+	val, has := asr.Events[evID]
 	if !has {
 		return utils.ErrNotFound
 	}
-	if answered {
+	if val.Answered {
 		asr.Answered -= 1
 	}
 	asr.Count -= 1
-	delete(asr.Events, evID)
+	if val.CompressFactor <= 0 {
+		delete(asr.Events, evID)
+	} else {
+		val.CompressFactor = val.CompressFactor - 1
+	}
 	asr.val = nil
 	return
 }
@@ -166,7 +181,13 @@ func (asr *StatASR) GetFilterIDs() []string {
 }
 
 func NewACD(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatACD{Events: make(map[string]time.Duration), MinItems: minItems, FilterIDs: filterIDs}, nil
+	return &StatACD{Events: make(map[string]*DurationWithCompress), MinItems: minItems, FilterIDs: filterIDs}, nil
+}
+
+// ACDHelper structure
+type DurationWithCompress struct {
+	Duration       time.Duration
+	CompressFactor int
 }
 
 // ACD implements AverageCallDuration metric
@@ -174,7 +195,7 @@ type StatACD struct {
 	FilterIDs []string
 	Sum       time.Duration
 	Count     int64
-	Events    map[string]time.Duration // map[EventTenantID]Duration
+	Events    map[string]*DurationWithCompress // map[EventTenantID]Duration
 	MinItems  int
 	val       *time.Duration // cached ACD value
 }
@@ -182,7 +203,7 @@ type StatACD struct {
 // getValue returns acr.val
 func (acd *StatACD) getValue() time.Duration {
 	if acd.val == nil {
-		if (acd.MinItems > 0 && len(acd.Events) < acd.MinItems) || (acd.Count == 0) {
+		if (acd.MinItems > 0 && acd.Count < int64(acd.MinItems)) || (acd.Count == 0) {
 			acd.val = utils.DurationPointer(time.Duration((-1) * time.Nanosecond))
 		} else {
 			acd.val = utils.DurationPointer(time.Duration(acd.Sum.Nanoseconds() / acd.Count))
@@ -222,22 +243,30 @@ func (acd *StatACD) AddEvent(ev *utils.CGREvent) (err error) {
 		return
 	}
 	acd.Sum += dur
-	acd.Events[ev.ID] = dur
+	if val, has := acd.Events[ev.ID]; !has {
+		acd.Events[ev.ID] = &DurationWithCompress{Duration: dur}
+	} else {
+		val.CompressFactor = val.CompressFactor + 1
+	}
 	acd.Count += 1
 	acd.val = nil
 	return
 }
 
 func (acd *StatACD) RemEvent(evID string) (err error) {
-	duration, has := acd.Events[evID]
+	val, has := acd.Events[evID]
 	if !has {
 		return utils.ErrNotFound
 	}
-	if duration != 0 {
-		acd.Sum -= duration
+	if val.Duration != 0 {
+		acd.Sum -= val.Duration
 	}
 	acd.Count -= 1
-	delete(acd.Events, evID)
+	if val.CompressFactor <= 0 {
+		delete(acd.Events, evID)
+	} else {
+		val.CompressFactor = val.CompressFactor - 1
+	}
 	acd.val = nil
 	return
 }
@@ -255,7 +284,7 @@ func (acd *StatACD) GetFilterIDs() []string {
 }
 
 func NewTCD(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatTCD{Events: make(map[string]time.Duration), MinItems: minItems, FilterIDs: filterIDs}, nil
+	return &StatTCD{Events: make(map[string]*DurationWithCompress), MinItems: minItems, FilterIDs: filterIDs}, nil
 }
 
 // TCD implements TotalCallDuration metric
@@ -263,7 +292,7 @@ type StatTCD struct {
 	FilterIDs []string
 	Sum       time.Duration
 	Count     int64
-	Events    map[string]time.Duration // map[EventTenantID]Duration
+	Events    map[string]*DurationWithCompress // map[EventTenantID]Duration
 	MinItems  int
 	val       *time.Duration // cached TCD value
 }
@@ -271,7 +300,7 @@ type StatTCD struct {
 // getValue returns tcd.val
 func (tcd *StatTCD) getValue() time.Duration {
 	if tcd.val == nil {
-		if (tcd.MinItems > 0 && len(tcd.Events) < tcd.MinItems) || (tcd.Count == 0) {
+		if (tcd.MinItems > 0 && tcd.Count < int64(tcd.MinItems)) || (tcd.Count == 0) {
 			tcd.val = utils.DurationPointer(time.Duration((-1) * time.Nanosecond))
 		} else {
 			tcd.val = utils.DurationPointer(time.Duration(tcd.Sum.Nanoseconds()))
@@ -311,22 +340,30 @@ func (tcd *StatTCD) AddEvent(ev *utils.CGREvent) (err error) {
 		return
 	}
 	tcd.Sum += dur
-	tcd.Events[ev.ID] = dur
+	if val, has := tcd.Events[ev.ID]; !has {
+		tcd.Events[ev.ID] = &DurationWithCompress{Duration: dur}
+	} else {
+		val.CompressFactor = val.CompressFactor + 1
+	}
 	tcd.Count += 1
 	tcd.val = nil
 	return
 }
 
 func (tcd *StatTCD) RemEvent(evID string) (err error) {
-	duration, has := tcd.Events[evID]
+	val, has := tcd.Events[evID]
 	if !has {
 		return utils.ErrNotFound
 	}
-	if duration != 0 {
-		tcd.Sum -= duration
+	if val.Duration != 0 {
+		tcd.Sum -= val.Duration
 	}
 	tcd.Count -= 1
-	delete(tcd.Events, evID)
+	if val.CompressFactor <= 0 {
+		delete(tcd.Events, evID)
+	} else {
+		val.CompressFactor = val.CompressFactor - 1
+	}
 	tcd.val = nil
 	return
 }
@@ -345,15 +382,21 @@ func (tcd *StatTCD) GetFilterIDs() []string {
 }
 
 func NewACC(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatACC{Events: make(map[string]float64), MinItems: minItems, FilterIDs: filterIDs}, nil
+	return &StatACC{Events: make(map[string]*StatWithCompress), MinItems: minItems, FilterIDs: filterIDs}, nil
+}
+
+// ACDHelper structure
+type StatWithCompress struct {
+	Stat           float64
+	CompressFactor int
 }
 
 // ACC implements AverageCallCost metric
 type StatACC struct {
 	FilterIDs []string
 	Sum       float64
-	Count     float64
-	Events    map[string]float64 // map[EventTenantID]Cost
+	Count     int64
+	Events    map[string]*StatWithCompress // map[EventTenantID]Cost
 	MinItems  int
 	val       *float64 // cached ACC value
 }
@@ -361,10 +404,10 @@ type StatACC struct {
 // getValue returns tcd.val
 func (acc *StatACC) getValue() float64 {
 	if acc.val == nil {
-		if (acc.MinItems > 0 && len(acc.Events) < acc.MinItems) || (acc.Count == 0) {
+		if (acc.MinItems > 0 && acc.Count < int64(acc.MinItems)) || (acc.Count == 0) {
 			acc.val = utils.Float64Pointer(STATS_NA)
 		} else {
-			acc.val = utils.Float64Pointer(utils.Round((acc.Sum / acc.Count),
+			acc.val = utils.Float64Pointer(utils.Round((acc.Sum / float64(acc.Count)),
 				config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE))
 		}
 	}
@@ -398,7 +441,11 @@ func (acc *StatACC) AddEvent(ev *utils.CGREvent) (err error) {
 		return
 	}
 	acc.Sum += cost
-	acc.Events[ev.ID] = cost
+	if val, has := acc.Events[ev.ID]; !has {
+		acc.Events[ev.ID] = &StatWithCompress{Stat: cost}
+	} else {
+		val.CompressFactor = val.CompressFactor + 1
+	}
 	acc.Count += 1
 	acc.val = nil
 	return
@@ -409,9 +456,13 @@ func (acc *StatACC) RemEvent(evID string) (err error) {
 	if !has {
 		return utils.ErrNotFound
 	}
-	acc.Sum -= cost
+	acc.Sum -= cost.Stat
 	acc.Count -= 1
-	delete(acc.Events, evID)
+	if cost.CompressFactor <= 0 {
+		delete(acc.Events, evID)
+	} else {
+		cost.CompressFactor = cost.CompressFactor - 1
+	}
 	acc.val = nil
 	return
 }
@@ -430,15 +481,15 @@ func (acc *StatACC) GetFilterIDs() []string {
 }
 
 func NewTCC(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatTCC{Events: make(map[string]float64), MinItems: minItems, FilterIDs: filterIDs}, nil
+	return &StatTCC{Events: make(map[string]*StatWithCompress), MinItems: minItems, FilterIDs: filterIDs}, nil
 }
 
 // TCC implements TotalCallCost metric
 type StatTCC struct {
 	FilterIDs []string
 	Sum       float64
-	Count     float64
-	Events    map[string]float64 // map[EventTenantID]Cost
+	Count     int64
+	Events    map[string]*StatWithCompress // map[EventTenantID]Cost
 	MinItems  int
 	val       *float64 // cached TCC value
 }
@@ -446,7 +497,7 @@ type StatTCC struct {
 // getValue returns tcd.val
 func (tcc *StatTCC) getValue() float64 {
 	if tcc.val == nil {
-		if (tcc.MinItems > 0 && len(tcc.Events) < tcc.MinItems) || (tcc.Count == 0) {
+		if (tcc.MinItems > 0 && tcc.Count < int64(tcc.MinItems)) || (tcc.Count == 0) {
 			tcc.val = utils.Float64Pointer(STATS_NA)
 		} else {
 			tcc.val = utils.Float64Pointer(utils.Round(tcc.Sum,
@@ -483,7 +534,11 @@ func (tcc *StatTCC) AddEvent(ev *utils.CGREvent) (err error) {
 		return
 	}
 	tcc.Sum += cost
-	tcc.Events[ev.ID] = cost
+	if val, has := tcc.Events[ev.ID]; !has {
+		tcc.Events[ev.ID] = &StatWithCompress{Stat: cost}
+	} else {
+		val.CompressFactor = val.CompressFactor + 1
+	}
 	tcc.Count += 1
 	tcc.val = nil
 	return
@@ -494,11 +549,15 @@ func (tcc *StatTCC) RemEvent(evID string) (err error) {
 	if !has {
 		return utils.ErrNotFound
 	}
-	if cost != 0 {
-		tcc.Sum -= cost
+	if cost.Stat != 0 {
+		tcc.Sum -= cost.Stat
 	}
 	tcc.Count -= 1
-	delete(tcc.Events, evID)
+	if cost.CompressFactor <= 0 {
+		delete(tcc.Events, evID)
+	} else {
+		cost.CompressFactor = cost.CompressFactor - 1
+	}
 	tcc.val = nil
 	return
 }
@@ -517,7 +576,7 @@ func (tcc *StatTCC) GetFilterIDs() []string {
 }
 
 func NewPDD(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatPDD{Events: make(map[string]time.Duration), MinItems: minItems, FilterIDs: filterIDs}, nil
+	return &StatPDD{Events: make(map[string]*DurationWithCompress), MinItems: minItems, FilterIDs: filterIDs}, nil
 }
 
 // PDD implements Post Dial Delay (average) metric
@@ -525,7 +584,7 @@ type StatPDD struct {
 	FilterIDs []string
 	Sum       time.Duration
 	Count     int64
-	Events    map[string]time.Duration // map[EventTenantID]Duration
+	Events    map[string]*DurationWithCompress // map[EventTenantID]Duration
 	MinItems  int
 	val       *time.Duration // cached PDD value
 }
@@ -533,7 +592,7 @@ type StatPDD struct {
 // getValue returns pdd.val
 func (pdd *StatPDD) getValue() time.Duration {
 	if pdd.val == nil {
-		if (pdd.MinItems > 0 && len(pdd.Events) < pdd.MinItems) || (pdd.Count == 0) {
+		if (pdd.MinItems > 0 && pdd.Count < int64(pdd.MinItems)) || (pdd.Count == 0) {
 			pdd.val = utils.DurationPointer(time.Duration((-1) * time.Nanosecond))
 		} else {
 			pdd.val = utils.DurationPointer(time.Duration(pdd.Sum.Nanoseconds() / pdd.Count))
@@ -573,22 +632,30 @@ func (pdd *StatPDD) AddEvent(ev *utils.CGREvent) (err error) {
 		return
 	}
 	pdd.Sum += dur
-	pdd.Events[ev.ID] = dur
+	if val, has := pdd.Events[ev.ID]; !has {
+		pdd.Events[ev.ID] = &DurationWithCompress{Duration: dur}
+	} else {
+		val.CompressFactor = val.CompressFactor + 1
+	}
 	pdd.Count += 1
 	pdd.val = nil
 	return
 }
 
 func (pdd *StatPDD) RemEvent(evID string) (err error) {
-	duration, has := pdd.Events[evID]
+	val, has := pdd.Events[evID]
 	if !has {
 		return utils.ErrNotFound
 	}
-	if duration != 0 {
-		pdd.Sum -= duration
+	if val.Duration != 0 {
+		pdd.Sum -= val.Duration
 	}
 	pdd.Count -= 1
-	delete(pdd.Events, evID)
+	if val.CompressFactor <= 0 {
+		delete(pdd.Events, evID)
+	} else {
+		val.CompressFactor = val.CompressFactor - 1
+	}
 	pdd.val = nil
 	return
 }
@@ -605,7 +672,7 @@ func (pdd *StatPDD) GetFilterIDs() []string {
 	return pdd.FilterIDs
 }
 
-func NewDCC(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
+func NewDDC(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
 	return &StatDDC{Destinations: make(map[string]utils.StringMap),
 		Events: make(map[string]string), MinItems: minItems, FilterIDs: filterIDs}, nil
 }
@@ -681,14 +748,15 @@ func (ddc *StatDDC) GetFilterIDs() []string {
 }
 
 func NewStatSum(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatSum{Events: make(map[string]float64),
+	return &StatSum{Events: make(map[string]*StatWithCompress),
 		MinItems: minItems, FieldName: extraParams, FilterIDs: filterIDs}, nil
 }
 
 type StatSum struct {
 	FilterIDs []string
 	Sum       float64
-	Events    map[string]float64 // map[EventTenantID]Cost
+	Count     int64
+	Events    map[string]*StatWithCompress // map[EventTenantID]Cost
 	MinItems  int
 	FieldName string
 	val       *float64 // cached sum value
@@ -697,7 +765,7 @@ type StatSum struct {
 // getValue returns tcd.val
 func (sum *StatSum) getValue() float64 {
 	if sum.val == nil {
-		if len(sum.Events) == 0 || len(sum.Events) < sum.MinItems {
+		if len(sum.Events) == 0 || sum.Count < int64(sum.MinItems) {
 			sum.val = utils.Float64Pointer(STATS_NA)
 		} else {
 			sum.val = utils.Float64Pointer(utils.Round(sum.Sum,
@@ -734,7 +802,12 @@ func (sum *StatSum) AddEvent(ev *utils.CGREvent) (err error) {
 		return
 	}
 	sum.Sum += val
-	sum.Events[ev.ID] = val
+	if v, has := sum.Events[ev.ID]; !has {
+		sum.Events[ev.ID] = &StatWithCompress{Stat: val}
+	} else {
+		v.CompressFactor = v.CompressFactor + 1
+	}
+	sum.Count += 1
 	sum.val = nil
 	return
 }
@@ -744,10 +817,15 @@ func (sum *StatSum) RemEvent(evID string) (err error) {
 	if !has {
 		return utils.ErrNotFound
 	}
-	if val != 0 {
-		sum.Sum -= val
+	if val.Stat != 0 {
+		sum.Sum -= val.Stat
 	}
-	delete(sum.Events, evID)
+	sum.Count -= 1
+	if val.CompressFactor <= 0 {
+		delete(sum.Events, evID)
+	} else {
+		val.CompressFactor = val.CompressFactor - 1
+	}
 	sum.val = nil
 	return
 }
@@ -766,7 +844,7 @@ func (sum *StatSum) GetFilterIDs() []string {
 }
 
 func NewStatAverage(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatAverage{Events: make(map[string]float64),
+	return &StatAverage{Events: make(map[string]*StatWithCompress),
 		MinItems: minItems, FieldName: extraParams, FilterIDs: filterIDs}, nil
 }
 
@@ -774,8 +852,8 @@ func NewStatAverage(minItems int, extraParams string, filterIDs []string) (StatM
 type StatAverage struct {
 	FilterIDs []string
 	Sum       float64
-	Count     float64
-	Events    map[string]float64 // map[EventTenantID]Cost
+	Count     int64
+	Events    map[string]*StatWithCompress // map[EventTenantID]Cost
 	MinItems  int
 	FieldName string
 	val       *float64 // cached avg value
@@ -784,10 +862,10 @@ type StatAverage struct {
 // getValue returns tcd.val
 func (avg *StatAverage) getValue() float64 {
 	if avg.val == nil {
-		if (avg.MinItems > 0 && len(avg.Events) < avg.MinItems) || (avg.Count == 0) {
+		if (avg.MinItems > 0 && avg.Count < int64(avg.MinItems)) || (avg.Count == 0) {
 			avg.val = utils.Float64Pointer(STATS_NA)
 		} else {
-			avg.val = utils.Float64Pointer(utils.Round((avg.Sum / avg.Count),
+			avg.val = utils.Float64Pointer(utils.Round((avg.Sum / float64(avg.Count)),
 				config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE))
 		}
 	}
@@ -821,7 +899,11 @@ func (avg *StatAverage) AddEvent(ev *utils.CGREvent) (err error) {
 		return
 	}
 	avg.Sum += val
-	avg.Events[ev.ID] = val
+	if v, has := avg.Events[ev.ID]; !has {
+		avg.Events[ev.ID] = &StatWithCompress{Stat: val}
+	} else {
+		v.CompressFactor = v.CompressFactor + 1
+	}
 	avg.Count += 1
 	avg.val = nil
 	return
@@ -832,11 +914,15 @@ func (avg *StatAverage) RemEvent(evID string) (err error) {
 	if !has {
 		return utils.ErrNotFound
 	}
-	if avg.Events[avg.FieldName] >= 0 {
-		avg.Sum -= val
+	if val.Stat >= 0 {
+		avg.Sum -= val.Stat
 	}
 	avg.Count -= 1
-	delete(avg.Events, evID)
+	if val.CompressFactor <= 0 {
+		delete(avg.Events, evID)
+	} else {
+		val.CompressFactor = val.CompressFactor - 1
+	}
 	avg.val = nil
 	return
 }
