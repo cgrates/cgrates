@@ -165,9 +165,9 @@ func testDispatcherSUpdateDispatcherProfile(t *testing.T) {
 		ActivationTime: time.Date(2019, 3, 1, 0, 0, 0, 0, time.UTC),
 		ExpiryTime:     time.Date(2019, 4, 1, 0, 0, 0, 0, time.UTC),
 	}
-	dispatcherProfile.Conns = []*engine.DispatcherConn{
-		{ID: "HOST1", Weight: 20.0},
-		{ID: "HOST2", Weight: 10.0},
+	dispatcherProfile.Hosts = engine.DispatcherHostProfiles{
+		&engine.DispatcherHostProfile{ID: "HOST1", Weight: 20.0},
+		&engine.DispatcherHostProfile{ID: "HOST2", Weight: 10.0},
 	}
 	if err := dispatcherRPC.Call(utils.ApierV1SetDispatcherProfile,
 		dispatcherProfile, &result); err != nil {
