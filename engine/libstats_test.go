@@ -52,9 +52,9 @@ func TestStatRemEventWithID(t *testing.T) {
 			utils.MetaASR: &StatASR{
 				Answered: 1,
 				Count:    2,
-				Events: map[string]*AnsweredWithCompress{
-					"cgrates.org:TestRemEventWithID_1": &AnsweredWithCompress{Answered: 1},
-					"cgrates.org:TestRemEventWithID_2": &AnsweredWithCompress{Answered: 0},
+				Events: map[string]*StatWithCompress{
+					"cgrates.org:TestRemEventWithID_1": &StatWithCompress{Stat: 1},
+					"cgrates.org:TestRemEventWithID_2": &StatWithCompress{Stat: 0},
 				},
 			},
 		},
@@ -95,23 +95,17 @@ func TestStatRemExpired(t *testing.T) {
 			utils.MetaASR: &StatASR{
 				Answered: 2,
 				Count:    3,
-				Events: map[string]*AnsweredWithCompress{
-					"cgrates.org:TestStatRemExpired_1": &AnsweredWithCompress{Answered: 1},
-					"cgrates.org:TestStatRemExpired_2": &AnsweredWithCompress{Answered: 0},
-					"cgrates.org:TestStatRemExpired_3": &AnsweredWithCompress{Answered: 1},
+				Events: map[string]*StatWithCompress{
+					"cgrates.org:TestStatRemExpired_1": &StatWithCompress{Stat: 1},
+					"cgrates.org:TestStatRemExpired_2": &StatWithCompress{Stat: 0},
+					"cgrates.org:TestStatRemExpired_3": &StatWithCompress{Stat: 1},
 				},
 			},
 		},
-		SQItems: []struct {
-			EventID    string
-			ExpiryTime *time.Time
-		}{
-			struct {
-				EventID    string     // Bounded to the original StatEvent
-				ExpiryTime *time.Time // Used to auto-expire events
-			}{"cgrates.org:TestStatRemExpired_1", utils.TimePointer(time.Now())},
-			{"cgrates.org:TestStatRemExpired_2", utils.TimePointer(time.Now())},
-			{"cgrates.org:TestStatRemExpired_3", utils.TimePointer(time.Now().Add(time.Duration(time.Minute)))},
+		SQItems: []SQItem{
+			SQItem{"cgrates.org:TestStatRemExpired_1", utils.TimePointer(time.Now())},
+			SQItem{"cgrates.org:TestStatRemExpired_2", utils.TimePointer(time.Now())},
+			SQItem{"cgrates.org:TestStatRemExpired_3", utils.TimePointer(time.Now().Add(time.Duration(time.Minute)))},
 		},
 	}
 	asrMetric := sq.SQMetrics[utils.MetaASR].(*StatASR)
@@ -134,10 +128,7 @@ func TestStatRemOnQueueLength(t *testing.T) {
 		sqPrfl: &StatQueueProfile{
 			QueueLength: 2,
 		},
-		SQItems: []struct {
-			EventID    string
-			ExpiryTime *time.Time
-		}{
+		SQItems: []SQItem{
 			{"cgrates.org:TestStatRemExpired_1", nil},
 		},
 	}
@@ -145,10 +136,7 @@ func TestStatRemOnQueueLength(t *testing.T) {
 	if len(sq.SQItems) != 1 {
 		t.Errorf("wrong items: %+v", sq.SQItems)
 	}
-	sq.SQItems = []struct {
-		EventID    string
-		ExpiryTime *time.Time
-	}{
+	sq.SQItems = []SQItem{
 		{"cgrates.org:TestStatRemExpired_1", nil},
 		{"cgrates.org:TestStatRemExpired_2", nil},
 	}
@@ -159,10 +147,7 @@ func TestStatRemOnQueueLength(t *testing.T) {
 		t.Errorf("wrong item in SQItems: %+v", sq.SQItems[0])
 	}
 	sq.sqPrfl.QueueLength = -1
-	sq.SQItems = []struct {
-		EventID    string
-		ExpiryTime *time.Time
-	}{
+	sq.SQItems = []SQItem{
 		{"cgrates.org:TestStatRemExpired_1", nil},
 		{"cgrates.org:TestStatRemExpired_2", nil},
 		{"cgrates.org:TestStatRemExpired_3", nil},
@@ -179,8 +164,8 @@ func TestStatAddStatEvent(t *testing.T) {
 			utils.MetaASR: &StatASR{
 				Answered: 1,
 				Count:    1,
-				Events: map[string]*AnsweredWithCompress{
-					"cgrates.org:TestStatRemExpired_1": &AnsweredWithCompress{Answered: 1},
+				Events: map[string]*StatWithCompress{
+					"cgrates.org:TestStatRemExpired_1": &StatWithCompress{Stat: 1},
 				},
 			},
 		},

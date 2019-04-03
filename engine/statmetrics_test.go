@@ -74,6 +74,101 @@ func TestASRGetStringValue(t *testing.T) {
 	}
 }
 
+func TestASRGetStringValue2(t *testing.T) {
+	asr, _ := NewASR(2, "", []string{})
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1"}
+	asr.AddEvent(ev)
+	asr.AddEvent(ev2)
+	if strVal := asr.GetStringValue(""); strVal != "50%" {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
+	asr.AddEvent(ev2)
+	if strVal := asr.GetStringValue(""); strVal != "33.33333%" {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
+	asr.AddEvent(ev4)
+	if strVal := asr.GetStringValue(""); strVal != "25%" {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
+	asr.RemEvent(ev4.ID)
+	asr.RemEvent(ev2.ID)
+	if strVal := asr.GetStringValue(""); strVal != "50%" {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
+	asr.RemEvent(ev2.ID)
+	asr.AddEvent(ev)
+	if strVal := asr.GetStringValue(""); strVal != "100%" {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
+}
+
+func TestASRGetStringValue3(t *testing.T) {
+	asr := &StatASR{Events: make(map[string]*StatWithCompress),
+		MinItems: 2, FilterIDs: []string{}}
+	expected := &StatASR{
+		Events: map[string]*StatWithCompress{
+			"EVENT_1": &StatWithCompress{Stat: 1, CompressFactor: 1},
+			"EVENT_2": &StatWithCompress{Stat: 0, CompressFactor: 1},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		Answered:  1,
+		Count:     2,
+	}
+	expected.GetStringValue("")
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1"}
+	asr.AddEvent(ev)
+	asr.AddEvent(ev2)
+	if strVal := asr.GetStringValue(""); strVal != "50%" {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
+	if !reflect.DeepEqual(*expected, *asr) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(asr))
+	}
+	asr.AddEvent(ev2)
+	asr.AddEvent(ev4)
+	v := expected.Events["EVENT_1"]
+	v.Stat = 0.5
+	v.CompressFactor = 2
+	v = expected.Events["EVENT_2"]
+	v.Stat = 0
+	v.CompressFactor = 2
+	expected.Count = 4
+	expected.val = nil
+	expected.GetStringValue("")
+	if strVal := asr.GetStringValue(""); strVal != "25%" {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
+	if !reflect.DeepEqual(*expected, *asr) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(asr))
+	}
+	asr.RemEvent(ev4.ID)
+	asr.RemEvent(ev2.ID)
+	v = expected.Events["EVENT_1"]
+	v.Stat = 1
+	v.CompressFactor = 1
+	v = expected.Events["EVENT_2"]
+	v.Stat = 0
+	v.CompressFactor = 1
+	expected.Count = 2
+	expected.val = nil
+	expected.GetStringValue("")
+	if strVal := asr.GetStringValue(""); strVal != "50%" {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
+	if !reflect.DeepEqual(*expected, *asr) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(asr))
+	}
+}
+
 func TestASRGetValue(t *testing.T) {
 	asr, _ := NewASR(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -183,6 +278,75 @@ func TestACDGetStringValue(t *testing.T) {
 	acd.RemEvent(ev5.ID)
 	if strVal := acd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong acd value: %s", strVal)
+	}
+}
+
+func TestACDGetStringValue2(t *testing.T) {
+	acd, _ := NewACD(2, "", []string{})
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.Usage: time.Duration(2 * time.Minute)}}
+	if err := acd.AddEvent(ev1); err != nil {
+		t.Error(err)
+	}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{"Usage": time.Duration(1 * time.Minute)}}
+	acd.AddEvent(ev2)
+	if strVal := acd.GetStringValue(""); strVal != "1m30s" {
+		t.Errorf("wrong acd value: %s", strVal)
+	}
+	acd.AddEvent(ev2)
+	acd.AddEvent(ev2)
+	if strVal := acd.GetStringValue(""); strVal != "1m15s" {
+		t.Errorf("wrong acd value: %s", strVal)
+	}
+	acd.RemEvent(ev2.ID)
+	if strVal := acd.GetStringValue(""); strVal != "1m20s" {
+		t.Errorf("wrong acd value: %s", strVal)
+	}
+}
+
+func TestACDGetStringValue3(t *testing.T) {
+	acd := &StatACD{Events: make(map[string]*DurationWithCompress), MinItems: 2, FilterIDs: []string{}}
+	expected := &StatACD{
+		Events: map[string]*DurationWithCompress{
+			"EVENT_1": &DurationWithCompress{Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
+			"EVENT_3": &DurationWithCompress{Duration: time.Minute, CompressFactor: 1},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		Count:     3,
+		Sum:       6 * time.Minute,
+	}
+	expected.GetStringValue("")
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.Usage: time.Duration(2 * time.Minute)}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.Usage: time.Duration(3 * time.Minute)}}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
+		Event: map[string]interface{}{"Usage": time.Duration(1 * time.Minute)}}
+	if err := acd.AddEvent(ev1); err != nil {
+		t.Error(err)
+	}
+	if err := acd.AddEvent(ev2); err != nil {
+		t.Error(err)
+	}
+	if err := acd.AddEvent(ev3); err != nil {
+		t.Error(err)
+	}
+	acd.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *acd) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acd))
+	}
+	v := expected.Events[ev1.ID]
+	v.CompressFactor = 1
+	expected.Count = 2
+	expected.Sum = 3*time.Minute + 30*time.Second
+	expected.val = nil
+	expected.GetStringValue("")
+	acd.RemEvent(ev1.ID)
+	acd.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *acd) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acd))
 	}
 }
 
@@ -356,6 +520,75 @@ func TestTCDGetStringValue(t *testing.T) {
 	}
 }
 
+func TestTCDGetStringValue2(t *testing.T) {
+	tcd, _ := NewTCD(2, "", []string{})
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.Usage: time.Duration(2 * time.Minute)}}
+	if err := tcd.AddEvent(ev1); err != nil {
+		t.Error(err)
+	}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{"Usage": time.Duration(1 * time.Minute)}}
+	tcd.AddEvent(ev2)
+	if strVal := tcd.GetStringValue(""); strVal != "3m0s" {
+		t.Errorf("wrong tcd value: %s", strVal)
+	}
+	tcd.AddEvent(ev2)
+	tcd.AddEvent(ev2)
+	if strVal := tcd.GetStringValue(""); strVal != "5m0s" {
+		t.Errorf("wrong tcd value: %s", strVal)
+	}
+	tcd.RemEvent(ev2.ID)
+	if strVal := tcd.GetStringValue(""); strVal != "4m0s" {
+		t.Errorf("wrong tcd value: %s", strVal)
+	}
+}
+
+func TestTCDGetStringValue3(t *testing.T) {
+	tcd := &StatTCD{Events: make(map[string]*DurationWithCompress), MinItems: 2, FilterIDs: []string{}}
+	expected := &StatTCD{
+		Events: map[string]*DurationWithCompress{
+			"EVENT_1": &DurationWithCompress{Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
+			"EVENT_3": &DurationWithCompress{Duration: time.Minute, CompressFactor: 1},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		Count:     3,
+		Sum:       6 * time.Minute,
+	}
+	expected.GetStringValue("")
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.Usage: time.Duration(2 * time.Minute)}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.Usage: time.Duration(3 * time.Minute)}}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
+		Event: map[string]interface{}{"Usage": time.Duration(1 * time.Minute)}}
+	if err := tcd.AddEvent(ev1); err != nil {
+		t.Error(err)
+	}
+	if err := tcd.AddEvent(ev2); err != nil {
+		t.Error(err)
+	}
+	if err := tcd.AddEvent(ev3); err != nil {
+		t.Error(err)
+	}
+	tcd.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *tcd) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcd))
+	}
+	v := expected.Events[ev1.ID]
+	v.CompressFactor = 1
+	expected.Count = 2
+	expected.Sum = 3*time.Minute + 30*time.Second
+	expected.val = nil
+	expected.GetStringValue("")
+	tcd.RemEvent(ev1.ID)
+	tcd.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *tcd) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcd))
+	}
+}
+
 func TestTCDGetFloat64Value(t *testing.T) {
 	tcd, _ := NewTCD(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -517,6 +750,75 @@ func TestACCGetStringValue(t *testing.T) {
 	}
 }
 
+func TestACCGetStringValue2(t *testing.T) {
+	acc, _ := NewACC(2, "", []string{})
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 12.3}}
+	if err := acc.AddEvent(ev1); err != nil {
+		t.Error(err)
+	}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{"Cost": 18.3}}
+	acc.AddEvent(ev2)
+	if strVal := acc.GetStringValue(""); strVal != "15.3" {
+		t.Errorf("wrong acc value: %s", strVal)
+	}
+	acc.AddEvent(ev2)
+	acc.AddEvent(ev2)
+	if strVal := acc.GetStringValue(""); strVal != "16.8" {
+		t.Errorf("wrong acc value: %s", strVal)
+	}
+	acc.RemEvent(ev2.ID)
+	if strVal := acc.GetStringValue(""); strVal != "16.3" {
+		t.Errorf("wrong acc value: %s", strVal)
+	}
+}
+
+func TestACCGetStringValue3(t *testing.T) {
+	acc := &StatACC{Events: make(map[string]*StatWithCompress), MinItems: 2, FilterIDs: []string{}}
+	expected := &StatACC{
+		Events: map[string]*StatWithCompress{
+			"EVENT_1": &StatWithCompress{Stat: 12.2, CompressFactor: 2},
+			"EVENT_3": &StatWithCompress{Stat: 18.3, CompressFactor: 1},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		Count:     3,
+		Sum:       42.7,
+	}
+	expected.GetStringValue("")
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 18.2}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 6.2}}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
+		Event: map[string]interface{}{"Cost": 18.3}}
+	if err := acc.AddEvent(ev1); err != nil {
+		t.Error(err)
+	}
+	if err := acc.AddEvent(ev2); err != nil {
+		t.Error(err)
+	}
+	if err := acc.AddEvent(ev3); err != nil {
+		t.Error(err)
+	}
+	acc.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *acc) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acc))
+	}
+	v := expected.Events[ev1.ID]
+	v.CompressFactor = 1
+	expected.Count = 2
+	expected.Sum = expected.Sum - 12.2
+	expected.val = nil
+	expected.GetStringValue("")
+	acc.RemEvent(ev1.ID)
+	acc.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *acc) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acc))
+	}
+}
+
 func TestACCGetValue(t *testing.T) {
 	acc, _ := NewACC(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -615,6 +917,75 @@ func TestTCCGetStringValue(t *testing.T) {
 	tcc.RemEvent(ev5.ID)
 	if strVal := tcc.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong tcc value: %s", strVal)
+	}
+}
+
+func TestTCCGetStringValue2(t *testing.T) {
+	tcc, _ := NewTCC(2, "", []string{})
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 12.3}}
+	if err := tcc.AddEvent(ev1); err != nil {
+		t.Error(err)
+	}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{"Cost": 18.3}}
+	tcc.AddEvent(ev2)
+	if strVal := tcc.GetStringValue(""); strVal != "30.6" {
+		t.Errorf("wrong tcc value: %s", strVal)
+	}
+	tcc.AddEvent(ev2)
+	tcc.AddEvent(ev2)
+	if strVal := tcc.GetStringValue(""); strVal != "67.2" {
+		t.Errorf("wrong tcc value: %s", strVal)
+	}
+	tcc.RemEvent(ev2.ID)
+	if strVal := tcc.GetStringValue(""); strVal != "48.9" {
+		t.Errorf("wrong tcc value: %s", strVal)
+	}
+}
+
+func TestTCCGetStringValue3(t *testing.T) {
+	tcc := &StatTCC{Events: make(map[string]*StatWithCompress), MinItems: 2, FilterIDs: []string{}}
+	expected := &StatTCC{
+		Events: map[string]*StatWithCompress{
+			"EVENT_1": &StatWithCompress{Stat: 12.2, CompressFactor: 2},
+			"EVENT_3": &StatWithCompress{Stat: 18.3, CompressFactor: 1},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		Count:     3,
+		Sum:       42.7,
+	}
+	expected.GetStringValue("")
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 18.2}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 6.2}}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
+		Event: map[string]interface{}{"Cost": 18.3}}
+	if err := tcc.AddEvent(ev1); err != nil {
+		t.Error(err)
+	}
+	if err := tcc.AddEvent(ev2); err != nil {
+		t.Error(err)
+	}
+	if err := tcc.AddEvent(ev3); err != nil {
+		t.Error(err)
+	}
+	tcc.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *tcc) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcc))
+	}
+	v := expected.Events[ev1.ID]
+	v.CompressFactor = 1
+	expected.Count = 2
+	expected.Sum = expected.Sum - 12.2
+	expected.val = nil
+	expected.GetStringValue("")
+	tcc.RemEvent(ev1.ID)
+	tcc.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *tcc) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcc))
 	}
 }
 
@@ -729,6 +1100,75 @@ func TestPDDGetStringValue(t *testing.T) {
 	pdd.RemEvent(ev5.ID)
 	if strVal := pdd.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong pdd value: %s", strVal)
+	}
+}
+
+func TestPDDGetStringValue2(t *testing.T) {
+	pdd, _ := NewPDD(2, "", []string{})
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.PDD: time.Duration(2 * time.Minute)}}
+	if err := pdd.AddEvent(ev1); err != nil {
+		t.Error(err)
+	}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{utils.PDD: time.Duration(1 * time.Minute)}}
+	pdd.AddEvent(ev2)
+	if strVal := pdd.GetStringValue(""); strVal != "1m30s" {
+		t.Errorf("wrong pdd value: %s", strVal)
+	}
+	pdd.AddEvent(ev2)
+	pdd.AddEvent(ev2)
+	if strVal := pdd.GetStringValue(""); strVal != "1m15s" {
+		t.Errorf("wrong pdd value: %s", strVal)
+	}
+	pdd.RemEvent(ev2.ID)
+	if strVal := pdd.GetStringValue(""); strVal != "1m20s" {
+		t.Errorf("wrong pdd value: %s", strVal)
+	}
+}
+
+func TestPDDGetStringValue3(t *testing.T) {
+	pdd := &StatPDD{Events: make(map[string]*DurationWithCompress), MinItems: 2, FilterIDs: []string{}}
+	expected := &StatPDD{
+		Events: map[string]*DurationWithCompress{
+			"EVENT_1": &DurationWithCompress{Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
+			"EVENT_3": &DurationWithCompress{Duration: time.Minute, CompressFactor: 1},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		Count:     3,
+		Sum:       6 * time.Minute,
+	}
+	expected.GetStringValue("")
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.PDD: time.Duration(2 * time.Minute)}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.PDD: time.Duration(3 * time.Minute)}}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
+		Event: map[string]interface{}{utils.PDD: time.Duration(1 * time.Minute)}}
+	if err := pdd.AddEvent(ev1); err != nil {
+		t.Error(err)
+	}
+	if err := pdd.AddEvent(ev2); err != nil {
+		t.Error(err)
+	}
+	if err := pdd.AddEvent(ev3); err != nil {
+		t.Error(err)
+	}
+	pdd.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *pdd) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(pdd))
+	}
+	v := expected.Events[ev1.ID]
+	v.CompressFactor = 1
+	expected.Count = 2
+	expected.Sum = 3*time.Minute + 30*time.Second
+	expected.val = nil
+	expected.GetStringValue("")
+	pdd.RemEvent(ev1.ID)
+	pdd.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *pdd) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(pdd))
 	}
 }
 
@@ -1066,6 +1506,76 @@ func TestStatSumGetStringValue(t *testing.T) {
 	}
 }
 
+func TestStatSumGetStringValue2(t *testing.T) {
+	statSum, _ := NewStatSum(2, "Cost", []string{})
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 12.3}}
+	if err := statSum.AddEvent(ev1); err != nil {
+		t.Error(err)
+	}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{"Cost": 18.3}}
+	statSum.AddEvent(ev2)
+	if strVal := statSum.GetStringValue(""); strVal != "30.6" {
+		t.Errorf("wrong statSum value: %s", strVal)
+	}
+	statSum.AddEvent(ev2)
+	statSum.AddEvent(ev2)
+	if strVal := statSum.GetStringValue(""); strVal != "67.2" {
+		t.Errorf("wrong statSum value: %s", strVal)
+	}
+	statSum.RemEvent(ev2.ID)
+	if strVal := statSum.GetStringValue(""); strVal != "48.9" {
+		t.Errorf("wrong statSum value: %s", strVal)
+	}
+}
+
+func TestStatSumGetStringValue3(t *testing.T) {
+	statSum := &StatSum{Events: make(map[string]*StatWithCompress), MinItems: 2, FilterIDs: []string{}, FieldName: "Cost"}
+	expected := &StatSum{
+		Events: map[string]*StatWithCompress{
+			"EVENT_1": &StatWithCompress{Stat: 12.2, CompressFactor: 2},
+			"EVENT_3": &StatWithCompress{Stat: 18.3, CompressFactor: 1},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		FieldName: "Cost",
+		Count:     3,
+		Sum:       42.7,
+	}
+	expected.GetStringValue("")
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 18.2}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 6.2}}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
+		Event: map[string]interface{}{"Cost": 18.3}}
+	if err := statSum.AddEvent(ev1); err != nil {
+		t.Error(err)
+	}
+	if err := statSum.AddEvent(ev2); err != nil {
+		t.Error(err)
+	}
+	if err := statSum.AddEvent(ev3); err != nil {
+		t.Error(err)
+	}
+	statSum.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *statSum) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(statSum))
+	}
+	v := expected.Events[ev1.ID]
+	v.CompressFactor = 1
+	expected.Count = 2
+	expected.Sum = expected.Sum - 12.2
+	expected.val = nil
+	expected.GetStringValue("")
+	statSum.RemEvent(ev1.ID)
+	statSum.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *statSum) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(statSum))
+	}
+}
+
 func TestStatAverageGetFloat64Value(t *testing.T) {
 	statAvg, _ := NewStatAverage(2, "Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -1169,6 +1679,76 @@ func TestStatAverageGetStringValue(t *testing.T) {
 	statAvg.RemEvent(ev3.ID)
 	if strVal := statAvg.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong statAvg value: %s", strVal)
+	}
+}
+
+func TestStatAverageGetStringValue2(t *testing.T) {
+	statAvg, _ := NewStatAverage(2, "Cost", []string{})
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 12.3}}
+	if err := statAvg.AddEvent(ev1); err != nil {
+		t.Error(err)
+	}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{"Cost": 18.3}}
+	statAvg.AddEvent(ev2)
+	if strVal := statAvg.GetStringValue(""); strVal != "15.3" {
+		t.Errorf("wrong statAvg value: %s", strVal)
+	}
+	statAvg.AddEvent(ev2)
+	statAvg.AddEvent(ev2)
+	if strVal := statAvg.GetStringValue(""); strVal != "16.8" {
+		t.Errorf("wrong statAvg value: %s", strVal)
+	}
+	statAvg.RemEvent(ev2.ID)
+	if strVal := statAvg.GetStringValue(""); strVal != "16.3" {
+		t.Errorf("wrong statAvg value: %s", strVal)
+	}
+}
+
+func TestStatAverageGetStringValue3(t *testing.T) {
+	statAvg := &StatAverage{Events: make(map[string]*StatWithCompress), MinItems: 2, FilterIDs: []string{}, FieldName: "Cost"}
+	expected := &StatAverage{
+		Events: map[string]*StatWithCompress{
+			"EVENT_1": &StatWithCompress{Stat: 12.2, CompressFactor: 2},
+			"EVENT_3": &StatWithCompress{Stat: 18.3, CompressFactor: 1},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		FieldName: "Cost",
+		Count:     3,
+		Sum:       42.7,
+	}
+	expected.GetStringValue("")
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 18.2}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 6.2}}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
+		Event: map[string]interface{}{"Cost": 18.3}}
+	if err := statAvg.AddEvent(ev1); err != nil {
+		t.Error(err)
+	}
+	if err := statAvg.AddEvent(ev2); err != nil {
+		t.Error(err)
+	}
+	if err := statAvg.AddEvent(ev3); err != nil {
+		t.Error(err)
+	}
+	statAvg.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *statAvg) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(statAvg))
+	}
+	v := expected.Events[ev1.ID]
+	v.CompressFactor = 1
+	expected.Count = 2
+	expected.Sum = expected.Sum - 12.2
+	expected.val = nil
+	expected.GetStringValue("")
+	statAvg.RemEvent(ev1.ID)
+	statAvg.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *statAvg) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(statAvg))
 	}
 }
 
@@ -1287,7 +1867,7 @@ func TestASRMarshal(t *testing.T) {
 			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
 	asr.AddEvent(ev)
 	var nasr StatASR
-	expected := []byte(`{"FilterIDs":["*string:Account:1001"],"Answered":1,"Count":1,"Events":{"EVENT_1":{"Answered":1,"CompressFactor":0}},"MinItems":2}`)
+	expected := []byte(`{"FilterIDs":["*string:Account:1001"],"Answered":1,"Count":1,"Events":{"EVENT_1":{"Stat":1,"CompressFactor":1}},"MinItems":2}`)
 	if b, err := asr.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1307,7 +1887,7 @@ func TestACDMarshal(t *testing.T) {
 			"Usage":      time.Duration(10 * time.Second)}}
 	acd.AddEvent(ev)
 	var nacd StatACD
-	expected := []byte(`{"FilterIDs":[],"Sum":10000000000,"Count":1,"Events":{"EVENT_1":{"Duration":10000000000,"CompressFactor":0}},"MinItems":2}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":10000000000,"Count":1,"Events":{"EVENT_1":{"Duration":10000000000,"CompressFactor":1}},"MinItems":2}`)
 	if b, err := acd.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1327,7 +1907,7 @@ func TestTCDMarshal(t *testing.T) {
 			"Usage":      time.Duration(10 * time.Second)}}
 	tcd.AddEvent(ev)
 	var ntcd StatTCD
-	expected := []byte(`{"FilterIDs":[],"Sum":10000000000,"Count":1,"Events":{"EVENT_1":{"Duration":10000000000,"CompressFactor":0}},"MinItems":2}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":10000000000,"Count":1,"Events":{"EVENT_1":{"Duration":10000000000,"CompressFactor":1}},"MinItems":2}`)
 	if b, err := tcd.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1347,7 +1927,7 @@ func TestACCMarshal(t *testing.T) {
 			"Cost":       "12.3"}}
 	acc.AddEvent(ev)
 	var nacc StatACC
-	expected := []byte(`{"FilterIDs":[],"Sum":12.3,"Count":1,"Events":{"EVENT_1":{"Stat":12.3,"CompressFactor":0}},"MinItems":2}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":12.3,"Count":1,"Events":{"EVENT_1":{"Stat":12.3,"CompressFactor":1}},"MinItems":2}`)
 	if b, err := acc.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1367,7 +1947,7 @@ func TestTCCMarshal(t *testing.T) {
 			"Cost":       "12.3"}}
 	tcc.AddEvent(ev)
 	var ntcc StatTCC
-	expected := []byte(`{"FilterIDs":[],"Sum":12.3,"Count":1,"Events":{"EVENT_1":{"Stat":12.3,"CompressFactor":0}},"MinItems":2}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":12.3,"Count":1,"Events":{"EVENT_1":{"Stat":12.3,"CompressFactor":1}},"MinItems":2}`)
 	if b, err := tcc.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1388,7 +1968,7 @@ func TestPDDMarshal(t *testing.T) {
 			utils.PDD:    time.Duration(5 * time.Second)}}
 	pdd.AddEvent(ev)
 	var ntdd StatPDD
-	expected := []byte(`{"FilterIDs":[],"Sum":5000000000,"Count":1,"Events":{"EVENT_1":{"Duration":5000000000,"CompressFactor":0}},"MinItems":2}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":5000000000,"Count":1,"Events":{"EVENT_1":{"Duration":5000000000,"CompressFactor":1}},"MinItems":2}`)
 	if b, err := pdd.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1433,7 +2013,7 @@ func TestStatSumMarshal(t *testing.T) {
 			utils.Destination: "1002"}}
 	statSum.AddEvent(ev)
 	var nstatSum StatSum
-	expected := []byte(`{"FilterIDs":[],"Sum":20,"Count":1,"Events":{"EVENT_1":{"Stat":20,"CompressFactor":0}},"MinItems":2,"FieldName":"Cost"}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":20,"Count":1,"Events":{"EVENT_1":{"Stat":20,"CompressFactor":1}},"MinItems":2,"FieldName":"Cost"}`)
 	if b, err := statSum.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -1456,7 +2036,7 @@ func TestStatAverageMarshal(t *testing.T) {
 			utils.Destination: "1002"}}
 	statAvg.AddEvent(ev)
 	var nstatAvg StatAverage
-	expected := []byte(`{"FilterIDs":[],"Sum":20,"Count":1,"Events":{"EVENT_1":{"Stat":20,"CompressFactor":0}},"MinItems":2,"FieldName":"Cost"}`)
+	expected := []byte(`{"FilterIDs":[],"Sum":20,"Count":1,"Events":{"EVENT_1":{"Stat":20,"CompressFactor":1}},"MinItems":2,"FieldName":"Cost"}`)
 	if b, err := statAvg.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {

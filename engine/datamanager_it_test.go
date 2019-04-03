@@ -85,20 +85,19 @@ func testDMitCRUDStatQueue(t *testing.T) {
 	sq := &StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "testDMitCRUDStatQueue",
-		SQItems: []struct {
-			EventID    string     // Bounded to the original StatEvent
-			ExpiryTime *time.Time // Used to auto-expire events
-		}{{EventID: "cgrates.org:ev1", ExpiryTime: eTime},
+		SQItems: []SQItem{
+			{EventID: "cgrates.org:ev1", ExpiryTime: eTime},
 			{EventID: "cgrates.org:ev2", ExpiryTime: eTime},
-			{EventID: "cgrates.org:ev3", ExpiryTime: eTime}},
+			{EventID: "cgrates.org:ev3", ExpiryTime: eTime},
+		},
 		SQMetrics: map[string]StatMetric{
 			utils.MetaASR: &StatASR{
 				Answered: 2,
 				Count:    3,
-				Events: map[string]*AnsweredWithCompress{
-					"cgrates.org:ev1": &AnsweredWithCompress{Answered: 1},
-					"cgrates.org:ev2": &AnsweredWithCompress{Answered: 1},
-					"cgrates.org:ev3": &AnsweredWithCompress{Answered: 0},
+				Events: map[string]*StatWithCompress{
+					"cgrates.org:ev1": &StatWithCompress{Stat: 1},
+					"cgrates.org:ev2": &StatWithCompress{Stat: 1},
+					"cgrates.org:ev3": &StatWithCompress{Stat: 0},
 				},
 			},
 		},

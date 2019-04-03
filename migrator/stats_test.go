@@ -154,14 +154,9 @@ func TestRemakeQueue(t *testing.T) {
 	sq := &engine.StatQueue{
 		Tenant: "cgrates.org",
 		ID:     "StatsID",
-		SQItems: []struct {
-			EventID    string
-			ExpiryTime *time.Time
-		}{
-			{
-				EventID: "ev1",
-			},
-		},
+		SQItems: []engine.SQItem{{
+			EventID: "ev1",
+		}},
 		SQMetrics: map[string]engine.StatMetric{
 			"*tcc":          nil,
 			"*sum:Usage":    nil,
