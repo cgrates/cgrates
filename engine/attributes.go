@@ -169,16 +169,34 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 				continue
 			}
 		}
-		substitute, err := attribute.Substitute.ParseEvent(args.Event)
+		var substitute string
+		var err error
+		switch attribute.Type {
+		case utils.META_CONSTANT:
+			substitute, err = attribute.Substitute.ParseValue(utils.EmptyString)
+		case utils.MetaVariable, utils.META_COMPOSED:
+			substitute, err = attribute.Substitute.ParseEvent(args.Event)
+		default: // backwards compatible in case that Type is empty
+			substitute, err = attribute.Substitute.ParseEvent(args.Event)
+		}
+
 		if err != nil {
 			return nil, err
 		}
+		rply.AlteredFields = append(rply.AlteredFields, attribute.FieldName)
 		if substitute == utils.META_NONE {
 			delete(rply.CGREvent.Event, attribute.FieldName)
-		} else {
-			rply.CGREvent.Event[attribute.FieldName] = substitute
+			continue
 		}
-		rply.AlteredFields = append(rply.AlteredFields, attribute.FieldName)
+		if attribute.Type == utils.META_COMPOSED {
+			evStrVal, err := utils.IfaceAsString(rply.CGREvent.Event[attribute.FieldName])
+			if err != nil {
+				return nil, err
+			}
+			substitute = evStrVal + substitute
+		}
+		rply.CGREvent.Event[attribute.FieldName] = substitute
+
 	}
 	return
 }

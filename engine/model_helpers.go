@@ -2070,6 +2070,7 @@ func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 			}
 			th.Attributes = append(th.Attributes, &utils.TPAttribute{
 				FilterIDs:  filterIDs,
+				Type:       tp.Type,
 				FieldName:  tp.FieldName,
 				Substitute: tp.Substitute,
 			})
@@ -2135,6 +2136,7 @@ func APItoModelTPAttribute(th *utils.TPAttributeProfile) (mdls TPAttributes) {
 		}
 		mdl.FieldName = reqAttribute.FieldName
 		mdl.Substitute = reqAttribute.Substitute
+		mdl.Type = reqAttribute.Type
 		mdls = append(mdls, mdl)
 	}
 	return
@@ -2164,6 +2166,7 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 		attrPrf.Attributes[i] = &Attribute{
 			FilterIDs:  reqAttr.FilterIDs,
 			FieldName:  reqAttr.FieldName,
+			Type:       reqAttr.Type,
 			Substitute: sbstPrsr,
 		}
 	}

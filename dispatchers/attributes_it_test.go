@@ -120,6 +120,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 			{
 				FilterIDs:  []string{},
 				FieldName:  "Password",
+				Type:       utils.META_CONSTANT,
 				Substitute: config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
 			},
 		},
@@ -295,6 +296,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 			{
 				FilterIDs:  []string{},
 				FieldName:  "Password",
+				Type:       utils.META_CONSTANT,
 				Substitute: config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
 			},
 		},
@@ -386,6 +388,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 			{
 				FilterIDs:  []string{},
 				FieldName:  "Password",
+				Type:       utils.META_CONSTANT,
 				Substitute: config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
 			},
 		},
