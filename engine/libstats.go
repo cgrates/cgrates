@@ -56,12 +56,9 @@ type MetricWithFilters struct {
 // NewStoredStatQueue initiates a StoredStatQueue out of StatQueue
 func NewStoredStatQueue(sq *StatQueue, ms Marshaler) (sSQ *StoredStatQueue, err error) {
 	sSQ = &StoredStatQueue{
-		Tenant: sq.Tenant,
-		ID:     sq.ID,
-		SQItems: make([]struct {
-			EventID    string
-			ExpiryTime *time.Time
-		}, len(sq.SQItems)),
+		Tenant:    sq.Tenant,
+		ID:        sq.ID,
+		SQItems:   make([]SQItem, len(sq.SQItems)),
 		SQMetrics: make(map[string][]byte, len(sq.SQMetrics)),
 		MinItems:  sq.MinItems,
 	}
@@ -80,12 +77,9 @@ func NewStoredStatQueue(sq *StatQueue, ms Marshaler) (sSQ *StoredStatQueue, err 
 
 // StoredStatQueue differs from StatQueue due to serialization of SQMetrics
 type StoredStatQueue struct {
-	Tenant  string
-	ID      string
-	SQItems []struct {
-		EventID    string     // Bounded to the original utils.CGREvent
-		ExpiryTime *time.Time // Used to auto-expire events
-	}
+	Tenant    string
+	ID        string
+	SQItems   []SQItem
 	SQMetrics map[string][]byte
 	MinItems  int
 }
@@ -98,12 +92,9 @@ func (ssq *StoredStatQueue) SqID() string {
 // AsStatQueue converts into StatQueue unmarshaling SQMetrics
 func (ssq *StoredStatQueue) AsStatQueue(ms Marshaler) (sq *StatQueue, err error) {
 	sq = &StatQueue{
-		Tenant: ssq.Tenant,
-		ID:     ssq.ID,
-		SQItems: make([]struct {
-			EventID    string
-			ExpiryTime *time.Time
-		}, len(ssq.SQItems)),
+		Tenant:    ssq.Tenant,
+		ID:        ssq.ID,
+		SQItems:   make([]SQItem, len(ssq.SQItems)),
 		SQMetrics: make(map[string]StatMetric, len(ssq.SQMetrics)),
 		MinItems:  ssq.MinItems,
 	}
@@ -122,20 +113,22 @@ func (ssq *StoredStatQueue) AsStatQueue(ms Marshaler) (sq *StatQueue, err error)
 	return
 }
 
+type SQItem struct {
+	EventID    string     // Bounded to the original utils.CGREvent
+	ExpiryTime *time.Time // Used to auto-expire events
+}
+
 // StatQueue represents an individual stats instance
 type StatQueue struct {
 	sync.RWMutex // protect the elements from within
 	Tenant       string
 	ID           string
-	SQItems      []struct {
-		EventID    string     // Bounded to the original utils.CGREvent
-		ExpiryTime *time.Time // Used to auto-expire events
-	}
-	SQMetrics map[string]StatMetric
-	MinItems  int
-	sqPrfl    *StatQueueProfile
-	dirty     *bool          // needs save
-	ttl       *time.Duration // timeToLeave, picked on each init
+	SQItems      []SQItem
+	SQMetrics    map[string]StatMetric
+	MinItems     int
+	sqPrfl       *StatQueueProfile
+	dirty        *bool          // needs save
+	ttl          *time.Duration // timeToLeave, picked on each init
 }
 
 // SqID will compose the unique identifier for the StatQueue out of Tenant and ID
