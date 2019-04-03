@@ -28,6 +28,7 @@ import (
 type Attribute struct {
 	FilterIDs  []string
 	FieldName  string
+	Type       string
 	Substitute config.RSRParsers
 }
 

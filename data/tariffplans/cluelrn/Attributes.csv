@@ -1,8 +1,8 @@
-#Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,FieldName,Substitute,Blocker,Weight
-cgrates.org,LRN_Dst3125650565,lrn,*string:~Destination:3125650565,,,Destination,13128543000,false,10
-cgrates.org,LRN_Dst3125650565,,,,,OriginalDestination,3125650565,false,10
-cgrates.org,LRN_LATA_Dst13128543000,lrn,*string:~Destination:13128543000;*rsr::~OriginalDestination(!^$),,,DestinationLATA,358,false,20
-cgrates.org,LRN_LATA_Cli9174269000,lrn,*string:~Account:9174269000;*rsr::~DestinationLATA(!^$),,,CallerLATA,132,false,30
-cgrates.org,LRN_JURISDICTION_NY,lrn,FLTR_INTRALATA_NEWYORK,,,LRNJurisdiction,INTRA,false,50
-cgrates.org,LRN_JURISDICTION_IL,lrn,FLTR_INTRALATA_ILLINOIS,,,LRNJurisdiction,INTRA,false,50
-cgrates.org,LRN_JURISDICTION_INTER,lrn,*string:~Destination:13128543000;*rsr::~CallerLATA(!^$),,,LRNJurisdiction,INTER,false,40
+#Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,FieldName,Type,Substitute,Blocker,Weight
+cgrates.org,LRN_Dst3125650565,lrn,*string:~Destination:3125650565,,,Destination,*constant,13128543000,false,10
+cgrates.org,LRN_Dst3125650565,,,,,OriginalDestination,*constant,3125650565,false,10
+cgrates.org,LRN_LATA_Dst13128543000,lrn,*string:~Destination:13128543000;*rsr::~OriginalDestination(!^$),,,DestinationLATA,*constant,358,false,20
+cgrates.org,LRN_LATA_Cli9174269000,lrn,*string:~Account:9174269000;*rsr::~DestinationLATA(!^$),,,CallerLATA,*constant,132,false,30
+cgrates.org,LRN_JURISDICTION_NY,lrn,FLTR_INTRALATA_NEWYORK,,,LRNJurisdiction,*constant,INTRA,false,50
+cgrates.org,LRN_JURISDICTION_IL,lrn,FLTR_INTRALATA_ILLINOIS,,,LRNJurisdiction,*constant,INTRA,false,50
+cgrates.org,LRN_JURISDICTION_INTER,lrn,*string:~Destination:13128543000;*rsr::~CallerLATA(!^$),,,LRNJurisdiction,*constant,INTER,false,40
