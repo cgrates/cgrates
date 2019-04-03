@@ -123,7 +123,7 @@ func (at *ActionTrigger) Match(a *Action) bool {
 	if a.Balance.Type != nil && a.Balance.GetType() != at.Balance.GetType() {
 		return false
 	}
-	var thresholdType bool
+	thresholdType := true // by default we consider that we don't have ExtraParameters
 	if a.ExtraParameters != "" {
 		t := struct {
 			GroupID       string
