@@ -126,4 +126,6 @@ imports:
   subpackages: 
   - aws
   - service
+- name: github.com/miekg/dns
+  version: 73601d4aed9d844322611759d7f3619110b7c88e
 testImports: []

@@ -66,3 +66,4 @@ import:
   subpackages:
   - aws
   - service
+- package: github.com/miekg/dns
