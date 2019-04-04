@@ -19,6 +19,7 @@ package engine
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -215,6 +216,109 @@ func TestASRGetValue(t *testing.T) {
 	}
 }
 
+func TestASRCompress(t *testing.T) {
+	asr := &StatASR{Events: make(map[string]*StatWithCompress),
+		MinItems: 2, FilterIDs: []string{}}
+	expected := &StatASR{
+		Events: map[string]*StatWithCompress{
+			"EVENT_1": &StatWithCompress{Stat: 1, CompressFactor: 1},
+			"EVENT_2": &StatWithCompress{Stat: 0, CompressFactor: 1},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		Answered:  1,
+		Count:     2,
+	}
+	expected.GetStringValue("")
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1"}
+	asr.AddEvent(ev)
+	asr.AddEvent(ev2)
+	expIDs := []string{"EVENT_1", "EVENT_2"}
+	rply := asr.Compress(10, "EVENT_3")
+	sort.Strings(rply)
+	if !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	if strVal := asr.GetStringValue(""); strVal != "50%" {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
+	if !reflect.DeepEqual(*expected, *asr) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(asr))
+	}
+	expected = &StatASR{
+		Events: map[string]*StatWithCompress{
+			"EVENT_3": &StatWithCompress{Stat: 0.5, CompressFactor: 2},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		Answered:  1,
+		Count:     2,
+	}
+	expected.GetStringValue("")
+	expIDs = []string{"EVENT_3"}
+	if rply := asr.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	if strVal := asr.GetStringValue(""); strVal != "50%" {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
+	if !reflect.DeepEqual(*expected, *asr) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(asr))
+	}
+	asr.AddEvent(ev2)
+	asr.AddEvent(ev4)
+	v := expected.Events["EVENT_3"]
+	v.Stat = 0.25
+	v.CompressFactor = 4
+	expected.Count = 4
+	expected.val = nil
+	expected.GetStringValue("")
+	if rply := asr.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	if strVal := asr.GetStringValue(""); strVal != "25%" {
+		t.Errorf("wrong asr value: %s", strVal)
+	}
+	if !reflect.DeepEqual(*expected, *asr) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(asr))
+	}
+}
+
+func TestASRGetCompressFactor(t *testing.T) {
+	CF := make(map[string]int)
+	expectedCF := map[string]int{
+		"EVENT_1": 1,
+		"EVENT_2": 1,
+	}
+	asr, _ := NewASR(2, "", []string{})
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{
+			"AnswerTime": time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1"}
+	asr.AddEvent(ev)
+	asr.AddEvent(ev2)
+	if CF = asr.GetCompressFactor(make(map[string]int)); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+	asr.AddEvent(ev2)
+	expectedCF["EVENT_2"] = 2
+	if CF = asr.GetCompressFactor(make(map[string]int)); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+	asr.AddEvent(ev4)
+	expectedCF["EVENT_2"] = 3
+	expectedCF["EVENT_1"] = 2
+	CF["EVENT_2"] = 3
+	if CF = asr.GetCompressFactor(CF); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+}
+
 func TestACDGetStringValue(t *testing.T) {
 	acd, _ := NewACD(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -347,6 +451,92 @@ func TestACDGetStringValue3(t *testing.T) {
 	acd.GetStringValue("")
 	if !reflect.DeepEqual(*expected, *acd) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acd))
+	}
+}
+
+func TestACDCompress(t *testing.T) {
+	acd := &StatACD{Events: make(map[string]*DurationWithCompress), MinItems: 2, FilterIDs: []string{}}
+	expected := &StatACD{
+		Events: map[string]*DurationWithCompress{
+			"EVENT_1": &DurationWithCompress{Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
+			"EVENT_3": &DurationWithCompress{Duration: time.Minute, CompressFactor: 1},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		Count:     3,
+		Sum:       6 * time.Minute,
+	}
+	expected.GetStringValue("")
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.Usage: time.Duration(2 * time.Minute)}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.Usage: time.Duration(3 * time.Minute)}}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
+		Event: map[string]interface{}{"Usage": time.Duration(1 * time.Minute)}}
+	acd.AddEvent(ev1)
+	acd.AddEvent(ev2)
+	acd.AddEvent(ev3)
+	expIDs := []string{"EVENT_1", "EVENT_3"}
+	rply := acd.Compress(10, "EVENT_3")
+	sort.Strings(rply)
+	if !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	acd.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *acd) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acd))
+	}
+	expected = &StatACD{
+		Events: map[string]*DurationWithCompress{
+			"EVENT_3": &DurationWithCompress{Duration: 2 * time.Minute, CompressFactor: 3},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		Count:     3,
+		Sum:       6 * time.Minute,
+	}
+	expected.GetStringValue("")
+
+	expIDs = []string{"EVENT_3"}
+	if rply := acd.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	acd.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *acd) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acd))
+	}
+}
+
+func TestACDGetCompressFactor(t *testing.T) {
+	CF := make(map[string]int)
+	expectedCF := map[string]int{
+		"EVENT_1": 1,
+		"EVENT_2": 1,
+	}
+	acd, _ := NewACD(2, "", []string{})
+
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Usage": time.Duration(1 * time.Minute)}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{"Usage": time.Duration(1 * time.Minute)}}
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{utils.Usage: time.Duration(2 * time.Minute)}}
+
+	acd.AddEvent(ev)
+	acd.AddEvent(ev2)
+	if CF = acd.GetCompressFactor(make(map[string]int)); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+	acd.AddEvent(ev2)
+	expectedCF["EVENT_2"] = 2
+	if CF = acd.GetCompressFactor(make(map[string]int)); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+	acd.AddEvent(ev4)
+	expectedCF["EVENT_2"] = 3
+	CF["EVENT_2"] = 3
+	if CF = acd.GetCompressFactor(CF); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
 	}
 }
 
@@ -698,6 +888,92 @@ func TestTCDGetValue(t *testing.T) {
 	}
 }
 
+func TestTCDCompress(t *testing.T) {
+	tcd := &StatTCD{Events: make(map[string]*DurationWithCompress), MinItems: 2, FilterIDs: []string{}}
+	expected := &StatTCD{
+		Events: map[string]*DurationWithCompress{
+			"EVENT_1": &DurationWithCompress{Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
+			"EVENT_3": &DurationWithCompress{Duration: time.Minute, CompressFactor: 1},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		Count:     3,
+		Sum:       6 * time.Minute,
+	}
+	expected.GetStringValue("")
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.Usage: time.Duration(2 * time.Minute)}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.Usage: time.Duration(3 * time.Minute)}}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
+		Event: map[string]interface{}{"Usage": time.Duration(1 * time.Minute)}}
+	tcd.AddEvent(ev1)
+	tcd.AddEvent(ev2)
+	tcd.AddEvent(ev3)
+	expIDs := []string{"EVENT_1", "EVENT_3"}
+	rply := tcd.Compress(10, "EVENT_3")
+	sort.Strings(rply)
+	if !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	tcd.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *tcd) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcd))
+	}
+	expected = &StatTCD{
+		Events: map[string]*DurationWithCompress{
+			"EVENT_3": &DurationWithCompress{Duration: 2 * time.Minute, CompressFactor: 3},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		Count:     3,
+		Sum:       6 * time.Minute,
+	}
+	expected.GetStringValue("")
+
+	expIDs = []string{"EVENT_3"}
+	if rply := tcd.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	tcd.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *tcd) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcd))
+	}
+}
+
+func TestTCDGetCompressFactor(t *testing.T) {
+	CF := make(map[string]int)
+	expectedCF := map[string]int{
+		"EVENT_1": 1,
+		"EVENT_2": 1,
+	}
+	tcd, _ := NewTCD(2, "", []string{})
+
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Usage": time.Duration(1 * time.Minute)}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{"Usage": time.Duration(1 * time.Minute)}}
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{utils.Usage: time.Duration(2 * time.Minute)}}
+
+	tcd.AddEvent(ev)
+	tcd.AddEvent(ev2)
+	if CF = tcd.GetCompressFactor(make(map[string]int)); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+	tcd.AddEvent(ev2)
+	expectedCF["EVENT_2"] = 2
+	if CF = tcd.GetCompressFactor(make(map[string]int)); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+	tcd.AddEvent(ev4)
+	expectedCF["EVENT_2"] = 3
+	CF["EVENT_2"] = 3
+	if CF = tcd.GetCompressFactor(CF); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+}
+
 func TestACCGetStringValue(t *testing.T) {
 	acc, _ := NewACC(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -865,6 +1141,106 @@ func TestACCGetValue(t *testing.T) {
 	acc.RemEvent(ev5.ID)
 	if strVal := acc.GetValue(); strVal != -1.0 {
 		t.Errorf("wrong acc value: %v", strVal)
+	}
+}
+
+func TestACCCompress(t *testing.T) {
+	acc := &StatACC{Events: make(map[string]*StatWithCompress),
+		MinItems: 2, FilterIDs: []string{}}
+	expected := &StatACC{
+		Events: map[string]*StatWithCompress{
+			"EVENT_1": &StatWithCompress{Stat: 18.2, CompressFactor: 1},
+			"EVENT_2": &StatWithCompress{Stat: 6.2, CompressFactor: 1},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		Sum:       24.4,
+		Count:     2,
+	}
+	expected.GetStringValue("")
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 18.2}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{"Cost": 6.2}}
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 18.3}}
+	acc.AddEvent(ev)
+	acc.AddEvent(ev2)
+	expIDs := []string{"EVENT_1", "EVENT_2"}
+	rply := acc.Compress(10, "EVENT_3")
+	sort.Strings(rply)
+	if !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	acc.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *acc) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acc))
+	}
+	expected = &StatACC{
+		Events: map[string]*StatWithCompress{
+			"EVENT_3": &StatWithCompress{Stat: 12.2, CompressFactor: 2},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		Sum:       24.4,
+		Count:     2,
+	}
+	expected.GetStringValue("")
+	expIDs = []string{"EVENT_3"}
+	if rply := acc.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	acc.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *acc) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acc))
+	}
+	acc.AddEvent(ev2)
+	acc.AddEvent(ev4)
+	v := expected.Events["EVENT_3"]
+	v.Stat = 12.225
+	v.CompressFactor = 4
+	expected.Count = 4
+	expected.Sum = 48.9
+	expected.val = nil
+	expected.GetStringValue("")
+	if rply := acc.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	acc.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *acc) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(acc))
+	}
+}
+
+func TestACCGetCompressFactor(t *testing.T) {
+	CF := make(map[string]int)
+	expectedCF := map[string]int{
+		"EVENT_1": 1,
+		"EVENT_2": 1,
+	}
+	acc, _ := NewACC(2, "", []string{})
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 18.2}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{"Cost": 18.2}}
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 18.2}}
+	acc.AddEvent(ev)
+	acc.AddEvent(ev2)
+	if CF = acc.GetCompressFactor(make(map[string]int)); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+	acc.AddEvent(ev2)
+	expectedCF["EVENT_2"] = 2
+	if CF = acc.GetCompressFactor(make(map[string]int)); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+	acc.AddEvent(ev4)
+	expectedCF["EVENT_2"] = 3
+	expectedCF["EVENT_1"] = 2
+	CF["EVENT_2"] = 3
+	if CF = acc.GetCompressFactor(CF); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
 	}
 }
 
@@ -1038,6 +1414,106 @@ func TestTCCGetValue(t *testing.T) {
 	tcc.RemEvent(ev5.ID)
 	if strVal := tcc.GetValue(); strVal != -1.0 {
 		t.Errorf("wrong tcc value: %v", strVal)
+	}
+}
+
+func TestTCCCompress(t *testing.T) {
+	tcc := &StatTCC{Events: make(map[string]*StatWithCompress),
+		MinItems: 2, FilterIDs: []string{}}
+	expected := &StatTCC{
+		Events: map[string]*StatWithCompress{
+			"EVENT_1": &StatWithCompress{Stat: 18.2, CompressFactor: 1},
+			"EVENT_2": &StatWithCompress{Stat: 6.2, CompressFactor: 1},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		Sum:       24.4,
+		Count:     2,
+	}
+	expected.GetStringValue("")
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 18.2}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{"Cost": 6.2}}
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 18.3}}
+	tcc.AddEvent(ev)
+	tcc.AddEvent(ev2)
+	expIDs := []string{"EVENT_1", "EVENT_2"}
+	rply := tcc.Compress(10, "EVENT_3")
+	sort.Strings(rply)
+	if !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	tcc.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *tcc) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcc))
+	}
+	expected = &StatTCC{
+		Events: map[string]*StatWithCompress{
+			"EVENT_3": &StatWithCompress{Stat: 12.2, CompressFactor: 2},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		Sum:       24.4,
+		Count:     2,
+	}
+	expected.GetStringValue("")
+	expIDs = []string{"EVENT_3"}
+	if rply := tcc.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	tcc.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *tcc) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcc))
+	}
+	tcc.AddEvent(ev2)
+	tcc.AddEvent(ev4)
+	v := expected.Events["EVENT_3"]
+	v.Stat = 12.225
+	v.CompressFactor = 4
+	expected.Count = 4
+	expected.Sum = 48.9
+	expected.val = nil
+	expected.GetStringValue("")
+	if rply := tcc.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	tcc.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *tcc) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(tcc))
+	}
+}
+
+func TestTCCGetCompressFactor(t *testing.T) {
+	CF := make(map[string]int)
+	expectedCF := map[string]int{
+		"EVENT_1": 1,
+		"EVENT_2": 1,
+	}
+	tcc, _ := NewTCC(2, "", []string{})
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 18.2}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{"Cost": 18.2}}
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 18.2}}
+	tcc.AddEvent(ev)
+	tcc.AddEvent(ev2)
+	if CF = tcc.GetCompressFactor(make(map[string]int)); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+	tcc.AddEvent(ev2)
+	expectedCF["EVENT_2"] = 2
+	if CF = tcc.GetCompressFactor(make(map[string]int)); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+	tcc.AddEvent(ev4)
+	expectedCF["EVENT_2"] = 3
+	expectedCF["EVENT_1"] = 2
+	CF["EVENT_2"] = 3
+	if CF = tcc.GetCompressFactor(CF); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
 	}
 }
 
@@ -1298,6 +1774,92 @@ func TestPDDGetValue(t *testing.T) {
 	}
 }
 
+func TestPDDCompress(t *testing.T) {
+	pdd := &StatPDD{Events: make(map[string]*DurationWithCompress), MinItems: 2, FilterIDs: []string{}}
+	expected := &StatPDD{
+		Events: map[string]*DurationWithCompress{
+			"EVENT_1": &DurationWithCompress{Duration: 2*time.Minute + 30*time.Second, CompressFactor: 2},
+			"EVENT_3": &DurationWithCompress{Duration: time.Minute, CompressFactor: 1},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		Count:     3,
+		Sum:       6 * time.Minute,
+	}
+	expected.GetStringValue("")
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.PDD: time.Duration(2 * time.Minute)}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.PDD: time.Duration(3 * time.Minute)}}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
+		Event: map[string]interface{}{utils.PDD: time.Duration(1 * time.Minute)}}
+	pdd.AddEvent(ev1)
+	pdd.AddEvent(ev2)
+	pdd.AddEvent(ev3)
+	expIDs := []string{"EVENT_1", "EVENT_3"}
+	rply := pdd.Compress(10, "EVENT_3")
+	sort.Strings(rply)
+	if !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	pdd.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *pdd) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(pdd))
+	}
+	expected = &StatPDD{
+		Events: map[string]*DurationWithCompress{
+			"EVENT_3": &DurationWithCompress{Duration: 2 * time.Minute, CompressFactor: 3},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		Count:     3,
+		Sum:       6 * time.Minute,
+	}
+	expected.GetStringValue("")
+
+	expIDs = []string{"EVENT_3"}
+	if rply := pdd.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	pdd.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *pdd) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(pdd))
+	}
+}
+
+func TestPDDGetCompressFactor(t *testing.T) {
+	CF := make(map[string]int)
+	expectedCF := map[string]int{
+		"EVENT_1": 1,
+		"EVENT_2": 1,
+	}
+	pdd, _ := NewPDD(2, "", []string{})
+
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.PDD: time.Duration(1 * time.Minute)}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{utils.PDD: time.Duration(1 * time.Minute)}}
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{utils.PDD: time.Duration(2 * time.Minute)}}
+
+	pdd.AddEvent(ev)
+	pdd.AddEvent(ev2)
+	if CF = pdd.GetCompressFactor(make(map[string]int)); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+	pdd.AddEvent(ev2)
+	expectedCF["EVENT_2"] = 2
+	if CF = pdd.GetCompressFactor(make(map[string]int)); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+	pdd.AddEvent(ev4)
+	expectedCF["EVENT_2"] = 3
+	CF["EVENT_2"] = 3
+	if CF = pdd.GetCompressFactor(CF); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+}
+
 func TestDDCGetStringValue(t *testing.T) {
 	ddc, _ := NewDDC(2, "", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -1395,6 +1957,106 @@ func TestDDCGetFloat64Value(t *testing.T) {
 	ddc.RemEvent(ev5.ID)
 	if strVal := ddc.GetFloat64Value(); strVal != -1.0 {
 		t.Errorf("wrong ddc value: %v", strVal)
+	}
+}
+
+func TestDDCCompress(t *testing.T) {
+	ddc := &StatDDC{Destinations: make(map[string]utils.StringMap), Events: make(map[string]string), MinItems: 2, FilterIDs: []string{}}
+	expected := &StatDDC{
+		Destinations: map[string]utils.StringMap{
+			"1001": utils.StringMap{
+				"EVENT_1": true,
+			},
+			"1002": utils.StringMap{
+				"EVENT_3": true,
+			},
+		},
+		Events: map[string]string{
+			"EVENT_1": "1001",
+			"EVENT_3": "1002",
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+	}
+	expected.GetStringValue("")
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.Destination: "1001"}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.Destination: "1001"}}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
+		Event: map[string]interface{}{utils.Destination: "1002"}}
+	ddc.AddEvent(ev1)
+	ddc.AddEvent(ev2)
+	ddc.AddEvent(ev3)
+	expIDs := []string{"EVENT_1", "EVENT_3"}
+	rply := ddc.Compress(10, "EVENT_3")
+	sort.Strings(rply)
+	if !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	ddc.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *ddc) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(ddc))
+	}
+	expected = &StatDDC{
+		Destinations: map[string]utils.StringMap{
+			"1001": utils.StringMap{
+				"EVENT_1": true,
+			},
+			"1002": utils.StringMap{
+				"EVENT_3": true,
+			},
+		},
+		Events: map[string]string{
+			"EVENT_1": "1001",
+			"EVENT_3": "1002",
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+	}
+	expected.GetStringValue("")
+
+	rply = ddc.Compress(10, "EVENT_3")
+	sort.Strings(rply)
+	if !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	ddc.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *ddc) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(ddc))
+	}
+}
+
+func TestDDCGetCompressFactor(t *testing.T) {
+	CF := make(map[string]int)
+	expectedCF := map[string]int{
+		"EVENT_1": 1,
+		"EVENT_2": 1,
+	}
+	ddc, _ := NewDDC(2, "", []string{})
+
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.Destination: "1002"}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{utils.Destination: "1001"}}
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{utils.Destination: "1001"}}
+
+	ddc.AddEvent(ev)
+	ddc.AddEvent(ev2)
+	if CF = ddc.GetCompressFactor(make(map[string]int)); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+	ddc.AddEvent(ev2)
+	expectedCF["EVENT_2"] = 1
+	if CF = ddc.GetCompressFactor(make(map[string]int)); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+	ddc.AddEvent(ev4)
+	expectedCF["EVENT_2"] = 3
+	CF["EVENT_2"] = 3
+	if CF = ddc.GetCompressFactor(CF); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
 	}
 }
 
@@ -1576,6 +2238,108 @@ func TestStatSumGetStringValue3(t *testing.T) {
 	}
 }
 
+func TestStatSumCompress(t *testing.T) {
+	sum := &StatSum{Events: make(map[string]*StatWithCompress), FieldName: "Cost",
+		MinItems: 2, FilterIDs: []string{}}
+	expected := &StatSum{
+		Events: map[string]*StatWithCompress{
+			"EVENT_1": &StatWithCompress{Stat: 18.2, CompressFactor: 1},
+			"EVENT_2": &StatWithCompress{Stat: 6.2, CompressFactor: 1},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		Sum:       24.4,
+		FieldName: "Cost",
+		Count:     2,
+	}
+	expected.GetStringValue("")
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 18.2}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{"Cost": 6.2}}
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 18.3}}
+	sum.AddEvent(ev)
+	sum.AddEvent(ev2)
+	expIDs := []string{"EVENT_1", "EVENT_2"}
+	rply := sum.Compress(10, "EVENT_3")
+	sort.Strings(rply)
+	if !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	sum.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *sum) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(sum))
+	}
+	expected = &StatSum{
+		Events: map[string]*StatWithCompress{
+			"EVENT_3": &StatWithCompress{Stat: 12.2, CompressFactor: 2},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		FieldName: "Cost",
+		Sum:       24.4,
+		Count:     2,
+	}
+	expected.GetStringValue("")
+	expIDs = []string{"EVENT_3"}
+	if rply := sum.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	sum.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *sum) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(sum))
+	}
+	sum.AddEvent(ev2)
+	sum.AddEvent(ev4)
+	v := expected.Events["EVENT_3"]
+	v.Stat = 12.225
+	v.CompressFactor = 4
+	expected.Count = 4
+	expected.Sum = 48.9
+	expected.val = nil
+	expected.GetStringValue("")
+	if rply := sum.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	sum.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *sum) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(sum))
+	}
+}
+
+func TestStatSumGetCompressFactor(t *testing.T) {
+	CF := make(map[string]int)
+	expectedCF := map[string]int{
+		"EVENT_1": 1,
+		"EVENT_2": 1,
+	}
+	sum, _ := NewStatSum(2, "Cost", []string{})
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 18.2}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{"Cost": 18.2}}
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 18.2}}
+	sum.AddEvent(ev)
+	sum.AddEvent(ev2)
+	if CF = sum.GetCompressFactor(make(map[string]int)); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+	sum.AddEvent(ev2)
+	expectedCF["EVENT_2"] = 2
+	if CF = sum.GetCompressFactor(make(map[string]int)); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+	sum.AddEvent(ev4)
+	expectedCF["EVENT_2"] = 3
+	expectedCF["EVENT_1"] = 2
+	CF["EVENT_2"] = 3
+	if CF = sum.GetCompressFactor(CF); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+}
+
 func TestStatAverageGetFloat64Value(t *testing.T) {
 	statAvg, _ := NewStatAverage(2, "Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -1749,6 +2513,108 @@ func TestStatAverageGetStringValue3(t *testing.T) {
 	statAvg.GetStringValue("")
 	if !reflect.DeepEqual(*expected, *statAvg) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(statAvg))
+	}
+}
+
+func TestStatAverageCompress(t *testing.T) {
+	avg := &StatAverage{Events: make(map[string]*StatWithCompress), FieldName: "Cost",
+		MinItems: 2, FilterIDs: []string{}}
+	expected := &StatAverage{
+		Events: map[string]*StatWithCompress{
+			"EVENT_1": &StatWithCompress{Stat: 18.2, CompressFactor: 1},
+			"EVENT_2": &StatWithCompress{Stat: 6.2, CompressFactor: 1},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		Sum:       24.4,
+		FieldName: "Cost",
+		Count:     2,
+	}
+	expected.GetStringValue("")
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 18.2}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{"Cost": 6.2}}
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 18.3}}
+	avg.AddEvent(ev)
+	avg.AddEvent(ev2)
+	expIDs := []string{"EVENT_1", "EVENT_2"}
+	rply := avg.Compress(10, "EVENT_3")
+	sort.Strings(rply)
+	if !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	avg.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *avg) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(avg))
+	}
+	expected = &StatAverage{
+		Events: map[string]*StatWithCompress{
+			"EVENT_3": &StatWithCompress{Stat: 12.2, CompressFactor: 2},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		FieldName: "Cost",
+		Sum:       24.4,
+		Count:     2,
+	}
+	expected.GetStringValue("")
+	expIDs = []string{"EVENT_3"}
+	if rply := avg.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	avg.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *avg) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(avg))
+	}
+	avg.AddEvent(ev2)
+	avg.AddEvent(ev4)
+	v := expected.Events["EVENT_3"]
+	v.Stat = 12.225
+	v.CompressFactor = 4
+	expected.Count = 4
+	expected.Sum = 48.9
+	expected.val = nil
+	expected.GetStringValue("")
+	if rply := avg.Compress(1, "EVENT_3"); !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	avg.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *avg) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(avg))
+	}
+}
+
+func TestStatAverageGetCompressFactor(t *testing.T) {
+	CF := make(map[string]int)
+	expectedCF := map[string]int{
+		"EVENT_1": 1,
+		"EVENT_2": 1,
+	}
+	avg, _ := NewStatAverage(2, "Cost", []string{})
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 18.2}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{"Cost": 18.2}}
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": 18.2}}
+	avg.AddEvent(ev)
+	avg.AddEvent(ev2)
+	if CF = avg.GetCompressFactor(make(map[string]int)); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+	avg.AddEvent(ev2)
+	expectedCF["EVENT_2"] = 2
+	if CF = avg.GetCompressFactor(make(map[string]int)); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+	avg.AddEvent(ev4)
+	expectedCF["EVENT_2"] = 3
+	expectedCF["EVENT_1"] = 2
+	CF["EVENT_2"] = 3
+	if CF = avg.GetCompressFactor(CF); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
 	}
 }
 

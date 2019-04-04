@@ -233,14 +233,13 @@ func (sq *StatQueue) Compress(maxQL int64) bool {
 		return false
 	}
 	var newSQItems []SQItem
-	SQMap := make(map[string]*time.Time)
+	sqMap := make(map[string]*time.Time)
 	idMap := make(map[string]struct{})
-	defaultCompressID := utils.UUIDSha1Prefix()
+	defaultCompressID := sq.SQItems[len(sq.SQItems)-1].EventID
 	defaultTTL := sq.SQItems[len(sq.SQItems)-1].ExpiryTime
 
-	SQMap[defaultCompressID] = defaultTTL
 	for _, sqitem := range sq.SQItems {
-		SQMap[sqitem.EventID] = sqitem.ExpiryTime
+		sqMap[sqitem.EventID] = sqitem.ExpiryTime
 	}
 
 	for _, m := range sq.SQMetrics {
@@ -249,7 +248,7 @@ func (sq *StatQueue) Compress(maxQL int64) bool {
 		}
 	}
 	for k, _ := range idMap {
-		ttl, has := SQMap[k]
+		ttl, has := sqMap[k]
 		if !has { // log warning
 			ttl = defaultTTL
 		}
