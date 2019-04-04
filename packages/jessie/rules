@@ -31,6 +31,10 @@ binary-arch: clean
 	cp $(GOPATH)/bin/cgr-* $(PKGDIR)/usr/bin/
 	mkdir -p $(PKGDIR)/etc/
 	cp -r $(CURDIR)/data/conf/cgrates $(PKGDIR)/etc/
+	mkdir -p $(PKGDIR)/etc/logrotate.d
+	mkdir -p $(PKGDIR)/etc/rsyslog.d
+	cp -r $(CURDIR)/data/conf/logging/deb_logrotate.conf $(PKGDIR)/etc/logrotate.d/CGRateS
+	cp -r $(CURDIR)/data/conf/logging/deb_rsyslog.conf $(PKGDIR)/etc/rsyslog.d/25-CGRateS.conf
 	mkdir -p $(PKGDIR)/usr/share/cgrates
 	cp -r $(CURDIR)/data/* $(PKGDIR)/usr/share/cgrates/
 	tar -xzvf $(PKGDIR)/usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/freeswitch_conf.tar.gz -C $(PKGDIR)/usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/
