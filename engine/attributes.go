@@ -20,6 +20,8 @@ package engine
 
 import (
 	"fmt"
+	"math"
+	"strconv"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -176,6 +178,65 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 			substitute, err = attribute.Substitute.ParseValue(utils.EmptyString)
 		case utils.MetaVariable, utils.META_COMPOSED:
 			substitute, err = attribute.Substitute.ParseEvent(args.Event)
+		case utils.META_USAGE_DIFFERENCE:
+			if len(attribute.Substitute) != 2 {
+				return nil, fmt.Errorf("invalid arguments <%s>", utils.ToJSON(attribute.Substitute))
+			}
+			strVal1, err := attribute.Substitute[0].ParseEvent(args.Event)
+			if err != nil {
+				return nil, err
+			}
+			strVal2, err := attribute.Substitute[1].ParseEvent(args.Event)
+			if err != nil {
+				return nil, err
+			}
+			tEnd, err := utils.ParseTimeDetectLayout(strVal1, utils.EmptyString)
+			if err != nil {
+				return nil, err
+			}
+			tStart, err := utils.ParseTimeDetectLayout(strVal2, utils.EmptyString)
+			if err != nil {
+				return nil, err
+			}
+			substitute = tEnd.Sub(tStart).String()
+		case utils.MetaSum:
+			iFaceVals := make([]interface{}, len(attribute.Substitute))
+			for i, val := range attribute.Substitute {
+				strVal, err := val.ParseEvent(args.Event)
+				if err != nil {
+					return nil, err
+				}
+				iFaceVals[i] = utils.StringToInterface(strVal)
+			}
+			ifaceSum, err := utils.Sum(iFaceVals...)
+			if err != nil {
+				return nil, err
+			}
+			substitute, err = utils.IfaceAsString(ifaceSum)
+		case utils.MetaValueExponent:
+			if len(attribute.Substitute) != 2 {
+				return nil, fmt.Errorf("invalid arguments <%s> to %s",
+					utils.ToJSON(attribute.Substitute), utils.MetaValueExponent)
+			}
+			strVal1, err := attribute.Substitute[0].ParseEvent(args.Event) // String Value
+			if err != nil {
+				return nil, err
+			}
+			val, err := strconv.ParseFloat(strVal1, 64)
+			if err != nil {
+				return nil, fmt.Errorf("invalid value <%s> to %s",
+					strVal1, utils.MetaValueExponent)
+			}
+			strVal2, err := attribute.Substitute[1].ParseEvent(args.Event) // String Exponent
+			if err != nil {
+				return nil, err
+			}
+			exp, err := strconv.Atoi(strVal2)
+			if err != nil {
+				return nil, err
+			}
+			substitute = strconv.FormatFloat(utils.Round(val*math.Pow10(exp),
+				config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64)
 		default: // backwards compatible in case that Type is empty
 			substitute, err = attribute.Substitute.ParseEvent(args.Event)
 		}
@@ -183,7 +244,10 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 		if err != nil {
 			return nil, err
 		}
-		rply.AlteredFields = append(rply.AlteredFields, attribute.FieldName)
+		//add only once the FieldName in AlteredFields
+		if !utils.IsSliceMember(rply.AlteredFields, attribute.FieldName) {
+			rply.AlteredFields = append(rply.AlteredFields, attribute.FieldName)
+		}
 		if substitute == utils.META_NONE {
 			delete(rply.CGREvent.Event, attribute.FieldName)
 			continue
