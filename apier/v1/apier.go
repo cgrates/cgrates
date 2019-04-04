@@ -26,6 +26,7 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -379,7 +380,7 @@ func (self *ApierV1) SetRatingProfile(attrs utils.AttrSetRatingProfile, reply *s
 		return utils.NewErrServerError(err)
 	}
 	//generate a loadID for CacheRatingProfiles and store it in database
-	if err := self.DataManager.SetLoadIDs(map[string]string{utils.CacheRatingProfiles: utils.UUIDSha1Prefix()}); err != nil {
+	if err := self.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = OK
@@ -499,7 +500,7 @@ func (self *ApierV1) SetActions(attrs V1AttrSetActions, reply *string) (err erro
 		return utils.NewErrServerError(err)
 	}
 	//generate a loadID for CacheActions and store it in database
-	if err := self.DataManager.SetLoadIDs(map[string]string{utils.CacheActions: utils.UUIDSha1Prefix()}); err != nil {
+	if err := self.DataManager.SetLoadIDs(map[string]int64{utils.CacheActions: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = OK
@@ -632,7 +633,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err 
 		sched.Reload()
 	}
 	//generate a loadID for CacheActionPlans and store it in database
-	if err := self.DataManager.SetLoadIDs(map[string]string{utils.CacheActionPlans: utils.UUIDSha1Prefix()}); err != nil {
+	if err := self.DataManager.SetLoadIDs(map[string]int64{utils.CacheActionPlans: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = OK
@@ -805,7 +806,7 @@ func (self *ApierV1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *st
 		return utils.NewErrServerError(err)
 	}
 	//generate a loadID for CacheActionPlans and store it in database
-	if err := self.DataManager.SetLoadIDs(map[string]string{utils.CacheRatingProfiles: utils.UUIDSha1Prefix()}); err != nil {
+	if err := self.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -895,7 +896,7 @@ func (self *ApierV1) RemoveActions(attr AttrRemoveActions, reply *string) error 
 		}
 	}
 	//generate a loadID for CacheActions and store it in database
-	if err := self.DataManager.SetLoadIDs(map[string]string{utils.CacheActions: utils.UUIDSha1Prefix()}); err != nil {
+	if err := self.DataManager.SetLoadIDs(map[string]int64{utils.CacheActions: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
@@ -1039,11 +1040,33 @@ func (v1 *ApierV1) CallCache(cacheOpt string, args engine.ArgsGetCacheItem) (err
 	return
 }
 
-func (v1 *ApierV1) GetCacheVersions(args string, reply *map[string]string) (err error) {
+func (v1 *ApierV1) GetLoadIDs(args string, reply *map[string]int64) (err error) {
 	if loadIDs, err := v1.DataManager.GetItemLoadIDs(args, false); err != nil {
 		return err
 	} else {
 		*reply = loadIDs
+	}
+	return
+}
+
+type LoadTimeArgs struct {
+	Timezone string
+	Item     string
+}
+
+func (v1 *ApierV1) GetLoadTimes(args LoadTimeArgs, reply *map[string]string) (err error) {
+	if loadIDs, err := v1.DataManager.GetItemLoadIDs(args.Item, false); err != nil {
+		return err
+	} else {
+		provMp := make(map[string]string)
+		for key, val := range loadIDs {
+			timeVal, err := utils.ParseTimeDetectLayout(strconv.FormatInt(val, 10), args.Timezone)
+			if err != nil {
+				return err
+			}
+			provMp[key] = timeVal.String()
+		}
+		*reply = provMp
 	}
 	return
 }

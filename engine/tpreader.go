@@ -24,6 +24,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/structmatcher"
@@ -1413,8 +1414,8 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 		// }
 	}
 	//generate a loadID
-	loadID := utils.UUIDSha1Prefix()
-	loadIDs := make(map[string]string)
+	loadID := time.Now().UnixNano()
+	loadIDs := make(map[string]int64)
 	if verbose {
 		log.Print("Destinations:")
 	}

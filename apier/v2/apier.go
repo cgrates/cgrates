@@ -26,6 +26,7 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"time"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
@@ -327,7 +328,7 @@ func (self *ApierV2) SetActions(attrs utils.AttrSetActions, reply *string) error
 		return utils.NewErrServerError(err)
 	}
 	//generate a loadID for CacheActions and store it in database
-	if err := self.DataManager.SetLoadIDs(map[string]string{utils.CacheActions: utils.UUIDSha1Prefix()}); err != nil {
+	if err := self.DataManager.SetLoadIDs(map[string]int64{utils.CacheActions: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

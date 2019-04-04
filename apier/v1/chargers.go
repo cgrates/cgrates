@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -68,7 +70,7 @@ func (apierV1 *ApierV1) SetChargerProfile(arg *ChargerWithCache, reply *string) 
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheChargerProfiles and store it in database
-	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheChargerProfiles: utils.UUIDSha1Prefix()}); err != nil {
+	if err := apierV1.DataManager.SetLoadIDs(map[string]int64{utils.CacheChargerProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ChargerProfile
@@ -93,7 +95,7 @@ func (apierV1 *ApierV1) RemoveChargerProfile(arg utils.TenantIDWrapper, reply *s
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheChargerProfiles and store it in database
-	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheChargerProfiles: utils.UUIDSha1Prefix()}); err != nil {
+	if err := apierV1.DataManager.SetLoadIDs(map[string]int64{utils.CacheChargerProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ChargerProfile

@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -86,7 +88,7 @@ func (apierV1 *ApierV1) SetAttributeProfile(alsWrp *AttributeWithCache, reply *s
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheAttributeProfiles and store it in database
-	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheAttributeProfiles: utils.UUIDSha1Prefix()}); err != nil {
+	if err := apierV1.DataManager.SetLoadIDs(map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	args := engine.ArgsGetCacheItem{
@@ -110,7 +112,7 @@ func (apierV1 *ApierV1) RemoveAttributeProfile(arg *utils.TenantIDWrapper, reply
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheAttributeProfiles and store it in database
-	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheAttributeProfiles: utils.UUIDSha1Prefix()}); err != nil {
+	if err := apierV1.DataManager.SetLoadIDs(map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	args := engine.ArgsGetCacheItem{

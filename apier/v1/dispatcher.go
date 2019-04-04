@@ -73,7 +73,7 @@ func (apierV1 *ApierV1) SetDispatcherProfile(args *DispatcherWithCache, reply *s
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheDispatcherProfiles and store it in database
-	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheDispatcherProfiles: utils.UUIDSha1Prefix()}); err != nil {
+	if err := apierV1.DataManager.SetLoadIDs(map[string]int64{utils.CacheDispatcherProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
@@ -98,7 +98,7 @@ func (apierV1 *ApierV1) RemoveDispatcherProfile(arg *utils.TenantIDWrapper, repl
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheDispatcherProfiles and store it in database
-	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheDispatcherProfiles: utils.UUIDSha1Prefix()}); err != nil {
+	if err := apierV1.DataManager.SetLoadIDs(map[string]int64{utils.CacheDispatcherProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
@@ -158,7 +158,7 @@ func (apierV1 *ApierV1) SetDispatcherHost(args *DispatcherHostWrapper, reply *st
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheDispatcherHosts and store it in database
-	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheDispatcherHosts: utils.UUIDSha1Prefix()}); err != nil {
+	if err := apierV1.DataManager.SetLoadIDs(map[string]int64{utils.CacheDispatcherHosts: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
@@ -183,7 +183,7 @@ func (apierV1 *ApierV1) RemoveDispatcherHost(arg *utils.TenantIDWrapper, reply *
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheDispatcherHosts and store it in database
-	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheDispatcherHosts: utils.UUIDSha1Prefix()}); err != nil {
+	if err := apierV1.DataManager.SetLoadIDs(map[string]int64{utils.CacheDispatcherHosts: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile

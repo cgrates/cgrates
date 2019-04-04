@@ -18,43 +18,48 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
+import (
+	v1 "github.com/cgrates/cgrates/apier/v1"
+)
+
 func init() {
-	c := &CmdCacheVersions{
-		name:      "cache_versions",
-		rpcMethod: "ApierV1.GetCacheVersions",
+	c := &CmdLoadTimes{
+		name:      "get_load_times",
+		rpcMethod: "ApierV1.GetLoadTimes",
+		rpcParams: &v1.LoadTimeArgs{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdCacheVersions struct {
+type CmdLoadTimes struct {
 	name      string
 	rpcMethod string
-	rpcParams *StringWrapper
+	rpcParams *v1.LoadTimeArgs
 	*CommandExecuter
 }
 
-func (self *CmdCacheVersions) Name() string {
+func (self *CmdLoadTimes) Name() string {
 	return self.name
 }
 
-func (self *CmdCacheVersions) RpcMethod() string {
+func (self *CmdLoadTimes) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdCacheVersions) RpcParams(reset bool) interface{} {
+func (self *CmdLoadTimes) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &StringWrapper{}
+		self.rpcParams = &v1.LoadTimeArgs{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdCacheVersions) PostprocessRpcParams() error {
+func (self *CmdLoadTimes) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdCacheVersions) RpcResult() interface{} {
+func (self *CmdLoadTimes) RpcResult() interface{} {
 	a := make(map[string]string, 0)
 	return &a
 }

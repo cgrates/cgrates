@@ -1594,20 +1594,28 @@ func (rs *RedisStorage) GetStorageType() string {
 	return utils.REDIS
 }
 
-func (rs *RedisStorage) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[string]string, err error) {
+func (rs *RedisStorage) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[string]int64, err error) {
 	if itemIDPrefix != "" {
-		fldVal, err := rs.Cmd("HGET", utils.LoadIDs, itemIDPrefix).Str()
+		fldVal, err := rs.Cmd("HGET", utils.LoadIDs, itemIDPrefix).Int64()
 		if err != nil {
 			if err == redis.ErrRespNil {
 				err = utils.ErrNotFound
 			}
 			return nil, err
 		}
-		return map[string]string{itemIDPrefix: fldVal}, nil
+		return map[string]int64{itemIDPrefix: fldVal}, nil
 	}
-	loadIDs, err = rs.Cmd("HGETALL", utils.LoadIDs).Map()
+	mpLoadIDs, err := rs.Cmd("HGETALL", utils.LoadIDs).Map()
 	if err != nil {
 		return nil, err
+	}
+	loadIDs = make(map[string]int64)
+	for key, val := range mpLoadIDs {
+		intVal, err := strconv.ParseInt(val, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		loadIDs[key] = intVal
 	}
 	if len(loadIDs) == 0 {
 		return nil, utils.ErrNotFound
@@ -1615,6 +1623,6 @@ func (rs *RedisStorage) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[stri
 	return
 }
 
-func (rs *RedisStorage) SetLoadIDsDrv(loadIDs map[string]string) error {
+func (rs *RedisStorage) SetLoadIDsDrv(loadIDs map[string]int64) error {
 	return rs.Cmd("HMSET", utils.LoadIDs, loadIDs).Err
 }

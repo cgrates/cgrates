@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -104,8 +106,8 @@ func (apierV1 *ApierV1) SetThresholdProfile(args *ThresholdWithCache, reply *str
 	}
 	//generate a loadID for CacheThresholdProfiles and CacheThresholds and store it in database
 	//make 1 insert for both ThresholdProfile and Threshold instead of 2
-	loadID := utils.UUIDSha1Prefix()
-	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheThresholdProfiles: loadID, utils.CacheThresholds: loadID}); err != nil {
+	loadID := time.Now().UnixNano()
+	if err := apierV1.DataManager.SetLoadIDs(map[string]int64{utils.CacheThresholdProfiles: loadID, utils.CacheThresholds: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ThresholdProfile
@@ -152,8 +154,8 @@ func (apierV1 *ApierV1) RemoveThresholdProfile(args *utils.TenantIDWrapper, repl
 	}
 	//generate a loadID for CacheThresholdProfiles and CacheThresholds and store it in database
 	//make 1 insert for both ThresholdProfile and Threshold instead of 2
-	loadID := utils.UUIDSha1Prefix()
-	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheThresholdProfiles: loadID, utils.CacheThresholds: loadID}); err != nil {
+	loadID := time.Now().UnixNano()
+	if err := apierV1.DataManager.SetLoadIDs(map[string]int64{utils.CacheThresholdProfiles: loadID, utils.CacheThresholds: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Threshold
