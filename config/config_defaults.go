@@ -484,6 +484,7 @@ const CGRATES_CFG_JSON = `
 "stats": {									// StatS config
 	"enabled": false,						// starts Stat service: <true|false>.
 	"store_interval": "",					// dump cache regularly to dataDB, 0 - dump at start/shutdown: <""|$dur>
+	"max_queue_lenght": 0,					// used to compress data
 	"thresholds_conns": [],					// connections to ThresholdS for StatUpdates, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
 	"indexed_selects":true,					// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing

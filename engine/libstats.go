@@ -56,11 +56,12 @@ type MetricWithFilters struct {
 // NewStoredStatQueue initiates a StoredStatQueue out of StatQueue
 func NewStoredStatQueue(sq *StatQueue, ms Marshaler) (sSQ *StoredStatQueue, err error) {
 	sSQ = &StoredStatQueue{
-		Tenant:    sq.Tenant,
-		ID:        sq.ID,
-		SQItems:   make([]SQItem, len(sq.SQItems)),
-		SQMetrics: make(map[string][]byte, len(sq.SQMetrics)),
-		MinItems:  sq.MinItems,
+		Tenant:     sq.Tenant,
+		ID:         sq.ID,
+		Compressed: sq.Compress(int64(config.CgrConfig().StatSCfg().MaxQueueLenght)),
+		SQItems:    make([]SQItem, len(sq.SQItems)),
+		SQMetrics:  make(map[string][]byte, len(sq.SQMetrics)),
+		MinItems:   sq.MinItems,
 	}
 	for i, sqItm := range sq.SQItems {
 		sSQ.SQItems[i] = sqItm
@@ -77,11 +78,12 @@ func NewStoredStatQueue(sq *StatQueue, ms Marshaler) (sSQ *StoredStatQueue, err 
 
 // StoredStatQueue differs from StatQueue due to serialization of SQMetrics
 type StoredStatQueue struct {
-	Tenant    string
-	ID        string
-	SQItems   []SQItem
-	SQMetrics map[string][]byte
-	MinItems  int
+	Tenant     string
+	ID         string
+	SQItems    []SQItem
+	SQMetrics  map[string][]byte
+	MinItems   int
+	Compressed bool
 }
 
 // SqID will compose the unique identifier for the StatQueue out of Tenant and ID
@@ -109,6 +111,9 @@ func (ssq *StoredStatQueue) AsStatQueue(ms Marshaler) (sq *StatQueue, err error)
 		} else {
 			sq.SQMetrics[metricID] = metric
 		}
+	}
+	if ssq.Compressed {
+		sq.Expand()
 	}
 	return
 }
@@ -221,6 +226,69 @@ func (sq *StatQueue) addStatEvent(ev *utils.CGREvent, filterS *FilterS) (err err
 		}
 	}
 	return
+}
+
+func (sq *StatQueue) Compress(maxQL int64) bool {
+	if int64(len(sq.SQItems)) < maxQL || maxQL == 0 {
+		return false
+	}
+	var newSQItems []SQItem
+	SQMap := make(map[string]*time.Time)
+	idMap := make(map[string]struct{})
+	defaultCompressID := utils.UUIDSha1Prefix()
+	defaultTTL := sq.SQItems[len(sq.SQItems)-1].ExpiryTime
+
+	SQMap[defaultCompressID] = defaultTTL
+	for _, sqitem := range sq.SQItems {
+		SQMap[sqitem.EventID] = sqitem.ExpiryTime
+	}
+
+	for _, m := range sq.SQMetrics {
+		for _, id := range m.Compress(maxQL, defaultCompressID) {
+			idMap[id] = struct{}{}
+		}
+	}
+	for k, _ := range idMap {
+		ttl, has := SQMap[k]
+		if !has { // log warning
+			ttl = defaultTTL
+		}
+		newSQItems = append(newSQItems, SQItem{
+			EventID:    k,
+			ExpiryTime: ttl,
+		})
+	}
+	if sq.ttl != nil {
+		sort.Slice(newSQItems, func(i, j int) bool {
+			if newSQItems[i].ExpiryTime == nil {
+				return false
+			}
+			if newSQItems[j].ExpiryTime == nil {
+				return true
+			}
+			return newSQItems[i].ExpiryTime.Before(*(newSQItems[j].ExpiryTime))
+		})
+	}
+	sq.SQItems = newSQItems
+	return true
+}
+
+func (sq *StatQueue) Expand() {
+	compressFactorMap := make(map[string]int)
+	for _, m := range sq.SQMetrics {
+		compressFactorMap = m.GetCompressFactor(compressFactorMap)
+	}
+	var newSQItems []SQItem
+	for _, sqi := range sq.SQItems {
+		cf, has := compressFactorMap[sqi.EventID]
+		if !has {
+			continue
+		}
+		for i := 0; i < cf; i++ {
+			newSQItems = append(newSQItems, sqi)
+		}
+	}
+	sq.SQItems = newSQItems
 }
 
 // StatQueues is a sortable list of StatQueue
