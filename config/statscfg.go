@@ -28,6 +28,7 @@ type StatSCfg struct {
 	Enabled             bool
 	IndexedSelects      bool
 	StoreInterval       time.Duration // Dump regularly from cache into dataDB
+	MaxQueueLenght      int
 	ThresholdSConns     []*RemoteHost
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
@@ -47,6 +48,9 @@ func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
 		if st.StoreInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Store_interval); err != nil {
 			return err
 		}
+	}
+	if jsnCfg.Max_queue_lenght != nil {
+		st.MaxQueueLenght = *jsnCfg.Max_queue_lenght
 	}
 	if jsnCfg.Thresholds_conns != nil {
 		st.ThresholdSConns = make([]*RemoteHost, len(*jsnCfg.Thresholds_conns))

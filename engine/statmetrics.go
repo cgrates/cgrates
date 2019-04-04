@@ -80,6 +80,8 @@ type StatMetric interface {
 	Marshal(ms Marshaler) (marshaled []byte, err error)
 	LoadMarshaled(ms Marshaler, marshaled []byte) (err error)
 	GetFilterIDs() (filterIDs []string)
+	Compress(queueLen int64, defaultID string) (eventIDs []string)
+	GetCompressFactor(events map[string]int) map[string]int
 }
 
 func NewASR(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
@@ -190,6 +192,36 @@ func (asr *StatASR) GetFilterIDs() []string {
 	return asr.FilterIDs
 }
 
+// Compress is part of StatMetric interface
+func (asr *StatASR) Compress(queueLen int64, defaultID string) (eventIDs []string) {
+	if asr.Count < queueLen {
+		for id, _ := range asr.Events {
+			eventIDs = append(eventIDs, id)
+		}
+		return
+	}
+	stat := &StatWithCompress{
+		Stat: utils.Round(asr.Answered/float64(asr.Count),
+			config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE),
+		CompressFactor: int(asr.Count),
+	}
+	asr.Events = map[string]*StatWithCompress{defaultID: stat}
+	return []string{defaultID}
+}
+
+// Compress is part of StatMetric interface
+func (asr *StatASR) GetCompressFactor(events map[string]int) map[string]int {
+	for id, val := range asr.Events {
+		if _, has := events[id]; !has {
+			events[id] = val.CompressFactor
+		}
+		if events[id] < val.CompressFactor {
+			events[id] = val.CompressFactor
+		}
+	}
+	return events
+}
+
 func NewACD(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
 	return &StatACD{Events: make(map[string]*DurationWithCompress), MinItems: minItems, FilterIDs: filterIDs}, nil
 }
@@ -286,6 +318,35 @@ func (acd *StatACD) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 // GetFilterIDs is part of StatMetric interface
 func (acd *StatACD) GetFilterIDs() []string {
 	return acd.FilterIDs
+}
+
+// Compress is part of StatMetric interface
+func (acd *StatACD) Compress(queueLen int64, defaultID string) (eventIDs []string) {
+	if acd.Count < queueLen {
+		for id, _ := range acd.Events {
+			eventIDs = append(eventIDs, id)
+		}
+		return
+	}
+	stat := &DurationWithCompress{
+		Duration:       time.Duration(acd.Sum.Nanoseconds() / acd.Count),
+		CompressFactor: int(acd.Count),
+	}
+	acd.Events = map[string]*DurationWithCompress{defaultID: stat}
+	return []string{defaultID}
+}
+
+// Compress is part of StatMetric interface
+func (acd *StatACD) GetCompressFactor(events map[string]int) map[string]int {
+	for id, val := range acd.Events {
+		if _, has := events[id]; !has {
+			events[id] = val.CompressFactor
+		}
+		if events[id] < val.CompressFactor {
+			events[id] = val.CompressFactor
+		}
+	}
+	return events
 }
 
 func NewTCD(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
@@ -387,6 +448,35 @@ func (tcd *StatTCD) GetFilterIDs() []string {
 	return tcd.FilterIDs
 }
 
+// Compress is part of StatMetric interface
+func (tcd *StatTCD) Compress(queueLen int64, defaultID string) (eventIDs []string) {
+	if tcd.Count < queueLen {
+		for id, _ := range tcd.Events {
+			eventIDs = append(eventIDs, id)
+		}
+		return
+	}
+	stat := &DurationWithCompress{
+		Duration:       time.Duration(tcd.Sum.Nanoseconds() / tcd.Count),
+		CompressFactor: int(tcd.Count),
+	}
+	tcd.Events = map[string]*DurationWithCompress{defaultID: stat}
+	return []string{defaultID}
+}
+
+// Compress is part of StatMetric interface
+func (tcd *StatTCD) GetCompressFactor(events map[string]int) map[string]int {
+	for id, val := range tcd.Events {
+		if _, has := events[id]; !has {
+			events[id] = val.CompressFactor
+		}
+		if events[id] < val.CompressFactor {
+			events[id] = val.CompressFactor
+		}
+	}
+	return events
+}
+
 func NewACC(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
 	return &StatACC{Events: make(map[string]*StatWithCompress), MinItems: minItems, FilterIDs: filterIDs}, nil
 }
@@ -479,6 +569,36 @@ func (acc *StatACC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 // GetFilterIDs is part of StatMetric interface
 func (acc *StatACC) GetFilterIDs() []string {
 	return acc.FilterIDs
+}
+
+// Compress is part of StatMetric interface
+func (acc *StatACC) Compress(queueLen int64, defaultID string) (eventIDs []string) {
+	if acc.Count < queueLen {
+		for id, _ := range acc.Events {
+			eventIDs = append(eventIDs, id)
+		}
+		return
+	}
+	stat := &StatWithCompress{
+		Stat: utils.Round((acc.Sum / float64(acc.Count)),
+			config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE),
+		CompressFactor: int(acc.Count),
+	}
+	acc.Events = map[string]*StatWithCompress{defaultID: stat}
+	return []string{defaultID}
+}
+
+// Compress is part of StatMetric interface
+func (acc *StatACC) GetCompressFactor(events map[string]int) map[string]int {
+	for id, val := range acc.Events {
+		if _, has := events[id]; !has {
+			events[id] = val.CompressFactor
+		}
+		if events[id] < val.CompressFactor {
+			events[id] = val.CompressFactor
+		}
+	}
+	return events
 }
 
 func NewTCC(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
@@ -575,6 +695,36 @@ func (tcc *StatTCC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 // GetFilterIDs is part of StatMetric interface
 func (tcc *StatTCC) GetFilterIDs() []string {
 	return tcc.FilterIDs
+}
+
+// Compress is part of StatMetric interface
+func (tcc *StatTCC) Compress(queueLen int64, defaultID string) (eventIDs []string) {
+	if tcc.Count < queueLen {
+		for id, _ := range tcc.Events {
+			eventIDs = append(eventIDs, id)
+		}
+		return
+	}
+	stat := &StatWithCompress{
+		Stat: utils.Round((tcc.Sum / float64(tcc.Count)),
+			config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE),
+		CompressFactor: int(tcc.Count),
+	}
+	tcc.Events = map[string]*StatWithCompress{defaultID: stat}
+	return []string{defaultID}
+}
+
+// Compress is part of StatMetric interface
+func (tcc *StatTCC) GetCompressFactor(events map[string]int) map[string]int {
+	for id, val := range tcc.Events {
+		if _, has := events[id]; !has {
+			events[id] = val.CompressFactor
+		}
+		if events[id] < val.CompressFactor {
+			events[id] = val.CompressFactor
+		}
+	}
+	return events
 }
 
 func NewPDD(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
@@ -675,6 +825,35 @@ func (pdd *StatPDD) GetFilterIDs() []string {
 	return pdd.FilterIDs
 }
 
+// Compress is part of StatMetric interface
+func (pdd *StatPDD) Compress(queueLen int64, defaultID string) (eventIDs []string) {
+	if pdd.Count < queueLen {
+		for id, _ := range pdd.Events {
+			eventIDs = append(eventIDs, id)
+		}
+		return
+	}
+	stat := &DurationWithCompress{
+		Duration:       time.Duration(pdd.Sum.Nanoseconds() / pdd.Count),
+		CompressFactor: int(pdd.Count),
+	}
+	pdd.Events = map[string]*DurationWithCompress{defaultID: stat}
+	return []string{defaultID}
+}
+
+// Compress is part of StatMetric interface
+func (pdd *StatPDD) GetCompressFactor(events map[string]int) map[string]int {
+	for id, val := range pdd.Events {
+		if _, has := events[id]; !has {
+			events[id] = val.CompressFactor
+		}
+		if events[id] < val.CompressFactor {
+			events[id] = val.CompressFactor
+		}
+	}
+	return events
+}
+
 func NewDDC(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
 	return &StatDDC{Destinations: make(map[string]utils.StringMap),
 		Events: make(map[string]string), MinItems: minItems, FilterIDs: filterIDs}, nil
@@ -748,6 +927,26 @@ func (ddc *StatDDC) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 // GetFilterIDs is part of StatMetric interface
 func (ddc *StatDDC) GetFilterIDs() []string {
 	return ddc.FilterIDs
+}
+
+func (ddc *StatDDC) Compress(queueLen int64, defaultID string) (eventIDs []string) {
+	for id, _ := range ddc.Events {
+		eventIDs = append(eventIDs, id)
+	}
+	return
+}
+
+// Compress is part of StatMetric interface
+func (ddc *StatDDC) GetCompressFactor(events map[string]int) map[string]int {
+	for id, _ := range ddc.Events {
+		if _, has := events[id]; !has {
+			events[id] = 1
+		}
+		if events[id] < 1 {
+			events[id] = 1
+		}
+	}
+	return events
 }
 
 func NewStatSum(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
@@ -845,6 +1044,36 @@ func (sum *StatSum) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
 // GetFilterIDs is part of StatMetric interface
 func (sum *StatSum) GetFilterIDs() []string {
 	return sum.FilterIDs
+}
+
+// Compress is part of StatMetric interface
+func (sum *StatSum) Compress(queueLen int64, defaultID string) (eventIDs []string) {
+	if sum.Count < queueLen {
+		for id, _ := range sum.Events {
+			eventIDs = append(eventIDs, id)
+		}
+		return
+	}
+	stat := &StatWithCompress{
+		Stat: utils.Round((sum.Sum / float64(sum.Count)),
+			config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE),
+		CompressFactor: int(sum.Count),
+	}
+	sum.Events = map[string]*StatWithCompress{defaultID: stat}
+	return []string{defaultID}
+}
+
+// Compress is part of StatMetric interface
+func (sum *StatSum) GetCompressFactor(events map[string]int) map[string]int {
+	for id, val := range sum.Events {
+		if _, has := events[id]; !has {
+			events[id] = val.CompressFactor
+		}
+		if events[id] < val.CompressFactor {
+			events[id] = val.CompressFactor
+		}
+	}
+	return events
 }
 
 func NewStatAverage(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
@@ -945,6 +1174,36 @@ func (avg *StatAverage) GetFilterIDs() []string {
 	return avg.FilterIDs
 }
 
+// Compress is part of StatMetric interface
+func (avg *StatAverage) Compress(queueLen int64, defaultID string) (eventIDs []string) {
+	if avg.Count < queueLen {
+		for id, _ := range avg.Events {
+			eventIDs = append(eventIDs, id)
+		}
+		return
+	}
+	stat := &StatWithCompress{
+		Stat: utils.Round((avg.Sum / float64(avg.Count)),
+			config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE),
+		CompressFactor: int(avg.Count),
+	}
+	avg.Events = map[string]*StatWithCompress{defaultID: stat}
+	return []string{defaultID}
+}
+
+// Compress is part of StatMetric interface
+func (avg *StatAverage) GetCompressFactor(events map[string]int) map[string]int {
+	for id, val := range avg.Events {
+		if _, has := events[id]; !has {
+			events[id] = val.CompressFactor
+		}
+		if events[id] < val.CompressFactor {
+			events[id] = val.CompressFactor
+		}
+	}
+	return events
+}
+
 func NewStatDistinct(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
 	return &StatDistinct{Events: make(map[string]struct{}),
 		MinItems: minItems, FieldName: extraParams, FilterIDs: filterIDs}, nil
@@ -1021,4 +1280,24 @@ func (sum *StatDistinct) LoadMarshaled(ms Marshaler, marshaled []byte) (err erro
 // GetFilterIDs is part of StatMetric interface
 func (sum *StatDistinct) GetFilterIDs() []string {
 	return sum.FilterIDs
+}
+
+func (sum *StatDistinct) Compress(queueLen int64, defaultID string) (eventIDs []string) {
+	for id, _ := range sum.Events {
+		eventIDs = append(eventIDs, id)
+	}
+	return
+}
+
+// Compress is part of StatMetric interface
+func (sum *StatDistinct) GetCompressFactor(events map[string]int) map[string]int {
+	for id, _ := range sum.Events {
+		if _, has := events[id]; !has {
+			events[id] = 1
+		}
+		if events[id] < 1 {
+			events[id] = 1
+		}
+	}
+	return events
 }
