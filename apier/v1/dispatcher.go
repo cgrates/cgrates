@@ -657,3 +657,17 @@ func (dS *DispatcherSchedulerSv1) Reload(attr *dispatchers.StringkWithApiKey, re
 func (dS *DispatcherSchedulerSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
 	return dS.dS.SchedulerSv1Ping(args, reply)
 }
+
+func NewDispatcherSv1(dS *dispatchers.DispatcherService) *DispatcherSv1 {
+	return &DispatcherSv1{dS: dS}
+}
+
+type DispatcherSv1 struct {
+	dS *dispatchers.DispatcherService
+}
+
+// GetProfileForEvent returns the matching dispatcher profile for the provided event
+func (dSv1 DispatcherSv1) GetProfileForEvent(ev *dispatchers.DispatcherEvent,
+	dPrfl *engine.DispatcherProfile) error {
+	return dSv1.dS.V1GetProfileForEvent(ev, dPrfl)
+}

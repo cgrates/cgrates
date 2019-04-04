@@ -43,6 +43,12 @@ type CGREvWithApiKey struct {
 	utils.CGREvent
 }
 
+type DispatcherEvent struct {
+	utils.CGREvent
+	DispatcherResource
+	Subsystem string
+}
+
 type TntIDWithApiKey struct {
 	utils.TenantID
 	DispatcherResource
