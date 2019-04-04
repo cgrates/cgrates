@@ -2191,7 +2191,7 @@ func (ms *MongoStorage) RemoveDispatcherHostDrv(tenant, id string) (err error) {
 	})
 }
 
-func (ms *MongoStorage) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[string]string, err error) {
+func (ms *MongoStorage) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[string]int64, err error) {
 	fop := options.FindOne()
 	if itemIDPrefix != "" {
 		fop.SetProjection(bson.M{itemIDPrefix: 1, "_id": 0})
@@ -2216,7 +2216,7 @@ func (ms *MongoStorage) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[stri
 	return
 }
 
-func (ms *MongoStorage) SetLoadIDsDrv(loadIDs map[string]string) (err error) {
+func (ms *MongoStorage) SetLoadIDsDrv(loadIDs map[string]int64) (err error) {
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(colLID).UpdateOne(sctx, bson.D{}, bson.M{"$set": loadIDs},
 			options.Update().SetUpsert(true),

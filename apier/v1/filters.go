@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -37,7 +39,7 @@ func (apierV1 *ApierV1) SetFilter(arg *FilterWithCache, reply *string) error {
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheFilters and store it in database
-	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheFilters: utils.UUIDSha1Prefix()}); err != nil {
+	if err := apierV1.DataManager.SetLoadIDs(map[string]int64{utils.CacheFilters: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Filter
@@ -92,7 +94,7 @@ func (apierV1 *ApierV1) RemoveFilter(arg utils.TenantIDWrapper, reply *string) e
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheFilters and store it in database
-	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheFilters: utils.UUIDSha1Prefix()}); err != nil {
+	if err := apierV1.DataManager.SetLoadIDs(map[string]int64{utils.CacheFilters: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Filter

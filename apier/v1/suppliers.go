@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -68,7 +70,7 @@ func (apierV1 *ApierV1) SetSupplierProfile(args *SupplierWithCache, reply *strin
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheSupplierProfiles and store it in database
-	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheSupplierProfiles: utils.UUIDSha1Prefix()}); err != nil {
+	if err := apierV1.DataManager.SetLoadIDs(map[string]int64{utils.CacheSupplierProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for SupplierProfile
@@ -92,7 +94,7 @@ func (apierV1 *ApierV1) RemoveSupplierProfile(args *utils.TenantIDWrapper, reply
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheSupplierProfiles and store it in database
-	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheSupplierProfiles: utils.UUIDSha1Prefix()}); err != nil {
+	if err := apierV1.DataManager.SetLoadIDs(map[string]int64{utils.CacheSupplierProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for SupplierProfile

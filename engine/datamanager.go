@@ -1363,7 +1363,7 @@ func (dm *DataManager) RemoveDispatcherHost(tenant, id string,
 	return
 }
 
-func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loadIDs map[string]string, err error) {
+func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loadIDs map[string]int64, err error) {
 	loadIDs, err = dm.DataDB().GetItemLoadIDsDrv(itemIDPrefix)
 	if err != nil {
 		if err == utils.ErrNotFound && cacheWrite {
@@ -1383,6 +1383,6 @@ func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loa
 	return
 }
 
-func (dm *DataManager) SetLoadIDs(loadIDs map[string]string) error {
+func (dm *DataManager) SetLoadIDs(loadIDs map[string]int64) error {
 	return dm.DataDB().SetLoadIDsDrv(loadIDs)
 }

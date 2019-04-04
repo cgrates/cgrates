@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -70,8 +72,8 @@ func (apierV1 *ApierV1) SetStatQueueProfile(arg *StatQueueWithCache, reply *stri
 	}
 	//generate a loadID for CacheStatQueueProfiles and CacheStatQueues and store it in database
 	//make 1 insert for both StatQueueProfile and StatQueue instead of 2
-	loadID := utils.UUIDSha1Prefix()
-	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheStatQueueProfiles: loadID, utils.CacheStatQueues: loadID}); err != nil {
+	loadID := time.Now().UnixNano()
+	if err := apierV1.DataManager.SetLoadIDs(map[string]int64{utils.CacheStatQueueProfiles: loadID, utils.CacheStatQueues: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueueProfile
@@ -128,8 +130,8 @@ func (apierV1 *ApierV1) RemStatQueueProfile(args *utils.TenantIDWrapper, reply *
 	}
 	//generate a loadID for CacheStatQueueProfiles and CacheStatQueues and store it in database
 	//make 1 insert for both StatQueueProfile and StatQueue instead of 2
-	loadID := utils.UUIDSha1Prefix()
-	if err := apierV1.DataManager.SetLoadIDs(map[string]string{utils.CacheStatQueueProfiles: loadID, utils.CacheStatQueues: loadID}); err != nil {
+	loadID := time.Now().UnixNano()
+	if err := apierV1.DataManager.SetLoadIDs(map[string]int64{utils.CacheStatQueueProfiles: loadID, utils.CacheStatQueues: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueues

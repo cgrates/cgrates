@@ -470,8 +470,8 @@ func (chS *CacheS) V1FlushCache(args utils.AttrReloadCache, reply *string) (err 
 }
 
 //populateCacheLoadIDs populate cacheLoadIDs based on attrs
-func populateCacheLoadIDs(loadIDs map[string]string, attrs utils.AttrReloadCache) (cacheLoadIDs map[string]string) {
-	cacheLoadIDs = make(map[string]string)
+func populateCacheLoadIDs(loadIDs map[string]int64, attrs utils.AttrReloadCache) (cacheLoadIDs map[string]int64) {
+	cacheLoadIDs = make(map[string]int64)
 	//based on IDs of each type populate cacheLoadIDs and add into cache
 	if attrs.DestinationIDs == nil || len(*attrs.DestinationIDs) != 0 {
 		cacheLoadIDs[utils.CacheDestinations] = loadIDs[utils.CacheDestinations]

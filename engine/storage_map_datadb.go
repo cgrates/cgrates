@@ -1423,7 +1423,7 @@ func (ms *MapStorage) GetStorageType() string {
 	return utils.MAPSTOR
 }
 
-func (ms *MapStorage) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[string]string, err error) {
+func (ms *MapStorage) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[string]int64, err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	values, ok := ms.dict[utils.LoadIDs]
@@ -1435,12 +1435,12 @@ func (ms *MapStorage) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[string
 		return nil, err
 	}
 	if itemIDPrefix != "" {
-		return map[string]string{itemIDPrefix: loadIDs[itemIDPrefix]}, nil
+		return map[string]int64{itemIDPrefix: loadIDs[itemIDPrefix]}, nil
 	}
 	return loadIDs, nil
 }
 
-func (ms *MapStorage) SetLoadIDsDrv(loadIDs map[string]string) (err error) {
+func (ms *MapStorage) SetLoadIDsDrv(loadIDs map[string]int64) (err error) {
 	var result []byte
 	result, err = ms.ms.Marshal(loadIDs)
 	if err != nil {
