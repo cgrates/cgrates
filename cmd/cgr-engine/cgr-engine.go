@@ -299,7 +299,11 @@ func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, in
 	server.RpcRegister(smgRpc)
 
 	ssv1 := v1.NewSessionSv1(sm) // methods with multiple options
-	server.RpcRegister(ssv1)
+	if !config.CgrConfig().DispatcherSCfg().Enabled {
+		server.RpcRegister(ssv1)
+	} else {
+		engine.IntRPC.AddConnection(utils.SessionSv1, ssv1)
+	}
 	// Register BiRpc handlers
 	if cfg.SessionSCfg().ListenBijson != "" {
 		for method, handler := range smgRpc.Handlers() {
@@ -674,7 +678,11 @@ func startAttributeService(internalAttributeSChan chan rpcclient.RpcClientConnec
 		return
 	}()
 	aSv1 := v1.NewAttributeSv1(aS)
-	server.RpcRegister(aSv1)
+	if !config.CgrConfig().DispatcherSCfg().Enabled {
+		server.RpcRegister(aSv1)
+	} else {
+		engine.IntRPC.AddConnection(utils.AttributeSv1, aSv1)
+	}
 	internalAttributeSChan <- aSv1
 }
 
@@ -723,7 +731,11 @@ func startChargerService(internalChargerSChan chan rpcclient.RpcClientConnection
 		return
 	}()
 	cSv1 := v1.NewChargerSv1(cS)
-	server.RpcRegister(cSv1)
+	if !config.CgrConfig().DispatcherSCfg().Enabled {
+		server.RpcRegister(cSv1)
+	} else {
+		engine.IntRPC.AddConnection(utils.ChargerSv1, cSv1)
+	}
 	internalChargerSChan <- cSv1
 }
 
@@ -770,7 +782,11 @@ func startResourceService(internalRsChan chan rpcclient.RpcClientConnection, cac
 		return
 	}()
 	rsV1 := v1.NewResourceSv1(rS)
-	server.RpcRegister(rsV1)
+	if !config.CgrConfig().DispatcherSCfg().Enabled {
+		server.RpcRegister(rsV1)
+	} else {
+		engine.IntRPC.AddConnection(utils.ResourceSv1, rsV1)
+	}
 	internalRsChan <- rsV1
 }
 
@@ -817,7 +833,11 @@ func startStatService(internalStatSChan chan rpcclient.RpcClientConnection, cach
 		return
 	}()
 	stsV1 := v1.NewStatSv1(sS)
-	server.RpcRegister(stsV1)
+	if !config.CgrConfig().DispatcherSCfg().Enabled {
+		server.RpcRegister(stsV1)
+	} else {
+		engine.IntRPC.AddConnection(utils.StatSv1, stsV1)
+	}
 	internalStatSChan <- stsV1
 }
 
@@ -848,7 +868,11 @@ func startThresholdService(internalThresholdSChan chan rpcclient.RpcClientConnec
 		return
 	}()
 	tSv1 := v1.NewThresholdSv1(tS)
-	server.RpcRegister(tSv1)
+	if !config.CgrConfig().DispatcherSCfg().Enabled {
+		server.RpcRegister(tSv1)
+	} else {
+		engine.IntRPC.AddConnection(utils.ThresholdSv1, tSv1)
+	}
 	internalThresholdSChan <- tSv1
 }
 
@@ -929,7 +953,11 @@ func startSupplierService(internalSupplierSChan chan rpcclient.RpcClientConnecti
 		return
 	}()
 	splV1 := v1.NewSupplierSv1(splS)
-	server.RpcRegister(splV1)
+	if !config.CgrConfig().DispatcherSCfg().Enabled {
+		server.RpcRegister(splV1)
+	} else {
+		engine.IntRPC.AddConnection(utils.SupplierSv1, splV1)
+	}
 	internalSupplierSChan <- splV1
 }
 
@@ -1080,6 +1108,8 @@ func initCacheS(internalCacheSChan chan rpcclient.RpcClientConnection,
 
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(v1.NewCacheSv1(chS))
+	} else {
+		engine.IntRPC.AddConnection(utils.CacheSv1, v1.NewCacheSv1(chS))
 	}
 	internalCacheSChan <- chS
 	return
@@ -1088,6 +1118,8 @@ func initCacheS(internalCacheSChan chan rpcclient.RpcClientConnection,
 func initGuardianSv1(server *utils.Server) {
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(v1.NewGuardianSv1())
+	} else {
+		engine.IntRPC.AddConnection(utils.GuardianSv1, v1.NewGuardianSv1())
 	}
 }
 
@@ -1096,6 +1128,8 @@ func initSchedulerS(internalCacheSChan chan rpcclient.RpcClientConnection,
 	schdS := servmanager.NewSchedulerS(srvMngr)
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(v1.NewSchedulerSv1(schdS))
+	} else {
+		engine.IntRPC.AddConnection(utils.SchedulerSv1, v1.NewSchedulerSv1(schdS))
 	}
 	internalCacheSChan <- schdS
 }

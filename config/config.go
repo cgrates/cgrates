@@ -692,11 +692,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
-	if self.dispatcherSCfg.Enabled {
-		if self.attributeSCfg.Enabled {
-			return fmt.Errorf("<%s> cannot start in tandem with <%s>", utils.DispatcherS, utils.AttributeS)
-		}
-	}
 	// Scheduler check connection with CDR Server
 	if !self.cdrsCfg.CDRSEnabled {
 		for _, connCfg := range self.schedulerCfg.CDRsConns {

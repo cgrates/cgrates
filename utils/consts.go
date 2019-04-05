@@ -703,6 +703,7 @@ const (
 
 // ApierV1 APIs
 const (
+	ApierV1                         = "ApierV1"
 	ApierV1ComputeFilterIndexes     = "ApierV1.ComputeFilterIndexes"
 	ApierV1Ping                     = "ApierV1.Ping"
 	ApierV1SetDispatcherProfile     = "ApierV1.SetDispatcherProfile"
@@ -716,6 +717,7 @@ const (
 )
 
 const (
+	ApierV2                         = "ApierV2"
 	ApierV2LoadTariffPlanFromFolder = "ApierV2.LoadTariffPlanFromFolder"
 	ApierV2GetCDRs                  = "ApierV2.GetCDRs"
 	ApierV2GetAccount               = "ApierV2.GetAccount"

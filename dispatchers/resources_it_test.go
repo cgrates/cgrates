@@ -39,11 +39,11 @@ var sTestsDspRes = []func(t *testing.T){
 
 //Test start here
 func TestDspResourceSTMySQL(t *testing.T) {
-	testDsp(t, sTestsDspRes, "TestDspResourceS", "all", "all2", "attributes", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	testDsp(t, sTestsDspRes, "TestDspResourceS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
 }
 
 func TestDspResourceSMongo(t *testing.T) {
-	testDsp(t, sTestsDspRes, "TestDspResourceS", "all", "all2", "attributes_mongo", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+	testDsp(t, sTestsDspRes, "TestDspResourceS", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
 }
 
 func testDspResPingFailover(t *testing.T) {

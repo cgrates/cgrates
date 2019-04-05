@@ -37,11 +37,11 @@ var sTestsDspRsp = []func(t *testing.T){
 
 //Test start here
 func TestDspResponderTMySQL(t *testing.T) {
-	testDsp(t, sTestsDspRsp, "TestDspAttributeS", "all", "all2", "attributes", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	testDsp(t, sTestsDspRsp, "TestDspAttributeS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
 }
 
 func TestDspResponderMongo(t *testing.T) {
-	testDsp(t, sTestsDspRsp, "TestDspAttributeS", "all", "all2", "attributes_mongo", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+	testDsp(t, sTestsDspRsp, "TestDspAttributeS", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
 }
 
 func testDspResponderStatus(t *testing.T) {
@@ -105,6 +105,9 @@ func getNodeWithRoute(route string, t *testing.T) string {
 	}
 	if err := dispEngine.RCP.Call(utils.ResponderStatus, &ev, &reply); err != nil {
 		t.Error(err)
+	}
+	if reply[utils.NodeID] == nil {
+		return ""
 	}
 	return reply[utils.NodeID].(string)
 }

@@ -29,24 +29,22 @@
 
 
 "attributes": {
-	"enabled": false
+	"enabled": true
 },
 
 "scheduler": {
 	"enabled": true,				
 },
 
+"rals": {
+	"enabled": true,
+},
+
 "dispatchers":{
  	"enabled": true,
  	"attributes_conns": [
-		{"address": "127.0.0.1:5012", "transport": "*json"},
+		{"address": "*internal"},
  	],
-},
-
-"apier": {	
-	"caches_conns":[						// connections to CacheS for reloads
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],						
 },
 
 }
