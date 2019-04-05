@@ -1960,23 +1960,57 @@ func TestDDCGetFloat64Value(t *testing.T) {
 	}
 }
 
+func TestDDCGetStringValue2(t *testing.T) {
+	statDistinct, _ := NewDDC(2, "", []string{})
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.Destination: "1001"}}
+	if strVal := statDistinct.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
+		t.Errorf("wrong statDistinct value: %s", strVal)
+	}
+
+	statDistinct.AddEvent(ev)
+	if strVal := statDistinct.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
+		t.Errorf("wrong statDistinct value: %s", strVal)
+	}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.Destination: "1002"}}
+	statDistinct.AddEvent(ev2)
+	if strVal := statDistinct.GetStringValue(""); strVal != "2" {
+		t.Errorf("wrong statDistinct value: %s", strVal)
+	}
+	statDistinct.RemEvent(ev.ID)
+	if strVal := statDistinct.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
+		t.Errorf("wrong statDistinct value: %s", strVal)
+	}
+}
+
 func TestDDCCompress(t *testing.T) {
-	ddc := &StatDDC{Destinations: make(map[string]utils.StringMap), Events: make(map[string]string), MinItems: 2, FilterIDs: []string{}}
+	ddc := &StatDDC{
+		Events:      make(map[string]map[string]int64),
+		FieldValues: make(map[string]map[string]struct{}),
+		MinItems:    2,
+		FilterIDs:   []string{},
+	}
 	expected := &StatDDC{
-		Destinations: map[string]utils.StringMap{
-			"1001": utils.StringMap{
-				"EVENT_1": true,
+		Events: map[string]map[string]int64{
+			"EVENT_1": map[string]int64{
+				"1001": 2,
 			},
-			"1002": utils.StringMap{
-				"EVENT_3": true,
+			"EVENT_3": map[string]int64{
+				"1002": 1,
 			},
 		},
-		Events: map[string]string{
-			"EVENT_1": "1001",
-			"EVENT_3": "1002",
+		FieldValues: map[string]map[string]struct{}{
+			"1001": map[string]struct{}{
+				"EVENT_1": struct{}{},
+			},
+			"1002": map[string]struct{}{
+				"EVENT_3": struct{}{},
+			},
 		},
 		MinItems:  2,
 		FilterIDs: []string{},
+		Count:     3,
 	}
 	expected.GetStringValue("")
 	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
@@ -1998,24 +2032,6 @@ func TestDDCCompress(t *testing.T) {
 	if !reflect.DeepEqual(*expected, *ddc) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(ddc))
 	}
-	expected = &StatDDC{
-		Destinations: map[string]utils.StringMap{
-			"1001": utils.StringMap{
-				"EVENT_1": true,
-			},
-			"1002": utils.StringMap{
-				"EVENT_3": true,
-			},
-		},
-		Events: map[string]string{
-			"EVENT_1": "1001",
-			"EVENT_3": "1002",
-		},
-		MinItems:  2,
-		FilterIDs: []string{},
-	}
-	expected.GetStringValue("")
-
 	rply = ddc.Compress(10, "EVENT_3")
 	sort.Strings(rply)
 	if !reflect.DeepEqual(expIDs, rply) {
@@ -2048,7 +2064,7 @@ func TestDDCGetCompressFactor(t *testing.T) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
 	}
 	ddc.AddEvent(ev2)
-	expectedCF["EVENT_2"] = 1
+	expectedCF["EVENT_2"] = 2
 	if CF = ddc.GetCompressFactor(make(map[string]int)); !reflect.DeepEqual(expectedCF, CF) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
 	}
@@ -2621,39 +2637,29 @@ func TestStatAverageGetCompressFactor(t *testing.T) {
 func TestStatDistinctGetFloat64Value(t *testing.T) {
 	statDistinct, _ := NewStatDistinct(2, "Usage", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
-		Event: map[string]interface{}{
-			"Cost":            "20",
-			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			"Usage":           time.Duration(10 * time.Second),
-			utils.PDD:         time.Duration(5 * time.Second),
-			utils.Destination: "1002"}}
+		Event: map[string]interface{}{"Usage": time.Duration(10 * time.Second)}}
 	statDistinct.AddEvent(ev)
 	if v := statDistinct.GetFloat64Value(); v != -1.0 {
 		t.Errorf("wrong statDistinct value: %v", v)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2"}
 	statDistinct.AddEvent(ev2)
-	if v := statDistinct.GetFloat64Value(); v != 1.0 {
+	if v := statDistinct.GetFloat64Value(); v != -1.0 {
 		t.Errorf("wrong statDistinct value: %v", v)
 	}
 	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_4",
 		Event: map[string]interface{}{
-			"Cost":            "20",
-			"Usage":           time.Duration(1 * time.Minute),
-			"AnswerTime":      time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.PDD:         time.Duration(10 * time.Second),
-			utils.Destination: "1001",
+			"Usage": time.Duration(1 * time.Minute),
 		},
 	}
 	ev5 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_5",
 		Event: map[string]interface{}{
-			"Cost":            "20",
-			"Usage":           time.Duration(1*time.Minute + 30*time.Second),
-			"AnswerTime":      time.Date(2015, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Destination: "1003",
+			"Usage": time.Duration(1*time.Minute + 30*time.Second),
 		},
 	}
-	statDistinct.AddEvent(ev4)
+	if err := statDistinct.AddEvent(ev4); err != nil {
+		t.Error(err)
+	}
 	if strVal := statDistinct.GetFloat64Value(); strVal != 2 {
 		t.Errorf("wrong statDistinct value: %v", strVal)
 	}
@@ -2662,11 +2668,11 @@ func TestStatDistinctGetFloat64Value(t *testing.T) {
 		t.Errorf("wrong statDistinct value: %v", strVal)
 	}
 	statDistinct.RemEvent(ev2.ID)
-	if strVal := statDistinct.GetFloat64Value(); strVal != 2 {
+	if strVal := statDistinct.GetFloat64Value(); strVal != 3 {
 		t.Errorf("wrong statDistinct value: %v", strVal)
 	}
 	statDistinct.RemEvent(ev4.ID)
-	if strVal := statDistinct.GetFloat64Value(); strVal != 1 {
+	if strVal := statDistinct.GetFloat64Value(); strVal != 2 {
 		t.Errorf("wrong statDistinct value: %v", strVal)
 	}
 	statDistinct.RemEvent(ev.ID)
@@ -2682,10 +2688,7 @@ func TestStatDistinctGetFloat64Value(t *testing.T) {
 func TestStatDistinctGetStringValue(t *testing.T) {
 	statDistinct, _ := NewStatDistinct(2, "Cost", []string{})
 	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
-		Event: map[string]interface{}{
-			"Cost":            "20",
-			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Destination: "1002"}}
+		Event: map[string]interface{}{"Cost": "20"}}
 	if strVal := statDistinct.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
@@ -2695,19 +2698,12 @@ func TestStatDistinctGetStringValue(t *testing.T) {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
-		Event: map[string]interface{}{
-			"Cost":            "20",
-			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Destination: "1002"}}
-
+		Event: map[string]interface{}{"Cost": "20"}}
 	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
-		Event: map[string]interface{}{
-			"Cost":            "20",
-			"AnswerTime":      time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Destination: "1001"}}
+		Event: map[string]interface{}{"Cost": "40"}}
 	statDistinct.AddEvent(ev2)
 	statDistinct.AddEvent(ev3)
-	if strVal := statDistinct.GetStringValue(""); strVal != "3" {
+	if strVal := statDistinct.GetStringValue(""); strVal != "2" {
 		t.Errorf("wrong statDistinct value: %s", strVal)
 	}
 	statDistinct.RemEvent(ev.ID)
@@ -2721,6 +2717,124 @@ func TestStatDistinctGetStringValue(t *testing.T) {
 	statDistinct.RemEvent(ev3.ID)
 	if strVal := statDistinct.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
 		t.Errorf("wrong statDistinct value: %s", strVal)
+	}
+}
+
+func TestStatDistinctGetStringValue2(t *testing.T) {
+	statDistinct, _ := NewStatDistinct(2, "Cost", []string{})
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": "20"}}
+	if strVal := statDistinct.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
+		t.Errorf("wrong statDistinct value: %s", strVal)
+	}
+
+	statDistinct.AddEvent(ev)
+	if strVal := statDistinct.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
+		t.Errorf("wrong statDistinct value: %s", strVal)
+	}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{"Cost": "40"}}
+	statDistinct.AddEvent(ev2)
+	if strVal := statDistinct.GetStringValue(""); strVal != "2" {
+		t.Errorf("wrong statDistinct value: %s", strVal)
+	}
+	statDistinct.RemEvent(ev.ID)
+	if strVal := statDistinct.GetStringValue(""); strVal != utils.NOT_AVAILABLE {
+		t.Errorf("wrong statDistinct value: %s", strVal)
+	}
+}
+
+func TestStatDistinctCompress(t *testing.T) {
+	ddc := &StatDistinct{
+		Events:      make(map[string]map[string]int64),
+		FieldValues: make(map[string]map[string]struct{}),
+		MinItems:    2,
+		FilterIDs:   []string{},
+		FieldName:   utils.Destination,
+	}
+	expected := &StatDistinct{
+		Events: map[string]map[string]int64{
+			"EVENT_1": map[string]int64{
+				"1001": 2,
+			},
+			"EVENT_3": map[string]int64{
+				"1002": 1,
+			},
+		},
+		FieldValues: map[string]map[string]struct{}{
+			"1001": map[string]struct{}{
+				"EVENT_1": struct{}{},
+			},
+			"1002": map[string]struct{}{
+				"EVENT_3": struct{}{},
+			},
+		},
+		MinItems:  2,
+		FilterIDs: []string{},
+		FieldName: utils.Destination,
+		Count:     3,
+	}
+	expected.GetStringValue("")
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.Destination: "1001"}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.Destination: "1001"}}
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_3",
+		Event: map[string]interface{}{utils.Destination: "1002"}}
+	ddc.AddEvent(ev1)
+	ddc.AddEvent(ev2)
+	ddc.AddEvent(ev3)
+	expIDs := []string{"EVENT_1", "EVENT_3"}
+	rply := ddc.Compress(10, "EVENT_3")
+	sort.Strings(rply)
+	if !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	ddc.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *ddc) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(ddc))
+	}
+	rply = ddc.Compress(10, "EVENT_3")
+	sort.Strings(rply)
+	if !reflect.DeepEqual(expIDs, rply) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expIDs), utils.ToJSON(rply))
+	}
+	ddc.GetStringValue("")
+	if !reflect.DeepEqual(*expected, *ddc) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(ddc))
+	}
+}
+
+func TestStatDistinctGetCompressFactor(t *testing.T) {
+	CF := make(map[string]int)
+	expectedCF := map[string]int{
+		"EVENT_1": 1,
+		"EVENT_2": 1,
+	}
+	ddc, _ := NewStatDistinct(2, utils.Destination, []string{})
+
+	ev := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_1",
+		Event: map[string]interface{}{utils.Destination: "1002"}}
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{utils.Destination: "1001"}}
+	ev4 := &utils.CGREvent{Tenant: "cgrates.org", ID: "EVENT_2",
+		Event: map[string]interface{}{utils.Destination: "1001"}}
+
+	ddc.AddEvent(ev)
+	ddc.AddEvent(ev2)
+	if CF = ddc.GetCompressFactor(make(map[string]int)); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+	ddc.AddEvent(ev2)
+	expectedCF["EVENT_2"] = 2
+	if CF = ddc.GetCompressFactor(make(map[string]int)); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
+	}
+	ddc.AddEvent(ev4)
+	expectedCF["EVENT_2"] = 3
+	CF["EVENT_2"] = 3
+	if CF = ddc.GetCompressFactor(CF); !reflect.DeepEqual(expectedCF, CF) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedCF), utils.ToJSON(CF))
 	}
 }
 
@@ -2856,7 +2970,7 @@ func TestDCCMarshal(t *testing.T) {
 			utils.Destination: "1002"}}
 	ddc.AddEvent(ev)
 	var nddc StatDDC
-	expected := []byte(`{"FilterIDs":[],"Destinations":{"1002":{"EVENT_1":true}},"Events":{"EVENT_1":"1002"},"MinItems":2}`)
+	expected := []byte(`{"FilterIDs":[],"FieldValues":{"1002":{"EVENT_1":{}}},"Events":{"EVENT_1":{"1002":1}},"MinItems":2,"Count":1}`)
 	if b, err := ddc.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
@@ -2925,7 +3039,7 @@ func TestStatDistrictMarshal(t *testing.T) {
 			utils.Destination: "1002"}}
 	statDistinct.AddEvent(ev)
 	var nStatDistinct StatDistinct
-	expected := []byte(`{"FilterIDs":[],"Numbers":1,"Events":{"EVENT_1":{}},"MinItems":2,"FieldName":"Usage"}`)
+	expected := []byte(`{"FilterIDs":[],"FieldValues":{"10s":{"EVENT_1":{}}},"Events":{"EVENT_1":{"10s":1}},"MinItems":2,"FieldName":"Usage","Count":1}`)
 	if b, err := statDistinct.Marshal(&jMarshaler); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, b) {
