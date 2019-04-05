@@ -1,0 +1,51 @@
+{
+
+// Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+// Copyright (C) ITsysCOM GmbH
+//
+// This file contains the default configuration hardcoded into CGRateS.
+// This is what you get when you load CGRateS with an empty configuration file.
+
+
+"stor_db": {
+	"db_password": "CGRateS.org",
+},
+
+"sessions": {
+	"enabled": true,
+	"attributes_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+},
+
+
+"rals": {
+	"enabled": true,
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"rals_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"chargers": {
+	"enabled": true,
+},
+
+
+"attributes": {
+	"enabled": true,
+},
+
+
+"dns_agent": {
+	"enabled": true,
+	"listen": ":53"		
+},
+
+
+}

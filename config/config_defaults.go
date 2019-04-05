@@ -455,8 +455,8 @@ const CGRATES_CFG_JSON = `
 
 "dns_agent": {
 	"enabled": false,											// enables the DNS agent: <true|false>
+	"listen": "127.0.0.1:2053",									// address where to listen for DNS requests <x.y.z.y:1234>
 	"listen_net": "udp",										// network to listen on <udp|tcp|tcp-tls>
-	"listen": "127.0.0.1:53",									// address where to listen for DNS requests <x.y.z.y:1234>
 	"sessions_conns": [											// connections to SessionS for session management and CDR posting
 		{"address": "*internal"}
 	],

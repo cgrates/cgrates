@@ -45,13 +45,15 @@ type DNSAgent struct {
 
 // ListenAndServe will run the DNS handler doing also the connection to listen address
 func (da *DNSAgent) ListenAndServe() error {
+	utils.Logger.Info(fmt.Sprintf("<%s> start listening on <%s:%s>",
+		utils.DNSAgent, da.cgrCfg.DNSAgentCfg().ListenNet, da.cgrCfg.DNSAgentCfg().Listen))
 	if strings.HasSuffix(da.cgrCfg.DNSAgentCfg().ListenNet, utils.TLSNoCaps) {
 		return dns.ListenAndServeTLS(
 			da.cgrCfg.DNSAgentCfg().Listen,
 			da.cgrCfg.TlsCfg().ServerCerificate,
 			da.cgrCfg.TlsCfg().ServerKey,
 			dns.HandlerFunc(
-				func(w ResponseWriter, m *Msg) {
+				func(w dns.ResponseWriter, m *dns.Msg) {
 					go da.handleMessage(w, m)
 				}),
 		)
@@ -60,7 +62,7 @@ func (da *DNSAgent) ListenAndServe() error {
 		da.cgrCfg.DNSAgentCfg().Listen,
 		da.cgrCfg.DNSAgentCfg().ListenNet,
 		dns.HandlerFunc(
-			func(w ResponseWriter, m *Msg) {
+			func(w dns.ResponseWriter, m *dns.Msg) {
 				go da.handleMessage(w, m)
 			}),
 	)
@@ -68,6 +70,6 @@ func (da *DNSAgent) ListenAndServe() error {
 
 // handleMessage is the entry point of all DNS requests
 // requests are reaching here asynchronously
-func (da *DNSAgent) handleMessage(w ResponseWriter, m *dns.Msg) {
+func (da *DNSAgent) handleMessage(w dns.ResponseWriter, m *dns.Msg) {
 	fmt.Printf("got message: %+v\n", m)
 }

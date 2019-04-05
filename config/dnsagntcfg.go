@@ -24,8 +24,8 @@ import (
 
 type DNSAgentCfg struct {
 	Enabled           bool
-	ListenNet         string // udp or tcp
 	Listen            string
+	ListenNet         string // udp or tcp
 	SessionSConns     []*RemoteHost
 	Timezone          string
 	RequestProcessors []*RequestProcessor

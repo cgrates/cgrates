@@ -427,6 +427,39 @@ func startRadiusAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitCh
 	exitChan <- true
 }
 
+func startDNSAgent(internalSMGChan chan rpcclient.RpcClientConnection,
+	filterSChan chan *engine.FilterS, exitChan chan bool) {
+	filterS := <-filterSChan
+	filterSChan <- filterS
+	utils.Logger.Info(fmt.Sprintf("starting %s service", utils.DNSAgent))
+	var err error
+	var smgConn *rpcclient.RpcClientPool
+	if len(cfg.RadiusAgentCfg().SessionSConns) != 0 {
+		smgConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+			cfg.TlsCfg().ClientKey,
+			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
+			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
+			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
+			cfg.RadiusAgentCfg().SessionSConns, internalSMGChan,
+			cfg.GeneralCfg().InternalTtl, false)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to SMG: %s", utils.DNSAgent, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	da, err := agents.NewDNSAgent(cfg, filterS, smgConn)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
+		exitChan <- true
+		return
+	}
+	if err = da.ListenAndServe(); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
+	}
+	exitChan <- true
+}
+
 func startFsAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
 	var err error
 	var sS rpcclient.RpcClientConnection
@@ -1448,6 +1481,10 @@ func main() {
 
 	if cfg.RadiusAgentCfg().Enabled {
 		go startRadiusAgent(internalSMGChan, exitChan, filterSChan)
+	}
+
+	if cfg.DNSAgentCfg().Enabled {
+		go startDNSAgent(internalSMGChan, filterSChan, exitChan)
 	}
 
 	if len(cfg.HttpAgentCfg()) != 0 {
