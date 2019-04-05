@@ -218,7 +218,7 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 	case 2:
 		return m.migrateV2Attributes()
 	case 3:
-		return m.migrateV2Attributes()
+		return m.migrateV3Attributes()
 	}
 	return
 }
