@@ -159,9 +159,9 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
 			{
-				FilterIDs:  []string{"*string:Account:1001"},
-				FieldName:  "Account",
-				Substitute: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
+				FilterIDs: []string{"*string:Account:1001"},
+				FieldName: "Account",
+				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -174,9 +174,9 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
 			{
-				FilterIDs:  []string{"*string:~Account:1001"},
-				FieldName:  "Account",
-				Substitute: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
+				FilterIDs: []string{"*string:~Account:1001"},
+				FieldName: "Account",
+				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,

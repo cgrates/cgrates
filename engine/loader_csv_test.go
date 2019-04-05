@@ -257,7 +257,7 @@ cgrates.org,SPP_1,,,,,supplier1,FLTR_DST_DE,Account2,RPL_3,ResGroup3,Stat2,10,,,
 cgrates.org,SPP_1,,,,,supplier1,,,,ResGroup4,Stat3,10,,,
 `
 	attributeProfiles = `
-#Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,FieldName,Type,Substitute,Blocker,Weight
+#Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,FieldName,Type,Value,Blocker,Weight
 cgrates.org,ALS1,con1,FLTR_1,2014-07-29T15:00:00Z,*string:Field1:Initial,Field1,*variable,Sub1,true,20
 cgrates.org,ALS1,con2;con3,,,,Field2,*variable,Sub2,true,20
 `
@@ -1511,16 +1511,16 @@ func TestLoadAttributeProfiles(t *testing.T) {
 			},
 			Attributes: []*utils.TPAttribute{
 				&utils.TPAttribute{
-					FilterIDs:  []string{"*string:Field1:Initial"},
-					FieldName:  "Field1",
-					Type:       utils.MetaVariable,
-					Substitute: "Sub1",
+					FilterIDs: []string{"*string:Field1:Initial"},
+					FieldName: "Field1",
+					Type:      utils.MetaVariable,
+					Value:     "Sub1",
 				},
 				&utils.TPAttribute{
-					FilterIDs:  []string{},
-					FieldName:  "Field2",
-					Type:       utils.MetaVariable,
-					Substitute: "Sub2",
+					FilterIDs: []string{},
+					FieldName: "Field2",
+					Type:      utils.MetaVariable,
+					Value:     "Sub2",
 				},
 			},
 			Blocker: true,

@@ -122,8 +122,8 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 			},
 			Attributes: []*engine.ExternalAttribute{
 				{
-					FieldName:  "Account",
-					Substitute: "1001",
+					FieldName: "Account",
+					Value:     "1001",
 				},
 			},
 			Weight: 20,
@@ -148,8 +148,8 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  "Account",
-					Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+					FieldName: "Account",
+					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -180,12 +180,12 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 			},
 			Attributes: []*engine.ExternalAttribute{
 				{
-					FieldName:  "Account",
-					Substitute: "1001",
+					FieldName: "Account",
+					Value:     "1001",
 				},
 				{
-					FieldName:  "Subject",
-					Substitute: "~Account",
+					FieldName: "Subject",
+					Value:     "~Account",
 				},
 			},
 			Weight: 20,
@@ -210,12 +210,12 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  "Account",
-					Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+					FieldName: "Account",
+					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName:  "Subject",
-					Substitute: config.NewRSRParsersMustCompile("~Account", true, utils.INFIELD_SEP),
+					FieldName: "Subject",
+					Value:     config.NewRSRParsersMustCompile("~Account", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,

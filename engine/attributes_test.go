@@ -88,8 +88,8 @@ var (
 			},
 			Attributes: []*Attribute{
 				{
-					FieldName:  utils.Account,
-					Substitute: config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
+					FieldName: utils.Account,
+					Value:     config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -105,8 +105,8 @@ var (
 			},
 			Attributes: []*Attribute{
 				{
-					FieldName:  utils.Account,
-					Substitute: config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
+					FieldName: utils.Account,
+					Value:     config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -122,8 +122,8 @@ var (
 			},
 			Attributes: []*Attribute{
 				{
-					FieldName:  utils.Account,
-					Substitute: config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
+					FieldName: utils.Account,
+					Value:     config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -139,8 +139,8 @@ var (
 			},
 			Attributes: []*Attribute{
 				{
-					FieldName:  utils.Account,
-					Substitute: config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
+					FieldName: utils.Account,
+					Value:     config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -410,8 +410,8 @@ func TestAttributeIndexer(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  utils.Account,
-				Substitute: config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
+				FieldName: utils.Account,
+				Value:     config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -476,8 +476,8 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field1",
-				Substitute: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				FieldName: "Field1",
+				Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -492,8 +492,8 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field2",
-				Substitute: config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
+				FieldName: "Field2",
+				Value:     config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -508,8 +508,8 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field3",
-				Substitute: config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
+				FieldName: "Field3",
+				Value:     config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 30,
@@ -584,8 +584,8 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field1",
-				Substitute: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				FieldName: "Field1",
+				Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -600,8 +600,8 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field2",
-				Substitute: config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
+				FieldName: "Field2",
+				Value:     config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -616,8 +616,8 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field3",
-				Substitute: config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
+				FieldName: "Field3",
+				Value:     config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 30,
@@ -691,8 +691,8 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field1",
-				Substitute: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				FieldName: "Field1",
+				Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -707,8 +707,8 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field2",
-				Substitute: config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
+				FieldName: "Field2",
+				Value:     config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -723,8 +723,8 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field3",
-				Substitute: config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
+				FieldName: "Field3",
+				Value:     config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 30,
@@ -798,8 +798,8 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field1",
-				Substitute: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				FieldName: "Field1",
+				Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -814,8 +814,8 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field2",
-				Substitute: config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
+				FieldName: "Field2",
+				Value:     config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -888,8 +888,8 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field1",
-				Substitute: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				FieldName: "Field1",
+				Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -904,8 +904,8 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field2",
-				Substitute: config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
+				FieldName: "Field2",
+				Value:     config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -921,8 +921,8 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field3",
-				Substitute: config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
+				FieldName: "Field3",
+				Value:     config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 30,
@@ -997,8 +997,8 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field1",
-				Substitute: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				FieldName: "Field1",
+				Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1014,8 +1014,8 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field2",
-				Substitute: config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
+				FieldName: "Field2",
+				Value:     config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -1030,8 +1030,8 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field3",
-				Substitute: config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
+				FieldName: "Field3",
+				Value:     config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 30,
@@ -1084,7 +1084,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 	}
 }
 
-func TestAttributeProcessSubstitute(t *testing.T) {
+func TestAttributeProcessValue(t *testing.T) {
 	//refresh the DM
 	if err := dmAtr.DataDB().Flush(""); err != nil {
 		t.Error(err)
@@ -1105,8 +1105,8 @@ func TestAttributeProcessSubstitute(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field2",
-				Substitute: config.NewRSRParsersMustCompile("~Field1", true, utils.INFIELD_SEP),
+				FieldName: "Field2",
+				Value:     config.NewRSRParsersMustCompile("~Field1", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1174,19 +1174,19 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FilterIDs:  []string{"*string:~PassField:Test"},
-				FieldName:  "PassField",
-				Substitute: config.NewRSRParsersMustCompile("Pass", true, utils.INFIELD_SEP),
+				FilterIDs: []string{"*string:~PassField:Test"},
+				FieldName: "PassField",
+				Value:     config.NewRSRParsersMustCompile("Pass", true, utils.INFIELD_SEP),
 			},
 			{
-				FilterIDs:  []string{"*string:~PassField:RandomValue"},
-				FieldName:  "NotPassField",
-				Substitute: config.NewRSRParsersMustCompile("NotPass", true, utils.INFIELD_SEP),
+				FilterIDs: []string{"*string:~PassField:RandomValue"},
+				FieldName: "NotPassField",
+				Value:     config.NewRSRParsersMustCompile("NotPass", true, utils.INFIELD_SEP),
 			},
 			{
-				FilterIDs:  []string{"*notexists:~RandomField:"},
-				FieldName:  "RandomField",
-				Substitute: config.NewRSRParsersMustCompile("RandomValue", true, utils.INFIELD_SEP),
+				FilterIDs: []string{"*notexists:~RandomField:"},
+				FieldName: "RandomField",
+				Value:     config.NewRSRParsersMustCompile("RandomValue", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -1254,9 +1254,9 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field2",
-				Type:       utils.META_CONSTANT,
-				Substitute: config.NewRSRParsersMustCompile("ConstVal", true, utils.INFIELD_SEP),
+				FieldName: "Field2",
+				Type:      utils.META_CONSTANT,
+				Value:     config.NewRSRParsersMustCompile("ConstVal", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1325,14 +1325,14 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field2",
-				Type:       utils.MetaVariable,
-				Substitute: config.NewRSRParsersMustCompile("~Field1", true, utils.INFIELD_SEP),
+				FieldName: "Field2",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("~Field1", true, utils.INFIELD_SEP),
 			},
 			{
-				FieldName:  "Field2",
-				Type:       utils.MetaVariable,
-				Substitute: config.NewRSRParsersMustCompile("~TheField", true, utils.INFIELD_SEP),
+				FieldName: "Field2",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("~TheField", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1403,19 +1403,19 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field2",
-				Type:       utils.META_COMPOSED,
-				Substitute: config.NewRSRParsersMustCompile("~Field1", true, utils.INFIELD_SEP),
+				FieldName: "Field2",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~Field1", true, utils.INFIELD_SEP),
 			},
 			{
-				FieldName:  "Field2",
-				Type:       utils.META_COMPOSED,
-				Substitute: config.NewRSRParsersMustCompile("_", true, utils.INFIELD_SEP),
+				FieldName: "Field2",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("_", true, utils.INFIELD_SEP),
 			},
 			{
-				FieldName:  "Field2",
-				Type:       utils.META_COMPOSED,
-				Substitute: config.NewRSRParsersMustCompile("~TheField", true, utils.INFIELD_SEP),
+				FieldName: "Field2",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~TheField", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1486,9 +1486,9 @@ func TestAttributeProcessEventSum(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field2",
-				Type:       utils.MetaSum,
-				Substitute: config.NewRSRParsersMustCompile("10;~NumField;20", true, utils.INFIELD_SEP),
+				FieldName: "Field2",
+				Type:      utils.MetaSum,
+				Value:     config.NewRSRParsersMustCompile("10;~NumField;20", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1561,9 +1561,9 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field2",
-				Type:       utils.META_USAGE_DIFFERENCE,
-				Substitute: config.NewRSRParsersMustCompile("~UnixTimeStamp;~UnixTimeStamp2", true, utils.INFIELD_SEP),
+				FieldName: "Field2",
+				Type:      utils.META_USAGE_DIFFERENCE,
+				Value:     config.NewRSRParsersMustCompile("~UnixTimeStamp;~UnixTimeStamp2", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1638,9 +1638,9 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field2",
-				Type:       utils.MetaValueExponent,
-				Substitute: config.NewRSRParsersMustCompile("~Multiplier;~Pow", true, utils.INFIELD_SEP),
+				FieldName: "Field2",
+				Type:      utils.MetaValueExponent,
+				Value:     config.NewRSRParsersMustCompile("~Multiplier;~Pow", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1725,9 +1725,9 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field2",
-				Type:       utils.META_CONSTANT,
-				Substitute: config.NewRSRParsersMustCompile("ConstVal", true, utils.INFIELD_SEP),
+				FieldName: "Field2",
+				Type:      utils.META_CONSTANT,
+				Value:     config.NewRSRParsersMustCompile("ConstVal", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1788,9 +1788,9 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Field2",
-				Type:       utils.MetaVariable,
-				Substitute: config.NewRSRParsersMustCompile("~Field1", true, utils.INFIELD_SEP),
+				FieldName: "Field2",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("~Field1", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,

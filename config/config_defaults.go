@@ -540,8 +540,9 @@ const CGRATES_CFG_JSON = `
 					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "~4"},
 					{"tag": "AttributeFilterIDs", "field_id": "AttributeFilterIDs", "type": "*composed", "value": "~5"},
 					{"tag": "FieldName", "field_id": "FieldName", "type": "*composed", "value": "~6"},
-					{"tag": "Substitute", "field_id": "Substitute", "type": "*composed", "value": "~7"},
-					{"tag": "Weight", "field_id": "Weight", "type": "*composed", "value": "~8"},
+					{"tag": "Type", "field_id": "Type", "type": "*composed", "value": "~7"},
+					{"tag": "Value", "field_id": "Value", "type": "*composed", "value": "~8"},
+					{"tag": "Weight", "field_id": "Weight", "type": "*composed", "value": "~9"},
 				],
 			},
 			{

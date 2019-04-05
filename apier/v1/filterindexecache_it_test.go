@@ -887,12 +887,12 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  utils.Account,
-					Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+					FieldName: utils.Account,
+					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName:  utils.Subject,
-					Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+					FieldName: utils.Subject,
+					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -980,12 +980,12 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  utils.Account,
-					Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+					FieldName: utils.Account,
+					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName:  utils.Subject,
-					Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+					FieldName: utils.Subject,
+					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,

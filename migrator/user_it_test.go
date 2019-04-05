@@ -129,16 +129,19 @@ func testUsrITMigrateAndMove(t *testing.T) {
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
 			{
-				FieldName:  utils.MetaTenant,
-				Substitute: config.NewRSRParsersMustCompile("cgrates.com", true, utils.INFIELD_SEP),
+				FieldName: utils.MetaTenant,
+				Type:      utils.META_CONSTANT,
+				Value:     config.NewRSRParsersMustCompile("cgrates.com", true, utils.INFIELD_SEP),
 			},
 			{
-				FieldName:  utils.RequestType,
-				Substitute: config.NewRSRParsersMustCompile("*prepaid", true, utils.INFIELD_SEP),
+				FieldName: utils.RequestType,
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("*prepaid", true, utils.INFIELD_SEP),
 			},
 			{
-				FieldName:  "msisdn",
-				Substitute: config.NewRSRParsersMustCompile("123423534646752", true, utils.INFIELD_SEP),
+				FieldName: "msisdn",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("123423534646752", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: false,

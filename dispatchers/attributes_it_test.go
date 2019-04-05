@@ -118,10 +118,10 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 		Contexts:  []string{"simpleauth"},
 		Attributes: []*engine.Attribute{
 			{
-				FilterIDs:  []string{},
-				FieldName:  "Password",
-				Type:       utils.META_CONSTANT,
-				Substitute: config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
+				FilterIDs: []string{},
+				FieldName: "Password",
+				Type:      utils.META_CONSTANT,
+				Value:     config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20.0,
@@ -294,10 +294,10 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 		Contexts:  []string{"simpleauth"},
 		Attributes: []*engine.Attribute{
 			{
-				FilterIDs:  []string{},
-				FieldName:  "Password",
-				Type:       utils.META_CONSTANT,
-				Substitute: config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
+				FilterIDs: []string{},
+				FieldName: "Password",
+				Type:      utils.META_CONSTANT,
+				Value:     config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20.0,
@@ -386,10 +386,10 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 		Contexts:  []string{"simpleauth"},
 		Attributes: []*engine.Attribute{
 			{
-				FilterIDs:  []string{},
-				FieldName:  "Password",
-				Type:       utils.META_CONSTANT,
-				Substitute: config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
+				FilterIDs: []string{},
+				FieldName: "Password",
+				Type:      utils.META_CONSTANT,
+				Value:     config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20.0,

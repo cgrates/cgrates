@@ -64,9 +64,9 @@ func Testv1AttributeProfileAsAttributeProfile(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FilterIDs:  []string{"*string:FL1:In1"},
-				FieldName:  "FL1",
-				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+				FilterIDs: []string{"*string:FL1:In1"},
+				FieldName: "FL1",
+				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,

@@ -368,7 +368,7 @@ type TPAttribute struct {
 	AttributeFilterIDs string  `index:"5" re:""`
 	FieldName          string  `index:"6" re:""`
 	Type               string  `index:"7" re:""`
-	Substitute         string  `index:"8" re:""`
+	Value              string  `index:"8" re:""`
 	Blocker            bool    `index:"9" re:""`
 	Weight             float64 `index:"10" re:"\d+\.?\d*"`
 	CreatedAt          time.Time

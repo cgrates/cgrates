@@ -131,9 +131,9 @@ func testTPAlsPrfSetTPAlsPrf(t *testing.T) {
 		Contexts: []string{"con1"},
 		Attributes: []*utils.TPAttribute{
 			&utils.TPAttribute{
-				FieldName:  "FL1",
-				Substitute: "Al1",
-				FilterIDs:  []string{},
+				FieldName: "FL1",
+				Value:     "Al1",
+				FilterIDs: []string{},
 			},
 		},
 		Weight: 20,
@@ -173,14 +173,14 @@ func testTPAlsPrfGetTPAlsPrfIDs(t *testing.T) {
 func testTPAlsPrfUpdateTPAlsPrf(t *testing.T) {
 	tpAlsPrf.Attributes = []*utils.TPAttribute{
 		&utils.TPAttribute{
-			FieldName:  "FL1",
-			Substitute: "Al1",
-			FilterIDs:  []string{},
+			FieldName: "FL1",
+			Value:     "Al1",
+			FilterIDs: []string{},
 		},
 		&utils.TPAttribute{
-			FieldName:  "FL2",
-			Substitute: "Al2",
-			FilterIDs:  []string{},
+			FieldName: "FL2",
+			Value:     "Al2",
+			FilterIDs: []string{},
 		},
 	}
 	var result string
@@ -205,14 +205,14 @@ func testTPAlsPrfGetTPAlsPrfAfterUpdate(t *testing.T) {
 		Contexts: []string{"con1"},
 		Attributes: []*utils.TPAttribute{
 			&utils.TPAttribute{
-				FieldName:  "FL2",
-				Substitute: "Al2",
-				FilterIDs:  []string{},
+				FieldName: "FL2",
+				Value:     "Al2",
+				FilterIDs: []string{},
 			},
 			&utils.TPAttribute{
-				FieldName:  "FL1",
-				Substitute: "Al1",
-				FilterIDs:  []string{},
+				FieldName: "FL1",
+				Value:     "Al1",
+				FilterIDs: []string{},
 			},
 		},
 		Weight: 20,

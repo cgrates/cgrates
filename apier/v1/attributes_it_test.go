@@ -182,12 +182,12 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 				ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  utils.Account,
-					Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+					FieldName: utils.Account,
+					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName:  utils.Subject,
-					Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+					FieldName: utils.Subject,
+					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 10.0,
@@ -207,8 +207,8 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 		return
 	}
 	attrReply.Compile() // Populate private variables in RSRParsers
-	if !reflect.DeepEqual(eAttrPrf.Attributes[0].Substitute[0], attrReply.Attributes[0].Substitute[0]) {
-		t.Errorf("Expecting: %+v, received: %+v", eAttrPrf.Attributes[0].Substitute[0], attrReply.Attributes[0].Substitute[0])
+	if !reflect.DeepEqual(eAttrPrf.Attributes[0].Value[0], attrReply.Attributes[0].Value[0]) {
+		t.Errorf("Expecting: %+v, received: %+v", eAttrPrf.Attributes[0].Value[0], attrReply.Attributes[0].Value[0])
 	}
 }
 
@@ -234,8 +234,8 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 				ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  utils.Account,
-					Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+					FieldName: utils.Account,
+					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 10.0,
@@ -286,8 +286,8 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 				ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  utils.Account,
-					Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+					FieldName: utils.Account,
+					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 10.0,
@@ -434,13 +434,13 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FilterIDs:  []string{"*string:~Account:1008"},
-					FieldName:  utils.Account,
-					Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+					FilterIDs: []string{"*string:~Account:1008"},
+					FieldName: utils.Account,
+					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName:  utils.Subject,
-					Substitute: config.NewRSRParsersMustCompile(utils.META_NONE, true, utils.INFIELD_SEP),
+					FieldName: utils.Subject,
+					Value:     config.NewRSRParsersMustCompile(utils.META_NONE, true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -501,13 +501,13 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FilterIDs:  []string{"*string:~Account:1008"},
-					FieldName:  utils.Account,
-					Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+					FilterIDs: []string{"*string:~Account:1008"},
+					FieldName: utils.Account,
+					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName:  utils.Subject,
-					Substitute: config.NewRSRParsersMustCompile(utils.META_NONE, true, utils.INFIELD_SEP),
+					FieldName: utils.Subject,
+					Value:     config.NewRSRParsersMustCompile(utils.META_NONE, true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -579,14 +579,14 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FilterIDs:  []string{"*string:~Account:1008"},
-					FieldName:  utils.Account,
-					Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+					FilterIDs: []string{"*string:~Account:1008"},
+					FieldName: utils.Account,
+					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 				{
-					FilterIDs:  []string{"*string:~Subject:1008"},
-					FieldName:  utils.Subject,
-					Substitute: config.NewRSRParsersMustCompile(utils.META_NONE, true, utils.INFIELD_SEP),
+					FilterIDs: []string{"*string:~Subject:1008"},
+					FieldName: utils.Subject,
+					Value:     config.NewRSRParsersMustCompile(utils.META_NONE, true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -633,8 +633,8 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  "Field2",
-					Substitute: config.NewRSRParsersMustCompile("~Field1", true, utils.INFIELD_SEP),
+					FieldName: "Field2",
+					Value:     config.NewRSRParsersMustCompile("~Field1", true, utils.INFIELD_SEP),
 				},
 			},
 			Blocker: true,
@@ -707,8 +707,8 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  "FL1",
-					Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+					FieldName: "FL1",
+					Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -735,12 +735,12 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 func testAttributeSUpdateAlsPrf(t *testing.T) {
 	alsPrf.Attributes = []*engine.Attribute{
 		{
-			FieldName:  "FL1",
-			Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+			FieldName: "FL1",
+			Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 		},
 		{
-			FieldName:  "FL2",
-			Substitute: config.NewRSRParsersMustCompile("Al2", true, utils.INFIELD_SEP),
+			FieldName: "FL2",
+			Value:     config.NewRSRParsersMustCompile("Al2", true, utils.INFIELD_SEP),
 		},
 	}
 	alsPrf.Compile()
@@ -797,7 +797,7 @@ func testAttributeSSetAlsPrf2(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FieldName: utils.Subject,
-					Substitute: config.RSRParsers{
+					Value: config.RSRParsers{
 						&config.RSRParser{
 							Rules:           "roam",
 							AllFiltersMatch: true,
@@ -841,7 +841,7 @@ func testAttributeSSetAlsPrf3(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FieldName: utils.Subject,
-					Substitute: config.RSRParsers{
+					Value: config.RSRParsers{
 						&config.RSRParser{
 							Rules: "",
 						},
@@ -872,7 +872,7 @@ func testAttributeSSetAlsPrf4(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FieldName: utils.Subject,
-					Substitute: config.RSRParsers{
+					Value: config.RSRParsers{
 						&config.RSRParser{},
 					},
 				},
@@ -908,8 +908,8 @@ func testAttributeSProcessEventWithSearchAndReplace(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  "Category",
-					Substitute: config.NewRSRParsersMustCompile("~Category:s/(.*)/${1}_suffix/", true, utils.INFIELD_SEP),
+					FieldName: "Category",
+					Value:     config.NewRSRParsersMustCompile("~Category:s/(.*)/${1}_suffix/", true, utils.INFIELD_SEP),
 				},
 			},
 			Blocker: true,
@@ -966,8 +966,8 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  "Field1",
-					Substitute: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+					FieldName: "Field1",
+					Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 10,
@@ -984,8 +984,8 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  "Field2",
-					Substitute: config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
+					FieldName: "Field2",
+					Value:     config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -1002,8 +1002,8 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  "Field3",
-					Substitute: config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
+					FieldName: "Field3",
+					Value:     config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 30,
@@ -1076,8 +1076,8 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  "Field1",
-					Substitute: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+					FieldName: "Field1",
+					Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 10,
@@ -1094,8 +1094,8 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  "Field2",
-					Substitute: config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
+					FieldName: "Field2",
+					Value:     config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -1112,8 +1112,8 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  "Field3",
-					Substitute: config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
+					FieldName: "Field3",
+					Value:     config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 30,
@@ -1195,8 +1195,8 @@ func testAttributeSCachingMetaNone(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  "Field1",
-					Substitute: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+					FieldName: "Field1",
+					Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 10,
@@ -1254,8 +1254,8 @@ func testAttributeSCachingMetaLoad(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  "Field1",
-					Substitute: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+					FieldName: "Field1",
+					Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 10,
@@ -1346,8 +1346,8 @@ func testAttributeSCachingMetaReload1(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  "Field1",
-					Substitute: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+					FieldName: "Field1",
+					Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 10,
@@ -1405,8 +1405,8 @@ func testAttributeSCachingMetaReload2(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  "Field1",
-					Substitute: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+					FieldName: "Field1",
+					Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 10,
@@ -1445,8 +1445,8 @@ func testAttributeSCachingMetaReload2(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  "Field1",
-					Substitute: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+					FieldName: "Field1",
+					Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 10,
@@ -1484,8 +1484,8 @@ func testAttributeSCachingMetaRemove(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  "Field1",
-					Substitute: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+					FieldName: "Field1",
+					Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 10,
@@ -1534,8 +1534,8 @@ func testAttributeSCachingMetaRemove(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName:  "Field1",
-					Substitute: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+					FieldName: "Field1",
+					Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 10,

@@ -255,9 +255,10 @@ func testAttrITMigrateAndMove(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			{
-				FilterIDs:  []string{"*string:FL1:In1"},
-				FieldName:  "FL1",
-				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+				FilterIDs: []string{"*string:FL1:In1"},
+				FieldName: "FL1",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -287,7 +288,7 @@ func testAttrITMigrateAndMove(t *testing.T) {
 
 		if vrs, err := attrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 			t.Error(err)
-		} else if vrs[utils.Attributes] != 3 {
+		} else if vrs[utils.Attributes] != 4 {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 		}
 		result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",
@@ -374,9 +375,10 @@ func testAttrITMigrateV2(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			{
-				FilterIDs:  []string{"*string:FL1:In1"},
-				FieldName:  "FL1",
-				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+				FilterIDs: []string{"*string:FL1:In1"},
+				FieldName: "FL1",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -405,7 +407,7 @@ func testAttrITMigrateV2(t *testing.T) {
 
 	if vrs, err := attrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 		t.Error(err)
-	} else if vrs[utils.Attributes] != 3 {
+	} else if vrs[utils.Attributes] != 4 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
 	result, err := attrMigrator.dmOut.DataManager().GetAttributeProfile("cgrates.org",

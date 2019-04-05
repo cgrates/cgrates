@@ -160,7 +160,7 @@ func testChargerSLoadAddCharger(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FieldName: "Password",
-					Substitute: config.RSRParsers{
+					Value: config.RSRParsers{
 						&config.RSRParser{
 							Rules:           "CGRateS.org",
 							AllFiltersMatch: true,

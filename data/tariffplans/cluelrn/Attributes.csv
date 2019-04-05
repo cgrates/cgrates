@@ -1,4 +1,4 @@
-#Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,FieldName,Type,Substitute,Blocker,Weight
+#Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,FieldName,Type,Value,Blocker,Weight
 cgrates.org,LRN_Dst3125650565,lrn,*string:~Destination:3125650565,,,Destination,*constant,13128543000,false,10
 cgrates.org,LRN_Dst3125650565,,,,,OriginalDestination,*constant,3125650565,false,10
 cgrates.org,LRN_LATA_Dst13128543000,lrn,*string:~Destination:13128543000;*rsr::~OriginalDestination(!^$),,,DestinationLATA,*constant,358,false,20
