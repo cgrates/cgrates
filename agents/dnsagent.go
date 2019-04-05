@@ -72,4 +72,10 @@ func (da *DNSAgent) ListenAndServe() error {
 // requests are reaching here asynchronously
 func (da *DNSAgent) handleMessage(w dns.ResponseWriter, m *dns.Msg) {
 	fmt.Printf("got message: %+v\n", m)
+	rply := new(dns.Msg)
+	rply.SetReply(m)
+	rply.Authoritative = true
+
+	fmt.Printf("send reply message: %+v\n", rply)
+	w.WriteMsg(rply)
 }
