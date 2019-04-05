@@ -855,64 +855,99 @@ func (pdd *StatPDD) GetCompressFactor(events map[string]int) map[string]int {
 }
 
 func NewDDC(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatDDC{Destinations: make(map[string]utils.StringMap),
-		Events: make(map[string]string), MinItems: minItems, FilterIDs: filterIDs}, nil
+	return &StatDDC{Events: make(map[string]map[string]int64), FieldValues: make(map[string]map[string]struct{}),
+		MinItems: minItems, FilterIDs: filterIDs}, nil
 }
 
-// DDC implements Destination Distinct Count metric
 type StatDDC struct {
-	FilterIDs    []string
-	Destinations map[string]utils.StringMap
-	Events       map[string]string // map[EventTenantID]Destination
-	MinItems     int
+	FilterIDs   []string
+	FieldValues map[string]map[string]struct{} // map[fieldValue]map[eventID]
+	Events      map[string]map[string]int64    // map[EventTenantID]map[fieldValue]compressfactor
+	MinItems    int
+	Count       int64
+}
+
+// getValue returns tcd.val
+func (ddc *StatDDC) getValue() float64 {
+	if ddc.Count == 0 || ddc.Count < int64(ddc.MinItems) {
+		return STATS_NA
+	}
+	return float64(len(ddc.FieldValues))
 }
 
 func (ddc *StatDDC) GetStringValue(fmtOpts string) (valStr string) {
-	if val := len(ddc.Destinations); (val == 0) || (ddc.MinItems > 0 && len(ddc.Events) < ddc.MinItems) {
+	if val := ddc.getValue(); val == STATS_NA {
 		valStr = utils.NOT_AVAILABLE
 	} else {
-		valStr = fmt.Sprintf("%+v", len(ddc.Destinations))
+		valStr = strconv.FormatFloat(ddc.getValue(), 'f', -1, 64)
 	}
 	return
 }
 
 func (ddc *StatDDC) GetValue() (v interface{}) {
-	return len(ddc.Destinations)
+	return ddc.getValue()
 }
 
 func (ddc *StatDDC) GetFloat64Value() (v float64) {
-	if val := len(ddc.Destinations); (val == 0) || (ddc.MinItems > 0 && len(ddc.Events) < ddc.MinItems) {
-		v = -1.0
-	} else {
-		v = float64(len(ddc.Destinations))
-	}
-	return
+	return ddc.getValue()
 }
 
 func (ddc *StatDDC) AddEvent(ev *utils.CGREvent) (err error) {
-	var dest string
-	if dest, err = ev.FieldAsString(utils.Destination); err != nil {
+	var fieldValue string
+	if fieldValue, err = ev.FieldAsString(utils.Destination); err != nil {
 		return err
 	}
-	if _, has := ddc.Destinations[dest]; !has {
-		ddc.Destinations[dest] = make(map[string]bool)
+
+	// add to fieldValues
+	if _, has := ddc.FieldValues[fieldValue]; !has {
+		ddc.FieldValues[fieldValue] = make(map[string]struct{})
 	}
-	ddc.Destinations[dest][ev.ID] = true
-	ddc.Events[ev.ID] = dest
+	ddc.FieldValues[fieldValue][ev.ID] = struct{}{}
+
+	// add to events
+	if _, has := ddc.Events[ev.ID]; !has {
+		ddc.Events[ev.ID] = make(map[string]int64)
+	}
+	ddc.Count += 1
+	if _, has := ddc.Events[ev.ID][fieldValue]; !has {
+		ddc.Events[ev.ID][fieldValue] = 1
+		return
+	}
+	ddc.Events[ev.ID][fieldValue] = ddc.Events[ev.ID][fieldValue] + 1
 	return
 }
 
 func (ddc *StatDDC) RemEvent(evID string) (err error) {
-	destination, has := ddc.Events[evID]
+	fieldValues, has := ddc.Events[evID]
 	if !has {
 		return utils.ErrNotFound
 	}
-	delete(ddc.Events, evID)
-	if len(ddc.Destinations[destination]) == 1 {
-		delete(ddc.Destinations, destination)
+	if len(fieldValues) == 0 {
+		delete(ddc.Events, evID)
+		return utils.ErrNotFound
+	}
+
+	// decrement events
+	var fieldValue string
+	for k, _ := range fieldValues {
+		fieldValue = k
+		break
+	}
+	ddc.Count -= 1
+	if fieldValues[fieldValue] > 1 {
+		ddc.Events[evID][fieldValue] = ddc.Events[evID][fieldValue] - 1
+		return // do not delete the reference until it reaches 0
+	}
+	delete(ddc.Events[evID], fieldValue)
+
+	// remove from fieldValues
+	if _, has := ddc.FieldValues[fieldValue]; !has {
 		return
 	}
-	delete(ddc.Destinations[destination], evID)
+	delete(ddc.FieldValues[fieldValue], evID)
+	if len(ddc.FieldValues[fieldValue]) <= 0 {
+		delete(ddc.FieldValues, fieldValue)
+	}
 	return
 }
 
@@ -938,12 +973,16 @@ func (ddc *StatDDC) Compress(queueLen int64, defaultID string) (eventIDs []strin
 
 // Compress is part of StatMetric interface
 func (ddc *StatDDC) GetCompressFactor(events map[string]int) map[string]int {
-	for id, _ := range ddc.Events {
-		if _, has := events[id]; !has {
-			events[id] = 1
+	for id, ev := range ddc.Events {
+		compressFactor := 0
+		for _, fields := range ev {
+			compressFactor += int(fields)
 		}
-		if events[id] < 1 {
-			events[id] = 1
+		if _, has := events[id]; !has {
+			events[id] = compressFactor
+		}
+		if events[id] < compressFactor {
+			events[id] = compressFactor
 		}
 	}
 	return events
@@ -1205,98 +1244,135 @@ func (avg *StatAverage) GetCompressFactor(events map[string]int) map[string]int 
 }
 
 func NewStatDistinct(minItems int, extraParams string, filterIDs []string) (StatMetric, error) {
-	return &StatDistinct{Events: make(map[string]struct{}),
+	return &StatDistinct{Events: make(map[string]map[string]int64), FieldValues: make(map[string]map[string]struct{}),
 		MinItems: minItems, FieldName: extraParams, FilterIDs: filterIDs}, nil
 }
 
 type StatDistinct struct {
-	FilterIDs []string
-	Numbers   float64
-	Events    map[string]struct{} // map[EventTenantID]Cost
-	MinItems  int
-	FieldName string
-	val       *float64 // cached sum value
+	FilterIDs   []string
+	FieldValues map[string]map[string]struct{} // map[fieldValue]map[eventID]
+	Events      map[string]map[string]int64    // map[EventTenantID]map[fieldValue]compressfactor
+	MinItems    int
+	FieldName   string
+	Count       int64
 }
 
 // getValue returns tcd.val
-func (sum *StatDistinct) getValue() float64 {
-	if sum.val == nil {
-		if len(sum.Events) == 0 || len(sum.Events) < sum.MinItems {
-			sum.val = utils.Float64Pointer(STATS_NA)
-		} else {
-			sum.val = utils.Float64Pointer(utils.Round(sum.Numbers,
-				config.CgrConfig().GeneralCfg().RoundingDecimals,
-				utils.ROUNDING_MIDDLE))
-		}
+func (dst *StatDistinct) getValue() float64 {
+	if dst.Count == 0 || dst.Count < int64(dst.MinItems) {
+		return STATS_NA
 	}
-	return *sum.val
+	return float64(len(dst.FieldValues))
 }
 
-func (sum *StatDistinct) GetStringValue(fmtOpts string) (valStr string) {
-	if val := sum.getValue(); val == STATS_NA {
+func (dst *StatDistinct) GetStringValue(fmtOpts string) (valStr string) {
+	if val := dst.getValue(); val == STATS_NA {
 		valStr = utils.NOT_AVAILABLE
 	} else {
-		valStr = strconv.FormatFloat(sum.getValue(), 'f', -1, 64)
+		valStr = strconv.FormatFloat(dst.getValue(), 'f', -1, 64)
 	}
 	return
 }
 
-func (sum *StatDistinct) GetValue() (v interface{}) {
-	return sum.getValue()
+func (dst *StatDistinct) GetValue() (v interface{}) {
+	return dst.getValue()
 }
 
-func (sum *StatDistinct) GetFloat64Value() (v float64) {
-	return sum.getValue()
+func (dst *StatDistinct) GetFloat64Value() (v float64) {
+	return dst.getValue()
 }
 
-func (sum *StatDistinct) AddEvent(ev *utils.CGREvent) (err error) {
-	if has := ev.HasField(sum.FieldName); has {
-		sum.Numbers += 1
+func (dst *StatDistinct) AddEvent(ev *utils.CGREvent) (err error) {
+	var fieldValue string
+	if fieldValue, err = ev.FieldAsString(dst.FieldName); err != nil {
+		return err
 	}
-	sum.Events[ev.ID] = struct{}{}
-	sum.val = nil
+
+	// add to fieldValues
+	if _, has := dst.FieldValues[fieldValue]; !has {
+		dst.FieldValues[fieldValue] = make(map[string]struct{})
+	}
+	dst.FieldValues[fieldValue][ev.ID] = struct{}{}
+
+	// add to events
+	if _, has := dst.Events[ev.ID]; !has {
+		dst.Events[ev.ID] = make(map[string]int64)
+	}
+	dst.Count += 1
+	if _, has := dst.Events[ev.ID][fieldValue]; !has {
+		dst.Events[ev.ID][fieldValue] = 1
+		return
+	}
+	dst.Events[ev.ID][fieldValue] = dst.Events[ev.ID][fieldValue] + 1
 	return
 }
 
-func (sum *StatDistinct) RemEvent(evID string) (err error) {
-	_, has := sum.Events[evID]
+func (dst *StatDistinct) RemEvent(evID string) (err error) {
+	fieldValues, has := dst.Events[evID]
 	if !has {
 		return utils.ErrNotFound
 	}
-	delete(sum.Events, evID)
-	sum.Numbers -= 1
-	sum.val = nil
+	if len(fieldValues) == 0 {
+		delete(dst.Events, evID)
+		return utils.ErrNotFound
+	}
+
+	// decrement events
+	var fieldValue string
+	for k, _ := range fieldValues {
+		fieldValue = k
+		break
+	}
+	dst.Count -= 1
+	if fieldValues[fieldValue] > 1 {
+		dst.Events[evID][fieldValue] = dst.Events[evID][fieldValue] - 1
+		return // do not delete the reference until it reaches 0
+	}
+	delete(dst.Events[evID], fieldValue)
+
+	// remove from fieldValues
+	if _, has := dst.FieldValues[fieldValue]; !has {
+		return
+	}
+	delete(dst.FieldValues[fieldValue], evID)
+	if len(dst.FieldValues[fieldValue]) <= 0 {
+		delete(dst.FieldValues, fieldValue)
+	}
 	return
 }
 
-func (sum *StatDistinct) Marshal(ms Marshaler) (marshaled []byte, err error) {
-	return ms.Marshal(sum)
+func (dst *StatDistinct) Marshal(ms Marshaler) (marshaled []byte, err error) {
+	return ms.Marshal(dst)
 }
 
-func (sum *StatDistinct) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
-	return ms.Unmarshal(marshaled, sum)
+func (dst *StatDistinct) LoadMarshaled(ms Marshaler, marshaled []byte) (err error) {
+	return ms.Unmarshal(marshaled, dst)
 }
 
 // GetFilterIDs is part of StatMetric interface
-func (sum *StatDistinct) GetFilterIDs() []string {
-	return sum.FilterIDs
+func (dst *StatDistinct) GetFilterIDs() []string {
+	return dst.FilterIDs
 }
 
-func (sum *StatDistinct) Compress(queueLen int64, defaultID string) (eventIDs []string) {
-	for id, _ := range sum.Events {
+func (dst *StatDistinct) Compress(queueLen int64, defaultID string) (eventIDs []string) {
+	for id, _ := range dst.Events {
 		eventIDs = append(eventIDs, id)
 	}
 	return
 }
 
 // Compress is part of StatMetric interface
-func (sum *StatDistinct) GetCompressFactor(events map[string]int) map[string]int {
-	for id, _ := range sum.Events {
-		if _, has := events[id]; !has {
-			events[id] = 1
+func (dst *StatDistinct) GetCompressFactor(events map[string]int) map[string]int {
+	for id, ev := range dst.Events {
+		compressFactor := 0
+		for _, fields := range ev {
+			compressFactor += int(fields)
 		}
-		if events[id] < 1 {
-			events[id] = 1
+		if _, has := events[id]; !has {
+			events[id] = compressFactor
+		}
+		if events[id] < compressFactor {
+			events[id] = compressFactor
 		}
 	}
 	return events
