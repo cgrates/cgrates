@@ -156,6 +156,10 @@ func (sq *StatQueue) ProcessEvent(ev *utils.CGREvent, filterS *FilterS) (err err
 func (sq *StatQueue) remEventWithID(evID string) (err error) {
 	for metricID, metric := range sq.SQMetrics {
 		if err = metric.RemEvent(evID); err != nil {
+			if err.Error() == utils.ErrNotFound.Error() {
+				err = nil
+				continue
+			}
 			utils.Logger.Warning(fmt.Sprintf("<StatQueue> metricID: %s, remove eventID: %s, error: %s", metricID, evID, err.Error()))
 			return
 		}
