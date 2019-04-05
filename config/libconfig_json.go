@@ -437,7 +437,7 @@ type StatServJsonCfg struct {
 	Enabled               *bool
 	Indexed_selects       *bool
 	Store_interval        *string
-	Max_queue_lenght      *int
+	Max_queue_length      *int
 	Thresholds_conns      *[]*HaPoolJsonCfg
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string

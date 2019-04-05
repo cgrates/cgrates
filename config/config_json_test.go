@@ -800,7 +800,7 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 		Enabled:               utils.BoolPointer(false),
 		Indexed_selects:       utils.BoolPointer(true),
 		Store_interval:        utils.StringPointer(""),
-		Max_queue_lenght:      utils.IntPointer(0),
+		Max_queue_length:      utils.IntPointer(0),
 		Thresholds_conns:      &[]*HaPoolJsonCfg{},
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
