@@ -152,6 +152,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.asteriskAgentCfg = new(AsteriskAgentCfg)
 	cfg.diameterAgentCfg = new(DiameterAgentCfg)
 	cfg.radiusAgentCfg = new(RadiusAgentCfg)
+	cfg.dnsAgentCfg = new(DNSAgentCfg)
 	cfg.attributeSCfg = new(AttributeSCfg)
 	cfg.chargerSCfg = new(ChargerSCfg)
 	cfg.resourceSCfg = new(ResourceSConfig)
@@ -324,6 +325,7 @@ type CGRConfig struct {
 	asteriskAgentCfg *AsteriskAgentCfg // AsteriskAgent config
 	diameterAgentCfg *DiameterAgentCfg // DiameterAgent config
 	radiusAgentCfg   *RadiusAgentCfg   // RadiusAgent config
+	dnsAgentCfg      *DNSAgentCfg      // DNSAgent config
 	attributeSCfg    *AttributeSCfg    // AttributeS config
 	chargerSCfg      *ChargerSCfg      // ChargerS config
 	resourceSCfg     *ResourceSConfig  // ResourceS config
@@ -605,6 +607,13 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
+	if self.dnsAgentCfg.Enabled && !self.sessionSCfg.Enabled {
+		for _, sSConn := range self.dnsAgentCfg.SessionSConns {
+			if sSConn.Address == utils.MetaInternal {
+				return fmt.Errorf("%s not enabled but referenced by %s", utils.SessionS, utils.DNSAgent)
+			}
+		}
+	}
 	// HTTPAgent checks
 	for _, httpAgentCfg := range self.httpAgentCfg {
 		// httpAgent checks
@@ -840,6 +849,14 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return err
 	}
 
+	jsnDNSCfg, err := jsnCfg.DNSAgentJsonCfg()
+	if err != nil {
+		return err
+	}
+	if err := self.dnsAgentCfg.loadFromJsonCfg(jsnDNSCfg, self.generalCfg.RsrSepatarot); err != nil {
+		return err
+	}
+
 	jsnHttpAgntCfg, err := jsnCfg.HttpAgentJsonCfg()
 	if err != nil {
 		return err
@@ -1048,6 +1065,10 @@ func (self *CGRConfig) DiameterAgentCfg() *DiameterAgentCfg {
 
 func (self *CGRConfig) RadiusAgentCfg() *RadiusAgentCfg {
 	return self.radiusAgentCfg
+}
+
+func (self *CGRConfig) DNSAgentCfg() *DNSAgentCfg {
+	return self.dnsAgentCfg
 }
 
 func (cfg *CGRConfig) AttributeSCfg() *AttributeSCfg {

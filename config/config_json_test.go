@@ -737,6 +737,26 @@ func TestHttpAgentJsonCfg(t *testing.T) {
 	}
 }
 
+func TestDNSAgentJsonCfg(t *testing.T) {
+	eCfg := &DNSAgentJsonCfg{
+		Enabled:    utils.BoolPointer(false),
+		Listen_net: utils.StringPointer("udp"),
+		Listen:     utils.StringPointer("127.0.0.1:53"),
+		Sessions_conns: &[]*HaPoolJsonCfg{
+			{
+				Address: utils.StringPointer(utils.MetaInternal),
+			}},
+		Timezone:           utils.StringPointer(""),
+		Request_processors: &[]*ReqProcessorJsnCfg{},
+	}
+	if cfg, err := dfCgrJsonCfg.DNSAgentJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		rcv := *cfg.Request_processors
+		t.Errorf("Received: %+v", rcv)
+	}
+}
+
 func TestDfAttributeServJsonCfg(t *testing.T) {
 	eCfg := &AttributeSJsonCfg{
 		Enabled:               utils.BoolPointer(false),

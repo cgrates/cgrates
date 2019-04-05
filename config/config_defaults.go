@@ -453,6 +453,19 @@ const CGRATES_CFG_JSON = `
 ],
 
 
+"dns_agent": {
+	"enabled": false,											// enables the DNS agent: <true|false>
+	"listen_net": "udp",										// network to listen on <udp|tcp|tcp-tls>
+	"listen": "127.0.0.1:53",									// address where to listen for DNS requests <x.y.z.y:1234>
+	"sessions_conns": [											// connections to SessionS for session management and CDR posting
+		{"address": "*internal"}
+	],
+	"timezone": "",												// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
+	"request_processors": [										// request processors to be applied to DNS messages
+	],
+},
+
+
 "attributes": {								// AttributeS config
 	"enabled": false,						// starts attribute service: <true|false>.
 	"indexed_selects":true,					// enable profile matching exclusively on indexes

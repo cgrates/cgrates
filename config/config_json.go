@@ -66,6 +66,7 @@ const (
 	TlsCfgJson         = "tls"
 	AnalyzerCfgJson    = "analyzers"
 	Apier              = "apier"
+	DNSAgentJson       = "dns_agent"
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -318,6 +319,16 @@ func (self CgrJsonCfg) HttpAgentJsonCfg() (*[]*HttpAgentJsonCfg, error) {
 		return nil, err
 	}
 	return &httpAgnt, nil
+}
+
+func (self CgrJsonCfg) DNSAgentJsonCfg() (da *DNSAgentJsonCfg, err error) {
+	rawCfg, hasKey := self[DNSAgentJson]
+	if !hasKey {
+		return
+	}
+	da = new(DNSAgentJsonCfg)
+	err = json.Unmarshal(*rawCfg, da)
+	return
 }
 
 func (cgrJsn CgrJsonCfg) AttributeServJsonCfg() (*AttributeSJsonCfg, error) {

@@ -360,7 +360,6 @@ type RadiusAgentJsonCfg struct {
 	Client_secrets      *map[string]string
 	Client_dictionaries *map[string]string
 	Sessions_conns      *[]*HaPoolJsonCfg
-	Tenant              *string
 	Timezone            *string
 	Request_processors  *[]*RAReqProcessorJsnCfg
 }
@@ -397,11 +396,25 @@ type HttpAgentProcessorJsnCfg struct {
 	Reply_fields        *[]*FcTemplateJsonCfg
 }
 
-// History server config section
-type HistServJsonCfg struct {
-	Enabled       *bool
-	History_dir   *string
-	Save_interval *string
+// DNSAgentJsonCfg
+type DNSAgentJsonCfg struct {
+	Enabled            *bool
+	Listen             *string
+	Listen_net         *string
+	Sessions_conns     *[]*HaPoolJsonCfg
+	Timezone           *string
+	Request_processors *[]*ReqProcessorJsnCfg
+}
+
+type ReqProcessorJsnCfg struct {
+	ID                  *string
+	Filters             *[]string
+	Tenant              *string
+	Timezone            *string
+	Flags               *[]string
+	Continue_on_success *bool
+	Request_fields      *[]*FcTemplateJsonCfg
+	Reply_fields        *[]*FcTemplateJsonCfg
 }
 
 // Attribute service config section

@@ -562,6 +562,8 @@ const (
 	MetaRemove                   = "*remove"
 	MetaClear                    = "*clear"
 	LoadIDs                      = "load_ids"
+	DNSAgent                     = "DNSAgent"
+	TLSNoCaps                    = "tls"
 )
 
 // Migrator Action
