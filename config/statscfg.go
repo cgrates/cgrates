@@ -49,8 +49,8 @@ func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
 			return err
 		}
 	}
-	if jsnCfg.Max_queue_lenght != nil {
-		st.MaxQueueLenght = *jsnCfg.Max_queue_lenght
+	if jsnCfg.Max_queue_length != nil {
+		st.MaxQueueLenght = *jsnCfg.Max_queue_length
 	}
 	if jsnCfg.Thresholds_conns != nil {
 		st.ThresholdSConns = make([]*RemoteHost, len(*jsnCfg.Thresholds_conns))
