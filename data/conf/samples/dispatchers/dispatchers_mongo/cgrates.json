@@ -41,16 +41,18 @@
 },
 
 "attributes": {
-	"enabled": false
+	"enabled": true
 },
 
+"rals": {
+	"enabled": true,
+},
 
 "dispatchers":{
  	"enabled": true,
  	"attributes_conns": [
-		{"address": "127.0.0.1:5012", "transport": "*json"},
+		{"address": "*internal"},
  	],
 },
-
 
 }

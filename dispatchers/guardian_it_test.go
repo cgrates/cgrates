@@ -35,7 +35,7 @@ var sTestsDspGrd = []func(t *testing.T){
 
 //Test start here
 func TestDspGuardianSTMySQL(t *testing.T) {
-	testDsp(t, sTestsDspGrd, "TestDspGuardianS", "all", "all2", "attributes", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	testDsp(t, sTestsDspGrd, "TestDspGuardianS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
 }
 
 func testDspGrdPing(t *testing.T) {

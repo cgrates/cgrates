@@ -45,11 +45,11 @@ var sTestsDspChc = []func(t *testing.T){
 
 //Test start here
 func TestDspCacheSv1TMySQL(t *testing.T) {
-	testDsp(t, sTestsDspChc, "TestDspCacheSv1", "all", "all2", "attributes", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	testDsp(t, sTestsDspChc, "TestDspCacheSv1", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
 }
 
 func TestDspCacheSv1Mongo(t *testing.T) {
-	testDsp(t, sTestsDspChc, "TestDspCacheSv1", "all", "all2", "attributes_mongo", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+	testDsp(t, sTestsDspChc, "TestDspCacheSv1", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
 }
 
 func testDspChcPing(t *testing.T) {

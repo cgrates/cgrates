@@ -32,7 +32,7 @@ var sTestsDspSched = []func(t *testing.T){
 
 //Test start here
 func TestDspSchedulerSTMySQL(t *testing.T) {
-	testDsp(t, sTestsDspSched, "TestDspSchedulerSTMySQL", "all", "all2", "attributes", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	testDsp(t, sTestsDspSched, "TestDspSchedulerSTMySQL", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
 }
 
 func testDspSchedPing(t *testing.T) {

@@ -21,6 +21,8 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -65,4 +67,44 @@ func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connA
 		err = nil
 	}
 	return rpcPool, err
+}
+
+var IntRPC *InternalRPC
+
+func init() {
+	IntRPC = &InternalRPC{subsystems: make(map[string]rpcclient.RpcClientConnection)}
+}
+
+type InternalRPC struct {
+	sync.Mutex
+	subsystems map[string]rpcclient.RpcClientConnection
+}
+
+func (irpc *InternalRPC) AddConnection(name string, conn rpcclient.RpcClientConnection) {
+	if conn == nil {
+		return
+	}
+	irpc.Lock()
+	irpc.subsystems[name] = conn
+	irpc.Unlock()
+}
+
+func (irpc *InternalRPC) Call(method string, args interface{}, reply interface{}) error {
+	methodSplit := strings.Split(method, ".")
+	if len(methodSplit) != 2 {
+		return rpcclient.ErrUnsupporteServiceMethod
+	}
+	irpc.Lock()
+	defer irpc.Unlock()
+	conn, has := irpc.subsystems[methodSplit[0]]
+	if !has {
+		return rpcclient.ErrUnsupporteServiceMethod
+	}
+	return conn.Call(method, args, reply)
+}
+
+func (irpc *InternalRPC) GetConnChan() (connChan chan rpcclient.RpcClientConnection) {
+	connChan = make(chan rpcclient.RpcClientConnection, 1)
+	connChan <- irpc
+	return
 }

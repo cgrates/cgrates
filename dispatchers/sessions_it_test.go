@@ -56,11 +56,11 @@ var sTestsDspSession = []func(t *testing.T){
 
 //Test start here
 func TestDspSessionSTMySQL(t *testing.T) {
-	testDsp(t, sTestsDspSession, "TestDspSessionS", "all", "all2", "attributes", "dispatchers", "testit", "tutorial", "dispatchers")
+	testDsp(t, sTestsDspSession, "TestDspSessionS", "all", "all2", "dispatchers", "testit", "tutorial", "dispatchers")
 }
 
 func TestDspSessionSMongo(t *testing.T) {
-	testDsp(t, sTestsDspSession, "TestDspSessionS", "all", "all2", "attributes_mongo", "dispatchers_mongo", "testit", "tutorial", "dispatchers")
+	testDsp(t, sTestsDspSession, "TestDspSessionS", "all", "all2", "dispatchers_mongo", "testit", "tutorial", "dispatchers")
 }
 
 func testDspSessionAddBalacne(t *testing.T) {
