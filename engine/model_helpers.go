@@ -2069,10 +2069,10 @@ func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 				}
 			}
 			th.Attributes = append(th.Attributes, &utils.TPAttribute{
-				FilterIDs:  filterIDs,
-				Type:       tp.Type,
-				FieldName:  tp.FieldName,
-				Substitute: tp.Substitute,
+				FilterIDs: filterIDs,
+				Type:      tp.Type,
+				FieldName: tp.FieldName,
+				Value:     tp.Value,
 			})
 		}
 		mst[key.TenantID()] = th
@@ -2135,7 +2135,7 @@ func APItoModelTPAttribute(th *utils.TPAttributeProfile) (mdls TPAttributes) {
 			}
 		}
 		mdl.FieldName = reqAttribute.FieldName
-		mdl.Substitute = reqAttribute.Substitute
+		mdl.Value = reqAttribute.Value
 		mdl.Type = reqAttribute.Type
 		mdls = append(mdls, mdl)
 	}
@@ -2159,15 +2159,15 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 		attrPrf.Contexts[i] = context
 	}
 	for i, reqAttr := range tpAttr.Attributes {
-		sbstPrsr, err := config.NewRSRParsers(reqAttr.Substitute, true, config.CgrConfig().GeneralCfg().RsrSepatarot)
+		sbstPrsr, err := config.NewRSRParsers(reqAttr.Value, true, config.CgrConfig().GeneralCfg().RsrSepatarot)
 		if err != nil {
 			return nil, err
 		}
 		attrPrf.Attributes[i] = &Attribute{
-			FilterIDs:  reqAttr.FilterIDs,
-			FieldName:  reqAttr.FieldName,
-			Type:       reqAttr.Type,
-			Substitute: sbstPrsr,
+			FilterIDs: reqAttr.FilterIDs,
+			FieldName: reqAttr.FieldName,
+			Type:      reqAttr.Type,
+			Value:     sbstPrsr,
 		}
 	}
 	if tpAttr.ActivationInterval != nil {

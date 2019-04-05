@@ -388,14 +388,14 @@ CREATE TABLE tp_attributes (
   `attribute_filter_ids` varchar(64) NOT NULL,
   `field_name` varchar(64) NOT NULL,
   `type` varchar(64) NOT NULL,
-  `substitute` varchar(64) NOT NULL,
+  `value` varchar(64) NOT NULL,
   `blocker` BOOLEAN NOT NULL,
   `weight` decimal(8,2) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
   UNIQUE KEY `unique_tp_attributes` (`tpid`,`tenant`,
-    `id`,`filter_ids`,`field_name`,`substitute` )
+    `id`,`filter_ids`,`field_name`,`value` )
 );
 
 --

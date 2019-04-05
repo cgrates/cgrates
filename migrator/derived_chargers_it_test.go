@@ -148,12 +148,14 @@ func testDCITMigrateAndMove(t *testing.T) {
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
 			{
-				FieldName:  utils.Account,
-				Substitute: config.NewRSRParsersMustCompile("1004", true, utils.INFIELD_SEP),
+				FieldName: utils.Account,
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("1004", true, utils.INFIELD_SEP),
 			},
 			{
-				FieldName:  utils.Subject,
-				Substitute: config.NewRSRParsersMustCompile("call_1003", true, utils.INFIELD_SEP),
+				FieldName: utils.Subject,
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("call_1003", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: false,

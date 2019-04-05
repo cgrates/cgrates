@@ -53,8 +53,9 @@ func TestFieldinfo2Attribute(t *testing.T) {
 			Initial:   make([]*engine.Attribute, 0),
 			Expected: []*engine.Attribute{
 				&engine.Attribute{
-					FieldName:  utils.Account,
-					Substitute: config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
+					FieldName: utils.Account,
+					Type:      utils.MetaVariable,
+					Value:     config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
 				},
 			},
 		},
@@ -64,8 +65,9 @@ func TestFieldinfo2Attribute(t *testing.T) {
 			Initial:   make([]*engine.Attribute, 0),
 			Expected: []*engine.Attribute{
 				&engine.Attribute{
-					FieldName:  utils.Subject,
-					Substitute: config.NewRSRParsersMustCompile(`~effective_caller_id_number:s/(\d+)/+$1/`, true, utils.INFIELD_SEP),
+					FieldName: utils.Subject,
+					Type:      utils.MetaVariable,
+					Value:     config.NewRSRParsersMustCompile(`~effective_caller_id_number:s/(\d+)/+$1/`, true, utils.INFIELD_SEP),
 				},
 			},
 		},
@@ -74,18 +76,21 @@ func TestFieldinfo2Attribute(t *testing.T) {
 			FieldInfo: "^call_1003",
 			Initial: []*engine.Attribute{
 				&engine.Attribute{
-					FieldName:  utils.Account,
-					Substitute: config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
+					FieldName: utils.Account,
+					Type:      utils.MetaVariable,
+					Value:     config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
 				},
 			},
 			Expected: []*engine.Attribute{
 				&engine.Attribute{
-					FieldName:  utils.Account,
-					Substitute: config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
+					FieldName: utils.Account,
+					Type:      utils.MetaVariable,
+					Value:     config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
 				},
 				&engine.Attribute{
-					FieldName:  utils.Subject,
-					Substitute: config.NewRSRParsersMustCompile("call_1003", true, utils.INFIELD_SEP),
+					FieldName: utils.Subject,
+					Type:      utils.MetaVariable,
+					Value:     config.NewRSRParsersMustCompile("call_1003", true, utils.INFIELD_SEP),
 				},
 			},
 		},
@@ -123,12 +128,14 @@ func TestDerivedChargers2AttributeProfile(t *testing.T) {
 				ActivationInterval: nil,
 				Attributes: []*engine.Attribute{
 					&engine.Attribute{
-						FieldName:  utils.Category,
-						Substitute: config.NewRSRParsersMustCompile("*voice", true, utils.INFIELD_SEP),
+						FieldName: utils.Category,
+						Type:      utils.MetaVariable,
+						Value:     config.NewRSRParsersMustCompile("*voice", true, utils.INFIELD_SEP),
 					},
 					&engine.Attribute{
-						FieldName:  utils.Account,
-						Substitute: config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
+						FieldName: utils.Account,
+						Type:      utils.MetaVariable,
+						Value:     config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
 					},
 				},
 				Blocker: false,
@@ -154,20 +161,24 @@ func TestDerivedChargers2AttributeProfile(t *testing.T) {
 				ActivationInterval: nil,
 				Attributes: []*engine.Attribute{
 					&engine.Attribute{
-						FieldName:  utils.Category,
-						Substitute: config.NewRSRParsersMustCompile("*voice", true, utils.INFIELD_SEP),
+						FieldName: utils.Category,
+						Type:      utils.MetaVariable,
+						Value:     config.NewRSRParsersMustCompile("*voice", true, utils.INFIELD_SEP),
 					},
 					&engine.Attribute{
-						FieldName:  utils.Account,
-						Substitute: config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
+						FieldName: utils.Account,
+						Type:      utils.MetaVariable,
+						Value:     config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
 					},
 					&engine.Attribute{
-						FieldName:  utils.Subject,
-						Substitute: config.NewRSRParsersMustCompile("call_1003_to_1004", true, utils.INFIELD_SEP),
+						FieldName: utils.Subject,
+						Type:      utils.MetaVariable,
+						Value:     config.NewRSRParsersMustCompile("call_1003_to_1004", true, utils.INFIELD_SEP),
 					},
 					&engine.Attribute{
-						FieldName:  utils.Destination,
-						Substitute: config.NewRSRParsersMustCompile("1004", true, utils.INFIELD_SEP),
+						FieldName: utils.Destination,
+						Type:      utils.MetaVariable,
+						Value:     config.NewRSRParsersMustCompile("1004", true, utils.INFIELD_SEP),
 					},
 				},
 				Blocker: false,

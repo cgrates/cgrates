@@ -83,8 +83,9 @@ func fieldinfo2Attribute(attr []*engine.Attribute, fieldName, fieldInfo string) 
 		return attr
 	}
 	return append(attr, &engine.Attribute{
-		FieldName:  fieldName,
-		Substitute: rp,
+		FieldName: fieldName,
+		Value:     rp,
+		Type:      utils.MetaVariable,
 	})
 }
 

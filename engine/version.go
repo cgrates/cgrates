@@ -144,7 +144,7 @@ func CurrentDataDBVersions() Versions {
 		utils.SharedGroups:        2,
 		utils.Thresholds:          3,
 		utils.Suppliers:           1,
-		utils.Attributes:          3,
+		utils.Attributes:          4,
 		utils.Timing:              1,
 		utils.RQF:                 2,
 		utils.Resource:            1,

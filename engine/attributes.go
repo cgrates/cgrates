@@ -175,18 +175,18 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 		var err error
 		switch attribute.Type {
 		case utils.META_CONSTANT:
-			substitute, err = attribute.Substitute.ParseValue(utils.EmptyString)
+			substitute, err = attribute.Value.ParseValue(utils.EmptyString)
 		case utils.MetaVariable, utils.META_COMPOSED:
-			substitute, err = attribute.Substitute.ParseEvent(args.Event)
+			substitute, err = attribute.Value.ParseEvent(args.Event)
 		case utils.META_USAGE_DIFFERENCE:
-			if len(attribute.Substitute) != 2 {
-				return nil, fmt.Errorf("invalid arguments <%s>", utils.ToJSON(attribute.Substitute))
+			if len(attribute.Value) != 2 {
+				return nil, fmt.Errorf("invalid arguments <%s>", utils.ToJSON(attribute.Value))
 			}
-			strVal1, err := attribute.Substitute[0].ParseEvent(args.Event)
+			strVal1, err := attribute.Value[0].ParseEvent(args.Event)
 			if err != nil {
 				return nil, err
 			}
-			strVal2, err := attribute.Substitute[1].ParseEvent(args.Event)
+			strVal2, err := attribute.Value[1].ParseEvent(args.Event)
 			if err != nil {
 				return nil, err
 			}
@@ -200,8 +200,8 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 			}
 			substitute = tEnd.Sub(tStart).String()
 		case utils.MetaSum:
-			iFaceVals := make([]interface{}, len(attribute.Substitute))
-			for i, val := range attribute.Substitute {
+			iFaceVals := make([]interface{}, len(attribute.Value))
+			for i, val := range attribute.Value {
 				strVal, err := val.ParseEvent(args.Event)
 				if err != nil {
 					return nil, err
@@ -214,11 +214,11 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 			}
 			substitute, err = utils.IfaceAsString(ifaceSum)
 		case utils.MetaValueExponent:
-			if len(attribute.Substitute) != 2 {
+			if len(attribute.Value) != 2 {
 				return nil, fmt.Errorf("invalid arguments <%s> to %s",
-					utils.ToJSON(attribute.Substitute), utils.MetaValueExponent)
+					utils.ToJSON(attribute.Value), utils.MetaValueExponent)
 			}
-			strVal1, err := attribute.Substitute[0].ParseEvent(args.Event) // String Value
+			strVal1, err := attribute.Value[0].ParseEvent(args.Event) // String Value
 			if err != nil {
 				return nil, err
 			}
@@ -227,7 +227,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 				return nil, fmt.Errorf("invalid value <%s> to %s",
 					strVal1, utils.MetaValueExponent)
 			}
-			strVal2, err := attribute.Substitute[1].ParseEvent(args.Event) // String Exponent
+			strVal2, err := attribute.Value[1].ParseEvent(args.Event) // String Exponent
 			if err != nil {
 				return nil, err
 			}
@@ -238,7 +238,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 			substitute = strconv.FormatFloat(utils.Round(val*math.Pow10(exp),
 				config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64)
 		default: // backwards compatible in case that Type is empty
-			substitute, err = attribute.Substitute.ParseEvent(args.Event)
+			substitute, err = attribute.Value.ParseEvent(args.Event)
 		}
 
 		if err != nil {

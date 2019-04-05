@@ -74,7 +74,7 @@ func (apierV1 *ApierV1) SetAttributeProfile(alsWrp *AttributeWithCache, reply *s
 	}
 	if len(alsWrp.Attributes) != 0 {
 		for _, attr := range alsWrp.Attributes {
-			for _, sub := range attr.Substitute {
+			for _, sub := range attr.Value {
 				if sub.Rules == "" {
 					return utils.NewErrMandatoryIeMissing("Rules")
 				}

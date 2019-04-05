@@ -1146,10 +1146,10 @@ type TPSupplierProfile struct {
 
 // TPAttribute is used in TPAttributeProfile
 type TPAttribute struct {
-	FilterIDs  []string
-	FieldName  string
-	Type       string
-	Substitute string
+	FilterIDs []string
+	FieldName string
+	Type      string
+	Value     string
 }
 
 // TPAttributeProfile is used in APIs to manage remotely offline AttributeProfile

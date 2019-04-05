@@ -143,13 +143,15 @@ func testAlsITMigrateAndMove(t *testing.T) {
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
 			{
-				FieldName:  "Account",
-				Substitute: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
+				FieldName: "Account",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 			},
 			{
-				FilterIDs:  []string{"*string:~Category:call_1001"},
-				FieldName:  "Category",
-				Substitute: config.NewRSRParsersMustCompile("call_1002", true, utils.INFIELD_SEP),
+				FilterIDs: []string{"*string:~Category:call_1001"},
+				FieldName: "Category",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("call_1002", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: false,

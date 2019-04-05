@@ -702,3 +702,51 @@ func (v1rs *redisMigrator) remV2AttributeProfile(tenant, id string) (err error) 
 	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(tenant, id)
 	return v1rs.rds.Cmd("DEL", key).Err
 }
+
+//AttributeProfile methods
+//get
+func (v1rs *redisMigrator) getV3AttributeProfile() (v3attrPrf *v3AttributeProfile, err error) {
+	var v3attr *v3AttributeProfile
+	if v1rs.qryIdx == nil {
+		v1rs.dataKeys, err = v1rs.rds.GetKeysForPrefix(utils.AttributeProfilePrefix)
+		if err != nil {
+			return
+		} else if len(v1rs.dataKeys) == 0 {
+			return nil, utils.ErrNotFound
+		}
+		v1rs.qryIdx = utils.IntPointer(0)
+	}
+	if *v1rs.qryIdx <= len(v1rs.dataKeys)-1 {
+		strVal, err := v1rs.rds.Cmd("GET", v1rs.dataKeys[*v1rs.qryIdx]).Bytes()
+		if err != nil {
+			return nil, err
+		}
+		if err := v1rs.rds.Marshaler().Unmarshal(strVal, &v3attr); err != nil {
+			return nil, err
+		}
+		*v1rs.qryIdx = *v1rs.qryIdx + 1
+	} else {
+		v1rs.qryIdx = nil
+		return nil, utils.ErrNoMoreData
+	}
+	return v3attr, nil
+}
+
+//set
+func (v1rs *redisMigrator) setV3AttributeProfile(x *v3AttributeProfile) (err error) {
+	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(x.Tenant, x.ID)
+	bit, err := v1rs.rds.Marshaler().Marshal(x)
+	if err != nil {
+		return err
+	}
+	if err = v1rs.rds.Cmd("SET", key, bit).Err; err != nil {
+		return err
+	}
+	return
+}
+
+//rem
+func (v1rs *redisMigrator) remV3AttributeProfile(tenant, id string) (err error) {
+	key := utils.AttributeProfilePrefix + utils.ConcatenatedKey(tenant, id)
+	return v1rs.rds.Cmd("DEL", key).Err
+}

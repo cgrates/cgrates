@@ -26,10 +26,10 @@ import (
 )
 
 type Attribute struct {
-	FilterIDs  []string
-	FieldName  string
-	Type       string
-	Substitute config.RSRParsers
+	FilterIDs []string
+	FieldName string
+	Type      string
+	Value     config.RSRParsers
 }
 
 type AttributeProfile struct {
@@ -45,7 +45,7 @@ type AttributeProfile struct {
 
 func (ap *AttributeProfile) compileSubstitutes() (err error) {
 	for _, attr := range ap.Attributes {
-		if err = attr.Substitute.Compile(); err != nil {
+		if err = attr.Value.Compile(); err != nil {
 			return
 		}
 	}
@@ -70,9 +70,10 @@ func (aps AttributeProfiles) Sort() {
 }
 
 type ExternalAttribute struct {
-	FilterIDs  []string
-	FieldName  string
-	Substitute string
+	FilterIDs []string
+	FieldName string
+	Type      string
+	Value     string
 }
 
 type ExternalAttributeProfile struct {
@@ -93,13 +94,14 @@ func (ext *ExternalAttributeProfile) AsAttributeProfile() (attr *AttributeProfil
 	}
 	attr.Attributes = make([]*Attribute, len(ext.Attributes))
 	for i, extAttr := range ext.Attributes {
-		if len(extAttr.Substitute) == 0 {
-			return nil, utils.NewErrMandatoryIeMissing("Substitute")
+		if len(extAttr.Value) == 0 {
+			return nil, utils.NewErrMandatoryIeMissing("Value")
 		}
 		attr.Attributes[i] = new(Attribute)
-		if attr.Attributes[i].Substitute, err = config.NewRSRParsers(extAttr.Substitute, true, utils.INFIELD_SEP); err != nil {
+		if attr.Attributes[i].Value, err = config.NewRSRParsers(extAttr.Value, true, utils.INFIELD_SEP); err != nil {
 			return nil, err
 		}
+		attr.Attributes[i].Type = extAttr.Type
 		attr.Attributes[i].FilterIDs = extAttr.FilterIDs
 		attr.Attributes[i].FieldName = extAttr.FieldName
 	}

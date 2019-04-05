@@ -39,8 +39,8 @@ func TestConvertExternalToProfile(t *testing.T) {
 		},
 		Attributes: []*ExternalAttribute{
 			&ExternalAttribute{
-				FieldName:  "Account",
-				Substitute: "1001",
+				FieldName: "Account",
+				Value:     "1001",
 			},
 		},
 		Weight: 20,
@@ -57,8 +57,8 @@ func TestConvertExternalToProfile(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "Account",
-				Substitute: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+				FieldName: "Account",
+				Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -115,7 +115,7 @@ func TestConvertExternalToProfileMissing2(t *testing.T) {
 	}
 
 	_, err := external.AsAttributeProfile()
-	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [Substitute]" {
+	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [Value]" {
 		t.Error(err)
 	}
 

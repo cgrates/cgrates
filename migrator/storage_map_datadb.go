@@ -230,3 +230,19 @@ func (v1ms *mapMigrator) setV2AttributeProfile(x *v2AttributeProfile) (err error
 func (v1ms *mapMigrator) remV2AttributeProfile(tenant, id string) (err error) {
 	return utils.ErrNotImplemented
 }
+
+//AttributeProfile methods
+//get
+func (v1ms *mapMigrator) getV3AttributeProfile() (v3attrPrf *v3AttributeProfile, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+//set
+func (v1ms *mapMigrator) setV3AttributeProfile(x *v3AttributeProfile) (err error) {
+	return utils.ErrNotImplemented
+}
+
+//rem
+func (v1ms *mapMigrator) remV3AttributeProfile(tenant, id string) (err error) {
+	return utils.ErrNotImplemented
+}

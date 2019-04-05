@@ -1244,9 +1244,9 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FilterIDs:  []string{"*string:FL1:In1"},
-					FieldName:  "FL1",
-					Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+					FilterIDs: []string{"*string:FL1:In1"},
+					FieldName: "FL1",
+					Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -1357,9 +1357,9 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
 			Attributes: []*engine.Attribute{{
-				FilterIDs:  []string{"*string:FL1:In1"},
-				FieldName:  "FL1",
-				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+				FilterIDs: []string{"*string:FL1:In1"},
+				FieldName: "FL1",
+				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 			}},
 			Weight: 20,
 		},

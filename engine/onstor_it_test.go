@@ -1856,8 +1856,8 @@ func testOnStorITAttributeProfile(t *testing.T) {
 		Contexts: []string{"con1"},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "FN1",
-				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+				FieldName: "FN1",
+				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -1936,8 +1936,8 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 		Contexts: []string{"con1"},
 		Attributes: []*Attribute{
 			{
-				FieldName:  "FN1",
-				Substitute: config.NewRSRParsersMustCompile("Val1", true, utils.INFIELD_SEP),
+				FieldName: "FN1",
+				Value:     config.NewRSRParsersMustCompile("Val1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -1958,8 +1958,8 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	}
 	attrProfile.Attributes = []*Attribute{
 		{
-			FieldName:  "FN1",
-			Substitute: config.NewRSRParsersMustCompile("123.123", true, utils.INFIELD_SEP),
+			FieldName: "FN1",
+			Value:     config.NewRSRParsersMustCompile("123.123", true, utils.INFIELD_SEP),
 		},
 	}
 	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
@@ -1974,8 +1974,8 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	}
 	attrProfile.Attributes = []*Attribute{
 		{
-			FieldName:  "FN1",
-			Substitute: config.NewRSRParsersMustCompile("true", true, utils.INFIELD_SEP),
+			FieldName: "FN1",
+			Value:     config.NewRSRParsersMustCompile("true", true, utils.INFIELD_SEP),
 		},
 	}
 	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
