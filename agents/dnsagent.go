@@ -20,6 +20,7 @@ package agents
 
 import (
 	"fmt"
+	"net"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
@@ -70,11 +71,25 @@ func (da *DNSAgent) ListenAndServe() error {
 
 // handleMessage is the entry point of all DNS requests
 // requests are reaching here asynchronously
-func (da *DNSAgent) handleMessage(w dns.ResponseWriter, m *dns.Msg) {
-	fmt.Printf("got message: %+v\n", m)
+func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
+	fmt.Printf("got message: %+v\n", req)
 	rply := new(dns.Msg)
-	rply.SetReply(m)
-	rply.Authoritative = true
+	rply.SetReply(req)
+	switch req.Question[0].Qtype {
+	case dns.TypeA:
+		rply.Authoritative = true
+		if req.Question[0].Name == "cgrates.org." {
+			rply.Answer = append(rply.Answer,
+				&dns.A{
+					Hdr: dns.RR_Header{
+						Name:   req.Question[0].Name,
+						Rrtype: dns.TypeA,
+						Class:  dns.ClassINET,
+						Ttl:    60},
+					A: net.ParseIP("195.201.167.179")},
+			)
+		}
+	}
 
 	fmt.Printf("send reply message: %+v\n", rply)
 	w.WriteMsg(rply)
