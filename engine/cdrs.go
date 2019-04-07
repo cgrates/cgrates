@@ -279,6 +279,8 @@ func (cdrS *CDRServer) rateCDRWithErr(cdr *CDR) (ratedCDRs []*CDR) {
 func (cdrS *CDRServer) chrgProcessEvent(cgrEv *utils.CGREvent,
 	attrS, store, export, thdS, statS bool) (err error) {
 	var chrgrs []*ChrgSProcessEventReply
+	//in case of internal connection what should we do here ?
+	//
 	if err = cdrS.chargerS.Call(utils.ChargerSv1ProcessEvent,
 		cgrEv, &chrgrs); err != nil {
 		utils.Logger.Warning(
@@ -317,11 +319,29 @@ func (cdrS *CDRServer) chrgProcessEvent(cgrEv *utils.CGREvent,
 // statSProcessEvent will send the event to StatS if the connection is configured
 func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 	var rplyEv AttrSProcessEventReply
+	attrArgs := &AttrArgsProcessEvent{
+		Context:  utils.StringPointer(utils.MetaCDRs),
+		CGREvent: *cgrEv}
+	//check if we have APIKey in event and in case it has add it in ArgDispatcher
+	apiKeyIface, hasApiKey := cgrEv.Event[utils.MetaApiKey]
+	if hasApiKey {
+		attrArgs.ArgDispatcher = &utils.ArgDispatcher{
+			APIKey: utils.StringPointer(apiKeyIface.(string)),
+		}
+	}
+	//check if we have RouteID in event and in case it has add it in ArgDispatcher
+	routeIDIface, hasRouteID := cgrEv.Event[utils.MetaRouteID]
+	if hasRouteID {
+		if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+			attrArgs.ArgDispatcher = &utils.ArgDispatcher{
+				RouteID: utils.StringPointer(routeIDIface.(string)),
+			}
+		} else {
+			attrArgs.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
+		}
+	}
 	if err = cdrS.attrS.Call(utils.AttributeSv1ProcessEvent,
-		&AttrArgsProcessEvent{
-			Context:  utils.StringPointer(utils.MetaCDRs),
-			CGREvent: *cgrEv},
-		&rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
+		attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 		*cgrEv = *rplyEv.CGREvent
 	} else if err.Error() == utils.ErrNotFound.Error() {
 		err = nil // cancel ErrNotFound
@@ -332,8 +352,27 @@ func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 // thdSProcessEvent will send the event to ThresholdS if the connection is configured
 func (cdrS *CDRServer) thdSProcessEvent(cgrEv *utils.CGREvent) {
 	var tIDs []string
+	thArgs := &ArgsProcessEvent{CGREvent: *cgrEv}
+	//check if we have APIKey in event and in case it has add it in ArgDispatcher
+	apiKeyIface, hasApiKey := cgrEv.Event[utils.MetaApiKey]
+	if hasApiKey {
+		thArgs.ArgDispatcher = &utils.ArgDispatcher{
+			APIKey: utils.StringPointer(apiKeyIface.(string)),
+		}
+	}
+	//check if we have RouteID in event and in case it has add it in ArgDispatcher
+	routeIDIface, hasRouteID := cgrEv.Event[utils.MetaRouteID]
+	if hasRouteID {
+		if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+			thArgs.ArgDispatcher = &utils.ArgDispatcher{
+				RouteID: utils.StringPointer(routeIDIface.(string)),
+			}
+		} else {
+			thArgs.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
+		}
+	}
 	if err := cdrS.thdS.Call(utils.ThresholdSv1ProcessEvent,
-		&ArgsProcessEvent{CGREvent: *cgrEv}, &tIDs); err != nil &&
+		thArgs, &tIDs); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s processing CDR event %+v with thdS.",
@@ -345,8 +384,27 @@ func (cdrS *CDRServer) thdSProcessEvent(cgrEv *utils.CGREvent) {
 // statSProcessEvent will send the event to StatS if the connection is configured
 func (cdrS *CDRServer) statSProcessEvent(cgrEv *utils.CGREvent) {
 	var reply []string
+	statArgs := &StatsArgsProcessEvent{CGREvent: *cgrEv}
+	//check if we have APIKey in event and in case it has add it in ArgDispatcher
+	apiKeyIface, hasApiKey := cgrEv.Event[utils.MetaApiKey]
+	if hasApiKey {
+		statArgs.ArgDispatcher = &utils.ArgDispatcher{
+			APIKey: utils.StringPointer(apiKeyIface.(string)),
+		}
+	}
+	//check if we have RouteID in event and in case it has add it in ArgDispatcher
+	routeIDIface, hasRouteID := cgrEv.Event[utils.MetaRouteID]
+	if hasRouteID {
+		if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+			statArgs.ArgDispatcher = &utils.ArgDispatcher{
+				RouteID: utils.StringPointer(routeIDIface.(string)),
+			}
+		} else {
+			statArgs.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
+		}
+	}
 	if err := cdrS.statS.Call(utils.StatSv1ProcessEvent,
-		&StatsArgsProcessEvent{CGREvent: *cgrEv}, &reply); err != nil &&
+		statArgs, &reply); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s processing CDR event %+v with %s.",

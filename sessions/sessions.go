@@ -949,6 +949,7 @@ func (sS *SessionS) forkSession(s *Session) (err error) {
 	if len(s.SRuns) != 0 {
 		return errors.New("already forked")
 	}
+	//we need to see what we do in case we have ArgDispatcher
 	cgrEv := &utils.CGREvent{
 		Tenant: s.Tenant,
 		ID:     utils.UUIDSha1Prefix(),
@@ -1160,6 +1161,24 @@ func (sS *SessionS) authSession(tnt string, evStart *engine.SafEvent) (maxUsage 
 		Tenant:     tnt,
 		EventStart: evStart,
 	}
+	//check if we have APIKey in event and in case it has add it in ArgDispatcher
+	apiKeyIface, errApiKey := evStart.FieldAsString([]string{utils.MetaApiKey})
+	if errApiKey == nil {
+		s.ArgDispatcher = &utils.ArgDispatcher{
+			APIKey: utils.StringPointer(apiKeyIface),
+		}
+	}
+	//check if we have RouteID in event and in case it has add it in ArgDispatcher
+	routeIDIface, errRouteID := evStart.FieldAsString([]string{utils.MetaRouteID})
+	if errRouteID == nil {
+		if errApiKey.Error() == utils.ErrNotFound.Error() { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+			s.ArgDispatcher = &utils.ArgDispatcher{
+				RouteID: utils.StringPointer(routeIDIface),
+			}
+		} else {
+			s.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface)
+		}
+	}
 	if err = sS.forkSession(s); err != nil {
 		return
 	}
@@ -1196,6 +1215,24 @@ func (sS *SessionS) initSession(tnt string, evStart *engine.SafEvent, clntConnID
 		EventStart:    evStart,
 		ClientConnID:  clntConnID,
 		DebitInterval: dbtItval,
+	}
+	//check if we have APIKey in event and in case it has add it in ArgDispatcher
+	apiKeyIface, errApiKey := evStart.FieldAsString([]string{utils.MetaApiKey})
+	if errApiKey == nil {
+		s.ArgDispatcher = &utils.ArgDispatcher{
+			APIKey: utils.StringPointer(apiKeyIface),
+		}
+	}
+	//check if we have RouteID in event and in case it has add it in ArgDispatcher
+	routeIDIface, errRouteID := evStart.FieldAsString([]string{utils.MetaRouteID})
+	if errRouteID == nil {
+		if errApiKey.Error() == utils.ErrNotFound.Error() { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+			s.ArgDispatcher = &utils.ArgDispatcher{
+				RouteID: utils.StringPointer(routeIDIface),
+			}
+		} else {
+			s.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface)
+		}
 	}
 	if err = sS.forkSession(s); err != nil {
 		return nil, err
