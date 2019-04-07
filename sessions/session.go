@@ -75,6 +75,7 @@ type Session struct {
 
 	debitStop   chan struct{}
 	sTerminator *sTerminator // automatic timeout for the session
+	*utils.ArgDispatcher
 }
 
 // CGRid is a thread-safe method to return the CGRID of a session

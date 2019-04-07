@@ -26,8 +26,11 @@ import (
 )
 
 // ResponderPing interogates Responder server responsible to process the event
-func (dS *DispatcherService) ResponderPing(args *CGREvWithApiKey,
+func (dS *DispatcherService) ResponderPing(args *utils.CGREventWithArgDispatcher,
 	reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.ResponderPing,
 			args.CGREvent.Tenant,
@@ -35,12 +38,15 @@ func (dS *DispatcherService) ResponderPing(args *CGREvWithApiKey,
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaResponder, args.RouteID,
+	return dS.Dispatch(args.CGREvent, utils.MetaResponder, args.RouteID,
 		utils.ResponderPing, args.CGREvent, reply)
 }
 
-func (dS *DispatcherService) ResponderStatus(args *TntWithApiKey,
+func (dS *DispatcherService) ResponderStatus(args *utils.TenantWithArgDispatcher,
 	reply *map[string]interface{}) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.ResponderStatus, args.Tenant,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
@@ -53,80 +59,101 @@ func (dS *DispatcherService) ResponderStatus(args *TntWithApiKey,
 		"", reply)
 }
 
-func (dS *DispatcherService) ResponderGetCost(args *CallDescriptorWithApiKey,
+func (dS *DispatcherService) ResponderGetCost(args *engine.CallDescriptor,
 	reply *engine.CallCost) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.ResponderGetCost, args.Tenant,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(args.CallDescriptor.AsCGREvent(), utils.MetaResponder,
-		args.RouteID, utils.ResponderGetCost, args.CallDescriptor, reply)
+	return dS.Dispatch(args.AsCGREvent(), utils.MetaResponder,
+		args.RouteID, utils.ResponderGetCost, args, reply)
 }
 
-func (dS *DispatcherService) ResponderDebit(args *CallDescriptorWithApiKey,
+func (dS *DispatcherService) ResponderDebit(args *engine.CallDescriptor,
 	reply *engine.CallCost) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.ResponderDebit, args.Tenant,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(args.CallDescriptor.AsCGREvent(), utils.MetaResponder,
-		args.RouteID, utils.ResponderDebit, args.CallDescriptor, reply)
+	return dS.Dispatch(args.AsCGREvent(), utils.MetaResponder,
+		args.RouteID, utils.ResponderDebit, args, reply)
 }
 
-func (dS *DispatcherService) ResponderMaxDebit(args *CallDescriptorWithApiKey,
+func (dS *DispatcherService) ResponderMaxDebit(args *engine.CallDescriptor,
 	reply *engine.CallCost) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.ResponderMaxDebit, args.Tenant,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(args.CallDescriptor.AsCGREvent(), utils.MetaResponder,
-		args.RouteID, utils.ResponderMaxDebit, args.CallDescriptor, reply)
+	return dS.Dispatch(args.AsCGREvent(), utils.MetaResponder,
+		args.RouteID, utils.ResponderMaxDebit, args, reply)
 }
 
-func (dS *DispatcherService) ResponderRefundIncrements(args *CallDescriptorWithApiKey,
+func (dS *DispatcherService) ResponderRefundIncrements(args *engine.CallDescriptor,
 	reply *engine.Account) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.ResponderRefundIncrements, args.Tenant,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(args.CallDescriptor.AsCGREvent(), utils.MetaResponder,
-		args.RouteID, utils.ResponderRefundIncrements, args.CallDescriptor, reply)
+	return dS.Dispatch(args.AsCGREvent(), utils.MetaResponder,
+		args.RouteID, utils.ResponderRefundIncrements, args, reply)
 }
 
-func (dS *DispatcherService) ResponderRefundRounding(args *CallDescriptorWithApiKey,
+func (dS *DispatcherService) ResponderRefundRounding(args *engine.CallDescriptor,
 	reply *float64) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.ResponderRefundRounding, args.Tenant,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(args.CallDescriptor.AsCGREvent(), utils.MetaResponder,
-		args.RouteID, utils.ResponderRefundRounding, args.CallDescriptor, reply)
+	return dS.Dispatch(args.AsCGREvent(), utils.MetaResponder,
+		args.RouteID, utils.ResponderRefundRounding, args, reply)
 }
 
-func (dS *DispatcherService) ResponderGetMaxSessionTime(args *CallDescriptorWithApiKey,
+func (dS *DispatcherService) ResponderGetMaxSessionTime(args *engine.CallDescriptor,
 	reply *time.Duration) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.ResponderGetMaxSessionTime, args.Tenant,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(args.CallDescriptor.AsCGREvent(), utils.MetaResponder,
-		args.RouteID, utils.ResponderGetMaxSessionTime, args.CallDescriptor, reply)
+	return dS.Dispatch(args.AsCGREvent(), utils.MetaResponder,
+		args.RouteID, utils.ResponderGetMaxSessionTime, args, reply)
 }
 
-func (dS *DispatcherService) ResponderShutdown(args *TntWithApiKey,
+func (dS *DispatcherService) ResponderShutdown(args *utils.TenantWithArgDispatcher,
 	reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.ResponderShutdown, args.Tenant,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
@@ -139,8 +166,11 @@ func (dS *DispatcherService) ResponderShutdown(args *TntWithApiKey,
 		"", reply)
 }
 
-func (dS *DispatcherService) ResponderGetTimeout(args *TntWithApiKey,
+func (dS *DispatcherService) ResponderGetTimeout(args *utils.TenantWithArgDispatcher,
 	reply *time.Duration) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.ResponderGetTimeout, args.Tenant,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {

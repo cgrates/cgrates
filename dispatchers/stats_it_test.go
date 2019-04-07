@@ -56,12 +56,12 @@ func testDspStsPingFailover(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	ev := CGREvWithApiKey{
-		CGREvent: utils.CGREvent{
+	ev := utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		DispatcherResource: DispatcherResource{
-			APIKey: "stat12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("stat12345"),
 		},
 	}
 	if err := dispEngine.RCP.Call(utils.StatSv1Ping, &ev, &reply); err != nil {
@@ -87,23 +87,21 @@ func testDspStsGetStatFailover(t *testing.T) {
 	var reply []string
 	var metrics map[string]string
 	expected := []string{"Stats1"}
-	args := ArgsStatProcessEventWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "stat12345",
+	args := engine.StatsArgsProcessEvent{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME:  "Event1",
+				utils.Account:     "1001",
+				utils.AnswerTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:       time.Duration(135 * time.Second),
+				utils.COST:        123.0,
+				utils.RunID:       utils.DEFAULT_RUNID,
+				utils.Destination: "1002"},
 		},
-		StatsArgsProcessEvent: engine.StatsArgsProcessEvent{
-			CGREvent: utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					utils.EVENT_NAME:  "Event1",
-					utils.Account:     "1001",
-					utils.AnswerTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:       time.Duration(135 * time.Second),
-					utils.COST:        123.0,
-					utils.RunID:       utils.DEFAULT_RUNID,
-					utils.Destination: "1002"},
-			},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("stat12345"),
 		},
 	}
 	if err := dispEngine.RCP.Call(utils.StatSv1ProcessEvent, args, &reply); err != nil {
@@ -112,11 +110,11 @@ func testDspStsGetStatFailover(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 
-	args2 := TntIDWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "stat12345",
+	args2 := utils.TenantIDWithArgDispatcher{
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("stat12345"),
 		},
-		TenantID: utils.TenantID{
+		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "Stats1",
 		},
@@ -144,12 +142,12 @@ func testDspStsPing(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RCP.Call(utils.StatSv1Ping, &CGREvWithApiKey{
-		CGREvent: utils.CGREvent{
+	if err := dispEngine.RCP.Call(utils.StatSv1Ping, &utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		DispatcherResource: DispatcherResource{
-			APIKey: "stat12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("stat12345"),
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -160,31 +158,31 @@ func testDspStsPing(t *testing.T) {
 
 func testDspStsTestAuthKey(t *testing.T) {
 	var reply []string
-	args := ArgsStatProcessEventWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "12345",
+	args := engine.StatsArgsProcessEvent{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Account:    "1001",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(135 * time.Second),
+				utils.COST:       123.0,
+				utils.PDD:        time.Duration(12 * time.Second)},
 		},
-		StatsArgsProcessEvent: engine.StatsArgsProcessEvent{
-			CGREvent: utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					utils.Account:    "1001",
-					utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:      time.Duration(135 * time.Second),
-					utils.COST:       123.0,
-					utils.PDD:        time.Duration(12 * time.Second)}},
-		}}
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("12345"),
+		},
+	}
 	if err := dispEngine.RCP.Call(utils.StatSv1ProcessEvent,
 		args, &reply); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
 
-	args2 := TntIDWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "12345",
+	args2 := utils.TenantIDWithArgDispatcher{
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("12345"),
 		},
-		TenantID: utils.TenantID{
+		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "Stats2",
 		},
@@ -201,22 +199,20 @@ func testDspStsTestAuthKey2(t *testing.T) {
 	var reply []string
 	var metrics map[string]string
 	expected := []string{"Stats2"}
-	args := ArgsStatProcessEventWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "stat12345",
+	args := engine.StatsArgsProcessEvent{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Account:     "1001",
+				utils.AnswerTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:       time.Duration(135 * time.Second),
+				utils.COST:        123.0,
+				utils.RunID:       utils.DEFAULT_RUNID,
+				utils.Destination: "1002"},
 		},
-		StatsArgsProcessEvent: engine.StatsArgsProcessEvent{
-			CGREvent: utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					utils.Account:     "1001",
-					utils.AnswerTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:       time.Duration(135 * time.Second),
-					utils.COST:        123.0,
-					utils.RunID:       utils.DEFAULT_RUNID,
-					utils.Destination: "1002"},
-			},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("stat12345"),
 		},
 	}
 	if err := dispEngine.RCP.Call(utils.StatSv1ProcessEvent, args, &reply); err != nil {
@@ -225,11 +221,11 @@ func testDspStsTestAuthKey2(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 
-	args2 := TntIDWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "stat12345",
+	args2 := utils.TenantIDWithArgDispatcher{
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("stat12345"),
 		},
-		TenantID: utils.TenantID{
+		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "Stats2",
 		},
@@ -246,23 +242,21 @@ func testDspStsTestAuthKey2(t *testing.T) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
 	}
 
-	args = ArgsStatProcessEventWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "stat12345",
-		},
-		StatsArgsProcessEvent: engine.StatsArgsProcessEvent{
-			CGREvent: utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "event1",
-				Event: map[string]interface{}{
-					utils.Account:     "1002",
-					utils.AnswerTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-					utils.Usage:       time.Duration(45 * time.Second),
-					utils.RunID:       utils.DEFAULT_RUNID,
-					utils.COST:        10.0,
-					utils.Destination: "1001",
-				},
+	args = engine.StatsArgsProcessEvent{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Account:     "1002",
+				utils.AnswerTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:       time.Duration(45 * time.Second),
+				utils.RunID:       utils.DEFAULT_RUNID,
+				utils.COST:        10.0,
+				utils.Destination: "1001",
 			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("stat12345"),
 		},
 	}
 	if err := dispEngine.RCP.Call(utils.StatSv1ProcessEvent, args, &reply); err != nil {
@@ -287,11 +281,11 @@ func testDspStsTestAuthKey3(t *testing.T) {
 	var reply []string
 	var metrics map[string]float64
 
-	args2 := TntIDWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "stat12345",
+	args2 := utils.TenantIDWithArgDispatcher{
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("stat12345"),
 		},
-		TenantID: utils.TenantID{
+		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "Stats2",
 		},
@@ -310,12 +304,12 @@ func testDspStsTestAuthKey3(t *testing.T) {
 
 	estats := []string{"Stats2", "Stats2_1"}
 	if err := dispEngine.RCP.Call(utils.StatSv1GetQueueIDs,
-		&TntWithApiKey{
-			TenantArg: utils.TenantArg{
+		&utils.TenantWithArgDispatcher{
+			TenantArg: &utils.TenantArg{
 				Tenant: "cgrates.org",
 			},
-			DispatcherResource: DispatcherResource{
-				APIKey: "stat12345",
+			ArgDispatcher: &utils.ArgDispatcher{
+				APIKey: utils.StringPointer("stat12345"),
 			},
 		}, &reply); err != nil {
 		t.Error(err)
@@ -328,23 +322,21 @@ func testDspStsTestAuthKey3(t *testing.T) {
 
 	estats = []string{"Stats2"}
 	if err := dispEngine.RCP.Call(utils.StatSv1GetStatQueuesForEvent,
-		&ArgsStatProcessEventWithApiKey{
-			StatsArgsProcessEvent: engine.StatsArgsProcessEvent{
-				CGREvent: utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "GetStats",
-					Event: map[string]interface{}{
-						utils.Account:     "1002",
-						utils.AnswerTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-						utils.Usage:       time.Duration(45 * time.Second),
-						utils.RunID:       utils.DEFAULT_RUNID,
-						utils.COST:        10.0,
-						utils.Destination: "1001",
-					},
+		&engine.StatsArgsProcessEvent{
+			CGREvent: utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "GetStats",
+				Event: map[string]interface{}{
+					utils.Account:     "1002",
+					utils.AnswerTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+					utils.Usage:       time.Duration(45 * time.Second),
+					utils.RunID:       utils.DEFAULT_RUNID,
+					utils.COST:        10.0,
+					utils.Destination: "1001",
 				},
 			},
-			DispatcherResource: DispatcherResource{
-				APIKey: "stat12345",
+			ArgDispatcher: &utils.ArgDispatcher{
+				APIKey: utils.StringPointer("stat12345"),
 			},
 		}, &reply); err != nil {
 		t.Error(err)

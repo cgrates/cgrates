@@ -180,3 +180,8 @@ type CGREvents struct {
 	Time   *time.Time // event time
 	Events []map[string]interface{}
 }
+
+type CGREventWithArgDispatcher struct {
+	*CGREvent
+	*ArgDispatcher
+}

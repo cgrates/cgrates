@@ -24,7 +24,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) SchedulerSv1Ping(args *CGREvWithApiKey, reply *string) (err error) {
+func (dS *DispatcherService) SchedulerSv1Ping(args *utils.CGREventWithArgDispatcher, reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.SchedulerSv1Ping,
 			args.CGREvent.Tenant,
@@ -32,11 +35,14 @@ func (dS *DispatcherService) SchedulerSv1Ping(args *CGREvWithApiKey, reply *stri
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaScheduler, args.RouteID,
+	return dS.Dispatch(args.CGREvent, utils.MetaScheduler, args.RouteID,
 		utils.SchedulerSv1Ping, args.CGREvent, reply)
 }
 
 func (dS *DispatcherService) SchedulerSv1Reload(args *StringkWithApiKey, reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.SchedulerSv1Ping,
 			args.TenantArg.Tenant,

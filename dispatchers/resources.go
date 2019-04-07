@@ -23,7 +23,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) ResourceSv1Ping(args *CGREvWithApiKey, rpl *string) (err error) {
+func (dS *DispatcherService) ResourceSv1Ping(args *utils.CGREventWithArgDispatcher, rpl *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.ResourceSv1Ping,
 			args.CGREvent.Tenant,
@@ -31,62 +34,74 @@ func (dS *DispatcherService) ResourceSv1Ping(args *CGREvWithApiKey, rpl *string)
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaResources, args.RouteID,
+	return dS.Dispatch(args.CGREvent, utils.MetaResources, args.RouteID,
 		utils.ResourceSv1Ping, args.CGREvent, rpl)
 }
 
-func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args *ArgsV1ResUsageWithApiKey,
+func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args *utils.ArgRSv1ResourceUsage,
 	reply *engine.Resources) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.ResourceSv1GetResourcesForEvent,
-			args.ArgRSv1ResourceUsage.CGREvent.Tenant,
-			args.APIKey, args.ArgRSv1ResourceUsage.CGREvent.Time); err != nil {
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 
 	}
 	return dS.Dispatch(&args.CGREvent, utils.MetaResources, args.RouteID,
-		utils.ResourceSv1GetResourcesForEvent, args.ArgRSv1ResourceUsage, reply)
+		utils.ResourceSv1GetResourcesForEvent, args, reply)
 }
 
-func (dS *DispatcherService) ResourceSv1AuthorizeResources(args *ArgsV1ResUsageWithApiKey,
+func (dS *DispatcherService) ResourceSv1AuthorizeResources(args *utils.ArgRSv1ResourceUsage,
 	reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.ResourceSv1AuthorizeResources,
-			args.ArgRSv1ResourceUsage.CGREvent.Tenant,
-			args.APIKey, args.ArgRSv1ResourceUsage.CGREvent.Time); err != nil {
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 
 	}
 	return dS.Dispatch(&args.CGREvent, utils.MetaResources, args.RouteID,
-		utils.ResourceSv1AuthorizeResources, args.ArgRSv1ResourceUsage, reply)
+		utils.ResourceSv1AuthorizeResources, args, reply)
 }
 
-func (dS *DispatcherService) ResourceSv1AllocateResources(args *ArgsV1ResUsageWithApiKey,
+func (dS *DispatcherService) ResourceSv1AllocateResources(args *utils.ArgRSv1ResourceUsage,
 	reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.ResourceSv1AllocateResources,
-			args.ArgRSv1ResourceUsage.CGREvent.Tenant,
-			args.APIKey, args.ArgRSv1ResourceUsage.CGREvent.Time); err != nil {
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 
 	}
 	return dS.Dispatch(&args.CGREvent, utils.MetaResources, args.RouteID,
-		utils.ResourceSv1AllocateResources, args.ArgRSv1ResourceUsage, reply)
+		utils.ResourceSv1AllocateResources, args, reply)
 }
 
-func (dS *DispatcherService) ResourceSv1ReleaseResources(args *ArgsV1ResUsageWithApiKey,
+func (dS *DispatcherService) ResourceSv1ReleaseResources(args *utils.ArgRSv1ResourceUsage,
 	reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.ResourceSv1ReleaseResources,
-			args.ArgRSv1ResourceUsage.CGREvent.Tenant,
-			args.APIKey, args.ArgRSv1ResourceUsage.CGREvent.Time); err != nil {
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 
 	}
 	return dS.Dispatch(&args.CGREvent, utils.MetaResources, args.RouteID,
-		utils.ResourceSv1ReleaseResources, args.ArgRSv1ResourceUsage, reply)
+		utils.ResourceSv1ReleaseResources, args, reply)
 }

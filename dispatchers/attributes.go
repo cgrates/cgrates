@@ -24,43 +24,52 @@ import (
 )
 
 // AttributeSv1Ping interogates AttributeS server responsible to process the event
-func (dS *DispatcherService) AttributeSv1Ping(args *CGREvWithApiKey,
+func (dS *DispatcherService) AttributeSv1Ping(args *utils.CGREventWithArgDispatcher,
 	reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.AttributeSv1Ping,
+			args.Tenant,
+			args.APIKey, args.Time); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(args.CGREvent, utils.MetaAttributes, args.RouteID,
+		utils.AttributeSv1Ping, args, reply)
+}
+
+// AttributeSv1GetAttributeForEvent is the dispatcher method for AttributeSv1.GetAttributeForEvent
+func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *engine.AttrArgsProcessEvent,
+	reply *engine.AttributeProfile) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.AttributeSv1GetAttributeForEvent,
 			args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&args.CGREvent, utils.MetaAttributes, args.RouteID,
-		utils.AttributeSv1Ping, args.CGREvent, reply)
+		utils.AttributeSv1GetAttributeForEvent, args, reply)
 }
 
-// AttributeSv1GetAttributeForEvent is the dispatcher method for AttributeSv1.GetAttributeForEvent
-func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *ArgsAttrProcessEventWithApiKey,
-	reply *engine.AttributeProfile) (err error) {
-	if dS.attrS != nil {
-		if err = dS.authorize(utils.AttributeSv1GetAttributeForEvent,
-			args.AttrArgsProcessEvent.CGREvent.Tenant,
-			args.APIKey, args.AttrArgsProcessEvent.CGREvent.Time); err != nil {
-			return
-		}
-	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaAttributes, args.RouteID,
-		utils.AttributeSv1GetAttributeForEvent, args.AttrArgsProcessEvent, reply)
-}
-
-func (dS *DispatcherService) AttributeSv1ProcessEvent(args *ArgsAttrProcessEventWithApiKey,
+func (dS *DispatcherService) AttributeSv1ProcessEvent(args *engine.AttrArgsProcessEvent,
 	reply *engine.AttrSProcessEventReply) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.AttributeSv1ProcessEvent,
-			args.AttrArgsProcessEvent.CGREvent.Tenant,
-			args.APIKey, args.AttrArgsProcessEvent.CGREvent.Time); err != nil {
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 
 	}
 	return dS.Dispatch(&args.CGREvent, utils.MetaAttributes, args.RouteID,
-		utils.AttributeSv1ProcessEvent, args.AttrArgsProcessEvent, reply)
+		utils.AttributeSv1ProcessEvent, args, reply)
 }

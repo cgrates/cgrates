@@ -78,8 +78,8 @@ func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
 	return
 }
 
-func (dS *DispatcherService) authorize(method, tenant, apiKey string, evTime *time.Time) (err error) {
-	if apiKey == "" {
+func (dS *DispatcherService) authorize(method, tenant string, apiKey *string, evTime *time.Time) (err error) {
+	if apiKey == nil || *apiKey == "" {
 		return utils.NewErrMandatoryIeMissing(utils.APIKey)
 	}
 	ev := &utils.CGREvent{
@@ -87,7 +87,7 @@ func (dS *DispatcherService) authorize(method, tenant, apiKey string, evTime *ti
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   evTime,
 		Event: map[string]interface{}{
-			utils.APIKey: apiKey,
+			utils.APIKey: *apiKey,
 		},
 	}
 	var rplyEv engine.AttrSProcessEventReply

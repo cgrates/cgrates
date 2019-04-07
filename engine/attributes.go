@@ -147,6 +147,7 @@ type AttrArgsProcessEvent struct {
 	Context      *string // attach the event to a context
 	ProcessRuns  *int    // number of loops for ProcessEvent
 	utils.CGREvent
+	*utils.ArgDispatcher
 }
 
 // processEvent will match event with attribute profile and do the necessary replacements

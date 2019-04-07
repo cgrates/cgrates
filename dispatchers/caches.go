@@ -26,8 +26,11 @@ import (
 )
 
 // CacheSv1Ping interogates CacheSv1 server responsible to process the event
-func (dS *DispatcherService) CacheSv1Ping(args *CGREvWithApiKey,
+func (dS *DispatcherService) CacheSv1Ping(args *utils.CGREventWithArgDispatcher,
 	reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.CacheSv1Ping,
 			args.CGREvent.Tenant,
@@ -35,7 +38,7 @@ func (dS *DispatcherService) CacheSv1Ping(args *CGREvWithApiKey,
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaCaches, args.RouteID,
+	return dS.Dispatch(args.CGREvent, utils.MetaCaches, args.RouteID,
 		utils.CacheSv1Ping, args.CGREvent, reply)
 }
 
@@ -56,6 +59,9 @@ func (dS *DispatcherService) CacheSv1GetItemIDs(args *ArgsGetCacheItemIDsWithApi
 // HasItem verifies the existence of an Item in cache
 func (dS *DispatcherService) CacheSv1HasItem(args *ArgsGetCacheItemWithApiKey,
 	reply *bool) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.CacheSv1HasItem,
 			args.TenantArg.Tenant,
@@ -70,6 +76,9 @@ func (dS *DispatcherService) CacheSv1HasItem(args *ArgsGetCacheItemWithApiKey,
 // GetItemExpiryTime returns the expiryTime for an item
 func (dS *DispatcherService) CacheSv1GetItemExpiryTime(args *ArgsGetCacheItemWithApiKey,
 	reply *time.Time) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.CacheSv1GetItemExpiryTime,
 			args.TenantArg.Tenant,
@@ -84,6 +93,9 @@ func (dS *DispatcherService) CacheSv1GetItemExpiryTime(args *ArgsGetCacheItemWit
 // RemoveItem removes the Item with ID from cache
 func (dS *DispatcherService) CacheSv1RemoveItem(args *ArgsGetCacheItemWithApiKey,
 	reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.CacheSv1RemoveItem,
 			args.TenantArg.Tenant,
@@ -98,6 +110,9 @@ func (dS *DispatcherService) CacheSv1RemoveItem(args *ArgsGetCacheItemWithApiKey
 // Clear will clear partitions in the cache (nil fol all, empty slice for none)
 func (dS *DispatcherService) CacheSv1Clear(args *AttrCacheIDsWithApiKey,
 	reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.CacheSv1Clear,
 			args.TenantArg.Tenant,
@@ -111,6 +126,9 @@ func (dS *DispatcherService) CacheSv1Clear(args *AttrCacheIDsWithApiKey,
 
 // FlushCache wipes out cache for a prefix or completely
 func (dS *DispatcherService) CacheSv1FlushCache(args AttrReloadCacheWithApiKey, reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.CacheSv1FlushCache,
 			args.TenantArg.Tenant,
@@ -125,6 +143,9 @@ func (dS *DispatcherService) CacheSv1FlushCache(args AttrReloadCacheWithApiKey, 
 // GetCacheStats returns CacheStats filtered by cacheIDs
 func (dS *DispatcherService) CacheSv1GetCacheStats(args *AttrCacheIDsWithApiKey,
 	reply *map[string]*ltcache.CacheStats) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.CacheSv1GetCacheStats,
 			args.TenantArg.Tenant,
@@ -138,6 +159,9 @@ func (dS *DispatcherService) CacheSv1GetCacheStats(args *AttrCacheIDsWithApiKey,
 
 // PrecacheStatus checks status of active precache processes
 func (dS *DispatcherService) CacheSv1PrecacheStatus(args *AttrCacheIDsWithApiKey, reply *map[string]string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.CacheSv1PrecacheStatus,
 			args.TenantArg.Tenant,
@@ -152,6 +176,9 @@ func (dS *DispatcherService) CacheSv1PrecacheStatus(args *AttrCacheIDsWithApiKey
 // HasGroup checks existence of a group in cache
 func (dS *DispatcherService) CacheSv1HasGroup(args *ArgsGetGroupWithApiKey,
 	reply *bool) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.CacheSv1HasGroup,
 			args.TenantArg.Tenant,
@@ -166,6 +193,9 @@ func (dS *DispatcherService) CacheSv1HasGroup(args *ArgsGetGroupWithApiKey,
 // GetGroupItemIDs returns a list of itemIDs in a cache group
 func (dS *DispatcherService) CacheSv1GetGroupItemIDs(args *ArgsGetGroupWithApiKey,
 	reply *[]string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.CacheSv1GetGroupItemIDs,
 			args.TenantArg.Tenant,
@@ -180,6 +210,9 @@ func (dS *DispatcherService) CacheSv1GetGroupItemIDs(args *ArgsGetGroupWithApiKe
 // RemoveGroup will remove a group and all items belonging to it from cache
 func (dS *DispatcherService) CacheSv1RemoveGroup(args *ArgsGetGroupWithApiKey,
 	reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.CacheSv1RemoveGroup,
 			args.TenantArg.Tenant,
@@ -193,6 +226,9 @@ func (dS *DispatcherService) CacheSv1RemoveGroup(args *ArgsGetGroupWithApiKey,
 
 // ReloadCache reloads cache from DB for a prefix or completely
 func (dS *DispatcherService) CacheSv1ReloadCache(args AttrReloadCacheWithApiKey, reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.CacheSv1ReloadCache,
 			args.TenantArg.Tenant,
@@ -206,6 +242,9 @@ func (dS *DispatcherService) CacheSv1ReloadCache(args AttrReloadCacheWithApiKey,
 
 // LoadCache loads cache from DB for a prefix or completely
 func (dS *DispatcherService) CacheSv1LoadCache(args AttrReloadCacheWithApiKey, reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.CacheSv1LoadCache,
 			args.TenantArg.Tenant,

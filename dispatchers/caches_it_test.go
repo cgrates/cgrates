@@ -62,12 +62,12 @@ func testDspChcPing(t *testing.T) {
 	if dispEngine.RCP == nil {
 		t.Fatal(dispEngine.RCP)
 	}
-	if err := dispEngine.RCP.Call(utils.CacheSv1Ping, &CGREvWithApiKey{
-		CGREvent: utils.CGREvent{
+	if err := dispEngine.RCP.Call(utils.CacheSv1Ping, &utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		DispatcherResource: DispatcherResource{
-			APIKey: "chc12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("chc12345"),
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -85,8 +85,8 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats[utils.CacheDestinations].Items = 4
 	expStats[utils.CacheLoadIDs].Items = 17
 	args := AttrCacheIDsWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "chc12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("chc12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -100,8 +100,8 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	reply := ""
 	// Simple test that command is executed without errors
 	if err := dispEngine.RCP.Call(utils.CacheSv1LoadCache, AttrReloadCacheWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "chc12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("chc12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -171,8 +171,8 @@ func testDspChcPrecacheStatus(t *testing.T) {
 	}
 
 	if err := dispEngine.RCP.Call(utils.CacheSv1PrecacheStatus, AttrCacheIDsWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "chc12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("chc12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -191,8 +191,8 @@ func testDspChcGetItemIDs(t *testing.T) {
 		ArgsGetCacheItemIDs: engine.ArgsGetCacheItemIDs{
 			CacheID: utils.CacheChargerProfiles,
 		},
-		DispatcherResource: DispatcherResource{
-			APIKey: "chc12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("chc12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -214,8 +214,8 @@ func testDspChcHasItem(t *testing.T) {
 			CacheID: utils.CacheChargerProfiles,
 			ItemID:  "cgrates.org:DEFAULT",
 		},
-		DispatcherResource: DispatcherResource{
-			APIKey: "chc12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("chc12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -236,8 +236,8 @@ func testDspChcGetItemExpiryTime(t *testing.T) {
 			CacheID: utils.CacheChargerProfiles,
 			ItemID:  "cgrates.org:DEFAULT",
 		},
-		DispatcherResource: DispatcherResource{
-			APIKey: "chc12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("chc12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -253,8 +253,8 @@ func testDspChcGetItemExpiryTime(t *testing.T) {
 func testDspChcReloadCache(t *testing.T) {
 	reply := ""
 	if err := dispEngine.RCP.Call(utils.CacheSv1ReloadCache, AttrReloadCacheWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "chc12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("chc12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -273,8 +273,8 @@ func testDspChcRemoveItem(t *testing.T) {
 			CacheID: utils.CacheChargerProfiles,
 			ItemID:  "cgrates.org:DEFAULT",
 		},
-		DispatcherResource: DispatcherResource{
-			APIKey: "chc12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("chc12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -301,8 +301,8 @@ func testDspChcRemoveItem(t *testing.T) {
 func testDspChcClear(t *testing.T) {
 	reply := ""
 	if err := dispEngine.RCP.Call(utils.CacheSv1Clear, AttrCacheIDsWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "chc12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("chc12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -315,8 +315,8 @@ func testDspChcClear(t *testing.T) {
 	var rcvStats map[string]*ltcache.CacheStats
 	expStats := engine.GetDefaultEmptyCacheStats()
 	if err := dispEngine.RCP.Call(utils.CacheSv1GetCacheStats, AttrCacheIDsWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "chc12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("chc12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -331,8 +331,8 @@ func testDspChcClear(t *testing.T) {
 func testDspChcFlush(t *testing.T) {
 	reply := ""
 	if err := dispEngine.RCP.Call(utils.CacheSv1FlushCache, AttrReloadCacheWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "chc12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("chc12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -348,8 +348,8 @@ func testDspChcFlush(t *testing.T) {
 	var rcvStats map[string]*ltcache.CacheStats
 	expStats := engine.GetDefaultEmptyCacheStats()
 	if err := dispEngine.RCP.Call(utils.CacheSv1GetCacheStats, AttrCacheIDsWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "chc12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("chc12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",

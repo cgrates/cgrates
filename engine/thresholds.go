@@ -279,6 +279,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 type ArgsProcessEvent struct {
 	ThresholdIDs []string
 	utils.CGREvent
+	*utils.ArgDispatcher
 }
 
 // processEvent processes a new event, dispatching to matching thresholds

@@ -228,6 +228,7 @@ func (ss *StatService) Call(serviceMethod string, args interface{}, reply interf
 type StatsArgsProcessEvent struct {
 	StatIDs []string
 	utils.CGREvent
+	*utils.ArgDispatcher
 }
 
 // processEvent processes a new event, dispatching to matching queues

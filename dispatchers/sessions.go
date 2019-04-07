@@ -25,7 +25,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) SessionSv1Ping(args *CGREvWithApiKey, reply *string) (err error) {
+func (dS *DispatcherService) SessionSv1Ping(args *utils.CGREventWithArgDispatcher, reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.SessionSv1Ping,
 			args.CGREvent.Tenant,
@@ -33,77 +36,95 @@ func (dS *DispatcherService) SessionSv1Ping(args *CGREvWithApiKey, reply *string
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaSessionS, args.RouteID,
+	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, args.RouteID,
 		utils.SessionSv1Ping, args.CGREvent, reply)
 }
 
-func (dS *DispatcherService) SessionSv1AuthorizeEvent(args *AuthorizeArgsWithApiKey,
+func (dS *DispatcherService) SessionSv1AuthorizeEvent(args *sessions.V1AuthorizeArgs,
 	reply *sessions.V1AuthorizeReply) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.SessionSv1AuthorizeEvent,
-			args.V1AuthorizeArgs.CGREvent.Tenant,
-			args.APIKey, args.V1AuthorizeArgs.CGREvent.Time); err != nil {
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&args.V1AuthorizeArgs.CGREvent, utils.MetaSessionS, args.RouteID,
-		utils.SessionSv1AuthorizeEvent, args.V1AuthorizeArgs, reply)
+	return dS.Dispatch(&args.CGREvent, utils.MetaSessionS, args.RouteID,
+		utils.SessionSv1AuthorizeEvent, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1AuthorizeEventWithDigest(args *AuthorizeArgsWithApiKey,
+func (dS *DispatcherService) SessionSv1AuthorizeEventWithDigest(args *sessions.V1AuthorizeArgs,
 	reply *sessions.V1AuthorizeReplyWithDigest) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.SessionSv1AuthorizeEventWithDigest,
-			args.V1AuthorizeArgs.CGREvent.Tenant,
-			args.APIKey, args.V1AuthorizeArgs.CGREvent.Time); err != nil {
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&args.V1AuthorizeArgs.CGREvent, utils.MetaSessionS, args.RouteID,
-		utils.SessionSv1AuthorizeEventWithDigest, args.V1AuthorizeArgs, reply)
+	return dS.Dispatch(&args.CGREvent, utils.MetaSessionS, args.RouteID,
+		utils.SessionSv1AuthorizeEventWithDigest, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1InitiateSession(args *InitArgsWithApiKey,
+func (dS *DispatcherService) SessionSv1InitiateSession(args *sessions.V1InitSessionArgs,
 	reply *sessions.V1InitSessionReply) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.SessionSv1InitiateSession,
-			args.V1InitSessionArgs.CGREvent.Tenant,
-			args.APIKey, args.V1InitSessionArgs.CGREvent.Time); err != nil {
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&args.V1InitSessionArgs.CGREvent, utils.MetaSessionS, args.RouteID,
-		utils.SessionSv1InitiateSession, args.V1InitSessionArgs, reply)
+	return dS.Dispatch(&args.CGREvent, utils.MetaSessionS, args.RouteID,
+		utils.SessionSv1InitiateSession, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1InitiateSessionWithDigest(args *InitArgsWithApiKey,
+func (dS *DispatcherService) SessionSv1InitiateSessionWithDigest(args *sessions.V1InitSessionArgs,
 	reply *sessions.V1InitReplyWithDigest) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.SessionSv1InitiateSessionWithDigest,
-			args.V1InitSessionArgs.CGREvent.Tenant,
-			args.APIKey, args.V1InitSessionArgs.CGREvent.Time); err != nil {
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&args.V1InitSessionArgs.CGREvent, utils.MetaSessionS, args.RouteID,
-		utils.SessionSv1InitiateSessionWithDigest, args.V1InitSessionArgs, reply)
+	return dS.Dispatch(&args.CGREvent, utils.MetaSessionS, args.RouteID,
+		utils.SessionSv1InitiateSessionWithDigest, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1UpdateSession(args *UpdateSessionWithApiKey,
+func (dS *DispatcherService) SessionSv1UpdateSession(args *sessions.V1UpdateSessionArgs,
 	reply *sessions.V1UpdateSessionReply) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.SessionSv1UpdateSession,
-			args.V1UpdateSessionArgs.CGREvent.Tenant,
-			args.APIKey, args.V1UpdateSessionArgs.CGREvent.Time); err != nil {
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&args.V1UpdateSessionArgs.CGREvent, utils.MetaSessionS, args.RouteID,
-		utils.SessionSv1UpdateSession, args.V1UpdateSessionArgs, reply)
+	return dS.Dispatch(&args.CGREvent, utils.MetaSessionS, args.RouteID,
+		utils.SessionSv1UpdateSession, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1SyncSessions(args *TntWithApiKey,
+func (dS *DispatcherService) SessionSv1SyncSessions(args *utils.TenantWithArgDispatcher,
 	reply *sessions.V1UpdateSessionReply) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.SessionSv1SyncSessions,
 			args.TenantArg.Tenant,
@@ -115,21 +136,27 @@ func (dS *DispatcherService) SessionSv1SyncSessions(args *TntWithApiKey,
 		utils.SessionSv1SyncSessions, &args.TenantArg.Tenant, reply)
 }
 
-func (dS *DispatcherService) SessionSv1TerminateSession(args *TerminateSessionWithApiKey,
+func (dS *DispatcherService) SessionSv1TerminateSession(args *sessions.V1TerminateSessionArgs,
 	reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.SessionSv1TerminateSession,
-			args.V1TerminateSessionArgs.CGREvent.Tenant,
-			args.APIKey, args.V1TerminateSessionArgs.CGREvent.Time); err != nil {
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&args.V1TerminateSessionArgs.CGREvent, utils.MetaSessionS, args.RouteID,
-		utils.SessionSv1TerminateSession, args.V1TerminateSessionArgs, reply)
+	return dS.Dispatch(&args.CGREvent, utils.MetaSessionS, args.RouteID,
+		utils.SessionSv1TerminateSession, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1ProcessCDR(args *CGREvWithApiKey,
+func (dS *DispatcherService) SessionSv1ProcessCDR(args *utils.CGREventWithArgDispatcher,
 	reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.SessionSv1ProcessCDR,
 			args.CGREvent.Tenant,
@@ -137,25 +164,31 @@ func (dS *DispatcherService) SessionSv1ProcessCDR(args *CGREvWithApiKey,
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaSessionS, args.RouteID,
-		utils.SessionSv1ProcessCDR, args.CGREvent, reply)
+	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, args.RouteID,
+		utils.SessionSv1ProcessCDR, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1ProcessEvent(args *ProcessEventWithApiKey,
+func (dS *DispatcherService) SessionSv1ProcessEvent(args *sessions.V1ProcessEventArgs,
 	reply *sessions.V1ProcessEventReply) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.SessionSv1ProcessEvent,
-			args.V1ProcessEventArgs.CGREvent.Tenant,
-			args.APIKey, args.V1ProcessEventArgs.CGREvent.Time); err != nil {
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&args.CGREvent, utils.MetaSessionS, args.RouteID,
-		utils.SessionSv1ProcessEvent, args.V1ProcessEventArgs, reply)
+		utils.SessionSv1ProcessEvent, args, reply)
 }
 
 func (dS *DispatcherService) SessionSv1GetActiveSessions(args *FilterSessionWithApiKey,
 	reply *[]*sessions.ActiveSession) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.SessionSv1GetActiveSessions,
 			args.TenantArg.Tenant,
@@ -169,6 +202,9 @@ func (dS *DispatcherService) SessionSv1GetActiveSessions(args *FilterSessionWith
 
 func (dS *DispatcherService) SessionSv1GetActiveSessionsCount(args *FilterSessionWithApiKey,
 	reply *int) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.SessionSv1GetActiveSessionsCount,
 			args.TenantArg.Tenant,
@@ -182,6 +218,9 @@ func (dS *DispatcherService) SessionSv1GetActiveSessionsCount(args *FilterSessio
 
 func (dS *DispatcherService) SessionSv1ForceDisconnect(args *FilterSessionWithApiKey,
 	reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.SessionSv1ForceDisconnect,
 			args.TenantArg.Tenant,
@@ -195,6 +234,9 @@ func (dS *DispatcherService) SessionSv1ForceDisconnect(args *FilterSessionWithAp
 
 func (dS *DispatcherService) SessionSv1GetPassiveSessions(args *FilterSessionWithApiKey,
 	reply *[]*sessions.ActiveSession) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.SessionSv1GetPassiveSessions,
 			args.TenantArg.Tenant,
@@ -208,6 +250,9 @@ func (dS *DispatcherService) SessionSv1GetPassiveSessions(args *FilterSessionWit
 
 func (dS *DispatcherService) SessionSv1GetPassiveSessionsCount(args *FilterSessionWithApiKey,
 	reply *int) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.SessionSv1GetPassiveSessionsCount,
 			args.TenantArg.Tenant,
@@ -221,6 +266,9 @@ func (dS *DispatcherService) SessionSv1GetPassiveSessionsCount(args *FilterSessi
 
 func (dS *DispatcherService) SessionSv1ReplicateSessions(args *ArgsReplicateSessionsWithApiKey,
 	reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.SessionSv1ReplicateSessions,
 			args.TenantArg.Tenant,
@@ -232,15 +280,18 @@ func (dS *DispatcherService) SessionSv1ReplicateSessions(args *ArgsReplicateSess
 		utils.SessionSv1ReplicateSessions, args.ArgsReplicateSessions, reply)
 }
 
-func (dS *DispatcherService) SessionSv1SetPassiveSession(args *SessionWithApiKey,
+func (dS *DispatcherService) SessionSv1SetPassiveSession(args *sessions.Session,
 	reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.SessionSv1SetPassiveSession,
-			args.Session.Tenant,
+			args.Tenant,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.Session.Tenant}, utils.MetaSessionS, args.RouteID,
-		utils.SessionSv1SetPassiveSession, args.Session, reply)
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaSessionS, args.RouteID,
+		utils.SessionSv1SetPassiveSession, args, reply)
 }

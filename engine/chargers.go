@@ -130,8 +130,8 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREvent) (rply []*ChrgSProc
 
 		var evReply AttrSProcessEventReply
 		if err = cS.attrS.Call(utils.AttributeSv1ProcessEvent,
-			&AttrArgsProcessEvent{cP.AttributeIDs,
-				utils.StringPointer(utils.MetaChargers), nil, *clonedEv},
+			&AttrArgsProcessEvent{AttributeIDs: cP.AttributeIDs,
+				Context: utils.StringPointer(utils.MetaChargers), ProcessRuns: nil, CGREvent: *clonedEv},
 			&evReply); err != nil {
 			return nil, err
 		}
