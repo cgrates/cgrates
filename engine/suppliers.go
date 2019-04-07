@@ -481,6 +481,10 @@ func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *Sorted
 			Context:  utils.StringPointer(utils.MetaSuppliers),
 			CGREvent: args.CGREvent,
 		}
+		// in case we receive ArgDispatcher we add it to be used by DispatcherS
+		if args.ArgDispatcher != nil {
+			attrArgs.ArgDispatcher = args.ArgDispatcher
+		}
 		var rplyEv AttrSProcessEventReply
 		if err := spS.attributeS.Call(utils.AttributeSv1ProcessEvent,
 			attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {

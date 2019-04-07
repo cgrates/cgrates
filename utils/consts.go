@@ -564,6 +564,8 @@ const (
 	LoadIDs                      = "load_ids"
 	DNSAgent                     = "DNSAgent"
 	TLSNoCaps                    = "tls"
+	MetaRouteID                  = "*route_id"
+	MetaApiKey                   = "*api_key"
 )
 
 // Migrator Action

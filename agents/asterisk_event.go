@@ -290,6 +290,24 @@ func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs)
 	args.GetAttributes = strings.Index(smaEv.Subsystems(), utils.MetaAttributes) != -1
 	args.ProcessThresholds = strings.Index(smaEv.Subsystems(), utils.MetaThresholds) != -1
 	args.ProcessStats = strings.Index(smaEv.Subsystems(), utils.MetaStats) != -1
+	//check if we have APIKey in event and in case it has add it in ArgDispatcher
+	apiKeyIface, hasApiKey := cgrEv.Event[utils.MetaApiKey]
+	if hasApiKey {
+		args.ArgDispatcher = &utils.ArgDispatcher{
+			APIKey: utils.StringPointer(apiKeyIface.(string)),
+		}
+	}
+	//check if we have RouteID in event and in case it has add it in ArgDispatcher
+	routeIDIface, hasRouteID := cgrEv.Event[utils.MetaRouteID]
+	if hasRouteID {
+		if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+			args.ArgDispatcher = &utils.ArgDispatcher{
+				RouteID: utils.StringPointer(routeIDIface.(string)),
+			}
+		} else {
+			args.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
+		}
+	}
 	return
 }
 
@@ -309,6 +327,24 @@ func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEv utils.CGREvent) (args *ses
 	args.GetAttributes = strings.Index(subsystems, utils.MetaAttributes) != -1
 	args.ProcessThresholds = strings.Index(subsystems, utils.MetaThresholds) != -1
 	args.ProcessStats = strings.Index(subsystems, utils.MetaStats) != -1
+	//check if we have APIKey in event and in case it has add it in ArgDispatcher
+	apiKeyIface, hasApiKey := cgrEv.Event[utils.MetaApiKey]
+	if hasApiKey {
+		args.ArgDispatcher = &utils.ArgDispatcher{
+			APIKey: utils.StringPointer(apiKeyIface.(string)),
+		}
+	}
+	//check if we have RouteID in event and in case it has add it in ArgDispatcher
+	routeIDIface, hasRouteID := cgrEv.Event[utils.MetaRouteID]
+	if hasRouteID {
+		if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+			args.ArgDispatcher = &utils.ArgDispatcher{
+				RouteID: utils.StringPointer(routeIDIface.(string)),
+			}
+		} else {
+			args.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
+		}
+	}
 	return
 }
 
@@ -327,5 +363,23 @@ func (smaEv *SMAsteriskEvent) V1TerminateSessionArgs(cgrEv utils.CGREvent) (args
 	args.ReleaseResources = strings.Index(subsystems, utils.MetaResources) != -1
 	args.ProcessThresholds = strings.Index(subsystems, utils.MetaThresholds) != -1
 	args.ProcessStats = strings.Index(subsystems, utils.MetaStats) != -1
+	//check if we have APIKey in event and in case it has add it in ArgDispatcher
+	apiKeyIface, hasApiKey := cgrEv.Event[utils.MetaApiKey]
+	if hasApiKey {
+		args.ArgDispatcher = &utils.ArgDispatcher{
+			APIKey: utils.StringPointer(apiKeyIface.(string)),
+		}
+	}
+	//check if we have RouteID in event and in case it has add it in ArgDispatcher
+	routeIDIface, hasRouteID := cgrEv.Event[utils.MetaRouteID]
+	if hasRouteID {
+		if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+			args.ArgDispatcher = &utils.ArgDispatcher{
+				RouteID: utils.StringPointer(routeIDIface.(string)),
+			}
+		} else {
+			args.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
+		}
+	}
 	return
 }
