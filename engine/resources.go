@@ -508,7 +508,7 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent, usageTT
 }
 
 // processThresholds will pass the event for resource to ThresholdS
-func (rS *ResourceService) processThresholds(r *Resource) (err error) {
+func (rS *ResourceService) processThresholds(r *Resource, argDispatcher *utils.ArgDispatcher) (err error) {
 	if rS.thdS == nil {
 		return
 	}
@@ -527,6 +527,10 @@ func (rS *ResourceService) processThresholds(r *Resource) (err error) {
 				utils.EventType:  utils.ResourceUpdate,
 				utils.ResourceID: r.ID,
 				utils.Usage:      r.totalUsage()}}}
+	// in case we receive ArgDispatcher we add it to be used by DispatcherS
+	if argDispatcher != nil {
+		thEv.ArgDispatcher = argDispatcher
+	}
 	var tIDs []string
 	if err = rS.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
@@ -647,7 +651,7 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 			rS.storedResources[r.TenantID()] = true
 			rS.srMux.Unlock()
 		}
-		rS.processThresholds(r)
+		rS.processThresholds(r, args.ArgDispatcher)
 	}
 	*reply = alcMsg
 	return
@@ -686,7 +690,7 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 				rS.storedResources[r.TenantID()] = true
 			}
 		}
-		rS.processThresholds(r)
+		rS.processThresholds(r, args.ArgDispatcher)
 	}
 	if rS.storeInterval != -1 {
 		rS.srMux.Unlock()

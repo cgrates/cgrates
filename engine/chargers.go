@@ -128,11 +128,33 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREvent) (rply []*ChrgSProc
 			return nil, errors.New("no connection to AttributeS")
 		}
 
+		args := &AttrArgsProcessEvent{
+			AttributeIDs: cP.AttributeIDs,
+			Context:      utils.StringPointer(utils.MetaChargers),
+			ProcessRuns:  nil,
+			CGREvent:     *clonedEv}
+		//check if we have APIKey in event and in case it has add it in ArgDispatcher
+		apiKeyIface, hasApiKey := clonedEv.Event[utils.MetaApiKey]
+		if hasApiKey {
+			args.ArgDispatcher = &utils.ArgDispatcher{
+				APIKey: utils.StringPointer(apiKeyIface.(string)),
+			}
+		}
+		//check if we have RouteID in event and in case it has add it in ArgDispatcher
+		routeIDIface, hasRouteID := clonedEv.Event[utils.MetaRouteID]
+		if hasRouteID {
+			if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+				args.ArgDispatcher = &utils.ArgDispatcher{
+					RouteID: utils.StringPointer(routeIDIface.(string)),
+				}
+			} else {
+				args.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
+			}
+		}
+
 		var evReply AttrSProcessEventReply
 		if err = cS.attrS.Call(utils.AttributeSv1ProcessEvent,
-			&AttrArgsProcessEvent{AttributeIDs: cP.AttributeIDs,
-				Context: utils.StringPointer(utils.MetaChargers), ProcessRuns: nil, CGREvent: *clonedEv},
-			&evReply); err != nil {
+			args, &evReply); err != nil {
 			return nil, err
 		}
 		rply[i].AttributeSProfiles = evReply.MatchedProfiles

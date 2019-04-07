@@ -1523,6 +1523,24 @@ func NewV1AuthorizeArgs(attrs, res, maxUsage, thrslds,
 	if supplsEventCost {
 		args.SuppliersMaxCost = utils.MetaSuppliersEventCost
 	}
+	//check if we have APIKey in event and in case it has add it in ArgDispatcher
+	apiKeyIface, hasApiKey := cgrEv.Event[utils.MetaApiKey]
+	if hasApiKey {
+		args.ArgDispatcher = &utils.ArgDispatcher{
+			APIKey: utils.StringPointer(apiKeyIface.(string)),
+		}
+	}
+	//check if we have RouteID in event and in case it has add it in ArgDispatcher
+	routeIDIface, hasRouteID := cgrEv.Event[utils.MetaRouteID]
+	if hasRouteID {
+		if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+			args.ArgDispatcher = &utils.ArgDispatcher{
+				RouteID: utils.StringPointer(routeIDIface.(string)),
+			}
+		} else {
+			args.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
+		}
+	}
 	return
 }
 
@@ -1625,6 +1643,10 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 			Context:  utils.StringPointer(utils.MetaSessionS),
 			CGREvent: args.CGREvent,
 		}
+		// in case we receive ArgDispatcher we add it to be used by DispatcherS
+		if args.ArgDispatcher != nil {
+			attrArgs.ArgDispatcher = args.ArgDispatcher
+		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
 			attrArgs, &rplyEv); err == nil {
@@ -1661,6 +1683,10 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 			UsageID:  originID,
 			Units:    1,
 		}
+		// in case we receive ArgDispatcher we add it to be used by DispatcherS
+		if args.ArgDispatcher != nil {
+			attrRU.ArgDispatcher = args.ArgDispatcher
+		}
 		if err = sS.resS.Call(utils.ResourceSv1AuthorizeResources,
 			attrRU, &allocMsg); err != nil {
 			return utils.NewErrResourceS(err)
@@ -1682,6 +1708,10 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 			CGREvent:     *cgrEv,
 			Paginator:    args.Paginator,
 		}
+		// in case we receive ArgDispatcher we add it to be used by DispatcherS
+		if args.ArgDispatcher != nil {
+			sArgs.ArgDispatcher = args.ArgDispatcher
+		}
 		if err = sS.splS.Call(utils.SupplierSv1GetSuppliers,
 			sArgs, &splsReply); err != nil {
 			return utils.NewErrSupplierS(err)
@@ -1698,6 +1728,10 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		thEv := &engine.ArgsProcessEvent{
 			CGREvent: args.CGREvent,
 		}
+		// in case we receive ArgDispatcher we add it to be used by DispatcherS
+		if args.ArgDispatcher != nil {
+			thEv.ArgDispatcher = args.ArgDispatcher
+		}
 		if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
@@ -1710,9 +1744,14 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		if sS.statS == nil {
 			return utils.NewErrNotConnected(utils.StatService)
 		}
+		statArgs := &engine.StatsArgsProcessEvent{CGREvent: args.CGREvent}
+		// in case we receive ArgDispatcher we add it to be used by DispatcherS
+		if args.ArgDispatcher != nil {
+			statArgs.ArgDispatcher = args.ArgDispatcher
+		}
 		var statReply []string
 		if err := sS.statS.Call(utils.StatSv1ProcessEvent,
-			&engine.StatsArgsProcessEvent{CGREvent: args.CGREvent}, &statReply); err != nil &&
+			statArgs, &statReply); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with StatS.",
@@ -1769,8 +1808,8 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.RpcClientConn
 
 // NewV1InitSessionArgs is a constructor for V1InitSessionArgs
 func NewV1InitSessionArgs(attrs, resrc, acnt, thrslds, stats bool,
-	cgrEv utils.CGREvent) *V1InitSessionArgs {
-	return &V1InitSessionArgs{
+	cgrEv utils.CGREvent) (args *V1InitSessionArgs) {
+	args = &V1InitSessionArgs{
 		GetAttributes:     attrs,
 		AllocateResources: resrc,
 		InitSession:       acnt,
@@ -1778,6 +1817,25 @@ func NewV1InitSessionArgs(attrs, resrc, acnt, thrslds, stats bool,
 		ProcessStats:      stats,
 		CGREvent:          cgrEv,
 	}
+	//check if we have APIKey in event and in case it has add it in ArgDispatcher
+	apiKeyIface, hasApiKey := cgrEv.Event[utils.MetaApiKey]
+	if hasApiKey {
+		args.ArgDispatcher = &utils.ArgDispatcher{
+			APIKey: utils.StringPointer(apiKeyIface.(string)),
+		}
+	}
+	//check if we have RouteID in event and in case it has add it in ArgDispatcher
+	routeIDIface, hasRouteID := cgrEv.Event[utils.MetaRouteID]
+	if hasRouteID {
+		if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+			args.ArgDispatcher = &utils.ArgDispatcher{
+				RouteID: utils.StringPointer(routeIDIface.(string)),
+			}
+		} else {
+			args.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
+		}
+	}
+	return
 }
 
 // V1InitSessionArgs are options for session initialization request
@@ -1872,6 +1930,10 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 			Context:  utils.StringPointer(utils.MetaSessionS),
 			CGREvent: args.CGREvent,
 		}
+		// in case we receive ArgDispatcher we add it to be used by DispatcherS
+		if args.ArgDispatcher != nil {
+			attrArgs.ArgDispatcher = args.ArgDispatcher
+		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
 			attrArgs, &rplyEv); err == nil {
@@ -1897,6 +1959,10 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 			CGREvent: args.CGREvent,
 			UsageID:  originID,
 			Units:    1,
+		}
+		// in case we receive ArgDispatcher we add it to be used by DispatcherS
+		if args.ArgDispatcher != nil {
+			attrRU.ArgDispatcher = args.ArgDispatcher
 		}
 		var allocMessage string
 		if err = sS.resS.Call(utils.ResourceSv1AllocateResources,
@@ -1937,6 +2003,10 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		thEv := &engine.ArgsProcessEvent{
 			CGREvent: args.CGREvent,
 		}
+		// in case we receive ArgDispatcher we add it to be used by DispatcherS
+		if args.ArgDispatcher != nil {
+			thEv.ArgDispatcher = args.ArgDispatcher
+		}
 		if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent,
 			thEv, &tIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
@@ -1951,9 +2021,13 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrNotConnected(utils.StatService)
 		}
 		var statReply []string
+		statArgs := &engine.StatsArgsProcessEvent{CGREvent: args.CGREvent}
+		// in case we receive ArgDispatcher we add it to be used by DispatcherS
+		if args.ArgDispatcher != nil {
+			statArgs.ArgDispatcher = args.ArgDispatcher
+		}
 		if err := sS.statS.Call(utils.StatSv1ProcessEvent,
-			&engine.StatsArgsProcessEvent{CGREvent: args.CGREvent},
-			&statReply); err != nil &&
+			statArgs, &statReply); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with StatS.",
@@ -2008,9 +2082,28 @@ func (sS *SessionS) BiRPCv1InitiateSessionWithDigest(clnt rpcclient.RpcClientCon
 
 // NewV1UpdateSessionArgs is a constructor for update session arguments
 func NewV1UpdateSessionArgs(attrs, acnts bool,
-	cgrEv utils.CGREvent) *V1UpdateSessionArgs {
-	return &V1UpdateSessionArgs{GetAttributes: attrs,
+	cgrEv utils.CGREvent) (args *V1UpdateSessionArgs) {
+	args = &V1UpdateSessionArgs{GetAttributes: attrs,
 		UpdateSession: acnts, CGREvent: cgrEv}
+	//check if we have APIKey in event and in case it has add it in ArgDispatcher
+	apiKeyIface, hasApiKey := cgrEv.Event[utils.MetaApiKey]
+	if hasApiKey {
+		args.ArgDispatcher = &utils.ArgDispatcher{
+			APIKey: utils.StringPointer(apiKeyIface.(string)),
+		}
+	}
+	//check if we have RouteID in event and in case it has add it in ArgDispatcher
+	routeIDIface, hasRouteID := cgrEv.Event[utils.MetaRouteID]
+	if hasRouteID {
+		if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+			args.ArgDispatcher = &utils.ArgDispatcher{
+				RouteID: utils.StringPointer(routeIDIface.(string)),
+			}
+		} else {
+			args.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
+		}
+	}
+	return
 }
 
 // V1UpdateSessionArgs contains options for session update
@@ -2089,6 +2182,10 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 			Context:  utils.StringPointer(utils.MetaSessionS),
 			CGREvent: args.CGREvent,
 		}
+		// in case we receive ArgDispatcher we add it to be used by DispatcherS
+		if args.ArgDispatcher != nil {
+			attrArgs.ArgDispatcher = args.ArgDispatcher
+		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
 			attrArgs, &rplyEv); err == nil {
@@ -2137,13 +2234,32 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 }
 
 func NewV1TerminateSessionArgs(acnts, resrc, thrds, stats bool,
-	cgrEv utils.CGREvent) *V1TerminateSessionArgs {
-	return &V1TerminateSessionArgs{
+	cgrEv utils.CGREvent) (args *V1TerminateSessionArgs) {
+	args = &V1TerminateSessionArgs{
 		TerminateSession:  acnts,
 		ReleaseResources:  resrc,
 		ProcessThresholds: thrds,
 		ProcessStats:      stats,
 		CGREvent:          cgrEv}
+	//check if we have APIKey in event and in case it has add it in ArgDispatcher
+	apiKeyIface, hasApiKey := cgrEv.Event[utils.MetaApiKey]
+	if hasApiKey {
+		args.ArgDispatcher = &utils.ArgDispatcher{
+			APIKey: utils.StringPointer(apiKeyIface.(string)),
+		}
+	}
+	//check if we have RouteID in event and in case it has add it in ArgDispatcher
+	routeIDIface, hasRouteID := cgrEv.Event[utils.MetaRouteID]
+	if hasRouteID {
+		if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+			args.ArgDispatcher = &utils.ArgDispatcher{
+				RouteID: utils.StringPointer(routeIDIface.(string)),
+			}
+		} else {
+			args.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
+		}
+	}
+	return
 }
 
 type V1TerminateSessionArgs struct {
@@ -2235,6 +2351,10 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 			UsageID:  originID, // same ID should be accepted by first group since the previous resource should be expired
 			Units:    1,
 		}
+		// in case we receive ArgDispatcher we add it to be used by DispatcherS
+		if args.ArgDispatcher != nil {
+			argsRU.ArgDispatcher = args.ArgDispatcher
+		}
 		if err = sS.resS.Call(utils.ResourceSv1ReleaseResources,
 			argsRU, &reply); err != nil {
 			return utils.NewErrResourceS(err)
@@ -2248,6 +2368,10 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 		thEv := &engine.ArgsProcessEvent{
 			CGREvent: args.CGREvent,
 		}
+		// in case we receive ArgDispatcher we add it to be used by DispatcherS
+		if args.ArgDispatcher != nil {
+			thEv.ArgDispatcher = args.ArgDispatcher
+		}
 		if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
@@ -2260,8 +2384,13 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrNotConnected(utils.StatS)
 		}
 		var statReply []string
+		statArgs := &engine.StatsArgsProcessEvent{CGREvent: args.CGREvent}
+		// in case we receive ArgDispatcher we add it to be used by DispatcherS
+		if args.ArgDispatcher != nil {
+			statArgs.ArgDispatcher = args.ArgDispatcher
+		}
 		if err := sS.statS.Call(utils.StatSv1ProcessEvent,
-			&engine.StatsArgsProcessEvent{CGREvent: args.CGREvent}, &statReply); err != nil &&
+			statArgs, &statReply); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with StatS.",
@@ -2362,8 +2491,8 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 
 // NewV1ProcessEventArgs is a constructor for EventArgs used by ProcessEvent
 func NewV1ProcessEventArgs(resrc, acnts, attrs, thds, stats bool,
-	cgrEv utils.CGREvent) *V1ProcessEventArgs {
-	return &V1ProcessEventArgs{
+	cgrEv utils.CGREvent) (args *V1ProcessEventArgs) {
+	args = &V1ProcessEventArgs{
 		AllocateResources: resrc,
 		Debit:             acnts,
 		GetAttributes:     attrs,
@@ -2371,6 +2500,25 @@ func NewV1ProcessEventArgs(resrc, acnts, attrs, thds, stats bool,
 		ProcessStats:      stats,
 		CGREvent:          cgrEv,
 	}
+	//check if we have APIKey in event and in case it has add it in ArgDispatcher
+	apiKeyIface, hasApiKey := cgrEv.Event[utils.MetaApiKey]
+	if hasApiKey {
+		args.ArgDispatcher = &utils.ArgDispatcher{
+			APIKey: utils.StringPointer(apiKeyIface.(string)),
+		}
+	}
+	//check if we have RouteID in event and in case it has add it in ArgDispatcher
+	routeIDIface, hasRouteID := cgrEv.Event[utils.MetaRouteID]
+	if hasRouteID {
+		if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+			args.ArgDispatcher = &utils.ArgDispatcher{
+				RouteID: utils.StringPointer(routeIDIface.(string)),
+			}
+		} else {
+			args.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
+		}
+	}
+	return
 }
 
 // V1ProcessEventArgs are the options passed to ProcessEvent API
@@ -2456,6 +2604,10 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 			Context:  utils.StringPointer(utils.MetaSessionS),
 			CGREvent: args.CGREvent,
 		}
+		// in case we receive ArgDispatcher we add it to be used by DispatcherS
+		if args.ArgDispatcher != nil {
+			attrArgs.ArgDispatcher = args.ArgDispatcher
+		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
 			attrArgs, &rplyEv); err == nil {
@@ -2482,6 +2634,10 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 			UsageID:  originID,
 			Units:    1,
 		}
+		// in case we receive ArgDispatcher we add it to be used by DispatcherS
+		if args.ArgDispatcher != nil {
+			attrRU.ArgDispatcher = args.ArgDispatcher
+		}
 		var allocMessage string
 		if err = sS.resS.Call(utils.ResourceSv1AllocateResources,
 			attrRU, &allocMessage); err != nil {
@@ -2505,6 +2661,10 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 		thEv := &engine.ArgsProcessEvent{
 			CGREvent: args.CGREvent,
 		}
+		// in case we receive ArgDispatcher we add it to be used by DispatcherS
+		if args.ArgDispatcher != nil {
+			thEv.ArgDispatcher = args.ArgDispatcher
+		}
 		if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent,
 			thEv, &tIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
@@ -2518,8 +2678,13 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrNotConnected(utils.StatS)
 		}
 		var statReply []string
+		statArgs := &engine.StatsArgsProcessEvent{CGREvent: args.CGREvent}
+		// in case we receive ArgDispatcher we add it to be used by DispatcherS
+		if args.ArgDispatcher != nil {
+			statArgs.ArgDispatcher = args.ArgDispatcher
+		}
 		if err := sS.statS.Call(utils.StatSv1ProcessEvent,
-			&engine.StatsArgsProcessEvent{CGREvent: args.CGREvent}, &statReply); err != nil &&
+			statArgs, &statReply); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with StatS.",

@@ -1259,5 +1259,91 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 	if !reflect.DeepEqual(rcvS[0], s) {
 		t.Errorf("Expecting %+v, received: %+v", s, rcvS[0])
 	}
+}
 
+func TestSessionSNewV1AuthorizeArgsWithArgDispatcher(t *testing.T) {
+	cgrEv := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Event",
+		Event: map[string]interface{}{
+			utils.Account:     "1001",
+			utils.Destination: "1002",
+			utils.MetaApiKey:  "testkey",
+			utils.MetaRouteID: "testrouteid",
+		},
+	}
+	expected := &V1AuthorizeArgs{
+		AuthorizeResources: true,
+		GetAttributes:      true,
+		CGREvent:           cgrEv,
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey:  utils.StringPointer("testkey"),
+			RouteID: utils.StringPointer("testrouteid"),
+		},
+	}
+	rply := NewV1AuthorizeArgs(true, true, false, false, false, false, false, false, cgrEv)
+	if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
+	}
+	expected = &V1AuthorizeArgs{
+		GetAttributes:         true,
+		AuthorizeResources:    false,
+		GetMaxUsage:           true,
+		ProcessThresholds:     false,
+		ProcessStats:          true,
+		GetSuppliers:          false,
+		SuppliersIgnoreErrors: true,
+		SuppliersMaxCost:      utils.MetaSuppliersEventCost,
+		CGREvent:              cgrEv,
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey:  utils.StringPointer("testkey"),
+			RouteID: utils.StringPointer("testrouteid"),
+		},
+	}
+	rply = NewV1AuthorizeArgs(true, false, true, false, true, false, true, true, cgrEv)
+	if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
+	}
+}
+
+func TestSessionSNewV1AuthorizeArgsWithArgDispatcher2(t *testing.T) {
+	cgrEv := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Event",
+		Event: map[string]interface{}{
+			utils.Account:     "1001",
+			utils.Destination: "1002",
+			utils.MetaRouteID: "testrouteid",
+		},
+	}
+	expected := &V1AuthorizeArgs{
+		AuthorizeResources: true,
+		GetAttributes:      true,
+		CGREvent:           cgrEv,
+		ArgDispatcher: &utils.ArgDispatcher{
+			RouteID: utils.StringPointer("testrouteid"),
+		},
+	}
+	rply := NewV1AuthorizeArgs(true, true, false, false, false, false, false, false, cgrEv)
+	if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
+	}
+	expected = &V1AuthorizeArgs{
+		GetAttributes:         true,
+		AuthorizeResources:    false,
+		GetMaxUsage:           true,
+		ProcessThresholds:     false,
+		ProcessStats:          true,
+		GetSuppliers:          false,
+		SuppliersIgnoreErrors: true,
+		SuppliersMaxCost:      utils.MetaSuppliersEventCost,
+		CGREvent:              cgrEv,
+		ArgDispatcher: &utils.ArgDispatcher{
+			RouteID: utils.StringPointer("testrouteid"),
+		},
+	}
+	rply = NewV1AuthorizeArgs(true, false, true, false, true, false, true, true, cgrEv)
+	if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
+	}
 }

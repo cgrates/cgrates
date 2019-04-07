@@ -282,6 +282,10 @@ func (sS *StatService) processEvent(args *StatsArgsProcessEvent) (statQueueIDs [
 					Event: map[string]interface{}{
 						utils.EventType: utils.StatUpdate,
 						utils.StatID:    sq.ID}}}
+			// in case we receive ArgDispatcher we add it to be used by DispatcherS
+			if args.ArgDispatcher != nil {
+				thEv.ArgDispatcher = args.ArgDispatcher
+			}
 			for metricID, metric := range sq.SQMetrics {
 				thEv.Event[metricID] = metric.GetValue()
 			}
