@@ -151,7 +151,6 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREvent) (rply []*ChrgSProc
 				args.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
 			}
 		}
-
 		var evReply AttrSProcessEventReply
 		if err = cS.attrS.Call(utils.AttributeSv1ProcessEvent,
 			args, &evReply); err != nil {

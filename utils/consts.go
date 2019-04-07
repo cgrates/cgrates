@@ -858,6 +858,7 @@ const (
 
 // Cdrs APIs
 const (
+	CDRsV1                 = "CDRsV1"
 	CDRsV1CountCDRs        = "CDRsV1.CountCDRs"
 	CDRsV1RateCDRs         = "CDRsV1.RateCDRs"
 	CDRsV1GetCDRs          = "CDRsV1.GetCDRs"
@@ -865,6 +866,7 @@ const (
 	CDRsV1StoreSessionCost = "CDRsV1.StoreSessionCost"
 	CDRsV1ProcessEvent     = "CDRsV1.ProcessEvent"
 	CDRsV2StoreSessionCost = "CDRsV2.StoreSessionCost"
+	CDRsV1Ping             = "CDRsV1.Ping"
 )
 
 // Scheduler

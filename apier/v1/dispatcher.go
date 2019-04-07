@@ -671,3 +671,17 @@ func (dSv1 DispatcherSv1) GetProfileForEvent(ev *dispatchers.DispatcherEvent,
 	dPrfl *engine.DispatcherProfile) error {
 	return dSv1.dS.V1GetProfileForEvent(ev, dPrfl)
 }
+
+func NewDispatcherSCDRsV1(dps *dispatchers.DispatcherService) *DispatcherSCDRsV1 {
+	return &DispatcherSCDRsV1{dS: dps}
+}
+
+// Exports RPC from CDRsV1
+type DispatcherSCDRsV1 struct {
+	dS *dispatchers.DispatcherService
+}
+
+// Ping used to detreminate if component is active
+func (dS *DispatcherSCDRsV1) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
+	return dS.dS.CDRsV1Ping(args, reply)
+}
