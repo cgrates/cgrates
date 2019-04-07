@@ -20,7 +20,6 @@ package agents
 
 import (
 	"fmt"
-	"net"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
@@ -73,7 +72,7 @@ func (da *DNSAgent) ListenAndServe() error {
 // requests are reaching here asynchronously
 func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 	fmt.Printf("got message: %+v\n", req)
-	rply := new(dns.Msg)
+	/*rply := new(dns.Msg)
 	rply.SetReply(req)
 	switch req.Question[0].Qtype {
 	case dns.TypeA:
@@ -90,7 +89,17 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 			)
 		}
 	}
-
-	fmt.Printf("send reply message: %+v\n", rply)
 	w.WriteMsg(rply)
+	*/
+	reqVars := make(map[string]interface{})
+	reqVars[QueryType] = dns.TypeToString[req.Question[0].Qtype]
+	if req.Question[0].Qtype == dns.TypeNAPTR {
+		e164, err := e164FromNAPTR(req.Question[0].Name)
+		if err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> decoding NAPTR query: <%s>, err: %s",
+					utils.DNSAgent, req.Question[0].Name, err.Error()))
+		}
+		reqVars[E164Address] = e164
+	}
 }
