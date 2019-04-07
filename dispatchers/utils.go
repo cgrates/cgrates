@@ -33,148 +33,68 @@ var ( //var used in all tests
 	nowTime    = time.Now()
 )
 
-type DispatcherResource struct {
-	APIKey  string
-	RouteID *string // route over previous computed path
-}
-
-type CGREvWithApiKey struct {
-	DispatcherResource
-	utils.CGREvent
-}
-
 type DispatcherEvent struct {
 	utils.CGREvent
-	DispatcherResource
+	*utils.ArgDispatcher
 	Subsystem string
 }
 
-type TntIDWithApiKey struct {
-	utils.TenantID
-	DispatcherResource
-}
-
-type TntWithApiKey struct {
-	utils.TenantArg
-	DispatcherResource
-}
-
-type ArgsV1ResUsageWithApiKey struct {
-	DispatcherResource
-	utils.ArgRSv1ResourceUsage
-}
-
-type ArgsProcessEventWithApiKey struct {
-	DispatcherResource
-	engine.ArgsProcessEvent
-}
-
-type ArgsAttrProcessEventWithApiKey struct {
-	DispatcherResource
-	engine.AttrArgsProcessEvent
-}
-
-type ArgsGetSuppliersWithApiKey struct {
-	DispatcherResource
-	engine.ArgsGetSuppliers
-}
-
-type ArgsStatProcessEventWithApiKey struct {
-	DispatcherResource
-	engine.StatsArgsProcessEvent
-}
-
-type AuthorizeArgsWithApiKey struct {
-	DispatcherResource
-	sessions.V1AuthorizeArgs
-}
-
-type InitArgsWithApiKey struct {
-	DispatcherResource
-	sessions.V1InitSessionArgs
-}
-
-type ProcessEventWithApiKey struct {
-	DispatcherResource
-	sessions.V1ProcessEventArgs
-}
-
-type TerminateSessionWithApiKey struct {
-	DispatcherResource
-	sessions.V1TerminateSessionArgs
-}
-
-type UpdateSessionWithApiKey struct {
-	DispatcherResource
-	sessions.V1UpdateSessionArgs
-}
-
 type FilterSessionWithApiKey struct {
-	DispatcherResource
+	*utils.ArgDispatcher
 	utils.TenantArg
 	Filters map[string]string
 }
 
 type ArgsReplicateSessionsWithApiKey struct {
-	DispatcherResource
+	*utils.ArgDispatcher
 	utils.TenantArg
 	sessions.ArgsReplicateSessions
 }
 
-type SessionWithApiKey struct {
-	DispatcherResource
-	sessions.Session
-}
-
-type CallDescriptorWithApiKey struct {
-	DispatcherResource
-	engine.CallDescriptor
-}
-
 type ArgsGetCacheItemIDsWithApiKey struct {
-	DispatcherResource
+	*utils.ArgDispatcher
 	utils.TenantArg
 	engine.ArgsGetCacheItemIDs
 }
 
 type ArgsGetCacheItemWithApiKey struct {
-	DispatcherResource
+	*utils.ArgDispatcher
 	utils.TenantArg
 	engine.ArgsGetCacheItem
 }
 
 type AttrReloadCacheWithApiKey struct {
-	DispatcherResource
+	*utils.ArgDispatcher
 	utils.TenantArg
 	utils.AttrReloadCache
 }
 
 type AttrCacheIDsWithApiKey struct {
-	DispatcherResource
+	*utils.ArgDispatcher
 	utils.TenantArg
 	CacheIDs []string
 }
 
 type ArgsGetGroupWithApiKey struct {
-	DispatcherResource
+	*utils.ArgDispatcher
 	utils.TenantArg
 	engine.ArgsGetGroup
 }
 
 type AttrRemoteLockWithApiKey struct {
-	DispatcherResource
+	*utils.ArgDispatcher
 	utils.TenantArg
 	utils.AttrRemoteLock
 }
 
 type AttrRemoteUnlockWithApiKey struct {
-	DispatcherResource
+	*utils.ArgDispatcher
 	utils.TenantArg
 	RefID string
 }
 
 type StringkWithApiKey struct {
-	DispatcherResource
+	*utils.ArgDispatcher
 	utils.TenantArg
 	Arg string
 }

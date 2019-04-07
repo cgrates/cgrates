@@ -21,7 +21,6 @@ package console
 import (
 	"time"
 
-	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -30,7 +29,7 @@ func init() {
 	c := &CmdSessionsInitiate{
 		name:      "session_initiate",
 		rpcMethod: utils.SessionSv1InitiateSessionWithDigest,
-		rpcParams: &dispatchers.InitArgsWithApiKey{},
+		rpcParams: &sessions.V1InitSessionArgs{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -39,7 +38,7 @@ func init() {
 type CmdSessionsInitiate struct {
 	name      string
 	rpcMethod string
-	rpcParams *dispatchers.InitArgsWithApiKey
+	rpcParams *sessions.V1InitSessionArgs
 	*CommandExecuter
 }
 
@@ -53,7 +52,7 @@ func (self *CmdSessionsInitiate) RpcMethod() string {
 
 func (self *CmdSessionsInitiate) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &dispatchers.InitArgsWithApiKey{}
+		self.rpcParams = &sessions.V1InitSessionArgs{}
 	}
 	return self.rpcParams
 }

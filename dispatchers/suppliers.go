@@ -23,7 +23,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) SupplierSv1Ping(args *CGREvWithApiKey, reply *string) (err error) {
+func (dS *DispatcherService) SupplierSv1Ping(args *utils.CGREventWithArgDispatcher, reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.SupplierSv1Ping,
 			args.CGREvent.Tenant,
@@ -31,19 +34,22 @@ func (dS *DispatcherService) SupplierSv1Ping(args *CGREvWithApiKey, reply *strin
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaSuppliers, args.RouteID,
+	return dS.Dispatch(args.CGREvent, utils.MetaSuppliers, args.RouteID,
 		utils.SupplierSv1Ping, args.CGREvent, reply)
 }
 
-func (dS *DispatcherService) SupplierSv1GetSuppliers(args *ArgsGetSuppliersWithApiKey,
+func (dS *DispatcherService) SupplierSv1GetSuppliers(args *engine.ArgsGetSuppliers,
 	reply *engine.SortedSuppliers) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.SupplierSv1GetSuppliers,
-			args.ArgsGetSuppliers.CGREvent.Tenant,
-			args.APIKey, args.ArgsGetSuppliers.CGREvent.Time); err != nil {
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(&args.CGREvent, utils.MetaSuppliers, args.RouteID,
-		utils.SupplierSv1GetSuppliers, args.ArgsGetSuppliers, reply)
+		utils.SupplierSv1GetSuppliers, args, reply)
 }

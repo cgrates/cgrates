@@ -1538,6 +1538,7 @@ type V1AuthorizeArgs struct {
 	SuppliersIgnoreErrors bool
 	utils.CGREvent
 	utils.Paginator
+	*utils.ArgDispatcher
 }
 
 // V1AuthorizeReply are options available in auth reply
@@ -1787,6 +1788,7 @@ type V1InitSessionArgs struct {
 	ProcessThresholds bool
 	ProcessStats      bool
 	utils.CGREvent
+	*utils.ArgDispatcher
 }
 
 // V1InitSessionReply are options for initialization reply
@@ -2016,6 +2018,7 @@ type V1UpdateSessionArgs struct {
 	GetAttributes bool
 	UpdateSession bool
 	utils.CGREvent
+	*utils.ArgDispatcher
 }
 
 // V1UpdateSessionReply contains options for session update reply
@@ -2149,6 +2152,7 @@ type V1TerminateSessionArgs struct {
 	ProcessThresholds bool
 	ProcessStats      bool
 	utils.CGREvent
+	*utils.ArgDispatcher
 }
 
 // BiRPCV1TerminateSession will stop debit loops as well as release any used resources
@@ -2376,8 +2380,8 @@ type V1ProcessEventArgs struct {
 	Debit             bool
 	ProcessThresholds bool
 	ProcessStats      bool
-
 	utils.CGREvent
+	*utils.ArgDispatcher
 }
 
 // V1ProcessEventReply is the reply for the ProcessEvent API

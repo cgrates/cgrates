@@ -434,6 +434,7 @@ type ArgsGetSuppliers struct {
 	MaxCost      string // toDo: try with interface{} here
 	utils.CGREvent
 	utils.Paginator
+	*utils.ArgDispatcher
 }
 
 func (args *ArgsGetSuppliers) asOptsGetSuppliers() (opts *optsGetSuppliers, err error) {

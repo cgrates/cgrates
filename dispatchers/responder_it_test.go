@@ -51,12 +51,12 @@ func testDspResponderStatus(t *testing.T) {
 	} else if reply[utils.NodeID] != "ALL" {
 		t.Errorf("Received: %s", reply)
 	}
-	ev := TntWithApiKey{
-		TenantArg: utils.TenantArg{
+	ev := utils.TenantWithArgDispatcher{
+		TenantArg: &utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
-		DispatcherResource: DispatcherResource{
-			APIKey: "rsp12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("rsp12345"),
 		},
 	}
 	if err := dispEngine.RCP.Call(utils.ResponderStatus, &ev, &reply); err != nil {
@@ -76,24 +76,24 @@ func testDspResponderStatus(t *testing.T) {
 func getNodeWithRoute(route string, t *testing.T) string {
 	var reply map[string]interface{}
 	var pingReply string
-	pingEv := CGREvWithApiKey{
-		CGREvent: utils.CGREvent{
+	pingEv := utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
 				utils.EVENT_NAME: "Random",
 			},
 		},
-		DispatcherResource: DispatcherResource{
-			APIKey:  "rsp12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey:  utils.StringPointer("rsp12345"),
 			RouteID: &route,
 		},
 	}
-	ev := TntWithApiKey{
-		TenantArg: utils.TenantArg{
+	ev := utils.TenantWithArgDispatcher{
+		TenantArg: &utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
-		DispatcherResource: DispatcherResource{
-			APIKey:  "rsp12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey:  utils.StringPointer("rsp12345"),
 			RouteID: &route,
 		},
 	}
@@ -122,12 +122,12 @@ func testDspResponderRandom(t *testing.T) {
 func testDspResponderShutdown(t *testing.T) {
 	var reply string
 	var statusReply map[string]interface{}
-	ev := TntWithApiKey{
-		TenantArg: utils.TenantArg{
+	ev := utils.TenantWithArgDispatcher{
+		TenantArg: &utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
-		DispatcherResource: DispatcherResource{
-			APIKey: "rsp12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("rsp12345"),
 		},
 	}
 	if err := dispEngine.RCP.Call(utils.ResponderShutdown, &ev, &reply); err != nil {
@@ -151,15 +151,15 @@ func testDspResponderShutdown(t *testing.T) {
 
 func testDspResponderBroadcast(t *testing.T) {
 	var pingReply string
-	pingEv := CGREvWithApiKey{
-		CGREvent: utils.CGREvent{
+	pingEv := utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
 				utils.EVENT_NAME: "Broadcast",
 			},
 		},
-		DispatcherResource: DispatcherResource{
-			APIKey: "rsp12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("rsp12345"),
 		},
 	}
 	if err := dispEngine.RCP.Call(utils.ResponderPing, pingEv, &pingReply); err != nil {

@@ -1018,6 +1018,7 @@ type ArgRSv1ResourceUsage struct {
 	UsageID  string // ResourceUsage Identifier
 	UsageTTL *time.Duration
 	Units    float64
+	*ArgDispatcher
 }
 
 func (args *ArgRSv1ResourceUsage) TenantID() string {

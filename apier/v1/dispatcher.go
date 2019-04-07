@@ -208,28 +208,28 @@ type DispatcherThresholdSv1 struct {
 }
 
 // Ping implements ThresholdSv1Ping
-func (dT *DispatcherThresholdSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+func (dT *DispatcherThresholdSv1) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
 	return dT.dS.ThresholdSv1Ping(args, reply)
 }
 
 // GetThresholdsForEvent implements ThresholdSv1GetThresholdsForEvent
-func (dT *DispatcherThresholdSv1) GetThresholdsForEvent(tntID *dispatchers.ArgsProcessEventWithApiKey,
+func (dT *DispatcherThresholdSv1) GetThresholdsForEvent(tntID *engine.ArgsProcessEvent,
 	t *engine.Thresholds) error {
 	return dT.dS.ThresholdSv1GetThresholdsForEvent(tntID, t)
 }
 
 // ProcessEvent implements ThresholdSv1ProcessEvent
-func (dT *DispatcherThresholdSv1) ProcessEvent(args *dispatchers.ArgsProcessEventWithApiKey,
+func (dT *DispatcherThresholdSv1) ProcessEvent(args *engine.ArgsProcessEvent,
 	tIDs *[]string) error {
 	return dT.dS.ThresholdSv1ProcessEvent(args, tIDs)
 }
 
-func (dT *DispatcherThresholdSv1) GetThresholdIDs(args *dispatchers.TntWithApiKey,
+func (dT *DispatcherThresholdSv1) GetThresholdIDs(args *utils.TenantWithArgDispatcher,
 	tIDs *[]string) error {
 	return dT.dS.ThresholdSv1GetThresholdIDs(args, tIDs)
 }
 
-func (dT *DispatcherThresholdSv1) GetThreshold(args *dispatchers.TntIDWithApiKey,
+func (dT *DispatcherThresholdSv1) GetThreshold(args *utils.TenantIDWithArgDispatcher,
 	th *engine.Threshold) error {
 	return dT.dS.ThresholdSv1GetThreshold(args, th)
 }
@@ -244,33 +244,33 @@ type DispatcherStatSv1 struct {
 }
 
 // Ping implements StatSv1Ping
-func (dSts *DispatcherStatSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+func (dSts *DispatcherStatSv1) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
 	return dSts.dS.StatSv1Ping(args, reply)
 }
 
 // GetStatQueuesForEvent implements StatSv1GetStatQueuesForEvent
-func (dSts *DispatcherStatSv1) GetStatQueuesForEvent(args *dispatchers.ArgsStatProcessEventWithApiKey, reply *[]string) error {
+func (dSts *DispatcherStatSv1) GetStatQueuesForEvent(args *engine.StatsArgsProcessEvent, reply *[]string) error {
 	return dSts.dS.StatSv1GetStatQueuesForEvent(args, reply)
 }
 
 // GetQueueStringMetrics implements StatSv1GetQueueStringMetrics
-func (dSts *DispatcherStatSv1) GetQueueStringMetrics(args *dispatchers.TntIDWithApiKey,
+func (dSts *DispatcherStatSv1) GetQueueStringMetrics(args *utils.TenantIDWithArgDispatcher,
 	reply *map[string]string) error {
 	return dSts.dS.StatSv1GetQueueStringMetrics(args, reply)
 }
 
-func (dSts *DispatcherStatSv1) GetQueueFloatMetrics(args *dispatchers.TntIDWithApiKey,
+func (dSts *DispatcherStatSv1) GetQueueFloatMetrics(args *utils.TenantIDWithArgDispatcher,
 	reply *map[string]float64) error {
 	return dSts.dS.StatSv1GetQueueFloatMetrics(args, reply)
 }
 
-func (dSts *DispatcherStatSv1) GetQueueIDs(args *dispatchers.TntWithApiKey,
+func (dSts *DispatcherStatSv1) GetQueueIDs(args *utils.TenantWithArgDispatcher,
 	reply *[]string) error {
 	return dSts.dS.StatSv1GetQueueIDs(args, reply)
 }
 
 // GetQueueStringMetrics implements StatSv1ProcessEvent
-func (dSts *DispatcherStatSv1) ProcessEvent(args *dispatchers.ArgsStatProcessEventWithApiKey, reply *[]string) error {
+func (dSts *DispatcherStatSv1) ProcessEvent(args *engine.StatsArgsProcessEvent, reply *[]string) error {
 	return dSts.dS.StatSv1ProcessEvent(args, reply)
 }
 
@@ -284,27 +284,27 @@ type DispatcherResourceSv1 struct {
 }
 
 // Ping implements ResourceSv1Ping
-func (dRs *DispatcherResourceSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+func (dRs *DispatcherResourceSv1) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
 	return dRs.dRs.ResourceSv1Ping(args, reply)
 }
 
 // GetResourcesForEvent implements ResourceSv1GetResourcesForEvent
-func (dRs *DispatcherResourceSv1) GetResourcesForEvent(args *dispatchers.ArgsV1ResUsageWithApiKey,
+func (dRs *DispatcherResourceSv1) GetResourcesForEvent(args *utils.ArgRSv1ResourceUsage,
 	reply *engine.Resources) error {
 	return dRs.dRs.ResourceSv1GetResourcesForEvent(args, reply)
 }
 
-func (dRs *DispatcherResourceSv1) AuthorizeResources(args *dispatchers.ArgsV1ResUsageWithApiKey,
+func (dRs *DispatcherResourceSv1) AuthorizeResources(args *utils.ArgRSv1ResourceUsage,
 	reply *string) error {
 	return dRs.dRs.ResourceSv1AuthorizeResources(args, reply)
 }
 
-func (dRs *DispatcherResourceSv1) AllocateResources(args *dispatchers.ArgsV1ResUsageWithApiKey,
+func (dRs *DispatcherResourceSv1) AllocateResources(args *utils.ArgRSv1ResourceUsage,
 	reply *string) error {
 	return dRs.dRs.ResourceSv1AllocateResources(args, reply)
 }
 
-func (dRs *DispatcherResourceSv1) ReleaseResources(args *dispatchers.ArgsV1ResUsageWithApiKey,
+func (dRs *DispatcherResourceSv1) ReleaseResources(args *utils.ArgRSv1ResourceUsage,
 	reply *string) error {
 	return dRs.dRs.ResourceSv1ReleaseResources(args, reply)
 }
@@ -319,12 +319,12 @@ type DispatcherSupplierSv1 struct {
 }
 
 // Ping implements SupplierSv1Ping
-func (dSup *DispatcherSupplierSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+func (dSup *DispatcherSupplierSv1) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
 	return dSup.dSup.SupplierSv1Ping(args, reply)
 }
 
 // GetSuppliers implements SupplierSv1GetSuppliers
-func (dSup *DispatcherSupplierSv1) GetSuppliers(args *dispatchers.ArgsGetSuppliersWithApiKey,
+func (dSup *DispatcherSupplierSv1) GetSuppliers(args *engine.ArgsGetSuppliers,
 	reply *engine.SortedSuppliers) error {
 	return dSup.dSup.SupplierSv1GetSuppliers(args, reply)
 }
@@ -339,18 +339,18 @@ type DispatcherAttributeSv1 struct {
 }
 
 // Ping implements SupplierSv1Ping
-func (dA *DispatcherAttributeSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+func (dA *DispatcherAttributeSv1) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
 	return dA.dA.AttributeSv1Ping(args, reply)
 }
 
 // GetAttributeForEvent implements AttributeSv1GetAttributeForEvent
-func (dA *DispatcherAttributeSv1) GetAttributeForEvent(args *dispatchers.ArgsAttrProcessEventWithApiKey,
+func (dA *DispatcherAttributeSv1) GetAttributeForEvent(args *engine.AttrArgsProcessEvent,
 	reply *engine.AttributeProfile) error {
 	return dA.dA.AttributeSv1GetAttributeForEvent(args, reply)
 }
 
 // ProcessEvent implements AttributeSv1ProcessEvent
-func (dA *DispatcherAttributeSv1) ProcessEvent(args *dispatchers.ArgsAttrProcessEventWithApiKey,
+func (dA *DispatcherAttributeSv1) ProcessEvent(args *engine.AttrArgsProcessEvent,
 	reply *engine.AttrSProcessEventReply) error {
 	return dA.dA.AttributeSv1ProcessEvent(args, reply)
 }
@@ -365,18 +365,18 @@ type DispatcherChargerSv1 struct {
 }
 
 // Ping implements ChargerSv1Ping
-func (dC *DispatcherChargerSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+func (dC *DispatcherChargerSv1) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
 	return dC.dC.ChargerSv1Ping(args, reply)
 }
 
 // GetChargersForEvent implements ChargerSv1GetChargersForEvent
-func (dC *DispatcherChargerSv1) GetChargersForEvent(args *dispatchers.CGREvWithApiKey,
+func (dC *DispatcherChargerSv1) GetChargersForEvent(args *utils.CGREventWithArgDispatcher,
 	reply *engine.ChargerProfiles) (err error) {
 	return dC.dC.ChargerSv1GetChargersForEvent(args, reply)
 }
 
 // ProcessEvent implements ChargerSv1ProcessEvent
-func (dC *DispatcherChargerSv1) ProcessEvent(args *dispatchers.CGREvWithApiKey,
+func (dC *DispatcherChargerSv1) ProcessEvent(args *utils.CGREventWithArgDispatcher,
 	reply *[]*engine.ChrgSProcessEventReply) (err error) {
 	return dC.dC.ChargerSv1ProcessEvent(args, reply)
 }
@@ -391,53 +391,53 @@ type DispatcherSessionSv1 struct {
 }
 
 // Ping implements SessionSv1Ping
-func (dS *DispatcherSessionSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+func (dS *DispatcherSessionSv1) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
 	return dS.dS.SessionSv1Ping(args, reply)
 }
 
 // AuthorizeEventWithDigest implements SessionSv1AuthorizeEventWithDigest
-func (dS *DispatcherSessionSv1) AuthorizeEventWithDigest(args *dispatchers.AuthorizeArgsWithApiKey,
+func (dS *DispatcherSessionSv1) AuthorizeEventWithDigest(args *sessions.V1AuthorizeArgs,
 	reply *sessions.V1AuthorizeReplyWithDigest) error {
 	return dS.dS.SessionSv1AuthorizeEventWithDigest(args, reply)
 }
 
-func (dS *DispatcherSessionSv1) AuthorizeEvent(args *dispatchers.AuthorizeArgsWithApiKey,
+func (dS *DispatcherSessionSv1) AuthorizeEvent(args *sessions.V1AuthorizeArgs,
 	reply *sessions.V1AuthorizeReply) error {
 	return dS.dS.SessionSv1AuthorizeEvent(args, reply)
 }
 
 // InitiateSessionWithDigest implements SessionSv1InitiateSessionWithDigest
-func (dS *DispatcherSessionSv1) InitiateSessionWithDigest(args *dispatchers.InitArgsWithApiKey,
+func (dS *DispatcherSessionSv1) InitiateSessionWithDigest(args *sessions.V1InitSessionArgs,
 	reply *sessions.V1InitReplyWithDigest) (err error) {
 	return dS.dS.SessionSv1InitiateSessionWithDigest(args, reply)
 }
 
 // InitiateSessionWithDigest implements SessionSv1InitiateSessionWithDigest
-func (dS *DispatcherSessionSv1) InitiateSession(args *dispatchers.InitArgsWithApiKey,
+func (dS *DispatcherSessionSv1) InitiateSession(args *sessions.V1InitSessionArgs,
 	reply *sessions.V1InitSessionReply) (err error) {
 	return dS.dS.SessionSv1InitiateSession(args, reply)
 }
 
 // ProcessCDR implements SessionSv1ProcessCDR
-func (dS *DispatcherSessionSv1) ProcessCDR(args *dispatchers.CGREvWithApiKey,
+func (dS *DispatcherSessionSv1) ProcessCDR(args *utils.CGREventWithArgDispatcher,
 	reply *string) (err error) {
 	return dS.dS.SessionSv1ProcessCDR(args, reply)
 }
 
 // ProcessEvent implements SessionSv1ProcessEvent
-func (dS *DispatcherSessionSv1) ProcessEvent(args *dispatchers.ProcessEventWithApiKey,
+func (dS *DispatcherSessionSv1) ProcessEvent(args *sessions.V1ProcessEventArgs,
 	reply *sessions.V1ProcessEventReply) (err error) {
 	return dS.dS.SessionSv1ProcessEvent(args, reply)
 }
 
 // TerminateSession implements SessionSv1TerminateSession
-func (dS *DispatcherSessionSv1) TerminateSession(args *dispatchers.TerminateSessionWithApiKey,
+func (dS *DispatcherSessionSv1) TerminateSession(args *sessions.V1TerminateSessionArgs,
 	reply *string) (err error) {
 	return dS.dS.SessionSv1TerminateSession(args, reply)
 }
 
 // UpdateSession implements SessionSv1UpdateSession
-func (dS *DispatcherSessionSv1) UpdateSession(args *dispatchers.UpdateSessionWithApiKey,
+func (dS *DispatcherSessionSv1) UpdateSession(args *sessions.V1UpdateSessionArgs,
 	reply *sessions.V1UpdateSessionReply) (err error) {
 	return dS.dS.SessionSv1UpdateSession(args, reply)
 }
@@ -472,7 +472,7 @@ func (dS *DispatcherSessionSv1) ReplicateSessions(args *dispatchers.ArgsReplicat
 	return dS.dS.SessionSv1ReplicateSessions(args, reply)
 }
 
-func (dS *DispatcherSessionSv1) SetPassiveSession(args *dispatchers.SessionWithApiKey,
+func (dS *DispatcherSessionSv1) SetPassiveSession(args *sessions.Session,
 	reply *string) (err error) {
 	return dS.dS.SessionSv1SetPassiveSession(args, reply)
 }
@@ -486,44 +486,44 @@ type DispatcherResponder struct {
 	dS *dispatchers.DispatcherService
 }
 
-func (dS *DispatcherResponder) Status(args *dispatchers.TntWithApiKey, reply *map[string]interface{}) error {
+func (dS *DispatcherResponder) Status(args *utils.TenantWithArgDispatcher, reply *map[string]interface{}) error {
 	return dS.dS.ResponderStatus(args, reply)
 }
 
-func (dS *DispatcherResponder) GetCost(args *dispatchers.CallDescriptorWithApiKey, reply *engine.CallCost) error {
+func (dS *DispatcherResponder) GetCost(args *engine.CallDescriptor, reply *engine.CallCost) error {
 	return dS.dS.ResponderGetCost(args, reply)
 }
 
-func (dS *DispatcherResponder) Debit(args *dispatchers.CallDescriptorWithApiKey, reply *engine.CallCost) error {
+func (dS *DispatcherResponder) Debit(args *engine.CallDescriptor, reply *engine.CallCost) error {
 	return dS.dS.ResponderDebit(args, reply)
 }
 
-func (dS *DispatcherResponder) MaxDebit(args *dispatchers.CallDescriptorWithApiKey, reply *engine.CallCost) error {
+func (dS *DispatcherResponder) MaxDebit(args *engine.CallDescriptor, reply *engine.CallCost) error {
 	return dS.dS.ResponderMaxDebit(args, reply)
 }
 
-func (dS *DispatcherResponder) RefundIncrements(args *dispatchers.CallDescriptorWithApiKey, reply *engine.Account) error {
+func (dS *DispatcherResponder) RefundIncrements(args *engine.CallDescriptor, reply *engine.Account) error {
 	return dS.dS.ResponderRefundIncrements(args, reply)
 }
 
-func (dS *DispatcherResponder) RefundRounding(args *dispatchers.CallDescriptorWithApiKey, reply *float64) error {
+func (dS *DispatcherResponder) RefundRounding(args *engine.CallDescriptor, reply *float64) error {
 	return dS.dS.ResponderRefundRounding(args, reply)
 }
 
-func (dS *DispatcherResponder) GetMaxSessionTime(args *dispatchers.CallDescriptorWithApiKey, reply *time.Duration) error {
+func (dS *DispatcherResponder) GetMaxSessionTime(args *engine.CallDescriptor, reply *time.Duration) error {
 	return dS.dS.ResponderGetMaxSessionTime(args, reply)
 }
 
-func (dS *DispatcherResponder) Shutdown(args *dispatchers.TntWithApiKey, reply *string) error {
+func (dS *DispatcherResponder) Shutdown(args *utils.TenantWithArgDispatcher, reply *string) error {
 	return dS.dS.ResponderShutdown(args, reply)
 }
 
-func (dS *DispatcherResponder) GetTimeout(args *dispatchers.TntWithApiKey, reply *time.Duration) error {
+func (dS *DispatcherResponder) GetTimeout(args *utils.TenantWithArgDispatcher, reply *time.Duration) error {
 	return dS.dS.ResponderGetTimeout(args, reply)
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherResponder) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+func (dS *DispatcherResponder) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
 	return dS.dS.ResponderPing(args, reply)
 }
 
@@ -611,7 +611,7 @@ func (dS *DispatcherCacheSv1) LoadCache(args dispatchers.AttrReloadCacheWithApiK
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherCacheSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+func (dS *DispatcherCacheSv1) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
 	return dS.dS.CacheSv1Ping(args, reply)
 }
 
@@ -635,7 +635,7 @@ func (dS *DispatcherGuardianSv1) RemoteUnlock(attr *dispatchers.AttrRemoteUnlock
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherGuardianSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+func (dS *DispatcherGuardianSv1) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
 	return dS.dS.GuardianSv1Ping(args, reply)
 }
 
@@ -654,7 +654,7 @@ func (dS *DispatcherSchedulerSv1) Reload(attr *dispatchers.StringkWithApiKey, re
 }
 
 // Ping used to detreminate if component is active
-func (dS *DispatcherSchedulerSv1) Ping(args *dispatchers.CGREvWithApiKey, reply *string) error {
+func (dS *DispatcherSchedulerSv1) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
 	return dS.dS.SchedulerSv1Ping(args, reply)
 }
 

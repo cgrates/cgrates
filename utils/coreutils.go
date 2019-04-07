@@ -792,9 +792,19 @@ type TenantArg struct {
 	Tenant string
 }
 
+type TenantWithArgDispatcher struct {
+	*TenantArg
+	*ArgDispatcher
+}
+
 type TenantID struct {
 	Tenant string
 	ID     string
+}
+
+type TenantIDWithArgDispatcher struct {
+	*TenantID
+	*ArgDispatcher
 }
 
 func (tID *TenantID) TenantID() string {
@@ -936,6 +946,11 @@ func (ffn *FallbackFileName) AsString() string {
 type CachedRPCResponse struct {
 	Result interface{}
 	Error  error
+}
+
+type ArgDispatcher struct {
+	APIKey  *string
+	RouteID *string
 }
 
 func ReverseString(s string) string {

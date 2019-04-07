@@ -21,7 +21,7 @@ package console
 import (
 	"time"
 
-	"github.com/cgrates/cgrates/dispatchers"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -29,7 +29,7 @@ func init() {
 	c := &CmdThresholdProcessEvent{
 		name:      "thresholds_process_event",
 		rpcMethod: utils.ThresholdSv1ProcessEvent,
-		rpcParams: &dispatchers.ArgsProcessEventWithApiKey{},
+		rpcParams: &engine.ArgsProcessEvent{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -38,7 +38,7 @@ func init() {
 type CmdThresholdProcessEvent struct {
 	name      string
 	rpcMethod string
-	rpcParams *dispatchers.ArgsProcessEventWithApiKey
+	rpcParams *engine.ArgsProcessEvent
 	*CommandExecuter
 }
 
@@ -52,7 +52,7 @@ func (self *CmdThresholdProcessEvent) RpcMethod() string {
 
 func (self *CmdThresholdProcessEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &dispatchers.ArgsProcessEventWithApiKey{}
+		self.rpcParams = &engine.ArgsProcessEvent{}
 	}
 	return self.rpcParams
 }

@@ -21,10 +21,14 @@ package dispatchers
 import (
 	"time"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (dS *DispatcherService) StatSv1Ping(args *CGREvWithApiKey, reply *string) (err error) {
+func (dS *DispatcherService) StatSv1Ping(args *utils.CGREventWithArgDispatcher, reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.StatSv1Ping,
 			args.CGREvent.Tenant,
@@ -32,12 +36,15 @@ func (dS *DispatcherService) StatSv1Ping(args *CGREvWithApiKey, reply *string) (
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaStats, args.RouteID,
+	return dS.Dispatch(args.CGREvent, utils.MetaStats, args.RouteID,
 		utils.StatSv1Ping, args.CGREvent, reply)
 }
 
-func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *ArgsStatProcessEventWithApiKey,
+func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *engine.StatsArgsProcessEvent,
 	reply *[]string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.StatSv1GetStatQueuesForEvent,
 			args.CGREvent.Tenant,
@@ -46,11 +53,14 @@ func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *ArgsStatProcessE
 		}
 	}
 	return dS.Dispatch(&args.CGREvent, utils.MetaStats, args.RouteID,
-		utils.StatSv1GetStatQueuesForEvent, args.StatsArgsProcessEvent, reply)
+		utils.StatSv1GetStatQueuesForEvent, args, reply)
 }
 
-func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *TntIDWithApiKey,
+func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *utils.TenantIDWithArgDispatcher,
 	reply *map[string]string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.StatSv1GetQueueStringMetrics,
 			args.TenantID.Tenant,
@@ -65,8 +75,11 @@ func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *TntIDWithApiKey,
 		args.TenantID, reply)
 }
 
-func (dS *DispatcherService) StatSv1ProcessEvent(args *ArgsStatProcessEventWithApiKey,
+func (dS *DispatcherService) StatSv1ProcessEvent(args *engine.StatsArgsProcessEvent,
 	reply *[]string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.StatSv1ProcessEvent,
 			args.CGREvent.Tenant,
@@ -75,11 +88,14 @@ func (dS *DispatcherService) StatSv1ProcessEvent(args *ArgsStatProcessEventWithA
 		}
 	}
 	return dS.Dispatch(&args.CGREvent, utils.MetaStats, args.RouteID,
-		utils.StatSv1ProcessEvent, args.StatsArgsProcessEvent, reply)
+		utils.StatSv1ProcessEvent, args, reply)
 }
 
-func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(args *TntIDWithApiKey,
+func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(args *utils.TenantIDWithArgDispatcher,
 	reply *map[string]float64) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.StatSv1GetQueueFloatMetrics,
 			args.TenantID.Tenant,
@@ -94,8 +110,11 @@ func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(args *TntIDWithApiKey,
 		args.TenantID, reply)
 }
 
-func (dS *DispatcherService) StatSv1GetQueueIDs(args *TntWithApiKey,
+func (dS *DispatcherService) StatSv1GetQueueIDs(args *utils.TenantWithArgDispatcher,
 	reply *[]string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.StatSv1GetQueueIDs,
 			args.TenantArg.Tenant,

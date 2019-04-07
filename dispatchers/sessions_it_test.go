@@ -111,12 +111,12 @@ func testDspSessionPing(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RCP.Call(utils.SessionSv1Ping, &CGREvWithApiKey{
-		CGREvent: utils.CGREvent{
+	if err := dispEngine.RCP.Call(utils.SessionSv1Ping, &utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		DispatcherResource: DispatcherResource{
-			APIKey: "ses12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("ses12345"),
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -132,12 +132,12 @@ func testDspSessionPingFailover(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	ev := CGREvWithApiKey{
-		CGREvent: utils.CGREvent{
+	ev := utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		DispatcherResource: DispatcherResource{
-			APIKey: "ses12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("ses12345"),
 		},
 	}
 	if err := dispEngine.RCP.Call(utils.SessionSv1Ping, &ev, &reply); err != nil {
@@ -161,30 +161,28 @@ func testDspSessionPingFailover(t *testing.T) {
 
 func testDspSessionTestAuthKey(t *testing.T) {
 	authUsage := 5 * time.Minute
-	args := AuthorizeArgsWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "12345",
-		},
-		V1AuthorizeArgs: sessions.V1AuthorizeArgs{
-			GetMaxUsage:        true,
-			AuthorizeResources: true,
-			GetSuppliers:       true,
-			GetAttributes:      true,
-			CGREvent: utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSSv1ItAuth",
-				Event: map[string]interface{}{
-					utils.Tenant:      "cgrates.org",
-					utils.Category:    "call",
-					utils.ToR:         utils.VOICE,
-					utils.OriginID:    "TestSSv1It1",
-					utils.RequestType: utils.META_PREPAID,
-					utils.Account:     "1001",
-					utils.Destination: "1002",
-					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.Usage:       authUsage,
-				},
+	args := sessions.V1AuthorizeArgs{
+		GetMaxUsage:        true,
+		AuthorizeResources: true,
+		GetSuppliers:       true,
+		GetAttributes:      true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItAuth",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "TestSSv1It1",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.Usage:       authUsage,
 			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("12345"),
 		},
 	}
 	var rply sessions.V1AuthorizeReplyWithDigest
@@ -196,31 +194,29 @@ func testDspSessionTestAuthKey(t *testing.T) {
 
 func testDspSessionAuthorize(t *testing.T) {
 	authUsage := 5 * time.Minute
-	argsAuth := &AuthorizeArgsWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "ses12345",
-		},
-		V1AuthorizeArgs: sessions.V1AuthorizeArgs{
-			GetMaxUsage:        true,
-			AuthorizeResources: true,
-			GetSuppliers:       true,
-			GetAttributes:      true,
-			CGREvent: utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSSv1ItAuth",
-				Event: map[string]interface{}{
-					utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
-					utils.Tenant:      "cgrates.org",
-					utils.Category:    "call",
-					utils.ToR:         utils.VOICE,
-					utils.OriginID:    "TestSSv1It1",
-					utils.RequestType: utils.META_PREPAID,
-					utils.Account:     "1001",
-					utils.Destination: "1002",
-					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.Usage:       authUsage,
-				},
+	argsAuth := &sessions.V1AuthorizeArgs{
+		GetMaxUsage:        true,
+		AuthorizeResources: true,
+		GetSuppliers:       true,
+		GetAttributes:      true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItAuth",
+			Event: map[string]interface{}{
+				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "TestSSv1It1",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.Usage:       authUsage,
 			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("ses12345"),
 		},
 	}
 	var rply sessions.V1AuthorizeReplyWithDigest
@@ -250,31 +246,29 @@ func testDspSessionAuthorize(t *testing.T) {
 
 func testDspSessionInit(t *testing.T) {
 	initUsage := time.Duration(5 * time.Minute)
-	argsInit := &InitArgsWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "ses12345",
-		},
-		V1InitSessionArgs: sessions.V1InitSessionArgs{
-			InitSession:       true,
-			AllocateResources: true,
-			GetAttributes:     true,
-			CGREvent: utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSSv1ItInitiateSession",
-				Event: map[string]interface{}{
-					utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
-					utils.Tenant:      "cgrates.org",
-					utils.Category:    "call",
-					utils.ToR:         utils.VOICE,
-					utils.OriginID:    "TestSSv1It1",
-					utils.RequestType: utils.META_PREPAID,
-					utils.Account:     "1001",
-					utils.Destination: "1002",
-					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:       initUsage,
-				},
+	argsInit := &sessions.V1InitSessionArgs{
+		InitSession:       true,
+		AllocateResources: true,
+		GetAttributes:     true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItInitiateSession",
+			Event: map[string]interface{}{
+				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "TestSSv1It1",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       initUsage,
 			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("ses12345"),
 		},
 	}
 	var rply sessions.V1InitReplyWithDigest
@@ -292,8 +286,8 @@ func testDspSessionInit(t *testing.T) {
 
 func testDspGetSessions(t *testing.T) {
 	filtr := FilterSessionWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "ses12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("ses12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -330,29 +324,27 @@ func testDspGetSessions(t *testing.T) {
 
 func testDspSessionUpdate(t *testing.T) {
 	reqUsage := 5 * time.Minute
-	argsUpdate := &UpdateSessionWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "ses12345",
-		},
-		V1UpdateSessionArgs: sessions.V1UpdateSessionArgs{
-			GetAttributes: true,
-			UpdateSession: true,
-			CGREvent: utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSSv1ItUpdateSession",
-				Event: map[string]interface{}{
-					utils.Tenant:      "cgrates.org",
-					utils.Category:    "call",
-					utils.ToR:         utils.VOICE,
-					utils.OriginID:    "TestSSv1It1",
-					utils.RequestType: utils.META_PREPAID,
-					utils.Account:     "1001",
-					utils.Destination: "1002",
-					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:       reqUsage,
-				},
+	argsUpdate := &sessions.V1UpdateSessionArgs{
+		GetAttributes: true,
+		UpdateSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItUpdateSession",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "TestSSv1It1",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       reqUsage,
 			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("ses12345"),
 		},
 	}
 	var rply sessions.V1UpdateSessionReply
@@ -393,30 +385,28 @@ func testDspSessionUpdate(t *testing.T) {
 
 func testDspSessionUpdate2(t *testing.T) {
 	reqUsage := 5 * time.Minute
-	argsUpdate := &UpdateSessionWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "ses12345",
-		},
-		V1UpdateSessionArgs: sessions.V1UpdateSessionArgs{
-			GetAttributes: true,
-			UpdateSession: true,
-			CGREvent: utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSSv1ItUpdateSession",
-				Event: map[string]interface{}{
-					utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
-					utils.Tenant:      "cgrates.org",
-					utils.Category:    "call",
-					utils.ToR:         utils.VOICE,
-					utils.OriginID:    "TestSSv1It1",
-					utils.RequestType: utils.META_PREPAID,
-					utils.Account:     "1001",
-					utils.Destination: "1002",
-					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:       reqUsage,
-				},
+	argsUpdate := &sessions.V1UpdateSessionArgs{
+		GetAttributes: true,
+		UpdateSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItUpdateSession",
+			Event: map[string]interface{}{
+				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "TestSSv1It1",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       reqUsage,
 			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("ses12345"),
 		},
 	}
 	var rply sessions.V1UpdateSessionReply
@@ -462,29 +452,27 @@ func testDspSessionUpdate2(t *testing.T) {
 }
 
 func testDspSessionTerminate(t *testing.T) {
-	args := &TerminateSessionWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "ses12345",
-		},
-		V1TerminateSessionArgs: sessions.V1TerminateSessionArgs{
-			TerminateSession: true,
-			ReleaseResources: true,
-			CGREvent: utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSSv1ItUpdateSession",
-				Event: map[string]interface{}{
-					utils.Tenant:      "cgrates.org",
-					utils.Category:    "call",
-					utils.ToR:         utils.VOICE,
-					utils.OriginID:    "TestSSv1It1",
-					utils.RequestType: utils.META_PREPAID,
-					utils.Account:     "1001",
-					utils.Destination: "1002",
-					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:       10 * time.Minute,
-				},
+	args := &sessions.V1TerminateSessionArgs{
+		TerminateSession: true,
+		ReleaseResources: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItUpdateSession",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "TestSSv1It1",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       10 * time.Minute,
 			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("ses12345"),
 		},
 	}
 	var rply string
@@ -498,11 +486,8 @@ func testDspSessionTerminate(t *testing.T) {
 }
 
 func testDspSessionProcessCDR(t *testing.T) {
-	args := CGREvWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "ses12345",
-		},
-		CGREvent: utils.CGREvent{
+	args := utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessCDR",
 			Event: map[string]interface{}{
@@ -518,6 +503,9 @@ func testDspSessionProcessCDR(t *testing.T) {
 				utils.Usage:       10 * time.Minute,
 			},
 		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("ses12345"),
+		},
 	}
 
 	var rply string
@@ -532,31 +520,29 @@ func testDspSessionProcessCDR(t *testing.T) {
 
 func testDspSessionProcessEvent(t *testing.T) {
 	initUsage := 5 * time.Minute
-	args := ProcessEventWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "ses12345",
-		},
-		V1ProcessEventArgs: sessions.V1ProcessEventArgs{
-			AllocateResources: true,
-			Debit:             true,
-			GetAttributes:     true,
-			CGREvent: utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestSSv1ItProcessEvent",
-				Event: map[string]interface{}{
-					utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
-					utils.Tenant:      "cgrates.org",
-					utils.Category:    "call",
-					utils.ToR:         utils.VOICE,
-					utils.OriginID:    "TestSSv1It2",
-					utils.RequestType: utils.META_PREPAID,
-					utils.Account:     "1001",
-					utils.Destination: "1002",
-					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-					utils.Usage:       initUsage,
-				},
+	args := sessions.V1ProcessEventArgs{
+		AllocateResources: true,
+		Debit:             true,
+		GetAttributes:     true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItProcessEvent",
+			Event: map[string]interface{}{
+				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "TestSSv1It2",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       initUsage,
 			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("ses12345"),
 		},
 	}
 	var rply sessions.V1ProcessEventReply
@@ -608,8 +594,8 @@ func testDspSessionReplicate(t *testing.T) {
 
 	var reply string
 	if err := dispEngine.RCP.Call(utils.SessionSv1ReplicateSessions, ArgsReplicateSessionsWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "ses12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("ses12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -645,8 +631,8 @@ func testDspSessionPassive(t *testing.T) {
 	testDspSessionUpdate2(t)
 	var repl int
 	filtr := FilterSessionWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "ses12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("ses12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -676,50 +662,48 @@ func testDspSessionPassive(t *testing.T) {
 	}
 
 	var reply string
-	if err := dispEngine.RCP.Call(utils.SessionSv1SetPassiveSession, SessionWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "ses12345",
-		},
-		Session: sessions.Session{
-			CGRID:      rply[0].CGRID,
-			Tenant:     rply[0].Tenant,
-			ResourceID: "TestSSv1It1",
-			EventStart: engine.NewSafEvent(map[string]interface{}{
-				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "TestSSv1It1",
-				utils.RequestType: utils.META_PREPAID,
-				utils.Account:     "1001",
-				utils.Destination: "1002",
-				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       5 * time.Minute,
-			}),
-			SRuns: []*sessions.SRun{
-				&sessions.SRun{
-					Event: engine.NewMapEvent(map[string]interface{}{
-						"RunID":           "CustomerCharges",
-						utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
-						utils.Tenant:      "cgrates.org",
-						utils.Category:    "call",
-						utils.ToR:         utils.VOICE,
-						utils.OriginID:    "TestSSv1It1",
-						utils.RequestType: utils.META_PREPAID,
-						utils.Account:     "1001",
-						utils.Destination: "1002",
-						utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-						utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-						utils.Usage:       5 * time.Minute,
-					}),
-					CD:        &engine.CallDescriptor{},
-					EventCost: &engine.EventCost{},
+	if err := dispEngine.RCP.Call(utils.SessionSv1SetPassiveSession, sessions.Session{
+		CGRID:      rply[0].CGRID,
+		Tenant:     rply[0].Tenant,
+		ResourceID: "TestSSv1It1",
+		EventStart: engine.NewSafEvent(map[string]interface{}{
+			utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
+			utils.Tenant:      "cgrates.org",
+			utils.Category:    "call",
+			utils.ToR:         utils.VOICE,
+			utils.OriginID:    "TestSSv1It1",
+			utils.RequestType: utils.META_PREPAID,
+			utils.Account:     "1001",
+			utils.Destination: "1002",
+			utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+			utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+			utils.Usage:       5 * time.Minute,
+		}),
+		SRuns: []*sessions.SRun{
+			&sessions.SRun{
+				Event: engine.NewMapEvent(map[string]interface{}{
+					"RunID":           "CustomerCharges",
+					utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "TestSSv1It1",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "1001",
+					utils.Destination: "1002",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       5 * time.Minute,
+				}),
+				CD:        &engine.CallDescriptor{},
+				EventCost: &engine.EventCost{},
 
-					LastUsage:  5 * time.Minute,
-					TotalUsage: 10 * time.Minute,
-				},
+				LastUsage:  5 * time.Minute,
+				TotalUsage: 10 * time.Minute,
 			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("ses12345"),
 		},
 	}, &reply); err != nil {
 		t.Fatal(err)
@@ -751,8 +735,8 @@ func testDspSessionForceDisconect(t *testing.T) {
 	testDspSessionInit(t)
 	var repl int
 	filtr := FilterSessionWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "ses12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("ses12345"),
 		},
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",

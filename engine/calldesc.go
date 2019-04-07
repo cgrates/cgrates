@@ -171,6 +171,7 @@ type CallDescriptor struct {
 	DenyNegativeAccount bool // prevent account going on negative during debit
 	account             *Account
 	testCallcost        *CallCost // testing purpose only!
+	*utils.ArgDispatcher
 }
 
 // AsCGREvent converts the CallDescriptor into CGREvent

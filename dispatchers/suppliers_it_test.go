@@ -55,12 +55,12 @@ func testDspSupPing(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RCP.Call(utils.SupplierSv1Ping, &CGREvWithApiKey{
-		CGREvent: utils.CGREvent{
+	if err := dispEngine.RCP.Call(utils.SupplierSv1Ping, &utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		DispatcherResource: DispatcherResource{
-			APIKey: "sup12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("sup12345"),
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -76,12 +76,12 @@ func testDspSupPingFailover(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	ev := CGREvWithApiKey{
-		CGREvent: utils.CGREvent{
+	ev := utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		DispatcherResource: DispatcherResource{
-			APIKey: "sup12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("sup12345"),
 		},
 	}
 	if err := dispEngine.RCP.Call(utils.SupplierSv1Ping, &ev, &reply); err != nil {
@@ -142,24 +142,22 @@ func testDspSupGetSupFailover(t *testing.T) {
 			},
 		},
 	}
-	args := &ArgsGetSuppliersWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "sup12345",
-		},
-		ArgsGetSuppliers: engine.ArgsGetSuppliers{
-			CGREvent: utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Time:   &nowTime,
-				Event: map[string]interface{}{
-					utils.EVENT_NAME:  "Event1",
-					utils.Account:     "1002",
-					utils.Subject:     "1002",
-					utils.Destination: "1001",
-					utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-					utils.Usage:       "1m20s",
-				},
+	args := &engine.ArgsGetSuppliers{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Time:   &nowTime,
+			Event: map[string]interface{}{
+				utils.EVENT_NAME:  "Event1",
+				utils.Account:     "1002",
+				utils.Subject:     "1002",
+				utils.Destination: "1001",
+				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:       "1m20s",
 			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("sup12345"),
 		},
 	}
 	if err := dispEngine.RCP.Call(utils.SupplierSv1GetSuppliers,
@@ -180,23 +178,21 @@ func testDspSupGetSupFailover(t *testing.T) {
 
 func testDspSupTestAuthKey(t *testing.T) {
 	var rpl *engine.SortedSuppliers
-	args := &ArgsGetSuppliersWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "12345",
-		},
-		ArgsGetSuppliers: engine.ArgsGetSuppliers{
-			CGREvent: utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Time:   &nowTime,
-				Event: map[string]interface{}{
-					utils.Account:     "1002",
-					utils.Subject:     "1002",
-					utils.Destination: "1001",
-					utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-					utils.Usage:       "1m20s",
-				},
+	args := &engine.ArgsGetSuppliers{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Time:   &nowTime,
+			Event: map[string]interface{}{
+				utils.Account:     "1002",
+				utils.Subject:     "1002",
+				utils.Destination: "1001",
+				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:       "1m20s",
 			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("12345"),
 		},
 	}
 	if err := dispEngine.RCP.Call(utils.SupplierSv1GetSuppliers,
@@ -231,23 +227,21 @@ func testDspSupTestAuthKey2(t *testing.T) {
 			},
 		},
 	}
-	args := &ArgsGetSuppliersWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "sup12345",
-		},
-		ArgsGetSuppliers: engine.ArgsGetSuppliers{
-			CGREvent: utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Time:   &nowTime,
-				Event: map[string]interface{}{
-					utils.Account:     "1002",
-					utils.Subject:     "1002",
-					utils.Destination: "1001",
-					utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-					utils.Usage:       "1m20s",
-				},
+	args := &engine.ArgsGetSuppliers{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Time:   &nowTime,
+			Event: map[string]interface{}{
+				utils.Account:     "1002",
+				utils.Subject:     "1002",
+				utils.Destination: "1001",
+				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:       "1m20s",
 			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("sup12345"),
 		},
 	}
 	if err := dispEngine.RCP.Call(utils.SupplierSv1GetSuppliers,
@@ -297,24 +291,22 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 			},
 		},
 	}
-	args := &ArgsGetSuppliersWithApiKey{
-		DispatcherResource: DispatcherResource{
-			APIKey: "sup12345",
-		},
-		ArgsGetSuppliers: engine.ArgsGetSuppliers{
-			CGREvent: utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     utils.UUIDSha1Prefix(),
-				Time:   &nowTime,
-				Event: map[string]interface{}{
-					utils.EVENT_NAME:  "RoundRobin",
-					utils.Account:     "1002",
-					utils.Subject:     "1002",
-					utils.Destination: "1001",
-					utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
-					utils.Usage:       "1m20s",
-				},
+	args := &engine.ArgsGetSuppliers{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
+			Time:   &nowTime,
+			Event: map[string]interface{}{
+				utils.EVENT_NAME:  "RoundRobin",
+				utils.Account:     "1002",
+				utils.Subject:     "1002",
+				utils.Destination: "1001",
+				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:       "1m20s",
 			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("sup12345"),
 		},
 	}
 	if err := dispEngine.RCP.Call(utils.SupplierSv1GetSuppliers,

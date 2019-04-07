@@ -45,12 +45,12 @@ func testDspGrdPing(t *testing.T) {
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RCP.Call(utils.GuardianSv1Ping, &CGREvWithApiKey{
-		CGREvent: utils.CGREvent{
+	if err := dispEngine.RCP.Call(utils.GuardianSv1Ping, &utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
-		DispatcherResource: DispatcherResource{
-			APIKey: "grd12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("grd12345"),
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -72,8 +72,8 @@ func testDspGrdLock(t *testing.T) {
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
-		DispatcherResource: DispatcherResource{
-			APIKey: "grd12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("grd12345"),
 		},
 	}, &reply); err != nil {
 		t.Error(err)
@@ -85,8 +85,8 @@ func testDspGrdLock(t *testing.T) {
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
-		DispatcherResource: DispatcherResource{
-			APIKey: "grd12345",
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("grd12345"),
 		},
 	}, &unlockReply); err != nil {
 		t.Error(err)
