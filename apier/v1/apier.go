@@ -54,6 +54,12 @@ type ApierV1 struct {
 	SchedulerS  rpcclient.RpcClientConnection
 }
 
+// Call implements rpcclient.RpcClientConnection interface for internal RPC
+func (self *ApierV1) Call(serviceMethod string,
+	args interface{}, reply interface{}) error {
+	return utils.APIerRPCCall(self, serviceMethod, args, reply)
+}
+
 func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) error {
 	if dst, err := self.DataManager.DataDB().GetDestination(dstId, false, utils.NonTransactional); err != nil {
 		return utils.ErrNotFound

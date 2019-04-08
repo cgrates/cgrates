@@ -31,7 +31,7 @@ import (
 )
 
 // Starts rater and reports on chan
-func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *engine.CacheS,
+func startRater(internalRaterChan, internalApierv1, internalApierv2 chan rpcclient.RpcClientConnection, cacheS *engine.CacheS,
 	internalThdSChan, internalStatSChan chan rpcclient.RpcClientConnection,
 	serviceManager *servmanager.ServiceManager, server *utils.Server,
 	dm *engine.DataManager, loadDb engine.LoadStorage, cdrDb engine.CdrStorage,
@@ -201,5 +201,8 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	utils.RegisterRpcParams("", apierRpcV1)
 	utils.RegisterRpcParams("", apierRpcV2)
 	utils.GetRpcParams("")
+
+	internalApierv1 <- apierRpcV1
+	internalApierv2 <- apierRpcV2
 	internalRaterChan <- responder // Rater done
 }

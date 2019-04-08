@@ -1098,7 +1098,7 @@ func initCacheS(internalCacheSChan chan rpcclient.RpcClientConnection,
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(chSv1)
 	}
-	internalCacheSChan <- chS //v1
+	internalCacheSChan <- chS
 	return
 }
 
@@ -1437,17 +1437,19 @@ func main() {
 	internalSchedSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalGuardianSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalLoaderSChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalApierV1Chan := make(chan rpcclient.RpcClientConnection, 1)
+	internalApierV2Chan := make(chan rpcclient.RpcClientConnection, 1)
 
 	// init internalRPCSet
 	engine.IntRPC = engine.NewRPCClientSet()
 	if cfg.DispatcherSCfg().Enabled {
 		engine.IntRPC.AddInternalRPCClient(utils.AnalyzerSv1, internalAnalyzerSChan)
-		// engine.IntRPC.AddInternalRPCClient(utils.ApierV1, internalApierV1Chan)
-		// engine.IntRPC.AddInternalRPCClient(utils.ApierV2, internalApierV2Chan)
+		engine.IntRPC.AddInternalRPCClient(utils.ApierV1, internalApierV1Chan)
+		engine.IntRPC.AddInternalRPCClient(utils.ApierV2, internalApierV2Chan)
 		engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1, internalAttributeSChan)
 		engine.IntRPC.AddInternalRPCClient(utils.CacheSv1, internalCacheSChan) // server or from apier
-		// engine.IntRPC.AddInternalRPCClient(utils.CDRsV1, internalCdrSChan)
-		// engine.IntRPC.AddInternalRPCClient(utils.CDRsV2, internalCdrSChan)
+		engine.IntRPC.AddInternalRPCClient(utils.CDRsV1, internalCdrSChan)
+		engine.IntRPC.AddInternalRPCClient(utils.CDRsV2, internalCdrSChan)
 		engine.IntRPC.AddInternalRPCClient(utils.ChargerSv1, internalChargerSChan)
 		engine.IntRPC.AddInternalRPCClient(utils.GuardianSv1, internalGuardianSChan)
 		engine.IntRPC.AddInternalRPCClient(utils.LoaderSv1, internalLoaderSChan)
@@ -1479,7 +1481,7 @@ func main() {
 
 	// Start RALs
 	if cfg.RalsCfg().RALsEnabled {
-		go startRater(internalRaterChan, cacheS, internalThresholdSChan,
+		go startRater(internalRaterChan, internalApierV1Chan, internalApierV2Chan, cacheS, internalThresholdSChan,
 			internalStatSChan, srvManager, server, dm, loadDb, cdrDb,
 			&stopHandled, exitChan, cacheS, filterSChan, internalCacheSChan, internalSchedSChan)
 	}

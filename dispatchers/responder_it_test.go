@@ -33,6 +33,7 @@ var sTestsDspRsp = []func(t *testing.T){
 
 	testDspResponderRandom,
 	testDspResponderBroadcast,
+	testDspResponderInternal,
 }
 
 //Test start here
@@ -185,4 +186,45 @@ func testDspResponderBroadcast(t *testing.T) {
 	}
 	allEngine.startEngine(t)
 	allEngine2.startEngine(t)
+}
+
+func testDspResponderInternal(t *testing.T) {
+	var reply map[string]interface{}
+	var pingReply string
+	route := "internal"
+	pingEv := utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME: "Internal",
+			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey:  utils.StringPointer("rsp12345"),
+			RouteID: &route,
+		},
+	}
+	ev := utils.TenantWithArgDispatcher{
+		TenantArg: &utils.TenantArg{
+			Tenant: "cgrates.org",
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey:  utils.StringPointer("rsp12345"),
+			RouteID: &route,
+		},
+	}
+	if err := dispEngine.RCP.Call(utils.ResponderPing, pingEv, &pingReply); err != nil {
+		t.Error(err)
+	} else if pingReply != utils.Pong {
+		t.Errorf("Received: %s", pingReply)
+	}
+	if err := dispEngine.RCP.Call(utils.ResponderStatus, &ev, &reply); err != nil {
+		t.Error(err)
+	}
+	if reply[utils.NodeID] == nil {
+		return
+	}
+	if strRply := reply[utils.NodeID].(string); strRply != "DispatcherS1" {
+		t.Errorf("Expected: DispatcherS1 , received: %s", strRply)
+	}
 }

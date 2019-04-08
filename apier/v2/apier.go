@@ -39,6 +39,12 @@ type ApierV2 struct {
 	v1.ApierV1
 }
 
+// Call implements rpcclient.RpcClientConnection interface for internal RPC
+func (self *ApierV2) Call(serviceMethod string,
+	args interface{}, reply interface{}) error {
+	return utils.APIerRPCCall(self, serviceMethod, args, reply)
+}
+
 type AttrLoadRatingProfile struct {
 	TPid            string
 	RatingProfileId string
