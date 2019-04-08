@@ -19,10 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"errors"
 	"fmt"
-	"strings"
-	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -39,15 +36,8 @@ func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connA
 	atLestOneConnected := false // If one connected we don't longer return errors
 	for _, rpcConnCfg := range rpcConnCfgs {
 		if rpcConnCfg.Address == utils.MetaInternal {
-			var internalConn rpcclient.RpcClientConnection
-			select {
-			case internalConn = <-internalConnChan:
-				internalConnChan <- internalConn
-			case <-time.After(ttl):
-				return nil, errors.New("TTL triggered")
-			}
 			rpcClient, err = rpcclient.NewRpcClient("", "", rpcConnCfg.TLS, keyPath, certPath, caPath, connAttempts,
-				reconnects, connectTimeout, replyTimeout, rpcclient.INTERNAL_RPC, internalConn, lazyConnect)
+				reconnects, connectTimeout, replyTimeout, rpcclient.INTERNAL_RPC, internalConnChan, lazyConnect)
 		} else if utils.IsSliceMember([]string{utils.MetaJSONrpc, utils.MetaGOBrpc, ""}, rpcConnCfg.Transport) {
 			codec := utils.GOB
 			if rpcConnCfg.Transport != "" {
@@ -69,42 +59,67 @@ func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connA
 	return rpcPool, err
 }
 
-var IntRPC *InternalRPC
+var IntRPC *rpcclient.RPCClientSet
 
-func init() {
-	IntRPC = &InternalRPC{subsystems: make(map[string]rpcclient.RpcClientConnection)}
-}
-
-type InternalRPC struct {
-	sync.Mutex
-	subsystems map[string]rpcclient.RpcClientConnection
-}
-
-func (irpc *InternalRPC) AddConnection(name string, conn rpcclient.RpcClientConnection) {
-	if conn == nil {
+func InitInternalRPC() {
+	if !config.CgrConfig().DispatcherSCfg().Enabled {
 		return
 	}
-	irpc.Lock()
-	irpc.subsystems[name] = conn
-	irpc.Unlock()
+	var subsystems []string
+	subsystems = append(subsystems, utils.CacheSv1)
+	subsystems = append(subsystems, utils.GuardianSv1)
+	subsystems = append(subsystems, utils.SchedulerSv1)
+	subsystems = append(subsystems, utils.LoaderSv1)
+	if config.CgrConfig().AttributeSCfg().Enabled {
+		subsystems = append(subsystems, utils.AttributeSv1)
+	}
+	if config.CgrConfig().RalsCfg().RALsEnabled {
+		subsystems = append(subsystems, utils.ApierV1)
+		subsystems = append(subsystems, utils.ApierV2)
+		subsystems = append(subsystems, utils.Responder)
+	}
+	if config.CgrConfig().CdrsCfg().CDRSEnabled {
+		subsystems = append(subsystems, utils.CDRsV1)
+		subsystems = append(subsystems, utils.CDRsV2)
+	}
+	if config.CgrConfig().AnalyzerSCfg().Enabled {
+		subsystems = append(subsystems, utils.AnalyzerSv1)
+	}
+	if config.CgrConfig().SessionSCfg().Enabled {
+		subsystems = append(subsystems, utils.SessionSv1)
+	}
+	if config.CgrConfig().ChargerSCfg().Enabled {
+		subsystems = append(subsystems, utils.ChargerSv1)
+	}
+	if config.CgrConfig().ResourceSCfg().Enabled {
+		subsystems = append(subsystems, utils.ResourceSv1)
+	}
+	if config.CgrConfig().StatSCfg().Enabled {
+		subsystems = append(subsystems, utils.StatSv1)
+	}
+	if config.CgrConfig().ThresholdSCfg().Enabled {
+		subsystems = append(subsystems, utils.ThresholdSv1)
+	}
+	if config.CgrConfig().SupplierSCfg().Enabled {
+		subsystems = append(subsystems, utils.SupplierSv1)
+	}
+	IntRPC = rpcclient.NewRPCClientSet(subsystems, config.CgrConfig().GeneralCfg().InternalTtl)
 }
 
-func (irpc *InternalRPC) Call(method string, args interface{}, reply interface{}) error {
-	methodSplit := strings.Split(method, ".")
-	if len(methodSplit) != 2 {
-		return rpcclient.ErrUnsupporteServiceMethod
+func AddInternalRPCClient(name string, rpc rpcclient.RpcClientConnection) {
+	connChan := make(chan rpcclient.RpcClientConnection, 1)
+	connChan <- rpc
+	err := IntRPC.AddRPCConnection(name, "", "", false, "", "", "",
+		config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
+		config.CgrConfig().GeneralCfg().ConnectTimeout, config.CgrConfig().GeneralCfg().ReplyTimeout,
+		rpcclient.INTERNAL_RPC, connChan, true)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<InternalRCP> Error adding %s to the set: %v", name, err.Error()))
 	}
-	irpc.Lock()
-	defer irpc.Unlock()
-	conn, has := irpc.subsystems[methodSplit[0]]
-	if !has {
-		return rpcclient.ErrUnsupporteServiceMethod
-	}
-	return conn.Call(method, args, reply)
 }
 
-func (irpc *InternalRPC) GetConnChan() (connChan chan rpcclient.RpcClientConnection) {
-	connChan = make(chan rpcclient.RpcClientConnection, 1)
-	connChan <- irpc
-	return
+func GetInternalRPCClientChanel() chan rpcclient.RpcClientConnection {
+	connChan := make(chan rpcclient.RpcClientConnection, 1)
+	connChan <- IntRPC
+	return connChan
 }
