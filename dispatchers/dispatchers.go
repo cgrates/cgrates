@@ -179,7 +179,7 @@ func (dS *DispatcherService) Dispatch(ev *utils.CGREvent, subsys string, routeID
 	}
 	engine.Cache.Set(utils.CacheDispatchers, tntID, d, nil,
 		true, utils.EmptyString)
-	return d.Dispatch(routeID, serviceMethod, args, reply)
+	return d.Dispatch(routeID, subsys, serviceMethod, args, reply)
 }
 
 func (dS *DispatcherService) V1GetProfileForEvent(ev *DispatcherEvent,
