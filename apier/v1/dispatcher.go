@@ -685,3 +685,31 @@ type DispatcherSCDRsV1 struct {
 func (dS *DispatcherSCDRsV1) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
 	return dS.dS.CDRsV1Ping(args, reply)
 }
+
+func (dS *DispatcherSCDRsV1) GetCDRs(args utils.RPCCDRsFilter, reply *[]*engine.CDR) error {
+	return dS.dS.CDRsV1GetCDRs(args, reply)
+}
+
+func (dS *DispatcherSCDRsV1) CountCDRs(args *utils.RPCCDRsFilter, reply *int64) error {
+	return dS.dS.CDRsV1CountCDRs(args, reply)
+}
+
+func (dS *DispatcherSCDRsV1) StoreSessionCost(args *engine.AttrCDRSStoreSMCost, reply *string) error {
+	return dS.dS.CDRsV1StoreSessionCost(args, reply)
+}
+
+func (dS *DispatcherSCDRsV1) RateCDRs(args *engine.ArgRateCDRs, reply *string) error {
+	return dS.dS.CDRsV1RateCDRs(args, reply)
+}
+
+func (dS *DispatcherSCDRsV1) ProcessExternalCDR(args *engine.ExternalCDR, reply *string) error {
+	return dS.dS.CDRsV1ProcessExternalCDR(args, reply)
+}
+
+func (dS *DispatcherSCDRsV1) ProcessEvent(args *engine.ArgV1ProcessEvent, reply *string) error {
+	return dS.dS.CDRsV1ProcessEvent(args, reply)
+}
+
+func (dS *DispatcherSCDRsV1) ProcessCDR(args *engine.CDR, reply *string) error {
+	return dS.dS.CDRsV1ProcessCDR(args, reply)
+}

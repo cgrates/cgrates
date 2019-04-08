@@ -62,7 +62,7 @@ func (cS *ChargerService) Shutdown() (err error) {
 }
 
 // matchingChargingProfilesForEvent returns ordered list of matching chargers which are active by the time of the function call
-func (cS *ChargerService) matchingChargerProfilesForEvent(cgrEv *utils.CGREvent) (cPs ChargerProfiles, err error) {
+func (cS *ChargerService) matchingChargerProfilesForEvent(cgrEv *utils.CGREventWithArgDispatcher) (cPs ChargerProfiles, err error) {
 	cpIDs, err := MatchingItemIDsForEvent(cgrEv.Event,
 		cS.cfg.ChargerSCfg().StringIndexedFields, cS.cfg.ChargerSCfg().PrefixIndexedFields,
 		cS.dm, utils.CacheChargerFilterIndexes, cgrEv.Tenant, cS.cfg.ChargerSCfg().IndexedSelects)
@@ -108,7 +108,7 @@ type ChrgSProcessEventReply struct {
 	CGREvent           *utils.CGREvent
 }
 
-func (cS *ChargerService) processEvent(cgrEv *utils.CGREvent) (rply []*ChrgSProcessEventReply, err error) {
+func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithArgDispatcher) (rply []*ChrgSProcessEventReply, err error) {
 	var cPs ChargerProfiles
 	if cPs, err = cS.matchingChargerProfilesForEvent(cgrEv); err != nil {
 		return nil, err
@@ -119,7 +119,7 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREvent) (rply []*ChrgSProc
 		clonedEv.Event[utils.RunID] = cP.RunID
 		rply[i] = &ChrgSProcessEventReply{
 			ChargerSProfile: cP.ID,
-			CGREvent:        clonedEv,
+			CGREvent:        clonedEv.CGREvent,
 		}
 		if len(cP.AttributeIDs) == 1 && cP.AttributeIDs[0] == utils.META_NONE {
 			continue // AttributeS disabled
@@ -132,24 +132,9 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREvent) (rply []*ChrgSProc
 			AttributeIDs: cP.AttributeIDs,
 			Context:      utils.StringPointer(utils.MetaChargers),
 			ProcessRuns:  nil,
-			CGREvent:     *clonedEv}
-		//check if we have APIKey in event and in case it has add it in ArgDispatcher
-		apiKeyIface, hasApiKey := clonedEv.Event[utils.MetaApiKey]
-		if hasApiKey {
-			args.ArgDispatcher = &utils.ArgDispatcher{
-				APIKey: utils.StringPointer(apiKeyIface.(string)),
-			}
-		}
-		//check if we have RouteID in event and in case it has add it in ArgDispatcher
-		routeIDIface, hasRouteID := clonedEv.Event[utils.MetaRouteID]
-		if hasRouteID {
-			if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
-				args.ArgDispatcher = &utils.ArgDispatcher{
-					RouteID: utils.StringPointer(routeIDIface.(string)),
-				}
-			} else {
-				args.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
-			}
+			CGREvent:     *clonedEv.CGREvent}
+		if clonedEv.ArgDispatcher != nil {
+			args.ArgDispatcher = clonedEv.ArgDispatcher
 		}
 		var evReply AttrSProcessEventReply
 		if err = cS.attrS.Call(utils.AttributeSv1ProcessEvent,
@@ -166,7 +151,7 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREvent) (rply []*ChrgSProc
 }
 
 // V1ProcessEvent will process the event received via API and return list of events forked
-func (cS *ChargerService) V1ProcessEvent(args *utils.CGREvent,
+func (cS *ChargerService) V1ProcessEvent(args *utils.CGREventWithArgDispatcher,
 	reply *[]*ChrgSProcessEventReply) (err error) {
 	if args.Event == nil {
 		return utils.NewErrMandatoryIeMissing("Event")
@@ -183,7 +168,7 @@ func (cS *ChargerService) V1ProcessEvent(args *utils.CGREvent,
 }
 
 // V1GetChargersForEvent exposes the list of ordered matching ChargingProfiles for an event
-func (cS *ChargerService) V1GetChargersForEvent(args *utils.CGREvent,
+func (cS *ChargerService) V1GetChargersForEvent(args *utils.CGREventWithArgDispatcher,
 	rply *ChargerProfiles) (err error) {
 	cPs, err := cS.matchingChargerProfilesForEvent(args)
 	if err != nil {

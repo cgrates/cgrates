@@ -64,31 +64,37 @@ var (
 			Weight:       20,
 		},
 	}
-	chargerEvents = []*utils.CGREvent{
+	chargerEvents = []*utils.CGREventWithArgDispatcher{
 		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
-				"Charger":        "ChargerProfile1",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
-				"UsageInterval":  "1s",
-				utils.Weight:     "200.0",
+			CGREvent: &utils.CGREvent{
+				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+				ID:     utils.GenUUID(),
+				Event: map[string]interface{}{
+					"Charger":        "ChargerProfile1",
+					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+					"UsageInterval":  "1s",
+					utils.Weight:     "200.0",
+				},
 			},
 		},
 		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
-				"Charger":        "ChargerProfile2",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			CGREvent: &utils.CGREvent{
+				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+				ID:     utils.GenUUID(),
+				Event: map[string]interface{}{
+					"Charger":        "ChargerProfile2",
+					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				},
 			},
 		},
 		{
-			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
-			ID:     utils.GenUUID(),
-			Event: map[string]interface{}{
-				"Charger":        "DistinctMatch",
-				utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+			CGREvent: &utils.CGREvent{
+				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+				ID:     utils.GenUUID(),
+				Event: map[string]interface{}{
+					"Charger":        "DistinctMatch",
+					utils.AnswerTime: time.Date(2014, 7, 14, 14, 30, 0, 0, time.UTC),
+				},
 			},
 		},
 	}
@@ -205,7 +211,7 @@ func TestChargerProcessEvent(t *testing.T) {
 	rpl := []*ChrgSProcessEventReply{
 		{
 			ChargerSProfile: "CPP_1",
-			CGREvent:        chargerEvents[0],
+			CGREvent:        chargerEvents[0].CGREvent,
 		},
 	}
 	rpl[0].CGREvent.Event[utils.RunID] = cPPs[0].RunID

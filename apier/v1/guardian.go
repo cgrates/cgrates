@@ -42,7 +42,7 @@ func (self *GuardianSv1) RemoteUnlock(refID string, reply *[]string) (err error)
 }
 
 // Ping return pong if the service is active
-func (self *GuardianSv1) Ping(ign *utils.CGREvent, reply *string) error {
+func (self *GuardianSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

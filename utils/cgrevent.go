@@ -185,3 +185,24 @@ type CGREventWithArgDispatcher struct {
 	*CGREvent
 	*ArgDispatcher
 }
+
+func (ev *CGREventWithArgDispatcher) Clone() (clned *CGREventWithArgDispatcher) {
+	clned = &CGREventWithArgDispatcher{
+		CGREvent: &CGREvent{
+			Tenant: ev.Tenant,
+			ID:     ev.ID,
+			Event:  make(map[string]interface{}), // a bit forced but safe
+		},
+	}
+	if ev.Time != nil {
+		clned.Time = TimePointer(*ev.Time)
+	}
+	for k, v := range ev.Event {
+		clned.Event[k] = v
+	}
+	if ev.ArgDispatcher != nil {
+		clned.ArgDispatcher = new(ArgDispatcher)
+		*clned.ArgDispatcher = *ev.ArgDispatcher
+	}
+	return
+}

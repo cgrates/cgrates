@@ -170,7 +170,7 @@ func (apierV1 *ApierV1) RemoveThresholdProfile(args *utils.TenantIDWrapper, repl
 	return nil
 }
 
-func (tSv1 *ThresholdSv1) Ping(ign *utils.CGREvent, reply *string) error {
+func (tSv1 *ThresholdSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

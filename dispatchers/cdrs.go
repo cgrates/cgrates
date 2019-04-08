@@ -18,9 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package dispatchers
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"time"
 
-// CacheSv1Ping interogates CacheSv1 server responsible to process the event
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+)
+
+// CDRsV1Ping interogates CDRsV1 server responsible to process the event
 func (dS *DispatcherService) CDRsV1Ping(args *utils.CGREventWithArgDispatcher,
 	reply *string) (err error) {
 	if args.ArgDispatcher == nil {
@@ -35,4 +40,109 @@ func (dS *DispatcherService) CDRsV1Ping(args *utils.CGREventWithArgDispatcher,
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaCDRs, args.RouteID,
 		utils.CDRsV1Ping, args.CGREvent, reply)
+}
+
+func (dS *DispatcherService) CDRsV1GetCDRs(args utils.RPCCDRsFilter, reply *[]*engine.CDR) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.CDRsV1GetCDRs,
+			args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCDRs, args.RouteID,
+		utils.CDRsV1GetCDRs, args, reply)
+}
+
+func (dS *DispatcherService) CDRsV1CountCDRs(args *utils.RPCCDRsFilter, reply *int64) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.CDRsV1CountCDRs,
+			args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCDRs, args.RouteID,
+		utils.CDRsV1CountCDRs, args, reply)
+}
+
+func (dS *DispatcherService) CDRsV1StoreSessionCost(args *engine.AttrCDRSStoreSMCost, reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.CDRsV1StoreSessionCost,
+			args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCDRs, args.RouteID,
+		utils.CDRsV1StoreSessionCost, args, reply)
+}
+
+func (dS *DispatcherService) CDRsV1RateCDRs(args *engine.ArgRateCDRs, reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.CDRsV1RateCDRs,
+			args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCDRs, args.RouteID,
+		utils.CDRsV1RateCDRs, args, reply)
+}
+
+func (dS *DispatcherService) CDRsV1ProcessExternalCDR(args *engine.ExternalCDR, reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.CDRsV1ProcessExternalCDR,
+			args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaCDRs, args.RouteID,
+		utils.CDRsV1ProcessExternalCDR, args, reply)
+}
+
+func (dS *DispatcherService) CDRsV1ProcessEvent(args *engine.ArgV1ProcessEvent, reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.CDRsV1ProcessEvent,
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&args.CGREvent, utils.MetaCDRs, args.RouteID,
+		utils.CDRsV1ProcessEvent, args, reply)
+}
+
+func (dS *DispatcherService) CDRsV1ProcessCDR(args *engine.CDR, reply *string) (err error) {
+	if args.ArgDispatcher == nil {
+		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	}
+	if dS.attrS != nil {
+		if err = dS.authorize(utils.CDRsV1ProcessCDR,
+			args.Tenant,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaCDRs, args.RouteID,
+		utils.CDRsV1ProcessCDR, args, reply)
 }

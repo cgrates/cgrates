@@ -82,7 +82,7 @@ func (self *CmdApierPing) RpcParams(reset bool) interface{} {
 		self.rpcParams = &StringWrapper{}
 	}
 
-	return utils.CGREvent{}
+	return utils.CGREventWithArgDispatcher{}
 }
 
 func (self *CmdApierPing) PostprocessRpcParams() error {

@@ -153,7 +153,7 @@ func (alSv1 *AttributeSv1) ProcessEvent(args *engine.AttrArgsProcessEvent,
 	return alSv1.attrS.V1ProcessEvent(args, reply)
 }
 
-func (alSv1 *AttributeSv1) Ping(ign *utils.CGREvent, reply *string) error {
+func (alSv1 *AttributeSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

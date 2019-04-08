@@ -394,9 +394,13 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 					CGREvent:   *cgrEv,
 					ChargerS:   utils.BoolPointer(false),
 					AttributeS: utils.BoolPointer(false)}
+
 				if unratedReqs.HasField( // order additional rating for unrated request types
 					engine.NewMapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RequestType)) {
 					argsProc.RALs = utils.BoolPointer(true)
+				}
+				if s.ArgDispatcher != nil {
+					argsProc.ArgDispatcher = s.ArgDispatcher
 				}
 				if err = sS.cdrS.Call(utils.CDRsV1ProcessEvent, argsProc, &reply); err != nil {
 					utils.Logger.Warning(
@@ -414,6 +418,9 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 			CGREvent: cgrEv,
 			UsageID:  s.ResourceID,
 			Units:    1,
+		}
+		if s.ArgDispatcher != nil {
+			argsRU.ArgDispatcher = s.ArgDispatcher
 		}
 		if err := sS.resS.Call(utils.ResourceSv1ReleaseResources,
 			argsRU, &reply); err != nil {
@@ -465,6 +472,9 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 	sr.CD.TimeEnd = sr.CD.TimeStart.Add(rDur)
 	sr.CD.DurationIndex += rDur
 	cd := sr.CD.Clone()
+	if s.ArgDispatcher != nil {
+		cd.ArgDispatcher = s.ArgDispatcher
+	}
 	s.Unlock()
 	cc := new(engine.CallCost)
 	if err := sS.ralS.Call(utils.ResponderMaxDebit, cd, cc); err != nil {
@@ -600,6 +610,9 @@ func (sS *SessionS) refundSession(s *Session, sRunIdx int, rUsage time.Duration)
 		TOR:         sr.CD.TOR,
 		Increments:  incrmts,
 	}
+	if s.ArgDispatcher != nil {
+		cd.ArgDispatcher = s.ArgDispatcher
+	}
 	var acnt engine.Account
 	if err = sS.ralS.Call(utils.ResponderRefundIncrements, cd, &acnt); err != nil {
 		return
@@ -629,10 +642,16 @@ func (sS *SessionS) storeSCost(s *Session, sRunIdx int) (err error) {
 		Usage:       sr.TotalUsage,
 		CostDetails: sr.EventCost,
 	}
+	argSmCost := &engine.ArgsV2CDRSStoreSMCost{
+		Cost:           smCost,
+		CheckDuplicate: true,
+	}
+	if s.ArgDispatcher != nil {
+		argSmCost.ArgDispatcher = s.ArgDispatcher
+	}
 	var reply string
 	if err := sS.cdrS.Call(utils.CDRsV2StoreSessionCost,
-		&engine.ArgsV2CDRSStoreSMCost{Cost: smCost,
-			CheckDuplicate: true}, &reply); err != nil {
+		argSmCost, &reply); err != nil {
 		if err == utils.ErrExists {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> refunding session: <%s> error: <%s>",
@@ -949,11 +968,17 @@ func (sS *SessionS) forkSession(s *Session) (err error) {
 	if len(s.SRuns) != 0 {
 		return errors.New("already forked")
 	}
-	//we need to see what we do in case we have ArgDispatcher
-	cgrEv := &utils.CGREvent{
-		Tenant: s.Tenant,
-		ID:     utils.UUIDSha1Prefix(),
-		Event:  s.EventStart.AsMapInterface(),
+	cgrEv := &utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
+			Tenant: s.Tenant,
+			ID:     utils.UUIDSha1Prefix(),
+			Event:  s.EventStart.AsMapInterface(),
+		},
+	}
+	// in case we have ArgDispatcher in session we populate CGREvent
+	// so DispatcherS can verify the APIKey/RouteID if it's necessary
+	if s.ArgDispatcher != nil {
+		cgrEv.ArgDispatcher = s.ArgDispatcher
 	}
 	var chrgrs []*engine.ChrgSProcessEventReply
 	if err = sS.chargerS.Call(utils.ChargerSv1ProcessEvent,
@@ -1190,9 +1215,14 @@ func (sS *SessionS) authSession(tnt string, evStart *engine.SafEvent) (maxUsage 
 		if !utils.IsSliceMember(prepaidReqs,
 			sr.Event.GetStringIgnoreErrors(utils.RequestType)) {
 			rplyMaxUsage = time.Duration(-1)
-		} else if err = sS.ralS.Call(utils.ResponderGetMaxSessionTime,
-			sr.CD, &rplyMaxUsage); err != nil {
-			return
+		} else {
+			if s.ArgDispatcher != nil {
+				sr.CD.ArgDispatcher = s.ArgDispatcher
+			}
+			if err = sS.ralS.Call(utils.ResponderGetMaxSessionTime,
+				sr.CD, &rplyMaxUsage); err != nil {
+				return
+			}
 		}
 		if !maxUsageSet ||
 			maxUsage == time.Duration(-1) ||
@@ -1316,6 +1346,9 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration) (er
 				}
 				sr.CD.TimeEnd = sr.CD.TimeStart.Add(notCharged)
 				sr.CD.DurationIndex += notCharged
+				if s.ArgDispatcher != nil {
+					sr.CD.ArgDispatcher = s.ArgDispatcher
+				}
 				cc := new(engine.CallCost)
 				if err = sS.ralS.Call(utils.ResponderDebit, sr.CD, cc); err == nil {
 					sr.EventCost.Merge(

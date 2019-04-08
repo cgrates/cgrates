@@ -828,6 +828,7 @@ type RPCCDRsFilter struct {
 	MaxCost                *float64          // End of the usage interval (<)
 	OrderBy                string            // Ascendent/Descendent
 	Paginator                                // Add pagination
+	*TenantWithArgDispatcher
 }
 
 func (self *RPCCDRsFilter) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
