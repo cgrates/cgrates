@@ -104,6 +104,7 @@ type CDR struct {
 	CostSource  string            // The source of this cost
 	Cost        float64           //
 	CostDetails *EventCost        // Attach the cost details to CDR when possible
+	*utils.ArgDispatcher
 }
 
 // AddDefaults will add missing information based on other fields
@@ -804,6 +805,7 @@ type ExternalCDR struct {
 	CostDetails string
 	ExtraInfo   string
 	PreRated    bool // Mark the CDR as rated so we do not process it during mediation
+	*utils.ArgDispatcher
 }
 
 // Used when authorizing requests from outside, eg ApierV1.GetMaxUsage

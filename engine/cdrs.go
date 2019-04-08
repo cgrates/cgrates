@@ -220,6 +220,9 @@ func (cdrS *CDRServer) getCostFromRater(cdr *CDR) (*CallCost, error) {
 		DurationIndex:   cdr.Usage,
 		PerformRounding: true,
 	}
+	if cdr.ArgDispatcher != nil {
+		cd.ArgDispatcher = cdr.ArgDispatcher
+	}
 	if utils.IsSliceMember([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.META_PREPAID,
 		utils.PSEUDOPREPAID, utils.POSTPAID, utils.PREPAID}, cdr.RequestType) { // Prepaid - Cost can be recalculated in case of missing records from SM
 		err = cdrS.rals.Call("Responder.Debit", cd, cc)
@@ -234,7 +237,7 @@ func (cdrS *CDRServer) getCostFromRater(cdr *CDR) (*CallCost, error) {
 }
 
 // attrStoExpThdStat will process a CGREvent with the configured subsystems
-func (cdrS *CDRServer) attrStoExpThdStat(cgrEv *utils.CGREvent,
+func (cdrS *CDRServer) attrStoExpThdStat(cgrEv *utils.CGREventWithArgDispatcher,
 	attrS, store, export, thdS, statS bool) (err error) {
 	if attrS {
 		if err = cdrS.attrSProcessEvent(cgrEv); err != nil {
@@ -276,11 +279,9 @@ func (cdrS *CDRServer) rateCDRWithErr(cdr *CDR) (ratedCDRs []*CDR) {
 
 // chrgProcessEvent will process the CGREvent with ChargerS subsystem
 // it is designed to run in it's own goroutine
-func (cdrS *CDRServer) chrgProcessEvent(cgrEv *utils.CGREvent,
+func (cdrS *CDRServer) chrgProcessEvent(cgrEv *utils.CGREventWithArgDispatcher,
 	attrS, store, export, thdS, statS bool) (err error) {
 	var chrgrs []*ChrgSProcessEventReply
-	//in case of internal connection what should we do here ?
-	//
 	if err = cdrS.chargerS.Call(utils.ChargerSv1ProcessEvent,
 		cgrEv, &chrgrs); err != nil {
 		utils.Logger.Warning(
@@ -300,7 +301,13 @@ func (cdrS *CDRServer) chrgProcessEvent(cgrEv *utils.CGREvent,
 			continue
 		}
 		for _, rtCDR := range cdrS.rateCDRWithErr(cdr) {
-			if errProc := cdrS.attrStoExpThdStat(rtCDR.AsCGREvent(),
+			arg := &utils.CGREventWithArgDispatcher{
+				CGREvent: rtCDR.AsCGREvent(),
+			}
+			if cgrEv.ArgDispatcher != nil {
+				arg.ArgDispatcher = cgrEv.ArgDispatcher
+			}
+			if errProc := cdrS.attrStoExpThdStat(arg,
 				attrS, store, export, thdS, statS); errProc != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing CDR event %+v with %s",
@@ -317,32 +324,17 @@ func (cdrS *CDRServer) chrgProcessEvent(cgrEv *utils.CGREvent,
 }
 
 // statSProcessEvent will send the event to StatS if the connection is configured
-func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREvent) (err error) {
+func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher) (err error) {
 	var rplyEv AttrSProcessEventReply
 	attrArgs := &AttrArgsProcessEvent{
 		Context:  utils.StringPointer(utils.MetaCDRs),
-		CGREvent: *cgrEv}
-	//check if we have APIKey in event and in case it has add it in ArgDispatcher
-	apiKeyIface, hasApiKey := cgrEv.Event[utils.MetaApiKey]
-	if hasApiKey {
-		attrArgs.ArgDispatcher = &utils.ArgDispatcher{
-			APIKey: utils.StringPointer(apiKeyIface.(string)),
-		}
-	}
-	//check if we have RouteID in event and in case it has add it in ArgDispatcher
-	routeIDIface, hasRouteID := cgrEv.Event[utils.MetaRouteID]
-	if hasRouteID {
-		if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
-			attrArgs.ArgDispatcher = &utils.ArgDispatcher{
-				RouteID: utils.StringPointer(routeIDIface.(string)),
-			}
-		} else {
-			attrArgs.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
-		}
+		CGREvent: *cgrEv.CGREvent}
+	if cgrEv.ArgDispatcher != nil {
+		attrArgs.ArgDispatcher = cgrEv.ArgDispatcher
 	}
 	if err = cdrS.attrS.Call(utils.AttributeSv1ProcessEvent,
 		attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
-		*cgrEv = *rplyEv.CGREvent
+		*cgrEv.CGREvent = *rplyEv.CGREvent
 	} else if err.Error() == utils.ErrNotFound.Error() {
 		err = nil // cancel ErrNotFound
 	}
@@ -350,26 +342,11 @@ func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREvent) (err error) {
 }
 
 // thdSProcessEvent will send the event to ThresholdS if the connection is configured
-func (cdrS *CDRServer) thdSProcessEvent(cgrEv *utils.CGREvent) {
+func (cdrS *CDRServer) thdSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher) {
 	var tIDs []string
-	thArgs := &ArgsProcessEvent{CGREvent: *cgrEv}
-	//check if we have APIKey in event and in case it has add it in ArgDispatcher
-	apiKeyIface, hasApiKey := cgrEv.Event[utils.MetaApiKey]
-	if hasApiKey {
-		thArgs.ArgDispatcher = &utils.ArgDispatcher{
-			APIKey: utils.StringPointer(apiKeyIface.(string)),
-		}
-	}
-	//check if we have RouteID in event and in case it has add it in ArgDispatcher
-	routeIDIface, hasRouteID := cgrEv.Event[utils.MetaRouteID]
-	if hasRouteID {
-		if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
-			thArgs.ArgDispatcher = &utils.ArgDispatcher{
-				RouteID: utils.StringPointer(routeIDIface.(string)),
-			}
-		} else {
-			thArgs.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
-		}
+	thArgs := &ArgsProcessEvent{CGREvent: *(cgrEv.CGREvent)}
+	if cgrEv.ArgDispatcher != nil {
+		thArgs.ArgDispatcher = cgrEv.ArgDispatcher
 	}
 	if err := cdrS.thdS.Call(utils.ThresholdSv1ProcessEvent,
 		thArgs, &tIDs); err != nil &&
@@ -382,26 +359,11 @@ func (cdrS *CDRServer) thdSProcessEvent(cgrEv *utils.CGREvent) {
 }
 
 // statSProcessEvent will send the event to StatS if the connection is configured
-func (cdrS *CDRServer) statSProcessEvent(cgrEv *utils.CGREvent) {
+func (cdrS *CDRServer) statSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher) {
 	var reply []string
-	statArgs := &StatsArgsProcessEvent{CGREvent: *cgrEv}
-	//check if we have APIKey in event and in case it has add it in ArgDispatcher
-	apiKeyIface, hasApiKey := cgrEv.Event[utils.MetaApiKey]
-	if hasApiKey {
-		statArgs.ArgDispatcher = &utils.ArgDispatcher{
-			APIKey: utils.StringPointer(apiKeyIface.(string)),
-		}
-	}
-	//check if we have RouteID in event and in case it has add it in ArgDispatcher
-	routeIDIface, hasRouteID := cgrEv.Event[utils.MetaRouteID]
-	if hasRouteID {
-		if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
-			statArgs.ArgDispatcher = &utils.ArgDispatcher{
-				RouteID: utils.StringPointer(routeIDIface.(string)),
-			}
-		} else {
-			statArgs.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
-		}
+	statArgs := &StatsArgsProcessEvent{CGREvent: *cgrEv.CGREvent}
+	if cgrEv.ArgDispatcher != nil {
+		statArgs.ArgDispatcher = cgrEv.ArgDispatcher
 	}
 	if err := cdrS.statS.Call(utils.StatSv1ProcessEvent,
 		statArgs, &reply); err != nil &&
@@ -505,10 +467,15 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDR, reply *string) (err error) {
 	if utils.IsSliceMember([]string{"", utils.MetaRaw}, cdr.RunID) {
 		cdr.Cost = -1.0
 	}
-	cgrEv := &utils.CGREvent{
-		Tenant: cdr.Tenant,
-		ID:     utils.UUIDSha1Prefix(),
-		Event:  cdr.AsMapStringIface(),
+	cgrEv := &utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
+			Tenant: cdr.Tenant,
+			ID:     utils.UUIDSha1Prefix(),
+			Event:  cdr.AsMapStringIface(),
+		},
+	}
+	if cdr.ArgDispatcher != nil {
+		cgrEv.ArgDispatcher = cdr.ArgDispatcher
 	}
 	if cdrS.attrS != nil {
 		if err = cdrS.attrSProcessEvent(cgrEv); err != nil {
@@ -553,6 +520,7 @@ type ArgV1ProcessEvent struct {
 	Export     *bool // control online exports for the CDR
 	ThresholdS *bool // control ThresholdS
 	StatS      *bool // control sending the CDR to StatS for aggregation
+	*utils.ArgDispatcher
 }
 
 // V2ProcessCDR will process the CDR out of CGREvent
@@ -608,7 +576,13 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	if arg.RALs != nil {
 		ralS = *arg.RALs
 	}
-	cgrEv := &arg.CGREvent
+	cgrEv := &utils.CGREventWithArgDispatcher{
+		CGREvent: &arg.CGREvent,
+	}
+	if arg.ArgDispatcher != nil {
+		cgrEv.ArgDispatcher = arg.ArgDispatcher
+	}
+
 	if !ralS {
 		if err = cdrS.attrStoExpThdStat(cgrEv,
 			attrS, store, export, thdS, statS); err != nil {
@@ -627,7 +601,10 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 			return
 		}
 		for _, rtCDR := range cdrS.rateCDRWithErr(cdr) {
-			cgrEv := rtCDR.AsCGREvent()
+			cgrEv := &utils.CGREventWithArgDispatcher{
+				CGREvent:      rtCDR.AsCGREvent(),
+				ArgDispatcher: arg.ArgDispatcher,
+			}
 			if errProc := cdrS.attrStoExpThdStat(cgrEv,
 				attrS, store, export, thdS, statS); err != nil {
 				utils.Logger.Warning(
@@ -750,6 +727,7 @@ type ArgRateCDRs struct {
 	Export     *bool // Replicate results
 	ThresholdS *bool
 	StatS      *bool // Set to true if the CDRs should be sent to stats server
+	*utils.ArgDispatcher
 }
 
 // V1RateCDRs is used for re-/rate CDRs which are already stored within StorDB
@@ -784,7 +762,11 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 			if cdrS.chargerS == nil {
 				return utils.NewErrNotConnected(utils.ChargerS)
 			}
-			if err = cdrS.chrgProcessEvent(cdr.AsCGREvent(),
+			argCharger := &utils.CGREventWithArgDispatcher{
+				CGREvent:      cdr.AsCGREvent(),
+				ArgDispatcher: arg.ArgDispatcher,
+			}
+			if err = cdrS.chrgProcessEvent(argCharger,
 				false, store, export, thdS, statS); err != nil {
 				return utils.NewErrServerError(err)
 			}

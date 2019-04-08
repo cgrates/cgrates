@@ -1026,6 +1026,7 @@ func (cd *CallDescriptor) Clone() *CallDescriptor {
 		CgrID:           cd.CgrID,
 		RunID:           cd.RunID,
 	}
+
 }
 
 // AccountSummary returns the AccountSummary for cached account

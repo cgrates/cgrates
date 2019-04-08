@@ -186,7 +186,7 @@ func (stsv1 *StatSv1) GetQueueFloatMetrics(args *utils.TenantID, reply *map[stri
 	return stsv1.sS.V1GetQueueFloatMetrics(args, reply)
 }
 
-func (stSv1 *StatSv1) Ping(ign *utils.CGREvent, reply *string) error {
+func (stSv1 *StatSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

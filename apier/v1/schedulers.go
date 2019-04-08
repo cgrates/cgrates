@@ -37,7 +37,7 @@ func (schdSv1 *SchedulerSv1) Reload(arg string, reply *string) error {
 	return schdSv1.schdS.V1Reload(arg, reply)
 }
 
-func (schdSv1 *SchedulerSv1) Ping(ign *utils.CGREvent, reply *string) error {
+func (schdSv1 *SchedulerSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
