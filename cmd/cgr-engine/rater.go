@@ -191,8 +191,9 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2 chan rpcclie
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(responder)
 	}
-	server.RpcRegister(apierRpcV1) // ToDo: Add apierv1 to dispatcher
-	server.RpcRegister(apierRpcV2) // ToDo: Add apierv2 to dispatcher
+	// ToDo: do not register when dispatcher is active
+	server.RpcRegister(apierRpcV1)
+	server.RpcRegister(apierRpcV2)
 
 	utils.RegisterRpcParams("", &v1.CDRsV1{})
 	utils.RegisterRpcParams("", &v2.CDRsV2{})
