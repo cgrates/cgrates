@@ -191,10 +191,10 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheS *en
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(responder)
 	} else {
-		engine.IntRPC.AddConnection(utils.Responder, responder)
+		engine.AddInternalRPCClient(utils.Responder, responder)
 	}
-	server.RpcRegister(apierRpcV1)
-	server.RpcRegister(apierRpcV2)
+	server.RpcRegister(apierRpcV1) // ToDo: Add apierv1 to dispatcher
+	server.RpcRegister(apierRpcV2) // ToDo: Add apierv2 to dispatcher
 
 	utils.RegisterRpcParams("", &v1.CDRsV1{})
 	utils.RegisterRpcParams("", &v2.CDRsV2{})

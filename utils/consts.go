@@ -822,11 +822,13 @@ const (
 
 // AnalyzerS APIs
 const (
+	AnalyzerSv1     = "AnalyzerSv1"
 	AnalyzerSv1Ping = "AnalyzerSv1.Ping"
 )
 
 // LoaderS APIs
 const (
+	LoaderSv1     = "LoaderSv1"
 	LoaderSv1Load = "LoaderSv1.Load"
 	LoaderSv1Ping = "LoaderSv1.Ping"
 )
@@ -868,8 +870,9 @@ const (
 	CDRsV1ProcessExternalCDR = "CDRsV1.ProcessExternalCDR"
 	CDRsV1StoreSessionCost   = "CDRsV1.StoreSessionCost"
 	CDRsV1ProcessEvent       = "CDRsV1.ProcessEvent"
-	CDRsV2StoreSessionCost   = "CDRsV2.StoreSessionCost"
 	CDRsV1Ping               = "CDRsV1.Ping"
+	CDRsV2                   = "CDRsV2"
+	CDRsV2StoreSessionCost   = "CDRsV2.StoreSessionCost"
 )
 
 // Scheduler
