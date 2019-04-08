@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -59,57 +60,37 @@ func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connA
 	return rpcPool, err
 }
 
-var IntRPC *rpcclient.RPCClientSet
+var IntRPC *RPCClientSet
 
-func InitInternalRPC() {
-	if !config.CgrConfig().DispatcherSCfg().Enabled {
-		return
-	}
-	var subsystems []string
-	subsystems = append(subsystems, utils.CacheSv1)
-	subsystems = append(subsystems, utils.GuardianSv1)
-	subsystems = append(subsystems, utils.SchedulerSv1)
-	subsystems = append(subsystems, utils.LoaderSv1)
-	if config.CgrConfig().AttributeSCfg().Enabled {
-		subsystems = append(subsystems, utils.AttributeSv1)
-	}
-	if config.CgrConfig().RalsCfg().RALsEnabled {
-		subsystems = append(subsystems, utils.ApierV1)
-		subsystems = append(subsystems, utils.ApierV2)
-		subsystems = append(subsystems, utils.Responder)
-	}
-	if config.CgrConfig().CdrsCfg().CDRSEnabled {
-		subsystems = append(subsystems, utils.CDRsV1)
-		subsystems = append(subsystems, utils.CDRsV2)
-	}
-	if config.CgrConfig().AnalyzerSCfg().Enabled {
-		subsystems = append(subsystems, utils.AnalyzerSv1)
-	}
-	if config.CgrConfig().SessionSCfg().Enabled {
-		subsystems = append(subsystems, utils.SessionSv1)
-	}
-	if config.CgrConfig().ChargerSCfg().Enabled {
-		subsystems = append(subsystems, utils.ChargerSv1)
-	}
-	if config.CgrConfig().ResourceSCfg().Enabled {
-		subsystems = append(subsystems, utils.ResourceSv1)
-	}
-	if config.CgrConfig().StatSCfg().Enabled {
-		subsystems = append(subsystems, utils.StatSv1)
-	}
-	if config.CgrConfig().ThresholdSCfg().Enabled {
-		subsystems = append(subsystems, utils.ThresholdSv1)
-	}
-	if config.CgrConfig().SupplierSCfg().Enabled {
-		subsystems = append(subsystems, utils.SupplierSv1)
-	}
-	IntRPC = rpcclient.NewRPCClientSet(subsystems, config.CgrConfig().GeneralCfg().InternalTtl)
+func NewRPCClientSet() (s *RPCClientSet) {
+	return &RPCClientSet{set: make(map[string]*rpcclient.RpcClient)}
 }
 
-func AddInternalRPCClient(name string, rpc rpcclient.RpcClientConnection) {
-	connChan := make(chan rpcclient.RpcClientConnection, 1)
-	connChan <- rpc
-	err := IntRPC.AddRPCConnection(name, "", "", false, "", "", "",
+type RPCClientSet struct {
+	set map[string]*rpcclient.RpcClient
+}
+
+func (s *RPCClientSet) AddRPCClient(name string, rpc *rpcclient.RpcClient) {
+	s.set[name] = rpc
+}
+
+func (s *RPCClientSet) AddRPCConnection(name, transport, addr string, tls bool,
+	key_path, cert_path, ca_path string, connectAttempts, reconnects int,
+	connTimeout, replyTimeout time.Duration, codec string,
+	internalChan chan rpcclient.RpcClientConnection, lazyConnect bool) error {
+	rpc, err := rpcclient.NewRpcClient(transport, addr, tls, key_path, cert_path,
+		ca_path, connectAttempts, reconnects, connTimeout, replyTimeout,
+		codec, internalChan, lazyConnect)
+	if err != nil {
+		return err
+	}
+	s.AddRPCClient(name, rpc)
+	return nil
+}
+
+func (s *RPCClientSet) AddInternalRPCClient(name string, connChan chan rpcclient.RpcClientConnection) {
+	err := s.AddRPCConnection(name, utils.EmptyString, utils.EmptyString,
+		false, utils.EmptyString, utils.EmptyString, utils.EmptyString,
 		config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
 		config.CgrConfig().GeneralCfg().ConnectTimeout, config.CgrConfig().GeneralCfg().ReplyTimeout,
 		rpcclient.INTERNAL_RPC, connChan, true)
@@ -118,8 +99,20 @@ func AddInternalRPCClient(name string, rpc rpcclient.RpcClientConnection) {
 	}
 }
 
-func GetInternalRPCClientChanel() chan rpcclient.RpcClientConnection {
+func (s *RPCClientSet) GetInternalChanel() chan rpcclient.RpcClientConnection {
 	connChan := make(chan rpcclient.RpcClientConnection, 1)
-	connChan <- IntRPC
+	connChan <- s
 	return connChan
+}
+
+func (s *RPCClientSet) Call(method string, args interface{}, reply interface{}) error {
+	methodSplit := strings.Split(method, ".")
+	if len(methodSplit) != 2 {
+		return rpcclient.ErrUnsupporteServiceMethod
+	}
+	conn, has := s.set[methodSplit[0]]
+	if !has {
+		return rpcclient.ErrUnsupporteServiceMethod
+	}
+	return conn.Call(method, args, reply)
 }
