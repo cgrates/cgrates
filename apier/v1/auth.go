@@ -27,7 +27,7 @@ import (
 )
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit
-func (self *ApierV1) GetMaxUsage(usageRecord engine.UsageRecord, maxUsage *int64) error {
+func (self *ApierV1) GetMaxUsage(usageRecord engine.UsageRecordWithArgDispatcher, maxUsage *int64) error {
 	if usageRecord.ToR == "" {
 		usageRecord.ToR = utils.VOICE
 	}
@@ -55,7 +55,8 @@ func (self *ApierV1) GetMaxUsage(usageRecord engine.UsageRecord, maxUsage *int64
 		return utils.NewErrServerError(err)
 	}
 	var maxDur time.Duration
-	if err := self.Responder.GetMaxSessionTime(cd, &maxDur); err != nil {
+	if err := self.Responder.GetMaxSessionTime(&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
+		ArgDispatcher: usageRecord.ArgDispatcher}, &maxDur); err != nil {
 		return err
 	}
 	if maxDur == time.Duration(-1) {

@@ -490,27 +490,27 @@ func (dS *DispatcherResponder) Status(args *utils.TenantWithArgDispatcher, reply
 	return dS.dS.ResponderStatus(args, reply)
 }
 
-func (dS *DispatcherResponder) GetCost(args *engine.CallDescriptor, reply *engine.CallCost) error {
+func (dS *DispatcherResponder) GetCost(args *engine.CallDescriptorWithArgDispatcher, reply *engine.CallCost) error {
 	return dS.dS.ResponderGetCost(args, reply)
 }
 
-func (dS *DispatcherResponder) Debit(args *engine.CallDescriptor, reply *engine.CallCost) error {
+func (dS *DispatcherResponder) Debit(args *engine.CallDescriptorWithArgDispatcher, reply *engine.CallCost) error {
 	return dS.dS.ResponderDebit(args, reply)
 }
 
-func (dS *DispatcherResponder) MaxDebit(args *engine.CallDescriptor, reply *engine.CallCost) error {
+func (dS *DispatcherResponder) MaxDebit(args *engine.CallDescriptorWithArgDispatcher, reply *engine.CallCost) error {
 	return dS.dS.ResponderMaxDebit(args, reply)
 }
 
-func (dS *DispatcherResponder) RefundIncrements(args *engine.CallDescriptor, reply *engine.Account) error {
+func (dS *DispatcherResponder) RefundIncrements(args *engine.CallDescriptorWithArgDispatcher, reply *engine.Account) error {
 	return dS.dS.ResponderRefundIncrements(args, reply)
 }
 
-func (dS *DispatcherResponder) RefundRounding(args *engine.CallDescriptor, reply *float64) error {
+func (dS *DispatcherResponder) RefundRounding(args *engine.CallDescriptorWithArgDispatcher, reply *float64) error {
 	return dS.dS.ResponderRefundRounding(args, reply)
 }
 
-func (dS *DispatcherResponder) GetMaxSessionTime(args *engine.CallDescriptor, reply *time.Duration) error {
+func (dS *DispatcherResponder) GetMaxSessionTime(args *engine.CallDescriptorWithArgDispatcher, reply *time.Duration) error {
 	return dS.dS.ResponderGetMaxSessionTime(args, reply)
 }
 

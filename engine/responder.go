@@ -60,7 +60,7 @@ func (rs *Responder) usageAllowed(tor string, reqUsage time.Duration) (allowed b
 /*
 RPC method thet provides the external RPC interface for getting the rating information.
 */
-func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
+func (rs *Responder) GetCost(arg *CallDescriptorWithArgDispatcher, reply *CallCost) (err error) {
 	if arg.Tenant == "" {
 		arg.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
 	}
@@ -85,7 +85,7 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 	return
 }
 
-func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
+func (rs *Responder) Debit(arg *CallDescriptorWithArgDispatcher, reply *CallCost) (err error) {
 	// RPC caching
 	if config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.ResponderDebit, arg.CgrID)
@@ -123,7 +123,7 @@ func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 	return
 }
 
-func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) {
+func (rs *Responder) MaxDebit(arg *CallDescriptorWithArgDispatcher, reply *CallCost) (err error) {
 	// RPC caching
 	if config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.ResponderMaxDebit, arg.CgrID)
@@ -161,7 +161,7 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 	return
 }
 
-func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *Account) (err error) {
+func (rs *Responder) RefundIncrements(arg *CallDescriptorWithArgDispatcher, reply *Account) (err error) {
 	// RPC caching
 	if config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.ResponderRefundIncrements, arg.CgrID)
@@ -199,7 +199,7 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *Account) (err 
 	return
 }
 
-func (rs *Responder) RefundRounding(arg *CallDescriptor, reply *float64) (err error) {
+func (rs *Responder) RefundRounding(arg *CallDescriptorWithArgDispatcher, reply *float64) (err error) {
 	// RPC caching
 	if config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.ResponderRefundRounding, arg.CgrID)
@@ -230,7 +230,7 @@ func (rs *Responder) RefundRounding(arg *CallDescriptor, reply *float64) (err er
 	return
 }
 
-func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *time.Duration) (err error) {
+func (rs *Responder) GetMaxSessionTime(arg *CallDescriptorWithArgDispatcher, reply *time.Duration) (err error) {
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}

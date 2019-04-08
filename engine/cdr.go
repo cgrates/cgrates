@@ -889,3 +889,8 @@ type ExternalCDRWithArgDispatcher struct {
 	*ExternalCDR
 	*utils.ArgDispatcher
 }
+
+type UsageRecordWithArgDispatcher struct {
+	*UsageRecord
+	*utils.ArgDispatcher
+}

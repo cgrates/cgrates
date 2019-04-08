@@ -25,7 +25,7 @@ import (
 
 // DebitUsage will debit the balance for the usage cost, allowing the
 // account to go negative if the cost calculated is greater than the balance
-func (apier *ApierV1) DebitUsage(usageRecord engine.UsageRecord, reply *string) error {
+func (apier *ApierV1) DebitUsage(usageRecord engine.UsageRecordWithArgDispatcher, reply *string) error {
 	return apier.DebitUsageWithOptions(AttrDebitUsageWithOptions{
 		UsageRecord:          &usageRecord,
 		AllowNegativeAccount: true,
@@ -34,14 +34,14 @@ func (apier *ApierV1) DebitUsage(usageRecord engine.UsageRecord, reply *string) 
 
 // AttrDebitUsageWithOptions represents the DebitUsage request
 type AttrDebitUsageWithOptions struct {
-	UsageRecord          *engine.UsageRecord
+	UsageRecord          *engine.UsageRecordWithArgDispatcher
 	AllowNegativeAccount bool // allow account to go negative during debit
 }
 
 // DebitUsageWithOptions will debit the account based on the usage cost with
 // additional options to control if the balance can go negative
 func (apier *ApierV1) DebitUsageWithOptions(args AttrDebitUsageWithOptions, reply *string) error {
-	usageRecord := args.UsageRecord
+	usageRecord := args.UsageRecord.UsageRecord
 	if missing := utils.MissingStructFields(usageRecord, []string{"Account", "Destination", "Usage"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -75,7 +75,8 @@ func (apier *ApierV1) DebitUsageWithOptions(args AttrDebitUsageWithOptions, repl
 
 	// Calculate the cost for usage and debit the account
 	var cc engine.CallCost
-	if err := apier.Responder.Debit(cd, &cc); err != nil {
+	if err := apier.Responder.Debit(&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
+		ArgDispatcher: args.UsageRecord.ArgDispatcher}, &cc); err != nil {
 		return utils.NewErrServerError(err)
 	}
 

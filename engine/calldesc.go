@@ -171,7 +171,6 @@ type CallDescriptor struct {
 	DenyNegativeAccount bool // prevent account going on negative during debit
 	account             *Account
 	testCallcost        *CallCost // testing purpose only!
-	*utils.ArgDispatcher
 }
 
 // AsCGREvent converts the CallDescriptor into CGREvent
@@ -1066,4 +1065,9 @@ func (cd *CallDescriptor) AsNavigableMap(tpl []*config.FCTemplate) (nM *config.N
 // RemoteHost is part of utils.DataProvider
 func (cd *CallDescriptor) RemoteHost() net.Addr {
 	return utils.LocalAddr()
+}
+
+type CallDescriptorWithArgDispatcher struct {
+	*CallDescriptor
+	*utils.ArgDispatcher
 }

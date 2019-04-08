@@ -59,7 +59,7 @@ func (dS *DispatcherService) ResponderStatus(args *utils.TenantWithArgDispatcher
 		"", reply)
 }
 
-func (dS *DispatcherService) ResponderGetCost(args *engine.CallDescriptor,
+func (dS *DispatcherService) ResponderGetCost(args *engine.CallDescriptorWithArgDispatcher,
 	reply *engine.CallCost) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
@@ -74,7 +74,7 @@ func (dS *DispatcherService) ResponderGetCost(args *engine.CallDescriptor,
 		args.RouteID, utils.ResponderGetCost, args, reply)
 }
 
-func (dS *DispatcherService) ResponderDebit(args *engine.CallDescriptor,
+func (dS *DispatcherService) ResponderDebit(args *engine.CallDescriptorWithArgDispatcher,
 	reply *engine.CallCost) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
@@ -89,7 +89,7 @@ func (dS *DispatcherService) ResponderDebit(args *engine.CallDescriptor,
 		args.RouteID, utils.ResponderDebit, args, reply)
 }
 
-func (dS *DispatcherService) ResponderMaxDebit(args *engine.CallDescriptor,
+func (dS *DispatcherService) ResponderMaxDebit(args *engine.CallDescriptorWithArgDispatcher,
 	reply *engine.CallCost) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
@@ -104,7 +104,7 @@ func (dS *DispatcherService) ResponderMaxDebit(args *engine.CallDescriptor,
 		args.RouteID, utils.ResponderMaxDebit, args, reply)
 }
 
-func (dS *DispatcherService) ResponderRefundIncrements(args *engine.CallDescriptor,
+func (dS *DispatcherService) ResponderRefundIncrements(args *engine.CallDescriptorWithArgDispatcher,
 	reply *engine.Account) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
@@ -119,7 +119,7 @@ func (dS *DispatcherService) ResponderRefundIncrements(args *engine.CallDescript
 		args.RouteID, utils.ResponderRefundIncrements, args, reply)
 }
 
-func (dS *DispatcherService) ResponderRefundRounding(args *engine.CallDescriptor,
+func (dS *DispatcherService) ResponderRefundRounding(args *engine.CallDescriptorWithArgDispatcher,
 	reply *float64) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
@@ -134,7 +134,7 @@ func (dS *DispatcherService) ResponderRefundRounding(args *engine.CallDescriptor
 		args.RouteID, utils.ResponderRefundRounding, args, reply)
 }
 
-func (dS *DispatcherService) ResponderGetMaxSessionTime(args *engine.CallDescriptor,
+func (dS *DispatcherService) ResponderGetMaxSessionTime(args *engine.CallDescriptorWithArgDispatcher,
 	reply *time.Duration) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
