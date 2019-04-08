@@ -1333,7 +1333,7 @@ func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrit
 		cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 		cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 		cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-		dH.Conns, GetInternalRPCClientChanel(), cfg.GeneralCfg().InternalTtl, false); err != nil {
+		dH.Conns, IntRPC.GetInternalChanel(), cfg.GeneralCfg().InternalTtl, false); err != nil {
 		return nil, err
 	}
 	if cacheWrite {
