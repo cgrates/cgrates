@@ -42,7 +42,7 @@ func (dS *DispatcherService) CDRsV1Ping(args *utils.CGREventWithArgDispatcher,
 		utils.CDRsV1Ping, args.CGREvent, reply)
 }
 
-func (dS *DispatcherService) CDRsV1GetCDRs(args utils.RPCCDRsFilter, reply *[]*engine.CDR) (err error) {
+func (dS *DispatcherService) CDRsV1GetCDRs(args utils.RPCCDRsFilterWithArgDispatcher, reply *[]*engine.CDR) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
 	}
@@ -57,7 +57,7 @@ func (dS *DispatcherService) CDRsV1GetCDRs(args utils.RPCCDRsFilter, reply *[]*e
 		utils.CDRsV1GetCDRs, args, reply)
 }
 
-func (dS *DispatcherService) CDRsV1CountCDRs(args *utils.RPCCDRsFilter, reply *int64) (err error) {
+func (dS *DispatcherService) CDRsV1CountCDRs(args *utils.RPCCDRsFilterWithArgDispatcher, reply *int64) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
 	}
@@ -93,7 +93,7 @@ func (dS *DispatcherService) CDRsV1RateCDRs(args *engine.ArgRateCDRs, reply *str
 	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.CDRsV1RateCDRs,
-			args.Tenant,
+			args.TenantArg.Tenant,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
@@ -102,7 +102,7 @@ func (dS *DispatcherService) CDRsV1RateCDRs(args *engine.ArgRateCDRs, reply *str
 		utils.CDRsV1RateCDRs, args, reply)
 }
 
-func (dS *DispatcherService) CDRsV1ProcessExternalCDR(args *engine.ExternalCDR, reply *string) (err error) {
+func (dS *DispatcherService) CDRsV1ProcessExternalCDR(args *engine.ExternalCDRWithArgDispatcher, reply *string) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
 	}
@@ -132,7 +132,7 @@ func (dS *DispatcherService) CDRsV1ProcessEvent(args *engine.ArgV1ProcessEvent, 
 		utils.CDRsV1ProcessEvent, args, reply)
 }
 
-func (dS *DispatcherService) CDRsV1ProcessCDR(args *engine.CDR, reply *string) (err error) {
+func (dS *DispatcherService) CDRsV1ProcessCDR(args *engine.CDRWithArgDispatcher, reply *string) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
 	}

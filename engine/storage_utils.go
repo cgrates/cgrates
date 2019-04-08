@@ -169,13 +169,15 @@ type SMCost struct {
 type AttrCDRSStoreSMCost struct {
 	Cost           *SMCost
 	CheckDuplicate bool
-	*utils.TenantWithArgDispatcher
+	*utils.ArgDispatcher
+	*utils.TenantArg
 }
 
 type ArgsV2CDRSStoreSMCost struct {
 	Cost           *V2SMCost
 	CheckDuplicate bool
-	*utils.TenantWithArgDispatcher
+	*utils.ArgDispatcher
+	*utils.TenantArg
 }
 
 type V2SMCost struct {

@@ -86,7 +86,7 @@ func (ssv1 *SessionSv1) BiRPCv1TerminateSession(clnt *rpc2.Client, args *session
 	return ssv1.Ss.BiRPCv1TerminateSession(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1ProcessCDR(clnt *rpc2.Client, cgrEv *utils.CGREvent, rply *string) error {
+func (ssv1 *SessionSv1) BiRPCv1ProcessCDR(clnt *rpc2.Client, cgrEv *utils.CGREventWithArgDispatcher, rply *string) error {
 	return ssv1.Ss.BiRPCv1ProcessCDR(clnt, cgrEv, rply)
 }
 

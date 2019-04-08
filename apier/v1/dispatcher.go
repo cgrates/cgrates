@@ -686,11 +686,11 @@ func (dS *DispatcherSCDRsV1) Ping(args *utils.CGREventWithArgDispatcher, reply *
 	return dS.dS.CDRsV1Ping(args, reply)
 }
 
-func (dS *DispatcherSCDRsV1) GetCDRs(args utils.RPCCDRsFilter, reply *[]*engine.CDR) error {
+func (dS *DispatcherSCDRsV1) GetCDRs(args utils.RPCCDRsFilterWithArgDispatcher, reply *[]*engine.CDR) error {
 	return dS.dS.CDRsV1GetCDRs(args, reply)
 }
 
-func (dS *DispatcherSCDRsV1) CountCDRs(args *utils.RPCCDRsFilter, reply *int64) error {
+func (dS *DispatcherSCDRsV1) CountCDRs(args *utils.RPCCDRsFilterWithArgDispatcher, reply *int64) error {
 	return dS.dS.CDRsV1CountCDRs(args, reply)
 }
 
@@ -702,7 +702,7 @@ func (dS *DispatcherSCDRsV1) RateCDRs(args *engine.ArgRateCDRs, reply *string) e
 	return dS.dS.CDRsV1RateCDRs(args, reply)
 }
 
-func (dS *DispatcherSCDRsV1) ProcessExternalCDR(args *engine.ExternalCDR, reply *string) error {
+func (dS *DispatcherSCDRsV1) ProcessExternalCDR(args *engine.ExternalCDRWithArgDispatcher, reply *string) error {
 	return dS.dS.CDRsV1ProcessExternalCDR(args, reply)
 }
 
@@ -710,6 +710,6 @@ func (dS *DispatcherSCDRsV1) ProcessEvent(args *engine.ArgV1ProcessEvent, reply 
 	return dS.dS.CDRsV1ProcessEvent(args, reply)
 }
 
-func (dS *DispatcherSCDRsV1) ProcessCDR(args *engine.CDR, reply *string) error {
+func (dS *DispatcherSCDRsV1) ProcessCDR(args *engine.CDRWithArgDispatcher, reply *string) error {
 	return dS.dS.CDRsV1ProcessCDR(args, reply)
 }

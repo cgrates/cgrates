@@ -828,7 +828,6 @@ type RPCCDRsFilter struct {
 	MaxCost                *float64          // End of the usage interval (<)
 	OrderBy                string            // Ascendent/Descendent
 	Paginator                                // Add pagination
-	*TenantWithArgDispatcher
 }
 
 func (self *RPCCDRsFilter) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
@@ -1357,4 +1356,9 @@ func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string, 
 		err = fmt.Errorf("FieldName: %q not supported", fieldName)
 	}
 	return smcFilter, err
+}
+
+type RPCCDRsFilterWithArgDispatcher struct {
+	*RPCCDRsFilter
+	*TenantWithArgDispatcher
 }

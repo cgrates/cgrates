@@ -354,8 +354,30 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 	if reqProcessor.Flags.HasKey(utils.MetaCDRs) &&
 		!reqProcessor.Flags.HasKey(utils.MetaDryRun) {
 		var rplyCDRs string
+		//compose the arguments for SessionSv1ProcessCDR
+		argProcessCDR := &utils.CGREventWithArgDispatcher{
+			CGREvent: cgrEv,
+		}
+		//check if we have APIKey in event and in case it has add it in ArgDispatcher
+		apiKeyIface, hasApiKey := cgrEv.Event[utils.MetaApiKey]
+		if hasApiKey {
+			argProcessCDR.ArgDispatcher = &utils.ArgDispatcher{
+				APIKey: utils.StringPointer(apiKeyIface.(string)),
+			}
+		}
+		//check if we have RouteID in event and in case it has add it in ArgDispatcher
+		routeIDIface, hasRouteID := cgrEv.Event[utils.MetaRouteID]
+		if hasRouteID {
+			if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+				argProcessCDR.ArgDispatcher = &utils.ArgDispatcher{
+					RouteID: utils.StringPointer(routeIDIface.(string)),
+				}
+			} else {
+				argProcessCDR.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
+			}
+		}
 		if err = da.sS.Call(utils.SessionSv1ProcessCDR,
-			cgrEv, &rplyCDRs); err != nil {
+			argProcessCDR, &rplyCDRs); err != nil {
 			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
 		}
 	}

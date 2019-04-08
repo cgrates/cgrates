@@ -215,9 +215,11 @@ func (_ *singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeI
 	hostIDs []string, serviceMethod string, args interface{}, reply interface{}) (err error) {
 	var dH *engine.DispatcherHost
 	if routeID != nil && *routeID != "" {
+		// overwrite routeID with RouteID:Subsystem
+		*routeID = utils.ConcatenatedKey(*routeID, subsystem)
 		// use previously discovered route
 		if x, ok := engine.Cache.Get(utils.CacheDispatcherRoutes,
-			utils.ConcatenatedKey(subsystem, *routeID)); ok && x != nil {
+			*routeID); ok && x != nil {
 			dH = x.(*engine.DispatcherHost)
 			if err = dH.Call(serviceMethod, args, reply); !utils.IsNetworkError(err) {
 				return
@@ -233,7 +235,7 @@ func (_ *singleResultstrategyDispatcher) dispatch(dm *engine.DataManager, routeI
 			continue
 		}
 		if routeID != nil && *routeID != "" { // cache the discovered route
-			engine.Cache.Set(utils.CacheDispatcherRoutes, utils.ConcatenatedKey(subsystem, *routeID), dH,
+			engine.Cache.Set(utils.CacheDispatcherRoutes, *routeID, dH,
 				nil, true, utils.EmptyString)
 		}
 		break

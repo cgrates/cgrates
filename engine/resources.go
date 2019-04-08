@@ -526,10 +526,10 @@ func (rS *ResourceService) processThresholds(r *Resource, argDispatcher *utils.A
 			Event: map[string]interface{}{
 				utils.EventType:  utils.ResourceUpdate,
 				utils.ResourceID: r.ID,
-				utils.Usage:      r.totalUsage()}}}
-	// in case we receive ArgDispatcher we add it to be used by DispatcherS
-	if argDispatcher != nil {
-		thEv.ArgDispatcher = argDispatcher
+				utils.Usage:      r.totalUsage(),
+			},
+		},
+		ArgDispatcher: argDispatcher,
 	}
 	var tIDs []string
 	if err = rS.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
