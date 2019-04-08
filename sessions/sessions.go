@@ -391,16 +391,14 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 			var reply string
 			for _, cgrEv := range cgrEvs {
 				argsProc := &engine.ArgV1ProcessEvent{
-					CGREvent:   *cgrEv,
-					ChargerS:   utils.BoolPointer(false),
-					AttributeS: utils.BoolPointer(false)}
-
+					CGREvent:      *cgrEv,
+					ChargerS:      utils.BoolPointer(false),
+					AttributeS:    utils.BoolPointer(false),
+					ArgDispatcher: s.ArgDispatcher,
+				}
 				if unratedReqs.HasField( // order additional rating for unrated request types
 					engine.NewMapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RequestType)) {
 					argsProc.RALs = utils.BoolPointer(true)
-				}
-				if s.ArgDispatcher != nil {
-					argsProc.ArgDispatcher = s.ArgDispatcher
 				}
 				if err = sS.cdrS.Call(utils.CDRsV1ProcessEvent, argsProc, &reply); err != nil {
 					utils.Logger.Warning(
@@ -415,12 +413,10 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 	if sS.resS != nil && s.ResourceID != "" {
 		var reply string
 		argsRU := utils.ArgRSv1ResourceUsage{
-			CGREvent: cgrEv,
-			UsageID:  s.ResourceID,
-			Units:    1,
-		}
-		if s.ArgDispatcher != nil {
-			argsRU.ArgDispatcher = s.ArgDispatcher
+			CGREvent:      cgrEv,
+			UsageID:       s.ResourceID,
+			Units:         1,
+			ArgDispatcher: s.ArgDispatcher,
 		}
 		if err := sS.resS.Call(utils.ResourceSv1ReleaseResources,
 			argsRU, &reply); err != nil {
@@ -600,18 +596,16 @@ func (sS *SessionS) refundSession(s *Session, sRunIdx int, rUsage time.Duration)
 		}
 	}
 	cd := &engine.CallDescriptor{
-		CgrID:       s.CGRID,
-		RunID:       sr.Event.GetStringIgnoreErrors(utils.RunID),
-		Category:    sr.CD.Category,
-		Tenant:      sr.CD.Tenant,
-		Subject:     sr.CD.Subject,
-		Account:     sr.CD.Account,
-		Destination: sr.CD.Destination,
-		TOR:         sr.CD.TOR,
-		Increments:  incrmts,
-	}
-	if s.ArgDispatcher != nil {
-		cd.ArgDispatcher = s.ArgDispatcher
+		CgrID:         s.CGRID,
+		RunID:         sr.Event.GetStringIgnoreErrors(utils.RunID),
+		Category:      sr.CD.Category,
+		Tenant:        sr.CD.Tenant,
+		Subject:       sr.CD.Subject,
+		Account:       sr.CD.Account,
+		Destination:   sr.CD.Destination,
+		TOR:           sr.CD.TOR,
+		Increments:    incrmts,
+		ArgDispatcher: s.ArgDispatcher,
 	}
 	var acnt engine.Account
 	if err = sS.ralS.Call(utils.ResponderRefundIncrements, cd, &acnt); err != nil {
@@ -645,9 +639,10 @@ func (sS *SessionS) storeSCost(s *Session, sRunIdx int) (err error) {
 	argSmCost := &engine.ArgsV2CDRSStoreSMCost{
 		Cost:           smCost,
 		CheckDuplicate: true,
-	}
-	if s.ArgDispatcher != nil {
-		argSmCost.ArgDispatcher = s.ArgDispatcher
+		ArgDispatcher:  s.ArgDispatcher,
+		TenantArg: &utils.TenantArg{
+			Tenant: s.Tenant,
+		},
 	}
 	var reply string
 	if err := sS.cdrS.Call(utils.CDRsV2StoreSessionCost,
@@ -974,11 +969,7 @@ func (sS *SessionS) forkSession(s *Session) (err error) {
 			ID:     utils.UUIDSha1Prefix(),
 			Event:  s.EventStart.AsMapInterface(),
 		},
-	}
-	// in case we have ArgDispatcher in session we populate CGREvent
-	// so DispatcherS can verify the APIKey/RouteID if it's necessary
-	if s.ArgDispatcher != nil {
-		cgrEv.ArgDispatcher = s.ArgDispatcher
+		ArgDispatcher: s.ArgDispatcher,
 	}
 	var chrgrs []*engine.ChrgSProcessEventReply
 	if err = sS.chargerS.Call(utils.ChargerSv1ProcessEvent,
@@ -1710,12 +1701,9 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrNotConnected(utils.AttributeS)
 		}
 		attrArgs := &engine.AttrArgsProcessEvent{
-			Context:  utils.StringPointer(utils.MetaSessionS),
-			CGREvent: args.CGREvent,
-		}
-		// in case we receive ArgDispatcher we add it to be used by DispatcherS
-		if args.ArgDispatcher != nil {
-			attrArgs.ArgDispatcher = args.ArgDispatcher
+			Context:       utils.StringPointer(utils.MetaSessionS),
+			CGREvent:      args.CGREvent,
+			ArgDispatcher: args.ArgDispatcher,
 		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
@@ -1749,13 +1737,10 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		}
 		var allocMsg string
 		attrRU := utils.ArgRSv1ResourceUsage{
-			CGREvent: args.CGREvent,
-			UsageID:  originID,
-			Units:    1,
-		}
-		// in case we receive ArgDispatcher we add it to be used by DispatcherS
-		if args.ArgDispatcher != nil {
-			attrRU.ArgDispatcher = args.ArgDispatcher
+			CGREvent:      args.CGREvent,
+			UsageID:       originID,
+			Units:         1,
+			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err = sS.resS.Call(utils.ResourceSv1AuthorizeResources,
 			attrRU, &allocMsg); err != nil {
@@ -1773,14 +1758,11 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		}
 		var splsReply engine.SortedSuppliers
 		sArgs := &engine.ArgsGetSuppliers{
-			IgnoreErrors: args.SuppliersIgnoreErrors,
-			MaxCost:      args.SuppliersMaxCost,
-			CGREvent:     *cgrEv,
-			Paginator:    args.Paginator,
-		}
-		// in case we receive ArgDispatcher we add it to be used by DispatcherS
-		if args.ArgDispatcher != nil {
-			sArgs.ArgDispatcher = args.ArgDispatcher
+			IgnoreErrors:  args.SuppliersIgnoreErrors,
+			MaxCost:       args.SuppliersMaxCost,
+			CGREvent:      *cgrEv,
+			Paginator:     args.Paginator,
+			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err = sS.splS.Call(utils.SupplierSv1GetSuppliers,
 			sArgs, &splsReply); err != nil {
@@ -1796,11 +1778,8 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		}
 		var tIDs []string
 		thEv := &engine.ArgsProcessEvent{
-			CGREvent: args.CGREvent,
-		}
-		// in case we receive ArgDispatcher we add it to be used by DispatcherS
-		if args.ArgDispatcher != nil {
-			thEv.ArgDispatcher = args.ArgDispatcher
+			CGREvent:      args.CGREvent,
+			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
@@ -1814,10 +1793,9 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		if sS.statS == nil {
 			return utils.NewErrNotConnected(utils.StatService)
 		}
-		statArgs := &engine.StatsArgsProcessEvent{CGREvent: args.CGREvent}
-		// in case we receive ArgDispatcher we add it to be used by DispatcherS
-		if args.ArgDispatcher != nil {
-			statArgs.ArgDispatcher = args.ArgDispatcher
+		statArgs := &engine.StatsArgsProcessEvent{
+			CGREvent:      args.CGREvent,
+			ArgDispatcher: args.ArgDispatcher,
 		}
 		var statReply []string
 		if err := sS.statS.Call(utils.StatSv1ProcessEvent,
@@ -1997,12 +1975,9 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrNotConnected(utils.AttributeS)
 		}
 		attrArgs := &engine.AttrArgsProcessEvent{
-			Context:  utils.StringPointer(utils.MetaSessionS),
-			CGREvent: args.CGREvent,
-		}
-		// in case we receive ArgDispatcher we add it to be used by DispatcherS
-		if args.ArgDispatcher != nil {
-			attrArgs.ArgDispatcher = args.ArgDispatcher
+			Context:       utils.StringPointer(utils.MetaSessionS),
+			CGREvent:      args.CGREvent,
+			ArgDispatcher: args.ArgDispatcher,
 		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
@@ -2026,13 +2001,10 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
 		attrRU := utils.ArgRSv1ResourceUsage{
-			CGREvent: args.CGREvent,
-			UsageID:  originID,
-			Units:    1,
-		}
-		// in case we receive ArgDispatcher we add it to be used by DispatcherS
-		if args.ArgDispatcher != nil {
-			attrRU.ArgDispatcher = args.ArgDispatcher
+			CGREvent:      args.CGREvent,
+			UsageID:       originID,
+			Units:         1,
+			ArgDispatcher: args.ArgDispatcher,
 		}
 		var allocMessage string
 		if err = sS.resS.Call(utils.ResourceSv1AllocateResources,
@@ -2071,11 +2043,8 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		}
 		var tIDs []string
 		thEv := &engine.ArgsProcessEvent{
-			CGREvent: args.CGREvent,
-		}
-		// in case we receive ArgDispatcher we add it to be used by DispatcherS
-		if args.ArgDispatcher != nil {
-			thEv.ArgDispatcher = args.ArgDispatcher
+			CGREvent:      args.CGREvent,
+			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent,
 			thEv, &tIDs); err != nil &&
@@ -2091,10 +2060,9 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrNotConnected(utils.StatService)
 		}
 		var statReply []string
-		statArgs := &engine.StatsArgsProcessEvent{CGREvent: args.CGREvent}
-		// in case we receive ArgDispatcher we add it to be used by DispatcherS
-		if args.ArgDispatcher != nil {
-			statArgs.ArgDispatcher = args.ArgDispatcher
+		statArgs := &engine.StatsArgsProcessEvent{
+			CGREvent:      args.CGREvent,
+			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err := sS.statS.Call(utils.StatSv1ProcessEvent,
 			statArgs, &statReply); err != nil &&
@@ -2153,8 +2121,11 @@ func (sS *SessionS) BiRPCv1InitiateSessionWithDigest(clnt rpcclient.RpcClientCon
 // NewV1UpdateSessionArgs is a constructor for update session arguments
 func NewV1UpdateSessionArgs(attrs, acnts bool,
 	cgrEv utils.CGREvent) (args *V1UpdateSessionArgs) {
-	args = &V1UpdateSessionArgs{GetAttributes: attrs,
-		UpdateSession: acnts, CGREvent: cgrEv}
+	args = &V1UpdateSessionArgs{
+		GetAttributes: attrs,
+		UpdateSession: acnts,
+		CGREvent:      cgrEv,
+	}
 	//check if we have APIKey in event and in case it has add it in ArgDispatcher
 	apiKeyIface, hasApiKey := cgrEv.Event[utils.MetaApiKey]
 	if hasApiKey {
@@ -2249,12 +2220,9 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrNotConnected(utils.AttributeS)
 		}
 		attrArgs := &engine.AttrArgsProcessEvent{
-			Context:  utils.StringPointer(utils.MetaSessionS),
-			CGREvent: args.CGREvent,
-		}
-		// in case we receive ArgDispatcher we add it to be used by DispatcherS
-		if args.ArgDispatcher != nil {
-			attrArgs.ArgDispatcher = args.ArgDispatcher
+			Context:       utils.StringPointer(utils.MetaSessionS),
+			CGREvent:      args.CGREvent,
+			ArgDispatcher: args.ArgDispatcher,
 		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
@@ -2417,13 +2385,10 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 		}
 		var reply string
 		argsRU := utils.ArgRSv1ResourceUsage{
-			CGREvent: args.CGREvent,
-			UsageID:  originID, // same ID should be accepted by first group since the previous resource should be expired
-			Units:    1,
-		}
-		// in case we receive ArgDispatcher we add it to be used by DispatcherS
-		if args.ArgDispatcher != nil {
-			argsRU.ArgDispatcher = args.ArgDispatcher
+			CGREvent:      args.CGREvent,
+			UsageID:       originID, // same ID should be accepted by first group since the previous resource should be expired
+			Units:         1,
+			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err = sS.resS.Call(utils.ResourceSv1ReleaseResources,
 			argsRU, &reply); err != nil {
@@ -2436,11 +2401,8 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 		}
 		var tIDs []string
 		thEv := &engine.ArgsProcessEvent{
-			CGREvent: args.CGREvent,
-		}
-		// in case we receive ArgDispatcher we add it to be used by DispatcherS
-		if args.ArgDispatcher != nil {
-			thEv.ArgDispatcher = args.ArgDispatcher
+			CGREvent:      args.CGREvent,
+			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
@@ -2454,10 +2416,9 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrNotConnected(utils.StatS)
 		}
 		var statReply []string
-		statArgs := &engine.StatsArgsProcessEvent{CGREvent: args.CGREvent}
-		// in case we receive ArgDispatcher we add it to be used by DispatcherS
-		if args.ArgDispatcher != nil {
-			statArgs.ArgDispatcher = args.ArgDispatcher
+		statArgs := &engine.StatsArgsProcessEvent{
+			CGREvent:      args.CGREvent,
+			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err := sS.statS.Call(utils.StatSv1ProcessEvent,
 			statArgs, &statReply); err != nil &&
@@ -2473,14 +2434,14 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 
 // BiRPCv1ProcessCDR sends the CDR to CDRs
 func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
-	cgrEv *utils.CGREvent, rply *string) (err error) {
-	if cgrEv.ID == "" {
-		cgrEv.ID = utils.GenUUID()
+	cgrEvWithArgDisp *utils.CGREventWithArgDispatcher, rply *string) (err error) {
+	if cgrEvWithArgDisp.ID == "" {
+		cgrEvWithArgDisp.ID = utils.GenUUID()
 	}
 
 	// RPC caching
 	if sS.cgrCfg.CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.SessionSv1ProcessCDR, cgrEv.ID)
+		cacheKey := utils.ConcatenatedKey(utils.SessionSv1ProcessCDR, cgrEvWithArgDisp.ID)
 		refID := guardian.Guardian.GuardIDs("",
 			sS.cgrCfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
@@ -2498,7 +2459,7 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 	}
 	// end of RPC caching
 
-	ev := engine.NewSafEvent(cgrEv.Event)
+	ev := engine.NewSafEvent(cgrEvWithArgDisp.Event)
 	cgrID := GetSetCGRID(ev)
 	ss := sS.getRelocateSessions(cgrID,
 		ev.GetStringIgnoreErrors(utils.InitialOriginID),
@@ -2517,7 +2478,8 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 	}
 	if s == nil { // no cached session, CDR will be handled by CDRs
 		return sS.cdrS.Call(utils.CDRsV1ProcessEvent,
-			&engine.ArgV1ProcessEvent{CGREvent: *cgrEv}, rply)
+			&engine.ArgV1ProcessEvent{CGREvent: *cgrEvWithArgDisp.CGREvent,
+				ArgDispatcher: cgrEvWithArgDisp.ArgDispatcher}, rply)
 	}
 
 	// Use previously stored Session to generate CDRs
@@ -2538,9 +2500,11 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 	var withErrors bool
 	for _, cgrEv := range cgrEvs {
 		argsProc := &engine.ArgV1ProcessEvent{
-			CGREvent:   *cgrEv,
-			ChargerS:   utils.BoolPointer(false),
-			AttributeS: utils.BoolPointer(false)}
+			CGREvent:      *cgrEv,
+			ChargerS:      utils.BoolPointer(false),
+			AttributeS:    utils.BoolPointer(false),
+			ArgDispatcher: cgrEvWithArgDisp.ArgDispatcher,
+		}
 		if unratedReqs.HasField( // order additional rating for unrated request types
 			engine.NewMapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RequestType)) {
 			argsProc.RALs = utils.BoolPointer(true)
@@ -2671,12 +2635,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrNotConnected(utils.AttributeS)
 		}
 		attrArgs := &engine.AttrArgsProcessEvent{
-			Context:  utils.StringPointer(utils.MetaSessionS),
-			CGREvent: args.CGREvent,
-		}
-		// in case we receive ArgDispatcher we add it to be used by DispatcherS
-		if args.ArgDispatcher != nil {
-			attrArgs.ArgDispatcher = args.ArgDispatcher
+			Context:       utils.StringPointer(utils.MetaSessionS),
+			CGREvent:      args.CGREvent,
+			ArgDispatcher: args.ArgDispatcher,
 		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
@@ -2700,13 +2661,10 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
 		attrRU := utils.ArgRSv1ResourceUsage{
-			CGREvent: args.CGREvent,
-			UsageID:  originID,
-			Units:    1,
-		}
-		// in case we receive ArgDispatcher we add it to be used by DispatcherS
-		if args.ArgDispatcher != nil {
-			attrRU.ArgDispatcher = args.ArgDispatcher
+			CGREvent:      args.CGREvent,
+			UsageID:       originID,
+			Units:         1,
+			ArgDispatcher: args.ArgDispatcher,
 		}
 		var allocMessage string
 		if err = sS.resS.Call(utils.ResourceSv1AllocateResources,
@@ -2729,11 +2687,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 		}
 		var tIDs []string
 		thEv := &engine.ArgsProcessEvent{
-			CGREvent: args.CGREvent,
-		}
-		// in case we receive ArgDispatcher we add it to be used by DispatcherS
-		if args.ArgDispatcher != nil {
-			thEv.ArgDispatcher = args.ArgDispatcher
+			CGREvent:      args.CGREvent,
+			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent,
 			thEv, &tIDs); err != nil &&
@@ -2748,10 +2703,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrNotConnected(utils.StatS)
 		}
 		var statReply []string
-		statArgs := &engine.StatsArgsProcessEvent{CGREvent: args.CGREvent}
-		// in case we receive ArgDispatcher we add it to be used by DispatcherS
-		if args.ArgDispatcher != nil {
-			statArgs.ArgDispatcher = args.ArgDispatcher
+		statArgs := &engine.StatsArgsProcessEvent{
+			CGREvent:      args.CGREvent,
+			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err := sS.statS.Call(utils.StatSv1ProcessEvent,
 			statArgs, &statReply); err != nil &&
@@ -2919,11 +2873,12 @@ func (sS *SessionS) BiRPCV1ProcessCDR(clnt rpcclient.RpcClientConnection,
 	ev engine.MapEvent, rply *string) (err error) {
 	return sS.BiRPCv1ProcessCDR(
 		clnt,
-		&utils.CGREvent{
-			Tenant: utils.FirstNonEmpty(
-				ev.GetStringIgnoreErrors(utils.Tenant),
-				sS.cgrCfg.GeneralCfg().DefaultTenant),
-			ID:    utils.UUIDSha1Prefix(),
-			Event: ev},
+		&utils.CGREventWithArgDispatcher{
+			CGREvent: &utils.CGREvent{
+				Tenant: utils.FirstNonEmpty(
+					ev.GetStringIgnoreErrors(utils.Tenant),
+					sS.cgrCfg.GeneralCfg().DefaultTenant),
+				ID:    utils.UUIDSha1Prefix(),
+				Event: ev}},
 		rply)
 }

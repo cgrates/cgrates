@@ -43,7 +43,7 @@ func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	cdr := cgrCdr.AsCDR(cdrServer.cgrCfg.GeneralCfg().DefaultTimezone)
 	var ignored string
-	if err := cdrServer.V1ProcessCDR(cdr, &ignored); err != nil {
+	if err := cdrServer.V1ProcessCDR(&CDRWithArgDispatcher{CDR: cdr}, &ignored); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> processing CDR: %s, err: <%s>",
 				utils.CDRs, cdr, err.Error()))
@@ -60,7 +60,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	cdr := fsCdr.AsCDR(cdrServer.cgrCfg.GeneralCfg().DefaultTimezone)
 	var ignored string
-	if err := cdrServer.V1ProcessCDR(cdr, &ignored); err != nil {
+	if err := cdrServer.V1ProcessCDR(&CDRWithArgDispatcher{CDR: cdr}, &ignored); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> processing CDR: %s, err: <%s>",
 				utils.CDRs, cdr, err.Error()))
@@ -137,7 +137,7 @@ func (cdrS *CDRServer) storeSMCost(smCost *SMCost, checkDuplicate bool) error {
 
 // rateCDR will populate cost field
 // Returns more than one rated CDR in case of SMCost retrieved based on prefix
-func (cdrS *CDRServer) rateCDR(cdr *CDR) ([]*CDR, error) {
+func (cdrS *CDRServer) rateCDR(cdr *CDRWithArgDispatcher) ([]*CDR, error) {
 	var qryCC *CallCost
 	var err error
 	if cdr.RequestType == utils.META_NONE {
@@ -197,11 +197,11 @@ func (cdrS *CDRServer) rateCDR(cdr *CDR) ([]*CDR, error) {
 		cdr.CostDetails = NewEventCostFromCallCost(qryCC, cdr.CGRID, cdr.RunID)
 	}
 	cdr.CostDetails.Compute()
-	return []*CDR{cdr}, nil
+	return []*CDR{cdr.CDR}, nil
 }
 
 // getCostFromRater will retrieve the cost from RALs
-func (cdrS *CDRServer) getCostFromRater(cdr *CDR) (*CallCost, error) {
+func (cdrS *CDRServer) getCostFromRater(cdr *CDRWithArgDispatcher) (*CallCost, error) {
 	cc := new(CallCost)
 	var err error
 	timeStart := cdr.AnswerTime
@@ -266,13 +266,13 @@ func (cdrS *CDRServer) attrStoExpThdStat(cgrEv *utils.CGREventWithArgDispatcher,
 	return
 }
 
-func (cdrS *CDRServer) rateCDRWithErr(cdr *CDR) (ratedCDRs []*CDR) {
+func (cdrS *CDRServer) rateCDRWithErr(cdr *CDRWithArgDispatcher) (ratedCDRs []*CDR) {
 	var err error
 	ratedCDRs, err = cdrS.rateCDR(cdr)
 	if err != nil {
 		cdr.Cost = -1.0 // If there was an error, mark the CDR
 		cdr.ExtraInfo = err.Error()
-		ratedCDRs = []*CDR{cdr}
+		ratedCDRs = []*CDR{cdr.CDR}
 	}
 	return
 }
@@ -300,12 +300,10 @@ func (cdrS *CDRServer) chrgProcessEvent(cgrEv *utils.CGREventWithArgDispatcher,
 			partExec = true
 			continue
 		}
-		for _, rtCDR := range cdrS.rateCDRWithErr(cdr) {
+		for _, rtCDR := range cdrS.rateCDRWithErr(&CDRWithArgDispatcher{CDR: cdr, ArgDispatcher: cgrEv.ArgDispatcher}) {
 			arg := &utils.CGREventWithArgDispatcher{
-				CGREvent: rtCDR.AsCGREvent(),
-			}
-			if cgrEv.ArgDispatcher != nil {
-				arg.ArgDispatcher = cgrEv.ArgDispatcher
+				CGREvent:      rtCDR.AsCGREvent(),
+				ArgDispatcher: cgrEv.ArgDispatcher,
 			}
 			if errProc := cdrS.attrStoExpThdStat(arg,
 				attrS, store, export, thdS, statS); errProc != nil {
@@ -426,7 +424,7 @@ func (cdrS *CDRServer) Call(serviceMethod string, args interface{}, reply interf
 }
 
 // V1ProcessCDR processes a CDR
-func (cdrS *CDRServer) V1ProcessCDR(cdr *CDR, reply *string) (err error) {
+func (cdrS *CDRServer) V1ProcessCDR(cdr *CDRWithArgDispatcher, reply *string) (err error) {
 	if cdr.CGRID == utils.EmptyString { // Populate CGRID if not present
 		cdr.ComputeCGRID()
 	}
@@ -473,9 +471,7 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDR, reply *string) (err error) {
 			ID:     utils.UUIDSha1Prefix(),
 			Event:  cdr.AsMapStringIface(),
 		},
-	}
-	if cdr.ArgDispatcher != nil {
-		cgrEv.ArgDispatcher = cdr.ArgDispatcher
+		ArgDispatcher: cdr.ArgDispatcher,
 	}
 	if cdrS.attrS != nil {
 		if err = cdrS.attrSProcessEvent(cgrEv); err != nil {
@@ -484,7 +480,7 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDR, reply *string) (err error) {
 		}
 	}
 	if cdrS.cgrCfg.CdrsCfg().CDRSStoreCdrs { // Store *raw CDR
-		if err = cdrS.cdrDb.SetCDR(cdr, false); err != nil {
+		if err = cdrS.cdrDb.SetCDR(cdr.CDR, false); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> storing primary CDR %+v, got error: %s",
 					utils.CDRs, cdr, err.Error()))
@@ -493,7 +489,7 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDR, reply *string) (err error) {
 		}
 	}
 	if len(cdrS.cgrCfg.CdrsCfg().CDRSOnlineCDRExports) != 0 {
-		cdrS.exportCDRs([]*CDR{cdr}) // Replicate raw CDR
+		cdrS.exportCDRs([]*CDR{cdr.CDR}) // Replicate raw CDR
 	}
 	if cdrS.thdS != nil {
 		go cdrS.thdSProcessEvent(cgrEv)
@@ -600,7 +596,8 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 			err = utils.ErrPartiallyExecuted
 			return
 		}
-		for _, rtCDR := range cdrS.rateCDRWithErr(cdr) {
+		for _, rtCDR := range cdrS.rateCDRWithErr(&CDRWithArgDispatcher{CDR: cdr,
+			ArgDispatcher: arg.ArgDispatcher}) {
 			cgrEv := &utils.CGREventWithArgDispatcher{
 				CGREvent:      rtCDR.AsCGREvent(),
 				ArgDispatcher: arg.ArgDispatcher,
@@ -728,6 +725,7 @@ type ArgRateCDRs struct {
 	ThresholdS *bool
 	StatS      *bool // Set to true if the CDRs should be sent to stats server
 	*utils.ArgDispatcher
+	*utils.TenantArg
 }
 
 // V1RateCDRs is used for re-/rate CDRs which are already stored within StorDB
@@ -777,16 +775,18 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 }
 
 // Used to process external CDRs
-func (cdrS *CDRServer) V1ProcessExternalCDR(eCDR *ExternalCDR, reply *string) error {
-	cdr, err := NewCDRFromExternalCDR(eCDR, cdrS.cgrCfg.GeneralCfg().DefaultTimezone)
+func (cdrS *CDRServer) V1ProcessExternalCDR(eCDR *ExternalCDRWithArgDispatcher, reply *string) error {
+	cdr, err := NewCDRFromExternalCDR(eCDR.ExternalCDR,
+		cdrS.cgrCfg.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return err
 	}
-	return cdrS.V1ProcessCDR(cdr, reply)
+	return cdrS.V1ProcessCDR(&CDRWithArgDispatcher{CDR: cdr,
+		ArgDispatcher: eCDR.ArgDispatcher}, reply)
 }
 
 // V1GetCDRs returns CDRs from DB
-func (cdrS *CDRServer) V1GetCDRs(args utils.RPCCDRsFilter, cdrs *[]*CDR) error {
+func (cdrS *CDRServer) V1GetCDRs(args utils.RPCCDRsFilterWithArgDispatcher, cdrs *[]*CDR) error {
 	cdrsFltr, err := args.AsCDRsFilter(cdrS.cgrCfg.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		if err.Error() != utils.NotFoundCaps {
@@ -803,7 +803,7 @@ func (cdrS *CDRServer) V1GetCDRs(args utils.RPCCDRsFilter, cdrs *[]*CDR) error {
 }
 
 // V1CountCDRs counts CDRs from DB
-func (cdrS *CDRServer) V1CountCDRs(args *utils.RPCCDRsFilter, cnt *int64) error {
+func (cdrS *CDRServer) V1CountCDRs(args *utils.RPCCDRsFilterWithArgDispatcher, cnt *int64) error {
 	cdrsFltr, err := args.AsCDRsFilter(cdrS.cgrCfg.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		if err.Error() != utils.NotFoundCaps {
