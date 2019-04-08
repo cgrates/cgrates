@@ -468,12 +468,11 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 	sr.CD.TimeEnd = sr.CD.TimeStart.Add(rDur)
 	sr.CD.DurationIndex += rDur
 	cd := sr.CD.Clone()
-	if s.ArgDispatcher != nil {
-		cd.ArgDispatcher = s.ArgDispatcher
-	}
+	argDsp := s.ArgDispatcher
 	s.Unlock()
 	cc := new(engine.CallCost)
-	if err := sS.ralS.Call(utils.ResponderMaxDebit, cd, cc); err != nil {
+	if err := sS.ralS.Call(utils.ResponderMaxDebit, &engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
+		ArgDispatcher: argDsp}, cc); err != nil {
 		s.Lock()
 		sr.ExtraDuration += dbtRsrv
 		s.Unlock()
@@ -596,19 +595,19 @@ func (sS *SessionS) refundSession(s *Session, sRunIdx int, rUsage time.Duration)
 		}
 	}
 	cd := &engine.CallDescriptor{
-		CgrID:         s.CGRID,
-		RunID:         sr.Event.GetStringIgnoreErrors(utils.RunID),
-		Category:      sr.CD.Category,
-		Tenant:        sr.CD.Tenant,
-		Subject:       sr.CD.Subject,
-		Account:       sr.CD.Account,
-		Destination:   sr.CD.Destination,
-		TOR:           sr.CD.TOR,
-		Increments:    incrmts,
-		ArgDispatcher: s.ArgDispatcher,
+		CgrID:       s.CGRID,
+		RunID:       sr.Event.GetStringIgnoreErrors(utils.RunID),
+		Category:    sr.CD.Category,
+		Tenant:      sr.CD.Tenant,
+		Subject:     sr.CD.Subject,
+		Account:     sr.CD.Account,
+		Destination: sr.CD.Destination,
+		TOR:         sr.CD.TOR,
+		Increments:  incrmts,
 	}
 	var acnt engine.Account
-	if err = sS.ralS.Call(utils.ResponderRefundIncrements, cd, &acnt); err != nil {
+	if err = sS.ralS.Call(utils.ResponderRefundIncrements, &engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
+		ArgDispatcher: s.ArgDispatcher}, &acnt); err != nil {
 		return
 	}
 	if acnt.ID != "" { // Account info updated, update also cached AccountSummary
@@ -1206,14 +1205,10 @@ func (sS *SessionS) authSession(tnt string, evStart *engine.SafEvent) (maxUsage 
 		if !utils.IsSliceMember(prepaidReqs,
 			sr.Event.GetStringIgnoreErrors(utils.RequestType)) {
 			rplyMaxUsage = time.Duration(-1)
-		} else {
-			if s.ArgDispatcher != nil {
-				sr.CD.ArgDispatcher = s.ArgDispatcher
-			}
-			if err = sS.ralS.Call(utils.ResponderGetMaxSessionTime,
-				sr.CD, &rplyMaxUsage); err != nil {
-				return
-			}
+		} else if err = sS.ralS.Call(utils.ResponderGetMaxSessionTime,
+			&engine.CallDescriptorWithArgDispatcher{CallDescriptor: sr.CD,
+				ArgDispatcher: s.ArgDispatcher}, &rplyMaxUsage); err != nil {
+			return
 		}
 		if !maxUsageSet ||
 			maxUsage == time.Duration(-1) ||
@@ -1337,11 +1332,9 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration) (er
 				}
 				sr.CD.TimeEnd = sr.CD.TimeStart.Add(notCharged)
 				sr.CD.DurationIndex += notCharged
-				if s.ArgDispatcher != nil {
-					sr.CD.ArgDispatcher = s.ArgDispatcher
-				}
 				cc := new(engine.CallCost)
-				if err = sS.ralS.Call(utils.ResponderDebit, sr.CD, cc); err == nil {
+				if err = sS.ralS.Call(utils.ResponderDebit, &engine.CallDescriptorWithArgDispatcher{CallDescriptor: sr.CD,
+					ArgDispatcher: s.ArgDispatcher}, cc); err == nil {
 					sr.EventCost.Merge(
 						engine.NewEventCostFromCallCost(cc, s.CGRID,
 							sr.Event.GetStringIgnoreErrors(utils.RunID)))

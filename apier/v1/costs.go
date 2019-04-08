@@ -32,6 +32,7 @@ type AttrGetCost struct {
 	AnswerTime  string
 	Destination string
 	Usage       string
+	*utils.ArgDispatcher
 }
 
 func (apier *ApierV1) GetCost(attrs AttrGetCost, ec *engine.EventCost) error {
@@ -55,7 +56,8 @@ func (apier *ApierV1) GetCost(attrs AttrGetCost, ec *engine.EventCost) error {
 		DurationIndex: usage,
 	}
 	var cc engine.CallCost
-	if err := apier.Responder.GetCost(cd, &cc); err != nil {
+	if err := apier.Responder.GetCost(&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
+		ArgDispatcher: attrs.ArgDispatcher}, &cc); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*ec = *engine.NewEventCostFromCallCost(&cc, "", "")
@@ -69,6 +71,7 @@ type AttrGetDataCost struct {
 	Subject    string
 	AnswerTime string
 	Usage      time.Duration // the call duration so far (till TimeEnd)
+	*utils.ArgDispatcher
 }
 
 func (apier *ApierV1) GetDataCost(attrs AttrGetDataCost, reply *engine.DataCost) error {
@@ -87,7 +90,8 @@ func (apier *ApierV1) GetDataCost(attrs AttrGetDataCost, reply *engine.DataCost)
 		TOR:           utils.DATA,
 	}
 	var cc engine.CallCost
-	if err := apier.Responder.GetCost(cd, &cc); err != nil {
+	if err := apier.Responder.GetCost(&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
+		ArgDispatcher: attrs.ArgDispatcher}, &cc); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if dc, err := cc.ToDataCost(); err != nil {

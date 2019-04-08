@@ -102,7 +102,7 @@ func TestAuthPostpaidNoAcnt(t *testing.T) {
 		t.Error(err)
 	}
 	var maxSessionTime time.Duration
-	if err := rsponder.GetMaxSessionTime(cd, &maxSessionTime); err != utils.ErrAccountNotFound {
+	if err := rsponder.GetMaxSessionTime(&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd}, &maxSessionTime); err != utils.ErrAccountNotFound {
 		t.Error(err)
 	}
 }
@@ -117,7 +117,7 @@ func TestAuthPostpaidFallbackDest(t *testing.T) {
 		t.Error(err)
 	}
 	var maxSessionTime time.Duration
-	if err = rsponder.GetMaxSessionTime(cd, &maxSessionTime); err != nil {
+	if err = rsponder.GetMaxSessionTime(&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd}, &maxSessionTime); err != nil {
 		t.Error(err)
 	} else if maxSessionTime != time.Duration(0) {
 		t.Error("Unexpected maxSessionTime received: ", maxSessionTime)
@@ -134,7 +134,7 @@ func TestAuthPostpaidWithDestination(t *testing.T) {
 		t.Error(err)
 	}
 	var maxSessionTime time.Duration
-	if err := rsponder.GetMaxSessionTime(cd, &maxSessionTime); err != nil {
+	if err := rsponder.GetMaxSessionTime(&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd}, &maxSessionTime); err != nil {
 		t.Error(err)
 	} else if maxSessionTime != time.Duration(0) {
 		t.Error("Unexpected maxSessionTime received: ", maxSessionTime)
