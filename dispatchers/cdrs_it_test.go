@@ -33,6 +33,10 @@ var sTestsDspCDRs = []func(t *testing.T){
 	testDspCDRsProcessEvent,
 	testDspCDRsCountCDR,
 	testDspCDRsGetCDR,
+	testDspCDRsProcessCDR,
+	testDspCDRsGetCDR2,
+	testDspCDRsProcessExternalCDR,
+	testDspCDRsGetCDR3,
 }
 
 //Test start here
@@ -71,7 +75,7 @@ func testDspCDRsProcessEvent(t *testing.T) {
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
-				utils.OriginID:    "testV2CDRsProcessCDR1",
+				utils.OriginID:    "testDspCDRsProcessEvent",
 				utils.OriginHost:  "192.168.1.1",
 				utils.Source:      "testDspCDRsProcessEvent",
 				utils.RequestType: utils.META_RATED,
@@ -142,7 +146,119 @@ func testDspCDRsGetCDR(t *testing.T) {
 		t.Error(err)
 	} else if len(reply) != 1 {
 		t.Errorf("Received: %+v", reply)
-	} else if reply[0].CGRID != "1888cd1ba89f9654ca22b45787db217182f9da0d" {
-		t.Errorf("Expected: 1888cd1ba89f9654ca22b45787db217182f9da0d , received:%v", reply[0].CGRID)
+	} else if reply[0].CGRID != "9ee4c71fcd67eef5fb25a4bb3f190487de3073f5" {
+		t.Errorf("Expected: 9ee4c71fcd67eef5fb25a4bb3f190487de3073f5 , received:%v", reply[0].CGRID)
+	}
+}
+
+func testDspCDRsProcessCDR(t *testing.T) {
+	var reply string
+	args := &engine.CDRWithArgDispatcher{
+		CDR: &engine.CDR{
+			Tenant:      "cgrates.org",
+			OriginID:    "testDspCDRsProcessCDR",
+			OriginHost:  "192.168.1.1",
+			Source:      "testDspCDRsProcessCDR",
+			RequestType: utils.META_RATED,
+			Account:     "1001",
+			Subject:     "1001",
+			Destination: "1002",
+			AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+			Usage:       time.Duration(2) * time.Minute,
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("cdrs12345"),
+		},
+	}
+	if err := dispEngine.RCP.Call(utils.CDRsV1ProcessCDR, args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+	time.Sleep(100 * time.Millisecond)
+}
+
+func testDspCDRsGetCDR2(t *testing.T) {
+	var reply []*engine.CDR
+	args := utils.RPCCDRsFilterWithArgDispatcher{
+		RPCCDRsFilter: &utils.RPCCDRsFilter{
+			Accounts:  []string{"1001"},
+			RunIDs:    []string{utils.MetaDefault},
+			OriginIDs: []string{"testDspCDRsProcessCDR"},
+		},
+		TenantWithArgDispatcher: &utils.TenantWithArgDispatcher{
+			TenantArg: &utils.TenantArg{
+				Tenant: "cgrates.org",
+			},
+			ArgDispatcher: &utils.ArgDispatcher{
+				APIKey: utils.StringPointer("cdrs12345"),
+			},
+		},
+	}
+
+	if err := dispEngine.RCP.Call(utils.CDRsV1GetCDRs, args, &reply); err != nil {
+		t.Error(err)
+	} else if len(reply) != 1 {
+		t.Errorf("Received: %+v", reply)
+	} else if reply[0].CGRID != "f08dfd32930b6bea326bb8ec4e38ab03d781c0bf" {
+		t.Errorf("Expected: f08dfd32930b6bea326bb8ec4e38ab03d781c0bf , received:%v", reply[0].CGRID)
+	}
+}
+
+func testDspCDRsProcessExternalCDR(t *testing.T) {
+	var reply string
+	args := &engine.ExternalCDRWithArgDispatcher{
+		ExternalCDR: &engine.ExternalCDR{
+			ToR:         utils.VOICE,
+			OriginID:    "testDspCDRsProcessExternalCDR",
+			OriginHost:  "127.0.0.1",
+			Source:      utils.UNIT_TEST,
+			RequestType: utils.META_RATED,
+			Tenant:      "cgrates.org",
+			Category:    "call",
+			Account:     "1003",
+			Subject:     "1003",
+			Destination: "1001",
+			SetupTime:   "2014-08-04T13:00:00Z",
+			AnswerTime:  "2014-08-04T13:00:07Z",
+			Usage:       "1s",
+			ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("cdrs12345"),
+		},
+	}
+	if err := dispEngine.RCP.Call(utils.CDRsV1ProcessExternalCDR, args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+	time.Sleep(100 * time.Millisecond)
+}
+
+func testDspCDRsGetCDR3(t *testing.T) {
+	var reply []*engine.CDR
+	args := utils.RPCCDRsFilterWithArgDispatcher{
+		RPCCDRsFilter: &utils.RPCCDRsFilter{
+			Accounts:  []string{"1003"},
+			RunIDs:    []string{utils.MetaDefault},
+			OriginIDs: []string{"testDspCDRsProcessExternalCDR"},
+		},
+		TenantWithArgDispatcher: &utils.TenantWithArgDispatcher{
+			TenantArg: &utils.TenantArg{
+				Tenant: "cgrates.org",
+			},
+			ArgDispatcher: &utils.ArgDispatcher{
+				APIKey: utils.StringPointer("cdrs12345"),
+			},
+		},
+	}
+
+	if err := dispEngine.RCP.Call(utils.CDRsV1GetCDRs, args, &reply); err != nil {
+		t.Error(err)
+	} else if len(reply) != 1 {
+		t.Errorf("Received: %+v", reply)
+	} else if reply[0].CGRID != "8ae63781b39f3265d014d2ba6a70437172fba46d" {
+		t.Errorf("Expected: 8ae63781b39f3265d014d2ba6a70437172fba46d , received:%v", reply[0].CGRID)
 	}
 }
