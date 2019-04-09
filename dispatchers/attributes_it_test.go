@@ -41,6 +41,8 @@ var sTestsDspAttr = []func(t *testing.T){
 	testDspAttrTestAuthKey,
 	testDspAttrTestAuthKey2,
 	testDspAttrTestAuthKey3,
+
+	testDspAttrGetAttrInternal,
 }
 
 //Test start here
@@ -446,6 +448,46 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 	}
 
 	// To ALL
+	if err := dispEngine.RCP.Call(utils.AttributeSv1ProcessEvent,
+		args, &rplyEv); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eRply, &rplyEv) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
+	}
+}
+
+func testDspAttrGetAttrInternal(t *testing.T) {
+	args := &engine.AttrArgsProcessEvent{
+		Context: utils.StringPointer("simpleauth"),
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSGetAttributeForEvent",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME: "Internal",
+				utils.Account:    "1003",
+			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("attr12345"),
+		},
+	}
+
+	eRply := &engine.AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_1003_SIMPLEAUTH"},
+		AlteredFields:   []string{"Password"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSGetAttributeForEvent",
+			Event: map[string]interface{}{
+				utils.Account:    "1003",
+				utils.EVENT_NAME: "Internal",
+				"Password":       "CGRateS.com",
+			},
+		},
+	}
+
+	var rplyEv engine.AttrSProcessEventReply
 	if err := dispEngine.RCP.Call(utils.AttributeSv1ProcessEvent,
 		args, &rplyEv); err != nil {
 		t.Error(err)
