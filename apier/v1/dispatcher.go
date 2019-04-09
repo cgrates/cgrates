@@ -122,7 +122,7 @@ func (apierV1 *ApierV1) GetDispatcherHost(arg *utils.TenantID, reply *engine.Dis
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if dpp, err := apierV1.DataManager.GetDispatcherHost(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+	if dpp, err := apierV1.DataManager.GetDispatcherHost(arg.Tenant, arg.ID, true, false, utils.NonTransactional); err != nil {
 		return utils.APIErrorHandler(err)
 	} else {
 		*reply = *dpp

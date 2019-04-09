@@ -1326,17 +1326,17 @@ func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrit
 		}
 		return nil, err
 	}
-	cfg := config.CgrConfig()
-	if dH.rpcConn, err = NewRPCPool(
-		rpcclient.POOL_FIRST,
-		cfg.TlsCfg().ClientKey,
-		cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-		cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-		cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-		dH.Conns, IntRPC.GetInternalChanel(), cfg.GeneralCfg().InternalTtl, false); err != nil {
-		return nil, err
-	}
 	if cacheWrite {
+		cfg := config.CgrConfig()
+		if dH.rpcConn, err = NewRPCPool(
+			rpcclient.POOL_FIRST,
+			cfg.TlsCfg().ClientKey,
+			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
+			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
+			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
+			dH.Conns, IntRPC.GetInternalChanel(), cfg.GeneralCfg().InternalTtl, false); err != nil {
+			return nil, err
+		}
 		Cache.Set(utils.CacheDispatcherHosts, tntID, dH, nil,
 			cacheCommit(transactionID), transactionID)
 	}
