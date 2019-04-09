@@ -42,7 +42,11 @@ func (apierV1 *ApierV1) GetDispatcherProfile(arg *utils.TenantID, reply *engine.
 }
 
 // GetDispatcherProfileIDs returns list of dispatcherProfile IDs registered for a tenant
-func (apierV1 *ApierV1) GetDispatcherProfileIDs(tenant string, dPrfIDs *[]string) error {
+func (apierV1 *ApierV1) GetDispatcherProfileIDs(tenantArg *utils.TenantArg, dPrfIDs *[]string) error {
+	if tenantArg.Tenant == "" {
+		return utils.NewErrMandatoryIeMissing(utils.Tenant)
+	}
+	tenant := tenantArg.Tenant
 	prfx := utils.DispatcherProfilePrefix + tenant + ":"
 	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
@@ -127,7 +131,11 @@ func (apierV1 *ApierV1) GetDispatcherHost(arg *utils.TenantID, reply *engine.Dis
 }
 
 // GetDispatcherHostIDs returns list of dispatcherHost IDs registered for a tenant
-func (apierV1 *ApierV1) GetDispatcherHostIDs(tenant string, dPrfIDs *[]string) error {
+func (apierV1 *ApierV1) GetDispatcherHostIDs(tenantArg *utils.TenantArg, dPrfIDs *[]string) error {
+	if tenantArg.Tenant == "" {
+		return utils.NewErrMandatoryIeMissing(utils.Tenant)
+	}
+	tenant := tenantArg.Tenant
 	prfx := utils.DispatcherHostPrefix + tenant + ":"
 	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {

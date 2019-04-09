@@ -150,7 +150,7 @@ func testDispatcherSGetDispatcherProfileIDs(t *testing.T) {
 	var result []string
 	expected := []string{"Dsp1"}
 	if err := dispatcherRPC.Call("ApierV1.GetDispatcherProfileIDs",
-		dispatcherProfile.Tenant, &result); err != nil {
+		utils.TenantArg{Tenant: dispatcherProfile.Tenant}, &result); err != nil {
 		t.Error(err)
 	} else if len(result) != len(expected) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
