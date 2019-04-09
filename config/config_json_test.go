@@ -231,8 +231,8 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 func TestDfRalsJsonCfg(t *testing.T) {
 	eCfg := &RalsJsonCfg{
 		Enabled:                    utils.BoolPointer(false),
-		Thresholds_conns:           &[]*HaPoolJsonCfg{},
-		Stats_conns:                &[]*HaPoolJsonCfg{},
+		Thresholds_conns:           &[]*RemoteHostJson{},
+		Stats_conns:                &[]*RemoteHostJson{},
 		Rp_subject_prefix_matching: utils.BoolPointer(false),
 		Remove_expired:             utils.BoolPointer(true),
 		Max_computed_usage: &map[string]string{
@@ -251,7 +251,7 @@ func TestDfRalsJsonCfg(t *testing.T) {
 func TestDfSchedulerJsonCfg(t *testing.T) {
 	eCfg := &SchedulerJsonCfg{
 		Enabled:    utils.BoolPointer(false),
-		Cdrs_conns: &[]*HaPoolJsonCfg{},
+		Cdrs_conns: &[]*RemoteHostJson{},
 	}
 	if cfg, err := dfCgrJsonCfg.SchedulerJsonCfg(); err != nil {
 		t.Error(err)
@@ -266,17 +266,17 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Extra_fields:         &[]string{},
 		Store_cdrs:           utils.BoolPointer(true),
 		Session_cost_retries: utils.IntPointer(5),
-		Chargers_conns: &[]*HaPoolJsonCfg{
+		Chargers_conns: &[]*RemoteHostJson{
 			{
 				Address: utils.StringPointer("*internal"),
 			}},
-		Rals_conns: &[]*HaPoolJsonCfg{
+		Rals_conns: &[]*RemoteHostJson{
 			{
 				Address: utils.StringPointer("*internal"),
 			}},
-		Attributes_conns:   &[]*HaPoolJsonCfg{},
-		Thresholds_conns:   &[]*HaPoolJsonCfg{},
-		Stats_conns:        &[]*HaPoolJsonCfg{},
+		Attributes_conns:   &[]*RemoteHostJson{},
+		Thresholds_conns:   &[]*RemoteHostJson{},
+		Stats_conns:        &[]*RemoteHostJson{},
 		Online_cdr_exports: &[]string{},
 	}
 	if cfg, err := dfCgrJsonCfg.CdrsJsonCfg(); err != nil {
@@ -437,7 +437,7 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 			Id:      utils.StringPointer(utils.META_DEFAULT),
 			Enabled: utils.BoolPointer(false),
 			Dry_run: utils.BoolPointer(false),
-			Cdrs_conns: &[]*HaPoolJsonCfg{{
+			Cdrs_conns: &[]*RemoteHostJson{{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
 			Cdr_format:                  utils.StringPointer("*csv"),
@@ -473,21 +473,21 @@ func TestSmgJsonCfg(t *testing.T) {
 	eCfg := &SessionSJsonCfg{
 		Enabled:       utils.BoolPointer(false),
 		Listen_bijson: utils.StringPointer("127.0.0.1:2014"),
-		Chargers_conns: &[]*HaPoolJsonCfg{{
+		Chargers_conns: &[]*RemoteHostJson{{
 			Address: utils.StringPointer(utils.MetaInternal),
 		}},
-		Rals_conns: &[]*HaPoolJsonCfg{{
+		Rals_conns: &[]*RemoteHostJson{{
 			Address: utils.StringPointer(utils.MetaInternal),
 		}},
-		Cdrs_conns: &[]*HaPoolJsonCfg{{
+		Cdrs_conns: &[]*RemoteHostJson{{
 			Address: utils.StringPointer(utils.MetaInternal),
 		}},
-		Resources_conns:           &[]*HaPoolJsonCfg{},
-		Thresholds_conns:          &[]*HaPoolJsonCfg{},
-		Stats_conns:               &[]*HaPoolJsonCfg{},
-		Suppliers_conns:           &[]*HaPoolJsonCfg{},
-		Attributes_conns:          &[]*HaPoolJsonCfg{},
-		Session_replication_conns: &[]*HaPoolJsonCfg{},
+		Resources_conns:           &[]*RemoteHostJson{},
+		Thresholds_conns:          &[]*RemoteHostJson{},
+		Stats_conns:               &[]*RemoteHostJson{},
+		Suppliers_conns:           &[]*RemoteHostJson{},
+		Attributes_conns:          &[]*RemoteHostJson{},
+		Session_replication_conns: &[]*RemoteHostJson{},
 		Debit_interval:            utils.StringPointer("0s"),
 		Store_session_costs:       utils.BoolPointer(false),
 		Min_call_duration:         utils.StringPointer("0s"),
@@ -507,7 +507,7 @@ func TestSmgJsonCfg(t *testing.T) {
 func TestFsAgentJsonCfg(t *testing.T) {
 	eCfg := &FreeswitchAgentJsonCfg{
 		Enabled: utils.BoolPointer(false),
-		Sessions_conns: &[]*HaPoolJsonCfg{
+		Sessions_conns: &[]*RemoteHostJson{
 			{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
@@ -535,7 +535,7 @@ func TestFsAgentJsonCfg(t *testing.T) {
 func TestKamAgentJsonCfg(t *testing.T) {
 	eCfg := &KamAgentJsonCfg{
 		Enabled: utils.BoolPointer(false),
-		Sessions_conns: &[]*HaPoolJsonCfg{
+		Sessions_conns: &[]*RemoteHostJson{
 			{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
@@ -558,7 +558,7 @@ func TestKamAgentJsonCfg(t *testing.T) {
 func TestAsteriskAgentJsonCfg(t *testing.T) {
 	eCfg := &AsteriskAgentJsonCfg{
 		Enabled: utils.BoolPointer(false),
-		Sessions_conns: &[]*HaPoolJsonCfg{
+		Sessions_conns: &[]*RemoteHostJson{
 			{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
@@ -586,7 +586,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 		Listen:            utils.StringPointer("127.0.0.1:3868"),
 		Listen_net:        utils.StringPointer("tcp"),
 		Dictionaries_path: utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
-		Sessions_conns: &[]*HaPoolJsonCfg{
+		Sessions_conns: &[]*RemoteHostJson{
 			{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
@@ -714,7 +714,7 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 		Client_dictionaries: utils.MapStringStringPointer(map[string]string{
 			utils.META_DEFAULT: "/usr/share/cgrates/radius/dict/",
 		}),
-		Sessions_conns: &[]*HaPoolJsonCfg{
+		Sessions_conns: &[]*RemoteHostJson{
 			{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
@@ -742,7 +742,7 @@ func TestDNSAgentJsonCfg(t *testing.T) {
 		Enabled:    utils.BoolPointer(false),
 		Listen_net: utils.StringPointer("udp"),
 		Listen:     utils.StringPointer("127.0.0.1:2053"),
-		Sessions_conns: &[]*HaPoolJsonCfg{
+		Sessions_conns: &[]*RemoteHostJson{
 			{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
@@ -776,7 +776,7 @@ func TestDfChargerServJsonCfg(t *testing.T) {
 	eCfg := &ChargerSJsonCfg{
 		Enabled:               utils.BoolPointer(false),
 		Indexed_selects:       utils.BoolPointer(true),
-		Attributes_conns:      &[]*HaPoolJsonCfg{},
+		Attributes_conns:      &[]*RemoteHostJson{},
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
 	}
@@ -789,8 +789,8 @@ func TestDfChargerServJsonCfg(t *testing.T) {
 
 func TestDfFilterSJsonCfg(t *testing.T) {
 	eCfg := &FilterSJsonCfg{
-		Stats_conns:     &[]*HaPoolJsonCfg{},
-		Resources_conns: &[]*HaPoolJsonCfg{},
+		Stats_conns:     &[]*RemoteHostJson{},
+		Resources_conns: &[]*RemoteHostJson{},
 	}
 	if cfg, err := dfCgrJsonCfg.FilterSJsonCfg(); err != nil {
 		t.Error(err)
@@ -803,7 +803,7 @@ func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 	eCfg := &ResourceSJsonCfg{
 		Enabled:               utils.BoolPointer(false),
 		Indexed_selects:       utils.BoolPointer(true),
-		Thresholds_conns:      &[]*HaPoolJsonCfg{},
+		Thresholds_conns:      &[]*RemoteHostJson{},
 		Store_interval:        utils.StringPointer(""),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
@@ -821,7 +821,7 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 		Indexed_selects:       utils.BoolPointer(true),
 		Store_interval:        utils.StringPointer(""),
 		Max_queue_length:      utils.IntPointer(0),
-		Thresholds_conns:      &[]*HaPoolJsonCfg{},
+		Thresholds_conns:      &[]*RemoteHostJson{},
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
 	}
@@ -853,14 +853,14 @@ func TestDfSupplierSJsonCfg(t *testing.T) {
 		Indexed_selects:       utils.BoolPointer(true),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
-		Attributes_conns:      &[]*HaPoolJsonCfg{},
-		Rals_conns: &[]*HaPoolJsonCfg{
+		Attributes_conns:      &[]*RemoteHostJson{},
+		Rals_conns: &[]*RemoteHostJson{
 			{
 				Address: utils.StringPointer("*internal"),
 			},
 		},
-		Resources_conns: &[]*HaPoolJsonCfg{},
-		Stats_conns:     &[]*HaPoolJsonCfg{},
+		Resources_conns: &[]*RemoteHostJson{},
+		Stats_conns:     &[]*RemoteHostJson{},
 	}
 	if cfg, err := dfCgrJsonCfg.SupplierSJsonCfg(); err != nil {
 		t.Error(err)
@@ -878,7 +878,7 @@ func TestDfLoaderJsonCfg(t *testing.T) {
 			Dry_run:       utils.BoolPointer(false),
 			Run_delay:     utils.IntPointer(0),
 			Lock_filename: utils.StringPointer(".cgr.lck"),
-			Caches_conns: &[]*HaPoolJsonCfg{{
+			Caches_conns: &[]*RemoteHostJson{{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
 			Field_separator: utils.StringPointer(","),
@@ -1438,7 +1438,7 @@ func TestDfDispatcherSJsonCfg(t *testing.T) {
 		Indexed_selects:       utils.BoolPointer(true),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
-		Attributes_conns:      &[]*HaPoolJsonCfg{},
+		Attributes_conns:      &[]*RemoteHostJson{},
 	}
 	if cfg, err := dfCgrJsonCfg.DispatcherSJsonCfg(); err != nil {
 		t.Error(err)
@@ -1453,13 +1453,13 @@ func TestDfLoaderCfg(t *testing.T) {
 		Data_path:       utils.StringPointer("./"),
 		Disable_reverse: utils.BoolPointer(false),
 		Field_separator: utils.StringPointer(","),
-		Caches_conns: &[]*HaPoolJsonCfg{
+		Caches_conns: &[]*RemoteHostJson{
 			{
 				Address:   utils.StringPointer("127.0.0.1:2012"),
 				Transport: utils.StringPointer(utils.MetaJSONrpc),
 			},
 		},
-		Scheduler_conns: &[]*HaPoolJsonCfg{
+		Scheduler_conns: &[]*RemoteHostJson{
 			{
 				Address:   utils.StringPointer("127.0.0.1:2012"),
 				Transport: utils.StringPointer(utils.MetaJSONrpc),
@@ -1527,12 +1527,12 @@ func TestDfAnalyzerCfg(t *testing.T) {
 
 func TestDfApierCfg(t *testing.T) {
 	eCfg := &ApierJsonCfg{
-		Caches_conns: &[]*HaPoolJsonCfg{
+		Caches_conns: &[]*RemoteHostJson{
 			{
 				Address: utils.StringPointer(utils.MetaInternal),
 			},
 		},
-		Scheduler_conns: &[]*HaPoolJsonCfg{
+		Scheduler_conns: &[]*RemoteHostJson{
 			{
 				Address: utils.StringPointer(utils.MetaInternal),
 			},

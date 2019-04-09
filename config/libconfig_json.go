@@ -93,15 +93,15 @@ type DbJsonCfg struct {
 
 // Filters config
 type FilterSJsonCfg struct {
-	Stats_conns     *[]*HaPoolJsonCfg
-	Resources_conns *[]*HaPoolJsonCfg
+	Stats_conns     *[]*RemoteHostJson
+	Resources_conns *[]*RemoteHostJson
 }
 
 // Rater config section
 type RalsJsonCfg struct {
 	Enabled                    *bool
-	Thresholds_conns           *[]*HaPoolJsonCfg
-	Stats_conns                *[]*HaPoolJsonCfg
+	Thresholds_conns           *[]*RemoteHostJson
+	Stats_conns                *[]*RemoteHostJson
 	Rp_subject_prefix_matching *bool
 	Remove_expired             *bool
 	Max_computed_usage         *map[string]string
@@ -110,7 +110,7 @@ type RalsJsonCfg struct {
 // Scheduler config section
 type SchedulerJsonCfg struct {
 	Enabled    *bool
-	Cdrs_conns *[]*HaPoolJsonCfg
+	Cdrs_conns *[]*RemoteHostJson
 }
 
 // Cdrs config section
@@ -119,11 +119,11 @@ type CdrsJsonCfg struct {
 	Extra_fields         *[]string
 	Store_cdrs           *bool
 	Session_cost_retries *int
-	Chargers_conns       *[]*HaPoolJsonCfg
-	Rals_conns           *[]*HaPoolJsonCfg
-	Attributes_conns     *[]*HaPoolJsonCfg
-	Thresholds_conns     *[]*HaPoolJsonCfg
-	Stats_conns          *[]*HaPoolJsonCfg
+	Chargers_conns       *[]*RemoteHostJson
+	Rals_conns           *[]*RemoteHostJson
+	Attributes_conns     *[]*RemoteHostJson
+	Thresholds_conns     *[]*RemoteHostJson
+	Stats_conns          *[]*RemoteHostJson
 	Online_cdr_exports   *[]string
 }
 
@@ -183,7 +183,7 @@ type CdrcJsonCfg struct {
 	Id                          *string
 	Enabled                     *bool
 	Dry_run                     *bool
-	Cdrs_conns                  *[]*HaPoolJsonCfg
+	Cdrs_conns                  *[]*RemoteHostJson
 	Cdr_format                  *string
 	Field_separator             *string
 	Timezone                    *string
@@ -210,15 +210,15 @@ type CdrcJsonCfg struct {
 type SessionSJsonCfg struct {
 	Enabled                   *bool
 	Listen_bijson             *string
-	Chargers_conns            *[]*HaPoolJsonCfg
-	Rals_conns                *[]*HaPoolJsonCfg
-	Resources_conns           *[]*HaPoolJsonCfg
-	Thresholds_conns          *[]*HaPoolJsonCfg
-	Stats_conns               *[]*HaPoolJsonCfg
-	Suppliers_conns           *[]*HaPoolJsonCfg
-	Cdrs_conns                *[]*HaPoolJsonCfg
-	Session_replication_conns *[]*HaPoolJsonCfg
-	Attributes_conns          *[]*HaPoolJsonCfg
+	Chargers_conns            *[]*RemoteHostJson
+	Rals_conns                *[]*RemoteHostJson
+	Resources_conns           *[]*RemoteHostJson
+	Thresholds_conns          *[]*RemoteHostJson
+	Stats_conns               *[]*RemoteHostJson
+	Suppliers_conns           *[]*RemoteHostJson
+	Cdrs_conns                *[]*RemoteHostJson
+	Session_replication_conns *[]*RemoteHostJson
+	Attributes_conns          *[]*RemoteHostJson
 	Debit_interval            *string
 	Store_session_costs       *bool
 	Min_call_duration         *string
@@ -235,7 +235,7 @@ type SessionSJsonCfg struct {
 // FreeSWITCHAgent config section
 type FreeswitchAgentJsonCfg struct {
 	Enabled        *bool
-	Sessions_conns *[]*HaPoolJsonCfg
+	Sessions_conns *[]*RemoteHostJson
 	Subscribe_park *bool
 	Create_cdr     *bool
 	Extra_fields   *[]string
@@ -256,7 +256,7 @@ type FsConnJsonCfg struct {
 }
 
 // Represents one connection instance towards a rater/cdrs server
-type HaPoolJsonCfg struct {
+type RemoteHostJson struct {
 	Address     *string
 	Transport   *string
 	Synchronous *bool
@@ -273,7 +273,7 @@ type AstConnJsonCfg struct {
 
 type AsteriskAgentJsonCfg struct {
 	Enabled        *bool
-	Sessions_conns *[]*HaPoolJsonCfg
+	Sessions_conns *[]*RemoteHostJson
 	Create_cdr     *bool
 	Asterisk_conns *[]*AstConnJsonCfg
 }
@@ -290,7 +290,7 @@ type CacheJsonCfg map[string]*CacheParamJsonCfg
 // SM-Kamailio config section
 type KamAgentJsonCfg struct {
 	Enabled        *bool
-	Sessions_conns *[]*HaPoolJsonCfg
+	Sessions_conns *[]*RemoteHostJson
 	Create_cdr     *bool
 	Evapi_conns    *[]*KamConnJsonCfg
 }
@@ -305,8 +305,8 @@ type KamConnJsonCfg struct {
 type SmOsipsJsonCfg struct {
 	Enabled                   *bool
 	Listen_udp                *string
-	Rals_conns                *[]*HaPoolJsonCfg
-	Cdrs_conns                *[]*HaPoolJsonCfg
+	Rals_conns                *[]*RemoteHostJson
+	Cdrs_conns                *[]*RemoteHostJson
 	Create_cdr                *bool
 	Debit_interval            *string
 	Min_call_duration         *string
@@ -327,7 +327,7 @@ type DiameterAgentJsonCfg struct {
 	Listen               *string
 	Listen_net           *string
 	Dictionaries_path    *string
-	Sessions_conns       *[]*HaPoolJsonCfg
+	Sessions_conns       *[]*RemoteHostJson
 	Origin_host          *string
 	Origin_realm         *string
 	Vendor_id            *int
@@ -359,7 +359,7 @@ type RadiusAgentJsonCfg struct {
 	Listen_acct         *string
 	Client_secrets      *map[string]string
 	Client_dictionaries *map[string]string
-	Sessions_conns      *[]*HaPoolJsonCfg
+	Sessions_conns      *[]*RemoteHostJson
 	Timezone            *string
 	Request_processors  *[]*RAReqProcessorJsnCfg
 }
@@ -379,7 +379,7 @@ type RAReqProcessorJsnCfg struct {
 type HttpAgentJsonCfg struct {
 	Id                 *string
 	Url                *string
-	Sessions_conns     *[]*HaPoolJsonCfg
+	Sessions_conns     *[]*RemoteHostJson
 	Request_payload    *string
 	Reply_payload      *string
 	Request_processors *[]*HttpAgentProcessorJsnCfg
@@ -401,7 +401,7 @@ type DNSAgentJsonCfg struct {
 	Enabled            *bool
 	Listen             *string
 	Listen_net         *string
-	Sessions_conns     *[]*HaPoolJsonCfg
+	Sessions_conns     *[]*RemoteHostJson
 	Timezone           *string
 	Request_processors *[]*ReqProcessorJsnCfg
 }
@@ -430,7 +430,7 @@ type AttributeSJsonCfg struct {
 type ChargerSJsonCfg struct {
 	Enabled               *bool
 	Indexed_selects       *bool
-	Attributes_conns      *[]*HaPoolJsonCfg
+	Attributes_conns      *[]*RemoteHostJson
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
 }
@@ -439,7 +439,7 @@ type ChargerSJsonCfg struct {
 type ResourceSJsonCfg struct {
 	Enabled               *bool
 	Indexed_selects       *bool
-	Thresholds_conns      *[]*HaPoolJsonCfg
+	Thresholds_conns      *[]*RemoteHostJson
 	Store_interval        *string
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
@@ -451,7 +451,7 @@ type StatServJsonCfg struct {
 	Indexed_selects       *bool
 	Store_interval        *string
 	Max_queue_length      *int
-	Thresholds_conns      *[]*HaPoolJsonCfg
+	Thresholds_conns      *[]*RemoteHostJson
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
 }
@@ -471,10 +471,10 @@ type SupplierSJsonCfg struct {
 	Indexed_selects       *bool
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
-	Attributes_conns      *[]*HaPoolJsonCfg
-	Rals_conns            *[]*HaPoolJsonCfg
-	Resources_conns       *[]*HaPoolJsonCfg
-	Stats_conns           *[]*HaPoolJsonCfg
+	Attributes_conns      *[]*RemoteHostJson
+	Rals_conns            *[]*RemoteHostJson
+	Resources_conns       *[]*RemoteHostJson
+	Stats_conns           *[]*RemoteHostJson
 }
 
 type LoaderJsonDataType struct {
@@ -490,7 +490,7 @@ type LoaderJsonCfg struct {
 	Dry_run         *bool
 	Run_delay       *int
 	Lock_filename   *string
-	Caches_conns    *[]*HaPoolJsonCfg
+	Caches_conns    *[]*RemoteHostJson
 	Field_separator *string
 	Tp_in_dir       *string
 	Tp_out_dir      *string
@@ -540,7 +540,7 @@ type DispatcherSJsonCfg struct {
 	Indexed_selects       *bool
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
-	Attributes_conns      *[]*HaPoolJsonCfg
+	Attributes_conns      *[]*RemoteHostJson
 }
 
 type LoaderCfgJson struct {
@@ -548,8 +548,8 @@ type LoaderCfgJson struct {
 	Data_path       *string
 	Disable_reverse *bool
 	Field_separator *string
-	Caches_conns    *[]*HaPoolJsonCfg
-	Scheduler_conns *[]*HaPoolJsonCfg
+	Caches_conns    *[]*RemoteHostJson
+	Scheduler_conns *[]*RemoteHostJson
 }
 
 type MigratorCfgJson struct {
@@ -599,6 +599,6 @@ type AnalyzerSJsonCfg struct {
 }
 
 type ApierJsonCfg struct {
-	Caches_conns    *[]*HaPoolJsonCfg
-	Scheduler_conns *[]*HaPoolJsonCfg
+	Caches_conns    *[]*RemoteHostJson
+	Scheduler_conns *[]*RemoteHostJson
 }

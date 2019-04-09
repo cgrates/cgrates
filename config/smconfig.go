@@ -41,7 +41,7 @@ type RemoteHost struct {
 	TLS         bool
 }
 
-func (self *RemoteHost) loadFromJsonCfg(jsnCfg *HaPoolJsonCfg) error {
+func (self *RemoteHost) loadFromJsonCfg(jsnCfg *RemoteHostJson) error {
 	if jsnCfg == nil {
 		return nil
 	}
