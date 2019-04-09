@@ -1125,29 +1125,34 @@ func startRpc(server *utils.Server, internalRaterChan,
 	internalSMGChan, internalAnalyzerSChan chan rpcclient.RpcClientConnection,
 	internalDispatcherSChan chan *dispatchers.DispatcherService,
 	exitChan chan bool) {
-	select { // Any of the rpc methods will unlock listening to rpc requests
-	case resp := <-internalRaterChan:
-		internalRaterChan <- resp
-	case cdrs := <-internalCdrSChan:
-		internalCdrSChan <- cdrs
-	case smg := <-internalSMGChan:
-		internalSMGChan <- smg
-	case rls := <-internalRsChan:
-		internalRsChan <- rls
-	case statS := <-internalStatSChan:
-		internalStatSChan <- statS
-	case attrS := <-internalAttrSChan:
-		internalAttrSChan <- attrS
-	case chrgS := <-internalChargerSChan:
-		internalChargerSChan <- chrgS
-	case thS := <-internalThdSChan:
-		internalThdSChan <- thS
-	case splS := <-internalSuplSChan:
-		internalSuplSChan <- splS
-	case dispatcherS := <-internalDispatcherSChan:
-		internalDispatcherSChan <- dispatcherS
-	case analyzerS := <-internalAnalyzerSChan:
-		internalAnalyzerSChan <- analyzerS
+	if !config.CgrConfig().DispatcherSCfg().Enabled {
+		select { // Any of the rpc methods will unlock listening to rpc requests
+		case resp := <-internalRaterChan:
+			internalRaterChan <- resp
+		case cdrs := <-internalCdrSChan:
+			internalCdrSChan <- cdrs
+		case smg := <-internalSMGChan:
+			internalSMGChan <- smg
+		case rls := <-internalRsChan:
+			internalRsChan <- rls
+		case statS := <-internalStatSChan:
+			internalStatSChan <- statS
+		case attrS := <-internalAttrSChan:
+			internalAttrSChan <- attrS
+		case chrgS := <-internalChargerSChan:
+			internalChargerSChan <- chrgS
+		case thS := <-internalThdSChan:
+			internalThdSChan <- thS
+		case splS := <-internalSuplSChan:
+			internalSuplSChan <- splS
+		case analyzerS := <-internalAnalyzerSChan:
+			internalAnalyzerSChan <- analyzerS
+		}
+	} else {
+		select {
+		case dispatcherS := <-internalDispatcherSChan:
+			internalDispatcherSChan <- dispatcherS
+		}
 	}
 
 	go server.ServeJSON(cfg.ListenCfg().RPCJSONListen)
