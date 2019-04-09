@@ -200,7 +200,8 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connID string) {
 			return
 		}
 		cgrEv.Event[utils.OriginHost] = ka.conns[connID].RemoteAddr().String()
-		if err := ka.sessionS.Call(utils.SessionSv1ProcessCDR, cgrEv, &reply); err != nil {
+		if err := ka.sessionS.Call(utils.SessionSv1ProcessCDR,
+			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv}, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("%s> failed processing CGREvent: %s, error: %s",
 				utils.KamailioAgent, utils.ToJSON(cgrEv), err.Error()))
 		}
