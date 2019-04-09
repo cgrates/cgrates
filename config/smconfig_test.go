@@ -219,12 +219,12 @@ func TestRemoteHostloadFromJsonCfg(t *testing.T) {
 	} else if !reflect.DeepEqual(hpoolcfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, hpoolcfg)
 	}
-	if err := hpoolcfg.loadFromJsonCfg(new(HaPoolJsonCfg)); err != nil {
+	if err := hpoolcfg.loadFromJsonCfg(new(RemoteHostJson)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(hpoolcfg, expected) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, hpoolcfg)
 	}
-	json := &HaPoolJsonCfg{
+	json := &RemoteHostJson{
 		Address:     utils.StringPointer("127.0.0.1:8448"),
 		Synchronous: utils.BoolPointer(true),
 	}

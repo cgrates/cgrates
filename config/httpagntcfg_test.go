@@ -223,7 +223,7 @@ func TestHttpAgentCfgloadFromJsonCfg(t *testing.T) {
 	jsnhttpCfg := &HttpAgentJsonCfg{
 		Id:              utils.StringPointer("conecto1"),
 		Url:             utils.StringPointer("/conecto"),
-		Sessions_conns:  &[]*HaPoolJsonCfg{{Address: utils.StringPointer("127.0.0.1:2012"), Transport: utils.StringPointer("*json")}},
+		Sessions_conns:  &[]*RemoteHostJson{{Address: utils.StringPointer("127.0.0.1:2012"), Transport: utils.StringPointer("*json")}},
 		Request_payload: utils.StringPointer("*url"),
 		Reply_payload:   utils.StringPointer("*xml"),
 		Request_processors: &[]*HttpAgentProcessorJsnCfg{
