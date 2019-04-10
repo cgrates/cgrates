@@ -19,46 +19,47 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdGetDispatcherHostIDs{
-		name:      "dispatcherhost_ids",
-		rpcMethod: utils.ApierV1GetDispatcherHostIDs,
+	c := &CmdGetDispatcherHost{
+		name:      "dispatcher_host",
+		rpcMethod: utils.ApierV1GetDispatcherHost,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdGetDispatcherHostIDs struct {
+type CmdGetDispatcherHost struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantArg
+	rpcParams *utils.TenantID
 	*CommandExecuter
 }
 
-func (self *CmdGetDispatcherHostIDs) Name() string {
+func (self *CmdGetDispatcherHost) Name() string {
 	return self.name
 }
 
-func (self *CmdGetDispatcherHostIDs) RpcMethod() string {
+func (self *CmdGetDispatcherHost) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetDispatcherHostIDs) RpcParams(reset bool) interface{} {
+func (self *CmdGetDispatcherHost) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(utils.TenantArg)
+		self.rpcParams = new(utils.TenantID)
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetDispatcherHostIDs) PostprocessRpcParams() error {
+func (self *CmdGetDispatcherHost) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetDispatcherHostIDs) RpcResult() interface{} {
-	var s []string
+func (self *CmdGetDispatcherHost) RpcResult() interface{} {
+	var s engine.DispatcherHost
 	return &s
 }

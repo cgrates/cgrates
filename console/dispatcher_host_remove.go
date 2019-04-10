@@ -24,7 +24,7 @@ import (
 
 func init() {
 	c := &CmdRemoveDispatcherHost{
-		name:      "dispatcherhost_remove",
+		name:      "dispatcher_host_remove",
 		rpcMethod: utils.ApierV1RemoveDispatcherHost,
 	}
 	commands[c.Name()] = c
