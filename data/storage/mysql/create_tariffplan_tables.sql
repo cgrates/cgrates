@@ -183,7 +183,7 @@ CREATE TABLE `tp_action_plans` (
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_action_schedule` (`tpid`,`tag`,`actions_tag`)
+  UNIQUE KEY `unique_action_schedule` (`tpid`,`tag`,`actions_tag`,`timing_tag`)
 );
 
 --

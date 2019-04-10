@@ -23,7 +23,7 @@ psql -U $user -h $host -d cgrates -f "$DIR"/create_tariffplan_tables.sql
 tpt=$?
 
 if [ $cdrt = 0 ] && [ $tpt = 0 ]; then
-	echo -e "\n\t+++ CGR-DB successfully set-up! +++\n"
+	echo "\n\t+++ CGR-DB successfully set-up! +++\n"
 	exit 0
 fi
 

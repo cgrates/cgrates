@@ -22,7 +22,7 @@ mysql -u $1 -p$2 -h $host -D cgrates < "$DIR"/create_tariffplan_tables.sql
 tpt=$?
 
 if [ $cu = 0 ] && [ $cdrt = 0 ] && [ $tpt = 0 ]; then
-	echo -e "\n\t+++ CGR-DB successfully set-up! +++\n"
+	echo "\n\t+++ CGR-DB successfully set-up! +++\n"
 	exit 0
 fi
 

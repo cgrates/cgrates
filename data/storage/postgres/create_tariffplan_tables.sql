@@ -176,7 +176,7 @@ CREATE TABLE tp_action_plans (
   timing_tag VARCHAR(64) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE,
-  UNIQUE  (tpid, tag, actions_tag)
+  UNIQUE  (tpid, tag, actions_tag, timing_tag)
 );
 CREATE INDEX tpactionplans_tpid_idx ON tp_action_plans (tpid);
 CREATE INDEX tpactionplans_idx ON tp_action_plans (tpid,tag);
