@@ -36,7 +36,7 @@ func init() {
 type CmdSetDispatcherHost struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.DispatcherHostWrapper
+	rpcParams *v1.DispatcherHostWithCache
 	*CommandExecuter
 }
 
@@ -50,7 +50,7 @@ func (self *CmdSetDispatcherHost) RpcMethod() string {
 
 func (self *CmdSetDispatcherHost) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(v1.DispatcherHostWrapper)
+		self.rpcParams = new(v1.DispatcherHostWithCache)
 	}
 	return self.rpcParams
 }

@@ -93,7 +93,7 @@ func (apierV1 *ApierV1) SetDispatcherProfile(args *DispatcherWithCache, reply *s
 }
 
 //RemoveDispatcherProfile remove a specific Dispatcher Profile
-func (apierV1 *ApierV1) RemoveDispatcherProfile(arg *utils.TenantIDWrapper, reply *string) error {
+func (apierV1 *ApierV1) RemoveDispatcherProfile(arg *utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -152,13 +152,13 @@ func (apierV1 *ApierV1) GetDispatcherHostIDs(tenantArg *utils.TenantArg, dPrfIDs
 	return nil
 }
 
-type DispatcherHostWrapper struct {
+type DispatcherHostWithCache struct {
 	*engine.DispatcherHost
 	Cache *string
 }
 
 //SetDispatcherHost add/update a new Dispatcher Host
-func (apierV1 *ApierV1) SetDispatcherHost(args *DispatcherHostWrapper, reply *string) error {
+func (apierV1 *ApierV1) SetDispatcherHost(args *DispatcherHostWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(args.DispatcherHost, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -182,7 +182,7 @@ func (apierV1 *ApierV1) SetDispatcherHost(args *DispatcherHostWrapper, reply *st
 }
 
 //RemoveDispatcherHost remove a specific Dispatcher Host
-func (apierV1 *ApierV1) RemoveDispatcherHost(arg *utils.TenantIDWrapper, reply *string) error {
+func (apierV1 *ApierV1) RemoveDispatcherHost(arg *utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

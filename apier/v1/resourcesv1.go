@@ -149,7 +149,7 @@ func (apierV1 *ApierV1) SetResourceProfile(arg *ResourceWithCache, reply *string
 }
 
 //RemoveResourceProfile remove a specific resource configuration
-func (apierV1 *ApierV1) RemoveResourceProfile(arg utils.TenantIDWrapper, reply *string) error {
+func (apierV1 *ApierV1) RemoveResourceProfile(arg utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

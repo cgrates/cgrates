@@ -110,7 +110,7 @@ func (apierV1 *ApierV1) SetStatQueueProfile(arg *StatQueueWithCache, reply *stri
 }
 
 // Remove a specific stat configuration
-func (apierV1 *ApierV1) RemStatQueueProfile(args *utils.TenantIDWrapper, reply *string) error {
+func (apierV1 *ApierV1) RemStatQueueProfile(args *utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

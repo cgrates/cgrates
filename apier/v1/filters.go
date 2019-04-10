@@ -86,7 +86,7 @@ func (apierV1 *ApierV1) GetFilterIDs(tenant string, fltrIDs *[]string) error {
 }
 
 //RemoveFilter  remove a specific filter
-func (apierV1 *ApierV1) RemoveFilter(arg utils.TenantIDWrapper, reply *string) error {
+func (apierV1 *ApierV1) RemoveFilter(arg utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

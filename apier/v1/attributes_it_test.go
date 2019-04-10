@@ -764,7 +764,7 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 func testAttributeSRemAlsPrf(t *testing.T) {
 	var resp string
 	if err := attrSRPC.Call("ApierV1.RemoveAttributeProfile",
-		&utils.TenantIDWrapper{Tenant: alsPrf.Tenant, ID: alsPrf.ID}, &resp); err != nil {
+		&utils.TenantIDWithCache{Tenant: alsPrf.Tenant, ID: alsPrf.ID}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -778,7 +778,7 @@ func testAttributeSRemAlsPrf(t *testing.T) {
 	// remove twice shoud return not found
 	resp = ""
 	if err := attrSRPC.Call("ApierV1.RemoveAttributeProfile",
-		&utils.TenantIDWrapper{Tenant: alsPrf.Tenant, ID: alsPrf.ID}, &resp); err.Error() != utils.ErrNotFound.Error() {
+		&utils.TenantIDWithCache{Tenant: alsPrf.Tenant, ID: alsPrf.ID}, &resp); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
 	}
 }
@@ -1302,7 +1302,7 @@ func testAttributeSCachingMetaLoad(t *testing.T) {
 	//remove from cache and DataManager the profile
 	var resp string
 	if err := attrSRPC.Call("ApierV1.RemoveAttributeProfile",
-		&utils.TenantIDWrapper{Tenant: attrPrf1.Tenant, ID: attrPrf1.ID,
+		&utils.TenantIDWithCache{Tenant: attrPrf1.Tenant, ID: attrPrf1.ID,
 			Cache: utils.StringPointer(utils.MetaRemove)}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

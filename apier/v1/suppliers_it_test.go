@@ -852,7 +852,7 @@ func testV1SplSUpdateSupplierProfiles(t *testing.T) {
 func testV1SplSRemSupplierProfiles(t *testing.T) {
 	var resp string
 	if err := splSv1Rpc.Call("ApierV1.RemoveSupplierProfile",
-		&utils.TenantIDWrapper{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err != nil {
+		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -864,7 +864,7 @@ func testV1SplSRemSupplierProfiles(t *testing.T) {
 		t.Error(err)
 	}
 	if err := splSv1Rpc.Call("ApierV1.RemoveSupplierProfile",
-		&utils.TenantIDWrapper{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err.Error() != utils.ErrNotFound.Error() {
+		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
 	}
 }
