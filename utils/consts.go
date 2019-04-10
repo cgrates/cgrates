@@ -822,7 +822,8 @@ const (
 
 // DispatcherS APIs
 const (
-	DispatcherSv1Ping = "DispatcherSv1.Ping"
+	DispatcherSv1Ping               = "DispatcherSv1.Ping"
+	DispatcherSv1GetProfileForEvent = "DispatcherSv1.GetProfileForEvent"
 )
 
 // AnalyzerS APIs

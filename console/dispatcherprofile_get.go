@@ -19,48 +19,47 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdDispatcherProfile{
-		name:      "dispatcherprofile",
-		rpcMethod: utils.DispatcherSv1GetProfileForEvent,
+	c := &CmdGetDispatcherProfile{
+		name:      "dispatcherprofile_get",
+		rpcMethod: utils.ApierV1GetDispatcherProfile,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdDispatcherProfile struct {
+type CmdGetDispatcherProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *dispatchers.DispatcherEvent
+	rpcParams *utils.TenantID
 	*CommandExecuter
 }
 
-func (self *CmdDispatcherProfile) Name() string {
+func (self *CmdGetDispatcherProfile) Name() string {
 	return self.name
 }
 
-func (self *CmdDispatcherProfile) RpcMethod() string {
+func (self *CmdGetDispatcherProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdDispatcherProfile) RpcParams(reset bool) interface{} {
+func (self *CmdGetDispatcherProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(dispatchers.DispatcherEvent)
+		self.rpcParams = new(utils.TenantID)
 	}
 	return self.rpcParams
 }
 
-func (self *CmdDispatcherProfile) PostprocessRpcParams() error {
+func (self *CmdGetDispatcherProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdDispatcherProfile) RpcResult() interface{} {
+func (self *CmdGetDispatcherProfile) RpcResult() interface{} {
 	var s engine.DispatcherProfile
 	return &s
 }
