@@ -1186,3 +1186,91 @@ cgrates.org,EVENT1,,,,,,ALL,,10,,,
 	}
 
 }
+
+func TestLoaderProcessDispatcheHosts(t *testing.T) {
+	dipatcherHostCSV := `
+#Tenant[0],ID[1],Address[2],Transport[3],TLS[4]
+cgrates.org,ALL,127.0.0.1:6012,*json,false
+`
+	data, _ := engine.NewMapStorage()
+	ldr := &Loader{
+		ldrID:         "TestLoaderProcessContent",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaDispatcherHosts: []*config.FCTemplate{
+			&config.FCTemplate{
+				Tag:       "Tenant",
+				FieldId:   "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~0", true, utils.INFIELD_SEP),
+				Mandatory: true,
+			},
+			&config.FCTemplate{
+				Tag:       "ID",
+				FieldId:   "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~1", true, utils.INFIELD_SEP),
+				Mandatory: true,
+			},
+			&config.FCTemplate{
+				Tag:     "Address",
+				FieldId: "Address",
+				Type:    utils.META_COMPOSED,
+				Value:   config.NewRSRParsersMustCompile("~2", true, utils.INFIELD_SEP),
+			},
+			&config.FCTemplate{
+				Tag:     "Transport",
+				FieldId: "Transport",
+				Type:    utils.META_COMPOSED,
+				Value:   config.NewRSRParsersMustCompile("~3", true, utils.INFIELD_SEP),
+			},
+			&config.FCTemplate{
+				Tag:     "TLS",
+				FieldId: "TLS",
+				Type:    utils.META_COMPOSED,
+				Value:   config.NewRSRParsersMustCompile("~4", true, utils.INFIELD_SEP),
+			},
+		},
+	}
+	rdr := ioutil.NopCloser(strings.NewReader(dipatcherHostCSV))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaDispatcherHosts: map[string]*openedCSVFile{
+			utils.DispatcherProfilesCsv: &openedCSVFile{
+				fileName: utils.DispatcherProfilesCsv,
+				rdr:      rdr,
+				csvRdr:   csvRdr,
+			},
+		},
+	}
+	if err := ldr.processContent(utils.MetaDispatcherHosts); err != nil {
+		t.Error(err)
+	}
+	if len(ldr.bufLoaderData) != 0 {
+		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
+	}
+	eDispHost := &engine.DispatcherHost{
+		Tenant: "cgrates.org",
+		ID:     "ALL",
+		Conns: []*config.RemoteHost{
+			&config.RemoteHost{
+				Address:   "127.0.0.1:6012",
+				Transport: utils.MetaJSONrpc,
+			},
+		},
+	}
+
+	rcv, err := ldr.dm.GetDispatcherHost("cgrates.org", "ALL",
+		true, false, utils.NonTransactional)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(eDispHost, rcv) {
+		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eDispHost), utils.ToJSON(rcv))
+	}
+
+}
