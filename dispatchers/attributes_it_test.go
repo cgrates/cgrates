@@ -95,6 +95,12 @@ func testDspAttrPingFailover(t *testing.T) {
 	}
 	allEngine.startEngine(t)
 	allEngine2.startEngine(t)
+	reply = ""
+	if err := dispEngine.RCP.Call(utils.AttributeSv1Ping, &ev, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
+	}
 }
 
 func testDspAttrGetAttrFailover(t *testing.T) {
