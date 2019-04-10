@@ -221,5 +221,37 @@ func TestDispatcherProfilesSort(t *testing.T) {
 	if dProf.Sort(); !reflect.DeepEqual(eProf, dProf) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eProf), utils.ToJSON(dProf))
 	}
+}
 
+type testRPCHost struct {
+	serviceMethod string
+	args          interface{}
+	reply         interface{}
+}
+
+func (v *testRPCHost) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	v.serviceMethod = serviceMethod
+	v.args = args
+	v.reply = reply
+	return nil
+}
+
+func TestDispatcherHostCall(t *testing.T) {
+	tRPC := &testRPCHost{}
+	dspHost := DispatcherHost{}
+	etRPC := &testRPCHost{
+		serviceMethod: utils.AttributeSv1Ping,
+		args:          &utils.CGREvent{},
+		reply:         utils.StringPointer(""),
+	}
+	var reply string
+	if err := dspHost.Call(utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err == nil || err.Error() != utils.ErrNotConnected.Error() {
+		t.Errorf("Expected: %s , received: %v", utils.ErrNotConnected.Error(), err)
+	}
+	dspHost.rpcConn = tRPC
+	if err := dspHost.Call(utils.AttributeSv1Ping, &utils.CGREvent{}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(*etRPC, *tRPC) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(etRPC), utils.ToJSON(tRPC))
+	}
 }
