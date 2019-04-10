@@ -660,7 +660,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*dispatchers",						// data source type
-				"file_name": "DispatcherProfiles.csv",				// file name in the tp_in_dir
+				"file_name": "DispatcherProfiles.csv",		// file name in the tp_in_dir
 				"fields": [
 					{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~0", "mandatory": true},
 					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "~1", "mandatory": true},
@@ -675,6 +675,17 @@ const CGRATES_CFG_JSON = `
 					{"tag": "ConnBlocker", "field_id": "ConnBlocker", "type": "*composed", "value": "~10"},
 					{"tag": "ConnParameters", "field_id": "ConnParameters", "type": "*composed", "value": "~11"},
 					{"tag": "Weight", "field_id": "Weight", "type": "*composed", "value": "~12"},
+				],
+			},
+			{
+				"type": "*dispatcher_hosts",						// data source type
+				"file_name": "DispatcherHosts.csv",					// file name in the tp_in_dir 
+				"fields": [
+					{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~0", "mandatory": true},
+					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "~1", "mandatory": true},
+					{"tag": "Address", "field_id": "Address", "type": "*composed", "value": "~2"},
+					{"tag": "Transport", "field_id": "Transport", "type": "*composed", "value": "~3"},
+					{"tag": "TLS", "field_id": "TLS", "type": "*composed", "value": "~4"},
 				],
 			},
 		],
