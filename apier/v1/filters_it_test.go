@@ -194,7 +194,7 @@ func testFilterGetFilterAfterUpdate(t *testing.T) {
 func testFilterRemoveFilter(t *testing.T) {
 	var resp string
 	if err := filterRPC.Call("ApierV1.RemoveFilter",
-		&utils.TenantIDWrapper{Tenant: "cgrates.org", ID: "Filter1"}, &resp); err != nil {
+		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "Filter1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)

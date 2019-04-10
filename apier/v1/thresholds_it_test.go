@@ -404,7 +404,7 @@ func testV1TSUpdateThresholdProfile(t *testing.T) {
 func testV1TSRemoveThresholdProfile(t *testing.T) {
 	var resp string
 	if err := tSv1Rpc.Call("ApierV1.RemoveThresholdProfile",
-		&utils.TenantIDWrapper{Tenant: "cgrates.org", ID: "THD_Test"}, &resp); err != nil {
+		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "THD_Test"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
@@ -416,7 +416,7 @@ func testV1TSRemoveThresholdProfile(t *testing.T) {
 		t.Errorf("Recived %s and the error:%+v", utils.ToJSON(sqp), err)
 	}
 	if err := tSv1Rpc.Call("ApierV1.RemoveThresholdProfile",
-		&utils.TenantIDWrapper{Tenant: "cgrates.org", ID: "THD_Test"}, &resp); err.Error() != utils.ErrNotFound.Error() {
+		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "THD_Test"}, &resp); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
 	}
 }

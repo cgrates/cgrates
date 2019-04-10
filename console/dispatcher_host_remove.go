@@ -35,7 +35,7 @@ func init() {
 type CmdRemoveDispatcherHost struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantIDWrapper
+	rpcParams *utils.TenantIDWithCache
 	*CommandExecuter
 }
 
@@ -49,7 +49,7 @@ func (self *CmdRemoveDispatcherHost) RpcMethod() string {
 
 func (self *CmdRemoveDispatcherHost) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(utils.TenantIDWrapper)
+		self.rpcParams = new(utils.TenantIDWithCache)
 	}
 	return self.rpcParams
 }

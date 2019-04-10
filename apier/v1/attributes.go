@@ -103,7 +103,7 @@ func (apierV1 *ApierV1) SetAttributeProfile(alsWrp *AttributeWithCache, reply *s
 }
 
 //RemoveAttributeProfile remove a specific Attribute Profile
-func (apierV1 *ApierV1) RemoveAttributeProfile(arg *utils.TenantIDWrapper, reply *string) error {
+func (apierV1 *ApierV1) RemoveAttributeProfile(arg *utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

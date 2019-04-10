@@ -24,7 +24,7 @@ func init() {
 	c := &CmdRemoveResource{
 		name:      "resource_remove",
 		rpcMethod: "ApierV1.RemoveResourceProfile",
-		rpcParams: &utils.TenantIDWrapper{},
+		rpcParams: &utils.TenantIDWithCache{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -34,7 +34,7 @@ func init() {
 type CmdRemoveResource struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantIDWrapper
+	rpcParams *utils.TenantIDWithCache
 	*CommandExecuter
 }
 
@@ -48,7 +48,7 @@ func (self *CmdRemoveResource) RpcMethod() string {
 
 func (self *CmdRemoveResource) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantIDWrapper{}
+		self.rpcParams = &utils.TenantIDWithCache{}
 	}
 	return self.rpcParams
 }

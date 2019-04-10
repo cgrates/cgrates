@@ -204,7 +204,7 @@ func testDispatcherSRemDispatcherProfile(t *testing.T) {
 	}
 
 	if err := dispatcherRPC.Call(utils.ApierV1RemoveDispatcherProfile,
-		&utils.TenantIDWrapper{Tenant: "cgrates.org", ID: "Dsp1"},
+		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "Dsp1"},
 		&result); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
 	}

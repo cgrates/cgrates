@@ -86,7 +86,7 @@ func (apierV1 *ApierV1) SetChargerProfile(arg *ChargerWithCache, reply *string) 
 }
 
 //RemoveChargerProfile remove a specific Charger Profile
-func (apierV1 *ApierV1) RemoveChargerProfile(arg utils.TenantIDWrapper, reply *string) error {
+func (apierV1 *ApierV1) RemoveChargerProfile(arg utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

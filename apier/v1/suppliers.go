@@ -86,7 +86,7 @@ func (apierV1 *ApierV1) SetSupplierProfile(args *SupplierWithCache, reply *strin
 }
 
 //RemoveSupplierProfile remove a specific Supplier configuration
-func (apierV1 *ApierV1) RemoveSupplierProfile(args *utils.TenantIDWrapper, reply *string) error {
+func (apierV1 *ApierV1) RemoveSupplierProfile(args *utils.TenantIDWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

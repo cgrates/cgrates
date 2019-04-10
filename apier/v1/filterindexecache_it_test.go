@@ -1103,7 +1103,7 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 	//Remove threshold profile that was set form api
-	if err := tFIdxCaRpc.Call("ApierV1.RemoveAttributeProfile", &utils.TenantIDWrapper{Tenant: "cgrates.org",
+	if err := tFIdxCaRpc.Call("ApierV1.RemoveAttributeProfile", &utils.TenantIDWithCache{Tenant: "cgrates.org",
 		ID: "TEST_PROFILE1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -1117,7 +1117,7 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 		t.Error(err)
 	}
 	//Remove threshold profile that was set form tariffplan
-	if err := tFIdxCaRpc.Call("ApierV1.RemoveAttributeProfile", &utils.TenantIDWrapper{Tenant: "cgrates.org",
+	if err := tFIdxCaRpc.Call("ApierV1.RemoveAttributeProfile", &utils.TenantIDWithCache{Tenant: "cgrates.org",
 		ID: "ATTR_1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

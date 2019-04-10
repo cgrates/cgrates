@@ -811,13 +811,13 @@ func (tID *TenantID) TenantID() string {
 	return ConcatenatedKey(tID.Tenant, tID.ID)
 }
 
-type TenantIDWrapper struct {
+type TenantIDWithCache struct {
 	Tenant string
 	ID     string
 	Cache  *string
 }
 
-func (tID *TenantIDWrapper) TenantID() string {
+func (tID *TenantIDWithCache) TenantID() string {
 	return ConcatenatedKey(tID.Tenant, tID.ID)
 }
 

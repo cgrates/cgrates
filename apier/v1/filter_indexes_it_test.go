@@ -1450,14 +1450,14 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call("ApierV1.RemoveAttributeProfile", &utils.TenantIDWrapper{
+	if err := tFIdxRpc.Call("ApierV1.RemoveAttributeProfile", &utils.TenantIDWithCache{
 		Tenant: tenant,
 		ID:     "ApierTest"}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call("ApierV1.RemoveAttributeProfile", &utils.TenantIDWrapper{
+	if err := tFIdxRpc.Call("ApierV1.RemoveAttributeProfile", &utils.TenantIDWithCache{
 		Tenant: tenant,
 		ID:     "ApierTest2"}, &result); err != nil {
 		t.Error(err)
