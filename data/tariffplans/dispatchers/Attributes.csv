@@ -14,3 +14,4 @@ cgrates.org,ATTR_API_CHC_AUTH,*auth,*string:~APIKey:chc12345,,,APIMethods,*const
 cgrates.org,ATTR_API_GRD_AUTH,*auth,*string:~APIKey:grd12345,,,APIMethods,*constant,GuardianSv1.Ping&GuardianSv1.RemoteLock&GuardianSv1.RemoteUnlock,false,20
 cgrates.org,ATTR_API_SCHD_AUTH,*auth,*string:~APIKey:sched12345,,,APIMethods,*constant,SchedulerSv1.Ping,false,20
 cgrates.org,ATTR_API_CDRS_AUTH,*auth,*string:~APIKey:cdrs12345,,,APIMethods,*constant,CDRsV1.Ping,false,20
+cgrates.org,ATTR_API_DSP_AUTH,*auth,*string:~APIKey:dsp12345,,,APIMethods,*constant,DispatcherSv1.Ping&DispatcherSv1.GetProfileForEvent,false,20

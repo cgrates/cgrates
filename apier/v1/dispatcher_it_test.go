@@ -85,7 +85,6 @@ func testDispatcherSInitCfg(t *testing.T) {
 		t.Error(err)
 	}
 	dispatcherCfg.DataFolderPath = *dataDir
-	config.SetCgrConfig(dispatcherCfg)
 }
 
 func testDispatcherSInitDataDb(t *testing.T) {
