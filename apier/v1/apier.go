@@ -909,18 +909,6 @@ func (self *ApierV1) RemoveActions(attr AttrRemoveActions, reply *string) error 
 	return nil
 }
 
-func (v1 *ApierV1) StartService(args servmanager.ArgStartService, reply *string) (err error) {
-	return v1.ServManager.V1StartService(args, reply)
-}
-
-func (v1 *ApierV1) StopService(args servmanager.ArgStartService, reply *string) (err error) {
-	return v1.ServManager.V1StopService(args, reply)
-}
-
-func (v1 *ApierV1) ServiceStatus(args servmanager.ArgStartService, reply *string) (err error) {
-	return v1.ServManager.V1ServiceStatus(args, reply)
-}
-
 type ArgsReplyFailedPosts struct {
 	FailedRequestsInDir  *string  // if defined it will be our source of requests to be replayed
 	FailedRequestsOutDir *string  // if defined it will become our destination for files failing to be replayed, *none to be discarded

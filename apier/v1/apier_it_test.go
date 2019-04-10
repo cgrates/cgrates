@@ -1673,35 +1673,35 @@ func TestApierLoadTariffPlanFromStorDb(t *testing.T) {
 
 func TestApierStartStopServiceStatus(t *testing.T) {
 	var reply string
-	if err := rater.Call("ApierV1.ServiceStatus", servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
+	if err := rater.Call(utils.ServManagerV1ServiceStatus, servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.RunningCaps {
 		t.Errorf("Received: <%s>", reply)
 	}
-	if err := rater.Call("ApierV1.StopService", servmanager.ArgStartService{ServiceID: "INVALID"},
+	if err := rater.Call(utils.ServManagerV1StopService, servmanager.ArgStartService{ServiceID: "INVALID"},
 		&reply); err == nil || err.Error() != utils.UnsupportedServiceIDCaps {
 		t.Error(err)
 	}
-	if err := rater.Call("ApierV1.StopService", servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
+	if err := rater.Call(utils.ServManagerV1StopService, servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: <%s>", reply)
 	}
-	if err := rater.Call("ApierV1.ServiceStatus", servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
+	if err := rater.Call(utils.ServManagerV1ServiceStatus, servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.StoppedCaps {
 		t.Errorf("Received: <%s>", reply)
 	}
-	if err := rater.Call("ApierV1.StartService", servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
+	if err := rater.Call(utils.ServManagerV1StartService, servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: <%s>", reply)
 	}
-	if err := rater.Call("ApierV1.ServiceStatus", servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
+	if err := rater.Call(utils.ServManagerV1ServiceStatus, servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.RunningCaps {

@@ -730,6 +730,14 @@ const (
 	ApierV2CountCDRs                = "ApierV2.CountCDRs"
 )
 
+const (
+	ServManagerV1              = "ServManagerV1"
+	ServManagerV1StartService  = "ServManagerV1.StartService"
+	ServManagerV1StopService   = "ServManagerV1.StopService"
+	ServManagerV1ServiceStatus = "ServManagerV1.ServiceStatus"
+	ServManagerV1Ping          = "ServManagerV1.Ping"
+)
+
 // SupplierS APIs
 const (
 	SupplierSv1GetSuppliers = "SupplierSv1.GetSuppliers"
