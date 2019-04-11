@@ -204,6 +204,25 @@ func testV1STSProcessEvent(t *testing.T) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
 	}
 
+	//process with one event (should be N/A becaus MinItems is 2)
+	expectedFloatMetrics := map[string]float64{
+		utils.MetaASR: -1.0,
+		utils.MetaACD: -1.0,
+		utils.MetaTCC: -1.0,
+		utils.MetaTCD: -1.0,
+		utils.MetaACC: -1.0,
+		utils.MetaPDD: -1.0,
+		utils.StatsJoin(utils.MetaSum, utils.Usage):     -1.0,
+		utils.StatsJoin(utils.MetaAverage, utils.Usage): -1.0,
+	}
+	var floatMetrics map[string]float64
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueFloatMetrics,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &floatMetrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedFloatMetrics, floatMetrics) {
+		t.Errorf("expecting: %+v, received reply: %+v", expectedFloatMetrics, floatMetrics)
+	}
+
 	args2 := engine.StatsArgsProcessEvent{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -247,6 +266,23 @@ func testV1STSProcessEvent(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics2, metrics2) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics2, metrics2)
+	}
+
+	expectedFloatMetrics2 := map[string]float64{
+		utils.MetaASR: 66.66667,
+		utils.MetaACD: 60,
+		utils.MetaTCC: 135.1,
+		utils.MetaTCD: 180,
+		utils.MetaACC: 45.03333,
+		utils.MetaPDD: -1.0,
+		utils.StatsJoin(utils.MetaSum, utils.Usage):     180000000000,
+		utils.StatsJoin(utils.MetaAverage, utils.Usage): 60000000000,
+	}
+	var floatMetrics2 map[string]float64
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueFloatMetrics, &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &floatMetrics2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedFloatMetrics2, floatMetrics2) {
+		t.Errorf("expecting: %+v, received reply: %+v", expectedFloatMetrics2, floatMetrics2)
 	}
 
 }
