@@ -733,11 +733,11 @@ const (
 )
 
 const (
-	ServManagerV1              = "ServManagerV1"
-	ServManagerV1StartService  = "ServManagerV1.StartService"
-	ServManagerV1StopService   = "ServManagerV1.StopService"
-	ServManagerV1ServiceStatus = "ServManagerV1.ServiceStatus"
-	ServManagerV1Ping          = "ServManagerV1.Ping"
+	ServiceManagerV1              = "ServiceManagerV1"
+	ServiceManagerV1StartService  = "ServiceManagerV1.StartService"
+	ServiceManagerV1StopService   = "ServiceManagerV1.StopService"
+	ServiceManagerV1ServiceStatus = "ServiceManagerV1.ServiceStatus"
+	ServiceManagerV1Ping          = "ServiceManagerV1.Ping"
 )
 
 // SupplierS APIs

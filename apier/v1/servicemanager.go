@@ -23,34 +23,34 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewServManagerV1(sm *servmanager.ServiceManager) *ServManagerV1 {
-	return &ServManagerV1{sm: sm}
+func NewServiceManagerV1(sm *servmanager.ServiceManager) *ServiceManagerV1 {
+	return &ServiceManagerV1{sm: sm}
 }
 
-type ServManagerV1 struct {
+type ServiceManagerV1 struct {
 	sm *servmanager.ServiceManager // Need to have them capitalize so we can export in V2
 }
 
-func (servManager *ServManagerV1) StartService(args servmanager.ArgStartService, reply *string) (err error) {
+func (servManager *ServiceManagerV1) StartService(args servmanager.ArgStartService, reply *string) (err error) {
 	return servManager.sm.V1StartService(args, reply)
 }
 
-func (servManager *ServManagerV1) StopService(args servmanager.ArgStartService, reply *string) (err error) {
+func (servManager *ServiceManagerV1) StopService(args servmanager.ArgStartService, reply *string) (err error) {
 	return servManager.sm.V1StopService(args, reply)
 }
 
-func (servManager *ServManagerV1) ServiceStatus(args servmanager.ArgStartService, reply *string) (err error) {
+func (servManager *ServiceManagerV1) ServiceStatus(args servmanager.ArgStartService, reply *string) (err error) {
 	return servManager.sm.V1ServiceStatus(args, reply)
 }
 
 // Ping return pong if the service is active
-func (servManager *ServManagerV1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
+func (servManager *ServiceManagerV1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
 
 // Call implements rpcclient.RpcClientConnection interface for internal RPC
-func (servManager *ServManagerV1) Call(serviceMethod string,
+func (servManager *ServiceManagerV1) Call(serviceMethod string,
 	args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(servManager, serviceMethod, args, reply)
 }
