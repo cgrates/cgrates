@@ -473,6 +473,20 @@ func testV1TSMaxHits(t *testing.T) {
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
+
+	//check threshold for event
+	var ths engine.Thresholds
+	eTd.Hits = 2
+	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThresholdsForEvent,
+		thEvent, &ths); err != nil {
+		t.Error(err)
+	} else if len(ths) != 1 {
+		t.Errorf("expecting: 1, received: %+v", utils.ToJSON(ths))
+	} else if !reflect.DeepEqual(eTd.TenantID(), ths[0].TenantID()) {
+		t.Errorf("expecting: %+v, received: %+v", eTd.TenantID(), ths[0].TenantID())
+	} else if !reflect.DeepEqual(eTd.Hits, ths[0].Hits) {
+		t.Errorf("expecting: %+v, received: %+v", eTd.Hits, ths[0].Hits)
+	}
 	//check threshold after second process ( hits : 2)
 	eTd.Hits = 2
 	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThreshold,
@@ -481,6 +495,7 @@ func testV1TSMaxHits(t *testing.T) {
 	} else if !reflect.DeepEqual(eTd.Hits, td.Hits) {
 		t.Errorf("expecting: %+v, received: %+v", eTd, td)
 	}
+
 	//process event
 	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, thEvent, &ids); err != nil {
 		t.Error(err)
@@ -493,7 +508,6 @@ func testV1TSMaxHits(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Err : %+v \n, td : %+v", err, utils.ToJSON(td))
 	}
-
 }
 
 func testV1TSStopEngine(t *testing.T) {
