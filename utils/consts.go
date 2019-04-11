@@ -72,6 +72,7 @@ var (
 		CacheAttributeProfiles:       AttributeProfilePrefix,
 		CacheChargerProfiles:         ChargerProfilePrefix,
 		CacheDispatcherProfiles:      DispatcherProfilePrefix,
+		CacheDispatcherHosts:         DispatcherHostPrefix,
 		CacheResourceFilterIndexes:   ResourceFilterIndexes,
 		CacheStatFilterIndexes:       StatFilterIndexes,
 		CacheThresholdFilterIndexes:  ThresholdFilterIndexes,
