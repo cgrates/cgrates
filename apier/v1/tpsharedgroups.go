@@ -77,7 +77,7 @@ func (self *ApierV1) GetTPSharedGroupIds(attrs AttrGetTPSharedGroupIds, reply *[
 }
 
 // Removes specific SharedGroups on Tariff plan
-func (self *ApierV1) RemTPSharedGroups(attrs AttrGetTPSharedGroups, reply *string) error {
+func (self *ApierV1) RemoveTPSharedGroups(attrs AttrGetTPSharedGroups, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

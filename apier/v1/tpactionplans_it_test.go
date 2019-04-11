@@ -224,7 +224,7 @@ func testTPAccPlansGetTPAccPlanAfterUpdate(t *testing.T) {
 
 func testTPAccPlansRemTPAccPlan(t *testing.T) {
 	var resp string
-	if err := tpAccPlansRPC.Call("ApierV1.RemTPActionPlan",
+	if err := tpAccPlansRPC.Call("ApierV1.RemoveTPActionPlan",
 		&AttrGetTPActionPlan{TPid: "TPAcc", ID: "ID"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

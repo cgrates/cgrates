@@ -666,13 +666,13 @@ func testV1FIdxRemoveStatQueueProfile(t *testing.T) {
 	if result != utils.OK {
 		t.Errorf("Error: %+v", result)
 	}
-	if err := tFIdxRpc.Call("ApierV1.RemStatQueueProfile",
+	if err := tFIdxRpc.Call("ApierV1.RemoveStatQueueProfile",
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE1"}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tFIdxRpc.Call("ApierV1.RemStatQueueProfile",
+	if err := tFIdxRpc.Call("ApierV1.RemoveStatQueueProfile",
 		&utils.TenantID{Tenant: tenant, ID: "TEST_PROFILE2"}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {

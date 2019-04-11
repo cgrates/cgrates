@@ -213,7 +213,7 @@ func testTPAccActionsGetTPAccActionAfterUpdate(t *testing.T) {
 
 func testTPAccActionsRemTPAccAction(t *testing.T) {
 	var resp string
-	if err := tpAccActionsRPC.Call("ApierV1.RemTPAccountActions",
+	if err := tpAccActionsRPC.Call("ApierV1.RemoveTPAccountActions",
 		&AttrGetTPAccountActions{TPid: "TPAcc", AccountActionsId: tpAccActionID}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

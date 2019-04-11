@@ -73,7 +73,7 @@ func (self *ApierV1) GetTPChargerIDs(attrs *AttrGetTPChargerIds, reply *[]string
 }
 
 // Removes specific ChargerProfile on Tariff plan
-func (self *ApierV1) RemTPCharger(attrs *utils.TPTntID, reply *string) error {
+func (self *ApierV1) RemoveTPCharger(attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

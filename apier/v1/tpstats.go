@@ -74,7 +74,7 @@ func (self *ApierV1) GetTPStatIDs(attrs *AttrGetTPStatIds, reply *[]string) erro
 }
 
 // Removes specific Stat on Tariff plan
-func (self *ApierV1) RemTPStat(attrs *utils.TPTntID, reply *string) error {
+func (self *ApierV1) RemoveTPStat(attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

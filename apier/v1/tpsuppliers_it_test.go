@@ -235,7 +235,7 @@ func testTPSplPrfGetTPSplPrfAfterUpdate(t *testing.T) {
 
 func testTPSplPrfRemTPSplPrf(t *testing.T) {
 	var resp string
-	if err := tpSplPrfRPC.Call("ApierV1.RemTPSupplierProfile",
+	if err := tpSplPrfRPC.Call("ApierV1.RemoveTPSupplierProfile",
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "SUPL_1"},
 		&resp); err != nil {
 		t.Error(err)

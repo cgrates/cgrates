@@ -791,7 +791,7 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 	}
 	var result string
 	//Remove threshold profile that was set form api
-	if err := tFIdxCaRpc.Call("ApierV1.RemStatQueueProfile",
+	if err := tFIdxCaRpc.Call("ApierV1.RemoveStatQueueProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -805,7 +805,7 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 		t.Error(err)
 	}
 	//Remove threshold profile that was set form tariffplan
-	if err := tFIdxCaRpc.Call("ApierV1.RemStatQueueProfile",
+	if err := tFIdxCaRpc.Call("ApierV1.RemoveStatQueueProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {

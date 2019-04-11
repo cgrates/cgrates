@@ -221,7 +221,7 @@ func testTPFilterGetTPFilterAfterUpdate(t *testing.T) {
 
 func testTPFilterRemTPFilter(t *testing.T) {
 	var resp string
-	if err := tpFilterRPC.Call("ApierV1.RemTPFilterProfile",
+	if err := tpFilterRPC.Call("ApierV1.RemoveTPFilterProfile",
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Filter"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

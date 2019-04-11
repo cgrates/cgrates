@@ -126,7 +126,7 @@ func (self *ApierV1) GetTPAccountActionIds(attrs AttrGetTPAccountActionIds, repl
 }
 
 // Removes specific AccountActions on Tariff plan
-func (self *ApierV1) RemTPAccountActions(attrs AttrGetTPAccountActions, reply *string) error {
+func (self *ApierV1) RemoveTPAccountActions(attrs AttrGetTPAccountActions, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "Account"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

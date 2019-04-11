@@ -54,7 +54,7 @@ func (self *ApierV2) GetTPDestination(attrs AttrGetTPDestination, reply *utils.T
 	return nil
 }
 
-func (self *ApierV2) RemTPDestination(attrs AttrGetTPDestination, reply *string) error {
+func (self *ApierV2) RemoveTPDestination(attrs AttrGetTPDestination, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Tag"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

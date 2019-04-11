@@ -82,7 +82,7 @@ func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*Accoun
 	return nil
 }
 
-type AttrRemActionTiming struct {
+type AttrRemoveActionTiming struct {
 	ActionPlanId    string // Id identifying the ActionTimings profile
 	ActionTimingId  string // Internal CGR id identifying particular ActionTiming, *all for all user related ActionTimings to be canceled
 	Tenant          string // Tenant the account belongs to
@@ -91,7 +91,7 @@ type AttrRemActionTiming struct {
 }
 
 // Removes an ActionTimings or parts of it depending on filters being set
-func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) (err error) {
+func (self *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&attrs, []string{"ActionPlanId"}); len(missing) != 0 { // Only mandatory ActionPlanId
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

@@ -53,7 +53,7 @@ var sTestsTPRatingPlans = []func(t *testing.T){
 	testTPRatingPlansGetTPRatingPlanIds,
 	testTPRatingPlansUpdateTPRatingPlan,
 	testTPRatingPlansGetTPRatingPlanAfterUpdate,
-	testTPRatingPlansRemTPRatingPlan,
+	testTPRatingPlansRemoveTPRatingPlan,
 	testTPRatingPlansGetTPRatingPlanAfterRemove,
 	testTPRatingPlansKillEngine,
 }
@@ -218,9 +218,9 @@ func testTPRatingPlansGetTPRatingPlanAfterUpdate(t *testing.T) {
 	}
 }
 
-func testTPRatingPlansRemTPRatingPlan(t *testing.T) {
+func testTPRatingPlansRemoveTPRatingPlan(t *testing.T) {
 	var resp string
-	if err := tpRatingPlanRPC.Call("ApierV1.RemTPRatingPlan",
+	if err := tpRatingPlanRPC.Call("ApierV1.RemoveTPRatingPlan",
 		&AttrGetTPRatingPlan{TPid: "TPRP1", ID: "Plan1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

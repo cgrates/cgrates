@@ -54,7 +54,7 @@ var sTestsTPActionTriggers = []func(t *testing.T){
 	testTPActionTriggersGetTPActionTriggersIds,
 	testTPActionTriggersUpdateTPActionTriggers,
 	testTPActionTriggersGetTPActionTriggersAfterUpdate,
-	testTPActionTriggersRemTPActionTriggers,
+	testTPActionTriggersRemoveTPActionTriggers,
 	testTPActionTriggersGetTPActionTriggersAfterRemove,
 	testTPActionTriggersKillEngine,
 }
@@ -312,9 +312,9 @@ func testTPActionTriggersGetTPActionTriggersAfterUpdate(t *testing.T) {
 
 }
 
-func testTPActionTriggersRemTPActionTriggers(t *testing.T) {
+func testTPActionTriggersRemoveTPActionTriggers(t *testing.T) {
 	var resp string
-	if err := tpActionTriggerRPC.Call("ApierV1.RemTPActionTriggers",
+	if err := tpActionTriggerRPC.Call("ApierV1.RemoveTPActionTriggers",
 		&AttrGetTPActionTriggers{TPid: "TPAct", ID: "ID"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

@@ -201,7 +201,7 @@ func testTPThreholdGetTPThreholdAfterUpdate(t *testing.T) {
 
 func testTPThreholdRemTPThrehold(t *testing.T) {
 	var resp string
-	if err := tpThresholdRPC.Call("ApierV1.RemTPThreshold",
+	if err := tpThresholdRPC.Call("ApierV1.RemoveTPThreshold",
 		&utils.TPTntID{TPid: "TH1", Tenant: "cgrates.org", ID: "Threshold"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

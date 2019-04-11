@@ -77,7 +77,7 @@ func (self *ApierV1) GetTPTimingIds(attrs AttrGetTPTimingIds, reply *[]string) e
 }
 
 // Removes specific Timing on Tariff plan
-func (self *ApierV1) RemTPTiming(attrs AttrGetTPTiming, reply *string) error {
+func (self *ApierV1) RemoveTPTiming(attrs AttrGetTPTiming, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

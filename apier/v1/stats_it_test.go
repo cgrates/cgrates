@@ -402,7 +402,7 @@ func testV1STSUpdateStatQueueProfile(t *testing.T) {
 
 func testV1STSRemoveStatQueueProfile(t *testing.T) {
 	var resp string
-	if err := stsV1Rpc.Call("ApierV1.RemStatQueueProfile",
+	if err := stsV1Rpc.Call("ApierV1.RemoveStatQueueProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -413,7 +413,7 @@ func testV1STSRemoveStatQueueProfile(t *testing.T) {
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &sqp); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := stsV1Rpc.Call("ApierV1.RemStatQueueProfile",
+	if err := stsV1Rpc.Call("ApierV1.RemoveStatQueueProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
 	}

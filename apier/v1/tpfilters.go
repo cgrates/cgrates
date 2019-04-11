@@ -73,7 +73,7 @@ func (self *ApierV1) GetTPFilterProfileIds(attrs *AttrGetTPFilterProfileIds, rep
 }
 
 // Removes specific FilterProfile on Tariff plan
-func (self *ApierV1) RemTPFilterProfile(attrs *utils.TPTntID, reply *string) error {
+func (self *ApierV1) RemoveTPFilterProfile(attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

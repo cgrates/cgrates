@@ -53,7 +53,7 @@ var sTestsTPResources = []func(t *testing.T){
 	testTPResGetTPResourceAfterSet,
 	testTPResUpdateTPResource,
 	testTPResGetTPResourceAfterUpdate,
-	testTPResRemTPResource,
+	testTPResRemoveTPResource,
 	testTPResGetTPResourceAfterRemove,
 	testTPResKillEngine,
 }
@@ -187,9 +187,9 @@ func testTPResGetTPResourceAfterUpdate(t *testing.T) {
 	}
 }
 
-func testTPResRemTPResource(t *testing.T) {
+func testTPResRemoveTPResource(t *testing.T) {
 	var resp string
-	if err := tpResRPC.Call("ApierV1.RemTPResource", &utils.TPTntID{TPid: "TPR1", Tenant: "cgrates.org", ID: "ResGroup1"},
+	if err := tpResRPC.Call("ApierV1.RemoveTPResource", &utils.TPTntID{TPid: "TPR1", Tenant: "cgrates.org", ID: "ResGroup1"},
 		&resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

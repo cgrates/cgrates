@@ -73,7 +73,7 @@ func (self *ApierV1) GetTPThresholdIDs(attrs *AttrGetTPThresholdIds, reply *[]st
 }
 
 // Removes specific Threshold on Tariff plan
-func (self *ApierV1) RemTPThreshold(attrs *utils.TPTntID, reply *string) error {
+func (self *ApierV1) RemoveTPThreshold(attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
