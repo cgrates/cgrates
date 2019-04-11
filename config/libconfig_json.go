@@ -447,13 +447,13 @@ type ResourceSJsonCfg struct {
 
 // Stat service config section
 type StatServJsonCfg struct {
-	Enabled               *bool
-	Indexed_selects       *bool
-	Store_interval        *string
-	Max_queue_length      *int
-	Thresholds_conns      *[]*RemoteHostJson
-	String_indexed_fields *[]string
-	Prefix_indexed_fields *[]string
+	Enabled                  *bool
+	Indexed_selects          *bool
+	Store_interval           *string
+	Store_uncompressed_limit *int
+	Thresholds_conns         *[]*RemoteHostJson
+	String_indexed_fields    *[]string
+	Prefix_indexed_fields    *[]string
 }
 
 // Threshold service config section

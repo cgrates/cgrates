@@ -58,7 +58,7 @@ func NewStoredStatQueue(sq *StatQueue, ms Marshaler) (sSQ *StoredStatQueue, err 
 	sSQ = &StoredStatQueue{
 		Tenant:     sq.Tenant,
 		ID:         sq.ID,
-		Compressed: sq.Compress(int64(config.CgrConfig().StatSCfg().MaxQueueLenght)),
+		Compressed: sq.Compress(int64(config.CgrConfig().StatSCfg().StoreUncompressedLimit)),
 		SQItems:    make([]SQItem, len(sq.SQItems)),
 		SQMetrics:  make(map[string][]byte, len(sq.SQMetrics)),
 		MinItems:   sq.MinItems,
