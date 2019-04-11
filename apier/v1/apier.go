@@ -652,7 +652,8 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err 
 func verifyFormat(tStr string) bool {
 	if tStr == utils.EmptyString ||
 		tStr == utils.MetaEveryMinute ||
-		tStr == utils.MetaHourly {
+		tStr == utils.MetaHourly ||
+		tStr == utils.ASAP {
 		return true
 	}
 
