@@ -166,10 +166,10 @@ func TestApierTPTiming(t *testing.T) {
 		t.Errorf("Calling ApierV1.GetTPTiming expected: %v, received: %v", tmAlways, rplyTmAlways2)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPTiming", AttrGetTPTiming{tmAlways2.TPid, tmAlways2.ID}, &reply); err != nil {
-		t.Error("Calling ApierV1.RemTPTiming, got error: ", err.Error())
+	if err := rater.Call("ApierV1.RemoveTPTiming", AttrGetTPTiming{tmAlways2.TPid, tmAlways2.ID}, &reply); err != nil {
+		t.Error("Calling ApierV1.RemoveTPTiming, got error: ", err.Error())
 	} else if reply != "OK" {
-		t.Error("Calling ApierV1.RemTPTiming received: ", reply)
+		t.Error("Calling ApierV1.RemoveTPTiming received: ", reply)
 	}
 	// Test getIds
 	var rplyTmIds []string
@@ -217,10 +217,10 @@ func TestApierTPDestination(t *testing.T) {
 		t.Errorf("Calling ApierV1.GetTPDestination expected: %v, received: %v", dstDe2, rplyDstDe2)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPDestination", AttrGetTPDestination{dstDe2.TPid, dstDe2.ID}, &reply); err != nil {
-		t.Error("Calling ApierV1.RemTPTiming, got error: ", err.Error())
+	if err := rater.Call("ApierV1.RemoveTPDestination", AttrGetTPDestination{dstDe2.TPid, dstDe2.ID}, &reply); err != nil {
+		t.Error("Calling ApierV1.RemoveTPTiming, got error: ", err.Error())
 	} else if reply != "OK" {
-		t.Error("Calling ApierV1.RemTPTiming received: ", reply)
+		t.Error("Calling ApierV1.RemoveTPTiming received: ", reply)
 	}
 	// Test getIds
 	var rplyDstIds []string
@@ -268,10 +268,10 @@ func TestApierTPRate(t *testing.T) {
 		t.Errorf("Calling ApierV1.GetTPRate expected: %+v, received: %+v", rt2, rplyRt2)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPRate", AttrGetTPRate{rt2.TPid, rt2.ID}, &reply); err != nil {
-		t.Error("Calling ApierV1.RemTPRate, got error: ", err.Error())
+	if err := rater.Call("ApierV1.RemoveTPRate", AttrGetTPRate{rt2.TPid, rt2.ID}, &reply); err != nil {
+		t.Error("Calling ApierV1.RemoveTPRate, got error: ", err.Error())
 	} else if reply != "OK" {
-		t.Error("Calling ApierV1.RemTPRate received: ", reply)
+		t.Error("Calling ApierV1.RemoveTPRate received: ", reply)
 	}
 	// Test getIds
 	var rplyRtIds []string
@@ -322,10 +322,10 @@ func TestApierTPDestinationRate(t *testing.T) {
 		t.Errorf("Calling ApierV1.GetTPDestinationRate expected: %v, received: %v", dr2, rplyDr2)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPDestinationRate", AttrGetTPDestinationRate{dr2.TPid, dr2.ID, utils.Paginator{}}, &reply); err != nil {
-		t.Error("Calling ApierV1.RemTPRate, got error: ", err.Error())
+	if err := rater.Call("ApierV1.RemoveTPDestinationRate", AttrGetTPDestinationRate{dr2.TPid, dr2.ID, utils.Paginator{}}, &reply); err != nil {
+		t.Error("Calling ApierV1.RemoveTPRate, got error: ", err.Error())
 	} else if reply != "OK" {
-		t.Error("Calling ApierV1.RemTPRate received: ", reply)
+		t.Error("Calling ApierV1.RemoveTPRate received: ", reply)
 	}
 	// Test getIds
 	var rplyDrIds []string
@@ -373,10 +373,10 @@ func TestApierTPRatingPlan(t *testing.T) {
 		t.Errorf("Calling ApierV1.GetTPRatingPlan expected: %v, received: %v", rpTst, rplyRpTst)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPRatingPlan", AttrGetTPRatingPlan{TPid: rpTst.TPid, ID: rpTst.ID}, &reply); err != nil {
-		t.Error("Calling ApierV1.RemTPRatingPlan, got error: ", err.Error())
+	if err := rater.Call("ApierV1.RemoveTPRatingPlan", AttrGetTPRatingPlan{TPid: rpTst.TPid, ID: rpTst.ID}, &reply); err != nil {
+		t.Error("Calling ApierV1.RemoveTPRatingPlan, got error: ", err.Error())
 	} else if reply != "OK" {
-		t.Error("Calling ApierV1.RemTPRatingPlan received: ", reply)
+		t.Error("Calling ApierV1.RemoveTPRatingPlan received: ", reply)
 	}
 	// Test getIds
 	var rplyRpIds []string
@@ -426,10 +426,10 @@ func TestApierTPRatingProfile(t *testing.T) {
 		t.Errorf("Calling ApierV1.GetTPRatingProfiles expected: %v, received: %v", rpfTst, rplyRpf)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPRatingProfile", AttrGetTPRatingProfile{TPid: rpfTst.TPid, RatingProfileId: rpfTst.GetRatingProfilesId()}, &reply); err != nil {
-		t.Error("Calling ApierV1.RemTPRatingProfile, got error: ", err.Error())
+	if err := rater.Call("ApierV1.RemoveTPRatingProfile", AttrGetTPRatingProfile{TPid: rpfTst.TPid, RatingProfileId: rpfTst.GetRatingProfilesId()}, &reply); err != nil {
+		t.Error("Calling ApierV1.RemoveTPRatingProfile, got error: ", err.Error())
 	} else if reply != "OK" {
-		t.Error("Calling ApierV1.RemTPRatingProfile received: ", reply)
+		t.Error("Calling ApierV1.RemoveTPRatingProfile received: ", reply)
 	}
 	// Test getLoadIds
 	var rplyRpIds []string
@@ -485,10 +485,10 @@ func TestApierTPActions(t *testing.T) {
 		t.Errorf("Calling ApierV1.GetTPActions expected: %v, received: %v", actTst, rplyActs)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPActions", AttrGetTPActions{TPid: actTst.TPid, ID: actTst.ID}, &reply); err != nil {
-		t.Error("Calling ApierV1.RemTPActions, got error: ", err.Error())
+	if err := rater.Call("ApierV1.RemoveTPActions", AttrGetTPActions{TPid: actTst.TPid, ID: actTst.ID}, &reply); err != nil {
+		t.Error("Calling ApierV1.RemoveTPActions, got error: ", err.Error())
 	} else if reply != "OK" {
-		t.Error("Calling ApierV1.RemTPActions received: ", reply)
+		t.Error("Calling ApierV1.RemoveTPActions received: ", reply)
 	}
 	// Test getIds
 	var rplyIds []string
@@ -535,10 +535,10 @@ func TestApierTPActionPlan(t *testing.T) {
 		t.Errorf("Calling ApierV1.GetTPActionPlan expected: %v, received: %v", atTst, rplyActs)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPActionPlan", AttrGetTPActionPlan{TPid: atTst.TPid, ID: atTst.ID}, &reply); err != nil {
-		t.Error("Calling ApierV1.RemTPActionPlan, got error: ", err.Error())
+	if err := rater.Call("ApierV1.RemoveTPActionPlan", AttrGetTPActionPlan{TPid: atTst.TPid, ID: atTst.ID}, &reply); err != nil {
+		t.Error("Calling ApierV1.RemoveTPActionPlan, got error: ", err.Error())
 	} else if reply != "OK" {
-		t.Error("Calling ApierV1.RemTPActionPlan received: ", reply)
+		t.Error("Calling ApierV1.RemoveTPActionPlan received: ", reply)
 	}
 	// Test getIds
 	var rplyIds []string
@@ -591,10 +591,10 @@ func TestApierTPActionTriggers(t *testing.T) {
 		t.Errorf("Calling ApierV1.GetTPActionTriggers expected: %+v, received: %+v", atTst.ActionTriggers[0], rplyActs.ActionTriggers[0])
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPActionTriggers", AttrGetTPActionTriggers{TPid: atTst.TPid, ID: atTst.ID}, &reply); err != nil {
-		t.Error("Calling ApierV1.RemTPActionTriggers, got error: ", err.Error())
+	if err := rater.Call("ApierV1.RemoveTPActionTriggers", AttrGetTPActionTriggers{TPid: atTst.TPid, ID: atTst.ID}, &reply); err != nil {
+		t.Error("Calling ApierV1.RemoveTPActionTriggers, got error: ", err.Error())
 	} else if reply != "OK" {
-		t.Error("Calling ApierV1.RemTPActionTriggers received: ", reply)
+		t.Error("Calling ApierV1.RemoveTPActionTriggers received: ", reply)
 	}
 	// Test getIds
 	var rplyIds []string
@@ -649,10 +649,10 @@ func TestApierTPAccountActions(t *testing.T) {
 		t.Errorf("Calling ApierV1.GetTPAccountActions expected: %v, received: %v", aaTst, rplyaa)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPAccountActions", AttrGetTPAccountActions{TPid: aaTst.TPid, AccountActionsId: aaTst.GetId()}, &reply); err != nil {
-		t.Error("Calling ApierV1.RemTPAccountActions, got error: ", err.Error())
+	if err := rater.Call("ApierV1.RemoveTPAccountActions", AttrGetTPAccountActions{TPid: aaTst.TPid, AccountActionsId: aaTst.GetId()}, &reply); err != nil {
+		t.Error("Calling ApierV1.RemoveTPAccountActions, got error: ", err.Error())
 	} else if reply != "OK" {
-		t.Error("Calling ApierV1.RemTPAccountActions received: ", reply)
+		t.Error("Calling ApierV1.RemoveTPAccountActions received: ", reply)
 	}
 	// Test getLoadIds
 	var rplyRpIds []string
@@ -1176,9 +1176,9 @@ func TestApierITGetScheduledActionsForAccount(t *testing.T) {
 // Test here RemoveActionTiming
 func TestApierRemUniqueIDActionTiming(t *testing.T) {
 	var rmReply string
-	rmReq := AttrRemActionTiming{ActionPlanId: "ATMS_1", Tenant: "cgrates.org", Account: "dan4"}
-	if err := rater.Call("ApierV1.RemActionTiming", rmReq, &rmReply); err != nil {
-		t.Error("Got error on ApierV1.RemActionTiming: ", err.Error())
+	rmReq := AttrRemoveActionTiming{ActionPlanId: "ATMS_1", Tenant: "cgrates.org", Account: "dan4"}
+	if err := rater.Call("ApierV1.RemoveActionTiming", rmReq, &rmReply); err != nil {
+		t.Error("Got error on ApierV1.RemoveActionTiming: ", err.Error())
 	} else if rmReply != OK {
 		t.Error("Unexpected answer received", rmReply)
 	}

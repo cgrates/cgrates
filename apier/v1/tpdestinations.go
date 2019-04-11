@@ -77,7 +77,7 @@ func (self *ApierV1) GetTPDestinationIDs(attrs AttrGetTPDestinationIds, reply *[
 }
 
 // Removes specific Destination on Tariff plan
-func (self *ApierV1) RemTPDestination(attrs AttrGetTPDestination, reply *string) error {
+func (self *ApierV1) RemoveTPDestination(attrs AttrGetTPDestination, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

@@ -54,7 +54,7 @@ var sTestsTPStats = []func(t *testing.T){
 	testTPStatsGetTPStatAfterSet,
 	testTPStatsUpdateTPStat,
 	testTPStatsGetTPStatAfterUpdate,
-	testTPStatsRemTPStat,
+	testTPStatsRemoveTPStat,
 	testTPStatsGetTPStatAfterRemove,
 	testTPStatsKillEngine,
 }
@@ -204,9 +204,9 @@ func testTPStatsGetTPStatAfterUpdate(t *testing.T) {
 	}
 }
 
-func testTPStatsRemTPStat(t *testing.T) {
+func testTPStatsRemoveTPStat(t *testing.T) {
 	var resp string
-	if err := tpStatRPC.Call("ApierV1.RemTPStat",
+	if err := tpStatRPC.Call("ApierV1.RemoveTPStat",
 		&utils.TPTntID{TPid: "TPS1", Tenant: "cgrates.org", ID: "Stat1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

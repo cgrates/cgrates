@@ -56,7 +56,7 @@ var sTestsTPRatingProfiles = []func(t *testing.T){
 	testTPRatingProfilesUpdateTPRatingProfile,
 	testTPRatingProfilesGetTPRatingProfileAfterUpdate,
 	testTPRatingProfilesGetTPRatingProfileIds,
-	testTPRatingProfilesRemTPRatingProfile,
+	testTPRatingProfilesRemoveTPRatingProfile,
 	testTPRatingProfilesGetTPRatingProfileAfterRemove,
 	testTPRatingProfilesKillEngine,
 }
@@ -268,9 +268,9 @@ func testTPRatingProfilesGetTPRatingProfileIds(t *testing.T) {
 	}
 }
 
-func testTPRatingProfilesRemTPRatingProfile(t *testing.T) {
+func testTPRatingProfilesRemoveTPRatingProfile(t *testing.T) {
 	var resp string
-	if err := tpRatingProfileRPC.Call("ApierV1.RemTPRatingProfile",
+	if err := tpRatingProfileRPC.Call("ApierV1.RemoveTPRatingProfile",
 		&AttrGetTPRatingProfile{TPid: "TPRProf1", RatingProfileId: tpRatingProfile.GetRatingProfilesId()}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

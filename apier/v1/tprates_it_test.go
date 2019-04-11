@@ -53,7 +53,7 @@ var sTestsTPRates = []func(t *testing.T){
 	testTPRatesGetTPRateIds,
 	testTPRatesUpdateTPRate,
 	testTPRatesGetTPRateAfterUpdate,
-	testTPRatesRemTPRate,
+	testTPRatesRemoveTPRate,
 	testTPRatesGetTPRateAfterRemove,
 	testTPRatesKillEngine,
 }
@@ -219,9 +219,9 @@ func testTPRatesGetTPRateAfterUpdate(t *testing.T) {
 
 }
 
-func testTPRatesRemTPRate(t *testing.T) {
+func testTPRatesRemoveTPRate(t *testing.T) {
 	var resp string
-	if err := tpRateRPC.Call("ApierV1.RemTPRate",
+	if err := tpRateRPC.Call("ApierV1.RemoveTPRate",
 		&AttrGetTPRate{TPid: "TPidTpRate", ID: "RT_FS_USERS"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

@@ -53,7 +53,7 @@ var sTestsTPSharedGroups = []func(t *testing.T){
 	testTPSharedGroupsGetTPSharedGroupIds,
 	testTPSharedGroupsUpdateTPShareGroups,
 	testTpSharedGroupsGetTPSharedGroupsAfterUpdate,
-	testTPSharedGroupsRemTPSharedGroups,
+	testTPSharedGroupsRemoveTPSharedGroups,
 	testTPSharedGroupsGetTPSharedGroupsAfterRemove,
 	testTPSharedGroupsKillEngine,
 }
@@ -214,9 +214,9 @@ func testTpSharedGroupsGetTPSharedGroupsAfterUpdate(t *testing.T) {
 	}
 }
 
-func testTPSharedGroupsRemTPSharedGroups(t *testing.T) {
+func testTPSharedGroupsRemoveTPSharedGroups(t *testing.T) {
 	var resp string
-	if err := tpSharedGroupRPC.Call("ApierV1.RemTPSharedGroups", &AttrGetTPSharedGroups{TPid: tpSharedGroups.TPid, ID: tpSharedGroups.ID}, &resp); err != nil {
+	if err := tpSharedGroupRPC.Call("ApierV1.RemoveTPSharedGroups", &AttrGetTPSharedGroups{TPid: tpSharedGroups.TPid, ID: tpSharedGroups.ID}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)

@@ -236,7 +236,7 @@ func testTPAlsPrfGetTPAlsPrfAfterUpdate(t *testing.T) {
 
 func testTPAlsPrfRemTPAlsPrf(t *testing.T) {
 	var resp string
-	if err := tpAlsPrfRPC.Call("ApierV1.RemTPAttributeProfile",
+	if err := tpAlsPrfRPC.Call("ApierV1.RemoveTPAttributeProfile",
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Attr1"},
 		&resp); err != nil {
 		t.Error(err)

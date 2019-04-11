@@ -194,7 +194,7 @@ func testTPDispatcherGetTPDispatcherAfterUpdate(t *testing.T) {
 
 func testTPDispatcherRemTPDispatcher(t *testing.T) {
 	var resp string
-	if err := tpDispatcherRPC.Call("ApierV1.RemTPDispatcherProfile",
+	if err := tpDispatcherRPC.Call("ApierV1.RemoveTPDispatcherProfile",
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Dsp1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

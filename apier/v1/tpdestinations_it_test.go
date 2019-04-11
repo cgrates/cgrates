@@ -53,7 +53,7 @@ var sTestsTPDestinations = []func(t *testing.T){
 	testTPDestinationsGetTPDestinationIds,
 	testTPDestinationsUpdateTPDestination,
 	testTPDestinationsGetTPDestinationAfterUpdate,
-	testTPDestinationsRemTPDestination,
+	testTPDestinationsRemoveTPDestination,
 	testTPDestinationsGetTPDestinationAfterRemove,
 	testTPDestinationsKillEngine,
 }
@@ -196,9 +196,9 @@ func testTPDestinationsGetTPDestinationAfterUpdate(t *testing.T) {
 
 }
 
-func testTPDestinationsRemTPDestination(t *testing.T) {
+func testTPDestinationsRemoveTPDestination(t *testing.T) {
 	var resp string
-	if err := tpDestinationRPC.Call("ApierV1.RemTPDestination",
+	if err := tpDestinationRPC.Call("ApierV1.RemoveTPDestination",
 		&AttrGetTPDestination{TPid: "TPD", ID: "GERMANY"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

@@ -53,7 +53,7 @@ var sTestsTPTiming = []func(t *testing.T){
 	testTPTimingsGetTPTimingIds,
 	testTPTimingsUpdateTPTiming,
 	testTPTimingsGetTPTimingAfterUpdate,
-	testTPTimingsRemTPTiming,
+	testTPTimingsRemoveTPTiming,
 	testTPTimingsGetTPTimingAfterRemove,
 	testTPTimingsKillEngine,
 }
@@ -183,9 +183,9 @@ func testTPTimingsGetTPTimingAfterUpdate(t *testing.T) {
 	}
 }
 
-func testTPTimingsRemTPTiming(t *testing.T) {
+func testTPTimingsRemoveTPTiming(t *testing.T) {
 	var resp string
-	if err := tpTimingRPC.Call("ApierV1.RemTPTiming", &AttrGetTPTiming{TPid: tpTiming.TPid, ID: tpTiming.ID}, &resp); err != nil {
+	if err := tpTimingRPC.Call("ApierV1.RemoveTPTiming", &AttrGetTPTiming{TPid: tpTiming.TPid, ID: tpTiming.ID}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)

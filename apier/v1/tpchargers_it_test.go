@@ -192,7 +192,7 @@ func testTPChrgsGetTPChrgsAfterUpdate(t *testing.T) {
 
 func testTPChrgsRemTPChrgs(t *testing.T) {
 	var resp string
-	if err := tpChrgsRPC.Call("ApierV1.RemTPCharger",
+	if err := tpChrgsRPC.Call("ApierV1.RemoveTPCharger",
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Chrgs"},
 		&resp); err != nil {
 		t.Error(err)

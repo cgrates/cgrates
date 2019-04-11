@@ -133,7 +133,7 @@ func (self *ApierV1) GetTPRatingProfileIds(attrs AttrGetTPRatingProfileIds, repl
 }
 
 // Removes specific RatingProfiles on Tariff plan
-func (self *ApierV1) RemTPRatingProfile(attrs AttrGetTPRatingProfile, reply *string) error {
+func (self *ApierV1) RemoveTPRatingProfile(attrs AttrGetTPRatingProfile, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingProfileId"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

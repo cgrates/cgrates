@@ -72,8 +72,8 @@ func (self *ApierV1) GetTPDispatcherProfileIDs(attrs *AttrGetTPDispatcherIds, re
 	return nil
 }
 
-//RemTPCharger removes specific DispatcherProfile on Tariff plan
-func (self *ApierV1) RemTPDispatcherProfile(attrs *utils.TPTntID, reply *string) error {
+//RemoveTPCharger removes specific DispatcherProfile on Tariff plan
+func (self *ApierV1) RemoveTPDispatcherProfile(attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -131,8 +131,8 @@ func (self *ApierV1) GetTPDispatcherHostIDs(attrs *AttrGetTPDispatcherIds, reply
 	return nil
 }
 
-//RemTPDispatcherHost removes specific DispatcherHost on Tariff plan
-func (self *ApierV1) RemTPDispatcherHost(attrs *utils.TPTntID, reply *string) error {
+//RemoveTPDispatcherHost removes specific DispatcherHost on Tariff plan
+func (self *ApierV1) RemoveTPDispatcherHost(attrs *utils.TPTntID, reply *string) error {
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

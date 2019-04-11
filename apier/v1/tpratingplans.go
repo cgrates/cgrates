@@ -80,7 +80,7 @@ func (self *ApierV1) GetTPRatingPlanIds(attrs AttrGetTPRatingPlanIds, reply *[]s
 }
 
 // Removes specific RatingPlan on Tariff plan
-func (self *ApierV1) RemTPRatingPlan(attrs AttrGetTPRatingPlan, reply *string) error {
+func (self *ApierV1) RemoveTPRatingPlan(attrs AttrGetTPRatingPlan, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

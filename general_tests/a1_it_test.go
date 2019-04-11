@@ -327,8 +327,8 @@ func TestA1itConcurrentAPs(t *testing.T) {
 		}(acnt)
 		go func(acnt string) {
 			var reply string
-			if err := a1rpc.Call("ApierV1.RemActionTiming",
-				v1.AttrRemActionTiming{Tenant: "cgrates.org", Account: acnt, ActionPlanId: "PACKAGE_1"}, &reply); err != nil {
+			if err := a1rpc.Call("ApierV1.RemoveActionTiming",
+				v1.AttrRemoveActionTiming{Tenant: "cgrates.org", Account: acnt, ActionPlanId: "PACKAGE_1"}, &reply); err != nil {
 				t.Error(err)
 			}
 			wg.Done()

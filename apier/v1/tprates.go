@@ -79,7 +79,7 @@ func (self *ApierV1) GetTPRateIds(attrs AttrGetTPRateIds, reply *[]string) error
 }
 
 // Removes specific Rate on Tariff plan
-func (self *ApierV1) RemTPRate(attrs AttrGetTPRate, reply *string) error {
+func (self *ApierV1) RemoveTPRate(attrs AttrGetTPRate, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

@@ -85,7 +85,7 @@ func (self *ApierV1) GetTPActionPlanIds(attrs AttrGetTPActionPlanIds, reply *[]s
 }
 
 // Removes specific ActionPlan on Tariff plan
-func (self *ApierV1) RemTPActionPlan(attrs AttrGetTPActionPlan, reply *string) error {
+func (self *ApierV1) RemoveTPActionPlan(attrs AttrGetTPActionPlan, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
