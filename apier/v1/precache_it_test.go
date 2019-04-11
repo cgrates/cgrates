@@ -192,7 +192,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 		utils.CacheDispatcherHosts: {
-			Items:  0,
+			Items:  1,
 			Groups: 0,
 		},
 		utils.CacheDispatcherRoutes: {
