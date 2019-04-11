@@ -210,10 +210,11 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 	if err := apierRPC.Call("ApierV2.SetActions", argActs1, &reply); err != nil {
 		t.Error(err)
 	}
+	tNow := time.Now().Add(time.Duration(time.Minute))
 	argAP1 := &v1.AttrSetActionPlan{Id: "TestApierV2itSetAccountWithAP_AP_1",
 		ActionPlan: []*v1.AttrActionPlan{
 			{ActionsId: argActs1.ActionsId,
-				Time:   time.Now().Add(time.Duration(time.Minute)).String(),
+				Time:   fmt.Sprintf("%v:%v:%v", tNow.Hour(), tNow.Minute(), tNow.Second()), // 10:4:12
 				Weight: 20.0}}}
 	if _, err := dm.DataDB().GetActionPlan(argAP1.Id, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
@@ -346,6 +347,43 @@ func TestApierV2itSetActionWithCategory(t *testing.T) {
 	} else if len(acnt.BalanceMap[utils.MONETARY][0].Categories) != 1 &&
 		acnt.BalanceMap[utils.MONETARY][0].Categories["test"] != true {
 		t.Fatalf("Unexpected category received: %+v", utils.ToJSON(acnt))
+	}
+}
+
+func TestApierV2itSetActionPlanWithWrongTiming(t *testing.T) {
+	var reply string
+	tNow := time.Now().Add(time.Duration(time.Minute)).String()
+	argAP1 := &v1.AttrSetActionPlan{Id: "TestApierV2itSetAccountWithAPWithWrongTiming",
+		ActionPlan: []*v1.AttrActionPlan{
+			&v1.AttrActionPlan{
+				ActionsId: "TestApierV2itSetAccountWithAP_ACT_1",
+				Time:      tNow,
+				Weight:    20.0,
+			},
+		},
+	}
+
+	if err := apierRPC.Call("ApierV1.SetActionPlan", argAP1, &reply); err == nil ||
+		err.Error() != fmt.Sprintf("UNSUPPORTED_FORMAT:%s", tNow) {
+		t.Error("Expecting error ", err)
+	}
+}
+
+func TestApierV2itSetActionPlanWithWrongTiming2(t *testing.T) {
+	var reply string
+	argAP1 := &v1.AttrSetActionPlan{Id: "TestApierV2itSetAccountWithAPWithWrongTiming",
+		ActionPlan: []*v1.AttrActionPlan{
+			&v1.AttrActionPlan{
+				ActionsId: "TestApierV2itSetAccountWithAP_ACT_1",
+				Time:      "aa:bb:cc",
+				Weight:    20.0,
+			},
+		},
+	}
+
+	if err := apierRPC.Call("ApierV1.SetActionPlan", argAP1, &reply); err == nil ||
+		err.Error() != fmt.Sprintf("UNSUPPORTED_FORMAT:aa:bb:cc") {
+		t.Error("Expecting error ", err)
 	}
 }
 

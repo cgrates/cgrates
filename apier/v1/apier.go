@@ -601,6 +601,9 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err 
 			timing.Months.Parse(apiAtm.Months, ";")
 			timing.MonthDays.Parse(apiAtm.MonthDays, ";")
 			timing.WeekDays.Parse(apiAtm.WeekDays, ";")
+			if !verifyFormat(apiAtm.Time) {
+				return 0, fmt.Errorf("%s:%s", utils.ErrUnsupportedFormat.Error(), apiAtm.Time)
+			}
 			timing.StartTime = apiAtm.Time
 			ap.ActionTimings = append(ap.ActionTimings, &engine.ActionTiming{
 				Uuid:      utils.GenUUID(),
@@ -644,6 +647,30 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err 
 	}
 	*reply = OK
 	return nil
+}
+
+func verifyFormat(tStr string) bool {
+	if tStr == utils.EmptyString ||
+		tStr == utils.MetaEveryMinute ||
+		tStr == utils.MetaHourly {
+		return true
+	}
+
+	if len(tStr) > 8 { // hh:mm:ss
+		return false
+	}
+	if a := strings.Split(tStr, utils.InInFieldSep); len(a) != 3 {
+		return false
+	} else {
+		if _, err := strconv.Atoi(a[0]); err != nil {
+			return false
+		} else if _, err := strconv.Atoi(a[1]); err != nil {
+			return false
+		} else if _, err := strconv.Atoi(a[2]); err != nil {
+			return false
+		}
+	}
+	return true
 }
 
 type AttrGetActionPlan struct {

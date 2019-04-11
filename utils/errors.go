@@ -77,6 +77,7 @@ var (
 	ErrNotConnected             = errors.New("NOT_CONNECTED")
 	RalsErrorPrfx               = "RALS_ERROR"
 	DispatcherErrorPrefix       = "DISPATCHER_ERROR"
+	ErrUnsupportedFormat        = errors.New("UNSUPPORTED_FORMAT")
 )
 
 // NewCGRError initialises a new CGRError
