@@ -21,6 +21,7 @@ package dispatchers
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -190,4 +191,31 @@ func (dS *DispatcherService) V1GetProfileForEvent(ev *DispatcherEvent,
 	}
 	*dPfl = *retDPfl
 	return
+}
+
+// ToDo: Add tests for it
+// Call implements rpcclient.RpcClientConnection interface for internal RPC
+func (dS *DispatcherService) Call(serviceMethod string, // all API fuction must be of type: SubsystemMethod
+	args interface{}, reply interface{}) error {
+	methodSplit := strings.Split(serviceMethod, ".")
+	if len(methodSplit) != 2 {
+		return rpcclient.ErrUnsupporteServiceMethod
+	}
+	method := reflect.ValueOf(dS).MethodByName(methodSplit[0] + methodSplit[1])
+	if !method.IsValid() {
+		return rpcclient.ErrUnsupporteServiceMethod
+	}
+	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
+	ret := method.Call(params)
+	if len(ret) != 1 {
+		return utils.ErrServerError
+	}
+	if ret[0].Interface() == nil {
+		return nil
+	}
+	err, ok := ret[0].Interface().(error)
+	if !ok {
+		return utils.ErrServerError
+	}
+	return err
 }

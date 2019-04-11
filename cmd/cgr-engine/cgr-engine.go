@@ -338,7 +338,7 @@ func startAsteriskAgent(internalSMGChan chan rpcclient.RpcClientConnection, exit
 	exitChan <- true
 }
 
-func startDiameterAgent(internalSsChan chan rpcclient.RpcClientConnection,
+func startDiameterAgent(internalSsChan, internalDispatcherSChan chan rpcclient.RpcClientConnection,
 	exitChan chan bool, filterSChan chan *engine.FilterS) {
 	var err error
 	utils.Logger.Info("Starting CGRateS DiameterAgent service")
@@ -353,7 +353,10 @@ func startDiameterAgent(internalSsChan chan rpcclient.RpcClientConnection,
 		exitChan <- true
 		return
 	}
-	if cfg.DiameterAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
+	if cfg.DispatcherSCfg().Enabled {
+		sS = <-internalDispatcherSChan
+		internalDispatcherSChan <- sS
+	} else if cfg.DiameterAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
 		sSInternal = true
 		sSIntConn := <-internalSsChan
 		internalSsChan <- sSIntConn
@@ -373,6 +376,7 @@ func startDiameterAgent(internalSsChan chan rpcclient.RpcClientConnection,
 			return
 		}
 	}
+
 	da, err := agents.NewDiameterAgent(cfg, filterS, sS)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> error: %s!", err))
@@ -974,7 +978,7 @@ func startLoaderS(cfg *config.CGRConfig,
 }
 
 // startDispatcherService fires up the DispatcherS
-func startDispatcherService(internalDispatcherSChan chan *dispatchers.DispatcherService,
+func startDispatcherService(internalDispatcherSChan chan rpcclient.RpcClientConnection,
 	intAttrSChan chan rpcclient.RpcClientConnection,
 	cfg *config.CGRConfig,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
@@ -1130,8 +1134,7 @@ func initServiceManagerV1(internalServiceManagerChan chan rpcclient.RpcClientCon
 func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
-	internalSMGChan, internalAnalyzerSChan chan rpcclient.RpcClientConnection,
-	internalDispatcherSChan chan *dispatchers.DispatcherService,
+	internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan chan rpcclient.RpcClientConnection,
 	exitChan chan bool) {
 	if !config.CgrConfig().DispatcherSCfg().Enabled {
 		select { // Any of the rpc methods will unlock listening to rpc requests
@@ -1435,7 +1438,7 @@ func main() {
 
 	// Define internal connections via channels
 	filterSChan := make(chan *engine.FilterS, 1)
-	internalDispatcherSChan := make(chan *dispatchers.DispatcherService, 1)
+	internalDispatcherSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalRaterChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalCdrSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalSMGChan := make(chan rpcclient.RpcClientConnection, 1)
@@ -1540,7 +1543,7 @@ func main() {
 	}
 
 	if cfg.DiameterAgentCfg().Enabled {
-		go startDiameterAgent(internalSMGChan, exitChan, filterSChan)
+		go startDiameterAgent(internalSMGChan, internalDispatcherSChan, exitChan, filterSChan)
 	}
 
 	if cfg.RadiusAgentCfg().Enabled {
