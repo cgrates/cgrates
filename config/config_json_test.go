@@ -817,13 +817,13 @@ func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 
 func TestDfStatServiceJsonCfg(t *testing.T) {
 	eCfg := &StatServJsonCfg{
-		Enabled:               utils.BoolPointer(false),
-		Indexed_selects:       utils.BoolPointer(true),
-		Store_interval:        utils.StringPointer(""),
-		Max_queue_length:      utils.IntPointer(0),
-		Thresholds_conns:      &[]*RemoteHostJson{},
-		String_indexed_fields: nil,
-		Prefix_indexed_fields: &[]string{},
+		Enabled:                  utils.BoolPointer(false),
+		Indexed_selects:          utils.BoolPointer(true),
+		Store_interval:           utils.StringPointer(""),
+		Store_uncompressed_limit: utils.IntPointer(0),
+		Thresholds_conns:         &[]*RemoteHostJson{},
+		String_indexed_fields:    nil,
+		Prefix_indexed_fields:    &[]string{},
 	}
 	if cfg, err := dfCgrJsonCfg.StatSJsonCfg(); err != nil {
 		t.Error(err)
