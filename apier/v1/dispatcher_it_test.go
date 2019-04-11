@@ -31,6 +31,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 var (
@@ -52,11 +53,13 @@ var sTestsDispatcher = []func(t *testing.T){
 	testDispatcherSSetDispatcherProfile,
 	testDispatcherSGetDispatcherProfileIDs,
 	testDispatcherSUpdateDispatcherProfile,
+	testDispatcherSGetDispatcherProfileCache,
 	testDispatcherSRemDispatcherProfile,
 
 	testDispatcherSSetDispatcherHost,
 	testDispatcherSGetDispatcherHostIDs,
 	testDispatcherSUpdateDispatcherHost,
+	testDispatcherSGetDispatcherHostCache,
 	testDispatcherSRemDispatcherHost,
 
 	testDispatcherSKillEngine,
@@ -196,6 +199,15 @@ func testDispatcherSUpdateDispatcherProfile(t *testing.T) {
 	}
 }
 
+func testDispatcherSGetDispatcherProfileCache(t *testing.T) {
+	var rcvStats map[string]*ltcache.CacheStats
+	if err := dispatcherRPC.Call(utils.CacheSv1GetCacheStats, nil, &rcvStats); err != nil {
+		t.Error(err)
+	} else if rcvStats[utils.CacheDispatcherProfiles].Items != 1 {
+		t.Errorf("Expecting: 1 DispatcherProfiles, received: %+v", rcvStats[utils.CacheDispatcherProfiles])
+	}
+}
+
 func testDispatcherSRemDispatcherProfile(t *testing.T) {
 	var result string
 	if err := dispatcherRPC.Call(utils.ApierV1RemoveDispatcherProfile,
@@ -299,6 +311,15 @@ func testDispatcherSUpdateDispatcherHost(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(dispatcherHost.DispatcherHost, dsp) {
 		t.Errorf("Expecting : %+v, received: %+v", dispatcherHost.DispatcherHost, dsp)
+	}
+}
+
+func testDispatcherSGetDispatcherHostCache(t *testing.T) {
+	var rcvStats map[string]*ltcache.CacheStats
+	if err := dispatcherRPC.Call(utils.CacheSv1GetCacheStats, nil, &rcvStats); err != nil {
+		t.Error(err)
+	} else if rcvStats[utils.CacheDispatcherHosts].Items != 0 {
+		t.Errorf("Expecting: 0 DispatcherProfiles, received: %+v", rcvStats[utils.CacheDispatcherProfiles])
 	}
 }
 
