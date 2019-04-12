@@ -46,7 +46,7 @@ var (
 		testDspITResetStorDb,
 		testDspITStartEngine,
 		testDspITRPCConn,
-		testDspITLoadData2,
+		testDspITLoadData,
 
 		testDspDspv1GetProfileForEvent,
 
@@ -102,7 +102,7 @@ func testDspITRPCConn(t *testing.T) {
 	}
 }
 
-func testDspITLoadData2(t *testing.T) {
+func testDspITLoadData(t *testing.T) {
 	wchan := make(chan struct{}, 1)
 	go func() {
 		loaderPath, err := exec.LookPath("cgr-loader")

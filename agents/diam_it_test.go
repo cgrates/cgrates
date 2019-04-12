@@ -21,6 +21,7 @@ import (
 	"flag"
 	"net/rpc"
 	"net/rpc/jsonrpc"
+	"os/exec"
 	"path"
 	"strings"
 	"testing"
@@ -35,43 +36,63 @@ import (
 	"github.com/cgrates/go-diameter/diam/dict"
 )
 
-var waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
-var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-var interations = flag.Int("iterations", 1, "Number of iterations to do for dry run simulation")
-var replyTimeout = flag.String("reply_timeout", "1s", "Maximum duration to wait for a reply")
+var (
+	waitRater    = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
+	dataDir      = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
+	interations  = flag.Int("iterations", 1, "Number of iterations to do for dry run simulation")
+	replyTimeout = flag.String("reply_timeout", "1s", "Maximum duration to wait for a reply")
 
-var daCfgPath, diamConfigDIR string
-var daCfg *config.CGRConfig
-var apierRpc *rpc.Client
-var diamClnt *DiameterClient
+	daCfgPath, diamConfigDIR string
+	daCfg                    *config.CGRConfig
+	apierRpc                 *rpc.Client
+	diamClnt                 *DiameterClient
 
-var rplyTimeout time.Duration
+	rplyTimeout time.Duration
 
-var sTestsDiam = []func(t *testing.T){
-	testDiamItInitCfg,
-	testDiamItResetDataDb,
-	testDiamItResetStorDb,
-	testDiamItStartEngine,
-	testDiamItConnectDiameterClient,
-	testDiamItApierRpcConn,
-	testDiamItTPFromFolder,
-	testDiamItDryRun,
-	testDiamItCCRInit,
-	testDiamItCCRUpdate,
-	testDiamItCCRTerminate,
-	testDiamItCCRSMS,
-	testDiamItKillEngine,
-}
+	isDispatcherActive bool
+
+	sTestsDiam = []func(t *testing.T){
+		testDiamItInitCfg,
+		testDiamItResetDataDb,
+		testDiamItResetStorDb,
+		testDiamItStartEngine,
+		testDiamItConnectDiameterClient,
+		testDiamItApierRpcConn,
+		testDiamItTPFromFolder,
+		testDiamItDryRun,
+		testDiamItCCRInit,
+		testDiamItCCRUpdate,
+		testDiamItCCRTerminate,
+		testDiamItCCRSMS,
+		testDiamItKillEngine,
+	}
+)
 
 // Test start here
 func TestDiamItTcp(t *testing.T) {
+	engine.KillEngine(0)
 	diamConfigDIR = "diamagent"
 	for _, stest := range sTestsDiam {
 		t.Run(diamConfigDIR, stest)
 	}
 }
 
+// Test start here
+func TestDiamItDispatcher(t *testing.T) {
+	isDispatcherActive = true
+	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all"), 200)
+	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all2"), 200)
+	diamConfigDIR = "dispatchers/diamagent"
+	testDiamItResetAllDB(t)
+	for _, stest := range sTestsDiam {
+		t.Run(diamConfigDIR, stest)
+	}
+	engine.KillEngine(100)
+	isDispatcherActive = false
+}
+
 func TestDiamItSctp(t *testing.T) {
+	engine.KillEngine(0)
 	diamConfigDIR = "diamsctpagent"
 	for _, stest := range sTestsDiam {
 		t.Run(diamConfigDIR, stest)
@@ -79,6 +100,7 @@ func TestDiamItSctp(t *testing.T) {
 }
 
 func TestDiamItMaxConn(t *testing.T) {
+	engine.KillEngine(0)
 	diamConfigDIR = "diamagentmaxconn"
 	for _, stest := range sTestsDiam[:7] {
 		t.Run(diamConfigDIR, stest)
@@ -88,6 +110,7 @@ func TestDiamItMaxConn(t *testing.T) {
 }
 
 func TestDiamItSessionDisconnect(t *testing.T) {
+	engine.KillEngine(0)
 	diamConfigDIR = "diamagent"
 	for _, stest := range sTestsDiam[:7] {
 		t.Run(diamConfigDIR, stest)
@@ -102,11 +125,28 @@ func testDiamItInitCfg(t *testing.T) {
 	var err error
 	daCfg, err = config.NewCGRConfigFromPath(daCfgPath)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	daCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(daCfg)
 	rplyTimeout, _ = utils.ParseDurationWithSecs(*replyTimeout)
+	if isDispatcherActive {
+		daCfg.ListenCfg().RPCJSONListen = ":6012"
+	}
+}
+
+func testDiamItResetAllDB(t *testing.T) {
+	cfgPath1 := path.Join(*dataDir, "conf", "samples", "dispatchers", "all")
+	allCfg, err := config.NewCGRConfigFromPath(cfgPath1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitDataDb(allCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDb(allCfg); err != nil {
+		t.Fatal(err)
+	}
 }
 
 // Remove data in both rating and accounting db
@@ -125,7 +165,7 @@ func testDiamItResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testDiamItStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(daCfgPath, 200); err != nil {
+	if _, err := engine.StartEngine(daCfgPath, 500); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -156,7 +196,32 @@ func testDiamItTPFromFolder(t *testing.T) {
 	if err := apierRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
+	if isDispatcherActive {
+		testDiamItTPLoadData(t)
+	}
 	time.Sleep(time.Duration(1 * time.Second)) // Give time for scheduler to execute topups
+}
+
+func testDiamItTPLoadData(t *testing.T) {
+	wchan := make(chan struct{}, 1)
+	go func() {
+		loaderPath, err := exec.LookPath("cgr-loader")
+		if err != nil {
+			t.Error(err)
+		}
+		loader := exec.Command(loaderPath, "-config_path", daCfgPath, "-path", path.Join(*dataDir, "tariffplans", "dispatchers"))
+
+		if err := loader.Start(); err != nil {
+			t.Error(err)
+		}
+		loader.Wait()
+		wchan <- struct{}{}
+	}()
+	select {
+	case <-wchan:
+	case <-time.After(5 * time.Second):
+		t.Errorf("cgr-loader failed: ")
+	}
 }
 
 func testDiamItDryRun(t *testing.T) {
