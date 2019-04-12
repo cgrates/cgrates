@@ -346,16 +346,15 @@ func startDiameterAgent(internalSsChan, internalDispatcherSChan chan rpcclient.R
 	filterSChan <- filterS
 	var sS rpcclient.RpcClientConnection
 	var sSInternal bool
-	if len(cfg.DiameterAgentCfg().SessionSConns) == 0 {
+	if cfg.DispatcherSCfg().Enabled {
+		sS = <-internalDispatcherSChan
+		internalDispatcherSChan <- sS
+	} else if len(cfg.DiameterAgentCfg().SessionSConns) == 0 {
 		utils.Logger.Crit(
 			fmt.Sprintf("<%s> no SessionS connections defined",
 				utils.DiameterAgent))
 		exitChan <- true
 		return
-	}
-	if cfg.DispatcherSCfg().Enabled {
-		sS = <-internalDispatcherSChan
-		internalDispatcherSChan <- sS
 	} else if cfg.DiameterAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
 		sSInternal = true
 		sSIntConn := <-internalSsChan
@@ -400,14 +399,17 @@ func startDiameterAgent(internalSsChan, internalDispatcherSChan chan rpcclient.R
 	exitChan <- true
 }
 
-func startRadiusAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool,
+func startRadiusAgent(internalSMGChan, internalDispatcherSChan chan rpcclient.RpcClientConnection, exitChan chan bool,
 	filterSChan chan *engine.FilterS) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
 	utils.Logger.Info("Starting CGRateS RadiusAgent service")
 	var err error
-	var smgConn *rpcclient.RpcClientPool
-	if len(cfg.RadiusAgentCfg().SessionSConns) != 0 {
+	var smgConn rpcclient.RpcClientConnection
+	if cfg.DispatcherSCfg().Enabled {
+		smgConn = <-internalDispatcherSChan
+		internalDispatcherSChan <- smgConn
+	} else if len(cfg.RadiusAgentCfg().SessionSConns) != 0 {
 		smgConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
 			cfg.TlsCfg().ClientKey,
 			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
@@ -416,19 +418,25 @@ func startRadiusAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitCh
 			cfg.RadiusAgentCfg().SessionSConns, internalSMGChan,
 			cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<RadiusAgent> Could not connect to SMG: %s", err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to SMG: %s", utils.RadiusAgent, err.Error()))
 			exitChan <- true
 			return
 		}
+	} else {
+		utils.Logger.Crit(
+			fmt.Sprintf("<%s> no SessionS connections defined",
+				utils.RadiusAgent))
+		exitChan <- true
+		return
 	}
 	ra, err := agents.NewRadiusAgent(cfg, filterS, smgConn)
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<RadiusAgent> error: <%s>", err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
 		exitChan <- true
 		return
 	}
 	if err = ra.ListenAndServe(); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<RadiusAgent> error: <%s>", err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
 	}
 	exitChan <- true
 }
@@ -1547,7 +1555,7 @@ func main() {
 	}
 
 	if cfg.RadiusAgentCfg().Enabled {
-		go startRadiusAgent(internalSMGChan, exitChan, filterSChan)
+		go startRadiusAgent(internalSMGChan, internalDispatcherSChan, exitChan, filterSChan)
 	}
 
 	if cfg.DNSAgentCfg().Enabled {
