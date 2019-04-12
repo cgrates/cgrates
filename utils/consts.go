@@ -313,6 +313,7 @@ const (
 	HIERARCHY_SEP                = ">"
 	META_COMPOSED                = "*composed"
 	META_USAGE_DIFFERENCE        = "*usage_difference"
+	MetaDifference               = "*difference"
 	MetaVariable                 = "*variable"
 	MetaCCUsage                  = "*cc_usage"
 	MetaValueExponent            = "*value_exponent"
@@ -497,6 +498,7 @@ const (
 	Error                        = "Error"
 	MetaCgreq                    = "*cgreq"
 	MetaCgrep                    = "*cgrep"
+	MetaCGRAReq                  = "*cgrareq"
 	MetaCGRRequest               = "*cgrRequest"
 	MetaCGRReply                 = "*cgrReply"
 	CGR_ACD                      = "cgr_acd"
@@ -566,6 +568,7 @@ const (
 	TLSNoCaps                    = "tls"
 	MetaRouteID                  = "*route_id"
 	MetaApiKey                   = "*api_key"
+	M
 )
 
 // Migrator Action

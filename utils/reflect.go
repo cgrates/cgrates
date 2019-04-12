@@ -164,17 +164,19 @@ func IfaceAsInt64(itm interface{}) (i int64, err error) {
 }
 
 func IfaceAsFloat64(itm interface{}) (f float64, err error) {
-	switch itm.(type) {
+	switch it := itm.(type) {
 	case float64:
-		return itm.(float64), nil
+		return it, nil
 	case time.Duration:
-		return float64(itm.(time.Duration).Nanoseconds()), nil
+		return float64(it.Nanoseconds()), nil
+	case int:
+		return float64(it), nil
 	case int64:
-		return float64(itm.(int64)), nil
+		return float64(it), nil
 	case string:
-		return strconv.ParseFloat(itm.(string), 64)
+		return strconv.ParseFloat(it, 64)
 	default:
-		err = fmt.Errorf("cannot convert field: %+v to float64", itm)
+		err = fmt.Errorf("cannot convert field: %+v to float64", it)
 	}
 	return
 }
@@ -406,5 +408,58 @@ func Sum(items ...interface{}) (sum interface{}, err error) {
 		}
 	}
 	return
+}
 
+// Difference attempts to sum multiple items
+// returns the result or error if not comparable
+func Difference(items ...interface{}) (diff interface{}, err error) {
+	//we need at least 2 items to diff them
+	if len(items) < 2 {
+		return nil, ErrNotEnoughParameters
+	}
+
+	switch dt := items[0].(type) {
+	// case time.Duration:
+	// 	diff = dt
+	// 	for _, item := range items[1:] {
+	// 		if itmVal, err := IfaceAsDuration(item); err != nil {
+	// 			return nil, err
+	// 		} else {
+	// 			diff = diff.(time.Duration) - itmVal
+	// 		}
+	// 	}
+
+	case time.Time:
+		diff = dt
+		for _, item := range items[1:] {
+			if itmVal, err := IfaceAsDuration(item); err != nil {
+				return nil, err
+			} else {
+				diff = diff.(time.Time).Add(-itmVal)
+			}
+		}
+
+	case float64:
+		diff = dt
+		for _, item := range items[1:] {
+			if itmVal, err := IfaceAsFloat64(item); err != nil {
+				return nil, err
+			} else {
+				diff = diff.(float64) - itmVal
+			}
+		}
+
+	// case int64:
+	// 	for _, item := range items[1:] {
+	// 		if itmVal, err := IfaceAsInt64(item); err != nil {
+	// 			return nil, err
+	// 		} else {
+	// 			diff = diff.(int64) - itmVal
+	// 		}
+	// 	}
+	default: // unsupported comparison
+		return nil, fmt.Errorf("unsupported type")
+	}
+
+	return
 }
