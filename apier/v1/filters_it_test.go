@@ -109,7 +109,8 @@ func testFilterRpcConn(t *testing.T) {
 
 func testFilterGetFilterBeforeSet(t *testing.T) {
 	var reply *engine.Filter
-	if err := filterRPC.Call("ApierV1.GetFilter", &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := filterRPC.Call("ApierV1.GetFilter", &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
@@ -122,7 +123,7 @@ func testFilterSetFilter(t *testing.T) {
 			Rules: []*engine.FilterRule{
 				{
 					FieldName: "*string",
-					Type:      "Account",
+					Type:      "~Account",
 					Values:    []string{"1001", "1002"},
 				},
 			},
@@ -164,12 +165,12 @@ func testFilterUpdateFilter(t *testing.T) {
 	filter.Rules = []*engine.FilterRule{
 		{
 			FieldName: "*string",
-			Type:      "Account",
+			Type:      "~Account",
 			Values:    []string{"1001", "1002"},
 		},
 		{
 			FieldName: engine.MetaPrefix,
-			Type:      "Destination",
+			Type:      "~Destination",
 			Values:    []string{"10", "20"},
 		},
 	}
@@ -204,7 +205,8 @@ func testFilterRemoveFilter(t *testing.T) {
 func testFilterGetFilterAfterRemove(t *testing.T) {
 	var reply *engine.Filter
 	if err := filterRPC.Call("ApierV1.GetFilter",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }

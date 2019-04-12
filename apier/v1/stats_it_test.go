@@ -325,7 +325,7 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 			ID:     "FLTR_1",
 			Rules: []*engine.FilterRule{
 				{
-					FieldName: "Account",
+					FieldName: "~Account",
 					Type:      "*string",
 					Values:    []string{"1001"},
 				},
@@ -405,7 +405,7 @@ func testV1STSUpdateStatQueueProfile(t *testing.T) {
 			ID:     "FLTR_2",
 			Rules: []*engine.FilterRule{
 				{
-					FieldName: "Account",
+					FieldName: "~Account",
 					Type:      "*string",
 					Values:    []string{"1001"},
 				},
