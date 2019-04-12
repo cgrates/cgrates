@@ -358,7 +358,7 @@ func testV1TSSetThresholdProfile(t *testing.T) {
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_Test",
-			FilterIDs: []string{"*string:Account:1001"},
+			FilterIDs: []string{"*string:~Account:1001"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -386,7 +386,7 @@ func testV1TSSetThresholdProfile(t *testing.T) {
 
 func testV1TSUpdateThresholdProfile(t *testing.T) {
 	var result string
-	tPrfl.FilterIDs = []string{"*string:Account:1001", "*prefix:DST:10"}
+	tPrfl.FilterIDs = []string{"*string:~Account:1001", "*prefix:~DST:10"}
 	if err := tSv1Rpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
