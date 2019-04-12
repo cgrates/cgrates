@@ -160,9 +160,12 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 			},
 		},
 	}
+	expected.Hosts.Sort()
 	if err := dspRPC.Call(utils.DispatcherSv1GetProfileForEvent, &arg, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected, reply) {
+	}
+	reply.Hosts.Sort()
+	if !reflect.DeepEqual(expected, reply) {
 		t.Errorf("expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(reply))
 	}
 }
