@@ -18,49 +18,115 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package dispatchers
+package v1
 
 import (
+	"net/rpc"
+	"net/rpc/jsonrpc"
+	"os/exec"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-var sTestsDspDspv1 = []func(t *testing.T){
-	testDspDspv1GetProfileForEvent,
-}
+var (
+	dspCfgPath string
+	dspCfg     *config.CGRConfig
+	dspRPC     *rpc.Client
+
+	sTestsDspDspv1 = []func(t *testing.T){
+		testDspITLoadConfig,
+		testDspITResetDataDB,
+		testDspITResetStorDb,
+		testDspITStartEngine,
+		testDspITRPCConn,
+		testDspITLoadData2,
+
+		testDspDspv1GetProfileForEvent,
+
+		testDspITStopCgrEngine,
+	}
+)
 
 //Test start here
 func TestDspDspv1SMySQL(t *testing.T) {
-	engine.KillEngine(0)
-	dispEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "dispatchers"), true, true)
-	dispEngine.loadData2(t, path.Join(dspDataDir, "tariffplans", "dispatchers"))
-	time.Sleep(500 * time.Millisecond)
+	dspCfgPath = path.Join(*dataDir, "conf", "samples", "dispatchers", "dispatchers")
 	for _, stest := range sTestsDspDspv1 {
 		t.Run("TestDspDspv1", stest)
 	}
-	dispEngine.stopEngine(t)
-	engine.KillEngine(0)
 }
 
 func TestDspDspv1SMongo(t *testing.T) {
-	engine.KillEngine(0)
-	dispEngine = newTestEngine(t, path.Join(dspDataDir, "conf", "samples", "dispatchers", "dispatchers_mongo"), true, true)
-	dispEngine.loadData2(t, path.Join(dspDataDir, "tariffplans", "dispatchers"))
-	time.Sleep(500 * time.Millisecond)
+	dspCfgPath = path.Join(*dataDir, "conf", "samples", "dispatchers", "dispatchers_mongo")
 	for _, stest := range sTestsDspDspv1 {
 		t.Run("TestDspDspv1", stest)
 	}
-	dispEngine.stopEngine(t)
-	engine.KillEngine(0)
+}
+
+func testDspITLoadConfig(t *testing.T) {
+	var err error
+	if dspCfg, err = config.NewCGRConfigFromPath(dspCfgPath); err != nil {
+		t.Error(err)
+	}
+}
+
+func testDspITResetDataDB(t *testing.T) {
+	if err := engine.InitDataDb(dspCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testDspITResetStorDb(t *testing.T) {
+	if err := engine.InitStorDb(dspCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testDspITStartEngine(t *testing.T) {
+	if _, err := engine.StopStartEngine(dspCfgPath, *waitRater); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testDspITRPCConn(t *testing.T) {
+	var err error
+	dspRPC, err = jsonrpc.Dial("tcp", dspCfg.ListenCfg().RPCJSONListen)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testDspITLoadData2(t *testing.T) {
+	wchan := make(chan struct{}, 1)
+	go func() {
+		loaderPath, err := exec.LookPath("cgr-loader")
+		if err != nil {
+			t.Error(err)
+		}
+		loader := exec.Command(loaderPath, "-config_path", dspCfgPath, "-path", path.Join(*dataDir, "tariffplans", "dispatchers"))
+
+		if err := loader.Start(); err != nil {
+			t.Error(err)
+		}
+		loader.Wait()
+		wchan <- struct{}{}
+	}()
+	select {
+	case <-wchan:
+	case <-time.After(5 * time.Second):
+		t.Errorf("cgr-loader failed: ")
+	}
+	time.Sleep(500 * time.Millisecond)
 }
 
 func testDspDspv1GetProfileForEvent(t *testing.T) {
-	arg := DispatcherEvent{
+	arg := dispatchers.DispatcherEvent{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testDspv1",
@@ -94,9 +160,15 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 			},
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.DispatcherSv1GetProfileForEvent, &arg, &reply); err != nil {
+	if err := dspRPC.Call(utils.DispatcherSv1GetProfileForEvent, &arg, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, reply) {
 		t.Errorf("expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func testDspITStopCgrEngine(t *testing.T) {
+	if err := engine.KillEngine(100); err != nil {
+		t.Error(err)
 	}
 }
