@@ -68,6 +68,7 @@ type AgentRequest struct {
 	Vars       *config.NavigableMap // shared data
 	CGRRequest *config.NavigableMap
 	CGRReply   *config.NavigableMap
+	CGRAReq    *config.NavigableMap // active request
 	Reply      *config.NavigableMap
 	tenant,
 	timezone string
@@ -99,6 +100,8 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 		return ar.CGRReply.FieldAsInterface(fldPath[1:])
 	case utils.MetaRep:
 		return ar.Reply.FieldAsInterface(fldPath[1:])
+	case utils.MetaCGRAReq:
+		return ar.CGRAReq.FieldAsInterface(fldPath[1:])
 	}
 }
 
@@ -117,8 +120,7 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 // AsNavigableMap implements engine.DataProvider
 func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 	nM *config.NavigableMap, err error) {
-	nM = config.NewNavigableMap(nil)
-
+	ar.CGRAReq = config.NewNavigableMap(nil)
 	for _, tplFld := range tplFlds {
 		if pass, err := ar.filterS.Pass(ar.tenant,
 			tplFld.Filters, ar); err != nil {
@@ -126,6 +128,8 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 		} else if !pass {
 			continue
 		}
+		fmt.Println("==============================================")
+		fmt.Println(utils.ToJSON(tplFld))
 		out, err := ar.ParseField(tplFld)
 		if err != nil {
 			if err == utils.ErrNotFound {
@@ -140,7 +144,7 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 		var valSet []*config.NMItem
 		fldPath := strings.Split(tplFld.FieldId, utils.NestingSep)
 		nMItm := &config.NMItem{Data: out, Path: fldPath, Config: tplFld}
-		if nMFields, err := nM.FieldAsInterface(fldPath); err != nil {
+		if nMFields, err := ar.CGRAReq.FieldAsInterface(fldPath); err != nil {
 			if err != utils.ErrNotFound {
 				return nil, err
 			}
@@ -162,12 +166,14 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 			valSet = valSet[:len(valSet)-1] // discard the last item
 		}
 		valSet = append(valSet, nMItm)
-		nM.Set(fldPath, valSet, false, true)
+		ar.CGRAReq.Set(fldPath, valSet, false, true)
+		fmt.Println("Set the value in nM")
+		fmt.Println(ar.CGRAReq.String())
 		if tplFld.Blocker { // useful in case of processing errors first
 			break
 		}
 	}
-	return
+	return ar.CGRAReq, nil
 }
 
 // parseField outputs the value based on the template item
@@ -259,6 +265,16 @@ func (aReq *AgentRequest) ParseField(
 			iFaceVals[i] = utils.StringToInterface(strVal)
 		}
 		out, err = utils.Sum(iFaceVals...)
+	case utils.MetaDifference:
+		iFaceVals := make([]interface{}, len(cfgFld.Value))
+		for i, val := range cfgFld.Value {
+			strVal, err := val.ParseDataProvider(aReq, utils.NestingSep)
+			if err != nil {
+				return "", err
+			}
+			iFaceVals[i] = utils.StringToInterface(strVal)
+		}
+		out, err = utils.Difference(iFaceVals...)
 	case utils.MetaValueExponent:
 		if len(cfgFld.Value) != 2 {
 			return nil, fmt.Errorf("invalid arguments <%s> to %s",

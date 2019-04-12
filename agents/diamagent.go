@@ -204,7 +204,8 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 	var processed bool
 	for _, reqProcessor := range da.cgrCfg.DiameterAgentCfg().RequestProcessors {
 		var lclProcessed bool
-		lclProcessed, err = da.processRequest(reqProcessor,
+		lclProcessed, err = da.processRequest(
+			reqProcessor,
 			newAgentRequest(
 				diamDP, reqVars, rply,
 				reqProcessor.Tenant, da.cgrCfg.GeneralCfg().DefaultTenant,
@@ -250,6 +251,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 		return pass, err
 	}
 	if agReq.CGRRequest, err = agReq.AsNavigableMap(reqProcessor.RequestFields); err != nil {
+		fmt.Println("EXIT HERE ???????????? ")
 		return
 	}
 	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.tenant, utils.NestingSep)
