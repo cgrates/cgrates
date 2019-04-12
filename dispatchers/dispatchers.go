@@ -193,7 +193,6 @@ func (dS *DispatcherService) V1GetProfileForEvent(ev *DispatcherEvent,
 	return
 }
 
-// ToDo: Add tests for it
 // Call implements rpcclient.RpcClientConnection interface for internal RPC
 func (dS *DispatcherService) Call(serviceMethod string, // all API fuction must be of type: SubsystemMethod
 	args interface{}, reply interface{}) error {
