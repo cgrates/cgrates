@@ -140,10 +140,10 @@ func logAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err 
 	switch {
 	case ub != nil:
 		body, _ := json.Marshal(ub)
-		utils.Logger.Info(fmt.Sprintf("Threshold hit, Balance: %s", body))
+		utils.Logger.Info(fmt.Sprintf("LOG Account: %s", body))
 	case extraData != nil:
 		body, _ := json.Marshal(extraData)
-		utils.Logger.Info(fmt.Sprintf("<CGRLog> extraData: %s", body))
+		utils.Logger.Info(fmt.Sprintf("LOG ExtraData: %s", body))
 	}
 	return
 }
