@@ -44,6 +44,9 @@ func (da *DNSAgentCfg) loadFromJsonCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 	if jsnCfg.Listen != nil {
 		da.Listen = *jsnCfg.Listen
 	}
+	if jsnCfg.Timezone != nil {
+		da.Timezone = *jsnCfg.Timezone
+	}
 	if jsnCfg.Sessions_conns != nil {
 		da.SessionSConns = make([]*RemoteHost, len(*jsnCfg.Sessions_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
