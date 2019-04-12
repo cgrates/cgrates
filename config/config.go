@@ -590,7 +590,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// DAgent checks
-	if self.diameterAgentCfg.Enabled {
+	if self.diameterAgentCfg.Enabled && !self.dispatcherSCfg.Enabled {
 		if !self.sessionSCfg.Enabled {
 			for _, daSMGConn := range self.diameterAgentCfg.SessionSConns {
 				if daSMGConn.Address == utils.MetaInternal {
@@ -600,7 +600,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
-	if self.radiusAgentCfg.Enabled && !self.sessionSCfg.Enabled {
+	if self.radiusAgentCfg.Enabled && !self.sessionSCfg.Enabled && !self.dispatcherSCfg.Enabled {
 		for _, raSMGConn := range self.radiusAgentCfg.SessionSConns {
 			if raSMGConn.Address == utils.MetaInternal {
 				return errors.New("SMGeneric not enabled but referenced by RadiusAgent component")
