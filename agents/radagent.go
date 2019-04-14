@@ -248,7 +248,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 	if reqProcessor.Flags.HasKey(utils.MetaCDRs) {
 		var rplyCDRs string
 		if err = ra.sessionS.Call(utils.SessionSv1ProcessCDR,
-			cgrEv, &rplyCDRs); err != nil {
+			cgrEv.AsCGREventWithArgDispatcher(), &rplyCDRs); err != nil {
 			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
 		}
 	}

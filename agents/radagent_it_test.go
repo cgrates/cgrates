@@ -23,6 +23,7 @@ package agents
 import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
+	"os/exec"
 	"path"
 	"reflect"
 	"testing"
@@ -35,13 +36,51 @@ import (
 	"github.com/cgrates/radigo"
 )
 
-var raCfgPath string
-var raCfg *config.CGRConfig
-var raAuthClnt, raAcctClnt *radigo.Client
-var raRPC *rpc.Client
+var (
+	raonfigDIR             string
+	raCfgPath              string
+	raCfg                  *config.CGRConfig
+	raAuthClnt, raAcctClnt *radigo.Client
+	raRPC                  *rpc.Client
 
-func TestRAitInitCfg(t *testing.T) {
-	raCfgPath = path.Join(*dataDir, "conf", "samples", "radagent")
+	sTestsRadius = []func(t *testing.T){
+		testRAitInitCfg,
+		testRAitResetDataDb,
+		testRAitResetStorDb,
+		testRAitStartEngine,
+		testRAitApierRpcConn,
+		testRAitTPFromFolder,
+		testRAitAuth,
+		testRAitAcctStart,
+		testRAitAcctStop,
+		testRAitStopCgrEngine,
+	}
+)
+
+// Test start here
+func TestRAit(t *testing.T) {
+	engine.KillEngine(0)
+	raonfigDIR = "radagent"
+	for _, stest := range sTestsRadius {
+		t.Run(diamConfigDIR, stest)
+	}
+}
+
+func TestRAitDispatcher(t *testing.T) {
+	isDispatcherActive = true
+	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all"), 200)
+	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all2"), 200)
+	raonfigDIR = "dispatchers/radagent"
+	testRadiusitResetAllDB(t)
+	for _, stest := range sTestsRadius {
+		t.Run(diamConfigDIR, stest)
+	}
+	engine.KillEngine(100)
+	isDispatcherActive = false
+}
+
+func testRAitInitCfg(t *testing.T) {
+	raCfgPath = path.Join(*dataDir, "conf", "samples", raonfigDIR)
 	// Init config first
 	var err error
 	raCfg, err = config.NewCGRConfigFromPath(raCfgPath)
@@ -50,31 +89,48 @@ func TestRAitInitCfg(t *testing.T) {
 	}
 	raCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(raCfg)
+	if isDispatcherActive {
+		raCfg.ListenCfg().RPCJSONListen = ":6012"
+	}
+}
+
+func testRadiusitResetAllDB(t *testing.T) {
+	cfgPath1 := path.Join(*dataDir, "conf", "samples", "dispatchers", "all")
+	allCfg, err := config.NewCGRConfigFromPath(cfgPath1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitDataDb(allCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDb(allCfg); err != nil {
+		t.Fatal(err)
+	}
 }
 
 // Remove data in both rating and accounting db
-func TestRAitResetDataDb(t *testing.T) {
+func testRAitResetDataDb(t *testing.T) {
 	if err := engine.InitDataDb(raCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
-func TestRAitResetStorDb(t *testing.T) {
+func testRAitResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(raCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine
-func TestRAitStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(raCfgPath, *waitRater); err != nil {
+func testRAitStartEngine(t *testing.T) {
+	if _, err := engine.StartEngine(raCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestRAitApierRpcConn(t *testing.T) {
+func testRAitApierRpcConn(t *testing.T) {
 	var err error
 	raRPC, err = jsonrpc.Dial("tcp", raCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -83,11 +139,14 @@ func TestRAitApierRpcConn(t *testing.T) {
 }
 
 // Load the tariff plan, creating accounts and their balances
-func TestRAitTPFromFolder(t *testing.T) {
+func testRAitTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	var loadInst utils.LoadInstance
 	if err := raRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
 		t.Error(err)
+	}
+	if isDispatcherActive {
+		testRadiusitTPLoadData(t)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 
@@ -107,7 +166,29 @@ func TestRAitTPFromFolder(t *testing.T) {
 	}
 }
 
-func TestRAitAuth(t *testing.T) {
+func testRadiusitTPLoadData(t *testing.T) {
+	wchan := make(chan struct{}, 1)
+	go func() {
+		loaderPath, err := exec.LookPath("cgr-loader")
+		if err != nil {
+			t.Error(err)
+		}
+		loader := exec.Command(loaderPath, "-config_path", raCfgPath, "-path", path.Join(*dataDir, "tariffplans", "dispatchers"))
+
+		if err := loader.Start(); err != nil {
+			t.Error(err)
+		}
+		loader.Wait()
+		wchan <- struct{}{}
+	}()
+	select {
+	case <-wchan:
+	case <-time.After(5 * time.Second):
+		t.Errorf("cgr-loader failed: ")
+	}
+}
+
+func testRAitAuth(t *testing.T) {
 	if raAuthClnt, err = radigo.NewClient("udp", "127.0.0.1:1812", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
@@ -147,7 +228,7 @@ func TestRAitAuth(t *testing.T) {
 	}
 }
 
-func TestRAitAcctStart(t *testing.T) {
+func testRAitAcctStart(t *testing.T) {
 	if raAcctClnt, err = radigo.NewClient("udp", "127.0.0.1:1813", "CGRateS.org", dictRad, 1, nil); err != nil {
 		t.Fatal(err)
 	}
@@ -206,6 +287,10 @@ func TestRAitAcctStart(t *testing.T) {
 	}
 	// Make sure the sessin is managed by SMG
 	time.Sleep(10 * time.Millisecond)
+	expUsage := 10 * time.Second
+	if isDispatcherActive { // no debit interval set on dispatched session
+		expUsage = 3 * time.Hour
+	}
 	var aSessions []*sessions.ActiveSession
 	if err := raRPC.Call(utils.SessionSv1GetActiveSessions,
 		map[string]string{utils.RunID: utils.META_DEFAULT,
@@ -214,12 +299,12 @@ func TestRAitAcctStart(t *testing.T) {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
-	} else if aSessions[0].Usage != 10*time.Second {
-		t.Errorf("Expecting 10s, received usage: %v\nAnd Session: %s ", aSessions[0].Usage, utils.ToJSON(aSessions))
+	} else if aSessions[0].Usage != expUsage {
+		t.Errorf("Expecting %v, received usage: %v\nAnd Session: %s ", expUsage, aSessions[0].Usage, utils.ToJSON(aSessions))
 	}
 }
 
-func TestRAitAcctStop(t *testing.T) {
+func testRAitAcctStop(t *testing.T) {
 	req := raAcctClnt.NewRequest(radigo.AccountingRequest, 3) // emulates Kamailio packet for accounting start
 	if err := req.AddAVPWithName("Acct-Status-Type", "Stop", ""); err != nil {
 		t.Error(err)
@@ -303,7 +388,7 @@ func TestRAitAcctStop(t *testing.T) {
 	}
 }
 
-func TestRAitStopCgrEngine(t *testing.T) {
+func testRAitStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
