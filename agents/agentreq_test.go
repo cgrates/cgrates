@@ -434,3 +434,46 @@ func TestAgReqMetaExponent(t *testing.T) {
 		t.Errorf("expecting: %+v, \n received: %+v", eMp, mpOut)
 	}
 }
+
+func TestAgReqCGRActiveRequest(t *testing.T) {
+	data, _ := engine.NewMapStorage()
+	dm := engine.NewDataManager(data)
+	cfg, _ := config.NewDefaultCGRConfig()
+	filterS := engine.NewFilterS(cfg, nil, nil, dm)
+	agReq := newAgentRequest(nil, nil, nil, nil, "cgrates.org", "", filterS)
+	// populate request, emulating the way will be done in HTTPAgent
+
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Value1", Filters: []string{},
+			FieldId: "Value1", Type: utils.META_CONSTANT,
+			Value: config.NewRSRParsersMustCompile("12", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Value2", Filters: []string{},
+			FieldId: "Value2", Type: utils.META_CONSTANT,
+			Value: config.NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Value3", Filters: []string{},
+			FieldId: "Value3", Type: utils.META_CONSTANT,
+			Value: config.NewRSRParsersMustCompile("2", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Diff", Filters: []string{},
+			FieldId: "Diff", Type: utils.MetaDifference,
+			Value: config.NewRSRParsersMustCompile("~*cgrareq.Value1;~*cgrareq.Value2;~*cgrareq.Value3", true, utils.INFIELD_SEP)},
+	}
+	eMp := config.NewNavigableMap(nil)
+	eMp.Set([]string{"Value1"}, []*config.NMItem{
+		&config.NMItem{Data: "12", Path: []string{"Value1"},
+			Config: tplFlds[0]}}, false, true)
+	eMp.Set([]string{"Value2"}, []*config.NMItem{
+		&config.NMItem{Data: "1", Path: []string{"Value2"},
+			Config: tplFlds[1]}}, false, true)
+	eMp.Set([]string{"Value3"}, []*config.NMItem{
+		&config.NMItem{Data: "2", Path: []string{"Value3"},
+			Config: tplFlds[2]}}, false, true)
+	eMp.Set([]string{"Diff"}, []*config.NMItem{
+		&config.NMItem{Data: int64(9), Path: []string{"Diff"},
+			Config: tplFlds[3]}}, false, true)
+
+	if mpOut, err := agReq.AsNavigableMap(tplFlds); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eMp, mpOut) {
+		t.Errorf("expecting: %+v,\n received: %+v", eMp, mpOut)
+	}
+}
