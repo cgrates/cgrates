@@ -485,7 +485,7 @@ func startFsAgent(internalSMGChan, internalDispatcherSChan chan rpcclient.RpcCli
 	} else if len(cfg.FsAgentCfg().SessionSConns) == 0 {
 		utils.Logger.Crit(
 			fmt.Sprintf("<%s> no SessionS connections defined",
-				utils.DiameterAgent))
+				utils.FreeSWITCHAgent))
 		exitChan <- true
 		return
 	} else if cfg.FsAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
@@ -503,7 +503,7 @@ func startFsAgent(internalSMGChan, internalDispatcherSChan chan rpcclient.RpcCli
 			cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.DiameterAgent, utils.SessionS, err.Error()))
+				utils.FreeSWITCHAgent, utils.SessionS, err.Error()))
 			exitChan <- true
 			return
 		}
@@ -527,17 +527,52 @@ func startFsAgent(internalSMGChan, internalDispatcherSChan chan rpcclient.RpcCli
 	exitChan <- true
 }
 
-func startKamAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
+func startKamAgent(internalSMGChan, internalDispatcherSChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
 	var err error
+	var sS rpcclient.RpcClientConnection
+	var sSInternal bool
 	utils.Logger.Info("Starting Kamailio agent")
-	smgRpcConn := <-internalSMGChan
-	internalSMGChan <- smgRpcConn
-	birpcClnt := utils.NewBiRPCInternalClient(smgRpcConn.(*sessions.SessionS))
-	ka := agents.NewKamailioAgent(cfg.KamAgentCfg(), birpcClnt,
+	if cfg.DispatcherSCfg().Enabled {
+		sS = <-internalDispatcherSChan
+		internalDispatcherSChan <- sS
+	} else if len(cfg.KamAgentCfg().SessionSConns) == 0 {
+		utils.Logger.Crit(
+			fmt.Sprintf("<%s> no SessionS connections defined",
+				utils.KamailioAgent))
+		exitChan <- true
+		return
+	} else if cfg.KamAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
+		sSInternal = true
+		sSIntConn := <-internalSMGChan
+		internalSMGChan <- sSIntConn
+		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
+	} else {
+		sS, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+			cfg.TlsCfg().ClientKey,
+			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
+			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
+			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
+			cfg.KamAgentCfg().SessionSConns, internalSMGChan,
+			cfg.GeneralCfg().InternalTtl, false)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
+				utils.KamailioAgent, utils.SessionS, err.Error()))
+			exitChan <- true
+			return
+		}
+	}
+	ka := agents.NewKamailioAgent(cfg.KamAgentCfg(), sS,
 		utils.FirstNonEmpty(cfg.KamAgentCfg().Timezone, cfg.GeneralCfg().DefaultTimezone))
-	var reply string
-	if err = birpcClnt.Call(utils.SessionSv1RegisterInternalBiJSONConn, "", &reply); err != nil { // for session sync
-		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.KamailioAgent, err))
+	if sSInternal { // bidirectional client backwards connection
+		sS.(*utils.BiRPCInternalClient).SetClientConn(ka)
+		var rply string
+		if err := sS.Call(utils.SessionSv1RegisterInternalBiJSONConn,
+			utils.EmptyString, &rply); err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
+				utils.KamailioAgent, utils.SessionS, err.Error()))
+			exitChan <- true
+			return
+		}
 	}
 	if err = ka.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.KamailioAgent, err))
@@ -545,17 +580,21 @@ func startKamAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan 
 	exitChan <- true
 }
 
-func startHTTPAgent(internalSMGChan chan rpcclient.RpcClientConnection,
+func startHTTPAgent(internalSMGChan, internalDispatcherSChan chan rpcclient.RpcClientConnection,
 	exitChan chan bool, server *utils.Server,
 	filterSChan chan *engine.FilterS, dfltTenant string) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
+	var sS rpcclient.RpcClientConnection
+	if cfg.DispatcherSCfg().Enabled {
+		sS = <-internalDispatcherSChan
+		internalDispatcherSChan <- sS
+	}
 	utils.Logger.Info("Starting HTTP agent")
 	var err error
 	for _, agntCfg := range cfg.HttpAgentCfg() {
-		var sSConn *rpcclient.RpcClientPool
-		if len(agntCfg.SessionSConns) != 0 {
-			sSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+		if !cfg.DispatcherSCfg().Enabled && len(agntCfg.SessionSConns) != 0 {
+			sS, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
 				cfg.TlsCfg().ClientKey,
 				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
@@ -570,7 +609,7 @@ func startHTTPAgent(internalSMGChan chan rpcclient.RpcClientConnection,
 			}
 		}
 		server.RegisterHttpHandler(agntCfg.Url,
-			agents.NewHTTPAgent(sSConn, filterS, dfltTenant, agntCfg.RequestPayload,
+			agents.NewHTTPAgent(sS, filterS, dfltTenant, agntCfg.RequestPayload,
 				agntCfg.ReplyPayload, agntCfg.RequestProcessors))
 	}
 }
@@ -1571,7 +1610,7 @@ func main() {
 
 	// Start SM-Kamailio
 	if cfg.KamAgentCfg().Enabled {
-		go startKamAgent(internalSMGChan, exitChan)
+		go startKamAgent(internalSMGChan, internalDispatcherSChan, exitChan)
 	}
 
 	if cfg.AsteriskAgentCfg().Enabled {
@@ -1591,7 +1630,7 @@ func main() {
 	}
 
 	if len(cfg.HttpAgentCfg()) != 0 {
-		go startHTTPAgent(internalSMGChan, exitChan, server, filterSChan,
+		go startHTTPAgent(internalSMGChan, internalDispatcherSChan, exitChan, server, filterSChan,
 			cfg.GeneralCfg().DefaultTenant)
 	}
 
