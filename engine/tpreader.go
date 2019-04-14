@@ -1788,6 +1788,9 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err 
 			log.Print("\t", th.TenantID())
 		}
 	}
+	if len(tpr.dispatcherHosts) != 0 {
+		loadIDs[utils.CacheDispatcherHosts] = loadID
+	}
 
 	if verbose {
 		log.Print("Timings:")
@@ -2051,6 +2054,8 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 }
 
 func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err error) {
+	loadID := time.Now().UnixNano()
+	loadIDs := make(map[string]int64)
 	for _, d := range tpr.destinations {
 		err = tpr.dm.DataDB().RemoveDestination(d.Id, utils.NonTransactional)
 		if err != nil {
@@ -2323,6 +2328,75 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 		if verbose {
 			log.Print("\t", tpTH.Tenant)
 		}
+	}
+	if len(tpr.destinations) != 0 {
+		loadIDs[utils.CacheDestinations] = loadID
+	}
+	if len(tpr.revDests) != 0 {
+		loadIDs[utils.CacheReverseDestinations] = loadID
+	}
+	if len(tpr.ratingPlans) != 0 {
+		loadIDs[utils.CacheRatingPlans] = loadID
+	}
+	if len(tpr.ratingProfiles) != 0 {
+		loadIDs[utils.CacheRatingProfiles] = loadID
+	}
+	if len(tpr.actionPlans) != 0 {
+		loadIDs[utils.CacheActionPlans] = loadID
+	}
+	if len(tpr.acntActionPlans) != 0 {
+		loadIDs[utils.CacheAccountActionPlans] = loadID
+	}
+	if len(tpr.actionsTriggers) != 0 {
+		loadIDs[utils.CacheActionTriggers] = loadID
+	}
+	if len(tpr.sharedGroups) != 0 {
+		loadIDs[utils.CacheSharedGroups] = loadID
+	}
+	if len(tpr.actions) != 0 {
+		loadIDs[utils.CacheActions] = loadID
+	}
+	if len(tpr.filters) != 0 {
+		loadIDs[utils.CacheFilters] = loadID
+	}
+	if len(tpr.resProfiles) != 0 {
+		loadIDs[utils.CacheResourceProfiles] = loadID
+	}
+	if len(tpr.resources) != 0 {
+		loadIDs[utils.CacheResources] = loadID
+	}
+	if len(tpr.sqProfiles) != 0 {
+		loadIDs[utils.CacheStatQueueProfiles] = loadID
+	}
+	if len(tpr.statQueues) != 0 {
+		loadIDs[utils.CacheStatQueues] = loadID
+	}
+	if len(tpr.thProfiles) != 0 {
+		loadIDs[utils.CacheThresholdProfiles] = loadID
+	}
+	if len(tpr.thresholds) != 0 {
+		loadIDs[utils.CacheThresholds] = loadID
+	}
+	if len(tpr.sppProfiles) != 0 {
+		loadIDs[utils.CacheSupplierProfiles] = loadID
+	}
+	if len(tpr.attributeProfiles) != 0 {
+		loadIDs[utils.CacheAttributeProfiles] = loadID
+	}
+	if len(tpr.chargerProfiles) != 0 {
+		loadIDs[utils.CacheChargerProfiles] = loadID
+	}
+	if len(tpr.dispatcherProfiles) != 0 {
+		loadIDs[utils.CacheDispatcherProfiles] = loadID
+	}
+	if len(tpr.dispatcherHosts) != 0 {
+		loadIDs[utils.CacheDispatcherHosts] = loadID
+	}
+	if len(tpr.timings) != 0 {
+		loadIDs[utils.CacheTimings] = loadID
+	}
+	if err = tpr.dm.SetLoadIDs(loadIDs); err != nil {
+		return err
 	}
 	return
 }
