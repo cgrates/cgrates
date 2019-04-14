@@ -266,7 +266,7 @@ func (sm *FSsessions) onChannelHangupComplete(fsev FSEvent, connId string) {
 			return
 		}
 		if err := sm.sS.Call(utils.SessionSv1ProcessCDR,
-			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv}, &reply); err != nil {
+			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv, ArgDispatcher: cgrEv.ConsumeArgDispatcher()}, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Failed processing CGREvent: %s,  error: <%s>",
 				utils.FreeSWITCHAgent, utils.ToJSON(cgrEv), err.Error()))
 		}
