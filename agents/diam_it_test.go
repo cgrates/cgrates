@@ -77,7 +77,6 @@ func TestDiamItTcp(t *testing.T) {
 	}
 }
 
-// Test start here
 func TestDiamItDispatcher(t *testing.T) {
 	isDispatcherActive = true
 	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all"), 200)

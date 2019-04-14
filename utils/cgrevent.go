@@ -172,6 +172,32 @@ func (ev *CGREvent) RemFldsWithPrefix(prfx string) {
 	}
 }
 
+// RemFldsWithPrefix will remove fields starting with prefix from event
+func (ev *CGREvent) AsCGREventWithArgDispatcher() (arg *CGREventWithArgDispatcher) {
+	arg = &CGREventWithArgDispatcher{
+		CGREvent: ev,
+	}
+	//check if we have APIKey in event and in case it has add it in ArgDispatcher
+	apiKeyIface, hasApiKey := ev.Event[MetaApiKey]
+	if hasApiKey {
+		arg.ArgDispatcher = &ArgDispatcher{
+			APIKey: StringPointer(apiKeyIface.(string)),
+		}
+	}
+	//check if we have RouteID in event and in case it has add it in ArgDispatcher
+	routeIDIface, hasRouteID := ev.Event[MetaRouteID]
+	if hasRouteID {
+		if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+			arg.ArgDispatcher = &ArgDispatcher{
+				RouteID: StringPointer(routeIDIface.(string)),
+			}
+		} else {
+			arg.ArgDispatcher.RouteID = StringPointer(routeIDIface.(string))
+		}
+	}
+	return
+}
+
 // CGREvents is a group of generic events processed by CGR services
 // ie: derived CDRs
 type CGREvents struct {
