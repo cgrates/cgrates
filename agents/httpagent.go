@@ -104,6 +104,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 		return
 	}
 	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.tenant, utils.NestingSep)
+	argDisp := cgrEv.ConsumeArgDispatcher()
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,
@@ -137,7 +138,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliers),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
-			*cgrEv)
+			*cgrEv, argDisp)
 		var authReply sessions.V1AuthorizeReply
 		err = ha.sessionS.Call(utils.SessionSv1AuthorizeEvent,
 			authArgs, &authReply)
@@ -150,7 +151,8 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 			reqProcessor.Flags.HasKey(utils.MetaResources),
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			reqProcessor.Flags.HasKey(utils.MetaThresholds),
-			reqProcessor.Flags.HasKey(utils.MetaStats), *cgrEv)
+			reqProcessor.Flags.HasKey(utils.MetaStats),
+			*cgrEv, argDisp)
 		var initReply sessions.V1InitSessionReply
 		err = ha.sessionS.Call(utils.SessionSv1InitiateSession,
 			initArgs, &initReply)
@@ -160,7 +162,8 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 	case utils.MetaUpdate:
 		updateArgs := sessions.NewV1UpdateSessionArgs(
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),
-			reqProcessor.Flags.HasKey(utils.MetaAccounts), *cgrEv)
+			reqProcessor.Flags.HasKey(utils.MetaAccounts),
+			*cgrEv, argDisp)
 		var updateReply sessions.V1UpdateSessionReply
 		err = ha.sessionS.Call(utils.SessionSv1UpdateSession,
 			updateArgs, &updateReply)
@@ -172,7 +175,8 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			reqProcessor.Flags.HasKey(utils.MetaResources),
 			reqProcessor.Flags.HasKey(utils.MetaThresholds),
-			reqProcessor.Flags.HasKey(utils.MetaStats), *cgrEv)
+			reqProcessor.Flags.HasKey(utils.MetaStats),
+			*cgrEv, argDisp)
 		var tRply string
 		err = ha.sessionS.Call(utils.SessionSv1TerminateSession,
 			terminateArgs, &tRply)
@@ -186,7 +190,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),
 			reqProcessor.Flags.HasKey(utils.MetaThresholds),
 			reqProcessor.Flags.HasKey(utils.MetaStats),
-			*cgrEv)
+			*cgrEv, argDisp)
 		var eventRply sessions.V1ProcessEventReply
 		err = ha.sessionS.Call(utils.SessionSv1ProcessEvent,
 			evArgs, &eventRply)
@@ -205,7 +209,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 		!reqProcessor.Flags.HasKey(utils.MetaDryRun) {
 		var rplyCDRs string
 		if err = ha.sessionS.Call(utils.SessionSv1ProcessCDR,
-			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv}, &rplyCDRs); err != nil {
+			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv, ArgDispatcher: argDisp}, &rplyCDRs); err != nil {
 			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
 		}
 	}

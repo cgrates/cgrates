@@ -173,28 +173,27 @@ func (ev *CGREvent) RemFldsWithPrefix(prfx string) {
 }
 
 // RemFldsWithPrefix will remove fields starting with prefix from event
-func (ev *CGREvent) AsCGREventWithArgDispatcher() (arg *CGREventWithArgDispatcher) {
-	arg = &CGREventWithArgDispatcher{
-		CGREvent: ev,
-	}
+func (ev *CGREvent) ConsumeArgDispatcher() (arg *ArgDispatcher) {
 	//check if we have APIKey in event and in case it has add it in ArgDispatcher
 	apiKeyIface, hasApiKey := ev.Event[MetaApiKey]
 	if hasApiKey {
-		arg.ArgDispatcher = &ArgDispatcher{
+		delete(ev.Event, MetaApiKey)
+		arg = &ArgDispatcher{
 			APIKey: StringPointer(apiKeyIface.(string)),
 		}
 	}
 	//check if we have RouteID in event and in case it has add it in ArgDispatcher
 	routeIDIface, hasRouteID := ev.Event[MetaRouteID]
-	if hasRouteID {
-		if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
-			arg.ArgDispatcher = &ArgDispatcher{
-				RouteID: StringPointer(routeIDIface.(string)),
-			}
-		} else {
-			arg.ArgDispatcher.RouteID = StringPointer(routeIDIface.(string))
+	if !hasRouteID {
+		return
+	}
+	delete(ev.Event, MetaRouteID)
+	if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+		return &ArgDispatcher{
+			RouteID: StringPointer(routeIDIface.(string)),
 		}
 	}
+	arg.RouteID = StringPointer(routeIDIface.(string))
 	return
 }
 

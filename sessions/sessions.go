@@ -1563,7 +1563,7 @@ func (sS *SessionS) BiRPCv1ReplicateSessions(clnt rpcclient.RpcClientConnection,
 // NewV1AuthorizeArgs is a constructor for V1AuthorizeArgs
 func NewV1AuthorizeArgs(attrs, res, maxUsage, thrslds,
 	statQueues, suppls, supplsIgnoreErrs, supplsEventCost bool,
-	cgrEv utils.CGREvent) (args *V1AuthorizeArgs) {
+	cgrEv utils.CGREvent, argDisp *utils.ArgDispatcher) (args *V1AuthorizeArgs) {
 	args = &V1AuthorizeArgs{
 		GetAttributes:         attrs,
 		AuthorizeResources:    res,
@@ -1577,24 +1577,7 @@ func NewV1AuthorizeArgs(attrs, res, maxUsage, thrslds,
 	if supplsEventCost {
 		args.SuppliersMaxCost = utils.MetaSuppliersEventCost
 	}
-	//check if we have APIKey in event and in case it has add it in ArgDispatcher
-	apiKeyIface, hasApiKey := cgrEv.Event[utils.MetaApiKey]
-	if hasApiKey {
-		args.ArgDispatcher = &utils.ArgDispatcher{
-			APIKey: utils.StringPointer(apiKeyIface.(string)),
-		}
-	}
-	//check if we have RouteID in event and in case it has add it in ArgDispatcher
-	routeIDIface, hasRouteID := cgrEv.Event[utils.MetaRouteID]
-	if hasRouteID {
-		if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
-			args.ArgDispatcher = &utils.ArgDispatcher{
-				RouteID: utils.StringPointer(routeIDIface.(string)),
-			}
-		} else {
-			args.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
-		}
-	}
+	args.ArgDispatcher = argDisp
 	return
 }
 
@@ -1849,7 +1832,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.RpcClientConn
 
 // NewV1InitSessionArgs is a constructor for V1InitSessionArgs
 func NewV1InitSessionArgs(attrs, resrc, acnt, thrslds, stats bool,
-	cgrEv utils.CGREvent) (args *V1InitSessionArgs) {
+	cgrEv utils.CGREvent, argDisp *utils.ArgDispatcher) (args *V1InitSessionArgs) {
 	args = &V1InitSessionArgs{
 		GetAttributes:     attrs,
 		AllocateResources: resrc,
@@ -1857,24 +1840,7 @@ func NewV1InitSessionArgs(attrs, resrc, acnt, thrslds, stats bool,
 		ProcessThresholds: thrslds,
 		ProcessStats:      stats,
 		CGREvent:          cgrEv,
-	}
-	//check if we have APIKey in event and in case it has add it in ArgDispatcher
-	apiKeyIface, hasApiKey := cgrEv.Event[utils.MetaApiKey]
-	if hasApiKey {
-		args.ArgDispatcher = &utils.ArgDispatcher{
-			APIKey: utils.StringPointer(apiKeyIface.(string)),
-		}
-	}
-	//check if we have RouteID in event and in case it has add it in ArgDispatcher
-	routeIDIface, hasRouteID := cgrEv.Event[utils.MetaRouteID]
-	if hasRouteID {
-		if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
-			args.ArgDispatcher = &utils.ArgDispatcher{
-				RouteID: utils.StringPointer(routeIDIface.(string)),
-			}
-		} else {
-			args.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
-		}
+		ArgDispatcher:     argDisp,
 	}
 	return
 }
@@ -2113,29 +2079,12 @@ func (sS *SessionS) BiRPCv1InitiateSessionWithDigest(clnt rpcclient.RpcClientCon
 
 // NewV1UpdateSessionArgs is a constructor for update session arguments
 func NewV1UpdateSessionArgs(attrs, acnts bool,
-	cgrEv utils.CGREvent) (args *V1UpdateSessionArgs) {
+	cgrEv utils.CGREvent, argDisp *utils.ArgDispatcher) (args *V1UpdateSessionArgs) {
 	args = &V1UpdateSessionArgs{
 		GetAttributes: attrs,
 		UpdateSession: acnts,
 		CGREvent:      cgrEv,
-	}
-	//check if we have APIKey in event and in case it has add it in ArgDispatcher
-	apiKeyIface, hasApiKey := cgrEv.Event[utils.MetaApiKey]
-	if hasApiKey {
-		args.ArgDispatcher = &utils.ArgDispatcher{
-			APIKey: utils.StringPointer(apiKeyIface.(string)),
-		}
-	}
-	//check if we have RouteID in event and in case it has add it in ArgDispatcher
-	routeIDIface, hasRouteID := cgrEv.Event[utils.MetaRouteID]
-	if hasRouteID {
-		if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
-			args.ArgDispatcher = &utils.ArgDispatcher{
-				RouteID: utils.StringPointer(routeIDIface.(string)),
-			}
-		} else {
-			args.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
-		}
+		ArgDispatcher: argDisp,
 	}
 	return
 }
@@ -2265,30 +2214,14 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 }
 
 func NewV1TerminateSessionArgs(acnts, resrc, thrds, stats bool,
-	cgrEv utils.CGREvent) (args *V1TerminateSessionArgs) {
+	cgrEv utils.CGREvent, argDisp *utils.ArgDispatcher) (args *V1TerminateSessionArgs) {
 	args = &V1TerminateSessionArgs{
 		TerminateSession:  acnts,
 		ReleaseResources:  resrc,
 		ProcessThresholds: thrds,
 		ProcessStats:      stats,
-		CGREvent:          cgrEv}
-	//check if we have APIKey in event and in case it has add it in ArgDispatcher
-	apiKeyIface, hasApiKey := cgrEv.Event[utils.MetaApiKey]
-	if hasApiKey {
-		args.ArgDispatcher = &utils.ArgDispatcher{
-			APIKey: utils.StringPointer(apiKeyIface.(string)),
-		}
-	}
-	//check if we have RouteID in event and in case it has add it in ArgDispatcher
-	routeIDIface, hasRouteID := cgrEv.Event[utils.MetaRouteID]
-	if hasRouteID {
-		if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
-			args.ArgDispatcher = &utils.ArgDispatcher{
-				RouteID: utils.StringPointer(routeIDIface.(string)),
-			}
-		} else {
-			args.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
-		}
+		CGREvent:          cgrEv,
+		ArgDispatcher:     argDisp,
 	}
 	return
 }
@@ -2518,7 +2451,7 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 
 // NewV1ProcessEventArgs is a constructor for EventArgs used by ProcessEvent
 func NewV1ProcessEventArgs(resrc, acnts, attrs, thds, stats bool,
-	cgrEv utils.CGREvent) (args *V1ProcessEventArgs) {
+	cgrEv utils.CGREvent, argDisp *utils.ArgDispatcher) (args *V1ProcessEventArgs) {
 	args = &V1ProcessEventArgs{
 		AllocateResources: resrc,
 		Debit:             acnts,
@@ -2526,24 +2459,7 @@ func NewV1ProcessEventArgs(resrc, acnts, attrs, thds, stats bool,
 		ProcessThresholds: thds,
 		ProcessStats:      stats,
 		CGREvent:          cgrEv,
-	}
-	//check if we have APIKey in event and in case it has add it in ArgDispatcher
-	apiKeyIface, hasApiKey := cgrEv.Event[utils.MetaApiKey]
-	if hasApiKey {
-		args.ArgDispatcher = &utils.ArgDispatcher{
-			APIKey: utils.StringPointer(apiKeyIface.(string)),
-		}
-	}
-	//check if we have RouteID in event and in case it has add it in ArgDispatcher
-	routeIDIface, hasRouteID := cgrEv.Event[utils.MetaRouteID]
-	if hasRouteID {
-		if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
-			args.ArgDispatcher = &utils.ArgDispatcher{
-				RouteID: utils.StringPointer(routeIDIface.(string)),
-			}
-		} else {
-			args.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
-		}
+		ArgDispatcher:     argDisp,
 	}
 	return
 }

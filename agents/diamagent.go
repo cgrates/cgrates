@@ -255,6 +255,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 		return
 	}
 	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.tenant, utils.NestingSep)
+	argDisp := cgrEv.ConsumeArgDispatcher()
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,
@@ -289,7 +290,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliers),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
-			*cgrEv)
+			*cgrEv, argDisp)
 		var authReply sessions.V1AuthorizeReply
 		err = da.sS.Call(utils.SessionSv1AuthorizeEvent,
 			authArgs, &authReply)
@@ -302,7 +303,8 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaResources),
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			reqProcessor.Flags.HasKey(utils.MetaThresholds),
-			reqProcessor.Flags.HasKey(utils.MetaStats), *cgrEv)
+			reqProcessor.Flags.HasKey(utils.MetaStats),
+			*cgrEv, argDisp)
 		var initReply sessions.V1InitSessionReply
 		err = da.sS.Call(utils.SessionSv1InitiateSession,
 			initArgs, &initReply)
@@ -312,7 +314,8 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 	case utils.MetaUpdate:
 		updateArgs := sessions.NewV1UpdateSessionArgs(
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),
-			reqProcessor.Flags.HasKey(utils.MetaAccounts), *cgrEv)
+			reqProcessor.Flags.HasKey(utils.MetaAccounts),
+			*cgrEv, argDisp)
 		var updateReply sessions.V1UpdateSessionReply
 		err = da.sS.Call(utils.SessionSv1UpdateSession,
 			updateArgs, &updateReply)
@@ -324,7 +327,8 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			reqProcessor.Flags.HasKey(utils.MetaResources),
 			reqProcessor.Flags.HasKey(utils.MetaThresholds),
-			reqProcessor.Flags.HasKey(utils.MetaStats), *cgrEv)
+			reqProcessor.Flags.HasKey(utils.MetaStats),
+			*cgrEv, argDisp)
 		var tRply string
 		err = da.sS.Call(utils.SessionSv1TerminateSession,
 			terminateArgs, &tRply)
@@ -338,7 +342,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),
 			reqProcessor.Flags.HasKey(utils.MetaThresholds),
 			reqProcessor.Flags.HasKey(utils.MetaStats),
-			*cgrEv)
+			*cgrEv, argDisp)
 		var eventRply sessions.V1ProcessEventReply
 		err = da.sS.Call(utils.SessionSv1ProcessEvent,
 			evArgs, &eventRply)
@@ -356,30 +360,8 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
 	if reqProcessor.Flags.HasKey(utils.MetaCDRs) &&
 		!reqProcessor.Flags.HasKey(utils.MetaDryRun) {
 		var rplyCDRs string
-		//compose the arguments for SessionSv1ProcessCDR
-		argProcessCDR := &utils.CGREventWithArgDispatcher{
-			CGREvent: cgrEv,
-		}
-		//check if we have APIKey in event and in case it has add it in ArgDispatcher
-		apiKeyIface, hasApiKey := cgrEv.Event[utils.MetaApiKey]
-		if hasApiKey {
-			argProcessCDR.ArgDispatcher = &utils.ArgDispatcher{
-				APIKey: utils.StringPointer(apiKeyIface.(string)),
-			}
-		}
-		//check if we have RouteID in event and in case it has add it in ArgDispatcher
-		routeIDIface, hasRouteID := cgrEv.Event[utils.MetaRouteID]
-		if hasRouteID {
-			if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
-				argProcessCDR.ArgDispatcher = &utils.ArgDispatcher{
-					RouteID: utils.StringPointer(routeIDIface.(string)),
-				}
-			} else {
-				argProcessCDR.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface.(string))
-			}
-		}
 		if err = da.sS.Call(utils.SessionSv1ProcessCDR,
-			argProcessCDR, &rplyCDRs); err != nil {
+			utils.CGREventWithArgDispatcher{CGREvent: cgrEv, ArgDispatcher: argDisp}, &rplyCDRs); err != nil {
 			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
 		}
 	}

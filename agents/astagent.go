@@ -57,8 +57,11 @@ const (
 
 func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
 	smgConn *utils.BiRPCInternalClient) (*AsteriskAgent, error) {
-	sma := &AsteriskAgent{cgrCfg: cgrCfg, smg: smgConn,
-		eventsCache: make(map[string]*utils.CGREvent)}
+	sma := &AsteriskAgent{
+		cgrCfg:      cgrCfg,
+		smg:         smgConn,
+		eventsCache: make(map[string]*utils.CGREventWithArgDispatcher),
+	}
 	sma.smg.SetClientConn(sma) // pass the connection to SMA back into smg so we can receive the disconnects
 	return sma, nil
 }
@@ -70,8 +73,8 @@ type AsteriskAgent struct {
 	astConn     *aringo.ARInGO
 	astEvChan   chan map[string]interface{}
 	astErrChan  chan error
-	eventsCache map[string]*utils.CGREvent // used to gather information about events during various phases
-	evCacheMux  sync.RWMutex               // Protect eventsCache
+	eventsCache map[string]*utils.CGREventWithArgDispatcher // used to gather information about events during various phases
+	evCacheMux  sync.RWMutex                                // Protect eventsCache
 }
 
 func (sma *AsteriskAgent) connectAsterisk() (err error) {
@@ -226,7 +229,10 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 	}
 	// Done with processing event, cache it for later use
 	sma.evCacheMux.Lock()
-	sma.eventsCache[ev.ChannelID()] = &authArgs.CGREvent
+	sma.eventsCache[ev.ChannelID()] = &utils.CGREventWithArgDispatcher{
+		CGREvent:      &authArgs.CGREvent,
+		ArgDispatcher: authArgs.ArgDispatcher,
+	}
 	sma.evCacheMux.Unlock()
 }
 
@@ -236,13 +242,13 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 		return
 	}
 	sma.evCacheMux.RLock()
-	cgrEv, hasIt := sma.eventsCache[ev.ChannelID()]
+	cgrEvDisp, hasIt := sma.eventsCache[ev.ChannelID()]
 	sma.evCacheMux.RUnlock()
 	if !hasIt { // Not handled by us
 		return
 	}
 	sma.evCacheMux.Lock()
-	err := ev.UpdateCGREvent(cgrEv) // Updates the event directly in the cache
+	err := ev.UpdateCGREvent(cgrEvDisp.CGREvent) // Updates the event directly in the cache
 	sma.evCacheMux.Unlock()
 	if err != nil {
 		sma.hangupChannel(ev.ChannelID(),
@@ -251,7 +257,7 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 		return
 	}
 	// populate init session args
-	initSessionArgs := ev.V1InitSessionArgs(*cgrEv)
+	initSessionArgs := ev.V1InitSessionArgs(*cgrEvDisp)
 	if initSessionArgs == nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate init session arguments",
 			utils.AsteriskAgent, ev.ChannelID()))
@@ -275,13 +281,13 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 // Channel disconnect
 func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 	sma.evCacheMux.RLock()
-	cgrEv, hasIt := sma.eventsCache[ev.ChannelID()]
+	cgrEvDisp, hasIt := sma.eventsCache[ev.ChannelID()]
 	sma.evCacheMux.RUnlock()
 	if !hasIt { // Not handled by us
 		return
 	}
 	sma.evCacheMux.Lock()
-	err := ev.UpdateCGREvent(cgrEv) // Updates the event directly in the cache
+	err := ev.UpdateCGREvent(cgrEvDisp.CGREvent) // Updates the event directly in the cache
 	sma.evCacheMux.Unlock()
 	if err != nil {
 		utils.Logger.Warning(
@@ -290,7 +296,7 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 		return
 	}
 	// populate terminate session args
-	tsArgs := ev.V1TerminateSessionArgs(*cgrEv)
+	tsArgs := ev.V1TerminateSessionArgs(*cgrEvDisp)
 	if tsArgs == nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate terminate session arguments",
 			utils.AsteriskAgent, ev.ChannelID()))
@@ -305,7 +311,7 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 	}
 	if sma.cgrCfg.AsteriskAgentCfg().CreateCDR {
 		if err := sma.smg.Call(utils.SessionSv1ProcessCDR,
-			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv}, &reply); err != nil {
+			cgrEvDisp, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to process CDR for channelID: %s",
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
 		}
