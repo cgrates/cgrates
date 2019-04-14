@@ -260,7 +260,7 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 		// Simulate resource usage
 		for _, r := range rs {
 			r.removeExpiredUnits()
-			if _, hasID := r.Usages[ru.ID]; hasID { // update
+			if _, hasID := r.Usages[ru.ID]; hasID && !dryRun { // update
 				r.clearUsage(ru.ID)
 			}
 			if r.rPrf == nil {
