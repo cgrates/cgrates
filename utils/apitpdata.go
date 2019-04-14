@@ -1021,7 +1021,8 @@ type ArgRSv1ResourceUsage struct {
 	*ArgDispatcher
 }
 
-func (args *ArgRSv1ResourceUsage) TenantID() string {
+// TenantUsageID is used when caching events to resources
+func (args *ArgRSv1ResourceUsage) TenantUsageID() string {
 	return ConcatenatedKey(args.CGREvent.Tenant, args.UsageID)
 }
 

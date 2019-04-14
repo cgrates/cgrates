@@ -66,7 +66,6 @@ var precachedPartitions = utils.StringMap{
 	utils.CacheDispatcherFilterIndexes: true,
 
 	utils.CacheDiameterMessages: true,
-	utils.CacheEventResources:   true,
 	utils.CacheTimings:          true,
 	utils.CacheLoadIDs:          true,
 }

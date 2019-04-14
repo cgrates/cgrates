@@ -62,7 +62,6 @@ var (
 		CacheSharedGroups:            SHARED_GROUP_PREFIX,
 		CacheResourceProfiles:        ResourceProfilesPrefix,
 		CacheResources:               ResourcesPrefix,
-		CacheEventResources:          EventResourcesPrefix,
 		CacheTimings:                 TimingsPrefix,
 		CacheStatQueueProfiles:       StatQueueProfilePrefix,
 		CacheStatQueues:              StatQueuePrefix,
@@ -434,7 +433,6 @@ const (
 	CostSource                   = "CostSource"
 	ExtraInfo                    = "ExtraInfo"
 	Meta                         = "*"
-	EventResourcesPrefix         = "ers_"
 	MetaSysLog                   = "*syslog"
 	MetaStdLog                   = "*stdout"
 	MetaNever                    = "*never"
@@ -568,7 +566,7 @@ const (
 	TLSNoCaps                    = "tls"
 	MetaRouteID                  = "*route_id"
 	MetaApiKey                   = "*api_key"
-	M
+	UsageID                      = "UsageID"
 )
 
 // Migrator Action

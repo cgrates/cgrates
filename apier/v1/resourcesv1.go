@@ -108,7 +108,7 @@ type ResourceWithCache struct {
 	Cache *string
 }
 
-//SetResourceProfile add a new resource configuration
+//SetResourceProfile adds a new resource configuration
 func (apierV1 *ApierV1) SetResourceProfile(arg *ResourceWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(arg.ResourceProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -119,7 +119,9 @@ func (apierV1 *ApierV1) SetResourceProfile(arg *ResourceWithCache, reply *string
 	//generate a loadID for CacheResourceProfiles and CacheResources and store it in database
 	//make 1 insert for both ResourceProfile and Resources instead of 2
 	loadID := time.Now().UnixNano()
-	if err := apierV1.DataManager.SetLoadIDs(map[string]int64{utils.CacheResourceProfiles: loadID, utils.CacheResources: loadID}); err != nil {
+	if err := apierV1.DataManager.SetLoadIDs(
+		map[string]int64{utils.CacheResourceProfiles: loadID,
+			utils.CacheResources: loadID}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ResourceProfile
