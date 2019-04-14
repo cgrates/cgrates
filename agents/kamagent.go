@@ -31,21 +31,24 @@ import (
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/kamevapi"
+	"github.com/cgrates/rpcclient"
 )
 
 func NewKamailioAgent(kaCfg *config.KamAgentCfg,
-	sessionS *utils.BiRPCInternalClient, timezone string) (ka *KamailioAgent) {
-	ka = &KamailioAgent{cfg: kaCfg, sessionS: sessionS,
+	sessionS rpcclient.RpcClientConnection, timezone string) (ka *KamailioAgent) {
+	ka = &KamailioAgent{
+		cfg:              kaCfg,
+		sessionS:         sessionS,
 		timezone:         timezone,
 		conns:            make(map[string]*kamevapi.KamEvapi),
-		activeSessionIDs: make(chan []*sessions.SessionID)}
-	ka.sessionS.SetClientConn(ka) // pass the connection to KA back into smg so we can receive the disconnects
+		activeSessionIDs: make(chan []*sessions.SessionID),
+	}
 	return
 }
 
 type KamailioAgent struct {
 	cfg              *config.KamAgentCfg
-	sessionS         *utils.BiRPCInternalClient
+	sessionS         rpcclient.RpcClientConnection
 	timezone         string
 	conns            map[string]*kamevapi.KamEvapi
 	activeSessionIDs chan []*sessions.SessionID
