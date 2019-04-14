@@ -129,36 +129,35 @@ func IfaceAsTime(itm interface{}, timezone string) (t time.Time, err error) {
 }
 
 func IfaceAsDuration(itm interface{}) (d time.Duration, err error) {
-	switch itm.(type) {
+	switch it := itm.(type) {
 	case time.Duration:
-		return itm.(time.Duration), nil
+		return it, nil
 	case float64: // automatically hitting here also ints
-		return time.Duration(int64(itm.(float64))), nil
+		return time.Duration(int64(it)), nil
 	case int64:
-		return time.Duration(itm.(int64)), nil
+		return time.Duration(it), nil
 	case int:
-		return time.Duration(itm.(int)), nil
+		return time.Duration(it), nil
 	case string:
 		return ParseDurationWithNanosecs(itm.(string))
-
 	default:
-		err = fmt.Errorf("cannot convert field: %+v to time.Duration", itm)
+		err = fmt.Errorf("cannot convert field: %+v to time.Duration", it)
 	}
 	return
 }
 
 func IfaceAsInt64(itm interface{}) (i int64, err error) {
-	switch itm.(type) {
+	switch it := itm.(type) {
 	case int:
-		return int64(itm.(int)), nil
+		return int64(it), nil
 	case time.Duration:
-		return itm.(time.Duration).Nanoseconds(), nil
+		return it.Nanoseconds(), nil
 	case int64:
-		return itm.(int64), nil
+		return it, nil
 	case string:
-		return strconv.ParseInt(itm.(string), 10, 64)
+		return strconv.ParseInt(it, 10, 64)
 	default:
-		err = fmt.Errorf("cannot convert field: %+v to int", itm)
+		err = fmt.Errorf("cannot convert field: %+v to int", it)
 	}
 	return
 }
@@ -352,59 +351,56 @@ func Sum(items ...interface{}) (sum interface{}, err error) {
 		return nil, ErrNotEnoughParameters
 	}
 
-	// convert the type for first item
-	valItm := reflect.ValueOf(items[0])
-	switch valItm.Kind() {
-	case reflect.Float32:
-		items[0] = valItm.Float()
-		valItm = reflect.ValueOf(items[0])
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32:
-		items[0] = valItm.Int()
-		valItm = reflect.ValueOf(items[0])
-	}
-	typItem := reflect.TypeOf(items[0])
-
-	//populate sum with first item so we can add after
-	switch items[0].(type) {
-	case float64:
-		sum = valItm.Float()
-	case int64:
-		sum = valItm.Int()
+	switch dt := items[0].(type) {
 	case time.Duration:
-		tVal := items[0].(time.Duration)
-		sum = tVal
-	}
-
-	for _, item := range items[1:] {
-		valOtItm := reflect.ValueOf(item)
-		// convert to wider type so we can be compatible with StringToInterface function
-		switch valOtItm.Kind() {
-		case reflect.Float32:
-			item = valOtItm.Float()
-			valOtItm = reflect.ValueOf(item)
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32:
-			item = valOtItm.Int()
-			valOtItm = reflect.ValueOf(item)
+		sum = dt
+		for _, item := range items[1:] {
+			if itmVal, err := IfaceAsDuration(item); err != nil {
+				return nil, err
+			} else {
+				sum = sum.(time.Duration) + itmVal
+			}
 		}
-		typOItem := reflect.TypeOf(item)
-		// check if the type for rest items is the same as first
-		if !typItem.Comparable() ||
-			!typOItem.Comparable() ||
-			typItem != typOItem {
-			return false, errors.New("incomparable")
+	case time.Time:
+		sum = dt
+		for _, item := range items[1:] {
+			if itmVal, err := IfaceAsDuration(item); err != nil {
+				return nil, err
+			} else {
+				sum = sum.(time.Time).Add(itmVal)
+			}
 		}
-
-		switch items[0].(type) {
-		case float64:
-			sum = reflect.ValueOf(sum).Float() + valOtItm.Float()
-		case int64:
-			sum = reflect.ValueOf(sum).Int() + valOtItm.Int()
-		case time.Duration:
-			tOVal := item.(time.Duration)
-			sum = sum.(time.Duration) + tOVal
-		default: // unsupported comparison
-			err = fmt.Errorf("unsupported comparison type: %v, kind: %v", typItem, typItem.Kind())
-			break
+	case float64:
+		sum = dt
+		for _, item := range items[1:] {
+			if itmVal, err := IfaceAsFloat64(item); err != nil {
+				return nil, err
+			} else {
+				sum = sum.(float64) + itmVal
+			}
+		}
+	case int64:
+		sum = dt
+		for _, item := range items[1:] {
+			if itmVal, err := IfaceAsInt64(item); err != nil {
+				return nil, err
+			} else {
+				sum = sum.(int64) + itmVal
+			}
+		}
+	case int:
+		// need explicit conversion for int
+		if firstItmVal, err := IfaceAsInt64(dt); err != nil {
+			return nil, err
+		} else {
+			sum = firstItmVal
+		}
+		for _, item := range items[1:] {
+			if itmVal, err := IfaceAsInt64(item); err != nil {
+				return nil, err
+			} else {
+				sum = sum.(int64) + itmVal
+			}
 		}
 	}
 	return
@@ -417,18 +413,16 @@ func Difference(items ...interface{}) (diff interface{}, err error) {
 	if len(items) < 2 {
 		return nil, ErrNotEnoughParameters
 	}
-
 	switch dt := items[0].(type) {
-	// case time.Duration:
-	// 	diff = dt
-	// 	for _, item := range items[1:] {
-	// 		if itmVal, err := IfaceAsDuration(item); err != nil {
-	// 			return nil, err
-	// 		} else {
-	// 			diff = diff.(time.Duration) - itmVal
-	// 		}
-	// 	}
-
+	case time.Duration:
+		diff = dt
+		for _, item := range items[1:] {
+			if itmVal, err := IfaceAsDuration(item); err != nil {
+				return nil, err
+			} else {
+				diff = diff.(time.Duration) - itmVal
+			}
+		}
 	case time.Time:
 		diff = dt
 		for _, item := range items[1:] {
@@ -438,7 +432,6 @@ func Difference(items ...interface{}) (diff interface{}, err error) {
 				diff = diff.(time.Time).Add(-itmVal)
 			}
 		}
-
 	case float64:
 		diff = dt
 		for _, item := range items[1:] {
@@ -448,18 +441,31 @@ func Difference(items ...interface{}) (diff interface{}, err error) {
 				diff = diff.(float64) - itmVal
 			}
 		}
-
-	// case int64:
-	// 	for _, item := range items[1:] {
-	// 		if itmVal, err := IfaceAsInt64(item); err != nil {
-	// 			return nil, err
-	// 		} else {
-	// 			diff = diff.(int64) - itmVal
-	// 		}
-	// 	}
+	case int64:
+		diff = dt
+		for _, item := range items[1:] {
+			if itmVal, err := IfaceAsInt64(item); err != nil {
+				return nil, err
+			} else {
+				diff = diff.(int64) - itmVal
+			}
+		}
+	case int:
+		// need explicit conversion for int
+		if firstItmVal, err := IfaceAsInt64(dt); err != nil {
+			return nil, err
+		} else {
+			diff = firstItmVal
+		}
+		for _, item := range items[1:] {
+			if itmVal, err := IfaceAsInt64(item); err != nil {
+				return nil, err
+			} else {
+				diff = diff.(int64) - itmVal
+			}
+		}
 	default: // unsupported comparison
 		return nil, fmt.Errorf("unsupported type")
 	}
-
 	return
 }

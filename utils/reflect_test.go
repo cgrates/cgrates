@@ -466,7 +466,7 @@ func TestSum(t *testing.T) {
 	if _, err := Sum(1); err == nil || err != ErrNotEnoughParameters {
 		t.Error(err)
 	}
-	if _, err := Sum(1, 1.2, false); err == nil || err.Error() != "incomparable" {
+	if _, err := Sum(1, 1.2, false); err == nil || err.Error() != "cannot convert field: 1.2 to int" {
 		t.Error(err)
 	}
 	if sum, err := Sum(1.2, 1.2, 1.2, 1.2); err != nil {
@@ -558,14 +558,14 @@ func TestDifference(t *testing.T) {
 	if _, err := Difference(10); err == nil || err != ErrNotEnoughParameters {
 		t.Error(err)
 	}
-	if _, err := Difference(10, 1.2, false); err == nil || err.Error() != "unsupported type" {
+	if _, err := Difference(10, 1.2, false); err == nil || err.Error() != "cannot convert field: 1.2 to int" {
 		t.Error(err)
 	}
-	// if diff, err := Difference(12, 1, 2, 3); err != nil {
-	// 	t.Error(err)
-	// } else if diff != int64(6) {
-	// 	t.Errorf("Expecting: 6, received: %+v", diff)
-	// }
+	if diff, err := Difference(12, 1, 2, 3); err != nil {
+		t.Error(err)
+	} else if diff != int64(6) {
+		t.Errorf("Expecting: 6, received: %+v", diff)
+	}
 	if diff, err := Difference(8.0, 4.0, 2.0, -1.0); err != nil {
 		t.Error(err)
 	} else if diff != 3.0 {
@@ -577,18 +577,18 @@ func TestDifference(t *testing.T) {
 	} else if diff != 3.0 {
 		t.Errorf("Expecting: 3.0, received: %+v", diff)
 	}
-	// if diff, err := Difference(10*time.Second, 1*time.Second, 2*time.Second,
-	// 	4*time.Millisecond); err != nil {
-	// 	t.Error(err)
-	// } else if diff != int64(6996000000) {
-	// 	t.Errorf("Expecting: 6.996ms, received: %+v", diff)
-	// }
-	// if diff, err := Difference(time.Duration(2*time.Second),
-	// 	time.Duration(10*time.Millisecond)); err != nil {
-	// 	t.Error(err)
-	// } else if diff != int64(1990000000) {
-	// 	t.Errorf("Expecting: 1.99s, received: %+v", diff)
-	// }
+	if diff, err := Difference(10*time.Second, 1*time.Second, 2*time.Second,
+		4*time.Millisecond); err != nil {
+		t.Error(err)
+	} else if diff != time.Duration(6*time.Second+996*time.Millisecond) {
+		t.Errorf("Expecting: 6.996ms, received: %+v", diff)
+	}
+	if diff, err := Difference(time.Duration(2*time.Second),
+		time.Duration(10*time.Millisecond)); err != nil {
+		t.Error(err)
+	} else if diff != time.Duration(1*time.Second+990*time.Millisecond) {
+		t.Errorf("Expecting: 1.99s, received: %+v", diff)
+	}
 
 	if diff, err := Difference(time.Date(2009, 11, 10, 23, 0, 0, 0, time.UTC),
 		time.Duration(10*time.Second)); err != nil {

@@ -128,8 +128,6 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 		} else if !pass {
 			continue
 		}
-		fmt.Println("==============================================")
-		fmt.Println(utils.ToJSON(tplFld))
 		out, err := ar.ParseField(tplFld)
 		if err != nil {
 			if err == utils.ErrNotFound {
@@ -167,8 +165,6 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 		}
 		valSet = append(valSet, nMItm)
 		ar.CGRAReq.Set(fldPath, valSet, false, true)
-		fmt.Println("Set the value in nM")
-		fmt.Println(ar.CGRAReq.String())
 		if tplFld.Blocker { // useful in case of processing errors first
 			break
 		}
