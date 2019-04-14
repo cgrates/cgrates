@@ -300,7 +300,7 @@ func TestResourceAllocateResource(t *testing.T) {
 	}
 	rs[0].rPrf.Limit = 1
 	rs[1].rPrf.Limit = 4
-	if alcMessage, err := rs.allocateResource(ru1, true); err != nil {
+	if alcMessage, err := rs.allocateResource(ru1, false); err != nil {
 		t.Error(err.Error())
 	} else {
 		if alcMessage != "ALLOC" {
