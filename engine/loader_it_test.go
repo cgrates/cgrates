@@ -367,6 +367,20 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 		}
 	}
 
+	for tenantid, fltr := range loader.filters {
+		rcv, err := loader.dm.GetFilter(tenantid.Tenant, tenantid.ID, false, false, utils.NonTransactional)
+		if err != nil {
+			t.Error("Failed GetFilter: ", err.Error())
+		}
+		filter, err := APItoFilter(fltr, "UTC")
+		if err != nil {
+			t.Error(err)
+		}
+		if !reflect.DeepEqual(filter, rcv) {
+			t.Errorf("Expecting: %v, received: %v", filter, rcv)
+		}
+	}
+
 	for tenantid, rl := range loader.resProfiles {
 		rcv, err := loader.dm.GetResourceProfile(tenantid.Tenant, tenantid.ID, false, false, utils.NonTransactional)
 		if err != nil {
