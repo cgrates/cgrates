@@ -87,14 +87,19 @@ func (self *TPCSVImporter) Run() error {
 		path.Join(self.DirPath, utils.DispatcherHostsCsv),
 	)
 	files, _ := ioutil.ReadDir(self.DirPath)
+	var withErrors bool
 	for _, f := range files {
 		fHandler, hasName := fileHandlers[f.Name()]
 		if !hasName {
 			continue
 		}
 		if err := fHandler(self, f.Name()); err != nil {
+			withErrors = true
 			utils.Logger.Err(fmt.Sprintf("<TPCSVImporter> Importing file: %s, got error: %s", f.Name(), err.Error()))
 		}
+	}
+	if withErrors {
+		return utils.ErrPartiallyExecuted
 	}
 	return nil
 }
