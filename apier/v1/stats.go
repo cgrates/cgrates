@@ -84,25 +84,29 @@ func (apierV1 *ApierV1) SetStatQueueProfile(arg *StatQueueWithCache, reply *stri
 	if err := apierV1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	//compose metrics for StatQueue
-	metrics := make(map[string]engine.StatMetric)
-	for _, metric := range arg.Metrics {
-		if stsMetric, err := engine.NewStatMetric(metric.MetricID, arg.MinItems, metric.FilterIDs); err != nil {
-			return utils.APIErrorHandler(err)
-		} else {
-			metrics[metric.MetricID] = stsMetric
+	if has, err := apierV1.DataManager.HasData(utils.StatQueuePrefix, arg.ID, arg.Tenant); err != nil {
+		return err
+	} else if !has {
+		//compose metrics for StatQueue
+		metrics := make(map[string]engine.StatMetric)
+		for _, metric := range arg.Metrics {
+			if stsMetric, err := engine.NewStatMetric(metric.MetricID, arg.MinItems, metric.FilterIDs); err != nil {
+				return utils.APIErrorHandler(err)
+			} else {
+				metrics[metric.MetricID] = stsMetric
+			}
 		}
-	}
-	if err := apierV1.DataManager.SetStatQueue(&engine.StatQueue{Tenant: arg.Tenant, ID: arg.ID, SQMetrics: metrics}); err != nil {
-		return utils.APIErrorHandler(err)
-	}
-	//handle caching for StatQueues
-	argCache = engine.ArgsGetCacheItem{
-		CacheID: utils.CacheStatQueues,
-		ItemID:  arg.TenantID(),
-	}
-	if err := apierV1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
-		return utils.APIErrorHandler(err)
+		if err := apierV1.DataManager.SetStatQueue(&engine.StatQueue{Tenant: arg.Tenant, ID: arg.ID, SQMetrics: metrics}); err != nil {
+			return utils.APIErrorHandler(err)
+		}
+		//handle caching for StatQueues
+		argCache = engine.ArgsGetCacheItem{
+			CacheID: utils.CacheStatQueues,
+			ItemID:  arg.TenantID(),
+		}
+		if err := apierV1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+			return utils.APIErrorHandler(err)
+		}
 	}
 
 	*reply = utils.OK

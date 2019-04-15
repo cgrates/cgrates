@@ -254,6 +254,7 @@ func testV1AccSendToThreshold(t *testing.T) {
 		MaxHits:   -1,
 		MinSleep:  time.Duration(1 * time.Second),
 		Weight:    20.0,
+		Async:     true,
 		ActionIDs: []string{"DISABLE_LOG"},
 	}
 
