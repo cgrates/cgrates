@@ -62,16 +62,14 @@ const (
 func NewFilterS(cfg *config.CGRConfig,
 	statSChan, resSChan chan rpcclient.RpcClientConnection, dm *DataManager) (fS *FilterS) {
 	fS = &FilterS{
-		statSChan: statSChan,
-		resSChan:  resSChan,
-		dm:        dm,
-		cfg:       cfg,
+		dm:  dm,
+		cfg: cfg,
 	}
 	if len(cfg.FilterSCfg().StatSConns) != 0 {
-		fS.connStatS()
+		fS.connStatS(statSChan)
 	}
 	if len(cfg.FilterSCfg().ResourceSConns) != 0 {
-		fS.connResourceS()
+		fS.connResourceS(resSChan)
 	}
 	return
 }
@@ -80,14 +78,13 @@ func NewFilterS(cfg *config.CGRConfig,
 // uses lazy connections where necessary to avoid deadlocks on service startup
 type FilterS struct {
 	cfg                   *config.CGRConfig
-	statSChan, resSChan   chan rpcclient.RpcClientConnection // reference towards internal statS connection, used for lazy connect
 	statSConns, resSConns rpcclient.RpcClientConnection
 	sSConnMux, rSConnMux  sync.RWMutex // make sure only one goroutine attempts connecting
 	dm                    *DataManager
 }
 
 // connStatS returns will connect towards StatS
-func (fS *FilterS) connStatS() (err error) {
+func (fS *FilterS) connStatS(statSChan chan rpcclient.RpcClientConnection) (err error) {
 	fS.sSConnMux.Lock()
 	defer fS.sSConnMux.Unlock()
 	if fS.statSConns != nil { // connection was populated between locks
@@ -98,12 +95,12 @@ func (fS *FilterS) connStatS() (err error) {
 		fS.cfg.TlsCfg().CaCertificate, fS.cfg.GeneralCfg().ConnectAttempts,
 		fS.cfg.GeneralCfg().Reconnects, fS.cfg.GeneralCfg().ConnectTimeout,
 		fS.cfg.GeneralCfg().ReplyTimeout, fS.cfg.FilterSCfg().StatSConns,
-		fS.statSChan, fS.cfg.GeneralCfg().InternalTtl, true)
+		statSChan, fS.cfg.GeneralCfg().InternalTtl, true)
 	return
 }
 
 // connResourceS returns will connect towards ResourceS
-func (fS *FilterS) connResourceS() (err error) {
+func (fS *FilterS) connResourceS(resSChan chan rpcclient.RpcClientConnection) (err error) {
 	fS.rSConnMux.Lock()
 	defer fS.rSConnMux.Unlock()
 	if fS.resSConns != nil { // connection was populated between locks
@@ -114,7 +111,7 @@ func (fS *FilterS) connResourceS() (err error) {
 		fS.cfg.TlsCfg().CaCertificate, fS.cfg.GeneralCfg().ConnectAttempts,
 		fS.cfg.GeneralCfg().Reconnects, fS.cfg.GeneralCfg().ConnectTimeout,
 		fS.cfg.GeneralCfg().ReplyTimeout, fS.cfg.FilterSCfg().ResourceSConns,
-		fS.resSChan, fS.cfg.GeneralCfg().InternalTtl, true)
+		resSChan, fS.cfg.GeneralCfg().InternalTtl, true)
 	return
 }
 

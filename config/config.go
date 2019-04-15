@@ -344,7 +344,7 @@ type CGRConfig struct {
 
 func (self *CGRConfig) checkConfigSanity() error {
 	// Rater checks
-	if self.ralsCfg.RALsEnabled {
+	if self.ralsCfg.RALsEnabled && !self.dispatcherSCfg.Enabled {
 		if !self.statsCfg.Enabled {
 			for _, connCfg := range self.ralsCfg.RALsStatSConns {
 				if connCfg.Address == utils.MetaInternal {
@@ -361,7 +361,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// CDRServer checks
-	if self.cdrsCfg.CDRSEnabled {
+	if self.cdrsCfg.CDRSEnabled && !self.dispatcherSCfg.Enabled {
 		if !self.chargerSCfg.Enabled {
 			for _, conn := range self.cdrsCfg.CDRSChargerSConns {
 				if conn.Address == utils.MetaInternal {
@@ -460,7 +460,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// SessionS checks
-	if self.sessionSCfg.Enabled {
+	if self.sessionSCfg.Enabled && !self.dispatcherSCfg.Enabled {
 		if len(self.sessionSCfg.RALsConns) == 0 {
 			return errors.New("<SessionS> RALs definition is mandatory")
 		}
@@ -528,11 +528,14 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// FreeSWITCHAgent checks
-	if self.fsAgentCfg.Enabled {
+	if self.fsAgentCfg.Enabled && !self.dispatcherSCfg.Enabled {
+		if len(self.fsAgentCfg.SessionSConns) == 0 {
+			return fmt.Errorf("<%s> SMG definition is mandatory!", utils.FreeSWITCHAgent)
+		}
 		for _, connCfg := range self.fsAgentCfg.SessionSConns {
-			if connCfg.Address != utils.MetaInternal {
-				return errors.New("only <*internal> connectivity allowed in in <freeswitch_agent> towards <sessions> for now")
-			}
+			// if connCfg.Address != utils.MetaInternal {
+			// 	return errors.New("only <*internal> connectivity allowed in in <freeswitch_agent> towards <sessions> for now")
+			// }
 			if connCfg.Address == utils.MetaInternal &&
 				!self.sessionSCfg.Enabled {
 				return errors.New("<sessions> not enabled but referenced by <freeswitch_agent>")
@@ -540,11 +543,14 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// KamailioAgent checks
-	if self.kamAgentCfg.Enabled {
+	if self.kamAgentCfg.Enabled && !self.dispatcherSCfg.Enabled {
+		if len(self.kamAgentCfg.SessionSConns) == 0 {
+			return fmt.Errorf("<%s> SMG definition is mandatory!", utils.KamailioAgent)
+		}
 		for _, connCfg := range self.kamAgentCfg.SessionSConns {
-			if connCfg.Address != utils.MetaInternal {
-				return errors.New("only <*internal> connectivity allowed in in <kamailio_agent> towards <sessions> for now")
-			}
+			// if connCfg.Address != utils.MetaInternal {
+			// 	return errors.New("only <*internal> connectivity allowed in in <kamailio_agent> towards <sessions> for now")
+			// }
 			if connCfg.Address == utils.MetaInternal &&
 				!self.sessionSCfg.Enabled {
 				return errors.New("<sessions> not enabled but referenced by <kamailio_agent>")
@@ -552,7 +558,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// SMOpenSIPS checks
-	if self.SmOsipsConfig.Enabled {
+	if self.SmOsipsConfig.Enabled && !self.dispatcherSCfg.Enabled {
 		if len(self.SmOsipsConfig.RALsConns) == 0 {
 			return errors.New("<SMOpenSIPS> Rater definition is mandatory!")
 		}
@@ -575,8 +581,8 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// AsteriskAgent checks
-	if self.asteriskAgentCfg.Enabled {
-		/*if len(self.asteriskAgentCfg.SessionSConns) == 0 {
+	if self.asteriskAgentCfg.Enabled && !self.dispatcherSCfg.Enabled {
+		if len(self.asteriskAgentCfg.SessionSConns) == 0 {
 			return errors.New("<SMAsterisk> SMG definition is mandatory!")
 		}
 		for _, smAstSMGConn := range self.asteriskAgentCfg.SessionSConns {
@@ -584,30 +590,33 @@ func (self *CGRConfig) checkConfigSanity() error {
 				return errors.New("<SMAsterisk> SMG not enabled.")
 			}
 		}
-		*/
-		if !self.sessionSCfg.Enabled {
-			return errors.New("<SMAsterisk> SMG not enabled.")
-		}
+		// if !self.sessionSCfg.Enabled {
+		// 	return errors.New("<SMAsterisk> SMG not enabled.")
+		// }
 	}
 	// DAgent checks
-	if self.diameterAgentCfg.Enabled && !self.dispatcherSCfg.Enabled {
-		if !self.sessionSCfg.Enabled {
-			for _, daSMGConn := range self.diameterAgentCfg.SessionSConns {
-				if daSMGConn.Address == utils.MetaInternal {
-					return fmt.Errorf("%s not enabled but referenced by %s component",
-						utils.SessionS, utils.DiameterAgent)
-				}
+	if self.diameterAgentCfg.Enabled && !self.sessionSCfg.Enabled && !self.dispatcherSCfg.Enabled {
+		if len(self.diameterAgentCfg.SessionSConns) == 0 {
+			return fmt.Errorf("<%s> SMG definition is mandatory!", utils.DiameterAgent)
+		}
+		for _, daSMGConn := range self.diameterAgentCfg.SessionSConns {
+			if daSMGConn.Address == utils.MetaInternal {
+				return fmt.Errorf("%s not enabled but referenced by %s component",
+					utils.SessionS, utils.DiameterAgent)
 			}
 		}
 	}
 	if self.radiusAgentCfg.Enabled && !self.sessionSCfg.Enabled && !self.dispatcherSCfg.Enabled {
+		if len(self.radiusAgentCfg.SessionSConns) == 0 {
+			return fmt.Errorf("<%s> SMG definition is mandatory!", utils.RadiusAgent)
+		}
 		for _, raSMGConn := range self.radiusAgentCfg.SessionSConns {
 			if raSMGConn.Address == utils.MetaInternal {
 				return errors.New("SMGeneric not enabled but referenced by RadiusAgent component")
 			}
 		}
 	}
-	if self.dnsAgentCfg.Enabled && !self.sessionSCfg.Enabled {
+	if self.dnsAgentCfg.Enabled && !self.sessionSCfg.Enabled && !self.dispatcherSCfg.Enabled {
 		for _, sSConn := range self.dnsAgentCfg.SessionSConns {
 			if sSConn.Address == utils.MetaInternal {
 				return fmt.Errorf("%s not enabled but referenced by %s", utils.SessionS, utils.DNSAgent)
@@ -617,9 +626,11 @@ func (self *CGRConfig) checkConfigSanity() error {
 	// HTTPAgent checks
 	for _, httpAgentCfg := range self.httpAgentCfg {
 		// httpAgent checks
-		for _, sSConn := range httpAgentCfg.SessionSConns {
-			if sSConn.Address == utils.MetaInternal && self.sessionSCfg.Enabled {
-				return errors.New("SessionS not enabled but referenced by HttpAgent component")
+		if !self.dispatcherSCfg.Enabled {
+			for _, sSConn := range httpAgentCfg.SessionSConns {
+				if sSConn.Address == utils.MetaInternal && self.sessionSCfg.Enabled {
+					return errors.New("SessionS not enabled but referenced by HttpAgent component")
+				}
 			}
 		}
 		if !utils.IsSliceMember([]string{utils.MetaUrl, utils.MetaXml}, httpAgentCfg.RequestPayload) {
@@ -636,7 +647,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> process_runs needs to be bigger than 0", utils.AttributeS)
 		}
 	}
-	if self.chargerSCfg.Enabled {
+	if self.chargerSCfg.Enabled && !self.dispatcherSCfg.Enabled {
 		for _, connCfg := range self.chargerSCfg.AttributeSConns {
 			if connCfg.Address == utils.MetaInternal &&
 				(self.attributeSCfg == nil || !self.attributeSCfg.Enabled) {
@@ -645,7 +656,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// ResourceLimiter checks
-	if self.resourceSCfg.Enabled && !self.thresholdSCfg.Enabled {
+	if self.resourceSCfg.Enabled && !self.thresholdSCfg.Enabled && !self.dispatcherSCfg.Enabled {
 		for _, connCfg := range self.resourceSCfg.ThresholdSConns {
 			if connCfg.Address == utils.MetaInternal {
 				return errors.New("ThresholdS not enabled but requested by ResourceS component.")
@@ -653,7 +664,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// StatS checks
-	if self.statsCfg.Enabled && !self.thresholdSCfg.Enabled {
+	if self.statsCfg.Enabled && !self.thresholdSCfg.Enabled && !self.dispatcherSCfg.Enabled {
 		for _, connCfg := range self.statsCfg.ThresholdSConns {
 			if connCfg.Address == utils.MetaInternal {
 				return errors.New("ThresholdS not enabled but requested by StatS component.")
@@ -661,7 +672,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// SupplierS checks
-	if self.supplierSCfg.Enabled {
+	if self.supplierSCfg.Enabled && !self.dispatcherSCfg.Enabled {
 		for _, connCfg := range self.supplierSCfg.RALsConns {
 			if connCfg.Address != utils.MetaInternal {
 				return errors.New("Only <*internal> RALs connectivity allowed in SupplierS for now")
@@ -693,7 +704,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// Scheduler check connection with CDR Server
-	if !self.cdrsCfg.CDRSEnabled {
+	if !self.cdrsCfg.CDRSEnabled && !self.dispatcherSCfg.Enabled {
 		for _, connCfg := range self.schedulerCfg.CDRsConns {
 			if connCfg.Address == utils.MetaInternal {
 				return errors.New("CDR Server not enabled but requested by Scheduler")
