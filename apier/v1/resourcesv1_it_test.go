@@ -126,7 +126,7 @@ func testV1RsFromFolder(t *testing.T) {
 }
 
 func testV1RsGetResourcesForEvent(t *testing.T) {
-	var reply *[]*engine.ResourceProfile
+	var reply *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
