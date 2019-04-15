@@ -32,6 +32,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 const (
@@ -56,20 +57,20 @@ const (
 )
 
 func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
-	smgConn *utils.BiRPCInternalClient) (*AsteriskAgent, error) {
+	smgConn rpcclient.RpcClientConnection) (*AsteriskAgent, error) {
 	sma := &AsteriskAgent{
 		cgrCfg:      cgrCfg,
+		astConnIdx:  astConnIdx,
 		smg:         smgConn,
 		eventsCache: make(map[string]*utils.CGREventWithArgDispatcher),
 	}
-	sma.smg.SetClientConn(sma) // pass the connection to SMA back into smg so we can receive the disconnects
 	return sma, nil
 }
 
 type AsteriskAgent struct {
 	cgrCfg      *config.CGRConfig // Separate from smCfg since there can be multiple
 	astConnIdx  int
-	smg         *utils.BiRPCInternalClient
+	smg         rpcclient.RpcClientConnection
 	astConn     *aringo.ARInGO
 	astEvChan   chan map[string]interface{}
 	astErrChan  chan error
