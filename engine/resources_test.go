@@ -76,7 +76,7 @@ var (
 			ThresholdIDs:      []string{""},
 		},
 	}
-	resourceTest = []*Resource{
+	resourceTest = Resources{
 		{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "ResourceProfile1",
@@ -471,61 +471,6 @@ func TestResourceAddFilters(t *testing.T) {
 	dmRES.SetFilter(fltrRes3)
 }
 
-/*
-func TestResourceCachedResourcesForEvent(t *testing.T) {
-	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: *resEvs[0],
-		UsageID:  "IDF",
-		Units:    10.0,
-	}
-	val := []*utils.TenantID{
-		{
-			Tenant: "cgrates.org",
-			ID:     "RL",
-		},
-	}
-	resources := []*Resource{
-		{
-			Tenant: "cgrates.org",
-			ID:     "RL",
-			rPrf: &ResourceProfile{
-				Tenant:    "cgrates.org",
-				ID:        "RL",
-				FilterIDs: []string{"FLTR_RES_RL"},
-				ActivationInterval: &utils.ActivationInterval{
-					ActivationTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-					ExpiryTime:     time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-				},
-				AllocationMessage: "ALLOC_RL",
-				Weight:            50,
-				Limit:             2,
-				ThresholdIDs:      []string{"TEST_ACTIONS"},
-				UsageTTL:          time.Duration(1 * time.Millisecond),
-			},
-			Usages: map[string]*ResourceUsage{
-				"RU2": {
-					Tenant:     "cgrates.org",
-					ID:         "RU2",
-					ExpiryTime: time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC),
-					Units:      2,
-				},
-			},
-			tUsage: utils.Float64Pointer(2),
-			dirty:  utils.BoolPointer(true),
-		},
-	}
-	Cache.Set(utils.CacheResources, resources[0].TenantID(),
-		resources[0], nil, true, "")
-	Cache.Set(utils.CacheEventResources, args.TenantID(),
-		val, nil, true, "")
-	rcv := resService.cachedResourcesForEvent(args.TenantID())
-	if !reflect.DeepEqual(resources[0], rcv[0]) {
-		t.Errorf("Expecting: %+v, received: %+v",
-			utils.ToJSON(resources[0]), utils.ToJSON(rcv[0]))
-	}
-}
-*/
-
 func TestResourceAddResourceProfile(t *testing.T) {
 	for _, resProfile := range resprf {
 		dmRES.SetResourceProfile(resProfile, true)
@@ -737,5 +682,105 @@ func TestResourceMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[2].ID, mres[0].ID)
 	} else if !reflect.DeepEqual(resourceTest[2].rPrf, mres[0].rPrf) {
 		t.Errorf("Expecting: %+v, received: %+v", resourceTest[2].rPrf, mres[0].rPrf)
+	}
+}
+
+func TestResourceResIDsMp(t *testing.T) {
+	expected := utils.StringMap{
+		"ResourceProfile1": true,
+		"ResourceProfile2": true,
+		"ResourceProfile3": true,
+	}
+	if rcv := resourceTest.resIDsMp(); !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+}
+
+func TestResourceTenatIDs(t *testing.T) {
+	expected := []string{
+		"cgrates.org:ResourceProfile1",
+		"cgrates.org:ResourceProfile2",
+		"cgrates.org:ResourceProfile3",
+	}
+	if rcv := resourceTest.tenatIDs(); !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+}
+
+func TestResourceIDs(t *testing.T) {
+	expected := []string{
+		"ResourceProfile1",
+		"ResourceProfile2",
+		"ResourceProfile3",
+	}
+	if rcv := resourceTest.IDs(); !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
+	}
+}
+
+func TestResourceCaching(t *testing.T) {
+	//clear the cache
+	Cache.Clear(nil)
+	// start fresh with new dataManager
+	data, _ := NewMapStorage()
+	dmRES = NewDataManager(data)
+	defaultCfg, err := config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	resService, err = NewResourceService(dmRES, time.Duration(1), nil,
+		&FilterS{dm: dmRES, cfg: defaultCfg}, nil, nil)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+
+	resProf := &ResourceProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ResourceProfileCached",
+		FilterIDs: []string{"*string:~Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		},
+		UsageTTL:          time.Duration(-1),
+		Limit:             10.00,
+		AllocationMessage: "AllocationMessage",
+		Weight:            20.00,
+		ThresholdIDs:      []string{utils.META_NONE},
+	}
+
+	Cache.Set(utils.CacheResourceProfiles, "cgrates.org:ResourceProfileCached",
+		resProf, nil, cacheCommit(utils.EmptyString), utils.EmptyString)
+
+	res := &Resource{Tenant: resProf.Tenant,
+		ID:     resProf.ID,
+		Usages: make(map[string]*ResourceUsage)}
+
+	Cache.Set(utils.CacheResources, "cgrates.org:ResourceProfileCached",
+		res, nil, cacheCommit(utils.EmptyString), utils.EmptyString)
+
+	resources := Resources{res}
+	Cache.Set(utils.CacheEventResources, "TestResourceCaching", resources.resIDsMp(), nil, true, "")
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Account":     "1001",
+			"Destination": "3002"},
+	}
+
+	mres, err := resService.matchingResourcesForEvent(ev,
+		"TestResourceCaching", nil)
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(resources[0].Tenant, mres[0].Tenant) {
+		t.Errorf("Expecting: %+v, received: %+v", resources[0].Tenant, mres[0].Tenant)
+	} else if !reflect.DeepEqual(resources[0].ID, mres[0].ID) {
+		t.Errorf("Expecting: %+v, received: %+v", resources[0].ID, mres[0].ID)
+	} else if !reflect.DeepEqual(resources[0].rPrf, mres[0].rPrf) {
+		t.Errorf("Expecting: %+v, received: %+v", resources[0].rPrf, mres[0].rPrf)
+	} else if !reflect.DeepEqual(resources[0].ttl, mres[0].ttl) {
+		t.Errorf("Expecting: %+v, received: %+v", resources[0].ttl, mres[0].ttl)
 	}
 }
