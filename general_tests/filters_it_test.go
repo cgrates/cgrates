@@ -402,6 +402,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 	argsRU := utils.ArgRSv1ResourceUsage{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
 				"Account":     "3001",
 				"Destination": "3002"},
