@@ -174,6 +174,9 @@ func (ev *CGREvent) RemFldsWithPrefix(prfx string) {
 
 // RemFldsWithPrefix will remove fields starting with prefix from event
 func (ev *CGREvent) ConsumeArgDispatcher() (arg *ArgDispatcher) {
+	if ev == nil {
+		return
+	}
 	//check if we have APIKey in event and in case it has add it in ArgDispatcher
 	apiKeyIface, hasApiKey := ev.Event[MetaApiKey]
 	if hasApiKey {
