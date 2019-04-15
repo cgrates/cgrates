@@ -60,11 +60,6 @@ type TpReader struct {
 	resources          []*utils.TenantID // IDs of resources which need creation based on resourceProfiles
 	statQueues         []*utils.TenantID // IDs of statQueues which need creation based on statQueueProfiles
 	thresholds         []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
-	suppliers          []*utils.TenantID // IDs of suppliers which need creation based on sppProfiles
-	attrTntID          []*utils.TenantID // IDs of suppliers which need creation based on attributeProfiles
-	chargers           []*utils.TenantID // IDs of chargers which need creation based on chargerProfiles
-	dpps               []*utils.TenantID // IDs of dispatchers which need creation based on dispatcherProfiles
-	dphs               []*utils.TenantID // IDs of dispatcherHosts which need creation based on dispatcherHosts
 	revDests,
 	acntActionPlans map[string][]string
 	cacheS     rpcclient.RpcClientConnection
@@ -1208,13 +1203,6 @@ func (tpr *TpReader) LoadSupplierProfilesFiltered(tag string) (err error) {
 		mapRsPfls[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
 	tpr.sppProfiles = mapRsPfls
-	for tntID := range mapRsPfls {
-		if has, err := tpr.dm.HasData(utils.SupplierProfilePrefix, tntID.ID, tntID.Tenant); err != nil {
-			return err
-		} else if !has {
-			tpr.suppliers = append(tpr.suppliers, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
-		}
-	}
 	return nil
 }
 
@@ -1232,13 +1220,6 @@ func (tpr *TpReader) LoadAttributeProfilesFiltered(tag string) (err error) {
 		mapAttrPfls[utils.TenantID{Tenant: attr.Tenant, ID: attr.ID}] = attr
 	}
 	tpr.attributeProfiles = mapAttrPfls
-	for tntID := range mapAttrPfls {
-		if has, err := tpr.dm.HasData(utils.AttributeProfilePrefix, tntID.ID, tntID.Tenant); err != nil {
-			return err
-		} else if !has {
-			tpr.attrTntID = append(tpr.attrTntID, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
-		}
-	}
 	return nil
 }
 
@@ -1256,13 +1237,6 @@ func (tpr *TpReader) LoadChargerProfilesFiltered(tag string) (err error) {
 		mapChargerProfile[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
 	tpr.chargerProfiles = mapChargerProfile
-	for tntID := range mapChargerProfile {
-		if has, err := tpr.dm.HasData(utils.ChargerProfilePrefix, tntID.ID, tntID.Tenant); err != nil {
-			return err
-		} else if !has {
-			tpr.chargers = append(tpr.chargers, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
-		}
-	}
 	return nil
 }
 
@@ -1280,13 +1254,6 @@ func (tpr *TpReader) LoadDispatcherProfilesFiltered(tag string) (err error) {
 		mapDispatcherProfile[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
 	tpr.dispatcherProfiles = mapDispatcherProfile
-	for tntID := range mapDispatcherProfile {
-		if has, err := tpr.dm.HasData(utils.DispatcherProfilePrefix, tntID.ID, tntID.Tenant); err != nil {
-			return err
-		} else if !has {
-			tpr.dpps = append(tpr.dpps, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
-		}
-	}
 	return nil
 }
 
@@ -1304,13 +1271,6 @@ func (tpr *TpReader) LoadDispatcherHostsFiltered(tag string) (err error) {
 		mapDispatcherHost[utils.TenantID{Tenant: rl.Tenant, ID: rl.ID}] = rl
 	}
 	tpr.dispatcherHosts = mapDispatcherHost
-	for tntID := range mapDispatcherHost {
-		if has, err := tpr.dm.HasData(utils.DispatcherHostPrefix, tntID.ID, tntID.Tenant); err != nil {
-			return err
-		} else if !has {
-			tpr.dphs = append(tpr.dphs, &utils.TenantID{Tenant: tntID.Tenant, ID: tntID.ID})
-		}
-	}
 	return nil
 }
 

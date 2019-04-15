@@ -670,6 +670,8 @@ func (ms *MongoStorage) HasDataDrv(category, subject, tenant string) (has bool, 
 		case utils.StatQueueProfilePrefix:
 			count, err = ms.getCol(colSqp).Count(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.ThresholdPrefix:
+			count, err = ms.getCol(colThs).Count(sctx, bson.M{"tenant": tenant, "id": subject})
+		case utils.ThresholdProfilePrefix:
 			count, err = ms.getCol(colTps).Count(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.FilterPrefix:
 			count, err = ms.getCol(colFlt).Count(sctx, bson.M{"tenant": tenant, "id": subject})

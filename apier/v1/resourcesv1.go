@@ -132,20 +132,26 @@ func (apierV1 *ApierV1) SetResourceProfile(arg *ResourceWithCache, reply *string
 	if err := apierV1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	if err := apierV1.DataManager.SetResource(
-		&engine.Resource{Tenant: arg.Tenant,
-			ID:     arg.ID,
-			Usages: make(map[string]*engine.ResourceUsage)}); err != nil {
-		return utils.APIErrorHandler(err)
+	//add the resource only if it's not present
+	if has, err := apierV1.DataManager.HasData(utils.ResourcesPrefix, arg.ID, arg.Tenant); err != nil {
+		return err
+	} else if !has {
+		if err := apierV1.DataManager.SetResource(
+			&engine.Resource{Tenant: arg.Tenant,
+				ID:     arg.ID,
+				Usages: make(map[string]*engine.ResourceUsage)}); err != nil {
+			return utils.APIErrorHandler(err)
+		}
+		//handle caching for Resource
+		argCache = engine.ArgsGetCacheItem{
+			CacheID: utils.CacheResources,
+			ItemID:  arg.TenantID(),
+		}
+		if err := apierV1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
+			return utils.APIErrorHandler(err)
+		}
 	}
-	//handle caching for Resource
-	argCache = engine.ArgsGetCacheItem{
-		CacheID: utils.CacheResources,
-		ItemID:  arg.TenantID(),
-	}
-	if err := apierV1.CallCache(GetCacheOpt(arg.Cache), argCache); err != nil {
-		return utils.APIErrorHandler(err)
-	}
+
 	*reply = utils.OK
 	return nil
 }
