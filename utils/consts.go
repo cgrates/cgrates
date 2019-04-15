@@ -567,6 +567,7 @@ const (
 	MetaRouteID                  = "*route_id"
 	MetaApiKey                   = "*api_key"
 	UsageID                      = "UsageID"
+	Status                       = "status"
 )
 
 // Migrator Action
