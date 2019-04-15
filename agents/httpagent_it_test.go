@@ -176,7 +176,7 @@ func testHAitAuthDryRun(t *testing.T) {
 		httpConst, addr, haCfg.HttpAgentCfg()[0].Url)
 	rply, err := httpC.Get(reqUrl)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	eXml := []byte(`<?xml version="1.0" encoding="UTF-8"?>
 <response>
