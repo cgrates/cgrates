@@ -481,33 +481,60 @@ func startRadiusAgent(internalSMGChan, internalDispatcherSChan chan rpcclient.Rp
 	exitChan <- true
 }
 
-func startDNSAgent(internalSMGChan chan rpcclient.RpcClientConnection,
+func startDNSAgent(internalSMGChan, internalDispatcherSChan chan rpcclient.RpcClientConnection,
 	filterSChan chan *engine.FilterS, exitChan chan bool) {
+	var err error
+	var sS rpcclient.RpcClientConnection
+	// var sSInternal bool
 	filterS := <-filterSChan
 	filterSChan <- filterS
 	utils.Logger.Info(fmt.Sprintf("starting %s service", utils.DNSAgent))
-	var err error
-	var smgConn *rpcclient.RpcClientPool
-	if len(cfg.RadiusAgentCfg().SessionSConns) != 0 {
-		smgConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+	if cfg.DispatcherSCfg().Enabled {
+		sS = <-internalDispatcherSChan
+		internalDispatcherSChan <- sS
+	} else if len(cfg.DNSAgentCfg().SessionSConns) == 0 {
+		utils.Logger.Crit(
+			fmt.Sprintf("<%s> no SessionS connections defined",
+				utils.DNSAgent))
+		exitChan <- true
+		return
+	} else if cfg.DNSAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
+		// sSInternal = true
+		sSIntConn := <-internalSMGChan
+		internalSMGChan <- sSIntConn
+		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
+	} else {
+		sS, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
 			cfg.TlsCfg().ClientKey,
 			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.RadiusAgentCfg().SessionSConns, internalSMGChan,
+			cfg.DNSAgentCfg().SessionSConns, internalSMGChan,
 			cfg.GeneralCfg().InternalTtl, false)
 		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to SMG: %s", utils.DNSAgent, err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
+				utils.DNSAgent, utils.SessionS, err.Error()))
 			exitChan <- true
 			return
 		}
 	}
-	da, err := agents.NewDNSAgent(cfg, filterS, smgConn)
+	da, err := agents.NewDNSAgent(cfg, filterS, sS)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
 		exitChan <- true
 		return
 	}
+	// if sSInternal { // bidirectional client backwards connection
+	// 	sS.(*utils.BiRPCInternalClient).SetClientConn(da)
+	// 	var rply string
+	// 	if err := sS.Call(utils.SessionSv1RegisterInternalBiJSONConn,
+	// 		utils.EmptyString, &rply); err != nil {
+	// 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
+	// 			utils.DNSAgent, utils.SessionS, err.Error()))
+	// 		exitChan <- true
+	// 		return
+	// 	}
+	// }
 	if err = da.ListenAndServe(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
 	}
@@ -1666,7 +1693,7 @@ func main() {
 	}
 
 	if cfg.DNSAgentCfg().Enabled {
-		go startDNSAgent(internalSMGChan, filterSChan, exitChan)
+		go startDNSAgent(internalSMGChan, internalDispatcherSChan, filterSChan, exitChan)
 	}
 
 	if len(cfg.HttpAgentCfg()) != 0 {
