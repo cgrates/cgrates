@@ -1146,6 +1146,7 @@ func testV1FIdxCaGetResourceProfileWithNotFound(t *testing.T) {
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
 				utils.Account:     "1002",
 				utils.Subject:     "1001",
@@ -1221,6 +1222,7 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
 				utils.Account:     "1001",
 				utils.Subject:     "1002",
@@ -1249,6 +1251,7 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e63",
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
 				utils.Account:     "1001",
 				utils.Subject:     "1002",
@@ -1273,6 +1276,7 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
 				utils.Account:     "1002",
 				utils.Subject:     "1001",
@@ -1348,6 +1352,7 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
 				utils.Account:     "2002",
 				utils.Subject:     "2001",
@@ -1413,6 +1418,7 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e65",
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
 				utils.Account:     "1002",
 				utils.Subject:     "1001",
@@ -1433,6 +1439,7 @@ func testV1FIdxCaRemoveResourceProfile(t *testing.T) {
 		UsageID: "653a8db2-4f67-4cf8-b622-169e8a482e61",
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
 				utils.Account:     "2002",
 				utils.Subject:     "2001",
@@ -1454,6 +1461,7 @@ func testV1FIdxCaRemoveResourceProfile(t *testing.T) {
 		UsageID: "654a8db2-4f67-4cf8-b622-169e8a482e61",
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
 				utils.Account:     "1002",
 				utils.Subject:     "1001",

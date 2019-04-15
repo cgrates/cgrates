@@ -38,11 +38,11 @@ var sTestsDspRes = []func(t *testing.T){
 }
 
 //Test start here
-func TestDspResourceSTMySQL(t *testing.T) {
+func TestDspResourceSITMySQL(t *testing.T) {
 	testDsp(t, sTestsDspRes, "TestDspResourceS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
 }
 
-func TestDspResourceSMongo(t *testing.T) {
+func TestDspResourceSITMongo(t *testing.T) {
 	testDsp(t, sTestsDspRes, "TestDspResourceS", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
 }
 
@@ -112,6 +112,7 @@ func testDspResTestAuthKey(t *testing.T) {
 				utils.Destination: "1002",
 			},
 		},
+		UsageID: utils.UUIDSha1Prefix(),
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("12345"),
 		},
@@ -134,6 +135,7 @@ func testDspResTestAuthKey2(t *testing.T) {
 				utils.Destination: "1002",
 			},
 		},
+		UsageID: utils.UUIDSha1Prefix(),
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("res12345"),
 		},
@@ -161,6 +163,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
 				"Account":     "1002",
 				"Subject":     "1001",
@@ -189,6 +192,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
 				"Account":     "1002",
 				"Subject":     "1001",
@@ -209,6 +213,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e55",
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
 				"Account":     "1002",
 				"Subject":     "1001",
@@ -228,12 +233,13 @@ func testDspResTestAuthKey3(t *testing.T) {
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
 				"Account":     "1002",
 				"Subject":     "1001",
 				"Destination": "1002"},
 		},
-		Units: 7,
+		Units: 6,
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("res12345"),
 		},
@@ -253,6 +259,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 				"Subject":     "1001",
 				"Destination": "1002"},
 		},
+		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("res12345"),
 		},
@@ -272,8 +279,8 @@ func testDspResTestAuthKey3(t *testing.T) {
 	// make sure Resource1 have no more active resources
 	for _, r := range *rs {
 		if r.ID == "ResGroup1" &&
-			(len(r.Usages) != 0 || len(r.TTLIdx) != 0) {
-			t.Errorf("Unexpected resource: %+v", r)
+			(len(r.Usages) != 1 || len(r.TTLIdx) != 0) {
+			t.Errorf("Unexpected resource: %+v", utils.ToJSON(r))
 		}
 	}
 }

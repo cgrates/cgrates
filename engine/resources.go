@@ -447,7 +447,7 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 	if x, ok := Cache.Get(utils.CacheEventResources, evUUID); ok { // The ResourceIDs were cached as utils.StringMap{"resID":bool}
 		isCached = true
 		if x == nil {
-			err = utils.ErrNotFound
+			return nil, utils.ErrNotFound
 		}
 		rIDs = x.(utils.StringMap)
 	} else { // select the resourceIDs out of dataDB
