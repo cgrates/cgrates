@@ -117,7 +117,6 @@ func TestMfEnvReaderITRead(t *testing.T) {
 		Reconnects:        -1,
 		ConnectTimeout:    time.Duration(1 * time.Second),
 		ReplyTimeout:      time.Duration(2 * time.Second),
-		InternalTtl:       time.Duration(2 * time.Minute),
 		LockingTimeout:    time.Duration(0),
 		DigestSeparator:   ",",
 		DigestEqual:       ":",

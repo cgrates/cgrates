@@ -82,8 +82,7 @@ func NewLoader(dm *engine.DataManager, cfg *config.LoaderSCfg,
 			config.CgrConfig().TlsCfg().ClientCerificate, config.CgrConfig().TlsCfg().CaCertificate,
 			config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
 			config.CgrConfig().GeneralCfg().ConnectTimeout, config.CgrConfig().GeneralCfg().ReplyTimeout,
-			cfg.CacheSConns, internalCacheSChan,
-			config.CgrConfig().GeneralCfg().InternalTtl, false)
+			cfg.CacheSConns, internalCacheSChan, false)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<LoaderS> Could not connect to CacheS, error: %s", err.Error()))
 			exitChan <- true

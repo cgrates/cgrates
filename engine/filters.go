@@ -95,7 +95,7 @@ func (fS *FilterS) connStatS(statSChan chan rpcclient.RpcClientConnection) (err 
 		fS.cfg.TlsCfg().CaCertificate, fS.cfg.GeneralCfg().ConnectAttempts,
 		fS.cfg.GeneralCfg().Reconnects, fS.cfg.GeneralCfg().ConnectTimeout,
 		fS.cfg.GeneralCfg().ReplyTimeout, fS.cfg.FilterSCfg().StatSConns,
-		statSChan, fS.cfg.GeneralCfg().InternalTtl, true)
+		statSChan, true)
 	return
 }
 
@@ -111,7 +111,7 @@ func (fS *FilterS) connResourceS(resSChan chan rpcclient.RpcClientConnection) (e
 		fS.cfg.TlsCfg().CaCertificate, fS.cfg.GeneralCfg().ConnectAttempts,
 		fS.cfg.GeneralCfg().Reconnects, fS.cfg.GeneralCfg().ConnectTimeout,
 		fS.cfg.GeneralCfg().ReplyTimeout, fS.cfg.FilterSCfg().ResourceSConns,
-		resSChan, fS.cfg.GeneralCfg().InternalTtl, true)
+		resSChan, true)
 	return
 }
 

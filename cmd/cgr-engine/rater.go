@@ -77,8 +77,7 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.RalsCfg().RALsThresholdSConns, internalThdSChan,
-				cfg.GeneralCfg().InternalTtl, false)
+				cfg.RalsCfg().RALsThresholdSConns, internalThdSChan, false)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to ThresholdS, error: %s", err.Error()))
 				exitChan <- true
@@ -101,8 +100,7 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.RalsCfg().RALsStatSConns, internalStatSChan,
-				cfg.GeneralCfg().InternalTtl, false)
+				cfg.RalsCfg().RALsStatSConns, internalStatSChan, false)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to StatS, error: %s", err.Error()))
 				exitChan <- true
@@ -126,8 +124,7 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.ApierCfg().CachesConns, internalCacheSChan,
-				cfg.GeneralCfg().InternalTtl, false)
+				cfg.ApierCfg().CachesConns, internalCacheSChan, false)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<APIer> Could not connect to CacheS, error: %s", err.Error()))
 				exitChan <- true
@@ -151,8 +148,7 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.ApierCfg().SchedulerConns, internalSchedulerSChan,
-				cfg.GeneralCfg().InternalTtl, false)
+				cfg.ApierCfg().SchedulerConns, internalSchedulerSChan, false)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<APIer> Could not connect to SchedulerS, error: %s", err.Error()))
 				exitChan <- true

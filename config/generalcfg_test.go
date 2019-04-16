@@ -56,7 +56,6 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 	"connect_timeout": "1s",								// consider connection unsuccessful on timeout, 0 to disable the feature
 	"reply_timeout": "2s",									// consider connection down for replies taking longer than this value
 	"response_cache_ttl": "0s",								// the life span of a cached response
-	"internal_ttl": "2m",									// maximum duration to wait for internal connections before giving up
 	"locking_timeout": "0",									// timeout internal locks to avoid deadlocks
 	"digest_separator": ",",
 	"digest_equal": ":",
@@ -80,8 +79,6 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 		Reconnects:        -1,
 		ConnectTimeout:    time.Duration(1 * time.Second),
 		ReplyTimeout:      time.Duration(2 * time.Second),
-		InternalTtl:       time.Duration(2 * time.Minute),
-		LockingTimeout:    time.Duration(0),
 		DigestSeparator:   ",",
 		DigestEqual:       ":",
 	}
