@@ -5,7 +5,6 @@
 // Starts rater, scheduler
 
 "general": {
-	"internal_ttl": "30m",
 },
 
 "listen": {

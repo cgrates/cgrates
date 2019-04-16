@@ -45,7 +45,6 @@ type GeneralCfg struct {
 	Reconnects        int           // number of recconect attempts in case of connection lost <-1 for infinite | nb>
 	ConnectTimeout    time.Duration // timeout for RPC connection attempts
 	ReplyTimeout      time.Duration // timeout replies if not reaching back
-	InternalTtl       time.Duration // maximum duration to wait for internal connections before giving up
 	LockingTimeout    time.Duration // locking mechanism timeout to avoid deadlocks
 	DigestSeparator   string        //
 	DigestEqual       string        //
@@ -115,11 +114,6 @@ func (gencfg *GeneralCfg) loadFromJsonCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 	}
 	if jsnGeneralCfg.Default_caching != nil {
 		gencfg.DefaultCaching = *jsnGeneralCfg.Default_caching
-	}
-	if jsnGeneralCfg.Internal_ttl != nil {
-		if gencfg.InternalTtl, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Internal_ttl); err != nil {
-			return err
-		}
 	}
 	if jsnGeneralCfg.Locking_timeout != nil {
 		if gencfg.LockingTimeout, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Locking_timeout); err != nil {

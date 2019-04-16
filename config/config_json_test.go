@@ -56,7 +56,6 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Reconnects:           utils.IntPointer(-1),
 		Connect_timeout:      utils.StringPointer("1s"),
 		Reply_timeout:        utils.StringPointer("2s"),
-		Internal_ttl:         utils.StringPointer("5s"),
 		Locking_timeout:      utils.StringPointer("0"),
 		Digest_separator:     utils.StringPointer(","),
 		Digest_equal:         utils.StringPointer(":"),
