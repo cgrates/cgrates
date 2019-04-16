@@ -48,6 +48,7 @@ var sTestsDspSession = []func(t *testing.T){
 	testDspSessionTerminate,
 	testDspSessionProcessCDR,
 	testDspSessionProcessEvent,
+	testDspSessionProcessEvent2,
 
 	testDspSessionReplicate,
 	testDspSessionPassive,
@@ -570,6 +571,73 @@ func testDspSessionProcessEvent(t *testing.T) {
 				utils.Account:     "1001",
 				utils.Destination: "1002",
 				"OfficeGroup":     "Marketing",
+				utils.OriginID:    "TestSSv1It2",
+				utils.RequestType: utils.META_PREPAID,
+				utils.SetupTime:   "2018-01-07T17:00:00Z",
+				utils.AnswerTime:  "2018-01-07T17:00:10Z",
+				utils.Usage:       300000000000.0,
+			},
+		},
+	}
+	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
+		t.Errorf("expecting: %+v, received: %+v",
+			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
+	}
+}
+
+func testDspSessionProcessEvent2(t *testing.T) {
+	initUsage := 5 * time.Minute
+	args := sessions.V1ProcessEventArgs{
+		AllocateResources: true,
+		Debit:             true,
+		GetAttributes:     true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItProcessEvent",
+			Event: map[string]interface{}{
+				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "TestSSv1It2",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       initUsage,
+				utils.EVENT_NAME:  "Internal",
+			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("pse12345"),
+		},
+	}
+	var rply sessions.V1ProcessEventReply
+	if err := dispEngine.RCP.Call(utils.SessionSv1ProcessEvent,
+		args, &rply); err != nil {
+		t.Fatal(err)
+	}
+	if *rply.MaxUsage != initUsage {
+		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
+	}
+	if *rply.ResourceAllocation != "RES_ACNT_1001" {
+		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
+	}
+	eAttrs := &engine.AttrSProcessEventReply{
+		MatchedProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
+		AlteredFields:   []string{"Password", "EventName"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItProcessEvent",
+			Event: map[string]interface{}{
+				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.VOICE,
+				utils.Account:     "1001",
+				utils.Destination: "1002",
+				"Password":        "CGRateS.org",
 				utils.OriginID:    "TestSSv1It2",
 				utils.RequestType: utils.META_PREPAID,
 				utils.SetupTime:   "2018-01-07T17:00:00Z",

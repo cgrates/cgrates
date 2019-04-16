@@ -38,7 +38,7 @@ func (dS *DispatcherService) ResourceSv1Ping(args *utils.CGREventWithArgDispatch
 		utils.ResourceSv1Ping, args.CGREvent, rpl)
 }
 
-func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args *utils.ArgRSv1ResourceUsage,
+func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args utils.ArgRSv1ResourceUsage,
 	reply *engine.Resources) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
@@ -55,7 +55,7 @@ func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args *utils.ArgRSv1
 		utils.ResourceSv1GetResourcesForEvent, args, reply)
 }
 
-func (dS *DispatcherService) ResourceSv1AuthorizeResources(args *utils.ArgRSv1ResourceUsage,
+func (dS *DispatcherService) ResourceSv1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
 	reply *string) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
@@ -72,7 +72,7 @@ func (dS *DispatcherService) ResourceSv1AuthorizeResources(args *utils.ArgRSv1Re
 		utils.ResourceSv1AuthorizeResources, args, reply)
 }
 
-func (dS *DispatcherService) ResourceSv1AllocateResources(args *utils.ArgRSv1ResourceUsage,
+func (dS *DispatcherService) ResourceSv1AllocateResources(args utils.ArgRSv1ResourceUsage,
 	reply *string) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
@@ -89,7 +89,7 @@ func (dS *DispatcherService) ResourceSv1AllocateResources(args *utils.ArgRSv1Res
 		utils.ResourceSv1AllocateResources, args, reply)
 }
 
-func (dS *DispatcherService) ResourceSv1ReleaseResources(args *utils.ArgRSv1ResourceUsage,
+func (dS *DispatcherService) ResourceSv1ReleaseResources(args utils.ArgRSv1ResourceUsage,
 	reply *string) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")

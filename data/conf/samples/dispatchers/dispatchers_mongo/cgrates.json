@@ -48,6 +48,11 @@
 	"enabled": true,
 },
 
+"sessions": {
+	"enabled": true,
+	"listen_bijson": ":3014",
+},
+
 "dispatchers":{
  	"enabled": true,
  	"attributes_conns": [
