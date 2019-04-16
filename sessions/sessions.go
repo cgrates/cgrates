@@ -1222,7 +1222,7 @@ func (sS *SessionS) authSession(tnt string, evStart *engine.SafEvent) (maxUsage 
 
 // initSession handles a new session
 func (sS *SessionS) initSession(tnt string, evStart *engine.SafEvent, clntConnID string,
-	resID string, dbtItval time.Duration) (s *Session, err error) {
+	resID string, dbtItval time.Duration, argDisp *utils.ArgDispatcher) (s *Session, err error) {
 	cgrID := GetSetCGRID(evStart)
 	s = &Session{
 		CGRID:         cgrID,
@@ -1231,24 +1231,7 @@ func (sS *SessionS) initSession(tnt string, evStart *engine.SafEvent, clntConnID
 		EventStart:    evStart,
 		ClientConnID:  clntConnID,
 		DebitInterval: dbtItval,
-	}
-	//check if we have APIKey in event and in case it has add it in ArgDispatcher
-	apiKeyIface, errApiKey := evStart.FieldAsString([]string{utils.MetaApiKey})
-	if errApiKey == nil {
-		s.ArgDispatcher = &utils.ArgDispatcher{
-			APIKey: utils.StringPointer(apiKeyIface),
-		}
-	}
-	//check if we have RouteID in event and in case it has add it in ArgDispatcher
-	routeIDIface, errRouteID := evStart.FieldAsString([]string{utils.MetaRouteID})
-	if errRouteID == nil {
-		if errApiKey.Error() == utils.ErrNotFound.Error() { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
-			s.ArgDispatcher = &utils.ArgDispatcher{
-				RouteID: utils.StringPointer(routeIDIface),
-			}
-		} else {
-			s.ArgDispatcher.RouteID = utils.StringPointer(routeIDIface)
-		}
+		ArgDispatcher: argDisp,
 	}
 	if err = sS.forkSession(s); err != nil {
 		return nil, err
@@ -1374,10 +1357,10 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration) (er
 }
 
 // chargeEvent will charge a single event (ie: SMS)
-func (sS *SessionS) chargeEvent(tnt string, ev *engine.SafEvent) (maxUsage time.Duration, err error) {
+func (sS *SessionS) chargeEvent(tnt string, ev *engine.SafEvent, argDisp *utils.ArgDispatcher) (maxUsage time.Duration, err error) {
 	cgrID := GetSetCGRID(ev)
 	var s *Session
-	if s, err = sS.initSession(tnt, ev, "", "", 0); err != nil {
+	if s, err = sS.initSession(tnt, ev, "", "", 0, argDisp); err != nil {
 		return
 	}
 	if maxUsage, err = sS.updateSession(s, ev.AsMapInterface()); err != nil {
@@ -1982,7 +1965,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 			}
 		}
 		s, err := sS.initSession(args.CGREvent.Tenant, ev,
-			sS.biJClntID(clnt), originID, dbtItvl)
+			sS.biJClntID(clnt), originID, dbtItvl, args.ArgDispatcher)
 		if err != nil {
 			return utils.NewErrRALs(err)
 		}
@@ -2198,7 +2181,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 		if len(ss) == 0 {
 			if s, err = sS.initSession(args.CGREvent.Tenant,
 				ev, sS.biJClntID(clnt),
-				me.GetStringIgnoreErrors(utils.OriginID), dbtItvl); err != nil {
+				me.GetStringIgnoreErrors(utils.OriginID), dbtItvl, args.ArgDispatcher); err != nil {
 				return utils.NewErrRALs(err)
 			}
 		} else {
@@ -2290,7 +2273,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 		if len(ss) == 0 {
 			if s, err = sS.initSession(args.CGREvent.Tenant,
 				ev, sS.biJClntID(clnt),
-				me.GetStringIgnoreErrors(utils.OriginID), dbtItvl); err != nil {
+				me.GetStringIgnoreErrors(utils.OriginID), dbtItvl, args.ArgDispatcher); err != nil {
 				return utils.NewErrRALs(err)
 			}
 		} else {
@@ -2584,7 +2567,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 	}
 	if args.Debit {
 		if maxUsage, err := sS.chargeEvent(args.CGREvent.Tenant,
-			engine.NewSafEvent(args.CGREvent.Event)); err != nil {
+			engine.NewSafEvent(args.CGREvent.Event), args.ArgDispatcher); err != nil {
 			return utils.NewErrRALs(err)
 		} else {
 			rply.MaxUsage = &maxUsage
