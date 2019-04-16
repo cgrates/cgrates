@@ -1592,7 +1592,7 @@ func main() {
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
 	var dm *engine.DataManager
-	if cfg.RalsCfg().RALsEnabled || cfg.SchedulerCfg().Enabled ||
+	if cfg.RalsCfg().RALsEnabled || cfg.SchedulerCfg().Enabled || cfg.ChargerSCfg().Enabled ||
 		cfg.AttributeSCfg().Enabled || cfg.ResourceSCfg().Enabled || cfg.StatSCfg().Enabled ||
 		cfg.ThresholdSCfg().Enabled || cfg.SupplierSCfg().Enabled || cfg.DispatcherSCfg().Enabled { // Some services can run without db, ie: SessionS or CDRC
 		dm, err = engine.ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
