@@ -170,7 +170,7 @@ func (self *SQLStorage) GetTpIds(colName string) ([]string, error) {
 
 // ToDo: TEST
 func (self *SQLStorage) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds,
-	filters map[string]string, pagination *utils.Paginator) ([]string, error) {
+	filters map[string]string, pagination *utils.PaginatorWithSearch) ([]string, error) {
 	qry := fmt.Sprintf("SELECT DISTINCT %s FROM %s where tpid='%s'", distinct, table, tpid)
 	for key, value := range filters {
 		if key != "" && value != "" {
@@ -178,17 +178,19 @@ func (self *SQLStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 		}
 	}
 	if pagination != nil {
-		if len(pagination.SearchTerm) != 0 {
-			qry += fmt.Sprintf(" AND (%s LIKE '%%%s%%'", distinct[0], pagination.SearchTerm)
+		if len(pagination.Search) != 0 {
+			qry += fmt.Sprintf(" AND (%s LIKE '%%%s%%'", distinct[0], pagination.Search)
 			for _, d := range distinct[1:] {
-				qry += fmt.Sprintf(" OR %s LIKE '%%%s%%'", d, pagination.SearchTerm)
+				qry += fmt.Sprintf(" OR %s LIKE '%%%s%%'", d, pagination.Search)
 			}
 			qry += fmt.Sprintf(")")
 		}
-		if pagination.Limit != nil { // Keep Postgres compatibility by adding offset only when limit defined
-			qry += fmt.Sprintf(" LIMIT %d", *pagination.Limit)
-			if pagination.Offset != nil {
-				qry += fmt.Sprintf(" OFFSET %d", *pagination.Offset)
+		if pagination.Paginator != nil {
+			if pagination.Limit != nil { // Keep Postgres compatibility by adding offset only when limit defined
+				qry += fmt.Sprintf(" LIMIT %d", *pagination.Limit)
+				if pagination.Offset != nil {
+					qry += fmt.Sprintf(" OFFSET %d", *pagination.Offset)
+				}
 			}
 		}
 	}

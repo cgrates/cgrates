@@ -53,7 +53,7 @@ func (self *ApierV1) GetTPThreshold(attr *utils.TPTntID, reply *utils.TPThreshol
 type AttrGetTPThresholdIds struct {
 	TPid   string // Tariff plan id
 	Tenant string
-	utils.Paginator
+	utils.PaginatorWithSearch
 }
 
 // Queries Threshold identities on specific tariff plan.
@@ -61,7 +61,8 @@ func (self *ApierV1) GetTPThresholdIDs(attrs *AttrGetTPThresholdIds, reply *[]st
 	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPThresholds, utils.TPDistinctIds{"id"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPThresholds,
+		utils.TPDistinctIds{"id"}, nil, &attrs.PaginatorWithSearch); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}

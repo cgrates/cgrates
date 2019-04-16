@@ -52,7 +52,7 @@ func (self *ApierV1) GetTPCharger(attr *utils.TPTntID, reply *utils.TPChargerPro
 
 type AttrGetTPChargerIds struct {
 	TPid string // Tariff plan id
-	utils.Paginator
+	utils.PaginatorWithSearch
 }
 
 // Queries Charger identities on specific tariff plan.
@@ -61,7 +61,7 @@ func (self *ApierV1) GetTPChargerIDs(attrs *AttrGetTPChargerIds, reply *[]string
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPChargers, utils.TPDistinctIds{"id"},
-		nil, &attrs.Paginator); err != nil {
+		nil, &attrs.PaginatorWithSearch); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}

@@ -27,7 +27,7 @@ func (ms *MapStorage) GetTpIds(colName string) (ids []string, err error) {
 	return nil, utils.ErrNotImplemented
 }
 func (ms *MapStorage) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds,
-	filters map[string]string, paginator *utils.Paginator) (ids []string, err error) {
+	filters map[string]string, paginator *utils.PaginatorWithSearch) (ids []string, err error) {
 	return nil, utils.ErrNotImplemented
 }
 func (ms *MapStorage) GetTPTimings(tpid, id string) (timings []*utils.ApierTPTiming, err error) {

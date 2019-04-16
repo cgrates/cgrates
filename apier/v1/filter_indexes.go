@@ -192,7 +192,7 @@ func (self *ApierV1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string)
 			}
 		}
 	}
-	if arg.Paginator.Limit != nil || arg.Paginator.Offset != nil || arg.Paginator.SearchTerm != "" {
+	if arg.Paginator.Limit != nil || arg.Paginator.Offset != nil {
 		*reply = arg.Paginator.PaginateStringSlice(indexedSlice)
 	} else {
 		*reply = indexedSlice

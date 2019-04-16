@@ -168,7 +168,8 @@ func testTPSharedGroupsAfterSet(t *testing.T) {
 func testTPSharedGroupsGetTPSharedGroupIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"Group1"}
-	if err := tpSharedGroupRPC.Call("ApierV1.GetTPSharedGroupIds", AttrGetTPSharedGroupIds{tpSharedGroups.TPid, utils.Paginator{}}, &result); err != nil {
+	if err := tpSharedGroupRPC.Call("ApierV1.GetTPSharedGroupIds",
+		AttrGetTPSharedGroupIds{tpSharedGroups.TPid, utils.PaginatorWithSearch{}}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result, expectedTPID) {
 		t.Errorf("Expecting: %+v, received: %+v", result, expectedTPID)
