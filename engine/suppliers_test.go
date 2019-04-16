@@ -492,6 +492,92 @@ func TestSuppliersSortedForEvent(t *testing.T) {
 	}
 }
 
+func TestSuppliersSortedForEventWithLimit(t *testing.T) {
+	eFirstSupplierProfile := &SortedSuppliers{
+		ProfileID: "SupplierProfile2",
+		Sorting:   utils.MetaWeight,
+		SortedSuppliers: []*SortedSupplier{
+			{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					"Weight": 30.0,
+				},
+				SupplierParameters: "param1",
+			},
+			{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					"Weight": 20.0,
+				},
+				SupplierParameters: "param2",
+			},
+		},
+	}
+	argsGetSuppliers[1].Paginator = utils.Paginator{
+		Limit: utils.IntPointer(2),
+	}
+	sprf, err := splService.sortedSuppliersForEvent(argsGetSuppliers[1])
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(eFirstSupplierProfile, sprf) {
+		t.Errorf("Expecting: %+v, received: %+v", eFirstSupplierProfile, sprf)
+	}
+}
+
+func TestSuppliersSortedForEventWithOffset(t *testing.T) {
+	eFirstSupplierProfile := &SortedSuppliers{
+		ProfileID: "SupplierProfile2",
+		Sorting:   utils.MetaWeight,
+		SortedSuppliers: []*SortedSupplier{
+			{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					"Weight": 10.0,
+				},
+				SupplierParameters: "param3",
+			},
+		},
+	}
+	argsGetSuppliers[1].Paginator = utils.Paginator{
+		Offset: utils.IntPointer(2),
+	}
+	sprf, err := splService.sortedSuppliersForEvent(argsGetSuppliers[1])
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(eFirstSupplierProfile, sprf) {
+		t.Errorf("Expecting: %+v,received: %+v", utils.ToJSON(eFirstSupplierProfile), utils.ToJSON(sprf))
+	}
+}
+
+func TestSuppliersSortedForEventWithLimitAndOffset(t *testing.T) {
+	eFirstSupplierProfile := &SortedSuppliers{
+		ProfileID: "SupplierProfile2",
+		Sorting:   utils.MetaWeight,
+		SortedSuppliers: []*SortedSupplier{
+			{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					"Weight": 20.0,
+				},
+				SupplierParameters: "param2",
+			},
+		},
+	}
+	argsGetSuppliers[1].Paginator = utils.Paginator{
+		Limit:  utils.IntPointer(1),
+		Offset: utils.IntPointer(1),
+	}
+	sprf, err := splService.sortedSuppliersForEvent(argsGetSuppliers[1])
+	if err != nil {
+		t.Errorf("Error: %+v", err)
+	}
+	if !reflect.DeepEqual(eFirstSupplierProfile, sprf) {
+		t.Errorf("Expecting: %+v,received: %+v", utils.ToJSON(eFirstSupplierProfile), utils.ToJSON(sprf))
+	}
+}
+
 func TestSuppliersAsOptsGetSuppliers(t *testing.T) {
 	s := &ArgsGetSuppliers{
 		IgnoreErrors: true,

@@ -1720,6 +1720,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 			IgnoreErrors:  args.SuppliersIgnoreErrors,
 			MaxCost:       args.SuppliersMaxCost,
 			CGREvent:      *cgrEv,
+			Paginator:     args.Paginator,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err = sS.splS.Call(utils.SupplierSv1GetSuppliers,
