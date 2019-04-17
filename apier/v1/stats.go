@@ -166,7 +166,7 @@ func (stsv1 *StatSv1) Call(serviceMethod string, args interface{}, reply interfa
 }
 
 // GetQueueIDs returns list of queueIDs registered for a tenant
-func (stsv1 *StatSv1) GetQueueIDs(tenant *utils.TenantArg, qIDs *[]string) error {
+func (stsv1 *StatSv1) GetQueueIDs(tenant *utils.TenantWithArgDispatcher, qIDs *[]string) error {
 	return stsv1.sS.V1GetQueueIDs(tenant.Tenant, qIDs)
 }
 
@@ -181,13 +181,13 @@ func (stsv1 *StatSv1) GetStatQueuesForEvent(args *engine.StatsArgsProcessEvent, 
 }
 
 // GetStringMetrics returns the string metrics for a Queue
-func (stsv1 *StatSv1) GetQueueStringMetrics(args *utils.TenantID, reply *map[string]string) (err error) {
-	return stsv1.sS.V1GetQueueStringMetrics(args, reply)
+func (stsv1 *StatSv1) GetQueueStringMetrics(args *utils.TenantIDWithArgDispatcher, reply *map[string]string) (err error) {
+	return stsv1.sS.V1GetQueueStringMetrics(args.TenantID, reply)
 }
 
 // GetQueueFloatMetrics returns the float metrics for a Queue
-func (stsv1 *StatSv1) GetQueueFloatMetrics(args *utils.TenantID, reply *map[string]float64) (err error) {
-	return stsv1.sS.V1GetQueueFloatMetrics(args, reply)
+func (stsv1 *StatSv1) GetQueueFloatMetrics(args *utils.TenantIDWithArgDispatcher, reply *map[string]float64) (err error) {
+	return stsv1.sS.V1GetQueueFloatMetrics(args.TenantID, reply)
 }
 
 func (stSv1 *StatSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {

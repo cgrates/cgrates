@@ -793,9 +793,9 @@ func startCDRS(internalCdrSChan, internalRaterChan, internalAttributeSChan, inte
 	utils.Logger.Info("Registering CDRS HTTP Handlers.")
 	cdrServer.RegisterHandlersToServer(server)
 	utils.Logger.Info("Registering CDRS RPC service.")
-	cdrSrv := v1.CDRsV1{CDRs: cdrServer}
-	server.RpcRegister(&cdrSrv)
-	server.RpcRegister(&v2.CDRsV2{CDRsV1: cdrSrv})
+	cdrSrv := v1.NewCDRsV1(cdrServer)
+	server.RpcRegister(cdrSrv)
+	server.RpcRegister(&v2.CDRsV2{CDRsV1: *cdrSrv})
 	// Make the cdr server available for internal communication
 	server.RpcRegister(cdrServer) // register CdrServer for internal usage (TODO: refactor this)
 	internalCdrSChan <- cdrServer // Signal that cdrS is operational

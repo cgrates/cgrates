@@ -38,16 +38,16 @@ var sTestsDspRsp = []func(t *testing.T){
 
 //Test start here
 func TestDspResponderTMySQL(t *testing.T) {
-	testDsp(t, sTestsDspRsp, "TestDspAttributeS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	testDsp(t, sTestsDspRsp, "TestDspResponder", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
 }
 
 func TestDspResponderMongo(t *testing.T) {
-	testDsp(t, sTestsDspRsp, "TestDspAttributeS", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+	testDsp(t, sTestsDspRsp, "TestDspResponder", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
 }
 
 func testDspResponderStatus(t *testing.T) {
 	var reply map[string]interface{}
-	if err := allEngine.RCP.Call(utils.ResponderStatus, "", &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.ResponderStatus, utils.TenantWithArgDispatcher{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply[utils.NodeID] != "ALL" {
 		t.Errorf("Received: %s", reply)
@@ -104,7 +104,7 @@ func getNodeWithRoute(route string, t *testing.T) string {
 	} else if pingReply != utils.Pong {
 		t.Errorf("Received: %s", pingReply)
 	}
-	if err := dispEngine.RCP.Call(utils.ResponderStatus, &ev, &reply); err != nil {
+	if err := dispEngine.RCP.Call(utils.ResponderStatus, ev, &reply); err != nil {
 		t.Error(err)
 	}
 	if reply[utils.NodeID] == nil {
@@ -134,7 +134,7 @@ func testDspResponderShutdown(t *testing.T) {
 			APIKey: utils.StringPointer("rsp12345"),
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.ResponderShutdown, &ev, &reply); err != nil {
+	if err := dispEngine.RCP.Call(utils.ResponderShutdown, ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "Done!" {
 		t.Errorf("Received: %s", utils.ToJSON(reply))

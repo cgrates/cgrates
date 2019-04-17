@@ -32,7 +32,7 @@ func init() {
 type CmdStatus struct {
 	name      string
 	rpcMethod string
-	rpcParams *EmptyWrapper
+	rpcParams *utils.TenantWithArgDispatcher
 	*CommandExecuter
 }
 
@@ -46,7 +46,7 @@ func (self *CmdStatus) RpcMethod() string {
 
 func (self *CmdStatus) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &EmptyWrapper{}
+		self.rpcParams = &utils.TenantWithArgDispatcher{}
 	}
 	return self.rpcParams
 }

@@ -475,7 +475,7 @@ func (dS *DispatcherSessionSv1) GetPassiveSessionsCount(args *dispatchers.Filter
 	return dS.dS.SessionSv1GetPassiveSessionsCount(args, reply)
 }
 
-func (dS *DispatcherSessionSv1) ReplicateSessions(args *dispatchers.ArgsReplicateSessionsWithApiKey,
+func (dS *DispatcherSessionSv1) ReplicateSessions(args dispatchers.ArgsReplicateSessionsWithApiKey,
 	reply *string) (err error) {
 	return dS.dS.SessionSv1ReplicateSessions(args, reply)
 }
@@ -633,12 +633,12 @@ type DispatcherGuardianSv1 struct {
 }
 
 // RemoteLock will lock a key from remote
-func (dS *DispatcherGuardianSv1) RemoteLock(attr *dispatchers.AttrRemoteLockWithApiKey, reply *string) (err error) {
+func (dS *DispatcherGuardianSv1) RemoteLock(attr dispatchers.AttrRemoteLockWithApiKey, reply *string) (err error) {
 	return dS.dS.GuardianSv1RemoteLock(attr, reply)
 }
 
 // RemoteUnlock will unlock a key from remote based on reference ID
-func (dS *DispatcherGuardianSv1) RemoteUnlock(attr *dispatchers.AttrRemoteUnlockWithApiKey, reply *[]string) (err error) {
+func (dS *DispatcherGuardianSv1) RemoteUnlock(attr dispatchers.AttrRemoteUnlockWithApiKey, reply *[]string) (err error) {
 	return dS.dS.GuardianSv1RemoteUnlock(attr, reply)
 }
 
@@ -657,7 +657,7 @@ type DispatcherSchedulerSv1 struct {
 }
 
 // Reload reloads scheduler instructions
-func (dS *DispatcherSchedulerSv1) Reload(attr *dispatchers.StringkWithApiKey, reply *string) (err error) {
+func (dS *DispatcherSchedulerSv1) Reload(attr *dispatchers.StringWithApiKey, reply *string) (err error) {
 	return dS.dS.SchedulerSv1Reload(attr, reply)
 }
 

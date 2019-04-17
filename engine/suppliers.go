@@ -260,7 +260,7 @@ func (spS *SupplierService) statMetrics(statIDs []string, tenant string) (stsMet
 		for _, statID := range statIDs {
 			var metrics map[string]float64
 			if err = spS.statS.Call(utils.StatSv1GetQueueFloatMetrics,
-				&utils.TenantID{Tenant: tenant, ID: statID}, &metrics); err != nil &&
+				&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: tenant, ID: statID}}, &metrics); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<SupplierS> error: %s getting statMetrics for stat : %s", err.Error(), statID))

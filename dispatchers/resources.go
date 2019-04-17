@@ -35,7 +35,7 @@ func (dS *DispatcherService) ResourceSv1Ping(args *utils.CGREventWithArgDispatch
 		}
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaResources, args.RouteID,
-		utils.ResourceSv1Ping, args.CGREvent, rpl)
+		utils.ResourceSv1Ping, args, rpl)
 }
 
 func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args utils.ArgRSv1ResourceUsage,

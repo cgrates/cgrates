@@ -479,7 +479,7 @@ func (fltr *FilterRule) passStatS(dP config.DataProvider,
 	for _, statItem := range fltr.statItems {
 		statValues := make(map[string]float64)
 		if err := stats.Call(utils.StatSv1GetQueueFloatMetrics,
-			&utils.TenantID{Tenant: tenant, ID: statItem.ItemID}, &statValues); err != nil {
+			&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: tenant, ID: statItem.ItemID}}, &statValues); err != nil {
 			return false, err
 		}
 		//convert statValues to map[string]interface{}

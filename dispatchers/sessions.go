@@ -37,7 +37,7 @@ func (dS *DispatcherService) SessionSv1Ping(args *utils.CGREventWithArgDispatche
 		}
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, args.RouteID,
-		utils.SessionSv1Ping, args.CGREvent, reply)
+		utils.SessionSv1Ping, args, reply)
 }
 
 func (dS *DispatcherService) SessionSv1AuthorizeEvent(args *sessions.V1AuthorizeArgs,
@@ -264,7 +264,7 @@ func (dS *DispatcherService) SessionSv1GetPassiveSessionsCount(args *FilterSessi
 		utils.SessionSv1GetPassiveSessionsCount, args.Filters, reply)
 }
 
-func (dS *DispatcherService) SessionSv1ReplicateSessions(args *ArgsReplicateSessionsWithApiKey,
+func (dS *DispatcherService) SessionSv1ReplicateSessions(args ArgsReplicateSessionsWithApiKey,
 	reply *string) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")

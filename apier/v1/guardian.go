@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -30,14 +31,14 @@ func NewGuardianSv1() *GuardianSv1 {
 type GuardianSv1 struct{}
 
 // RemoteLock will lock a key from remote
-func (self *GuardianSv1) RemoteLock(attr utils.AttrRemoteLock, reply *string) (err error) {
+func (self *GuardianSv1) RemoteLock(attr dispatchers.AttrRemoteLockWithApiKey, reply *string) (err error) {
 	*reply = guardian.Guardian.GuardIDs(attr.ReferenceID, attr.Timeout, attr.LockIDs...)
 	return
 }
 
 // RemoteUnlock will unlock a key from remote based on reference ID
-func (self *GuardianSv1) RemoteUnlock(refID string, reply *[]string) (err error) {
-	*reply = guardian.Guardian.UnguardIDs(refID)
+func (self *GuardianSv1) RemoteUnlock(refID dispatchers.AttrRemoteUnlockWithApiKey, reply *[]string) (err error) {
+	*reply = guardian.Guardian.UnguardIDs(refID.RefID)
 	return
 }
 
