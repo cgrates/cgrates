@@ -23,7 +23,7 @@ import "github.com/cgrates/cgrates/utils"
 func init() {
 	c := &CmdRemoveThreshold{
 		name:      "threshold_remove",
-		rpcMethod: "ApierV1.RemoveThresholdProfile",
+		rpcMethod: utils.ApierV1RemoveThresholdProfile,
 		rpcParams: &utils.TenantIDWithCache{},
 	}
 	commands[c.Name()] = c
