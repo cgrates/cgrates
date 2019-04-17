@@ -23,9 +23,9 @@ import (
 )
 
 func init() {
-	c := &CmdGetAttributeIDs{
-		name:      "attribute_ids",
-		rpcMethod: utils.ApierV1GetAttributeProfileIDs,
+	c := &CmdGetChargerIDs{
+		name:      "chargers_ids",
+		rpcMethod: utils.ApierV1GetChargerProfileIDs,
 		rpcParams: &utils.TenantArgWithPaginator{},
 	}
 	commands[c.Name()] = c
@@ -33,33 +33,33 @@ func init() {
 }
 
 // Commander implementation
-type CmdGetAttributeIDs struct {
+type CmdGetChargerIDs struct {
 	name      string
 	rpcMethod string
 	rpcParams *utils.TenantArgWithPaginator
 	*CommandExecuter
 }
 
-func (self *CmdGetAttributeIDs) Name() string {
+func (self *CmdGetChargerIDs) Name() string {
 	return self.name
 }
 
-func (self *CmdGetAttributeIDs) RpcMethod() string {
+func (self *CmdGetChargerIDs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetAttributeIDs) RpcParams(reset bool) interface{} {
+func (self *CmdGetChargerIDs) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantArgWithPaginator{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetAttributeIDs) PostprocessRpcParams() error {
+func (self *CmdGetChargerIDs) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetAttributeIDs) RpcResult() interface{} {
+func (self *CmdGetChargerIDs) RpcResult() interface{} {
 	atr := []string{}
 	return &atr
 }

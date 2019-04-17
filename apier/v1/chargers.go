@@ -39,8 +39,11 @@ func (apierV1 *ApierV1) GetChargerProfile(arg utils.TenantID, reply *engine.Char
 }
 
 // GetChargerProfileIDs returns list of chargerProfile IDs registered for a tenant
-func (apierV1 *ApierV1) GetChargerProfileIDs(tenant string, chPrfIDs *[]string) error {
-	prfx := utils.ChargerProfilePrefix + tenant + ":"
+func (apierV1 *ApierV1) GetChargerProfileIDs(args utils.TenantArgWithPaginator, chPrfIDs *[]string) error {
+	if missing := utils.MissingStructFields(&args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	prfx := utils.ChargerProfilePrefix + args.Tenant + ":"
 	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
@@ -52,7 +55,7 @@ func (apierV1 *ApierV1) GetChargerProfileIDs(tenant string, chPrfIDs *[]string) 
 	for i, key := range keys {
 		retIDs[i] = key[len(prfx):]
 	}
-	*chPrfIDs = retIDs
+	*chPrfIDs = args.PaginateStringSlice(retIDs)
 	return nil
 }
 
