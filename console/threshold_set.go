@@ -18,12 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import v1 "github.com/cgrates/cgrates/apier/v1"
+import (
+	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/utils"
+)
 
 func init() {
 	c := &CmdSetThreshold{
 		name:      "threshold_set",
-		rpcMethod: "ApierV1.SetThresholdProfile",
+		rpcMethod: utils.ApierV1SetThresholdProfile,
 		rpcParams: &v1.ThresholdWithCache{},
 	}
 	commands[c.Name()] = c

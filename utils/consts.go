@@ -790,6 +790,10 @@ const (
 	ThresholdSv1GetThresholdIDs       = "ThresholdSv1.GetThresholdIDs"
 	ThresholdSv1Ping                  = "ThresholdSv1.Ping"
 	ThresholdSv1GetThresholdsForEvent = "ThresholdSv1.GetThresholdsForEvent"
+	ApierV1GetThresholdProfileIDs     = "ApierV1.GetThresholdProfileIDs"
+	ApierV1GetThresholdProfile        = "ApierV1.GetThresholdProfile"
+	ApierV1RemoveThresholdProfile     = "ApierV1.RemoveThresholdProfile"
+	ApierV1SetThresholdProfile        = "ApierV1.SetThresholdProfile"
 )
 
 // StatS APIs
