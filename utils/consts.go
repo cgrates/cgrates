@@ -728,6 +728,10 @@ const (
 	ApierV1RemoveFilter             = "ApierV1.RemoveFilter"
 	ApierV1SetFilter                = "ApierV1.SetFilter"
 	ApierV1GetFilterIDs             = "ApierV1.GetFilterIDs"
+	ApierV1GetRatingProfile         = "ApierV1.GetRatingProfile"
+	ApierV1RemoveRatingProfile      = "ApierV1.RemoveRatingProfile"
+	ApierV1SetRatingProfile         = "ApierV1.SetRatingProfile"
+	ApierV1GetRatingProfileIDs      = "ApierV1.GetRatingProfileIDs"
 )
 
 const (
