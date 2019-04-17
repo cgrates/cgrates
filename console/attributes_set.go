@@ -18,12 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import v2 "github.com/cgrates/cgrates/apier/v2"
+import (
+	v2 "github.com/cgrates/cgrates/apier/v2"
+	"github.com/cgrates/cgrates/utils"
+)
 
 func init() {
 	c := &CmdSetAttributes{
 		name:      "attributes_set",
-		rpcMethod: "ApierV2.SetAttributeProfile",
+		rpcMethod: utils.ApierV2SetAttributeProfile,
 		rpcParams: &v2.AttributeWithCache{},
 	}
 	commands[c.Name()] = c
