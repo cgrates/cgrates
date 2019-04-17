@@ -792,6 +792,11 @@ type TenantArg struct {
 	Tenant string
 }
 
+type TenantArgWithPaginator struct {
+	TenantArg
+	Paginator
+}
+
 type TenantWithArgDispatcher struct {
 	*TenantArg
 	*ArgDispatcher

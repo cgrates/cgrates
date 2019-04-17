@@ -42,11 +42,11 @@ func (apierV1 *ApierV1) GetAttributeProfile(arg utils.TenantID, reply *engine.At
 }
 
 // GetAttributeProfileIDs returns list of attributeProfile IDs registered for a tenant
-func (apierV1 *ApierV1) GetAttributeProfileIDs(tenant string, attrPrfIDs *[]string) error {
-	if tenant == "" {
-		return utils.NewErrMandatoryIeMissing("Tenant")
+func (apierV1 *ApierV1) GetAttributeProfileIDs(args utils.TenantArgWithPaginator, attrPrfIDs *[]string) error {
+	if missing := utils.MissingStructFields(&args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	prfx := utils.AttributeProfilePrefix + tenant + ":"
+	prfx := utils.AttributeProfilePrefix + args.Tenant + ":"
 	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
@@ -58,7 +58,7 @@ func (apierV1 *ApierV1) GetAttributeProfileIDs(tenant string, attrPrfIDs *[]stri
 	for i, key := range keys {
 		retIDs[i] = key[len(prfx):]
 	}
-	*attrPrfIDs = retIDs
+	*attrPrfIDs = args.PaginateStringSlice(retIDs)
 	return nil
 }
 

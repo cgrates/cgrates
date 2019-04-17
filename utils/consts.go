@@ -753,8 +753,12 @@ const (
 
 // AttributeS APIs
 const (
+	ApierV1GetAttributeProfile       = "ApierV1.GetAttributeProfile"
+	ApierV1GetAttributeProfileIDs    = "ApierV1.GetAttributeProfileIDs"
 	AttributeSv1GetAttributeForEvent = "AttributeSv1.GetAttributeForEvent"
 	AttributeSv1ProcessEvent         = "AttributeSv1.ProcessEvent"
+	ApierV1RemoveAttributeProfile    = "ApierV1.RemoveAttributeProfile"
+	ApierV2SetAttributeProfile       = "ApierV2.SetAttributeProfile"
 	AttributeSv1Ping                 = "AttributeSv1.Ping"
 )
 
