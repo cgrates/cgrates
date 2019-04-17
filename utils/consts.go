@@ -722,6 +722,10 @@ const (
 	ApierV1LoadTariffPlanFromFolder = "ApierV1.LoadTariffPlanFromFolder"
 	ApierV1GetCost                  = "ApierV1.GetCost"
 	ApierV1SetBalance               = "ApierV1.SetBalance"
+	ApierV1GetSupplierProfile       = "ApierV1.GetSupplierProfile"
+	ApierV1GetSupplierProfileIDs    = "ApierV1.GetSupplierProfileIDs"
+	ApierV1RemoveSupplierProfile    = "ApierV1.RemoveSupplierProfile"
+	ApierV1SetSupplierProfile       = "ApierV1.SetSupplierProfile"
 )
 
 const (

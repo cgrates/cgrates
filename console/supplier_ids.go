@@ -19,47 +19,47 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdSetSupplier{
-		name:      "supplier_set",
-		rpcMethod: utils.ApierV1SetSupplierProfile,
-		rpcParams: &v1.SupplierWithCache{},
+	c := &CmdSuppliersIDs{
+		name:      "supplier_ids",
+		rpcMethod: utils.ApierV1GetSupplierProfileIDs,
+		rpcParams: &utils.TenantArg{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdSetSupplier struct {
+type CmdSuppliersIDs struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.SupplierWithCache
+	rpcParams *utils.TenantArg
 	*CommandExecuter
 }
 
-func (self *CmdSetSupplier) Name() string {
+func (self *CmdSuppliersIDs) Name() string {
 	return self.name
 }
 
-func (self *CmdSetSupplier) RpcMethod() string {
+func (self *CmdSuppliersIDs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetSupplier) RpcParams(reset bool) interface{} {
+func (self *CmdSuppliersIDs) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.SupplierWithCache{}
+		self.rpcParams = &utils.TenantArg{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSetSupplier) PostprocessRpcParams() error {
+func (self *CmdSuppliersIDs) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetSupplier) RpcResult() interface{} {
-	var s string
-	return &s
+func (self *CmdSuppliersIDs) RpcResult() interface{} {
+	var atr *engine.SortedSuppliers
+	return &atr
 }
