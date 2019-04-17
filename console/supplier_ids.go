@@ -27,7 +27,7 @@ func init() {
 	c := &CmdSuppliersIDs{
 		name:      "supplier_ids",
 		rpcMethod: utils.ApierV1GetSupplierProfileIDs,
-		rpcParams: &utils.TenantArg{},
+		rpcParams: &utils.TenantArgWithPaginator{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdSuppliersIDs struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantArg
+	rpcParams *utils.TenantArgWithPaginator
 	*CommandExecuter
 }
 
@@ -50,7 +50,7 @@ func (self *CmdSuppliersIDs) RpcMethod() string {
 
 func (self *CmdSuppliersIDs) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantArg{}
+		self.rpcParams = &utils.TenantArgWithPaginator{}
 	}
 	return self.rpcParams
 }
