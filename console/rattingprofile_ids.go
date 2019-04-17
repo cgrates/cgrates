@@ -23,43 +23,42 @@ import (
 )
 
 func init() {
-	c := &CmdSetRatingProfile{
-		name:      "ratingprofile_set",
-		rpcMethod: utils.ApierV1SetRatingProfile,
+	c := &CmdGetRatingProfileIDs{
+		name:      "ratingprofil_ids",
+		rpcMethod: utils.ApierV1GetRatingProfileIDs,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdSetRatingProfile struct {
+type CmdGetRatingProfileIDs struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.AttrSetRatingProfile
-	rpcResult string
+	rpcParams *utils.TenantArgWithPaginator
 	*CommandExecuter
 }
 
-func (self *CmdSetRatingProfile) Name() string {
+func (self *CmdGetRatingProfileIDs) Name() string {
 	return self.name
 }
 
-func (self *CmdSetRatingProfile) RpcMethod() string {
+func (self *CmdGetRatingProfileIDs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetRatingProfile) RpcParams(reset bool) interface{} {
+func (self *CmdGetRatingProfileIDs) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(utils.AttrSetRatingProfile)
+		self.rpcParams = new(utils.TenantArgWithPaginator)
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSetRatingProfile) PostprocessRpcParams() error {
+func (self *CmdGetRatingProfileIDs) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetRatingProfile) RpcResult() interface{} {
-	var s string
+func (self *CmdGetRatingProfileIDs) RpcResult() interface{} {
+	var s []string
 	return &s
 }

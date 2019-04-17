@@ -819,6 +819,14 @@ func TestApierV1GetRatingProfile(t *testing.T) {
 	if err := rater.Call("ApierV1.GetRatingProfile", attrGetRatingPlan, &rpl); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error on ApierV1.GetRatingProfile, recived : %+v", err)
 	}
+
+	expectedIds := []string{"call:dan", "call:*any"}
+	var result []string
+	if err := rater.Call(utils.ApierV1GetRatingProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
+		t.Error(err)
+	} else if len(expectedIds) != len(result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+	}
 }
 
 // Test here ReloadCache

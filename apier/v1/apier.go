@@ -393,6 +393,27 @@ func (self *ApierV1) SetRatingProfile(attrs utils.AttrSetRatingProfile, reply *s
 	return nil
 }
 
+// GetRatingProfileIDs returns list of resourceProfile IDs registered for a tenant
+func (apierV1 *ApierV1) GetRatingProfileIDs(args utils.TenantArgWithPaginator, rsPrfIDs *[]string) error {
+	if missing := utils.MissingStructFields(&args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	prfx := utils.RATING_PROFILE_PREFIX + "*out:" + args.Tenant + ":"
+	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	if err != nil {
+		return err
+	}
+	if len(keys) == 0 {
+		return utils.ErrNotFound
+	}
+	retIDs := make([]string, len(keys))
+	for i, key := range keys {
+		retIDs[i] = key[len(prfx):]
+	}
+	*rsPrfIDs = args.PaginateStringSlice(retIDs)
+	return nil
+}
+
 func (self *ApierV1) GetRatingProfile(attrs utils.AttrGetRatingProfile, reply *engine.RatingProfile) (err error) {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Category", "Direction", "Subject"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)

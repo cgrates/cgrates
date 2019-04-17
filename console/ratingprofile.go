@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdGetRatingProfile{
 		name:      "ratingprofile",
-		rpcMethod: "ApierV1.GetRatingProfile",
+		rpcMethod: utils.ApierV1GetRatingProfile,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
