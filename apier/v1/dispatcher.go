@@ -42,9 +42,9 @@ func (apierV1 *ApierV1) GetDispatcherProfile(arg *utils.TenantID, reply *engine.
 }
 
 // GetDispatcherProfileIDs returns list of dispatcherProfile IDs registered for a tenant
-func (apierV1 *ApierV1) GetDispatcherProfileIDs(tenantArg *utils.TenantArg, dPrfIDs *[]string) error {
-	if tenantArg.Tenant == "" {
-		return utils.NewErrMandatoryIeMissing(utils.Tenant)
+func (apierV1 *ApierV1) GetDispatcherProfileIDs(tenantArg utils.TenantArgWithPaginator, dPrfIDs *[]string) error {
+	if missing := utils.MissingStructFields(&tenantArg, []string{utils.Tenant}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tenant := tenantArg.Tenant
 	prfx := utils.DispatcherProfilePrefix + tenant + ":"
@@ -59,7 +59,7 @@ func (apierV1 *ApierV1) GetDispatcherProfileIDs(tenantArg *utils.TenantArg, dPrf
 	for i, key := range keys {
 		retIDs[i] = key[len(prfx):]
 	}
-	*dPrfIDs = retIDs
+	*dPrfIDs = tenantArg.PaginateStringSlice(retIDs)
 	return nil
 }
 
@@ -131,9 +131,9 @@ func (apierV1 *ApierV1) GetDispatcherHost(arg *utils.TenantID, reply *engine.Dis
 }
 
 // GetDispatcherHostIDs returns list of dispatcherHost IDs registered for a tenant
-func (apierV1 *ApierV1) GetDispatcherHostIDs(tenantArg *utils.TenantArg, dPrfIDs *[]string) error {
-	if tenantArg.Tenant == "" {
-		return utils.NewErrMandatoryIeMissing(utils.Tenant)
+func (apierV1 *ApierV1) GetDispatcherHostIDs(tenantArg utils.TenantArgWithPaginator, dPrfIDs *[]string) error {
+	if missing := utils.MissingStructFields(&tenantArg, []string{utils.Tenant}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tenant := tenantArg.Tenant
 	prfx := utils.DispatcherHostPrefix + tenant + ":"
@@ -148,7 +148,7 @@ func (apierV1 *ApierV1) GetDispatcherHostIDs(tenantArg *utils.TenantArg, dPrfIDs
 	for i, key := range keys {
 		retIDs[i] = key[len(prfx):]
 	}
-	*dPrfIDs = retIDs
+	*dPrfIDs = tenantArg.PaginateStringSlice(retIDs)
 	return nil
 }
 
