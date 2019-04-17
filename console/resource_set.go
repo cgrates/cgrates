@@ -18,12 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import v1 "github.com/cgrates/cgrates/apier/v1"
+import (
+	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/utils"
+)
 
 func init() {
 	c := &CmdSetResource{
 		name:      "resource_set",
-		rpcMethod: "ApierV1.SetResourceProfile",
+		rpcMethod: utils.ApierV1SetResourceProfile,
 		rpcParams: &v1.ResourceWithCache{},
 	}
 	commands[c.Name()] = c

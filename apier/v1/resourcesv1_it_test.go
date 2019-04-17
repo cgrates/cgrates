@@ -650,7 +650,7 @@ func testV1RsSetResourceProfile(t *testing.T) {
 func testV1RsGetResourceProfileIDs(t *testing.T) {
 	expected := []string{"ResGroup2", "ResGroup1", "ResGroup3", "RES_GR_TEST"}
 	var result []string
-	if err := rlsV1Rpc.Call("ApierV1.GetResourceProfileIDs", "cgrates.org", &result); err != nil {
+	if err := rlsV1Rpc.Call(utils.ApierV1GetResourceProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
