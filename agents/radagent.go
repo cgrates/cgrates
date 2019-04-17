@@ -138,7 +138,7 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 }
 
 // processRequest represents one processor processing the request
-func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
+func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 	agReq *AgentRequest, rply *radigo.Packet) (processed bool, err error) {
 	if pass, err := ra.filterS.Pass(agReq.tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
@@ -163,7 +163,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> LOG, processorID: %s, radius message: %s",
-				utils.RadiusAgent, reqProcessor.Id, agReq.Request.String()))
+				utils.RadiusAgent, reqProcessor.ID, agReq.Request.String()))
 	}
 	switch reqType {
 	default:
@@ -171,7 +171,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RARequestProcessor,
 	case utils.MetaDryRun:
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, CGREvent: %s",
-				utils.RadiusAgent, reqProcessor.Id, utils.ToJSON(cgrEv)))
+				utils.RadiusAgent, reqProcessor.ID, utils.ToJSON(cgrEv)))
 	case utils.MetaAuth:
 		authArgs := sessions.NewV1AuthorizeArgs(
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),

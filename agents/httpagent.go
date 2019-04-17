@@ -32,7 +32,7 @@ import (
 // NewHttpAgent will construct a HTTPAgent
 func NewHTTPAgent(sessionS rpcclient.RpcClientConnection,
 	filterS *engine.FilterS, dfltTenant, reqPayload, rplyPayload string,
-	reqProcessors []*config.HttpAgntProcCfg) *HTTPAgent {
+	reqProcessors []*config.RequestProcessor) *HTTPAgent {
 	return &HTTPAgent{sessionS: sessionS, filterS: filterS,
 		dfltTenant: dfltTenant,
 		reqPayload: reqPayload, rplyPayload: rplyPayload,
@@ -46,7 +46,7 @@ type HTTPAgent struct {
 	dfltTenant,
 	reqPayload,
 	rplyPayload string
-	reqProcessors []*config.HttpAgntProcCfg
+	reqProcessors []*config.RequestProcessor
 }
 
 // ServeHTTP implements http.Handler interface
@@ -94,7 +94,7 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 // processRequest represents one processor processing the request
-func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
+func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	agReq *AgentRequest) (processed bool, err error) {
 	if pass, err := ha.filterS.Pass(agReq.tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
@@ -119,7 +119,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> LOG, processorID: %s, http message: %s",
-				utils.HTTPAgent, reqProcessor.Id, agReq.Request.String()))
+				utils.HTTPAgent, reqProcessor.ID, agReq.Request.String()))
 	}
 	switch reqType {
 	default:
@@ -127,7 +127,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.HttpAgntProcCfg,
 	case utils.MetaDryRun:
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, CGREvent: %s",
-				utils.HTTPAgent, reqProcessor.Id, utils.ToJSON(cgrEv)))
+				utils.HTTPAgent, reqProcessor.ID, utils.ToJSON(cgrEv)))
 	case utils.MetaAuth:
 		authArgs := sessions.NewV1AuthorizeArgs(
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),

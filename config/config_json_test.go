@@ -692,7 +692,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 					Value:    utils.StringPointer("1")},
 			},
 		},
-		Request_processors: &[]*DARequestProcessorJsnCfg{},
+		Request_processors: &[]*ReqProcessorJsnCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.DiameterAgentJsonCfg(); err != nil {
 		t.Error(err)
@@ -717,7 +717,7 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 			{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
-		Request_processors: &[]*RAReqProcessorJsnCfg{},
+		Request_processors: &[]*ReqProcessorJsnCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.RadiusAgentJsonCfg(); err != nil {
 		t.Error(err)

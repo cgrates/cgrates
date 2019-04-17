@@ -83,6 +83,7 @@ type RequestProcessor struct {
 	Filters           []string
 	Flags             utils.StringMap
 	ContinueOnSuccess bool
+	Timezone          string
 	RequestFields     []*FCTemplate
 	ReplyFields       []*FCTemplate
 }
@@ -102,6 +103,9 @@ func (rp *RequestProcessor) loadFromJsonCfg(jsnCfg *ReqProcessorJsnCfg, sep stri
 	}
 	if jsnCfg.Flags != nil {
 		rp.Flags = utils.StringMapFromSlice(*jsnCfg.Flags)
+	}
+	if jsnCfg.Timezone != nil {
+		rp.Timezone = *jsnCfg.Timezone
 	}
 	if jsnCfg.Continue_on_success != nil {
 		rp.ContinueOnSuccess = *jsnCfg.Continue_on_success

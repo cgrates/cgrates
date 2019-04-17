@@ -18,10 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import (
-	"github.com/cgrates/cgrates/utils"
-)
-
 type DiameterAgentCfg struct {
 	Enabled           bool   // enables the diameter agent: <true|false>
 	ListenNet         string // sctp or tcp
@@ -36,7 +32,7 @@ type DiameterAgentCfg struct {
 	SyncedConnReqs    bool
 	ASRTemplate       string
 	Templates         map[string][]*FCTemplate
-	RequestProcessors []*DARequestProcessor
+	RequestProcessors []*RequestProcessor
 }
 
 func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separator string) (err error) {
@@ -95,10 +91,10 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separa
 	}
 	if jsnCfg.Request_processors != nil {
 		for _, reqProcJsn := range *jsnCfg.Request_processors {
-			rp := new(DARequestProcessor)
+			rp := new(RequestProcessor)
 			var haveID bool
 			for _, rpSet := range da.RequestProcessors {
-				if reqProcJsn.Id != nil && rpSet.ID == *reqProcJsn.Id {
+				if reqProcJsn.ID != nil && rpSet.ID == *reqProcJsn.ID {
 					rp = rpSet // Will load data into the one set
 					haveID = true
 					break
@@ -110,58 +106,6 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separa
 			if !haveID {
 				da.RequestProcessors = append(da.RequestProcessors, rp)
 			}
-		}
-	}
-	return nil
-}
-
-// One Diameter request processor configuration
-type DARequestProcessor struct {
-	ID                string
-	Tenant            RSRParsers
-	Filters           []string
-	Flags             utils.StringMap
-	Timezone          string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	ContinueOnSuccess bool
-	RequestFields     []*FCTemplate
-	ReplyFields       []*FCTemplate
-}
-
-func (dap *DARequestProcessor) loadFromJsonCfg(jsnCfg *DARequestProcessorJsnCfg, separator string) (err error) {
-	if jsnCfg == nil {
-		return nil
-	}
-	if jsnCfg.Id != nil {
-		dap.ID = *jsnCfg.Id
-	}
-	if jsnCfg.Tenant != nil {
-		if dap.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true, separator); err != nil {
-			return
-		}
-	}
-	if jsnCfg.Filters != nil {
-		dap.Filters = make([]string, len(*jsnCfg.Filters))
-		for i, fltr := range *jsnCfg.Filters {
-			dap.Filters[i] = fltr
-		}
-	}
-	if jsnCfg.Flags != nil {
-		dap.Flags = utils.StringMapFromSlice(*jsnCfg.Flags)
-	}
-	if jsnCfg.Timezone != nil {
-		dap.Timezone = *jsnCfg.Timezone
-	}
-	if jsnCfg.Continue_on_success != nil {
-		dap.ContinueOnSuccess = *jsnCfg.Continue_on_success
-	}
-	if jsnCfg.Request_fields != nil {
-		if dap.RequestFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Request_fields, separator); err != nil {
-			return
-		}
-	}
-	if jsnCfg.Reply_fields != nil {
-		if dap.ReplyFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Reply_fields, separator); err != nil {
-			return
 		}
 	}
 	return nil

@@ -18,10 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import (
-	"github.com/cgrates/cgrates/utils"
-)
-
 type HttpAgentCfgs []*HttpAgentCfg
 
 func (hcfgs *HttpAgentCfgs) loadFromJsonCfg(jsnHttpAgntCfg *[]*HttpAgentJsonCfg, separator string) (err error) {
@@ -58,19 +54,19 @@ type HttpAgentCfg struct {
 	SessionSConns     []*RemoteHost
 	RequestPayload    string
 	ReplyPayload      string
-	RequestProcessors []*HttpAgntProcCfg
+	RequestProcessors []*RequestProcessor
 }
 
-func (ca *HttpAgentCfg) appendHttpAgntProcCfgs(hps *[]*HttpAgentProcessorJsnCfg, separator string) (err error) {
+func (ca *HttpAgentCfg) appendHttpAgntProcCfgs(hps *[]*ReqProcessorJsnCfg, separator string) (err error) {
 	if hps == nil {
 		return
 	}
 	for _, reqProcJsn := range *hps {
-		rp := new(HttpAgntProcCfg)
+		rp := new(RequestProcessor)
 		var haveID bool
-		if reqProcJsn.Id != nil {
+		if reqProcJsn.ID != nil {
 			for _, rpSet := range ca.RequestProcessors {
-				if rpSet.Id == *reqProcJsn.Id {
+				if rpSet.ID == *reqProcJsn.ID {
 					rp = rpSet // Will load data into the one set
 					haveID = true
 					break
@@ -112,57 +108,6 @@ func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg, separator stri
 	}
 	if err = ca.appendHttpAgntProcCfgs(jsnCfg.Request_processors, separator); err != nil {
 		return err
-	}
-	return nil
-}
-
-type HttpAgntProcCfg struct {
-	Id                string
-	Filters           []string
-	Tenant            RSRParsers
-	Timezone          string
-	Flags             utils.StringMap
-	ContinueOnSuccess bool
-	RequestFields     []*FCTemplate
-	ReplyFields       []*FCTemplate
-}
-
-func (ha *HttpAgntProcCfg) loadFromJsonCfg(jsnCfg *HttpAgentProcessorJsnCfg, separator string) (err error) {
-	if jsnCfg == nil {
-		return nil
-	}
-	if jsnCfg.Id != nil {
-		ha.Id = *jsnCfg.Id
-	}
-	if jsnCfg.Filters != nil {
-		ha.Filters = make([]string, len(*jsnCfg.Filters))
-		for i, fltr := range *jsnCfg.Filters {
-			ha.Filters[i] = fltr
-		}
-	}
-	if jsnCfg.Tenant != nil {
-		if ha.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true, separator); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Timezone != nil {
-		ha.Timezone = *jsnCfg.Timezone
-	}
-	if jsnCfg.Flags != nil {
-		ha.Flags = utils.StringMapFromSlice(*jsnCfg.Flags)
-	}
-	if jsnCfg.Continue_on_success != nil {
-		ha.ContinueOnSuccess = *jsnCfg.Continue_on_success
-	}
-	if jsnCfg.Request_fields != nil {
-		if ha.RequestFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Request_fields, separator); err != nil {
-			return
-		}
-	}
-	if jsnCfg.Reply_fields != nil {
-		if ha.ReplyFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Reply_fields, separator); err != nil {
-			return
-		}
 	}
 	return nil
 }

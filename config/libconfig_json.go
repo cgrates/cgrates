@@ -335,19 +335,7 @@ type DiameterAgentJsonCfg struct {
 	Synced_conn_requests *bool
 	Asr_template         *string
 	Templates            map[string][]*FcTemplateJsonCfg
-	Request_processors   *[]*DARequestProcessorJsnCfg
-}
-
-// One Diameter request processor configuration
-type DARequestProcessorJsnCfg struct {
-	Id                  *string
-	Tenant              *string
-	Filters             *[]string
-	Flags               *[]string
-	Timezone            *string
-	Continue_on_success *bool
-	Request_fields      *[]*FcTemplateJsonCfg
-	Reply_fields        *[]*FcTemplateJsonCfg
+	Request_processors   *[]*ReqProcessorJsnCfg
 }
 
 // Radius Agent configuration section
@@ -360,18 +348,7 @@ type RadiusAgentJsonCfg struct {
 	Client_dictionaries *map[string]string
 	Sessions_conns      *[]*RemoteHostJson
 	Timezone            *string
-	Request_processors  *[]*RAReqProcessorJsnCfg
-}
-
-type RAReqProcessorJsnCfg struct {
-	Id                  *string
-	Filters             *[]string
-	Tenant              *string
-	Timezone            *string
-	Flags               *[]string
-	Continue_on_success *bool
-	Request_fields      *[]*FcTemplateJsonCfg
-	Reply_fields        *[]*FcTemplateJsonCfg
+	Request_processors  *[]*ReqProcessorJsnCfg
 }
 
 // Conecto Agent configuration section
@@ -381,18 +358,7 @@ type HttpAgentJsonCfg struct {
 	Sessions_conns     *[]*RemoteHostJson
 	Request_payload    *string
 	Reply_payload      *string
-	Request_processors *[]*HttpAgentProcessorJsnCfg
-}
-
-type HttpAgentProcessorJsnCfg struct {
-	Id                  *string
-	Filters             *[]string
-	Tenant              *string
-	Timezone            *string
-	Flags               *[]string
-	Continue_on_success *bool
-	Request_fields      *[]*FcTemplateJsonCfg
-	Reply_fields        *[]*FcTemplateJsonCfg
+	Request_processors *[]*ReqProcessorJsnCfg
 }
 
 // DNSAgentJsonCfg

@@ -138,9 +138,9 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 			SessionSConns:  []*RemoteHost{{Address: "127.0.0.2:2012", Transport: "*json"}},
 			RequestPayload: "*url",
 			ReplyPayload:   "*xml",
-			RequestProcessors: []*HttpAgntProcCfg{
+			RequestProcessors: []*RequestProcessor{
 				{
-					Id:            "OutboundAUTHDryRun",
+					ID:            "OutboundAUTHDryRun",
 					Filters:       []string{},
 					Tenant:        NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 					Flags:         utils.StringMap{"*dryrun": true},
@@ -154,7 +154,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					}},
 				},
 				{
-					Id:      "OutboundAUTH",
+					ID:      "OutboundAUTH",
 					Filters: []string{"*string:~*req.request_type:OutboundAUTH"},
 					Tenant:  NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 					Flags: utils.StringMap{"*accounts": true,
@@ -179,7 +179,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					},
 				},
 				{
-					Id:      "mtcall_cdr",
+					ID:      "mtcall_cdr",
 					Filters: []string{"*string:~*req.request_type:MTCALL_CDR"},
 					Tenant:  NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 					Flags:   utils.StringMap{"*cdrs": true},
@@ -206,8 +206,8 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 			SessionSConns:  []*RemoteHost{{Address: "127.0.0.1:2012", Transport: "*json"}},
 			RequestPayload: "*xml",
 			ReplyPayload:   "*xml",
-			RequestProcessors: []*HttpAgntProcCfg{{
-				Id:     "cdr_from_xml",
+			RequestProcessors: []*RequestProcessor{{
+				ID:     "cdr_from_xml",
 				Tenant: NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 				Flags:  utils.StringMap{"*cdrs": true},
 				RequestFields: []*FCTemplate{

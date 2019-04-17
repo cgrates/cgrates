@@ -244,14 +244,13 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 	writeOnConn(c, a)
 }
 
-func (da *DiameterAgent) processRequest(reqProcessor *config.DARequestProcessor,
+func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 	agReq *AgentRequest) (processed bool, err error) {
 	if pass, err := da.filterS.Pass(agReq.tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
 	}
 	if agReq.CGRRequest, err = agReq.AsNavigableMap(reqProcessor.RequestFields); err != nil {
-		fmt.Println("EXIT HERE ???????????? ")
 		return
 	}
 	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.tenant, utils.NestingSep)
