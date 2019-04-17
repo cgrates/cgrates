@@ -80,6 +80,10 @@ func (apier *ApierV1) RemoveCDRs(attrs utils.RPCCDRsFilter, reply *string) error
 	return nil
 }
 
+func NewCDRsV1(CDRs *engine.CDRServer) *CDRsV1 {
+	return &CDRsV1{CDRs: CDRs}
+}
+
 // Receive CDRs via RPC methods
 type CDRsV1 struct {
 	CDRs *engine.CDRServer

@@ -38,11 +38,11 @@ func (dS *DispatcherService) GuardianSv1Ping(args *utils.CGREventWithArgDispatch
 		}
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaGuardian, args.RouteID,
-		utils.GuardianSv1Ping, args.CGREvent, reply)
+		utils.GuardianSv1Ping, args, reply)
 }
 
 // RemoteLock will lock a key from remote
-func (dS *DispatcherService) GuardianSv1RemoteLock(args *AttrRemoteLockWithApiKey,
+func (dS *DispatcherService) GuardianSv1RemoteLock(args AttrRemoteLockWithApiKey,
 	reply *string) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
@@ -59,7 +59,7 @@ func (dS *DispatcherService) GuardianSv1RemoteLock(args *AttrRemoteLockWithApiKe
 }
 
 // RemoteUnlock will unlock a key from remote based on reference ID
-func (dS *DispatcherService) GuardianSv1RemoteUnlock(args *AttrRemoteUnlockWithApiKey,
+func (dS *DispatcherService) GuardianSv1RemoteUnlock(args AttrRemoteUnlockWithApiKey,
 	reply *[]string) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
@@ -72,5 +72,5 @@ func (dS *DispatcherService) GuardianSv1RemoteUnlock(args *AttrRemoteUnlockWithA
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaGuardian, args.RouteID,
-		utils.GuardianSv1RemoteUnlock, args.RefID, reply)
+		utils.GuardianSv1RemoteUnlock, args, reply)
 }

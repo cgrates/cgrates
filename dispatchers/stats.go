@@ -37,7 +37,7 @@ func (dS *DispatcherService) StatSv1Ping(args *utils.CGREventWithArgDispatcher, 
 		}
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaStats, args.RouteID,
-		utils.StatSv1Ping, args.CGREvent, reply)
+		utils.StatSv1Ping, args, reply)
 }
 
 func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *engine.StatsArgsProcessEvent,

@@ -36,10 +36,10 @@ func (dS *DispatcherService) SchedulerSv1Ping(args *utils.CGREventWithArgDispatc
 		}
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaScheduler, args.RouteID,
-		utils.SchedulerSv1Ping, args.CGREvent, reply)
+		utils.SchedulerSv1Ping, args, reply)
 }
 
-func (dS *DispatcherService) SchedulerSv1Reload(args *StringkWithApiKey, reply *string) (err error) {
+func (dS *DispatcherService) SchedulerSv1Reload(args *StringWithApiKey, reply *string) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
 	}

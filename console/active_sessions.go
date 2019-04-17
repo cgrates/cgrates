@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
+	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -50,13 +51,13 @@ func (self *CmdActiveSessions) RpcMethod() string {
 
 func (self *CmdActiveSessions) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &map[string]string{}
+		self.rpcParams = &dispatchers.FilterSessionWithApiKey{}
 	}
 	return self.rpcParams
 }
 
 func (self *CmdActiveSessions) PostprocessRpcParams() error {
-	param := self.rpcParams.(*map[string]string)
+	param := self.rpcParams.(*dispatchers.FilterSessionWithApiKey)
 	self.rpcParams = param
 	return nil
 }

@@ -93,7 +93,7 @@ type AttrRemoteUnlockWithApiKey struct {
 	RefID string
 }
 
-type StringkWithApiKey struct {
+type StringWithApiKey struct {
 	*utils.ArgDispatcher
 	utils.TenantArg
 	Arg string

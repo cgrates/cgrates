@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -72,7 +73,7 @@ func TestGuardianSIT(t *testing.T) {
 		t.Error(err)
 	}
 	var unlockReply []string
-	if err = guardianRPC.Call(utils.GuardianSv1RemoteUnlock, reply, &unlockReply); err != nil {
+	if err = guardianRPC.Call(utils.GuardianSv1RemoteUnlock, dispatchers.AttrRemoteUnlockWithApiKey{RefID: reply}, &unlockReply); err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(args.LockIDs, unlockReply) {

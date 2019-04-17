@@ -39,7 +39,7 @@ func (dS *DispatcherService) ResponderPing(args *utils.CGREventWithArgDispatcher
 		}
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaResponder, args.RouteID,
-		utils.ResponderPing, args.CGREvent, reply)
+		utils.ResponderPing, args, reply)
 }
 
 func (dS *DispatcherService) ResponderStatus(args *utils.TenantWithArgDispatcher,
@@ -56,7 +56,7 @@ func (dS *DispatcherService) ResponderStatus(args *utils.TenantWithArgDispatcher
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: args.Tenant,
 	}, utils.MetaResponder, args.RouteID, utils.ResponderStatus,
-		"", reply)
+		args, reply)
 }
 
 func (dS *DispatcherService) ResponderGetCost(args *engine.CallDescriptorWithArgDispatcher,
@@ -163,7 +163,7 @@ func (dS *DispatcherService) ResponderShutdown(args *utils.TenantWithArgDispatch
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: args.Tenant,
 	}, utils.MetaResponder, args.RouteID, utils.ResponderShutdown,
-		"", reply)
+		args, reply)
 }
 
 func (dS *DispatcherService) ResponderGetTimeout(args *utils.TenantWithArgDispatcher,

@@ -39,7 +39,7 @@ func (dS *DispatcherService) CDRsV1Ping(args *utils.CGREventWithArgDispatcher,
 		}
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaCDRs, args.RouteID,
-		utils.CDRsV1Ping, args.CGREvent, reply)
+		utils.CDRsV1Ping, args, reply)
 }
 
 func (dS *DispatcherService) CDRsV1GetCDRs(args utils.RPCCDRsFilterWithArgDispatcher, reply *[]*engine.CDR) (err error) {

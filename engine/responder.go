@@ -241,12 +241,12 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptorWithArgDispatcher, rep
 	return
 }
 
-func (rs *Responder) Status(arg string, reply *map[string]interface{}) (err error) {
-	if arg != "" { // Introduce  delay in answer, used in some automated tests
-		if delay, err := utils.ParseDurationWithNanosecs(arg); err == nil {
-			time.Sleep(delay)
-		}
-	}
+func (rs *Responder) Status(arg *utils.TenantWithArgDispatcher, reply *map[string]interface{}) (err error) {
+	// if arg != "" { // Introduce  delay in answer, used in some automated tests
+	// 	if delay, err := utils.ParseDurationWithNanosecs(arg); err == nil {
+	// 		time.Sleep(delay)
+	// 	}
+	// }
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)
 	response := make(map[string]interface{})
@@ -261,7 +261,7 @@ func (rs *Responder) Status(arg string, reply *map[string]interface{}) (err erro
 	return
 }
 
-func (rs *Responder) Shutdown(arg string, reply *string) (err error) {
+func (rs *Responder) Shutdown(arg *utils.TenantWithArgDispatcher, reply *string) (err error) {
 	dm.DataDB().Close()
 	cdrStorage.Close()
 	defer func() { rs.ExitChan <- true }()
@@ -270,7 +270,7 @@ func (rs *Responder) Shutdown(arg string, reply *string) (err error) {
 }
 
 // Ping used to detreminate if component is active
-func (chSv1 *Responder) Ping(ign *utils.CGREvent, reply *string) error {
+func (chSv1 *Responder) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

@@ -37,7 +37,7 @@ func (dS *DispatcherService) ThresholdSv1Ping(args *utils.CGREventWithArgDispatc
 		}
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaThresholds, args.RouteID,
-		utils.ThresholdSv1Ping, args.CGREvent, reply)
+		utils.ThresholdSv1Ping, args, reply)
 }
 
 func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(args *engine.ArgsProcessEvent,

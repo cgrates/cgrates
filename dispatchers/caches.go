@@ -39,7 +39,7 @@ func (dS *DispatcherService) CacheSv1Ping(args *utils.CGREventWithArgDispatcher,
 		}
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaCaches, args.RouteID,
-		utils.CacheSv1Ping, args.CGREvent, reply)
+		utils.CacheSv1Ping, args, reply)
 }
 
 // GetItemIDs returns the IDs for cacheID with given prefix

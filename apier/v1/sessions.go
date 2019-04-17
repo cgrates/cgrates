@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -76,38 +77,38 @@ func (ssv1 *SessionSv1) ProcessEvent(args *sessions.V1ProcessEventArgs,
 	return ssv1.Ss.BiRPCv1ProcessEvent(nil, args, rply)
 }
 
-func (ssv1 *SessionSv1) GetActiveSessions(args map[string]string,
+func (ssv1 *SessionSv1) GetActiveSessions(args *dispatchers.FilterSessionWithApiKey,
 	rply *[]*sessions.ActiveSession) error {
-	return ssv1.Ss.BiRPCv1GetActiveSessions(nil, args, rply)
+	return ssv1.Ss.BiRPCv1GetActiveSessions(nil, args.Filters, rply)
 }
 
-func (ssv1 *SessionSv1) GetActiveSessionsCount(args map[string]string,
+func (ssv1 *SessionSv1) GetActiveSessionsCount(args *dispatchers.FilterSessionWithApiKey,
 	rply *int) error {
-	return ssv1.Ss.BiRPCv1GetActiveSessionsCount(nil, args, rply)
+	return ssv1.Ss.BiRPCv1GetActiveSessionsCount(nil, args.Filters, rply)
 }
 
-func (ssv1 *SessionSv1) ForceDisconnect(args map[string]string,
+func (ssv1 *SessionSv1) ForceDisconnect(args *dispatchers.FilterSessionWithApiKey,
 	rply *string) error {
-	return ssv1.Ss.BiRPCv1ForceDisconnect(nil, args, rply)
+	return ssv1.Ss.BiRPCv1ForceDisconnect(nil, args.Filters, rply)
 }
 
-func (ssv1 *SessionSv1) GetPassiveSessions(args map[string]string,
+func (ssv1 *SessionSv1) GetPassiveSessions(args *dispatchers.FilterSessionWithApiKey,
 	rply *[]*sessions.ActiveSession) error {
-	return ssv1.Ss.BiRPCv1GetPassiveSessions(nil, args, rply)
+	return ssv1.Ss.BiRPCv1GetPassiveSessions(nil, args.Filters, rply)
 }
 
-func (ssv1 *SessionSv1) GetPassiveSessionsCount(args map[string]string,
+func (ssv1 *SessionSv1) GetPassiveSessionsCount(args *dispatchers.FilterSessionWithApiKey,
 	rply *int) error {
-	return ssv1.Ss.BiRPCv1GetPassiveSessionsCount(nil, args, rply)
+	return ssv1.Ss.BiRPCv1GetPassiveSessionsCount(nil, args.Filters, rply)
 }
 
-func (ssv1 *SessionSv1) Ping(ign *utils.CGREvent, reply *string) error {
+func (ssv1 *SessionSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }
 
-func (ssv1 *SessionSv1) ReplicateSessions(args sessions.ArgsReplicateSessions, rply *string) error {
-	return ssv1.Ss.BiRPCv1ReplicateSessions(nil, args, rply)
+func (ssv1 *SessionSv1) ReplicateSessions(args dispatchers.ArgsReplicateSessionsWithApiKey, rply *string) error {
+	return ssv1.Ss.BiRPCv1ReplicateSessions(nil, args.ArgsReplicateSessions, rply)
 }
 
 func (ssv1 *SessionSv1) SetPassiveSession(args *sessions.Session,

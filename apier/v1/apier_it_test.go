@@ -36,6 +36,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/servmanager"
@@ -718,7 +719,7 @@ func TestApierLoadAccountActions(t *testing.T) {
 func TestApierReloadScheduler(t *testing.T) {
 	reply := ""
 	// Simple test that command is executed without errors
-	if err := rater.Call(utils.SchedulerSv1Reload, reply, &reply); err != nil {
+	if err := rater.Call(utils.SchedulerSv1Reload, dispatchers.StringWithApiKey{}, &reply); err != nil {
 		t.Error("Got error on SchedulerSv1.Reload: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling SchedulerSv1.Reload got reply: ", reply)
@@ -1621,7 +1622,7 @@ func TestApierReloadCache2(t *testing.T) {
 func TestApierReloadScheduler2(t *testing.T) {
 	reply := ""
 	// Simple test that command is executed without errors
-	if err := rater.Call(utils.SchedulerSv1Reload, reply, &reply); err != nil {
+	if err := rater.Call(utils.SchedulerSv1Reload, dispatchers.StringWithApiKey{}, &reply); err != nil {
 		t.Error("Got error on SchedulerSv1.Reload: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling SchedulerSv1.Reload got reply: ", reply)
@@ -1707,7 +1708,7 @@ func TestApierStartStopServiceStatus(t *testing.T) {
 	} else if reply != utils.RunningCaps {
 		t.Errorf("Received: <%s>", reply)
 	}
-	if err := rater.Call(utils.SchedulerSv1Reload, reply, &reply); err != nil {
+	if err := rater.Call(utils.SchedulerSv1Reload, dispatchers.StringWithApiKey{}, &reply); err != nil {
 		t.Error("Got error on SchedulerSv1.Reload: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling SchedulerSv1.Reload got reply: ", reply)

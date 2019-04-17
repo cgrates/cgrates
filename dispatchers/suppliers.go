@@ -35,7 +35,7 @@ func (dS *DispatcherService) SupplierSv1Ping(args *utils.CGREventWithArgDispatch
 		}
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaSuppliers, args.RouteID,
-		utils.SupplierSv1Ping, args.CGREvent, reply)
+		utils.SupplierSv1Ping, args, reply)
 }
 
 func (dS *DispatcherService) SupplierSv1GetSuppliers(args *engine.ArgsGetSuppliers,

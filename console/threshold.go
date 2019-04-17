@@ -27,7 +27,7 @@ func init() {
 	c := &CmdGetThreshold{
 		name:      "threshold",
 		rpcMethod: "ApierV1.GetThresholdProfile",
-		rpcParams: &utils.TenantID{},
+		rpcParams: &utils.TenantIDWithArgDispatcher{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdGetThreshold struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantID
+	rpcParams *utils.TenantIDWithArgDispatcher
 	*CommandExecuter
 }
 
@@ -50,7 +50,7 @@ func (self *CmdGetThreshold) RpcMethod() string {
 
 func (self *CmdGetThreshold) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantID{}
+		self.rpcParams = &utils.TenantIDWithArgDispatcher{}
 	}
 	return self.rpcParams
 }
