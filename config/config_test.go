@@ -609,14 +609,11 @@ func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
 
 func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 	eSessionSCfg := &SessionSCfg{
-		Enabled:      false,
-		ListenBijson: "127.0.0.1:2014",
-		ChargerSConns: []*RemoteHost{
-			{Address: "*internal"}},
-		RALsConns: []*RemoteHost{
-			{Address: "*internal"}},
-		CDRsConns: []*RemoteHost{
-			{Address: "*internal"}},
+		Enabled:                 false,
+		ListenBijson:            "127.0.0.1:2014",
+		ChargerSConns:           []*RemoteHost{},
+		RALsConns:               []*RemoteHost{},
+		CDRsConns:               []*RemoteHost{},
 		ResSConns:               []*RemoteHost{},
 		ThreshSConns:            []*RemoteHost{},
 		StatSConns:              []*RemoteHost{},

@@ -292,15 +292,9 @@ const CGRATES_CFG_JSON = `
 "sessions": {
 	"enabled": false,						// starts the session service: <true|false>
 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
-	"chargers_conns": [						// connections to ChargerS for session forking <*internal|x.y.z.y:1234>
-		{"address": "*internal"}
-	],					
-	"rals_conns": [							// connections to RALs for rating/accounting <""|*internal|127.0.0.1:2013>
-		{"address": "*internal"}
-	],
-	"cdrs_conns": [							// connections to CDRs for CDR posting <*internal|x.y.z.y:1234>
-		{"address": "*internal"}
-	],
+	"chargers_conns": [],					// connections to ChargerS for session forking <*internal|x.y.z.y:1234>
+	"rals_conns": [],						// connections to RALs for rating/accounting <""|*internal|127.0.0.1:2013>
+	"cdrs_conns": [],						// connections to CDRs for CDR posting <*internal|x.y.z.y:1234>
 	"resources_conns": [],					// connections to ResourceS for resources monitoring <""|*internal|127.0.0.1:2013>
 	"thresholds_conns": [],					// connections to ThresholdS for reporting session events <""|*internal|127.0.0.1:2013>
 	"stats_conns": [],						// connections to StatS for reporting session events <""|*internal|127.0.0.1:2013>

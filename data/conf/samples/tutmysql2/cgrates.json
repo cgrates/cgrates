@@ -79,6 +79,15 @@
 	"attributes_conns": [
 		{"address": "127.0.0.1:2012", "transport":"*json"}
 	],
+	"rals_conns": [
+		{"address": "*internal"}
+	],
+	"cdrs_conns": [
+		{"address": "*internal"}
+	],
+	"chargers_conns": [
+		{"address": "*internal"}
+	],
 },
 
 

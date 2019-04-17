@@ -461,12 +461,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 	}
 	// SessionS checks
 	if self.sessionSCfg.Enabled && !self.dispatcherSCfg.Enabled {
-		if len(self.sessionSCfg.RALsConns) == 0 {
-			return errors.New("<SessionS> RALs definition is mandatory")
-		}
-		if len(self.sessionSCfg.ChargerSConns) == 0 {
-			return fmt.Errorf("<%s> %s connection is mandatory", utils.SessionS, utils.ChargerS)
-		}
 		if !self.chargerSCfg.Enabled {
 			for _, conn := range self.sessionSCfg.ChargerSConns {
 				if conn.Address == utils.MetaInternal {
@@ -515,9 +509,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 					return errors.New("<SessionS> AttributeS not enabled but requested by SMGeneric component.")
 				}
 			}
-		}
-		if len(self.sessionSCfg.CDRsConns) == 0 {
-			return errors.New("<SessionS> CDRs definition is mandatory!")
 		}
 		if !self.cdrsCfg.CDRSEnabled {
 			for _, smgCDRSConn := range self.sessionSCfg.CDRsConns {
