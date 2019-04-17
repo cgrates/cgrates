@@ -137,3 +137,10 @@ type CDRsV1Interface interface {
 	RateCDRs(arg *engine.ArgRateCDRs, reply *string) error
 	StoreSessionCost(attr *engine.AttrCDRSStoreSMCost, reply *string) error
 }
+
+type ServiceManagerV1Interface interface {
+	StartService(args dispatchers.ArgStartServiceWithApiKey, reply *string) error
+	StopService(args dispatchers.ArgStartServiceWithApiKey, reply *string) error
+	ServiceStatus(args dispatchers.ArgStartServiceWithApiKey, reply *string) error
+	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
+}

@@ -388,6 +388,7 @@ const (
 	MetaThresholds               = "*thresholds"
 	MetaSuppliers                = "*suppliers"
 	MetaAttributes               = "*attributes"
+	MetaServiceManager           = "*servicemanager"
 	MetaChargers                 = "*chargers"
 	MetaDispatchers              = "*dispatchers"
 	MetaDispatcherHosts          = "*dispatcher_hosts"

@@ -1682,35 +1682,35 @@ func TestApierLoadTariffPlanFromStorDb(t *testing.T) {
 
 func TestApierStartStopServiceStatus(t *testing.T) {
 	var reply string
-	if err := rater.Call(utils.ServiceManagerV1ServiceStatus, servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
+	if err := rater.Call(utils.ServiceManagerV1ServiceStatus, dispatchers.ArgStartServiceWithApiKey{ArgStartService: servmanager.ArgStartService{ServiceID: utils.MetaScheduler}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.RunningCaps {
 		t.Errorf("Received: <%s>", reply)
 	}
-	if err := rater.Call(utils.ServiceManagerV1StopService, servmanager.ArgStartService{ServiceID: "INVALID"},
+	if err := rater.Call(utils.ServiceManagerV1StopService, dispatchers.ArgStartServiceWithApiKey{ArgStartService: servmanager.ArgStartService{ServiceID: "INVALID"}},
 		&reply); err == nil || err.Error() != utils.UnsupportedServiceIDCaps {
 		t.Error(err)
 	}
-	if err := rater.Call(utils.ServiceManagerV1StopService, servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
+	if err := rater.Call(utils.ServiceManagerV1StopService, dispatchers.ArgStartServiceWithApiKey{ArgStartService: servmanager.ArgStartService{ServiceID: utils.MetaScheduler}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: <%s>", reply)
 	}
-	if err := rater.Call(utils.ServiceManagerV1ServiceStatus, servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
+	if err := rater.Call(utils.ServiceManagerV1ServiceStatus, dispatchers.ArgStartServiceWithApiKey{ArgStartService: servmanager.ArgStartService{ServiceID: utils.MetaScheduler}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.StoppedCaps {
 		t.Errorf("Received: <%s>", reply)
 	}
-	if err := rater.Call(utils.ServiceManagerV1StartService, servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
+	if err := rater.Call(utils.ServiceManagerV1StartService, dispatchers.ArgStartServiceWithApiKey{ArgStartService: servmanager.ArgStartService{ServiceID: utils.MetaScheduler}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: <%s>", reply)
 	}
-	if err := rater.Call(utils.ServiceManagerV1ServiceStatus, servmanager.ArgStartService{ServiceID: utils.MetaScheduler},
+	if err := rater.Call(utils.ServiceManagerV1ServiceStatus, dispatchers.ArgStartServiceWithApiKey{ArgStartService: servmanager.ArgStartService{ServiceID: utils.MetaScheduler}},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.RunningCaps {
