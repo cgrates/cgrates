@@ -794,12 +794,16 @@ const (
 
 // StatS APIs
 const (
-	StatSv1ProcessEvent          = "StatSv1.ProcessEvent"
-	StatSv1GetQueueIDs           = "StatSv1.GetQueueIDs"
-	StatSv1GetQueueStringMetrics = "StatSv1.GetQueueStringMetrics"
-	StatSv1GetQueueFloatMetrics  = "StatSv1.GetQueueFloatMetrics"
-	StatSv1Ping                  = "StatSv1.Ping"
-	StatSv1GetStatQueuesForEvent = "StatSv1.GetStatQueuesForEvent"
+	StatSv1ProcessEvent           = "StatSv1.ProcessEvent"
+	StatSv1GetQueueIDs            = "StatSv1.GetQueueIDs"
+	StatSv1GetQueueStringMetrics  = "StatSv1.GetQueueStringMetrics"
+	StatSv1GetQueueFloatMetrics   = "StatSv1.GetQueueFloatMetrics"
+	StatSv1Ping                   = "StatSv1.Ping"
+	StatSv1GetStatQueuesForEvent  = "StatSv1.GetStatQueuesForEvent"
+	ApierV1GetStatQueueProfile    = "ApierV1.GetStatQueueProfile"
+	ApierV1RemoveStatQueueProfile = "ApierV1.RemoveStatQueueProfile"
+	ApierV1SetStatQueueProfile    = "ApierV1.SetStatQueueProfile"
+	ApierV1GetStatQueueProfileIDs = "ApierV1.GetStatQueueProfileIDs"
 )
 
 // ResourceS APIs

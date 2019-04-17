@@ -40,8 +40,11 @@ func (apierV1 *ApierV1) GetStatQueueProfile(arg *utils.TenantID, reply *engine.S
 }
 
 // GetStatQueueProfileIDs returns list of statQueueProfile IDs registered for a tenant
-func (apierV1 *ApierV1) GetStatQueueProfileIDs(tenant string, stsPrfIDs *[]string) error {
-	prfx := utils.StatQueueProfilePrefix + tenant + ":"
+func (apierV1 *ApierV1) GetStatQueueProfileIDs(args utils.TenantArgWithPaginator, stsPrfIDs *[]string) error {
+	if missing := utils.MissingStructFields(&args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	prfx := utils.StatQueueProfilePrefix + args.Tenant + ":"
 	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
@@ -53,7 +56,7 @@ func (apierV1 *ApierV1) GetStatQueueProfileIDs(tenant string, stsPrfIDs *[]strin
 	for i, key := range keys {
 		retIDs[i] = key[len(prfx):]
 	}
-	*stsPrfIDs = retIDs
+	*stsPrfIDs = args.PaginateStringSlice(retIDs)
 	return nil
 }
 
