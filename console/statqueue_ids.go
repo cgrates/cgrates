@@ -19,48 +19,47 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdSetStatQueue{
-		name:      "statqueue_set",
-		rpcMethod: utils.ApierV1SetStatQueueProfile,
-		rpcParams: &v1.StatQueueWithCache{},
+	c := &CmdGetStatQueueIDs{
+		name:      "statqueue_ids",
+		rpcMethod: utils.ApierV1GetStatQueueProfileIDs,
+		rpcParams: &utils.TenantArgWithPaginator{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdSetStatQueue struct {
+type CmdGetStatQueueIDs struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.StatQueueWithCache
+	rpcParams *utils.TenantArgWithPaginator
 	*CommandExecuter
 }
 
-func (self *CmdSetStatQueue) Name() string {
+func (self *CmdGetStatQueueIDs) Name() string {
 	return self.name
 }
 
-func (self *CmdSetStatQueue) RpcMethod() string {
+func (self *CmdGetStatQueueIDs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetStatQueue) RpcParams(reset bool) interface{} {
+func (self *CmdGetStatQueueIDs) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.StatQueueWithCache{}
+		self.rpcParams = &utils.TenantArgWithPaginator{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSetStatQueue) PostprocessRpcParams() error {
+func (self *CmdGetStatQueueIDs) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetStatQueue) RpcResult() interface{} {
-	var s string
-	return &s
+func (self *CmdGetStatQueueIDs) RpcResult() interface{} {
+	atr := []string{}
+	return &atr
 }
