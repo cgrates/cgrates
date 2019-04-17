@@ -39,11 +39,11 @@ func (apierV1 *ApierV1) GetSupplierProfile(arg utils.TenantID, reply *engine.Sup
 }
 
 // GetSupplierProfileIDs returns list of supplierProfile IDs registered for a tenant
-func (apierV1 *ApierV1) GetSupplierProfileIDs(tenantArg *utils.TenantArg, sppPrfIDs *[]string) error {
-	if tenantArg.Tenant == "" {
-		return utils.NewErrMandatoryIeMissing(utils.Tenant)
+func (apierV1 *ApierV1) GetSupplierProfileIDs(args utils.TenantArgWithPaginator, sppPrfIDs *[]string) error {
+	if missing := utils.MissingStructFields(&args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	prfx := utils.SupplierProfilePrefix + tenantArg.Tenant + ":"
+	prfx := utils.SupplierProfilePrefix + args.Tenant + ":"
 	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
@@ -55,7 +55,7 @@ func (apierV1 *ApierV1) GetSupplierProfileIDs(tenantArg *utils.TenantArg, sppPrf
 	for i, key := range keys {
 		retIDs[i] = key[len(prfx):]
 	}
-	*sppPrfIDs = retIDs
+	*sppPrfIDs = args.PaginateStringSlice(retIDs)
 	return nil
 }
 
