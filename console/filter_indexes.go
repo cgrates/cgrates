@@ -19,13 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/apier/v1"
+	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
 	c := &CmdGetFilterIndexes{
 		name:      "filter_indexes",
-		rpcMethod: "ApierV1.GetFilterIndexes",
+		rpcMethod: utils.ApierV1GetFilterIndexes,
 		rpcParams: &v1.AttrGetFilterIndexes{},
 	}
 	commands[c.Name()] = c

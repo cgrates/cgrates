@@ -68,8 +68,11 @@ func (apierV1 *ApierV1) GetFilter(arg utils.TenantID, reply *engine.Filter) erro
 }
 
 // GetFilterIDs returns list of Filter IDs registered for a tenant
-func (apierV1 *ApierV1) GetFilterIDs(tenant string, fltrIDs *[]string) error {
-	prfx := utils.FilterPrefix + tenant + ":"
+func (apierV1 *ApierV1) GetFilterIDs(args utils.TenantArgWithPaginator, fltrIDs *[]string) error {
+	if missing := utils.MissingStructFields(&args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	prfx := utils.FilterPrefix + args.Tenant + ":"
 	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
@@ -81,7 +84,7 @@ func (apierV1 *ApierV1) GetFilterIDs(tenant string, fltrIDs *[]string) error {
 	for i, key := range keys {
 		retIDs[i] = key[len(prfx):]
 	}
-	*fltrIDs = retIDs
+	*fltrIDs = args.PaginateStringSlice(retIDs)
 	return nil
 }
 

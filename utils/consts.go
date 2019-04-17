@@ -722,10 +722,12 @@ const (
 	ApierV1LoadTariffPlanFromFolder = "ApierV1.LoadTariffPlanFromFolder"
 	ApierV1GetCost                  = "ApierV1.GetCost"
 	ApierV1SetBalance               = "ApierV1.SetBalance"
-	ApierV1GetSupplierProfile       = "ApierV1.GetSupplierProfile"
-	ApierV1GetSupplierProfileIDs    = "ApierV1.GetSupplierProfileIDs"
-	ApierV1RemoveSupplierProfile    = "ApierV1.RemoveSupplierProfile"
-	ApierV1SetSupplierProfile       = "ApierV1.SetSupplierProfile"
+	ApierV1GetFilter                = "ApierV1.GetFilter"
+	ApierV1GetFilterIndexes         = "ApierV1.GetFilterIndexes"
+	ApierV1RemoveFilterIndexes      = "ApierV1.RemoveFilterIndexes"
+	ApierV1RemoveFilter             = "ApierV1.RemoveFilter"
+	ApierV1SetFilter                = "ApierV1.SetFilter"
+	ApierV1GetFilterIDs             = "ApierV1.GetFilterIDs"
 )
 
 const (
@@ -747,18 +749,22 @@ const (
 
 // SupplierS APIs
 const (
-	SupplierSv1GetSuppliers = "SupplierSv1.GetSuppliers"
-	SupplierSv1Ping         = "SupplierSv1.Ping"
+	SupplierSv1GetSuppliers      = "SupplierSv1.GetSuppliers"
+	SupplierSv1Ping              = "SupplierSv1.Ping"
+	ApierV1GetSupplierProfile    = "ApierV1.GetSupplierProfile"
+	ApierV1GetSupplierProfileIDs = "ApierV1.GetSupplierProfileIDs"
+	ApierV1RemoveSupplierProfile = "ApierV1.RemoveSupplierProfile"
+	ApierV1SetSupplierProfile    = "ApierV1.SetSupplierProfile"
 )
 
 // AttributeS APIs
 const (
 	ApierV1GetAttributeProfile       = "ApierV1.GetAttributeProfile"
 	ApierV1GetAttributeProfileIDs    = "ApierV1.GetAttributeProfileIDs"
-	AttributeSv1GetAttributeForEvent = "AttributeSv1.GetAttributeForEvent"
-	AttributeSv1ProcessEvent         = "AttributeSv1.ProcessEvent"
 	ApierV1RemoveAttributeProfile    = "ApierV1.RemoveAttributeProfile"
 	ApierV2SetAttributeProfile       = "ApierV2.SetAttributeProfile"
+	AttributeSv1GetAttributeForEvent = "AttributeSv1.GetAttributeForEvent"
+	AttributeSv1ProcessEvent         = "AttributeSv1.ProcessEvent"
 	AttributeSv1Ping                 = "AttributeSv1.Ping"
 )
 

@@ -19,48 +19,47 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdRemoveFilterIndexes{
-		name:      "filter_indexes_remove",
-		rpcMethod: utils.ApierV1RemoveFilterIndexes,
-		rpcParams: &v1.AttrRemFilterIndexes{},
+	c := &CmdGetFilterIDs{
+		name:      "filter_ids",
+		rpcMethod: utils.ApierV1GetFilterIDs,
+		rpcParams: &utils.TenantArgWithPaginator{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdRemoveFilterIndexes struct {
+type CmdGetFilterIDs struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.AttrRemFilterIndexes
+	rpcParams *utils.TenantArgWithPaginator
 	*CommandExecuter
 }
 
-func (self *CmdRemoveFilterIndexes) Name() string {
+func (self *CmdGetFilterIDs) Name() string {
 	return self.name
 }
 
-func (self *CmdRemoveFilterIndexes) RpcMethod() string {
+func (self *CmdGetFilterIDs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveFilterIndexes) RpcParams(reset bool) interface{} {
+func (self *CmdGetFilterIDs) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.AttrRemFilterIndexes{}
+		self.rpcParams = &utils.TenantArgWithPaginator{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdRemoveFilterIndexes) PostprocessRpcParams() error {
+func (self *CmdGetFilterIDs) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveFilterIndexes) RpcResult() interface{} {
-	var atr string
+func (self *CmdGetFilterIDs) RpcResult() interface{} {
+	atr := []string{}
 	return &atr
 }
