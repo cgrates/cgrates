@@ -18,12 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import v1 "github.com/cgrates/cgrates/apier/v1"
+import (
+	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/utils"
+)
 
 func init() {
 	c := &CmdSetFilter{
 		name:      "filter_set",
-		rpcMethod: "ApierV1.SetFilter",
+		rpcMethod: utils.ApierV1SetFilter,
 		rpcParams: &v1.FilterWithCache{},
 	}
 	commands[c.Name()] = c
