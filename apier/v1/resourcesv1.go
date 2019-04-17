@@ -86,8 +86,11 @@ func (apierV1 *ApierV1) GetResourceProfile(arg utils.TenantID, reply *engine.Res
 }
 
 // GetResourceProfileIDs returns list of resourceProfile IDs registered for a tenant
-func (apierV1 *ApierV1) GetResourceProfileIDs(tenant string, rsPrfIDs *[]string) error {
-	prfx := utils.ResourceProfilesPrefix + tenant + ":"
+func (apierV1 *ApierV1) GetResourceProfileIDs(args utils.TenantArgWithPaginator, rsPrfIDs *[]string) error {
+	if missing := utils.MissingStructFields(&args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	prfx := utils.ResourceProfilesPrefix + args.Tenant + ":"
 	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
@@ -99,7 +102,7 @@ func (apierV1 *ApierV1) GetResourceProfileIDs(tenant string, rsPrfIDs *[]string)
 	for i, key := range keys {
 		retIDs[i] = key[len(prfx):]
 	}
-	*rsPrfIDs = retIDs
+	*rsPrfIDs = args.PaginateStringSlice(retIDs)
 	return nil
 }
 

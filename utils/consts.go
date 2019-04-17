@@ -805,6 +805,10 @@ const (
 	ResourceSv1AllocateResources    = "ResourceSv1.AllocateResources"
 	ResourceSv1ReleaseResources     = "ResourceSv1.ReleaseResources"
 	ResourceSv1Ping                 = "ResourceSv1.Ping"
+	ApierV1SetResourceProfile       = "ApierV1.SetResourceProfile"
+	ApierV1RemoveResourceProfile    = "ApierV1.RemoveResourceProfile"
+	ApierV1GetResourceProfile       = "ApierV1.GetResourceProfile"
+	ApierV1GetResourceProfileIDs    = "ApierV1.GetResourceProfileIDs"
 )
 
 // SessionS APIs

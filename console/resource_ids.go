@@ -19,48 +19,47 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdGetResource{
-		name:      "resource",
-		rpcMethod: utils.ApierV1GetResourceProfile,
-		rpcParams: &utils.TenantID{},
+	c := &CmdGetResourceIDs{
+		name:      "resource_ids",
+		rpcMethod: utils.ApierV1GetResourceProfileIDs,
+		rpcParams: &utils.TenantArgWithPaginator{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdGetResource struct {
+type CmdGetResourceIDs struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TenantID
+	rpcParams *utils.TenantArgWithPaginator
 	*CommandExecuter
 }
 
-func (self *CmdGetResource) Name() string {
+func (self *CmdGetResourceIDs) Name() string {
 	return self.name
 }
 
-func (self *CmdGetResource) RpcMethod() string {
+func (self *CmdGetResourceIDs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetResource) RpcParams(reset bool) interface{} {
+func (self *CmdGetResourceIDs) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantID{}
+		self.rpcParams = &utils.TenantArgWithPaginator{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetResource) PostprocessRpcParams() error {
+func (self *CmdGetResourceIDs) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetResource) RpcResult() interface{} {
-	atr := engine.ResourceProfile{}
+func (self *CmdGetResourceIDs) RpcResult() interface{} {
+	atr := []string{}
 	return &atr
 }
