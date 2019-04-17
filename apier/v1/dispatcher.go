@@ -721,3 +721,26 @@ func (dS *DispatcherSCDRsV1) ProcessEvent(args *engine.ArgV1ProcessEvent, reply 
 func (dS *DispatcherSCDRsV1) ProcessCDR(args *engine.CDRWithArgDispatcher, reply *string) error {
 	return dS.dS.CDRsV1ProcessCDR(args, reply)
 }
+
+func NewDispatcherSServiceManagerV1(dps *dispatchers.DispatcherService) *DispatcherSServiceManagerV1 {
+	return &DispatcherSServiceManagerV1{dS: dps}
+}
+
+// Exports RPC from ServiceManagerV1
+type DispatcherSServiceManagerV1 struct {
+	dS *dispatchers.DispatcherService
+}
+
+// Ping used to detreminate if component is active
+func (dS *DispatcherSServiceManagerV1) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
+	return dS.dS.ServiceManagerV1Ping(args, reply)
+}
+func (dS *DispatcherSServiceManagerV1) StartService(args dispatchers.ArgStartServiceWithApiKey, reply *string) error {
+	return dS.dS.ServiceManagerV1StartService(args, reply)
+}
+func (dS *DispatcherSServiceManagerV1) StopService(args dispatchers.ArgStartServiceWithApiKey, reply *string) error {
+	return dS.dS.ServiceManagerV1StopService(args, reply)
+}
+func (dS *DispatcherSServiceManagerV1) ServiceStatus(args dispatchers.ArgStartServiceWithApiKey, reply *string) error {
+	return dS.dS.ServiceManagerV1ServiceStatus(args, reply)
+}

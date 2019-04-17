@@ -22,6 +22,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/servmanager"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
@@ -97,6 +99,12 @@ type StringWithApiKey struct {
 	*utils.ArgDispatcher
 	utils.TenantArg
 	Arg string
+}
+
+type ArgStartServiceWithApiKey struct {
+	*utils.ArgDispatcher
+	utils.TenantArg
+	servmanager.ArgStartService
 }
 
 func ParseStringMap(s string) utils.StringMap {
