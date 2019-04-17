@@ -767,6 +767,10 @@ const (
 	ChargerSv1Ping                = "ChargerSv1.Ping"
 	ChargerSv1GetChargersForEvent = "ChargerSv1.GetChargersForEvent"
 	ChargerSv1ProcessEvent        = "ChargerSv1.ProcessEvent"
+	ApierV1GetChargerProfile      = "ApierV1.GetChargerProfile"
+	ApierV1RemoveChargerProfile   = "ApierV1.RemoveChargerProfile"
+	ApierV1SetChargerProfile      = "ApierV1.SetChargerProfile"
+	ApierV1GetChargerProfileIDs   = "ApierV1.GetChargerProfileIDs"
 )
 
 // ThresholdS APIs

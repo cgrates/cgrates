@@ -267,9 +267,17 @@ func testChargerSSetChargerProfile(t *testing.T) {
 func testChargerSGetChargerProfileIDs(t *testing.T) {
 	expected := []string{"Charger1", "ApierTest"}
 	var result []string
-	if err := chargerRPC.Call("ApierV1.GetChargerProfileIDs", "cgrates.org", &result); err != nil {
+	if err := chargerRPC.Call(utils.ApierV1GetChargerProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
+		t.Errorf("Expecting : %+v, received: %+v", expected, result)
+	}
+	if err := chargerRPC.Call(utils.ApierV1GetChargerProfileIDs, utils.TenantArgWithPaginator{
+		TenantArg: utils.TenantArg{Tenant: "cgrates.org"},
+		Paginator: utils.Paginator{Limit: utils.IntPointer(1)},
+	}, &result); err != nil {
+		t.Error(err)
+	} else if 1 != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
 	}
 }

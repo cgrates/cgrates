@@ -18,12 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/apier/v1"
+import (
+	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/utils"
+)
 
 func init() {
 	c := &CmdSetChargers{
 		name:      "chargers_set",
-		rpcMethod: "ApierV1.SetChargerProfile",
+		rpcMethod: utils.ApierV1SetChargerProfile,
 		rpcParams: &v1.ChargerWithCache{},
 	}
 	commands[c.Name()] = c
