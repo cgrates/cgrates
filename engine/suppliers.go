@@ -125,11 +125,14 @@ func (spS *SupplierService) Shutdown() error {
 }
 
 // matchingSupplierProfilesForEvent returns ordered list of matching resources which are active by the time of the call
-func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent) (matchingLP *SupplierProfile, err error) {
+func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent, singleResult bool) (matchingSLP []*SupplierProfile, err error) {
 	sPrflIDs, err := MatchingItemIDsForEvent(ev.Event, spS.stringIndexedFields, spS.prefixIndexedFields,
 		spS.dm, utils.CacheSupplierFilterIndexes, ev.Tenant, spS.filterS.cfg.SupplierSCfg().IndexedSelects)
 	if err != nil {
 		return nil, err
+	}
+	if singleResult {
+		matchingSLP = make([]*SupplierProfile, 1)
 	}
 	for lpID := range sPrflIDs {
 		splPrfl, err := spS.dm.GetSupplierProfile(ev.Tenant, lpID, true, true, utils.NonTransactional)
@@ -149,12 +152,23 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent)
 		} else if !pass {
 			continue
 		}
-		if matchingLP == nil || matchingLP.Weight < splPrfl.Weight {
-			matchingLP = splPrfl
+		if singleResult {
+			if matchingSLP[0] == nil || matchingSLP[0].Weight < splPrfl.Weight {
+				matchingSLP[0] = splPrfl
+			}
+		} else {
+			matchingSLP = append(matchingSLP, splPrfl)
 		}
 	}
-	if matchingLP == nil {
-		return nil, utils.ErrNotFound
+	if singleResult {
+		if matchingSLP[0] == nil {
+			return nil, utils.ErrNotFound
+		}
+	} else {
+		if len(matchingSLP) == 0 {
+			return nil, utils.ErrNotFound
+		}
+		sort.Slice(matchingSLP, func(i, j int) bool { return matchingSLP[i].Weight < matchingSLP[j].Weight })
 	}
 	return
 }
@@ -402,10 +416,11 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 	if _, has := args.CGREvent.Event[utils.Usage]; !has {
 		args.CGREvent.Event[utils.Usage] = time.Duration(time.Minute) // make sure we have default set for Usage
 	}
-	var splPrfl *SupplierProfile
-	if splPrfl, err = spS.matchingSupplierProfilesForEvent(&args.CGREvent); err != nil {
+	var splPrfls []*SupplierProfile
+	if splPrfls, err = spS.matchingSupplierProfilesForEvent(&args.CGREvent, true); err != nil {
 		return
 	}
+	splPrfl := splPrfls[0]
 	extraOpts, err := args.asOptsGetSuppliers() // convert suppliers arguments into internal options used to limit data
 	if err != nil {
 		return nil, err
@@ -469,7 +484,7 @@ type optsGetSuppliers struct {
 	sortingParameters []string //used for QOS strategy
 }
 
-// V1GetSuppliersForEvent returns the list of valid supplier IDs
+// V1GetSupplierProfilesForEvent returns the list of valid supplier IDs
 func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *SortedSuppliers) (err error) {
 	if missing := utils.MissingStructFields(&args.CGREvent, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -498,5 +513,23 @@ func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *Sorted
 		return err
 	}
 	*reply = *sSps
+	return
+}
+
+// V1GetSupplierProfiles returns the list of valid supplier profiles
+func (spS *SupplierService) V1GetSupplierProfilesForEvent(args *utils.CGREventWithArgDispatcher, reply *[]*SupplierProfile) (err error) {
+	if missing := utils.MissingStructFields(args.CGREvent, []string{"Tenant", "ID"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	} else if args.CGREvent.Event == nil {
+		return utils.NewErrMandatoryIeMissing("Event")
+	}
+	sPs, err := spS.matchingSupplierProfilesForEvent(args.CGREvent, false)
+	if err != nil {
+		if err != utils.ErrNotFound {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	}
+	*reply = sPs
 	return
 }

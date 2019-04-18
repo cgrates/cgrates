@@ -754,12 +754,13 @@ const (
 
 // SupplierS APIs
 const (
-	SupplierSv1GetSuppliers      = "SupplierSv1.GetSuppliers"
-	SupplierSv1Ping              = "SupplierSv1.Ping"
-	ApierV1GetSupplierProfile    = "ApierV1.GetSupplierProfile"
-	ApierV1GetSupplierProfileIDs = "ApierV1.GetSupplierProfileIDs"
-	ApierV1RemoveSupplierProfile = "ApierV1.RemoveSupplierProfile"
-	ApierV1SetSupplierProfile    = "ApierV1.SetSupplierProfile"
+	SupplierSv1GetSuppliers                = "SupplierSv1.GetSuppliers"
+	SupplierSv1GetSupplierProfilesForEvent = "SupplierSv1.GetSupplierProfilesForEvent"
+	SupplierSv1Ping                        = "SupplierSv1.Ping"
+	ApierV1GetSupplierProfile              = "ApierV1.GetSupplierProfile"
+	ApierV1GetSupplierProfileIDs           = "ApierV1.GetSupplierProfileIDs"
+	ApierV1RemoveSupplierProfile           = "ApierV1.RemoveSupplierProfile"
+	ApierV1SetSupplierProfile              = "ApierV1.SetSupplierProfile"
 )
 
 // AttributeS APIs
