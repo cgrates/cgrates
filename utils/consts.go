@@ -390,6 +390,7 @@ const (
 	MetaAttributes               = "*attributes"
 	MetaServiceManager           = "*servicemanager"
 	MetaChargers                 = "*chargers"
+	MetaConfig                   = "*config"
 	MetaDispatchers              = "*dispatchers"
 	MetaDispatcherHosts          = "*dispatcher_hosts"
 	MetaResources                = "*resources"
@@ -750,6 +751,11 @@ const (
 	ServiceManagerV1StopService   = "ServiceManagerV1.StopService"
 	ServiceManagerV1ServiceStatus = "ServiceManagerV1.ServiceStatus"
 	ServiceManagerV1Ping          = "ServiceManagerV1.Ping"
+)
+
+const (
+	ConfigSv1               = "ConfigSv1"
+	ConfigSv1GetJSONSection = "ConfigSv1.GetJSONSection"
 )
 
 // SupplierS APIs
