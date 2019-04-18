@@ -360,7 +360,8 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		!reqProcessor.Flags.HasKey(utils.MetaDryRun) {
 		var rplyCDRs string
 		if err = da.sS.Call(utils.SessionSv1ProcessCDR,
-			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv, ArgDispatcher: argDisp}, &rplyCDRs); err != nil {
+			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
+				ArgDispatcher: argDisp}, &rplyCDRs); err != nil {
 			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
 		}
 	}
