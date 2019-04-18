@@ -1673,7 +1673,6 @@ func main() {
 		engine.IntRPC.AddInternalRPCClient(utils.SupplierSv1, internalSupplierSChan)
 		engine.IntRPC.AddInternalRPCClient(utils.ThresholdSv1, internalThresholdSChan)
 		engine.IntRPC.AddInternalRPCClient(utils.ServiceManagerV1, internalServeManagerChan)
-		engine.IntRPC.AddInternalRPCClient(utils.ServManagerV1, internalServeManagerChan)
 		engine.IntRPC.AddInternalRPCClient(utils.ConfigSv1, internalConfigChan)
 	}
 
