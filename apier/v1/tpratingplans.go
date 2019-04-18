@@ -60,7 +60,7 @@ func (self *ApierV1) GetTPRatingPlan(attrs AttrGetTPRatingPlan, reply *utils.TPR
 
 type AttrGetTPRatingPlanIds struct {
 	TPid string // Tariff plan id
-	utils.Paginator
+	utils.PaginatorWithSearch
 }
 
 // Queries RatingPlan identities on specific tariff plan.
@@ -68,7 +68,8 @@ func (self *ApierV1) GetTPRatingPlanIds(attrs AttrGetTPRatingPlanIds, reply *[]s
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRatingPlans, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPRatingPlans,
+		utils.TPDistinctIds{"tag"}, nil, &attrs.PaginatorWithSearch); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
@@ -216,6 +217,7 @@ func NewCGRConfigFromPath(path string) (*CGRConfig, error) {
 	if err != nil {
 		return nil, err
 	}
+	cfg.ConfigPath = path
 	if isUrl(path) {
 		return loadConfigFromHttp(cfg, path) // prefix protocol
 	}
@@ -296,6 +298,7 @@ func loadConfigFromHttp(cfg *CGRConfig, urlPaths string) (*CGRConfig, error) {
 type CGRConfig struct {
 	MaxCallDuration time.Duration // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
 	DataFolderPath  string        // Path towards data folder, for tests internal usage, not loading out of .json options
+	ConfigPath      string        // Path towards config
 
 	// Cache defaults loaded from json and needing clones
 	dfltCdreProfile *CdreCfg // Default cdreConfig profile
@@ -461,12 +464,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 	}
 	// SessionS checks
 	if self.sessionSCfg.Enabled && !self.dispatcherSCfg.Enabled {
-		if len(self.sessionSCfg.RALsConns) == 0 {
-			return errors.New("<SessionS> RALs definition is mandatory")
-		}
-		if len(self.sessionSCfg.ChargerSConns) == 0 {
-			return fmt.Errorf("<%s> %s connection is mandatory", utils.SessionS, utils.ChargerS)
-		}
 		if !self.chargerSCfg.Enabled {
 			for _, conn := range self.sessionSCfg.ChargerSConns {
 				if conn.Address == utils.MetaInternal {
@@ -515,9 +512,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 					return errors.New("<SessionS> AttributeS not enabled but requested by SMGeneric component.")
 				}
 			}
-		}
-		if len(self.sessionSCfg.CDRsConns) == 0 {
-			return errors.New("<SessionS> CDRs definition is mandatory!")
 		}
 		if !self.cdrsCfg.CDRSEnabled {
 			for _, smgCDRSConn := range self.sessionSCfg.CDRsConns {
@@ -1194,4 +1188,91 @@ func (cfg *CGRConfig) AnalyzerSCfg() *AnalyzerSCfg {
 
 func (cfg *CGRConfig) ApierCfg() *ApierCfg {
 	return cfg.apier
+}
+
+// Call implements rpcclient.RpcClientConnection interface for internal RPC
+func (cSv1 *CGRConfig) Call(serviceMethod string,
+	args interface{}, reply interface{}) error {
+	return utils.APIerRPCCall(cSv1, serviceMethod, args, reply)
+}
+
+type StringWithArgDispatcher struct {
+	*utils.ArgDispatcher
+	utils.TenantArg
+	Section string
+}
+
+//V1GetConfigSection will retrieve from CGRConfig a section
+func (cfg *CGRConfig) V1GetConfigSection(args *StringWithArgDispatcher, reply *map[string]interface{}) (err error) {
+	var jsonString string
+	switch args.Section {
+	case GENERAL_JSN:
+		jsonString = utils.ToJSON(cfg.GeneralCfg())
+	case DATADB_JSN:
+		jsonString = utils.ToJSON(cfg.DataDbCfg())
+	case STORDB_JSN:
+		jsonString = utils.ToJSON(cfg.StorDbCfg())
+	case TlsCfgJson:
+		jsonString = utils.ToJSON(cfg.TlsCfg())
+	case CACHE_JSN:
+		jsonString = utils.ToJSON(cfg.CacheCfg())
+	case LISTEN_JSN:
+		jsonString = utils.ToJSON(cfg.ListenCfg())
+	case HTTP_JSN:
+		jsonString = utils.ToJSON(cfg.HTTPCfg())
+	case FILTERS_JSON:
+		jsonString = utils.ToJSON(cfg.FilterSCfg())
+	case RALS_JSN:
+		jsonString = utils.ToJSON(cfg.RalsCfg())
+	case SCHEDULER_JSN:
+		jsonString = utils.ToJSON(cfg.SchedulerCfg())
+	case CDRS_JSN:
+		jsonString = utils.ToJSON(cfg.CdrsCfg())
+	case SessionSJson:
+		jsonString = utils.ToJSON(cfg.SessionSCfg())
+	case FS_JSN:
+		jsonString = utils.ToJSON(cfg.FsAgentCfg())
+	case KamailioAgentJSN:
+		jsonString = utils.ToJSON(cfg.KamAgentCfg())
+	case AsteriskAgentJSN:
+		jsonString = utils.ToJSON(cfg.AsteriskAgentCfg())
+	case DA_JSN:
+		jsonString = utils.ToJSON(cfg.DiameterAgentCfg())
+	case RA_JSN:
+		jsonString = utils.ToJSON(cfg.RadiusAgentCfg())
+	case DNSAgentJson:
+		jsonString = utils.ToJSON(cfg.DNSAgentCfg())
+	case ATTRIBUTE_JSN:
+		jsonString = utils.ToJSON(cfg.AttributeSCfg())
+	case ChargerSCfgJson:
+		jsonString = utils.ToJSON(cfg.ChargerSCfg())
+	case RESOURCES_JSON:
+		jsonString = utils.ToJSON(cfg.ResourceSCfg())
+	case STATS_JSON:
+		jsonString = utils.ToJSON(cfg.StatSCfg())
+	case THRESHOLDS_JSON:
+		jsonString = utils.ToJSON(cfg.ThresholdSCfg())
+	case SupplierSJson:
+		jsonString = utils.ToJSON(cfg.SupplierSCfg())
+	case SURETAX_JSON:
+		jsonString = utils.ToJSON(cfg.SureTaxCfg())
+	case DispatcherJson:
+		jsonString = utils.ToJSON(cfg.DispatcherSCfg())
+	case LoaderJson:
+		jsonString = utils.ToJSON(cfg.LoaderCfg())
+	case CgrLoaderCfgJson:
+		jsonString = utils.ToJSON(cfg.LoaderCgrCfg())
+	case CgrMigratorCfgJson:
+		jsonString = utils.ToJSON(cfg.MigratorCgrCfg())
+	case Apier:
+		jsonString = utils.ToJSON(cfg.ApierCfg())
+	case CDRC_JSN:
+		jsonString = utils.ToJSON(cfg.CdrcProfiles)
+	case CDRE_JSN:
+		jsonString = utils.ToJSON(cfg.CdreProfiles)
+	default:
+		return errors.New("Invalid section")
+	}
+	json.Unmarshal([]byte(jsonString), reply)
+	return
 }

@@ -81,7 +81,8 @@ func (ms *MongoStorage) GetTpIds(colName string) (tpids []string, err error) {
 	return tpids, nil
 }
 
-func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds, filter map[string]string, pag *utils.Paginator) ([]string, error) {
+func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds,
+	filter map[string]string, pag *utils.PaginatorWithSearch) ([]string, error) {
 	findMap := bson.M{}
 	if tpid != "" {
 		findMap["tpid"] = tpid
@@ -90,22 +91,23 @@ func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 		findMap[k] = v
 	}
 
-	if pag != nil && pag.SearchTerm != "" {
-		var searchItems []bson.M
-		for _, d := range distinct {
-			searchItems = append(searchItems, bson.M{d: bsonx.Regex(".*"+regexp.QuoteMeta(pag.SearchTerm)+".*", "")})
-		}
-		// findMap["$and"] = []bson.M{{"$or": searchItems}} //before
-		findMap["$or"] = searchItems // after
-	}
-
 	fop := options.Find()
 	if pag != nil {
-		if pag.Limit != nil {
-			fop = fop.SetLimit(int64(*pag.Limit))
+		if pag.Search != "" {
+			var searchItems []bson.M
+			for _, d := range distinct {
+				searchItems = append(searchItems, bson.M{d: bsonx.Regex(".*"+regexp.QuoteMeta(pag.Search)+".*", "")})
+			}
+			// findMap["$and"] = []bson.M{{"$or": searchItems}} //before
+			findMap["$or"] = searchItems // after
 		}
-		if pag.Offset != nil {
-			fop = fop.SetSkip(int64(*pag.Offset))
+		if pag.Paginator != nil {
+			if pag.Limit != nil {
+				fop = fop.SetLimit(int64(*pag.Limit))
+			}
+			if pag.Offset != nil {
+				fop = fop.SetSkip(int64(*pag.Offset))
+			}
 		}
 	}
 

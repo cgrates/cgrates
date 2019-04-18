@@ -88,7 +88,7 @@ func (self *ApierV1) GetTPAccountActions(attrs AttrGetTPAccountActions, reply *u
 
 type AttrGetTPAccountActionIds struct {
 	TPid string // Tariff plan id
-	utils.Paginator
+	utils.PaginatorWithSearch
 }
 
 // Queries AccountActions identities on specific tariff plan.
@@ -97,7 +97,7 @@ func (self *ApierV1) GetTPAccountActionLoadIds(attrs AttrGetTPAccountActionIds, 
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPAccountActions,
-		utils.TPDistinctIds{"loadid"}, nil, &attrs.Paginator); err != nil {
+		utils.TPDistinctIds{"loadid"}, nil, &attrs.PaginatorWithSearch); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -114,7 +114,7 @@ func (self *ApierV1) GetTPAccountActionIds(attrs AttrGetTPAccountActionIds, repl
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPAccountActions,
-		utils.TPDistinctIds{"loadid", "tenant", "account"}, nil, &attrs.Paginator); err != nil {
+		utils.TPDistinctIds{"loadid", "tenant", "account"}, nil, &attrs.PaginatorWithSearch); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}

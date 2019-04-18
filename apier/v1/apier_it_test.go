@@ -175,7 +175,7 @@ func TestApierTPTiming(t *testing.T) {
 	// Test getIds
 	var rplyTmIds []string
 	expectedTmIds := []string{"ALWAYS", "ASAP"}
-	if err := rater.Call("ApierV1.GetTPTimingIds", AttrGetTPTimingIds{tmAlways.TPid, utils.Paginator{}}, &rplyTmIds); err != nil {
+	if err := rater.Call("ApierV1.GetTPTimingIds", AttrGetTPTimingIds{tmAlways.TPid, utils.PaginatorWithSearch{}}, &rplyTmIds); err != nil {
 		t.Error("Calling ApierV1.GetTPTimingIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedTmIds, rplyTmIds) {
 		t.Errorf("Calling ApierV1.GetTPTimingIds expected: %v, received: %v", expectedTmIds, rplyTmIds)
@@ -277,7 +277,7 @@ func TestApierTPRate(t *testing.T) {
 	// Test getIds
 	var rplyRtIds []string
 	expectedRtIds := []string{"RT_FS_USERS"}
-	if err := rater.Call("ApierV1.GetTPRateIds", AttrGetTPRateIds{rt.TPid, utils.Paginator{}}, &rplyRtIds); err != nil {
+	if err := rater.Call("ApierV1.GetTPRateIds", AttrGetTPRateIds{rt.TPid, utils.PaginatorWithSearch{}}, &rplyRtIds); err != nil {
 		t.Error("Calling ApierV1.GetTPRateIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedRtIds, rplyRtIds) {
 		t.Errorf("Calling ApierV1.GetTPDestinationIDs expected: %v, received: %v", expectedRtIds, rplyRtIds)
@@ -331,7 +331,7 @@ func TestApierTPDestinationRate(t *testing.T) {
 	// Test getIds
 	var rplyDrIds []string
 	expectedDrIds := []string{"DR_FREESWITCH_USERS"}
-	if err := rater.Call("ApierV1.GetTPDestinationRateIds", AttrTPDestinationRateIds{dr.TPid, utils.Paginator{}}, &rplyDrIds); err != nil {
+	if err := rater.Call("ApierV1.GetTPDestinationRateIds", AttrTPDestinationRateIds{dr.TPid, utils.PaginatorWithSearch{}}, &rplyDrIds); err != nil {
 		t.Error("Calling ApierV1.GetTPDestinationRateIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedDrIds, rplyDrIds) {
 		t.Errorf("Calling ApierV1.GetTPDestinationRateIds expected: %v, received: %v", expectedDrIds, rplyDrIds)
@@ -382,7 +382,7 @@ func TestApierTPRatingPlan(t *testing.T) {
 	// Test getIds
 	var rplyRpIds []string
 	expectedRpIds := []string{"RETAIL1"}
-	if err := rater.Call("ApierV1.GetTPRatingPlanIds", AttrGetTPRatingPlanIds{rp.TPid, utils.Paginator{}}, &rplyRpIds); err != nil {
+	if err := rater.Call("ApierV1.GetTPRatingPlanIds", AttrGetTPRatingPlanIds{rp.TPid, utils.PaginatorWithSearch{}}, &rplyRpIds); err != nil {
 		t.Error("Calling ApierV1.GetTPRatingPlanIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedRpIds, rplyRpIds) {
 		t.Errorf("Calling ApierV1.GetTPRatingPlanIds expected: %v, received: %v", expectedRpIds, rplyRpIds)

@@ -32,11 +32,16 @@ func (tpdi TPDistinctIds) String() string {
 	return strings.Join(tpdi, ",")
 }
 
+type PaginatorWithSearch struct {
+	*Paginator
+	Search string // Global matching pattern in items returned, partially used in some APIs
+}
+
 // Paginate stuff around items returned
 type Paginator struct {
-	Limit      *int   // Limit the number of items returned
-	Offset     *int   // Offset of the first item returned (eg: use Limit*Page in case of PerPage items)
-	SearchTerm string // Global matching pattern in items returned, partially used in some APIs
+	Limit  *int // Limit the number of items returned
+	Offset *int // Offset of the first item returned (eg: use Limit*Page in case of PerPage items)
+
 }
 
 func (pgnt *Paginator) PaginateStringSlice(in []string) (out []string) {

@@ -52,7 +52,7 @@ func (self *ApierV1) GetTPFilterProfile(attr *utils.TPTntID, reply *utils.TPFilt
 
 type AttrGetTPFilterProfileIds struct {
 	TPid string // Tariff plan id
-	utils.Paginator
+	utils.PaginatorWithSearch
 }
 
 // Queries FilterProfile identities on specific tariff plan.
@@ -61,7 +61,7 @@ func (self *ApierV1) GetTPFilterProfileIds(attrs *AttrGetTPFilterProfileIds, rep
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPFilters, utils.TPDistinctIds{"id"},
-		nil, &attrs.Paginator); err != nil {
+		nil, &attrs.PaginatorWithSearch); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}

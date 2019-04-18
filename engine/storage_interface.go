@@ -161,7 +161,7 @@ type LoadStorage interface {
 type LoadReader interface {
 	GetTpIds(string) ([]string, error)
 	GetTpTableIds(string, string, utils.TPDistinctIds,
-		map[string]string, *utils.Paginator) ([]string, error)
+		map[string]string, *utils.PaginatorWithSearch) ([]string, error)
 	GetTPTimings(string, string) ([]*utils.ApierTPTiming, error)
 	GetTPDestinations(string, string) ([]*utils.TPDestination, error)
 	GetTPRates(string, string) ([]*utils.TPRate, error)

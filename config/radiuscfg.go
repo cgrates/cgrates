@@ -18,10 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import (
-	"github.com/cgrates/cgrates/utils"
-)
-
 type RadiusAgentCfg struct {
 	Enabled            bool
 	ListenNet          string // udp or tcp
@@ -30,7 +26,7 @@ type RadiusAgentCfg struct {
 	ClientSecrets      map[string]string
 	ClientDictionaries map[string]string
 	SessionSConns      []*RemoteHost
-	RequestProcessors  []*RARequestProcessor
+	RequestProcessors  []*RequestProcessor
 }
 
 func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg, separator string) (err error) {
@@ -74,10 +70,10 @@ func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg, separato
 	}
 	if jsnCfg.Request_processors != nil {
 		for _, reqProcJsn := range *jsnCfg.Request_processors {
-			rp := new(RARequestProcessor)
+			rp := new(RequestProcessor)
 			var haveID bool
 			for _, rpSet := range self.RequestProcessors {
-				if reqProcJsn.Id != nil && rpSet.Id == *reqProcJsn.Id {
+				if reqProcJsn.ID != nil && rpSet.ID == *reqProcJsn.ID {
 					rp = rpSet // Will load data into the one set
 					haveID = true
 					break
@@ -89,58 +85,6 @@ func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg, separato
 			if !haveID {
 				self.RequestProcessors = append(self.RequestProcessors, rp)
 			}
-		}
-	}
-	return nil
-}
-
-// One Diameter request processor configuration
-type RARequestProcessor struct {
-	Id                string
-	Tenant            RSRParsers
-	Filters           []string
-	Timezone          string
-	Flags             utils.StringMap
-	ContinueOnSuccess bool
-	RequestFields     []*FCTemplate
-	ReplyFields       []*FCTemplate
-}
-
-func (self *RARequestProcessor) loadFromJsonCfg(jsnCfg *RAReqProcessorJsnCfg, separator string) (err error) {
-	if jsnCfg == nil {
-		return nil
-	}
-	if jsnCfg.Id != nil {
-		self.Id = *jsnCfg.Id
-	}
-	if jsnCfg.Filters != nil {
-		self.Filters = make([]string, len(*jsnCfg.Filters))
-		for i, fltr := range *jsnCfg.Filters {
-			self.Filters[i] = fltr
-		}
-	}
-	if jsnCfg.Flags != nil {
-		self.Flags = utils.StringMapFromSlice(*jsnCfg.Flags)
-	}
-	if jsnCfg.Continue_on_success != nil {
-		self.ContinueOnSuccess = *jsnCfg.Continue_on_success
-	}
-	if jsnCfg.Tenant != nil {
-		if self.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true, separator); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Timezone != nil {
-		self.Timezone = *jsnCfg.Timezone
-	}
-	if jsnCfg.Request_fields != nil {
-		if self.RequestFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Request_fields, separator); err != nil {
-			return
-		}
-	}
-	if jsnCfg.Reply_fields != nil {
-		if self.ReplyFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Reply_fields, separator); err != nil {
-			return
 		}
 	}
 	return nil

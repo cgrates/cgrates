@@ -52,7 +52,7 @@ func (self *ApierV1) GetTPSupplierProfile(attr *utils.TPTntID, reply *utils.TPSu
 
 type AttrGetTPSupplierProfileIDs struct {
 	TPid string // Tariff plan id
-	utils.Paginator
+	utils.PaginatorWithSearch
 }
 
 // Queries SupplierProfile identities on specific tariff plan.
@@ -60,8 +60,8 @@ func (self *ApierV1) GetTPSupplierProfileIDs(attrs *AttrGetTPSupplierProfileIDs,
 	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPSuppliers, utils.TPDistinctIds{"id"},
-		nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPSuppliers,
+		utils.TPDistinctIds{"id"}, nil, &attrs.PaginatorWithSearch); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}

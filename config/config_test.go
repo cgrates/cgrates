@@ -609,14 +609,11 @@ func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
 
 func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 	eSessionSCfg := &SessionSCfg{
-		Enabled:      false,
-		ListenBijson: "127.0.0.1:2014",
-		ChargerSConns: []*RemoteHost{
-			{Address: "*internal"}},
-		RALsConns: []*RemoteHost{
-			{Address: "*internal"}},
-		CDRsConns: []*RemoteHost{
-			{Address: "*internal"}},
+		Enabled:                 false,
+		ListenBijson:            "127.0.0.1:2014",
+		ChargerSConns:           []*RemoteHost{},
+		RALsConns:               []*RemoteHost{},
+		CDRsConns:               []*RemoteHost{},
 		ResSConns:               []*RemoteHost{},
 		ThreshSConns:            []*RemoteHost{},
 		StatSConns:              []*RemoteHost{},
@@ -1755,5 +1752,32 @@ func TestCgrCfgJSONDefaultApierCfg(t *testing.T) {
 	}
 	if !reflect.DeepEqual(cgrCfg.apier, aCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.apier, aCfg)
+	}
+}
+
+func TestCgrCfgV1GetConfigSection(t *testing.T) {
+	JSN_CFG := `
+{
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+	}
+}`
+	expected := map[string]interface{}{
+		"HTTPListen":       ":2080",
+		"HTTPTLSListen":    "127.0.0.1:2280",
+		"RPCGOBListen":     ":2013",
+		"RPCGOBTLSListen":  "127.0.0.1:2023",
+		"RPCJSONListen":    ":2012",
+		"RPCJSONTLSListen": "127.0.0.1:2022",
+	}
+	var rcv map[string]interface{}
+	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(JSN_CFG); err != nil {
+		t.Error(err)
+	} else if err := cgrCfg.V1GetConfigSection(&StringWithArgDispatcher{Section: LISTEN_JSN}, &rcv); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected: %+v, received: %+v", expected, rcv)
 	}
 }

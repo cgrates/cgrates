@@ -52,7 +52,7 @@ func (self *ApierV1) GetTPAttributeProfile(attr *utils.TPTntID, reply *utils.TPA
 
 type AttrGetTPAttributeProfileIds struct {
 	TPid string // Tariff plan id
-	utils.Paginator
+	utils.PaginatorWithSearch
 }
 
 // Queries attribute identities on specific tariff plan.
@@ -60,7 +60,8 @@ func (self *ApierV1) GetTPAttributeProfileIds(attrs *AttrGetTPAttributeProfileId
 	if missing := utils.MissingStructFields(attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPAttributes, utils.TPDistinctIds{"id"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPAttributes,
+		utils.TPDistinctIds{"id"}, nil, &attrs.PaginatorWithSearch); err != nil {
 		return utils.NewErrServerError(err)
 	} else if ids == nil {
 		return utils.ErrNotFound
@@ -75,7 +76,8 @@ func (self *ApierV1) RemoveTPAttributeProfile(attrs *utils.TPTntID, reply *strin
 	if missing := utils.MissingStructFields(attrs, []string{"TPid", "Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBLTPAttributes, attrs.TPid, map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBLTPAttributes, attrs.TPid,
+		map[string]string{"tenant": attrs.Tenant, "id": attrs.ID}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = utils.OK

@@ -52,7 +52,7 @@ func (self *ApierV1) GetTPDispatcherProfile(attr *utils.TPTntID, reply *utils.TP
 
 type AttrGetTPDispatcherIds struct {
 	TPid string // Tariff plan id
-	utils.Paginator
+	utils.PaginatorWithSearch
 }
 
 //GetTPDispatcherIDs queries dispatcher identities on specific tariff plan.
@@ -61,7 +61,7 @@ func (self *ApierV1) GetTPDispatcherProfileIDs(attrs *AttrGetTPDispatcherIds, re
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPDispatchers, utils.TPDistinctIds{"id"},
-		nil, &attrs.Paginator); err != nil {
+		nil, &attrs.PaginatorWithSearch); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}
@@ -120,7 +120,7 @@ func (self *ApierV1) GetTPDispatcherHostIDs(attrs *AttrGetTPDispatcherIds, reply
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPDispatcherHosts, utils.TPDistinctIds{"id"},
-		nil, &attrs.Paginator); err != nil {
+		nil, &attrs.PaginatorWithSearch); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}

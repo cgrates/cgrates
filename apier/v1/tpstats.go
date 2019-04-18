@@ -53,7 +53,7 @@ func (self *ApierV1) GetTPStat(attr *utils.TPTntID, reply *utils.TPStatProfile) 
 type AttrGetTPStatIds struct {
 	TPid   string // Tariff plan id
 	Tenant string
-	utils.Paginator
+	utils.PaginatorWithSearch
 }
 
 // Queries Stat identities on specific tariff plan.
@@ -62,7 +62,7 @@ func (self *ApierV1) GetTPStatIDs(attrs *AttrGetTPStatIds, reply *[]string) erro
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBLTPStats,
-		utils.TPDistinctIds{"id"}, nil, &attrs.Paginator); err != nil {
+		utils.TPDistinctIds{"id"}, nil, &attrs.PaginatorWithSearch); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			err = utils.NewErrServerError(err)
 		}

@@ -21,6 +21,7 @@ package v1
 import (
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -749,4 +750,18 @@ func (dS *DispatcherSServiceManagerV1) StopService(args dispatchers.ArgStartServ
 }
 func (dS *DispatcherSServiceManagerV1) ServiceStatus(args dispatchers.ArgStartServiceWithApiKey, reply *string) error {
 	return dS.dS.ServiceManagerV1ServiceStatus(args, reply)
+}
+
+func NewDispatcherConfigSv1(dps *dispatchers.DispatcherService) *DispatcherConfigSv1 {
+	return &DispatcherConfigSv1{dS: dps}
+}
+
+// Exports RPC from CDRsV1
+type DispatcherConfigSv1 struct {
+	dS *dispatchers.DispatcherService
+}
+
+// Ping used to detreminate if component is active
+func (dS *DispatcherConfigSv1) GetJSONSection(args *config.StringWithArgDispatcher, reply *map[string]interface{}) (err error) {
+	return dS.dS.ConfigSv1GetJSONSection(args, reply)
 }

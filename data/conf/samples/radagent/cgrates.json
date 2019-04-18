@@ -72,6 +72,9 @@
 	"resources_conns": [
 		{"address": "127.0.0.1:2012", "transport": "*json"}
 	],
+	"chargers_conns": [
+		{"address": "*internal"}
+	],
 	"debit_interval": "10s",
 },
 

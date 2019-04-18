@@ -470,17 +470,11 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 
 func TestSmgJsonCfg(t *testing.T) {
 	eCfg := &SessionSJsonCfg{
-		Enabled:       utils.BoolPointer(false),
-		Listen_bijson: utils.StringPointer("127.0.0.1:2014"),
-		Chargers_conns: &[]*RemoteHostJson{{
-			Address: utils.StringPointer(utils.MetaInternal),
-		}},
-		Rals_conns: &[]*RemoteHostJson{{
-			Address: utils.StringPointer(utils.MetaInternal),
-		}},
-		Cdrs_conns: &[]*RemoteHostJson{{
-			Address: utils.StringPointer(utils.MetaInternal),
-		}},
+		Enabled:                   utils.BoolPointer(false),
+		Listen_bijson:             utils.StringPointer("127.0.0.1:2014"),
+		Chargers_conns:            &[]*RemoteHostJson{},
+		Rals_conns:                &[]*RemoteHostJson{},
+		Cdrs_conns:                &[]*RemoteHostJson{},
 		Resources_conns:           &[]*RemoteHostJson{},
 		Thresholds_conns:          &[]*RemoteHostJson{},
 		Stats_conns:               &[]*RemoteHostJson{},
@@ -692,7 +686,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 					Value:    utils.StringPointer("1")},
 			},
 		},
-		Request_processors: &[]*DARequestProcessorJsnCfg{},
+		Request_processors: &[]*ReqProcessorJsnCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.DiameterAgentJsonCfg(); err != nil {
 		t.Error(err)
@@ -717,7 +711,7 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 			{
 				Address: utils.StringPointer(utils.MetaInternal),
 			}},
-		Request_processors: &[]*RAReqProcessorJsnCfg{},
+		Request_processors: &[]*ReqProcessorJsnCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.RadiusAgentJsonCfg(); err != nil {
 		t.Error(err)

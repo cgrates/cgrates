@@ -31,7 +31,8 @@ func (m *Migrator) migrateCurrentTPactionplans() (err error) {
 		return err
 	}
 	for _, tpid := range tpids {
-		ids, err := m.storDBIn.StorDB().GetTpTableIds(tpid, utils.TBLTPActionPlans, utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
+		ids, err := m.storDBIn.StorDB().GetTpTableIds(tpid, utils.TBLTPActionPlans,
+			utils.TPDistinctIds{"tag"}, map[string]string{}, nil)
 		if err != nil {
 			return err
 		}

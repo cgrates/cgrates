@@ -75,38 +75,3 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(dacfg))
 	}
 }
-
-func TestDARequestProcessorloadFromJsonCfg(t *testing.T) {
-	var dareq, expected DARequestProcessor
-	if err := dareq.loadFromJsonCfg(nil, utils.INFIELD_SEP); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(dareq, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, dareq)
-	}
-	if err := dareq.loadFromJsonCfg(new(DARequestProcessorJsnCfg), utils.INFIELD_SEP); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(dareq, expected) {
-		t.Errorf("Expected: %+v ,recived: %+v", expected, dareq)
-	}
-	json := &DARequestProcessorJsnCfg{
-		Id:                  utils.StringPointer("cgrates"),
-		Tenant:              utils.StringPointer("tenant"),
-		Filters:             &[]string{"filter1", "filter2"},
-		Flags:               &[]string{"flag1", "flag2"},
-		Timezone:            utils.StringPointer("Local"),
-		Continue_on_success: utils.BoolPointer(true),
-	}
-	expected = DARequestProcessor{
-		ID:                "cgrates",
-		Tenant:            NewRSRParsersMustCompile("tenant", true, utils.INFIELD_SEP),
-		Filters:           []string{"filter1", "filter2"},
-		Flags:             utils.StringMap{"flag1": true, "flag2": true},
-		Timezone:          "Local",
-		ContinueOnSuccess: true,
-	}
-	if err = dareq.loadFromJsonCfg(json, utils.INFIELD_SEP); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, dareq) {
-		t.Errorf("Expected: %+v , recived: %+v", utils.ToJSON(expected), utils.ToJSON(dareq))
-	}
-}

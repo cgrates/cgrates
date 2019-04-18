@@ -49,6 +49,12 @@
 	"rals_conns": [
 		{"address": "127.0.0.1:22012", "transport": "*json"},
 	],
+	"cdrs_conns": [
+		{"address": "*internal"}
+	],
+	"chargers_conns": [
+		{"address": "*internal"}
+	],
 },
 
 }
