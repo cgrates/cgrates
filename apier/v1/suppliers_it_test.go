@@ -24,6 +24,7 @@ import (
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -65,6 +66,7 @@ var sTestsSupplierSV1 = []func(t *testing.T){
 	testV1SplSGetSupplierProfileIDs,
 	testV1SplSUpdateSupplierProfiles,
 	testV1SplSRemSupplierProfiles,
+	testV1SplSGetSupplierForEvent,
 	testV1SplSupplierPing,
 	testV1SplSStopEngine,
 }
@@ -875,6 +877,70 @@ func testV1SplSupplierPing(t *testing.T) {
 		t.Error(err)
 	} else if resp != utils.Pong {
 		t.Error("Unexpected reply returned", resp)
+	}
+}
+
+func testV1SplSGetSupplierForEvent(t *testing.T) {
+	ev := &utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplSGetHighestCostSuppliers",
+			Event: map[string]interface{}{
+				utils.Account:     "1000",
+				utils.Destination: "1001",
+				utils.SetupTime:   "*now",
+				"Subject":         "TEST",
+			},
+		},
+	}
+	expected := engine.SupplierProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SPL_LCR",
+		FilterIDs: []string{"FLTR_TEST"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2017, 11, 27, 00, 00, 00, 00, time.UTC),
+		},
+		Sorting:           "*least_cost",
+		SortingParameters: []string{},
+		Suppliers: []*engine.Supplier{
+			&engine.Supplier{
+				ID:                 "supplier_1",
+				FilterIDs:          nil,
+				AccountIDs:         nil,
+				RatingPlanIDs:      []string{"RP_TEST_1"},
+				ResourceIDs:        nil,
+				StatIDs:            nil,
+				Weight:             10,
+				Blocker:            false,
+				SupplierParameters: "",
+			},
+			&engine.Supplier{
+				ID:                 "supplier_2",
+				FilterIDs:          nil,
+				AccountIDs:         nil,
+				RatingPlanIDs:      []string{"RP_TEST_2"},
+				ResourceIDs:        nil,
+				StatIDs:            nil,
+				Weight:             0,
+				Blocker:            false,
+				SupplierParameters: "",
+			},
+		},
+		Weight: 50,
+	}
+	var supProf engine.SupplierProfile
+	if err := splSv1Rpc.Call(utils.SupplierSv1GetSupplierForEvent,
+		ev, &supProf); err != nil {
+		t.Fatal(err)
+	}
+	sort.Slice(expected.Suppliers, func(i, j int) bool {
+		return supProf.Suppliers[i].Weight < supProf.Suppliers[j].Weight
+	})
+	sort.Slice(supProf.Suppliers, func(i, j int) bool {
+		return supProf.Suppliers[i].Weight < supProf.Suppliers[j].Weight
+	})
+	if !reflect.DeepEqual(expected, supProf) {
+		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(expected), utils.ToJSON(supProf))
 	}
 }
 

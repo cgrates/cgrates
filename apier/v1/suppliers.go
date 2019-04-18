@@ -133,6 +133,12 @@ func (splv1 *SupplierSv1) GetSuppliers(args *engine.ArgsGetSuppliers,
 	return splv1.splS.V1GetSuppliers(args, reply)
 }
 
+// GetSuppliersProfiles returns a list of suppliers profiles that match for Event
+func (splv1 *SupplierSv1) GetSupplierForEvent(args *utils.CGREventWithArgDispatcher,
+	reply *engine.SupplierProfile) error {
+	return splv1.splS.V1GetSupplierForEvent(args, reply)
+}
+
 func (splv1 *SupplierSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
 	*reply = utils.Pong
 	return nil

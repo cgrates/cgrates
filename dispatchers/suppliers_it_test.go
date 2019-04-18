@@ -22,6 +22,7 @@ package dispatchers
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -37,6 +38,7 @@ var sTestsDspSup = []func(t *testing.T){
 	testDspSupPing,
 	testDspSupTestAuthKey,
 	testDspSupTestAuthKey2,
+	testDspSupGetSupplierForEvent,
 }
 
 //Test start here
@@ -320,5 +322,73 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRpl, rpl) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eRpl), utils.ToJSON(rpl))
+	}
+}
+
+func testDspSupGetSupplierForEvent(t *testing.T) {
+	ev := &utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplSGetHighestCostSuppliers",
+			Event: map[string]interface{}{
+				utils.Account:     "1002",
+				utils.Subject:     "1002",
+				utils.Destination: "1001",
+				utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
+				utils.Usage:       "1m20s",
+			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("sup12345"),
+		},
+	}
+	expected := engine.SupplierProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SPL_ACNT_1002",
+		FilterIDs: []string{"FLTR_ACNT_1002"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2017, 11, 27, 00, 00, 00, 00, time.UTC),
+		},
+		Sorting:           "*least_cost",
+		SortingParameters: []string{},
+		Suppliers: []*engine.Supplier{
+			&engine.Supplier{
+				ID:                 "supplier1",
+				FilterIDs:          nil,
+				AccountIDs:         nil,
+				RatingPlanIDs:      []string{"RP_1002_LOW"},
+				ResourceIDs:        nil,
+				StatIDs:            nil,
+				Weight:             10,
+				Blocker:            false,
+				SupplierParameters: "",
+			},
+			&engine.Supplier{
+				ID:                 "supplier2",
+				FilterIDs:          nil,
+				AccountIDs:         nil,
+				RatingPlanIDs:      []string{"RP_1002"},
+				ResourceIDs:        nil,
+				StatIDs:            nil,
+				Weight:             20,
+				Blocker:            false,
+				SupplierParameters: "",
+			},
+		},
+		Weight: 10,
+	}
+	var supProf engine.SupplierProfile
+	if err := dispEngine.RCP.Call(utils.SupplierSv1GetSupplierForEvent,
+		ev, &supProf); err != nil {
+		t.Fatal(err)
+	}
+	sort.Slice(expected.Suppliers, func(i, j int) bool {
+		return supProf.Suppliers[i].Weight < supProf.Suppliers[j].Weight
+	})
+	sort.Slice(supProf.Suppliers, func(i, j int) bool {
+		return supProf.Suppliers[i].Weight < supProf.Suppliers[j].Weight
+	})
+	if !reflect.DeepEqual(expected, supProf) {
+		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(expected), utils.ToJSON(supProf))
 	}
 }

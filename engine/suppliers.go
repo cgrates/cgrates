@@ -469,7 +469,7 @@ type optsGetSuppliers struct {
 	sortingParameters []string //used for QOS strategy
 }
 
-// V1GetSuppliersForEvent returns the list of valid supplier IDs
+// V1GetSupplierForEvent returns the list of valid supplier IDs
 func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *SortedSuppliers) (err error) {
 	if missing := utils.MissingStructFields(&args.CGREvent, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -498,5 +498,25 @@ func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *Sorted
 		return err
 	}
 	*reply = *sSps
+	return
+}
+
+// V1GetSupplierProfiles returns the list of valid supplier profiles
+func (spS *SupplierService) V1GetSupplierForEvent(args *utils.CGREventWithArgDispatcher, reply *SupplierProfile) (err error) {
+	if missing := utils.MissingStructFields(args.CGREvent, []string{"Tenant", "ID"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	} else if args.CGREvent.Event == nil {
+		return utils.NewErrMandatoryIeMissing("Event")
+	}
+	sPs, err := spS.matchingSupplierProfilesForEvent(args.CGREvent)
+	if err != nil {
+		if err != utils.ErrNotFound {
+			err = utils.NewErrServerError(err)
+		}
+		return err
+	}
+	if sPs != nil {
+		*reply = *sPs
+	}
 	return
 }
