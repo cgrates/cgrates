@@ -928,18 +928,18 @@ func testV1SplSGetSupplierForEvent(t *testing.T) {
 		},
 		Weight: 50,
 	}
-	var supProf engine.SupplierProfile
-	if err := splSv1Rpc.Call(utils.SupplierSv1GetSupplierForEvent,
+	var supProf []*engine.SupplierProfile
+	if err := splSv1Rpc.Call(utils.SupplierSv1GetSupplierProfilesForEvent,
 		ev, &supProf); err != nil {
 		t.Fatal(err)
 	}
 	sort.Slice(expected.Suppliers, func(i, j int) bool {
-		return supProf.Suppliers[i].Weight < supProf.Suppliers[j].Weight
+		return expected.Suppliers[i].Weight < expected.Suppliers[j].Weight
 	})
-	sort.Slice(supProf.Suppliers, func(i, j int) bool {
-		return supProf.Suppliers[i].Weight < supProf.Suppliers[j].Weight
+	sort.Slice(supProf[0].Suppliers, func(i, j int) bool {
+		return supProf[0].Suppliers[i].Weight < supProf[0].Suppliers[j].Weight
 	})
-	if !reflect.DeepEqual(expected, supProf) {
+	if !reflect.DeepEqual(expected, *supProf[0]) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(expected), utils.ToJSON(supProf))
 	}
 }

@@ -54,18 +54,18 @@ func (dS *DispatcherService) SupplierSv1GetSuppliers(args *engine.ArgsGetSupplie
 		utils.SupplierSv1GetSuppliers, args, reply)
 }
 
-func (dS *DispatcherService) SupplierSv1GetSupplierForEvent(args *utils.CGREventWithArgDispatcher,
-	reply *engine.SupplierProfile) (err error) {
+func (dS *DispatcherService) SupplierSv1GetSupplierProfilesForEvent(args *utils.CGREventWithArgDispatcher,
+	reply *[]*engine.SupplierProfile) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
 	}
 	if dS.attrS != nil {
-		if err = dS.authorize(utils.SupplierSv1GetSupplierForEvent,
+		if err = dS.authorize(utils.SupplierSv1GetSupplierProfilesForEvent,
 			args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaSuppliers, args.RouteID,
-		utils.SupplierSv1GetSupplierForEvent, args, reply)
+		utils.SupplierSv1GetSupplierProfilesForEvent, args, reply)
 }

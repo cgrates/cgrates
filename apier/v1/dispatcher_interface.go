@@ -55,7 +55,7 @@ type ResourceSv1Interface interface {
 
 type SupplierSv1Interface interface {
 	GetSuppliers(args *engine.ArgsGetSuppliers, reply *engine.SortedSuppliers) error
-	GetSupplierForEvent(args *utils.CGREventWithArgDispatcher, reply *engine.SupplierProfile) error
+	GetSupplierProfilesForEvent(args *utils.CGREventWithArgDispatcher, reply *[]*engine.SupplierProfile) error
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 }
 

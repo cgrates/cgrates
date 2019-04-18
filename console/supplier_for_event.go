@@ -25,8 +25,8 @@ import (
 
 func init() {
 	c := &CmdGetSupplierForEvent{
-		name:      "supplier_for_event",
-		rpcMethod: utils.SupplierSv1GetSupplierForEvent,
+		name:      "supplier_profiles_for_event",
+		rpcMethod: utils.SupplierSv1GetSupplierProfilesForEvent,
 		rpcParams: &utils.CGREventWithArgDispatcher{},
 	}
 	commands[c.Name()] = c
@@ -60,6 +60,6 @@ func (self *CmdGetSupplierForEvent) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetSupplierForEvent) RpcResult() interface{} {
-	atr := engine.SupplierProfile{}
+	atr := []*engine.SupplierProfile{}
 	return &atr
 }

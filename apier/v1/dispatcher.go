@@ -338,9 +338,9 @@ func (dSup *DispatcherSupplierSv1) GetSuppliers(args *engine.ArgsGetSuppliers,
 }
 
 // GetSuppliersProfiles returns a list of suppliers profiles that match for Event
-func (dSup *DispatcherSupplierSv1) GetSupplierForEvent(args *utils.CGREventWithArgDispatcher,
-	reply *engine.SupplierProfile) error {
-	return dSup.dSup.SupplierSv1GetSupplierForEvent(args, reply)
+func (dSup *DispatcherSupplierSv1) GetSupplierProfilesForEvent(args *utils.CGREventWithArgDispatcher,
+	reply *[]*engine.SupplierProfile) error {
+	return dSup.dSup.SupplierSv1GetSupplierProfilesForEvent(args, reply)
 }
 
 func NewDispatcherAttributeSv1(dps *dispatchers.DispatcherService) *DispatcherAttributeSv1 {
