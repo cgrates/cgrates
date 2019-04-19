@@ -32,11 +32,11 @@ type AttributeWithCache struct {
 }
 
 //SetAttributeProfile add/update a new Attribute Profile
-func (apierV2 *ApierV2) SetAttributeProfile(extAlsPrfWrp *AttributeWithCache, reply *string) error {
-	if missing := utils.MissingStructFields(extAlsPrfWrp.ExternalAttributeProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
+func (apierV2 *ApierV2) SetAttributeProfile(arg *AttributeWithCache, reply *string) error {
+	if missing := utils.MissingStructFields(arg.ExternalAttributeProfile, []string{utils.Tenant, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	alsPrf, err := extAlsPrfWrp.ExternalAttributeProfile.AsAttributeProfile()
+	alsPrf, err := arg.ExternalAttributeProfile.AsAttributeProfile()
 	if err != nil {
 		return utils.APIErrorHandler(err)
 	}
@@ -44,14 +44,17 @@ func (apierV2 *ApierV2) SetAttributeProfile(extAlsPrfWrp *AttributeWithCache, re
 		return utils.APIErrorHandler(err)
 	}
 	//generate a loadID for CacheAttributeProfiles and store it in database
-	if err := apierV2.DataManager.SetLoadIDs(map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
+	if err := apierV2.DataManager.SetLoadIDs(
+		map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	args := engine.ArgsGetCacheItem{
 		CacheID: utils.CacheAttributeProfiles,
 		ItemID:  alsPrf.TenantID(),
 	}
-	if err := apierV2.CallCache(v1.GetCacheOpt(extAlsPrfWrp.Cache), args); err != nil {
+	if err := apierV2.ApierV1.CallCache(
+		v1.GetCacheOpt(arg.Cache),
+		args); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

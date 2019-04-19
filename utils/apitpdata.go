@@ -515,8 +515,9 @@ func InitAttrReloadCache() (rpl AttrReloadCache) {
 	rpl.AttributeProfileIDs = &[]string{}
 	rpl.ChargerProfileIDs = &[]string{}
 	rpl.DispatcherProfileIDs = &[]string{}
+	rpl.DispatcherHostIDs = &[]string{}
 	rpl.DispatcherRoutesIDs = &[]string{}
-	return rpl
+	return
 }
 
 type CacheKeys struct {
