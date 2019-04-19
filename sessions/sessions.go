@@ -921,11 +921,7 @@ func (sS *SessionS) asActiveSessions(fltrs map[string]string,
 			delete(fltrs, fltrFldName)
 		}
 	}
-	var remainingSessions []*Session // Survived index matching
-	ss := sS.getSessions(fltrs[utils.CGRID], psv)
-	for _, s := range ss {
-		remainingSessions = append(remainingSessions, s)
-	}
+	remainingSessions := sS.getSessions(fltrs[utils.CGRID], psv)
 	if len(fltrs) != 0 { // Still have some filters to match
 		for _, s := range remainingSessions {
 			for _, sr := range s.SRuns {
