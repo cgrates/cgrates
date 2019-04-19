@@ -168,7 +168,7 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent,
 		if len(matchingSLP) == 0 {
 			return nil, utils.ErrNotFound
 		}
-		sort.Slice(matchingSLP, func(i, j int) bool { return matchingSLP[i].Weight < matchingSLP[j].Weight })
+		sort.Slice(matchingSLP, func(i, j int) bool { return matchingSLP[i].Weight > matchingSLP[j].Weight })
 	}
 	return
 }
