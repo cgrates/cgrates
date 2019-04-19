@@ -41,6 +41,7 @@ import (
 	"github.com/mongodb/mongo-go-driver/mongo"
 	"github.com/mongodb/mongo-go-driver/mongo/options"
 	"github.com/mongodb/mongo-go-driver/x/bsonx"
+	"github.com/mongodb/mongo-go-driver/x/network/command"
 )
 
 const (
@@ -259,7 +260,7 @@ func (ms *MongoStorage) GetContext() context.Context {
 }
 
 func (ms *MongoStorage) EnsureIndexesForCol(col string) (err error) { // exported for migrator
-	if err = ms.dropAllIndexesForCol(col); err != nil { // make sure you do not have indexes
+	if err = ms.dropAllIndexesForCol(col); err != nil && !command.IsNotFound(err) { // make sure you do not have indexes
 		return
 	}
 	switch col {
