@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -265,8 +266,12 @@ func (sm *FSsessions) onChannelHangupComplete(fsev FSEvent, connId string) {
 		if err != nil {
 			return
 		}
+		argsDisp := cgrEv.ConsumeArgDispatcher()
+		if strings.Index(fsev[VarCGRSubsystems], utils.MetaDispatchers) != -1 && argsDisp == nil {
+			argsDisp = new(utils.ArgDispatcher)
+		}
 		if err := sm.sS.Call(utils.SessionSv1ProcessCDR,
-			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv, ArgDispatcher: cgrEv.ConsumeArgDispatcher()}, &reply); err != nil {
+			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv, ArgDispatcher: argsDisp}, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Failed processing CGREvent: %s,  error: <%s>",
 				utils.FreeSWITCHAgent, utils.ToJSON(cgrEv), err.Error()))
 		}

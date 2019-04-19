@@ -255,6 +255,9 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 	}
 	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.tenant, utils.NestingSep)
 	argDisp := cgrEv.ConsumeArgDispatcher()
+	if reqProcessor.Flags.HasKey(utils.MetaDispatchers) && argDisp == nil {
+		argDisp = new(utils.ArgDispatcher)
+	}
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,

@@ -43,9 +43,9 @@
 
 "dispatchers":{
  	"enabled": true,
- 	"attributes_conns": [
-		{"address": "*internal"},
- 	],
+ 	// "attributes_conns": [
+		// {"address": "*internal"},
+ 	// ],
 },
 
 "radius_agent": {
@@ -54,11 +54,11 @@
 		{
 			"id": "KamailioAuth",
 			"filters": ["*string:~*vars.*radReqType:*radAuth"],
-			"flags": ["*auth", "*accounts"],
+			"flags": ["*auth", "*accounts","*dispatchers"],
 			"continue_on_success": false,
 			"request_fields":[
 				{"tag": "Category", "field_id": "Category", "type": "*constant", "value": "call"},
-				{"tag": "*api_key", "field_id": "*api_key", "type": "*constant", "value": "ses12345"},
+				// {"tag": "*api_key", "field_id": "*api_key", "type": "*constant", "value": "ses12345"},
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
 					"value": "*prepaid", "mandatory": true},	
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
@@ -82,11 +82,11 @@
 		{
 			"id": "KamailioAccountingStart",
 			"filters": ["*string:~*req.Acct-Status-Type:Start"],
-			"flags": ["*initiate", "*attributes", "*resources", "*accounts"],
+			"flags": ["*initiate", "*attributes", "*resources", "*accounts","*dispatchers"],
 			"continue_on_success": false,
 			"request_fields":[	
 				{"tag": "Category", "field_id": "Category", "type": "*constant", "value": "call"},
-				{"tag": "*api_key", "field_id": "*api_key", "type": "*constant", "value": "ses12345"},
+				// {"tag": "*api_key", "field_id": "*api_key", "type": "*constant", "value": "ses12345"},
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
 					"value": "*prepaid", "mandatory": true},	
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
@@ -110,11 +110,11 @@
 		{
 			"id": "KamailioAccountingStop",
 			"filters": ["*string:~*req.Acct-Status-Type:Stop"],
-			"flags": ["*terminate", "*resources", "*accounts", "*cdrs"],
+			"flags": ["*terminate", "*resources", "*accounts", "*cdrs","*dispatchers"],
 			"continue_on_success": false,
 			"request_fields":[	
 				{"tag": "Category", "field_id": "Category", "type": "*constant", "value": "call"},
-				{"tag": "*api_key", "field_id": "*api_key", "type": "*constant", "value": "ses12345"},
+				// {"tag": "*api_key", "field_id": "*api_key", "type": "*constant", "value": "ses12345"},
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
 					"value": "*prepaid", "mandatory": true},	
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 

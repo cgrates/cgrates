@@ -192,6 +192,9 @@ func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 	args.ProcessThresholds = strings.Index(subsystems, utils.MetaThresholds) != -1
 	args.ProcessStats = strings.Index(subsystems, utils.MetaStats) != -1
 	args.ArgDispatcher = cgrEv.ConsumeArgDispatcher()
+	if strings.Index(subsystems, utils.MetaDispatchers) != -1 && args.ArgDispatcher == nil {
+		args.ArgDispatcher = new(utils.ArgDispatcher)
+	}
 	return
 }
 
@@ -256,6 +259,9 @@ func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 	args.ProcessThresholds = strings.Index(subsystems, utils.MetaThresholds) != -1
 	args.ProcessStats = strings.Index(subsystems, utils.MetaStats) != -1
 	args.ArgDispatcher = cgrEv.ConsumeArgDispatcher()
+	if strings.Index(subsystems, utils.MetaDispatchers) != -1 && args.ArgDispatcher == nil {
+		args.ArgDispatcher = new(utils.ArgDispatcher)
+	}
 	return
 }
 
@@ -278,6 +284,9 @@ func (kev KamEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionA
 	args.ProcessThresholds = strings.Index(subsystems, utils.MetaThresholds) != -1
 	args.ProcessStats = strings.Index(subsystems, utils.MetaStats) != -1
 	args.ArgDispatcher = cgrEv.ConsumeArgDispatcher()
+	if strings.Index(subsystems, utils.MetaDispatchers) != -1 && args.ArgDispatcher == nil {
+		args.ArgDispatcher = new(utils.ArgDispatcher)
+	}
 	return
 }
 
