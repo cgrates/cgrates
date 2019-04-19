@@ -627,6 +627,7 @@ const (
 // Migrator Metas
 const (
 	MetaSetVersions         = "*set_versions"
+	MetaEnsureIndexes       = "*ensure_indexes"
 	MetaTpRatingPlans       = "*tp_rating_plans"
 	MetaTpFilters           = "*tp_filters"
 	MetaTpDestinationRates  = "*tp_destination_rates"

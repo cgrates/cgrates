@@ -87,6 +87,24 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 				return utils.NewCGRError(utils.Migrator, utils.ServerErrorCaps, err.Error(),
 					fmt.Sprintf("error: <%s> when seting versions for StorDB", err.Error())), nil
 			}
+		case utils.MetaEnsureIndexes:
+			if m.storDBOut.StorDB().GetStorageType() == utils.MONGO {
+				mgo := m.storDBOut.StorDB().(*engine.MongoStorage)
+				if err = mgo.EnsureIndexes(); err != nil {
+					return
+				}
+			} else {
+				fmt.Printf("The StorDB type is not %s .\n %s works only on %s .\n", utils.MONGO, utils.MetaEnsureIndexes, utils.MONGO)
+			}
+
+			if m.dmOut.DataManager().DataDB().GetStorageType() == utils.MONGO {
+				mgo := m.dmOut.DataManager().DataDB().(*engine.MongoStorage)
+				if err = mgo.EnsureIndexes(); err != nil {
+					return
+				}
+			} else {
+				fmt.Printf("The DataDB type is not %s .\n %s works only on %s.\n ", utils.MONGO, utils.MetaEnsureIndexes, utils.MONGO)
+			}
 		case utils.MetaCDRs:
 			err = m.migrateCDRs()
 		case utils.MetaSessionsCosts:
