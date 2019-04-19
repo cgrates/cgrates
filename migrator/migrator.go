@@ -94,7 +94,7 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 					return
 				}
 			} else {
-				fmt.Printf("The StorDB type is not %s .\n %s works only on %s .\n", utils.MONGO, utils.MetaEnsureIndexes, utils.MONGO)
+				log.Printf("The StorDB type has to be %s .\n ", utils.MONGO)
 			}
 
 			if m.dmOut.DataManager().DataDB().GetStorageType() == utils.MONGO {
@@ -103,7 +103,7 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 					return
 				}
 			} else {
-				fmt.Printf("The DataDB type is not %s .\n %s works only on %s.\n ", utils.MONGO, utils.MetaEnsureIndexes, utils.MONGO)
+				log.Printf("The DataDB type has to be %s .\n ", utils.MONGO)
 			}
 		case utils.MetaCDRs:
 			err = m.migrateCDRs()
