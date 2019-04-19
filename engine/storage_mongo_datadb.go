@@ -226,7 +226,7 @@ func (ms *MongoStorage) IsDataDB() bool {
 	return ms.isDataDB
 }
 
-func (ms *MongoStorage) EnusureIndex(colName string, uniq bool, keys ...string) error {
+func (ms *MongoStorage) enusureIndex(colName string, uniq bool, keys ...string) error {
 	return ms.query(func(sctx mongo.SessionContext) error {
 		col := ms.getCol(colName)
 		io := options.Index().SetUnique(uniq)
@@ -242,6 +242,14 @@ func (ms *MongoStorage) EnusureIndex(colName string, uniq bool, keys ...string) 
 	})
 }
 
+func (ms *MongoStorage) dropAllIndexesForCol(colName string) error {
+	return ms.query(func(sctx mongo.SessionContext) error {
+		col := ms.getCol(colName)
+		_, err := col.Indexes().DropAll(sctx)
+		return err
+	})
+}
+
 func (ms *MongoStorage) getCol(col string) *mongo.Collection {
 	return ms.client.Database(ms.db).Collection(col)
 }
@@ -250,23 +258,72 @@ func (ms *MongoStorage) GetContext() context.Context {
 	return ms.ctx
 }
 
+func (ms *MongoStorage) EnsureIndexesForCol(col string) (err error) { // exported for migrator
+	if err = ms.dropAllIndexesForCol(col); err != nil { // make sure you do not have indexes
+		return
+	}
+	switch col {
+	case colAct, colApl, colAAp, colAtr, colRpl, colDst, colRds, colLht, colRFI:
+		if err = ms.enusureIndex(col, true, "key"); err != nil {
+			return
+		}
+	case colRsP, colRes, colSqs, colSqp, colTps, colThs, colSpp, colAttr, colFlt, colCpp, colDpp:
+		if err = ms.enusureIndex(col, true, "tenant", "id"); err != nil {
+			return
+		}
+	case colRpf, colShg, colAcc:
+		if err = ms.enusureIndex(col, true, "id"); err != nil {
+			return
+		}
+		//StorDB
+	case utils.TBLTPTimings, utils.TBLTPDestinations,
+		utils.TBLTPDestinationRates, utils.TBLTPRatingPlans,
+		utils.TBLTPSharedGroups, utils.TBLTPActions,
+		utils.TBLTPActionPlans, utils.TBLTPActionTriggers,
+		utils.TBLTPStats, utils.TBLTPResources:
+		if err = ms.enusureIndex(col, true, "tpid", "id"); err != nil {
+			return
+		}
+	case utils.TBLTPRateProfiles:
+		if err = ms.enusureIndex(col, true, "tpid", "direction",
+			"tenant", "category", "subject", "loadid"); err != nil {
+			return
+		}
+	case utils.CDRsTBL:
+		if err = ms.enusureIndex(col, true, CGRIDLow, RunIDLow,
+			OriginIDLow); err != nil {
+			return
+		}
+		for _, idxKey := range ms.cdrsIndexes {
+			if err = ms.enusureIndex(col, false, idxKey); err != nil {
+				return
+			}
+		}
+	case utils.SessionCostsTBL:
+		if err = ms.enusureIndex(col, true, CGRIDLow,
+			RunIDLow); err != nil {
+			return
+		}
+		if err = ms.enusureIndex(col, false, OriginHostLow,
+			OriginIDLow); err != nil {
+			return
+		}
+		if err = ms.enusureIndex(col, false, RunIDLow,
+			OriginIDLow); err != nil {
+			return
+		}
+	}
+	return
+}
+
 // EnsureIndexes creates db indexes
 func (ms *MongoStorage) EnsureIndexes() (err error) {
 	if ms.storageType == utils.DataDB {
 		for _, col := range []string{colAct, colApl, colAAp, colAtr,
-			colRpl, colDst, colRds, colLht, colRFI} {
-			if err = ms.EnusureIndex(col, true, "key"); err != nil {
-				return
-			}
-		}
-		for _, col := range []string{colRsP, colRes, colSqs, colSqp,
-			colTps, colThs, colSpp, colAttr, colFlt, colCpp, colDpp} {
-			if err = ms.EnusureIndex(col, true, "tenant", "id"); err != nil {
-				return
-			}
-		}
-		for _, col := range []string{colRpf, colShg, colAcc} {
-			if err = ms.EnusureIndex(col, true, "id"); err != nil {
+			colRpl, colDst, colRds, colLht, colRFI, colRsP, colRes, colSqs, colSqp,
+			colTps, colThs, colSpp, colAttr, colFlt, colCpp, colDpp,
+			colRpf, colShg, colAcc} {
+			if err = ms.EnsureIndexesForCol(col); err != nil {
 				return
 			}
 		}
@@ -276,41 +333,11 @@ func (ms *MongoStorage) EnsureIndexes() (err error) {
 			utils.TBLTPDestinationRates, utils.TBLTPRatingPlans,
 			utils.TBLTPSharedGroups, utils.TBLTPActions,
 			utils.TBLTPActionPlans, utils.TBLTPActionTriggers,
-			utils.TBLTPStats, utils.TBLTPResources} {
-			if err = ms.EnusureIndex(col, true, "tpid", "id"); err != nil {
+			utils.TBLTPStats, utils.TBLTPResources,
+			utils.TBLTPRateProfiles, utils.CDRsTBL, utils.SessionCostsTBL} {
+			if err = ms.EnsureIndexesForCol(col); err != nil {
 				return
 			}
-		}
-
-		if err = ms.EnusureIndex(utils.TBLTPRateProfiles, true, "tpid", "direction",
-			"tenant", "category", "subject", "loadid"); err != nil {
-			return
-		}
-
-		if err = ms.EnusureIndex(utils.CDRsTBL, true, CGRIDLow, RunIDLow,
-			OriginIDLow); err != nil {
-			return
-		}
-
-		for _, idxKey := range ms.cdrsIndexes {
-			if err = ms.EnusureIndex(utils.CDRsTBL, false, idxKey); err != nil {
-				return
-			}
-		}
-
-		if err = ms.EnusureIndex(utils.SessionCostsTBL, true, CGRIDLow,
-			RunIDLow); err != nil {
-			return
-		}
-
-		if err = ms.EnusureIndex(utils.SessionCostsTBL, false, OriginHostLow,
-			OriginIDLow); err != nil {
-			return
-		}
-
-		if err = ms.EnusureIndex(utils.SessionCostsTBL, false, RunIDLow,
-			OriginIDLow); err != nil {
-			return
 		}
 	}
 	return
