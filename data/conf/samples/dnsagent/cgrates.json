@@ -53,7 +53,7 @@
 
 "dns_agent": {
 	"enabled": true,
-	"listen": ":53"		
+	"listen": ":2053"		
 },
 
 
