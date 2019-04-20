@@ -115,3 +115,65 @@ func dnsWriteMsg(w dns.ResponseWriter, msg *dns.Msg) (err error) {
 	}
 	return
 }
+
+// appendDNSAnswer will append the right answer payload to the message
+func appendDNSAnswer(msg *dns.Msg) (err error) {
+	switch msg.Question[0].Qtype {
+	case dns.TypeA:
+		msg.Answer = append(msg.Answer,
+			&dns.A{
+				Hdr: dns.RR_Header{
+					Name:   msg.Question[0].Name,
+					Rrtype: dns.TypeA,
+					Class:  dns.ClassINET,
+					Ttl:    60},
+			},
+		)
+	default:
+		return fmt.Errorf("unsupported DNS type: <%v>", msg.Question[0].Qtype)
+	}
+	return
+}
+
+// updateDNSMsgFromNM will update DNS message with values from NavigableMap
+func updateDNSMsgFromNM(msg *dns.Msg, nm *config.NavigableMap) (err error) {
+	for _, valX := range nm.Values() {
+		nmItms, cast := valX.([]*config.NMItem)
+		if !cast {
+			return fmt.Errorf("cannot cast val: %s into []*config.NMItem", utils.ToJSON(valX))
+		}
+		if len(nmItms) == 0 {
+			continue
+		}
+		cfgItm := nmItms[0] // first item gives some config for the rest
+		if cfgItm.Config.NewBranch {
+			if err = appendDNSAnswer(msg); err != nil {
+				return
+			}
+		}
+		if len(cfgItm.Path) == 0 {
+			return errors.New("empty path in config item")
+		}
+		switch cfgItm.Path[0] {
+		case utils.MetaResponseCode:
+			var itm int64
+			if itm, err = utils.IfaceAsInt64(cfgItm.Data); err != nil {
+				return fmt.Errorf("item: <%s>, err: %s", cfgItm.Path[0], err.Error())
+			}
+			msg.Rcode = int(itm)
+			continue
+		case utils.MetaAnswer:
+			lastAnswer := msg.Answer[len(msg.Answer)-1]
+			switch msg.Question[0].Qtype {
+			case dns.TypeA:
+				var ip string
+				if ip, err = utils.IfaceAsString(cfgItm.Data); err != nil {
+					return
+				}
+				lastAnswer.(*dns.A).A = net.ParseIP(ip)
+			}
+
+		}
+	}
+	return
+}
