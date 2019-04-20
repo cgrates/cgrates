@@ -110,6 +110,7 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 			return
 		}
 		reqVars[E164Address] = e164
+		utils.Logger.Info(fmt.Sprintf("reqVars: %+v", reqVars))
 	}
 	rplyNM := config.NewNavigableMap(nil) // share it among different processors
 

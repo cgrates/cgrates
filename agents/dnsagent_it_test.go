@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
-	"net/http"
+	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -31,13 +31,14 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/miekg/dns"
 )
 
 var (
 	dnsCfgPath string
 	dnsCfg     *config.CGRConfig
 	dnsRPC     *rpc.Client
-	dnsClnt    *http.Client // so we can cache the connection
+	dnsClnt    *dns.Conn // so we can cache the connection
 )
 
 var sTestsDNS = []func(t *testing.T){
@@ -45,6 +46,8 @@ var sTestsDNS = []func(t *testing.T){
 	testDNSitStartEngine,
 	testDNSitApierRpcConn,
 	testDNSitTPFromFolder,
+	testDNSitClntConn,
+	testDNSitClntNAPTRDryRun,
 	testDNSitStopEngine,
 }
 
@@ -110,6 +113,33 @@ func testDNSitTPFromFolder(t *testing.T) {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
+	}
+}
+
+// Connect DNS client to server
+func testDNSitClntConn(t *testing.T) {
+	c := new(dns.Client)
+	var err error
+	if dnsClnt, err = c.Dial(dnsCfg.DNSAgentCfg().Listen); err != nil { // just testing the connection, not not saving it
+		t.Fatal(err)
+	} else if dnsClnt == nil {
+		t.Fatalf("conn is nil")
+	}
+	fmt.Printf("done connecting to %s", dnsCfg.DNSAgentCfg().Listen)
+}
+
+func testDNSitClntNAPTRDryRun(t *testing.T) {
+	m := new(dns.Msg)
+	m.SetQuestion("3.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeNAPTR)
+	if err := dnsClnt.WriteMsg(m); err != nil {
+		t.Error(err)
+	}
+	if rply, err := dnsClnt.ReadMsg(); err != nil {
+		t.Error(err)
+	} else {
+		if rply.Rcode != dns.RcodeSuccess {
+			t.Errorf("failed to get an valid answer\n%v", rply)
+		}
 	}
 }
 
