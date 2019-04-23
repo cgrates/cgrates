@@ -99,7 +99,9 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 	reqVars[QueryType] = dns.TypeToString[req.Question[0].Qtype]
 	rply := new(dns.Msg)
 	rply.SetReply(req)
-	if req.Question[0].Qtype == dns.TypeNAPTR {
+	// message preprocesing
+	switch req.Question[0].Qtype {
+	case dns.TypeNAPTR:
 		e164, err := e164FromNAPTR(req.Question[0].Name)
 		if err != nil {
 			utils.Logger.Warning(

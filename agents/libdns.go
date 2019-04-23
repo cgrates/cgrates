@@ -171,6 +171,12 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *config.NavigableMap) (err error) {
 					return
 				}
 				lastAnswer.(*dns.A).A = net.ParseIP(ip)
+			case dns.TypeNAPTR:
+				if rr, err := dns.NewRR(`IN NAPTR 100 10 "U" "E2U+sip" "!^.*$!sip:customer-service@example.com!" .`); err != nil {
+					return err
+				} else {
+					lastAnswer = rr
+				}
 			}
 
 		}
