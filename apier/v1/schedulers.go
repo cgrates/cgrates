@@ -34,7 +34,7 @@ type SchedulerSv1 struct {
 
 // Reload reloads scheduler instructions
 func (schdSv1 *SchedulerSv1) Reload(arg *utils.CGREventWithArgDispatcher, reply *string) error {
-	return schdSv1.schdS.V1Reload(utils.EmptyString, reply)
+	return schdSv1.schdS.V1Reload(arg, reply)
 }
 
 func (schdSv1 *SchedulerSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {

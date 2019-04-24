@@ -38,7 +38,7 @@ func (schdS *SchedulerS) Call(serviceMethod string, args interface{}, reply inte
 }
 
 // V1ReloadScheduler reloads the scheduler tasks
-func (schdS *SchedulerS) V1Reload(_ string, reply *string) (err error) {
+func (schdS *SchedulerS) V1Reload(_ *utils.CGREventWithArgDispatcher, reply *string) (err error) {
 	sched := schdS.srvMngr.GetScheduler()
 	if sched == nil {
 		return errors.New(utils.SchedulerNotRunningCaps)
