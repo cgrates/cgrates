@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/rpc"
@@ -33,50 +34,49 @@ import (
 )
 
 var (
-	SessionBenchmarkCfg *config.CGRConfig
-	SessionBenchmarkRPC *rpc.Client
-	ConnectOnce         sync.Once
-	NoSessions          int
+	sBenchCfg *config.CGRConfig
+	sBenchRPC *rpc.Client
+	connOnce  sync.Once
+	initRuns  = flag.Int("init_runs", 25000, "number of loops to run in init")
 )
 
 func startRPC() {
 	var err error
-	SessionBenchmarkCfg, err = config.NewCGRConfigFromPath(path.Join(config.CgrConfig().DataFolderPath, "conf", "samples", "tutmysql"))
+	sBenchCfg, err = config.NewCGRConfigFromPath(
+		path.Join(config.CgrConfig().DataFolderPath, "conf", "samples", "tutmysql"))
 	if err != nil {
 		log.Fatal(err)
 	}
-	config.SetCgrConfig(SessionBenchmarkCfg)
-	if SessionBenchmarkRPC, err = jsonrpc.Dial("tcp", SessionBenchmarkCfg.ListenCfg().RPCJSONListen); err != nil {
+	config.SetCgrConfig(sBenchCfg)
+	if sBenchRPC, err = jsonrpc.Dial("tcp", sBenchCfg.ListenCfg().RPCJSONListen); err != nil {
 		log.Fatalf("Error at dialing rcp client:%v\n", err)
 	}
 }
 
-func addBalance(SessionBenchmarkRPC *rpc.Client, sraccount string) {
+func addBalance(sBenchRPC *rpc.Client, sraccount string) {
 	attrSetBalance := utils.AttrSetBalance{
-		Tenant:        "cgrates.org",
-		Account:       sraccount,
-		BalanceType:   utils.VOICE,
-		BalanceID:     utils.StringPointer("TestDynamicDebitBalance"),
-		Value:         utils.Float64Pointer(5 * float64(time.Hour)),
-		RatingSubject: utils.StringPointer("*zero5ms"),
+		Tenant:      "cgrates.org",
+		Account:     sraccount,
+		BalanceType: utils.VOICE,
+		BalanceID:   utils.StringPointer("TestDynamicDebitBalance"),
+		Value:       utils.Float64Pointer(5 * float64(time.Hour)),
 	}
 	var reply string
-	if err := SessionBenchmarkRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := sBenchRPC.Call("ApierV2.SetBalance",
+		attrSetBalance, &reply); err != nil {
 		log.Fatal(err)
-		// } else if reply != utils.OK {
-		// log.Fatalf("Received: %s", reply)
 	}
 }
 
 func addAccouns() {
 	var wg sync.WaitGroup
-	for i := 0; i < 23000; i++ {
+	for i := 0; i < *initRuns; i++ {
 		wg.Add(1)
-		go func(i int, SessionBenchmarkRPC *rpc.Client) {
-			addBalance(SessionBenchmarkRPC, fmt.Sprintf("1001%v1002", i))
-			addBalance(SessionBenchmarkRPC, fmt.Sprintf("1001%v1001", i))
+		go func(i int, sBenchRPC *rpc.Client) {
+			addBalance(sBenchRPC, fmt.Sprintf("1001%v", i))
+			addBalance(sBenchRPC, fmt.Sprintf("1002%v", i))
 			wg.Done()
-		}(i, SessionBenchmarkRPC)
+		}(i, sBenchRPC)
 	}
 	wg.Wait()
 }
@@ -90,47 +90,37 @@ func sendInit() {
 			Event: map[string]interface{}{
 				utils.EVENT_NAME:  "TEST_EVENT",
 				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "123491",
-				utils.Account:     "1001",
-				utils.Subject:     "1001",
-				utils.Destination: "1002",
 				utils.Category:    "call",
 				utils.Tenant:      "cgrates.org",
 				utils.RequestType: utils.META_PREPAID,
-				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
 				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-				utils.Usage:       "10", // 5MB
 			},
 		},
 	}
-	// var wg sync.WaitGroup
-	for i := 0; i < 23000; i++ {
-		// wg.Add(1)
-		// go func(i int, SessionBenchmarkRPC *rpc.Client) {
-		initArgs.ID = utils.UUIDSha1Prefix()
-		initArgs.Event[utils.OriginID] = utils.UUIDSha1Prefix()
-		initArgs.Event[utils.Account] = fmt.Sprintf("1001%v1002", i)
-		initArgs.Event[utils.Subject] = initArgs.Event[utils.Account]
-		initArgs.Event[utils.Destination] = fmt.Sprintf("1001%v1001", i)
+	var wg sync.WaitGroup
+	for i := 0; i < *initRuns; i++ {
+		wg.Add(1)
+		go func(i int) {
+			initArgs.ID = utils.UUIDSha1Prefix()
+			initArgs.Event[utils.OriginID] = utils.UUIDSha1Prefix()
+			initArgs.Event[utils.Account] = fmt.Sprintf("1001%v", i)
+			initArgs.Event[utils.Subject] = initArgs.Event[utils.Account]
+			initArgs.Event[utils.Destination] = fmt.Sprintf("1002%v", i)
 
-		var initRpl *V1InitSessionReply
-		if err := SessionBenchmarkRPC.Call(utils.SessionSv1InitiateSession,
-			initArgs, &initRpl); err != nil {
-			log.Fatal(err)
-		}
-		// _ = getCount(SessionBenchmarkRPC)
-		// if c := getCount(SessionBenchmarkRPC); i+1 != c {
-		// 	log.Fatalf("Not Enough sessions %v!=%v", i+1, c)
-		// }
-		// wg.Done()
-		// }(i, SessionBenchmarkRPC)
+			var initRpl *V1InitSessionReply
+			if err := sBenchRPC.Call(utils.SessionSv1InitiateSession,
+				initArgs, &initRpl); err != nil {
+				log.Fatal(err)
+			}
+			wg.Done()
+		}(i)
 	}
-	// wg.Wait()
+	wg.Wait()
 }
 
-func getCount(SessionBenchmarkRPC *rpc.Client) int {
+func getCount() int {
 	var count int
-	if err := SessionBenchmarkRPC.Call(utils.SessionSv1GetActiveSessionsCount,
+	if err := sBenchRPC.Call(utils.SessionSv1GetActiveSessionsCount,
 		map[string]string{}, &count); err != nil {
 		log.Fatal(err)
 	}
@@ -138,7 +128,7 @@ func getCount(SessionBenchmarkRPC *rpc.Client) int {
 }
 
 func BenchmarkSendInitSession(b *testing.B) {
-	ConnectOnce.Do(func() {
+	connOnce.Do(func() {
 		startRPC()
 		// addAccouns()
 		sendInit()
@@ -146,9 +136,6 @@ func BenchmarkSendInitSession(b *testing.B) {
 	})
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_ = getCount(SessionBenchmarkRPC)
-		// if count < 2000 {
-		// 	b.Fatal("Not Enough sessions")
-		// }
+		_ = getCount()
 	}
 }

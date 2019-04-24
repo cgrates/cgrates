@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -34,8 +33,8 @@ type SchedulerSv1 struct {
 }
 
 // Reload reloads scheduler instructions
-func (schdSv1 *SchedulerSv1) Reload(arg *dispatchers.StringWithApiKey, reply *string) error {
-	return schdSv1.schdS.V1Reload(arg.Arg, reply)
+func (schdSv1 *SchedulerSv1) Reload(arg *utils.CGREventWithArgDispatcher, reply *string) error {
+	return schdSv1.schdS.V1Reload(utils.EmptyString, reply)
 }
 
 func (schdSv1 *SchedulerSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {

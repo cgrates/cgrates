@@ -2475,7 +2475,8 @@ func (tpr *TpReader) ReloadCache(flush, verbose bool) (err error) {
 		if verbose {
 			log.Print("Reloading scheduler")
 		}
-		if err = tpr.schedulerS.Call(utils.SchedulerSv1Reload, "", &reply); err != nil {
+		if err = tpr.schedulerS.Call(utils.SchedulerSv1Reload,
+			new(utils.CGREventWithArgDispatcher), &reply); err != nil {
 			log.Printf("WARNING: Got error on scheduler reload: %s\n", err.Error())
 		}
 	}

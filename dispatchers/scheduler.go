@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
-	"time"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -39,17 +37,17 @@ func (dS *DispatcherService) SchedulerSv1Ping(args *utils.CGREventWithArgDispatc
 		utils.SchedulerSv1Ping, args, reply)
 }
 
-func (dS *DispatcherService) SchedulerSv1Reload(args *StringWithApiKey, reply *string) (err error) {
+func (dS *DispatcherService) SchedulerSv1Reload(args *utils.CGREventWithArgDispatcher, reply *string) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
 	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.SchedulerSv1Ping,
-			args.TenantArg.Tenant,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaScheduler,
-		args.RouteID, utils.SchedulerSv1Reload, args.Arg, reply)
+	return dS.Dispatch(args.CGREvent, utils.MetaScheduler, args.RouteID,
+		utils.SchedulerSv1Reload, args, reply)
 }

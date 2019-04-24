@@ -664,7 +664,7 @@ type DispatcherSchedulerSv1 struct {
 }
 
 // Reload reloads scheduler instructions
-func (dS *DispatcherSchedulerSv1) Reload(attr *dispatchers.StringWithApiKey, reply *string) (err error) {
+func (dS *DispatcherSchedulerSv1) Reload(attr *utils.CGREventWithArgDispatcher, reply *string) (err error) {
 	return dS.dS.SchedulerSv1Reload(attr, reply)
 }
 

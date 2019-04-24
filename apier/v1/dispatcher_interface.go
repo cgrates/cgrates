@@ -127,7 +127,7 @@ type GuardianSv1Interface interface {
 }
 
 type SchedulerSv1Interface interface {
-	Reload(arg *dispatchers.StringWithApiKey, reply *string) error
+	Reload(arg *utils.CGREventWithArgDispatcher, reply *string) error
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 }
 
