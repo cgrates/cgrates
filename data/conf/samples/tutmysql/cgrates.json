@@ -5,6 +5,7 @@
 
 "general": {
 	"log_level": 7,
+	"reply_timeout": "20s",
 },
 
 
@@ -28,7 +29,7 @@
 "rals": {
 	"enabled": true,
 	"thresholds_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"},
+		{"address": "*internal"},
 	],
 },
 
@@ -36,7 +37,7 @@
 "scheduler": {
 	"enabled": true,
 	"cdrs_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"},
+		{"address": "*internal"},
 	],
 },
 
@@ -44,7 +45,7 @@
 "cdrs": {
 	"enabled": true,
 	"chargers_conns":[
-		{"address": "127.0.0.1:2012", "transport":"*json"},
+		{"address": "*internal"},
 	],
 },
 
@@ -198,7 +199,7 @@
 "chargers": {
 	"enabled": true,
 	"attributes_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"},
+		{"address": "*internal"},
 	],
 },
 
@@ -233,7 +234,7 @@
 		{"address": "*internal"},
 	],
 	"resources_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"},
+		{"address": "*internal"},
 	],
 },
 
@@ -250,13 +251,13 @@
 		{"address": "*internal"}
 	],
 	"rals_conns": [
-		{"address": "*internal"}
+		{"address": "*internal"},
 	],
 	"cdrs_conns": [
 		{"address": "*internal"}
 	],
 	"chargers_conns": [
-		{"address": "*internal"}
+		{"address": "*internal"},
 	],
 },
 

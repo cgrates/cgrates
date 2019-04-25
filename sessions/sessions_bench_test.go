@@ -30,6 +30,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -38,6 +39,8 @@ var (
 	sBenchRPC *rpc.Client
 	connOnce  sync.Once
 	initRuns  = flag.Int("init_runs", 25000, "number of loops to run in init")
+	cps       = flag.Int("cps", 2000, "number of loops to run in init")
+	maxCps    = make(chan struct{}, *cps)
 )
 
 func startRPC() {
@@ -51,6 +54,23 @@ func startRPC() {
 	if sBenchRPC, err = jsonrpc.Dial("tcp", sBenchCfg.ListenCfg().RPCJSONListen); err != nil {
 		log.Fatalf("Error at dialing rcp client:%v\n", err)
 	}
+}
+
+func loadTP() {
+	for i := 0; i < *cps; i++ { // init CPS limitation
+		maxCps <- struct{}{}
+	}
+	if err := engine.InitDataDb(sBenchCfg); err != nil {
+		log.Fatal(err)
+	}
+	attrs := &utils.AttrLoadTpFromFolder{
+		FolderPath: path.Join(config.CgrConfig().DataFolderPath, "tariffplans", "tutorial")}
+	var tpLoadInst utils.LoadInstance
+	if err := sBenchRPC.Call("ApierV2.LoadTariffPlanFromFolder",
+		attrs, &tpLoadInst); err != nil {
+		log.Fatal(err)
+	}
+	time.Sleep(time.Duration(100) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 func addBalance(sBenchRPC *rpc.Client, sraccount string) {
@@ -72,35 +92,38 @@ func addAccouns() {
 	var wg sync.WaitGroup
 	for i := 0; i < *initRuns; i++ {
 		wg.Add(1)
-		go func(i int, sBenchRPC *rpc.Client) {
+		go func(i int) {
+			oneCps := <-maxCps // queue here for maxCps
+			defer func() { maxCps <- oneCps }()
 			addBalance(sBenchRPC, fmt.Sprintf("1001%v", i))
-			addBalance(sBenchRPC, fmt.Sprintf("1002%v", i))
 			wg.Done()
-		}(i, sBenchRPC)
+		}(i)
 	}
 	wg.Wait()
 }
 
 func sendInit() {
-	initArgs := &V1InitSessionArgs{
-		InitSession: true,
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "",
-			Event: map[string]interface{}{
-				utils.EVENT_NAME:  "TEST_EVENT",
-				utils.ToR:         utils.VOICE,
-				utils.Category:    "call",
-				utils.Tenant:      "cgrates.org",
-				utils.RequestType: utils.META_PREPAID,
-				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-			},
-		},
-	}
 	var wg sync.WaitGroup
 	for i := 0; i < *initRuns; i++ {
 		wg.Add(1)
 		go func(i int) {
+			oneCps := <-maxCps // queue here for maxCps
+			defer func() { maxCps <- oneCps }()
+			initArgs := &V1InitSessionArgs{
+				InitSession: true,
+				CGREvent: utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "",
+					Event: map[string]interface{}{
+						utils.EVENT_NAME:  "TEST_EVENT",
+						utils.ToR:         utils.VOICE,
+						utils.Category:    "call",
+						utils.Tenant:      "cgrates.org",
+						utils.RequestType: utils.META_PREPAID,
+						utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+					},
+				},
+			}
 			initArgs.ID = utils.UUIDSha1Prefix()
 			initArgs.Event[utils.OriginID] = utils.UUIDSha1Prefix()
 			initArgs.Event[utils.Account] = fmt.Sprintf("1001%v", i)
@@ -130,7 +153,8 @@ func getCount() int {
 func BenchmarkSendInitSession(b *testing.B) {
 	connOnce.Do(func() {
 		startRPC()
-		// addAccouns()
+		loadTP()
+		addAccouns()
 		sendInit()
 		// time.Sleep(3 * time.Minute)
 	})

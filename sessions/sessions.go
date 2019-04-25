@@ -910,6 +910,21 @@ func (sS *SessionS) getSessionIDsMatchingIndexes(fltrs map[string]string,
 func (sS *SessionS) asActiveSessions(fltrs map[string]string,
 	count, psv bool) (aSs []*ActiveSession, counter int, err error) {
 	aSs = make([]*ActiveSession, 0) // Make sure we return at least empty list and not nil
+
+	if len(fltrs) == 0 { // no filters applied
+		ss := sS.getSessions(utils.EmptyString, psv)
+		if count {
+			return nil, len(ss), nil
+		}
+		aSs = make([]*ActiveSession, len(ss))
+		for _, s := range ss {
+			aSs = append(aSs,
+				s.AsActiveSessions(sS.cgrCfg.GeneralCfg().DefaultTimezone,
+					sS.cgrCfg.GeneralCfg().NodeID)...) // Expensive for large number of sessions
+		}
+		return
+	}
+
 	// Check first based on indexes so we can downsize the list of matching sessions
 	matchingSessionIDs, checkedFilters := sS.getSessionIDsMatchingIndexes(fltrs, psv)
 	if len(matchingSessionIDs) == 0 && len(checkedFilters) != 0 {
