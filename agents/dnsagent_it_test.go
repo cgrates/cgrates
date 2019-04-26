@@ -46,7 +46,8 @@ var sTestsDNS = []func(t *testing.T){
 	testDNSitApierRpcConn,
 	testDNSitTPFromFolder,
 	testDNSitClntConn,
-	testDNSitClntNAPTRDryRun,
+	//testDNSitClntNAPTRDryRun,
+	testDNSitClntNAPTRSuppliers,
 	testDNSitStopEngine,
 }
 
@@ -140,6 +141,28 @@ func testDNSitClntNAPTRDryRun(t *testing.T) {
 		}
 		if answr.Regexp != "^.*$" {
 			t.Errorf("received: <%q>", answr.Regexp)
+		}
+		if answr.Replacement != "sip:1\\@172.16.1.10." {
+			t.Errorf("received: <%q>", answr.Replacement)
+		}
+	}
+}
+
+func testDNSitClntNAPTRSuppliers(t *testing.T) {
+	m := new(dns.Msg)
+	m.SetQuestion("4.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeNAPTR)
+	if err := dnsClnt.WriteMsg(m); err != nil {
+		t.Error(err)
+	}
+	if rply, err := dnsClnt.ReadMsg(); err != nil {
+		t.Error(err)
+	} else {
+		if rply.Rcode != dns.RcodeSuccess {
+			t.Errorf("failed to get an valid answer\n%v", rply)
+		}
+		answr := rply.Answer[0].(*dns.NAPTR)
+		if answr.Order != 100 {
+			t.Errorf("received: <%q>", answr.Order)
 		}
 		if answr.Replacement != "sip:1\\@172.16.1.10." {
 			t.Errorf("received: <%q>", answr.Replacement)

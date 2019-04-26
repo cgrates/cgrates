@@ -34,6 +34,9 @@
 	"chargers_conns": [
 		{"address": "*internal"}
 	],
+	"suppliers_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
 },
 
 
@@ -60,9 +63,17 @@
 },
 
 
+"suppliers": {
+	"enabled": true,
+},
+
+
 "dns_agent": {
 	"enabled": true,
-	"listen": ":2053"		
+	"listen": ":2053",
+	"sessions_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],		
 },
 
 

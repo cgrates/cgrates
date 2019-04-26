@@ -441,6 +441,7 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 			sortedSuppliers.SortedSuppliers = sortedSuppliers.SortedSuppliers[:*args.Paginator.Limit]
 		}
 	}
+	sortedSuppliers.Count = len(sortedSuppliers.SortedSuppliers)
 	return sortedSuppliers, nil
 }
 

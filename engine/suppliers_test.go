@@ -415,6 +415,7 @@ func TestSuppliersSortedForEvent(t *testing.T) {
 	eFirstSupplierProfile := &SortedSuppliers{
 		ProfileID: "SupplierProfile1",
 		Sorting:   utils.MetaWeight,
+		Count:     1,
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier1",
@@ -436,6 +437,7 @@ func TestSuppliersSortedForEvent(t *testing.T) {
 	eFirstSupplierProfile = &SortedSuppliers{
 		ProfileID: "SupplierProfile2",
 		Sorting:   utils.MetaWeight,
+		Count:     3,
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier1",
@@ -472,6 +474,7 @@ func TestSuppliersSortedForEvent(t *testing.T) {
 	eFirstSupplierProfile = &SortedSuppliers{
 		ProfileID: "SupplierProfilePrefix",
 		Sorting:   utils.MetaWeight,
+		Count:     1,
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier1",
@@ -496,6 +499,7 @@ func TestSuppliersSortedForEventWithLimit(t *testing.T) {
 	eFirstSupplierProfile := &SortedSuppliers{
 		ProfileID: "SupplierProfile2",
 		Sorting:   utils.MetaWeight,
+		Count:     2,
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier1",
@@ -529,6 +533,7 @@ func TestSuppliersSortedForEventWithOffset(t *testing.T) {
 	eFirstSupplierProfile := &SortedSuppliers{
 		ProfileID: "SupplierProfile2",
 		Sorting:   utils.MetaWeight,
+		Count:     1,
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier3",
@@ -555,6 +560,7 @@ func TestSuppliersSortedForEventWithLimitAndOffset(t *testing.T) {
 	eFirstSupplierProfile := &SortedSuppliers{
 		ProfileID: "SupplierProfile2",
 		Sorting:   utils.MetaWeight,
+		Count:     1,
 		SortedSuppliers: []*SortedSupplier{
 			{
 				SupplierID: "supplier2",

@@ -37,6 +37,7 @@ type SortedSupplier struct {
 type SortedSuppliers struct {
 	ProfileID       string            // Profile matched
 	Sorting         string            // Sorting algorithm
+	Count           int               // number of suppliers returned
 	SortedSuppliers []*SortedSupplier // list of supplier IDs and SortingData data
 }
 
