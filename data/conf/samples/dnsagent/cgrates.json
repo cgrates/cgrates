@@ -11,10 +11,19 @@
 	"db_password": "CGRateS.org",
 },
 
+
+"scheduler": {
+	"enabled": true,
+	"cdrs_conns": [
+		{"address": "*internal"},
+	],
+},
+
+
 "sessions": {
 	"enabled": true,
 	"attributes_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
+		{"address": "*internal"}
 	],
 	"rals_conns": [
 		{"address": "*internal"}

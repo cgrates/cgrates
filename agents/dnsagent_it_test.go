@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
-	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -43,7 +42,7 @@ var (
 
 var sTestsDNS = []func(t *testing.T){
 	testDNSitResetDB,
-	testDNSitStartEngine,
+	//testDNSitStartEngine,
 	testDNSitApierRpcConn,
 	testDNSitTPFromFolder,
 	testDNSitClntConn,
@@ -94,26 +93,13 @@ func testDNSitApierRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func testDNSitTPFromFolder(t *testing.T) {
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	var loadInst utils.LoadInstance
-	if err := dnsRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
+	if err := dnsRPC.Call(utils.ApierV2LoadTariffPlanFromFolder,
+		attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
-	//add a default charger
-	chargerProfile := &engine.ChargerProfile{
-		Tenant:       "cgrates.org",
-		ID:           "Default",
-		RunID:        utils.MetaDefault,
-		AttributeIDs: []string{"*none"},
-		Weight:       20,
-	}
-	var result string
-	if err := dnsRPC.Call("ApierV1.SetChargerProfile", chargerProfile, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
 }
 
 // Connect DNS client to server
@@ -125,7 +111,6 @@ func testDNSitClntConn(t *testing.T) {
 	} else if dnsClnt == nil {
 		t.Fatalf("conn is nil")
 	}
-	fmt.Printf("done connecting to %s", dnsCfg.DNSAgentCfg().Listen)
 }
 
 func testDNSitClntNAPTRDryRun(t *testing.T) {
@@ -139,6 +124,25 @@ func testDNSitClntNAPTRDryRun(t *testing.T) {
 	} else {
 		if rply.Rcode != dns.RcodeSuccess {
 			t.Errorf("failed to get an valid answer\n%v", rply)
+		}
+		answr := rply.Answer[0].(*dns.NAPTR)
+		if answr.Order != 100 {
+			t.Errorf("received: <%q>", answr.Order)
+		}
+		if answr.Preference != 10 {
+			t.Errorf("received: <%q>", answr.Preference)
+		}
+		if answr.Flags != "U" {
+			t.Errorf("received: <%q>", answr.Flags)
+		}
+		if answr.Service != "E2U+SIP" {
+			t.Errorf("received: <%q>", answr.Service)
+		}
+		if answr.Regexp != "^.*$" {
+			t.Errorf("received: <%q>", answr.Regexp)
+		}
+		if answr.Replacement != "sip:1\\@172.16.1.10." {
+			t.Errorf("received: <%q>", answr.Replacement)
 		}
 	}
 }

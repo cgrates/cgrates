@@ -31,7 +31,7 @@ import (
 
 const (
 	QueryType   = "QueryType"
-	E164Address = "E164"
+	E164Address = "E164Address"
 )
 
 // e164FromNAPTR extracts the E164 address out of a NAPTR name record
@@ -129,6 +129,16 @@ func appendDNSAnswer(msg *dns.Msg) (err error) {
 					Ttl:    60},
 			},
 		)
+	case dns.TypeNAPTR:
+		msg.Answer = append(msg.Answer,
+			&dns.NAPTR{
+				Hdr: dns.RR_Header{
+					Name:   msg.Question[0].Name,
+					Rrtype: msg.Question[0].Qtype,
+					Class:  dns.ClassINET,
+					Ttl:    60},
+			},
+		)
 	default:
 		return fmt.Errorf("unsupported DNS type: <%v>", msg.Question[0].Qtype)
 	}
@@ -146,7 +156,7 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *config.NavigableMap) (err error) {
 			continue
 		}
 		cfgItm := nmItms[0] // first item gives some config for the rest
-		if cfgItm.Config.NewBranch {
+		if len(msg.Answer) == 0 || cfgItm.Config.NewBranch {
 			if err = appendDNSAnswer(msg); err != nil {
 				return
 			}
@@ -155,31 +165,68 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *config.NavigableMap) (err error) {
 			return errors.New("empty path in config item")
 		}
 		switch cfgItm.Path[0] {
-		case utils.MetaResponseCode:
+		case utils.Rcode:
 			var itm int64
 			if itm, err = utils.IfaceAsInt64(cfgItm.Data); err != nil {
 				return fmt.Errorf("item: <%s>, err: %s", cfgItm.Path[0], err.Error())
 			}
 			msg.Rcode = int(itm)
-			continue
-		case utils.MetaAnswer:
-			lastAnswer := msg.Answer[len(msg.Answer)-1]
-			switch msg.Question[0].Qtype {
-			case dns.TypeA:
-				var ip string
-				if ip, err = utils.IfaceAsString(cfgItm.Data); err != nil {
-					return
-				}
-				lastAnswer.(*dns.A).A = net.ParseIP(ip)
-			case dns.TypeNAPTR:
-				if rr, err := dns.NewRR(`IN NAPTR 100 10 "U" "E2U+sip" "!^.*$!sip:customer-service@example.com!" .`); err != nil {
-					return err
-				} else {
-					lastAnswer = rr
-				}
+		case utils.Order:
+			if msg.Question[0].Qtype != dns.TypeNAPTR {
+				return fmt.Errorf("field <%s> only works with NAPTR", utils.Order)
 			}
-
+			var itm int64
+			if itm, err = utils.IfaceAsInt64(cfgItm.Data); err != nil {
+				return fmt.Errorf("item: <%s>, err: %s", cfgItm.Path[0], err.Error())
+			}
+			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Order = uint16(itm)
+		case utils.Preference:
+			if msg.Question[0].Qtype != dns.TypeNAPTR {
+				return fmt.Errorf("field <%s> only works with NAPTR", utils.Preference)
+			}
+			var itm int64
+			if itm, err = utils.IfaceAsInt64(cfgItm.Data); err != nil {
+				return fmt.Errorf("item: <%s>, err: %s", cfgItm.Path[0], err.Error())
+			}
+			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Preference = uint16(itm)
+		case utils.Flags:
+			if msg.Question[0].Qtype != dns.TypeNAPTR {
+				return fmt.Errorf("field <%s> only works with NAPTR", utils.Flags)
+			}
+			var itm string
+			if itm, err = utils.IfaceAsString(cfgItm.Data); err != nil {
+				return fmt.Errorf("item: <%s>, err: %s", cfgItm.Path[0], err.Error())
+			}
+			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Flags = itm
+		case utils.Service:
+			if msg.Question[0].Qtype != dns.TypeNAPTR {
+				return fmt.Errorf("field <%s> only works with NAPTR", utils.Service)
+			}
+			var itm string
+			if itm, err = utils.IfaceAsString(cfgItm.Data); err != nil {
+				return fmt.Errorf("item: <%s>, err: %s", cfgItm.Path[0], err.Error())
+			}
+			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Service = itm
+		case utils.Regexp:
+			if msg.Question[0].Qtype != dns.TypeNAPTR {
+				return fmt.Errorf("field <%s> only works with NAPTR", utils.Regexp)
+			}
+			var itm string
+			if itm, err = utils.IfaceAsString(cfgItm.Data); err != nil {
+				return fmt.Errorf("item: <%s>, err: %s", cfgItm.Path[0], err.Error())
+			}
+			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Regexp = itm
+		case utils.Replacement:
+			if msg.Question[0].Qtype != dns.TypeNAPTR {
+				return fmt.Errorf("field <%s> only works with NAPTR", utils.Replacement)
+			}
+			var rplc string
+			if rplc, err = utils.IfaceAsString(cfgItm.Data); err != nil {
+				return fmt.Errorf("item: <%s>, err: %s", cfgItm.Path[0], err.Error())
+			}
+			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Replacement = rplc
 		}
+
 	}
 	return
 }

@@ -571,9 +571,13 @@ const (
 	MetaApiKey                   = "*api_key"
 	UsageID                      = "UsageID"
 	Status                       = "status"
-	MetaResponseCode             = "*response_code"
-	MetaAnswer                   = "*answer"
-	MetaTTL                      = "*ttl"
+	Rcode                        = "Rcode"
+	Replacement                  = "Replacement"
+	Regexp                       = "Regexp"
+	Order                        = "Order"
+	Preference                   = "Preference"
+	Flags                        = "Flags"
+	Service                      = "Service"
 )
 
 // Migrator Action

@@ -72,28 +72,6 @@ func (da *DNSAgent) ListenAndServe() error {
 // handleMessage is the entry point of all DNS requests
 // requests are reaching here asynchronously
 func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
-	fmt.Printf("got message: %+v\n", req)
-	/*rply := new(dns.Msg)
-	rply.SetReply(req)
-	switch req.Question[0].Qtype {
-	case dns.TypeA:
-		rply.Authoritative = true
-		if req.Question[0].Name == "cgrates.org." {
-			rply.Answer = append(rply.Answer,
-				&dns.A{
-					Hdr: dns.RR_Header{
-						Name:   req.Question[0].Name,
-						Rrtype: dns.TypeA,
-						Class:  dns.ClassINET,
-						Ttl:    60},
-					A: net.ParseIP("195.201.167.179")},
-			)
-		}
-	}
-	rply.Rcode = dns.RcodeServerFailure
-	w.WriteMsg(rply)
-	*/
-
 	dnsDP := newDNSDataProvider(req, w)
 	reqVars := make(map[string]interface{})
 	reqVars[QueryType] = dns.TypeToString[req.Question[0].Qtype]
@@ -112,10 +90,8 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 			return
 		}
 		reqVars[E164Address] = e164
-		utils.Logger.Info(fmt.Sprintf("reqVars: %+v", reqVars))
 	}
 	rplyNM := config.NewNavigableMap(nil) // share it among different processors
-
 	var processed bool
 	var err error
 	for _, reqProcessor := range da.cgrCfg.DNSAgentCfg().RequestProcessors {
@@ -152,6 +128,20 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 		dnsWriteMsg(w, rply)
 		return
 	}
+	if err = updateDNSMsgFromNM(rply, rplyNM); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %s updating answer: %s from NM %s",
+				utils.DNSAgent, err.Error(), utils.ToJSON(rply), utils.ToJSON(rplyNM)))
+		rply.Rcode = dns.RcodeServerFailure
+		dnsWriteMsg(w, rply)
+	}
+	if err = dnsWriteMsg(w, rply); err != nil { // failed sending, most probably content issue
+		rply = new(dns.Msg)
+		rply.SetReply(req)
+		rply.Rcode = dns.RcodeServerFailure
+		dnsWriteMsg(w, rply)
+	}
+	return
 }
 
 func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
