@@ -970,6 +970,9 @@ func (sS *SessionS) asActiveSessions(fltrs map[string]string,
 // forSession can only be called once per Session
 // not thread-safe since it should be called in init where there is no concurrency
 func (sS *SessionS) forkSession(s *Session) (err error) {
+	if sS.chargerS == nil {
+		return errors.New("ChargerS is disabled")
+        }
 	if len(s.SRuns) != 0 {
 		return errors.New("already forked")
 	}
