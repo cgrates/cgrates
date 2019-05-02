@@ -144,6 +144,7 @@ func testV1SplSGetWeightSuppliers(t *testing.T) {
 	eSpls := engine.SortedSuppliers{
 		ProfileID: "SPL_WEIGHT_1",
 		Sorting:   utils.MetaWeight,
+		Count:     2,
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID: "supplier2",
@@ -186,6 +187,7 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 	eSpls := engine.SortedSuppliers{
 		ProfileID: "SPL_LEASTCOST_1",
 		Sorting:   utils.MetaLeastCost,
+		Count:     3,
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID: "supplier3",
@@ -241,6 +243,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost(t *testing.T) {
 	eSpls := engine.SortedSuppliers{
 		ProfileID: "SPL_LEASTCOST_1",
 		Sorting:   utils.MetaLeastCost,
+		Count:     2,
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID: "supplier3",
@@ -311,6 +314,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost2(t *testing.T) {
 	eSpls := engine.SortedSuppliers{
 		ProfileID: "SPL_LEASTCOST_1",
 		Sorting:   utils.MetaLeastCost,
+		Count:     2,
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID: "supplier3",
@@ -357,6 +361,7 @@ func testV1SplSGetHighestCostSuppliers(t *testing.T) {
 	eSpls := engine.SortedSuppliers{
 		ProfileID: "SPL_HIGHESTCOST_1",
 		Sorting:   utils.MetaHighestCost,
+		Count:     3,
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID: "supplier2",
@@ -712,6 +717,7 @@ func testV1SplSGetSupplierWithoutFilter(t *testing.T) {
 	eSpls := engine.SortedSuppliers{
 		ProfileID: "SPL_WEIGHT_2",
 		Sorting:   utils.MetaWeight,
+		Count:     1,
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID: "supplier1",

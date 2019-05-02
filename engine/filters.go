@@ -550,8 +550,8 @@ func (fltr *FilterRule) passResourceS(dP config.DataProvider,
 	}
 	for _, resItem := range fltr.resourceItems {
 		//take total usage for resource
-		var reply *Resource
-		if err := resourceS.Call(utils.ApierV1GetResource,
+		var reply Resource
+		if err := resourceS.Call(utils.ResourceSv1GetResource,
 			&utils.TenantID{Tenant: tenant, ID: resItem.ItemID}, &reply); err != nil {
 			return false, err
 		}

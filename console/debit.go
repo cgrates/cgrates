@@ -34,7 +34,7 @@ func init() {
 type CmdDebit struct {
 	name       string
 	rpcMethod  string
-	rpcParams  *engine.CallDescriptor
+	rpcParams  *engine.CallDescriptorWithArgDispatcher
 	clientArgs []string
 	*CommandExecuter
 }
@@ -49,7 +49,7 @@ func (self *CmdDebit) RpcMethod() string {
 
 func (self *CmdDebit) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(engine.CallDescriptor)
+		self.rpcParams = new(engine.CallDescriptorWithArgDispatcher)
 	}
 	return self.rpcParams
 }

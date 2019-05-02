@@ -58,7 +58,7 @@ func (self *CmdChargersProcessEvent) RpcParams(reset bool) interface{} {
 }
 
 func (self *CmdChargersProcessEvent) PostprocessRpcParams() error {
-	if self.rpcParams.Time == nil {
+	if self.rpcParams.CGREvent != nil && self.rpcParams.Time == nil {
 		self.rpcParams.Time = utils.TimePointer(time.Now())
 	}
 	return nil

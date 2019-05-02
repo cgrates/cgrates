@@ -60,16 +60,8 @@ func (rsv1 *ResourceSv1) ReleaseResources(args utils.ArgRSv1ResourceUsage, reply
 }
 
 // GetResource returns a resource configuration
-func (apierV1 *ApierV1) GetResource(arg utils.TenantID, reply *engine.Resource) error {
-	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
-		return utils.NewErrMandatoryIeMissing(missing...)
-	}
-	if res, err := apierV1.DataManager.GetResource(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
-		return utils.APIErrorHandler(err)
-	} else {
-		*reply = *res
-	}
-	return nil
+func (rsv1 *ResourceSv1) GetResource(args *utils.TenantID, reply *engine.Resource) error {
+	return rsv1.rls.V1GetResource(args, reply)
 }
 
 // GetResourceProfile returns a resource configuration

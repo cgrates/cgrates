@@ -164,6 +164,7 @@ func TestSSv1ItAuth(t *testing.T) {
 	eSplrs := &engine.SortedSuppliers{
 		ProfileID: "SPL_ACNT_1001",
 		Sorting:   utils.MetaWeight,
+		Count:     2,
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID: "supplier1",
@@ -180,7 +181,7 @@ func TestSSv1ItAuth(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(eSplrs, rply.Suppliers) {
-		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eSplrs), utils.ToJSON(rply.Suppliers))
+		t.Errorf("expecting: %+v,\n received: %+v", utils.ToJSON(eSplrs), utils.ToJSON(rply.Suppliers))
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
@@ -316,7 +317,7 @@ func TestSSv1ItInitiateSession(t *testing.T) {
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
-		t.Errorf("wrong active sessions: %s", utils.ToJSON(aSessions))
+		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v", utils.ToJSON(aSessions), len(aSessions))
 	}
 }
 
