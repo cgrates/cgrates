@@ -53,7 +53,7 @@ if len(from_keys) > 0:
             print('Moving key %s (%d of %d)...' % (key, i, len(from_keys))),
             try:
                 from_redis.execute_command('MIGRATE', to_host, to_port, key, to_db, timeout)
-            except redis.exceptions.ResponseError, e:
+            except redis.exceptions.ResponseError as e:
                 if 'ERR Target key name is busy' not in str(e):
                     raise e
             print('Done.')
