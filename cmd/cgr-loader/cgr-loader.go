@@ -119,6 +119,7 @@ func main() {
 		if ldrCfg, err = config.NewCGRConfigFromPath(*cfgPath); err != nil {
 			log.Fatalf("Error loading config file %s", err.Error())
 		}
+		config.SetCgrConfig(ldrCfg)
 	}
 
 	// Data for DataDB

@@ -128,6 +128,7 @@ func main() {
 		if mgrCfg, err = config.NewCGRConfigFromPath(*cfgPath); err != nil {
 			log.Fatalf("error loading config file %s", err.Error())
 		}
+		config.SetCgrConfig(mgrCfg)
 	}
 
 	// inDataDB
