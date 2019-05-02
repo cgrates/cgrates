@@ -6,8 +6,6 @@
 #   ^ the script will "move" the collections if source and target server are the same
 #     but will "copy" (dump/restore) if source and target servers are different
 
-import os
-import shutil
 import subprocess
 import sys
 from collections import OrderedDict

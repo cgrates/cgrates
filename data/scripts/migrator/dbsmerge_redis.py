@@ -8,8 +8,6 @@
 # behaviour:
 #   ^ the script will not overwrite keys on the destination server/database
 
-import time
-
 import redis
 
 from_host   = '127.0.0.1'
