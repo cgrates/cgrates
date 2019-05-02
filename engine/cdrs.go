@@ -692,7 +692,7 @@ func (cdrS *CDRServer) V2StoreSessionCost(args *ArgsV2CDRSStoreSMCost, reply *st
 		cd.Increments = roundIncrements
 		var response float64
 		if err := cdrS.rals.Call(utils.ResponderRefundRounding,
-			&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd},
+			&CallDescriptorWithArgDispatcher{CallDescriptor: cd},
 			&response); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<CDRS> RefundRounding for cc: %+v, got error: %s",
