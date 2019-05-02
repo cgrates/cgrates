@@ -81,7 +81,7 @@ else:
       '--db',     '%s' % from_db,
       '--port', '%s' % from_port,
       '-o',     '%s' % dump_folder,
-      ], stderr= subprocess.STDOUT)
+      ], stderr=subprocess.STDOUT)
     print('Dump complete.')
 
     print('Restoring...')
@@ -94,6 +94,6 @@ else:
       '--db',   '%s' % to_db,
       '--port', '%s' % to_port,
       '--drop', '%s/%s' % (dump_folder, from_db),
-      ], stderr= subprocess.STDOUT)
+      ], stderr=subprocess.STDOUT)
     print('Restore complete.')
 print('Migration complete.')

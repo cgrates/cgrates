@@ -23,8 +23,8 @@ to_pass = ''  # Not used
 keymask = '*'
 timeout = 2000
 
-from_redis = redis.Redis(host = from_host, port = from_port, password=from_pass, db = from_db)
-to_redis = redis.Redis(host = to_host, port = to_port, db = to_db)
+from_redis = redis.Redis(host=from_host, port=from_port, password=from_pass, db=from_db)
+to_redis = redis.Redis(host=to_host, port=to_port, db=to_db)
 
 to_keys = to_redis.keys(keymask)
 from_keys = from_redis.keys(keymask)
