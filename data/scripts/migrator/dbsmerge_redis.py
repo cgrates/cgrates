@@ -3,8 +3,8 @@
 # depends:
 #   ^ redis # install via easy_install redis
 # asserts:
-#   ^ destination redis is not password protected when connected from source redis server
-#     (https://github.com/antirez/redis/pull/2507)
+#   ^ destination redis is not password protected when connected from source
+#      redis server (https://github.com/antirez/redis/pull/2507)
 # behaviour:
 #   ^ the script will not overwrite keys on the destination server/database
 
@@ -23,8 +23,17 @@ to_pass = ''  # Not used
 keymask = '*'
 timeout = 2000
 
-from_redis = redis.Redis(host=from_host, port=from_port, password=from_pass, db=from_db)
-to_redis = redis.Redis(host=to_host, port=to_port, db=to_db)
+from_redis = redis.Redis(
+                          host=from_host,
+                          port=from_port,
+                          password=from_pass,
+                          db=from_db
+                        )
+to_redis = redis.Redis(
+                        host=to_host,
+                        port=to_port,
+                        db=to_db
+                      )
 
 to_keys = to_redis.keys(keymask)
 from_keys = from_redis.keys(keymask)
@@ -50,7 +59,14 @@ if len(from_keys) > 0:
             i += 1
             print('Moving key %s (%d of %d)...' % (key, i, len(from_keys))),
             try:
-                from_redis.execute_command('MIGRATE', to_host, to_port, key, to_db, timeout)
+                from_redis.execute_command(
+                                            'MIGRATE',
+                                            to_host,
+                                            to_port,
+                                            key,
+                                            to_db,
+                                            timeout
+                                          )
             except redis.exceptions.ResponseError as e:
                 if 'ERR Target key name is busy' not in str(e):
                     raise e

@@ -3,8 +3,9 @@
 # depends:
 #   ^ pymongo # install via: easy_install pymongo
 # behaviour:
-#   ^ the script will "move" the collections if source and target server are the same
-#     but will "copy" (dump/restore) if source and target servers are different
+#   ^ the script will "move" the collections if source and target server are
+#     the same but will "copy" (dump/restore) if source and target servers are
+#     different
 
 import subprocess
 import sys
@@ -33,7 +34,8 @@ ignore_empty_cols = True
 
 # Overwrite target collections flag.
 # Works only if from/to is on same host.
-# If from/to hosts are different we use mongorestore which overwrites by default.
+# If from/to hosts are different we use mongorestore
+# which overwrites by default.
 drop_target = False
 
 dump_folder = 'dump'
@@ -41,9 +43,19 @@ dump_folder = 'dump'
 # same server
 if from_host == to_host and from_port == to_port:
         print('Migrating on same server...')
-        mongo_from_url = 'mongodb://' + from_user + ':' + quote_plus(from_pass) + '@' + from_host + ':' + from_port + '/' + from_auth_db
+        mongo_from_url = 'mongodb://%s:%s@%s:%s/%s' % (
+                                                        from_user,
+                                                        quote_plus(from_pass),
+                                                        from_host,
+                                                        from_port,
+                                                        from_auth_db
+                                                      )
         if from_pass == '':  # disabled auth
-            mongo_from_url = 'mongodb://' + from_host + ':' + from_port + '/' + from_db
+            mongo_from_url = 'mongodb://%s:%s/%s' % (
+                                                      from_host,
+                                                      from_port,
+                                                      from_db
+                                                    )
         client = MongoClient(mongo_from_url)
 
         db = client[from_db]
@@ -55,15 +67,43 @@ if from_host == to_host and from_port == to_port:
             i = 0
             for col in cols:
                 i += 1
-                if not ignore_empty_cols or (ignore_empty_cols and db[col].count() > 0):
-                    print('Moving collection %s (%d of %d)...' % (col, i, len(cols)))
+                if(
+                    not ignore_empty_cols or
+                    (ignore_empty_cols and db[col].count() > 0)
+                  ):
+                    print(
+                           'Moving collection %s (%d of %d)...' % (
+                             col, i, len(cols)
+                           )
+                         )
                     try:
-                        client.admin.command(OrderedDict([('renameCollection', from_db + '.' + col), ('to', to_db + '.' + col), ('dropTarget', drop_target)]))
+                        client.admin.command(
+                            OrderedDict(
+                                [
+                                  (
+                                    'renameCollection',
+                                    from_db + '.' + col
+                                  ),
+                                  (
+                                    'to',
+                                    to_db + '.' + col
+                                  ),
+                                  (
+                                    'dropTarget',
+                                    drop_target
+                                  )
+                                ]
+                            )
+                        )
                     except:
                         e = sys.exc_info()[0]
                         print(e)
                 else:
-                    print('Skipping empty collection %s (%d of %d)...' % (col, i, len(cols)))
+                    print(
+                           'Skipping empty collection %s (%d of %d)...' % (
+                             col, i, len(cols)
+                           )
+                         )
         # no collections found
         else:
             print('No collections in source database.')
