@@ -39,7 +39,7 @@ from collections import OrderedDict
 # same server
 if from_host == to_host and from_port == to_port:
         print('Migrating on same server...')
-        mongo_from_url = 'mongodb://' + from_user + ':' + quote_plus(from_pass) + '@'+ from_host + ':' + from_port + '/' + from_auth_db
+        mongo_from_url = 'mongodb://' + from_user + ':' + quote_plus(from_pass) + '@' + from_host + ':' + from_port + '/' + from_auth_db
         if from_pass == '':  # disabled auth
           mongo_from_url = 'mongodb://' + from_host + ':' + from_port + '/' + from_db
         client = MongoClient(mongo_from_url)
