@@ -81,12 +81,11 @@ func (m *Migrator) migrateTPSuppliers() (err error) {
 	switch vrs[utils.TpSuppliers] {
 	case current[utils.TpSuppliers]:
 		if m.sameStorDB {
-			return
+			break
 		}
 		if err := m.migrateCurrentTPSuppliers(); err != nil {
 			return err
 		}
-		return
 	}
-	return
+	return m.ensureIndexesStorDB(utils.TBLTPSuppliers)
 }

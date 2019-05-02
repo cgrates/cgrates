@@ -210,17 +210,25 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 	switch vrs[utils.Attributes] {
 	case current[utils.Attributes]:
 		if m.sameDataDB {
-			return
+			break
 		}
-		return m.migrateCurrentAttributeProfile()
+		if err = m.migrateCurrentAttributeProfile(); err != nil {
+			return err
+		}
 	case 1:
-		return m.migrateV1Attributes()
+		if err = m.migrateV1Attributes(); err != nil {
+			return err
+		}
 	case 2:
-		return m.migrateV2Attributes()
+		if err = m.migrateV2Attributes(); err != nil {
+			return err
+		}
 	case 3:
-		return m.migrateV3Attributes()
+		if err = m.migrateV3Attributes(); err != nil {
+			return err
+		}
 	}
-	return
+	return m.ensureIndexesDataDB(engine.ColAttr)
 }
 
 func (v1AttrPrf v1AttributeProfile) AsAttributeProfile() (attrPrf *engine.AttributeProfile, err error) {

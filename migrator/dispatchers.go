@@ -73,9 +73,11 @@ func (m *Migrator) migrateDispatchers() (err error) {
 	switch vrs[utils.Dispatchers] {
 	case current[utils.Dispatchers]:
 		if m.sameDataDB {
-			return
+			break
 		}
-		return m.migrateCurrentDispatcher()
+		if err = m.migrateCurrentDispatcher(); err != nil {
+			return err
+		}
 	}
-	return
+	return m.ensureIndexesDataDB(engine.ColDpp)
 }

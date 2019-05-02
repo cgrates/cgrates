@@ -67,9 +67,11 @@ func (m *Migrator) migrateTimings() (err error) {
 	switch vrs[utils.Timing] {
 	case current[utils.Timing]:
 		if m.sameDataDB {
-			return
+			break
 		}
-		return m.migrateCurrentTiming()
+		if err = m.migrateCurrentTiming(); err != nil {
+			return err
+		}
 	}
-	return
+	return m.ensureIndexesDataDB(engine.ColTmg)
 }

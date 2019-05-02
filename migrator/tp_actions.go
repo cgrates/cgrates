@@ -76,12 +76,11 @@ func (m *Migrator) migrateTPactions() (err error) {
 	switch vrs[utils.TpActions] {
 	case current[utils.TpActions]:
 		if m.sameStorDB {
-			return
+			break
 		}
 		if err := m.migrateCurrentTPactions(); err != nil {
 			return err
 		}
-		return
 	}
-	return
+	return m.ensureIndexesStorDB(utils.TBLTPActions)
 }

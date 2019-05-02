@@ -67,9 +67,11 @@ func (m *Migrator) migrateRatingPlans() (err error) {
 	switch vrs[utils.RatingPlan] {
 	case current[utils.RatingPlan]:
 		if m.sameDataDB {
-			return
+			break
 		}
-		return m.migrateCurrentRatingPlans()
+		if err = m.migrateCurrentRatingPlans(); err != nil {
+			return err
+		}
 	}
-	return
+	return m.ensureIndexesDataDB(engine.ColRpl)
 }

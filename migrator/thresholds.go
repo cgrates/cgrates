@@ -189,15 +189,21 @@ func (m *Migrator) migrateThresholds() (err error) {
 	switch vrs[utils.Thresholds] {
 	case current[utils.Thresholds]:
 		if m.sameDataDB {
-			return
+			break
 		}
-		return m.migrateCurrentThresholds()
+		if err = m.migrateCurrentThresholds(); err != nil {
+			return err
+		}
 	case 1:
-		return m.migrateV2ActionTriggers()
+		if err = m.migrateV2ActionTriggers(); err != nil {
+			return err
+		}
 	case 2:
-		return m.migrateV2Thresholds()
+		if err = m.migrateV2Thresholds(); err != nil {
+			return err
+		}
 	}
-	return
+	return m.ensureIndexesDataDB(engine.ColTps)
 }
 
 func (v2ATR v2ActionTrigger) AsThreshold() (thp *engine.ThresholdProfile, th *engine.Threshold, filter *engine.Filter, err error) {

@@ -130,13 +130,17 @@ func (m *Migrator) migrateActionTriggers() (err error) {
 	switch vrs[utils.ActionTriggers] {
 	case current[utils.ActionTriggers]:
 		if m.sameDataDB {
-			return
+			break
 		}
-		return m.migrateCurrentActionTrigger()
+		if err = m.migrateCurrentActionTrigger(); err != nil {
+			return err
+		}
 	case 1:
-		return m.migrateV1ActionTrigger()
+		if err = m.migrateV1ActionTrigger(); err != nil {
+			return err
+		}
 	}
-	return
+	return m.ensureIndexesDataDB(engine.ColAtr)
 }
 
 func (v1Act v1ActionTrigger) AsActionTrigger() (at *engine.ActionTrigger) {

@@ -78,12 +78,11 @@ func (m *Migrator) migrateTPratingplans() (err error) {
 	switch vrs[utils.TpRatingPlans] {
 	case current[utils.TpRatingPlans]:
 		if m.sameStorDB {
-			return
+			break
 		}
 		if err := m.migrateCurrentTPratingplans(); err != nil {
 			return err
 		}
-		return
 	}
-	return
+	return m.ensureIndexesStorDB(utils.TBLTPRatingPlans)
 }

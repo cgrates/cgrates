@@ -79,12 +79,11 @@ func (m *Migrator) migrateTPChargers() (err error) {
 	switch vrs[utils.TpChargers] {
 	case current[utils.TpChargers]:
 		if m.sameStorDB {
-			return
+			break
 		}
 		if err := m.migrateCurrentTPChargers(); err != nil {
 			return err
 		}
-		return
 	}
-	return
+	return m.ensureIndexesStorDB(utils.TBLTPChargers)
 }

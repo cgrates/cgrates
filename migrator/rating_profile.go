@@ -67,9 +67,11 @@ func (m *Migrator) migrateRatingProfiles() (err error) {
 	switch vrs[utils.RatingProfile] {
 	case current[utils.RatingProfile]:
 		if m.sameDataDB {
-			return
+			break
 		}
-		return m.migrateCurrentRatingProfiles()
+		if err = m.migrateCurrentRatingProfiles(); err != nil {
+			return err
+		}
 	}
-	return
+	return m.ensureIndexesDataDB(engine.ColRpf)
 }

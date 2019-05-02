@@ -63,13 +63,19 @@ func (m *Migrator) migrateSessionSCosts() (err error) {
 	}
 	switch vrs[utils.SessionSCosts] {
 	case 0, 1:
-		return m.migrateV1SessionSCosts()
+		if err = m.migrateV1SessionSCosts(); err != nil {
+			return err
+		}
 	case 2:
-		return m.migrateV2SessionSCosts()
+		if err = m.migrateV2SessionSCosts(); err != nil {
+			return err
+		}
 	case current[utils.SessionSCosts]:
-		return m.migrateCurrentSessionSCost()
+		if err = m.migrateCurrentSessionSCost(); err != nil {
+			return err
+		}
 	}
-	return nil
+	return m.ensureIndexesStorDB(utils.SessionCostsTBL)
 }
 
 func (m *Migrator) migrateV1SessionSCosts() (err error) {

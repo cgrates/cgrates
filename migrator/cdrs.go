@@ -60,11 +60,15 @@ func (m *Migrator) migrateCDRs() (err error) {
 	}
 	switch vrs[utils.CDRs] {
 	case 1:
-		return m.migrateV1CDRs()
+		if err = m.migrateV1CDRs(); err != nil {
+			return err
+		}
 	case current[utils.CDRs]:
-		return m.migrateCurrentCDRs()
+		if err = m.migrateCurrentCDRs(); err != nil {
+			return err
+		}
 	}
-	return
+	return m.ensureIndexesStorDB(engine.ColCDRs)
 }
 
 func (m *Migrator) migrateV1CDRs() (err error) {

@@ -69,9 +69,11 @@ func (m *Migrator) migrateSupplierProfiles() (err error) {
 	switch vrs[utils.Suppliers] {
 	case current[utils.Suppliers]:
 		if m.sameDataDB {
-			return
+			break
 		}
-		return m.migrateCurrentSupplierProfile()
+		if err = m.migrateCurrentSupplierProfile(); err != nil {
+			return err
+		}
 	}
-	return
+	return m.ensureIndexesDataDB(engine.ColSpp)
 }

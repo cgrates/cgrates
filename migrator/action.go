@@ -118,13 +118,17 @@ func (m *Migrator) migrateActions() (err error) {
 	switch vrs[utils.Actions] {
 	case current[utils.Actions]:
 		if m.sameDataDB {
-			return
+			break
 		}
-		return m.migrateCurrentActions()
+		if err = m.migrateCurrentActions(); err != nil {
+			return err
+		}
 	case 1:
-		return m.migrateV1Actions()
+		if err = m.migrateV1Actions(); err != nil {
+			return err
+		}
 	}
-	return
+	return m.ensureIndexesDataDB(engine.ColAct)
 }
 
 func (v1Act v1Action) AsAction() (act *engine.Action) {

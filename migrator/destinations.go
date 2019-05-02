@@ -127,9 +127,11 @@ func (m *Migrator) migrateReverseDestinations() (err error) {
 	switch vrs[utils.ReverseDestinations] {
 	case current[utils.ReverseDestinations]:
 		if m.sameDataDB {
-			return
+			break
 		}
-		return m.migrateCurrentReverseDestinations()
+		if err = m.migrateCurrentReverseDestinations(); err != nil {
+			return err
+		}
 	}
-	return
+	return m.ensureIndexesDataDB(engine.ColDst, engine.ColRds)
 }

@@ -69,9 +69,11 @@ func (m *Migrator) migrateResources() (err error) {
 	switch vrs[utils.Resource] {
 	case current[utils.Resource]:
 		if m.sameDataDB {
-			return
+			break
 		}
-		return m.migrateCurrentResource()
+		if err = m.migrateCurrentResource(); err != nil {
+			return err
+		}
 	}
-	return
+	return m.ensureIndexesDataDB(engine.ColRsP)
 }

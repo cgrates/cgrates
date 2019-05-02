@@ -79,12 +79,11 @@ func (m *Migrator) migrateTpTimings() (err error) {
 	switch vrs[utils.TpTiming] {
 	case current[utils.TpTiming]:
 		if m.sameStorDB {
-			return
+			break
 		}
 		if err := m.migrateCurrentTPTiming(); err != nil {
 			return err
 		}
-		return
 	}
-	return
+	return m.ensureIndexesStorDB(utils.TBLTPTimings)
 }

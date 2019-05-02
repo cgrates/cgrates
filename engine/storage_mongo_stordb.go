@@ -1533,7 +1533,7 @@ func (ms *MongoStorage) GetVersions(itm string) (vrs Versions, err error) {
 		fop.SetProjection(bson.M{"_id": 0})
 	}
 	if err = ms.query(func(sctx mongo.SessionContext) (err error) {
-		cur := ms.getCol(colVer).FindOne(sctx, bson.D{}, fop)
+		cur := ms.getCol(ColVer).FindOne(sctx, bson.D{}, fop)
 		if err := cur.Decode(&vrs); err != nil {
 			if err == mongo.ErrNoDocuments {
 				return utils.ErrNotFound
@@ -1555,14 +1555,14 @@ func (ms *MongoStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 		ms.RemoveVersions(nil)
 	}
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
-		_, err = ms.getCol(colVer).UpdateOne(sctx, bson.D{}, bson.M{"$set": vrs},
+		_, err = ms.getCol(ColVer).UpdateOne(sctx, bson.D{}, bson.M{"$set": vrs},
 			options.Update().SetUpsert(true),
 		)
 		return err
 	})
 	// }
 	// return ms.query( func(sctx mongo.SessionContext) error {
-	// 	_, err := ms.getCol(colVer).InsertOne(sctx, vrs)
+	// 	_, err := ms.getCol(ColVer).InsertOne(sctx, vrs)
 	// 	return err
 	// })
 	// _, err = col.Upsert(bson.M{}, bson.M{"$set": &vrs})
@@ -1571,7 +1571,7 @@ func (ms *MongoStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 func (ms *MongoStorage) RemoveVersions(vrs Versions) (err error) {
 	if len(vrs) == 0 {
 		return ms.query(func(sctx mongo.SessionContext) (err error) {
-			dr, err := ms.getCol(colVer).DeleteOne(sctx, bson.D{})
+			dr, err := ms.getCol(ColVer).DeleteOne(sctx, bson.D{})
 			if dr.DeletedCount == 0 {
 				return utils.ErrNotFound
 			}
@@ -1580,7 +1580,7 @@ func (ms *MongoStorage) RemoveVersions(vrs Versions) (err error) {
 	}
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		for k := range vrs {
-			if _, err = ms.getCol(colVer).UpdateOne(sctx, bson.D{}, bson.M{"$unset": bson.M{k: 1}},
+			if _, err = ms.getCol(ColVer).UpdateOne(sctx, bson.D{}, bson.M{"$unset": bson.M{k: 1}},
 				options.Update().SetUpsert(true)); err != nil {
 				return err
 			}

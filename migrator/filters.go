@@ -153,14 +153,18 @@ func (m *Migrator) migrateFilters() (err error) {
 	}
 	switch vrs[utils.RQF] {
 	case 1:
-		return m.migrateRequestFilterV1()
+		if err = m.migrateRequestFilterV1(); err != nil {
+			return err
+		}
 	case current[utils.RQF]:
 		if m.sameDataDB {
-			return
+			break
 		}
-		return m.migrateCurrentRequestFilter()
+		if err = m.migrateCurrentRequestFilter(); err != nil {
+			return err
+		}
 	}
-	return
+	return m.ensureIndexesDataDB(engine.ColFlt)
 }
 
 func (m *Migrator) migrateResourceProfileFiltersV1() (err error) {

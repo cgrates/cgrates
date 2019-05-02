@@ -78,12 +78,11 @@ func (m *Migrator) migrateTPfilters() (err error) {
 	switch vrs[utils.TpFilters] {
 	case current[utils.TpFilters]:
 		if m.sameStorDB {
-			return
+			break
 		}
 		if err := m.migrateCurrentTPfilters(); err != nil {
 			return err
 		}
-		return
 	}
-	return
+	return m.ensureIndexesStorDB(utils.TBLTPFilters)
 }

@@ -79,12 +79,11 @@ func (m *Migrator) migrateTPDispatchers() (err error) {
 	switch vrs[utils.TpDispatchers] {
 	case current[utils.TpDispatchers]:
 		if m.sameStorDB {
-			return
+			break
 		}
 		if err := m.migrateCurrentTPDispatchers(); err != nil {
 			return err
 		}
-		return
 	}
-	return
+	return m.ensureIndexesStorDB(utils.TBLTPDispatchers)
 }
