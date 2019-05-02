@@ -13,19 +13,19 @@ from urllib import quote_plus
 
 from pymongo import MongoClient
 
-from_host    = '127.0.0.1'
-from_port    = '27017'
-from_db      = '11'
+from_host = '127.0.0.1'
+from_port = '27017'
+from_db = '11'
 from_auth_db = 'cgrates'  # Auth db on source server
-from_user    = 'cgrates'
-from_pass    = ''
+from_user = 'cgrates'
+from_pass = ''
 
-to_host      = '127.0.0.1'
-to_port      = '27017'
-to_db        = '10'
-to_auth_db   = "cgrates"  # Auth db on target server
-to_user      = 'cgrates'
-to_pass      = ''
+to_host = '127.0.0.1'
+to_port = '27017'
+to_db = '10'
+to_auth_db = "cgrates"  # Auth db on target server
+to_user = 'cgrates'
+to_pass = ''
 
 ignore_empty_cols = True
 # Do not migrate collections with 0 document count.
