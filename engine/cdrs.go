@@ -222,11 +222,13 @@ func (cdrS *CDRServer) getCostFromRater(cdr *CDRWithArgDispatcher) (*CallCost, e
 	}
 	if utils.IsSliceMember([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.META_PREPAID,
 		utils.PSEUDOPREPAID, utils.POSTPAID, utils.PREPAID}, cdr.RequestType) { // Prepaid - Cost can be recalculated in case of missing records from SM
-		err = cdrS.rals.Call(utils.ResponderDebit, &CallDescriptorWithArgDispatcher{CallDescriptor: cd,
-			ArgDispatcher: cdr.ArgDispatcher}, cc)
+		err = cdrS.rals.Call(utils.ResponderDebit,
+			&CallDescriptorWithArgDispatcher{CallDescriptor: cd,
+				ArgDispatcher: cdr.ArgDispatcher}, cc)
 	} else {
-		err = cdrS.rals.Call(utils.ResponderGetCost, &CallDescriptorWithArgDispatcher{CallDescriptor: cd,
-			ArgDispatcher: cdr.ArgDispatcher}, cc)
+		err = cdrS.rals.Call(utils.ResponderGetCost,
+			&CallDescriptorWithArgDispatcher{CallDescriptor: cd,
+				ArgDispatcher: cdr.ArgDispatcher}, cc)
 	}
 	if err != nil {
 		return cc, err
