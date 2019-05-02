@@ -22,12 +22,13 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
 	c := &CmdGetMaxDuration{
 		name:       "maxduration",
-		rpcMethod:  "Responder.GetMaxSessionTime",
+		rpcMethod:  utils.ResponderGetMaxSessionTime,
 		clientArgs: []string{"Direction", "Category", "TOR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
 	}
 	commands[c.Name()] = c
