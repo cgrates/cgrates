@@ -55,6 +55,33 @@ func (m *Migrator) migrateCurrentDispatcher() (err error) {
 	return
 }
 
+func (m *Migrator) migrateCurrentDispatcherHost() (err error) {
+	var ids []string
+	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DispatcherHostPrefix)
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		idg := strings.TrimPrefix(id, utils.DispatcherHostPrefix+tenant+":")
+		dpp, err := m.dmIN.DataManager().GetDispatcherHost(tenant, idg, false, false, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if dpp == nil || m.dryRun {
+			continue
+		}
+		if err := m.dmOut.DataManager().SetDispatcherHost(dpp); err != nil {
+			return err
+		}
+		if err := m.dmIN.DataManager().RemoveDispatcherHost(tenant,
+			idg, utils.NonTransactional); err != nil {
+			return err
+		}
+	}
+	return
+}
+
 func (m *Migrator) migrateDispatchers() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
@@ -78,6 +105,9 @@ func (m *Migrator) migrateDispatchers() (err error) {
 		if err = m.migrateCurrentDispatcher(); err != nil {
 			return err
 		}
+		if err = m.migrateCurrentDispatcherHost(); err != nil {
+			return err
+		}
 	}
-	return m.ensureIndexesDataDB(engine.ColDpp)
+	return m.ensureIndexesDataDB(engine.ColDpp, engine.ColDph)
 }
