@@ -3,13 +3,13 @@
 # depends:
 #   ^ psycopg2 (debian: python-psycopg2)
 
+import psycopg2
+
 host = '127.0.0.1'
 port = 5432
 database = 'cgrates'
 user = 'cgrates'
 password = 'CGRateS.org'
-
-import psycopg2
 
 print('Connecting to PostgreSQL...')
 cnx = psycopg2.connect(

@@ -3,13 +3,13 @@
 # depends:
 #   ^ mysql (debian: python-mysql.connector)
 
+import mysql.connector
+
 host = '127.0.0.1'
 port = 3306
 database = 'cgrates'
 user = 'root'
 password = 'CGRateS.org'
-
-import mysql.connector
 
 config = {
   'user':               user,

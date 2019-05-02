@@ -6,6 +6,15 @@
 #   ^ the script will "move" the collections if source and target server are the same
 #     but will "copy" (dump/restore) if source and target servers are different
 
+import os
+import shutil
+import subprocess
+import sys
+from collections import OrderedDict
+from urllib import quote_plus
+
+from pymongo import MongoClient
+
 from_host    = '127.0.0.1'
 from_port    = '27017'
 from_db      = '11'
@@ -30,11 +39,6 @@ ignore_empty_cols = True
 drop_target = False
 
 dump_folder = 'dump'
-
-import sys
-from pymongo import MongoClient
-from urllib import quote_plus
-from collections import OrderedDict
 
 # same server
 if from_host == to_host and from_port == to_port:
@@ -68,10 +72,6 @@ if from_host == to_host and from_port == to_port:
 
 # different servers
 else:
-    import subprocess
-    import os
-    import shutil
-
     print('Migrating between different servers...')
     print('Dumping...')
     out = subprocess.check_output([
