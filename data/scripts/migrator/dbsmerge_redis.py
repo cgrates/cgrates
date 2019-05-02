@@ -16,7 +16,7 @@ from_pass   = ''
 to_host     = '127.0.0.1'
 to_port     = 6379
 to_db       = 10
-to_pass     = '' # Not used
+to_pass     = ''  # Not used
 
 keymask     = '*'
 timeout     = 2000

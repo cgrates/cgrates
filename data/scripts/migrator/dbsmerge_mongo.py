@@ -9,14 +9,14 @@
 from_host    = '127.0.0.1'
 from_port    = '27017'
 from_db      = '11'
-from_auth_db = 'cgrates' # Auth db on source server
+from_auth_db = 'cgrates'  # Auth db on source server
 from_user    = 'cgrates'
 from_pass    = ''
 
 to_host      = '127.0.0.1'
 to_port      = '27017'
 to_db        = '10'
-to_auth_db   = "cgrates" # Auth db on target server
+to_auth_db   = "cgrates"  # Auth db on target server
 to_user      = 'cgrates'
 to_pass      = ''
 
@@ -40,7 +40,7 @@ from collections import OrderedDict
 if from_host == to_host and from_port == to_port:
         print('Migrating on same server...')
         mongo_from_url = 'mongodb://' + from_user + ':' + quote_plus(from_pass) + '@'+ from_host + ':' + from_port + '/' + from_auth_db
-        if from_pass == '': # disabled auth
+        if from_pass == '':  # disabled auth
           mongo_from_url = 'mongodb://' + from_host + ':' + from_port + '/' + from_db
         client = MongoClient(mongo_from_url)
 
