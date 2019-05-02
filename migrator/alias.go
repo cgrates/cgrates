@@ -184,5 +184,8 @@ func (m *Migrator) migrateAlias2Attributes() (err error) {
 }
 
 func (m *Migrator) migrateAlias() (err error) {
-	return m.migrateAlias2Attributes()
+	if err = m.migrateAlias2Attributes(); err != nil {
+		return err
+	}
+	return m.ensureIndexesDataDB(engine.ColAttr)
 }

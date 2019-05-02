@@ -80,12 +80,11 @@ func (m *Migrator) migrateTPthresholds() (err error) {
 	switch vrs[utils.TpThresholds] {
 	case current[utils.TpThresholds]:
 		if m.sameStorDB {
-			return
+			break
 		}
 		if err := m.migrateCurrentTPthresholds(); err != nil {
 			return err
 		}
-		return
 	}
-	return
+	return m.ensureIndexesStorDB(utils.TBLTPThresholds)
 }

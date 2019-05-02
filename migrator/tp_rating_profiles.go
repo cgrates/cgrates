@@ -75,12 +75,11 @@ func (m *Migrator) migrateTPratingprofiles() (err error) {
 	switch vrs[utils.TpRatingProfiles] {
 	case current[utils.TpRatingProfiles]:
 		if m.sameStorDB {
-			return
+			break
 		}
 		if err := m.migrateCurrentTPratingprofiles(); err != nil {
 			return err
 		}
-		return
 	}
-	return
+	return m.ensureIndexesStorDB(utils.TBLTPRateProfiles)
 }

@@ -77,12 +77,11 @@ func (m *Migrator) migrateTPactiontriggers() (err error) {
 	switch vrs[utils.TpActionTriggers] {
 	case current[utils.TpActionTriggers]:
 		if m.sameStorDB {
-			return
+			break
 		}
 		if err := m.migrateCurrentTPactiontriggers(); err != nil {
 			return err
 		}
-		return
 	}
-	return
+	return m.ensureIndexesStorDB(utils.TBLTPActionTriggers)
 }

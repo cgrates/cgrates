@@ -124,5 +124,8 @@ func (m *Migrator) migrateV1User2AttributeProfile() (err error) {
 }
 
 func (m *Migrator) migrateUser() (err error) {
-	return m.migrateV1User2AttributeProfile()
+	if err = m.migrateV1User2AttributeProfile(); err != nil {
+		return err
+	}
+	return m.ensureIndexesDataDB(engine.ColAttr)
 }

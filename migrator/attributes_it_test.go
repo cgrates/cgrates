@@ -47,6 +47,7 @@ var sTestsAttrIT = []func(t *testing.T){
 	testAttrITMigrateAndMove,
 	testAttrITFlush,
 	testAttrITMigrateV2,
+	testAttrITFlush,
 	testAttrITMigrateV3,
 }
 

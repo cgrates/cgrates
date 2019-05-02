@@ -69,9 +69,11 @@ func (m *Migrator) migrateChargers() (err error) {
 	switch vrs[utils.Chargers] {
 	case current[utils.Chargers]:
 		if m.sameDataDB {
-			return
+			break
 		}
-		return m.migrateCurrentCharger()
+		if err = m.migrateCurrentCharger(); err != nil {
+			return err
+		}
 	}
-	return
+	return m.ensureIndexesDataDB(engine.ColCpp)
 }

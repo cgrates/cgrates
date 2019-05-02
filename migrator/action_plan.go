@@ -126,13 +126,17 @@ func (m *Migrator) migrateActionPlans() (err error) {
 	switch vrs[utils.ActionPlans] {
 	case current[utils.ActionPlans]:
 		if m.sameDataDB {
-			return
+			break
 		}
-		return m.migrateCurrentActionPlans()
+		if err = m.migrateCurrentActionPlans(); err != nil {
+			return err
+		}
 	case 1:
-		return m.migrateV1ActionPlans()
+		if err = m.migrateV1ActionPlans(); err != nil {
+			return err
+		}
 	}
-	return
+	return m.ensureIndexesDataDB(engine.ColApl)
 }
 
 func (v1AP v1ActionPlan) AsActionPlan() (ap *engine.ActionPlan) {

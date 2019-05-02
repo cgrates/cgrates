@@ -80,12 +80,11 @@ func (m *Migrator) migrateTPstats() (err error) {
 	switch vrs[utils.TpStats] {
 	case current[utils.TpStats]:
 		if m.sameStorDB {
-			return
+			break
 		}
 		if err := m.migrateCurrentTPstats(); err != nil {
 			return err
 		}
-		return
 	}
-	return
+	return m.ensureIndexesStorDB(utils.TBLTPStats)
 }

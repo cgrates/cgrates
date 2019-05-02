@@ -79,12 +79,11 @@ func (m *Migrator) migrateTPsharedgroups() (err error) {
 	switch vrs[utils.TpSharedGroups] {
 	case current[utils.TpSharedGroups]:
 		if m.sameStorDB {
-			return
+			break
 		}
 		if err := m.migrateCurrentTPsharedgroups(); err != nil {
 			return err
 		}
-		return
 	}
-	return
+	return m.ensureIndexesStorDB(utils.TBLTPResources)
 }

@@ -76,12 +76,11 @@ func (m *Migrator) migrateTPdestinationrates() (err error) {
 	switch vrs[utils.TpDestinationRates] {
 	case current[utils.TpDestinationRates]:
 		if m.sameStorDB {
-			return
+			break
 		}
 		if err := m.migrateCurrentTPdestinationrates(); err != nil {
 			return err
 		}
-		return
 	}
-	return
+	return m.ensureIndexesStorDB(utils.TBLTPDestinationRates)
 }

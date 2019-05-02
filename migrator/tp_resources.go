@@ -80,12 +80,11 @@ func (m *Migrator) migrateTPresources() (err error) {
 	switch vrs[utils.TpResources] {
 	case current[utils.TpResources]:
 		if m.sameStorDB {
-			return
+			break
 		}
 		if err := m.migrateCurrentTPresources(); err != nil {
 			return err
 		}
-		return
 	}
-	return
+	return m.ensureIndexesStorDB(utils.TBLTPResources)
 }

@@ -232,16 +232,22 @@ func (m *Migrator) migrateStats() (err error) {
 	}
 	switch vrs[utils.StatS] {
 	case 1:
-		return m.migrateV1CDRSTATS()
+		if err = m.migrateV1CDRSTATS(); err != nil {
+			return err
+		}
 	case 2:
-		return m.migrateV2Stats()
+		if err = m.migrateV2Stats(); err != nil {
+			return err
+		}
 	case current[utils.StatS]:
 		if m.sameDataDB {
-			return
+			break
 		}
-		return m.migrateCurrentStats()
+		if err = m.migrateCurrentStats(); err != nil {
+			return err
+		}
 	}
-	return
+	return m.ensureIndexesDataDB(engine.ColSqs)
 }
 
 func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq *engine.StatQueueProfile, err error) {

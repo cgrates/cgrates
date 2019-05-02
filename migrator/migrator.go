@@ -312,3 +312,19 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 	}
 	return
 }
+
+func (m *Migrator) ensureIndexesDataDB(cols ...string) error {
+	if m.dmOut.DataManager().DataDB().GetStorageType() != utils.MONGO {
+		return nil
+	}
+	mgo := m.dmOut.DataManager().DataDB().(*engine.MongoStorage)
+	return mgo.EnsureIndexes(cols...)
+}
+
+func (m *Migrator) ensureIndexesStorDB(cols ...string) error {
+	if m.storDBOut.StorDB().GetStorageType() != utils.MONGO {
+		return nil
+	}
+	mgo := m.storDBOut.StorDB().(*engine.MongoStorage)
+	return mgo.EnsureIndexes(cols...)
+}

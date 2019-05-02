@@ -102,13 +102,17 @@ func (m *Migrator) migrateSharedGroups() (err error) {
 	switch vrs[utils.SharedGroups] {
 	case current[utils.SharedGroups]:
 		if m.sameDataDB {
-			return
+			break
 		}
-		return m.migrateCurrentSharedGroups()
+		if err = m.migrateCurrentSharedGroups(); err != nil {
+			return err
+		}
 	case 1:
-		return m.migrateV1SharedGroups()
+		if err = m.migrateV1SharedGroups(); err != nil {
+			return err
+		}
 	}
-	return
+	return m.ensureIndexesDataDB(engine.ColShg)
 }
 
 func (v1SG v1SharedGroup) AsSharedGroup() (sg *engine.SharedGroup) {

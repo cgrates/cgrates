@@ -214,5 +214,8 @@ func (m *Migrator) migrateV1DerivedChargers() (err error) {
 }
 
 func (m *Migrator) migrateDerivedChargers() (err error) {
-	return m.migrateV1DerivedChargers()
+	if err = m.migrateV1DerivedChargers(); err != nil {
+		return err
+	}
+	return m.ensureIndexesDataDB(engine.ColCpp, engine.ColAttr)
 }
