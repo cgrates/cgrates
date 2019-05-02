@@ -299,12 +299,13 @@ func (spS *SupplierService) statMetrics(statIDs []string, tenant string) (stsMet
 func (spS *SupplierService) resourceUsage(resIDs []string, tenant string) (tUsage float64, err error) {
 	if spS.resourceS != nil {
 		for _, resID := range resIDs {
-			var res *Resource
-			if err = spS.resourceS.Call(utils.ApierV1GetResource,
+			var res Resource
+			if err = spS.resourceS.Call(utils.ResourceSv1GetResource,
 				&utils.TenantID{Tenant: tenant, ID: resID}, &res); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<SupplierS> error: %s getting resource for ID : %s", err.Error(), resID))
+				continue
 			}
 			tUsage += res.totalUsage()
 		}

@@ -110,6 +110,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 	eRpl1 := &engine.SortedSuppliers{
 		ProfileID: "SPL_WEIGHT_2",
 		Sorting:   utils.MetaWeight,
+		Count:     1,
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID:         "supplier1",
@@ -123,6 +124,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 	eRpl := &engine.SortedSuppliers{
 		ProfileID: "SPL_ACNT_1002",
 		Sorting:   utils.MetaLeastCost,
+		Count:     2,
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID:         "supplier1",
@@ -208,6 +210,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 	eRpl := &engine.SortedSuppliers{
 		ProfileID: "SPL_ACNT_1002",
 		Sorting:   utils.MetaLeastCost,
+		Count:     2,
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID:         "supplier1",
@@ -259,6 +262,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 	eRpl1 := &engine.SortedSuppliers{
 		ProfileID: "SPL_WEIGHT_2",
 		Sorting:   utils.MetaWeight,
+		Count:     1,
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID:         "supplier1",
@@ -272,6 +276,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 	eRpl := &engine.SortedSuppliers{
 		ProfileID: "SPL_ACNT_1002",
 		Sorting:   utils.MetaLeastCost,
+		Count:     2,
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
 				SupplierID:         "supplier1",

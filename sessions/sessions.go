@@ -471,8 +471,9 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 	argDsp := s.ArgDispatcher
 	s.Unlock()
 	cc := new(engine.CallCost)
-	if err := sS.ralS.Call(utils.ResponderMaxDebit, &engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
-		ArgDispatcher: argDsp}, cc); err != nil {
+	if err := sS.ralS.Call(utils.ResponderMaxDebit,
+		&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
+			ArgDispatcher: argDsp}, cc); err != nil {
 		s.Lock()
 		sr.ExtraDuration += dbtRsrv
 		s.Unlock()
@@ -606,8 +607,9 @@ func (sS *SessionS) refundSession(s *Session, sRunIdx int, rUsage time.Duration)
 		Increments:  incrmts,
 	}
 	var acnt engine.Account
-	if err = sS.ralS.Call(utils.ResponderRefundIncrements, &engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
-		ArgDispatcher: s.ArgDispatcher}, &acnt); err != nil {
+	if err = sS.ralS.Call(utils.ResponderRefundIncrements,
+		&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
+			ArgDispatcher: s.ArgDispatcher}, &acnt); err != nil {
 		return
 	}
 	if acnt.ID != "" { // Account info updated, update also cached AccountSummary
@@ -913,14 +915,13 @@ func (sS *SessionS) asActiveSessions(fltrs map[string]string,
 
 	if len(fltrs) == 0 { // no filters applied
 		ss := sS.getSessions(utils.EmptyString, psv)
-		if count {
-			return nil, len(ss), nil
-		}
-		aSs = make([]*ActiveSession, len(ss))
 		for _, s := range ss {
 			aSs = append(aSs,
 				s.AsActiveSessions(sS.cgrCfg.GeneralCfg().DefaultTimezone,
 					sS.cgrCfg.GeneralCfg().NodeID)...) // Expensive for large number of sessions
+		}
+		if count {
+			return nil, len(aSs), nil
 		}
 		return
 	}
@@ -1330,8 +1331,9 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration) (er
 				sr.CD.TimeEnd = sr.CD.TimeStart.Add(notCharged)
 				sr.CD.DurationIndex += notCharged
 				cc := new(engine.CallCost)
-				if err = sS.ralS.Call(utils.ResponderDebit, &engine.CallDescriptorWithArgDispatcher{CallDescriptor: sr.CD,
-					ArgDispatcher: s.ArgDispatcher}, cc); err == nil {
+				if err = sS.ralS.Call(utils.ResponderDebit,
+					&engine.CallDescriptorWithArgDispatcher{CallDescriptor: sr.CD,
+						ArgDispatcher: s.ArgDispatcher}, cc); err == nil {
 					sr.EventCost.Merge(
 						engine.NewEventCostFromCallCost(cc, s.CGRID,
 							sr.Event.GetStringIgnoreErrors(utils.RunID)))
@@ -2401,7 +2403,8 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 	}
 	if s == nil { // no cached session, CDR will be handled by CDRs
 		return sS.cdrS.Call(utils.CDRsV1ProcessEvent,
-			&engine.ArgV1ProcessEvent{CGREvent: *cgrEvWithArgDisp.CGREvent,
+			&engine.ArgV1ProcessEvent{
+				CGREvent:      *cgrEvWithArgDisp.CGREvent,
 				ArgDispatcher: cgrEvWithArgDisp.ArgDispatcher}, rply)
 	}
 

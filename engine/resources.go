@@ -721,3 +721,16 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 	*reply = utils.OK
 	return
 }
+
+// GetResource returns a resource configuration
+func (rS *ResourceService) V1GetResource(arg *utils.TenantID, reply *Resource) error {
+	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if res, err := rS.dm.GetResource(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+		return err
+	} else {
+		*reply = *res
+	}
+	return nil
+}

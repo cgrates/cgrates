@@ -152,7 +152,7 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithArgDispatcher) (
 // V1ProcessEvent will process the event received via API and return list of events forked
 func (cS *ChargerService) V1ProcessEvent(args *utils.CGREventWithArgDispatcher,
 	reply *[]*ChrgSProcessEventReply) (err error) {
-	if args.Event == nil {
+	if args.CGREvent == nil || args.Event == nil {
 		return utils.NewErrMandatoryIeMissing("Event")
 	}
 	rply, err := cS.processEvent(args)

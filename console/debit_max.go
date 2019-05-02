@@ -34,7 +34,7 @@ func init() {
 type CmdMaxDebit struct {
 	name       string
 	rpcMethod  string
-	rpcParams  *engine.CallDescriptor
+	rpcParams  *engine.CallDescriptorWithArgDispatcher
 	clientArgs []string
 	*CommandExecuter
 }
@@ -49,7 +49,7 @@ func (self *CmdMaxDebit) RpcMethod() string {
 
 func (self *CmdMaxDebit) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(engine.CallDescriptor)
+		self.rpcParams = new(engine.CallDescriptorWithArgDispatcher)
 	}
 	return self.rpcParams
 }

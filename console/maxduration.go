@@ -38,7 +38,7 @@ func init() {
 type CmdGetMaxDuration struct {
 	name       string
 	rpcMethod  string
-	rpcParams  *engine.CallDescriptor
+	rpcParams  *engine.CallDescriptorWithArgDispatcher
 	clientArgs []string
 	*CommandExecuter
 }
@@ -53,7 +53,7 @@ func (self *CmdGetMaxDuration) RpcMethod() string {
 
 func (self *CmdGetMaxDuration) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(engine.CallDescriptor)
+		self.rpcParams = new(engine.CallDescriptorWithArgDispatcher)
 	}
 	return self.rpcParams
 }
