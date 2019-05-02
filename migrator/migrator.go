@@ -253,6 +253,9 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			if err := m.migrateDerivedChargers(); err != nil {
 				log.Print("ERROR: ", utils.MetaDerivedChargersV, " ", err)
 			}
+			if err := m.migrateDispatchers(); err != nil {
+				log.Print("ERROR: ", utils.MetaDispatchers, " ", err)
+			}
 			err = nil
 			//STORDB ALL
 		case utils.MetaStorDB:
@@ -303,6 +306,18 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			}
 			if err := m.migrateTPDestinations(); err != nil {
 				log.Print("ERROR: ", utils.MetaTpDestinations, " ", err)
+			}
+			if err := m.migrateTPChargers(); err != nil {
+				log.Print("ERROR: ", utils.MetaTpChargers, " ", err)
+			}
+			if err := m.migrateTPDispatchers(); err != nil {
+				log.Print("ERROR: ", utils.MetaTpDispatchers, " ", err)
+			}
+			if err := m.migrateCDRs(); err != nil {
+				log.Print("ERROR: ", utils.MetaCDRs, " ", err)
+			}
+			if err := m.migrateSessionSCosts(); err != nil {
+				log.Print("ERROR: ", utils.MetaSessionsCosts, " ", err)
 			}
 			err = nil
 		}

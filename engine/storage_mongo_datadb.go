@@ -263,12 +263,13 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) (err error) { // exporte
 	if err = ms.dropAllIndexesForCol(col); err != nil && !command.IsNotFound(err) { // make sure you do not have indexes
 		return
 	}
+	err = nil
 	switch col {
 	case ColAct, ColApl, ColAAp, ColAtr, ColRpl, ColDst, ColRds, ColLht, ColRFI:
 		if err = ms.enusureIndex(col, true, "key"); err != nil {
 			return
 		}
-	case ColRsP, ColRes, ColSqs, ColSqp, ColTps, ColThs, ColSpp, ColAttr, ColFlt, ColCpp, ColDpp:
+	case ColRsP, ColRes, ColSqs, ColSqp, ColTps, ColThs, ColSpp, ColAttr, ColFlt, ColCpp, ColDpp, ColDph:
 		if err = ms.enusureIndex(col, true, "tenant", "id"); err != nil {
 			return
 		}
@@ -281,7 +282,9 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) (err error) { // exporte
 		utils.TBLTPDestinationRates, utils.TBLTPRatingPlans,
 		utils.TBLTPSharedGroups, utils.TBLTPActions,
 		utils.TBLTPActionPlans, utils.TBLTPActionTriggers,
-		utils.TBLTPStats, utils.TBLTPResources:
+		utils.TBLTPStats, utils.TBLTPResources, utils.TBLTPDispatchers,
+		utils.TBLTPDispatcherHosts, utils.TBLTPChargers,
+		utils.TBLTPSuppliers, utils.TBLTPThresholds:
 		if err = ms.enusureIndex(col, true, "tpid", "id"); err != nil {
 			return
 		}
