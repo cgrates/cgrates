@@ -10,18 +10,18 @@
 
 import redis
 
-from_host   = '127.0.0.1'
-from_port   = 6379
-from_db     = 11
-from_pass   = ''
+from_host = '127.0.0.1'
+from_port = 6379
+from_db = 11
+from_pass = ''
 
-to_host     = '127.0.0.1'
-to_port     = 6379
-to_db       = 10
-to_pass     = ''  # Not used
+to_host = '127.0.0.1'
+to_port = 6379
+to_db = 10
+to_pass = ''  # Not used
 
-keymask     = '*'
-timeout     = 2000
+keymask = '*'
+timeout = 2000
 
 from_redis = redis.Redis(host = from_host, port = from_port, password=from_pass, db = from_db)
 to_redis = redis.Redis(host = to_host, port = to_port, db = to_db)
