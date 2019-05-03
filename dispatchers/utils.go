@@ -44,7 +44,7 @@ type DispatcherEvent struct {
 type FilterSessionWithApiKey struct {
 	*utils.ArgDispatcher
 	utils.TenantArg
-	Filters map[string]string
+	sessions.FilterWithPaginator
 }
 
 type ArgsReplicateSessionsWithApiKey struct {
