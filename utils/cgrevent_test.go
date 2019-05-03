@@ -18,8 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
@@ -118,7 +118,6 @@ func TestCGREventFieldAsString(t *testing.T) {
 }
 
 func TestCGREventFieldAsFloat64(t *testing.T) {
-	err1 := fmt.Errorf("cannot cast %s to string", AnswerTime)
 	se := &CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "supplierEvent1",
@@ -154,12 +153,8 @@ func TestCGREventFieldAsFloat64(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", 0, answ)
 	}
 
-	answ, err = se.FieldAsFloat64(AnswerTime)
-	if !reflect.DeepEqual(err, err1) {
-		t.Error(err)
-	}
-	if answ != 0 {
-		t.Errorf("Expecting: %+v, received: %+v", 0, answ)
+	if _, err := se.FieldAsFloat64(AnswerTime); err == nil || !strings.HasPrefix(err.Error(), "cannot convert field") {
+		t.Errorf("Unexpected error : %+v", err)
 	}
 }
 func TestCGREventClone(t *testing.T) {
