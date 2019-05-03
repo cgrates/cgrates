@@ -107,8 +107,10 @@ func testDspCppGetChtgFailover(t *testing.T) {
 	}
 	var reply *engine.ChargerProfiles
 	if err := dispEngine.RCP.Call(utils.ChargerSv1GetChargersForEvent,
-		args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected error NOT_FOUND but recived %v and reply %v\n", err, reply)
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eChargers, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eChargers), utils.ToJSON(reply))
 	}
 
 	allEngine2.stopEngine(t)
@@ -223,10 +225,11 @@ func testDspCppGetChtgRoundRobin(t *testing.T) {
 	var reply *engine.ChargerProfiles
 	// To ALL2
 	if err := dispEngine.RCP.Call(utils.ChargerSv1GetChargersForEvent,
-		args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Errorf("Expected error NOT_FOUND but recived %v and reply %v\n", err, reply)
+		args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eChargers, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eChargers), utils.ToJSON(reply))
 	}
-
 	// To ALL
 	if err := dispEngine.RCP.Call(utils.ChargerSv1GetChargersForEvent,
 		args, &reply); err != nil {
