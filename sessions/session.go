@@ -270,3 +270,8 @@ func (sr *SRun) debitReserve(dur time.Duration, lastUsage *time.Duration) (rDur 
 	}
 	return
 }
+
+type FilterWithPaginator struct {
+	Filters map[string]string
+	*utils.Paginator
+}

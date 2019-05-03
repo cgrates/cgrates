@@ -1442,19 +1442,49 @@ func (sS *SessionS) CallBiRPC(clnt rpcclient.RpcClientConnection,
 
 // BiRPCv1GetActiveSessions returns the list of active sessions based on filter
 func (sS *SessionS) BiRPCv1GetActiveSessions(clnt rpcclient.RpcClientConnection,
-	fltr map[string]string, reply *[]*ActiveSession) (err error) {
-	for fldName, fldVal := range fltr {
+	args *FilterWithPaginator, reply *[]*ActiveSession) (err error) {
+	if args == nil { //protection in case on nil
+		args = &FilterWithPaginator{}
+	}
+	for fldName, fldVal := range args.Filters {
 		if fldVal == "" {
-			fltr[fldName] = utils.META_NONE
+			args.Filters[fldName] = utils.META_NONE
 		}
 	}
-	aSs, _, err := sS.asActiveSessions(fltr, false, false)
+	aSs, _, err := sS.asActiveSessions(args.Filters, false, false)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(aSs) == 0 {
 		return utils.ErrNotFound
 	}
-	*reply = aSs
+	if args.Paginator == nil { //small optimization
+		*reply = aSs
+	} else {
+		var limit, offset int
+		if args.Limit != nil && *args.Limit > 0 {
+			limit = *args.Limit
+		}
+		if args.Offset != nil && *args.Offset > 0 {
+			offset = *args.Offset
+		}
+		if limit == 0 && offset == 0 {
+			*reply = aSs
+			return
+		}
+		if offset > len(aSs) {
+			return fmt.Errorf("Offset : %+v is greater than lenght of active sessions : %+v", offset, len(aSs))
+		}
+		if offset != 0 {
+			limit = limit + offset
+		}
+		if limit == 0 {
+			limit = len(aSs[offset:])
+		} else if limit > len(aSs) {
+			limit = len(aSs)
+		}
+		*reply = aSs[offset:limit]
+	}
+
 	return nil
 }
 
@@ -1476,19 +1506,49 @@ func (sS *SessionS) BiRPCv1GetActiveSessionsCount(clnt rpcclient.RpcClientConnec
 
 // BiRPCv1GetPassiveSessions returns the passive sessions handled by SessionS
 func (sS *SessionS) BiRPCv1GetPassiveSessions(clnt rpcclient.RpcClientConnection,
-	fltr map[string]string, reply *[]*ActiveSession) error {
-	for fldName, fldVal := range fltr {
+	args *FilterWithPaginator, reply *[]*ActiveSession) error {
+	if args == nil { //protection in case on nil
+		args = &FilterWithPaginator{}
+	}
+	for fldName, fldVal := range args.Filters {
 		if fldVal == "" {
-			fltr[fldName] = utils.META_NONE
+			args.Filters[fldName] = utils.META_NONE
 		}
 	}
-	pSs, _, err := sS.asActiveSessions(fltr, false, true)
+	pSs, _, err := sS.asActiveSessions(args.Filters, false, true)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(pSs) == 0 {
 		return utils.ErrNotFound
 	}
-	*reply = pSs
+	if args.Paginator == nil { //small optimization
+		*reply = pSs
+	} else {
+		var limit, offset int
+		if args.Limit != nil && *args.Limit > 0 {
+			limit = *args.Limit
+		}
+		if args.Offset != nil && *args.Offset > 0 {
+			offset = *args.Offset
+		}
+		if limit == 0 && offset == 0 {
+			*reply = pSs
+			return nil
+		}
+		if offset > len(pSs) {
+			return fmt.Errorf("Offset : %+v is greater than lenght of passive sessions : %+v", offset, len(pSs))
+		}
+		if offset != 0 {
+			limit = limit + offset
+		}
+		if limit == 0 {
+			limit = len(pSs[offset:])
+		} else if limit > len(pSs) {
+			limit = len(pSs)
+		}
+		*reply = pSs[offset:limit]
+	}
+
 	return nil
 }
 

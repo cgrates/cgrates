@@ -197,7 +197,7 @@ func (dS *DispatcherService) SessionSv1GetActiveSessions(args *FilterSessionWith
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaSessionS, args.RouteID,
-		utils.SessionSv1GetActiveSessions, args.Filters, reply)
+		utils.SessionSv1GetActiveSessions, args.FilterWithPaginator, reply)
 }
 
 func (dS *DispatcherService) SessionSv1GetActiveSessionsCount(args *FilterSessionWithApiKey,
@@ -245,7 +245,7 @@ func (dS *DispatcherService) SessionSv1GetPassiveSessions(args *FilterSessionWit
 		}
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaSessionS, args.RouteID,
-		utils.SessionSv1GetPassiveSessions, args.Filters, reply)
+		utils.SessionSv1GetPassiveSessions, args.FilterWithPaginator, reply)
 }
 
 func (dS *DispatcherService) SessionSv1GetPassiveSessionsCount(args *FilterSessionWithApiKey,
