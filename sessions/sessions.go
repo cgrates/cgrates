@@ -378,6 +378,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 	}
 	cgrEv := utils.CGREvent{
 		Tenant: s.Tenant,
+		ID:     utils.GenUUID(),
 		Event:  s.EventStart.AsMapInterface(),
 	}
 	// post the CDRs
@@ -385,8 +386,8 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 		if cgrEvs, err := s.asCGREvents(); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
-					"<%s> could not post CDR for event %s, err: %s",
-					utils.SessionS, utils.ToJSON(cgrEv), err.Error()))
+					"<%s> failed convering session: %s in CGREvents with err: %s",
+					utils.SessionS, utils.ToJSON(s), err.Error()))
 		} else {
 			var reply string
 			for _, cgrEv := range cgrEvs {

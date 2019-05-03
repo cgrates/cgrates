@@ -41,6 +41,9 @@
 	"stats_conns": [
 		{"address": "*internal"}
 	],
+	"chargers_conns": [
+    	{"address": "*internal"}
+    ],
 	"sessions_cost_retries": 5,
 },
 
@@ -57,8 +60,8 @@
 	"enabled": true,
 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
 	"chargers_conns": [
-                {"address": "*internal"}
-        ],
+    	{"address": "*internal"}
+    ],
 	"rals_conns": [
 		{"address": "*internal"}
 	],
