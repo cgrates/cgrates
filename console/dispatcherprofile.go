@@ -51,7 +51,7 @@ func (self *CmdDispatcherProfile) RpcMethod() string {
 
 func (self *CmdDispatcherProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(dispatchers.DispatcherEvent)
+		self.rpcParams = &dispatchers.DispatcherEvent{ArgDispatcher: new(utils.ArgDispatcher)}
 	}
 	return self.rpcParams
 }

@@ -51,7 +51,7 @@ func (self *CmdGetJSONConfig) RpcMethod() string {
 
 func (self *CmdGetJSONConfig) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &config.StringWithArgDispatcher{}
+		self.rpcParams = &config.StringWithArgDispatcher{ArgDispatcher: new(utils.ArgDispatcher)}
 	}
 	return self.rpcParams
 }

@@ -46,7 +46,10 @@ func (self *CmdStatus) RpcMethod() string {
 
 func (self *CmdStatus) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantWithArgDispatcher{}
+		self.rpcParams = &utils.TenantWithArgDispatcher{
+			TenantArg:     new(utils.TenantArg),
+			ArgDispatcher: new(utils.ArgDispatcher),
+		}
 	}
 	return self.rpcParams
 }

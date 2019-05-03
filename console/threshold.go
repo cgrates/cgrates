@@ -50,7 +50,10 @@ func (self *CmdGetThreshold) RpcMethod() string {
 
 func (self *CmdGetThreshold) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TenantIDWithArgDispatcher{}
+		self.rpcParams = &utils.TenantIDWithArgDispatcher{
+			TenantID:      new(utils.TenantID),
+			ArgDispatcher: new(utils.ArgDispatcher),
+		}
 	}
 	return self.rpcParams
 }

@@ -20,6 +20,7 @@ package console
 
 import (
 	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -50,7 +51,7 @@ func (self *CmdSetSupplier) RpcMethod() string {
 
 func (self *CmdSetSupplier) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.SupplierWithCache{}
+		self.rpcParams = &v1.SupplierWithCache{SupplierProfile: new(engine.SupplierProfile)}
 	}
 	return self.rpcParams
 }

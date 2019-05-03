@@ -18,7 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/engine"
+import (
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+)
 
 func init() {
 	c := &CmdMaxDebit{
@@ -49,7 +52,10 @@ func (self *CmdMaxDebit) RpcMethod() string {
 
 func (self *CmdMaxDebit) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(engine.CallDescriptorWithArgDispatcher)
+		self.rpcParams = &engine.CallDescriptorWithArgDispatcher{
+			CallDescriptor: new(engine.CallDescriptor),
+			ArgDispatcher:  new(utils.ArgDispatcher),
+		}
 	}
 	return self.rpcParams
 }

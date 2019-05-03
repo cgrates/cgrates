@@ -20,6 +20,7 @@ package console
 
 import (
 	v2 "github.com/cgrates/cgrates/apier/v2"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -50,7 +51,7 @@ func (self *CmdSetAttributes) RpcMethod() string {
 
 func (self *CmdSetAttributes) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v2.AttributeWithCache{}
+		self.rpcParams = &v2.AttributeWithCache{ExternalAttributeProfile: new(engine.ExternalAttributeProfile)}
 	}
 	return self.rpcParams
 }

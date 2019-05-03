@@ -20,6 +20,7 @@ package console
 
 import (
 	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -51,7 +52,7 @@ func (self *CmdSetStatQueue) RpcMethod() string {
 
 func (self *CmdSetStatQueue) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.StatQueueWithCache{}
+		self.rpcParams = &v1.StatQueueWithCache{StatQueueProfile: new(engine.StatQueueProfile)}
 	}
 	return self.rpcParams
 }

@@ -52,7 +52,10 @@ func (self *CmdChargersProcessEvent) RpcMethod() string {
 
 func (self *CmdChargersProcessEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.CGREventWithArgDispatcher{}
+		self.rpcParams = &utils.CGREventWithArgDispatcher{
+			CGREvent:      new(utils.CGREvent),
+			ArgDispatcher: new(utils.ArgDispatcher),
+		}
 	}
 	return self.rpcParams
 }

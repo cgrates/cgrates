@@ -52,7 +52,7 @@ func (self *CmdSessionsAuthorize) RpcMethod() string {
 
 func (self *CmdSessionsAuthorize) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &sessions.V1AuthorizeArgs{}
+		self.rpcParams = &sessions.V1AuthorizeArgs{ArgDispatcher: new(utils.ArgDispatcher)}
 	}
 	return self.rpcParams
 }

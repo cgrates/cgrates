@@ -20,6 +20,7 @@ package console
 
 import (
 	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -51,7 +52,7 @@ func (self *CmdSetThreshold) RpcMethod() string {
 
 func (self *CmdSetThreshold) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.ThresholdWithCache{}
+		self.rpcParams = &v1.ThresholdWithCache{ThresholdProfile: new(engine.ThresholdProfile)}
 	}
 	return self.rpcParams
 }

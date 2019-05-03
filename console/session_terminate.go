@@ -52,7 +52,7 @@ func (self *CmdSessionsTerminate) RpcMethod() string {
 
 func (self *CmdSessionsTerminate) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &sessions.V1TerminateSessionArgs{}
+		self.rpcParams = &sessions.V1TerminateSessionArgs{ArgDispatcher: new(utils.ArgDispatcher)}
 	}
 	return self.rpcParams
 }

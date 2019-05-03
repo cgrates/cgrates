@@ -19,8 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/apier/v1"
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
@@ -53,7 +54,7 @@ func (self *CmdGetCost) RpcMethod() string {
 
 func (self *CmdGetCost) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.AttrGetCost{}
+		self.rpcParams = &v1.AttrGetCost{ArgDispatcher: new(utils.ArgDispatcher)}
 	}
 	return self.rpcParams
 }

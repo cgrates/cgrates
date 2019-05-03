@@ -52,7 +52,10 @@ func (self *CmdDebit) RpcMethod() string {
 
 func (self *CmdDebit) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(engine.CallDescriptorWithArgDispatcher)
+		self.rpcParams = &engine.CallDescriptorWithArgDispatcher{
+			CallDescriptor: new(engine.CallDescriptor),
+			ArgDispatcher:  new(utils.ArgDispatcher),
+		}
 	}
 	return self.rpcParams
 }

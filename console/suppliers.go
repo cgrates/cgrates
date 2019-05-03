@@ -52,7 +52,7 @@ func (self *CmdSuppliersSort) RpcMethod() string {
 
 func (self *CmdSuppliersSort) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.ArgsGetSuppliers{}
+		self.rpcParams = &engine.ArgsGetSuppliers{ArgDispatcher: new(utils.ArgDispatcher)}
 	}
 	return self.rpcParams
 }

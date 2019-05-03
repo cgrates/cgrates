@@ -51,7 +51,7 @@ func (self *CmdPassiveSessions) RpcMethod() string {
 
 func (self *CmdPassiveSessions) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &dispatchers.FilterSessionWithApiKey{}
+		self.rpcParams = &dispatchers.FilterSessionWithApiKey{ArgDispatcher: new(utils.ArgDispatcher)}
 	}
 	return self.rpcParams
 }

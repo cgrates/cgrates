@@ -53,7 +53,7 @@ func (self *CmdStatsQueueForEvent) RpcMethod() string {
 
 func (self *CmdStatsQueueForEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.StatsArgsProcessEvent{}
+		self.rpcParams = &engine.StatsArgsProcessEvent{ArgDispatcher: new(utils.ArgDispatcher)}
 	}
 	return self.rpcParams
 }

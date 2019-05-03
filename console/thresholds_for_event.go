@@ -52,7 +52,7 @@ func (self *CmdThresholdsForEvent) RpcMethod() string {
 
 func (self *CmdThresholdsForEvent) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.ArgsProcessEvent{}
+		self.rpcParams = &engine.ArgsProcessEvent{ArgDispatcher: new(utils.ArgDispatcher)}
 	}
 	return self.rpcParams
 }

@@ -38,7 +38,7 @@ var (
 	sBenchCfg *config.CGRConfig
 	sBenchRPC *rpc.Client
 	connOnce  sync.Once
-	initRuns  = flag.Int("init_runs", 25000, "number of loops to run in init")
+	initRuns  = flag.Int("runs", 25000, "number of loops to run in init")
 	cps       = flag.Int("cps", 2000, "number of loops to run in init")
 	maxCps    = make(chan struct{}, *cps)
 )
@@ -127,7 +127,7 @@ func sendInit() {
 			initArgs.ID = utils.UUIDSha1Prefix()
 			initArgs.Event[utils.OriginID] = utils.UUIDSha1Prefix()
 			initArgs.Event[utils.Account] = fmt.Sprintf("1001%v", i)
-			initArgs.Event[utils.Subject] = initArgs.Event[utils.Account]
+			initArgs.Event[utils.Subject] = "1001" //initArgs.Event[utils.Account]
 			initArgs.Event[utils.Destination] = fmt.Sprintf("1002%v", i)
 
 			var initRpl *V1InitSessionReply
@@ -143,8 +143,9 @@ func sendInit() {
 
 func getCount() int {
 	var count int
-	if err := sBenchRPC.Call(utils.SessionSv1GetActiveSessionsCount,
-		map[string]string{}, &count); err != nil {
+	if err := sBenchRPC.Call(utils.SessionSv1GetActiveSessionsCount, map[string]interface{}{
+		"Filters": map[string]string{utils.ToR: utils.VOICE},
+	}, &count); err != nil {
 		log.Fatal(err)
 	}
 	return count
