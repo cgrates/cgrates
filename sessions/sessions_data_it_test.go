@@ -75,21 +75,6 @@ func TestSessionsDataApierRpcConn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	//add a default charger
-	chargerProfile := &engine.ChargerProfile{
-		Tenant:       "cgrates.org",
-		ID:           "Default",
-		RunID:        utils.MetaDefault,
-		AttributeIDs: []string{"*none"},
-		Weight:       20,
-	}
-	var result string
-	if err := sDataRPC.Call("ApierV1.SetChargerProfile", chargerProfile, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
 }
 
 // Load the tariff plan, creating accounts and their balances
