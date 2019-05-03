@@ -19,9 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"fmt"
 	"reflect"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -54,11 +52,7 @@ func (ev *CGREvent) FieldAsString(fldName string) (val string, err error) {
 	if !has {
 		return "", ErrNotFound
 	}
-	val, err = IfaceAsString(iface)
-	if err != nil {
-		return "", fmt.Errorf("cannot cast %s to string", fldName)
-	}
-	return val, nil
+	return IfaceAsString(iface)
 }
 
 // FieldAsTime returns a field as Time instance
@@ -68,16 +62,7 @@ func (ev *CGREvent) FieldAsTime(fldName string, timezone string) (t time.Time, e
 		err = ErrNotFound
 		return
 	}
-	var canCast bool
-	if t, canCast = iface.(time.Time); canCast {
-		return
-	}
-	s, canCast := iface.(string)
-	if !canCast {
-		err = fmt.Errorf("cannot cast %s to string", fldName)
-		return
-	}
-	return ParseTimeDetectLayout(s, timezone)
+	return IfaceAsTime(iface, timezone)
 }
 
 // FieldAsDuration returns a field as Duration instance
@@ -87,19 +72,7 @@ func (ev *CGREvent) FieldAsDuration(fldName string) (d time.Duration, err error)
 		err = ErrNotFound
 		return
 	}
-	var canCast bool
-	if d, canCast = iface.(time.Duration); canCast {
-		return
-	}
-	if f, canCast := iface.(float64); canCast {
-		return time.Duration(int64(f)), nil
-	}
-	s, canCast := iface.(string)
-	if !canCast {
-		err = fmt.Errorf("cannot cast %s to string", fldName)
-		return
-	}
-	return ParseDurationWithNanosecs(s)
+	return IfaceAsDuration(iface)
 }
 
 // FieldAsFloat64 returns a field as float64 instance
@@ -108,15 +81,7 @@ func (ev *CGREvent) FieldAsFloat64(fldName string) (f float64, err error) {
 	if !has {
 		return f, ErrNotFound
 	}
-	if val, canCast := iface.(float64); canCast {
-		return val, nil
-	}
-	csStr, canCast := iface.(string)
-	if !canCast {
-		err = fmt.Errorf("cannot cast %s to string", fldName)
-		return
-	}
-	return strconv.ParseFloat(csStr, 64)
+	return IfaceAsFloat64(iface)
 }
 
 func (ev *CGREvent) TenantID() string {
