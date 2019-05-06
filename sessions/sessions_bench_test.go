@@ -102,40 +102,58 @@ func addAccouns() {
 	wg.Wait()
 }
 
+func initSession(i int) {
+	oneCps := <-maxCps // queue here for maxCps
+	defer func() { maxCps <- oneCps }()
+	initArgs := &V1InitSessionArgs{
+		InitSession: true,
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "",
+			Event: map[string]interface{}{
+				utils.EVENT_NAME:  "TEST_EVENT",
+				utils.ToR:         utils.VOICE,
+				utils.Category:    "call",
+				utils.Tenant:      "cgrates.org",
+				utils.RequestType: utils.META_PREPAID,
+				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+			},
+		},
+	}
+	initArgs.ID = utils.UUIDSha1Prefix()
+	initArgs.Event[utils.OriginID] = utils.UUIDSha1Prefix()
+	initArgs.Event[utils.Account] = fmt.Sprintf("1001%v", i)
+	initArgs.Event[utils.Subject] = "1001" //initArgs.Event[utils.Account]
+	initArgs.Event[utils.Destination] = fmt.Sprintf("1002%v", i)
+
+	var initRpl *V1InitSessionReply
+	if err := sBenchRPC.Call(utils.SessionSv1InitiateSession,
+		initArgs, &initRpl); err != nil {
+		// log.Fatal(err)
+	}
+}
+
+func sendInitx10(r int) {
+	var wg sync.WaitGroup
+	for i := r; i < r+10; i++ {
+		wg.Add(1)
+		go func(i int) {
+			initSession(i)
+			wg.Done()
+
+		}(i)
+	}
+	wg.Wait()
+}
+
 func sendInit() {
 	var wg sync.WaitGroup
 	for i := 0; i < *initRuns; i++ {
 		wg.Add(1)
 		go func(i int) {
-			oneCps := <-maxCps // queue here for maxCps
-			defer func() { maxCps <- oneCps }()
-			initArgs := &V1InitSessionArgs{
-				InitSession: true,
-				CGREvent: utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "",
-					Event: map[string]interface{}{
-						utils.EVENT_NAME:  "TEST_EVENT",
-						utils.ToR:         utils.VOICE,
-						utils.Category:    "call",
-						utils.Tenant:      "cgrates.org",
-						utils.RequestType: utils.META_PREPAID,
-						utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-					},
-				},
-			}
-			initArgs.ID = utils.UUIDSha1Prefix()
-			initArgs.Event[utils.OriginID] = utils.UUIDSha1Prefix()
-			initArgs.Event[utils.Account] = fmt.Sprintf("1001%v", i)
-			initArgs.Event[utils.Subject] = "1001" //initArgs.Event[utils.Account]
-			initArgs.Event[utils.Destination] = fmt.Sprintf("1002%v", i)
-
-			var initRpl *V1InitSessionReply
-			if err := sBenchRPC.Call(utils.SessionSv1InitiateSession,
-				initArgs, &initRpl); err != nil {
-				log.Fatal(err)
-			}
+			initSession(i)
 			wg.Done()
+
 		}(i)
 	}
 	wg.Wait()
@@ -162,5 +180,25 @@ func BenchmarkSendInitSession(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = getCount()
+	}
+}
+
+func BenchmarkSendInitSessionx10(b *testing.B) {
+	connOnce.Do(func() {
+		startRPC()
+		loadTP()
+		addAccouns()
+		// time.Sleep(3 * time.Minute)
+	})
+	b.ResetTimer()
+	for i := 0; i < *initRuns/10; i++ {
+		sendInitx10(i * 10)
+		tStart := time.Now()
+		_ = getCount()
+		if tDur := time.Now().Sub(tStart); tDur > 100*time.Millisecond && tDur < time.Second {
+			fmt.Printf("Expected answer in less than %v receved answer after %v for %v sessions\n", 100*time.Millisecond, tDur, i*10+10)
+		} else if tDur >= time.Second {
+			b.Fatalf("Fatal:Expected answer in less than %v receved answer after %v for %v sessions", time.Second, tDur, i*10+10)
+		}
 	}
 }
