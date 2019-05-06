@@ -150,6 +150,7 @@ func (sm *FSsessions) onChannelPark(fsev FSEvent, connId string) {
 	}
 	fsev[VarCGROriginHost] = sm.conns[connId].cfg.Alias
 	authArgs := fsev.V1AuthorizeArgs()
+	authArgs.CGREvent.Event[FsConnID] = connId // Attach the connection ID
 	var authReply sessions.V1AuthorizeReply
 	if err := sm.sS.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
 		utils.Logger.Err(
@@ -254,8 +255,10 @@ func (sm *FSsessions) onChannelHangupComplete(fsev FSEvent, connId string) {
 	var reply string
 	fsev[VarCGROriginHost] = sm.conns[connId].cfg.Alias
 	if fsev[VarAnswerEpoch] != "0" { // call was answered
+		terminateSessionArgs := fsev.V1TerminateSessionArgs()
+		terminateSessionArgs.CGREvent.Event[FsConnID] = connId // Attach the connection ID in case we need to create a session and disconnect it
 		if err := sm.sS.Call(utils.SessionSv1TerminateSession,
-			fsev.V1TerminateSessionArgs(), &reply); err != nil {
+			terminateSessionArgs, &reply); err != nil {
 			utils.Logger.Err(
 				fmt.Sprintf("<%s> Could not terminate session with event %s, error: %s",
 					utils.FreeSWITCHAgent, fsev.GetUUID(), err.Error()))
@@ -374,11 +377,18 @@ func (sm *FSsessions) Call(serviceMethod string, args interface{}, reply interfa
 	return utils.RPCCall(sm, serviceMethod, args, reply)
 }
 
-// Internal method to disconnect session in asterisk
+// Internal method to disconnect session in FreeSWITCH
 func (fsa *FSsessions) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) (err error) {
 	ev := engine.NewMapEvent(args.EventStart)
 	channelID := ev.GetStringIgnoreErrors(utils.OriginID)
-	if err = fsa.disconnectSession(ev.GetStringIgnoreErrors(FsConnID), channelID,
+	connID, err := ev.GetString(FsConnID)
+	if err != nil {
+		utils.Logger.Err(
+			fmt.Sprintf("<%s> error: <%s:%s> when attempting to disconnect channelID: <%s>",
+				utils.FreeSWITCHAgent, err.Error(), FsConnID, channelID))
+		return
+	}
+	if err = fsa.disconnectSession(connID, channelID,
 		utils.FirstNonEmpty(ev.GetStringIgnoreErrors(CALL_DEST_NR), ev.GetStringIgnoreErrors(SIP_REQ_USER)),
 		utils.ErrInsufficientCredit.Error()); err != nil {
 		return

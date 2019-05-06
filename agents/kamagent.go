@@ -118,6 +118,7 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connID string) {
 		return
 	}
 	authArgs.CGREvent.Event[utils.OriginHost] = ka.conns[connID].RemoteAddr().String()
+	authArgs.CGREvent.Event[EvapiConnID] = connID // Attach the connection ID
 	var authReply sessions.V1AuthorizeReply
 	err = ka.sessionS.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authReply)
 	if kar, err := kev.AsKamAuthReply(authArgs, &authReply, err); err != nil {
@@ -190,6 +191,7 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connID string) {
 	}
 	var reply string
 	tsArgs.CGREvent.Event[utils.OriginHost] = ka.conns[connID].RemoteAddr().String()
+	tsArgs.CGREvent.Event[EvapiConnID] = connID // Attach the connection ID in case we need to create a session and disconnect it
 	if err := ka.sessionS.Call(utils.SessionSv1TerminateSession,
 		tsArgs, &reply); err != nil {
 		utils.Logger.Err(
@@ -251,7 +253,15 @@ func (ka *KamailioAgent) V1DisconnectSession(args utils.AttrDisconnectSession, r
 	if err != nil {
 		return err
 	}
-	connID, err := utils.IfaceAsString(args.EventStart[EvapiConnID])
+	connIDIface, has := args.EventStart[EvapiConnID]
+	if !has {
+		utils.Logger.Err(
+			fmt.Sprintf("<%s> error: <%s:%s> when attempting to disconnect <%s:%s> and <%s:%s>",
+				utils.KamailioAgent, utils.ErrNotFound.Error(), EvapiConnID,
+				KamHashEntry, hEntry, KamHashID, hID))
+		return
+	}
+	connID, err := utils.IfaceAsString(connIDIface)
 	if err != nil {
 		return err
 	}
