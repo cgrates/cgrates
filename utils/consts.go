@@ -857,13 +857,12 @@ const (
 	SessionSv1GetPassiveSessions         = "SessionSv1.GetPassiveSessions"
 	SessionSv1GetPassiveSessionsCount    = "SessionSv1.GetPassiveSessionsCount"
 	SessionSv1SetPassiveSession          = "SessionSv1.SetPassiveSession"
-	SMGenericV1InitiateSession           = "SMGenericV1.InitiateSession"
-	SMGenericV2InitiateSession           = "SMGenericV2.InitiateSession"
-	SMGenericV2UpdateSession             = "SMGenericV2.UpdateSession"
 	SessionSv1Ping                       = "SessionSv1.Ping"
 	SessionSv1GetActiveSessionIDs        = "SessionSv1.GetActiveSessionIDs"
 	SessionSv1RegisterInternalBiJSONConn = "SessionSv1.RegisterInternalBiJSONConn"
 	SessionSv1ReplicateSessions          = "SessionSv1.ReplicateSessions"
+
+	SMGenericV1InitiateSession = "SMGenericV1.InitiateSession"
 )
 
 // Responder APIs
