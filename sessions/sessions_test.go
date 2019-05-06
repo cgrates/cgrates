@@ -838,17 +838,21 @@ func TestSessionSNewV1ProcessEventArgs(t *testing.T) {
 		Debit:             true,
 		GetAttributes:     true,
 		CGREvent:          cgrEv,
+		GetSuppliers:      true,
 	}
-	rply := NewV1ProcessEventArgs(true, true, true, false, false, cgrEv, nil)
+	rply := NewV1ProcessEventArgs(true, true, true, false, false, true, false, false, cgrEv, nil)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
 	expected = &V1ProcessEventArgs{
-		AllocateResources: true,
-		GetAttributes:     true,
-		CGREvent:          cgrEv,
+		AllocateResources:     true,
+		GetAttributes:         true,
+		CGREvent:              cgrEv,
+		GetSuppliers:          true,
+		SuppliersMaxCost:      utils.MetaSuppliersEventCost,
+		SuppliersIgnoreErrors: true,
 	}
-	rply = NewV1ProcessEventArgs(true, false, true, false, false, cgrEv, nil)
+	rply = NewV1ProcessEventArgs(true, false, true, false, false, true, true, true, cgrEv, nil)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
