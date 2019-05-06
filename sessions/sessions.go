@@ -2511,28 +2511,38 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 }
 
 // NewV1ProcessEventArgs is a constructor for EventArgs used by ProcessEvent
-func NewV1ProcessEventArgs(resrc, acnts, attrs, thds, stats bool,
+func NewV1ProcessEventArgs(resrc, acnts, attrs, thds, stats,
+	suppls, supplsIgnoreErrs, supplsEventCost bool,
 	cgrEv utils.CGREvent, argDisp *utils.ArgDispatcher) (args *V1ProcessEventArgs) {
 	args = &V1ProcessEventArgs{
-		AllocateResources: resrc,
-		Debit:             acnts,
-		GetAttributes:     attrs,
-		ProcessThresholds: thds,
-		ProcessStats:      stats,
-		CGREvent:          cgrEv,
-		ArgDispatcher:     argDisp,
+		AllocateResources:     resrc,
+		Debit:                 acnts,
+		GetAttributes:         attrs,
+		ProcessThresholds:     thds,
+		ProcessStats:          stats,
+		SuppliersIgnoreErrors: supplsIgnoreErrs,
+		GetSuppliers:          suppls,
+		CGREvent:              cgrEv,
+		ArgDispatcher:         argDisp,
+	}
+	if supplsEventCost {
+		args.SuppliersMaxCost = utils.MetaSuppliersEventCost
 	}
 	return
 }
 
 // V1ProcessEventArgs are the options passed to ProcessEvent API
 type V1ProcessEventArgs struct {
-	GetAttributes     bool
-	AllocateResources bool
-	Debit             bool
-	ProcessThresholds bool
-	ProcessStats      bool
+	GetAttributes         bool
+	AllocateResources     bool
+	Debit                 bool
+	ProcessThresholds     bool
+	ProcessStats          bool
+	GetSuppliers          bool
+	SuppliersMaxCost      string
+	SuppliersIgnoreErrors bool
 	utils.CGREvent
+	utils.Paginator
 	*utils.ArgDispatcher
 }
 
@@ -2541,6 +2551,7 @@ type V1ProcessEventReply struct {
 	MaxUsage           *time.Duration
 	ResourceAllocation *string
 	Attributes         *engine.AttrSProcessEventReply
+	Suppliers          *engine.SortedSuppliers
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
@@ -2642,6 +2653,30 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrResourceS(err)
 		}
 		rply.ResourceAllocation = &allocMessage
+	}
+	if args.GetSuppliers {
+		if sS.splS == nil {
+			return utils.NewErrNotConnected(utils.SupplierS)
+		}
+		cgrEv := args.CGREvent.Clone()
+		if acd, has := cgrEv.Event[utils.ACD]; has {
+			cgrEv.Event[utils.Usage] = acd
+		}
+		var splsReply engine.SortedSuppliers
+		sArgs := &engine.ArgsGetSuppliers{
+			IgnoreErrors:  args.SuppliersIgnoreErrors,
+			MaxCost:       args.SuppliersMaxCost,
+			CGREvent:      *cgrEv,
+			Paginator:     args.Paginator,
+			ArgDispatcher: args.ArgDispatcher,
+		}
+		if err = sS.splS.Call(utils.SupplierSv1GetSuppliers,
+			sArgs, &splsReply); err != nil {
+			return utils.NewErrSupplierS(err)
+		}
+		if splsReply.SortedSuppliers != nil {
+			rply.Suppliers = &splsReply
+		}
 	}
 	if args.Debit {
 		if maxUsage, err := sS.chargeEvent(args.CGREvent.Tenant,
