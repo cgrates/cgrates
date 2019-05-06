@@ -42,7 +42,7 @@ var (
 
 var sTestsDNS = []func(t *testing.T){
 	testDNSitResetDB,
-	//testDNSitStartEngine,
+	testDNSitStartEngine,
 	testDNSitApierRpcConn,
 	testDNSitTPFromFolder,
 	testDNSitClntConn,
