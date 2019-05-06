@@ -293,7 +293,9 @@ func testDspGetSessions(t *testing.T) {
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
-		Filters: map[string]string{},
+		FilterWithPaginator: sessions.FilterWithPaginator{
+			Filters: map[string]string{},
+		},
 	}
 	var reply int
 	if err := dispEngine.RCP.Call(utils.SessionSv1GetActiveSessionsCount,
@@ -705,7 +707,9 @@ func testDspSessionPassive(t *testing.T) {
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
-		Filters: map[string]string{},
+		FilterWithPaginator: sessions.FilterWithPaginator{
+			Filters: map[string]string{},
+		},
 	}
 	time.Sleep(10 * time.Millisecond)
 	if err := dispEngine.RCP.Call(utils.SessionSv1GetPassiveSessionsCount,
@@ -809,7 +813,9 @@ func testDspSessionForceDisconect(t *testing.T) {
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
 		},
-		Filters: map[string]string{},
+		FilterWithPaginator: sessions.FilterWithPaginator{
+			Filters: map[string]string{},
+		},
 	}
 	time.Sleep(10 * time.Millisecond)
 	if err := dispEngine.RCP.Call(utils.SessionSv1GetPassiveSessionsCount,
