@@ -24,6 +24,11 @@ import (
 	"strings"
 )
 
+var (
+	spltRgxp  = regexp.MustCompile(`:s\/`)
+	rulesRgxp = regexp.MustCompile(`(?:(.+[^\\])\/(.*[^\\])*\/){1,}`)
+)
+
 func NewRSRField(fldStr string) (fld *RSRField, err error) {
 	if len(fldStr) == 0 {
 		return nil, nil
@@ -85,14 +90,12 @@ func NewRSRField(fldStr string) (fld *RSRField, err error) {
 		rsrField.filters = filters
 		return rsrField, nil
 	}
-	spltRgxp := regexp.MustCompile(`:s\/`)
 	spltRules := spltRgxp.Split(fldStr, -1)
 	if len(spltRules) < 2 {
 		return nil, fmt.Errorf("Invalid Split of Search&Replace field rule. %s", fldStr)
 	}
 	rsrField.Id = spltRules[0][1:]
-	rsrField.filters = filters // Original id in form ~hdr_name
-	rulesRgxp := regexp.MustCompile(`(?:(.+[^\\])\/(.*[^\\])*\/){1,}`)
+	rsrField.filters = filters              // Original id in form ~hdr_name
 	for _, ruleStr := range spltRules[1:] { // :s/ already removed through split
 		allMatches := rulesRgxp.FindStringSubmatch(ruleStr)
 		if len(allMatches) != 3 {

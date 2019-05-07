@@ -46,7 +46,24 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-var startCGRateSTime time.Time
+var (
+	startCGRateSTime time.Time
+
+	rfc3339Rule                  = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.+$`)
+	sqlRule                      = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$`)
+	utcFormat                    = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}[T]\d{2}:\d{2}:\d{2}$`)
+	gotimeRule                   = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\.?\d*\s[+,-]\d+\s\w+$`)
+	gotimeRule2                  = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\.?\d*\s[+,-]\d+\s[+,-]\d+$`)
+	fsTimestamp                  = regexp.MustCompile(`^\d{16}$`)
+	astTimestamp                 = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d*[+,-]\d+$`)
+	unixTimestampRule            = regexp.MustCompile(`^\d{10}$`)
+	unixTimestampMilisecondsRule = regexp.MustCompile(`^\d{13}$`)
+	unixTimestampNanosecondsRule = regexp.MustCompile(`^\d{19}$`)
+	oneLineTimestampRule         = regexp.MustCompile(`^\d{14}$`)
+	oneSpaceTimestampRule        = regexp.MustCompile(`^\d{2}\.\d{2}.\d{4}\s{1}\d{2}:\d{2}:\d{2}$`)
+	eamonTimestampRule           = regexp.MustCompile(`^\d{2}/\d{2}/\d{4}\s{1}\d{2}:\d{2}:\d{2}$`)
+	broadsoftTimestampRule       = regexp.MustCompile(`^\d{14}\.\d{3}`)
+)
 
 func init() {
 	startCGRateSTime = time.Now()
@@ -177,20 +194,6 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 	if err != nil {
 		return nilTime, err
 	}
-	rfc3339Rule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.+$`)
-	sqlRule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$`)
-	utcFormat := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}[T]\d{2}:\d{2}:\d{2}$`)
-	gotimeRule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\.?\d*\s[+,-]\d+\s\w+$`)
-	gotimeRule2 := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\.?\d*\s[+,-]\d+\s[+,-]\d+$`)
-	fsTimestamp := regexp.MustCompile(`^\d{16}$`)
-	astTimestamp := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d*[+,-]\d+$`)
-	unixTimestampRule := regexp.MustCompile(`^\d{10}$`)
-	unixTimestampMilisecondsRule := regexp.MustCompile(`^\d{13}$`)
-	unixTimestampNanosecondsRule := regexp.MustCompile(`^\d{19}$`)
-	oneLineTimestampRule := regexp.MustCompile(`^\d{14}$`)
-	oneSpaceTimestampRule := regexp.MustCompile(`^\d{2}\.\d{2}.\d{4}\s{1}\d{2}:\d{2}:\d{2}$`)
-	eamonTimestampRule := regexp.MustCompile(`^\d{2}/\d{2}/\d{4}\s{1}\d{2}:\d{2}:\d{2}$`)
-	broadsoftTimestampRule := regexp.MustCompile(`^\d{14}\.\d{3}`)
 	switch {
 	case tmStr == UNLIMITED || tmStr == "":
 	// leave it at zero
