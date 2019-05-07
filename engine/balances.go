@@ -740,7 +740,6 @@ func (bc Balances) Swap(i, j int) {
 func (bc Balances) Less(j, i int) bool {
 	return bc[i].precision < bc[j].precision ||
 		(bc[i].precision == bc[j].precision && bc[i].Weight < bc[j].Weight)
-
 }
 
 func (bc Balances) Sort() {

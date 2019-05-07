@@ -49,7 +49,7 @@ var sTestsCDRsOfflineIT = []func(t *testing.T){
 	testV2CDRsOfflineLoadData,
 	testV2CDRsOfflineBalanceUpdate,
 	testV2CDRsOfflineExpiryBalance,
-
+	testV2CDRsSpecialCase,
 	testV2CDRsOfflineKillEngine,
 }
 
@@ -322,6 +322,60 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 	}
 	//process cdr should trigger balance update event
 	if err := cdrsOfflineRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+}
+
+func testV2CDRsSpecialCase(t *testing.T) {
+	//add a test account with balance type monetary and value 10
+	attrs := &utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "specialTest",
+		BalanceType: utils.MONETARY,
+		BalanceID:   utils.StringPointer("SpecialBalance1"),
+		Value:       utils.Float64Pointer(10.0),
+		Weight:      utils.Float64Pointer(10.0),
+	}
+	var reply string
+	if err := cdrsOfflineRpc.Call("ApierV2.SetBalance", attrs, &reply); err != nil {
+		t.Fatal(err)
+	}
+	attrs.BalanceID = utils.StringPointer("SpecialBalance2")
+	if err := cdrsOfflineRpc.Call("ApierV2.SetBalance", attrs, &reply); err != nil {
+		t.Fatal(err)
+	}
+	var acnt *engine.Account
+	if err := cdrsOfflineRpc.Call("ApierV2.GetAccount", &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "specialTest"}, &acnt); err != nil {
+		t.Error(err)
+	} else if len(acnt.BalanceMap) != 1 || len(acnt.BalanceMap[utils.MONETARY]) != 2 {
+		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MONETARY])
+	}
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]interface{}{
+			utils.OriginID:    "testV2CDRsSpecialCase",
+			utils.OriginHost:  "192.168.1.1",
+			utils.Source:      "testV2CDRsSpecialCase",
+			utils.RequestType: utils.META_POSTPAID,
+			utils.Category:    "call",
+			utils.Account:     "specialTest",
+			utils.Subject:     "specialTest",
+			utils.Destination: "1002",
+			utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+			utils.Usage:       time.Duration(1) * time.Minute,
+		},
+	}
+	mapEv := engine.NewMapEvent(cgrEv.Event)
+	cdr, err := mapEv.AsCDR(nil, "cgrates.org", "")
+	if err != nil {
+		t.Error("Unexpected error received: ", err)
+	}
+	//process cdr should trigger balance update event
+	if err := cdrsOfflineRpc.Call(utils.CDRsV1ProcessCDR, cdr, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)

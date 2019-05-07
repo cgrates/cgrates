@@ -67,6 +67,28 @@ func TestBalanceSortWeight(t *testing.T) {
 	}
 }
 
+func TestBalanceSortWeight2(t *testing.T) {
+	bs := Balances{
+		&Balance{ID: "B1", Weight: 2, precision: 1},
+		&Balance{ID: "B2", Weight: 1, precision: 1},
+	}
+	bs.Sort()
+	if bs[0].ID != "B1" && bs[1].ID != "B2" {
+		t.Error("Buckets not sorted by precision!")
+	}
+}
+
+func TestBalanceSortWeight3(t *testing.T) {
+	bs := Balances{
+		&Balance{ID: "B1", Weight: 2, Value: 10.0},
+		&Balance{ID: "B2", Weight: 4, Value: 10.0},
+	}
+	bs.Sort()
+	if bs[0].ID != "B2" && bs[1].ID != "B1" {
+		t.Error(utils.ToJSON(bs))
+	}
+}
+
 func TestBalanceSortWeightLess(t *testing.T) {
 	mb1 := &Balance{Weight: 1, precision: 1}
 	mb2 := &Balance{Weight: 2, precision: 1}
