@@ -2186,6 +2186,93 @@ func TestAccountAsAccountDigest(t *testing.T) {
 	}
 }
 
+func TestAccountGetBalancesForPrefixSpecialCases(t *testing.T) {
+	acc := &Account{
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
+				&Balance{
+					ID:     "SpecialBalance1",
+					Value:  10,
+					Weight: 10.0,
+				},
+				&Balance{
+					ID:     "SpecialBalance2",
+					Value:  10,
+					Weight: 10.0,
+				},
+			},
+		},
+	}
+	bcs := acc.getBalancesForPrefix("", "", utils.MONETARY, "")
+	if len(bcs) != 2 && bcs[0].ID != "SpecialBalance1" && bcs[1].ID != "SpecialBalance2" {
+		t.Errorf("Unexpected order balances : %+v", utils.ToJSON(bcs))
+	}
+}
+
+func TestAccountGetBalancesForPrefixSpecialCases2(t *testing.T) {
+	acc := &Account{
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
+				&Balance{
+					ID:     "SpecialBalance1",
+					Value:  10,
+					Weight: 10.0,
+				},
+				&Balance{
+					ID:     "SpecialBalance2",
+					Value:  10,
+					Weight: 20.0,
+				},
+			},
+		},
+	}
+	bcs := acc.getBalancesForPrefix("", "", utils.MONETARY, "")
+	if len(bcs) != 2 && bcs[0].ID != "SpecialBalance2" && bcs[0].Weight != 20.0 {
+		t.Errorf("Unexpected order balances : %+v", utils.ToJSON(bcs))
+	}
+}
+
+func TestAccountGetBalancesForPrefixSpecialCases3(t *testing.T) {
+	acc := &Account{
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
+				&Balance{
+					ID:     "SpecialBalance1",
+					Value:  10,
+					Weight: 10.0,
+				},
+				&Balance{
+					ID:     "SpecialBalance2",
+					Value:  10,
+					Weight: 10.0,
+				},
+				&Balance{
+					ID:     "SpecialBalance3",
+					Value:  10,
+					Weight: 10.0,
+				},
+				&Balance{
+					ID:     "SpecialBalance4",
+					Value:  10,
+					Weight: 10.0,
+				},
+				&Balance{
+					ID:     "SpecialBalance5",
+					Value:  10,
+					Weight: 10.0,
+				},
+			},
+		},
+	}
+	bcs := acc.getBalancesForPrefix("", "", utils.MONETARY, "")
+	if len(bcs) != 5 &&
+		bcs[0].ID != "SpecialBalance1" && bcs[1].ID != "SpecialBalance2" &&
+		bcs[2].ID != "SpecialBalance3" && bcs[3].ID != "SpecialBalance4" &&
+		bcs[4].ID != "SpecialBalance5" {
+		t.Errorf("Unexpected order balances : %+v", utils.ToJSON(bcs))
+	}
+}
+
 /*********************************** Benchmarks *******************************/
 
 func BenchmarkGetSecondForPrefix(b *testing.B) {
