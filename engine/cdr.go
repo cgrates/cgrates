@@ -290,7 +290,11 @@ func (cdr *CDR) AsMapStringIface() (mp map[string]interface{}) {
 	mp[utils.PreRated] = cdr.PreRated
 	mp[utils.CostSource] = cdr.CostSource
 	mp[utils.Cost] = cdr.Cost
-	mp[utils.CostDetails] = cdr.CostDetails
+	if cdr.CostDetails != nil {
+		var result map[string]interface{}
+		json.Unmarshal([]byte(utils.ToJSON(cdr.CostDetails)), &result)
+		mp[utils.CostDetails] = result
+	}
 	return
 }
 

@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"reflect"
 	"strconv"
 	"testing"
@@ -228,6 +229,60 @@ func TestFieldsAsString(t *testing.T) {
 	if val := cdr.FieldsAsString(
 		config.NewRSRParsersMustCompile("~Category;_from_;~Account", true, utils.INFIELD_SEP)); val != eVal {
 		t.Errorf("Expecting : %s, received: %s", eVal, val)
+	}
+}
+
+func TestFieldAsStringForCostDetails(t *testing.T) {
+	cc := &CallCost{
+		Category:    "generic",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "data",
+		TOR:         "*data",
+		Cost:        0,
+		AccountSummary: &AccountSummary{
+			Tenant: "cgrates.org",
+			ID:     "AccountFromAccountSummary",
+		},
+	}
+
+	cdr := &CDR{
+		CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+		OrderID:     123,
+		ToR:         utils.VOICE,
+		OriginID:    "dsafdsaf",
+		OriginHost:  "192.168.1.1",
+		Source:      utils.UNIT_TEST,
+		RequestType: utils.META_RATED,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1002",
+		Subject:     "1001",
+		Destination: "+4986517174963",
+		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		RunID:       utils.META_DEFAULT,
+		Usage:       time.Duration(10) * time.Second,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		Cost:        1.01,
+		CostDetails: NewEventCostFromCallCost(cc, "TestCDRTestCDRAsMapStringIface2", utils.META_DEFAULT),
+	}
+
+	prsr := config.NewRSRParserMustCompile("~CostDetails.CGRID", true)
+	eFldVal := "TestCDRTestCDRAsMapStringIface2"
+	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
+		t.Error(err)
+	} else if fldVal != eFldVal {
+		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
+	}
+
+	prsr = config.NewRSRParserMustCompile("~CostDetails.AccountSummary.ID", true)
+	eFldVal = "AccountFromAccountSummary"
+	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
+		t.Error(err)
+	} else if fldVal != eFldVal {
+		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
 	}
 }
 
@@ -579,7 +634,6 @@ func TestCDRAsMapStringIface(t *testing.T) {
 		utils.Usage:       time.Duration(10) * time.Second,
 		utils.CostSource:  cdr.CostSource,
 		utils.Cost:        1.01,
-		utils.CostDetails: cdr.CostDetails,
 		utils.PreRated:    false,
 		utils.Partial:     false,
 		utils.ExtraInfo:   cdr.ExtraInfo,
@@ -587,10 +641,88 @@ func TestCDRAsMapStringIface(t *testing.T) {
 	if cdrMp := cdr.AsMapStringIface(); !reflect.DeepEqual(mp, cdrMp) {
 		t.Errorf("Expecting: %+v, received: %+v", mp, cdrMp)
 	}
+}
 
+func TestCDRTestCDRAsMapStringIface2(t *testing.T) {
+	cc := &CallCost{
+		Category:    "generic",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "data",
+		TOR:         "*data",
+		Cost:        0,
+	}
+
+	cdr := &CDR{
+		CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+		OrderID:     123,
+		ToR:         utils.VOICE,
+		OriginID:    "dsafdsaf",
+		OriginHost:  "192.168.1.1",
+		Source:      utils.UNIT_TEST,
+		RequestType: utils.META_RATED,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1002",
+		Subject:     "1001",
+		Destination: "+4986517174963",
+		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		RunID:       utils.DEFAULT_RUNID,
+		Usage:       time.Duration(10) * time.Second,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		Cost:        1.01,
+		CostDetails: NewEventCostFromCallCost(cc, "TestCDRTestCDRAsMapStringIface2", utils.META_DEFAULT),
+	}
+
+	var result map[string]interface{}
+	json.Unmarshal([]byte(utils.ToJSON(cdr.CostDetails)), &result)
+	mp := map[string]interface{}{
+		"field_extr1":     "val_extr1",
+		"fieldextr2":      "valextr2",
+		utils.CGRID:       cdr.CGRID,
+		utils.RunID:       utils.DEFAULT_RUNID,
+		utils.OrderID:     cdr.OrderID,
+		utils.OriginHost:  "192.168.1.1",
+		utils.Source:      utils.UNIT_TEST,
+		utils.OriginID:    "dsafdsaf",
+		utils.ToR:         utils.VOICE,
+		utils.RequestType: utils.META_RATED,
+		utils.Tenant:      "cgrates.org",
+		utils.Category:    "call",
+		utils.Account:     "1002",
+		utils.Subject:     "1001",
+		utils.Destination: "+4986517174963",
+		utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+		utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		utils.Usage:       time.Duration(10) * time.Second,
+		utils.CostSource:  cdr.CostSource,
+		utils.Cost:        1.01,
+		utils.PreRated:    false,
+		utils.Partial:     false,
+		utils.ExtraInfo:   cdr.ExtraInfo,
+		utils.CostDetails: result,
+	}
+	if cdrMp := cdr.AsMapStringIface(); !reflect.DeepEqual(mp, cdrMp) {
+		t.Errorf("Expecting: %+v, received: %+v", mp, cdrMp)
+	}
 }
 
 func TestCDRAsExportRecord(t *testing.T) {
+	cc := &CallCost{
+		Category:    "generic",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "data",
+		TOR:         "*data",
+		Cost:        0,
+		AccountSummary: &AccountSummary{
+			Tenant: "cgrates.org",
+			ID:     "AccountFromAccountSummary",
+		},
+	}
 	cdr := &CDR{
 		CGRID: utils.Sha1("dsafdsaf",
 			time.Unix(1383813745, 0).UTC().String()),
@@ -606,7 +738,9 @@ func TestCDRAsExportRecord(t *testing.T) {
 		AnswerTime:  time.Unix(1383813746, 0).UTC(),
 		Usage:       time.Duration(10) * time.Second,
 		RunID:       utils.DEFAULT_RUNID, Cost: 1.01,
-		ExtraFields: map[string]string{"stop_time": "2014-06-11 19:19:00 +0000 UTC", "fieldextr2": "valextr2"}}
+		ExtraFields: map[string]string{"stop_time": "2014-06-11 19:19:00 +0000 UTC", "fieldextr2": "valextr2"},
+		CostDetails: NewEventCostFromCallCost(cc, "TestCDRTestCDRAsMapStringIface2", utils.META_DEFAULT),
+	}
 
 	prsr := config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Destination, true, utils.INFIELD_SEP)
 	cfgCdrFld := &config.FCTemplate{Tag: "destination", Type: utils.META_COMPOSED,
@@ -680,6 +814,24 @@ func TestCDRAsExportRecord(t *testing.T) {
 	if _, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, 0, nil); err == nil {
 		t.Error("Should give error here, got none.")
 	}
+
+	prsr = config.NewRSRParsersMustCompile("~CostDetails.CGRID", true, utils.INFIELD_SEP)
+	cfgCdrFld = &config.FCTemplate{Tag: "CGRIDFromCostDetails", Type: utils.META_COMPOSED,
+		FieldId: "CGRIDFromCostDetails", Value: prsr}
+	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, 0, nil); err != nil {
+		t.Error(err)
+	} else if expRecord[0] != cdr.CostDetails.CGRID {
+		t.Errorf("Expecting:\n%s\nReceived:\n%s", cdr.CostDetails.CGRID, expRecord)
+	}
+	prsr = config.NewRSRParsersMustCompile("~CostDetails.AccountSummary.ID", true, utils.INFIELD_SEP)
+	cfgCdrFld = &config.FCTemplate{Tag: "AccountID", Type: utils.META_COMPOSED,
+		FieldId: "CustomAccountID", Value: prsr}
+	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, 0, nil); err != nil {
+		t.Error(err)
+	} else if expRecord[0] != cdr.CostDetails.AccountSummary.ID {
+		t.Errorf("Expecting:\n%s\nReceived:\n%s", cdr.CostDetails.AccountSummary.ID, expRecord)
+	}
+
 }
 
 func TestCDRAsExportMap(t *testing.T) {
@@ -833,7 +985,6 @@ func TestCDRAsCGREvent(t *testing.T) {
 		Cost:        1.01,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
-	var costdetails *EventCost
 	eCGREvent := utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "GenePreRated",
@@ -843,7 +994,6 @@ func TestCDRAsCGREvent(t *testing.T) {
 			"CGRID":       cdr.CGRID,
 			"Category":    "call",
 			"Cost":        1.01,
-			"CostDetails": costdetails,
 			"CostSource":  "",
 			"Destination": "+4986517174963",
 			"ExtraInfo":   "",
