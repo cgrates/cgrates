@@ -128,43 +128,45 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 		} else if !pass {
 			continue
 		}
-		out, err := ar.ParseField(tplFld)
-		if err != nil {
-			if err == utils.ErrNotFound {
-				if !tplFld.Mandatory {
-					err = nil
-					continue
+		if tplFld.FieldId != utils.META_NONE {
+			out, err := ar.ParseField(tplFld)
+			if err != nil {
+				if err == utils.ErrNotFound {
+					if !tplFld.Mandatory {
+						err = nil
+						continue
+					}
+					err = utils.ErrPrefixNotFound(tplFld.Tag)
 				}
-				err = utils.ErrPrefixNotFound(tplFld.Tag)
-			}
-			return nil, err
-		}
-		var valSet []*config.NMItem
-		fldPath := strings.Split(tplFld.FieldId, utils.NestingSep)
-		nMItm := &config.NMItem{Data: out, Path: fldPath, Config: tplFld}
-		if nMFields, err := ar.CGRAReq.FieldAsInterface(fldPath); err != nil {
-			if err != utils.ErrNotFound {
 				return nil, err
 			}
-		} else {
-			valSet = nMFields.([]*config.NMItem) // start from previous stored fields
-			if tplFld.Type == utils.META_COMPOSED {
-				prevNMItem := valSet[len(valSet)-1] // could be we need nil protection here
-				prevDataStr, err := utils.IfaceAsString(prevNMItem.Data)
-				if err != nil {
+			var valSet []*config.NMItem
+			fldPath := strings.Split(tplFld.FieldId, utils.NestingSep)
+			nMItm := &config.NMItem{Data: out, Path: fldPath, Config: tplFld}
+			if nMFields, err := ar.CGRAReq.FieldAsInterface(fldPath); err != nil {
+				if err != utils.ErrNotFound {
 					return nil, err
 				}
-				outStr, err := utils.IfaceAsString(out)
-				if err != nil {
-					return nil, err
+			} else {
+				valSet = nMFields.([]*config.NMItem) // start from previous stored fields
+				if tplFld.Type == utils.META_COMPOSED {
+					prevNMItem := valSet[len(valSet)-1] // could be we need nil protection here
+					prevDataStr, err := utils.IfaceAsString(prevNMItem.Data)
+					if err != nil {
+						return nil, err
+					}
+					outStr, err := utils.IfaceAsString(out)
+					if err != nil {
+						return nil, err
+					}
+					*nMItm = *prevNMItem // inherit the particularities, ie AttributeName
+					nMItm.Data = prevDataStr + outStr
 				}
-				*nMItm = *prevNMItem // inherit the particularities, ie AttributeName
-				nMItm.Data = prevDataStr + outStr
+				valSet = valSet[:len(valSet)-1] // discard the last item
 			}
-			valSet = valSet[:len(valSet)-1] // discard the last item
+			valSet = append(valSet, nMItm)
+			ar.CGRAReq.Set(fldPath, valSet, false, true)
 		}
-		valSet = append(valSet, nMItm)
-		ar.CGRAReq.Set(fldPath, valSet, false, true)
 		if tplFld.Blocker { // useful in case of processing errors first
 			break
 		}
