@@ -26,6 +26,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+var (
+	spltRgxp  = regexp.MustCompile(`:s\/`)
+	rulesRgxp = regexp.MustCompile(`(?:(.*[^\\])\/(.*[^\\])*\/){1,}`)
+)
+
 func NewRSRParsers(parsersRules string, allFiltersMatch bool, rsrSeparator string) (prsrs RSRParsers, err error) {
 	if parsersRules == "" {
 		return
@@ -167,11 +172,9 @@ func NewRSRParser(parserRules string, allFiltersMatch bool) (rsrParser *RSRParse
 		return
 	}
 	// dynamic content via attributeNames
-	spltRgxp := regexp.MustCompile(`:s\/`)
 	spltRules := spltRgxp.Split(parserRules, -1)
 	rsrParser.attrName = spltRules[0][1:] // in form ~hdr_name
 	if len(spltRules) > 1 {
-		rulesRgxp := regexp.MustCompile(`(?:(.*[^\\])\/(.*[^\\])*\/){1,}`)
 		for _, ruleStr := range spltRules[1:] { // :s/ already removed through split
 			allMatches := rulesRgxp.FindStringSubmatch(ruleStr)
 			if len(allMatches) != 3 {

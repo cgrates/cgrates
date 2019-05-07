@@ -34,6 +34,13 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+var (
+	kamAuthReqRegexp   = regexp.MustCompile(CGR_AUTH_REQUEST)
+	kamCallStartRegexp = regexp.MustCompile(CGR_CALL_START)
+	kamCallEndRegexp   = regexp.MustCompile(CGR_CALL_END)
+	kamDlgListRegexp   = regexp.MustCompile(CGR_DLG_LIST)
+)
+
 func NewKamailioAgent(kaCfg *config.KamAgentCfg,
 	sessionS rpcclient.RpcClientConnection, timezone string) (ka *KamailioAgent) {
 	ka = &KamailioAgent{
@@ -57,12 +64,10 @@ type KamailioAgent struct {
 func (self *KamailioAgent) Connect() error {
 	var err error
 	eventHandlers := map[*regexp.Regexp][]func([]byte, string){
-		regexp.MustCompile(CGR_AUTH_REQUEST): {
-			self.onCgrAuth},
-		regexp.MustCompile(CGR_CALL_START): {
-			self.onCallStart},
-		regexp.MustCompile(CGR_CALL_END): {self.onCallEnd},
-		regexp.MustCompile(CGR_DLG_LIST): {self.onDlgList},
+		kamAuthReqRegexp:   {self.onCgrAuth},
+		kamCallStartRegexp: {self.onCallStart},
+		kamCallEndRegexp:   {self.onCallEnd},
+		kamDlgListRegexp:   {self.onDlgList},
 	}
 	errChan := make(chan error)
 	for _, connCfg := range self.cfg.EvapiConns {
