@@ -1623,7 +1623,8 @@ func (sS *SessionS) BiRPCv1ReplicateSessions(clnt rpcclient.RpcClientConnection,
 // NewV1AuthorizeArgs is a constructor for V1AuthorizeArgs
 func NewV1AuthorizeArgs(attrs, res, maxUsage, thrslds,
 	statQueues, suppls, supplsIgnoreErrs, supplsEventCost bool,
-	cgrEv utils.CGREvent, argDisp *utils.ArgDispatcher) (args *V1AuthorizeArgs) {
+	cgrEv utils.CGREvent, argDisp *utils.ArgDispatcher,
+	supplierPaginator utils.Paginator) (args *V1AuthorizeArgs) {
 	args = &V1AuthorizeArgs{
 		GetAttributes:         attrs,
 		AuthorizeResources:    res,
@@ -1638,6 +1639,7 @@ func NewV1AuthorizeArgs(attrs, res, maxUsage, thrslds,
 		args.SuppliersMaxCost = utils.MetaSuppliersEventCost
 	}
 	args.ArgDispatcher = argDisp
+	args.Paginator = supplierPaginator
 	return
 }
 
@@ -2513,7 +2515,8 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 // NewV1ProcessEventArgs is a constructor for EventArgs used by ProcessEvent
 func NewV1ProcessEventArgs(resrc, acnts, attrs, thds, stats,
 	suppls, supplsIgnoreErrs, supplsEventCost bool,
-	cgrEv utils.CGREvent, argDisp *utils.ArgDispatcher) (args *V1ProcessEventArgs) {
+	cgrEv utils.CGREvent, argDisp *utils.ArgDispatcher,
+	supplierPaginator utils.Paginator) (args *V1ProcessEventArgs) {
 	args = &V1ProcessEventArgs{
 		AllocateResources:     resrc,
 		Debit:                 acnts,
@@ -2528,6 +2531,7 @@ func NewV1ProcessEventArgs(resrc, acnts, attrs, thds, stats,
 	if supplsEventCost {
 		args.SuppliersMaxCost = utils.MetaSuppliersEventCost
 	}
+	args.Paginator = supplierPaginator
 	return
 }
 

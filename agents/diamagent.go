@@ -258,6 +258,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 	if reqProcessor.Flags.HasKey(utils.MetaDispatchers) && argDisp == nil {
 		argDisp = new(utils.ArgDispatcher)
 	}
+	supplierPaginator := cgrEv.ConsumeSupplierPaginator()
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,
@@ -292,7 +293,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliers),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
-			*cgrEv, argDisp)
+			*cgrEv, argDisp, supplierPaginator)
 		var authReply sessions.V1AuthorizeReply
 		err = da.sS.Call(utils.SessionSv1AuthorizeEvent,
 			authArgs, &authReply)
@@ -347,7 +348,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliers),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
-			*cgrEv, argDisp)
+			*cgrEv, argDisp, supplierPaginator)
 		var eventRply sessions.V1ProcessEventReply
 		err = da.sS.Call(utils.SessionSv1ProcessEvent,
 			evArgs, &eventRply)
