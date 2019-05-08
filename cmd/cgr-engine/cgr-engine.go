@@ -160,7 +160,8 @@ func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConne
 
 func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, internalThresholdSChan,
 	internalStatSChan, internalSupplierSChan, internalAttrSChan, internalCDRSChan, internalChargerSChan,
-	internalDispatcherSChan chan rpcclient.RpcClientConnection, server *utils.Server, exitChan chan bool) {
+	internalDispatcherSChan chan rpcclient.RpcClientConnection, server *utils.Server,
+	dm *engine.DataManager, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS Session service.")
 	var err error
 	var ralsConns, resSConns, threshSConns, statSConns, suplSConns, attrSConns, cdrsConn, chargerSConn, dispatcherSConn rpcclient.RpcClientConnection
@@ -308,7 +309,7 @@ func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, in
 	}
 	sm := sessions.NewSessionS(cfg, ralsConns, resSConns, threshSConns,
 		statSConns, suplSConns, attrSConns, cdrsConn, chargerSConn,
-		sReplConns, cfg.GeneralCfg().DefaultTimezone)
+		sReplConns, dm, cfg.GeneralCfg().DefaultTimezone)
 	//start sync session in a separate gorutine
 	go func() {
 		if err = sm.ListenAndServe(exitChan); err != nil {
@@ -1580,7 +1581,8 @@ func main() {
 	var dm *engine.DataManager
 	if cfg.RalsCfg().RALsEnabled || cfg.SchedulerCfg().Enabled || cfg.ChargerSCfg().Enabled ||
 		cfg.AttributeSCfg().Enabled || cfg.ResourceSCfg().Enabled || cfg.StatSCfg().Enabled ||
-		cfg.ThresholdSCfg().Enabled || cfg.SupplierSCfg().Enabled || cfg.DispatcherSCfg().Enabled { // Some services can run without db, ie: SessionS or CDRC
+		cfg.ThresholdSCfg().Enabled || cfg.SupplierSCfg().Enabled || cfg.DispatcherSCfg().Enabled ||
+		cfg.SessionSCfg().Enabled { // Some services can run without db, ie:  CDRC
 		dm, err = engine.ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
 			cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
 			cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
@@ -1723,7 +1725,7 @@ func main() {
 		go startSessionS(internalSMGChan, internalRaterChan, internalRsChan,
 			internalThresholdSChan, internalStatSChan, internalSupplierSChan,
 			internalAttributeSChan, internalCdrSChan, internalChargerSChan,
-			internalDispatcherSChan, server, exitChan)
+			internalDispatcherSChan, server, dm, exitChan)
 	}
 	// Start FreeSWITCHAgent
 	if cfg.FsAgentCfg().Enabled {

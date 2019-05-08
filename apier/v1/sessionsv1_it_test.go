@@ -314,7 +314,7 @@ func TestSSv1ItInitiateSession(t *testing.T) {
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
 	}
 	aSessions := make([]*sessions.ActiveSession, 0)
-	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
+	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
 		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v", utils.ToJSON(aSessions), len(aSessions))
@@ -347,7 +347,7 @@ func TestSSv1ItInitiateSessionWithDigest(t *testing.T) {
 	var rply sessions.V1InitReplyWithDigest
 	if err := sSv1BiRpc.Call(utils.SessionSv1InitiateSessionWithDigest,
 		args, &rply); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if *rply.MaxUsage != initUsage.Seconds() {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)

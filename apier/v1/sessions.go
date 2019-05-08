@@ -77,29 +77,29 @@ func (ssv1 *SessionSv1) ProcessEvent(args *sessions.V1ProcessEventArgs,
 	return ssv1.Ss.BiRPCv1ProcessEvent(nil, args, rply)
 }
 
-func (ssv1 *SessionSv1) GetActiveSessions(args *dispatchers.FilterSessionWithApiKey,
+func (ssv1 *SessionSv1) GetActiveSessions(args *utils.SessionFilter,
 	rply *[]*sessions.ActiveSession) error {
-	return ssv1.Ss.BiRPCv1GetActiveSessions(nil, &args.FilterWithPaginator, rply)
+	return ssv1.Ss.BiRPCv1GetActiveSessions(nil, args, rply)
 }
 
-func (ssv1 *SessionSv1) GetActiveSessionsCount(args *dispatchers.FilterSessionWithApiKey,
+func (ssv1 *SessionSv1) GetActiveSessionsCount(args *utils.SessionFilter,
 	rply *int) error {
-	return ssv1.Ss.BiRPCv1GetActiveSessionsCount(nil, args.Filters, rply)
+	return ssv1.Ss.BiRPCv1GetActiveSessionsCount(nil, args, rply)
 }
 
-func (ssv1 *SessionSv1) ForceDisconnect(args *dispatchers.FilterSessionWithApiKey,
+func (ssv1 *SessionSv1) ForceDisconnect(args *utils.SessionFilter,
 	rply *string) error {
-	return ssv1.Ss.BiRPCv1ForceDisconnect(nil, args.Filters, rply)
+	return ssv1.Ss.BiRPCv1ForceDisconnect(nil, args, rply)
 }
 
-func (ssv1 *SessionSv1) GetPassiveSessions(args *dispatchers.FilterSessionWithApiKey,
+func (ssv1 *SessionSv1) GetPassiveSessions(args *utils.SessionFilter,
 	rply *[]*sessions.ActiveSession) error {
-	return ssv1.Ss.BiRPCv1GetPassiveSessions(nil, &args.FilterWithPaginator, rply)
+	return ssv1.Ss.BiRPCv1GetPassiveSessions(nil, args, rply)
 }
 
-func (ssv1 *SessionSv1) GetPassiveSessionsCount(args *dispatchers.FilterSessionWithApiKey,
+func (ssv1 *SessionSv1) GetPassiveSessionsCount(args *utils.SessionFilter,
 	rply *int) error {
-	return ssv1.Ss.BiRPCv1GetPassiveSessionsCount(nil, args.Filters, rply)
+	return ssv1.Ss.BiRPCv1GetPassiveSessionsCount(nil, args, rply)
 }
 
 func (ssv1 *SessionSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {

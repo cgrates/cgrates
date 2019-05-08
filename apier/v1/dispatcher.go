@@ -457,27 +457,27 @@ func (dS *DispatcherSessionSv1) UpdateSession(args *sessions.V1UpdateSessionArgs
 	return dS.dS.SessionSv1UpdateSession(args, reply)
 }
 
-func (dS *DispatcherSessionSv1) GetActiveSessions(args *dispatchers.FilterSessionWithApiKey,
+func (dS *DispatcherSessionSv1) GetActiveSessions(args *utils.SessionFilter,
 	reply *[]*sessions.ActiveSession) (err error) {
 	return dS.dS.SessionSv1GetActiveSessions(args, reply)
 }
 
-func (dS *DispatcherSessionSv1) GetActiveSessionsCount(args *dispatchers.FilterSessionWithApiKey,
+func (dS *DispatcherSessionSv1) GetActiveSessionsCount(args *utils.SessionFilter,
 	reply *int) (err error) {
 	return dS.dS.SessionSv1GetActiveSessionsCount(args, reply)
 }
 
-func (dS *DispatcherSessionSv1) ForceDisconnect(args *dispatchers.FilterSessionWithApiKey,
+func (dS *DispatcherSessionSv1) ForceDisconnect(args *utils.SessionFilter,
 	reply *string) (err error) {
 	return dS.dS.SessionSv1ForceDisconnect(args, reply)
 }
 
-func (dS *DispatcherSessionSv1) GetPassiveSessions(args *dispatchers.FilterSessionWithApiKey,
+func (dS *DispatcherSessionSv1) GetPassiveSessions(args *utils.SessionFilter,
 	reply *[]*sessions.ActiveSession) (err error) {
 	return dS.dS.SessionSv1GetPassiveSessions(args, reply)
 }
 
-func (dS *DispatcherSessionSv1) GetPassiveSessionsCount(args *dispatchers.FilterSessionWithApiKey,
+func (dS *DispatcherSessionSv1) GetPassiveSessionsCount(args *utils.SessionFilter,
 	reply *int) (err error) {
 	return dS.dS.SessionSv1GetPassiveSessionsCount(args, reply)
 }

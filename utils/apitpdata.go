@@ -1416,3 +1416,10 @@ type ArgsGetGroup struct {
 	CacheID string
 	GroupID string
 }
+
+type SessionFilter struct {
+	Limit   *int
+	Filters []string
+	Tenant  string
+	*ArgDispatcher
+}

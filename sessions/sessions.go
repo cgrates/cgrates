@@ -71,7 +71,7 @@ type SReplConn struct {
 // NewSessionS constructs  a new SessionS instance
 func NewSessionS(cgrCfg *config.CGRConfig, ralS, resS, thdS,
 	statS, splS, attrS, cdrS, chargerS rpcclient.RpcClientConnection,
-	sReplConns []*SReplConn, tmz string) *SessionS {
+	sReplConns []*SReplConn, dm *engine.DataManager, tmz string) *SessionS {
 	cgrCfg.SessionSCfg().SessionIndexes[utils.OriginID] = true // Make sure we have indexing for OriginID since it is a requirement on prefix searching
 	if chargerS != nil && reflect.ValueOf(chargerS).IsNil() {
 		chargerS = nil
@@ -111,11 +111,11 @@ func NewSessionS(cgrCfg *config.CGRConfig, ralS, resS, thdS,
 		biJClnts:      make(map[rpcclient.RpcClientConnection]string),
 		biJIDs:        make(map[string]*biJClient),
 		aSessions:     make(map[string]*Session),
-		aSessionsIdx:  make(map[string]map[string]utils.StringMap),
 		aSessionsRIdx: make(map[string][]*riFieldNameVal),
 		pSessions:     make(map[string]*Session),
-		pSessionsIdx:  make(map[string]map[string]utils.StringMap),
-		pSessionsRIdx: make(map[string][]*riFieldNameVal)}
+		pSessionsRIdx: make(map[string][]*riFieldNameVal),
+		dm:            dm,
+	}
 }
 
 // biJClient contains info we need to reach back a bidirectional json client
@@ -146,17 +146,16 @@ type SessionS struct {
 	aSsMux    sync.RWMutex        // protects aSessions
 	aSessions map[string]*Session // group sessions per sessionId, multiple runs based on derived charging
 
-	aSIMux        sync.RWMutex                          // protects aSessionsIdx
-	aSessionsIdx  map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue]utils.StringMap[cgrID]
-	aSessionsRIdx map[string][]*riFieldNameVal          // reverse indexes for active sessions, used on remove
+	aSIMux        sync.RWMutex                 // protects aSessionsIdx
+	aSessionsRIdx map[string][]*riFieldNameVal // reverse indexes for active sessions, used on remove
 
 	pSsMux    sync.RWMutex        // protects pSessions
 	pSessions map[string]*Session // group passive sessions based on cgrID
 
-	pSIMux        sync.RWMutex                          // protects pSessionsIdx
-	pSessionsIdx  map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue]utils.StringMap[cgrID]
-	pSessionsRIdx map[string][]*riFieldNameVal          // reverse indexes for passive sessions, used on remove
+	pSIMux        sync.RWMutex                 // protects pSessionsIdx
+	pSessionsRIdx map[string][]*riFieldNameVal // reverse indexes for passive sessions, used on remove
 
+	dm *engine.DataManager
 }
 
 // ListenAndServe starts the service and binds it to the listen loop
@@ -774,39 +773,40 @@ func (sS *SessionS) unregisterSession(cgrID string, passive bool) bool {
 // indexSession will index an active or passive Session based on configuration
 func (sS *SessionS) indexSession(s *Session, pSessions bool) {
 	idxMux := &sS.aSIMux // pointer to original mux since will have no effect if we copy it
-	ssIndx := sS.aSessionsIdx
+	itemIDPrefix := "act"
 	ssRIdx := sS.aSessionsRIdx
 	if pSessions {
 		idxMux = &sS.pSIMux
-		ssIndx = sS.pSessionsIdx
+		itemIDPrefix = "psv"
 		ssRIdx = sS.pSessionsRIdx
 	}
 	idxMux.Lock()
 	defer idxMux.Unlock()
 	for fieldName := range sS.cgrCfg.SessionSCfg().SessionIndexes {
-		fieldVal, err := s.EventStart.GetString(fieldName)
-		if err != nil {
-			if err == utils.ErrNotFound {
-				fieldVal = utils.NOT_AVAILABLE
-			} else {
-				utils.Logger.Err(fmt.Sprintf("<%s> retrieving field: %s from event: %+v, err: <%s>", utils.SessionS, fieldName, s.EventStart, err))
-				continue
+		for _, sr := range s.SRuns {
+			fieldVal, err := sr.Event.GetString(fieldName)
+			if err != nil {
+				if err == utils.ErrNotFound {
+					fieldVal = utils.NOT_AVAILABLE
+				} else {
+					utils.Logger.Err(fmt.Sprintf("<%s> retrieving field: %s from event: %+v, err: <%s>", utils.SessionS, fieldName, sr.Event, err))
+					continue
+				}
 			}
+			if fieldVal == "" {
+				fieldVal = utils.MetaEmpty
+			}
+			// insert to cache
+			fieldValKey := utils.ConcatenatedKey(itemIDPrefix, utils.MetaString, utils.DynamicDataPrefix+fieldName, fieldVal)
+			itemIDs := utils.NewStringMap()
+			if x, ok := engine.Cache.Get(utils.CacheSessionFilterIndexes, fieldValKey); ok && x != nil { // Attempt to find in cache first
+				itemIDs = x.(utils.StringMap)
+			}
+			itemIDs[s.CGRID] = true
+			engine.Cache.Set(utils.CacheSessionFilterIndexes, fieldValKey, itemIDs, nil,
+				true, utils.NonTransactional)
+			ssRIdx[s.CGRID] = append(ssRIdx[s.CGRID], &riFieldNameVal{fieldName: fieldName, fieldValue: fieldVal}) // reverse index
 		}
-		if fieldVal == "" {
-			fieldVal = utils.MetaEmpty
-		}
-		if _, hasFieldName := ssIndx[fieldName]; !hasFieldName { // Init it here
-			ssIndx[fieldName] = make(map[string]utils.StringMap)
-		}
-		if _, hasFieldVal := ssIndx[fieldName][fieldVal]; !hasFieldVal {
-			ssIndx[fieldName][fieldVal] = make(utils.StringMap)
-		}
-		ssIndx[fieldName][fieldVal][s.CGRID] = true
-		if _, hasIt := ssRIdx[s.CGRID]; !hasIt {
-			ssRIdx[s.CGRID] = make([]*riFieldNameVal, 0)
-		}
-		ssRIdx[s.CGRID] = append(ssRIdx[s.CGRID], &riFieldNameVal{fieldName: fieldName, fieldValue: fieldVal})
 	}
 	return
 }
@@ -815,11 +815,11 @@ func (sS *SessionS) indexSession(s *Session, pSessions bool) {
 // called on terminate or relocate
 func (sS *SessionS) unindexSession(cgrID string, pSessions bool) bool {
 	idxMux := &sS.aSIMux
-	ssIndx := sS.aSessionsIdx
+	itemIDPrefix := "act"
 	ssRIdx := sS.aSessionsRIdx
 	if pSessions {
 		idxMux = &sS.pSIMux
-		ssIndx = sS.pSessionsIdx
+		itemIDPrefix = "psv"
 		ssRIdx = sS.pSessionsRIdx
 	}
 	idxMux.Lock()
@@ -828,142 +828,169 @@ func (sS *SessionS) unindexSession(cgrID string, pSessions bool) bool {
 		return false
 	}
 	for _, riFNV := range ssRIdx[cgrID] {
-		delete(ssIndx[riFNV.fieldName][riFNV.fieldValue], cgrID)
-		if len(ssIndx[riFNV.fieldName][riFNV.fieldValue]) == 0 {
-			delete(ssIndx[riFNV.fieldName], riFNV.fieldValue)
-		}
-		if len(ssIndx[riFNV.fieldName]) == 0 {
-			delete(ssIndx, riFNV.fieldName)
-		}
+		fieldValKey := utils.ConcatenatedKey(itemIDPrefix, utils.MetaString, utils.DynamicDataPrefix+riFNV.fieldName, riFNV.fieldValue)
+		engine.Cache.Remove(utils.CacheSessionFilterIndexes, fieldValKey, true, utils.NonTransactional)
 	}
 	delete(ssRIdx, cgrID)
 	return true
 }
 
-// getSessionIDsForPrefix works with session relocation returning list of sessions with ID matching prefix for OriginID field
-func (sS *SessionS) getSessionIDsForPrefix(prefix string, pSessions bool) (cgrIDs []string) {
-	idxMux := &sS.aSIMux
-	ssIndx := sS.aSessionsIdx
-	if pSessions {
-		idxMux = &sS.pSIMux
-		ssIndx = sS.pSessionsIdx
-	}
-	idxMux.RLock()
-	for originID := range ssIndx[utils.OriginID] {
-		if strings.HasPrefix(originID, prefix) {
-			cgrIDs = append(cgrIDs,
-				ssIndx[utils.OriginID][originID].Slice()...)
+func (sS *SessionS) getIndexedFilters(tenant string, fltrs []string) (indexedFltr map[string][]string, unindexedFltr []*engine.FilterRule) {
+	indexedFltr = make(map[string][]string)
+	for _, fltrID := range fltrs {
+		f, err := sS.dm.GetFilter(tenant, fltrID,
+			true, true, utils.NonTransactional)
+		if err != nil {
+			if err == utils.ErrNotFound {
+				err = utils.ErrPrefixNotFound(fltrID)
+			}
+			continue
+		}
+		if f.ActivationInterval != nil &&
+			!f.ActivationInterval.IsActiveAtTime(time.Now()) { // not active
+			continue
+		}
+		for _, fltr := range f.Rules {
+			if fltr.Type != utils.MetaString ||
+				!sS.cgrCfg.SessionSCfg().SessionIndexes.HasKey(utils.DynamicDataPrefix+fltr.FieldName) {
+				unindexedFltr = append(unindexedFltr, fltr)
+				continue
+			}
+			indexedFltr[fltr.FieldName] = fltr.Values
 		}
 	}
-	idxMux.RUnlock()
 	return
 }
 
 // getSessionIDsMatchingIndexes will check inside indexes if it can find sessionIDs matching all filters
-// matchedIndexes returns map[matchedFieldName]possibleMatchedFieldVal so we optimize further to avoid checking them
-func (sS *SessionS) getSessionIDsMatchingIndexes(fltrs map[string]string,
-	pSessions bool) (utils.StringMap, map[string]string) {
-	idxMux := &sS.aSIMux
-	ssIndx := sS.aSessionsIdx
+func (sS *SessionS) getSessionIDsMatchingIndexes(fltrs map[string][]string,
+	pSessions bool) []string {
+	itemIDPrefix := "act"
 	if pSessions {
-		idxMux = &sS.pSIMux
-		ssIndx = sS.pSessionsIdx
+		itemIDPrefix = "psv"
 	}
-	idxMux.RLock()
-	defer idxMux.RUnlock()
-	matchedIndexes := make(map[string]string)
-	matchingSessions := make(utils.StringMap)
-	checkNr := 0
-	findFunc := func(cgrID, fltrName, fltrVal string) bool {
-		for cgrmID := range ssIndx[fltrName][fltrVal] {
-			if cgrID == cgrmID {
-				return true
+	getMatchingIndexes := func(itemIDPrefix, fieldName string, values []string) (matchingSessionsbyValue utils.StringMap) {
+		matchingSessionsbyValue = make(utils.StringMap)
+		for _, fieldVal := range values {
+			fieldValKey := utils.ConcatenatedKey(itemIDPrefix, utils.MetaString, fieldName, fieldVal)
+			itemIDs := utils.NewStringMap()
+			if x, ok := engine.Cache.Get(utils.CacheSessionFilterIndexes, fieldValKey); ok && x != nil { // Attempt to find in cache first
+				itemIDs = x.(utils.StringMap)
+			}
+			for cgrID := range itemIDs {
+				matchingSessionsbyValue[cgrID] = true
 			}
 		}
-		return false
+		return matchingSessionsbyValue
 	}
-	for fltrName, fltrVal := range fltrs {
-		if _, hasFldName := ssIndx[fltrName]; !hasFldName {
-			continue
-		}
+	matchingSessions := make(utils.StringMap)
+	checkNr := 0
+	for fieldName, values := range fltrs {
+		matchingSessionsbyValue := getMatchingIndexes(itemIDPrefix, fieldName, values)
 		checkNr += 1
-		if _, hasFldVal := ssIndx[fltrName][fltrVal]; !hasFldVal {
-			matchedIndexes[fltrName] = utils.META_NONE
-			return make(utils.StringMap), matchedIndexes
-		}
-		matchedIndexes[fltrName] = fltrVal
-		if checkNr == 1 { // First run will init the MatchingSessions
-			matchingSessions = ssIndx[fltrName][fltrVal]
+		if checkNr == 1 {
+			matchingSessions = matchingSessionsbyValue
 			continue
 		}
-		// Higher run, takes out non matching indexes
 		for cgrID := range matchingSessions {
-			if !findFunc(cgrID, fltrName, fltrVal) {
+			if !matchingSessionsbyValue.HasKey(cgrID) {
 				delete(matchingSessions, cgrID)
 			}
 		}
+		if len(matchingSessions) == 0 {
+			return make([]string, 0)
+		}
 	}
-	return matchingSessions.Clone(), matchedIndexes
+	return matchingSessions.Slice()
 }
 
-// ToDo: break the method asActiveSessions to return []*Session
-// func (sS *SessionS) filterSessions(fltrs map[string]string, psv bool) (ss []*Session) {
-
-// asActiveSessions returns sessions from either active or passive table as []*ActiveSession
-func (sS *SessionS) asActiveSessions(fltrs map[string]string,
-	count, psv bool) (aSs []*ActiveSession, counter int, err error) {
-	aSs = make([]*ActiveSession, 0) // Make sure we return at least empty list and not nil
-
-	if len(fltrs) == 0 { // no filters applied
+func (sS *SessionS) filterSessions(sf *utils.SessionFilter, psv bool) (aSs []*ActiveSession) {
+	if len(sf.Filters) == 0 {
 		ss := sS.getSessions(utils.EmptyString, psv)
 		for _, s := range ss {
 			aSs = append(aSs,
 				s.AsActiveSessions(sS.cgrCfg.GeneralCfg().DefaultTimezone,
 					sS.cgrCfg.GeneralCfg().NodeID)...) // Expensive for large number of sessions
-		}
-		if count {
-			return nil, len(aSs), nil
+			if sf.Limit != nil && *sf.Limit > 0 && *sf.Limit < len(aSs) {
+				return aSs[:*sf.Limit]
+			}
 		}
 		return
 	}
-
-	// Check first based on indexes so we can downsize the list of matching sessions
-	matchingSessionIDs, checkedFilters := sS.getSessionIDsMatchingIndexes(fltrs, psv)
-	if len(matchingSessionIDs) == 0 && len(checkedFilters) != 0 {
+	tenant := utils.FirstNonEmpty(sf.Tenant, sS.cgrCfg.GeneralCfg().DefaultTenant)
+	indx, unindx := sS.getIndexedFilters(tenant, sf.Filters)
+	ss := sS.getSessionsFromCGRIDs(psv, sS.getSessionIDsMatchingIndexes(indx, psv)...)
+	pass := func(filterRules []*engine.FilterRule,
+		me engine.MapEvent) (pass bool) {
+		pass = true
+		if len(filterRules) == 0 {
+			return
+		}
+		var err error
+		ev := config.NewNavigableMap(me)
+		for _, fltr := range filterRules {
+			if pass, err = fltr.Pass(ev, sS.statS, tenant); err != nil || !pass {
+				pass = false
+				return
+			}
+		}
 		return
 	}
-	for fltrFldName := range fltrs {
-		if _, alreadyChecked := checkedFilters[fltrFldName]; alreadyChecked &&
-			fltrFldName != utils.RunID { // Optimize further checks, RunID should stay since it can create bugs
-			delete(fltrs, fltrFldName)
-		}
-	}
-	remainingSessions := sS.getSessions(fltrs[utils.CGRID], psv)
-	if len(fltrs) != 0 { // Still have some filters to match
-		for _, s := range remainingSessions {
-			for _, sr := range s.SRuns {
-				matchingAll := true
-				for fltrFldName, fltrFldVal := range fltrs {
-					if sr.Event.GetStringIgnoreErrors(fltrFldName) != fltrFldVal { // No Match
-						matchingAll = false
-						break
-					}
-				}
-				if matchingAll {
-					aSs = append(aSs, s.asActiveSessions(sr, sS.cgrCfg.GeneralCfg().DefaultTimezone,
-						sS.cgrCfg.GeneralCfg().NodeID))
+	for _, s := range ss {
+		s.RLock()
+		for _, sr := range s.SRuns {
+			if pass(unindx, sr.Event) {
+				aSs = append(aSs,
+					s.asActiveSessions(sr, sS.cgrCfg.GeneralCfg().DefaultTimezone,
+						sS.cgrCfg.GeneralCfg().NodeID)) // Expensive for large number of sessions
+				if sf.Limit != nil && *sf.Limit > 0 && *sf.Limit < len(aSs) {
+					s.RUnlock()
+					return aSs[:*sf.Limit]
 				}
 			}
 		}
-	} else {
-		for _, s := range remainingSessions {
-			aSs = append(aSs,
-				s.AsActiveSessions(sS.cgrCfg.GeneralCfg().DefaultTimezone,
-					sS.cgrCfg.GeneralCfg().NodeID)...) // Expensive for large number of sessions
-		}
+		s.RUnlock()
 	}
-	if count {
-		return nil, len(aSs), nil
+	return
+}
+
+func (sS *SessionS) filterSessionsCount(sf *utils.SessionFilter, psv bool) (count int) {
+	count = 0
+	if len(sf.Filters) == 0 {
+		ss := sS.getSessions(utils.EmptyString, psv)
+		for _, s := range ss {
+			s.RLock()
+			count += len(s.SRuns)
+			s.RUnlock()
+		}
+		return
+	}
+	tenant := utils.FirstNonEmpty(sf.Tenant, sS.cgrCfg.GeneralCfg().DefaultTenant)
+	indx, unindx := sS.getIndexedFilters(tenant, sf.Filters)
+	ss := sS.getSessionsFromCGRIDs(psv, sS.getSessionIDsMatchingIndexes(indx, psv)...)
+	pass := func(filterRules []*engine.FilterRule,
+		me engine.MapEvent) (pass bool) {
+		pass = true
+		if len(filterRules) == 0 {
+			return
+		}
+		var err error
+		ev := config.NewNavigableMap(me)
+		for _, fltr := range filterRules {
+			if pass, err = fltr.Pass(ev, sS.statS, tenant); err != nil || !pass {
+				return
+			}
+		}
+		return
+	}
+	for _, s := range ss {
+		s.RLock()
+		for _, sr := range s.SRuns {
+			if pass(unindx, sr.Event) {
+				count += 1
+			}
+		}
+		s.RUnlock()
 	}
 	return
 }
@@ -1052,6 +1079,34 @@ func (sS *SessionS) getSessions(cgrID string, pSessions bool) (ss []*Session) {
 	}
 	if s, hasCGRID := ssMp[cgrID]; hasCGRID {
 		ss = []*Session{s}
+	}
+	return
+}
+
+// getSessions is used to return in a thread-safe manner active or passive sessions
+func (sS *SessionS) getSessionsFromCGRIDs(pSessions bool, cgrIDs ...string) (ss []*Session) {
+	ssMux := &sS.aSsMux  // get the pointer so we don't copy, otherwise locks will not work
+	ssMp := sS.aSessions // reference it so we don't overwrite the new map without protection
+	if pSessions {
+		ssMux = &sS.pSsMux
+		ssMp = sS.pSessions
+	}
+	ssMux.RLock()
+	defer ssMux.RUnlock()
+	if len(cgrIDs) == 0 {
+		ss = make([]*Session, len(ssMp))
+		var i int
+		for _, s := range ssMp {
+			ss[i] = s
+			i++
+		}
+		return
+	}
+	ss = make([]*Session, len(cgrIDs))
+	for i, cgrID := range cgrIDs {
+		if s, hasCGRID := ssMp[cgrID]; hasCGRID {
+			ss[i] = s
+		}
 	}
 	return
 }
@@ -1442,129 +1497,49 @@ func (sS *SessionS) CallBiRPC(clnt rpcclient.RpcClientConnection,
 
 // BiRPCv1GetActiveSessions returns the list of active sessions based on filter
 func (sS *SessionS) BiRPCv1GetActiveSessions(clnt rpcclient.RpcClientConnection,
-	args *FilterWithPaginator, reply *[]*ActiveSession) (err error) {
+	args *utils.SessionFilter, reply *[]*ActiveSession) (err error) {
 	if args == nil { //protection in case on nil
-		args = &FilterWithPaginator{}
+		args = &utils.SessionFilter{}
 	}
-	for fldName, fldVal := range args.Filters {
-		if fldVal == "" {
-			args.Filters[fldName] = utils.META_NONE
-		}
-	}
-	aSs, _, err := sS.asActiveSessions(args.Filters, false, false)
-	if err != nil {
-		return utils.NewErrServerError(err)
-	} else if len(aSs) == 0 {
+	aSs := sS.filterSessions(args, false)
+	if len(aSs) == 0 {
 		return utils.ErrNotFound
 	}
-	if args.Paginator == nil { //small optimization
-		*reply = aSs
-	} else {
-		var limit, offset int
-		if args.Limit != nil && *args.Limit > 0 {
-			limit = *args.Limit
-		}
-		if args.Offset != nil && *args.Offset > 0 {
-			offset = *args.Offset
-		}
-		if limit == 0 && offset == 0 {
-			*reply = aSs
-			return
-		}
-		if offset > len(aSs) {
-			return fmt.Errorf("Offset : %+v is greater than lenght of active sessions : %+v", offset, len(aSs))
-		}
-		if offset != 0 {
-			limit = limit + offset
-		}
-		if limit == 0 {
-			limit = len(aSs[offset:])
-		} else if limit > len(aSs) {
-			limit = len(aSs)
-		}
-		*reply = aSs[offset:limit]
-	}
-
+	*reply = aSs
 	return nil
 }
 
 // BiRPCv1GetActiveSessionsCount counts the active sessions
 func (sS *SessionS) BiRPCv1GetActiveSessionsCount(clnt rpcclient.RpcClientConnection,
-	fltr map[string]string, reply *int) error {
-	for fldName, fldVal := range fltr {
-		if fldVal == "" {
-			fltr[fldName] = utils.META_NONE
-		}
+	args *utils.SessionFilter, reply *int) error {
+	if args == nil { //protection in case on nil
+		args = &utils.SessionFilter{}
 	}
-	if _, count, err := sS.asActiveSessions(fltr, true, false); err != nil {
-		return err
-	} else {
-		*reply = count
-	}
+	*reply = sS.filterSessionsCount(args, false)
 	return nil
 }
 
 // BiRPCv1GetPassiveSessions returns the passive sessions handled by SessionS
 func (sS *SessionS) BiRPCv1GetPassiveSessions(clnt rpcclient.RpcClientConnection,
-	args *FilterWithPaginator, reply *[]*ActiveSession) error {
+	args *utils.SessionFilter, reply *[]*ActiveSession) error {
 	if args == nil { //protection in case on nil
-		args = &FilterWithPaginator{}
+		args = &utils.SessionFilter{}
 	}
-	for fldName, fldVal := range args.Filters {
-		if fldVal == "" {
-			args.Filters[fldName] = utils.META_NONE
-		}
-	}
-	pSs, _, err := sS.asActiveSessions(args.Filters, false, true)
-	if err != nil {
-		return utils.NewErrServerError(err)
-	} else if len(pSs) == 0 {
+	pSs := sS.filterSessions(args, true)
+	if len(pSs) == 0 {
 		return utils.ErrNotFound
 	}
-	if args.Paginator == nil { //small optimization
-		*reply = pSs
-	} else {
-		var limit, offset int
-		if args.Limit != nil && *args.Limit > 0 {
-			limit = *args.Limit
-		}
-		if args.Offset != nil && *args.Offset > 0 {
-			offset = *args.Offset
-		}
-		if limit == 0 && offset == 0 {
-			*reply = pSs
-			return nil
-		}
-		if offset > len(pSs) {
-			return fmt.Errorf("Offset : %+v is greater than lenght of passive sessions : %+v", offset, len(pSs))
-		}
-		if offset != 0 {
-			limit = limit + offset
-		}
-		if limit == 0 {
-			limit = len(pSs[offset:])
-		} else if limit > len(pSs) {
-			limit = len(pSs)
-		}
-		*reply = pSs[offset:limit]
-	}
-
+	*reply = pSs
 	return nil
 }
 
 // BiRPCv1GetPassiveSessionsCount counts the passive sessions handled by the system
 func (sS *SessionS) BiRPCv1GetPassiveSessionsCount(clnt rpcclient.RpcClientConnection,
-	fltr map[string]string, reply *int) error {
-	for fldName, fldVal := range fltr {
-		if fldVal == "" {
-			fltr[fldName] = utils.META_NONE
-		}
+	args *utils.SessionFilter, reply *int) error {
+	if args == nil { //protection in case on nil
+		args = &utils.SessionFilter{}
 	}
-	if _, count, err := sS.asActiveSessions(fltr, true, true); err != nil {
-		return err
-	} else {
-		*reply = count
-	}
+	*reply = sS.filterSessionsCount(args, true)
 	return nil
 }
 
@@ -2737,16 +2712,12 @@ func (sS *SessionS) BiRPCv1SyncSessions(clnt rpcclient.RpcClientConnection,
 
 // BiRPCv1ForceDisconnect will force disconnecting sessions matching sessions
 func (sS *SessionS) BiRPCv1ForceDisconnect(clnt rpcclient.RpcClientConnection,
-	fltr map[string]string, reply *string) error {
-	for fldName, fldVal := range fltr {
-		if fldVal == "" {
-			fltr[fldName] = utils.META_NONE
-		}
+	args *utils.SessionFilter, reply *string) (err error) {
+	if args == nil { //protection in case on nil
+		args = &utils.SessionFilter{}
 	}
-	aSs, _, err := sS.asActiveSessions(fltr, false, false)
-	if err != nil {
-		return utils.NewErrServerError(err)
-	} else if len(aSs) == 0 {
+	aSs := sS.filterSessions(args, false)
+	if len(aSs) == 0 {
 		return utils.ErrNotFound
 	}
 	for _, as := range aSs {
