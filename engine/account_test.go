@@ -2186,7 +2186,7 @@ func TestAccountAsAccountDigest(t *testing.T) {
 	}
 }
 
-func TestAccountGetBalancesForPrefixSpecialCases(t *testing.T) {
+func TestAccountGetBalancesGetBalanceWithSameWeight(t *testing.T) {
 	acc := &Account{
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{
@@ -2209,7 +2209,7 @@ func TestAccountGetBalancesForPrefixSpecialCases(t *testing.T) {
 	}
 }
 
-func TestAccountGetBalancesForPrefixSpecialCases2(t *testing.T) {
+func TestAccountGetBalancesForPrefix2(t *testing.T) {
 	acc := &Account{
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{
@@ -2232,7 +2232,7 @@ func TestAccountGetBalancesForPrefixSpecialCases2(t *testing.T) {
 	}
 }
 
-func TestAccountGetBalancesForPrefixSpecialCases3(t *testing.T) {
+func TestAccountGetMultipleBalancesForPrefixWithSameWeight(t *testing.T) {
 	acc := &Account{
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{

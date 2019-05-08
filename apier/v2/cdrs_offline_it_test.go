@@ -49,7 +49,7 @@ var sTestsCDRsOfflineIT = []func(t *testing.T){
 	testV2CDRsOfflineLoadData,
 	testV2CDRsOfflineBalanceUpdate,
 	testV2CDRsOfflineExpiryBalance,
-	testV2CDRsSpecialCase,
+	testV2CDRsBalancesWithSameWeight,
 	testV2CDRsOfflineKillEngine,
 }
 
@@ -121,7 +121,6 @@ func testV2CDRsOfflineLoadData(t *testing.T) {
 }
 
 func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
-
 	//add a test account with balance type monetary and value 10
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
@@ -214,7 +213,6 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 }
 
 func testV2CDRsOfflineExpiryBalance(t *testing.T) {
-
 	var reply string
 	acc := &utils.AttrSetActions{ActionsId: "ACT_TOPUP_TEST2", Actions: []*utils.TPAction{
 		&utils.TPAction{Identifier: engine.TOPUP, BalanceType: utils.MONETARY, BalanceId: "BalanceExpired1", Units: "5",
@@ -329,7 +327,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
 }
 
-func testV2CDRsSpecialCase(t *testing.T) {
+func testV2CDRsBalancesWithSameWeight(t *testing.T) {
 	//add a test account with balance type monetary and value 10
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
@@ -348,7 +346,8 @@ func testV2CDRsSpecialCase(t *testing.T) {
 		t.Fatal(err)
 	}
 	var acnt *engine.Account
-	if err := cdrsOfflineRpc.Call("ApierV2.GetAccount", &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "specialTest"}, &acnt); err != nil {
+	if err := cdrsOfflineRpc.Call("ApierV2.GetAccount",
+		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "specialTest"}, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 1 || len(acnt.BalanceMap[utils.MONETARY]) != 2 {
 		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MONETARY])
@@ -357,9 +356,9 @@ func testV2CDRsSpecialCase(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event: map[string]interface{}{
-			utils.OriginID:    "testV2CDRsSpecialCase",
+			utils.OriginID:    "testV2CDRsBalancesWithSameWeight",
 			utils.OriginHost:  "192.168.1.1",
-			utils.Source:      "testV2CDRsSpecialCase",
+			utils.Source:      "testV2CDRsBalancesWithSameWeight",
 			utils.RequestType: utils.META_POSTPAID,
 			utils.Category:    "call",
 			utils.Account:     "specialTest",
