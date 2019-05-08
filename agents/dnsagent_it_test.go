@@ -47,7 +47,8 @@ var sTestsDNS = []func(t *testing.T){
 	testDNSitTPFromFolder,
 	testDNSitClntConn,
 	//testDNSitClntNAPTRDryRun,
-	testDNSitClntNAPTRSuppliers,
+	testDNSitClntNAPTRAttributes,
+	//testDNSitClntNAPTRSuppliers,
 	testDNSitStopEngine,
 }
 
@@ -94,7 +95,7 @@ func testDNSitApierRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func testDNSitTPFromFolder(t *testing.T) {
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "dnsagent")}
 	var loadInst utils.LoadInstance
 	if err := dnsRPC.Call(utils.ApierV2LoadTariffPlanFromFolder,
 		attrs, &loadInst); err != nil {
@@ -148,9 +149,31 @@ func testDNSitClntNAPTRDryRun(t *testing.T) {
 	}
 }
 
-func testDNSitClntNAPTRSuppliers(t *testing.T) {
+func testDNSitClntNAPTRAttributes(t *testing.T) {
 	m := new(dns.Msg)
 	m.SetQuestion("4.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeNAPTR)
+	if err := dnsClnt.WriteMsg(m); err != nil {
+		t.Error(err)
+	}
+	if rply, err := dnsClnt.ReadMsg(); err != nil {
+		t.Error(err)
+	} else {
+		if rply.Rcode != dns.RcodeSuccess {
+			t.Errorf("failed to get an valid answer\n%v", rply)
+		}
+		answr := rply.Answer[0].(*dns.NAPTR)
+		if answr.Order != 100 {
+			t.Errorf("received: <%q>", answr.Order)
+		}
+		if answr.Replacement != "sip:\\1@172.16.1.1." {
+			t.Errorf("received: <%q>", answr.Replacement)
+		}
+	}
+}
+
+func testDNSitClntNAPTRSuppliers(t *testing.T) {
+	m := new(dns.Msg)
+	m.SetQuestion("5.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeNAPTR)
 	if err := dnsClnt.WriteMsg(m); err != nil {
 		t.Error(err)
 	}
