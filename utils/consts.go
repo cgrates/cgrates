@@ -578,6 +578,8 @@ const (
 	Preference                   = "Preference"
 	Flags                        = "Flags"
 	Service                      = "Service"
+	MetaSuppliersLimit           = "*suppliers_limit"
+	MetaSuppliersOffset          = "*suppliers_offset"
 )
 
 // Migrator Action

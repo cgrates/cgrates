@@ -165,6 +165,45 @@ func (ev *CGREvent) ConsumeArgDispatcher() (arg *ArgDispatcher) {
 	return
 }
 
+// ConsumeSupplierPaginator will consume supplierPaginator if presented
+func (ev *CGREvent) ConsumeSupplierPaginator() (args Paginator) {
+	if ev == nil {
+		return
+	}
+	//check if we have suppliersLimit in event and in case it has add it in args
+	limitIface, hasSuppliersLimit := ev.Event[MetaSuppliersLimit]
+	if hasSuppliersLimit {
+		delete(ev.Event, MetaSuppliersLimit)
+		limit, err := IfaceAsInt64(limitIface)
+		if err != nil {
+			Logger.Err(err.Error())
+			return
+		}
+		args = Paginator{
+			Limit: IntPointer(int(limit)),
+		}
+	}
+	//check if we have offset in event and in case it has add it in args
+	offsetIface, hasSuppliersOffset := ev.Event[MetaSuppliersOffset]
+	if hasSuppliersOffset {
+		delete(ev.Event, MetaSuppliersOffset)
+		offset, err := IfaceAsInt64(offsetIface)
+		if err != nil {
+			Logger.Err(err.Error())
+			return
+		}
+		if !hasSuppliersLimit { //in case we don't have limit, but we have offset we need to initialize the struct
+			args = Paginator{
+				Offset: IntPointer(int(offset)),
+			}
+		} else {
+			args.Offset = IntPointer(int(offset))
+		}
+	}
+
+	return
+}
+
 // CGREvents is a group of generic events processed by CGR services
 // ie: derived CDRs
 type CGREvents struct {

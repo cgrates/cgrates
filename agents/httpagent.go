@@ -108,6 +108,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	if reqProcessor.Flags.HasKey(utils.MetaDispatchers) && argDisp == nil {
 		argDisp = new(utils.ArgDispatcher)
 	}
+	suppliersPaginator := cgrEv.ConsumeSupplierPaginator()
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,
@@ -141,7 +142,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliers),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
-			*cgrEv, argDisp)
+			*cgrEv, argDisp, suppliersPaginator)
 		var authReply sessions.V1AuthorizeReply
 		err = ha.sessionS.Call(utils.SessionSv1AuthorizeEvent,
 			authArgs, &authReply)
@@ -196,7 +197,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliers),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
-			*cgrEv, argDisp)
+			*cgrEv, argDisp, suppliersPaginator)
 		var eventRply sessions.V1ProcessEventReply
 		err = ha.sessionS.Call(utils.SessionSv1ProcessEvent,
 			evArgs, &eventRply)

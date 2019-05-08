@@ -155,6 +155,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 	}
 	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.tenant, utils.NestingSep)
 	argDisp := cgrEv.ConsumeArgDispatcher()
+	supplierPagainator := cgrEv.ConsumeSupplierPaginator()
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,
@@ -189,7 +190,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliers),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
-			*cgrEv, argDisp)
+			*cgrEv, argDisp, supplierPagainator)
 		var authReply sessions.V1AuthorizeReply
 		err = da.sS.Call(utils.SessionSv1AuthorizeEvent,
 			authArgs, &authReply)
@@ -244,7 +245,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliers),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
-			*cgrEv, argDisp)
+			*cgrEv, argDisp, supplierPagainator)
 		var eventRply sessions.V1ProcessEventReply
 		err = da.sS.Call(utils.SessionSv1ProcessEvent,
 			evArgs, &eventRply)
