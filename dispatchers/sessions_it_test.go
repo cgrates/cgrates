@@ -286,16 +286,12 @@ func testDspSessionInit(t *testing.T) {
 }
 
 func testDspGetSessions(t *testing.T) {
-	filtr := FilterSessionWithApiKey{
+	filtr := utils.SessionFilter{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("ses12345"),
 		},
-		TenantArg: utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
-		FilterWithPaginator: sessions.FilterWithPaginator{
-			Filters: map[string]string{},
-		},
+		Tenant:  "cgrates.org",
+		Filters: []string{},
 	}
 	var reply int
 	if err := dispEngine.RCP.Call(utils.SessionSv1GetActiveSessionsCount,
@@ -700,16 +696,12 @@ func testDspSessionPassive(t *testing.T) {
 	allEngine.stopEngine(t)
 	testDspSessionUpdate2(t)
 	var repl int
-	filtr := FilterSessionWithApiKey{
+	filtr := utils.SessionFilter{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("ses12345"),
 		},
-		TenantArg: utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
-		FilterWithPaginator: sessions.FilterWithPaginator{
-			Filters: map[string]string{},
-		},
+		Tenant:  "cgrates.org",
+		Filters: []string{},
 	}
 	time.Sleep(10 * time.Millisecond)
 	if err := dispEngine.RCP.Call(utils.SessionSv1GetPassiveSessionsCount,
@@ -806,16 +798,12 @@ func testDspSessionForceDisconect(t *testing.T) {
 	testDspSessionAuthorize(t)
 	testDspSessionInit(t)
 	var repl int
-	filtr := FilterSessionWithApiKey{
+	filtr := utils.SessionFilter{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("ses12345"),
 		},
-		TenantArg: utils.TenantArg{
-			Tenant: "cgrates.org",
-		},
-		FilterWithPaginator: sessions.FilterWithPaginator{
-			Filters: map[string]string{},
-		},
+		Tenant:  "cgrates.org",
+		Filters: []string{},
 	}
 	time.Sleep(10 * time.Millisecond)
 	if err := dispEngine.RCP.Call(utils.SessionSv1GetPassiveSessionsCount,

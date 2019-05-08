@@ -40,12 +40,6 @@ type DispatcherEvent struct {
 	Subsystem string
 }
 
-type FilterSessionWithApiKey struct {
-	*utils.ArgDispatcher
-	utils.TenantArg
-	sessions.FilterWithPaginator
-}
-
 type ArgsReplicateSessionsWithApiKey struct {
 	*utils.ArgDispatcher
 	utils.TenantArg

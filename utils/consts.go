@@ -1060,6 +1060,7 @@ const (
 	CacheAttributeFilterIndexes  = "attribute_filter_indexes"
 	CacheChargerFilterIndexes    = "charger_filter_indexes"
 	CacheDispatcherFilterIndexes = "dispatcher_filter_indexes"
+	CacheSessionFilterIndexes    = "session_filter_indexes"
 	CacheDiameterMessages        = "diameter_messages"
 	CacheRPCResponses            = "rpc_responses"
 	CacheClosedSessions          = "closed_sessions"

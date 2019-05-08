@@ -95,27 +95,27 @@ func (ssv1 *SessionSv1) BiRPCv1ProcessEvent(clnt *rpc2.Client, args *sessions.V1
 	return ssv1.Ss.BiRPCv1ProcessEvent(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1GetActiveSessions(clnt *rpc2.Client, args *sessions.FilterWithPaginator,
+func (ssv1 *SessionSv1) BiRPCv1GetActiveSessions(clnt *rpc2.Client, args *utils.SessionFilter,
 	rply *[]*sessions.ActiveSession) error {
 	return ssv1.Ss.BiRPCv1GetActiveSessions(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1GetActiveSessionsCount(clnt *rpc2.Client, args map[string]string,
+func (ssv1 *SessionSv1) BiRPCv1GetActiveSessionsCount(clnt *rpc2.Client, args *utils.SessionFilter,
 	rply *int) error {
 	return ssv1.Ss.BiRPCv1GetActiveSessionsCount(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessions(clnt *rpc2.Client, args *sessions.FilterWithPaginator,
+func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessions(clnt *rpc2.Client, args *utils.SessionFilter,
 	rply *[]*sessions.ActiveSession) error {
 	return ssv1.Ss.BiRPCv1GetPassiveSessions(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessionsCount(clnt *rpc2.Client, args map[string]string,
+func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessionsCount(clnt *rpc2.Client, args *utils.SessionFilter,
 	rply *int) error {
 	return ssv1.Ss.BiRPCv1GetPassiveSessionsCount(clnt, args, rply)
 }
 
-func (ssv1 *SessionSv1) BiRPCv1ForceDisconnect(clnt *rpc2.Client, args map[string]string,
+func (ssv1 *SessionSv1) BiRPCv1ForceDisconnect(clnt *rpc2.Client, args *utils.SessionFilter,
 	rply *string) error {
 	return ssv1.Ss.BiRPCv1ForceDisconnect(clnt, args, rply)
 }

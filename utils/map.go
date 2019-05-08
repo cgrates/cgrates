@@ -181,6 +181,16 @@ func (sm StringMap) HasKey(key string) (has bool) {
 	return
 }
 
+func (sm StringMap) GetSlice() (result []string) {
+	result = make([]string, len(sm))
+	i := 0
+	for k := range sm {
+		result[i] = k
+		i += 1
+	}
+	return
+}
+
 /*
 func NoDots(m map[string]struct{}) map[string]struct{} {
 	return MapKeysReplace(m, ".", "．")
