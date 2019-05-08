@@ -45,8 +45,8 @@ var (
 	cfgPath    = cgrMigratorFlags.String("config_path", "",
 		"Configuration directory path.")
 
-	migrate = cgrMigratorFlags.String("migrate", "", "fire up automatic migration "+
-		"\n <*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups|*stordb|*datadb>")
+	exec = cgrMigratorFlags.String("exec", "", "fire up automatic migration "+
+		"<*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups|*stordb|*datadb>")
 	version = cgrMigratorFlags.Bool("version", false, "prints the application version")
 
 	inDataDBType = cgrMigratorFlags.String("datadb_type", dfltCfg.DataDbCfg().DataDbType,
@@ -343,9 +343,9 @@ func main() {
 		log.Fatal(err)
 	}
 	config.SetCgrConfig(mgrCfg)
-	if migrate != nil && *migrate != "" { // Run migrator
+	if exec != nil && *exec != "" { // Run migrator
 		migrstats := make(map[string]int)
-		mig := strings.Split(*migrate, ",")
+		mig := strings.Split(*exec, ",")
 		err, migrstats = m.Migrate(mig)
 		if err != nil {
 			log.Fatal(err)
