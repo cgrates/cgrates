@@ -678,17 +678,19 @@ type AttrRemCdrs struct {
 }
 
 type AttrLoadTpFromFolder struct {
-	FolderPath string // Take files from folder absolute path
-	DryRun     bool   // Do not write to database but parse only
-	FlushDb    bool   // Flush previous data before loading new one
-	Validate   bool   // Run structural checks on data
+	FolderPath    string // Take files from folder absolute path
+	DryRun        bool   // Do not write to database but parse only
+	FlushDb       bool   // Flush previous data before loading new one
+	Validate      bool   // Run structural checks on data
+	ArgDispatcher *ArgDispatcher
 }
 
 type AttrImportTPFromFolder struct {
-	TPid         string
-	FolderPath   string
-	RunId        string
-	CsvSeparator string
+	TPid          string
+	FolderPath    string
+	RunId         string
+	CsvSeparator  string
+	ArgDispatcher *ArgDispatcher
 }
 
 type AttrGetDestination struct {
@@ -1368,4 +1370,49 @@ func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string, 
 type RPCCDRsFilterWithArgDispatcher struct {
 	*RPCCDRsFilter
 	*TenantWithArgDispatcher
+}
+
+type ArgsGetCacheItemIDsWithArgDispatcher struct {
+	*ArgDispatcher
+	TenantArg
+	ArgsGetCacheItemIDs
+}
+
+type ArgsGetCacheItemWithArgDispatcher struct {
+	*ArgDispatcher
+	TenantArg
+	ArgsGetCacheItem
+}
+
+type AttrReloadCacheWithArgDispatcher struct {
+	*ArgDispatcher
+	TenantArg
+	AttrReloadCache
+}
+
+type AttrCacheIDsWithArgDispatcher struct {
+	*ArgDispatcher
+	TenantArg
+	CacheIDs []string
+}
+
+type ArgsGetGroupWithArgDispatcher struct {
+	*ArgDispatcher
+	TenantArg
+	ArgsGetGroup
+}
+
+type ArgsGetCacheItemIDs struct {
+	CacheID      string
+	ItemIDPrefix string
+}
+
+type ArgsGetCacheItem struct {
+	CacheID string
+	ItemID  string
+}
+
+type ArgsGetGroup struct {
+	CacheID string
+	GroupID string
 }

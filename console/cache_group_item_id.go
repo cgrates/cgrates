@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -27,7 +26,7 @@ func init() {
 	c := &CmdCacheGetGroupItemIDs{
 		name:      "cache_group_item_ids",
 		rpcMethod: utils.CacheSv1GetGroupItemIDs,
-		rpcParams: &engine.ArgsGetGroup{},
+		rpcParams: &utils.ArgsGetGroup{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -37,7 +36,7 @@ func init() {
 type CmdCacheGetGroupItemIDs struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.ArgsGetGroup
+	rpcParams *utils.ArgsGetGroup
 	*CommandExecuter
 }
 
@@ -51,7 +50,7 @@ func (self *CmdCacheGetGroupItemIDs) RpcMethod() string {
 
 func (self *CmdCacheGetGroupItemIDs) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.ArgsGetGroup{}
+		self.rpcParams = &utils.ArgsGetGroup{}
 	}
 	return self.rpcParams
 }

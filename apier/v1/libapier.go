@@ -20,7 +20,6 @@ package v1
 
 import (
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -37,7 +36,7 @@ func GetCacheOpt(apiOpt *string) string {
 
 // composeArgsReload add the ItemID to AttrReloadCache
 // for a specific CacheID
-func composeArgsReload(args engine.ArgsGetCacheItem) (rpl utils.AttrReloadCache) {
+func composeArgsReload(args utils.ArgsGetCacheItem) (rpl utils.AttrReloadCache) {
 	rpl = utils.InitAttrReloadCache()
 	switch args.CacheID {
 	case utils.CacheResourceProfiles:

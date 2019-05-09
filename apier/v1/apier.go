@@ -271,10 +271,11 @@ func (self *ApierV1) LoadSharedGroup(attrs AttrLoadSharedGroup, reply *string) e
 }
 
 type AttrLoadTpFromStorDb struct {
-	TPid     string
-	FlushDb  bool // Flush dataDB before loading
-	DryRun   bool // Only simulate, no write
-	Validate bool // Run structural checks
+	TPid          string
+	FlushDb       bool // Flush dataDB before loading
+	DryRun        bool // Only simulate, no write
+	Validate      bool // Run structural checks
+	ArgDispatcher *utils.ArgDispatcher
 }
 
 // Loads complete data in a TP from storDb
@@ -303,7 +304,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	}
 	// reload cache
 	utils.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading cache.")
-	if err := dbReader.ReloadCache(attrs.FlushDb, true); err != nil {
+	if err := dbReader.ReloadCache(attrs.FlushDb, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
 
@@ -804,7 +805,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	}
 	// reload cache
 	utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
-	if err := loader.ReloadCache(attrs.FlushDb, true); err != nil {
+	if err := loader.ReloadCache(attrs.FlushDb, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -1058,25 +1059,29 @@ func (v1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (
 
 // CallCache caching the item based on cacheopt
 // visible in ApierV2
-func (v1 *ApierV1) CallCache(cacheOpt string, args engine.ArgsGetCacheItem) (err error) {
+func (v1 *ApierV1) CallCache(cacheOpt string, args utils.ArgsGetCacheItem) (err error) {
 	var reply string
 	switch cacheOpt {
 	case utils.META_NONE:
 		return
 	case utils.MetaReload:
-		if err = v1.CacheS.Call(utils.CacheSv1ReloadCache, composeArgsReload(args), &reply); err != nil {
+		if err = v1.CacheS.Call(utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+			AttrReloadCache: composeArgsReload(args)}, &reply); err != nil {
 			return err
 		}
 	case utils.MetaLoad:
-		if err = v1.CacheS.Call(utils.CacheSv1LoadCache, composeArgsReload(args), &reply); err != nil {
+		if err = v1.CacheS.Call(utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
+			AttrReloadCache: composeArgsReload(args)}, &reply); err != nil {
 			return err
 		}
 	case utils.MetaRemove:
-		if err = v1.CacheS.Call(utils.CacheSv1RemoveItem, &args, &reply); err != nil {
+		if err = v1.CacheS.Call(utils.CacheSv1RemoveItem,
+			&utils.ArgsGetCacheItemWithArgDispatcher{ArgsGetCacheItem: args}, &reply); err != nil {
 			return err
 		}
 	case utils.MetaClear:
-		if err = v1.CacheS.Call(utils.CacheSv1FlushCache, composeArgsReload(args), &reply); err != nil {
+		if err = v1.CacheS.Call(utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
+			AttrReloadCache: composeArgsReload(args)}, &reply); err != nil {
 			return err
 		}
 	}

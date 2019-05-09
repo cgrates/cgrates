@@ -29,7 +29,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
@@ -102,7 +101,7 @@ func testPrecacheRpcConn(t *testing.T) {
 }
 
 func testPrecacheGetItemIDs(t *testing.T) {
-	args := &engine.ArgsGetCacheItemIDs{
+	args := &utils.ArgsGetCacheItemIDs{
 		CacheID: utils.MetaDefault,
 	}
 	var reply *[]string
@@ -114,7 +113,7 @@ func testPrecacheGetItemIDs(t *testing.T) {
 
 func testPrecacheGetCacheStatsBeforeLoad(t *testing.T) {
 	var reply *map[string]*ltcache.CacheStats
-	args := &dispatchers.AttrCacheIDsWithApiKey{
+	args := &utils.AttrCacheIDsWithArgDispatcher{
 		CacheIDs: []string{},
 	}
 	dfltStats := engine.GetDefaultEmptyCacheStats()
@@ -148,7 +147,7 @@ func testPrecacheRestartEngine(t *testing.T) {
 
 func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 	var reply *map[string]*ltcache.CacheStats
-	args := &dispatchers.AttrCacheIDsWithApiKey{
+	args := &utils.AttrCacheIDsWithArgDispatcher{
 		CacheIDs: []string{},
 	}
 	expectedStats := &map[string]*ltcache.CacheStats{

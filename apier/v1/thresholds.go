@@ -114,7 +114,7 @@ func (apierV1 *ApierV1) SetThresholdProfile(args *ThresholdWithCache, reply *str
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ThresholdProfile
-	argCache := engine.ArgsGetCacheItem{
+	argCache := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheThresholdProfiles,
 		ItemID:  args.TenantID(),
 	}
@@ -129,7 +129,7 @@ func (apierV1 *ApierV1) SetThresholdProfile(args *ThresholdWithCache, reply *str
 			return err
 		}
 		//handle caching for Threshold
-		argCache = engine.ArgsGetCacheItem{
+		argCache = utils.ArgsGetCacheItem{
 			CacheID: utils.CacheThresholds,
 			ItemID:  args.TenantID(),
 		}
@@ -151,7 +151,7 @@ func (apierV1 *ApierV1) RemoveThresholdProfile(args *utils.TenantIDWithCache, re
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ThresholdProfile
-	argCache := engine.ArgsGetCacheItem{
+	argCache := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheThresholdProfiles,
 		ItemID:  args.TenantID(),
 	}
@@ -168,7 +168,7 @@ func (apierV1 *ApierV1) RemoveThresholdProfile(args *utils.TenantIDWithCache, re
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Threshold
-	argCache = engine.ArgsGetCacheItem{
+	argCache = utils.ArgsGetCacheItem{
 		CacheID: utils.CacheThresholds,
 		ItemID:  args.TenantID(),
 	}

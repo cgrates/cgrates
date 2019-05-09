@@ -80,7 +80,7 @@ func (apierV1 *ApierV1) SetStatQueueProfile(arg *StatQueueWithCache, reply *stri
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueueProfile
-	argCache := engine.ArgsGetCacheItem{
+	argCache := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheStatQueueProfiles,
 		ItemID:  arg.TenantID(),
 	}
@@ -103,7 +103,7 @@ func (apierV1 *ApierV1) SetStatQueueProfile(arg *StatQueueWithCache, reply *stri
 			return utils.APIErrorHandler(err)
 		}
 		//handle caching for StatQueues
-		argCache = engine.ArgsGetCacheItem{
+		argCache = utils.ArgsGetCacheItem{
 			CacheID: utils.CacheStatQueues,
 			ItemID:  arg.TenantID(),
 		}
@@ -125,7 +125,7 @@ func (apierV1 *ApierV1) RemoveStatQueueProfile(args *utils.TenantIDWithCache, re
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueueProfile
-	argCache := engine.ArgsGetCacheItem{
+	argCache := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheStatQueueProfiles,
 		ItemID:  args.TenantID(),
 	}
@@ -142,7 +142,7 @@ func (apierV1 *ApierV1) RemoveStatQueueProfile(args *utils.TenantIDWithCache, re
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for StatQueues
-	argCache = engine.ArgsGetCacheItem{
+	argCache = utils.ArgsGetCacheItem{
 		CacheID: utils.CacheStatQueues,
 		ItemID:  args.TenantID(),
 	}

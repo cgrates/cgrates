@@ -2361,7 +2361,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 	return
 }
 
-func (tpr *TpReader) ReloadCache(flush, verbose bool) (err error) {
+func (tpr *TpReader) ReloadCache(flush, verbose bool, argDispatcher *utils.ArgDispatcher) (err error) {
 	if tpr.cacheS == nil {
 		log.Print("Disabled automatic reload")
 		return
@@ -2390,31 +2390,34 @@ func (tpr *TpReader) ReloadCache(flush, verbose bool) (err error) {
 	aps, _ := tpr.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
 
 	//compose Reload Cache argument
-	cacheArgs := utils.AttrReloadCache{
-		ArgsCache: utils.ArgsCache{
-			DestinationIDs:        &dstIds,
-			ReverseDestinationIDs: &revDstIDs,
-			RatingPlanIDs:         &rplIds,
-			RatingProfileIDs:      &rpfIds,
-			ActionIDs:             &actIds,
-			ActionPlanIDs:         &aps,
-			AccountActionPlanIDs:  &aapIDs,
-			SharedGroupIDs:        &shgIds,
-			ResourceProfileIDs:    &rspIDs,
-			ResourceIDs:           &resIDs,
-			ActionTriggerIDs:      &aatIDs,
-			StatsQueueIDs:         &stqIDs,
-			StatsQueueProfileIDs:  &stqpIDs,
-			ThresholdIDs:          &trsIDs,
-			ThresholdProfileIDs:   &trspfIDs,
-			FilterIDs:             &flrIDs,
-			SupplierProfileIDs:    &spfIDs,
-			AttributeProfileIDs:   &apfIDs,
-			ChargerProfileIDs:     &chargerIDs,
-			DispatcherProfileIDs:  &dppIDs,
-			DispatcherHostIDs:     &dphIDs,
+	cacheArgs := utils.AttrReloadCacheWithArgDispatcher{
+		ArgDispatcher: argDispatcher,
+		AttrReloadCache: utils.AttrReloadCache{
+			ArgsCache: utils.ArgsCache{
+				DestinationIDs:        &dstIds,
+				ReverseDestinationIDs: &revDstIDs,
+				RatingPlanIDs:         &rplIds,
+				RatingProfileIDs:      &rpfIds,
+				ActionIDs:             &actIds,
+				ActionPlanIDs:         &aps,
+				AccountActionPlanIDs:  &aapIDs,
+				SharedGroupIDs:        &shgIds,
+				ResourceProfileIDs:    &rspIDs,
+				ResourceIDs:           &resIDs,
+				ActionTriggerIDs:      &aatIDs,
+				StatsQueueIDs:         &stqIDs,
+				StatsQueueProfileIDs:  &stqpIDs,
+				ThresholdIDs:          &trsIDs,
+				ThresholdProfileIDs:   &trspfIDs,
+				FilterIDs:             &flrIDs,
+				SupplierProfileIDs:    &spfIDs,
+				AttributeProfileIDs:   &apfIDs,
+				ChargerProfileIDs:     &chargerIDs,
+				DispatcherProfileIDs:  &dppIDs,
+				DispatcherHostIDs:     &dphIDs,
+			},
+			FlushAll: flush,
 		},
-		FlushAll: flush,
 	}
 
 	if verbose {
@@ -2466,7 +2469,11 @@ func (tpr *TpReader) ReloadCache(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Clearing indexes")
 	}
-	if err = tpr.cacheS.Call(utils.CacheSv1Clear, cacheIDs, &reply); err != nil {
+	clearArgs := &utils.AttrCacheIDsWithArgDispatcher{
+		ArgDispatcher: argDispatcher,
+		CacheIDs:      cacheIDs,
+	}
+	if err = tpr.cacheS.Call(utils.CacheSv1Clear, clearArgs, &reply); err != nil {
 		log.Printf("WARNING: Got error on cache clear: %s\n", err.Error())
 	}
 
@@ -2486,7 +2493,7 @@ func (tpr *TpReader) ReloadCache(flush, verbose bool) (err error) {
 	if err != nil {
 		return err
 	}
-	cacheLoadIDs := populateCacheLoadIDs(loadIDs, cacheArgs)
+	cacheLoadIDs := populateCacheLoadIDs(loadIDs, cacheArgs.AttrReloadCache)
 	for key, val := range cacheLoadIDs {
 		Cache.Set(utils.CacheLoadIDs, key, val, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
