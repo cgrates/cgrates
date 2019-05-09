@@ -24,7 +24,7 @@
 				{"tag": "NAPTRRegexp", "field_id": "Regexp", 
 					"type": "*constant", "value": "^.*$"},
 				{"tag": "NAPTRReplacement", "field_id": "Replacement", 
-					"type": "*variable", "value": "*cgrep.Attributes.CGREvent.Event.NAPTRAddress"},
+					"type": "*variable", "value": "~*cgrep.Attributes.NAPTRAddress"},
 			],
 		},
 	],

@@ -179,7 +179,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 	case utils.MetaDryRun:
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, CGREvent: %s",
-				utils.DiameterAgent, reqProcessor.ID, utils.ToJSON(cgrEv)))
+				utils.DNSAgent, reqProcessor.ID, utils.ToJSON(cgrEv)))
 	case utils.MetaAuth:
 		authArgs := sessions.NewV1AuthorizeArgs(
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),
@@ -276,13 +276,13 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 	}
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> LOG, Diameter reply: %s",
-				utils.DiameterAgent, agReq.Reply))
+			fmt.Sprintf("<%s> LOG, DNSAgent reply: %s",
+				utils.DNSAgent, agReq.Reply))
 	}
 	if reqType == utils.MetaDryRun {
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> DRY_RUN, Diameter reply: %s",
-				utils.DiameterAgent, agReq.Reply))
+			fmt.Sprintf("<%s> DRY_RUN, DNSAgent reply: %s",
+				utils.DNSAgent, agReq.Reply))
 	}
 	return true, nil
 }
