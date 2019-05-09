@@ -802,7 +802,7 @@ func (sS *SessionS) indexSession(s *Session, pSessions bool) {
 			if x, ok := engine.Cache.Get(utils.CacheSessionFilterIndexes, fieldValKey); ok && x != nil { // Attempt to find in cache first
 				itemIDs = x.(utils.StringMap)
 			}
-			itemIDs[s.CGRID] = true
+			itemIDs[utils.ConcatenatedKey(s.CGRID, sr.CD.RunID)] = true
 			engine.Cache.Set(utils.CacheSessionFilterIndexes, fieldValKey, itemIDs, nil,
 				true, utils.NonTransactional)
 			ssRIdx[s.CGRID] = append(ssRIdx[s.CGRID], &riFieldNameVal{fieldName: fieldName, fieldValue: fieldVal}) // reverse index
@@ -864,7 +864,7 @@ func (sS *SessionS) getIndexedFilters(tenant string, fltrs []string) (indexedFlt
 
 // getSessionIDsMatchingIndexes will check inside indexes if it can find sessionIDs matching all filters
 func (sS *SessionS) getSessionIDsMatchingIndexes(fltrs map[string][]string,
-	pSessions bool) []string {
+	pSessions bool) (cgrIDs []string, sessions map[string]utils.StringMap) {
 	itemIDPrefix := "act"
 	if pSessions {
 		itemIDPrefix = "psv"
@@ -884,6 +884,7 @@ func (sS *SessionS) getSessionIDsMatchingIndexes(fltrs map[string][]string,
 		return matchingSessionsbyValue
 	}
 	matchingSessions := make(utils.StringMap)
+	sessions = make(map[string]utils.StringMap)
 	checkNr := 0
 	for fieldName, values := range fltrs {
 		matchingSessionsbyValue := getMatchingIndexes(itemIDPrefix, fieldName, values)
@@ -898,10 +899,19 @@ func (sS *SessionS) getSessionIDsMatchingIndexes(fltrs map[string][]string,
 			}
 		}
 		if len(matchingSessions) == 0 {
-			return make([]string, 0)
+			return make([]string, 0), sessions
 		}
 	}
-	return matchingSessions.Slice()
+	matcingCGRIDs := make(utils.StringMap)
+	for key := range matchingSessions {
+		spl := utils.SplitConcatenatedKey(key)
+		if !matcingCGRIDs.HasKey(spl[0]) {
+			matcingCGRIDs[spl[0]] = true
+			sessions[spl[0]] = utils.NewStringMap()
+		}
+		sessions[spl[0]][spl[1]] = true
+	}
+	return matcingCGRIDs.Slice(), sessions
 }
 
 func (sS *SessionS) filterSessions(sf *utils.SessionFilter, psv bool) (aSs []*ActiveSession) {
@@ -919,7 +929,8 @@ func (sS *SessionS) filterSessions(sf *utils.SessionFilter, psv bool) (aSs []*Ac
 	}
 	tenant := utils.FirstNonEmpty(sf.Tenant, sS.cgrCfg.GeneralCfg().DefaultTenant)
 	indx, unindx := sS.getIndexedFilters(tenant, sf.Filters)
-	ss := sS.getSessionsFromCGRIDs(psv, sS.getSessionIDsMatchingIndexes(indx, psv)...)
+	cgrIDs, matchingSRuns := sS.getSessionIDsMatchingIndexes(indx, psv)
+	ss := sS.getSessionsFromCGRIDs(psv, cgrIDs...)
 	pass := func(filterRules []*engine.FilterRule,
 		me engine.MapEvent) (pass bool) {
 		pass = true
@@ -938,7 +949,11 @@ func (sS *SessionS) filterSessions(sf *utils.SessionFilter, psv bool) (aSs []*Ac
 	}
 	for _, s := range ss {
 		s.RLock()
+		runIDs := matchingSRuns[s.CGRID]
 		for _, sr := range s.SRuns {
+			if len(cgrIDs) != 0 && !runIDs.HasKey(sr.CD.RunID) {
+				continue
+			}
 			if pass(unindx, sr.Event) {
 				aSs = append(aSs,
 					s.asActiveSessions(sr, sS.cgrCfg.GeneralCfg().DefaultTimezone,
@@ -967,7 +982,8 @@ func (sS *SessionS) filterSessionsCount(sf *utils.SessionFilter, psv bool) (coun
 	}
 	tenant := utils.FirstNonEmpty(sf.Tenant, sS.cgrCfg.GeneralCfg().DefaultTenant)
 	indx, unindx := sS.getIndexedFilters(tenant, sf.Filters)
-	ss := sS.getSessionsFromCGRIDs(psv, sS.getSessionIDsMatchingIndexes(indx, psv)...)
+	cgrIDs, matchingSRuns := sS.getSessionIDsMatchingIndexes(indx, psv)
+	ss := sS.getSessionsFromCGRIDs(psv, cgrIDs...)
 	pass := func(filterRules []*engine.FilterRule,
 		me engine.MapEvent) (pass bool) {
 		pass = true
@@ -985,7 +1001,11 @@ func (sS *SessionS) filterSessionsCount(sf *utils.SessionFilter, psv bool) (coun
 	}
 	for _, s := range ss {
 		s.RLock()
+		runIDs := matchingSRuns[s.CGRID]
 		for _, sr := range s.SRuns {
+			if len(cgrIDs) != 0 && !runIDs.HasKey(sr.CD.RunID) {
+				continue
+			}
 			if pass(unindx, sr.Event) {
 				count += 1
 			}
