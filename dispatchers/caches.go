@@ -43,7 +43,7 @@ func (dS *DispatcherService) CacheSv1Ping(args *utils.CGREventWithArgDispatcher,
 }
 
 // GetItemIDs returns the IDs for cacheID with given prefix
-func (dS *DispatcherService) CacheSv1GetItemIDs(args *ArgsGetCacheItemIDsWithApiKey,
+func (dS *DispatcherService) CacheSv1GetItemIDs(args *utils.ArgsGetCacheItemIDsWithArgDispatcher,
 	reply *[]string) (err error) {
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.CacheSv1GetItemIDs,
@@ -57,7 +57,7 @@ func (dS *DispatcherService) CacheSv1GetItemIDs(args *ArgsGetCacheItemIDsWithApi
 }
 
 // HasItem verifies the existence of an Item in cache
-func (dS *DispatcherService) CacheSv1HasItem(args *ArgsGetCacheItemWithApiKey,
+func (dS *DispatcherService) CacheSv1HasItem(args *utils.ArgsGetCacheItemWithArgDispatcher,
 	reply *bool) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
@@ -74,7 +74,7 @@ func (dS *DispatcherService) CacheSv1HasItem(args *ArgsGetCacheItemWithApiKey,
 }
 
 // GetItemExpiryTime returns the expiryTime for an item
-func (dS *DispatcherService) CacheSv1GetItemExpiryTime(args *ArgsGetCacheItemWithApiKey,
+func (dS *DispatcherService) CacheSv1GetItemExpiryTime(args *utils.ArgsGetCacheItemWithArgDispatcher,
 	reply *time.Time) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
@@ -91,7 +91,7 @@ func (dS *DispatcherService) CacheSv1GetItemExpiryTime(args *ArgsGetCacheItemWit
 }
 
 // RemoveItem removes the Item with ID from cache
-func (dS *DispatcherService) CacheSv1RemoveItem(args *ArgsGetCacheItemWithApiKey,
+func (dS *DispatcherService) CacheSv1RemoveItem(args *utils.ArgsGetCacheItemWithArgDispatcher,
 	reply *string) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
@@ -108,7 +108,7 @@ func (dS *DispatcherService) CacheSv1RemoveItem(args *ArgsGetCacheItemWithApiKey
 }
 
 // Clear will clear partitions in the cache (nil fol all, empty slice for none)
-func (dS *DispatcherService) CacheSv1Clear(args *AttrCacheIDsWithApiKey,
+func (dS *DispatcherService) CacheSv1Clear(args *utils.AttrCacheIDsWithArgDispatcher,
 	reply *string) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
@@ -125,7 +125,7 @@ func (dS *DispatcherService) CacheSv1Clear(args *AttrCacheIDsWithApiKey,
 }
 
 // FlushCache wipes out cache for a prefix or completely
-func (dS *DispatcherService) CacheSv1FlushCache(args AttrReloadCacheWithApiKey, reply *string) (err error) {
+func (dS *DispatcherService) CacheSv1FlushCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
 	}
@@ -141,7 +141,7 @@ func (dS *DispatcherService) CacheSv1FlushCache(args AttrReloadCacheWithApiKey, 
 }
 
 // GetCacheStats returns CacheStats filtered by cacheIDs
-func (dS *DispatcherService) CacheSv1GetCacheStats(args *AttrCacheIDsWithApiKey,
+func (dS *DispatcherService) CacheSv1GetCacheStats(args *utils.AttrCacheIDsWithArgDispatcher,
 	reply *map[string]*ltcache.CacheStats) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
@@ -158,7 +158,7 @@ func (dS *DispatcherService) CacheSv1GetCacheStats(args *AttrCacheIDsWithApiKey,
 }
 
 // PrecacheStatus checks status of active precache processes
-func (dS *DispatcherService) CacheSv1PrecacheStatus(args *AttrCacheIDsWithApiKey, reply *map[string]string) (err error) {
+func (dS *DispatcherService) CacheSv1PrecacheStatus(args *utils.AttrCacheIDsWithArgDispatcher, reply *map[string]string) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
 	}
@@ -174,7 +174,7 @@ func (dS *DispatcherService) CacheSv1PrecacheStatus(args *AttrCacheIDsWithApiKey
 }
 
 // HasGroup checks existence of a group in cache
-func (dS *DispatcherService) CacheSv1HasGroup(args *ArgsGetGroupWithApiKey,
+func (dS *DispatcherService) CacheSv1HasGroup(args *utils.ArgsGetGroupWithArgDispatcher,
 	reply *bool) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
@@ -191,7 +191,7 @@ func (dS *DispatcherService) CacheSv1HasGroup(args *ArgsGetGroupWithApiKey,
 }
 
 // GetGroupItemIDs returns a list of itemIDs in a cache group
-func (dS *DispatcherService) CacheSv1GetGroupItemIDs(args *ArgsGetGroupWithApiKey,
+func (dS *DispatcherService) CacheSv1GetGroupItemIDs(args *utils.ArgsGetGroupWithArgDispatcher,
 	reply *[]string) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
@@ -208,7 +208,7 @@ func (dS *DispatcherService) CacheSv1GetGroupItemIDs(args *ArgsGetGroupWithApiKe
 }
 
 // RemoveGroup will remove a group and all items belonging to it from cache
-func (dS *DispatcherService) CacheSv1RemoveGroup(args *ArgsGetGroupWithApiKey,
+func (dS *DispatcherService) CacheSv1RemoveGroup(args *utils.ArgsGetGroupWithArgDispatcher,
 	reply *string) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
@@ -225,7 +225,7 @@ func (dS *DispatcherService) CacheSv1RemoveGroup(args *ArgsGetGroupWithApiKey,
 }
 
 // ReloadCache reloads cache from DB for a prefix or completely
-func (dS *DispatcherService) CacheSv1ReloadCache(args AttrReloadCacheWithApiKey, reply *string) (err error) {
+func (dS *DispatcherService) CacheSv1ReloadCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
 	}
@@ -241,7 +241,7 @@ func (dS *DispatcherService) CacheSv1ReloadCache(args AttrReloadCacheWithApiKey,
 }
 
 // LoadCache loads cache from DB for a prefix or completely
-func (dS *DispatcherService) CacheSv1LoadCache(args AttrReloadCacheWithApiKey, reply *string) (err error) {
+func (dS *DispatcherService) CacheSv1LoadCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
 	}

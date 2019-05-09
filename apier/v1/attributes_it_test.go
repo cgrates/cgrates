@@ -1219,7 +1219,7 @@ func testAttributeSCachingMetaNone(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply bool
-	argsCache := engine.ArgsGetCacheItem{
+	argsCache := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheAttributeProfiles,
 		ItemID:  "cgrates.org:ATTR_1",
 	}
@@ -1230,7 +1230,7 @@ func testAttributeSCachingMetaNone(t *testing.T) {
 	}
 
 	var rcvKeys []string
-	argsCache2 := engine.ArgsGetCacheItemIDs{
+	argsCache2 := utils.ArgsGetCacheItemIDs{
 		CacheID: utils.CacheAttributeProfiles,
 	}
 	if err := attrSRPC.Call(utils.CacheSv1GetItemIDs, argsCache2, &rcvKeys); err == nil ||
@@ -1278,7 +1278,7 @@ func testAttributeSCachingMetaLoad(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply bool
-	argsCache := engine.ArgsGetCacheItem{
+	argsCache := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheAttributeProfiles,
 		ItemID:  "cgrates.org:ATTR_1",
 	}
@@ -1290,7 +1290,7 @@ func testAttributeSCachingMetaLoad(t *testing.T) {
 
 	var rcvKeys []string
 	expectedIDs := []string{"cgrates.org:ATTR_1"}
-	argsCache2 := engine.ArgsGetCacheItemIDs{
+	argsCache2 := utils.ArgsGetCacheItemIDs{
 		CacheID: utils.CacheAttributeProfiles,
 	}
 	if err := attrSRPC.Call(utils.CacheSv1GetItemIDs, argsCache2, &rcvKeys); err != nil {
@@ -1317,7 +1317,7 @@ func testAttributeSCachingMetaLoad(t *testing.T) {
 		t.Error("Unexpected reply returned", resp)
 	}
 
-	argsCache = engine.ArgsGetCacheItem{
+	argsCache = utils.ArgsGetCacheItem{
 		CacheID: utils.CacheAttributeProfiles,
 		ItemID:  "cgrates.org:ATTR_1",
 	}
@@ -1370,7 +1370,7 @@ func testAttributeSCachingMetaReload1(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply bool
-	argsCache := engine.ArgsGetCacheItem{
+	argsCache := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheAttributeProfiles,
 		ItemID:  "cgrates.org:ATTR_1",
 	}
@@ -1381,7 +1381,7 @@ func testAttributeSCachingMetaReload1(t *testing.T) {
 	}
 
 	var rcvKeys []string
-	argsCache2 := engine.ArgsGetCacheItemIDs{
+	argsCache2 := utils.ArgsGetCacheItemIDs{
 		CacheID: utils.CacheAttributeProfiles,
 	}
 	if err := attrSRPC.Call(utils.CacheSv1GetItemIDs, argsCache2, &rcvKeys); err == nil ||
@@ -1508,7 +1508,7 @@ func testAttributeSCachingMetaRemove(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply bool
-	argsCache := engine.ArgsGetCacheItem{
+	argsCache := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheAttributeProfiles,
 		ItemID:  "cgrates.org:ATTR_1",
 	}
@@ -1520,7 +1520,7 @@ func testAttributeSCachingMetaRemove(t *testing.T) {
 
 	var rcvKeys []string
 	expectedIDs := []string{"cgrates.org:ATTR_1"}
-	argsCache2 := engine.ArgsGetCacheItemIDs{
+	argsCache2 := utils.ArgsGetCacheItemIDs{
 		CacheID: utils.CacheAttributeProfiles,
 	}
 	if err := attrSRPC.Call(utils.CacheSv1GetItemIDs, argsCache2, &rcvKeys); err != nil {

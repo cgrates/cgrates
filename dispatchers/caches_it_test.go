@@ -84,7 +84,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats[utils.CacheActions].Items = 1
 	expStats[utils.CacheDestinations].Items = 4
 	expStats[utils.CacheLoadIDs].Items = 17
-	args := AttrCacheIDsWithApiKey{
+	args := utils.AttrCacheIDsWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("chc12345"),
 		},
@@ -99,7 +99,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	}
 	reply := ""
 	// Simple test that command is executed without errors
-	if err := dispEngine.RCP.Call(utils.CacheSv1LoadCache, AttrReloadCacheWithApiKey{
+	if err := dispEngine.RCP.Call(utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("chc12345"),
 		},
@@ -169,7 +169,7 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.CacheLoadIDs:                 utils.MetaReady,
 	}
 
-	if err := dispEngine.RCP.Call(utils.CacheSv1PrecacheStatus, AttrCacheIDsWithApiKey{
+	if err := dispEngine.RCP.Call(utils.CacheSv1PrecacheStatus, utils.AttrCacheIDsWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("chc12345"),
 		},
@@ -186,8 +186,8 @@ func testDspChcPrecacheStatus(t *testing.T) {
 func testDspChcGetItemIDs(t *testing.T) {
 	var rcvKeys []string
 	expKeys := []string{"cgrates.org:DEFAULT"}
-	argsAPI := ArgsGetCacheItemIDsWithApiKey{
-		ArgsGetCacheItemIDs: engine.ArgsGetCacheItemIDs{
+	argsAPI := utils.ArgsGetCacheItemIDsWithArgDispatcher{
+		ArgsGetCacheItemIDs: utils.ArgsGetCacheItemIDs{
 			CacheID: utils.CacheChargerProfiles,
 		},
 		ArgDispatcher: &utils.ArgDispatcher{
@@ -208,8 +208,8 @@ func testDspChcGetItemIDs(t *testing.T) {
 func testDspChcHasItem(t *testing.T) {
 	var reply bool
 	expected := true
-	argsAPI := ArgsGetCacheItemWithApiKey{
-		ArgsGetCacheItem: engine.ArgsGetCacheItem{
+	argsAPI := utils.ArgsGetCacheItemWithArgDispatcher{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
 			CacheID: utils.CacheChargerProfiles,
 			ItemID:  "cgrates.org:DEFAULT",
 		},
@@ -230,8 +230,8 @@ func testDspChcHasItem(t *testing.T) {
 func testDspChcGetItemExpiryTime(t *testing.T) {
 	var reply time.Time
 	var expected time.Time
-	argsAPI := ArgsGetCacheItemWithApiKey{
-		ArgsGetCacheItem: engine.ArgsGetCacheItem{
+	argsAPI := utils.ArgsGetCacheItemWithArgDispatcher{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
 			CacheID: utils.CacheChargerProfiles,
 			ItemID:  "cgrates.org:DEFAULT",
 		},
@@ -251,7 +251,7 @@ func testDspChcGetItemExpiryTime(t *testing.T) {
 
 func testDspChcReloadCache(t *testing.T) {
 	reply := ""
-	if err := dispEngine.RCP.Call(utils.CacheSv1ReloadCache, AttrReloadCacheWithApiKey{
+	if err := dispEngine.RCP.Call(utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("chc12345"),
 		},
@@ -267,8 +267,8 @@ func testDspChcReloadCache(t *testing.T) {
 
 func testDspChcRemoveItem(t *testing.T) {
 	var reply bool
-	argsAPI := ArgsGetCacheItemWithApiKey{
-		ArgsGetCacheItem: engine.ArgsGetCacheItem{
+	argsAPI := utils.ArgsGetCacheItemWithArgDispatcher{
+		ArgsGetCacheItem: utils.ArgsGetCacheItem{
 			CacheID: utils.CacheChargerProfiles,
 			ItemID:  "cgrates.org:DEFAULT",
 		},
@@ -299,7 +299,7 @@ func testDspChcRemoveItem(t *testing.T) {
 
 func testDspChcClear(t *testing.T) {
 	reply := ""
-	if err := dispEngine.RCP.Call(utils.CacheSv1Clear, AttrCacheIDsWithApiKey{
+	if err := dispEngine.RCP.Call(utils.CacheSv1Clear, utils.AttrCacheIDsWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("chc12345"),
 		},
@@ -313,7 +313,7 @@ func testDspChcClear(t *testing.T) {
 	}
 	var rcvStats map[string]*ltcache.CacheStats
 	expStats := engine.GetDefaultEmptyCacheStats()
-	if err := dispEngine.RCP.Call(utils.CacheSv1GetCacheStats, AttrCacheIDsWithApiKey{
+	if err := dispEngine.RCP.Call(utils.CacheSv1GetCacheStats, utils.AttrCacheIDsWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("chc12345"),
 		},
@@ -329,7 +329,7 @@ func testDspChcClear(t *testing.T) {
 
 func testDspChcFlush(t *testing.T) {
 	reply := ""
-	if err := dispEngine.RCP.Call(utils.CacheSv1FlushCache, AttrReloadCacheWithApiKey{
+	if err := dispEngine.RCP.Call(utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("chc12345"),
 		},
@@ -346,7 +346,7 @@ func testDspChcFlush(t *testing.T) {
 	}
 	var rcvStats map[string]*ltcache.CacheStats
 	expStats := engine.GetDefaultEmptyCacheStats()
-	if err := dispEngine.RCP.Call(utils.CacheSv1GetCacheStats, AttrCacheIDsWithApiKey{
+	if err := dispEngine.RCP.Call(utils.CacheSv1GetCacheStats, utils.AttrCacheIDsWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("chc12345"),
 		},

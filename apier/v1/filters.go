@@ -43,7 +43,7 @@ func (apierV1 *ApierV1) SetFilter(arg *FilterWithCache, reply *string) error {
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Filter
-	argCache := engine.ArgsGetCacheItem{
+	argCache := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheFilters,
 		ItemID:  arg.TenantID(),
 	}
@@ -101,7 +101,7 @@ func (apierV1 *ApierV1) RemoveFilter(arg utils.TenantIDWithCache, reply *string)
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Filter
-	argCache := engine.ArgsGetCacheItem{
+	argCache := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheFilters,
 		ItemID:  arg.TenantID(),
 	}

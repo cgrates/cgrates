@@ -48,7 +48,7 @@ func (apierV2 *ApierV2) SetAttributeProfile(arg *AttributeWithCache, reply *stri
 		map[string]int64{utils.CacheAttributeProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	args := engine.ArgsGetCacheItem{
+	args := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheAttributeProfiles,
 		ItemID:  alsPrf.TenantID(),
 	}

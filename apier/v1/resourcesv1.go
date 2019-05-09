@@ -120,7 +120,7 @@ func (apierV1 *ApierV1) SetResourceProfile(arg *ResourceWithCache, reply *string
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ResourceProfile
-	argCache := engine.ArgsGetCacheItem{
+	argCache := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheResourceProfiles,
 		ItemID:  arg.TenantID(),
 	}
@@ -138,7 +138,7 @@ func (apierV1 *ApierV1) SetResourceProfile(arg *ResourceWithCache, reply *string
 			return utils.APIErrorHandler(err)
 		}
 		//handle caching for Resource
-		argCache = engine.ArgsGetCacheItem{
+		argCache = utils.ArgsGetCacheItem{
 			CacheID: utils.CacheResources,
 			ItemID:  arg.TenantID(),
 		}
@@ -160,7 +160,7 @@ func (apierV1 *ApierV1) RemoveResourceProfile(arg utils.TenantIDWithCache, reply
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ResourceProfile
-	argCache := engine.ArgsGetCacheItem{
+	argCache := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheResourceProfiles,
 		ItemID:  arg.TenantID(),
 	}
@@ -177,7 +177,7 @@ func (apierV1 *ApierV1) RemoveResourceProfile(arg utils.TenantIDWithCache, reply
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for Resource
-	argCache = engine.ArgsGetCacheItem{
+	argCache = utils.ArgsGetCacheItem{
 		CacheID: utils.CacheResources,
 		ItemID:  arg.TenantID(),
 	}

@@ -77,7 +77,7 @@ func (apierV1 *ApierV1) SetChargerProfile(arg *ChargerWithCache, reply *string) 
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ChargerProfile
-	argCache := engine.ArgsGetCacheItem{
+	argCache := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheChargerProfiles,
 		ItemID:  arg.TenantID(),
 	}
@@ -102,7 +102,7 @@ func (apierV1 *ApierV1) RemoveChargerProfile(arg utils.TenantIDWithCache, reply 
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for ChargerProfile
-	argCache := engine.ArgsGetCacheItem{
+	argCache := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheChargerProfiles,
 		ItemID:  arg.TenantID(),
 	}

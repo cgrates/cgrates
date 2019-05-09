@@ -148,12 +148,7 @@ func (chS *CacheS) Call(serviceMethod string, args interface{}, reply interface{
 	return utils.RPCCall(chS, serviceMethod, args, reply)
 }
 
-type ArgsGetCacheItemIDs struct {
-	CacheID      string
-	ItemIDPrefix string
-}
-
-func (chS *CacheS) V1GetItemIDs(args *ArgsGetCacheItemIDs,
+func (chS *CacheS) V1GetItemIDs(args *utils.ArgsGetCacheItemIDsWithArgDispatcher,
 	reply *[]string) (err error) {
 	itmIDs := Cache.GetItemIDs(args.CacheID, args.ItemIDPrefix)
 	if len(itmIDs) == 0 {
@@ -163,18 +158,13 @@ func (chS *CacheS) V1GetItemIDs(args *ArgsGetCacheItemIDs,
 	return
 }
 
-type ArgsGetCacheItem struct {
-	CacheID string
-	ItemID  string
-}
-
-func (chS *CacheS) V1HasItem(args *ArgsGetCacheItem,
+func (chS *CacheS) V1HasItem(args *utils.ArgsGetCacheItemWithArgDispatcher,
 	reply *bool) (err error) {
 	*reply = Cache.HasItem(args.CacheID, args.ItemID)
 	return
 }
 
-func (chS *CacheS) V1GetItemExpiryTime(args *ArgsGetCacheItem,
+func (chS *CacheS) V1GetItemExpiryTime(args *utils.ArgsGetCacheItemWithArgDispatcher,
 	reply *time.Time) (err error) {
 	expTime, has := Cache.GetItemExpiryTime(args.CacheID, args.ItemID)
 	if !has {
@@ -184,35 +174,35 @@ func (chS *CacheS) V1GetItemExpiryTime(args *ArgsGetCacheItem,
 	return
 }
 
-func (chS *CacheS) V1RemoveItem(args *ArgsGetCacheItem,
+func (chS *CacheS) V1RemoveItem(args *utils.ArgsGetCacheItemWithArgDispatcher,
 	reply *string) (err error) {
 	Cache.Remove(args.CacheID, args.ItemID, true, utils.NonTransactional)
 	*reply = utils.OK
 	return
 }
 
-func (chS *CacheS) V1Clear(cacheIDs []string,
+func (chS *CacheS) V1Clear(args *utils.AttrCacheIDsWithArgDispatcher,
 	reply *string) (err error) {
-	Cache.Clear(cacheIDs)
+	Cache.Clear(args.CacheIDs)
 	*reply = utils.OK
 	return
 }
 
-func (chS *CacheS) V1GetCacheStats(cacheIDs []string,
+func (chS *CacheS) V1GetCacheStats(args *utils.AttrCacheIDsWithArgDispatcher,
 	rply *map[string]*ltcache.CacheStats) (err error) {
-	cs := Cache.GetCacheStats(cacheIDs)
+	cs := Cache.GetCacheStats(args.CacheIDs)
 	*rply = cs
 	return
 }
 
-func (chS *CacheS) V1PrecacheStatus(cacheIDs []string, rply *map[string]string) (err error) {
-	if len(cacheIDs) == 0 {
+func (chS *CacheS) V1PrecacheStatus(args *utils.AttrCacheIDsWithArgDispatcher, rply *map[string]string) (err error) {
+	if len(args.CacheIDs) == 0 {
 		for cacheID := range precachedPartitions {
-			cacheIDs = append(cacheIDs, cacheID)
+			args.CacheIDs = append(args.CacheIDs, cacheID)
 		}
 	}
 	pCacheStatus := make(map[string]string)
-	for _, cacheID := range cacheIDs {
+	for _, cacheID := range args.CacheIDs {
 		if _, has := chS.pcItems[cacheID]; !has {
 			return fmt.Errorf("unknown cacheID: %s", cacheID)
 		}
@@ -227,18 +217,13 @@ func (chS *CacheS) V1PrecacheStatus(cacheIDs []string, rply *map[string]string) 
 	return
 }
 
-type ArgsGetGroup struct {
-	CacheID string
-	GroupID string
-}
-
-func (chS *CacheS) V1HasGroup(args *ArgsGetGroup,
+func (chS *CacheS) V1HasGroup(args *utils.ArgsGetGroupWithArgDispatcher,
 	rply *bool) (err error) {
 	*rply = Cache.HasGroup(args.CacheID, args.GroupID)
 	return
 }
 
-func (chS *CacheS) V1GetGroupItemIDs(args *ArgsGetGroup,
+func (chS *CacheS) V1GetGroupItemIDs(args *utils.ArgsGetGroupWithArgDispatcher,
 	rply *[]string) (err error) {
 	if has := Cache.HasGroup(args.CacheID, args.GroupID); !has {
 		return utils.ErrNotFound
@@ -247,7 +232,7 @@ func (chS *CacheS) V1GetGroupItemIDs(args *ArgsGetGroup,
 	return
 }
 
-func (chS *CacheS) V1RemoveGroup(args *ArgsGetGroup,
+func (chS *CacheS) V1RemoveGroup(args *utils.ArgsGetGroupWithArgDispatcher,
 	rply *string) (err error) {
 	Cache.RemoveGroup(args.CacheID, args.GroupID, true, utils.NonTransactional)
 	*rply = utils.OK
@@ -261,7 +246,7 @@ func (chS *CacheS) reloadCache(chID string, IDs *[]string) error {
 	return chS.dm.CacheDataFromDB(chID, *IDs, true)
 }
 
-func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCache, reply *string) (err error) {
+func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
 	if attrs.FlushAll {
 		Cache.Clear(nil)
 		return
@@ -356,7 +341,7 @@ func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCache, reply *string) (er
 	if err != nil {
 		return err
 	}
-	cacheLoadIDs := populateCacheLoadIDs(loadIDs, attrs)
+	cacheLoadIDs := populateCacheLoadIDs(loadIDs, attrs.AttrReloadCache)
 	for key, val := range cacheLoadIDs {
 		Cache.Set(utils.CacheLoadIDs, key, val, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
@@ -373,7 +358,7 @@ func toStringSlice(in *[]string) []string {
 	return *in
 }
 
-func (chS *CacheS) V1LoadCache(args utils.AttrReloadCache, reply *string) (err error) {
+func (chS *CacheS) V1LoadCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
 	if args.FlushAll {
 		Cache.Clear(nil)
 	}
@@ -407,7 +392,7 @@ func (chS *CacheS) V1LoadCache(args utils.AttrReloadCache, reply *string) (err e
 	if err != nil {
 		return err
 	}
-	cacheLoadIDs := populateCacheLoadIDs(loadIDs, args)
+	cacheLoadIDs := populateCacheLoadIDs(loadIDs, args.AttrReloadCache)
 	for key, val := range cacheLoadIDs {
 		Cache.Set(utils.CacheLoadIDs, key, val, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
@@ -427,7 +412,7 @@ func flushCache(chID string, IDs *[]string) {
 }
 
 // FlushCache wipes out cache for a prefix or completely
-func (chS *CacheS) V1FlushCache(args utils.AttrReloadCache, reply *string) (err error) {
+func (chS *CacheS) V1FlushCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
 	if args.FlushAll {
 		Cache.Clear(nil)
 		*reply = utils.OK
@@ -459,7 +444,7 @@ func (chS *CacheS) V1FlushCache(args utils.AttrReloadCache, reply *string) (err 
 	if err != nil {
 		return err
 	}
-	cacheLoadIDs := populateCacheLoadIDs(loadIDs, args)
+	cacheLoadIDs := populateCacheLoadIDs(loadIDs, args.AttrReloadCache)
 	for key, val := range cacheLoadIDs {
 		Cache.Set(utils.CacheLoadIDs, key, val, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)

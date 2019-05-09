@@ -104,19 +104,19 @@ type ResponderInterface interface {
 }
 
 type CacheSv1Interface interface {
-	GetItemIDs(args *dispatchers.ArgsGetCacheItemIDsWithApiKey, reply *[]string) error
-	HasItem(args *dispatchers.ArgsGetCacheItemWithApiKey, reply *bool) error
-	GetItemExpiryTime(args *dispatchers.ArgsGetCacheItemWithApiKey, reply *time.Time) error
-	RemoveItem(args *dispatchers.ArgsGetCacheItemWithApiKey, reply *string) error
-	Clear(cacheIDs *dispatchers.AttrCacheIDsWithApiKey, reply *string) error
-	FlushCache(args dispatchers.AttrReloadCacheWithApiKey, reply *string) error
-	GetCacheStats(cacheIDs *dispatchers.AttrCacheIDsWithApiKey, rply *map[string]*ltcache.CacheStats) error
-	PrecacheStatus(cacheIDs *dispatchers.AttrCacheIDsWithApiKey, rply *map[string]string) error
-	HasGroup(args *dispatchers.ArgsGetGroupWithApiKey, rply *bool) error
-	GetGroupItemIDs(args *dispatchers.ArgsGetGroupWithApiKey, rply *[]string) error
-	RemoveGroup(args *dispatchers.ArgsGetGroupWithApiKey, rply *string) error
-	ReloadCache(attrs dispatchers.AttrReloadCacheWithApiKey, reply *string) error
-	LoadCache(args dispatchers.AttrReloadCacheWithApiKey, reply *string) error
+	GetItemIDs(args *utils.ArgsGetCacheItemIDsWithArgDispatcher, reply *[]string) error
+	HasItem(args *utils.ArgsGetCacheItemWithArgDispatcher, reply *bool) error
+	GetItemExpiryTime(args *utils.ArgsGetCacheItemWithArgDispatcher, reply *time.Time) error
+	RemoveItem(args *utils.ArgsGetCacheItemWithArgDispatcher, reply *string) error
+	Clear(cacheIDs *utils.AttrCacheIDsWithArgDispatcher, reply *string) error
+	FlushCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) error
+	GetCacheStats(cacheIDs *utils.AttrCacheIDsWithArgDispatcher, rply *map[string]*ltcache.CacheStats) error
+	PrecacheStatus(cacheIDs *utils.AttrCacheIDsWithArgDispatcher, rply *map[string]string) error
+	HasGroup(args *utils.ArgsGetGroupWithArgDispatcher, rply *bool) error
+	GetGroupItemIDs(args *utils.ArgsGetGroupWithArgDispatcher, rply *[]string) error
+	RemoveGroup(args *utils.ArgsGetGroupWithArgDispatcher, rply *string) error
+	ReloadCache(attrs utils.AttrReloadCacheWithArgDispatcher, reply *string) error
+	LoadCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) error
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 }
 

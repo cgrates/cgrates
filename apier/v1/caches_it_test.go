@@ -221,7 +221,7 @@ func testCacheSReload(t *testing.T) {
 func testCacheSGetItemIDs(t *testing.T) {
 	var rcvKeys []string
 	var expKeys []string
-	argsAPI := engine.ArgsGetCacheItemIDs{
+	argsAPI := utils.ArgsGetCacheItemIDs{
 		CacheID:      utils.CacheThresholdProfiles,
 		ItemIDPrefix: "NotExistent",
 	}
@@ -230,7 +230,7 @@ func testCacheSGetItemIDs(t *testing.T) {
 	}
 
 	expKeys = []string{"cgrates.org:Threshold1"}
-	argsAPI = engine.ArgsGetCacheItemIDs{
+	argsAPI = utils.ArgsGetCacheItemIDs{
 		CacheID: utils.CacheThresholdProfiles,
 	}
 	if err := chcRPC.Call(utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
@@ -244,7 +244,7 @@ func testCacheSGetItemIDs(t *testing.T) {
 func testCacheSHasItem(t *testing.T) {
 	var reply bool
 	var expected bool
-	argsAPI := engine.ArgsGetCacheItem{
+	argsAPI := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheThresholdProfiles,
 		ItemID:  "NotExistent",
 	}
@@ -255,7 +255,7 @@ func testCacheSHasItem(t *testing.T) {
 	}
 
 	expected = true
-	argsAPI = engine.ArgsGetCacheItem{
+	argsAPI = utils.ArgsGetCacheItem{
 		CacheID: utils.CacheThresholdProfiles,
 		ItemID:  "cgrates.org:Threshold1",
 	}
@@ -269,7 +269,7 @@ func testCacheSHasItem(t *testing.T) {
 func testCacheSGetItemExpiryTime(t *testing.T) {
 	var reply time.Time
 	var expected time.Time
-	argsAPI := engine.ArgsGetCacheItem{
+	argsAPI := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheThresholdProfiles,
 		ItemID:  "NotExistent",
 	}
@@ -278,7 +278,7 @@ func testCacheSGetItemExpiryTime(t *testing.T) {
 	}
 
 	// expected = true
-	argsAPI = engine.ArgsGetCacheItem{
+	argsAPI = utils.ArgsGetCacheItem{
 		CacheID: utils.CacheThresholdProfiles,
 		ItemID:  "cgrates.org:Threshold1",
 	}
@@ -301,7 +301,7 @@ func testCacheSReloadCache(t *testing.T) {
 
 func testCacheSRemoveItem(t *testing.T) {
 	var reply bool
-	argsAPI := engine.ArgsGetCacheItem{
+	argsAPI := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheThresholdProfiles,
 		ItemID:  "cgrates.org:Threshold1",
 	}

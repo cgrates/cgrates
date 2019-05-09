@@ -96,6 +96,8 @@ var (
 	disableReverse = cgrLoaderFlags.Bool("disable_reverse_mappings", false, "Will disable reverse mappings rebuilding")
 	flushStorDB    = cgrLoaderFlags.Bool("flush_stordb", false, "Remove tariff plan data for id from the database")
 	remove         = cgrLoaderFlags.Bool("remove", false, "Will remove instead of adding data from DB")
+	apiKey         = cgrLoaderFlags.String("api_key", "", "Api Key used to comosed ArgDispatcher")
+	routeID        = cgrLoaderFlags.String("route_id", "", "RouteID used to comosed ArgDispatcher")
 
 	err        error
 	dm         *engine.DataManager
@@ -351,7 +353,10 @@ func main() {
 			log.Fatal("Could not write to database: ", err)
 		}
 		// reload cache
-		if err := tpReader.ReloadCache(*flush, *verbose); err != nil {
+		if err := tpReader.ReloadCache(*flush, *verbose, &utils.ArgDispatcher{
+			APIKey:  apiKey,
+			RouteID: routeID,
+		}); err != nil {
 			log.Fatal("Could not reload cache: ", err)
 		}
 	} else {

@@ -77,7 +77,7 @@ func (apierV1 *ApierV1) SetSupplierProfile(args *SupplierWithCache, reply *strin
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for SupplierProfile
-	argCache := engine.ArgsGetCacheItem{
+	argCache := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheSupplierProfiles,
 		ItemID:  args.TenantID(),
 	}
@@ -101,7 +101,7 @@ func (apierV1 *ApierV1) RemoveSupplierProfile(args *utils.TenantIDWithCache, rep
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for SupplierProfile
-	argCache := engine.ArgsGetCacheItem{
+	argCache := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheSupplierProfiles,
 		ItemID:  args.TenantID(),
 	}

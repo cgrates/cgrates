@@ -82,7 +82,7 @@ func (apierV1 *ApierV1) SetDispatcherProfile(args *DispatcherWithCache, reply *s
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
-	argCache := engine.ArgsGetCacheItem{
+	argCache := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheDispatcherProfiles,
 		ItemID:  args.TenantID(),
 	}
@@ -107,7 +107,7 @@ func (apierV1 *ApierV1) RemoveDispatcherProfile(arg *utils.TenantIDWithCache, re
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
-	argCache := engine.ArgsGetCacheItem{
+	argCache := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheDispatcherProfiles,
 		ItemID:  arg.TenantID(),
 	}
@@ -171,7 +171,7 @@ func (apierV1 *ApierV1) SetDispatcherHost(args *DispatcherHostWithCache, reply *
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
-	argCache := engine.ArgsGetCacheItem{
+	argCache := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheDispatcherHosts,
 		ItemID:  args.TenantID(),
 	}
@@ -196,7 +196,7 @@ func (apierV1 *ApierV1) RemoveDispatcherHost(arg *utils.TenantIDWithCache, reply
 		return utils.APIErrorHandler(err)
 	}
 	//handle caching for DispatcherProfile
-	argCache := engine.ArgsGetCacheItem{
+	argCache := utils.ArgsGetCacheItem{
 		CacheID: utils.CacheDispatcherHosts,
 		ItemID:  arg.TenantID(),
 	}
@@ -552,76 +552,76 @@ type DispatcherCacheSv1 struct {
 }
 
 // GetItemIDs returns the IDs for cacheID with given prefix
-func (dS *DispatcherCacheSv1) GetItemIDs(args *dispatchers.ArgsGetCacheItemIDsWithApiKey,
+func (dS *DispatcherCacheSv1) GetItemIDs(args *utils.ArgsGetCacheItemIDsWithArgDispatcher,
 	reply *[]string) error {
 	return dS.dS.CacheSv1GetItemIDs(args, reply)
 }
 
 // HasItem verifies the existence of an Item in cache
-func (dS *DispatcherCacheSv1) HasItem(args *dispatchers.ArgsGetCacheItemWithApiKey,
+func (dS *DispatcherCacheSv1) HasItem(args *utils.ArgsGetCacheItemWithArgDispatcher,
 	reply *bool) error {
 	return dS.dS.CacheSv1HasItem(args, reply)
 }
 
 // GetItemExpiryTime returns the expiryTime for an item
-func (dS *DispatcherCacheSv1) GetItemExpiryTime(args *dispatchers.ArgsGetCacheItemWithApiKey,
+func (dS *DispatcherCacheSv1) GetItemExpiryTime(args *utils.ArgsGetCacheItemWithArgDispatcher,
 	reply *time.Time) error {
 	return dS.dS.CacheSv1GetItemExpiryTime(args, reply)
 }
 
 // RemoveItem removes the Item with ID from cache
-func (dS *DispatcherCacheSv1) RemoveItem(args *dispatchers.ArgsGetCacheItemWithApiKey,
+func (dS *DispatcherCacheSv1) RemoveItem(args *utils.ArgsGetCacheItemWithArgDispatcher,
 	reply *string) error {
 	return dS.dS.CacheSv1RemoveItem(args, reply)
 }
 
 // Clear will clear partitions in the cache (nil fol all, empty slice for none)
-func (dS *DispatcherCacheSv1) Clear(args *dispatchers.AttrCacheIDsWithApiKey,
+func (dS *DispatcherCacheSv1) Clear(args *utils.AttrCacheIDsWithArgDispatcher,
 	reply *string) error {
 	return dS.dS.CacheSv1Clear(args, reply)
 }
 
 // FlushCache wipes out cache for a prefix or completely
-func (dS *DispatcherCacheSv1) FlushCache(args dispatchers.AttrReloadCacheWithApiKey, reply *string) (err error) {
+func (dS *DispatcherCacheSv1) FlushCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
 	return dS.dS.CacheSv1FlushCache(args, reply)
 }
 
 // GetCacheStats returns CacheStats filtered by cacheIDs
-func (dS *DispatcherCacheSv1) GetCacheStats(args *dispatchers.AttrCacheIDsWithApiKey,
+func (dS *DispatcherCacheSv1) GetCacheStats(args *utils.AttrCacheIDsWithArgDispatcher,
 	reply *map[string]*ltcache.CacheStats) error {
 	return dS.dS.CacheSv1GetCacheStats(args, reply)
 }
 
 // PrecacheStatus checks status of active precache processes
-func (dS *DispatcherCacheSv1) PrecacheStatus(args *dispatchers.AttrCacheIDsWithApiKey, reply *map[string]string) error {
+func (dS *DispatcherCacheSv1) PrecacheStatus(args *utils.AttrCacheIDsWithArgDispatcher, reply *map[string]string) error {
 	return dS.dS.CacheSv1PrecacheStatus(args, reply)
 }
 
 // HasGroup checks existence of a group in cache
-func (dS *DispatcherCacheSv1) HasGroup(args *dispatchers.ArgsGetGroupWithApiKey,
+func (dS *DispatcherCacheSv1) HasGroup(args *utils.ArgsGetGroupWithArgDispatcher,
 	reply *bool) (err error) {
 	return dS.dS.CacheSv1HasGroup(args, reply)
 }
 
 // GetGroupItemIDs returns a list of itemIDs in a cache group
-func (dS *DispatcherCacheSv1) GetGroupItemIDs(args *dispatchers.ArgsGetGroupWithApiKey,
+func (dS *DispatcherCacheSv1) GetGroupItemIDs(args *utils.ArgsGetGroupWithArgDispatcher,
 	reply *[]string) (err error) {
 	return dS.dS.CacheSv1GetGroupItemIDs(args, reply)
 }
 
 // RemoveGroup will remove a group and all items belonging to it from cache
-func (dS *DispatcherCacheSv1) RemoveGroup(args *dispatchers.ArgsGetGroupWithApiKey,
+func (dS *DispatcherCacheSv1) RemoveGroup(args *utils.ArgsGetGroupWithArgDispatcher,
 	reply *string) (err error) {
 	return dS.dS.CacheSv1RemoveGroup(args, reply)
 }
 
 // ReloadCache reloads cache from DB for a prefix or completely
-func (dS *DispatcherCacheSv1) ReloadCache(args dispatchers.AttrReloadCacheWithApiKey, reply *string) (err error) {
+func (dS *DispatcherCacheSv1) ReloadCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
 	return dS.dS.CacheSv1ReloadCache(args, reply)
 }
 
 // LoadCache loads cache from DB for a prefix or completely
-func (dS *DispatcherCacheSv1) LoadCache(args dispatchers.AttrReloadCacheWithApiKey, reply *string) (err error) {
+func (dS *DispatcherCacheSv1) LoadCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
 	return dS.dS.CacheSv1LoadCache(args, reply)
 }
 
