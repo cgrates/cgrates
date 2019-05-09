@@ -580,6 +580,8 @@ const (
 	Service                      = "Service"
 	MetaSuppliersLimit           = "*suppliers_limit"
 	MetaSuppliersOffset          = "*suppliers_offset"
+	ActiveSessionPrefix          = "act"
+	PasiveSessionPrefix          = "psv"
 )
 
 // Migrator Action

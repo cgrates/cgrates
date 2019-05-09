@@ -773,12 +773,12 @@ func (sS *SessionS) unregisterSession(cgrID string, passive bool) bool {
 // indexSession will index an active or passive Session based on configuration
 func (sS *SessionS) indexSession(s *Session, pSessions bool) {
 	idxMux := &sS.aSIMux // pointer to original mux since will have no effect if we copy it
-	itemIDPrefix := "act"
 	ssRIdx := sS.aSessionsRIdx
+	itemIDPrefix := utils.ActiveSessionPrefix
 	if pSessions {
 		idxMux = &sS.pSIMux
-		itemIDPrefix = "psv"
 		ssRIdx = sS.pSessionsRIdx
+		itemIDPrefix = utils.PasiveSessionPrefix
 	}
 	idxMux.Lock()
 	defer idxMux.Unlock()
@@ -815,12 +815,12 @@ func (sS *SessionS) indexSession(s *Session, pSessions bool) {
 // called on terminate or relocate
 func (sS *SessionS) unindexSession(cgrID string, pSessions bool) bool {
 	idxMux := &sS.aSIMux
-	itemIDPrefix := "act"
 	ssRIdx := sS.aSessionsRIdx
+	itemIDPrefix := utils.ActiveSessionPrefix
 	if pSessions {
 		idxMux = &sS.pSIMux
-		itemIDPrefix = "psv"
 		ssRIdx = sS.pSessionsRIdx
+		itemIDPrefix = utils.PasiveSessionPrefix
 	}
 	idxMux.Lock()
 	defer idxMux.Unlock()
@@ -829,7 +829,22 @@ func (sS *SessionS) unindexSession(cgrID string, pSessions bool) bool {
 	}
 	for _, riFNV := range ssRIdx[cgrID] {
 		fieldValKey := utils.ConcatenatedKey(itemIDPrefix, utils.MetaString, utils.DynamicDataPrefix+riFNV.fieldName, riFNV.fieldValue)
-		engine.Cache.Remove(utils.CacheSessionFilterIndexes, fieldValKey, true, utils.NonTransactional)
+		itemIDs := utils.NewStringMap()
+		if x, ok := engine.Cache.Get(utils.CacheSessionFilterIndexes, fieldValKey); ok && x != nil { // Attempt to find in cache first
+			itemIDs = x.(utils.StringMap)
+		}
+		for k := range itemIDs {
+			if strings.HasPrefix(k, cgrID) {
+				delete(itemIDs, k)
+			}
+		}
+		if len(itemIDs) == 0 {
+			engine.Cache.Remove(utils.CacheSessionFilterIndexes, fieldValKey, true, utils.NonTransactional)
+		} else {
+			engine.Cache.Set(utils.CacheSessionFilterIndexes, fieldValKey, itemIDs, nil,
+				true, utils.NonTransactional)
+		}
+
 	}
 	delete(ssRIdx, cgrID)
 	return true
@@ -865,9 +880,9 @@ func (sS *SessionS) getIndexedFilters(tenant string, fltrs []string) (indexedFlt
 // getSessionIDsMatchingIndexes will check inside indexes if it can find sessionIDs matching all filters
 func (sS *SessionS) getSessionIDsMatchingIndexes(fltrs map[string][]string,
 	pSessions bool) (cgrIDs []string, sessions map[string]utils.StringMap) {
-	itemIDPrefix := "act"
+	itemIDPrefix := utils.ActiveSessionPrefix
 	if pSessions {
-		itemIDPrefix = "psv"
+		itemIDPrefix = utils.PasiveSessionPrefix
 	}
 	getMatchingIndexes := func(itemIDPrefix, fieldName string, values []string) (matchingSessionsbyValue utils.StringMap) {
 		matchingSessionsbyValue = make(utils.StringMap)
