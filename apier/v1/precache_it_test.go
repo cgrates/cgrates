@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
@@ -113,10 +114,12 @@ func testPrecacheGetItemIDs(t *testing.T) {
 
 func testPrecacheGetCacheStatsBeforeLoad(t *testing.T) {
 	var reply *map[string]*ltcache.CacheStats
-	cacheIDs := []string{}
+	args := &dispatchers.AttrCacheIDsWithApiKey{
+		CacheIDs: []string{},
+	}
 	dfltStats := engine.GetDefaultEmptyCacheStats()
 	expectedStats := &dfltStats
-	if err := precacheRPC.Call(utils.CacheSv1GetCacheStats, cacheIDs, &reply); err != nil {
+	if err := precacheRPC.Call(utils.CacheSv1GetCacheStats, args, &reply); err != nil {
 		t.Error(err.Error())
 	} else if !reflect.DeepEqual(reply, expectedStats) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(reply))
@@ -145,7 +148,9 @@ func testPrecacheRestartEngine(t *testing.T) {
 
 func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 	var reply *map[string]*ltcache.CacheStats
-	cacheIDs := []string{}
+	args := &dispatchers.AttrCacheIDsWithApiKey{
+		CacheIDs: []string{},
+	}
 	expectedStats := &map[string]*ltcache.CacheStats{
 		utils.MetaDefault: {
 			Items:  0,
@@ -292,7 +297,7 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Groups: 0,
 		},
 	}
-	if err := precacheRPC.Call(utils.CacheSv1GetCacheStats, cacheIDs, &reply); err != nil {
+	if err := precacheRPC.Call(utils.CacheSv1GetCacheStats, args, &reply); err != nil {
 		t.Error(err.Error())
 	} else if !reflect.DeepEqual(reply, expectedStats) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(reply))

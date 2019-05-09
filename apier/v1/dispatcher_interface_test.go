@@ -66,7 +66,7 @@ func TestResponderInterface(t *testing.T) {
 
 func TestCacheSv1Interface(t *testing.T) {
 	_ = CacheSv1Interface(NewDispatcherCacheSv1(nil))
-	// _ = CacheSv1Interface(NewCacheSv1(nil))
+	_ = CacheSv1Interface(NewCacheSv1(nil))
 }
 
 func TestGuardianSv1Interface(t *testing.T) {
