@@ -90,6 +90,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		SRuns: []*SRun{
 			&SRun{
 				Event: sEv.AsMapInterface(),
+				CD:    &engine.CallDescriptor{},
 			},
 		},
 	}
@@ -157,6 +158,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		SRuns: []*SRun{
 			&SRun{
 				Event: sSEv2.AsMapInterface(),
+				CD:    &engine.CallDescriptor{},
 			},
 		},
 	}
@@ -175,6 +177,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		SRuns: []*SRun{
 			&SRun{
 				Event: sSEv3.AsMapInterface(),
+				CD:    &engine.CallDescriptor{},
 			},
 		},
 	}
@@ -398,6 +401,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		SRuns: []*SRun{
 			&SRun{
 				Event: sSEv.AsMapInterface(),
+				CD:    &engine.CallDescriptor{},
 			},
 		},
 	}
@@ -454,6 +458,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		SRuns: []*SRun{
 			&SRun{
 				Event: sSEv2.AsMapInterface(),
+				CD:    &engine.CallDescriptor{},
 			},
 		},
 	}
@@ -519,6 +524,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		SRuns: []*SRun{
 			&SRun{
 				Event: sSEv3.AsMapInterface(),
+				CD:    &engine.CallDescriptor{},
 			},
 		},
 	}
@@ -605,6 +611,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		SRuns: []*SRun{
 			&SRun{
 				Event: sSEv.AsMapInterface(),
+				CD:    &engine.CallDescriptor{},
 			},
 		},
 	}
@@ -664,6 +671,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		SRuns: []*SRun{
 			&SRun{
 				Event: sSEv2.AsMapInterface(),
+				CD:    &engine.CallDescriptor{},
 			},
 		},
 	}
@@ -729,6 +737,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		SRuns: []*SRun{
 			&SRun{
 				Event: sSEv3.AsMapInterface(),
+				CD:    &engine.CallDescriptor{},
 			},
 		},
 	}
@@ -1319,5 +1328,110 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher2(t *testing.T) {
 	rply = NewV1AuthorizeArgs(true, false, true, false, true, false, true, true, cgrEv, argDisp, utils.Paginator{})
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
+	}
+}
+
+func TestSessionSGetIndexedFilters(t *testing.T) {
+	sSCfg, _ := config.NewDefaultCGRConfig()
+	mpStr, _ := engine.NewMapStorage()
+	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.NewDataManager(mpStr), "UTC")
+	expIndx := map[string][]string{}
+	expUindx := []*engine.FilterRule{
+		&engine.FilterRule{
+			Type:      utils.MetaString,
+			FieldName: utils.DynamicDataPrefix + utils.ToR,
+			Values:    []string{utils.VOICE},
+		},
+	}
+	fltrs := []string{"*string:~ToR:*voice"}
+	if rplyindx, rplyUnindx := sS.getIndexedFilters("", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
+		t.Errorf("Expected %s , received: %s", utils.ToJSON(expIndx), utils.ToJSON(rplyindx))
+	} else if !reflect.DeepEqual(expUindx, rplyUnindx) {
+		t.Errorf("Expected %s , received: %s", utils.ToJSON(expUindx), utils.ToJSON(rplyUnindx))
+	}
+	sSCfg.SessionSCfg().SessionIndexes = utils.StringMap{
+		"ToR": true,
+	}
+	sS = NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.NewDataManager(mpStr), "UTC")
+	expIndx = map[string][]string{(utils.DynamicDataPrefix + utils.ToR): []string{utils.VOICE}}
+	expUindx = nil
+	if rplyindx, rplyUnindx := sS.getIndexedFilters("", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
+		t.Errorf("Expected %s , received: %s", utils.ToJSON(expIndx), utils.ToJSON(rplyindx))
+	} else if !reflect.DeepEqual(expUindx, rplyUnindx) {
+		t.Errorf("Expected %s , received: %s", utils.ToJSON(expUindx), utils.ToJSON(rplyUnindx))
+	}
+
+}
+
+func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
+	sSCfg, _ := config.NewDefaultCGRConfig()
+	sSCfg.SessionSCfg().SessionIndexes = utils.StringMap{
+		"ToR": true,
+	}
+	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
+	sEv := engine.NewSafEvent(map[string]interface{}{
+		utils.EVENT_NAME:       "TEST_EVENT",
+		utils.ToR:              "*voice",
+		utils.OriginID:         "12345",
+		utils.Direction:        "*out",
+		utils.Account:          "account1",
+		utils.Subject:          "subject1",
+		utils.Destination:      "+4986517174963",
+		utils.Category:         "call",
+		utils.Tenant:           "cgrates.org",
+		utils.RequestType:      "*prepaid",
+		utils.SetupTime:        "2015-11-09 14:21:24",
+		utils.AnswerTime:       "2015-11-09 14:22:02",
+		utils.Usage:            "1m23s",
+		utils.LastUsed:         "21s",
+		utils.PDD:              "300ms",
+		utils.SUPPLIER:         "supplier1",
+		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
+		utils.OriginHost:       "127.0.0.1",
+		"Extra1":               "Value1",
+		"Extra2":               5,
+		"Extra3":               "",
+	})
+	// Index first session
+	session := &Session{
+		CGRID:      GetSetCGRID(sEv),
+		EventStart: sEv,
+		SRuns: []*SRun{
+			&SRun{
+				Event: sEv.AsMapInterface(),
+				CD: &engine.CallDescriptor{
+					RunID: "RunID",
+				},
+			},
+		},
+	}
+	cgrID := GetSetCGRID(sEv)
+	sS.indexSession(session, false)
+	indx := map[string][]string{"~ToR": []string{utils.VOICE, utils.DATA}}
+	expCGRIDs := []string{cgrID}
+	expmatchingSRuns := map[string]utils.StringMap{cgrID: utils.StringMap{
+		"RunID": true,
+	}}
+	if cgrIDs, matchingSRuns := sS.getSessionIDsMatchingIndexes(indx, false); !reflect.DeepEqual(expCGRIDs, cgrIDs) {
+		t.Errorf("Expected %s , received: %s", utils.ToJSON(expCGRIDs), utils.ToJSON(cgrIDs))
+	} else if !reflect.DeepEqual(expmatchingSRuns, matchingSRuns) {
+		t.Errorf("Expected %s , received: %s", utils.ToJSON(expmatchingSRuns), utils.ToJSON(matchingSRuns))
+	}
+	sSCfg.SessionSCfg().SessionIndexes = utils.StringMap{
+		"ToR":    true,
+		"Extra3": true,
+	}
+	sS = NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
+	sS.indexSession(session, false)
+	indx = map[string][]string{
+		"~ToR":    []string{utils.VOICE, utils.DATA},
+		"~Extra2": []string{"55"},
+	}
+	expCGRIDs = []string{}
+	expmatchingSRuns = map[string]utils.StringMap{}
+	if cgrIDs, matchingSRuns := sS.getSessionIDsMatchingIndexes(indx, false); !reflect.DeepEqual(expCGRIDs, cgrIDs) {
+		t.Errorf("Expected %s , received: %s", utils.ToJSON(expCGRIDs), utils.ToJSON(cgrIDs))
+	} else if !reflect.DeepEqual(expmatchingSRuns, matchingSRuns) {
+		t.Errorf("Expected %s , received: %s", utils.ToJSON(expmatchingSRuns), utils.ToJSON(matchingSRuns))
 	}
 }
