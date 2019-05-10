@@ -261,6 +261,7 @@ func TestSessionsItTerminatePassive(t *testing.T) {
 			&SRun{
 				Event:      engine.NewMapEvent(sEv.AsMapInterface()),
 				TotalUsage: time.Minute,
+				CD:         &engine.CallDescriptor{},
 			},
 		},
 	}

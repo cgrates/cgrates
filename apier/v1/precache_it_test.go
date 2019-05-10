@@ -295,10 +295,6 @@ func testPrecacheGetCacheStatsAfterRestart(t *testing.T) {
 			Items:  0,
 			Groups: 0,
 		},
-		utils.CacheSessionFilterIndexes: {
-			Items:  0,
-			Groups: 0,
-		},
 	}
 	if err := precacheRPC.Call(utils.CacheSv1GetCacheStats, args, &reply); err != nil {
 		t.Error(err.Error())
