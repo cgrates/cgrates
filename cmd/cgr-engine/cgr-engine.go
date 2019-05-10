@@ -1316,7 +1316,8 @@ func initServiceManagerV1(internalServiceManagerChan chan rpcclient.RpcClientCon
 func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
-	internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan chan rpcclient.RpcClientConnection,
+	internalSMGChan, internalAnalyzerSChan,
+	internalDispatcherSChan, internalLoaderSChan chan rpcclient.RpcClientConnection,
 	exitChan chan bool) {
 	if !cfg.DispatcherSCfg().Enabled {
 		select { // Any of the rpc methods will unlock listening to rpc requests
@@ -1340,6 +1341,8 @@ func startRpc(server *utils.Server, internalRaterChan,
 			internalSuplSChan <- splS
 		case analyzerS := <-internalAnalyzerSChan:
 			internalAnalyzerSChan <- analyzerS
+		case loaderS := <-internalLoaderSChan:
+			internalLoaderSChan <- loaderS
 		}
 	} else {
 		select {
@@ -1809,7 +1812,7 @@ func main() {
 		internalRsChan, internalStatSChan,
 		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
 		internalSupplierSChan, internalSMGChan, internalAnalyzerSChan,
-		internalDispatcherSChan, exitChan)
+		internalDispatcherSChan, internalLoaderSChan, exitChan)
 	<-exitChan
 
 	if *cpuProfDir != "" { // wait to end cpuProfiling
