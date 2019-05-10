@@ -311,6 +311,12 @@ func TestParseTimeDetectLayout(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", expected, date)
 	}
 
+	date, err = ParseTimeDetectLayout("2014-11-25T00:00:00+01:00", "")
+	expected = time.Date(2014, 11, 24, 23, 0, 0, 0, time.UTC)
+	if err != nil || !date.UTC().Equal(expected.UTC()) {
+		t.Errorf("Expecting: %v, received: %v", expected.UTC(), date.UTC())
+	}
+
 }
 
 func TestRoundDuration(t *testing.T) {
