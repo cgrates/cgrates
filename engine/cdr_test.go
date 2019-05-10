@@ -723,6 +723,15 @@ func TestCDRAsExportRecord(t *testing.T) {
 			ID:     "AccountFromAccountSummary",
 		},
 	}
+	eventCost := NewEventCostFromCallCost(cc, "TestCDRTestCDRAsMapStringIface2", utils.META_DEFAULT)
+	eventCost.RatingFilters = RatingFilters{
+		"3d99c91": RatingMatchedFilters{
+			"DestinationID":     "CustomDestination",
+			"DestinationPrefix": "26377",
+			"RatingPlanID":      "RP_ZW_v1",
+		},
+	}
+
 	cdr := &CDR{
 		CGRID: utils.Sha1("dsafdsaf",
 			time.Unix(1383813745, 0).UTC().String()),
@@ -739,7 +748,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 		Usage:       time.Duration(10) * time.Second,
 		RunID:       utils.DEFAULT_RUNID, Cost: 1.01,
 		ExtraFields: map[string]string{"stop_time": "2014-06-11 19:19:00 +0000 UTC", "fieldextr2": "valextr2"},
-		CostDetails: NewEventCostFromCallCost(cc, "TestCDRTestCDRAsMapStringIface2", utils.META_DEFAULT),
+		CostDetails: eventCost,
 	}
 
 	prsr := config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+utils.Destination, true, utils.INFIELD_SEP)
@@ -831,6 +840,16 @@ func TestCDRAsExportRecord(t *testing.T) {
 	} else if expRecord[0] != cdr.CostDetails.AccountSummary.ID {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", cdr.CostDetails.AccountSummary.ID, expRecord)
 	}
+
+	//!!!Need to discuss about this case!!
+	// prsr = config.NewRSRParsersMustCompile("~CostDetails.RatingFilters.DestinationID", true, utils.INFIELD_SEP)
+	// cfgCdrFld = &config.FCTemplate{Tag: "DestinationID", Type: utils.META_COMPOSED,
+	// 	FieldId: "CustomDestinationID", Value: prsr}
+	// if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, 0, nil); err != nil {
+	// 	t.Error(err)
+	// } else if expRecord[0] != "CustomDestination" {
+	// 	t.Errorf("Expecting:\n%s\nReceived:\n%s", "CustomDestination", expRecord)
+	// }
 
 }
 
