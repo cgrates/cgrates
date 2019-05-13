@@ -104,6 +104,7 @@ type RalsJsonCfg struct {
 	Rp_subject_prefix_matching *bool
 	Remove_expired             *bool
 	Max_computed_usage         *map[string]string
+	Balance_rating_subject     *map[string]string
 }
 
 // Scheduler config section

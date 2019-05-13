@@ -174,6 +174,13 @@ const CGRATES_CFG_JSON = `
 		"*data": "107374182400",
 		"*sms": "10000"
 	},
+	"balance_rating_subject":{				// default rating subject in case that balance rating subject is empty
+		"*any": "*zero1ns",
+		"*voice": "*zero1s",
+		"*data": "*zero1ns",
+		"*sms": "*zero1ns",
+		"*monetary":"*zero1ns",
+	},
 },
 
 
