@@ -1714,7 +1714,7 @@ func (v1AuthReply *V1AuthorizeReply) AsNavigableMap(
 			cgrReply[utils.CapMaxUsage] = *v1AuthReply.MaxUsage
 		}
 		if v1AuthReply.Suppliers != nil {
-			cgrReply[utils.CapSuppliers] = v1AuthReply.Suppliers.Digest()
+			cgrReply[utils.CapSuppliers] = *v1AuthReply.Suppliers
 		}
 		if v1AuthReply.ThresholdIDs != nil {
 			cgrReply[utils.CapThresholds] = *v1AuthReply.ThresholdIDs
@@ -2602,6 +2602,9 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap(
 				}
 			}
 			cgrReply[utils.CapAttributes] = attrs
+		}
+		if v1Rply.Suppliers != nil {
+			cgrReply[utils.CapSuppliers] = *v1Rply.Suppliers
 		}
 	}
 	return config.NewNavigableMap(cgrReply), nil
