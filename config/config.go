@@ -142,6 +142,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.filterSCfg = new(FilterSCfg)
 	cfg.ralsCfg = new(RalsCfg)
 	cfg.ralsCfg.RALsMaxComputedUsage = make(map[string]time.Duration)
+	cfg.ralsCfg.RALsBalanceRatingSubject = make(map[string]string)
 	cfg.schedulerCfg = new(SchedulerCfg)
 	cfg.cdrsCfg = new(CdrsCfg)
 	cfg.CdreProfiles = make(map[string]*CdreCfg)

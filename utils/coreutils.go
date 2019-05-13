@@ -340,15 +340,10 @@ func MinDuration(d1, d2 time.Duration) time.Duration {
 // ParseZeroRatingSubject will parse the subject in the balance
 // returns duration if able to extract it from subject
 // returns error if not able to parse duration (ie: if ratingSubject is standard one)
-func ParseZeroRatingSubject(tor, rateSubj string) (time.Duration, error) {
+func ParseZeroRatingSubject(tor, rateSubj string, defaultRateSubj map[string]string) (time.Duration, error) {
 	rateSubj = strings.TrimSpace(rateSubj)
 	if rateSubj == "" || rateSubj == ANY {
-		switch tor {
-		case VOICE:
-			rateSubj = ZERO_RATING_SUBJECT_PREFIX + "1s"
-		default:
-			rateSubj = ZERO_RATING_SUBJECT_PREFIX + "1ns"
-		}
+		rateSubj = defaultRateSubj[tor]
 	}
 	if !strings.HasPrefix(rateSubj, ZERO_RATING_SUBJECT_PREFIX) {
 		return 0, errors.New("malformed rating subject: " + rateSubj)

@@ -474,6 +474,17 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 	if !reflect.DeepEqual(eMaxCU, cgrCfg.RalsCfg().RALsMaxComputedUsage) {
 		t.Errorf("Expecting: %+v , received: %+v", eMaxCU, cgrCfg.RalsCfg().RALsMaxComputedUsage)
 	}
+	eBalRatingSbj := map[string]string{
+		utils.ANY:      "*zero1ns",
+		utils.VOICE:    "*zero1s",
+		utils.DATA:     "*zero1ns",
+		utils.SMS:      "*zero1ns",
+		utils.MONETARY: "*zero1ns",
+		utils.GENERIC:  "*zero1ns",
+	}
+	if !reflect.DeepEqual(eBalRatingSbj, cgrCfg.RalsCfg().RALsBalanceRatingSubject) {
+		t.Errorf("Expecting: %+v , received: %+v", eBalRatingSbj, cgrCfg.RalsCfg().RALsBalanceRatingSubject)
+	}
 }
 
 func TestCgrCfgJSONDefaultsScheduler(t *testing.T) {

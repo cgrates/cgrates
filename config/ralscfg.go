@@ -26,12 +26,13 @@ import (
 
 // Rater config section
 type RalsCfg struct {
-	RALsEnabled             bool          // start standalone server (no balancer)
-	RALsThresholdSConns     []*RemoteHost // address where to reach ThresholdS config
-	RALsStatSConns          []*RemoteHost
-	RpSubjectPrefixMatching bool // enables prefix matching for the rating profile subject
-	RemoveExpired           bool
-	RALsMaxComputedUsage    map[string]time.Duration
+	RALsEnabled              bool          // start standalone server (no balancer)
+	RALsThresholdSConns      []*RemoteHost // address where to reach ThresholdS config
+	RALsStatSConns           []*RemoteHost
+	RpSubjectPrefixMatching  bool // enables prefix matching for the rating profile subject
+	RemoveExpired            bool
+	RALsMaxComputedUsage     map[string]time.Duration
+	RALsBalanceRatingSubject map[string]string
 }
 
 //loadFromJsonCfg loads Rals config from JsonCfg
@@ -67,6 +68,11 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 			if ralsCfg.RALsMaxComputedUsage[k], err = utils.ParseDurationWithNanosecs(v); err != nil {
 				return
 			}
+		}
+	}
+	if jsnRALsCfg.Balance_rating_subject != nil {
+		for k, v := range *jsnRALsCfg.Balance_rating_subject {
+			ralsCfg.RALsBalanceRatingSubject[k] = v
 		}
 	}
 
