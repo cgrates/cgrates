@@ -161,8 +161,8 @@ func sendInit() {
 
 func getCount() int {
 	var count int
-	if err := sBenchRPC.Call(utils.SessionSv1GetActiveSessionsCount, map[string]interface{}{
-		"Filters": map[string]string{utils.ToR: utils.VOICE},
+	if err := sBenchRPC.Call(utils.SessionSv1GetActiveSessionsCount, utils.SessionFilter{
+		Filters: []string{"*string:~ToR:*voice"},
 	}, &count); err != nil {
 		log.Fatal(err)
 	}
@@ -183,7 +183,7 @@ func BenchmarkSendInitSession(b *testing.B) {
 	}
 }
 
-func BenchmarkSendInitSessionx10(b *testing.B) {
+func benchmarkSendInitSessionx10(b *testing.B) {
 	connOnce.Do(func() {
 		startRPC()
 		loadTP()
