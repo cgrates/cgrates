@@ -1007,7 +1007,7 @@ func TestSessionSV1AuthorizeReplyAsNavigableMap(t *testing.T) {
 		utils.CapAttributes:         map[string]interface{}{"OfficeGroup": "Marketing"},
 		utils.CapResourceAllocation: "ResGr1",
 		utils.CapMaxUsage:           5 * time.Minute,
-		utils.CapSuppliers:          splrs.Digest(),
+		utils.CapSuppliers:          *splrs,
 		utils.CapThresholds:         *thIDs,
 		utils.CapStatQueues:         *statIDs,
 	})
