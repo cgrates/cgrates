@@ -841,15 +841,15 @@ func TestCDRAsExportRecord(t *testing.T) {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", cdr.CostDetails.AccountSummary.ID, expRecord)
 	}
 
-	//!!!Need to discuss about this case!!
-	// prsr = config.NewRSRParsersMustCompile("~CostDetails.RatingFilters.DestinationID", true, utils.INFIELD_SEP)
-	// cfgCdrFld = &config.FCTemplate{Tag: "DestinationID", Type: utils.META_COMPOSED,
-	// 	FieldId: "CustomDestinationID", Value: prsr}
-	// if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, 0, nil); err != nil {
-	// 	t.Error(err)
-	// } else if expRecord[0] != "CustomDestination" {
-	// 	t.Errorf("Expecting:\n%s\nReceived:\n%s", "CustomDestination", expRecord)
-	// }
+	expected := `{"3d99c91":{"DestinationID":"CustomDestination","DestinationPrefix":"26377","RatingPlanID":"RP_ZW_v1"}}`
+	prsr = config.NewRSRParsersMustCompile("~CostDetails.RatingFilters", true, utils.INFIELD_SEP)
+	cfgCdrFld = &config.FCTemplate{Tag: "DestinationID", Type: utils.META_COMPOSED,
+		FieldId: "CustomDestinationID", Value: prsr}
+	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, 0, nil); err != nil {
+		t.Error(err)
+	} else if expRecord[0] != expected {
+		t.Errorf("Expecting: <%q>,\n Received: <%q>", expected, expRecord[0])
+	}
 
 }
 
