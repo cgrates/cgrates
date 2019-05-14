@@ -480,7 +480,6 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 		utils.DATA:     "*zero1ns",
 		utils.SMS:      "*zero1ns",
 		utils.MONETARY: "*zero1ns",
-		utils.GENERIC:  "*zero1ns",
 	}
 	if !reflect.DeepEqual(eBalRatingSbj, cgrCfg.RalsCfg().RALsBalanceRatingSubject) {
 		t.Errorf("Expecting: %+v , received: %+v", eBalRatingSbj, cgrCfg.RalsCfg().RALsBalanceRatingSubject)
