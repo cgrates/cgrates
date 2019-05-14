@@ -180,6 +180,7 @@ const CGRATES_CFG_JSON = `
 		"*data": "*zero1ns",
 		"*sms": "*zero1ns",
 		"*monetary":"*zero1ns",
+		"*generic":"*zero1ns",
 	},
 },
 
