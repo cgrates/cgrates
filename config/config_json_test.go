@@ -245,6 +245,7 @@ func TestDfRalsJsonCfg(t *testing.T) {
 			utils.DATA:     "*zero1ns",
 			utils.SMS:      "*zero1ns",
 			utils.MONETARY: "*zero1ns",
+			utils.GENERIC:  "*zero1ns",
 		},
 	}
 	if cfg, err := dfCgrJsonCfg.RalsJsonCfg(); err != nil {
