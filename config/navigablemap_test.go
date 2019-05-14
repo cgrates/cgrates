@@ -19,6 +19,7 @@ package config
 
 import (
 	"encoding/xml"
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -871,5 +872,187 @@ func TestNavMapMerge(t *testing.T) {
 	nM.Merge(nM2)
 	if !reflect.DeepEqual(nM2, nM) {
 		t.Errorf("expecting: %+v, received: %+v", nM2, nM)
+	}
+}
+
+func TestNavMapGetIndex(t *testing.T) {
+	nM := NewNavigableMap(nil)
+	var expIndx *int
+	var expPath string
+	var path string = "Fld1"
+	expPath = path
+	if rplyPath, rplyIndx := nM.getIndex(path); rplyPath != expPath && rplyIndx != expIndx {
+		t.Errorf("Expected: path=%s ,indx=%v, received: path=%s ,indx=%v", expPath, expIndx, rplyPath, rplyIndx)
+	}
+
+	path = "slice[5]"
+	expPath = "slice"
+	expIndx = utils.IntPointer(5)
+	if rplyPath, rplyIndx := nM.getIndex(path); rplyPath != expPath && rplyIndx != expIndx {
+		t.Errorf("Expected: path=%s ,indx=%v, received: path=%s ,indx=%v", expPath, expIndx, rplyPath, rplyIndx)
+	}
+
+	path = "slice[~cgreq.Count]"
+	expPath = "slice"
+	expIndx = nil
+	if rplyPath, rplyIndx := nM.getIndex(path); rplyPath != expPath && rplyIndx != expIndx {
+		t.Errorf("Expected: path=%s ,indx=%v, received: path=%s ,indx=%v", expPath, expIndx, rplyPath, rplyIndx)
+	}
+}
+
+func TestNavMapGetNextMap(t *testing.T) {
+	nM := NewNavigableMap(nil)
+	mp := map[string]interface{}{
+		"field1": 10,
+		"field2": []string{"val1", "val2"},
+		"field3": []int{1, 2, 3},
+		"map1":   map[string]interface{}{"field1": 100000},
+		"map2":   []map[string]interface{}{map[string]interface{}{"field2": 11}},
+		"map3":   []NavigableMap{NavigableMap{data: map[string]interface{}{"field4": 112}}},
+	}
+	path := "map4"
+	if _, err := nM.getNextMap(mp, path); err != nil && err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected error: %s , received error %v", utils.ErrNotFound.Error(), err)
+	}
+	path = "map2[10]"
+	if _, err := nM.getNextMap(mp, path); err != nil && err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected error: %s , received error %v", utils.ErrNotFound.Error(), err)
+	}
+	path = "field1"
+	experr := fmt.Errorf("cannot cast field: <%+v> type: %T with path: <%s> to map[string]interface{}",
+		mp[path], mp[path], path)
+	if _, err := nM.getNextMap(mp, path); err != nil && err.Error() != experr.Error() {
+		t.Errorf("Expected error: %s , received error %v", experr.Error(), err)
+	}
+	path = "map1"
+	expMap := map[string]interface{}{"field1": 100000}
+	if rm, err := nM.getNextMap(mp, path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rm, expMap) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expMap), utils.ToJSON(rm))
+	}
+	path = "map2[0]"
+	expMap = map[string]interface{}{"field2": 11}
+	if rm, err := nM.getNextMap(mp, path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rm, expMap) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expMap), utils.ToJSON(rm))
+	}
+	path = "map3[0]"
+	expMap = map[string]interface{}{"field4": 112}
+	if rm, err := nM.getNextMap(mp, path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rm, expMap) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(expMap), utils.ToJSON(rm))
+	}
+}
+
+func TestNavMapgetLastItem(t *testing.T) {
+	nM := NewNavigableMap(nil)
+	mp := map[string]interface{}{
+		"field1": 10,
+		"field2": []string{"val1", "val2"},
+		"field3": []int{1, 2, 3},
+		"map1":   map[string]interface{}{"field1": 100000},
+		"map2":   []map[string]interface{}{map[string]interface{}{"field2": 11}},
+		"map3":   []NavigableMap{NavigableMap{data: map[string]interface{}{"field4": 112}}},
+	}
+	path := "map4"
+	if _, err := nM.getLastItem(mp, path); err != nil && err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected error: %s , received error %v", utils.ErrNotFound.Error(), err)
+	}
+	path = "map2[10]"
+	if _, err := nM.getLastItem(mp, path); err != nil && err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expected error: %s , received error %v", utils.ErrNotFound.Error(), err)
+	}
+	path = "field1"
+	var expVal interface{} = 10
+	if rplyVal, err := nM.getLastItem(mp, path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expVal, rplyVal) {
+		t.Errorf("Expected: %v ,received: %v", expVal, rplyVal)
+	}
+
+	path = "field2[1]"
+	expVal = "val2"
+	if rplyVal, err := nM.getLastItem(mp, path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expVal, rplyVal) {
+		t.Errorf("Expected: %v ,received: %v", expVal, rplyVal)
+	}
+	path = "field3[2]"
+	expVal = 3
+	if rplyVal, err := nM.getLastItem(mp, path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expVal, rplyVal) {
+		t.Errorf("Expected: %v ,received: %v", expVal, rplyVal)
+	}
+	path = "field2"
+	expVal = []string{"val1", "val2"}
+	if rplyVal, err := nM.getLastItem(mp, path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expVal, rplyVal) {
+		t.Errorf("Expected: %v ,received: %v", expVal, rplyVal)
+	}
+}
+
+func TestNavMapFieldAsInterface(t *testing.T) {
+	nM := &NavigableMap{
+		data: map[string]interface{}{
+			"FirstLevel": map[string]interface{}{
+				"SecondLevel": []map[string]interface{}{
+					map[string]interface{}{
+						"ThirdLevel": map[string]interface{}{
+							"Fld1": "Val1",
+						},
+					},
+					map[string]interface{}{
+						"Count": 10,
+						"ThirdLevel2": map[string]interface{}{
+							"Fld2": []string{"Val1", "Val2", "Val3"},
+						},
+					},
+				},
+			},
+			"AnotherFirstLevel": "ValAnotherFirstLevel",
+		},
+	}
+
+	path := []string{"FirstLevel", "SecondLevel[0]", "Count"}
+	expErr := utils.ErrNotFound
+	var eVal interface{} = nil
+	if _, err := nM.FieldAsInterface(path); err != nil && err.Error() != expErr.Error() {
+		t.Errorf("Expected error: %s, received error: %v", expErr.Error(), err)
+	}
+
+	path = []string{"AnotherFirstLevel", "SecondLevel", "Count"}
+	expErr = fmt.Errorf("cannot cast field: <%+v> type: %T with path: <%s> to map[string]interface{}",
+		nM.data["AnotherFirstLevel"], nM.data["AnotherFirstLevel"], "AnotherFirstLevel")
+	if _, err := nM.FieldAsInterface(path); err != nil && err.Error() != expErr.Error() {
+		t.Errorf("Expected error: %s, received error: %v", expErr.Error(), err)
+	}
+
+	path = []string{"FirstLevel", "SecondLevel[1]", "Count"}
+	eVal = 10
+	if rplyVal, err := nM.FieldAsInterface(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eVal, rplyVal) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(eVal), utils.ToJSON(rplyVal))
+	}
+
+	path = []string{"FirstLevel", "SecondLevel[1]", "ThirdLevel2", "Fld2"}
+	eVal = []string{"Val1", "Val2", "Val3"}
+	if rplyVal, err := nM.FieldAsInterface(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eVal, rplyVal) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(eVal), utils.ToJSON(rplyVal))
+	}
+
+	path = []string{"FirstLevel", "SecondLevel[1]", "ThirdLevel2", "Fld2[2]"}
+	eVal = "Val3"
+	if rplyVal, err := nM.FieldAsInterface(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eVal, rplyVal) {
+		t.Errorf("Expected: %s , received: %s", utils.ToJSON(eVal), utils.ToJSON(rplyVal))
 	}
 }

@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -101,52 +102,123 @@ func (nM *NavigableMap) FieldAsInterface(fldPath []string) (fldVal interface{}, 
 		return nil, errors.New("empty field path")
 	}
 	lastMp := nM.data // last map when layered
-	var canCast bool
 	for i, spath := range fldPath {
 		if i == lenPath-1 { // lastElement
-			var idx *int
-			if idxStart := strings.Index(spath, utils.IdxStart); idxStart != -1 &&
-				strings.HasSuffix(spath, utils.IdxEnd) {
-				slctr := spath[idxStart+1 : len(spath)-1]
-				if !strings.HasPrefix(slctr, utils.DynamicDataPrefix) {
-					if idxVal, err := strconv.Atoi(slctr); err != nil {
-						return nil, err
-					} else {
-						idx = utils.IntPointer(idxVal)
-					}
-				}
-				spath = spath[:idxStart] // ignore the selector for now since it is processed in other places
-			}
-			var has bool
-			fldVal, has = lastMp[spath]
-			if !has {
-				return nil, utils.ErrNotFound
-			}
-			if valItms, isItms := fldVal.([]*NMItem); isItms && idx != nil {
-				if *idx >= len(valItms) {
-					return nil, fmt.Errorf("selector index %d out of range", *idx)
-				}
-				fldVal = valItms[*idx].Data
-			}
+			return nM.getLastItem(lastMp, spath)
+		}
+		if lastMp, err = nM.getNextMap(lastMp, spath); err != nil {
 			return
-		}
-		elmnt, has := lastMp[spath]
-		if !has {
-			return nil, utils.ErrNotFound
-		}
-		lastMp, canCast = elmnt.(map[string]interface{})
-		if !canCast {
-			lastMpNM, canCast := elmnt.(*NavigableMap) // attempt to cast into NavigableMap
-			if !canCast {
-				err = fmt.Errorf("cannot cast field: <%+v> type: %T with path: <%s> to map[string]interface{}",
-					elmnt, elmnt, spath)
-				return
-			}
-			lastMp = lastMpNM.data
 		}
 	}
 	err = errors.New("end of function")
 	return
+}
+
+// getLastItem returns the item from the map
+// checking if it needs to return the item or an element of him if the item is a slice
+func (nM *NavigableMap) getLastItem(mp map[string]interface{}, spath string) (val interface{}, err error) {
+	var idx *int
+	spath, idx = nM.getIndex(spath)
+	var has bool
+	val, has = mp[spath]
+	if !has {
+		return nil, utils.ErrNotFound
+	}
+	if idx == nil {
+		return val, nil
+	}
+	switch vt := val.(type) {
+	case []string:
+		if *idx > len(vt) {
+			return nil, utils.ErrNotFound
+			// return nil, fmt.Errorf("selector index %d out of range", *idx)
+		}
+		return vt[*idx], nil
+	case []*NMItem:
+		if *idx > len(vt) {
+			return nil, utils.ErrNotFound
+			// return nil, fmt.Errorf("selector index %d out of range", *idx)
+		}
+		return vt[*idx].Data, nil
+	default:
+	}
+	// only if all above fails use reflect:
+	vr := reflect.ValueOf(val)
+	if vr.Kind() == reflect.Ptr {
+		vr = vr.Elem()
+	}
+	if vr.Kind() != reflect.Slice && vr.Kind() != reflect.Array {
+		return nil, utils.ErrNotFound
+		// return nil, fmt.Errorf("selector index used on non slice type(%T)", val)
+	}
+	if *idx > vr.Len() {
+		return nil, utils.ErrNotFound
+		// return nil, fmt.Errorf("selector index %d out of range", *idx)
+	}
+	return vr.Index(*idx).Interface(), nil
+}
+
+// getNextMap returns the next map from the given map
+// used only for path parsing
+func (nM *NavigableMap) getNextMap(mp map[string]interface{}, spath string) (map[string]interface{}, error) {
+	var idx *int
+	spath, idx = nM.getIndex(spath)
+	mi, has := mp[spath]
+	if !has {
+		return nil, utils.ErrNotFound
+	}
+	if idx == nil {
+		switch mv := mi.(type) {
+		case map[string]interface{}:
+			return mv, nil
+		case *map[string]interface{}:
+			return *mv, nil
+		case NavigableMap:
+			return mv.data, nil
+		case *NavigableMap:
+			return mv.data, nil
+		default:
+		}
+	} else {
+		switch mv := mi.(type) {
+		case []map[string]interface{}:
+			if *idx < len(mv) {
+				return mv[*idx], nil
+			}
+		case []NavigableMap:
+			if *idx < len(mv) {
+				return mv[*idx].data, nil
+			}
+		case []*NavigableMap:
+			if *idx < len(mv) {
+				return mv[*idx].data, nil
+			}
+		default:
+		}
+		return nil, utils.ErrNotFound // xml compatible
+	}
+	return nil, fmt.Errorf("cannot cast field: <%+v> type: %T with path: <%s> to map[string]interface{}",
+		mi, mi, spath)
+}
+
+// getIndex returns the path and index if index present
+// path[index]=>path,index
+// path=>path,nil
+func (nM *NavigableMap) getIndex(spath string) (opath string, idx *int) {
+	idxStart := strings.Index(spath, utils.IdxStart)
+	if idxStart == -1 || !strings.HasSuffix(spath, utils.IdxEnd) {
+		return spath, nil
+	}
+	slctr := spath[idxStart+1 : len(spath)-1]
+	opath = spath[:idxStart]
+	if strings.HasPrefix(slctr, utils.DynamicDataPrefix) {
+		return
+	}
+	idxVal, err := strconv.Atoi(slctr)
+	if err != nil {
+		return spath, nil
+	}
+	return opath, &idxVal
 }
 
 // FieldAsString returns the field value as string for the path specified
