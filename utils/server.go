@@ -52,8 +52,13 @@ type Server struct {
 	httpEnabled bool
 	birpcSrv    *rpc2.Server
 	sync.RWMutex
-	httpsMux *http.ServeMux
-	httpMux  *http.ServeMux
+	httpsMux     *http.ServeMux
+	httpMux      *http.ServeMux
+	isDispatched bool
+}
+
+func (s *Server) SetDispatched() {
+	s.isDispatched = true
 }
 
 func (s *Server) RpcRegister(rcvr interface{}) {
@@ -156,7 +161,12 @@ func (s *Server) ServeJSON(addr string) {
 			continue
 		}
 		//utils.Logger.Info(fmt.Sprintf("<CGRServer> New incoming connection: %v", conn.RemoteAddr()))
-		go jsonrpc.ServeConn(conn)
+		if s.isDispatched {
+			go rpc.ServeCodec(NewCustomJSONServerCodec(conn))
+		} else {
+			go jsonrpc.ServeConn(conn)
+		}
+
 	}
 
 }
