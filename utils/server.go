@@ -262,7 +262,11 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 		s.Unlock()
 		Logger.Info("<HTTP> enabling handler for WebSocket connections")
 		wsHandler := websocket.Handler(func(ws *websocket.Conn) {
-			jsonrpc.ServeConn(ws)
+			if s.isDispatched {
+				rpc.ServeCodec(NewCustomJSONServerCodec(ws))
+			} else {
+				jsonrpc.ServeConn(ws)
+			}
 		})
 		if useBasicAuth {
 			s.httpMux.HandleFunc(wsRPCURL, use(func(w http.ResponseWriter, r *http.Request) {
@@ -458,7 +462,11 @@ func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey, caCert string,
 			}
 			continue
 		}
-		go jsonrpc.ServeConn(conn)
+		if s.isDispatched {
+			go rpc.ServeCodec(NewCustomJSONServerCodec(conn))
+		} else {
+			go jsonrpc.ServeConn(conn)
+		}
 	}
 }
 

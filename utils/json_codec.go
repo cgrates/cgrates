@@ -53,7 +53,7 @@ type jsonServerCodec struct {
 	pending map[uint64]*json.RawMessage
 }
 
-// NewServerCodec returns a new rpc.ServerCodec using JSON-RPC on conn.
+// NewCustomJSONServerCodec is used only when DispatcherS is active to handle APIer methods generically
 func NewCustomJSONServerCodec(conn io.ReadWriteCloser) rpc.ServerCodec {
 	return &jsonServerCodec{
 		dec:     json.NewDecoder(conn),
@@ -64,9 +64,10 @@ func NewCustomJSONServerCodec(conn io.ReadWriteCloser) rpc.ServerCodec {
 }
 
 type serverRequest struct {
-	Method string           `json:"method"`
-	Params *json.RawMessage `json:"params"`
-	Id     *json.RawMessage `json:"id"`
+	Method  string           `json:"method"`
+	Params  *json.RawMessage `json:"params"`
+	Id      *json.RawMessage `json:"id"`
+	isApier bool
 }
 
 func (r *serverRequest) reset() {
@@ -88,8 +89,8 @@ func (c *jsonServerCodec) ReadRequestHeader(r *rpc.Request) error {
 	}
 	// in case we get a request with ApierV1 or ApierV2 we redirect
 	// to Dispatcher to send it according to ArgDispatcher
-	if strings.HasPrefix(c.req.Method, "ApierV") {
-		r.ServiceMethod = DispatcherSv1SwitchApierVRequest
+	if c.req.isApier = strings.HasPrefix(c.req.Method, ApierV); c.req.isApier {
+		r.ServiceMethod = DispatcherSv1Apier
 	} else {
 		r.ServiceMethod = c.req.Method
 	}
@@ -116,7 +117,7 @@ func (c *jsonServerCodec) ReadRequestBody(x interface{}) error {
 	}
 	// following example from ReadRequestHeader in case we get ApierV1
 	// or ApierV2 we compose the parameters
-	if strings.HasPrefix(c.req.Method, "ApierV") {
+	if c.req.isApier {
 		cx := x.(*MethodParameters)
 		cx.Method = c.req.Method
 		var params [1]interface{}

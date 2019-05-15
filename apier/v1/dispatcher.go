@@ -687,6 +687,10 @@ func (dSv1 DispatcherSv1) GetProfileForEvent(ev *dispatchers.DispatcherEvent,
 	return dSv1.dS.V1GetProfileForEvent(ev, dPrfl)
 }
 
+func (dSv1 DispatcherSv1) Apier(args *utils.MethodParameters, reply *interface{}) (err error) {
+	return dSv1.dS.V1Apier(new(ApierV1), args, reply)
+}
+
 func NewDispatcherSCDRsV1(dps *dispatchers.DispatcherService) *DispatcherSCDRsV1 {
 	return &DispatcherSCDRsV1{dS: dps}
 }
