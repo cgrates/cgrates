@@ -1202,6 +1202,8 @@ func startDispatcherService(internalDispatcherSChan, internalAttributeSChan chan
 		return
 	}()
 
+	server.SetDispatched()
+
 	server.RpcRegister(v1.NewDispatcherSv1(dspS))
 
 	server.RpcRegisterName(utils.ThresholdSv1,

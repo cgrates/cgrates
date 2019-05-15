@@ -582,6 +582,8 @@ const (
 	MetaSuppliersOffset          = "*suppliers_offset"
 	ActiveSessionPrefix          = "act"
 	PasiveSessionPrefix          = "psv"
+	ApierV                       = "ApierV"
+	MetaApier                    = "*apier"
 )
 
 // Migrator Action
@@ -713,6 +715,7 @@ const (
 	ChargerSv1     = "ChargerSv1"
 	MetaAuth       = "*auth"
 	APIKey         = "APIKey"
+	RouteID        = "RouteID"
 	APIMethods     = "APIMethods"
 	APIMethod      = "APIMethod"
 	NestingSep     = "."
@@ -886,9 +889,9 @@ const (
 
 // DispatcherS APIs
 const (
-	DispatcherSv1Ping                = "DispatcherSv1.Ping"
-	DispatcherSv1GetProfileForEvent  = "DispatcherSv1.GetProfileForEvent"
-	DispatcherSv1SwitchApierVRequest = "DispatcherSv1.SwitchApierVRequest"
+	DispatcherSv1Ping               = "DispatcherSv1.Ping"
+	DispatcherSv1GetProfileForEvent = "DispatcherSv1.GetProfileForEvent"
+	DispatcherSv1Apier              = "DispatcherSv1.Apier"
 )
 
 // AnalyzerS APIs
