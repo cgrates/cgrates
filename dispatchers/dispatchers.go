@@ -205,15 +205,15 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 	var argD *utils.ArgDispatcher
 	//check if we have APIKey in event and in case it has add it in ArgDispatcher
 	apiKeyIface, hasApiKey := parameters[utils.APIKey]
-	if hasApiKey {
+	if hasApiKey && apiKeyIface != nil {
 		argD = &utils.ArgDispatcher{
 			APIKey: utils.StringPointer(apiKeyIface.(string)),
 		}
 	}
 	//check if we have RouteID in event and in case it has add it in ArgDispatcher
 	routeIDIface, hasRouteID := parameters[utils.RouteID]
-	if hasRouteID {
-		if !hasApiKey { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
+	if hasRouteID && routeIDIface != nil {
+		if !hasApiKey || apiKeyIface == nil { //in case we don't have APIKey, but we have RouteID we need to initialize the struct
 			argD = &utils.ArgDispatcher{
 				RouteID: utils.StringPointer(routeIDIface.(string)),
 			}

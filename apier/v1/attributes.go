@@ -26,7 +26,7 @@ import (
 )
 
 // GetAttributeProfile returns an Attribute Profile
-func (apierV1 *ApierV1) GetAttributeProfile(arg utils.TenantID, reply *engine.AttributeProfile) error {
+func (apierV1 *ApierV1) GetAttributeProfile(arg utils.TenantIDWithArgDispatcher, reply *engine.AttributeProfile) error {
 	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -65,6 +65,7 @@ func (apierV1 *ApierV1) GetAttributeProfileIDs(args utils.TenantArgWithPaginator
 type AttributeWithCache struct {
 	*engine.AttributeProfile
 	Cache *string
+	*utils.ArgDispatcher
 }
 
 //SetAttributeProfile add/update a new Attribute Profile
