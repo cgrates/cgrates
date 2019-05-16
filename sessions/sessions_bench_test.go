@@ -46,7 +46,7 @@ var (
 func startRPC() {
 	var err error
 	sBenchCfg, err = config.NewCGRConfigFromPath(
-		path.Join(config.CgrConfig().DataFolderPath, "conf", "samples", "tutmysql"))
+		path.Join(config.CgrConfig().DataFolderPath, "conf", "samples", "tutmongo"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -181,6 +181,50 @@ func BenchmarkSendInitSession(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_ = getCount()
 	}
+}
+
+func BenchmarkEncodingJSON(b *testing.B) {
+	maxCps = make(chan struct{}, *cps)
+	for i := 0; i < *cps; i++ { // init CPS limitation
+		maxCps <- struct{}{}
+	}
+	var err error
+	sBenchCfg, err = config.NewCGRConfigFromPath(
+		path.Join(config.CgrConfig().DataFolderPath, "conf", "samples", "tutmongo"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if sBenchRPC, err = jsonrpc.Dial("tcp", sBenchCfg.ListenCfg().RPCJSONListen); err != nil {
+		log.Fatalf("Error at dialing rcp client:%v\n", err)
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		initSession(i)
+	}
+
+}
+
+func BenchmarkEncodingGOB(b *testing.B) {
+	maxCps = make(chan struct{}, *cps)
+	for i := 0; i < *cps; i++ { // init CPS limitation
+		maxCps <- struct{}{}
+	}
+	var err error
+	sBenchCfg, err = config.NewCGRConfigFromPath(
+		path.Join(config.CgrConfig().DataFolderPath, "conf", "samples", "tutmongo"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if sBenchRPC, err = rpc.Dial("tcp", sBenchCfg.ListenCfg().RPCGOBListen); err != nil {
+		log.Fatalf("Error at dialing rcp client:%v\n", err)
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		initSession(i)
+	}
+
 }
 
 func benchmarkSendInitSessionx10(b *testing.B) {

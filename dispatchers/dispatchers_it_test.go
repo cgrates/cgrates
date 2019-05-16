@@ -107,7 +107,8 @@ func testDspApierGetAttributes(t *testing.T) {
 	if err := dispEngine.RCP.Call("ApierV1.GetAttributeProfile",
 		utils.TenantIDWithArgDispatcher{
 			TenantID:      &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_Dispatcher"},
-			ArgDispatcher: &utils.ArgDispatcher{APIKey: utils.StringPointer("apier12345")}}, &reply); err != nil {
+			ArgDispatcher: &utils.ArgDispatcher{APIKey: utils.StringPointer("apier12345")},
+		}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -119,12 +120,11 @@ func testDspApierGetAttributes(t *testing.T) {
 
 func testDspApierUnkownAPiKey(t *testing.T) {
 	var reply *engine.AttributeProfile
-
 	if err := dispEngine.RCP.Call("ApierV1.GetAttributeProfile",
 		utils.TenantIDWithArgDispatcher{
 			TenantID:      &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_Dispatcher"},
-			ArgDispatcher: &utils.ArgDispatcher{APIKey: utils.StringPointer("RandomApiKey")}}, &reply); err == nil || err.Error() != utils.ErrUnknownApiKey.Error() {
+			ArgDispatcher: &utils.ArgDispatcher{APIKey: utils.StringPointer("RandomApiKey")},
+		}, &reply); err == nil || err.Error() != utils.ErrUnknownApiKey.Error() {
 		t.Fatal(err)
 	}
-
 }
