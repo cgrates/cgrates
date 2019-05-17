@@ -231,8 +231,9 @@ func (dS *DispatcherService) CacheSv1ReloadCache(args utils.AttrReloadCacheWithA
 		tnt = args.TenantArg.Tenant
 	}
 	var routeID *string
-	if args.RouteID != nil {
-		routeID = args.RouteID
+	if args.ArgDispatcher != nil &&
+		args.ArgDispatcher.RouteID != nil {
+		routeID = args.ArgDispatcher.RouteID
 	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
