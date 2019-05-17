@@ -226,17 +226,24 @@ func (dS *DispatcherService) CacheSv1RemoveGroup(args *utils.ArgsGetGroupWithArg
 
 // ReloadCache reloads cache from DB for a prefix or completely
 func (dS *DispatcherService) CacheSv1ReloadCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.TenantArg.Tenant != "" {
+		tnt = args.TenantArg.Tenant
+	}
+	var routeID *string
+	if args.RouteID != nil {
+		routeID = args.RouteID
 	}
 	if dS.attrS != nil {
-		if err = dS.authorize(utils.CacheSv1ReloadCache,
-			args.TenantArg.Tenant,
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
+		if err = dS.authorize(utils.CacheSv1ReloadCache, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCaches, args.RouteID,
+	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
 		utils.CacheSv1ReloadCache, args.AttrReloadCache, reply)
 }
 
