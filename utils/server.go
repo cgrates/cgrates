@@ -52,8 +52,13 @@ type Server struct {
 	httpEnabled bool
 	birpcSrv    *rpc2.Server
 	sync.RWMutex
-	httpsMux *http.ServeMux
-	httpMux  *http.ServeMux
+	httpsMux     *http.ServeMux
+	httpMux      *http.ServeMux
+	isDispatched bool
+}
+
+func (s *Server) SetDispatched() {
+	s.isDispatched = true
 }
 
 func (s *Server) RpcRegister(rcvr interface{}) {
@@ -156,7 +161,12 @@ func (s *Server) ServeJSON(addr string) {
 			continue
 		}
 		//utils.Logger.Info(fmt.Sprintf("<CGRServer> New incoming connection: %v", conn.RemoteAddr()))
-		go jsonrpc.ServeConn(conn)
+		if s.isDispatched {
+			go rpc.ServeCodec(NewCustomJSONServerCodec(conn))
+		} else {
+			go jsonrpc.ServeConn(conn)
+		}
+
 	}
 
 }
@@ -252,7 +262,11 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 		s.Unlock()
 		Logger.Info("<HTTP> enabling handler for WebSocket connections")
 		wsHandler := websocket.Handler(func(ws *websocket.Conn) {
-			jsonrpc.ServeConn(ws)
+			if s.isDispatched {
+				rpc.ServeCodec(NewCustomJSONServerCodec(ws))
+			} else {
+				jsonrpc.ServeConn(ws)
+			}
 		})
 		if useBasicAuth {
 			s.httpMux.HandleFunc(wsRPCURL, use(func(w http.ResponseWriter, r *http.Request) {
@@ -448,7 +462,11 @@ func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey, caCert string,
 			}
 			continue
 		}
-		go jsonrpc.ServeConn(conn)
+		if s.isDispatched {
+			go rpc.ServeCodec(NewCustomJSONServerCodec(conn))
+		} else {
+			go jsonrpc.ServeConn(conn)
+		}
 	}
 }
 
@@ -479,7 +497,11 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 		s.Unlock()
 		Logger.Info("<HTTPTLS> enabling handler for WebSocket connections")
 		wsHandler := websocket.Handler(func(ws *websocket.Conn) {
-			jsonrpc.ServeConn(ws)
+			if s.isDispatched {
+				rpc.ServeCodec(NewCustomJSONServerCodec(ws))
+			} else {
+				jsonrpc.ServeConn(ws)
+			}
 		})
 		if useBasicAuth {
 			s.httpsMux.HandleFunc(wsRPCURL, use(func(w http.ResponseWriter, r *http.Request) {

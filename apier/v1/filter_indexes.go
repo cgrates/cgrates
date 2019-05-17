@@ -450,7 +450,7 @@ func (self *ApierV1) computeAttributeIndexes(tenant, context string, attrIDs *[]
 		if err != nil {
 			return nil, err
 		}
-		if !utils.IsSliceMember(ap.Contexts, context) {
+		if !utils.IsSliceMember(ap.Contexts, context) && context != utils.META_ANY {
 			continue
 		}
 		fltrIDs := make([]string, len(ap.FilterIDs))
@@ -784,7 +784,7 @@ func (self *ApierV1) computeDispatcherIndexes(tenant, context string, dspIDs *[]
 		if err != nil {
 			return nil, err
 		}
-		if !utils.IsSliceMember(dsp.Subsystems, context) {
+		if !utils.IsSliceMember(dsp.Subsystems, context) && context != utils.META_ANY {
 			continue
 		}
 		fltrIDs := make([]string, len(dsp.FilterIDs))

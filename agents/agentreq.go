@@ -66,9 +66,9 @@ func newAgentRequest(req config.DataProvider,
 type AgentRequest struct {
 	Request    config.DataProvider  // request
 	Vars       *config.NavigableMap // shared data
-	CGRRequest *config.NavigableMap
+	CGRRequest *config.NavigableMap // Used in reply to acced the request that was send
 	CGRReply   *config.NavigableMap
-	CGRAReq    *config.NavigableMap // active request
+	CGRAReq    *config.NavigableMap // Used to acces live build in request; both available as active request and active reply
 	Reply      *config.NavigableMap
 	tenant,
 	timezone string

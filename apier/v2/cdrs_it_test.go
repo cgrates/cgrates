@@ -23,9 +23,11 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
+	"reflect"
 	"testing"
 	"time"
 
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -49,6 +51,7 @@ var sTestsCDRsIT = []func(t *testing.T){
 	testV2CDRsRateCDRs,
 	testV2CDRsGetCdrs2,
 	testV2CDRsUsageNegative,
+	testV2CDRsDifferentTenants,
 	testV2CDRsKillEngine,
 }
 
@@ -338,6 +341,129 @@ func testV2CDRsUsageNegative(t *testing.T) {
 		if cdrs[0].Usage != "0s" {
 			t.Errorf("Unexpected usage for CDR: %s", cdrs[0].Usage)
 		}
+	}
+}
+
+func testV2CDRsDifferentTenants(t *testing.T) {
+	//add an attribute
+	alsPrf := &v1.AttributeWithCache{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    "cgrates.com",
+			ID:        "ATTR_Tenant",
+			Contexts:  []string{utils.META_ANY},
+			FilterIDs: []string{"*string:~Tenant:cgrates.com"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.Attribute{
+				{
+					FieldName: utils.MetaTenant,
+					Type:      utils.META_CONSTANT,
+					Value: config.RSRParsers{
+						&config.RSRParser{
+							Rules:           "CustomTenant",
+							AllFiltersMatch: true,
+						},
+					},
+				},
+				{
+					FieldName: utils.Tenant,
+					Type:      utils.META_CONSTANT,
+					Value: config.RSRParsers{
+						&config.RSRParser{
+							Rules:           "CustomTenant",
+							AllFiltersMatch: true,
+						},
+					},
+				},
+			},
+			Blocker: false,
+			Weight:  10,
+		},
+		Cache: utils.StringPointer(utils.MetaReload),
+	}
+	alsPrf.Compile()
+	var result string
+	if err := cdrsRpc.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var reply *engine.AttributeProfile
+	if err := cdrsRpc.Call("ApierV1.GetAttributeProfile",
+		&utils.TenantID{Tenant: "cgrates.com", ID: "ATTR_Tenant"}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	reply.Compile()
+	if !reflect.DeepEqual(alsPrf.AttributeProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
+	}
+	//add a charger
+	chargerProfile := &v1.ChargerWithCache{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant: "CustomTenant",
+			ID:     "CustomCharger",
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			RunID:        "CustomRunID",
+			AttributeIDs: []string{"*none"},
+			Weight:       20,
+		},
+		Cache: utils.StringPointer(utils.MetaReload),
+	}
+	if err := cdrsRpc.Call("ApierV1.SetChargerProfile", chargerProfile, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var reply2 *engine.ChargerProfile
+	if err := cdrsRpc.Call("ApierV1.GetChargerProfile",
+		&utils.TenantID{Tenant: "CustomTenant", ID: "CustomCharger"}, &reply2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, reply2) {
+		t.Errorf("Expecting : %+v, received: %+v", chargerProfile.ChargerProfile, reply2)
+	}
+
+	argsCdr := &engine.ArgV1ProcessEvent{
+		AttributeS: utils.BoolPointer(true),
+		ChargerS:   utils.BoolPointer(true),
+		StatS:      utils.BoolPointer(false),
+		ThresholdS: utils.BoolPointer(false),
+		Store:      utils.BoolPointer(true),
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.com",
+			Event: map[string]interface{}{
+				utils.OriginID:    "testV2CDRsDifferentTenants",
+				utils.OriginHost:  "192.168.1.1",
+				utils.Source:      "testV2CDRsDifferentTenants",
+				utils.RequestType: utils.META_RATED,
+				utils.Category:    "call",
+				utils.Account:     "testV2CDRsDifferentTenants",
+				utils.Destination: "+4986517174963",
+				utils.Tenant:      "cgrates.com",
+				utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:       time.Duration(1) * time.Second,
+				"field_extr1":     "val_extr1",
+				"fieldextr2":      "valextr2",
+			},
+		},
+	}
+	var reply3 string
+	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, argsCdr, &reply3); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply3 != utils.OK {
+		t.Error("Unexpected reply received: ", reply3)
+	}
+	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+
+	var cdrs []*engine.ExternalCDR
+	args := utils.RPCCDRsFilter{Tenants: []string{"CustomTenant"}}
+	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 2 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	}
 }
 

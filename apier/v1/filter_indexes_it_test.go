@@ -78,6 +78,7 @@ var sTestsFilterIndexesSV1 = []func(t *testing.T){
 	testV1FIdxComputeAttributeProfileIndexes,
 	testV1FIdxSetSecondAttributeProfileIndexes,
 	testV1FIdxSecondComputeAttributeProfileIndexes,
+	testV1FIdxComputeWithAnotherContext,
 	testV1FIdxRemoveAttributeProfile,
 
 	testV1FIdxdxInitDataDb,
@@ -1430,6 +1431,41 @@ func testV1FIdxSecondComputeAttributeProfileIndexes(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v",
 			expectedIDX, utils.ToJSON(indexes))
 	}
+}
+
+func testV1FIdxComputeWithAnotherContext(t *testing.T) {
+	var result string
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes,
+		utils.ArgsComputeFilterIndexes{
+			Tenant:        tenant,
+			Context:       utils.META_ANY,
+			ThresholdIDs:  &emptySlice,
+			AttributeIDs:  nil,
+			ResourceIDs:   &emptySlice,
+			StatIDs:       &emptySlice,
+			SupplierIDs:   &emptySlice,
+			ChargerIDs:    &emptySlice,
+			DispatcherIDs: &emptySlice,
+		}, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Errorf("Error: %+v", result)
+	}
+	expectedIDX := []string{"*string:~Account:1001:ApierTest", "*string:~Account:1001:ApierTest2"}
+	revExpectedIDX := []string{"*string:~Account:1001:ApierTest2", "*string:~Account:1001:ApierTest"}
+	var indexes []string
+	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
+		ItemType:   utils.MetaAttributes,
+		Tenant:     tenant,
+		FilterType: engine.MetaString,
+		Context:    utils.META_ANY}, &indexes); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(expectedIDX, indexes) && !reflect.DeepEqual(revExpectedIDX, indexes) {
+		t.Errorf("Expecting: %+v or %+v, received: %+v",
+			expectedIDX, revExpectedIDX, utils.ToJSON(indexes))
+	}
+
 }
 
 func testV1FIdxRemoveAttributeProfile(t *testing.T) {
