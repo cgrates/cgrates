@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package dispatchers
 
+/*
 import (
 	"reflect"
 	"testing"
@@ -128,3 +129,4 @@ func testDspApierUnkownAPiKey(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+*/

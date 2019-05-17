@@ -166,7 +166,7 @@ func TestSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 
 	// Make sure we are receiving a disconnect event
 	select {
-	case <-time.After(time.Duration(50 * time.Millisecond)):
+	case <-time.After(time.Duration(100 * time.Millisecond)):
 		t.Error("Did not receive disconnect event")
 	case disconnectEv := <-disconnectEvChan:
 		if engine.NewMapEvent(disconnectEv.EventStart).GetStringIgnoreErrors(utils.OriginID) != initArgs.CGREvent.Event[utils.OriginID] {
