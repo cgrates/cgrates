@@ -144,11 +144,6 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithArgDispatcher) (
 		rply[i].AlteredFields = evReply.AlteredFields
 		if len(evReply.AlteredFields) != 0 {
 			rply[i].CGREvent = evReply.CGREvent
-			if tntIface, has := rply[i].CGREvent.Event[utils.MetaTenant]; has {
-				// special case when we want to overwrite the tenant
-				rply[i].CGREvent.Tenant = tntIface.(string)
-				delete(rply[i].CGREvent.Event, utils.MetaTenant)
-			}
 		}
 	}
 	return
