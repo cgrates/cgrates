@@ -1452,7 +1452,7 @@ func testV1FIdxComputeWithAnotherContext(t *testing.T) {
 		t.Errorf("Error: %+v", result)
 	}
 	expectedIDX := []string{"*string:~Account:1001:ApierTest", "*string:~Account:1001:ApierTest2"}
-	revExpectedIDX := []string{"*string:~Account:1001:ApierTest", "*string:~Account:1001:ApierTest2"}
+	revExpectedIDX := []string{"*string:~Account:1001:ApierTest2", "*string:~Account:1001:ApierTest"}
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
 		ItemType:   utils.MetaAttributes,

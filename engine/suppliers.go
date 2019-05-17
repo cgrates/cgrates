@@ -503,6 +503,11 @@ func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *Sorted
 		if err := spS.attributeS.Call(utils.AttributeSv1ProcessEvent,
 			attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 			args.CGREvent = *rplyEv.CGREvent
+			if tntIface, has := args.CGREvent.Event[utils.MetaTenant]; has {
+				// special case when we want to overwrite the tenant
+				args.CGREvent.Tenant = tntIface.(string)
+				delete(args.CGREvent.Event, utils.MetaTenant)
+			}
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
 		}

@@ -334,6 +334,11 @@ func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher)
 	if err = cdrS.attrS.Call(utils.AttributeSv1ProcessEvent,
 		attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 		*cgrEv.CGREvent = *rplyEv.CGREvent
+		if tntIface, has := cgrEv.CGREvent.Event[utils.MetaTenant]; has {
+			// special case when we want to overwrite the tenant
+			cgrEv.CGREvent.Tenant = tntIface.(string)
+			delete(cgrEv.CGREvent.Event, utils.MetaTenant)
+		}
 	} else if err.Error() == utils.ErrNotFound.Error() {
 		err = nil // cancel ErrNotFound
 	}
