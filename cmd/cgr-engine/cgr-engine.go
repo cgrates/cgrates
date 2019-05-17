@@ -1202,7 +1202,9 @@ func startDispatcherService(internalDispatcherSChan, internalAttributeSChan chan
 		return
 	}()
 
-	server.SetDispatched()
+	// for the moment we dispable Apier through dispatcher
+	// until we figured out a better sollution in case of gob server
+	// server.SetDispatched()
 
 	server.RpcRegister(v1.NewDispatcherSv1(dspS))
 
