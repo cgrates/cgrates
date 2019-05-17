@@ -1588,8 +1588,7 @@ func main() {
 	var dm *engine.DataManager
 	if cfg.RalsCfg().RALsEnabled || cfg.SchedulerCfg().Enabled || cfg.ChargerSCfg().Enabled ||
 		cfg.AttributeSCfg().Enabled || cfg.ResourceSCfg().Enabled || cfg.StatSCfg().Enabled ||
-		cfg.ThresholdSCfg().Enabled || cfg.SupplierSCfg().Enabled || cfg.DispatcherSCfg().Enabled ||
-		cfg.SessionSCfg().Enabled { // Some services can run without db, ie:  CDRC
+		cfg.ThresholdSCfg().Enabled || cfg.SupplierSCfg().Enabled || cfg.DispatcherSCfg().Enabled { // Some services can run without db, ie:  CDRC
 		dm, err = engine.ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
 			cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
 			cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
@@ -1604,6 +1603,22 @@ func main() {
 		if err := engine.CheckVersions(dm.DataDB()); err != nil {
 			fmt.Println(err.Error())
 			return
+		}
+	} else if cfg.SessionSCfg().Enabled {
+		dm, err = engine.ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
+			cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
+			cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
+			cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+			cfg.CacheCfg(), cfg.DataDbCfg().DataDbSentinelName)
+		if err != nil { // Cannot configure getter database, show stopper
+			utils.Logger.Warning(fmt.Sprintf("Could not configure dataDb: %s.Some SessionS API will not work", err))
+		} else {
+			defer dm.DataDB().Close()
+			engine.SetDataStorage(dm)
+			if err := engine.CheckVersions(dm.DataDB()); err != nil {
+				fmt.Println(err.Error())
+				return
+			}
 		}
 	}
 	if cfg.RalsCfg().RALsEnabled || cfg.CdrsCfg().CDRSEnabled {
