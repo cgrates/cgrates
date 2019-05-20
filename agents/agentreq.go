@@ -91,18 +91,22 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 	default:
 		return nil, fmt.Errorf("unsupported field prefix: <%s>", fldPath[0])
 	case utils.MetaReq:
-		return ar.Request.FieldAsInterface(fldPath[1:])
+		val, err = ar.Request.FieldAsInterface(fldPath[1:])
 	case utils.MetaVars:
-		return ar.Vars.FieldAsInterface(fldPath[1:])
+		val, err = ar.Vars.FieldAsInterface(fldPath[1:])
 	case utils.MetaCgreq:
-		return ar.CGRRequest.FieldAsInterface(fldPath[1:])
+		val, err = ar.CGRRequest.FieldAsInterface(fldPath[1:])
 	case utils.MetaCgrep:
-		return ar.CGRReply.FieldAsInterface(fldPath[1:])
+		val, err = ar.CGRReply.FieldAsInterface(fldPath[1:])
 	case utils.MetaRep:
-		return ar.Reply.FieldAsInterface(fldPath[1:])
+		val, err = ar.Reply.FieldAsInterface(fldPath[1:])
 	case utils.MetaCGRAReq:
-		return ar.CGRAReq.FieldAsInterface(fldPath[1:])
+		val, err = ar.CGRAReq.FieldAsInterface(fldPath[1:])
 	}
+	if nmItems, isNMItems := val.([]*config.NMItem); isNMItems { // special handling of NMItems, take the last value out of it
+		val = nmItems[len(nmItems)-1].Data // could be we need nil protection here
+	}
+	return
 }
 
 // FieldAsString implements engine.DataProvider
@@ -110,9 +114,6 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 	var iface interface{}
 	if iface, err = ar.FieldAsInterface(fldPath); err != nil {
 		return
-	}
-	if nmItems, isNMItems := iface.([]*config.NMItem); isNMItems { // special handling of NMItems, take the last value out of it
-		iface = nmItems[len(nmItems)-1].Data // could be we need nil protection here
 	}
 	return utils.IfaceAsString(iface)
 }
