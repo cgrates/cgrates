@@ -554,3 +554,107 @@ func TestAgReqFieldAsNone2(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", eMp, mpOut)
 	}
 }
+
+func TestAgReqAsNavigableMap2(t *testing.T) {
+	data, _ := engine.NewMapStorage()
+	dm := engine.NewDataManager(data)
+	cfg, _ := config.NewDefaultCGRConfig()
+	filterS := engine.NewFilterS(cfg, nil, nil, dm)
+	agReq := newAgentRequest(nil, nil, nil, nil, "cgrates.org", "", filterS)
+	// populate request, emulating the way will be done in HTTPAgent
+	agReq.CGRRequest.Set([]string{utils.ToR}, utils.VOICE, false, false)
+	agReq.CGRRequest.Set([]string{utils.Account}, "1001", false, false)
+	agReq.CGRRequest.Set([]string{utils.Destination}, "1002", false, false)
+	agReq.CGRRequest.Set([]string{utils.AnswerTime},
+		time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC), false, false)
+	agReq.CGRRequest.Set([]string{utils.RequestType}, utils.META_PREPAID, false, false)
+
+	agReq.CGRReply = config.NewNavigableMap(nil)
+
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Tenant",
+			FieldId: utils.Tenant, Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Account",
+			FieldId: utils.Account, Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Destination",
+			FieldId: utils.Destination, Type: utils.META_COMPOSED,
+			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Usage",
+			FieldId: utils.Usage, Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("30s", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "CalculatedUsage",
+			FieldId: "CalculatedUsage", Filters: []string{"*gt:~*cgrareq.Usage:0"},
+			Type: "*difference", Value: config.NewRSRParsersMustCompile("~*cgreq.AnswerTime;~*cgrareq.Usage", true, utils.INFIELD_SEP),
+		},
+	}
+	eMp := config.NewNavigableMap(nil)
+	eMp.Set([]string{utils.Tenant}, []*config.NMItem{
+		&config.NMItem{Data: "cgrates.org", Path: []string{utils.Tenant},
+			Config: tplFlds[0]}}, false, true)
+	eMp.Set([]string{utils.Account}, []*config.NMItem{
+		&config.NMItem{Data: "1001", Path: []string{utils.Account},
+			Config: tplFlds[1]}}, false, true)
+	eMp.Set([]string{utils.Destination}, []*config.NMItem{
+		&config.NMItem{Data: "1002", Path: []string{utils.Destination},
+			Config: tplFlds[2]}}, false, true)
+	eMp.Set([]string{"Usage"}, []*config.NMItem{
+		&config.NMItem{Data: "30s", Path: []string{"Usage"},
+			Config: tplFlds[3]}}, false, true)
+	eMp.Set([]string{"CalculatedUsage"}, []*config.NMItem{
+		&config.NMItem{Data: time.Date(2013, 12, 30, 14, 59, 31, 0, time.UTC), Path: []string{"CalculatedUsage"},
+			Config: tplFlds[4]}}, false, true)
+	if mpOut, err := agReq.AsNavigableMap(tplFlds); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eMp, mpOut) {
+		t.Errorf("expecting: %+v, received: %+v", eMp, mpOut)
+	}
+}
+
+func TestAgReqFieldAsInterface(t *testing.T) {
+	data, _ := engine.NewMapStorage()
+	dm := engine.NewDataManager(data)
+	cfg, _ := config.NewDefaultCGRConfig()
+	filterS := engine.NewFilterS(cfg, nil, nil, dm)
+	agReq := newAgentRequest(nil, nil, nil, nil, "cgrates.org", "", filterS)
+	// populate request, emulating the way will be done in HTTPAgent
+	agReq.CGRAReq = config.NewNavigableMap(nil)
+	agReq.CGRAReq.Set([]string{utils.Usage}, []*config.NMItem{{Data: 3 * time.Minute}}, false, false)
+	agReq.CGRAReq.Set([]string{utils.ToR}, []*config.NMItem{{Data: utils.VOICE}}, false, false)
+	agReq.CGRAReq.Set([]string{utils.Account}, "1001", false, false)
+	agReq.CGRAReq.Set([]string{utils.Destination}, "1002", false, false)
+
+	path := []string{"*cgrareq", utils.Usage}
+	var expVal interface{}
+	expVal = 3 * time.Minute
+	if rply, err := agReq.FieldAsInterface(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, expVal) {
+		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
+	}
+
+	path = []string{"*cgrareq", utils.ToR}
+	expVal = utils.VOICE
+	if rply, err := agReq.FieldAsInterface(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, expVal) {
+		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
+	}
+
+	path = []string{"*cgrareq", utils.Account}
+	expVal = "1001"
+	if rply, err := agReq.FieldAsInterface(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, expVal) {
+		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
+	}
+
+	path = []string{"*cgrareq", utils.Destination}
+	expVal = "1002"
+	if rply, err := agReq.FieldAsInterface(path); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rply, expVal) {
+		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
+	}
+}
