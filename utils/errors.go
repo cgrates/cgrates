@@ -78,7 +78,7 @@ var (
 	RalsErrorPrfx               = "RALS_ERROR"
 	DispatcherErrorPrefix       = "DISPATCHER_ERROR"
 	ErrUnsupportedFormat        = errors.New("UNSUPPORTED_FORMAT")
-	NoDataBaseConnection        = errors.New("NO_DATA_BASE_CONNECTION")
+	ErrNoDatabaseConn           = errors.New("NO_DATA_BASE_CONNECTION")
 )
 
 // NewCGRError initialises a new CGRError
