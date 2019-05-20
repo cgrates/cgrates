@@ -1552,7 +1552,7 @@ func (sS *SessionS) BiRPCv1GetActiveSessions(clnt rpcclient.RpcClientConnection,
 		args = &utils.SessionFilter{}
 	}
 	if len(args.Filters) != 0 && sS.dm == nil {
-		return utils.NoDataBaseConnection
+		return utils.ErrNoDatabaseConn
 	}
 	aSs := sS.filterSessions(args, false)
 	if len(aSs) == 0 {
@@ -1569,7 +1569,7 @@ func (sS *SessionS) BiRPCv1GetActiveSessionsCount(clnt rpcclient.RpcClientConnec
 		args = &utils.SessionFilter{}
 	}
 	if len(args.Filters) != 0 && sS.dm == nil {
-		return utils.NoDataBaseConnection
+		return utils.ErrNoDatabaseConn
 	}
 	*reply = sS.filterSessionsCount(args, false)
 	return nil
@@ -1582,7 +1582,7 @@ func (sS *SessionS) BiRPCv1GetPassiveSessions(clnt rpcclient.RpcClientConnection
 		args = &utils.SessionFilter{}
 	}
 	if len(args.Filters) != 0 && sS.dm == nil {
-		return utils.NoDataBaseConnection
+		return utils.ErrNoDatabaseConn
 	}
 	pSs := sS.filterSessions(args, true)
 	if len(pSs) == 0 {
@@ -1599,7 +1599,7 @@ func (sS *SessionS) BiRPCv1GetPassiveSessionsCount(clnt rpcclient.RpcClientConne
 		args = &utils.SessionFilter{}
 	}
 	if len(args.Filters) != 0 && sS.dm == nil {
-		return utils.NoDataBaseConnection
+		return utils.ErrNoDatabaseConn
 	}
 	*reply = sS.filterSessionsCount(args, true)
 	return nil
@@ -2782,7 +2782,7 @@ func (sS *SessionS) BiRPCv1ForceDisconnect(clnt rpcclient.RpcClientConnection,
 		args = &utils.SessionFilter{}
 	}
 	if len(args.Filters) != 0 && sS.dm == nil {
-		return utils.NoDataBaseConnection
+		return utils.ErrNoDatabaseConn
 	}
 	aSs := sS.filterSessions(args, false)
 	if len(aSs) == 0 {
