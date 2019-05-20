@@ -878,6 +878,12 @@ func TestPassFilterMaxCost(t *testing.T) {
 	} else if !pass {
 		t.Errorf("Expecting: true, received: %+v", pass)
 	}
+	if pass, err := filterS.Pass("cgrates.org",
+		[]string{"*gt:~MaxUsage:0"}, config.NewNavigableMap(passEvent3)); err != nil {
+		t.Errorf(err.Error())
+	} else if !pass {
+		t.Errorf("Expecting: true, received: %+v", pass)
+	}
 }
 
 func TestPassFilterMissingField(t *testing.T) {
