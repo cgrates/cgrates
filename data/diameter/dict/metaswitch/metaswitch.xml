@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diameter>
+  <application id="4" type="auth">
+    <vendor id="19444" name="Metaswitch Networks Ltd" />
+    <avp name="Intra-BG-Indicator" code="880" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="19444">
+        <data type="Enumerated">
+          <item code="0" name="NONE" />
+          <item code="1" name="INTRA-BG" />
+        </data>
+    </avp>
+  </application>
+</diameter>
