@@ -767,6 +767,7 @@ func (sS *SessionS) unregisterSession(cgrID string, passive bool) bool {
 		if s.sTerminator != nil &&
 			s.sTerminator.endChan != nil {
 			close(s.sTerminator.endChan)
+			s.sTerminator.endChan = nil
 			time.Sleep(1) // ensure context switching so that the goroutine can remove old terminator
 		}
 	}
