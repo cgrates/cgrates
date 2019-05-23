@@ -28,121 +28,152 @@ import (
 // CDRsV1Ping interogates CDRsV1 server responsible to process the event
 func (dS *DispatcherService) CDRsV1Ping(args *utils.CGREventWithArgDispatcher,
 	reply *string) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
+	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
-		if err = dS.authorize(utils.CDRsV1Ping,
-			args.CGREvent.Tenant,
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
+		if err = dS.authorize(utils.CDRsV1Ping, args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaCDRs, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(args.CGREvent, utils.MetaCDRs, routeID,
 		utils.CDRsV1Ping, args, reply)
 }
 
 func (dS *DispatcherService) CDRsV1GetCDRs(args utils.RPCCDRsFilterWithArgDispatcher, reply *[]*engine.CDR) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
+	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
-		if err = dS.authorize(utils.CDRsV1GetCDRs,
-			args.Tenant,
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
+		if err = dS.authorize(utils.CDRsV1GetCDRs, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCDRs, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCDRs, routeID,
 		utils.CDRsV1GetCDRs, args, reply)
 }
 
 func (dS *DispatcherService) CDRsV1CountCDRs(args *utils.RPCCDRsFilterWithArgDispatcher, reply *int64) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
+	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
-		if err = dS.authorize(utils.CDRsV1CountCDRs,
-			args.Tenant,
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
+		if err = dS.authorize(utils.CDRsV1CountCDRs, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCDRs, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCDRs, routeID,
 		utils.CDRsV1CountCDRs, args, reply)
 }
 
 func (dS *DispatcherService) CDRsV1StoreSessionCost(args *engine.AttrCDRSStoreSMCost, reply *string) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
+	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
-		if err = dS.authorize(utils.CDRsV1StoreSessionCost,
-			args.Tenant,
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
+		if err = dS.authorize(utils.CDRsV1StoreSessionCost, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCDRs, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCDRs, routeID,
 		utils.CDRsV1StoreSessionCost, args, reply)
 }
 
 func (dS *DispatcherService) CDRsV1RateCDRs(args *engine.ArgRateCDRs, reply *string) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
+	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
-		if err = dS.authorize(utils.CDRsV1RateCDRs,
-			args.TenantArg.Tenant,
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
+		if err = dS.authorize(utils.CDRsV1RateCDRs, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaCDRs, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCDRs, routeID,
 		utils.CDRsV1RateCDRs, args, reply)
 }
 
 func (dS *DispatcherService) CDRsV1ProcessExternalCDR(args *engine.ExternalCDRWithArgDispatcher, reply *string) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
 	if dS.attrS != nil {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
 		if err = dS.authorize(utils.CDRsV1ProcessExternalCDR,
 			args.Tenant,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaCDRs, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaCDRs, routeID,
 		utils.CDRsV1ProcessExternalCDR, args, reply)
 }
 
 func (dS *DispatcherService) CDRsV1ProcessEvent(args *engine.ArgV1ProcessEvent, reply *string) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
 	if dS.attrS != nil {
-		if err = dS.authorize(utils.CDRsV1ProcessEvent,
-			args.CGREvent.Tenant,
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
+		if err = dS.authorize(utils.CDRsV1ProcessEvent, args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaCDRs, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&args.CGREvent, utils.MetaCDRs, routeID,
 		utils.CDRsV1ProcessEvent, args, reply)
 }
 
 func (dS *DispatcherService) CDRsV1ProcessCDR(args *engine.CDRWithArgDispatcher, reply *string) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
 	if dS.attrS != nil {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
 		if err = dS.authorize(utils.CDRsV1ProcessCDR,
 			args.Tenant,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaCDRs, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaCDRs, routeID,
 		utils.CDRsV1ProcessCDR, args, reply)
 }

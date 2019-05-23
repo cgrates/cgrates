@@ -23,31 +23,41 @@ import (
 )
 
 func (dS *DispatcherService) SchedulerSv1Ping(args *utils.CGREventWithArgDispatcher, reply *string) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
+	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
 		if err = dS.authorize(utils.SchedulerSv1Ping,
 			args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaScheduler, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(args.CGREvent, utils.MetaScheduler, routeID,
 		utils.SchedulerSv1Ping, args, reply)
 }
 
 func (dS *DispatcherService) SchedulerSv1Reload(args *utils.CGREventWithArgDispatcher, reply *string) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
+	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
 		if err = dS.authorize(utils.SchedulerSv1Ping,
 			args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaScheduler, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(args.CGREvent, utils.MetaScheduler, routeID,
 		utils.SchedulerSv1Reload, args, reply)
 }

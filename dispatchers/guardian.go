@@ -27,50 +27,63 @@ import (
 // GuardianSv1Ping interogates GuardianSv1 server responsible to process the event
 func (dS *DispatcherService) GuardianSv1Ping(args *utils.CGREventWithArgDispatcher,
 	reply *string) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
+	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
 		if err = dS.authorize(utils.GuardianSv1Ping,
 			args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaGuardian, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(args.CGREvent, utils.MetaGuardian, routeID,
 		utils.GuardianSv1Ping, args, reply)
 }
 
 // RemoteLock will lock a key from remote
 func (dS *DispatcherService) GuardianSv1RemoteLock(args AttrRemoteLockWithApiKey,
 	reply *string) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
+	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
-		if err = dS.authorize(utils.GuardianSv1RemoteLock,
-			args.TenantArg.Tenant,
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
+		if err = dS.authorize(utils.GuardianSv1RemoteLock, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaGuardian, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaGuardian, routeID,
 		utils.GuardianSv1RemoteLock, args.AttrRemoteLock, reply)
 }
 
 // RemoteUnlock will unlock a key from remote based on reference ID
 func (dS *DispatcherService) GuardianSv1RemoteUnlock(args AttrRemoteUnlockWithApiKey,
 	reply *[]string) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
+	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
-		if err = dS.authorize(utils.GuardianSv1RemoteUnlock,
-			args.TenantArg.Tenant,
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
+		if err = dS.authorize(utils.GuardianSv1RemoteUnlock, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaGuardian, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaGuardian, routeID,
 		utils.GuardianSv1RemoteUnlock, args, reply)
 }

@@ -26,6 +26,7 @@ import (
 )
 
 func (dS *DispatcherService) ThresholdSv1Ping(args *utils.CGREventWithArgDispatcher, reply *string) (err error) {
+	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
 	}
@@ -36,7 +37,11 @@ func (dS *DispatcherService) ThresholdSv1Ping(args *utils.CGREventWithArgDispatc
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaThresholds, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(args.CGREvent, utils.MetaThresholds, routeID,
 		utils.ThresholdSv1Ping, args, reply)
 }
 
@@ -52,7 +57,11 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(args *engine.Args
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaThresholds, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&args.CGREvent, utils.MetaThresholds, routeID,
 		utils.ThresholdSv1GetThresholdsForEvent, args, t)
 }
 
@@ -68,7 +77,11 @@ func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *engine.ArgsProcessEv
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaThresholds, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&args.CGREvent, utils.MetaThresholds, routeID,
 		utils.ThresholdSv1ProcessEvent, args, tIDs)
 }
 
@@ -82,7 +95,11 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(args *utils.TenantWithA
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaThresholds, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaThresholds, routeID,
 		utils.ThresholdSv1GetThresholdIDs, args.TenantArg, tIDs)
 }
 
@@ -97,8 +114,12 @@ func (dS *DispatcherService) ThresholdSv1GetThreshold(args *utils.TenantIDWithAr
 			return
 		}
 	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: args.Tenant,
 		ID:     args.ID,
-	}, utils.MetaThresholds, args.RouteID, utils.ThresholdSv1GetThreshold, args.TenantID, th)
+	}, utils.MetaThresholds, routeID, utils.ThresholdSv1GetThreshold, args.TenantID, th)
 }

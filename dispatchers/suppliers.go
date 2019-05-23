@@ -24,48 +24,61 @@ import (
 )
 
 func (dS *DispatcherService) SupplierSv1Ping(args *utils.CGREventWithArgDispatcher, reply *string) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
+	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
 		if err = dS.authorize(utils.SupplierSv1Ping,
 			args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaSuppliers, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(args.CGREvent, utils.MetaSuppliers, routeID,
 		utils.SupplierSv1Ping, args, reply)
 }
 
 func (dS *DispatcherService) SupplierSv1GetSuppliers(args *engine.ArgsGetSuppliers,
 	reply *engine.SortedSuppliers) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
 	if dS.attrS != nil {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
 		if err = dS.authorize(utils.SupplierSv1GetSuppliers,
 			args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaSuppliers, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&args.CGREvent, utils.MetaSuppliers, routeID,
 		utils.SupplierSv1GetSuppliers, args, reply)
 }
 
 func (dS *DispatcherService) SupplierSv1GetSupplierProfilesForEvent(args *utils.CGREventWithArgDispatcher,
 	reply *[]*engine.SupplierProfile) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
 	if dS.attrS != nil {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
 		if err = dS.authorize(utils.SupplierSv1GetSupplierProfilesForEvent,
 			args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaSuppliers, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(args.CGREvent, utils.MetaSuppliers, routeID,
 		utils.SupplierSv1GetSupplierProfilesForEvent, args, reply)
 }
