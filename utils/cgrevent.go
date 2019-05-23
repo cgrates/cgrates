@@ -138,7 +138,7 @@ func (ev *CGREvent) RemFldsWithPrefix(prfx string) {
 }
 
 // RemFldsWithPrefix will remove fields starting with prefix from event
-func (ev *CGREvent) ConsumeArgDispatcher() (arg *ArgDispatcher) {
+func (ev *CGREvent) consumeArgDispatcher() (arg *ArgDispatcher) {
 	if ev == nil {
 		return
 	}
@@ -166,7 +166,8 @@ func (ev *CGREvent) ConsumeArgDispatcher() (arg *ArgDispatcher) {
 }
 
 // ConsumeSupplierPaginator will consume supplierPaginator if presented
-func (ev *CGREvent) ConsumeSupplierPaginator() (args Paginator) {
+func (ev *CGREvent) consumeSupplierPaginator() (args *Paginator) {
+	args = new(Paginator)
 	if ev == nil {
 		return
 	}
@@ -179,7 +180,7 @@ func (ev *CGREvent) ConsumeSupplierPaginator() (args Paginator) {
 			Logger.Err(err.Error())
 			return
 		}
-		args = Paginator{
+		args = &Paginator{
 			Limit: IntPointer(int(limit)),
 		}
 	}
@@ -193,14 +194,31 @@ func (ev *CGREvent) ConsumeSupplierPaginator() (args Paginator) {
 			return
 		}
 		if !hasSuppliersLimit { //in case we don't have limit, but we have offset we need to initialize the struct
-			args = Paginator{
+			args = &Paginator{
 				Offset: IntPointer(int(offset)),
 			}
 		} else {
 			args.Offset = IntPointer(int(offset))
 		}
 	}
+	return
+}
 
+type ConsumeArgs struct {
+	ArgDispatcher     *ArgDispatcher
+	SupplierPaginator *Paginator
+}
+
+func (ev *CGREvent) ConsumeArgs(dispatcherFlag, consumeSupplierPaginator bool) (ca ConsumeArgs) {
+	ca = ConsumeArgs{
+		ArgDispatcher: ev.consumeArgDispatcher(),
+	}
+	if dispatcherFlag && ca.ArgDispatcher == nil {
+		ca.ArgDispatcher = new(ArgDispatcher)
+	}
+	if consumeSupplierPaginator {
+		ca.SupplierPaginator = ev.consumeSupplierPaginator()
+	}
 	return
 }
 
