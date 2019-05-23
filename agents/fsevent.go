@@ -424,10 +424,9 @@ func (fsev FSEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 	args.GetAttributes = strings.Index(subsystems, utils.MetaAttributes) != -1
 	args.ProcessThresholds = strings.Index(subsystems, utils.MetaThresholds) != -1
 	args.ProcessStats = strings.Index(subsystems, utils.MetaStats) != -1
-	args.ArgDispatcher = cgrEv.ConsumeArgDispatcher()
-	if strings.Index(subsystems, utils.MetaDispatchers) != -1 && args.ArgDispatcher == nil {
-		args.ArgDispatcher = new(utils.ArgDispatcher)
-	}
+	cgrArgs := cgrEv.ConsumeArgs(strings.Index(subsystems, utils.MetaDispatchers) != -1, true)
+	args.ArgDispatcher = cgrArgs.ArgDispatcher
+	args.Paginator = *cgrArgs.SupplierPaginator
 	return
 }
 
@@ -450,10 +449,8 @@ func (fsev FSEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 	args.GetAttributes = strings.Index(subsystems, utils.MetaAttributes) != -1
 	args.ProcessThresholds = strings.Index(subsystems, utils.MetaThresholds) != -1
 	args.ProcessStats = strings.Index(subsystems, utils.MetaStats) != -1
-	args.ArgDispatcher = cgrEv.ConsumeArgDispatcher()
-	if strings.Index(subsystems, utils.MetaDispatchers) != -1 && args.ArgDispatcher == nil {
-		args.ArgDispatcher = new(utils.ArgDispatcher)
-	}
+	cgrArgs := cgrEv.ConsumeArgs(strings.Index(subsystems, utils.MetaDispatchers) != -1, false)
+	args.ArgDispatcher = cgrArgs.ArgDispatcher
 	return
 }
 
@@ -475,10 +472,8 @@ func (fsev FSEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionA
 	args.ReleaseResources = strings.Index(subsystems, utils.MetaResources) != -1
 	args.ProcessThresholds = strings.Index(subsystems, utils.MetaThresholds) != -1
 	args.ProcessStats = strings.Index(subsystems, utils.MetaStats) != -1
-	args.ArgDispatcher = cgrEv.ConsumeArgDispatcher()
-	if strings.Index(subsystems, utils.MetaDispatchers) != -1 && args.ArgDispatcher == nil {
-		args.ArgDispatcher = new(utils.ArgDispatcher)
-	}
+	cgrArgs := cgrEv.ConsumeArgs(strings.Index(subsystems, utils.MetaDispatchers) != -1, false)
+	args.ArgDispatcher = cgrArgs.ArgDispatcher
 	return
 }
 

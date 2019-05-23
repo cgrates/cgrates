@@ -210,12 +210,9 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connID string) {
 			return
 		}
 		cgrEv.Event[utils.OriginHost] = ka.conns[connID].RemoteAddr().String()
-		argsDisp := cgrEv.ConsumeArgDispatcher()
-		if strings.Index(kev[utils.CGRSubsystems], utils.MetaDispatchers) != -1 && argsDisp == nil {
-			argsDisp = new(utils.ArgDispatcher)
-		}
+		cgrArgs := cgrEv.ConsumeArgs(strings.Index(kev[utils.CGRSubsystems], utils.MetaDispatchers) != -1, false)
 		if err := ka.sessionS.Call(utils.SessionSv1ProcessCDR,
-			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv, ArgDispatcher: argsDisp}, &reply); err != nil {
+			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv, ArgDispatcher: cgrArgs.ArgDispatcher}, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("%s> failed processing CGREvent: %s, error: %s",
 				utils.KamailioAgent, utils.ToJSON(cgrEv), err.Error()))
 		}

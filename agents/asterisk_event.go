@@ -291,10 +291,9 @@ func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs)
 	args.ProcessThresholds = strings.Index(smaEv.Subsystems(), utils.MetaThresholds) != -1
 	args.ProcessStats = strings.Index(smaEv.Subsystems(), utils.MetaStats) != -1
 
-	args.ArgDispatcher = cgrEv.ConsumeArgDispatcher()
-	if strings.Index(smaEv.Subsystems(), utils.MetaDispatchers) != -1 && args.ArgDispatcher == nil {
-		args.ArgDispatcher = new(utils.ArgDispatcher)
-	}
+	cgrArgs := cgrEv.ConsumeArgs(strings.Index(smaEv.Subsystems(), utils.MetaDispatchers) != -1, true)
+	args.ArgDispatcher = cgrArgs.ArgDispatcher
+	args.Paginator = *cgrArgs.SupplierPaginator
 	return
 }
 

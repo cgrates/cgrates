@@ -254,11 +254,6 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		return
 	}
 	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.tenant, utils.NestingSep)
-	argDisp := cgrEv.ConsumeArgDispatcher()
-	if reqProcessor.Flags.HasKey(utils.MetaDispatchers) && argDisp == nil {
-		argDisp = new(utils.ArgDispatcher)
-	}
-	supplierPaginator := cgrEv.ConsumeSupplierPaginator()
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,
@@ -270,6 +265,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			break
 		}
 	}
+	cgrArgs := cgrEv.ConsumeArgs(reqProcessor.Flags.HasKey(utils.MetaDispatchers), reqType == utils.MetaAuth || reqType == utils.MetaEvent)
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> LOG, processorID: %s, diameter message: %s",
@@ -293,7 +289,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliers),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
-			*cgrEv, argDisp, supplierPaginator)
+			*cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
 		var authReply sessions.V1AuthorizeReply
 		err = da.sS.Call(utils.SessionSv1AuthorizeEvent,
 			authArgs, &authReply)
@@ -307,7 +303,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			reqProcessor.Flags.HasKey(utils.MetaThresholds),
 			reqProcessor.Flags.HasKey(utils.MetaStats),
-			*cgrEv, argDisp)
+			*cgrEv, cgrArgs.ArgDispatcher)
 		var initReply sessions.V1InitSessionReply
 		err = da.sS.Call(utils.SessionSv1InitiateSession,
 			initArgs, &initReply)
@@ -318,7 +314,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		updateArgs := sessions.NewV1UpdateSessionArgs(
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
-			*cgrEv, argDisp)
+			*cgrEv, cgrArgs.ArgDispatcher)
 		var updateReply sessions.V1UpdateSessionReply
 		err = da.sS.Call(utils.SessionSv1UpdateSession,
 			updateArgs, &updateReply)
@@ -331,7 +327,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaResources),
 			reqProcessor.Flags.HasKey(utils.MetaThresholds),
 			reqProcessor.Flags.HasKey(utils.MetaStats),
-			*cgrEv, argDisp)
+			*cgrEv, cgrArgs.ArgDispatcher)
 		var tRply string
 		err = da.sS.Call(utils.SessionSv1TerminateSession,
 			terminateArgs, &tRply)
@@ -348,7 +344,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliers),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
-			*cgrEv, argDisp, supplierPaginator)
+			*cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
 		var eventRply sessions.V1ProcessEventReply
 		err = da.sS.Call(utils.SessionSv1ProcessEvent,
 			evArgs, &eventRply)
@@ -368,7 +364,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		var rplyCDRs string
 		if err = da.sS.Call(utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
-				ArgDispatcher: argDisp}, &rplyCDRs); err != nil {
+				ArgDispatcher: cgrArgs.ArgDispatcher}, &rplyCDRs); err != nil {
 			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
 		}
 	}
