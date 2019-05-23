@@ -186,7 +186,7 @@ func (sS *SessionS) ListenAndServe(exitChan chan bool) (err error) {
 // Shutdown is called by engine to clear states
 func (sS *SessionS) Shutdown() (err error) {
 	for _, s := range sS.getSessions("", false) { // Force sessions shutdown
-		sS.endSession(s, nil, nil)
+		sS.endSession(s, nil, nil, nil)
 	}
 	return
 }
@@ -373,7 +373,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 		}
 	}
 	//we apply the correction before
-	if err = sS.endSession(s, nil, nil); err != nil {
+	if err = sS.endSession(s, nil, nil, nil); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf(
 				"<%s> failed force terminating session with ID <%s>, err: <%s>",
@@ -1409,7 +1409,7 @@ func (sS *SessionS) updateSession(s *Session, updtEv engine.MapEvent) (maxUsage 
 }
 
 // endSession will end a session from outside
-func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration) (err error) {
+func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration, aTime *time.Time) (err error) {
 	//check if we have replicate connection and close the session there
 	defer sS.replicateSessions(s.CGRID, true, sS.sReplConns)
 
@@ -1464,6 +1464,9 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration) (er
 			s.EventStart.Set(utils.Usage, sr.TotalUsage)
 		}
 		sr.Event[utils.Usage] = sr.TotalUsage
+		if aTime != nil {
+			sr.Event[utils.AnswerTime] = *aTime
+		}
 		if sS.cgrCfg.SessionSCfg().StoreSCosts {
 			if err := sS.storeSCost(s, sRunIdx); err != nil {
 				utils.Logger.Warning(
@@ -1487,14 +1490,14 @@ func (sS *SessionS) chargeEvent(tnt string, ev *engine.SafEvent, argDisp *utils.
 		return
 	}
 	if maxUsage, err = sS.updateSession(s, ev.AsMapInterface()); err != nil {
-		if errEnd := sS.endSession(s, utils.DurationPointer(time.Duration(0)), nil); errEnd != nil {
+		if errEnd := sS.endSession(s, utils.DurationPointer(time.Duration(0)), nil, nil); errEnd != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error when force-ending charged event: <%s>, err: <%s>",
 					utils.SessionS, cgrID, err.Error()))
 		}
 		return
 	}
-	if errEnd := sS.endSession(s, utils.DurationPointer(maxUsage), nil); errEnd != nil {
+	if errEnd := sS.endSession(s, utils.DurationPointer(maxUsage), nil, nil); errEnd != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error when ending charged event: <%s>, err: <%s>",
 				utils.SessionS, cgrID, err.Error()))
@@ -2398,7 +2401,8 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 		}
 		if err = sS.endSession(s,
 			me.GetDurationPtrIgnoreErrors(utils.Usage),
-			me.GetDurationPtrIgnoreErrors(utils.LastUsed)); err != nil {
+			me.GetDurationPtrIgnoreErrors(utils.LastUsed),
+			utils.TimePointer(me.GetTimeIgnoreErrors(utils.AnswerTime, utils.EmptyString))); err != nil {
 			return utils.NewErrRALs(err)
 		}
 	}
