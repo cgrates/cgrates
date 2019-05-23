@@ -207,10 +207,10 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 		elem := reflect.ValueOf(cdr).Elem()
 		for key, rsrFlds := range defaultTemplate {
 			parsedValue, err := rsrFlds.ParseDataProvider(newCdrLogProvider(acc, action), utils.NestingSep)
-			field := elem.FieldByName(key)
 			if err != nil {
 				return err
 			}
+			field := elem.FieldByName(key)
 			if field.IsValid() && field.CanSet() {
 				switch field.Kind() {
 				case reflect.Float64:

@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 var err error
@@ -2644,6 +2645,109 @@ func TestCacheGetClonedActions(t *testing.T) {
 	aCloned := clned.(Actions)
 	if !reflect.DeepEqual(actions, aCloned) {
 		t.Errorf("Expecting: %+v, received: %+v", actions[1].Balance, aCloned[1].Balance)
+	}
+}
+
+// TestCdrLogAction
+type RPCMock struct {
+	args *ArgV1ProcessEvent
+}
+
+func (r *RPCMock) Call(method string, args interface{}, rply interface{}) error {
+	if method != utils.CDRsV1ProcessEvent {
+		return rpcclient.ErrUnsupporteServiceMethod
+	}
+	if r.args != nil {
+		return fmt.Errorf("There should be only one call to this function")
+	}
+	r.args = args.(*ArgV1ProcessEvent)
+	rp := rply.(*string)
+	*rp = utils.OK
+	return nil
+}
+func TestCdrLogAction(t *testing.T) {
+	bakSch := schedCdrsConns
+	mock := RPCMock{}
+	schedCdrsConns = &mock
+	defer func() { schedCdrsConns = bakSch }()
+
+	var extraData interface{}
+	acc := &Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
+				&Balance{Value: 20},
+			},
+		},
+		UnitCounters: UnitCounters{
+			utils.MONETARY: []*UnitCounter{
+				&UnitCounter{
+					Counters: CounterFilters{
+						&CounterFilter{Value: 1},
+					},
+				},
+			},
+		},
+	}
+	a := &Action{
+		Id:              "CDRLog1",
+		ActionType:      "*cdrlog",
+		ExtraParameters: "{\"BalanceID\":\"~BalanceID\",\"ActionID\":\"~ActionID\",\"BalanceValue\":\"~BalanceValue\"}",
+		Weight:          50,
+	}
+	acs := Actions{
+		a,
+		&Action{
+			Id:         "CdrDebit",
+			ActionType: "*debit",
+			Balance: &BalanceFilter{
+				ID:     utils.StringPointer(utils.MetaDefault),
+				Value:  &utils.ValueFormula{Static: 9.95},
+				Type:   utils.StringPointer(utils.MONETARY),
+				Weight: utils.Float64Pointer(0),
+			},
+			Weight:       float64(90),
+			balanceValue: 10,
+		},
+	}
+	if err := cdrLogAction(acc, a, acs, extraData); err != nil {
+		t.Fatal(err)
+	}
+	if mock.args == nil {
+		t.Fatalf("Expected a call to %s", utils.CDRsV1ProcessEvent)
+	}
+	expCgrEv := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     mock.args.CGREvent.ID,
+		Event: map[string]interface{}{
+			"Account":      "1001",
+			"ActionID":     "CdrDebit",
+			"AnswerTime":   mock.args.CGREvent.Event["AnswerTime"],
+			"BalanceID":    "*default",
+			"BalanceValue": "10",
+			"CGRID":        mock.args.CGREvent.Event["CGRID"],
+			"Category":     "",
+			"Cost":         9.95,
+			"CostSource":   "",
+			"Destination":  "",
+			"ExtraInfo":    "",
+			"OrderID":      mock.args.CGREvent.Event["OrderID"],
+			"OriginHost":   "127.0.0.1",
+			"OriginID":     mock.args.CGREvent.Event["OriginID"],
+			"Partial":      false,
+			"PreRated":     true,
+			"RequestType":  "*none",
+			"RunID":        "*debit",
+			"SetupTime":    mock.args.CGREvent.Event["SetupTime"],
+			"Source":       "*cdrlog",
+			"Subject":      "1001",
+			"Tenant":       "cgrates.org",
+			"ToR":          "*monetary",
+			"Usage":        mock.args.CGREvent.Event["Usage"],
+		},
+	}
+	if !reflect.DeepEqual(expCgrEv, mock.args.CGREvent) {
+		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(expCgrEv), utils.ToJSON(mock.args.CGREvent))
 	}
 }
 
