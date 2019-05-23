@@ -24,26 +24,31 @@ import (
 )
 
 func (dS *DispatcherService) ResourceSv1Ping(args *utils.CGREventWithArgDispatcher, rpl *string) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
+	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
 		if err = dS.authorize(utils.ResourceSv1Ping,
 			args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(args.CGREvent, utils.MetaResources, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(args.CGREvent, utils.MetaResources, routeID,
 		utils.ResourceSv1Ping, args, rpl)
 }
 
 func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args utils.ArgRSv1ResourceUsage,
 	reply *engine.Resources) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
 	if dS.attrS != nil {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
 		if err = dS.authorize(utils.ResourceSv1GetResourcesForEvent,
 			args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
@@ -51,16 +56,20 @@ func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args utils.ArgRSv1R
 		}
 
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaResources, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&args.CGREvent, utils.MetaResources, routeID,
 		utils.ResourceSv1GetResourcesForEvent, args, reply)
 }
 
 func (dS *DispatcherService) ResourceSv1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
 	reply *string) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
 	if dS.attrS != nil {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
 		if err = dS.authorize(utils.ResourceSv1AuthorizeResources,
 			args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
@@ -68,16 +77,20 @@ func (dS *DispatcherService) ResourceSv1AuthorizeResources(args utils.ArgRSv1Res
 		}
 
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaResources, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&args.CGREvent, utils.MetaResources, routeID,
 		utils.ResourceSv1AuthorizeResources, args, reply)
 }
 
 func (dS *DispatcherService) ResourceSv1AllocateResources(args utils.ArgRSv1ResourceUsage,
 	reply *string) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
 	if dS.attrS != nil {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
 		if err = dS.authorize(utils.ResourceSv1AllocateResources,
 			args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
@@ -85,16 +98,20 @@ func (dS *DispatcherService) ResourceSv1AllocateResources(args utils.ArgRSv1Reso
 		}
 
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaResources, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&args.CGREvent, utils.MetaResources, routeID,
 		utils.ResourceSv1AllocateResources, args, reply)
 }
 
 func (dS *DispatcherService) ResourceSv1ReleaseResources(args utils.ArgRSv1ResourceUsage,
 	reply *string) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
 	if dS.attrS != nil {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
 		if err = dS.authorize(utils.ResourceSv1ReleaseResources,
 			args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
@@ -102,6 +119,10 @@ func (dS *DispatcherService) ResourceSv1ReleaseResources(args utils.ArgRSv1Resou
 		}
 
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaResources, args.RouteID,
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&args.CGREvent, utils.MetaResources, routeID,
 		utils.ResourceSv1ReleaseResources, args, reply)
 }

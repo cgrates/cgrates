@@ -26,15 +26,20 @@ import (
 )
 
 func (dS *DispatcherService) ConfigSv1GetJSONSection(args *config.StringWithArgDispatcher, reply *map[string]interface{}) (err error) {
-	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
+	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
-		if err = dS.authorize(utils.ConfigSv1GetJSONSection,
-			args.Tenant, args.APIKey, utils.TimePointer(time.Now())); err != nil {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
+		if err = dS.authorize(utils.ConfigSv1GetJSONSection, tnt,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant},
-		utils.MetaConfig, args.RouteID, utils.ConfigSv1GetJSONSection, args, reply)
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: tnt},
+		utils.MetaConfig, routeID, utils.ConfigSv1GetJSONSection, args, reply)
 }

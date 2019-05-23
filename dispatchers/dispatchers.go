@@ -222,13 +222,12 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 		}
 	}
 
-	if argD == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
-	}
-
 	tenant, _ := utils.IfaceAsString(parameters[utils.Tenant])
 	tenant = utils.FirstNonEmpty(tenant, config.CgrConfig().GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
+		if argD == nil {
+			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		}
 		if err = dS.authorize(args.Method,
 			tenant,
 			argD.APIKey, utils.TimePointer(time.Now())); err != nil {
@@ -275,7 +274,12 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 	if realArgsType.Kind() != reflect.Ptr {
 		realArgs = reflect.ValueOf(realArgs).Elem().Interface()
 	}
-	if err := dS.Dispatch(&utils.CGREvent{Tenant: tenant, Event: parameters}, utils.MetaApier, argD.RouteID,
+
+	var routeID *string
+	if argD != nil {
+		routeID = argD.RouteID
+	}
+	if err := dS.Dispatch(&utils.CGREvent{Tenant: tenant, Event: parameters}, utils.MetaApier, routeID,
 		args.Method, realArgs, realReply); err != nil {
 		return err
 	}
