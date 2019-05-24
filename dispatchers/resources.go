@@ -27,7 +27,7 @@ func (dS *DispatcherService) ResourceSv1Ping(args *utils.CGREventWithArgDispatch
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResourceSv1Ping,
 			args.CGREvent.Tenant,
@@ -47,7 +47,7 @@ func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args utils.ArgRSv1R
 	reply *engine.Resources) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResourceSv1GetResourcesForEvent,
 			args.CGREvent.Tenant,
@@ -68,7 +68,7 @@ func (dS *DispatcherService) ResourceSv1AuthorizeResources(args utils.ArgRSv1Res
 	reply *string) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResourceSv1AuthorizeResources,
 			args.CGREvent.Tenant,
@@ -89,7 +89,7 @@ func (dS *DispatcherService) ResourceSv1AllocateResources(args utils.ArgRSv1Reso
 	reply *string) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResourceSv1AllocateResources,
 			args.CGREvent.Tenant,
@@ -110,7 +110,7 @@ func (dS *DispatcherService) ResourceSv1ReleaseResources(args utils.ArgRSv1Resou
 	reply *string) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResourceSv1ReleaseResources,
 			args.CGREvent.Tenant,

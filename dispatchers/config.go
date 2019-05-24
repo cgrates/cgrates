@@ -29,7 +29,7 @@ func (dS *DispatcherService) ConfigSv1GetJSONSection(args *config.StringWithArgD
 	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ConfigSv1GetJSONSection, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {

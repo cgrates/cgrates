@@ -28,7 +28,7 @@ import (
 func (dS *DispatcherService) ThresholdSv1Ping(args *utils.CGREventWithArgDispatcher, reply *string) (err error) {
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.ThresholdSv1Ping,
@@ -48,7 +48,7 @@ func (dS *DispatcherService) ThresholdSv1Ping(args *utils.CGREventWithArgDispatc
 func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(args *engine.ArgsProcessEvent,
 	t *engine.Thresholds) (err error) {
 	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.ThresholdSv1GetThresholdsForEvent,
@@ -68,7 +68,7 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(args *engine.Args
 func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *engine.ArgsProcessEvent,
 	tIDs *[]string) (err error) {
 	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.ThresholdSv1ProcessEvent,
@@ -87,7 +87,7 @@ func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *engine.ArgsProcessEv
 
 func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(args *utils.TenantWithArgDispatcher, tIDs *[]string) (err error) {
 	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.ThresholdSv1GetThresholdIDs,
@@ -105,7 +105,7 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(args *utils.TenantWithA
 
 func (dS *DispatcherService) ThresholdSv1GetThreshold(args *utils.TenantIDWithArgDispatcher, th *engine.Threshold) (err error) {
 	if args.ArgDispatcher == nil {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.ThresholdSv1GetThreshold,

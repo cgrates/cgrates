@@ -29,7 +29,7 @@ func (dS *DispatcherService) SessionSv1Ping(args *utils.CGREventWithArgDispatche
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1Ping,
 			args.CGREvent.Tenant,
@@ -49,7 +49,7 @@ func (dS *DispatcherService) SessionSv1AuthorizeEvent(args *sessions.V1Authorize
 	reply *sessions.V1AuthorizeReply) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1AuthorizeEvent,
 			args.CGREvent.Tenant,
@@ -69,7 +69,7 @@ func (dS *DispatcherService) SessionSv1AuthorizeEventWithDigest(args *sessions.V
 	reply *sessions.V1AuthorizeReplyWithDigest) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1AuthorizeEventWithDigest,
 			args.CGREvent.Tenant,
@@ -89,7 +89,7 @@ func (dS *DispatcherService) SessionSv1InitiateSession(args *sessions.V1InitSess
 	reply *sessions.V1InitSessionReply) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1InitiateSession,
 			args.CGREvent.Tenant,
@@ -109,7 +109,7 @@ func (dS *DispatcherService) SessionSv1InitiateSessionWithDigest(args *sessions.
 	reply *sessions.V1InitReplyWithDigest) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1InitiateSessionWithDigest,
 			args.CGREvent.Tenant,
@@ -129,7 +129,7 @@ func (dS *DispatcherService) SessionSv1UpdateSession(args *sessions.V1UpdateSess
 	reply *sessions.V1UpdateSessionReply) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1UpdateSession,
 			args.CGREvent.Tenant,
@@ -150,7 +150,7 @@ func (dS *DispatcherService) SessionSv1SyncSessions(args *utils.TenantWithArgDis
 	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1SyncSessions, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
@@ -169,7 +169,7 @@ func (dS *DispatcherService) SessionSv1TerminateSession(args *sessions.V1Termina
 	reply *string) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1TerminateSession,
 			args.CGREvent.Tenant,
@@ -189,7 +189,7 @@ func (dS *DispatcherService) SessionSv1ProcessCDR(args *utils.CGREventWithArgDis
 	reply *string) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1ProcessCDR,
 			args.CGREvent.Tenant,
@@ -209,7 +209,7 @@ func (dS *DispatcherService) SessionSv1ProcessEvent(args *sessions.V1ProcessEven
 	reply *sessions.V1ProcessEventReply) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1ProcessEvent,
 			args.CGREvent.Tenant,
@@ -229,7 +229,7 @@ func (dS *DispatcherService) SessionSv1GetActiveSessions(args *utils.SessionFilt
 	reply *[]*sessions.ActiveSession) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1GetActiveSessions,
 			args.Tenant, args.APIKey, utils.TimePointer(time.Now())); err != nil {
@@ -248,7 +248,7 @@ func (dS *DispatcherService) SessionSv1GetActiveSessionsCount(args *utils.Sessio
 	reply *int) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1GetActiveSessionsCount,
 			args.Tenant, args.APIKey, utils.TimePointer(time.Now())); err != nil {
@@ -267,7 +267,7 @@ func (dS *DispatcherService) SessionSv1ForceDisconnect(args *utils.SessionFilter
 	reply *string) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1ForceDisconnect,
 			args.Tenant, args.APIKey, utils.TimePointer(time.Now())); err != nil {
@@ -286,7 +286,7 @@ func (dS *DispatcherService) SessionSv1GetPassiveSessions(args *utils.SessionFil
 	reply *[]*sessions.ActiveSession) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1GetPassiveSessions,
 			args.Tenant, args.APIKey, utils.TimePointer(time.Now())); err != nil {
@@ -305,7 +305,7 @@ func (dS *DispatcherService) SessionSv1GetPassiveSessionsCount(args *utils.Sessi
 	reply *int) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1GetPassiveSessionsCount,
 			args.Tenant, args.APIKey, utils.TimePointer(time.Now())); err != nil {
@@ -325,7 +325,7 @@ func (dS *DispatcherService) SessionSv1ReplicateSessions(args ArgsReplicateSessi
 	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1ReplicateSessions, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
@@ -344,7 +344,7 @@ func (dS *DispatcherService) SessionSv1SetPassiveSession(args *sessions.Session,
 	reply *string) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SessionSv1SetPassiveSession,
 			args.Tenant,

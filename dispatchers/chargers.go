@@ -27,7 +27,7 @@ func (dS *DispatcherService) ChargerSv1Ping(args *utils.CGREventWithArgDispatche
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ChargerSv1Ping,
 			args.Tenant,
@@ -47,7 +47,7 @@ func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *utils.CGREventW
 	reply *engine.ChargerProfiles) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ChargerSv1GetChargersForEvent,
 			args.CGREvent.Tenant,
@@ -67,7 +67,7 @@ func (dS *DispatcherService) ChargerSv1ProcessEvent(args *utils.CGREventWithArgD
 	reply *[]*engine.ChrgSProcessEventReply) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ChargerSv1ProcessEvent,
 			args.CGREvent.Tenant,

@@ -30,7 +30,7 @@ func (dS *DispatcherService) GuardianSv1Ping(args *utils.CGREventWithArgDispatch
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.GuardianSv1Ping,
 			args.CGREvent.Tenant,
@@ -52,7 +52,7 @@ func (dS *DispatcherService) GuardianSv1RemoteLock(args AttrRemoteLockWithApiKey
 	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.GuardianSv1RemoteLock, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
@@ -73,7 +73,7 @@ func (dS *DispatcherService) GuardianSv1RemoteUnlock(args AttrRemoteUnlockWithAp
 	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.GuardianSv1RemoteUnlock, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {

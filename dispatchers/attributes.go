@@ -29,7 +29,7 @@ func (dS *DispatcherService) AttributeSv1Ping(args *utils.CGREventWithArgDispatc
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.AttributeSv1Ping,
 			args.Tenant,
@@ -50,7 +50,7 @@ func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *engine.AttrA
 	reply *engine.AttributeProfile) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.AttributeSv1GetAttributeForEvent,
 			args.CGREvent.Tenant,
@@ -70,7 +70,7 @@ func (dS *DispatcherService) AttributeSv1ProcessEvent(args *engine.AttrArgsProce
 	reply *engine.AttrSProcessEventReply) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.AttributeSv1ProcessEvent,
 			args.CGREvent.Tenant,
