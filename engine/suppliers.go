@@ -496,7 +496,7 @@ func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *Sorted
 	if spS.attributeS != nil {
 		attrArgs := &AttrArgsProcessEvent{
 			Context:       utils.StringPointer(utils.MetaSuppliers),
-			CGREvent:      args.CGREvent,
+			CGREvent:      &args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		var rplyEv AttrSProcessEventReply

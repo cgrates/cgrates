@@ -132,7 +132,7 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithArgDispatcher) (
 			AttributeIDs:  cP.AttributeIDs,
 			Context:       utils.StringPointer(utils.MetaChargers),
 			ProcessRuns:   nil,
-			CGREvent:      *clonedEv.CGREvent,
+			CGREvent:      clonedEv.CGREvent,
 			ArgDispatcher: clonedEv.ArgDispatcher,
 		}
 		var evReply AttrSProcessEventReply
