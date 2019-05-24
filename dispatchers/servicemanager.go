@@ -30,7 +30,7 @@ func (dS *DispatcherService) ServiceManagerV1Ping(args *utils.CGREventWithArgDis
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ServiceManagerV1Ping,
 			args.Tenant,
@@ -51,7 +51,7 @@ func (dS *DispatcherService) ServiceManagerV1StartService(args ArgStartServiceWi
 	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ServiceManagerV1StartService, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
@@ -71,7 +71,7 @@ func (dS *DispatcherService) ServiceManagerV1StopService(args ArgStartServiceWit
 	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ServiceManagerV1StopService, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
@@ -91,7 +91,7 @@ func (dS *DispatcherService) ServiceManagerV1ServiceStatus(args ArgStartServiceW
 	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ServiceManagerV1ServiceStatus, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {

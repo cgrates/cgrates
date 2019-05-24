@@ -30,7 +30,7 @@ func (dS *DispatcherService) ResponderPing(args *utils.CGREventWithArgDispatcher
 	reply *string) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResponderPing,
 			args.CGREvent.Tenant,
@@ -51,7 +51,7 @@ func (dS *DispatcherService) ResponderStatus(args *utils.TenantWithArgDispatcher
 	tnt := utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResponderStatus, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
@@ -70,7 +70,7 @@ func (dS *DispatcherService) ResponderGetCost(args *engine.CallDescriptorWithArg
 	reply *engine.CallCost) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResponderGetCost, args.Tenant,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
@@ -89,7 +89,7 @@ func (dS *DispatcherService) ResponderDebit(args *engine.CallDescriptorWithArgDi
 	reply *engine.CallCost) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResponderDebit, args.Tenant,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
@@ -108,7 +108,7 @@ func (dS *DispatcherService) ResponderMaxDebit(args *engine.CallDescriptorWithAr
 	reply *engine.CallCost) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResponderMaxDebit, args.Tenant,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
@@ -127,7 +127,7 @@ func (dS *DispatcherService) ResponderRefundIncrements(args *engine.CallDescript
 	reply *engine.Account) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResponderRefundIncrements, args.Tenant,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
@@ -146,7 +146,7 @@ func (dS *DispatcherService) ResponderRefundRounding(args *engine.CallDescriptor
 	reply *float64) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResponderRefundRounding, args.Tenant,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
@@ -165,7 +165,7 @@ func (dS *DispatcherService) ResponderGetMaxSessionTime(args *engine.CallDescrip
 	reply *time.Duration) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResponderGetMaxSessionTime, args.Tenant,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
@@ -185,7 +185,7 @@ func (dS *DispatcherService) ResponderShutdown(args *utils.TenantWithArgDispatch
 	tnt := utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResponderShutdown, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
@@ -205,7 +205,7 @@ func (dS *DispatcherService) ResponderGetTimeout(args *utils.TenantWithArgDispat
 	tnt := utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.ResponderGetTimeout, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {

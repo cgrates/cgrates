@@ -199,7 +199,7 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 
 	parameters, canCast := args.Parameters.(map[string]interface{})
 	if !canCast {
-		return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+		return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 	}
 
 	var argD *utils.ArgDispatcher
@@ -226,7 +226,7 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 	tenant = utils.FirstNonEmpty(tenant, config.CgrConfig().GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if argD == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(args.Method,
 			tenant,

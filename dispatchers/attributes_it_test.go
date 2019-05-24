@@ -54,6 +54,14 @@ func TestDspAttributeSMongo(t *testing.T) {
 	testDsp(t, sTestsDspAttr, "TestDspAttributeS", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
 }
 
+func TestDspAttributeSNoConn(t *testing.T) {
+	testDsp(t, []func(t *testing.T){
+		testDspAttrPingFailover,
+		testDspAttrPing,
+		testDspAttrPingNoArgDispatcher,
+	}, "TestDspAttributeS", "all", "all2", "dispatchers_no_attributes", "tutorial", "oldtutorial", "dispatchers")
+}
+
 func testDspAttrPingFailover(t *testing.T) {
 	var reply string
 	if err := allEngine.RCP.Call(utils.AttributeSv1Ping, new(utils.CGREvent), &reply); err != nil {
@@ -225,7 +233,7 @@ func testDspAttrTestMissingArgDispatcher(t *testing.T) {
 	}
 	var attrReply *engine.AttributeProfile
 	if err := dispEngine.RCP.Call(utils.AttributeSv1GetAttributeForEvent,
-		args, &attrReply); err == nil || err.Error() != utils.NewErrMandatoryIeMissing("ArgDispatcher").Error() {
+		args, &attrReply); err == nil || err.Error() != utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField).Error() {
 		t.Errorf("Error:%v rply=%s", err, utils.ToJSON(attrReply))
 	}
 }
@@ -500,5 +508,24 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 	} else if !reflect.DeepEqual(eRply, &rplyEv) {
 		t.Errorf("Expecting: %s, received: %s",
 			utils.ToJSON(eRply), utils.ToJSON(rplyEv))
+	}
+}
+
+func testDspAttrPingNoArgDispatcher(t *testing.T) {
+	var reply string
+	if err := allEngine.RCP.Call(utils.AttributeSv1Ping, new(utils.CGREvent), &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
+	}
+	if dispEngine.RCP == nil {
+		t.Fatal(dispEngine.RCP)
+	}
+	if err := dispEngine.RCP.Call(utils.AttributeSv1Ping, &utils.CGREventWithArgDispatcher{
+		CGREvent: &utils.CGREvent{Tenant: "cgrates.org"},
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
 	}
 }

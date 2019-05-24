@@ -27,7 +27,7 @@ func (dS *DispatcherService) SupplierSv1Ping(args *utils.CGREventWithArgDispatch
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SupplierSv1Ping,
 			args.CGREvent.Tenant,
@@ -47,7 +47,7 @@ func (dS *DispatcherService) SupplierSv1GetSuppliers(args *engine.ArgsGetSupplie
 	reply *engine.SortedSuppliers) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SupplierSv1GetSuppliers,
 			args.CGREvent.Tenant,
@@ -67,7 +67,7 @@ func (dS *DispatcherService) SupplierSv1GetSupplierProfilesForEvent(args *utils.
 	reply *[]*engine.SupplierProfile) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing("ArgDispatcher")
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
 		if err = dS.authorize(utils.SupplierSv1GetSupplierProfilesForEvent,
 			args.CGREvent.Tenant,
