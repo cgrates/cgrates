@@ -355,6 +355,8 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 			return 0, nil
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, accID)
 	}
+	//reset the error in case that the account is not found
+	err = nil
 	if len(at.accountIDs) == 0 { // action timing executing without accounts
 		for _, a := range aac {
 			if expDate, parseErr := utils.ParseTimeDetectLayout(a.ExpirationString,
