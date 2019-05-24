@@ -1781,7 +1781,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		}
 		attrArgs := &engine.AttrArgsProcessEvent{
 			Context:       utils.StringPointer(utils.MetaSessionS),
-			CGREvent:      args.CGREvent,
+			CGREvent:      &args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		var rplyEv engine.AttrSProcessEventReply
@@ -2038,7 +2038,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		}
 		attrArgs := &engine.AttrArgsProcessEvent{
 			Context:       utils.StringPointer(utils.MetaSessionS),
-			CGREvent:      args.CGREvent,
+			CGREvent:      &args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		var rplyEv engine.AttrSProcessEventReply
@@ -2266,7 +2266,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 		}
 		attrArgs := &engine.AttrArgsProcessEvent{
 			Context:       utils.StringPointer(utils.MetaSessionS),
-			CGREvent:      args.CGREvent,
+			CGREvent:      &args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		var rplyEv engine.AttrSProcessEventReply
@@ -2666,7 +2666,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 		}
 		attrArgs := &engine.AttrArgsProcessEvent{
 			Context:       utils.StringPointer(utils.MetaSessionS),
-			CGREvent:      args.CGREvent,
+			CGREvent:      &args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		var rplyEv engine.AttrSProcessEventReply

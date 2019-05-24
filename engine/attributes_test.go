@@ -34,7 +34,7 @@ var (
 	attrEvs                = []*AttrArgsProcessEvent{
 		{
 			Context: utils.StringPointer(utils.MetaSessionS),
-			CGREvent: utils.CGREvent{ //matching AttributeProfile1
+			CGREvent: &utils.CGREvent{ //matching AttributeProfile1
 				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				ID:     utils.GenUUID(),
 				Event: map[string]interface{}{
@@ -47,7 +47,7 @@ var (
 		},
 		{
 			Context: utils.StringPointer(utils.MetaSessionS),
-			CGREvent: utils.CGREvent{ //matching AttributeProfile2
+			CGREvent: &utils.CGREvent{ //matching AttributeProfile2
 				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				ID:     utils.GenUUID(),
 				Event: map[string]interface{}{
@@ -57,7 +57,7 @@ var (
 		},
 		{
 			Context: utils.StringPointer(utils.MetaSessionS),
-			CGREvent: utils.CGREvent{ //matching AttributeProfilePrefix
+			CGREvent: &utils.CGREvent{ //matching AttributeProfilePrefix
 				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				ID:     utils.GenUUID(),
 				Event: map[string]interface{}{
@@ -67,7 +67,7 @@ var (
 		},
 		{
 			Context: utils.StringPointer(utils.MetaSessionS),
-			CGREvent: utils.CGREvent{ //matching AttributeProfilePrefix
+			CGREvent: &utils.CGREvent{ //matching AttributeProfilePrefix
 				Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 				ID:     utils.GenUUID(),
 				Event: map[string]interface{}{
@@ -274,7 +274,7 @@ func TestAttributeProcessEvent(t *testing.T) {
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"AttributeProfile1"},
 		AlteredFields:   []string{"Account"},
-		CGREvent:        &attrEvs[0].CGREvent,
+		CGREvent:        attrEvs[0].CGREvent,
 	}
 	atrp, err := attrService.processEvent(attrEvs[0])
 	if err != nil {
@@ -298,7 +298,7 @@ func TestAttributeProcessEventWithIDs(t *testing.T) {
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"AttributeIDMatch"},
 		AlteredFields:   []string{"Account"},
-		CGREvent:        &attrEvs[3].CGREvent,
+		CGREvent:        attrEvs[3].CGREvent,
 	}
 	if atrp, err := attrService.processEvent(attrEvs[3]); err != nil {
 	} else if !reflect.DeepEqual(eRply, atrp) {
@@ -527,7 +527,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 	attrArgs := &AttrArgsProcessEvent{
 		Context:     utils.StringPointer(utils.MetaSessionS),
 		ProcessRuns: utils.IntPointer(4),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
@@ -635,7 +635,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 	attrArgs := &AttrArgsProcessEvent{
 		Context:     utils.StringPointer(utils.MetaSessionS),
 		ProcessRuns: utils.IntPointer(4),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
@@ -742,7 +742,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 	attrArgs := &AttrArgsProcessEvent{
 		Context:     utils.StringPointer(utils.MetaSessionS),
 		ProcessRuns: utils.IntPointer(2),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
@@ -830,7 +830,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 	attrArgs := &AttrArgsProcessEvent{
 		Context:     utils.StringPointer(utils.MetaSessionS),
 		ProcessRuns: utils.IntPointer(4),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
@@ -940,7 +940,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 	attrArgs := &AttrArgsProcessEvent{
 		Context:     utils.StringPointer(utils.MetaSessionS),
 		ProcessRuns: utils.IntPointer(4),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
@@ -1049,7 +1049,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 	attrArgs := &AttrArgsProcessEvent{
 		Context:     utils.StringPointer(utils.MetaSessionS),
 		ProcessRuns: utils.IntPointer(4),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
@@ -1119,7 +1119,7 @@ func TestAttributeProcessValue(t *testing.T) {
 	attrArgs := &AttrArgsProcessEvent{
 		Context:     utils.StringPointer(utils.MetaSessionS),
 		ProcessRuns: utils.IntPointer(1),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
@@ -1198,7 +1198,7 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 	attrArgs := &AttrArgsProcessEvent{
 		Context:     utils.StringPointer(utils.MetaSessionS),
 		ProcessRuns: utils.IntPointer(1),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
@@ -1269,7 +1269,7 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 	attrArgs := &AttrArgsProcessEvent{
 		Context:     utils.StringPointer(utils.MetaSessionS),
 		ProcessRuns: utils.IntPointer(1),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
@@ -1345,7 +1345,7 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 	attrArgs := &AttrArgsProcessEvent{
 		Context:     utils.StringPointer(utils.MetaSessionS),
 		ProcessRuns: utils.IntPointer(1),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
@@ -1428,7 +1428,7 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 	attrArgs := &AttrArgsProcessEvent{
 		Context:     utils.StringPointer(utils.MetaSessionS),
 		ProcessRuns: utils.IntPointer(1),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
@@ -1501,7 +1501,7 @@ func TestAttributeProcessEventSum(t *testing.T) {
 	attrArgs := &AttrArgsProcessEvent{
 		Context:     utils.StringPointer(utils.MetaSessionS),
 		ProcessRuns: utils.IntPointer(1),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
@@ -1576,7 +1576,7 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 	attrArgs := &AttrArgsProcessEvent{
 		Context:     utils.StringPointer(utils.MetaSessionS),
 		ProcessRuns: utils.IntPointer(1),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
@@ -1653,7 +1653,7 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 	attrArgs := &AttrArgsProcessEvent{
 		Context:     utils.StringPointer(utils.MetaSessionS),
 		ProcessRuns: utils.IntPointer(1),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
@@ -1740,7 +1740,7 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 	attrArgs := &AttrArgsProcessEvent{
 		Context:     utils.StringPointer(utils.MetaSessionS),
 		ProcessRuns: utils.IntPointer(1),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
@@ -1803,7 +1803,7 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 	attrArgs := &AttrArgsProcessEvent{
 		Context:     utils.StringPointer(utils.MetaSessionS),
 		ProcessRuns: utils.IntPointer(1),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{

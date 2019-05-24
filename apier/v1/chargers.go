@@ -26,8 +26,8 @@ import (
 )
 
 // GetChargerProfile returns a Charger Profile
-func (apierV1 *ApierV1) GetChargerProfile(arg utils.TenantID, reply *engine.ChargerProfile) error {
-	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+func (apierV1 *ApierV1) GetChargerProfile(arg *utils.TenantID, reply *engine.ChargerProfile) error {
+	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if cpp, err := apierV1.DataManager.GetChargerProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
@@ -39,8 +39,8 @@ func (apierV1 *ApierV1) GetChargerProfile(arg utils.TenantID, reply *engine.Char
 }
 
 // GetChargerProfileIDs returns list of chargerProfile IDs registered for a tenant
-func (apierV1 *ApierV1) GetChargerProfileIDs(args utils.TenantArgWithPaginator, chPrfIDs *[]string) error {
-	if missing := utils.MissingStructFields(&args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
+func (apierV1 *ApierV1) GetChargerProfileIDs(args *utils.TenantArgWithPaginator, chPrfIDs *[]string) error {
+	if missing := utils.MissingStructFields(args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	prfx := utils.ChargerProfilePrefix + args.Tenant + ":"
@@ -89,8 +89,8 @@ func (apierV1 *ApierV1) SetChargerProfile(arg *ChargerWithCache, reply *string) 
 }
 
 //RemoveChargerProfile remove a specific Charger Profile
-func (apierV1 *ApierV1) RemoveChargerProfile(arg utils.TenantIDWithCache, reply *string) error {
-	if missing := utils.MissingStructFields(&arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+func (apierV1 *ApierV1) RemoveChargerProfile(arg *utils.TenantIDWithCache, reply *string) error {
+	if missing := utils.MissingStructFields(arg, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := apierV1.DataManager.RemoveChargerProfile(arg.Tenant,

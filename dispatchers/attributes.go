@@ -62,7 +62,7 @@ func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *engine.AttrA
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaAttributes, routeID,
+	return dS.Dispatch(args.CGREvent, utils.MetaAttributes, routeID,
 		utils.AttributeSv1GetAttributeForEvent, args, reply)
 }
 
@@ -83,6 +83,6 @@ func (dS *DispatcherService) AttributeSv1ProcessEvent(args *engine.AttrArgsProce
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaAttributes, routeID,
+	return dS.Dispatch(args.CGREvent, utils.MetaAttributes, routeID,
 		utils.AttributeSv1ProcessEvent, args, reply)
 }

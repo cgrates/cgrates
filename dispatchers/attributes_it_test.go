@@ -114,7 +114,7 @@ func testDspAttrPingFailover(t *testing.T) {
 func testDspAttrGetAttrFailover(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer("simpleauth"),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
 			Event: map[string]interface{}{
@@ -223,7 +223,7 @@ func testDspAttrPing(t *testing.T) {
 func testDspAttrTestMissingArgDispatcher(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer("simpleauth"),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
 			Event: map[string]interface{}{
@@ -241,7 +241,7 @@ func testDspAttrTestMissingArgDispatcher(t *testing.T) {
 func testDspAttrTestMissingApiKey(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer("simpleauth"),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
 			Event: map[string]interface{}{
@@ -260,7 +260,7 @@ func testDspAttrTestMissingApiKey(t *testing.T) {
 func testDspAttrTestUnknownApiKey(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer("simpleauth"),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
 			Event: map[string]interface{}{
@@ -281,7 +281,7 @@ func testDspAttrTestUnknownApiKey(t *testing.T) {
 func testDspAttrTestAuthKey(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer("simpleauth"),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
 			Event: map[string]interface{}{
@@ -302,7 +302,7 @@ func testDspAttrTestAuthKey(t *testing.T) {
 func testDspAttrTestAuthKey2(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer("simpleauth"),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
 			Event: map[string]interface{}{
@@ -367,7 +367,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 func testDspAttrTestAuthKey3(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer("simpleauth"),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
 			Event: map[string]interface{}{
@@ -389,7 +389,7 @@ func testDspAttrTestAuthKey3(t *testing.T) {
 func testDspAttrGetAttrRoundRobin(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer("simpleauth"),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
 			Event: map[string]interface{}{
@@ -474,7 +474,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 func testDspAttrGetAttrInternal(t *testing.T) {
 	args := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer("simpleauth"),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
 			Event: map[string]interface{}{

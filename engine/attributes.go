@@ -146,7 +146,7 @@ type AttrArgsProcessEvent struct {
 	AttributeIDs []string
 	Context      *string // attach the event to a context
 	ProcessRuns  *int    // number of loops for ProcessEvent
-	utils.CGREvent
+	*utils.CGREvent
 	*utils.ArgDispatcher
 }
 
@@ -268,6 +268,9 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 
 func (alS *AttributeService) V1GetAttributeForEvent(args *AttrArgsProcessEvent,
 	attrPrfl *AttributeProfile) (err error) {
+	if args.CGREvent == nil {
+		return utils.NewErrMandatoryIeMissing("CGREvent")
+	}
 	attrPrf, err := alS.attributeProfileForEvent(args)
 	if err != nil {
 		if err != utils.ErrNotFound {
@@ -281,7 +284,7 @@ func (alS *AttributeService) V1GetAttributeForEvent(args *AttrArgsProcessEvent,
 
 func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	reply *AttrSProcessEventReply) (err error) {
-	if args.Event == nil {
+	if args.CGREvent == nil || args.Event == nil {
 		return utils.NewErrMandatoryIeMissing("Event")
 	}
 	if args.ProcessRuns == nil || *args.ProcessRuns == 0 {
@@ -300,7 +303,7 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 			break
 		}
 		if len(evRply.AlteredFields) != 0 {
-			args.CGREvent = *evRply.CGREvent // for next loop
+			args.CGREvent = evRply.CGREvent // for next loop
 		}
 		if apiRply == nil { // first reply
 			apiRply = evRply

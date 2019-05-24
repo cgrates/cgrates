@@ -832,7 +832,7 @@ func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 func testV1FIdxCaProcessAttributeProfileEventWithNotFound(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
 			Event: map[string]interface{}{
@@ -906,7 +906,7 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 	//matches TEST_PROFILE1
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
 			Event: map[string]interface{}{
@@ -926,7 +926,7 @@ func testV1FIdxCaGetAttributeProfileFromTP(t *testing.T) {
 	//matches ATTR_1
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
 			Event: map[string]interface{}{
@@ -999,7 +999,7 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 	//matches TEST_PROFILE1
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
 			Event: map[string]interface{}{
@@ -1055,7 +1055,7 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 	//matches TEST_PROFILE1
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
 			Event: map[string]interface{}{
@@ -1074,7 +1074,7 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 	var resp string
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
 			Event: map[string]interface{}{
@@ -1090,7 +1090,7 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 
 	ev2 := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
 			Event: map[string]interface{}{

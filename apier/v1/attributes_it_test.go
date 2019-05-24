@@ -162,7 +162,7 @@ func testAttributeSLoadFromFolder(t *testing.T) {
 func testAttributeSGetAttributeForEvent(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
 			Event: map[string]interface{}{
@@ -215,7 +215,7 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaCDRs),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
 			Event: map[string]interface{}{
@@ -267,7 +267,7 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaCDRs),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEventWihMetaAnyContext",
 			Event: map[string]interface{}{
@@ -323,7 +323,7 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 func testAttributeSProcessEvent(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
 			Event: map[string]interface{}{
@@ -372,7 +372,7 @@ func testAttributeSProcessEvent(t *testing.T) {
 func testAttributeSProcessEventNotFound(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEventNotFound",
 			Event: map[string]interface{}{
@@ -392,7 +392,7 @@ func testAttributeSProcessEventNotFound(t *testing.T) {
 func testAttributeSProcessEventMissing(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
 			Event: map[string]interface{}{
@@ -413,7 +413,7 @@ func testAttributeSProcessEventMissing(t *testing.T) {
 func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSWithNoneSubstitute",
 			Event: map[string]interface{}{
@@ -479,7 +479,7 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSWithNoneSubstitute",
 			Event: map[string]interface{}{
@@ -557,7 +557,7 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 	ev := &engine.AttrArgsProcessEvent{
 		Context: utils.StringPointer(utils.MetaSessionS),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSWithNoneSubstitute",
 			Event: map[string]interface{}{
@@ -650,7 +650,7 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 	attrArgs := &engine.AttrArgsProcessEvent{
 		ProcessRuns: utils.IntPointer(1),
 		Context:     utils.StringPointer(utils.MetaSessionS),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "HeaderEventForAttribute",
 			Event: map[string]interface{}{
@@ -933,7 +933,7 @@ func testAttributeSProcessEventWithSearchAndReplace(t *testing.T) {
 	attrArgs := &engine.AttrArgsProcessEvent{
 		ProcessRuns: utils.IntPointer(1),
 		Context:     utils.StringPointer(utils.MetaSessionS),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "HeaderEventForAttribute",
 			Event: map[string]interface{}{
@@ -1037,7 +1037,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 	attrArgs := &engine.AttrArgsProcessEvent{
 		Context:     utils.StringPointer(utils.MetaSessionS),
 		ProcessRuns: utils.IntPointer(4),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
@@ -1147,7 +1147,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 	attrArgs := &engine.AttrArgsProcessEvent{
 		Context:     utils.StringPointer(utils.MetaSessionS),
 		ProcessRuns: utils.IntPointer(4),
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{
