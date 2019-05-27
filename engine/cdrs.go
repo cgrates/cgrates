@@ -348,7 +348,7 @@ func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher)
 // thdSProcessEvent will send the event to ThresholdS if the connection is configured
 func (cdrS *CDRServer) thdSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher) {
 	var tIDs []string
-	thArgs := &ArgsProcessEvent{CGREvent: *(cgrEv.CGREvent)}
+	thArgs := &ArgsProcessEvent{CGREvent: cgrEv.CGREvent}
 	if cgrEv.ArgDispatcher != nil {
 		thArgs.ArgDispatcher = cgrEv.ArgDispatcher
 	}

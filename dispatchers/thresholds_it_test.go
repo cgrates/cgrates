@@ -88,7 +88,7 @@ func testDspThProcessEventFailover(t *testing.T) {
 	eIDs := []string{"THD_ACNT_1001"}
 	nowTime := time.Now()
 	args := &engine.ArgsProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Time:   &nowTime,
@@ -139,7 +139,7 @@ func testDspThTestAuthKey(t *testing.T) {
 	var ids []string
 	nowTime := time.Now()
 	args := &engine.ArgsProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Time:   &nowTime,
@@ -167,7 +167,7 @@ func testDspThTestAuthKey2(t *testing.T) {
 	eIDs := []string{"THD_ACNT_1002"}
 	nowTime := time.Now()
 	args := &engine.ArgsProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Time:   &nowTime,

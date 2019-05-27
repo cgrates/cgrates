@@ -91,7 +91,7 @@ var (
 	}
 	argsGetThresholds = []*ArgsProcessEvent{
 		{
-			CGREvent: utils.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "Ev1",
 				Event: map[string]interface{}{
@@ -101,7 +101,7 @@ var (
 			},
 		},
 		{
-			CGREvent: utils.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "Ev1",
 				Event: map[string]interface{}{
@@ -111,7 +111,7 @@ var (
 			},
 		},
 		{
-			CGREvent: utils.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "Ev1",
 				Event: map[string]interface{}{

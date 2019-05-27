@@ -278,7 +278,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 
 type ArgsProcessEvent struct {
 	ThresholdIDs []string
-	utils.CGREvent
+	*utils.CGREvent
 	*utils.ArgDispatcher
 }
 
@@ -342,7 +342,7 @@ func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (thresholdsIDs 
 func (tS *ThresholdService) V1ProcessEvent(args *ArgsProcessEvent, reply *[]string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.CGREvent.Event == nil {
+	} else if args.CGREvent == nil || args.CGREvent.Event == nil {
 		return utils.NewErrMandatoryIeMissing("Event")
 	}
 	if ids, err := tS.processEvent(args); err != nil {
@@ -357,7 +357,7 @@ func (tS *ThresholdService) V1ProcessEvent(args *ArgsProcessEvent, reply *[]stri
 func (tS *ThresholdService) V1GetThresholdsForEvent(args *ArgsProcessEvent, reply *Thresholds) (err error) {
 	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.CGREvent.Event == nil {
+	} else if args.CGREvent == nil || args.CGREvent.Event == nil {
 		return utils.NewErrMandatoryIeMissing("Event")
 	}
 	var ts Thresholds

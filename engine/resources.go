@@ -417,7 +417,7 @@ func (rS *ResourceService) processThresholds(r *Resource, argDispatcher *utils.A
 		thIDs = r.rPrf.ThresholdIDs
 	}
 	thEv := &ArgsProcessEvent{ThresholdIDs: thIDs,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: r.Tenant,
 			ID:     utils.GenUUID(),
 			Event: map[string]interface{}{

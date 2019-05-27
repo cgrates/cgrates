@@ -1857,7 +1857,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		}
 		var tIDs []string
 		thEv := &engine.ArgsProcessEvent{
-			CGREvent:      args.CGREvent,
+			CGREvent:      &args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
@@ -2105,7 +2105,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		}
 		var tIDs []string
 		thEv := &engine.ArgsProcessEvent{
-			CGREvent:      args.CGREvent,
+			CGREvent:      &args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent,
@@ -2431,7 +2431,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 		}
 		var tIDs []string
 		thEv := &engine.ArgsProcessEvent{
-			CGREvent:      args.CGREvent,
+			CGREvent:      &args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
@@ -2741,7 +2741,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 		}
 		var tIDs []string
 		thEv := &engine.ArgsProcessEvent{
-			CGREvent:      args.CGREvent,
+			CGREvent:      &args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent,
