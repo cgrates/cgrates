@@ -171,7 +171,7 @@ func testV1STSProcessEvent(t *testing.T) {
 	var reply []string
 	expected := []string{"Stats1"}
 	args := engine.StatsArgsProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]interface{}{
@@ -224,7 +224,7 @@ func testV1STSProcessEvent(t *testing.T) {
 	}
 
 	args2 := engine.StatsArgsProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event2",
 			Event: map[string]interface{}{
@@ -238,7 +238,7 @@ func testV1STSProcessEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 	args3 := engine.StatsArgsProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event3",
 			Event: map[string]interface{}{
@@ -520,7 +520,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 	var reply2 []string
 	expected := []string{"CustomStatProfile"}
 	args := engine.StatsArgsProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]interface{}{
@@ -546,7 +546,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 	}
 	//second process
 	args = engine.StatsArgsProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event2",
 			Event: map[string]interface{}{
@@ -602,7 +602,7 @@ func BenchmarkSTSV1SetEvent(b *testing.B) {
 	var reply string
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, evs[rand.Intn(len(evs))],
+		if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &evs[rand.Intn(len(evs))],
 			&reply); err != nil {
 			b.Error(err)
 		} else if reply != utils.OK {

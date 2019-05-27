@@ -100,7 +100,7 @@ var (
 	}
 	statsEvs = []*StatsArgsProcessEvent{
 		{
-			CGREvent: utils.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event1",
 				Event: map[string]interface{}{
@@ -115,7 +115,7 @@ var (
 			},
 		},
 		{
-			CGREvent: utils.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event2",
 				Event: map[string]interface{}{
@@ -129,7 +129,7 @@ var (
 			},
 		},
 		{
-			CGREvent: utils.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "event3",
 				Event: map[string]interface{}{

@@ -88,7 +88,7 @@ func testDspStsGetStatFailover(t *testing.T) {
 	var metrics map[string]string
 	expected := []string{"Stats1"}
 	args := engine.StatsArgsProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]interface{}{
@@ -159,7 +159,7 @@ func testDspStsPing(t *testing.T) {
 func testDspStsTestAuthKey(t *testing.T) {
 	var reply []string
 	args := engine.StatsArgsProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]interface{}{
@@ -200,7 +200,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 	var metrics map[string]string
 	expected := []string{"Stats2"}
 	args := engine.StatsArgsProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]interface{}{
@@ -243,7 +243,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 	}
 
 	args = engine.StatsArgsProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]interface{}{
@@ -323,7 +323,7 @@ func testDspStsTestAuthKey3(t *testing.T) {
 	estats = []string{"Stats2"}
 	if err := dispEngine.RCP.Call(utils.StatSv1GetStatQueuesForEvent,
 		&engine.StatsArgsProcessEvent{
-			CGREvent: utils.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "GetStats",
 				Event: map[string]interface{}{

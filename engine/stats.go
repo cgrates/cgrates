@@ -227,7 +227,7 @@ func (ss *StatService) Call(serviceMethod string, args interface{}, reply interf
 
 type StatsArgsProcessEvent struct {
 	StatIDs []string
-	utils.CGREvent
+	*utils.CGREvent
 	*utils.ArgDispatcher
 }
 
@@ -247,7 +247,7 @@ func (sS *StatService) processEvent(args *StatsArgsProcessEvent) (statQueueIDs [
 		stsIDs = append(stsIDs, sq.ID)
 		lkID := utils.StatQueuePrefix + sq.TenantID()
 		guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
-			err = sq.ProcessEvent(&args.CGREvent, sS.filterS)
+			err = sq.ProcessEvent(args.CGREvent, sS.filterS)
 			return
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, lkID)
 		if err != nil {
@@ -313,7 +313,7 @@ func (sS *StatService) processEvent(args *StatsArgsProcessEvent) (statQueueIDs [
 func (sS *StatService) V1ProcessEvent(args *StatsArgsProcessEvent, reply *[]string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.Event == nil {
+	} else if args.CGREvent == nil || args.Event == nil {
 		return utils.NewErrMandatoryIeMissing("Event")
 	}
 	if ids, err := sS.processEvent(args); err != nil {
@@ -328,7 +328,7 @@ func (sS *StatService) V1ProcessEvent(args *StatsArgsProcessEvent, reply *[]stri
 func (sS *StatService) V1GetStatQueuesForEvent(args *StatsArgsProcessEvent, reply *[]string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.Event == nil {
+	} else if args.CGREvent == nil || args.Event == nil {
 		return utils.NewErrMandatoryIeMissing("Event")
 	}
 	var sQs StatQueues

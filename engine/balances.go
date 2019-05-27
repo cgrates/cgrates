@@ -690,7 +690,7 @@ func (b *Balance) Publish() {
 	}
 	accountId := b.account.ID
 	acntTnt := utils.NewTenantID(accountId)
-	cgrEv := utils.CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: acntTnt.Tenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]interface{}{
@@ -715,7 +715,7 @@ func (b *Balance) Publish() {
 	}
 	if thresholdS != nil {
 		var tIDs []string
-		if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, &ArgsProcessEvent{CGREvent: &cgrEv}, &tIDs); err != nil &&
+		if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, &ArgsProcessEvent{CGREvent: cgrEv}, &tIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<AccountS> error: %s processing balance event %+v with ThresholdS.",
