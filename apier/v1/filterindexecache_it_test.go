@@ -140,7 +140,7 @@ func testV1FIdxCaFromFolder(t *testing.T) {
 //ThresholdProfile
 func testV1FIdxCaProcessEventWithNotFound(t *testing.T) {
 	tEv := &engine.ArgsProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]interface{}{
@@ -205,7 +205,7 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 	//matches TEST_PROFILE1
 	tEv := &engine.ArgsProcessEvent{
 		ThresholdIDs: []string{"TEST_PROFILE1"},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]interface{}{
@@ -226,7 +226,7 @@ func testV1FIdxCaGetThresholdFromTP(t *testing.T) {
 	//matches THD_ACNT_BALANCE_1
 	tEv := &engine.ArgsProcessEvent{
 		ThresholdIDs: []string{"THD_ACNT_BALANCE_1"},
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]interface{}{
@@ -295,7 +295,7 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 	}
 	//make sure doesn't match the thresholdprofile after update
 	tEv := &engine.ArgsProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]interface{}{
@@ -310,7 +310,7 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 	}
 	//matches thresholdprofile after update
 	tEv2 := &engine.ArgsProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]interface{}{
@@ -374,7 +374,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	tEv := &engine.ArgsProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event1",
 			Event: map[string]interface{}{
@@ -387,7 +387,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 		t.Error(err)
 	}
 	tEv2 := &engine.ArgsProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event3",
 			Event: map[string]interface{}{
@@ -405,7 +405,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 	var resp string
 	tEv := &engine.ArgsProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event8",
 			Event: map[string]interface{}{
@@ -420,7 +420,7 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 	}
 
 	tEv2 := &engine.ArgsProcessEvent{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "event9",
 			Event: map[string]interface{}{

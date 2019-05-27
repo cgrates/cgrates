@@ -715,7 +715,7 @@ func (b *Balance) Publish() {
 	}
 	if thresholdS != nil {
 		var tIDs []string
-		if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, &ArgsProcessEvent{CGREvent: cgrEv}, &tIDs); err != nil &&
+		if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, &ArgsProcessEvent{CGREvent: &cgrEv}, &tIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<AccountS> error: %s processing balance event %+v with ThresholdS.",
@@ -807,7 +807,7 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 			}
 			acntTnt := utils.NewTenantID(b.account.ID)
 			thEv := &ArgsProcessEvent{
-				CGREvent: utils.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: acntTnt.Tenant,
 					ID:     utils.GenUUID(),
 					Event: map[string]interface{}{
@@ -838,7 +838,7 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 		for _, acnt := range savedAccounts {
 			acntTnt := utils.NewTenantID(acnt.ID)
 			thEv := &ArgsProcessEvent{
-				CGREvent: utils.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: acntTnt.Tenant,
 					ID:     utils.GenUUID(),
 					Event: map[string]interface{}{

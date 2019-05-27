@@ -276,7 +276,7 @@ func (sS *StatService) processEvent(args *StatsArgsProcessEvent) (statQueueIDs [
 			}
 			thEv := &ArgsProcessEvent{
 				ThresholdIDs: thIDs,
-				CGREvent: utils.CGREvent{
+				CGREvent: &utils.CGREvent{
 					Tenant: sq.Tenant,
 					ID:     utils.GenUUID(),
 					Event: map[string]interface{}{

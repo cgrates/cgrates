@@ -247,53 +247,53 @@ func testV1TSGetThresholds(t *testing.T) {
 func testV1TSProcessEvent(t *testing.T) {
 	var ids []string
 	eIDs := []string{}
-	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[0], &ids); err == nil ||
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, &tEvs[0], &ids); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	eIDs = []string{"THD_ACNT_BALANCE_1"}
-	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[1], &ids); err != nil {
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, &tEvs[1], &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
 	eIDs = []string{"THD_STATS_1"}
-	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[2], &ids); err != nil {
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, &tEvs[2], &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
 	eIDs = []string{"THD_STATS_2", "THD_STATS_1"}
 	eIDs2 := []string{"THD_STATS_1", "THD_STATS_2"}
-	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[3], &ids); err != nil {
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, &tEvs[3], &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) && !reflect.DeepEqual(ids, eIDs2) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
 	eIDs = []string{"THD_STATS_3"}
-	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[4], &ids); err != nil {
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, &tEvs[4], &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
 	eIDs = []string{"THD_RES_1"}
-	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[5], &ids); err != nil {
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, &tEvs[5], &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[6], &ids); err != nil {
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, &tEvs[6], &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[7], &ids); err != nil {
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, &tEvs[7], &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
 	eIDs = []string{"THD_CDRS_1"}
-	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, tEvs[8], &ids); err != nil {
+	if err := tSv1Rpc.Call(utils.ThresholdSv1ProcessEvent, &tEvs[8], &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
