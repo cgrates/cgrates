@@ -57,15 +57,11 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(args *engine.Args
 			return
 		}
 	}
-<<<<<<< HEAD
 	var routeID *string
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaThresholds, routeID,
-=======
-	return dS.Dispatch(args.CGREvent, utils.MetaThresholds, args.RouteID,
->>>>>>> Replacing CGREvent with *CGRevent when inherited for ThresholdService
+	return dS.Dispatch(args.CGREvent, utils.MetaThresholds, routeID,
 		utils.ThresholdSv1GetThresholdsForEvent, args, t)
 }
 
@@ -81,15 +77,11 @@ func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *engine.ArgsProcessEv
 			return
 		}
 	}
-<<<<<<< HEAD
 	var routeID *string
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaThresholds, routeID,
-=======
-	return dS.Dispatch(args.CGREvent, utils.MetaThresholds, args.RouteID,
->>>>>>> Replacing CGREvent with *CGRevent when inherited for ThresholdService
+	return dS.Dispatch(args.CGREvent, utils.MetaThresholds, routeID,
 		utils.ThresholdSv1ProcessEvent, args, tIDs)
 }
 
