@@ -60,7 +60,7 @@ func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *engine.StatsArgs
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaStats, routeID,
+	return dS.Dispatch(args.CGREvent, utils.MetaStats, routeID,
 		utils.StatSv1GetStatQueuesForEvent, args, reply)
 }
 
@@ -103,7 +103,7 @@ func (dS *DispatcherService) StatSv1ProcessEvent(args *engine.StatsArgsProcessEv
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaStats, routeID,
+	return dS.Dispatch(args.CGREvent, utils.MetaStats, routeID,
 		utils.StatSv1ProcessEvent, args, reply)
 }
 

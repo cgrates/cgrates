@@ -365,7 +365,7 @@ func (cdrS *CDRServer) thdSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher) 
 // statSProcessEvent will send the event to StatS if the connection is configured
 func (cdrS *CDRServer) statSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher) {
 	var reply []string
-	statArgs := &StatsArgsProcessEvent{CGREvent: *cgrEv.CGREvent}
+	statArgs := &StatsArgsProcessEvent{CGREvent: cgrEv.CGREvent}
 	if cgrEv.ArgDispatcher != nil {
 		statArgs.ArgDispatcher = cgrEv.ArgDispatcher
 	}

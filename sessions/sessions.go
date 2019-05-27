@@ -1873,7 +1873,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrNotConnected(utils.StatService)
 		}
 		statArgs := &engine.StatsArgsProcessEvent{
-			CGREvent:      args.CGREvent,
+			CGREvent:      &args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		var statReply []string
@@ -2123,7 +2123,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		}
 		var statReply []string
 		statArgs := &engine.StatsArgsProcessEvent{
-			CGREvent:      args.CGREvent,
+			CGREvent:      &args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err := sS.statS.Call(utils.StatSv1ProcessEvent,
@@ -2447,7 +2447,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 		}
 		var statReply []string
 		statArgs := &engine.StatsArgsProcessEvent{
-			CGREvent:      args.CGREvent,
+			CGREvent:      &args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err := sS.statS.Call(utils.StatSv1ProcessEvent,
@@ -2758,7 +2758,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 		}
 		var statReply []string
 		statArgs := &engine.StatsArgsProcessEvent{
-			CGREvent:      args.CGREvent,
+			CGREvent:      &args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err := sS.statS.Call(utils.StatSv1ProcessEvent,

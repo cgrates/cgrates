@@ -1083,7 +1083,7 @@ func (acc *Account) AsAccountSummary() *AccountSummary {
 
 func (acnt *Account) Publish() {
 	acntTnt := utils.NewTenantID(acnt.ID)
-	cgrEv := utils.CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: acntTnt.Tenant,
 		ID:     utils.GenUUID(),
 		Event: map[string]interface{}{
@@ -1106,7 +1106,7 @@ func (acnt *Account) Publish() {
 	if thresholdS != nil {
 		var tIDs []string
 		if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent,
-			&ArgsProcessEvent{CGREvent: &cgrEv}, &tIDs); err != nil &&
+			&ArgsProcessEvent{CGREvent: cgrEv}, &tIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
 				fmt.Sprintf("<AccountS> error: %s processing account event %+v with ThresholdS.", err.Error(), cgrEv))
