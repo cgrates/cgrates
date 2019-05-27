@@ -61,7 +61,7 @@ imports:
 - name: github.com/streadway/amqp
   version: 70e15c650864f4fc47f5d3c82ea117285480895d
 - name: github.com/vcabbage/amqp
-  version: eeac921ad619e75b733dba1ccf4b9df90faa9904
+  version: a69a1d51f8e7b55567f8d190a8fab04503a97735
 - name: github.com/ugorji/go
   version: 5a66da2e74afec77056667aacd61e97b6ea8f661
   subpackages:
