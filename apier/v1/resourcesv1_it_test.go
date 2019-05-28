@@ -128,7 +128,7 @@ func testV1RsFromFolder(t *testing.T) {
 func testV1RsGetResourcesForEvent(t *testing.T) {
 	var reply *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event1",
 			Event:  map[string]interface{}{"Unknown": "unknown"},
@@ -192,7 +192,7 @@ func testV1RsGetResourcesForEvent(t *testing.T) {
 func testV1RsTTL0(t *testing.T) {
 	// only matching Resource3
 	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -209,7 +209,7 @@ func testV1RsTTL0(t *testing.T) {
 	}
 	// overwrite the first allocation
 	argsRU = utils.ArgRSv1ResourceUsage{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -224,7 +224,7 @@ func testV1RsTTL0(t *testing.T) {
 	}
 	// too many units should be rejected
 	argsRU = utils.ArgRSv1ResourceUsage{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -241,7 +241,7 @@ func testV1RsTTL0(t *testing.T) {
 	// check the record
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -285,7 +285,7 @@ func testV1RsTTL0(t *testing.T) {
 	var releaseReply string
 	argsRU = utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e25", // same ID should be accepted by first group since the previous resource should be expired
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -304,7 +304,7 @@ func testV1RsAllocateResource(t *testing.T) {
 	var reply string
 	argsRU := utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e51",
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -325,7 +325,7 @@ func testV1RsAllocateResource(t *testing.T) {
 	// Second event to test matching of exact limit of first resource
 	argsRU = utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e52",
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -346,7 +346,7 @@ func testV1RsAllocateResource(t *testing.T) {
 	// Third event testing overflow to second resource which still has one resource available
 	argsRU = utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e53",
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -367,7 +367,7 @@ func testV1RsAllocateResource(t *testing.T) {
 	// Test resource unavailable
 	argsRU = utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e54", // same ID should be accepted by first group since the previous resource should be expired
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -385,7 +385,7 @@ func testV1RsAllocateResource(t *testing.T) {
 
 	argsRU = utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e55", // same ID should be accepted by first group since the previous resource should be expired
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -409,7 +409,7 @@ func testV1RsAuthorizeResources(t *testing.T) {
 	var reply string
 	argsRU := utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -426,7 +426,7 @@ func testV1RsAuthorizeResources(t *testing.T) {
 	}
 	argsRU = utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -447,7 +447,7 @@ func testV1RsReleaseResource(t *testing.T) {
 	var reply string
 	argsRU := utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e55", // same ID should be accepted by first group since the previous resource should be expired
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -464,7 +464,7 @@ func testV1RsReleaseResource(t *testing.T) {
 	// only match Resource1 since we don't want for storing of the resource2 bellow
 	argsRU = utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -481,7 +481,7 @@ func testV1RsReleaseResource(t *testing.T) {
 	}
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event5",
 			Event: map[string]interface{}{
@@ -515,7 +515,7 @@ func testV1RsReleaseResource(t *testing.T) {
 func testV1RsDBStore(t *testing.T) {
 	argsRU := utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e71",
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -534,7 +534,7 @@ func testV1RsDBStore(t *testing.T) {
 	}
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event3",
 			Event: map[string]interface{}{
@@ -579,7 +579,7 @@ func testV1RsDBStore(t *testing.T) {
 	}
 	rs = new(engine.Resources)
 	args = &utils.ArgRSv1ResourceUsage{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event4",
 			Event: map[string]interface{}{

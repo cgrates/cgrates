@@ -128,7 +128,7 @@ func testV1RsSetProfile(t *testing.T) {
 
 func testV1RsAllocate(t *testing.T) {
 	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -148,7 +148,7 @@ func testV1RsAllocate(t *testing.T) {
 	}
 
 	argsRU2 := utils.ArgRSv1ResourceUsage{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -170,7 +170,7 @@ func testV1RsAllocate(t *testing.T) {
 func testV1RsAuthorize(t *testing.T) {
 	var reply *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -204,7 +204,7 @@ func testV1RsAuthorize(t *testing.T) {
 	var reply2 string
 	argsRU := utils.ArgRSv1ResourceUsage{
 		UsageID: "chan_1",
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{

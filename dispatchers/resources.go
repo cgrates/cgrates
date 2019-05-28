@@ -60,7 +60,7 @@ func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args utils.ArgRSv1R
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaResources, routeID,
+	return dS.Dispatch(args.CGREvent, utils.MetaResources, routeID,
 		utils.ResourceSv1GetResourcesForEvent, args, reply)
 }
 
@@ -81,7 +81,7 @@ func (dS *DispatcherService) ResourceSv1AuthorizeResources(args utils.ArgRSv1Res
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaResources, routeID,
+	return dS.Dispatch(args.CGREvent, utils.MetaResources, routeID,
 		utils.ResourceSv1AuthorizeResources, args, reply)
 }
 
@@ -102,7 +102,7 @@ func (dS *DispatcherService) ResourceSv1AllocateResources(args utils.ArgRSv1Reso
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaResources, routeID,
+	return dS.Dispatch(args.CGREvent, utils.MetaResources, routeID,
 		utils.ResourceSv1AllocateResources, args, reply)
 }
 
@@ -123,6 +123,6 @@ func (dS *DispatcherService) ResourceSv1ReleaseResources(args utils.ArgRSv1Resou
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaResources, routeID,
+	return dS.Dispatch(args.CGREvent, utils.MetaResources, routeID,
 		utils.ResourceSv1ReleaseResources, args, reply)
 }
