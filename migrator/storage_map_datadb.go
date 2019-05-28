@@ -246,3 +246,5 @@ func (v1ms *mapMigrator) setV3AttributeProfile(x *v3AttributeProfile) (err error
 func (v1ms *mapMigrator) remV3AttributeProfile(tenant, id string) (err error) {
 	return utils.ErrNotImplemented
 }
+
+func (v1ms *mapMigrator) close() {}

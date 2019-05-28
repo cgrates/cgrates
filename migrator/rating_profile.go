@@ -44,6 +44,9 @@ func (m *Migrator) migrateCurrentRatingProfiles() (err error) {
 		if err := m.dmOut.DataManager().SetRatingProfile(rp, utils.NonTransactional); err != nil {
 			return err
 		}
+		if err := m.dmIN.DataManager().RemoveRatingProfile(idg, utils.NonTransactional); err != nil {
+			return err
+		}
 		m.stats[utils.RatingProfile] += 1
 	}
 	return

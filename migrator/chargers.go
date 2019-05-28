@@ -46,6 +46,10 @@ func (m *Migrator) migrateCurrentCharger() (err error) {
 		if err := m.dmOut.DataManager().SetChargerProfile(cpp, true); err != nil {
 			return err
 		}
+		if err := m.dmIN.DataManager().RemoveChargerProfile(tenant,
+			idg, utils.NonTransactional, false); err != nil {
+			return err
+		}
 		m.stats[utils.Chargers] += 1
 	}
 	return

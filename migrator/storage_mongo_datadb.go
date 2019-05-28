@@ -59,6 +59,10 @@ func newMongoMigrator(dm *engine.DataManager) (mgoMig *mongoMigrator) {
 	}
 }
 
+func (mgoMig *mongoMigrator) close() {
+	mgoMig.mgoDB.Close()
+}
+
 func (mgoMig *mongoMigrator) DataManager() *engine.DataManager {
 	return mgoMig.dm
 }
@@ -202,12 +206,35 @@ func (v1ms *mongoMigrator) setV1Actions(x *v1Actions) (err error) {
 //ActionTriggers methods
 //get
 func (v1ms *mongoMigrator) getV1ActionTriggers() (v1acts *v1ActionTriggers, err error) {
-	return nil, utils.ErrNotImplemented
+	if v1ms.cursor == nil {
+		var cursor mongo.Cursor
+		cursor, err = v1ms.mgoDB.DB().Collection(v1ActionTriggersCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		if err != nil {
+			return nil, err
+		}
+		v1ms.cursor = &cursor
+	}
+	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
+		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
+		v1ms.cursor = nil
+		return nil, utils.ErrNoMoreData
+	}
+	v1act := new(v1ActionTrigger)
+	if err := (*v1ms.cursor).Decode(v1act); err != nil {
+		return nil, err
+	}
+	return &v1ActionTriggers{v1act}, nil
 }
 
 //set
-func (v1ms *mongoMigrator) setV1ActionTriggers(x *v1ActionTriggers) (err error) {
-	return utils.ErrNotImplemented
+func (v1ms *mongoMigrator) setV1ActionTriggers(act *v1ActionTriggers) (err error) {
+	for _, x := range *act {
+		_, err = v1ms.mgoDB.DB().Collection(v1ActionTriggersCol).InsertOne(v1ms.mgoDB.GetContext(), *x)
+		if err != nil {
+			return err
+		}
+	}
+	return
 }
 
 //Actions methods

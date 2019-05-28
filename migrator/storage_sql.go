@@ -41,6 +41,10 @@ type migratorSQL struct {
 	rowIter    *sql.Rows
 }
 
+func (sqlMig *migratorSQL) close() {
+	sqlMig.sqlStorage.Close()
+}
+
 func (sqlMig *migratorSQL) StorDB() engine.StorDB {
 	return *sqlMig.storDB
 }

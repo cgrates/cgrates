@@ -27,7 +27,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func Testv1AttributeProfileAsAttributeProfile(t *testing.T) {
+func TestV1AttributeProfileAsAttributeProfile(t *testing.T) {
 	var cloneExpTime time.Time
 	expTime := time.Now().Add(time.Duration(20 * time.Minute))
 	if err := utils.Clone(expTime, &cloneExpTime); err != nil {
@@ -66,12 +66,106 @@ func Testv1AttributeProfileAsAttributeProfile(t *testing.T) {
 			&engine.Attribute{
 				FilterIDs: []string{"*string:FL1:In1"},
 				FieldName: "FL1",
+				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
 	}
 	if ap, err := v1Attribute.AsAttributeProfile(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(attrPrf, ap) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(attrPrf), utils.ToJSON(ap))
+	}
+}
+
+func TestV2AttributeProfileAsAttributeProfile(t *testing.T) {
+	cloneExpTime := time.Now().Add(time.Duration(20 * time.Minute))
+	v2Attribute := v2AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"filter1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     cloneExpTime,
+		},
+		Attributes: []*v2Attribute{
+			&v2Attribute{
+				FieldName:  "FL1",
+				Initial:    "In1",
+				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+				Append:     true,
+			},
+		},
+		Weight: 20,
+	}
+	attrPrf := &engine.AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"filter1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     cloneExpTime,
+		},
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
+				FilterIDs: []string{"*string:FL1:In1"},
+				FieldName: "FL1",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
+	if ap, err := v2Attribute.AsAttributeProfile(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(attrPrf, ap) {
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(attrPrf), utils.ToJSON(ap))
+	}
+}
+
+func TestV3AttributeProfileAsAttributeProfile(t *testing.T) {
+	cloneExpTime := time.Now().Add(time.Duration(20 * time.Minute))
+	v3Attribute := v3AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"filter1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     cloneExpTime,
+		},
+		Attributes: []*v3Attribute{
+			&v3Attribute{
+				FilterIDs:  []string{"*string:FL1:In1"},
+				FieldName:  "FL1",
+				Substitute: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
+	attrPrf := &engine.AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "attributeprofile1",
+		Contexts:  []string{utils.MetaSessionS},
+		FilterIDs: []string{"filter1"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			ExpiryTime:     cloneExpTime,
+		},
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
+				FilterIDs: []string{"*string:FL1:In1"},
+				FieldName: "FL1",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
+	if ap, err := v3Attribute.AsAttributeProfile(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(attrPrf, ap) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(attrPrf), utils.ToJSON(ap))

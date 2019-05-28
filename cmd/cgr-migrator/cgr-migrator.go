@@ -342,6 +342,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer m.Close()
 	config.SetCgrConfig(mgrCfg)
 	if exec != nil && *exec != "" { // Run migrator
 		migrstats := make(map[string]int)

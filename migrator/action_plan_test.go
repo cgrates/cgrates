@@ -26,8 +26,22 @@ import (
 )
 
 func TestV1ActionPlanAsActionPlan(t *testing.T) {
-	v1ap := &v1ActionPlan{Id: "test", AccountIds: []string{"one"}, Timing: &engine.RateInterval{Timing: new(engine.RITiming)}}
-	ap := &engine.ActionPlan{Id: "test", AccountIDs: utils.StringMap{"one": true}, ActionTimings: []*engine.ActionTiming{&engine.ActionTiming{Timing: &engine.RateInterval{Timing: new(engine.RITiming)}}}}
+	v1ap := &v1ActionPlan{
+		Id:         "test",
+		AccountIds: []string{"one"},
+		Timing:     &engine.RateInterval{Timing: new(engine.RITiming)},
+	}
+	ap := &engine.ActionPlan{
+		Id:         "test",
+		AccountIDs: utils.StringMap{"one": true},
+		ActionTimings: []*engine.ActionTiming{
+			&engine.ActionTiming{
+				Timing: &engine.RateInterval{
+					Timing: new(engine.RITiming),
+				},
+			},
+		},
+	}
 	newap := v1ap.AsActionPlan()
 	if ap.Id != newap.Id || !reflect.DeepEqual(ap.AccountIDs, newap.AccountIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", *ap, newap)

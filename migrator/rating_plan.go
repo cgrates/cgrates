@@ -44,6 +44,9 @@ func (m *Migrator) migrateCurrentRatingPlans() (err error) {
 		if err := m.dmOut.DataManager().SetRatingPlan(rp, utils.NonTransactional); err != nil {
 			return err
 		}
+		if err := m.dmIN.DataManager().RemoveRatingPlan(idg, utils.NonTransactional); err != nil {
+			return err
+		}
 		m.stats[utils.RatingPlan] += 1
 	}
 	return

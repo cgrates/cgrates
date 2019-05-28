@@ -343,3 +343,19 @@ func (m *Migrator) ensureIndexesStorDB(cols ...string) error {
 	mgo := m.storDBOut.StorDB().(*engine.MongoStorage)
 	return mgo.EnsureIndexes(cols...)
 }
+
+// closes all opened DBs
+func (m *Migrator) Close() {
+	if m.dmIN != nil {
+		m.dmIN.close()
+	}
+	if m.dmOut != nil {
+		m.dmOut.close()
+	}
+	if m.storDBIn != nil {
+		m.storDBIn.close()
+	}
+	if m.storDBOut != nil {
+		m.storDBOut.close()
+	}
+}

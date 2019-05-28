@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package migrator
 
-/*
 import (
 	//"flag"
 	"log"
@@ -138,23 +137,25 @@ func TestActionTriggerITMoveEncoding2(t *testing.T) {
 }
 
 func testActTrgITConnect(t *testing.T) {
-	dataDBIn, err := NewMigratorDataDB(actTrgCfgIn.DataDbType,
-		actTrgCfgIn.DataDbHost, actTrgCfgIn.DataDbPort, actTrgCfgIn.DataDbName,
-		actTrgCfgIn.DataDbUser, actTrgCfgIn.DataDbPass, actTrgCfgIn.DBDataEncoding,
-		config.CgrConfig().CacheCfg(), *loadHistorySize)
+	dataDBIn, err := NewMigratorDataDB(actTrgCfgIn.DataDbCfg().DataDbType,
+		actTrgCfgIn.DataDbCfg().DataDbHost, actTrgCfgIn.DataDbCfg().DataDbPort,
+		actTrgCfgIn.DataDbCfg().DataDbName, actTrgCfgIn.DataDbCfg().DataDbUser,
+		actTrgCfgIn.DataDbCfg().DataDbPass, actTrgCfgIn.GeneralCfg().DBDataEncoding,
+		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}
-	dataDBOut, err := NewMigratorDataDB(actTrgCfgOut.DataDbType,
-		actTrgCfgOut.DataDbHost, actTrgCfgOut.DataDbPort, actTrgCfgOut.DataDbName,
-		actTrgCfgOut.DataDbUser, actTrgCfgOut.DataDbPass, actTrgCfgOut.DBDataEncoding,
-		config.CgrConfig().CacheCfg(), *loadHistorySize)
+	dataDBOut, err := NewMigratorDataDB(actTrgCfgOut.DataDbCfg().DataDbType,
+		actTrgCfgOut.DataDbCfg().DataDbHost, actTrgCfgOut.DataDbCfg().DataDbPort,
+		actTrgCfgOut.DataDbCfg().DataDbName, actTrgCfgOut.DataDbCfg().DataDbUser,
+		actTrgCfgOut.DataDbCfg().DataDbPass, actTrgCfgOut.GeneralCfg().DBDataEncoding,
+		config.CgrConfig().CacheCfg(), "")
 	if err != nil {
 		log.Fatal(err)
 	}
 	actTrgMigrator, err = NewMigrator(dataDBIn, dataDBOut,
 		nil, nil,
-		false, false, false)
+		false, false, false, false)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -162,6 +163,7 @@ func testActTrgITConnect(t *testing.T) {
 
 func testActTrgITFlush(t *testing.T) {
 	actTrgMigrator.dmOut.DataManager().DataDB().Flush("")
+	actTrgMigrator.dmIN.DataManager().DataDB().Flush("")
 	if err := engine.SetDBVersions(actTrgMigrator.dmOut.DataManager().DataDB()); err != nil {
 		t.Error("Error  ", err.Error())
 	}
@@ -185,10 +187,8 @@ func testActTrgITMigrateAndMove(t *testing.T) {
 		&engine.ActionTrigger{
 			ID: "Test",
 			Balance: &engine.BalanceFilter{
-				Timings:        []*engine.RITiming{},
 				ExpirationDate: utils.TimePointer(tim),
 				Type:           utils.StringPointer(utils.MONETARY),
-				Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 			},
 			ExpirationDate:    tim,
 			LastExecutionTime: tim,
@@ -202,7 +202,7 @@ func testActTrgITMigrateAndMove(t *testing.T) {
 
 	switch actActionTrigger {
 	case utils.Migrate:
-		err := actTrgMigrator.dmIN.setV2ActionTrigger(v1actTrg)
+		err := actTrgMigrator.dmIN.setV1ActionTriggers(v1actTrg)
 		if err != nil {
 			t.Error("Error when setting v1 ActionTriggers ", err.Error())
 		}
@@ -220,7 +220,7 @@ func testActTrgITMigrateAndMove(t *testing.T) {
 			t.Error("Error when getting ActionTriggers ", err.Error())
 		}
 		if !reflect.DeepEqual(actTrg, result) {
-			t.Errorf("Expecting: %+v, received: %+v", actTrg, result)
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(actTrg), utils.ToJSON(result))
 		}
 		// utils.tojson si verificat
 	case utils.Move:
@@ -228,7 +228,7 @@ func testActTrgITMigrateAndMove(t *testing.T) {
 			t.Error("Error when setting ActionTriggers ", err.Error())
 		}
 		currentVersion := engine.CurrentDataDBVersions()
-		err := actTrgMigrator.dmOut.DataManager().DataDB().SetVersions(currentVersion, false)
+		err := actTrgMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
 		if err != nil {
 			t.Error("Error when setting version for ActionTriggers ", err.Error())
 		}
@@ -245,4 +245,3 @@ func testActTrgITMigrateAndMove(t *testing.T) {
 		}
 	}
 }
-*/

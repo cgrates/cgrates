@@ -37,6 +37,8 @@ type mapStorDBMigrator struct {
 	qryIdx   *int
 }
 
+func (mpMig *mapStorDBMigrator) close() {}
+
 func (mpMig *mapStorDBMigrator) StorDB() engine.StorDB {
 	return *mpMig.storDB
 }

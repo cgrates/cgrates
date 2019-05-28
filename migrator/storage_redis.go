@@ -44,6 +44,10 @@ func newRedisMigrator(dm *engine.DataManager) (rM *redisMigrator) {
 	}
 }
 
+func (rdsMig *redisMigrator) close() {
+	rdsMig.rds.Close()
+}
+
 func (rdsMig *redisMigrator) DataManager() *engine.DataManager {
 	return rdsMig.dm
 }
