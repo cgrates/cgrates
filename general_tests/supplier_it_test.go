@@ -324,7 +324,7 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 	var reply string
 	argsRU := utils.ArgRSv1ResourceUsage{
 		UsageID: "RandomID",
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event1",
 			Event: map[string]interface{}{
@@ -347,7 +347,7 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 	argsRU = utils.ArgRSv1ResourceUsage{
 		UsageID: "RandomID2",
 
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event2",
 			Event: map[string]interface{}{
@@ -369,7 +369,7 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 
 	argsRU = utils.ArgRSv1ResourceUsage{
 		UsageID: "RandomID3",
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event3",
 			Event: map[string]interface{}{
@@ -391,7 +391,7 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 
 	argsRU = utils.ArgRSv1ResourceUsage{
 		UsageID: "RandomID4",
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "Event4",
 			Event: map[string]interface{}{

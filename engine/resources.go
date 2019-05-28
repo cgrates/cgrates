@@ -527,7 +527,10 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 
 // V1ResourcesForEvent returns active resource configs matching the event
 func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, reply *Resources) (err error) {
-	if missing := utils.MissingStructFields(&args.CGREvent, []string{utils.Tenant, utils.ID, utils.Event}); len(missing) != 0 { //Params missing
+	if args.CGREvent == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
+	}
+	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.Tenant, utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.UsageID == "" {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
@@ -553,7 +556,7 @@ func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, 
 	// end of RPC caching
 
 	var mtcRLs Resources
-	if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent, args.UsageID, args.UsageTTL); err != nil {
+	if mtcRLs, err = rS.matchingResourcesForEvent(args.CGREvent, args.UsageID, args.UsageTTL); err != nil {
 		return err
 	}
 	*reply = mtcRLs
@@ -562,7 +565,10 @@ func (rS *ResourceService) V1ResourcesForEvent(args utils.ArgRSv1ResourceUsage, 
 
 // V1AuthorizeResources queries service to find if an Usage is allowed
 func (rS *ResourceService) V1AuthorizeResources(args utils.ArgRSv1ResourceUsage, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&args.CGREvent, []string{utils.Tenant, utils.ID, utils.Event}); len(missing) != 0 { //Params missing
+	if args.CGREvent == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
+	}
+	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.Tenant, utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.UsageID == "" {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
@@ -588,7 +594,7 @@ func (rS *ResourceService) V1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
 	// end of RPC caching
 
 	var mtcRLs Resources
-	if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent, args.UsageID, args.UsageTTL); err != nil {
+	if mtcRLs, err = rS.matchingResourcesForEvent(args.CGREvent, args.UsageID, args.UsageTTL); err != nil {
 		return err
 	}
 	var alcMessage string
@@ -608,7 +614,10 @@ func (rS *ResourceService) V1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
 
 // V1AllocateResource is called when a resource requires allocation
 func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&args.CGREvent, []string{utils.Tenant, utils.ID, utils.Event}); len(missing) != 0 { //Params missing
+	if args.CGREvent == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
+	}
+	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.Tenant, utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.UsageID == "" {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
@@ -634,7 +643,7 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 	// end of RPC caching
 
 	var mtcRLs Resources
-	if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent, args.UsageID,
+	if mtcRLs, err = rS.matchingResourcesForEvent(args.CGREvent, args.UsageID,
 		args.UsageTTL); err != nil {
 		return err
 	}
@@ -667,7 +676,10 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 
 // V1ReleaseResource is called when we need to clear an allocation
 func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&args.CGREvent, []string{utils.Tenant, utils.ID, utils.Event}); len(missing) != 0 { //Params missing
+	if args.CGREvent == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
+	}
+	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.Tenant, utils.ID, utils.Event}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.UsageID == "" {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
@@ -693,7 +705,7 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 	// end of RPC caching
 
 	var mtcRLs Resources
-	if mtcRLs, err = rS.matchingResourcesForEvent(&args.CGREvent, args.UsageID,
+	if mtcRLs, err = rS.matchingResourcesForEvent(args.CGREvent, args.UsageID,
 		args.UsageTTL); err != nil {
 		return err
 	}

@@ -1144,7 +1144,7 @@ func testV1FIdxCaGetResourceProfileWithNotFound(t *testing.T) {
 	var reply string
 	argsRU := utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -1220,7 +1220,7 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 	}
 	argsRU := utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -1249,7 +1249,7 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 	var reply string
 	argsRU := utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e63",
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -1274,7 +1274,7 @@ func testV1FIdxCaGetResourceProfileFromTP(t *testing.T) {
 
 	argsReU := utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -1350,7 +1350,7 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 	}
 	argsReU := utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e61",
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -1416,7 +1416,7 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 	}
 	argsReU := utils.ArgRSv1ResourceUsage{
 		UsageID: "651a8db2-4f67-4cf8-b622-169e8a482e65",
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -1437,7 +1437,7 @@ func testV1FIdxCaRemoveResourceProfile(t *testing.T) {
 	var resp string
 	argsReU := utils.ArgRSv1ResourceUsage{
 		UsageID: "653a8db2-4f67-4cf8-b622-169e8a482e61",
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
@@ -1459,7 +1459,7 @@ func testV1FIdxCaRemoveResourceProfile(t *testing.T) {
 	}
 	argsRU := utils.ArgRSv1ResourceUsage{
 		UsageID: "654a8db2-4f67-4cf8-b622-169e8a482e61",
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{

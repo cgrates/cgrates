@@ -1022,7 +1022,7 @@ type AttrRLsCache struct {
 }
 
 type ArgRSv1ResourceUsage struct {
-	CGREvent
+	*CGREvent
 	UsageID  string // ResourceUsage Identifier
 	UsageTTL *time.Duration
 	Units    float64

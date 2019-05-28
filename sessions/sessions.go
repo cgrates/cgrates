@@ -379,11 +379,6 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 				"<%s> failed force terminating session with ID <%s>, err: <%s>",
 				utils.SessionS, s.CGRid(), err.Error()))
 	}
-	cgrEv := utils.CGREvent{
-		Tenant: s.Tenant,
-		ID:     utils.GenUUID(),
-		Event:  s.EventStart.AsMapInterface(),
-	}
 	// post the CDRs
 	if sS.cdrS != nil {
 		if cgrEvs, err := s.asCGREvents(); err != nil {
@@ -417,7 +412,11 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 	if sS.resS != nil && s.ResourceID != "" {
 		var reply string
 		argsRU := utils.ArgRSv1ResourceUsage{
-			CGREvent:      cgrEv,
+			CGREvent: &utils.CGREvent{
+				Tenant: s.Tenant,
+				ID:     utils.GenUUID(),
+				Event:  s.EventStart.AsMapInterface(),
+			},
 			UsageID:       s.ResourceID,
 			Units:         1,
 			ArgDispatcher: s.ArgDispatcher,
@@ -1816,7 +1815,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		}
 		var allocMsg string
 		attrRU := utils.ArgRSv1ResourceUsage{
-			CGREvent:      args.CGREvent,
+			CGREvent:      &args.CGREvent,
 			UsageID:       originID,
 			Units:         1,
 			ArgDispatcher: args.ArgDispatcher,
@@ -2063,7 +2062,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
 		attrRU := utils.ArgRSv1ResourceUsage{
-			CGREvent:      args.CGREvent,
+			CGREvent:      &args.CGREvent,
 			UsageID:       originID,
 			Units:         1,
 			ArgDispatcher: args.ArgDispatcher,
@@ -2415,7 +2414,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 		}
 		var reply string
 		argsRU := utils.ArgRSv1ResourceUsage{
-			CGREvent:      args.CGREvent,
+			CGREvent:      &args.CGREvent,
 			UsageID:       originID, // same ID should be accepted by first group since the previous resource should be expired
 			Units:         1,
 			ArgDispatcher: args.ArgDispatcher,
@@ -2691,7 +2690,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
 		attrRU := utils.ArgRSv1ResourceUsage{
-			CGREvent:      args.CGREvent,
+			CGREvent:      &args.CGREvent,
 			UsageID:       originID,
 			Units:         1,
 			ArgDispatcher: args.ArgDispatcher,

@@ -400,7 +400,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 
 	// Allocate 3 units for resource ResTest
 	argsRU := utils.ArgRSv1ResourceUsage{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Event: map[string]interface{}{
