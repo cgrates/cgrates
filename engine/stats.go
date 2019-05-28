@@ -311,10 +311,13 @@ func (sS *StatService) processEvent(args *StatsArgsProcessEvent) (statQueueIDs [
 
 // V1ProcessEvent implements StatV1 method for processing an Event
 func (sS *StatService) V1ProcessEvent(args *StatsArgsProcessEvent, reply *[]string) (err error) {
-	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if args.CGREvent == nil {
+		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
+	}
+	if missing := utils.MissingStructFields(args, []string{utils.Tenant, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.CGREvent == nil || args.Event == nil {
-		return utils.NewErrMandatoryIeMissing("Event")
+	} else if args.Event == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	if ids, err := sS.processEvent(args); err != nil {
 		return err
@@ -326,10 +329,13 @@ func (sS *StatService) V1ProcessEvent(args *StatsArgsProcessEvent, reply *[]stri
 
 // V1StatQueuesForEvent implements StatV1 method for processing an Event
 func (sS *StatService) V1GetStatQueuesForEvent(args *StatsArgsProcessEvent, reply *[]string) (err error) {
-	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if args.CGREvent == nil {
+		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
+	}
+	if missing := utils.MissingStructFields(args, []string{utils.Tenant, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.CGREvent == nil || args.Event == nil {
-		return utils.NewErrMandatoryIeMissing("Event")
+	} else if args.Event == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	var sQs StatQueues
 	if sQs, err = sS.matchingStatQueuesForEvent(args); err != nil {
@@ -346,7 +352,7 @@ func (sS *StatService) V1GetStatQueuesForEvent(args *StatsArgsProcessEvent, repl
 
 // V1GetQueueStringMetrics returns the metrics of a Queue as string values
 func (sS *StatService) V1GetQueueStringMetrics(args *utils.TenantID, reply *map[string]string) (err error) {
-	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(args, []string{utils.Tenant, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	sq, err := sS.dm.GetStatQueue(args.Tenant, args.ID, true, true, "")
@@ -368,7 +374,7 @@ func (sS *StatService) V1GetQueueStringMetrics(args *utils.TenantID, reply *map[
 
 // V1GetFloatMetrics returns the metrics as float64 values
 func (sS *StatService) V1GetQueueFloatMetrics(args *utils.TenantID, reply *map[string]float64) (err error) {
-	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(args, []string{utils.Tenant, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	sq, err := sS.dm.GetStatQueue(args.Tenant, args.ID, true, true, "")

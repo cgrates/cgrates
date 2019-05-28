@@ -584,6 +584,7 @@ const (
 	PasiveSessionPrefix          = "psv"
 	ApierV                       = "ApierV"
 	MetaApier                    = "*apier"
+	CGREventString               = "CGREvent"
 )
 
 // Migrator Action
