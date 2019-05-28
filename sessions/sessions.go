@@ -1838,7 +1838,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		sArgs := &engine.ArgsGetSuppliers{
 			IgnoreErrors:  args.SuppliersIgnoreErrors,
 			MaxCost:       args.SuppliersMaxCost,
-			CGREvent:      *cgrEv,
+			CGREvent:      cgrEv,
 			Paginator:     args.Paginator,
 			ArgDispatcher: args.ArgDispatcher,
 		}
@@ -2714,7 +2714,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 		sArgs := &engine.ArgsGetSuppliers{
 			IgnoreErrors:  args.SuppliersIgnoreErrors,
 			MaxCost:       args.SuppliersMaxCost,
-			CGREvent:      *cgrEv,
+			CGREvent:      cgrEv,
 			Paginator:     args.Paginator,
 			ArgDispatcher: args.ArgDispatcher,
 		}

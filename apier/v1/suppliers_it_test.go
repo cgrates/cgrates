@@ -132,7 +132,7 @@ func testV1SplSFromFolder(t *testing.T) {
 
 func testV1SplSGetWeightSuppliers(t *testing.T) {
 	ev := &engine.ArgsGetSuppliers{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetWeightSuppliers",
 			Event: map[string]interface{}{
@@ -172,7 +172,7 @@ func testV1SplSGetWeightSuppliers(t *testing.T) {
 
 func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 	ev := &engine.ArgsGetSuppliers{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetLeastCostSuppliers",
 			Event: map[string]interface{}{
@@ -228,7 +228,7 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 func testV1SplSGetLeastCostSuppliersWithMaxCost(t *testing.T) {
 	ev := &engine.ArgsGetSuppliers{
 		MaxCost: "0.30",
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetLeastCostSuppliers",
 			Event: map[string]interface{}{
@@ -276,7 +276,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost(t *testing.T) {
 func testV1SplSGetLeastCostSuppliersWithMaxCostNotFound(t *testing.T) {
 	ev := &engine.ArgsGetSuppliers{
 		MaxCost: "0.001",
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetLeastCostSuppliers",
 			Event: map[string]interface{}{
@@ -298,7 +298,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCostNotFound(t *testing.T) {
 func testV1SplSGetLeastCostSuppliersWithMaxCost2(t *testing.T) {
 	ev := &engine.ArgsGetSuppliers{
 		MaxCost: utils.MetaEventCost,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetLeastCostSuppliers",
 			Event: map[string]interface{}{
@@ -346,7 +346,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost2(t *testing.T) {
 
 func testV1SplSGetHighestCostSuppliers(t *testing.T) {
 	ev := &engine.ArgsGetSuppliers{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetHighestCostSuppliers",
 			Event: map[string]interface{}{
@@ -402,7 +402,7 @@ func testV1SplSGetHighestCostSuppliers(t *testing.T) {
 func testV1SplSGetLeastCostSuppliersErr(t *testing.T) {
 	ev := &engine.ArgsGetSuppliers{
 		IgnoreErrors: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetHighestCostSuppliers",
 			Event: map[string]interface{}{
@@ -546,7 +546,7 @@ func testV1SplSPolulateStatsForQOS(t *testing.T) {
 
 func testV1SplSGetQOSSuppliers(t *testing.T) {
 	ev := &engine.ArgsGetSuppliers{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetQOSSuppliers",
 			Event: map[string]interface{}{
@@ -577,7 +577,7 @@ func testV1SplSGetQOSSuppliers(t *testing.T) {
 
 func testV1SplSGetQOSSuppliers2(t *testing.T) {
 	ev := &engine.ArgsGetSuppliers{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetQOSSuppliers",
 			Event: map[string]interface{}{
@@ -608,7 +608,7 @@ func testV1SplSGetQOSSuppliers2(t *testing.T) {
 
 func testV1SplSGetQOSSuppliers3(t *testing.T) {
 	ev := &engine.ArgsGetSuppliers{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetQOSSuppliers",
 			Event: map[string]interface{}{
@@ -639,7 +639,7 @@ func testV1SplSGetQOSSuppliers3(t *testing.T) {
 
 func testV1SplSGetQOSSuppliersFiltred(t *testing.T) {
 	ev := &engine.ArgsGetSuppliers{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetQOSSuppliers",
 			Event: map[string]interface{}{
@@ -670,7 +670,7 @@ func testV1SplSGetQOSSuppliersFiltred(t *testing.T) {
 
 func testV1SplSGetQOSSuppliersFiltred2(t *testing.T) {
 	ev := &engine.ArgsGetSuppliers{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetQOSSuppliers",
 			Event: map[string]interface{}{
@@ -705,7 +705,7 @@ func testV1SplSGetQOSSuppliersFiltred2(t *testing.T) {
 
 func testV1SplSGetSupplierWithoutFilter(t *testing.T) {
 	ev := &engine.ArgsGetSuppliers{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetSupplierWithoutFilter",
 			Event: map[string]interface{}{

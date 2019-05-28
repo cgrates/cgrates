@@ -418,7 +418,7 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 		args.CGREvent.Event[utils.Usage] = time.Duration(time.Minute) // make sure we have default set for Usage
 	}
 	var splPrfls []*SupplierProfile
-	if splPrfls, err = spS.matchingSupplierProfilesForEvent(&args.CGREvent, true); err != nil {
+	if splPrfls, err = spS.matchingSupplierProfilesForEvent(args.CGREvent, true); err != nil {
 		return
 	}
 	splPrfl := splPrfls[0]
@@ -428,7 +428,7 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 	}
 	extraOpts.sortingParameters = splPrfl.SortingParameters // populate sortingParameters in extraOpts
 	sortedSuppliers, err := spS.sorter.SortSuppliers(splPrfl.ID, splPrfl.Sorting,
-		splPrfl.Suppliers, &args.CGREvent, extraOpts)
+		splPrfl.Suppliers, args.CGREvent, extraOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -449,7 +449,7 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 type ArgsGetSuppliers struct {
 	IgnoreErrors bool
 	MaxCost      string // toDo: try with interface{} here
-	utils.CGREvent
+	*utils.CGREvent
 	utils.Paginator
 	*utils.ArgDispatcher
 }
@@ -461,7 +461,7 @@ func (args *ArgsGetSuppliers) asOptsGetSuppliers() (opts *optsGetSuppliers, err 
 			utils.Destination, utils.SetupTime, utils.Usage}); err != nil {
 			return
 		}
-		cd, err := NewCallDescriptorFromCGREvent(&args.CGREvent,
+		cd, err := NewCallDescriptorFromCGREvent(args.CGREvent,
 			config.CgrConfig().GeneralCfg().DefaultTimezone)
 		if err != nil {
 			return nil, err
@@ -488,7 +488,10 @@ type optsGetSuppliers struct {
 
 // V1GetSupplierProfilesForEvent returns the list of valid supplier IDs
 func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *SortedSuppliers) (err error) {
-	if missing := utils.MissingStructFields(&args.CGREvent, []string{"Tenant", "ID"}); len(missing) != 0 {
+	if args.CGREvent == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
+	}
+	if missing := utils.MissingStructFields(args.CGREvent, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.CGREvent.Event == nil {
 		return utils.NewErrMandatoryIeMissing("Event")
@@ -496,13 +499,13 @@ func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *Sorted
 	if spS.attributeS != nil {
 		attrArgs := &AttrArgsProcessEvent{
 			Context:       utils.StringPointer(utils.MetaSuppliers),
-			CGREvent:      &args.CGREvent,
+			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		var rplyEv AttrSProcessEventReply
 		if err := spS.attributeS.Call(utils.AttributeSv1ProcessEvent,
 			attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
-			args.CGREvent = *rplyEv.CGREvent
+			args.CGREvent = rplyEv.CGREvent
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
 		}
