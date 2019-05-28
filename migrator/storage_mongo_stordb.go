@@ -39,6 +39,10 @@ type mongoStorDBMigrator struct {
 	cursor *mongo.Cursor
 }
 
+func (mgoMig *mongoStorDBMigrator) close() {
+	mgoMig.mgoDB.Close()
+}
+
 func (mgoMig *mongoStorDBMigrator) StorDB() engine.StorDB {
 	return *mgoMig.storDB
 }

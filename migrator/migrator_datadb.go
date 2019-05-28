@@ -63,4 +63,5 @@ type MigratorDataDB interface {
 	remV3AttributeProfile(tenant, id string) (err error)
 
 	DataManager() *engine.DataManager
+	close()
 }

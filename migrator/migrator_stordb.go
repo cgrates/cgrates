@@ -31,4 +31,5 @@ type MigratorStorDB interface {
 	setV2SMCost(v2Cost *v2SessionsCost) (err error)
 	remV2SMCost(v2Cost *v2SessionsCost) (err error)
 	StorDB() engine.StorDB
+	close()
 }

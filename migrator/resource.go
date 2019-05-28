@@ -46,6 +46,9 @@ func (m *Migrator) migrateCurrentResource() (err error) {
 		if err := m.dmOut.DataManager().SetResourceProfile(res, true); err != nil {
 			return err
 		}
+		if err := m.dmIN.DataManager().RemoveResourceProfile(tenant, idg, utils.NonTransactional, false); err != nil {
+			return err
+		}
 		m.stats[utils.Resource] += 1
 	}
 	return
