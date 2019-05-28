@@ -340,10 +340,13 @@ func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (thresholdsIDs 
 
 // V1ProcessEvent implements ThresholdService method for processing an Event
 func (tS *ThresholdService) V1ProcessEvent(args *ArgsProcessEvent, reply *[]string) (err error) {
-	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if args.CGREvent == nil {
+		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
+	}
+	if missing := utils.MissingStructFields(args, []string{utils.Tenant, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.CGREvent == nil || args.CGREvent.Event == nil {
-		return utils.NewErrMandatoryIeMissing("Event")
+	} else if args.CGREvent.Event == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	if ids, err := tS.processEvent(args); err != nil {
 		return err
@@ -355,10 +358,13 @@ func (tS *ThresholdService) V1ProcessEvent(args *ArgsProcessEvent, reply *[]stri
 
 // V1GetThresholdsForEvent queries thresholds matching an Event
 func (tS *ThresholdService) V1GetThresholdsForEvent(args *ArgsProcessEvent, reply *Thresholds) (err error) {
-	if missing := utils.MissingStructFields(args, []string{"Tenant", "ID"}); len(missing) != 0 { //Params missing
+	if args.CGREvent == nil {
+		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
+	}
+	if missing := utils.MissingStructFields(args, []string{utils.Tenant, utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.CGREvent == nil || args.CGREvent.Event == nil {
-		return utils.NewErrMandatoryIeMissing("Event")
+	} else if args.CGREvent.Event == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	var ts Thresholds
 	if ts, err = tS.matchingThresholdsForEvent(args); err == nil {

@@ -269,7 +269,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 func (alS *AttributeService) V1GetAttributeForEvent(args *AttrArgsProcessEvent,
 	attrPrfl *AttributeProfile) (err error) {
 	if args.CGREvent == nil {
-		return utils.NewErrMandatoryIeMissing("CGREvent")
+		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
 	attrPrf, err := alS.attributeProfileForEvent(args)
 	if err != nil {
@@ -284,8 +284,11 @@ func (alS *AttributeService) V1GetAttributeForEvent(args *AttrArgsProcessEvent,
 
 func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	reply *AttrSProcessEventReply) (err error) {
-	if args.CGREvent == nil || args.Event == nil {
-		return utils.NewErrMandatoryIeMissing("Event")
+	if args.CGREvent == nil {
+		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
+	}
+	if args.Event == nil {
+		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	if args.ProcessRuns == nil || *args.ProcessRuns == 0 {
 		args.ProcessRuns = utils.IntPointer(alS.processRuns)

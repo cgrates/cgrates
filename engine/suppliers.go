@@ -489,12 +489,12 @@ type optsGetSuppliers struct {
 // V1GetSupplierProfilesForEvent returns the list of valid supplier IDs
 func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *SortedSuppliers) (err error) {
 	if args.CGREvent == nil {
-		return utils.NewErrMandatoryIeMissing(utils.Event)
+		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
-	if missing := utils.MissingStructFields(args.CGREvent, []string{"Tenant", "ID"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.Tenant, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.CGREvent.Event == nil {
-		return utils.NewErrMandatoryIeMissing("Event")
+		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	if spS.attributeS != nil {
 		attrArgs := &AttrArgsProcessEvent{
@@ -523,10 +523,10 @@ func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *Sorted
 
 // V1GetSupplierProfiles returns the list of valid supplier profiles
 func (spS *SupplierService) V1GetSupplierProfilesForEvent(args *utils.CGREventWithArgDispatcher, reply *[]*SupplierProfile) (err error) {
-	if missing := utils.MissingStructFields(args.CGREvent, []string{"Tenant", "ID"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.Tenant, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.CGREvent.Event == nil {
-		return utils.NewErrMandatoryIeMissing("Event")
+		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	sPs, err := spS.matchingSupplierProfilesForEvent(args.CGREvent, false)
 	if err != nil {
