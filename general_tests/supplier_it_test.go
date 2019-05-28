@@ -154,7 +154,7 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", splPrf, reply)
 	}
 	ev := &engine.ArgsGetSuppliers{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetLeastCostSuppliers",
 			Event: map[string]interface{}{
@@ -415,7 +415,7 @@ func testV1SplSPopulateResUsage(t *testing.T) {
 
 func testV1SplSGetSortedSuppliers(t *testing.T) {
 	ev := &engine.ArgsGetSuppliers{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetSortedSuppliers",
 			Event: map[string]interface{}{
@@ -497,7 +497,7 @@ func testV1SplSAddNewSplPrf2(t *testing.T) {
 
 func testV1SplSGetSortedSuppliers2(t *testing.T) {
 	ev := &engine.ArgsGetSuppliers{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testV1SplSGetSortedSuppliers2",
 			Event: map[string]interface{}{

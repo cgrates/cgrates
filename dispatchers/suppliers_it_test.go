@@ -147,7 +147,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 		},
 	}
 	args := &engine.ArgsGetSuppliers{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Time:   &nowTime,
@@ -183,7 +183,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 func testDspSupTestAuthKey(t *testing.T) {
 	var rpl *engine.SortedSuppliers
 	args := &engine.ArgsGetSuppliers{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Time:   &nowTime,
@@ -233,7 +233,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 		},
 	}
 	args := &engine.ArgsGetSuppliers{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Time:   &nowTime,
@@ -299,7 +299,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 		},
 	}
 	args := &engine.ArgsGetSuppliers{
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     utils.UUIDSha1Prefix(),
 			Time:   &nowTime,

@@ -130,7 +130,7 @@ var (
 	}
 	argsGetSuppliers = []*ArgsGetSuppliers{
 		{ //matching SupplierProfile1
-			CGREvent: utils.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "utils.CGREvent1",
 				Event: map[string]interface{}{
@@ -143,7 +143,7 @@ var (
 			},
 		},
 		{ //matching SupplierProfile2
-			CGREvent: utils.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "utils.CGREvent1",
 				Event: map[string]interface{}{
@@ -156,7 +156,7 @@ var (
 			},
 		},
 		{ //matching SupplierProfilePrefix
-			CGREvent: utils.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "utils.CGREvent1",
 				Event: map[string]interface{}{
@@ -165,7 +165,7 @@ var (
 			},
 		},
 		{ //matching
-			CGREvent: utils.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "CGR",
 				Event: map[string]interface{}{
@@ -386,7 +386,7 @@ func TestSuppliersCache(t *testing.T) {
 }
 
 func TestSuppliersmatchingSupplierProfilesForEvent(t *testing.T) {
-	sprf, err := splService.matchingSupplierProfilesForEvent(&argsGetSuppliers[0].CGREvent, true)
+	sprf, err := splService.matchingSupplierProfilesForEvent(argsGetSuppliers[0].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -394,7 +394,7 @@ func TestSuppliersmatchingSupplierProfilesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
 	}
 
-	sprf, err = splService.matchingSupplierProfilesForEvent(&argsGetSuppliers[1].CGREvent, true)
+	sprf, err = splService.matchingSupplierProfilesForEvent(argsGetSuppliers[1].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -402,7 +402,7 @@ func TestSuppliersmatchingSupplierProfilesForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
 	}
 
-	sprf, err = splService.matchingSupplierProfilesForEvent(&argsGetSuppliers[2].CGREvent, true)
+	sprf, err = splService.matchingSupplierProfilesForEvent(argsGetSuppliers[2].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -636,7 +636,7 @@ func TestSuppliersAsOptsGetSuppliersMaxCost(t *testing.T) {
 
 func TestSuppliersMatchWithIndexFalse(t *testing.T) {
 	splService.filterS.cfg.SupplierSCfg().IndexedSelects = false
-	sprf, err := splService.matchingSupplierProfilesForEvent(&argsGetSuppliers[0].CGREvent, true)
+	sprf, err := splService.matchingSupplierProfilesForEvent(argsGetSuppliers[0].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -644,7 +644,7 @@ func TestSuppliersMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[0], sprf[0])
 	}
 
-	sprf, err = splService.matchingSupplierProfilesForEvent(&argsGetSuppliers[1].CGREvent, true)
+	sprf, err = splService.matchingSupplierProfilesForEvent(argsGetSuppliers[1].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -652,7 +652,7 @@ func TestSuppliersMatchWithIndexFalse(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sppTest[1], sprf[0])
 	}
 
-	sprf, err = splService.matchingSupplierProfilesForEvent(&argsGetSuppliers[2].CGREvent, true)
+	sprf, err = splService.matchingSupplierProfilesForEvent(argsGetSuppliers[2].CGREvent, true)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

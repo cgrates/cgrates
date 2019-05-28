@@ -59,7 +59,7 @@ func (dS *DispatcherService) SupplierSv1GetSuppliers(args *engine.ArgsGetSupplie
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaSuppliers, routeID,
+	return dS.Dispatch(args.CGREvent, utils.MetaSuppliers, routeID,
 		utils.SupplierSv1GetSuppliers, args, reply)
 }
 
