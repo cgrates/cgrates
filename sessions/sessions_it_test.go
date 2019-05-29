@@ -100,7 +100,7 @@ func TestSessionsItTerminatUnexist(t *testing.T) {
 	usage := time.Duration(2 * time.Minute)
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsItTerminatUnexist",
 			Event: map[string]interface{}{
@@ -211,7 +211,7 @@ func TestSessionsItUpdateUnexist(t *testing.T) {
 	var rpl string
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsItTerminatUnexist",
 			Event: map[string]interface{}{
@@ -287,7 +287,7 @@ func TestSessionsItTerminatePassive(t *testing.T) {
 
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsItTerminatUnexist",
 			Event: map[string]interface{}{
@@ -387,7 +387,7 @@ func TestSessionsItEventCostCompressing(t *testing.T) {
 	}
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedData",
 			Event: map[string]interface{}{

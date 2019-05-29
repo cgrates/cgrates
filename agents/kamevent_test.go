@@ -314,7 +314,7 @@ func TestKamEvV1TerminateSessionArgs(t *testing.T) {
 	}
 	expected := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 				config.CgrConfig().GeneralCfg().DefaultTenant),
 			ID:    utils.UUIDSha1Prefix(),

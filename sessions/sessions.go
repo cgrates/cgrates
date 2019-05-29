@@ -2316,7 +2316,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 }
 
 func NewV1TerminateSessionArgs(acnts, resrc, thrds, stats bool,
-	cgrEv utils.CGREvent, argDisp *utils.ArgDispatcher) (args *V1TerminateSessionArgs) {
+	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher) (args *V1TerminateSessionArgs) {
 	args = &V1TerminateSessionArgs{
 		TerminateSession:  acnts,
 		ReleaseResources:  resrc,
@@ -2333,7 +2333,7 @@ type V1TerminateSessionArgs struct {
 	ReleaseResources  bool
 	ProcessThresholds bool
 	ProcessStats      bool
-	utils.CGREvent
+	*utils.CGREvent
 	*utils.ArgDispatcher
 }
 
@@ -2414,7 +2414,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 		}
 		var reply string
 		argsRU := utils.ArgRSv1ResourceUsage{
-			CGREvent:      &args.CGREvent,
+			CGREvent:      args.CGREvent,
 			UsageID:       originID, // same ID should be accepted by first group since the previous resource should be expired
 			Units:         1,
 			ArgDispatcher: args.ArgDispatcher,
@@ -2430,7 +2430,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 		}
 		var tIDs []string
 		thEv := &engine.ArgsProcessEvent{
-			CGREvent:      &args.CGREvent,
+			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
@@ -2446,7 +2446,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 		}
 		var statReply []string
 		statArgs := &engine.StatsArgsProcessEvent{
-			CGREvent:      &args.CGREvent,
+			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err := sS.statS.Call(utils.StatSv1ProcessEvent,
@@ -2909,7 +2909,7 @@ func (sS *SessionS) BiRPCV1TerminateSession(clnt rpcclient.RpcClientConnection,
 		clnt,
 		&V1TerminateSessionArgs{
 			TerminateSession: true,
-			CGREvent: utils.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: utils.FirstNonEmpty(
 					ev.GetStringIgnoreErrors(utils.Tenant),
 					sS.cgrCfg.GeneralCfg().DefaultTenant),

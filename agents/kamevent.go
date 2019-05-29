@@ -270,7 +270,7 @@ func (kev KamEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionA
 	}
 	args = &sessions.V1TerminateSessionArgs{ // defaults
 		TerminateSession: true,
-		CGREvent:         *cgrEv,
+		CGREvent:         cgrEv,
 	}
 	subsystems, has := kev[utils.CGRSubsystems]
 	if !has {

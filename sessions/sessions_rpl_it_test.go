@@ -231,7 +231,7 @@ func TestSessionSRplUpdate(t *testing.T) {
 func TestSessionSRplTerminate(t *testing.T) {
 	args := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionSRplTerminate",
 			Event: map[string]interface{}{
