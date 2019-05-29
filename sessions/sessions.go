@@ -2181,7 +2181,7 @@ func (sS *SessionS) BiRPCv1InitiateSessionWithDigest(clnt rpcclient.RpcClientCon
 
 // NewV1UpdateSessionArgs is a constructor for update session arguments
 func NewV1UpdateSessionArgs(attrs, acnts bool,
-	cgrEv utils.CGREvent, argDisp *utils.ArgDispatcher) (args *V1UpdateSessionArgs) {
+	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher) (args *V1UpdateSessionArgs) {
 	args = &V1UpdateSessionArgs{
 		GetAttributes: attrs,
 		UpdateSession: acnts,
@@ -2195,7 +2195,7 @@ func NewV1UpdateSessionArgs(attrs, acnts bool,
 type V1UpdateSessionArgs struct {
 	GetAttributes bool
 	UpdateSession bool
-	utils.CGREvent
+	*utils.CGREvent
 	*utils.ArgDispatcher
 }
 
@@ -2265,13 +2265,13 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 		}
 		attrArgs := &engine.AttrArgsProcessEvent{
 			Context:       utils.StringPointer(utils.MetaSessionS),
-			CGREvent:      &args.CGREvent,
+			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
 			attrArgs, &rplyEv); err == nil {
-			args.CGREvent = *rplyEv.CGREvent
+			args.CGREvent = rplyEv.CGREvent
 			if tntIface, has := args.CGREvent.Event[utils.MetaTenant]; has {
 				// special case when we want to overwrite the tenant
 				args.CGREvent.Tenant = tntIface.(string)
@@ -2883,7 +2883,7 @@ func (sS *SessionS) BiRPCV1UpdateSession(clnt rpcclient.RpcClientConnection,
 		clnt,
 		&V1UpdateSessionArgs{
 			UpdateSession: true,
-			CGREvent: utils.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: utils.FirstNonEmpty(
 					ev.GetStringIgnoreErrors(utils.Tenant),
 					sS.cgrCfg.GeneralCfg().DefaultTenant),

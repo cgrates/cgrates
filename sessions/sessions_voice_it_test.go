@@ -393,7 +393,7 @@ func TestSessionsVoiceLastUsed(t *testing.T) {
 	lastUsage := time.Duration(1*time.Minute + 30*time.Second)
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsed",
 			Event: map[string]interface{}{
@@ -430,7 +430,7 @@ func TestSessionsVoiceLastUsed(t *testing.T) {
 	lastUsage = time.Duration(2*time.Minute + 30*time.Second)
 	updateArgs = &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsed",
 			Event: map[string]interface{}{
@@ -554,7 +554,7 @@ func TestSessionsVoiceLastUsedEnd(t *testing.T) {
 	lastUsage := time.Duration(30 * time.Second)
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsedEnd",
 			Event: map[string]interface{}{
@@ -677,7 +677,7 @@ func TestSessionsVoiceLastUsedNotFixed(t *testing.T) {
 	lastUsage := time.Duration(12 * time.Second)
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsedNotFixed",
 			Event: map[string]interface{}{
@@ -813,7 +813,7 @@ func TestSessionsVoiceSessionTTL(t *testing.T) {
 	lastUsage := time.Duration(30 * time.Second)
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceSessionTTL",
 			Event: map[string]interface{}{
@@ -964,7 +964,7 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	lastUsage := time.Duration(30 * time.Second)
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceSessionTTLWithRelocate",
 			Event: map[string]interface{}{
@@ -1125,7 +1125,7 @@ func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	lastUsage := time.Duration(30 * time.Second)
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceSessionTTLWithRelocate",
 			Event: map[string]interface{}{

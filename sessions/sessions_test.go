@@ -832,7 +832,7 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 }
 
 func TestSessionSNewV1UpdateSessionArgs(t *testing.T) {
-	cgrEv := utils.CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
 		Event: map[string]interface{}{

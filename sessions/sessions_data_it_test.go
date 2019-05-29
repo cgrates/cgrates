@@ -157,7 +157,7 @@ func TestSessionsDataLastUsedData(t *testing.T) {
 
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedData",
 			Event: map[string]interface{}{
@@ -299,7 +299,7 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	usage = int64(8192)
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedMultipleUpdates",
 			Event: map[string]interface{}{
@@ -344,7 +344,7 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	usage = int64(1024)
 	updateArgs = &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedMultipleUpdates",
 			Event: map[string]interface{}{
@@ -388,7 +388,7 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	usage = int64(1024)
 	updateArgs = &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedMultipleUpdates",
 			Event: map[string]interface{}{
@@ -631,7 +631,7 @@ func TestSessionsDataTTLExpMultiUpdates(t *testing.T) {
 	usage = int64(4096)
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataTTLExpMultiUpdates",
 			Event: map[string]interface{}{
@@ -753,7 +753,7 @@ func TestSessionsDataMultipleDataNoUsage(t *testing.T) {
 	usage = int64(1024)
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataMultipleDataNoUsage",
 			Event: map[string]interface{}{
@@ -800,7 +800,7 @@ func TestSessionsDataMultipleDataNoUsage(t *testing.T) {
 	usage = int64(0)
 	updateArgs = &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataMultipleDataNoUsage",
 			Event: map[string]interface{}{
