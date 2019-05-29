@@ -44,6 +44,8 @@ var (
 var sTestsAttrIT = []func(t *testing.T){
 	testAttrITConnect,
 	testAttrITFlush,
+	testAttrITMigrateOnlyVersion,
+	testAttrITFlush,
 	testAttrITMigrateAndMove,
 	testAttrITFlush,
 	testAttrITMigrateV2,
@@ -222,6 +224,31 @@ func testAttrITFlush(t *testing.T) {
 	}
 	if err := engine.SetDBVersions(attrMigrator.dmIN.DataManager().DataDB()); err != nil {
 		t.Error("Error  ", err.Error())
+	}
+}
+
+func testAttrITMigrateOnlyVersion(t *testing.T) {
+	currentVersion := engine.Versions{utils.Attributes: 1}
+	err := attrMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
+	if err != nil {
+		t.Error("Error when setting version for Attributes ", err.Error())
+	}
+
+	if vrs, err := attrMigrator.dmIN.DataManager().DataDB().GetVersions(""); err != nil {
+		t.Error(err)
+	} else if vrs[utils.Attributes] != 1 {
+		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
+	}
+
+	err, _ = attrMigrator.Migrate([]string{utils.MetaAttributes})
+	if err != nil {
+		t.Error("Error when migrating Attributes ", err.Error())
+	}
+
+	if vrs, err := attrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
+		t.Error(err)
+	} else if vrs[utils.Attributes] != 4 {
+		t.Errorf("Unexpected version returned: %d", vrs[utils.Attributes])
 	}
 }
 
