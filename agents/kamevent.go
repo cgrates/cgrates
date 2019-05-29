@@ -246,7 +246,7 @@ func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 	}
 	args = &sessions.V1InitSessionArgs{ // defaults
 		InitSession: true,
-		CGREvent:    *cgrEv,
+		CGREvent:    cgrEv,
 	}
 	subsystems, has := kev[utils.CGRSubsystems]
 	if !has {

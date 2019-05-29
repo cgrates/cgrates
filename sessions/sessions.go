@@ -1934,7 +1934,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.RpcClientConn
 
 // NewV1InitSessionArgs is a constructor for V1InitSessionArgs
 func NewV1InitSessionArgs(attrs, resrc, acnt, thrslds, stats bool,
-	cgrEv utils.CGREvent, argDisp *utils.ArgDispatcher) (args *V1InitSessionArgs) {
+	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher) (args *V1InitSessionArgs) {
 	args = &V1InitSessionArgs{
 		GetAttributes:     attrs,
 		AllocateResources: resrc,
@@ -1954,7 +1954,7 @@ type V1InitSessionArgs struct {
 	InitSession       bool
 	ProcessThresholds bool
 	ProcessStats      bool
-	utils.CGREvent
+	*utils.CGREvent
 	*utils.ArgDispatcher
 }
 
@@ -2037,13 +2037,13 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		}
 		attrArgs := &engine.AttrArgsProcessEvent{
 			Context:       utils.StringPointer(utils.MetaSessionS),
-			CGREvent:      &args.CGREvent,
+			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
 			attrArgs, &rplyEv); err == nil {
-			args.CGREvent = *rplyEv.CGREvent
+			args.CGREvent = rplyEv.CGREvent
 			if tntIface, has := args.CGREvent.Event[utils.MetaTenant]; has {
 				// special case when we want to overwrite the tenant
 				args.CGREvent.Tenant = tntIface.(string)
@@ -2062,7 +2062,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
 		attrRU := utils.ArgRSv1ResourceUsage{
-			CGREvent:      &args.CGREvent,
+			CGREvent:      args.CGREvent,
 			UsageID:       originID,
 			Units:         1,
 			ArgDispatcher: args.ArgDispatcher,
@@ -2104,7 +2104,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		}
 		var tIDs []string
 		thEv := &engine.ArgsProcessEvent{
-			CGREvent:      &args.CGREvent,
+			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent,
@@ -2122,7 +2122,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		}
 		var statReply []string
 		statArgs := &engine.StatsArgsProcessEvent{
-			CGREvent:      &args.CGREvent,
+			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err := sS.statS.Call(utils.StatSv1ProcessEvent,
@@ -2856,7 +2856,7 @@ func (sS *SessionS) BiRPCV1InitiateSession(clnt rpcclient.RpcClientConnection,
 		clnt,
 		&V1InitSessionArgs{
 			InitSession: true,
-			CGREvent: utils.CGREvent{
+			CGREvent: &utils.CGREvent{
 				Tenant: utils.FirstNonEmpty(
 					ev.GetStringIgnoreErrors(utils.Tenant),
 					sS.cgrCfg.GeneralCfg().DefaultTenant),

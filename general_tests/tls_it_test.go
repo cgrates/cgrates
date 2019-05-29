@@ -136,7 +136,7 @@ func testTLSPing(t *testing.T) {
 		InitSession:       true,
 		AllocateResources: true,
 		GetAttributes:     true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession",
 			Event: map[string]interface{}{

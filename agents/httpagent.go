@@ -152,7 +152,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			reqProcessor.Flags.HasKey(utils.MetaThresholds),
 			reqProcessor.Flags.HasKey(utils.MetaStats),
-			*cgrEv, cgrArgs.ArgDispatcher)
+			cgrEv, cgrArgs.ArgDispatcher)
 		var initReply sessions.V1InitSessionReply
 		err = ha.sessionS.Call(utils.SessionSv1InitiateSession,
 			initArgs, &initReply)

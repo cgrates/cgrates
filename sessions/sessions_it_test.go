@@ -340,7 +340,7 @@ func TestSessionsItEventCostCompressing(t *testing.T) {
 	// Init the session
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsItEventCostCompressing",
 			Event: map[string]interface{}{

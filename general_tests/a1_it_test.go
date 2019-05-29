@@ -144,7 +144,7 @@ func TestA1itDataSession1(t *testing.T) {
 	usage := time.Duration(10240)
 	initArgs := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestA1itDataSession1",
 			Event: map[string]interface{}{
