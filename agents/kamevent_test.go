@@ -151,7 +151,7 @@ func TestKamEvV1AuthorizeArgs(t *testing.T) {
 	}
 	expected := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 				config.CgrConfig().GeneralCfg().DefaultTenant),
 			ID:    utils.UUIDSha1Prefix(),
@@ -200,7 +200,7 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 	}
 	authArgs := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 				config.CgrConfig().GeneralCfg().DefaultTenant),
 			ID:    utils.UUIDSha1Prefix(),
@@ -225,7 +225,7 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 		KamReplyRoute: "CGR_PROFILE_REPLY"}
 	authArgs = &sessions.V1AuthorizeArgs{
 		GetAttributes: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 				config.CgrConfig().GeneralCfg().DefaultTenant),
 			ID:    utils.UUIDSha1Prefix(),

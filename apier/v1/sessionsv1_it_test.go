@@ -135,7 +135,7 @@ func TestSSv1ItAuth(t *testing.T) {
 		AuthorizeResources: true,
 		GetSuppliers:       true,
 		GetAttributes:      true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
 			Event: map[string]interface{}{
@@ -217,7 +217,7 @@ func TestSSv1ItAuthWithDigest(t *testing.T) {
 		AuthorizeResources: true,
 		GetSuppliers:       true,
 		GetAttributes:      true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
 			Event: map[string]interface{}{

@@ -343,7 +343,7 @@ func TestSMAEventV1AuthorizeArgs(t *testing.T) {
 	}
 	exp := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
-		CGREvent:    *cgrEv,
+		CGREvent:    cgrEv,
 	}
 	if rcv := smaEv.V1AuthorizeArgs(); !reflect.DeepEqual(exp.GetMaxUsage, rcv.GetMaxUsage) {
 		t.Errorf("Expecting: %+v, received: %+v", exp.GetMaxUsage, rcv.GetMaxUsage)
@@ -368,7 +368,7 @@ func TestSMAEventV1AuthorizeArgs(t *testing.T) {
 		ProcessThresholds:  true,
 		ProcessStats:       true,
 		GetSuppliers:       true,
-		CGREvent:           *cgrEv2,
+		CGREvent:           cgrEv2,
 	}
 	if rcv := smaEv2.V1AuthorizeArgs(); !reflect.DeepEqual(exp2.GetAttributes, rcv.GetAttributes) {
 		t.Errorf("Expecting: %+v, received: %+v", exp2.GetAttributes, rcv.GetAttributes)

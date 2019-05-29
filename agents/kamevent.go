@@ -175,7 +175,7 @@ func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 	}
 	args = &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
-		CGREvent:    *cgrEv,
+		CGREvent:    cgrEv,
 	}
 	subsystems, has := kev[utils.CGRSubsystems]
 	if !has {
