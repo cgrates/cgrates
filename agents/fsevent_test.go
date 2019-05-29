@@ -993,7 +993,7 @@ func TestFsEvV1AuthorizeArgs(t *testing.T) {
 	}
 	expected := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: ev.GetTenant(utils.META_DEFAULT),
 			ID:     utils.UUIDSha1Prefix(),
 			Time:   &sTime,

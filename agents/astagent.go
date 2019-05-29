@@ -231,7 +231,7 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 	// Done with processing event, cache it for later use
 	sma.evCacheMux.Lock()
 	sma.eventsCache[ev.ChannelID()] = &utils.CGREventWithArgDispatcher{
-		CGREvent:      &authArgs.CGREvent,
+		CGREvent:      authArgs.CGREvent,
 		ArgDispatcher: authArgs.ArgDispatcher,
 	}
 	sma.evCacheMux.Unlock()

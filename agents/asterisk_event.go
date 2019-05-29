@@ -273,7 +273,7 @@ func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs)
 	}
 	args = &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
-		CGREvent:    *cgrEv,
+		CGREvent:    cgrEv,
 	}
 	if smaEv.Subsystems() == utils.EmptyString {
 		utils.Logger.Err(fmt.Sprintf("<%s> cgr_subsystems variable is not set",

@@ -797,7 +797,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 }
 
 func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
-	cgrEv := utils.CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
 		Event: map[string]interface{}{
@@ -1243,7 +1243,7 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 }
 
 func TestSessionSNewV1AuthorizeArgsWithArgDispatcher(t *testing.T) {
-	cgrEv := utils.CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
 		Event: map[string]interface{}{
@@ -1289,7 +1289,7 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher(t *testing.T) {
 }
 
 func TestSessionSNewV1AuthorizeArgsWithArgDispatcher2(t *testing.T) {
-	cgrEv := utils.CGREvent{
+	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
 		Event: map[string]interface{}{

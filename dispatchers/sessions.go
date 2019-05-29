@@ -61,7 +61,7 @@ func (dS *DispatcherService) SessionSv1AuthorizeEvent(args *sessions.V1Authorize
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaSessionS, routeID,
+	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, routeID,
 		utils.SessionSv1AuthorizeEvent, args, reply)
 }
 
@@ -81,7 +81,7 @@ func (dS *DispatcherService) SessionSv1AuthorizeEventWithDigest(args *sessions.V
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaSessionS, routeID,
+	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, routeID,
 		utils.SessionSv1AuthorizeEventWithDigest, args, reply)
 }
 

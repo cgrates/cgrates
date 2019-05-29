@@ -167,7 +167,7 @@ func testDspSessionTestAuthKey(t *testing.T) {
 		AuthorizeResources: true,
 		GetSuppliers:       true,
 		GetAttributes:      true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
 			Event: map[string]interface{}{
@@ -200,7 +200,7 @@ func testDspSessionAuthorize(t *testing.T) {
 		AuthorizeResources: true,
 		GetSuppliers:       true,
 		GetAttributes:      true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
 			Event: map[string]interface{}{

@@ -188,7 +188,7 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 	authUsage := 5 * time.Minute
 	args := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testRPCMethodsAuthorizeSession",
 			Event: map[string]interface{}{
