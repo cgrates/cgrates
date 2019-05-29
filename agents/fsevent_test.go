@@ -1036,7 +1036,7 @@ func TestFsEvV1InitSessionArgs(t *testing.T) {
 	}
 	expected := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: ev.GetTenant(utils.META_DEFAULT),
 			ID:     utils.UUIDSha1Prefix(),
 			Time:   &sTime,

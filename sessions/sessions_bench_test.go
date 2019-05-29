@@ -107,7 +107,7 @@ func initSession(i int) {
 	defer func() { maxCps <- oneCps }()
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "",
 			Event: map[string]interface{}{

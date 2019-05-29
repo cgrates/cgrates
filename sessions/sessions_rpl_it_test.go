@@ -103,7 +103,7 @@ func TestSessionSRplInitiate(t *testing.T) {
 	usage := time.Duration(1*time.Minute + 30*time.Second)
 	argsInit := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionSRplInitiate",
 			Event: map[string]interface{}{
@@ -290,7 +290,7 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 	// create two sessions
 	argsInit1 := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
 			Event: map[string]interface{}{
@@ -312,7 +312,7 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 
 	argsInit2 := &V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth2",
 			Event: map[string]interface{}{

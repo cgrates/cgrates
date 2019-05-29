@@ -300,7 +300,7 @@ func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs)
 func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp utils.CGREventWithArgDispatcher) (args *sessions.V1InitSessionArgs) {
 	args = &sessions.V1InitSessionArgs{ // defaults
 		InitSession: true,
-		CGREvent:    *cgrEvDisp.CGREvent,
+		CGREvent:    cgrEvDisp.CGREvent,
 	}
 	subsystems, err := cgrEvDisp.CGREvent.FieldAsString(utils.CGRSubsystems)
 	if err != nil {

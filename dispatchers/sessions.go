@@ -101,7 +101,7 @@ func (dS *DispatcherService) SessionSv1InitiateSession(args *sessions.V1InitSess
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaSessionS, routeID,
+	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, routeID,
 		utils.SessionSv1InitiateSession, args, reply)
 }
 
@@ -121,7 +121,7 @@ func (dS *DispatcherService) SessionSv1InitiateSessionWithDigest(args *sessions.
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaSessionS, routeID,
+	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, routeID,
 		utils.SessionSv1InitiateSessionWithDigest, args, reply)
 }
 

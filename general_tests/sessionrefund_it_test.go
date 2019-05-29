@@ -117,7 +117,7 @@ func TestSrItAddVoiceBalance(t *testing.T) {
 func TestSrItInitSession(t *testing.T) {
 	args1 := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: srtenant,
 			ID:     "TestSrItInitiateSession",
 			Event: map[string]interface{}{
@@ -204,7 +204,7 @@ func TestSrItAddMonetaryBalance(t *testing.T) {
 func TestSrItInitSession2(t *testing.T) {
 	args1 := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: srtenant,
 			ID:     "TestSrItInitiateSession1",
 			Event: map[string]interface{}{

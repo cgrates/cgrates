@@ -118,7 +118,7 @@ func TestSesItAddVoiceBalance(t *testing.T) {
 func TestSesItInitSession(t *testing.T) {
 	args1 := &sessions.V1InitSessionArgs{
 		InitSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: sesTenant,
 			ID:     "TestSesItInitiateSession",
 			Event: map[string]interface{}{
