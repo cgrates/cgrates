@@ -214,7 +214,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 		updateArgs := sessions.NewV1UpdateSessionArgs(
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
-			*cgrEv, cgrArgs.ArgDispatcher)
+			cgrEv, cgrArgs.ArgDispatcher)
 		var updateReply sessions.V1UpdateSessionReply
 		err = da.sS.Call(utils.SessionSv1UpdateSession,
 			updateArgs, &updateReply)

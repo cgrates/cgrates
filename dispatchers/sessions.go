@@ -141,7 +141,7 @@ func (dS *DispatcherService) SessionSv1UpdateSession(args *sessions.V1UpdateSess
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaSessionS, routeID,
+	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, routeID,
 		utils.SessionSv1UpdateSession, args, reply)
 }
 

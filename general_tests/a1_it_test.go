@@ -178,7 +178,7 @@ func TestA1itDataSession1(t *testing.T) {
 
 	updateArgs := &sessions.V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsed",
 			Event: map[string]interface{}{

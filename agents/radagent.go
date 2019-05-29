@@ -207,7 +207,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 		updateArgs := sessions.NewV1UpdateSessionArgs(
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
-			*cgrEv, cgrArgs.ArgDispatcher)
+			cgrEv, cgrArgs.ArgDispatcher)
 		var updateReply sessions.V1UpdateSessionReply
 		err = ra.sessionS.Call(utils.SessionSv1UpdateSession,
 			updateArgs, &updateReply)

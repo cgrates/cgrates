@@ -171,7 +171,7 @@ func TestSessionsItUpdateUnexist(t *testing.T) {
 	usage := time.Duration(2 * time.Minute)
 	updtArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsItUpdateUnexist",
 			Event: map[string]interface{}{
@@ -363,7 +363,7 @@ func TestSessionsItEventCostCompressing(t *testing.T) {
 	}
 	updateArgs := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsItEventCostCompressing",
 			Event: map[string]interface{}{

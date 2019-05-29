@@ -161,7 +161,7 @@ func TestSessionSRplUpdate(t *testing.T) {
 	usage := time.Duration(1 * time.Minute)
 	argsUpdate := &V1UpdateSessionArgs{
 		UpdateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionSRplUpdate",
 			Event: map[string]interface{}{
