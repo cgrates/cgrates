@@ -2556,7 +2556,7 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 // NewV1ProcessEventArgs is a constructor for EventArgs used by ProcessEvent
 func NewV1ProcessEventArgs(resrc, acnts, attrs, thds, stats,
 	suppls, supplsIgnoreErrs, supplsEventCost bool,
-	cgrEv utils.CGREvent, argDisp *utils.ArgDispatcher,
+	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher,
 	supplierPaginator utils.Paginator) (args *V1ProcessEventArgs) {
 	args = &V1ProcessEventArgs{
 		AllocateResources:     resrc,
@@ -2586,7 +2586,7 @@ type V1ProcessEventArgs struct {
 	GetSuppliers          bool
 	SuppliersMaxCost      string
 	SuppliersIgnoreErrors bool
-	utils.CGREvent
+	*utils.CGREvent
 	utils.Paginator
 	*utils.ArgDispatcher
 }
@@ -2665,13 +2665,13 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 		}
 		attrArgs := &engine.AttrArgsProcessEvent{
 			Context:       utils.StringPointer(utils.MetaSessionS),
-			CGREvent:      &args.CGREvent,
+			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
 			attrArgs, &rplyEv); err == nil {
-			args.CGREvent = *rplyEv.CGREvent
+			args.CGREvent = rplyEv.CGREvent
 			if tntIface, has := args.CGREvent.Event[utils.MetaTenant]; has {
 				// special case when we want to overwrite the tenant
 				args.CGREvent.Tenant = tntIface.(string)
@@ -2690,7 +2690,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
 		attrRU := utils.ArgRSv1ResourceUsage{
-			CGREvent:      &args.CGREvent,
+			CGREvent:      args.CGREvent,
 			UsageID:       originID,
 			Units:         1,
 			ArgDispatcher: args.ArgDispatcher,
@@ -2740,7 +2740,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 		}
 		var tIDs []string
 		thEv := &engine.ArgsProcessEvent{
-			CGREvent:      &args.CGREvent,
+			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent,
@@ -2757,7 +2757,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 		}
 		var statReply []string
 		statArgs := &engine.StatsArgsProcessEvent{
-			CGREvent:      &args.CGREvent,
+			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		if err := sS.statS.Call(utils.StatSv1ProcessEvent,

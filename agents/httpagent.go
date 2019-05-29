@@ -193,7 +193,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliers),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
-			*cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
+			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
 		var eventRply sessions.V1ProcessEventReply
 		err = ha.sessionS.Call(utils.SessionSv1ProcessEvent,
 			evArgs, &eventRply)
