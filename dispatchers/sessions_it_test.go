@@ -523,7 +523,7 @@ func testDspSessionProcessEvent(t *testing.T) {
 		AllocateResources: true,
 		Debit:             true,
 		GetAttributes:     true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessEvent",
 			Event: map[string]interface{}{
@@ -589,7 +589,7 @@ func testDspSessionProcessEvent2(t *testing.T) {
 		AllocateResources: true,
 		Debit:             true,
 		GetAttributes:     true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessEvent",
 			Event: map[string]interface{}{

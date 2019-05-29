@@ -584,7 +584,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 	initUsage := 5 * time.Minute
 	args := &sessions.V1ProcessEventArgs{
 		Debit: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testRPCMethodsProcessEvent",
 			Event: map[string]interface{}{

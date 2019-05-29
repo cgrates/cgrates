@@ -221,7 +221,7 @@ func (dS *DispatcherService) SessionSv1ProcessEvent(args *sessions.V1ProcessEven
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaSessionS, routeID,
+	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, routeID,
 		utils.SessionSv1ProcessEvent, args, reply)
 }
 
