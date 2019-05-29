@@ -157,7 +157,7 @@ func (v1rs *redisMigrator) getV1ActionPlans() (v1aps *v1ActionPlans, err error) 
 		if err != nil {
 			return
 		} else if len(v1rs.dataKeys) == 0 {
-			return nil, utils.ErrNotFound
+			return nil, utils.ErrNoMoreData
 		}
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
@@ -198,7 +198,7 @@ func (v1rs *redisMigrator) getV1Actions() (v1acs *v1Actions, err error) {
 		if err != nil {
 			return
 		} else if len(v1rs.dataKeys) == 0 {
-			return nil, utils.ErrNotFound
+			return nil, utils.ErrNoMoreData
 		}
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
@@ -239,7 +239,7 @@ func (v1rs *redisMigrator) getV1ActionTriggers() (v1acts *v1ActionTriggers, err 
 		if err != nil {
 			return
 		} else if len(v1rs.dataKeys) == 0 {
-			return nil, utils.ErrNotFound
+			return nil, utils.ErrNoMoreData
 		}
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
@@ -280,7 +280,7 @@ func (v1rs *redisMigrator) getV1SharedGroup() (v1sg *v1SharedGroup, err error) {
 		if err != nil {
 			return
 		} else if len(v1rs.dataKeys) == 0 {
-			return nil, utils.ErrNotFound
+			return nil, utils.ErrNoMoreData
 		}
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
@@ -321,7 +321,7 @@ func (v1rs *redisMigrator) getV1Stats() (v1st *v1Stat, err error) {
 		if err != nil {
 			return
 		} else if len(v1rs.dataKeys) == 0 {
-			return nil, utils.ErrNotFound
+			return nil, utils.ErrNoMoreData
 		}
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
@@ -362,7 +362,7 @@ func (v1rs *redisMigrator) getV2ActionTrigger() (v2at *v2ActionTrigger, err erro
 		if err != nil {
 			return
 		} else if len(v1rs.dataKeys) == 0 {
-			return nil, utils.ErrNotFound
+			return nil, utils.ErrNoMoreData
 		}
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
@@ -404,7 +404,7 @@ func (v1rs *redisMigrator) getV1AttributeProfile() (v1attrPrf *v1AttributeProfil
 		if err != nil {
 			return
 		} else if len(v1rs.dataKeys) == 0 {
-			return nil, utils.ErrNotFound
+			return nil, utils.ErrNoMoreData
 		}
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
@@ -446,7 +446,7 @@ func (v1rs *redisMigrator) getV2ThresholdProfile() (v2T *v2Threshold, err error)
 		if err != nil {
 			return
 		} else if len(v1rs.dataKeys) == 0 {
-			return nil, utils.ErrNotFound
+			return nil, utils.ErrNoMoreData
 		}
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
@@ -668,7 +668,7 @@ func (v1rs *redisMigrator) getV2AttributeProfile() (v2attrPrf *v2AttributeProfil
 		if err != nil {
 			return
 		} else if len(v1rs.dataKeys) == 0 {
-			return nil, utils.ErrNotFound
+			return nil, utils.ErrNoMoreData
 		}
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
@@ -716,7 +716,7 @@ func (v1rs *redisMigrator) getV3AttributeProfile() (v3attrPrf *v3AttributeProfil
 		if err != nil {
 			return
 		} else if len(v1rs.dataKeys) == 0 {
-			return nil, utils.ErrNotFound
+			return nil, utils.ErrNoMoreData
 		}
 		v1rs.qryIdx = utils.IntPointer(0)
 	}
