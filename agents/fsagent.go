@@ -148,7 +148,7 @@ func (sm *FSsessions) onChannelPark(fsev FSEvent, connId string) {
 	if fsev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Not for us
 		return
 	}
-	fsev[VarCGROriginHost] = sm.conns[connId].cfg.Alias
+	fsev[VarCGROriginHost] = utils.FirstNonEmpty(fsev[VarCGROriginHost], sm.conns[connId].cfg.Alias) // rewrite the OriginHost variable if it is empty
 	authArgs := fsev.V1AuthorizeArgs()
 	authArgs.CGREvent.Event[FsConnID] = connId // Attach the connection ID
 	var authReply sessions.V1AuthorizeReply
@@ -228,7 +228,7 @@ func (sm *FSsessions) onChannelAnswer(fsev FSEvent, connId string) {
 				utils.FreeSWITCHAgent, err.Error(), VarCGROriginHost))
 		return
 	}
-	fsev[VarCGROriginHost] = sm.conns[connId].cfg.Alias
+	fsev[VarCGROriginHost] = utils.FirstNonEmpty(fsev[VarCGROriginHost], sm.conns[connId].cfg.Alias) // rewrite the OriginHost variable if it is empty
 	chanUUID := fsev.GetUUID()
 	if missing := fsev.MissingParameter(sm.timezone); missing != "" {
 		sm.disconnectSession(connId, chanUUID, "",
@@ -253,8 +253,8 @@ func (sm *FSsessions) onChannelHangupComplete(fsev FSEvent, connId string) {
 		return
 	}
 	var reply string
-	fsev[VarCGROriginHost] = sm.conns[connId].cfg.Alias
-	if fsev[VarAnswerEpoch] != "0" { // call was answered
+	fsev[VarCGROriginHost] = utils.FirstNonEmpty(fsev[VarCGROriginHost], sm.conns[connId].cfg.Alias) // rewrite the OriginHost variable if it is empty
+	if fsev[VarAnswerEpoch] != "0" {                                                                 // call was answered
 		terminateSessionArgs := fsev.V1TerminateSessionArgs()
 		terminateSessionArgs.CGREvent.Event[FsConnID] = connId // Attach the connection ID in case we need to create a session and disconnect it
 		if err := sm.sS.Call(utils.SessionSv1TerminateSession,
