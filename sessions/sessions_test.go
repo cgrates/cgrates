@@ -90,43 +90,45 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		SRuns: []*SRun{
 			&SRun{
 				Event: sEv.AsMapInterface(),
-				CD:    &engine.CallDescriptor{},
+				CD: &engine.CallDescriptor{
+					RunID: utils.DEFAULT_RUNID,
+				},
 			},
 		},
 	}
 	cgrID := GetSetCGRID(sEv)
 	sS.indexSession(session, false)
-	// eIndexes := map[string]map[string]utils.StringMap{
-	// 	"OriginID": map[string]utils.StringMap{
-	// 		"12345": utils.StringMap{
-	// 			cgrID: true,
-	// 		},
-	// 	},
-	// 	"Tenant": map[string]utils.StringMap{
-	// 		"cgrates.org": utils.StringMap{
-	// 			cgrID: true,
-	// 		},
-	// 	},
-	// 	"Account": map[string]utils.StringMap{
-	// 		"account1": utils.StringMap{
-	// 			cgrID: true,
-	// 		},
-	// 	},
-	// 	"Extra3": map[string]utils.StringMap{
-	// 		utils.MetaEmpty: utils.StringMap{
-	// 			cgrID: true,
-	// 		},
-	// 	},
-	// 	"Extra4": map[string]utils.StringMap{
-	// 		utils.NOT_AVAILABLE: utils.StringMap{
-	// 			cgrID: true,
-	// 		},
-	// 	},
-	// }
-	// if !reflect.DeepEqual(eIndexes, sS.aSessionsIdx) {
-	// 	t.Errorf("Expecting: %s, received: %s",
-	// 		utils.ToJSON(eIndexes), utils.ToJSON(sS.aSessionsIdx))
-	// }
+	eIndexes := map[string]map[string]map[string]utils.StringMap{
+		"OriginID": map[string]map[string]utils.StringMap{
+			"12345": map[string]utils.StringMap{
+				cgrID: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+		"Tenant": map[string]map[string]utils.StringMap{
+			"cgrates.org": map[string]utils.StringMap{
+				cgrID: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+		"Account": map[string]map[string]utils.StringMap{
+			"account1": map[string]utils.StringMap{
+				cgrID: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+		"Extra3": map[string]map[string]utils.StringMap{
+			utils.MetaEmpty: map[string]utils.StringMap{
+				cgrID: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+		"Extra4": map[string]map[string]utils.StringMap{
+			utils.NOT_AVAILABLE: map[string]utils.StringMap{
+				cgrID: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+	}
+	if !reflect.DeepEqual(eIndexes, sS.aSessionsIdx) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eIndexes), utils.ToJSON(sS.aSessionsIdx))
+	}
 	eRIdxes := map[string][]*riFieldNameVal{
 		cgrID: []*riFieldNameVal{
 			&riFieldNameVal{fieldName: "Tenant", fieldValue: "cgrates.org"},
@@ -158,7 +160,9 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		SRuns: []*SRun{
 			&SRun{
 				Event: sSEv2.AsMapInterface(),
-				CD:    &engine.CallDescriptor{},
+				CD: &engine.CallDescriptor{
+					RunID: utils.DEFAULT_RUNID,
+				},
 			},
 		},
 	}
@@ -177,63 +181,65 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		SRuns: []*SRun{
 			&SRun{
 				Event: sSEv3.AsMapInterface(),
-				CD:    &engine.CallDescriptor{},
+				CD: &engine.CallDescriptor{
+					RunID: utils.DEFAULT_RUNID,
+				},
 			},
 		},
 	}
 	sS.indexSession(session3, false)
-	// eIndexes = map[string]map[string]utils.StringMap{
-	// 	"OriginID": map[string]utils.StringMap{
-	// 		"12345": utils.StringMap{
-	// 			cgrID: true,
-	// 		},
-	// 		"12346": utils.StringMap{
-	// 			cgrID2: true,
-	// 		},
-	// 		"12347": utils.StringMap{
-	// 			cgrID3: true,
-	// 		},
-	// 	},
-	// 	"Tenant": map[string]utils.StringMap{
-	// 		"cgrates.org": utils.StringMap{
-	// 			cgrID:  true,
-	// 			cgrID3: true,
-	// 		},
-	// 		"itsyscom.com": utils.StringMap{
-	// 			cgrID2: true,
-	// 		},
-	// 	},
-	// 	"Account": map[string]utils.StringMap{
-	// 		"account1": utils.StringMap{
-	// 			cgrID: true,
-	// 		},
-	// 		"account2": utils.StringMap{
-	// 			cgrID2: true,
-	// 			cgrID3: true,
-	// 		},
-	// 	},
-	// 	"Extra3": map[string]utils.StringMap{
-	// 		utils.MetaEmpty: utils.StringMap{
-	// 			cgrID:  true,
-	// 			cgrID2: true,
-	// 		},
-	// 		utils.NOT_AVAILABLE: utils.StringMap{
-	// 			cgrID3: true,
-	// 		},
-	// 	},
-	// 	"Extra4": map[string]utils.StringMap{
-	// 		utils.NOT_AVAILABLE: utils.StringMap{
-	// 			cgrID:  true,
-	// 			cgrID3: true,
-	// 		},
-	// 		"info2": utils.StringMap{
-	// 			cgrID2: true,
-	// 		},
-	// 	},
-	// }
-	// if !reflect.DeepEqual(eIndexes, sS.aSessionsIdx) {
-	// 	t.Errorf("Expecting: %+v, received: %+v", eIndexes, sS.aSessionsIdx)
-	// }
+	eIndexes = map[string]map[string]map[string]utils.StringMap{
+		"OriginID": map[string]map[string]utils.StringMap{
+			"12345": map[string]utils.StringMap{
+				cgrID: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+			"12346": map[string]utils.StringMap{
+				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+			"12347": map[string]utils.StringMap{
+				cgrID3: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+		"Tenant": map[string]map[string]utils.StringMap{
+			"cgrates.org": map[string]utils.StringMap{
+				cgrID:  utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID3: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+			"itsyscom.com": map[string]utils.StringMap{
+				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+		"Account": map[string]map[string]utils.StringMap{
+			"account1": map[string]utils.StringMap{
+				cgrID: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+			"account2": map[string]utils.StringMap{
+				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID3: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+		"Extra3": map[string]map[string]utils.StringMap{
+			utils.MetaEmpty: map[string]utils.StringMap{
+				cgrID:  utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+			utils.NOT_AVAILABLE: map[string]utils.StringMap{
+				cgrID3: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+		"Extra4": map[string]map[string]utils.StringMap{
+			utils.NOT_AVAILABLE: map[string]utils.StringMap{
+				cgrID:  utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID3: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+			"info2": map[string]utils.StringMap{
+				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+	}
+	if !reflect.DeepEqual(eIndexes, sS.aSessionsIdx) {
+		t.Errorf("Expecting: %+v, received: %+v", eIndexes, sS.aSessionsIdx)
+	}
 	eRIdxes = map[string][]*riFieldNameVal{
 		cgrID: []*riFieldNameVal{
 			&riFieldNameVal{fieldName: "Tenant", fieldValue: "cgrates.org"},
@@ -264,49 +270,49 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 	}
 	// Unidex first session
 	sS.unindexSession(cgrID, false)
-	// eIndexes = map[string]map[string]utils.StringMap{
-	// 	"OriginID": map[string]utils.StringMap{
-	// 		"12346": utils.StringMap{
-	// 			cgrID2: true,
-	// 		},
-	// 		"12347": utils.StringMap{
-	// 			cgrID3: true,
-	// 		},
-	// 	},
-	// 	"Tenant": map[string]utils.StringMap{
-	// 		"cgrates.org": utils.StringMap{
-	// 			cgrID3: true,
-	// 		},
-	// 		"itsyscom.com": utils.StringMap{
-	// 			cgrID2: true,
-	// 		},
-	// 	},
-	// 	"Account": map[string]utils.StringMap{
-	// 		"account2": utils.StringMap{
-	// 			cgrID2: true,
-	// 			cgrID3: true,
-	// 		},
-	// 	},
-	// 	"Extra3": map[string]utils.StringMap{
-	// 		utils.MetaEmpty: utils.StringMap{
-	// 			cgrID2: true,
-	// 		},
-	// 		utils.NOT_AVAILABLE: utils.StringMap{
-	// 			cgrID3: true,
-	// 		},
-	// 	},
-	// 	"Extra4": map[string]utils.StringMap{
-	// 		"info2": utils.StringMap{
-	// 			cgrID2: true,
-	// 		},
-	// 		utils.NOT_AVAILABLE: utils.StringMap{
-	// 			cgrID3: true,
-	// 		},
-	// 	},
-	// }
-	// if !reflect.DeepEqual(eIndexes, sS.aSessionsIdx) {
-	// 	t.Errorf("Expecting: %+v, received: %+v", eIndexes, sS.aSessionsIdx)
-	// }
+	eIndexes = map[string]map[string]map[string]utils.StringMap{
+		"OriginID": map[string]map[string]utils.StringMap{
+			"12346": map[string]utils.StringMap{
+				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+			"12347": map[string]utils.StringMap{
+				cgrID3: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+		"Tenant": map[string]map[string]utils.StringMap{
+			"cgrates.org": map[string]utils.StringMap{
+				cgrID3: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+			"itsyscom.com": map[string]utils.StringMap{
+				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+		"Account": map[string]map[string]utils.StringMap{
+			"account2": map[string]utils.StringMap{
+				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID3: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+		"Extra3": map[string]map[string]utils.StringMap{
+			utils.MetaEmpty: map[string]utils.StringMap{
+				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+			utils.NOT_AVAILABLE: map[string]utils.StringMap{
+				cgrID3: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+		"Extra4": map[string]map[string]utils.StringMap{
+			"info2": map[string]utils.StringMap{
+				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+			utils.NOT_AVAILABLE: map[string]utils.StringMap{
+				cgrID3: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+	}
+	if !reflect.DeepEqual(eIndexes, sS.aSessionsIdx) {
+		t.Errorf("Expecting: %+v, received: %+v", eIndexes, sS.aSessionsIdx)
+	}
 	eRIdxes = map[string][]*riFieldNameVal{
 		cgrID2: []*riFieldNameVal{
 			&riFieldNameVal{fieldName: "Tenant", fieldValue: "itsyscom.com"},
@@ -328,36 +334,36 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.aSessionsRIdx)
 	}
 	sS.unindexSession(cgrID3, false)
-	// eIndexes = map[string]map[string]utils.StringMap{
-	// 	"OriginID": map[string]utils.StringMap{
-	// 		"12346": utils.StringMap{
-	// 			cgrID2: true,
-	// 		},
-	// 	},
-	// 	"Tenant": map[string]utils.StringMap{
-	// 		"itsyscom.com": utils.StringMap{
-	// 			cgrID2: true,
-	// 		},
-	// 	},
-	// 	"Account": map[string]utils.StringMap{
-	// 		"account2": utils.StringMap{
-	// 			cgrID2: true,
-	// 		},
-	// 	},
-	// 	"Extra3": map[string]utils.StringMap{
-	// 		utils.MetaEmpty: utils.StringMap{
-	// 			cgrID2: true,
-	// 		},
-	// 	},
-	// 	"Extra4": map[string]utils.StringMap{
-	// 		"info2": utils.StringMap{
-	// 			cgrID2: true,
-	// 		},
-	// 	},
-	// }
-	// if !reflect.DeepEqual(eIndexes, sS.aSessionsIdx) {
-	// 	t.Errorf("Expecting: %+v, received: %+v", eIndexes, sS.aSessionsIdx)
-	// }
+	eIndexes = map[string]map[string]map[string]utils.StringMap{
+		"OriginID": map[string]map[string]utils.StringMap{
+			"12346": map[string]utils.StringMap{
+				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+		"Tenant": map[string]map[string]utils.StringMap{
+			"itsyscom.com": map[string]utils.StringMap{
+				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+		"Account": map[string]map[string]utils.StringMap{
+			"account2": map[string]utils.StringMap{
+				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+		"Extra3": map[string]map[string]utils.StringMap{
+			utils.MetaEmpty: map[string]utils.StringMap{
+				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+		"Extra4": map[string]map[string]utils.StringMap{
+			"info2": map[string]utils.StringMap{
+				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+	}
+	if !reflect.DeepEqual(eIndexes, sS.aSessionsIdx) {
+		t.Errorf("Expecting: %+v, received: %+v", eIndexes, sS.aSessionsIdx)
+	}
 	eRIdxes = map[string][]*riFieldNameVal{
 		cgrID2: []*riFieldNameVal{
 			&riFieldNameVal{fieldName: "Tenant", fieldValue: "itsyscom.com"},
@@ -401,7 +407,9 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		SRuns: []*SRun{
 			&SRun{
 				Event: sSEv.AsMapInterface(),
-				CD:    &engine.CallDescriptor{},
+				CD: &engine.CallDescriptor{
+					RunID: utils.DEFAULT_RUNID,
+				},
 			},
 		},
 	}
@@ -414,17 +422,17 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	}
 
 	//verify if the index was created according to session
-	// eIndexes := map[string]map[string]utils.StringMap{
-	// 	"OriginID": map[string]utils.StringMap{
-	// 		"111": utils.StringMap{
-	// 			"session1": true,
-	// 		},
-	// 	},
-	// }
-	// if !reflect.DeepEqual(eIndexes, sS.aSessionsIdx) {
-	// 	t.Errorf("Expecting: %s, received: %s",
-	// 		utils.ToJSON(eIndexes), utils.ToJSON(sS.aSessionsIdx))
-	// }
+	eIndexes := map[string]map[string]map[string]utils.StringMap{
+		"OriginID": map[string]map[string]utils.StringMap{
+			"111": map[string]utils.StringMap{
+				"session1": utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+	}
+	if !reflect.DeepEqual(eIndexes, sS.aSessionsIdx) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eIndexes), utils.ToJSON(sS.aSessionsIdx))
+	}
 	//verify if the revIdx was created according to session
 	eRIdxes := map[string][]*riFieldNameVal{
 		"session1": []*riFieldNameVal{
@@ -458,7 +466,9 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		SRuns: []*SRun{
 			&SRun{
 				Event: sSEv2.AsMapInterface(),
-				CD:    &engine.CallDescriptor{},
+				CD: &engine.CallDescriptor{
+					RunID: utils.DEFAULT_RUNID,
+				},
 			},
 		},
 	}
@@ -469,21 +479,21 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", s2, rcvS[0])
 	}
 
-	//verify if the index was created according to session
-	// eIndexes = map[string]map[string]utils.StringMap{
-	// 	"OriginID": map[string]utils.StringMap{
-	// 		"111": utils.StringMap{
-	// 			"session1": true,
-	// 		},
-	// 		"222": utils.StringMap{
-	// 			"session2": true,
-	// 		},
-	// 	},
-	// }
-	// if !reflect.DeepEqual(eIndexes, sS.aSessionsIdx) {
-	// 	t.Errorf("Expecting: %s, received: %s",
-	// 		utils.ToJSON(eIndexes), utils.ToJSON(sS.aSessionsIdx))
-	// }
+	// verify if the index was created according to session
+	eIndexes = map[string]map[string]map[string]utils.StringMap{
+		"OriginID": map[string]map[string]utils.StringMap{
+			"111": map[string]utils.StringMap{
+				"session1": utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+			"222": map[string]utils.StringMap{
+				"session2": utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+	}
+	if !reflect.DeepEqual(eIndexes, sS.aSessionsIdx) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eIndexes), utils.ToJSON(sS.aSessionsIdx))
+	}
 	//verify if the revIdx was created according to session
 	eRIdxes = map[string][]*riFieldNameVal{
 		"session1": []*riFieldNameVal{
@@ -524,7 +534,9 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		SRuns: []*SRun{
 			&SRun{
 				Event: sSEv3.AsMapInterface(),
-				CD:    &engine.CallDescriptor{},
+				CD: &engine.CallDescriptor{
+					RunID: utils.DEFAULT_RUNID,
+				},
 			},
 		},
 	}
@@ -540,17 +552,17 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	//unregister the session and check if the index was removed
 	sS.unregisterSession("session1", false)
 
-	// eIndexes = map[string]map[string]utils.StringMap{
-	// 	"OriginID": map[string]utils.StringMap{
-	// 		"222": utils.StringMap{
-	// 			"session2": true,
-	// 		},
-	// 	},
-	// }
-	// if !reflect.DeepEqual(eIndexes, sS.aSessionsIdx) {
-	// 	t.Errorf("Expecting: %s, received: %s",
-	// 		utils.ToJSON(eIndexes), utils.ToJSON(sS.aSessionsIdx))
-	// }
+	eIndexes = map[string]map[string]map[string]utils.StringMap{
+		"OriginID": map[string]map[string]utils.StringMap{
+			"222": map[string]utils.StringMap{
+				"session2": utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+	}
+	if !reflect.DeepEqual(eIndexes, sS.aSessionsIdx) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eIndexes), utils.ToJSON(sS.aSessionsIdx))
+	}
 	eRIdxes = map[string][]*riFieldNameVal{
 		"session2": []*riFieldNameVal{
 			&riFieldNameVal{fieldName: "OriginID", fieldValue: "222"},
@@ -567,11 +579,11 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 
 	sS.unregisterSession("session2", false)
 
-	// eIndexes = map[string]map[string]utils.StringMap{}
-	// if !reflect.DeepEqual(eIndexes, sS.aSessionsIdx) {
-	// 	t.Errorf("Expecting: %s, received: %s",
-	// 		utils.ToJSON(eIndexes), utils.ToJSON(sS.aSessionsIdx))
-	// }
+	eIndexes = map[string]map[string]map[string]utils.StringMap{}
+	if !reflect.DeepEqual(eIndexes, sS.aSessionsIdx) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eIndexes), utils.ToJSON(sS.aSessionsIdx))
+	}
 	eRIdxes = map[string][]*riFieldNameVal{}
 	if len(eRIdxes) != len(sS.aSessionsRIdx) {
 		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.aSessionsRIdx)
@@ -611,7 +623,9 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		SRuns: []*SRun{
 			&SRun{
 				Event: sSEv.AsMapInterface(),
-				CD:    &engine.CallDescriptor{},
+				CD: &engine.CallDescriptor{
+					RunID: utils.DEFAULT_RUNID,
+				},
 			},
 		},
 	}
@@ -624,17 +638,17 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	}
 
 	//verify if the index was created according to session
-	// eIndexes := map[string]map[string]utils.StringMap{
-	// 	"OriginID": map[string]utils.StringMap{
-	// 		"111": utils.StringMap{
-	// 			"session1": true,
-	// 		},
-	// 	},
-	// }
-	// if !reflect.DeepEqual(eIndexes, sS.pSessionsIdx) {
-	// 	t.Errorf("Expecting: %s, received: %s",
-	// 		utils.ToJSON(eIndexes), utils.ToJSON(sS.pSessionsIdx))
-	// }
+	eIndexes := map[string]map[string]map[string]utils.StringMap{
+		"OriginID": map[string]map[string]utils.StringMap{
+			"111": map[string]utils.StringMap{
+				"session1": utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+	}
+	if !reflect.DeepEqual(eIndexes, sS.pSessionsIdx) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eIndexes), utils.ToJSON(sS.pSessionsIdx))
+	}
 	//verify if the revIdx was created according to session
 	eRIdxes := map[string][]*riFieldNameVal{
 		"session1": []*riFieldNameVal{
@@ -671,7 +685,9 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		SRuns: []*SRun{
 			&SRun{
 				Event: sSEv2.AsMapInterface(),
-				CD:    &engine.CallDescriptor{},
+				CD: &engine.CallDescriptor{
+					RunID: utils.DEFAULT_RUNID,
+				},
 			},
 		},
 	}
@@ -683,20 +699,20 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	}
 
 	//verify if the index was created according to session
-	// eIndexes = map[string]map[string]utils.StringMap{
-	// 	"OriginID": map[string]utils.StringMap{
-	// 		"111": utils.StringMap{
-	// 			"session1": true,
-	// 		},
-	// 		"222": utils.StringMap{
-	// 			"session2": true,
-	// 		},
-	// 	},
-	// }
-	// if !reflect.DeepEqual(eIndexes, sS.pSessionsIdx) {
-	// 	t.Errorf("Expecting: %s, received: %s",
-	// 		utils.ToJSON(eIndexes), utils.ToJSON(sS.pSessionsIdx))
-	// }
+	eIndexes = map[string]map[string]map[string]utils.StringMap{
+		"OriginID": map[string]map[string]utils.StringMap{
+			"111": map[string]utils.StringMap{
+				"session1": utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+			"222": map[string]utils.StringMap{
+				"session2": utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+	}
+	if !reflect.DeepEqual(eIndexes, sS.pSessionsIdx) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eIndexes), utils.ToJSON(sS.pSessionsIdx))
+	}
 	//verify if the revIdx was created according to session
 	eRIdxes = map[string][]*riFieldNameVal{
 		"session1": []*riFieldNameVal{
@@ -753,17 +769,17 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	//unregister the session and check if the index was removed
 	sS.unregisterSession("session1", true)
 
-	// eIndexes = map[string]map[string]utils.StringMap{
-	// 	"OriginID": map[string]utils.StringMap{
-	// 		"222": utils.StringMap{
-	// 			"session2": true,
-	// 		},
-	// 	},
-	// }
-	// if !reflect.DeepEqual(eIndexes, sS.pSessionsIdx) {
-	// 	t.Errorf("Expecting: %s, received: %s",
-	// 		utils.ToJSON(eIndexes), utils.ToJSON(sS.pSessionsIdx))
-	// }
+	eIndexes = map[string]map[string]map[string]utils.StringMap{
+		"OriginID": map[string]map[string]utils.StringMap{
+			"222": map[string]utils.StringMap{
+				"session2": utils.StringMap{utils.DEFAULT_RUNID: true},
+			},
+		},
+	}
+	if !reflect.DeepEqual(eIndexes, sS.pSessionsIdx) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eIndexes), utils.ToJSON(sS.pSessionsIdx))
+	}
 	eRIdxes = map[string][]*riFieldNameVal{
 		"session2": []*riFieldNameVal{
 			&riFieldNameVal{fieldName: "OriginID", fieldValue: "222"},
@@ -780,11 +796,11 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 
 	sS.unregisterSession("session2", true)
 
-	// eIndexes = map[string]map[string]utils.StringMap{}
-	// if !reflect.DeepEqual(eIndexes, sS.pSessionsIdx) {
-	// 	t.Errorf("Expecting: %s, received: %s",
-	// 		utils.ToJSON(eIndexes), utils.ToJSON(sS.pSessionsIdx))
-	// }
+	eIndexes = map[string]map[string]map[string]utils.StringMap{}
+	if !reflect.DeepEqual(eIndexes, sS.pSessionsIdx) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eIndexes), utils.ToJSON(sS.pSessionsIdx))
+	}
 	eRIdxes = map[string][]*riFieldNameVal{}
 	if len(eRIdxes) != len(sS.pSessionsRIdx) {
 		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.pSessionsRIdx)
