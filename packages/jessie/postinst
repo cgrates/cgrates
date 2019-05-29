@@ -31,7 +31,7 @@ case "$1" in
 		chown -R cgrates:cgrates /var/spool/cgrates/
 		chown -R cgrates:cgrates /var/lib/cgrates/
 		chown -R cgrates:cgrates /usr/share/cgrates/
-		chown syslog:adm /var/log/cgrates
+		chown root:adm /var/log/cgrates
         ;;
 
 	abort-upgrade|abort-remove|abort-deconfigure)
