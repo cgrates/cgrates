@@ -320,7 +320,7 @@ func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp utils.CGREventWithArgD
 func (smaEv *SMAsteriskEvent) V1TerminateSessionArgs(cgrEvDisp utils.CGREventWithArgDispatcher) (args *sessions.V1TerminateSessionArgs) {
 	args = &sessions.V1TerminateSessionArgs{ // defaults
 		TerminateSession: true,
-		CGREvent:         *cgrEvDisp.CGREvent,
+		CGREvent:         cgrEvDisp.CGREvent,
 	}
 	subsystems, err := cgrEvDisp.CGREvent.FieldAsString(utils.CGRSubsystems)
 	if err != nil {

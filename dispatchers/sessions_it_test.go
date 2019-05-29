@@ -326,7 +326,7 @@ func testDspSessionUpdate(t *testing.T) {
 	argsUpdate := &sessions.V1UpdateSessionArgs{
 		GetAttributes: true,
 		UpdateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]interface{}{
@@ -387,7 +387,7 @@ func testDspSessionUpdate2(t *testing.T) {
 	argsUpdate := &sessions.V1UpdateSessionArgs{
 		GetAttributes: true,
 		UpdateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]interface{}{
@@ -454,7 +454,7 @@ func testDspSessionTerminate(t *testing.T) {
 	args := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
 		ReleaseResources: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]interface{}{

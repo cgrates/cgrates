@@ -135,7 +135,7 @@ func TestSessionsVoiceMonetaryRefund(t *testing.T) {
 	usage = time.Duration(time.Minute)
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceMonetaryRefund",
 			Event: map[string]interface{}{
@@ -214,7 +214,7 @@ func TestSessionsVoiceVoiceRefund(t *testing.T) {
 	usage = time.Duration(time.Minute)
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceVoiceRefund",
 			Event: map[string]interface{}{
@@ -302,7 +302,7 @@ func TestSessionsVoiceMixedRefund(t *testing.T) {
 	usage = time.Duration(time.Minute)
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceMixedRefund",
 			Event: map[string]interface{}{
@@ -468,7 +468,7 @@ func TestSessionsVoiceLastUsed(t *testing.T) {
 	usage = time.Duration(1 * time.Minute)
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsed",
 			Event: map[string]interface{}{
@@ -592,7 +592,7 @@ func TestSessionsVoiceLastUsedEnd(t *testing.T) {
 
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsedEnd",
 			Event: map[string]interface{}{
@@ -714,7 +714,7 @@ func TestSessionsVoiceLastUsedNotFixed(t *testing.T) {
 
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsedNotFixed",
 			Event: map[string]interface{}{
@@ -1176,7 +1176,7 @@ func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsedNotFixed",
 			Event: map[string]interface{}{

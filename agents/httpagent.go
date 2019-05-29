@@ -176,7 +176,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaResources),
 			reqProcessor.Flags.HasKey(utils.MetaThresholds),
 			reqProcessor.Flags.HasKey(utils.MetaStats),
-			*cgrEv, cgrArgs.ArgDispatcher)
+			cgrEv, cgrArgs.ArgDispatcher)
 		var tRply string
 		err = ha.sessionS.Call(utils.SessionSv1TerminateSession,
 			terminateArgs, &tRply)

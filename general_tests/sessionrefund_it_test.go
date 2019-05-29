@@ -149,7 +149,7 @@ func TestSrItInitSession(t *testing.T) {
 func TestSrItTerminateSession(t *testing.T) {
 	args := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: srtenant,
 			ID:     "TestSrItUpdateSession",
 			Event: map[string]interface{}{
@@ -236,7 +236,7 @@ func TestSrItInitSession2(t *testing.T) {
 func TestSrItTerminateSession2(t *testing.T) {
 	args := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: srtenant,
 			ID:     "TestSrItUpdateSession",
 			Event: map[string]interface{}{

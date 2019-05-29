@@ -215,7 +215,7 @@ func TestA1itDataSession1(t *testing.T) {
 	usage = time.Duration(1 * time.Minute)
 	termArgs := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsVoiceLastUsed",
 			Event: map[string]interface{}{

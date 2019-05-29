@@ -181,7 +181,7 @@ func (dS *DispatcherService) SessionSv1TerminateSession(args *sessions.V1Termina
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(&args.CGREvent, utils.MetaSessionS, routeID,
+	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, routeID,
 		utils.SessionSv1TerminateSession, args, reply)
 }
 

@@ -195,7 +195,7 @@ func TestSessionsDataLastUsedData(t *testing.T) {
 
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedData",
 			Event: map[string]interface{}{
@@ -430,7 +430,7 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataLastUsedMultipleUpdates",
 			Event: map[string]interface{}{
@@ -845,7 +845,7 @@ func TestSessionsDataMultipleDataNoUsage(t *testing.T) {
 
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSessionsDataMultipleDataNoUsage",
 			Event: map[string]interface{}{

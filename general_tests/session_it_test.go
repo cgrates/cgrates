@@ -150,7 +150,7 @@ func TestSesItInitSession(t *testing.T) {
 func TestSesItTerminateSession(t *testing.T) {
 	args := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: sesTenant,
 			ID:     "TestSesItUpdateSession",
 			Event: map[string]interface{}{

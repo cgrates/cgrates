@@ -465,7 +465,7 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 func testRPCMethodsTerminateSession(t *testing.T) {
 	args := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testRPCMethodsTerminateSession",
 			Event: map[string]interface{}{

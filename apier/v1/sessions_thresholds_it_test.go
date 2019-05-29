@@ -293,7 +293,7 @@ func TestSessionSv1ItTerminateSession(t *testing.T) {
 		TerminateSession:  true,
 		ReleaseResources:  true,
 		ProcessThresholds: true,
-		CGREvent: utils.CGREvent{
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItTerminateSession",
 			Event: map[string]interface{}{
