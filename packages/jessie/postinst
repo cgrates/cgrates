@@ -32,6 +32,7 @@ case "$1" in
 		chown -R cgrates:cgrates /var/lib/cgrates/
 		chown -R cgrates:cgrates /usr/share/cgrates/
 		chown root:adm /var/log/cgrates
+		chmod 775 /var/log/cgrates
         ;;
 
 	abort-upgrade|abort-remove|abort-deconfigure)
