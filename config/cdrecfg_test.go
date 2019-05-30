@@ -40,15 +40,11 @@ func TestCdreCfgClone(t *testing.T) {
 			Value:   runIdRsrs},
 	}
 	initCdreCfg := &CdreCfg{
-		ExportFormat:   utils.MetaFileCSV,
-		ExportPath:     "/var/spool/cgrates/cdre",
-		Synchronous:    true,
-		Attempts:       2,
-		FieldSeparator: rune(','),
-		UsageMultiplyFactor: map[string]float64{
-			utils.ANY:  1.0,
-			utils.DATA: 1024,
-		},
+		ExportFormat:       utils.MetaFileCSV,
+		ExportPath:         "/var/spool/cgrates/cdre",
+		Synchronous:        true,
+		Attempts:           2,
+		FieldSeparator:     rune(','),
 		CostMultiplyFactor: 1.0,
 		ContentFields:      initContentFlds,
 	}
@@ -63,16 +59,12 @@ func TestCdreCfgClone(t *testing.T) {
 			Value:   runIdRsrs},
 	}
 	eClnCdreCfg := &CdreCfg{
-		ExportFormat:   utils.MetaFileCSV,
-		ExportPath:     "/var/spool/cgrates/cdre",
-		Synchronous:    true,
-		Attempts:       2,
-		Filters:        []string{},
-		FieldSeparator: rune(','),
-		UsageMultiplyFactor: map[string]float64{
-			utils.ANY:  1.0,
-			utils.DATA: 1024.0,
-		},
+		ExportFormat:       utils.MetaFileCSV,
+		ExportPath:         "/var/spool/cgrates/cdre",
+		Synchronous:        true,
+		Attempts:           2,
+		Filters:            []string{},
+		FieldSeparator:     rune(','),
 		CostMultiplyFactor: 1.0,
 		HeaderFields:       emptyFields,
 		ContentFields:      eClnContentFlds,
@@ -80,10 +72,6 @@ func TestCdreCfgClone(t *testing.T) {
 	}
 	clnCdreCfg := initCdreCfg.Clone()
 	if !reflect.DeepEqual(eClnCdreCfg, clnCdreCfg) {
-		t.Errorf("Cloned result: %+v", clnCdreCfg)
-	}
-	initCdreCfg.UsageMultiplyFactor[utils.DATA] = 2048.0
-	if !reflect.DeepEqual(eClnCdreCfg, clnCdreCfg) { // MOdifying a field after clone should not affect cloned instance
 		t.Errorf("Cloned result: %+v", clnCdreCfg)
 	}
 	initContentFlds[0].Tag = "Destination"
@@ -119,9 +107,6 @@ func TestCdreCfgloadFromJsonCfg(t *testing.T) {
 		"synchronous": false,							// block processing until export has a result
 		"attempts": 1,									// Number of attempts if not success
 		"field_separator": ",",							// used field separator in some export formats, eg: *file_csv
-		"usage_multiply_factor": {
-			"*any": 1									// multiply usage based on ToR field or *any for all
-		},
 		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
 		"header_fields": [],							// template of the exported header fields
 		"content_fields": [								// template of the exported content fields
@@ -136,15 +121,14 @@ func TestCdreCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	}
 	expected = CdreCfg{
-		ExportFormat:        "*file_csv",
-		ExportPath:          "/var/spool/cgrates/cdre",
-		Filters:             []string{},
-		Tenant:              "cgrates.org",
-		Attempts:            1,
-		FieldSeparator:      ',',
-		UsageMultiplyFactor: map[string]float64{"*any": 1},
-		CostMultiplyFactor:  1,
-		HeaderFields:        []*FCTemplate{},
+		ExportFormat:       "*file_csv",
+		ExportPath:         "/var/spool/cgrates/cdre",
+		Filters:            []string{},
+		Tenant:             "cgrates.org",
+		Attempts:           1,
+		FieldSeparator:     ',',
+		CostMultiplyFactor: 1,
+		HeaderFields:       []*FCTemplate{},
 		ContentFields: []*FCTemplate{{
 			Tag:   "CGRID",
 			Type:  "*composed",

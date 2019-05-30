@@ -140,11 +140,6 @@ func (cdr *CDR) ComputeCGRID() {
 	cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.OriginHost)
 }
 
-// Used to multiply usage on export
-func (cdr *CDR) UsageMultiply(multiplyFactor float64, roundDecimals int) {
-	cdr.Usage = time.Duration(int(utils.Round(float64(cdr.Usage.Nanoseconds())*multiplyFactor, roundDecimals, utils.ROUNDING_MIDDLE))) // Rounding down could introduce a slight loss here but only at nanoseconds level
-}
-
 // Used to multiply cost on export
 func (cdr *CDR) CostMultiply(multiplyFactor float64, roundDecimals int) {
 	cdr.Cost = utils.Round(cdr.Cost*multiplyFactor, roundDecimals, utils.ROUNDING_MIDDLE)

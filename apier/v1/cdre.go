@@ -133,19 +133,6 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if exportFormat == utils.DRYRUN {
 		filePath = utils.DRYRUN
 	}
-	usageMultiplyFactor := exportTemplate.UsageMultiplyFactor
-	if attr.DataUsageMultiplyFactor != nil && *attr.DataUsageMultiplyFactor != 0.0 {
-		usageMultiplyFactor[utils.DATA] = *attr.DataUsageMultiplyFactor
-	}
-	if attr.SmsUsageMultiplyFactor != nil && *attr.SmsUsageMultiplyFactor != 0.0 {
-		usageMultiplyFactor[utils.SMS] = *attr.SmsUsageMultiplyFactor
-	}
-	if attr.MmsUsageMultiplyFactor != nil && *attr.MmsUsageMultiplyFactor != 0.0 {
-		usageMultiplyFactor[utils.MMS] = *attr.MmsUsageMultiplyFactor
-	}
-	if attr.GenericUsageMultiplyFactor != nil && *attr.GenericUsageMultiplyFactor != 0.0 {
-		usageMultiplyFactor[utils.GENERIC] = *attr.GenericUsageMultiplyFactor
-	}
 	costMultiplyFactor := exportTemplate.CostMultiplyFactor
 	if attr.CostMultiplyFactor != nil && *attr.CostMultiplyFactor != 0.0 {
 		costMultiplyFactor = *attr.CostMultiplyFactor
@@ -163,7 +150,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	}
 	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat,
 		filePath, utils.META_NONE, exportID, exportTemplate.Synchronous,
-		exportTemplate.Attempts, fieldSep, usageMultiplyFactor, costMultiplyFactor,
+		exportTemplate.Attempts, fieldSep, costMultiplyFactor,
 		self.Config.GeneralCfg().RoundingDecimals,
 		self.Config.GeneralCfg().HttpSkipTlsVerify, self.HTTPPoster, self.FilterS)
 	if err != nil {
@@ -211,7 +198,6 @@ type ArgExportCDRs struct {
 	Synchronous         *bool
 	Attempts            *int
 	FieldSeparator      *string
-	UsageMultiplyFactor utils.FieldMultiplyFactor
 	CostMultiplyFactor  *float64
 	ExportID            *string // Optional exportid
 	ExportFileName      *string // If provided the output filename will be set to this
@@ -295,10 +281,6 @@ func (self *ApierV1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err 
 		u.Path = path.Join(u.Path, fileName)
 		filePath = u.String()
 	}
-	usageMultiplyFactor := exportTemplate.UsageMultiplyFactor
-	for k, v := range arg.UsageMultiplyFactor {
-		usageMultiplyFactor[k] = v
-	}
 	costMultiplyFactor := exportTemplate.CostMultiplyFactor
 	if arg.CostMultiplyFactor != nil && *arg.CostMultiplyFactor != 0.0 {
 		costMultiplyFactor = *arg.CostMultiplyFactor
@@ -319,7 +301,7 @@ func (self *ApierV1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err 
 	}
 	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat,
 		filePath, utils.META_NONE, exportID,
-		synchronous, attempts, fieldSep, usageMultiplyFactor,
+		synchronous, attempts, fieldSep,
 		costMultiplyFactor, roundingDecimals,
 		self.Config.GeneralCfg().HttpSkipTlsVerify,
 		self.HTTPPoster, self.FilterS)
