@@ -127,41 +127,6 @@ type CdrsJsonCfg struct {
 	Online_cdr_exports   *[]string
 }
 
-type CdrReplicationJsonCfg struct {
-	Transport      *string
-	Address        *string
-	Synchronous    *bool
-	Attempts       *int
-	Cdr_filter     *string
-	Content_fields *[]*CdrFieldJsonCfg
-}
-
-// One cdr field config, used in cdre and cdrc
-type CdrFieldJsonCfg struct {
-	Tag                  *string
-	Type                 *string
-	Field_id             *string
-	Attribute_id         *string
-	Handler_id           *string
-	Value                *string
-	Append               *bool
-	Width                *int
-	Strip                *string
-	Padding              *string
-	Layout               *string
-	Field_filter         *string
-	Filters              *[]string
-	Mandatory            *bool
-	Cost_shift_digits    *int
-	Rounding_decimals    *int
-	Timezone             *string
-	Mask_destinationd_id *string
-	Mask_length          *int
-	Break_on_success     *bool
-	New_branch           *bool
-	Blocker              *bool
-}
-
 // Cdre config section
 type CdreJsonCfg struct {
 	Export_format   *string

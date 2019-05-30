@@ -33,7 +33,7 @@ import (
 
 // CGRReplier is the interface supported by replies convertible to CGRReply
 type NavigableMapper interface {
-	AsNavigableMap([]*CfgCdrField) (*NavigableMap, error)
+	AsNavigableMap([]*FCTemplate) (*NavigableMap, error)
 }
 
 // NewNavigableMap constructs a NavigableMap

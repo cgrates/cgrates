@@ -158,7 +158,7 @@ func TestRadReplyAppendAttributes(t *testing.T) {
 
 type myEv map[string]interface{}
 
-func (ev myEv) AsNavigableMap(tpl []*config.CfgCdrField) (*config.NavigableMap, error) {
+func (ev myEv) AsNavigableMap(tpl []*config.FCTemplate) (*config.NavigableMap, error) {
 	return config.NewNavigableMap(ev), nil
 }
 
