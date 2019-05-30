@@ -19,8 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"net"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -683,5 +685,145 @@ func TestUpdateDiamMsgFromNavMap4(t *testing.T) {
 	}
 	if !reflect.DeepEqual(eMessage.String(), m2.String()) {
 		t.Errorf("Expected %s, recived %s", utils.ToJSON(eMessage), utils.ToJSON(m2))
+	}
+}
+
+func TestDiamAVPAsIface(t *testing.T) {
+	args := diam.NewAVP(435, avp.Mbit, 0, datatype.Address("127.0.0.1"))
+	var exp interface{} = net.IP([]byte("127.0.0.1"))
+	if rply, err := diamAVPAsIface(args); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	args = diam.NewAVP(435, avp.Mbit, 0, datatype.DiameterIdentity("diam1"))
+	exp = "diam1"
+	if rply, err := diamAVPAsIface(args); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	args = diam.NewAVP(435, avp.Mbit, 0, datatype.DiameterURI("http://172.10.88.88/"))
+	exp = "http://172.10.88.88/"
+	if rply, err := diamAVPAsIface(args); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	args = diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(10))
+	exp = int32(10)
+	if rply, err := diamAVPAsIface(args); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	args = diam.NewAVP(450, avp.Mbit, 0, datatype.Float32(10.25))
+	exp = float32(10.25)
+	if rply, err := diamAVPAsIface(args); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	args = diam.NewAVP(450, avp.Mbit, 0, datatype.Float64(10.25))
+	exp = float64(10.25)
+	if rply, err := diamAVPAsIface(args); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	args = diam.NewAVP(450, avp.Mbit, 0, datatype.IPFilterRule("fltr1"))
+	exp = "fltr1"
+	if rply, err := diamAVPAsIface(args); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	args = diam.NewAVP(435, avp.Mbit, 0, datatype.IPv4("127.0.0.1"))
+	exp = net.IP([]byte("127.0.0.1"))
+	if rply, err := diamAVPAsIface(args); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	args = diam.NewAVP(450, avp.Mbit, 0, datatype.Integer32(10))
+	exp = int32(10)
+	if rply, err := diamAVPAsIface(args); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	args = diam.NewAVP(450, avp.Mbit, 0, datatype.Integer64(10))
+	exp = int64(10)
+	if rply, err := diamAVPAsIface(args); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	args = diam.NewAVP(450, avp.Mbit, 0, datatype.OctetString("diam1"))
+	exp = "diam1"
+	if rply, err := diamAVPAsIface(args); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	args = diam.NewAVP(450, avp.Mbit, 0, datatype.QoSFilterRule("diam1"))
+	exp = "diam1"
+	if rply, err := diamAVPAsIface(args); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	args = diam.NewAVP(450, avp.Mbit, 0, datatype.UTF8String("diam1"))
+	exp = "diam1"
+	if rply, err := diamAVPAsIface(args); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	args = diam.NewAVP(450, avp.Mbit, 0, datatype.Unsigned32(10))
+	exp = uint32(10)
+	if rply, err := diamAVPAsIface(args); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	args = diam.NewAVP(450, avp.Mbit, 0, datatype.Unsigned64(10))
+	exp = uint64(10)
+	if rply, err := diamAVPAsIface(args); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	now := time.Now()
+	args = diam.NewAVP(450, avp.Mbit, 0, datatype.Time(now))
+	exp = now
+	if rply, err := diamAVPAsIface(args); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	args = diam.NewAVP(434, avp.Mbit, 0, &diam.GroupedAVP{ // 434 code for Redirect-Server
+		AVP: []*diam.AVP{
+			diam.NewAVP(435, avp.Mbit, 0, datatype.UTF8String("http://172.10.88.88/")), // 435 code for Redirect-Server-Address
+		},
+	})
+	if rply, err := diamAVPAsIface(args); err == nil {
+		t.Errorf("Expected err received: err: %v, rply %v", err, rply)
 	}
 }
