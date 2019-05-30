@@ -1710,7 +1710,7 @@ type V1AuthorizeReply struct {
 
 // AsNavigableMap is part of engine.NavigableMapper interface
 func (v1AuthReply *V1AuthorizeReply) AsNavigableMap(
-	ignr []*config.CfgCdrField) (*config.NavigableMap, error) {
+	ignr []*config.FCTemplate) (*config.NavigableMap, error) {
 	cgrReply := make(map[string]interface{})
 	if v1AuthReply != nil {
 		if v1AuthReply.Attributes != nil {
@@ -1969,7 +1969,7 @@ type V1InitSessionReply struct {
 
 // AsNavigableMap is part of engine.NavigableMapper interface
 func (v1Rply *V1InitSessionReply) AsNavigableMap(
-	ignr []*config.CfgCdrField) (*config.NavigableMap, error) {
+	ignr []*config.FCTemplate) (*config.NavigableMap, error) {
 	cgrReply := make(map[string]interface{})
 	if v1Rply != nil {
 		if v1Rply.Attributes != nil {
@@ -2207,7 +2207,7 @@ type V1UpdateSessionReply struct {
 
 // AsNavigableMap is part of engine.NavigableMapper interface
 func (v1Rply *V1UpdateSessionReply) AsNavigableMap(
-	ignr []*config.CfgCdrField) (*config.NavigableMap, error) {
+	ignr []*config.FCTemplate) (*config.NavigableMap, error) {
 	cgrReply := make(map[string]interface{})
 	if v1Rply != nil {
 		if v1Rply.Attributes != nil {
@@ -2601,7 +2601,7 @@ type V1ProcessEventReply struct {
 
 // AsNavigableMap is part of engine.NavigableMapper interface
 func (v1Rply *V1ProcessEventReply) AsNavigableMap(
-	ignr []*config.CfgCdrField) (*config.NavigableMap, error) {
+	ignr []*config.FCTemplate) (*config.NavigableMap, error) {
 	cgrReply := make(map[string]interface{})
 	if v1Rply != nil {
 		if v1Rply.MaxUsage != nil {
