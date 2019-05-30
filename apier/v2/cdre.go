@@ -31,20 +31,16 @@ import (
 )
 
 type AttrExportCdrsToFile struct {
-	CdrFormat                  *string  // Cdr output file format <utils.CdreCdrFormats>
-	FieldSeparator             *string  // Separator used between fields
-	ExportID                   *string  // Optional exportid
-	ExportDirectory            *string  // If provided it overwrites the configured export directory
-	ExportFileName             *string  // If provided the output filename will be set to this
-	ExportTemplate             *string  // Exported fields template  <""|fld1,fld2|>
-	DataUsageMultiplyFactor    *float64 // Multiply data usage before export (eg: convert from KBytes to Bytes)
-	SMSUsageMultiplyFactor     *float64 // Multiply sms usage before export (eg: convert from SMS unit to call duration for some billing systems)
-	MMSUsageMultiplyFactor     *float64 // Multiply mms usage before export (eg: convert from MMS unit to call duration for some billing systems)
-	GenericUsageMultiplyFactor *float64 // Multiply generic usage before export (eg: convert from GENERIC unit to call duration for some billing systems)
-	CostMultiplyFactor         *float64 // Multiply the cost before export, eg: apply VAT
-	RoundingDecimals           *int     // force rounding to this value
-	Verbose                    bool     // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
-	utils.RPCCDRsFilter                 // Inherit the CDR filter attributes
+	CdrFormat           *string  // Cdr output file format <utils.CdreCdrFormats>
+	FieldSeparator      *string  // Separator used between fields
+	ExportID            *string  // Optional exportid
+	ExportDirectory     *string  // If provided it overwrites the configured export directory
+	ExportFileName      *string  // If provided the output filename will be set to this
+	ExportTemplate      *string  // Exported fields template  <""|fld1,fld2|>
+	CostMultiplyFactor  *float64 // Multiply the cost before export, eg: apply VAT
+	RoundingDecimals    *int     // force rounding to this value
+	Verbose             bool     // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
+	utils.RPCCDRsFilter          // Inherit the CDR filter attributes
 }
 
 type ExportedFileCdrs struct {
@@ -106,19 +102,6 @@ func (self *ApierV2) ExportCdrsToFile(attr AttrExportCdrsToFile, reply *Exported
 	if exportFormat == utils.DRYRUN {
 		filePath = utils.DRYRUN
 	}
-	usageMultiplyFactor := exportTemplate.UsageMultiplyFactor
-	if attr.DataUsageMultiplyFactor != nil && *attr.DataUsageMultiplyFactor != 0.0 {
-		usageMultiplyFactor[utils.DATA] = *attr.DataUsageMultiplyFactor
-	}
-	if attr.SMSUsageMultiplyFactor != nil && *attr.SMSUsageMultiplyFactor != 0.0 {
-		usageMultiplyFactor[utils.SMS] = *attr.SMSUsageMultiplyFactor
-	}
-	if attr.MMSUsageMultiplyFactor != nil && *attr.MMSUsageMultiplyFactor != 0.0 {
-		usageMultiplyFactor[utils.MMS] = *attr.MMSUsageMultiplyFactor
-	}
-	if attr.GenericUsageMultiplyFactor != nil && *attr.GenericUsageMultiplyFactor != 0.0 {
-		usageMultiplyFactor[utils.GENERIC] = *attr.GenericUsageMultiplyFactor
-	}
 	costMultiplyFactor := exportTemplate.CostMultiplyFactor
 	if attr.CostMultiplyFactor != nil && *attr.CostMultiplyFactor != 0.0 {
 		costMultiplyFactor = *attr.CostMultiplyFactor
@@ -140,7 +123,7 @@ func (self *ApierV2) ExportCdrsToFile(attr AttrExportCdrsToFile, reply *Exported
 	}
 	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat,
 		filePath, utils.META_NONE, exportID, exportTemplate.Synchronous,
-		exportTemplate.Attempts, fieldSep, usageMultiplyFactor, costMultiplyFactor,
+		exportTemplate.Attempts, fieldSep, costMultiplyFactor,
 		roundingDecimals, self.Config.GeneralCfg().HttpSkipTlsVerify,
 		self.HTTPPoster, self.FilterS)
 	if err != nil {
@@ -153,7 +136,8 @@ func (self *ApierV2) ExportCdrsToFile(attr AttrExportCdrsToFile, reply *Exported
 		*reply = ExportedFileCdrs{ExportedFilePath: ""}
 		return nil
 	}
-	*reply = ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), TotalCost: cdrexp.TotalCost(), FirstOrderId: cdrexp.FirstOrderId(), LastOrderId: cdrexp.LastOrderId()}
+	*reply = ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs),
+		TotalCost: cdrexp.TotalCost(), FirstOrderId: cdrexp.FirstOrderId(), LastOrderId: cdrexp.LastOrderId()}
 	if !attr.Verbose {
 		reply.ExportedCgrIds = cdrexp.PositiveExports()
 		reply.UnexportedCgrIds = cdrexp.NegativeExports()

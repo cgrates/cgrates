@@ -18,24 +18,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import (
-	"github.com/cgrates/cgrates/utils"
-)
-
 // One instance of CdrExporter
 type CdreCfg struct {
-	ExportFormat        string
-	ExportPath          string
-	Filters             []string
-	Tenant              string
-	Synchronous         bool
-	Attempts            int
-	FieldSeparator      rune
-	UsageMultiplyFactor utils.FieldMultiplyFactor
-	CostMultiplyFactor  float64
-	HeaderFields        []*FCTemplate
-	ContentFields       []*FCTemplate
-	TrailerFields       []*FCTemplate
+	ExportFormat       string
+	ExportPath         string
+	Filters            []string
+	Tenant             string
+	Synchronous        bool
+	Attempts           int
+	FieldSeparator     rune
+	CostMultiplyFactor float64
+	HeaderFields       []*FCTemplate
+	ContentFields      []*FCTemplate
+	TrailerFields      []*FCTemplate
 }
 
 func (self *CdreCfg) loadFromJsonCfg(jsnCfg *CdreJsonCfg, separator string) (err error) {
@@ -67,14 +62,6 @@ func (self *CdreCfg) loadFromJsonCfg(jsnCfg *CdreJsonCfg, separator string) (err
 		sepStr := *jsnCfg.Field_separator
 		self.FieldSeparator = rune(sepStr[0])
 	}
-	if jsnCfg.Usage_multiply_factor != nil {
-		if self.UsageMultiplyFactor == nil { // not yet initialized
-			self.UsageMultiplyFactor = make(map[string]float64, len(*jsnCfg.Usage_multiply_factor))
-		}
-		for k, v := range *jsnCfg.Usage_multiply_factor {
-			self.UsageMultiplyFactor[k] = v
-		}
-	}
 	if jsnCfg.Cost_multiply_factor != nil {
 		self.CostMultiplyFactor = *jsnCfg.Cost_multiply_factor
 	}
@@ -105,10 +92,6 @@ func (self *CdreCfg) Clone() *CdreCfg {
 	clnCdre.Attempts = self.Attempts
 	clnCdre.FieldSeparator = self.FieldSeparator
 	clnCdre.Tenant = self.Tenant
-	clnCdre.UsageMultiplyFactor = make(map[string]float64, len(self.UsageMultiplyFactor))
-	for k, v := range self.UsageMultiplyFactor {
-		clnCdre.UsageMultiplyFactor[k] = v
-	}
 	clnCdre.Filters = make([]string, len(self.Filters))
 	for i, fltr := range self.Filters {
 		clnCdre.Filters[i] = fltr

@@ -286,18 +286,6 @@ func TestFieldAsStringForCostDetails(t *testing.T) {
 	}
 }
 
-func TestUsageMultiply(t *testing.T) {
-	cdr := CDR{Usage: time.Duration(10) * time.Second}
-	if cdr.UsageMultiply(1024.0, 0); cdr.Usage != time.Duration(10240)*time.Second {
-		t.Errorf("Unexpected usage after multiply: %v", cdr.Usage.Nanoseconds())
-	}
-	cdr = CDR{Usage: time.Duration(10240) * time.Second} // Simulate conversion back, gives out a bit odd result but this can be rounded on export
-	expectDuration, _ := time.ParseDuration("10.000005120s")
-	if cdr.UsageMultiply(0.000976563, 0); cdr.Usage != expectDuration {
-		t.Errorf("Unexpected usage after multiply: %v", cdr.Usage.Nanoseconds())
-	}
-}
-
 func TestCostMultiply(t *testing.T) {
 	cdr := CDR{Cost: 1.01}
 	if cdr.CostMultiply(1.19, 4); cdr.Cost != 1.2019 {

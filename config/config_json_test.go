@@ -344,18 +344,17 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 	}
 	eCfg := map[string]*CdreJsonCfg{
 		utils.META_DEFAULT: {
-			Export_format:         utils.StringPointer(utils.MetaFileCSV),
-			Export_path:           utils.StringPointer("/var/spool/cgrates/cdre"),
-			Synchronous:           utils.BoolPointer(false),
-			Attempts:              utils.IntPointer(1),
-			Tenant:                utils.StringPointer(""),
-			Field_separator:       utils.StringPointer(","),
-			Usage_multiply_factor: &map[string]float64{utils.ANY: 1.0},
-			Cost_multiply_factor:  utils.Float64Pointer(1.0),
-			Header_fields:         &eFields,
-			Content_fields:        &eContentFlds,
-			Trailer_fields:        &eFields,
-			Filters:               &[]string{},
+			Export_format:        utils.StringPointer(utils.MetaFileCSV),
+			Export_path:          utils.StringPointer("/var/spool/cgrates/cdre"),
+			Synchronous:          utils.BoolPointer(false),
+			Attempts:             utils.IntPointer(1),
+			Tenant:               utils.StringPointer(""),
+			Field_separator:      utils.StringPointer(","),
+			Cost_multiply_factor: utils.Float64Pointer(1.0),
+			Header_fields:        &eFields,
+			Content_fields:       &eContentFlds,
+			Trailer_fields:       &eFields,
+			Filters:              &[]string{},
 		},
 	}
 	if cfg, err := dfCgrJsonCfg.CdreJsonCfgs(); err != nil {
