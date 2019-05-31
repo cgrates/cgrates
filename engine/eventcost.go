@@ -607,8 +607,10 @@ func (ec *EventCost) Trim(atUsage time.Duration) (srplusEC *EventCost, err error
 		return // no trim
 	}
 	if atUsage == 0 {
-		srplusEC = ec
-		ec = NewBareEventCost()
+		//clone the event because we need to overwrite ec
+		srplusEC = ec.Clone()
+		// modify the value of ec
+		*ec = *NewBareEventCost()
 		ec.CGRID = srplusEC.CGRID
 		ec.RunID = srplusEC.RunID
 		ec.StartTime = srplusEC.StartTime
