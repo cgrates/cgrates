@@ -74,35 +74,27 @@ func TestCsvRecordToCDR(t *testing.T) {
 func TestCsvDataMultiplyFactor(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
 	cdrcConfig := cgrConfig.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0]
+	data, _ := engine.NewMapStorage()
+	dm := engine.NewDataManager(data)
+	filterS := engine.NewFilterS(cgrConfig, nil, nil, dm)
 	cdrcConfig.CdrSourceId = "TEST_CDRC"
 	cdrcConfig.ContentFields = []*config.FCTemplate{
 		{Tag: "TORField", Type: utils.META_COMPOSED, FieldId: utils.ToR,
 			Value: config.NewRSRParsersMustCompile("~0", true, utils.INFIELD_SEP)},
-		{Tag: "UsageField", Type: utils.META_COMPOSED, FieldId: utils.Usage,
+		{Tag: "UsageField", Type: utils.META_COMPOSED, FieldId: utils.Usage, Filters: []string{"*notstring:~0:*data"},
 			Value: config.NewRSRParsersMustCompile("~1", true, utils.INFIELD_SEP)},
+		{Tag: "UsageField", Type: utils.META_COMPOSED, FieldId: utils.Usage, Filters: []string{"*string:~0:*data"},
+			Value: config.NewRSRParsersMustCompile("~1{*multiply:1024}", true, utils.INFIELD_SEP)},
 	}
-	csvProcessor := &CsvRecordsProcessor{dfltCdrcCfg: cdrcConfig, cdrcCfgs: []*config.CdrcCfg{cdrcConfig}}
-	csvProcessor.cdrcCfgs[0].DataUsageMultiplyFactor = 0
+	csvProcessor := &CsvRecordsProcessor{dfltCdrcCfg: cdrcConfig, cdrcCfgs: []*config.CdrcCfg{cdrcConfig}, filterS: filterS}
 	cdrRow := []string{"*data", "1"}
 	rtCdr, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig, "cgrates.org")
 	if err != nil {
 		t.Error("Failed to parse CDR in rated cdr", err)
 	}
 	// var sTime time.Time
+	var sTime time.Time
 	expectedCdr := &engine.CDR{
-		CGRID:       utils.Sha1("", "0.0.0.0"),
-		ToR:         cdrRow[0],
-		OriginHost:  "0.0.0.0",
-		Source:      "TEST_CDRC",
-		Usage:       time.Duration(1),
-		ExtraFields: map[string]string{},
-		Cost:        -1,
-	}
-	if !reflect.DeepEqual(expectedCdr, rtCdr) {
-		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
-	}
-	csvProcessor.cdrcCfgs[0].DataUsageMultiplyFactor = 1024
-	expectedCdr = &engine.CDR{
 		CGRID:       utils.Sha1("", "0.0.0.0"),
 		ToR:         cdrRow[0],
 		OriginHost:  "0.0.0.0",
@@ -111,8 +103,10 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 		ExtraFields: map[string]string{},
 		Cost:        -1,
 	}
-	if rtCdr, _ := csvProcessor.recordToStoredCdr(cdrRow,
-		cdrcConfig, "cgrates.org"); !reflect.DeepEqual(expectedCdr, rtCdr) {
+	if rtCdr, err := csvProcessor.recordToStoredCdr(cdrRow,
+		cdrcConfig, "cgrates.org"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedCdr, rtCdr) {
 		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
 	}
 	cdrRow = []string{"*voice", "1s"}

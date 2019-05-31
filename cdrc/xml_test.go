@@ -209,12 +209,11 @@ func TestXMLHandlerSubstractUsage(t *testing.T) {
 func TestXMLRPProcess(t *testing.T) {
 	cdrcCfgs := []*config.CdrcCfg{
 		{
-			ID:                      "TestXML",
-			Enabled:                 true,
-			CdrFormat:               "xml",
-			DataUsageMultiplyFactor: 1024,
-			CDRPath:                 utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}),
-			CdrSourceId:             "TestXML",
+			ID:          "TestXML",
+			Enabled:     true,
+			CdrFormat:   "xml",
+			CDRPath:     utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}),
+			CdrSourceId: "TestXML",
 			ContentFields: []*config.FCTemplate{
 				{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.ToR,
 					Value: config.NewRSRParsersMustCompile("*voice", true, utils.INFIELD_SEP), Mandatory: true},
@@ -283,13 +282,12 @@ func TestXMLRPProcess(t *testing.T) {
 func TestXMLRPProcessWithNewFilters(t *testing.T) {
 	cdrcCfgs := []*config.CdrcCfg{
 		{
-			ID:                      "XMLWithFilters",
-			Enabled:                 true,
-			CdrFormat:               "xml",
-			DataUsageMultiplyFactor: 1024,
-			CDRPath:                 utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}),
-			CdrSourceId:             "XMLWithFilters",
-			Filters:                 []string{"*string:~broadWorksCDR.cdrData.headerModule.type:Normal"},
+			ID:          "XMLWithFilters",
+			Enabled:     true,
+			CdrFormat:   "xml",
+			CDRPath:     utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}),
+			CdrSourceId: "XMLWithFilters",
+			Filters:     []string{"*string:~broadWorksCDR.cdrData.headerModule.type:Normal"},
 			ContentFields: []*config.FCTemplate{
 				{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.ToR,
 					Value: config.NewRSRParsersMustCompile("*voice", true, utils.INFIELD_SEP), Mandatory: true},
@@ -551,13 +549,12 @@ func TestXMLElementText3(t *testing.T) {
 func TestXMLRPNestingSeparator(t *testing.T) {
 	cdrcCfgs := []*config.CdrcCfg{
 		{
-			ID:                      "msw_xml",
-			Enabled:                 true,
-			CdrFormat:               "xml",
-			DataUsageMultiplyFactor: 1024,
-			CDRPath:                 utils.HierarchyPath([]string{"File", "CDRs", "Call"}),
-			CdrSourceId:             "zw_cfs1",
-			Filters:                 []string{},
+			ID:          "msw_xml",
+			Enabled:     true,
+			CdrFormat:   "xml",
+			CDRPath:     utils.HierarchyPath([]string{"File", "CDRs", "Call"}),
+			CdrSourceId: "zw_cfs1",
+			Filters:     []string{},
 			ContentFields: []*config.FCTemplate{
 				{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.ToR,
 					Value: config.NewRSRParsersMustCompile("*voice", true, utils.INFIELD_SEP), Mandatory: true},
