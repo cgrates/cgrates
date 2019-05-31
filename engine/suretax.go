@@ -42,14 +42,14 @@ func NewSureTaxRequest(cdr *CDR, stCfg *config.SureTaxCfg) (*SureTaxRequest, err
 	}
 	aTimeLoc := cdr.AnswerTime.In(stCfg.Timezone)
 	revenue := utils.Round(cdr.Cost, 4, utils.ROUNDING_MIDDLE)
-	unts, err := strconv.ParseInt(cdr.FieldsAsStringWithRSRFields(stCfg.Units), 10, 64)
+	unts, err := strconv.ParseInt(cdr.FieldsAsString(stCfg.Units), 10, 64)
 	if err != nil {
 		return nil, err
 	}
 	taxExempt := []string{}
-	definedTaxExtempt := cdr.FieldsAsStringWithRSRFields(stCfg.TaxExemptionCodeList)
+	definedTaxExtempt := cdr.FieldsAsString(stCfg.TaxExemptionCodeList)
 	if len(definedTaxExtempt) != 0 {
-		taxExempt = strings.Split(cdr.FieldsAsStringWithRSRFields(stCfg.TaxExemptionCodeList), ",")
+		taxExempt = strings.Split(cdr.FieldsAsString(stCfg.TaxExemptionCodeList), ",")
 	}
 	stReq := new(STRequest)
 	stReq.ClientNumber = stCfg.ClientNumber
@@ -59,28 +59,28 @@ func NewSureTaxRequest(cdr *CDR, stCfg *config.SureTaxCfg) (*SureTaxRequest, err
 	stReq.DataMonth = strconv.Itoa(int(aTimeLoc.Month()))
 	stReq.TotalRevenue = revenue
 	stReq.ReturnFileCode = stCfg.ReturnFileCode
-	stReq.ClientTracking = cdr.FieldsAsStringWithRSRFields(stCfg.ClientTracking)
+	stReq.ClientTracking = cdr.FieldsAsString(stCfg.ClientTracking)
 	stReq.ResponseGroup = stCfg.ResponseGroup
 	stReq.ResponseType = stCfg.ResponseType
 	stReq.ItemList = []*STRequestItem{
 		{
-			CustomerNumber:       cdr.FieldsAsStringWithRSRFields(stCfg.CustomerNumber),
-			OrigNumber:           cdr.FieldsAsStringWithRSRFields(stCfg.OrigNumber),
-			TermNumber:           cdr.FieldsAsStringWithRSRFields(stCfg.TermNumber),
-			BillToNumber:         cdr.FieldsAsStringWithRSRFields(stCfg.BillToNumber),
-			Zipcode:              cdr.FieldsAsStringWithRSRFields(stCfg.Zipcode),
-			Plus4:                cdr.FieldsAsStringWithRSRFields(stCfg.Plus4),
-			P2PZipcode:           cdr.FieldsAsStringWithRSRFields(stCfg.P2PZipcode),
-			P2PPlus4:             cdr.FieldsAsStringWithRSRFields(stCfg.P2PPlus4),
+			CustomerNumber:       cdr.FieldsAsString(stCfg.CustomerNumber),
+			OrigNumber:           cdr.FieldsAsString(stCfg.OrigNumber),
+			TermNumber:           cdr.FieldsAsString(stCfg.TermNumber),
+			BillToNumber:         cdr.FieldsAsString(stCfg.BillToNumber),
+			Zipcode:              cdr.FieldsAsString(stCfg.Zipcode),
+			Plus4:                cdr.FieldsAsString(stCfg.Plus4),
+			P2PZipcode:           cdr.FieldsAsString(stCfg.P2PZipcode),
+			P2PPlus4:             cdr.FieldsAsString(stCfg.P2PPlus4),
 			TransDate:            aTimeLoc.Format("2006-01-02T15:04:05"),
 			Revenue:              revenue,
 			Units:                unts,
-			UnitType:             cdr.FieldsAsStringWithRSRFields(stCfg.UnitType),
+			UnitType:             cdr.FieldsAsString(stCfg.UnitType),
 			Seconds:              int64(cdr.Usage.Seconds()),
-			TaxIncludedCode:      cdr.FieldsAsStringWithRSRFields(stCfg.TaxIncluded),
-			TaxSitusRule:         cdr.FieldsAsStringWithRSRFields(stCfg.TaxSitusRule),
-			TransTypeCode:        cdr.FieldsAsStringWithRSRFields(stCfg.TransTypeCode),
-			SalesTypeCode:        cdr.FieldsAsStringWithRSRFields(stCfg.SalesTypeCode),
+			TaxIncludedCode:      cdr.FieldsAsString(stCfg.TaxIncluded),
+			TaxSitusRule:         cdr.FieldsAsString(stCfg.TaxSitusRule),
+			TransTypeCode:        cdr.FieldsAsString(stCfg.TransTypeCode),
+			SalesTypeCode:        cdr.FieldsAsString(stCfg.SalesTypeCode),
 			RegulatoryCode:       stCfg.RegulatoryCode,
 			TaxExemptionCodeList: taxExempt,
 		},

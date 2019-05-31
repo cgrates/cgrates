@@ -708,22 +708,22 @@ const CGRATES_CFG_JSON = `
 	"response_group": "03",					// determines how taxes are grouped for the response <03|13>
 	"response_type": "D4",					// determines the granularity of taxes and (optionally) the decimal precision for the tax calculations and amounts in the response
 	"regulatory_code": "03",				// provider type
-	"client_tracking": "CGRID",				// template extracting client information out of StoredCdr; <$RSRFields>
-	"customer_number": "Subject",			// template extracting customer number out of StoredCdr; <$RSRFields>
-	"orig_number":  "Subject", 				// template extracting origination number out of StoredCdr; <$RSRFields>
-	"term_number": "Destination",			// template extracting termination number out of StoredCdr; <$RSRFields>
-	"bill_to_number": "",					// template extracting billed to number out of StoredCdr; <$RSRFields>
-	"zipcode": "",							// template extracting billing zip code out of StoredCdr; <$RSRFields>
-	"plus4": "",							// template extracting billing zip code extension out of StoredCdr; <$RSRFields>
-	"p2pzipcode": "",						// template extracting secondary zip code out of StoredCdr; <$RSRFields>
-	"p2pplus4": "",							// template extracting secondary zip code extension out of StoredCdr; <$RSRFields>
-	"units": "^1",							// template extracting number of “lines” or unique charges contained within the revenue out of StoredCdr; <$RSRFields>
-	"unit_type": "^00",						// template extracting number of unique access lines out of StoredCdr; <$RSRFields>
-	"tax_included": "^0",					// template extracting tax included in revenue out of StoredCdr; <$RSRFields>
-	"tax_situs_rule": "^04",				// template extracting tax situs rule out of StoredCdr; <$RSRFields>
-	"trans_type_code": "^010101",			// template extracting transaction type indicator out of StoredCdr; <$RSRFields>
-	"sales_type_code": "^R",				// template extracting sales type code out of StoredCdr; <$RSRFields>
-	"tax_exemption_code_list": "",			// template extracting tax exemption code list out of StoredCdr; <$RSRFields>
+	"client_tracking": "~CGRID",			// template extracting client information out of StoredCdr; <RSRParsers>
+	"customer_number": "~Subject",			// template extracting customer number out of StoredCdr; <RSRParsers>
+	"orig_number":  "~Subject", 			// template extracting origination number out of StoredCdr; <RSRParsers>
+	"term_number": "~Destination",			// template extracting termination number out of StoredCdr; <RSRParsers>
+	"bill_to_number": "",					// template extracting billed to number out of StoredCdr; <RSRParsers>
+	"zipcode": "",							// template extracting billing zip code out of StoredCdr; <RSRParsers>
+	"plus4": "",							// template extracting billing zip code extension out of StoredCdr; <RSRParsers>
+	"p2pzipcode": "",						// template extracting secondary zip code out of StoredCdr; <RSRParsers>
+	"p2pplus4": "",							// template extracting secondary zip code extension out of StoredCdr; <RSRParsers>
+	"units": "1",							// template extracting number of “lines” or unique charges contained within the revenue out of StoredCdr; <RSRParsers>
+	"unit_type": "00",						// template extracting number of unique access lines out of StoredCdr; <RSRParsers>
+	"tax_included": "0",					// template extracting tax included in revenue out of StoredCdr; <RSRParsers>
+	"tax_situs_rule": "04",					// template extracting tax situs rule out of StoredCdr; <RSRParsers>
+	"trans_type_code": "010101",			// template extracting transaction type indicator out of StoredCdr; <RSRParsers>
+	"sales_type_code": "R",					// template extracting sales type code out of StoredCdr; <RSRParsers>
+	"tax_exemption_code_list": "",			// template extracting tax exemption code list out of StoredCdr; <RSRParsers>
 },
 
 
