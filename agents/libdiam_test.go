@@ -827,3 +827,197 @@ func TestDiamAVPAsIface(t *testing.T) {
 		t.Errorf("Expected err received: err: %v, rply %v", err, rply)
 	}
 }
+
+func TestNewDiamDataType(t *testing.T) {
+	argType := datatype.AddressType
+	argVal := "127.0.0.1"
+	var exp datatype.Type = datatype.Address(net.ParseIP("127.0.0.1"))
+	if rply, err := newDiamDataType(argType, argVal, ""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	argType = datatype.DiameterIdentityType
+	argVal = "diam1"
+	exp = datatype.DiameterIdentity("diam1")
+	if rply, err := newDiamDataType(argType, argVal, ""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	argType = datatype.DiameterURIType
+	argVal = "http://172.10.88.88/"
+	exp = datatype.DiameterURI("http://172.10.88.88/")
+	if rply, err := newDiamDataType(argType, argVal, ""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	argType = datatype.EnumeratedType
+	argVal = "00"
+	exp = datatype.Enumerated(int32(0))
+	if rply, err := newDiamDataType(argType, argVal, ""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	argVal = "0.0"
+	if rply, err := newDiamDataType(argType, argVal, ""); err == nil {
+		t.Errorf("Expected err received: err: %v, rply %v", err, rply)
+	}
+
+	argType = datatype.Float32Type
+	argVal = "00"
+	exp = datatype.Float32(float32(0))
+	if rply, err := newDiamDataType(argType, argVal, ""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	argVal = "0.0A"
+	if rply, err := newDiamDataType(argType, argVal, ""); err == nil {
+		t.Errorf("Expected err received: err: %v, rply %v", err, rply)
+	}
+
+	argType = datatype.Float64Type
+	argVal = "00"
+	exp = datatype.Float64(float64(0))
+	if rply, err := newDiamDataType(argType, argVal, ""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	argVal = "0.0A"
+	if rply, err := newDiamDataType(argType, argVal, ""); err == nil {
+		t.Errorf("Expected err received: err: %v, rply %v", err, rply)
+	}
+
+	argType = datatype.IPFilterRuleType
+	argVal = "filter1"
+	exp = datatype.IPFilterRule("filter1")
+	if rply, err := newDiamDataType(argType, argVal, ""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	argType = datatype.IPv4Type
+	argVal = "127.0.0.1"
+	exp = datatype.IPv4(net.ParseIP("127.0.0.1"))
+	if rply, err := newDiamDataType(argType, argVal, ""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	argType = datatype.Integer32Type
+	argVal = "00"
+	exp = datatype.Integer32(int32(0))
+	if rply, err := newDiamDataType(argType, argVal, ""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	argVal = "0.0"
+	if rply, err := newDiamDataType(argType, argVal, ""); err == nil {
+		t.Errorf("Expected err received: err: %v, rply %v", err, rply)
+	}
+
+	argType = datatype.Integer64Type
+	argVal = "00"
+	exp = datatype.Integer64(int64(0))
+	if rply, err := newDiamDataType(argType, argVal, ""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	argVal = "0.0"
+	if rply, err := newDiamDataType(argType, argVal, ""); err == nil {
+		t.Errorf("Expected err received: err: %v, rply %v", err, rply)
+	}
+
+	argType = datatype.OctetStringType
+	argVal = "diam1"
+	exp = datatype.OctetString("diam1")
+	if rply, err := newDiamDataType(argType, argVal, ""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	argType = datatype.QoSFilterRuleType
+	argVal = "diam1"
+	exp = datatype.QoSFilterRule("diam1")
+	if rply, err := newDiamDataType(argType, argVal, ""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	argType = datatype.UTF8StringType
+	argVal = "diam1"
+	exp = datatype.UTF8String("diam1")
+	if rply, err := newDiamDataType(argType, argVal, ""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	argType = datatype.Unsigned32Type
+	argVal = "00"
+	exp = datatype.Unsigned32(uint32(0))
+	if rply, err := newDiamDataType(argType, argVal, ""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	argVal = "0.0"
+	if rply, err := newDiamDataType(argType, argVal, ""); err == nil {
+		t.Errorf("Expected err received: err: %v, rply %v", err, rply)
+	}
+
+	argType = datatype.Unsigned64Type
+	argVal = "00"
+	exp = datatype.Unsigned64(uint64(0))
+	if rply, err := newDiamDataType(argType, argVal, ""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	argVal = "0.0"
+	if rply, err := newDiamDataType(argType, argVal, ""); err == nil {
+		t.Errorf("Expected err received: err: %v, rply %v", err, rply)
+	}
+
+	now := time.Now().UTC()
+
+	argType = datatype.TimeType
+	argVal = now.String()
+	exp = datatype.Time(now)
+	if rply, err := newDiamDataType(argType, argVal, ""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected<%T>: %v ,received<%T>: %v ", exp, exp, rply, rply)
+	}
+
+	argVal = "0.0"
+	if rply, err := newDiamDataType(argType, argVal, ""); err == nil {
+		t.Errorf("Expected err received: err: %v, rply %v", err, rply)
+	}
+
+	argType = datatype.GroupedType
+	argVal = "{}"
+	if rply, err := newDiamDataType(argType, argVal, ""); err == nil {
+		t.Errorf("Expected err received: err: %v, rply %v", err, rply)
+	}
+}

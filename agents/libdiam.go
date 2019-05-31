@@ -139,13 +139,13 @@ func newDiamDataType(typ datatype.TypeID, valStr,
 		return datatype.Enumerated(int32(i)), nil
 	case datatype.Float32Type:
 		f, err := strconv.ParseFloat(valStr, 32)
-		if err == nil {
+		if err != nil {
 			return nil, err
 		}
 		return datatype.Float32(float32(f)), nil
 	case datatype.Float64Type:
 		f, err := strconv.ParseFloat(valStr, 64)
-		if err == nil {
+		if err != nil {
 			return nil, err
 		}
 		return datatype.Float64(f), nil
