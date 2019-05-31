@@ -176,7 +176,7 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity *xmlquery.Node, cdrcCf
 			return nil, err
 		}
 	}
-	cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.SetupTime.UTC().String())
+	cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.OriginHost)
 	if cdr.ToR == utils.DATA && cdrcCfg.DataUsageMultiplyFactor != 0 {
 		cdr.Usage = time.Duration(float64(cdr.Usage.Nanoseconds()) * cdrcCfg.DataUsageMultiplyFactor)
 	}

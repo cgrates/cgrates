@@ -28,7 +28,7 @@ CREATE TABLE cdrs (
  created_at TIMESTAMP WITH TIME ZONE,
  updated_at TIMESTAMP WITH TIME ZONE NULL,
  deleted_at TIMESTAMP WITH TIME ZONE NULL,
- UNIQUE (cgrid, run_id, origin_id)
+ UNIQUE (cgrid, run_id)
 );
 ;
 DROP INDEX IF EXISTS deleted_at_cp_idx;

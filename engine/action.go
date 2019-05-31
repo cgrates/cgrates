@@ -202,7 +202,7 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 			ExtraFields: make(map[string]string),
 			PreRated:    true,
 		}
-		cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.SetupTime.String())
+		cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.OriginHost)
 		cdr.Usage = time.Duration(1)
 		elem := reflect.ValueOf(cdr).Elem()
 		for key, rsrFlds := range defaultTemplate {

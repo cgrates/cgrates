@@ -257,14 +257,23 @@ func TestXMLRPProcess(t *testing.T) {
 		t.Error(err)
 	}
 	expectedCDRs := []*engine.CDR{
-		{CGRID: "1f045359a0784d15e051d7e41ae30132b139d714",
-			OriginHost: "0.0.0.0", Source: "TestXML", OriginID: "25160047719:0",
-			ToR: "*voice", RequestType: "*rated", Tenant: "cgrates.org",
-			Category: "call", Account: "1001", Destination: "+4986517174963",
+		{
+			CGRID:       utils.Sha1("25160047719:0", "0.0.0.0"),
+			OriginHost:  "0.0.0.0",
+			Source:      "TestXML",
+			OriginID:    "25160047719:0",
+			ToR:         "*voice",
+			RequestType: "*rated",
+			Tenant:      "cgrates.org",
+			Category:    "call",
+			Account:     "1001",
+			Destination: "+4986517174963",
 			SetupTime:   time.Date(2016, 4, 19, 21, 0, 5, 247000000, time.UTC),
 			AnswerTime:  time.Date(2016, 4, 19, 21, 0, 6, 813000000, time.UTC),
 			Usage:       time.Duration(13483000000),
-			ExtraFields: map[string]string{}, Cost: -1},
+			ExtraFields: map[string]string{},
+			Cost:        -1,
+		},
 	}
 	if !reflect.DeepEqual(expectedCDRs, cdrs) {
 		t.Errorf("Expecting: %+v\n, received: %+v\n", expectedCDRs, cdrs)
@@ -329,14 +338,23 @@ func TestXMLRPProcessWithNewFilters(t *testing.T) {
 		t.Error(err)
 	}
 	expectedCDRs := []*engine.CDR{
-		{CGRID: "1f045359a0784d15e051d7e41ae30132b139d714",
-			OriginHost: "0.0.0.0", Source: "XMLWithFilters", OriginID: "25160047719:0",
-			ToR: "*voice", RequestType: "*rated", Tenant: "cgrates.org",
-			Category: "call", Account: "1001", Destination: "+4986517174963",
+		{
+			CGRID:       utils.Sha1("25160047719:0", "0.0.0.0"),
+			OriginHost:  "0.0.0.0",
+			Source:      "XMLWithFilters",
+			OriginID:    "25160047719:0",
+			ToR:         "*voice",
+			RequestType: "*rated",
+			Tenant:      "cgrates.org",
+			Category:    "call",
+			Account:     "1001",
+			Destination: "+4986517174963",
 			SetupTime:   time.Date(2016, 4, 19, 21, 0, 5, 247000000, time.UTC),
 			AnswerTime:  time.Date(2016, 4, 19, 21, 0, 6, 813000000, time.UTC),
 			Usage:       time.Duration(13483000000),
-			ExtraFields: map[string]string{}, Cost: -1},
+			ExtraFields: map[string]string{},
+			Cost:        -1,
+		},
 	}
 	if !reflect.DeepEqual(expectedCDRs, cdrs) {
 		t.Errorf("Expecting: %+v\n, received: %+v\n", expectedCDRs, cdrs)
@@ -588,14 +606,23 @@ func TestXMLRPNestingSeparator(t *testing.T) {
 		t.Error(err)
 	}
 	expectedCDRs := []*engine.CDR{
-		{CGRID: "0ad7f9554ff8fc5b3a7cebbe7431bbf809bc5144",
-			OriginHost: "0.0.0.0", Source: "zw_cfs1", OriginID: "46d7974398c2671016afccc3f2c428c7",
-			ToR: "*voice", RequestType: "*rated", Tenant: "XX.liquid.tel",
-			Category: "call", Account: "+27110493421", Destination: "+270843073451",
+		{
+			CGRID:       utils.Sha1("46d7974398c2671016afccc3f2c428c7", "0.0.0.0"),
+			OriginHost:  "0.0.0.0",
+			Source:      "zw_cfs1",
+			OriginID:    "46d7974398c2671016afccc3f2c428c7",
+			ToR:         "*voice",
+			RequestType: "*rated",
+			Tenant:      "XX.liquid.tel",
+			Category:    "call",
+			Account:     "+27110493421",
+			Destination: "+270843073451",
 			SetupTime:   time.Date(2017, 11, 9, 11, 5, 34, 973000000, time.UTC),
 			AnswerTime:  time.Date(2017, 11, 9, 11, 5, 39, 364000000, time.UTC),
 			Usage:       time.Duration(53737000000),
-			ExtraFields: map[string]string{}, Cost: -1},
+			ExtraFields: map[string]string{},
+			Cost:        -1,
+		},
 	}
 	if !reflect.DeepEqual(expectedCDRs, cdrs) {
 		t.Errorf("Expecting: %+v\n, received: %+v\n", expectedCDRs, cdrs)

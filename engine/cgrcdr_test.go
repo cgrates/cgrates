@@ -18,10 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"github.com/cgrates/cgrates/utils"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 /*
@@ -40,8 +41,8 @@ func TestCgrCdrAsCDR(t *testing.T) {
 		utils.Account: "1001", utils.Subject: "1001", utils.Destination: "1002",
 		utils.SetupTime: "2013-11-07T08:42:20Z", utils.AnswerTime: "2013-11-07T08:42:26Z",
 		utils.Usage: "10s", "field_extr1": "val_extr1", "fieldextr2": "valextr2"}
-	setupTime, _ := utils.ParseTimeDetectLayout(cgrCdr[utils.SetupTime], "")
-	expctRtCdr := &CDR{CGRID: utils.Sha1(cgrCdr[utils.OriginID], setupTime.String()),
+	// setupTime, _ := utils.ParseTimeDetectLayout(cgrCdr[utils.SetupTime], "")
+	expctRtCdr := &CDR{CGRID: utils.Sha1(cgrCdr[utils.OriginID], cgrCdr[utils.OriginHost]),
 		ToR: utils.VOICE, OriginID: cgrCdr[utils.OriginID],
 		OriginHost:  cgrCdr[utils.OriginHost],
 		Source:      cgrCdr[utils.Source],
