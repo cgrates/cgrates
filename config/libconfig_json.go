@@ -164,17 +164,16 @@ type CdrFieldJsonCfg struct {
 
 // Cdre config section
 type CdreJsonCfg struct {
-	Export_format        *string
-	Export_path          *string
-	Filters              *[]string
-	Tenant               *string
-	Synchronous          *bool
-	Attempts             *int
-	Field_separator      *string
-	Cost_multiply_factor *float64
-	Header_fields        *[]*FcTemplateJsonCfg
-	Content_fields       *[]*FcTemplateJsonCfg
-	Trailer_fields       *[]*FcTemplateJsonCfg
+	Export_format   *string
+	Export_path     *string
+	Filters         *[]string
+	Tenant          *string
+	Synchronous     *bool
+	Attempts        *int
+	Field_separator *string
+	Header_fields   *[]*FcTemplateJsonCfg
+	Content_fields  *[]*FcTemplateJsonCfg
+	Trailer_fields  *[]*FcTemplateJsonCfg
 }
 
 // Cdrc config section

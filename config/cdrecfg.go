@@ -20,17 +20,16 @@ package config
 
 // One instance of CdrExporter
 type CdreCfg struct {
-	ExportFormat       string
-	ExportPath         string
-	Filters            []string
-	Tenant             string
-	Synchronous        bool
-	Attempts           int
-	FieldSeparator     rune
-	CostMultiplyFactor float64
-	HeaderFields       []*FCTemplate
-	ContentFields      []*FCTemplate
-	TrailerFields      []*FCTemplate
+	ExportFormat   string
+	ExportPath     string
+	Filters        []string
+	Tenant         string
+	Synchronous    bool
+	Attempts       int
+	FieldSeparator rune
+	HeaderFields   []*FCTemplate
+	ContentFields  []*FCTemplate
+	TrailerFields  []*FCTemplate
 }
 
 func (self *CdreCfg) loadFromJsonCfg(jsnCfg *CdreJsonCfg, separator string) (err error) {
@@ -61,9 +60,6 @@ func (self *CdreCfg) loadFromJsonCfg(jsnCfg *CdreJsonCfg, separator string) (err
 	if jsnCfg.Field_separator != nil && len(*jsnCfg.Field_separator) > 0 { // Make sure we got at least one character so we don't get panic here
 		sepStr := *jsnCfg.Field_separator
 		self.FieldSeparator = rune(sepStr[0])
-	}
-	if jsnCfg.Cost_multiply_factor != nil {
-		self.CostMultiplyFactor = *jsnCfg.Cost_multiply_factor
 	}
 	if jsnCfg.Header_fields != nil {
 		if self.HeaderFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Header_fields, separator); err != nil {
@@ -96,7 +92,6 @@ func (self *CdreCfg) Clone() *CdreCfg {
 	for i, fltr := range self.Filters {
 		clnCdre.Filters[i] = fltr
 	}
-	clnCdre.CostMultiplyFactor = self.CostMultiplyFactor
 	clnCdre.HeaderFields = make([]*FCTemplate, len(self.HeaderFields))
 	for idx, fld := range self.HeaderFields {
 		clonedVal := *fld

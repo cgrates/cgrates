@@ -9,7 +9,6 @@
 
 "cdre": {
 	"*default": {
-		"cost_multiply_factor": 1024,			// multiply data usage before export (eg: convert from KBytes to Bytes)
 		"export_path": "/tmp/cgrates/cdre",			// path where the exported CDRs will be placed
 	},
 	"export1": {

@@ -286,17 +286,6 @@ func TestFieldAsStringForCostDetails(t *testing.T) {
 	}
 }
 
-func TestCostMultiply(t *testing.T) {
-	cdr := CDR{Cost: 1.01}
-	if cdr.CostMultiply(1.19, 4); cdr.Cost != 1.2019 {
-		t.Errorf("Unexpected cost after multiply: %v", cdr.Cost)
-	}
-	cdr = CDR{Cost: 1.01}
-	if cdr.CostMultiply(1000, 0); cdr.Cost != 1010 {
-		t.Errorf("Unexpected cost after multiply: %v", cdr.Cost)
-	}
-}
-
 func TestFormatCost(t *testing.T) {
 	cdr := CDR{Cost: 1.01}
 	if cdr.FormatCost(0, 4) != "1.0100" {

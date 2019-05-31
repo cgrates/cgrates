@@ -133,10 +133,6 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if exportFormat == utils.DRYRUN {
 		filePath = utils.DRYRUN
 	}
-	costMultiplyFactor := exportTemplate.CostMultiplyFactor
-	if attr.CostMultiplyFactor != nil && *attr.CostMultiplyFactor != 0.0 {
-		costMultiplyFactor = *attr.CostMultiplyFactor
-	}
 	cdrsFltr, err := attr.AsCDRsFilter(self.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -150,7 +146,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	}
 	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat,
 		filePath, utils.META_NONE, exportID, exportTemplate.Synchronous,
-		exportTemplate.Attempts, fieldSep, costMultiplyFactor,
+		exportTemplate.Attempts, fieldSep,
 		self.Config.GeneralCfg().RoundingDecimals,
 		self.Config.GeneralCfg().HttpSkipTlsVerify, self.HTTPPoster, self.FilterS)
 	if err != nil {
@@ -198,7 +194,6 @@ type ArgExportCDRs struct {
 	Synchronous         *bool
 	Attempts            *int
 	FieldSeparator      *string
-	CostMultiplyFactor  *float64
 	ExportID            *string // Optional exportid
 	ExportFileName      *string // If provided the output filename will be set to this
 	RoundingDecimals    *int    // force rounding to this value
@@ -281,10 +276,6 @@ func (self *ApierV1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err 
 		u.Path = path.Join(u.Path, fileName)
 		filePath = u.String()
 	}
-	costMultiplyFactor := exportTemplate.CostMultiplyFactor
-	if arg.CostMultiplyFactor != nil && *arg.CostMultiplyFactor != 0.0 {
-		costMultiplyFactor = *arg.CostMultiplyFactor
-	}
 	roundingDecimals := self.Config.GeneralCfg().RoundingDecimals
 	if arg.RoundingDecimals != nil {
 		roundingDecimals = *arg.RoundingDecimals
@@ -301,8 +292,7 @@ func (self *ApierV1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err 
 	}
 	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat,
 		filePath, utils.META_NONE, exportID,
-		synchronous, attempts, fieldSep,
-		costMultiplyFactor, roundingDecimals,
+		synchronous, attempts, fieldSep, roundingDecimals,
 		self.Config.GeneralCfg().HttpSkipTlsVerify,
 		self.HTTPPoster, self.FilterS)
 	if err != nil {

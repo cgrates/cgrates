@@ -600,16 +600,15 @@ func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
 	}
 	eCdreCfg := map[string]*CdreCfg{
 		utils.MetaDefault: {
-			ExportFormat:       utils.MetaFileCSV,
-			ExportPath:         "/var/spool/cgrates/cdre",
-			Filters:            []string{},
-			Synchronous:        false,
-			Attempts:           1,
-			FieldSeparator:     ',',
-			CostMultiplyFactor: 1.0,
-			HeaderFields:       eFields,
-			ContentFields:      eContentFlds,
-			TrailerFields:      eFields,
+			ExportFormat:   utils.MetaFileCSV,
+			ExportPath:     "/var/spool/cgrates/cdre",
+			Filters:        []string{},
+			Synchronous:    false,
+			Attempts:       1,
+			FieldSeparator: ',',
+			HeaderFields:   eFields,
+			ContentFields:  eContentFlds,
+			TrailerFields:  eFields,
 		},
 	}
 	if !reflect.DeepEqual(cgrCfg.CdreProfiles, eCdreCfg) {
