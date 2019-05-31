@@ -32,7 +32,6 @@ var cdrcCfg = CdrcCfg{
 	CdrFormat:                "csv",
 	FieldSeparator:           ',',
 	MaxOpenFiles:             1024,
-	DataUsageMultiplyFactor:  1024,
 	CdrInDir:                 "/var/spool/cgrates/cdrc/in",
 	CdrOutDir:                "/var/spool/cgrates/cdrc/out",
 	FailedCallsPrefix:        "missed_calls",
@@ -88,7 +87,6 @@ func TestCdrcCfgloadFromJsonCfg(t *testing.T) {
 		"timezone": "",									// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 		"run_delay": 0,									// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
 		"max_open_files": 1024,							// maximum simultaneous files to process, 0 for unlimited
-		"data_usage_multiply_factor": 1024,				// conversion factor for data usage
 		"cdr_in_dir": "/var/spool/cgrates/cdrc/in",		// absolute path towards the directory where the CDRs are stored
 		"cdr_out_dir": "/var/spool/cgrates/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
 		"failed_calls_prefix": "missed_calls",			// used in case of flatstore CDRs to avoid searching for BYE records

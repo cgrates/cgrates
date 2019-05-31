@@ -28,7 +28,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -147,7 +146,6 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *confi
 	var err error
 	var lazyHttpFields []*config.FCTemplate
 	var cfgFields []*config.FCTemplate
-	var duMultiplyFactor float64
 	var storedCdr *engine.CDR
 	fwvProvider := newfwvProvider(record) // used for filterS and for RSRParsers
 	if self.headerCdr != nil {            // Clone the header CDR so we can use it as base to future processing (inherit fields defined there)
@@ -158,11 +156,9 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *confi
 	if cfgKey == "*header" {
 		cfgFields = cdrcCfg.HeaderFields
 		storedCdr.Source = cdrcCfg.CdrSourceId
-		duMultiplyFactor = cdrcCfg.DataUsageMultiplyFactor
 	} else {
 		cfgFields = cdrcCfg.ContentFields
 		storedCdr.Source = cdrcCfg.CdrSourceId
-		duMultiplyFactor = cdrcCfg.DataUsageMultiplyFactor
 	}
 	fldVals := make(map[string]string)
 	for _, cdrFldCfg := range cfgFields {
@@ -199,9 +195,6 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *confi
 	}
 	if storedCdr.CGRID == "" && storedCdr.OriginID != "" && cfgKey != "*header" {
 		storedCdr.CGRID = utils.Sha1(storedCdr.OriginID, storedCdr.OriginHost)
-	}
-	if storedCdr.ToR == utils.DATA && duMultiplyFactor != 0 {
-		storedCdr.Usage = time.Duration(float64(storedCdr.Usage.Nanoseconds()) * duMultiplyFactor)
 	}
 	for _, httpFieldCfg := range lazyHttpFields { // Lazy process the http fields
 		var outValByte []byte

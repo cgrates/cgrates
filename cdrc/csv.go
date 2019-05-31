@@ -25,7 +25,6 @@ import (
 	"net"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -189,9 +188,6 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 		}
 	}
 	storedCdr.CGRID = utils.Sha1(storedCdr.OriginID, storedCdr.OriginHost)
-	if storedCdr.ToR == utils.DATA && cdrcCfg.DataUsageMultiplyFactor != 0 {
-		storedCdr.Usage = time.Duration(float64(storedCdr.Usage.Nanoseconds()) * cdrcCfg.DataUsageMultiplyFactor)
-	}
 	for _, httpFieldCfg := range lazyHttpFields { // Lazy process the http fields
 		var outValByte []byte
 		var fieldVal, httpAddr string

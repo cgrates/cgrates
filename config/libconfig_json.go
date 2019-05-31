@@ -151,7 +151,6 @@ type CdrcJsonCfg struct {
 	Field_separator             *string
 	Timezone                    *string
 	Run_delay                   *int
-	Data_usage_multiply_factor  *float64
 	Cdr_in_dir                  *string
 	Cdr_out_dir                 *string
 	Failed_calls_prefix         *string

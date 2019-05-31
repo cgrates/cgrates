@@ -177,9 +177,6 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity *xmlquery.Node, cdrcCf
 		}
 	}
 	cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.OriginHost)
-	if cdr.ToR == utils.DATA && cdrcCfg.DataUsageMultiplyFactor != 0 {
-		cdr.Usage = time.Duration(float64(cdr.Usage.Nanoseconds()) * cdrcCfg.DataUsageMultiplyFactor)
-	}
 	for _, httpFieldCfg := range lazyHttpFields { // Lazy process the http fields
 		var outValByte []byte
 		var fieldVal, httpAddr string
