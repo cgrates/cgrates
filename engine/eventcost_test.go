@@ -991,14 +991,21 @@ func TestECTrimZeroAndFull(t *testing.T) {
 	}
 	eFullSrpls := testEC.Clone()
 	eFullSrpls.Usage = utils.DurationPointer(time.Duration(10 * time.Minute))
-	eFullSrpls.Charges[0].usage = utils.DurationPointer(time.Duration(1 * time.Minute))
-	eFullSrpls.Charges[1].usage = utils.DurationPointer(time.Duration(1 * time.Minute))
-	eFullSrpls.Charges[2].usage = utils.DurationPointer(time.Duration(1 * time.Minute))
 	if srplsEC, err := ec.Trim(time.Duration(0)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eFullSrpls, srplsEC) {
 		t.Errorf("\tExpecting: %s,\n\treceived: %s",
 			utils.ToJSON(eFullSrpls), utils.ToJSON(srplsEC))
+	}
+	//verify the event cost
+	newEc := NewBareEventCost()
+	newEc.CGRID = eFullSrpls.CGRID
+	newEc.RunID = eFullSrpls.RunID
+	newEc.StartTime = eFullSrpls.StartTime
+	newEc.AccountSummary = eFullSrpls.AccountSummary.Clone()
+	if !reflect.DeepEqual(newEc, ec) {
+		t.Errorf("\tExpecting: %s,\n\treceived: %s",
+			utils.ToJSON(newEc), utils.ToJSON(ec))
 	}
 }
 

@@ -1451,7 +1451,6 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration, aTi
 							"<%s> failed refunding session: <%s>, srIdx: <%d>, error: <%s>",
 							utils.SessionS, s.CGRID, sRunIdx, err.Error()))
 				}
-				// FixMe: make sure refund is reflected inside EventCost
 			}
 			// set cost fields
 			sr.Event[utils.Cost] = sr.EventCost.GetCost()
