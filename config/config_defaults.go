@@ -212,7 +212,6 @@ const CGRATES_CFG_JSON = `
 		"synchronous": false,							// block processing until export has a result
 		"attempts": 1,									// export attempts
 		"field_separator": ",",							// used field separator in some export formats, eg: *file_csv
-		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
 		"header_fields": [],							// template of the exported header fields
 		"content_fields": [								// template of the exported content fields
 			{"tag": "CGRID", "type": "*composed", "value": "~CGRID"},

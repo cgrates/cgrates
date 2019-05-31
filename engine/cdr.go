@@ -140,11 +140,6 @@ func (cdr *CDR) ComputeCGRID() {
 	cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.OriginHost)
 }
 
-// Used to multiply cost on export
-func (cdr *CDR) CostMultiply(multiplyFactor float64, roundDecimals int) {
-	cdr.Cost = utils.Round(cdr.Cost*multiplyFactor, roundDecimals, utils.ROUNDING_MIDDLE)
-}
-
 // Format cost as string on export
 func (cdr *CDR) FormatCost(shiftDecimals, roundDecimals int) string {
 	cost := cdr.Cost

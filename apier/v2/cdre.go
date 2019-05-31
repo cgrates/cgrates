@@ -31,16 +31,15 @@ import (
 )
 
 type AttrExportCdrsToFile struct {
-	CdrFormat           *string  // Cdr output file format <utils.CdreCdrFormats>
-	FieldSeparator      *string  // Separator used between fields
-	ExportID            *string  // Optional exportid
-	ExportDirectory     *string  // If provided it overwrites the configured export directory
-	ExportFileName      *string  // If provided the output filename will be set to this
-	ExportTemplate      *string  // Exported fields template  <""|fld1,fld2|>
-	CostMultiplyFactor  *float64 // Multiply the cost before export, eg: apply VAT
-	RoundingDecimals    *int     // force rounding to this value
-	Verbose             bool     // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
-	utils.RPCCDRsFilter          // Inherit the CDR filter attributes
+	CdrFormat           *string // Cdr output file format <utils.CdreCdrFormats>
+	FieldSeparator      *string // Separator used between fields
+	ExportID            *string // Optional exportid
+	ExportDirectory     *string // If provided it overwrites the configured export directory
+	ExportFileName      *string // If provided the output filename will be set to this
+	ExportTemplate      *string // Exported fields template  <""|fld1,fld2|>
+	RoundingDecimals    *int    // force rounding to this value
+	Verbose             bool    // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
+	utils.RPCCDRsFilter         // Inherit the CDR filter attributes
 }
 
 type ExportedFileCdrs struct {
@@ -102,10 +101,6 @@ func (self *ApierV2) ExportCdrsToFile(attr AttrExportCdrsToFile, reply *Exported
 	if exportFormat == utils.DRYRUN {
 		filePath = utils.DRYRUN
 	}
-	costMultiplyFactor := exportTemplate.CostMultiplyFactor
-	if attr.CostMultiplyFactor != nil && *attr.CostMultiplyFactor != 0.0 {
-		costMultiplyFactor = *attr.CostMultiplyFactor
-	}
 	cdrsFltr, err := attr.RPCCDRsFilter.AsCDRsFilter(self.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -123,7 +118,7 @@ func (self *ApierV2) ExportCdrsToFile(attr AttrExportCdrsToFile, reply *Exported
 	}
 	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat,
 		filePath, utils.META_NONE, exportID, exportTemplate.Synchronous,
-		exportTemplate.Attempts, fieldSep, costMultiplyFactor,
+		exportTemplate.Attempts, fieldSep,
 		roundingDecimals, self.Config.GeneralCfg().HttpSkipTlsVerify,
 		self.HTTPPoster, self.FilterS)
 	if err != nil {

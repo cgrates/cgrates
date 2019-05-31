@@ -61,9 +61,6 @@ func TestMfCdreDefaultInstance(t *testing.T) {
 	if mfCgrCfg.CdreProfiles[prfl].ExportFormat != utils.MetaFileCSV {
 		t.Error("Default instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].ExportFormat)
 	}
-	if mfCgrCfg.CdreProfiles[prfl].CostMultiplyFactor != 1024.0 {
-		t.Error("Default instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].CostMultiplyFactor)
-	}
 	if len(mfCgrCfg.CdreProfiles[prfl].HeaderFields) != 0 {
 		t.Error("Default instance has number of header fields: ", len(mfCgrCfg.CdreProfiles[prfl].HeaderFields))
 	}
@@ -79,9 +76,6 @@ func TestMfCdreExport1Instance(t *testing.T) {
 	prfl := "export1"
 	if mfCgrCfg.CdreProfiles[prfl].ExportFormat != utils.MetaFileCSV {
 		t.Error("Export1 instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].ExportFormat)
-	}
-	if mfCgrCfg.CdreProfiles[prfl].CostMultiplyFactor != 1.0 {
-		t.Error("Export1 instance has DataUsageMultiplyFormat: ", mfCgrCfg.CdreProfiles[prfl].CostMultiplyFactor)
 	}
 	if len(mfCgrCfg.CdreProfiles[prfl].HeaderFields) != 2 {
 		t.Error("Export1 instance has number of header fields: ", len(mfCgrCfg.CdreProfiles[prfl].HeaderFields))

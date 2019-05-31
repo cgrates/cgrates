@@ -51,46 +51,44 @@ const (
 )
 
 func NewCDRExporter(cdrs []*CDR, exportTemplate *config.CdreCfg, exportFormat, exportPath, fallbackPath, exportID string,
-	synchronous bool, attempts int, fieldSeparator rune, costMultiplyFactor float64, roundingDecimals int,
+	synchronous bool, attempts int, fieldSeparator rune, roundingDecimals int,
 	httpSkipTlsCheck bool, httpPoster *HTTPPoster, filterS *FilterS) (*CDRExporter, error) {
 	if len(cdrs) == 0 { // Nothing to export
 		return nil, nil
 	}
 	cdre := &CDRExporter{
-		cdrs:               cdrs,
-		exportTemplate:     exportTemplate,
-		exportFormat:       exportFormat,
-		exportPath:         exportPath,
-		fallbackPath:       fallbackPath,
-		exportID:           exportID,
-		synchronous:        synchronous,
-		attempts:           attempts,
-		fieldSeparator:     fieldSeparator,
-		costMultiplyFactor: costMultiplyFactor,
-		roundingDecimals:   roundingDecimals,
-		httpSkipTlsCheck:   httpSkipTlsCheck,
-		httpPoster:         httpPoster,
-		negativeExports:    make(map[string]string),
-		filterS:            filterS,
+		cdrs:             cdrs,
+		exportTemplate:   exportTemplate,
+		exportFormat:     exportFormat,
+		exportPath:       exportPath,
+		fallbackPath:     fallbackPath,
+		exportID:         exportID,
+		synchronous:      synchronous,
+		attempts:         attempts,
+		fieldSeparator:   fieldSeparator,
+		roundingDecimals: roundingDecimals,
+		httpSkipTlsCheck: httpSkipTlsCheck,
+		httpPoster:       httpPoster,
+		negativeExports:  make(map[string]string),
+		filterS:          filterS,
 	}
 	return cdre, nil
 }
 
 type CDRExporter struct {
 	sync.RWMutex
-	cdrs               []*CDR
-	exportTemplate     *config.CdreCfg
-	exportFormat       string
-	exportPath         string
-	fallbackPath       string // folder where we save failed CDRs
-	exportID           string // Unique identifier or this export
-	synchronous        bool
-	attempts           int
-	fieldSeparator     rune
-	costMultiplyFactor float64
-	roundingDecimals   int
-	httpSkipTlsCheck   bool
-	httpPoster         *HTTPPoster
+	cdrs             []*CDR
+	exportTemplate   *config.CdreCfg
+	exportFormat     string
+	exportPath       string
+	fallbackPath     string // folder where we save failed CDRs
+	exportID         string // Unique identifier or this export
+	synchronous      bool
+	attempts         int
+	fieldSeparator   rune
+	roundingDecimals int
+	httpSkipTlsCheck bool
+	httpPoster       *HTTPPoster
 
 	header, trailer []string   // Header and Trailer fields
 	content         [][]string // Rows of cdr fields
@@ -295,9 +293,6 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 func (cdre *CDRExporter) processCDR(cdr *CDR) (err error) {
 	if cdr.ExtraFields == nil { // Avoid assignment in nil map if not initialized
 		cdr.ExtraFields = make(map[string]string)
-	}
-	if cdre.costMultiplyFactor != 0.0 {
-		cdr.CostMultiply(cdre.costMultiplyFactor, cdre.roundingDecimals)
 	}
 	switch cdre.exportFormat {
 	case utils.MetaFileFWV, utils.MetaFileCSV:

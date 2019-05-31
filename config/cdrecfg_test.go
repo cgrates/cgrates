@@ -40,13 +40,12 @@ func TestCdreCfgClone(t *testing.T) {
 			Value:   runIdRsrs},
 	}
 	initCdreCfg := &CdreCfg{
-		ExportFormat:       utils.MetaFileCSV,
-		ExportPath:         "/var/spool/cgrates/cdre",
-		Synchronous:        true,
-		Attempts:           2,
-		FieldSeparator:     rune(','),
-		CostMultiplyFactor: 1.0,
-		ContentFields:      initContentFlds,
+		ExportFormat:   utils.MetaFileCSV,
+		ExportPath:     "/var/spool/cgrates/cdre",
+		Synchronous:    true,
+		Attempts:       2,
+		FieldSeparator: rune(','),
+		ContentFields:  initContentFlds,
 	}
 	eClnContentFlds := []*FCTemplate{
 		{Tag: "CgrId",
@@ -59,16 +58,15 @@ func TestCdreCfgClone(t *testing.T) {
 			Value:   runIdRsrs},
 	}
 	eClnCdreCfg := &CdreCfg{
-		ExportFormat:       utils.MetaFileCSV,
-		ExportPath:         "/var/spool/cgrates/cdre",
-		Synchronous:        true,
-		Attempts:           2,
-		Filters:            []string{},
-		FieldSeparator:     rune(','),
-		CostMultiplyFactor: 1.0,
-		HeaderFields:       emptyFields,
-		ContentFields:      eClnContentFlds,
-		TrailerFields:      emptyFields,
+		ExportFormat:   utils.MetaFileCSV,
+		ExportPath:     "/var/spool/cgrates/cdre",
+		Synchronous:    true,
+		Attempts:       2,
+		Filters:        []string{},
+		FieldSeparator: rune(','),
+		HeaderFields:   emptyFields,
+		ContentFields:  eClnContentFlds,
+		TrailerFields:  emptyFields,
 	}
 	clnCdreCfg := initCdreCfg.Clone()
 	if !reflect.DeepEqual(eClnCdreCfg, clnCdreCfg) {
@@ -107,7 +105,6 @@ func TestCdreCfgloadFromJsonCfg(t *testing.T) {
 		"synchronous": false,							// block processing until export has a result
 		"attempts": 1,									// Number of attempts if not success
 		"field_separator": ",",							// used field separator in some export formats, eg: *file_csv
-		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
 		"header_fields": [],							// template of the exported header fields
 		"content_fields": [								// template of the exported content fields
 			{"tag": "CGRID", "type": "*composed", "value": "~CGRID"},
@@ -121,14 +118,13 @@ func TestCdreCfgloadFromJsonCfg(t *testing.T) {
 		t.Error(err)
 	}
 	expected = CdreCfg{
-		ExportFormat:       "*file_csv",
-		ExportPath:         "/var/spool/cgrates/cdre",
-		Filters:            []string{},
-		Tenant:             "cgrates.org",
-		Attempts:           1,
-		FieldSeparator:     ',',
-		CostMultiplyFactor: 1,
-		HeaderFields:       []*FCTemplate{},
+		ExportFormat:   "*file_csv",
+		ExportPath:     "/var/spool/cgrates/cdre",
+		Filters:        []string{},
+		Tenant:         "cgrates.org",
+		Attempts:       1,
+		FieldSeparator: ',',
+		HeaderFields:   []*FCTemplate{},
 		ContentFields: []*FCTemplate{{
 			Tag:   "CGRID",
 			Type:  "*composed",

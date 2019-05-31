@@ -530,7 +530,6 @@ type AttrExpFileCdrs struct {
 	ExportDir           *string  // If provided it overwrites the configured export directory
 	ExportFileName      *string  // If provided the output filename will be set to this
 	ExportTemplate      *string  // Exported fields template  <""|fld1,fld2|*xml:instance_name>
-	CostMultiplyFactor  *float64 // Multiply the cost before export, eg: apply VAT
 	CgrIds              []string // If provided, it will filter based on the cgrids present in list
 	MediationRunIds     []string // If provided, it will filter on mediation runid
 	TORs                []string // If provided, filter on TypeOfRecord
