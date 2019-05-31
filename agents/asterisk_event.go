@@ -158,6 +158,10 @@ func (smaEv *SMAsteriskEvent) Subsystems() string {
 	return smaEv.cachedFields[utils.CGRSubsystems]
 }
 
+func (smaEv *SMAsteriskEvent) OriginHost() string {
+	return smaEv.cachedFields[utils.CGROriginHost]
+}
+
 func (smaEv *SMAsteriskEvent) DisconnectCause() string {
 	cachedKey := utils.CGR_DISCONNECT_CAUSE
 	cachedVal, hasIt := smaEv.cachedFields[cachedKey]
@@ -235,7 +239,7 @@ func (smaEv *SMAsteriskEvent) AsMapStringInterface() (mp map[string]interface{})
 	if smaEv.Subject() != "" {
 		mp[utils.Subject] = smaEv.Subject()
 	}
-	mp[utils.OriginHost] = smaEv.OriginatorIP()
+	mp[utils.OriginHost] = utils.FirstNonEmpty(smaEv.OriginHost(), smaEv.OriginatorIP())
 	mp[utils.Account] = smaEv.Account()
 	mp[utils.Destination] = smaEv.Destination()
 	mp[utils.SetupTime] = smaEv.SetupTime()

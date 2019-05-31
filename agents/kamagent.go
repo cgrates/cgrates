@@ -122,7 +122,7 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connID string) {
 			utils.KamailioAgent, kev[utils.OriginID]))
 		return
 	}
-	authArgs.CGREvent.Event[utils.OriginHost] = ka.conns[connID].RemoteAddr().String()
+	authArgs.CGREvent.Event[utils.OriginHost] = utils.FirstNonEmpty(authArgs.CGREvent.Event[utils.OriginHost].(string), ka.conns[connID].RemoteAddr().String())
 	authArgs.CGREvent.Event[EvapiConnID] = connID // Attach the connection ID
 	var authReply sessions.V1AuthorizeReply
 	err = ka.sessionS.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authReply)
@@ -158,7 +158,7 @@ func (ka *KamailioAgent) onCallStart(evData []byte, connID string) {
 		return
 	}
 	initSessionArgs.CGREvent.Event[EvapiConnID] = connID // Attach the connection ID so we can properly disconnect later
-	initSessionArgs.CGREvent.Event[utils.OriginHost] = ka.conns[connID].RemoteAddr().String()
+	initSessionArgs.CGREvent.Event[utils.OriginHost] = utils.FirstNonEmpty(initSessionArgs.CGREvent.Event[utils.OriginHost].(string), ka.conns[connID].RemoteAddr().String())
 
 	var initReply sessions.V1InitSessionReply
 	if err := ka.sessionS.Call(utils.SessionSv1InitiateSession,
@@ -195,7 +195,7 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connID string) {
 		return
 	}
 	var reply string
-	tsArgs.CGREvent.Event[utils.OriginHost] = ka.conns[connID].RemoteAddr().String()
+	tsArgs.CGREvent.Event[utils.OriginHost] = utils.FirstNonEmpty(tsArgs.CGREvent.Event[utils.OriginHost].(string), ka.conns[connID].RemoteAddr().String())
 	tsArgs.CGREvent.Event[EvapiConnID] = connID // Attach the connection ID in case we need to create a session and disconnect it
 	if err := ka.sessionS.Call(utils.SessionSv1TerminateSession,
 		tsArgs, &reply); err != nil {
@@ -209,7 +209,7 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connID string) {
 		if err != nil {
 			return
 		}
-		cgrEv.Event[utils.OriginHost] = ka.conns[connID].RemoteAddr().String()
+		cgrEv.Event[utils.OriginHost] = utils.FirstNonEmpty(cgrEv.Event[utils.OriginHost].(string), ka.conns[connID].RemoteAddr().String())
 		cgrArgs := cgrEv.ConsumeArgs(strings.Index(kev[utils.CGRSubsystems], utils.MetaDispatchers) != -1, false)
 		if err := ka.sessionS.Call(utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv, ArgDispatcher: cgrArgs.ArgDispatcher}, &reply); err != nil {
