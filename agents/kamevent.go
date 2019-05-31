@@ -118,6 +118,9 @@ func (kev KamEvent) AsMapStringInterface() (mp map[string]interface{}) {
 			v += "s" // mark the Usage as seconds
 		}
 		if !utils.IsSliceMember(kamReservedEventFields, k) { // reserved attributes not getting into event
+			if k == utils.CGROriginHost {
+				mp[utils.OriginHost] = v
+			}
 			mp[k] = v
 		}
 	}
