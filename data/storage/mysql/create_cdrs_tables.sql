@@ -29,7 +29,7 @@ CREATE TABLE cdrs (
   updated_at TIMESTAMP NULL,
   deleted_at TIMESTAMP NULL,
   PRIMARY KEY (id),
-  UNIQUE KEY cdrrun (cgrid, run_id, origin_id)
+  UNIQUE KEY cdrrun (cgrid, run_id)
 );
 
 DROP TABLE IF EXISTS session_costs;

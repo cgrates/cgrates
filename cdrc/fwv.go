@@ -198,7 +198,7 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *confi
 		}
 	}
 	if storedCdr.CGRID == "" && storedCdr.OriginID != "" && cfgKey != "*header" {
-		storedCdr.CGRID = utils.Sha1(storedCdr.OriginID, storedCdr.SetupTime.UTC().String())
+		storedCdr.CGRID = utils.Sha1(storedCdr.OriginID, storedCdr.OriginHost)
 	}
 	if storedCdr.ToR == utils.DATA && duMultiplyFactor != 0 {
 		storedCdr.Usage = time.Duration(float64(storedCdr.Usage.Nanoseconds()) * duMultiplyFactor)

@@ -48,7 +48,7 @@ func TestCsvRecordToCDR(t *testing.T) {
 		t.Error("Failed to parse CDR in rated cdr", err)
 	}
 	expectedCdr := &engine.CDR{
-		CGRID:       utils.Sha1(cdrRow[3], time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC).String()),
+		CGRID:       utils.Sha1(cdrRow[3], "0.0.0.0"),
 		RunID:       utils.MetaDefault,
 		ToR:         cdrRow[2],
 		OriginID:    cdrRow[3],
@@ -88,9 +88,9 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 	if err != nil {
 		t.Error("Failed to parse CDR in rated cdr", err)
 	}
-	var sTime time.Time
+	// var sTime time.Time
 	expectedCdr := &engine.CDR{
-		CGRID:       utils.Sha1("", sTime.String()),
+		CGRID:       utils.Sha1("", "0.0.0.0"),
 		ToR:         cdrRow[0],
 		OriginHost:  "0.0.0.0",
 		Source:      "TEST_CDRC",
@@ -103,7 +103,7 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 	}
 	csvProcessor.cdrcCfgs[0].DataUsageMultiplyFactor = 1024
 	expectedCdr = &engine.CDR{
-		CGRID:       utils.Sha1("", sTime.String()),
+		CGRID:       utils.Sha1("", "0.0.0.0"),
 		ToR:         cdrRow[0],
 		OriginHost:  "0.0.0.0",
 		Source:      "TEST_CDRC",
@@ -117,7 +117,7 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 	}
 	cdrRow = []string{"*voice", "1s"}
 	expectedCdr = &engine.CDR{
-		CGRID:       utils.Sha1("", sTime.String()),
+		CGRID:       utils.Sha1("", "0.0.0.0"),
 		ToR:         cdrRow[0],
 		OriginHost:  "0.0.0.0",
 		Source:      "TEST_CDRC",
