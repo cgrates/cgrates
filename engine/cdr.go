@@ -180,20 +180,6 @@ func (cdr *CDR) FieldAsStringWithRSRField(rsrFld *utils.RSRField) (parsed string
 	return rsrFld.Parse(fldIface)
 }
 
-// concatenates values of multiple fields defined in template, used eg in CDR templates
-func (cdr *CDR) FieldsAsStringWithRSRFields(rsrFlds utils.RSRFields) (fldVal string) {
-	for _, rsrFld := range rsrFlds {
-		if fldStr, err := cdr.FieldAsStringWithRSRField(rsrFld); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error: %s processing field with template: %+v",
-					utils.CDR, err.Error(), rsrFld))
-		} else {
-			fldVal += fldStr
-		}
-	}
-	return
-}
-
 // Populates the field with id from value; strings are appended to original one
 func (cdr *CDR) ParseFieldValue(fieldId, fieldVal, timezone string) error {
 	var err error
