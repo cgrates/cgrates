@@ -2596,6 +2596,8 @@ type V1ProcessEventReply struct {
 	ResourceAllocation *string
 	Attributes         *engine.AttrSProcessEventReply
 	Suppliers          *engine.SortedSuppliers
+	ThresholdIDs       *[]string
+	StatQueueIDs       *[]string
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
@@ -2620,6 +2622,12 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap(
 		}
 		if v1Rply.Suppliers != nil {
 			cgrReply[utils.CapSuppliers] = v1Rply.Suppliers.AsNavigableMap()
+		}
+		if v1Rply.ThresholdIDs != nil {
+			cgrReply[utils.CapThresholds] = *v1Rply.ThresholdIDs
+		}
+		if v1Rply.StatQueueIDs != nil {
+			cgrReply[utils.CapStatQueues] = *v1Rply.StatQueueIDs
 		}
 	}
 	return config.NewNavigableMap(cgrReply), nil
@@ -2749,6 +2757,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
 					utils.SessionS, err.Error(), thEv))
 		}
+		rply.ThresholdIDs = &tIDs
 	}
 	if args.ProcessStats {
 		if sS.statS == nil {
@@ -2766,6 +2775,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 				fmt.Sprintf("<%s> error: %s processing event %+v with StatS.",
 					utils.SessionS, err.Error(), args.CGREvent))
 		}
+		rply.ThresholdIDs = &statReply
 	}
 	return nil
 }
