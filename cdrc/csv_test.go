@@ -88,12 +88,6 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 	}
 	csvProcessor := &CsvRecordsProcessor{dfltCdrcCfg: cdrcConfig, cdrcCfgs: []*config.CdrcCfg{cdrcConfig}, filterS: filterS}
 	cdrRow := []string{"*data", "1"}
-	rtCdr, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig, "cgrates.org")
-	if err != nil {
-		t.Error("Failed to parse CDR in rated cdr", err)
-	}
-	// var sTime time.Time
-	var sTime time.Time
 	expectedCdr := &engine.CDR{
 		CGRID:       utils.Sha1("", "0.0.0.0"),
 		ToR:         cdrRow[0],
