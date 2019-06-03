@@ -71,8 +71,6 @@ fi
 export GO15VENDOREXPERIMENT=1
 export GOPATH=$RPM_BUILD_DIR/%{name}-%{version}
 cd $RPM_BUILD_DIR/%{name}-%{version}/src/github.com/cgrates/cgrates
-go get -v github.com/Masterminds/glide
-$GOPATH/bin/glide install
 ./build.sh
 
 %install

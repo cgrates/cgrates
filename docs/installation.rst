@@ -46,27 +46,14 @@ In this Tutorial we are going to install Go 1.11
 3.2.2 Build CGRateS from Source
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To manage this *vendor* folder we use a tool named `glide`_ which will download specific versions of the external packages used by CGRateS.
-To configure the project with `glide`_ use the following commands:
+To configure the project with use the following commands:
 
 ::
 
-   go get github.com/Masterminds/glide
    go get github.com/cgrates/cgrates
    cd $GOPATH/src/github.com/cgrates/cgrates
-   glide install
    ./build.sh
 
-The **glide install** command will install the external dependencies versions, specified in the **glide.lock** file, in the vendor folder.
-There are different versions for each CGRateS branch, versions that are recorded in the **lock** file when the GCRateS releases are made (using **glide update** command).
-
-.. note:: The *vendor* folder **should not** be registered with the VCS we are using.
-
-For more information and command options use `glide`_ readme page.
-
-.. _installed: http://golang.org/doc/install
-.. _configured: http://golang.org/doc/code.html
-.. _glide: https://github.com/Masterminds/glide
 
 .. _post-install:
 

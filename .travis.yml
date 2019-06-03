@@ -1,13 +1,12 @@
 language: go
 
 go:
-  - 1.11
+  - 1.12.5
 
 install:
-  - go get github.com/Masterminds/glide
-  - glide install
 
-script: go test -v $(glide novendor)
+
+script: go test -v 
 
 branches:
   only: master
