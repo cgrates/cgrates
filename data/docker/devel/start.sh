@@ -28,7 +28,6 @@ export GOROOT=/root/go; export GOPATH=/root/code; export PATH=$GOROOT/bin:$GOPAT
 
 # build and install cgrates
 cd /root/cgr
-#glide -y devel.yaml install
 ./build.sh
 
 # create cgr-engine and cgr-loader link

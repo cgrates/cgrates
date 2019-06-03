@@ -1,4 +1,4 @@
 #! /usr/bin/env sh
 ./build.sh
-go test $(glide novendor)
+go test 
 exit $?
