@@ -379,6 +379,7 @@ func TestMapEventAsCDR(t *testing.T) {
 		"Source":      1001,
 		"CostSource":  "1002",
 		"ExtraField2": "extra",
+		"ExtraInfo":   "ACCOUNT_NOT_FOUND",
 	}
 	expected = &CDR{
 		CGRID:      "da39a3ee5e6b4b0d3255bfef95601890afd80709",
@@ -394,6 +395,7 @@ func TestMapEventAsCDR(t *testing.T) {
 		RequestType: cfg.GeneralCfg().DefaultReqType,
 		Tenant:      cfg.GeneralCfg().DefaultTenant,
 		Category:    cfg.GeneralCfg().DefaultCategory,
+		ExtraInfo:   "ACCOUNT_NOT_FOUND",
 	}
 	if rply, err := me.AsCDR(cfg, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Error(err)
