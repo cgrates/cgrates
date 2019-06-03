@@ -35,6 +35,7 @@ const (
 	CGR_SESSION_DISCONNECT = "CGR_SESSION_DISCONNECT"
 	CGR_CALL_START         = "CGR_CALL_START"
 	CGR_CALL_END           = "CGR_CALL_END"
+	CGR_PROCESS_EVENT      = "CGR_PROCESS_EVENT"
 	KamTRIndex             = "tr_index"
 	KamTRLabel             = "tr_label"
 	KamHashEntry           = "h_entry"
@@ -104,6 +105,19 @@ func (kev KamEvent) MissingParameter() bool {
 			kev[utils.Account],
 			kev[utils.Destination],
 		}, "")
+	case CGR_PROCESS_EVENT:
+		// TRIndex and TRLabel must exist in order to know where to send back the response
+		mndPrm := []string{kev[KamTRIndex], kev[KamTRLabel]}
+		_, has := kev[utils.CGRSubsystems]
+		// in case that the user populate cgr_subsystems we treat it like a ProcessEvent
+		// and expect to have the required fields
+		if has {
+			mndPrm = append(mndPrm, kev[utils.OriginID],
+				kev[utils.AnswerTime],
+				kev[utils.Account],
+				kev[utils.Destination])
+		}
+		return utils.IsSliceMember(mndPrm, "")
 	default: // no/unsupported event
 		return true
 	}
@@ -147,6 +161,12 @@ func (kev KamEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err erro
 		}
 		sTime = sTimePrv
 	case CGR_CALL_END:
+		sTimePrv, err := utils.ParseTimeDetectLayout(kev[utils.AnswerTime], timezone)
+		if err != nil {
+			return nil, err
+		}
+		sTime = sTimePrv
+	case CGR_PROCESS_EVENT:
 		sTimePrv, err := utils.ParseTimeDetectLayout(kev[utils.AnswerTime], timezone)
 		if err != nil {
 			return nil, err
@@ -202,12 +222,12 @@ func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 
 // AsKamAuthReply builds up a Kamailio AuthReply based on arguments and reply from SessionS
 func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
-	authReply *sessions.V1AuthorizeReply, rplyErr error) (kar *KamAuthReply, err error) {
+	authReply *sessions.V1AuthorizeReply, rplyErr error) (kar *KamReply, err error) {
 	evName := CGR_AUTH_REPLY
 	if kamRouReply, has := kev[KamReplyRoute]; has {
 		evName = kamRouReply
 	}
-	kar = &KamAuthReply{Event: evName,
+	kar = &KamReply{Event: evName,
 		TransactionIndex: kev[KamTRIndex],
 		TransactionLabel: kev[KamTRLabel],
 	}
@@ -265,6 +285,89 @@ func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 	return
 }
 
+// V1ProcessEventArgs returns the arguments used in SessionSv1.ProcessEvent
+func (kev KamEvent) V1ProcessEventArgs() (args *sessions.V1ProcessEventArgs) {
+	cgrEv, err := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
+	if err != nil {
+		return
+	}
+	args = &sessions.V1ProcessEventArgs{ // defaults
+		CGREvent: cgrEv,
+	}
+	subsystems, has := kev[utils.CGRSubsystems]
+	if !has {
+		return
+	}
+	args.GetAttributes = strings.Index(subsystems, utils.MetaAttributes) != -1
+	args.AllocateResources = strings.Index(subsystems, utils.MetaResources) != -1
+	args.Debit = strings.Index(subsystems, utils.MetaAccounts) != -1
+	args.ProcessThresholds = strings.Index(subsystems, utils.MetaThresholds) != -1
+	args.ProcessStats = strings.Index(subsystems, utils.MetaStats) != -1
+	args.GetSuppliers = strings.Index(subsystems, utils.MetaSuppliers) != -1
+	args.SuppliersIgnoreErrors = strings.Index(subsystems, utils.MetaSuppliersIgnoreErrors) != -1
+	if strings.Index(subsystems, utils.MetaSuppliersEventCost) != -1 {
+		args.SuppliersMaxCost = utils.MetaEventCost
+	}
+	cgrArgs := cgrEv.ConsumeArgs(strings.Index(subsystems, utils.MetaDispatchers) != -1, true)
+	args.ArgDispatcher = cgrArgs.ArgDispatcher
+	args.Paginator = *cgrArgs.SupplierPaginator
+	return
+}
+
+// AsKamAuthReply builds up a Kamailio ProcessEvent based on arguments and reply from SessionS
+func (kev KamEvent) AsKamProcessEventReply(procEvArgs *sessions.V1ProcessEventArgs,
+	procEvReply *sessions.V1ProcessEventReply, rplyErr error) (kar *KamReply, err error) {
+	evName := CGR_PROCESS_EVENT
+	if kamRouReply, has := kev[KamReplyRoute]; has {
+		evName = kamRouReply
+	}
+	kar = &KamReply{Event: evName,
+		TransactionIndex: kev[KamTRIndex],
+		TransactionLabel: kev[KamTRLabel],
+	}
+	if rplyErr != nil {
+		kar.Error = rplyErr.Error()
+		return
+	}
+	if procEvArgs.GetAttributes && procEvReply.Attributes != nil {
+		kar.Attributes = procEvReply.Attributes.Digest()
+	}
+	if procEvArgs.AllocateResources {
+		kar.ResourceAllocation = *procEvReply.ResourceAllocation
+	}
+	if procEvArgs.Debit {
+		if *procEvReply.MaxUsage == -1 { // For calls different than unlimited, set limits
+			kar.MaxUsage = -1
+		} else {
+			kar.MaxUsage = int(utils.Round(procEvReply.MaxUsage.Seconds(), 0, utils.ROUNDING_MIDDLE))
+		}
+	}
+	if procEvArgs.GetSuppliers && procEvReply.Suppliers != nil {
+		kar.Suppliers = procEvReply.Suppliers.Digest()
+	}
+
+	if procEvArgs.ProcessThresholds {
+		kar.Thresholds = strings.Join(*procEvReply.ThresholdIDs, utils.FIELDS_SEP)
+	}
+	if procEvArgs.ProcessStats {
+		kar.StatQueues = strings.Join(*procEvReply.StatQueueIDs, utils.FIELDS_SEP)
+	}
+	return
+}
+
+// AsKamProcessEventEmptyReply builds up a Kamailio ProcessEventEmpty
+func (kev KamEvent) AsKamProcessEventEmptyReply() (kar *KamReply) {
+	evName := CGR_PROCESS_EVENT
+	if kamRouReply, has := kev[KamReplyRoute]; has {
+		evName = kamRouReply
+	}
+	kar = &KamReply{Event: evName,
+		TransactionIndex: kev[KamTRIndex],
+		TransactionLabel: kev[KamTRLabel],
+	}
+	return
+}
+
 // V1TerminateSessionArgs returns the arguments used in SMGv1.TerminateSession
 func (kev KamEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionArgs) {
 	cgrEv, err := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
@@ -288,7 +391,9 @@ func (kev KamEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionA
 	return
 }
 
-type KamAuthReply struct {
+//KamReply will be used to send back to kamailio from
+//Authrization,ProcessEvent and ProcessEvent empty (pingPong)
+type KamReply struct {
 	Event              string // Kamailio will use this to differentiate between requests and replies
 	TransactionIndex   string // Original transaction index
 	TransactionLabel   string // Original transaction label
@@ -301,7 +406,7 @@ type KamAuthReply struct {
 	Error              string // Reply in case of error
 }
 
-func (self *KamAuthReply) String() string {
+func (self *KamReply) String() string {
 	mrsh, _ := json.Marshal(self)
 	return string(mrsh)
 }
