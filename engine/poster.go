@@ -495,6 +495,9 @@ func (pstr *AWSPoster) Post(content []byte, fallbackFileName string) (err error)
 		}
 		// reset client and try again
 		// used in case of closed conection because of idle time
+		if pstr.client != nil {
+			pstr.client.Close() // Make shure the connection is closed before reseting it
+		}
 		pstr.client = nil
 		time.Sleep(time.Duration(fib()) * time.Second)
 	}
