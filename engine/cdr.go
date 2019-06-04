@@ -331,9 +331,17 @@ func (cdr *CDR) exportFieldValue(cfgCdrFld *config.FCTemplate, filterS *FilterS)
 			cdrVal = cdr.FormatCost(cfgCdrFld.CostShiftDigits,
 				cfgCdrFld.RoundingDecimals)
 		case utils.SetupTime:
-			cdrVal = cdr.SetupTime.Format(cfgCdrFld.Layout)
+			if cfgCdrFld.Layout == "" {
+				cdrVal = cdr.SetupTime.Format(time.RFC3339)
+			} else {
+				cdrVal = cdr.SetupTime.Format(cfgCdrFld.Layout)
+			}
 		case utils.AnswerTime: // Format time based on layout
-			cdrVal = cdr.AnswerTime.Format(cfgCdrFld.Layout)
+			if cfgCdrFld.Layout == "" {
+				cdrVal = cdr.AnswerTime.Format(time.RFC3339)
+			} else {
+				cdrVal = cdr.AnswerTime.Format(cfgCdrFld.Layout)
+			}
 		case utils.Destination:
 			cdrVal, err = cdr.FieldAsString(rsrFld)
 			if err != nil {
@@ -356,10 +364,6 @@ func (cdr *CDR) exportFieldValue(cfgCdrFld *config.FCTemplate, filterS *FilterS)
 
 func (cdr *CDR) formatField(cfgFld *config.FCTemplate, httpSkipTlsCheck bool,
 	groupedCDRs []*CDR, filterS *FilterS) (outVal string, err error) {
-	layout := cfgFld.Layout
-	if layout == "" {
-		layout = time.RFC3339
-	}
 	switch cfgFld.Type {
 	case utils.META_FILLER:
 		outVal, err = cfgFld.Value.ParseValue(utils.EmptyString)
@@ -374,7 +378,11 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, httpSkipTlsCheck bool,
 		if dtFld, err := utils.ParseTimeDetectLayout(rawVal, cfgFld.Timezone); err != nil { // Only one rule makes sense here
 			return "", err
 		} else {
-			outVal = dtFld.Format(layout)
+			if cfgFld.Layout == "" {
+				outVal = dtFld.Format(time.RFC3339)
+			} else {
+				outVal = dtFld.Format(cfgFld.Layout)
+			}
 		}
 	case utils.META_HTTP_POST:
 		var outValByte []byte
