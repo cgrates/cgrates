@@ -332,16 +332,14 @@ func (cdr *CDR) exportFieldValue(cfgCdrFld *config.FCTemplate, filterS *FilterS)
 				cfgCdrFld.RoundingDecimals)
 		case utils.SetupTime:
 			if cfgCdrFld.Layout == "" {
-				cdrVal = cdr.SetupTime.Format(time.RFC3339)
-			} else {
-				cdrVal = cdr.SetupTime.Format(cfgCdrFld.Layout)
+				cfgCdrFld.Layout = time.RFC3339
 			}
+			cdrVal = cdr.SetupTime.Format(cfgCdrFld.Layout)
 		case utils.AnswerTime: // Format time based on layout
 			if cfgCdrFld.Layout == "" {
-				cdrVal = cdr.AnswerTime.Format(time.RFC3339)
-			} else {
-				cdrVal = cdr.AnswerTime.Format(cfgCdrFld.Layout)
+				cfgCdrFld.Layout = time.RFC3339
 			}
+			cdrVal = cdr.AnswerTime.Format(cfgCdrFld.Layout)
 		case utils.Destination:
 			cdrVal, err = cdr.FieldAsString(rsrFld)
 			if err != nil {
@@ -379,10 +377,9 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, httpSkipTlsCheck bool,
 			return "", err
 		} else {
 			if cfgFld.Layout == "" {
-				outVal = dtFld.Format(time.RFC3339)
-			} else {
-				outVal = dtFld.Format(cfgFld.Layout)
+				cfgFld.Layout = time.RFC3339
 			}
+			outVal = dtFld.Format(cfgFld.Layout)
 		}
 	case utils.META_HTTP_POST:
 		var outValByte []byte
@@ -423,19 +420,13 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, httpSkipTlsCheck bool,
 // Used in place where we need to export the CDR based on an export template
 // ExportRecord is a []string to keep it compatible with encoding/csv Writer
 func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
-	httpSkipTlsCheck bool, groupedCDRs []*CDR, roundingDecs int, filterS *FilterS) (expRecord []string, err error) {
+	httpSkipTlsCheck bool, groupedCDRs []*CDR, filterS *FilterS) (expRecord []string, err error) {
 	for _, cfgFld := range exportFields {
 		if pass, err := filterS.Pass(cdr.Tenant,
 			cfgFld.Filters, config.NewNavigableMap(cdr.AsMapStringIface())); err != nil {
 			return []string{}, err
 		} else if !pass {
 			continue
-		}
-		if roundingDecs != 0 {
-			clnFld := new(config.FCTemplate) // Clone so we can modify the rounding decimals without affecting the template
-			*clnFld = *cfgFld
-			clnFld.RoundingDecimals = roundingDecs
-			cfgFld = clnFld
 		}
 		if fmtOut, err := cdr.formatField(cfgFld, httpSkipTlsCheck, groupedCDRs, filterS); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<CDR> error: %s exporting field: %s, CDR: %s\n",
@@ -451,7 +442,7 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
 // AsExportMap converts the CDR into a map[string]string based on export template
 // Used in real-time replication as well as remote exports
 func (cdr *CDR) AsExportMap(exportFields []*config.FCTemplate, httpSkipTlsCheck bool,
-	groupedCDRs []*CDR, roundingDecs int, filterS *FilterS) (expMap map[string]string, err error) {
+	groupedCDRs []*CDR, filterS *FilterS) (expMap map[string]string, err error) {
 	expMap = make(map[string]string)
 	for _, cfgFld := range exportFields {
 		if pass, err := filterS.Pass(cdr.Tenant,
@@ -459,12 +450,6 @@ func (cdr *CDR) AsExportMap(exportFields []*config.FCTemplate, httpSkipTlsCheck 
 			return nil, err
 		} else if !pass {
 			continue
-		}
-		if roundingDecs != 0 {
-			clnFld := new(config.FCTemplate) // Clone so we can modify the rounding decimals without affecting the template
-			*clnFld = *cfgFld
-			clnFld.RoundingDecimals = roundingDecs
-			cfgFld = clnFld
 		}
 		if fmtOut, err := cdr.formatField(cfgFld, httpSkipTlsCheck, groupedCDRs, filterS); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<CDR> error: %s exporting field: %s, CDR: %s\n",

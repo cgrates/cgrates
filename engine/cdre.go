@@ -51,7 +51,7 @@ const (
 )
 
 func NewCDRExporter(cdrs []*CDR, exportTemplate *config.CdreCfg, exportFormat, exportPath, fallbackPath, exportID string,
-	synchronous bool, attempts int, fieldSeparator rune, roundingDecimals int,
+	synchronous bool, attempts int, fieldSeparator rune,
 	httpSkipTlsCheck bool, httpPoster *HTTPPoster, filterS *FilterS) (*CDRExporter, error) {
 	if len(cdrs) == 0 { // Nothing to export
 		return nil, nil
@@ -66,7 +66,6 @@ func NewCDRExporter(cdrs []*CDR, exportTemplate *config.CdreCfg, exportFormat, e
 		synchronous:      synchronous,
 		attempts:         attempts,
 		fieldSeparator:   fieldSeparator,
-		roundingDecimals: roundingDecimals,
 		httpSkipTlsCheck: httpSkipTlsCheck,
 		httpPoster:       httpPoster,
 		negativeExports:  make(map[string]string),
@@ -86,7 +85,6 @@ type CDRExporter struct {
 	synchronous      bool
 	attempts         int
 	fieldSeparator   rune
-	roundingDecimals int
 	httpSkipTlsCheck bool
 	httpPoster       *HTTPPoster
 
@@ -135,7 +133,7 @@ func (cdre *CDRExporter) metaHandler(tag, arg string) (string, error) {
 		return cdr.FieldAsString(&config.RSRParser{Rules: "~" + utils.Usage, AllFiltersMatch: true})
 	case META_COSTCDRS:
 		return strconv.FormatFloat(utils.Round(cdre.totalCost,
-			cdre.roundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
+			globalRoundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
 	default:
 		return "", fmt.Errorf("Unsupported METATAG: %s", tag)
 	}
@@ -243,7 +241,7 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 		}
 		body = jsn
 	case utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap, utils.MetaAWSjsonMap, utils.MetaSQSjsonMap:
-		expMp, err := cdr.AsExportMap(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, nil, cdre.roundingDecimals, cdre.filterS)
+		expMp, err := cdr.AsExportMap(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, nil, cdre.filterS)
 		if err != nil {
 			return err
 		}
@@ -253,7 +251,7 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 		}
 		body = jsn
 	case utils.META_HTTP_POST:
-		expMp, err := cdr.AsExportMap(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, nil, cdre.roundingDecimals, cdre.filterS)
+		expMp, err := cdr.AsExportMap(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, nil, cdre.filterS)
 		if err != nil {
 			return err
 		}
@@ -297,7 +295,7 @@ func (cdre *CDRExporter) processCDR(cdr *CDR) (err error) {
 	switch cdre.exportFormat {
 	case utils.MetaFileFWV, utils.MetaFileCSV:
 		var cdrRow []string
-		cdrRow, err = cdr.AsExportRecord(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, cdre.cdrs, cdre.roundingDecimals, cdre.filterS)
+		cdrRow, err = cdr.AsExportRecord(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, cdre.cdrs, cdre.filterS)
 		if len(cdrRow) == 0 && err == nil { // No CDR data, most likely no configuration fields defined
 			return
 		} else {
@@ -339,7 +337,7 @@ func (cdre *CDRExporter) processCDR(cdr *CDR) (err error) {
 	}
 	if cdr.Cost != -1 {
 		cdre.totalCost += cdr.Cost
-		cdre.totalCost = utils.Round(cdre.totalCost, cdre.roundingDecimals, utils.ROUNDING_MIDDLE)
+		cdre.totalCost = utils.Round(cdre.totalCost, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 	}
 	if cdre.firstExpOrderId > cdr.OrderID || cdre.firstExpOrderId == 0 {
 		cdre.firstExpOrderId = cdr.OrderID

@@ -37,7 +37,6 @@ type AttrExportCdrsToFile struct {
 	ExportDirectory     *string // If provided it overwrites the configured export directory
 	ExportFileName      *string // If provided the output filename will be set to this
 	ExportTemplate      *string // Exported fields template  <""|fld1,fld2|>
-	RoundingDecimals    *int    // force rounding to this value
 	Verbose             bool    // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
 	utils.RPCCDRsFilter         // Inherit the CDR filter attributes
 }
@@ -112,14 +111,9 @@ func (self *ApierV2) ExportCdrsToFile(attr AttrExportCdrsToFile, reply *Exported
 		*reply = ExportedFileCdrs{ExportedFilePath: ""}
 		return nil
 	}
-	roundingDecimals := self.Config.GeneralCfg().RoundingDecimals
-	if attr.RoundingDecimals != nil {
-		roundingDecimals = *attr.RoundingDecimals
-	}
 	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat,
 		filePath, utils.META_NONE, exportID, exportTemplate.Synchronous,
-		exportTemplate.Attempts, fieldSep,
-		roundingDecimals, self.Config.GeneralCfg().HttpSkipTlsVerify,
+		exportTemplate.Attempts, fieldSep, self.Config.GeneralCfg().HttpSkipTlsVerify,
 		self.HTTPPoster, self.FilterS)
 	if err != nil {
 		return utils.NewErrServerError(err)

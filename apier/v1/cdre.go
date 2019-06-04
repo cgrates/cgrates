@@ -147,7 +147,6 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat,
 		filePath, utils.META_NONE, exportID, exportTemplate.Synchronous,
 		exportTemplate.Attempts, fieldSep,
-		self.Config.GeneralCfg().RoundingDecimals,
 		self.Config.GeneralCfg().HttpSkipTlsVerify, self.HTTPPoster, self.FilterS)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -196,7 +195,6 @@ type ArgExportCDRs struct {
 	FieldSeparator      *string
 	ExportID            *string // Optional exportid
 	ExportFileName      *string // If provided the output filename will be set to this
-	RoundingDecimals    *int    // force rounding to this value
 	Verbose             bool    // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
 	utils.RPCCDRsFilter         // Inherit the CDR filter attributes
 }
@@ -276,10 +274,6 @@ func (self *ApierV1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err 
 		u.Path = path.Join(u.Path, fileName)
 		filePath = u.String()
 	}
-	roundingDecimals := self.Config.GeneralCfg().RoundingDecimals
-	if arg.RoundingDecimals != nil {
-		roundingDecimals = *arg.RoundingDecimals
-	}
 	cdrsFltr, err := arg.RPCCDRsFilter.AsCDRsFilter(self.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -292,7 +286,7 @@ func (self *ApierV1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err 
 	}
 	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat,
 		filePath, utils.META_NONE, exportID,
-		synchronous, attempts, fieldSep, roundingDecimals,
+		synchronous, attempts, fieldSep,
 		self.Config.GeneralCfg().HttpSkipTlsVerify,
 		self.HTTPPoster, self.FilterS)
 	if err != nil {

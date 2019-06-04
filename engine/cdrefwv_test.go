@@ -183,11 +183,12 @@ var contentJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Strip:   utils.StringPointer("right"),
 		Padding: utils.StringPointer("right")},
 	{
-		Tag:     utils.StringPointer("Cost"),
-		Type:    utils.StringPointer(utils.META_COMPOSED),
-		Width:   utils.IntPointer(9),
-		Value:   utils.StringPointer("~" + utils.COST),
-		Padding: utils.StringPointer("zeroleft")},
+		Tag:               utils.StringPointer("Cost"),
+		Type:              utils.StringPointer(utils.META_COMPOSED),
+		Width:             utils.IntPointer(9),
+		Value:             utils.StringPointer("~" + utils.COST),
+		Padding:           utils.StringPointer("zeroleft"),
+		Rounding_decimals: utils.IntPointer(5)},
 	{
 		Tag:   utils.StringPointer("DestinationPrivacy"),
 		Type:  utils.StringPointer(utils.MetaMaskedDestination),
@@ -282,8 +283,7 @@ func TestWriteCdr(t *testing.T) {
 	}
 
 	cdre, err := NewCDRExporter([]*CDR{cdr}, cdreCfg, utils.MetaFileFWV, "", "", "fwv_1",
-		true, 1, '|', cfg.GeneralCfg().RoundingDecimals,
-		cfg.GeneralCfg().HttpSkipTlsVerify, nil, nil)
+		true, 1, '|', cfg.GeneralCfg().HttpSkipTlsVerify, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -314,7 +314,7 @@ func TestWriteCdr(t *testing.T) {
 		t.Error("Unexpected number of records in the stats: ", cdre.numberOfRecords)
 	} else if cdre.totalDuration != cdr.Usage {
 		t.Error("Unexpected total duration in the stats: ", cdre.totalDuration)
-	} else if cdre.totalCost != utils.Round(cdr.Cost, cdre.roundingDecimals, utils.ROUNDING_MIDDLE) {
+	} else if cdre.totalCost != utils.Round(cdr.Cost, 5, utils.ROUNDING_MIDDLE) {
 		t.Error("Unexpected total cost in the stats: ", cdre.totalCost)
 	}
 
@@ -324,7 +324,7 @@ func TestWriteCdr(t *testing.T) {
 	if cdre.LastOrderId() != 1 {
 		t.Error("Unexpected LastOrderId", cdre.LastOrderId())
 	}
-	if cdre.TotalCost() != utils.Round(cdr.Cost, cdre.roundingDecimals, utils.ROUNDING_MIDDLE) {
+	if cdre.TotalCost() != utils.Round(cdr.Cost, 5, utils.ROUNDING_MIDDLE) {
 		t.Error("Unexpected TotalCost: ", cdre.TotalCost())
 	}
 }
@@ -370,7 +370,6 @@ func TestWriteCdrs(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	cdre, err := NewCDRExporter([]*CDR{cdr1, cdr2, cdr3, cdr4}, cdreCfg,
 		utils.MetaFileFWV, "", "", "fwv_1", true, 1, ',',
-		cfg.GeneralCfg().RoundingDecimals,
 		cfg.GeneralCfg().HttpSkipTlsVerify, nil, nil)
 	if err != nil {
 		t.Error(err)

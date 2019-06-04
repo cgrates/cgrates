@@ -78,7 +78,7 @@ func (prc *PartialRecordsCache) dumpPartialRecords(originID string) {
 			csvWriter.Comma = prc.csvSep
 			for _, cdr := range prc.partialRecords[originID].cdrs {
 				expRec, err := cdr.AsExportRecord(prc.partialRecords[originID].cacheDumpFields,
-					prc.httpSkipTlsCheck, nil, prc.roundDecimals, prc.filterS)
+					prc.httpSkipTlsCheck, nil, prc.filterS)
 				if err != nil {
 					return nil, err
 				}
