@@ -419,6 +419,56 @@ func TestIfaceAsInt64(t *testing.T) {
 	}
 }
 
+func TestIfaceAsTInt64(t *testing.T) {
+	eInt := int64(3)
+	val := interface{}(3)
+	if itmConvert, err := IfaceAsTInt64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eInt {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(time.Duration(3))
+	if itmConvert, err := IfaceAsTInt64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eInt {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}("3")
+	if itmConvert, err := IfaceAsTInt64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eInt {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(int64(3))
+	if itmConvert, err := IfaceAsTInt64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eInt {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(int32(3))
+	if itmConvert, err := IfaceAsTInt64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eInt {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(float32(3.14))
+	if itmConvert, err := IfaceAsTInt64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eInt {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}(float64(3.14))
+	if itmConvert, err := IfaceAsTInt64(val); err != nil {
+		t.Error(err)
+	} else if itmConvert != eInt {
+		t.Errorf("received: %+v", itmConvert)
+	}
+	val = interface{}("This is not an integer")
+	if _, err := IfaceAsTInt64(val); err == nil {
+		t.Error("expecting error")
+	}
+}
+
 func TestIfaceAsBool(t *testing.T) {
 	val := interface{}(true)
 	if itmConvert, err := IfaceAsBool(val); err != nil {

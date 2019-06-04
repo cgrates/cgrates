@@ -152,12 +152,37 @@ func IfaceAsInt64(itm interface{}) (i int64, err error) {
 		return int64(it), nil
 	case time.Duration:
 		return it.Nanoseconds(), nil
+	case int32:
+		return int64(it), nil
 	case int64:
 		return it, nil
 	case string:
 		return strconv.ParseInt(it, 10, 64)
 	default:
 		err = fmt.Errorf("cannot convert field: %+v to int", it)
+	}
+	return
+}
+
+// same function as IfaceAsInt64 but if the value is float round it to int64 instead of returning error
+func IfaceAsTInt64(itm interface{}) (i int64, err error) {
+	switch it := itm.(type) {
+	case int:
+		return int64(it), nil
+	case time.Duration:
+		return it.Nanoseconds(), nil
+	case int32:
+		return int64(it), nil
+	case int64:
+		return it, nil
+	case float32:
+		return int64(it), nil
+	case float64:
+		return int64(it), nil
+	case string:
+		return strconv.ParseInt(it, 10, 64)
+	default:
+		err = fmt.Errorf("cannot convert field<%T>: %+v to int", it, it)
 	}
 	return
 }
