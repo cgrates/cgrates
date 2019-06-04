@@ -41,3 +41,9 @@ func (cS *CoreSv1) Call(serviceMethod string,
 func (cS *CoreSv1) Status(arg *utils.TenantWithArgDispatcher, reply *map[string]interface{}) error {
 	return cS.cS.Status(arg, reply)
 }
+
+// Ping used to detreminate if component is active
+func (cS *CoreSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
+	*reply = utils.Pong
+	return nil
+}

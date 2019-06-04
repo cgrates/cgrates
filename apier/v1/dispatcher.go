@@ -778,3 +778,8 @@ type DispatcherCoreSv1 struct {
 func (dS *DispatcherCoreSv1) Status(args *utils.TenantWithArgDispatcher, reply *map[string]interface{}) error {
 	return dS.dS.CoreSv1Status(args, reply)
 }
+
+// Ping used to detreminate if component is active
+func (dS *DispatcherCoreSv1) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
+	return dS.dS.CoreSv1Ping(args, reply)
+}
