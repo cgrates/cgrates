@@ -387,8 +387,7 @@ func (cdrS *CDRServer) exportCDRs(cdrs []*CDR) (err error) {
 		if cdre, err = NewCDRExporter(cdrs, expTpl, expTpl.ExportFormat,
 			expTpl.ExportPath, cdrS.cgrCfg.GeneralCfg().FailedPostsDir,
 			"CDRSReplication", expTpl.Synchronous, expTpl.Attempts,
-			expTpl.FieldSeparator, cdrS.cgrCfg.GeneralCfg().RoundingDecimals,
-			cdrS.cgrCfg.GeneralCfg().HttpSkipTlsVerify, cdrS.httpPoster,
+			expTpl.FieldSeparator, cdrS.cgrCfg.GeneralCfg().HttpSkipTlsVerify, cdrS.httpPoster,
 			cdrS.filterS); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<CDRS> Building CDRExporter for online exports got error: <%s>", err.Error()))
 			continue

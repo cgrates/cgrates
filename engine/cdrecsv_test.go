@@ -45,8 +45,7 @@ func TestCsvCdrWriter(t *testing.T) {
 	}
 	cdre, err := NewCDRExporter([]*CDR{storedCdr1},
 		cfg.CdreProfiles[utils.MetaDefault], utils.MetaFileCSV, "", "", "firstexport",
-		true, 1, ',', cfg.GeneralCfg().RoundingDecimals,
-		cfg.GeneralCfg().HttpSkipTlsVerify, nil, nil)
+		true, 1, ',', cfg.GeneralCfg().HttpSkipTlsVerify, nil, nil)
 	if err != nil {
 		t.Error("Unexpected error received: ", err)
 	}
@@ -57,7 +56,7 @@ func TestCsvCdrWriter(t *testing.T) {
 	if err := cdre.writeCsv(csvWriter); err != nil {
 		t.Error("Unexpected error: ", err)
 	}
-	expected := `dbafe9c8614c785a65aabd116dd3959c3c56f7f6,*default,*voice,dsafdsaf,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10s,1.01000`
+	expected := `dbafe9c8614c785a65aabd116dd3959c3c56f7f6,*default,*voice,dsafdsaf,*rated,cgrates.org,call,1001,1001,1002,2013-11-07T08:42:25Z,2013-11-07T08:42:26Z,10s,1.0100`
 	result := strings.TrimSpace(writer.String())
 	if result != expected {
 		t.Errorf("Expected: \n%s \n received: \n%s.", expected, result)
@@ -84,7 +83,6 @@ func TestAlternativeFieldSeparator(t *testing.T) {
 	}
 	cdre, err := NewCDRExporter([]*CDR{storedCdr1}, cfg.CdreProfiles[utils.MetaDefault],
 		utils.MetaFileCSV, "", "", "firstexport", true, 1, '|',
-		cfg.GeneralCfg().RoundingDecimals,
 		cfg.GeneralCfg().HttpSkipTlsVerify, nil, nil)
 	if err != nil {
 		t.Error("Unexpected error received: ", err)
@@ -96,7 +94,7 @@ func TestAlternativeFieldSeparator(t *testing.T) {
 	if err := cdre.writeCsv(csvWriter); err != nil {
 		t.Error("Unexpected error: ", err)
 	}
-	expected := `dbafe9c8614c785a65aabd116dd3959c3c56f7f6|*default|*voice|dsafdsaf|*rated|cgrates.org|call|1001|1001|1002|2013-11-07T08:42:25Z|2013-11-07T08:42:26Z|10s|1.01000`
+	expected := `dbafe9c8614c785a65aabd116dd3959c3c56f7f6|*default|*voice|dsafdsaf|*rated|cgrates.org|call|1001|1001|1002|2013-11-07T08:42:25Z|2013-11-07T08:42:26Z|10s|1.0100`
 	result := strings.TrimSpace(writer.String())
 	if result != expected {
 		t.Errorf("Expected: \n%s received: \n%s.", expected, result)
@@ -139,7 +137,7 @@ func TestExportVoiceWithConvert(t *testing.T) {
 			Value:   config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
 		{Tag: "Cost", Type: "*composed",
 			Value:            config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Cost", true, utils.INFIELD_SEP),
-			RoundingDecimals: 4},
+			RoundingDecimals: 5},
 	}
 	cdrVoice := &CDR{
 		CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
@@ -179,7 +177,7 @@ func TestExportVoiceWithConvert(t *testing.T) {
 	}
 	cdre, err := NewCDRExporter([]*CDR{cdrVoice, cdrData, cdrSMS}, cdreCfg,
 		utils.MetaFileCSV, "", "", "firstexport",
-		true, 1, '|', 5, true, nil, &FilterS{cfg: cfg})
+		true, 1, '|', true, nil, &FilterS{cfg: cfg})
 	if err != nil {
 		t.Error("Unexpected error received: ", err)
 	}
@@ -236,7 +234,7 @@ func TestExportWithFilter(t *testing.T) {
 			Value:   config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
 		{Tag: "Cost", Type: "*composed",
 			Value:            config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Cost", true, utils.INFIELD_SEP),
-			RoundingDecimals: 4},
+			RoundingDecimals: 5},
 	}
 	cdrVoice := &CDR{
 		CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
@@ -276,7 +274,7 @@ func TestExportWithFilter(t *testing.T) {
 	}
 	cdre, err := NewCDRExporter([]*CDR{cdrVoice, cdrData, cdrSMS}, cdreCfg,
 		utils.MetaFileCSV, "", "", "firstexport",
-		true, 1, '|', 5, true, nil, &FilterS{cfg: cfg})
+		true, 1, '|', true, nil, &FilterS{cfg: cfg})
 	if err != nil {
 		t.Error("Unexpected error received: ", err)
 	}
@@ -332,7 +330,7 @@ func TestExportWithFilter2(t *testing.T) {
 			Value:   config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
 		{Tag: "Cost", Type: "*composed",
 			Value:            config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Cost", true, utils.INFIELD_SEP),
-			RoundingDecimals: 4},
+			RoundingDecimals: 5},
 	}
 	cdrVoice := &CDR{
 		CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()),
@@ -372,7 +370,7 @@ func TestExportWithFilter2(t *testing.T) {
 	}
 	cdre, err := NewCDRExporter([]*CDR{cdrVoice, cdrData, cdrSMS}, cdreCfg,
 		utils.MetaFileCSV, "", "", "firstexport",
-		true, 1, '|', 5, true, nil, &FilterS{cfg: cfg})
+		true, 1, '|', true, nil, &FilterS{cfg: cfg})
 	if err != nil {
 		t.Error("Unexpected error received: ", err)
 	}
