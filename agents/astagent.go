@@ -103,7 +103,8 @@ func (sma *AsteriskAgent) ListenAndServe() (err error) {
 			return
 		case astRawEv := <-sma.astEvChan:
 			smAsteriskEvent := NewSMAsteriskEvent(astRawEv,
-				strings.Split(sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address, ":")[0])
+				strings.Split(sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Address, ":")[0],
+				sma.cgrCfg.AsteriskAgentCfg().AsteriskConns[sma.astConnIdx].Alias)
 
 			switch smAsteriskEvent.EventType() {
 			case ARIStasisStart:

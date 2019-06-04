@@ -410,6 +410,7 @@ func NewDefaultAsteriskConnCfg() *AsteriskConnCfg {
 }
 
 type AsteriskConnCfg struct {
+	Alias           string
 	Address         string
 	User            string
 	Password        string
@@ -423,6 +424,9 @@ func (aConnCfg *AsteriskConnCfg) loadFromJsonCfg(jsnCfg *AstConnJsonCfg) error {
 	}
 	if jsnCfg.Address != nil {
 		aConnCfg.Address = *jsnCfg.Address
+	}
+	if jsnCfg.Alias != nil {
+		aConnCfg.Alias = *jsnCfg.Alias
 	}
 	if jsnCfg.User != nil {
 		aConnCfg.User = *jsnCfg.User
