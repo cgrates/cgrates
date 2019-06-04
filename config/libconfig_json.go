@@ -226,6 +226,7 @@ type RemoteHostJson struct {
 }
 
 type AstConnJsonCfg struct {
+	Alias            *string
 	Address          *string
 	User             *string
 	Password         *string
@@ -259,6 +260,7 @@ type KamAgentJsonCfg struct {
 
 // Represents one connection instance towards Kamailio
 type KamConnJsonCfg struct {
+	Alias      *string
 	Address    *string
 	Reconnects *int
 }

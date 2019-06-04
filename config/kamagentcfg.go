@@ -20,6 +20,7 @@ package config
 
 // Represents one connection instance towards Kamailio
 type KamConnCfg struct {
+	Alias      string
 	Address    string
 	Reconnects int
 }
@@ -30,6 +31,9 @@ func (self *KamConnCfg) loadFromJsonCfg(jsnCfg *KamConnJsonCfg) error {
 	}
 	if jsnCfg.Address != nil {
 		self.Address = *jsnCfg.Address
+	}
+	if jsnCfg.Alias != nil {
+		self.Alias = *jsnCfg.Alias
 	}
 	if jsnCfg.Reconnects != nil {
 		self.Reconnects = *jsnCfg.Reconnects

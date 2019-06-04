@@ -50,6 +50,7 @@ func NewKamailioAgent(kaCfg *config.KamAgentCfg,
 		timezone:         timezone,
 		conns:            make(map[string]*kamevapi.KamEvapi),
 		activeSessionIDs: make(chan []*sessions.SessionID),
+		connAliases:      make(map[string]string),
 	}
 	return
 }
@@ -59,6 +60,7 @@ type KamailioAgent struct {
 	sessionS         rpcclient.RpcClientConnection
 	timezone         string
 	conns            map[string]*kamevapi.KamEvapi
+	connAliases      map[string]string
 	activeSessionIDs chan []*sessions.SessionID
 }
 
@@ -74,6 +76,7 @@ func (self *KamailioAgent) Connect() error {
 	errChan := make(chan error)
 	for _, connCfg := range self.cfg.EvapiConns {
 		connID := utils.GenUUID()
+		self.connAliases[connID] = connCfg.Alias
 		logger := log.New(utils.Logger, "kamevapi:", 2)
 		if self.conns[connID], err = kamevapi.NewKamEvapi(connCfg.Address, connID, connCfg.Reconnects, eventHandlers, logger); err != nil {
 			return err
@@ -124,11 +127,7 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connID string) {
 			utils.KamailioAgent, kev[utils.OriginID]))
 		return
 	}
-	originHost := ka.conns[connID].RemoteAddr().String()
-	if oHIf, has := authArgs.CGREvent.Event[utils.OriginHost]; has {
-		originHost = oHIf.(string)
-	}
-	authArgs.CGREvent.Event[utils.OriginHost] = originHost
+	authArgs.CGREvent.Event[utils.OriginHost] = utils.FirstNonEmpty(authArgs.CGREvent.Event[utils.OriginHost].(string), ka.connAliases[connID], ka.conns[connID].RemoteAddr().String())
 	authArgs.CGREvent.Event[EvapiConnID] = connID // Attach the connection ID
 	var authReply sessions.V1AuthorizeReply
 	err = ka.sessionS.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authReply)
@@ -164,11 +163,7 @@ func (ka *KamailioAgent) onCallStart(evData []byte, connID string) {
 		return
 	}
 	initSessionArgs.CGREvent.Event[EvapiConnID] = connID // Attach the connection ID so we can properly disconnect later
-	originHost := ka.conns[connID].RemoteAddr().String()
-	if oHIf, has := initSessionArgs.CGREvent.Event[utils.OriginHost]; has {
-		originHost = oHIf.(string)
-	}
-	initSessionArgs.CGREvent.Event[utils.OriginHost] = originHost
+
 
 	var initReply sessions.V1InitSessionReply
 	if err := ka.sessionS.Call(utils.SessionSv1InitiateSession,
@@ -205,11 +200,7 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connID string) {
 		return
 	}
 	var reply string
-	originHost := ka.conns[connID].RemoteAddr().String()
-	if oHIf, has := tsArgs.CGREvent.Event[utils.OriginHost]; has {
-		originHost = oHIf.(string)
-	}
-	tsArgs.CGREvent.Event[utils.OriginHost] = originHost
+
 	tsArgs.CGREvent.Event[EvapiConnID] = connID // Attach the connection ID in case we need to create a session and disconnect it
 	if err := ka.sessionS.Call(utils.SessionSv1TerminateSession,
 		tsArgs, &reply); err != nil {
@@ -223,7 +214,7 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connID string) {
 		if err != nil {
 			return
 		}
-		cgrEv.Event[utils.OriginHost] = originHost
+
 		cgrArgs := cgrEv.ConsumeArgs(strings.Index(kev[utils.CGRSubsystems], utils.MetaDispatchers) != -1, false)
 		if err := ka.sessionS.Call(utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv, ArgDispatcher: cgrArgs.ArgDispatcher}, &reply); err != nil {

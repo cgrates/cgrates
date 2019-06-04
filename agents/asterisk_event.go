@@ -27,16 +27,17 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewSMAsteriskEvent(ariEv map[string]interface{}, asteriskIP string) *SMAsteriskEvent {
+func NewSMAsteriskEvent(ariEv map[string]interface{}, asteriskIP, asteriskAlias string) *SMAsteriskEvent {
 	smsmaEv := &SMAsteriskEvent{ariEv: ariEv, asteriskIP: asteriskIP, cachedFields: make(map[string]string)}
 	smsmaEv.parseStasisArgs() // Populate appArgs
 	return smsmaEv
 }
 
 type SMAsteriskEvent struct { // Standalone struct so we can cache the fields while we parse them
-	ariEv        map[string]interface{} // stasis event
-	asteriskIP   string
-	cachedFields map[string]string // Cache replies here
+	ariEv         map[string]interface{} // stasis event
+	asteriskIP    string
+	asteriskAlias string
+	cachedFields  map[string]string // Cache replies here
 }
 
 // parseStasisArgs will convert the args passed to Stasis into CGRateS attribute/value pairs understood by CGRateS and store them in cachedFields
@@ -239,7 +240,7 @@ func (smaEv *SMAsteriskEvent) AsMapStringInterface() (mp map[string]interface{})
 	if smaEv.Subject() != "" {
 		mp[utils.Subject] = smaEv.Subject()
 	}
-	mp[utils.OriginHost] = utils.FirstNonEmpty(smaEv.OriginHost(), smaEv.OriginatorIP())
+	mp[utils.OriginHost] = utils.FirstNonEmpty(smaEv.OriginHost(), smaEv.asteriskAlias, smaEv.OriginatorIP())
 	mp[utils.Account] = smaEv.Account()
 	mp[utils.Destination] = smaEv.Destination()
 	mp[utils.SetupTime] = smaEv.SetupTime()
