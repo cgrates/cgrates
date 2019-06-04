@@ -501,10 +501,6 @@ type DispatcherResponder struct {
 	dS *dispatchers.DispatcherService
 }
 
-func (dS *DispatcherResponder) Status(args *utils.TenantWithArgDispatcher, reply *map[string]interface{}) error {
-	return dS.dS.ResponderStatus(args, reply)
-}
-
 func (dS *DispatcherResponder) GetCost(args *engine.CallDescriptorWithArgDispatcher, reply *engine.CallCost) error {
 	return dS.dS.ResponderGetCost(args, reply)
 }
@@ -768,4 +764,17 @@ type DispatcherConfigSv1 struct {
 // Ping used to detreminate if component is active
 func (dS *DispatcherConfigSv1) GetJSONSection(args *config.StringWithArgDispatcher, reply *map[string]interface{}) (err error) {
 	return dS.dS.ConfigSv1GetJSONSection(args, reply)
+}
+
+func NewDispatcherCoreSv1(dps *dispatchers.DispatcherService) *DispatcherCoreSv1 {
+	return &DispatcherCoreSv1{dS: dps}
+}
+
+// Exports RPC from RLs
+type DispatcherCoreSv1 struct {
+	dS *dispatchers.DispatcherService
+}
+
+func (dS *DispatcherCoreSv1) Status(args *utils.TenantWithArgDispatcher, reply *map[string]interface{}) error {
+	return dS.dS.CoreSv1Status(args, reply)
 }

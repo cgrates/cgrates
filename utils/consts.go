@@ -385,6 +385,7 @@ const (
 	MetaRALs                     = "*rals"
 	MetaStats                    = "*stats"
 	MetaResponder                = "*responder"
+	MetaCore                     = "*core"
 	MetaThresholds               = "*thresholds"
 	MetaSuppliers                = "*suppliers"
 	MetaAttributes               = "*attributes"
@@ -775,6 +776,12 @@ const (
 	ConfigSv1GetJSONSection = "ConfigSv1.GetJSONSection"
 )
 
+const (
+	CoreS         = "CoreS"
+	CoreSv1       = "CoreSv1"
+	CoreSv1Status = "CoreSv1.Status"
+)
+
 // SupplierS APIs
 const (
 	SupplierSv1GetSuppliers                = "SupplierSv1.GetSuppliers"
@@ -881,7 +888,6 @@ const (
 	ResponderDebit             = "Responder.Debit"
 	ResponderRefundIncrements  = "Responder.RefundIncrements"
 	ResponderGetMaxSessionTime = "Responder.GetMaxSessionTime"
-	ResponderStatus            = "Responder.Status"
 	ResponderMaxDebit          = "Responder.MaxDebit"
 	ResponderRefundRounding    = "Responder.RefundRounding"
 	ResponderGetCost           = "Responder.GetCost"

@@ -20,7 +20,6 @@ package engine
 
 import (
 	"reflect"
-	"runtime"
 	"strings"
 	"time"
 
@@ -238,26 +237,6 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptorWithArgDispatcher, rep
 		return utils.ErrMaxUsageExceeded
 	}
 	*reply, err = arg.GetMaxSessionDuration()
-	return
-}
-
-func (rs *Responder) Status(arg *utils.TenantWithArgDispatcher, reply *map[string]interface{}) (err error) {
-	// if arg != "" { // Introduce  delay in answer, used in some automated tests
-	// 	if delay, err := utils.ParseDurationWithNanosecs(arg); err == nil {
-	// 		time.Sleep(delay)
-	// 	}
-	// }
-	memstats := new(runtime.MemStats)
-	runtime.ReadMemStats(memstats)
-	response := make(map[string]interface{})
-	response[utils.NodeID] = config.CgrConfig().GeneralCfg().NodeID
-	response[utils.MemoryUsage] = utils.SizeFmt(float64(memstats.HeapAlloc), "")
-	response[utils.ActiveGoroutines] = runtime.NumGoroutine()
-	response[utils.Footprint] = utils.SizeFmt(float64(memstats.Sys), "")
-	response[utils.Version] = utils.GetCGRVersion()
-	response[utils.RunningSince] = utils.GetStartTime()
-	response[utils.GoVersion] = runtime.Version()
-	*reply = response
 	return
 }
 
