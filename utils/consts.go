@@ -780,6 +780,7 @@ const (
 	CoreS         = "CoreS"
 	CoreSv1       = "CoreSv1"
 	CoreSv1Status = "CoreSv1.Status"
+	CoreSv1Ping   = "CoreSv1.Ping"
 )
 
 // SupplierS APIs

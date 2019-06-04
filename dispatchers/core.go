@@ -43,3 +43,23 @@ func (dS *DispatcherService) CoreSv1Status(args *utils.TenantWithArgDispatcher,
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCore,
 		routeID, utils.CoreSv1Status, args, reply)
 }
+
+func (dS *DispatcherService) CoreSv1Ping(args *utils.CGREventWithArgDispatcher, reply *string) (err error) {
+	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if dS.attrS != nil {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.CoreSv1Ping,
+			args.Tenant,
+			args.APIKey, args.Time); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(args.CGREvent, utils.MetaCore, routeID,
+		utils.CoreSv1Ping, args, reply)
+}

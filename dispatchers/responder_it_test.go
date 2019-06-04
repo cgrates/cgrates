@@ -47,7 +47,7 @@ func TestDspResponderMongo(t *testing.T) {
 
 func testDspResponderStatus(t *testing.T) {
 	var reply map[string]interface{}
-	if err := allEngine.RCP.Call(utils.ResponderStatus, utils.TenantWithArgDispatcher{}, &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply[utils.NodeID] != "ALL" {
 		t.Errorf("Received: %s", reply)
@@ -60,13 +60,13 @@ func testDspResponderStatus(t *testing.T) {
 			APIKey: utils.StringPointer("rsp12345"),
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.ResponderStatus, &ev, &reply); err != nil {
+	if err := dispEngine.RCP.Call(utils.CoreSv1Status, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply[utils.NodeID] != "ALL" {
 		t.Errorf("Received: %s", utils.ToJSON(reply))
 	}
 	allEngine.stopEngine(t)
-	if err := dispEngine.RCP.Call(utils.ResponderStatus, &ev, &reply); err != nil {
+	if err := dispEngine.RCP.Call(utils.CoreSv1Status, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply[utils.NodeID] != "ALL2" {
 		t.Errorf("Received: %s", utils.ToJSON(reply))
@@ -99,12 +99,12 @@ func getNodeWithRoute(route string, t *testing.T) string {
 		},
 	}
 
-	if err := dispEngine.RCP.Call(utils.ResponderPing, pingEv, &pingReply); err != nil {
+	if err := dispEngine.RCP.Call(utils.CoreSv1Ping, pingEv, &pingReply); err != nil {
 		t.Error(err)
 	} else if pingReply != utils.Pong {
 		t.Errorf("Received: %s", pingReply)
 	}
-	if err := dispEngine.RCP.Call(utils.ResponderStatus, ev, &reply); err != nil {
+	if err := dispEngine.RCP.Call(utils.CoreSv1Status, ev, &reply); err != nil {
 		t.Error(err)
 	}
 	if reply[utils.NodeID] == nil {
@@ -139,7 +139,7 @@ func testDspResponderShutdown(t *testing.T) {
 	} else if reply != "Done!" {
 		t.Errorf("Received: %s", utils.ToJSON(reply))
 	}
-	if err := dispEngine.RCP.Call(utils.ResponderStatus, &ev, &statusReply); err != nil {
+	if err := dispEngine.RCP.Call(utils.CoreSv1Status, &ev, &statusReply); err != nil {
 		t.Error(err)
 	} else if statusReply[utils.NodeID] != "ALL2" {
 		t.Errorf("Received: %s", utils.ToJSON(statusReply))
@@ -213,12 +213,12 @@ func testDspResponderInternal(t *testing.T) {
 			RouteID: &route,
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.ResponderPing, pingEv, &pingReply); err != nil {
+	if err := dispEngine.RCP.Call(utils.CoreSv1Ping, pingEv, &pingReply); err != nil {
 		t.Error(err)
 	} else if pingReply != utils.Pong {
 		t.Errorf("Received: %s", pingReply)
 	}
-	if err := dispEngine.RCP.Call(utils.ResponderStatus, &ev, &reply); err != nil {
+	if err := dispEngine.RCP.Call(utils.CoreSv1Status, &ev, &reply); err != nil {
 		t.Error(err)
 	}
 	if reply[utils.NodeID] == nil {
