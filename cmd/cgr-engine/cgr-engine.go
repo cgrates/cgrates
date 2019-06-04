@@ -1247,6 +1247,9 @@ func startDispatcherService(internalDispatcherSChan, internalAttributeSChan chan
 	server.RpcRegisterName(utils.ConfigSv1,
 		v1.NewDispatcherConfigSv1(dspS))
 
+	server.RpcRegisterName(utils.CoreSv1,
+		v1.NewDispatcherCoreSv1(dspS))
+
 	internalDispatcherSChan <- dspS
 }
 
@@ -1299,6 +1302,14 @@ func initGuardianSv1(internalGuardianSChan chan rpcclient.RpcClientConnection, s
 		server.RpcRegister(grdSv1)
 	}
 	internalGuardianSChan <- grdSv1
+}
+
+func initCoreSv1(internalCoreSv1Chan chan rpcclient.RpcClientConnection, server *utils.Server) {
+	cSv1 := v1.NewCoreSv1(engine.NewCoreService())
+	if !cfg.DispatcherSCfg().Enabled {
+		server.RpcRegister(cSv1)
+	}
+	internalCoreSv1Chan <- cSv1
 }
 
 func initSchedulerS(internalSchedSChan chan rpcclient.RpcClientConnection,
@@ -1663,6 +1674,7 @@ func main() {
 	internalApierV2Chan := make(chan rpcclient.RpcClientConnection, 1)
 	internalServeManagerChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalConfigChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalCoreSv1Chan := make(chan rpcclient.RpcClientConnection, 1)
 
 	// init internalRPCSet
 	engine.IntRPC = engine.NewRPCClientSet()
@@ -1686,6 +1698,7 @@ func main() {
 		engine.IntRPC.AddInternalRPCClient(utils.ThresholdSv1, internalThresholdSChan)
 		engine.IntRPC.AddInternalRPCClient(utils.ServiceManagerV1, internalServeManagerChan)
 		engine.IntRPC.AddInternalRPCClient(utils.ConfigSv1, internalConfigChan)
+		engine.IntRPC.AddInternalRPCClient(utils.CoreSv1, internalCoreSv1Chan)
 	}
 
 	// init CacheS
@@ -1693,6 +1706,9 @@ func main() {
 
 	// init GuardianSv1
 	initGuardianSv1(internalGuardianSChan, server)
+
+	// init CoreSv1
+	initCoreSv1(internalCoreSv1Chan, server)
 
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, dm, cacheS, exitChan)

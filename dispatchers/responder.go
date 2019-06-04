@@ -46,26 +46,6 @@ func (dS *DispatcherService) ResponderPing(args *utils.CGREventWithArgDispatcher
 		routeID, utils.ResponderPing, args, reply)
 }
 
-func (dS *DispatcherService) ResponderStatus(args *utils.TenantWithArgDispatcher,
-	reply *map[string]interface{}) (err error) {
-	tnt := utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if dS.attrS != nil {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
-		if err = dS.authorize(utils.ResponderStatus, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
-			return
-		}
-	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaResponder,
-		routeID, utils.ResponderStatus, args, reply)
-}
-
 func (dS *DispatcherService) ResponderGetCost(args *engine.CallDescriptorWithArgDispatcher,
 	reply *engine.CallCost) (err error) {
 	if dS.attrS != nil {

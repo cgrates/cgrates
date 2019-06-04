@@ -23,7 +23,7 @@ import "github.com/cgrates/cgrates/utils"
 func init() {
 	c := &CmdStatus{
 		name:      "status",
-		rpcMethod: utils.ResponderStatus,
+		rpcMethod: utils.CoreSv1Status,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
