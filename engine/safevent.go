@@ -126,6 +126,13 @@ func (se *SafEvent) GetString(fldName string) (out string, err error) {
 	return
 }
 
+func (se SafEvent) GetInt64(fldName string) (out int64, err error) {
+	se.RLock()
+	out, err = se.Me.GetInt64(fldName)
+	se.RUnlock()
+	return
+}
+
 func (se *SafEvent) GetStringIgnoreErrors(fldName string) (out string) {
 	out, _ = se.GetString(fldName)
 	return
