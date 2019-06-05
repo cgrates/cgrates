@@ -48,6 +48,9 @@
 
 "cdrs": {
 	"enabled": true,
+	"chargers_conns":[
+		{"address": "127.0.0.1:2012", "transport":"*json"},
+	],
 },
 
 

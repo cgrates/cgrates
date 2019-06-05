@@ -466,13 +466,14 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 	if attr.Overwrite {
 		aType += "_reset" // => *topup_reset/*debit_reset
 	}
+
 	a := &engine.Action{
 		ActionType: aType,
 		Balance: &engine.BalanceFilter{
 			Uuid:           attr.BalanceUuid,
 			ID:             attr.BalanceId,
 			Type:           utils.StringPointer(attr.BalanceType),
-			Value:          &utils.ValueFormula{Static: attr.Value},
+			Value:          &utils.ValueFormula{Static: math.Abs(attr.Value)},
 			ExpirationDate: expTime,
 			RatingSubject:  attr.RatingSubject,
 			Weight:         attr.Weight,
@@ -559,7 +560,7 @@ func (self *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) error
 		},
 	}
 	if attr.Value != nil {
-		a.Balance.Value = &utils.ValueFormula{Static: *attr.Value}
+		a.Balance.Value = &utils.ValueFormula{Static: math.Abs(*attr.Value)}
 	}
 	if attr.DestinationIds != nil {
 		a.Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.DestinationIds))
@@ -629,7 +630,7 @@ func (self *ApierV1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) e
 		},
 	}
 	if attr.Value != nil {
-		a.Balance.Value = &utils.ValueFormula{Static: *attr.Value}
+		a.Balance.Value = &utils.ValueFormula{Static: math.Abs(*attr.Value)}
 	}
 	if attr.DestinationIds != nil {
 		a.Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.DestinationIds))

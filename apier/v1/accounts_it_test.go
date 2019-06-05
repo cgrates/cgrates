@@ -52,6 +52,7 @@ var (
 		testAccITSetBalance,
 		testAccITSetBalanceWithExtraData,
 		testAccITSetBalanceWithExtraData2,
+		testAccITAddBalanceWithNegative,
 		testAccITStopCgrEngine,
 	}
 )
@@ -280,6 +281,78 @@ func testAccITSetBalanceWithExtraData2(t *testing.T) {
 		t.Error("Unexpected number of ExtraFields returned: ", len(cdrs[0].ExtraFields))
 	} else if cdrs[0].ExtraFields["ActionVal"] != "1.5" {
 		t.Error("Unexpected value of ExtraFields[ActionVal] returned: ", cdrs[0].ExtraFields["ActionVal"])
+	}
+}
+
+func testAccITAddBalanceWithNegative(t *testing.T) {
+	var acnt *engine.Account
+	attrAcc := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "AddBalanceWithNegative",
+	}
+
+	if err := accRPC.Call("ApierV2.GetAccount", attrAcc, &acnt); err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+	//topup with a negative value
+	var reply string
+	attrs := &AttrAddBalance{
+		Tenant:      "cgrates.org",
+		Account:     "AddBalanceWithNegative",
+		BalanceType: "*monetary",
+		Value:       -3.5,
+	}
+	if err := accRPC.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
+	}
+	//give time to create the account and execute the action
+	time.Sleep(50 * time.Millisecond)
+
+	attrAcc = &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "AddBalanceWithNegative",
+	}
+	if err := accRPC.Call("ApierV2.GetAccount", attrAcc, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 3.5 {
+		t.Errorf("Unexpected balance received : %+v", acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+
+	if err := accRPC.Call("ApierV1.DebitBalance", &AttrAddBalance{
+		Tenant:      "cgrates.org",
+		Account:     "AddBalanceWithNegative",
+		BalanceType: utils.MONETARY,
+		Value:       2,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+
+	if err := accRPC.Call("ApierV2.GetAccount", attrAcc, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 1.5 {
+		t.Errorf("Unexpected balance received : %+v", acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+
+	if err := accRPC.Call("ApierV1.DebitBalance", &AttrAddBalance{
+		Tenant:      "cgrates.org",
+		Account:     "AddBalanceWithNegative",
+		BalanceType: utils.MONETARY,
+		Value:       -1,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+
+	if err := accRPC.Call("ApierV2.GetAccount", attrAcc, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 0.5 {
+		t.Errorf("Unexpected balance received : %+v", acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 }
 
