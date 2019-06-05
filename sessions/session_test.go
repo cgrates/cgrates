@@ -19,12 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
+
+//Test1 ExtraDuration 0 and LastUsage < initial
 
 //Test1 ExtraDuration 0 and LastUsage < initial
 func TestSRunDebitReserve(t *testing.T) {
@@ -264,4 +267,259 @@ func TestSessionAsCGREvents(t *testing.T) {
 	} else if cgrEvs[1].Event[utils.Cost] != 12.13 {
 		t.Errorf("Expecting: %+v, received: %+v", 12.13, cgrEvs[1].Event[utils.Cost])
 	}
+}
+
+func TestSessionAsActiveSessions(t *testing.T) {
+	startEv := map[string]interface{}{
+		utils.EVENT_NAME:  "TEST_EVENT",
+		utils.ToR:         utils.VOICE,
+		utils.OriginID:    "123451",
+		utils.Account:     "1001",
+		utils.Subject:     "1001",
+		utils.Destination: "1004",
+		utils.Category:    "call",
+		utils.Tenant:      "cgrates.org",
+		utils.RequestType: utils.META_PREPAID,
+		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Cost:        12.12,
+	}
+	ev := map[string]interface{}{
+		utils.EVENT_NAME:  "TEST_EVENT2",
+		utils.ToR:         utils.VOICE,
+		utils.OriginID:    "123451",
+		utils.Account:     "1001",
+		utils.Subject:     "1001",
+		utils.Destination: "1004",
+		utils.Category:    "call",
+		utils.RunID:       utils.MetaDefault,
+		utils.Tenant:      "cgrates.org",
+		utils.RequestType: utils.META_PREPAID,
+		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Cost:        12.13,
+	}
+	s := &Session{
+		CGRID:         "RandomCGRID",
+		Tenant:        "cgrates.org",
+		EventStart:    engine.NewSafEvent(startEv),
+		DebitInterval: time.Second,
+		SRuns: []*SRun{
+			&SRun{
+				Event:      engine.NewMapEvent(ev),
+				TotalUsage: time.Duration(2 * time.Second),
+			},
+		},
+	}
+	exp := []*ActiveSession{
+		&ActiveSession{
+			CGRID:    "RandomCGRID",
+			RunID:    utils.MetaDefault,
+			ToR:      utils.VOICE,
+			OriginID: "123451",
+			// OriginHost:  s.EventStart.GetStringIgnoreErrors(utils.OriginHost),
+			Source:      utils.SessionS + "_" + "TEST_EVENT",
+			RequestType: utils.META_PREPAID,
+			Tenant:      "cgrates.org",
+			Category:    "call",
+			Account:     "1001",
+			Subject:     "1001",
+			Destination: "1004",
+			SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+			AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+			Usage:       time.Duration(2 * time.Second),
+			ExtraFields: map[string]string{
+				utils.EVENT_NAME: "TEST_EVENT2",
+			},
+			NodeID:        "ALL",
+			DebitInterval: time.Second,
+			// aSs[i].LoopIndex:     sr.CD.LoopIndex,
+			// aSs[i].DurationIndex: sr.CD.DurationIndex,
+			// aSs[i].MaxRate:       sr.CD.MaxRate,
+			// aSs[i].MaxRateUnit:   sr.CD.MaxRateUnit,
+			// aSs[i].MaxCostSoFar:  sr.CD.MaxCostSoFar,
+		},
+	}
+	//check for some fields if populated correct
+	rply := s.AsActiveSessions("", "ALL")
+	if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+
+}
+
+func TestSessionAsActiveSessions2(t *testing.T) {
+	startEv := map[string]interface{}{
+		utils.EVENT_NAME:  "TEST_EVENT",
+		utils.ToR:         utils.VOICE,
+		utils.OriginID:    "123451",
+		utils.Account:     "1001",
+		utils.Subject:     "1001",
+		utils.Destination: "1004",
+		utils.Category:    "call",
+		utils.Tenant:      "cgrates.org",
+		utils.RequestType: utils.META_PREPAID,
+		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Cost:        12.12,
+	}
+	ev := map[string]interface{}{
+		utils.EVENT_NAME:  "TEST_EVENT2",
+		utils.ToR:         utils.VOICE,
+		utils.OriginID:    "123451",
+		utils.Account:     "1001",
+		utils.Subject:     "1001",
+		utils.Destination: "1004",
+		utils.Category:    "call",
+		utils.RunID:       utils.MetaDefault,
+		utils.Tenant:      "cgrates.org",
+		utils.RequestType: utils.META_PREPAID,
+		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Cost:        12.13,
+	}
+	s := &Session{
+		CGRID:         "RandomCGRID",
+		Tenant:        "cgrates.org",
+		EventStart:    engine.NewSafEvent(startEv),
+		DebitInterval: time.Second,
+		SRuns: []*SRun{
+			&SRun{
+				Event:      engine.NewMapEvent(ev),
+				TotalUsage: time.Duration(2 * time.Second),
+				CD: &engine.CallDescriptor{
+					LoopIndex:     10,
+					DurationIndex: 3 * time.Second,
+					MaxRate:       11,
+					MaxRateUnit:   30 * time.Second,
+					MaxCostSoFar:  20,
+				},
+			},
+		},
+	}
+	exp := []*ActiveSession{
+		&ActiveSession{
+			CGRID:    "RandomCGRID",
+			RunID:    utils.MetaDefault,
+			ToR:      utils.VOICE,
+			OriginID: "123451",
+			// OriginHost:  s.EventStart.GetStringIgnoreErrors(utils.OriginHost),
+			Source:      utils.SessionS + "_" + "TEST_EVENT",
+			RequestType: utils.META_PREPAID,
+			Tenant:      "cgrates.org",
+			Category:    "call",
+			Account:     "1001",
+			Subject:     "1001",
+			Destination: "1004",
+			SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+			AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+			Usage:       time.Duration(2 * time.Second),
+			ExtraFields: map[string]string{
+				utils.EVENT_NAME: "TEST_EVENT2",
+			},
+			NodeID:        "ALL",
+			DebitInterval: time.Second,
+			LoopIndex:     10,
+			DurationIndex: 3 * time.Second,
+			MaxRate:       11,
+			MaxRateUnit:   30 * time.Second,
+			MaxCostSoFar:  20,
+		},
+	}
+	//check for some fields if populated correct
+	rply := s.AsActiveSessions("", "ALL")
+	if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+
+}
+
+func TestSessionAsActiveSessions3(t *testing.T) {
+	startEv := map[string]interface{}{
+		utils.EVENT_NAME:  "TEST_EVENT",
+		utils.ToR:         utils.VOICE,
+		utils.OriginID:    "123451",
+		utils.Account:     "1001",
+		utils.Subject:     "1001",
+		utils.Destination: "1004",
+		utils.Category:    "call",
+		utils.Tenant:      "cgrates.org",
+		utils.RequestType: utils.META_PREPAID,
+		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Cost:        12.12,
+	}
+	ev := map[string]interface{}{
+		utils.EVENT_NAME:  "TEST_EVENT2",
+		utils.ToR:         utils.VOICE,
+		utils.OriginID:    "123451",
+		utils.Account:     "1001",
+		utils.Subject:     "1001",
+		utils.Destination: "1004",
+		utils.Category:    "call",
+		utils.RunID:       utils.MetaDefault,
+		utils.Tenant:      "cgrates.org",
+		utils.RequestType: utils.META_PREPAID,
+		utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+		utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+		utils.Usage:       time.Duration(2 * time.Second),
+		utils.Cost:        12.13,
+	}
+	s := &Session{
+		CGRID:         "RandomCGRID",
+		Tenant:        "cgrates.org",
+		EventStart:    engine.NewSafEvent(startEv),
+		DebitInterval: time.Second,
+		SRuns: []*SRun{
+			&SRun{
+				Event:      engine.NewMapEvent(ev),
+				TotalUsage: time.Duration(2 * time.Second),
+				CD: &engine.CallDescriptor{
+					LoopIndex:     10,
+					DurationIndex: 3 * time.Second,
+					MaxRate:       11,
+					MaxRateUnit:   30 * time.Second,
+					MaxCostSoFar:  20,
+				},
+			},
+		},
+	}
+	exp := &ActiveSession{
+		CGRID:    "RandomCGRID",
+		RunID:    utils.MetaDefault,
+		ToR:      utils.VOICE,
+		OriginID: "123451",
+		// OriginHost:  s.EventStart.GetStringIgnoreErrors(utils.OriginHost),
+		Source:      utils.SessionS + "_" + "TEST_EVENT",
+		RequestType: utils.META_PREPAID,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "1004",
+		SetupTime:   time.Date(2016, time.January, 5, 18, 30, 59, 0, time.UTC),
+		AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
+		Usage:       time.Duration(2 * time.Second),
+		ExtraFields: map[string]string{
+			utils.EVENT_NAME: "TEST_EVENT2",
+		},
+		NodeID:        "ALL",
+		DebitInterval: time.Second,
+		LoopIndex:     10,
+		DurationIndex: 3 * time.Second,
+		MaxRate:       11,
+		MaxRateUnit:   30 * time.Second,
+		MaxCostSoFar:  20,
+	}
+	//check for some fields if populated correct
+	rply := s.asActiveSessions(s.SRuns[0], "", "ALL")
+	if !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+
 }
