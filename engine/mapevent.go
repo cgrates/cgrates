@@ -81,6 +81,14 @@ func (me MapEvent) GetString(fldName string) (out string, err error) {
 	return utils.IfaceAsString(fldIface)
 }
 
+func (me MapEvent) GetInt64(fldName string) (out int64, err error) {
+	fldIface, has := me[fldName]
+	if !has {
+		return 0, utils.ErrNotFound
+	}
+	return utils.IfaceAsInt64(fldIface)
+}
+
 func (me MapEvent) GetStringIgnoreErrors(fldName string) (out string) {
 	out, _ = me.GetString(fldName)
 	return
