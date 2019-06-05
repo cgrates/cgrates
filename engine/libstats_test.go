@@ -614,3 +614,81 @@ func TestStatExpand3(t *testing.T) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(expectedTCD), utils.ToJSON(rply))
 	}
 }
+
+func TestStatRemoveExpiredTTL(t *testing.T) {
+	sq = &StatQueue{
+		ttl: utils.DurationPointer(time.Duration(100 * time.Millisecond)),
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
+				Answered: 1,
+				Count:    1,
+				Events: map[string]*StatWithCompress{
+					"cgrates.org:TestStatRemExpired_1": &StatWithCompress{Stat: 1, CompressFactor: 1},
+				},
+			},
+		},
+		sqPrfl: &StatQueueProfile{
+			QueueLength: 0, //unlimited que
+		},
+	}
+
+	//add ev1 with ttl 100ms (after 100ms the event should be removed)
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
+	sq.ProcessEvent(ev1, nil)
+
+	if len(sq.SQItems) != 1 && sq.SQItems[0].EventID != "TestStatAddStatEvent_1" {
+		t.Errorf("Expecting: 1, received: %+v", len(sq.SQItems))
+	}
+	//after 150ms the event expired
+	time.Sleep(150 * time.Millisecond)
+
+	//processing a new event should clean the expired events and add the new one
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_2"}
+	sq.ProcessEvent(ev2, nil)
+	if len(sq.SQItems) != 1 && sq.SQItems[0].EventID != "TestStatAddStatEvent_2" {
+		t.Errorf("Expecting: 1, received: %+v", len(sq.SQItems))
+	}
+}
+
+func TestStatRemoveExpiredQueue(t *testing.T) {
+	sq = &StatQueue{
+		SQMetrics: map[string]StatMetric{
+			utils.MetaASR: &StatASR{
+				Answered: 1,
+				Count:    1,
+				Events: map[string]*StatWithCompress{
+					"cgrates.org:TestStatRemExpired_1": &StatWithCompress{Stat: 1, CompressFactor: 1},
+				},
+			},
+		},
+		sqPrfl: &StatQueueProfile{
+			QueueLength: 2, //unlimited que
+		},
+	}
+
+	//add ev1 with ttl 100ms (after 100ms the event should be removed)
+	ev1 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_1"}
+	sq.ProcessEvent(ev1, nil)
+
+	if len(sq.SQItems) != 1 && sq.SQItems[0].EventID != "TestStatAddStatEvent_1" {
+		t.Errorf("Expecting: 1, received: %+v", len(sq.SQItems))
+	}
+	//after 150ms the event expired
+	time.Sleep(150 * time.Millisecond)
+
+	//processing a new event should clean the expired events and add the new one
+	ev2 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_2"}
+	sq.ProcessEvent(ev2, nil)
+	if len(sq.SQItems) != 2 && sq.SQItems[0].EventID != "TestStatAddStatEvent_1" &&
+		sq.SQItems[1].EventID != "TestStatAddStatEvent_2" {
+		t.Errorf("Expecting: 2, received: %+v", len(sq.SQItems))
+	}
+
+	//processing a new event should clean the expired events and add the new one
+	ev3 := &utils.CGREvent{Tenant: "cgrates.org", ID: "TestStatAddStatEvent_3"}
+	sq.ProcessEvent(ev3, nil)
+	if len(sq.SQItems) != 2 && sq.SQItems[0].EventID != "TestStatAddStatEvent_2" &&
+		sq.SQItems[1].EventID != "TestStatAddStatEvent_3" {
+		t.Errorf("Expecting: 2, received: %+v", len(sq.SQItems))
+	}
+}
