@@ -2129,7 +2129,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 			return err
 		}
 		if verbose {
-			log.Print("\t", tpRsp.Tenant)
+			log.Print("\t", utils.ConcatenatedKey(tpRsp.Tenant, tpRsp.ID))
 		}
 	}
 	if verbose {
@@ -2151,7 +2151,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 			return err
 		}
 		if verbose {
-			log.Print("\t", tpST.Tenant)
+			log.Print("\t", utils.ConcatenatedKey(tpST.Tenant, tpST.ID))
 		}
 	}
 	if verbose {
@@ -2162,7 +2162,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 			return
 		}
 		if verbose {
-			log.Print("\t", sqTntID.Tenant)
+			log.Print("\t", sqTntID.TenantID())
 		}
 	}
 	if verbose {
@@ -2173,7 +2173,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 			return err
 		}
 		if verbose {
-			log.Print("\t", tpTH.Tenant)
+			log.Print("\t", utils.ConcatenatedKey(tpTH.Tenant, tpTH.ID))
 		}
 	}
 	if verbose {
@@ -2184,67 +2184,70 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 			return err
 		}
 		if verbose {
-			log.Print("\t", thd.Tenant)
+			log.Print("\t", thd.TenantID())
 		}
 	}
 
 	if verbose {
 		log.Print("SupplierProfiles:")
 	}
-	for _, tpTH := range tpr.sppProfiles {
-		if err = tpr.dm.RemoveSupplierProfile(tpTH.Tenant, tpTH.ID, utils.NonTransactional, true); err != nil {
+	for _, tpSpl := range tpr.sppProfiles {
+		if err = tpr.dm.RemoveSupplierProfile(tpSpl.Tenant, tpSpl.ID, utils.NonTransactional, true); err != nil {
 			return err
 		}
 		if verbose {
-			log.Print("\t", tpTH.Tenant)
+			log.Print("\t", utils.ConcatenatedKey(tpSpl.Tenant, tpSpl.ID))
 		}
 	}
 
 	if verbose {
 		log.Print("AttributeProfiles:")
 	}
-	for _, tpTH := range tpr.attributeProfiles {
-		if err = tpr.dm.RemoveAttributeProfile(tpTH.Tenant, tpTH.ID,
+	for _, tpAttr := range tpr.attributeProfiles {
+		if err = tpr.dm.RemoveAttributeProfile(tpAttr.Tenant, tpAttr.ID,
 			utils.NonTransactional, true); err != nil {
 			return err
 		}
 		if verbose {
-			log.Print("\t", tpTH.Tenant)
+			log.Print("\t", utils.ConcatenatedKey(tpAttr.Tenant, tpAttr.ID))
 		}
 	}
 
 	if verbose {
 		log.Print("ChargerProfiles:")
 	}
-	for _, tpTH := range tpr.chargerProfiles {
-		if err = tpr.dm.RemoveChargerProfile(tpTH.Tenant, tpTH.ID, utils.NonTransactional, true); err != nil {
+	for _, tpChr := range tpr.chargerProfiles {
+		if err = tpr.dm.RemoveChargerProfile(tpChr.Tenant, tpChr.ID,
+			utils.NonTransactional, true); err != nil {
 			return err
 		}
 		if verbose {
-			log.Print("\t", tpTH.Tenant)
+			log.Print("\t", utils.ConcatenatedKey(tpChr.Tenant, tpChr.ID))
 		}
 	}
 
 	if verbose {
 		log.Print("DispatcherProfiles:")
 	}
-	for _, tpTH := range tpr.dispatcherProfiles {
-		if err = tpr.dm.RemoveDispatcherProfile(tpTH.Tenant, tpTH.ID, utils.NonTransactional, true); err != nil {
+	for _, tpDsp := range tpr.dispatcherProfiles {
+		if err = tpr.dm.RemoveDispatcherProfile(tpDsp.Tenant, tpTH.tpDsp,
+			utils.NonTransactional, true); err != nil {
 			return err
 		}
 		if verbose {
-			log.Print("\t", tpTH.Tenant)
+			log.Print("\t", utils.ConcatenatedKey(tpDsp.Tenant, tpDsp.ID))
 		}
 	}
 	if verbose {
 		log.Print("DispatcherHosts:")
 	}
-	for _, tpTH := range tpr.dispatcherHosts {
-		if err = tpr.dm.RemoveDispatcherHost(tpTH.Tenant, tpTH.ID, utils.NonTransactional); err != nil {
+	for _, tpDsh := range tpr.dispatcherHosts {
+		if err = tpr.dm.RemoveDispatcherHost(tpDsh.Tenant, tpDsh.ID,
+			utils.NonTransactional); err != nil {
 			return err
 		}
 		if verbose {
-			log.Print("\t", tpTH.Tenant)
+			log.Print("\t", utils.ConcatenatedKey(tpDsh.Tenant, tpDsh.ID))
 		}
 	}
 
@@ -2281,12 +2284,13 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 	if verbose {
 		log.Print("Filters:")
 	}
-	for _, tpTH := range tpr.filters {
-		if err = tpr.dm.RemoveFilter(tpTH.Tenant, tpTH.ID, utils.NonTransactional); err != nil {
+	for _, tpFltr := range tpr.filters {
+		if err = tpr.dm.RemoveFilter(tpFltr.Tenant, tpFltr.ID,
+			utils.NonTransactional); err != nil {
 			return err
 		}
 		if verbose {
-			log.Print("\t", tpTH.Tenant)
+			log.Print("\t", utils.ConcatenatedKey(tpFltr.Tenant, tpFltr.ID))
 		}
 	}
 	if len(tpr.destinations) != 0 {
