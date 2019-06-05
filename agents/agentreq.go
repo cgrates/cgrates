@@ -33,10 +33,14 @@ import (
 
 func newAgentRequest(req config.DataProvider,
 	vars map[string]interface{},
+	cgrRply *config.NavigableMap,
 	rply *config.NavigableMap,
 	tntTpl config.RSRParsers,
 	dfltTenant, timezone string,
 	filterS *engine.FilterS) (ar *AgentRequest) {
+	if cgrRply == nil {
+		cgrRply = config.NewNavigableMap(nil)
+	}
 	if rply == nil {
 		rply = config.NewNavigableMap(nil)
 	}
@@ -44,7 +48,7 @@ func newAgentRequest(req config.DataProvider,
 		Request:    req,
 		Vars:       config.NewNavigableMap(vars),
 		CGRRequest: config.NewNavigableMap(nil),
-		CGRReply:   config.NewNavigableMap(nil),
+		CGRReply:   cgrRply,
 		Reply:      rply,
 		timezone:   timezone,
 		filterS:    filterS,
@@ -182,6 +186,8 @@ func (aReq *AgentRequest) ParseField(
 	switch cfgFld.Type {
 	default:
 		return "", fmt.Errorf("unsupported type: <%s>", cfgFld.Type)
+	case utils.META_NONE:
+		return
 	case utils.META_FILLER:
 		out, err = cfgFld.Value.ParseValue(utils.EmptyString)
 		cfgFld.Padding = "right"
@@ -308,5 +314,25 @@ func (aReq *AgentRequest) ParseField(
 		out, err = utils.FmtFieldWidth(cfgFld.Tag, out.(string), cfgFld.Width,
 			cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory)
 	}
+	return
+}
+
+// setCGRReply will set the aReq.cgrReply based on reply coming from upstream or error
+// returns error in case of reply not converting to NavigableMap
+func (aReq *AgentRequest) setCGRReply(rply config.NavigableMapper, errRply error) (err error) {
+	var nm *config.NavigableMap
+	if errRply != nil {
+		nm = config.NewNavigableMap(map[string]interface{}{
+			utils.Error: errRply.Error()})
+	} else {
+		nm = config.NewNavigableMap(nil)
+		if rply != nil {
+			if nm, err = rply.AsNavigableMap(nil); err != nil {
+				return
+			}
+		}
+		nm.Set([]string{utils.Error}, "", false, false) // enforce empty error
+	}
+	*aReq.CGRReply = *nm // update value so we can share CGRReply
 	return
 }

@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -97,7 +96,7 @@ func TestRadComposedFieldValue(t *testing.T) {
 	if err := pkt.AddAVPWithName("Cisco-NAS-Port", "CGR1", "Cisco"); err != nil {
 		t.Error(err)
 	}
-	agReq := newAgentRequest(nil, nil, nil, nil, "cgrates.org", "", nil)
+	agReq := newAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", nil)
 	agReq.Vars.Set([]string{MetaRadReqType}, MetaRadAcctStart, false, false)
 	agReq.Vars.Set([]string{"Cisco"}, "CGR1", false, false)
 	agReq.Vars.Set([]string{"User-Name"}, "flopsy", false, false)
@@ -117,11 +116,10 @@ func TestRadFieldOutVal(t *testing.T) {
 		t.Error(err)
 	}
 	eOut := fmt.Sprintf("%s|flopsy|CGR1", MetaRadAcctStart)
-	agReq := newAgentRequest(nil, nil, nil, nil, "cgrates.org", "", nil)
+	agReq := newAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", nil)
 	agReq.Vars.Set([]string{MetaRadReqType}, MetaRadAcctStart, false, false)
 	agReq.Vars.Set([]string{"Cisco"}, "CGR1", false, false)
 	agReq.Vars.Set([]string{"User-Name"}, "flopsy", false, false)
-	//processorVars{MetaRadReqType: MetaRadAcctStart}
 	cfgFld := &config.FCTemplate{Tag: "ComposedTest", Type: utils.META_COMPOSED, FieldId: utils.Destination,
 		Value: config.NewRSRParsersMustCompile("~*vars.*radReqType;|;~*vars.User-Name;|;~*vars.Cisco", true, utils.INFIELD_SEP), Mandatory: true}
 	if outVal, err := radFieldOutVal(pkt, agReq, cfgFld); err != nil {
@@ -139,7 +137,7 @@ func TestRadReplyAppendAttributes(t *testing.T) {
 		&config.FCTemplate{Tag: "Acct-Session-Time", FieldId: "Acct-Session-Time", Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP)},
 	}
-	agReq := newAgentRequest(nil, nil, nil, nil, "cgrates.org", "", nil)
+	agReq := newAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", nil)
 	agReq.CGRReply.Set([]string{utils.CapMaxUsage}, time.Duration(time.Hour), false, false)
 	agReq.CGRReply.Set([]string{utils.CapAttributes, "RadReply"}, "AccessAccept", false, false)
 	agReq.CGRReply.Set([]string{utils.CapAttributes, utils.Account}, "1001", false, false)
@@ -162,6 +160,7 @@ func (ev myEv) AsNavigableMap(tpl []*config.FCTemplate) (*config.NavigableMap, e
 	return config.NewNavigableMap(ev), nil
 }
 
+/*
 func TestNewCGRReply(t *testing.T) {
 	eCgrRply := config.NewNavigableMap(map[string]interface{}{
 		utils.Error: "some",
@@ -187,6 +186,7 @@ func TestNewCGRReply(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eCgrRply, rpl)
 	}
 }
+*/
 
 func TestRadiusDPFieldAsInterface(t *testing.T) {
 	pkt := radigo.NewPacket(radigo.AccountingRequest, 1, dictRad, coder, "CGRateS.org")

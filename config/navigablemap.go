@@ -59,7 +59,7 @@ type NavigableMap struct {
 	order [][]string             // order of field paths
 }
 
-// Add will add items into NavigableMap populating also order
+// Set will set items into NavigableMap populating also order
 // apnd parameter allows appending the data if both sides are []*NMItem
 func (nM *NavigableMap) Set(path []string, data interface{}, apnd, ordered bool) {
 	if ordered {

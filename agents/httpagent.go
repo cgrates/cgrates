@@ -58,8 +58,10 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 				utils.HTTPAgent, err.Error()))
 		return
 	}
+	cgrRplyNM := config.NewNavigableMap(nil)
+	rplyNM := config.NewNavigableMap(nil)
 	for _, reqProcessor := range ha.reqProcessors {
-		agReq := newAgentRequest(dcdr, nil, nil,
+		agReq := newAgentRequest(dcdr, nil, cgrRplyNM, rplyNM,
 			reqProcessor.Tenant, ha.dfltTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
@@ -139,10 +141,10 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
-		var authReply sessions.V1AuthorizeReply
+		rply := new(sessions.V1AuthorizeReply)
 		err = ha.sessionS.Call(utils.SessionSv1AuthorizeEvent,
-			authArgs, &authReply)
-		if agReq.CGRReply, err = NewCGRReply(&authReply, err); err != nil {
+			authArgs, rply)
+		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
 	case utils.MetaInitiate:
@@ -153,10 +155,10 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaThresholds),
 			reqProcessor.Flags.HasKey(utils.MetaStats),
 			cgrEv, cgrArgs.ArgDispatcher)
-		var initReply sessions.V1InitSessionReply
+		rply := new(sessions.V1InitSessionReply)
 		err = ha.sessionS.Call(utils.SessionSv1InitiateSession,
-			initArgs, &initReply)
-		if agReq.CGRReply, err = NewCGRReply(&initReply, err); err != nil {
+			initArgs, rply)
+		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
 	case utils.MetaUpdate:
@@ -164,10 +166,10 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher)
-		var updateReply sessions.V1UpdateSessionReply
+		rply := new(sessions.V1UpdateSessionReply)
 		err = ha.sessionS.Call(utils.SessionSv1UpdateSession,
-			updateArgs, &updateReply)
-		if agReq.CGRReply, err = NewCGRReply(&updateReply, err); err != nil {
+			updateArgs, rply)
+		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
 	case utils.MetaTerminate:
@@ -177,10 +179,10 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaThresholds),
 			reqProcessor.Flags.HasKey(utils.MetaStats),
 			cgrEv, cgrArgs.ArgDispatcher)
-		var tRply string
+		rply := utils.StringPointer("")
 		err = ha.sessionS.Call(utils.SessionSv1TerminateSession,
-			terminateArgs, &tRply)
-		if agReq.CGRReply, err = NewCGRReply(nil, err); err != nil {
+			terminateArgs, rply)
+		if err = agReq.setCGRReply(nil, err); err != nil {
 			return
 		}
 	case utils.MetaEvent:
@@ -194,15 +196,15 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
-		var eventRply sessions.V1ProcessEventReply
+		rply := new(sessions.V1ProcessEventReply)
 		err = ha.sessionS.Call(utils.SessionSv1ProcessEvent,
-			evArgs, &eventRply)
+			evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		} else if eventRply.MaxUsage != nil {
-			cgrEv.Event[utils.Usage] = *eventRply.MaxUsage // make sure the CDR reflects the debit
+		} else if rply.MaxUsage != nil {
+			cgrEv.Event[utils.Usage] = *rply.MaxUsage // make sure the CDR reflects the debit
 		}
-		if agReq.CGRReply, err = NewCGRReply(&eventRply, err); err != nil {
+		if err = agReq.setCGRReply(nil, err); err != nil {
 			return
 		}
 	case utils.MetaCDRs: // allow CDR processing
@@ -210,9 +212,11 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.HasKey(utils.MetaCDRs) &&
 		!reqProcessor.Flags.HasKey(utils.MetaDryRun) {
-		var rplyCDRs string
+		rplyCDRs := utils.StringPointer("")
 		if err = ha.sessionS.Call(utils.SessionSv1ProcessCDR,
-			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv, ArgDispatcher: cgrArgs.ArgDispatcher}, &rplyCDRs); err != nil {
+			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
+				ArgDispatcher: cgrArgs.ArgDispatcher},
+			rplyCDRs); err != nil {
 			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
 		}
 	}

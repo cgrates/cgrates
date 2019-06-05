@@ -91,6 +91,7 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 		}
 		reqVars[E164Address] = e164
 	}
+	cgrRplyNM := config.NewNavigableMap(nil)
 	rplyNM := config.NewNavigableMap(nil) // share it among different processors
 	var processed bool
 	var err error
@@ -99,7 +100,7 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 		lclProcessed, err = da.processRequest(
 			reqProcessor,
 			newAgentRequest(
-				dnsDP, reqVars, rplyNM,
+				dnsDP, reqVars, cgrRplyNM, rplyNM,
 				reqProcessor.Tenant,
 				da.cgrCfg.GeneralCfg().DefaultTenant,
 				utils.FirstNonEmpty(da.cgrCfg.DNSAgentCfg().Timezone,
@@ -134,6 +135,7 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 				utils.DNSAgent, err.Error(), utils.ToJSON(rply), utils.ToJSON(rplyNM)))
 		rply.Rcode = dns.RcodeServerFailure
 		dnsWriteMsg(w, rply)
+		return
 	}
 	if err = dnsWriteMsg(w, rply); err != nil { // failed sending, most probably content issue
 		rply = new(dns.Msg)
@@ -190,10 +192,10 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
-		var authReply sessions.V1AuthorizeReply
+		rply := new(sessions.V1AuthorizeReply)
 		err = da.sS.Call(utils.SessionSv1AuthorizeEvent,
-			authArgs, &authReply)
-		if agReq.CGRReply, err = NewCGRReply(&authReply, err); err != nil {
+			authArgs, rply)
+		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
 	case utils.MetaInitiate:
@@ -204,10 +206,10 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaThresholds),
 			reqProcessor.Flags.HasKey(utils.MetaStats),
 			cgrEv, cgrArgs.ArgDispatcher)
-		var initReply sessions.V1InitSessionReply
+		rply := new(sessions.V1InitSessionReply)
 		err = da.sS.Call(utils.SessionSv1InitiateSession,
-			initArgs, &initReply)
-		if agReq.CGRReply, err = NewCGRReply(&initReply, err); err != nil {
+			initArgs, rply)
+		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
 	case utils.MetaUpdate:
@@ -215,10 +217,10 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher)
-		var updateReply sessions.V1UpdateSessionReply
+		rply := new(sessions.V1UpdateSessionReply)
 		err = da.sS.Call(utils.SessionSv1UpdateSession,
-			updateArgs, &updateReply)
-		if agReq.CGRReply, err = NewCGRReply(&updateReply, err); err != nil {
+			updateArgs, rply)
+		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
 	case utils.MetaTerminate:
@@ -228,10 +230,10 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaThresholds),
 			reqProcessor.Flags.HasKey(utils.MetaStats),
 			cgrEv, cgrArgs.ArgDispatcher)
-		var tRply string
+		rply := utils.StringPointer("")
 		err = da.sS.Call(utils.SessionSv1TerminateSession,
-			terminateArgs, &tRply)
-		if agReq.CGRReply, err = NewCGRReply(nil, err); err != nil {
+			terminateArgs, rply)
+		if err = agReq.setCGRReply(nil, err); err != nil {
 			return
 		}
 	case utils.MetaEvent:
@@ -245,15 +247,15 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
-		var eventRply sessions.V1ProcessEventReply
+		rply := new(sessions.V1ProcessEventReply) // need it so rpcclient can clone
 		err = da.sS.Call(utils.SessionSv1ProcessEvent,
-			evArgs, &eventRply)
+			evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		} else if eventRply.MaxUsage != nil {
-			cgrEv.Event[utils.Usage] = *eventRply.MaxUsage // make sure the CDR reflects the debit
+		} else if rply.MaxUsage != nil {
+			cgrEv.Event[utils.Usage] = *rply.MaxUsage // make sure the CDR reflects the debit
 		}
-		if agReq.CGRReply, err = NewCGRReply(&eventRply, err); err != nil {
+		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
 	case utils.MetaCDRs: // allow CDR processing
@@ -261,7 +263,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.HasKey(utils.MetaCDRs) &&
 		!reqProcessor.Flags.HasKey(utils.MetaDryRun) {
-		var rplyCDRs string
+		rplyCDRs := utils.StringPointer("")
 		if err = da.sS.Call(utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher}, &rplyCDRs); err != nil {

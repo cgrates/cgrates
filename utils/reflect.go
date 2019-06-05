@@ -318,19 +318,17 @@ func GreaterThan(item, oItem interface{}, orEqual bool) (gte bool, err error) {
 	typItem := reflect.TypeOf(item)
 	typOItem := reflect.TypeOf(oItem)
 	if typItem != typOItem {
-		if item, err = GetUniformType(item); err != nil {
-			return false, err
+		if item, err = GetUniformType(item); err == nil { // overwrite type only if possible
+			typItem = reflect.TypeOf(item)
 		}
-		if oItem, err = GetUniformType(oItem); err != nil {
-			return false, err
+		if oItem, err = GetUniformType(oItem); err == nil {
+			typOItem = reflect.TypeOf(oItem)
 		}
-		typItem = reflect.TypeOf(item)
-		typOItem = reflect.TypeOf(oItem)
 	}
 	if !typItem.Comparable() ||
 		!typOItem.Comparable() ||
 		typItem != typOItem {
-		return false, errors.New("incomparable")
+		return false, fmt.Errorf("incomparable: <%+v> with <%+v>", item, oItem)
 	}
 	switch tVal := item.(type) {
 	case float64:

@@ -42,12 +42,12 @@ var (
 
 var sTestsDNS = []func(t *testing.T){
 	testDNSitResetDB,
-	testDNSitStartEngine,
+	//testDNSitStartEngine,
 	testDNSitApierRpcConn,
 	testDNSitTPFromFolder,
 	testDNSitClntConn,
-	testDNSitClntNAPTRDryRun,
-	testDNSitClntNAPTRAttributes,
+	//testDNSitClntNAPTRDryRun,
+	//testDNSitClntNAPTRAttributes,
 	testDNSitClntNAPTRSuppliers,
 	testDNSitStopEngine,
 }
@@ -165,8 +165,8 @@ func testDNSitClntNAPTRAttributes(t *testing.T) {
 		if answr.Order != 100 {
 			t.Errorf("received: <%q>", answr.Order)
 		}
-		if answr.Replacement != "sip:1\\@172.16.1.1." {
-			t.Errorf("Expected :<%q> , received: <%q>", "sip:1\\@172.16.1.1.", answr.Replacement)
+		if answr.Regexp != "sip:1\\@172.16.1.1." {
+			t.Errorf("Expected :<%q> , received: <%q>", "sip:1\\@172.16.1.1.", answr.Regexp)
 		}
 	}
 }
@@ -185,10 +185,10 @@ func testDNSitClntNAPTRSuppliers(t *testing.T) {
 		}
 		answr := rply.Answer[0].(*dns.NAPTR)
 		if answr.Order != 100 {
-			t.Errorf("received: <%q>", answr.Order)
+			t.Errorf("received: <%v>", answr.Order)
 		}
-		if answr.Replacement != "sip:1\\@172.16.1.10." {
-			t.Errorf("received: <%q>", answr.Replacement)
+		if answr.Regexp != "!^(.*)$!sip:1@172.16.1.11!" {
+			t.Errorf("received: <%q>", answr.Regexp)
 		}
 	}
 }

@@ -117,24 +117,6 @@ func radReplyAppendAttributes(reply *radigo.Packet, agReq *AgentRequest,
 	return
 }
 
-// NewCGRReply is specific to replies coming from CGRateS
-func NewCGRReply(rply config.NavigableMapper,
-	errRply error) (mp *config.NavigableMap, err error) {
-	if errRply != nil {
-		return config.NewNavigableMap(map[string]interface{}{
-			utils.Error: errRply.Error()}), nil
-	}
-	mp = config.NewNavigableMap(nil)
-	if rply != nil {
-		mp, err = rply.AsNavigableMap(nil)
-		if err != nil {
-			return nil, err
-		}
-	}
-	mp.Set([]string{utils.Error}, "", false, false) // enforce empty error
-	return
-}
-
 // newRADataProvider constructs a DataProvider
 func newRADataProvider(req *radigo.Packet) (dP config.DataProvider) {
 	dP = &radiusDP{req: req, cache: config.NewNavigableMap(nil)}
