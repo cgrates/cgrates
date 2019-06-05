@@ -2230,7 +2230,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 		log.Print("DispatcherProfiles:")
 	}
 	for _, tpDsp := range tpr.dispatcherProfiles {
-		if err = tpr.dm.RemoveDispatcherProfile(tpDsp.Tenant, tpTH.tpDsp,
+		if err = tpr.dm.RemoveDispatcherProfile(tpDsp.Tenant, tpDsp.ID,
 			utils.NonTransactional, true); err != nil {
 			return err
 		}
