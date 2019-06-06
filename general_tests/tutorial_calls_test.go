@@ -307,7 +307,8 @@ func testCallStatMetricsBefore(t *testing.T) {
 func testCallCheckResourceBeforeAllocation(t *testing.T) {
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: utils.CGREvent{
+		UsageID: "OriginID",
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "ResourceEvent",
 			Event: map[string]interface{}{
@@ -316,9 +317,9 @@ func testCallCheckResourceBeforeAllocation(t *testing.T) {
 				utils.Destination: "1002"},
 		}}
 	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	} else if len(*rs) != 1 {
-		t.Errorf("Resources: %+v", utils.ToJSON(rs))
+		t.Fatalf("Resources: %+v", utils.ToJSON(rs))
 	}
 	for _, r := range *rs {
 		if r.ID == "ResGroup1" &&
@@ -450,7 +451,8 @@ func testCallCall1003To1001SecondTime(t *testing.T) {
 func testCallCheckResourceAllocation(t *testing.T) {
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: utils.CGREvent{
+		UsageID: "OriginID1",
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "ResourceAllocation",
 			Event: map[string]interface{}{
@@ -459,9 +461,9 @@ func testCallCheckResourceAllocation(t *testing.T) {
 				utils.Destination: "1002"},
 		}}
 	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	} else if len(*rs) != 1 {
-		t.Errorf("Resources: %+v", utils.ToJSON(rs))
+		t.Fatalf("Resources: %+v", utils.ToJSON(rs))
 	}
 	for _, r := range *rs {
 		if r.ID == "ResGroup1" && len(r.Usages) != 3 {
@@ -637,7 +639,8 @@ func testCallStatMetrics(t *testing.T) {
 func testCallCheckResourceRelease(t *testing.T) {
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: utils.CGREvent{
+		UsageID: "OriginID2",
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "ResourceRelease",
 			Event: map[string]interface{}{
@@ -646,9 +649,9 @@ func testCallCheckResourceRelease(t *testing.T) {
 				utils.Destination: "1002"},
 		}}
 	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	} else if len(*rs) != 1 {
-		t.Errorf("Resources: %+v", rs)
+		t.Fatalf("Resources: %+v", rs)
 	}
 	for _, r := range *rs {
 		if r.ID == "ResGroup1" && len(r.Usages) != 0 {
@@ -711,7 +714,8 @@ func testCallSyncSessions(t *testing.T) {
 	//check if resource was allocated for 2 calls(1001->1002;1001->1003)
 	var rs *engine.Resources
 	args := &utils.ArgRSv1ResourceUsage{
-		CGREvent: utils.CGREvent{
+		UsageID: "OriginID3",
+		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "AllocateResource",
 			Event: map[string]interface{}{
@@ -720,9 +724,9 @@ func testCallSyncSessions(t *testing.T) {
 				utils.Destination: "1002"},
 		}}
 	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	} else if len(*rs) != 1 {
-		t.Errorf("Resources: %+v", utils.ToJSON(rs))
+		t.Fatalf("Resources: %+v", utils.ToJSON(rs))
 	}
 	for _, r := range *rs {
 		if r.ID == "ResGroup1" && len(r.Usages) != 2 {
@@ -777,7 +781,7 @@ func testCallSyncSessions(t *testing.T) {
 	if err := tutorialCallsRpc.Call(utils.ApierV2GetCDRs, req, &rplCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rplCdrs) != numberOfCDR { // cdr from sync session + cdr from before
-		t.Error("Unexpected number of CDRs returned: ", len(rplCdrs))
+		t.Fatal("Unexpected number of CDRs returned: ", len(rplCdrs))
 	} else if time1, err := utils.ParseDurationWithSecs(rplCdrs[0].Usage); err != nil {
 		t.Error(err)
 	} else if time1 > time.Duration(15*time.Second) {
@@ -797,9 +801,9 @@ func testCallSyncSessions(t *testing.T) {
 	//check if resource was released
 	var rsAfter *engine.Resources
 	if err := tutorialCallsRpc.Call(utils.ResourceSv1GetResourcesForEvent, args, &rsAfter); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	} else if len(*rsAfter) != 1 {
-		t.Errorf("Resources: %+v", rsAfter)
+		t.Fatalf("Resources: %+v", rsAfter)
 	}
 	for _, r := range *rsAfter {
 		if r.ID == "ResGroup1" && len(r.Usages) != 0 {
