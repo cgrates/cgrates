@@ -124,7 +124,11 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connID string) {
 			utils.KamailioAgent, kev[utils.OriginID]))
 		return
 	}
-	authArgs.CGREvent.Event[utils.OriginHost] = utils.FirstNonEmpty(authArgs.CGREvent.Event[utils.OriginHost].(string), ka.conns[connID].RemoteAddr().String())
+	originHost := ka.conns[connID].RemoteAddr().String()
+	if oHIf, has := authArgs.CGREvent.Event[utils.OriginHost]; has {
+		originHost = oHIf.(string)
+	}
+	authArgs.CGREvent.Event[utils.OriginHost] = originHost
 	authArgs.CGREvent.Event[EvapiConnID] = connID // Attach the connection ID
 	var authReply sessions.V1AuthorizeReply
 	err = ka.sessionS.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authReply)
@@ -160,7 +164,11 @@ func (ka *KamailioAgent) onCallStart(evData []byte, connID string) {
 		return
 	}
 	initSessionArgs.CGREvent.Event[EvapiConnID] = connID // Attach the connection ID so we can properly disconnect later
-	initSessionArgs.CGREvent.Event[utils.OriginHost] = utils.FirstNonEmpty(initSessionArgs.CGREvent.Event[utils.OriginHost].(string), ka.conns[connID].RemoteAddr().String())
+	originHost := ka.conns[connID].RemoteAddr().String()
+	if oHIf, has := initSessionArgs.CGREvent.Event[utils.OriginHost]; has {
+		originHost = oHIf.(string)
+	}
+	initSessionArgs.CGREvent.Event[utils.OriginHost] = originHost
 
 	var initReply sessions.V1InitSessionReply
 	if err := ka.sessionS.Call(utils.SessionSv1InitiateSession,
@@ -197,7 +205,11 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connID string) {
 		return
 	}
 	var reply string
-	tsArgs.CGREvent.Event[utils.OriginHost] = utils.FirstNonEmpty(tsArgs.CGREvent.Event[utils.OriginHost].(string), ka.conns[connID].RemoteAddr().String())
+	originHost := ka.conns[connID].RemoteAddr().String()
+	if oHIf, has := tsArgs.CGREvent.Event[utils.OriginHost]; has {
+		originHost = oHIf.(string)
+	}
+	tsArgs.CGREvent.Event[utils.OriginHost] = originHost
 	tsArgs.CGREvent.Event[EvapiConnID] = connID // Attach the connection ID in case we need to create a session and disconnect it
 	if err := ka.sessionS.Call(utils.SessionSv1TerminateSession,
 		tsArgs, &reply); err != nil {
@@ -207,11 +219,11 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connID string) {
 		// no return here since we want CDR anyhow
 	}
 	if ka.cfg.CreateCdr || strings.Index(kev[utils.CGRSubsystems], utils.MetaCDRs) != -1 {
-		cgrEv, err := kev.AsCGREvent(ka.timezone)
+		cgrEv, err := kev.AsCGREvent(ka.timezone) // FixMe: do we need to create the event once again?
 		if err != nil {
 			return
 		}
-		cgrEv.Event[utils.OriginHost] = utils.FirstNonEmpty(cgrEv.Event[utils.OriginHost].(string), ka.conns[connID].RemoteAddr().String())
+		cgrEv.Event[utils.OriginHost] = originHost
 		cgrArgs := cgrEv.ConsumeArgs(strings.Index(kev[utils.CGRSubsystems], utils.MetaDispatchers) != -1, false)
 		if err := ka.sessionS.Call(utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv, ArgDispatcher: cgrArgs.ArgDispatcher}, &reply); err != nil {
@@ -229,6 +241,7 @@ func (ka *KamailioAgent) onDlgList(evData []byte, connID string) {
 		return
 	}
 	var sIDs []*sessions.SessionID
+	// FixMe: find way to add OriginHost from event also, to be compatible with above implementation
 	for _, dlgInfo := range kamDlgRpl.Jsonrpl_body.Result {
 		sIDs = append(sIDs, &sessions.SessionID{
 			OriginHost: ka.conns[connID].RemoteAddr().String(),
@@ -272,7 +285,11 @@ func (ka *KamailioAgent) onCgrProcessEvent(evData []byte, connID string) {
 			utils.KamailioAgent, kev[utils.OriginID]))
 		return
 	}
-	procEvArgs.CGREvent.Event[utils.OriginHost] = utils.FirstNonEmpty(procEvArgs.CGREvent.Event[utils.OriginHost].(string), ka.conns[connID].RemoteAddr().String())
+	originHost := ka.conns[connID].RemoteAddr().String()
+	if oHIf, has := procEvArgs.CGREvent.Event[utils.OriginHost]; has {
+		originHost = oHIf.(string)
+	}
+	procEvArgs.CGREvent.Event[utils.OriginHost] = originHost
 	procEvArgs.CGREvent.Event[EvapiConnID] = connID // Attach the connection ID
 
 	var processReply sessions.V1ProcessEventReply
