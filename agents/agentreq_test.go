@@ -691,3 +691,53 @@ func TestNewCGRReply(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eCgrRply, rpl)
 	}
 }
+
+func TestAgReqNewAGWithReply(t *testing.T) {
+	data, _ := engine.NewMapStorage()
+	dm := engine.NewDataManager(data)
+	cfg, _ := config.NewDefaultCGRConfig()
+	filterS := engine.NewFilterS(cfg, nil, nil, dm)
+
+	ev := myEv{
+		"FirstLevel": map[string]interface{}{
+			"SecondLevel": map[string]interface{}{
+				"Fld1": "Val1",
+			},
+		},
+	}
+	rply := config.NewNavigableMap(ev)
+
+	agReq := newAgentRequest(nil, nil, rply, nil, "cgrates.org", "", filterS)
+
+	cgrRply := map[string]interface{}{
+		utils.CapAttributes: map[string]interface{}{
+			"PaypalAccount": "cgrates@paypal.com",
+		},
+		utils.CapMaxUsage: time.Duration(120 * time.Second),
+		utils.Error:       "",
+	}
+	agReq.CGRReply = config.NewNavigableMap(cgrRply)
+
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Fld1",
+			FieldId: "Fld1", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*rep.FirstLevel.SecondLevel.Fld1", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Fld2",
+			FieldId: "Fld2", Type: utils.MetaVariable,
+			Value: config.NewRSRParsersMustCompile("~*cgrep.Attributes.PaypalAccount", true, utils.INFIELD_SEP)},
+	}
+
+	eMp := config.NewNavigableMap(nil)
+	eMp.Set([]string{"Fld1"}, []*config.NMItem{
+		&config.NMItem{Data: "Val1", Path: []string{"Fld1"},
+			Config: tplFlds[0]}}, false, true)
+	eMp.Set([]string{"Fld2"}, []*config.NMItem{
+		&config.NMItem{Data: "cgrates@paypal.com", Path: []string{"Fld2"},
+			Config: tplFlds[1]}}, false, true)
+
+	if mpOut, err := agReq.AsNavigableMap(tplFlds); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eMp, mpOut) {
+		t.Errorf("expecting: %+v, received: %+v", eMp, mpOut)
+	}
+}
