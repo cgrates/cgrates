@@ -21,6 +21,7 @@ package agents
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"net/http"
 	"reflect"
 	"strings"
@@ -656,5 +657,37 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, expVal) {
 		t.Errorf("Expected %v , received: %v", utils.ToJSON(expVal), utils.ToJSON(rply))
+	}
+}
+
+type myEv map[string]interface{}
+
+func (ev myEv) AsNavigableMap(tpl []*config.FCTemplate) (*config.NavigableMap, error) {
+	return config.NewNavigableMap(ev), nil
+}
+
+func TestNewCGRReply(t *testing.T) {
+	eCgrRply := config.NewNavigableMap(map[string]interface{}{
+		utils.Error: "some",
+	})
+	if rpl, err := NewCGRReply(nil, errors.New("some")); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCgrRply, rpl) {
+		t.Errorf("Expecting: %+v, received: %+v",
+			utils.ToJSON(eCgrRply), utils.ToJSON(rpl))
+	}
+	ev := myEv{
+		"FirstLevel": map[string]interface{}{
+			"SecondLevel": map[string]interface{}{
+				"Fld1": "Val1",
+			},
+		},
+	}
+	eCgrRply = config.NewNavigableMap(ev)
+	eCgrRply.Set([]string{utils.Error}, "", false, false)
+	if rpl, err := NewCGRReply(config.NavigableMapper(ev), nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCgrRply, rpl) {
+		t.Errorf("Expecting: %+v, received: %+v", eCgrRply, rpl)
 	}
 }
