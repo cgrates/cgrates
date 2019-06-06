@@ -20,6 +20,7 @@ package utils
 import (
 	"net"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
@@ -148,7 +149,8 @@ func TestGreaterThan(t *testing.T) {
 		t.Error("should be not greater than")
 	}
 	if _, err := GreaterThan(struct{}{},
-		map[string]interface{}{"a": "a"}, false); err == nil || err.Error() != "incomparable" {
+		map[string]interface{}{"a": "a"}, false); err == nil ||
+		!strings.HasPrefix(err.Error(), "incomparable") {
 		t.Error(err)
 	}
 	if gte, err := GreaterThan(1.2, 1.2, true); err != nil {

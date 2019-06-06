@@ -42,12 +42,12 @@ var (
 
 var sTestsDNS = []func(t *testing.T){
 	testDNSitResetDB,
-	//testDNSitStartEngine,
+	testDNSitStartEngine,
 	testDNSitApierRpcConn,
 	testDNSitTPFromFolder,
 	testDNSitClntConn,
-	//testDNSitClntNAPTRDryRun,
-	//testDNSitClntNAPTRAttributes,
+	testDNSitClntNAPTRDryRun,
+	testDNSitClntNAPTRAttributes,
 	testDNSitClntNAPTRSuppliers,
 	testDNSitStopEngine,
 }

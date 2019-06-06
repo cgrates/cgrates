@@ -560,7 +560,7 @@ func TestAgReqAsNavigableMap2(t *testing.T) {
 	dm := engine.NewDataManager(data)
 	cfg, _ := config.NewDefaultCGRConfig()
 	filterS := engine.NewFilterS(cfg, nil, nil, dm)
-	agReq := newAgentRequest(nil, nil, nil, nil, "cgrates.org", "", filterS)
+	agReq := newAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRRequest.Set([]string{utils.ToR}, utils.VOICE, false, false)
 	agReq.CGRRequest.Set([]string{utils.Account}, "1001", false, false)
@@ -617,7 +617,7 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 	dm := engine.NewDataManager(data)
 	cfg, _ := config.NewDefaultCGRConfig()
 	filterS := engine.NewFilterS(cfg, nil, nil, dm)
-	agReq := newAgentRequest(nil, nil, nil, nil, "cgrates.org", "", filterS)
+	agReq := newAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS)
 	// populate request, emulating the way will be done in HTTPAgent
 	agReq.CGRAReq = config.NewNavigableMap(nil)
 	agReq.CGRAReq.Set([]string{utils.Usage}, []*config.NMItem{{Data: 3 * time.Minute}}, false, false)
