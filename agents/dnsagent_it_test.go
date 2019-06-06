@@ -165,7 +165,7 @@ func testDNSitClntNAPTRAttributes(t *testing.T) {
 		if answr.Order != 100 {
 			t.Errorf("received: <%q>", answr.Order)
 		}
-		if answr.Regexp != "sip:1\\@172.16.1.1." {
+		if answr.Regexp != "sip:1@172.16.1.1." {
 			t.Errorf("Expected :<%q> , received: <%q>", "sip:1\\@172.16.1.1.", answr.Regexp)
 		}
 	}
