@@ -86,7 +86,7 @@ func (me MapEvent) GetInt64(fldName string) (out int64, err error) {
 	if !has {
 		return 0, utils.ErrNotFound
 	}
-	return utils.IfaceAsInt64(fldIface)
+	return utils.IfaceAsTInt64(fldIface)
 }
 
 func (me MapEvent) GetStringIgnoreErrors(fldName string) (out string) {

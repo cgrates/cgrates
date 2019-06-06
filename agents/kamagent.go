@@ -329,7 +329,7 @@ func (ka *KamailioAgent) V1DisconnectSession(args utils.AttrDisconnectSession, r
 				KamHashEntry, hEntry, KamHashID, hID))
 		return
 	}
-	connIdx, err := utils.IfaceAsInt64(connIdxIface)
+	connIdx, err := utils.IfaceAsTInt64(connIdxIface)
 	if err != nil {
 		return err
 	}
