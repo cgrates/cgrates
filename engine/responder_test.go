@@ -128,3 +128,348 @@ func TestResponderGobSMCost(t *testing.T) {
 		t.Error("wrong transmission")
 	}
 }
+
+func TestResponderUsageAllow(t *testing.T) {
+	rsp := &Responder{
+		MaxComputedUsage: map[string]time.Duration{
+			utils.ANY:   time.Duration(10 * time.Second),
+			utils.VOICE: time.Duration(20 * time.Second),
+		},
+	}
+	if allow := rsp.usageAllowed(utils.VOICE, time.Duration(17*time.Second)); !allow {
+		t.Errorf("Expected true, received : %+v", allow)
+	}
+	if allow := rsp.usageAllowed(utils.VOICE, time.Duration(22*time.Second)); allow {
+		t.Errorf("Expected false, received : %+v", allow)
+	}
+	if allow := rsp.usageAllowed(utils.DATA, time.Duration(7*time.Second)); !allow {
+		t.Errorf("Expected true, received : %+v", allow)
+	}
+	if allow := rsp.usageAllowed(utils.DATA, time.Duration(12*time.Second)); allow {
+		t.Errorf("Expected false, received : %+v", allow)
+	}
+}
+
+func TestResponderGetCostMaxUsageANY(t *testing.T) {
+	rsponder.MaxComputedUsage = map[string]time.Duration{
+		utils.ANY:   time.Duration(10 * time.Second),
+		utils.VOICE: time.Duration(20 * time.Second),
+	}
+	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
+	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
+	cd := &CallDescriptorWithArgDispatcher{
+		CallDescriptor: &CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "dan",
+			TOR:           utils.ANY,
+			Account:       "dan",
+			Destination:   "+4917621621391",
+			DurationIndex: 9,
+			TimeStart:     tStart,
+			TimeEnd:       tEnd,
+		},
+	}
+	var cc CallCost
+	if err := rsponder.GetCost(cd, &cc); err == nil ||
+		err.Error() != utils.ErrMaxUsageExceeded.Error() {
+		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
+	}
+}
+
+func TestResponderGetCostMaxUsageVOICE(t *testing.T) {
+	rsponder.MaxComputedUsage = map[string]time.Duration{
+		utils.ANY:   time.Duration(10 * time.Second),
+		utils.VOICE: time.Duration(20 * time.Second),
+	}
+	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
+	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
+	cd := &CallDescriptorWithArgDispatcher{
+		CallDescriptor: &CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "dan",
+			TOR:           utils.VOICE,
+			Account:       "dan",
+			Destination:   "+4917621621391",
+			DurationIndex: 9,
+			TimeStart:     tStart,
+			TimeEnd:       tEnd,
+		},
+	}
+	var cc CallCost
+	if err := rsponder.GetCost(cd, &cc); err == nil ||
+		err.Error() != utils.ErrMaxUsageExceeded.Error() {
+		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
+	}
+}
+
+func TestResponderDebitMaxUsageANY(t *testing.T) {
+	rsponder.MaxComputedUsage = map[string]time.Duration{
+		utils.ANY:   time.Duration(10 * time.Second),
+		utils.VOICE: time.Duration(20 * time.Second),
+	}
+	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
+	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
+	cd := &CallDescriptorWithArgDispatcher{
+		CallDescriptor: &CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "dan",
+			TOR:           utils.ANY,
+			Account:       "dan",
+			Destination:   "+4917621621391",
+			DurationIndex: 9,
+			TimeStart:     tStart,
+			TimeEnd:       tEnd,
+		},
+	}
+	var cc CallCost
+	if err := rsponder.Debit(cd, &cc); err == nil ||
+		err.Error() != utils.ErrMaxUsageExceeded.Error() {
+		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
+	}
+}
+
+func TestResponderDebitMaxUsageVOICE(t *testing.T) {
+	rsponder.MaxComputedUsage = map[string]time.Duration{
+		utils.ANY:   time.Duration(10 * time.Second),
+		utils.VOICE: time.Duration(20 * time.Second),
+	}
+	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
+	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
+	cd := &CallDescriptorWithArgDispatcher{
+		CallDescriptor: &CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "dan",
+			TOR:           utils.VOICE,
+			Account:       "dan",
+			Destination:   "+4917621621391",
+			DurationIndex: 9,
+			TimeStart:     tStart,
+			TimeEnd:       tEnd,
+		},
+	}
+	var cc CallCost
+	if err := rsponder.Debit(cd, &cc); err == nil ||
+		err.Error() != utils.ErrMaxUsageExceeded.Error() {
+		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
+	}
+}
+
+func TestResponderMaxDebitMaxUsageANY(t *testing.T) {
+	rsponder.MaxComputedUsage = map[string]time.Duration{
+		utils.ANY:   time.Duration(10 * time.Second),
+		utils.VOICE: time.Duration(20 * time.Second),
+	}
+	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
+	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
+	cd := &CallDescriptorWithArgDispatcher{
+		CallDescriptor: &CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "dan",
+			TOR:           utils.ANY,
+			Account:       "dan",
+			Destination:   "+4917621621391",
+			DurationIndex: 9,
+			TimeStart:     tStart,
+			TimeEnd:       tEnd,
+		},
+	}
+	var cc CallCost
+	if err := rsponder.MaxDebit(cd, &cc); err == nil ||
+		err.Error() != utils.ErrMaxUsageExceeded.Error() {
+		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
+	}
+}
+
+func TestResponderMaxDebitMaxUsageVOICE(t *testing.T) {
+	rsponder.MaxComputedUsage = map[string]time.Duration{
+		utils.ANY:   time.Duration(10 * time.Second),
+		utils.VOICE: time.Duration(20 * time.Second),
+	}
+	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
+	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
+	cd := &CallDescriptorWithArgDispatcher{
+		CallDescriptor: &CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "dan",
+			TOR:           utils.VOICE,
+			Account:       "dan",
+			Destination:   "+4917621621391",
+			DurationIndex: 9,
+			TimeStart:     tStart,
+			TimeEnd:       tEnd,
+		},
+	}
+	var cc CallCost
+	if err := rsponder.MaxDebit(cd, &cc); err == nil ||
+		err.Error() != utils.ErrMaxUsageExceeded.Error() {
+		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
+	}
+}
+
+func TestResponderRefundIncrementsMaxUsageANY(t *testing.T) {
+	rsponder.MaxComputedUsage = map[string]time.Duration{
+		utils.ANY:   time.Duration(10 * time.Second),
+		utils.VOICE: time.Duration(20 * time.Second),
+	}
+	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
+	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
+	cd := &CallDescriptorWithArgDispatcher{
+		CallDescriptor: &CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "dan",
+			TOR:           utils.ANY,
+			Account:       "dan",
+			Destination:   "+4917621621391",
+			DurationIndex: 9,
+			TimeStart:     tStart,
+			TimeEnd:       tEnd,
+		},
+	}
+	var acc Account
+	if err := rsponder.RefundIncrements(cd, &acc); err == nil ||
+		err.Error() != utils.ErrMaxUsageExceeded.Error() {
+		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
+	}
+}
+
+func TestResponderRefundIncrementsMaxUsageVOICE(t *testing.T) {
+	rsponder.MaxComputedUsage = map[string]time.Duration{
+		utils.ANY:   time.Duration(10 * time.Second),
+		utils.VOICE: time.Duration(20 * time.Second),
+	}
+	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
+	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
+	cd := &CallDescriptorWithArgDispatcher{
+		CallDescriptor: &CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "dan",
+			TOR:           utils.VOICE,
+			Account:       "dan",
+			Destination:   "+4917621621391",
+			DurationIndex: 9,
+			TimeStart:     tStart,
+			TimeEnd:       tEnd,
+		},
+	}
+	var acc Account
+	if err := rsponder.RefundIncrements(cd, &acc); err == nil ||
+		err.Error() != utils.ErrMaxUsageExceeded.Error() {
+		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
+	}
+}
+
+func TestResponderRefundRoundingMaxUsageANY(t *testing.T) {
+	rsponder.MaxComputedUsage = map[string]time.Duration{
+		utils.ANY:   time.Duration(10 * time.Second),
+		utils.VOICE: time.Duration(20 * time.Second),
+	}
+	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
+	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
+	cd := &CallDescriptorWithArgDispatcher{
+		CallDescriptor: &CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "dan",
+			TOR:           utils.ANY,
+			Account:       "dan",
+			Destination:   "+4917621621391",
+			DurationIndex: 9,
+			TimeStart:     tStart,
+			TimeEnd:       tEnd,
+		},
+	}
+	var reply float64
+	if err := rsponder.RefundRounding(cd, &reply); err == nil ||
+		err.Error() != utils.ErrMaxUsageExceeded.Error() {
+		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
+	}
+}
+
+func TestResponderRefundRoundingMaxUsageVOICE(t *testing.T) {
+	rsponder.MaxComputedUsage = map[string]time.Duration{
+		utils.ANY:   time.Duration(10 * time.Second),
+		utils.VOICE: time.Duration(20 * time.Second),
+	}
+	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
+	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
+	cd := &CallDescriptorWithArgDispatcher{
+		CallDescriptor: &CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "dan",
+			TOR:           utils.VOICE,
+			Account:       "dan",
+			Destination:   "+4917621621391",
+			DurationIndex: 9,
+			TimeStart:     tStart,
+			TimeEnd:       tEnd,
+		},
+	}
+	var reply float64
+	if err := rsponder.RefundRounding(cd, &reply); err == nil ||
+		err.Error() != utils.ErrMaxUsageExceeded.Error() {
+		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
+	}
+}
+
+func TestResponderGetMaxSessionTimeMaxUsageANY(t *testing.T) {
+	rsponder.MaxComputedUsage = map[string]time.Duration{
+		utils.ANY:   time.Duration(10 * time.Second),
+		utils.VOICE: time.Duration(20 * time.Second),
+	}
+	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
+	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:11Z", "")
+	cd := &CallDescriptorWithArgDispatcher{
+		CallDescriptor: &CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "dan",
+			TOR:           utils.ANY,
+			Account:       "dan",
+			Destination:   "+4917621621391",
+			DurationIndex: 9,
+			TimeStart:     tStart,
+			TimeEnd:       tEnd,
+		},
+	}
+	var reply time.Duration
+	if err := rsponder.GetMaxSessionTime(cd, &reply); err == nil ||
+		err.Error() != utils.ErrMaxUsageExceeded.Error() {
+		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
+	}
+}
+
+func TestResponderGetMaxSessionTimeMaxUsageVOICE(t *testing.T) {
+	rsponder.MaxComputedUsage = map[string]time.Duration{
+		utils.ANY:   time.Duration(10 * time.Second),
+		utils.VOICE: time.Duration(20 * time.Second),
+	}
+	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
+	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:21Z", "")
+	cd := &CallDescriptorWithArgDispatcher{
+		CallDescriptor: &CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "dan",
+			TOR:           utils.VOICE,
+			Account:       "dan",
+			Destination:   "+4917621621391",
+			DurationIndex: 9,
+			TimeStart:     tStart,
+			TimeEnd:       tEnd,
+		},
+	}
+	var reply time.Duration
+	if err := rsponder.GetMaxSessionTime(cd, &reply); err == nil ||
+		err.Error() != utils.ErrMaxUsageExceeded.Error() {
+		t.Errorf("Expected %+v, received : %+v", utils.ErrMaxUsageExceeded, err)
+	}
+}
