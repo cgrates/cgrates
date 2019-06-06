@@ -53,8 +53,10 @@ func TestNewKamEvent(t *testing.T) {
 		"cgr_destination": "1002", "cgr_answertime": "1419839310",
 		"cgr_duration": "3", "cgr_pdd": "4",
 		utils.CGR_SUPPLIER:         "supplier2",
-		utils.CGR_DISCONNECT_CAUSE: "200"}
-	if kamEv, err := NewKamEvent([]byte(evStr)); err != nil {
+		utils.CGR_DISCONNECT_CAUSE: "200",
+		utils.CGROriginHost:        utils.KamailioAgent,
+	}
+	if kamEv, err := NewKamEvent([]byte(evStr), utils.KamailioAgent, ""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eKamEv, kamEv) {
 		t.Error("Received: ", kamEv)
