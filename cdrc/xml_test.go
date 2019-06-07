@@ -212,7 +212,7 @@ func TestXMLRPProcess(t *testing.T) {
 			ID:          "TestXML",
 			Enabled:     true,
 			CdrFormat:   "xml",
-			CDRPath:     utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}),
+			CDRRootPath: utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}),
 			CdrSourceId: "TestXML",
 			ContentFields: []*config.FCTemplate{
 				{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.ToR,
@@ -285,7 +285,7 @@ func TestXMLRPProcessWithNewFilters(t *testing.T) {
 			ID:          "XMLWithFilters",
 			Enabled:     true,
 			CdrFormat:   "xml",
-			CDRPath:     utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}),
+			CDRRootPath: utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}),
 			CdrSourceId: "XMLWithFilters",
 			Filters:     []string{"*string:~broadWorksCDR.cdrData.headerModule.type:Normal"},
 			ContentFields: []*config.FCTemplate{
@@ -552,7 +552,7 @@ func TestXMLRPNestingSeparator(t *testing.T) {
 			ID:          "msw_xml",
 			Enabled:     true,
 			CdrFormat:   "xml",
-			CDRPath:     utils.HierarchyPath([]string{"File", "CDRs", "Call"}),
+			CDRRootPath: utils.HierarchyPath([]string{"File", "CDRs", "Call"}),
 			CdrSourceId: "zw_cfs1",
 			Filters:     []string{},
 			ContentFields: []*config.FCTemplate{

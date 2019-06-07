@@ -7,8 +7,8 @@
 	{
 		"id": "CDRC-CSV3",
 		"enabled": true,							// enable CDR client functionality
-		"cdr_in_dir": "/tmp/cgrates/cdrc3/in",		// absolute path towards the directory where the CDRs are stored
-		"cdr_out_dir": "/tmp/cgrates/cdrc3/out",	// absolute path towards the directory where processed CDRs will be moved
+		"cdr_in_path": "/tmp/cgrates/cdrc3/in",		// absolute path towards the directory where the CDRs are stored
+		"cdr_out_path": "/tmp/cgrates/cdrc3/out",	// absolute path towards the directory where processed CDRs will be moved
 		"cdr_source_id": "csv3",					// free form field, tag identifying the source of the CDRs within CDRS database
 	},
 ],

@@ -1035,16 +1035,16 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			if err := cdrcInstCfg.loadFromJsonCfg(jsnCrc1Cfg, self.generalCfg.RsrSepatarot); err != nil {
 				return err
 			}
-			if cdrcInstCfg.CdrInDir == "" {
-				return utils.ErrCDRCNoInDir
+			if cdrcInstCfg.CDRInPath == "" {
+				return utils.ErrCDRCNoInPath
 			}
-			if _, hasDir := self.CdrcProfiles[cdrcInstCfg.CdrInDir]; !hasDir {
-				self.CdrcProfiles[cdrcInstCfg.CdrInDir] = make([]*CdrcCfg, 0)
+			if _, hasDir := self.CdrcProfiles[cdrcInstCfg.CDRInPath]; !hasDir {
+				self.CdrcProfiles[cdrcInstCfg.CDRInPath] = make([]*CdrcCfg, 0)
 			}
 			if indxFound != -1 { // Replace previous config so we have inheritance
 				self.CdrcProfiles[pathFound][indxFound] = cdrcInstCfg
 			} else {
-				self.CdrcProfiles[cdrcInstCfg.CdrInDir] = append(self.CdrcProfiles[cdrcInstCfg.CdrInDir], cdrcInstCfg)
+				self.CdrcProfiles[cdrcInstCfg.CDRInPath] = append(self.CdrcProfiles[cdrcInstCfg.CDRInPath], cdrcInstCfg)
 			}
 		}
 	}

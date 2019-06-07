@@ -32,11 +32,11 @@ var cdrcCfg = CdrcCfg{
 	CdrFormat:                "csv",
 	FieldSeparator:           ',',
 	MaxOpenFiles:             1024,
-	CdrInDir:                 "/var/spool/cgrates/cdrc/in",
-	CdrOutDir:                "/var/spool/cgrates/cdrc/out",
+	CDRInPath:                "/var/spool/cgrates/cdrc/in",
+	CDROutPath:               "/var/spool/cgrates/cdrc/out",
 	FailedCallsPrefix:        "missed_calls",
-	CDRPath:                  []string{""},
-	CdrSourceId:              "freeswitch_csv",
+	CDRRootPath:              []string{""},
+	CdrSourceId:              "cdrc_csv",
 	Filters:                  []string{},
 	Tenant:                   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 	PartialRecordCache:       time.Duration(10 * time.Second),
@@ -87,11 +87,11 @@ func TestCdrcCfgloadFromJsonCfg(t *testing.T) {
 		"timezone": "",									// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 		"run_delay": 0,									// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
 		"max_open_files": 1024,							// maximum simultaneous files to process, 0 for unlimited
-		"cdr_in_dir": "/var/spool/cgrates/cdrc/in",		// absolute path towards the directory where the CDRs are stored
-		"cdr_out_dir": "/var/spool/cgrates/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
+		"cdr_in_path": "/var/spool/cgrates/cdrc/in",	// absolute path towards the directory where the CDRs are stored
+		"cdr_out_path": "/var/spool/cgrates/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
 		"failed_calls_prefix": "missed_calls",			// used in case of flatstore CDRs to avoid searching for BYE records
-		"cdr_path": "",									// path towards one CDR element in case of XML CDRs
-		"cdr_source_id": "freeswitch_csv",				// free form field, tag identifying the source of the CDRs within CDRS database
+		"cdr_root_path": "",							// path towards one CDR element in case of XML CDRs
+		"cdr_source_id": "cdrc_csv",					// free form field, tag identifying the source of the CDRs within CDRS database
 		"filters" :[],									// new filters used in FilterS subsystem
 		"tenant": "cgrates.org",						// default tenant
 		"continue_on_success": false,					// continue to the next template if executed

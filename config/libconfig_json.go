@@ -151,10 +151,10 @@ type CdrcJsonCfg struct {
 	Field_separator             *string
 	Timezone                    *string
 	Run_delay                   *int
-	Cdr_in_dir                  *string
-	Cdr_out_dir                 *string
+	Cdr_in_path                 *string
+	Cdr_out_path                *string
 	Failed_calls_prefix         *string
-	Cdr_path                    *string
+	Cdr_root_path               *string
 	Cdr_source_id               *string
 	Filters                     *[]string
 	Tenant                      *string

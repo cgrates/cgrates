@@ -72,7 +72,7 @@ var (
 	ErrSessionNotFound          = errors.New("SESSION_NOT_FOUND")
 	ErrJsonIncompleteComment    = errors.New("JSON_INCOMPLETE_COMMENT")
 	ErrCDRCNoProfileID          = errors.New("CDRC_PROFILE_WITHOUT_ID")
-	ErrCDRCNoInDir              = errors.New("CDRC_PROFILE_WITHOUT_IN_DIR")
+	ErrCDRCNoInPath             = errors.New("CDRC_PROFILE_WITHOUT_IN_PATH")
 	ErrNotEnoughParameters      = errors.New("NotEnoughParameters")
 	ErrNotConnected             = errors.New("NOT_CONNECTED")
 	RalsErrorPrfx               = "RALS_ERROR"

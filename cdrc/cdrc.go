@@ -37,8 +37,6 @@ import (
 )
 
 const (
-	CSV             = "csv"
-	FS_CSV          = "freeswitch_csv"
 	UNPAIRED_SUFFIX = ".unpaired"
 )
 
@@ -51,7 +49,7 @@ type RecordsProcessor interface {
 /*
 One instance  of CDRC will act on one folder.
 Common parameters within configs processed:
- * cdrS, cdrFormat, cdrInDir, cdrOutDir, runDelay
+ * cdrS, cdrFormat, CDRInPath, CDROutPath, runDelay
 Parameters specific per config instance:
  * duMultiplyFactor, cdrSourceId, cdrFilter, cdrFields
 */
@@ -74,16 +72,16 @@ func NewCdrc(cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool, cdrs rpcclient.R
 	}
 	var err error
 	if cdrc.unpairedRecordsCache, err = NewUnpairedRecordsCache(cdrcCfg.PartialRecordCache,
-		cdrcCfg.CdrOutDir, cdrcCfg.FieldSeparator); err != nil {
+		cdrcCfg.CDROutPath, cdrcCfg.FieldSeparator); err != nil {
 		return nil, err
 	}
 	if cdrc.partialRecordsCache, err = NewPartialRecordsCache(cdrcCfg.PartialRecordCache,
-		cdrcCfg.PartialCacheExpiryAction, cdrcCfg.CdrOutDir, cdrcCfg.FieldSeparator, roundDecimals,
+		cdrcCfg.PartialCacheExpiryAction, cdrcCfg.CDROutPath, cdrcCfg.FieldSeparator, roundDecimals,
 		cdrc.timezone, cdrc.httpSkipTlsCheck, cdrc.cdrs, filterS); err != nil {
 		return nil, err
 	}
 	// Before processing, make sure in and out folders exist
-	for _, dir := range []string{cdrcCfg.CdrInDir, cdrcCfg.CdrOutDir} {
+	for _, dir := range []string{cdrcCfg.CDRInPath, cdrcCfg.CDROutPath} {
 		if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
 			return nil, fmt.Errorf("Nonexistent folder: %s", dir)
 		}
@@ -116,7 +114,7 @@ func (self *Cdrc) Run() error {
 	for {
 		select {
 		case <-self.closeChan: // Exit, reinject closeChan for other CDRCs
-			utils.Logger.Info(fmt.Sprintf("<Cdrc> Shutting down CDRC on path %s.", self.dfltCdrcCfg.CdrInDir))
+			utils.Logger.Info(fmt.Sprintf("<Cdrc> Shutting down CDRC on path %s.", self.dfltCdrcCfg.CDRInPath))
 			return nil
 		default:
 		}
@@ -132,18 +130,18 @@ func (self *Cdrc) trackCDRFiles() (err error) {
 		return
 	}
 	defer watcher.Close()
-	err = watcher.Add(self.dfltCdrcCfg.CdrInDir)
+	err = watcher.Add(self.dfltCdrcCfg.CDRInPath)
 	if err != nil {
 		return
 	}
-	utils.Logger.Info(fmt.Sprintf("<Cdrc> Monitoring %s for file moves.", self.dfltCdrcCfg.CdrInDir))
+	utils.Logger.Info(fmt.Sprintf("<Cdrc> Monitoring %s for file moves.", self.dfltCdrcCfg.CDRInPath))
 	for {
 		select {
 		case <-self.closeChan: // Exit, reinject closeChan for other CDRCs
-			utils.Logger.Info(fmt.Sprintf("<Cdrc> Shutting down CDRC on path %s.", self.dfltCdrcCfg.CdrInDir))
+			utils.Logger.Info(fmt.Sprintf("<Cdrc> Shutting down CDRC on path %s.", self.dfltCdrcCfg.CDRInPath))
 			return nil
 		case ev := <-watcher.Events:
-			if ev.Op&fsnotify.Create == fsnotify.Create && (self.dfltCdrcCfg.CdrFormat != FS_CSV || path.Ext(ev.Name) != ".csv") {
+			if ev.Op&fsnotify.Create == fsnotify.Create && (self.dfltCdrcCfg.CdrFormat != utils.MetaFScsv || path.Ext(ev.Name) != ".csv") {
 				go func() { //Enable async processing here
 					if err = self.processFile(ev.Name); err != nil {
 						utils.Logger.Err(fmt.Sprintf("Processing file %s, error: %s", ev.Name, err.Error()))
@@ -158,12 +156,12 @@ func (self *Cdrc) trackCDRFiles() (err error) {
 
 // One run over the CDR folder
 func (self *Cdrc) processCdrDir() error {
-	utils.Logger.Info(fmt.Sprintf("<Cdrc> Parsing folder %s for CDR files.", self.dfltCdrcCfg.CdrInDir))
-	filesInDir, _ := ioutil.ReadDir(self.dfltCdrcCfg.CdrInDir)
+	utils.Logger.Info(fmt.Sprintf("<Cdrc> Parsing folder %s for CDR files.", self.dfltCdrcCfg.CDRInPath))
+	filesInDir, _ := ioutil.ReadDir(self.dfltCdrcCfg.CDRInPath)
 	for _, file := range filesInDir {
-		if self.dfltCdrcCfg.CdrFormat != FS_CSV || path.Ext(file.Name()) != ".csv" {
+		if self.dfltCdrcCfg.CdrFormat != utils.MetaFScsv || path.Ext(file.Name()) != ".csv" {
 			go func() { //Enable async processing here
-				if err := self.processFile(path.Join(self.dfltCdrcCfg.CdrInDir, file.Name())); err != nil {
+				if err := self.processFile(path.Join(self.dfltCdrcCfg.CDRInPath, file.Name())); err != nil {
 					utils.Logger.Err(fmt.Sprintf("Processing file %s, error: %s", file, err.Error()))
 				}
 			}()
@@ -188,7 +186,7 @@ func (self *Cdrc) processFile(filePath string) error {
 	}
 	var recordsProcessor RecordsProcessor
 	switch self.dfltCdrcCfg.CdrFormat {
-	case CSV, FS_CSV, utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE, utils.PartialCSV:
+	case utils.MetaFileCSV, utils.MetaFScsv, utils.MetaKamFlatstore, utils.MetaOsipsFlatstore, utils.MetaPartialCSV:
 		csvReader := csv.NewReader(bufio.NewReader(file))
 		csvReader.Comma = self.dfltCdrcCfg.FieldSeparator
 		csvReader.Comment = '#'
@@ -199,7 +197,7 @@ func (self *Cdrc) processFile(filePath string) error {
 		recordsProcessor = NewFwvRecordsProcessor(file, self.dfltCdrcCfg, self.cdrcCfgs,
 			self.httpClient, self.httpSkipTlsCheck, self.timezone, self.filterS)
 	case utils.XML:
-		if recordsProcessor, err = NewXMLRecordsProcessor(file, self.dfltCdrcCfg.CDRPath,
+		if recordsProcessor, err = NewXMLRecordsProcessor(file, self.dfltCdrcCfg.CDRRootPath,
 			self.timezone, self.httpSkipTlsCheck, self.cdrcCfgs, self.filterS); err != nil {
 			return err
 		}
@@ -234,7 +232,7 @@ func (self *Cdrc) processFile(filePath string) error {
 		}
 	}
 	// Finished with file, move it to processed folder
-	newPath := path.Join(self.dfltCdrcCfg.CdrOutDir, fn)
+	newPath := path.Join(self.dfltCdrcCfg.CDROutPath, fn)
 	if err := os.Rename(filePath, newPath); err != nil {
 		utils.Logger.Err(err.Error())
 		return err

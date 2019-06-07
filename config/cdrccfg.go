@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -35,10 +34,10 @@ type CdrcCfg struct {
 	Timezone                 string              // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 	RunDelay                 time.Duration       // Delay between runs, 0 for inotify driven requests
 	MaxOpenFiles             int                 // Maximum number of files opened simultaneously
-	CdrInDir                 string              // Folder to process CDRs from
-	CdrOutDir                string              // Folder to move processed CDRs to
+	CDRInPath                string              // Folder to process CDRs from
+	CDROutPath               string              // Folder to move processed CDRs to
 	FailedCallsPrefix        string              // Used in case of flatstore CDRs to avoid searching for BYE records
-	CDRPath                  utils.HierarchyPath // used for XML CDRs to specify the path towards CDR elements
+	CDRRootPath              utils.HierarchyPath // used for XML CDRs to specify the path towards CDR elements
 	CdrSourceId              string              // Source identifier for the processed CDRs
 	Filters                  []string
 	Tenant                   RSRParsers
@@ -73,7 +72,7 @@ func (self *CdrcCfg) loadFromJsonCfg(jsnCfg *CdrcJsonCfg, separator string) erro
 		}
 	}
 	if jsnCfg.Cdr_format != nil {
-		self.CdrFormat = strings.TrimPrefix(*jsnCfg.Cdr_format, "*")
+		self.CdrFormat = *jsnCfg.Cdr_format
 	}
 	if jsnCfg.Field_separator != nil && len(*jsnCfg.Field_separator) > 0 {
 		sepStr := *jsnCfg.Field_separator
@@ -88,17 +87,17 @@ func (self *CdrcCfg) loadFromJsonCfg(jsnCfg *CdrcJsonCfg, separator string) erro
 	if jsnCfg.Max_open_files != nil {
 		self.MaxOpenFiles = *jsnCfg.Max_open_files
 	}
-	if jsnCfg.Cdr_in_dir != nil {
-		self.CdrInDir = *jsnCfg.Cdr_in_dir
+	if jsnCfg.Cdr_in_path != nil {
+		self.CDRInPath = *jsnCfg.Cdr_in_path
 	}
-	if jsnCfg.Cdr_out_dir != nil {
-		self.CdrOutDir = *jsnCfg.Cdr_out_dir
+	if jsnCfg.Cdr_out_path != nil {
+		self.CDROutPath = *jsnCfg.Cdr_out_path
 	}
 	if jsnCfg.Failed_calls_prefix != nil {
 		self.FailedCallsPrefix = *jsnCfg.Failed_calls_prefix
 	}
-	if jsnCfg.Cdr_path != nil {
-		self.CDRPath = utils.ParseHierarchyPath(*jsnCfg.Cdr_path, "")
+	if jsnCfg.Cdr_root_path != nil {
+		self.CDRRootPath = utils.ParseHierarchyPath(*jsnCfg.Cdr_root_path, "")
 	}
 	if jsnCfg.Cdr_source_id != nil {
 		self.CdrSourceId = *jsnCfg.Cdr_source_id
@@ -164,11 +163,11 @@ func (self *CdrcCfg) Clone() *CdrcCfg {
 	clnCdrc.Timezone = self.Timezone
 	clnCdrc.RunDelay = self.RunDelay
 	clnCdrc.MaxOpenFiles = self.MaxOpenFiles
-	clnCdrc.CdrInDir = self.CdrInDir
-	clnCdrc.CdrOutDir = self.CdrOutDir
-	clnCdrc.CDRPath = make(utils.HierarchyPath, len(self.CDRPath))
-	for i, path := range self.CDRPath {
-		clnCdrc.CDRPath[i] = path
+	clnCdrc.CDRInPath = self.CDRInPath
+	clnCdrc.CDROutPath = self.CDROutPath
+	clnCdrc.CDRRootPath = make(utils.HierarchyPath, len(self.CDRRootPath))
+	for i, path := range self.CDRRootPath {
+		clnCdrc.CDRRootPath[i] = path
 	}
 	clnCdrc.FailedCallsPrefix = self.FailedCallsPrefix
 	clnCdrc.Filters = make([]string, len(self.Filters))

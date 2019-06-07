@@ -242,16 +242,16 @@ const CGRATES_CFG_JSON = `
 		"cdrs_conns": [									// connections to CDRs. <*internal|x.y.z.y:1234>
 			{"address": "*internal"}
 		],
-		"cdr_format": "*csv",							// CDR file format <*csv|*freeswitch_csv|*fwv|*opensips_flatstore|*partial_csv>
+		"cdr_format": "*file_csv",						// CDR file format <*file_csv|*freeswitch_csv|*fwv|*opensips_flatstore|*partial_csv>
 		"field_separator": ",",							// separator used in case of csv files
 		"timezone": "",									// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 		"run_delay": 0,									// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
 		"max_open_files": 1024,							// maximum simultaneous files to process, 0 for unlimited
-		"cdr_in_dir": "/var/spool/cgrates/cdrc/in",		// absolute path towards the directory where the CDRs are stored
-		"cdr_out_dir": "/var/spool/cgrates/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
+		"cdr_in_path": "/var/spool/cgrates/cdrc/in",	// absolute path towards the directory where the CDRs are stored
+		"cdr_out_path": "/var/spool/cgrates/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
 		"failed_calls_prefix": "missed_calls",			// used in case of flatstore CDRs to avoid searching for BYE records
-		"cdr_path": "",									// path towards one CDR element in case of XML CDRs
-		"cdr_source_id": "freeswitch_csv",				// free form field, tag identifying the source of the CDRs within CDRS database
+		"cdr_root_path": "",							// path towards one CDR element in case of XML CDRs
+		"cdr_source_id": "cdrc_csv",					// free form field, tag identifying the source of the CDRs within CDRS database
 		"filters" :[],									// limit parsing based on the filters
 		"tenant": "",									// tenant used by import
 		"continue_on_success": false,					// continue to the next template if executed
