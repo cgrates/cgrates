@@ -271,6 +271,7 @@ type sTerminator struct {
 }
 
 // setSTerminator installs a new terminator for a session
+// assumes the Session is locked in this stage
 func (sS *SessionS) setSTerminator(s *Session) {
 	ttl, err := s.EventStart.GetDuration(utils.SessionTTL)
 	switch err {
@@ -372,7 +373,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 			}
 		}
 	}
-	//we apply the correction before
+	// we apply the correction before
 	if err = sS.endSession(s, nil, nil, nil); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf(
@@ -1165,7 +1166,9 @@ func (sS *SessionS) getSessionsFromCGRIDs(pSessions bool, cgrIDs ...string) (ss 
 func (sS *SessionS) transitSState(cgrID string, psv bool) (ss []*Session) {
 	ss = sS.getSessions(cgrID, !psv)
 	for _, s := range ss {
+		s.RLock() // protect the sTerminator
 		sS.unregisterSession(cgrID, !psv)
+		s.RUnlock()
 		sS.registerSession(s, psv)
 		// ToDo: activate prepaid debits
 	}
@@ -1190,8 +1193,8 @@ func (sS *SessionS) relocateSessions(initOriginID, originID, originHost string) 
 	newCGRID := utils.Sha1(originID, originHost)
 	ss = sS.getActivateSessions(initCGRID)
 	for _, s := range ss {
-		sS.unregisterSession(s.CGRID, false)
 		s.Lock()
+		sS.unregisterSession(s.CGRID, false)
 		s.CGRID = newCGRID
 		// Overwrite initial CGRID with new one
 		s.EventStart.Set(utils.CGRID, newCGRID)    // Overwrite CGRID for final CDR
@@ -1614,17 +1617,21 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(clnt rpcclient.RpcClientConnection,
 		return utils.NewErrMandatoryIeMissing(utils.CGRID)
 	}
 	if s.EventStart == nil { // remove instead of
-		if removed := sS.unregisterSession(s.CGRID, true); !removed {
+		s.RLock()
+		removed := sS.unregisterSession(s.CGRID, true)
+		s.RUnlock()
+		if !removed {
 			err = utils.ErrServerError
 			return
 		}
 	} else {
 		//if we have an active session with the same CGRID
 		//we unregister it first then regiser the new one
+		s.Lock()
 		if len(sS.getSessions(s.CGRID, false)) != 0 {
 			sS.unregisterSession(s.CGRID, false)
 		}
-		s.Lock()
+
 		sS.initSessionDebitLoops(s)
 		s.Unlock()
 		sS.registerSession(s, true)
