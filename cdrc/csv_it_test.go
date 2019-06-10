@@ -166,7 +166,8 @@ func TestCsvITAnalyseCDRs(t *testing.T) {
 	} else if len(reply) != 5 { // 1 injected, 1 rated, 1 *raw and it's pair in *default run
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
-	if err := cdrcRpc.Call(utils.ApierV2GetCDRs, utils.RPCCDRsFilter{DestinationPrefixes: []string{"08651"}}, &reply); err == nil || err.Error() != utils.NotFoundCaps {
+	if err := cdrcRpc.Call(utils.ApierV2GetCDRs, utils.RPCCDRsFilter{DestinationPrefixes: []string{"08651"}},
+		&reply); err == nil || err.Error() != utils.NotFoundCaps {
 		t.Error("Unexpected error: ", err) // Original 08651 was converted
 	}
 }

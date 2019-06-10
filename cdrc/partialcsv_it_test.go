@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cdrc
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -96,9 +97,11 @@ func TestPartcsvITCreateCdrDirs(t *testing.T) {
 }
 
 func TestPartcsvITStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(partpartcsvCfgPath, *waitRater); err != nil {
-		t.Fatal(err)
-	}
+	// if _, err := engine.StopStartEngine(partpartcsvCfgPath, *waitRater); err != nil {
+	// 	t.Fatal(err)
+	// }
+	fmt.Println("START THE ENGINE MANUAL ")
+	time.Sleep(10 * time.Second)
 }
 
 // Connect rpc client to rater
@@ -151,7 +154,7 @@ func TestPartcsvITProcessedFiles(t *testing.T) {
 	if outContent1, err := ioutil.ReadFile(path.Join(partcsvCDRCDirOut1, "file1.csv")); err != nil {
 		t.Error(err)
 	} else if partCsvFileContent1 != string(outContent1) {
-		t.Errorf("Expecting: %q, received: %q", partCsvFileContent1, string(outContent1))
+		t.Errorf("Expecting: %q, \n received: %q", partCsvFileContent1, string(outContent1))
 	}
 	if outContent2, err := ioutil.ReadFile(path.Join(partcsvCDRCDirOut1, "file2.csv")); err != nil {
 		t.Error(err)
@@ -172,7 +175,7 @@ func TestPartcsvITProcessedFiles(t *testing.T) {
 	if contentCacheDump, err := ioutil.ReadFile(path.Join(partcsvCDRCDirOut1, fileName)); err != nil {
 		t.Error(err)
 	} else if len(eCacheDumpFile1) != len(string(contentCacheDump)) {
-		t.Errorf("Expecting: %q, received: %q", eCacheDumpFile1, string(contentCacheDump))
+		t.Errorf("Expecting: %q, \n received: %q", eCacheDumpFile1, string(contentCacheDump))
 	}
 	if outContent3, err := ioutil.ReadFile(path.Join(partcsvCDRCDirOut2, "file3.csv")); err != nil {
 		t.Error(err)

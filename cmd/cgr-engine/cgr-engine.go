@@ -144,8 +144,7 @@ func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConne
 		}
 	}
 	cdrc, err := cdrc.NewCdrc(cdrcCfgs, httpSkipTlsCheck, cdrsConn, closeChan,
-		cfg.GeneralCfg().DefaultTimezone, cfg.GeneralCfg().RoundingDecimals,
-		filterS)
+		cfg.GeneralCfg().DefaultTimezone, filterS)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("Cdrc config parsing error: %s", err.Error()))
 		exitChan <- true

@@ -51,7 +51,7 @@
     "cdr_format": "*file_xml",                                                    // CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore|partial_csv.
     "cdr_in_path": "/tmp/cdrcxmlwithfilters2/xmlit2/in",
     "cdr_out_path": "/tmp/cdrcxmlwithfilters2/xmlit2/out",
-    "cdr_path": "File.CDRs.Call",                                                                // path towards one CDR element in case of XML CDRs
+    "cdr_root_path": "File.CDRs.Call",                                                                // path towards one CDR element in case of XML CDRs
     "cdr_source_id": "zw_cfs1",                              // free form field, tag identifying the source of the CDRs within CDRS database          
     "content_fields":[                                                    // import content_fields template, id will match internally CDR field, in case of .csv value will be represented by index of the field value
       {"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
