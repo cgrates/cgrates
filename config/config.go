@@ -437,13 +437,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 					}
 				}
 			}
-			if utils.IsSliceMember(utils.MainCDRFields, cdrcInst.CdrFormat) {
-				for _, dir := range []string{cdrcInst.CDRInPath, cdrcInst.CDROutPath} {
-					if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
-						return fmt.Errorf("<CDRC> nonexistent folder: %s", dir)
-					}
-				}
-			}
 		}
 	}
 	// Loaders sanity checks

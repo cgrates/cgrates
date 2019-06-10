@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"path"
 	"time"
@@ -51,7 +50,7 @@ One instance  of CDRC will act on one folder.
 Common parameters within configs processed:
  * cdrS, cdrFormat, CDRInPath, CDROutPath, runDelay
 Parameters specific per config instance:
- * duMultiplyFactor, cdrSourceId, cdrFilter, cdrFields
+ * cdrSourceId, cdrFilter, cdrFields
 */
 func NewCdrc(cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool, cdrs rpcclient.RpcClientConnection,
 	closeChan chan struct{}, dfltTimezone string, roundDecimals int, filterS *engine.FilterS) (cdrc *Cdrc, err error) {
@@ -64,6 +63,15 @@ func NewCdrc(cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool, cdrs rpcclient.R
 		cdrs:             cdrs,
 		closeChan:        closeChan,
 		maxOpenFiles:     make(chan struct{}, cdrcCfg.MaxOpenFiles),
+		roundDecimals:    roundDecimals,
+	}
+	// Before processing, make sure in and out folders exist
+	if utils.IsSliceMember(utils.MainCDRFields, cdrcCfg.CdrFormat) {
+		for _, dir := range []string{cdrcCfg.CDRInPath, cdrcCfg.CDROutPath} {
+			if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
+				return nil, fmt.Errorf("<CDRC> nonexistent folder: %s", dir)
+			}
+		}
 	}
 	if utils.IsSliceMember(utils.MainCDRFields, cdrcCfg.CdrFormat) {
 		var processFile struct{}
@@ -71,31 +79,20 @@ func NewCdrc(cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool, cdrs rpcclient.R
 			cdrc.maxOpenFiles <- processFile // Empty initiate so we do not need to wait later when we pop
 		}
 	}
-	// unpairedRecordsCache is used with flatStore CDRs
-	cdrc.unpairedRecordsCache = NewUnpairedRecordsCache(cdrcCfg.PartialRecordCache,
-		cdrcCfg.CDROutPath, cdrcCfg.FieldSeparator)
-	cdrc.partialRecordsCache = NewPartialRecordsCache(cdrcCfg.PartialRecordCache,
-		cdrcCfg.PartialCacheExpiryAction, cdrcCfg.CDROutPath, cdrcCfg.FieldSeparator, roundDecimals,
-		cdrc.timezone, cdrc.httpSkipTlsCheck, cdrc.cdrs, filterS)
-	// Before processing, make sure in and out folders exist
-
 	cdrc.filterS = filterS
-	cdrc.httpClient = new(http.Client)
-	return cdrc, nil
+	return
 }
 
 type Cdrc struct {
-	httpSkipTlsCheck     bool
-	cdrcCfgs             []*config.CdrcCfg // All cdrc config profiles attached to this CDRC (key will be profile instance name)
-	dfltCdrcCfg          *config.CdrcCfg
-	timezone             string
-	cdrs                 rpcclient.RpcClientConnection
-	httpClient           *http.Client
-	closeChan            chan struct{}         // Used to signal config reloads when we need to span different CDRC-Client
-	maxOpenFiles         chan struct{}         // Maximum number of simultaneous files processed
-	unpairedRecordsCache *UnpairedRecordsCache // Shared between all files in the folder we process
-	partialRecordsCache  *PartialRecordsCache
-	filterS              *engine.FilterS
+	httpSkipTlsCheck bool
+	cdrcCfgs         []*config.CdrcCfg // All cdrc config profiles attached to this CDRC (key will be profile instance name)
+	dfltCdrcCfg      *config.CdrcCfg
+	timezone         string
+	cdrs             rpcclient.RpcClientConnection
+	closeChan        chan struct{} // Used to signal config reloads when we need to span different CDRC-Client
+	maxOpenFiles     chan struct{} // Maximum number of simultaneous files processed
+	filterS          *engine.FilterS
+	roundDecimals    int
 }
 
 // When called fires up folder monitoring, either automated via inotify or manual by sleeping between processing
@@ -184,11 +181,11 @@ func (self *Cdrc) processFile(filePath string) error {
 		csvReader.Comma = self.dfltCdrcCfg.FieldSeparator
 		csvReader.Comment = '#'
 		recordsProcessor = NewCsvRecordsProcessor(csvReader, self.timezone, fn, self.dfltCdrcCfg,
-			self.cdrcCfgs, self.httpSkipTlsCheck, self.unpairedRecordsCache, self.partialRecordsCache,
-			self.dfltCdrcCfg.CacheDumpFields, self.filterS)
+			self.cdrcCfgs, self.httpSkipTlsCheck,
+			self.dfltCdrcCfg.CacheDumpFields, self.filterS, self.cdrs, self.roundDecimals)
 	case utils.MetaFileFWV:
 		recordsProcessor = NewFwvRecordsProcessor(file, self.dfltCdrcCfg, self.cdrcCfgs,
-			self.httpClient, self.httpSkipTlsCheck, self.timezone, self.filterS)
+			self.httpSkipTlsCheck, self.timezone, self.filterS)
 	case utils.MetaFileXML:
 		if recordsProcessor, err = NewXMLRecordsProcessor(file, self.dfltCdrcCfg.CDRRootPath,
 			self.timezone, self.httpSkipTlsCheck, self.cdrcCfgs, self.filterS); err != nil {

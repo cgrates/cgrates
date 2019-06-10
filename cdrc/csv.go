@@ -29,15 +29,24 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func NewCsvRecordsProcessor(csvReader *csv.Reader, timezone, fileName string,
 	dfltCdrcCfg *config.CdrcCfg, cdrcCfgs []*config.CdrcCfg,
-	httpSkipTlsCheck bool, unpairedRecordsCache *UnpairedRecordsCache, partialRecordsCache *PartialRecordsCache,
-	cacheDumpFields []*config.FCTemplate, filterS *engine.FilterS) *CsvRecordsProcessor {
-	return &CsvRecordsProcessor{csvReader: csvReader, timezone: timezone, fileName: fileName,
-		dfltCdrcCfg: dfltCdrcCfg, cdrcCfgs: cdrcCfgs, httpSkipTlsCheck: httpSkipTlsCheck, unpairedRecordsCache: unpairedRecordsCache,
-		partialRecordsCache: partialRecordsCache, partialCacheDumpFields: cacheDumpFields, filterS: filterS}
+	httpSkipTlsCheck bool, cacheDumpFields []*config.FCTemplate,
+	filterS *engine.FilterS, cdrs rpcclient.RpcClientConnection, roundDecimals int) *CsvRecordsProcessor {
+	return &CsvRecordsProcessor{csvReader: csvReader,
+		timezone: timezone, fileName: fileName,
+		dfltCdrcCfg: dfltCdrcCfg, cdrcCfgs: cdrcCfgs,
+		httpSkipTlsCheck: httpSkipTlsCheck,
+		unpairedRecordsCache: NewUnpairedRecordsCache(dfltCdrcCfg.PartialRecordCache,
+			dfltCdrcCfg.CDROutPath, dfltCdrcCfg.FieldSeparator),
+		partialRecordsCache: NewPartialRecordsCache(dfltCdrcCfg.PartialRecordCache,
+			dfltCdrcCfg.PartialCacheExpiryAction, dfltCdrcCfg.CDROutPath,
+			dfltCdrcCfg.FieldSeparator, roundDecimals,
+			timezone, httpSkipTlsCheck, cdrs, filterS),
+		partialCacheDumpFields: cacheDumpFields, filterS: filterS}
 
 }
 

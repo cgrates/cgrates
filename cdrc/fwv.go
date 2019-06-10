@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -35,7 +34,7 @@ import (
 )
 
 func NewFwvRecordsProcessor(file *os.File, dfltCfg *config.CdrcCfg,
-	cdrcCfgs []*config.CdrcCfg, httpClient *http.Client,
+	cdrcCfgs []*config.CdrcCfg,
 	httpSkipTlsCheck bool, timezone string, filterS *engine.FilterS) *FwvRecordsProcessor {
 	return &FwvRecordsProcessor{file: file, cdrcCfgs: cdrcCfgs, dfltCfg: dfltCfg,
 		httpSkipTlsCheck: httpSkipTlsCheck, timezone: timezone, filterS: filterS}
@@ -45,7 +44,6 @@ type FwvRecordsProcessor struct {
 	file               *os.File
 	dfltCfg            *config.CdrcCfg // General parameters
 	cdrcCfgs           []*config.CdrcCfg
-	httpClient         *http.Client
 	httpSkipTlsCheck   bool
 	timezone           string
 	lineLen            int64       // Length of the line in the file
