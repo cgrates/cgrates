@@ -53,7 +53,7 @@ Parameters specific per config instance:
  * cdrSourceId, cdrFilter, cdrFields
 */
 func NewCdrc(cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool, cdrs rpcclient.RpcClientConnection,
-	closeChan chan struct{}, dfltTimezone string, roundDecimals int, filterS *engine.FilterS) (cdrc *Cdrc, err error) {
+	closeChan chan struct{}, dfltTimezone string, filterS *engine.FilterS) (cdrc *Cdrc, err error) {
 	cdrcCfg := cdrcCfgs[0]
 	cdrc = &Cdrc{
 		httpSkipTlsCheck: httpSkipTlsCheck,
@@ -63,17 +63,16 @@ func NewCdrc(cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool, cdrs rpcclient.R
 		cdrs:             cdrs,
 		closeChan:        closeChan,
 		maxOpenFiles:     make(chan struct{}, cdrcCfg.MaxOpenFiles),
-		roundDecimals:    roundDecimals,
 	}
 	// Before processing, make sure in and out folders exist
-	if utils.IsSliceMember(utils.MainCDRFields, cdrcCfg.CdrFormat) {
+	if utils.IsSliceMember(utils.CDRCFileFormats, cdrcCfg.CdrFormat) {
 		for _, dir := range []string{cdrcCfg.CDRInPath, cdrcCfg.CDROutPath} {
 			if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
 				return nil, fmt.Errorf("<CDRC> nonexistent folder: %s", dir)
 			}
 		}
 	}
-	if utils.IsSliceMember(utils.MainCDRFields, cdrcCfg.CdrFormat) {
+	if utils.IsSliceMember(utils.CDRCFileFormats, cdrcCfg.CdrFormat) {
 		var processFile struct{}
 		for i := 0; i < cdrcCfg.MaxOpenFiles; i++ {
 			cdrc.maxOpenFiles <- processFile // Empty initiate so we do not need to wait later when we pop
@@ -92,7 +91,6 @@ type Cdrc struct {
 	closeChan        chan struct{} // Used to signal config reloads when we need to span different CDRC-Client
 	maxOpenFiles     chan struct{} // Maximum number of simultaneous files processed
 	filterS          *engine.FilterS
-	roundDecimals    int
 }
 
 // When called fires up folder monitoring, either automated via inotify or manual by sleeping between processing
@@ -182,7 +180,7 @@ func (self *Cdrc) processFile(filePath string) error {
 		csvReader.Comment = '#'
 		recordsProcessor = NewCsvRecordsProcessor(csvReader, self.timezone, fn, self.dfltCdrcCfg,
 			self.cdrcCfgs, self.httpSkipTlsCheck,
-			self.dfltCdrcCfg.CacheDumpFields, self.filterS, self.cdrs, self.roundDecimals)
+			self.dfltCdrcCfg.CacheDumpFields, self.filterS, self.cdrs)
 	case utils.MetaFileFWV:
 		recordsProcessor = NewFwvRecordsProcessor(file, self.dfltCdrcCfg, self.cdrcCfgs,
 			self.httpSkipTlsCheck, self.timezone, self.filterS)
