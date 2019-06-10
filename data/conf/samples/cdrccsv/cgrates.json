@@ -32,16 +32,16 @@
  	{
  		"id": "*default",
  		"enabled": true,					
- 		"cdr_in_dir": "/tmp/cdrctests/csvit1/in",
- 		"cdr_out_dir": "/tmp/cdrctests/csvit1/out",
+ 		"cdr_in_path": "/tmp/cdrctests/csvit1/in",
+ 		"cdr_out_path": "/tmp/cdrctests/csvit1/out",
  		"cdr_source_id": "csvit1",
  	},
  	{
  		"id": "*CSVit2",								// identifier of the CDRC runner
  		"enabled": true,							// enable CDR client functionality		
  		"field_separator": ";",					
- 		"cdr_in_dir": "/tmp/cdrctests/csvit2/in",	// absolute path towards the directory where the CDRs are stored
- 		"cdr_out_dir": "/tmp/cdrctests/csvit2/out",	// absolute path towards the directory where processed CDRs will be moved
+ 		"cdr_in_path": "/tmp/cdrctests/csvit2/in",	// absolute path towards the directory where the CDRs are stored
+ 		"cdr_out_path": "/tmp/cdrctests/csvit2/out",	// absolute path towards the directory where processed CDRs will be moved
  		"cdr_source_id": "csvit2",			// free form field, tag identifying the source of the CDRs within CDRS database
 		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
@@ -65,8 +65,8 @@
  		"id": "*CSVWithFilter1",								// identifier of the CDRC runner
  		"enabled": true,							// enable CDR client functionality		
  		"field_separator": ";",					
- 		"cdr_in_dir": "/tmp/csvwithfilter1/csvit1/in",	// absolute path towards the directory where the CDRs are stored
- 		"cdr_out_dir": "/tmp/csvwithfilter1/csvit1/out",	// absolute path towards the directory where processed CDRs will be moved
+ 		"cdr_in_path": "/tmp/csvwithfilter1/csvit1/in",	// absolute path towards the directory where the CDRs are stored
+ 		"cdr_out_path": "/tmp/csvwithfilter1/csvit1/out",	// absolute path towards the directory where processed CDRs will be moved
  		"cdr_source_id": "csvit1",			// free form field, tag identifying the source of the CDRs within CDRS database
  		"filters":["*string:~3:1002"],		//filter Account to be 1002
 		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
@@ -91,8 +91,8 @@
  		"id": "*CSVWithFilter2",								// identifier of the CDRC runner
  		"enabled": true,							// enable CDR client functionality		
  		"field_separator": ";",					
- 		"cdr_in_dir": "/tmp/csvwithfilter2/csvit2/in",	// absolute path towards the directory where the CDRs are stored
- 		"cdr_out_dir": "/tmp/csvwithfilter2/csvit2/out",	// absolute path towards the directory where processed CDRs will be moved
+ 		"cdr_in_path": "/tmp/csvwithfilter2/csvit2/in",	// absolute path towards the directory where the CDRs are stored
+ 		"cdr_out_path": "/tmp/csvwithfilter2/csvit2/out",	// absolute path towards the directory where processed CDRs will be moved
  		"cdr_source_id": "csvit2",			// free form field, tag identifying the source of the CDRs within CDRS database
  		"filters":["*string:~3:1002","*string:~1:*prepaid","*gte:~6:70"],		//filter Account to be 1002 and RequestType *prepaid
 		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
@@ -117,8 +117,8 @@
  		"id": "*CSVit4",								// identifier of the CDRC runner
  		"enabled": true,							// enable CDR client functionality		
  		"field_separator": ";",					
- 		"cdr_in_dir": "/tmp/csvwithfilter3/csvit3/in",	// absolute path towards the directory where the CDRs are stored
- 		"cdr_out_dir": "/tmp/csvwithfilter3/csvit3/out",	// absolute path towards the directory where processed CDRs will be moved
+ 		"cdr_in_path": "/tmp/csvwithfilter3/csvit3/in",	// absolute path towards the directory where the CDRs are stored
+ 		"cdr_out_path": "/tmp/csvwithfilter3/csvit3/out",	// absolute path towards the directory where processed CDRs will be moved
  		"cdr_source_id": "csvit4",			// free form field, tag identifying the source of the CDRs within CDRS database
  		"filters":["*string:~1:*postpaid"],		//filter Account to be 1002
 		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
@@ -144,8 +144,8 @@
  		"id": "DifferentTenant",								// identifier of the CDRC runner
  		"enabled": true,							// enable CDR client functionality		
  		"field_separator": ";",					
- 		"cdr_in_dir": "/tmp/csvwithfilter4/csvit4/in",	// absolute path towards the directory where the CDRs are stored
- 		"cdr_out_dir": "/tmp/csvwithfilter4/csvit4/out",	// absolute path towards the directory where processed CDRs will be moved
+ 		"cdr_in_path": "/tmp/csvwithfilter4/csvit4/in",	// absolute path towards the directory where the CDRs are stored
+ 		"cdr_out_path": "/tmp/csvwithfilter4/csvit4/out",	// absolute path towards the directory where processed CDRs will be moved
  		"tenant": "~2",						// tenant used in filterS.Pass
  		"filters":["FLTR_CDRC_ACC"],		// if tenant is itsyscom.com will check if Account is 1001 and if tenant is cgrates.org will check if Account is 1002
  		"cdr_source_id": "diffTenant",			// free form field, tag identifying the source of the CDRs within CDRS database

@@ -29,9 +29,9 @@
  	{
 		"id": "part1",
 		"enabled": true,
-		"cdr_format": "partial_csv",
-		"cdr_in_dir": "/tmp/cdrctests/partcsv1/in",	// absolute path towards the directory where the CDRs are stored
-		"cdr_out_dir": "/tmp/cdrctests/partcsv1/out",	// absolute path towards the directory where processed CDRs will be moved
+		"cdr_format": "*partial_csv",
+		"cdr_in_path": "/tmp/cdrctests/partcsv1/in",	// absolute path towards the directory where the CDRs are stored
+		"cdr_out_path": "/tmp/cdrctests/partcsv1/out",	// absolute path towards the directory where processed CDRs will be moved
 		"cdr_source_id": "partial_csv_test",			// free form field, tag identifying the source of the CDRs within CDRS database
 		"partial_record_cache": "1s",				// duration to cache partial records when not pairing
 		"partial_cache_expiry_action": "*dump_to_file",
@@ -70,8 +70,8 @@
 		"id": "post_on_expiry",
 		"enabled": true,
 		"cdr_format": "partial_csv",
-		"cdr_in_dir": "/tmp/cdrctests/partcsv2/in",	// absolute path towards the directory where the CDRs are stored
-		"cdr_out_dir": "/tmp/cdrctests/partcsv2/out",	// absolute path towards the directory where processed CDRs will be moved
+		"cdr_in_path": "/tmp/cdrctests/partcsv2/in",	// absolute path towards the directory where the CDRs are stored
+		"cdr_out_path": "/tmp/cdrctests/partcsv2/out",	// absolute path towards the directory where processed CDRs will be moved
 		"cdr_source_id": "partial_csv_test2",			// free form field, tag identifying the source of the CDRs within CDRS database
 		"partial_record_cache": "1s",				// duration to cache partial records when not pairing
 		"partial_cache_expiry_action": "*post_cdr",

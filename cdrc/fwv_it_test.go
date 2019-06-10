@@ -96,7 +96,10 @@ func TestFwvitCreateCdrFiles(t *testing.T) {
 	}
 	for _, cdrcProfiles := range fwvCfg.CdrcProfiles {
 		for _, cdrcInst := range cdrcProfiles {
-			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
+			if !cdrcInst.Enabled {
+				continue
+			}
+			for _, dir := range []string{cdrcInst.CDRInPath, cdrcInst.CDROutPath} {
 				if err := os.RemoveAll(dir); err != nil {
 					t.Fatal("Error removing folder: ", dir, err)
 				}
@@ -142,15 +145,15 @@ func TestFwvitProcessFiles(t *testing.T) {
 	if err := ioutil.WriteFile(path.Join("/tmp", fileName), []byte(FW_CDR_FILE1), 0755); err != nil {
 		t.Fatal(err.Error())
 	}
-	if err := os.Rename(path.Join("/tmp", fileName), path.Join(fwvCdrcCfg.CdrInDir, fileName)); err != nil {
+	if err := os.Rename(path.Join("/tmp", fileName), path.Join(fwvCdrcCfg.CDRInPath, fileName)); err != nil {
 		t.Fatal(err)
 	}
 	time.Sleep(time.Duration(1) * time.Second)
-	filesInDir, _ := ioutil.ReadDir(fwvCdrcCfg.CdrInDir)
+	filesInDir, _ := ioutil.ReadDir(fwvCdrcCfg.CDRInPath)
 	if len(filesInDir) != 0 {
 		t.Errorf("Files in cdrcInDir: %d", len(filesInDir))
 	}
-	filesOutDir, _ := ioutil.ReadDir(fwvCdrcCfg.CdrOutDir)
+	filesOutDir, _ := ioutil.ReadDir(fwvCdrcCfg.CDROutPath)
 	if len(filesOutDir) != 1 {
 		t.Errorf("In CdrcOutDir, expecting 1 files, got: %d", len(filesOutDir))
 	}
@@ -195,17 +198,17 @@ func TestFwvit2CreateCdrFiles(t *testing.T) {
 			fwvCdrcCfg = cdrcCfg
 		}
 	}
-	if err := os.RemoveAll(fwvCdrcCfg.CdrInDir); err != nil {
-		t.Fatal("Error removing folder: ", fwvCdrcCfg.CdrInDir, err)
+	if err := os.RemoveAll(fwvCdrcCfg.CDRInPath); err != nil {
+		t.Fatal("Error removing folder: ", fwvCdrcCfg.CDRInPath, err)
 	}
-	if err := os.MkdirAll(fwvCdrcCfg.CdrInDir, 0755); err != nil {
-		t.Fatal("Error creating folder: ", fwvCdrcCfg.CdrInDir, err)
+	if err := os.MkdirAll(fwvCdrcCfg.CDRInPath, 0755); err != nil {
+		t.Fatal("Error creating folder: ", fwvCdrcCfg.CDRInPath, err)
 	}
-	if err := os.RemoveAll(fwvCdrcCfg.CdrOutDir); err != nil {
-		t.Fatal("Error removing folder: ", fwvCdrcCfg.CdrOutDir, err)
+	if err := os.RemoveAll(fwvCdrcCfg.CDROutPath); err != nil {
+		t.Fatal("Error removing folder: ", fwvCdrcCfg.CDROutPath, err)
 	}
-	if err := os.MkdirAll(fwvCdrcCfg.CdrOutDir, 0755); err != nil {
-		t.Fatal("Error creating folder: ", fwvCdrcCfg.CdrOutDir, err)
+	if err := os.MkdirAll(fwvCdrcCfg.CDROutPath, 0755); err != nil {
+		t.Fatal("Error creating folder: ", fwvCdrcCfg.CDROutPath, err)
 	}
 }
 
@@ -236,15 +239,15 @@ func TestFwvit2ProcessFiles(t *testing.T) {
 	if err := ioutil.WriteFile(path.Join("/tmp", fileName), []byte(FW_CDR_FILE1), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
-	if err := os.Rename(path.Join("/tmp", fileName), path.Join(fwvCdrcCfg.CdrInDir, fileName)); err != nil {
+	if err := os.Rename(path.Join("/tmp", fileName), path.Join(fwvCdrcCfg.CDRInPath, fileName)); err != nil {
 		t.Fatal(err)
 	}
 	time.Sleep(time.Duration(1) * time.Second)
-	filesInDir, _ := ioutil.ReadDir(fwvCdrcCfg.CdrInDir)
+	filesInDir, _ := ioutil.ReadDir(fwvCdrcCfg.CDRInPath)
 	if len(filesInDir) != 0 {
 		t.Errorf("Files in cdrcInDir: %d", len(filesInDir))
 	}
-	filesOutDir, _ := ioutil.ReadDir(fwvCdrcCfg.CdrOutDir)
+	filesOutDir, _ := ioutil.ReadDir(fwvCdrcCfg.CDROutPath)
 	if len(filesOutDir) != 1 {
 		t.Errorf("In CdrcOutDir, expecting 1 files, got: %d", len(filesOutDir))
 	}
@@ -291,17 +294,17 @@ func TestFwvit3CreateCdrFiles(t *testing.T) {
 			fwvCdrcCfg = cdrcCfg
 		}
 	}
-	if err := os.RemoveAll(fwvCdrcCfg.CdrInDir); err != nil {
-		t.Fatal("Error removing folder: ", fwvCdrcCfg.CdrInDir, err)
+	if err := os.RemoveAll(fwvCdrcCfg.CDRInPath); err != nil {
+		t.Fatal("Error removing folder: ", fwvCdrcCfg.CDRInPath, err)
 	}
-	if err := os.MkdirAll(fwvCdrcCfg.CdrInDir, 0755); err != nil {
-		t.Fatal("Error creating folder: ", fwvCdrcCfg.CdrInDir, err)
+	if err := os.MkdirAll(fwvCdrcCfg.CDRInPath, 0755); err != nil {
+		t.Fatal("Error creating folder: ", fwvCdrcCfg.CDRInPath, err)
 	}
-	if err := os.RemoveAll(fwvCdrcCfg.CdrOutDir); err != nil {
-		t.Fatal("Error removing folder: ", fwvCdrcCfg.CdrOutDir, err)
+	if err := os.RemoveAll(fwvCdrcCfg.CDROutPath); err != nil {
+		t.Fatal("Error removing folder: ", fwvCdrcCfg.CDROutPath, err)
 	}
-	if err := os.MkdirAll(fwvCdrcCfg.CdrOutDir, 0755); err != nil {
-		t.Fatal("Error creating folder: ", fwvCdrcCfg.CdrOutDir, err)
+	if err := os.MkdirAll(fwvCdrcCfg.CDROutPath, 0755); err != nil {
+		t.Fatal("Error creating folder: ", fwvCdrcCfg.CDROutPath, err)
 	}
 }
 
@@ -345,15 +348,15 @@ func TestFwvit3ProcessFiles(t *testing.T) {
 	if err := ioutil.WriteFile(path.Join("/tmp", fileName), []byte(FW_CDR_FILE1), 0644); err != nil {
 		t.Fatal(err.Error())
 	}
-	if err := os.Rename(path.Join("/tmp", fileName), path.Join(fwvCdrcCfg.CdrInDir, fileName)); err != nil {
+	if err := os.Rename(path.Join("/tmp", fileName), path.Join(fwvCdrcCfg.CDRInPath, fileName)); err != nil {
 		t.Fatal(err)
 	}
 	time.Sleep(time.Duration(1) * time.Second)
-	filesInDir, _ := ioutil.ReadDir(fwvCdrcCfg.CdrInDir)
+	filesInDir, _ := ioutil.ReadDir(fwvCdrcCfg.CDRInPath)
 	if len(filesInDir) != 0 {
 		t.Errorf("Files in cdrcInDir: %d", len(filesInDir))
 	}
-	filesOutDir, _ := ioutil.ReadDir(fwvCdrcCfg.CdrOutDir)
+	filesOutDir, _ := ioutil.ReadDir(fwvCdrcCfg.CDROutPath)
 	if len(filesOutDir) != 1 {
 		t.Errorf("In CdrcOutDir, expecting 1 files, got: %d", len(filesOutDir))
 	}

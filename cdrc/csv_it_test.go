@@ -90,7 +90,10 @@ func TestCsvITResetDataDb(t *testing.T) {
 func TestCsvITCreateCdrDirs(t *testing.T) {
 	for _, cdrcProfiles := range csvCfg.CdrcProfiles {
 		for _, cdrcInst := range cdrcProfiles {
-			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
+			if !cdrcInst.Enabled {
+				continue
+			}
+			for _, dir := range []string{cdrcInst.CDRInPath, cdrcInst.CDROutPath} {
 				if err := os.RemoveAll(dir); err != nil {
 					t.Fatal("Error removing folder: ", dir, err)
 				}
@@ -197,7 +200,7 @@ func TestCsvIT2InitCdrDb(t *testing.T) {
 func TestCsvIT2CreateCdrDirs(t *testing.T) {
 	for _, cdrcProfiles := range csvCfg.CdrcProfiles {
 		for _, cdrcInst := range cdrcProfiles {
-			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
+			for _, dir := range []string{cdrcInst.CDRInPath, cdrcInst.CDROutPath} {
 				if err := os.RemoveAll(dir); err != nil {
 					t.Fatal("Error removing folder: ", dir, err)
 				}
@@ -289,7 +292,7 @@ func TestCsvIT3InitCdrDb(t *testing.T) {
 func TestCsvIT3CreateCdrDirs(t *testing.T) {
 	for _, cdrcProfiles := range csvCfg.CdrcProfiles {
 		for _, cdrcInst := range cdrcProfiles {
-			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
+			for _, dir := range []string{cdrcInst.CDRInPath, cdrcInst.CDROutPath} {
 				if err := os.RemoveAll(dir); err != nil {
 					t.Fatal("Error removing folder: ", dir, err)
 				}
@@ -376,7 +379,7 @@ func TestCsvIT4InitCdrDb(t *testing.T) {
 func TestCsvIT4CreateCdrDirs(t *testing.T) {
 	for _, cdrcProfiles := range csvCfg.CdrcProfiles {
 		for _, cdrcInst := range cdrcProfiles {
-			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
+			for _, dir := range []string{cdrcInst.CDRInPath, cdrcInst.CDROutPath} {
 				if err := os.RemoveAll(dir); err != nil {
 					t.Fatal("Error removing folder: ", dir, err)
 				}
@@ -463,7 +466,7 @@ func TestCsvIT5InitCdrDb(t *testing.T) {
 func TestCsvIT5CreateCdrDirs(t *testing.T) {
 	for _, cdrcProfiles := range csvCfg.CdrcProfiles {
 		for _, cdrcInst := range cdrcProfiles {
-			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
+			for _, dir := range []string{cdrcInst.CDRInPath, cdrcInst.CDROutPath} {
 				if err := os.RemoveAll(dir); err != nil {
 					t.Fatal("Error removing folder: ", dir, err)
 				}

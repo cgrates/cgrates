@@ -65,7 +65,10 @@ func TestXmlITResetDataDb(t *testing.T) {
 func TestXmlITCreateCdrDirs(t *testing.T) {
 	for _, cdrcProfiles := range xmlCfg.CdrcProfiles {
 		for _, cdrcInst := range cdrcProfiles {
-			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
+			if !cdrcInst.Enabled {
+				continue
+			}
+			for _, dir := range []string{cdrcInst.CDRInPath, cdrcInst.CDROutPath} {
 				if err := os.RemoveAll(dir); err != nil {
 					t.Fatal("Error removing folder: ", dir, err)
 				}
@@ -74,8 +77,8 @@ func TestXmlITCreateCdrDirs(t *testing.T) {
 				}
 			}
 			if cdrcInst.ID == "XMLit1" { // Initialize the folders to check later
-				xmlPathIn1 = cdrcInst.CdrInDir
-				xmlPathOut1 = cdrcInst.CdrOutDir
+				xmlPathIn1 = cdrcInst.CDRInPath
+				xmlPathOut1 = cdrcInst.CDROutPath
 			}
 		}
 	}
@@ -157,7 +160,10 @@ func TestXmlIT2InitCdrDb(t *testing.T) {
 func TestXmlIT2CreateCdrDirs(t *testing.T) {
 	for _, cdrcProfiles := range xmlCfg.CdrcProfiles {
 		for _, cdrcInst := range cdrcProfiles {
-			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
+			if !cdrcInst.Enabled {
+				continue
+			}
+			for _, dir := range []string{cdrcInst.CDRInPath, cdrcInst.CDROutPath} {
 				if err := os.RemoveAll(dir); err != nil {
 					t.Fatal("Error removing folder: ", dir, err)
 				}
@@ -166,8 +172,8 @@ func TestXmlIT2CreateCdrDirs(t *testing.T) {
 				}
 			}
 			if cdrcInst.ID == "XMLWithFilter" { // Initialize the folders to check later
-				xmlPathIn1 = cdrcInst.CdrInDir
-				xmlPathOut1 = cdrcInst.CdrOutDir
+				xmlPathIn1 = cdrcInst.CDRInPath
+				xmlPathOut1 = cdrcInst.CDROutPath
 			}
 		}
 	}
@@ -243,7 +249,10 @@ func TestXmlIT3InitCdrDb(t *testing.T) {
 func TestXmlIT3CreateCdrDirs(t *testing.T) {
 	for _, cdrcProfiles := range xmlCfg.CdrcProfiles {
 		for _, cdrcInst := range cdrcProfiles {
-			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
+			for _, dir := range []string{cdrcInst.CDRInPath, cdrcInst.CDROutPath} {
+				if !cdrcInst.Enabled {
+					continue
+				}
 				if err := os.RemoveAll(dir); err != nil {
 					t.Fatal("Error removing folder: ", dir, err)
 				}
@@ -252,8 +261,8 @@ func TestXmlIT3CreateCdrDirs(t *testing.T) {
 				}
 			}
 			if cdrcInst.ID == "msw_xml" { // Initialize the folders to check later
-				xmlPathIn1 = cdrcInst.CdrInDir
-				xmlPathOut1 = cdrcInst.CdrOutDir
+				xmlPathIn1 = cdrcInst.CDRInPath
+				xmlPathOut1 = cdrcInst.CDROutPath
 			}
 		}
 	}
@@ -329,7 +338,10 @@ func TestXmlIT4InitCdrDb(t *testing.T) {
 func TestXmlIT4CreateCdrDirs(t *testing.T) {
 	for _, cdrcProfiles := range xmlCfg.CdrcProfiles {
 		for _, cdrcInst := range cdrcProfiles {
-			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
+			if !cdrcInst.Enabled {
+				continue
+			}
+			for _, dir := range []string{cdrcInst.CDRInPath, cdrcInst.CDROutPath} {
 				if err := os.RemoveAll(dir); err != nil {
 					t.Fatal("Error removing folder: ", dir, err)
 				}
@@ -338,8 +350,8 @@ func TestXmlIT4CreateCdrDirs(t *testing.T) {
 				}
 			}
 			if cdrcInst.ID == "msw_xml2" { // Initialize the folders to check later
-				xmlPathIn1 = cdrcInst.CdrInDir
-				xmlPathOut1 = cdrcInst.CdrOutDir
+				xmlPathIn1 = cdrcInst.CDRInPath
+				xmlPathOut1 = cdrcInst.CDROutPath
 			}
 		}
 	}
@@ -415,7 +427,10 @@ func TestXmlIT5InitCdrDb(t *testing.T) {
 func TestXmlIT5CreateCdrDirs(t *testing.T) {
 	for _, cdrcProfiles := range xmlCfg.CdrcProfiles {
 		for _, cdrcInst := range cdrcProfiles {
-			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
+			if !cdrcInst.Enabled {
+				continue
+			}
+			for _, dir := range []string{cdrcInst.CDRInPath, cdrcInst.CDROutPath} {
 				if err := os.RemoveAll(dir); err != nil {
 					t.Fatal("Error removing folder: ", dir, err)
 				}
@@ -424,8 +439,8 @@ func TestXmlIT5CreateCdrDirs(t *testing.T) {
 				}
 			}
 			if cdrcInst.ID == "XMLWithFilterID" { // Initialize the folders to check later
-				xmlPathIn1 = cdrcInst.CdrInDir
-				xmlPathOut1 = cdrcInst.CdrOutDir
+				xmlPathIn1 = cdrcInst.CDRInPath
+				xmlPathOut1 = cdrcInst.CDROutPath
 			}
 		}
 	}
@@ -526,7 +541,10 @@ func TestXmlIT6InitCdrDb(t *testing.T) {
 func TestXmlIT6CreateCdrDirs(t *testing.T) {
 	for _, cdrcProfiles := range xmlCfg.CdrcProfiles {
 		for _, cdrcInst := range cdrcProfiles {
-			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
+			if !cdrcInst.Enabled {
+				continue
+			}
+			for _, dir := range []string{cdrcInst.CDRInPath, cdrcInst.CDROutPath} {
 				if err := os.RemoveAll(dir); err != nil {
 					t.Fatal("Error removing folder: ", dir, err)
 				}
@@ -535,8 +553,8 @@ func TestXmlIT6CreateCdrDirs(t *testing.T) {
 				}
 			}
 			if cdrcInst.ID == "XMLWithIndex" { // Initialize the folders to check later
-				xmlPathIn1 = cdrcInst.CdrInDir
-				xmlPathOut1 = cdrcInst.CdrOutDir
+				xmlPathIn1 = cdrcInst.CDRInPath
+				xmlPathOut1 = cdrcInst.CDROutPath
 			}
 		}
 	}

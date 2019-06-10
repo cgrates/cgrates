@@ -25,10 +25,10 @@
  	{
  		"id": "XMLit1",
  		"enabled": true,	
- 		"cdr_format": "xml",
- 		"cdr_in_dir": "/tmp/cdrctests/xmlit1/in",
- 		"cdr_out_dir": "/tmp/cdrctests/xmlit1/out",
- 		"cdr_path": "broadWorksCDR.cdrData",
+ 		"cdr_format": "*file_xml",
+ 		"cdr_in_path": "/tmp/cdrctests/xmlit1/in",
+ 		"cdr_out_path": "/tmp/cdrctests/xmlit1/out",
+ 		"cdr_root_path": "broadWorksCDR.cdrData",
  		"cdr_source_id": "xmlit1",
 		"content_fields":[							// import content_fields template, id will match internally CDR field, in case of .csv value will be represented by index of the field value
 			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},

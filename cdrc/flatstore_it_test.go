@@ -90,17 +90,17 @@ func TestFlatstoreitCreateCdrFiles(t *testing.T) {
 			flatstoreCdrcCfg = cdrcCfg
 		}
 	}
-	if err := os.RemoveAll(flatstoreCdrcCfg.CdrInDir); err != nil {
-		t.Fatal("Error removing folder: ", flatstoreCdrcCfg.CdrInDir, err)
+	if err := os.RemoveAll(flatstoreCdrcCfg.CDRInPath); err != nil {
+		t.Fatal("Error removing folder: ", flatstoreCdrcCfg.CDRInPath, err)
 	}
-	if err := os.MkdirAll(flatstoreCdrcCfg.CdrInDir, 0755); err != nil {
-		t.Fatal("Error creating folder: ", flatstoreCdrcCfg.CdrInDir, err)
+	if err := os.MkdirAll(flatstoreCdrcCfg.CDRInPath, 0755); err != nil {
+		t.Fatal("Error creating folder: ", flatstoreCdrcCfg.CDRInPath, err)
 	}
-	if err := os.RemoveAll(flatstoreCdrcCfg.CdrOutDir); err != nil {
-		t.Fatal("Error removing folder: ", flatstoreCdrcCfg.CdrOutDir, err)
+	if err := os.RemoveAll(flatstoreCdrcCfg.CDROutPath); err != nil {
+		t.Fatal("Error removing folder: ", flatstoreCdrcCfg.CDROutPath, err)
 	}
-	if err := os.MkdirAll(flatstoreCdrcCfg.CdrOutDir, 0755); err != nil {
-		t.Fatal("Error creating folder: ", flatstoreCdrcCfg.CdrOutDir, err)
+	if err := os.MkdirAll(flatstoreCdrcCfg.CDROutPath, 0755); err != nil {
+		t.Fatal("Error creating folder: ", flatstoreCdrcCfg.CDROutPath, err)
 	}
 }
 
@@ -134,22 +134,22 @@ func TestFlatstoreitProcessFiles(t *testing.T) {
 	}
 	//Rename(oldpath, newpath string)
 	for _, fileName := range []string{"acc_1.log", "missed_calls_1.log", "acc_2.log", "acc_3.log"} {
-		if err := os.Rename(path.Join("/tmp", fileName), path.Join(flatstoreCdrcCfg.CdrInDir, fileName)); err != nil {
+		if err := os.Rename(path.Join("/tmp", fileName), path.Join(flatstoreCdrcCfg.CDRInPath, fileName)); err != nil {
 			t.Fatal(err)
 		}
 	}
 	time.Sleep(time.Duration(3) * time.Second) // Give time for processing to happen and the .unparired file to be written
-	filesInDir, _ := ioutil.ReadDir(flatstoreCdrcCfg.CdrInDir)
+	filesInDir, _ := ioutil.ReadDir(flatstoreCdrcCfg.CDRInPath)
 	if len(filesInDir) != 0 {
 		t.Errorf("Files in cdrcInDir: %+v", filesInDir)
 	}
-	filesOutDir, _ := ioutil.ReadDir(flatstoreCdrcCfg.CdrOutDir)
+	filesOutDir, _ := ioutil.ReadDir(flatstoreCdrcCfg.CDROutPath)
 	if len(filesOutDir) != 5 {
 		f := []string{}
 		for _, s := range filesOutDir {
 			f = append(f, s.Name())
 			t.Errorf("File %s:", s.Name())
-			if partContent, err := ioutil.ReadFile(path.Join(flatstoreCdrcCfg.CdrOutDir, s.Name())); err != nil {
+			if partContent, err := ioutil.ReadFile(path.Join(flatstoreCdrcCfg.CDROutPath, s.Name())); err != nil {
 				t.Error(err)
 			} else {
 				t.Errorf("%s", partContent)
@@ -160,7 +160,7 @@ func TestFlatstoreitProcessFiles(t *testing.T) {
 		return
 	}
 	ePartContent := "INVITE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9p@0:0:0:0:0:0:0:0|200|OK|1436454408|*prepaid|1001|1002||3401:2069362475\n"
-	if partContent, err := ioutil.ReadFile(path.Join(flatstoreCdrcCfg.CdrOutDir, "acc_3.log.unpaired")); err != nil {
+	if partContent, err := ioutil.ReadFile(path.Join(flatstoreCdrcCfg.CDROutPath, "acc_3.log.unpaired")); err != nil {
 		t.Error(err)
 	} else if (ePartContent) != (string(partContent)) {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", ePartContent, string(partContent))

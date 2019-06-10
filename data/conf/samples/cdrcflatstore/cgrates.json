@@ -40,13 +40,13 @@
 		"cdrs_conns": [
 			{"address": "*internal"}				// address where to reach CDR server. <*internal|x.y.z.y:1234>
 		],
-		"cdr_format": "opensips_flatstore",				// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore>
+		"cdr_format": "*opensips_flatstore",				// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore>
 		"field_separator": "|",							// separator used in case of csv files
 		"run_delay": 0,									// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
 		"max_open_files": 1024,							// maximum simultaneous files to process
 		"data_usage_multiply_factor": 1024,				// conversion factor for data usage
-		"cdr_in_dir": "/tmp/cgr_flatstore/cdrc/in",		// absolute path towards the directory where the CDRs are stored
-		"cdr_out_dir": "/tmp/cgr_flatstore/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
+		"cdr_in_path": "/tmp/cgr_flatstore/cdrc/in",		// absolute path towards the directory where the CDRs are stored
+		"cdr_out_path": "/tmp/cgr_flatstore/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
 		"failed_calls_prefix": "missed_calls",			// used in case of flatstore CDRs to avoid searching for BYE records
 		"cdr_source_id": "flatstore",					// free form field, id identifying the source of the CDRs within CDRS database
 		"partial_record_cache": "1s",					// duration to cache partial records when not pairing

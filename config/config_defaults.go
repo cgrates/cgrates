@@ -242,7 +242,7 @@ const CGRATES_CFG_JSON = `
 		"cdrs_conns": [									// connections to CDRs. <*internal|x.y.z.y:1234>
 			{"address": "*internal"}
 		],
-		"cdr_format": "*file_csv",						// CDR file format <*file_csv|*freeswitch_csv|*fwv|*opensips_flatstore|*partial_csv>
+		"cdr_format": "*file_csv",						// CDR file format <*file_csv|*freeswitch_csv|*file_fwv|*opensips_flatstore|*partial_csv|*file_xml>
 		"field_separator": ",",							// separator used in case of csv files
 		"timezone": "",									// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 		"run_delay": 0,									// sleep interval in seconds between consecutive runs, 0 to use automation via inotify

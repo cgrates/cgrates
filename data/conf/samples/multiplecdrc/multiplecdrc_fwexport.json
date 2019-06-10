@@ -28,15 +28,15 @@
 	{
 		"id": "CDRC-CSV1",
 		"enabled": true,							// enable CDR client functionality
-		"cdr_in_dir": "/tmp/cgrates/cdrc1/in",		// absolute path towards the directory where the CDRs are stored
-		"cdr_out_dir": "/tmp/cgrates/cdrc1/out",	// absolute path towards the directory where processed CDRs will be moved
+		"cdr_in_path": "/tmp/cgrates/cdrc1/in",		// absolute path towards the directory where the CDRs are stored
+		"cdr_out_path": "/tmp/cgrates/cdrc1/out",	// absolute path towards the directory where processed CDRs will be moved
 		"cdr_source_id": "csv1",					// free form field, tag identifying the source of the CDRs within CDRS database
 	},
 	{
 		"id": "CDRC-CSV2",
 		"enabled": true,							// enable CDR client functionality
-		"cdr_in_dir": "/tmp/cgrates/cdrc2/in",		// absolute path towards the directory where the CDRs are stored
-		"cdr_out_dir": "/tmp/cgrates/cdrc2/out",	// absolute path towards the directory where processed CDRs will be moved
+		"cdr_in_path": "/tmp/cgrates/cdrc2/in",		// absolute path towards the directory where the CDRs are stored
+		"cdr_out_path": "/tmp/cgrates/cdrc2/out",	// absolute path towards the directory where processed CDRs will be moved
 		"cdr_source_id": "csv2",					// free form field, tag identifying the source of the CDRs within CDRS database
 		"content_fields":[								// import template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 			{"cdr_field_id": "tor", "value": "~7:s/^(voice|data|sms|generic)$/*$1/"},
@@ -57,8 +57,8 @@
 		"id": "CDRC-CSV3",
 		"enabled": true,							// enable CDR client functionality
 		"field_separator": ";",						// separator used in case of csv files
-		"cdr_in_dir": "/tmp/cgrates/cdrc3/in",		// absolute path towards the directory where the CDRs are stored
-		"cdr_out_dir": "/tmp/cgrates/cdrc3/out",	// absolute path towards the directory where processed CDRs will be moved
+		"cdr_in_path": "/tmp/cgrates/cdrc3/in",		// absolute path towards the directory where the CDRs are stored
+		"cdr_out_path": "/tmp/cgrates/cdrc3/out",	// absolute path towards the directory where processed CDRs will be moved
 		"cdr_source_id": "csv3",					// free form field, tag identifying the source of the CDRs within CDRS database
 		"content_fields":[								// import template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 			{"cdr_field_id": "tor", "value": "^*voice"},

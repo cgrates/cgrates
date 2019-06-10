@@ -25,10 +25,10 @@
  	{
  		"id": "XMLWithFilter",
  		"enabled": true,	
- 		"cdr_format": "xml",
- 		"cdr_in_dir": "/tmp/cdrcxmlwithfilters/xmlit1/in",
- 		"cdr_out_dir": "/tmp/cdrcxmlwithfilters/xmlit1/out",
- 		"cdr_path": "broadWorksCDR.cdrData",
+ 		"cdr_format": "*file_xml",
+ 		"cdr_in_path": "/tmp/cdrcxmlwithfilters/xmlit1/in",
+ 		"cdr_out_path": "/tmp/cdrcxmlwithfilters/xmlit1/out",
+ 		"cdr_root_path": "broadWorksCDR.cdrData",
     "cdr_source_id": "xmlit1",
  		"filters": ["*string:~broadWorksCDR.cdrData.basicModule.userNumber:1002","*string:~broadWorksCDR.cdrData.headerModule.type:Normal"],
 		"content_fields":[							// import content_fields template, id will match internally CDR field, in case of .csv value will be represented by index of the field value
@@ -48,9 +48,9 @@
 	{
     "id": "msw_xml",                                                               // identifier of the CDRC runner
     "enabled": true,                                                               // enable CDR client functionality
-    "cdr_format": "xml",                                                    // CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore|partial_csv.
-    "cdr_in_dir": "/tmp/cdrcxmlwithfilters2/xmlit2/in",
-    "cdr_out_dir": "/tmp/cdrcxmlwithfilters2/xmlit2/out",
+    "cdr_format": "*file_xml",                                                    // CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore|partial_csv.
+    "cdr_in_path": "/tmp/cdrcxmlwithfilters2/xmlit2/in",
+    "cdr_out_path": "/tmp/cdrcxmlwithfilters2/xmlit2/out",
     "cdr_path": "File.CDRs.Call",                                                                // path towards one CDR element in case of XML CDRs
     "cdr_source_id": "zw_cfs1",                              // free form field, tag identifying the source of the CDRs within CDRS database          
     "content_fields":[                                                    // import content_fields template, id will match internally CDR field, in case of .csv value will be represented by index of the field value
@@ -71,10 +71,10 @@
   {
     "id": "msw_xml2",                                                               // identifier of the CDRC runner
     "enabled": true,                                                               // enable CDR client functionality
-    "cdr_format": "xml",                                                    // CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore|partial_csv.
-    "cdr_in_dir": "/tmp/cdrcxmlwithfilters3/xmlit3/in",
-    "cdr_out_dir": "/tmp/cdrcxmlwithfilters3/xmlit3/out",
-    "cdr_path": "File.CDRs.Call",                                                                 // path towards one CDR element in case of XML CDRs
+    "cdr_format": "*file_xml",                                                    // CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore|partial_csv.
+    "cdr_in_path": "/tmp/cdrcxmlwithfilters3/xmlit3/in",
+    "cdr_out_path": "/tmp/cdrcxmlwithfilters3/xmlit3/out",
+    "cdr_root_path": "File.CDRs.Call",                                                                 // path towards one CDR element in case of XML CDRs
     "cdr_source_id": "zw_cfs1",                              // free form field, tag identifying the source of the CDRs within CDRS database           
     "content_fields":[                                                    // import content_fields template, id will match internally CDR field, in case of .csv value will be represented by index of the field value
       {"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
@@ -96,10 +96,10 @@
   {
     "id": "XMLWithFilterID",
     "enabled": true,  
-    "cdr_format": "xml",
-    "cdr_in_dir": "/tmp/cdrcxmlwithfilters/xmlit5/in",
-    "cdr_out_dir": "/tmp/cdrcxmlwithfilters/xmlit5/out",
-    "cdr_path": "broadWorksCDR.cdrData",
+    "cdr_format": "*file_xml",
+    "cdr_in_path": "/tmp/cdrcxmlwithfilters/xmlit5/in",
+    "cdr_out_path": "/tmp/cdrcxmlwithfilters/xmlit5/out",
+    "cdr_root_path": "broadWorksCDR.cdrData",
     "cdr_source_id": "xmlit1",
     "filters": ["FLTR_XML"],
     "content_fields":[              // import content_fields template, id will match internally CDR field, in case of .csv value will be represented by index of the field value
@@ -119,10 +119,10 @@
     {
     "id": "XMLWithIndex",
     "enabled": true,  
-    "cdr_format": "xml",
-    "cdr_in_dir": "/tmp/cdrcxmlwithindex/xmlit1/in",
-    "cdr_out_dir": "/tmp/cdrcxmlwithindex/xmlit1/out",
-    "cdr_path": "complete-success-notification",
+    "cdr_format": "*file_xml",
+    "cdr_in_path": "/tmp/cdrcxmlwithindex/xmlit1/in",
+    "cdr_out_path": "/tmp/cdrcxmlwithindex/xmlit1/out",
+    "cdr_root_path": "complete-success-notification",
     "cdr_source_id": "xmlit1",
     "content_fields":[              // import content_fields template, id will match internally CDR field, in case of .csv value will be represented by index of the field value
       {"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},

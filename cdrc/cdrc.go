@@ -56,7 +56,6 @@ Parameters specific per config instance:
 func NewCdrc(cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool, cdrs rpcclient.RpcClientConnection,
 	closeChan chan struct{}, dfltTimezone string, roundDecimals int, filterS *engine.FilterS) (*Cdrc, error) {
 	cdrcCfg := cdrcCfgs[0]
-
 	cdrc := &Cdrc{
 		httpSkipTlsCheck: httpSkipTlsCheck,
 		cdrcCfgs:         cdrcCfgs,
@@ -193,10 +192,10 @@ func (self *Cdrc) processFile(filePath string) error {
 		recordsProcessor = NewCsvRecordsProcessor(csvReader, self.timezone, fn, self.dfltCdrcCfg,
 			self.cdrcCfgs, self.httpSkipTlsCheck, self.unpairedRecordsCache, self.partialRecordsCache,
 			self.dfltCdrcCfg.CacheDumpFields, self.filterS)
-	case utils.FWV:
+	case utils.MetaFileFWV:
 		recordsProcessor = NewFwvRecordsProcessor(file, self.dfltCdrcCfg, self.cdrcCfgs,
 			self.httpClient, self.httpSkipTlsCheck, self.timezone, self.filterS)
-	case utils.XML:
+	case utils.MetaFileXML:
 		if recordsProcessor, err = NewXMLRecordsProcessor(file, self.dfltCdrcCfg.CDRRootPath,
 			self.timezone, self.httpSkipTlsCheck, self.cdrcCfgs, self.filterS); err != nil {
 			return err

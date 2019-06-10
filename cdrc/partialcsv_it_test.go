@@ -75,12 +75,15 @@ func TestPartcsvITResetDataDb(t *testing.T) {
 func TestPartcsvITCreateCdrDirs(t *testing.T) {
 	for path, cdrcProfiles := range partcsvCfg.CdrcProfiles {
 		for _, cdrcInst := range cdrcProfiles {
-			if path == "/tmp/cdrctests/partcsv1/in" {
-				partcsvCDRCDirIn1, partcsvCDRCDirOut1 = cdrcInst.CdrInDir, cdrcInst.CdrOutDir
-			} else if path == "/tmp/cdrctests/partcsv2/in" {
-				partcsvCDRCDirIn2, partcsvCDRCDirOut2 = cdrcInst.CdrInDir, cdrcInst.CdrOutDir
+			if !cdrcInst.Enabled {
+				continue
 			}
-			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
+			if path == "/tmp/cdrctests/partcsv1/in" {
+				partcsvCDRCDirIn1, partcsvCDRCDirOut1 = cdrcInst.CDRInPath, cdrcInst.CDROutPath
+			} else if path == "/tmp/cdrctests/partcsv2/in" {
+				partcsvCDRCDirIn2, partcsvCDRCDirOut2 = cdrcInst.CDRInPath, cdrcInst.CDROutPath
+			}
+			for _, dir := range []string{cdrcInst.CDRInPath, cdrcInst.CDROutPath} {
 				if err := os.RemoveAll(dir); err != nil {
 					t.Fatal("Error removing folder: ", dir, err)
 				}
