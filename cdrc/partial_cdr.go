@@ -40,13 +40,13 @@ const (
 
 func NewPartialRecordsCache(ttl time.Duration, expiryAction string, cdrOutDir string, csvSep rune,
 	roundDecimals int, timezone string, httpSkipTlsCheck bool,
-	cdrs rpcclient.RpcClientConnection, filterS *engine.FilterS) (*PartialRecordsCache, error) {
+	cdrs rpcclient.RpcClientConnection, filterS *engine.FilterS) *PartialRecordsCache {
 	return &PartialRecordsCache{ttl: ttl, expiryAction: expiryAction, cdrOutDir: cdrOutDir,
 		csvSep: csvSep, roundDecimals: roundDecimals, timezone: timezone,
 		httpSkipTlsCheck: httpSkipTlsCheck, cdrs: cdrs,
 		partialRecords: make(map[string]*PartialCDRRecord),
 		dumpTimers:     make(map[string]*time.Timer),
-		guard:          guardian.Guardian, filterS: filterS}, nil
+		guard:          guardian.Guardian, filterS: filterS}
 }
 
 type PartialRecordsCache struct {

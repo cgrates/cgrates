@@ -31,9 +31,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewUnpairedRecordsCache(ttl time.Duration, cdrOutDir string, csvSep rune) (*UnpairedRecordsCache, error) {
+func NewUnpairedRecordsCache(ttl time.Duration, cdrOutDir string, csvSep rune) *UnpairedRecordsCache {
 	return &UnpairedRecordsCache{ttl: ttl, cdrOutDir: cdrOutDir, csvSep: csvSep,
-		partialRecords: make(map[string]map[string]*UnpairedRecord), guard: guardian.Guardian}, nil
+		partialRecords: make(map[string]map[string]*UnpairedRecord), guard: guardian.Guardian}
 }
 
 type UnpairedRecordsCache struct {

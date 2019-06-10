@@ -26,6 +26,8 @@ var (
 	MainCDRFields = []string{CGRID, Source, OriginHost, OriginID, ToR, RequestType, Tenant, Category,
 		Account, Subject, Destination, SetupTime, AnswerTime, Usage, COST, RATED, Partial, RunID,
 		PreRated, CostSource, CostDetails, ExtraInfo, OrderID}
+	CDRCFileFormats = []string{MetaFileCSV, MetaFScsv,
+		MetaKamFlatstore, MetaOsipsFlatstore, MetaPartialCSV, MetaFileFWV, MetaFileXML}
 	MainCDRFieldsMap StringMap
 
 	GitLastLog                  string // If set, it will be processed as part of versioning

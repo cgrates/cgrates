@@ -54,9 +54,9 @@ Parameters specific per config instance:
  * duMultiplyFactor, cdrSourceId, cdrFilter, cdrFields
 */
 func NewCdrc(cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool, cdrs rpcclient.RpcClientConnection,
-	closeChan chan struct{}, dfltTimezone string, roundDecimals int, filterS *engine.FilterS) (*Cdrc, error) {
+	closeChan chan struct{}, dfltTimezone string, roundDecimals int, filterS *engine.FilterS) (cdrc *Cdrc, err error) {
 	cdrcCfg := cdrcCfgs[0]
-	cdrc := &Cdrc{
+	cdrc = &Cdrc{
 		httpSkipTlsCheck: httpSkipTlsCheck,
 		cdrcCfgs:         cdrcCfgs,
 		dfltCdrcCfg:      cdrcCfg,
@@ -65,26 +65,20 @@ func NewCdrc(cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool, cdrs rpcclient.R
 		closeChan:        closeChan,
 		maxOpenFiles:     make(chan struct{}, cdrcCfg.MaxOpenFiles),
 	}
-	var processFile struct{}
-	for i := 0; i < cdrcCfg.MaxOpenFiles; i++ {
-		cdrc.maxOpenFiles <- processFile // Empty initiate so we do not need to wait later when we pop
-	}
-	var err error
-	if cdrc.unpairedRecordsCache, err = NewUnpairedRecordsCache(cdrcCfg.PartialRecordCache,
-		cdrcCfg.CDROutPath, cdrcCfg.FieldSeparator); err != nil {
-		return nil, err
-	}
-	if cdrc.partialRecordsCache, err = NewPartialRecordsCache(cdrcCfg.PartialRecordCache,
-		cdrcCfg.PartialCacheExpiryAction, cdrcCfg.CDROutPath, cdrcCfg.FieldSeparator, roundDecimals,
-		cdrc.timezone, cdrc.httpSkipTlsCheck, cdrc.cdrs, filterS); err != nil {
-		return nil, err
-	}
-	// Before processing, make sure in and out folders exist
-	for _, dir := range []string{cdrcCfg.CDRInPath, cdrcCfg.CDROutPath} {
-		if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
-			return nil, fmt.Errorf("Nonexistent folder: %s", dir)
+	if utils.IsSliceMember(utils.MainCDRFields, cdrcCfg.CdrFormat) {
+		var processFile struct{}
+		for i := 0; i < cdrcCfg.MaxOpenFiles; i++ {
+			cdrc.maxOpenFiles <- processFile // Empty initiate so we do not need to wait later when we pop
 		}
 	}
+	// unpairedRecordsCache is used with flatStore CDRs
+	cdrc.unpairedRecordsCache = NewUnpairedRecordsCache(cdrcCfg.PartialRecordCache,
+		cdrcCfg.CDROutPath, cdrcCfg.FieldSeparator)
+	cdrc.partialRecordsCache = NewPartialRecordsCache(cdrcCfg.PartialRecordCache,
+		cdrcCfg.PartialCacheExpiryAction, cdrcCfg.CDROutPath, cdrcCfg.FieldSeparator, roundDecimals,
+		cdrc.timezone, cdrc.httpSkipTlsCheck, cdrc.cdrs, filterS)
+	// Before processing, make sure in and out folders exist
+
 	cdrc.filterS = filterS
 	cdrc.httpClient = new(http.Client)
 	return cdrc, nil

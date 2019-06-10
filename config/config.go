@@ -426,7 +426,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 			if len(cdrcInst.ContentFields) == 0 {
 				return errors.New("CdrC enabled but no fields to be processed defined!")
 			}
-			if cdrcInst.CdrFormat == utils.CSV {
+			if cdrcInst.CdrFormat == utils.MetaFileCSV {
 				for _, cdrFld := range cdrcInst.ContentFields {
 					for _, rsrFld := range cdrFld.Value {
 						if rsrFld.attrName != "" {
@@ -434,6 +434,13 @@ func (self *CGRConfig) checkConfigSanity() error {
 								return fmt.Errorf("CDR fields must be indices in case of .csv files, have instead: %s", rsrFld.attrName)
 							}
 						}
+					}
+				}
+			}
+			if utils.IsSliceMember(utils.MainCDRFields, cdrcInst.CdrFormat) {
+				for _, dir := range []string{cdrcInst.CDRInPath, cdrcInst.CDROutPath} {
+					if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
+						return fmt.Errorf("<CDRC> nonexistent folder: %s", dir)
 					}
 				}
 			}
