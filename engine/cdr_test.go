@@ -711,6 +711,16 @@ func TestCDRAsExportRecord(t *testing.T) {
 		t.Errorf("Expecting: <%q>,\n Received: <%q>", expected, expRecord[0])
 	}
 
+	expected = "RP_ZW_v1"
+	prsr = config.NewRSRParsersMustCompile("~CostDetails.RatingFilters:s/RatingPlanID\"\\s?\\:\\s?\"([^\"]*)\".*/$1/", true, utils.INFIELD_SEP)
+	cfgCdrFld = &config.FCTemplate{Tag: "DestinationID", Type: utils.META_COMPOSED,
+		FieldId: "CustomDestinationID", Value: prsr}
+	if expRecord, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, nil); err != nil {
+		t.Error(err)
+	} else if expRecord[0] != expected {
+		t.Errorf("Expecting: <%q>,\n Received: <%q>", expected, expRecord[0])
+	}
+
 }
 
 func TestCDRAsExportMap(t *testing.T) {
