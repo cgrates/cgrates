@@ -33,13 +33,15 @@
 		"cdr_in_path": "/tmp/cdrctests/partcsv1/in",	// absolute path towards the directory where the CDRs are stored
 		"cdr_out_path": "/tmp/cdrctests/partcsv1/out",	// absolute path towards the directory where processed CDRs will be moved
 		"cdr_source_id": "partial_csv_test",			// free form field, tag identifying the source of the CDRs within CDRS database
-		"partial_record_cache": "1s",				// duration to cache partial records when not pairing
+		"partial_record_cache": "2s",				// duration to cache partial records when not pairing
 		"partial_cache_expiry_action": "*dump_to_file",
 		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 			{"tag": "ToR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
 			{"tag": "AccId1", "field_id": "OriginID", "type": "*composed", "value": "~0"},
 			{"tag": "AccId2", "field_id": "OriginID", "type": "*composed", "value": "_"},
 			{"tag": "AccId3", "field_id": "OriginID", "type": "*composed", "value": "~1"},
+			{"tag": "AccId4", "field_id": "OriginID", "type": "*composed", "value": "_"},
+			{"tag": "AccId5", "field_id": "OriginID", "type": "*composed", "value": "~4"},
 			{"tag": "OrderID", "field_id": "OrderID", "type": "*unix_timestamp", "value": "~3"},
 			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "*rated", "mandatory": true},
 			{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "*out", "mandatory": true},
@@ -67,7 +69,7 @@
 	{
 		"id": "post_on_expiry",
 		"enabled": true,
-		"cdr_format": "partial_csv",
+		"cdr_format": "*partial_csv",
 		"cdr_in_path": "/tmp/cdrctests/partcsv2/in",	// absolute path towards the directory where the CDRs are stored
 		"cdr_out_path": "/tmp/cdrctests/partcsv2/out",	// absolute path towards the directory where processed CDRs will be moved
 		"cdr_source_id": "partial_csv_test2",			// free form field, tag identifying the source of the CDRs within CDRS database
@@ -78,6 +80,8 @@
 			{"tag": "AccId1", "field_id": "OriginID", "type": "*composed", "value": "~0"},
 			{"tag": "AccId2", "field_id": "OriginID", "type": "*composed", "value": "_"},
 			{"tag": "AccId3", "field_id": "OriginID", "type": "*composed", "value": "~1"},
+			{"tag": "AccId4", "field_id": "OriginID", "type": "*composed", "value": "_"},
+			{"tag": "AccId5", "field_id": "OriginID", "type": "*composed", "value": "~4"},
 			{"tag": "OrderID", "field_id": "OrderID", "type": "*unix_timestamp", "value": "~3"},
 			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "*rated", "mandatory": true},
 			{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "*out", "mandatory": true},

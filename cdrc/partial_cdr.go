@@ -65,9 +65,15 @@ type PartialRecordsCache struct {
 
 // Dumps the cache into a .unpaired file in the outdir and cleans cache after
 func (prc *PartialRecordsCache) dumpPartialRecords(originID string) {
+	fmt.Printf("=== PartialRecordsCache: \n")
+	for key, val := range prc.partialRecords {
+		fmt.Printf("=== partialRecords: %+v : %+v \n", key, utils.ToJSON(val.cdrs))
+	}
+
 	_, err := prc.guard.Guard(func() (interface{}, error) {
 		if prc.partialRecords[originID].Len() != 0 { // Only write the file if there are records in the cache
 			dumpFilePath := path.Join(prc.cdrOutDir, fmt.Sprintf("%s.%s.%d", originID, PartialRecordsSuffix, time.Now().Unix()))
+			fmt.Println("dumpFilePath: ", dumpFilePath)
 			fileOut, err := os.Create(dumpFilePath)
 			if err != nil {
 				utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed creating %s, error: %s", dumpFilePath, err.Error()))
@@ -155,6 +161,8 @@ func (prc *PartialRecordsCache) uncachePartialCDR(pCDR *PartialCDRRecord) {
 
 // Returns PartialCDR only if merge was possible
 func (prc *PartialRecordsCache) MergePartialCDRRecord(pCDR *PartialCDRRecord) (*engine.CDR, error) {
+	fmt.Println("===Enter in MergePartialCDRRecord===")
+	fmt.Println("===", utils.ToJSON(pCDR.cdrs))
 	if pCDR.Len() == 0 || pCDR.cdrs[0].OriginID == "" { // Sanity check
 		return nil, nil
 	}
