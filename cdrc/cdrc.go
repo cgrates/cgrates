@@ -78,19 +78,26 @@ func NewCdrc(cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool, cdrs rpcclient.R
 			cdrc.maxOpenFiles <- processFile // Empty initiate so we do not need to wait later when we pop
 		}
 	}
+	cdrc.unpairedRecordsCache = NewUnpairedRecordsCache(cdrcCfg.PartialRecordCache,
+		cdrcCfg.CDROutPath, cdrcCfg.FieldSeparator)
+	cdrc.partialRecordsCache = NewPartialRecordsCache(cdrcCfg.PartialRecordCache,
+		cdrcCfg.PartialCacheExpiryAction, cdrcCfg.CDROutPath,
+		cdrcCfg.FieldSeparator, cdrc.timezone, httpSkipTlsCheck, cdrs, filterS)
 	cdrc.filterS = filterS
 	return
 }
 
 type Cdrc struct {
-	httpSkipTlsCheck bool
-	cdrcCfgs         []*config.CdrcCfg // All cdrc config profiles attached to this CDRC (key will be profile instance name)
-	dfltCdrcCfg      *config.CdrcCfg
-	timezone         string
-	cdrs             rpcclient.RpcClientConnection
-	closeChan        chan struct{} // Used to signal config reloads when we need to span different CDRC-Client
-	maxOpenFiles     chan struct{} // Maximum number of simultaneous files processed
-	filterS          *engine.FilterS
+	httpSkipTlsCheck     bool
+	cdrcCfgs             []*config.CdrcCfg // All cdrc config profiles attached to this CDRC (key will be profile instance name)
+	dfltCdrcCfg          *config.CdrcCfg
+	timezone             string
+	cdrs                 rpcclient.RpcClientConnection
+	closeChan            chan struct{} // Used to signal config reloads when we need to span different CDRC-Client
+	maxOpenFiles         chan struct{} // Maximum number of simultaneous files processed
+	filterS              *engine.FilterS
+	unpairedRecordsCache *UnpairedRecordsCache // Shared between all files in the folder we process
+	partialRecordsCache  *PartialRecordsCache
 }
 
 // When called fires up folder monitoring, either automated via inotify or manual by sleeping between processing
@@ -180,7 +187,8 @@ func (self *Cdrc) processFile(filePath string) error {
 		csvReader.Comment = '#'
 		recordsProcessor = NewCsvRecordsProcessor(csvReader, self.timezone, fn, self.dfltCdrcCfg,
 			self.cdrcCfgs, self.httpSkipTlsCheck,
-			self.dfltCdrcCfg.CacheDumpFields, self.filterS, self.cdrs)
+			self.dfltCdrcCfg.CacheDumpFields, self.filterS, self.cdrs,
+			self.unpairedRecordsCache, self.partialRecordsCache)
 	case utils.MetaFileFWV:
 		recordsProcessor = NewFwvRecordsProcessor(file, self.dfltCdrcCfg, self.cdrcCfgs,
 			self.httpSkipTlsCheck, self.timezone, self.filterS)

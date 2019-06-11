@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cdrc
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -97,11 +96,9 @@ func TestPartcsvITCreateCdrDirs(t *testing.T) {
 }
 
 func TestPartcsvITStartEngine(t *testing.T) {
-	// if _, err := engine.StopStartEngine(partpartcsvCfgPath, *waitRater); err != nil {
-	// 	t.Fatal(err)
-	// }
-	fmt.Println("START THE ENGINE MANUAL ")
-	time.Sleep(10 * time.Second)
+	if _, err := engine.StopStartEngine(partpartcsvCfgPath, *waitRater); err != nil {
+		t.Fatal(err)
+	}
 }
 
 // Connect rpc client to rater

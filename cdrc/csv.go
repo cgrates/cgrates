@@ -35,16 +35,14 @@ import (
 func NewCsvRecordsProcessor(csvReader *csv.Reader, timezone, fileName string,
 	dfltCdrcCfg *config.CdrcCfg, cdrcCfgs []*config.CdrcCfg,
 	httpSkipTlsCheck bool, cacheDumpFields []*config.FCTemplate,
-	filterS *engine.FilterS, cdrs rpcclient.RpcClientConnection) *CsvRecordsProcessor {
+	filterS *engine.FilterS, cdrs rpcclient.RpcClientConnection,
+	unp *UnpairedRecordsCache, prt *PartialRecordsCache) *CsvRecordsProcessor {
 	return &CsvRecordsProcessor{csvReader: csvReader,
 		timezone: timezone, fileName: fileName,
 		dfltCdrcCfg: dfltCdrcCfg, cdrcCfgs: cdrcCfgs,
-		httpSkipTlsCheck: httpSkipTlsCheck,
-		unpairedRecordsCache: NewUnpairedRecordsCache(dfltCdrcCfg.PartialRecordCache,
-			dfltCdrcCfg.CDROutPath, dfltCdrcCfg.FieldSeparator),
-		partialRecordsCache: NewPartialRecordsCache(dfltCdrcCfg.PartialRecordCache,
-			dfltCdrcCfg.PartialCacheExpiryAction, dfltCdrcCfg.CDROutPath,
-			dfltCdrcCfg.FieldSeparator, timezone, httpSkipTlsCheck, cdrs, filterS),
+		httpSkipTlsCheck:       httpSkipTlsCheck,
+		unpairedRecordsCache:   unp,
+		partialRecordsCache:    prt,
 		partialCacheDumpFields: cacheDumpFields, filterS: filterS}
 
 }
@@ -133,7 +131,6 @@ func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, 
 		} else if self.dfltCdrcCfg.CdrFormat == utils.MetaPartialCSV {
 			fmt.Println("===Teo===")
 			fmt.Println(utils.ToJSON(record))
-			fmt.Println(utils.ToJSON(storedCdr))
 			if storedCdr, err = self.partialRecordsCache.MergePartialCDRRecord(NewPartialCDRRecord(storedCdr, self.partialCacheDumpFields)); err != nil {
 				return nil, fmt.Errorf("Failed merging PartialCDR, error: %s", err.Error())
 			} else if storedCdr == nil { // CDR was absorbed by cache since it was partial
