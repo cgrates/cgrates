@@ -421,7 +421,7 @@ func testCallCall1002To1001(t *testing.T) {
 func testCallCall1001To1003(t *testing.T) {
 	if err := engine.PjsuaCallUri(
 		&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "CGRateS.org", Realm: "*"},
-		"sip:1003@127.0.0.1", "sip:127.0.0.1:5080", time.Duration(60)*time.Second, 5073); err != nil {
+		"sip:1003@127.0.0.1", "sip:127.0.0.1:5080", 60*time.Second, 5073); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -430,7 +430,7 @@ func testCallCall1001To1003(t *testing.T) {
 func testCallCall1003To1001(t *testing.T) {
 	if err := engine.PjsuaCallUri(
 		&engine.PjsuaAccount{Id: "sip:1003@127.0.0.1", Username: "1003", Password: "CGRateS.org", Realm: "*"},
-		"sip:1001@127.0.0.1", "sip:127.0.0.1:5080", time.Duration(20)*time.Second, 5074); err != nil {
+		"sip:1001@127.0.0.1", "sip:127.0.0.1:5080", 20*time.Second, 5074); err != nil {
 		t.Fatal(err)
 	}
 	// after this call from 1001 to 1003 and call from 1003 to 1001 should be done
@@ -441,7 +441,7 @@ func testCallCall1003To1001SecondTime(t *testing.T) {
 	time.Sleep(22 * time.Second)
 	if err := engine.PjsuaCallUri(
 		&engine.PjsuaAccount{Id: "sip:1003@127.0.0.1", Username: "1003", Password: "CGRateS.org", Realm: "*"},
-		"sip:1001@127.0.0.1", "sip:127.0.0.1:5080", time.Duration(15)*time.Second, 5075); err != nil {
+		"sip:1001@127.0.0.1", "sip:127.0.0.1:5080", 15*time.Second, 5075); err != nil {
 		t.Fatal(err)
 	}
 	time.Sleep(time.Second)
@@ -757,8 +757,8 @@ func testCallSyncSessions(t *testing.T) {
 
 	// activeSessions shouldn't be active
 	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
-		&map[string]string{}, &reply); err != nil && err.Error() != utils.ErrNotFound.Error() {
-		t.Error("Got error on SessionSv1.GetActiveSessions: ", err)
+		&map[string]string{}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Got error on SessionSv1.GetActiveSessions: %v and reply: %s", err, utils.ToJSON(reply))
 	}
 
 	var sourceForCDR string
@@ -773,15 +773,22 @@ func testCallSyncSessions(t *testing.T) {
 	case utils.Asterisk:
 		sourceForCDR = utils.AsteriskAgent
 		numberOfCDR = 3
+	case utils.Opensips:
+		sourceForCDR = utils.Opensips
+		numberOfCDR = 3
 	}
 	// verify cdr
 	var rplCdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{Sources: []string{sourceForCDR}, MaxUsage: "20s",
-		RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}}
+	req := utils.RPCCDRsFilter{
+		Sources:  []string{sourceForCDR},
+		MaxUsage: "20s",
+		RunIDs:   []string{utils.META_DEFAULT},
+		Accounts: []string{"1001"},
+	}
 	if err := tutorialCallsRpc.Call(utils.ApierV2GetCDRs, req, &rplCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rplCdrs) != numberOfCDR { // cdr from sync session + cdr from before
-		t.Fatal("Unexpected number of CDRs returned: ", len(rplCdrs))
+		t.Fatal("Unexpected number of CDRs returned: ", len(rplCdrs), utils.ToJSON(rplCdrs))
 	} else if time1, err := utils.ParseDurationWithSecs(rplCdrs[0].Usage); err != nil {
 		t.Error(err)
 	} else if time1 > time.Duration(15*time.Second) {
@@ -814,7 +821,7 @@ func testCallSyncSessions(t *testing.T) {
 
 func testCallStopPjsuaListener(t *testing.T) {
 	tutorialCallsPjSuaListener.Write([]byte("q\n")) // Close pjsua
-	time.Sleep(time.Duration(1) * time.Second)      // Allow pjsua to finish it's tasks, eg un-REGISTER
+	time.Sleep(time.Second)                         // Allow pjsua to finish it's tasks, eg un-REGISTER
 }
 
 func testCallStopCgrEngine(t *testing.T) {
