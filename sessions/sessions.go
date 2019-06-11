@@ -429,21 +429,23 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 					utils.SessionS, err.Error(), s.ResourceID))
 		}
 	}
-	if clntConn := sS.biJClnt(s.ClientConnID); clntConn != nil {
-		var rply string
-		if err := clntConn.conn.Call(utils.SessionSv1DisconnectSession,
-			utils.AttrDisconnectSession{
-				EventStart: s.EventStart.AsMapInterface(),
-				Reason:     ErrForcedDisconnect.Error()},
-			&rply); err != nil {
-			if err != utils.ErrNotImplemented {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> err: %s remotely disconnect session with id: %s",
-						utils.SessionS, err.Error(), s.CGRID))
-			}
-		}
-	}
 	sS.replicateSessions(s.CGRID, false, sS.sReplConns)
+	if clntConn := sS.biJClnt(s.ClientConnID); clntConn != nil {
+		go func() {
+			var rply string
+			if err := clntConn.conn.Call(utils.SessionSv1DisconnectSession,
+				utils.AttrDisconnectSession{
+					EventStart: s.EventStart.AsMapInterface(),
+					Reason:     ErrForcedDisconnect.Error()},
+				&rply); err != nil {
+				if err != utils.ErrNotImplemented {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> err: %s remotely disconnect session with id: %s",
+							utils.SessionS, err.Error(), s.CGRID))
+				}
+			}
+		}()
+	}
 	return
 }
 
@@ -2541,8 +2543,8 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 			AttributeS:    utils.BoolPointer(false),
 			ArgDispatcher: cgrEvWithArgDisp.ArgDispatcher,
 		}
-		if unratedReqs.HasField( // order additional rating for unrated request types
-			engine.NewMapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RequestType)) {
+		if mp := engine.NewMapEvent(cgrEv.Event); mp.GetStringIgnoreErrors(utils.RunID) != utils.MetaRaw && // check if is *raw
+			unratedReqs.HasField(mp.GetStringIgnoreErrors(utils.RequestType)) { // order additional rating for unrated request types
 			argsProc.RALs = utils.BoolPointer(true)
 		}
 		if err = sS.cdrS.Call(utils.CDRsV1ProcessEvent,

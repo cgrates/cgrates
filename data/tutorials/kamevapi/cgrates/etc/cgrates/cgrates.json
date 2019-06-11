@@ -83,7 +83,7 @@
 	],
 	"store_session_costs": true,
 	"debit_interval": "5s",
-	"channel_sync_interval":"5m",
+	"channel_sync_interval":"7s", // default: "5m" for test please use "7s"
 },
 
 

@@ -43,6 +43,9 @@
 	"stats_conns": [
 		{"address": "127.0.0.1:2012", "transport": "*json"},
 	],
+	"chargers_conns": [
+    	{"address": "*internal"}
+    ],
 	"sessions_cost_retries": 5,
 },
 
@@ -78,6 +81,9 @@
 	"thresholds_conns": [
 		{"address": "127.0.0.1:2012", "transport": "*json"},
 	],
+	"chargers_conns": [
+    	{"address": "*internal"}
+    ],
 	"store_session_costs": true,
 	"debit_interval": "5s",
 	"channel_sync_interval":"7s",
