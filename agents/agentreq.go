@@ -203,7 +203,8 @@ func (aReq *AgentRequest) ParseField(
 		isString = true
 	case utils.META_USAGE_DIFFERENCE:
 		if len(cfgFld.Value) != 2 {
-			return nil, fmt.Errorf("invalid arguments <%s>", utils.ToJSON(cfgFld.Value))
+			return nil, fmt.Errorf("invalid arguments <%s> to %s",
+				utils.ToJSON(cfgFld.Value), utils.META_USAGE_DIFFERENCE)
 		}
 		strVal1, err := cfgFld.Value[0].ParseDataProvider(aReq, utils.NestingSep)
 		if err != nil {

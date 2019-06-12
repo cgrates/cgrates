@@ -800,3 +800,300 @@ func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
 		t.Errorf("expecting: %+v, \n received: %+v", eMp, mpOut)
 	}
 }
+
+func TestAgReqParseFieldMetaCCUsage(t *testing.T) {
+	//creater diameter message
+	m := diam.NewRequest(diam.CreditControl, 4, nil)
+	m.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String("simuhuawei;1449573472;00002"))
+	m.NewAVP("Subscription-Id", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(2)),              // Subscription-Id-Type
+			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("208708000004")), // Subscription-Id-Data
+			diam.NewAVP(avp.ValueDigits, avp.Mbit, 0, datatype.Integer64(20000)),
+		}})
+	//create diameterDataProvider
+	dP := newDADataProvider(nil, m)
+	data, _ := engine.NewMapStorage()
+	dm := engine.NewDataManager(data)
+	cfg, _ := config.NewDefaultCGRConfig()
+	filterS := engine.NewFilterS(cfg, nil, nil, dm)
+	//pass the data provider to agent request
+	agReq := newAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS)
+
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "CCUsage", Filters: []string{},
+			FieldId: "CCUsage", Type: utils.MetaCCUsage,
+			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id", true, utils.INFIELD_SEP),
+			Mandatory: true},
+	}
+	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
+		err.Error() != `invalid arguments <[{"Rules":"~*req.Session-Id","AllFiltersMatch":true}]> to *cc_usage` {
+		t.Error(err)
+	}
+
+	tplFlds = []*config.FCTemplate{
+		&config.FCTemplate{Tag: "CCUsage", Filters: []string{},
+			FieldId: "CCUsage", Type: utils.MetaCCUsage,
+			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id;12s;12s", true, utils.INFIELD_SEP),
+			Mandatory: true},
+	}
+	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
+		err.Error() != `invalid requestNumber <simuhuawei;1449573472;00002> to *cc_usage` {
+		t.Error(err)
+	}
+
+	tplFlds = []*config.FCTemplate{
+		&config.FCTemplate{Tag: "CCUsage", Filters: []string{},
+			FieldId: "CCUsage", Type: utils.MetaCCUsage,
+			Value:     config.NewRSRParsersMustCompile("10;~*req.Session-Id;12s", true, utils.INFIELD_SEP),
+			Mandatory: true},
+	}
+	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
+		err.Error() != `invalid usedCCTime <simuhuawei;1449573472;00002> to *cc_usage` {
+		t.Error(err)
+	}
+
+	tplFlds = []*config.FCTemplate{
+		&config.FCTemplate{Tag: "CCUsage", Filters: []string{},
+			FieldId: "CCUsage", Type: utils.MetaCCUsage,
+			Value:     config.NewRSRParsersMustCompile("10;12s;~*req.Session-Id", true, utils.INFIELD_SEP),
+			Mandatory: true},
+	}
+	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
+		err.Error() != `invalid debitInterval <simuhuawei;1449573472;00002> to *cc_usage` {
+		t.Error(err)
+	}
+
+	tplFlds = []*config.FCTemplate{
+		&config.FCTemplate{Tag: "CCUsage", Filters: []string{},
+			FieldId: "CCUsage", Type: utils.MetaCCUsage,
+			Value:     config.NewRSRParsersMustCompile("3;10s;5s", true, utils.INFIELD_SEP),
+			Mandatory: true},
+	}
+	//5s*2 + 10s
+	expected := time.Duration(20 * time.Second)
+	if out, err := agReq.ParseField(tplFlds[0]); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(out, expected) {
+		t.Errorf("expecting: <%+v>, received: <%+v>", expected, out)
+	}
+}
+
+func TestAgReqParseFieldMetaUsageDifference(t *testing.T) {
+	//creater diameter message
+	m := diam.NewRequest(diam.CreditControl, 4, nil)
+	m.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String("simuhuawei;1449573472;00002"))
+	m.NewAVP("Subscription-Id", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(2)),              // Subscription-Id-Type
+			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("208708000004")), // Subscription-Id-Data
+			diam.NewAVP(avp.ValueDigits, avp.Mbit, 0, datatype.Integer64(20000)),
+		}})
+	//create diameterDataProvider
+	dP := newDADataProvider(nil, m)
+	data, _ := engine.NewMapStorage()
+	dm := engine.NewDataManager(data)
+	cfg, _ := config.NewDefaultCGRConfig()
+	filterS := engine.NewFilterS(cfg, nil, nil, dm)
+	//pass the data provider to agent request
+	agReq := newAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS)
+
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Usage", Filters: []string{},
+			FieldId: "Usage", Type: utils.META_USAGE_DIFFERENCE,
+			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id", true, utils.INFIELD_SEP),
+			Mandatory: true},
+	}
+	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
+		err.Error() != `invalid arguments <[{"Rules":"~*req.Session-Id","AllFiltersMatch":true}]> to *usage_difference` {
+		t.Error(err)
+	}
+
+	tplFlds = []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Usage", Filters: []string{},
+			FieldId: "Usage", Type: utils.META_USAGE_DIFFERENCE,
+			Value:     config.NewRSRParsersMustCompile("1560325161;~*req.Session-Id", true, utils.INFIELD_SEP),
+			Mandatory: true},
+	}
+	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
+		err.Error() != `Unsupported time format` {
+		t.Error(err)
+	}
+
+	tplFlds = []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Usage", Filters: []string{},
+			FieldId: "Usage", Type: utils.META_USAGE_DIFFERENCE,
+			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id;1560325161", true, utils.INFIELD_SEP),
+			Mandatory: true},
+	}
+	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
+		err.Error() != `Unsupported time format` {
+		t.Error(err)
+	}
+
+	tplFlds = []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Usage", Filters: []string{},
+			FieldId: "Usage", Type: utils.META_USAGE_DIFFERENCE,
+			Value:     config.NewRSRParsersMustCompile("1560325161;1560325151", true, utils.INFIELD_SEP),
+			Mandatory: true},
+	}
+	expected := "10s"
+	if out, err := agReq.ParseField(tplFlds[0]); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(out, expected) {
+		t.Errorf("expecting: <%+v>, received: <%+v>", expected, out)
+	}
+}
+
+func TestAgReqParseFieldMetaSum(t *testing.T) {
+	//creater diameter message
+	m := diam.NewRequest(diam.CreditControl, 4, nil)
+	m.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String("simuhuawei;1449573472;00002"))
+	m.NewAVP("Subscription-Id", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(2)),              // Subscription-Id-Type
+			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("208708000004")), // Subscription-Id-Data
+			diam.NewAVP(avp.ValueDigits, avp.Mbit, 0, datatype.Integer64(20000)),
+		}})
+	//create diameterDataProvider
+	dP := newDADataProvider(nil, m)
+	data, _ := engine.NewMapStorage()
+	dm := engine.NewDataManager(data)
+	cfg, _ := config.NewDefaultCGRConfig()
+	filterS := engine.NewFilterS(cfg, nil, nil, dm)
+	//pass the data provider to agent request
+	agReq := newAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS)
+
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Sum", Filters: []string{},
+			FieldId: "Sum", Type: utils.MetaSum,
+			Value:     config.NewRSRParsersMustCompile("15;~*req.Session-Id", true, utils.INFIELD_SEP),
+			Mandatory: true},
+	}
+	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
+		err.Error() != `strconv.ParseInt: parsing "simuhuawei;1449573472;00002": invalid syntax` {
+		t.Error(err)
+	}
+
+	tplFlds = []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Sum", Filters: []string{},
+			FieldId: "Sum", Type: utils.MetaSum,
+			Value:     config.NewRSRParsersMustCompile("15;15", true, utils.INFIELD_SEP),
+			Mandatory: true},
+	}
+	expected := int64(30)
+	if out, err := agReq.ParseField(tplFlds[0]); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(out, expected) {
+		t.Errorf("expecting: <%+v>, %T received: <%+v> %T", expected, expected, out, out)
+	}
+}
+
+func TestAgReqParseFieldMetaDifference(t *testing.T) {
+	//creater diameter message
+	m := diam.NewRequest(diam.CreditControl, 4, nil)
+	m.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String("simuhuawei;1449573472;00002"))
+	m.NewAVP("Subscription-Id", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(2)),              // Subscription-Id-Type
+			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("208708000004")), // Subscription-Id-Data
+			diam.NewAVP(avp.ValueDigits, avp.Mbit, 0, datatype.Integer64(20000)),
+		}})
+	//create diameterDataProvider
+	dP := newDADataProvider(nil, m)
+	data, _ := engine.NewMapStorage()
+	dm := engine.NewDataManager(data)
+	cfg, _ := config.NewDefaultCGRConfig()
+	filterS := engine.NewFilterS(cfg, nil, nil, dm)
+	//pass the data provider to agent request
+	agReq := newAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS)
+
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Diff", Filters: []string{},
+			FieldId: "Diff", Type: utils.MetaDifference,
+			Value:     config.NewRSRParsersMustCompile("15;~*req.Session-Id", true, utils.INFIELD_SEP),
+			Mandatory: true},
+	}
+	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
+		err.Error() != `strconv.ParseInt: parsing "simuhuawei;1449573472;00002": invalid syntax` {
+		t.Error(err)
+	}
+
+	tplFlds = []*config.FCTemplate{
+		&config.FCTemplate{Tag: "Diff", Filters: []string{},
+			FieldId: "Diff", Type: utils.MetaDifference,
+			Value:     config.NewRSRParsersMustCompile("15;12;2", true, utils.INFIELD_SEP),
+			Mandatory: true},
+	}
+	expected := int64(1)
+	if out, err := agReq.ParseField(tplFlds[0]); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(out, expected) {
+		t.Errorf("expecting: <%+v>, %T received: <%+v> %T", expected, expected, out, out)
+	}
+}
+
+func TestAgReqParseFieldMetaValueExponent(t *testing.T) {
+	//creater diameter message
+	m := diam.NewRequest(diam.CreditControl, 4, nil)
+	m.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String("simuhuawei;1449573472;00002"))
+	m.NewAVP("Subscription-Id", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(2)),              // Subscription-Id-Type
+			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("208708000004")), // Subscription-Id-Data
+			diam.NewAVP(avp.ValueDigits, avp.Mbit, 0, datatype.Integer64(20000)),
+		}})
+	//create diameterDataProvider
+	dP := newDADataProvider(nil, m)
+	data, _ := engine.NewMapStorage()
+	dm := engine.NewDataManager(data)
+	cfg, _ := config.NewDefaultCGRConfig()
+	filterS := engine.NewFilterS(cfg, nil, nil, dm)
+	//pass the data provider to agent request
+	agReq := newAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS)
+
+	tplFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "ValExp", Filters: []string{},
+			FieldId: "ValExp", Type: utils.MetaValueExponent,
+			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id", true, utils.INFIELD_SEP),
+			Mandatory: true},
+	}
+	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
+		err.Error() != `invalid arguments <[{"Rules":"~*req.Session-Id","AllFiltersMatch":true}]> to *value_exponent` {
+		t.Error(err)
+	}
+
+	tplFlds = []*config.FCTemplate{
+		&config.FCTemplate{Tag: "ValExp", Filters: []string{},
+			FieldId: "ValExp", Type: utils.MetaValueExponent,
+			Value:     config.NewRSRParsersMustCompile("15;~*req.Session-Id", true, utils.INFIELD_SEP),
+			Mandatory: true},
+	}
+	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
+		err.Error() != `strconv.Atoi: parsing "simuhuawei;1449573472;00002": invalid syntax` {
+		t.Error(err)
+	}
+
+	tplFlds = []*config.FCTemplate{
+		&config.FCTemplate{Tag: "ValExp", Filters: []string{},
+			FieldId: "ValExp", Type: utils.MetaValueExponent,
+			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id;15", true, utils.INFIELD_SEP),
+			Mandatory: true},
+	}
+	if _, err := agReq.ParseField(tplFlds[0]); err == nil ||
+		err.Error() != `invalid value <simuhuawei;1449573472;00002> to *value_exponent` {
+		t.Error(err)
+	}
+	tplFlds = []*config.FCTemplate{
+		&config.FCTemplate{Tag: "ValExp", Filters: []string{},
+			FieldId: "ValExp", Type: utils.MetaValueExponent,
+			Value:     config.NewRSRParsersMustCompile("2;3", true, utils.INFIELD_SEP),
+			Mandatory: true},
+	}
+	expected := "2000"
+	if out, err := agReq.ParseField(tplFlds[0]); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(out, expected) {
+		t.Errorf("expecting: <%+v>, %T received: <%+v> %T", expected, expected, out, out)
+	}
+}
