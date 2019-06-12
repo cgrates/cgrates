@@ -22,7 +22,7 @@ import "sort"
 
 var (
 	CDRExportFormats = []string{DRYRUN, MetaFileCSV, MetaFileFWV, MetaHTTPjsonCDR, MetaHTTPjsonMap,
-		MetaHTTPjson, META_HTTP_POST, MetaAMQPjsonCDR, MetaAMQPjsonMap, MetaAWSjsonMap, MetaSQSjsonMap}
+		MetaHTTPjson, META_HTTP_POST, MetaAMQPjsonCDR, MetaAMQPjsonMap, MetaAMQPV1jsonMap, MetaSQSjsonMap}
 	MainCDRFields = []string{CGRID, Source, OriginHost, OriginID, ToR, RequestType, Tenant, Category,
 		Account, Subject, Destination, SetupTime, AnswerTime, Usage, COST, RATED, Partial, RunID,
 		PreRated, CostSource, CostDetails, ExtraInfo, OrderID}
@@ -32,25 +32,25 @@ var (
 
 	GitLastLog                  string // If set, it will be processed as part of versioning
 	PosterTransportContentTypes = map[string]string{
-		MetaHTTPjsonCDR: CONTENT_JSON,
-		MetaHTTPjsonMap: CONTENT_JSON,
-		MetaHTTPjson:    CONTENT_JSON,
-		META_HTTP_POST:  CONTENT_FORM,
-		MetaAMQPjsonCDR: CONTENT_JSON,
-		MetaAMQPjsonMap: CONTENT_JSON,
-		MetaAWSjsonMap:  CONTENT_JSON,
-		MetaSQSjsonMap:  CONTENT_JSON,
+		MetaHTTPjsonCDR:   CONTENT_JSON,
+		MetaHTTPjsonMap:   CONTENT_JSON,
+		MetaHTTPjson:      CONTENT_JSON,
+		META_HTTP_POST:    CONTENT_FORM,
+		MetaAMQPjsonCDR:   CONTENT_JSON,
+		MetaAMQPjsonMap:   CONTENT_JSON,
+		MetaAMQPV1jsonMap: CONTENT_JSON,
+		MetaSQSjsonMap:    CONTENT_JSON,
 	}
 	CDREFileSuffixes = map[string]string{
-		MetaHTTPjsonCDR: JSNSuffix,
-		MetaHTTPjsonMap: JSNSuffix,
-		MetaAMQPjsonCDR: JSNSuffix,
-		MetaAMQPjsonMap: JSNSuffix,
-		MetaAWSjsonMap:  JSNSuffix,
-		MetaSQSjsonMap:  JSNSuffix,
-		META_HTTP_POST:  FormSuffix,
-		MetaFileCSV:     CSVSuffix,
-		MetaFileFWV:     FWVSuffix,
+		MetaHTTPjsonCDR:   JSNSuffix,
+		MetaHTTPjsonMap:   JSNSuffix,
+		MetaAMQPjsonCDR:   JSNSuffix,
+		MetaAMQPjsonMap:   JSNSuffix,
+		MetaAMQPV1jsonMap: JSNSuffix,
+		MetaSQSjsonMap:    JSNSuffix,
+		META_HTTP_POST:    FormSuffix,
+		MetaFileCSV:       CSVSuffix,
+		MetaFileFWV:       FWVSuffix,
 	}
 	CacheInstanceToPrefix = map[string]string{
 		CacheDestinations:            DESTINATION_PREFIX,
@@ -278,7 +278,7 @@ const (
 	MetaHTTPjsonMap               = "*http_json_map"
 	MetaAMQPjsonCDR               = "*amqp_json_cdr"
 	MetaAMQPjsonMap               = "*amqp_json_map"
-	MetaAWSjsonMap                = "*aws_json_map"
+	MetaAMQPV1jsonMap             = "*amqpv1_json_map"
 	MetaSQSjsonMap                = "*sqs_json_map"
 	NANO_MULTIPLIER               = 1000000000
 	CGR_AUTHORIZE                 = "CGR_AUTHORIZE"

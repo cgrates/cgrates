@@ -240,7 +240,7 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 			return err
 		}
 		body = jsn
-	case utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap, utils.MetaAWSjsonMap, utils.MetaSQSjsonMap:
+	case utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap, utils.MetaAMQPV1jsonMap, utils.MetaSQSjsonMap:
 		expMp, err := cdr.AsExportMap(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, nil, cdre.filterS)
 		if err != nil {
 			return err
@@ -279,7 +279,7 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 	case utils.MetaAMQPjsonCDR, utils.MetaAMQPjsonMap:
 		err = PostersCache.PostAMQP(cdre.exportPath, cdre.attempts, body.([]byte),
 			utils.PosterTransportContentTypes[cdre.exportFormat], cdre.fallbackPath, fallbackFileName)
-	case utils.MetaAWSjsonMap:
+	case utils.MetaAMQPV1jsonMap:
 		err = PostersCache.PostAWS(cdre.exportPath, cdre.attempts, body.([]byte), cdre.fallbackPath, fallbackFileName)
 	case utils.MetaSQSjsonMap:
 		err = PostersCache.PostSQS(cdre.exportPath, cdre.attempts, body.([]byte), cdre.fallbackPath, fallbackFileName)

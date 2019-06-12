@@ -455,7 +455,7 @@ func TestCDRsOnExpAWSAMQPPosterFileFailover(t *testing.T) {
 	var fileName string
 	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
 		fileName = file.Name()
-		if strings.HasPrefix(fileName, "cdr|*aws_json_map") {
+		if strings.HasPrefix(fileName, "cdr|*amqpv1_json_map") {
 			foundFile = true
 			filePath := path.Join(cdrsMasterCfg.GeneralCfg().FailedPostsDir, fileName)
 			if readBytes, err := ioutil.ReadFile(filePath); err != nil {
