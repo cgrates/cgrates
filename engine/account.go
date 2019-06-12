@@ -1093,8 +1093,8 @@ func (acnt *Account) Publish() {
 			utils.AllowNegative: acnt.AllowNegative,
 			utils.Disabled:      acnt.Disabled}}
 	if statS != nil {
-		var reply []string
 		go func() {
+			var reply []string
 			if err := statS.Call(utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{CGREvent: cgrEv}, &reply); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
@@ -1104,13 +1104,15 @@ func (acnt *Account) Publish() {
 		}()
 	}
 	if thresholdS != nil {
-		var tIDs []string
-		if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent,
-			&ArgsProcessEvent{CGREvent: cgrEv}, &tIDs); err != nil &&
-			err.Error() != utils.ErrNotFound.Error() {
-			utils.Logger.Warning(
-				fmt.Sprintf("<AccountS> error: %s processing account event %+v with ThresholdS.", err.Error(), cgrEv))
-		}
+		go func() {
+			var tIDs []string
+			if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent,
+				&ArgsProcessEvent{CGREvent: cgrEv}, &tIDs); err != nil &&
+				err.Error() != utils.ErrNotFound.Error() {
+				utils.Logger.Warning(
+					fmt.Sprintf("<AccountS> error: %s processing account event %+v with ThresholdS.", err.Error(), cgrEv))
+			}
+		}()
 	}
 }
 
