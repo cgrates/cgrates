@@ -68,7 +68,7 @@ func TestMCDRCEmptyTables(t *testing.T) {
 func TestMCDRCCreateCdrDirs(t *testing.T) {
 	for _, cdrcProfiles := range cfg.CdrcProfiles {
 		for _, cdrcInst := range cdrcProfiles {
-			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
+			for _, dir := range []string{cdrcInst.CDRInPath, cdrcInst.CDROutPath} {
 				if err := os.RemoveAll(dir); err != nil {
 					t.Fatal("Error removing folder: ", dir, err)
 				}
