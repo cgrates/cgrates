@@ -68,6 +68,9 @@ func (self *ApierV2) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.Ac
 		if acnt, err := self.DataManager.DataDB().GetAccount(acntKey[len(utils.ACCOUNT_PREFIX):]); err != nil && err != utils.ErrNotFound { // Not found is not an error here
 			return err
 		} else if acnt != nil {
+			if attr.Disabled != nil && *attr.Disabled != acnt.Disabled {
+				continue
+			}
 			retAccounts = append(retAccounts, acnt)
 		}
 	}

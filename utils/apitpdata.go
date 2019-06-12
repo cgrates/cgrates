@@ -455,6 +455,7 @@ type AttrGetAccounts struct {
 	AccountIds []string
 	Offset     int // Set the item offset
 	Limit      int // Limit number of items retrieved
+	Disabled   *bool
 }
 
 type ArgsCache struct {

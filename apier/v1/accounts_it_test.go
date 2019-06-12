@@ -53,6 +53,7 @@ var (
 		testAccITSetBalanceWithExtraData,
 		testAccITSetBalanceWithExtraData2,
 		testAccITAddBalanceWithNegative,
+		testAccITGetDisabledAccounts,
 		testAccITStopCgrEngine,
 	}
 )
@@ -353,6 +354,30 @@ func testAccITAddBalanceWithNegative(t *testing.T) {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 0.5 {
 		t.Errorf("Unexpected balance received : %+v", acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+}
+
+func testAccITGetDisabledAccounts(t *testing.T) {
+	var reply string
+	acnt1 := utils.AttrSetAccount{Tenant: "cgrates.org", Account: "account1", Disabled: utils.BoolPointer(true)}
+	acnt2 := utils.AttrSetAccount{Tenant: "cgrates.org", Account: "account2", Disabled: utils.BoolPointer(false)}
+	acnt3 := utils.AttrSetAccount{Tenant: "cgrates.org", Account: "account3", Disabled: utils.BoolPointer(true)}
+	acnt4 := utils.AttrSetAccount{Tenant: "cgrates.org", Account: "account4", Disabled: utils.BoolPointer(true)}
+
+	for _, account := range []utils.AttrSetAccount{acnt1, acnt2, acnt3, acnt4} {
+		if err := accRPC.Call("ApierV1.SetAccount", account, &reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
+		}
+	}
+
+	var acnts []*engine.Account
+	if err := accRPC.Call("ApierV2.GetAccounts", utils.AttrGetAccounts{Tenant: "cgrates.org", Disabled: utils.BoolPointer(true)},
+		&acnts); err != nil {
+		t.Error(err)
+	} else if len(acnts) != 3 {
+		t.Errorf("Accounts received: %+v", acnts)
 	}
 }
 
