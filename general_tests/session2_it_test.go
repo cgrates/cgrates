@@ -168,6 +168,7 @@ func testSesItAsActiveSessions(t *testing.T) {
 		t.Errorf("Expeced 0 session received %v session(s)", count)
 	}
 }
+
 func testSesItStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
