@@ -15,20 +15,20 @@
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="CGRateS real-time charging system"
+DESC="CGRateS Online Charging System"
 NAME=cgrates
 DAEMON=/usr/bin/cgr-engine
 USER=cgrates
 GROUP=cgrates
 DAEMON_OPTS=""
-TUTFOLDER=/usr/share/cgrates/tutorials/fs_evsock/cgrates
-TMP_DIR=/tmp/cgr_evsock/cgrates
+TUTFOLDER=/usr/share/cgrates/tutorials_test/osips/$NAME
+TMP_DIR=/tmp/cgr_osipsnative/$NAME
 SCRIPTNAME=$TUTFOLDER/etc/init.d/$NAME
 RUNDIR=$TMP_DIR/run
 PIDFILE=$RUNDIR/cgr-engine.pid
 STACKTRACE=$RUNDIR/$NAME.strace
 ENABLE=true
-DAEMON_OPTS="-config_path=/usr/share/cgrates/tutorials/fs_evsock/cgrates/etc/cgrates"
+DAEMON_OPTS="-config_path=$TUTFOLDER/etc/cgrates"
 CDREDIR=$TMP_DIR/cdre
 
 # Exit if the package is not installed
