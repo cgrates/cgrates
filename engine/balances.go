@@ -703,8 +703,8 @@ func (b *Balance) Publish() {
 		cgrEv.Event[utils.ExpiryTime] = b.ExpirationDate.Format(time.RFC3339)
 	}
 	if statS != nil {
-		var reply []string
 		go func() {
+			var reply []string
 			if err := statS.Call(utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{CGREvent: cgrEv}, &reply); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
@@ -714,13 +714,15 @@ func (b *Balance) Publish() {
 		}()
 	}
 	if thresholdS != nil {
-		var tIDs []string
-		if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, &ArgsProcessEvent{CGREvent: cgrEv}, &tIDs); err != nil &&
-			err.Error() != utils.ErrNotFound.Error() {
-			utils.Logger.Warning(
-				fmt.Sprintf("<AccountS> error: %s processing balance event %+v with ThresholdS.",
-					err.Error(), cgrEv))
-		}
+		go func() {
+			var tIDs []string
+			if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, &ArgsProcessEvent{CGREvent: cgrEv}, &tIDs); err != nil &&
+				err.Error() != utils.ErrNotFound.Error() {
+				utils.Logger.Warning(
+					fmt.Sprintf("<AccountS> error: %s processing balance event %+v with ThresholdS.",
+						err.Error(), cgrEv))
+			}
+		}()
 	}
 }
 
