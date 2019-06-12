@@ -127,7 +127,7 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		MetaPublishAccount:        publishAccount,
 		MetaPublishBalance:        publishBalance,
 		utils.MetaAMQPjsonMap:     sendAMQP,
-		utils.MetaAWSjsonMap:      sendAWS,
+		utils.MetaAMQPV1jsonMap:   sendAWS,
 		utils.MetaSQSjsonMap:      sendSQS,
 		MetaRemoveSessionCosts:    removeSessionCosts,
 		MetaRemoveExpired:         removeExpired,
@@ -424,7 +424,7 @@ func sendAWS(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 	cfg := config.CgrConfig()
 	fallbackFileName := (&utils.FallbackFileName{
 		Module:     fmt.Sprintf("%s>%s", utils.ActionsPoster, a.ActionType),
-		Transport:  utils.MetaAWSjsonMap,
+		Transport:  utils.MetaAMQPV1jsonMap,
 		Address:    a.ExtraParameters,
 		RequestID:  utils.GenUUID(),
 		FileSuffix: utils.JSNSuffix,

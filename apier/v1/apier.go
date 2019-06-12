@@ -1026,7 +1026,7 @@ func (v1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (
 				v1.Config.GeneralCfg().PosterAttempts, fileContent,
 				utils.PosterTransportContentTypes[ffn.Transport],
 				failedReqsOutDir, file.Name())
-		case utils.MetaAWSjsonMap:
+		case utils.MetaAMQPV1jsonMap:
 			err = engine.PostersCache.PostAWS(ffn.Address, v1.Config.GeneralCfg().PosterAttempts,
 				fileContent, failedReqsOutDir, file.Name())
 		case utils.MetaSQSjsonMap:
