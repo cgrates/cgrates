@@ -5,8 +5,7 @@
 
 "general": {
     "log_level": 7,
-	"node_id":"CGRKamailio",
-	"reply_timeout": "5s",
+	"node_id":"CGRFreeswitch",
 },
 
 
@@ -43,6 +42,9 @@
 	"stats_conns": [
 		{"address": "127.0.0.1:2012", "transport": "*json"},
 	],
+	"chargers_conns": [
+    	{"address": "*internal"}
+    ],
 	"sessions_cost_retries": 5,
 },
 
@@ -79,23 +81,22 @@
 		{"address": "127.0.0.1:2012", "transport": "*json"},
 	],
 	"chargers_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
+    	{"address": "*internal"}
+    ],
 	"store_session_costs": true,
 	"debit_interval": "5s",
-	"channel_sync_interval":"5m",
+	"channel_sync_interval":"7s",
 },
 
 
-"kamailio_agent": {
+"freeswitch_agent": {
 	"enabled": true,
-	"evapi_conns":[
-		{"address": "127.0.0.1:8448", "reconnects": 5}
+	"event_socket_conns":[
+		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": -1,"alias":""}
 	],
 	"sessions_conns": [
 		{"address": "*internal"},
 	],
-	"create_cdr": true,
 },
 
 
