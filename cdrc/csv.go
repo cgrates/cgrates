@@ -129,17 +129,12 @@ func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, 
 		if err != nil {
 			return nil, fmt.Errorf("Failed converting to StoredCdr, error: %s", err.Error())
 		} else if self.dfltCdrcCfg.CdrFormat == utils.MetaPartialCSV {
-			fmt.Println("===Teo===")
-			fmt.Println(utils.ToJSON(record))
 			if storedCdr, err = self.partialRecordsCache.MergePartialCDRRecord(NewPartialCDRRecord(storedCdr, self.partialCacheDumpFields)); err != nil {
 				return nil, fmt.Errorf("Failed merging PartialCDR, error: %s", err.Error())
 			} else if storedCdr == nil { // CDR was absorbed by cache since it was partial
-				fmt.Println("===CDR ABSORBED===")
 				continue
 			}
 		}
-		fmt.Println("=== storedCdr to save : ===")
-		fmt.Println(utils.ToJSON(storedCdr))
 		recordCdrs = append(recordCdrs, storedCdr)
 		if !cdrcCfg.ContinueOnSuccess {
 			break
