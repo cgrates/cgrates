@@ -78,10 +78,10 @@ func (me MapEvent) GetString(fldName string) (out string, err error) {
 	if !has {
 		return "", utils.ErrNotFound
 	}
-	return utils.IfaceAsString(fldIface)
+	return utils.IfaceAsString(fldIface), nil
 }
 
-func (me MapEvent) GetInt64(fldName string) (out int64, err error) {
+func (me MapEvent) GetTInt64(fldName string) (out int64, err error) {
 	fldIface, has := me[fldName]
 	if !has {
 		return 0, utils.ErrNotFound
@@ -160,25 +160,13 @@ func (me MapEvent) AsMapString(ignoredFlds utils.StringMap) (mp map[string]strin
 		if ignoredFlds.HasKey(k) {
 			continue
 		}
-		var out string
-		if out, err = utils.IfaceAsString(v); err != nil {
-			return nil, err
-		}
-		mp[k] = out
+		mp[k] = utils.IfaceAsString(v)
 	}
 	return
 }
 
 func (me MapEvent) AsMapStringIgnoreErrors(ignoredFlds utils.StringMap) (mp map[string]string) {
-	mp = make(map[string]string)
-	for k, v := range me {
-		if ignoredFlds.HasKey(k) {
-			continue
-		}
-		if out, err := utils.IfaceAsString(v); err == nil {
-			mp[k] = out
-		}
-	}
+	mp, _ = me.AsMapString(ignoredFlds)
 	return
 }
 
@@ -187,62 +175,37 @@ func (me MapEvent) AsCDR(cfg *config.CGRConfig, tnt, tmz string) (cdr *CDR, err 
 	cdr = &CDR{Tenant: tnt, Cost: -1.0, ExtraFields: make(map[string]string)}
 	for k, v := range me {
 		if _, has := utils.MainCDRFieldsMap[k]; !has { // not primary field, populate extra ones
-			if cdr.ExtraFields[k], err = utils.IfaceAsString(v); err != nil {
-				return nil, err
-			}
+			cdr.ExtraFields[k] = utils.IfaceAsString(v)
 			continue
 		}
 		switch k {
 		default:
+			// for the momment this return can not be reached because we implemented a case for every MainCDRField
 			return nil, fmt.Errorf("unimplemented CDR field: <%s>", k)
 		case utils.CGRID:
-			if cdr.CGRID, err = utils.IfaceAsString(v); err != nil {
-				return nil, err
-			}
+			cdr.CGRID = utils.IfaceAsString(v)
 		case utils.RunID:
-			if cdr.RunID, err = utils.IfaceAsString(v); err != nil {
-				return nil, err
-			}
+			cdr.RunID = utils.IfaceAsString(v)
 		case utils.OriginHost:
-			if cdr.OriginHost, err = utils.IfaceAsString(v); err != nil {
-				return nil, err
-			}
+			cdr.OriginHost = utils.IfaceAsString(v)
 		case utils.Source:
-			if cdr.Source, err = utils.IfaceAsString(v); err != nil {
-				return nil, err
-			}
+			cdr.Source = utils.IfaceAsString(v)
 		case utils.OriginID:
-			if cdr.OriginID, err = utils.IfaceAsString(v); err != nil {
-				return nil, err
-			}
+			cdr.OriginID = utils.IfaceAsString(v)
 		case utils.ToR:
-			if cdr.ToR, err = utils.IfaceAsString(v); err != nil {
-				return nil, err
-			}
+			cdr.ToR = utils.IfaceAsString(v)
 		case utils.RequestType:
-			if cdr.RequestType, err = utils.IfaceAsString(v); err != nil {
-				return nil, err
-			}
+			cdr.RequestType = utils.IfaceAsString(v)
 		case utils.Tenant:
-			if cdr.Tenant, err = utils.IfaceAsString(v); err != nil {
-				return nil, err
-			}
+			cdr.Tenant = utils.IfaceAsString(v)
 		case utils.Category:
-			if cdr.Category, err = utils.IfaceAsString(v); err != nil {
-				return nil, err
-			}
+			cdr.Category = utils.IfaceAsString(v)
 		case utils.Account:
-			if cdr.Account, err = utils.IfaceAsString(v); err != nil {
-				return nil, err
-			}
+			cdr.Account = utils.IfaceAsString(v)
 		case utils.Subject:
-			if cdr.Subject, err = utils.IfaceAsString(v); err != nil {
-				return nil, err
-			}
+			cdr.Subject = utils.IfaceAsString(v)
 		case utils.Destination:
-			if cdr.Destination, err = utils.IfaceAsString(v); err != nil {
-				return nil, err
-			}
+			cdr.Destination = utils.IfaceAsString(v)
 		case utils.SetupTime:
 			if cdr.SetupTime, err = utils.IfaceAsTime(v, tmz); err != nil {
 				return nil, err
@@ -264,9 +227,7 @@ func (me MapEvent) AsCDR(cfg *config.CGRConfig, tnt, tmz string) (cdr *CDR, err 
 				return nil, err
 			}
 		case utils.CostSource:
-			if cdr.CostSource, err = utils.IfaceAsString(v); err != nil {
-				return nil, err
-			}
+			cdr.CostSource = utils.IfaceAsString(v)
 		case utils.Cost:
 			if cdr.Cost, err = utils.IfaceAsFloat64(v); err != nil {
 				return nil, err
@@ -276,9 +237,7 @@ func (me MapEvent) AsCDR(cfg *config.CGRConfig, tnt, tmz string) (cdr *CDR, err 
 				return nil, err
 			}
 		case utils.ExtraInfo:
-			if cdr.ExtraInfo, err = utils.IfaceAsString(v); err != nil {
-				return nil, err
-			}
+			cdr.ExtraInfo = utils.IfaceAsString(v)
 		case utils.OrderID:
 			if cdr.OrderID, err = utils.IfaceAsTInt64(v); err != nil {
 				return nil, err

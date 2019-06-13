@@ -222,8 +222,7 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 		}
 	}
 
-	tenant, _ := utils.IfaceAsString(parameters[utils.Tenant])
-	tenant = utils.FirstNonEmpty(tenant, config.CgrConfig().GeneralCfg().DefaultTenant)
+	tenant := utils.FirstNonEmpty(utils.IfaceAsString(parameters[utils.Tenant]), config.CgrConfig().GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if argD == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)

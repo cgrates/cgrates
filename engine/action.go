@@ -176,12 +176,8 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 	}
 	//In case that we have extra data we populate default templates
 	mapExtraData, _ := extraData.(map[string]interface{})
-	var strVal string
 	for key, val := range mapExtraData {
-		if strVal, err = utils.IfaceAsString(val); err != nil {
-			return
-		}
-		if defaultTemplate[key], err = config.NewRSRParsers(strVal,
+		if defaultTemplate[key], err = config.NewRSRParsers(utils.IfaceAsString(val),
 			true, config.CgrConfig().GeneralCfg().RsrSepatarot); err != nil {
 			return
 		}
@@ -965,8 +961,7 @@ func (cdrP *cdrLogProvider) FieldAsString(fldPath []string) (data string, err er
 	if err != nil {
 		return
 	}
-	data, err = utils.IfaceAsString(valIface)
-	return
+	return utils.IfaceAsString(valIface), nil
 }
 
 // AsNavigableMap is part of engine.DataProvider interface

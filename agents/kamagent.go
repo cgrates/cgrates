@@ -313,14 +313,8 @@ func (self *KamailioAgent) disconnectSession(connIdx int, dscEv *KamSessionDisco
 
 // Internal method to disconnect session in Kamailio
 func (ka *KamailioAgent) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) (err error) {
-	hEntry, err := utils.IfaceAsString(args.EventStart[KamHashEntry])
-	if err != nil {
-		return err
-	}
-	hID, err := utils.IfaceAsString(args.EventStart[KamHashID])
-	if err != nil {
-		return err
-	}
+	hEntry := utils.IfaceAsString(args.EventStart[KamHashEntry])
+	hID := utils.IfaceAsString(args.EventStart[KamHashID])
 	connIdxIface, has := args.EventStart[EvapiConnID]
 	if !has {
 		utils.Logger.Err(

@@ -229,10 +229,7 @@ func (nM *NavigableMap) FieldAsString(fldPath []string) (fldVal string, err erro
 	if err != nil {
 		return
 	}
-	if fldVal, err = utils.IfaceAsString(valIface); err != nil {
-		return "", fmt.Errorf("cannot cast field: %s to string", utils.ToJSON(valIface))
-	}
-	return
+	return utils.IfaceAsString(valIface), nil
 }
 
 // String is part of engine.DataProvider interface
@@ -371,11 +368,7 @@ func (nM *NavigableMap) AsXMLElements() (ents []*XMLElement, err error) {
 			if nmItm.Config != nil && nmItm.Config.NewBranch {
 				pathIdx = make(map[string]*XMLElement) // reset cache so we can start having other elements with same path
 			}
-			val, err := utils.IfaceAsString(nmItm.Data)
-			if err != nil {
-				return nil,
-					fmt.Errorf("cannot cast value: <%s> to string", utils.ToJSON(nmItm.Data))
-			}
+			val := utils.IfaceAsString(nmItm.Data)
 			var pathCached bool
 			for i := len(nmItm.Path); i > 0; i-- {
 				var cachedElm *XMLElement

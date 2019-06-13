@@ -213,7 +213,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 			if err != nil {
 				return nil, err
 			}
-			substitute, err = utils.IfaceAsString(ifaceSum)
+			substitute = utils.IfaceAsString(ifaceSum)
 		case utils.MetaValueExponent:
 			if len(attribute.Value) != 2 {
 				return nil, fmt.Errorf("invalid arguments <%s> to %s",
@@ -254,11 +254,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 			continue
 		}
 		if attribute.Type == utils.META_COMPOSED {
-			evStrVal, err := utils.IfaceAsString(rply.CGREvent.Event[attribute.FieldName])
-			if err != nil {
-				return nil, err
-			}
-			substitute = evStrVal + substitute
+			substitute = utils.IfaceAsString(rply.CGREvent.Event[attribute.FieldName]) + substitute
 		}
 		rply.CGREvent.Event[attribute.FieldName] = substitute
 

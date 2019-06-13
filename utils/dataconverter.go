@@ -37,11 +37,7 @@ func (dcs DataConverters) ConvertString(in string) (out string, err error) {
 			return
 		}
 	}
-	out, err = IfaceAsString(outIface)
-	if err != nil {
-		return "", NewErrStringCast(outIface)
-	}
-	return
+	return IfaceAsString(outIface), nil
 }
 
 // DataConverter represents functions which should convert input into output

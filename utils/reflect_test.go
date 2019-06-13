@@ -252,55 +252,37 @@ func TestStringToInterface(t *testing.T) {
 
 func TestIfaceAsString(t *testing.T) {
 	val := interface{}("string1")
-	if rply, err := IfaceAsString(val); err != nil {
-		t.Error(err)
-	} else if rply != "string1" {
+	if rply := IfaceAsString(val); rply != "string1" {
 		t.Errorf("Expeced string1 ,recived %+v", rply)
 	}
 	val = interface{}(123)
-	if rply, err := IfaceAsString(val); err != nil {
-		t.Error(err)
-	} else if rply != "123" {
+	if rply := IfaceAsString(val); rply != "123" {
 		t.Errorf("Expeced 123 ,recived %+v", rply)
 	}
 	val = interface{}([]byte("byte_val"))
-	if rply, err := IfaceAsString(val); err != nil {
-		t.Error(err)
-	} else if rply != "byte_val" {
+	if rply := IfaceAsString(val); rply != "byte_val" {
 		t.Errorf("Expeced byte_val ,recived %+v", rply)
 	}
 	val = interface{}(true)
-	if rply, err := IfaceAsString(val); err != nil {
-		t.Error(err)
-	} else if rply != "true" {
+	if rply := IfaceAsString(val); rply != "true" {
 		t.Errorf("Expeced true ,recived %+v", rply)
 	}
-	if rply, err := IfaceAsString(time.Duration(1 * time.Second)); err != nil {
-		t.Error(err)
-	} else if rply != "1s" {
+	if rply := IfaceAsString(time.Duration(1 * time.Second)); rply != "1s" {
 		t.Errorf("Expeced 1s ,recived %+v", rply)
 	}
-	if rply, err := IfaceAsString(nil); err != nil {
-		t.Error(err)
-	} else if rply != "" {
+	if rply := IfaceAsString(nil); rply != "" {
 		t.Errorf("Expeced  ,recived %+v", rply)
 	}
 	val = interface{}(net.ParseIP("127.0.0.1"))
-	if rply, err := IfaceAsString(val); err != nil {
-		t.Error(err)
-	} else if rply != "127.0.0.1" {
+	if rply := IfaceAsString(val); rply != "127.0.0.1" {
 		t.Errorf("Expeced  ,recived %+v", rply)
 	}
 	val = interface{}(10.23)
-	if rply, err := IfaceAsString(val); err != nil {
-		t.Error(err)
-	} else if rply != "10.23" {
+	if rply := IfaceAsString(val); rply != "10.23" {
 		t.Errorf("Expeced  ,recived %+v", rply)
 	}
 	val = interface{}(time.Date(2009, 11, 10, 23, 0, 0, 0, time.UTC))
-	if rply, err := IfaceAsString(val); err != nil {
-		t.Error(err)
-	} else if rply != "2009-11-10T23:00:00Z" {
+	if rply := IfaceAsString(val); rply != "2009-11-10T23:00:00Z" {
 		t.Errorf("Expeced  ,recived %+v", rply)
 	}
 }
