@@ -42,10 +42,10 @@ var tutorialCallsRpc *rpc.Client
 var tutorialCallsPjSuaListener *os.File
 var waitRater = flag.Int("wait_rater", 1000, "Number of miliseconds to wait for rater to start and cache")
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-var fsConfig = flag.String("fsConfig", "/usr/share/cgrates/tutorials_test/fs_evsock", "FreeSwitch tutorial folder")
-var kamConfig = flag.String("kamConfig", "/usr/share/cgrates/tutorials_test/kamevapi", "Kamailio tutorial folder")
-var oSipsConfig = flag.String("osConfig", "/usr/share/cgrates/tutorials_test/osips", "OpenSips tutorial folder")
-var ariConf = flag.String("ariConf", "/usr/share/cgrates/tutorials_test/asterisk_ari", "Asterisk tutorial folder")
+var fsConfig = flag.String("fsConfig", "/usr/share/cgrates/tutorial_tests/fs_evsock", "FreeSwitch tutorial folder")
+var kamConfig = flag.String("kamConfig", "/usr/share/cgrates/tutorial_tests/kamevapi", "Kamailio tutorial folder")
+var oSipsConfig = flag.String("osConfig", "/usr/share/cgrates/tutorial_tests/osips", "OpenSips tutorial folder")
+var ariConf = flag.String("ariConf", "/usr/share/cgrates/tutorial_tests/asterisk_ari", "Asterisk tutorial folder")
 var optConf string
 
 var sTestsCalls = []func(t *testing.T){
