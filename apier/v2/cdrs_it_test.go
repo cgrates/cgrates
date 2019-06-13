@@ -207,6 +207,28 @@ func testV2CDRsGetCdrs(t *testing.T) {
 
 // Should re-rate the supplier1 cost with RP_ANY2CNT
 func testV2CDRsRateCDRs(t *testing.T) {
+	var rpl engine.RatingProfile
+	attrGetRatingPlan := &utils.AttrGetRatingProfile{
+		Tenant: "cgrates.org", Category: "call", Subject: "SUPPLIER1"}
+	actTime, err := utils.ParseTimeDetectLayout("2018-01-01T00:00:00Z", "")
+	if err != nil {
+		t.Error(err)
+	}
+	expected := engine.RatingProfile{
+		Id: "*out:cgrates.org:call:SUPPLIER1",
+		RatingPlanActivations: engine.RatingPlanActivations{
+			{
+				ActivationTime: actTime,
+				RatingPlanId:   "RP_ANY1CNT",
+			},
+		},
+	}
+	if err := cdrsRpc.Call("ApierV1.GetRatingProfile", attrGetRatingPlan, &rpl); err != nil {
+		t.Errorf("Got error on ApierV1.GetRatingProfile: %+v", err)
+	} else if !reflect.DeepEqual(expected, rpl) {
+		t.Errorf("Calling ApierV1.GetRatingProfile expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rpl))
+	}
+
 	rpf := &utils.AttrSetRatingProfile{
 		Tenant:   "cgrates.org",
 		Category: "call",
@@ -215,13 +237,30 @@ func testV2CDRsRateCDRs(t *testing.T) {
 			{
 				ActivationTime: "2018-01-01T00:00:00Z",
 				RatingPlanId:   "RP_ANY2CNT"}},
-		Overwrite: true}
+		Overwrite: true,
+	}
 	var reply string
 	if err := cdrsRpc.Call("ApierV1.SetRatingProfile", rpf, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetRatingProfile: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.SetRatingProfile got reply: ", reply)
 	}
+
+	expected = engine.RatingProfile{
+		Id: "*out:cgrates.org:call:SUPPLIER1",
+		RatingPlanActivations: engine.RatingPlanActivations{
+			{
+				ActivationTime: actTime,
+				RatingPlanId:   "RP_ANY2CNT",
+			},
+		},
+	}
+	if err := cdrsRpc.Call("ApierV1.GetRatingProfile", attrGetRatingPlan, &rpl); err != nil {
+		t.Errorf("Got error on ApierV1.GetRatingProfile: %+v", err)
+	} else if !reflect.DeepEqual(expected, rpl) {
+		t.Errorf("Calling ApierV1.GetRatingProfile expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rpl))
+	}
+
 	if err := cdrsRpc.Call(utils.CDRsV1RateCDRs, &engine.ArgRateCDRs{
 		RPCCDRsFilter: utils.RPCCDRsFilter{NotRunIDs: []string{utils.MetaRaw}},
 		ChargerS:      utils.BoolPointer(true),
