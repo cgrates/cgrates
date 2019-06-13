@@ -274,8 +274,7 @@ func (cP *csvProvider) FieldAsString(fldPath []string) (data string, err error) 
 	if err != nil {
 		return
 	}
-	data, err = utils.IfaceAsString(valIface)
-	return
+	return utils.IfaceAsString(valIface), nil
 }
 
 // AsNavigableMap is part of engine.DataProvider interface

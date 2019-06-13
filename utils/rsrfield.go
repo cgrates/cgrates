@@ -186,10 +186,7 @@ func (rsrf *RSRField) filtersPassing(value string) bool {
 
 // Parse will parse the value out considering converters and filters
 func (rsrf *RSRField) Parse(value interface{}) (out string, err error) {
-	if out, err = IfaceAsString(value); err != nil {
-		return
-	}
-	out = rsrf.parseValue(out)
+	out = rsrf.parseValue(IfaceAsString(value))
 	if out, err = rsrf.converters.ConvertString(out); err != nil {
 		return
 	}

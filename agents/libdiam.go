@@ -116,7 +116,7 @@ func diamAVPAsString(dAVP *diam.AVP) (s string, err error) {
 	if iface, err = diamAVPAsIface(dAVP); err != nil {
 		return
 	}
-	return utils.IfaceAsString(iface)
+	return utils.IfaceAsString(iface), nil
 }
 
 // newDiamDataType constructs dataType from valStr
@@ -320,7 +320,7 @@ func (dP *diameterDP) FieldAsString(fldPath []string) (data string, err error) {
 	if err != nil {
 		return
 	}
-	return utils.IfaceAsString(valIface)
+	return utils.IfaceAsString(valIface), nil
 }
 
 // RemoteHost is part of engine.DataProvider interface
@@ -447,16 +447,12 @@ func updateDiamMsgFromNavMap(m *diam.Message, navMp *config.NavigableMap, tmz st
 		if itm == nil {
 			continue // all attributes, not writable to diameter packet
 		}
-		itmStr, err := utils.IfaceAsString(itm.Data)
-		if err != nil {
-			return fmt.Errorf("cannot convert data: %+v to string, err: %s", itm.Data, err)
-		}
 		var newBranch bool
 		if itm.Config != nil && itm.Config.NewBranch {
 			newBranch = true
 		}
 		if err = messageSetAVPsWithPath(m, itm.Path,
-			itmStr, newBranch, tmz); err != nil {
+			utils.IfaceAsString(itm.Data), newBranch, tmz); err != nil {
 			return fmt.Errorf("setting item with path: %+v got err: %s", itm.Path, err.Error())
 		}
 	}

@@ -79,7 +79,7 @@ func (dP *dnsDP) FieldAsString(fldPath []string) (data string, err error) {
 	if err != nil {
 		return
 	}
-	return utils.IfaceAsString(valIface)
+	return utils.IfaceAsString(valIface), nil
 }
 
 // RemoteHost is part of engine.DataProvider interface
@@ -193,38 +193,22 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *config.NavigableMap) (err error) {
 			if msg.Question[0].Qtype != dns.TypeNAPTR {
 				return fmt.Errorf("field <%s> only works with NAPTR", utils.Flags)
 			}
-			var itm string
-			if itm, err = utils.IfaceAsString(cfgItm.Data); err != nil {
-				return fmt.Errorf("item: <%s>, err: %s", cfgItm.Path[0], err.Error())
-			}
-			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Flags = itm
+			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Flags = utils.IfaceAsString(cfgItm.Data)
 		case utils.Service:
 			if msg.Question[0].Qtype != dns.TypeNAPTR {
 				return fmt.Errorf("field <%s> only works with NAPTR", utils.Service)
 			}
-			var itm string
-			if itm, err = utils.IfaceAsString(cfgItm.Data); err != nil {
-				return fmt.Errorf("item: <%s>, err: %s", cfgItm.Path[0], err.Error())
-			}
-			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Service = itm
+			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Service = utils.IfaceAsString(cfgItm.Data)
 		case utils.Regexp:
 			if msg.Question[0].Qtype != dns.TypeNAPTR {
 				return fmt.Errorf("field <%s> only works with NAPTR", utils.Regexp)
 			}
-			var itm string
-			if itm, err = utils.IfaceAsString(cfgItm.Data); err != nil {
-				return fmt.Errorf("item: <%s>, err: %s", cfgItm.Path[0], err.Error())
-			}
-			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Regexp = itm
+			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Regexp = utils.IfaceAsString(cfgItm.Data)
 		case utils.Replacement:
 			if msg.Question[0].Qtype != dns.TypeNAPTR {
 				return fmt.Errorf("field <%s> only works with NAPTR", utils.Replacement)
 			}
-			var rplc string
-			if rplc, err = utils.IfaceAsString(cfgItm.Data); err != nil {
-				return fmt.Errorf("item: <%s>, err: %s", cfgItm.Path[0], err.Error())
-			}
-			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Replacement = rplc
+			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Replacement = utils.IfaceAsString(cfgItm.Data)
 		}
 
 	}

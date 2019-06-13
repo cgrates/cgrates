@@ -790,3 +790,61 @@ func TestSafEventAsCDR(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
 }
+
+func TestSafEventGetTInt64(t *testing.T) {
+	if rply, err := safEv.GetTInt64("test2"); err != nil {
+		t.Error(err)
+	} else if rply != int64(42) {
+		t.Errorf("Expecting %+v, received: %+v", int64(42), rply)
+	}
+
+	if rply, err := safEv.GetTInt64("test3"); err != nil {
+		t.Error(err)
+	} else if rply != int64(42) {
+		t.Errorf("Expecting %+v, received: %+v", int64(42), rply)
+	}
+
+	if rply, err := safEv.GetTInt64("test4"); err == nil {
+		t.Errorf("Expecting error, received: %+v with error %v", rply, err)
+	}
+
+	if rply, err := safEv.GetTInt64("0test"); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting error: %v, received: %+v with error %v", utils.ErrNotFound, rply, err)
+	}
+}
+
+func TestSafEventGetDurationPtrIgnoreErrors(t *testing.T) {
+	if rply := safEv.GetDurationPtrIgnoreErrors("test"); rply != nil {
+		t.Errorf("Expected: %+v, received: %+v", nil, rply)
+	}
+	expected := utils.DurationPointer(time.Duration(10 * time.Second))
+	if rply := safEv.GetDurationPtrIgnoreErrors("test6"); *rply != *expected {
+		t.Errorf("Expected: %+v, received: %+v", expected, rply)
+	}
+	expected = utils.DurationPointer(time.Duration(42 * time.Second))
+	if rply := safEv.GetDurationPtrIgnoreErrors("test7"); *rply != *expected {
+		t.Errorf("Expected: %+v, received: %+v", expected, rply)
+	}
+	expected = utils.DurationPointer(time.Duration(42))
+	if rply := safEv.GetDurationPtrIgnoreErrors("test2"); *rply != *expected {
+		t.Errorf("Expected: %+v, received: %+v", expected, rply)
+	}
+}
+
+func TestSafEventGetDurationOrDefault(t *testing.T) {
+	safEv.Remove("test7")
+	expected := time.Duration(10 * time.Second)
+	if rply, err := safEv.GetDurationOrDefault("test7", time.Duration(10*time.Second)); err != nil {
+		t.Error(err)
+	} else if rply != expected {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
+	safEv.Set("test7", "42s")
+	expected = time.Duration(42 * time.Second)
+	if rply, err := safEv.GetDurationOrDefault("test7", time.Second); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
+
+}

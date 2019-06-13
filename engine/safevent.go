@@ -126,9 +126,9 @@ func (se *SafEvent) GetString(fldName string) (out string, err error) {
 	return
 }
 
-func (se SafEvent) GetInt64(fldName string) (out int64, err error) {
+func (se SafEvent) GetTInt64(fldName string) (out int64, err error) {
 	se.RLock()
-	out, err = se.Me.GetInt64(fldName)
+	out, err = se.Me.GetTInt64(fldName)
 	se.RUnlock()
 	return
 }
@@ -219,7 +219,7 @@ func (se *SafEvent) GetSetString(fldName string, setVal string) (out string, err
 		return
 	}
 	// should be present, return it as string
-	return utils.IfaceAsString(outIface)
+	return utils.IfaceAsString(outIface), nil
 }
 
 // GetMapInterface returns the map stored internally without cloning it

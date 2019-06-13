@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
@@ -71,13 +70,7 @@ func MatchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 					continue
 				}
 				if _, cached := stringFieldVals[fldName]; !cached {
-					strVal, err := utils.IfaceAsString(fieldValIf)
-					if err != nil {
-						utils.Logger.Warning(
-							fmt.Sprintf("<%s> cannot cast field: %s into string", utils.FilterS, fldName))
-						continue
-					}
-					stringFieldVals[fldName] = strVal
+					stringFieldVals[fldName] = utils.IfaceAsString(fieldValIf)
 				}
 				fldVal := stringFieldVals[fldName]
 				fldVals := []string{fldVal}

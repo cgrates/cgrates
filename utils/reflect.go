@@ -106,11 +106,7 @@ func ReflectFieldAsString(intf interface{}, fldName, extraFieldsLabel string) (s
 	case reflect.Float64:
 		return strconv.FormatFloat(vOf.Float(), 'f', -1, 64), nil
 	case reflect.Interface:
-		strVal, err := IfaceAsString(field)
-		if err != nil {
-			return "", fmt.Errorf("Cannot convert to string field type: %s", vOf.Kind().String())
-		}
-		return strVal, nil
+		return IfaceAsString(field), nil
 	default:
 		return "", fmt.Errorf("Cannot convert to string field type: %s", vOf.Kind().String())
 	}
@@ -223,42 +219,38 @@ func IfaceAsBool(itm interface{}) (b bool, err error) {
 	return
 }
 
-func IfaceAsString(fld interface{}) (out string, err error) {
-	switch fld.(type) {
+func IfaceAsString(fld interface{}) (out string) {
+	switch value := fld.(type) {
 	case nil:
 		return
 	case int:
-		return strconv.Itoa(fld.(int)), nil
+		return strconv.Itoa(value)
 	case int32:
-		return strconv.FormatInt(int64(fld.(int32)), 10), nil
+		return strconv.FormatInt(int64(value), 10)
 	case int64:
-		return strconv.FormatInt(fld.(int64), 10), nil
+		return strconv.FormatInt(value, 10)
 	case uint32:
-		return strconv.FormatUint(uint64(fld.(uint32)), 10), nil
+		return strconv.FormatUint(uint64(value), 10)
 	case uint64:
-		return strconv.FormatUint(fld.(uint64), 10), nil
+		return strconv.FormatUint(value, 10)
 	case bool:
-		return strconv.FormatBool(fld.(bool)), nil
+		return strconv.FormatBool(value)
 	case float32:
-		return strconv.FormatFloat(float64(fld.(float32)), 'f', -1, 64), nil
+		return strconv.FormatFloat(float64(value), 'f', -1, 64)
 	case float64:
-		return strconv.FormatFloat(fld.(float64), 'f', -1, 64), nil
+		return strconv.FormatFloat(value, 'f', -1, 64)
 	case []uint8:
-		if byteVal, canCast := fld.([]byte); !canCast {
-			return "", ErrNotConvertibleNoCaps
-		} else {
-			return string(byteVal), nil
-		}
+		return string(value) // byte is an alias for uint8 conversions implicit
 	case time.Duration:
-		return fld.(time.Duration).String(), nil
+		return value.String()
 	case time.Time:
-		return fld.(time.Time).Format(time.RFC3339), nil
+		return value.Format(time.RFC3339)
 	case net.IP:
-		return fld.(net.IP).String(), nil
+		return value.String()
 	case string:
-		return fld.(string), nil
+		return value
 	default: // Maybe we are lucky and the value converts to string
-		return ToJSON(fld), nil
+		return ToJSON(fld)
 	}
 }
 

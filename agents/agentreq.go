@@ -119,7 +119,7 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 	if iface, err = ar.FieldAsInterface(fldPath); err != nil {
 		return
 	}
-	return utils.IfaceAsString(iface)
+	return utils.IfaceAsString(iface), nil
 }
 
 // AsNavigableMap implements engine.DataProvider
@@ -156,16 +156,8 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 				valSet = nMFields.([]*config.NMItem) // start from previous stored fields
 				if tplFld.Type == utils.META_COMPOSED {
 					prevNMItem := valSet[len(valSet)-1] // could be we need nil protection here
-					prevDataStr, err := utils.IfaceAsString(prevNMItem.Data)
-					if err != nil {
-						return nil, err
-					}
-					outStr, err := utils.IfaceAsString(out)
-					if err != nil {
-						return nil, err
-					}
-					*nMItm = *prevNMItem // inherit the particularities, ie AttributeName
-					nMItm.Data = prevDataStr + outStr
+					*nMItm = *prevNMItem                // inherit the particularities, ie AttributeName
+					nMItm.Data = utils.IfaceAsString(prevNMItem.Data) + utils.IfaceAsString(out)
 				}
 				valSet = valSet[:len(valSet)-1] // discard the last item
 			}

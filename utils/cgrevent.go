@@ -52,7 +52,7 @@ func (ev *CGREvent) FieldAsString(fldName string) (val string, err error) {
 	if !has {
 		return "", ErrNotFound
 	}
-	return IfaceAsString(iface)
+	return IfaceAsString(iface), nil
 }
 
 // FieldAsTime returns a field as Time instance

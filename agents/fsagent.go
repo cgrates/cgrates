@@ -385,7 +385,7 @@ func (sm *FSsessions) Call(serviceMethod string, args interface{}, reply interfa
 func (fsa *FSsessions) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) (err error) {
 	ev := engine.NewMapEvent(args.EventStart)
 	channelID := ev.GetStringIgnoreErrors(utils.OriginID)
-	connIdx, err := ev.GetInt64(FsConnID)
+	connIdx, err := ev.GetTInt64(FsConnID)
 	if err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> error: <%s:%s> when attempting to disconnect channelID: <%s>",

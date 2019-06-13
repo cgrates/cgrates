@@ -250,10 +250,7 @@ func (prsr *RSRParser) parseValue(value string) string {
 
 // ParseValue will parse the value out considering converters and filters
 func (prsr *RSRParser) ParseValue(value interface{}) (out string, err error) {
-	if out, err = utils.IfaceAsString(value); err != nil {
-		return
-	}
-	out = prsr.parseValue(out)
+	out = prsr.parseValue(utils.IfaceAsString(value))
 	if out, err = prsr.converters.ConvertString(out); err != nil {
 		return
 	}

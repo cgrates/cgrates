@@ -362,6 +362,15 @@ func TestMapEventAsCDR(t *testing.T) {
 	if _, err := me.AsCDR(nil, utils.EmptyString, utils.EmptyString); err == nil {
 		t.Errorf("Expecting not null error, received: null error")
 	}
+	me = MapEvent{"CostDetails": "clearly not CostDetails string"}
+	if _, err := me.AsCDR(nil, utils.EmptyString, utils.EmptyString); err == nil {
+		t.Errorf("Expecting not null error, received: null error")
+	}
+	me = MapEvent{"OrderID": "clearly not int64 string"}
+	if _, err := me.AsCDR(nil, utils.EmptyString, utils.EmptyString); err == nil {
+		t.Errorf("Expecting not null error, received: null error")
+	}
+
 	me = MapEvent{"ExtraField1": 5, "ExtraField2": "extra"}
 	expected = &CDR{
 		Cost: -1.0,
@@ -396,6 +405,50 @@ func TestMapEventAsCDR(t *testing.T) {
 		Tenant:      cfg.GeneralCfg().DefaultTenant,
 		Category:    cfg.GeneralCfg().DefaultCategory,
 		ExtraInfo:   "ACCOUNT_NOT_FOUND",
+	}
+	if rply, err := me.AsCDR(cfg, utils.EmptyString, utils.EmptyString); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
+	me = MapEvent{
+		utils.CGRID:       "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+		utils.RunID:       utils.MetaDefault,
+		utils.OriginHost:  utils.FreeSWITCHAgent,
+		utils.OriginID:    "127.0.0.1",
+		utils.ToR:         utils.VOICE,
+		utils.RequestType: utils.META_PREPAID,
+		utils.Tenant:      "cgrates.org",
+		utils.Category:    utils.CALL,
+		utils.Account:     "10010",
+		utils.Subject:     "10010",
+		utils.Destination: "10012",
+		"ExtraField1":     5,
+		"Source":          1001,
+		"CostSource":      "1002",
+		"ExtraField2":     "extra",
+		"ExtraInfo":       "ACCOUNT_NOT_FOUND",
+	}
+	expected = &CDR{
+		CGRID:       "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+		RunID:       utils.MetaDefault,
+		OriginHost:  utils.FreeSWITCHAgent,
+		OriginID:    "127.0.0.1",
+		ToR:         utils.VOICE,
+		RequestType: utils.META_PREPAID,
+		Tenant:      "cgrates.org",
+		Category:    utils.CALL,
+		Account:     "10010",
+		Subject:     "10010",
+		Destination: "10012",
+		Cost:        -1.0,
+		Source:      "1001",
+		CostSource:  "1002",
+		ExtraFields: map[string]string{
+			"ExtraField1": "5",
+			"ExtraField2": "extra",
+		},
+		ExtraInfo: "ACCOUNT_NOT_FOUND",
 	}
 	if rply, err := me.AsCDR(cfg, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Error(err)
@@ -612,5 +665,74 @@ func TestMapEventAsCDR(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
+}
+
+func TestMapEventGetTInt64(t *testing.T) {
+	if rply, err := mapEv.GetTInt64("test2"); err != nil {
+		t.Error(err)
+	} else if rply != int64(42) {
+		t.Errorf("Expecting %+v, received: %+v", int64(42), rply)
+	}
+
+	if rply, err := mapEv.GetTInt64("test3"); err != nil {
+		t.Error(err)
+	} else if rply != int64(42) {
+		t.Errorf("Expecting %+v, received: %+v", int64(42), rply)
+	}
+
+	if rply, err := mapEv.GetTInt64("test4"); err == nil {
+		t.Errorf("Expecting error, received: %+v with error %v", rply, err)
+	}
+
+	if rply, err := mapEv.GetTInt64("0test"); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting error: %v, received: %+v with error %v", utils.ErrNotFound, rply, err)
+	}
+}
+
+func TestMapEventGetDurationPtr(t *testing.T) {
+	if rply, err := mapEv.GetDurationPtr("test4"); err == nil {
+		t.Errorf("Expecting error, received: %+v with error %v", rply, err)
+	}
+	if rply, err := mapEv.GetDurationPtr("test"); err != utils.ErrNotFound {
+		t.Errorf("Expected: %+v, received: %+v", utils.ErrNotFound, err)
+	} else if rply != nil {
+		t.Errorf("Expected: %+v , received duration: %+v", nil, rply)
+	}
+	expected := utils.DurationPointer(time.Duration(10 * time.Second))
+	if rply, err := mapEv.GetDurationPtr("test6"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
+	expected = utils.DurationPointer(time.Duration(42 * time.Second))
+	if rply, err := mapEv.GetDurationPtr("test7"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
+	expected = utils.DurationPointer(time.Duration(42))
+	if rply, err := mapEv.GetDurationPtr("test2"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
+}
+
+func TestMapEventGetDurationPtrIgnoreErrors(t *testing.T) {
+	if rply := mapEv.GetDurationPtrIgnoreErrors("test"); rply != nil {
+		t.Errorf("Expected: %+v, received: %+v", nil, rply)
+	}
+	expected := utils.DurationPointer(time.Duration(10 * time.Second))
+	if rply := mapEv.GetDurationPtrIgnoreErrors("test6"); *rply != *expected {
+		t.Errorf("Expected: %+v, received: %+v", expected, rply)
+	}
+	expected = utils.DurationPointer(time.Duration(42 * time.Second))
+	if rply := mapEv.GetDurationPtrIgnoreErrors("test7"); *rply != *expected {
+		t.Errorf("Expected: %+v, received: %+v", expected, rply)
+	}
+	expected = utils.DurationPointer(time.Duration(42))
+	if rply := mapEv.GetDurationPtrIgnoreErrors("test2"); *rply != *expected {
+		t.Errorf("Expected: %+v, received: %+v", expected, rply)
 	}
 }

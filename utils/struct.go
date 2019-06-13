@@ -288,11 +288,7 @@ func UpdateStructWithIfaceMap(s interface{}, mp map[string]interface{}) (err err
 					fld.SetFloat(valFlt)
 				}
 			case reflect.String:
-				if valStr, err := IfaceAsString(val); err != nil {
-					return fmt.Errorf("cannot convert field: %+v to string", val)
-				} else {
-					fld.SetString(valStr)
-				}
+				fld.SetString(IfaceAsString(val))
 			default: // improper use of function
 				return fmt.Errorf("cannot update unsupported struct field: %+v", fld)
 			}
