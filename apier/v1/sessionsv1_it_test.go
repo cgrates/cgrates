@@ -36,11 +36,33 @@ import (
 )
 
 var (
-	sSv1CfgPath string
-	sSv1Cfg     *config.CGRConfig
-	sSv1BiRpc   *rpc2.Client
-	sSApierRpc  *rpc.Client
-	discEvChan  = make(chan *utils.AttrDisconnectSession, 1)
+	sSv1CfgPath     string
+	sSv1Cfg         *config.CGRConfig
+	sSv1BiRpc       *rpc2.Client
+	sSApierRpc      *rpc.Client
+	discEvChan      = make(chan *utils.AttrDisconnectSession, 1)
+	sSV1RequestType string
+	sTestSessionSv1 = []func(t *testing.T){
+		testSSv1ItInitCfg,
+		testSSv1ItResetDataDb,
+		testSSv1ItResetStorDb,
+		testSSv1ItStartEngine,
+		testSSv1ItRpcConn,
+		testSSv1ItPing,
+		testSSv1ItTPFromFolder,
+		testSSv1ItAuth,
+		testSSv1ItAuthWithDigest,
+		testSSv1ItInitiateSession,
+		testSSv1ItInitiateSessionWithDigest,
+		testSSv1ItUpdateSession,
+		testSSv1ItTerminateSession,
+		testSSv1ItProcessCDR,
+		testSSv1ItProcessEvent,
+		testSSv1ItCDRsGetCdrs,
+		testSSv1ItForceUpdateSession,
+		testSSv1ItDynamicDebit,
+		testSSv1ItStopCgrEngine,
+	}
 )
 
 func handleDisconnectSession(clnt *rpc2.Client,
@@ -57,7 +79,21 @@ func handleGetSessionIDs(clnt *rpc2.Client,
 	return nil
 }
 
-func TestSSv1ItInitCfg(t *testing.T) {
+func TestSSv1ItWithPrepaid(t *testing.T) {
+	sSV1RequestType = utils.META_PREPAID
+	for _, stest := range sTestSessionSv1 {
+		t.Run(sSV1RequestType, stest)
+	}
+}
+
+// func TestSSv1ItWithPostPaid(t *testing.T) {
+// 	sSV1RequestType = utils.META_POSTPAID
+// 	for _, stest := range sTestSessionSv1 {
+// 		t.Run(sSV1RequestType, stest)
+// 	}
+// }
+
+func testSSv1ItInitCfg(t *testing.T) {
 	var err error
 	sSv1CfgPath = path.Join(*dataDir, "conf", "samples", "sessions")
 	// Init config first
@@ -69,25 +105,25 @@ func TestSSv1ItInitCfg(t *testing.T) {
 	config.SetCgrConfig(sSv1Cfg)
 }
 
-func TestSSv1ItResetDataDb(t *testing.T) {
+func testSSv1ItResetDataDb(t *testing.T) {
 	if err := engine.InitDataDb(sSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestSSv1ItResetStorDb(t *testing.T) {
+func testSSv1ItResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(sSv1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestSSv1ItStartEngine(t *testing.T) {
+func testSSv1ItStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(sSv1CfgPath, 1000); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestSSv1ItRpcConn(t *testing.T) {
+func testSSv1ItRpcConn(t *testing.T) {
 	dummyClnt, err := utils.NewBiJSONrpcClient(sSv1Cfg.SessionSCfg().ListenBijson,
 		nil)
 	if err != nil {
@@ -107,7 +143,7 @@ func TestSSv1ItRpcConn(t *testing.T) {
 	dummyClnt.Close() // close so we don't get EOF error when disconnecting server
 }
 
-func TestSSv1ItPing(t *testing.T) {
+func testSSv1ItPing(t *testing.T) {
 	var resp string
 	if err := sSv1BiRpc.Call(utils.SessionSv1Ping, new(utils.CGREvent), &resp); err != nil {
 		t.Error(err)
@@ -117,7 +153,7 @@ func TestSSv1ItPing(t *testing.T) {
 }
 
 // Load the tariff plan, creating accounts and their balances
-func TestSSv1ItTPFromFolder(t *testing.T) {
+func testSSv1ItTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{
 		FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
 	var loadInst utils.LoadInstance
@@ -128,7 +164,7 @@ func TestSSv1ItTPFromFolder(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 }
 
-func TestSSv1ItAuth(t *testing.T) {
+func testSSv1ItAuth(t *testing.T) {
 	authUsage := 5 * time.Minute
 	args := &sessions.V1AuthorizeArgs{
 		GetMaxUsage:        true,
@@ -142,7 +178,7 @@ func TestSSv1ItAuth(t *testing.T) {
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "TestSSv1It1",
-				utils.RequestType: utils.META_PREPAID,
+				utils.RequestType: sSV1RequestType,
 				utils.Account:     "1001",
 				utils.Subject:     "ANY2CNT",
 				utils.Destination: "1002",
@@ -155,7 +191,10 @@ func TestSSv1ItAuth(t *testing.T) {
 	if err := sSv1BiRpc.Call(utils.SessionSv1AuthorizeEvent, args, &rply); err != nil {
 		t.Fatal(err)
 	}
-	if *rply.MaxUsage != authUsage {
+	// in case of prepaid we expect a MaxUsage of 5min
+	// and in case of postpaid we expect -1
+	if (sSV1RequestType == utils.META_PREPAID && *rply.MaxUsage != authUsage) ||
+		(sSV1RequestType == utils.META_POSTPAID && *rply.MaxUsage != -1) {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceAllocation == "" {
@@ -198,7 +237,7 @@ func TestSSv1ItAuth(t *testing.T) {
 				utils.Destination: "1002",
 				"OfficeGroup":     "Marketing",
 				utils.OriginID:    "TestSSv1It1",
-				utils.RequestType: utils.META_PREPAID,
+				utils.RequestType: sSV1RequestType,
 				utils.SetupTime:   "2018-01-07T17:00:00Z",
 				utils.Usage:       300000000000.0,
 			},
@@ -210,7 +249,7 @@ func TestSSv1ItAuth(t *testing.T) {
 	}
 }
 
-func TestSSv1ItAuthWithDigest(t *testing.T) {
+func testSSv1ItAuthWithDigest(t *testing.T) {
 	authUsage := 5 * time.Minute
 	args := &sessions.V1AuthorizeArgs{
 		GetMaxUsage:        true,
@@ -224,7 +263,7 @@ func TestSSv1ItAuthWithDigest(t *testing.T) {
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "TestSSv1It1",
-				utils.RequestType: utils.META_PREPAID,
+				utils.RequestType: sSV1RequestType,
 				utils.Account:     "1001",
 				utils.Subject:     "ANY2CNT",
 				utils.Destination: "1002",
@@ -237,7 +276,10 @@ func TestSSv1ItAuthWithDigest(t *testing.T) {
 	if err := sSv1BiRpc.Call(utils.SessionSv1AuthorizeEventWithDigest, args, &rply); err != nil {
 		t.Error(err)
 	}
-	if *rply.MaxUsage != authUsage.Seconds() {
+	// in case of prepaid we expect a MaxUsage of 5min
+	// and in case of postpaid we expect -1
+	if (sSV1RequestType == utils.META_PREPAID && *rply.MaxUsage != authUsage.Seconds()) ||
+		(sSV1RequestType == utils.META_POSTPAID && *rply.MaxUsage != -1) {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceAllocation == "" {
@@ -253,7 +295,7 @@ func TestSSv1ItAuthWithDigest(t *testing.T) {
 	}
 }
 
-func TestSSv1ItInitiateSession(t *testing.T) {
+func testSSv1ItInitiateSession(t *testing.T) {
 	initUsage := 5 * time.Minute
 	args := &sessions.V1InitSessionArgs{
 		InitSession:       true,
@@ -266,7 +308,7 @@ func TestSSv1ItInitiateSession(t *testing.T) {
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "TestSSv1It1",
-				utils.RequestType: utils.META_PREPAID,
+				utils.RequestType: sSV1RequestType,
 				utils.Account:     "1001",
 				utils.Subject:     "ANY2CNT",
 				utils.Destination: "1002",
@@ -281,7 +323,10 @@ func TestSSv1ItInitiateSession(t *testing.T) {
 		args, &rply); err != nil {
 		t.Error(err)
 	}
-	if *rply.MaxUsage != initUsage {
+	// in case of prepaid we expect a MaxUsage of 5min
+	// and in case of postpaid we expect -1
+	if (sSV1RequestType == utils.META_PREPAID && *rply.MaxUsage != initUsage) ||
+		(sSV1RequestType == utils.META_POSTPAID && *rply.MaxUsage != -1) {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceAllocation != "RES_ACNT_1001" {
@@ -302,7 +347,7 @@ func TestSSv1ItInitiateSession(t *testing.T) {
 				utils.Destination: "1002",
 				"OfficeGroup":     "Marketing",
 				utils.OriginID:    "TestSSv1It1",
-				utils.RequestType: utils.META_PREPAID,
+				utils.RequestType: sSV1RequestType,
 				utils.SetupTime:   "2018-01-07T17:00:00Z",
 				utils.AnswerTime:  "2018-01-07T17:00:10Z",
 				utils.Usage:       300000000000.0,
@@ -321,7 +366,7 @@ func TestSSv1ItInitiateSession(t *testing.T) {
 	}
 }
 
-func TestSSv1ItInitiateSessionWithDigest(t *testing.T) {
+func testSSv1ItInitiateSessionWithDigest(t *testing.T) {
 	initUsage := time.Duration(5 * time.Minute)
 	args := &sessions.V1InitSessionArgs{
 		InitSession:       true,
@@ -334,7 +379,7 @@ func TestSSv1ItInitiateSessionWithDigest(t *testing.T) {
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "TestSSv1It1",
-				utils.RequestType: utils.META_PREPAID,
+				utils.RequestType: sSV1RequestType,
 				utils.Account:     "1001",
 				utils.Subject:     "ANY2CNT",
 				utils.Destination: "1002",
@@ -349,7 +394,10 @@ func TestSSv1ItInitiateSessionWithDigest(t *testing.T) {
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}
-	if *rply.MaxUsage != initUsage.Seconds() {
+	// in case of prepaid we expect a MaxUsage of 5min
+	// and in case of postpaid we expect -1
+	if (sSV1RequestType == utils.META_PREPAID && *rply.MaxUsage != initUsage.Seconds()) ||
+		(sSV1RequestType == utils.META_POSTPAID && *rply.MaxUsage != -1) {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceAllocation != "RES_ACNT_1001" {
@@ -368,7 +416,7 @@ func TestSSv1ItInitiateSessionWithDigest(t *testing.T) {
 	}
 }
 
-func TestSSv1ItUpdateSession(t *testing.T) {
+func testSSv1ItUpdateSession(t *testing.T) {
 	reqUsage := 5 * time.Minute
 	args := &sessions.V1UpdateSessionArgs{
 		GetAttributes: true,
@@ -380,7 +428,7 @@ func TestSSv1ItUpdateSession(t *testing.T) {
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "TestSSv1It1",
-				utils.RequestType: utils.META_PREPAID,
+				utils.RequestType: sSV1RequestType,
 				utils.Account:     "1001",
 				utils.Subject:     "ANY2CNT",
 				utils.Destination: "1002",
@@ -410,7 +458,7 @@ func TestSSv1ItUpdateSession(t *testing.T) {
 				utils.Destination: "1002",
 				"OfficeGroup":     "Marketing",
 				utils.OriginID:    "TestSSv1It1",
-				utils.RequestType: utils.META_PREPAID,
+				utils.RequestType: sSV1RequestType,
 				utils.SetupTime:   "2018-01-07T17:00:00Z",
 				utils.AnswerTime:  "2018-01-07T17:00:10Z",
 				utils.Usage:       300000000000.0,
@@ -421,7 +469,10 @@ func TestSSv1ItUpdateSession(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
 	}
-	if *rply.MaxUsage != reqUsage {
+	// in case of prepaid we expect a MaxUsage of 5min
+	// and in case of postpaid we expect -1
+	if (sSV1RequestType == utils.META_PREPAID && *rply.MaxUsage != reqUsage) ||
+		(sSV1RequestType == utils.META_POSTPAID && *rply.MaxUsage != -1) {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)
@@ -432,7 +483,7 @@ func TestSSv1ItUpdateSession(t *testing.T) {
 	}
 }
 
-func TestSSv1ItTerminateSession(t *testing.T) {
+func testSSv1ItTerminateSession(t *testing.T) {
 	args := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
 		ReleaseResources: true,
@@ -443,7 +494,7 @@ func TestSSv1ItTerminateSession(t *testing.T) {
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "TestSSv1It1",
-				utils.RequestType: utils.META_PREPAID,
+				utils.RequestType: sSV1RequestType,
 				utils.Account:     "1001",
 				utils.Subject:     "ANY2CNT",
 				utils.Destination: "1002",
@@ -468,7 +519,7 @@ func TestSSv1ItTerminateSession(t *testing.T) {
 	}
 }
 
-func TestSSv1ItProcessCDR(t *testing.T) {
+func testSSv1ItProcessCDR(t *testing.T) {
 	args := utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItProcessCDR",
@@ -476,7 +527,7 @@ func TestSSv1ItProcessCDR(t *testing.T) {
 			utils.Tenant:      "cgrates.org",
 			utils.ToR:         utils.VOICE,
 			utils.OriginID:    "TestSSv1It1",
-			utils.RequestType: utils.META_PREPAID,
+			utils.RequestType: sSV1RequestType,
 			utils.Account:     "1001",
 			utils.Subject:     "ANY2CNT",
 			utils.Destination: "1002",
@@ -497,7 +548,7 @@ func TestSSv1ItProcessCDR(t *testing.T) {
 }
 
 // TestSSv1ItProcessEvent processes individual event and also checks it's CDRs
-func TestSSv1ItProcessEvent(t *testing.T) {
+func testSSv1ItProcessEvent(t *testing.T) {
 	initUsage := 5 * time.Minute
 	args := &sessions.V1ProcessEventArgs{
 		AllocateResources: true,
@@ -510,7 +561,7 @@ func TestSSv1ItProcessEvent(t *testing.T) {
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "TestSSv1It2",
-				utils.RequestType: utils.META_PREPAID,
+				utils.RequestType: sSV1RequestType,
 				utils.Account:     "1001",
 				utils.Subject:     "ANY2CNT",
 				utils.Destination: "1002",
@@ -525,7 +576,10 @@ func TestSSv1ItProcessEvent(t *testing.T) {
 		args, &rply); err != nil {
 		t.Error(err)
 	}
-	if *rply.MaxUsage != initUsage {
+	// in case of prepaid we expect a MaxUsage of 5min
+	// and in case of postpaid we expect -1
+	if (sSV1RequestType == utils.META_PREPAID && *rply.MaxUsage != initUsage) ||
+		(sSV1RequestType == utils.META_POSTPAID && *rply.MaxUsage != -1) {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceAllocation != "RES_ACNT_1001" {
@@ -546,12 +600,15 @@ func TestSSv1ItProcessEvent(t *testing.T) {
 				utils.Destination: "1002",
 				"OfficeGroup":     "Marketing",
 				utils.OriginID:    "TestSSv1It2",
-				utils.RequestType: utils.META_PREPAID,
+				utils.RequestType: sSV1RequestType,
 				utils.SetupTime:   "2018-01-07T17:00:00Z",
 				utils.AnswerTime:  "2018-01-07T17:00:10Z",
 				utils.Usage:       300000000000.0,
 			},
 		},
+	}
+	if sSV1RequestType == utils.META_POSTPAID {
+		eAttrs.CGREvent.Event[utils.Usage] = -1.0
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
 		t.Errorf("expecting: %+v, received: %+v",
@@ -573,7 +630,7 @@ func TestSSv1ItProcessEvent(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 }
 
-func TestSSv1ItCDRsGetCdrs(t *testing.T) {
+func testSSv1ItCDRsGetCdrs(t *testing.T) {
 	var cdrCnt int64
 	req := utils.AttrGetCdrs{}
 	if err := sSApierRpc.Call(utils.CDRsV1CountCDRs, req, &cdrCnt); err != nil {
@@ -615,6 +672,7 @@ func TestSSv1ItCDRsGetCdrs(t *testing.T) {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
 	}
+
 	args = utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"},
 		OriginIDs: []string{"TestSSv1It2"}}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
@@ -639,7 +697,7 @@ func TestSSv1ItCDRsGetCdrs(t *testing.T) {
 	}
 }
 
-func TestSSv1ItForceUpdateSession(t *testing.T) {
+func testSSv1ItForceUpdateSession(t *testing.T) {
 	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %v with len(asessions)=%v", err, len(aSessions))
@@ -665,7 +723,7 @@ func TestSSv1ItForceUpdateSession(t *testing.T) {
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "TestSSv1It",
-				utils.RequestType: utils.META_PREPAID,
+				utils.RequestType: sSV1RequestType,
 				utils.Account:     "1001",
 				utils.Subject:     "ANY2CNT",
 				utils.Destination: "1002",
@@ -696,7 +754,7 @@ func TestSSv1ItForceUpdateSession(t *testing.T) {
 				utils.Destination: "1002",
 				"OfficeGroup":     "Marketing",
 				utils.OriginID:    "TestSSv1It",
-				utils.RequestType: utils.META_PREPAID,
+				utils.RequestType: sSV1RequestType,
 				utils.SetupTime:   "2018-01-07T17:00:00Z",
 				utils.AnswerTime:  "2018-01-07T17:00:10Z",
 				utils.Usage:       300000000000.0,
@@ -765,7 +823,7 @@ func TestSSv1ItForceUpdateSession(t *testing.T) {
 	}
 }
 
-func TestSSv1ItDynamicDebit(t *testing.T) {
+func testSSv1ItDynamicDebit(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:        "cgrates.org",
 		Account:       "TestDynamicDebit",
@@ -803,7 +861,7 @@ func TestSSv1ItDynamicDebit(t *testing.T) {
 				utils.Category:         "call",
 				utils.ToR:              utils.VOICE,
 				utils.OriginID:         "TestDynamicTDebit",
-				utils.RequestType:      utils.META_PREPAID,
+				utils.RequestType:      sSV1RequestType,
 				utils.Account:          "TestDynamicDebit",
 				utils.Subject:          "TEST",
 				utils.Destination:      "TEST",
@@ -877,7 +935,7 @@ func TestSSv1ItDynamicDebit(t *testing.T) {
 	}
 }
 
-func TestSSv1ItStopCgrEngine(t *testing.T) {
+func testSSv1ItStopCgrEngine(t *testing.T) {
 	if err := sSv1BiRpc.Close(); err != nil { // Close the connection so we don't get EOF warnings from client
 		t.Error(err)
 	}
