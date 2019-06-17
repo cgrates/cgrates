@@ -190,6 +190,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 				fmt.Sprintf("<%s> denying request due to maximum active requests reached: %d, message: %s",
 					utils.DiameterAgent, da.cgrCfg.DiameterAgentCfg().MaxActiveReqs, m))
 			writeOnConn(c, diamErr)
+			da.aReqsLck.Unlock()
 			return
 		}
 		da.aReqs++
