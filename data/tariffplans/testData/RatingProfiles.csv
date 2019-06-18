@@ -1,0 +1,2 @@
+#Tenant,Category,Subject,ActivationTime,RatingPlanID,FallbackSubject
+cgrates.org,data,10kilo,2019-03-01T00:00:00Z,RP_DATA,
