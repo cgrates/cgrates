@@ -24,31 +24,31 @@ import (
 )
 
 func init() {
-	c := &CmdGetThreshold{
-		name:      "threshold",
-		rpcMethod: utils.ThresholdSv1GetThreshold,
+	c := &CmdGetThresholdProfile{
+		name:      "threshold_profile",
+		rpcMethod: utils.ApierV1GetThresholdProfile,
 		rpcParams: &utils.TenantIDWithArgDispatcher{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdGetThreshold struct {
+type CmdGetThresholdProfile struct {
 	name      string
 	rpcMethod string
 	rpcParams *utils.TenantIDWithArgDispatcher
 	*CommandExecuter
 }
 
-func (self *CmdGetThreshold) Name() string {
+func (self *CmdGetThresholdProfile) Name() string {
 	return self.name
 }
 
-func (self *CmdGetThreshold) RpcMethod() string {
+func (self *CmdGetThresholdProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetThreshold) RpcParams(reset bool) interface{} {
+func (self *CmdGetThresholdProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantIDWithArgDispatcher{
 			TenantID:      new(utils.TenantID),
@@ -58,11 +58,11 @@ func (self *CmdGetThreshold) RpcParams(reset bool) interface{} {
 	return self.rpcParams
 }
 
-func (self *CmdGetThreshold) PostprocessRpcParams() error {
+func (self *CmdGetThresholdProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetThreshold) RpcResult() interface{} {
-	atr := engine.Threshold{}
+func (self *CmdGetThresholdProfile) RpcResult() interface{} {
+	atr := engine.ThresholdProfile{}
 	return &atr
 }
