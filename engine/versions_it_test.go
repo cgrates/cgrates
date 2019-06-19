@@ -161,13 +161,13 @@ func testVersion(t *testing.T) {
 		currentVersion = allVersions
 		testVersion = allVersions
 		testVersion[utils.Accounts] = 1
-		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"
+		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>"
 	case utils.MONGO, utils.REDIS:
 		currentVersion = dataDbVersions
 		testVersion = dataDbVersions
 		testVersion[utils.Accounts] = 1
 
-		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"
+		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>"
 	}
 
 	//dataDB
@@ -203,12 +203,12 @@ func testVersion(t *testing.T) {
 		currentVersion = allVersions
 		testVersion = allVersions
 		testVersion[utils.Accounts] = 1
-		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*accounts>"
+		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*accounts>"
 	case utils.MONGO, utils.POSTGRES, utils.MYSQL:
 		currentVersion = storDbVersions
 		testVersion = allVersions
 		testVersion[utils.CostDetails] = 1
-		test = "Migration needed: please backup cgr data and run : <cgr-migrator -migrate=*cost_details>"
+		test = "Migration needed: please backup cgr data and run : <cgr-migrator -exec=*cost_details>"
 	}
 	//storageDb
 
