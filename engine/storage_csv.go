@@ -130,598 +130,280 @@ func openStringCSVStorage(data string, comma rune,
 	return
 }
 
-func (csvs *CSVStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.timingsFn, csvs.sep, getColumnCount(TpTiming{}))
-	if err != nil {
-		//log.Print("Could not load timings file: ", err)
-		// allow writing of the other values
-		return nil, nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
-	var tpTimings TpTimings
-	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
+func (csvs *CSVStorage) proccesData(listType interface{}, fns []string, process func(interface{})) error {
+	collumnCount := getColumnCount(listType)
+	for _, fileName := range fns {
+		csvReader, fp, err := csvs.readerFunc(fileName, csvs.sep, collumnCount)
 		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.timingsFn, err.Error())
-			return nil, err
+			// maybe a log to view if failed to open file
+			continue // try read the rest
 		}
-		if tpTiming, err := csvLoad(TpTiming{}, record); err != nil {
-			log.Print("error loading timing: ", err)
-			return nil, err
-		} else {
-			tm := tpTiming.(TpTiming)
-			tm.Tpid = tpid
-			tpTimings = append(tpTimings, tm)
+		if err = func() error { // to execute defer corectly
+			if fp != nil {
+				defer fp.Close()
+			}
+			for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
+				if err != nil {
+					log.Printf("bad line in %s, %s\n", fileName, err.Error())
+					return err
+				}
+				if item, err := csvLoad(listType, record); err != nil {
+					log.Printf("error loading %s: %v", "", err)
+					return err
+				} else {
+					process(item)
+				}
+			}
+			return nil
+		}(); err != nil {
+			return err
 		}
+	}
+	return nil
+}
+
+func (csvs *CSVStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, error) {
+	var tpTimings TpTimings
+	if err := csvs.proccesData(TpTiming{}, []string{csvs.timingsFn}, func(tp interface{}) {
+		tm := tp.(TpTiming)
+		tm.Tpid = tpid
+		tpTimings = append(tpTimings, tm)
+	}); err != nil {
+		return nil, err
 	}
 	return tpTimings.AsTPTimings(), nil
 }
 
 func (csvs *CSVStorage) GetTPDestinations(tpid, id string) ([]*utils.TPDestination, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.destinationsFn, csvs.sep, getColumnCount(TpDestination{}))
-	if err != nil {
-		//log.Print("Could not load destinations file: ", err)
-		// allow writing of the other values
-		return nil, nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
 	var tpDests TpDestinations
-	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
-		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.destinationsFn, err.Error())
-			return nil, err
-		}
-		if tpDest, err := csvLoad(TpDestination{}, record); err != nil {
-			log.Print("error loading destination: ", err)
-			return nil, err
-		} else {
-			d := tpDest.(TpDestination)
-			d.Tpid = tpid
-			tpDests = append(tpDests, d)
-		}
+	if err := csvs.proccesData(TpDestination{}, []string{csvs.destinationsFn}, func(tp interface{}) {
+		d := tp.(TpDestination)
+		d.Tpid = tpid
+		tpDests = append(tpDests, d)
+	}); err != nil {
+		return nil, err
 	}
 	return tpDests.AsTPDestinations(), nil
 }
 
 func (csvs *CSVStorage) GetTPRates(tpid, id string) ([]*utils.TPRate, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.ratesFn, csvs.sep, getColumnCount(TpRate{}))
-	if err != nil {
-		//log.Print("Could not load rates file: ", err)
-		// allow writing of the other values
-		return nil, nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
 	var tpRates TpRates
-	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
-		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.ratesFn, err.Error())
-			return nil, err
-		}
-		if tpRate, err := csvLoad(TpRate{}, record); err != nil {
-			log.Print("error loading rate: ", err)
-			return nil, err
-		} else {
-			r := tpRate.(TpRate)
-			r.Tpid = tpid
-			tpRates = append(tpRates, r)
-		}
-	}
-	if rs, err := tpRates.AsTPRates(); err != nil {
+	if err := csvs.proccesData(TpRate{}, []string{csvs.ratesFn}, func(tp interface{}) {
+		r := tp.(TpRate)
+		r.Tpid = tpid
+		tpRates = append(tpRates, r)
+	}); err != nil {
 		return nil, err
-	} else {
-		return rs, nil
 	}
+	return tpRates.AsTPRates()
 }
 
 func (csvs *CSVStorage) GetTPDestinationRates(tpid, id string, p *utils.Paginator) ([]*utils.TPDestinationRate, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.destinationratesFn, csvs.sep, getColumnCount(TpDestinationRate{}))
-	if err != nil {
-		//log.Print("Could not load destination_rates file: ", err)
-		// allow writing of the other values
-		return nil, nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
 	var tpDestinationRates TpDestinationRates
-	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
-		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.destinationratesFn, err.Error())
-			return nil, err
-		}
-		if tpRate, err := csvLoad(TpDestinationRate{}, record); err != nil {
-			log.Print("error loading destination rate: ", err)
-			return nil, err
-		} else {
-			dr := tpRate.(TpDestinationRate)
-			dr.Tpid = tpid
-			tpDestinationRates = append(tpDestinationRates, dr)
-		}
-	}
-	if drs, err := tpDestinationRates.AsTPDestinationRates(); err != nil {
+	if err := csvs.proccesData(TpDestinationRate{}, []string{csvs.destinationratesFn}, func(tp interface{}) {
+		dr := tp.(TpDestinationRate)
+		dr.Tpid = tpid
+		tpDestinationRates = append(tpDestinationRates, dr)
+	}); err != nil {
 		return nil, err
-	} else {
-		return drs, nil
 	}
+	return tpDestinationRates.AsTPDestinationRates()
 }
 
 func (csvs *CSVStorage) GetTPRatingPlans(tpid, id string, p *utils.Paginator) ([]*utils.TPRatingPlan, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.destinationratetimingsFn, csvs.sep, getColumnCount(TpRatingPlan{}))
-	if err != nil {
-		//log.Print("Could not load rate plans file: ", err)
-		// allow writing of the other values
-		return nil, nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
 	var tpRatingPlans TpRatingPlans
-	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
-		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.destinationratetimingsFn, err.Error())
-			return nil, err
-		}
-		if tpRate, err := csvLoad(TpRatingPlan{}, record); err != nil {
-			log.Print("error loading rating plan: ", err)
-			return nil, err
-		} else {
-			rp := tpRate.(TpRatingPlan)
-			rp.Tpid = tpid
-			tpRatingPlans = append(tpRatingPlans, rp)
-		}
-	}
-	if rps, err := tpRatingPlans.AsTPRatingPlans(); err != nil {
+	if err := csvs.proccesData(TpRatingPlan{}, []string{csvs.destinationratetimingsFn}, func(tp interface{}) {
+		rp := tp.(TpRatingPlan)
+		rp.Tpid = tpid
+		tpRatingPlans = append(tpRatingPlans, rp)
+	}); err != nil {
 		return nil, err
-	} else {
-		return rps, nil
 	}
+	return tpRatingPlans.AsTPRatingPlans()
 }
 
 func (csvs *CSVStorage) GetTPRatingProfiles(filter *utils.TPRatingProfile) ([]*utils.TPRatingProfile, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.ratingprofilesFn, csvs.sep, getColumnCount(TpRatingProfile{}))
-	if err != nil {
-		//log.Print("Could not load rating profiles file: ", err)
-		// allow writing of the other values
-		return nil, nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
 	var tpRatingProfiles TpRatingProfiles
-	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
-		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.ratingprofilesFn, err.Error())
-			return nil, err
+	if err := csvs.proccesData(TpRatingProfile{}, []string{csvs.ratingprofilesFn}, func(tp interface{}) {
+		rpf := tp.(TpRatingProfile)
+		if filter != nil {
+			rpf.Tpid = filter.TPid
+			rpf.Loadid = filter.LoadId
 		}
-		if tpRate, err := csvLoad(TpRatingProfile{}, record); err != nil {
-			log.Print("error loading rating profile: ", err)
-			return nil, err
-		} else {
-			rpf := tpRate.(TpRatingProfile)
-			if filter != nil {
-				rpf.Tpid = filter.TPid
-				rpf.Loadid = filter.LoadId
-			}
-			tpRatingProfiles = append(tpRatingProfiles, rpf)
-		}
-	}
-	if rps, err := tpRatingProfiles.AsTPRatingProfiles(); err != nil {
+		tpRatingProfiles = append(tpRatingProfiles, rpf)
+	}); err != nil {
 		return nil, err
-	} else {
-		return rps, nil
 	}
+	return tpRatingProfiles.AsTPRatingProfiles()
 }
 
 func (csvs *CSVStorage) GetTPSharedGroups(tpid, id string) ([]*utils.TPSharedGroups, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.sharedgroupsFn, csvs.sep, getColumnCount(TpSharedGroup{}))
-	if err != nil {
-		//log.Print("Could not load shared groups file: ", err)
-		// allow writing of the other values
-		return nil, nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
 	var tpSharedGroups TpSharedGroups
-	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
-		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.sharedgroupsFn, err.Error())
-			return nil, err
-		}
-		if tpRate, err := csvLoad(TpSharedGroup{}, record); err != nil {
-			log.Print("error loading shared group: ", err)
-			return nil, err
-		} else {
-			sg := tpRate.(TpSharedGroup)
-			sg.Tpid = tpid
-			tpSharedGroups = append(tpSharedGroups, sg)
-		}
-	}
-	if sgs, err := tpSharedGroups.AsTPSharedGroups(); err != nil {
+	if err := csvs.proccesData(TpSharedGroup{}, []string{csvs.sharedgroupsFn}, func(tp interface{}) {
+		sg := tp.(TpSharedGroup)
+		sg.Tpid = tpid
+		tpSharedGroups = append(tpSharedGroups, sg)
+	}); err != nil {
 		return nil, err
-	} else {
-		return sgs, nil
 	}
+	return tpSharedGroups.AsTPSharedGroups()
 }
 
 func (csvs *CSVStorage) GetTPActions(tpid, id string) ([]*utils.TPActions, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.actionsFn, csvs.sep, getColumnCount(TpAction{}))
-	if err != nil {
-		//log.Print("Could not load action file: ", err)
-		// allow writing of the other values
-		return nil, nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
 	var tpActions TpActions
-	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
-		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.actionsFn, err.Error())
-			return nil, err
-		}
-		if tpAction, err := csvLoad(TpAction{}, record); err != nil {
-			log.Print("error loading action: ", err)
-			return nil, err
-		} else {
-			a := tpAction.(TpAction)
-			a.Tpid = tpid
-			tpActions = append(tpActions, a)
-		}
-	}
-	if as, err := tpActions.AsTPActions(); err != nil {
+	if err := csvs.proccesData(TpAction{}, []string{csvs.actionsFn}, func(tp interface{}) {
+		a := tp.(TpAction)
+		a.Tpid = tpid
+		tpActions = append(tpActions, a)
+	}); err != nil {
 		return nil, err
-	} else {
-		return as, nil
 	}
+	return tpActions.AsTPActions()
 }
 
 func (csvs *CSVStorage) GetTPActionPlans(tpid, id string) ([]*utils.TPActionPlan, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.actiontimingsFn, csvs.sep, getColumnCount(TpActionPlan{}))
-	if err != nil {
-		//log.Print("Could not load action plans file: ", err)
-		// allow writing of the other values
-		return nil, nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
 	var tpActionPlans TpActionPlans
-	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
-		if tpRate, err := csvLoad(TpActionPlan{}, record); err != nil {
-			log.Print("error loading action plan: ", err)
-			return nil, err
-		} else {
-			ap := tpRate.(TpActionPlan)
-			ap.Tpid = tpid
-			tpActionPlans = append(tpActionPlans, ap)
-		}
-	}
-	if aps, err := tpActionPlans.AsTPActionPlans(); err != nil {
+	if err := csvs.proccesData(TpActionPlan{}, []string{csvs.actiontimingsFn}, func(tp interface{}) {
+		ap := tp.(TpActionPlan)
+		ap.Tpid = tpid
+		tpActionPlans = append(tpActionPlans, ap)
+	}); err != nil {
 		return nil, err
-	} else {
-		return aps, nil
 	}
+	return tpActionPlans.AsTPActionPlans()
 }
 
 func (csvs *CSVStorage) GetTPActionTriggers(tpid, id string) ([]*utils.TPActionTriggers, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.actiontriggersFn, csvs.sep, getColumnCount(TpActionTrigger{}))
-	if err != nil {
-		//log.Print("Could not load action triggers file: ", err)
-		// allow writing of the other values
-		return nil, nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
 	var tpActionTriggers TpActionTriggers
-	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
-		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.actiontriggersFn, err.Error())
-			return nil, err
-		}
-		if tpAt, err := csvLoad(TpActionTrigger{}, record); err != nil {
-			log.Print("error loading action trigger: ", err)
-			return nil, err
-		} else {
-			at := tpAt.(TpActionTrigger)
-			at.Tpid = tpid
-			tpActionTriggers = append(tpActionTriggers, at)
-		}
-	}
-	if ats, err := tpActionTriggers.AsTPActionTriggers(); err != nil {
+	if err := csvs.proccesData(TpActionTrigger{}, []string{csvs.actiontriggersFn}, func(tp interface{}) {
+		at := tp.(TpActionTrigger)
+		at.Tpid = tpid
+		tpActionTriggers = append(tpActionTriggers, at)
+	}); err != nil {
 		return nil, err
-	} else {
-		return ats, nil
 	}
+	return tpActionTriggers.AsTPActionTriggers()
 }
 
 func (csvs *CSVStorage) GetTPAccountActions(filter *utils.TPAccountActions) ([]*utils.TPAccountActions, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.accountactionsFn, csvs.sep, getColumnCount(TpAccountAction{}))
-	if err != nil {
-		//log.Print("Could not load account actions file: ", err)
-		// allow writing of the other values
-		return nil, nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
 	var tpAccountActions TpAccountActions
-	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
-		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.accountactionsFn, err.Error())
-			return nil, err
+	if err := csvs.proccesData(TpAccountAction{}, []string{csvs.accountactionsFn}, func(tp interface{}) {
+		aa := tp.(TpAccountAction)
+		if filter != nil {
+			aa.Tpid = filter.TPid
+			aa.Loadid = filter.LoadId
 		}
-		if tpAa, err := csvLoad(TpAccountAction{}, record); err != nil {
-			log.Print("error loading account action: ", err)
-			return nil, err
-		} else {
-			aa := tpAa.(TpAccountAction)
-			if filter != nil {
-				aa.Tpid = filter.TPid
-				aa.Loadid = filter.LoadId
-			}
-			tpAccountActions = append(tpAccountActions, aa)
-		}
-	}
-	if ats, err := tpAccountActions.AsTPAccountActions(); err != nil {
+		tpAccountActions = append(tpAccountActions, aa)
+	}); err != nil {
 		return nil, err
-	} else {
-		return ats, nil
 	}
+	return tpAccountActions.AsTPAccountActions()
 }
 
 func (csvs *CSVStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPResourceProfile, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.resProfilesFn, csvs.sep, getColumnCount(TpResource{}))
-	if err != nil {
-		//log.Print("Could not load resource limits file: ", err)
-		// allow writing of the other values
-		return nil, nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
 	var tpResLimits TpResources
-	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
-		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.resProfilesFn, err.Error())
-			return nil, err
-		}
-		if tpResLimit, err := csvLoad(TpResource{}, record); err != nil {
-			log.Print("error loading resourceprofiles: ", err)
-			return nil, err
-		} else {
-			tpLimit := tpResLimit.(TpResource)
-			tpLimit.Tpid = tpid
-			tpResLimits = append(tpResLimits, &tpLimit)
-		}
+	if err := csvs.proccesData(TpResource{}, []string{csvs.resProfilesFn}, func(tp interface{}) {
+		tpLimit := tp.(TpResource)
+		tpLimit.Tpid = tpid
+		tpResLimits = append(tpResLimits, &tpLimit)
+	}); err != nil {
+		return nil, err
 	}
 	return tpResLimits.AsTPResources(), nil
 }
 
 func (csvs *CSVStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStatProfile, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.statsFn, csvs.sep, getColumnCount(TpStat{}))
-	if err != nil {
-		//log.Print("Could not load stats file: ", err)
-		// allow writing of the other values
-		return nil, nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
 	var tpStats TpStats
-	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
-		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.statsFn, err.Error())
-			return nil, err
-		}
-		if tpstats, err := csvLoad(TpStat{}, record); err != nil {
-			log.Print("error loading TPStats: ", err)
-			return nil, err
-		} else {
-			tPstats := tpstats.(TpStat)
-			tPstats.Tpid = tpid
-			tpStats = append(tpStats, &tPstats)
-		}
+	if err := csvs.proccesData(TpStat{}, []string{csvs.statsFn}, func(tp interface{}) {
+		tPstats := tp.(TpStat)
+		tPstats.Tpid = tpid
+		tpStats = append(tpStats, &tPstats)
+	}); err != nil {
+		return nil, err
 	}
 	return tpStats.AsTPStats(), nil
 }
 
 func (csvs *CSVStorage) GetTPThresholds(tpid, tenant, id string) ([]*utils.TPThresholdProfile, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.thresholdsFn, csvs.sep, getColumnCount(TpThreshold{}))
-	if err != nil {
-		//log.Print("Could not load threshold file: ", err)
-		// allow writing of the other values
-		return nil, nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
 	var tpThreshold TpThresholds
-	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
-		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.thresholdsFn, err.Error())
-			return nil, err
-		}
-		if thresholdCfg, err := csvLoad(TpThreshold{}, record); err != nil {
-			log.Print("error loading TPThreshold: ", err)
-			return nil, err
-		} else {
-			tHresholdCfg := thresholdCfg.(TpThreshold)
-			tHresholdCfg.Tpid = tpid
-			tpThreshold = append(tpThreshold, &tHresholdCfg)
-		}
+	if err := csvs.proccesData(TpThreshold{}, []string{csvs.thresholdsFn}, func(tp interface{}) {
+		tHresholdCfg := tp.(TpThreshold)
+		tHresholdCfg.Tpid = tpid
+		tpThreshold = append(tpThreshold, &tHresholdCfg)
+	}); err != nil {
+		return nil, err
 	}
 	return tpThreshold.AsTPThreshold(), nil
 }
 
 func (csvs *CSVStorage) GetTPFilters(tpid, tenant, id string) ([]*utils.TPFilterProfile, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.filterFn, csvs.sep, getColumnCount(TpFilter{}))
-	if err != nil {
-		//log.Print("Could not load filter file: ", err)
-		// allow writing of the other values
-		return nil, nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
 	var tpFilter TpFilterS
-	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
-		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.filterFn, err.Error())
-			return nil, err
-		}
-		if filterCfg, err := csvLoad(TpFilter{}, record); err != nil {
-			log.Print("error loading TPFilter: ", err)
-			return nil, err
-		} else {
-			fIlterCfg := filterCfg.(TpFilter)
-			fIlterCfg.Tpid = tpid
-			tpFilter = append(tpFilter, &fIlterCfg)
-		}
+	if err := csvs.proccesData(TpFilter{}, []string{csvs.filterFn}, func(tp interface{}) {
+		fIlterCfg := tp.(TpFilter)
+		fIlterCfg.Tpid = tpid
+		tpFilter = append(tpFilter, &fIlterCfg)
+	}); err != nil {
+		return nil, err
 	}
 	return tpFilter.AsTPFilter(), nil
 }
 
 func (csvs *CSVStorage) GetTPSuppliers(tpid, tenant, id string) ([]*utils.TPSupplierProfile, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.suppProfilesFn, csvs.sep, getColumnCount(TpSupplier{}))
-	if err != nil {
-		//log.Print("Could not load lcrProfile file: ", err)
-		// allow writing of the other values
-		return nil, nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
 	var tpSPPs TpSuppliers
-	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
-		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.suppProfilesFn, err.Error())
-			return nil, err
-		}
-		if suppProfile, err := csvLoad(TpSupplier{}, record); err != nil {
-			log.Print("error loading tpSupplier: ", err)
-			return nil, err
-		} else {
-			suppProfile := suppProfile.(TpSupplier)
-			suppProfile.Tpid = tpid
-			tpSPPs = append(tpSPPs, &suppProfile)
-		}
+	if err := csvs.proccesData(TpSupplier{}, []string{csvs.suppProfilesFn}, func(tp interface{}) {
+		suppProfile := tp.(TpSupplier)
+		suppProfile.Tpid = tpid
+		tpSPPs = append(tpSPPs, &suppProfile)
+	}); err != nil {
+		return nil, err
 	}
 	return tpSPPs.AsTPSuppliers(), nil
 }
 
 func (csvs *CSVStorage) GetTPAttributes(tpid, tenant, id string) ([]*utils.TPAttributeProfile, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.attributeProfilesFn, csvs.sep, getColumnCount(TPAttribute{}))
-	if err != nil {
-		//log.Print("Could not load AttributeProfile file: ", err)
-		// allow writing of the other values
-		return nil, nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
 	var tpAls TPAttributes
-	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
-		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.attributeProfilesFn, err.Error())
-			return nil, err
-		}
-		if attributeProfile, err := csvLoad(TPAttribute{}, record); err != nil {
-			log.Print("error loading tpAttributeProfile: ", err)
-			return nil, err
-		} else {
-			attributeProfile := attributeProfile.(TPAttribute)
-			attributeProfile.Tpid = tpid
-			tpAls = append(tpAls, &attributeProfile)
-		}
+	if err := csvs.proccesData(TPAttribute{}, []string{csvs.attributeProfilesFn}, func(tp interface{}) {
+		attributeProfile := tp.(TPAttribute)
+		attributeProfile.Tpid = tpid
+		tpAls = append(tpAls, &attributeProfile)
+	}); err != nil {
+		return nil, err
 	}
 	return tpAls.AsTPAttributes(), nil
 }
 
 func (csvs *CSVStorage) GetTPChargers(tpid, tenant, id string) ([]*utils.TPChargerProfile, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.chargerProfilesFn, csvs.sep, getColumnCount(TPCharger{}))
-	if err != nil {
-		//log.Print("Could not load AttributeProfile file: ", err)
-		// allow writing of the other values
-		return nil, nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
 	var tpCPPs TPChargers
-	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
-		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.chargerProfilesFn, err.Error())
-			return nil, err
-		}
-		if cpp, err := csvLoad(TPCharger{}, record); err != nil {
-			log.Print("error loading tpChargerProfile: ", err)
-			return nil, err
-		} else {
-			cpp := cpp.(TPCharger)
-			cpp.Tpid = tpid
-			tpCPPs = append(tpCPPs, &cpp)
-		}
+	if err := csvs.proccesData(TPCharger{}, []string{csvs.chargerProfilesFn}, func(tp interface{}) {
+		cpp := tp.(TPCharger)
+		cpp.Tpid = tpid
+		tpCPPs = append(tpCPPs, &cpp)
+	}); err != nil {
+		return nil, err
 	}
 	return tpCPPs.AsTPChargers(), nil
 }
 
 func (csvs *CSVStorage) GetTPDispatcherProfiles(tpid, tenant, id string) ([]*utils.TPDispatcherProfile, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.dispatcherProfilesFn, csvs.sep, getColumnCount(TPDispatcherProfile{}))
-	if err != nil {
-		// allow writing of the other values
-		return nil, nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
 	var tpDPPs TPDispatcherProfiles
-	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
-		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.dispatcherProfilesFn, err.Error())
-			return nil, err
-		}
-		if dpp, err := csvLoad(TPDispatcherProfile{}, record); err != nil {
-			log.Print("error loading tpDispatcherProfile: ", err)
-			return nil, err
-		} else {
-			dpp := dpp.(TPDispatcherProfile)
-			dpp.Tpid = tpid
-			tpDPPs = append(tpDPPs, &dpp)
-		}
+	if err := csvs.proccesData(TPDispatcherProfile{}, []string{csvs.dispatcherProfilesFn}, func(tp interface{}) {
+		dpp := tp.(TPDispatcherProfile)
+		dpp.Tpid = tpid
+		tpDPPs = append(tpDPPs, &dpp)
+	}); err != nil {
+		return nil, err
 	}
 	return tpDPPs.AsTPDispatcherProfiles(), nil
 }
 
 func (csvs *CSVStorage) GetTPDispatcherHosts(tpid, tenant, id string) ([]*utils.TPDispatcherHost, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.dispatcherHostsFn, csvs.sep, getColumnCount(TPDispatcherHost{}))
-	if err != nil {
-		// allow writing of the other values
-		return nil, nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
 	var tpDDHs TPDispatcherHosts
-	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
-		if err != nil {
-			log.Printf("bad line in %s, %s\n", csvs.dispatcherHostsFn, err.Error())
-			return nil, err
-		}
-		if dpp, err := csvLoad(TPDispatcherHost{}, record); err != nil {
-			log.Print("error loading tpDispatcherHost: ", err)
-			return nil, err
-		} else {
-			dpp := dpp.(TPDispatcherHost)
-			dpp.Tpid = tpid
-			tpDDHs = append(tpDDHs, &dpp)
-		}
+	if err := csvs.proccesData(TPDispatcherHost{}, []string{csvs.dispatcherHostsFn}, func(tp interface{}) {
+		dpp := tp.(TPDispatcherHost)
+		dpp.Tpid = tpid
+		tpDDHs = append(tpDDHs, &dpp)
+	}); err != nil {
+		return nil, err
 	}
 	return tpDDHs.AsTPDispatcherHosts(), nil
 }
