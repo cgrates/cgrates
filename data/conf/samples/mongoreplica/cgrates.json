@@ -22,7 +22,6 @@
 	"db_name": "teoOnline?replicaSet=rs0&authSource=admin", 
 	"db_user": "cgrates", 					// username to use when connecting to data_db
 	"db_password": "CGRateS.org", 						// password to use when connecting to data_db
-	"load_history_size": 10,				// Number of records in the load history
 },
 
 

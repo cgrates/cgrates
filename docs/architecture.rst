@@ -358,8 +358,6 @@ Can be used to:
          Flush the database before importing
    -from_stordb
          Load the tariff plan from storDb to dataDb
-   -load_history_size int
-         Limit the number of records in the load history (default 10)
    -migrate_rc8 string
          Migrate Accounts, Actions, ActionTriggers, DerivedChargers, ActionPlans and SharedGroups to RC8 structures, possible values: *all,acc,atr,act,dcs,apl,shg
    -path string
@@ -450,8 +448,6 @@ Command line stress testing tool.
         The destination to use in queries. (default "1002")
   -json
         Use JSON RPC
-  -load_history_size int
-        Limit the number of records in the load history (default 10)
   -memprofile string
         write memory profile to this file
   -parallel int
@@ -493,8 +489,6 @@ Command line migration tool.
       The encoding used to store object data in strings (default "msgpack")
   -dry_run
       When true will not save loaded data to dataDb but just parse it for consistency and errors.(default "false")
-  -load_history_size int
-      Limit the number of records in the load history (default 10)
   -migrate string
       Fire up automatic migration *to use multiple values use ',' as separator 
       <*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups> 
@@ -512,8 +506,6 @@ Command line migration tool.
       The DataDb user to sign in as. (default "cgrates")
   -old_dbdata_encoding string
       The encoding used to store object data in strings
-  -old_load_history_size int
-      Limit the number of records in the load history
   -old_stordb_host string
       The storDb host to connect to. (default "192.168.100.40")
   -old_stordb_name string
