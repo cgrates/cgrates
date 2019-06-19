@@ -142,7 +142,6 @@ func (rs *Responder) MaxDebit(arg *CallDescriptorWithArgDispatcher, reply *CallC
 			nil, true, utils.NonTransactional)
 	}
 	// end of RPC caching
-
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}

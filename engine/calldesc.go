@@ -648,6 +648,8 @@ If the user has no credit then it will return 0.
 If the user has postpayed plan it returns -1.
 */
 func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Duration, error) {
+	fmt.Println("===Teo==== Enter in CallDesc getMaxSessionDuration")
+
 	// clone the account for discarding chenges on debit dry run
 	//log.Printf("ORIG CD: %+v", origCD)
 	account := origAcc.Clone()
@@ -663,15 +665,18 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	}
 	cd := origCD.Clone()
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
+	fmt.Println("initialDuration : ", initialDuration)
 	defaultBalance := account.GetDefaultMoneyBalance()
 
 	//use this to check what increment was payed with debt
 	initialDefaultBalanceValue := defaultBalance.GetValue()
 
+	tStart := time.Now()
 	cc, err := cd.debit(account, true, false)
 	if err != nil {
 		return 0, err
 	}
+	fmt.Println("Duration for debit from getMaxSessionDuration: ", time.Now().Sub(tStart))
 
 	// not enough credit for connect fee
 	if cc.negativeConnectFee == true {
@@ -680,7 +685,9 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 
 	var totalCost float64
 	var totalDuration time.Duration
+	decompressStart := time.Now()
 	cc.Timespans.Decompress()
+	fmt.Println("Duration for dcc.Timespans.Decompress(): ", time.Now().Sub(decompressStart))
 	for _, ts := range cc.Timespans {
 		if cd.MaxRate > 0 && cd.MaxRateUnit > 0 {
 			rate, _, rateUnit := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
@@ -710,6 +717,8 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 			}
 		}
 	}
+	fmt.Println("totalDuration : ", totalDuration)
+	fmt.Println("===Teo==== Exit CallDesc getMaxSessionDuration")
 	return utils.MinDuration(initialDuration, totalDuration), nil
 }
 
@@ -821,8 +830,13 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 // by the GetMaxSessionDuration method. The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 	cd.account = nil // make sure it's not cached
+	fmt.Println("===Teo=== ")
+	fmt.Println("===Teo=== Enter in CallDescriptor MaxDebit")
+	tSt := time.Now()
+	//fmt.Println("===Teo=== cc : ", utils.ToJSON(cd))
 	_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
 		account, err := cd.getAccount()
+		//fmt.Println("Account: ", utils.ToJSON(account))
 		if err != nil {
 			return nil, err
 		}
@@ -838,10 +852,16 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 			}
 		}
 		_, err = guardian.Guardian.Guard(func() (iface interface{}, err error) {
+			tStart := time.Now()
+			fmt.Println("CD before getMaxSessionDuration: ", cd)
 			remainingDuration, err := cd.getMaxSessionDuration(account)
 			if err != nil && cd.GetDuration() > 0 {
 				return nil, err
 			}
+			//	fmt.Println("Account after cd.getMaxSessionDuration: ", utils.ToJSON(account))
+			fmt.Println("Total time spend in cd.getMaxSessionDuration(account) : ", time.Now().Sub(tStart))
+			fmt.Println("CD after getMaxSessionDuration: ", cd)
+			fmt.Println("remainingDuration after exit getMaxSessionDuration: ", remainingDuration)
 			// check ForceDuartion
 			if cd.ForceDuration && !account.AllowNegative && remainingDuration < cd.GetDuration() {
 				return nil, utils.ErrInsufficientCredit
@@ -871,16 +891,20 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 				cd.TimeEnd = cd.TimeStart.Add(remainingDuration)
 				cd.DurationIndex -= initialDuration - remainingDuration
 			}
+			fmt.Println("CD after if remainingDuration > 0 {: ", cd)
 			//log.Print("Remaining duration: ", remainingDuration)
+			tStart3 := time.Now()
 			cc, err = cd.debit(account, cd.DryRun, !cd.DenyNegativeAccount)
 			if err == nil {
 				cc.AccountSummary = cd.AccountSummary()
 			}
+			fmt.Println("Duration from CallDesc debit : ", time.Now().Sub(tStart3))
 			//log.Print(balanceMap[0].Value, balanceMap[1].Value)
 			return
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, lkIDs...)
 		return
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+cd.GetAccountKey())
+	fmt.Println("===Teo=== Exit callDest MaxDebit with a duration of :", time.Now().Sub(tSt))
 	return cc, err
 }
 
