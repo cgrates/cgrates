@@ -12,7 +12,7 @@ sed -i 's/config_dir/config_path/g' /usr/share/cgrates/tutorials/fs_evsock/cgrat
 sed -i 's/\/etc\/cgrates/\/etc\/cgrates -httprof_path=\/pprof -logger=*stdout/g' /usr/share/cgrates/tutorials/fs_evsock/cgrates/etc/init.d/cgrates
 
 # Get our data ready
-/usr/bin/cgr-migrator -migrate=*set_versions -config_path=/usr/share/cgrates/tutorials/fs_evsock/cgrates/etc/cgrates/
+/usr/bin/cgr-migrator -exec=*set_versions -config_path=/usr/share/cgrates/tutorials/fs_evsock/cgrates/etc/cgrates/
 
 # Let FreeSWITCH start up
 sleep 5

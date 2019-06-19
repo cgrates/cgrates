@@ -158,7 +158,7 @@ Once database setup is completed, we need to write the versions data. To do this
 Sample usage for MySQL: 
 ::
 
-   cgr-migrator -stordb_passwd="CGRateS.org" -migrate="*set_versions"
+   cgr-migrator -stordb_passwd="CGRateS.org" -exec="*set_versions"
 
 
 3.3.3.Git
