@@ -43,7 +43,7 @@ As described in post-install section, we will need to set up the MySQL_ database
 Once the database is in place, we can now set versions:
 ::
 
-   cgr-migrator -stordb_passwd="CGRateS.org" -migrate="*set_versions"
+   cgr-migrator -stordb_passwd="CGRateS.org" -exec="*set_versions"
 
 At this point we have **CGRateS** installed but not yet configured. To facilitate understanding and speed up the process, **CGRateS** has the configurations used in these tutorials available in the */usr/share/cgrates/tutorials* folder.
 

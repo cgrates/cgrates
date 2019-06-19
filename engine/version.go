@@ -26,17 +26,17 @@ import (
 
 var (
 	dataDBVers = map[string]string{
-		utils.Accounts:       "cgr-migrator -migrate=*accounts",
-		utils.Attributes:     "cgr-migrator -migrate=*attributes",
-		utils.Actions:        "cgr-migrator -migrate=*actions",
-		utils.ActionTriggers: "cgr-migrator -migrate=*action_triggers",
-		utils.ActionPlans:    "cgr-migrator -migrate=*action_plans",
-		utils.SharedGroups:   "cgr-migrator -migrate=*shared_groups",
-		utils.Thresholds:     "cgr-migrator -migrate=*thresholds",
+		utils.Accounts:       "cgr-migrator -exec=*accounts",
+		utils.Attributes:     "cgr-migrator -exec=*attributes",
+		utils.Actions:        "cgr-migrator -exec=*actions",
+		utils.ActionTriggers: "cgr-migrator -exec=*action_triggers",
+		utils.ActionPlans:    "cgr-migrator -exec=*action_plans",
+		utils.SharedGroups:   "cgr-migrator -exec=*shared_groups",
+		utils.Thresholds:     "cgr-migrator -exec=*thresholds",
 	}
 	storDBVers = map[string]string{
-		utils.CostDetails:   "cgr-migrator -migrate=*cost_details",
-		utils.SessionSCosts: "cgr-migrator -migrate=*sessions_costs",
+		utils.CostDetails:   "cgr-migrator -exec=*cost_details",
+		utils.SessionSCosts: "cgr-migrator -exec=*sessions_costs",
 	}
 	allVers map[string]string // init will fill this with a merge of data+stor
 )
@@ -67,7 +67,7 @@ func CheckVersions(storage Storage) error {
 			return err
 		}
 		if !empty {
-			return fmt.Errorf("No versions defined: please backup cgrates data and run : <cgr-migrator -migrate=*set_versions>")
+			return fmt.Errorf("No versions defined: please backup cgrates data and run : <cgr-migrator -exec=*set_versions>")
 		}
 		// no data, safe to write version
 		if err := OverwriteDBVersions(storage); err != nil {
