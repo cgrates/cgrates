@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -29,6 +30,7 @@ import (
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -44,15 +46,18 @@ var sTestsData = []func(t *testing.T){
 	testV1DataLoadConfig,
 	testV1DataInitDataDb,
 	testV1DataResetStorDb,
-	testV1DataStartEngine,
+	//testV1DataStartEngine,
 	testV1DataRpcConn,
 	testV1DataLoadTarrifPlans,
-	testV1DataDataDebitUsageWith10Kilo,
-	testV1DataGetCostWith10Kilo,
-	testV1DataDebitBalanceWith10Kilo,
-	testV1DataDataDebitUsage1G0,
-	testV1DataGetCost1G0,
-	testV1DataDebitBalance1G0,
+	// testV1DataDataDebitUsageWith10Kilo,
+	// testV1DataGetCostWith10Kilo,
+	// testV1DataDebitBalanceWith10Kilo,
+	// testV1DataDataDebitUsage1G0,
+	// testV1DataGetCost1G0,
+	// testV1DataDebitBalance1G0,
+	testV1DataInitSession,
+	testV1DataUpdateWith1Mo,
+	testV1DataUpdateWith1Go,
 	testV1DataStopEngine,
 }
 
@@ -385,6 +390,165 @@ func testV1DataDebitBalance1G0(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v",
 			expected, rply)
 	}
+}
+
+func testV1DataInitSession(t *testing.T) {
+	attrSetBalance := utils.AttrSetBalance{
+		Tenant:        "cgrates.org",
+		Account:       "testV1DataInitSession",
+		BalanceType:   utils.DATA,
+		Categories:    utils.StringPointer("data"),
+		BalanceID:     utils.StringPointer("testV1DataInitSession"),
+		Value:         utils.Float64Pointer(1100000000),
+		RatingSubject: utils.StringPointer("*zero10000ns"),
+	}
+	var reply string
+	if err := dataRpc.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+
+	expected := 1100000000.0
+	var acc *engine.Account
+	if err := dataRpc.Call("ApierV2.GetAccount",
+		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataInitSession"},
+		&acc); err != nil {
+		t.Error(err)
+	} else if _, has := acc.BalanceMap[utils.DATA]; !has {
+		t.Error("Unexpected balance returned: ", utils.ToJSON(acc.BalanceMap[utils.DATA]))
+	} else if rply := acc.BalanceMap[utils.DATA].GetTotalValue(); rply != expected {
+		t.Errorf("Expecting: %v, received: %v",
+			expected, rply)
+	}
+
+	initUsage := 10000
+	args := &sessions.V1InitSessionArgs{
+		InitSession: true,
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1DataInitSession",
+			Event: map[string]interface{}{
+				utils.Tenant:         "cgrates.org",
+				utils.ToR:            utils.DATA,
+				utils.Category:       "data",
+				utils.OriginID:       "781512335",
+				utils.RequestType:    utils.META_PREPAID,
+				utils.Account:        "testV1DataInitSession",
+				utils.Subject:        "10kilo",
+				utils.Destination:    "*any",
+				utils.SetupTime:      time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:     time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.Usage:          initUsage,
+				"SessionTTL":         "300s",
+				"SessionTTLLastUsed": "0s",
+				"SessionTTLMaxDelay": "1800s",
+				"SessionTTLUsage":    "0s",
+			},
+		},
+	}
+	var rply sessions.V1InitSessionReply
+	if err := dataRpc.Call(utils.SessionSv1InitiateSession,
+		args, &rply); err != nil {
+		t.Error(err)
+	}
+
+	aSessions := make([]*sessions.ActiveSession, 0)
+	if err := dataRpc.Call(utils.SessionSv1GetActiveSessions,
+		&utils.SessionFilter{}, &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 1 {
+		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v",
+			utils.ToJSON(aSessions), len(aSessions))
+	}
+	fmt.Println("Session : ", utils.ToJSON(aSessions))
+}
+
+func testV1DataUpdateWith1Mo(t *testing.T) {
+	reqUsage := 1000000
+	args := &sessions.V1UpdateSessionArgs{
+		UpdateSession: true,
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1DataUpdateWith1Mo",
+			Event: map[string]interface{}{
+				utils.Tenant:         "cgrates.org",
+				utils.ToR:            utils.DATA,
+				utils.Category:       "data",
+				"InitialOriginID":    "781512335",
+				"LastUsed":           0,
+				"OriginID":           "781512335-11",
+				utils.RequestType:    utils.META_PREPAID,
+				utils.Account:        "testV1DataInitSession",
+				utils.Subject:        "10kilo",
+				utils.Destination:    "*any",
+				utils.SetupTime:      time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:     time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.Usage:          reqUsage,
+				"SessionTTL":         "28807s",
+				"SessionTTLLastUsed": "0s",
+				"SessionTTLMaxDelay": "1800s",
+				"SessionTTLUsage":    "0s",
+			},
+		},
+	}
+	var rply sessions.V1UpdateSessionReply
+	if err := dataRpc.Call(utils.SessionSv1UpdateSession,
+		args, &rply); err != nil {
+		t.Error(err)
+	}
+	aSessions := make([]*sessions.ActiveSession, 0)
+	if err := dataRpc.Call(utils.SessionSv1GetActiveSessions,
+		&utils.SessionFilter{}, &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 1 {
+		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v",
+			utils.ToJSON(aSessions), len(aSessions))
+	}
+}
+
+func testV1DataUpdateWith1Go(t *testing.T) {
+	reqUsage := 1000000000
+	args := &sessions.V1UpdateSessionArgs{
+		UpdateSession: true,
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1DataUpdateWith1Go",
+			Event: map[string]interface{}{
+				utils.Tenant:         "cgrates.org",
+				utils.ToR:            utils.DATA,
+				utils.Category:       "data",
+				"InitialOriginID":    "781512335",
+				"LastUsed":           946405,
+				"OriginID":           "781512335-11",
+				utils.RequestType:    utils.META_PREPAID,
+				utils.Account:        "testV1DataInitSession",
+				utils.Subject:        "10kilo",
+				utils.Destination:    "*any",
+				utils.SetupTime:      time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:     time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.Usage:          reqUsage,
+				"SessionTTL":         "28807s",
+				"SessionTTLLastUsed": "0s",
+				"SessionTTLMaxDelay": "1800s",
+				"SessionTTLUsage":    "0s",
+			},
+		},
+	}
+	var rply sessions.V1UpdateSessionReply
+	if err := dataRpc.Call(utils.SessionSv1UpdateSession,
+		args, &rply); err != nil {
+		t.Error(err)
+	}
+	aSessions := make([]*sessions.ActiveSession, 0)
+	if err := dataRpc.Call(utils.SessionSv1GetActiveSessions,
+		&utils.SessionFilter{}, &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 1 {
+		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v",
+			utils.ToJSON(aSessions), len(aSessions))
+	}
+
 }
 
 func testV1DataStopEngine(t *testing.T) {

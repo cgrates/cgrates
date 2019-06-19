@@ -533,18 +533,18 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 				defaultBalance := ub.GetDefaultMoneyBalance()
 				defaultBalance.SubstractValue(cost)
 				//send default balance to thresholdS to be processed
-				acntTnt := utils.NewTenantID(ub.ID)
-				thEv := &ArgsProcessEvent{
-					CGREvent: &utils.CGREvent{
-						Tenant: acntTnt.Tenant,
-						ID:     utils.GenUUID(),
-						Event: map[string]interface{}{
-							utils.EventType:   utils.BalanceUpdate,
-							utils.EventSource: utils.AccountService,
-							utils.Account:     acntTnt.ID,
-							utils.BalanceID:   defaultBalance.ID,
-							utils.Units:       defaultBalance.Value}}}
 				if thresholdS != nil {
+					acntTnt := utils.NewTenantID(ub.ID)
+					thEv := &ArgsProcessEvent{
+						CGREvent: &utils.CGREvent{
+							Tenant: acntTnt.Tenant,
+							ID:     utils.GenUUID(),
+							Event: map[string]interface{}{
+								utils.EventType:   utils.BalanceUpdate,
+								utils.EventSource: utils.AccountService,
+								utils.Account:     acntTnt.ID,
+								utils.BalanceID:   defaultBalance.ID,
+								utils.Units:       defaultBalance.Value}}}
 					var tIDs []string
 					if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 						err.Error() != utils.ErrNotFound.Error() {
