@@ -18,6 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import (
+	"fmt"
+	"os"
+	"path"
+	"strings"
+)
+
 const CGRATES_CFG_JSON = `
 {
 
@@ -783,3 +790,24 @@ const CGRATES_CFG_JSON = `
 },
 
 }`
+
+func writeDefaultCofig() error {
+	f, err := os.OpenFile(path.Join("/usr", "share", "cgrates", "conf", "cgrates", "cgrates.json"), os.O_WRONLY|os.O_CREATE, 0755)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	rows := strings.Split(CGRATES_CFG_JSON, "\n")[1:] // remove first empty row
+	for i, row := range rows {
+		if i == 0 || i == len(rows)-1 { // do not comment first and last row
+			fmt.Fprintln(f, row)
+			continue
+		}
+		if withoutSpace := strings.TrimSpace(row); len(withoutSpace) == 0 || strings.HasPrefix(row, "//") { // do not comment empty rows and alerady commented ones
+			fmt.Fprintln(f, row)
+			continue
+		}
+		fmt.Fprintf(f, "// %s\n", row)
+	}
+	return nil
+}
