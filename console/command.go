@@ -38,6 +38,7 @@ type Commander interface {
 	ClientArgs() []string                     // for autocompletion
 	Name() string
 	LocalExecute() string
+	GetFormatedResult(result interface{}) string
 }
 
 func GetCommands() map[string]Commander {

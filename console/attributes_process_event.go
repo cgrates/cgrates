@@ -68,3 +68,9 @@ func (self *CmdAttributesProcessEvent) RpcResult() interface{} {
 	atr := engine.AttrSProcessEventReply{}
 	return &atr
 }
+
+func (self *CmdAttributesProcessEvent) GetFormatedResult(result interface{}) string {
+	return GetFormatedResult(result, map[string]struct{}{
+		"Usage": struct{}{},
+	})
+}

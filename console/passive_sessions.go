@@ -65,3 +65,12 @@ func (self *CmdPassiveSessions) RpcResult() interface{} {
 	var sessions *[]*sessions.ActiveSession
 	return &sessions
 }
+
+func (self *CmdPassiveSessions) GetFormatedResult(result interface{}) string {
+	return GetFormatedSliceResult(result, map[string]struct{}{
+		"Usage":         struct{}{},
+		"DurationIndex": struct{}{},
+		"MaxRateUnit":   struct{}{},
+		"DebitInterval": struct{}{},
+	})
+}

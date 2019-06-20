@@ -128,14 +128,32 @@ func IfaceAsDuration(itm interface{}) (d time.Duration, err error) {
 	switch it := itm.(type) {
 	case time.Duration:
 		return it, nil
-	case float64: // automatically hitting here also ints
+	case int: // check every int type
+		return time.Duration(int64(it)), nil
+	case int8:
+		return time.Duration(int64(it)), nil
+	case int16:
+		return time.Duration(int64(it)), nil
+	case int32:
 		return time.Duration(int64(it)), nil
 	case int64:
-		return time.Duration(it), nil
-	case int:
-		return time.Duration(it), nil
+		return time.Duration(int64(it)), nil
+	case uint:
+		return time.Duration(int64(it)), nil
+	case uint8:
+		return time.Duration(int64(it)), nil
+	case uint16:
+		return time.Duration(int64(it)), nil
+	case uint32:
+		return time.Duration(int64(it)), nil
+	case uint64:
+		return time.Duration(int64(it)), nil
+	case float32: // automatically hitting here also ints
+		return time.Duration(int64(it)), nil
+	case float64: // automatically hitting here also ints
+		return time.Duration(int64(it)), nil
 	case string:
-		return ParseDurationWithNanosecs(itm.(string))
+		return ParseDurationWithNanosecs(it)
 	default:
 		err = fmt.Errorf("cannot convert field: %+v to time.Duration", it)
 	}

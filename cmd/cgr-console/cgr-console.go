@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -109,8 +108,7 @@ func executeCommand(command string) {
 		if rpcErr := client.Call(cmd.RpcMethod(), param, res); rpcErr != nil {
 			fmt.Println("Error executing command: " + rpcErr.Error())
 		} else {
-			result, _ := json.MarshalIndent(res, "", " ")
-			fmt.Println(string(result))
+			fmt.Println(cmd.GetFormatedResult(res))
 		}
 	} else {
 		fmt.Println(cmd.LocalExecute())

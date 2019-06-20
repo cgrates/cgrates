@@ -64,3 +64,9 @@ func (self *CmdGetStatQueue) RpcResult() interface{} {
 	atr := engine.StatQueueProfile{}
 	return &atr
 }
+
+func (self *CmdGetStatQueue) GetFormatedResult(result interface{}) string {
+	return GetFormatedResult(result, map[string]struct{}{
+		"TTL": struct{}{},
+	})
+}

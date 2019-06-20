@@ -63,3 +63,12 @@ func (self *CmdGetCostDetails) PostprocessRpcParams() error {
 func (self *CmdGetCostDetails) RpcResult() interface{} {
 	return &engine.EventCost{}
 }
+
+func (self *CmdGetCostDetails) GetFormatedResult(result interface{}) string {
+	return GetFormatedResult(result, map[string]struct{}{
+		"Usage":              struct{}{},
+		"GroupIntervalStart": struct{}{},
+		"RateIncrement":      struct{}{},
+		"RateUnit":           struct{}{},
+	})
+}
