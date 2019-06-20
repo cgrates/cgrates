@@ -274,7 +274,7 @@ func TestSessionsItTerminatePassive(t *testing.T) {
 	} else if rply != utils.OK {
 		t.Errorf("Expecting : %+v, received: %+v", utils.OK, rply)
 	}
-	var pSessions []*ActiveSession
+	var pSessions []*ExternalSession
 	//check if the passive session was created
 	if err := sItRPC.Call(utils.SessionSv1GetPassiveSessions,
 		map[string]string{utils.OriginID: "123789"}, &pSessions); err != nil {

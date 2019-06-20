@@ -313,7 +313,7 @@ func TestSSv1ItInitiateSession(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
 	}
-	aSessions := make([]*sessions.ActiveSession, 0)
+	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
@@ -360,7 +360,7 @@ func TestSSv1ItInitiateSessionWithDigest(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.AttributesDigest))
 	}
-	aSessions := make([]*sessions.ActiveSession, 0)
+	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
@@ -424,7 +424,7 @@ func TestSSv1ItUpdateSession(t *testing.T) {
 	if *rply.MaxUsage != reqUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
-	aSessions := make([]*sessions.ActiveSession, 0)
+	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
@@ -461,7 +461,7 @@ func TestSSv1ItTerminateSession(t *testing.T) {
 	if rply != utils.OK {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
-	aSessions := make([]*sessions.ActiveSession, 0)
+	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -557,7 +557,7 @@ func TestSSv1ItProcessEvent(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
 	}
-	aSessions := make([]*sessions.ActiveSession, 0)
+	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -640,7 +640,7 @@ func TestSSv1ItCDRsGetCdrs(t *testing.T) {
 }
 
 func TestSSv1ItForceUpdateSession(t *testing.T) {
-	aSessions := make([]*sessions.ActiveSession, 0)
+	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %v with len(asessions)=%v", err, len(aSessions))
 	}
@@ -710,7 +710,7 @@ func TestSSv1ItForceUpdateSession(t *testing.T) {
 	if *rply.MaxUsage != reqUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
-	aSessions = make([]*sessions.ActiveSession, 0)
+	aSessions = make([]*sessions.ExternalSession, 0)
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
@@ -730,7 +730,7 @@ func TestSSv1ItForceUpdateSession(t *testing.T) {
 	} else if rplyt != utils.OK {
 		t.Errorf("Unexpected reply: %s", rplyt)
 	}
-	aSessions = make([]*sessions.ActiveSession, 0)
+	aSessions = make([]*sessions.ExternalSession, 0)
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -823,7 +823,7 @@ func TestSSv1ItDynamicDebit(t *testing.T) {
 		t.Errorf("Unexpected MaxUsage: %v", rply1.MaxUsage)
 	}
 
-	aSessions := make([]*sessions.ActiveSession, 0)
+	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
@@ -870,7 +870,7 @@ func TestSSv1ItDynamicDebit(t *testing.T) {
 
 	time.Sleep(50 * time.Millisecond)
 
-	aSessions = make([]*sessions.ActiveSession, 0)
+	aSessions = make([]*sessions.ExternalSession, 0)
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

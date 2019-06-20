@@ -36,7 +36,7 @@ func (s *SessionID) CGRID() string {
 }
 
 // Will be used when displaying active sessions via RPC
-type ActiveSession struct {
+type ExternalSession struct {
 	CGRID         string
 	RunID         string
 	ToR           string            // type of record, meta-field, should map to one of the TORs hardcoded inside the server <*voice|*data|*sms|*generic>
@@ -114,11 +114,11 @@ func (s Session) Clone() (cln *Session) {
 	return
 }
 
-func (s *Session) AsActiveSessions(tmz, nodeID string) (aSs []*ActiveSession) {
+func (s *Session) AsExternalSessions(tmz, nodeID string) (aSs []*ExternalSession) {
 	s.RLock()
-	aSs = make([]*ActiveSession, len(s.SRuns))
+	aSs = make([]*ExternalSession, len(s.SRuns))
 	for i, sr := range s.SRuns {
-		aSs[i] = &ActiveSession{
+		aSs[i] = &ExternalSession{
 			CGRID:       s.CGRID,
 			RunID:       sr.Event.GetStringIgnoreErrors(utils.RunID),
 			ToR:         sr.Event.GetStringIgnoreErrors(utils.ToR),
@@ -150,9 +150,9 @@ func (s *Session) AsActiveSessions(tmz, nodeID string) (aSs []*ActiveSession) {
 	s.RUnlock()
 	return
 }
-func (s *Session) asActiveSessions(sr *SRun, tmz, nodeID string) (aS *ActiveSession) {
+func (s *Session) AsExternalSession(sr *SRun, tmz, nodeID string) (aS *ExternalSession) {
 	s.RLock()
-	aS = &ActiveSession{
+	aS = &ExternalSession{
 		CGRID:       s.CGRID,
 		RunID:       sr.Event.GetStringIgnoreErrors(utils.RunID),
 		ToR:         sr.Event.GetStringIgnoreErrors(utils.ToR),

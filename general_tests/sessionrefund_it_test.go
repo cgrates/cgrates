@@ -175,7 +175,7 @@ func TestSrItTerminateSession(t *testing.T) {
 	if rply != utils.OK {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
-	aSessions := make([]*sessions.ActiveSession, 0)
+	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := srrpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -262,7 +262,7 @@ func TestSrItTerminateSession2(t *testing.T) {
 	if rply != utils.OK {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
-	aSessions := make([]*sessions.ActiveSession, 0)
+	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := srrpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

@@ -791,7 +791,7 @@ func TestSessionsVoiceSessionTTL(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", usage, *initRpl.MaxUsage)
 	}
 
-	var aSessions []*ActiveSession
+	var aSessions []*ExternalSession
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		map[string]string{utils.RunID: utils.META_DEFAULT,
 			utils.OriginID: "12360"}, &aSessions); err != nil {
@@ -941,7 +941,7 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", usage, *initRpl.MaxUsage)
 	}
 
-	var aSessions []*ActiveSession
+	var aSessions []*ExternalSession
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		map[string]string{utils.RunID: utils.META_DEFAULT,
 			utils.OriginID: "12361"},
@@ -1102,7 +1102,7 @@ func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	}
 
 	time.Sleep(time.Duration(20) * time.Millisecond)
-	var aSessions []*ActiveSession
+	var aSessions []*ExternalSession
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		map[string]string{utils.RunID: utils.META_DEFAULT,
 			utils.OriginID: "12371"},

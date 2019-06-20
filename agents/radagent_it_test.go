@@ -276,7 +276,7 @@ func testRAitAcctStart(t *testing.T) {
 	if isDispatcherActive { // no debit interval set on dispatched session
 		expUsage = 3 * time.Hour
 	}
-	var aSessions []*sessions.ActiveSession
+	var aSessions []*sessions.ExternalSession
 	if err := raRPC.Call(utils.SessionSv1GetActiveSessions,
 		map[string]string{utils.RunID: utils.META_DEFAULT,
 			utils.OriginID: "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"},
@@ -344,7 +344,7 @@ func testRAitAcctStop(t *testing.T) {
 		t.Errorf("Received AVPs: %+v", reply.AVPs)
 	}
 	// Make sure the sessin was disconnected from SMG
-	var aSessions []*sessions.ActiveSession
+	var aSessions []*sessions.ExternalSession
 	if err := raRPC.Call(utils.SessionSv1GetActiveSessions,
 		map[string]string{utils.RunID: utils.META_DEFAULT, utils.OriginID: "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"},
 		&aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {

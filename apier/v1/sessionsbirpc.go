@@ -96,7 +96,7 @@ func (ssv1 *SessionSv1) BiRPCv1ProcessEvent(clnt *rpc2.Client, args *sessions.V1
 }
 
 func (ssv1 *SessionSv1) BiRPCv1GetActiveSessions(clnt *rpc2.Client, args *utils.SessionFilter,
-	rply *[]*sessions.ActiveSession) error {
+	rply *[]*sessions.ExternalSession) error {
 	return ssv1.Ss.BiRPCv1GetActiveSessions(clnt, args, rply)
 }
 
@@ -106,7 +106,7 @@ func (ssv1 *SessionSv1) BiRPCv1GetActiveSessionsCount(clnt *rpc2.Client, args *u
 }
 
 func (ssv1 *SessionSv1) BiRPCv1GetPassiveSessions(clnt *rpc2.Client, args *utils.SessionFilter,
-	rply *[]*sessions.ActiveSession) error {
+	rply *[]*sessions.ExternalSession) error {
 	return ssv1.Ss.BiRPCv1GetPassiveSessions(clnt, args, rply)
 }
 

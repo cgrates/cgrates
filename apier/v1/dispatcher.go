@@ -458,7 +458,7 @@ func (dS *DispatcherSessionSv1) UpdateSession(args *sessions.V1UpdateSessionArgs
 }
 
 func (dS *DispatcherSessionSv1) GetActiveSessions(args *utils.SessionFilter,
-	reply *[]*sessions.ActiveSession) (err error) {
+	reply *[]*sessions.ExternalSession) (err error) {
 	return dS.dS.SessionSv1GetActiveSessions(args, reply)
 }
 
@@ -473,7 +473,7 @@ func (dS *DispatcherSessionSv1) ForceDisconnect(args *utils.SessionFilter,
 }
 
 func (dS *DispatcherSessionSv1) GetPassiveSessions(args *utils.SessionFilter,
-	reply *[]*sessions.ActiveSession) (err error) {
+	reply *[]*sessions.ExternalSession) (err error) {
 	return dS.dS.SessionSv1GetPassiveSessions(args, reply)
 }
 

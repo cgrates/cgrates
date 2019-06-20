@@ -176,7 +176,7 @@ func TestSesItTerminateSession(t *testing.T) {
 	if rply != utils.OK {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
-	aSessions := make([]*sessions.ActiveSession, 0)
+	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := sesRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

@@ -1650,9 +1650,15 @@ func TestDebitGeneric(t *testing.T) {
 				RateInterval: &RateInterval{
 					Rating: &RIRate{
 						Rates: RateGroups{
-							&Rate{GroupIntervalStart: 0, Value: 100,
-								RateIncrement: 1,
-								RateUnit:      time.Nanosecond}}}},
+							&Rate{
+								GroupIntervalStart: 0,
+								Value:              100,
+								RateIncrement:      1,
+								RateUnit:           time.Nanosecond,
+							},
+						},
+					},
+				},
 			},
 		},
 		TOR: utils.GENERIC,

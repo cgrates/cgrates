@@ -89,7 +89,7 @@ func TestSessionSRplTPFromFolder(t *testing.T) {
 }
 
 func TestSessionSRplInitiate(t *testing.T) {
-	var aSessions []*ActiveSession
+	var aSessions []*ExternalSession
 	//make sure we don't have active sessions on master and passive on slave
 	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions,
 		nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -145,7 +145,7 @@ func TestSessionSRplInitiate(t *testing.T) {
 	}
 
 	//check if the session was created as passive session on slave
-	var pSessions []*ActiveSession
+	var pSessions []*ExternalSession
 	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions,
 		map[string]string{utils.OriginID: "123451"}, &pSessions); err != nil {
 		t.Error(err)
@@ -190,7 +190,7 @@ func TestSessionSRplUpdate(t *testing.T) {
 	}
 
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
-	var aSessions []*ActiveSession
+	var aSessions []*ExternalSession
 	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetActiveSessions,
 		map[string]string{utils.OriginID: "123451"}, &aSessions); err != nil {
 		t.Error(err)
@@ -200,7 +200,7 @@ func TestSessionSRplUpdate(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", time.Duration(150)*time.Second, aSessions[0].Usage)
 	}
 
-	var pSessions []*ActiveSession
+	var pSessions []*ExternalSession
 	// Make sure we don't have passive session on active host
 	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, nil,
 		&pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -255,7 +255,7 @@ func TestSessionSRplTerminate(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
-	var aSessions []*ActiveSession
+	var aSessions []*ExternalSession
 	//check if the session was terminated on master
 	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions,
 		map[string]string{utils.OriginID: "123451"}, &aSessions); err == nil ||
@@ -268,7 +268,7 @@ func TestSessionSRplTerminate(t *testing.T) {
 		t.Errorf("Error: %v with len(aSessions)=%v , session : %+v", err, len(aSessions), utils.ToIJSON(aSessions))
 	}
 	// check to don't have passive session on master and slave
-	var pSessions []*ActiveSession
+	var pSessions []*ExternalSession
 	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, nil,
 		&pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %v with len(pSessions)=%v , session : %+v", err, len(pSessions), utils.ToIJSON(pSessions))
@@ -342,7 +342,7 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 		}
 	}
 	//verify if the sessions was created on master and are active
-	var aSessions []*ActiveSession
+	var aSessions []*ExternalSession
 	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {

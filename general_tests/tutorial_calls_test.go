@@ -382,8 +382,8 @@ func testCallCall1001To1002(t *testing.T) {
 
 // GetActiveSessions
 func testCallGetActiveSessions(t *testing.T) {
-	var reply *[]*sessions.ActiveSession
-	expected := &[]*sessions.ActiveSession{
+	var reply *[]*sessions.ExternalSession
+	expected := &[]*sessions.ExternalSession{
 		{
 			RequestType: "*prepaid",
 			Tenant:      "cgrates.org",
@@ -685,7 +685,7 @@ func testCallCheckThreshold1002After(t *testing.T) {
 }
 
 func testCallSyncSessions(t *testing.T) {
-	var reply *[]*sessions.ActiveSession
+	var reply *[]*sessions.ExternalSession
 	// activeSessions shouldn't be active
 	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
 		&map[string]string{}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
