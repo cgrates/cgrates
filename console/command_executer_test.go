@@ -20,6 +20,7 @@ package console
 import (
 	"encoding/json"
 	"testing"
+	"time"
 )
 
 func TestToJSON(t *testing.T) {
@@ -103,5 +104,136 @@ func TestFromJSONArraySpace(t *testing.T) {
 	expected := `Param=["id1", "id2", "id3"] TimeStart="Test" Test=1`
 	if line != expected {
 		t.Errorf("Expected: %s got: '%s'", expected, line)
+	}
+}
+
+func TestGetStringValue(t *testing.T) {
+	dflt := map[string]struct{}{}
+	expected := "10"
+	if rply := getStringValue(int64(10), dflt); rply != expected {
+		t.Errorf("Expecting: %s , received: %s", expected, rply)
+	}
+
+	expected = "true"
+	if rply := getStringValue(true, dflt); rply != expected {
+		t.Errorf("Expecting: %s , received: %s", expected, rply)
+	}
+
+	expected = "null"
+	if rply := getStringValue(nil, dflt); rply != expected {
+		t.Errorf("Expecting: %s , received: %s", expected, rply)
+	}
+
+	expected = "10.5"
+	if rply := getStringValue(10.5, dflt); rply != expected {
+		t.Errorf("Expecting: %s , received: %s", expected, rply)
+	}
+
+	expected = "[10,5]"
+	if rply := getStringValue([]float32{10, 5}, dflt); rply != expected {
+		t.Errorf("Expecting: %s , received: %s", expected, rply)
+	}
+
+	expected = `{"ID":"id1","TimeValue":10000}`
+	if rply := getStringValue(struct {
+		ID        string
+		TimeValue int64
+	}{ID: "id1", TimeValue: 10000}, dflt); rply != expected {
+		t.Errorf("Expecting: %s , received: %s", expected, rply)
+	}
+
+	if rply := getStringValue(map[string]interface{}{
+		"ID":        "id1",
+		"TimeValue": 10000}, dflt); rply != expected {
+		t.Errorf("Expecting: %s , received: %s", expected, rply)
+	}
+
+	expected = `{"ID":"id1","TimeValue":"1s"}`
+	if rply := getStringValue(map[string]interface{}{
+		"ID":        "id1",
+		"TimeValue": int64(time.Second)}, map[string]struct{}{"TimeValue": struct{}{}}); rply != expected {
+		t.Errorf("Expecting: %s , received: %s", expected, rply)
+	}
+
+	expected = "[10,20,30]"
+	if rply := getSliceAsString([]interface{}{10, 20, 30}, dflt); rply != expected {
+		t.Errorf("Expecting: %s , received: %s", expected, rply)
+	}
+}
+
+func TestGetSliceAsString(t *testing.T) {
+	dflt := map[string]struct{}{}
+	expected := "[10,20,30]"
+	if rply := getSliceAsString([]interface{}{10, 20, 30}, dflt); rply != expected {
+		t.Errorf("Expecting: %s , received: %s", expected, rply)
+	}
+
+	expected = `["test1","test2","test3"]`
+	if rply := getSliceAsString([]interface{}{"test1", "test2", "test3"}, dflt); rply != expected {
+		t.Errorf("Expecting: %s , received: %s", expected, rply)
+	}
+}
+
+func TestGetMapAsString(t *testing.T) {
+	dflt := map[string]struct{}{}
+	expected := `{"ID":"id1","TimeValue":10000}`
+	if rply := getStringValue(map[string]interface{}{
+		"ID":        "id1",
+		"TimeValue": 10000}, dflt); rply != expected {
+		t.Errorf("Expecting: %s , received: %s", expected, rply)
+	}
+
+	expected = `{"ID":"id1","TimeValue":"1s"}`
+	if rply := getStringValue(map[string]interface{}{
+		"ID":        "id1",
+		"TimeValue": int64(time.Second)}, map[string]struct{}{"TimeValue": struct{}{}}); rply != expected {
+		t.Errorf("Expecting: %s , received: %s", expected, rply)
+	}
+}
+
+func TestGetFormatedResult(t *testing.T) {
+	dflt := map[string]struct{}{}
+	expected := `{
+ "ID": "id1",
+ "TimeValue": 10000
+}`
+	if rply := GetFormatedResult(map[string]interface{}{
+		"ID":        "id1",
+		"TimeValue": 10000}, dflt); rply != expected {
+		t.Errorf("Expecting: %q , received: %q", expected, rply)
+	}
+
+	expected = `{
+ "ID": "id1",
+ "TimeValue": "1s"
+}`
+	if rply := GetFormatedResult(map[string]interface{}{
+		"ID":        "id1",
+		"TimeValue": int64(time.Second)}, map[string]struct{}{"TimeValue": struct{}{}}); rply != expected {
+		t.Errorf("Expecting: %s , received: %s", expected, rply)
+	}
+
+	expected = `{
+ "ID": "id1",
+ "TimeValue": 10000
+}`
+	if rply := GetFormatedResult(struct {
+		ID        string
+		TimeValue int64
+	}{ID: "id1", TimeValue: 10000}, dflt); rply != expected {
+		t.Errorf("Expecting: %s , received: %s", expected, rply)
+	}
+}
+
+func TestGetFormatedSliceResult(t *testing.T) {
+	dflt := map[string]struct{}{}
+	expected := "[10,20,30]"
+	if rply := getSliceAsString([]interface{}{10, 20, 30}, dflt); rply != expected {
+		t.Errorf("Expecting: %s , received: %s", expected, rply)
+	}
+
+	expected = `["test1","test2","test3"]`
+	if rply := getSliceAsString([]interface{}{"test1", "test2", "test3"}, dflt); rply != expected {
+		t.Errorf("Expecting: %s , received: %s", expected, rply)
 	}
 }

@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -162,20 +163,19 @@ func getSliceAsString(mp []interface{}, defaultDurationFields map[string]struct{
 }
 
 func getMapAsString(mp map[string]interface{}, defaultDurationFields map[string]struct{}) (out string) {
-	// defaultDurationFields := map[string]struct{}{"b": struct{}{}, "c": struct{}{}, "d": struct{}{}}
-	out = "{"
+	// in order to find the data faster
+	keylist := []string{} // add key value pairs to list so at the end we can sort them
 	for k, v := range mp {
 		if _, has := defaultDurationFields[k]; has {
 			if t, err := utils.IfaceAsDuration(v); err == nil {
-				out += fmt.Sprintf(`"%s":"%s",`, k, t.String())
+				keylist = append(keylist, fmt.Sprintf(`"%s":"%s"`, k, t.String()))
 				continue
-			} else {
-				fmt.Println(err)
 			}
 		}
-		out += fmt.Sprintf(`"%s":%s,`, k, getStringValue(v, defaultDurationFields))
+		keylist = append(keylist, fmt.Sprintf(`"%s":%s`, k, getStringValue(v, defaultDurationFields)))
 	}
-	return strings.TrimSuffix(out, ",") + "}"
+	sort.Strings(keylist)
+	return fmt.Sprintf(`{%s}`, strings.Join(keylist, ","))
 }
 
 func GetFormatedResult(result interface{}, defaultDurationFields map[string]struct{}) string {
