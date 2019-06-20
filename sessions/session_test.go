@@ -269,7 +269,7 @@ func TestSessionAsCGREvents(t *testing.T) {
 	}
 }
 
-func TestSessionAsActiveSessions(t *testing.T) {
+func TestSessionAsExternalSessions(t *testing.T) {
 	startEv := map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.VOICE,
@@ -313,8 +313,8 @@ func TestSessionAsActiveSessions(t *testing.T) {
 			},
 		},
 	}
-	exp := []*ActiveSession{
-		&ActiveSession{
+	exp := []*ExternalSession{
+		&ExternalSession{
 			CGRID:    "RandomCGRID",
 			RunID:    utils.MetaDefault,
 			ToR:      utils.VOICE,
@@ -343,14 +343,14 @@ func TestSessionAsActiveSessions(t *testing.T) {
 		},
 	}
 	//check for some fields if populated correct
-	rply := s.AsActiveSessions("", "ALL")
+	rply := s.AsExternalSessions("", "ALL")
 	if !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(exp), utils.ToJSON(rply))
 	}
 
 }
 
-func TestSessionAsActiveSessions2(t *testing.T) {
+func TestSessionAsExternalSessions2(t *testing.T) {
 	startEv := map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.VOICE,
@@ -401,8 +401,8 @@ func TestSessionAsActiveSessions2(t *testing.T) {
 			},
 		},
 	}
-	exp := []*ActiveSession{
-		&ActiveSession{
+	exp := []*ExternalSession{
+		&ExternalSession{
 			CGRID:    "RandomCGRID",
 			RunID:    utils.MetaDefault,
 			ToR:      utils.VOICE,
@@ -431,14 +431,14 @@ func TestSessionAsActiveSessions2(t *testing.T) {
 		},
 	}
 	//check for some fields if populated correct
-	rply := s.AsActiveSessions("", "ALL")
+	rply := s.AsExternalSessions("", "ALL")
 	if !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(exp), utils.ToJSON(rply))
 	}
 
 }
 
-func TestSessionAsActiveSessions3(t *testing.T) {
+func TestSessionAsExternalSessions3(t *testing.T) {
 	startEv := map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         utils.VOICE,
@@ -489,7 +489,7 @@ func TestSessionAsActiveSessions3(t *testing.T) {
 			},
 		},
 	}
-	exp := &ActiveSession{
+	exp := &ExternalSession{
 		CGRID:    "RandomCGRID",
 		RunID:    utils.MetaDefault,
 		ToR:      utils.VOICE,
@@ -517,7 +517,7 @@ func TestSessionAsActiveSessions3(t *testing.T) {
 		MaxCostSoFar:  20,
 	}
 	//check for some fields if populated correct
-	rply := s.asActiveSessions(s.SRuns[0], "", "ALL")
+	rply := s.AsExternalSession(s.SRuns[0], "", "ALL")
 	if !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(exp), utils.ToJSON(rply))
 	}

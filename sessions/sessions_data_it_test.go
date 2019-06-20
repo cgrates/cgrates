@@ -288,7 +288,7 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, totalVal)
 	}
-	aSessions := make([]*ActiveSession, 0)
+	aSessions := make([]*ExternalSession, 0)
 	if err := sDataRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 ||
@@ -620,7 +620,7 @@ func TestSessionsDataTTLExpMultiUpdates(t *testing.T) {
 	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
 	}
-	aSessions := make([]*ActiveSession, 0)
+	aSessions := make([]*ExternalSession, 0)
 	if err := sDataRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 ||
@@ -742,7 +742,7 @@ func TestSessionsDataMultipleDataNoUsage(t *testing.T) {
 	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
 	}
-	aSessions := make([]*ActiveSession, 0)
+	aSessions := make([]*ExternalSession, 0)
 	if err := sDataRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 ||
@@ -789,7 +789,7 @@ func TestSessionsDataMultipleDataNoUsage(t *testing.T) {
 	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
 	}
-	aSessions = make([]*ActiveSession, 0)
+	aSessions = make([]*ExternalSession, 0)
 	if err := sDataRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 ||
@@ -835,7 +835,7 @@ func TestSessionsDataMultipleDataNoUsage(t *testing.T) {
 	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
 	}
-	aSessions = make([]*ActiveSession, 0)
+	aSessions = make([]*ExternalSession, 0)
 	if err := sDataRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 ||
@@ -947,7 +947,7 @@ func TestSessionsDataTTLUsageProtection(t *testing.T) {
 	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
 	}
-	aSessions := make([]*ActiveSession, 0)
+	aSessions := make([]*ExternalSession, 0)
 	if err := sDataRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 ||

@@ -300,7 +300,7 @@ func testDspGetSessions(t *testing.T) {
 	} else if reply != 2 {
 		t.Errorf("Expected 2 active sessions recived %v", reply)
 	}
-	var rply []*sessions.ActiveSession
+	var rply []*sessions.ExternalSession
 	if err := dispEngine.RCP.Call(utils.SessionSv1GetActiveSessions,
 		&filtr, &rply); err != nil {
 		t.Fatal(err)
@@ -717,7 +717,7 @@ func testDspSessionPassive(t *testing.T) {
 		t.Errorf("Expected 1 active sessions recived %v", repl)
 	}
 
-	var rply []*sessions.ActiveSession
+	var rply []*sessions.ExternalSession
 	if err := dispEngine.RCP.Call(utils.SessionSv1GetActiveSessions,
 		&filtr, &rply); err != nil {
 		t.Fatal(err)
@@ -819,7 +819,7 @@ func testDspSessionForceDisconect(t *testing.T) {
 		t.Errorf("Expected 1 active sessions recived %v", repl)
 	}
 
-	var rply []*sessions.ActiveSession
+	var rply []*sessions.ExternalSession
 	if err := dispEngine.RCP.Call(utils.SessionSv1GetActiveSessions,
 		&filtr, &rply); err != nil {
 		t.Fatal(err)

@@ -226,7 +226,7 @@ func (dS *DispatcherService) SessionSv1ProcessEvent(args *sessions.V1ProcessEven
 }
 
 func (dS *DispatcherService) SessionSv1GetActiveSessions(args *utils.SessionFilter,
-	reply *[]*sessions.ActiveSession) (err error) {
+	reply *[]*sessions.ExternalSession) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
@@ -283,7 +283,7 @@ func (dS *DispatcherService) SessionSv1ForceDisconnect(args *utils.SessionFilter
 }
 
 func (dS *DispatcherService) SessionSv1GetPassiveSessions(args *utils.SessionFilter,
-	reply *[]*sessions.ActiveSession) (err error) {
+	reply *[]*sessions.ExternalSession) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)

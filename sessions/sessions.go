@@ -947,12 +947,12 @@ func (sS *SessionS) getSessionIDsMatchingIndexes(fltrs map[string][]string,
 	return cgrIDs, matchingSessions
 }
 
-func (sS *SessionS) filterSessions(sf *utils.SessionFilter, psv bool) (aSs []*ActiveSession) {
+func (sS *SessionS) filterSessions(sf *utils.SessionFilter, psv bool) (aSs []*ExternalSession) {
 	if len(sf.Filters) == 0 {
 		ss := sS.getSessions(utils.EmptyString, psv)
 		for _, s := range ss {
 			aSs = append(aSs,
-				s.AsActiveSessions(sS.cgrCfg.GeneralCfg().DefaultTimezone,
+				s.AsExternalSessions(sS.cgrCfg.GeneralCfg().DefaultTimezone,
 					sS.cgrCfg.GeneralCfg().NodeID)...) // Expensive for large number of sessions
 			if sf.Limit != nil && *sf.Limit > 0 && *sf.Limit < len(aSs) {
 				return aSs[:*sf.Limit]
@@ -989,7 +989,7 @@ func (sS *SessionS) filterSessions(sf *utils.SessionFilter, psv bool) (aSs []*Ac
 			}
 			if pass(unindx, sr.Event) {
 				aSs = append(aSs,
-					s.asActiveSessions(sr, sS.cgrCfg.GeneralCfg().DefaultTimezone,
+					s.AsExternalSession(sr, sS.cgrCfg.GeneralCfg().DefaultTimezone,
 						sS.cgrCfg.GeneralCfg().NodeID)) // Expensive for large number of sessions
 				if sf.Limit != nil && *sf.Limit > 0 && *sf.Limit < len(aSs) {
 					s.RUnlock()
@@ -1554,7 +1554,7 @@ func (sS *SessionS) CallBiRPC(clnt rpcclient.RpcClientConnection,
 
 // BiRPCv1GetActiveSessions returns the list of active sessions based on filter
 func (sS *SessionS) BiRPCv1GetActiveSessions(clnt rpcclient.RpcClientConnection,
-	args *utils.SessionFilter, reply *[]*ActiveSession) (err error) {
+	args *utils.SessionFilter, reply *[]*ExternalSession) (err error) {
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
 	}
@@ -1584,7 +1584,7 @@ func (sS *SessionS) BiRPCv1GetActiveSessionsCount(clnt rpcclient.RpcClientConnec
 
 // BiRPCv1GetPassiveSessions returns the passive sessions handled by SessionS
 func (sS *SessionS) BiRPCv1GetPassiveSessions(clnt rpcclient.RpcClientConnection,
-	args *utils.SessionFilter, reply *[]*ActiveSession) error {
+	args *utils.SessionFilter, reply *[]*ExternalSession) error {
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
 	}

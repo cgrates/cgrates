@@ -81,10 +81,10 @@ type SessionSv1Interface interface {
 	TerminateSession(args *sessions.V1TerminateSessionArgs, rply *string) error
 	ProcessCDR(cgrEv *utils.CGREventWithArgDispatcher, rply *string) error
 	ProcessEvent(args *sessions.V1ProcessEventArgs, rply *sessions.V1ProcessEventReply) error
-	GetActiveSessions(args *utils.SessionFilter, rply *[]*sessions.ActiveSession) error
+	GetActiveSessions(args *utils.SessionFilter, rply *[]*sessions.ExternalSession) error
 	GetActiveSessionsCount(args *utils.SessionFilter, rply *int) error
 	ForceDisconnect(args *utils.SessionFilter, rply *string) error
-	GetPassiveSessions(args *utils.SessionFilter, rply *[]*sessions.ActiveSession) error
+	GetPassiveSessions(args *utils.SessionFilter, rply *[]*sessions.ExternalSession) error
 	GetPassiveSessionsCount(args *utils.SessionFilter, rply *int) error
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 	ReplicateSessions(args dispatchers.ArgsReplicateSessionsWithApiKey, rply *string) error

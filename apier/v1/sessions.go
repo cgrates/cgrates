@@ -78,7 +78,7 @@ func (ssv1 *SessionSv1) ProcessEvent(args *sessions.V1ProcessEventArgs,
 }
 
 func (ssv1 *SessionSv1) GetActiveSessions(args *utils.SessionFilter,
-	rply *[]*sessions.ActiveSession) error {
+	rply *[]*sessions.ExternalSession) error {
 	return ssv1.Ss.BiRPCv1GetActiveSessions(nil, args, rply)
 }
 
@@ -93,7 +93,7 @@ func (ssv1 *SessionSv1) ForceDisconnect(args *utils.SessionFilter,
 }
 
 func (ssv1 *SessionSv1) GetPassiveSessions(args *utils.SessionFilter,
-	rply *[]*sessions.ActiveSession) error {
+	rply *[]*sessions.ExternalSession) error {
 	return ssv1.Ss.BiRPCv1GetPassiveSessions(nil, args, rply)
 }
 
