@@ -66,3 +66,9 @@ func (self *CmdGetThreshold) RpcResult() interface{} {
 	atr := engine.Threshold{}
 	return &atr
 }
+
+func (self *CmdGetThreshold) GetFormatedResult(result interface{}) string {
+	return GetFormatedResult(result, map[string]struct{}{
+		"MinSleep": struct{}{},
+	})
+}

@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -73,4 +75,12 @@ func (self *CmdGetMaxDuration) RpcResult() interface{} {
 
 func (self *CmdGetMaxDuration) ClientArgs() []string {
 	return self.clientArgs
+}
+
+func (self *CmdGetMaxDuration) GetFormatedResult(result interface{}) string {
+	if tv, canCast := result.(*time.Duration); canCast {
+		return fmt.Sprintf(`"%s"`, tv.String())
+	}
+	out, _ := json.MarshalIndent(result, "", " ")
+	return string(out)
 }

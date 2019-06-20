@@ -134,3 +134,77 @@ func FromJSON(jsn []byte, interestingFields []string) (line string) {
 	}
 	return strings.TrimSpace(line)
 }
+
+func getStringValue(v interface{}, defaultDurationFields map[string]struct{}) string {
+	switch o := v.(type) {
+	case nil:
+		return "null"
+	case int, int8, int16, int32, int64,
+		uint, uint8, uint16, uint32, uint64,
+		float32, float64:
+		return fmt.Sprintf(`%v`, o)
+	case string:
+		return fmt.Sprintf(`"%s"`, o)
+	case map[string]interface{}:
+		return getMapAsString(o, defaultDurationFields)
+	case []interface{}:
+		return getSliceAsString(o, defaultDurationFields)
+	}
+	return utils.ToJSON(v)
+}
+
+func getSliceAsString(mp []interface{}, defaultDurationFields map[string]struct{}) (out string) {
+	out = "["
+	for _, v := range mp {
+		out += fmt.Sprintf(`%s,`, getStringValue(v, defaultDurationFields))
+	}
+	return strings.TrimSuffix(out, ",") + "]"
+}
+
+func getMapAsString(mp map[string]interface{}, defaultDurationFields map[string]struct{}) (out string) {
+	// defaultDurationFields := map[string]struct{}{"b": struct{}{}, "c": struct{}{}, "d": struct{}{}}
+	out = "{"
+	for k, v := range mp {
+		if _, has := defaultDurationFields[k]; has {
+			if t, err := utils.IfaceAsDuration(v); err == nil {
+				out += fmt.Sprintf(`"%s":"%s",`, k, t.String())
+				continue
+			} else {
+				fmt.Println(err)
+			}
+		}
+		out += fmt.Sprintf(`"%s":%s,`, k, getStringValue(v, defaultDurationFields))
+	}
+	return strings.TrimSuffix(out, ",") + "}"
+}
+
+func GetFormatedResult(result interface{}, defaultDurationFields map[string]struct{}) string {
+	jsonResult, _ := json.Marshal(result)
+	var mp map[string]interface{}
+	if err := json.Unmarshal(jsonResult, &mp); err != nil {
+		out, _ := json.MarshalIndent(result, "", " ")
+		return string(out)
+	}
+	mpstr := getMapAsString(mp, defaultDurationFields)
+	var out bytes.Buffer
+	json.Indent(&out, []byte(mpstr), "", " ")
+	return out.String()
+}
+
+func GetFormatedSliceResult(result interface{}, defaultDurationFields map[string]struct{}) string {
+	jsonResult, _ := json.Marshal(result)
+	var mp []interface{}
+	if err := json.Unmarshal(jsonResult, &mp); err != nil {
+		out, _ := json.MarshalIndent(result, "", " ")
+		return string(out)
+	}
+	mpstr := getSliceAsString(mp, defaultDurationFields)
+	var out bytes.Buffer
+	json.Indent(&out, []byte(mpstr), "", " ")
+	return out.String()
+}
+
+func (ce *CommandExecuter) GetFormatedResult(result interface{}) string {
+	out, _ := json.MarshalIndent(result, "", " ")
+	return string(out)
+}

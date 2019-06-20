@@ -68,3 +68,10 @@ func (self *CmdSessionsInitiate) RpcResult() interface{} {
 	var atr *sessions.V1InitSessionReply
 	return &atr
 }
+
+func (self *CmdSessionsInitiate) GetFormatedResult(result interface{}) string {
+	return GetFormatedResult(result, map[string]struct{}{
+		"Usage":    struct{}{},
+		"MaxUsage": struct{}{},
+	})
+}

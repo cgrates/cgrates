@@ -64,3 +64,9 @@ func (self *CmdGetResource) RpcResult() interface{} {
 	atr := engine.ResourceProfile{}
 	return &atr
 }
+
+func (self *CmdGetResource) GetFormatedResult(result interface{}) string {
+	return GetFormatedResult(result, map[string]struct{}{
+		"UsageTTL": struct{}{},
+	})
+}

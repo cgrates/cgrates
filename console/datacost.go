@@ -69,3 +69,12 @@ func (self *CmdGetDataCost) RpcResult() interface{} {
 func (self *CmdGetDataCost) ClientArgs() []string {
 	return self.clientArgs
 }
+
+func (self *CmdGetDataCost) GetFormatedResult(result interface{}) string {
+	return GetFormatedResult(result, map[string]struct{}{
+		"Usage":              struct{}{},
+		"GroupIntervalStart": struct{}{},
+		"RateIncrement":      struct{}{},
+		"RateUnit":           struct{}{},
+	})
+}

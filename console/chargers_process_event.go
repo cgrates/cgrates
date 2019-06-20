@@ -71,3 +71,9 @@ func (self *CmdChargersProcessEvent) RpcResult() interface{} {
 	atr := []*engine.ChrgSProcessEventReply{}
 	return &atr
 }
+
+func (self *CmdChargersProcessEvent) GetFormatedResult(result interface{}) string {
+	return GetFormatedResult(result, map[string]struct{}{
+		"Usage": struct{}{},
+	})
+}

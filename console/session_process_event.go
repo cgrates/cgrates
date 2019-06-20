@@ -68,3 +68,10 @@ func (self *CmdSessionsProcessEvent) RpcResult() interface{} {
 	var atr *sessions.V1ProcessEventReply
 	return &atr
 }
+
+func (self *CmdSessionsProcessEvent) GetFormatedResult(result interface{}) string {
+	return GetFormatedResult(result, map[string]struct{}{
+		"Usage":    struct{}{},
+		"MaxUsage": struct{}{},
+	})
+}
