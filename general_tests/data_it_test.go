@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -46,7 +45,7 @@ var sTestsData = []func(t *testing.T){
 	testV1DataLoadConfig,
 	testV1DataInitDataDb,
 	testV1DataResetStorDb,
-	//testV1DataStartEngine,
+	testV1DataStartEngine,
 	testV1DataRpcConn,
 	testV1DataLoadTarrifPlans,
 	// testV1DataDataDebitUsageWith10Kilo,
@@ -461,7 +460,6 @@ func testV1DataInitSession(t *testing.T) {
 		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v",
 			utils.ToJSON(aSessions), len(aSessions))
 	}
-	fmt.Println("Session : ", utils.ToJSON(aSessions))
 }
 
 func testV1DataUpdateWith1Mo(t *testing.T) {
