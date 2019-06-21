@@ -426,7 +426,7 @@ func sendAWS(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 		FileSuffix: utils.JSNSuffix,
 	}).AsString()
 
-	return PostersCache.PostAWS(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts,
+	return PostersCache.PostAMQPv1(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts,
 		body, cfg.GeneralCfg().FailedPostsDir, fallbackFileName)
 }
 

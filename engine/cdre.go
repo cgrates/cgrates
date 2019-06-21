@@ -284,7 +284,7 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 		err = PostersCache.PostAMQP(cdre.exportPath, cdre.attempts, body.([]byte),
 			utils.PosterTransportContentTypes[cdre.exportFormat], cdre.fallbackPath, fallbackFileName)
 	case utils.MetaAMQPV1jsonMap:
-		err = PostersCache.PostAWS(cdre.exportPath, cdre.attempts, body.([]byte), cdre.fallbackPath, fallbackFileName)
+		err = PostersCache.PostAMQPv1(cdre.exportPath, cdre.attempts, body.([]byte), cdre.fallbackPath, fallbackFileName)
 	case utils.MetaSQSjsonMap:
 		err = PostersCache.PostSQS(cdre.exportPath, cdre.attempts, body.([]byte), cdre.fallbackPath, fallbackFileName)
 	}
