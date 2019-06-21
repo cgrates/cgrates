@@ -722,6 +722,39 @@ func (self *ApierV1) GetActionPlan(attr AttrGetActionPlan, reply *[]*engine.Acti
 	return nil
 }
 
+func (self *ApierV1) RemoveActionPlan(attr AttrGetActionPlan, reply *string) (err error) {
+	if missing := utils.MissingStructFields(&attr, []string{"ID"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if _, err = guardian.Guardian.Guard(func() (interface{}, error) {
+		var prevAccountIDs utils.StringMap
+		if prevAP, err := self.DataManager.DataDB().GetActionPlan(attr.ID, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+			return 0, err
+		} else if prevAP != nil {
+			prevAccountIDs = prevAP.AccountIDs
+		}
+		if err := self.DataManager.DataDB().RemoveActionPlan(attr.ID, utils.NonTransactional); err != nil {
+			return 0, err
+		}
+		for acntID := range prevAccountIDs {
+			if err := self.DataManager.DataDB().RemAccountActionPlans(acntID, []string{attr.ID}); err != nil {
+				return 0, utils.NewErrServerError(err)
+			}
+		}
+		if len(prevAccountIDs) != 0 {
+			if err = self.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, prevAccountIDs.Slice(), true); err != nil &&
+				err.Error() != utils.ErrNotFound.Error() {
+				return 0, utils.NewErrServerError(err)
+			}
+		}
+		return 0, nil
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACTION_PLAN_PREFIX); err != nil {
+		return err
+	}
+	*reply = OK
+	return nil
+}
+
 // Process dependencies and load a specific AccountActions profile from storDb into dataDb.
 func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *string) error {
 	if len(attrs.TPid) == 0 {
