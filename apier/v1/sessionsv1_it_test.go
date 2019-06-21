@@ -59,8 +59,8 @@ var (
 		testSSv1ItProcessCDR,
 		testSSv1ItProcessEvent,
 		testSSv1ItCDRsGetCdrs,
-		// testSSv1ItForceUpdateSession,
-		// testSSv1ItDynamicDebit,
+		testSSv1ItForceUpdateSession,
+		testSSv1ItDynamicDebit,
 		testSSv1ItStopCgrEngine,
 	}
 )
@@ -88,6 +88,7 @@ func TestSSv1ItWithPrepaid(t *testing.T) {
 
 func TestSSv1ItWithPostPaid(t *testing.T) {
 	sSV1RequestType = utils.META_POSTPAID
+	sTestSessionSv1 = append(sTestSessionSv1[:len(sTestSessionSv1)-3], testSSv1ItStopCgrEngine)
 	for _, stest := range sTestSessionSv1 {
 		t.Run(sSV1RequestType, stest)
 	}
@@ -95,6 +96,7 @@ func TestSSv1ItWithPostPaid(t *testing.T) {
 
 func TestSSv1ItWithRated(t *testing.T) {
 	sSV1RequestType = utils.META_RATED
+	sTestSessionSv1 = append(sTestSessionSv1[:len(sTestSessionSv1)-3], testSSv1ItStopCgrEngine)
 	for _, stest := range sTestSessionSv1 {
 		t.Run(sSV1RequestType, stest)
 	}
@@ -632,10 +634,6 @@ func testSSv1ItProcessEvent(t *testing.T) {
 				utils.Usage:       300000000000.0,
 			},
 		},
-	}
-	if sSV1RequestType == utils.META_POSTPAID ||
-		sSV1RequestType == utils.META_RATED {
-		eAttrs.CGREvent.Event[utils.Usage] = -1.0
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
 		t.Errorf("expecting: %+v, received: %+v",

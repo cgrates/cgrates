@@ -28,7 +28,8 @@ var (
 		PreRated, CostSource, CostDetails, ExtraInfo, OrderID}
 	CDRCFileFormats = []string{MetaFileCSV, MetaFScsv,
 		MetaKamFlatstore, MetaOsipsFlatstore, MetaPartialCSV, MetaFileFWV, MetaFileXML}
-	MainCDRFieldsMap StringMap
+	PostPaidRatedSlice = []string{META_POSTPAID, META_RATED}
+	MainCDRFieldsMap   StringMap
 
 	GitLastLog                  string // If set, it will be processed as part of versioning
 	PosterTransportContentTypes = map[string]string{

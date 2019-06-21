@@ -1500,7 +1500,12 @@ func (sS *SessionS) chargeEvent(tnt string, ev *engine.SafEvent, argDisp *utils.
 		}
 		return
 	}
-	if errEnd := sS.endSession(s, utils.DurationPointer(maxUsage), nil, nil); errEnd != nil {
+	usage := maxUsage
+	if utils.IsSliceMember(utils.PostPaidRatedSlice, ev.GetStringIgnoreErrors(utils.RequestType)) {
+		usage = ev.GetDurationIgnoreErrors(utils.Usage)
+	}
+	//in case of postpaid and rated maxUsage = usage from event
+	if errEnd := sS.endSession(s, utils.DurationPointer(usage), nil, nil); errEnd != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error when ending charged event: <%s>, err: <%s>",
 				utils.SessionS, cgrID, err.Error()))
