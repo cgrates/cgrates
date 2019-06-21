@@ -1,4 +1,4 @@
-// +build integration
+// +build generate
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
@@ -20,11 +20,37 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
+	"os"
+	"path"
+	"strings"
 	"testing"
 )
 
+func writeDefaultCofig(fileName string) error {
+	f, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE, 0755)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	rows := strings.Split(CGRATES_CFG_JSON, "\n")[1:] // remove first empty row
+	for i, row := range rows {
+		if i == 0 || i == len(rows)-1 { // do not comment first and last row
+			fmt.Fprintln(f, row)
+			continue
+		}
+		if withoutSpace := strings.TrimSpace(row); len(withoutSpace) == 0 || strings.HasPrefix(row, "//") { // do not comment empty rows and alerady commented ones
+			fmt.Fprintln(f, row)
+			continue
+		}
+		fmt.Fprintf(f, "// %s\n", row)
+	}
+	return nil
+}
+
+// used only to generate the commented configuration file
 func TestWriteDefaultCofig(t *testing.T) {
-	if err := writeDefaultCofig(); err != nil {
+	if err := writeDefaultCofig(path.Join("/usr", "share", "cgrates", "conf", "cgrates", "cgrates.json")); err != nil {
 		t.Fatal(err)
 	}
 }
