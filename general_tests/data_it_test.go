@@ -452,7 +452,7 @@ func testV1DataInitSession(t *testing.T) {
 		t.Error(err)
 	}
 
-	aSessions := make([]*sessions.ActiveSession, 0)
+	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := dataRpc.Call(utils.SessionSv1GetActiveSessions,
 		&utils.SessionFilter{}, &aSessions); err != nil {
 		t.Error(err)
@@ -495,7 +495,7 @@ func testV1DataUpdateWith1Mo(t *testing.T) {
 		args, &rply); err != nil {
 		t.Error(err)
 	}
-	aSessions := make([]*sessions.ActiveSession, 0)
+	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := dataRpc.Call(utils.SessionSv1GetActiveSessions,
 		&utils.SessionFilter{}, &aSessions); err != nil {
 		t.Error(err)
@@ -538,7 +538,7 @@ func testV1DataUpdateWith1Go(t *testing.T) {
 		args, &rply); err != nil {
 		t.Error(err)
 	}
-	aSessions := make([]*sessions.ActiveSession, 0)
+	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := dataRpc.Call(utils.SessionSv1GetActiveSessions,
 		&utils.SessionFilter{}, &aSessions); err != nil {
 		t.Error(err)
