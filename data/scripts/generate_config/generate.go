@@ -1,5 +1,3 @@
-// +build generate
-
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 Copyright (C) ITsysCOM GmbH
@@ -17,14 +15,17 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package config
+package main
 
 import (
+	"flag"
 	"fmt"
+	"log"
 	"os"
 	"path"
 	"strings"
-	"testing"
+
+	"github.com/cgrates/cgrates/config"
 )
 
 func writeDefaultCofig(fileName string) error {
@@ -33,7 +34,7 @@ func writeDefaultCofig(fileName string) error {
 		return err
 	}
 	defer f.Close()
-	rows := strings.Split(CGRATES_CFG_JSON, "\n")[1:] // remove first empty row
+	rows := strings.Split(config.CGRATES_CFG_JSON, "\n")[1:] // remove first empty row
 	for i, row := range rows {
 		if i == 0 || i == len(rows)-1 { // do not comment first and last row
 			fmt.Fprintln(f, row)
@@ -49,8 +50,16 @@ func writeDefaultCofig(fileName string) error {
 }
 
 // used only to generate the commented configuration file
-func TestWriteDefaultCofig(t *testing.T) {
-	if err := writeDefaultCofig(path.Join("/usr", "share", "cgrates", "conf", "cgrates", "cgrates.json")); err != nil {
-		t.Fatal(err)
+func main() {
+	generateFlags := flag.NewFlagSet("generate", flag.ContinueOnError)
+	cfgPath := generateFlags.String("config_path", path.Join("/usr", "share", "cgrates", "conf", "cgrates", "cgrates.json"), "The file path for generated configuration.")
+	if err := generateFlags.Parse(os.Args[1:]); err != nil {
+		log.Fatal(err)
 	}
+
+	fmt.Println("Generating configuration file ...")
+	if err := writeDefaultCofig(*cfgPath); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Done writing file at path: %s\n", *cfgPath)
 }
