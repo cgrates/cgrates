@@ -212,7 +212,7 @@ const CGRATES_CFG_JSON = `
 		"synchronous": false,							// block processing until export has a result
 		"attempts": 1,									// export attempts
 		"field_separator": ",",							// used field separator in some export formats, eg: *file_csv
-		"attributes_context": "",						// context for attributes (empty string means disable attributes process)
+		"attributes_context": "",						// attributes context - empty disables attributes processing
 		"header_fields": [],							// template of the exported header fields
 		"content_fields": [								// template of the exported content fields
 			{"tag": "CGRID", "type": "*composed", "value": "~CGRID"},
