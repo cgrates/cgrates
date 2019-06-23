@@ -52,6 +52,7 @@ type ApierV1 struct {
 	FilterS     *engine.FilterS //Used for CDR Exporter
 	CacheS      rpcclient.RpcClientConnection
 	SchedulerS  rpcclient.RpcClientConnection
+	AttributeS  rpcclient.RpcClientConnection
 }
 
 // Call implements rpcclient.RpcClientConnection interface for internal RPC

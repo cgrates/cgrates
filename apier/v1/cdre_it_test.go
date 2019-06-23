@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"io/ioutil"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -62,12 +63,23 @@ func TestCDRExportMySql(t *testing.T) {
 	}
 }
 
+func TestCDRExportWithAttributeS(t *testing.T) {
+	cdreConfigDIR = "cdrewithattributes"
+	tests := sTestsCDRE[0:6]
+	tests = append(tests, testCDReAddAttributes)
+	tests = append(tests, testCDReExportCDRsWithAttributes)
+	tests = append(tests, testCDReKillEngine)
+	for _, stest := range tests {
+		t.Run(cdreConfigDIR, stest)
+	}
+}
+
 func testCDReInitCfg(t *testing.T) {
 	var err error
 	cdreCfgPath = path.Join(alsPrfDataDir, "conf", "samples", cdreConfigDIR)
 	cdreCfg, err = config.NewCGRConfigFromPath(cdreCfgPath)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	cdreCfg.DataFolderPath = alsPrfDataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(cdreCfg)
@@ -251,6 +263,72 @@ func testCDReProcessExternalCdr(t *testing.T) {
 				t.Errorf("Expected %s,recived %s", utils.ToJSON(c.ExtraFields), utils.ToJSON(cdr.ExtraFields))
 			}
 		}
+	}
+}
+
+func testCDReAddAttributes(t *testing.T) {
+	alsPrf := &AttributeWithCache{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ATTR_CDRE",
+			Contexts:  []string{"*cdre"},
+			FilterIDs: []string{"*string:~Subject:1001"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			Attributes: []*engine.Attribute{
+				{
+					FieldName: utils.Subject,
+					Value:     config.NewRSRParsersMustCompile("ATTR_SUBJECT", true, utils.INFIELD_SEP),
+				},
+				{
+					FieldName: utils.Category,
+					Value:     config.NewRSRParsersMustCompile("ATTR_CATEGORY", true, utils.INFIELD_SEP),
+				},
+			},
+			Weight: 20,
+		},
+	}
+	alsPrf.Compile()
+	var result string
+	if err := cdreRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var reply *engine.AttributeProfile
+	if err := cdreRPC.Call("ApierV1.GetAttributeProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_CDRE"}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	reply.Compile()
+	if !reflect.DeepEqual(alsPrf.AttributeProfile, reply) {
+		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
+	}
+}
+
+func testCDReExportCDRsWithAttributes(t *testing.T) {
+	attr := ArgExportCDRs{
+		ExportTemplate: utils.StringPointer("TemplateWithAttributeS"),
+		Verbose:        true,
+	}
+	var rply *RplExportedCDRs
+	if err := cdreRPC.Call("ApierV1.ExportCDRs", attr, &rply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(rply.ExportedCGRIDs) != 2 {
+		t.Errorf("Unexpected number of CDR exported: %s ", utils.ToJSON(rply))
+	}
+	fileContent1 := `Cdr3,*raw,test2,OriginCDR3,cgrates.org,ATTR_CATEGORY,1001,ATTR_SUBJECT,+4986517174963,30s,-1.0000
+Cdr2,*raw,test2,OriginCDR2,cgrates.org,ATTR_CATEGORY,1001,ATTR_SUBJECT,+4986517174963,5s,-1.0000
+`
+	fileContent2 := `Cdr2,*raw,test2,OriginCDR2,cgrates.org,ATTR_CATEGORY,1001,ATTR_SUBJECT,+4986517174963,5s,-1.0000
+Cdr3,*raw,test2,OriginCDR3,cgrates.org,ATTR_CATEGORY,1001,ATTR_SUBJECT,+4986517174963,30s,-1.0000
+`
+	if outContent1, err := ioutil.ReadFile(rply.ExportedPath); err != nil {
+		t.Error(err)
+	} else if fileContent1 != string(outContent1) && fileContent2 != string(outContent1) {
+		t.Errorf("Expecting: \n<%q>, \nreceived: \n<%q>", fileContent1, string(outContent1))
 	}
 }
 

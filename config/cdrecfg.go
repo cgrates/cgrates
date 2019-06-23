@@ -20,16 +20,17 @@ package config
 
 // One instance of CdrExporter
 type CdreCfg struct {
-	ExportFormat   string
-	ExportPath     string
-	Filters        []string
-	Tenant         string
-	Synchronous    bool
-	Attempts       int
-	FieldSeparator rune
-	HeaderFields   []*FCTemplate
-	ContentFields  []*FCTemplate
-	TrailerFields  []*FCTemplate
+	ExportFormat      string
+	ExportPath        string
+	Filters           []string
+	Tenant            string
+	AttributeSContext string
+	Synchronous       bool
+	Attempts          int
+	FieldSeparator    rune
+	HeaderFields      []*FCTemplate
+	ContentFields     []*FCTemplate
+	TrailerFields     []*FCTemplate
 }
 
 func (self *CdreCfg) loadFromJsonCfg(jsnCfg *CdreJsonCfg, separator string) (err error) {
@@ -56,6 +57,9 @@ func (self *CdreCfg) loadFromJsonCfg(jsnCfg *CdreJsonCfg, separator string) (err
 	}
 	if jsnCfg.Attempts != nil {
 		self.Attempts = *jsnCfg.Attempts
+	}
+	if jsnCfg.Attributes_context != nil {
+		self.AttributeSContext = *jsnCfg.Attributes_context
 	}
 	if jsnCfg.Field_separator != nil && len(*jsnCfg.Field_separator) > 0 { // Make sure we got at least one character so we don't get panic here
 		sepStr := *jsnCfg.Field_separator

@@ -20,8 +20,9 @@ package config
 
 // ApierCfg is the configuration of Apier service
 type ApierCfg struct {
-	CachesConns    []*RemoteHost // connections towards Cache
-	SchedulerConns []*RemoteHost // connections towards Scheduler
+	CachesConns     []*RemoteHost // connections towards Cache
+	SchedulerConns  []*RemoteHost // connections towards Scheduler
+	AttributeSConns []*RemoteHost // connections towards AttributeS
 }
 
 func (aCfg *ApierCfg) loadFromJsonCfg(jsnCfg *ApierJsonCfg) (err error) {
@@ -42,5 +43,13 @@ func (aCfg *ApierCfg) loadFromJsonCfg(jsnCfg *ApierJsonCfg) (err error) {
 			aCfg.SchedulerConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
+	if jsnCfg.Attributes_conns != nil {
+		aCfg.AttributeSConns = make([]*RemoteHost, len(*jsnCfg.Attributes_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Attributes_conns {
+			aCfg.AttributeSConns[idx] = NewDfltRemoteHost()
+			aCfg.AttributeSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
+
 	return nil
 }
