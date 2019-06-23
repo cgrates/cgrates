@@ -133,7 +133,7 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 		} else if !pass {
 			continue
 		}
-		if tplFld.FieldId != utils.META_NONE {
+		if tplFld.Type != utils.META_NONE {
 			out, err := ar.ParseField(tplFld)
 			if err != nil {
 				if err == utils.ErrNotFound {
