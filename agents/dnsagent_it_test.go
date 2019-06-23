@@ -179,7 +179,8 @@ func testDNSitClntNAPTRSuppliers(t *testing.T) {
 	}
 	if rply, err := dnsClnt.ReadMsg(); err != nil {
 		t.Error(err)
-	} else {
+	} else if len(rply.Answer) != 2 {
+		t.Errorf("wrong number of records: %s", utils.ToIJSON(rply.Answer))
 		if rply.Rcode != dns.RcodeSuccess {
 			t.Errorf("failed to get an valid answer\n%v", rply)
 		}
@@ -188,6 +189,10 @@ func testDNSitClntNAPTRSuppliers(t *testing.T) {
 			t.Errorf("received: <%v>", answr.Order)
 		}
 		if answr.Regexp != "!^(.*)$!sip:1@172.16.1.11!" {
+			t.Errorf("received: <%q>", answr.Regexp)
+		}
+		answr2 := rply.Answer[1].(*dns.NAPTR)
+		if answr2.Regexp != "!^(.*)$!sip:\\1@172.16.1.12!" {
 			t.Errorf("received: <%q>", answr.Regexp)
 		}
 	}

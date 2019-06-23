@@ -7,6 +7,10 @@
 // This is what you get when you load CGRateS with an empty configuration file.
 
 
+"general": {
+	"log_level": 7,											// control the level of messages logged (0-emerg to 7-debug)
+},
+
 "stor_db": {
 	"db_password": "CGRateS.org",
 },

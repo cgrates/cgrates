@@ -147,6 +147,7 @@ func appendDNSAnswer(msg *dns.Msg) (err error) {
 
 // updateDNSMsgFromNM will update DNS message with values from NavigableMap
 func updateDNSMsgFromNM(msg *dns.Msg, nm *config.NavigableMap) (err error) {
+	msgFields := make(map[string]struct{}) // work around to NMap issue
 	for _, valX := range nm.Values() {
 		nmItms, cast := valX.([]*config.NMItem)
 		if !cast {
@@ -155,15 +156,21 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *config.NavigableMap) (err error) {
 		if len(nmItms) == 0 {
 			continue
 		}
-		cfgItm := nmItms[0] // first item gives some config for the rest
-		if len(msg.Answer) == 0 || cfgItm.Config.NewBranch {
-			if err = appendDNSAnswer(msg); err != nil {
-				return
-			}
-		}
+		cfgItm := nmItms[0] // first item gives some config for the rest, cannot iterate through NMItems since they are multipled by order
 		if len(cfgItm.Path) == 0 {
 			return errors.New("empty path in config item")
 		}
+		apnd := len(msg.Answer) == 0
+		if _, has := msgFields[cfgItm.Path[0]]; has { // force append if the same path was already used
+			apnd = true
+		}
+		if apnd {
+			if err = appendDNSAnswer(msg); err != nil {
+				return
+			}
+			msgFields = make(map[string]struct{}) // reset the fields inside since we have a new message
+		}
+
 		switch cfgItm.Path[0] {
 		case utils.Rcode:
 			var itm int64
@@ -210,6 +217,8 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *config.NavigableMap) (err error) {
 			}
 			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Replacement = utils.IfaceAsString(cfgItm.Data)
 		}
+
+		msgFields[cfgItm.Path[0]] = struct{}{} // detect new branch
 
 	}
 	return

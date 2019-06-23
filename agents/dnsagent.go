@@ -167,7 +167,8 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			break
 		}
 	}
-	cgrArgs := cgrEv.ConsumeArgs(reqProcessor.Flags.HasKey(utils.MetaDispatchers), reqType == utils.MetaAuth || reqType == utils.MetaEvent)
+	cgrArgs := cgrEv.ConsumeArgs(reqProcessor.Flags.HasKey(utils.MetaDispatchers),
+		reqType == utils.MetaAuth || reqType == utils.MetaEvent)
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> LOG, processorID: <%s>, message: %s",

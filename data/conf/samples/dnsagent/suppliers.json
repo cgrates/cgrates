@@ -53,7 +53,7 @@
 				{"tag": "NAPTRService", "field_id": "Service", 
 					"type": "*constant", "value": "E2U+SIP"},
 				{"tag": "NAPTRRegexp", "field_id": "Regexp", "type": "*variable", 
-					"value": "~*cgrep.Suppliers.SortedSuppliers[1].SupplierParameters;!"},
+					"value": "~*cgrep.Suppliers.SortedSuppliers[1].SupplierParameters"},
 			],
 		},
 	],
