@@ -599,15 +599,16 @@ func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
 	}
 	eCdreCfg := map[string]*CdreCfg{
 		utils.MetaDefault: {
-			ExportFormat:   utils.MetaFileCSV,
-			ExportPath:     "/var/spool/cgrates/cdre",
-			Filters:        []string{},
-			Synchronous:    false,
-			Attempts:       1,
-			FieldSeparator: ',',
-			HeaderFields:   eFields,
-			ContentFields:  eContentFlds,
-			TrailerFields:  eFields,
+			ExportFormat:      utils.MetaFileCSV,
+			ExportPath:        "/var/spool/cgrates/cdre",
+			Filters:           []string{},
+			Synchronous:       false,
+			Attempts:          1,
+			AttributeSContext: "",
+			FieldSeparator:    ',',
+			HeaderFields:      eFields,
+			ContentFields:     eContentFlds,
+			TrailerFields:     eFields,
 		},
 	}
 	if !reflect.DeepEqual(cgrCfg.CdreProfiles, eCdreCfg) {
@@ -641,8 +642,8 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 		t.Errorf("expecting: %s, received: %s",
 			utils.ToJSON(eSessionSCfg), utils.ToJSON(cgrCfg.sessionSCfg))
 	}
-
 }
+
 func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 	eCacheCfg := CacheCfg{
 		utils.CacheDestinations: &CacheParamCfg{Limit: -1,
@@ -1756,6 +1757,7 @@ func TestCgrCfgJSONDefaultApierCfg(t *testing.T) {
 				Address: utils.MetaInternal,
 			},
 		},
+		AttributeSConns: []*RemoteHost{},
 	}
 	if !reflect.DeepEqual(cgrCfg.apier, aCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.apier, aCfg)

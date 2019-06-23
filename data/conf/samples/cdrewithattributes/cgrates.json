@@ -1,0 +1,91 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"log_level": 7,
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "redis",						// data_db type: <redis|mongo>
+	"db_port": 6379, 						// data_db port to reach the database
+	"db_name": "10", 						// data_db database name to connect to
+	
+},
+
+"stor_db": {
+	"db_password": "CGRateS.org",
+},
+
+
+"rals": {
+	"enabled": true,
+},
+
+
+"scheduler": {
+	"enabled": true,
+},
+
+
+"cdrs": {
+	"enabled": true,
+},
+
+
+"cdre": {
+	"TemplateWithAttributeS": {
+		"export_format": "*file_csv",
+		"export_path": "/tmp/",
+		"attributes_context":"*cdre",
+		"filters" :["*string:~Source:test2"],
+		"content_fields": [
+			{"tag": "CGRID", "type": "*composed", "value": "~CGRID"},
+			{"tag": "RunID", "type": "*composed", "value": "~RunID"},
+			{"tag":"Source", "type": "*composed", "value": "~Source"},
+			{"tag":"OriginID", "type": "*composed", "value": "~OriginID"},
+			{"tag":"Tenant", "type": "*composed", "value": "~Tenant"},
+			{"tag":"Category", "type": "*composed", "value": "~Category"},
+			{"tag":"Account", "type": "*composed", "value": "~Account"},
+			{"tag":"Subject", "type": "*composed", "value": "~Subject"},
+			{"tag":"Destination", "type": "*composed", "value": "~Destination"},
+			{"tag":"Usage", "type": "*composed", "value": "~Usage"},
+			{"tag":"Cost", "type": "*composed", "value": "~Cost", "rounding_decimals": 4},
+		],
+	},
+},
+
+
+"attributes": {
+	"enabled": true,
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": [
+		{"address": "*internal"}
+	],
+},
+
+"apier": {	
+	"caches_conns":[						// connections to CacheS for reloads
+		{"address": "*internal"},
+	],
+	"scheduler_conns": [					// connections to SchedulerS for reloads
+		{"address": "*internal"}
+	],						
+	"attributes_conns": [
+		{"address": "*internal"}
+	],					// connections to AttributeS for CDRExporter
+},
+
+}

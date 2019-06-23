@@ -21,6 +21,7 @@ package engine
 import (
 	"encoding/csv"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/url"
@@ -33,6 +34,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 const (
@@ -52,7 +54,7 @@ const (
 
 func NewCDRExporter(cdrs []*CDR, exportTemplate *config.CdreCfg, exportFormat, exportPath, fallbackPath, exportID string,
 	synchronous bool, attempts int, fieldSeparator rune,
-	httpSkipTlsCheck bool, httpPoster *HTTPPoster, filterS *FilterS) (*CDRExporter, error) {
+	httpSkipTlsCheck bool, httpPoster *HTTPPoster, attrS rpcclient.RpcClientConnection, filterS *FilterS) (*CDRExporter, error) {
 	if len(cdrs) == 0 { // Nothing to export
 		return nil, nil
 	}
@@ -69,6 +71,7 @@ func NewCDRExporter(cdrs []*CDR, exportTemplate *config.CdreCfg, exportFormat, e
 		httpSkipTlsCheck: httpSkipTlsCheck,
 		httpPoster:       httpPoster,
 		negativeExports:  make(map[string]string),
+		attrS:            attrS,
 		filterS:          filterS,
 	}
 	return cdre, nil
@@ -100,6 +103,7 @@ type CDRExporter struct {
 	positiveExports                 []string          // CGRIDs of successfully exported CDRs
 	negativeExports                 map[string]string // CGRIDs of failed exports
 
+	attrS   rpcclient.RpcClientConnection
 	filterS *FilterS
 }
 
@@ -292,6 +296,27 @@ func (cdre *CDRExporter) processCDR(cdr *CDR) (err error) {
 	if cdr.ExtraFields == nil { // Avoid assignment in nil map if not initialized
 		cdr.ExtraFields = make(map[string]string)
 	}
+	// send the cdr to be processed by attributeS
+	if cdre.exportTemplate.AttributeSContext != utils.EmptyString {
+		if cdre.attrS == nil {
+			return errors.New("no connection to AttributeS")
+		}
+		args := &AttrArgsProcessEvent{
+			Context:  utils.StringPointer(cdre.exportTemplate.AttributeSContext),
+			CGREvent: cdr.AsCGREvent(),
+		}
+		var evReply AttrSProcessEventReply
+		if err = cdre.attrS.Call(utils.AttributeSv1ProcessEvent,
+			args, &evReply); err != nil {
+			return err
+		}
+		if len(evReply.AlteredFields) != 0 {
+			if err := cdr.UpdateFromCGREvent(evReply.CGREvent, evReply.AlteredFields); err != nil {
+				return err
+			}
+		}
+	}
+
 	switch cdre.exportFormat {
 	case utils.MetaFileFWV, utils.MetaFileCSV:
 		var cdrRow []string

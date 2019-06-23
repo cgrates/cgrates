@@ -32,7 +32,7 @@ import (
 
 // Starts rater and reports on chan
 func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThdSChan, internalStatSChan,
-	internalCacheSChan, internalSchedulerSChan, internalDispatcherSChan chan rpcclient.RpcClientConnection,
+	internalCacheSChan, internalSchedulerSChan, internalAttributeSChan, internalDispatcherSChan chan rpcclient.RpcClientConnection,
 	serviceManager *servmanager.ServiceManager, server *utils.Server,
 	dm *engine.DataManager, loadDb engine.LoadStorage, cdrDb engine.CdrStorage,
 	chS *engine.CacheS, // separate from channel for optimization
@@ -157,6 +157,30 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 		}()
 	}
 
+	//create scheduler connection
+	var attributeSrpc rpcclient.RpcClientConnection
+	if isDispatcherEnabled {
+		attributeSrpc = dispatcherConn
+	} else if len(cfg.ApierCfg().SchedulerConns) != 0 {
+		attributeSTaskChan := make(chan struct{})
+		waitTasks = append(waitTasks, attributeSTaskChan)
+		go func() {
+			defer close(attributeSTaskChan)
+			var err error
+			attributeSrpc, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+				cfg.TlsCfg().ClientKey,
+				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
+				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
+				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
+				cfg.ApierCfg().AttributeSConns, internalAttributeSChan, false)
+			if err != nil {
+				utils.Logger.Crit(fmt.Sprintf("<APIer> Could not connect to AttributeS, error: %s", err.Error()))
+				exitChan <- true
+				return
+			}
+		}()
+	}
+
 	// Wait for all connections to complete before going further
 	for _, chn := range waitTasks {
 		<-chn
@@ -174,6 +198,10 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 	if schedulerSrpc != nil && reflect.ValueOf(schedulerSrpc).IsNil() {
 		schedulerSrpc = nil
 	}
+	// correct reflect on schedulerS since there is no APIer init
+	if attributeSrpc != nil && reflect.ValueOf(attributeSrpc).IsNil() {
+		attributeSrpc = nil
+	}
 	apierRpcV1 := &v1.ApierV1{
 		StorDb:      loadDb,
 		DataManager: dm,
@@ -185,7 +213,8 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 			cfg.GeneralCfg().ReplyTimeout),
 		FilterS:    filterS,
 		CacheS:     cacheSrpc,
-		SchedulerS: schedulerSrpc}
+		SchedulerS: schedulerSrpc,
+		AttributeS: attributeSrpc}
 
 	if thdS != nil {
 		engine.SetThresholdS(thdS) // temporary architectural fix until we will have separate AccountS
