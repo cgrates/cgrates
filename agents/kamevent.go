@@ -126,9 +126,6 @@ func (kev KamEvent) MissingParameter() bool {
 			kev[KamTRIndex],
 			kev[KamTRLabel],
 			kev[utils.OriginID],
-			kev[utils.AnswerTime],
-			kev[utils.Account],
-			kev[utils.Destination],
 		}, "")
 	default: // no/unsupported event
 		return true
@@ -185,11 +182,7 @@ func (kev KamEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err erro
 		}
 		sTime = sTimePrv
 	case CGR_PROCESS_CDR:
-		sTimePrv, err := utils.ParseTimeDetectLayout(kev[utils.AnswerTime], timezone)
-		if err != nil {
-			return nil, err
-		}
-		sTime = sTimePrv
+		sTime = time.Now()
 	default: // no/unsupported event
 		return
 	}
