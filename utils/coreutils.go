@@ -898,7 +898,7 @@ func NewFallbackFileNameFronString(fileName string) (ffn *FallbackFileName, err 
 		return nil, fmt.Errorf("unsupported module: %s", ffn.Module)
 	}
 	fileNameWithoutModule := fileName[moduleIdx+1:]
-	for _, trspt := range []string{MetaHTTPjsonCDR, MetaHTTPjsonMap, MetaHTTPjson, META_HTTP_POST, MetaAMQPjsonCDR, MetaAMQPjsonMap, MetaAMQPV1jsonMap, MetaSQSjsonMap} {
+	for _, trspt := range []string{MetaHTTPjsonCDR, MetaHTTPjsonMap, MetaHTTPjson, META_HTTP_POST, MetaAMQPjsonCDR, MetaAMQPjsonMap, MetaAMQPV1jsonMap, MetaSQSjsonMap, MetaKafkajsonMap} {
 		if strings.HasPrefix(fileNameWithoutModule, trspt) {
 			ffn.Transport = trspt
 			break

@@ -34,6 +34,7 @@ const (
 	defaultQueueID      = "cgrates_cdrs"
 	defaultExchangeType = "direct"
 	queueID             = "queue_id"
+	topic               = "topic"
 	exchange            = "exchange"
 	exchangeType        = "exchange_type"
 	routingKey          = "routing_key"
@@ -50,6 +51,7 @@ func init() {
 		amqpCache:   make(map[string]Poster),
 		amqpv1Cache: make(map[string]Poster),
 		sqsCache:    make(map[string]Poster),
+		kafkaCache:  make(map[string]Poster),
 	} // Initialize the cache for amqpPosters
 }
 
@@ -60,6 +62,7 @@ type PosterCache struct {
 	amqpCache   map[string]Poster
 	amqpv1Cache map[string]Poster
 	sqsCache    map[string]Poster
+	kafkaCache  map[string]Poster
 }
 
 type Poster interface {
@@ -105,6 +108,9 @@ func (pc *PosterCache) Close() {
 	for _, v := range pc.sqsCache {
 		v.Close()
 	}
+	for _, v := range pc.kafkaCache {
+		v.Close()
+	}
 }
 
 // GetAMQPPoster creates a new poster only if not already cached
@@ -148,6 +154,19 @@ func (pc *PosterCache) GetSQSPoster(dialURL string, attempts int, fallbackFileDi
 	return pc.sqsCache[dialURL], nil
 }
 
+func (pc *PosterCache) GetKafkaPoster(dialURL string, attempts int, fallbackFileDir string) (Poster, error) {
+	pc.Lock()
+	defer pc.Unlock()
+	if _, hasIt := pc.sqsCache[dialURL]; !hasIt {
+		if pstr, err := NewKafkaPoster(dialURL, attempts, fallbackFileDir); err != nil {
+			return nil, err
+		} else {
+			pc.kafkaCache[dialURL] = pstr
+		}
+	}
+	return pc.kafkaCache[dialURL], nil
+}
+
 func (pc *PosterCache) PostAMQP(dialURL string, attempts int,
 	content []byte, contentType, fallbackFileDir, fallbackFileName string) error {
 	amqpPoster, err := pc.GetAMQPPoster(dialURL, attempts, fallbackFileDir)
@@ -173,4 +192,13 @@ func (pc *PosterCache) PostSQS(dialURL string, attempts int,
 		return err
 	}
 	return sqsPoster.Post(content, fallbackFileName)
+}
+
+func (pc *PosterCache) PostKafka(dialURL string, attempts int,
+	content []byte, fallbackFileDir, fallbackFileName string) error {
+	kafkaPoster, err := pc.GetKafkaPoster(dialURL, attempts, fallbackFileDir)
+	if err != nil {
+		return err
+	}
+	return kafkaPoster.Post(content, fallbackFileName)
 }

@@ -67,3 +67,4 @@ import:
   - aws
   - service
 - package: github.com/miekg/dns
+- package: github.com/segmentio/kafka-go
