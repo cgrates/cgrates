@@ -100,7 +100,7 @@ func (da *DiameterAgent) handlers() diam.Handler {
 				continue
 			}
 			for _, iAddr := range addrs {
-				hosts = append(hosts, strings.Split(iAddr.String(), utils.HDR_VAL_SEP)[0]) // address came in form x.y.z.t/24
+				hosts = append(hosts, net.ParseIP(strings.Split(iAddr.String(), utils.HDR_VAL_SEP)[0])) // address came in form x.y.z.t/24
 			}
 		}
 	}
