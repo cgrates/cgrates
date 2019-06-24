@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"os"
@@ -35,6 +36,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
+	kafka "github.com/segmentio/kafka-go"
 	"github.com/streadway/amqp"
 )
 
@@ -473,32 +475,24 @@ func TestCDRsOnExpAWSAMQPPosterFileFailover(t *testing.T) {
 	}
 }
 
-func TestCDRsOnExpSQSPosterFileFailover(t *testing.T) {
-	time.Sleep(time.Duration(10 * time.Second))
+func TestCDRsOnExpKafkaPosterFileFailover(t *testing.T) {
 	failoverContent := [][]byte{[]byte(`{"CGRID":"57548d485d61ebcba55afbe5d939c82a8e9ff670"}`), []byte(`{"CGRID":"88ed9c38005f07576a1e1af293063833b60edcc6"}`)}
-	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
-	if len(filesInDir) == 0 {
-		t.Fatalf("No files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
-	}
-	var foundFile bool
-	var fileName string
-	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
-		fileName = file.Name()
-		if strings.HasPrefix(fileName, "cdr|*sqs_json_map") {
-			foundFile = true
-			filePath := path.Join(cdrsMasterCfg.GeneralCfg().FailedPostsDir, fileName)
-			if readBytes, err := ioutil.ReadFile(filePath); err != nil {
-				t.Error(err)
-			} else if !reflect.DeepEqual(failoverContent[0], readBytes) && !reflect.DeepEqual(failoverContent[1], readBytes) { // Checking just the prefix should do since some content is dynamic
-				t.Errorf("Expecting: %v or %v, received: %v", string(failoverContent[0]), string(failoverContent[1]), string(readBytes))
-			}
-			if err := os.Remove(filePath); err != nil {
-				t.Error("Failed removing file: ", filePath)
-			}
+
+	reader := kafka.NewReader(kafka.ReaderConfig{
+		Brokers: []string{"localhost:9092"},
+		Topic:   "cgrates_cdrs",
+		GroupID: "tmp",
+	})
+
+	defer reader.Close()
+
+	for i := 0; i < 6; i++ {
+		ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+		if m, err := reader.ReadMessage(ctx); err != nil {
+			t.Fatal(err)
+		} else if !reflect.DeepEqual(failoverContent[0], m.Value) && !reflect.DeepEqual(failoverContent[1], m.Value) { // Checking just the prefix should do since some content is dynamic
+			t.Errorf("Expecting: %v or %v, received: %v", string(failoverContent[0]), string(failoverContent[1]), string(m.Value))
 		}
-	}
-	if !foundFile {
-		t.Fatal("Could not find the file in folder")
 	}
 }
 

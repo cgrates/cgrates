@@ -22,7 +22,8 @@ import "sort"
 
 var (
 	CDRExportFormats = []string{DRYRUN, MetaFileCSV, MetaFileFWV, MetaHTTPjsonCDR, MetaHTTPjsonMap,
-		MetaHTTPjson, META_HTTP_POST, MetaAMQPjsonCDR, MetaAMQPjsonMap, MetaAMQPV1jsonMap, MetaSQSjsonMap}
+		MetaHTTPjson, META_HTTP_POST, MetaAMQPjsonCDR, MetaAMQPjsonMap, MetaAMQPV1jsonMap, MetaSQSjsonMap,
+		MetaKafkajsonMap}
 	MainCDRFields = []string{CGRID, Source, OriginHost, OriginID, ToR, RequestType, Tenant, Category,
 		Account, Subject, Destination, SetupTime, AnswerTime, Usage, COST, RATED, Partial, RunID,
 		PreRated, CostSource, CostDetails, ExtraInfo, OrderID}
@@ -41,6 +42,7 @@ var (
 		MetaAMQPjsonMap:   CONTENT_JSON,
 		MetaAMQPV1jsonMap: CONTENT_JSON,
 		MetaSQSjsonMap:    CONTENT_JSON,
+		MetaKafkajsonMap:  CONTENT_JSON,
 	}
 	CDREFileSuffixes = map[string]string{
 		MetaHTTPjsonCDR:   JSNSuffix,
@@ -49,6 +51,7 @@ var (
 		MetaAMQPjsonMap:   JSNSuffix,
 		MetaAMQPV1jsonMap: JSNSuffix,
 		MetaSQSjsonMap:    JSNSuffix,
+		MetaKafkajsonMap:  JSNSuffix,
 		META_HTTP_POST:    FormSuffix,
 		MetaFileCSV:       CSVSuffix,
 		MetaFileFWV:       FWVSuffix,
@@ -281,6 +284,7 @@ const (
 	MetaAMQPjsonMap               = "*amqp_json_map"
 	MetaAMQPV1jsonMap             = "*amqpv1_json_map"
 	MetaSQSjsonMap                = "*sqs_json_map"
+	MetaKafkajsonMap              = "*kafka_json_map"
 	NANO_MULTIPLIER               = 1000000000
 	CGR_AUTHORIZE                 = "CGR_AUTHORIZE"
 	CONFIG_PATH                   = "/etc/cgrates/"
