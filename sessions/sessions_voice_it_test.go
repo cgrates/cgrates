@@ -21,6 +21,7 @@ package sessions
 
 import (
 	"flag"
+	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -793,8 +794,12 @@ func TestSessionsVoiceSessionTTL(t *testing.T) {
 
 	var aSessions []*ExternalSession
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
-		map[string]string{utils.RunID: utils.META_DEFAULT,
-			utils.OriginID: "12360"}, &aSessions); err != nil {
+		utils.SessionFilter{
+			Filters: []string{
+				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.META_DEFAULT),
+				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12360"),
+			},
+		}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -834,7 +839,7 @@ func TestSessionsVoiceSessionTTL(t *testing.T) {
 
 	var updateRpl *V1UpdateSessionReply
 	if err := sessionsRPC.Call(utils.SessionSv1UpdateSession, updateArgs, &updateRpl); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	time.Sleep(time.Duration(10 * time.Millisecond))
 	if *updateRpl.MaxUsage != usage {
@@ -842,8 +847,12 @@ func TestSessionsVoiceSessionTTL(t *testing.T) {
 	}
 
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
-		map[string]string{utils.RunID: utils.META_DEFAULT, utils.OriginID: "12360"},
-		&aSessions); err != nil {
+		utils.SessionFilter{
+			Filters: []string{
+				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.META_DEFAULT),
+				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12360"),
+			},
+		}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -943,9 +952,12 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 
 	var aSessions []*ExternalSession
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
-		map[string]string{utils.RunID: utils.META_DEFAULT,
-			utils.OriginID: "12361"},
-		&aSessions); err != nil {
+		utils.SessionFilter{
+			Filters: []string{
+				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.META_DEFAULT),
+				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12361"),
+			},
+		}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -997,9 +1009,12 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 
 	time.Sleep(time.Duration(20) * time.Millisecond)
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
-		map[string]string{utils.RunID: utils.META_DEFAULT,
-			utils.OriginID: "12362"},
-		&aSessions); err != nil {
+		utils.SessionFilter{
+			Filters: []string{
+				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.META_DEFAULT),
+				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12362"),
+			},
+		}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -1024,9 +1039,12 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 			eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
-		map[string]string{utils.RunID: utils.META_DEFAULT,
-			utils.OriginID: "12362"},
-		&aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		utils.SessionFilter{
+			Filters: []string{
+				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.META_DEFAULT),
+				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12362"),
+			},
+		}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, utils.ToJSON(aSessions))
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -1104,9 +1122,12 @@ func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	time.Sleep(time.Duration(20) * time.Millisecond)
 	var aSessions []*ExternalSession
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
-		map[string]string{utils.RunID: utils.META_DEFAULT,
-			utils.OriginID: "12371"},
-		&aSessions); err != nil {
+		utils.SessionFilter{
+			Filters: []string{
+				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.META_DEFAULT),
+				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12371"),
+			},
+		}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -1158,8 +1179,12 @@ func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 
 	time.Sleep(time.Duration(20) * time.Millisecond)
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
-		map[string]string{utils.RunID: utils.META_DEFAULT,
-			utils.OriginID: "12372-1"}, &aSessions); err != nil {
+		utils.SessionFilter{
+			Filters: []string{
+				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.META_DEFAULT),
+				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12372-1"),
+			},
+		}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -1204,8 +1229,12 @@ func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 
 	time.Sleep(time.Duration(10) * time.Millisecond)
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
-		map[string]string{utils.RunID: utils.META_DEFAULT,
-			utils.OriginID: "12372-1"}, &aSessions); err == nil ||
+		utils.SessionFilter{
+			Filters: []string{
+				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.META_DEFAULT),
+				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12372-1"),
+			},
+		}, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
@@ -1283,7 +1312,6 @@ func TestSMGDataDerivedChargingNoCredit(t *testing.T) {
 */
 
 // ToDo: Add test for ChargeEvent with derived charging, one with debit possible and second not so we see refund and error.CreditInsufficient showing up.
-
 func TestSessionsVoiceStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(1000); err != nil {
 		t.Error(err)

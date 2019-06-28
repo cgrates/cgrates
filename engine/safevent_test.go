@@ -814,19 +814,20 @@ func TestSafEventGetTInt64(t *testing.T) {
 }
 
 func TestSafEventGetDurationPtrIgnoreErrors(t *testing.T) {
+	safEv = &SafEvent{Me: NewMapEvent(sMap)}
 	if rply := safEv.GetDurationPtrIgnoreErrors("test"); rply != nil {
 		t.Errorf("Expected: %+v, received: %+v", nil, rply)
 	}
 	expected := utils.DurationPointer(time.Duration(10 * time.Second))
-	if rply := safEv.GetDurationPtrIgnoreErrors("test6"); *rply != *expected {
+	if rply := safEv.GetDurationPtrIgnoreErrors("test6"); rply == nil || *rply != *expected {
 		t.Errorf("Expected: %+v, received: %+v", expected, rply)
 	}
 	expected = utils.DurationPointer(time.Duration(42 * time.Second))
-	if rply := safEv.GetDurationPtrIgnoreErrors("test7"); *rply != *expected {
+	if rply := safEv.GetDurationPtrIgnoreErrors("test7"); rply == nil || *rply != *expected {
 		t.Errorf("Expected: %+v, received: %+v", expected, rply)
 	}
 	expected = utils.DurationPointer(time.Duration(42))
-	if rply := safEv.GetDurationPtrIgnoreErrors("test2"); *rply != *expected {
+	if rply := safEv.GetDurationPtrIgnoreErrors("test2"); rply == nil || *rply != *expected {
 		t.Errorf("Expected: %+v, received: %+v", expected, rply)
 	}
 }

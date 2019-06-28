@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os/exec"
@@ -278,9 +279,12 @@ func testRAitAcctStart(t *testing.T) {
 	}
 	var aSessions []*sessions.ExternalSession
 	if err := raRPC.Call(utils.SessionSv1GetActiveSessions,
-		map[string]string{utils.RunID: utils.META_DEFAULT,
-			utils.OriginID: "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"},
-		&aSessions); err != nil {
+		utils.SessionFilter{
+			Filters: []string{
+				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.META_DEFAULT),
+				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"),
+			},
+		}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -346,8 +350,12 @@ func testRAitAcctStop(t *testing.T) {
 	// Make sure the sessin was disconnected from SMG
 	var aSessions []*sessions.ExternalSession
 	if err := raRPC.Call(utils.SessionSv1GetActiveSessions,
-		map[string]string{utils.RunID: utils.META_DEFAULT, utils.OriginID: "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"},
-		&aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		utils.SessionFilter{
+			Filters: []string{
+				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.META_DEFAULT),
+				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"),
+			},
+		}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	time.Sleep(150 * time.Millisecond)

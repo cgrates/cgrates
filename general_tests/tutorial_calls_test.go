@@ -394,7 +394,7 @@ func testCallGetActiveSessions(t *testing.T) {
 		},
 	}
 	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
-		&map[string]string{}, &reply); err != nil {
+		nil, &reply); err != nil {
 		t.Error("Got error on SessionSv1.GetActiveSessions: ", err.Error())
 	} else {
 		// compare some fields (eg. CGRId is generated)
@@ -688,7 +688,7 @@ func testCallSyncSessions(t *testing.T) {
 	var reply *[]*sessions.ExternalSession
 	// activeSessions shouldn't be active
 	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
-		&map[string]string{}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		nil, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error("Got error on SessionSv1.GetActiveSessions: ", err)
 	}
 	// 1001 call 1002 stop the call after 12 seconds
@@ -706,7 +706,7 @@ func testCallSyncSessions(t *testing.T) {
 	time.Sleep(1 * time.Second)
 	// get active sessions
 	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
-		&map[string]string{}, &reply); err != nil {
+		nil, &reply); err != nil {
 		t.Error("Got error on SessionSv1.GetActiveSessions: ", err.Error())
 	} else if len(*reply) != 2 {
 		t.Errorf("expecting 2 active sessions, received: %+v", utils.ToJSON(reply))
@@ -757,7 +757,7 @@ func testCallSyncSessions(t *testing.T) {
 
 	// activeSessions shouldn't be active
 	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
-		&map[string]string{}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		nil, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Got error on SessionSv1.GetActiveSessions: %v and reply: %s", err, utils.ToJSON(reply))
 	}
 

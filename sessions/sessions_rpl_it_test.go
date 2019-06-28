@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
+	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -136,7 +137,11 @@ func TestSessionSRplInitiate(t *testing.T) {
 
 	//check if the session was createad as active session on master
 	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions,
-		map[string]string{utils.OriginID: "123451"}, &aSessions); err != nil {
+		utils.SessionFilter{
+			Filters: []string{
+				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "123451"),
+			},
+		}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", utils.ToIJSON(aSessions))
@@ -147,7 +152,11 @@ func TestSessionSRplInitiate(t *testing.T) {
 	//check if the session was created as passive session on slave
 	var pSessions []*ExternalSession
 	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions,
-		map[string]string{utils.OriginID: "123451"}, &pSessions); err != nil {
+		utils.SessionFilter{
+			Filters: []string{
+				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "123451"),
+			},
+		}, &pSessions); err != nil {
 		t.Error(err)
 	} else if len(pSessions) != 1 {
 		t.Errorf("PassiveSessions: %+v", pSessions)
@@ -192,7 +201,11 @@ func TestSessionSRplUpdate(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
 	var aSessions []*ExternalSession
 	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetActiveSessions,
-		map[string]string{utils.OriginID: "123451"}, &aSessions); err != nil {
+		utils.SessionFilter{
+			Filters: []string{
+				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "123451"),
+			},
+		}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -209,7 +222,11 @@ func TestSessionSRplUpdate(t *testing.T) {
 
 	// Master should not longer have activeSession
 	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions,
-		map[string]string{utils.OriginID: "123451"}, &aSessions); err == nil ||
+		utils.SessionFilter{
+			Filters: []string{
+				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "123451"),
+			},
+		}, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %v with len(aSessions)=%v , session : %+v", err, len(aSessions), utils.ToJSON(aSessions))
 	}
@@ -258,7 +275,11 @@ func TestSessionSRplTerminate(t *testing.T) {
 	var aSessions []*ExternalSession
 	//check if the session was terminated on master
 	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions,
-		map[string]string{utils.OriginID: "123451"}, &aSessions); err == nil ||
+		utils.SessionFilter{
+			Filters: []string{
+				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "123451"),
+			},
+		}, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %v with len(aSessions)=%v , session : %+v", err, len(aSessions), utils.ToIJSON(aSessions))
 	}
