@@ -685,7 +685,7 @@ func testDspSessionReplicate(t *testing.T) {
 	var repl int
 	time.Sleep(10 * time.Millisecond)
 	if err := allEngine2.RCP.Call(utils.SessionSv1GetPassiveSessionsCount,
-		map[string]string{}, &repl); err != nil {
+		nil, &repl); err != nil {
 		t.Fatal(err)
 	} else if repl != 2 {
 		t.Errorf("Expected 1 sessions recived %v", repl)

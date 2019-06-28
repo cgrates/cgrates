@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
+	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -277,7 +278,11 @@ func TestSessionsItTerminatePassive(t *testing.T) {
 	var pSessions []*ExternalSession
 	//check if the passive session was created
 	if err := sItRPC.Call(utils.SessionSv1GetPassiveSessions,
-		map[string]string{utils.OriginID: "123789"}, &pSessions); err != nil {
+		utils.SessionFilter{
+			Filters: []string{
+				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "123789"),
+			},
+		}, &pSessions); err != nil {
 		t.Error(err)
 	} else if len(pSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", pSessions)
@@ -315,7 +320,11 @@ func TestSessionsItTerminatePassive(t *testing.T) {
 
 	//check if the passive session was terminate
 	if err := sItRPC.Call(utils.SessionSv1GetPassiveSessions,
-		map[string]string{utils.OriginID: "123789"}, &pSessions); err == nil ||
+		utils.SessionFilter{
+			Filters: []string{
+				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "123789"),
+			},
+		}, &pSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %v with len(aSessions)=%v , session : %+v", err, len(pSessions), utils.ToJSON(pSessions))
 	}
