@@ -130,6 +130,7 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		utils.MetaAMQPV1jsonMap:   sendAWS,
 		utils.MetaSQSjsonMap:      sendSQS,
 		utils.MetaKafkajsonMap:    sendKafka,
+		utils.MetaS3jsonMap:       sendS3,
 		MetaRemoveSessionCosts:    removeSessionCosts,
 		MetaRemoveExpired:         removeExpired,
 	}
@@ -464,6 +465,24 @@ func sendKafka(ub *Account, a *Action, acs Actions, extraData interface{}) error
 	}).AsString()
 
 	return PostersCache.PostKafka(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts,
+		body, cfg.GeneralCfg().FailedPostsDir, fallbackFileName)
+}
+
+func sendS3(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+	body, err := getOneData(ub, extraData)
+	if err != nil {
+		return err
+	}
+	cfg := config.CgrConfig()
+	fallbackFileName := (&utils.FallbackFileName{
+		Module:     fmt.Sprintf("%s>%s", utils.ActionsPoster, a.ActionType),
+		Transport:  utils.MetaS3jsonMap,
+		Address:    a.ExtraParameters,
+		RequestID:  utils.GenUUID(),
+		FileSuffix: utils.JSNSuffix,
+	}).AsString()
+
+	return PostersCache.PostS3(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts,
 		body, cfg.GeneralCfg().FailedPostsDir, fallbackFileName)
 }
 

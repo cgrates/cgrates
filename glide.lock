@@ -122,7 +122,7 @@ imports:
 - name: github.com/antchfx/xpath
   version: 3de91f3991a1af6e495d49c9218318b5544b20e3
 - name: github.com/aws/aws-sdk-go
-  version: 38d16b00d959591df03ffcc08fa5d463ffc15e2a
+  version: 68afe677298a894afc385165f93ec26895a50c9e
   subpackages: 
   - aws
   - service

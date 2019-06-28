@@ -244,7 +244,7 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 			return err
 		}
 		body = jsn
-	case utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap, utils.MetaAMQPV1jsonMap, utils.MetaSQSjsonMap, utils.MetaKafkajsonMap:
+	case utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap, utils.MetaAMQPV1jsonMap, utils.MetaSQSjsonMap, utils.MetaKafkajsonMap, utils.MetaS3jsonMap:
 		expMp, err := cdr.AsExportMap(cdre.exportTemplate.ContentFields, cdre.httpSkipTlsCheck, nil, cdre.filterS)
 		if err != nil {
 			return err
@@ -289,6 +289,8 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 		err = PostersCache.PostSQS(cdre.exportPath, cdre.attempts, body.([]byte), cdre.fallbackPath, fallbackFileName)
 	case utils.MetaKafkajsonMap:
 		err = PostersCache.PostKafka(cdre.exportPath, cdre.attempts, body.([]byte), cdre.fallbackPath, fallbackFileName)
+	case utils.MetaS3jsonMap:
+		err = PostersCache.PostS3(cdre.exportPath, cdre.attempts, body.([]byte), cdre.fallbackPath, fallbackFileName)
 	}
 	return
 }

@@ -496,6 +496,64 @@ func TestCDRsOnExpKafkaPosterFileFailover(t *testing.T) {
 	}
 }
 
+func TestCDRsOnExpSQSPosterFileFailover(t *testing.T) {
+	time.Sleep(time.Duration(10 * time.Second))
+	failoverContent := [][]byte{[]byte(`{"CGRID":"57548d485d61ebcba55afbe5d939c82a8e9ff670"}`), []byte(`{"CGRID":"88ed9c38005f07576a1e1af293063833b60edcc6"}`)}
+	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
+	if len(filesInDir) == 0 {
+		t.Fatalf("No files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
+	}
+	var foundFile bool
+	var fileName string
+	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
+		fileName = file.Name()
+		if strings.HasPrefix(fileName, "cdr|*sqs_json_map") {
+			foundFile = true
+			filePath := path.Join(cdrsMasterCfg.GeneralCfg().FailedPostsDir, fileName)
+			if readBytes, err := ioutil.ReadFile(filePath); err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(failoverContent[0], readBytes) && !reflect.DeepEqual(failoverContent[1], readBytes) { // Checking just the prefix should do since some content is dynamic
+				t.Errorf("Expecting: %v or %v, received: %v", string(failoverContent[0]), string(failoverContent[1]), string(readBytes))
+			}
+			if err := os.Remove(filePath); err != nil {
+				t.Error("Failed removing file: ", filePath)
+			}
+		}
+	}
+	if !foundFile {
+		t.Fatal("Could not find the file in folder")
+	}
+}
+
+func TestCDRsOnExpS3PosterFileFailover(t *testing.T) {
+	time.Sleep(time.Duration(10 * time.Second))
+	failoverContent := [][]byte{[]byte(`{"CGRID":"57548d485d61ebcba55afbe5d939c82a8e9ff670"}`), []byte(`{"CGRID":"88ed9c38005f07576a1e1af293063833b60edcc6"}`)}
+	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
+	if len(filesInDir) == 0 {
+		t.Fatalf("No files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
+	}
+	var foundFile bool
+	var fileName string
+	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
+		fileName = file.Name()
+		if strings.HasPrefix(fileName, "cdr|*s3_json_map") {
+			foundFile = true
+			filePath := path.Join(cdrsMasterCfg.GeneralCfg().FailedPostsDir, fileName)
+			if readBytes, err := ioutil.ReadFile(filePath); err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(failoverContent[0], readBytes) && !reflect.DeepEqual(failoverContent[1], readBytes) { // Checking just the prefix should do since some content is dynamic
+				t.Errorf("Expecting: %v or %v, received: %v", string(failoverContent[0]), string(failoverContent[1]), string(readBytes))
+			}
+			if err := os.Remove(filePath); err != nil {
+				t.Error("Failed removing file: ", filePath)
+			}
+		}
+	}
+	if !foundFile {
+		t.Fatal("Could not find the file in folder")
+	}
+}
+
 /*
 // Performance test, check `lsof -a -p 8427 | wc -l`
 
