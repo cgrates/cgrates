@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
 	"fmt"
 	"net/url"
 	"strings"
@@ -26,15 +27,14 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewSQSPoster(dialURL string, attempts int, fallbackFileDir string) (Poster, error) {
-	pstr := &SQSPoster{
+func NewS3Poster(dialURL string, attempts int, fallbackFileDir string) (Poster, error) {
+	pstr := &S3Poster{
 		attempts:        attempts,
 		fallbackFileDir: fallbackFileDir,
 	}
@@ -45,7 +45,7 @@ func NewSQSPoster(dialURL string, attempts int, fallbackFileDir string) (Poster,
 	return pstr, nil
 }
 
-type SQSPoster struct {
+type S3Poster struct {
 	sync.Mutex
 	dialURL         string
 	awsRegion       string
@@ -60,9 +60,9 @@ type SQSPoster struct {
 	session *session.Session
 }
 
-func (pstr *SQSPoster) Close() {}
+func (pstr *S3Poster) Close() {}
 
-func (pstr *SQSPoster) parseURL(dialURL string) (err error) {
+func (pstr *S3Poster) parseURL(dialURL string) (err error) {
 	u, err := url.Parse(dialURL)
 	if err != nil {
 		return err
@@ -78,62 +78,28 @@ func (pstr *SQSPoster) parseURL(dialURL string) (err error) {
 	if vals, has := qry[awsRegion]; has && len(vals) != 0 {
 		pstr.awsRegion = vals[0]
 	} else {
-		utils.Logger.Warning("<SQSPoster> No region present for AWS.")
+		utils.Logger.Warning("<S3Poster> No region present for AWS.")
 	}
 	if vals, has := qry[awsID]; has && len(vals) != 0 {
 		pstr.awsID = vals[0]
 	} else {
-		utils.Logger.Warning("<SQSPoster> No access key ID present for AWS.")
+		utils.Logger.Warning("<S3Poster> No access key ID present for AWS.")
 	}
 	if vals, has := qry[awsSecret]; has && len(vals) != 0 {
 		pstr.awsKey = vals[0]
 	} else {
-		utils.Logger.Warning("<SQSPoster> No secret access key present for AWS.")
+		utils.Logger.Warning("<S3Poster> No secret access key present for AWS.")
 	}
 	if vals, has := qry[awsToken]; has && len(vals) != 0 {
 		pstr.awsToken = vals[0]
 	} else {
-		utils.Logger.Warning("<SQSPoster> No session token present for AWS.")
+		utils.Logger.Warning("<S3Poster> No session token present for AWS.")
 	}
-	pstr.getQueueURL()
 	return nil
 }
 
-func (pstr *SQSPoster) getQueueURL() (err error) {
-	if pstr.queueURL != nil {
-		return nil
-	}
-	// pstr.getQueueOnce.Do(func() {
-	var svc *sqs.SQS
-	if svc, err = pstr.newPosterSession(); err != nil {
-		return
-	}
-	var result *sqs.GetQueueUrlOutput
-	if result, err = svc.GetQueueUrl(&sqs.GetQueueUrlInput{
-		QueueName: aws.String(pstr.queueID),
-	}); err == nil {
-		pstr.queueURL = new(string)
-		*(pstr.queueURL) = *result.QueueUrl
-		return
-	}
-	if aerr, ok := err.(awserr.Error); ok && aerr.Code() == sqs.ErrCodeQueueDoesNotExist {
-		// For CreateQueue
-		var createResult *sqs.CreateQueueOutput
-		if createResult, err = svc.CreateQueue(&sqs.CreateQueueInput{
-			QueueName: aws.String(pstr.queueID),
-		}); err == nil {
-			pstr.queueURL = new(string)
-			*(pstr.queueURL) = *createResult.QueueUrl
-			return
-		}
-	}
-	utils.Logger.Warning(fmt.Sprintf("<SQSPoster> can not get url for queue with ID=%s because err: %v", pstr.queueID, err))
-	// })
-	return err
-}
-
-func (pstr *SQSPoster) Post(message []byte, fallbackFileName string) (err error) {
-	var svc *sqs.SQS
+func (pstr *S3Poster) Post(message []byte, fallbackFileName string) (err error) {
+	var svc *s3manager.Uploader
 	fib := utils.Fib()
 
 	for i := 0; i < pstr.attempts; i++ {
@@ -144,30 +110,38 @@ func (pstr *SQSPoster) Post(message []byte, fallbackFileName string) (err error)
 	}
 	if err != nil {
 		if fallbackFileName != utils.META_NONE {
-			utils.Logger.Warning(fmt.Sprintf("<SQSPoster> creating new session, err: %s", err.Error()))
+			utils.Logger.Warning(fmt.Sprintf("<S3Poster> creating new session, err: %s", err.Error()))
 			err = writeToFile(pstr.fallbackFileDir, fallbackFileName, message)
 		}
 		return err
 	}
 
 	for i := 0; i < pstr.attempts; i++ {
-		if _, err = svc.SendMessage(
-			&sqs.SendMessageInput{
-				MessageBody: aws.String(string(message)),
-				QueueUrl:    pstr.queueURL,
-			},
-		); err == nil {
+		if _, err = svc.Upload(&s3manager.UploadInput{
+			Bucket: aws.String(pstr.queueID),
+
+			// Can also use the `filepath` standard library package to modify the
+			// filename as need for an S3 object key. Such as turning absolute path
+			// to a relative path.
+			Key: aws.String(fallbackFileName),
+
+			// The file to be uploaded. io.ReadSeeker is preferred as the Uploader
+			// will be able to optimize memory when uploading large content. io.Reader
+			// is supported, but will require buffering of the reader's bytes for
+			// each part.
+			Body: bytes.NewReader(message),
+		}); err == nil {
 			break
 		}
 	}
 	if err != nil && fallbackFileName != utils.META_NONE {
-		utils.Logger.Warning(fmt.Sprintf("<SQSPoster> posting new message, err: %s", err.Error()))
+		utils.Logger.Warning(fmt.Sprintf("<S3Poster> posting new message, err: %s", err.Error()))
 		err = writeToFile(pstr.fallbackFileDir, fallbackFileName, message)
 	}
 	return err
 }
 
-func (pstr *SQSPoster) newPosterSession() (s *sqs.SQS, err error) {
+func (pstr *S3Poster) newPosterSession() (s *s3manager.Uploader, err error) {
 	pstr.Lock()
 	defer pstr.Unlock()
 	if pstr.session == nil {
@@ -190,5 +164,5 @@ func (pstr *SQSPoster) newPosterSession() (s *sqs.SQS, err error) {
 		}
 		pstr.session = ses
 	}
-	return sqs.New(pstr.session), nil
+	return s3manager.NewUploader(pstr.session), nil
 }

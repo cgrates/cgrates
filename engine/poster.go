@@ -52,6 +52,7 @@ func init() {
 		amqpv1Cache: make(map[string]Poster),
 		sqsCache:    make(map[string]Poster),
 		kafkaCache:  make(map[string]Poster),
+		s3Cache:     make(map[string]Poster),
 	} // Initialize the cache for amqpPosters
 }
 
@@ -63,6 +64,7 @@ type PosterCache struct {
 	amqpv1Cache map[string]Poster
 	sqsCache    map[string]Poster
 	kafkaCache  map[string]Poster
+	s3Cache     map[string]Poster
 }
 
 type Poster interface {
@@ -157,7 +159,7 @@ func (pc *PosterCache) GetSQSPoster(dialURL string, attempts int, fallbackFileDi
 func (pc *PosterCache) GetKafkaPoster(dialURL string, attempts int, fallbackFileDir string) (Poster, error) {
 	pc.Lock()
 	defer pc.Unlock()
-	if _, hasIt := pc.sqsCache[dialURL]; !hasIt {
+	if _, hasIt := pc.kafkaCache[dialURL]; !hasIt {
 		if pstr, err := NewKafkaPoster(dialURL, attempts, fallbackFileDir); err != nil {
 			return nil, err
 		} else {
@@ -165,6 +167,19 @@ func (pc *PosterCache) GetKafkaPoster(dialURL string, attempts int, fallbackFile
 		}
 	}
 	return pc.kafkaCache[dialURL], nil
+}
+
+func (pc *PosterCache) GetS3Poster(dialURL string, attempts int, fallbackFileDir string) (Poster, error) {
+	pc.Lock()
+	defer pc.Unlock()
+	if _, hasIt := pc.s3Cache[dialURL]; !hasIt {
+		if pstr, err := NewS3Poster(dialURL, attempts, fallbackFileDir); err != nil {
+			return nil, err
+		} else {
+			pc.s3Cache[dialURL] = pstr
+		}
+	}
+	return pc.s3Cache[dialURL], nil
 }
 
 func (pc *PosterCache) PostAMQP(dialURL string, attempts int,
@@ -201,4 +216,13 @@ func (pc *PosterCache) PostKafka(dialURL string, attempts int,
 		return err
 	}
 	return kafkaPoster.Post(content, fallbackFileName)
+}
+
+func (pc *PosterCache) PostS3(dialURL string, attempts int,
+	content []byte, fallbackFileDir, fallbackFileName string) error {
+	sqsPoster, err := pc.GetS3Poster(dialURL, attempts, fallbackFileDir)
+	if err != nil {
+		return err
+	}
+	return sqsPoster.Post(content, fallbackFileName)
 }
