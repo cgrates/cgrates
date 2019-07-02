@@ -128,7 +128,6 @@ func TestMapSubsystemIDsFromSlice(t *testing.T) {
 	} else if !reflect.DeepEqual(mp, eMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, mp)
 	}
-
 }
 
 func TestMapSubsystemIDsFromSliceWithErr(t *testing.T) {
@@ -136,6 +135,31 @@ func TestMapSubsystemIDsFromSliceWithErr(t *testing.T) {
 
 	if _, err := MapSubsystemIDsFromSlice(sls); err != ErrUnsupportedFormat {
 		t.Error(err)
+	}
+}
+
+func TestMapSubsystemIDsHasKey(t *testing.T) {
+	sls := []string{"*event", "*thresholds:ID1;ID2;ID3", "*attributes", "*stats:ID"}
+	eMp := MapSubsystemIDs{
+		"*event":      []string{},
+		"*thresholds": []string{"ID1", "ID2", "ID3"},
+		"*attributes": []string{},
+		"*stats":      []string{"ID"},
+	}
+	mp, err := MapSubsystemIDsFromSlice(sls)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(mp, eMp) {
+		t.Errorf("Expecting: %+v, received: %+v", eMp, mp)
+	}
+	if has := mp.HasKey("*event"); !has {
+		t.Errorf("Expecting: true, received: %+v", has)
+	}
+	if has := mp.HasKey("*thresholds"); !has {
+		t.Errorf("Expecting: true, received: %+v", has)
+	}
+	if has := mp.HasKey("*resources"); has {
+		t.Errorf("Expecting: false, received: %+v", has)
 	}
 
 }
