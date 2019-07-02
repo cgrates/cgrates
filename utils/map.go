@@ -268,3 +268,11 @@ func (msIDs MapSubsystemIDs) HasKey(key string) (has bool) {
 	_, has = msIDs[key]
 	return
 }
+
+func (msIDs MapSubsystemIDs) GetIDs(key string) []string {
+	ids, has := msIDs[key]
+	if !has {
+		return []string{}
+	}
+	return ids
+}

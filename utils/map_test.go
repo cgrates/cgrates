@@ -163,3 +163,32 @@ func TestMapSubsystemIDsHasKey(t *testing.T) {
 	}
 
 }
+
+func TestMapSubsystemIDsGetIDs(t *testing.T) {
+	sls := []string{"*event", "*thresholds:ID1;ID2;ID3", "*attributes", "*stats:ID"}
+	eMp := MapSubsystemIDs{
+		"*event":      []string{},
+		"*thresholds": []string{"ID1", "ID2", "ID3"},
+		"*attributes": []string{},
+		"*stats":      []string{"ID"},
+	}
+	mp, err := MapSubsystemIDsFromSlice(sls)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(mp, eMp) {
+		t.Errorf("Expecting: %+v, received: %+v", eMp, mp)
+	}
+	eIDs := []string{"ID1", "ID2", "ID3"}
+	if ids := mp.GetIDs("*thresholds"); !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting: %+v, received: %+v", eIDs, ids)
+	}
+	eIDs = []string{}
+	if ids := mp.GetIDs("*event"); !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting: %+v, received: %+v", eIDs, ids)
+	}
+	eIDs = []string{}
+	if ids := mp.GetIDs("*test"); !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting: %+v, received: %+v", eIDs, ids)
+	}
+
+}

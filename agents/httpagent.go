@@ -140,7 +140,10 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliers),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
-			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
+			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
+			reqProcessor.Flags.GetIDs(utils.MetaAttributes),
+			reqProcessor.Flags.GetIDs(utils.MetaThresholds),
+			reqProcessor.Flags.GetIDs(utils.MetaStats))
 		rply := new(sessions.V1AuthorizeReply)
 		err = ha.sessionS.Call(utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
@@ -154,7 +157,10 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			reqProcessor.Flags.HasKey(utils.MetaThresholds),
 			reqProcessor.Flags.HasKey(utils.MetaStats),
-			cgrEv, cgrArgs.ArgDispatcher)
+			cgrEv, cgrArgs.ArgDispatcher,
+			reqProcessor.Flags.GetIDs(utils.MetaAttributes),
+			reqProcessor.Flags.GetIDs(utils.MetaThresholds),
+			reqProcessor.Flags.GetIDs(utils.MetaStats))
 		rply := new(sessions.V1InitSessionReply)
 		err = ha.sessionS.Call(utils.SessionSv1InitiateSession,
 			initArgs, rply)
@@ -165,7 +171,8 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		updateArgs := sessions.NewV1UpdateSessionArgs(
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
-			cgrEv, cgrArgs.ArgDispatcher)
+			cgrEv, cgrArgs.ArgDispatcher,
+			reqProcessor.Flags.GetIDs(utils.MetaAttributes))
 		rply := new(sessions.V1UpdateSessionReply)
 		err = ha.sessionS.Call(utils.SessionSv1UpdateSession,
 			updateArgs, rply)
@@ -178,7 +185,9 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaResources),
 			reqProcessor.Flags.HasKey(utils.MetaThresholds),
 			reqProcessor.Flags.HasKey(utils.MetaStats),
-			cgrEv, cgrArgs.ArgDispatcher)
+			cgrEv, cgrArgs.ArgDispatcher,
+			reqProcessor.Flags.GetIDs(utils.MetaThresholds),
+			reqProcessor.Flags.GetIDs(utils.MetaStats))
 		rply := utils.StringPointer("")
 		err = ha.sessionS.Call(utils.SessionSv1TerminateSession,
 			terminateArgs, rply)
@@ -195,7 +204,10 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliers),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
-			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
+			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
+			reqProcessor.Flags.GetIDs(utils.MetaAttributes),
+			reqProcessor.Flags.GetIDs(utils.MetaThresholds),
+			reqProcessor.Flags.GetIDs(utils.MetaStats))
 		rply := new(sessions.V1ProcessEventReply)
 		err = ha.sessionS.Call(utils.SessionSv1ProcessEvent,
 			evArgs, rply)
