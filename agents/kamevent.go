@@ -77,7 +77,7 @@ func NewKamEvent(kamEvData []byte, alias, adress string) (KamEvent, error) {
 	if err := json.Unmarshal(kamEvData, &kev); err != nil {
 		return nil, err
 	}
-	kev[utils.CGROriginHost] = utils.FirstNonEmpty(kev[utils.CGROriginHost], alias, adress)
+	kev[utils.OriginHost] = utils.FirstNonEmpty(kev[utils.OriginHost], alias, adress)
 	return kev, nil
 }
 
@@ -141,9 +141,6 @@ func (kev KamEvent) AsMapStringInterface() (mp map[string]interface{}) {
 			v += "s" // mark the Usage as seconds
 		}
 		if !utils.IsSliceMember(kamReservedEventFields, k) { // reserved attributes not getting into event
-			if k == utils.CGROriginHost {
-				mp[utils.OriginHost] = v
-			}
 			mp[k] = v
 		}
 	}
