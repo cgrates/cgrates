@@ -247,3 +247,24 @@ func MapStringToInt64(in map[string]string) (out map[string]int64, err error) {
 	}
 	return mapout, nil
 }
+
+func MapSubsystemIDsFromSlice(s []string) (MapSubsystemIDs, error) {
+	result := make(MapSubsystemIDs, len(s))
+	for _, v := range s {
+		subsystemWithIDs := strings.Split(v, InInFieldSep)
+		result[subsystemWithIDs[0]] = []string{}
+		if len(subsystemWithIDs) == 2 {
+			result[subsystemWithIDs[0]] = strings.Split(subsystemWithIDs[1], INFIELD_SEP)
+		} else if len(subsystemWithIDs) > 2 {
+			return nil, ErrUnsupportedFormat
+		}
+	}
+	return result, nil
+}
+
+type MapSubsystemIDs map[string][]string
+
+func (msIDs MapSubsystemIDs) HasKey(key string) (has bool) {
+	_, has = msIDs[key]
+	return
+}
