@@ -81,7 +81,7 @@ type RequestProcessor struct {
 	ID                string
 	Tenant            RSRParsers
 	Filters           []string
-	Flags             utils.StringMap
+	Flags             utils.MapSubsystemIDs
 	ContinueOnSuccess bool
 	Timezone          string
 	RequestFields     []*FCTemplate
@@ -102,7 +102,9 @@ func (rp *RequestProcessor) loadFromJsonCfg(jsnCfg *ReqProcessorJsnCfg, sep stri
 		}
 	}
 	if jsnCfg.Flags != nil {
-		rp.Flags = utils.StringMapFromSlice(*jsnCfg.Flags)
+		if rp.Flags, err = utils.MapSubsystemIDsFromSlice(*jsnCfg.Flags); err != nil {
+			return
+		}
 	}
 	if jsnCfg.Timezone != nil {
 		rp.Timezone = *jsnCfg.Timezone

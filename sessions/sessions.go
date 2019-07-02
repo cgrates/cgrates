@@ -1677,7 +1677,8 @@ func (sS *SessionS) BiRPCv1ReplicateSessions(clnt rpcclient.RpcClientConnection,
 func NewV1AuthorizeArgs(attrs, res, maxUsage, thrslds,
 	statQueues, suppls, supplsIgnoreErrs, supplsEventCost bool,
 	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher,
-	supplierPaginator utils.Paginator) (args *V1AuthorizeArgs) {
+	supplierPaginator utils.Paginator,
+	attributeIDs, thresholdIDs, statIDs []string) (args *V1AuthorizeArgs) {
 	args = &V1AuthorizeArgs{
 		GetAttributes:         attrs,
 		AuthorizeResources:    res,
@@ -1693,6 +1694,16 @@ func NewV1AuthorizeArgs(attrs, res, maxUsage, thrslds,
 	}
 	args.ArgDispatcher = argDisp
 	args.Paginator = supplierPaginator
+	if len(attributeIDs) != 0 {
+		args.AttributeIDs = &attributeIDs
+	}
+	if len(thresholdIDs) != 0 {
+		args.ThresholdIDs = &thresholdIDs
+	}
+	if len(statIDs) != 0 {
+		args.StatIDs = &statIDs
+	}
+
 	return
 }
 
@@ -1706,6 +1717,9 @@ type V1AuthorizeArgs struct {
 	GetSuppliers          bool
 	SuppliersMaxCost      string
 	SuppliersIgnoreErrors bool
+	AttributeIDs          *[]string
+	ThresholdIDs          *[]string
+	StatIDs               *[]string
 	*utils.CGREvent
 	utils.Paginator
 	*utils.ArgDispatcher
@@ -1796,6 +1810,9 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
+		if args.AttributeIDs != nil {
+			attrArgs.AttributeIDs = *args.AttributeIDs
+		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
 			attrArgs, &rplyEv); err == nil {
@@ -1872,6 +1889,9 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
+		if args.ThresholdIDs != nil {
+			thEv.ThresholdIDs = *args.ThresholdIDs
+		}
 		if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
@@ -1887,6 +1907,9 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		statArgs := &engine.StatsArgsProcessEvent{
 			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
+		}
+		if args.StatIDs != nil {
+			statArgs.StatIDs = *args.StatIDs
 		}
 		var statReply []string
 		if err := sS.statS.Call(utils.StatSv1ProcessEvent,
@@ -1947,7 +1970,8 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.RpcClientConn
 
 // NewV1InitSessionArgs is a constructor for V1InitSessionArgs
 func NewV1InitSessionArgs(attrs, resrc, acnt, thrslds, stats bool,
-	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher) (args *V1InitSessionArgs) {
+	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher,
+	attributeIDs, thresholdIDs, statIDs []string) (args *V1InitSessionArgs) {
 	args = &V1InitSessionArgs{
 		GetAttributes:     attrs,
 		AllocateResources: resrc,
@@ -1956,6 +1980,15 @@ func NewV1InitSessionArgs(attrs, resrc, acnt, thrslds, stats bool,
 		ProcessStats:      stats,
 		CGREvent:          cgrEv,
 		ArgDispatcher:     argDisp,
+	}
+	if len(attributeIDs) != 0 {
+		args.AttributeIDs = &attributeIDs
+	}
+	if len(thresholdIDs) != 0 {
+		args.ThresholdIDs = &thresholdIDs
+	}
+	if len(statIDs) != 0 {
+		args.StatIDs = &statIDs
 	}
 	return
 }
@@ -1967,6 +2000,9 @@ type V1InitSessionArgs struct {
 	InitSession       bool
 	ProcessThresholds bool
 	ProcessStats      bool
+	AttributeIDs      *[]string
+	ThresholdIDs      *[]string
+	StatIDs           *[]string
 	*utils.CGREvent
 	*utils.ArgDispatcher
 }
@@ -2053,6 +2089,9 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
+		if args.AttributeIDs != nil {
+			attrArgs.AttributeIDs = *args.AttributeIDs
+		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
 			attrArgs, &rplyEv); err == nil {
@@ -2120,6 +2159,9 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
+		if args.ThresholdIDs != nil {
+			thEv.ThresholdIDs = *args.ThresholdIDs
+		}
 		if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent,
 			thEv, &tIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
@@ -2137,6 +2179,9 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		statArgs := &engine.StatsArgsProcessEvent{
 			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
+		}
+		if args.StatIDs != nil {
+			statArgs.StatIDs = *args.StatIDs
 		}
 		if err := sS.statS.Call(utils.StatSv1ProcessEvent,
 			statArgs, &statReply); err != nil &&
@@ -2194,12 +2239,16 @@ func (sS *SessionS) BiRPCv1InitiateSessionWithDigest(clnt rpcclient.RpcClientCon
 
 // NewV1UpdateSessionArgs is a constructor for update session arguments
 func NewV1UpdateSessionArgs(attrs, acnts bool,
-	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher) (args *V1UpdateSessionArgs) {
+	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher,
+	attributeIDs []string) (args *V1UpdateSessionArgs) {
 	args = &V1UpdateSessionArgs{
 		GetAttributes: attrs,
 		UpdateSession: acnts,
 		CGREvent:      cgrEv,
 		ArgDispatcher: argDisp,
+	}
+	if len(attributeIDs) != 0 {
+		args.AttributeIDs = &attributeIDs
 	}
 	return
 }
@@ -2208,6 +2257,7 @@ func NewV1UpdateSessionArgs(attrs, acnts bool,
 type V1UpdateSessionArgs struct {
 	GetAttributes bool
 	UpdateSession bool
+	AttributeIDs  *[]string
 	*utils.CGREvent
 	*utils.ArgDispatcher
 }
@@ -2281,6 +2331,9 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
+		if *args.AttributeIDs != nil {
+			attrArgs.AttributeIDs = *args.AttributeIDs
+		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
 			attrArgs, &rplyEv); err == nil {
@@ -2329,7 +2382,8 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 }
 
 func NewV1TerminateSessionArgs(acnts, resrc, thrds, stats bool,
-	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher) (args *V1TerminateSessionArgs) {
+	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher,
+	thresholdIDs, statIDs []string) (args *V1TerminateSessionArgs) {
 	args = &V1TerminateSessionArgs{
 		TerminateSession:  acnts,
 		ReleaseResources:  resrc,
@@ -2337,6 +2391,12 @@ func NewV1TerminateSessionArgs(acnts, resrc, thrds, stats bool,
 		ProcessStats:      stats,
 		CGREvent:          cgrEv,
 		ArgDispatcher:     argDisp,
+	}
+	if len(thresholdIDs) != 0 {
+		args.ThresholdIDs = &thresholdIDs
+	}
+	if len(statIDs) != 0 {
+		args.StatIDs = &statIDs
 	}
 	return
 }
@@ -2346,6 +2406,8 @@ type V1TerminateSessionArgs struct {
 	ReleaseResources  bool
 	ProcessThresholds bool
 	ProcessStats      bool
+	ThresholdIDs      *[]string
+	StatIDs           *[]string
 	*utils.CGREvent
 	*utils.ArgDispatcher
 }
@@ -2446,6 +2508,9 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
+		if args.ThresholdIDs != nil {
+			thEv.ThresholdIDs = *args.ThresholdIDs
+		}
 		if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			utils.Logger.Warning(
@@ -2461,6 +2526,9 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 		statArgs := &engine.StatsArgsProcessEvent{
 			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
+		}
+		if args.StatIDs != nil {
+			statArgs.StatIDs = *args.StatIDs
 		}
 		if err := sS.statS.Call(utils.StatSv1ProcessEvent,
 			statArgs, &statReply); err != nil &&
@@ -2570,7 +2638,8 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 func NewV1ProcessEventArgs(resrc, acnts, attrs, thds, stats,
 	suppls, supplsIgnoreErrs, supplsEventCost bool,
 	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher,
-	supplierPaginator utils.Paginator) (args *V1ProcessEventArgs) {
+	supplierPaginator utils.Paginator,
+	attributeIDs, thresholdIDs, statIDs []string) (args *V1ProcessEventArgs) {
 	args = &V1ProcessEventArgs{
 		AllocateResources:     resrc,
 		Debit:                 acnts,
@@ -2586,6 +2655,15 @@ func NewV1ProcessEventArgs(resrc, acnts, attrs, thds, stats,
 		args.SuppliersMaxCost = utils.MetaSuppliersEventCost
 	}
 	args.Paginator = supplierPaginator
+	if len(attributeIDs) != 0 {
+		args.AttributeIDs = &attributeIDs
+	}
+	if len(thresholdIDs) != 0 {
+		args.ThresholdIDs = &thresholdIDs
+	}
+	if len(statIDs) != 0 {
+		args.StatIDs = &statIDs
+	}
 	return
 }
 
@@ -2599,6 +2677,9 @@ type V1ProcessEventArgs struct {
 	GetSuppliers          bool
 	SuppliersMaxCost      string
 	SuppliersIgnoreErrors bool
+	AttributeIDs          *[]string
+	ThresholdIDs          *[]string
+	StatIDs               *[]string
 	*utils.CGREvent
 	utils.Paginator
 	*utils.ArgDispatcher
@@ -2689,6 +2770,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
+		if args.AttributeIDs != nil {
+			attrArgs.AttributeIDs = *args.AttributeIDs
+		}
 		var rplyEv engine.AttrSProcessEventReply
 		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
 			attrArgs, &rplyEv); err == nil {
@@ -2764,6 +2848,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
+		if args.ThresholdIDs != nil {
+			thEv.ThresholdIDs = *args.ThresholdIDs
+		}
 		if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent,
 			thEv, &tIDs); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
@@ -2781,6 +2868,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 		statArgs := &engine.StatsArgsProcessEvent{
 			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
+		}
+		if args.StatIDs != nil {
+			statArgs.StatIDs = *args.StatIDs
 		}
 		if err := sS.statS.Call(utils.StatSv1ProcessEvent,
 			statArgs, &statReply); err != nil &&
