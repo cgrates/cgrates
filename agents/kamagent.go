@@ -79,11 +79,11 @@ func (self *KamailioAgent) Connect() error {
 		if self.conns[connIdx], err = kamevapi.NewKamEvapi(connCfg.Address, connIdx, connCfg.Reconnects, eventHandlers, logger); err != nil {
 			return err
 		}
-		go func() { // Start reading in own goroutine, return on error
-			if err := self.conns[connIdx].ReadEvents(); err != nil {
+		go func(conn *kamevapi.KamEvapi) { // Start reading in own goroutine, return on error
+			if err := conn.ReadEvents(); err != nil {
 				errChan <- err
 			}
-		}()
+		}(self.conns[connIdx])
 	}
 	err = <-errChan // Will keep the Connect locked until the first error in one of the connections
 	return err
