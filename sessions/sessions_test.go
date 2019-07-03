@@ -861,7 +861,7 @@ func TestSessionSNewV1UpdateSessionArgs(t *testing.T) {
 		UpdateSession: true,
 		CGREvent:      cgrEv,
 	}
-	rply := NewV1UpdateSessionArgs(true, true, cgrEv, nil, nil)
+	rply := NewV1UpdateSessionArgs(true, nil, true, cgrEv, nil)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -870,7 +870,7 @@ func TestSessionSNewV1UpdateSessionArgs(t *testing.T) {
 		UpdateSession: true,
 		CGREvent:      cgrEv,
 	}
-	rply = NewV1UpdateSessionArgs(false, true, cgrEv, nil, nil)
+	rply = NewV1UpdateSessionArgs(false, nil, true, cgrEv, nil)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -890,14 +890,14 @@ func TestSessionSNewV1TerminateSessionArgs(t *testing.T) {
 		ProcessThresholds: true,
 		CGREvent:          cgrEv,
 	}
-	rply := NewV1TerminateSessionArgs(true, false, true, false, cgrEv, nil, nil, nil)
+	rply := NewV1TerminateSessionArgs(true, false, true, nil, false, nil, cgrEv, nil)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
 	expected = &V1TerminateSessionArgs{
 		CGREvent: cgrEv,
 	}
-	rply = NewV1TerminateSessionArgs(false, false, false, false, cgrEv, nil, nil, nil)
+	rply = NewV1TerminateSessionArgs(false, false, false, nil, false, nil, cgrEv, nil)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}

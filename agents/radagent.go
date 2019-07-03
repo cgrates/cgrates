@@ -217,9 +217,9 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 	case utils.MetaUpdate:
 		updateArgs := sessions.NewV1UpdateSessionArgs(
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),
+			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes),
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
-			cgrEv, cgrArgs.ArgDispatcher,
-			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes))
+			cgrEv, cgrArgs.ArgDispatcher)
 		rply := new(sessions.V1UpdateSessionReply)
 		err = ra.sessionS.Call(utils.SessionSv1UpdateSession,
 			updateArgs, rply)
@@ -231,10 +231,10 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			reqProcessor.Flags.HasKey(utils.MetaResources),
 			reqProcessor.Flags.HasKey(utils.MetaThresholds),
-			reqProcessor.Flags.HasKey(utils.MetaStats),
-			cgrEv, cgrArgs.ArgDispatcher,
 			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds),
-			reqProcessor.Flags.ParamsSlice(utils.MetaStats))
+			reqProcessor.Flags.HasKey(utils.MetaStats),
+			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
+			cgrEv, cgrArgs.ArgDispatcher)
 		rply := utils.StringPointer("")
 		err = ra.sessionS.Call(utils.SessionSv1TerminateSession,
 			terminateArgs, rply)
