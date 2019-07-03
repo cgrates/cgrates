@@ -46,6 +46,7 @@ const (
 	MetaGreaterThan    = "*gt"
 	MetaGreaterOrEqual = "*gte"
 	MetaResources      = "*resources"
+	MetaEqual          = "*eq"
 
 	MetaNotString       = "*notstring"
 	MetaNotPrefix       = "*notprefix"
@@ -57,6 +58,7 @@ const (
 	MetaNotStatS        = "*notstats"
 	MetaNotDestinations = "*notdestinations"
 	MetaNotResources    = "*notresources"
+	MetaNotEqual        = "*noteq"
 )
 
 func NewFilterS(cfg *config.CGRConfig,
@@ -198,17 +200,17 @@ func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error)
 	if !utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
 		MetaTimings, MetaRSR, MetaStatS, MetaDestinations, MetaEmpty,
 		MetaExists, MetaLessThan, MetaLessOrEqual, MetaGreaterThan,
-		MetaGreaterOrEqual, MetaResources}, rType) {
+		MetaGreaterOrEqual, MetaResources, MetaEqual, MetaNotEqual}, rType) {
 		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
 	}
 	if fieldName == "" && utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
 		MetaTimings, MetaDestinations, MetaLessThan, MetaEmpty, MetaExists,
-		MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual}, rType) {
+		MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual, MetaEqual, MetaNotEqual}, rType) {
 		return nil, fmt.Errorf("FieldName is mandatory for Type: %s", rfType)
 	}
 	if len(vals) == 0 && utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
 		MetaTimings, MetaRSR, MetaDestinations, MetaLessThan, MetaLessOrEqual,
-		MetaGreaterThan, MetaGreaterOrEqual}, rType) {
+		MetaGreaterThan, MetaGreaterOrEqual, MetaEqual, MetaNotEqual}, rType) {
 		return nil, fmt.Errorf("Values is mandatory for Type: %s", rfType)
 	}
 	rf := &FilterRule{
@@ -319,6 +321,8 @@ func (fltr *FilterRule) Pass(dP config.DataProvider,
 		result, err = fltr.passGreaterThan(dP)
 	case MetaResources, MetaNotResources:
 		result, err = fltr.passResourceS(dP, rpcClnt, tenant)
+	case MetaEqual, MetaNotEqual:
+		result, err = fltr.passEqualThan(dP)
 	default:
 		err = utils.ErrPrefixNotErrNotImplemented(fltr.Type)
 	}
@@ -574,4 +578,29 @@ func (fltr *FilterRule) passResourceS(dP config.DataProvider,
 		}
 	}
 	return true, nil
+}
+
+func (fltr *FilterRule) passEqualThan(dP config.DataProvider) (bool, error) {
+	fldIf, err := config.GetDynamicInterface(fltr.FieldName, dP)
+	if err != nil {
+		if err == utils.ErrNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+	if fldStr, castStr := fldIf.(string); castStr { // attempt converting string since deserialization fails here (ie: time.Time fields)
+		fldIf = utils.StringToInterface(fldStr)
+	}
+	for _, val := range fltr.Values {
+		sval, err := config.GetDynamicInterface(val, dP)
+		if err != nil {
+			continue
+		}
+		if eq, err := utils.EqualThan(fldIf, sval); err != nil {
+			return false, err
+		} else if eq {
+			return true, nil
+		}
+	}
+	return false, nil
 }

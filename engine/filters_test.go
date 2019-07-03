@@ -471,6 +471,47 @@ func TestFilterPassGreaterThan(t *testing.T) {
 	}
 }
 
+func TestFilterPassEqualThan(t *testing.T) {
+	rf, err := NewFilterRule(MetaEqual, "~ASR", []string{"40"})
+	if err != nil {
+		t.Error(err)
+	}
+	ev := config.NewNavigableMap(nil)
+	ev.Set([]string{"ASR"}, 40.0, false, true)
+	if passes, err := rf.passEqualThan(ev); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("not passing")
+	}
+	ev = config.NewNavigableMap(nil)
+	ev.Set([]string{"ASR"}, 39, false, true)
+	if passes, err := rf.passEqualThan(ev); err != nil {
+		t.Error(err)
+	} else if passes {
+		t.Error("equal should not be passing")
+	}
+	rf, err = NewFilterRule(MetaNotEqual, "~ASR", []string{"40"})
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.Pass(ev, nil, ""); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("not passing", passes)
+	}
+	ev = config.NewNavigableMap(nil)
+	ev.Set([]string{"ASR"}, "string1", false, true)
+	rf, err = NewFilterRule(MetaEqual, "~ASR", []string{"string1"})
+	if err != nil {
+		t.Error(err)
+	}
+	if passes, err := rf.passEqualThan(ev); err != nil {
+		t.Error(err)
+	} else if !passes {
+		t.Error("not passing")
+	}
+}
+
 func TestFilterNewRequestFilter(t *testing.T) {
 	rf, err := NewFilterRule(MetaString, "~MetaString", []string{"String"})
 	if err != nil {

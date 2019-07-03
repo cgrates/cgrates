@@ -639,3 +639,58 @@ func TestDifference(t *testing.T) {
 	}
 
 }
+
+func TestEqualThan(t *testing.T) {
+	if gte, err := EqualThan(1, 1.2); err != nil {
+		t.Error(err)
+	} else if gte {
+		t.Error("should be not greater than")
+	}
+	if _, err := EqualThan(struct{}{},
+		map[string]interface{}{"a": "a"}); err == nil ||
+		!strings.HasPrefix(err.Error(), "incomparable") {
+		t.Error(err)
+	}
+	if gte, err := EqualThan(1.2, 1.2); err != nil {
+		t.Error(err)
+	} else if !gte {
+		t.Error("should be equal")
+	}
+	if gte, err := EqualThan(1.3, 1.2); err != nil {
+		t.Error(err)
+	} else if gte {
+		t.Error("should not be equal")
+	}
+	if gte, err := EqualThan(1.3, int(1)); err != nil {
+		t.Error(err)
+	} else if gte {
+		t.Error("should not be equal")
+	}
+	if gte, err := EqualThan(1.2, 1.3); err != nil {
+		t.Error(err)
+	} else if gte {
+		t.Error("should be equal")
+	}
+	if gte, err := EqualThan(2.0, int64(2)); err != nil {
+		t.Error(err)
+	} else if !gte {
+		t.Error("should be equal")
+	}
+	if gte, err := EqualThan(time.Duration(2*time.Second),
+		time.Duration(2*time.Second)); err != nil {
+		t.Error(err)
+	} else if !gte {
+		t.Error("should be equal")
+	}
+	now := time.Now()
+	if gte, err := EqualThan(now.Add(time.Second), now); err != nil {
+		t.Error(err)
+	} else if gte {
+		t.Error("should not be equal")
+	}
+	if gte, err := EqualThan(now, now); err != nil {
+		t.Error(err)
+	} else if !gte {
+		t.Error("should be equal")
+	}
+}

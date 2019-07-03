@@ -376,6 +376,46 @@ func GreaterThan(item, oItem interface{}, orEqual bool) (gte bool, err error) {
 	return
 }
 
+func EqualThan(item, oItem interface{}) (eq bool, err error) {
+	item = GetBasicType(item)
+	oItem = GetBasicType(oItem)
+	typItem := reflect.TypeOf(item)
+	typOItem := reflect.TypeOf(oItem)
+	if typItem != typOItem {
+		if item, err = GetUniformType(item); err == nil { // overwrite type only if possible
+			typItem = reflect.TypeOf(item)
+		}
+		if oItem, err = GetUniformType(oItem); err == nil {
+			typOItem = reflect.TypeOf(oItem)
+		}
+	}
+	if !typItem.Comparable() ||
+		!typOItem.Comparable() ||
+		typItem != typOItem {
+		return false, fmt.Errorf("incomparable: <%+v> with <%+v>", item, oItem)
+	}
+	switch tVal := item.(type) {
+	case float64:
+		tOVal := oItem.(float64)
+		eq = tVal == tOVal
+	case uint64:
+		tOVal := oItem.(uint64)
+		eq = tVal == tOVal
+	case int64:
+		tOVal := oItem.(int64)
+		eq = tVal == tOVal
+	case time.Time:
+		tOVal := oItem.(time.Time)
+		eq = tVal == tOVal
+	case string:
+		tOVal := oItem.(string)
+		eq = tVal == tOVal
+	default: // unsupported comparison
+		err = fmt.Errorf("unsupported comparison type: %v, kind: %v", typItem, typItem.Kind())
+	}
+	return
+}
+
 // Sum attempts to sum multiple items
 // returns the result or error if not comparable
 func Sum(items ...interface{}) (sum interface{}, err error) {
