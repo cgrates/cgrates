@@ -1969,9 +1969,10 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.RpcClientConn
 }
 
 // NewV1InitSessionArgs is a constructor for V1InitSessionArgs
-func NewV1InitSessionArgs(attrs, resrc, acnt, thrslds, stats bool,
-	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher,
-	attributeIDs, thresholdIDs, statIDs []string) (args *V1InitSessionArgs) {
+func NewV1InitSessionArgs(attrs bool, attributeIDs []string,
+	thrslds bool, thresholdIDs []string, stats bool, statIDs []string,
+	resrc, acnt bool, cgrEv *utils.CGREvent,
+	argDisp *utils.ArgDispatcher) (args *V1InitSessionArgs) {
 	args = &V1InitSessionArgs{
 		GetAttributes:     attrs,
 		AllocateResources: resrc,
