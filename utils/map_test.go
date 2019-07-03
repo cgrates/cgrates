@@ -117,13 +117,13 @@ func TestMapHasKey(t *testing.T) {
 
 func TestMapSubsystemIDsFromSlice(t *testing.T) {
 	sls := []string{"*event", "*thresholds:ID1;ID2;ID3", "*attributes", "*stats:ID"}
-	eMp := MapSubsystemIDs{
+	eMp := FlagsWithParams{
 		"*event":      []string{},
 		"*thresholds": []string{"ID1", "ID2", "ID3"},
 		"*attributes": []string{},
 		"*stats":      []string{"ID"},
 	}
-	if mp, err := MapSubsystemIDsFromSlice(sls); err != nil {
+	if mp, err := FlagsWithParamsFromSlice(sls); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(mp, eMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, mp)
@@ -133,20 +133,20 @@ func TestMapSubsystemIDsFromSlice(t *testing.T) {
 func TestMapSubsystemIDsFromSliceWithErr(t *testing.T) {
 	sls := []string{"*event", "*thresholds:ID1;ID2;ID3:error:", "*attributes", "*stats:ID"}
 
-	if _, err := MapSubsystemIDsFromSlice(sls); err != ErrUnsupportedFormat {
+	if _, err := FlagsWithParamsFromSlice(sls); err != ErrUnsupportedFormat {
 		t.Error(err)
 	}
 }
 
 func TestMapSubsystemIDsHasKey(t *testing.T) {
 	sls := []string{"*event", "*thresholds:ID1;ID2;ID3", "*attributes", "*stats:ID"}
-	eMp := MapSubsystemIDs{
+	eMp := FlagsWithParams{
 		"*event":      []string{},
 		"*thresholds": []string{"ID1", "ID2", "ID3"},
 		"*attributes": []string{},
 		"*stats":      []string{"ID"},
 	}
-	mp, err := MapSubsystemIDsFromSlice(sls)
+	mp, err := FlagsWithParamsFromSlice(sls)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(mp, eMp) {
@@ -166,28 +166,28 @@ func TestMapSubsystemIDsHasKey(t *testing.T) {
 
 func TestMapSubsystemIDsGetIDs(t *testing.T) {
 	sls := []string{"*event", "*thresholds:ID1;ID2;ID3", "*attributes", "*stats:ID"}
-	eMp := MapSubsystemIDs{
+	eMp := FlagsWithParams{
 		"*event":      []string{},
 		"*thresholds": []string{"ID1", "ID2", "ID3"},
 		"*attributes": []string{},
 		"*stats":      []string{"ID"},
 	}
-	mp, err := MapSubsystemIDsFromSlice(sls)
+	mp, err := FlagsWithParamsFromSlice(sls)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(mp, eMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, mp)
 	}
 	eIDs := []string{"ID1", "ID2", "ID3"}
-	if ids := mp.GetIDs("*thresholds"); !reflect.DeepEqual(ids, eIDs) {
+	if ids := mp.ParamsSlice("*thresholds"); !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", eIDs, ids)
 	}
 	eIDs = []string{}
-	if ids := mp.GetIDs("*event"); !reflect.DeepEqual(ids, eIDs) {
+	if ids := mp.ParamsSlice("*event"); !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", eIDs, ids)
 	}
-	eIDs = []string{}
-	if ids := mp.GetIDs("*test"); !reflect.DeepEqual(ids, eIDs) {
+	eIDs = nil
+	if ids := mp.ParamsSlice("*test"); !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", eIDs, ids)
 	}
 

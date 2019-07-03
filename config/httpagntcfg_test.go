@@ -74,7 +74,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 			ID:            "OutboundAUTHDryRun",
 			Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
 			Tenant:        NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
-			Flags:         utils.MapSubsystemIDs{"*dryrun": []string{}},
+			Flags:         utils.FlagsWithParams{"*dryrun": []string{}},
 			RequestFields: []*FCTemplate{},
 			ReplyFields: []*FCTemplate{{
 				Tag:       "Allow",
@@ -153,7 +153,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 				ID:            "OutboundAUTHDryRun",
 				Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
 				Tenant:        NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
-				Flags:         utils.MapSubsystemIDs{"*dryrun": []string{}},
+				Flags:         utils.FlagsWithParams{"*dryrun": []string{}},
 				RequestFields: []*FCTemplate{},
 				ReplyFields: []*FCTemplate{{
 					Tag:       "Allow",
@@ -166,7 +166,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 					ID:      "mtcall_cdr",
 					Filters: []string{"*string:*req.request_type:MTCALL_CDR"},
 					Tenant:  NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
-					Flags:   utils.MapSubsystemIDs{"*cdrs": []string{}},
+					Flags:   utils.FlagsWithParams{"*cdrs": []string{}},
 					RequestFields: []*FCTemplate{{
 						Tag:       "RequestType",
 						FieldId:   "RequestType",
@@ -191,7 +191,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 			RequestProcessors: []*RequestProcessor{{
 				ID:            "cdr_from_xml",
 				Tenant:        NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
-				Flags:         utils.MapSubsystemIDs{"*cdrs": []string{}},
+				Flags:         utils.FlagsWithParams{"*cdrs": []string{}},
 				RequestFields: []*FCTemplate{},
 				ReplyFields:   []*FCTemplate{},
 			}},
@@ -247,7 +247,7 @@ func TestHttpAgentCfgloadFromJsonCfg(t *testing.T) {
 			ID:            "OutboundAUTHDryRun",
 			Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
 			Tenant:        NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
-			Flags:         utils.MapSubsystemIDs{"*dryrun": []string{}},
+			Flags:         utils.FlagsWithParams{"*dryrun": []string{}},
 			RequestFields: []*FCTemplate{},
 			ReplyFields:   []*FCTemplate{},
 		}},
@@ -271,7 +271,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 			ID:            "OutboundAUTHDryRun",
 			Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
 			Tenant:        NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
-			Flags:         utils.MapSubsystemIDs{"*dryrun": []string{}},
+			Flags:         utils.FlagsWithParams{"*dryrun": []string{}},
 			RequestFields: []*FCTemplate{},
 			ReplyFields: []*FCTemplate{{
 				Tag:       "Allow",
@@ -320,7 +320,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 			ID:            "OutboundAUTHDryRun",
 			Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
 			Tenant:        NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
-			Flags:         utils.MapSubsystemIDs{"*dryrun": []string{}},
+			Flags:         utils.FlagsWithParams{"*dryrun": []string{}},
 			RequestFields: []*FCTemplate{},
 			ReplyFields: []*FCTemplate{{
 				Tag:       "Allow",
@@ -333,7 +333,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 			ID:            "OutboundAUTHDryRun1",
 			Filters:       []string{"*string:*req.request_type:OutboundAUTH", "*string:*req.Msisdn:497700056231"},
 			Tenant:        NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
-			Flags:         utils.MapSubsystemIDs{"*dryrun": []string{}},
+			Flags:         utils.FlagsWithParams{"*dryrun": []string{}},
 			RequestFields: []*FCTemplate{},
 			ReplyFields: []*FCTemplate{{
 				Tag:       "Allow",

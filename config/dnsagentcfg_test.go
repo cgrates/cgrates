@@ -90,7 +90,7 @@ func TestRequestProcessorloadFromJsonCfg(t *testing.T) {
 		ID:                "cgrates",
 		Tenant:            NewRSRParsersMustCompile("tenant", true, utils.INFIELD_SEP),
 		Filters:           []string{"filter1", "filter2"},
-		Flags:             utils.MapSubsystemIDs{"flag1": []string{}, "flag2": []string{}},
+		Flags:             utils.FlagsWithParams{"flag1": []string{}, "flag2": []string{}},
 		ContinueOnSuccess: true,
 	}
 	if err = dareq.loadFromJsonCfg(json, utils.INFIELD_SEP); err != nil {

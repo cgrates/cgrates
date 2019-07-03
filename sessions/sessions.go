@@ -1674,11 +1674,11 @@ func (sS *SessionS) BiRPCv1ReplicateSessions(clnt rpcclient.RpcClientConnection,
 }
 
 // NewV1AuthorizeArgs is a constructor for V1AuthorizeArgs
-func NewV1AuthorizeArgs(attrs, res, maxUsage, thrslds,
-	statQueues, suppls, supplsIgnoreErrs, supplsEventCost bool,
+func NewV1AuthorizeArgs(attrs bool, attributeIDs []string,
+	thrslds bool, thresholdIDs []string, statQueues bool, statIDs []string,
+	res, maxUsage, suppls, supplsIgnoreErrs, supplsEventCost bool,
 	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher,
-	supplierPaginator utils.Paginator,
-	attributeIDs, thresholdIDs, statIDs []string) (args *V1AuthorizeArgs) {
+	supplierPaginator utils.Paginator) (args *V1AuthorizeArgs) {
 	args = &V1AuthorizeArgs{
 		GetAttributes:         attrs,
 		AuthorizeResources:    res,
