@@ -919,7 +919,7 @@ func TestSessionSNewV1ProcessEventArgs(t *testing.T) {
 		CGREvent:          cgrEv,
 		GetSuppliers:      true,
 	}
-	rply := NewV1ProcessEventArgs(true, true, true, false, false, true, false, false, cgrEv, nil, utils.Paginator{}, nil, nil, nil)
+	rply := NewV1ProcessEventArgs(true, nil, false, nil, false, nil, true, true, true, false, false, cgrEv, nil, utils.Paginator{})
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -931,7 +931,7 @@ func TestSessionSNewV1ProcessEventArgs(t *testing.T) {
 		SuppliersMaxCost:      utils.MetaSuppliersEventCost,
 		SuppliersIgnoreErrors: true,
 	}
-	rply = NewV1ProcessEventArgs(true, false, true, false, false, true, true, true, cgrEv, nil, utils.Paginator{}, nil, nil, nil)
+	rply = NewV1ProcessEventArgs(true, nil, false, nil, false, nil, true, false, true, true, true, cgrEv, nil, utils.Paginator{})
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}

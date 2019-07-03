@@ -243,18 +243,18 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 		}
 	case utils.MetaEvent:
 		evArgs := sessions.NewV1ProcessEventArgs(
+			reqProcessor.Flags.HasKey(utils.MetaAttributes),
+			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes),
+			reqProcessor.Flags.HasKey(utils.MetaThresholds),
+			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds),
+			reqProcessor.Flags.HasKey(utils.MetaStats),
+			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
 			reqProcessor.Flags.HasKey(utils.MetaResources),
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
-			reqProcessor.Flags.HasKey(utils.MetaAttributes),
-			reqProcessor.Flags.HasKey(utils.MetaThresholds),
-			reqProcessor.Flags.HasKey(utils.MetaStats),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliers),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
-			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
-			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes),
-			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds),
-			reqProcessor.Flags.ParamsSlice(utils.MetaStats))
+			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
 		rply := new(sessions.V1ProcessEventReply)
 		err = ra.sessionS.Call(utils.SessionSv1ProcessEvent, evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {

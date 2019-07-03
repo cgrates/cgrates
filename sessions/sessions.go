@@ -2637,11 +2637,11 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 }
 
 // NewV1ProcessEventArgs is a constructor for EventArgs used by ProcessEvent
-func NewV1ProcessEventArgs(resrc, acnts, attrs, thds, stats,
+func NewV1ProcessEventArgs(attrs bool, attributeIDs []string,
+	thds bool, thresholdIDs []string, stats bool, statIDs []string, resrc, acnts,
 	suppls, supplsIgnoreErrs, supplsEventCost bool,
 	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher,
-	supplierPaginator utils.Paginator,
-	attributeIDs, thresholdIDs, statIDs []string) (args *V1ProcessEventArgs) {
+	supplierPaginator utils.Paginator) (args *V1ProcessEventArgs) {
 	args = &V1ProcessEventArgs{
 		AllocateResources:     resrc,
 		Debit:                 acnts,
