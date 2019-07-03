@@ -305,14 +305,14 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 	case utils.MetaInitiate:
 		initArgs := sessions.NewV1InitSessionArgs(
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),
+			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes),
+			reqProcessor.Flags.HasKey(utils.MetaThresholds),
+			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds),
+			reqProcessor.Flags.HasKey(utils.MetaStats),
+			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
 			reqProcessor.Flags.HasKey(utils.MetaResources),
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
-			reqProcessor.Flags.HasKey(utils.MetaThresholds),
-			reqProcessor.Flags.HasKey(utils.MetaStats),
-			cgrEv, cgrArgs.ArgDispatcher,
-			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes),
-			reqProcessor.Flags.ParamsSlice(utils.MetaThresholds),
-			reqProcessor.Flags.ParamsSlice(utils.MetaStats))
+			cgrEv, cgrArgs.ArgDispatcher)
 		rply := new(sessions.V1InitSessionReply)
 		err = da.sS.Call(utils.SessionSv1InitiateSession,
 			initArgs, rply)
