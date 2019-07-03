@@ -248,8 +248,8 @@ func MapStringToInt64(in map[string]string) (out map[string]int64, err error) {
 	return mapout, nil
 }
 
-func MapSubsystemIDsFromSlice(s []string) (MapSubsystemIDs, error) {
-	result := make(MapSubsystemIDs, len(s))
+func FlagsWithParamsFromSlice(s []string) (FlagsWithParams, error) {
+	result := make(FlagsWithParams, len(s))
 	for _, v := range s {
 		subsystemWithIDs := strings.Split(v, InInFieldSep)
 		result[subsystemWithIDs[0]] = []string{}
@@ -262,17 +262,16 @@ func MapSubsystemIDsFromSlice(s []string) (MapSubsystemIDs, error) {
 	return result, nil
 }
 
-type MapSubsystemIDs map[string][]string
+type FlagsWithParams map[string]interface{}
 
-func (msIDs MapSubsystemIDs) HasKey(key string) (has bool) {
-	_, has = msIDs[key]
+func (fWp FlagsWithParams) HasKey(key string) (has bool) {
+	_, has = fWp[key]
 	return
 }
 
-func (msIDs MapSubsystemIDs) GetIDs(key string) []string {
-	ids, has := msIDs[key]
-	if !has {
-		return []string{}
+func (fWp FlagsWithParams) ParamsSlice(subs string) (ps []string) {
+	if psIfc, has := fWp[subs]; has {
+		ps, _ = psIfc.([]string)
 	}
-	return ids
+	return ps
 }

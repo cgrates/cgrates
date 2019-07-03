@@ -137,7 +137,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					ID:            "OutboundAUTHDryRun",
 					Filters:       []string{},
 					Tenant:        NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
-					Flags:         utils.MapSubsystemIDs{"*dryrun": []string{}},
+					Flags:         utils.FlagsWithParams{"*dryrun": []string{}},
 					RequestFields: []*FCTemplate{},
 					ReplyFields: []*FCTemplate{{
 						Tag:       "Allow",
@@ -151,7 +151,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					ID:      "OutboundAUTH",
 					Filters: []string{"*string:~*req.request_type:OutboundAUTH"},
 					Tenant:  NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
-					Flags: utils.MapSubsystemIDs{"*accounts": []string{},
+					Flags: utils.FlagsWithParams{"*accounts": []string{},
 						"*attributes": []string{}, "*auth": []string{}},
 					RequestFields: []*FCTemplate{
 						{
@@ -176,7 +176,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					ID:      "mtcall_cdr",
 					Filters: []string{"*string:~*req.request_type:MTCALL_CDR"},
 					Tenant:  NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
-					Flags:   utils.MapSubsystemIDs{"*cdrs": []string{}},
+					Flags:   utils.FlagsWithParams{"*cdrs": []string{}},
 					RequestFields: []*FCTemplate{{
 						Tag:       "RequestType",
 						FieldId:   "RequestType",
