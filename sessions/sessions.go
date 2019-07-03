@@ -2239,9 +2239,9 @@ func (sS *SessionS) BiRPCv1InitiateSessionWithDigest(clnt rpcclient.RpcClientCon
 }
 
 // NewV1UpdateSessionArgs is a constructor for update session arguments
-func NewV1UpdateSessionArgs(attrs, acnts bool,
-	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher,
-	attributeIDs []string) (args *V1UpdateSessionArgs) {
+func NewV1UpdateSessionArgs(attrs bool, attributeIDs []string,
+	acnts bool, cgrEv *utils.CGREvent,
+	argDisp *utils.ArgDispatcher) (args *V1UpdateSessionArgs) {
 	args = &V1UpdateSessionArgs{
 		GetAttributes: attrs,
 		UpdateSession: acnts,
@@ -2382,9 +2382,10 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 	return
 }
 
-func NewV1TerminateSessionArgs(acnts, resrc, thrds, stats bool,
-	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher,
-	thresholdIDs, statIDs []string) (args *V1TerminateSessionArgs) {
+func NewV1TerminateSessionArgs(acnts, resrc,
+	thrds bool, thresholdIDs []string, stats bool,
+	statIDs []string, cgrEv *utils.CGREvent,
+	argDisp *utils.ArgDispatcher) (args *V1TerminateSessionArgs) {
 	args = &V1TerminateSessionArgs{
 		TerminateSession:  acnts,
 		ReleaseResources:  resrc,
