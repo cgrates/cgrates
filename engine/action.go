@@ -86,6 +86,7 @@ const (
 	MetaPublishBalance        = "*publish_balance"
 	MetaRemoveSessionCosts    = "*remove_session_costs"
 	MetaRemoveExpired         = "*remove_expired"
+	MetaPostEvent             = "*post_event"
 )
 
 func (a *Action) Clone() *Action {
@@ -133,6 +134,7 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		utils.MetaS3jsonMap:       sendS3,
 		MetaRemoveSessionCosts:    removeSessionCosts,
 		MetaRemoveExpired:         removeExpired,
+		MetaPostEvent:             postEvent,
 	}
 	f, exists := actionFuncMap[typ]
 	return f, exists
@@ -1059,4 +1061,24 @@ func removeExpired(acc *Account, action *Action, _ Actions, extraData interface{
 		return utils.ErrNotFound
 	}
 	return nil
+}
+
+func postEvent(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+	jsn, err := json.Marshal(extraData)
+	if err != nil {
+		return err
+	}
+	cfg := config.CgrConfig()
+	ffn := &utils.FallbackFileName{
+		Module:     fmt.Sprintf("%s>%s", utils.ActionsPoster, a.ActionType),
+		Transport:  utils.MetaHTTPjson,
+		Address:    a.ExtraParameters,
+		RequestID:  utils.GenUUID(),
+		FileSuffix: utils.JSNSuffix,
+	}
+	_, err = NewHTTPPoster(config.CgrConfig().GeneralCfg().HttpSkipTlsVerify,
+		config.CgrConfig().GeneralCfg().ReplyTimeout).Post(a.ExtraParameters,
+		utils.CONTENT_JSON, jsn, config.CgrConfig().GeneralCfg().PosterAttempts,
+		path.Join(cfg.GeneralCfg().FailedPostsDir, ffn.AsString()))
+	return err
 }
