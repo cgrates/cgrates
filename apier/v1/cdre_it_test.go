@@ -194,7 +194,7 @@ func testCDReProcessExternalCdr(t *testing.T) {
 		SetupTime:   "2014-08-04T13:00:00Z",
 		AnswerTime:  "2014-08-04T13:00:07Z",
 		Usage:       "1s",
-		ExtraFields: map[string]string{"EventType": "cdr", "field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
 	var reply string
 	if err := cdreRPC.Call("CDRsV1.ProcessExternalCDR", cdr, &reply); err != nil {
