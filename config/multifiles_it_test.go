@@ -203,7 +203,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 			RequestProcessors: []*RequestProcessor{{
 				ID:     "cdr_from_xml",
 				Tenant: NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
-				Flags:  utils.FlagsWithParams{"*cdrs": true},
+				Flags:  utils.FlagsWithParams{"*cdrs": []string{}},
 				RequestFields: []*FCTemplate{
 					{
 						Tag:       "TOR",

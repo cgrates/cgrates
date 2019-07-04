@@ -110,7 +110,7 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 			processed = lclProcessed
 		}
 		if err != nil ||
-			(lclProcessed && !reqProcessor.ContinueOnSuccess) {
+			(lclProcessed && !reqProcessor.Continue) {
 			break
 		}
 	}

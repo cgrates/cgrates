@@ -89,7 +89,7 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 					utils.HTTPAgent, err.Error(), utils.ToJSON(agReq.Reply)))
 			return
 		}
-		if lclProcessed && !reqProcessor.ContinueOnSuccess {
+		if lclProcessed && !reqProcessor.Continue {
 			break
 		}
 	}

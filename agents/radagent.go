@@ -89,7 +89,7 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 		if lclProcessed, err = ra.processRequest(reqProcessor, agReq, rpl); lclProcessed {
 			processed = lclProcessed
 		}
-		if err != nil || (lclProcessed && !reqProcessor.ContinueOnSuccess) {
+		if err != nil || (lclProcessed && !reqProcessor.Continue) {
 			break
 		}
 	}
@@ -125,7 +125,7 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 		if lclProcessed, err = ra.processRequest(reqProcessor, agReq, rpl); lclProcessed {
 			processed = lclProcessed
 		}
-		if err != nil || (lclProcessed && !reqProcessor.ContinueOnSuccess) {
+		if err != nil || (lclProcessed && !reqProcessor.Continue) {
 			break
 		}
 	}

@@ -218,7 +218,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			processed = lclProcessed
 		}
 		if err != nil ||
-			(lclProcessed && !reqProcessor.ContinueOnSuccess) {
+			(lclProcessed && !reqProcessor.Continue) {
 			break
 		}
 	}
