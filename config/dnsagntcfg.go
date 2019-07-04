@@ -78,14 +78,14 @@ func (da *DNSAgentCfg) loadFromJsonCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 
 // One  request processor configuration
 type RequestProcessor struct {
-	ID                string
-	Tenant            RSRParsers
-	Filters           []string
-	Flags             utils.FlagsWithParams
-	ContinueOnSuccess bool
-	Timezone          string
-	RequestFields     []*FCTemplate
-	ReplyFields       []*FCTemplate
+	ID            string
+	Tenant        RSRParsers
+	Filters       []string
+	Flags         utils.FlagsWithParams
+	Continue      bool
+	Timezone      string
+	RequestFields []*FCTemplate
+	ReplyFields   []*FCTemplate
 }
 
 func (rp *RequestProcessor) loadFromJsonCfg(jsnCfg *ReqProcessorJsnCfg, sep string) (err error) {
@@ -109,8 +109,8 @@ func (rp *RequestProcessor) loadFromJsonCfg(jsnCfg *ReqProcessorJsnCfg, sep stri
 	if jsnCfg.Timezone != nil {
 		rp.Timezone = *jsnCfg.Timezone
 	}
-	if jsnCfg.Continue_on_success != nil {
-		rp.ContinueOnSuccess = *jsnCfg.Continue_on_success
+	if jsnCfg.Continue != nil {
+		rp.Continue = *jsnCfg.Continue
 	}
 	if jsnCfg.Tenant != nil {
 		if rp.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true, sep); err != nil {

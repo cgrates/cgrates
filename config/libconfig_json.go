@@ -338,14 +338,14 @@ type DNSAgentJsonCfg struct {
 }
 
 type ReqProcessorJsnCfg struct {
-	ID                  *string
-	Filters             *[]string
-	Tenant              *string
-	Timezone            *string
-	Flags               *[]string
-	Continue_on_success *bool
-	Request_fields      *[]*FcTemplateJsonCfg
-	Reply_fields        *[]*FcTemplateJsonCfg
+	ID             *string
+	Filters        *[]string
+	Tenant         *string
+	Timezone       *string
+	Flags          *[]string
+	Continue       *bool
+	Request_fields *[]*FcTemplateJsonCfg
+	Reply_fields   *[]*FcTemplateJsonCfg
 }
 
 // Attribute service config section
