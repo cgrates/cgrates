@@ -87,6 +87,7 @@ const (
 	MetaRemoveSessionCosts    = "*remove_session_costs"
 	MetaRemoveExpired         = "*remove_expired"
 	MetaPostEvent             = "*post_event"
+	MetaCDRAccount            = "*cdr_account"
 )
 
 func (a *Action) Clone() *Action {
@@ -135,6 +136,7 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		MetaRemoveSessionCosts:    removeSessionCosts,
 		MetaRemoveExpired:         removeExpired,
 		MetaPostEvent:             postEvent,
+		MetaCDRAccount:            resetAccount,
 	}
 	f, exists := actionFuncMap[typ]
 	return f, exists
@@ -1081,4 +1083,49 @@ func postEvent(ub *Account, a *Action, acs Actions, extraData interface{}) error
 		utils.CONTENT_JSON, jsn, config.CgrConfig().GeneralCfg().PosterAttempts,
 		path.Join(cfg.GeneralCfg().FailedPostsDir, ffn.AsString()))
 	return err
+}
+
+func resetAccount(ub *Account, action *Action, acts Actions, _ interface{}) error {
+	if ub == nil {
+		return errors.New("nil account")
+	}
+	if cdrStorage == nil {
+		return fmt.Errorf("nil cdrStorage for %s action", utils.ToJSON(action))
+	}
+	account := ub.GetID()
+	filter := &utils.CDRsFilter{
+		NotRunIDs: []string{utils.MetaRaw},
+		Accounts:  []string{account},
+		OrderBy:   fmt.Sprintf("%s%sdesc", utils.OrderID, utils.INFIELD_SEP),
+		Paginator: utils.Paginator{Limit: utils.IntPointer(1)},
+	}
+	cdrs, _, err := cdrStorage.GetCDRs(filter, false)
+	if err != nil {
+		return err
+	}
+	cd := cdrs[0].CostDetails
+	if cd == nil {
+		return errors.New("nil CostDetails")
+	}
+	acs := cd.AccountSummary
+	if acs == nil {
+		return errors.New("nil AccountSummary")
+	}
+	for _, bsum := range acs.BalanceSummaries {
+		if bsum == nil {
+			continue
+		}
+		if err := ub.setBalanceAction(&Action{
+			Balance: &BalanceFilter{
+				Uuid:     &bsum.UUID,
+				ID:       &bsum.ID,
+				Type:     &bsum.Type,
+				Value:    &utils.ValueFormula{Static: bsum.Value},
+				Disabled: &bsum.Disabled,
+			},
+		}); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<%s> Error %s setting balance %s for account: %s", utils.Actions, err, bsum.UUID, account))
+		}
+	}
+	return nil
 }

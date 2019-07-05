@@ -341,7 +341,113 @@ func TestActionsitThresholdCDrLog(t *testing.T) {
 		strconv.FormatFloat(rcvedCdrs[0].Cost, 'f', -1, 64) != attrsAA.Actions[0].Units {
 		t.Errorf("Received: %+v", rcvedCdrs[0])
 	}
+}
 
+func TestActionsitCDRAccount(t *testing.T) {
+	var reply string
+	acnt := "10023456789"
+
+	// redelareted in function with minimum information to avoid cyclic dependencies
+	type AttrAddBalance struct {
+		Tenant      string
+		Account     string
+		BalanceUuid *string
+		BalanceId   *string
+		BalanceType string
+		Value       float64
+		Overwrite   bool
+	}
+	attrs := &AttrAddBalance{
+		Tenant:      "cgrates.org",
+		Account:     acnt,
+		BalanceType: utils.VOICE,
+		BalanceUuid: utils.StringPointer("testUUID"),
+		BalanceId:   utils.StringPointer("TestID"),
+		Value:       float64(30 * time.Second),
+		Overwrite:   true,
+	}
+	if err := actsLclRpc.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
+	}
+
+	attrsAA := &utils.AttrSetActions{
+		ActionsId: "ACTS_RESET1",
+		Actions: []*utils.TPAction{
+			{Identifier: MetaCDRAccount, ExpiryTime: UNLIMITED, Weight: 20.0},
+		},
+	}
+	if err := actsLclRpc.Call("ApierV2.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error("Got error on ApierV2.SetActions: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
+	}
+
+	var acc Account
+	attrs2 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: acnt}
+	var uuid string
+	if err := actsLclRpc.Call("ApierV2.GetAccount", attrs2, &acc); err != nil {
+		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
+	} else {
+		voice := acc.BalanceMap[utils.VOICE]
+		for _, u := range voice {
+			uuid = u.Uuid
+			break
+		}
+	}
+
+	args := &CDRWithArgDispatcher{
+		CDR: &CDR{
+			Tenant:      "cgrates.org",
+			OriginID:    "testDspCDRsProcessCDR",
+			OriginHost:  "192.168.1.1",
+			Source:      "testDspCDRsProcessCDR",
+			RequestType: utils.META_RATED,
+			RunID:       utils.MetaDefault,
+			PreRated:    true,
+			Account:     acnt,
+			Subject:     acnt,
+			Destination: "1002",
+			AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+			Usage:       time.Duration(2) * time.Minute,
+			CostDetails: &EventCost{
+				CGRID: utils.UUIDSha1Prefix(),
+				RunID: utils.MetaDefault,
+				AccountSummary: &AccountSummary{
+					Tenant: "cgrates.org",
+					ID:     acnt,
+					BalanceSummaries: []*BalanceSummary{
+						{
+							UUID:  uuid,
+							ID:    "TestID",
+							Type:  utils.VOICE,
+							Value: float64(10 * time.Second),
+						},
+					},
+				},
+			},
+		},
+	}
+	if err := actsLclRpc.Call(utils.CDRsV1ProcessCDR, args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+	time.Sleep(100 * time.Millisecond)
+
+	attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", Account: acnt, ActionsId: attrsAA.ActionsId}
+	if err := actsLclRpc.Call("ApierV1.ExecuteAction", attrsEA, &reply); err != nil {
+		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
+	}
+
+	if err := actsLclRpc.Call("ApierV2.GetAccount", attrs2, &acc); err != nil {
+		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
+	} else if tv := acc.BalanceMap[utils.VOICE].GetTotalValue(); tv != float64(10*time.Second) {
+		t.Errorf("Calling ApierV1.GetBalance expected: %f, received: %f", float64(10*time.Second), tv)
+	}
 }
 
 func TestActionsitStopCgrEngine(t *testing.T) {
