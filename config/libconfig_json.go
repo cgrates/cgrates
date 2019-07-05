@@ -343,9 +343,9 @@ type ReqProcessorJsnCfg struct {
 	Tenant         *string
 	Timezone       *string
 	Flags          *[]string
-	Continue       *bool
 	Request_fields *[]*FcTemplateJsonCfg
 	Reply_fields   *[]*FcTemplateJsonCfg
+	Continue       *bool
 }
 
 // Attribute service config section

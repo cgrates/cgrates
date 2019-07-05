@@ -82,10 +82,10 @@ type RequestProcessor struct {
 	Tenant        RSRParsers
 	Filters       []string
 	Flags         utils.FlagsWithParams
-	Continue      bool
 	Timezone      string
 	RequestFields []*FCTemplate
 	ReplyFields   []*FCTemplate
+	Continue      bool
 }
 
 func (rp *RequestProcessor) loadFromJsonCfg(jsnCfg *ReqProcessorJsnCfg, sep string) (err error) {
