@@ -376,7 +376,7 @@ func GreaterThan(item, oItem interface{}, orEqual bool) (gte bool, err error) {
 	return
 }
 
-func EqualThan(item, oItem interface{}) (eq bool, err error) {
+func EqualTo(item, oItem interface{}) (eq bool, err error) {
 	item = GetBasicType(item)
 	oItem = GetBasicType(oItem)
 	typItem := reflect.TypeOf(item)

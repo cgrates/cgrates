@@ -239,14 +239,14 @@ func (cdrS *CDRServer) getCostFromRater(cdr *CDRWithArgDispatcher) (*CallCost, e
 
 // attrStoExpThdStat will process a CGREvent with the configured subsystems
 func (cdrS *CDRServer) attrStoExpThdStat(cgrEv *utils.CGREventWithArgDispatcher,
-	attrS, store, allowUpdate, export, thdS, statS bool, eventType string) (err error) {
+	attrS, store, allowUpdate, export, thdS, statS bool) (err error) {
 	if attrS {
 		if err = cdrS.attrSProcessEvent(cgrEv); err != nil {
 			return
 		}
 	}
 	if thdS {
-		go cdrS.thdSProcessEvent(cgrEv, eventType)
+		go cdrS.thdSProcessEvent(cgrEv)
 	}
 	if statS {
 		go cdrS.statSProcessEvent(cgrEv)
@@ -281,7 +281,7 @@ func (cdrS *CDRServer) rateCDRWithErr(cdr *CDRWithArgDispatcher) (ratedCDRs []*C
 // chrgProcessEvent will process the CGREvent with ChargerS subsystem
 // it is designed to run in it's own goroutine
 func (cdrS *CDRServer) chrgProcessEvent(cgrEv *utils.CGREventWithArgDispatcher,
-	attrS, store, allowUpdate, export, thdS, statS bool, eventType string) (err error) {
+	attrS, store, allowUpdate, export, thdS, statS bool) (err error) {
 	var chrgrs []*ChrgSProcessEventReply
 	if err = cdrS.chargerS.Call(utils.ChargerSv1ProcessEvent,
 		cgrEv, &chrgrs); err != nil {
@@ -307,7 +307,7 @@ func (cdrS *CDRServer) chrgProcessEvent(cgrEv *utils.CGREventWithArgDispatcher,
 				ArgDispatcher: cgrEv.ArgDispatcher,
 			}
 			if errProc := cdrS.attrStoExpThdStat(arg,
-				attrS, store, allowUpdate, export, thdS, statS, eventType); errProc != nil {
+				attrS, store, allowUpdate, export, thdS, statS); errProc != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing CDR event %+v with %s",
 						utils.CDRs, errProc.Error(), cgrEv, utils.ChargerS))
@@ -346,11 +346,11 @@ func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher)
 }
 
 // thdSProcessEvent will send the event to ThresholdS if the connection is configured
-func (cdrS *CDRServer) thdSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher, eventType string) {
+func (cdrS *CDRServer) thdSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher) {
 	var tIDs []string
 	// we clone the CGREvent so we can add EventType without it to be propagated
 	thArgs := &ArgsProcessEvent{CGREvent: cgrEv.CGREvent.Clone()}
-	thArgs.CGREvent.Event[utils.EventType] = eventType
+	thArgs.CGREvent.Event[utils.EventType] = utils.CDR
 	if cgrEv.ArgDispatcher != nil {
 		thArgs.ArgDispatcher = cgrEv.ArgDispatcher
 	}
@@ -499,7 +499,7 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDRWithArgDispatcher, reply *string) (e
 		cdrS.exportCDRs([]*CDR{cdr.CDR}) // Replicate raw CDR
 	}
 	if cdrS.thdS != nil {
-		go cdrS.thdSProcessEvent(cgrEv, utils.CDRPoster)
+		go cdrS.thdSProcessEvent(cgrEv)
 	}
 	if cdrS.statS != nil {
 		go cdrS.statSProcessEvent(cgrEv)
@@ -507,7 +507,7 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDRWithArgDispatcher, reply *string) (e
 	if cdrS.chargerS != nil &&
 		utils.IsSliceMember([]string{"", utils.MetaRaw}, cdr.RunID) {
 		go cdrS.chrgProcessEvent(cgrEv, cdrS.attrS != nil, cdrS.cgrCfg.CdrsCfg().CDRSStoreCdrs, false,
-			len(cdrS.cgrCfg.CdrsCfg().CDRSOnlineCDRExports) != 0, cdrS.thdS != nil, cdrS.statS != nil, utils.CDRPoster)
+			len(cdrS.cgrCfg.CdrsCfg().CDRSOnlineCDRExports) != 0, cdrS.thdS != nil, cdrS.statS != nil)
 	}
 	*reply = utils.OK
 
@@ -588,7 +588,7 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 
 	if !ralS {
 		if err = cdrS.attrStoExpThdStat(cgrEv,
-			attrS, store, false, export, thdS, statS, utils.Event); err != nil {
+			attrS, store, false, export, thdS, statS); err != nil {
 			err = utils.NewErrServerError(err)
 			return
 		}
@@ -610,7 +610,7 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 				ArgDispatcher: arg.ArgDispatcher,
 			}
 			if errProc := cdrS.attrStoExpThdStat(cgrEv,
-				attrS, store, false, export, thdS, statS, utils.Event); err != nil {
+				attrS, store, false, export, thdS, statS); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing event %+v ",
 						utils.CDRs, errProc.Error(), cgrEv))
@@ -625,7 +625,7 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	}
 	if chrgS {
 		go cdrS.chrgProcessEvent(cgrEv,
-			attrS, store, false, export, thdS, statS, utils.Event)
+			attrS, store, false, export, thdS, statS)
 	}
 	*reply = utils.OK
 	return nil
@@ -773,7 +773,7 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 				ArgDispatcher: arg.ArgDispatcher,
 			}
 			if err = cdrS.chrgProcessEvent(argCharger,
-				false, store, true, export, thdS, statS, utils.CDRPoster); err != nil {
+				false, store, true, export, thdS, statS); err != nil {
 				return utils.NewErrServerError(err)
 			}
 		}
