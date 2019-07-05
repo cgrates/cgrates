@@ -322,7 +322,7 @@ func (fltr *FilterRule) Pass(dP config.DataProvider,
 	case MetaResources, MetaNotResources:
 		result, err = fltr.passResourceS(dP, rpcClnt, tenant)
 	case MetaEqual, MetaNotEqual:
-		result, err = fltr.passEqualThan(dP)
+		result, err = fltr.passEqualTo(dP)
 	default:
 		err = utils.ErrPrefixNotErrNotImplemented(fltr.Type)
 	}
@@ -580,7 +580,7 @@ func (fltr *FilterRule) passResourceS(dP config.DataProvider,
 	return true, nil
 }
 
-func (fltr *FilterRule) passEqualThan(dP config.DataProvider) (bool, error) {
+func (fltr *FilterRule) passEqualTo(dP config.DataProvider) (bool, error) {
 	fldIf, err := config.GetDynamicInterface(fltr.FieldName, dP)
 	if err != nil {
 		if err == utils.ErrNotFound {
@@ -596,7 +596,7 @@ func (fltr *FilterRule) passEqualThan(dP config.DataProvider) (bool, error) {
 		if err != nil {
 			continue
 		}
-		if eq, err := utils.EqualThan(fldIf, sval); err != nil {
+		if eq, err := utils.EqualTo(fldIf, sval); err != nil {
 			return false, err
 		} else if eq {
 			return true, nil
