@@ -20,7 +20,6 @@ package engine
 
 import (
 	"fmt"
-	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -38,10 +37,7 @@ func NewSQSPoster(dialURL string, attempts int, fallbackFileDir string) (Poster,
 		attempts:        attempts,
 		fallbackFileDir: fallbackFileDir,
 	}
-	err := pstr.parseURL(dialURL)
-	if err != nil {
-		return nil, err
-	}
+	pstr.parseURL(dialURL)
 	return pstr, nil
 }
 
@@ -62,41 +58,28 @@ type SQSPoster struct {
 
 func (pstr *SQSPoster) Close() {}
 
-func (pstr *SQSPoster) parseURL(dialURL string) (err error) {
-	u, err := url.Parse(dialURL)
-	if err != nil {
-		return err
-	}
-	qry := u.Query()
+func (pstr *SQSPoster) parseURL(dialURL string) {
+	qry := utils.GetUrlRawArguments(dialURL)
 
 	pstr.dialURL = strings.Split(dialURL, "?")[0]
 	pstr.dialURL = strings.TrimSuffix(pstr.dialURL, "/") // used to remove / to point to correct endpoint
 	pstr.queueID = defaultQueueID
-	if vals, has := qry[queueID]; has && len(vals) != 0 {
-		pstr.queueID = vals[0]
+	if val, has := qry[queueID]; has {
+		pstr.queueID = val
 	}
-	if vals, has := qry[awsRegion]; has && len(vals) != 0 {
-		pstr.awsRegion = vals[0]
-	} else {
-		utils.Logger.Warning("<SQSPoster> No region present for AWS.")
+	if val, has := qry[awsRegion]; has {
+		pstr.awsRegion = val
 	}
-	if vals, has := qry[awsID]; has && len(vals) != 0 {
-		pstr.awsID = vals[0]
-	} else {
-		utils.Logger.Warning("<SQSPoster> No access key ID present for AWS.")
+	if val, has := qry[awsID]; has {
+		pstr.awsID = val
 	}
-	if vals, has := qry[awsSecret]; has && len(vals) != 0 {
-		pstr.awsKey = vals[0]
-	} else {
-		utils.Logger.Warning("<SQSPoster> No secret access key present for AWS.")
+	if val, has := qry[awsSecret]; has {
+		pstr.awsKey = val
 	}
-	if vals, has := qry[awsToken]; has && len(vals) != 0 {
-		pstr.awsToken = vals[0]
-	} else {
-		utils.Logger.Warning("<SQSPoster> No session token present for AWS.")
+	if val, has := qry[awsToken]; has {
+		pstr.awsToken = val
 	}
 	pstr.getQueueURL()
-	return nil
 }
 
 func (pstr *SQSPoster) getQueueURL() (err error) {
@@ -132,7 +115,7 @@ func (pstr *SQSPoster) getQueueURL() (err error) {
 	return err
 }
 
-func (pstr *SQSPoster) Post(message []byte, fallbackFileName string) (err error) {
+func (pstr *SQSPoster) Post(message []byte, fallbackFileName, _ string) (err error) {
 	var svc *sqs.SQS
 	fib := utils.Fib()
 

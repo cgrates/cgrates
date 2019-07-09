@@ -65,11 +65,11 @@ func (pstr *KafkaPoster) parseURL(dialURL string) error {
 
 // Post is the method being called when we need to post anything in the queue
 // the optional chn will permits channel caching
-func (pstr *KafkaPoster) Post(content []byte, fallbackFileName string) (err error) {
+func (pstr *KafkaPoster) Post(content []byte, fallbackFileName, key string) (err error) {
 	pstr.newPostWriter()
 	pstr.Lock()
 	if err = pstr.writer.WriteMessages(context.Background(), kafka.Message{
-		Key:   []byte(utils.UUIDSha1Prefix()),
+		Key:   []byte(key),
 		Value: content,
 	}); err == nil {
 		pstr.Unlock()

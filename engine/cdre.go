@@ -288,9 +288,9 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 	case utils.MetaSQSjsonMap:
 		err = PostersCache.PostSQS(cdre.exportPath, cdre.attempts, body.([]byte), cdre.fallbackPath, fallbackFileName)
 	case utils.MetaKafkajsonMap:
-		err = PostersCache.PostKafka(cdre.exportPath, cdre.attempts, body.([]byte), cdre.fallbackPath, fallbackFileName)
+		err = PostersCache.PostKafka(cdre.exportPath, cdre.attempts, body.([]byte), cdre.fallbackPath, fallbackFileName, utils.ConcatenatedKey(cdr.CGRID, cdr.RunID))
 	case utils.MetaS3jsonMap:
-		err = PostersCache.PostS3(cdre.exportPath, cdre.attempts, body.([]byte), cdre.fallbackPath, fallbackFileName)
+		err = PostersCache.PostS3(cdre.exportPath, cdre.attempts, body.([]byte), cdre.fallbackPath, fallbackFileName, utils.ConcatenatedKey(cdr.CGRID, cdr.RunID))
 	}
 	return
 }

@@ -963,3 +963,24 @@ func ReverseString(s string) string {
 	}
 	return string(r)
 }
+
+func GetUrlRawArguments(dialURL string) (out map[string]string) {
+	out = make(map[string]string)
+	idx := strings.IndexRune(dialURL, '?')
+	if idx == -1 {
+		return
+	}
+	strParams := dialURL[idx+1:]
+	if len(strParams) == 0 {
+		return
+	}
+	vecParams := strings.Split(strParams, "&")
+	for _, paramPair := range vecParams {
+		idx := strings.IndexRune(paramPair, '=')
+		if idx == -1 {
+			continue
+		}
+		out[paramPair[:idx]] = paramPair[idx+1:]
+	}
+	return
+}
