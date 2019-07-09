@@ -1068,10 +1068,10 @@ func (v1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (
 				fileContent, failedReqsOutDir, file.Name())
 		case utils.MetaKafkajsonMap:
 			err = engine.PostersCache.PostKafka(ffn.Address, v1.Config.GeneralCfg().PosterAttempts,
-				fileContent, failedReqsOutDir, file.Name())
+				fileContent, failedReqsOutDir, file.Name(), utils.UUIDSha1Prefix())
 		case utils.MetaS3jsonMap:
 			err = engine.PostersCache.PostS3(ffn.Address, v1.Config.GeneralCfg().PosterAttempts,
-				fileContent, failedReqsOutDir, file.Name())
+				fileContent, failedReqsOutDir, file.Name(), utils.UUIDSha1Prefix())
 		default:
 			err = fmt.Errorf("unsupported replication transport: %s", ffn.Transport)
 		}

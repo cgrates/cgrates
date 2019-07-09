@@ -395,8 +395,20 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, cdrePrfl := range self.cdrsCfg.CDRSOnlineCDRExports {
-			if _, hasIt := self.CdreProfiles[cdrePrfl]; !hasIt {
+			if cdreProfile, hasIt := self.CdreProfiles[cdrePrfl]; !hasIt {
 				return fmt.Errorf("<CDRS> Cannot find CDR export template with ID: <%s>", cdrePrfl)
+			} else if cdreProfile.ExportFormat == utils.MetaS3jsonMap || cdreProfile.ExportFormat == utils.MetaSQSjsonMap {
+				poster := "SQSPoster"
+				if cdreProfile.ExportFormat == utils.MetaS3jsonMap {
+					poster = "S3Poster"
+				}
+				neededArgs := []string{"aws_region", "aws_key", "aws_secret"}
+				args := utils.GetUrlRawArguments(cdreProfile.ExportPath)
+				for _, arg := range neededArgs {
+					if _, has := args[arg]; !has {
+						utils.Logger.Err(fmt.Sprintf("<%s> No %s present for AWS for cdre: <%s>.", poster, arg, cdrePrfl))
+					}
+				}
 			}
 		}
 		if !self.thresholdSCfg.Enabled {

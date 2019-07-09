@@ -87,7 +87,7 @@ func (pstr *AMQPPoster) parseURL(dialURL string) error {
 
 // Post is the method being called when we need to post anything in the queue
 // the optional chn will permits channel caching
-func (pstr *AMQPPoster) Post(content []byte, fallbackFileName string) (err error) {
+func (pstr *AMQPPoster) Post(content []byte, fallbackFileName, _ string) (err error) {
 	var chn *amqp.Channel
 	fib := utils.Fib()
 

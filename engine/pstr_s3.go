@@ -21,7 +21,6 @@ package engine
 import (
 	"bytes"
 	"fmt"
-	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -38,10 +37,7 @@ func NewS3Poster(dialURL string, attempts int, fallbackFileDir string) (Poster, 
 		attempts:        attempts,
 		fallbackFileDir: fallbackFileDir,
 	}
-	err := pstr.parseURL(dialURL)
-	if err != nil {
-		return nil, err
-	}
+	pstr.parseURL(dialURL)
 	return pstr, nil
 }
 
@@ -54,51 +50,40 @@ type S3Poster struct {
 	awsToken        string
 	attempts        int
 	fallbackFileDir string
-	queueURL        *string
 	queueID         string
-	// getQueueOnce    sync.Once
-	session *session.Session
+	folderPath      string
+	session         *session.Session
 }
 
 func (pstr *S3Poster) Close() {}
 
-func (pstr *S3Poster) parseURL(dialURL string) (err error) {
-	u, err := url.Parse(dialURL)
-	if err != nil {
-		return err
-	}
-	qry := u.Query()
+func (pstr *S3Poster) parseURL(dialURL string) {
+	qry := utils.GetUrlRawArguments(dialURL)
 
 	pstr.dialURL = strings.Split(dialURL, "?")[0]
 	pstr.dialURL = strings.TrimSuffix(pstr.dialURL, "/") // used to remove / to point to correct endpoint
 	pstr.queueID = defaultQueueID
-	if vals, has := qry[queueID]; has && len(vals) != 0 {
-		pstr.queueID = vals[0]
+	if val, has := qry[queueID]; has {
+		pstr.queueID = val
 	}
-	if vals, has := qry[awsRegion]; has && len(vals) != 0 {
-		pstr.awsRegion = vals[0]
-	} else {
-		utils.Logger.Warning("<S3Poster> No region present for AWS.")
+	if val, has := qry[folderPath]; has {
+		pstr.folderPath = val
 	}
-	if vals, has := qry[awsID]; has && len(vals) != 0 {
-		pstr.awsID = vals[0]
-	} else {
-		utils.Logger.Warning("<S3Poster> No access key ID present for AWS.")
+	if val, has := qry[awsRegion]; has {
+		pstr.awsRegion = val
 	}
-	if vals, has := qry[awsSecret]; has && len(vals) != 0 {
-		pstr.awsKey = vals[0]
-	} else {
-		utils.Logger.Warning("<S3Poster> No secret access key present for AWS.")
+	if val, has := qry[awsID]; has {
+		pstr.awsID = val
 	}
-	if vals, has := qry[awsToken]; has && len(vals) != 0 {
-		pstr.awsToken = vals[0]
-	} else {
-		utils.Logger.Warning("<S3Poster> No session token present for AWS.")
+	if val, has := qry[awsSecret]; has {
+		pstr.awsKey = val
 	}
-	return nil
+	if val, has := qry[awsToken]; has {
+		pstr.awsToken = val
+	}
 }
 
-func (pstr *S3Poster) Post(message []byte, fallbackFileName string) (err error) {
+func (pstr *S3Poster) Post(message []byte, fallbackFileName, key string) (err error) {
 	var svc *s3manager.Uploader
 	fib := utils.Fib()
 
@@ -123,7 +108,7 @@ func (pstr *S3Poster) Post(message []byte, fallbackFileName string) (err error) 
 			// Can also use the `filepath` standard library package to modify the
 			// filename as need for an S3 object key. Such as turning absolute path
 			// to a relative path.
-			Key: aws.String(fallbackFileName),
+			Key: aws.String(fmt.Sprintf("%s/%s.json", pstr.folderPath, key)),
 
 			// The file to be uploaded. io.ReadSeeker is preferred as the Uploader
 			// will be able to optimize memory when uploading large content. io.Reader

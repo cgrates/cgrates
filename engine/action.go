@@ -469,7 +469,7 @@ func sendKafka(ub *Account, a *Action, acs Actions, extraData interface{}) error
 	}).AsString()
 
 	return PostersCache.PostKafka(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts,
-		body, cfg.GeneralCfg().FailedPostsDir, fallbackFileName)
+		body, cfg.GeneralCfg().FailedPostsDir, fallbackFileName, utils.UUIDSha1Prefix())
 }
 
 func sendS3(ub *Account, a *Action, acs Actions, extraData interface{}) error {
@@ -487,7 +487,7 @@ func sendS3(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 	}).AsString()
 
 	return PostersCache.PostS3(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts,
-		body, cfg.GeneralCfg().FailedPostsDir, fallbackFileName)
+		body, cfg.GeneralCfg().FailedPostsDir, fallbackFileName, utils.UUIDSha1Prefix())
 }
 
 func callUrl(ub *Account, a *Action, acs Actions, extraData interface{}) error {

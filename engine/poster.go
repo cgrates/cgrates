@@ -39,11 +39,12 @@ const (
 	exchangeType        = "exchange_type"
 	routingKey          = "routing_key"
 
-	awsRegion    = "aws_region"
-	awsID        = "aws_key"
-	awsSecret    = "aws_secret"
-	awsToken     = "aws_token"
-	awsAccountID = "aws_account_id"
+	awsRegion = "aws_region"
+	awsID     = "aws_key"
+	awsSecret = "aws_secret"
+	awsToken  = "aws_token"
+	// awsAccountID = "aws_account_id"
+	folderPath = "folder_path"
 )
 
 func init() {
@@ -68,7 +69,7 @@ type PosterCache struct {
 }
 
 type Poster interface {
-	Post([]byte, string) error
+	Post(body []byte, fallbackName, key string) error
 	Close()
 }
 
@@ -188,7 +189,7 @@ func (pc *PosterCache) PostAMQP(dialURL string, attempts int,
 	if err != nil {
 		return err
 	}
-	return amqpPoster.Post(content, fallbackFileName)
+	return amqpPoster.Post(content, fallbackFileName, "")
 }
 
 func (pc *PosterCache) PostAMQPv1(dialURL string, attempts int,
@@ -197,7 +198,7 @@ func (pc *PosterCache) PostAMQPv1(dialURL string, attempts int,
 	if err != nil {
 		return err
 	}
-	return AMQPv1Poster.Post(content, fallbackFileName)
+	return AMQPv1Poster.Post(content, fallbackFileName, "")
 }
 
 func (pc *PosterCache) PostSQS(dialURL string, attempts int,
@@ -206,23 +207,23 @@ func (pc *PosterCache) PostSQS(dialURL string, attempts int,
 	if err != nil {
 		return err
 	}
-	return sqsPoster.Post(content, fallbackFileName)
+	return sqsPoster.Post(content, fallbackFileName, "")
 }
 
 func (pc *PosterCache) PostKafka(dialURL string, attempts int,
-	content []byte, fallbackFileDir, fallbackFileName string) error {
+	content []byte, fallbackFileDir, fallbackFileName, key string) error {
 	kafkaPoster, err := pc.GetKafkaPoster(dialURL, attempts, fallbackFileDir)
 	if err != nil {
 		return err
 	}
-	return kafkaPoster.Post(content, fallbackFileName)
+	return kafkaPoster.Post(content, fallbackFileName, key)
 }
 
 func (pc *PosterCache) PostS3(dialURL string, attempts int,
-	content []byte, fallbackFileDir, fallbackFileName string) error {
+	content []byte, fallbackFileDir, fallbackFileName, key string) error {
 	sqsPoster, err := pc.GetS3Poster(dialURL, attempts, fallbackFileDir)
 	if err != nil {
 		return err
 	}
-	return sqsPoster.Post(content, fallbackFileName)
+	return sqsPoster.Post(content, fallbackFileName, key)
 }

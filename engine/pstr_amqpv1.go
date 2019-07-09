@@ -60,7 +60,7 @@ func (pstr *AMQPv1Poster) Close() {
 	pstr.Unlock()
 }
 
-func (pstr *AMQPv1Poster) Post(content []byte, fallbackFileName string) (err error) {
+func (pstr *AMQPv1Poster) Post(content []byte, fallbackFileName, _ string) (err error) {
 	var s *amqpv1.Session
 	fib := utils.Fib()
 
