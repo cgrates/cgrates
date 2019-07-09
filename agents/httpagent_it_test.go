@@ -313,22 +313,21 @@ func testHAitTextPlain(t *testing.T) {
 		addr = haCfg.ListenCfg().HTTPTLSListen
 		httpConst = "https"
 	}
-	reqUrl := fmt.Sprintf("%s://%s%s?request_type=TextPlainDryRun&CallID=123456&Msisdn=497700056231&Imsi=2343000000000123&Destination=491239440004&MSRN=0102220233444488999&ProfileID=1&AgentID=176&GlobalMSISDN=497700056129&GlobalIMSI=214180000175129&ICCID=8923418450000089629&MCC=234&MNC=10&calltype=callback",
+	reqUrl := fmt.Sprintf("%s://%s%s?request_type=TextPlainDryRun&CallID=123456&Msisdn=497700056231&Imsi=2343000000000123&Destination=491239440004",
 		httpConst, addr, haCfg.HttpAgentCfg()[2].Url)
 	rply, err := httpC.Get(reqUrl)
 	if err != nil {
 		t.Fatal(err)
 	}
-	eXml := []byte(`<?xml version="1.0" encoding="UTF-8"?>
-<response>
-  <Allow>1</Allow>
-  <Concatenated>234/Val1</Concatenated>
-  <MaxDuration>1200</MaxDuration>
-</response>`)
+	response := []byte(`Variable1=Hola1
+Variable2=Hola2
+ComposedVar=TestComposed
+Item1.1=Val2
+`)
 	if body, err := ioutil.ReadAll(rply.Body); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eXml, body) {
-		t.Errorf("expecting: <%s>, received: <%s>", string(eXml), string(body))
+	} else if !reflect.DeepEqual(response, body) {
+		t.Errorf("expecting: \n<%s>\n, received: \n<%s>\n", string(response), string(body))
 	}
 	rply.Body.Close()
 	time.Sleep(time.Millisecond)

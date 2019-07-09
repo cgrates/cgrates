@@ -20,6 +20,7 @@ package agents
 
 import (
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -257,14 +258,23 @@ type haTextPlainEncoder struct {
 // Encode implements httpAgentReplyEncoder
 func (xE *haTextPlainEncoder) Encode(nM *config.NavigableMap) (err error) {
 	var str string
+	msgFields := make(map[string]string) // work around to NMap issue
 	for _, val := range nM.Values() {
 		nmItms, isNMItems := val.([]*config.NMItem)
 		if !isNMItems {
 			return fmt.Errorf("value: %+v is not []*NMItem", val)
 		}
-		for _, nmItm := range nmItms {
-			str += fmt.Sprintf("%s=%s\n", strings.Join(nmItm.Path, utils.NestingSep), utils.IfaceAsString(nmItm.Data))
+		if len(nmItms) == 0 {
+			continue
 		}
+		cfgItm := nmItms[0] // first item gives some config for the rest, cannot iterate through NMItems since they are multipled by order
+		if len(cfgItm.Path) == 0 {
+			return errors.New("empty path in config item")
+		}
+		msgFields[strings.Join(cfgItm.Path, utils.NestingSep)] = utils.IfaceAsString(cfgItm.Data)
+	}
+	for key, val := range msgFields {
+		str += fmt.Sprintf("%s=%s\n", key, val)
 	}
 	_, err = xE.w.Write([]byte(str))
 	return
