@@ -598,6 +598,7 @@ const (
 	MetaApier                    = "*apier"
 	CGREventString               = "CGREvent"
 	MetaPing                     = "*ping"
+	MetaTextPlain                = "*text_plain"
 )
 
 // Migrator Action

@@ -213,6 +213,8 @@ func newHAReplyEncoder(encType string,
 		return nil, fmt.Errorf("unsupported encoder type <%s>", encType)
 	case utils.MetaXml:
 		return newHAXMLEncoder(w)
+	case utils.MetaTextPlain:
+		return newHATextPlainEncoder(w)
 	}
 }
 
@@ -241,5 +243,29 @@ func (xE *haXMLEncoder) Encode(nM *config.NavigableMap) (err error) {
 		return
 	}
 	_, err = xE.w.Write(xmlOut)
+	return
+}
+
+func newHATextPlainEncoder(w http.ResponseWriter) (xE httpAgentReplyEncoder, err error) {
+	return &haTextPlainEncoder{w: w}, nil
+}
+
+type haTextPlainEncoder struct {
+	w http.ResponseWriter
+}
+
+// Encode implements httpAgentReplyEncoder
+func (xE *haTextPlainEncoder) Encode(nM *config.NavigableMap) (err error) {
+	var str string
+	for _, val := range nM.Values() {
+		nmItms, isNMItems := val.([]*config.NMItem)
+		if !isNMItems {
+			return fmt.Errorf("value: %+v is not []*NMItem", val)
+		}
+		for _, nmItm := range nmItms {
+			str += fmt.Sprintf("%s=%s\n", strings.Join(nmItm.Path, utils.NestingSep), utils.IfaceAsString(nmItm.Data))
+		}
+	}
+	_, err = xE.w.Write([]byte(str))
 	return
 }
