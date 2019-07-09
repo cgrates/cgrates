@@ -76,22 +76,22 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		if !lclProcessed {
 			continue
 		}
-		encdr, err := newHAReplyEncoder(ha.rplyPayload, w)
-		if err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error creating reply encoder: %s",
-					utils.HTTPAgent, err.Error()))
-			return
-		}
-		if err = encdr.Encode(agReq.Reply); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error: %s encoding out %s",
-					utils.HTTPAgent, err.Error(), utils.ToJSON(agReq.Reply)))
-			return
-		}
 		if lclProcessed && !reqProcessor.Continue {
 			break
 		}
+	}
+	encdr, err := newHAReplyEncoder(ha.rplyPayload, w)
+	if err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error creating reply encoder: %s",
+				utils.HTTPAgent, err.Error()))
+		return
+	}
+	if err = encdr.Encode(rplyNM); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %s encoding out %s",
+				utils.HTTPAgent, err.Error(), utils.ToJSON(rplyNM)))
+		return
 	}
 }
 

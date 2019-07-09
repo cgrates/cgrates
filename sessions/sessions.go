@@ -2332,7 +2332,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
-		if *args.AttributeIDs != nil {
+		if args.AttributeIDs != nil {
 			attrArgs.AttributeIDs = *args.AttributeIDs
 		}
 		var rplyEv engine.AttrSProcessEventReply
