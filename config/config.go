@@ -632,7 +632,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> unsupported request payload %s",
 				utils.HTTPAgent, httpAgentCfg.RequestPayload)
 		}
-		if !utils.IsSliceMember([]string{utils.MetaXml}, httpAgentCfg.ReplyPayload) {
+		if !utils.IsSliceMember([]string{utils.MetaXml, utils.MetaTextPlain}, httpAgentCfg.ReplyPayload) {
 			return fmt.Errorf("<%s> unsupported reply payload %s",
 				utils.HTTPAgent, httpAgentCfg.ReplyPayload)
 		}
