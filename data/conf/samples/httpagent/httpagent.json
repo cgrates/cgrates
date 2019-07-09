@@ -126,8 +126,8 @@
 		],
 	},
 	{
-		"id": "conecto_textplain",
-		"url": "/conecto_textplain",
+		"id": "textplain",
+		"url": "/textplain",
 		"sessions_conns": [
 			{"address": "127.0.0.1:2012", "transport": "*json"}
 		],
@@ -150,9 +150,19 @@
 						"value": "Test", "mandatory": true},
 					{"tag": "Field4", "field_id": "ComposedVar", "type": "*composed", 
 						"value": "Composed", "mandatory": true},
-					{"tag": "Field5", "field_id": "Item1.1", "type": "*constant", 
+					{"tag": "Field5", "field_id": "Item1.1", "type": "*variable", 
 						"value": "Val1", "mandatory": true},
-					{"tag": "Field6", "field_id": "Item1.1", "type": "*constant", 
+				],
+				"continue": true,
+			},
+			{
+				"id": "TextPlainDryRun2",
+				"filters": ["*string:~*req.request_type:TextPlainDryRun","*string:~*req.Msisdn:497700056231"],
+				"tenant": "cgrates.org",
+				"flags": ["*dryrun"],
+				"request_fields":[],
+				"reply_fields":[
+					{"tag": "Field1", "field_id": "Item1.1", "type": "*variable", 
 						"value": "Val2", "mandatory": true},
 				],
 			},
