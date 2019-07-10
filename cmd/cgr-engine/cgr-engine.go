@@ -1593,6 +1593,8 @@ func main() {
 	}
 	utils.Logger.SetLogLevel(lgLevel)
 
+	cfg.LazzySanityCheck()
+
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
 	var dm *engine.DataManager

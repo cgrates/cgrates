@@ -39,11 +39,10 @@ const (
 	exchangeType        = "exchange_type"
 	routingKey          = "routing_key"
 
-	awsRegion = "aws_region"
-	awsID     = "aws_key"
-	awsSecret = "aws_secret"
-	awsToken  = "aws_token"
-	// awsAccountID = "aws_account_id"
+	//awsRegion = "aws_region"
+	//awsID     = "aws_key"
+	//awsSecret = "aws_secret"
+	awsToken   = "aws_token"
 	folderPath = "folder_path"
 )
 

@@ -1096,6 +1096,7 @@ func resetAccount(ub *Account, action *Action, acts Actions, _ interface{}) erro
 	filter := &utils.CDRsFilter{
 		NotRunIDs: []string{utils.MetaRaw},
 		Accounts:  []string{account},
+		NotCosts:  []float64{-1},
 		OrderBy:   fmt.Sprintf("%s%sdesc", utils.OrderID, utils.INFIELD_SEP),
 		Paginator: utils.Paginator{Limit: utils.IntPointer(1)},
 	}

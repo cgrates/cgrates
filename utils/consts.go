@@ -1118,6 +1118,15 @@ const (
 	HTTPAgent       = "HTTPAgent"
 )
 
+// Poster
+const (
+	SQSPoster = "SQSPoster"
+	S3Poster  = "S3Poster"
+	AWSRegion = "aws_region"
+	AWSKey    = "aws_key"
+	AWSSecret = "aws_secret"
+)
+
 func buildCacheInstRevPrefixes() {
 	CachePrefixToInstance = make(map[string]string)
 	for k, v := range CacheInstanceToPrefix {
