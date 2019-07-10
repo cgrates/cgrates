@@ -450,6 +450,84 @@ func TestActionsitCDRAccount(t *testing.T) {
 	}
 }
 
+func TestActionsitThresholdPostEvent(t *testing.T) {
+	var thReply *ThresholdProfile
+	var result string
+	var reply string
+
+	//if we check syslog we will see that it tries to post
+	attrsAA := &utils.AttrSetActions{ActionsId: "ACT_TH_POSTEVENT", Actions: []*utils.TPAction{
+		&utils.TPAction{Identifier: MetaPostEvent, ExtraParameters: "http://127.0.0.1:12080/invalid_json"},
+	}}
+	if err := actsLclRpc.Call("ApierV2.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error("Got error on ApierV2.SetActions: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
+	}
+	//make sure that the threshold don't exit
+	if err := actsLclRpc.Call("ApierV1.GetThresholdProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_PostEvent"}, &thReply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	tPrfl := &ThresholdProfile{
+		Tenant: "cgrates.org",
+		ID:     "THD_PostEvent",
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		MaxHits:   -1,
+		MinSleep:  time.Duration(5 * time.Minute),
+		Blocker:   false,
+		Weight:    20.0,
+		ActionIDs: []string{"ACT_TH_POSTEVENT"},
+		Async:     false,
+	}
+	if err := actsLclRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := actsLclRpc.Call("ApierV1.GetThresholdProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_PostEvent"}, &thReply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(tPrfl, thReply) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl, thReply)
+	}
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "cdrev1",
+		Event: map[string]interface{}{
+			utils.EventType:   utils.CDR,
+			"field_extr1":     "val_extr1",
+			"fieldextr2":      "valextr2",
+			utils.CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+			utils.RunID:       utils.MetaRaw,
+			utils.OrderID:     123,
+			utils.OriginHost:  "192.168.1.1",
+			utils.Source:      utils.UNIT_TEST,
+			utils.OriginID:    "dsafdsaf",
+			utils.RequestType: utils.META_RATED,
+			utils.Tenant:      "cgrates.org",
+			utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+			utils.PDD:         time.Duration(0) * time.Second,
+			utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+			utils.Usage:       time.Duration(10) * time.Second,
+			utils.SUPPLIER:    "SUPPL1",
+			utils.COST:        -1.0,
+		},
+	}
+	var ids []string
+	eIDs := []string{"THD_PostEvent"}
+	if err := actsLclRpc.Call(utils.ThresholdSv1ProcessEvent, &ArgsProcessEvent{CGREvent: ev}, &ids); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
+	}
+
+}
+
 func TestActionsitStopCgrEngine(t *testing.T) {
 	if err := KillEngine(*waitRater); err != nil {
 		t.Error(err)
