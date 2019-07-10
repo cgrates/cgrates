@@ -2550,6 +2550,9 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 	if cgrEvWithArgDisp.ID == "" {
 		cgrEvWithArgDisp.ID = utils.GenUUID()
 	}
+	if _, has := cgrEvWithArgDisp.Event[utils.Source]; !has {
+		cgrEvWithArgDisp.Event[utils.Source] = utils.MetaSessionS
+	}
 
 	// RPC caching
 	if sS.cgrCfg.CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
