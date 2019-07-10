@@ -32,17 +32,30 @@ import (
 const (
 	QueryType   = "QueryType"
 	E164Address = "E164Address"
+	QueryName   = "QueryName"
+	DomainName  = "DomainName"
 )
 
 // e164FromNAPTR extracts the E164 address out of a NAPTR name record
 func e164FromNAPTR(name string) (e164 string, err error) {
-	i := strings.Index(name, ".e164.arpa")
+	i := strings.Index(name, ".e164.")
 	if i == -1 {
 		return "", errors.New("unknown format")
 	}
 	e164 = utils.ReverseString(
 		strings.Replace(name[:i], ".", "", -1))
 	return
+}
+
+// domainNameFromNAPTR extracts the domain part out of a NAPTR name record
+func domainNameFromNAPTR(name string) (dName string) {
+	i := strings.Index(name, ".e164.")
+	if i == -1 {
+		dName = name
+	} else {
+		dName = name[i:]
+	}
+	return strings.Trim(dName, ".")
 }
 
 // newDADataProvider constructs a DataProvider for a diameter message

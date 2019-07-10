@@ -80,6 +80,7 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 	// message preprocesing
 	switch req.Question[0].Qtype {
 	case dns.TypeNAPTR:
+		reqVars[QueryName] = req.Question[0].Name
 		e164, err := e164FromNAPTR(req.Question[0].Name)
 		if err != nil {
 			utils.Logger.Warning(
@@ -90,6 +91,8 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 			return
 		}
 		reqVars[E164Address] = e164
+		reqVars[DomainName] = domainNameFromNAPTR(req.Question[0].Name)
+
 	}
 	cgrRplyNM := config.NewNavigableMap(nil)
 	rplyNM := config.NewNavigableMap(nil) // share it among different processors

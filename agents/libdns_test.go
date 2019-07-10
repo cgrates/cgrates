@@ -35,6 +35,18 @@ func TestE164FromNAPTR(t *testing.T) {
 	}
 }
 
+func TestDomainNameFromNAPTR(t *testing.T) {
+	if dName := domainNameFromNAPTR("8.7.6.5.4.3.2.1.0.1.6.e164.arpa."); dName != "e164.arpa" {
+		t.Errorf("received: <%s>", dName)
+	}
+	if dName := domainNameFromNAPTR("8.7.6.5.4.3.2.1.0.1.6.e164.itsyscom.com."); dName != "e164.itsyscom.com" {
+		t.Errorf("received: <%s>", dName)
+	}
+	if dName := domainNameFromNAPTR("8.7.6.5.4.3.2.1.0.1.6.itsyscom.com."); dName != "8.7.6.5.4.3.2.1.0.1.6.itsyscom.com" {
+		t.Errorf("received: <%s>", dName)
+	}
+}
+
 func TestAppendDNSAnswerTypeNAPTR(t *testing.T) {
 	m := new(dns.Msg)
 	m.SetQuestion("3.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeNAPTR)
