@@ -67,13 +67,13 @@ func (pstr *SQSPoster) parseURL(dialURL string) {
 	if val, has := qry[queueID]; has {
 		pstr.queueID = val
 	}
-	if val, has := qry[awsRegion]; has {
+	if val, has := qry[utils.AWSRegion]; has {
 		pstr.awsRegion = val
 	}
-	if val, has := qry[awsID]; has {
+	if val, has := qry[utils.AWSKey]; has {
 		pstr.awsID = val
 	}
-	if val, has := qry[awsSecret]; has {
+	if val, has := qry[utils.AWSSecret]; has {
 		pstr.awsKey = val
 	}
 	if val, has := qry[awsToken]; has {
