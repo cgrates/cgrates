@@ -26,8 +26,8 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/dns"
 	"github.com/cgrates/rpcclient"
+	"github.com/miekg/dns"
 )
 
 // NewDNSAgent is the constructor for DNSAgent

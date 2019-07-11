@@ -126,8 +126,8 @@ imports:
   subpackages: 
   - aws
   - service
-- name: github.com/cgrates/dns
-  version: 8a9e9ce3f8fc97a804077038ce3d6c6c0797f282
+- name: github.com/miekg/dns
+  version: b13675009d59c97f3721247d9efa8914e1866a5b
 - name: github.com/segmentio/kafka-go
   version: 0b38267f13d5e17fcf8dfbb89168ef7fb520deb8
 testImports: []

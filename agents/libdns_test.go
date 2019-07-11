@@ -24,7 +24,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/dns"
+	"github.com/miekg/dns"
 )
 
 func TestE164FromNAPTR(t *testing.T) {
