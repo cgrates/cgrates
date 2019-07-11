@@ -279,8 +279,8 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 	case utils.META_NONE: // do nothing on CGRateS side
 	case utils.MetaDryRun:
 		utils.Logger.Info(
-			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, CGREvent: %s",
-				utils.DiameterAgent, reqProcessor.ID, utils.ToJSON(cgrEv)))
+			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, DiameterMessage: %s",
+				utils.DiameterAgent, reqProcessor.ID, agReq.Request.String()))
 	case utils.MetaAuth:
 		authArgs := sessions.NewV1AuthorizeArgs(
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),
