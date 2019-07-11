@@ -207,12 +207,7 @@ func testSSv1ItAuth(t *testing.T) {
 	if err := sSv1BiRpc.Call(utils.SessionSv1AuthorizeEvent, args, &rply); err != nil {
 		t.Fatal(err)
 	}
-	// in case of prepaid and pseudoprepade we expect a MaxUsage of 5min
-	// and in case of postpaid and rated we expect -1
-	if ((sSV1RequestType == utils.META_PREPAID ||
-		sSV1RequestType == utils.META_PSEUDOPREPAID) && *rply.MaxUsage != authUsage) ||
-		((sSV1RequestType == utils.META_POSTPAID ||
-			sSV1RequestType == utils.META_RATED) && *rply.MaxUsage != -1) {
+	if *rply.MaxUsage != authUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceAllocation == "" {
@@ -296,10 +291,7 @@ func testSSv1ItAuthWithDigest(t *testing.T) {
 	}
 	// in case of prepaid and pseudoprepade we expect a MaxUsage of 5min
 	// and in case of postpaid and rated we expect -1
-	if ((sSV1RequestType == utils.META_PREPAID ||
-		sSV1RequestType == utils.META_PSEUDOPREPAID) && *rply.MaxUsage != authUsage.Seconds()) ||
-		((sSV1RequestType == utils.META_POSTPAID ||
-			sSV1RequestType == utils.META_RATED) && *rply.MaxUsage != -1) {
+	if *rply.MaxUsage != authUsage.Seconds() {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceAllocation == "" {

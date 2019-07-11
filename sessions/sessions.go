@@ -1290,7 +1290,9 @@ func (sS *SessionS) initSessionDebitLoops(s *Session) {
 // authSession calculates maximum usage allowed for given session
 func (sS *SessionS) authSession(tnt string, evStart *engine.SafEvent) (maxUsage time.Duration, err error) {
 	cgrID := GetSetCGRID(evStart)
-	if _, err = evStart.GetDuration(utils.Usage); err != nil {
+	var eventUsage time.Duration
+	eventUsage, err = evStart.GetDuration(utils.Usage)
+	if err != nil {
 		if err != utils.ErrNotFound {
 			return
 		}
@@ -1330,15 +1332,15 @@ func (sS *SessionS) authSession(tnt string, evStart *engine.SafEvent) (maxUsage 
 		var rplyMaxUsage time.Duration
 		if !utils.IsSliceMember(prepaidReqs,
 			sr.Event.GetStringIgnoreErrors(utils.RequestType)) {
-			rplyMaxUsage = time.Duration(-1)
+			rplyMaxUsage = eventUsage
 		} else if err = sS.ralS.Call(utils.ResponderGetMaxSessionTime,
 			&engine.CallDescriptorWithArgDispatcher{CallDescriptor: sr.CD,
 				ArgDispatcher: s.ArgDispatcher}, &rplyMaxUsage); err != nil {
 			return
 		}
 		if !maxUsageSet ||
-			maxUsage == time.Duration(-1) ||
-			(rplyMaxUsage < maxUsage && rplyMaxUsage != time.Duration(-1)) {
+			maxUsage == eventUsage ||
+			(rplyMaxUsage < maxUsage && rplyMaxUsage != eventUsage) {
 			maxUsage = rplyMaxUsage
 			maxUsageSet = true
 		}
