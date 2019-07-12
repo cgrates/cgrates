@@ -32,26 +32,26 @@ type CSVStorage struct {
 	sep        rune
 	readerFunc func(string, rune, int) (*csv.Reader, *os.File, error)
 	// file names
-	destinationsFn           string
-	ratesFn                  string
-	destinationratesFn       string
-	timingsFn                string
-	destinationratetimingsFn string
-	ratingprofilesFn         string
-	sharedgroupsFn           string
-	actionsFn                string
-	actiontimingsFn          string
-	actiontriggersFn         string
-	accountactionsFn         string
-	resProfilesFn            string
-	statsFn                  string
-	thresholdsFn             string
-	filterFn                 string
-	suppProfilesFn           string
-	attributeProfilesFn      string
-	chargerProfilesFn        string
-	dispatcherProfilesFn     string
-	dispatcherHostsFn        string
+	destinationsFn           []string
+	ratesFn                  []string
+	destinationratesFn       []string
+	timingsFn                []string
+	destinationratetimingsFn []string
+	ratingprofilesFn         []string
+	sharedgroupsFn           []string
+	actionsFn                []string
+	actiontimingsFn          []string
+	actiontriggersFn         []string
+	accountactionsFn         []string
+	resProfilesFn            []string
+	statsFn                  []string
+	thresholdsFn             []string
+	filterFn                 []string
+	suppProfilesFn           []string
+	attributeProfilesFn      []string
+	chargerProfilesFn        []string
+	dispatcherProfilesFn     []string
+	dispatcherHostsFn        []string
 }
 
 func NewFileCSVStorage(sep rune,
@@ -60,7 +60,7 @@ func NewFileCSVStorage(sep rune,
 	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn,
 	resProfilesFn, statsFn, thresholdsFn,
 	filterFn, suppProfilesFn, attributeProfilesFn,
-	chargerProfilesFn, dispatcherProfilesFn, dispatcherHostsFn string) *CSVStorage {
+	chargerProfilesFn, dispatcherProfilesFn, dispatcherHostsFn []string) *CSVStorage {
 	return &CSVStorage{
 		sep:                      sep,
 		readerFunc:               openFileCSVStorage,
@@ -95,13 +95,13 @@ func NewStringCSVStorage(sep rune,
 	thresholdsFn, filterFn, suppProfilesFn,
 	attributeProfilesFn, chargerProfilesFn,
 	dispatcherProfilesFn, dispatcherHostsFn string) *CSVStorage {
-	c := NewFileCSVStorage(sep, destinationsFn, timingsFn,
-		ratesFn, destinationratesFn, destinationratetimingsFn,
-		ratingprofilesFn, sharedgroupsFn, actionsFn,
-		actiontimingsFn, actiontriggersFn, accountactionsFn,
-		resProfilesFn, statsFn, thresholdsFn, filterFn,
-		suppProfilesFn, attributeProfilesFn, chargerProfilesFn,
-		dispatcherProfilesFn, dispatcherHostsFn)
+	c := NewFileCSVStorage(sep, []string{destinationsFn}, []string{timingsFn},
+		[]string{ratesFn}, []string{destinationratesFn}, []string{destinationratetimingsFn},
+		[]string{ratingprofilesFn}, []string{sharedgroupsFn}, []string{actionsFn},
+		[]string{actiontimingsFn}, []string{actiontriggersFn}, []string{accountactionsFn},
+		[]string{resProfilesFn}, []string{statsFn}, []string{thresholdsFn}, []string{filterFn},
+		[]string{suppProfilesFn}, []string{attributeProfilesFn}, []string{chargerProfilesFn},
+		[]string{dispatcherProfilesFn}, []string{dispatcherHostsFn})
 	c.readerFunc = openStringCSVStorage
 	return c
 }
@@ -164,7 +164,7 @@ func (csvs *CSVStorage) proccesData(listType interface{}, fns []string, process 
 
 func (csvs *CSVStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, error) {
 	var tpTimings TpTimings
-	if err := csvs.proccesData(TpTiming{}, []string{csvs.timingsFn}, func(tp interface{}) {
+	if err := csvs.proccesData(TpTiming{}, csvs.timingsFn, func(tp interface{}) {
 		tm := tp.(TpTiming)
 		tm.Tpid = tpid
 		tpTimings = append(tpTimings, tm)
@@ -176,7 +176,7 @@ func (csvs *CSVStorage) GetTPTimings(tpid, id string) ([]*utils.ApierTPTiming, e
 
 func (csvs *CSVStorage) GetTPDestinations(tpid, id string) ([]*utils.TPDestination, error) {
 	var tpDests TpDestinations
-	if err := csvs.proccesData(TpDestination{}, []string{csvs.destinationsFn}, func(tp interface{}) {
+	if err := csvs.proccesData(TpDestination{}, csvs.destinationsFn, func(tp interface{}) {
 		d := tp.(TpDestination)
 		d.Tpid = tpid
 		tpDests = append(tpDests, d)
@@ -188,7 +188,7 @@ func (csvs *CSVStorage) GetTPDestinations(tpid, id string) ([]*utils.TPDestinati
 
 func (csvs *CSVStorage) GetTPRates(tpid, id string) ([]*utils.TPRate, error) {
 	var tpRates TpRates
-	if err := csvs.proccesData(TpRate{}, []string{csvs.ratesFn}, func(tp interface{}) {
+	if err := csvs.proccesData(TpRate{}, csvs.ratesFn, func(tp interface{}) {
 		r := tp.(TpRate)
 		r.Tpid = tpid
 		tpRates = append(tpRates, r)
@@ -200,7 +200,7 @@ func (csvs *CSVStorage) GetTPRates(tpid, id string) ([]*utils.TPRate, error) {
 
 func (csvs *CSVStorage) GetTPDestinationRates(tpid, id string, p *utils.Paginator) ([]*utils.TPDestinationRate, error) {
 	var tpDestinationRates TpDestinationRates
-	if err := csvs.proccesData(TpDestinationRate{}, []string{csvs.destinationratesFn}, func(tp interface{}) {
+	if err := csvs.proccesData(TpDestinationRate{}, csvs.destinationratesFn, func(tp interface{}) {
 		dr := tp.(TpDestinationRate)
 		dr.Tpid = tpid
 		tpDestinationRates = append(tpDestinationRates, dr)
@@ -212,7 +212,7 @@ func (csvs *CSVStorage) GetTPDestinationRates(tpid, id string, p *utils.Paginato
 
 func (csvs *CSVStorage) GetTPRatingPlans(tpid, id string, p *utils.Paginator) ([]*utils.TPRatingPlan, error) {
 	var tpRatingPlans TpRatingPlans
-	if err := csvs.proccesData(TpRatingPlan{}, []string{csvs.destinationratetimingsFn}, func(tp interface{}) {
+	if err := csvs.proccesData(TpRatingPlan{}, csvs.destinationratetimingsFn, func(tp interface{}) {
 		rp := tp.(TpRatingPlan)
 		rp.Tpid = tpid
 		tpRatingPlans = append(tpRatingPlans, rp)
@@ -224,7 +224,7 @@ func (csvs *CSVStorage) GetTPRatingPlans(tpid, id string, p *utils.Paginator) ([
 
 func (csvs *CSVStorage) GetTPRatingProfiles(filter *utils.TPRatingProfile) ([]*utils.TPRatingProfile, error) {
 	var tpRatingProfiles TpRatingProfiles
-	if err := csvs.proccesData(TpRatingProfile{}, []string{csvs.ratingprofilesFn}, func(tp interface{}) {
+	if err := csvs.proccesData(TpRatingProfile{}, csvs.ratingprofilesFn, func(tp interface{}) {
 		rpf := tp.(TpRatingProfile)
 		if filter != nil {
 			rpf.Tpid = filter.TPid
@@ -239,7 +239,7 @@ func (csvs *CSVStorage) GetTPRatingProfiles(filter *utils.TPRatingProfile) ([]*u
 
 func (csvs *CSVStorage) GetTPSharedGroups(tpid, id string) ([]*utils.TPSharedGroups, error) {
 	var tpSharedGroups TpSharedGroups
-	if err := csvs.proccesData(TpSharedGroup{}, []string{csvs.sharedgroupsFn}, func(tp interface{}) {
+	if err := csvs.proccesData(TpSharedGroup{}, csvs.sharedgroupsFn, func(tp interface{}) {
 		sg := tp.(TpSharedGroup)
 		sg.Tpid = tpid
 		tpSharedGroups = append(tpSharedGroups, sg)
@@ -251,7 +251,7 @@ func (csvs *CSVStorage) GetTPSharedGroups(tpid, id string) ([]*utils.TPSharedGro
 
 func (csvs *CSVStorage) GetTPActions(tpid, id string) ([]*utils.TPActions, error) {
 	var tpActions TpActions
-	if err := csvs.proccesData(TpAction{}, []string{csvs.actionsFn}, func(tp interface{}) {
+	if err := csvs.proccesData(TpAction{}, csvs.actionsFn, func(tp interface{}) {
 		a := tp.(TpAction)
 		a.Tpid = tpid
 		tpActions = append(tpActions, a)
@@ -263,7 +263,7 @@ func (csvs *CSVStorage) GetTPActions(tpid, id string) ([]*utils.TPActions, error
 
 func (csvs *CSVStorage) GetTPActionPlans(tpid, id string) ([]*utils.TPActionPlan, error) {
 	var tpActionPlans TpActionPlans
-	if err := csvs.proccesData(TpActionPlan{}, []string{csvs.actiontimingsFn}, func(tp interface{}) {
+	if err := csvs.proccesData(TpActionPlan{}, csvs.actiontimingsFn, func(tp interface{}) {
 		ap := tp.(TpActionPlan)
 		ap.Tpid = tpid
 		tpActionPlans = append(tpActionPlans, ap)
@@ -275,7 +275,7 @@ func (csvs *CSVStorage) GetTPActionPlans(tpid, id string) ([]*utils.TPActionPlan
 
 func (csvs *CSVStorage) GetTPActionTriggers(tpid, id string) ([]*utils.TPActionTriggers, error) {
 	var tpActionTriggers TpActionTriggers
-	if err := csvs.proccesData(TpActionTrigger{}, []string{csvs.actiontriggersFn}, func(tp interface{}) {
+	if err := csvs.proccesData(TpActionTrigger{}, csvs.actiontriggersFn, func(tp interface{}) {
 		at := tp.(TpActionTrigger)
 		at.Tpid = tpid
 		tpActionTriggers = append(tpActionTriggers, at)
@@ -287,7 +287,7 @@ func (csvs *CSVStorage) GetTPActionTriggers(tpid, id string) ([]*utils.TPActionT
 
 func (csvs *CSVStorage) GetTPAccountActions(filter *utils.TPAccountActions) ([]*utils.TPAccountActions, error) {
 	var tpAccountActions TpAccountActions
-	if err := csvs.proccesData(TpAccountAction{}, []string{csvs.accountactionsFn}, func(tp interface{}) {
+	if err := csvs.proccesData(TpAccountAction{}, csvs.accountactionsFn, func(tp interface{}) {
 		aa := tp.(TpAccountAction)
 		if filter != nil {
 			aa.Tpid = filter.TPid
@@ -302,7 +302,7 @@ func (csvs *CSVStorage) GetTPAccountActions(filter *utils.TPAccountActions) ([]*
 
 func (csvs *CSVStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPResourceProfile, error) {
 	var tpResLimits TpResources
-	if err := csvs.proccesData(TpResource{}, []string{csvs.resProfilesFn}, func(tp interface{}) {
+	if err := csvs.proccesData(TpResource{}, csvs.resProfilesFn, func(tp interface{}) {
 		tpLimit := tp.(TpResource)
 		tpLimit.Tpid = tpid
 		tpResLimits = append(tpResLimits, &tpLimit)
@@ -314,7 +314,7 @@ func (csvs *CSVStorage) GetTPResources(tpid, tenant, id string) ([]*utils.TPReso
 
 func (csvs *CSVStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStatProfile, error) {
 	var tpStats TpStats
-	if err := csvs.proccesData(TpStat{}, []string{csvs.statsFn}, func(tp interface{}) {
+	if err := csvs.proccesData(TpStat{}, csvs.statsFn, func(tp interface{}) {
 		tPstats := tp.(TpStat)
 		tPstats.Tpid = tpid
 		tpStats = append(tpStats, &tPstats)
@@ -326,7 +326,7 @@ func (csvs *CSVStorage) GetTPStats(tpid, tenant, id string) ([]*utils.TPStatProf
 
 func (csvs *CSVStorage) GetTPThresholds(tpid, tenant, id string) ([]*utils.TPThresholdProfile, error) {
 	var tpThreshold TpThresholds
-	if err := csvs.proccesData(TpThreshold{}, []string{csvs.thresholdsFn}, func(tp interface{}) {
+	if err := csvs.proccesData(TpThreshold{}, csvs.thresholdsFn, func(tp interface{}) {
 		tHresholdCfg := tp.(TpThreshold)
 		tHresholdCfg.Tpid = tpid
 		tpThreshold = append(tpThreshold, &tHresholdCfg)
@@ -338,7 +338,7 @@ func (csvs *CSVStorage) GetTPThresholds(tpid, tenant, id string) ([]*utils.TPThr
 
 func (csvs *CSVStorage) GetTPFilters(tpid, tenant, id string) ([]*utils.TPFilterProfile, error) {
 	var tpFilter TpFilterS
-	if err := csvs.proccesData(TpFilter{}, []string{csvs.filterFn}, func(tp interface{}) {
+	if err := csvs.proccesData(TpFilter{}, csvs.filterFn, func(tp interface{}) {
 		fIlterCfg := tp.(TpFilter)
 		fIlterCfg.Tpid = tpid
 		tpFilter = append(tpFilter, &fIlterCfg)
@@ -350,7 +350,7 @@ func (csvs *CSVStorage) GetTPFilters(tpid, tenant, id string) ([]*utils.TPFilter
 
 func (csvs *CSVStorage) GetTPSuppliers(tpid, tenant, id string) ([]*utils.TPSupplierProfile, error) {
 	var tpSPPs TpSuppliers
-	if err := csvs.proccesData(TpSupplier{}, []string{csvs.suppProfilesFn}, func(tp interface{}) {
+	if err := csvs.proccesData(TpSupplier{}, csvs.suppProfilesFn, func(tp interface{}) {
 		suppProfile := tp.(TpSupplier)
 		suppProfile.Tpid = tpid
 		tpSPPs = append(tpSPPs, &suppProfile)
@@ -362,7 +362,7 @@ func (csvs *CSVStorage) GetTPSuppliers(tpid, tenant, id string) ([]*utils.TPSupp
 
 func (csvs *CSVStorage) GetTPAttributes(tpid, tenant, id string) ([]*utils.TPAttributeProfile, error) {
 	var tpAls TPAttributes
-	if err := csvs.proccesData(TPAttribute{}, []string{csvs.attributeProfilesFn}, func(tp interface{}) {
+	if err := csvs.proccesData(TPAttribute{}, csvs.attributeProfilesFn, func(tp interface{}) {
 		attributeProfile := tp.(TPAttribute)
 		attributeProfile.Tpid = tpid
 		tpAls = append(tpAls, &attributeProfile)
@@ -374,7 +374,7 @@ func (csvs *CSVStorage) GetTPAttributes(tpid, tenant, id string) ([]*utils.TPAtt
 
 func (csvs *CSVStorage) GetTPChargers(tpid, tenant, id string) ([]*utils.TPChargerProfile, error) {
 	var tpCPPs TPChargers
-	if err := csvs.proccesData(TPCharger{}, []string{csvs.chargerProfilesFn}, func(tp interface{}) {
+	if err := csvs.proccesData(TPCharger{}, csvs.chargerProfilesFn, func(tp interface{}) {
 		cpp := tp.(TPCharger)
 		cpp.Tpid = tpid
 		tpCPPs = append(tpCPPs, &cpp)
@@ -386,7 +386,7 @@ func (csvs *CSVStorage) GetTPChargers(tpid, tenant, id string) ([]*utils.TPCharg
 
 func (csvs *CSVStorage) GetTPDispatcherProfiles(tpid, tenant, id string) ([]*utils.TPDispatcherProfile, error) {
 	var tpDPPs TPDispatcherProfiles
-	if err := csvs.proccesData(TPDispatcherProfile{}, []string{csvs.dispatcherProfilesFn}, func(tp interface{}) {
+	if err := csvs.proccesData(TPDispatcherProfile{}, csvs.dispatcherProfilesFn, func(tp interface{}) {
 		dpp := tp.(TPDispatcherProfile)
 		dpp.Tpid = tpid
 		tpDPPs = append(tpDPPs, &dpp)
@@ -398,7 +398,7 @@ func (csvs *CSVStorage) GetTPDispatcherProfiles(tpid, tenant, id string) ([]*uti
 
 func (csvs *CSVStorage) GetTPDispatcherHosts(tpid, tenant, id string) ([]*utils.TPDispatcherHost, error) {
 	var tpDDHs TPDispatcherHosts
-	if err := csvs.proccesData(TPDispatcherHost{}, []string{csvs.dispatcherHostsFn}, func(tp interface{}) {
+	if err := csvs.proccesData(TPDispatcherHost{}, csvs.dispatcherHostsFn, func(tp interface{}) {
 		dpp := tp.(TPDispatcherHost)
 		dpp.Tpid = tpid
 		tpDDHs = append(tpDDHs, &dpp)
