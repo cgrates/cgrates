@@ -67,6 +67,10 @@ var sTestsSupplierSV1 = []func(t *testing.T){
 	testV1SplSUpdateSupplierProfiles,
 	testV1SplSRemSupplierProfiles,
 	testV1SplSGetSupplierForEvent,
+	//reset the database and load the TP again
+	testV1SplSInitDataDb,
+	testV1SplSFromFolder,
+	testV1SplsOneSupplierWithoutDestination,
 	testV1SplSupplierPing,
 	testV1SplSStopEngine,
 }
@@ -947,6 +951,94 @@ func testV1SplSGetSupplierForEvent(t *testing.T) {
 	})
 	if !reflect.DeepEqual(expected, *supProf[0]) {
 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(expected), utils.ToJSON(supProf))
+	}
+}
+
+// Scenario: We create two rating plans RP_MOBILE and RP_LOCAL
+// RP_LOCAL contains destination for both mobile and local
+// and RP_MOBILE contains destinations only for mobile
+// Create a SupplierProfile with *least_cost strategy with 2 suppliers
+// supplier1 have attached RP_LOCAL and supplier2 have attach RP_MOBILE
+func testV1SplsOneSupplierWithoutDestination(t *testing.T) {
+	var reply *engine.SupplierProfile
+	if err := splSv1Rpc.Call("ApierV1.GetSupplierProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_DESTINATION"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	splPrf = &SupplierWithCache{
+		SupplierProfile: &engine.SupplierProfile{
+			Tenant:    "cgrates.org",
+			ID:        "SPL_DESTINATION",
+			FilterIDs: []string{"*string:~Account:SpecialCase"},
+			Sorting:   utils.MetaLeastCost,
+			Suppliers: []*engine.Supplier{
+				{
+					ID:            "local",
+					RatingPlanIDs: []string{"RP_LOCAL"},
+					Weight:        10,
+				},
+				{
+					ID:            "mobile",
+					RatingPlanIDs: []string{"RP_MOBILE"},
+					FilterIDs:     []string{"*destinations:~*req.Destination:DST_MOBILE"},
+					Weight:        10,
+				},
+			},
+			Weight: 100,
+		},
+	}
+
+	var result string
+	if err := splSv1Rpc.Call("ApierV1.SetSupplierProfile", splPrf, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	ev := &engine.ArgsGetSuppliers{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testV1SplsOneSupplierWithoutDestination",
+			Event: map[string]interface{}{
+				utils.Account:     "SpecialCase",
+				utils.Destination: "+24680",
+				utils.SetupTime:   utils.MetaNow,
+				utils.Usage:       "2m",
+			},
+		},
+		IgnoreErrors: true,
+	}
+	eSpls := engine.SortedSuppliers{
+		ProfileID: "SPL_DESTINATION",
+		Sorting:   utils.MetaLeastCost,
+		Count:     1,
+		SortedSuppliers: []*engine.SortedSupplier{
+			{
+				SupplierID: "local",
+				SortingData: map[string]interface{}{
+					utils.Cost:     0.0396,
+					"RatingPlanID": "RP_LOCAL",
+					utils.Weight:   10.0,
+				},
+			},
+		},
+	}
+	var suplsReply engine.SortedSuppliers
+	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
+		ev, &suplsReply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSpls, suplsReply) {
+		t.Errorf("Expecting: %s, received: %s",
+			utils.ToJSON(eSpls), utils.ToJSON(suplsReply))
+	}
+
+	//in case that we don't use ignore errors
+	//we get an error for the second supplier
+	ev.IgnoreErrors = false
+	if err := splSv1Rpc.Call(utils.SupplierSv1GetSuppliers,
+		ev, &suplsReply); err != nil {
+		t.Error(err)
 	}
 }
 
