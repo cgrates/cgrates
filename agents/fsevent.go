@@ -65,7 +65,7 @@ const (
 	PDD_NOMEDIA_MS           = "variable_progressmsec"
 	IGNOREPARK               = "variable_cgr_ignorepark"
 	FS_VARPREFIX             = "variable_"
-	VarCGRSubsystems         = "variable_" + utils.CGRSubsystems
+	VarCGRFlags              = "variable_" + utils.CGRFlags
 	CGRResourceAllocation    = "cgr_resource_allocation"
 	VAR_CGR_DISCONNECT_CAUSE = "variable_" + utils.CGR_DISCONNECT_CAUSE
 	VAR_CGR_CMPUTELCR        = "variable_" + utils.CGR_COMPUTELCR
@@ -415,23 +415,46 @@ func (fsev FSEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 		GetMaxUsage: true,
 		CGREvent:    cgrEv,
 	}
-	subsystems, has := fsev[VarCGRSubsystems]
+	subsystems, has := fsev[VarCGRFlags]
 	if !has {
 		return
 	}
-	args.GetMaxUsage = strings.Index(subsystems, utils.MetaAccounts) != -1
-	args.AuthorizeResources = strings.Index(subsystems, utils.MetaResources) != -1
-	args.GetSuppliers = strings.Index(subsystems, utils.MetaSuppliers) != -1
-	args.SuppliersIgnoreErrors = strings.Index(subsystems, utils.MetaSuppliersIgnoreErrors) != -1
-	if strings.Index(subsystems, utils.MetaSuppliersEventCost) != -1 {
-		args.SuppliersMaxCost = utils.MetaEventCost
+	for _, subsystem := range strings.Split(subsystems, utils.FIELDS_SEP) {
+		switch {
+		case subsystem == utils.MetaAccounts:
+			args.GetMaxUsage = true
+		case subsystem == utils.MetaResources:
+			args.AuthorizeResources = true
+		case subsystem == utils.MetaDispatchers:
+			cgrArgs := cgrEv.ConsumeArgs(true, true)
+			args.ArgDispatcher = cgrArgs.ArgDispatcher
+			args.Paginator = *cgrArgs.SupplierPaginator
+		case subsystem == utils.MetaSuppliers:
+			args.GetSuppliers = true
+		case subsystem == utils.MetaSuppliersIgnoreErrors:
+			args.SuppliersIgnoreErrors = true
+		case subsystem == utils.MetaSuppliersEventCost:
+			args.SuppliersMaxCost = utils.MetaEventCost
+		case strings.Index(subsystem, utils.MetaAttributes) != -1:
+			args.GetAttributes = true
+			if attrWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(attrWithIDs) > 1 {
+				attrIDs := strings.Split(attrWithIDs[1], utils.INFIELD_SEP)
+				args.AttributeIDs = &attrIDs
+			}
+		case strings.Index(subsystem, utils.MetaThresholds) != -1:
+			args.ProcessThresholds = true
+			if thdWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(thdWithIDs) > 1 {
+				thIDs := strings.Split(thdWithIDs[1], utils.INFIELD_SEP)
+				args.ThresholdIDs = &thIDs
+			}
+		case strings.Index(subsystem, utils.MetaStats) != -1:
+			args.ProcessStats = true
+			if stsWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(stsWithIDs) > 1 {
+				stsIDs := strings.Split(stsWithIDs[1], utils.INFIELD_SEP)
+				args.StatIDs = &stsIDs
+			}
+		}
 	}
-	args.GetAttributes = strings.Index(subsystems, utils.MetaAttributes) != -1
-	args.ProcessThresholds = strings.Index(subsystems, utils.MetaThresholds) != -1
-	args.ProcessStats = strings.Index(subsystems, utils.MetaStats) != -1
-	cgrArgs := cgrEv.ConsumeArgs(strings.Index(subsystems, utils.MetaDispatchers) != -1, true)
-	args.ArgDispatcher = cgrArgs.ArgDispatcher
-	args.Paginator = *cgrArgs.SupplierPaginator
 	return
 }
 
@@ -445,17 +468,39 @@ func (fsev FSEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 		InitSession: true,
 		CGREvent:    cgrEv,
 	}
-	subsystems, has := fsev[VarCGRSubsystems]
+	subsystems, has := fsev[VarCGRFlags]
 	if !has {
 		return
 	}
-	args.InitSession = strings.Index(subsystems, utils.MetaAccounts) != -1
-	args.AllocateResources = strings.Index(subsystems, utils.MetaResources) != -1
-	args.GetAttributes = strings.Index(subsystems, utils.MetaAttributes) != -1
-	args.ProcessThresholds = strings.Index(subsystems, utils.MetaThresholds) != -1
-	args.ProcessStats = strings.Index(subsystems, utils.MetaStats) != -1
-	cgrArgs := cgrEv.ConsumeArgs(strings.Index(subsystems, utils.MetaDispatchers) != -1, false)
-	args.ArgDispatcher = cgrArgs.ArgDispatcher
+	for _, subsystem := range strings.Split(subsystems, utils.FIELDS_SEP) {
+		switch {
+		case subsystem == utils.MetaAccounts:
+			args.InitSession = true
+		case subsystem == utils.MetaResources:
+			args.AllocateResources = true
+		case subsystem == utils.MetaDispatchers:
+			cgrArgs := cgrEv.ConsumeArgs(true, false)
+			args.ArgDispatcher = cgrArgs.ArgDispatcher
+		case strings.Index(subsystem, utils.MetaAttributes) != -1:
+			args.GetAttributes = true
+			if attrWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(attrWithIDs) > 1 {
+				attrIDs := strings.Split(attrWithIDs[1], utils.INFIELD_SEP)
+				args.AttributeIDs = &attrIDs
+			}
+		case strings.Index(subsystem, utils.MetaThresholds) != -1:
+			args.ProcessThresholds = true
+			if thdWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(thdWithIDs) > 1 {
+				thIDs := strings.Split(thdWithIDs[1], utils.INFIELD_SEP)
+				args.ThresholdIDs = &thIDs
+			}
+		case strings.Index(subsystem, utils.MetaStats) != -1:
+			args.ProcessStats = true
+			if stsWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(stsWithIDs) > 1 {
+				stsIDs := strings.Split(stsWithIDs[1], utils.INFIELD_SEP)
+				args.StatIDs = &stsIDs
+			}
+		}
+	}
 	return
 }
 
@@ -469,16 +514,33 @@ func (fsev FSEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionA
 		TerminateSession: true,
 		CGREvent:         cgrEv,
 	}
-	subsystems, has := fsev[VarCGRSubsystems]
+	subsystems, has := fsev[VarCGRFlags]
 	if !has {
 		return
 	}
-	args.TerminateSession = strings.Index(subsystems, utils.MetaAccounts) != -1
-	args.ReleaseResources = strings.Index(subsystems, utils.MetaResources) != -1
-	args.ProcessThresholds = strings.Index(subsystems, utils.MetaThresholds) != -1
-	args.ProcessStats = strings.Index(subsystems, utils.MetaStats) != -1
-	cgrArgs := cgrEv.ConsumeArgs(strings.Index(subsystems, utils.MetaDispatchers) != -1, false)
-	args.ArgDispatcher = cgrArgs.ArgDispatcher
+	for _, subsystem := range strings.Split(subsystems, utils.FIELDS_SEP) {
+		switch {
+		case subsystem == utils.MetaAccounts:
+			args.TerminateSession = true
+		case subsystem == utils.MetaResources:
+			args.ReleaseResources = true
+		case subsystem == utils.MetaDispatchers:
+			cgrArgs := cgrEv.ConsumeArgs(true, false)
+			args.ArgDispatcher = cgrArgs.ArgDispatcher
+		case strings.Index(subsystem, utils.MetaThresholds) != -1:
+			args.ProcessThresholds = true
+			if thdWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(thdWithIDs) > 1 {
+				thIDs := strings.Split(thdWithIDs[1], utils.INFIELD_SEP)
+				args.ThresholdIDs = &thIDs
+			}
+		case strings.Index(subsystem, utils.MetaStats) != -1:
+			args.ProcessStats = true
+			if stsWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(stsWithIDs) > 1 {
+				stsIDs := strings.Split(stsWithIDs[1], utils.INFIELD_SEP)
+				args.StatIDs = &stsIDs
+			}
+		}
+	}
 	return
 }
 

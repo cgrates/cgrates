@@ -47,7 +47,7 @@ const (
 )
 
 var (
-	kamReservedEventFields = []string{EVENT, KamTRIndex, KamTRLabel, utils.CGRSubsystems, KamReplyRoute}
+	kamReservedEventFields = []string{EVENT, KamTRIndex, KamTRLabel, utils.CGRFlags, KamReplyRoute}
 	kamReservedCDRFields   = append(kamReservedEventFields, KamHashEntry, KamHashID) // HashEntry and id are needed in events for disconnects
 )
 
@@ -110,7 +110,7 @@ func (kev KamEvent) MissingParameter() bool {
 	case CGR_PROCESS_EVENT:
 		// TRIndex and TRLabel must exist in order to know where to send back the response
 		mndPrm := []string{kev[KamTRIndex], kev[KamTRLabel]}
-		_, has := kev[utils.CGRSubsystems]
+		_, has := kev[utils.CGRFlags]
 		// in case that the user populate cgr_subsystems we treat it like a ProcessEvent
 		// and expect to have the required fields
 		if has {
@@ -208,23 +208,46 @@ func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 		GetMaxUsage: true,
 		CGREvent:    cgrEv,
 	}
-	subsystems, has := kev[utils.CGRSubsystems]
+	subsystems, has := kev[utils.CGRFlags]
 	if !has {
 		return
 	}
-	args.GetMaxUsage = strings.Index(subsystems, utils.MetaAccounts) != -1
-	args.AuthorizeResources = strings.Index(subsystems, utils.MetaResources) != -1
-	args.GetSuppliers = strings.Index(subsystems, utils.MetaSuppliers) != -1
-	args.SuppliersIgnoreErrors = strings.Index(subsystems, utils.MetaSuppliersIgnoreErrors) != -1
-	if strings.Index(subsystems, utils.MetaSuppliersEventCost) != -1 {
-		args.SuppliersMaxCost = utils.MetaEventCost
+	for _, subsystem := range strings.Split(subsystems, utils.FIELDS_SEP) {
+		switch {
+		case subsystem == utils.MetaAccounts:
+			args.GetMaxUsage = true
+		case subsystem == utils.MetaResources:
+			args.AuthorizeResources = true
+		case subsystem == utils.MetaDispatchers:
+			cgrArgs := cgrEv.ConsumeArgs(true, true)
+			args.ArgDispatcher = cgrArgs.ArgDispatcher
+			args.Paginator = *cgrArgs.SupplierPaginator
+		case subsystem == utils.MetaSuppliers:
+			args.GetSuppliers = true
+		case subsystem == utils.MetaSuppliersIgnoreErrors:
+			args.SuppliersIgnoreErrors = true
+		case subsystem == utils.MetaSuppliersEventCost:
+			args.SuppliersMaxCost = utils.MetaEventCost
+		case strings.Index(subsystem, utils.MetaAttributes) != -1:
+			args.GetAttributes = true
+			if attrWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(attrWithIDs) > 1 {
+				attrIDs := strings.Split(attrWithIDs[1], utils.INFIELD_SEP)
+				args.AttributeIDs = &attrIDs
+			}
+		case strings.Index(subsystem, utils.MetaThresholds) != -1:
+			args.ProcessThresholds = true
+			if thdWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(thdWithIDs) > 1 {
+				tdIDs := strings.Split(thdWithIDs[1], utils.INFIELD_SEP)
+				args.ThresholdIDs = &tdIDs
+			}
+		case strings.Index(subsystem, utils.MetaStats) != -1:
+			args.ProcessStats = true
+			if stsWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(stsWithIDs) > 1 {
+				stsIDs := strings.Split(stsWithIDs[1], utils.INFIELD_SEP)
+				args.StatIDs = &stsIDs
+			}
+		}
 	}
-	args.GetAttributes = strings.Index(subsystems, utils.MetaAttributes) != -1
-	args.ProcessThresholds = strings.Index(subsystems, utils.MetaThresholds) != -1
-	args.ProcessStats = strings.Index(subsystems, utils.MetaStats) != -1
-	cgrArgs := cgrEv.ConsumeArgs(strings.Index(subsystems, utils.MetaDispatchers) != -1, true)
-	args.ArgDispatcher = cgrArgs.ArgDispatcher
-	args.Paginator = *cgrArgs.SupplierPaginator
 	return
 }
 
@@ -279,17 +302,39 @@ func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 		InitSession: true,
 		CGREvent:    cgrEv,
 	}
-	subsystems, has := kev[utils.CGRSubsystems]
+	subsystems, has := kev[utils.CGRFlags]
 	if !has {
 		return
 	}
-	args.InitSession = strings.Index(subsystems, utils.MetaAccounts) != -1
-	args.AllocateResources = strings.Index(subsystems, utils.MetaResources) != -1
-	args.GetAttributes = strings.Index(subsystems, utils.MetaAttributes) != -1
-	args.ProcessThresholds = strings.Index(subsystems, utils.MetaThresholds) != -1
-	args.ProcessStats = strings.Index(subsystems, utils.MetaStats) != -1
-	cgrArgs := cgrEv.ConsumeArgs(strings.Index(subsystems, utils.MetaDispatchers) != -1, false)
-	args.ArgDispatcher = cgrArgs.ArgDispatcher
+	for _, subsystem := range strings.Split(subsystems, utils.FIELDS_SEP) {
+		switch {
+		case subsystem == utils.MetaAccounts:
+			args.InitSession = true
+		case subsystem == utils.MetaResources:
+			args.AllocateResources = true
+		case subsystem == utils.MetaDispatchers:
+			cgrArgs := cgrEv.ConsumeArgs(true, false)
+			args.ArgDispatcher = cgrArgs.ArgDispatcher
+		case strings.Index(subsystem, utils.MetaAttributes) != -1:
+			args.GetAttributes = true
+			if attrWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(attrWithIDs) > 1 {
+				attrIDs := strings.Split(attrWithIDs[1], utils.INFIELD_SEP)
+				args.AttributeIDs = &attrIDs
+			}
+		case strings.Index(subsystem, utils.MetaThresholds) != -1:
+			args.ProcessThresholds = true
+			if thdWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(thdWithIDs) > 1 {
+				thIDs := strings.Split(thdWithIDs[1], utils.INFIELD_SEP)
+				args.ThresholdIDs = &thIDs
+			}
+		case strings.Index(subsystem, utils.MetaStats) != -1:
+			args.ProcessStats = true
+			if stsWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(stsWithIDs) > 1 {
+				stsIDs := strings.Split(stsWithIDs[1], utils.INFIELD_SEP)
+				args.StatIDs = &stsIDs
+			}
+		}
+	}
 	return
 }
 
@@ -302,23 +347,46 @@ func (kev KamEvent) V1ProcessEventArgs() (args *sessions.V1ProcessEventArgs) {
 	args = &sessions.V1ProcessEventArgs{ // defaults
 		CGREvent: cgrEv,
 	}
-	subsystems, has := kev[utils.CGRSubsystems]
+	subsystems, has := kev[utils.CGRFlags]
 	if !has {
 		return
 	}
-	args.GetAttributes = strings.Index(subsystems, utils.MetaAttributes) != -1
-	args.AllocateResources = strings.Index(subsystems, utils.MetaResources) != -1
-	args.Debit = strings.Index(subsystems, utils.MetaAccounts) != -1
-	args.ProcessThresholds = strings.Index(subsystems, utils.MetaThresholds) != -1
-	args.ProcessStats = strings.Index(subsystems, utils.MetaStats) != -1
-	args.GetSuppliers = strings.Index(subsystems, utils.MetaSuppliers) != -1
-	args.SuppliersIgnoreErrors = strings.Index(subsystems, utils.MetaSuppliersIgnoreErrors) != -1
-	if strings.Index(subsystems, utils.MetaSuppliersEventCost) != -1 {
-		args.SuppliersMaxCost = utils.MetaEventCost
+	for _, subsystem := range strings.Split(subsystems, utils.FIELDS_SEP) {
+		switch {
+		case subsystem == utils.MetaAccounts:
+			args.Debit = true
+		case subsystem == utils.MetaResources:
+			args.AllocateResources = true
+		case subsystem == utils.MetaDispatchers:
+			cgrArgs := cgrEv.ConsumeArgs(true, true)
+			args.ArgDispatcher = cgrArgs.ArgDispatcher
+			args.Paginator = *cgrArgs.SupplierPaginator
+		case subsystem == utils.MetaSuppliers:
+			args.GetSuppliers = true
+		case subsystem == utils.MetaSuppliersIgnoreErrors:
+			args.SuppliersIgnoreErrors = true
+		case subsystem == utils.MetaSuppliersEventCost:
+			args.SuppliersMaxCost = utils.MetaEventCost
+		case strings.Index(subsystem, utils.MetaAttributes) != -1:
+			args.GetAttributes = true
+			if attrWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(attrWithIDs) > 1 {
+				attrIDs := strings.Split(attrWithIDs[1], utils.INFIELD_SEP)
+				args.AttributeIDs = &attrIDs
+			}
+		case strings.Index(subsystem, utils.MetaThresholds) != -1:
+			args.ProcessThresholds = true
+			if thdWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(thdWithIDs) > 1 {
+				tdIDs := strings.Split(thdWithIDs[1], utils.INFIELD_SEP)
+				args.ThresholdIDs = &tdIDs
+			}
+		case strings.Index(subsystem, utils.MetaStats) != -1:
+			args.ProcessStats = true
+			if stsWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(stsWithIDs) > 1 {
+				stsIDs := strings.Split(stsWithIDs[1], utils.INFIELD_SEP)
+				args.StatIDs = &stsIDs
+			}
+		}
 	}
-	cgrArgs := cgrEv.ConsumeArgs(strings.Index(subsystems, utils.MetaDispatchers) != -1, true)
-	args.ArgDispatcher = cgrArgs.ArgDispatcher
-	args.Paginator = *cgrArgs.SupplierPaginator
 	return
 }
 
@@ -331,7 +399,7 @@ func (kev KamEvent) V1ProcessCDRArgs() (args *utils.CGREventWithArgDispatcher) {
 	args = &utils.CGREventWithArgDispatcher{ // defaults
 		CGREvent: cgrEv,
 	}
-	subsystems, has := kev[utils.CGRSubsystems]
+	subsystems, has := kev[utils.CGRFlags]
 	if !has {
 		return
 	}
@@ -421,16 +489,33 @@ func (kev KamEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionA
 		TerminateSession: true,
 		CGREvent:         cgrEv,
 	}
-	subsystems, has := kev[utils.CGRSubsystems]
+	subsystems, has := kev[utils.CGRFlags]
 	if !has {
 		return
 	}
-	args.TerminateSession = strings.Index(subsystems, utils.MetaAccounts) != -1
-	args.ReleaseResources = strings.Index(subsystems, utils.MetaResources) != -1
-	args.ProcessThresholds = strings.Index(subsystems, utils.MetaThresholds) != -1
-	args.ProcessStats = strings.Index(subsystems, utils.MetaStats) != -1
-	cgrArgs := cgrEv.ConsumeArgs(strings.Index(subsystems, utils.MetaDispatchers) != -1, false)
-	args.ArgDispatcher = cgrArgs.ArgDispatcher
+	for _, subsystem := range strings.Split(subsystems, utils.FIELDS_SEP) {
+		switch {
+		case subsystem == utils.MetaAccounts:
+			args.TerminateSession = true
+		case subsystem == utils.MetaResources:
+			args.ReleaseResources = true
+		case subsystem == utils.MetaDispatchers:
+			cgrArgs := cgrEv.ConsumeArgs(true, false)
+			args.ArgDispatcher = cgrArgs.ArgDispatcher
+		case strings.Index(subsystem, utils.MetaThresholds) != -1:
+			args.ProcessThresholds = true
+			if thdWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(thdWithIDs) > 1 {
+				thIDs := strings.Split(thdWithIDs[1], utils.INFIELD_SEP)
+				args.ThresholdIDs = &thIDs
+			}
+		case strings.Index(subsystem, utils.MetaStats) != -1:
+			args.ProcessStats = true
+			if stsWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(stsWithIDs) > 1 {
+				stsIDs := strings.Split(stsWithIDs[1], utils.INFIELD_SEP)
+				args.StatIDs = &stsIDs
+			}
+		}
+	}
 	return
 }
 
