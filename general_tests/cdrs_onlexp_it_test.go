@@ -68,7 +68,7 @@ func TestCDRsOnExpInitCdrDb(t *testing.T) {
 		t.Fatal("Error removing folder: ", cdrsMasterCfg.GeneralCfg().FailedPostsDir, err)
 	}
 
-	if err := os.Mkdir(cdrsMasterCfg.GeneralCfg().FailedPostsDir, 0700); err != nil {
+	if err := os.MkdirAll(cdrsMasterCfg.GeneralCfg().FailedPostsDir, 0700); err != nil {
 		t.Error(err)
 	}
 

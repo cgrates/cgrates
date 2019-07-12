@@ -1,0 +1,152 @@
+---
+- hosts: all
+  vars:
+    ###############################################################
+    ##################### Golang Vars #############################
+    ###############################################################
+    # Go language SDK version number
+    golang_version: '1.12.7'
+    # Mirror to download the Go language SDK redistributable package from
+    golang_mirror: 'https://storage.googleapis.com/golang'
+    # Base installation directory the Go language SDK distribution
+    golang_install_dir: '/usr/local/go'
+    # Directory to store files downloaded for Go language SDK installation
+    golang_download_dir: "{{ x_ansible_download_dir | default(ansible_env.HOME + '/.ansible/tmp/downloads') }}"
+    # Location for GOPATH environment variable
+    golang_gopath: "/home/{{ gouser }}/go"
+    # Filename of Go language SDK redistributable package
+    golang_redis_filename: 'go{{ golang_version }}.linux-amd64.tar.gz'
+    ###############################################################
+    ###################### Kafka Vars #############################
+    ###############################################################
+    kafka_apache_mirror: https://archive.apache.org/dist/
+    kafka_user: kafka
+    kafka_version_kafka: 2.1.0
+    kafka_version_scala: 2.11
+    kafka_base_name: "kafka_{{ kafka_version_scala }}-{{ kafka_version_kafka }}"
+    kafka_url: "{{ kafka_apache_mirror }}/kafka/{{ kafka_version_kafka }}/{{ kafka_base_name }}.tgz"
+    kafka_download_folder: "/home/{{ kafka_user }}/Downloads"
+    kafka_install_folder: "/home/{{ kafka_user }}"
+    # kafka_user_password: "123456y"
+    
+    ###############################################################
+    # CGRateS location
+    cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
+    ###############################################################
+  remote_user: root
+  tasks:
+
+###########################################################################################################################
+
+###########################################################################################################################
+# install dependencies
+  - name: Install build-essential 
+    apt:
+      name: build-essential 
+      state: present
+
+  - name: Install the git
+    apt:
+      name: git
+
+  - name: Install the redis
+    apt:
+      name: redis-server
+
+  - name: Install the mongo
+    apt:
+      name: mongodb-server
+
+  - name: Install the mysql
+    apt:
+      name: mysql-server
+
+  - name: Install the postgresql
+    apt:
+      name: postgresql
+
+  - name: Install the postgresql-contrib
+    apt:
+      name: postgresql-contrib
+
+###########################################################################################################################
+
+  - name: Install kafka
+    include: kafka.yaml
+
+  - name: Install rabbitmq
+    include: rabbitmq.yaml
+###########################################################################################################################
+
+###########################################################################################################################
+  # install golang
+  - name: install unarchive dependencies (zypper)
+    become: yes
+    zypper:
+      name:
+        - gzip
+        - tar
+      state: present
+    when: ansible_pkg_mgr == 'zypper'
+
+  - name: Install golang
+    include: go.yaml
+
+  # glide
+  - name: install glide
+    command: go get -u github.com/Masterminds/glide
+    become_user: "{{ gouser }}"
+###########################################################################################################################
+
+###########################################################################################################################
+# install cgrates
+  - name: create cgrates directory
+    file:
+      state: directory
+      mode: 'u=rwx,go=rx'
+      owner: "{{ gouser }}"
+      group: "{{ gouser }}"
+      dest: '{{ cgrates_dir }}'
+    become_user: "{{ gouser }}"
+
+  - name: git clone cgrates
+    git:
+      repo: https://github.com/cgrates/cgrates.git
+      dest: '{{ cgrates_dir }}'
+    become: yes
+    become_user: "{{ gouser }}"
+
+  - name:  glide install
+    command: "{{ golang_gopath }}/bin/glide install"
+    args:
+      chdir: '{{ cgrates_dir }}'
+
+  - name:  build cgrates
+    command: 'sh {{ cgrates_dir }}/build.sh'
+    args:
+      chdir: '{{ cgrates_dir }}'
+
+  - name: symbol link
+    file:
+      src: "{{ cgrates_dir }}/data"
+      dest: "/usr/share/cgrates"
+      state: link
+###########################################################################################################################
+
+###########################################################################################################################
+# post install
+  - name:  post install mysql
+    command: 'sh {{ cgrates_dir }}/data/storage/mysql/setup_cgr_db.sh root CGRateS.org localhost'
+    args:
+      chdir: '{{ cgrates_dir }}/data/storage/mysql/'
+
+  - name:  post install postgres2
+    command: 'sh {{ cgrates_dir }}/data/storage/postgres/create_db_with_users.sh'
+    args:
+      chdir: '{{ cgrates_dir }}/data/storage/postgres/'
+
+  - name:  post install mongo
+    command: 'sh {{ cgrates_dir }}/data/storage/mongo/setup_cgr_db.sh'
+    args:
+      chdir: '{{ cgrates_dir }}/data/storage/mongo/'
+
