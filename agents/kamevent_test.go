@@ -151,7 +151,7 @@ func TestKamEvV1AuthorizeArgs(t *testing.T) {
 		"cgr_duration": "3", "cgr_pdd": "4",
 		utils.CGR_SUPPLIER:         "supplier2",
 		utils.CGR_DISCONNECT_CAUSE: "200",
-		utils.CGRSubsystems:        "*accounts;**suppliers_event_cost;*suppliers_ignore_errors"}
+		utils.CGRFlags:             "*accounts,*suppliers,*suppliers_event_cost,*suppliers_ignore_errors"}
 	sTime, err := utils.ParseTimeDetectLayout(kamEv[utils.AnswerTime], timezone)
 	if err != nil {
 		return

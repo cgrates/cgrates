@@ -219,12 +219,12 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
 		// no return here since we want CDR anyhow
 	}
-	if ka.cfg.CreateCdr || strings.Index(kev[utils.CGRSubsystems], utils.MetaCDRs) != -1 {
+	if ka.cfg.CreateCdr || strings.Index(kev[utils.CGRFlags], utils.MetaCDRs) != -1 {
 		cgrEv, err := kev.AsCGREvent(ka.timezone) // FixMe: do we need to create the event once again?
 		if err != nil {
 			return
 		}
-		cgrArgs := cgrEv.ConsumeArgs(strings.Index(kev[utils.CGRSubsystems], utils.MetaDispatchers) != -1, false)
+		cgrArgs := cgrEv.ConsumeArgs(strings.Index(kev[utils.CGRFlags], utils.MetaDispatchers) != -1, false)
 		if err := ka.sessionS.Call(utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv, ArgDispatcher: cgrArgs.ArgDispatcher}, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("%s> failed processing CGREvent: %s, error: %s",
@@ -277,7 +277,7 @@ func (ka *KamailioAgent) onCgrProcessEvent(evData []byte, connIdx int) {
 
 	//in case that we don't reveice cgr_subsystems from kamailio
 	//we consider this as ping-pong event
-	if _, has := kev[utils.CGRSubsystems]; !has {
+	if _, has := kev[utils.CGRFlags]; !has {
 		if err = ka.conns[connIdx].Send(kev.AsKamProcessEventEmptyReply().String()); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> failed sending empty process event reply for event: %s, error %s",
 				utils.KamailioAgent, kev[utils.OriginID], err.Error()))

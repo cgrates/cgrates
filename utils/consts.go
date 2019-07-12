@@ -560,7 +560,6 @@ const (
 	MetaErr                      = "*err"
 	OriginRealm                  = "OriginRealm"
 	ProductName                  = "ProductName"
-	CGRSubsystems                = "cgr_subsystems"
 	IdxStart                     = "["
 	IdxEnd                       = "]"
 	MetaLog                      = "*log"

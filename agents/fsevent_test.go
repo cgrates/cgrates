@@ -337,7 +337,7 @@ variable_rtp_audio_out_dtmf_packet_count: 0
 variable_rtp_audio_out_cng_packet_count: 0
 variable_rtp_audio_rtcp_packet_count: 1450
 variable_rtp_audio_rtcp_octet_count: 45940
-variable_cgr_subsystems: *resources%3B*attributes%3B*sessions%3B*suppliers_event_cost%3B*suppliers_ignore_errors%3B*accounts`
+variable_cgr_flags: *resources,*attributes,*sessions,*suppliers,*suppliers_event_cost,*suppliers_ignore_errors,*accounts`
 
 func TestEventCreation(t *testing.T) {
 	body := `Event-Name: RE_SCHEDULE
