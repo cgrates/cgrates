@@ -67,10 +67,11 @@ var sTestsSupplierSV1 = []func(t *testing.T){
 	testV1SplSUpdateSupplierProfiles,
 	testV1SplSRemSupplierProfiles,
 	testV1SplSGetSupplierForEvent,
-	//reset the database and load the TP again
-	testV1SplSInitDataDb,
-	testV1SplSFromFolder,
-	testV1SplsOneSupplierWithoutDestination,
+	// reset the database and load the TP again
+	// testV1SplSInitDataDb,
+	// testV1SplSFromFolder,
+	// for the moment we decide to comment the tests
+	// testV1SplsOneSupplierWithoutDestination,
 	testV1SplSupplierPing,
 	testV1SplSStopEngine,
 }
