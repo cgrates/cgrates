@@ -484,7 +484,7 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 		s.Lock()
 		s.httpEnabled = true
 		s.Unlock()
-		Logger.Info("<HTTPTLS> enabling handler for JSON-RPC")
+		Logger.Info("<HTTPS> enabling handler for JSON-RPC")
 		if useBasicAuth {
 			s.httpsMux.HandleFunc(jsonRPCURL, use(handleRequest, basicAuth(userList)))
 		} else {
@@ -495,7 +495,7 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 		s.Lock()
 		s.httpEnabled = true
 		s.Unlock()
-		Logger.Info("<HTTPTLS> enabling handler for WebSocket connections")
+		Logger.Info("<HTTPS> enabling handler for WebSocket connections")
 		wsHandler := websocket.Handler(func(ws *websocket.Conn) {
 			if s.isDispatched {
 				rpc.ServeCodec(NewCustomJSONServerCodec(ws))
@@ -515,7 +515,7 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 		return
 	}
 	if useBasicAuth {
-		Logger.Info("<HTTPTLS> enabling basic auth")
+		Logger.Info("<HTTPS> enabling basic auth")
 	}
 	config, err := loadTLSConfig(serverCrt, serverKey, caCert, serverPolicy, serverName)
 	if err != nil {
@@ -526,6 +526,6 @@ func (s *Server) ServeHTTPTLS(addr, serverCrt, serverKey, caCert string, serverP
 		Handler:   s.httpsMux,
 		TLSConfig: &config,
 	}
-	Logger.Info(fmt.Sprintf("<HTTPTLS> start listening at <%s>", addr))
+	Logger.Info(fmt.Sprintf("<HTTPS> start listening at <%s>", addr))
 	httpSrv.ListenAndServeTLS(serverCrt, serverKey)
 }
