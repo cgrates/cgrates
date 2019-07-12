@@ -24,6 +24,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -83,6 +84,7 @@ var (
 		"When true will not save loaded data to dataDb but just parse it for consistency and errors.")
 	fieldSep = cgrLoaderFlags.String("field_sep", ",",
 		`Separator for csv file (by default "," is used)`)
+	recursive = cgrLoaderFlags.Bool("recursive", false, "Loads data from folder recursive.")
 
 	fromStorDB    = cgrLoaderFlags.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
 	toStorDB      = cgrLoaderFlags.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
@@ -106,6 +108,27 @@ var (
 	schedulerS rpcclient.RpcClientConnection
 	loader     engine.LoadReader
 )
+
+func getAllFolders(inPath string) (paths []string, err error) {
+	err = filepath.Walk(inPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			paths = append(paths, path)
+		}
+		return nil
+	})
+	return
+}
+
+func appendName(paths []string, fileName string) (out []string) {
+	out = make([]string, len(paths))
+	for i, path_ := range paths {
+		out[i] = path.Join(path_, fileName)
+	}
+	return
+}
 
 func main() {
 	if err := cgrLoaderFlags.Parse(os.Args[1:]); err != nil {
@@ -284,27 +307,76 @@ func main() {
 	if *fromStorDB { // Load Tariff Plan from storDb into dataDb
 		loader = storDb
 	} else { // Default load from csv files to dataDb
+
+		destinations_paths := []string{path.Join(*dataPath, utils.DESTINATIONS_CSV)}
+		timings_paths := []string{path.Join(*dataPath, utils.TIMINGS_CSV)}
+		rates_paths := []string{path.Join(*dataPath, utils.RATES_CSV)}
+		destination_rates_paths := []string{path.Join(*dataPath, utils.DESTINATION_RATES_CSV)}
+		rating_plans_paths := []string{path.Join(*dataPath, utils.RATING_PLANS_CSV)}
+		rating_profiles_paths := []string{path.Join(*dataPath, utils.RATING_PROFILES_CSV)}
+		shared_groups_paths := []string{path.Join(*dataPath, utils.SHARED_GROUPS_CSV)}
+		actions_paths := []string{path.Join(*dataPath, utils.ACTIONS_CSV)}
+		action_plans_paths := []string{path.Join(*dataPath, utils.ACTION_PLANS_CSV)}
+		action_triggers_paths := []string{path.Join(*dataPath, utils.ACTION_TRIGGERS_CSV)}
+		account_actions_paths := []string{path.Join(*dataPath, utils.ACCOUNT_ACTIONS_CSV)}
+		resources_paths := []string{path.Join(*dataPath, utils.ResourcesCsv)}
+		stats_paths := []string{path.Join(*dataPath, utils.StatsCsv)}
+		thresholds_paths := []string{path.Join(*dataPath, utils.ThresholdsCsv)}
+		filters_paths := []string{path.Join(*dataPath, utils.FiltersCsv)}
+		suppliers_paths := []string{path.Join(*dataPath, utils.SuppliersCsv)}
+		attributes_paths := []string{path.Join(*dataPath, utils.AttributesCsv)}
+		chargers_paths := []string{path.Join(*dataPath, utils.ChargersCsv)}
+		dispatcherprofiles_paths := []string{path.Join(*dataPath, utils.DispatcherProfilesCsv)}
+		dispatcherhosts_paths := []string{path.Join(*dataPath, utils.DispatcherHostsCsv)}
+
+		if *recursive {
+			allFoldersPath, err := getAllFolders(*dataPath)
+			if err != nil {
+				log.Fatal(err)
+			}
+			destinations_paths = appendName(allFoldersPath, utils.DESTINATIONS_CSV)
+			timings_paths = appendName(allFoldersPath, utils.TIMINGS_CSV)
+			rates_paths = appendName(allFoldersPath, utils.RATES_CSV)
+			destination_rates_paths = appendName(allFoldersPath, utils.DESTINATION_RATES_CSV)
+			rating_plans_paths = appendName(allFoldersPath, utils.RATING_PLANS_CSV)
+			rating_profiles_paths = appendName(allFoldersPath, utils.RATING_PROFILES_CSV)
+			shared_groups_paths = appendName(allFoldersPath, utils.SHARED_GROUPS_CSV)
+			actions_paths = appendName(allFoldersPath, utils.ACTIONS_CSV)
+			action_plans_paths = appendName(allFoldersPath, utils.ACTION_PLANS_CSV)
+			action_triggers_paths = appendName(allFoldersPath, utils.ACTION_TRIGGERS_CSV)
+			account_actions_paths = appendName(allFoldersPath, utils.ACCOUNT_ACTIONS_CSV)
+			resources_paths = appendName(allFoldersPath, utils.ResourcesCsv)
+			stats_paths = appendName(allFoldersPath, utils.StatsCsv)
+			thresholds_paths = appendName(allFoldersPath, utils.ThresholdsCsv)
+			filters_paths = appendName(allFoldersPath, utils.FiltersCsv)
+			suppliers_paths = appendName(allFoldersPath, utils.SuppliersCsv)
+			attributes_paths = appendName(allFoldersPath, utils.AttributesCsv)
+			chargers_paths = appendName(allFoldersPath, utils.ChargersCsv)
+			dispatcherprofiles_paths = appendName(allFoldersPath, utils.DispatcherProfilesCsv)
+			dispatcherhosts_paths = appendName(allFoldersPath, utils.DispatcherHostsCsv)
+		}
+
 		loader = engine.NewFileCSVStorage(ldrCfg.LoaderCgrCfg().FieldSeparator,
-			path.Join(*dataPath, utils.DESTINATIONS_CSV),
-			path.Join(*dataPath, utils.TIMINGS_CSV),
-			path.Join(*dataPath, utils.RATES_CSV),
-			path.Join(*dataPath, utils.DESTINATION_RATES_CSV),
-			path.Join(*dataPath, utils.RATING_PLANS_CSV),
-			path.Join(*dataPath, utils.RATING_PROFILES_CSV),
-			path.Join(*dataPath, utils.SHARED_GROUPS_CSV),
-			path.Join(*dataPath, utils.ACTIONS_CSV),
-			path.Join(*dataPath, utils.ACTION_PLANS_CSV),
-			path.Join(*dataPath, utils.ACTION_TRIGGERS_CSV),
-			path.Join(*dataPath, utils.ACCOUNT_ACTIONS_CSV),
-			path.Join(*dataPath, utils.ResourcesCsv),
-			path.Join(*dataPath, utils.StatsCsv),
-			path.Join(*dataPath, utils.ThresholdsCsv),
-			path.Join(*dataPath, utils.FiltersCsv),
-			path.Join(*dataPath, utils.SuppliersCsv),
-			path.Join(*dataPath, utils.AttributesCsv),
-			path.Join(*dataPath, utils.ChargersCsv),
-			path.Join(*dataPath, utils.DispatcherProfilesCsv),
-			path.Join(*dataPath, utils.DispatcherHostsCsv),
+			destinations_paths,
+			timings_paths,
+			rates_paths,
+			destination_rates_paths,
+			rating_plans_paths,
+			rating_profiles_paths,
+			shared_groups_paths,
+			actions_paths,
+			action_plans_paths,
+			action_triggers_paths,
+			account_actions_paths,
+			resources_paths,
+			stats_paths,
+			thresholds_paths,
+			filters_paths,
+			suppliers_paths,
+			attributes_paths,
+			chargers_paths,
+			dispatcherprofiles_paths,
+			dispatcherhosts_paths,
 		)
 	}
 
