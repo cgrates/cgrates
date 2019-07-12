@@ -1,0 +1,13 @@
+[Unit]
+Requires=zookeeper.service
+After=zookeeper.service
+
+[Service]
+Type=simple
+User={{ kafka_user }}
+ExecStart=/bin/sh -c '/home/{{ kafka_user }}/kafka/bin/kafka-server-start.sh /home/{{ kafka_user }}/kafka/config/server.properties > /home/{{ kafka_user }}/kafka/kafka.log 2>&1'
+ExecStop=/home/{{ kafka_user }}/kafka/bin/kafka-server-stop.sh
+Restart=on-abnormal
+
+[Install]
+WantedBy=multi-user.target

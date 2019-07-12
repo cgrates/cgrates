@@ -1,0 +1,74 @@
+---
+- name: Ensure group "kafka" exists
+  group:
+    name: "{{ kafka_user }}"
+    state: present
+
+- name: Add the user 'kafka'
+  user:
+    name:  "{{ kafka_user }}"
+    # password: "{{ kafka_user_password }}"
+    groups: "sudo,{{ kafka_user }}"
+
+- name: Install the java 
+  apt:
+    name: default-jdk
+
+- name: Ensure download folder
+  file:
+    state: directory
+    mode: 'u=rwx,go=rx'
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_user }}"
+    path: "{{ kafka_download_folder }}"
+
+- name: Fetch kafka binary package
+  get_url:
+    dest: "{{ kafka_download_folder }}/{{ kafka_base_name }}.tgz"
+    url: "{{ kafka_url }}"
+
+- name: Uncompress the kafka tar
+  unarchive:
+    copy: no
+    creates: "/home/{{ kafka_user }}/{{ kafka_base_name }}"
+    dest: "{{ kafka_install_folder }}"
+    src: "{{ kafka_download_folder }}/{{ kafka_base_name }}.tgz"
+    mode: 'u=rwx,go=rx'
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_user }}"
+
+- name: Link kafka to the right version
+  file:
+    path: "{{ kafka_install_folder }}/kafka"
+    src: "{{ kafka_install_folder }}/{{ kafka_base_name }}"
+    owner: "{{ kafka_user }}"
+    group: "{{ kafka_user }}"
+    state: link
+
+- name: Add Zookeeper SystemD script
+  become: yes
+  template:
+    dest: /etc/systemd/system/zookeeper.service
+    mode: u+rw,g+rw,o+r
+    src: zookeeper.service.j2
+
+- name: Add Kafka SystemD script
+  become: yes
+  template:
+    dest: /etc/systemd/system/kafka.service
+    mode: u+rw,g+rw,o+r
+    src: kafka.service.j2
+
+- name: Ensure Kafka is enabled for SystemD
+  become: yes
+  systemd:
+    daemon_reload: yes
+    name: kafka
+    enabled: yes
+
+- name: Ensure Kafka is running
+  become: yes
+  service:
+    enabled: yes
+    name: kafka
+    state: started
