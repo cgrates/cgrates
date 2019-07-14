@@ -21,7 +21,7 @@
 					"type": "*constant", "value": "U"},
 				{"tag": "NAPTRService", "field_id": "Service", 
 					"type": "*constant", "value": "E2U+SIP"},
-				{"tag": "NAPTRReplacement", "field_id": "Regexp", 
+				{"tag": "NAPTRRegex", "field_id": "Regexp", 
 					"type": "*variable", "value": "~*cgrep.Attributes.NAPTRAddress"},
 			],
 		},

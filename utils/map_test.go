@@ -19,6 +19,7 @@ package utils
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -161,7 +162,6 @@ func TestMapSubsystemIDsHasKey(t *testing.T) {
 	if has := mp.HasKey("*resources"); has {
 		t.Errorf("Expecting: false, received: %+v", has)
 	}
-
 }
 
 func TestMapSubsystemIDsGetIDs(t *testing.T) {
@@ -190,5 +190,26 @@ func TestMapSubsystemIDsGetIDs(t *testing.T) {
 	if ids := mp.ParamsSlice("*test"); !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", eIDs, ids)
 	}
+}
 
+func TestFlagsToSlice(t *testing.T) {
+	sls := []string{"*event", "*thresholds:ID1;ID2;ID3", "*attributes", "*stats:ID"}
+	eMp := FlagsWithParams{
+		"*event":      []string{},
+		"*thresholds": []string{"ID1", "ID2", "ID3"},
+		"*attributes": []string{},
+		"*stats":      []string{"ID"},
+	}
+	mp, err := FlagsWithParamsFromSlice(sls)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(mp, eMp) {
+		t.Errorf("Expecting: %+v, received: %+v", eMp, mp)
+	}
+	sort.Strings(sls)
+	flgSls := mp.SliceFlags()
+	sort.Strings(flgSls)
+	if !reflect.DeepEqual(flgSls, sls) {
+		t.Errorf("Expecting: %+v, received: %+v", sls, flgSls)
+	}
 }

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -274,4 +275,16 @@ func (fWp FlagsWithParams) ParamsSlice(subs string) (ps []string) {
 		ps, _ = psIfc.([]string)
 	}
 	return ps
+}
+
+//func to convert from FlagsWithParams back to []string
+func (fWp FlagsWithParams) SliceFlags() (sls []string) {
+	for key, _ := range fWp {
+		if prmSlice := fWp.ParamsSlice(key); !reflect.DeepEqual(prmSlice, []string{}) {
+			sls = append(sls, ConcatenatedKey(key, strings.Join(prmSlice, INFIELD_SEP)))
+		} else {
+			sls = append(sls, key)
+		}
+	}
+	return
 }
