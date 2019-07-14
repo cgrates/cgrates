@@ -240,7 +240,7 @@ func NewCGRConfigFromPath(path string) (*CGRConfig, error) {
 func loadConfigFromFolder(cfg *CGRConfig, cfgDir string) (*CGRConfig, error) {
 	jsonFilesFound := false
 	err := filepath.Walk(cfgDir, func(path string, info os.FileInfo, err error) error {
-		if !info.IsDir() {
+		if !info.IsDir() || strings.HasPrefix(info.Name(), ".") { // also ignore hidden files and folders
 			return nil
 		}
 		cfgFiles, err := filepath.Glob(filepath.Join(path, "*.json"))

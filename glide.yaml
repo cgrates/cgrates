@@ -68,3 +68,10 @@ import:
   - service
 - package: github.com/miekg/dns
 - package: github.com/segmentio/kafka-go
+- package: google.golang.org/api
+  subpackages:
+  - sheets/v4
+- package: golang.org/x/oauth2
+  subpackages:
+  - google
+- package: cloud.google.com/go

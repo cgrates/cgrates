@@ -130,4 +130,10 @@ imports:
   version: b13675009d59c97f3721247d9efa8914e1866a5b
 - name: github.com/segmentio/kafka-go
   version: 0b38267f13d5e17fcf8dfbb89168ef7fb520deb8
+- name: google.golang.org/api/
+  version: aa15faf3c8a1cffc77fc3dabe95703bb12c5f6a9
+- name: golang.org/x/oauth2
+  version: 0f29369cfe4552d0e4bcddc57cc75f4d7e672a33
+- name: cloud.google.com/go
+  version: f5404d6c65b2a7a73e4914d7463b6342d6d676e2
 testImports: []

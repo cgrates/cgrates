@@ -95,28 +95,7 @@ func TestLoaderITRemoveLoad(t *testing.T) {
 			t.Error("Failed validating data: ", err.Error())
 		}
 	}*/
-	loader = NewTpReader(dataDbCsv.DataDB(), NewFileCSVStorage(utils.CSV_SEP,
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DESTINATIONS_CSV)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.TIMINGS_CSV)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATES_CSV)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DESTINATION_RATES_CSV)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATING_PLANS_CSV)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATING_PROFILES_CSV)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.SHARED_GROUPS_CSV)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTIONS_CSV)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTION_PLANS_CSV)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTION_TRIGGERS_CSV)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACCOUNT_ACTIONS_CSV)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ResourcesCsv)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.StatsCsv)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ThresholdsCsv)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.FiltersCsv)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.SuppliersCsv)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.AttributesCsv)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ChargersCsv)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DispatcherProfilesCsv)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DispatcherHostsCsv)},
-	), "", "", nil, nil)
+	loader = NewTpReader(dataDbCsv.DataDB(), NewFileCSVStorage(utils.CSV_SEP, path.Join(*dataDir, "tariffplans", *tpCsvScenario), false), "", "", nil, nil)
 
 	if err = loader.LoadDestinations(); err != nil {
 		t.Error("Failed loading destinations: ", err.Error())
@@ -191,28 +170,7 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 			t.Error("Failed validating data: ", err.Error())
 		}
 	}*/
-	loader = NewTpReader(dataDbCsv.DataDB(), NewFileCSVStorage(utils.CSV_SEP,
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DESTINATIONS_CSV)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.TIMINGS_CSV)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATES_CSV)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DESTINATION_RATES_CSV)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATING_PLANS_CSV)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATING_PROFILES_CSV)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.SHARED_GROUPS_CSV)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTIONS_CSV)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTION_PLANS_CSV)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTION_TRIGGERS_CSV)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACCOUNT_ACTIONS_CSV)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ResourcesCsv)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.StatsCsv)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ThresholdsCsv)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.FiltersCsv)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.SuppliersCsv)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.AttributesCsv)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ChargersCsv)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DispatcherProfilesCsv)},
-		[]string{path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DispatcherHostsCsv)},
-	), "", "", nil, nil)
+	loader = NewTpReader(dataDbCsv.DataDB(), NewFileCSVStorage(utils.CSV_SEP, path.Join(*dataDir, "tariffplans", *tpCsvScenario), false), "", "", nil, nil)
 
 	if err = loader.LoadDestinations(); err != nil {
 		t.Error("Failed loading destinations: ", err.Error())
