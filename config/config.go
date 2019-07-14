@@ -709,7 +709,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 	return nil
 }
 
-func (self *CGRConfig) LazzySanityCheck() {
+func (self *CGRConfig) LazySanityCheck() {
 	for _, cdrePrfl := range self.cdrsCfg.CDRSOnlineCDRExports {
 		if cdreProfile, hasIt := self.CdreProfiles[cdrePrfl]; hasIt && (cdreProfile.ExportFormat == utils.MetaS3jsonMap || cdreProfile.ExportFormat == utils.MetaSQSjsonMap) {
 			poster := utils.SQSPoster
