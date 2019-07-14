@@ -609,6 +609,9 @@ const (
 	CGREventString               = "CGREvent"
 	MetaPing                     = "*ping"
 	MetaTextPlain                = "*text_plain"
+	MetaIgnoreErrors             = "*ignore_errors"
+	MetaRelease                  = "*release"
+	MetaAllocate                 = "*allocate"
 )
 
 // Migrator Action
