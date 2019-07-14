@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"path"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -64,28 +63,7 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 }
 
 func (self *TPCSVImporter) Run() error {
-	self.csvr = NewFileCSVStorage(self.Sep,
-		[]string{path.Join(self.DirPath, utils.DESTINATIONS_CSV)},
-		[]string{path.Join(self.DirPath, utils.TIMINGS_CSV)},
-		[]string{path.Join(self.DirPath, utils.RATES_CSV)},
-		[]string{path.Join(self.DirPath, utils.DESTINATION_RATES_CSV)},
-		[]string{path.Join(self.DirPath, utils.RATING_PLANS_CSV)},
-		[]string{path.Join(self.DirPath, utils.RATING_PROFILES_CSV)},
-		[]string{path.Join(self.DirPath, utils.SHARED_GROUPS_CSV)},
-		[]string{path.Join(self.DirPath, utils.ACTIONS_CSV)},
-		[]string{path.Join(self.DirPath, utils.ACTION_PLANS_CSV)},
-		[]string{path.Join(self.DirPath, utils.ACTION_TRIGGERS_CSV)},
-		[]string{path.Join(self.DirPath, utils.ACCOUNT_ACTIONS_CSV)},
-		[]string{path.Join(self.DirPath, utils.ResourcesCsv)},
-		[]string{path.Join(self.DirPath, utils.StatsCsv)},
-		[]string{path.Join(self.DirPath, utils.ThresholdsCsv)},
-		[]string{path.Join(self.DirPath, utils.FiltersCsv)},
-		[]string{path.Join(self.DirPath, utils.SuppliersCsv)},
-		[]string{path.Join(self.DirPath, utils.AttributesCsv)},
-		[]string{path.Join(self.DirPath, utils.ChargersCsv)},
-		[]string{path.Join(self.DirPath, utils.DispatcherProfilesCsv)},
-		[]string{path.Join(self.DirPath, utils.DispatcherHostsCsv)},
-	)
+	self.csvr = NewFileCSVStorage(self.Sep, self.DirPath, false)
 	files, _ := ioutil.ReadDir(self.DirPath)
 	var withErrors bool
 	for _, f := range files {

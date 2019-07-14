@@ -435,6 +435,17 @@ const (
 	ActionPlans                  = "ActionPlans"
 	ActionTriggers               = "ActionTriggers"
 	SharedGroups                 = "SharedGroups"
+	Timings                      = "Timings"
+	Rates                        = "Rates"
+	DestinationRates             = "DestinationRates"
+	RatingPlans                  = "RatingPlans"
+	RatingProfiles               = "RatingProfiles"
+	AccountActions               = "AccountActions"
+	Resources                    = "Resources"
+	Stats                        = "Stats"
+	Filters                      = "Filters"
+	DispatcherProfiles           = "DispatcherProfiles"
+	DispatcherHosts              = "DispatcherHosts"
 	MetaEveryMinute              = "*every_minute"
 	MetaHourly                   = "*hourly"
 	ID                           = "ID"
@@ -1124,6 +1135,14 @@ const (
 	AWSRegion = "aws_region"
 	AWSKey    = "aws_key"
 	AWSSecret = "aws_secret"
+)
+
+// Google_API
+const (
+	MetaGoogleAPI             = "*gapi"
+	GoogleConfigDirName       = ".gapi"
+	GoogleCredentialsFileName = "credentials.json"
+	GoogleTokenFileName       = "token.json"
 )
 
 func buildCacheInstRevPrefixes() {

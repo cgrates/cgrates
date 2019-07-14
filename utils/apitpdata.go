@@ -678,6 +678,7 @@ type AttrLoadTpFromFolder struct {
 	DryRun        bool   // Do not write to database but parse only
 	FlushDb       bool   // Flush previous data before loading new one
 	Validate      bool   // Run structural checks on data
+	Recursive     bool   // load data recursive
 	ArgDispatcher *ArgDispatcher
 }
 

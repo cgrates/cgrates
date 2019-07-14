@@ -126,29 +126,7 @@ func StopStartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 
 func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disable_reverse bool,
 	cacheS rpcclient.RpcClientConnection, schedulerS rpcclient.RpcClientConnection) error {
-	loader := NewTpReader(dm.dataDB, NewFileCSVStorage(utils.CSV_SEP,
-		[]string{path.Join(tpPath, utils.DESTINATIONS_CSV)},
-		[]string{path.Join(tpPath, utils.TIMINGS_CSV)},
-		[]string{path.Join(tpPath, utils.RATES_CSV)},
-		[]string{path.Join(tpPath, utils.DESTINATION_RATES_CSV)},
-		[]string{path.Join(tpPath, utils.RATING_PLANS_CSV)},
-		[]string{path.Join(tpPath, utils.RATING_PROFILES_CSV)},
-		[]string{path.Join(tpPath, utils.SHARED_GROUPS_CSV)},
-		[]string{path.Join(tpPath, utils.ACTIONS_CSV)},
-		[]string{path.Join(tpPath, utils.ACTION_PLANS_CSV)},
-		[]string{path.Join(tpPath, utils.ACTION_TRIGGERS_CSV)},
-		[]string{path.Join(tpPath, utils.ACCOUNT_ACTIONS_CSV)},
-
-		[]string{path.Join(tpPath, utils.ResourcesCsv)},
-		[]string{path.Join(tpPath, utils.StatsCsv)},
-		[]string{path.Join(tpPath, utils.ThresholdsCsv)},
-		[]string{path.Join(tpPath, utils.FiltersCsv)},
-		[]string{path.Join(tpPath, utils.SuppliersCsv)},
-		[]string{path.Join(tpPath, utils.AttributesCsv)},
-		[]string{path.Join(tpPath, utils.ChargersCsv)},
-		[]string{path.Join(tpPath, utils.DispatcherProfilesCsv)},
-		[]string{path.Join(tpPath, utils.DispatcherHostsCsv)},
-	), "", timezone, cacheS, schedulerS)
+	loader := NewTpReader(dm.dataDB, NewFileCSVStorage(utils.CSV_SEP, tpPath, false), "", timezone, cacheS, schedulerS)
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}

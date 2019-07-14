@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"math"
 	"os"
-	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -107,28 +106,7 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		return utils.ErrInvalidPath
 	}
 	loader := engine.NewTpReader(self.DataManager.DataDB(),
-		engine.NewFileCSVStorage(utils.CSV_SEP,
-			[]string{path.Join(attrs.FolderPath, utils.DESTINATIONS_CSV)},
-			[]string{path.Join(attrs.FolderPath, utils.TIMINGS_CSV)},
-			[]string{path.Join(attrs.FolderPath, utils.RATES_CSV)},
-			[]string{path.Join(attrs.FolderPath, utils.DESTINATION_RATES_CSV)},
-			[]string{path.Join(attrs.FolderPath, utils.RATING_PLANS_CSV)},
-			[]string{path.Join(attrs.FolderPath, utils.RATING_PROFILES_CSV)},
-			[]string{path.Join(attrs.FolderPath, utils.SHARED_GROUPS_CSV)},
-			[]string{path.Join(attrs.FolderPath, utils.ACTIONS_CSV)},
-			[]string{path.Join(attrs.FolderPath, utils.ACTION_PLANS_CSV)},
-			[]string{path.Join(attrs.FolderPath, utils.ACTION_TRIGGERS_CSV)},
-			[]string{path.Join(attrs.FolderPath, utils.ACCOUNT_ACTIONS_CSV)},
-			[]string{path.Join(attrs.FolderPath, utils.ResourcesCsv)},
-			[]string{path.Join(attrs.FolderPath, utils.StatsCsv)},
-			[]string{path.Join(attrs.FolderPath, utils.ThresholdsCsv)},
-			[]string{path.Join(attrs.FolderPath, utils.FiltersCsv)},
-			[]string{path.Join(attrs.FolderPath, utils.SuppliersCsv)},
-			[]string{path.Join(attrs.FolderPath, utils.AttributesCsv)},
-			[]string{path.Join(attrs.FolderPath, utils.ChargersCsv)},
-			[]string{path.Join(attrs.FolderPath, utils.DispatcherProfilesCsv)},
-			[]string{path.Join(attrs.FolderPath, utils.DispatcherHostsCsv)},
-		), "", self.Config.GeneralCfg().DefaultTimezone,
+		engine.NewFileCSVStorage(utils.CSV_SEP, attrs.FolderPath, attrs.Recursive), "", self.Config.GeneralCfg().DefaultTimezone,
 		self.CacheS, self.SchedulerS)
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
