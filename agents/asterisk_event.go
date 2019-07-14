@@ -331,8 +331,8 @@ func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp utils.CGREventWithArgD
 	}
 	subsystems, err := cgrEvDisp.CGREvent.FieldAsString(utils.CGRFlags)
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> event: %s don't have cgr_subsystems variable",
-			utils.AsteriskAgent, utils.ToJSON(cgrEvDisp.CGREvent)))
+		utils.Logger.Err(fmt.Sprintf("<%s> event: %s don't have %s variable",
+			utils.AsteriskAgent, utils.ToJSON(cgrEvDisp.CGREvent), utils.CGRFlags))
 		return
 	}
 	for _, subsystem := range strings.Split(subsystems, utils.FIELDS_SEP) {
@@ -374,8 +374,8 @@ func (smaEv *SMAsteriskEvent) V1TerminateSessionArgs(cgrEvDisp utils.CGREventWit
 	}
 	subsystems, err := cgrEvDisp.CGREvent.FieldAsString(utils.CGRFlags)
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> event: %s don't have cgr_subsystems variable",
-			utils.AsteriskAgent, utils.ToJSON(cgrEvDisp.CGREvent)))
+		utils.Logger.Err(fmt.Sprintf("<%s> event: %s don't have %s variable",
+			utils.AsteriskAgent, utils.ToJSON(cgrEvDisp.CGREvent), utils.CGRFlags))
 		return
 	}
 	for _, subsystem := range strings.Split(subsystems, utils.FIELDS_SEP) {
