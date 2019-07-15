@@ -237,10 +237,16 @@ func NewCGRConfigFromPath(path string) (*CGRConfig, error) {
 	return cfg, nil
 }
 
+func isHidden(fileName string) bool {
+	if fileName == "." || fileName == ".." {
+		return false
+	}
+	return strings.HasPrefix(fileName, ".")
+}
 func loadConfigFromFolder(cfg *CGRConfig, cfgDir string) (*CGRConfig, error) {
 	jsonFilesFound := false
 	err := filepath.Walk(cfgDir, func(path string, info os.FileInfo, err error) error {
-		if !info.IsDir() || strings.HasPrefix(info.Name(), ".") { // also ignore hidden files and folders
+		if !info.IsDir() || isHidden(info.Name()) { // also ignore hidden files and folders
 			return nil
 		}
 		cfgFiles, err := filepath.Glob(filepath.Join(path, "*.json"))
