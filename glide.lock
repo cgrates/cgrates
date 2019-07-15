@@ -67,19 +67,26 @@ imports:
   subpackages:
   - codec
 - name: golang.org/x/net
-  version: 26e67e76b6c3f6ce91f7c52def5af501b4e0f3a2
+  version: da137c7871d730100384dbcf36e6f8fa493aef5b
   subpackages:
   - context
   - html
   - html/atom
   - html/charset
   - websocket
+  - context/ctxhttp
+  - http/httpguts
+  - http2
+  - http2/hpack
+  - idna
+  - internal/timeseries
+  - trace
 - name: golang.org/x/sys
-  version: a646d33e2ee3172a661fc09bca23bb4889a41bc8
+  version: fae7ac547cb717d141c433a2a173315e216b64c4
   subpackages:
   - unix
 - name: golang.org/x/text
-  version: ceefd2213ed29504fff30155163c8f59827734f3
+  version: 342b2e1fbaa52c93f31447ad2c6abc048c63e475
   subpackages:
   - encoding
   - encoding/charmap
@@ -96,6 +103,9 @@ imports:
   - language
   - runes
   - transform
+  - secure/bidirule
+  - unicode/bidi
+  - unicode/norm
 - name: github.com/fsnotify/fsnotify
   version: ccc981bf80385c528a65fbfdd49bf2d8da22aa23
 - name: github.com/mongodb/mongo-go-driver
@@ -136,4 +146,108 @@ imports:
   version: 0f29369cfe4552d0e4bcddc57cc75f4d7e672a33
 - name: cloud.google.com/go
   version: f5404d6c65b2a7a73e4914d7463b6342d6d676e2
+- name: cloud.google.com/go
+  version: f5404d6c65b2a7a73e4914d7463b6342d6d676e2
+  subpackages:
+  - compute/metadata
+- name: github.com/golang/protobuf
+  version: 6c65a5562fc06764971b7c5d05c76c75e84bdbf7
+  subpackages:
+  - proto
+  - ptypes
+  - ptypes/any
+  - ptypes/duration
+  - ptypes/timestamp
+- name: github.com/hashicorp/golang-lru
+  version: 59383c442f7d7b190497e9bb8fc17a48d06cd03f
+  subpackages:
+  - simplelru
+- name: go.opencensus.io
+  version: b4a14686f0a98096416fe1b4cb848e384fb2b22b
+  subpackages:
+  - internal
+  - internal/tagencoding
+  - metric/metricdata
+  - metric/metricproducer
+  - plugin/ochttp
+  - plugin/ochttp/propagation/b3
+  - resource
+  - stats
+  - stats/internal
+  - stats/view
+  - tag
+  - trace
+  - trace/internal
+  - trace/propagation
+  - trace/tracestate
+- name: golang.org/x/oauth2
+  version: 0f29369cfe4552d0e4bcddc57cc75f4d7e672a33
+  subpackages:
+  - google
+  - internal
+  - jws
+  - jwt
+- name: google.golang.org/api
+  version: 02490b97dff7cfde1995bd77de808fd27053bc87
+  subpackages:
+  - gensupport
+  - googleapi
+  - googleapi/internal/uritemplates
+  - googleapi/transport
+  - internal
+  - option
+  - sheets/v4
+  - transport/http
+  - transport/http/internal/propagation
+- name: google.golang.org/appengine
+  version: b2f4a3cf3c67576a2ee09e1fe62656a5086ce880
+  subpackages:
+  - internal
+  - internal/app_identity
+  - internal/base
+  - internal/datastore
+  - internal/log
+  - internal/modules
+  - internal/remote_api
+  - internal/urlfetch
+  - urlfetch
+- name: google.golang.org/genproto
+  version: 3bdd9d9f5532d75d09efb230bd767d265245cfe5
+  subpackages:
+  - googleapis/rpc/status
+- name: google.golang.org/grpc
+  version: 24b2fb8959201be9ce659bc87b0d590a34c67eae
+  subpackages:
+  - balancer
+  - balancer/base
+  - balancer/roundrobin
+  - binarylog/grpc_binarylog_v1
+  - codes
+  - connectivity
+  - credentials
+  - credentials/internal
+  - encoding
+  - encoding/proto
+  - grpclog
+  - internal
+  - internal/backoff
+  - internal/balancerload
+  - internal/binarylog
+  - internal/channelz
+  - internal/envconfig
+  - internal/grpcrand
+  - internal/grpcsync
+  - internal/syscall
+  - internal/transport
+  - keepalive
+  - metadata
+  - naming
+  - peer
+  - resolver
+  - resolver/dns
+  - resolver/passthrough
+  - serviceconfig
+  - stats
+  - status
+  - tap
 testImports: []
