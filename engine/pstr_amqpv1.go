@@ -26,7 +26,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
-	amqpv1 "github.com/vcabbage/amqp"
+	amqpv1 "pack.ag/amqp"
 )
 
 func NewAMQPv1Poster(dialURL string, attempts int, fallbackFileDir string) (Poster, error) {

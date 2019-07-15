@@ -33,15 +33,14 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
 
-	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/bson/bsoncodec"
-	"github.com/mongodb/mongo-go-driver/bson/bsonrw"
-	"github.com/mongodb/mongo-go-driver/bson/bsontype"
-	"github.com/mongodb/mongo-go-driver/bson/primitive"
-	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/mongo/options"
-	"github.com/mongodb/mongo-go-driver/x/bsonx"
-	"github.com/mongodb/mongo-go-driver/x/network/command"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/bsoncodec"
+	"go.mongodb.org/mongo-driver/bson/bsonrw"
+	"go.mongodb.org/mongo-driver/bson/bsontype"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/x/bsonx"
 )
 
 const (
@@ -147,10 +146,11 @@ func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes
 	url = "mongodb://" + url
 	reg := bson.NewRegistryBuilder().RegisterDecoder(tTime, bsoncodec.ValueDecoderFunc(TimeDecodeValue1)).Build()
 	opt := options.Client().
+		ApplyURI(url).
 		SetRegistry(reg).
 		SetServerSelectionTimeout(ttl)
 
-	client, err := mongo.NewClientWithOptions(url, opt)
+	client, err := mongo.NewClient(opt)
 	// client, err := mongo.NewClient(url)
 
 	if err != nil {
@@ -260,7 +260,7 @@ func (ms *MongoStorage) GetContext() context.Context {
 }
 
 func (ms *MongoStorage) ensureIndexesForCol(col string) (err error) { // exported for migrator
-	if err = ms.dropAllIndexesForCol(col); err != nil && !command.IsNotFound(err) { // make sure you do not have indexes
+	if err = ms.dropAllIndexesForCol(col); err != nil && err.Error() != "ns not found" { // make sure you do not have indexes
 		return
 	}
 	err = nil
@@ -689,41 +689,41 @@ func (ms *MongoStorage) HasDataDrv(category, subject, tenant string) (has bool, 
 		var count int64
 		switch category {
 		case utils.DESTINATION_PREFIX:
-			count, err = ms.getCol(ColDst).Count(sctx, bson.M{"key": subject})
+			count, err = ms.getCol(ColDst).CountDocuments(sctx, bson.M{"key": subject})
 		case utils.RATING_PLAN_PREFIX:
-			count, err = ms.getCol(ColRpl).Count(sctx, bson.M{"key": subject})
+			count, err = ms.getCol(ColRpl).CountDocuments(sctx, bson.M{"key": subject})
 		case utils.RATING_PROFILE_PREFIX:
-			count, err = ms.getCol(ColRpf).Count(sctx, bson.M{"key": subject})
+			count, err = ms.getCol(ColRpf).CountDocuments(sctx, bson.M{"key": subject})
 		case utils.ACTION_PREFIX:
-			count, err = ms.getCol(ColAct).Count(sctx, bson.M{"key": subject})
+			count, err = ms.getCol(ColAct).CountDocuments(sctx, bson.M{"key": subject})
 		case utils.ACTION_PLAN_PREFIX:
-			count, err = ms.getCol(ColApl).Count(sctx, bson.M{"key": subject})
+			count, err = ms.getCol(ColApl).CountDocuments(sctx, bson.M{"key": subject})
 		case utils.ACCOUNT_PREFIX:
-			count, err = ms.getCol(ColAcc).Count(sctx, bson.M{"id": subject})
+			count, err = ms.getCol(ColAcc).CountDocuments(sctx, bson.M{"id": subject})
 		case utils.ResourcesPrefix:
-			count, err = ms.getCol(ColRes).Count(sctx, bson.M{"tenant": tenant, "id": subject})
+			count, err = ms.getCol(ColRes).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.ResourceProfilesPrefix:
-			count, err = ms.getCol(ColRsP).Count(sctx, bson.M{"tenant": tenant, "id": subject})
+			count, err = ms.getCol(ColRsP).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.StatQueuePrefix:
-			count, err = ms.getCol(ColSqs).Count(sctx, bson.M{"tenant": tenant, "id": subject})
+			count, err = ms.getCol(ColSqs).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.StatQueueProfilePrefix:
-			count, err = ms.getCol(ColSqp).Count(sctx, bson.M{"tenant": tenant, "id": subject})
+			count, err = ms.getCol(ColSqp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.ThresholdPrefix:
-			count, err = ms.getCol(ColThs).Count(sctx, bson.M{"tenant": tenant, "id": subject})
+			count, err = ms.getCol(ColThs).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.ThresholdProfilePrefix:
-			count, err = ms.getCol(ColTps).Count(sctx, bson.M{"tenant": tenant, "id": subject})
+			count, err = ms.getCol(ColTps).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.FilterPrefix:
-			count, err = ms.getCol(ColFlt).Count(sctx, bson.M{"tenant": tenant, "id": subject})
+			count, err = ms.getCol(ColFlt).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.SupplierProfilePrefix:
-			count, err = ms.getCol(ColSpp).Count(sctx, bson.M{"tenant": tenant, "id": subject})
+			count, err = ms.getCol(ColSpp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.AttributeProfilePrefix:
-			count, err = ms.getCol(ColAttr).Count(sctx, bson.M{"tenant": tenant, "id": subject})
+			count, err = ms.getCol(ColAttr).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.ChargerProfilePrefix:
-			count, err = ms.getCol(ColCpp).Count(sctx, bson.M{"tenant": tenant, "id": subject})
+			count, err = ms.getCol(ColCpp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.DispatcherProfilePrefix:
-			count, err = ms.getCol(ColDpp).Count(sctx, bson.M{"tenant": tenant, "id": subject})
+			count, err = ms.getCol(ColDpp).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		case utils.DispatcherHostPrefix:
-			count, err = ms.getCol(ColDph).Count(sctx, bson.M{"tenant": tenant, "id": subject})
+			count, err = ms.getCol(ColDph).CountDocuments(sctx, bson.M{"tenant": tenant, "id": subject})
 		default:
 			err = fmt.Errorf("unsupported category in HasData: %s", category)
 		}

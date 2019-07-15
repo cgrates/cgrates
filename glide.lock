@@ -1,6 +1,56 @@
-hash: 2daed4c5ed5052824ae5df18b0690a85226f9e3c61c336f83db7fccc6f4ecd51
-updated: 2017-04-21T14:51:07.386488974+02:00
+hash: 497f0a02100f03d9c0def54840db813cdea2ffe979d7bdc4c27094d2dd6a2b7a
+updated: 2019-07-15T19:45:13.621468072+03:00
 imports:
+- name: cloud.google.com/go
+  version: 570ba224802bce0768591e4245c91a19ca031e1d
+  subpackages:
+  - compute/metadata
+- name: github.com/antchfx/xmlquery
+  version: ebb6e8b1d11997a4b8995f1b21d5c4ee044f1d1c
+- name: github.com/antchfx/xpath
+  version: b6dbe470e10224a23b2f69db0d4449bc6627ece6
+- name: github.com/aws/aws-sdk-go
+  version: 7a3d36756688bc55a0d67cf0563ffd59cfa93770
+  subpackages:
+  - aws
+  - aws/awserr
+  - aws/awsutil
+  - aws/client
+  - aws/client/metadata
+  - aws/corehandlers
+  - aws/credentials
+  - aws/credentials/ec2rolecreds
+  - aws/credentials/endpointcreds
+  - aws/credentials/processcreds
+  - aws/credentials/stscreds
+  - aws/csm
+  - aws/defaults
+  - aws/ec2metadata
+  - aws/endpoints
+  - aws/request
+  - aws/session
+  - aws/signer/v4
+  - internal/ini
+  - internal/s3err
+  - internal/sdkio
+  - internal/sdkrand
+  - internal/sdkuri
+  - internal/shareddefaults
+  - private/protocol
+  - private/protocol/eventstream
+  - private/protocol/eventstream/eventstreamapi
+  - private/protocol/json/jsonutil
+  - private/protocol/query
+  - private/protocol/query/queryutil
+  - private/protocol/rest
+  - private/protocol/restxml
+  - private/protocol/xml/xmlutil
+  - service
+  - service/s3
+  - service/s3/s3iface
+  - service/s3/s3manager
+  - service/sqs
+  - service/sts
 - name: github.com/cenkalti/hub
   version: 11382a9960d39b0ecda16fd01c424c11ff765a34
 - name: github.com/cenkalti/rpc2
@@ -10,17 +60,7 @@ imports:
 - name: github.com/cgrates/aringo
   version: f996da7890eaec95ba13240253744446e17e6598
 - name: github.com/cgrates/fsock
-  version: 4759d9e84c74981872c5c2bbffe6f23ecba2ea3c
-- name: github.com/cgrates/kamevapi
-  version: ec679e0176542f09fa7a2503c95d12b4159b482a
-- name: github.com/cgrates/ltcache
-  version: 92fb7fa77cca400b55d805e4a6d625443027c7f5
-- name: github.com/cgrates/osipsdagram
-  version: 3d6beed663452471dec3ca194137a30d379d9e8f
-- name: github.com/cgrates/radigo
-  version: e5c8f3272cccf795f47b82e25a8f3408312c14e0
-- name: github.com/cgrates/rpcclient
-  version: 8fcc68b2c38bbab455047ad4712212394a2e9b95
+  version: 317895b42f1af0a0d3a845701b4612473a438fcb
 - name: github.com/cgrates/go-diameter
   version: 74cc2c72ff0c6ff7af51868c6e541b6d1b7c5514
   subpackages:
@@ -31,125 +71,26 @@ imports:
   - diam/sm
   - diam/sm/smparser
   - diam/sm/smpeer
-- name: github.com/ishidawataru/sctp
-  version: 6e2cb1366111dcf547c13531e3a263a067715847
-- name: github.com/go-sql-driver/mysql
-  version: 99ff426eb706cffe92ff3d058e168b278cabf7c7
-- name: github.com/gorhill/cronexpr
-  version: 88b0669f7d75f171bd612b874e52b95c190218df
-- name: github.com/jinzhu/gorm
-  version: 5be9bd34135805e0332b993378864b159784d8a8
-- name: github.com/jinzhu/inflection
-  version: 1c35d901db3da928c72a72d8458480cc9ade058f
-- name: github.com/kr/pty
-  version: db8e3cd836b82e82e0a9c8edc6896967dd31374f
-- name: github.com/lib/pq
-  version: 4ded0e9383f75c197b3a2aaa6d590ac52df6fd79
+- name: github.com/cgrates/kamevapi
+  version: ec679e0176542f09fa7a2503c95d12b4159b482a
+- name: github.com/cgrates/ltcache
+  version: 92fb7fa77cca400b55d805e4a6d625443027c7f5
+- name: github.com/cgrates/osipsdagram
+  version: 3d6beed663452471dec3ca194137a30d379d9e8f
+- name: github.com/cgrates/radigo
+  version: e5c8f3272cccf795f47b82e25a8f3408312c14e0
   subpackages:
-  - oid
-- name: github.com/mediocregopher/radix.v2
-  version: 94360be262532d465b7e4760c7a67195d3319a87
-  subpackages:
-  - pool
-  - redis
-- name: github.com/mitchellh/mapstructure
-  version: fa473d140ef3c6adf42d6b391fe76707f1f243c8
-- name: github.com/peterh/liner
-  version: 5a0dfa99e2aa1d433a9642e863da51402e609376
-- name: github.com/mattn/go-runewidth
-  version: ce7b0b5c7b45a81508558cd1dba6bb1e4ddb51bb
-- name: github.com/streadway/amqp
-  version: 70e15c650864f4fc47f5d3c82ea117285480895d
-- name: github.com/vcabbage/amqp
-  version: a69a1d51f8e7b55567f8d190a8fab04503a97735
-- name: github.com/ugorji/go
-  version: 5a66da2e74afec77056667aacd61e97b6ea8f661
-  subpackages:
-  - codec
-- name: golang.org/x/net
-  version: da137c7871d730100384dbcf36e6f8fa493aef5b
-  subpackages:
-  - context
-  - html
-  - html/atom
-  - html/charset
-  - websocket
-  - context/ctxhttp
-  - http/httpguts
-  - http2
-  - http2/hpack
-  - idna
-  - internal/timeseries
-  - trace
-- name: golang.org/x/sys
-  version: fae7ac547cb717d141c433a2a173315e216b64c4
-  subpackages:
-  - unix
-- name: golang.org/x/text
-  version: 342b2e1fbaa52c93f31447ad2c6abc048c63e475
-  subpackages:
-  - encoding
-  - encoding/charmap
-  - encoding/htmlindex
-  - encoding/internal
-  - encoding/internal/identifier
-  - encoding/japanese
-  - encoding/korean
-  - encoding/simplifiedchinese
-  - encoding/traditionalchinese
-  - encoding/unicode
-  - internal/tag
-  - internal/utf8internal
-  - language
-  - runes
-  - transform
-  - secure/bidirule
-  - unicode/bidi
-  - unicode/norm
+  - codecs
+- name: github.com/cgrates/rpcclient
+  version: 8fcc68b2c38bbab455047ad4712212394a2e9b95
+- name: github.com/creack/pty
+  version: 2769f65a3a94eb8f876f44a0459d24ae7ad2e488
 - name: github.com/fsnotify/fsnotify
-  version: ccc981bf80385c528a65fbfdd49bf2d8da22aa23
-- name: github.com/mongodb/mongo-go-driver
-  version: 4f3b0a882e7d5f83c3d1ab4d0e530a51642fce03
-  subpackages:
-  - bson
-  - bson/bsoncodec
-  - bson/bsonrw
-  - bson/bsontype
-  - bson/primitive
-  - internal
-  - mongo
-  - mongo/readconcern
-  - mongo/readpref
-  - mongo/writeconcern
-  - mongo/options
-  - x/bsonx
-  - x/bsonx/bsoncore
-  - x/mongo/driver/topology
-- name: github.com/dlintw/goconf
-  version: dcc070983490608a14480e3bf943bad464785df5
-- name: github.com/antchfx/xmlquery
-  version: 07935b1c0f2e6f0efa02c98cd70e223d70218955
-- name: github.com/antchfx/xpath
-  version: 3de91f3991a1af6e495d49c9218318b5544b20e3
-- name: github.com/aws/aws-sdk-go
-  version: 68afe677298a894afc385165f93ec26895a50c9e
-  subpackages: 
-  - aws
-  - service
-- name: github.com/miekg/dns
-  version: b13675009d59c97f3721247d9efa8914e1866a5b
-- name: github.com/segmentio/kafka-go
-  version: 0b38267f13d5e17fcf8dfbb89168ef7fb520deb8
-- name: google.golang.org/api/
-  version: aa15faf3c8a1cffc77fc3dabe95703bb12c5f6a9
-- name: golang.org/x/oauth2
-  version: 0f29369cfe4552d0e4bcddc57cc75f4d7e672a33
-- name: cloud.google.com/go
-  version: f5404d6c65b2a7a73e4914d7463b6342d6d676e2
-- name: cloud.google.com/go
-  version: f5404d6c65b2a7a73e4914d7463b6342d6d676e2
-  subpackages:
-  - compute/metadata
+  version: 1485a34d5d5723fea214f5710708e19a831720e4
+- name: github.com/go-sql-driver/mysql
+  version: 877a9775f06853f611fb2d4e817d92479242d1cd
+- name: github.com/go-stack/stack
+  version: 2fee6af1a9795aafbe0253a0cfbdf668e1fb8a9a
 - name: github.com/golang/protobuf
   version: 6c65a5562fc06764971b7c5d05c76c75e84bdbf7
   subpackages:
@@ -158,10 +99,89 @@ imports:
   - ptypes/any
   - ptypes/duration
   - ptypes/timestamp
+- name: github.com/golang/snappy
+  version: 2a8bb927dd31d8daada140a5d09578521ce5c36a
+- name: github.com/gorhill/cronexpr
+  version: 88b0669f7d75f171bd612b874e52b95c190218df
 - name: github.com/hashicorp/golang-lru
   version: 59383c442f7d7b190497e9bb8fc17a48d06cd03f
   subpackages:
   - simplelru
+- name: github.com/ishidawataru/sctp
+  version: 6e2cb1366111dcf547c13531e3a263a067715847
+- name: github.com/jinzhu/gorm
+  version: 836fb2c19d84dac7b0272958dfb9af7cf0d0ade4
+- name: github.com/jinzhu/inflection
+  version: f5c5f50e6090ae76a29240b61ae2a90dd810112e
+- name: github.com/jmespath/go-jmespath
+  version: c2b33e8439af944379acbdd9c3a5fe0bc44bd8a5
+- name: github.com/lib/pq
+  version: 2ff3cb3adc01768e0a552b3a02575a6df38a9bea
+  subpackages:
+  - oid
+  - scram
+- name: github.com/mattn/go-runewidth
+  version: 703b5e6b11ae25aeb2af9ebb5d5fdf8fa2575211
+- name: github.com/mediocregopher/radix.v2
+  version: b67df6e626f993b64b3ca9f4b8630900e61002e3
+  subpackages:
+  - pool
+  - pubsub
+  - redis
+  - sentinel
+- name: github.com/miekg/dns
+  version: b13675009d59c97f3721247d9efa8914e1866a5b
+- name: github.com/mitchellh/mapstructure
+  version: 3536a929edddb9a5b34bd6861dc4a9647cb459fe
+- name: github.com/peterh/liner
+  version: 6f820f8f90ce9482ffbd40bb15f9ea9932f4942d
+- name: github.com/pkg/errors
+  version: 27936f6d90f9c8e1145f11ed52ffffbfdb9e0af7
+- name: github.com/segmentio/kafka-go
+  version: 03ea927bad1420f26268119c110a679eb25e88b3
+  subpackages:
+  - sasl
+- name: github.com/streadway/amqp
+  version: 75d898a42a940fbc854dfd1a4199eabdc00cf024
+- name: github.com/ugorji/go
+  version: 5a66da2e74afec77056667aacd61e97b6ea8f661
+  subpackages:
+  - codec
+- name: github.com/xdg/scram
+  version: 7eeb5667e42c09cb51bf7b7c28aea8c56767da90
+- name: github.com/xdg/stringprep
+  version: 73f8eece6fdcd902c185bf651de50f3828bed5ed
+- name: go.mongodb.org/mongo-driver
+  version: 9ec4480161a76f5267d56fc836b7f6d357fd9209
+  subpackages:
+  - bson
+  - bson/bsoncodec
+  - bson/bsonrw
+  - bson/bsontype
+  - bson/primitive
+  - event
+  - internal
+  - mongo
+  - mongo/options
+  - mongo/readconcern
+  - mongo/readpref
+  - mongo/writeconcern
+  - tag
+  - version
+  - x/bsonx
+  - x/bsonx/bsoncore
+  - x/mongo/driver
+  - x/mongo/driver/address
+  - x/mongo/driver/auth
+  - x/mongo/driver/auth/internal/gssapi
+  - x/mongo/driver/connstring
+  - x/mongo/driver/description
+  - x/mongo/driver/dns
+  - x/mongo/driver/operation
+  - x/mongo/driver/session
+  - x/mongo/driver/topology
+  - x/mongo/driver/uuid
+  - x/mongo/driver/wiremessage
 - name: go.opencensus.io
   version: b4a14686f0a98096416fe1b4cb848e384fb2b22b
   subpackages:
@@ -180,6 +200,32 @@ imports:
   - trace/internal
   - trace/propagation
   - trace/tracestate
+- name: golang.org/x/crypto
+  version: 4def268fd1a49955bfb3dda92fe3db4f924f2285
+  subpackages:
+  - ed25519
+  - ed25519/internal/edwards25519
+  - pbkdf2
+- name: golang.org/x/net
+  version: da137c7871d730100384dbcf36e6f8fa493aef5b
+  subpackages:
+  - bpf
+  - context
+  - context/ctxhttp
+  - html
+  - html/atom
+  - html/charset
+  - http/httpguts
+  - http2
+  - http2/hpack
+  - idna
+  - internal/iana
+  - internal/socket
+  - internal/timeseries
+  - ipv4
+  - ipv6
+  - trace
+  - websocket
 - name: golang.org/x/oauth2
   version: 0f29369cfe4552d0e4bcddc57cc75f4d7e672a33
   subpackages:
@@ -187,6 +233,38 @@ imports:
   - internal
   - jws
   - jwt
+- name: golang.org/x/sync
+  version: 112230192c580c3556b8cee6403af37a4fc5f28c
+  subpackages:
+  - semaphore
+- name: golang.org/x/sys
+  version: fae7ac547cb717d141c433a2a173315e216b64c4
+  subpackages:
+  - unix
+  - windows
+- name: golang.org/x/text
+  version: 342b2e1fbaa52c93f31447ad2c6abc048c63e475
+  subpackages:
+  - encoding
+  - encoding/charmap
+  - encoding/htmlindex
+  - encoding/internal
+  - encoding/internal/identifier
+  - encoding/japanese
+  - encoding/korean
+  - encoding/simplifiedchinese
+  - encoding/traditionalchinese
+  - encoding/unicode
+  - internal/language
+  - internal/language/compact
+  - internal/tag
+  - internal/utf8internal
+  - language
+  - runes
+  - secure/bidirule
+  - transform
+  - unicode/bidi
+  - unicode/norm
 - name: google.golang.org/api
   version: 02490b97dff7cfde1995bd77de808fd27053bc87
   subpackages:
@@ -202,6 +280,7 @@ imports:
 - name: google.golang.org/appengine
   version: b2f4a3cf3c67576a2ee09e1fe62656a5086ce880
   subpackages:
+  - cloudsql
   - internal
   - internal/app_identity
   - internal/base
@@ -250,4 +329,8 @@ imports:
   - stats
   - status
   - tap
+- name: pack.ag/amqp
+  version: 279d72ee259701e0e0e58d98a52a82ba172a2f5f
+  subpackages:
+  - internal/testconn
 testImports: []

@@ -27,10 +27,10 @@ import (
 
 	"github.com/cgrates/cgrates/utils"
 
-	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/mongo/options"
-	"github.com/mongodb/mongo-go-driver/x/bsonx"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/x/bsonx"
 )
 
 func (ms *MongoStorage) GetTpIds(colName string) (tpids []string, err error) {
@@ -1140,7 +1140,7 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	if qryFltr.Count {
 		var cnt int64
 		if err := ms.query(func(sctx mongo.SessionContext) (err error) {
-			cnt, err = ms.getCol(ColCDRs).Count(sctx, filters, cop)
+			cnt, err = ms.getCol(ColCDRs).CountDocuments(sctx, filters, cop)
 			return err
 		}); err != nil {
 			return nil, 0, err

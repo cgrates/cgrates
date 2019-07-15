@@ -1,6 +1,5 @@
-package: ""
+package: github.com/cgrates/cgrates
 import:
-- package: github.com/cenkalti/hub
 - package: github.com/cenkalti/rpc2
 - package: github.com/cgrates/fsock
 - package: github.com/cgrates/kamevapi
@@ -17,14 +16,13 @@ import:
 - package: github.com/go-sql-driver/mysql
 - package: github.com/gorhill/cronexpr
 - package: github.com/jinzhu/gorm
-- package: github.com/kr/pty
+- package: github.com/creack/pty
 - package: github.com/lib/pq
 - package: github.com/mediocregopher/radix.v2
   subpackages:
   - pool
   - redis
 - package: github.com/peterh/liner
-- package: github.com/mattn/go-runewidth
 - package: github.com/ugorji/go
   subpackages:
   - codec
@@ -36,13 +34,11 @@ import:
 - package: github.com/mitchellh/mapstructure
 - package: github.com/cgrates/aringo
 - package: github.com/streadway/amqp
-- package: github.com/vcabbage/amqp
+- package: pack.ag/amqp
 - package: github.com/cgrates/radigo
 - package: github.com/cgrates/ltcache
-- package: github.com/dlintw/goconf
 - package: github.com/antchfx/xmlquery
-- package: github.com/antchfx/xpath
-- package: github.com/mongodb/mongo-go-driver
+- package: go.mongodb.org/mongo-driver
   subpackages:
   - bson
   - bson/bsoncodec
@@ -58,11 +54,6 @@ import:
   - x/bsonx
   - x/bsonx/bsoncore
   - x/mongo/driver/topology
-- package: github.com/stretchr/testify
-  subpackages:
-  - require
-- package: github.com/Masterminds/semver
-  version: ^1.4.2
 - package: github.com/aws/aws-sdk-go
   subpackages:
   - aws
