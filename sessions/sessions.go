@@ -1709,6 +1709,15 @@ func NewV1AuthorizeArgs(attrs bool, attributeIDs []string,
 	return
 }
 
+func getFlagIDs(flag string) *[]string {
+	flagWithIDs := strings.Split(flag, utils.InInFieldSep)
+	if len(flagWithIDs) <= 1 {
+		return nil
+	}
+	IDs := strings.Split(flagWithIDs[1], utils.INFIELD_SEP)
+	return &IDs
+}
+
 // V1AuthorizeArgs are options available in auth request
 type V1AuthorizeArgs struct {
 	GetAttributes         bool
@@ -1725,6 +1734,38 @@ type V1AuthorizeArgs struct {
 	*utils.CGREvent
 	utils.Paginator
 	*utils.ArgDispatcher
+}
+
+func (args *V1AuthorizeArgs) ParseFlags(flags string) {
+	dispatcherFlag := false
+	for _, subsystem := range strings.Split(flags, utils.FIELDS_SEP) {
+		switch {
+		case subsystem == utils.MetaAccounts:
+			args.GetMaxUsage = true
+		case subsystem == utils.MetaResources:
+			args.AuthorizeResources = true
+		case subsystem == utils.MetaDispatchers:
+			dispatcherFlag = true
+		case subsystem == utils.MetaSuppliers:
+			args.GetSuppliers = true
+		case subsystem == utils.MetaSuppliersIgnoreErrors:
+			args.SuppliersIgnoreErrors = true
+		case subsystem == utils.MetaSuppliersEventCost:
+			args.SuppliersMaxCost = utils.MetaEventCost
+		case strings.HasPrefix(subsystem, utils.MetaAttributes):
+			args.GetAttributes = true
+			args.AttributeIDs = getFlagIDs(subsystem)
+		case strings.HasPrefix(subsystem, utils.MetaThresholds):
+			args.ProcessThresholds = true
+			args.ThresholdIDs = getFlagIDs(subsystem)
+		case strings.HasPrefix(subsystem, utils.MetaStats):
+			args.ProcessStats = true
+			args.StatIDs = getFlagIDs(subsystem)
+		}
+	}
+	cgrArgs := args.CGREvent.ConsumeArgs(dispatcherFlag, true)
+	args.ArgDispatcher = cgrArgs.ArgDispatcher
+	args.Paginator = *cgrArgs.SupplierPaginator
 }
 
 // V1AuthorizeReply are options available in auth reply
@@ -2008,6 +2049,31 @@ type V1InitSessionArgs struct {
 	StatIDs           *[]string
 	*utils.CGREvent
 	*utils.ArgDispatcher
+}
+
+func (args *V1InitSessionArgs) ParseFlags(flags string) {
+	dispatcherFlag := false
+	for _, subsystem := range strings.Split(flags, utils.FIELDS_SEP) {
+		switch {
+		case subsystem == utils.MetaAccounts:
+			args.InitSession = true
+		case subsystem == utils.MetaResources:
+			args.AllocateResources = true
+		case subsystem == utils.MetaDispatchers:
+			dispatcherFlag = true
+		case strings.HasPrefix(subsystem, utils.MetaAttributes):
+			args.GetAttributes = true
+			args.AttributeIDs = getFlagIDs(subsystem)
+		case strings.HasPrefix(subsystem, utils.MetaThresholds):
+			args.ProcessThresholds = true
+			args.ThresholdIDs = getFlagIDs(subsystem)
+		case strings.HasPrefix(subsystem, utils.MetaStats):
+			args.ProcessStats = true
+			args.StatIDs = getFlagIDs(subsystem)
+		}
+	}
+	cgrArgs := args.CGREvent.ConsumeArgs(dispatcherFlag, false)
+	args.ArgDispatcher = cgrArgs.ArgDispatcher
 }
 
 // V1InitSessionReply are options for initialization reply
@@ -2416,6 +2482,28 @@ type V1TerminateSessionArgs struct {
 	*utils.ArgDispatcher
 }
 
+func (args *V1TerminateSessionArgs) ParseFlags(flags string) {
+	dispatcherFlag := false
+	for _, subsystem := range strings.Split(flags, utils.FIELDS_SEP) {
+		switch {
+		case subsystem == utils.MetaAccounts:
+			args.TerminateSession = true
+		case subsystem == utils.MetaResources:
+			args.ReleaseResources = true
+		case subsystem == utils.MetaDispatchers:
+			dispatcherFlag = true
+		case strings.Index(subsystem, utils.MetaThresholds) != -1:
+			args.ProcessThresholds = true
+			args.ThresholdIDs = getFlagIDs(subsystem)
+		case strings.Index(subsystem, utils.MetaStats) != -1:
+			args.ProcessStats = true
+			args.StatIDs = getFlagIDs(subsystem)
+		}
+	}
+	cgrArgs := args.CGREvent.ConsumeArgs(dispatcherFlag, false)
+	args.ArgDispatcher = cgrArgs.ArgDispatcher
+}
+
 // BiRPCV1TerminateSession will stop debit loops as well as release any used resources
 func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 	args *V1TerminateSessionArgs, rply *string) (err error) {
@@ -2691,6 +2779,38 @@ type V1ProcessEventArgs struct {
 	*utils.CGREvent
 	utils.Paginator
 	*utils.ArgDispatcher
+}
+
+func (args V1ProcessEventArgs) ParseFlags(flags string) {
+	dispatcherFlag := false
+	for _, subsystem := range strings.Split(flags, utils.FIELDS_SEP) {
+		switch {
+		case subsystem == utils.MetaAccounts:
+			args.Debit = true
+		case subsystem == utils.MetaResources:
+			args.AllocateResources = true
+		case subsystem == utils.MetaDispatchers:
+			dispatcherFlag = true
+		case subsystem == utils.MetaSuppliers:
+			args.GetSuppliers = true
+		case subsystem == utils.MetaSuppliersIgnoreErrors:
+			args.SuppliersIgnoreErrors = true
+		case subsystem == utils.MetaSuppliersEventCost:
+			args.SuppliersMaxCost = utils.MetaEventCost
+		case strings.Index(subsystem, utils.MetaAttributes) != -1:
+			args.GetAttributes = true
+			args.AttributeIDs = getFlagIDs(subsystem)
+		case strings.Index(subsystem, utils.MetaThresholds) != -1:
+			args.ProcessThresholds = true
+			args.ThresholdIDs = getFlagIDs(subsystem)
+		case strings.Index(subsystem, utils.MetaStats) != -1:
+			args.ProcessStats = true
+			args.StatIDs = getFlagIDs(subsystem)
+		}
+	}
+	cgrArgs := args.CGREvent.ConsumeArgs(dispatcherFlag, true)
+	args.ArgDispatcher = cgrArgs.ArgDispatcher
+	args.Paginator = *cgrArgs.SupplierPaginator
 }
 
 // V1ProcessEventReply is the reply for the ProcessEvent API

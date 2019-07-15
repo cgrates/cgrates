@@ -285,42 +285,7 @@ func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs)
 			utils.AsteriskAgent))
 		return
 	}
-	for _, subsystem := range strings.Split(smaEv.Subsystems(), utils.FIELDS_SEP) {
-		switch {
-		case subsystem == utils.MetaAccounts:
-			args.GetMaxUsage = true
-		case subsystem == utils.MetaResources:
-			args.AuthorizeResources = true
-		case subsystem == utils.MetaDispatchers:
-			cgrArgs := cgrEv.ConsumeArgs(true, true)
-			args.ArgDispatcher = cgrArgs.ArgDispatcher
-			args.Paginator = *cgrArgs.SupplierPaginator
-		case subsystem == utils.MetaSuppliers:
-			args.GetSuppliers = true
-		case subsystem == utils.MetaSuppliersIgnoreErrors:
-			args.SuppliersIgnoreErrors = true
-		case subsystem == utils.MetaSuppliersEventCost:
-			args.SuppliersMaxCost = utils.MetaEventCost
-		case strings.Index(subsystem, utils.MetaAttributes) != -1:
-			args.GetAttributes = true
-			if attrWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(attrWithIDs) > 1 {
-				attrIDs := strings.Split(attrWithIDs[1], utils.INFIELD_SEP)
-				args.AttributeIDs = &attrIDs
-			}
-		case strings.Index(subsystem, utils.MetaThresholds) != -1:
-			args.ProcessThresholds = true
-			if thdWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(thdWithIDs) > 1 {
-				thIDs := strings.Split(thdWithIDs[1], utils.INFIELD_SEP)
-				args.ThresholdIDs = &thIDs
-			}
-		case strings.Index(subsystem, utils.MetaStats) != -1:
-			args.ProcessStats = true
-			if stsWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(stsWithIDs) > 1 {
-				stsIDs := strings.Split(stsWithIDs[1], utils.INFIELD_SEP)
-				args.StatIDs = &stsIDs
-			}
-		}
-	}
+	args.ParseFlags(smaEv.Subsystems())
 	return
 }
 
@@ -335,35 +300,7 @@ func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp utils.CGREventWithArgD
 			utils.AsteriskAgent, utils.ToJSON(cgrEvDisp.CGREvent), utils.CGRFlags))
 		return
 	}
-	for _, subsystem := range strings.Split(subsystems, utils.FIELDS_SEP) {
-		switch {
-		case subsystem == utils.MetaAccounts:
-			args.InitSession = true
-		case subsystem == utils.MetaResources:
-			args.AllocateResources = true
-		case subsystem == utils.MetaDispatchers:
-			cgrArgs := cgrEvDisp.ConsumeArgs(true, false)
-			args.ArgDispatcher = cgrArgs.ArgDispatcher
-		case strings.Index(subsystem, utils.MetaAttributes) != -1:
-			args.GetAttributes = true
-			if attrWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(attrWithIDs) > 1 {
-				attrIDs := strings.Split(attrWithIDs[1], utils.INFIELD_SEP)
-				args.AttributeIDs = &attrIDs
-			}
-		case strings.Index(subsystem, utils.MetaThresholds) != -1:
-			args.ProcessThresholds = true
-			if thdWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(thdWithIDs) > 1 {
-				thIDs := strings.Split(thdWithIDs[1], utils.INFIELD_SEP)
-				args.ThresholdIDs = &thIDs
-			}
-		case strings.Index(subsystem, utils.MetaStats) != -1:
-			args.ProcessStats = true
-			if stsWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(stsWithIDs) > 1 {
-				stsIDs := strings.Split(stsWithIDs[1], utils.INFIELD_SEP)
-				args.StatIDs = &stsIDs
-			}
-		}
-	}
+	args.ParseFlags(subsystems)
 	return
 }
 
@@ -378,28 +315,6 @@ func (smaEv *SMAsteriskEvent) V1TerminateSessionArgs(cgrEvDisp utils.CGREventWit
 			utils.AsteriskAgent, utils.ToJSON(cgrEvDisp.CGREvent), utils.CGRFlags))
 		return
 	}
-	for _, subsystem := range strings.Split(subsystems, utils.FIELDS_SEP) {
-		switch {
-		case subsystem == utils.MetaAccounts:
-			args.TerminateSession = true
-		case subsystem == utils.MetaResources:
-			args.ReleaseResources = true
-		case subsystem == utils.MetaDispatchers:
-			cgrArgs := cgrEvDisp.ConsumeArgs(true, false)
-			args.ArgDispatcher = cgrArgs.ArgDispatcher
-		case strings.Index(subsystem, utils.MetaThresholds) != -1:
-			args.ProcessThresholds = true
-			if thdWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(thdWithIDs) > 1 {
-				thIDs := strings.Split(thdWithIDs[1], utils.INFIELD_SEP)
-				args.ThresholdIDs = &thIDs
-			}
-		case strings.Index(subsystem, utils.MetaStats) != -1:
-			args.ProcessStats = true
-			if stsWithIDs := strings.Split(subsystem, utils.InInFieldSep); len(stsWithIDs) > 1 {
-				stsIDs := strings.Split(stsWithIDs[1], utils.INFIELD_SEP)
-				args.StatIDs = &stsIDs
-			}
-		}
-	}
+	args.ParseFlags(subsystems)
 	return
 }
