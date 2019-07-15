@@ -243,6 +243,7 @@ func isHidden(fileName string) bool {
 	}
 	return strings.HasPrefix(fileName, ".")
 }
+
 func loadConfigFromFolder(cfg *CGRConfig, cfgDir string) (*CGRConfig, error) {
 	jsonFilesFound := false
 	err := filepath.Walk(cfgDir, func(path string, info os.FileInfo, err error) error {
