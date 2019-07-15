@@ -895,7 +895,7 @@ const (
 	SessionSv1TerminateSession           = "SessionSv1.TerminateSession"
 	SessionSv1ProcessCDR                 = "SessionSv1.ProcessCDR"
 	SessionSv1ProcessMessage             = "SessionSv1.ProcessMessage"
-	SessionSv2ProcessEvent               = "SessionSv2.ProcessEvent"
+	SessionSv1ProcessEvent               = "SessionSv1.ProcessEvent"
 	SessionSv1DisconnectSession          = "SessionSv1.DisconnectSession"
 	SessionSv1GetActiveSessions          = "SessionSv1.GetActiveSessions"
 	SessionSv1GetActiveSessionsCount     = "SessionSv1.GetActiveSessionsCount"
