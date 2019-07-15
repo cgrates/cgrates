@@ -108,7 +108,7 @@ func testSes3ItLoadFromFolder(t *testing.T) {
 
 func testSes3ItProcessEvent(t *testing.T) {
 	initUsage := 5 * time.Minute
-	args := sessions.V1ProcessEventArgs{
+	args := sessions.V1ProcessMessageArgs{
 		AllocateResources: true,
 		Debit:             true,
 		GetAttributes:     true,
@@ -135,8 +135,8 @@ func testSes3ItProcessEvent(t *testing.T) {
 			APIKey: utils.StringPointer("ses12345"),
 		},
 	}
-	var rply sessions.V1ProcessEventReply
-	if err := ses3RPC.Call(utils.SessionSv1ProcessEvent,
+	var rply sessions.V1ProcessMessageReply
+	if err := ses3RPC.Call(utils.SessionSv1ProcessMessage,
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}

@@ -427,23 +427,23 @@ func TestProcessRequest(t *testing.T) {
 		t.Errorf("Expected the reply to have one value received: %s", rply.String())
 	}
 
-	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaEvent, utils.MetaAccounts, utils.MetaAttributes})
+	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaMessage, utils.MetaAccounts, utils.MetaAttributes})
 	cgrRplyNM = config.NewNavigableMap(nil)
 	rply = config.NewNavigableMap(nil)
 
 	sS = &testMockSessionConn{calls: map[string]func(arg interface{}, rply interface{}) error{
-		utils.SessionSv1ProcessEvent: func(arg interface{}, rply interface{}) error {
+		utils.SessionSv1ProcessMessage: func(arg interface{}, rply interface{}) error {
 			var tm *time.Time
 			var id string
 			if arg == nil {
 				t.Errorf("args is nil")
-			} else if rargs, can := arg.(*sessions.V1ProcessEventArgs); !can {
-				t.Errorf("args is not of sessions.V1ProcessEventArgs type")
+			} else if rargs, can := arg.(*sessions.V1ProcessMessageArgs); !can {
+				t.Errorf("args is not of sessions.V1ProcessMessageArgs type")
 			} else {
 				tm = rargs.Time // need time
 				id = rargs.ID
 			}
-			expargs := &sessions.V1ProcessEventArgs{
+			expargs := &sessions.V1ProcessMessageArgs{
 				GetAttributes: true,
 				Debit:         true,
 				CGREvent: &utils.CGREvent{
@@ -464,12 +464,12 @@ func TestProcessRequest(t *testing.T) {
 			if !reflect.DeepEqual(expargs, arg) {
 				t.Errorf("Expected:%s ,received: %s", utils.ToJSON(expargs), utils.ToJSON(arg))
 			}
-			prply, can := rply.(*sessions.V1ProcessEventReply)
+			prply, can := rply.(*sessions.V1ProcessMessageReply)
 			if !can {
 				t.Errorf("Wrong argument type : %T", rply)
 				return nil
 			}
-			*prply = sessions.V1ProcessEventReply{
+			*prply = sessions.V1ProcessMessageReply{
 				Attributes: &engine.AttrSProcessEventReply{
 					MatchedProfiles: []string{"ATTR_1001_SESSIONAUTH"},
 					AlteredFields:   []string{"Password", "PaypalAccount", "RequestType", "LCRProfile"},

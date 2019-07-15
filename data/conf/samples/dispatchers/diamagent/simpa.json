@@ -7,7 +7,7 @@
 			"id": "simpa_event",
 			"filters": ["*string:~*vars.*cmd:CCR", "*string:~*req.CC-Request-Type:4",
 				"*prefix:~*req.Service-Context-Id:simpa"],
-			"flags": ["*event", "*accounts", "*log"],
+			"flags": ["*message", "*accounts", "*log"],
 			"request_fields":[
 				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*generic"},
 				{"tag": "*api_key", "field_id": "*api_key", "type": "*constant", "value": "ses12345"},

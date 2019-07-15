@@ -35,7 +35,7 @@ const (
 	CGR_SESSION_DISCONNECT = "CGR_SESSION_DISCONNECT"
 	CGR_CALL_START         = "CGR_CALL_START"
 	CGR_CALL_END           = "CGR_CALL_END"
-	CGR_PROCESS_EVENT      = "CGR_PROCESS_EVENT"
+	CGR_PROCESS_MESSAGE    = "CGR_PROCESS_MESSAGE"
 	CGR_PROCESS_CDR        = "CGR_PROCESS_CDR"
 	KamTRIndex             = "tr_index"
 	KamTRLabel             = "tr_label"
@@ -107,7 +107,7 @@ func (kev KamEvent) MissingParameter() bool {
 			kev[utils.Account],
 			kev[utils.Destination],
 		}, "")
-	case CGR_PROCESS_EVENT:
+	case CGR_PROCESS_MESSAGE:
 		// TRIndex and TRLabel must exist in order to know where to send back the response
 		mndPrm := []string{kev[KamTRIndex], kev[KamTRLabel]}
 		_, has := kev[utils.CGRFlags]
@@ -172,7 +172,7 @@ func (kev KamEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err erro
 			return nil, err
 		}
 		sTime = sTimePrv
-	case CGR_PROCESS_EVENT:
+	case CGR_PROCESS_MESSAGE:
 		sTimePrv, err := utils.ParseTimeDetectLayout(kev[utils.AnswerTime], timezone)
 		if err != nil {
 			return nil, err
@@ -275,13 +275,13 @@ func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 	return
 }
 
-// V1ProcessEventArgs returns the arguments used in SessionSv1.ProcessEvent
-func (kev KamEvent) V1ProcessEventArgs() (args *sessions.V1ProcessEventArgs) {
+// V1ProcessMessageArgs returns the arguments used in SessionSv1.ProcessMessage
+func (kev KamEvent) V1ProcessMessageArgs() (args *sessions.V1ProcessMessageArgs) {
 	cgrEv, err := kev.AsCGREvent(config.CgrConfig().GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return
 	}
-	args = &sessions.V1ProcessEventArgs{ // defaults
+	args = &sessions.V1ProcessMessageArgs{ // defaults
 		CGREvent: cgrEv,
 	}
 	subsystems, has := kev[utils.CGRFlags]
@@ -311,9 +311,9 @@ func (kev KamEvent) V1ProcessCDRArgs() (args *utils.CGREventWithArgDispatcher) {
 }
 
 // AsKamProcessEventReply builds up a Kamailio ProcessEvent based on arguments and reply from SessionS
-func (kev KamEvent) AsKamProcessEventReply(procEvArgs *sessions.V1ProcessEventArgs,
-	procEvReply *sessions.V1ProcessEventReply, rplyErr error) (kar *KamReply, err error) {
-	evName := CGR_PROCESS_EVENT
+func (kev KamEvent) AsKamProcessMessageReply(procEvArgs *sessions.V1ProcessMessageArgs,
+	procEvReply *sessions.V1ProcessMessageReply, rplyErr error) (kar *KamReply, err error) {
+	evName := CGR_PROCESS_MESSAGE
 	if kamRouReply, has := kev[KamReplyRoute]; has {
 		evName = kamRouReply
 	}
@@ -369,8 +369,8 @@ func (kev KamEvent) AsKamProcessCDRReply(cgrEvWithArgDisp *utils.CGREventWithArg
 }
 
 // AsKamProcessEventEmptyReply builds up a Kamailio ProcessEventEmpty
-func (kev KamEvent) AsKamProcessEventEmptyReply() (kar *KamReply) {
-	evName := CGR_PROCESS_EVENT
+func (kev KamEvent) AsKamProcessMessageEmptyReply() (kar *KamReply) {
+	evName := CGR_PROCESS_MESSAGE
 	if kamRouReply, has := kev[KamReplyRoute]; has {
 		evName = kamRouReply
 	}

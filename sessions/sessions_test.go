@@ -903,7 +903,7 @@ func TestSessionSNewV1TerminateSessionArgs(t *testing.T) {
 	}
 }
 
-func TestSessionSNewV1ProcessEventArgs(t *testing.T) {
+func TestSessionSNewV1ProcessMessageArgs(t *testing.T) {
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
@@ -912,18 +912,18 @@ func TestSessionSNewV1ProcessEventArgs(t *testing.T) {
 			utils.Destination: "1002",
 		},
 	}
-	expected := &V1ProcessEventArgs{
+	expected := &V1ProcessMessageArgs{
 		AllocateResources: true,
 		Debit:             true,
 		GetAttributes:     true,
 		CGREvent:          cgrEv,
 		GetSuppliers:      true,
 	}
-	rply := NewV1ProcessEventArgs(true, nil, false, nil, false, nil, true, true, true, false, false, cgrEv, nil, utils.Paginator{})
+	rply := NewV1ProcessMessageArgs(true, nil, false, nil, false, nil, true, true, true, false, false, cgrEv, nil, utils.Paginator{})
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
-	expected = &V1ProcessEventArgs{
+	expected = &V1ProcessMessageArgs{
 		AllocateResources:     true,
 		GetAttributes:         true,
 		CGREvent:              cgrEv,
@@ -931,7 +931,7 @@ func TestSessionSNewV1ProcessEventArgs(t *testing.T) {
 		SuppliersMaxCost:      utils.MetaSuppliersEventCost,
 		SuppliersIgnoreErrors: true,
 	}
-	rply = NewV1ProcessEventArgs(true, nil, false, nil, false, nil, true, false, true, true, true, cgrEv, nil, utils.Paginator{})
+	rply = NewV1ProcessMessageArgs(true, nil, false, nil, false, nil, true, false, true, true, true, cgrEv, nil, utils.Paginator{})
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1093,8 +1093,8 @@ func TestSessionSV1UpdateSessionReplyAsNavigableMap(t *testing.T) {
 	}
 }
 
-func TestSessionSV1ProcessEventReplyAsNavigableMap(t *testing.T) {
-	v1PrcEvRpl := new(V1ProcessEventReply)
+func TestSessionSV1ProcessMessageReplyAsNavigableMap(t *testing.T) {
+	v1PrcEvRpl := new(V1ProcessMessageReply)
 	expected := config.NewNavigableMap(map[string]interface{}{})
 	if rply, _ := v1PrcEvRpl.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)

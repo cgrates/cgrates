@@ -554,6 +554,7 @@ const (
 	MetaUpdate                   = "*update"
 	MetaTerminate                = "*terminate"
 	MetaEvent                    = "*event"
+	MetaMessage                  = "*message"
 	MetaDryRun                   = "*dryrun"
 	Event                        = "Event"
 	EmptyString                  = ""
@@ -612,6 +613,7 @@ const (
 	MetaIgnoreErrors             = "*ignore_errors"
 	MetaRelease                  = "*release"
 	MetaAllocate                 = "*allocate"
+	MetaAuthorize                = "*authorize"
 )
 
 // Migrator Action
@@ -892,7 +894,8 @@ const (
 	SessionSv1SyncSessions               = "SessionSv1.SyncSessions"
 	SessionSv1TerminateSession           = "SessionSv1.TerminateSession"
 	SessionSv1ProcessCDR                 = "SessionSv1.ProcessCDR"
-	SessionSv1ProcessEvent               = "SessionSv1.ProcessEvent"
+	SessionSv1ProcessMessage             = "SessionSv1.ProcessMessage"
+	SessionSv2ProcessEvent               = "SessionSv2.ProcessEvent"
 	SessionSv1DisconnectSession          = "SessionSv1.DisconnectSession"
 	SessionSv1GetActiveSessions          = "SessionSv1.GetActiveSessions"
 	SessionSv1GetActiveSessionsCount     = "SessionSv1.GetActiveSessionsCount"

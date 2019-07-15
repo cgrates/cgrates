@@ -7,7 +7,7 @@
 			"id": "message",
 			"filters": ["*string:~*vars.*cmd:CCR", "*prefix:~*req.Service-Context-Id:message",
 				"*string:~*req.CC-Request-Type:4"],
-			"flags": ["*event", "*accounts", "*cdrs","*attributes"],
+			"flags": ["*message", "*accounts", "*cdrs","*attributes"],
 			"request_fields":[
 				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*sms"},
 				{"tag": "*api_key", "field_id": "*api_key", "type": "*constant", "value": "ses12345"},

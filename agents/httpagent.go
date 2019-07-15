@@ -110,14 +110,14 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,
 		utils.MetaInitiate, utils.MetaUpdate,
-		utils.MetaTerminate, utils.MetaEvent,
+		utils.MetaTerminate, utils.MetaMessage,
 		utils.MetaCDRs} {
 		if reqProcessor.Flags.HasKey(typ) { // request type is identified through flags
 			reqType = typ
 			break
 		}
 	}
-	cgrArgs := cgrEv.ConsumeArgs(reqProcessor.Flags.HasKey(utils.MetaDispatchers), reqType == utils.MetaAuth || reqType == utils.MetaEvent)
+	cgrArgs := cgrEv.ConsumeArgs(reqProcessor.Flags.HasKey(utils.MetaDispatchers), reqType == utils.MetaAuth || reqType == utils.MetaMessage)
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> LOG, processorID: %s, http message: %s",
@@ -195,8 +195,8 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		if err = agReq.setCGRReply(nil, err); err != nil {
 			return
 		}
-	case utils.MetaEvent:
-		evArgs := sessions.NewV1ProcessEventArgs(
+	case utils.MetaMessage:
+		evArgs := sessions.NewV1ProcessMessageArgs(
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),
 			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes),
 			reqProcessor.Flags.HasKey(utils.MetaThresholds),
@@ -209,8 +209,8 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersIgnoreErrors),
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
-		rply := new(sessions.V1ProcessEventReply)
-		err = ha.sessionS.Call(utils.SessionSv1ProcessEvent,
+		rply := new(sessions.V1ProcessMessageReply)
+		err = ha.sessionS.Call(utils.SessionSv1ProcessMessage,
 			evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
