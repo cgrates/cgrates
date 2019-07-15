@@ -205,13 +205,13 @@ func (dS *DispatcherService) SessionSv1ProcessCDR(args *utils.CGREventWithArgDis
 		utils.SessionSv1ProcessCDR, args, reply)
 }
 
-func (dS *DispatcherService) SessionSv1ProcessEvent(args *sessions.V1ProcessEventArgs,
-	reply *sessions.V1ProcessEventReply) (err error) {
+func (dS *DispatcherService) SessionSv1ProcessMessage(args *sessions.V1ProcessMessageArgs,
+	reply *sessions.V1ProcessMessageReply) (err error) {
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.SessionSv1ProcessEvent,
+		if err = dS.authorize(utils.SessionSv1ProcessMessage,
 			args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
@@ -222,7 +222,7 @@ func (dS *DispatcherService) SessionSv1ProcessEvent(args *sessions.V1ProcessEven
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, routeID,
-		utils.SessionSv1ProcessEvent, args, reply)
+		utils.SessionSv1ProcessMessage, args, reply)
 }
 
 func (dS *DispatcherService) SessionSv1GetActiveSessions(args *utils.SessionFilter,

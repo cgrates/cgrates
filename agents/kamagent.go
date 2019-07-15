@@ -35,12 +35,12 @@ import (
 )
 
 var (
-	kamAuthReqRegexp     = regexp.MustCompile(CGR_AUTH_REQUEST)
-	kamCallStartRegexp   = regexp.MustCompile(CGR_CALL_START)
-	kamCallEndRegexp     = regexp.MustCompile(CGR_CALL_END)
-	kamDlgListRegexp     = regexp.MustCompile(CGR_DLG_LIST)
-	kamProcessEventRegex = regexp.MustCompile(CGR_PROCESS_EVENT)
-	kamProcessCDRRegex   = regexp.MustCompile(CGR_PROCESS_CDR)
+	kamAuthReqRegexp       = regexp.MustCompile(CGR_AUTH_REQUEST)
+	kamCallStartRegexp     = regexp.MustCompile(CGR_CALL_START)
+	kamCallEndRegexp       = regexp.MustCompile(CGR_CALL_END)
+	kamDlgListRegexp       = regexp.MustCompile(CGR_DLG_LIST)
+	kamProcessMessageRegex = regexp.MustCompile(CGR_PROCESS_MESSAGE)
+	kamProcessCDRRegex     = regexp.MustCompile(CGR_PROCESS_CDR)
 )
 
 func NewKamailioAgent(kaCfg *config.KamAgentCfg,
@@ -66,12 +66,12 @@ type KamailioAgent struct {
 func (self *KamailioAgent) Connect() error {
 	var err error
 	eventHandlers := map[*regexp.Regexp][]func([]byte, int){
-		kamAuthReqRegexp:     {self.onCgrAuth},
-		kamCallStartRegexp:   {self.onCallStart},
-		kamCallEndRegexp:     {self.onCallEnd},
-		kamDlgListRegexp:     {self.onDlgList},
-		kamProcessEventRegex: {self.onCgrProcessEvent},
-		kamProcessCDRRegex:   {self.onCgrProcessCDR},
+		kamAuthReqRegexp:       {self.onCgrAuth},
+		kamCallStartRegexp:     {self.onCallStart},
+		kamCallEndRegexp:       {self.onCallEnd},
+		kamDlgListRegexp:       {self.onDlgList},
+		kamProcessMessageRegex: {self.onCgrProcessMessage},
+		kamProcessCDRRegex:     {self.onCgrProcessCDR},
 	}
 	errChan := make(chan error)
 	for connIdx, connCfg := range self.cfg.EvapiConns {
@@ -251,7 +251,7 @@ func (ka *KamailioAgent) onDlgList(evData []byte, connIdx int) {
 	ka.activeSessionIDs <- sIDs
 }
 
-func (ka *KamailioAgent) onCgrProcessEvent(evData []byte, connIdx int) {
+func (ka *KamailioAgent) onCgrProcessMessage(evData []byte, connIdx int) {
 	if connIdx >= len(ka.conns) { // protection against index out of range panic
 		err := fmt.Errorf("Index out of range[0,%v): %v ", len(ka.conns), connIdx)
 		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.FreeSWITCHAgent, err.Error()))
@@ -265,7 +265,7 @@ func (ka *KamailioAgent) onCgrProcessEvent(evData []byte, connIdx int) {
 	}
 
 	if kev.MissingParameter() {
-		if kRply, err := kev.AsKamProcessEventReply(nil, nil, utils.ErrMandatoryIeMissing); err != nil {
+		if kRply, err := kev.AsKamProcessMessageReply(nil, nil, utils.ErrMandatoryIeMissing); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> failed building process session event reply for event: %s, error: %s",
 				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
 		} else if err = ka.conns[connIdx].Send(kRply.String()); err != nil {
@@ -278,24 +278,24 @@ func (ka *KamailioAgent) onCgrProcessEvent(evData []byte, connIdx int) {
 	//in case that we don't reveice cgr_flags from kamailio
 	//we consider this as ping-pong event
 	if _, has := kev[utils.CGRFlags]; !has {
-		if err = ka.conns[connIdx].Send(kev.AsKamProcessEventEmptyReply().String()); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> failed sending empty process event reply for event: %s, error %s",
+		if err = ka.conns[connIdx].Send(kev.AsKamProcessMessageEmptyReply().String()); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> failed sending empty process message reply for event: %s, error %s",
 				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
 		}
 	}
 
-	procEvArgs := kev.V1ProcessEventArgs()
+	procEvArgs := kev.V1ProcessMessageArgs()
 	if procEvArgs == nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate process event session arguments",
+		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate process message session arguments",
 			utils.KamailioAgent, kev[utils.OriginID]))
 		return
 	}
 	procEvArgs.CGREvent.Event[EvapiConnID] = connIdx // Attach the connection ID
 
-	var processReply sessions.V1ProcessEventReply
-	err = ka.sessionS.Call(utils.SessionSv1ProcessEvent, procEvArgs, &processReply)
+	var processReply sessions.V1ProcessMessageReply
+	err = ka.sessionS.Call(utils.SessionSv1ProcessMessage, procEvArgs, &processReply)
 
-	if kar, err := kev.AsKamProcessEventReply(procEvArgs, &processReply, err); err != nil {
+	if kar, err := kev.AsKamProcessMessageReply(procEvArgs, &processReply, err); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed building process session event reply for event: %s, error: %s",
 			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
 	} else if err = ka.conns[connIdx].Send(kar.String()); err != nil {

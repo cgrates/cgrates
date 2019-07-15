@@ -568,7 +568,7 @@ func testSSv1ItProcessCDR(t *testing.T) {
 // TestSSv1ItProcessEvent processes individual event and also checks it's CDRs
 func testSSv1ItProcessEvent(t *testing.T) {
 	initUsage := 5 * time.Minute
-	args := &sessions.V1ProcessEventArgs{
+	args := &sessions.V1ProcessMessageArgs{
 		AllocateResources: true,
 		Debit:             true,
 		GetAttributes:     true,
@@ -589,8 +589,8 @@ func testSSv1ItProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	var rply sessions.V1ProcessEventReply
-	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessEvent,
+	var rply sessions.V1ProcessMessageReply
+	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessMessage,
 		args, &rply); err != nil {
 		t.Error(err)
 	}

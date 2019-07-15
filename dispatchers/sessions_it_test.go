@@ -519,7 +519,7 @@ func testDspSessionProcessCDR(t *testing.T) {
 
 func testDspSessionProcessEvent(t *testing.T) {
 	initUsage := 5 * time.Minute
-	args := sessions.V1ProcessEventArgs{
+	args := sessions.V1ProcessMessageArgs{
 		AllocateResources: true,
 		Debit:             true,
 		GetAttributes:     true,
@@ -544,8 +544,8 @@ func testDspSessionProcessEvent(t *testing.T) {
 			APIKey: utils.StringPointer("ses12345"),
 		},
 	}
-	var rply sessions.V1ProcessEventReply
-	if err := dispEngine.RCP.Call(utils.SessionSv1ProcessEvent,
+	var rply sessions.V1ProcessMessageReply
+	if err := dispEngine.RCP.Call(utils.SessionSv1ProcessMessage,
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}
@@ -585,7 +585,7 @@ func testDspSessionProcessEvent(t *testing.T) {
 
 func testDspSessionProcessEvent2(t *testing.T) {
 	initUsage := 5 * time.Minute
-	args := sessions.V1ProcessEventArgs{
+	args := sessions.V1ProcessMessageArgs{
 		AllocateResources: true,
 		Debit:             true,
 		GetAttributes:     true,
@@ -611,8 +611,8 @@ func testDspSessionProcessEvent2(t *testing.T) {
 			APIKey: utils.StringPointer("pse12345"),
 		},
 	}
-	var rply sessions.V1ProcessEventReply
-	if err := dispEngine.RCP.Call(utils.SessionSv1ProcessEvent,
+	var rply sessions.V1ProcessMessageReply
+	if err := dispEngine.RCP.Call(utils.SessionSv1ProcessMessage,
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}

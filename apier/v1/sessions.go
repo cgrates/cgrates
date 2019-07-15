@@ -72,9 +72,9 @@ func (ssv1 *SessionSv1) ProcessCDR(cgrEv *utils.CGREventWithArgDispatcher, rply 
 	return ssv1.Ss.BiRPCv1ProcessCDR(nil, cgrEv, rply)
 }
 
-func (ssv1 *SessionSv1) ProcessEvent(args *sessions.V1ProcessEventArgs,
-	rply *sessions.V1ProcessEventReply) error {
-	return ssv1.Ss.BiRPCv1ProcessEvent(nil, args, rply)
+func (ssv1 *SessionSv1) ProcessMessage(args *sessions.V1ProcessMessageArgs,
+	rply *sessions.V1ProcessMessageReply) error {
+	return ssv1.Ss.BiRPCv1ProcessMessage(nil, args, rply)
 }
 
 func (ssv1 *SessionSv1) GetActiveSessions(args *utils.SessionFilter,

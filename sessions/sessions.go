@@ -2730,13 +2730,13 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 	return
 }
 
-// NewV1ProcessEventArgs is a constructor for EventArgs used by ProcessEvent
-func NewV1ProcessEventArgs(attrs bool, attributeIDs []string,
+// NewV1ProcessMessageArgs is a constructor for MessageArgs used by ProcessMessage
+func NewV1ProcessMessageArgs(attrs bool, attributeIDs []string,
 	thds bool, thresholdIDs []string, stats bool, statIDs []string, resrc, acnts,
 	suppls, supplsIgnoreErrs, supplsEventCost bool,
 	cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher,
-	supplierPaginator utils.Paginator) (args *V1ProcessEventArgs) {
-	args = &V1ProcessEventArgs{
+	supplierPaginator utils.Paginator) (args *V1ProcessMessageArgs) {
+	args = &V1ProcessMessageArgs{
 		AllocateResources:     resrc,
 		Debit:                 acnts,
 		GetAttributes:         attrs,
@@ -2763,8 +2763,8 @@ func NewV1ProcessEventArgs(attrs bool, attributeIDs []string,
 	return
 }
 
-// V1ProcessEventArgs are the options passed to ProcessEvent API
-type V1ProcessEventArgs struct {
+// V1ProcessMessageArgs are the options passed to ProcessMessage API
+type V1ProcessMessageArgs struct {
 	GetAttributes         bool
 	AllocateResources     bool
 	Debit                 bool
@@ -2781,7 +2781,7 @@ type V1ProcessEventArgs struct {
 	*utils.ArgDispatcher
 }
 
-func (args V1ProcessEventArgs) ParseFlags(flags string) {
+func (args V1ProcessMessageArgs) ParseFlags(flags string) {
 	dispatcherFlag := false
 	for _, subsystem := range strings.Split(flags, utils.FIELDS_SEP) {
 		switch {
@@ -2813,8 +2813,8 @@ func (args V1ProcessEventArgs) ParseFlags(flags string) {
 	args.Paginator = *cgrArgs.SupplierPaginator
 }
 
-// V1ProcessEventReply is the reply for the ProcessEvent API
-type V1ProcessEventReply struct {
+// V1ProcessMessageReply is the reply for the ProcessMessage API
+type V1ProcessMessageReply struct {
 	MaxUsage           *time.Duration
 	ResourceAllocation *string
 	Attributes         *engine.AttrSProcessEventReply
@@ -2824,7 +2824,7 @@ type V1ProcessEventReply struct {
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1ProcessEventReply) AsNavigableMap(
+func (v1Rply *V1ProcessMessageReply) AsNavigableMap(
 	ignr []*config.FCTemplate) (*config.NavigableMap, error) {
 	cgrReply := make(map[string]interface{})
 	if v1Rply != nil {
@@ -2857,15 +2857,15 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap(
 }
 
 // BiRPCv1ProcessEvent processes one event with the right subsystems based on arguments received
-func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
-	args *V1ProcessEventArgs, rply *V1ProcessEventReply) (err error) {
+func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.RpcClientConnection,
+	args *V1ProcessMessageArgs, rply *V1ProcessMessageReply) (err error) {
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
 	}
 
 	// RPC caching
 	if sS.cgrCfg.CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.SessionSv1ProcessEvent, args.CGREvent.ID)
+		cacheKey := utils.ConcatenatedKey(utils.SessionSv1ProcessMessage, args.CGREvent.ID)
 		refID := guardian.Guardian.GuardIDs("",
 			sS.cgrCfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
 		defer guardian.Guardian.UnguardIDs(refID)
@@ -2873,7 +2873,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
-				*rply = *cachedResp.Result.(*V1ProcessEventReply)
+				*rply = *cachedResp.Result.(*V1ProcessMessageReply)
 			}
 			return cachedResp.Error
 		}
@@ -3031,7 +3031,7 @@ type V2ProcessEventReply struct {
 	StatQueueIDs          *[]string
 }
 
-// BiRPCv1ProcessEvent processes one event with the right subsystems based on arguments received
+// BiRPCv2ProcessEvent processes one event with the right subsystems based on arguments received
 func (sS *SessionS) BiRPCv2ProcessEvent(clnt rpcclient.RpcClientConnection,
 	args *V2ProcessEventArgs, rply *V2ProcessEventReply) (err error) {
 	if args.CGREvent.ID == "" {
@@ -3048,7 +3048,7 @@ func (sS *SessionS) BiRPCv2ProcessEvent(clnt rpcclient.RpcClientConnection,
 		if itm, has := engine.Cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
 			if cachedResp.Error == nil {
-				*rply = *cachedResp.Result.(*V1ProcessEventReply)
+				*rply = *cachedResp.Result.(*V2ProcessEventReply)
 			}
 			return cachedResp.Error
 		}
@@ -3170,12 +3170,14 @@ func (sS *SessionS) BiRPCv2ProcessEvent(clnt rpcclient.RpcClientConnection,
 		if originID == "" {
 			return utils.NewErrMandatoryIeMissing(utils.OriginID)
 		}
+		ev := engine.NewSafEvent(args.CGREvent.Event)
 		dbtItvl := sS.cgrCfg.SessionSCfg().DebitInterval
 		if ev.HasField(utils.CGRDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
 			if dbtItvl, err = ev.GetDuration(utils.CGRDebitInterval); err != nil {
 				return utils.NewErrRALs(err)
 			}
 		}
+		cgrID := GetSetCGRID(ev)
 		ss := sS.getRelocateSessions(cgrID,
 			me.GetStringIgnoreErrors(utils.InitialOriginID),
 			me.GetStringIgnoreErrors(utils.OriginID),

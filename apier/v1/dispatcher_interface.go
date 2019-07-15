@@ -80,7 +80,7 @@ type SessionSv1Interface interface {
 	// SyncSessions(args *string, rply *string) error
 	TerminateSession(args *sessions.V1TerminateSessionArgs, rply *string) error
 	ProcessCDR(cgrEv *utils.CGREventWithArgDispatcher, rply *string) error
-	ProcessEvent(args *sessions.V1ProcessEventArgs, rply *sessions.V1ProcessEventReply) error
+	ProcessMessage(args *sessions.V1ProcessMessageArgs, rply *sessions.V1ProcessMessageReply) error
 	GetActiveSessions(args *utils.SessionFilter, rply *[]*sessions.ExternalSession) error
 	GetActiveSessionsCount(args *utils.SessionFilter, rply *int) error
 	ForceDisconnect(args *utils.SessionFilter, rply *string) error

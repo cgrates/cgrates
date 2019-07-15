@@ -343,9 +343,9 @@ func TestKamEvV1TerminateSessionArgs(t *testing.T) {
 	}
 }
 
-func TestKamEvV1ProcessEventArgs(t *testing.T) {
+func TestKamEvV1ProcessMessageArgs(t *testing.T) {
 	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
-	kamEv := KamEvent{"event": "CGR_PROCESS_EVENT",
+	kamEv := KamEvent{"event": "CGR_PROCESS_MESSAGE",
 		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
 		"from_tag": "bf71ad59", "to_tag": "7351fecf",
 		"cgr_reqtype": utils.META_POSTPAID, "cgr_account": "1001",
@@ -357,7 +357,7 @@ func TestKamEvV1ProcessEventArgs(t *testing.T) {
 	if err != nil {
 		return
 	}
-	expected := &sessions.V1ProcessEventArgs{
+	expected := &sessions.V1ProcessMessageArgs{
 		CGREvent: &utils.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 				config.CgrConfig().GeneralCfg().DefaultTenant),
@@ -366,7 +366,7 @@ func TestKamEvV1ProcessEventArgs(t *testing.T) {
 			Event: kamEv.AsMapStringInterface(),
 		},
 	}
-	rcv := kamEv.V1ProcessEventArgs()
+	rcv := kamEv.V1ProcessMessageArgs()
 	if !reflect.DeepEqual(expected.CGREvent.Tenant, rcv.CGREvent.Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.CGREvent.Tenant, rcv.CGREvent.Tenant)
 	} else if !reflect.DeepEqual(expected.CGREvent.Time, rcv.CGREvent.Time) {
@@ -380,7 +380,7 @@ func TestKamEvV1ProcessEventArgs(t *testing.T) {
 
 func TestKamEvAsKamProcessEventReply(t *testing.T) {
 	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
-	kamEv := KamEvent{"event": "CGR_PROCESS_EVENT",
+	kamEv := KamEvent{"event": "CGR_PROCESS_MESSAGE",
 		"callid":   "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
 		"from_tag": "bf71ad59", "to_tag": "7351fecf",
 		"cgr_reqtype": utils.META_POSTPAID, "cgr_account": "1001",
@@ -392,7 +392,7 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 	if err != nil {
 		return
 	}
-	procEvArgs := &sessions.V1ProcessEventArgs{
+	procEvArgs := &sessions.V1ProcessMessageArgs{
 		Debit: true,
 		CGREvent: &utils.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
@@ -402,14 +402,14 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 			Event: kamEv.AsMapStringInterface(),
 		},
 	}
-	procEvhRply := &sessions.V1ProcessEventReply{
+	procEvhRply := &sessions.V1ProcessMessageReply{
 		MaxUsage: utils.DurationPointer(time.Duration(5 * time.Second)),
 	}
 	expected := &KamReply{
-		Event:    CGR_PROCESS_EVENT,
+		Event:    CGR_PROCESS_MESSAGE,
 		MaxUsage: 5,
 	}
-	if rcv, err := kamEv.AsKamProcessEventReply(procEvArgs, procEvhRply, nil); err != nil {
+	if rcv, err := kamEv.AsKamProcessMessageReply(procEvArgs, procEvhRply, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)
@@ -417,7 +417,7 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 	kamEv = KamEvent{"event": "CGR_PROFILE_REQUEST",
 		"Tenant": "cgrates.org", "Account": "1001",
 		KamReplyRoute: "CGR_PROFILE_REPLY"}
-	procEvArgs = &sessions.V1ProcessEventArgs{
+	procEvArgs = &sessions.V1ProcessMessageArgs{
 		GetAttributes: true,
 		CGREvent: &utils.CGREvent{
 			Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
@@ -427,7 +427,7 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 			Event: kamEv.AsMapStringInterface(),
 		},
 	}
-	procEvhRply = &sessions.V1ProcessEventReply{
+	procEvhRply = &sessions.V1ProcessMessageReply{
 		Attributes: &engine.AttrSProcessEventReply{
 			MatchedProfiles: []string{"ATTR_1001_ACCOUNT_PROFILE"},
 			AlteredFields:   []string{"Password", utils.RequestType},
@@ -447,7 +447,7 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 		Event:      "CGR_PROFILE_REPLY",
 		Attributes: "Password:check123,RequestType:*prepaid",
 	}
-	if rcv, err := kamEv.AsKamProcessEventReply(procEvArgs, procEvhRply, nil); err != nil {
+	if rcv, err := kamEv.AsKamProcessMessageReply(procEvArgs, procEvhRply, nil); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, rcv)

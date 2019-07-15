@@ -582,7 +582,7 @@ func testRPCMethodsProcessCDR(t *testing.T) {
 
 func testRPCMethodsProcessEvent(t *testing.T) {
 	initUsage := 5 * time.Minute
-	args := &sessions.V1ProcessEventArgs{
+	args := &sessions.V1ProcessMessageArgs{
 		Debit: true,
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -601,8 +601,8 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	var rplyFirst sessions.V1ProcessEventReply
-	if err := rpcRpc.Call(utils.SessionSv1ProcessEvent,
+	var rplyFirst sessions.V1ProcessMessageReply
+	if err := rpcRpc.Call(utils.SessionSv1ProcessMessage,
 		args, &rplyFirst); err != nil {
 		t.Error(err)
 	} else if *rplyFirst.MaxUsage != initUsage {
@@ -639,8 +639,8 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 	}
 
 	//get response from cache
-	var rply sessions.V1ProcessEventReply
-	if err := rpcRpc.Call(utils.SessionSv1ProcessEvent,
+	var rply sessions.V1ProcessMessageReply
+	if err := rpcRpc.Call(utils.SessionSv1ProcessMessage,
 		args, &rply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rply, rplyFirst) {
@@ -651,7 +651,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 	//give time to CGRateS to delete the response from cache
 	time.Sleep(1*time.Second + 500*time.Millisecond)
 
-	if err := rpcRpc.Call(utils.SessionSv1ProcessEvent,
+	if err := rpcRpc.Call(utils.SessionSv1ProcessMessage,
 		args, &rplyFirst); err == nil || err.Error() != "RALS_ERROR:ACCOUNT_DISABLED" {
 		t.Error("Unexpected error returned", err)
 	}

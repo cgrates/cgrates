@@ -6,7 +6,7 @@
 			"id": "NAPTRSuppliersQuery",
 			"filters": ["*string:~*vars.QueryType:NAPTR", 
 				"*string:~*vars.E164Address:4986517174965"],
-			"flags": ["*event", "*suppliers"],
+			"flags": ["*message", "*suppliers"],
 			"request_fields":[
 				{"tag": "TOR", "field_id": "Account", "type": "*constant", "value": "1001"}, // so we can match the supplier profile
 			],

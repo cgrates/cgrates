@@ -30,7 +30,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/dns"
+	"github.com/miekg/dns"
 )
 
 var (
@@ -140,10 +140,10 @@ func testDNSitClntNAPTRDryRun(t *testing.T) {
 		if answr.Service != "E2U+SIP" {
 			t.Errorf("received: <%q>", answr.Service)
 		}
-		if answr.Regexp != "^.*$" {
+		if answr.Regexp != "!^(.*)$!sip:1@172.16.1.10.!" {
 			t.Errorf("received: <%q>", answr.Regexp)
 		}
-		if answr.Replacement != "sip:1\\@172.16.1.10." {
+		if answr.Replacement != "." {
 			t.Errorf("received: <%q>", answr.Replacement)
 		}
 	}
