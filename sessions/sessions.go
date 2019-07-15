@@ -528,7 +528,7 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 		return
 	}
 
-	for {
+	for i := 0; i < 3; {
 		var maxDebit time.Duration
 		if maxDebit, err = sS.debitSession(s, sRunIdx, dbtIvl, nil); err != nil {
 			utils.Logger.Warning(
@@ -545,6 +545,7 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 			}
 			return
 		} else if maxDebit < dbtIvl {
+			i++
 			go func() { // schedule sending disconnect command
 				select {
 				case <-s.debitStop: // call was disconnected already
@@ -1434,6 +1435,7 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration, aTi
 		}
 		if s.debitStop != nil {
 			close(s.debitStop) // Stop automatic debits
+			time.Sleep(1)
 			s.debitStop = nil
 		}
 		if sr.EventCost != nil {
