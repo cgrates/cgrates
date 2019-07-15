@@ -193,7 +193,7 @@ func NewGoogleCSVStorage(sep rune, spreadsheetId, cfgPath string) (*CSVStorage, 
 	if err != nil {
 		return nil, err
 	}
-	sheetNames, err := getAllSpreadSheetsName(spreadsheetId, sht)
+	sheetNames, err := getSpreatsheetTabs(spreadsheetId, sht)
 	if err != nil {
 		return nil, err
 	}
@@ -688,7 +688,7 @@ func newSheet(configPath string) (sht *sheets.Service, err error) { //*google_ap
 	return
 }
 
-func getAllSpreadSheetsName(spreadsheetId string, srv *sheets.Service) (sheetsName map[string]struct{}, err error) {
+func getSpreatsheetTabs(spreadsheetId string, srv *sheets.Service) (sheetsName map[string]struct{}, err error) {
 	sheetsName = make(map[string]struct{})
 	sht, err := srv.Spreadsheets.Get(spreadsheetId).Do()
 	if err != nil {

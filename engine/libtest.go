@@ -32,7 +32,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
 	"github.com/cgrates/rpcclient"
-	"github.com/kr/pty"
+	"github.com/creack/pty"
 )
 
 func InitDataDb(cfg *config.CGRConfig) error {
