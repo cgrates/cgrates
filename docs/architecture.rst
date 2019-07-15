@@ -53,7 +53,7 @@ it will start on demand **one or more** service(s), outlined below.
  Usage of cgr-engine:
    -cdrs
          Enforce starting of the cdrs daemon overwriting config
-   -config_dir string
+   -config_path string
          Configuration directory path. (default "/etc/cgrates/")
    -cpuprofile string
          write cpu profile to file
@@ -71,7 +71,7 @@ it will start on demand **one or more** service(s), outlined below.
          Prints the application version.
 
 
-.. hint::  # cgr-engine -config_dir=/etc/cgrates
+.. hint::  # cgr-engine -config_path=/etc/cgrates
 
 
 2.1.1. RALs service
