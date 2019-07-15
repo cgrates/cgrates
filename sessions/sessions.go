@@ -1899,24 +1899,10 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		authReply.ResourceAllocation = &allocMsg
 	}
 	if args.GetSuppliers {
-		if sS.splS == nil {
-			return utils.NewErrNotConnected(utils.SupplierS)
-		}
-		cgrEv := args.CGREvent.Clone()
-		if acd, has := cgrEv.Event[utils.ACD]; has {
-			cgrEv.Event[utils.Usage] = acd
-		}
-		var splsReply engine.SortedSuppliers
-		sArgs := &engine.ArgsGetSuppliers{
-			IgnoreErrors:  args.SuppliersIgnoreErrors,
-			MaxCost:       args.SuppliersMaxCost,
-			CGREvent:      cgrEv,
-			Paginator:     args.Paginator,
-			ArgDispatcher: args.ArgDispatcher,
-		}
-		if err = sS.splS.Call(utils.SupplierSv1GetSuppliers,
-			sArgs, &splsReply); err != nil {
-			return utils.NewErrSupplierS(err)
+		splsReply, err := sS.getSuppliers(args.CGREvent.Clone(), args.ArgDispatcher,
+			args.Paginator, args.SuppliersIgnoreErrors, args.SuppliersMaxCost)
+		if err != nil {
+			return err
 		}
 		if splsReply.SortedSuppliers != nil {
 			authReply.Suppliers = &splsReply
@@ -2859,24 +2845,10 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.RpcClientConnection,
 		rply.ResourceAllocation = &allocMessage
 	}
 	if args.GetSuppliers {
-		if sS.splS == nil {
-			return utils.NewErrNotConnected(utils.SupplierS)
-		}
-		cgrEv := args.CGREvent.Clone()
-		if acd, has := cgrEv.Event[utils.ACD]; has {
-			cgrEv.Event[utils.Usage] = acd
-		}
-		var splsReply engine.SortedSuppliers
-		sArgs := &engine.ArgsGetSuppliers{
-			IgnoreErrors:  args.SuppliersIgnoreErrors,
-			MaxCost:       args.SuppliersMaxCost,
-			CGREvent:      cgrEv,
-			Paginator:     args.Paginator,
-			ArgDispatcher: args.ArgDispatcher,
-		}
-		if err = sS.splS.Call(utils.SupplierSv1GetSuppliers,
-			sArgs, &splsReply); err != nil {
-			return utils.NewErrSupplierS(err)
+		splsReply, err := sS.getSuppliers(args.CGREvent.Clone(), args.ArgDispatcher,
+			args.Paginator, args.SuppliersIgnoreErrors, args.SuppliersMaxCost)
+		if err != nil {
+			return err
 		}
 		if splsReply.SortedSuppliers != nil {
 			rply.Suppliers = &splsReply
@@ -3132,33 +3104,26 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 	}
 	// get suppliers if required
 	if argsFlagsWithParams.HasKey(utils.MetaSuppliers) {
-		if sS.splS == nil {
-			return utils.NewErrNotConnected(utils.SupplierS)
-		}
-		cgrEv := args.CGREvent.Clone()
-		if acd, has := cgrEv.Event[utils.ACD]; has {
-			cgrEv.Event[utils.Usage] = acd
-		}
-		var splsReply engine.SortedSuppliers
-		sArgs := &engine.ArgsGetSuppliers{
-			CGREvent:      cgrEv,
-			Paginator:     args.Paginator,
-			ArgDispatcher: args.ArgDispatcher,
-		}
+		var ignoreErrors bool
+		var maxCost string
 		// check in case we have options for suppliers
 		if splOpts := argsFlagsWithParams.ParamsSlice(utils.MetaSuppliers); len(splOpts) != 0 {
-			for _, splOpt := range splOpts {
-				if splOpt == utils.MetaIgnoreErrors {
-					sArgs.IgnoreErrors = true
-				}
-				if splOpt == utils.MetaEventCost {
-					sArgs.MaxCost = utils.MetaSuppliersEventCost
-				}
+			//check for subflags and convert them into utils.FlagsWithParams
+			splsFlagsWithParams, err := utils.FlagsWithParamsFromSlice(splOpts)
+			if err != nil {
+				return err
+			}
+			if splsFlagsWithParams.HasKey(utils.MetaIgnoreErrors) {
+				ignoreErrors = true
+			}
+			if splsFlagsWithParams.HasKey(utils.MetaEventCost) {
+				maxCost = utils.MetaSuppliersEventCost
 			}
 		}
-		if err = sS.splS.Call(utils.SupplierSv1GetSuppliers,
-			sArgs, &splsReply); err != nil {
-			return utils.NewErrSupplierS(err)
+		splsReply, err := sS.getSuppliers(args.CGREvent.Clone(), args.ArgDispatcher,
+			args.Paginator, ignoreErrors, maxCost)
+		if err != nil {
+			return err
 		}
 		if splsReply.SortedSuppliers != nil {
 			rply.Suppliers = &splsReply
@@ -3281,6 +3246,29 @@ func (sS *SessionS) processStats(cgrEv *utils.CGREvent, argDisp *utils.ArgDispat
 				utils.SessionS, err.Error(), cgrEv))
 	}
 	return
+}
+
+func (sS *SessionS) getSuppliers(cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher, pag utils.Paginator,
+	ignoreErrors bool, maxCost string) (splsReply engine.SortedSuppliers, err error) {
+	if sS.splS == nil {
+		return splsReply, utils.NewErrNotConnected(utils.SupplierS)
+	}
+	if acd, has := cgrEv.Event[utils.ACD]; has {
+		cgrEv.Event[utils.Usage] = acd
+	}
+	sArgs := &engine.ArgsGetSuppliers{
+		CGREvent:      cgrEv,
+		Paginator:     pag,
+		ArgDispatcher: argDisp,
+		IgnoreErrors:  ignoreErrors,
+		MaxCost:       maxCost,
+	}
+	if err = sS.splS.Call(utils.SupplierSv1GetSuppliers,
+		sArgs, &splsReply); err != nil {
+		return splsReply, utils.NewErrSupplierS(err)
+	}
+	return
+
 }
 
 // BiRPCV1GetMaxUsage returns the maximum usage as seconds, compatible with OpenSIPS 2.3
