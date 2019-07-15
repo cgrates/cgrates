@@ -38,7 +38,7 @@ Integration tests with SureTax platform.
 Configuration file is kept outside of CGRateS repository since it contains sensitive customer information
 */
 
-var configDir = flag.String("config_dir", "", "CGR config dir path here")
+var configDir = flag.String("config_path", "", "CGR config dir path here")
 var tpDir = flag.String("tp_dir", "", "CGR config dir path here")
 
 var stiCfg *config.CGRConfig

@@ -8,7 +8,7 @@ cd /usr/share/cgrates/storage/postgres && ./setup_cgr_db.sh
 /usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/init.d/freeswitch start
  
 # Docker doesn't have syslog. Let others modify this to send out logs if needed
-sed -i 's/config_dir/config_path/g' /usr/share/cgrates/tutorials/fs_evsock/cgrates/etc/init.d/cgrates
+sed -i 's/config_path/config_path/g' /usr/share/cgrates/tutorials/fs_evsock/cgrates/etc/init.d/cgrates
 sed -i 's/\/etc\/cgrates/\/etc\/cgrates -httprof_path=\/pprof -logger=*stdout/g' /usr/share/cgrates/tutorials/fs_evsock/cgrates/etc/init.d/cgrates
 
 # Get our data ready

@@ -41,7 +41,7 @@ cd /usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/ && tar xzf freeswitch_
 #cd /root/.oh-my-zsh; git pull
 
 cd /root/cgr
-echo "for cgradmin run: cgr-engine -config_dir data/conf/samples/cgradmin"
+echo "for cgradmin run: cgr-engine -config_path data/conf/samples/cgradmin"
 echo 'export GOROOT=/root/go; export GOPATH=/root/code; export PATH=$GOROOT/bin:$GOPATH/bin:$PATH'>>/root/.zshrc
 
 DISABLE_AUTO_UPDATE="true" zsh
