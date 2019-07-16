@@ -347,7 +347,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			return
 		}
 	case utils.MetaMessage:
-		evArgs := sessions.NewV1ProcessMessageArgs(
+		msgArgs := sessions.NewV1ProcessMessageArgs(
 			reqProcessor.Flags.HasKey(utils.MetaAttributes),
 			reqProcessor.Flags.ParamsSlice(utils.MetaAttributes),
 			reqProcessor.Flags.HasKey(utils.MetaThresholds),
@@ -362,6 +362,24 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
 		rply := new(sessions.V1ProcessMessageReply)
 		err = da.sS.Call(utils.SessionSv1ProcessMessage,
+			msgArgs, rply)
+		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
+			cgrEv.Event[utils.Usage] = 0 // avoid further debits
+		} else if rply.MaxUsage != nil {
+			cgrEv.Event[utils.Usage] = *rply.MaxUsage // make sure the CDR reflects the debit
+		}
+		if err = agReq.setCGRReply(rply, err); err != nil {
+			return
+		}
+	case utils.MetaEvent:
+		evArgs := &sessions.V1ProcessEventArgs{
+			Flags:         reqProcessor.Flags.SliceFlags(),
+			CGREvent:      cgrEv,
+			ArgDispatcher: cgrArgs.ArgDispatcher,
+			Paginator:     *cgrArgs.SupplierPaginator,
+		}
+		rply := new(sessions.V1ProcessEventReply)
+		err = da.sS.Call(utils.SessionSv1ProcessEvent,
 			evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits

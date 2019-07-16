@@ -439,10 +439,16 @@ func (dS *DispatcherSessionSv1) ProcessCDR(args *utils.CGREventWithArgDispatcher
 	return dS.dS.SessionSv1ProcessCDR(args, reply)
 }
 
-// ProcessEvent implements SessionSv1ProcessEvent
+// ProcessMessage implements SessionSv1ProcessMessage
 func (dS *DispatcherSessionSv1) ProcessMessage(args *sessions.V1ProcessMessageArgs,
 	reply *sessions.V1ProcessMessageReply) (err error) {
 	return dS.dS.SessionSv1ProcessMessage(args, reply)
+}
+
+// ProcessMessage implements SessionSv1ProcessMessage
+func (dS *DispatcherSessionSv1) ProcessEvent(args *sessions.V1ProcessEventArgs,
+	reply *sessions.V1ProcessEventReply) (err error) {
+	return dS.dS.SessionSv1ProcessEvent(args, reply)
 }
 
 // TerminateSession implements SessionSv1TerminateSession

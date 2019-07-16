@@ -41,6 +41,7 @@ func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 		utils.SessionSv1TerminateSession:          ssv1.BiRPCv1TerminateSession,
 		utils.SessionSv1ProcessCDR:                ssv1.BiRPCv1ProcessCDR,
 		utils.SessionSv1ProcessMessage:            ssv1.BiRPCv1ProcessMessage,
+		utils.SessionSv1ProcessEvent:              ssv1.BiRPCv1ProcessEvent,
 
 		utils.SessionSv1ForceDisconnect:            ssv1.BiRPCv1ForceDisconnect,
 		utils.SessionSv1RegisterInternalBiJSONConn: ssv1.BiRPCv1RegisterInternalBiJSONConn,
@@ -93,6 +94,11 @@ func (ssv1 *SessionSv1) BiRPCv1ProcessCDR(clnt *rpc2.Client, cgrEv *utils.CGREve
 func (ssv1 *SessionSv1) BiRPCv1ProcessMessage(clnt *rpc2.Client, args *sessions.V1ProcessMessageArgs,
 	rply *sessions.V1ProcessMessageReply) error {
 	return ssv1.Ss.BiRPCv1ProcessMessage(clnt, args, rply)
+}
+
+func (ssv1 *SessionSv1) BiRPCv1ProcessEvent(clnt *rpc2.Client, args *sessions.V1ProcessEventArgs,
+	rply *sessions.V1ProcessEventReply) error {
+	return ssv1.Ss.BiRPCv1ProcessEvent(clnt, args, rply)
 }
 
 func (ssv1 *SessionSv1) BiRPCv1GetActiveSessions(clnt *rpc2.Client, args *utils.SessionFilter,

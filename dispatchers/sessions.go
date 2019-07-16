@@ -225,6 +225,26 @@ func (dS *DispatcherService) SessionSv1ProcessMessage(args *sessions.V1ProcessMe
 		utils.SessionSv1ProcessMessage, args, reply)
 }
 
+func (dS *DispatcherService) SessionSv1ProcessEvent(args *sessions.V1ProcessEventArgs,
+	reply *sessions.V1ProcessEventReply) (err error) {
+	if dS.attrS != nil {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.SessionSv1ProcessEvent,
+			args.CGREvent.Tenant,
+			args.APIKey, args.CGREvent.Time); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(args.CGREvent, utils.MetaSessionS, routeID,
+		utils.SessionSv1ProcessEvent, args, reply)
+}
+
 func (dS *DispatcherService) SessionSv1GetActiveSessions(args *utils.SessionFilter,
 	reply *[]*sessions.ExternalSession) (err error) {
 	if dS.attrS != nil {
