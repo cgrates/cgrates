@@ -1846,27 +1846,16 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
 	}
 	if args.GetAttributes {
-		if sS.attrS == nil {
-			return utils.NewErrNotConnected(utils.AttributeS)
-		}
-		attrArgs := &engine.AttrArgsProcessEvent{
-			Context:       utils.StringPointer(utils.MetaSessionS),
-			CGREvent:      args.CGREvent,
-			ArgDispatcher: args.ArgDispatcher,
-		}
-		if len(args.AttributeIDs) != 0 {
-			attrArgs.AttributeIDs = args.AttributeIDs
-		}
-		var rplyEv engine.AttrSProcessEventReply
-		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
-			attrArgs, &rplyEv); err == nil {
-			args.CGREvent = rplyEv.CGREvent
+		rplyAttr, err := sS.processAttributes(args.CGREvent, args.ArgDispatcher,
+			args.AttributeIDs)
+		if err == nil {
+			args.CGREvent = rplyAttr.CGREvent
 			if tntIface, has := args.CGREvent.Event[utils.MetaTenant]; has {
 				// special case when we want to overwrite the tenant
 				args.CGREvent.Tenant = tntIface.(string)
 				delete(args.CGREvent.Event, utils.MetaTenant)
 			}
-			authReply.Attributes = &rplyEv
+			authReply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
 		}
@@ -2112,27 +2101,16 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 	}
 	originID, _ := args.CGREvent.FieldAsString(utils.OriginID)
 	if args.GetAttributes {
-		if sS.attrS == nil {
-			return utils.NewErrNotConnected(utils.AttributeS)
-		}
-		attrArgs := &engine.AttrArgsProcessEvent{
-			Context:       utils.StringPointer(utils.MetaSessionS),
-			CGREvent:      args.CGREvent,
-			ArgDispatcher: args.ArgDispatcher,
-		}
-		if len(args.AttributeIDs) != 0 {
-			attrArgs.AttributeIDs = args.AttributeIDs
-		}
-		var rplyEv engine.AttrSProcessEventReply
-		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
-			attrArgs, &rplyEv); err == nil {
-			args.CGREvent = rplyEv.CGREvent
+		rplyAttr, err := sS.processAttributes(args.CGREvent, args.ArgDispatcher,
+			args.AttributeIDs)
+		if err == nil {
+			args.CGREvent = rplyAttr.CGREvent
 			if tntIface, has := args.CGREvent.Event[utils.MetaTenant]; has {
 				// special case when we want to overwrite the tenant
 				args.CGREvent.Tenant = tntIface.(string)
 				delete(args.CGREvent.Event, utils.MetaTenant)
 			}
-			rply.Attributes = &rplyEv
+			rply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
 		}
@@ -2328,27 +2306,16 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 		args.CGREvent.Tenant = sS.cgrCfg.GeneralCfg().DefaultTenant
 	}
 	if args.GetAttributes {
-		if sS.attrS == nil {
-			return utils.NewErrNotConnected(utils.AttributeS)
-		}
-		attrArgs := &engine.AttrArgsProcessEvent{
-			Context:       utils.StringPointer(utils.MetaSessionS),
-			CGREvent:      args.CGREvent,
-			ArgDispatcher: args.ArgDispatcher,
-		}
-		if len(args.AttributeIDs) != 0 {
-			attrArgs.AttributeIDs = args.AttributeIDs
-		}
-		var rplyEv engine.AttrSProcessEventReply
-		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
-			attrArgs, &rplyEv); err == nil {
-			args.CGREvent = rplyEv.CGREvent
+		rplyAttr, err := sS.processAttributes(args.CGREvent, args.ArgDispatcher,
+			args.AttributeIDs)
+		if err == nil {
+			args.CGREvent = rplyAttr.CGREvent
 			if tntIface, has := args.CGREvent.Event[utils.MetaTenant]; has {
 				// special case when we want to overwrite the tenant
 				args.CGREvent.Tenant = tntIface.(string)
 				delete(args.CGREvent.Event, utils.MetaTenant)
 			}
-			rply.Attributes = &rplyEv
+			rply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
 		}
@@ -2808,27 +2775,16 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.RpcClientConnection,
 	originID := me.GetStringIgnoreErrors(utils.OriginID)
 
 	if args.GetAttributes {
-		if sS.attrS == nil {
-			return utils.NewErrNotConnected(utils.AttributeS)
-		}
-		attrArgs := &engine.AttrArgsProcessEvent{
-			Context:       utils.StringPointer(utils.MetaSessionS),
-			CGREvent:      args.CGREvent,
-			ArgDispatcher: args.ArgDispatcher,
-		}
-		if len(args.AttributeIDs) != 0 {
-			attrArgs.AttributeIDs = args.AttributeIDs
-		}
-		var rplyEv engine.AttrSProcessEventReply
-		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
-			attrArgs, &rplyEv); err == nil {
-			args.CGREvent = rplyEv.CGREvent
+		rplyAttr, err := sS.processAttributes(args.CGREvent, args.ArgDispatcher,
+			args.AttributeIDs)
+		if err == nil {
+			args.CGREvent = rplyAttr.CGREvent
 			if tntIface, has := args.CGREvent.Event[utils.MetaTenant]; has {
 				// special case when we want to overwrite the tenant
 				args.CGREvent.Tenant = tntIface.(string)
 				delete(args.CGREvent.Event, utils.MetaTenant)
 			}
-			rply.Attributes = &rplyEv
+			rply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
 		}
@@ -2890,7 +2846,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.RpcClientConnection,
 	return nil
 }
 
-// V2ProcessEventArgs are the options passed to ProcessEvent API
+// V1ProcessEventArgs are the options passed to ProcessEvent API
 type V1ProcessEventArgs struct {
 	Flags []string
 	*utils.CGREvent
@@ -2898,7 +2854,7 @@ type V1ProcessEventArgs struct {
 	*utils.ArgDispatcher
 }
 
-// V2ProcessEventReply is the reply for the ProcessEvent API
+// V1ProcessEventReply is the reply for the ProcessEvent API
 type V1ProcessEventReply struct {
 	MaxUsage              *time.Duration
 	ResourceAuthorization *string
@@ -2910,7 +2866,7 @@ type V1ProcessEventReply struct {
 	StatQueueIDs          *[]string
 }
 
-// BiRPCv2ProcessEvent processes one event with the right subsystems based on arguments received
+// BiRPCv1ProcessEvent processes one event with the right subsystems based on arguments received
 func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 	args *V1ProcessEventArgs, rply *V1ProcessEventReply) (err error) {
 	if args.CGREvent.ID == "" {
@@ -2952,27 +2908,16 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 	}
 	// check for *attribute
 	if argsFlagsWithParams.HasKey(utils.MetaAttributes) {
-		if sS.attrS == nil {
-			return utils.NewErrNotConnected(utils.AttributeS)
-		}
-		attrArgs := &engine.AttrArgsProcessEvent{
-			Context:       utils.StringPointer(utils.MetaSessionS),
-			CGREvent:      args.CGREvent,
-			ArgDispatcher: args.ArgDispatcher,
-		}
-		if attrIDs := argsFlagsWithParams.ParamsSlice(utils.MetaAttributes); len(attrIDs) != 0 {
-			attrArgs.AttributeIDs = attrIDs
-		}
-		var rplyEv engine.AttrSProcessEventReply
-		if err := sS.attrS.Call(utils.AttributeSv1ProcessEvent,
-			attrArgs, &rplyEv); err == nil {
-			args.CGREvent = rplyEv.CGREvent
+		rplyAttr, err := sS.processAttributes(args.CGREvent, args.ArgDispatcher,
+			argsFlagsWithParams.ParamsSlice(utils.MetaAttributes))
+		if err == nil {
+			args.CGREvent = rplyAttr.CGREvent
 			if tntIface, has := args.CGREvent.Event[utils.MetaTenant]; has {
 				// special case when we want to overwrite the tenant
 				args.CGREvent.Tenant = tntIface.(string)
 				delete(args.CGREvent.Event, utils.MetaTenant)
 			}
-			rply.Attributes = &rplyEv
+			rply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
 		}
@@ -3208,6 +3153,7 @@ func (sS *SessionS) BiRPCv1RegisterInternalBiJSONConn(clnt rpcclient.RpcClientCo
 	return nil
 }
 
+// processThreshold will receive the event and send it to ThresholdS to be processed
 func (sS *SessionS) processThreshold(cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher, thIDs []string) (tIDs []string, err error) {
 	if sS.thdS == nil {
 		return tIDs, utils.NewErrNotConnected(utils.ThresholdS)
@@ -3232,6 +3178,7 @@ func (sS *SessionS) processThreshold(cgrEv *utils.CGREvent, argDisp *utils.ArgDi
 	return
 }
 
+// processStats will receive the event and send it to StatS to be processed
 func (sS *SessionS) processStats(cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher, stsIDs []string) (sIDs []string, err error) {
 	if sS.statS == nil {
 		return sIDs, utils.NewErrNotConnected(utils.StatS)
@@ -3257,6 +3204,7 @@ func (sS *SessionS) processStats(cgrEv *utils.CGREvent, argDisp *utils.ArgDispat
 	return
 }
 
+// getSuppliers will receive the event and send it to SupplierS to find the suppliers
 func (sS *SessionS) getSuppliers(cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher, pag utils.Paginator,
 	ignoreErrors bool, maxCost string) (splsReply engine.SortedSuppliers, err error) {
 	if sS.splS == nil {
@@ -3277,7 +3225,27 @@ func (sS *SessionS) getSuppliers(cgrEv *utils.CGREvent, argDisp *utils.ArgDispat
 		return splsReply, utils.NewErrSupplierS(err)
 	}
 	return
+}
 
+// processAttributes will receive the event and send it to AttributeS to be processed
+func (sS *SessionS) processAttributes(cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher,
+	attrIDs []string) (rplyEv engine.AttrSProcessEventReply, err error) {
+	if sS.attrS == nil {
+		return rplyEv, utils.NewErrNotConnected(utils.AttributeS)
+	}
+	attrArgs := &engine.AttrArgsProcessEvent{
+		Context:       utils.StringPointer(utils.MetaSessionS),
+		CGREvent:      cgrEv,
+		ArgDispatcher: argDisp,
+	}
+	if len(attrIDs) != 0 {
+		attrArgs.AttributeIDs = attrIDs
+	}
+	if err = sS.attrS.Call(utils.AttributeSv1ProcessEvent,
+		attrArgs, &rplyEv); err != nil {
+		return
+	}
+	return
 }
 
 // BiRPCV1GetMaxUsage returns the maximum usage as seconds, compatible with OpenSIPS 2.3
