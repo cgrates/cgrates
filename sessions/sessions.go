@@ -528,7 +528,7 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 		return
 	}
 
-	for i := 0; i < 3; {
+	for i := 0; i < sS.cgrCfg.SessionSCfg().TerminateAttempts; {
 		var maxDebit time.Duration
 		if maxDebit, err = sS.debitSession(s, sRunIdx, dbtIvl, nil); err != nil {
 			utils.Logger.Warning(
@@ -2487,19 +2487,26 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 				return utils.NewErrRALs(err)
 			}
 		}
-		ss := sS.getRelocateSessions(cgrID,
-			me.GetStringIgnoreErrors(utils.InitialOriginID),
-			me.GetStringIgnoreErrors(utils.OriginID),
-			me.GetStringIgnoreErrors(utils.OriginHost))
 		var s *Session
-		if len(ss) == 0 {
+		fib := utils.Fib()
+		for i := 0; i < sS.cgrCfg.SessionSCfg().TerminateAttempts; i++ {
+			ss := sS.getRelocateSessions(cgrID,
+				me.GetStringIgnoreErrors(utils.InitialOriginID),
+				me.GetStringIgnoreErrors(utils.OriginID),
+				me.GetStringIgnoreErrors(utils.OriginHost))
+			if len(ss) != 0 {
+				s = ss[0]
+				break
+			}
+			if i+1 < sS.cgrCfg.SessionSCfg().TerminateAttempts { // not last iteration
+				time.Sleep(time.Duration(fib()) * time.Millisecond)
+				continue
+			}
 			if s, err = sS.initSession(args.CGREvent.Tenant,
 				ev, sS.biJClntID(clnt),
 				me.GetStringIgnoreErrors(utils.OriginID), dbtItvl, args.ArgDispatcher); err != nil {
 				return utils.NewErrRALs(err)
 			}
-		} else {
-			s = ss[0]
 		}
 		if err = sS.endSession(s,
 			me.GetDurationPtrIgnoreErrors(utils.Usage),

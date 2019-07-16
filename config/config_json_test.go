@@ -495,6 +495,7 @@ func TestSmgJsonCfg(t *testing.T) {
 		Session_indexes:           &[]string{},
 		Client_protocol:           utils.Float64Pointer(1.0),
 		Channel_sync_interval:     utils.StringPointer("0"),
+		Terminate_attempts:        utils.IntPointer(5),
 	}
 	if cfg, err := dfCgrJsonCfg.SessionSJsonCfg(); err != nil {
 		t.Error(err)

@@ -53,6 +53,13 @@ var (
 		testSes3ItProcessEvent,
 		testSes3ItThreshold1002After2,
 		testSes3ItStatMetricsAfter2,
+
+		testSes3ItAddVoiceBalance,
+		testSes3ItTerminatWithoutInit,
+		testSes3ItInitAfterTerminate,
+		testSes3ItBalance,
+		testSes3ItCDRs,
+
 		testSes3ItStopCgrEngine,
 	}
 )
@@ -238,6 +245,155 @@ func testSes3ItStatMetricsAfter2(t *testing.T) {
 	}
 }
 
+func testSes3ItAddVoiceBalance(t *testing.T) {
+	attrSetBalance := utils.AttrSetBalance{
+		Tenant:        "cgrates.org",
+		Account:       "1002",
+		BalanceType:   utils.VOICE,
+		BalanceID:     utils.StringPointer("TestDynamicDebitBalance"),
+		Value:         utils.Float64Pointer(5 * float64(time.Second)),
+		RatingSubject: utils.StringPointer("*zero5ms"),
+	}
+	var reply string
+	if err := ses3RPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+	var acnt *engine.Account
+	attrs := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "1002",
+	}
+	if err := ses3RPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != float64(5*time.Second) {
+		t.Errorf("Expecting: %v, received: %v",
+			float64(5*time.Second), rply)
+	}
+}
+
+func testSes3ItTerminatWithoutInit(t *testing.T) {
+	go func() { // used in a gorutine to not block the test
+		// because it needs to call initSession when the call for Teminate is still active
+		args := &sessions.V1TerminateSessionArgs{
+			TerminateSession: true,
+			CGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TestSesItUpdateSession",
+				Event: map[string]interface{}{
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.ToR:         utils.VOICE,
+					utils.OriginID:    "TestTerminate",
+					utils.RequestType: utils.META_PREPAID,
+					utils.Account:     "1002",
+					utils.Subject:     "1001",
+					utils.Destination: "1001",
+					utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+					utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+					utils.Usage:       2 * time.Second,
+				},
+			},
+		}
+		var rply string
+		if err := ses3RPC.Call(utils.SessionSv1TerminateSession,
+			args, &rply); err != nil {
+			t.Error(err)
+		}
+		if rply != utils.OK {
+			t.Errorf("Unexpected reply: %s", rply)
+		}
+	}()
+
+}
+
+func testSes3ItInitAfterTerminate(t *testing.T) {
+	time.Sleep(3 * time.Millisecond)
+	args1 := &sessions.V1InitSessionArgs{
+		InitSession: true,
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSesItInitiateSession",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "TestTerminate",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1002",
+				utils.Subject:     "1001",
+				utils.Destination: "1001",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       5 * time.Second,
+			},
+		},
+	}
+	var rply1 sessions.V1InitSessionReply
+	if err := ses3RPC.Call(utils.SessionSv1InitiateSession,
+		args1, &rply1); err != nil {
+		t.Error(err)
+		return
+	} else if *rply1.MaxUsage != 0 {
+		t.Errorf("Unexpected MaxUsage: %v", rply1.MaxUsage)
+	}
+	time.Sleep(5 * time.Millisecond)
+	aSessions := make([]*sessions.ExternalSession, 0)
+	if err := ses3RPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+func testSes3ItBalance(t *testing.T) {
+	time.Sleep(10 * time.Millisecond)
+	var acnt *engine.Account
+	attrs := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "1002",
+	}
+	if err := ses3RPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != float64(3*time.Second) {
+		t.Errorf("Expecting: %v, received: %v",
+			3*time.Second, rply)
+	}
+}
+
+func testSes3ItCDRs(t *testing.T) {
+	var reply string
+	if err := ses3RPC.Call(utils.SessionSv1ProcessCDR, &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "TestSesItProccesCDR",
+		Event: map[string]interface{}{
+			utils.Tenant:      "cgrates.org",
+			utils.Category:    "call",
+			utils.ToR:         utils.VOICE,
+			utils.OriginID:    "TestTerminate",
+			utils.RequestType: utils.META_PREPAID,
+			utils.Account:     "1002",
+			utils.Subject:     "1001",
+			utils.Destination: "1001",
+			utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+			utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+			utils.Usage:       2 * time.Second,
+		}}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received reply: %s", reply)
+	}
+	time.Sleep(20 * time.Millisecond)
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"},
+		Accounts: []string{"1002"}}
+	if err := ses3RPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else if cdrs[0].Usage != "2s" {
+		t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
+	}
+}
 func testSes3ItStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
