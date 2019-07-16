@@ -121,6 +121,7 @@ type SessionSCfg struct {
 	SessionIndexes          utils.StringMap
 	ClientProtocol          float64
 	ChannelSyncInterval     time.Duration
+	TerminateAttempts       int
 }
 
 func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
@@ -243,6 +244,9 @@ func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		if self.ChannelSyncInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Channel_sync_interval); err != nil {
 			return err
 		}
+	}
+	if jsnCfg.Terminate_attempts != nil {
+		self.TerminateAttempts = *jsnCfg.Terminate_attempts
 	}
 	return nil
 }

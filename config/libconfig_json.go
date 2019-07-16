@@ -193,6 +193,7 @@ type SessionSJsonCfg struct {
 	Session_indexes           *[]string
 	Client_protocol           *float64
 	Channel_sync_interval     *string
+	Terminate_attempts        *int
 }
 
 // FreeSWITCHAgent config section

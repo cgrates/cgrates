@@ -637,6 +637,7 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 		SessionIndexes:          utils.StringMap{},
 		ClientProtocol:          1.0,
 		ChannelSyncInterval:     0,
+		TerminateAttempts:       5,
 	}
 	if !reflect.DeepEqual(eSessionSCfg, cgrCfg.sessionSCfg) {
 		t.Errorf("expecting: %s, received: %s",

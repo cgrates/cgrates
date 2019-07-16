@@ -88,16 +88,14 @@ func TestSSv1ItWithPrepaid(t *testing.T) {
 
 func TestSSv1ItWithPostPaid(t *testing.T) {
 	sSV1RequestType = utils.META_POSTPAID
-	sTestSessionSv1 = append(sTestSessionSv1[:len(sTestSessionSv1)-3], testSSv1ItStopCgrEngine)
-	for _, stest := range sTestSessionSv1 {
+	for _, stest := range append(sTestSessionSv1[:len(sTestSessionSv1)-3], testSSv1ItStopCgrEngine) {
 		t.Run(sSV1RequestType, stest)
 	}
 }
 
 func TestSSv1ItWithRated(t *testing.T) {
 	sSV1RequestType = utils.META_RATED
-	sTestSessionSv1 = append(sTestSessionSv1[:len(sTestSessionSv1)-3], testSSv1ItStopCgrEngine)
-	for _, stest := range sTestSessionSv1 {
+	for _, stest := range append(sTestSessionSv1[:len(sTestSessionSv1)-3], testSSv1ItStopCgrEngine) {
 		t.Run(sSV1RequestType, stest)
 	}
 }
