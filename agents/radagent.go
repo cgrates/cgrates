@@ -265,6 +265,24 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
+	case utils.MetaEvent:
+		evArgs := &sessions.V1ProcessEventArgs{
+			Flags:         reqProcessor.Flags.SliceFlags(),
+			CGREvent:      cgrEv,
+			ArgDispatcher: cgrArgs.ArgDispatcher,
+			Paginator:     *cgrArgs.SupplierPaginator,
+		}
+		rply := new(sessions.V1ProcessEventReply)
+		err = ra.sessionS.Call(utils.SessionSv1ProcessEvent,
+			evArgs, rply)
+		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
+			cgrEv.Event[utils.Usage] = 0 // avoid further debits
+		} else if rply.MaxUsage != nil {
+			cgrEv.Event[utils.Usage] = *rply.MaxUsage // make sure the CDR reflects the debit
+		}
+		if err = agReq.setCGRReply(rply, err); err != nil {
+			return
+		}
 	case utils.MetaCDRs: // allow this method
 	}
 	// separate request so we can capture the Terminate/Event also here
