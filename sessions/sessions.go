@@ -528,7 +528,7 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 		return
 	}
 
-	for i := 0; i < sS.cgrCfg.SessionSCfg().TerminateAttempts; {
+	for {
 		var maxDebit time.Duration
 		if maxDebit, err = sS.debitSession(s, sRunIdx, dbtIvl, nil); err != nil {
 			utils.Logger.Warning(
@@ -538,23 +538,36 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 			if err.Error() == utils.ErrUnauthorizedDestination.Error() {
 				dscReason = err.Error()
 			}
-			if err = sS.disconnectSession(s, dscReason); err != nil {
+			// try to disconect the session n times before we force terminate it on our side
+			for i := 0; i < sS.cgrCfg.SessionSCfg().TerminateAttempts; i++ {
+				if err = sS.disconnectSession(s, dscReason); err == nil {
+					return
+				}
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> could not disconnect session: %s, error: %s",
 						utils.SessionS, s.CGRid(), err.Error()))
 			}
+			if err = sS.forceSTerminate(s, 0, nil); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>", utils.SessionS, s.CGRid(), err))
+			}
 			return
 		} else if maxDebit < dbtIvl {
-			i++
 			go func() { // schedule sending disconnect command
 				select {
 				case <-s.debitStop: // call was disconnected already
 					return
 				case <-time.After(maxDebit):
-					if err := sS.disconnectSession(s, utils.ErrInsufficientCredit.Error()); err != nil {
+					// try to disconect the session n times before we force terminate it on our side
+					for i := 0; i < sS.cgrCfg.SessionSCfg().TerminateAttempts; i++ {
+						if err := sS.disconnectSession(s, utils.ErrInsufficientCredit.Error()); err == nil {
+							return
+						}
 						utils.Logger.Warning(
 							fmt.Sprintf("<%s> could not command disconnect session: %s, error: %s",
 								utils.SessionS, s.CGRid(), err.Error()))
+					}
+					if err = sS.forceSTerminate(s, 0, nil); err != nil {
+						utils.Logger.Warning(fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>", utils.SessionS, s.CGRid(), err))
 					}
 				}
 			}()
@@ -566,7 +579,6 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 			continue
 		}
 	}
-
 	return
 }
 
