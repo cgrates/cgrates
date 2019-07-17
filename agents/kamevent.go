@@ -205,11 +205,11 @@ func (kev KamEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 		return
 	}
 	args = &sessions.V1AuthorizeArgs{
-		GetMaxUsage: true,
-		CGREvent:    cgrEv,
+		CGREvent: cgrEv,
 	}
 	subsystems, has := kev[utils.CGRFlags]
 	if !has {
+		args.GetMaxUsage = true
 		return
 	}
 	args.ParseFlags(subsystems)
@@ -264,11 +264,11 @@ func (kev KamEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 		return
 	}
 	args = &sessions.V1InitSessionArgs{ // defaults
-		InitSession: true,
-		CGREvent:    cgrEv,
+		CGREvent: cgrEv,
 	}
 	subsystems, has := kev[utils.CGRFlags]
 	if !has {
+		args.InitSession = true
 		return
 	}
 	args.ParseFlags(subsystems)

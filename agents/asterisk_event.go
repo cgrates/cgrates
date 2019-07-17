@@ -277,12 +277,12 @@ func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs)
 		return
 	}
 	args = &sessions.V1AuthorizeArgs{
-		GetMaxUsage: true,
-		CGREvent:    cgrEv,
+		CGREvent: cgrEv,
 	}
 	if smaEv.Subsystems() == utils.EmptyString {
 		utils.Logger.Err(fmt.Sprintf("<%s> cgr_flags variable is not set",
 			utils.AsteriskAgent))
+		args.GetMaxUsage = true
 		return
 	}
 	args.ParseFlags(smaEv.Subsystems())
@@ -291,13 +291,13 @@ func (smaEv *SMAsteriskEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs)
 
 func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp utils.CGREventWithArgDispatcher) (args *sessions.V1InitSessionArgs) {
 	args = &sessions.V1InitSessionArgs{ // defaults
-		InitSession: true,
-		CGREvent:    cgrEvDisp.CGREvent,
+		CGREvent: cgrEvDisp.CGREvent,
 	}
 	subsystems, err := cgrEvDisp.CGREvent.FieldAsString(utils.CGRFlags)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s don't have %s variable",
 			utils.AsteriskAgent, utils.ToJSON(cgrEvDisp.CGREvent), utils.CGRFlags))
+		args.InitSession = true
 		return
 	}
 	args.ParseFlags(subsystems)
@@ -306,13 +306,13 @@ func (smaEv *SMAsteriskEvent) V1InitSessionArgs(cgrEvDisp utils.CGREventWithArgD
 
 func (smaEv *SMAsteriskEvent) V1TerminateSessionArgs(cgrEvDisp utils.CGREventWithArgDispatcher) (args *sessions.V1TerminateSessionArgs) {
 	args = &sessions.V1TerminateSessionArgs{ // defaults
-		TerminateSession: true,
-		CGREvent:         cgrEvDisp.CGREvent,
+		CGREvent: cgrEvDisp.CGREvent,
 	}
 	subsystems, err := cgrEvDisp.CGREvent.FieldAsString(utils.CGRFlags)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> event: %s don't have %s variable",
 			utils.AsteriskAgent, utils.ToJSON(cgrEvDisp.CGREvent), utils.CGRFlags))
+		args.TerminateSession = true
 		return
 	}
 	args.ParseFlags(subsystems)
