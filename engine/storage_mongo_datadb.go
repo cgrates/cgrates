@@ -33,14 +33,15 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/bsoncodec"
-	"go.mongodb.org/mongo-driver/bson/bsonrw"
-	"go.mongodb.org/mongo-driver/bson/bsontype"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/x/bsonx"
+	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/bson/bsoncodec"
+	"github.com/mongodb/mongo-go-driver/bson/bsonrw"
+	"github.com/mongodb/mongo-go-driver/bson/bsontype"
+	"github.com/mongodb/mongo-go-driver/bson/primitive"
+	"github.com/mongodb/mongo-go-driver/mongo"
+	"github.com/mongodb/mongo-go-driver/mongo/options"
+	"github.com/mongodb/mongo-go-driver/x/bsonx"
+	"github.com/mongodb/mongo-go-driver/x/network/command"
 )
 
 const (
@@ -146,11 +147,10 @@ func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes
 	url = "mongodb://" + url
 	reg := bson.NewRegistryBuilder().RegisterDecoder(tTime, bsoncodec.ValueDecoderFunc(TimeDecodeValue1)).Build()
 	opt := options.Client().
-		ApplyURI(url).
 		SetRegistry(reg).
 		SetServerSelectionTimeout(ttl)
 
-	client, err := mongo.NewClient(opt)
+	client, err := mongo.NewClientWithOptions(url, opt)
 	// client, err := mongo.NewClient(url)
 
 	if err != nil {
@@ -259,16 +259,16 @@ func (ms *MongoStorage) GetContext() context.Context {
 	return ms.ctx
 }
 
-func isNotFound(err error) bool {
-	de, ok := err.(mongo.CommandError)
-	if !ok { // if still can't converted to the mongo.CommandError check if error do not contains message
-		return strings.Contains(err.Error(), "ns not found")
-	}
-	return de.Code == 26 || de.Message == "ns not found"
-}
+// func isNotFound(err error) bool {
+// 	de, ok := err.(mongo.CommandError)
+// 	if !ok { // if still can't converted to the mongo.CommandError check if error do not contains message
+// 		return strings.Contains(err.Error(), "ns not found")
+// 	}
+// 	return de.Code == 26 || de.Message == "ns not found"
+// }
 
 func (ms *MongoStorage) ensureIndexesForCol(col string) (err error) { // exported for migrator
-	if err = ms.dropAllIndexesForCol(col); err != nil && !isNotFound(err) { // make sure you do not have indexes
+	if err = ms.dropAllIndexesForCol(col); err != nil && !command.IsNotFound(err) { // make sure you do not have indexes
 		return
 	}
 	err = nil
