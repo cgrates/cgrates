@@ -259,8 +259,16 @@ func (ms *MongoStorage) GetContext() context.Context {
 	return ms.ctx
 }
 
+func isNotFound(err error) bool {
+	de, ok := err.(mongo.CommandError)
+	if !ok { // if still can't converted to the mongo.CommandError check if error do not contains message
+		return strings.Contains(err.Error(), "ns not found")
+	}
+	return de.Code == 26 || de.Message == "ns not found"
+}
+
 func (ms *MongoStorage) ensureIndexesForCol(col string) (err error) { // exported for migrator
-	if err = ms.dropAllIndexesForCol(col); err != nil && err.Error() != "ns not found" { // make sure you do not have indexes
+	if err = ms.dropAllIndexesForCol(col); err != nil && !isNotFound(err) { // make sure you do not have indexes
 		return
 	}
 	err = nil
