@@ -412,11 +412,11 @@ func (fsev FSEvent) V1AuthorizeArgs() (args *sessions.V1AuthorizeArgs) {
 	}
 	cgrEv.Event[utils.Usage] = config.CgrConfig().SessionSCfg().MaxCallDuration // no billsec available in auth
 	args = &sessions.V1AuthorizeArgs{                                           // defaults
-		GetMaxUsage: true,
-		CGREvent:    cgrEv,
+		CGREvent: cgrEv,
 	}
 	subsystems, has := fsev[VarCGRFlags]
 	if !has {
+		args.GetMaxUsage = true
 		return
 	}
 	args.ParseFlags(subsystems)
@@ -430,11 +430,11 @@ func (fsev FSEvent) V1InitSessionArgs() (args *sessions.V1InitSessionArgs) {
 		return
 	}
 	args = &sessions.V1InitSessionArgs{ // defaults
-		InitSession: true,
-		CGREvent:    cgrEv,
+		CGREvent: cgrEv,
 	}
 	subsystems, has := fsev[VarCGRFlags]
 	if !has {
+		args.InitSession = true
 		return
 	}
 	args.ParseFlags(subsystems)
@@ -448,11 +448,11 @@ func (fsev FSEvent) V1TerminateSessionArgs() (args *sessions.V1TerminateSessionA
 		return
 	}
 	args = &sessions.V1TerminateSessionArgs{ // defaults
-		TerminateSession: true,
-		CGREvent:         cgrEv,
+		CGREvent: cgrEv,
 	}
 	subsystems, has := fsev[VarCGRFlags]
 	if !has {
+		args.TerminateSession = true
 		return
 	}
 	args.ParseFlags(subsystems)
