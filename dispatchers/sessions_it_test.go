@@ -50,6 +50,8 @@ var sTestsDspSession = []func(t *testing.T){
 	testDspSessionProcessEvent,
 	testDspSessionProcessEvent2,
 
+	testDspSessionProcessEvent3,
+
 	testDspSessionReplicate,
 	testDspSessionPassive,
 	testDspSessionForceDisconect,
@@ -842,6 +844,50 @@ func testDspSessionForceDisconect(t *testing.T) {
 	}
 	if err := dispEngine.RCP.Call(utils.SessionSv1GetActiveSessionsCount,
 		filtr, &repl); err != nil {
+		t.Fatal(err)
+	} else if repl != 0 {
+		t.Errorf("Expected no active sessions recived %v", repl)
+	}
+}
+
+func testDspSessionProcessEvent3(t *testing.T) {
+	args := &sessions.V1ProcessEventArgs{
+		Flags: []string{utils.MetaTerminate, "*resources:*release"},
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testSSv1ItProcessEventTerminateSession",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "testSSv1ItProcessEvent",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       10 * time.Minute,
+			},
+		},
+		ArgDispatcher: &utils.ArgDispatcher{
+			APIKey: utils.StringPointer("ses12345"),
+		},
+	}
+	var rply sessions.V1ProcessEventReply
+	if err := dispEngine.RCP.Call(utils.SessionSv1ProcessEvent,
+		args, &rply); err != nil {
+		t.Error(err)
+	}
+
+	var repl int
+	if err := dispEngine.RCP.Call(utils.SessionSv1GetActiveSessionsCount,
+		utils.SessionFilter{
+			ArgDispatcher: &utils.ArgDispatcher{
+				APIKey: utils.StringPointer("ses12345"),
+			},
+			Tenant:  "cgrates.org",
+			Filters: []string{},
+		}, &repl); err != nil {
 		t.Fatal(err)
 	} else if repl != 0 {
 		t.Errorf("Expected no active sessions recived %v", repl)
