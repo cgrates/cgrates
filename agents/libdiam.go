@@ -31,10 +31,10 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/go-diameter/diam"
-	"github.com/cgrates/go-diameter/diam/avp"
-	"github.com/cgrates/go-diameter/diam/datatype"
-	"github.com/cgrates/go-diameter/diam/dict"
+	"github.com/fiorix/go-diameter/diam"
+	"github.com/fiorix/go-diameter/diam/avp"
+	"github.com/fiorix/go-diameter/diam/datatype"
+	"github.com/fiorix/go-diameter/diam/dict"
 )
 
 func loadDictionaries(dictsDir, componentId string) error {
@@ -462,7 +462,7 @@ func updateDiamMsgFromNavMap(m *diam.Message, navMp *config.NavigableMap, tmz st
 // diamAnswer builds up the answer to be sent back to the client
 func diamAnswer(m *diam.Message, resCode uint32, errFlag bool,
 	rply *config.NavigableMap, tmz string) (a *diam.Message, err error) {
-	a = newDiamAnswer(m, resCode)
+	a = m.Answer(resCode)
 	if errFlag {
 		a.Header.CommandFlags = diam.ErrorFlag
 	}
@@ -506,22 +506,6 @@ func disectDiamListen(addrs string) (ipAddrs []net.IP) {
 		ipAddrs[i] = net.ParseIP(ip)
 	}
 	return
-}
-
-// newDiamAnswer temporary until fiorix will fix the issue
-func newDiamAnswer(m *diam.Message, resCode uint32) *diam.Message {
-	nm := diam.NewMessage(
-		m.Header.CommandCode,
-		m.Header.CommandFlags&^diam.RequestFlag, // Reset the Request bit.
-		m.Header.ApplicationID,
-		m.Header.HopByHopID,
-		m.Header.EndToEndID,
-		m.Dictionary(),
-	)
-	if resCode != 0 {
-		nm.NewAVP(avp.ResultCode, avp.Mbit, 0, datatype.Unsigned32(resCode))
-	}
-	return nm
 }
 
 // diamMessageData is cached when data is needed (ie. )
