@@ -27,7 +27,7 @@ import (
 
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ugorji/go/codec"
-	"go.mongodb.org/mongo-driver/bson"
+	"github.com/mongodb/mongo-go-driver/bson"
 )
 
 type Storage interface {

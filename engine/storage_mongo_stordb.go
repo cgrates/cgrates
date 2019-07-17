@@ -27,10 +27,10 @@ import (
 
 	"github.com/cgrates/cgrates/utils"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/x/bsonx"
+	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/mongo"
+	"github.com/mongodb/mongo-go-driver/mongo/options"
+	"github.com/mongodb/mongo-go-driver/x/bsonx"
 )
 
 func (ms *MongoStorage) GetTpIds(colName string) (tpids []string, err error) {
@@ -1572,10 +1572,13 @@ func (ms *MongoStorage) RemoveVersions(vrs Versions) (err error) {
 	if len(vrs) == 0 {
 		return ms.query(func(sctx mongo.SessionContext) (err error) {
 			dr, err := ms.getCol(ColVer).DeleteOne(sctx, bson.D{})
+			if err != nil {
+				return err
+			}
 			if dr.DeletedCount == 0 {
 				return utils.ErrNotFound
 			}
-			return err
+			return nil
 		})
 	}
 	return ms.query(func(sctx mongo.SessionContext) (err error) {

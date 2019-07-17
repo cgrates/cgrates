@@ -21,8 +21,8 @@ package migrator
 import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
 func newMongoStorDBMigrator(stor engine.StorDB) (mgoMig *mongoStorDBMigrator) {
@@ -51,10 +51,12 @@ func (mgoMig *mongoStorDBMigrator) StorDB() engine.StorDB {
 //get
 func (v1ms *mongoStorDBMigrator) getV1CDR() (v1Cdr *v1Cdrs, err error) {
 	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(engine.ColCDRs).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		var cursor mongo.Cursor
+		cursor, err = v1ms.mgoDB.DB().Collection(engine.ColCDRs).Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
 			return nil, err
 		}
+		v1ms.cursor = &cursor
 	}
 	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
 		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
@@ -94,10 +96,12 @@ func (v1ms *mongoStorDBMigrator) createV1SMCosts() (err error) {
 //get
 func (v1ms *mongoStorDBMigrator) getV2SMCost() (v2Cost *v2SessionsCost, err error) {
 	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(utils.SessionCostsTBL).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		var cursor mongo.Cursor
+		cursor, err = v1ms.mgoDB.DB().Collection(utils.SessionCostsTBL).Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
 			return nil, err
 		}
+		v1ms.cursor = &cursor
 	}
 	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
 		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())

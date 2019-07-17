@@ -21,9 +21,9 @@ package migrator
 import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/mongo"
+	"github.com/mongodb/mongo-go-driver/mongo/options"
 )
 
 const (
@@ -72,10 +72,12 @@ func (mgoMig *mongoMigrator) DataManager() *engine.DataManager {
 //get
 func (v1ms *mongoMigrator) getv1Account() (v1Acnt *v1Account, err error) {
 	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(v1AccountDBPrefix).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		var cursor mongo.Cursor
+		cursor, err = v1ms.mgoDB.DB().Collection(v1AccountDBPrefix).Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
 			return nil, err
 		}
+		v1ms.cursor = &cursor
 	}
 	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
 		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
@@ -107,10 +109,12 @@ func (v1ms *mongoMigrator) remV1Account(id string) (err error) {
 //get
 func (v1ms *mongoMigrator) getv2Account() (v2Acnt *v2Account, err error) {
 	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(v2AccountsCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		var cursor mongo.Cursor
+		cursor, err = v1ms.mgoDB.DB().Collection(v2AccountsCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
 			return nil, err
 		}
+		v1ms.cursor = &cursor
 	}
 	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
 		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
@@ -143,10 +147,12 @@ func (v1ms *mongoMigrator) remV2Account(id string) (err error) {
 func (v1ms *mongoMigrator) getV1ActionPlans() (v1aps *v1ActionPlans, err error) {
 	strct := new(AtKeyValue)
 	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection("actiontimings").Find(v1ms.mgoDB.GetContext(), bson.D{})
+		var cursor mongo.Cursor
+		cursor, err = v1ms.mgoDB.DB().Collection("actiontimings").Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
 			return nil, err
 		}
+		v1ms.cursor = &cursor
 	}
 	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
 		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
@@ -171,10 +177,12 @@ func (v1ms *mongoMigrator) setV1ActionPlans(x *v1ActionPlans) (err error) {
 func (v1ms *mongoMigrator) getV1Actions() (v1acs *v1Actions, err error) {
 	strct := new(AcKeyValue)
 	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection("actions").Find(v1ms.mgoDB.GetContext(), bson.D{})
+		var cursor mongo.Cursor
+		cursor, err = v1ms.mgoDB.DB().Collection("actions").Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
 			return nil, err
 		}
+		v1ms.cursor = &cursor
 	}
 	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
 		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
@@ -198,10 +206,12 @@ func (v1ms *mongoMigrator) setV1Actions(x *v1Actions) (err error) {
 //get
 func (v1ms *mongoMigrator) getV1ActionTriggers() (v1acts *v1ActionTriggers, err error) {
 	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(v1ActionTriggersCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		var cursor mongo.Cursor
+		cursor, err = v1ms.mgoDB.DB().Collection(v1ActionTriggersCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
 			return nil, err
 		}
+		v1ms.cursor = &cursor
 	}
 	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
 		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
@@ -230,10 +240,12 @@ func (v1ms *mongoMigrator) setV1ActionTriggers(act *v1ActionTriggers) (err error
 //get
 func (v1ms *mongoMigrator) getV1SharedGroup() (v1sg *v1SharedGroup, err error) {
 	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(utils.SHARED_GROUP_PREFIX).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		var cursor mongo.Cursor
+		cursor, err = v1ms.mgoDB.DB().Collection(utils.SHARED_GROUP_PREFIX).Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
 			return nil, err
 		}
+		v1ms.cursor = &cursor
 	}
 	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
 		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
@@ -257,10 +269,12 @@ func (v1ms *mongoMigrator) setV1SharedGroup(x *v1SharedGroup) (err error) {
 //get
 func (v1ms *mongoMigrator) getV1Stats() (v1st *v1Stat, err error) {
 	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(utils.CDR_STATS_PREFIX).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		var cursor mongo.Cursor
+		cursor, err = v1ms.mgoDB.DB().Collection(utils.CDR_STATS_PREFIX).Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
 			return nil, err
 		}
+		v1ms.cursor = &cursor
 	}
 	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
 		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
@@ -284,10 +298,12 @@ func (v1ms *mongoMigrator) setV1Stats(x *v1Stat) (err error) {
 //get
 func (v1ms *mongoMigrator) getV2ActionTrigger() (v2at *v2ActionTrigger, err error) {
 	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(v1ActionTriggersCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		var cursor mongo.Cursor
+		cursor, err = v1ms.mgoDB.DB().Collection(v1ActionTriggersCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
 			return nil, err
 		}
+		v1ms.cursor = &cursor
 	}
 	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
 		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
@@ -311,10 +327,12 @@ func (v1ms *mongoMigrator) setV2ActionTrigger(x *v2ActionTrigger) (err error) {
 //get
 func (v1ms *mongoMigrator) getV1AttributeProfile() (v1attrPrf *v1AttributeProfile, err error) {
 	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(v1AttributeProfilesCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		var cursor mongo.Cursor
+		cursor, err = v1ms.mgoDB.DB().Collection(v1AttributeProfilesCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
 			return nil, err
 		}
+		v1ms.cursor = &cursor
 	}
 	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
 		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
@@ -338,10 +356,12 @@ func (v1ms *mongoMigrator) setV1AttributeProfile(x *v1AttributeProfile) (err err
 //get
 func (v1ms *mongoMigrator) getV2ThresholdProfile() (v2T *v2Threshold, err error) {
 	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(v2ThresholdProfileCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		var cursor mongo.Cursor
+		cursor, err = v1ms.mgoDB.DB().Collection(v2ThresholdProfileCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
 			return nil, err
 		}
+		v1ms.cursor = &cursor
 	}
 	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
 		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
@@ -371,10 +391,12 @@ func (v1ms *mongoMigrator) remV2ThresholdProfile(tenant, id string) (err error) 
 //get
 func (v1ms *mongoMigrator) getV1Alias() (v1a *v1Alias, err error) {
 	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(v1AliasCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		var cursor mongo.Cursor
+		cursor, err = v1ms.mgoDB.DB().Collection(v1AliasCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
 			return nil, err
 		}
+		v1ms.cursor = &cursor
 	}
 	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
 		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
@@ -449,10 +471,12 @@ func (v1ms *mongoMigrator) remV1Alias(key string) (err error) {
 //get
 func (v1ms *mongoMigrator) getV1User() (v1u *v1UserProfile, err error) {
 	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(v1UserCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		var cursor mongo.Cursor
+		cursor, err = v1ms.mgoDB.DB().Collection(v1UserCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
 			return nil, err
 		}
+		v1ms.cursor = &cursor
 	}
 	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
 		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
@@ -491,10 +515,12 @@ func (v1ms *mongoMigrator) remV1User(key string) (err error) {
 //get
 func (v1ms *mongoMigrator) getV1DerivedChargers() (v1d *v1DerivedChargersWithKey, err error) {
 	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(v1DerivedChargersCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		var cursor mongo.Cursor
+		cursor, err = v1ms.mgoDB.DB().Collection(v1DerivedChargersCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
 			return nil, err
 		}
+		v1ms.cursor = &cursor
 	}
 	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
 		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
@@ -527,10 +553,12 @@ func (v1ms *mongoMigrator) remV1DerivedChargers(key string) (err error) {
 //get
 func (v1ms *mongoMigrator) getV2AttributeProfile() (v2attrPrf *v2AttributeProfile, err error) {
 	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(v1AttributeProfilesCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		var cursor mongo.Cursor
+		cursor, err = v1ms.mgoDB.DB().Collection(v1AttributeProfilesCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
 			return nil, err
 		}
+		v1ms.cursor = &cursor
 	}
 	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
 		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
@@ -560,10 +588,12 @@ func (v1ms *mongoMigrator) remV2AttributeProfile(tenant, id string) (err error) 
 //get
 func (v1ms *mongoMigrator) getV3AttributeProfile() (v3attrPrf *v3AttributeProfile, err error) {
 	if v1ms.cursor == nil {
-		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(v1AttributeProfilesCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		var cursor mongo.Cursor
+		cursor, err = v1ms.mgoDB.DB().Collection(v1AttributeProfilesCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
 		if err != nil {
 			return nil, err
 		}
+		v1ms.cursor = &cursor
 	}
 	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
 		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())

@@ -38,7 +38,7 @@ import:
 - package: github.com/cgrates/radigo
 - package: github.com/cgrates/ltcache
 - package: github.com/antchfx/xmlquery
-- package: go.mongodb.org/mongo-driver
+- package: github.com/mongodb/mongo-go-driver
   subpackages:
   - bson
   - bson/bsoncodec
