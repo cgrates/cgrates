@@ -29,10 +29,10 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/go-diameter/diam"
-	"github.com/cgrates/go-diameter/diam/datatype"
-	"github.com/cgrates/go-diameter/diam/sm"
 	"github.com/cgrates/rpcclient"
+	"github.com/fiorix/go-diameter/diam"
+	"github.com/fiorix/go-diameter/diam/datatype"
+	"github.com/fiorix/go-diameter/diam/sm"
 )
 
 func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,

@@ -61,8 +61,8 @@ imports:
   version: f996da7890eaec95ba13240253744446e17e6598
 - name: github.com/cgrates/fsock
   version: 317895b42f1af0a0d3a845701b4612473a438fcb
-- name: github.com/cgrates/go-diameter
-  version: 74cc2c72ff0c6ff7af51868c6e541b6d1b7c5514
+- name: github.com/fiorix/go-diameter
+  version: f4823472d0e034d116b1aad90c065a347798c4d8
   subpackages:
   - diam
   - diam/avp

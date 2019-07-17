@@ -26,10 +26,10 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/go-diameter/diam"
-	"github.com/cgrates/go-diameter/diam/avp"
-	"github.com/cgrates/go-diameter/diam/datatype"
-	"github.com/cgrates/go-diameter/diam/sm"
+	"github.com/fiorix/go-diameter/diam"
+	"github.com/fiorix/go-diameter/diam/avp"
+	"github.com/fiorix/go-diameter/diam/datatype"
+	"github.com/fiorix/go-diameter/diam/sm"
 )
 
 var dictOnce sync.Once
