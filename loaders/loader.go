@@ -528,7 +528,9 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 
 	if ldr.cacheS != nil {
 		var reply string
-		if err = ldr.cacheS.Call(utils.CacheSv1ReloadCache, cacheArgs, &reply); err != nil {
+		if err = ldr.cacheS.Call(utils.CacheSv1ReloadCache,
+			utils.AttrReloadCacheWithArgDispatcher{
+				AttrReloadCache: cacheArgs}, &reply); err != nil {
 			return err
 		}
 	}
