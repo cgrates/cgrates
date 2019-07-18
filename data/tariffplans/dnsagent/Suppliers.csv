@@ -1,4 +1,4 @@
 #Tenant,ID,FilterIDs,ActivationInterval,Sorting,SortingParamameters,SupplierID,SupplierFilterIDs,SupplierAccountIDs,SupplierRatingPlanIDs,SupplierResourceIDs,SupplierStatIDs,SupplierWeight,SupplierBlocker,SupplierParameters,Weight
 cgrates.org,SPL_ACNT_1001,*string:~Account:1001,,*weight,,supplier1,,,,,,10,,!^(.*)$!sip:\1@172.16.1.11!,10
-cgrates.org,SPL_ACNT_1001,,,,,supplier2,,,,,,5,,!^(.*)$!sip:\\1@172.16.1.12!,10
+cgrates.org,SPL_ACNT_1001,,,,,supplier2,,,,,,5,,!^(.*)$!sip:\1@172.16.1.12!,10
 

@@ -183,11 +183,14 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *config.NavigableMap) (err error) {
 			}
 			msgFields = make(map[string]struct{}) // reset the fields inside since we have a new message
 		}
-
+		itmData := nmItms[0].Data // populate default with first item's data
+		if len(nmItms) >= len(msg.Answer) {
+			itmData = nmItms[len(msg.Answer)-1].Data // data at same index as answer
+		}
 		switch cfgItm.Path[0] {
 		case utils.Rcode:
 			var itm int64
-			if itm, err = utils.IfaceAsInt64(cfgItm.Data); err != nil {
+			if itm, err = utils.IfaceAsInt64(itmData); err != nil {
 				return fmt.Errorf("item: <%s>, err: %s", cfgItm.Path[0], err.Error())
 			}
 			msg.Rcode = int(itm)
@@ -196,7 +199,7 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *config.NavigableMap) (err error) {
 				return fmt.Errorf("field <%s> only works with NAPTR", utils.Order)
 			}
 			var itm int64
-			if itm, err = utils.IfaceAsInt64(cfgItm.Data); err != nil {
+			if itm, err = utils.IfaceAsInt64(itmData); err != nil {
 				return fmt.Errorf("item: <%s>, err: %s", cfgItm.Path[0], err.Error())
 			}
 			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Order = uint16(itm)
@@ -205,7 +208,7 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *config.NavigableMap) (err error) {
 				return fmt.Errorf("field <%s> only works with NAPTR", utils.Preference)
 			}
 			var itm int64
-			if itm, err = utils.IfaceAsInt64(cfgItm.Data); err != nil {
+			if itm, err = utils.IfaceAsInt64(itmData); err != nil {
 				return fmt.Errorf("item: <%s>, err: %s", cfgItm.Path[0], err.Error())
 			}
 			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Preference = uint16(itm)
@@ -213,22 +216,22 @@ func updateDNSMsgFromNM(msg *dns.Msg, nm *config.NavigableMap) (err error) {
 			if msg.Question[0].Qtype != dns.TypeNAPTR {
 				return fmt.Errorf("field <%s> only works with NAPTR", utils.Flags)
 			}
-			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Flags = utils.IfaceAsString(cfgItm.Data)
+			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Flags = utils.IfaceAsString(itmData)
 		case utils.Service:
 			if msg.Question[0].Qtype != dns.TypeNAPTR {
 				return fmt.Errorf("field <%s> only works with NAPTR", utils.Service)
 			}
-			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Service = utils.IfaceAsString(cfgItm.Data)
+			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Service = utils.IfaceAsString(itmData)
 		case utils.Regexp:
 			if msg.Question[0].Qtype != dns.TypeNAPTR {
 				return fmt.Errorf("field <%s> only works with NAPTR", utils.Regexp)
 			}
-			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Regexp = utils.IfaceAsString(cfgItm.Data)
+			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Regexp = utils.IfaceAsString(itmData)
 		case utils.Replacement:
 			if msg.Question[0].Qtype != dns.TypeNAPTR {
 				return fmt.Errorf("field <%s> only works with NAPTR", utils.Replacement)
 			}
-			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Replacement = utils.IfaceAsString(cfgItm.Data)
+			msg.Answer[len(msg.Answer)-1].(*dns.NAPTR).Replacement = utils.IfaceAsString(itmData)
 		}
 
 		msgFields[cfgItm.Path[0]] = struct{}{} // detect new branch

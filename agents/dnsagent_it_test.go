@@ -194,8 +194,8 @@ func testDNSitClntNAPTRSuppliers(t *testing.T) {
 		t.Errorf("received: <%q>", answr.Regexp)
 	}
 	answr2 := rply.Answer[1].(*dns.NAPTR)
-	if answr2.Regexp != "!^(.*)$!sip:\\1@172.16.1.12!" {
-		t.Errorf("received: <%q>", answr.Regexp)
+	if answr2.Regexp != "!^(.*)$!sip:1@172.16.1.12!" {
+		t.Errorf("received: <%q>", answr2.Regexp)
 	}
 }
 
