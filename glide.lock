@@ -151,25 +151,37 @@ imports:
   version: 7eeb5667e42c09cb51bf7b7c28aea8c56767da90
 - name: github.com/xdg/stringprep
   version: 73f8eece6fdcd902c185bf651de50f3828bed5ed
-- name: github.com/mongodb/mongo-go-driver
-  version: 4f3b0a882e7d5f83c3d1ab4d0e530a51642fce03
+- name: go.mongodb.org/mongo-driver
+  version: 9ec4480161a76f5267d56fc836b7f6d357fd9209
   subpackages:
   - bson
   - bson/bsoncodec
   - bson/bsonrw
   - bson/bsontype
   - bson/primitive
+  - event
   - internal
   - mongo
+  - mongo/options
   - mongo/readconcern
   - mongo/readpref
   - mongo/writeconcern
+  - tag
+  - version
   - x/bsonx
   - x/bsonx/bsoncore
+  - x/mongo/driver
+  - x/mongo/driver/address
+  - x/mongo/driver/auth
+  - x/mongo/driver/auth/internal/gssapi
+  - x/mongo/driver/connstring
+  - x/mongo/driver/description
+  - x/mongo/driver/dns
+  - x/mongo/driver/operation
+  - x/mongo/driver/session
   - x/mongo/driver/topology
   - x/mongo/driver/uuid
   - x/mongo/driver/wiremessage
-  - mongo/options
 - name: go.opencensus.io
   version: b4a14686f0a98096416fe1b4cb848e384fb2b22b
   subpackages:
