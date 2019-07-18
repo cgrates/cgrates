@@ -36,6 +36,7 @@ make deb:
 	dch -v "$(JESSIE_PKG_VERSION)" -m "Package build for git commit $(GIT_COMMIT) ($(GIT_DATE))." -D "$(DISTRIBUTION)" ;\
 	dpkg-buildpackage -rfakeroot -tc; \
 	rm debian
+	git checkout jessie/changelog
 
 make squeeze:
 	cd ..;\
@@ -43,5 +44,6 @@ make squeeze:
 	dch -v "$(SQUEEZE_PKG_VERSION)" -m "Package build for git commit $(GIT_COMMIT) ($(GIT_DATE))." -D "$(DISTRIBUTION)" ;\
 	dpkg-buildpackage -rfakeroot -tc; \
 	rm debian
+	git checkout squeeze/changelog
 
 .PHONY: deb squeeze
