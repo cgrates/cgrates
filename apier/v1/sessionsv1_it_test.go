@@ -102,7 +102,7 @@ func TestSSv1ItWithRated(t *testing.T) {
 
 func TestSSv1ItWithPseudoPrepaid(t *testing.T) {
 	sSV1RequestType = utils.META_PSEUDOPREPAID
-	for _, stest := range sTestSessionSv1 {
+	for _, stest := range append(sTestSessionSv1[:len(sTestSessionSv1)-3], testSSv1ItStopCgrEngine) {
 		t.Run(sSV1RequestType, stest)
 	}
 }
