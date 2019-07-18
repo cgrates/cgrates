@@ -255,7 +255,7 @@ func testActionsUpdateBalance(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
 	}
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(1)
 	attrsEA2 := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: changeBlockerAction.ActionsId}
 	if err := actsRPC.Call("ApierV1.ExecuteAction", attrsEA2, &reply); err != nil {
 		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
