@@ -531,8 +531,11 @@ func TestLoaderProcessThresholds(t *testing.T) {
 		ActionIDs: []string{"THRESH1"},
 		Async:     true,
 	}
-	if aps, err := ldr.dm.GetThresholdProfile("cgrates.org", "Threshold1",
-		true, false, utils.NonTransactional); err != nil {
+	aps, err := ldr.dm.GetThresholdProfile("cgrates.org", "Threshold1",
+		true, false, utils.NonTransactional)
+	sort.Strings(eTh1.FilterIDs)
+	sort.Strings(aps.FilterIDs)
+	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTh1, aps) {
 		t.Errorf("expecting: %s, received: %s",
@@ -653,6 +656,8 @@ func TestLoaderProcessStats(t *testing.T) {
 	//sort the slices of Metrics
 	sort.Slice(eSt1.Metrics, func(i, j int) bool { return eSt1.Metrics[i].MetricID < eSt1.Metrics[j].MetricID })
 	sort.Slice(aps.Metrics, func(i, j int) bool { return aps.Metrics[i].MetricID < aps.Metrics[j].MetricID })
+	sort.Strings(eSt1.ThresholdIDs)
+	sort.Strings(aps.ThresholdIDs)
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSt1, aps) {
@@ -1009,8 +1014,8 @@ func TestLoaderProcessDispatches(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	rcv.Hosts.Sort()
-	eDisp.Hosts.Sort()
+	sort.Slice(eDisp.Hosts, func(i, j int) bool { return eDisp.Hosts[i].ID < eDisp.Hosts[j].ID })
+	sort.Slice(rcv.Hosts, func(i, j int) bool { return rcv.Hosts[i].ID < rcv.Hosts[j].ID })
 	if !reflect.DeepEqual(eDisp, rcv) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eDisp), utils.ToJSON(rcv))
 	}
