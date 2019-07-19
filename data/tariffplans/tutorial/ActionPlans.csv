@@ -1,2 +1,2 @@
 #Id,ActionsId,TimingId,Weight
-AP_PACKAGE_10,ACT_TOPUP_RST_10,*asap,10
+AP_PACKAGE_10,ACT_BALANCE_RESET,*asap,10

@@ -2003,6 +2003,7 @@ func APItoSupplierProfile(tpSPP *utils.TPSupplierProfile, timezone string) (spp 
 			Weight:             suplier.Weight,
 			Blocker:            suplier.Blocker,
 			RatingPlanIDs:      suplier.RatingPlanIDs,
+			AccountIDs:         suplier.AccountIDs,
 			FilterIDs:          suplier.FilterIDs,
 			ResourceIDs:        suplier.ResourceIDs,
 			StatIDs:            suplier.StatIDs,
