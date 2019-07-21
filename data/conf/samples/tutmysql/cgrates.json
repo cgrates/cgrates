@@ -102,33 +102,6 @@
 			},
 		],
 	},
-	{
-		"id": "FilterLoader",									// identifier of the Loader
-		"enabled": false,									// starts as service: <true|false>.
-		"dry_run": false,									// do not send the CDRs to CDRS, just parse them
-		"run_delay": 0,										// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
-		"lock_filename": ".cgr.lock",						// Filename containing concurrency lock in case of delayed processing
-		"caches_conns": [
-			{"address": "*internal"},						// address where to reach the CacheS for data reload, empty for no reloads  <""|*internal|x.y.z.y:1234>
-		],
-		"field_separator": ",",								// separator used in case of csv files
-		"tp_in_dir": "/tmp/FilterIn",		// absolute path towards the directory where the CDRs are stored
-		"tp_out_dir": "/tmp/FilterOut",	// absolute path towards the directory where processed CDRs will be moved
-		"data":[	
-			{
-				"type": "*filters",						// data source type
-				"file_name": "Filters.csv",				// file name in the tp_in_dir
-				"fields": [
-					{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~0", "mandatory": true},
-					{"tag": "ID", "field_id": "ID", "type": "*composed", "value": "~1", "mandatory": true},
-					{"tag": "FilterType", "field_id": "FilterType", "type": "*composed", "value": "~2"},
-					{"tag": "FilterFieldName", "field_id": "FilterFieldName", "type": "*composed", "value": "~3"},
-					{"tag": "FilterFieldValues", "field_id": "FilterFieldValues", "type": "*composed", "value": "~4"},
-					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*composed", "value": "~5"},
-				],
-			},	
-		],
-	},
 ],
 
 
