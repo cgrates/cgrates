@@ -46,10 +46,10 @@ var (
 
 var sTestsLoader = []func(t *testing.T){
 	testLoaderInitCfg,
+	testLoaderMakeFolders,
 	testLoaderResetDataDB,
 	testLoaderStartEngine,
 	testLoaderRPCConn,
-	testLoaderMakeFolders,
 	testLoaderPopulateData,
 	testLoaderLoadAttributes,
 	testLoaderVerifyOutDir,
@@ -74,13 +74,32 @@ func TestLoaderITMongo(t *testing.T) {
 
 func testLoaderInitCfg(t *testing.T) {
 	var err error
-	loaderCfgPath = path.Join(loaderDataDir, "conf", "samples", loaderConfigDIR)
+	loaderCfgPath = path.Join(loaderDataDir, "conf", "samples", "loaders", loaderConfigDIR)
 	loaderCfg, err = config.NewCGRConfigFromPath(loaderCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
 	loaderCfg.DataFolderPath = loaderDataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(loaderCfg)
+}
+
+func testLoaderMakeFolders(t *testing.T) {
+	// active the loaders here
+	for _, ldr := range loaderCfg.LoaderCfg() {
+		if ldr.Id == "CustomLoader" {
+			for _, dir := range []string{ldr.TpInDir, ldr.TpOutDir} {
+				if err := os.RemoveAll(dir); err != nil {
+					t.Fatal("Error removing folder: ", dir, err)
+				}
+				if err := os.MkdirAll(dir, 0755); err != nil {
+					t.Fatal("Error creating folder: ", dir, err)
+				}
+			}
+			loaderPathIn = ldr.TpInDir
+			loaderPathOut = ldr.TpOutDir
+		}
+	}
+
 }
 
 // Wipe out the cdr database
@@ -104,19 +123,6 @@ func testLoaderRPCConn(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-}
-
-func testLoaderMakeFolders(t *testing.T) {
-	for _, dir := range []string{loaderCfg.LoaderCfg()[1].TpInDir, loaderCfg.LoaderCfg()[1].TpOutDir} {
-		if err := os.RemoveAll(dir); err != nil {
-			t.Fatal("Error removing folder: ", dir, err)
-		}
-		if err := os.MkdirAll(dir, 0755); err != nil {
-			t.Fatal("Error creating folder: ", dir, err)
-		}
-	}
-	loaderPathIn = loaderCfg.LoaderCfg()[1].TpInDir
-	loaderPathOut = loaderCfg.LoaderCfg()[1].TpOutDir
 }
 
 func testLoaderPopulateData(t *testing.T) {
