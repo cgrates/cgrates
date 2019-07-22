@@ -552,7 +552,7 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 			}
 			return
 		} else if maxDebit < dbtIvl {
-			go func(cgrID string) { // schedule sending disconnect command
+			go func(s *Session) { // schedule sending disconnect command
 				select {
 				case <-s.debitStop: // call was disconnected already
 					return
@@ -564,13 +564,13 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 						}
 						utils.Logger.Warning(
 							fmt.Sprintf("<%s> could not command disconnect session: %s, error: %s",
-								utils.SessionS, cgrID, err.Error()))
+								utils.SessionS, s.CGRid(), err.Error()))
 					}
 					if err = sS.forceSTerminate(s, 0, nil); err != nil {
-						utils.Logger.Warning(fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>", utils.SessionS, cgrID, err))
+						utils.Logger.Warning(fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>", utils.SessionS, s.CGRid(), err))
 					}
 				}
-			}(s.CGRid())
+			}(s)
 		}
 		select {
 		case <-s.debitStop:
