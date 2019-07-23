@@ -83,7 +83,7 @@ func TestSSv1ItProcessEventWithPseudoPrepaid(t *testing.T) {
 func testSSv1ItProcessEventAuth(t *testing.T) {
 	authUsage := 5 * time.Minute
 	args := &sessions.V1ProcessEventArgs{
-		Flags: []string{"*resources:*authorize", "*auth", "*suppliers", "*attributes"},
+		Flags: []string{"*resources:*authorize", "*rals:*auth", "*suppliers", "*attributes"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventAuth",
@@ -107,8 +107,8 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 	if *rply.MaxUsage != authUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
-	if *rply.ResourceAuthorization == "" {
-		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAuthorization)
+	if *rply.ResourceMessage == "" {
+		t.Errorf("Unexpected ResourceMessage: %s", *rply.ResourceMessage)
 	}
 	eSplrs := &engine.SortedSuppliers{
 		ProfileID: "SPL_ACNT_1001",
@@ -162,7 +162,7 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 	initUsage := 5 * time.Minute
 	args := &sessions.V1ProcessEventArgs{
-		Flags: []string{utils.MetaInitiate, "*resources:*allocate", "*attributes"},
+		Flags: []string{"*rals:*init", "*resources:*allocate", "*attributes"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventInitiateSession",
@@ -193,8 +193,8 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 			sSV1RequestType == utils.META_RATED) && *rply.MaxUsage != -1) {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
-	if *rply.ResourceAllocation != "RES_ACNT_1001" {
-		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
+	if *rply.ResourceMessage != "RES_ACNT_1001" {
+		t.Errorf("Unexpected ResourceMessage: %s", *rply.ResourceMessage)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
@@ -232,7 +232,7 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 	reqUsage := 5 * time.Minute
 	args := &sessions.V1ProcessEventArgs{
-		Flags: []string{utils.MetaUpdate, "*attributes"},
+		Flags: []string{"*rals:*update", "*attributes"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventUpdateSession",
@@ -299,7 +299,7 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 
 func testSSv1ItProcessEventTerminateSession(t *testing.T) {
 	args := &sessions.V1ProcessEventArgs{
-		Flags: []string{utils.MetaTerminate, "*resources:*release"},
+		Flags: []string{"*rals:*terminate", "*resources:*release"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventTerminateSession",

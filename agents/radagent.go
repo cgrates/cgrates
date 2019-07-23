@@ -157,7 +157,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 		utils.MetaDryRun, utils.MetaAuth,
 		utils.MetaInitiate, utils.MetaUpdate,
 		utils.MetaTerminate, utils.MetaMessage,
-		utils.MetaCDRs} {
+		utils.MetaCDRs, utils.MetaEvent, utils.META_NONE} {
 		if reqProcessor.Flags.HasKey(typ) { // request type is identified through flags
 			reqType = typ
 			break
@@ -172,6 +172,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 	switch reqType {
 	default:
 		return false, fmt.Errorf("unknown request type: <%s>", reqType)
+	case utils.META_NONE: // do nothing on CGRateS side
 	case utils.MetaDryRun:
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> DRY_RUN, processorID: %s, CGREvent: %s",

@@ -2868,14 +2868,12 @@ type V1ProcessEventArgs struct {
 
 // V1ProcessEventReply is the reply for the ProcessEvent API
 type V1ProcessEventReply struct {
-	MaxUsage              *time.Duration
-	ResourceAuthorization *string
-	ResourceAllocation    *string
-	ResourceRelease       *string
-	Attributes            *engine.AttrSProcessEventReply
-	Suppliers             *engine.SortedSuppliers
-	ThresholdIDs          *[]string
-	StatQueueIDs          *[]string
+	MaxUsage        *time.Duration
+	ResourceMessage *string
+	Attributes      *engine.AttrSProcessEventReply
+	Suppliers       *engine.SortedSuppliers
+	ThresholdIDs    *[]string
+	StatQueueIDs    *[]string
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
@@ -2886,14 +2884,8 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap(
 		if v1Rply.MaxUsage != nil {
 			cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
 		}
-		if v1Rply.ResourceAuthorization != nil {
-			cgrReply[utils.CapResourceAuthorization] = *v1Rply.ResourceAuthorization
-		}
-		if v1Rply.ResourceAllocation != nil {
-			cgrReply[utils.CapResourceAllocation] = *v1Rply.ResourceAllocation
-		}
-		if v1Rply.ResourceRelease != nil {
-			cgrReply[utils.CapResourceRelease] = *v1Rply.ResourceRelease
+		if v1Rply.ResourceMessage != nil {
+			cgrReply[utils.CapResourceMessage] = *v1Rply.ResourceMessage
 		}
 		if v1Rply.Attributes != nil {
 			attrs := make(map[string]interface{})
@@ -3000,111 +2992,117 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 					attrRU, &resMessage); err != nil {
 					return utils.NewErrResourceS(err)
 				}
-				rply.ResourceAuthorization = &resMessage
+				rply.ResourceMessage = &resMessage
 			}
 			if resourceFlagsWithParams.HasKey(utils.MetaAllocate) {
 				if err = sS.resS.Call(utils.ResourceSv1AllocateResources,
 					attrRU, &resMessage); err != nil {
 					return utils.NewErrResourceS(err)
 				}
-				rply.ResourceAllocation = &resMessage
+				rply.ResourceMessage = &resMessage
 			}
 			if resourceFlagsWithParams.HasKey(utils.MetaRelease) {
 				if err = sS.resS.Call(utils.ResourceSv1ReleaseResources,
 					attrRU, &resMessage); err != nil {
 					return utils.NewErrResourceS(err)
 				}
-				rply.ResourceRelease = &resMessage
+				rply.ResourceMessage = &resMessage
 			}
 		}
 	}
-	//check for *auth/*init/*update/*terminate flags
-	//only one of them can be executed
-	switch {
-	//check for auth session
-	case argsFlagsWithParams.HasKey(utils.MetaAuth):
-		maxUsage, err := sS.authSession(args.CGREvent.Tenant,
-			engine.NewSafEvent(args.CGREvent.Event))
-		if err != nil {
-			return utils.NewErrRALs(err)
-		}
-		rply.MaxUsage = &maxUsage
-	// check for init session
-	case argsFlagsWithParams.HasKey(utils.MetaInitiate):
-		if ev.HasField(utils.CGRDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
-			if dbtItvl, err = ev.GetDuration(utils.CGRDebitInterval); err != nil {
-				return utils.NewErrRALs(err)
-			}
-		}
-		s, err := sS.initSession(args.CGREvent.Tenant, ev,
-			sS.biJClntID(clnt), originID, dbtItvl, args.ArgDispatcher)
-		if err != nil {
-			return utils.NewErrRALs(err)
-		}
-		if dbtItvl > 0 { //active debit
-			rply.MaxUsage = utils.DurationPointer(time.Duration(-1))
-		} else {
-			if maxUsage, err := sS.updateSession(s, nil); err != nil {
-				return utils.NewErrRALs(err)
-			} else {
+	// check what we need to do for RALs (*auth/*init/*update/*terminate)
+	if argsFlagsWithParams.HasKey(utils.MetaRALs) {
+		if ralsOpts := argsFlagsWithParams.ParamsSlice(utils.MetaRALs); len(ralsOpts) != 0 {
+			//check for subflags and convert them into utils.FlagsWithParams
+			ralsFlagsWithParams, err := utils.FlagsWithParamsFromSlice(ralsOpts)
+			//for the moment only the the flag will be executed
+			switch {
+			//check for auth session
+			case ralsFlagsWithParams.HasKey(utils.MetaAuth):
+				maxUsage, err := sS.authSession(args.CGREvent.Tenant,
+					engine.NewSafEvent(args.CGREvent.Event))
+				if err != nil {
+					return utils.NewErrRALs(err)
+				}
 				rply.MaxUsage = &maxUsage
+			// check for init session
+			case ralsFlagsWithParams.HasKey(utils.MetaInit):
+				if ev.HasField(utils.CGRDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
+					if dbtItvl, err = ev.GetDuration(utils.CGRDebitInterval); err != nil {
+						return utils.NewErrRALs(err)
+					}
+				}
+				s, err := sS.initSession(args.CGREvent.Tenant, ev,
+					sS.biJClntID(clnt), originID, dbtItvl, args.ArgDispatcher)
+				if err != nil {
+					return utils.NewErrRALs(err)
+				}
+				if dbtItvl > 0 { //active debit
+					rply.MaxUsage = utils.DurationPointer(time.Duration(-1))
+				} else {
+					if maxUsage, err := sS.updateSession(s, nil); err != nil {
+						return utils.NewErrRALs(err)
+					} else {
+						rply.MaxUsage = &maxUsage
+					}
+				}
+			//check for update session
+			case ralsFlagsWithParams.HasKey(utils.MetaUpdate):
+				if me.HasField(utils.CGRDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
+					if dbtItvl, err = me.GetDuration(utils.CGRDebitInterval); err != nil {
+						return utils.NewErrRALs(err)
+					}
+				}
+				ev := engine.NewSafEvent(args.CGREvent.Event)
+				cgrID := GetSetCGRID(ev)
+				ss := sS.getRelocateSessions(cgrID,
+					me.GetStringIgnoreErrors(utils.InitialOriginID),
+					me.GetStringIgnoreErrors(utils.OriginID),
+					me.GetStringIgnoreErrors(utils.OriginHost))
+				var s *Session
+				if len(ss) == 0 {
+					if s, err = sS.initSession(args.CGREvent.Tenant,
+						ev, sS.biJClntID(clnt),
+						me.GetStringIgnoreErrors(utils.OriginID), dbtItvl, args.ArgDispatcher); err != nil {
+						return utils.NewErrRALs(err)
+					}
+				} else {
+					s = ss[0]
+				}
+				if maxUsage, err := sS.updateSession(s, ev.AsMapInterface()); err != nil {
+					return utils.NewErrRALs(err)
+				} else {
+					rply.MaxUsage = &maxUsage
+				}
+			// check for terminate session
+			case ralsFlagsWithParams.HasKey(utils.MetaTerminate):
+				if ev.HasField(utils.CGRDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
+					if dbtItvl, err = ev.GetDuration(utils.CGRDebitInterval); err != nil {
+						return utils.NewErrRALs(err)
+					}
+				}
+				cgrID := GetSetCGRID(ev)
+				ss := sS.getRelocateSessions(cgrID,
+					me.GetStringIgnoreErrors(utils.InitialOriginID),
+					me.GetStringIgnoreErrors(utils.OriginID),
+					me.GetStringIgnoreErrors(utils.OriginHost))
+				var s *Session
+				if len(ss) == 0 {
+					if s, err = sS.initSession(args.CGREvent.Tenant,
+						ev, sS.biJClntID(clnt),
+						me.GetStringIgnoreErrors(utils.OriginID), dbtItvl, args.ArgDispatcher); err != nil {
+						return utils.NewErrRALs(err)
+					}
+				} else {
+					s = ss[0]
+				}
+				if err = sS.endSession(s,
+					me.GetDurationPtrIgnoreErrors(utils.Usage),
+					me.GetDurationPtrIgnoreErrors(utils.LastUsed),
+					utils.TimePointer(me.GetTimeIgnoreErrors(utils.AnswerTime, utils.EmptyString))); err != nil {
+					return utils.NewErrRALs(err)
+				}
 			}
-		}
-	//check for update session
-	case argsFlagsWithParams.HasKey(utils.MetaUpdate):
-		if me.HasField(utils.CGRDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
-			if dbtItvl, err = me.GetDuration(utils.CGRDebitInterval); err != nil {
-				return utils.NewErrRALs(err)
-			}
-		}
-		ev := engine.NewSafEvent(args.CGREvent.Event)
-		cgrID := GetSetCGRID(ev)
-		ss := sS.getRelocateSessions(cgrID,
-			me.GetStringIgnoreErrors(utils.InitialOriginID),
-			me.GetStringIgnoreErrors(utils.OriginID),
-			me.GetStringIgnoreErrors(utils.OriginHost))
-		var s *Session
-		if len(ss) == 0 {
-			if s, err = sS.initSession(args.CGREvent.Tenant,
-				ev, sS.biJClntID(clnt),
-				me.GetStringIgnoreErrors(utils.OriginID), dbtItvl, args.ArgDispatcher); err != nil {
-				return utils.NewErrRALs(err)
-			}
-		} else {
-			s = ss[0]
-		}
-		if maxUsage, err := sS.updateSession(s, ev.AsMapInterface()); err != nil {
-			return utils.NewErrRALs(err)
-		} else {
-			rply.MaxUsage = &maxUsage
-		}
-	// check for terminate session
-	case argsFlagsWithParams.HasKey(utils.MetaTerminate):
-		if ev.HasField(utils.CGRDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
-			if dbtItvl, err = ev.GetDuration(utils.CGRDebitInterval); err != nil {
-				return utils.NewErrRALs(err)
-			}
-		}
-		cgrID := GetSetCGRID(ev)
-		ss := sS.getRelocateSessions(cgrID,
-			me.GetStringIgnoreErrors(utils.InitialOriginID),
-			me.GetStringIgnoreErrors(utils.OriginID),
-			me.GetStringIgnoreErrors(utils.OriginHost))
-		var s *Session
-		if len(ss) == 0 {
-			if s, err = sS.initSession(args.CGREvent.Tenant,
-				ev, sS.biJClntID(clnt),
-				me.GetStringIgnoreErrors(utils.OriginID), dbtItvl, args.ArgDispatcher); err != nil {
-				return utils.NewErrRALs(err)
-			}
-		} else {
-			s = ss[0]
-		}
-		if err = sS.endSession(s,
-			me.GetDurationPtrIgnoreErrors(utils.Usage),
-			me.GetDurationPtrIgnoreErrors(utils.LastUsed),
-			utils.TimePointer(me.GetTimeIgnoreErrors(utils.AnswerTime, utils.EmptyString))); err != nil {
-			return utils.NewErrRALs(err)
 		}
 	}
 	// get suppliers if required
