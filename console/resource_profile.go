@@ -24,9 +24,9 @@ import (
 )
 
 func init() {
-	c := &CmdGetResource{
-		name:      "resource",
-		rpcMethod: utils.ResourceSv1GetResource,
+	c := &CmdGetResourceProfile{
+		name:      "resource_profile",
+		rpcMethod: utils.ApierV1GetResourceProfile,
 		rpcParams: &utils.TenantID{},
 	}
 	commands[c.Name()] = c
@@ -34,33 +34,39 @@ func init() {
 }
 
 // Commander implementation
-type CmdGetResource struct {
+type CmdGetResourceProfile struct {
 	name      string
 	rpcMethod string
 	rpcParams *utils.TenantID
 	*CommandExecuter
 }
 
-func (self *CmdGetResource) Name() string {
+func (self *CmdGetResourceProfile) Name() string {
 	return self.name
 }
 
-func (self *CmdGetResource) RpcMethod() string {
+func (self *CmdGetResourceProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetResource) RpcParams(reset bool) interface{} {
+func (self *CmdGetResourceProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantID{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetResource) PostprocessRpcParams() error {
+func (self *CmdGetResourceProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetResource) RpcResult() interface{} {
-	atr := engine.Resource{}
+func (self *CmdGetResourceProfile) RpcResult() interface{} {
+	atr := engine.ResourceProfile{}
 	return &atr
+}
+
+func (self *CmdGetResourceProfile) GetFormatedResult(result interface{}) string {
+	return GetFormatedResult(result, map[string]struct{}{
+		"UsageTTL": struct{}{},
+	})
 }
