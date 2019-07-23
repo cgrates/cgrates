@@ -1914,16 +1914,21 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 	if args.ProcessThresholds {
 		tIDs, err := sS.processThreshold(args.CGREvent, args.ArgDispatcher,
 			args.ThresholdIDs)
-		if err != nil {
-			return err
+		if err != nil && err.Error() != utils.ErrNotFound.Error() {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
+					utils.SessionS, err.Error(), args.CGREvent))
 		}
 		authReply.ThresholdIDs = &tIDs
 	}
 	if args.ProcessStats {
 		sIDs, err := sS.processStats(args.CGREvent, args.ArgDispatcher,
 			args.StatIDs)
-		if err != nil {
-			return err
+		if err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event %+v with StatS.",
+					utils.SessionS, err.Error(), args.CGREvent))
 		}
 		authReply.StatQueueIDs = &sIDs
 	}
@@ -2174,16 +2179,21 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 	if args.ProcessThresholds {
 		tIDs, err := sS.processThreshold(args.CGREvent, args.ArgDispatcher,
 			args.ThresholdIDs)
-		if err != nil {
-			return err
+		if err != nil && err.Error() != utils.ErrNotFound.Error() {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
+					utils.SessionS, err.Error(), args.CGREvent))
 		}
 		rply.ThresholdIDs = &tIDs
 	}
 	if args.ProcessStats {
 		sIDs, err := sS.processStats(args.CGREvent, args.ArgDispatcher,
 			args.StatIDs)
-		if err != nil {
-			return err
+		if err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event %+v with StatS.",
+					utils.SessionS, err.Error(), args.CGREvent))
 		}
 		rply.StatQueueIDs = &sIDs
 	}
@@ -2516,15 +2526,21 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 	if args.ProcessThresholds {
 		_, err := sS.processThreshold(args.CGREvent, args.ArgDispatcher,
 			args.ThresholdIDs)
-		if err != nil {
-			return err
+		if err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
+					utils.SessionS, err.Error(), args.CGREvent))
 		}
 	}
 	if args.ProcessStats {
 		_, err := sS.processStats(args.CGREvent, args.ArgDispatcher,
 			args.StatIDs)
-		if err != nil {
-			return err
+		if err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event %+v with StatS.",
+					utils.SessionS, err.Error(), args.CGREvent))
 		}
 	}
 	*rply = utils.OK
@@ -2842,16 +2858,21 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.RpcClientConnection,
 	if args.ProcessThresholds {
 		tIDs, err := sS.processThreshold(args.CGREvent, args.ArgDispatcher,
 			args.ThresholdIDs)
-		if err != nil {
-			return err
+		if err != nil && err.Error() != utils.ErrNotFound.Error() {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
+					utils.SessionS, err.Error(), args.CGREvent))
 		}
 		rply.ThresholdIDs = &tIDs
 	}
 	if args.ProcessStats {
 		sIDs, err := sS.processStats(args.CGREvent, args.ArgDispatcher,
 			args.StatIDs)
-		if err != nil {
-			return err
+		if err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event %+v with StatS.",
+					utils.SessionS, err.Error(), args.CGREvent))
 		}
 		rply.StatQueueIDs = &sIDs
 	}
@@ -3136,8 +3157,10 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 	if argsFlagsWithParams.HasKey(utils.MetaThresholds) {
 		tIDs, err := sS.processThreshold(args.CGREvent, args.ArgDispatcher,
 			argsFlagsWithParams.ParamsSlice(utils.MetaThresholds))
-		if err != nil {
-			return err
+		if err != nil && err.Error() != utils.ErrNotFound.Error() {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
+					utils.SessionS, err.Error(), args.CGREvent))
 		}
 		rply.ThresholdIDs = &tIDs
 	}
@@ -3145,8 +3168,11 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 	if argsFlagsWithParams.HasKey(utils.MetaStats) {
 		sIDs, err := sS.processStats(args.CGREvent, args.ArgDispatcher,
 			argsFlagsWithParams.ParamsSlice(utils.MetaStats))
-		if err != nil {
-			return err
+		if err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event %+v with StatS.",
+					utils.SessionS, err.Error(), args.CGREvent))
 		}
 		rply.StatQueueIDs = &sIDs
 	}
@@ -3217,13 +3243,7 @@ func (sS *SessionS) processThreshold(cgrEv *utils.CGREvent, argDisp *utils.ArgDi
 	}
 	//initialize the returned variable
 	tIDs = make([]string, 0)
-	if err = sS.thdS.Call(utils.ThresholdSv1ProcessEvent,
-		thEv, &tIDs); err != nil &&
-		err.Error() != utils.ErrNotFound.Error() {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
-				utils.SessionS, err.Error(), thEv))
-	}
+	err = sS.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs)
 	return
 }
 
@@ -3243,13 +3263,7 @@ func (sS *SessionS) processStats(cgrEv *utils.CGREvent, argDisp *utils.ArgDispat
 	}
 	//initialize the returned variable
 	sIDs = make([]string, 0)
-	if err := sS.statS.Call(utils.StatSv1ProcessEvent,
-		statArgs, &sIDs); err != nil &&
-		err.Error() != utils.ErrNotFound.Error() {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s> error: %s processing event %+v with StatS.",
-				utils.SessionS, err.Error(), cgrEv))
-	}
+	err = sS.statS.Call(utils.StatSv1ProcessEvent, statArgs, &sIDs)
 	return
 }
 
