@@ -261,7 +261,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		utils.MetaDryRun, utils.MetaAuth,
 		utils.MetaInitiate, utils.MetaUpdate,
 		utils.MetaTerminate, utils.MetaMessage,
-		utils.MetaCDRs, utils.META_NONE} {
+		utils.MetaCDRs, utils.MetaEvent, utils.META_NONE} {
 		if reqProcessor.Flags.HasKey(typ) { // request type is identified through flags
 			reqType = typ
 			break

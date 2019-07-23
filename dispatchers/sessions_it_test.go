@@ -852,7 +852,7 @@ func testDspSessionForceDisconect(t *testing.T) {
 
 func testDspSessionProcessEvent3(t *testing.T) {
 	args := &sessions.V1ProcessEventArgs{
-		Flags: []string{utils.MetaTerminate, "*resources:*release"},
+		Flags: []string{"*rals:*terminate", "*resources:*release"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventTerminateSession",
