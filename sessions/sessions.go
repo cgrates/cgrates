@@ -1827,6 +1827,7 @@ func (v1AuthReply *V1AuthorizeReply) AsNavigableMap(
 // BiRPCv1AuthorizeEvent performs authorization for CGREvent based on specific components
 func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 	args *V1AuthorizeArgs, authReply *V1AuthorizeReply) (err error) {
+	var withErrors bool
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
 	}
@@ -1918,6 +1919,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
 					utils.SessionS, err.Error(), args.CGREvent))
+			withErrors = true
 		}
 		authReply.ThresholdIDs = &tIDs
 	}
@@ -1929,8 +1931,12 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with StatS.",
 					utils.SessionS, err.Error(), args.CGREvent))
+			withErrors = true
 		}
 		authReply.StatQueueIDs = &sIDs
+	}
+	if withErrors {
+		return utils.ErrPartiallyExecuted
 	}
 	return nil
 }
@@ -2086,6 +2092,7 @@ func (v1Rply *V1InitSessionReply) AsNavigableMap(
 // BiRPCv1InitiateSession initiates a new session
 func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 	args *V1InitSessionArgs, rply *V1InitSessionReply) (err error) {
+	var withErrors bool
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
 	}
@@ -2183,6 +2190,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
 					utils.SessionS, err.Error(), args.CGREvent))
+			withErrors = true
 		}
 		rply.ThresholdIDs = &tIDs
 	}
@@ -2194,8 +2202,12 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with StatS.",
 					utils.SessionS, err.Error(), args.CGREvent))
+			withErrors = true
 		}
 		rply.StatQueueIDs = &sIDs
+	}
+	if withErrors {
+		return utils.ErrPartiallyExecuted
 	}
 	return
 }
@@ -2432,6 +2444,7 @@ func (args *V1TerminateSessionArgs) ParseFlags(flags string) {
 // BiRPCV1TerminateSession will stop debit loops as well as release any used resources
 func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 	args *V1TerminateSessionArgs, rply *string) (err error) {
+	var withErrors bool
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
 	}
@@ -2531,6 +2544,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
 					utils.SessionS, err.Error(), args.CGREvent))
+			withErrors = true
 		}
 	}
 	if args.ProcessStats {
@@ -2541,7 +2555,11 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with StatS.",
 					utils.SessionS, err.Error(), args.CGREvent))
+			withErrors = true
 		}
+	}
+	if withErrors {
+		return utils.ErrPartiallyExecuted
 	}
 	*rply = utils.OK
 	return
@@ -2772,6 +2790,7 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap(
 // BiRPCv1ProcessEvent processes one event with the right subsystems based on arguments received
 func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.RpcClientConnection,
 	args *V1ProcessMessageArgs, rply *V1ProcessMessageReply) (err error) {
+	var withErrors bool
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
 	}
@@ -2862,6 +2881,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.RpcClientConnection,
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
 					utils.SessionS, err.Error(), args.CGREvent))
+			withErrors = true
 		}
 		rply.ThresholdIDs = &tIDs
 	}
@@ -2873,9 +2893,14 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.RpcClientConnection,
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with StatS.",
 					utils.SessionS, err.Error(), args.CGREvent))
+			withErrors = true
 		}
 		rply.StatQueueIDs = &sIDs
 	}
+	if withErrors {
+		return utils.ErrPartiallyExecuted
+	}
+
 	return nil
 }
 
@@ -2933,6 +2958,7 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap(
 // BiRPCv1ProcessEvent processes one event with the right subsystems based on arguments received
 func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 	args *V1ProcessEventArgs, rply *V1ProcessEventReply) (err error) {
+	var withErrors bool
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
 	}
@@ -3161,6 +3187,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with ThresholdS.",
 					utils.SessionS, err.Error(), args.CGREvent))
+			withErrors = true
 		}
 		rply.ThresholdIDs = &tIDs
 	}
@@ -3173,8 +3200,12 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event %+v with StatS.",
 					utils.SessionS, err.Error(), args.CGREvent))
+			withErrors = true
 		}
 		rply.StatQueueIDs = &sIDs
+	}
+	if withErrors {
+		return utils.ErrPartiallyExecuted
 	}
 	return nil
 }
