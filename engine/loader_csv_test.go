@@ -1354,40 +1354,20 @@ func TestLoadDispatcherProfiles(t *testing.T) {
 			},
 		},
 	}
-	revHosts := &utils.TPDispatcherProfile{
-		TPid:       testTPID,
-		Tenant:     "cgrates.org",
-		ID:         "D1",
-		Subsystems: []string{"*any"},
-		FilterIDs:  []string{"*string:Account:1001"},
-		ActivationInterval: &utils.TPActivationInterval{
-			ActivationTime: "2014-07-29T15:00:00Z",
-		},
-		Strategy: "*first",
-		Weight:   20,
-		Hosts: []*utils.TPDispatcherHostProfile{
-			&utils.TPDispatcherHostProfile{
-				ID:        "C2",
-				FilterIDs: []string{"*lt:Usage:10"},
-				Weight:    10,
-				Params:    []interface{}{"192.168.56.204"},
-				Blocker:   false,
-			},
-			&utils.TPDispatcherHostProfile{
-				ID:        "C1",
-				FilterIDs: []string{"*gt:Usage:10"},
-				Weight:    10,
-				Params:    []interface{}{"192.168.56.203"},
-				Blocker:   false,
-			},
-		},
+	if len(csvr.dispatcherProfiles) != 1 {
+		t.Errorf("Failed to load dispatcherProfiles: %s", utils.ToIJSON(csvr.dispatcherProfiles))
 	}
 	dppKey := utils.TenantID{Tenant: "cgrates.org", ID: "D1"}
-	if len(csvr.dispatcherProfiles) != 1 {
-		t.Errorf("Failed to load chargerProfiles: %s", utils.ToIJSON(csvr.chargerProfiles))
-	} else if !reflect.DeepEqual(eDispatcherProfiles, csvr.dispatcherProfiles[dppKey]) &&
-		!reflect.DeepEqual(revHosts, csvr.dispatcherProfiles[dppKey]) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eDispatcherProfiles), utils.ToJSON(csvr.dispatcherProfiles[dppKey]))
+	sort.Slice(eDispatcherProfiles.Hosts, func(i, j int) bool {
+		return eDispatcherProfiles.Hosts[i].ID < eDispatcherProfiles.Hosts[j].ID
+	})
+	sort.Slice(csvr.dispatcherProfiles[dppKey].Hosts, func(i, j int) bool {
+		return csvr.dispatcherProfiles[dppKey].Hosts[i].ID < csvr.dispatcherProfiles[dppKey].Hosts[j].ID
+	})
+
+	if !reflect.DeepEqual(eDispatcherProfiles, csvr.dispatcherProfiles[dppKey]) {
+		t.Errorf("Expecting: %+v, received: %+v",
+			utils.ToJSON(eDispatcherProfiles), utils.ToJSON(csvr.dispatcherProfiles[dppKey]))
 	}
 }
 
