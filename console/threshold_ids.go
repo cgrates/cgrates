@@ -59,6 +59,6 @@ func (self *CmdGetThresholdIDs) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetThresholdIDs) RpcResult() interface{} {
-	atr := []string{}
+	var atr []string
 	return &atr
 }

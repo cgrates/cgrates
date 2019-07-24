@@ -59,7 +59,7 @@ func (self *CmdGetDataDBVersions) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetDataDBVersions) RpcResult() interface{} {
-	s := engine.Versions{}
+	var s engine.Versions
 	return &s
 }
 

@@ -61,7 +61,7 @@ func (self *CmdGetTriggers) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetTriggers) RpcResult() interface{} {
-	atr := engine.ActionTriggers{}
+	var atr engine.ActionTriggers
 	return &atr
 }
 

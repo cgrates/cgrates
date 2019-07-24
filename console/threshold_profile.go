@@ -63,7 +63,7 @@ func (self *CmdGetThresholdProfile) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetThresholdProfile) RpcResult() interface{} {
-	atr := engine.ThresholdProfile{}
+	var atr engine.ThresholdProfile
 	return &atr
 }
 

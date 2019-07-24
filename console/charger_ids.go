@@ -60,6 +60,6 @@ func (self *CmdGetChargerIDs) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetChargerIDs) RpcResult() interface{} {
-	atr := []string{}
+	var atr []string
 	return &atr
 }

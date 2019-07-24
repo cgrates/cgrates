@@ -24,8 +24,8 @@ import (
 )
 
 func init() {
-	c := &CmdGetStatQueue{
-		name:      "statqueue",
+	c := &CmdGetStatQueueProfile{
+		name:      "statqueue_profile",
 		rpcMethod: utils.ApierV1GetStatQueueProfile,
 		rpcParams: &utils.TenantID{},
 	}
@@ -34,38 +34,38 @@ func init() {
 }
 
 // Commander implementation
-type CmdGetStatQueue struct {
+type CmdGetStatQueueProfile struct {
 	name      string
 	rpcMethod string
 	rpcParams *utils.TenantID
 	*CommandExecuter
 }
 
-func (self *CmdGetStatQueue) Name() string {
+func (self *CmdGetStatQueueProfile) Name() string {
 	return self.name
 }
 
-func (self *CmdGetStatQueue) RpcMethod() string {
+func (self *CmdGetStatQueueProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetStatQueue) RpcParams(reset bool) interface{} {
+func (self *CmdGetStatQueueProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TenantID{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetStatQueue) PostprocessRpcParams() error {
+func (self *CmdGetStatQueueProfile) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetStatQueue) RpcResult() interface{} {
-	atr := engine.StatQueueProfile{}
+func (self *CmdGetStatQueueProfile) RpcResult() interface{} {
+	var atr engine.StatQueueProfile
 	return &atr
 }
 
-func (self *CmdGetStatQueue) GetFormatedResult(result interface{}) string {
+func (self *CmdGetStatQueueProfile) GetFormatedResult(result interface{}) string {
 	return GetFormatedResult(result, map[string]struct{}{
 		"TTL": struct{}{},
 	})

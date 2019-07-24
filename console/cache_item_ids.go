@@ -60,6 +60,6 @@ func (self *CmdCacheGetItemIDs) PostprocessRpcParams() error {
 }
 
 func (self *CmdCacheGetItemIDs) RpcResult() interface{} {
-	reply := []string{}
+	var reply []string
 	return &reply
 }

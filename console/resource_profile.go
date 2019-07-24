@@ -61,7 +61,7 @@ func (self *CmdGetResourceProfile) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetResourceProfile) RpcResult() interface{} {
-	atr := engine.ResourceProfile{}
+	var atr engine.ResourceProfile
 	return &atr
 }
 

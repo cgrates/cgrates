@@ -60,6 +60,6 @@ func (self *CmdGetStatQueueIDs) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetStatQueueIDs) RpcResult() interface{} {
-	atr := []string{}
+	var atr []string
 	return &atr
 }

@@ -60,6 +60,6 @@ func (self *CmdGetFilterIDs) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetFilterIDs) RpcResult() interface{} {
-	atr := []string{}
+	var atr []string
 	return &atr
 }
