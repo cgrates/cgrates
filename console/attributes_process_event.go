@@ -65,7 +65,7 @@ func (self *CmdAttributesProcessEvent) PostprocessRpcParams() error {
 }
 
 func (self *CmdAttributesProcessEvent) RpcResult() interface{} {
-	atr := engine.AttrSProcessEventReply{}
+	var atr engine.AttrSProcessEventReply
 	return &atr
 }
 

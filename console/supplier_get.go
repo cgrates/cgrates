@@ -60,6 +60,6 @@ func (self *CmdGetSupplier) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetSupplier) RpcResult() interface{} {
-	atr := engine.SupplierProfile{}
+	var atr engine.SupplierProfile
 	return &atr
 }

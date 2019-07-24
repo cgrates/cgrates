@@ -60,6 +60,6 @@ func (self *CmdGetAttributeForEvent) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetAttributeForEvent) RpcResult() interface{} {
-	atr := engine.AttributeProfile{}
+	var atr engine.AttributeProfile
 	return &atr
 }

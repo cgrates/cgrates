@@ -61,6 +61,6 @@ func (self *CmdGetChargers) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetChargers) RpcResult() interface{} {
-	atr := engine.ChargerProfile{}
+	var atr engine.ChargerProfile
 	return &atr
 }

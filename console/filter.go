@@ -61,6 +61,6 @@ func (self *CmdGetFilter) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetFilter) RpcResult() interface{} {
-	atr := engine.Filter{}
+	var atr engine.Filter
 	return &atr
 }

@@ -62,6 +62,6 @@ func (self *CmdGetSupplierForEvent) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetSupplierForEvent) RpcResult() interface{} {
-	atr := []*engine.SupplierProfile{}
+	var atr []*engine.SupplierProfile
 	return &atr
 }
