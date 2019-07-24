@@ -83,7 +83,9 @@ func TestSSv1ItProcessEventWithPseudoPrepaid(t *testing.T) {
 func testSSv1ItProcessEventAuth(t *testing.T) {
 	authUsage := 5 * time.Minute
 	args := &sessions.V1ProcessEventArgs{
-		Flags: []string{"*resources:*authorize", "*rals:*auth", "*suppliers", "*attributes"},
+		Flags: []string{utils.ConcatenatedKey(utils.MetaResources, utils.MetaAuthorize),
+			utils.ConcatenatedKey(utils.MetaRALs, utils.MetaAuth),
+			utils.MetaSuppliers, utils.MetaAttributes},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventAuth",
@@ -162,7 +164,8 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 	initUsage := 5 * time.Minute
 	args := &sessions.V1ProcessEventArgs{
-		Flags: []string{"*rals:*init", "*resources:*allocate", "*attributes"},
+		Flags: []string{utils.ConcatenatedKey(utils.MetaRALs, utils.MetaInit),
+			utils.ConcatenatedKey(utils.MetaResources, utils.MetaAllocate), utils.MetaAttributes},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventInitiateSession",
@@ -232,7 +235,7 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 	reqUsage := 5 * time.Minute
 	args := &sessions.V1ProcessEventArgs{
-		Flags: []string{"*rals:*update", "*attributes"},
+		Flags: []string{utils.ConcatenatedKey(utils.MetaRALs, utils.MetaUpdate), utils.MetaAttributes},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventUpdateSession",
@@ -299,7 +302,8 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 
 func testSSv1ItProcessEventTerminateSession(t *testing.T) {
 	args := &sessions.V1ProcessEventArgs{
-		Flags: []string{"*rals:*terminate", "*resources:*release"},
+		Flags: []string{utils.ConcatenatedKey(utils.MetaRALs, utils.MetaTerminate),
+			utils.ConcatenatedKey(utils.MetaResources, utils.MetaRelease)},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testSSv1ItProcessEventTerminateSession",
