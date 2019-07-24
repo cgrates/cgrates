@@ -1936,9 +1936,9 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		authReply.StatQueueIDs = &sIDs
 	}
 	if withErrors {
-		return utils.ErrPartiallyExecuted
+		err = utils.ErrPartiallyExecuted
 	}
-	return nil
+	return
 }
 
 // V1AuthorizeReplyWithDigest contains return options for auth with digest
@@ -2207,7 +2207,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		rply.StatQueueIDs = &sIDs
 	}
 	if withErrors {
-		return utils.ErrPartiallyExecuted
+		err = utils.ErrPartiallyExecuted
 	}
 	return
 }
@@ -2559,7 +2559,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 		}
 	}
 	if withErrors {
-		return utils.ErrPartiallyExecuted
+		err = utils.ErrPartiallyExecuted
 	}
 	*rply = utils.OK
 	return
@@ -2898,10 +2898,10 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.RpcClientConnection,
 		rply.StatQueueIDs = &sIDs
 	}
 	if withErrors {
-		return utils.ErrPartiallyExecuted
+		err = utils.ErrPartiallyExecuted
 	}
 
-	return nil
+	return
 }
 
 // V1ProcessEventArgs are the options passed to ProcessEvent API
@@ -3205,9 +3205,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 		rply.StatQueueIDs = &sIDs
 	}
 	if withErrors {
-		return utils.ErrPartiallyExecuted
+		err = utils.ErrPartiallyExecuted
 	}
-	return nil
+	return
 }
 
 // BiRPCv1SyncSessions will sync sessions on demand
