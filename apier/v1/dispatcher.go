@@ -789,3 +789,21 @@ func (dS *DispatcherCoreSv1) Status(args *utils.TenantWithArgDispatcher, reply *
 func (dS *DispatcherCoreSv1) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
 	return dS.dS.CoreSv1Ping(args, reply)
 }
+
+func NewDispatcherRALsV1(dps *dispatchers.DispatcherService) *DispatcherRALsV1 {
+	return &DispatcherRALsV1{dS: dps}
+}
+
+// Exports RPC from RLs
+type DispatcherRALsV1 struct {
+	dS *dispatchers.DispatcherService
+}
+
+func (dS *DispatcherRALsV1) GetRatingPlansCost(args *utils.RatingPlanCostArg, reply *dispatchers.RatingPlanCost) error {
+	return dS.dS.RALsV1GetRatingPlansCost(args, reply)
+}
+
+// Ping used to detreminate if component is active
+func (dS *DispatcherRALsV1) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
+	return dS.dS.RALsV1Ping(args, reply)
+}

@@ -22,6 +22,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 
 	"github.com/cgrates/cgrates/sessions"
@@ -75,4 +76,9 @@ func ParseStringMap(s string) utils.StringMap {
 		return make(utils.StringMap)
 	}
 	return utils.StringMapFromSlice(strings.Split(s, utils.ANDSep))
+}
+
+type RatingPlanCost struct {
+	EventCost    *engine.EventCost
+	RatingPlanID string
 }

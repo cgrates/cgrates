@@ -73,6 +73,8 @@ func (self *CmdApierPing) RpcMethod() string {
 		return utils.AnalyzerSv1Ping
 	case utils.SchedulerSLow:
 		return utils.SchedulerSv1Ping
+	case utils.RALsLow:
+		return utils.RALsV1Ping
 	default:
 	}
 	return self.rpcMethod

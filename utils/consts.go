@@ -615,6 +615,8 @@ const (
 	MetaAllocate                 = "*allocate"
 	MetaAuthorize                = "*authorize"
 	MetaInit                     = "*init"
+	MetaRatingPlanCost           = "*rating_plan_cost"
+	RatingPlanIDs                = "RatingPlanIDs"
 )
 
 // Migrator Action
@@ -666,6 +668,7 @@ const (
 	AnalyzerSLow   = "analyzers"
 	SchedulerSLow  = "schedulers"
 	LoaderSLow     = "loaders"
+	RALsLow        = "rals"
 )
 
 // Migrator Metas
@@ -803,6 +806,12 @@ const (
 const (
 	ConfigSv1               = "ConfigSv1"
 	ConfigSv1GetJSONSection = "ConfigSv1.GetJSONSection"
+)
+
+const (
+	RALsV1                   = "RALsV1"
+	RALsV1GetRatingPlansCost = "RALsV1.GetRatingPlansCost"
+	RALsV1Ping               = "RALsV1.Ping"
 )
 
 const (

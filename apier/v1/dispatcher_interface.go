@@ -145,3 +145,8 @@ type ServiceManagerV1Interface interface {
 	ServiceStatus(args dispatchers.ArgStartServiceWithApiKey, reply *string) error
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 }
+
+type RALsV1Interface interface {
+	GetRatingPlansCost(arg *utils.RatingPlanCostArg, reply *dispatchers.RatingPlanCost) error
+	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
+}
