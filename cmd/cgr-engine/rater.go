@@ -31,8 +31,9 @@ import (
 )
 
 // Starts rater and reports on chan
-func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThdSChan, internalStatSChan,
-	internalCacheSChan, internalSchedulerSChan, internalAttributeSChan, internalDispatcherSChan chan rpcclient.RpcClientConnection,
+func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThdSChan,
+	internalStatSChan, internalCacheSChan, internalSchedulerSChan, internalAttributeSChan,
+	internalDispatcherSChan, internalRALsChan chan rpcclient.RpcClientConnection,
 	serviceManager *servmanager.ServiceManager, server *utils.Server,
 	dm *engine.DataManager, loadDb engine.LoadStorage, cdrDb engine.CdrStorage,
 	chS *engine.CacheS, // separate from channel for optimization
@@ -226,10 +227,13 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 	apierRpcV2 := &v2.ApierV2{
 		ApierV1: *apierRpcV1}
 
+	ralSv1 := v1.NewRALsV1()
+
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(responder)
 		server.RpcRegister(apierRpcV1)
 		server.RpcRegister(apierRpcV2)
+		server.RpcRegister(ralSv1)
 	}
 
 	utils.RegisterRpcParams("", &v1.CDRsV1{})
@@ -238,9 +242,11 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 	utils.RegisterRpcParams("", responder)
 	utils.RegisterRpcParams("", apierRpcV1)
 	utils.RegisterRpcParams("", apierRpcV2)
+	utils.RegisterRpcParams(utils.RALsV1, ralSv1)
 	utils.GetRpcParams("")
 
 	internalApierv1 <- apierRpcV1
 	internalApierv2 <- apierRpcV2
+	internalRALsChan <- ralSv1
 	internalRaterChan <- responder // Rater done
 }

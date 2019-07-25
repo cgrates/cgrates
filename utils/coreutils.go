@@ -984,3 +984,11 @@ func GetUrlRawArguments(dialURL string) (out map[string]string) {
 	}
 	return
 }
+
+type RatingPlanCostArg struct {
+	RatingPlanIDs []string
+	Destination   string
+	SetupTime     string
+	Usage         string
+	*ArgDispatcher
+}

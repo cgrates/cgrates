@@ -1249,6 +1249,9 @@ func startDispatcherService(internalDispatcherSChan, internalAttributeSChan chan
 	server.RpcRegisterName(utils.CoreSv1,
 		v1.NewDispatcherCoreSv1(dspS))
 
+	server.RpcRegisterName(utils.RALsV1,
+		v1.NewDispatcherRALsV1(dspS))
+
 	internalDispatcherSChan <- dspS
 }
 
@@ -1331,8 +1334,8 @@ func initServiceManagerV1(internalServiceManagerChan chan rpcclient.RpcClientCon
 func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
-	internalSMGChan, internalAnalyzerSChan,
-	internalDispatcherSChan, internalLoaderSChan chan rpcclient.RpcClientConnection,
+	internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan,
+	internalLoaderSChan, internalRALsv1Chan chan rpcclient.RpcClientConnection,
 	exitChan chan bool) {
 	if !cfg.DispatcherSCfg().Enabled {
 		select { // Any of the rpc methods will unlock listening to rpc requests
@@ -1358,6 +1361,8 @@ func startRpc(server *utils.Server, internalRaterChan,
 			internalAnalyzerSChan <- analyzerS
 		case loaderS := <-internalLoaderSChan:
 			internalLoaderSChan <- loaderS
+		case ralS := <-internalRALsv1Chan:
+			internalRALsv1Chan <- ralS
 		}
 	} else {
 		select {
@@ -1676,6 +1681,7 @@ func main() {
 	internalServeManagerChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalConfigChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalCoreSv1Chan := make(chan rpcclient.RpcClientConnection, 1)
+	internalRALsv1Chan := make(chan rpcclient.RpcClientConnection, 1)
 
 	// init internalRPCSet
 	engine.IntRPC = engine.NewRPCClientSet()
@@ -1700,6 +1706,7 @@ func main() {
 		engine.IntRPC.AddInternalRPCClient(utils.ServiceManagerV1, internalServeManagerChan)
 		engine.IntRPC.AddInternalRPCClient(utils.ConfigSv1, internalConfigChan)
 		engine.IntRPC.AddInternalRPCClient(utils.CoreSv1, internalCoreSv1Chan)
+		engine.IntRPC.AddInternalRPCClient(utils.RALsV1, internalRALsv1Chan)
 	}
 
 	// init CacheS
@@ -1727,8 +1734,9 @@ func main() {
 
 	// Start RALs
 	if cfg.RalsCfg().RALsEnabled {
-		go startRater(internalRaterChan, internalApierV1Chan, internalApierV2Chan, internalThresholdSChan,
-			internalStatSChan, internalCacheSChan, internalSchedSChan, internalAttributeSChan, internalDispatcherSChan,
+		go startRater(internalRaterChan, internalApierV1Chan, internalApierV2Chan,
+			internalThresholdSChan, internalStatSChan, internalCacheSChan, internalSchedSChan,
+			internalAttributeSChan, internalDispatcherSChan, internalRALsv1Chan,
 			srvManager, server, dm, loadDb, cdrDb, cacheS, filterSChan, exitChan)
 	}
 
@@ -1838,7 +1846,7 @@ func main() {
 		internalRsChan, internalStatSChan,
 		internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
 		internalSupplierSChan, internalSMGChan, internalAnalyzerSChan,
-		internalDispatcherSChan, internalLoaderSChan, exitChan)
+		internalDispatcherSChan, internalLoaderSChan, internalRALsv1Chan, exitChan)
 	<-exitChan
 
 	if *cpuProfDir != "" { // wait to end cpuProfiling
