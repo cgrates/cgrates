@@ -784,6 +784,8 @@ const (
 	ApierV1RemoveRatingProfile      = "ApierV1.RemoveRatingProfile"
 	ApierV1SetRatingProfile         = "ApierV1.SetRatingProfile"
 	ApierV1GetRatingProfileIDs      = "ApierV1.GetRatingProfileIDs"
+	ApierV1SetDataDBVersions        = "ApierV1.SetDataDBVersions"
+	ApierV1SetStorDBVersions        = "ApierV1.SetStorDBVersions"
 )
 
 const (
