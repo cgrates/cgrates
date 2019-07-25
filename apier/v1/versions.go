@@ -46,3 +46,32 @@ func (self *ApierV1) GetStorDBVersions(ign string, reply *engine.Versions) error
 	}
 	return nil
 }
+
+type SetVersionsArg struct {
+	Versions  engine.Versions
+	Overwrite bool
+}
+
+// Queries all versions from dataDB
+func (self *ApierV1) SetDataDBVersions(arg SetVersionsArg, reply *string) error {
+	if arg.Versions == nil {
+		arg.Versions = engine.CurrentDataDBVersions()
+	}
+	if err := self.DataManager.DataDB().SetVersions(arg.Versions, arg.Overwrite); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	*reply = utils.OK
+	return nil
+}
+
+// Queries all versions from stordb
+func (self *ApierV1) SetStorDBVersions(arg SetVersionsArg, reply *string) error {
+	if arg.Versions == nil {
+		arg.Versions = engine.CurrentDataDBVersions()
+	}
+	if err := self.StorDb.SetVersions(arg.Versions, arg.Overwrite); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	*reply = utils.OK
+	return nil
+}
