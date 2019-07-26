@@ -825,9 +825,9 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	return nil
 }
 
-// DeleteTariffPlanFromFolder will load the tarrifplan into TpReader object
+// DeleteTariffPlanFromFolder will load the tarrifplan from folder into TpReader object
 // and will delete if from database
-func (self *ApierV1) DeleteTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, reply *string) error {
+func (self *ApierV1) DeleteTPFromFolder(attrs utils.AttrLoadTpFromFolder, reply *string) error {
 	// verify if FolderPath is present
 	if len(attrs.FolderPath) == 0 {
 		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "FolderPath")
@@ -866,11 +866,47 @@ func (self *ApierV1) DeleteTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder
 		return utils.NewErrServerError(err)
 	}
 	// reload cache
-	utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
+	utils.Logger.Info("ApierV1.DeleteTPFromFolder, reloading cache.")
 	if err := loader.ReloadCache(attrs.FlushDb, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
+	return nil
+}
+
+// DeleteTariffPlanFromFolder will load the tarrifplan from StorDB into TpReader object
+// and will delete if from database
+func (self *ApierV1) DeleteTPFromStorDB(attrs AttrLoadTpFromStorDb, reply *string) error {
+	if len(attrs.TPid) == 0 {
+		return utils.NewErrMandatoryIeMissing("TPid")
+	}
+	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
+		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone,
+		self.CacheS, self.SchedulerS)
+	if err := dbReader.LoadAll(); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	if attrs.Validate {
+		if !dbReader.IsValid() {
+			*reply = OK
+			return errors.New("invalid data")
+		}
+	}
+	if attrs.DryRun {
+		*reply = OK
+		return nil // Mission complete, no errors
+	}
+	// remove data from Database
+	if err := dbReader.RemoveFromDatabase(false, false); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	// reload cache
+	utils.Logger.Info("ApierV1.DeleteTPFromStorDB, reloading cache.")
+	if err := dbReader.ReloadCache(attrs.FlushDb, true, attrs.ArgDispatcher); err != nil {
+		return utils.NewErrServerError(err)
+	}
+
+	*reply = OK
 	return nil
 }
 
