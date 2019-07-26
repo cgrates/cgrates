@@ -825,6 +825,55 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	return nil
 }
 
+// DeleteTariffPlanFromFolder will load the tarrifplan into TpReader object
+// and will delete if from database
+func (self *ApierV1) DeleteTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, reply *string) error {
+	// verify if FolderPath is present
+	if len(attrs.FolderPath) == 0 {
+		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "FolderPath")
+	}
+	// check if exists or is valid
+	if fi, err := os.Stat(attrs.FolderPath); err != nil {
+		if strings.HasSuffix(err.Error(), "no such file or directory") {
+			return utils.ErrInvalidPath
+		}
+		return utils.NewErrServerError(err)
+	} else if !fi.IsDir() {
+		return utils.ErrInvalidPath
+	}
+
+	// create the TpReader
+	loader := engine.NewTpReader(self.DataManager.DataDB(),
+		engine.NewFileCSVStorage(utils.CSV_SEP, attrs.FolderPath, attrs.Recursive), "", self.Config.GeneralCfg().DefaultTimezone,
+		self.CacheS, self.SchedulerS)
+	//Load the data
+	if err := loader.LoadAll(); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	if attrs.DryRun {
+		*reply = OK
+		return nil // Mission complete, no errors
+	}
+
+	if attrs.Validate {
+		if !loader.IsValid() {
+			return errors.New("invalid data")
+		}
+	}
+
+	// remove data from Database
+	if err := loader.RemoveFromDatabase(false, false); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	// reload cache
+	utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
+	if err := loader.ReloadCache(attrs.FlushDb, true, attrs.ArgDispatcher); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	*reply = utils.OK
+	return nil
+}
+
 type AttrRemoveRatingProfile struct {
 	Direction string
 	Tenant    string
