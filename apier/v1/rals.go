@@ -84,7 +84,10 @@ func (rsv1 *RALsV1) GetRatingPlansCost(arg *utils.RatingPlanCostArg, reply *disp
 		engine.Cache.Remove(utils.CacheRatingProfiles, rPrfl.Id,
 			true, utils.NonTransactional) // Remove here so we don't overload memory
 		if err != nil {
-			if err != utils.ErrNotFound {
+			// in case we have UnauthorizedDestination
+			// or NotFound try next RatingPlan
+			if err != utils.ErrUnauthorizedDestination &&
+				err != utils.ErrNotFound {
 				return err
 			}
 			continue
