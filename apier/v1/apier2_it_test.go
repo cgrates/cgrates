@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -48,6 +49,10 @@ var sTestsAPIer = []func(t *testing.T){
 	testAPIerLoadFromFolder,
 	testAPIerDeleteTPFromFolder,
 	testAPIerAfterDelete,
+	testAPIerLoadFromFolder,
+	testAPIerGetRatingPlanCost,
+	testAPIerGetRatingPlanCost2,
+	testAPIerGetRatingPlanCost3,
 	testAPIerKillEngine,
 }
 
@@ -129,6 +134,66 @@ func testAPIerAfterDelete(t *testing.T) {
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &replyTh); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+}
+
+func testAPIerGetRatingPlanCost(t *testing.T) {
+	arg := &utils.RatingPlanCostArg{
+		Destination:   "1002",
+		RatingPlanIDs: []string{"RP_1001", "RP_1002"},
+		SetupTime:     utils.META_NOW,
+		Usage:         "1h",
+	}
+	var reply dispatchers.RatingPlanCost
+	if err := apierRPC.Call(utils.RALsV1GetRatingPlansCost, arg, &reply); err != nil {
+		t.Error(err)
+	} else if reply.RatingPlanID != "RP_1001" {
+		t.Error("Unexpected RatingPlanID: ", reply.RatingPlanID)
+	} else if *reply.EventCost.Cost != 6.5118 {
+		t.Error("Unexpected Cost: ", *reply.EventCost.Cost)
+	} else if *reply.EventCost.Usage != time.Duration(time.Hour) {
+		t.Error("Unexpected Usage: ", *reply.EventCost.Usage)
+	}
+}
+
+// we need to discuss about this case
+// because 1003 have the following DestinationRate
+// DR_1003_MAXCOST_DISC,DST_1003,RT_1CNT_PER_SEC,*up,4,0.12,*disconnect
+func testAPIerGetRatingPlanCost2(t *testing.T) {
+	arg := &utils.RatingPlanCostArg{
+		Destination:   "1003",
+		RatingPlanIDs: []string{"RP_1001", "RP_1002"},
+		SetupTime:     utils.META_NOW,
+		Usage:         "1h",
+	}
+	var reply dispatchers.RatingPlanCost
+	if err := apierRPC.Call(utils.RALsV1GetRatingPlansCost, arg, &reply); err != nil {
+		t.Error(err)
+	} else if reply.RatingPlanID != "RP_1001" {
+		t.Error("Unexpected RatingPlanID: ", reply.RatingPlanID)
+	} else if *reply.EventCost.Cost != 36 {
+		t.Error("Unexpected Cost: ", *reply.EventCost.Cost)
+	} else if *reply.EventCost.Usage != time.Duration(time.Hour) {
+		t.Error("Unexpected Usage: ", *reply.EventCost.Usage)
+	}
+}
+
+func testAPIerGetRatingPlanCost3(t *testing.T) {
+	arg := &utils.RatingPlanCostArg{
+		Destination:   "1001",
+		RatingPlanIDs: []string{"RP_1001", "RP_1002"},
+		SetupTime:     utils.META_NOW,
+		Usage:         "1h",
+	}
+	var reply dispatchers.RatingPlanCost
+	if err := apierRPC.Call(utils.RALsV1GetRatingPlansCost, arg, &reply); err != nil {
+		t.Error(err)
+	} else if reply.RatingPlanID != "RP_1002" {
+		t.Error("Unexpected RatingPlanID: ", reply.RatingPlanID)
+	} else if *reply.EventCost.Cost != 36 {
+		t.Error("Unexpected Cost: ", *reply.EventCost.Cost)
+	} else if *reply.EventCost.Usage != time.Duration(time.Hour) {
+		t.Error("Unexpected Usage: ", *reply.EventCost.Usage)
 	}
 }
 
