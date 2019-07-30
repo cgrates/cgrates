@@ -21,6 +21,8 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/nyaruka/phonenumbers"
 )
 
 func TestNewDataConverter(t *testing.T) {
@@ -224,5 +226,75 @@ func TestDurationConverter(t *testing.T) {
 		t.Error(err.Error())
 	} else if expVal != i {
 		t.Errorf("expecting: %d, received: %d", expVal, i)
+	}
+}
+
+func TestPhoneNumberConverter(t *testing.T) {
+	// test for error
+	if _, err := NewDataConverter("*phone_number:US:1:2:error"); err == nil ||
+		err.Error() != "unsupported *phone_number converter parameters: <US:1:2:error>" {
+		t.Error(err)
+	}
+
+	eLc := &PhoneNumberConverter{CountryCode: "US", Format: phonenumbers.NATIONAL}
+	d, err := NewDataConverter("*phone_number:US")
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eLc, d) {
+		t.Errorf("expecting: %+v, received: %+v", eLc, d)
+	}
+	// simulate an E164 number and Format it into a National number
+	phoneNumberConverted, err := d.Convert("+14431234567")
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(phoneNumberConverted, "(443) 123-4567") {
+		t.Errorf("expecting: %+v, received: %+v", "(443) 123-4567", phoneNumberConverted)
+	}
+}
+
+func TestPhoneNumberConverter2(t *testing.T) {
+	eLc := &PhoneNumberConverter{CountryCode: "US", Format: phonenumbers.INTERNATIONAL}
+	d, err := NewDataConverter("*phone_number:US:1")
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eLc, d) {
+		t.Errorf("expecting: %+v, received: %+v", eLc, d)
+	}
+	// simulate an E164 number and Format it into a National number
+	phoneNumberConverted, err := d.Convert("+14431234567")
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(phoneNumberConverted, "+1 443-123-4567") {
+		t.Errorf("expecting: %+v, received: %+v", "+1 443-123-4567", phoneNumberConverted)
+	}
+}
+
+func TestPhoneNumberConverter3(t *testing.T) {
+	eLc := &PhoneNumberConverter{CountryCode: "DE", Format: phonenumbers.INTERNATIONAL}
+	d, err := NewDataConverter("*phone_number:DE:1")
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eLc, d) {
+		t.Errorf("expecting: %+v, received: %+v", eLc, d)
+	}
+	phoneNumberConverted, err := d.Convert("6502530000")
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(phoneNumberConverted, "+49 6502 530000") {
+		t.Errorf("expecting: %+v, received: %+v", "+49 6502 530000", phoneNumberConverted)
+	}
+
+	eLc = &PhoneNumberConverter{CountryCode: "DE", Format: phonenumbers.E164}
+	d, err = NewDataConverter("*phone_number:DE:0")
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eLc, d) {
+		t.Errorf("expecting: %+v, received: %+v", eLc, d)
+	}
+	phoneNumberConverted, err = d.Convert("6502530000")
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(phoneNumberConverted, "+496502530000") {
+		t.Errorf("expecting: %+v, received: %+v", "+496502530000", phoneNumberConverted)
 	}
 }

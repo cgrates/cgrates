@@ -67,3 +67,4 @@ import:
   version: ^0.7.0
   subpackages:
   - sheets/v4
+- package: github.com/nyaruka/phonenumbers
