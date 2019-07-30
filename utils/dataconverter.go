@@ -23,6 +23,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/nyaruka/phonenumbers"
 )
 
 // DataConverters groups together multiple converters,
@@ -70,6 +72,8 @@ func NewDataConverter(params string) (
 		return NewDivideConverter(params[len(MetaDivide)+1:])
 	case params == MetaDuration:
 		return NewDurationConverter("")
+	case strings.HasPrefix(params, MetaPhoneNumber):
+		return NewPhoneNumberConverter(params[len(MetaPhoneNumber)+1:])
 	default:
 		return nil,
 			fmt.Errorf("unsupported converter definition: <%s>",
@@ -229,4 +233,48 @@ type DurationConverter struct{}
 func (mS *DurationConverter) Convert(in interface{}) (
 	out interface{}, err error) {
 	return IfaceAsDuration(in)
+}
+
+// NewPhoneNumberConverter create a new phoneNumber converter
+// If the format isn't specify by default we use NATIONAL
+// Possible fromats are : E164(0) , INTERNATIONAL(1) , NATIONAL(2) ,RFC3966(3)
+// Also ContryCode needs to be specified
+func NewPhoneNumberConverter(params string) (
+	pbDC DataConverter, err error) {
+	lc := new(PhoneNumberConverter)
+	var paramsSplt []string
+	if params != "" {
+		paramsSplt = strings.Split(params, InInFieldSep)
+	}
+	switch len(paramsSplt) {
+	case 2:
+		lc.CountryCode = paramsSplt[0]
+		frm, err := strconv.Atoi(paramsSplt[1])
+		if err != nil {
+			return nil, err
+		}
+		lc.Format = phonenumbers.PhoneNumberFormat(frm)
+	case 1:
+		lc.CountryCode = paramsSplt[0]
+		lc.Format = 2
+	default:
+		return nil, fmt.Errorf("unsupported %s converter parameters: <%s>",
+			MetaPhoneNumber, params)
+	}
+	return lc, nil
+}
+
+// PhoneNumberConverter converts
+type PhoneNumberConverter struct {
+	CountryCode string
+	Format      phonenumbers.PhoneNumberFormat
+}
+
+func (lc *PhoneNumberConverter) Convert(in interface{}) (
+	out interface{}, err error) {
+	num, err := phonenumbers.Parse(IfaceAsString(in), lc.CountryCode)
+	if err != nil {
+		return nil, err
+	}
+	return phonenumbers.Format(num, lc.Format), nil
 }

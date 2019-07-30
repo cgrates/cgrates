@@ -333,4 +333,6 @@ imports:
   version: 279d72ee259701e0e0e58d98a52a82ba172a2f5f
   subpackages:
   - internal/testconn
+- name: github.com/nyaruka/phonenumbers
+  version: 6003ee416f90f658f24b7485e6e6af8652be042f
 testImports: []
