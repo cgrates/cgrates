@@ -345,6 +345,270 @@ func TestSessionSv1ItTerminateSession(t *testing.T) {
 	}
 }
 
+func TestSessionSv1ItAuthNotFoundThreshold(t *testing.T) {
+	args := &sessions.V1AuthorizeArgs{
+		ProcessStats:      true,
+		GetMaxUsage:       true,
+		ProcessThresholds: true,
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSesssonSv1ItNotFoundThreshold",
+			Event: map[string]interface{}{
+				utils.OriginID:    "TestSesssonSv1ItNotFoundThreshold",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1002",
+				utils.Destination: "1001",
+				utils.SetupTime: time.Date(2018,
+					time.January, 7, 16, 60, 0, 0, time.UTC),
+			},
+		},
+	}
+	var rply sessions.V1AuthorizeReply
+	if err := sSv1BiRpc2.Call(utils.SessionSv1AuthorizeEvent,
+		args, &rply); err != nil {
+		t.Error(err)
+	}
+	if rply.ThresholdIDs != nil {
+		t.Errorf("Expecting: nil, received: %s",
+			rply.ThresholdIDs)
+	}
+	if rply.StatQueueIDs != nil && len(*rply.StatQueueIDs) != 1 && (*rply.StatQueueIDs)[0] != "Stat_2" {
+		t.Errorf("Unexpected StatQueueIDs: %+v", rply.StatQueueIDs)
+	}
+}
+
+func TestSessionSv1ItInitNotFoundThreshold(t *testing.T) {
+	initUsage := 1024
+	args := &sessions.V1InitSessionArgs{
+		ProcessStats:      true,
+		InitSession:       true,
+		ProcessThresholds: true,
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSessionSv1ItInitNotFoundThreshold",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.DATA,
+				utils.OriginID:    "TestSessionSv1ItInitNotFoundThreshold",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1002",
+				utils.Subject:     "RP_ANY2CNT",
+				utils.Destination: "1001",
+				utils.SetupTime: time.Date(2018,
+					time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime: time.Date(2018,
+					time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage: initUsage,
+			},
+		},
+	}
+	var rply sessions.V1InitSessionReply
+	if err := sSv1BiRpc2.Call(utils.SessionSv1InitiateSession,
+		args, &rply); err != nil {
+		t.Error(err)
+	}
+	if rply.MaxUsage == nil {
+		t.Errorf("Expecting not nil, received: %s",
+			rply.MaxUsage)
+	} else if *rply.MaxUsage != time.Duration(1024) {
+		t.Errorf("Expecting: %+v, received: %+v",
+			time.Duration(1024), *rply.MaxUsage)
+	}
+	if rply.ThresholdIDs != nil {
+		t.Errorf("Expecting: nil, received: %s",
+			rply.ThresholdIDs)
+	}
+	if rply.StatQueueIDs != nil && len(*rply.StatQueueIDs) != 1 && (*rply.StatQueueIDs)[0] != "Stat_2" {
+		t.Errorf("Unexpected StatQueueIDs: %+v", rply.StatQueueIDs)
+	}
+
+	aSessions := make([]*sessions.ExternalSession, 0)
+	if err := sSv1BiRpc2.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 2 {
+		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v", utils.ToJSON(aSessions), len(aSessions))
+	}
+}
+
+func TestSessionSv1ItTerminateNotFoundThreshold(t *testing.T) {
+	initUsage := 1024
+	args := &sessions.V1TerminateSessionArgs{
+		ProcessStats:      true,
+		TerminateSession:  true,
+		ProcessThresholds: true,
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSessionSv1ItTerminateNotFoundThreshold",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.DATA,
+				utils.OriginID:    "TestSessionSv1ItInitNotFoundThreshold",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1002",
+				utils.Subject:     "RP_ANY2CNT",
+				utils.Destination: "1001",
+				utils.SetupTime: time.Date(2018,
+					time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime: time.Date(2018,
+					time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage: initUsage,
+			},
+		},
+	}
+	var rply string
+	if err := sSv1BiRpc2.Call(utils.SessionSv1TerminateSession,
+		args, &rply); err != nil {
+		t.Error(err)
+	}
+	if rply != utils.OK {
+		t.Errorf("Unexpected reply: %s", rply)
+	}
+	aSessions := make([]*sessions.ExternalSession, 0)
+	if err := sSv1BiRpc2.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func TestSessionSv1ItAuthNotFoundThresholdAndStats(t *testing.T) {
+	var resp string
+	if err := sSApierRpc2.Call("ApierV1.RemoveStatQueueProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "Stat_2"}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+
+	args := &sessions.V1AuthorizeArgs{
+		ProcessStats:      true,
+		GetMaxUsage:       true,
+		ProcessThresholds: true,
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSesssonSv1ItNotFoundThreshold",
+			Event: map[string]interface{}{
+				utils.OriginID:    "TestSesssonSv1ItNotFoundThreshold",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1002",
+				utils.Destination: "1001",
+				utils.SetupTime: time.Date(2018,
+					time.January, 7, 16, 60, 0, 0, time.UTC),
+			},
+		},
+	}
+	var rply sessions.V1AuthorizeReply
+	if err := sSv1BiRpc2.Call(utils.SessionSv1AuthorizeEvent,
+		args, &rply); err != nil {
+		t.Error(err)
+	}
+	if rply.ThresholdIDs != nil {
+		t.Errorf("Expecting: nil, received: %s",
+			rply.ThresholdIDs)
+	}
+	if rply.StatQueueIDs != nil {
+		t.Errorf("Expecting: nil, received: %s",
+			rply.StatQueueIDs)
+	}
+}
+
+func TestSessionSv1ItInitNotFoundThresholdAndStats(t *testing.T) {
+	initUsage := 1024
+	args := &sessions.V1InitSessionArgs{
+		ProcessStats:      true,
+		InitSession:       true,
+		ProcessThresholds: true,
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSessionSv1ItInitNotFoundThreshold",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.DATA,
+				utils.OriginID:    "TestSessionSv1ItInitNotFoundThreshold",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1002",
+				utils.Subject:     "RP_ANY2CNT",
+				utils.Destination: "1001",
+				utils.SetupTime: time.Date(2018,
+					time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime: time.Date(2018,
+					time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage: initUsage,
+			},
+		},
+	}
+	var rply sessions.V1InitSessionReply
+	if err := sSv1BiRpc2.Call(utils.SessionSv1InitiateSession,
+		args, &rply); err != nil {
+		t.Error(err)
+	}
+	if rply.MaxUsage == nil {
+		t.Errorf("Expecting not nil, received: %s",
+			rply.MaxUsage)
+	} else if *rply.MaxUsage != time.Duration(1024) {
+		t.Errorf("Expecting: %+v, received: %+v",
+			time.Duration(1024), *rply.MaxUsage)
+	}
+	if rply.ThresholdIDs != nil {
+		t.Errorf("Expecting: nil, received: %s",
+			rply.ThresholdIDs)
+	}
+	if rply.StatQueueIDs != nil {
+		t.Errorf("Expecting: nil, received: %s",
+			rply.StatQueueIDs)
+	}
+
+	aSessions := make([]*sessions.ExternalSession, 0)
+	if err := sSv1BiRpc2.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 2 {
+		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v", utils.ToJSON(aSessions), len(aSessions))
+	}
+}
+
+func TestSessionSv1ItTerminateNotFoundThresholdAndStats(t *testing.T) {
+	initUsage := 1024
+	args := &sessions.V1TerminateSessionArgs{
+		ProcessStats:      true,
+		TerminateSession:  true,
+		ProcessThresholds: true,
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSessionSv1ItTerminateNotFoundThreshold",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.DATA,
+				utils.OriginID:    "TestSessionSv1ItInitNotFoundThreshold",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1002",
+				utils.Subject:     "RP_ANY2CNT",
+				utils.Destination: "1001",
+				utils.SetupTime: time.Date(2018,
+					time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime: time.Date(2018,
+					time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage: initUsage,
+			},
+		},
+	}
+	var rply string
+	if err := sSv1BiRpc2.Call(utils.SessionSv1TerminateSession,
+		args, &rply); err != nil {
+		t.Error(err)
+	}
+	if rply != utils.OK {
+		t.Errorf("Unexpected reply: %s", rply)
+	}
+	aSessions := make([]*sessions.ExternalSession, 0)
+	if err := sSv1BiRpc2.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
 func TestSessionSv1ItStopCgrEngine(t *testing.T) {
 	if err := sSv1BiRpc2.Close(); err != nil { // Close the connection so we don't get EOF warnings from client
 		t.Error(err)
