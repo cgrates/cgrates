@@ -825,9 +825,9 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	return nil
 }
 
-// DeleteTariffPlanFromFolder will load the tarrifplan from folder into TpReader object
+// RemoveTPFromFolder will load the tarrifplan from folder into TpReader object
 // and will delete if from database
-func (self *ApierV1) DeleteTPFromFolder(attrs utils.AttrLoadTpFromFolder, reply *string) error {
+func (self *ApierV1) RemoveTPFromFolder(attrs utils.AttrLoadTpFromFolder, reply *string) error {
 	// verify if FolderPath is present
 	if len(attrs.FolderPath) == 0 {
 		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "FolderPath")
@@ -866,7 +866,7 @@ func (self *ApierV1) DeleteTPFromFolder(attrs utils.AttrLoadTpFromFolder, reply 
 		return utils.NewErrServerError(err)
 	}
 	// reload cache
-	utils.Logger.Info("ApierV1.DeleteTPFromFolder, reloading cache.")
+	utils.Logger.Info("ApierV1.RemoveTPFromFolder, reloading cache.")
 	if err := loader.ReloadCache(attrs.FlushDb, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -874,9 +874,9 @@ func (self *ApierV1) DeleteTPFromFolder(attrs utils.AttrLoadTpFromFolder, reply 
 	return nil
 }
 
-// DeleteTariffPlanFromFolder will load the tarrifplan from StorDB into TpReader object
+// RemoveTPFromStorDB will load the tarrifplan from StorDB into TpReader object
 // and will delete if from database
-func (self *ApierV1) DeleteTPFromStorDB(attrs AttrLoadTpFromStorDb, reply *string) error {
+func (self *ApierV1) RemoveTPFromStorDB(attrs AttrLoadTpFromStorDb, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
@@ -901,7 +901,7 @@ func (self *ApierV1) DeleteTPFromStorDB(attrs AttrLoadTpFromStorDb, reply *strin
 		return utils.NewErrServerError(err)
 	}
 	// reload cache
-	utils.Logger.Info("ApierV1.DeleteTPFromStorDB, reloading cache.")
+	utils.Logger.Info("ApierV1.RemoveTPFromStorDB, reloading cache.")
 	if err := dbReader.ReloadCache(attrs.FlushDb, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
