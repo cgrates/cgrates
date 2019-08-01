@@ -72,8 +72,8 @@ func NewDataConverter(params string) (
 		return NewDivideConverter(params[len(MetaDivide)+1:])
 	case params == MetaDuration:
 		return NewDurationConverter("")
-	case strings.HasPrefix(params, MetaPhoneNumber):
-		return NewPhoneNumberConverter(params[len(MetaPhoneNumber)+1:])
+	case strings.HasPrefix(params, MetaLibPhoneNumber):
+		return NewPhoneNumberConverter(params[len(MetaLibPhoneNumber)+1:])
 	default:
 		return nil,
 			fmt.Errorf("unsupported converter definition: <%s>",
@@ -259,7 +259,7 @@ func NewPhoneNumberConverter(params string) (
 		lc.Format = 2
 	default:
 		return nil, fmt.Errorf("unsupported %s converter parameters: <%s>",
-			MetaPhoneNumber, params)
+			MetaLibPhoneNumber, params)
 	}
 	return lc, nil
 }
