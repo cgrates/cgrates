@@ -459,12 +459,13 @@ func (self *CGRConfig) checkConfigSanity() error {
 		for _, data := range ldrSCfg.Data {
 			if !utils.IsSliceMember([]string{utils.MetaAttributes,
 				utils.MetaResources, utils.MetaFilters, utils.MetaStats,
-				utils.MetaSuppliers, utils.MetaThresholds}, data.Type) {
+				utils.MetaSuppliers, utils.MetaThresholds, utils.MetaChargers,
+				utils.MetaDispatchers, utils.MetaDispatcherHosts}, data.Type) {
 				return fmt.Errorf("<%s> unsupported data type %s", utils.LoaderS, data.Type)
 			}
 
 			for _, field := range data.Fields {
-				if field.Type != utils.META_COMPOSED && field.Type != utils.MetaString {
+				if field.Type != utils.META_COMPOSED && field.Type != utils.MetaString && field.Type != utils.MetaVariable {
 					return fmt.Errorf("<%s> invalid field type %s for %s at %s", utils.LoaderS, field.Type, data.Type, field.Tag)
 				}
 			}

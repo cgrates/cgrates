@@ -65,6 +65,8 @@ func (ld LoaderData) UpdateFromCSV(fileName string, record []string,
 				valOrig += out
 				ld[cfgFld.FieldId] = valOrig
 			}
+		case utils.MetaVariable:
+			ld[cfgFld.FieldId] = out
 		case utils.MetaString:
 			if _, has := ld[cfgFld.FieldId]; !has {
 				ld[cfgFld.FieldId] = out
