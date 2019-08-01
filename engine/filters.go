@@ -158,7 +158,18 @@ func (fS *FilterS) Pass(tenant string, filterIDs []string,
 			continue
 		}
 		for _, fltr := range f.Rules {
-			if pass, err = fltr.Pass(ev, fS.statSConns, tenant); err != nil || !pass {
+			// in case we have filters of type *stats,*resources or *accounts we need to send
+			// a rpcclient to get what we need (Metrics,Resource,Accounts)
+			var conn rpcclient.RpcClientConnection
+			switch fltr.Type {
+			case MetaStatS, MetaNotStatS:
+				conn = fS.statSConns
+			case MetaResources, MetaNotResources:
+				conn = fS.resSConns
+			case utils.MetaAccounts:
+				conn = fS.ralSConns
+			}
+			if pass, err = fltr.Pass(ev, conn, tenant); err != nil || !pass {
 				return pass, err
 			}
 		}
