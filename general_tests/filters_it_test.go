@@ -53,6 +53,7 @@ var sTestsFltr = []func(t *testing.T){
 	testV1FltrGetThresholdForEvent,
 	testV1FltrGetThresholdForEvent2,
 	testV1FltrPopulateResources,
+	testV1FltrAccounts,
 	testV1FltrStopEngine,
 }
 
@@ -504,6 +505,101 @@ func testV1FltrPopulateResources(t *testing.T) {
 	}
 
 	//expect NotFound error because filter doesn't match
+	if err := fltrRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &ids); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+}
+
+func testV1FltrAccounts(t *testing.T) {
+	var resp string
+	if err := fltrRpc.Call("ApierV1.RemoveThresholdProfile",
+		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &resp); err != nil {
+		t.Error(err)
+	} else if resp != utils.OK {
+		t.Error("Unexpected reply returned", resp)
+	}
+	//Add a filter of type *accounts and check if *monetary balance of account 1001 is minim 9 ( greater than 9)
+	//we expect that the balance to be 10 so the filter should pass (10 > 9)
+	filter := &engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_TH_Accounts",
+		Rules: []*engine.FilterRule{
+			{
+				Type:   "*accounts",
+				Values: []string{"*gt:1001.BalanceMap.*monetary[0].Value:9"},
+			},
+		},
+	}
+
+	var result string
+	if err := fltrRpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	//Add a threshold with filter from above and an inline filter for Account 1010
+	tPrfl := &engine.ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH_Account",
+		FilterIDs: []string{"FLTR_TH_Accounts", "*string:~Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+		},
+		MaxHits:   -1,
+		MinSleep:  time.Duration(1 * time.Millisecond),
+		Weight:    90.0,
+		ActionIDs: []string{"LOG"},
+		Async:     true,
+	}
+	if err := fltrRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	var rcvTh *engine.ThresholdProfile
+	if err := fltrRpc.Call("ApierV1.GetThresholdProfile",
+		&utils.TenantID{Tenant: tPrfl.Tenant, ID: tPrfl.ID}, &rcvTh); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(tPrfl, rcvTh) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl, rcvTh)
+	}
+
+	tEv := utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		Event: map[string]interface{}{
+			utils.Account: "1001"},
+	}
+	var ids []string
+	if err := fltrRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &ids); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ids, []string{"TH_Account"}) {
+		t.Error("Unexpected reply returned", ids)
+	}
+
+	// update the filter
+	//Add a filter of type *accounts and check if *monetary balance of account 1001 is minim 11 ( greater than 11)
+	//we expect that the balance to be 10 so the filter should not pass (10 > 11)
+	filter = &engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_TH_Accounts",
+		Rules: []*engine.FilterRule{
+			{
+				Type:   "*accounts",
+				Values: []string{"*gt:1001.BalanceMap.*monetary[0].Value:11"},
+			},
+		},
+	}
+
+	if err := fltrRpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
 	if err := fltrRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &ids); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

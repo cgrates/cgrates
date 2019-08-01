@@ -51,7 +51,7 @@ func (s *testMockSessionConn) Call(method string, arg interface{}, rply interfac
 func TestProcessRequest(t *testing.T) {
 	data, _ := engine.NewMapStorage()
 	dm := engine.NewDataManager(data)
-	filters := engine.NewFilterS(config.CgrConfig(), nil, nil, dm) // no need for filterS but stiil try to configure the dm :D
+	filters := engine.NewFilterS(config.CgrConfig(), nil, nil, nil, dm) // no need for filterS but stiil try to configure the dm :D
 
 	cgrRplyNM := config.NewNavigableMap(nil)
 	rply := config.NewNavigableMap(nil)

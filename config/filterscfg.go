@@ -21,6 +21,7 @@ package config
 type FilterSCfg struct {
 	StatSConns     []*RemoteHost
 	ResourceSConns []*RemoteHost
+	RALsConns      []*RemoteHost
 }
 
 func (fSCfg *FilterSCfg) loadFromJsonCfg(jsnCfg *FilterSJsonCfg) (err error) {
@@ -39,6 +40,13 @@ func (fSCfg *FilterSCfg) loadFromJsonCfg(jsnCfg *FilterSJsonCfg) (err error) {
 		for idx, jsnHaCfg := range *jsnCfg.Resources_conns {
 			fSCfg.ResourceSConns[idx] = NewDfltRemoteHost()
 			fSCfg.ResourceSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
+	if jsnCfg.Rals_conns != nil {
+		fSCfg.RALsConns = make([]*RemoteHost, len(*jsnCfg.Rals_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Rals_conns {
+			fSCfg.RALsConns[idx] = NewDfltRemoteHost()
+			fSCfg.RALsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	return

@@ -76,7 +76,7 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 	cdrcConfig := cgrConfig.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0]
 	data, _ := engine.NewMapStorage()
 	dm := engine.NewDataManager(data)
-	filterS := engine.NewFilterS(cgrConfig, nil, nil, dm)
+	filterS := engine.NewFilterS(cgrConfig, nil, nil, nil, dm)
 	cdrcConfig.CdrSourceId = "TEST_CDRC"
 	cdrcConfig.ContentFields = []*config.FCTemplate{
 		{Tag: "TORField", Type: utils.META_COMPOSED, FieldId: utils.ToR,
