@@ -116,6 +116,96 @@ func TestDataUpdateFromCSVOneFile(t *testing.T) {
 	}
 }
 
+func TestDataUpdateFromCSVOneFile2(t *testing.T) {
+	attrSFlds := []*config.FCTemplate{
+		&config.FCTemplate{Tag: "TenantID",
+			FieldId:   "Tenant",
+			Type:      utils.MetaVariable,
+			Value:     config.NewRSRParsersMustCompile("~0", true, utils.INFIELD_SEP),
+			Mandatory: true},
+		&config.FCTemplate{Tag: "ProfileID",
+			FieldId:   "ID",
+			Type:      utils.MetaVariable,
+			Value:     config.NewRSRParsersMustCompile("~1", true, utils.INFIELD_SEP),
+			Mandatory: true},
+		&config.FCTemplate{Tag: "Contexts",
+			FieldId: "Contexts",
+			Type:    utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("~2", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "FilterIDs",
+			FieldId: "FilterIDs",
+			Type:    utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("~3", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "ActivationInterval",
+			FieldId: "ActivationInterval",
+			Type:    utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("~4", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "FieldName",
+			FieldId: "FieldName",
+			Type:    utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("~5", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Initial",
+			FieldId: "Initial",
+			Type:    utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("~6", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Substitute",
+			FieldId: "Substitute",
+			Type:    utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("~7", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Append",
+			FieldId: "Append",
+			Type:    utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("~8", true, utils.INFIELD_SEP)},
+		&config.FCTemplate{Tag: "Weight",
+			FieldId: "Weight",
+			Type:    utils.MetaVariable,
+			Value:   config.NewRSRParsersMustCompile("~9", true, utils.INFIELD_SEP)},
+	}
+
+	rows := [][]string{
+		[]string{"cgrates.org", "ATTR_1", "*sessions;*cdrs", "*string:Account:1007", "2014-01-14T00:00:00Z", "Account", "*any", "1001", "false", "10"},
+		[]string{"cgrates.org", "ATTR_1", "", "", "", "Subject", "*any", "1001", "true", ""},
+	}
+	lData := make(LoaderData)
+	if err := lData.UpdateFromCSV("Attributes.csv", rows[0], attrSFlds,
+		config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP), nil); err != nil {
+		t.Error(err)
+	}
+	eLData := LoaderData{"Tenant": "cgrates.org",
+		"ID":                 "ATTR_1",
+		"Contexts":           "*sessions;*cdrs",
+		"FilterIDs":          "*string:Account:1007",
+		"ActivationInterval": "2014-01-14T00:00:00Z",
+		"FieldName":          "Account",
+		"Initial":            "*any",
+		"Substitute":         "1001",
+		"Append":             "false",
+		"Weight":             "10",
+	}
+	if !reflect.DeepEqual(eLData, lData) {
+		t.Errorf("expecting: %+v, received: %+v", eLData, lData)
+	}
+	lData = make(LoaderData)
+	if err := lData.UpdateFromCSV("Attributes.csv", rows[1], attrSFlds,
+		config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP), nil); err != nil {
+		t.Error(err)
+	}
+	eLData = LoaderData{"Tenant": "cgrates.org",
+		"ID":                 "ATTR_1",
+		"Contexts":           "",
+		"FilterIDs":          "",
+		"ActivationInterval": "",
+		"FieldName":          "Subject",
+		"Initial":            "*any",
+		"Substitute":         "1001",
+		"Append":             "true",
+		"Weight":             "",
+	}
+	if !reflect.DeepEqual(eLData, lData) {
+		t.Errorf("expecting: %+v, received: %+v", eLData, lData)
+	}
+}
+
 func TestDataUpdateFromCSVMultiFiles(t *testing.T) {
 	attrSFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "TenantID",
