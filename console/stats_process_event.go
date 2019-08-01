@@ -59,8 +59,9 @@ func (self *CmdStatQueueProcessEvent) RpcParams(reset bool) interface{} {
 }
 
 func (self *CmdStatQueueProcessEvent) PostprocessRpcParams() error {
-	if self.rpcParams.Time == nil {
-		self.rpcParams.Time = utils.TimePointer(time.Now())
+	if self.rpcParams != nil && self.rpcParams.CGREvent != nil &&
+		self.rpcParams.CGREvent.Time == nil {
+		self.rpcParams.CGREvent.Time = utils.TimePointer(time.Now())
 	}
 	return nil
 }
