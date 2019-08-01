@@ -62,7 +62,7 @@ const (
 )
 
 func NewFilterS(cfg *config.CGRConfig,
-	statSChan, resSChan chan rpcclient.RpcClientConnection, dm *DataManager) (fS *FilterS) {
+	statSChan, resSChan, ralSChan chan rpcclient.RpcClientConnection, dm *DataManager) (fS *FilterS) {
 	fS = &FilterS{
 		dm:  dm,
 		cfg: cfg,
@@ -73,16 +73,19 @@ func NewFilterS(cfg *config.CGRConfig,
 	if len(cfg.FilterSCfg().ResourceSConns) != 0 {
 		fS.connResourceS(resSChan)
 	}
+	if len(cfg.FilterSCfg().RALsConns) != 0 {
+		fS.connRALs(ralSChan)
+	}
 	return
 }
 
 // FilterS is a service used to take decisions in case of filters
 // uses lazy connections where necessary to avoid deadlocks on service startup
 type FilterS struct {
-	cfg                   *config.CGRConfig
-	statSConns, resSConns rpcclient.RpcClientConnection
-	sSConnMux, rSConnMux  sync.RWMutex // make sure only one goroutine attempts connecting
-	dm                    *DataManager
+	cfg                               *config.CGRConfig
+	statSConns, resSConns, ralSConns  rpcclient.RpcClientConnection
+	sSConnMux, rSConnMux, ralSConnMux sync.RWMutex // make sure only one goroutine attempts connecting
+	dm                                *DataManager
 }
 
 // connStatS returns will connect towards StatS
@@ -114,6 +117,22 @@ func (fS *FilterS) connResourceS(resSChan chan rpcclient.RpcClientConnection) (e
 		fS.cfg.GeneralCfg().Reconnects, fS.cfg.GeneralCfg().ConnectTimeout,
 		fS.cfg.GeneralCfg().ReplyTimeout, fS.cfg.FilterSCfg().ResourceSConns,
 		resSChan, true)
+	return
+}
+
+// connRALs returns will connect towards RALs
+func (fS *FilterS) connRALs(ralSChan chan rpcclient.RpcClientConnection) (err error) {
+	fS.ralSConnMux.Lock()
+	defer fS.ralSConnMux.Unlock()
+	if fS.ralSConns != nil { // connection was populated between locks
+		return
+	}
+	fS.ralSConns, err = NewRPCPool(rpcclient.POOL_FIRST,
+		fS.cfg.TlsCfg().ClientKey, fS.cfg.TlsCfg().ClientCerificate,
+		fS.cfg.TlsCfg().CaCertificate, fS.cfg.GeneralCfg().ConnectAttempts,
+		fS.cfg.GeneralCfg().Reconnects, fS.cfg.GeneralCfg().ConnectTimeout,
+		fS.cfg.GeneralCfg().ReplyTimeout, fS.cfg.FilterSCfg().RALsConns,
+		ralSChan, true)
 	return
 }
 
@@ -242,6 +261,7 @@ type FilterRule struct {
 	negative      *bool
 	statItems     []*itemFilter // Cached compiled itemFilter out of Values
 	resourceItems []*itemFilter // Cached compiled itemFilter out of Values
+	accountItems  []*itemFilter // Cached compiled itemFilter out of Values
 }
 
 // Separate method to compile RSR fields
@@ -279,9 +299,27 @@ func (rf *FilterRule) CompileValues() (err error) {
 				return fmt.Errorf("Value %s needs to contain at least 3 items", val)
 			}
 			// valSplt[0] filter type
-			// valSplt[1] id of the Resource
+			// valSplt[1] id of the AccountID.FieldToUsed
 			// valSplt[2] value to compare
 			rf.resourceItems[i] = &itemFilter{
+				FilterType:  valSplt[0],
+				ItemID:      valSplt[1],
+				FilterValue: valSplt[2],
+			}
+		}
+	case utils.MetaAccounts:
+		//value for filter of type *accounts needs to be in the following form:
+		//*gt:AccountID:ValueOfUsage
+		rf.accountItems = make([]*itemFilter, len(rf.Values))
+		for i, val := range rf.Values {
+			valSplt := strings.Split(val, utils.InInFieldSep)
+			if len(valSplt) != 3 {
+				return fmt.Errorf("Value %s needs to contain at least 3 items", val)
+			}
+			// valSplt[0] filter type
+			// valSplt[1] id of the Resource
+			// valSplt[2] value to compare
+			rf.accountItems[i] = &itemFilter{
 				FilterType:  valSplt[0],
 				ItemID:      valSplt[1],
 				FilterValue: valSplt[2],
@@ -323,6 +361,8 @@ func (fltr *FilterRule) Pass(dP config.DataProvider,
 		result, err = fltr.passResourceS(dP, rpcClnt, tenant)
 	case MetaEqual, MetaNotEqual:
 		result, err = fltr.passEqualTo(dP)
+	case utils.MetaAccounts:
+		result, err = fltr.passAccountS(dP, rpcClnt, tenant)
 	default:
 		err = utils.ErrPrefixNotErrNotImplemented(fltr.Type)
 	}
@@ -572,6 +612,38 @@ func (fltr *FilterRule) passResourceS(dP config.DataProvider,
 		}
 		// send it to passGreaterThan
 		if val, err := fltr.passGreaterThan(nM); err != nil || !val {
+			//in case of error return false and error
+			//and in case of not pass return false and nil
+			return false, err
+		}
+	}
+	return true, nil
+}
+
+func (fltr *FilterRule) passAccountS(dP config.DataProvider,
+	accountS rpcclient.RpcClientConnection, tenant string) (bool, error) {
+	if accountS == nil || reflect.ValueOf(accountS).IsNil() {
+		return false, errors.New("Missing AccountS information")
+	}
+	for _, accItem := range fltr.accountItems {
+		//split accItem.ItemID in two accountID and actual filter
+		//AccountID.BalanceMap.*monetary[0].Value
+		splittedString := strings.SplitN(accItem.ItemID, utils.NestingSep, 2)
+		accID := splittedString[0]
+		filterID := splittedString[1]
+		var reply Account
+		if err := accountS.Call(utils.ApierV2GetAccount,
+			&utils.AttrGetAccount{Tenant: tenant, Account: accID}, &reply); err != nil {
+			return false, err
+		}
+		//compose the newFilter
+		fltr, err := NewFilterRule(accItem.FilterType,
+			utils.DynamicDataPrefix+filterID, []string{accItem.FilterValue})
+		if err != nil {
+			return false, err
+		}
+		dP, _ := reply.AsNavigableMap(nil)
+		if val, err := fltr.Pass(dP, nil, tenant); err != nil || !val {
 			//in case of error return false and error
 			//and in case of not pass return false and nil
 			return false, err

@@ -1135,10 +1135,10 @@ func startSupplierService(internalSupplierSChan, internalRsChan, internalStatSCh
 
 // startFilterService fires up the FilterS
 func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS,
-	internalStatSChan, internalResourceSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
+	internalStatSChan, internalResourceSChan, internalRalSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
 	dm *engine.DataManager, exitChan chan bool) {
 	<-cacheS.GetPrecacheChannel(utils.CacheFilters)
-	filterSChan <- engine.NewFilterS(cfg, internalStatSChan, internalResourceSChan, dm)
+	filterSChan <- engine.NewFilterS(cfg, internalStatSChan, internalResourceSChan, internalRalSChan, dm)
 }
 
 // loaderService will start and register APIs for LoaderService if enabled
@@ -1794,7 +1794,7 @@ func main() {
 	}
 
 	// Start FilterS
-	go startFilterService(filterSChan, cacheS, internalStatSChan, internalRsChan, cfg, dm, exitChan)
+	go startFilterService(filterSChan, cacheS, internalStatSChan, internalRsChan, internalRaterChan, cfg, dm, exitChan)
 
 	if cfg.AttributeSCfg().Enabled {
 		go startAttributeService(internalAttributeSChan, cacheS,

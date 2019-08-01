@@ -94,6 +94,7 @@ type DbJsonCfg struct {
 type FilterSJsonCfg struct {
 	Stats_conns     *[]*RemoteHostJson
 	Resources_conns *[]*RemoteHostJson
+	Rals_conns      *[]*RemoteHostJson
 }
 
 // Rater config section

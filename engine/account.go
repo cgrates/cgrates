@@ -1116,6 +1116,29 @@ func (acnt *Account) Publish() {
 	}
 }
 
+func (acnt *Account) AsNavigableMap(_ []*config.FCTemplate) (*config.NavigableMap, error) {
+	mpIface := map[string]interface{}{
+		"ID": acnt.ID,
+		//"UnitCounters":   acnt.UnitCounters,
+		"ActionTriggers": acnt.ActionTriggers,
+		"AllowNegative":  acnt.AllowNegative,
+		"Disabled":       acnt.Disabled,
+	}
+
+	balanceMap := make(map[string]interface{}, len(acnt.BalanceMap))
+	for key, balances := range acnt.BalanceMap {
+		balSls := make([]*config.NavigableMap, len(balances))
+		for i, balance := range balances {
+			balSls[i], _ = balance.AsNavigableMap(nil)
+		}
+		balanceMap[key] = balSls
+	}
+	mpIface["BalanceMap"] = balanceMap
+
+	return config.NewNavigableMap(mpIface), nil
+
+}
+
 func NewAccountSummaryFromJSON(jsn string) (acntSummary *AccountSummary, err error) {
 	if !utils.IsSliceMember([]string{"", "null"}, jsn) { // Unmarshal only when content
 		json.Unmarshal([]byte(jsn), &acntSummary)
