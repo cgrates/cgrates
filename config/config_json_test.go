@@ -791,6 +791,7 @@ func TestDfFilterSJsonCfg(t *testing.T) {
 	eCfg := &FilterSJsonCfg{
 		Stats_conns:     &[]*RemoteHostJson{},
 		Resources_conns: &[]*RemoteHostJson{},
+		Rals_conns:      &[]*RemoteHostJson{},
 	}
 	if cfg, err := dfCgrJsonCfg.FilterSJsonCfg(); err != nil {
 		t.Error(err)
