@@ -583,7 +583,7 @@ const (
 	MetaTenant                   = "*tenant"
 	ResourceUsage                = "ResourceUsage"
 	MetaDuration                 = "*duration"
-	MetaPhoneNumber              = "*phone_number"
+	MetaLibPhoneNumber           = "*libphonenumber"
 	MetaReload                   = "*reload"
 	MetaLoad                     = "*load"
 	MetaRemove                   = "*remove"

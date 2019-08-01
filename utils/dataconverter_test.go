@@ -231,13 +231,13 @@ func TestDurationConverter(t *testing.T) {
 
 func TestPhoneNumberConverter(t *testing.T) {
 	// test for error
-	if _, err := NewDataConverter("*phone_number:US:1:2:error"); err == nil ||
-		err.Error() != "unsupported *phone_number converter parameters: <US:1:2:error>" {
+	if _, err := NewDataConverter("*libphonenumber:US:1:2:error"); err == nil ||
+		err.Error() != "unsupported *libphonenumber converter parameters: <US:1:2:error>" {
 		t.Error(err)
 	}
 
 	eLc := &PhoneNumberConverter{CountryCode: "US", Format: phonenumbers.NATIONAL}
-	d, err := NewDataConverter("*phone_number:US")
+	d, err := NewDataConverter("*libphonenumber:US")
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eLc, d) {
@@ -254,7 +254,7 @@ func TestPhoneNumberConverter(t *testing.T) {
 
 func TestPhoneNumberConverter2(t *testing.T) {
 	eLc := &PhoneNumberConverter{CountryCode: "US", Format: phonenumbers.INTERNATIONAL}
-	d, err := NewDataConverter("*phone_number:US:1")
+	d, err := NewDataConverter("*libphonenumber:US:1")
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eLc, d) {
@@ -271,7 +271,7 @@ func TestPhoneNumberConverter2(t *testing.T) {
 
 func TestPhoneNumberConverter3(t *testing.T) {
 	eLc := &PhoneNumberConverter{CountryCode: "DE", Format: phonenumbers.INTERNATIONAL}
-	d, err := NewDataConverter("*phone_number:DE:1")
+	d, err := NewDataConverter("*libphonenumber:DE:1")
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eLc, d) {
@@ -285,7 +285,7 @@ func TestPhoneNumberConverter3(t *testing.T) {
 	}
 
 	eLc = &PhoneNumberConverter{CountryCode: "DE", Format: phonenumbers.E164}
-	d, err = NewDataConverter("*phone_number:DE:0")
+	d, err = NewDataConverter("*libphonenumber:DE:0")
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eLc, d) {
