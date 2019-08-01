@@ -58,7 +58,8 @@ func (self *CmdResourceRelease) RpcParams(reset bool) interface{} {
 }
 
 func (self *CmdResourceRelease) PostprocessRpcParams() error {
-	if self.rpcParams.CGREvent.Time == nil {
+	if self.rpcParams != nil && self.rpcParams.CGREvent != nil &&
+		self.rpcParams.CGREvent.Time == nil {
 		self.rpcParams.CGREvent.Time = utils.TimePointer(time.Now())
 	}
 	return nil
