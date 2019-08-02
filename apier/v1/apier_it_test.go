@@ -1033,7 +1033,7 @@ func TestApierAddTriggeredAction(t *testing.T) {
 // Test here GetAccountActionTriggers
 func TestApierGetAccountActionTriggers(t *testing.T) {
 	var reply engine.ActionTriggers
-	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan32"}
+	req := utils.TenantAccount{Tenant: "cgrates.org", Account: "dan32"}
 	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
 	} else if len(reply) != 1 || reply[0].ActionsID != "WARN_VIA_HTTP" {
@@ -1063,7 +1063,7 @@ func TestApierAddTriggeredAction2(t *testing.T) {
 // Test here GetAccountActionTriggers
 func TestApierGetAccountActionTriggers2(t *testing.T) {
 	var reply engine.ActionTriggers
-	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2"}
+	req := utils.TenantAccount{Tenant: "cgrates.org", Account: "dan2"}
 	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
 	} else if len(reply) != 1 || reply[0].ActionsID != "LOG_BALANCE" {
@@ -1075,7 +1075,7 @@ func TestApierGetAccountActionTriggers2(t *testing.T) {
 func TestApierSetAccountActionTriggers(t *testing.T) {
 	// Test first get so we can steal the id which we need to remove
 	var reply engine.ActionTriggers
-	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2"}
+	req := utils.TenantAccount{Tenant: "cgrates.org", Account: "dan2"}
 	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
 	} else if len(reply) != 1 || reply[0].ActionsID != "LOG_BALANCE" {
@@ -1107,7 +1107,7 @@ func TestApierSetAccountActionTriggers(t *testing.T) {
 func TestApierRemAccountActionTriggers(t *testing.T) {
 	// Test first get so we can steal the id which we need to remove
 	var reply engine.ActionTriggers
-	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2"}
+	req := utils.TenantAccount{Tenant: "cgrates.org", Account: "dan2"}
 	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
 	} else if len(reply) != 1 || reply[0].ActionsID != "LOG_BALANCE" {
@@ -1157,7 +1157,7 @@ func TestApierSetAccount(t *testing.T) {
 // Test here GetAccountActionTimings
 func TestApierGetAccountActionPlan(t *testing.T) {
 	var reply []*AccountActionTiming
-	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan7"}
+	req := utils.TenantAccount{Tenant: "cgrates.org", Account: "dan7"}
 	if err := rater.Call("ApierV1.GetAccountActionPlan", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionPlan: ", err.Error())
 	} else if len(reply) != 1 {
@@ -1192,7 +1192,7 @@ func TestApierRemUniqueIDActionTiming(t *testing.T) {
 		t.Error("Unexpected answer received", rmReply)
 	}
 	var reply []*AccountActionTiming
-	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan4"}
+	req := utils.TenantAccount{Tenant: "cgrates.org", Account: "dan4"}
 	if err := rater.Call("ApierV1.GetAccountActionPlan", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionPlan: ", err.Error())
 	} else if len(reply) != 0 {
