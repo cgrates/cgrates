@@ -61,7 +61,7 @@ func (self *ApierV2) LoadRatingProfile(attrs AttrLoadRatingProfile, reply *strin
 	if err := dbReader.LoadRatingProfilesFiltered(tpRpf); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	*reply = v1.OK
+	*reply = utils.OK
 	return nil
 }
 
@@ -89,7 +89,7 @@ func (self *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *str
 	if sched != nil {
 		sched.Reload()
 	}
-	*reply = v1.OK
+	*reply = utils.OK
 	return nil
 }
 

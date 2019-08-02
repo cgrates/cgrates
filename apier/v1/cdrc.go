@@ -38,6 +38,6 @@ func (apier *ApierV1) ReloadCdrcConfig(attrs AttrReloadConfig, reply *string) er
 	}
 	apier.Config.CdrcProfiles = newCfg.CdrcProfiles // ToDo: Check if there can be any concurency involved here so we need to lock maybe
 	apier.Config.ConfigReloads[utils.CDRC] <- struct{}{}
-	*reply = OK
+	*reply = utils.OK
 	return nil
 }

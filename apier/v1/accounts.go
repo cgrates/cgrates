@@ -161,7 +161,7 @@ func (self *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *str
 		}
 		sched.Reload()
 	}
-	*reply = OK
+	*reply = utils.OK
 	return nil
 }
 
@@ -340,7 +340,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 		err.Error() != utils.ErrNotFound.Error() {
 		return err
 	}
-	*reply = OK
+	*reply = utils.OK
 	return nil
 }
 
@@ -503,7 +503,7 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 	if err := at.Execute(nil, nil); err != nil {
 		return err
 	}
-	*reply = OK
+	*reply = utils.OK
 	return nil
 }
 
@@ -584,7 +584,7 @@ func (self *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) error
 	if err := at.Execute(nil, nil); err != nil {
 		return err
 	}
-	*reply = OK
+	*reply = utils.OK
 	return nil
 }
 
@@ -646,6 +646,6 @@ func (self *ApierV1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) e
 		*reply = err.Error()
 		return err
 	}
-	*reply = OK
+	*reply = utils.OK
 	return nil
 }

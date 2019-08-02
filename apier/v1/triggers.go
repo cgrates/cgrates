@@ -613,6 +613,6 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 	if err != nil {
 		return err
 	}
-	*reply = OK
+	*reply = utils.OK
 	return nil
 }

@@ -80,6 +80,6 @@ func (apier *ApierV1) DebitUsageWithOptions(args AttrDebitUsageWithOptions, repl
 		return utils.NewErrServerError(err)
 	}
 
-	*reply = OK
+	*reply = utils.OK
 	return nil
 }
