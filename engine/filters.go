@@ -166,7 +166,7 @@ func (fS *FilterS) Pass(tenant string, filterIDs []string,
 				conn = fS.statSConns
 			case MetaResources, MetaNotResources:
 				conn = fS.resSConns
-			case utils.MetaAccounts:
+			case utils.MetaAccount:
 				conn = fS.ralSConns
 			}
 			if pass, err = fltr.Pass(ev, conn, tenant); err != nil || !pass {
@@ -230,7 +230,7 @@ func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error)
 	if !utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
 		MetaTimings, MetaRSR, MetaStatS, MetaDestinations, MetaEmpty,
 		MetaExists, MetaLessThan, MetaLessOrEqual, MetaGreaterThan,
-		MetaGreaterOrEqual, MetaResources, MetaEqual, MetaNotEqual}, rType) {
+		MetaGreaterOrEqual, MetaResources, MetaEqual, utils.MetaAccount, MetaNotEqual}, rType) {
 		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
 	}
 	if fieldName == "" && utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
@@ -318,7 +318,7 @@ func (rf *FilterRule) CompileValues() (err error) {
 				FilterValue: valSplt[2],
 			}
 		}
-	case utils.MetaAccounts:
+	case utils.MetaAccount:
 		//value for filter of type *accounts needs to be in the following form:
 		//*gt:AccountID:ValueOfUsage
 		rf.accountItems = make([]*itemFilter, len(rf.Values))
@@ -372,7 +372,7 @@ func (fltr *FilterRule) Pass(dP config.DataProvider,
 		result, err = fltr.passResourceS(dP, rpcClnt, tenant)
 	case MetaEqual, MetaNotEqual:
 		result, err = fltr.passEqualTo(dP)
-	case utils.MetaAccounts:
+	case utils.MetaAccount:
 		result, err = fltr.passAccountS(dP, rpcClnt, tenant)
 	default:
 		err = utils.ErrPrefixNotErrNotImplemented(fltr.Type)

@@ -618,6 +618,7 @@ const (
 	MetaInit                     = "*init"
 	MetaRatingPlanCost           = "*rating_plan_cost"
 	RatingPlanIDs                = "RatingPlanIDs"
+	MetaAccount                  = "*account"
 )
 
 // Migrator Action
