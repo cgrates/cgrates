@@ -229,7 +229,7 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 		Account:       "TestApierV2itSetAccountWithAP1",
 		ActionPlanIDs: &[]string{argAP1.Id},
 	}
-	acntID := utils.AccountKey(argSetAcnt1.Tenant, argSetAcnt1.Account)
+	acntID := utils.ConcatenatedKey(argSetAcnt1.Tenant, argSetAcnt1.Account)
 	if _, err := dm.DataDB().GetAccountActionPlans(acntID, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}

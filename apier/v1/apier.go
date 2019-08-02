@@ -179,7 +179,7 @@ func (self *ApierV1) ExecuteAction(attr *utils.AttrExecuteAction, reply *string)
 		ActionsID: attr.ActionsId,
 	}
 	if attr.Tenant != "" && attr.Account != "" {
-		at.SetAccountIDs(utils.StringMap{utils.AccountKey(attr.Tenant, attr.Account): true})
+		at.SetAccountIDs(utils.StringMap{utils.ConcatenatedKey(attr.Tenant, attr.Account): true})
 	}
 	if err := at.Execute(nil, nil); err != nil {
 		*reply = err.Error()

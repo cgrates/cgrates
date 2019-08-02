@@ -199,7 +199,7 @@ func (aa *TpAccountAction) SetAccountActionId(id string) error {
 }
 
 func (aa *TpAccountAction) GetAccountActionId() string {
-	return utils.AccountKey(aa.Tenant, aa.Account)
+	return utils.ConcatenatedKey(aa.Tenant, aa.Account)
 }
 
 type TpSharedGroup struct {
