@@ -526,7 +526,7 @@ func testV1FltrAccounts(t *testing.T) {
 		ID:     "FLTR_TH_Accounts",
 		Rules: []*engine.FilterRule{
 			{
-				Type:   "*accounts",
+				Type:   "*account",
 				Values: []string{"*gt:1001.BalanceMap.*monetary[0].Value:9"},
 			},
 		},
@@ -588,7 +588,7 @@ func testV1FltrAccounts(t *testing.T) {
 		ID:     "FLTR_TH_Accounts",
 		Rules: []*engine.FilterRule{
 			{
-				Type:   "*accounts",
+				Type:   "*account",
 				Values: []string{"*gt:1001.BalanceMap.*monetary[0].Value:11"},
 			},
 		},
