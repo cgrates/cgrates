@@ -164,12 +164,12 @@ func testFilterGetFilterAfterSet(t *testing.T) {
 func testFilterUpdateFilter(t *testing.T) {
 	filter.Rules = []*engine.FilterRule{
 		{
-			FieldName: "*string",
+			FieldName: utils.MetaString,
 			Type:      "~Account",
 			Values:    []string{"1001", "1002"},
 		},
 		{
-			FieldName: engine.MetaPrefix,
+			FieldName: utils.MetaPrefix,
 			Type:      "~Destination",
 			Values:    []string{"10", "20"},
 		},

@@ -234,12 +234,12 @@ type TPRatingProfile struct {
 
 // Used as key in nosql db (eg: redis)
 func (self *TPRatingProfile) KeyId() string {
-	return fmt.Sprintf("%s:%s:%s:%s", META_OUT,
+	return ConcatenatedKey(META_OUT,
 		self.Tenant, self.Category, self.Subject)
 }
 
 func (self *TPRatingProfile) KeyIdA() string {
-	return fmt.Sprintf("%s:%s:%s:%s:%s", self.LoadId, META_OUT,
+	return ConcatenatedKey(self.LoadId, META_OUT,
 		self.Tenant, self.Category, self.Subject)
 }
 
@@ -289,7 +289,7 @@ func FallbackSubjKeys(tenant, tor, fallbackSubjects string) []string {
 	var sslice sort.StringSlice
 	if len(fallbackSubjects) != 0 {
 		for _, fbs := range strings.Split(fallbackSubjects, string(FALLBACK_SEP)) {
-			newKey := fmt.Sprintf("%s:%s:%s:%s", META_OUT, tenant, tor, fbs)
+			newKey := ConcatenatedKey(META_OUT, tenant, tor, fbs)
 			i := sslice.Search(newKey)
 			if i < len(sslice) && sslice[i] != newKey {
 				// not found so insert it
@@ -423,7 +423,7 @@ type TPAccountActions struct {
 
 // Returns the id used in some nosql dbs (eg: redis)
 func (aa *TPAccountActions) KeyId() string {
-	return fmt.Sprintf("%s:%s", aa.Tenant, aa.Account)
+	return ConcatenatedKey(aa.Tenant, aa.Account)
 }
 
 func (aa *TPAccountActions) GetId() string {
@@ -1259,13 +1259,8 @@ type SMCostFilter struct { //id cu litere mare
 	CreatedAt      TimeInterval
 }
 
-func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string, values []string, timezone string) (smcf *SMCostFilter, err error) {
-	const (
-		MetaString         = "*string"
-		MetaNotString      = "*notstring"
-		MetaLessThan       = "*lt"
-		MetaGreaterOrEqual = "*gte"
-	)
+func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string,
+	values []string, timezone string) (smcf *SMCostFilter, err error) {
 	switch fieldName {
 	case DynamicDataPrefix + CGRID:
 		switch fieldType {

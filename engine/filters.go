@@ -28,39 +28,6 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-const (
-	MetaNot            = "*not"
-	MetaString         = "*string"
-	MetaPrefix         = "*prefix"
-	MetaSuffix         = "*suffix"
-	MetaEmpty          = "*empty"
-	MetaExists         = "*exists"
-	MetaTimings        = "*timings"
-	MetaRSR            = "*rsr"
-	MetaStatS          = "*stats"
-	MetaDestinations   = "*destinations"
-	MetaMinCapPrefix   = "*min_"
-	MetaMaxCapPrefix   = "*max_"
-	MetaLessThan       = "*lt"
-	MetaLessOrEqual    = "*lte"
-	MetaGreaterThan    = "*gt"
-	MetaGreaterOrEqual = "*gte"
-	MetaResources      = "*resources"
-	MetaEqual          = "*eq"
-
-	MetaNotString       = "*notstring"
-	MetaNotPrefix       = "*notprefix"
-	MetaNotSuffix       = "*notsuffix"
-	MetaNotEmpty        = "*notempty"
-	MetaNotExists       = "*notexists"
-	MetaNotTimings      = "*nottimings"
-	MetaNotRSR          = "*notrsr"
-	MetaNotStatS        = "*notstats"
-	MetaNotDestinations = "*notdestinations"
-	MetaNotResources    = "*notresources"
-	MetaNotEqual        = "*noteq"
-)
-
 func NewFilterS(cfg *config.CGRConfig,
 	statSChan, resSChan, ralSChan chan rpcclient.RpcClientConnection, dm *DataManager) (fS *FilterS) {
 	fS = &FilterS{
@@ -162,9 +129,9 @@ func (fS *FilterS) Pass(tenant string, filterIDs []string,
 			// a rpcclient to get what we need (Metrics,Resource,Accounts)
 			var conn rpcclient.RpcClientConnection
 			switch fltr.Type {
-			case MetaStatS, MetaNotStatS:
+			case utils.MetaStatS, utils.MetaNotStatS:
 				conn = fS.statSConns
-			case MetaResources, MetaNotResources:
+			case utils.MetaResources, utils.MetaNotResources:
 				conn = fS.resSConns
 			case utils.MetaAccount:
 				conn = fS.ralSConns
@@ -223,24 +190,27 @@ func (f *Filter) Compile() (err error) {
 func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error) {
 	var negative bool
 	rType := rfType
-	if strings.HasPrefix(rfType, MetaNot) {
-		rType = "*" + strings.TrimPrefix(rfType, MetaNot)
+	if strings.HasPrefix(rfType, utils.MetaNot) {
+		rType = "*" + strings.TrimPrefix(rfType, utils.MetaNot)
 		negative = true
 	}
-	if !utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
-		MetaTimings, MetaRSR, MetaStatS, MetaDestinations, MetaEmpty,
-		MetaExists, MetaLessThan, MetaLessOrEqual, MetaGreaterThan,
-		MetaGreaterOrEqual, MetaResources, MetaEqual, utils.MetaAccount, MetaNotEqual}, rType) {
+	if !utils.IsSliceMember([]string{utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
+		utils.MetaTimings, utils.MetaRSR, utils.MetaStatS, utils.MetaDestinations,
+		utils.MetaEmpty, utils.MetaExists, utils.MetaLessThan, utils.MetaLessOrEqual,
+		utils.MetaGreaterThan, utils.MetaGreaterOrEqual, utils.MetaResources, utils.MetaEqual,
+		utils.MetaAccount, utils.MetaNotEqual}, rType) {
 		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
 	}
-	if fieldName == "" && utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
-		MetaTimings, MetaDestinations, MetaLessThan, MetaEmpty, MetaExists,
-		MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual, MetaEqual, MetaNotEqual}, rType) {
+	if fieldName == "" && utils.IsSliceMember([]string{utils.MetaString, utils.MetaPrefix,
+		utils.MetaSuffix, utils.MetaTimings, utils.MetaDestinations, utils.MetaLessThan,
+		utils.MetaEmpty, utils.MetaExists, utils.MetaLessOrEqual, utils.MetaGreaterThan,
+		utils.MetaGreaterOrEqual, utils.MetaEqual, utils.MetaNotEqual}, rType) {
 		return nil, fmt.Errorf("FieldName is mandatory for Type: %s", rfType)
 	}
-	if len(vals) == 0 && utils.IsSliceMember([]string{MetaString, MetaPrefix, MetaSuffix,
-		MetaTimings, MetaRSR, MetaDestinations, MetaLessThan, MetaLessOrEqual,
-		MetaGreaterThan, MetaGreaterOrEqual, MetaEqual, MetaNotEqual}, rType) {
+	if len(vals) == 0 && utils.IsSliceMember([]string{utils.MetaString, utils.MetaPrefix,
+		utils.MetaSuffix, utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations,
+		utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual,
+		utils.MetaEqual, utils.MetaNotEqual}, rType) {
 		return nil, fmt.Errorf("Values is mandatory for Type: %s", rfType)
 	}
 	rf := &FilterRule{
@@ -278,11 +248,11 @@ type FilterRule struct {
 // Separate method to compile RSR fields
 func (rf *FilterRule) CompileValues() (err error) {
 	switch rf.Type {
-	case MetaRSR, MetaNotRSR:
+	case utils.MetaRSR, utils.MetaNotRSR:
 		if rf.rsrFields, err = config.NewRSRParsersFromSlice(rf.Values, true); err != nil {
 			return
 		}
-	case MetaStatS, MetaNotStatS:
+	case utils.MetaStatS, utils.MetaNotStatS:
 		//value for filter of type *stats needs to be in the following form:
 		//*gt#acd:StatID:ValueOfMetric
 		rf.statItems = make([]*itemFilter, len(rf.Values))
@@ -300,7 +270,7 @@ func (rf *FilterRule) CompileValues() (err error) {
 				FilterValue: valSplt[2],
 			}
 		}
-	case MetaResources, MetaNotResources:
+	case utils.MetaResources, utils.MetaNotResources:
 		//value for filter of type *resources needs to be in the following form:
 		//*gt:ResourceID:ValueOfUsage
 		rf.resourceItems = make([]*itemFilter, len(rf.Values))
@@ -344,33 +314,33 @@ func (rf *FilterRule) CompileValues() (err error) {
 func (fltr *FilterRule) Pass(dP config.DataProvider,
 	rpcClnt rpcclient.RpcClientConnection, tenant string) (result bool, err error) {
 	if fltr.negative == nil {
-		fltr.negative = utils.BoolPointer(strings.HasPrefix(fltr.Type, MetaNot))
+		fltr.negative = utils.BoolPointer(strings.HasPrefix(fltr.Type, utils.MetaNot))
 	}
 
 	switch fltr.Type {
-	case MetaString, MetaNotString:
+	case utils.MetaString, utils.MetaNotString:
 		result, err = fltr.passString(dP)
-	case MetaEmpty, MetaNotEmpty:
+	case utils.MetaEmpty, utils.MetaNotEmpty:
 		result, err = fltr.passEmpty(dP)
-	case MetaExists, MetaNotExists:
+	case utils.MetaExists, utils.MetaNotExists:
 		result, err = fltr.passExists(dP)
-	case MetaPrefix, MetaNotPrefix:
+	case utils.MetaPrefix, utils.MetaNotPrefix:
 		result, err = fltr.passStringPrefix(dP)
-	case MetaSuffix, MetaNotSuffix:
+	case utils.MetaSuffix, utils.MetaNotSuffix:
 		result, err = fltr.passStringSuffix(dP)
-	case MetaTimings, MetaNotTimings:
+	case utils.MetaTimings, utils.MetaNotTimings:
 		result, err = fltr.passTimings(dP)
-	case MetaDestinations, MetaNotDestinations:
+	case utils.MetaDestinations, utils.MetaNotDestinations:
 		result, err = fltr.passDestinations(dP)
-	case MetaRSR, MetaNotRSR:
+	case utils.MetaRSR, utils.MetaNotRSR:
 		result, err = fltr.passRSR(dP)
-	case MetaStatS, MetaNotStatS:
+	case utils.MetaStatS, utils.MetaNotStatS:
 		result, err = fltr.passStatS(dP, rpcClnt, tenant)
-	case MetaLessThan, MetaLessOrEqual, MetaGreaterThan, MetaGreaterOrEqual:
+	case utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual:
 		result, err = fltr.passGreaterThan(dP)
-	case MetaResources, MetaNotResources:
+	case utils.MetaResources, utils.MetaNotResources:
 		result, err = fltr.passResourceS(dP, rpcClnt, tenant)
-	case MetaEqual, MetaNotEqual:
+	case utils.MetaEqual, utils.MetaNotEqual:
 		result, err = fltr.passEqualTo(dP)
 	case utils.MetaAccount:
 		result, err = fltr.passAccountS(dP, rpcClnt, tenant)
@@ -578,8 +548,8 @@ func (fltr *FilterRule) passGreaterThan(dP config.DataProvider) (bool, error) {
 		fldIf = utils.StringToInterface(fldStr)
 	}
 	orEqual := false
-	if fltr.Type == MetaGreaterOrEqual ||
-		fltr.Type == MetaLessThan {
+	if fltr.Type == utils.MetaGreaterOrEqual ||
+		fltr.Type == utils.MetaLessThan {
 		orEqual = true
 	}
 	for _, val := range fltr.Values {
@@ -589,9 +559,9 @@ func (fltr *FilterRule) passGreaterThan(dP config.DataProvider) (bool, error) {
 		}
 		if gte, err := utils.GreaterThan(fldIf, sval, orEqual); err != nil {
 			return false, err
-		} else if utils.IsSliceMember([]string{MetaGreaterThan, MetaGreaterOrEqual}, fltr.Type) && gte {
+		} else if utils.IsSliceMember([]string{utils.MetaGreaterThan, utils.MetaGreaterOrEqual}, fltr.Type) && gte {
 			return true, nil
-		} else if utils.IsSliceMember([]string{MetaLessThan, MetaLessOrEqual}, fltr.Type) && !gte {
+		} else if utils.IsSliceMember([]string{utils.MetaLessThan, utils.MetaLessOrEqual}, fltr.Type) && !gte {
 			return true, nil
 		}
 	}

@@ -184,13 +184,13 @@ func testStsITMigrateAndMove(t *testing.T) {
 		t.Error(err)
 	}
 
-	x, _ := engine.NewFilterRule(engine.MetaGreaterOrEqual,
+	x, _ := engine.NewFilterRule(utils.MetaGreaterOrEqual,
 		"SetupInterval", []string{stsSetupTime.String()})
 	filters = append(filters, x)
-	x, _ = engine.NewFilterRule(engine.MetaGreaterOrEqual,
+	x, _ = engine.NewFilterRule(utils.MetaGreaterOrEqual,
 		"UsageInterval", []string{v1Sts.UsageInterval[0].String()})
 	filters = append(filters, x)
-	x, _ = engine.NewFilterRule(engine.MetaGreaterOrEqual,
+	x, _ = engine.NewFilterRule(utils.MetaGreaterOrEqual,
 		"PddInterval", []string{v1Sts.PddInterval[0].String()})
 	filters = append(filters, x)
 

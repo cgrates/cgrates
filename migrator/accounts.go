@@ -234,7 +234,7 @@ func (v1Acc v1Account) V1toV3Account() (ac *engine.Account) {
 	if len(idElements) != 3 {
 		log.Printf("Malformed account ID %s", v1Acc.Id)
 	}
-	ac.ID = fmt.Sprintf("%s:%s", idElements[1], idElements[2])
+	ac.ID = utils.ConcatenatedKey(idElements[1], idElements[2])
 	// balances
 	for oldBalKey, oldBalChain := range v1Acc.BalanceMap {
 		keyElements := strings.Split(oldBalKey, "*")

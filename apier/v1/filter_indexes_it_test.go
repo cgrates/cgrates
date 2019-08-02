@@ -212,7 +212,7 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 	}
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: engine.MetaString},
+		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -239,7 +239,7 @@ func testV1FIdxComputeThresholdsIndexes(t *testing.T) {
 	expectedIDX := []string{"*string:~Account:1001:TEST_PROFILE1"}
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: engine.MetaString},
+		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
 	}
@@ -313,7 +313,7 @@ func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 	}
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: engine.MetaString},
+		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -341,7 +341,7 @@ func testV1FIdxSecondComputeThresholdsIndexes(t *testing.T) {
 	expectedIDX := []string{"*string:~Account:1002:TEST_PROFILE2"}
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: engine.MetaString},
+		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil && err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -371,7 +371,7 @@ func testV1FIdxThirdComputeThresholdsIndexes(t *testing.T) {
 	sort.Strings(expectedIDX)
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: engine.MetaString},
+		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil && err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -424,7 +424,7 @@ func testV1FIdxRemoveThresholdProfile(t *testing.T) {
 	}
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: engine.MetaString},
+		ItemType: utils.MetaThresholds, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil && err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -504,7 +504,7 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 	}
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-		ItemType: utils.MetaStats, Tenant: tenant, FilterType: engine.MetaString},
+		ItemType: utils.MetaStats, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -530,7 +530,7 @@ func testV1FIdxComputeStatQueueProfileIndexes(t *testing.T) {
 	expectedIDX := []string{"*string:~Account:1001:TEST_PROFILE1"}
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-		ItemType: utils.MetaStats, Tenant: tenant, FilterType: engine.MetaString},
+		ItemType: utils.MetaStats, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
 	}
@@ -613,7 +613,7 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 	}
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-		ItemType: utils.MetaStats, Tenant: tenant, FilterType: engine.MetaString},
+		ItemType: utils.MetaStats, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -640,7 +640,7 @@ func testV1FIdxSecondComputeStatQueueProfileIndexes(t *testing.T) {
 	expectedIDX := []string{"*string:~Account:1001:TEST_PROFILE2"}
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-		ItemType: utils.MetaStats, Tenant: tenant, FilterType: engine.MetaString},
+		ItemType: utils.MetaStats, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
 	}
@@ -691,7 +691,7 @@ func testV1FIdxRemoveStatQueueProfile(t *testing.T) {
 	}
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-		ItemType: utils.MetaStats, Tenant: tenant, FilterType: engine.MetaString},
+		ItemType: utils.MetaStats, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil && err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -761,7 +761,7 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 	}
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-		ItemType: utils.MetaResources, Tenant: tenant, FilterType: engine.MetaString},
+		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil && err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -787,7 +787,7 @@ func testV1FIdxComputeResourceProfileIndexes(t *testing.T) {
 	expectedIDX := []string{"*string:~Account:1001:RCFG1"}
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-		ItemType: utils.MetaResources, Tenant: tenant, FilterType: engine.MetaString},
+		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
 	}
@@ -860,7 +860,7 @@ func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 	}
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-		ItemType: utils.MetaResources, Tenant: tenant, FilterType: engine.MetaString},
+		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil && err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -888,7 +888,7 @@ func testV1FIdxSecondComputeResourceProfileIndexes(t *testing.T) {
 	expectedIDX := []string{"*string:~Account:1001:RCFG2"}
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-		ItemType: utils.MetaResources, Tenant: tenant, FilterType: engine.MetaString},
+		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
 	}
@@ -937,7 +937,7 @@ func testV1FIdxRemoveResourceProfile(t *testing.T) {
 	}
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-		ItemType: utils.MetaResources, Tenant: tenant, FilterType: engine.MetaString},
+		ItemType: utils.MetaResources, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil && err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -1014,7 +1014,7 @@ func testV1FIdxSetSupplierProfileIndexes(t *testing.T) {
 	}
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-		ItemType: utils.MetaSuppliers, Tenant: tenant, FilterType: engine.MetaString},
+		ItemType: utils.MetaSuppliers, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -1040,7 +1040,7 @@ func testV1FIdxComputeSupplierProfileIndexes(t *testing.T) {
 	expectedIDX := []string{"*string:~Account:1001:TEST_PROFILE1"}
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-		ItemType: utils.MetaSuppliers, Tenant: tenant, FilterType: engine.MetaString},
+		ItemType: utils.MetaSuppliers, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
 	}
@@ -1117,7 +1117,7 @@ func testV1FIdxSetSecondSupplierProfileIndexes(t *testing.T) {
 	}
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-		ItemType: utils.MetaSuppliers, Tenant: tenant, FilterType: engine.MetaString},
+		ItemType: utils.MetaSuppliers, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -1145,7 +1145,7 @@ func testV1FIdxSecondComputeSupplierProfileIndexes(t *testing.T) {
 	expectedIDX := []string{"*string:~Account:1001:TEST_PROFILE2"}
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-		ItemType: utils.MetaSuppliers, Tenant: tenant, FilterType: engine.MetaString},
+		ItemType: utils.MetaSuppliers, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
 	}
@@ -1197,7 +1197,7 @@ func testV1FIdxRemoveSupplierProfile(t *testing.T) {
 	}
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-		ItemType: utils.MetaSuppliers, Tenant: tenant, FilterType: engine.MetaString},
+		ItemType: utils.MetaSuppliers, Tenant: tenant, FilterType: utils.MetaString},
 		&indexes); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -1281,7 +1281,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 	}
 	var indexes []string
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-		ItemType: utils.MetaAttributes, Tenant: tenant, FilterType: engine.MetaString,
+		ItemType: utils.MetaAttributes, Tenant: tenant, FilterType: utils.MetaString,
 		Context: utils.MetaSessionS}, &indexes); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -1310,7 +1310,7 @@ func testV1FIdxComputeAttributeProfileIndexes(t *testing.T) {
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
 		ItemType:   utils.MetaAttributes,
 		Tenant:     tenant,
-		FilterType: engine.MetaString,
+		FilterType: utils.MetaString,
 		Context:    utils.MetaSessionS}, &indexes); err != nil {
 		t.Error(err)
 	}
@@ -1394,7 +1394,7 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
 		ItemType:   utils.MetaAttributes,
 		Tenant:     tenant,
-		FilterType: engine.MetaString,
+		FilterType: utils.MetaString,
 		Context:    utils.MetaSessionS}, &indexes); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -1423,7 +1423,7 @@ func testV1FIdxSecondComputeAttributeProfileIndexes(t *testing.T) {
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
 		ItemType:   utils.MetaAttributes,
 		Tenant:     tenant,
-		FilterType: engine.MetaString,
+		FilterType: utils.MetaString,
 		Context:    utils.MetaSessionS}, &indexes); err != nil {
 		t.Error(err)
 	}
@@ -1457,7 +1457,7 @@ func testV1FIdxComputeWithAnotherContext(t *testing.T) {
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
 		ItemType:   utils.MetaAttributes,
 		Tenant:     tenant,
-		FilterType: engine.MetaString,
+		FilterType: utils.MetaString,
 		Context:    utils.META_ANY}, &indexes); err != nil {
 		t.Error(err)
 	}
@@ -1515,7 +1515,7 @@ func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 	if err := tFIdxRpc.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
 		ItemType:   utils.MetaAttributes,
 		Tenant:     tenant,
-		FilterType: engine.MetaString,
+		FilterType: utils.MetaString,
 		Context:    utils.MetaSessionS}, &indexes); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -1647,7 +1647,7 @@ func testV1FIdxGetFilterIndexes3(t *testing.T) {
 	arg := &AttrGetFilterIndexes{
 		Tenant:     tenant,
 		ItemType:   utils.MetaResources,
-		FilterType: engine.MetaPrefix,
+		FilterType: utils.MetaPrefix,
 	}
 	expectedIndexes := []string{
 		"*prefix:~Destination:20:ResProfile1",

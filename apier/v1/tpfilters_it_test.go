@@ -134,7 +134,7 @@ func testTPFilterSetTPFilter(t *testing.T) {
 		ID:     "Filter",
 		Filters: []*utils.TPFilter{
 			&utils.TPFilter{
-				Type:      "*string",
+				Type:      utils.MetaString,
 				FieldName: "Account",
 				Values:    []string{"1001", "1002"},
 			},
@@ -180,12 +180,12 @@ func testTPFilterGetFilterIds(t *testing.T) {
 func testTPFilterUpdateTPFilter(t *testing.T) {
 	tpFilter.Filters = []*utils.TPFilter{
 		&utils.TPFilter{
-			Type:      "*string",
+			Type:      utils.MetaString,
 			FieldName: "Account",
 			Values:    []string{"1001", "1002"},
 		},
 		&utils.TPFilter{
-			Type:      engine.MetaPrefix,
+			Type:      utils.MetaPrefix,
 			FieldName: "Destination",
 			Values:    []string{"10", "20"},
 		},

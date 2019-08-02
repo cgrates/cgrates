@@ -47,7 +47,7 @@ type FilterIndexer struct {
 func (rfi *FilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID string) {
 	for _, fltr := range tpFltr.Filters {
 		switch fltr.Type {
-		case MetaString:
+		case utils.MetaString:
 			for _, fldVal := range fltr.Values {
 				concatKey := utils.ConcatenatedKey(fltr.Type, fltr.FieldName, fldVal)
 				if _, hasIt := rfi.indexes[concatKey]; !hasIt {
@@ -56,7 +56,7 @@ func (rfi *FilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID st
 				rfi.indexes[concatKey][itemID] = true
 				rfi.chngdIndxKeys[concatKey] = true
 			}
-		case MetaPrefix:
+		case utils.MetaPrefix:
 			for _, fldVal := range fltr.Values {
 				concatKey := utils.ConcatenatedKey(fltr.Type, fltr.FieldName, fldVal)
 				if _, hasIt := rfi.indexes[concatKey]; !hasIt {
@@ -249,7 +249,7 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(tenant, itemID string, oldFilters 
 		for _, flt := range fltr.Rules {
 			var fldType, fldName string
 			var fldVals []string
-			if utils.IsSliceMember([]string{MetaString, MetaPrefix, utils.META_NONE}, flt.Type) {
+			if utils.IsSliceMember([]string{utils.MetaString, utils.MetaPrefix, utils.META_NONE}, flt.Type) {
 				fldType, fldName = flt.Type, flt.FieldName
 				fldVals = flt.Values
 			}
@@ -310,7 +310,7 @@ func createAndIndex(itemPrefix, tenant, context, itemID string, filterIDs []stri
 		for _, flt := range fltr.Rules {
 			var fldType, fldName string
 			var fldVals []string
-			if utils.IsSliceMember([]string{MetaString, MetaPrefix, utils.META_NONE}, flt.Type) {
+			if utils.IsSliceMember([]string{utils.MetaString, utils.MetaPrefix, utils.META_NONE}, flt.Type) {
 				fldType, fldName = flt.Type, flt.FieldName
 				fldVals = flt.Values
 			}

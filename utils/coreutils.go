@@ -727,7 +727,7 @@ func GetCGRVersion() (vers string) {
 			commitSplt := strings.Split(ln, " ")
 			if len(commitSplt) != 2 {
 				Logger.Err("Building version - cannot extract commit hash")
-				fmt.Println(fmt.Sprintf("Building version - cannot extract commit hash"))
+				fmt.Println("Building version - cannot extract commit hash")
 				return
 			}
 			commitHash = commitSplt[1]
@@ -737,13 +737,13 @@ func GetCGRVersion() (vers string) {
 			dateSplt := strings.Split(ln, ": ")
 			if len(dateSplt) != 2 {
 				Logger.Err("Building version - cannot split commit date")
-				fmt.Println(fmt.Sprintf("Building version - cannot split commit date"))
+				fmt.Println("Building version - cannot split commit date")
 				return
 			}
 			commitDate, err = time.Parse("Mon Jan 2 15:04:05 2006 -0700", strings.TrimSpace(dateSplt[1]))
 			if err != nil {
 				Logger.Err(fmt.Sprintf("Building version - error: <%s> compiling commit date", err.Error()))
-				fmt.Println(fmt.Sprintf("Building version - error: <%s> compiling commit date", err.Error()))
+				fmt.Printf("Building version - error: <%s> compiling commit date\n", err.Error())
 				return
 			}
 			break
@@ -873,11 +873,6 @@ func APIerRPCCall(inst interface{}, serviceMethod string, args interface{}, repl
 	return err
 }
 
-type AuthStruct struct {
-	Tenant string
-	ApiKey string
-}
-
 // NewFallbackFileNameFronString will revert the meta information in the fallback file name into original data
 func NewFallbackFileNameFronString(fileName string) (ffn *FallbackFileName, err error) {
 	ffn = new(FallbackFileName)
@@ -938,7 +933,8 @@ func (ffn *FallbackFileName) AsString() string {
 	if ffn.FileSuffix == "" { // Autopopulate FileSuffix based on the transport used
 		ffn.FileSuffix = CDREFileSuffixes[ffn.Transport]
 	}
-	return fmt.Sprintf("%s%s%s%s%s%s%s%s", ffn.Module, HandlerArgSep, ffn.Transport, HandlerArgSep, url.QueryEscape(ffn.Address), HandlerArgSep, ffn.RequestID, ffn.FileSuffix)
+	// instead of using fmt.Sprintf we use "+" as binary operator (small optimization)
+	return ffn.Module + HandlerArgSep + ffn.Transport + HandlerArgSep + url.QueryEscape(ffn.Address) + HandlerArgSep + ffn.RequestID + ffn.FileSuffix
 }
 
 // CachedRPCResponse is used to cache a RPC response

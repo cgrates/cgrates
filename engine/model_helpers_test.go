@@ -1052,7 +1052,7 @@ func TestTPFilterAsTPFilter(t *testing.T) {
 		&TpFilter{
 			Tpid:              "TEST_TPID",
 			ID:                "Filter1",
-			FilterType:        MetaPrefix,
+			FilterType:        utils.MetaPrefix,
 			FilterFieldName:   "Account",
 			FilterFieldValues: "1001;1002",
 		},
@@ -1063,7 +1063,7 @@ func TestTPFilterAsTPFilter(t *testing.T) {
 			ID:   tps[0].ID,
 			Filters: []*utils.TPFilter{
 				&utils.TPFilter{
-					Type:      MetaPrefix,
+					Type:      utils.MetaPrefix,
 					FieldName: "Account",
 					Values:    []string{"1001", "1002"},
 				},
@@ -1083,7 +1083,7 @@ func TestTPFilterAsTPFilter2(t *testing.T) {
 			Tpid:              "TEST_TPID",
 			Tenant:            "cgrates.org",
 			ID:                "Filter1",
-			FilterType:        MetaPrefix,
+			FilterType:        utils.MetaPrefix,
 			FilterFieldName:   "Account",
 			FilterFieldValues: "1001;1002",
 		},
@@ -1091,7 +1091,7 @@ func TestTPFilterAsTPFilter2(t *testing.T) {
 			Tpid:              "TEST_TPID",
 			Tenant:            "anotherTenant",
 			ID:                "Filter1",
-			FilterType:        MetaPrefix,
+			FilterType:        utils.MetaPrefix,
 			FilterFieldName:   "Account",
 			FilterFieldValues: "1010",
 		},
@@ -1103,7 +1103,7 @@ func TestTPFilterAsTPFilter2(t *testing.T) {
 			ID:     tps[0].ID,
 			Filters: []*utils.TPFilter{
 				&utils.TPFilter{
-					Type:      MetaPrefix,
+					Type:      utils.MetaPrefix,
 					FieldName: "Account",
 					Values:    []string{"1001", "1002"},
 				},
@@ -1115,7 +1115,7 @@ func TestTPFilterAsTPFilter2(t *testing.T) {
 			ID:     tps[1].ID,
 			Filters: []*utils.TPFilter{
 				&utils.TPFilter{
-					Type:      MetaPrefix,
+					Type:      utils.MetaPrefix,
 					FieldName: "Account",
 					Values:    []string{"1010"},
 				},
@@ -1137,7 +1137,7 @@ func TestAPItoTPFilter(t *testing.T) {
 		Filters: []*utils.TPFilter{
 			&utils.TPFilter{
 				FieldName: "Account",
-				Type:      "*string",
+				Type:      utils.MetaString,
 				Values:    []string{"1001", "1002"},
 			},
 		},
@@ -1149,7 +1149,7 @@ func TestAPItoTPFilter(t *testing.T) {
 		Rules: []*FilterRule{
 			&FilterRule{
 				FieldName: "Account",
-				Type:      "*string",
+				Type:      utils.MetaString,
 				Values:    []string{"1001", "1002"},
 			},
 		},
@@ -1172,7 +1172,7 @@ func TestFilterToTPFilter(t *testing.T) {
 		Rules: []*FilterRule{
 			&FilterRule{
 				FieldName: "Account",
-				Type:      "*string",
+				Type:      utils.MetaString,
 				Values:    []string{"1001", "1002"},
 			},
 		},
@@ -1187,7 +1187,7 @@ func TestFilterToTPFilter(t *testing.T) {
 		Filters: []*utils.TPFilter{
 			&utils.TPFilter{
 				FieldName: "Account",
-				Type:      "*string",
+				Type:      utils.MetaString,
 				Values:    []string{"1001", "1002"},
 			},
 		},

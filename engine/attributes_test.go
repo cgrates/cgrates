@@ -171,17 +171,17 @@ func TestAttributeAddFilters(t *testing.T) {
 		ID:     "FLTR_ATTR_1",
 		Rules: []*FilterRule{
 			{
-				Type:      MetaString,
+				Type:      utils.MetaString,
 				FieldName: "~Attribute",
 				Values:    []string{"AttributeProfile1"},
 			},
 			{
-				Type:      MetaGreaterOrEqual,
+				Type:      utils.MetaGreaterOrEqual,
 				FieldName: "~UsageInterval",
 				Values:    []string{(1 * time.Second).String()},
 			},
 			{
-				Type:      MetaGreaterOrEqual,
+				Type:      utils.MetaGreaterOrEqual,
 				FieldName: utils.DynamicDataPrefix + utils.Weight,
 				Values:    []string{"9.0"},
 			},
@@ -193,7 +193,7 @@ func TestAttributeAddFilters(t *testing.T) {
 		ID:     "FLTR_ATTR_2",
 		Rules: []*FilterRule{
 			{
-				Type:      MetaString,
+				Type:      utils.MetaString,
 				FieldName: "~Attribute",
 				Values:    []string{"AttributeProfile2"},
 			},
@@ -205,7 +205,7 @@ func TestAttributeAddFilters(t *testing.T) {
 		ID:     "FLTR_ATTR_3",
 		Rules: []*FilterRule{
 			{
-				Type:      MetaPrefix,
+				Type:      utils.MetaPrefix,
 				FieldName: "~Attribute",
 				Values:    []string{"AttributeProfilePrefix"},
 			},
@@ -217,7 +217,7 @@ func TestAttributeAddFilters(t *testing.T) {
 		ID:     "FLTR_ATTR_4",
 		Rules: []*FilterRule{
 			{
-				Type:      MetaGreaterOrEqual,
+				Type:      utils.MetaGreaterOrEqual,
 				FieldName: utils.DynamicDataPrefix + utils.Weight,
 				Values:    []string{"200.00"},
 			},
@@ -427,7 +427,7 @@ func TestAttributeIndexer(t *testing.T) {
 	rfi1 := NewFilterIndexer(dmAtr, utils.AttributeProfilePrefix,
 		utils.ConcatenatedKey(attrPrf.Tenant, utils.META_ANY))
 	if rcvIdx, err := dmAtr.GetFilterIndexes(utils.PrefixToIndexCache[rfi1.itemType],
-		rfi1.dbKeySuffix, MetaString, nil); err != nil {
+		rfi1.dbKeySuffix, utils.MetaString, nil); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
@@ -442,7 +442,7 @@ func TestAttributeIndexer(t *testing.T) {
 	rfi2 := NewFilterIndexer(dmAtr, utils.AttributeProfilePrefix,
 		utils.ConcatenatedKey(attrPrf.Tenant, utils.MetaSessionS))
 	if rcvIdx, err := dmAtr.GetFilterIndexes(utils.PrefixToIndexCache[rfi2.itemType],
-		rfi2.dbKeySuffix, MetaString, nil); err != nil {
+		rfi2.dbKeySuffix, utils.MetaString, nil); err != nil {
 		t.Error(err)
 	} else {
 		if !reflect.DeepEqual(eIdxes, rcvIdx) {
@@ -451,7 +451,7 @@ func TestAttributeIndexer(t *testing.T) {
 	}
 	//verify if old index was deleted ( context *any)
 	if _, err := dmAtr.GetFilterIndexes(utils.PrefixToIndexCache[rfi1.itemType],
-		rfi1.dbKeySuffix, MetaString, nil); err != utils.ErrNotFound {
+		rfi1.dbKeySuffix, utils.MetaString, nil); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }

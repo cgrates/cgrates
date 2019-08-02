@@ -28,7 +28,7 @@ import (
 )
 
 // Returns a list of ActionTriggers on an account
-func (self *ApierV1) GetAccountActionTriggers(attrs AttrAcntAction, reply *engine.ActionTriggers) error {
+func (self *ApierV1) GetAccountActionTriggers(attrs utils.TenantAccount, reply *engine.ActionTriggers) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
