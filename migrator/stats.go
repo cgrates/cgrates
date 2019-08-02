@@ -253,14 +253,14 @@ func (m *Migrator) migrateStats() (err error) {
 func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq *engine.StatQueueProfile, err error) {
 	var filters []*engine.FilterRule
 	if len(v1Sts.SetupInterval) == 1 {
-		x, err := engine.NewFilterRule(engine.MetaGreaterOrEqual,
+		x, err := engine.NewFilterRule(utils.MetaGreaterOrEqual,
 			"SetupInterval", []string{v1Sts.SetupInterval[0].String()})
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	} else if len(v1Sts.SetupInterval) == 2 {
-		x, err := engine.NewFilterRule(engine.MetaLessThan,
+		x, err := engine.NewFilterRule(utils.MetaLessThan,
 			"SetupInterval", []string{v1Sts.SetupInterval[1].String()})
 		if err != nil {
 			return nil, nil, nil, err
@@ -269,123 +269,123 @@ func (v1Sts v1Stat) AsStatQP() (filter *engine.Filter, sq *engine.StatQueue, stq
 	}
 
 	if len(v1Sts.TOR) != 0 {
-		x, err := engine.NewFilterRule(engine.MetaPrefix, "TOR", v1Sts.TOR)
+		x, err := engine.NewFilterRule(utils.MetaPrefix, "TOR", v1Sts.TOR)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.CdrHost) != 0 {
-		x, err := engine.NewFilterRule(engine.MetaPrefix, "CdrHost", v1Sts.CdrHost)
+		x, err := engine.NewFilterRule(utils.MetaPrefix, "CdrHost", v1Sts.CdrHost)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.ReqType) != 0 {
-		x, err := engine.NewFilterRule(engine.MetaPrefix, "ReqType", v1Sts.ReqType)
+		x, err := engine.NewFilterRule(utils.MetaPrefix, "ReqType", v1Sts.ReqType)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.Direction) != 0 {
-		x, err := engine.NewFilterRule(engine.MetaPrefix, "Direction", v1Sts.Direction)
+		x, err := engine.NewFilterRule(utils.MetaPrefix, "Direction", v1Sts.Direction)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.Category) != 0 {
-		x, err := engine.NewFilterRule(engine.MetaPrefix, "Category", v1Sts.Category)
+		x, err := engine.NewFilterRule(utils.MetaPrefix, "Category", v1Sts.Category)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.Account) != 0 {
-		x, err := engine.NewFilterRule(engine.MetaPrefix, "Account", v1Sts.Account)
+		x, err := engine.NewFilterRule(utils.MetaPrefix, "Account", v1Sts.Account)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.Subject) != 0 {
-		x, err := engine.NewFilterRule(engine.MetaPrefix, "Subject", v1Sts.Subject)
+		x, err := engine.NewFilterRule(utils.MetaPrefix, "Subject", v1Sts.Subject)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.Supplier) != 0 {
-		x, err := engine.NewFilterRule(engine.MetaPrefix, "Supplier", v1Sts.Supplier)
+		x, err := engine.NewFilterRule(utils.MetaPrefix, "Supplier", v1Sts.Supplier)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.UsageInterval) == 1 {
-		x, err := engine.NewFilterRule(engine.MetaGreaterOrEqual, "UsageInterval", []string{v1Sts.UsageInterval[0].String()})
+		x, err := engine.NewFilterRule(utils.MetaGreaterOrEqual, "UsageInterval", []string{v1Sts.UsageInterval[0].String()})
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	} else if len(v1Sts.UsageInterval) == 2 {
-		x, err := engine.NewFilterRule(engine.MetaLessThan, "UsageInterval", []string{v1Sts.UsageInterval[1].String()})
+		x, err := engine.NewFilterRule(utils.MetaLessThan, "UsageInterval", []string{v1Sts.UsageInterval[1].String()})
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.PddInterval) == 1 {
-		x, err := engine.NewFilterRule(engine.MetaGreaterOrEqual, "PddInterval", []string{v1Sts.PddInterval[0].String()})
+		x, err := engine.NewFilterRule(utils.MetaGreaterOrEqual, "PddInterval", []string{v1Sts.PddInterval[0].String()})
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	} else if len(v1Sts.PddInterval) == 2 {
-		x, err := engine.NewFilterRule(engine.MetaLessThan, "PddInterval", []string{v1Sts.PddInterval[1].String()})
+		x, err := engine.NewFilterRule(utils.MetaLessThan, "PddInterval", []string{v1Sts.PddInterval[1].String()})
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.Supplier) != 0 {
-		x, err := engine.NewFilterRule(engine.MetaPrefix, "Supplier", v1Sts.Supplier)
+		x, err := engine.NewFilterRule(utils.MetaPrefix, "Supplier", v1Sts.Supplier)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.DisconnectCause) != 0 {
-		x, err := engine.NewFilterRule(engine.MetaPrefix, "DisconnectCause", v1Sts.DisconnectCause)
+		x, err := engine.NewFilterRule(utils.MetaPrefix, "DisconnectCause", v1Sts.DisconnectCause)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.MediationRunIds) != 0 {
-		x, err := engine.NewFilterRule(engine.MetaPrefix, "MediationRunIds", v1Sts.MediationRunIds)
+		x, err := engine.NewFilterRule(utils.MetaPrefix, "MediationRunIds", v1Sts.MediationRunIds)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.RatedSubject) != 0 {
-		x, err := engine.NewFilterRule(engine.MetaPrefix, "RatedSubject", v1Sts.RatedSubject)
+		x, err := engine.NewFilterRule(utils.MetaPrefix, "RatedSubject", v1Sts.RatedSubject)
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	}
 	if len(v1Sts.CostInterval) == 1 {
-		x, err := engine.NewFilterRule(engine.MetaGreaterOrEqual, "CostInterval", []string{strconv.FormatFloat(v1Sts.CostInterval[0], 'f', 6, 64)})
+		x, err := engine.NewFilterRule(utils.MetaGreaterOrEqual, "CostInterval", []string{strconv.FormatFloat(v1Sts.CostInterval[0], 'f', 6, 64)})
 		if err != nil {
 			return nil, nil, nil, err
 		}
 		filters = append(filters, x)
 	} else if len(v1Sts.CostInterval) == 2 {
-		x, err := engine.NewFilterRule(engine.MetaLessThan, "CostInterval", []string{strconv.FormatFloat(v1Sts.CostInterval[1], 'f', 6, 64)})
+		x, err := engine.NewFilterRule(utils.MetaLessThan, "CostInterval", []string{strconv.FormatFloat(v1Sts.CostInterval[1], 'f', 6, 64)})
 		if err != nil {
 			return nil, nil, nil, err
 		}

@@ -73,11 +73,11 @@ func TestV1StatsAsStats(t *testing.T) {
 		}},
 	}
 
-	x, _ := engine.NewFilterRule(engine.MetaGreaterOrEqual, "SetupInterval", []string{v1Sts.SetupInterval[0].String()})
+	x, _ := engine.NewFilterRule(utils.MetaGreaterOrEqual, "SetupInterval", []string{v1Sts.SetupInterval[0].String()})
 	filters = append(filters, x)
-	x, _ = engine.NewFilterRule(engine.MetaGreaterOrEqual, "UsageInterval", []string{v1Sts.UsageInterval[0].String()})
+	x, _ = engine.NewFilterRule(utils.MetaGreaterOrEqual, "UsageInterval", []string{v1Sts.UsageInterval[0].String()})
 	filters = append(filters, x)
-	x, _ = engine.NewFilterRule(engine.MetaGreaterOrEqual, "PddInterval", []string{v1Sts.PddInterval[0].String()})
+	x, _ = engine.NewFilterRule(utils.MetaGreaterOrEqual, "PddInterval", []string{v1Sts.PddInterval[0].String()})
 	filters = append(filters, x)
 
 	filter := &engine.Filter{

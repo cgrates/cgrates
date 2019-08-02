@@ -829,10 +829,6 @@ func (account *Account) GetUniqueSharedGroupMembers(cd *CallDescriptor) (utils.S
 	return memberIds, nil
 }
 
-type TenantAccount struct {
-	Tenant, Account string
-}
-
 func (acc *Account) Clone() *Account {
 	newAcc := &Account{
 		ID:             acc.ID,

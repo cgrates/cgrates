@@ -187,7 +187,7 @@ func testITGetFilterIndexes(t *testing.T) {
 
 	if exsbjDan, err := dataManager.GetFilterIndexes(
 		utils.PrefixToIndexCache[utils.ResourceProfilesPrefix],
-		"cgrates.org", MetaString, sbjDan); err != nil {
+		"cgrates.org", utils.MetaString, sbjDan); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedsbjDan, exsbjDan) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedsbjDan, exsbjDan)
@@ -212,14 +212,14 @@ func testITMatchFilterIndex(t *testing.T) {
 	}
 	if rcvMp, err := dataManager.MatchFilterIndex(
 		utils.CacheResourceFilterIndexes, "cgrates.org",
-		MetaString, "Account", "1002"); err != nil {
+		utils.MetaString, "Account", "1002"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMp, rcvMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, rcvMp)
 	}
 	if _, err := dataManager.MatchFilterIndex(
 		utils.CacheResourceFilterIndexes, "cgrates.org",
-		MetaString, "NonexistentField", "1002"); err == nil ||
+		utils.MetaString, "NonexistentField", "1002"); err == nil ||
 		err != utils.ErrNotFound {
 		t.Error(err)
 	}
@@ -494,7 +494,7 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		utils.ConcatenatedKey("cgrates.org", "con3"))
 	if _, err := dataManager.GetFilterIndexes(
 		utils.PrefixToIndexCache[rfi.itemType], rfi.dbKeySuffix,
-		MetaString, nil); err != nil && err != utils.ErrNotFound {
+		utils.MetaString, nil); err != nil && err != utils.ErrNotFound {
 		t.Error(err)
 	}
 

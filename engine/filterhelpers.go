@@ -56,7 +56,7 @@ func MatchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 			i += 1
 		}
 		stringFieldVals := map[string]string{utils.ANY: utils.ANY} // cache here field string values, start with default one
-		filterIndexTypes := []string{MetaString, MetaPrefix, utils.META_NONE}
+		filterIndexTypes := []string{utils.MetaString, utils.MetaPrefix, utils.META_NONE}
 		for i, fieldIDs := range []*[]string{stringFldIDs, prefixFldIDs, nil} { // same routine for both string and prefix filter types
 			if filterIndexTypes[i] == utils.META_NONE {
 				fieldIDs = &[]string{utils.ANY} // so we can query DB for unindexed filters
@@ -75,7 +75,7 @@ func MatchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 				fldVal := stringFieldVals[fldName]
 				fldVals := []string{fldVal}
 				// default is only one fieldValue checked
-				if filterIndexTypes[i] == MetaPrefix {
+				if filterIndexTypes[i] == utils.MetaPrefix {
 					fldVals = utils.SplitPrefix(fldVal, 1) // all prefixes till last digit
 				}
 				if fldName != utils.META_ANY {

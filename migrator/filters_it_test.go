@@ -133,7 +133,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		ID:     "FLTR_2",
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
-				Type:      engine.MetaPrefix,
+				Type:      utils.MetaPrefix,
 				FieldName: "Account",
 				Values:    []string{"1001"},
 			},
@@ -144,7 +144,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		ID:     "FLTR_2",
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
-				Type:      engine.MetaPrefix,
+				Type:      utils.MetaPrefix,
 				FieldName: "~Account",
 				Values:    []string{"1001"},
 			},

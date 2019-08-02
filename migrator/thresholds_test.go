@@ -45,15 +45,15 @@ func Testv2ActionTriggerAsThreshold(t *testing.T) {
 		Executed:          false,
 		LastExecutionTime: time.Now(),
 	}
-	x, _ := engine.NewFilterRule(engine.MetaDestinations, "DestinationIDs", v2ATR.Balance.DestinationIDs.Slice())
+	x, _ := engine.NewFilterRule(utils.MetaDestinations, "DestinationIDs", v2ATR.Balance.DestinationIDs.Slice())
 	filters = append(filters, x)
-	x, _ = engine.NewFilterRule(engine.MetaPrefix, "RatingSubject", []string{*v2ATR.Balance.RatingSubject})
+	x, _ = engine.NewFilterRule(utils.MetaPrefix, "RatingSubject", []string{*v2ATR.Balance.RatingSubject})
 	filters = append(filters, x)
-	x, _ = engine.NewFilterRule(engine.MetaPrefix, "Categories", v2ATR.Balance.Categories.Slice())
+	x, _ = engine.NewFilterRule(utils.MetaPrefix, "Categories", v2ATR.Balance.Categories.Slice())
 	filters = append(filters, x)
-	x, _ = engine.NewFilterRule(engine.MetaPrefix, "SharedGroups", v2ATR.Balance.SharedGroups.Slice())
+	x, _ = engine.NewFilterRule(utils.MetaPrefix, "SharedGroups", v2ATR.Balance.SharedGroups.Slice())
 	filters = append(filters, x)
-	x, _ = engine.NewFilterRule(engine.MetaPrefix, "TimingIDs", v2ATR.Balance.TimingIDs.Slice())
+	x, _ = engine.NewFilterRule(utils.MetaPrefix, "TimingIDs", v2ATR.Balance.TimingIDs.Slice())
 	filters = append(filters, x)
 
 	filter := &engine.Filter{

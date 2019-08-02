@@ -1145,17 +1145,17 @@ func TestLoadFilters(t *testing.T) {
 			Filters: []*utils.TPFilter{
 				&utils.TPFilter{
 					FieldName: "Account",
-					Type:      "*string",
+					Type:      utils.MetaString,
 					Values:    []string{"1001", "1002"},
 				},
 				&utils.TPFilter{
 					FieldName: "Destination",
-					Type:      MetaPrefix,
+					Type:      utils.MetaPrefix,
 					Values:    []string{"10", "20"},
 				},
 				&utils.TPFilter{
 					FieldName: "",
-					Type:      "*rsr",
+					Type:      utils.MetaRSR,
 					Values:    []string{"Subject(~^1.*1$)", "Destination(1002)"},
 				},
 			},
@@ -1170,7 +1170,7 @@ func TestLoadFilters(t *testing.T) {
 			Filters: []*utils.TPFilter{
 				&utils.TPFilter{
 					FieldName: "Account",
-					Type:      "*string",
+					Type:      utils.MetaString,
 					Values:    []string{"dan"},
 				},
 			},
@@ -1185,7 +1185,7 @@ func TestLoadFilters(t *testing.T) {
 			Filters: []*utils.TPFilter{
 				&utils.TPFilter{
 					FieldName: "Destination",
-					Type:      "*destinations",
+					Type:      utils.MetaDestinations,
 					Values:    []string{"DST_DE"},
 				},
 			},
@@ -1200,7 +1200,7 @@ func TestLoadFilters(t *testing.T) {
 			Filters: []*utils.TPFilter{
 				&utils.TPFilter{
 					FieldName: "Destination",
-					Type:      "*destinations",
+					Type:      utils.MetaDestinations,
 					Values:    []string{"DST_NL"},
 				},
 			},

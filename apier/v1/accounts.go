@@ -20,7 +20,6 @@ package v1
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"strings"
 	"time"
@@ -31,11 +30,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type AttrAcntAction struct {
-	Tenant  string
-	Account string
-}
-
 type AccountActionTiming struct {
 	ActionPlanId string    // The id of the ActionPlanId profile attached to the account
 	Uuid         string    // The id to reference this particular ActionTiming
@@ -43,7 +37,7 @@ type AccountActionTiming struct {
 	NextExecTime time.Time // Next execution time
 }
 
-func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*AccountActionTiming) error {
+func (self *ApierV1) GetAccountActionPlan(attrs utils.TenantAccount, reply *[]*AccountActionTiming) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(strings.Join(missing, ","), "")
 	}
@@ -395,7 +389,7 @@ func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{
 
 // Get balance
 func (self *ApierV1) GetAccount(attr *utils.AttrGetAccount, reply *interface{}) error {
-	tag := fmt.Sprintf("%s:%s", attr.Tenant, attr.Account)
+	tag := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	userBalance, err := self.DataManager.DataDB().GetAccount(tag)
 	if err != nil {
 		return err

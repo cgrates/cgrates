@@ -162,22 +162,22 @@ func TestStatQueuesAddFilters(t *testing.T) {
 		ID:     "FLTR_STATS_1",
 		Rules: []*FilterRule{
 			{
-				Type:      MetaString,
+				Type:      utils.MetaString,
 				FieldName: "~Stats",
 				Values:    []string{"StatQueueProfile1"},
 			},
 			{
-				Type:      MetaGreaterOrEqual,
+				Type:      utils.MetaGreaterOrEqual,
 				FieldName: "~UsageInterval",
 				Values:    []string{(1 * time.Second).String()},
 			},
 			{
-				Type:      MetaGreaterOrEqual,
+				Type:      utils.MetaGreaterOrEqual,
 				FieldName: utils.DynamicDataPrefix + utils.Usage,
 				Values:    []string{(1 * time.Second).String()},
 			},
 			{
-				Type:      MetaGreaterOrEqual,
+				Type:      utils.MetaGreaterOrEqual,
 				FieldName: utils.DynamicDataPrefix + utils.Weight,
 				Values:    []string{"9.0"},
 			},
@@ -189,22 +189,22 @@ func TestStatQueuesAddFilters(t *testing.T) {
 		ID:     "FLTR_STATS_2",
 		Rules: []*FilterRule{
 			{
-				Type:      MetaString,
+				Type:      utils.MetaString,
 				FieldName: "~Stats",
 				Values:    []string{"StatQueueProfile2"},
 			},
 			{
-				Type:      MetaGreaterOrEqual,
+				Type:      utils.MetaGreaterOrEqual,
 				FieldName: "~PddInterval",
 				Values:    []string{(1 * time.Second).String()},
 			},
 			{
-				Type:      MetaGreaterOrEqual,
+				Type:      utils.MetaGreaterOrEqual,
 				FieldName: utils.DynamicDataPrefix + utils.Usage,
 				Values:    []string{(1 * time.Second).String()},
 			},
 			{
-				Type:      MetaGreaterOrEqual,
+				Type:      utils.MetaGreaterOrEqual,
 				FieldName: utils.DynamicDataPrefix + utils.Weight,
 				Values:    []string{"15.0"},
 			},
@@ -216,7 +216,7 @@ func TestStatQueuesAddFilters(t *testing.T) {
 		ID:     "FLTR_STATS_3",
 		Rules: []*FilterRule{
 			{
-				Type:      MetaPrefix,
+				Type:      utils.MetaPrefix,
 				FieldName: "~Stats",
 				Values:    []string{"StatQueueProfilePrefix"},
 			},

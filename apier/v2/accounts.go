@@ -20,7 +20,6 @@ package v2
 
 import (
 	"errors"
-	"fmt"
 	"math"
 
 	"github.com/cgrates/cgrates/config"
@@ -80,7 +79,7 @@ func (self *ApierV2) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.Ac
 
 // Get balance
 func (self *ApierV2) GetAccount(attr *utils.AttrGetAccount, reply *engine.Account) error {
-	tag := fmt.Sprintf("%s:%s", attr.Tenant, attr.Account)
+	tag := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	account, err := self.DataManager.DataDB().GetAccount(tag)
 	if err != nil {
 		return err

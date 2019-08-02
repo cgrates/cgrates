@@ -162,12 +162,12 @@ func TestThresholdsAddFilters(t *testing.T) {
 		ID:     "FLTR_TH_1",
 		Rules: []*FilterRule{
 			{
-				Type:      MetaString,
+				Type:      utils.MetaString,
 				FieldName: "~Threshold",
 				Values:    []string{"TH_1"},
 			},
 			{
-				Type:      MetaGreaterOrEqual,
+				Type:      utils.MetaGreaterOrEqual,
 				FieldName: utils.DynamicDataPrefix + utils.Weight,
 				Values:    []string{"9.0"},
 			},
@@ -179,12 +179,12 @@ func TestThresholdsAddFilters(t *testing.T) {
 		ID:     "FLTR_TH_2",
 		Rules: []*FilterRule{
 			{
-				Type:      MetaString,
+				Type:      utils.MetaString,
 				FieldName: "~Threshold",
 				Values:    []string{"TH_2"},
 			},
 			{
-				Type:      MetaGreaterOrEqual,
+				Type:      utils.MetaGreaterOrEqual,
 				FieldName: utils.DynamicDataPrefix + utils.Weight,
 				Values:    []string{"15.0"},
 			},
@@ -196,7 +196,7 @@ func TestThresholdsAddFilters(t *testing.T) {
 		ID:     "FLTR_TH_3",
 		Rules: []*FilterRule{
 			{
-				Type:      MetaPrefix,
+				Type:      utils.MetaPrefix,
 				FieldName: "~Threshold",
 				Values:    []string{"ThresholdPrefix"},
 			},

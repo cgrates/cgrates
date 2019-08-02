@@ -57,8 +57,8 @@ func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 func migrateFilterV1(fl *engine.Filter) *engine.Filter {
 	for i, rule := range fl.Rules {
 		if rule.FieldName == "" ||
-			utils.IsSliceMember([]string{engine.MetaRSR, engine.MetaStatS, engine.MetaResources,
-				engine.MetaNotRSR, engine.MetaNotStatS, engine.MetaNotResources}, rule.Type) ||
+			utils.IsSliceMember([]string{utils.MetaRSR, utils.MetaStatS, utils.MetaResources,
+				utils.MetaNotRSR, utils.MetaNotStatS, utils.MetaNotResources}, rule.Type) ||
 			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix) {
 			continue
 		}
@@ -76,8 +76,8 @@ func migrateInlineFilter(fl string) string {
 		return fl
 	}
 
-	if utils.IsSliceMember([]string{engine.MetaRSR, engine.MetaStatS, engine.MetaResources,
-		engine.MetaNotRSR, engine.MetaNotStatS, engine.MetaNotResources}, ruleSplt[0]) ||
+	if utils.IsSliceMember([]string{utils.MetaRSR, utils.MetaStatS, utils.MetaResources,
+		utils.MetaNotRSR, utils.MetaNotStatS, utils.MetaNotResources}, ruleSplt[0]) ||
 		strings.HasPrefix(ruleSplt[1], utils.DynamicDataPrefix) {
 		return fl
 	}

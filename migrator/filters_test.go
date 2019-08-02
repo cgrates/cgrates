@@ -65,7 +65,7 @@ func TestFiltersMigrate(t *testing.T) {
 				ID:     "FLTR_1",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      engine.MetaString,
+						Type:      utils.MetaString,
 						FieldName: "Account",
 						Values:    []string{},
 					},
@@ -76,7 +76,7 @@ func TestFiltersMigrate(t *testing.T) {
 				ID:     "FLTR_1",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      engine.MetaString,
+						Type:      utils.MetaString,
 						FieldName: "~Account",
 						Values:    []string{},
 					},
@@ -89,7 +89,7 @@ func TestFiltersMigrate(t *testing.T) {
 				ID:     "FLTR_2",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      engine.MetaPrefix,
+						Type:      utils.MetaPrefix,
 						FieldName: "~Account",
 						Values:    []string{},
 					},
@@ -100,7 +100,7 @@ func TestFiltersMigrate(t *testing.T) {
 				ID:     "FLTR_2",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      engine.MetaPrefix,
+						Type:      utils.MetaPrefix,
 						FieldName: "~Account",
 						Values:    []string{},
 					},
