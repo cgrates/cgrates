@@ -636,7 +636,7 @@ func removeAccountAction(ub *Account, a *Action, acs Actions, extraData interfac
 				return err
 			}
 		}
-		accID = utils.AccountKey(accountInfo.Tenant, accountInfo.Account)
+		accID = utils.ConcatenatedKey(accountInfo.Tenant, accountInfo.Account)
 	}
 	if accID == "" {
 		return utils.ErrInvalidKey

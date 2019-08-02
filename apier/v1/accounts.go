@@ -47,7 +47,7 @@ func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*Accoun
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(strings.Join(missing, ","), "")
 	}
-	acntID := utils.AccountKey(attrs.Tenant, attrs.Account)
+	acntID := utils.ConcatenatedKey(attrs.Tenant, attrs.Account)
 	acntATsIf, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		acntAPids, err := self.DataManager.DataDB().GetAccountActionPlans(acntID, false, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
@@ -100,7 +100,7 @@ func (self *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *str
 		if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 			return utils.NewErrMandatoryIeMissing(missing...)
 		}
-		accID = utils.AccountKey(attrs.Tenant, attrs.Account)
+		accID = utils.ConcatenatedKey(attrs.Tenant, attrs.Account)
 	}
 
 	var remAcntAPids []string // list of accounts who's indexes need modification
@@ -176,7 +176,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	accID := utils.AccountKey(attr.Tenant, attr.Account)
+	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	dirtyActionPlans := make(map[string]*engine.ActionPlan)
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		var ub *engine.Account
@@ -298,7 +298,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	dirtyActionPlans := make(map[string]*engine.ActionPlan)
-	accID := utils.AccountKey(attr.Tenant, attr.Account)
+	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		// remove it from all action plans
 		_, err := guardian.Guardian.Guard(func() (interface{}, error) {
@@ -448,7 +448,7 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 		}
 		expTime = &expTimeVal
 	}
-	accID := utils.AccountKey(attr.Tenant, attr.Account)
+	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	if _, err := self.DataManager.DataDB().GetAccount(accID); err != nil {
 		// create account if does not exist
 		account := &engine.Account{
@@ -531,7 +531,7 @@ func (self *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) error
 		}
 		expTime = &expTimeVal
 	}
-	accID := utils.AccountKey(attr.Tenant, attr.Account)
+	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	if _, err := self.DataManager.DataDB().GetAccount(accID); err != nil {
 		// create account if not exists
 		account := &engine.Account{
@@ -608,7 +608,7 @@ func (self *ApierV1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) e
 		}
 		expTime = &expTimeVal
 	}
-	accID := utils.AccountKey(attr.Tenant, attr.Account)
+	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	if _, err := self.DataManager.DataDB().GetAccount(accID); err != nil {
 		return utils.ErrNotFound
 	}

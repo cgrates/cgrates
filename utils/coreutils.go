@@ -325,10 +325,6 @@ func ParseDurationWithNanosecs(durStr string) (d time.Duration, err error) {
 	return time.ParseDuration(durStr)
 }
 
-func AccountKey(tenant, account string) string {
-	return fmt.Sprintf("%s:%s", tenant, account)
-}
-
 // returns the minimum duration between the two
 func MinDuration(d1, d2 time.Duration) time.Duration {
 	if d1 < d2 {
@@ -999,6 +995,6 @@ type RatingPlanCostArg struct {
 func WarnExecTime(startTime time.Time, logID string, maxDur time.Duration) {
 	totalDur := time.Since(startTime)
 	if totalDur > maxDur {
-		Logger.Warning(fmt.Sprintf("<%s> execution took: <%s>", totalDur))
+		Logger.Warning(fmt.Sprintf("<%s> execution took: <%s>", logID, totalDur))
 	}
 }

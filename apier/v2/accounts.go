@@ -106,7 +106,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	accID := utils.AccountKey(attr.Tenant, attr.Account)
+	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	dirtyActionPlans := make(map[string]*engine.ActionPlan)
 	var ub *engine.Account
 	var schedNeedsReload bool

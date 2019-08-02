@@ -157,7 +157,7 @@ func (self *ApierV2) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	accID := utils.AccountKey(attr.Tenant, attr.Account)
+	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	var account *engine.Account
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		if acc, err := self.DataManager.DataDB().GetAccount(accID); err == nil {
