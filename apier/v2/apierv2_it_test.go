@@ -146,7 +146,7 @@ func TestApierV2itSetAccountActionTriggers(t *testing.T) {
 		t.Error(err)
 	}
 	var ats engine.ActionTriggers
-	if err := apierRPC.Call("ApierV2.GetAccountActionTriggers", v1.AttrAcntAction{Tenant: "cgrates.org", Account: "dan"}, &ats); err != nil {
+	if err := apierRPC.Call("ApierV2.GetAccountActionTriggers", utils.TenantAccount{Tenant: "cgrates.org", Account: "dan"}, &ats); err != nil {
 		t.Error(err)
 	} else if len(ats) != 1 || ats[0].ID != *attrs.GroupID || ats[0].ThresholdValue != 50.0 {
 		t.Errorf("Received: %+v", ats)
@@ -155,7 +155,7 @@ func TestApierV2itSetAccountActionTriggers(t *testing.T) {
 	if err := apierRPC.Call("ApierV2.SetAccountActionTriggers", attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	if err := apierRPC.Call("ApierV2.GetAccountActionTriggers", v1.AttrAcntAction{Tenant: "cgrates.org", Account: "dan"}, &ats); err != nil {
+	if err := apierRPC.Call("ApierV2.GetAccountActionTriggers", utils.TenantAccount{Tenant: "cgrates.org", Account: "dan"}, &ats); err != nil {
 		t.Error(err)
 	} else if len(ats) != 1 || ats[0].ID != *attrs.GroupID || ats[0].ThresholdValue != 55.0 {
 		t.Errorf("Received: %+v", ats)
