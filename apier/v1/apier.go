@@ -36,10 +36,6 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-const (
-	OK = utils.OK
-)
-
 type ApierV1 struct {
 	StorDb      engine.LoadStorage
 	DataManager *engine.DataManager
@@ -161,7 +157,7 @@ func (self *ApierV1) SetDestination(attrs utils.AttrSetDestination, reply *strin
 	if err = self.DataManager.CacheDataFromDB(utils.REVERSE_DESTINATION_PREFIX, dest.Prefixes, true); err != nil {
 		return
 	}
-	*reply = OK
+	*reply = utils.OK
 	return nil
 }
 
@@ -185,7 +181,7 @@ func (self *ApierV1) ExecuteAction(attr *utils.AttrExecuteAction, reply *string)
 		*reply = err.Error()
 		return err
 	}
-	*reply = OK
+	*reply = utils.OK
 	return nil
 }
 
@@ -210,7 +206,7 @@ func (self *ApierV1) LoadDestination(attrs AttrLoadDestination, reply *string) e
 	if err := self.DataManager.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{attrs.ID}, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	*reply = OK
+	*reply = utils.OK
 	return nil
 }
 
@@ -232,7 +228,7 @@ func (self *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) err
 	} else if !loaded {
 		return utils.ErrNotFound
 	}
-	*reply = OK
+	*reply = utils.OK
 	return nil
 }
 
@@ -247,7 +243,7 @@ func (self *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *strin
 	if err := dbReader.LoadRatingProfilesFiltered(&attrs); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	*reply = OK
+	*reply = utils.OK
 	return nil
 }
 
@@ -267,7 +263,7 @@ func (self *ApierV1) LoadSharedGroup(attrs AttrLoadSharedGroup, reply *string) e
 	if err := dbReader.LoadSharedGroupsFiltered(attrs.SharedGroupId, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	*reply = OK
+	*reply = utils.OK
 	return nil
 }
 
@@ -292,12 +288,12 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	}
 	if attrs.Validate {
 		if !dbReader.IsValid() {
-			*reply = OK
+			*reply = utils.OK
 			return errors.New("invalid data")
 		}
 	}
 	if attrs.DryRun {
-		*reply = OK
+		*reply = utils.OK
 		return nil // Mission complete, no errors
 	}
 	if err := dbReader.WriteToDatabase(attrs.FlushDb, false, false); err != nil {
@@ -309,7 +305,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 		return utils.NewErrServerError(err)
 	}
 
-	*reply = OK
+	*reply = utils.OK
 	return nil
 }
 
@@ -391,7 +387,7 @@ func (self *ApierV1) SetRatingProfile(attrs utils.AttrSetRatingProfile, reply *s
 	if err := self.DataManager.SetLoadIDs(map[string]int64{utils.CacheRatingProfiles: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	*reply = OK
+	*reply = utils.OK
 	return nil
 }
 
@@ -532,7 +528,7 @@ func (self *ApierV1) SetActions(attrs V1AttrSetActions, reply *string) (err erro
 	if err := self.DataManager.SetLoadIDs(map[string]int64{utils.CacheActions: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	*reply = OK
+	*reply = utils.OK
 	return nil
 }
 
@@ -668,7 +664,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err 
 	if err := self.DataManager.SetLoadIDs(map[string]int64{utils.CacheActionPlans: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
-	*reply = OK
+	*reply = utils.OK
 	return nil
 }
 
@@ -751,7 +747,7 @@ func (self *ApierV1) RemoveActionPlan(attr AttrGetActionPlan, reply *string) (er
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACTION_PLAN_PREFIX); err != nil {
 		return err
 	}
-	*reply = OK
+	*reply = utils.OK
 	return nil
 }
 
@@ -774,7 +770,7 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 	if sched != nil {
 		sched.Reload()
 	}
-	*reply = OK
+	*reply = utils.OK
 	return nil
 }
 
@@ -802,7 +798,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		return utils.NewErrServerError(err)
 	}
 	if attrs.DryRun {
-		*reply = OK
+		*reply = utils.OK
 		return nil // Mission complete, no errors
 	}
 
@@ -851,7 +847,7 @@ func (self *ApierV1) RemoveTPFromFolder(attrs utils.AttrLoadTpFromFolder, reply 
 		return utils.NewErrServerError(err)
 	}
 	if attrs.DryRun {
-		*reply = OK
+		*reply = utils.OK
 		return nil // Mission complete, no errors
 	}
 
@@ -888,12 +884,12 @@ func (self *ApierV1) RemoveTPFromStorDB(attrs AttrLoadTpFromStorDb, reply *strin
 	}
 	if attrs.Validate {
 		if !dbReader.IsValid() {
-			*reply = OK
+			*reply = utils.OK
 			return errors.New("invalid data")
 		}
 	}
 	if attrs.DryRun {
-		*reply = OK
+		*reply = utils.OK
 		return nil // Mission complete, no errors
 	}
 	// remove data from Database
@@ -906,7 +902,7 @@ func (self *ApierV1) RemoveTPFromStorDB(attrs AttrLoadTpFromStorDb, reply *strin
 		return utils.NewErrServerError(err)
 	}
 
-	*reply = OK
+	*reply = utils.OK
 	return nil
 }
 

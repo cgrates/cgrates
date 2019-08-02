@@ -182,7 +182,7 @@ func (apier *ApierV1) ReloadCdreConfig(attrs AttrReloadConfig, reply *string) er
 	apier.Config.CdreProfiles = newCfg.CdreProfiles
 	apier.Config.ConfigReloads[utils.CDRE] <- cdreReloadStruct // Unlock reloads
 	utils.Logger.Info("<CDRE> Configuration reloaded")
-	*reply = OK
+	*reply = utils.OK
 	return nil
 }
 

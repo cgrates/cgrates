@@ -1088,12 +1088,12 @@ func TestApierSetAccountActionTriggers(t *testing.T) {
 	setReq := AttrSetAccountActionTriggers{Tenant: "cgrates.org", Account: "dan2", UniqueID: reply[0].UniqueID, ActivationDate: utils.StringPointer("2016-02-05T18:00:00Z")}
 	if err := rater.Call("ApierV1.ResetAccountActionTriggers", setReq, &setReply); err != nil {
 		t.Error("Got error on ApierV1.ResetActionTiming: ", err.Error())
-	} else if setReply != OK {
+	} else if setReply != utils.OK {
 		t.Error("Unexpected answer received", setReply)
 	}
 	if err := rater.Call("ApierV1.SetAccountActionTriggers", setReq, &setReply); err != nil {
 		t.Error("Got error on ApierV1.RemoveActionTiming: ", err.Error())
-	} else if setReply != OK {
+	} else if setReply != utils.OK {
 		t.Error("Unexpected answer received", setReply)
 	}
 	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
@@ -1120,12 +1120,12 @@ func TestApierRemAccountActionTriggers(t *testing.T) {
 	rmReq := AttrRemoveAccountActionTriggers{Tenant: "cgrates.org", Account: "dan2", UniqueID: reply[0].UniqueID}
 	if err := rater.Call("ApierV1.ResetAccountActionTriggers", rmReq, &rmReply); err != nil {
 		t.Error("Got error on ApierV1.ResetActionTiming: ", err.Error())
-	} else if rmReply != OK {
+	} else if rmReply != utils.OK {
 		t.Error("Unexpected answer received", rmReply)
 	}
 	if err := rater.Call("ApierV1.RemoveAccountActionTriggers", rmReq, &rmReply); err != nil {
 		t.Error("Got error on ApierV1.RemoveActionTiming: ", err.Error())
-	} else if rmReply != OK {
+	} else if rmReply != utils.OK {
 		t.Error("Unexpected answer received", rmReply)
 	}
 	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
@@ -1188,7 +1188,7 @@ func TestApierRemUniqueIDActionTiming(t *testing.T) {
 	rmReq := AttrRemoveActionTiming{ActionPlanId: "ATMS_1", Tenant: "cgrates.org", Account: "dan4"}
 	if err := rater.Call("ApierV1.RemoveActionTiming", rmReq, &rmReply); err != nil {
 		t.Error("Got error on ApierV1.RemoveActionTiming: ", err.Error())
-	} else if rmReply != OK {
+	} else if rmReply != utils.OK {
 		t.Error("Unexpected answer received", rmReply)
 	}
 	var reply []*AccountActionTiming
