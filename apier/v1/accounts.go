@@ -272,7 +272,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 			return 0, err
 		}
 		return 0, nil
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, accID)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+accID)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -327,7 +327,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 			return 0, err
 		}
 		return 0, nil
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, accID)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+accID)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

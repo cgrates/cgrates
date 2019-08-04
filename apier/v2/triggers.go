@@ -185,7 +185,7 @@ func (self *ApierV2) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 		}
 		account.ExecuteActionTriggers(nil)
 		return 0, self.DataManager.DataDB().SetAccount(account)
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, accID)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+accID)
 	if err != nil {
 		*reply = err.Error()
 		return err

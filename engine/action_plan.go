@@ -353,7 +353,7 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 				dm.DataDB().SetAccount(acc)
 			}
 			return 0, nil
-		}, config.CgrConfig().GeneralCfg().LockingTimeout, accID)
+		}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+accID)
 	}
 	//reset the error in case that the account is not found
 	err = nil
