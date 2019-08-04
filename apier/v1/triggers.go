@@ -98,7 +98,7 @@ func (self *ApierV1) AddAccountActionTriggers(attr AttrAddAccountActionTriggers,
 		}
 		account.InitCounters()
 		return 0, self.DataManager.DataDB().SetAccount(account)
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, accID)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+accID)
 	if err != nil {
 		*reply = err.Error()
 		return err
@@ -180,7 +180,7 @@ func (self *ApierV1) ResetAccountActionTriggers(attr AttrResetAccountActionTrigg
 			account.ExecuteActionTriggers(nil)
 		}
 		return 0, self.DataManager.DataDB().SetAccount(account)
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, accID)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+accID)
 	if err != nil {
 		*reply = err.Error()
 		return err
@@ -319,7 +319,7 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 		}
 		account.ExecuteActionTriggers(nil)
 		return 0, self.DataManager.DataDB().SetAccount(account)
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, accID)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+accID)
 	if err != nil {
 		*reply = err.Error()
 		return err
@@ -609,7 +609,7 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 		acnt.ActionTriggers = append(acnt.ActionTriggers, at)
 
 		return 0, self.DataManager.DataDB().SetAccount(acnt)
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, acntID)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+acntID)
 	if err != nil {
 		return err
 	}

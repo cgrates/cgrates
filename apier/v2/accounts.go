@@ -232,7 +232,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 		}
 		// All prepared, save account
 		return 0, self.DataManager.DataDB().SetAccount(ub)
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, accID)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+accID)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
