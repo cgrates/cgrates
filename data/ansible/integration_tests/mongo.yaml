@@ -1,0 +1,16 @@
+---
+- name: Add an apt key for MongoDB
+  apt_key:
+    url: https://www.mongodb.org/static/pgp/server-4.0.asc
+    state: present
+
+- name: Add apt repository for MongoDB
+  apt_repository:
+    repo: "deb http://repo.mongodb.org/apt/debian {{ ansible_distribution_release }}/mongodb-org/4.0 main"
+    filename: mongodb-org-4.0
+    update_cache: yes
+
+- name: Install MongoDB
+  apt:
+    name: "mongodb-org"
+    state: present

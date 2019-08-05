@@ -53,13 +53,13 @@
     apt:
       name: redis-server
 
-  - name: Install the mongo
-    apt:
-      name: mongodb-server
+  # - name: Install the mongo
+  #   apt:
+  #     name: mongodb-server
 
   - name: Install the mysql
     apt:
-      name: mysql-server
+      name: mariadb-server
 
   - name: Install the postgresql
     apt:
@@ -70,6 +70,8 @@
       name: postgresql-contrib
 
 ###########################################################################################################################
+  - name: Install mongo
+    include: mongo.yaml
 
   - name: Install kafka
     include: kafka.yaml
