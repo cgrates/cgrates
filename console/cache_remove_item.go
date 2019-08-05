@@ -26,7 +26,7 @@ func init() {
 	c := &CmdCacheRemoveItem{
 		name:      "cache_remove_item",
 		rpcMethod: utils.CacheSv1RemoveItem,
-		rpcParams: &utils.ArgsGetCacheItem{},
+		rpcParams: &utils.ArgsGetCacheItemWithArgDispatcher{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdCacheRemoveItem struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.ArgsGetCacheItem
+	rpcParams *utils.ArgsGetCacheItemWithArgDispatcher
 	*CommandExecuter
 }
 
@@ -50,7 +50,7 @@ func (self *CmdCacheRemoveItem) RpcMethod() string {
 
 func (self *CmdCacheRemoveItem) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.ArgsGetCacheItem{}
+		self.rpcParams = &utils.ArgsGetCacheItemWithArgDispatcher{}
 	}
 	return self.rpcParams
 }

@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -26,7 +28,7 @@ func init() {
 	c := &CmdCacheGetItemExpiryTime{
 		name:      "cache_item_expiry_time",
 		rpcMethod: utils.CacheSv1GetItemExpiryTime,
-		rpcParams: &utils.ArgsGetCacheItem{},
+		rpcParams: &utils.ArgsGetCacheItemWithArgDispatcher{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +38,7 @@ func init() {
 type CmdCacheGetItemExpiryTime struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.ArgsGetCacheItem
+	rpcParams *utils.ArgsGetCacheItemWithArgDispatcher
 	*CommandExecuter
 }
 
@@ -50,7 +52,7 @@ func (self *CmdCacheGetItemExpiryTime) RpcMethod() string {
 
 func (self *CmdCacheGetItemExpiryTime) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.ArgsGetCacheItem{}
+		self.rpcParams = &utils.ArgsGetCacheItemWithArgDispatcher{}
 	}
 	return self.rpcParams
 }
@@ -60,6 +62,6 @@ func (self *CmdCacheGetItemExpiryTime) PostprocessRpcParams() error {
 }
 
 func (self *CmdCacheGetItemExpiryTime) RpcResult() interface{} {
-	var reply string
+	var reply time.Time
 	return &reply
 }
