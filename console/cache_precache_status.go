@@ -20,13 +20,13 @@ package console
 
 import (
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/ltcache"
 )
 
 func init() {
 	c := &CmdGetPrecacheStatus{
 		name:      "cache_precache_status",
 		rpcMethod: utils.CacheSv1PrecacheStatus,
+		rpcParams: &utils.AttrCacheIDsWithArgDispatcher{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdGetPrecacheStatus struct {
 	name      string
 	rpcMethod string
-	rpcParams *StringSliceWrapper
+	rpcParams *utils.AttrCacheIDsWithArgDispatcher
 	*CommandExecuter
 }
 
@@ -50,7 +50,7 @@ func (self *CmdGetPrecacheStatus) RpcMethod() string {
 
 func (self *CmdGetPrecacheStatus) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(StringSliceWrapper)
+		self.rpcParams = new(utils.AttrCacheIDsWithArgDispatcher)
 	}
 	return self.rpcParams
 }
@@ -60,6 +60,6 @@ func (self *CmdGetPrecacheStatus) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetPrecacheStatus) RpcResult() interface{} {
-	reply := make(map[string]*ltcache.CacheStats)
+	reply := make(map[string]string)
 	return &reply
 }

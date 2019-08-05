@@ -27,6 +27,7 @@ func init() {
 	c := &CmdGetCacheStats{
 		name:      "cache_stats",
 		rpcMethod: utils.CacheSv1GetCacheStats,
+		rpcParams: &utils.AttrCacheIDsWithArgDispatcher{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +37,7 @@ func init() {
 type CmdGetCacheStats struct {
 	name      string
 	rpcMethod string
-	rpcParams *StringSliceWrapper
+	rpcParams *utils.AttrCacheIDsWithArgDispatcher
 	*CommandExecuter
 }
 
@@ -50,7 +51,7 @@ func (self *CmdGetCacheStats) RpcMethod() string {
 
 func (self *CmdGetCacheStats) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(StringSliceWrapper)
+		self.rpcParams = new(utils.AttrCacheIDsWithArgDispatcher)
 	}
 	return self.rpcParams
 }

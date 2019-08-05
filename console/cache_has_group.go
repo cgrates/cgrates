@@ -26,7 +26,7 @@ func init() {
 	c := &CmdCacheHasGroup{
 		name:      "cache_has_group",
 		rpcMethod: utils.CacheSv1HasGroup,
-		rpcParams: &utils.ArgsGetGroup{},
+		rpcParams: &utils.ArgsGetGroupWithArgDispatcher{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -36,7 +36,7 @@ func init() {
 type CmdCacheHasGroup struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.ArgsGetGroup
+	rpcParams *utils.ArgsGetGroupWithArgDispatcher
 	*CommandExecuter
 }
 
@@ -50,7 +50,7 @@ func (self *CmdCacheHasGroup) RpcMethod() string {
 
 func (self *CmdCacheHasGroup) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.ArgsGetGroup{}
+		self.rpcParams = &utils.ArgsGetGroupWithArgDispatcher{}
 	}
 	return self.rpcParams
 }

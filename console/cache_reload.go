@@ -24,6 +24,7 @@ func init() {
 	c := &CmdReloadCache{
 		name:      "cache_reload",
 		rpcMethod: utils.CacheSv1ReloadCache,
+		rpcParams: &utils.AttrReloadCacheWithArgDispatcher{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
