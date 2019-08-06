@@ -27,6 +27,6 @@ make deb:
 	dch -v "$(DEBIAN_PKG_VERSION)" -m "Package build for git commit $(GIT_COMMIT) ($(GIT_DATE))." -D "$(DISTRIBUTION)" ;\
 	dpkg-buildpackage -rfakeroot -tc; \
 	rm debian
-	git checkout jessie/changelog
+	git checkout debian/changelog
 
 .PHONY: deb squeeze
