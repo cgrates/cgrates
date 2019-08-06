@@ -994,3 +994,17 @@ func WarnExecTime(startTime time.Time, logID string, maxDur time.Duration) {
 		Logger.Warning(fmt.Sprintf("<%s> execution took: <%s>", logID, totalDur))
 	}
 }
+
+// endchan := LongExecTimeDetector("mesaj", 5*time.Second)
+// defer func() { close(endchan) }()
+func LongExecTimeDetector(logID string, maxDur time.Duration) (endchan chan struct{}) {
+	endchan = make(chan struct{}, 1)
+	go func() {
+		select {
+		case <-time.After(maxDur):
+			Logger.Warning(fmt.Sprintf("<%s> execution more than: <%s>", logID, maxDur))
+		case <-endchan:
+		}
+	}()
+	return
+}

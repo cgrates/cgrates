@@ -2400,7 +2400,7 @@ func (tps TPDispatcherProfiles) AsTPDispatcherProfiles() (result []*utils.TPDisp
 			tpDPP.Strategy = tp.Strategy
 		}
 		if tp.StrategyParameters != "" {
-			for _, param := range strings.Split(tp.FilterIDs, utils.INFIELD_SEP) {
+			for _, param := range strings.Split(tp.StrategyParameters, utils.INFIELD_SEP) {
 				tpDPP.StrategyParams = append(tpDPP.StrategyParams, param)
 			}
 		}
