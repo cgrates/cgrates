@@ -1,8 +1,9 @@
-cgrates (0.9.1~rc8) UNRELEASED; urgency=low
+cgrates (0.9.1~rc8+20190806152614+e7ec60e7f) nightly; urgency=low
 
   * RC8.
+  * Package build for git commit e7ec60e7f (20190806152614).
 
- -- DanB <danb@cgrates.org>  Mon, 22 Sep 2015 12:05:00 +0200
+ -- DanB <danb@cgrates.org>  Tue, 06 Aug 2019 16:06:31 +0300
 
 cgrates (0.9.1~rc7) UNRELEASED; urgency=low
 
