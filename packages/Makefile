@@ -12,38 +12,21 @@ ifeq ($(GIT_DATE),)
 	exit 1
 endif
 
-JESSIE_VERSION=$(shell dpkg-parsechangelog -S Version -ljessie/changelog 2> /dev/null)
+DEBIAN_VERSION=$(shell dpkg-parsechangelog -S Version -ldebian/changelog 2> /dev/null)
 
-ifeq ($(JESSIE_VERSION),)
-	echo "Error: Failed to extract version from jessie changelog"
+ifeq ($(DEBIAN_VERSION),)
+	echo "Error: Failed to extract version from debian changelog"
 	exit 1
 endif
 
-JESSIE_PKG_VERSION=$(JESSIE_VERSION)+$(GIT_DATE)+$(GIT_COMMIT)
-
-SQUEEZE_VERSION=$(shell dpkg-parsechangelog -S Version -lsqueeze/changelog 2> /dev/null)
-
-ifeq ($(SQUEEZE_VERSION),)
-	echo "Error: Failed to extract version from squeeze changelog"
-	exit 1
-endif
-
-SQUEEZE_PKG_VERSION=$(SQUEEZE_VERSION)+$(GIT_DATE)+$(GIT_COMMIT)
+DEBIAN_PKG_VERSION=$(DEBIAN_VERSION)+$(GIT_DATE)+$(GIT_COMMIT)
 
 make deb:
 	cd ..;\
-	ln -sf packages/jessie debian ;\
-	dch -v "$(JESSIE_PKG_VERSION)" -m "Package build for git commit $(GIT_COMMIT) ($(GIT_DATE))." -D "$(DISTRIBUTION)" ;\
+	ln -sf packages/debian debian ;\
+	dch -v "$(DEBIAN_PKG_VERSION)" -m "Package build for git commit $(GIT_COMMIT) ($(GIT_DATE))." -D "$(DISTRIBUTION)" ;\
 	dpkg-buildpackage -rfakeroot -tc; \
 	rm debian
 	git checkout jessie/changelog
-
-make squeeze:
-	cd ..;\
-	ln -sf packages/squeeze debian ;\
-	dch -v "$(SQUEEZE_PKG_VERSION)" -m "Package build for git commit $(GIT_COMMIT) ($(GIT_DATE))." -D "$(DISTRIBUTION)" ;\
-	dpkg-buildpackage -rfakeroot -tc; \
-	rm debian
-	git checkout squeeze/changelog
 
 .PHONY: deb squeeze
