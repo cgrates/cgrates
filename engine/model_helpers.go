@@ -2588,9 +2588,15 @@ func APItoDispatcherProfile(tpDPP *utils.TPDispatcherProfile, timezone string) (
 			dpp.Hosts[i].FilterIDs[j] = fltr
 		}
 		for j, param := range conn.Params {
-			if param != "" {
-				dpp.Hosts[i].Params[strconv.Itoa(j)] = param
+			if param == "" {
+				continue
 			}
+			if p := strings.SplitN(utils.IfaceAsString(param), utils.CONCATENATED_KEY_SEP, 2); len(p) == 1 {
+				dpp.Hosts[i].Params[strconv.Itoa(j)] = p[0]
+			} else {
+				dpp.Hosts[i].Params[p[0]] = p[1]
+			}
+
 		}
 	}
 	if tpDPP.ActivationInterval != nil {
