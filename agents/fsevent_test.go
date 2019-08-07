@@ -976,7 +976,7 @@ variable_rtp_audio_rtcp_octet_count: 0`
 	sessions.GetSetCGRID(smGev)
 	smCDR, err := smGev.AsCDR(fsCdrCfg, utils.EmptyString, timezone)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	fsCDR := fsCdr.AsCDR(timezone)
 	if fsCDR.CGRID != smCDR.CGRID {

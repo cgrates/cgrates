@@ -39,7 +39,7 @@ func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connA
 		if rpcConnCfg.Address == utils.MetaInternal {
 			rpcClient, err = rpcclient.NewRpcClient("", "", rpcConnCfg.TLS, keyPath, certPath, caPath, connAttempts,
 				reconnects, connectTimeout, replyTimeout, rpcclient.INTERNAL_RPC, internalConnChan, lazyConnect)
-		} else if utils.IsSliceMember([]string{utils.MetaJSONrpc, utils.MetaGOBrpc, ""}, rpcConnCfg.Transport) {
+		} else if utils.SliceHasMember([]string{utils.EmptyString, utils.MetaGOBrpc, utils.MetaJSONrpc}, rpcConnCfg.Transport) {
 			codec := utils.GOB
 			if rpcConnCfg.Transport != "" {
 				codec = rpcConnCfg.Transport[1:] // Transport contains always * before codec understood by rpcclient

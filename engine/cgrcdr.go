@@ -51,7 +51,7 @@ func (cgrCdr CgrCdr) getCGRID(timezone string) string {
 func (cgrCdr CgrCdr) getExtraFields() map[string]string {
 	extraFields := make(map[string]string)
 	for k, v := range cgrCdr {
-		if _, has := utils.MainCDRFieldsMap[k]; !has {
+		if !utils.MainCDRFields.Has(k) {
 			extraFields[k] = v
 		}
 	}

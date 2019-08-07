@@ -18,19 +18,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-import "sort"
-
 var (
-	CDRExportFormats = []string{DRYRUN, MetaFileCSV, MetaFileFWV, MetaHTTPjsonCDR, MetaHTTPjsonMap,
+	CDRExportFormats = NewStringSet([]string{DRYRUN, MetaFileCSV, MetaFileFWV, MetaHTTPjsonCDR, MetaHTTPjsonMap,
 		MetaHTTPjson, META_HTTP_POST, MetaAMQPjsonCDR, MetaAMQPjsonMap, MetaAMQPV1jsonMap, MetaSQSjsonMap,
-		MetaKafkajsonMap, MetaS3jsonMap}
-	MainCDRFields = []string{CGRID, Source, OriginHost, OriginID, ToR, RequestType, Tenant, Category,
+		MetaKafkajsonMap, MetaS3jsonMap})
+	MainCDRFields = NewStringSet([]string{CGRID, Source, OriginHost, OriginID, ToR, RequestType, Tenant, Category,
 		Account, Subject, Destination, SetupTime, AnswerTime, Usage, COST, RATED, Partial, RunID,
-		PreRated, CostSource, CostDetails, ExtraInfo, OrderID}
-	CDRCFileFormats = []string{MetaFileCSV, MetaFScsv,
-		MetaKamFlatstore, MetaOsipsFlatstore, MetaPartialCSV, MetaFileFWV, MetaFileXML}
+		PreRated, CostSource, CostDetails, ExtraInfo, OrderID})
+	CDRCFileFormats = NewStringSet([]string{MetaFileCSV, MetaFScsv,
+		MetaKamFlatstore, MetaOsipsFlatstore, MetaPartialCSV, MetaFileFWV, MetaFileXML})
 	PostPaidRatedSlice = []string{META_POSTPAID, META_RATED}
-	MainCDRFieldsMap   StringMap
 
 	GitLastLog                  string // If set, it will be processed as part of versioning
 	PosterTransportContentTypes = map[string]string{
@@ -1194,15 +1191,7 @@ func buildCacheIndexesToPrefix() {
 	}
 }
 
-// sortStringSlices makes sure the slices are string sorted
-// so we can search inside using SliceHasMember
-func sortStringSlices() {
-	sort.Strings(CDRExportFormats)
-}
-
 func init() {
-	sortStringSlices()
 	buildCacheInstRevPrefixes()
 	buildCacheIndexesToPrefix()
-	MainCDRFieldsMap = NewStringMap(MainCDRFields...)
 }

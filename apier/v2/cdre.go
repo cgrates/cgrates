@@ -65,7 +65,7 @@ func (self *ApierV2) ExportCdrsToFile(attr AttrExportCdrsToFile, reply *Exported
 	if attr.CdrFormat != nil && len(*attr.CdrFormat) != 0 {
 		exportFormat = strings.ToLower(*attr.CdrFormat)
 	}
-	if !utils.IsSliceMember(utils.CDRExportFormats, exportFormat) {
+	if !utils.CDRExportFormats.Has(exportFormat) {
 		return utils.NewErrMandatoryIeMissing("CdrFormat")
 	}
 	fieldSep := exportTemplate.FieldSeparator

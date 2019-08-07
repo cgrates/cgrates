@@ -54,12 +54,14 @@ func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 	return
 }
 
+var filterTypes = utils.NewStringSet([]string{utils.MetaRSR, utils.MetaStatS, utils.MetaResources,
+	utils.MetaNotRSR, utils.MetaNotStatS, utils.MetaNotResources})
+
 func migrateFilterV1(fl *engine.Filter) *engine.Filter {
 	for i, rule := range fl.Rules {
 		if rule.FieldName == "" ||
-			utils.IsSliceMember([]string{utils.MetaRSR, utils.MetaStatS, utils.MetaResources,
-				utils.MetaNotRSR, utils.MetaNotStatS, utils.MetaNotResources}, rule.Type) ||
-			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix) {
+			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix) ||
+			filterTypes.Has(rule.Type) {
 			continue
 		}
 		fl.Rules[i].FieldName = utils.DynamicDataPrefix + rule.FieldName
@@ -76,9 +78,8 @@ func migrateInlineFilter(fl string) string {
 		return fl
 	}
 
-	if utils.IsSliceMember([]string{utils.MetaRSR, utils.MetaStatS, utils.MetaResources,
-		utils.MetaNotRSR, utils.MetaNotStatS, utils.MetaNotResources}, ruleSplt[0]) ||
-		strings.HasPrefix(ruleSplt[1], utils.DynamicDataPrefix) {
+	if strings.HasPrefix(ruleSplt[1], utils.DynamicDataPrefix) ||
+		filterTypes.Has(ruleSplt[0]) {
 		return fl
 	}
 	return fmt.Sprintf("%s:~%s:%s", ruleSplt[0], ruleSplt[1], strings.Join(ruleSplt[2:], utils.InInFieldSep))

@@ -47,8 +47,8 @@ const (
 )
 
 var (
-	kamReservedEventFields = []string{EVENT, KamTRIndex, KamTRLabel, utils.CGRFlags, KamReplyRoute}
-	kamReservedCDRFields   = append(kamReservedEventFields, KamHashEntry, KamHashID) // HashEntry and id are needed in events for disconnects
+	kamReservedEventFields = utils.NewStringSet([]string{EVENT, KamTRIndex, KamTRLabel, utils.CGRFlags, KamReplyRoute})
+	// kamReservedCDRFields   = append(kamReservedEventFields, KamHashEntry, KamHashID) // HashEntry and id are needed in events for disconnects
 )
 
 func NewKamSessionDisconnect(hEntry, hID, reason string) *KamSessionDisconnect {
@@ -140,7 +140,7 @@ func (kev KamEvent) AsMapStringInterface() (mp map[string]interface{}) {
 		if k == utils.Usage {
 			v += "s" // mark the Usage as seconds
 		}
-		if !utils.IsSliceMember(kamReservedEventFields, k) { // reserved attributes not getting into event
+		if !kamReservedEventFields.Has(k) { // reserved attributes not getting into event
 			mp[k] = v
 		}
 	}

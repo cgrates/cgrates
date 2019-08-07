@@ -233,7 +233,7 @@ func (rs *RedisStorage) IsDBEmpty() (resp bool, err error) {
 }
 
 func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) (err error) {
-	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
+	if !utils.SliceHasMember([]string{utils.AccountActionPlansPrefix, utils.REVERSE_DESTINATION_PREFIX}, prefix) {
 		return utils.ErrInvalidKey
 	}
 	var keys []string
@@ -280,7 +280,7 @@ func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) (err error) {
 }
 
 func (rs *RedisStorage) RemoveReverseForPrefix(prefix string) (err error) {
-	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
+	if !utils.SliceHasMember([]string{utils.AccountActionPlansPrefix, utils.REVERSE_DESTINATION_PREFIX}, prefix) {
 		return utils.ErrInvalidKey
 	}
 	var keys []string

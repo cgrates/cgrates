@@ -259,54 +259,17 @@ func TestMapEventAsMapString(t *testing.T) {
 		"test4": "true",
 		"test5": "test",
 	}
-	mpIgnore := utils.StringMap{
-		"test6": true,
-		"test7": false,
-		"test8": true,
-		"test9": false,
-	}
-	if rply, err := mapEv.AsMapString(mpIgnore); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting %+v, received: %+v", expected, rply)
-	}
-	var mp MapEvent
-	mp = nil
-	if rply, err := mp.AsMapString(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(map[string]string{}, rply) {
-		t.Errorf("Expecting %+v, received: %+v", map[string]string{}, rply)
-	}
-	if rply, err := mp.AsMapString(mpIgnore); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(map[string]string{}, rply) {
-		t.Errorf("Expecting %+v, received: %+v", map[string]string{}, rply)
-	}
-}
+	mpIgnore := utils.NewStringSet([]string{"test6", "test7", "test8", "test9"})
 
-func TestMapEventAsMapStringIgnoreErrors(t *testing.T) {
-	expected := map[string]string{
-		"test1": utils.EmptyString,
-		"test2": "42",
-		"test3": "42.3",
-		"test4": "true",
-		"test5": "test",
-	}
-	mpIgnore := utils.StringMap{
-		"test6": true,
-		"test7": true,
-		"test8": true,
-		"test9": true,
-	}
-	if rply := mapEv.AsMapStringIgnoreErrors(mpIgnore); !reflect.DeepEqual(expected, rply) {
+	if rply := mapEv.AsMapString(mpIgnore); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
 	var mp MapEvent
 	mp = nil
-	if rply := mp.AsMapStringIgnoreErrors(nil); !reflect.DeepEqual(map[string]string{}, rply) {
+	if rply := mp.AsMapString(nil); !reflect.DeepEqual(map[string]string{}, rply) {
 		t.Errorf("Expecting %+v, received: %+v", map[string]string{}, rply)
 	}
-	if rply := mp.AsMapStringIgnoreErrors(mpIgnore); !reflect.DeepEqual(map[string]string{}, rply) {
+	if rply := mp.AsMapString(mpIgnore); !reflect.DeepEqual(map[string]string{}, rply) {
 		t.Errorf("Expecting %+v, received: %+v", map[string]string{}, rply)
 	}
 }

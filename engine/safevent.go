@@ -240,18 +240,9 @@ func (se *SafEvent) AsMapInterface() (mp map[string]interface{}) {
 
 // AsMapString returns a map[string]string out of mp, ignoring specific fields if needed
 // most used when needing to export extraFields
-func (se *SafEvent) AsMapString(ignoredFlds utils.StringMap) (mp map[string]string, err error) {
+func (se *SafEvent) AsMapString(ignoredFlds *utils.StringSet) (mp map[string]string) {
 	se.RLock()
-	mp, err = se.Me.AsMapString(ignoredFlds)
-	se.RUnlock()
-	return
-}
-
-// AsMapString returns a map[string]string out of mp, ignoring specific fields if needed
-// most used when needing to export extraFields
-func (se *SafEvent) AsMapStringIgnoreErrors(ignoredFlds utils.StringMap) (mp map[string]string) {
-	se.RLock()
-	mp = se.Me.AsMapStringIgnoreErrors(ignoredFlds)
+	mp = se.Me.AsMapString(ignoredFlds)
 	se.RUnlock()
 	return
 }

@@ -353,6 +353,11 @@ type CGRConfig struct {
 	apier            *ApierCfg
 }
 
+var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
+	utils.MetaResources, utils.MetaFilters, utils.MetaStats,
+	utils.MetaSuppliers, utils.MetaThresholds, utils.MetaChargers,
+	utils.MetaDispatchers, utils.MetaDispatcherHosts})
+
 func (self *CGRConfig) checkConfigSanity() error {
 	// Rater checks
 	if self.ralsCfg.RALsEnabled && !self.dispatcherSCfg.Enabled {
@@ -457,10 +462,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, data := range ldrSCfg.Data {
-			if !utils.IsSliceMember([]string{utils.MetaAttributes,
-				utils.MetaResources, utils.MetaFilters, utils.MetaStats,
-				utils.MetaSuppliers, utils.MetaThresholds, utils.MetaChargers,
-				utils.MetaDispatchers, utils.MetaDispatcherHosts}, data.Type) {
+			if !posibleLoaderTypes.Has(data.Type) {
 				return fmt.Errorf("<%s> unsupported data type %s", utils.LoaderS, data.Type)
 			}
 
@@ -636,11 +638,11 @@ func (self *CGRConfig) checkConfigSanity() error {
 				}
 			}
 		}
-		if !utils.IsSliceMember([]string{utils.MetaUrl, utils.MetaXml}, httpAgentCfg.RequestPayload) {
+		if !utils.SliceHasMember([]string{utils.MetaUrl, utils.MetaXml}, httpAgentCfg.RequestPayload) {
 			return fmt.Errorf("<%s> unsupported request payload %s",
 				utils.HTTPAgent, httpAgentCfg.RequestPayload)
 		}
-		if !utils.IsSliceMember([]string{utils.MetaXml, utils.MetaTextPlain}, httpAgentCfg.ReplyPayload) {
+		if !utils.SliceHasMember([]string{utils.MetaTextPlain, utils.MetaXml}, httpAgentCfg.ReplyPayload) {
 			return fmt.Errorf("<%s> unsupported reply payload %s",
 				utils.HTTPAgent, httpAgentCfg.ReplyPayload)
 		}

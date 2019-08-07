@@ -394,7 +394,7 @@ func (cdre *CDRExporter) processCDRs() (err error) {
 			}
 		}
 		if cdre.synchronous ||
-			utils.IsSliceMember([]string{utils.MetaFileCSV, utils.MetaFileFWV}, cdre.exportFormat) {
+			utils.SliceHasMember([]string{utils.MetaFileCSV, utils.MetaFileFWV}, cdre.exportFormat) {
 			wg.Add(1) // wait for synchronous or file ones since these need to be done before continuing
 		}
 		go func(cdre *CDRExporter, cdr *CDR) {
@@ -408,7 +408,7 @@ func (cdre *CDRExporter) processCDRs() (err error) {
 				cdre.Unlock()
 			}
 			if cdre.synchronous ||
-				utils.IsSliceMember([]string{utils.MetaFileCSV, utils.MetaFileFWV}, cdre.exportFormat) {
+				utils.SliceHasMember([]string{utils.MetaFileCSV, utils.MetaFileFWV}, cdre.exportFormat) {
 				wg.Done()
 			}
 		}(cdre, cdr)
@@ -484,7 +484,7 @@ func (cdre *CDRExporter) ExportCDRs() (err error) {
 	if err = cdre.processCDRs(); err != nil {
 		return
 	}
-	if utils.IsSliceMember([]string{utils.MetaFileCSV, utils.MetaFileFWV}, cdre.exportFormat) { // files are written after processing all CDRs
+	if utils.SliceHasMember([]string{utils.MetaFileCSV, utils.MetaFileFWV}, cdre.exportFormat) { // files are written after processing all CDRs
 		cdre.RLock()
 		contLen := len(cdre.content)
 		cdre.RUnlock()

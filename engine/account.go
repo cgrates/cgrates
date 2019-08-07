@@ -1136,7 +1136,7 @@ func (acnt *Account) AsNavigableMap(_ []*config.FCTemplate) (*config.NavigableMa
 }
 
 func NewAccountSummaryFromJSON(jsn string) (acntSummary *AccountSummary, err error) {
-	if !utils.IsSliceMember([]string{"", "null"}, jsn) { // Unmarshal only when content
+	if !utils.SliceHasMember([]string{"", "null"}, jsn) { // Unmarshal only when content
 		json.Unmarshal([]byte(jsn), &acntSummary)
 	}
 	return

@@ -156,8 +156,7 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 	// set stored cdr values
 	var cdrs []*CDR
 	for _, action := range acs {
-		if !utils.IsSliceMember([]string{utils.DEBIT, utils.DEBIT_RESET,
-			utils.TOPUP, utils.TOPUP_RESET, utils.SET_BALANCE}, action.ActionType) ||
+		if !utils.SliceHasMember([]string{utils.DEBIT, utils.DEBIT_RESET, utils.SET_BALANCE, utils.TOPUP, utils.TOPUP_RESET}, action.ActionType) ||
 			action.Balance == nil {
 			continue // Only log specific actions
 		}

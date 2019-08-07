@@ -622,47 +622,12 @@ func TestSafEventAsMapString(t *testing.T) {
 			safEv.Remove("test9")
 		})
 	}
-	var expected map[string]string
-	if expected, err = safEv.Me.AsMapString(nil); err != nil {
-		t.Error(err)
-	}
-	if rply, err := safEv.AsMapString(nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, rply) {
+	expected := safEv.Me.AsMapString(nil)
+	if rply := safEv.AsMapString(nil); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
 	delete(expected, "test1")
-	if rply, err := safEv.AsMapString(utils.StringMap{"test1": true}); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting %+v, received: %+v", expected, rply)
-	}
-}
-
-func TestSafEventAsMapStringIgnoreErrors(t *testing.T) {
-	for i := 0; i < 10; i++ {
-		t.Run("asMapStr", func(t *testing.T) {
-			t.Parallel()
-			safEv.AsMapStringIgnoreErrors(nil)
-		})
-		t.Run("set", func(t *testing.T) {
-			t.Parallel()
-			safEv.Set("test9", true)
-		})
-		t.Run("remove", func(t *testing.T) {
-			t.Parallel()
-			safEv.Remove("test9")
-		})
-	}
-	var expected map[string]string
-	if expected, err = safEv.Me.AsMapString(nil); err != nil {
-		t.Error(err)
-	}
-	if rply := safEv.AsMapStringIgnoreErrors(nil); !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting %+v, received: %+v", expected["test8"], rply["test8"])
-	}
-	delete(expected, "test1")
-	if rply := safEv.AsMapStringIgnoreErrors(utils.StringMap{"test1": true}); !reflect.DeepEqual(expected, rply) {
+	if rply := safEv.AsMapString(utils.NewStringSet([]string{"test1"})); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
 }

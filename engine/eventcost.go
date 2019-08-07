@@ -297,7 +297,7 @@ func (ec *EventCost) AsCallCost() *CallCost {
 						}
 					}
 				}
-				if utils.IsSliceMember([]string{utils.VOICE, utils.DATA}, balanceType) && cBC.ExtraChargeID == "" {
+				if utils.SliceHasMember([]string{utils.DATA, utils.VOICE}, balanceType) && cBC.ExtraChargeID == "" {
 					cBC.ExtraChargeID = utils.META_NONE // mark the balance to be exported as Unit type
 				}
 				if cBC.ExtraChargeID != "" { // have both monetary and data

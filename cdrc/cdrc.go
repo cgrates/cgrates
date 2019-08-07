@@ -65,14 +65,13 @@ func NewCdrc(cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool, cdrs rpcclient.R
 		maxOpenFiles:     make(chan struct{}, cdrcCfg.MaxOpenFiles),
 	}
 	// Before processing, make sure in and out folders exist
-	if utils.IsSliceMember(utils.CDRCFileFormats, cdrcCfg.CdrFormat) {
+	if utils.CDRCFileFormats.Has(cdrcCfg.CdrFormat) {
 		for _, dir := range []string{cdrcCfg.CDRInPath, cdrcCfg.CDROutPath} {
 			if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
 				return nil, fmt.Errorf("<CDRC> nonexistent folder: %s", dir)
 			}
 		}
-	}
-	if utils.IsSliceMember(utils.CDRCFileFormats, cdrcCfg.CdrFormat) {
+
 		var processFile struct{}
 		for i := 0; i < cdrcCfg.MaxOpenFiles; i++ {
 			cdrc.maxOpenFiles <- processFile // Empty initiate so we do not need to wait later when we pop
