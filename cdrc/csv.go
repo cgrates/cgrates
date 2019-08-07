@@ -71,7 +71,7 @@ func (self *CsvRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
 		return nil, err
 	}
 	self.processedRecordsNr += 1
-	if utils.IsSliceMember([]string{utils.MetaKamFlatstore, utils.MetaOsipsFlatstore}, self.dfltCdrcCfg.CdrFormat) {
+	if utils.SliceHasMember([]string{utils.MetaKamFlatstore, utils.MetaOsipsFlatstore}, self.dfltCdrcCfg.CdrFormat) {
 		if record, err = self.processFlatstoreRecord(record); err != nil {
 			return nil, err
 		} else if record == nil {
@@ -159,7 +159,7 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 				continue
 			}
 		}
-		if utils.IsSliceMember([]string{utils.MetaKamFlatstore, utils.MetaOsipsFlatstore}, self.dfltCdrcCfg.CdrFormat) { // Hardcode some values in case of flatstore
+		if utils.SliceHasMember([]string{utils.MetaKamFlatstore, utils.MetaOsipsFlatstore}, self.dfltCdrcCfg.CdrFormat) { // Hardcode some values in case of flatstore
 			switch cdrFldCfg.FieldId {
 			case utils.OriginID:
 				cdrFldCfg.Value = config.NewRSRParsersMustCompile("~3;~1;~2", true, utils.INFIELD_SEP) // in case of flatstore, accounting id is made up out of callid, from_tag and to_tag

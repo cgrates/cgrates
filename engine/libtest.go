@@ -317,7 +317,7 @@ func InitStorDb(cfg *config.CGRConfig) error {
 		cfg.StorDbCfg().StorDBType)); err != nil {
 		return err
 	}
-	if utils.IsSliceMember([]string{utils.MYSQL, utils.POSTGRES, utils.MONGO},
+	if utils.IsSliceMember([]string{utils.MONGO, utils.MYSQL, utils.POSTGRES},
 		cfg.StorDbCfg().StorDBType) {
 		if err := SetDBVersions(storDb); err != nil {
 			return err

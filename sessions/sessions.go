@@ -1117,7 +1117,7 @@ func (sS *SessionS) forkSession(s *Session) (err error) {
 				Destination: me.GetStringIgnoreErrors(utils.Destination),
 				TimeStart:   startTime,
 				TimeEnd:     startTime.Add(s.EventStart.GetDurationIgnoreErrors(utils.Usage)),
-				ExtraFields: me.AsMapStringIgnoreErrors(utils.NewStringMap(utils.MainCDRFields...)),
+				ExtraFields: me.AsMapString(utils.MainCDRFields),
 			},
 		}
 	}
@@ -1517,7 +1517,7 @@ func (sS *SessionS) chargeEvent(tnt string, ev *engine.SafEvent, argDisp *utils.
 		return
 	}
 	usage := maxUsage
-	if utils.IsSliceMember(utils.PostPaidRatedSlice, ev.GetStringIgnoreErrors(utils.RequestType)) {
+	if utils.SliceHasMember(utils.PostPaidRatedSlice, ev.GetStringIgnoreErrors(utils.RequestType)) {
 		usage = ev.GetDurationIgnoreErrors(utils.Usage)
 	}
 	//in case of postpaid and rated maxUsage = usage from event

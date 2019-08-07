@@ -149,7 +149,7 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithArgDispatcher) ([]*CDR, error) {
 	cdr.ExtraInfo = "" // Clean previous ExtraInfo, useful when re-rating
 	var cdrsRated []*CDR
 	_, hasLastUsed := cdr.ExtraFields[utils.LastUsed]
-	if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, cdr.RequestType) &&
+	if utils.SliceHasMember([]string{utils.META_PREPAID, utils.PREPAID}, cdr.RequestType) &&
 		(cdr.Usage != 0 || hasLastUsed) { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
 		// Should be previously calculated and stored in DB
 		fib := utils.Fib()
@@ -200,6 +200,9 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithArgDispatcher) ([]*CDR, error) {
 	return []*CDR{cdr.CDR}, nil
 }
 
+var reqTypes = utils.NewStringSet([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.META_PREPAID,
+	utils.PSEUDOPREPAID, utils.POSTPAID, utils.PREPAID})
+
 // getCostFromRater will retrieve the cost from RALs
 func (cdrS *CDRServer) getCostFromRater(cdr *CDRWithArgDispatcher) (*CallCost, error) {
 	cc := new(CallCost)
@@ -220,8 +223,7 @@ func (cdrS *CDRServer) getCostFromRater(cdr *CDRWithArgDispatcher) (*CallCost, e
 		DurationIndex:   cdr.Usage,
 		PerformRounding: true,
 	}
-	if utils.IsSliceMember([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.META_PREPAID,
-		utils.PSEUDOPREPAID, utils.POSTPAID, utils.PREPAID}, cdr.RequestType) { // Prepaid - Cost can be recalculated in case of missing records from SM
+	if reqTypes.Has(cdr.RequestType) { // Prepaid - Cost can be recalculated in case of missing records from SM
 		err = cdrS.rals.Call(utils.ResponderDebit,
 			&CallDescriptorWithArgDispatcher{CallDescriptor: cd,
 				ArgDispatcher: cdr.ArgDispatcher}, cc)
@@ -468,7 +470,7 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDRWithArgDispatcher, reply *string) (e
 	if !cdr.PreRated { // Enforce the RunID if CDR is not rated
 		cdr.RunID = utils.MetaRaw
 	}
-	if utils.IsSliceMember([]string{"", utils.MetaRaw}, cdr.RunID) {
+	if utils.SliceHasMember([]string{"", utils.MetaRaw}, cdr.RunID) {
 		cdr.Cost = -1.0
 	}
 	cgrEv := &utils.CGREventWithArgDispatcher{
@@ -505,7 +507,7 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDRWithArgDispatcher, reply *string) (e
 		go cdrS.statSProcessEvent(cgrEv)
 	}
 	if cdrS.chargerS != nil &&
-		utils.IsSliceMember([]string{"", utils.MetaRaw}, cdr.RunID) {
+		utils.SliceHasMember([]string{"", utils.MetaRaw}, cdr.RunID) {
 		go cdrS.chrgProcessEvent(cgrEv, cdrS.attrS != nil, cdrS.cgrCfg.CdrsCfg().CDRSStoreCdrs, false,
 			len(cdrS.cgrCfg.CdrsCfg().CDRSOnlineCDRExports) != 0, cdrS.thdS != nil, cdrS.statS != nil)
 	}

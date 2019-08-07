@@ -154,10 +154,13 @@ func (me MapEvent) Clone() (mp MapEvent) {
 
 // AsMapString returns a map[string]string out of mp, ignoring specific fields if needed
 // most used when needing to export extraFields
-func (me MapEvent) AsMapString(ignoredFlds utils.StringMap) (mp map[string]string, err error) {
+func (me MapEvent) AsMapString(ignoredFlds *utils.StringSet) (mp map[string]string) {
 	mp = make(map[string]string)
+	if ignoredFlds == nil {
+		ignoredFlds = utils.NewStringSet(nil)
+	}
 	for k, v := range me {
-		if ignoredFlds.HasKey(k) {
+		if ignoredFlds.Has(k) {
 			continue
 		}
 		mp[k] = utils.IfaceAsString(v)
@@ -165,16 +168,11 @@ func (me MapEvent) AsMapString(ignoredFlds utils.StringMap) (mp map[string]strin
 	return
 }
 
-func (me MapEvent) AsMapStringIgnoreErrors(ignoredFlds utils.StringMap) (mp map[string]string) {
-	mp, _ = me.AsMapString(ignoredFlds)
-	return
-}
-
 // AsCDR exports the SafEvent as CDR
 func (me MapEvent) AsCDR(cfg *config.CGRConfig, tnt, tmz string) (cdr *CDR, err error) {
 	cdr = &CDR{Tenant: tnt, Cost: -1.0, ExtraFields: make(map[string]string)}
 	for k, v := range me {
-		if _, has := utils.MainCDRFieldsMap[k]; !has { // not primary field, populate extra ones
+		if !utils.MainCDRFields.Has(k) { // not primary field, populate extra ones
 			cdr.ExtraFields[k] = utils.IfaceAsString(v)
 			continue
 		}

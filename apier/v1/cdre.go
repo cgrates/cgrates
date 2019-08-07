@@ -107,7 +107,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if attr.CdrFormat != nil && len(*attr.CdrFormat) != 0 {
 		exportFormat = strings.ToLower(*attr.CdrFormat)
 	}
-	if !utils.IsSliceMember(utils.CDRExportFormats, exportFormat) {
+	if !utils.CDRExportFormats.Has(exportFormat) {
 		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "CdrFormat")
 	}
 	fieldSep := exportTemplate.FieldSeparator
@@ -225,7 +225,7 @@ func (self *ApierV1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err 
 	if arg.ExportFormat != nil && len(*arg.ExportFormat) != 0 {
 		exportFormat = strings.ToLower(*arg.ExportFormat)
 	}
-	if !utils.IsSliceMember(utils.CDRExportFormats, exportFormat) {
+	if !utils.CDRExportFormats.Has(exportFormat) {
 		return utils.NewErrMandatoryIeMissing("CdrFormat")
 	}
 	synchronous := exportTemplate.Synchronous

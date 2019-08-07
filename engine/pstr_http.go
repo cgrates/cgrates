@@ -68,12 +68,12 @@ type HTTPPoster struct {
 // Post with built-in failover
 // Returns also reference towards client so we can close it's connections when done
 func (poster *HTTPPoster) Post(addr string, contentType string, content interface{}, attempts int, fallbackFilePath string) (respBody []byte, err error) {
-	if !utils.IsSliceMember([]string{utils.CONTENT_JSON, utils.CONTENT_FORM, utils.CONTENT_TEXT}, contentType) {
+	if !utils.SliceHasMember([]string{utils.CONTENT_FORM, utils.CONTENT_JSON, utils.CONTENT_TEXT}, contentType) {
 		return nil, fmt.Errorf("unsupported ContentType: %s", contentType)
 	}
 	var body []byte        // Used to write in file and send over http
 	var urlVals url.Values // Used when posting form
-	if utils.IsSliceMember([]string{utils.CONTENT_JSON, utils.CONTENT_TEXT}, contentType) {
+	if utils.SliceHasMember([]string{utils.CONTENT_JSON, utils.CONTENT_TEXT}, contentType) {
 		body = content.([]byte)
 	} else if contentType == utils.CONTENT_FORM {
 		urlVals = content.(url.Values)
@@ -86,7 +86,7 @@ func (poster *HTTPPoster) Post(addr string, contentType string, content interfac
 	}
 	for i := 0; i < attempts; i++ {
 		var resp *http.Response
-		if utils.IsSliceMember([]string{utils.CONTENT_JSON, utils.CONTENT_TEXT}, contentType) {
+		if utils.SliceHasMember([]string{utils.CONTENT_JSON, utils.CONTENT_TEXT}, contentType) {
 			resp, err = poster.httpClient.Post(addr, bodyType, bytes.NewBuffer(body))
 		} else if contentType == utils.CONTENT_FORM {
 			resp, err = poster.httpClient.PostForm(addr, urlVals)

@@ -173,12 +173,13 @@ func (smaEv *SMAsteriskEvent) DisconnectCause() string {
 	return cachedVal
 }
 
+var primaryFields = utils.NewStringSet([]string{eventType, channelID, timestamp, utils.SetupTime, utils.CGR_ACCOUNT, utils.CGR_DESTINATION, utils.CGR_REQTYPE,
+	utils.CGR_TENANT, utils.CGR_CATEGORY, utils.CGR_SUBJECT, utils.CGR_PDD, utils.CGR_SUPPLIER, utils.CGR_DISCONNECT_CAUSE})
+
 func (smaEv *SMAsteriskEvent) ExtraParameters() (extraParams map[string]string) {
 	extraParams = make(map[string]string)
-	primaryFields := []string{eventType, channelID, timestamp, utils.SetupTime, utils.CGR_ACCOUNT, utils.CGR_DESTINATION, utils.CGR_REQTYPE,
-		utils.CGR_TENANT, utils.CGR_CATEGORY, utils.CGR_SUBJECT, utils.CGR_PDD, utils.CGR_SUPPLIER, utils.CGR_DISCONNECT_CAUSE}
 	for cachedKey, cachedVal := range smaEv.cachedFields {
-		if !utils.IsSliceMember(primaryFields, cachedKey) {
+		if !primaryFields.Has(cachedKey) {
 			extraParams[cachedKey] = cachedVal
 		}
 	}

@@ -32,15 +32,15 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var (
-	TPExportFormats = []string{utils.CSV}
-)
+// var (
+// 	TPExportFormats = []string{utils.CSV}
+// )
 
 func NewTPExporter(storDb LoadStorage, tpID, expPath, fileFormat, sep string, compress bool) (*TPExporter, error) {
 	if len(tpID) == 0 {
 		return nil, errors.New("Missing TPid")
 	}
-	if !utils.IsSliceMember(TPExportFormats, fileFormat) {
+	if utils.CSV != fileFormat {
 		return nil, errors.New("Unsupported file format")
 	}
 	tpExp := &TPExporter{

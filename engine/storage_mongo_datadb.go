@@ -424,7 +424,7 @@ func (ms *MongoStorage) SelectDatabase(dbName string) (err error) {
 
 // RebuildReverseForPrefix implementation
 func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) (err error) {
-	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
+	if !utils.SliceHasMember([]string{utils.AccountActionPlansPrefix, utils.REVERSE_DESTINATION_PREFIX}, prefix) {
 		return utils.ErrInvalidKey
 	}
 	colName, ok := ms.getColNameForPrefix(prefix)
@@ -473,7 +473,7 @@ func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) (err error) {
 
 // RemoveReverseForPrefix implementation
 func (ms *MongoStorage) RemoveReverseForPrefix(prefix string) (err error) {
-	if !utils.IsSliceMember([]string{utils.REVERSE_DESTINATION_PREFIX, utils.AccountActionPlansPrefix}, prefix) {
+	if !utils.SliceHasMember([]string{utils.AccountActionPlansPrefix, utils.REVERSE_DESTINATION_PREFIX}, prefix) {
 		return utils.ErrInvalidKey
 	}
 	colName, ok := ms.getColNameForPrefix(prefix)

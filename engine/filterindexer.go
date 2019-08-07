@@ -249,7 +249,7 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(tenant, itemID string, oldFilters 
 		for _, flt := range fltr.Rules {
 			var fldType, fldName string
 			var fldVals []string
-			if utils.IsSliceMember([]string{utils.MetaString, utils.MetaPrefix, utils.META_NONE}, flt.Type) {
+			if utils.SliceHasMember([]string{utils.META_NONE, utils.MetaPrefix, utils.MetaString}, flt.Type) {
 				fldType, fldName = flt.Type, flt.FieldName
 				fldVals = flt.Values
 			}
@@ -310,7 +310,7 @@ func createAndIndex(itemPrefix, tenant, context, itemID string, filterIDs []stri
 		for _, flt := range fltr.Rules {
 			var fldType, fldName string
 			var fldVals []string
-			if utils.IsSliceMember([]string{utils.MetaString, utils.MetaPrefix, utils.META_NONE}, flt.Type) {
+			if utils.SliceHasMember([]string{utils.META_NONE, utils.MetaPrefix, utils.MetaString}, flt.Type) {
 				fldType, fldName = flt.Type, flt.FieldName
 				fldVals = flt.Values
 			}

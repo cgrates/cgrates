@@ -187,6 +187,20 @@ func (f *Filter) Compile() (err error) {
 	return
 }
 
+var supportedFiltersType *utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
+	utils.MetaTimings, utils.MetaRSR, utils.MetaStatS, utils.MetaDestinations,
+	utils.MetaEmpty, utils.MetaExists, utils.MetaLessThan, utils.MetaLessOrEqual,
+	utils.MetaGreaterThan, utils.MetaGreaterOrEqual, utils.MetaResources, utils.MetaEqual,
+	utils.MetaAccount, utils.MetaNotEqual})
+var needsFieldName *utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix,
+	utils.MetaSuffix, utils.MetaTimings, utils.MetaDestinations, utils.MetaLessThan,
+	utils.MetaEmpty, utils.MetaExists, utils.MetaLessOrEqual, utils.MetaGreaterThan,
+	utils.MetaGreaterOrEqual, utils.MetaEqual, utils.MetaNotEqual})
+var needsValues *utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix,
+	utils.MetaSuffix, utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations,
+	utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual,
+	utils.MetaEqual, utils.MetaNotEqual})
+
 func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error) {
 	var negative bool
 	rType := rfType
@@ -194,23 +208,13 @@ func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error)
 		rType = "*" + strings.TrimPrefix(rfType, utils.MetaNot)
 		negative = true
 	}
-	if !utils.IsSliceMember([]string{utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
-		utils.MetaTimings, utils.MetaRSR, utils.MetaStatS, utils.MetaDestinations,
-		utils.MetaEmpty, utils.MetaExists, utils.MetaLessThan, utils.MetaLessOrEqual,
-		utils.MetaGreaterThan, utils.MetaGreaterOrEqual, utils.MetaResources, utils.MetaEqual,
-		utils.MetaAccount, utils.MetaNotEqual}, rType) {
+	if !supportedFiltersType.Has(rType) {
 		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
 	}
-	if fieldName == "" && utils.IsSliceMember([]string{utils.MetaString, utils.MetaPrefix,
-		utils.MetaSuffix, utils.MetaTimings, utils.MetaDestinations, utils.MetaLessThan,
-		utils.MetaEmpty, utils.MetaExists, utils.MetaLessOrEqual, utils.MetaGreaterThan,
-		utils.MetaGreaterOrEqual, utils.MetaEqual, utils.MetaNotEqual}, rType) {
+	if fieldName == "" && needsFieldName.Has(rType) {
 		return nil, fmt.Errorf("FieldName is mandatory for Type: %s", rfType)
 	}
-	if len(vals) == 0 && utils.IsSliceMember([]string{utils.MetaString, utils.MetaPrefix,
-		utils.MetaSuffix, utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations,
-		utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual,
-		utils.MetaEqual, utils.MetaNotEqual}, rType) {
+	if len(vals) == 0 && needsValues.Has(rType) {
 		return nil, fmt.Errorf("Values is mandatory for Type: %s", rfType)
 	}
 	rf := &FilterRule{
@@ -559,9 +563,9 @@ func (fltr *FilterRule) passGreaterThan(dP config.DataProvider) (bool, error) {
 		}
 		if gte, err := utils.GreaterThan(fldIf, sval, orEqual); err != nil {
 			return false, err
-		} else if utils.IsSliceMember([]string{utils.MetaGreaterThan, utils.MetaGreaterOrEqual}, fltr.Type) && gte {
+		} else if utils.SliceHasMember([]string{utils.MetaGreaterThan, utils.MetaGreaterOrEqual}, fltr.Type) && gte {
 			return true, nil
-		} else if utils.IsSliceMember([]string{utils.MetaLessThan, utils.MetaLessOrEqual}, fltr.Type) && !gte {
+		} else if utils.SliceHasMember([]string{utils.MetaLessThan, utils.MetaLessOrEqual}, fltr.Type) && !gte {
 			return true, nil
 		}
 	}
