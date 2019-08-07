@@ -21,11 +21,15 @@ package dispatchers
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"sync"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
+
+// Dispatcher is responsible for routing requests to pool of connections
+// there will be different implementations based on strategy
 
 // Dispatcher is responsible for routing requests to pool of connections
 // there will be different implementations based on strategy
@@ -79,11 +83,16 @@ func newDispatcher(dm *engine.DataManager, pfl *engine.DispatcherProfile) (d Dis
 			strategy: new(brodcastStrategyDispatcher),
 		}
 	case utils.MetaLoad:
-		d = &WeightDispatcher{
-			dm:       dm,
-			tnt:      pfl.Tenant,
-			hosts:    pfl.Hosts.Clone(),
-			strategy: &loadStrategyDispatcher{hostsLoad: make(map[string]int64)},
+		hosts := pfl.Hosts.Clone()
+		if ls, err := newLoadStrattegyDispatcher(hosts); err != nil {
+			return nil, err
+		} else {
+			d = &WeightDispatcher{
+				dm:       dm,
+				tnt:      pfl.Tenant,
+				hosts:    hosts,
+				strategy: ls,
+			}
 		}
 	default:
 		err = fmt.Errorf("unsupported dispatch strategy: <%s>", pfl.Strategy)
@@ -278,9 +287,31 @@ func (_ *brodcastStrategyDispatcher) dispatch(dm *engine.DataManager, routeID *s
 	return
 }
 
+func newLoadStrattegyDispatcher(hosts engine.DispatcherHostProfiles) (ls *loadStrategyDispatcher, err error) {
+	ls = &loadStrategyDispatcher{
+		hostsLoad:  make(map[string]int64),
+		hostsRatio: make(map[string]int64),
+		sumRatio:   0,
+	}
+	for _, host := range hosts {
+		if strRatio, has := host.Params[utils.MetaRatio]; !has {
+			ls.hostsRatio[host.ID] = 1
+			ls.sumRatio += 1
+		} else if ratio, err := strconv.ParseInt(utils.IfaceAsString(strRatio), 10, 64); err != nil {
+			return nil, err
+		} else {
+			ls.hostsRatio[host.ID] = ratio
+			ls.sumRatio += ratio
+		}
+	}
+	return
+}
+
 type loadStrategyDispatcher struct {
 	sync.RWMutex
-	hostsLoad map[string]int64
+	hostsLoad  map[string]int64
+	hostsRatio map[string]int64
+	sumRatio   int64
 }
 
 func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID *string, subsystem, tnt string, hostIDs []string,
@@ -322,11 +353,18 @@ func (ld *loadStrategyDispatcher) dispatch(dm *engine.DataManager, routeID *stri
 }
 
 func (ld *loadStrategyDispatcher) getHosts(hostIDs []string) []string {
+	costs := make([]int64, len(hostIDs))
 	ld.RLock()
-	sort.Slice(hostIDs, func(i, j int) bool {
-		return ld.hostsLoad[hostIDs[i]] < ld.hostsLoad[hostIDs[j]]
-	})
+	for i, id := range hostIDs {
+		costs[i] = ld.hostsLoad[id]
+		if costs[i] >= ld.hostsRatio[id] {
+			costs[i] += ld.sumRatio
+		}
+	}
 	ld.RUnlock()
+	sort.Slice(hostIDs, func(i, j int) bool {
+		return costs[i] < costs[j]
+	})
 	return hostIDs
 }
 
