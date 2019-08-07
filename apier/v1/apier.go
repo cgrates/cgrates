@@ -941,7 +941,7 @@ func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
 
 func (self *ApierV1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *string) error {
 	if attr.Direction == "" {
-		attr.Direction = utils.OUT
+		attr.Direction = utils.META_OUT
 	}
 	if (attr.Subject != "" && utils.IsSliceMember([]string{attr.Direction, attr.Tenant, attr.Category}, "")) ||
 		(attr.Category != "" && utils.IsSliceMember([]string{attr.Direction, attr.Tenant}, "")) ||

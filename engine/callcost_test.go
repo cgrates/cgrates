@@ -104,7 +104,7 @@ func TestMultipleInputLeftMerge(t *testing.T) {
 	}
 	/*t1 = time.Date(2012, time.February, 2, 18, 01, 0, 0, time.UTC)
 	t2 = time.Date(2012, time.February, 2, 18, 02, 0, 0, time.UTC)
-	cd = &CallDescriptor{Direction: utils.OUT, TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd = &CallDescriptor{Direction: utils.META_OUT, TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc2, _ := cd.getCost()
 	if cc2.Cost != 30 {
 		t.Errorf("expected 30 was %v", cc2.Cost)

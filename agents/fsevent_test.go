@@ -513,7 +513,7 @@ func TestParseEventValue(t *testing.T) {
 	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.RequestType, true), ""); parsed != utils.META_PREPAID {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.Direction, true), ""); parsed != utils.OUT {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.Direction, true), ""); parsed != utils.META_OUT {
 		t.Error("Unexpected result parsed", parsed)
 	}
 	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.Tenant, true), ""); parsed != "cgrates.org" {

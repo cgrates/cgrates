@@ -77,7 +77,7 @@ func testLoaderInitCfg(t *testing.T) {
 	loaderCfgPath = path.Join(loaderDataDir, "conf", "samples", "loaders", loaderConfigDIR)
 	loaderCfg, err = config.NewCGRConfigFromPath(loaderCfgPath)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	loaderCfg.DataFolderPath = loaderDataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(loaderCfg)

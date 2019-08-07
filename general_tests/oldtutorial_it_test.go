@@ -1347,7 +1347,7 @@ package general_tests
 // 		Account:     "1001",
 // 		Subject:     "1001",
 // 		Tenant:      "cgrates.org",
-// 		Direction:   utils.OUT,
+// 		Direction:   utils.META_OUT,
 // 		Destination: "1003",
 // 		Timespans: []*engine.TimeSpan{
 // 			&engine.TimeSpan{
