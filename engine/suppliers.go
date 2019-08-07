@@ -226,7 +226,7 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 	}
 	for _, rp := range rpIDs { // loop through RatingPlans until we find one without errors
 		rPrfl := &RatingProfile{
-			Id: utils.ConcatenatedKey(utils.OUT,
+			Id: utils.ConcatenatedKey(utils.META_OUT,
 				ev.Tenant, utils.MetaSuppliers, subj),
 			RatingPlanActivations: RatingPlanActivations{
 				&RatingPlanActivation{

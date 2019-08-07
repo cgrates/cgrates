@@ -1282,7 +1282,7 @@ func TestSMGDataDerivedChargingNoCredit(t *testing.T) {
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
 		utils.OriginID:       "1234967",
-		utils.Direction:   utils.OUT,
+		utils.Direction:   utils.META_OUT,
 		utils.Account:     "1011",
 		utils.Subject:     "1011",
 		utils.Destination: "+49",

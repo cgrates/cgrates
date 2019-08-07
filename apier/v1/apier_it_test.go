@@ -960,7 +960,7 @@ func TestApierExecuteAction(t *testing.T) {
 }
 
 func TestApierSetActions(t *testing.T) {
-	act1 := &V1TPAction{Identifier: utils.TOPUP_RESET, BalanceType: utils.MONETARY, Directions: utils.OUT, Units: 75.0, ExpiryTime: utils.UNLIMITED, Weight: 20.0}
+	act1 := &V1TPAction{Identifier: utils.TOPUP_RESET, BalanceType: utils.MONETARY, Directions: utils.META_OUT, Units: 75.0, ExpiryTime: utils.UNLIMITED, Weight: 20.0}
 	attrs1 := &V1AttrSetActions{ActionsId: "ACTS_1", Actions: []*V1TPAction{act1}}
 	reply1 := ""
 	if err := rater.Call("ApierV1.SetActions", attrs1, &reply1); err != nil {

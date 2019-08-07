@@ -26,7 +26,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // Individual session run
@@ -38,7 +37,6 @@ type SessionRun struct {
 
 type Responder struct {
 	ExitChan         chan bool
-	CdrStats         rpcclient.RpcClientConnection
 	Timeout          time.Duration
 	Timezone         string
 	MaxComputedUsage map[string]time.Duration

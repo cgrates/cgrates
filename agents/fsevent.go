@@ -100,7 +100,7 @@ func (fsev FSEvent) GetDirection(fieldName string) string {
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
 	//TODO: implement direction
-	return utils.OUT
+	return utils.META_OUT
 }
 
 // Account calling
