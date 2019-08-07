@@ -258,7 +258,7 @@ func testV1FltrPupulateThreshold(t *testing.T) {
 
 	// Add a disable and log action
 	attrsAA := &utils.AttrSetActions{ActionsId: "LOG", Actions: []*utils.TPAction{
-		{Identifier: engine.LOG},
+		{Identifier: utils.LOG},
 	}}
 	if err := fltrRpc.Call("ApierV2.SetActions", attrsAA, &result); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())

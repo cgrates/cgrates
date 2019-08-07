@@ -648,8 +648,8 @@ func TestLoadActions(t *testing.T) {
 	expected := []*Action{
 		&Action{
 			Id:               "MINI",
-			ActionType:       TOPUP_RESET,
-			ExpirationString: UNLIMITED,
+			ActionType:       utils.TOPUP_RESET,
+			ExpirationString: utils.UNLIMITED,
 			ExtraParameters:  "",
 			Weight:           10,
 			Balance: &BalanceFilter{
@@ -667,8 +667,8 @@ func TestLoadActions(t *testing.T) {
 		},
 		&Action{
 			Id:               "MINI",
-			ActionType:       TOPUP,
-			ExpirationString: UNLIMITED,
+			ActionType:       utils.TOPUP,
+			ExpirationString: utils.UNLIMITED,
 			ExtraParameters:  "",
 			Weight:           10,
 			Balance: &BalanceFilter{
@@ -694,8 +694,8 @@ func TestLoadActions(t *testing.T) {
 	expected = []*Action{
 		&Action{
 			Id:               "SHARED",
-			ActionType:       TOPUP,
-			ExpirationString: UNLIMITED,
+			ActionType:       utils.TOPUP,
+			ExpirationString: utils.UNLIMITED,
 			Weight:           10,
 			Balance: &BalanceFilter{
 				Type:           utils.StringPointer(utils.MONETARY),
@@ -718,7 +718,7 @@ func TestLoadActions(t *testing.T) {
 	expected = []*Action{
 		&Action{
 			Id:              "DEFEE",
-			ActionType:      CDRLOG,
+			ActionType:      utils.CDRLOG,
 			ExtraParameters: `{"Category":"^ddi","MediationRunId":"^did_run"}`,
 			Weight:          10,
 			Balance: &BalanceFilter{
@@ -740,7 +740,7 @@ func TestLoadActions(t *testing.T) {
 	expected = []*Action{
 		&Action{
 			Id:               "TOPUP_RST_GNR_1000",
-			ActionType:       TOPUP_RESET,
+			ActionType:       utils.TOPUP_RESET,
 			ExtraParameters:  `{"*voice": 60.0,"*data":1024.0,"*sms":1.0}`,
 			Weight:           10,
 			ExpirationString: utils.UNLIMITED,

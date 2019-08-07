@@ -597,7 +597,7 @@ func TestActionPlansRemoveMember(t *testing.T) {
 	actions := []*Action{
 		&Action{
 			Id:         "REMOVE",
-			ActionType: REMOVE_ACCOUNT,
+			ActionType: utils.REMOVE_ACCOUNT,
 		},
 	}
 
@@ -1415,7 +1415,7 @@ func TestRemoveAction(t *testing.T) {
 		t.Errorf("account to be removed not found: %v", err)
 	}
 	a := &Action{
-		ActionType: REMOVE_ACCOUNT,
+		ActionType: utils.REMOVE_ACCOUNT,
 	}
 
 	at := &ActionTiming{
@@ -1432,7 +1432,7 @@ func TestRemoveAction(t *testing.T) {
 func TestTopupAction(t *testing.T) {
 	initialUb, _ := dm.DataDB().GetAccount("vdf:minu")
 	a := &Action{
-		ActionType: TOPUP,
+		ActionType: utils.TOPUP,
 		Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: &utils.ValueFormula{Static: 25},
 			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET")),
 			Weight:         utils.Float64Pointer(20)},
@@ -1455,7 +1455,7 @@ func TestTopupAction(t *testing.T) {
 func TestTopupActionLoaded(t *testing.T) {
 	initialUb, _ := dm.DataDB().GetAccount("vdf:minitsboy")
 	a := &Action{
-		ActionType: TOPUP,
+		ActionType: utils.TOPUP,
 		Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
 			Value:          &utils.ValueFormula{Static: 25},
 			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET")),
@@ -1549,7 +1549,7 @@ func TestActionTransactionFuncType(t *testing.T) {
 		Timing:     &RateInterval{},
 		actions: []*Action{
 			&Action{
-				ActionType: TOPUP,
+				ActionType: utils.TOPUP,
 				Balance: &BalanceFilter{Value: &utils.ValueFormula{Static: 1.1},
 					Type: utils.StringPointer(utils.MONETARY)},
 			},
@@ -1587,12 +1587,12 @@ func TestActionTransactionBalanceType(t *testing.T) {
 		Timing:     &RateInterval{},
 		actions: []*Action{
 			&Action{
-				ActionType: TOPUP,
+				ActionType: utils.TOPUP,
 				Balance: &BalanceFilter{Value: &utils.ValueFormula{Static: 1.1},
 					Type: utils.StringPointer(utils.MONETARY)},
 			},
 			&Action{
-				ActionType: TOPUP,
+				ActionType: utils.TOPUP,
 				Balance:    &BalanceFilter{Type: utils.StringPointer("test")},
 			},
 		},
@@ -1624,12 +1624,12 @@ func TestActionTransactionBalanceNotType(t *testing.T) {
 		Timing:     &RateInterval{},
 		actions: []*Action{
 			&Action{
-				ActionType: TOPUP,
+				ActionType: utils.TOPUP,
 				Balance: &BalanceFilter{Value: &utils.ValueFormula{Static: 1.1},
 					Type: utils.StringPointer(utils.VOICE)},
 			},
 			&Action{
-				ActionType: TOPUP,
+				ActionType: utils.TOPUP,
 				Balance:    &BalanceFilter{Type: utils.StringPointer("test")},
 			},
 		},
@@ -1661,14 +1661,14 @@ func TestActionWithExpireWithoutExpire(t *testing.T) {
 		Timing:     &RateInterval{},
 		actions: []*Action{
 			&Action{
-				ActionType: TOPUP,
+				ActionType: utils.TOPUP,
 				Balance: &BalanceFilter{
 					Type:  utils.StringPointer(utils.VOICE),
 					Value: &utils.ValueFormula{Static: 15},
 				},
 			},
 			&Action{
-				ActionType: TOPUP,
+				ActionType: utils.TOPUP,
 				Balance: &BalanceFilter{
 					Type:           utils.StringPointer(utils.VOICE),
 					Value:          &utils.ValueFormula{Static: 30},
@@ -1716,7 +1716,7 @@ func TestActionRemoveBalance(t *testing.T) {
 		Timing:     &RateInterval{},
 		actions: []*Action{
 			&Action{
-				ActionType: REMOVE_BALANCE,
+				ActionType: utils.REMOVE_BALANCE,
 				Balance: &BalanceFilter{
 					Type:           utils.StringPointer(utils.MONETARY),
 					DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT", "RET")),
@@ -1770,7 +1770,7 @@ func TestActionRemoveExpiredBalance(t *testing.T) {
 		Timing:     &RateInterval{},
 		actions: []*Action{
 			&Action{
-				ActionType: MetaRemoveExpired,
+				ActionType: utils.MetaRemoveExpired,
 				Balance: &BalanceFilter{
 					Type: utils.StringPointer(utils.MONETARY),
 				},
@@ -1819,7 +1819,7 @@ func TestActionTransferMonetaryDefault(t *testing.T) {
 	}
 
 	a := &Action{
-		ActionType: TRANSFER_MONETARY_DEFAULT,
+		ActionType: utils.TRANSFER_MONETARY_DEFAULT,
 	}
 
 	at := &ActionTiming{
@@ -1879,7 +1879,7 @@ func TestActionTransferMonetaryDefaultFilter(t *testing.T) {
 	}
 
 	a := &Action{
-		ActionType: TRANSFER_MONETARY_DEFAULT,
+		ActionType: utils.TRANSFER_MONETARY_DEFAULT,
 		Balance:    &BalanceFilter{Weight: utils.Float64Pointer(20)},
 	}
 
@@ -1940,7 +1940,7 @@ func TestActionConditionalTopup(t *testing.T) {
 	}
 
 	a := &Action{
-		ActionType: TOPUP,
+		ActionType: utils.TOPUP,
 		Filter:     `{"Type":"*monetary","Value":1,"Weight":10}`,
 		Balance: &BalanceFilter{
 			Type:   utils.StringPointer(utils.MONETARY),
@@ -2004,7 +2004,7 @@ func TestActionConditionalTopupNoMatch(t *testing.T) {
 	}
 
 	a := &Action{
-		ActionType: TOPUP,
+		ActionType: utils.TOPUP,
 		Filter:     `{"Type":"*monetary","Value":2,"Weight":10}`,
 		Balance: &BalanceFilter{
 			Type:   utils.StringPointer(utils.MONETARY),
@@ -2068,7 +2068,7 @@ func TestActionConditionalTopupExistingBalance(t *testing.T) {
 	}
 
 	a := &Action{
-		ActionType: TOPUP,
+		ActionType: utils.TOPUP,
 		Filter:     `{"Type":"*voice","Value":{"*gte":100}}`,
 		Balance: &BalanceFilter{
 			Type:   utils.StringPointer(utils.MONETARY),
@@ -2169,7 +2169,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 	}
 
 	a1 := &Action{
-		ActionType: "*set_balance",
+		ActionType: utils.SET_BALANCE,
 		Filter:     "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"ID\":{\"*eq\":\"*default\"}}]}",
 		Balance: &BalanceFilter{
 			Type:     utils.StringPointer("*sms"),
@@ -2179,7 +2179,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 		Weight: 9,
 	}
 	a2 := &Action{
-		ActionType: "*set_balance",
+		ActionType: utils.SET_BALANCE,
 		Filter:     "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"ID\":{\"*eq\":\"*default\"}}]}",
 		Balance: &BalanceFilter{
 			Type:           utils.StringPointer("*sms"),
@@ -2191,7 +2191,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 		Weight: 8,
 	}
 	a3 := &Action{
-		ActionType: "*set_balance",
+		ActionType: utils.SET_BALANCE,
 		Filter:     "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"ID\":{\"*eq\":\"*default\"}}]}",
 		Balance: &BalanceFilter{
 			Type:           utils.StringPointer("*sms"),
@@ -2203,7 +2203,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 		Weight: 8,
 	}
 	a4 := &Action{
-		ActionType: "*set_balance",
+		ActionType: utils.SET_BALANCE,
 		Filter:     "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"ID\":{\"*eq\":\"*default\"}}]}",
 		Balance: &BalanceFilter{
 			Type:          utils.StringPointer("*data"),
@@ -2215,7 +2215,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 		Weight: 7,
 	}
 	a5 := &Action{
-		ActionType: "*set_balance",
+		ActionType: utils.SET_BALANCE,
 		Filter:     "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"ID\":{\"*eq\":\"*default\"}}]}",
 		Balance: &BalanceFilter{
 			Type:           utils.StringPointer("*voice"),
@@ -2289,7 +2289,7 @@ func TestActionSetBalance(t *testing.T) {
 	}
 
 	a := &Action{
-		ActionType: SET_BALANCE,
+		ActionType: utils.SET_BALANCE,
 		Balance: &BalanceFilter{
 			ID:     utils.StringPointer("m2"),
 			Type:   utils.StringPointer(utils.MONETARY),
@@ -2396,7 +2396,7 @@ func TestActionTopUpZeroNegative(t *testing.T) {
 		actions: []*Action{
 			&Action{
 				Id:         "ZeroMonetary",
-				ActionType: TopUpZeroNegative,
+				ActionType: utils.TopUpZeroNegative,
 				Balance: &BalanceFilter{
 					Type: utils.StringPointer(utils.MONETARY),
 				},
@@ -2450,7 +2450,7 @@ func TestActionSetExpiry(t *testing.T) {
 		actions: []*Action{
 			&Action{
 				Id:         "SetExpiry",
-				ActionType: SetExpiry,
+				ActionType: utils.SetExpiry,
 				Balance: &BalanceFilter{
 					ID:             utils.StringPointer("Bal1"),
 					Type:           utils.StringPointer(utils.MONETARY),
@@ -2553,7 +2553,7 @@ func TestValueFormulaDebit(t *testing.T) {
 func TestClonedAction(t *testing.T) {
 	a := &Action{
 		Id:         "test1",
-		ActionType: TOPUP,
+		ActionType: utils.TOPUP,
 		Balance: &BalanceFilter{
 			ID:    utils.StringPointer(utils.MetaDefault),
 			Value: &utils.ValueFormula{Static: 1},
@@ -2573,7 +2573,7 @@ func TestClonedActions(t *testing.T) {
 	actions := Actions{
 		&Action{
 			Id:         "RECUR_FOR_V3HSILLMILLD1G",
-			ActionType: TOPUP,
+			ActionType: utils.TOPUP,
 			Balance: &BalanceFilter{
 				ID:    utils.StringPointer(utils.MetaDefault),
 				Value: &utils.ValueFormula{Static: 1},
@@ -2583,7 +2583,7 @@ func TestClonedActions(t *testing.T) {
 		},
 		&Action{
 			Id:         "RECUR_FOR_V3HSILLMILLD5G",
-			ActionType: DEBIT,
+			ActionType: utils.DEBIT,
 			Balance: &BalanceFilter{
 				ID:    utils.StringPointer(utils.MetaDefault),
 				Value: &utils.ValueFormula{Static: 2},
@@ -2609,7 +2609,7 @@ func TestCacheGetClonedActions(t *testing.T) {
 	actions := Actions{
 		&Action{
 			Id:         "RECUR_FOR_V3HSILLMILLD1G",
-			ActionType: TOPUP,
+			ActionType: utils.TOPUP,
 			Balance: &BalanceFilter{
 				ID:    utils.StringPointer(utils.MetaDefault),
 				Value: &utils.ValueFormula{Static: 1},
@@ -2619,7 +2619,7 @@ func TestCacheGetClonedActions(t *testing.T) {
 		},
 		&Action{
 			Id:         "REACT_FOR_V3HSILLMILL",
-			ActionType: SET_BALANCE,
+			ActionType: utils.SET_BALANCE,
 			Balance: &BalanceFilter{
 				ID:    utils.StringPointer("for_v3hsillmill_sms_ill"),
 				Type:  utils.StringPointer(utils.SMS),
@@ -2691,7 +2691,7 @@ func TestCdrLogAction(t *testing.T) {
 	}
 	a := &Action{
 		Id:              "CDRLog1",
-		ActionType:      "*cdrlog",
+		ActionType:      utils.CDRLOG,
 		ExtraParameters: "{\"BalanceID\":\"~BalanceID\",\"ActionID\":\"~ActionID\",\"BalanceValue\":\"~BalanceValue\"}",
 		Weight:          50,
 	}
@@ -2739,7 +2739,7 @@ func TestCdrLogAction(t *testing.T) {
 			"RequestType":  "*none",
 			"RunID":        "*debit",
 			"SetupTime":    mock.args.CGREvent.Event["SetupTime"],
-			"Source":       "*cdrlog",
+			"Source":       utils.CDRLOG,
 			"Subject":      "1001",
 			"Tenant":       "cgrates.org",
 			"ToR":          "*monetary",

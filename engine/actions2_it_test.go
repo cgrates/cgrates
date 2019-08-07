@@ -167,7 +167,7 @@ func testActionsExecuteRemoveSMCos1(t *testing.T) {
 		ActionsId: "REMOVE_SMCOST1",
 		Actions: []*utils.TPAction{
 			{
-				Identifier:      MetaRemoveSessionCosts,
+				Identifier:      utils.MetaRemoveSessionCosts,
 				TimingTags:      utils.ASAP,
 				ExtraParameters: "*string:~OriginID:13;*notstring:~OriginID:12",
 				Weight:          20,
@@ -200,7 +200,7 @@ func testActionsExecuteRemoveSMCos2(t *testing.T) {
 		ActionsId: "REMOVE_SMCOST2",
 		Actions: []*utils.TPAction{
 			{
-				Identifier:      MetaRemoveSessionCosts,
+				Identifier:      utils.MetaRemoveSessionCosts,
 				TimingTags:      utils.ASAP,
 				ExtraParameters: "",
 				Weight:          20,
@@ -234,7 +234,7 @@ func testActionsUpdateBalance(t *testing.T) {
 		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
 	}
 	topupAction := &utils.AttrSetActions{ActionsId: "ACT_TOPUP_RST", Actions: []*utils.TPAction{
-		{Identifier: TOPUP, BalanceId: "test", BalanceType: utils.MONETARY, Units: "5", ExpiryTime: UNLIMITED, Weight: 20.0},
+		{Identifier: utils.TOPUP, BalanceId: "test", BalanceType: utils.MONETARY, Units: "5", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
 	}}
 	if err := actsRPC.Call("ApierV2.SetActions", topupAction, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
@@ -242,7 +242,7 @@ func testActionsUpdateBalance(t *testing.T) {
 		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
 	}
 	changeBlockerAction := &utils.AttrSetActions{ActionsId: "ACT_BAL_UPDT", Actions: []*utils.TPAction{
-		{Identifier: SET_BALANCE, BalanceId: "test", BalanceBlocker: "true"},
+		{Identifier: utils.SET_BALANCE, BalanceId: "test", BalanceBlocker: "true"},
 	}}
 	if err := actsRPC.Call("ApierV2.SetActions", changeBlockerAction, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())

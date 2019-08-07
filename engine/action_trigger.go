@@ -101,7 +101,7 @@ func (at *ActionTrigger) Execute(ub *Account) (err error) {
 			transactionFailed = false
 			break
 		}
-		if a.ActionType == REMOVE_ACCOUNT {
+		if a.ActionType == utils.REMOVE_ACCOUNT {
 			removeAccountActionFound = true
 		}
 	}

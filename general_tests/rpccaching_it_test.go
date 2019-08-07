@@ -132,8 +132,8 @@ func testRPCMethodsAddData(t *testing.T) {
 	var reply string
 	// Add a disable and log action
 	attrsAA := &utils.AttrSetActions{ActionsId: "DISABLE_LOG", Actions: []*utils.TPAction{
-		{Identifier: engine.DISABLE_ACCOUNT},
-		{Identifier: engine.LOG},
+		{Identifier: utils.DISABLE_ACCOUNT},
+		{Identifier: utils.LOG},
 	}}
 	if err := rpcRpc.Call("ApierV2.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
@@ -142,8 +142,8 @@ func testRPCMethodsAddData(t *testing.T) {
 	}
 	// Add an enable and log action
 	attrsAA2 := &utils.AttrSetActions{ActionsId: "ENABLE_LOG", Actions: []*utils.TPAction{
-		{Identifier: engine.ENABLE_ACCOUNT},
-		{Identifier: engine.LOG},
+		{Identifier: utils.ENABLE_ACCOUNT},
+		{Identifier: utils.LOG},
 	}}
 	if err := rpcRpc.Call("ApierV2.SetActions", attrsAA2, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())

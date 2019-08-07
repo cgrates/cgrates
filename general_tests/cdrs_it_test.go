@@ -500,7 +500,7 @@ func testV2CDRsSetThresholdProfile(t *testing.T) {
 	var actreply string
 
 	// Set Action
-	attrsAA := &utils.AttrSetActions{ActionsId: "ACT_THD_PoccessCDR", Actions: []*utils.TPAction{{Identifier: engine.LOG}}}
+	attrsAA := &utils.AttrSetActions{ActionsId: "ACT_THD_PoccessCDR", Actions: []*utils.TPAction{{Identifier: utils.LOG}}}
 	if err := cdrsRpc.Call("ApierV2.SetActions", attrsAA, &actreply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
 	} else if actreply != utils.OK {

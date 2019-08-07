@@ -422,10 +422,10 @@ type AttrAddBalance struct {
 }
 
 func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
-	return self.modifyBalance(engine.TOPUP, attr, reply)
+	return self.modifyBalance(utils.TOPUP, attr, reply)
 }
 func (self *ApierV1) DebitBalance(attr *AttrAddBalance, reply *string) error {
-	return self.modifyBalance(engine.DEBIT, attr, reply)
+	return self.modifyBalance(utils.DEBIT, attr, reply)
 }
 
 func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *string) error {
@@ -491,12 +491,12 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 		a.Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.TimingIds))
 	}
 	publishAction := &engine.Action{
-		ActionType: engine.MetaPublishBalance,
+		ActionType: utils.MetaPublishBalance,
 	}
 	acts := engine.Actions{a, publishAction}
 	if attr.Cdrlog != nil && *attr.Cdrlog == true {
 		acts = engine.Actions{a, publishAction, &engine.Action{
-			ActionType: engine.CDRLOG,
+			ActionType: utils.CDRLOG,
 		}}
 	}
 	at.SetActions(acts)
@@ -544,7 +544,7 @@ func (self *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) error
 	at.SetAccountIDs(utils.StringMap{accID: true})
 
 	a := &engine.Action{
-		ActionType: engine.SET_BALANCE,
+		ActionType: utils.SET_BALANCE,
 		Balance: &engine.BalanceFilter{
 			Uuid:           attr.BalanceUUID,
 			ID:             attr.BalanceID,
@@ -572,12 +572,12 @@ func (self *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) error
 		a.Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.TimingIds))
 	}
 	publishAction := &engine.Action{
-		ActionType: engine.MetaPublishBalance,
+		ActionType: utils.MetaPublishBalance,
 	}
 	acts := engine.Actions{a, publishAction}
 	if attr.Cdrlog != nil && *attr.Cdrlog == true {
 		acts = engine.Actions{a, publishAction, &engine.Action{
-			ActionType: engine.CDRLOG,
+			ActionType: utils.CDRLOG,
 		}}
 	}
 	at.SetActions(acts)
@@ -614,7 +614,7 @@ func (self *ApierV1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) e
 	}
 	at.SetAccountIDs(utils.StringMap{accID: true})
 	a := &engine.Action{
-		ActionType: engine.REMOVE_BALANCE,
+		ActionType: utils.REMOVE_BALANCE,
 		Balance: &engine.BalanceFilter{
 			Uuid:           attr.BalanceUUID,
 			ID:             attr.BalanceID,

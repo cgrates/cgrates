@@ -663,8 +663,8 @@ func testOnStorITActions(t *testing.T) {
 	acts := Actions{
 		&Action{
 			Id:               "MINI",
-			ActionType:       TOPUP_RESET,
-			ExpirationString: UNLIMITED,
+			ActionType:       utils.TOPUP_RESET,
+			ExpirationString: utils.UNLIMITED,
 			Weight:           10,
 			Balance: &BalanceFilter{
 				Type: utils.StringPointer(utils.MONETARY),
@@ -687,8 +687,8 @@ func testOnStorITActions(t *testing.T) {
 		},
 		&Action{
 			Id:               "MINI",
-			ActionType:       TOPUP,
-			ExpirationString: UNLIMITED,
+			ActionType:       utils.TOPUP,
+			ExpirationString: utils.UNLIMITED,
 			Weight:           10,
 			Balance: &BalanceFilter{
 				Type: utils.StringPointer(utils.VOICE),
@@ -744,8 +744,8 @@ func testOnStorITActions(t *testing.T) {
 	acts = Actions{
 		&Action{
 			Id:               "MINI",
-			ActionType:       TOPUP_RESET,
-			ExpirationString: UNLIMITED,
+			ActionType:       utils.TOPUP_RESET,
+			ExpirationString: utils.UNLIMITED,
 			Weight:           10,
 			Balance: &BalanceFilter{
 				Type: utils.StringPointer(utils.MONETARY),
@@ -768,8 +768,8 @@ func testOnStorITActions(t *testing.T) {
 		},
 		&Action{
 			Id:               "MINI",
-			ActionType:       TOPUP,
-			ExpirationString: UNLIMITED,
+			ActionType:       utils.TOPUP,
+			ExpirationString: utils.UNLIMITED,
 			Weight:           10,
 			Balance: &BalanceFilter{
 				Type: utils.StringPointer(utils.VOICE),
@@ -794,8 +794,8 @@ func testOnStorITActions(t *testing.T) {
 		},
 		&Action{
 			Id:               "MINI",
-			ActionType:       DEBIT,
-			ExpirationString: UNLIMITED,
+			ActionType:       utils.DEBIT,
+			ExpirationString: utils.UNLIMITED,
 			Weight:           20,
 			Balance: &BalanceFilter{
 				Type: utils.StringPointer(utils.VOICE),

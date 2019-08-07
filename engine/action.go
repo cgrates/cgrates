@@ -54,42 +54,6 @@ type Action struct {
 	balanceValue     float64 // balance value after action execution, used with cdrlog
 }
 
-const (
-	LOG                       = "*log"
-	RESET_TRIGGERS            = "*reset_triggers"
-	SET_RECURRENT             = "*set_recurrent"
-	UNSET_RECURRENT           = "*unset_recurrent"
-	ALLOW_NEGATIVE            = "*allow_negative"
-	DENY_NEGATIVE             = "*deny_negative"
-	RESET_ACCOUNT             = "*reset_account"
-	REMOVE_ACCOUNT            = "*remove_account"
-	SET_BALANCE               = "*set_balance"
-	REMOVE_BALANCE            = "*remove_balance"
-	TOPUP_RESET               = "*topup_reset"
-	TOPUP                     = "*topup"
-	DEBIT_RESET               = "*debit_reset"
-	DEBIT                     = "*debit"
-	RESET_COUNTERS            = "*reset_counters"
-	ENABLE_ACCOUNT            = "*enable_account"
-	DISABLE_ACCOUNT           = "*disable_account"
-	CALL_URL                  = "*call_url"
-	CALL_URL_ASYNC            = "*call_url_async"
-	MAIL_ASYNC                = "*mail_async"
-	UNLIMITED                 = "*unlimited"
-	CDRLOG                    = "*cdrlog"
-	SET_DDESTINATIONS         = "*set_ddestinations"
-	TRANSFER_MONETARY_DEFAULT = "*transfer_monetary_default"
-	CGR_RPC                   = "*cgr_rpc"
-	TopUpZeroNegative         = "*topup_zero_negative"
-	SetExpiry                 = "*set_expiry"
-	MetaPublishAccount        = "*publish_account"
-	MetaPublishBalance        = "*publish_balance"
-	MetaRemoveSessionCosts    = "*remove_session_costs"
-	MetaRemoveExpired         = "*remove_expired"
-	MetaPostEvent             = "*post_event"
-	MetaCDRAccount            = "*cdr_account"
-)
-
 func (a *Action) Clone() *Action {
 	var clonedAction Action
 	utils.Clone(a, &clonedAction)
@@ -100,43 +64,43 @@ type actionTypeFunc func(*Account, *Action, Actions, interface{}) error
 
 func getActionFunc(typ string) (actionTypeFunc, bool) {
 	actionFuncMap := map[string]actionTypeFunc{
-		LOG:                       logAction,
-		CDRLOG:                    cdrLogAction,
-		RESET_TRIGGERS:            resetTriggersAction,
-		SET_RECURRENT:             setRecurrentAction,
-		UNSET_RECURRENT:           unsetRecurrentAction,
-		ALLOW_NEGATIVE:            allowNegativeAction,
-		DENY_NEGATIVE:             denyNegativeAction,
-		RESET_ACCOUNT:             resetAccountAction,
-		TOPUP_RESET:               topupResetAction,
-		TOPUP:                     topupAction,
-		DEBIT_RESET:               debitResetAction,
-		DEBIT:                     debitAction,
-		RESET_COUNTERS:            resetCountersAction,
-		ENABLE_ACCOUNT:            enableAccountAction,
-		DISABLE_ACCOUNT:           disableAccountAction,
-		CALL_URL:                  callUrl,
-		CALL_URL_ASYNC:            callUrlAsync,
-		MAIL_ASYNC:                mailAsync,
-		SET_DDESTINATIONS:         setddestinations,
-		REMOVE_ACCOUNT:            removeAccountAction,
-		REMOVE_BALANCE:            removeBalanceAction,
-		SET_BALANCE:               setBalanceAction,
-		TRANSFER_MONETARY_DEFAULT: transferMonetaryDefaultAction,
-		CGR_RPC:                   cgrRPCAction,
-		TopUpZeroNegative:         topupZeroNegativeAction,
-		SetExpiry:                 setExpiryAction,
-		MetaPublishAccount:        publishAccount,
-		MetaPublishBalance:        publishBalance,
-		utils.MetaAMQPjsonMap:     sendAMQP,
-		utils.MetaAMQPV1jsonMap:   sendAWS,
-		utils.MetaSQSjsonMap:      sendSQS,
-		utils.MetaKafkajsonMap:    sendKafka,
-		utils.MetaS3jsonMap:       sendS3,
-		MetaRemoveSessionCosts:    removeSessionCosts,
-		MetaRemoveExpired:         removeExpired,
-		MetaPostEvent:             postEvent,
-		MetaCDRAccount:            resetAccount,
+		utils.LOG:                       logAction,
+		utils.RESET_TRIGGERS:            resetTriggersAction,
+		utils.CDRLOG:                    cdrLogAction,
+		utils.SET_RECURRENT:             setRecurrentAction,
+		utils.UNSET_RECURRENT:           unsetRecurrentAction,
+		utils.ALLOW_NEGATIVE:            allowNegativeAction,
+		utils.DENY_NEGATIVE:             denyNegativeAction,
+		utils.RESET_ACCOUNT:             resetAccountAction,
+		utils.TOPUP_RESET:               topupResetAction,
+		utils.TOPUP:                     topupAction,
+		utils.DEBIT_RESET:               debitResetAction,
+		utils.DEBIT:                     debitAction,
+		utils.RESET_COUNTERS:            resetCountersAction,
+		utils.ENABLE_ACCOUNT:            enableAccountAction,
+		utils.DISABLE_ACCOUNT:           disableAccountAction,
+		utils.CALL_URL:                  callUrl,
+		utils.CALL_URL_ASYNC:            callUrlAsync,
+		utils.MAIL_ASYNC:                mailAsync,
+		utils.SET_DDESTINATIONS:         setddestinations,
+		utils.REMOVE_ACCOUNT:            removeAccountAction,
+		utils.REMOVE_BALANCE:            removeBalanceAction,
+		utils.SET_BALANCE:               setBalanceAction,
+		utils.TRANSFER_MONETARY_DEFAULT: transferMonetaryDefaultAction,
+		utils.CGR_RPC:                   cgrRPCAction,
+		utils.TopUpZeroNegative:         topupZeroNegativeAction,
+		utils.SetExpiry:                 setExpiryAction,
+		utils.MetaPublishAccount:        publishAccount,
+		utils.MetaPublishBalance:        publishBalance,
+		utils.MetaAMQPjsonMap:           sendAMQP,
+		utils.MetaAMQPV1jsonMap:         sendAWS,
+		utils.MetaSQSjsonMap:            sendSQS,
+		utils.MetaKafkajsonMap:          sendKafka,
+		utils.MetaS3jsonMap:             sendS3,
+		utils.MetaRemoveSessionCosts:    removeSessionCosts,
+		utils.MetaRemoveExpired:         removeExpired,
+		utils.MetaPostEvent:             postEvent,
+		utils.MetaCDRAccount:            resetAccount,
 	}
 	f, exists := actionFuncMap[typ]
 	return f, exists
@@ -192,13 +156,14 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 	// set stored cdr values
 	var cdrs []*CDR
 	for _, action := range acs {
-		if !utils.IsSliceMember([]string{DEBIT, DEBIT_RESET, TOPUP, TOPUP_RESET, SET_BALANCE}, action.ActionType) ||
+		if !utils.IsSliceMember([]string{utils.DEBIT, utils.DEBIT_RESET,
+			utils.TOPUP, utils.TOPUP_RESET, utils.SET_BALANCE}, action.ActionType) ||
 			action.Balance == nil {
 			continue // Only log specific actions
 		}
 		cdr := &CDR{
 			RunID:     action.ActionType,
-			Source:    CDRLOG,
+			Source:    utils.CDRLOG,
 			SetupTime: time.Now(), AnswerTime: time.Now(),
 			OriginID:    utils.GenUUID(),
 			ExtraFields: make(map[string]string),
@@ -1027,13 +992,13 @@ func removeSessionCosts(_ *Account, action *Action, _ Actions, _ interface{}) er
 		fltr, err := dm.GetFilter(tenant, fltrID, true, true, utils.NonTransactional)
 		if err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s>  Error: %s for filter: %s in action: <%s>",
-				utils.Actions, err.Error(), fltrID, MetaRemoveSessionCosts))
+				utils.Actions, err.Error(), fltrID, utils.MetaRemoveSessionCosts))
 			continue
 		}
 		for _, rule := range fltr.Rules {
 			smcFilter, err = utils.AppendToSMCostFilter(smcFilter, rule.Type, rule.FieldName, rule.Values, config.CgrConfig().GeneralCfg().DefaultTimezone)
 			if err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> %s in action: <%s>", utils.Actions, err.Error(), MetaRemoveSessionCosts))
+				utils.Logger.Warning(fmt.Sprintf("<%s> %s in action: <%s>", utils.Actions, err.Error(), utils.MetaRemoveSessionCosts))
 			}
 		}
 	}

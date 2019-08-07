@@ -22,26 +22,27 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestSchedulerUpdateActStats(t *testing.T) {
 	sched := &Scheduler{actStatsInterval: 1 * time.Millisecond, actSuccessStats: make(map[string]map[time.Time]bool)}
-	sched.updateActStats(&engine.Action{Id: "REMOVE_1", ActionType: engine.REMOVE_ACCOUNT}, false)
-	if len(sched.actSuccessStats[engine.REMOVE_ACCOUNT]) != 1 {
-		t.Errorf("Wrong stats: %+v", sched.actSuccessStats[engine.REMOVE_ACCOUNT])
+	sched.updateActStats(&engine.Action{Id: "REMOVE_1", ActionType: utils.REMOVE_ACCOUNT}, false)
+	if len(sched.actSuccessStats[utils.REMOVE_ACCOUNT]) != 1 {
+		t.Errorf("Wrong stats: %+v", sched.actSuccessStats[utils.REMOVE_ACCOUNT])
 	}
-	sched.updateActStats(&engine.Action{Id: "REMOVE_2", ActionType: engine.REMOVE_ACCOUNT}, false)
-	if len(sched.actSuccessStats[engine.REMOVE_ACCOUNT]) != 2 {
-		t.Errorf("Wrong stats: %+v", sched.actSuccessStats[engine.REMOVE_ACCOUNT])
+	sched.updateActStats(&engine.Action{Id: "REMOVE_2", ActionType: utils.REMOVE_ACCOUNT}, false)
+	if len(sched.actSuccessStats[utils.REMOVE_ACCOUNT]) != 2 {
+		t.Errorf("Wrong stats: %+v", sched.actSuccessStats[utils.REMOVE_ACCOUNT])
 	}
-	sched.updateActStats(&engine.Action{Id: "LOG1", ActionType: engine.LOG}, false)
-	if len(sched.actSuccessStats[engine.LOG]) != 1 ||
-		len(sched.actSuccessStats[engine.REMOVE_ACCOUNT]) != 2 {
+	sched.updateActStats(&engine.Action{Id: "LOG1", ActionType: utils.LOG}, false)
+	if len(sched.actSuccessStats[utils.LOG]) != 1 ||
+		len(sched.actSuccessStats[utils.REMOVE_ACCOUNT]) != 2 {
 		t.Errorf("Wrong stats: %+v", sched.actSuccessStats)
 	}
 	time.Sleep(sched.actStatsInterval)
-	sched.updateActStats(&engine.Action{Id: "REMOVE_3", ActionType: engine.REMOVE_ACCOUNT}, false)
-	if len(sched.actSuccessStats[engine.REMOVE_ACCOUNT]) != 1 || len(sched.actSuccessStats) != 1 {
+	sched.updateActStats(&engine.Action{Id: "REMOVE_3", ActionType: utils.REMOVE_ACCOUNT}, false)
+	if len(sched.actSuccessStats[utils.REMOVE_ACCOUNT]) != 1 || len(sched.actSuccessStats) != 1 {
 		t.Errorf("Wrong stats: %+v", sched.actSuccessStats)
 	}
 }
