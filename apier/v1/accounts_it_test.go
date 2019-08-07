@@ -198,7 +198,7 @@ func testAccITAddBalance(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	// verify the cdr from CdrLog
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{Sources: []string{engine.CDRLOG}}
+	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLOG}}
 	if err := accRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -219,7 +219,7 @@ func testAccITSetBalance(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	// verify the cdr from CdrLog
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{Sources: []string{engine.CDRLOG}}
+	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLOG}}
 	if err := accRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 2 {
@@ -245,7 +245,7 @@ func testAccITSetBalanceWithExtraData(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	// verify the cdr from CdrLog
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{Sources: []string{engine.CDRLOG}, Accounts: []string{"testAccITSetBalanceWithExtraData"}}
+	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLOG}, Accounts: []string{"testAccITSetBalanceWithExtraData"}}
 	if err := accRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -273,7 +273,7 @@ func testAccITSetBalanceWithExtraData2(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	// verify the cdr from CdrLog
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{Sources: []string{engine.CDRLOG}, Accounts: []string{"testAccITSetBalanceWithExtraData2"}}
+	req := utils.RPCCDRsFilter{Sources: []string{utils.CDRLOG}, Accounts: []string{"testAccITSetBalanceWithExtraData2"}}
 	if err := accRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {

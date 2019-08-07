@@ -117,7 +117,7 @@ func TestApierV2itAddBalance(t *testing.T) {
 
 func TestApierV2itSetAction(t *testing.T) {
 	attrs := utils.AttrSetActions{ActionsId: "DISABLE_ACCOUNT", Actions: []*utils.TPAction{
-		{Identifier: engine.DISABLE_ACCOUNT, Weight: 10.0},
+		{Identifier: utils.DISABLE_ACCOUNT, Weight: 10.0},
 	}}
 	var reply string
 	if err := apierRPC.Call("ApierV2.SetActions", attrs, &reply); err != nil {
@@ -203,7 +203,7 @@ func TestApierV2itFraudMitigation(t *testing.T) {
 func TestApierV2itSetAccountWithAP(t *testing.T) {
 	argActs1 := utils.AttrSetActions{ActionsId: "TestApierV2itSetAccountWithAP_ACT_1",
 		Actions: []*utils.TPAction{
-			{Identifier: engine.TOPUP_RESET,
+			{Identifier: utils.TOPUP_RESET,
 				BalanceType: utils.MONETARY, Units: "5.0", Weight: 20.0},
 		}}
 	var reply string
@@ -323,7 +323,7 @@ func TestApierV2itSetActionWithCategory(t *testing.T) {
 
 	argActs1 := utils.AttrSetActions{ActionsId: "TestApierV2itSetActionWithCategory_ACT",
 		Actions: []*utils.TPAction{
-			{Identifier: engine.TOPUP_RESET,
+			{Identifier: utils.TOPUP_RESET,
 				BalanceType: utils.MONETARY, Categories: "test", Units: "5.0", Weight: 20.0},
 		}}
 
