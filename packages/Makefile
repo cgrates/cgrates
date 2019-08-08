@@ -24,7 +24,7 @@ DEBIAN_PKG_VERSION=$(DEBIAN_VERSION)+$(GIT_DATE)+$(GIT_COMMIT)
 make deb:
 	cd ..;\
 	ln -sf packages/debian debian ;\
-	dch -v "$(DEBIAN_PKG_VERSION)" -m "Package build for git commit $(GIT_COMMIT) ($(GIT_DATE))." -D "$(DISTRIBUTION)" ;\
+	dch -v "$(DEBIAN_PKG_VERSION)" -m "Package build for git commit $(GIT_COMMIT) ($(GIT_DATE))." -D "$(DISTRIBUTION)" --force-distribution ;\
 	dpkg-buildpackage -rfakeroot -tc; \
 	rm debian
 	git checkout debian/changelog
