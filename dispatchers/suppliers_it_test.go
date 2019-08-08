@@ -123,7 +123,7 @@ func testDspSupGetSupFailover(t *testing.T) {
 	}
 	eRpl := &engine.SortedSuppliers{
 		ProfileID: "SPL_ACNT_1002",
-		Sorting:   utils.MetaLeastCost,
+		Sorting:   utils.MetaLC,
 		Count:     2,
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
@@ -209,7 +209,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 	var rpl *engine.SortedSuppliers
 	eRpl := &engine.SortedSuppliers{
 		ProfileID: "SPL_ACNT_1002",
-		Sorting:   utils.MetaLeastCost,
+		Sorting:   utils.MetaLC,
 		Count:     2,
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
@@ -275,7 +275,7 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 	}
 	eRpl := &engine.SortedSuppliers{
 		ProfileID: "SPL_ACNT_1002",
-		Sorting:   utils.MetaLeastCost,
+		Sorting:   utils.MetaLC,
 		Count:     2,
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
@@ -354,7 +354,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2017, 11, 27, 00, 00, 00, 00, time.UTC),
 		},
-		Sorting:           "*least_cost",
+		Sorting:           utils.MetaLC,
 		SortingParameters: []string{},
 		Suppliers: []*engine.Supplier{
 			&engine.Supplier{
