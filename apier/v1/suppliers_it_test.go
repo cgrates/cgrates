@@ -191,7 +191,7 @@ func testV1SplSGetLeastCostSuppliers(t *testing.T) {
 	}
 	eSpls := engine.SortedSuppliers{
 		ProfileID: "SPL_LEASTCOST_1",
-		Sorting:   utils.MetaLeastCost,
+		Sorting:   utils.MetaLC,
 		Count:     3,
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
@@ -247,7 +247,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost(t *testing.T) {
 	}
 	eSpls := engine.SortedSuppliers{
 		ProfileID: "SPL_LEASTCOST_1",
-		Sorting:   utils.MetaLeastCost,
+		Sorting:   utils.MetaLC,
 		Count:     2,
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
@@ -318,7 +318,7 @@ func testV1SplSGetLeastCostSuppliersWithMaxCost2(t *testing.T) {
 	}
 	eSpls := engine.SortedSuppliers{
 		ProfileID: "SPL_LEASTCOST_1",
-		Sorting:   utils.MetaLeastCost,
+		Sorting:   utils.MetaLC,
 		Count:     2,
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
@@ -365,7 +365,7 @@ func testV1SplSGetHighestCostSuppliers(t *testing.T) {
 	}
 	eSpls := engine.SortedSuppliers{
 		ProfileID: "SPL_HIGHESTCOST_1",
-		Sorting:   utils.MetaHighestCost,
+		Sorting:   utils.MetaHC,
 		Count:     3,
 		SortedSuppliers: []*engine.SortedSupplier{
 			{
@@ -911,7 +911,7 @@ func testV1SplSGetSupplierForEvent(t *testing.T) {
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2017, 11, 27, 00, 00, 00, 00, time.UTC),
 		},
-		Sorting:           "*least_cost",
+		Sorting:           utils.MetaLC,
 		SortingParameters: []string{},
 		Suppliers: []*engine.Supplier{
 			&engine.Supplier{
@@ -972,7 +972,7 @@ func testV1SplsOneSupplierWithoutDestination(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "SPL_DESTINATION",
 			FilterIDs: []string{"*string:~Account:SpecialCase"},
-			Sorting:   utils.MetaLeastCost,
+			Sorting:   utils.MetaLC,
 			Suppliers: []*engine.Supplier{
 				{
 					ID:            "local",
@@ -1012,7 +1012,7 @@ func testV1SplsOneSupplierWithoutDestination(t *testing.T) {
 	}
 	eSpls := engine.SortedSuppliers{
 		ProfileID: "SPL_DESTINATION",
-		Sorting:   utils.MetaLeastCost,
+		Sorting:   utils.MetaLC,
 		Count:     1,
 		SortedSuppliers: []*engine.SortedSupplier{
 			{

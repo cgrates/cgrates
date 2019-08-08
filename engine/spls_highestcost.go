@@ -26,7 +26,7 @@ import (
 
 func NewHighestCostSorter(spS *SupplierService) *HightCostSorter {
 	return &HightCostSorter{spS: spS,
-		sorting: utils.MetaHighestCost}
+		sorting: utils.MetaHC}
 }
 
 // HightCostSorter sorts suppliers based on their cost

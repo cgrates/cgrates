@@ -129,7 +129,7 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 	splPrf = &engine.SupplierProfile{
 		Tenant:  "cgrates.org",
 		ID:      "TEST_PROFILE2",
-		Sorting: utils.MetaLeastCost,
+		Sorting: utils.MetaLC,
 		Suppliers: []*engine.Supplier{
 			{
 				ID:         "SPL1",

@@ -181,8 +181,8 @@ type SuppliersSorter interface {
 func NewSupplierSortDispatcher(lcrS *SupplierService) (ssd SupplierSortDispatcher, err error) {
 	ssd = make(map[string]SuppliersSorter)
 	ssd[utils.MetaWeight] = NewWeightSorter(lcrS)
-	ssd[utils.MetaLeastCost] = NewLeastCostSorter(lcrS)
-	ssd[utils.MetaHighestCost] = NewHighestCostSorter(lcrS)
+	ssd[utils.MetaLC] = NewLeastCostSorter(lcrS)
+	ssd[utils.MetaHC] = NewHighestCostSorter(lcrS)
 	ssd[utils.MetaQOS] = NewQOSSupplierSorter(lcrS)
 	ssd[utils.MetaReas] = NewResourceAscendetSorter(lcrS)
 	ssd[utils.MetaReds] = NewResourceDescendentSorter(lcrS)
