@@ -190,7 +190,7 @@ func testAPIerGetRatingPlanCost3(t *testing.T) {
 		t.Error(err)
 	} else if reply.RatingPlanID != "RP_1002" {
 		t.Error("Unexpected RatingPlanID: ", reply.RatingPlanID)
-	} else if *reply.EventCost.Cost != 36 {
+	} else if *reply.EventCost.Cost != 6.5118 {
 		t.Error("Unexpected Cost: ", *reply.EventCost.Cost)
 	} else if *reply.EventCost.Usage != time.Duration(time.Hour) {
 		t.Error("Unexpected Usage: ", *reply.EventCost.Usage)
