@@ -359,14 +359,6 @@ func SplitConcatenatedKey(key string) []string {
 	return strings.Split(key, CONCATENATED_KEY_SEP)
 }
 
-func StatsJoin(keyVals ...string) string {
-	return strings.Join(keyVals, STATS_CHAR)
-}
-
-func SplitStats(key string) []string {
-	return strings.Split(key, STATS_CHAR)
-}
-
 func InfieldJoin(vals ...string) string {
 	return strings.Join(vals, INFIELD_SEP)
 }

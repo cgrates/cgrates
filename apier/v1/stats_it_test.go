@@ -156,8 +156,8 @@ func testV1STSGetStats(t *testing.T) {
 		utils.MetaTCD: utils.NOT_AVAILABLE,
 		utils.MetaACC: utils.NOT_AVAILABLE,
 		utils.MetaPDD: utils.NOT_AVAILABLE,
-		utils.StatsJoin(utils.MetaSum, utils.Usage):     utils.NOT_AVAILABLE,
-		utils.StatsJoin(utils.MetaAverage, utils.Usage): utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.Usage):     utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaAverage, utils.DynamicDataPrefix+utils.Usage): utils.NOT_AVAILABLE,
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &metrics); err != nil {
@@ -193,8 +193,8 @@ func testV1STSProcessEvent(t *testing.T) {
 		utils.MetaTCD: utils.NOT_AVAILABLE,
 		utils.MetaACC: utils.NOT_AVAILABLE,
 		utils.MetaPDD: utils.NOT_AVAILABLE,
-		utils.StatsJoin(utils.MetaSum, utils.Usage):     utils.NOT_AVAILABLE,
-		utils.StatsJoin(utils.MetaAverage, utils.Usage): utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.Usage):     utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaAverage, utils.DynamicDataPrefix+utils.Usage): utils.NOT_AVAILABLE,
 	}
 	var metrics map[string]string
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
@@ -212,8 +212,8 @@ func testV1STSProcessEvent(t *testing.T) {
 		utils.MetaTCD: -1.0,
 		utils.MetaACC: -1.0,
 		utils.MetaPDD: -1.0,
-		utils.StatsJoin(utils.MetaSum, utils.Usage):     -1.0,
-		utils.StatsJoin(utils.MetaAverage, utils.Usage): -1.0,
+		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.Usage):     -1.0,
+		utils.ConcatenatedKey(utils.MetaAverage, utils.DynamicDataPrefix+utils.Usage): -1.0,
 	}
 	var floatMetrics map[string]float64
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueFloatMetrics,
@@ -258,8 +258,8 @@ func testV1STSProcessEvent(t *testing.T) {
 		utils.MetaTCD: "3m0s",
 		utils.MetaTCC: "135.1",
 		utils.MetaPDD: utils.NOT_AVAILABLE,
-		utils.StatsJoin(utils.MetaSum, utils.Usage):     "180000000000",
-		utils.StatsJoin(utils.MetaAverage, utils.Usage): "60000000000",
+		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.Usage):     "180000000000",
+		utils.ConcatenatedKey(utils.MetaAverage, utils.DynamicDataPrefix+utils.Usage): "60000000000",
 	}
 	var metrics2 map[string]string
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics, &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics2); err != nil {
@@ -275,8 +275,8 @@ func testV1STSProcessEvent(t *testing.T) {
 		utils.MetaTCD: 180,
 		utils.MetaACC: 45.03333,
 		utils.MetaPDD: -1.0,
-		utils.StatsJoin(utils.MetaSum, utils.Usage):     180000000000,
-		utils.StatsJoin(utils.MetaAverage, utils.Usage): 60000000000,
+		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.Usage):     180000000000,
+		utils.ConcatenatedKey(utils.MetaAverage, utils.DynamicDataPrefix+utils.Usage): 60000000000,
 	}
 	var floatMetrics2 map[string]float64
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueFloatMetrics, &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &floatMetrics2); err != nil {
@@ -306,8 +306,8 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 		utils.MetaTCD: "3m0s",
 		utils.MetaTCC: "135.1",
 		utils.MetaPDD: utils.NOT_AVAILABLE,
-		utils.StatsJoin(utils.MetaSum, utils.Usage):     "180000000000",
-		utils.StatsJoin(utils.MetaAverage, utils.Usage): "60000000000",
+		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.Usage):     "180000000000",
+		utils.ConcatenatedKey(utils.MetaAverage, utils.DynamicDataPrefix+utils.Usage): "60000000000",
 	}
 	var metrics2 map[string]string
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics, &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics2); err != nil {
@@ -476,7 +476,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 					FilterIDs: []string{"*gt:~Usage:5s"},
 				},
 				&engine.MetricWithFilters{
-					MetricID:  "*sum#CustomValue",
+					MetricID:  "*sum:~CustomValue",
 					FilterIDs: []string{"*exists:~CustomValue:", "*gte:~CustomValue:10.0"},
 				},
 			},
@@ -508,7 +508,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 	expectedMetrics := map[string]string{
 		utils.MetaACD: utils.NOT_AVAILABLE,
 		utils.MetaTCD: utils.NOT_AVAILABLE,
-		utils.StatsJoin(utils.MetaSum, "CustomValue"): utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaSum, "~CustomValue"): utils.NOT_AVAILABLE,
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &metrics); err != nil {
@@ -536,7 +536,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 	expectedMetrics = map[string]string{
 		utils.MetaACD: utils.NOT_AVAILABLE,
 		utils.MetaTCD: "6s",
-		utils.StatsJoin(utils.MetaSum, "CustomValue"): utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaSum, "~CustomValue"): utils.NOT_AVAILABLE,
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &metrics); err != nil {
@@ -562,7 +562,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 	expectedMetrics = map[string]string{
 		utils.MetaACD: "12s",
 		utils.MetaTCD: "18s",
-		utils.StatsJoin(utils.MetaSum, "CustomValue"): "10",
+		utils.ConcatenatedKey(utils.MetaSum, "~CustomValue"): "10",
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &metrics); err != nil {

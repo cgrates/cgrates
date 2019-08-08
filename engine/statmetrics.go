@@ -21,6 +21,7 @@ package engine
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -58,8 +59,8 @@ func NewStatMetric(metricID string, minItems int, filterIDs []string) (sm StatMe
 		utils.MetaDistinct: NewStatDistinct,
 	}
 	// split the metricID
-	// in case of *sum we have *sum#FieldName
-	metricSplit := utils.SplitStats(metricID)
+	// in case of *sum we have *sum:~FieldName
+	metricSplit := utils.SplitConcatenatedKey(metricID)
 	if _, has := metrics[metricSplit[0]]; !has {
 		return nil, fmt.Errorf("unsupported metric type <%s>", metricSplit[0])
 	}
@@ -1036,11 +1037,20 @@ func (sum *StatSum) GetFloat64Value() (v float64) {
 
 func (sum *StatSum) AddEvent(ev *utils.CGREvent) (err error) {
 	var val float64
-	if val, err = ev.FieldAsFloat64(sum.FieldName); err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, sum.FieldName)
+	if strings.HasPrefix(sum.FieldName, utils.DynamicDataPrefix) {
+		//Remove the dynamic prefix and check in event for field
+		field := sum.FieldName[1:]
+		if val, err = ev.FieldAsFloat64(field); err != nil {
+			if err == utils.ErrNotFound {
+				err = utils.ErrPrefix(err, field)
+			}
+			return
 		}
-		return
+	} else { // in case we don't receive FieldName we consider that we receive a number
+		val, err = utils.IfaceAsFloat64(sum.FieldName)
+		if err != nil {
+			return
+		}
 	}
 	sum.Sum += val
 	if v, has := sum.Events[ev.ID]; !has {
@@ -1164,11 +1174,20 @@ func (avg *StatAverage) GetFloat64Value() (v float64) {
 
 func (avg *StatAverage) AddEvent(ev *utils.CGREvent) (err error) {
 	var val float64
-	if val, err = ev.FieldAsFloat64(avg.FieldName); err != nil {
-		if err == utils.ErrNotFound {
-			err = utils.ErrPrefix(err, avg.FieldName)
+	if strings.HasPrefix(avg.FieldName, utils.DynamicDataPrefix) {
+		//Remove the dynamic prefix and check in event for field
+		field := avg.FieldName[1:]
+		if val, err = ev.FieldAsFloat64(field); err != nil {
+			if err == utils.ErrNotFound {
+				err = utils.ErrPrefix(err, field)
+			}
+			return
 		}
-		return
+	} else { // in case we don't receive FieldName we consider that we receive a number
+		val, err = utils.IfaceAsFloat64(avg.FieldName)
+		if err != nil {
+			return
+		}
 	}
 	avg.Sum += val
 	if v, has := avg.Events[ev.ID]; !has {
@@ -1284,7 +1303,9 @@ func (dst *StatDistinct) GetFloat64Value() (v float64) {
 
 func (dst *StatDistinct) AddEvent(ev *utils.CGREvent) (err error) {
 	var fieldValue string
-	if fieldValue, err = ev.FieldAsString(dst.FieldName); err != nil {
+	// simply remove the Dynamic prefix and do normal process
+	field := dst.FieldName[1:]
+	if fieldValue, err = ev.FieldAsString(field); err != nil {
 		return err
 	}
 
