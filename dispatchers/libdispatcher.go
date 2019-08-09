@@ -84,15 +84,15 @@ func newDispatcher(dm *engine.DataManager, pfl *engine.DispatcherProfile) (d Dis
 		}
 	case utils.MetaLoad:
 		hosts := pfl.Hosts.Clone()
-		if ls, err := newLoadStrattegyDispatcher(hosts); err != nil {
+		ls, err := newLoadStrattegyDispatcher(hosts)
+		if err != nil {
 			return nil, err
-		} else {
-			d = &WeightDispatcher{
-				dm:       dm,
-				tnt:      pfl.Tenant,
-				hosts:    hosts,
-				strategy: ls,
-			}
+		}
+		d = &WeightDispatcher{
+			dm:       dm,
+			tnt:      pfl.Tenant,
+			hosts:    hosts,
+			strategy: ls,
 		}
 	default:
 		err = fmt.Errorf("unsupported dispatch strategy: <%s>", pfl.Strategy)
