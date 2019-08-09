@@ -86,8 +86,18 @@ func NewCgrJsonCfgFromFile(fpath string) (*CgrJsonCfg, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer cfgFile.Close()
-	return NewCgrJsonCfgFromReader(cfgFile)
+	cfg, err := NewCgrJsonCfgFromReader(cfgFile)
+	cfgFile.Close()
+	if err != nil {
+		// for a better error message
+		cfgFile, oerr := os.Open(fpath)
+		if oerr != nil {
+			return cfg, oerr
+		}
+		defer cfgFile.Close()
+		return cfg, HandleJSONError(cfgFile, err)
+	}
+	return cfg, nil
 }
 
 // Loads the config out of http request
@@ -99,8 +109,18 @@ func NewCgrJsonCfgFromHttp(fpath string) (*CgrJsonCfg, error) {
 	if err != nil {
 		return nil, utils.ErrPathNotReachable(fpath)
 	}
-	defer cfgReq.Body.Close()
-	return NewCgrJsonCfgFromReader(cfgReq.Body)
+	cfg, err := NewCgrJsonCfgFromReader(cfgReq.Body)
+	cfgReq.Body.Close()
+	if err != nil {
+		// for a better error message
+		cfgReq, rerr := myClient.Get(fpath)
+		if rerr != nil {
+			return nil, utils.ErrPathNotReachable(fpath)
+		}
+		defer cfgReq.Body.Close()
+		return cfg, HandleJSONError(cfgReq.Body, err)
+	}
+	return cfg, nil
 }
 
 // Main object holding the loaded config as section raw messages

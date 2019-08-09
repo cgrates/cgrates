@@ -20,11 +20,15 @@ package config
 
 import (
 	"bufio"
+	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 
 	"github.com/cgrates/cgrates/utils"
 )
+
+// NewRawJSONReader returns a raw JSON reader
 
 // NewRawJSONReader returns a raw JSON reader
 func NewRawJSONReader(r io.Reader) io.Reader {
@@ -330,4 +334,148 @@ func (b *EnvReader) Read(p []byte) (n int, err error) {
 		}
 	}
 	return len(p), nil
+}
+
+// warning: needs to read file again
+func HandleJSONError(reader io.Reader, err error) error {
+	var offset int64
+	switch realErr := err.(type) {
+	case nil:
+		return nil
+	case *json.InvalidUTF8Error, *json.UnmarshalFieldError: // deprecated
+		return err
+	case *json.InvalidUnmarshalError: // e.g. nil parameter
+		return err
+	case *json.SyntaxError:
+		offset = realErr.Offset
+	case *json.UnmarshalTypeError:
+		offset = realErr.Offset
+	default:
+		fmt.Printf("%T", err)
+		return err
+	}
+
+	var line int64 = 1 // start line counting from 1
+	var character int64
+	var lastChar byte
+	if offset == 0 {
+		return fmt.Errorf("%s at line %v around position %v", err.Error(), line, character)
+	}
+	br := bufio.NewReader(reader)
+
+	var i int64 = 0
+	readString := func() error {
+		for i < offset {
+			b, rerr := br.ReadByte()
+			if rerr != nil {
+				return rerr
+			}
+			i++
+			if isNewLine(b) {
+				line++
+				character = 0
+			} else {
+				character++
+			}
+			if b == '"' {
+				return nil
+			}
+		}
+		return nil
+	}
+	readLineComment := func() error {
+		for i < offset {
+			b, rerr := br.ReadByte()
+			if rerr != nil {
+				return rerr
+			}
+			if isNewLine(b) {
+				line++
+				character = 0
+				return nil
+			}
+			character++
+		}
+		return nil
+	}
+
+	readComment := func() error {
+		for i < offset {
+			b, rerr := br.ReadByte()
+			if rerr != nil {
+				return rerr
+			}
+			if isNewLine(b) {
+				line++
+				character = 0
+			} else {
+				character++
+			}
+			if b == '*' {
+				b, rerr := br.ReadByte()
+				if rerr != nil {
+					return rerr
+				}
+				if b == '/' {
+					character++
+					return nil
+				}
+				rerr = br.UnreadByte()
+				if rerr != nil {
+					return rerr
+				}
+			}
+		}
+		return nil
+	}
+
+	for i < offset { // handle the parsing
+		b, rerr := br.ReadByte()
+		if rerr != nil {
+			break
+		}
+		character++
+		if isNewLine(b) {
+			line++
+			character = 0
+		}
+		if (b == ']' || b == '}') && lastChar == ',' {
+			i-- //ignore ',' if is followed by ] or }
+		}
+		if !isWhiteSpace(b) {
+			i++
+			lastChar = b
+		}
+		if b == '"' { // read "" value
+			rerr := readString()
+			if rerr != nil {
+				break
+			}
+		}
+		if b == '/' {
+			b, rerr := br.ReadByte()
+			if rerr != nil {
+				break
+			}
+			if b == '/' { // read //
+				i--
+				rerr := readLineComment()
+				if rerr != nil {
+					break
+				}
+			} else if b == '*' { // read /*
+				i--
+				rerr := readComment()
+				if rerr != nil {
+					break
+				}
+			} else {
+				rerr := br.UnreadByte()
+				if rerr != nil {
+					break
+				}
+			}
+		}
+	}
+	return fmt.Errorf("%s around line %v and position %v", err.Error(), line, character)
 }
