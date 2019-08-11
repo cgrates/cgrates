@@ -879,7 +879,7 @@ func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 		OriginRealm:       "cgrates.org",
 		VendorId:          0,
 		ProductName:       "CGRateS",
-		MaxActiveReqs:     -1,
+		ConcurrentReqs:    -1,
 		RequestProcessors: nil,
 	}
 
@@ -907,8 +907,8 @@ func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.ProductName, testDA.ProductName) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.diameterAgentCfg.ProductName, testDA.ProductName)
 	}
-	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.MaxActiveReqs, testDA.MaxActiveReqs) {
-		t.Errorf("received: %+v, expecting: %+v", cgrCfg.diameterAgentCfg.MaxActiveReqs, testDA.MaxActiveReqs)
+	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.ConcurrentReqs, testDA.ConcurrentReqs) {
+		t.Errorf("received: %+v, expecting: %+v", cgrCfg.diameterAgentCfg.ConcurrentReqs, testDA.ConcurrentReqs)
 	}
 	if !reflect.DeepEqual(cgrCfg.diameterAgentCfg.RequestProcessors, testDA.RequestProcessors) {
 		t.Errorf("expecting: %+v, received: %+v", testDA.RequestProcessors, cgrCfg.diameterAgentCfg.RequestProcessors)

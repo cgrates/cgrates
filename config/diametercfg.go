@@ -28,7 +28,7 @@ type DiameterAgentCfg struct {
 	OriginRealm       string
 	VendorId          int
 	ProductName       string
-	MaxActiveReqs     int // limit the maximum number of requests processed
+	ConcurrentReqs    int // limit the maximum number of requests processed
 	SyncedConnReqs    bool
 	ASRTemplate       string
 	Templates         map[string][]*FCTemplate
@@ -70,8 +70,8 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separa
 	if jsnCfg.Product_name != nil {
 		da.ProductName = *jsnCfg.Product_name
 	}
-	if jsnCfg.Max_active_requests != nil {
-		da.MaxActiveReqs = *jsnCfg.Max_active_requests
+	if jsnCfg.Concurrent_requests != nil {
+		da.ConcurrentReqs = *jsnCfg.Concurrent_requests
 	}
 	if jsnCfg.Synced_conn_requests != nil {
 		da.SyncedConnReqs = *jsnCfg.Synced_conn_requests

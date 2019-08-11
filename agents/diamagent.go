@@ -183,12 +183,12 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 			nil, true, utils.NonTransactional)
 	}
 	// handle MaxActiveReqs
-	if da.cgrCfg.DiameterAgentCfg().MaxActiveReqs != -1 {
+	if da.cgrCfg.DiameterAgentCfg().ConcurrentReqs != -1 {
 		da.aReqsLck.Lock()
-		if da.aReqs == da.cgrCfg.DiameterAgentCfg().MaxActiveReqs {
+		if da.aReqs == da.cgrCfg.DiameterAgentCfg().ConcurrentReqs {
 			utils.Logger.Err(
 				fmt.Sprintf("<%s> denying request due to maximum active requests reached: %d, message: %s",
-					utils.DiameterAgent, da.cgrCfg.DiameterAgentCfg().MaxActiveReqs, m))
+					utils.DiameterAgent, da.cgrCfg.DiameterAgentCfg().ConcurrentReqs, m))
 			writeOnConn(c, diamErr)
 			da.aReqsLck.Unlock()
 			return

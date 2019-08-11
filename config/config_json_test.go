@@ -594,7 +594,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 		Origin_realm:         utils.StringPointer("cgrates.org"),
 		Vendor_id:            utils.IntPointer(0),
 		Product_name:         utils.StringPointer("CGRateS"),
-		Max_active_requests:  utils.IntPointer(-1),
+		Concurrent_requests:  utils.IntPointer(-1),
 		Synced_conn_requests: utils.BoolPointer(false),
 		Asr_template:         utils.StringPointer(""),
 		Templates: map[string][]*FcTemplateJsonCfg{
@@ -698,7 +698,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 	if cfg, err := dfCgrJsonCfg.DiameterAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Errorf("expecting: %s, \n\nreceived: %s", utils.ToJSON(eCfg), utils.ToJSON(cfg))
+		t.Errorf("expecting: %s, \n\nreceived: %s", utils.ToIJSON(eCfg), utils.ToIJSON(cfg))
 	}
 }
 

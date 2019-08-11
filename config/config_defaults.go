@@ -377,7 +377,7 @@ const CGRATES_CFG_JSON = `
 	"origin_realm": "cgrates.org",								// diameter Origin-Realm AVP used in replies
 	"vendor_id": 0,												// diameter Vendor-Id AVP used in replies
 	"product_name": "CGRateS",									// diameter Product-Name AVP used in replies
-	"max_active_requests": -1,									// limit the number of active requests processed by the server <-1|0-n>
+	"concurrent_requests": -1,									// limit the number of active requests processed by the server <-1|0-n>
 	"synced_conn_requests": false,								// process one request at the time per connection
 	"asr_template": "",											// enable AbortSession message being sent to client on DisconnectSession
 	"templates":{												// default message templates
