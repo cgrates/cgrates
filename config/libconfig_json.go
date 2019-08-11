@@ -170,6 +170,34 @@ type CdrcJsonCfg struct {
 	Cache_dump_fields           *[]*FcTemplateJsonCfg
 }
 
+// EventReaderSJsonCfg contains the configuration of EventReaderService
+type ERsJsonCfg struct {
+	Enabled        *bool
+	Sessions_conns *[]*RemoteHostJson
+	Readers        *[]*EventReaderJsonCfg
+}
+
+// EventReaderSJsonCfg is the configuration of a single EventReader
+type EventReaderJsonCfg struct {
+	Id                  *string
+	Type                *string
+	Field_separator     *string
+	Run_delay           *int
+	Concurrent_requests *int
+	Source_path         *string
+	Processed_path      *string
+	Xml_root_path       *string
+	Source_id           *string
+	Tenant              *string
+	Timezone            *string
+	Filters             *[]string
+	Flags               *[]string
+	Header_fields       *[]*FcTemplateJsonCfg
+	Content_fields      *[]*FcTemplateJsonCfg
+	Trailer_fields      *[]*FcTemplateJsonCfg
+	Continue            *bool
+}
+
 // SM-Generic config section
 type SessionSJsonCfg struct {
 	Enabled                   *bool
@@ -199,13 +227,11 @@ type SessionSJsonCfg struct {
 
 // FreeSWITCHAgent config section
 type FreeswitchAgentJsonCfg struct {
-	Enabled        *bool
-	Sessions_conns *[]*RemoteHostJson
-	Subscribe_park *bool
-	Create_cdr     *bool
-	Extra_fields   *[]string
-	//Min_dur_low_balance    *string
-	//Low_balance_ann_file   *string
+	Enabled                *bool
+	Sessions_conns         *[]*RemoteHostJson
+	Subscribe_park         *bool
+	Create_cdr             *bool
+	Extra_fields           *[]string
 	Empty_balance_context  *string
 	Empty_balance_ann_file *string
 	Max_wait_connection    *string

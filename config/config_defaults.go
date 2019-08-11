@@ -294,6 +294,47 @@ const CGRATES_CFG_JSON = `
 ],
 
 
+"ers": {									// EventReaderService
+	"enabled": false,						// starts the EventReader service: <true|false>
+	"sessions_conns": [						// connections to SessionS:  <*internal|127.0.0.1:2012>
+		{"address": "*internal"}
+	],
+	"readers": [
+		{
+			"id": "*default",									// identifier of the EventReader profile
+			"type": "*file_csv",								// reader type <*file_csv>
+			"field_separator": ",",								// separator used in case of csv files
+			"run_delay": 0,										// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
+			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
+			"source_path": "/var/spool/cgrates/cdrc/in",		// read data from this path
+			"processed_path": "/var/spool/cgrates/cdrc/out",	// move processed data here
+			"Xml_root_path": "",								// path towards one event in case of XML CDRs
+			"Source_id": "ers_csv",								// free form field, tag identifying the source of the CDRs within CDRS database
+			"tenant": "",										// tenant used by import
+			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+			"filters": [],										// limit parsing based on the filters
+			"flags": [],										// flags to influence the event processing
+			"header_fields": [],								// template of the import header fields
+			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+				{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "~2", "mandatory": true},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~3", "mandatory": true},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~4", "mandatory": true},
+				{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~6", "mandatory": true},
+				{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "~7", "mandatory": true},
+				{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~8", "mandatory": true},
+				{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~9", "mandatory": true},
+				{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~10", "mandatory": true},
+				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~11", "mandatory": true},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~12", "mandatory": true},
+				{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~13", "mandatory": true},
+			],
+			"trailer_fields": [],								// template of the import trailer fields
+			"continue": false,									// continue to the next template if executed	
+		},
+	],
+},
+
+
 "sessions": {
 	"enabled": false,						// starts the session service: <true|false>
 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests

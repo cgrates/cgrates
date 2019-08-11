@@ -67,6 +67,7 @@ const (
 	AnalyzerCfgJson    = "analyzers"
 	Apier              = "apier"
 	DNSAgentJson       = "dns_agent"
+	ERsJson            = "ers"
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -235,6 +236,16 @@ func (self CgrJsonCfg) CdrcJsonCfg() ([]*CdrcJsonCfg, error) {
 		return nil, err
 	}
 	return cfg, nil
+}
+
+func (self CgrJsonCfg) ERsJsonCfg() (erSCfg *ERsJsonCfg, err error) {
+	rawCfg, hasKey := self[ERsJson]
+	if !hasKey {
+		return
+	}
+	erSCfg = new(ERsJsonCfg)
+	err = json.Unmarshal(*rawCfg, &erSCfg)
+	return
 }
 
 func (self CgrJsonCfg) SessionSJsonCfg() (*SessionSJsonCfg, error) {
