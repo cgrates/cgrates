@@ -85,6 +85,7 @@ var sTestsStatSV1 = []func(t *testing.T){
 	testV1STSRemoveStatQueueProfile,
 	testV1STSStatsPing,
 	testV1STSProcessMetricsWithFilter,
+	testV1STSProcessStaticMetrics,
 	testV1STSStopEngine,
 }
 
@@ -563,6 +564,100 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 		utils.MetaACD: "12s",
 		utils.MetaTCD: "18s",
 		utils.ConcatenatedKey(utils.MetaSum, "~CustomValue"): "10",
+	}
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	}
+}
+
+func testV1STSProcessStaticMetrics(t *testing.T) {
+	statConfig = &StatQueueWithCache{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:    "cgrates.org",
+			ID:        "StaticStatQueue",
+			FilterIDs: []string{"*string:~StaticMetrics:StaticMetrics"}, //custom filter for event
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			QueueLength: 100,
+			TTL:         time.Duration(1) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				&engine.MetricWithFilters{
+					MetricID: "*sum:1",
+				},
+				&engine.MetricWithFilters{
+					MetricID: "*average:2",
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+			Blocker:      true,
+			Stored:       true,
+			Weight:       20,
+			MinItems:     1,
+		},
+	}
+	//set the custom statProfile
+	var result string
+	if err := stsV1Rpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	//verify it
+	var reply *engine.StatQueueProfile
+	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "StaticStatQueue"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(statConfig.StatQueueProfile), utils.ToJSON(reply))
+	}
+	//verify metrics
+	expectedIDs := []string{"StaticStatQueue"}
+	var metrics map[string]string
+	expectedMetrics := map[string]string{
+		utils.ConcatenatedKey(utils.MetaSum, "1"):     utils.NOT_AVAILABLE,
+		utils.ConcatenatedKey(utils.MetaAverage, "2"): utils.NOT_AVAILABLE,
+	}
+	//process event
+	var reply2 []string
+	expected := []string{"StaticStatQueue"}
+	args := engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				"StaticMetrics": "StaticMetrics",
+			},
+		},
+	}
+	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &args, &reply2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply2, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply2)
+	}
+	//verify metrics after first process
+	expectedMetrics = map[string]string{
+		utils.ConcatenatedKey(utils.MetaSum, "1"):     "1",
+		utils.ConcatenatedKey(utils.MetaAverage, "2"): "2",
+	}
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &metrics); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
+		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
+	}
+	//second process
+	if err := stsV1Rpc.Call(utils.StatSv1ProcessEvent, &args, &reply2); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply2, expected) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, reply2)
+	}
+	expectedMetrics = map[string]string{
+		utils.ConcatenatedKey(utils.MetaSum, "1"):     "2",
+		utils.ConcatenatedKey(utils.MetaAverage, "2"): "2",
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
 		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &metrics); err != nil {
