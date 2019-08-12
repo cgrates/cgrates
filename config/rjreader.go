@@ -354,13 +354,17 @@ func HandleJSONError(reader io.Reader, err error) error {
 		fmt.Printf("%T", err)
 		return err
 	}
-
-	var line int64 = 1 // start line counting from 1
-	var character int64
-	var lastChar byte
 	if offset == 0 {
-		return fmt.Errorf("%s at line %v around position %v", err.Error(), line, character)
+		return fmt.Errorf("%s at line 0 around position 0", err.Error())
 	}
+	line, character := getJsonOffsetLine(reader, offset)
+	return fmt.Errorf("%s around line %v and position %v", err.Error(), line, character)
+}
+
+func getJsonOffsetLine(reader io.Reader, offset int64) (line, character int64) {
+	line = 1 // start line counting from 1
+	var lastChar byte
+
 	br := bufio.NewReader(reader)
 
 	var i int64 = 0
@@ -458,12 +462,14 @@ func HandleJSONError(reader io.Reader, err error) error {
 				break
 			}
 			if b == '/' { // read //
+				character++
 				i--
 				rerr := readLineComment()
 				if rerr != nil {
 					break
 				}
 			} else if b == '*' { // read /*
+				character++
 				i--
 				rerr := readComment()
 				if rerr != nil {
@@ -477,5 +483,5 @@ func HandleJSONError(reader io.Reader, err error) error {
 			}
 		}
 	}
-	return fmt.Errorf("%s around line %v and position %v", err.Error(), line, character)
+	return
 }
