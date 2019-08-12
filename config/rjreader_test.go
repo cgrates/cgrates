@@ -19,6 +19,7 @@ package config
 
 import (
 	"bufio"
+	"encoding/json"
 	"os"
 	"reflect"
 	"strings"
@@ -271,7 +272,7 @@ func TestEnvReadercheckMeta(t *testing.T) {
 	}
 }
 
-func TestisNewLine(t *testing.T) {
+func TestIsNewLine(t *testing.T) {
 	for char, expected := range map[byte]bool{'a': false, '\n': true, ' ': false, '\t': false, '\r': true} {
 		if rply := isNewLine(char); expected != rply {
 			t.Errorf("Expected: %+v, recived: %+v", expected, rply)
@@ -279,7 +280,7 @@ func TestisNewLine(t *testing.T) {
 	}
 }
 
-func TestisWhiteSpace(t *testing.T) {
+func TestIsWhiteSpace(t *testing.T) {
 	for char, expected := range map[byte]bool{'a': false, '\n': true, ' ': true, '\t': true, '\r': true, 0: true, '1': false} {
 		if rply := isWhiteSpace(char); expected != rply {
 			t.Errorf("Expected: %+v, recived: %+v", expected, rply)
@@ -301,10 +302,106 @@ func TestReadEnv(t *testing.T) {
 	}
 }
 
-func TestisAlfanum(t *testing.T) {
+func TestIsAlfanum(t *testing.T) {
 	for char, expected := range map[byte]bool{'a': true, '\n': false, ' ': false, '\t': false, '\r': false, 0: false, '1': true, 'Q': true, '9': true} {
 		if rply := isAlfanum(char); expected != rply {
 			t.Errorf("Expected: %+v, recived: %+v", expected, rply)
 		}
 	}
+}
+
+func TestGetErrorLine(t *testing.T) {
+	jsonstr := `{//nonprocess string
+		/***********************************************/
+
+	// Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+	// Copyright (C) ITsysCOM GmbH
+	//
+	// This file contains the default configuration hardcoded into CGRateS.
+	// This is what you get when you load CGRateS with an empty configuration file.
+	"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+		"db_type": "redis",	1					// data_db type: <*redis|*mongo|*internal>
+		"db_host": "127.0.0.1",					/* data_db host address*/
+		"db_port": 6379, 						// data_db port to reach the database
+		"db_name": "10",/*/*asd*/ 						// data_db database name to connect to
+		"db_user": "user", 					// username to use when connecting to data_db
+		"db_password": ",/**/", 						// password to use when connecting to data_db
+		"redis_sentinel":"",					// redis_sentinel is the name of sentinel
+	},/*Multiline coment 
+	Line1
+	Line2
+	Line3
+	*/
+/**/		}//`
+	r := strings.NewReader(jsonstr)
+	_, err := NewCgrJsonCfgFromReader(r)
+	if err == nil {
+		t.Fatalf("Expected error received %v", err)
+	}
+	var offset int64
+	if realErr, canCast := err.(*json.SyntaxError); !canCast {
+		t.Fatalf("Expected json.SyntaxError received %v<%T>", err.Error(), err)
+	} else {
+		offset = realErr.Offset
+	}
+	var expOffset int64 = 31
+	if offset != expOffset {
+		t.Errorf("Expected offset %v received:%v", expOffset, offset)
+	}
+	r = strings.NewReader(jsonstr)
+	var expLine, expChar int64 = 10, 23
+	if line, character := getJsonOffsetLine(r, offset); expLine != line {
+		t.Errorf("Expected line %v received:%v", expLine, line)
+	} else if expChar != character {
+		t.Errorf("Expected line %v received:%v", expChar, character)
+	}
+
+}
+
+func TestGetErrorLine2(t *testing.T) {
+	jsonstr := `{//nonprocess string
+		/***********************************************/
+
+	// Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+	// Copyright (C) ITsysCOM GmbH
+	//
+	// This file contains the default configuration hardcoded into CGRateS.
+	// This is what you get when you load CGRateS with an empty configuration file.
+	"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+		"db_type": "redis",	/*some comment before*/1					// data_db type: <*redis|*mongo|*internal>
+		"db_host": "127.0.0.1",					/* data_db host address*/
+		"db_port": 6379, 						// data_db port to reach the database
+		"db_name": "10",/*/*asd*/ 						// data_db database name to connect to
+		"db_user": "user", 					// username to use when connecting to data_db
+		"db_password": ",/**/", 						// password to use when connecting to data_db
+		"redis_sentinel":"",					// redis_sentinel is the name of sentinel
+	},/*Multiline coment 
+	Line1
+	Line2
+	Line3
+	*/
+/**/		}//`
+	r := strings.NewReader(jsonstr)
+	_, err := NewCgrJsonCfgFromReader(r)
+	if err == nil {
+		t.Fatalf("Expected error received %v", err)
+	}
+	var offset int64
+	if realErr, canCast := err.(*json.SyntaxError); !canCast {
+		t.Fatalf("Expected json.SyntaxError received %v<%T>", err.Error(), err)
+	} else {
+		offset = realErr.Offset
+	}
+	var expOffset int64 = 31
+	if offset != expOffset {
+		t.Errorf("Expected offset %v received:%v", expOffset, offset)
+	}
+	r = strings.NewReader(jsonstr)
+	var expLine, expChar int64 = 10, 46
+	if line, character := getJsonOffsetLine(r, offset); expLine != line {
+		t.Errorf("Expected line %v received:%v", expLine, line)
+	} else if expChar != character {
+		t.Errorf("Expected line %v received:%v", expChar, character)
+	}
+
 }
