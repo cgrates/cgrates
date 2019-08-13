@@ -1582,3 +1582,64 @@ func TestDfApierCfg(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
+
+func TestDfEventReaderCfg(t *testing.T) {
+	cdrFields := []*FcTemplateJsonCfg{
+		{Tag: utils.StringPointer("TOR"), Field_id: utils.StringPointer(utils.ToR), Type: utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~2"), Mandatory: utils.BoolPointer(true)},
+		{Tag: utils.StringPointer("OriginID"), Field_id: utils.StringPointer(utils.OriginID), Type: utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~3"), Mandatory: utils.BoolPointer(true)},
+		{Tag: utils.StringPointer("RequestType"), Field_id: utils.StringPointer(utils.RequestType), Type: utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~4"), Mandatory: utils.BoolPointer(true)},
+		{Tag: utils.StringPointer("Tenant"), Field_id: utils.StringPointer(utils.Tenant), Type: utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~6"), Mandatory: utils.BoolPointer(true)},
+		{Tag: utils.StringPointer("Category"), Field_id: utils.StringPointer(utils.Category), Type: utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~7"), Mandatory: utils.BoolPointer(true)},
+		{Tag: utils.StringPointer("Account"), Field_id: utils.StringPointer(utils.Account), Type: utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~8"), Mandatory: utils.BoolPointer(true)},
+		{Tag: utils.StringPointer("Subject"), Field_id: utils.StringPointer(utils.Subject), Type: utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~9"), Mandatory: utils.BoolPointer(true)},
+		{Tag: utils.StringPointer("Destination"), Field_id: utils.StringPointer(utils.Destination), Type: utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~10"), Mandatory: utils.BoolPointer(true)},
+		{Tag: utils.StringPointer("SetupTime"), Field_id: utils.StringPointer(utils.SetupTime), Type: utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~11"), Mandatory: utils.BoolPointer(true)},
+		{Tag: utils.StringPointer("AnswerTime"), Field_id: utils.StringPointer(utils.AnswerTime), Type: utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~12"), Mandatory: utils.BoolPointer(true)},
+		{Tag: utils.StringPointer("Usage"), Field_id: utils.StringPointer(utils.Usage), Type: utils.StringPointer(utils.META_COMPOSED),
+			Value: utils.StringPointer("~13"), Mandatory: utils.BoolPointer(true)},
+	}
+	eCfg := &ERsJsonCfg{
+		Enabled: utils.BoolPointer(false),
+		Sessions_conns: &[]*RemoteHostJson{
+			{
+				Address: utils.StringPointer(utils.MetaInternal),
+			},
+		},
+		Readers: &[]*EventReaderJsonCfg{
+			&EventReaderJsonCfg{
+				Id:                  utils.StringPointer(utils.MetaDefault),
+				Type:                utils.StringPointer(utils.MetaFileCSV),
+				Field_separator:     utils.StringPointer(","),
+				Run_delay:           utils.IntPointer(0),
+				Concurrent_requests: utils.IntPointer(1024),
+				Source_path:         utils.StringPointer("/var/spool/cgrates/cdrc/in"),
+				Processed_path:      utils.StringPointer("/var/spool/cgrates/cdrc/out"),
+				Xml_root_path:       utils.StringPointer(utils.EmptyString),
+				Source_id:           utils.StringPointer("ers_csv"),
+				Tenant:              utils.StringPointer(utils.EmptyString),
+				Timezone:            utils.StringPointer(utils.EmptyString),
+				Filters:             &[]string{},
+				Flags:               &[]string{},
+				Header_fields:       &[]*FcTemplateJsonCfg{},
+				Content_fields:      &cdrFields,
+				Trailer_fields:      &[]*FcTemplateJsonCfg{},
+				Continue:            utils.BoolPointer(false),
+			},
+		},
+	}
+	if cfg, err := dfCgrJsonCfg.ERsJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Errorf("Expected: %+v, \nreceived: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
+	}
+}

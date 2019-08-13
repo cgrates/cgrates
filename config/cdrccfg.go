@@ -184,20 +184,16 @@ func (self *CdrcCfg) Clone() *CdrcCfg {
 	clnCdrc.TrailerFields = make([]*FCTemplate, len(self.TrailerFields))
 	clnCdrc.CacheDumpFields = make([]*FCTemplate, len(self.CacheDumpFields))
 	for idx, fld := range self.HeaderFields {
-		clonedVal := *fld
-		clnCdrc.HeaderFields[idx] = &clonedVal
+		clnCdrc.HeaderFields[idx] = fld.Clone()
 	}
 	for idx, fld := range self.ContentFields {
-		clonedVal := *fld
-		clnCdrc.ContentFields[idx] = &clonedVal
+		clnCdrc.ContentFields[idx] = fld.Clone()
 	}
 	for idx, fld := range self.TrailerFields {
-		clonedVal := *fld
-		clnCdrc.TrailerFields[idx] = &clonedVal
+		clnCdrc.TrailerFields[idx] = fld.Clone()
 	}
 	for idx, fld := range self.CacheDumpFields {
-		clonedVal := *fld
-		clnCdrc.CacheDumpFields[idx] = &clonedVal
+		clnCdrc.CacheDumpFields[idx] = fld.Clone()
 	}
 	return clnCdrc
 }

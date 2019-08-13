@@ -169,6 +169,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.loaderCfg = make([]*LoaderSCfg, 0)
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
 	cfg.apier = new(ApierCfg)
+	cfg.erCfg = new(ERsCfg)
 
 	cfg.ConfigReloads = make(map[string]chan struct{})
 	cfg.ConfigReloads[utils.CDRC] = make(chan struct{}, 1)
@@ -351,6 +352,7 @@ type CGRConfig struct {
 	analyzerSCfg     *AnalyzerSCfg     // AnalyzerS config
 	SmOsipsConfig    *SmOsipsConfig    // SMOpenSIPS Configuration
 	apier            *ApierCfg
+	erCfg            *ERsCfg
 }
 
 var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
@@ -1009,6 +1011,13 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err := self.apier.loadFromJsonCfg(jsnApierCfg); err != nil {
 		return err
 	}
+	jsnERsCfg, err := jsnCfg.ERsJsonCfg()
+	if err != nil {
+		return nil
+	}
+	if err := self.erCfg.loadFromJsonCfg(jsnERsCfg, self.generalCfg.RsrSepatarot); err != nil {
+		return err
+	}
 
 	if jsnCdreCfg != nil {
 		for profileName, jsnCdre1Cfg := range jsnCdreCfg {
@@ -1216,6 +1225,10 @@ func (cfg *CGRConfig) AnalyzerSCfg() *AnalyzerSCfg {
 
 func (cfg *CGRConfig) ApierCfg() *ApierCfg {
 	return cfg.apier
+}
+
+func (cfg *CGRConfig) ERsCfg() *ERsCfg {
+	return cfg.erCfg
 }
 
 // Call implements rpcclient.RpcClientConnection interface for internal RPC
