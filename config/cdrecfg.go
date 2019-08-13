@@ -98,18 +98,15 @@ func (self *CdreCfg) Clone() *CdreCfg {
 	}
 	clnCdre.HeaderFields = make([]*FCTemplate, len(self.HeaderFields))
 	for idx, fld := range self.HeaderFields {
-		clonedVal := *fld
-		clnCdre.HeaderFields[idx] = &clonedVal
+		clnCdre.HeaderFields[idx] = fld.Clone()
 	}
 	clnCdre.ContentFields = make([]*FCTemplate, len(self.ContentFields))
 	for idx, fld := range self.ContentFields {
-		clonedVal := *fld
-		clnCdre.ContentFields[idx] = &clonedVal
+		clnCdre.ContentFields[idx] = fld.Clone()
 	}
 	clnCdre.TrailerFields = make([]*FCTemplate, len(self.TrailerFields))
 	for idx, fld := range self.TrailerFields {
-		clonedVal := *fld
-		clnCdre.TrailerFields[idx] = &clonedVal
+		clnCdre.TrailerFields[idx] = fld.Clone()
 	}
 	return clnCdre
 }
