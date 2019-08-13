@@ -123,7 +123,7 @@ func TestCdrcCfgloadFromJsonCfg(t *testing.T) {
 func TestCdrcCfgClone(t *testing.T) {
 	clnCdrcCfg := *cdrcCfg.Clone()
 	if !reflect.DeepEqual(cdrcCfg, clnCdrcCfg) {
-		t.Errorf("Expected: %+v , recived: %+v", cdrcCfg, clnCdrcCfg)
+		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(cdrcCfg), utils.ToJSON(clnCdrcCfg))
 	}
 	cdrcCfg.ContentFields[0].Tag = "CGRID"
 	if reflect.DeepEqual(cdrcCfg, clnCdrcCfg) { // MOdifying a field after clone should not affect cloned instance

@@ -129,6 +129,18 @@ func (self *LoaderSCfg) loadFromJsonCfg(jsnCfg *LoaderJsonCfg, separator string)
 	return nil
 }
 
+// Clone itself into a new LoaderDataType
+func (self *LoaderDataType) Clone() *LoaderDataType {
+	cln := new(LoaderDataType)
+	cln.Type = self.Type
+	cln.Filename = self.Filename
+	cln.Fields = make([]*FCTemplate, len(self.Fields))
+	for idx, val := range self.Fields {
+		cln.Fields[idx] = val.Clone()
+	}
+	return cln
+}
+
 // Clone itself into a new LoadersConfig
 func (self *LoaderSCfg) Clone() *LoaderSCfg {
 	clnLoader := new(LoaderSCfg)
@@ -148,8 +160,7 @@ func (self *LoaderSCfg) Clone() *LoaderSCfg {
 	clnLoader.TpOutDir = self.TpOutDir
 	clnLoader.Data = make([]*LoaderDataType, len(self.Data))
 	for idx, fld := range self.Data {
-		clonedVal := *fld
-		clnLoader.Data[idx] = &clonedVal
+		clnLoader.Data[idx] = fld.Clone()
 	}
 	return clnLoader
 }

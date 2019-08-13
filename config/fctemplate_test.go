@@ -289,3 +289,29 @@ func TestFCTemplateInflate3(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestFCTemplateClone(t *testing.T) {
+	smpl := &FCTemplate{
+		Tag:     "Tenant",
+		Type:    "*composed",
+		FieldId: "Tenant",
+		Filters: []string{"Filter1", "Filter2"},
+		Value:   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
+	}
+	cloned := smpl.Clone()
+	if !reflect.DeepEqual(cloned, smpl) {
+		t.Errorf("expected: %s ,received: %s", utils.ToJSON(smpl), utils.ToJSON(cloned))
+	}
+	initialSmpl := &FCTemplate{
+		Tag:     "Tenant",
+		Type:    "*composed",
+		FieldId: "Tenant",
+		Filters: []string{"Filter1", "Filter2"},
+		Value:   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
+	}
+	smpl.Filters = []string{"SingleFilter"}
+	smpl.Value = NewRSRParsersMustCompile("cgrates.com", true, utils.INFIELD_SEP)
+	if !reflect.DeepEqual(cloned, initialSmpl) {
+		t.Errorf("expected: %s ,received: %s", utils.ToJSON(initialSmpl), utils.ToJSON(cloned))
+	}
+}

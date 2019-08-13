@@ -161,3 +161,37 @@ func InflateTemplates(fcts []*FCTemplate, msgTpls map[string][]*FCTemplate) ([]*
 	}
 	return fcts, nil
 }
+
+func (self *FCTemplate) Clone() *FCTemplate {
+	cln := new(FCTemplate)
+	cln.Tag = self.Tag
+	cln.Type = self.Type
+	cln.FieldId = self.FieldId
+	if len(self.Filters) != 0 {
+		cln.Filters = make([]string, len(self.Filters))
+		for idx, val := range self.Filters {
+			cln.Filters[idx] = val
+		}
+	}
+	cln.Value = make(RSRParsers, len(self.Value))
+	for idx, val := range self.Value {
+		clnVal := *val
+		cln.Value[idx] = &clnVal
+	}
+	cln.Width = self.Width
+	cln.Strip = self.Strip
+	cln.Padding = self.Padding
+	cln.Mandatory = self.Mandatory
+	cln.AttributeID = self.AttributeID
+	cln.NewBranch = self.NewBranch
+	cln.Timezone = self.Timezone
+	cln.Blocker = self.Blocker
+	cln.BreakOnSuccess = self.BreakOnSuccess
+	cln.HandlerId = self.HandlerId
+	cln.Layout = self.Layout
+	cln.CostShiftDigits = self.CostShiftDigits
+	cln.RoundingDecimals = self.RoundingDecimals
+	cln.MaskDestID = self.MaskDestID
+	cln.MaskLen = self.MaskLen
+	return cln
+}
