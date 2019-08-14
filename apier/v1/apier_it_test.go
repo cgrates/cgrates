@@ -1158,7 +1158,7 @@ func TestApierSetAccount(t *testing.T) {
 func TestApierGetAccountActionPlan(t *testing.T) {
 	var reply []*AccountActionTiming
 	req := utils.TenantAccount{Tenant: "cgrates.org", Account: "dan7"}
-	if err := rater.Call("ApierV1.GetAccountActionPlan", req, &reply); err != nil {
+	if err := rater.Call(utils.ApierV1GetAccountActionPlan, req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionPlan: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected action plan received: ", utils.ToJSON(reply))
@@ -1193,7 +1193,7 @@ func TestApierRemUniqueIDActionTiming(t *testing.T) {
 	}
 	var reply []*AccountActionTiming
 	req := utils.TenantAccount{Tenant: "cgrates.org", Account: "dan4"}
-	if err := rater.Call("ApierV1.GetAccountActionPlan", req, &reply); err != nil {
+	if err := rater.Call(utils.ApierV1GetAccountActionPlan, req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionPlan: ", err.Error())
 	} else if len(reply) != 0 {
 		t.Error("Action timings was not removed")

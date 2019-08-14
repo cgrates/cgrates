@@ -345,7 +345,7 @@ func (rs *RedisStorage) getKeysForFilterIndexesKeys(fkeys []string) (keys []stri
 func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	var r *redis.Resp
 	if prefix == utils.ACTION_PLAN_PREFIX { //so we can avoid the full scan on scheduler reloads
-		r = rs.Cmd("SMEMBERS", "indx"+utils.ACTION_PLAN_PREFIX)
+		r = rs.Cmd("SMEMBERS", utils.ActionPlanIndexes)
 	} else {
 		r = rs.Cmd("KEYS", prefix+"*")
 	}
@@ -891,7 +891,7 @@ func (rs *RedisStorage) GetActionPlan(key string, skipCache bool,
 func (rs *RedisStorage) RemoveActionPlan(key string,
 	transactionID string) error {
 	cCommit := cacheCommit(transactionID)
-	rs.Cmd("SREM", "indx"+utils.ACTION_PLAN_PREFIX, utils.ACTION_PLAN_PREFIX+key) //  should handle the error here?
+	rs.Cmd("SREM", utils.ActionPlanIndexes, utils.ACTION_PLAN_PREFIX+key) //  should handle the error here?
 	err := rs.Cmd("DEL", utils.ACTION_PLAN_PREFIX+key).Err
 	Cache.Remove(utils.CacheActionPlans, key,
 		cCommit, transactionID)
@@ -903,7 +903,7 @@ func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan,
 	cCommit := cacheCommit(transactionID)
 	if len(ats.ActionTimings) == 0 {
 		// delete the key
-		rs.Cmd("SREM", "indx"+utils.ACTION_PLAN_PREFIX, utils.ACTION_PLAN_PREFIX+key) //  should handle the error here?
+		rs.Cmd("SREM", utils.ActionPlanIndexes, utils.ACTION_PLAN_PREFIX+key) //  should handle the error here?
 		err = rs.Cmd("DEL", utils.ACTION_PLAN_PREFIX+key).Err
 		Cache.Remove(utils.CacheActionPlans, key,
 			cCommit, transactionID)
@@ -928,7 +928,7 @@ func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan,
 	w := zlib.NewWriter(&b)
 	w.Write(result)
 	w.Close()
-	rs.Cmd("SADD", "indx"+utils.ACTION_PLAN_PREFIX, utils.ACTION_PLAN_PREFIX+key) //  should handle the error here?
+	rs.Cmd("SADD", utils.ActionPlanIndexes, utils.ACTION_PLAN_PREFIX+key) //  should handle the error here?
 	return rs.Cmd("SET", utils.ACTION_PLAN_PREFIX+key, b.Bytes()).Err
 }
 

@@ -25,6 +25,8 @@ import (
 	"log"
 	"net/http"
 	"sync"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func main() {
@@ -47,7 +49,7 @@ func main() {
 	}
 	wg.Wait()
 	for index := 1; index < 1002; index++ {
-		resp, err := http.Post("http://localhost:2080/jsonrpc", "application/json", bytes.NewBuffer([]byte(fmt.Sprintf(`{"method": "ApierV1.GetAccountActionPlan","params": [{"Tenant":"reglo","Account":"100%d"}], "id":%d}`, index, index))))
+		resp, err := http.Post("http://localhost:2080/jsonrpc", "application/json", bytes.NewBuffer([]byte(fmt.Sprintf(`{"method": "%s","params": [{"Tenant":"reglo","Account":"100%d"}], "id":%d}`, utils.ApierV1GetAccountActionPlan, index, index))))
 		if err != nil {
 			log.Print("Post error: ", err)
 		}
