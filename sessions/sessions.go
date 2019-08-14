@@ -559,7 +559,7 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 				case <-time.After(maxDebit):
 					// try to disconect the session n times before we force terminate it on our side
 					for i := 0; i < sS.cgrCfg.SessionSCfg().TerminateAttempts; i++ {
-						if err := sS.disconnectSession(s, utils.ErrInsufficientCredit.Error()); err == nil {
+						if err = sS.disconnectSession(s, utils.ErrInsufficientCredit.Error()); err == nil {
 							return
 						}
 						utils.Logger.Warning(
@@ -697,7 +697,7 @@ func (sS *SessionS) disconnectSession(s *Session, rsn string) (err error) {
 		servMethod = "SMGClientV1.DisconnectSession"
 	}
 	var rply string
-	if err := clnt.conn.Call(servMethod,
+	if err = clnt.conn.Call(servMethod,
 		utils.AttrDisconnectSession{EventStart: sEv,
 			Reason: rsn}, &rply); err != nil {
 		if err != utils.ErrNotImplemented {
