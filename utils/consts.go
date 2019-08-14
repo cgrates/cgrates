@@ -460,8 +460,8 @@ const (
 	MetaStorDB                  = "*stordb"
 	MetaDataDB                  = "*datadb"
 	MetaWeight                  = "*weight"
-	MetaLC                       = "*lc"
-	MetaHC                       = "*hc"
+	MetaLC                      = "*lc"
+	MetaHC                      = "*hc"
 	MetaQOS                     = "*qos"
 	MetaReas                    = "*reas"
 	MetaReds                    = "*reds"
@@ -805,6 +805,7 @@ const (
 	ApierV1GetRatingProfileIDs      = "ApierV1.GetRatingProfileIDs"
 	ApierV1SetDataDBVersions        = "ApierV1.SetDataDBVersions"
 	ApierV1SetStorDBVersions        = "ApierV1.SetStorDBVersions"
+	ApierV1GetAccountActionPlan     = "ApierV1.GetAccountActionPlan"
 )
 
 const (
@@ -1149,6 +1150,7 @@ const (
 	AttributeFilterIndexes  = "afi_"
 	ChargerFilterIndexes    = "cfi_"
 	DispatcherFilterIndexes = "dfi_"
+	ActionPlanIndexes       = "api_"
 )
 
 // Agents

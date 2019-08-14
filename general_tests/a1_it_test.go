@@ -317,7 +317,7 @@ func TestA1itConcurrentAPs(t *testing.T) {
 		wg.Add(3)
 		go func(acnt string) {
 			var atms []*v1.AccountActionTiming
-			if err := a1rpc.Call("ApierV1.GetAccountActionPlan",
+			if err := a1rpc.Call(utils.ApierV1GetAccountActionPlan,
 				utils.TenantAccount{Tenant: "cgrates.org", Account: acnt}, &atms); err != nil {
 				t.Error(err)
 				//} else if len(atms) != 2 || atms[0].ActionPlanId != "PACKAGE_1" {
