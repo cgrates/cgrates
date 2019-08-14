@@ -45,8 +45,8 @@ var (
 )
 
 var sTestsLoader = []func(t *testing.T){
-	testLoaderInitCfg,
 	testLoaderMakeFolders,
+	testLoaderInitCfg,
 	testLoaderResetDataDB,
 	testLoaderStartEngine,
 	testLoaderRPCConn,
@@ -85,21 +85,16 @@ func testLoaderInitCfg(t *testing.T) {
 
 func testLoaderMakeFolders(t *testing.T) {
 	// active the loaders here
-	for _, ldr := range loaderCfg.LoaderCfg() {
-		if ldr.Id == "CustomLoader" {
-			for _, dir := range []string{ldr.TpInDir, ldr.TpOutDir} {
-				if err := os.RemoveAll(dir); err != nil {
-					t.Fatal("Error removing folder: ", dir, err)
-				}
-				if err := os.MkdirAll(dir, 0755); err != nil {
-					t.Fatal("Error creating folder: ", dir, err)
-				}
-			}
-			loaderPathIn = ldr.TpInDir
-			loaderPathOut = ldr.TpOutDir
+	for _, dir := range []string{"/tmp/In", "/tmp/Out"} {
+		if err := os.RemoveAll(dir); err != nil {
+			t.Fatal("Error removing folder: ", dir, err)
+		}
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Fatal("Error creating folder: ", dir, err)
 		}
 	}
-
+	loaderPathIn = "/tmp/In"
+	loaderPathOut = "/tmp/Out"
 }
 
 // Wipe out the cdr database
