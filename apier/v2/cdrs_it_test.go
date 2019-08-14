@@ -56,6 +56,10 @@ var sTestsCDRsIT = []func(t *testing.T){
 	testV2CDRsRemoveRatingProfiles,
 	testV2CDRsProcessCDRNoRattingPlan,
 	testV2CDRsGetCdrsNoRattingPlan,
+
+	testV2CDRsRateCDRsWithRatingPlan,
+	testV2CDRsGetCdrsWithRattingPlan,
+
 	testV2CDRsKillEngine,
 }
 
@@ -590,8 +594,7 @@ func testV2CDRsGetCdrsNoRattingPlan(t *testing.T) {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
 		if cdrs[0].ExtraInfo != utils.ErrRatingPlanNotFound.Error() {
-			t.Errorf("PayPalAccount should be added by AttributeS, have: %s",
-				cdrs[0].ExtraFields["PayPalAccount"])
+			t.Errorf("Expected ExtraInfo : %s received :%s", utils.ErrRatingPlanNotFound.Error(), cdrs[0].ExtraInfo)
 		}
 	}
 	args = utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"}, Accounts: []string{"testV2CDRsProcessCDR4"}}
@@ -604,8 +607,100 @@ func testV2CDRsGetCdrsNoRattingPlan(t *testing.T) {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
 		if cdrs[0].ExtraInfo != utils.ErrRatingPlanNotFound.Error() {
-			t.Errorf("PayPalAccount should be added by AttributeS, have: %s",
-				cdrs[0].ExtraFields["PayPalAccount"])
+			t.Errorf("Expected ExtraInfo : %s received :%s", utils.ErrRatingPlanNotFound.Error(), cdrs[0].ExtraInfo)
+		}
+	}
+}
+
+// Should re-rate the supplier1 cost with RP_ANY2CNT
+func testV2CDRsRateCDRsWithRatingPlan(t *testing.T) {
+	rpf := &utils.AttrSetRatingProfile{
+		Tenant:   "cgrates.org",
+		Category: "call",
+		Subject:  "SUPPLIER1",
+		RatingPlanActivations: []*utils.TPRatingActivation{
+			{
+				ActivationTime: "2018-01-01T00:00:00Z",
+				RatingPlanId:   "RP_ANY1CNT"}},
+		Overwrite: true,
+	}
+	var reply string
+	if err := cdrsRpc.Call("ApierV1.SetRatingProfile", rpf, &reply); err != nil {
+		t.Error("Got error on ApierV1.SetRatingProfile: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.SetRatingProfile got reply: ", reply)
+	}
+
+	rpf = &utils.AttrSetRatingProfile{
+		Tenant:   "cgrates.org",
+		Category: "call",
+		Subject:  utils.ANY,
+		RatingPlanActivations: []*utils.TPRatingActivation{
+			{
+				ActivationTime: "2018-01-01T00:00:00Z",
+				RatingPlanId:   "RP_TESTIT1"}},
+		Overwrite: true,
+	}
+	if err := cdrsRpc.Call("ApierV1.SetRatingProfile", rpf, &reply); err != nil {
+		t.Error("Got error on ApierV1.SetRatingProfile: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.SetRatingProfile got reply: ", reply)
+	}
+
+	if err := cdrsRpc.Call(utils.CDRsV1RateCDRs, &engine.ArgRateCDRs{
+		RPCCDRsFilter: utils.RPCCDRsFilter{NotRunIDs: []string{utils.MetaRaw}, Accounts: []string{"testV2CDRsProcessCDR4"}},
+		ChargerS:      utils.BoolPointer(true),
+	}, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+}
+
+func testV2CDRsGetCdrsWithRattingPlan(t *testing.T) {
+	var cdrCnt int64
+	req := utils.AttrGetCdrs{}
+	if err := cdrsRpc.Call("ApierV2.CountCDRs", req, &cdrCnt); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if cdrCnt != 11 {
+		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
+	}
+	var cdrs []*engine.ExternalCDR
+	args := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}, Accounts: []string{"testV2CDRsProcessCDR4"}}
+	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Cost != -1.0 {
+			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		}
+	}
+	args = utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"}, Accounts: []string{"testV2CDRsProcessCDR4"}}
+	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Cost != 0.0102 {
+			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		}
+		if cdrs[0].ExtraInfo != "" {
+			t.Errorf("Expected ExtraInfo : %s received :%s", "", cdrs[0].ExtraInfo)
+		}
+	}
+	args = utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"}, Accounts: []string{"testV2CDRsProcessCDR4"}}
+	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Cost != 0.0102 {
+			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		}
+		if cdrs[0].ExtraInfo != "" {
+			t.Errorf("Expected ExtraInfo : %s received :%s", "", cdrs[0].ExtraInfo)
 		}
 	}
 }

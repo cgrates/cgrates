@@ -308,6 +308,36 @@ func (t CDRsql) TableName() string {
 	return utils.CDRsTBL
 }
 
+func (t CDRsql) AsMapStringInterface() (out map[string]interface{}) {
+	out = make(map[string]interface{})
+	// out["id"] = t.ID // ignore ID
+	out["cgrid"] = t.Cgrid
+	out["run_id"] = t.RunID
+	out["origin_host"] = t.OriginHost
+	out["source"] = t.Source
+	out["origin_id"] = t.OriginID
+	out["tor"] = t.TOR
+	out["request_type"] = t.RequestType
+	out["tenant"] = t.Tenant
+	out["category"] = t.Category
+	out["account"] = t.Account
+	out["subject"] = t.Subject
+	out["destination"] = t.Destination
+	out["setup_time"] = t.SetupTime
+	out["answer_time"] = t.AnswerTime
+	out["usage"] = t.Usage
+	out["extra_fields"] = t.ExtraFields
+	out["cost_source"] = t.CostSource
+	out["cost"] = t.Cost
+	out["cost_details"] = t.CostDetails
+	out["extra_info"] = t.ExtraInfo
+	out["created_at"] = t.CreatedAt
+	out["updated_at"] = t.UpdatedAt
+	// out["deleted_at"] = t.DeletedAt // ignore DeletedAt
+	return
+
+}
+
 type SessionCostsSQL struct {
 	ID          int64
 	Cgrid       string
