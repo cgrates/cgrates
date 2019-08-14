@@ -52,6 +52,10 @@ var sTestsCDRsIT = []func(t *testing.T){
 	testV2CDRsGetCdrs2,
 	testV2CDRsUsageNegative,
 	testV2CDRsDifferentTenants,
+
+	testV2CDRsRemoveRatingProfiles,
+	testV2CDRsProcessCDRNoRattingPlan,
+	testV2CDRsGetCdrsNoRattingPlan,
 	testV2CDRsKillEngine,
 }
 
@@ -503,6 +507,106 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	}
+}
+
+func testV2CDRsRemoveRatingProfiles(t *testing.T) {
+	var reply string
+	if err := cdrsRpc.Call(utils.ApierV1RemoveRatingProfile, &v1.AttrRemoveRatingProfile{
+		Tenant:   "cgrates.org",
+		Category: utils.CALL,
+		Subject:  utils.ANY,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected: %s, received: %s ", utils.OK, reply)
+	}
+	if err := cdrsRpc.Call(utils.ApierV1RemoveRatingProfile, &v1.AttrRemoveRatingProfile{
+		Tenant:   "cgrates.org",
+		Category: utils.CALL,
+		Subject:  "SUPPLIER1",
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected: %s, received: %s ", utils.OK, reply)
+	}
+}
+
+func testV2CDRsProcessCDRNoRattingPlan(t *testing.T) {
+	args := &engine.ArgV1ProcessEvent{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:    "testV2CDRsProcessCDR4",
+				utils.OriginHost:  "192.168.1.1",
+				utils.Source:      "testV2CDRsProcessCDR4",
+				utils.RequestType: utils.META_RATED,
+				utils.Account:     "testV2CDRsProcessCDR4",
+				utils.Subject:     "NoSubject",
+				utils.Destination: "+1234567",
+				utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:       time.Duration(1) * time.Minute,
+				"field_extr1":     "val_extr1",
+				"fieldextr2":      "valextr2",
+			},
+		},
+	}
+
+	var reply string
+	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+}
+
+func testV2CDRsGetCdrsNoRattingPlan(t *testing.T) {
+	var cdrCnt int64
+	req := utils.AttrGetCdrs{}
+	if err := cdrsRpc.Call("ApierV2.CountCDRs", req, &cdrCnt); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if cdrCnt != 11 {
+		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
+	}
+	var cdrs []*engine.ExternalCDR
+	args := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}, Accounts: []string{"testV2CDRsProcessCDR4"}}
+	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Cost != -1.0 {
+			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		}
+	}
+	args = utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"}, Accounts: []string{"testV2CDRsProcessCDR4"}}
+	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Cost != -1 {
+			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		}
+		if cdrs[0].ExtraInfo != utils.ErrRatingPlanNotFound.Error() {
+			t.Errorf("PayPalAccount should be added by AttributeS, have: %s",
+				cdrs[0].ExtraFields["PayPalAccount"])
+		}
+	}
+	args = utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"}, Accounts: []string{"testV2CDRsProcessCDR4"}}
+	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Cost != -1 {
+			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		}
+		if cdrs[0].ExtraInfo != utils.ErrRatingPlanNotFound.Error() {
+			t.Errorf("PayPalAccount should be added by AttributeS, have: %s",
+				cdrs[0].ExtraFields["PayPalAccount"])
+		}
 	}
 }
 

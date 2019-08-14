@@ -241,7 +241,7 @@ func testActPlnITMigrateAndMove(t *testing.T) {
 		}
 		result, err := actPlnMigrator.dmOut.DataManager().DataDB().GetActionPlan((*v1actPln)[0].Id, true, utils.NonTransactional)
 		if err != nil {
-			t.Error("Error when getting ActionPlan ", err.Error())
+			t.Fatal("Error when getting ActionPlan ", err.Error())
 		}
 		// compared fields, uuid is generated in ActionTiming
 		if !reflect.DeepEqual(actPln.Id, result.Id) {
