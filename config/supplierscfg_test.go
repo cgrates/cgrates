@@ -46,6 +46,7 @@ func TestSupplierSCfgloadFromJsonCfg(t *testing.T) {
 	],
 	"resources_conns": [],					// address where to reach the Resource service, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// address where to reach the Stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+	"default_ratio":1,
 },
 }`
 	expected = SupplierSCfg{
@@ -54,6 +55,7 @@ func TestSupplierSCfgloadFromJsonCfg(t *testing.T) {
 		RALsConns:           []*RemoteHost{{Address: "*internal"}},
 		ResourceSConns:      []*RemoteHost{},
 		StatSConns:          []*RemoteHost{},
+		DefaultRatio:        1,
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
 		t.Error(err)

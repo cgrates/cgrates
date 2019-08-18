@@ -465,6 +465,7 @@ const (
 	MetaQOS                     = "*qos"
 	MetaReas                    = "*reas"
 	MetaReds                    = "*reds"
+	MetaLD                      = "*ld"
 	Weight                      = "Weight"
 	Cost                        = "Cost"
 	RatingPlanID                = "RatingPlanID"
@@ -564,6 +565,8 @@ const (
 	RatingPlanIDs               = "RatingPlanIDs"
 	MetaAccount                 = "*account"
 	ERs                         = "ERs"
+	Ratio                       = "Ratio"
+	LoadValue                   = "LoadValue"
 )
 
 // Migrator Action

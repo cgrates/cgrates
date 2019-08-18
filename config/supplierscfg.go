@@ -28,6 +28,7 @@ type SupplierSCfg struct {
 	RALsConns           []*RemoteHost
 	ResourceSConns      []*RemoteHost
 	StatSConns          []*RemoteHost
+	DefaultRatio        int
 }
 
 func (spl *SupplierSCfg) loadFromJsonCfg(jsnCfg *SupplierSJsonCfg) (err error) {
@@ -81,6 +82,9 @@ func (spl *SupplierSCfg) loadFromJsonCfg(jsnCfg *SupplierSJsonCfg) (err error) {
 			spl.StatSConns[idx] = NewDfltRemoteHost()
 			spl.StatSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
+	}
+	if jsnCfg.Default_ratio != nil {
+		spl.DefaultRatio = *jsnCfg.Default_ratio
 	}
 	return nil
 }

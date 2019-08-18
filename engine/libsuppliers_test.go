@@ -630,3 +630,44 @@ func TestLibSuppliersSortQOS8(t *testing.T) {
 			eIds, rcv)
 	}
 }
+
+func TestLibSuppliersSortLoadDistribution(t *testing.T) {
+	sSpls := &SortedSuppliers{
+		SortedSuppliers: []*SortedSupplier{
+			&SortedSupplier{
+				SupplierID: "supplier1",
+				SortingData: map[string]interface{}{
+					utils.Weight:    25.0,
+					utils.Ratio:     4.0,
+					utils.LoadValue: 3.0,
+				},
+			},
+			&SortedSupplier{
+				SupplierID: "supplier2",
+				SortingData: map[string]interface{}{
+					utils.Weight:    15.0,
+					utils.Ratio:     10.0,
+					utils.LoadValue: 5.0,
+				},
+			},
+			&SortedSupplier{
+				SupplierID: "supplier3",
+				SortingData: map[string]interface{}{
+					utils.Weight:    25.0,
+					utils.Ratio:     1.0,
+					utils.LoadValue: 1.0,
+				},
+			},
+		},
+	}
+	sSpls.SortLoadDistribution()
+	rcv := make([]string, len(sSpls.SortedSuppliers))
+	eIds := []string{"supplier2", "supplier1", "supplier3"}
+	for i, spl := range sSpls.SortedSuppliers {
+		rcv[i] = spl.SupplierID
+	}
+	if !reflect.DeepEqual(eIds, rcv) {
+		t.Errorf("Expecting: %+v, \n received: %+v",
+			eIds, rcv)
+	}
+}

@@ -434,6 +434,7 @@ type SupplierSJsonCfg struct {
 	Rals_conns            *[]*RemoteHostJson
 	Resources_conns       *[]*RemoteHostJson
 	Stats_conns           *[]*RemoteHostJson
+	Default_ratio         *int
 }
 
 type LoaderJsonDataType struct {
