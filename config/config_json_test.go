@@ -862,6 +862,7 @@ func TestDfSupplierSJsonCfg(t *testing.T) {
 		},
 		Resources_conns: &[]*RemoteHostJson{},
 		Stats_conns:     &[]*RemoteHostJson{},
+		Default_ratio:   utils.IntPointer(1),
 	}
 	if cfg, err := dfCgrJsonCfg.SupplierSJsonCfg(); err != nil {
 		t.Error(err)

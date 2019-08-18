@@ -861,6 +861,7 @@ func TestCgrCfgJSONDefaultSupplierSCfg(t *testing.T) {
 		},
 		ResourceSConns: []*RemoteHost{},
 		StatSConns:     []*RemoteHost{},
+		DefaultRatio:   1,
 	}
 	if !reflect.DeepEqual(eSupplSCfg, cgrCfg.supplierSCfg) {
 		t.Errorf("received: %+v, expecting: %+v", eSupplSCfg, cgrCfg.supplierSCfg)

@@ -23,6 +23,7 @@ import (
 	"reflect"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -41,6 +42,8 @@ type Supplier struct {
 	Weight             float64
 	Blocker            bool // do not process further supplier after this one
 	SupplierParameters string
+
+	cacheSupplier map[string]interface{} // cache["*ratio"]=ratio
 }
 
 // SupplierProfile represents the configuration of a Supplier profile
@@ -53,6 +56,43 @@ type SupplierProfile struct {
 	SortingParameters  []string
 	Suppliers          []*Supplier
 	Weight             float64
+
+	cache map[string]interface{}
+}
+
+func (sp *SupplierProfile) compileCacheParameters() error {
+	if sp.Sorting == utils.MetaLoad {
+		// construct the map for ratio
+		ratioMap := make(map[string]int)
+		// []string{"supplierID:Ratio"}
+		for _, splIDWithRatio := range sp.SortingParameters {
+			splitted := strings.Split(splIDWithRatio, utils.CONCATENATED_KEY_SEP)
+			ratioVal, err := strconv.Atoi(splitted[1])
+			if err != nil {
+				return err
+			}
+			ratioMap[splitted[0]] = ratioVal
+		}
+		// add the ratio for each supplier
+		for _, supplier := range sp.Suppliers {
+			supplier.cacheSupplier = make(map[string]interface{})
+			if ratioSupplier, has := ratioMap[supplier.ID]; !has { // in case that ratio isn't defined for specific suppliers check for default
+				if ratioDefault, has := ratioMap[utils.MetaDefault]; !has { // in case that *default ratio isn't defined take it from config
+					supplier.cacheSupplier[utils.MetaRatio] = config.CgrConfig().SupplierSCfg().DefaultRatio
+				} else {
+					supplier.cacheSupplier[utils.MetaRatio] = ratioDefault
+				}
+			} else {
+				supplier.cacheSupplier[utils.MetaRatio] = ratioSupplier
+			}
+		}
+	}
+	return nil
+}
+
+// Compile is a wrapper for convenience setting up the SupplierProfile
+func (sp *SupplierProfile) Compile() error {
+	return sp.compileCacheParameters()
 }
 
 // TenantID returns unique identifier of the LCRProfile in a multi-tenant environment
@@ -272,6 +312,7 @@ func (spS *SupplierService) statMetrics(statIDs []string, tenant string) (stsMet
 	provStsMetrics := make(map[string][]float64)
 	if spS.statS != nil {
 		for _, statID := range statIDs {
+			// check if we get an ID in the following form (StatID:MetricID)
 			var metrics map[string]float64
 			if err = spS.statS.Call(utils.StatSv1GetQueueFloatMetrics,
 				&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: tenant, ID: statID}}, &metrics); err != nil &&
@@ -290,6 +331,46 @@ func (spS *SupplierService) statMetrics(statIDs []string, tenant string) (stsMet
 				sum += val
 			}
 			stsMetric[metric] = sum / float64(len(slice))
+		}
+	}
+	return
+}
+
+// statMetricsForLoadDistribution will query a list of statIDs and return the sum of metrics
+// first metric found is always returned
+func (spS *SupplierService) statMetricsForLoadDistribution(statIDs []string, tenant string) (result float64, err error) {
+	provStsMetrics := make(map[string][]float64)
+	if spS.statS != nil {
+		for _, statID := range statIDs {
+			// check if we get an ID in the following form (StatID:MetricID)
+			statWithMetric := strings.Split(statID, utils.InInFieldSep)
+			var metrics map[string]float64
+			if err = spS.statS.Call(utils.StatSv1GetQueueFloatMetrics,
+				&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: tenant, ID: statWithMetric[0]}}, &metrics); err != nil &&
+				err.Error() != utils.ErrNotFound.Error() {
+				utils.Logger.Warning(
+					fmt.Sprintf("<SupplierS> error: %s getting statMetrics for stat : %s", err.Error(), statWithMetric[0]))
+			}
+			if len(statWithMetric) == 2 { // in case we have MetricID defined with StatID we consider only that metric
+				// check if statQueue have metric defined
+				if metricVal, has := metrics[statWithMetric[1]]; !has {
+					return 0, fmt.Errorf("<%s> error: %s metric %s for statID: %s", utils.SupplierS, utils.ErrNotFound, statWithMetric[1], statWithMetric[0])
+				} else {
+					provStsMetrics[statWithMetric[1]] = append(provStsMetrics[statWithMetric[1]], metricVal)
+				}
+			} else { // otherwise we consider all metrics
+				for key, val := range metrics {
+					//add value of metric in a slice in case that we get the same metric from different stat
+					provStsMetrics[key] = append(provStsMetrics[key], val)
+				}
+			}
+		}
+		for _, slice := range provStsMetrics {
+			sum := 0.0
+			for _, val := range slice {
+				sum += val
+			}
+			result += sum
 		}
 	}
 	return
@@ -349,32 +430,48 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 		}
 	}
 	//calculate metrics
+	//in case we have *load strategy we use statMetricsForLoadDistribution function to calculate the result
 	if len(spl.StatIDs) != 0 {
-		metricSupp, err := spS.statMetrics(spl.StatIDs, ev.Tenant) //create metric map for suppier
-		if err != nil {
-			if extraOpts.ignoreErrors {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> ignoring supplier with ID: %s, err: %s",
-						utils.SupplierS, spl.ID, err.Error()))
-				return nil, false, nil
-			} else {
-				return nil, false, err
+		if extraOpts.sortingStragety == utils.MetaLoad {
+			metricSum, err := spS.statMetricsForLoadDistribution(spl.StatIDs, ev.Tenant) //create metric map for suppier
+			if err != nil {
+				if extraOpts.ignoreErrors {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> ignoring supplier with ID: %s, err: %s",
+							utils.SupplierS, spl.ID, err.Error()))
+					return nil, false, nil
+				} else {
+					return nil, false, err
+				}
 			}
-		}
-		//add metrics from statIDs in SortingData
-		for key, val := range metricSupp {
-			sortedSpl.SortingData[key] = val
-		}
-		//check if the supplier have the metric from sortingParameters
-		//in case that the metric don't exist
-		//we use 10000000 for *pdd and -1 for others
-		for _, metric := range extraOpts.sortingParameters {
-			if _, hasMetric := metricSupp[metric]; !hasMetric {
-				switch metric {
-				default:
-					sortedSpl.SortingData[metric] = -1.0
-				case utils.MetaPDD:
-					sortedSpl.SortingData[metric] = 10000000.0
+			sortedSpl.SortingData[utils.LoadValue] = metricSum
+		} else {
+			metricSupp, err := spS.statMetrics(spl.StatIDs, ev.Tenant) //create metric map for suppier
+			if err != nil {
+				if extraOpts.ignoreErrors {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> ignoring supplier with ID: %s, err: %s",
+							utils.SupplierS, spl.ID, err.Error()))
+					return nil, false, nil
+				} else {
+					return nil, false, err
+				}
+			}
+			//add metrics from statIDs in SortingData
+			for key, val := range metricSupp {
+				sortedSpl.SortingData[key] = val
+			}
+			//check if the supplier have the metric from sortingParameters
+			//in case that the metric don't exist
+			//we use 10000000 for *pdd and -1 for others
+			for _, metric := range extraOpts.sortingParameters {
+				if _, hasMetric := metricSupp[metric]; !hasMetric {
+					switch metric {
+					default:
+						sortedSpl.SortingData[metric] = -1.0
+					case utils.MetaPDD:
+						sortedSpl.SortingData[metric] = 10000000.0
+					}
 				}
 			}
 		}
@@ -427,6 +524,7 @@ func (spS *SupplierService) sortedSuppliersForEvent(args *ArgsGetSuppliers) (sor
 		return nil, err
 	}
 	extraOpts.sortingParameters = splPrfl.SortingParameters // populate sortingParameters in extraOpts
+	extraOpts.sortingStragety = splPrfl.Sorting             // populate sortinStrategy in extraOpts
 	sortedSuppliers, err := spS.sorter.SortSuppliers(splPrfl.ID, splPrfl.Sorting,
 		splPrfl.Suppliers, args.CGREvent, extraOpts)
 	if err != nil {
@@ -484,6 +582,7 @@ type optsGetSuppliers struct {
 	ignoreErrors      bool
 	maxCost           float64
 	sortingParameters []string //used for QOS strategy
+	sortingStragety   string
 }
 
 // V1GetSupplierProfilesForEvent returns the list of valid supplier IDs

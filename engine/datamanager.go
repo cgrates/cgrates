@@ -1006,6 +1006,10 @@ func (dm *DataManager) GetSupplierProfile(tenant, id string, cacheRead, cacheWri
 		}
 		return nil, err
 	}
+	// populate cache will compute specific config parameters
+	if err = supp.Compile(); err != nil {
+		return nil, err
+	}
 	if cacheWrite {
 		Cache.Set(utils.CacheSupplierProfiles, tntID, supp, nil,
 			cacheCommit(transactionID), transactionID)
