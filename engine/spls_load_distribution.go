@@ -26,7 +26,7 @@ import (
 
 func NewLoadDistributionSorter(spS *SupplierService) *LoadDistributionSorter {
 	return &LoadDistributionSorter{spS: spS,
-		sorting: utils.MetaLD}
+		sorting: utils.MetaLoad}
 }
 
 // ResourceAscendentSorter orders suppliers based on their Resource Usage

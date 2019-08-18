@@ -465,7 +465,6 @@ const (
 	MetaQOS                     = "*qos"
 	MetaReas                    = "*reas"
 	MetaReds                    = "*reds"
-	MetaLD                      = "*ld"
 	Weight                      = "Weight"
 	Cost                        = "Cost"
 	RatingPlanID                = "RatingPlanID"
