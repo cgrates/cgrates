@@ -312,7 +312,6 @@ func (spS *SupplierService) statMetrics(statIDs []string, tenant string) (stsMet
 	provStsMetrics := make(map[string][]float64)
 	if spS.statS != nil {
 		for _, statID := range statIDs {
-			// check if we get an ID in the following form (StatID:MetricID)
 			var metrics map[string]float64
 			if err = spS.statS.Call(utils.StatSv1GetQueueFloatMetrics,
 				&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: tenant, ID: statID}}, &metrics); err != nil &&
