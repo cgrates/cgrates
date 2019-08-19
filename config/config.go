@@ -167,7 +167,6 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.migratorCgrCfg = new(MigratorCgrCfg)
 	cfg.mailerCfg = new(MailerCfg)
 	cfg.loaderCfg = make([]*LoaderSCfg, 0)
-	cfg.SmOsipsConfig = new(SmOsipsConfig)
 	cfg.apier = new(ApierCfg)
 	cfg.ersCfg = new(ERsCfg)
 
@@ -358,7 +357,6 @@ type CGRConfig struct {
 	migratorCgrCfg   *MigratorCgrCfg   // MigratorCgr config
 	mailerCfg        *MailerCfg        // Mailer config
 	analyzerSCfg     *AnalyzerSCfg     // AnalyzerS config
-	SmOsipsConfig    *SmOsipsConfig    // SMOpenSIPS Configuration
 	apier            *ApierCfg
 	ersCfg           *ERsCfg
 }
@@ -374,14 +372,16 @@ func (self *CGRConfig) checkConfigSanity() error {
 		if !self.statsCfg.Enabled {
 			for _, connCfg := range self.ralsCfg.RALsStatSConns {
 				if connCfg.Address == utils.MetaInternal {
-					return errors.New("StatS not enabled but requested by RALs component.")
+					return fmt.Errorf("%s not enabled but requested by %s component.",
+						utils.StatS, utils.RALService)
 				}
 			}
 		}
 		if !self.thresholdSCfg.Enabled {
 			for _, connCfg := range self.ralsCfg.RALsThresholdSConns {
 				if connCfg.Address == utils.MetaInternal {
-					return errors.New("ThresholdS not enabled but requested by RALs component.")
+					return fmt.Errorf("%s not enabled but requested by %s component.",
+						utils.ThresholdS, utils.RALService)
 				}
 			}
 		}
@@ -438,7 +438,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 			if len(cdrcInst.CdrsConns) == 0 {
 				return fmt.Errorf("<CDRC> Instance: %s, CdrC enabled but no CDRS defined!", cdrcInst.ID)
 			}
-			if !self.cdrsCfg.CDRSEnabled {
+			if !self.cdrsCfg.CDRSEnabled && !self.dispatcherSCfg.Enabled {
 				for _, conn := range cdrcInst.CdrsConns {
 					if conn.Address == utils.MetaInternal {
 						return errors.New("CDRS not enabled but referenced from CDRC")
@@ -488,162 +488,160 @@ func (self *CGRConfig) checkConfigSanity() error {
 		if !self.chargerSCfg.Enabled {
 			for _, conn := range self.sessionSCfg.ChargerSConns {
 				if conn.Address == utils.MetaInternal {
-					return errors.New("<SessionS> ChargerS not enabled")
+					return fmt.Errorf("<%s> %s not enabled", utils.SessionS, utils.ChargerS)
 				}
 			}
 		}
 		if !self.ralsCfg.RALsEnabled {
 			for _, smgRALsConn := range self.sessionSCfg.RALsConns {
 				if smgRALsConn.Address == utils.MetaInternal {
-					return errors.New("<SessionS> RALs not enabled but requested by SMGeneric component.")
+					return fmt.Errorf("<%s> %s not enabled but requested by SMGeneric component.", utils.SessionS, utils.RALService)
 				}
 			}
 		}
 		if !self.resourceSCfg.Enabled {
 			for _, conn := range self.sessionSCfg.ResSConns {
 				if conn.Address == utils.MetaInternal {
-					return errors.New("<SessionS> ResourceS not enabled but requested by SMGeneric component.")
+					return fmt.Errorf("<%s> %s not enabled but requested by SMGeneric component.", utils.SessionS, utils.ResourceS)
 				}
 			}
 		}
 		if !self.thresholdSCfg.Enabled {
 			for _, conn := range self.sessionSCfg.ThreshSConns {
 				if conn.Address == utils.MetaInternal {
-					return errors.New("<SessionS> ThresholdS not enabled but requested by SMGeneric component.")
+					return fmt.Errorf("<%s> %s not enabled but requested by SMGeneric component.", utils.SessionS, utils.ThresholdS)
 				}
 			}
 		}
 		if !self.statsCfg.Enabled {
 			for _, conn := range self.sessionSCfg.StatSConns {
 				if conn.Address == utils.MetaInternal {
-					return errors.New("<SessionS> StatS not enabled but requested by SMGeneric component.")
+					return fmt.Errorf("<%s> %s not enabled but requested by SMGeneric component.", utils.SessionS, utils.StatS)
 				}
 			}
 		}
 		if !self.supplierSCfg.Enabled {
 			for _, conn := range self.sessionSCfg.SupplSConns {
 				if conn.Address == utils.MetaInternal {
-					return errors.New("<SessionS> SupplierS not enabled but requested by SMGeneric component.")
+					return fmt.Errorf("<%s> %s not enabled but requested by SMGeneric component.", utils.SessionS, utils.SupplierS)
 				}
 			}
 		}
 		if !self.attributeSCfg.Enabled {
 			for _, conn := range self.sessionSCfg.AttrSConns {
 				if conn.Address == utils.MetaInternal {
-					return errors.New("<SessionS> AttributeS not enabled but requested by SMGeneric component.")
+					return fmt.Errorf("<%s> %s not enabled but requested by SMGeneric component.", utils.SessionS, utils.AttributeS)
 				}
 			}
 		}
 		if !self.cdrsCfg.CDRSEnabled {
 			for _, smgCDRSConn := range self.sessionSCfg.CDRsConns {
 				if smgCDRSConn.Address == utils.MetaInternal {
-					return errors.New("<SessionS> CDRS not enabled but referenced by SMGeneric component")
+					return fmt.Errorf("<%s> CDRS not enabled but referenced by SMGeneric component", utils.SessionS)
 				}
 			}
 		}
 	}
 	// FreeSWITCHAgent checks
-	if self.fsAgentCfg.Enabled && !self.dispatcherSCfg.Enabled {
+	if self.fsAgentCfg.Enabled {
 		if len(self.fsAgentCfg.SessionSConns) == 0 {
-			return fmt.Errorf("<%s> SMG definition is mandatory!", utils.FreeSWITCHAgent)
+			return fmt.Errorf("<%s> no %s connections defined",
+				utils.FreeSWITCHAgent, utils.SessionS)
 		}
-		for _, connCfg := range self.fsAgentCfg.SessionSConns {
-			// if connCfg.Address != utils.MetaInternal {
-			// 	return errors.New("only <*internal> connectivity allowed in in <freeswitch_agent> towards <sessions> for now")
-			// }
-			if connCfg.Address == utils.MetaInternal &&
-				!self.sessionSCfg.Enabled {
-				return errors.New("<sessions> not enabled but referenced by <freeswitch_agent>")
+		if !self.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
+			!self.sessionSCfg.Enabled {
+			for _, connCfg := range self.fsAgentCfg.SessionSConns {
+				if connCfg.Address == utils.MetaInternal {
+					return fmt.Errorf("%s not enabled but referenced by %s",
+						utils.SessionS, utils.FreeSWITCHAgent)
+				}
 			}
 		}
 	}
 	// KamailioAgent checks
-	if self.kamAgentCfg.Enabled && !self.dispatcherSCfg.Enabled {
+	if self.kamAgentCfg.Enabled {
 		if len(self.kamAgentCfg.SessionSConns) == 0 {
-			return fmt.Errorf("<%s> SMG definition is mandatory!", utils.KamailioAgent)
+			return fmt.Errorf("<%s> no %s connections defined",
+				utils.KamailioAgent, utils.SessionS)
 		}
-		for _, connCfg := range self.kamAgentCfg.SessionSConns {
-			// if connCfg.Address != utils.MetaInternal {
-			// 	return errors.New("only <*internal> connectivity allowed in in <kamailio_agent> towards <sessions> for now")
-			// }
-			if connCfg.Address == utils.MetaInternal &&
-				!self.sessionSCfg.Enabled {
-				return errors.New("<sessions> not enabled but referenced by <kamailio_agent>")
-			}
-		}
-	}
-	// SMOpenSIPS checks
-	if self.SmOsipsConfig.Enabled && !self.dispatcherSCfg.Enabled {
-		if len(self.SmOsipsConfig.RALsConns) == 0 {
-			return errors.New("<SMOpenSIPS> Rater definition is mandatory!")
-		}
-		if !self.ralsCfg.RALsEnabled {
-			for _, smOsipsRaterConn := range self.SmOsipsConfig.RALsConns {
-				if smOsipsRaterConn.Address == utils.MetaInternal {
-					return errors.New("<SMOpenSIPS> RALs not enabled.")
-				}
-			}
-		}
-		if len(self.SmOsipsConfig.CDRsConns) == 0 {
-			return errors.New("<SMOpenSIPS> CDRs definition is mandatory!")
-		}
-		if !self.cdrsCfg.CDRSEnabled {
-			for _, smOsipsCDRSConn := range self.SmOsipsConfig.CDRsConns {
-				if smOsipsCDRSConn.Address == utils.MetaInternal {
-					return errors.New("<SMOpenSIPS> CDRS not enabled.")
+		if !self.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
+			!self.sessionSCfg.Enabled {
+			for _, connCfg := range self.kamAgentCfg.SessionSConns {
+				if connCfg.Address == utils.MetaInternal {
+					return fmt.Errorf("%s not enabled but referenced by %s",
+						utils.SessionS, utils.KamailioAgent)
 				}
 			}
 		}
 	}
 	// AsteriskAgent checks
-	if self.asteriskAgentCfg.Enabled && !self.dispatcherSCfg.Enabled {
+	if self.asteriskAgentCfg.Enabled {
 		if len(self.asteriskAgentCfg.SessionSConns) == 0 {
-			return errors.New("<SMAsterisk> SMG definition is mandatory!")
+			return fmt.Errorf("<%s> no %s connections defined",
+				utils.AsteriskAgent, utils.SessionS)
 		}
-		for _, smAstSMGConn := range self.asteriskAgentCfg.SessionSConns {
-			if smAstSMGConn.Address == utils.MetaInternal && !self.sessionSCfg.Enabled {
-				return errors.New("<SMAsterisk> SMG not enabled.")
+		if !self.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
+			!self.sessionSCfg.Enabled {
+			for _, smAstSMGConn := range self.asteriskAgentCfg.SessionSConns {
+				if smAstSMGConn.Address == utils.MetaInternal {
+					return fmt.Errorf("%s not enabled but referenced by %s",
+						utils.SessionS, utils.AsteriskAgent)
+				}
 			}
 		}
-		// if !self.sessionSCfg.Enabled {
-		// 	return errors.New("<SMAsterisk> SMG not enabled.")
-		// }
 	}
 	// DAgent checks
-	if self.diameterAgentCfg.Enabled && !self.sessionSCfg.Enabled && !self.dispatcherSCfg.Enabled {
+	if self.diameterAgentCfg.Enabled {
 		if len(self.diameterAgentCfg.SessionSConns) == 0 {
-			return fmt.Errorf("<%s> SMG definition is mandatory!", utils.DiameterAgent)
+			return fmt.Errorf("<%s> no %s connections defined",
+				utils.DiameterAgent, utils.SessionS)
 		}
-		for _, daSMGConn := range self.diameterAgentCfg.SessionSConns {
-			if daSMGConn.Address == utils.MetaInternal {
-				return fmt.Errorf("%s not enabled but referenced by %s component",
-					utils.SessionS, utils.DiameterAgent)
+		if !self.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
+			!self.sessionSCfg.Enabled {
+			for _, daSMGConn := range self.diameterAgentCfg.SessionSConns {
+				if daSMGConn.Address == utils.MetaInternal {
+					return fmt.Errorf("%s not enabled but referenced by %s",
+						utils.SessionS, utils.DiameterAgent)
+				}
 			}
 		}
 	}
-	if self.radiusAgentCfg.Enabled && !self.sessionSCfg.Enabled && !self.dispatcherSCfg.Enabled {
+	if self.radiusAgentCfg.Enabled {
 		if len(self.radiusAgentCfg.SessionSConns) == 0 {
-			return fmt.Errorf("<%s> SMG definition is mandatory!", utils.RadiusAgent)
+			return fmt.Errorf("<%s> no %s connections defined",
+				utils.RadiusAgent, utils.SessionS)
 		}
-		for _, raSMGConn := range self.radiusAgentCfg.SessionSConns {
-			if raSMGConn.Address == utils.MetaInternal {
-				return errors.New("SMGeneric not enabled but referenced by RadiusAgent component")
+		if !self.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
+			!self.sessionSCfg.Enabled {
+			for _, raSMGConn := range self.radiusAgentCfg.SessionSConns {
+				if raSMGConn.Address == utils.MetaInternal {
+					return fmt.Errorf("%s not enabled but referenced by %s",
+						utils.SessionS, utils.RadiusAgent)
+				}
 			}
 		}
 	}
-	if self.dnsAgentCfg.Enabled && !self.sessionSCfg.Enabled && !self.dispatcherSCfg.Enabled {
-		for _, sSConn := range self.dnsAgentCfg.SessionSConns {
-			if sSConn.Address == utils.MetaInternal {
-				return fmt.Errorf("%s not enabled but referenced by %s", utils.SessionS, utils.DNSAgent)
+	if self.dnsAgentCfg.Enabled {
+		if len(self.dnsAgentCfg.SessionSConns) == 0 {
+			return fmt.Errorf("<%s> no %s connections defined",
+				utils.DNSAgent, utils.SessionS)
+		}
+		if !self.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
+			!self.sessionSCfg.Enabled {
+			for _, sSConn := range self.dnsAgentCfg.SessionSConns {
+				if sSConn.Address == utils.MetaInternal {
+					return fmt.Errorf("%s not enabled but referenced by %s", utils.SessionS, utils.DNSAgent)
+				}
 			}
 		}
 	}
 	// HTTPAgent checks
 	for _, httpAgentCfg := range self.httpAgentCfg {
 		// httpAgent checks
-		if !self.dispatcherSCfg.Enabled {
+		if !self.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
+			self.sessionSCfg.Enabled {
 			for _, sSConn := range httpAgentCfg.SessionSConns {
-				if sSConn.Address == utils.MetaInternal && self.sessionSCfg.Enabled {
+				if sSConn.Address == utils.MetaInternal {
 					return errors.New("SessionS not enabled but referenced by HttpAgent component")
 				}
 			}
@@ -662,10 +660,10 @@ func (self *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> process_runs needs to be bigger than 0", utils.AttributeS)
 		}
 	}
-	if self.chargerSCfg.Enabled && !self.dispatcherSCfg.Enabled {
+	if self.chargerSCfg.Enabled && !self.dispatcherSCfg.Enabled &&
+		(self.attributeSCfg == nil || !self.attributeSCfg.Enabled) {
 		for _, connCfg := range self.chargerSCfg.AttributeSConns {
-			if connCfg.Address == utils.MetaInternal &&
-				(self.attributeSCfg == nil || !self.attributeSCfg.Enabled) {
+			if connCfg.Address == utils.MetaInternal {
 				return errors.New("AttributeS not enabled but requested by ChargerS component.")
 			}
 		}
@@ -692,7 +690,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 			if connCfg.Address != utils.MetaInternal {
 				return errors.New("Only <*internal> RALs connectivity allowed in SupplierS for now")
 			}
-			if connCfg.Address == utils.MetaInternal && !self.ralsCfg.RALsEnabled {
+			if !self.ralsCfg.RALsEnabled {
 				return errors.New("RALs not enabled but requested by SupplierS component.")
 			}
 		}
