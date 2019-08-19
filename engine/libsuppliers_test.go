@@ -637,25 +637,25 @@ func TestLibSuppliersSortLoadDistribution(t *testing.T) {
 			&SortedSupplier{
 				SupplierID: "supplier1",
 				SortingData: map[string]interface{}{
-					utils.Weight:    25.0,
-					utils.Ratio:     4.0,
-					utils.LoadValue: 3.0,
+					utils.Weight: 25.0,
+					utils.Ratio:  4.0,
+					utils.Load:   3.0,
 				},
 			},
 			&SortedSupplier{
 				SupplierID: "supplier2",
 				SortingData: map[string]interface{}{
-					utils.Weight:    15.0,
-					utils.Ratio:     10.0,
-					utils.LoadValue: 5.0,
+					utils.Weight: 15.0,
+					utils.Ratio:  10.0,
+					utils.Load:   5.0,
 				},
 			},
 			&SortedSupplier{
 				SupplierID: "supplier3",
 				SortingData: map[string]interface{}{
-					utils.Weight:    25.0,
-					utils.Ratio:     1.0,
-					utils.LoadValue: 1.0,
+					utils.Weight: 25.0,
+					utils.Ratio:  1.0,
+					utils.Load:   1.0,
 				},
 			},
 		},

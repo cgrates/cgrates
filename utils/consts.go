@@ -565,7 +565,7 @@ const (
 	MetaAccount                 = "*account"
 	ERs                         = "ERs"
 	Ratio                       = "Ratio"
-	LoadValue                   = "LoadValue"
+	Load                        = "Load"
 )
 
 // Migrator Action
