@@ -23,15 +23,30 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type EventReader interface {
-	ID() string                     // configuration identifier
-	Init(args interface{}) error    // init will initialize the Reader, ie: open the file to read or http connection
-	Read() (*utils.CGREvent, error) // Process a single record in the events file
-	Processed() int64               // number of records processed
-	Close() error                   // called when the reader should release resources
+func NewCSVFileER(cfg *config.CGRConfig, cfgIdx int) (er EventReader, err error) {
+	return
 }
 
-// NewEventReader instantiates the event reader based on configuration at index
-func NewEventReader(rdrCfg *config.EventReaderCfg) (er EventReader, err error) {
+// CSVer implements EventReader interface for .csv files
+type CSVFileER struct {
+}
+
+func (csv *CSVFileER) ID() (id string) {
+	return
+}
+
+func (csv *CSVFileER) Init(args interface{}) (err error) {
+	return
+}
+
+func (csv *CSVFileER) Read() (ev *utils.CGREvent, err error) {
+	return
+}
+
+func (csv *CSVFileER) Processed() (nrItms int64) {
+	return
+}
+
+func (csv *CSVFileER) Close() (err error) {
 	return
 }

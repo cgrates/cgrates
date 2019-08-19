@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package cdrc
+package ers
 
 import (
 	"fmt"
@@ -34,13 +34,12 @@ func NewERService(cfg *config.CGRConfig, cdrS rpcclient.RpcClientConnection,
 		rdrs:   make(map[string][]EventReader),
 		cfgRld: cfgRld,
 	}
-	//for _, cfg := range cfg.CDRcProfiles() {
-	//	if !cfg.Enabled {
-	//		continue
-	//	}
-	//}
-	if len(erS.rdrs) == 0 {
-		return nil, nil // no CDRC profiles enabled
+	for _, rdrCfg := range cfg.ERsCfg().Readers {
+		if rdr, err := NewEventReader(rdrCfg); err != nil {
+			return nil, err
+		} else {
+			erS.rdrs[rdrCfg.SourcePath] = append(erS.rdrs[rdrCfg.SourcePath], rdr)
+		}
 	}
 	return
 }
@@ -76,9 +75,9 @@ func (erS *ERService) handleReloads() {
 		addIDs := make(map[string]struct{})    // IDs which need to be added to ERService
 		remIDs := make(map[string]struct{})    // IDs which need to be removed from ERService
 		// index config IDs
-		//for i, cgrCfg := range erS.cfg.CDRcProfiles() {
-		//	cfgIDs[cgrCfg.ID] = &erCfgRef{path: cgrCfg.CDRInPath, idx: i}
-		//}
+		for i, rdrCfg := range erS.cfg.ERsCfg().Readers {
+			cfgIDs[rdrCfg.ID] = &erCfgRef{path: rdrCfg.SourcePath, idx: i}
+		}
 		erS.Lock()
 		// index in use IDs
 		for path, rdrs := range erS.rdrs {
@@ -109,7 +108,7 @@ func (erS *ERService) handleReloads() {
 		// add new ids:
 		for id := range addIDs {
 			cfgRef := cfgIDs[id]
-			if newRdr, err := NewEventReader(erS.cfg, cfgRef.idx); err != nil {
+			if newRdr, err := NewEventReader(erS.cfg.ERsCfg().Readers[cfgRef.idx]); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf(
 						"<%s> error reloading config with ID: <%s>, err: <%s>",
@@ -119,5 +118,6 @@ func (erS *ERService) handleReloads() {
 			}
 
 		}
+		erS.Unlock()
 	}
 }
