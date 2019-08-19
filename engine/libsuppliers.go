@@ -147,8 +147,8 @@ func (sSpls *SortedSuppliers) SortResourceDescendent() {
 // sort based on the following formula (float64(ratio + metricVal) / float64(ratio)) -1 with fallback on Weight
 func (sSpls *SortedSuppliers) SortLoadDistribution() {
 	sort.Slice(sSpls.SortedSuppliers, func(i, j int) bool {
-		splIVal := ((sSpls.SortedSuppliers[i].SortingData[utils.Ratio].(float64)+sSpls.SortedSuppliers[i].SortingData[utils.LoadValue].(float64))/sSpls.SortedSuppliers[i].SortingData[utils.Ratio].(float64) - 1.0)
-		splJVal := ((sSpls.SortedSuppliers[j].SortingData[utils.Ratio].(float64)+sSpls.SortedSuppliers[j].SortingData[utils.LoadValue].(float64))/sSpls.SortedSuppliers[j].SortingData[utils.Ratio].(float64) - 1.0)
+		splIVal := ((sSpls.SortedSuppliers[i].SortingData[utils.Ratio].(float64)+sSpls.SortedSuppliers[i].SortingData[utils.Load].(float64))/sSpls.SortedSuppliers[i].SortingData[utils.Ratio].(float64) - 1.0)
+		splJVal := ((sSpls.SortedSuppliers[j].SortingData[utils.Ratio].(float64)+sSpls.SortedSuppliers[j].SortingData[utils.Load].(float64))/sSpls.SortedSuppliers[j].SortingData[utils.Ratio].(float64) - 1.0)
 		if splIVal == splJVal {
 			return sSpls.SortedSuppliers[i].SortingData[utils.Weight].(float64) > sSpls.SortedSuppliers[j].SortingData[utils.Weight].(float64)
 		}

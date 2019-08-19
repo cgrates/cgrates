@@ -443,7 +443,7 @@ func (spS *SupplierService) populateSortingData(ev *utils.CGREvent, spl *Supplie
 					return nil, false, err
 				}
 			}
-			sortedSpl.SortingData[utils.LoadValue] = metricSum
+			sortedSpl.SortingData[utils.Load] = metricSum
 		} else {
 			metricSupp, err := spS.statMetrics(spl.StatIDs, ev.Tenant) //create metric map for suppier
 			if err != nil {
