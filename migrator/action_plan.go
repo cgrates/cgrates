@@ -123,6 +123,15 @@ func (m *Migrator) migrateActionPlans() (err error) {
 			utils.UndefinedVersion,
 			"version number is not defined for ActionTriggers model")
 	}
+	if m.dmIN.DataManager().DataDB().GetStorageType() == utils.REDIS { // if redis rebuild action plans indexes
+		redisDB, can := m.dmIN.DataManager().DataDB().(*engine.RedisStorage)
+		if !can {
+			return fmt.Errorf("Storage type %s could not be cated to <*engine.RedisStorage>", m.dmIN.DataManager().DataDB().GetStorageType())
+		}
+		if err = redisDB.RebbuildActionPlanKeys(); err != nil {
+			return err
+		}
+	}
 	switch vrs[utils.ActionPlans] {
 	case current[utils.ActionPlans]:
 		if m.sameDataDB {
