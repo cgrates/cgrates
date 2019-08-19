@@ -50,6 +50,18 @@
 
 "sessions": {
 	"enabled": true,
+	"attributes_conns": [
+		{"address": "*internal"},
+ 	],
+	"resources_conns": [
+		{"address": "*internal"},
+	],		
+	"rals_conns": [
+		{"address": "*internal"}
+	],
+	"chargers_conns": [
+		{"address": "*internal"}
+	],
 	"listen_bijson": ":3014",
 },
 

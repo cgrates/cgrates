@@ -57,17 +57,21 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 		<-chS.GetPrecacheChannel(utils.CacheTimings)
 	}()
 
-	var dispatcherConn rpcclient.RpcClientConnection
-	isDispatcherEnabled := cfg.DispatcherSCfg().Enabled
-	if isDispatcherEnabled {
-		dispatcherConn = <-internalDispatcherSChan
-		internalDispatcherSChan <- dispatcherConn
+	intThdSChan := internalThdSChan
+	intStatSChan := internalStatSChan
+	intCacheSChan := internalCacheSChan
+	intSchedulerSChanL := internalSchedulerSChan
+	intAttributeSChan := internalAttributeSChan
+	if cfg.DispatcherSCfg().Enabled {
+		intThdSChan = internalDispatcherSChan
+		intStatSChan = internalDispatcherSChan
+		intCacheSChan = internalDispatcherSChan
+		intSchedulerSChanL = internalDispatcherSChan
+		intAttributeSChan = internalDispatcherSChan
 	}
 
 	var thdS rpcclient.RpcClientConnection
-	if isDispatcherEnabled {
-		thdS = dispatcherConn
-	} else if len(cfg.RalsCfg().RALsThresholdSConns) != 0 { // Connections to ThresholdS
+	if len(cfg.RalsCfg().RALsThresholdSConns) != 0 { // Connections to ThresholdS
 		thdsTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, thdsTaskChan)
 		go func() {
@@ -78,7 +82,7 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.RalsCfg().RALsThresholdSConns, internalThdSChan, false)
+				cfg.RalsCfg().RALsThresholdSConns, intThdSChan, false)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to ThresholdS, error: %s", err.Error()))
 				exitChan <- true
@@ -88,9 +92,7 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 	}
 
 	var stats rpcclient.RpcClientConnection
-	if isDispatcherEnabled {
-		stats = dispatcherConn
-	} else if len(cfg.RalsCfg().RALsStatSConns) != 0 { // Connections to StatS
+	if len(cfg.RalsCfg().RALsStatSConns) != 0 { // Connections to StatS
 		statsTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, statsTaskChan)
 		go func() {
@@ -101,7 +103,7 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.RalsCfg().RALsStatSConns, internalStatSChan, false)
+				cfg.RalsCfg().RALsStatSConns, intStatSChan, false)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to StatS, error: %s", err.Error()))
 				exitChan <- true
@@ -112,9 +114,7 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 
 	//create cache connection
 	var cacheSrpc rpcclient.RpcClientConnection
-	if isDispatcherEnabled {
-		cacheSrpc = dispatcherConn
-	} else if len(cfg.ApierCfg().CachesConns) != 0 {
+	if len(cfg.ApierCfg().CachesConns) != 0 {
 		cachesTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, cachesTaskChan)
 		go func() {
@@ -125,7 +125,7 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.ApierCfg().CachesConns, internalCacheSChan, false)
+				cfg.ApierCfg().CachesConns, intCacheSChan, false)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<APIer> Could not connect to CacheS, error: %s", err.Error()))
 				exitChan <- true
@@ -136,9 +136,7 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 
 	//create scheduler connection
 	var schedulerSrpc rpcclient.RpcClientConnection
-	if isDispatcherEnabled {
-		schedulerSrpc = dispatcherConn
-	} else if len(cfg.ApierCfg().SchedulerConns) != 0 {
+	if len(cfg.ApierCfg().SchedulerConns) != 0 {
 		schedulerSTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, schedulerSTaskChan)
 		go func() {
@@ -149,7 +147,7 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.ApierCfg().SchedulerConns, internalSchedulerSChan, false)
+				cfg.ApierCfg().SchedulerConns, intSchedulerSChanL, false)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<APIer> Could not connect to SchedulerS, error: %s", err.Error()))
 				exitChan <- true
@@ -160,9 +158,7 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 
 	//create scheduler connection
 	var attributeSrpc rpcclient.RpcClientConnection
-	if isDispatcherEnabled {
-		attributeSrpc = dispatcherConn
-	} else if len(cfg.ApierCfg().SchedulerConns) != 0 {
+	if len(cfg.ApierCfg().SchedulerConns) != 0 {
 		attributeSTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, attributeSTaskChan)
 		go func() {
@@ -173,7 +169,7 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.ApierCfg().AttributeSConns, internalAttributeSChan, false)
+				cfg.ApierCfg().AttributeSConns, intAttributeSChan, false)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<APIer> Could not connect to AttributeS, error: %s", err.Error()))
 				exitChan <- true
