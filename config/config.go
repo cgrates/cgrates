@@ -169,7 +169,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.loaderCfg = make([]*LoaderSCfg, 0)
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
 	cfg.apier = new(ApierCfg)
-	cfg.erCfg = new(ERsCfg)
+	cfg.ersCfg = new(ERsCfg)
 
 	cfg.ConfigReloads = make(map[string]chan struct{})
 	cfg.ConfigReloads[utils.CDRC] = make(chan struct{}, 1)
@@ -193,6 +193,13 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 
 	cfg.dfltCdreProfile = cfg.CdreProfiles[utils.META_DEFAULT].Clone() // So default will stay unique, will have nil pointer in case of no defaults loaded which is an extra check
 	cfg.dfltCdrcProfile = cfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0].Clone()
+	// populate default ERs reader
+	for _, ersRdr := range cfg.ersCfg.Readers {
+		if ersRdr.ID == utils.MetaDefault {
+			cfg.dfltEvRdr = ersRdr.Clone()
+			break
+		}
+	}
 	dfltFsConnConfig = cfg.fsAgentCfg.EventSocketConns[0] // We leave it crashing here on purpose if no Connection defaults defined
 	dfltKamConnConfig = cfg.kamAgentCfg.EvapiConns[0]
 	dfltAstConnCfg = cfg.asteriskAgentCfg.AsteriskConns[0]
@@ -310,8 +317,9 @@ type CGRConfig struct {
 	ConfigPath      string        // Path towards config
 
 	// Cache defaults loaded from json and needing clones
-	dfltCdreProfile *CdreCfg // Default cdreConfig profile
-	dfltCdrcProfile *CdrcCfg // Default cdrcConfig profile
+	dfltCdreProfile *CdreCfg        // Default cdreConfig profile
+	dfltCdrcProfile *CdrcCfg        // Default cdrcConfig profile
+	dfltEvRdr       *EventReaderCfg // default event reader
 
 	CdreProfiles map[string]*CdreCfg   // Cdre config profiles
 	CdrcProfiles map[string][]*CdrcCfg // Number of CDRC instances running imports, format map[dirPath][]{Configs}
@@ -352,7 +360,7 @@ type CGRConfig struct {
 	analyzerSCfg     *AnalyzerSCfg     // AnalyzerS config
 	SmOsipsConfig    *SmOsipsConfig    // SMOpenSIPS Configuration
 	apier            *ApierCfg
-	erCfg            *ERsCfg
+	ersCfg           *ERsCfg
 }
 
 var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
@@ -1015,7 +1023,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return nil
 	}
-	if err := self.erCfg.loadFromJsonCfg(jsnERsCfg, self.generalCfg.RsrSepatarot); err != nil {
+	if err := self.ersCfg.loadFromJsonCfg(jsnERsCfg, self.generalCfg.RsrSepatarot); err != nil {
 		return err
 	}
 
@@ -1228,7 +1236,7 @@ func (cfg *CGRConfig) ApierCfg() *ApierCfg {
 }
 
 func (cfg *CGRConfig) ERsCfg() *ERsCfg {
-	return cfg.erCfg
+	return cfg.ersCfg
 }
 
 // Call implements rpcclient.RpcClientConnection interface for internal RPC

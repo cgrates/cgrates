@@ -1855,7 +1855,7 @@ func TestCgrCdfEventReader(t *testing.T) {
 			},
 		},
 	}
-	if !reflect.DeepEqual(cgrCfg.erCfg, eCfg) {
-		t.Errorf("received: %+v,\n expecting: %+v", utils.ToJSON(cgrCfg.erCfg), utils.ToJSON(eCfg))
+	if !reflect.DeepEqual(cgrCfg.ersCfg, eCfg) {
+		t.Errorf("received: %+v,\n expecting: %+v", utils.ToJSON(cgrCfg.ersCfg), utils.ToJSON(eCfg))
 	}
 }

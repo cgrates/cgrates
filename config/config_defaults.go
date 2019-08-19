@@ -308,8 +308,8 @@ const CGRATES_CFG_JSON = `
 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
 			"source_path": "/var/spool/cgrates/cdrc/in",		// read data from this path
 			"processed_path": "/var/spool/cgrates/cdrc/out",	// move processed data here
-			"Xml_root_path": "",								// path towards one event in case of XML CDRs
-			"Source_id": "ers_csv",								// free form field, tag identifying the source of the CDRs within CDRS database
+			"xml_root_path": "",								// path towards one event in case of XML CDRs
+			"source_id": "ers_csv",								// free form field, tag identifying the source of the CDRs within CDRS database
 			"tenant": "",										// tenant used by import
 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 			"filters": [],										// limit parsing based on the filters
