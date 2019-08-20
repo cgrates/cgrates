@@ -808,6 +808,7 @@ const (
 	ApierV1SetDataDBVersions        = "ApierV1.SetDataDBVersions"
 	ApierV1SetStorDBVersions        = "ApierV1.SetStorDBVersions"
 	ApierV1GetAccountActionPlan     = "ApierV1.GetAccountActionPlan"
+	ApierV1ComputeActionPlanIndexes = "ApierV1.ComputeActionPlanIndexes"
 )
 
 const (
