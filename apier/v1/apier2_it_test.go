@@ -21,9 +21,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
+	"reflect"
 	"testing"
 	"time"
 
@@ -47,8 +49,10 @@ var sTestsAPIer = []func(t *testing.T){
 	testAPIerStartEngine,
 	testAPIerRPCConn,
 	testAPIerLoadFromFolder,
+	testAPIerVerifyAttributesAfterLoad,
 	testAPIerRemoveTPFromFolder,
 	testAPIerAfterDelete,
+	testAPIerVerifyAttributesAfterDelete,
 	testAPIerLoadFromFolder,
 	testAPIerGetRatingPlanCost,
 	testAPIerGetRatingPlanCost2,
@@ -113,6 +117,55 @@ func testAPIerLoadFromFolder(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 }
 
+func testAPIerVerifyAttributesAfterLoad(t *testing.T) {
+	ev := &engine.AttrArgsProcessEvent{
+		Context: utils.StringPointer("simpleauth"),
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAPIerAfterDelete",
+			Event: map[string]interface{}{
+				utils.Account: "1001",
+			},
+		},
+	}
+
+	eAttrPrf := &AttributeWithCache{
+		AttributeProfile: &engine.AttributeProfile{
+			Tenant:    ev.Tenant,
+			ID:        "ATTR_1001_SIMPLEAUTH",
+			FilterIDs: []string{"*string:~Account:1001"},
+			Contexts:  []string{"simpleauth"},
+			Attributes: []*engine.Attribute{
+				{
+					FilterIDs: []string{},
+					FieldName: "Password",
+					Type:      utils.META_CONSTANT,
+					Value:     config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
+				},
+			},
+			Weight: 20.0,
+		},
+	}
+	eAttrPrf.Compile()
+	var attrReply *engine.AttributeProfile
+	if err := apierRPC.Call(utils.AttributeSv1GetAttributeForEvent,
+		ev, &attrReply); err != nil {
+		fmt.Println(err)
+		t.Error(err)
+	}
+	if attrReply == nil {
+		t.Errorf("Expecting attrReply to not be nil")
+		// attrReply shoud not be nil so exit function
+		// to avoid nil segmentation fault;
+		// if this happens try to run this test manualy
+		return
+	}
+	attrReply.Compile() // Populate private variables in RSRParsers
+	if !reflect.DeepEqual(eAttrPrf.AttributeProfile, attrReply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eAttrPrf.AttributeProfile), utils.ToJSON(attrReply))
+	}
+}
+
 func testAPIerRemoveTPFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
@@ -125,13 +178,33 @@ func testAPIerRemoveTPFromFolder(t *testing.T) {
 func testAPIerAfterDelete(t *testing.T) {
 	var reply *engine.AttributeProfile
 	if err := apierRPC.Call("ApierV1.GetAttributeProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err == nil ||
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
 	}
 	var replyTh *engine.ThresholdProfile
 	if err := apierRPC.Call("ApierV1.GetThresholdProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &replyTh); err == nil ||
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &replyTh); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+
+}
+
+func testAPIerVerifyAttributesAfterDelete(t *testing.T) {
+	ev := &engine.AttrArgsProcessEvent{
+		Context: utils.StringPointer("simpleauth"),
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAPIerAfterDelete",
+			Event: map[string]interface{}{
+				utils.Account: "1001",
+			},
+		},
+	}
+	var attrReply *engine.AttributeProfile
+	if err := apierRPC.Call(utils.AttributeSv1GetAttributeForEvent,
+		ev, &attrReply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
