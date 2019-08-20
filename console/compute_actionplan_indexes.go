@@ -24,7 +24,7 @@ import (
 
 func init() {
 	c := &CmdComputeActionPlanIndexes{
-		name:      "actionplan_compute_indexes",
+		name:      "compute_actionplan_indexes",
 		rpcMethod: utils.ApierV1ComputeActionPlanIndexes,
 		rpcParams: new(EmptyWrapper),
 	}
