@@ -140,6 +140,15 @@ func (m *Migrator) migrateActionPlans() (err error) {
 		if err = m.migrateCurrentActionPlans(); err != nil {
 			return err
 		}
+	case 2: // neded to rebuild action plan indexes for redis
+		// All done, update version wtih current one
+		vrs := engine.Versions{utils.ActionPlans: engine.CurrentDataDBVersions()[utils.ActionPlans]}
+		if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+			return utils.NewCGRError(utils.Migrator,
+				utils.ServerErrorCaps,
+				err.Error(),
+				fmt.Sprintf("error: <%s> when updating ActionPlans version into dataDB", err.Error()))
+		}
 	case 1:
 		if err = m.migrateV1ActionPlans(); err != nil {
 			return err
