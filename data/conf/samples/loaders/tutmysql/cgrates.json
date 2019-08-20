@@ -74,6 +74,7 @@
 		"id": "CustomLoader",									// identifier of the Loader
 		"enabled": true,									// starts as service: <true|false>.
 		"dry_run": false,									// do not send the CDRs to CDRS, just parse them
+		"tenant": "cgrates.org",
 		"run_delay": 0,										// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
 		"lock_filename": ".cgr.lock",						// Filename containing concurrency lock in case of delayed processing
 		"caches_conns": [
@@ -108,6 +109,7 @@
 
 "attributes": {
 	"enabled": true,
+	"prefix_indexed_fields":["Destination"],
 },
 
 

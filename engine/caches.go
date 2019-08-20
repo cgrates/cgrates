@@ -339,7 +339,11 @@ func (chS *CacheS) V1ReloadCache(attrs utils.AttrReloadCacheWithArgDispatcher, r
 	//get loadIDs from database for all types
 	loadIDs, err := chS.dm.GetItemLoadIDs(utils.EmptyString, false)
 	if err != nil {
-		return err
+		if err == utils.ErrNotFound { // we can receive cache reload from LoaderS and we store the LoadID only after all Items was processed
+			loadIDs = make(map[string]int64)
+		} else {
+			return err
+		}
 	}
 	cacheLoadIDs := populateCacheLoadIDs(loadIDs, attrs.AttrReloadCache)
 	for key, val := range cacheLoadIDs {
@@ -390,7 +394,11 @@ func (chS *CacheS) V1LoadCache(args utils.AttrReloadCacheWithArgDispatcher, repl
 	//get loadIDs for all types
 	loadIDs, err := chS.dm.GetItemLoadIDs(utils.EmptyString, false)
 	if err != nil {
-		return err
+		if err == utils.ErrNotFound { // we can receive cache reload from LoaderS and we store the LoadID only after all Items was processed
+			loadIDs = make(map[string]int64)
+		} else {
+			return err
+		}
 	}
 	cacheLoadIDs := populateCacheLoadIDs(loadIDs, args.AttrReloadCache)
 	for key, val := range cacheLoadIDs {
