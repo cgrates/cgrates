@@ -140,7 +140,7 @@ func CurrentDataDBVersions() Versions {
 		utils.Accounts:            3,
 		utils.Actions:             2,
 		utils.ActionTriggers:      2,
-		utils.ActionPlans:         2,
+		utils.ActionPlans:         3,
 		utils.SharedGroups:        2,
 		utils.Thresholds:          3,
 		utils.Suppliers:           1,
