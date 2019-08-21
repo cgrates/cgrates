@@ -244,6 +244,20 @@ func TestFieldAsStringForCostDetails(t *testing.T) {
 		AccountSummary: &AccountSummary{
 			Tenant: "cgrates.org",
 			ID:     "AccountFromAccountSummary",
+			BalanceSummaries: []*BalanceSummary{
+				&BalanceSummary{
+					UUID:  "f9be602747f4",
+					ID:    "monetary",
+					Type:  utils.MONETARY,
+					Value: 0.5,
+				},
+				&BalanceSummary{
+					UUID:  "2e02510ab90a",
+					ID:    "voice",
+					Type:  utils.VOICE,
+					Value: 10,
+				},
+			},
 		},
 	}
 
@@ -279,6 +293,14 @@ func TestFieldAsStringForCostDetails(t *testing.T) {
 
 	prsr = config.NewRSRParserMustCompile("~CostDetails.AccountSummary.ID", true)
 	eFldVal = "AccountFromAccountSummary"
+	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
+		t.Error(err)
+	} else if fldVal != eFldVal {
+		t.Errorf("field: <%v>, expected: <%v>, received: <%v>", prsr, eFldVal, fldVal)
+	}
+
+	prsr = config.NewRSRParserMustCompile("~CostDetails.AccountSummary.BalanceSummaries[1].ID", true)
+	eFldVal = "voice"
 	if fldVal, err := cdr.FieldAsString(prsr); err != nil {
 		t.Error(err)
 	} else if fldVal != eFldVal {

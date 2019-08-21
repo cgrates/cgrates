@@ -181,6 +181,24 @@ func (nM *NavigableMap) getNextMap(mp map[string]interface{}, spath string) (map
 		}
 	} else {
 		switch mv := mi.(type) {
+		case []interface{}:
+			// in case we create the map using json and we marshall the value into a map[string]interface{}
+			// we can have slice of interfaces that is masking a slice of map[string]interface{}
+			// this is for CostDetails BalanceSummaries
+			if *idx < len(mv) {
+				mm := mv[*idx]
+				switch mmv := mm.(type) {
+				case map[string]interface{}:
+					return mmv, nil
+				case *map[string]interface{}:
+					return *mmv, nil
+				case NavigableMap:
+					return mmv.data, nil
+				case *NavigableMap:
+					return mmv.data, nil
+				default:
+				}
+			}
 		case []map[string]interface{}:
 			if *idx < len(mv) {
 				return mv[*idx], nil
