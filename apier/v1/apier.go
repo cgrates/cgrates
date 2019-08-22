@@ -269,10 +269,10 @@ func (self *ApierV1) LoadSharedGroup(attrs AttrLoadSharedGroup, reply *string) e
 
 type AttrLoadTpFromStorDb struct {
 	TPid          string
-	FlushDb       bool // Flush dataDB before loading
 	DryRun        bool // Only simulate, no write
 	Validate      bool // Run structural checks
 	ArgDispatcher *utils.ArgDispatcher
+	Caching       *string // Caching strategy
 }
 
 // Loads complete data in a TP from storDb
@@ -296,12 +296,17 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 		*reply = utils.OK
 		return nil // Mission complete, no errors
 	}
-	if err := dbReader.WriteToDatabase(attrs.FlushDb, false, false); err != nil {
+	if err := dbReader.WriteToDatabase(false, false); err != nil {
 		return utils.NewErrServerError(err)
+	}
+	//verify If Caching is present in arguments
+	caching := config.CgrConfig().GeneralCfg().DefaultCaching
+	if attrs.Caching != nil {
+		caching = *attrs.Caching
 	}
 	// reload cache
 	utils.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading cache.")
-	if err := dbReader.ReloadCache(attrs.FlushDb, true, attrs.ArgDispatcher); err != nil {
+	if err := dbReader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
 
@@ -809,12 +814,17 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	}
 
 	// write data intro Database
-	if err := loader.WriteToDatabase(attrs.FlushDb, false, false); err != nil {
+	if err := loader.WriteToDatabase(false, false); err != nil {
 		return utils.NewErrServerError(err)
+	}
+	//verify If Caching is present in arguments
+	caching := config.CgrConfig().GeneralCfg().DefaultCaching
+	if attrs.Caching != nil {
+		caching = *attrs.Caching
 	}
 	// reload cache
 	utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
-	if err := loader.ReloadCache(attrs.FlushDb, true, attrs.ArgDispatcher); err != nil {
+	if err := loader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -861,9 +871,14 @@ func (self *ApierV1) RemoveTPFromFolder(attrs utils.AttrLoadTpFromFolder, reply 
 	if err := loader.RemoveFromDatabase(false, false); err != nil {
 		return utils.NewErrServerError(err)
 	}
+	//verify If Caching is present in arguments
+	caching := config.CgrConfig().GeneralCfg().DefaultCaching
+	if attrs.Caching != nil {
+		caching = *attrs.Caching
+	}
 	// reload cache
 	utils.Logger.Info("ApierV1.RemoveTPFromFolder, reloading cache.")
-	if err := loader.ReloadCache(attrs.FlushDb, true, attrs.ArgDispatcher); err != nil {
+	if err := loader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -896,9 +911,14 @@ func (self *ApierV1) RemoveTPFromStorDB(attrs AttrLoadTpFromStorDb, reply *strin
 	if err := dbReader.RemoveFromDatabase(false, false); err != nil {
 		return utils.NewErrServerError(err)
 	}
+	//verify If Caching is present in arguments
+	caching := config.CgrConfig().GeneralCfg().DefaultCaching
+	if attrs.Caching != nil {
+		caching = *attrs.Caching
+	}
 	// reload cache
 	utils.Logger.Info("ApierV1.RemoveTPFromStorDB, reloading cache.")
-	if err := dbReader.ReloadCache(attrs.FlushDb, true, attrs.ArgDispatcher); err != nil {
+	if err := dbReader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
 

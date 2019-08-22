@@ -26,7 +26,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/structmatcher"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -1361,17 +1360,9 @@ func (tpr *TpReader) IsValid() bool {
 	return valid
 }
 
-func (tpr *TpReader) WriteToDatabase(flush, verbose, disable_reverse bool) (err error) {
+func (tpr *TpReader) WriteToDatabase(verbose, disable_reverse bool) (err error) {
 	if tpr.dm.dataDB == nil {
 		return errors.New("no database connection")
-	}
-	if flush {
-		// if verbose {
-		// 	log.Print("Flushing database")
-		// }
-		// if err = tpr.dm.DataDB().Flush(""); err != nil {
-		// 	return
-		// }
 	}
 	//generate a loadID
 	loadID := time.Now().UnixNano()
@@ -2365,7 +2356,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 	return
 }
 
-func (tpr *TpReader) ReloadCache(flush, verbose bool, argDispatcher *utils.ArgDispatcher) (err error) {
+func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *utils.ArgDispatcher) (err error) {
 	if tpr.cacheS == nil {
 		log.Print("Disabled automatic reload")
 		return
@@ -2420,7 +2411,6 @@ func (tpr *TpReader) ReloadCache(flush, verbose bool, argDispatcher *utils.ArgDi
 				DispatcherProfileIDs:  &dppIDs,
 				DispatcherHostIDs:     &dphIDs,
 			},
-			FlushAll: flush,
 		},
 	}
 
@@ -2428,7 +2418,7 @@ func (tpr *TpReader) ReloadCache(flush, verbose bool, argDispatcher *utils.ArgDi
 		log.Print("Reloading cache")
 	}
 	var reply string
-	switch config.CgrConfig().GeneralCfg().DefaultCaching {
+	switch caching {
 	case utils.META_NONE:
 		return
 	case utils.MetaReload:
@@ -2440,8 +2430,11 @@ func (tpr *TpReader) ReloadCache(flush, verbose bool, argDispatcher *utils.ArgDi
 			return
 		}
 	case utils.MetaRemove:
-		//
+		if err = tpr.cacheS.Call(utils.CacheSv1FlushCache, cacheArgs, &reply); err != nil {
+			return
+		}
 	case utils.MetaClear:
+		cacheArgs.FlushAll = true
 		if err = tpr.cacheS.Call(utils.CacheSv1FlushCache, cacheArgs, &reply); err != nil {
 			return
 		}

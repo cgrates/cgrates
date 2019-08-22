@@ -100,7 +100,7 @@ func init() {
 	if err := csvr.LoadDispatcherHosts(); err != nil {
 		log.Print("error in LoadDispatcherHosts:", err)
 	}
-	csvr.WriteToDatabase(false, false, false)
+	csvr.WriteToDatabase(false, false)
 	Cache.Clear(nil)
 	//dm.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 }

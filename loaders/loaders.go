@@ -74,6 +74,7 @@ func (ldrS *LoaderService) ListenAndServe(exitChan chan bool) (err error) {
 type ArgsProcessFolder struct {
 	LoaderID  string
 	ForceLock bool
+	Caching   *string
 }
 
 func (ldrS *LoaderService) V1Load(args *ArgsProcessFolder,
@@ -95,7 +96,12 @@ func (ldrS *LoaderService) V1Load(args *ArgsProcessFolder,
 		}
 		return errors.New("ANOTHER_LOADER_RUNNING")
 	}
-	if err := ldr.ProcessFolder(); err != nil {
+	//verify If Caching is present in arguments
+	caching := config.CgrConfig().GeneralCfg().DefaultCaching
+	if args.Caching != nil {
+		caching = *args.Caching
+	}
+	if err := ldr.ProcessFolder(caching); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*rply = utils.OK

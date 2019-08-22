@@ -98,7 +98,7 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 			"Attributes.csv": &openedCSVFile{fileName: "Attributes.csv",
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaAttributes); err != nil {
+	if err := ldr.processContent(utils.MetaAttributes, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	eAP := &engine.AttributeProfile{
@@ -189,7 +189,7 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 			"File2.csv": &openedCSVFile{fileName: "File2.csv",
 				rdr: rdr2, csvRdr: csvRdr2}},
 	}
-	if err := ldr.processContent(utils.MetaAttributes); err != nil {
+	if err := ldr.processContent(utils.MetaAttributes, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	eAP := &engine.AttributeProfile{
@@ -282,7 +282,7 @@ func TestLoaderProcessResource(t *testing.T) {
 			"Resources.csv": &openedCSVFile{fileName: "Resources.csv",
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaResources); err != nil {
+	if err := ldr.processContent(utils.MetaResources, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	eResPrf1 := &engine.ResourceProfile{
@@ -380,7 +380,7 @@ func TestLoaderProcessFilters(t *testing.T) {
 			"Filters.csv": &openedCSVFile{fileName: "Filters.csv",
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaFilters); err != nil {
+	if err := ldr.processContent(utils.MetaFilters, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	eFltr1 := &engine.Filter{
@@ -511,7 +511,7 @@ func TestLoaderProcessThresholds(t *testing.T) {
 			"Thresholds.csv": &openedCSVFile{fileName: "Thresholds.csv",
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaThresholds); err != nil {
+	if err := ldr.processContent(utils.MetaThresholds, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if len(ldr.bufLoaderData) != 0 {
@@ -618,7 +618,7 @@ func TestLoaderProcessStats(t *testing.T) {
 			"Stats.csv": &openedCSVFile{fileName: "Stats.csv",
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaStats); err != nil {
+	if err := ldr.processContent(utils.MetaStats, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if len(ldr.bufLoaderData) != 0 {
@@ -751,7 +751,7 @@ func TestLoaderProcessSuppliers(t *testing.T) {
 			"Suppliers.csv": &openedCSVFile{fileName: "Suppliers.csv",
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaSuppliers); err != nil {
+	if err := ldr.processContent(utils.MetaSuppliers, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if len(ldr.bufLoaderData) != 0 {
@@ -842,7 +842,7 @@ func TestLoaderProcessChargers(t *testing.T) {
 			utils.ChargersCsv: &openedCSVFile{fileName: utils.ChargersCsv,
 				rdr: rdr, csvRdr: csvRdr}},
 	}
-	if err := ldr.processContent(utils.MetaChargers); err != nil {
+	if err := ldr.processContent(utils.MetaChargers, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if len(ldr.bufLoaderData) != 0 {
@@ -974,7 +974,7 @@ func TestLoaderProcessDispatches(t *testing.T) {
 			},
 		},
 	}
-	if err := ldr.processContent(utils.MetaDispatchers); err != nil {
+	if err := ldr.processContent(utils.MetaDispatchers, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if len(ldr.bufLoaderData) != 0 {
@@ -1078,7 +1078,7 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 			},
 		},
 	}
-	if err := ldr.processContent(utils.MetaDispatcherHosts); err != nil {
+	if err := ldr.processContent(utils.MetaDispatcherHosts, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	if len(ldr.bufLoaderData) != 0 {

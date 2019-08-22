@@ -122,12 +122,17 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		}
 	}
 
-	if err := loader.WriteToDatabase(attrs.FlushDb, false, false); err != nil {
+	if err := loader.WriteToDatabase(false, false); err != nil {
 		return utils.NewErrServerError(err)
 	}
 
 	utils.Logger.Info("ApierV2.LoadTariffPlanFromFolder, reloading cache.")
-	if err := loader.ReloadCache(attrs.FlushDb, true, attrs.ArgDispatcher); err != nil {
+	//verify If Caching is present in arguments
+	caching := config.CgrConfig().GeneralCfg().DefaultCaching
+	if attrs.Caching != nil {
+		caching = *attrs.Caching
+	}
+	if err := loader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	loadHistList, err := self.DataManager.DataDB().GetLoadHistory(1, true, utils.NonTransactional)
