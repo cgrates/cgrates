@@ -68,8 +68,8 @@ var (
 	storDBPasswd = cgrLoaderFlags.String("stordb_passwd", dfltCfg.StorDbCfg().StorDBPass,
 		"The storDb user's password.")
 
-	flush = cgrLoaderFlags.Bool("flushdb", false,
-		"Flush the database before importing")
+	cachingArg = cgrLoaderFlags.String("caching", "",
+		"Cache option to do when load tp")
 	tpid = cgrLoaderFlags.String("tpid", dfltCfg.LoaderCgrCfg().TpID,
 		"The tariff plan ID from the database")
 	dataPath = cgrLoaderFlags.String("path", dfltCfg.LoaderCgrCfg().DataPath,
@@ -333,11 +333,15 @@ func main() {
 
 	if !*remove {
 		// write maps to database
-		if err := tpReader.WriteToDatabase(*flush, *verbose, *disableReverse); err != nil {
+		if err := tpReader.WriteToDatabase(*verbose, *disableReverse); err != nil {
 			log.Fatal("Could not write to database: ", err)
 		}
+		caching := config.CgrConfig().GeneralCfg().DefaultCaching
+		if cachingArg != nil && *cachingArg != utils.EmptyString {
+			caching = *cachingArg
+		}
 		// reload cache
-		if err := tpReader.ReloadCache(*flush, *verbose, &utils.ArgDispatcher{
+		if err := tpReader.ReloadCache(caching, *verbose, &utils.ArgDispatcher{
 			APIKey:  apiKey,
 			RouteID: routeID,
 		}); err != nil {

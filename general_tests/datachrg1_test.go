@@ -58,7 +58,7 @@ RP_DATA1,DR_DATA_2,TM2,10`
 	if err := csvr.LoadRatingProfiles(); err != nil {
 		t.Fatal(err)
 	}
-	csvr.WriteToDatabase(false, false, false)
+	csvr.WriteToDatabase(false, false)
 	engine.Cache.Clear(nil)
 	dataDB.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)

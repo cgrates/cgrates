@@ -97,7 +97,7 @@ cgrates.org,call,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,`
 		t.Fatal(err)
 	}
 
-	csvr.WriteToDatabase(false, false, false)
+	csvr.WriteToDatabase(false, false)
 	if acnt, err := dataDB3.DataDB().GetAccount("cgrates.org:12346"); err != nil {
 		t.Error(err)
 	} else if acnt == nil {

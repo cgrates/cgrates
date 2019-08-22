@@ -378,7 +378,7 @@ func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disable_
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := loader.WriteToDatabase(false, false, disable_reverse); err != nil {
+	if err := loader.WriteToDatabase(false, disable_reverse); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	return nil

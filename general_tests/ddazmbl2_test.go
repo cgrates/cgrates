@@ -98,7 +98,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	if err := csvr.LoadAccountActions(); err != nil {
 		t.Fatal(err)
 	}
-	csvr.WriteToDatabase(false, false, false)
+	csvr.WriteToDatabase(false, false)
 	if acnt, err := dataDB2.DataDB().GetAccount("cgrates.org:12345"); err != nil {
 		t.Error(err)
 	} else if acnt == nil {

@@ -154,7 +154,7 @@ func TestLoaderITRemoveLoad(t *testing.T) {
 	if err = loader.LoadDispatcherHosts(); err != nil {
 		t.Error("Failed loading Dispatcher hosts: ", err.Error())
 	}
-	if err := loader.WriteToDatabase(true, false, false); err != nil {
+	if err := loader.WriteToDatabase(false, false); err != nil {
 		t.Error("Could not write data into dataDb: ", err.Error())
 	}
 	if err := loader.RemoveFromDatabase(false, true); err != nil {
@@ -229,7 +229,7 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 	if err = loader.LoadDispatcherHosts(); err != nil {
 		t.Error("Failed loading Dispatcher hosts: ", err.Error())
 	}
-	if err := loader.WriteToDatabase(true, false, false); err != nil {
+	if err := loader.WriteToDatabase(false, false); err != nil {
 		t.Error("Could not write data into dataDb: ", err.Error())
 	}
 }

@@ -126,13 +126,13 @@ func (ldr *Loader) ListenAndServe(exitChan chan struct{}) (err error) {
 }
 
 // ProcessFolder will process the content in the folder with locking
-func (ldr *Loader) ProcessFolder() (err error) {
+func (ldr *Loader) ProcessFolder(caching string) (err error) {
 	if err = ldr.lockFolder(); err != nil {
 		return
 	}
 	defer ldr.unlockFolder()
 	for ldrType := range ldr.rdrs {
-		if err = ldr.processFiles(ldrType); err != nil {
+		if err = ldr.processFiles(ldrType, caching); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s-%s> loaderType: <%s> cannot open files, err: %s",
 				utils.LoaderS, ldr.ldrID, ldrType, err.Error()))
 			continue
@@ -187,7 +187,7 @@ func (ldr *Loader) moveFiles() (err error) {
 	return
 }
 
-func (ldr *Loader) processFiles(loaderType string) (err error) {
+func (ldr *Loader) processFiles(loaderType, caching string) (err error) {
 	for fName := range ldr.rdrs[loaderType] {
 		var rdr *os.File
 		if rdr, err = os.Open(path.Join(ldr.tpInDir, fName)); err != nil {
@@ -198,14 +198,14 @@ func (ldr *Loader) processFiles(loaderType string) (err error) {
 		ldr.rdrs[loaderType][fName] = &openedCSVFile{
 			fileName: fName, rdr: rdr, csvRdr: csvReader}
 		defer ldr.unreferenceFile(loaderType, fName)
-		if err = ldr.processContent(loaderType); err != nil {
+		if err = ldr.processContent(loaderType, caching); err != nil {
 			return
 		}
 	}
 	return
 }
 
-func (ldr *Loader) processContent(loaderType string) (err error) {
+func (ldr *Loader) processContent(loaderType, caching string) (err error) {
 	// start processing lines
 	keepLooping := true // controls looping
 	lineNr := 0
@@ -250,7 +250,7 @@ func (ldr *Loader) processContent(loaderType string) (err error) {
 				break // have stolen the existing key in buffer
 			}
 			if err = ldr.storeLoadedData(loaderType,
-				map[string][]LoaderData{prevTntID: ldr.bufLoaderData[prevTntID]}); err != nil {
+				map[string][]LoaderData{prevTntID: ldr.bufLoaderData[prevTntID]}, caching); err != nil {
 				return
 			}
 			delete(ldr.bufLoaderData, prevTntID)
@@ -263,7 +263,7 @@ func (ldr *Loader) processContent(loaderType string) (err error) {
 		break // get the first tenantID
 	}
 	if err = ldr.storeLoadedData(loaderType,
-		map[string][]LoaderData{tntID: ldr.bufLoaderData[tntID]}); err != nil {
+		map[string][]LoaderData{tntID: ldr.bufLoaderData[tntID]}, caching); err != nil {
 		return
 	}
 	delete(ldr.bufLoaderData, tntID)
@@ -271,7 +271,7 @@ func (ldr *Loader) processContent(loaderType string) (err error) {
 }
 
 func (ldr *Loader) storeLoadedData(loaderType string,
-	lds map[string][]LoaderData) (err error) {
+	lds map[string][]LoaderData, caching string) (err error) {
 	var ids []string
 	cacheArgs := utils.InitAttrReloadCache()
 	switch loaderType {
@@ -527,12 +527,34 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 	}
 
 	if ldr.cacheS != nil {
+
 		var reply string
-		if err = ldr.cacheS.Call(utils.CacheSv1ReloadCache,
-			utils.AttrReloadCacheWithArgDispatcher{
+		switch caching {
+		case utils.META_NONE:
+			return
+		case utils.MetaReload:
+			if err = ldr.cacheS.Call(utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
 				AttrReloadCache: cacheArgs}, &reply); err != nil {
-			return err
+				return
+			}
+		case utils.MetaLoad:
+			if err = ldr.cacheS.Call(utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
+				AttrReloadCache: cacheArgs}, &reply); err != nil {
+				return
+			}
+		case utils.MetaRemove:
+			if err = ldr.cacheS.Call(utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
+				AttrReloadCache: cacheArgs}, &reply); err != nil {
+				return
+			}
+		case utils.MetaClear:
+			cacheArgs.FlushAll = true
+			if err = ldr.cacheS.Call(utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
+				AttrReloadCache: cacheArgs}, &reply); err != nil {
+				return
+			}
 		}
+
 	}
 	return
 }
