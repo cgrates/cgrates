@@ -69,7 +69,7 @@ var (
 		"The storDb user's password.")
 
 	cachingArg = cgrLoaderFlags.String("caching", "",
-		"Cache option to do when load tp")
+		"Caching strategy used when loading TP")
 	tpid = cgrLoaderFlags.String("tpid", dfltCfg.LoaderCgrCfg().TpID,
 		"The tariff plan ID from the database")
 	dataPath = cgrLoaderFlags.String("path", dfltCfg.LoaderCgrCfg().DataPath,
