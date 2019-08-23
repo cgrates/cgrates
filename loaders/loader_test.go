@@ -1109,3 +1109,87 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eDispHost), utils.ToJSON(rcv))
 	}
 }
+
+func TestLoaderRemoveContentSingleFile(t *testing.T) {
+	data, _ := engine.NewMapStorage()
+	ldr := &Loader{
+		ldrID:         "TestLoaderProcessContent",
+		bufLoaderData: make(map[string][]LoaderData),
+		dm:            engine.NewDataManager(data),
+		timezone:      "UTC",
+	}
+	ldr.dataTpls = map[string][]*config.FCTemplate{
+		utils.MetaAttributes: []*config.FCTemplate{
+			&config.FCTemplate{Tag: "TenantID",
+				FieldId:   "Tenant",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~0", true, utils.INFIELD_SEP),
+				Mandatory: true},
+			&config.FCTemplate{Tag: "ProfileID",
+				FieldId:   "ID",
+				Type:      utils.META_COMPOSED,
+				Value:     config.NewRSRParsersMustCompile("~1", true, utils.INFIELD_SEP),
+				Mandatory: true},
+		},
+	}
+	rdr := ioutil.NopCloser(strings.NewReader(engine.AttributesCSVContent))
+	csvRdr := csv.NewReader(rdr)
+	csvRdr.Comment = '#'
+	ldr.rdrs = map[string]map[string]*openedCSVFile{
+		utils.MetaAttributes: map[string]*openedCSVFile{
+			"Attributes.csv": &openedCSVFile{fileName: "Attributes.csv",
+				rdr: rdr, csvRdr: csvRdr}},
+	}
+	// Add two attributeProfiles
+	ap := &engine.AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ALS1",
+		Contexts:  []string{"con1", "con2", "con3"},
+		FilterIDs: []string{"*string:~Account:1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC)},
+		Attributes: []*engine.Attribute{
+			&engine.Attribute{
+				FilterIDs: []string{"*string:~Field1:Initial"},
+				FieldName: "Field1",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("Sub1", true, utils.INFIELD_SEP),
+			},
+			&engine.Attribute{
+				FilterIDs: []string{},
+				FieldName: "Field2",
+				Type:      utils.MetaVariable,
+				Value:     config.NewRSRParsersMustCompile("Sub2", true, utils.INFIELD_SEP),
+			}},
+		Blocker: true,
+		Weight:  20,
+	}
+	if err := ldr.dm.SetAttributeProfile(ap, true); err != nil {
+		t.Error(err)
+	}
+	ap.ID = "Attr2"
+	if err := ldr.dm.SetAttributeProfile(ap, true); err != nil {
+		t.Error(err)
+	}
+
+	if err := ldr.removeContent(utils.MetaAttributes, utils.EmptyString); err != nil {
+		t.Error(err)
+	}
+
+	if len(ldr.bufLoaderData) != 0 {
+		t.Errorf("wrong buffer content: %+v", ldr.bufLoaderData)
+	}
+	// make sure the first attribute is deleted
+	if _, err := ldr.dm.GetAttributeProfile("cgrates.org", "ALS1",
+		true, false, utils.NonTransactional); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	// the second should be there
+	if rcv, err := ldr.dm.GetAttributeProfile("cgrates.org", "Attr2",
+		true, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ap, rcv) {
+		t.Errorf("expecting: %s, \n received: %s",
+			utils.ToJSON(ap), utils.ToJSON(rcv))
+	}
+}

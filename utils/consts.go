@@ -532,6 +532,7 @@ const (
 	MetaReload                  = "*reload"
 	MetaLoad                    = "*load"
 	MetaRemove                  = "*remove"
+	MetaStore                   = "*store"
 	MetaClear                   = "*clear"
 	LoadIDs                     = "load_ids"
 	DNSAgent                    = "DNSAgent"
@@ -976,9 +977,10 @@ const (
 
 // LoaderS APIs
 const (
-	LoaderSv1     = "LoaderSv1"
-	LoaderSv1Load = "LoaderSv1.Load"
-	LoaderSv1Ping = "LoaderSv1.Ping"
+	LoaderSv1       = "LoaderSv1"
+	LoaderSv1Load   = "LoaderSv1.Load"
+	LoaderSv1Remove = "LoaderSv1.Remove"
+	LoaderSv1Ping   = "LoaderSv1.Ping"
 )
 
 // CacheS APIs

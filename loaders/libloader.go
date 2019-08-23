@@ -36,6 +36,13 @@ func (ld LoaderData) TenantID() string {
 	return utils.ConcatenatedKey(tnt, prflID)
 }
 
+func (ld LoaderData) TenantIDStruct() utils.TenantID {
+	return utils.TenantID{
+		Tenant: ld[utils.Tenant].(string),
+		ID:     ld[utils.ID].(string),
+	}
+}
+
 // UpdateFromCSV will update LoaderData with data received from fileName,
 // contained in record and processed with cfgTpl
 func (ld LoaderData) UpdateFromCSV(fileName string, record []string,

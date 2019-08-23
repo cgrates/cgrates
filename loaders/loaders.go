@@ -101,7 +101,38 @@ func (ldrS *LoaderService) V1Load(args *ArgsProcessFolder,
 	if args.Caching != nil {
 		caching = *args.Caching
 	}
-	if err := ldr.ProcessFolder(caching); err != nil {
+	if err := ldr.ProcessFolder(caching, utils.MetaStore); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	*rply = utils.OK
+	return
+}
+
+func (ldrS *LoaderService) V1Remove(args *ArgsProcessFolder,
+	rply *string) (err error) {
+	if args.LoaderID == "" {
+		args.LoaderID = utils.META_DEFAULT
+	}
+	ldr, has := ldrS.ldrs[args.LoaderID]
+	if !has {
+		return fmt.Errorf("UNKNOWN_LOADER: %s", args.LoaderID)
+	}
+	if locked, err := ldr.isFolderLocked(); err != nil {
+		return utils.NewErrServerError(err)
+	} else if locked {
+		if args.ForceLock {
+			if err := ldr.unlockFolder(); err != nil {
+				return utils.NewErrServerError(err)
+			}
+		}
+		return errors.New("ANOTHER_LOADER_RUNNING")
+	}
+	//verify If Caching is present in arguments
+	caching := config.CgrConfig().GeneralCfg().DefaultCaching
+	if args.Caching != nil {
+		caching = *args.Caching
+	}
+	if err := ldr.ProcessFolder(caching, utils.MetaRemove); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*rply = utils.OK
