@@ -32,15 +32,12 @@ import (
 )
 
 // NewERService instantiates the ERService
-func NewERService(cfg *config.CGRConfig,
-	filterS *engine.FilterS,
-	sS rpcclient.RpcClientConnection,
-	cfgRld chan struct{}) (erS *ERService, err error) {
+func NewERService(cfg *config.CGRConfig, filterS *engine.FilterS,
+	sS rpcclient.RpcClientConnection) (erS *ERService, err error) {
 	erS = &ERService{
 		cfg:     cfg,
 		rdrs:    make(map[string][]EventReader),
 		stopLsn: make(map[string]chan struct{}),
-		cfgRld:  cfgRld,
 		sS:      sS,
 	}
 	return
@@ -50,16 +47,16 @@ func NewERService(cfg *config.CGRConfig,
 type ERService struct {
 	sync.RWMutex
 	cfg     *config.CGRConfig
+	rdrs    map[string][]EventReader // list of readers on specific paths map[path]reader
+	stopLsn map[string]chan struct{} // stops listening on paths
 	filterS *engine.FilterS
-	rdrs    map[string][]EventReader      // list of readers on specific paths map[path]reader
-	stopLsn map[string]chan struct{}      // stops listening on paths
-	cfgRld  chan struct{}                 // signal the need of config reloading - chan path / *any
 	sS      rpcclient.RpcClientConnection // connection towards SessionS
 
 }
 
 // ListenAndServe loops keeps the service alive
-func (erS *ERService) ListenAndServe(exitChan chan bool) (err error) {
+func (erS *ERService) ListenAndServe(cfgRldChan chan struct{},
+	exitChan chan bool) (err error) {
 	for _, rdrCfg := range erS.cfg.ERsCfg().Readers {
 		var rdr EventReader
 		if rdr, err = NewEventReader(rdrCfg); err != nil {
@@ -76,7 +73,7 @@ func (erS *ERService) ListenAndServe(exitChan chan bool) (err error) {
 		erS.rdrs[rdrCfg.SourcePath] = append(erS.rdrs[rdrCfg.SourcePath], rdr)
 
 	}
-	go erS.handleReloads()
+	go erS.handleReloads(cfgRldChan, exitChan)
 	e := <-exitChan
 	exitChan <- e // put back for the others listening for shutdown request
 	return
@@ -88,78 +85,83 @@ type erCfgRef struct {
 	idx  int
 }
 
-func (erS *ERService) handleReloads() {
+// handleReloads will handle the config reloads which are signaled over cfgRldChan
+func (erS *ERService) handleReloads(cfgRldChan chan struct{}, exitChan chan bool) {
 	for {
-		<-erS.cfgRld
-		cfgIDs := make(map[string]int)         // IDs which are configured in EventReader profiles as map[id]cfgIdx
-		inUseIDs := make(map[string]*erCfgRef) // IDs which are running in ERService map[id]rdrIdx
-		addIDs := make(map[string]struct{})    // IDs which need to be added to ERService
-		remIDs := make(map[string]struct{})    // IDs which need to be removed from ERService
-		// index config IDs
-		for i, rdrCfg := range erS.cfg.ERsCfg().Readers {
-			cfgIDs[rdrCfg.ID] = i
-		}
-		erS.Lock()
-		// index in use IDs
-		for path, rdrs := range erS.rdrs {
-			for i, rdr := range rdrs {
-				inUseIDs[rdr.ID()] = &erCfgRef{path: path, idx: i}
+		select {
+		case <-exitChan:
+			return
+		case <-cfgRldChan:
+			cfgIDs := make(map[string]int)         // IDs which are configured in EventReader profiles as map[id]cfgIdx
+			inUseIDs := make(map[string]*erCfgRef) // IDs which are running in ERService map[id]rdrIdx
+			addIDs := make(map[string]struct{})    // IDs which need to be added to ERService
+			remIDs := make(map[string]struct{})    // IDs which need to be removed from ERService
+			// index config IDs
+			for i, rdrCfg := range erS.cfg.ERsCfg().Readers {
+				cfgIDs[rdrCfg.ID] = i
 			}
-		}
-		// find out removed ids
-		for id := range inUseIDs {
-			if _, has := cfgIDs[id]; !has {
-				remIDs[id] = struct{}{}
-			}
-		}
-		// find out added ids
-		for id := range cfgIDs {
-			if _, has := inUseIDs[id]; !has {
-				addIDs[id] = struct{}{}
-			}
-		}
-		for id := range remIDs {
-			ref := inUseIDs[id]
-			rdrSlc := erS.rdrs[ref.path]
-			// remove the ids
-			copy(rdrSlc[ref.idx:], rdrSlc[ref.idx+1:])
-			rdrSlc[len(rdrSlc)-1] = nil // so it can be garbage collected
-			rdrSlc = rdrSlc[:len(rdrSlc)-1]
-			if len(rdrSlc) == 0 { // no more
-				delete(erS.rdrs, ref.path)
-				if chn, has := erS.stopLsn[ref.path]; has {
-					close(chn)
+			erS.Lock()
+			// index in use IDs
+			for path, rdrs := range erS.rdrs {
+				for i, rdr := range rdrs {
+					inUseIDs[rdr.ID()] = &erCfgRef{path: path, idx: i}
 				}
 			}
-		}
-		// add new ids:
-		for id := range addIDs {
-			rdrCfg := erS.cfg.ERsCfg().Readers[cfgIDs[id]]
-			if rdr, err := NewEventReader(rdrCfg); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf(
-						"<%s> error reloading config with ID: <%s>, err: <%s>",
-						utils.ERs, id, err.Error()))
-			} else {
-				if _, hasPath := erS.rdrs[rdrCfg.SourcePath]; !hasPath &&
-					rdrCfg.Type == utils.MetaFileCSV &&
-					rdrCfg.RunDelay == time.Duration(-1) { // set the channel to control listen stop
-					erS.stopLsn[rdrCfg.SourcePath] = make(chan struct{})
-					if err := erS.watchDir(rdrCfg.SourcePath); err != nil {
-						utils.Logger.Warning(
-							fmt.Sprintf(
-								"<%s> error scheduling dir watch for config: <%s>, err: <%s>",
-								utils.ERs, id, err.Error()))
+			// find out removed ids
+			for id := range inUseIDs {
+				if _, has := cfgIDs[id]; !has {
+					remIDs[id] = struct{}{}
+				}
+			}
+			// find out added ids
+			for id := range cfgIDs {
+				if _, has := inUseIDs[id]; !has {
+					addIDs[id] = struct{}{}
+				}
+			}
+			for id := range remIDs {
+				ref := inUseIDs[id]
+				rdrSlc := erS.rdrs[ref.path]
+				// remove the ids
+				copy(rdrSlc[ref.idx:], rdrSlc[ref.idx+1:])
+				rdrSlc[len(rdrSlc)-1] = nil // so it can be garbage collected
+				rdrSlc = rdrSlc[:len(rdrSlc)-1]
+				if len(rdrSlc) == 0 { // no more
+					delete(erS.rdrs, ref.path)
+					if chn, has := erS.stopLsn[ref.path]; has {
+						close(chn)
 					}
 				}
-				erS.rdrs[rdrCfg.SourcePath] = append(erS.rdrs[rdrCfg.SourcePath], rdr)
 			}
+			// add new ids:
+			for id := range addIDs {
+				rdrCfg := erS.cfg.ERsCfg().Readers[cfgIDs[id]]
+				if rdr, err := NewEventReader(rdrCfg); err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf(
+							"<%s> error reloading config with ID: <%s>, err: <%s>",
+							utils.ERs, id, err.Error()))
+				} else {
+					if _, hasPath := erS.rdrs[rdrCfg.SourcePath]; !hasPath &&
+						rdrCfg.Type == utils.MetaFileCSV &&
+						rdrCfg.RunDelay == time.Duration(-1) { // set the channel to control listen stop
+						erS.stopLsn[rdrCfg.SourcePath] = make(chan struct{})
+						if err := erS.watchDir(rdrCfg.SourcePath); err != nil {
+							utils.Logger.Warning(
+								fmt.Sprintf(
+									"<%s> error scheduling dir watch for config: <%s>, err: <%s>",
+									utils.ERs, id, err.Error()))
+						}
+					}
+					erS.rdrs[rdrCfg.SourcePath] = append(erS.rdrs[rdrCfg.SourcePath], rdr)
+				}
+			}
+			erS.Unlock()
 		}
-		erS.Unlock()
 	}
 }
 
-// trackFiles
+// watchDir sets up a watcher via inotify to be triggered on new files
 func (erS *ERService) watchDir(dirPath string) (err error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -194,5 +196,6 @@ func (erS *ERService) watchDir(dirPath string) (err error) {
 }
 
 func (erS *ERService) processPath(path string) (err error) {
+	fmt.Printf("ERService processPath: <%s>", path)
 	return
 }

@@ -27,6 +27,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -128,6 +129,8 @@ func SetCgrConfig(cfg *CGRConfig) {
 
 func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg := new(CGRConfig)
+	cfg.lks = make(map[string]*sync.RWMutex)
+	cfg.lks[ERsJson] = new(sync.RWMutex)
 	cfg.DataFolderPath = "/usr/share/cgrates/"
 	cfg.MaxCallDuration = time.Duration(3) * time.Hour // Hardcoded for now
 
@@ -181,6 +184,9 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.ConfigReloads[utils.DIAMETER_AGENT] <- struct{}{} // Unlock the channel
 	cfg.ConfigReloads[utils.SMAsterisk] = make(chan struct{}, 1)
 	cfg.ConfigReloads[utils.SMAsterisk] <- struct{}{} // Unlock the channel
+
+	cfg.rldChans = make(map[string]chan struct{})
+	cfg.rldChans[ERsJson] = make(chan struct{}, 1)
 
 	cgrJsonCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(CGRATES_CFG_JSON))
 	if err != nil {
@@ -311,6 +317,7 @@ func loadConfigFromHttp(cfg *CGRConfig, urlPaths string) (*CGRConfig, error) {
 
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
+	lks             map[string]*sync.RWMutex
 	MaxCallDuration time.Duration // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
 	DataFolderPath  string        // Path towards data folder, for tests internal usage, not loading out of .json options
 	ConfigPath      string        // Path towards config
@@ -326,6 +333,7 @@ type CGRConfig struct {
 	httpAgentCfg HttpAgentCfgs         // HttpAgent configs
 
 	ConfigReloads map[string]chan struct{} // Signals to specific entities that a config reload should occur
+	rldChans      map[string]chan struct{} // index here the channels used for reloads
 
 	generalCfg       *GeneralCfg       // General config
 	dataDbCfg        *DataDbCfg        // Database config
@@ -1233,8 +1241,15 @@ func (cfg *CGRConfig) ApierCfg() *ApierCfg {
 	return cfg.apier
 }
 
+// ERsCfg reads the EventReader configuration
 func (cfg *CGRConfig) ERsCfg() *ERsCfg {
+	cfg.lks[ERsJson].RLock()
+	defer cfg.lks[ERsJson].RUnlock()
 	return cfg.ersCfg
+}
+
+func (cfg *CGRConfig) GetReloadChan(sectID string) chan struct{} {
+	return cfg.rldChans[sectID]
 }
 
 // Call implements rpcclient.RpcClientConnection interface for internal RPC

@@ -39,6 +39,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/ers"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/servmanager"
@@ -318,6 +319,46 @@ func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, in
 		server.ServeBiJSON(cfg.SessionSCfg().ListenBijson, sm.OnBiJSONConnect, sm.OnBiJSONDisconnect)
 		exitChan <- true
 	}
+}
+
+// startERs handles starting of the EventReader Service
+func startERs(sSChan, dspSChan chan rpcclient.RpcClientConnection,
+	filterSChan chan *engine.FilterS,
+	cfgRld chan struct{}, exitChan chan bool) {
+	var err error
+
+	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ERs))
+	filterS := <-filterSChan
+	filterSChan <- filterS
+	// overwrite the session service channel with dispatcher one
+	if cfg.DispatcherSCfg().Enabled {
+		sSChan = dspSChan
+	}
+	var sS rpcclient.RpcClientConnection
+	if sS, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+		cfg.TlsCfg().ClientKey,
+		cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
+		cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
+		cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
+		cfg.ERsCfg().SessionSConns, sSChan, false); err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<%s> failed connecting to <%s>, error: <%s>",
+			utils.ERs, utils.SessionS, err.Error()))
+		exitChan <- true
+		return
+	}
+
+	var erS *ers.ERService
+	if erS, err = ers.NewERService(cfg, filterS, sS); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.ERs, err.Error()))
+		exitChan <- true
+		return
+	}
+
+	if err = erS.ListenAndServe(cfgRld, exitChan); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.ERs, err.Error()))
+	}
+
+	exitChan <- true
 }
 
 func startAsteriskAgent(internalSMGChan, internalDispatcherSChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
@@ -1711,6 +1752,11 @@ func main() {
 			internalThresholdSChan, internalStatSChan, internalSupplierSChan,
 			internalAttributeSChan, internalCdrSChan, internalChargerSChan,
 			internalDispatcherSChan, server, dm, exitChan)
+	}
+
+	if cfg.ERsCfg().Enabled {
+		go startERs(internalSMGChan, internalDispatcherSChan,
+			filterSChan, cfg.GetReloadChan(config.ERsJson), exitChan)
 	}
 	// Start FreeSWITCHAgent
 	if cfg.FsAgentCfg().Enabled {
