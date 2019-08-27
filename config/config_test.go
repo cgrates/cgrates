@@ -1699,13 +1699,13 @@ func TestCfgTlsCfg(t *testing.T) {
 	JSN_CFG := `
 	{
 	"tls":{
-		"server_certificate" : "path/To/Server/Cert",			
-		"server_key":"path/To/Server/Key",					
-		"client_certificate" : "path/To/Client/Cert",			
-		"client_key":"path/To/Client/Key",					
-		"ca_certificate":"path/To/CA/Cert",							
+		"server_certificate" : "path/To/Server/Cert",
+		"server_key":"path/To/Server/Key",
+		"client_certificate" : "path/To/Client/Cert",
+		"client_key":"path/To/Client/Key",
+		"ca_certificate":"path/To/CA/Cert",
 		"server_name":"TestServerName",
-		"server_policy":3,					
+		"server_policy":3,
 		},
 	}`
 	eCgrCfg, _ := NewDefaultCGRConfig()
@@ -1822,7 +1822,7 @@ func TestCgrCdfEventReader(t *testing.T) {
 				ProcessedPath:  "/var/spool/cgrates/cdrc/out",
 				XmlRootPath:    utils.EmptyString,
 				SourceID:       "ers_csv",
-				Tenant:         NewRSRParsersMustCompile("", true, utils.INFIELD_SEP),
+				Tenant:         nil,
 				Timezone:       utils.EmptyString,
 				Filters:        []string{},
 				Flags:          utils.FlagsWithParams{},
@@ -1858,4 +1858,52 @@ func TestCgrCdfEventReader(t *testing.T) {
 	if !reflect.DeepEqual(cgrCfg.ersCfg, eCfg) {
 		t.Errorf("received: %+v,\n expecting: %+v", utils.ToJSON(cgrCfg.ersCfg), utils.ToJSON(eCfg))
 	}
+}
+
+func TestCgrCfgEventReaderDefault(t *testing.T) {
+	eCfg := &EventReaderCfg{
+		ID:             utils.MetaDefault,
+		Type:           utils.MetaFileCSV,
+		FieldSep:       ",",
+		RunDelay:       time.Duration(0),
+		ConcurrentReqs: 1024,
+		SourcePath:     "/var/spool/cgrates/cdrc/in",
+		ProcessedPath:  "/var/spool/cgrates/cdrc/out",
+		XmlRootPath:    utils.EmptyString,
+		SourceID:       "ers_csv",
+		Tenant:         nil,
+		Timezone:       utils.EmptyString,
+		Filters:        nil,
+		Flags:          utils.FlagsWithParams{},
+		Header_fields:  make([]*FCTemplate, 0),
+		Content_fields: []*FCTemplate{
+			{Tag: "TOR", FieldId: "ToR", Type: utils.META_COMPOSED,
+				Value: NewRSRParsersMustCompile("~2", true, utils.INFIELD_SEP), Mandatory: true},
+			{Tag: "OriginID", FieldId: "OriginID", Type: utils.META_COMPOSED,
+				Value: NewRSRParsersMustCompile("~3", true, utils.INFIELD_SEP), Mandatory: true},
+			{Tag: "RequestType", FieldId: "RequestType", Type: utils.META_COMPOSED,
+				Value: NewRSRParsersMustCompile("~4", true, utils.INFIELD_SEP), Mandatory: true},
+			{Tag: "Tenant", FieldId: "Tenant", Type: utils.META_COMPOSED,
+				Value: NewRSRParsersMustCompile("~6", true, utils.INFIELD_SEP), Mandatory: true},
+			{Tag: "Category", FieldId: "Category", Type: utils.META_COMPOSED,
+				Value: NewRSRParsersMustCompile("~7", true, utils.INFIELD_SEP), Mandatory: true},
+			{Tag: "Account", FieldId: "Account", Type: utils.META_COMPOSED,
+				Value: NewRSRParsersMustCompile("~8", true, utils.INFIELD_SEP), Mandatory: true},
+			{Tag: "Subject", FieldId: "Subject", Type: utils.META_COMPOSED,
+				Value: NewRSRParsersMustCompile("~9", true, utils.INFIELD_SEP), Mandatory: true},
+			{Tag: "Destination", FieldId: "Destination", Type: utils.META_COMPOSED,
+				Value: NewRSRParsersMustCompile("~10", true, utils.INFIELD_SEP), Mandatory: true},
+			{Tag: "SetupTime", FieldId: "SetupTime", Type: utils.META_COMPOSED,
+				Value: NewRSRParsersMustCompile("~11", true, utils.INFIELD_SEP), Mandatory: true},
+			{Tag: "AnswerTime", FieldId: "AnswerTime", Type: utils.META_COMPOSED,
+				Value: NewRSRParsersMustCompile("~12", true, utils.INFIELD_SEP), Mandatory: true},
+			{Tag: "Usage", FieldId: "Usage", Type: utils.META_COMPOSED,
+				Value: NewRSRParsersMustCompile("~13", true, utils.INFIELD_SEP), Mandatory: true},
+		},
+		Trailer_fields: make([]*FCTemplate, 0),
+	}
+	if !reflect.DeepEqual(cgrCfg.dfltEvRdr, eCfg) {
+		t.Errorf("received: %+v,\n expecting: %+v", utils.ToJSON(cgrCfg.dfltEvRdr), utils.ToJSON(eCfg))
+	}
+
 }

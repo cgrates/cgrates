@@ -175,10 +175,12 @@ func (er *EventReaderCfg) Clone() (cln *EventReaderCfg) {
 	cln.ProcessedPath = er.ProcessedPath
 	cln.XmlRootPath = er.XmlRootPath
 	cln.SourceID = er.SourceID
-	cln.Tenant = make(RSRParsers, len(er.Tenant))
-	for idx, val := range er.Tenant {
-		clnVal := *val
-		cln.Tenant[idx] = &clnVal
+	if len(er.Tenant) != 0 {
+		cln.Tenant = make(RSRParsers, len(er.Tenant))
+		for idx, val := range er.Tenant {
+			clnVal := *val
+			cln.Tenant[idx] = &clnVal
+		}
 	}
 	cln.Timezone = er.Timezone
 	if len(er.Filters) != 0 {
