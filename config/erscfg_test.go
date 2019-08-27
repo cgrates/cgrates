@@ -54,7 +54,7 @@ func TestEventRedearClone(t *testing.T) {
 	}
 	cloned := orig.Clone()
 	if !reflect.DeepEqual(cloned, orig) {
-		t.Errorf("expected: %s ,received: %s", utils.ToJSON(orig), utils.ToJSON(cloned))
+		t.Errorf("expected: %s \n,received: %s", utils.ToJSON(orig), utils.ToJSON(cloned))
 	}
 	initialOrig := &EventReaderCfg{
 		ID:            utils.MetaDefault,
@@ -94,6 +94,6 @@ func TestEventRedearClone(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(cloned, initialOrig) {
-		t.Errorf("expected: %s ,received: %s", utils.ToJSON(initialOrig), utils.ToJSON(cloned))
+		t.Errorf("expected: %s \n,received: %s", utils.ToJSON(initialOrig), utils.ToJSON(cloned))
 	}
 }
