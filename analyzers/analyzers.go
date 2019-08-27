@@ -35,7 +35,7 @@ type AnalyzerService struct {
 
 // ListenAndServe will initialize the service
 func (aS *AnalyzerService) ListenAndServe(exitChan chan bool) error {
-	utils.Logger.Info("Starting Analyzer service")
+	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AnalyzerS))
 	e := <-exitChan
 	exitChan <- e // put back for the others listening for shutdown request
 	return nil

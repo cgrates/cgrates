@@ -46,7 +46,7 @@ type AttributeService struct {
 
 // ListenAndServe will initialize the service
 func (alS *AttributeService) ListenAndServe(exitChan chan bool) (err error) {
-	utils.Logger.Info("Starting Attribute service")
+	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AttributeS))
 	e := <-exitChan
 	exitChan <- e // put back for the others listening for shutdown request
 	return

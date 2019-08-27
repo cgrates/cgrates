@@ -321,6 +321,7 @@ type ResourceService struct {
 
 // Called to start the service
 func (rS *ResourceService) ListenAndServe(exitChan chan bool) error {
+	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ResourceS))
 	go rS.runBackup() // start backup loop
 	e := <-exitChan
 	exitChan <- e // put back for the others listening for shutdown request
