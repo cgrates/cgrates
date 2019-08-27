@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"fmt"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -34,5 +36,11 @@ type EventReader interface {
 
 // NewEventReader instantiates the event reader based on configuration at index
 func NewEventReader(rdrCfg *config.EventReaderCfg) (er EventReader, err error) {
+	switch rdrCfg.Type {
+	default:
+		err = fmt.Errorf("unsupported reader type: <%s>", rdrCfg.Type)
+	case utils.MetaFileCSV:
+
+	}
 	return
 }

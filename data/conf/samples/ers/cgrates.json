@@ -1,0 +1,55 @@
+{
+// CGRateS Configuration file
+//
+// Used for SessionSv1 integration tests
+
+
+"general": {
+    "log_level": 7,
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"stor_db": {
+	"db_password": "CGRateS.org",
+},
+
+
+"rals": {
+	"enabled": true,
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"chargers_conns": [],					
+	"rals_conns": [],
+},
+
+
+"sessions": {
+	"enabled": true,
+	"cdrs_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"ers": {
+	"enabled": true,
+	"readers": [
+		{
+			"id": "file_reader1",
+			"run_delay": -1,
+		},
+	],
+},
+
+
+}

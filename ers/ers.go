@@ -71,8 +71,8 @@ func (erS *ERService) ListenAndServe(cfgRldChan chan struct{},
 			}
 		}
 		erS.rdrs[rdrCfg.SourcePath] = append(erS.rdrs[rdrCfg.SourcePath], rdr)
-
 	}
+	//fmt.Printf("ERSService: %s\n", utils.ToIJSON(erS.rdrs))
 	go erS.handleReloads(cfgRldChan, exitChan)
 	e := <-exitChan
 	exitChan <- e // put back for the others listening for shutdown request
