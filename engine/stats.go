@@ -63,6 +63,7 @@ type StatService struct {
 
 // ListenAndServe loops keeps the service alive
 func (sS *StatService) ListenAndServe(exitChan chan bool) error {
+	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.StatS))
 	go sS.runBackup() // start backup loop
 	e := <-exitChan
 	exitChan <- e // put back for the others listening for shutdown request

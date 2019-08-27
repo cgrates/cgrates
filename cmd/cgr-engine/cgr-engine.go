@@ -145,7 +145,6 @@ func startSessionS(internalSMGChan, internalRaterChan, internalResourceSChan, in
 	internalStatSChan, internalSupplierSChan, internalAttrSChan, internalCDRSChan, internalChargerSChan,
 	internalDispatcherSChan chan rpcclient.RpcClientConnection, server *utils.Server,
 	dm *engine.DataManager, exitChan chan bool) {
-	utils.Logger.Info("Starting CGRateS Session service.")
 	var err error
 	var ralsConns, resSConns, threshSConns, statSConns, suplSConns, attrSConns, cdrsConn, chargerSConn rpcclient.RpcClientConnection
 
@@ -696,7 +695,8 @@ func startCDRS(internalCdrSChan, internalRaterChan, internalAttributeSChan, inte
 	filterS := <-filterSChan
 	filterSChan <- filterS
 	var err error
-	utils.Logger.Info("Starting CGRateS CDRS service.")
+	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CDRs))
+
 	var ralConn, attrSConn, thresholdSConn, statsConn, chargerSConn rpcclient.RpcClientConnection
 
 	intChargerSChan := internalChargerSChan
@@ -933,7 +933,6 @@ func startResourceService(internalRsChan, internalThresholdSChan,
 		exitChan <- true
 		return
 	}
-	utils.Logger.Info(fmt.Sprintf("Starting Resource Service"))
 	go func() {
 		if err := rS.ListenAndServe(exitChan); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<ResourceS> Could not start, error: %s", err.Error()))
@@ -988,7 +987,6 @@ func startStatService(internalStatSChan, internalThresholdSChan,
 		exitChan <- true
 		return
 	}
-	utils.Logger.Info(fmt.Sprintf("Starting Stat Service"))
 	go func() {
 		if err := sS.ListenAndServe(exitChan); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<StatS> Error: %s listening for packets", err.Error()))
@@ -1021,7 +1019,6 @@ func startThresholdService(internalThresholdSChan chan rpcclient.RpcClientConnec
 		exitChan <- true
 		return
 	}
-	utils.Logger.Info(fmt.Sprintf("Starting Threshold Service"))
 	go func() {
 		if err := tS.ListenAndServe(exitChan); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<ThresholdS> Error: %s listening for packets", err.Error()))
@@ -1250,7 +1247,6 @@ func startDispatcherService(internalDispatcherSChan, internalAttributeSChan chan
 // startAnalyzerService fires up the AnalyzerS
 func startAnalyzerService(internalAnalyzerSChan chan rpcclient.RpcClientConnection,
 	server *utils.Server, exitChan chan bool) {
-	utils.Logger.Info("Starting CGRateS Analyzer service.")
 	var err error
 	aS, err := analyzers.NewAnalyzerService()
 	if err != nil {

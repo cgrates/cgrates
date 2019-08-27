@@ -48,7 +48,7 @@ type ChargerService struct {
 
 // ListenAndServe will initialize the service
 func (cS *ChargerService) ListenAndServe(exitChan chan bool) (err error) {
-	utils.Logger.Info(fmt.Sprintf("Starting %s", utils.ChargerS))
+	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ChargerS))
 	e := <-exitChan
 	exitChan <- e
 	return
