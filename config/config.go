@@ -689,345 +689,488 @@ func (self *CGRConfig) LazySanityCheck() {
 }
 
 // Loads from json configuration object, will be used for defaults, config from file and reload, might need lock
-func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
+func (cfg *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	// Load sections out of JSON config, stop on error
-	jsnGeneralCfg, err := jsnCfg.GeneralJsonCfg()
-	if err != nil {
-		return err
-	}
-	if err := self.generalCfg.loadFromJsonCfg(jsnGeneralCfg); err != nil {
+	if err = cfg.loadGeneralCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnCacheCfg, err := jsnCfg.CacheJsonCfg()
-	if err != nil {
-		return err
-	}
-	if err := self.cacheCfg.loadFromJsonCfg(jsnCacheCfg); err != nil {
+	if err = cfg.loadCacheCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnListenCfg, err := jsnCfg.ListenJsonCfg()
-	if err != nil {
-		return err
-	}
-	if err := self.listenCfg.loadFromJsonCfg(jsnListenCfg); err != nil {
+	if err = cfg.loadListenCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnHttpCfg, err := jsnCfg.HttpJsonCfg()
-	if err != nil {
-		return err
-	}
-	if err := self.httpCfg.loadFromJsonCfg(jsnHttpCfg); err != nil {
+	if err = cfg.loadHttpCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnDataDbCfg, err := jsnCfg.DbJsonCfg(DATADB_JSN)
-	if err != nil {
-		return err
-	}
-	if err := self.dataDbCfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
+	if err = cfg.loadDataDBCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnStorDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN)
-	if err != nil {
-		return err
-	}
-	if err := self.storDbCfg.loadFromJsonCfg(jsnStorDbCfg); err != nil {
+	if err = cfg.loadStorDBCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnFilterSCfg, err := jsnCfg.FilterSJsonCfg()
-	if err != nil {
-		return err
-	}
-	if err = self.filterSCfg.loadFromJsonCfg(jsnFilterSCfg); err != nil {
+	if err = cfg.loadFilterSCfg(jsnCfg); err != nil {
 		return
 	}
 
-	jsnRALsCfg, err := jsnCfg.RalsJsonCfg()
-	if err != nil {
-		return err
-	}
-	if err = self.ralsCfg.loadFromJsonCfg(jsnRALsCfg); err != nil {
+	if err = cfg.loadRalSCfg(jsnCfg); err != nil {
 		return
 	}
 
-	jsnSchedCfg, err := jsnCfg.SchedulerJsonCfg()
-	if err != nil {
-		return err
-	}
-	if err := self.schedulerCfg.loadFromJsonCfg(jsnSchedCfg); err != nil {
+	if err = cfg.loadSchedulerCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnCdrsCfg, err := jsnCfg.CdrsJsonCfg()
-	if err != nil {
-		return err
-	}
-	if err := self.cdrsCfg.loadFromJsonCfg(jsnCdrsCfg); err != nil {
+	if err = cfg.loadCdrsCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnCdreCfg, err := jsnCfg.CdreJsonCfgs()
-	if err != nil {
+	if err = cfg.loadCdreCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnCdrcCfg, err := jsnCfg.CdrcJsonCfg()
-	if err != nil {
+	if err = cfg.loadCdrcCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnsessionSCfg, err := jsnCfg.SessionSJsonCfg()
-	if err != nil {
-		return err
-	}
-	if err := self.sessionSCfg.loadFromJsonCfg(jsnsessionSCfg); err != nil {
+	if err = cfg.loadSessionSCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnSmFsCfg, err := jsnCfg.FreeswitchAgentJsonCfg()
-	if err != nil {
-		return err
-	}
-	if err := self.fsAgentCfg.loadFromJsonCfg(jsnSmFsCfg); err != nil {
+	if err = cfg.loadFreeswitchAgentCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnKamAgentCfg, err := jsnCfg.KamAgentJsonCfg()
-	if err != nil {
-		return err
-	}
-	if err := self.kamAgentCfg.loadFromJsonCfg(jsnKamAgentCfg); err != nil {
+	if err = cfg.loadKamAgentCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnSMAstCfg, err := jsnCfg.AsteriskAgentJsonCfg()
-	if err != nil {
-		return err
-	}
-	if err := self.asteriskAgentCfg.loadFromJsonCfg(jsnSMAstCfg); err != nil {
+	if err = cfg.loadAsteriskAgentCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnDACfg, err := jsnCfg.DiameterAgentJsonCfg()
-	if err != nil {
-		return err
-	}
-	if err := self.diameterAgentCfg.loadFromJsonCfg(jsnDACfg, self.generalCfg.RSRSep); err != nil {
+	if err = cfg.loadDiameterAgentCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnRACfg, err := jsnCfg.RadiusAgentJsonCfg()
-	if err != nil {
-		return err
-	}
-	if err := self.radiusAgentCfg.loadFromJsonCfg(jsnRACfg, self.generalCfg.RSRSep); err != nil {
+	if err = cfg.loadRadiusAgentCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnDNSCfg, err := jsnCfg.DNSAgentJsonCfg()
-	if err != nil {
-		return err
-	}
-	if err := self.dnsAgentCfg.loadFromJsonCfg(jsnDNSCfg, self.generalCfg.RSRSep); err != nil {
+	if err = cfg.loadDNSAgentCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnHttpAgntCfg, err := jsnCfg.HttpAgentJsonCfg()
-	if err != nil {
-		return err
-	}
-	if err := self.httpAgentCfg.loadFromJsonCfg(jsnHttpAgntCfg, self.generalCfg.RSRSep); err != nil {
+	if err = cfg.loadHttpAgentCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnAttributeSCfg, err := jsnCfg.AttributeServJsonCfg()
-	if err != nil {
-		return err
-	}
-	if self.attributeSCfg.loadFromJsonCfg(jsnAttributeSCfg); err != nil {
+	if err = cfg.loadAttributeServCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnChargerSCfg, err := jsnCfg.ChargerServJsonCfg()
-	if err != nil {
-		return err
-	}
-	if self.chargerSCfg.loadFromJsonCfg(jsnChargerSCfg); err != nil {
+	if err = cfg.loadChargerServCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnRLSCfg, err := jsnCfg.ResourceSJsonCfg()
-	if err != nil {
-		return err
-	}
-	if self.resourceSCfg.loadFromJsonCfg(jsnRLSCfg); err != nil {
+	if err = cfg.loadResourceSCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnStatSCfg, err := jsnCfg.StatSJsonCfg()
-	if err != nil {
-		return err
-	}
-	if self.statsCfg.loadFromJsonCfg(jsnStatSCfg); err != nil {
+	if err = cfg.loadStatSCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnThresholdSCfg, err := jsnCfg.ThresholdSJsonCfg()
-	if err != nil {
-		return err
-	}
-	if self.thresholdSCfg.loadFromJsonCfg(jsnThresholdSCfg); err != nil {
+	if err = cfg.loadThresholdSCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnSupplierSCfg, err := jsnCfg.SupplierSJsonCfg()
-	if err != nil {
-		return err
-	}
-	if self.supplierSCfg.loadFromJsonCfg(jsnSupplierSCfg); err != nil {
+	if err = cfg.loadSupplierSCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnLoaderCfg, err := jsnCfg.LoaderJsonCfg()
-	if err != nil {
+	if err = cfg.loadLoaderCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnMailerCfg, err := jsnCfg.MailerJsonCfg()
-	if err != nil {
-		return err
-	}
-	if self.mailerCfg.loadFromJsonCfg(jsnMailerCfg); err != nil {
+	if err = cfg.loadMailerCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnSureTaxCfg, err := jsnCfg.SureTaxJsonCfg()
-	if err != nil {
-		return err
-	}
-	if err := self.sureTaxCfg.loadFromJsonCfg(jsnSureTaxCfg); err != nil {
+	if err = cfg.loadSureTaxCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnDispatcherSCfg, err := jsnCfg.DispatcherSJsonCfg()
-	if err != nil {
-		return err
-	}
-	if self.dispatcherSCfg.loadFromJsonCfg(jsnDispatcherSCfg); err != nil {
+	if err = cfg.loadDispatcherSCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnLoaderCgrCfg, err := jsnCfg.LoaderCfgJson()
-	if err != nil {
-		return err
-	}
-	if self.loaderCgrCfg.loadFromJsonCfg(jsnLoaderCgrCfg); err != nil {
+	if err = cfg.loadLoaderCgrCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnMigratorCgrCfg, err := jsnCfg.MigratorCfgJson()
-	if err != nil {
-		return err
-	}
-	if self.migratorCgrCfg.loadFromJsonCfg(jsnMigratorCgrCfg); err != nil {
+	if err = cfg.loadMigratorCgrCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnTlsCgrCfg, err := jsnCfg.TlsCfgJson()
-	if err != nil {
-		return err
-	}
-	if err := self.tlsCfg.loadFromJsonCfg(jsnTlsCgrCfg); err != nil {
+	if err = cfg.loadTlsCgrCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	jsnAnalyzerCgrCfg, err := jsnCfg.AnalyzerCfgJson()
-	if err != nil {
-		return err
-	}
-	if err := self.analyzerSCfg.loadFromJsonCfg(jsnAnalyzerCgrCfg); err != nil {
+	if err = cfg.loadAnalyzerCgrCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	if err := self.loadApierCfg(jsnCfg); err != nil {
+	if err = cfg.loadApierCfg(jsnCfg); err != nil {
 		return err
 	}
 
-	if err := self.loadErsCfg(jsnCfg); err != nil {
+	if err = cfg.loadErsCfg(jsnCfg); err != nil {
 		return err
 	}
 
+	return nil
+}
+
+func (cfg *CGRConfig) loadGeneralCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnGeneralCfg *GeneralJsonCfg
+	if jsnGeneralCfg, err = jsnCfg.GeneralJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.generalCfg.loadFromJsonCfg(jsnGeneralCfg)
+}
+
+func (cfg *CGRConfig) loadCacheCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnCacheCfg *CacheJsonCfg
+	if jsnCacheCfg, err = jsnCfg.CacheJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.cacheCfg.loadFromJsonCfg(jsnCacheCfg)
+}
+
+func (cfg *CGRConfig) loadListenCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnListenCfg *ListenJsonCfg
+	if jsnListenCfg, err = jsnCfg.ListenJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.listenCfg.loadFromJsonCfg(jsnListenCfg)
+}
+
+func (cfg *CGRConfig) loadHttpCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnHttpCfg *HTTPJsonCfg
+	if jsnHttpCfg, err = jsnCfg.HttpJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.httpCfg.loadFromJsonCfg(jsnHttpCfg)
+}
+
+func (cfg *CGRConfig) loadDataDBCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnDataDbCfg *DbJsonCfg
+	if jsnDataDbCfg, err = jsnCfg.DbJsonCfg(DATADB_JSN); err != nil {
+		return err
+	}
+	return cfg.dataDbCfg.loadFromJsonCfg(jsnDataDbCfg)
+}
+
+func (cfg *CGRConfig) loadStorDBCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnDataDbCfg *DbJsonCfg
+	if jsnDataDbCfg, err = jsnCfg.DbJsonCfg(STORDB_JSN); err != nil {
+		return err
+	}
+	return cfg.storDbCfg.loadFromJsonCfg(jsnDataDbCfg)
+}
+
+func (cfg *CGRConfig) loadFilterSCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnFilterSCfg *FilterSJsonCfg
+	if jsnFilterSCfg, err = jsnCfg.FilterSJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.filterSCfg.loadFromJsonCfg(jsnFilterSCfg)
+}
+
+func (cfg *CGRConfig) loadRalSCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnRALsCfg *RalsJsonCfg
+	if jsnRALsCfg, err = jsnCfg.RalsJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.ralsCfg.loadFromJsonCfg(jsnRALsCfg)
+}
+
+func (cfg *CGRConfig) loadSchedulerCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnSchedCfg *SchedulerJsonCfg
+	if jsnSchedCfg, err = jsnCfg.SchedulerJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.schedulerCfg.loadFromJsonCfg(jsnSchedCfg)
+}
+
+func (cfg *CGRConfig) loadCdrsCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnCdrsCfg *CdrsJsonCfg
+	if jsnCdrsCfg, err = jsnCfg.CdrsJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.cdrsCfg.loadFromJsonCfg(jsnCdrsCfg)
+}
+
+func (cfg *CGRConfig) loadCdreCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnCdreCfg map[string]*CdreJsonCfg
+	if jsnCdreCfg, err = jsnCfg.CdreJsonCfgs(); err != nil {
+		return err
+	}
 	if jsnCdreCfg != nil {
 		for profileName, jsnCdre1Cfg := range jsnCdreCfg {
-			if _, hasProfile := self.CdreProfiles[profileName]; !hasProfile { // New profile, create before loading from json
-				self.CdreProfiles[profileName] = new(CdreCfg)
+			if _, hasProfile := cfg.CdreProfiles[profileName]; !hasProfile { // New profile, create before loading from json
+				cfg.CdreProfiles[profileName] = new(CdreCfg)
 				if profileName != utils.META_DEFAULT {
-					self.CdreProfiles[profileName] = self.dfltCdreProfile.Clone() // Clone default so we do not inherit pointers
+					cfg.CdreProfiles[profileName] = cfg.dfltCdreProfile.Clone() // Clone default so we do not inherit pointers
 				}
 			}
-			if err = self.CdreProfiles[profileName].loadFromJsonCfg(jsnCdre1Cfg, self.generalCfg.RSRSep); err != nil { // Update the existing profile with content from json config
+			if err = cfg.CdreProfiles[profileName].loadFromJsonCfg(jsnCdre1Cfg, cfg.generalCfg.RSRSep); err != nil { // Update the existing profile with content from json config
 				return err
 			}
 		}
 	}
+	return
+}
 
-	if jsnLoaderCfg != nil {
-		// self.loaderCfg = make([]*LoaderSCfg, len(jsnLoaderCfg))
-		for _, profile := range jsnLoaderCfg {
-			loadSCfgp := NewDfltLoaderSCfg()
-			loadSCfgp.loadFromJsonCfg(profile, self.generalCfg.RSRSep)
-			self.loaderCfg = append(self.loaderCfg, loadSCfgp) // use apend so the loaderS profile to be loaded from multiple files
-		}
+func (cfg *CGRConfig) loadCdrcCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnCdrcCfg []*CdrcJsonCfg
+	if jsnCdrcCfg, err = jsnCfg.CdrcJsonCfg(); err != nil {
+		return err
 	}
-
 	if jsnCdrcCfg != nil {
 		for _, jsnCrc1Cfg := range jsnCdrcCfg {
 			if jsnCrc1Cfg.Id == nil || *jsnCrc1Cfg.Id == "" {
 				return utils.ErrCDRCNoProfileID
 			}
 			if *jsnCrc1Cfg.Id == utils.META_DEFAULT {
-				if self.dfltCdrcProfile == nil {
-					self.dfltCdrcProfile = new(CdrcCfg)
+				if cfg.dfltCdrcProfile == nil {
+					cfg.dfltCdrcProfile = new(CdrcCfg)
 				}
 			}
 			indxFound := -1 // Will be different than -1 if an instance with same id will be found
 			pathFound := "" // Will be populated with the path where slice of cfgs was found
 			var cdrcInstCfg *CdrcCfg
-			for path := range self.CdrcProfiles {
-				for i := range self.CdrcProfiles[path] {
-					if self.CdrcProfiles[path][i].ID == *jsnCrc1Cfg.Id {
+			for path := range cfg.CdrcProfiles {
+				for i := range cfg.CdrcProfiles[path] {
+					if cfg.CdrcProfiles[path][i].ID == *jsnCrc1Cfg.Id {
 						indxFound = i
 						pathFound = path
-						cdrcInstCfg = self.CdrcProfiles[path][i]
+						cdrcInstCfg = cfg.CdrcProfiles[path][i]
 						break
 					}
 				}
 			}
 			if cdrcInstCfg == nil {
-				cdrcInstCfg = self.dfltCdrcProfile.Clone()
+				cdrcInstCfg = cfg.dfltCdrcProfile.Clone()
 			}
-			if err := cdrcInstCfg.loadFromJsonCfg(jsnCrc1Cfg, self.generalCfg.RSRSep); err != nil {
+			if err := cdrcInstCfg.loadFromJsonCfg(jsnCrc1Cfg, cfg.generalCfg.RSRSep); err != nil {
 				return err
 			}
 			if cdrcInstCfg.CDRInPath == "" {
 				return utils.ErrCDRCNoInPath
 			}
-			if _, hasDir := self.CdrcProfiles[cdrcInstCfg.CDRInPath]; !hasDir {
-				self.CdrcProfiles[cdrcInstCfg.CDRInPath] = make([]*CdrcCfg, 0)
+			if _, hasDir := cfg.CdrcProfiles[cdrcInstCfg.CDRInPath]; !hasDir {
+				cfg.CdrcProfiles[cdrcInstCfg.CDRInPath] = make([]*CdrcCfg, 0)
 			}
 			if indxFound != -1 { // Replace previous config so we have inheritance
-				self.CdrcProfiles[pathFound][indxFound] = cdrcInstCfg
+				cfg.CdrcProfiles[pathFound][indxFound] = cdrcInstCfg
 			} else {
-				self.CdrcProfiles[cdrcInstCfg.CDRInPath] = append(self.CdrcProfiles[cdrcInstCfg.CDRInPath], cdrcInstCfg)
+				cfg.CdrcProfiles[cdrcInstCfg.CDRInPath] = append(cfg.CdrcProfiles[cdrcInstCfg.CDRInPath], cdrcInstCfg)
 			}
 		}
 	}
+	return
+}
+
+func (cfg *CGRConfig) loadSessionSCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnSessionSCfg *SessionSJsonCfg
+	if jsnSessionSCfg, err = jsnCfg.SessionSJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.sessionSCfg.loadFromJsonCfg(jsnSessionSCfg)
+}
+
+func (cfg *CGRConfig) loadFreeswitchAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnSmFsCfg *FreeswitchAgentJsonCfg
+	if jsnSmFsCfg, err = jsnCfg.FreeswitchAgentJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.fsAgentCfg.loadFromJsonCfg(jsnSmFsCfg)
+}
+
+func (cfg *CGRConfig) loadKamAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnKamAgentCfg *KamAgentJsonCfg
+	if jsnKamAgentCfg, err = jsnCfg.KamAgentJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.kamAgentCfg.loadFromJsonCfg(jsnKamAgentCfg)
+}
+
+func (cfg *CGRConfig) loadAsteriskAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnSMAstCfg *AsteriskAgentJsonCfg
+	if jsnSMAstCfg, err = jsnCfg.AsteriskAgentJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.asteriskAgentCfg.loadFromJsonCfg(jsnSMAstCfg)
+}
+
+func (cfg *CGRConfig) loadDiameterAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnDACfg *DiameterAgentJsonCfg
+	if jsnDACfg, err = jsnCfg.DiameterAgentJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.diameterAgentCfg.loadFromJsonCfg(jsnDACfg, cfg.GeneralCfg().RsrSepatarot)
+}
+
+func (cfg *CGRConfig) loadRadiusAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnRACfg *RadiusAgentJsonCfg
+	if jsnRACfg, err = jsnCfg.RadiusAgentJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.radiusAgentCfg.loadFromJsonCfg(jsnRACfg, cfg.GeneralCfg().RsrSepatarot)
+}
+
+func (cfg *CGRConfig) loadDNSAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnDNSCfg *DNSAgentJsonCfg
+	if jsnDNSCfg, err = jsnCfg.DNSAgentJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.dnsAgentCfg.loadFromJsonCfg(jsnDNSCfg, cfg.GeneralCfg().RsrSepatarot)
+}
+
+func (cfg *CGRConfig) loadHttpAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnHttpAgntCfg *[]*HttpAgentJsonCfg
+	if jsnHttpAgntCfg, err = jsnCfg.HttpAgentJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.httpAgentCfg.loadFromJsonCfg(jsnHttpAgntCfg, cfg.GeneralCfg().RsrSepatarot)
+}
+
+func (cfg *CGRConfig) loadAttributeServCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnAttributeSCfg *AttributeSJsonCfg
+	if jsnAttributeSCfg, err = jsnCfg.AttributeServJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.attributeSCfg.loadFromJsonCfg(jsnAttributeSCfg)
+}
+
+func (cfg *CGRConfig) loadChargerServCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnChargerSCfg *ChargerSJsonCfg
+	if jsnChargerSCfg, err = jsnCfg.ChargerServJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.chargerSCfg.loadFromJsonCfg(jsnChargerSCfg)
+}
+
+func (cfg *CGRConfig) loadResourceSCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnRLSCfg *ResourceSJsonCfg
+	if jsnRLSCfg, err = jsnCfg.ResourceSJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.resourceSCfg.loadFromJsonCfg(jsnRLSCfg)
+}
+
+func (cfg *CGRConfig) loadStatSCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnStatSCfg *StatServJsonCfg
+	if jsnStatSCfg, err = jsnCfg.StatSJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.statsCfg.loadFromJsonCfg(jsnStatSCfg)
+}
+
+func (cfg *CGRConfig) loadThresholdSCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnThresholdSCfg *ThresholdSJsonCfg
+	if jsnThresholdSCfg, err = jsnCfg.ThresholdSJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.thresholdSCfg.loadFromJsonCfg(jsnThresholdSCfg)
+}
+
+func (cfg *CGRConfig) loadSupplierSCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnSupplierSCfg *SupplierSJsonCfg
+	if jsnSupplierSCfg, err = jsnCfg.SupplierSJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.supplierSCfg.loadFromJsonCfg(jsnSupplierSCfg)
+}
+
+func (cfg *CGRConfig) loadLoaderCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnLoaderCfg []*LoaderJsonCfg
+	if jsnLoaderCfg, err = jsnCfg.LoaderJsonCfg(); err != nil {
+		return err
+	}
+	if jsnLoaderCfg != nil {
+		// cfg.loaderCfg = make([]*LoaderSCfg, len(jsnLoaderCfg))
+		for _, profile := range jsnLoaderCfg {
+			loadSCfgp := NewDfltLoaderSCfg()
+			loadSCfgp.loadFromJsonCfg(profile, cfg.GeneralCfg().RsrSepatarot)
+			cfg.loaderCfg = append(cfg.loaderCfg, loadSCfgp) // use apend so the loaderS profile to be loaded from multiple files
+		}
+	}
 	return nil
+}
+
+func (cfg *CGRConfig) loadMailerCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnMailerCfg *MailerJsonCfg
+	if jsnMailerCfg, err = jsnCfg.MailerJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.mailerCfg.loadFromJsonCfg(jsnMailerCfg)
+}
+
+func (cfg *CGRConfig) loadSureTaxCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnSureTaxCfg *SureTaxJsonCfg
+	if jsnSureTaxCfg, err = jsnCfg.SureTaxJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.sureTaxCfg.loadFromJsonCfg(jsnSureTaxCfg)
+}
+
+func (cfg *CGRConfig) loadDispatcherSCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnDispatcherSCfg *DispatcherSJsonCfg
+	if jsnDispatcherSCfg, err = jsnCfg.DispatcherSJsonCfg(); err != nil {
+		return err
+	}
+	return cfg.dispatcherSCfg.loadFromJsonCfg(jsnDispatcherSCfg)
+}
+
+func (cfg *CGRConfig) loadLoaderCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnLoaderCgrCfg *LoaderCfgJson
+	if jsnLoaderCgrCfg, err = jsnCfg.LoaderCfgJson(); err != nil {
+		return err
+	}
+	return cfg.loaderCgrCfg.loadFromJsonCfg(jsnLoaderCgrCfg)
+}
+
+func (cfg *CGRConfig) loadMigratorCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnMigratorCgrCfg *MigratorCfgJson
+	if jsnMigratorCgrCfg, err = jsnCfg.MigratorCfgJson(); err != nil {
+		return err
+	}
+	return cfg.migratorCgrCfg.loadFromJsonCfg(jsnMigratorCgrCfg)
+}
+
+func (cfg *CGRConfig) loadTlsCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnTlsCgrCfg *TlsJsonCfg
+	if jsnTlsCgrCfg, err = jsnCfg.TlsCfgJson(); err != nil {
+		return err
+	}
+	return cfg.tlsCfg.loadFromJsonCfg(jsnTlsCgrCfg)
+}
+
+func (cfg *CGRConfig) loadAnalyzerCgrCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnAnalyzerCgrCfg *AnalyzerSJsonCfg
+	if jsnAnalyzerCgrCfg, err = jsnCfg.AnalyzerCfgJson(); err != nil {
+		return err
+	}
+	return cfg.analyzerSCfg.loadFromJsonCfg(jsnAnalyzerCgrCfg)
 }
 
 func (cfg *CGRConfig) loadApierCfg(jsnCfg *CgrJsonCfg) (err error) {
