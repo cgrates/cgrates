@@ -1488,16 +1488,12 @@ func (cfg *CGRConfig) loadConfig(path, section string) (reload func(), err error
 	case utils.EmptyString:
 		cfg.LockSections()
 		defer cfg.UnlockSections()
-		parseFunction = func(jsnCfg *CgrJsonCfg) error {
-			return cfg.loadFromJsonCfg(jsnCfg)
-		}
+		parseFunction = cfg.loadFromJsonCfg
 		reload = func() {}
 	case ERsJson:
 		cfg.lks[ERsJson].Lock()
 		defer cfg.lks[ERsJson].Unlock()
-		parseFunction = func(jsnCfg *CgrJsonCfg) error {
-			return cfg.loadErsCfg(jsnCfg)
-		}
+		parseFunction = cfg.loadErsCfg
 		reload = func() { cfg.rldChans[ERsJson] <- struct{}{} }
 	default:
 		return nil, fmt.Errorf("Invalid section: <%s>", section)
