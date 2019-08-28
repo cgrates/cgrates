@@ -347,13 +347,13 @@ func startERs(sSChan, dspSChan chan rpcclient.RpcClientConnection,
 	}
 
 	var erS *ers.ERService
-	if erS, err = ers.NewERService(cfg, filterS, sS); err != nil {
+	if erS, err = ers.NewERService(cfg, filterS, sS, exitChan); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.ERs, err.Error()))
 		exitChan <- true
 		return
 	}
 
-	if err = erS.ListenAndServe(cfgRld, exitChan); err != nil {
+	if err = erS.ListenAndServe(cfgRld); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.ERs, err.Error()))
 	}
 

@@ -23,15 +23,19 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewCSVFileER(cfg *config.CGRConfig, cfgIdx int) (er EventReader, err error) {
-	return
+func NewCSVFileER(cfg *config.EventReaderCfg) (er EventReader, err error) {
+	return new(CSVFileER), nil
 }
 
-// CSVer implements EventReader interface for .csv files
+// CSVFileER implements EventReader interface for .csv files
 type CSVFileER struct {
 }
 
 func (csv *CSVFileER) ID() (id string) {
+	return
+}
+
+func (csv *CSVFileER) Config() (rdrCfg *config.EventReaderCfg) {
 	return
 }
 

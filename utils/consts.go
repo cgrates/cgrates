@@ -567,6 +567,7 @@ const (
 	ERs                         = "ERs"
 	Ratio                       = "Ratio"
 	Load                        = "Load"
+	Slash                       = "/"
 )
 
 // Migrator Action
