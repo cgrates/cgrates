@@ -767,9 +767,12 @@ type DispatcherConfigSv1 struct {
 	dS *dispatchers.DispatcherService
 }
 
-// Ping used to detreminate if component is active
 func (dS *DispatcherConfigSv1) GetJSONSection(args *config.StringWithArgDispatcher, reply *map[string]interface{}) (err error) {
 	return dS.dS.ConfigSv1GetJSONSection(args, reply)
+}
+
+func (dS *DispatcherConfigSv1) ReloadConfig(args *config.ConfigReloadWithArgDispatcher, reply *string) (err error) {
+	return dS.dS.ConfigSv1ReloadConfig(args, reply)
 }
 
 func NewDispatcherCoreSv1(dps *dispatchers.DispatcherService) *DispatcherCoreSv1 {

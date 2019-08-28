@@ -833,6 +833,7 @@ const (
 const (
 	ConfigSv1               = "ConfigSv1"
 	ConfigSv1GetJSONSection = "ConfigSv1.GetJSONSection"
+	ConfigSv1ReloadConfig   = "ConfigSv1.ReloadConfig"
 )
 
 const (

@@ -72,3 +72,57 @@ func TestNewCGRConfigFromPath(t *testing.T) {
 	}
 
 }
+
+func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
+	expected := map[string]interface{}{
+		"Enabled": true,
+		"Readers": []interface{}{
+			map[string]interface{}{
+				"ConcurrentReqs": 0.,
+				"Content_fields": nil,
+				"Continue":       false,
+				"FieldSep":       "",
+				"Filters":        nil,
+				"Flags":          nil,
+				"Header_fields":  nil,
+				"ID":             "file_reader1",
+				"ProcessedPath":  "",
+				"RunDelay":       -1.,
+				"SourceID":       "",
+				"SourcePath":     "",
+				"Tenant":         nil,
+				"Timezone":       "",
+				"Trailer_fields": nil,
+				"Type":           "",
+				"XmlRootPath":    "",
+			},
+		},
+		"SessionSConns": []interface{}{
+			map[string]interface{}{
+				"Address":     "*internal",
+				"Synchronous": false,
+				"TLS":         false,
+				"Transport":   "",
+			},
+		},
+	}
+
+	cfg, _ := NewDefaultCGRConfig()
+	var reply string
+	var rcv map[string]interface{}
+
+	if err := cfg.V1ReloadConfig(&ConfigReloadWithArgDispatcher{
+		Path:    "/usr/share/cgrates/conf/samples/ers",
+		Section: ERsJson,
+	}, &reply); err != nil {
+		t.Fatal(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected: %s ,received: %s", utils.OK, reply)
+	}
+
+	if err := cfg.V1GetConfigSection(&StringWithArgDispatcher{Section: ERsJson}, &rcv); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+}

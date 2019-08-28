@@ -43,3 +43,22 @@ func (dS *DispatcherService) ConfigSv1GetJSONSection(args *config.StringWithArgD
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt},
 		utils.MetaConfig, routeID, utils.ConfigSv1GetJSONSection, args, reply)
 }
+
+func (dS *DispatcherService) ConfigSv1ReloadConfig(args *config.ConfigReloadWithArgDispatcher, reply *string) (err error) {
+	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	if dS.attrS != nil {
+		if args.ArgDispatcher == nil {
+			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
+		}
+		if err = dS.authorize(utils.ConfigSv1ReloadConfig, tnt,
+			args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			return
+		}
+	}
+	var routeID *string
+	if args.ArgDispatcher != nil {
+		routeID = args.ArgDispatcher.RouteID
+	}
+	return dS.Dispatch(&utils.CGREvent{Tenant: tnt},
+		utils.MetaConfig, routeID, utils.ConfigSv1ReloadConfig, args, reply)
+}
