@@ -21,6 +21,7 @@ package v1
 import (
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -148,5 +149,15 @@ type ServiceManagerV1Interface interface {
 
 type RALsV1Interface interface {
 	GetRatingPlansCost(arg *utils.RatingPlanCostArg, reply *dispatchers.RatingPlanCost) error
+	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
+}
+
+type ConfigSv1Interface interface {
+	GetJSONSection(section *config.StringWithArgDispatcher, reply *map[string]interface{}) (err error)
+	ReloadConfig(section *config.ConfigReloadWithArgDispatcher, reply *string) (err error)
+}
+
+type CoreSv1Interface interface {
+	Status(arg *utils.TenantWithArgDispatcher, reply *map[string]interface{}) error
 	Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error
 }

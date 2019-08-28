@@ -36,6 +36,10 @@ func (cSv1 *ConfigSv1) GetJSONSection(section *config.StringWithArgDispatcher, r
 	return cSv1.cfg.V1GetConfigSection(section, reply)
 }
 
+func (cSv1 *ConfigSv1) ReloadConfig(args *config.ConfigReloadWithArgDispatcher, reply *string) (err error) {
+	return cSv1.cfg.V1ReloadConfig(args, reply)
+}
+
 // Call implements rpcclient.RpcClientConnection interface for internal RPC
 func (cSv1 *ConfigSv1) Call(serviceMethod string,
 	args interface{}, reply interface{}) error {
