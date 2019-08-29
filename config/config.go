@@ -233,12 +233,10 @@ func NewCGRConfigFromPath(path string) (*CGRConfig, error) {
 	}
 	cfg.ConfigPath = path
 
-	if err := updateConfigFromPath(path, func(jsnCfg *CgrJsonCfg) error {
-		return cfg.loadFromJsonCfg(jsnCfg)
-	}); err != nil {
+	if err := loadConfigFromPath(path, cfg.loadFromJsonCfg); err != nil {
 		return nil, err
 	}
-	if err = cfg.checkConfigSanity(); err != nil { // should we check only the updated sections?
+	if err = cfg.checkConfigSanity(); err != nil {
 		return nil, err
 	}
 	return cfg, nil
@@ -1498,14 +1496,14 @@ func (cfg *CGRConfig) loadConfig(path, section string) (reload func(), err error
 	default:
 		return nil, fmt.Errorf("Invalid section: <%s>", section)
 	}
-	err = updateConfigFromPath(path, parseFunction)
+	err = loadConfigFromPath(path, parseFunction)
 	return
 }
 
 // Reads all .json files out of a folder/subfolders and loads them up in lexical order
-func updateConfigFromPath(path string, parseFunction func(jsnCfg *CgrJsonCfg) error) error {
+func loadConfigFromPath(path string, parseFunction func(jsnCfg *CgrJsonCfg) error) error {
 	if isUrl(path) {
-		return updateConfigFromHttp(path, parseFunction) // prefix protocol
+		return loadConfigFromHttp(path, parseFunction) // prefix protocol
 	}
 	fi, err := os.Stat(path)
 	if err != nil {
@@ -1517,12 +1515,12 @@ func updateConfigFromPath(path string, parseFunction func(jsnCfg *CgrJsonCfg) er
 		return fmt.Errorf("Path: %s not a directory.", path)
 	}
 	if fi.IsDir() {
-		return updateConfigFromFolder(path, parseFunction)
+		return loadConfigFromFolder(path, parseFunction)
 	}
 	return nil
 }
 
-func updateConfigFromFolder(cfgDir string, parseFunction func(jsnCfg *CgrJsonCfg) error) error {
+func loadConfigFromFolder(cfgDir string, parseFunction func(jsnCfg *CgrJsonCfg) error) error {
 	jsonFilesFound := false
 	err := filepath.Walk(cfgDir, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() || isHidden(info.Name()) { // also ignore hidden files and folders
@@ -1558,7 +1556,7 @@ func updateConfigFromFolder(cfgDir string, parseFunction func(jsnCfg *CgrJsonCfg
 	return nil
 }
 
-func updateConfigFromHttp(urlPaths string, parseFunction func(jsnCfg *CgrJsonCfg) error) error {
+func loadConfigFromHttp(urlPaths string, parseFunction func(jsnCfg *CgrJsonCfg) error) error {
 	for _, urlPath := range strings.Split(urlPaths, utils.INFIELD_SEP) {
 		if _, err := url.ParseRequestURI(urlPath); err != nil {
 			return err
