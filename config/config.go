@@ -233,7 +233,7 @@ func NewCGRConfigFromPath(path string) (*CGRConfig, error) {
 	}
 	cfg.ConfigPath = path
 
-	if err := loadConfigFromPath(path, cfg.loadFromJsonCfg); err != nil {
+	if err := loadConfigFromPath(path, []func(*CgrJsonCfg) error{cfg.loadFromJsonCfg}); err != nil {
 		return nil, err
 	}
 	if err = cfg.checkConfigSanity(); err != nil {
@@ -1435,78 +1435,105 @@ type ConfigReloadWithArgDispatcher struct {
 	Path    string
 }
 
-func (cfg *CGRConfig) RLockSections() {
+func (cfg *CGRConfig) rLockSections() {
 	for _, lk := range cfg.lks {
 		lk.RLock()
 	}
 }
 
-func (cfg *CGRConfig) RUnlockSections() {
+func (cfg *CGRConfig) rUnlockSections() {
 	for _, lk := range cfg.lks {
 		lk.RUnlock()
 	}
 }
 
-func (cfg *CGRConfig) LockSections() {
+func (cfg *CGRConfig) lockSections() {
 	for _, lk := range cfg.lks {
 		lk.Lock()
 	}
 }
 
-func (cfg *CGRConfig) UnlockSections() {
+func (cfg *CGRConfig) unlockSections() {
 	for _, lk := range cfg.lks {
 		lk.Unlock()
 	}
 }
 
 func (cfg *CGRConfig) V1ReloadConfig(args *ConfigReloadWithArgDispatcher, reply *string) (err error) {
-	var reloadFunction func()
-	if reloadFunction, err = cfg.loadConfig(args.Path, args.Section); err != nil {
+	if missing := utils.MissingStructFields(&args, []string{"Path"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if err = cfg.loadConfig(args.Path, args.Section); err != nil {
 		return err
 	}
 	//  lock all sections
-	cfg.RLockSections()
+	cfg.rLockSections()
 
 	err = cfg.checkConfigSanity()
 
-	cfg.RUnlockSections() // unlock before checking the error
+	cfg.rUnlockSections() // unlock before checking the error
 
 	if err != nil {
 		return err
 	}
 
-	reloadFunction()
-	*reply = utils.OK
-	return nil
-}
-
-func (cfg *CGRConfig) loadConfig(path, section string) (reload func(), err error) {
-	var parseFunction func(jsnCfg *CgrJsonCfg) error
-	switch section {
-	case utils.EmptyString:
-		cfg.LockSections()
-		defer cfg.UnlockSections()
-		parseFunction = cfg.loadFromJsonCfg
-		reload = func() {}
-	case ERsJson:
-		cfg.lks[ERsJson].Lock()
-		defer cfg.lks[ERsJson].Unlock()
-		parseFunction = cfg.loadErsCfg
-		reload = func() { cfg.rldChans[ERsJson] <- struct{}{} }
-	default:
-		return nil, fmt.Errorf("Invalid section: <%s>", section)
+	if err = cfg.reloadSection(args.Section); err != nil {
+		return err
 	}
-	err = loadConfigFromPath(path, parseFunction)
+	*reply = utils.OK
 	return
 }
 
-// Reads all .json files out of a folder/subfolders and loads them up in lexical order
-func loadConfigFromPath(path string, parseFunction func(jsnCfg *CgrJsonCfg) error) error {
-	if isUrl(path) {
-		return loadConfigFromHttp(path, parseFunction) // prefix protocol
+func (cfg *CGRConfig) reloadSection(section string) (err error) {
+	var fall bool
+	switch section {
+	default:
+		return fmt.Errorf("Invalid section: <%s>", section)
+	case utils.EmptyString, "*all": // do constant
+		fall = true
+		fallthrough
+	case ERsJson:
+		cfg.rldChans[ERsJson] <- struct{}{}
+		if !fall {
+			break
+		}
+		fallthrough
+	case GENERAL_JSN: // to be implemented
+
 	}
-	fi, err := os.Stat(path)
-	if err != nil {
+	return
+}
+
+func (cfg *CGRConfig) loadConfig(path, section string) (err error) {
+	var parseFunctions []func(*CgrJsonCfg) error
+	var fall bool
+	switch section {
+	default:
+		return fmt.Errorf("Invalid section: <%s>", section)
+	case utils.EmptyString, "*all": // do constant
+		fall = true
+		fallthrough
+	case ERsJson:
+		cfg.lks[ERsJson].Lock()
+		defer cfg.lks[ERsJson].Unlock()
+		parseFunctions = append(parseFunctions, cfg.loadErsCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case GENERAL_JSN: // to be implemented
+
+	}
+	return loadConfigFromPath(path, parseFunctions)
+}
+
+// Reads all .json files out of a folder/subfolders and loads them up in lexical order
+func loadConfigFromPath(path string, parseFunctions []func(jsnCfg *CgrJsonCfg) error) (err error) {
+	if isUrl(path) {
+		return loadConfigFromHttp(path, parseFunctions) // prefix protocol
+	}
+	var fi os.FileInfo
+	if fi, err = os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
 			return utils.ErrPathNotReachable(path)
 		}
@@ -1515,23 +1542,23 @@ func loadConfigFromPath(path string, parseFunction func(jsnCfg *CgrJsonCfg) erro
 		return fmt.Errorf("Path: %s not a directory.", path)
 	}
 	if fi.IsDir() {
-		return loadConfigFromFolder(path, parseFunction)
+		return loadConfigFromFolder(path, parseFunctions)
 	}
-	return nil
+	return
 }
 
-func loadConfigFromFolder(cfgDir string, parseFunction func(jsnCfg *CgrJsonCfg) error) error {
+func loadConfigFromFolder(cfgDir string, parseFunctions []func(jsnCfg *CgrJsonCfg) error) (err error) {
 	jsonFilesFound := false
-	err := filepath.Walk(cfgDir, func(path string, info os.FileInfo, err error) error {
+	if err = filepath.Walk(cfgDir, func(path string, info os.FileInfo, err error) (werr error) {
 		if !info.IsDir() || isHidden(info.Name()) { // also ignore hidden files and folders
-			return nil
+			return
 		}
-		cfgFiles, err := filepath.Glob(filepath.Join(path, "*.json"))
-		if err != nil {
-			return err
+		var cfgFiles []string
+		if cfgFiles, werr = filepath.Glob(filepath.Join(path, "*.json")); werr != nil {
+			return
 		}
 		if cfgFiles == nil { // No need of processing further since there are no config files in the folder
-			return nil
+			return
 		}
 		if !jsonFilesFound {
 			jsonFilesFound = true
@@ -1540,34 +1567,41 @@ func loadConfigFromFolder(cfgDir string, parseFunction func(jsnCfg *CgrJsonCfg) 
 			if cgrJsonCfg, err := NewCgrJsonCfgFromFile(jsonFilePath); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<CGR-CFG> Error <%s> reading config from path: <%s>", err.Error(), jsonFilePath))
 				return err
-			} else if err := parseFunction(cgrJsonCfg); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<CGR-CFG> Error <%s> loading config from path: <%s>", err.Error(), jsonFilePath))
-				return err
+			} else {
+				for _, parseFunc := range parseFunctions {
+					if err := parseFunc(cgrJsonCfg); err != nil {
+						utils.Logger.Err(fmt.Sprintf("<CGR-CFG> Error <%s> loading config from path: <%s>", err.Error(), jsonFilePath))
+						return err
+					}
+				}
 			}
 		}
-		return nil
-	})
-	if err != nil {
+		return
+	}); err != nil {
 		return err
 	}
 	if !jsonFilesFound {
 		return fmt.Errorf("No config file found on path %s", cfgDir)
 	}
-	return nil
+	return
 }
 
-func loadConfigFromHttp(urlPaths string, parseFunction func(jsnCfg *CgrJsonCfg) error) error {
+func loadConfigFromHttp(urlPaths string, parseFunctions []func(jsnCfg *CgrJsonCfg) error) (err error) {
 	for _, urlPath := range strings.Split(urlPaths, utils.INFIELD_SEP) {
-		if _, err := url.ParseRequestURI(urlPath); err != nil {
-			return err
+		if _, err = url.ParseRequestURI(urlPath); err != nil {
+			return
 		}
 		if cgrJsonCfg, err := NewCgrJsonCfgFromHttp(urlPath); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<CGR-CFG> Error <%s> reading config from path: <%s>", err.Error(), urlPath))
 			return err
-		} else if err := parseFunction(cgrJsonCfg); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CGR-CFG> Error <%s> loading config from path: <%s>", err.Error(), urlPath))
-			return err
+		} else {
+			for _, parseFunc := range parseFunctions {
+				if err := parseFunc(cgrJsonCfg); err != nil {
+					utils.Logger.Err(fmt.Sprintf("<CGR-CFG> Error <%s> loading config from path: <%s>", err.Error(), urlPath))
+					return err
+				}
+			}
 		}
 	}
-	return nil
+	return
 }
