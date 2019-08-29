@@ -1069,7 +1069,12 @@ func (acc *Account) AsAccountSummary() *AccountSummary {
 		ad.Tenant = idSplt[0]
 		ad.ID = idSplt[1]
 	}
-	for balanceType, balances := range acc.BalanceMap {
+
+	for _, balanceType := range []string{utils.DATA, utils.SMS, utils.VOICE, utils.GENERIC, utils.MONETARY} {
+		balances, has := acc.BalanceMap[balanceType]
+		if !has {
+			continue
+		}
 		for _, balance := range balances {
 			ad.BalanceSummaries = append(ad.BalanceSummaries, balance.AsBalanceSummary(balanceType))
 		}
