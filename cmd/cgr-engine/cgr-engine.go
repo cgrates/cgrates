@@ -1516,11 +1516,31 @@ func cpuProfiling(cpuProfDir string, stopChan, doneChan chan struct{}, exitChan 
 	doneChan <- struct{}{}
 }
 
-func shutdownSingnalHandler(exitChan chan bool) {
-	c := make(chan os.Signal)
-	signal.Notify(c, os.Interrupt, syscall.SIGHUP, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
-	<-c
-	exitChan <- true
+func singnalHandler(exitChan chan bool) {
+	shutdownSignal := make(chan os.Signal)
+	reloadSignal := make(chan os.Signal)
+	signal.Notify(shutdownSignal, os.Interrupt,
+		syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+	signal.Notify(reloadSignal, syscall.SIGHUP)
+	for {
+		select {
+		case <-shutdownSignal:
+			exitChan <- true
+		case <-reloadSignal:
+			//  do it in it's own gorutine in order to not block the signal handler with the reload functionality
+			go func() {
+				var reply string
+				if err := config.CgrConfig().V1ReloadConfig(
+					&config.ConfigReloadWithArgDispatcher{
+						Section: utils.EmptyString,
+						Path:    config.CgrConfig().ConfigPath, // use the same path
+					}, &reply); err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("Error reloading configuration: <%s>", err))
+				}
+			}()
+		}
+	}
 }
 
 func main() {
@@ -1540,7 +1560,7 @@ func main() {
 	}
 
 	exitChan := make(chan bool)
-	go shutdownSingnalHandler(exitChan)
+	go singnalHandler(exitChan)
 
 	if *memProfDir != "" {
 		go memProfiling(*memProfDir, *memProfInterval, *memProfNrFiles, exitChan)
