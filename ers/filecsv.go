@@ -31,15 +31,11 @@ func NewCSVFileER(cfg *config.EventReaderCfg) (er EventReader, err error) {
 type CSVFileER struct {
 }
 
-func (csv *CSVFileER) ID() (id string) {
-	return
-}
-
 func (csv *CSVFileER) Config() (rdrCfg *config.EventReaderCfg) {
 	return
 }
 
-func (csv *CSVFileER) Init(args interface{}) (err error) {
+func (csv *CSVFileER) Init(itmPath, itmID string) (err error) {
 	return
 }
 

@@ -26,12 +26,11 @@ import (
 )
 
 type EventReader interface {
-	ID() string                     // configuration identifier
-	Config() *config.EventReaderCfg // reader configuration
-	Init(args interface{}) error    // init will initialize the Reader, ie: open the file to read or http connection
-	Read() (*utils.CGREvent, error) // process a single record in the events file
-	Processed() int64               // number of records processed
-	Close() error                   // called when the reader should release resources
+	Config() *config.EventReaderCfg     // reader configuration
+	Init(itmPath, itmName string) error // init will initialize the Reader, ie: open the file to read or http connection
+	Read() (*utils.CGREvent, error)     // process a single record in the events file
+	Processed() int64                   // number of records processed
+	Close() error                       // called when the reader should release resources
 }
 
 // NewEventReader instantiates the event reader based on configuration at index
