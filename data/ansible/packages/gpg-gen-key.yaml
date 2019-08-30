@@ -1,0 +1,30 @@
+---
+- name: set defaut gpg options
+  template:
+    src: gpg.conf.j2
+    dest: "{{ gpg_home }}/.gnupg/gpg.conf"
+    mode: '0600'
+    owner: "{{ gpg_generator_user }}"
+
+- name: copy default template for gpg key generation
+  template:
+    src: gen-key-script
+    dest: "{{ gpg_home }}/.gnupg/gen-key-script-{{ gpg_user }}"
+    mode: '0600'
+    owner: "{{ gpg_generator_user }}"
+
+- name: create some required file
+  shell: "gpg --list-secret-keys --keyid-format LONG"
+
+- name: generate randomness
+  shell: "sudo rngd -r /dev/urandom"
+  ignore_errors: true
+
+- name: generate gpg key
+  shell: "gpg --batch --gen-key {{ gpg_home }}/.gnupg/gen-key-script-{{ gpg_user }}"
+
+- name: get user armored public key
+  shell: "gpg --armor --output {{ gpg_pubkeyfileexport }} --export {{ gpg_useremail }}"
+
+- name: After export move the key to /var/packages
+  shell: "mv {{ gpg_pubkeyfileexport }} /var/packages"
