@@ -19,10 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -1466,7 +1468,7 @@ func (cfg *CGRConfig) V1ReloadConfig(args *ConfigReloadWithArgDispatcher, reply 
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err = cfg.loadConfig(args.Path, args.Section); err != nil {
-		return err
+		return
 	}
 	//  lock all sections
 	cfg.rLockSections()
@@ -1476,11 +1478,11 @@ func (cfg *CGRConfig) V1ReloadConfig(args *ConfigReloadWithArgDispatcher, reply 
 	cfg.rUnlockSections() // unlock before checking the error
 
 	if err != nil {
-		return err
+		return
 	}
 
 	if err = cfg.reloadSection(args.Section); err != nil {
-		return err
+		return
 	}
 	*reply = utils.OK
 	return
@@ -1530,13 +1532,17 @@ func (cfg *CGRConfig) loadConfig(path, section string) (err error) {
 }
 
 func (_ *CGRConfig) loadConfigFromReader(rdr io.Reader, loadFuncs []func(jsnCfg *CgrJsonCfg) error) (err error) {
+	b, err := ioutil.ReadAll(rdr)
+	if err != nil {
+		return
+	}
 	var jsnCfg *CgrJsonCfg
-	if jsnCfg, err = NewCgrJsonCfgFromReader(rdr); err != nil {
-		return err // should handle the json error
+	if jsnCfg, err = NewCgrJsonCfgFromReader(bytes.NewReader(b)); err != nil { // for the moment we dont't check the error in the rjreader
+		return HandleJSONError(bytes.NewReader(b), err)
 	}
 	for _, loadFunc := range loadFuncs {
-		if err := loadFunc(jsnCfg); err != nil {
-			return err
+		if err = loadFunc(jsnCfg); err != nil {
+			return
 		}
 	}
 	return
@@ -1552,7 +1558,7 @@ func (cfg *CGRConfig) loadConfigFromPath(path string, loadFuncs []func(jsnCfg *C
 		if os.IsNotExist(err) {
 			return utils.ErrPathNotReachable(path)
 		}
-		return err
+		return
 	} else if !fi.IsDir() && path != utils.CONFIG_PATH { // If config dir defined, needs to exist, not checking for default
 		return fmt.Errorf("Path: %s not a directory.", path)
 	}
@@ -1579,20 +1585,21 @@ func (cfg *CGRConfig) loadConfigFromFolder(cfgDir string, loadFuncs []func(jsnCf
 			jsonFilesFound = true
 		}
 		for _, jsonFilePath := range cfgFiles {
-			cfgFile, err := os.Open(jsonFilePath)
-			if err != nil {
-				return err
-			}
-			err = cfg.loadConfigFromReader(cfgFile, loadFuncs)
-			cfgFile.Close()
-			if err != nil {
-				return err
+			var cfgFile *os.File
+			cfgFile, werr = os.Open(jsonFilePath)
+			if werr != nil {
+				return
 			}
 
+			werr = cfg.loadConfigFromReader(cfgFile, loadFuncs)
+			cfgFile.Close()
+			if werr != nil {
+				return
+			}
 		}
 		return
 	}); err != nil {
-		return err
+		return
 	}
 	if !jsonFilesFound {
 		return fmt.Errorf("No config file found on path %s", cfgDir)
