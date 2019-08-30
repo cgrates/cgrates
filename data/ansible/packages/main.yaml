@@ -1,0 +1,143 @@
+---
+- hosts: all
+  vars:
+    ###############################################################
+    ##################### Golang Vars #############################
+    ###############################################################
+    # Go language SDK version number
+    golang_version: '1.12.7'
+    # Mirror to download the Go language SDK redistributable package from
+    golang_mirror: 'https://storage.googleapis.com/golang'
+    # Base installation directory the Go language SDK distribution
+    golang_install_dir: '/usr/local/go'
+    # Directory to store files downloaded for Go language SDK installation
+    golang_download_dir: "{{ x_ansible_download_dir | default(ansible_env.HOME + '/.ansible/tmp/downloads') }}"
+    # Location for GOPATH environment variable
+    golang_gopath: "/home/{{ gouser }}/go"
+    # Filename of Go language SDK redistributable package
+    golang_redis_filename: 'go{{ golang_version }}.linux-amd64.tar.gz'
+
+    ###############################################################
+    # CGRateS location
+    cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
+    ###############################################################
+    ##################### GPG Vars #############################
+    ###############################################################
+    gpg_generator_user: "root"
+    gpg_home: "/root"
+    gpg_user: "root"
+    gpg_realname: "CGRateS"
+    gpg_useremail: "cgrates@itsyscom.com"
+    gpg_pubkeyfileexport: "apt.cgrates.org.gpg.key"
+
+    gpg_keylength: 2048
+    gpg_subkeylength: 2048
+    gpg_expire: 360
+
+  remote_user: root
+  tasks:
+
+###########################################################################################################################
+
+###########################################################################################################################
+# install dependencies
+  - name: Install build-essential
+    apt:
+      name: build-essential
+      state: present
+
+  - name: Install the git
+    apt:
+      name: git
+      state: present
+
+  - name: Install devscripts
+    apt:
+      name: devscripts
+      state: present
+      
+  - name: Install reprepro
+    apt:
+      name: reprepro
+      state: present
+      
+  - name: Install NGINX server
+    apt:
+      name: nginx
+      state: present
+
+  - name: Config reprepro
+    include: reprepro.yaml
+
+  - name: Generate GPG Key
+    include: gpg.yaml
+
+  - name: Check if NGINX needs to be configured
+    shell: "ls /etc/nginx/sites-enabled | grep 'apt.cgrates.org.vhost'"
+    ignore_errors: true
+    register: nginxConfig
+
+  - debug: var=nginxConfig
+
+  - name: Configure NGINX server 
+    include: nginx.yaml
+    when: nginxConfig.stdout_lines|length < 1
+
+###########################################################################################################################
+
+###########################################################################################################################
+  # install golang
+  - name: install unarchive dependencies (zypper)
+    become: yes
+    zypper:
+      name:
+        - gzip
+        - tar
+      state: present
+    when: ansible_pkg_mgr == 'zypper'
+
+  - name: Install golang
+    include: go.yaml
+
+  # glide
+  - name: install glide
+    command: go get -u github.com/Masterminds/glide
+    become_user: "{{ gouser }}"
+###########################################################################################################################
+
+###########################################################################################################################
+# install cgrates
+  - name: create cgrates directory
+    file:
+      state: directory
+      mode: 'u=rwx,go=rx'
+      owner: "{{ gouser }}"
+      group: "{{ gouser }}"
+      dest: '{{ cgrates_dir }}'
+    become_user: "{{ gouser }}"
+
+  - name: git clone cgrates
+    git:
+      repo: https://github.com/cgrates/cgrates.git
+      dest: '{{ cgrates_dir }}'
+    become: yes
+    become_user: "{{ gouser }}"
+
+  - name:  glide install
+    command: "{{ golang_gopath }}/bin/glide install"
+    args:
+      chdir: '{{ cgrates_dir }}'
+
+  - name:  build cgrates
+    command: 'sh {{ cgrates_dir }}/build.sh'
+    args:
+      chdir: '{{ cgrates_dir }}'
+
+  - name: symbol link
+    file:
+      src: "{{ cgrates_dir }}/data"
+      dest: "/usr/share/cgrates"
+      state: link
+###########################################################################################################################
+
+###########################################################################################################################

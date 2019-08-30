@@ -1,0 +1,15 @@
+---
+- name: Ensure .gnupg config directory exists with right permissions
+  file: dest={{ gpg_home }}/.gnupg state=directory mode=0700 owner="{{ gpg_generator_user }}"
+
+## Note: matching on realname or email doesn't allow to create multiple keys. alternative?
+- name: check existing secret key
+  shell: "gpg --list-secret-keys | grep '{{ gpg_realname }}'"
+  changed_when: false
+  ignore_errors: true
+  become: yes
+  become_user: "{{ gpg_generator_user }}"
+  register: gpgkeys
+
+- include: gpg-gen-key.yaml
+  when: gpgkeys.stdout_lines|length < 1
