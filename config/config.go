@@ -22,6 +22,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -233,7 +235,7 @@ func NewCGRConfigFromPath(path string) (*CGRConfig, error) {
 	}
 	cfg.ConfigPath = path
 
-	if err := loadConfigFromPath(path, []func(*CgrJsonCfg) error{cfg.loadFromJsonCfg}); err != nil {
+	if err := cfg.loadConfigFromPath(path, []func(*CgrJsonCfg) error{cfg.loadFromJsonCfg}); err != nil {
 		return nil, err
 	}
 	if err = cfg.checkConfigSanity(); err != nil {
@@ -1505,7 +1507,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 }
 
 func (cfg *CGRConfig) loadConfig(path, section string) (err error) {
-	var parseFunctions []func(*CgrJsonCfg) error
+	var loadFuncs []func(*CgrJsonCfg) error
 	var fall bool
 	switch section {
 	default:
@@ -1516,7 +1518,7 @@ func (cfg *CGRConfig) loadConfig(path, section string) (err error) {
 	case ERsJson:
 		cfg.lks[ERsJson].Lock()
 		defer cfg.lks[ERsJson].Unlock()
-		parseFunctions = append(parseFunctions, cfg.loadErsCfg)
+		loadFuncs = append(loadFuncs, cfg.loadErsCfg)
 		if !fall {
 			break
 		}
@@ -1524,13 +1526,26 @@ func (cfg *CGRConfig) loadConfig(path, section string) (err error) {
 	case GENERAL_JSN: // to be implemented
 
 	}
-	return loadConfigFromPath(path, parseFunctions)
+	return cfg.loadConfigFromPath(path, loadFuncs)
+}
+
+func (_ *CGRConfig) loadConfigFromReader(rdr io.Reader, loadFuncs []func(jsnCfg *CgrJsonCfg) error) (err error) {
+	var jsnCfg *CgrJsonCfg
+	if jsnCfg, err = NewCgrJsonCfgFromReader(rdr); err != nil {
+		return err // should handle the json error
+	}
+	for _, loadFunc := range loadFuncs {
+		if err := loadFunc(jsnCfg); err != nil {
+			return err
+		}
+	}
+	return
 }
 
 // Reads all .json files out of a folder/subfolders and loads them up in lexical order
-func loadConfigFromPath(path string, parseFunctions []func(jsnCfg *CgrJsonCfg) error) (err error) {
+func (cfg *CGRConfig) loadConfigFromPath(path string, loadFuncs []func(jsnCfg *CgrJsonCfg) error) (err error) {
 	if isUrl(path) {
-		return loadConfigFromHttp(path, parseFunctions) // prefix protocol
+		return cfg.loadConfigFromHttp(path, loadFuncs) // prefix protocol
 	}
 	var fi os.FileInfo
 	if fi, err = os.Stat(path); err != nil {
@@ -1542,12 +1557,12 @@ func loadConfigFromPath(path string, parseFunctions []func(jsnCfg *CgrJsonCfg) e
 		return fmt.Errorf("Path: %s not a directory.", path)
 	}
 	if fi.IsDir() {
-		return loadConfigFromFolder(path, parseFunctions)
+		return cfg.loadConfigFromFolder(path, loadFuncs)
 	}
 	return
 }
 
-func loadConfigFromFolder(cfgDir string, parseFunctions []func(jsnCfg *CgrJsonCfg) error) (err error) {
+func (cfg *CGRConfig) loadConfigFromFolder(cfgDir string, loadFuncs []func(jsnCfg *CgrJsonCfg) error) (err error) {
 	jsonFilesFound := false
 	if err = filepath.Walk(cfgDir, func(path string, info os.FileInfo, err error) (werr error) {
 		if !info.IsDir() || isHidden(info.Name()) { // also ignore hidden files and folders
@@ -1564,17 +1579,16 @@ func loadConfigFromFolder(cfgDir string, parseFunctions []func(jsnCfg *CgrJsonCf
 			jsonFilesFound = true
 		}
 		for _, jsonFilePath := range cfgFiles {
-			if cgrJsonCfg, err := NewCgrJsonCfgFromFile(jsonFilePath); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<CGR-CFG> Error <%s> reading config from path: <%s>", err.Error(), jsonFilePath))
+			cfgFile, err := os.Open(jsonFilePath)
+			if err != nil {
 				return err
-			} else {
-				for _, parseFunc := range parseFunctions {
-					if err := parseFunc(cgrJsonCfg); err != nil {
-						utils.Logger.Err(fmt.Sprintf("<CGR-CFG> Error <%s> loading config from path: <%s>", err.Error(), jsonFilePath))
-						return err
-					}
-				}
 			}
+			err = cfg.loadConfigFromReader(cfgFile, loadFuncs)
+			cfgFile.Close()
+			if err != nil {
+				return err
+			}
+
 		}
 		return
 	}); err != nil {
@@ -1586,21 +1600,23 @@ func loadConfigFromFolder(cfgDir string, parseFunctions []func(jsnCfg *CgrJsonCf
 	return
 }
 
-func loadConfigFromHttp(urlPaths string, parseFunctions []func(jsnCfg *CgrJsonCfg) error) (err error) {
+func (cfg *CGRConfig) loadConfigFromHttp(urlPaths string, loadFuncs []func(jsnCfg *CgrJsonCfg) error) (err error) {
 	for _, urlPath := range strings.Split(urlPaths, utils.INFIELD_SEP) {
 		if _, err = url.ParseRequestURI(urlPath); err != nil {
 			return
 		}
-		if cgrJsonCfg, err := NewCgrJsonCfgFromHttp(urlPath); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CGR-CFG> Error <%s> reading config from path: <%s>", err.Error(), urlPath))
-			return err
-		} else {
-			for _, parseFunc := range parseFunctions {
-				if err := parseFunc(cgrJsonCfg); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<CGR-CFG> Error <%s> loading config from path: <%s>", err.Error(), urlPath))
-					return err
-				}
-			}
+		var myClient = &http.Client{
+			Timeout: CgrConfig().GeneralCfg().ReplyTimeout,
+		}
+		var cfgReq *http.Response
+		cfgReq, err = myClient.Get(urlPath)
+		if err != nil {
+			return utils.ErrPathNotReachable(urlPath)
+		}
+		err = cfg.loadConfigFromReader(cfgReq.Body, loadFuncs)
+		cfgReq.Body.Close()
+		if err != nil {
+			return
 		}
 	}
 	return
