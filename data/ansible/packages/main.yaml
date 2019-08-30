@@ -36,9 +36,7 @@
 
   remote_user: root
   tasks:
-
 ###########################################################################################################################
-
 ###########################################################################################################################
 # install dependencies
   - name: Install build-essential
@@ -65,7 +63,9 @@
     apt:
       name: nginx
       state: present
-
+###########################################################################################################################
+###########################################################################################################################
+# Prepare for configuration
   - name: Config reprepro
     include: reprepro.yaml
 
@@ -77,16 +77,13 @@
     ignore_errors: true
     register: nginxConfig
 
-  - debug: var=nginxConfig
-
   - name: Configure NGINX server 
     include: nginx.yaml
     when: nginxConfig.stdout_lines|length < 1
 
 ###########################################################################################################################
-
 ###########################################################################################################################
-  # install golang
+# Install Golang
   - name: install unarchive dependencies (zypper)
     become: yes
     zypper:
@@ -99,14 +96,14 @@
   - name: Install golang
     include: go.yaml
 
-  # glide
+# Install Glide
   - name: install glide
     command: go get -u github.com/Masterminds/glide
     become_user: "{{ gouser }}"
-###########################################################################################################################
 
 ###########################################################################################################################
-# install cgrates
+###########################################################################################################################
+# Install CGRateS
   - name: create cgrates directory
     file:
       state: directory
@@ -120,6 +117,8 @@
     git:
       repo: https://github.com/cgrates/cgrates.git
       dest: '{{ cgrates_dir }}'
+      update: yes
+      force: yes
     become: yes
     become_user: "{{ gouser }}"
 
@@ -139,5 +138,33 @@
       dest: "/usr/share/cgrates"
       state: link
 ###########################################################################################################################
-
 ###########################################################################################################################
+# Generate package
+#  - name:  Generate package
+#    command: 'make deb'
+#    args:
+#      chdir: '{{ cgrates_dir }}/packages'
+
+  - name: Check if the package was generated
+    shell: "ls {{ golang_gopath }}/src/github.com/cgrates | grep 'cgrates_'"
+    ignore_errors: true
+    register: packageVar
+
+  - name: Move the files to /var/packages/debian/incoming
+    command: sudo mv {{item}} /var/packages/debian/incoming/
+    args:
+      chdir: '{{ golang_gopath }}/src/github.com/cgrates'
+    when : packageVar.stdout_lines|length > 0
+    with_items: '{{ packageVar.stdout_lines }}'
+
+  - name : Get the name of the changes file
+    shell : "sudo ls /var/packages/debian/incoming/ | grep '.changes'"
+    register: changesFileNames
+
+# Include the package with reprepro
+  - name : Include the package with reprepro
+    command: sudo reprepro -A amd64 -Vb . include nightly /var/packages/debian/incoming/{{ item }}
+    args : 
+      chdir: /var/packages/debian
+    with_items: '{{ changesFileNames.stdout_lines }}'
+

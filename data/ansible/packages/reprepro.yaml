@@ -22,7 +22,6 @@
     force: no
     group: root
     owner: root
-    mode: 0555
 
 - name: Create options file
   copy:
@@ -31,7 +30,6 @@
     force: no
     group: root
     owner: root
-    mode: 0555
 
 - name: Create override.testing file
   copy:
@@ -40,4 +38,3 @@
     force: no
     group: root
     owner: root
-    mode: 0555
