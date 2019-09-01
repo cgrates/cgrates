@@ -30,7 +30,7 @@ type ERsCfg struct {
 	Readers       []*EventReaderCfg
 }
 
-func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, sep string) (err error) {
+func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, sep string, dfltRdrCfg *EventReaderCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -47,7 +47,12 @@ func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, sep string) (err error) {
 	if jsnCfg.Readers != nil {
 		erS.Readers = make([]*EventReaderCfg, len(*jsnCfg.Readers))
 		for idx, rdrs := range *jsnCfg.Readers {
-			erS.Readers[idx] = new(EventReaderCfg)
+			if dfltRdrCfg == nil { // when loading defaults dfltRdrCfg is nil ( e.g line 195)
+				erS.Readers[idx] = new(EventReaderCfg)
+			} else {
+				erS.Readers[idx] = dfltRdrCfg.Clone()
+			}
+
 			if err = erS.Readers[idx].loadFromJsonCfg(rdrs, sep); err != nil {
 				return err
 			}

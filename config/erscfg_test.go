@@ -20,6 +20,7 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -96,4 +97,80 @@ func TestEventRedearClone(t *testing.T) {
 	if !reflect.DeepEqual(cloned, initialOrig) {
 		t.Errorf("expected: %s \n,received: %s", utils.ToJSON(initialOrig), utils.ToJSON(cloned))
 	}
+}
+
+func TestEventReaderLoadFromJSON(t *testing.T) {
+	expectedERsCfg := &ERsCfg{
+		Enabled: true,
+		SessionSConns: []*RemoteHost{
+			{
+				Address: utils.MetaInternal,
+			},
+		},
+		Readers: []*EventReaderCfg{
+			&EventReaderCfg{
+				ID:             "file_reader1",
+				Type:           utils.MetaFileCSV,
+				FieldSep:       ",",
+				RunDelay:       time.Duration(-1),
+				ConcurrentReqs: 1024,
+				SourcePath:     "/tmp/ers/in",
+				ProcessedPath:  "/tmp/ers/out",
+				XmlRootPath:    utils.EmptyString,
+				SourceID:       "ers_csv",
+				Tenant:         nil,
+				Timezone:       utils.EmptyString,
+				Filters:        nil,
+				Flags:          utils.FlagsWithParams{},
+				Header_fields:  make([]*FCTemplate, 0),
+				Content_fields: []*FCTemplate{
+					{Tag: "TOR", FieldId: "ToR", Type: utils.META_COMPOSED,
+						Value: NewRSRParsersMustCompile("~2", true, utils.INFIELD_SEP), Mandatory: true},
+					{Tag: "OriginID", FieldId: "OriginID", Type: utils.META_COMPOSED,
+						Value: NewRSRParsersMustCompile("~3", true, utils.INFIELD_SEP), Mandatory: true},
+					{Tag: "RequestType", FieldId: "RequestType", Type: utils.META_COMPOSED,
+						Value: NewRSRParsersMustCompile("~4", true, utils.INFIELD_SEP), Mandatory: true},
+					{Tag: "Tenant", FieldId: "Tenant", Type: utils.META_COMPOSED,
+						Value: NewRSRParsersMustCompile("~6", true, utils.INFIELD_SEP), Mandatory: true},
+					{Tag: "Category", FieldId: "Category", Type: utils.META_COMPOSED,
+						Value: NewRSRParsersMustCompile("~7", true, utils.INFIELD_SEP), Mandatory: true},
+					{Tag: "Account", FieldId: "Account", Type: utils.META_COMPOSED,
+						Value: NewRSRParsersMustCompile("~8", true, utils.INFIELD_SEP), Mandatory: true},
+					{Tag: "Subject", FieldId: "Subject", Type: utils.META_COMPOSED,
+						Value: NewRSRParsersMustCompile("~9", true, utils.INFIELD_SEP), Mandatory: true},
+					{Tag: "Destination", FieldId: "Destination", Type: utils.META_COMPOSED,
+						Value: NewRSRParsersMustCompile("~10", true, utils.INFIELD_SEP), Mandatory: true},
+					{Tag: "SetupTime", FieldId: "SetupTime", Type: utils.META_COMPOSED,
+						Value: NewRSRParsersMustCompile("~11", true, utils.INFIELD_SEP), Mandatory: true},
+					{Tag: "AnswerTime", FieldId: "AnswerTime", Type: utils.META_COMPOSED,
+						Value: NewRSRParsersMustCompile("~12", true, utils.INFIELD_SEP), Mandatory: true},
+					{Tag: "Usage", FieldId: "Usage", Type: utils.META_COMPOSED,
+						Value: NewRSRParsersMustCompile("~13", true, utils.INFIELD_SEP), Mandatory: true},
+				},
+				Trailer_fields: make([]*FCTemplate, 0),
+			},
+		},
+	}
+
+	cfgJSONStr := `{
+"ers": {
+	"enabled": true,
+	"readers": [
+		{
+			"id": "file_reader1",
+			"run_delay": -1,
+			"type": "*file_csv",
+			"source_path": "/tmp/ers/in",
+			"processed_path": "/tmp/ers/out",
+		},
+	],
+}
+}`
+
+	if cfg, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedERsCfg, cfg.ersCfg) {
+		t.Errorf("Expected: %+v ,\n recived: %+v", utils.ToJSON(expectedERsCfg), utils.ToJSON(cfg.ersCfg))
+	}
+
 }

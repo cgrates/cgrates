@@ -251,7 +251,7 @@ func (v1AttrPrf v1AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 			if attr.Initial != utils.META_ANY {
 				filterIDs = append(filterIDs, utils.MetaString+":"+attr.FieldName+":"+attr.Initial)
 			}
-			sbstPrsr, err := config.NewRSRParsers(attr.Substitute, true, config.CgrConfig().GeneralCfg().RsrSepatarot)
+			sbstPrsr, err := config.NewRSRParsers(attr.Substitute, true, config.CgrConfig().GeneralCfg().RSRSep)
 			if err != nil {
 				return nil, err
 			}

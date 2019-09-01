@@ -2160,7 +2160,7 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 		attrPrf.Contexts[i] = context
 	}
 	for i, reqAttr := range tpAttr.Attributes {
-		sbstPrsr, err := config.NewRSRParsers(reqAttr.Value, true, config.CgrConfig().GeneralCfg().RsrSepatarot)
+		sbstPrsr, err := config.NewRSRParsers(reqAttr.Value, true, config.CgrConfig().GeneralCfg().RSRSep)
 		if err != nil {
 			return nil, err
 		}
