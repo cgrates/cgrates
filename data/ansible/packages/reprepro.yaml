@@ -1,37 +1,40 @@
 ---
 - name: Check if /var/packages/debian directory exists
+  become: true
   file:
     path: /var/packages/debian
     state: directory
 
 - name: Check if /var/packages/debian/conf directory exists
+  become: true
   file:
     path: /var/packages/debian/conf
     state: directory
 
 - name: Check if /var/packages/debian/incoming directory exists
+  become: true
   file:
     path: /var/packages/debian/incoming
     state: directory
 
+- name: Add distributions file in reprepro
+  become: true
+  template:
+    src: distributions.conf.j2
+    dest: "/var/packages/debian/conf/distributions"
+    mode: '0600'
+    owner: "{{ rootUser }}"
 
-- name: Create distributions file
-  copy:
-    content: "Origin: apt.cgrates.org\nLabel: apt.cgrates.org\nSuite: stable\nCodename: debian\nArchitectures: amd64\nComponents: main\nDescription: CGRateS APT repository\nSignWith: yes\nDebOverride: override.testing\nDscOverride: override.testing\n\nOrigin: apt.cgrates.org\nLabel: apt.cgrates.org\nSuite: nightly\nCodename: nightly\nArchitectures: amd64\nComponents: main\nDescription: CGRateS APT Nightly repository\nSignWith: yes\nDebOverride: override.testing\nDscOverride: override.testing\n"
-    dest: /var/packages/debian/conf/distributions
-    force: no
-    group: root
-    owner: root
-
-- name: Create options file
-  copy:
-    content: "verbose\nbasedir /var/packages/debian"
-    dest: /var/packages/debian/conf/options
-    force: no
-    group: root
-    owner: root
+- name: Add distributions file in reprepro
+  become: true
+  template:
+    src: options.conf.j2
+    dest: "/var/packages/debian/conf/options"
+    mode: '0600'
+    owner: "{{ rootUser }}"
 
 - name: Create override.testing file
+  become: true
   copy:
     content: ""
     dest: /var/packages/debian/conf/override.testing
