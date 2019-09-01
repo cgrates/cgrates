@@ -881,7 +881,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return err
 	}
-	if err := self.diameterAgentCfg.loadFromJsonCfg(jsnDACfg, self.generalCfg.RsrSepatarot); err != nil {
+	if err := self.diameterAgentCfg.loadFromJsonCfg(jsnDACfg, self.generalCfg.RSRSep); err != nil {
 		return err
 	}
 
@@ -889,7 +889,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return err
 	}
-	if err := self.radiusAgentCfg.loadFromJsonCfg(jsnRACfg, self.generalCfg.RsrSepatarot); err != nil {
+	if err := self.radiusAgentCfg.loadFromJsonCfg(jsnRACfg, self.generalCfg.RSRSep); err != nil {
 		return err
 	}
 
@@ -897,7 +897,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return err
 	}
-	if err := self.dnsAgentCfg.loadFromJsonCfg(jsnDNSCfg, self.generalCfg.RsrSepatarot); err != nil {
+	if err := self.dnsAgentCfg.loadFromJsonCfg(jsnDNSCfg, self.generalCfg.RSRSep); err != nil {
 		return err
 	}
 
@@ -905,7 +905,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return err
 	}
-	if err := self.httpAgentCfg.loadFromJsonCfg(jsnHttpAgntCfg, self.generalCfg.RsrSepatarot); err != nil {
+	if err := self.httpAgentCfg.loadFromJsonCfg(jsnHttpAgntCfg, self.generalCfg.RSRSep); err != nil {
 		return err
 	}
 
@@ -1029,7 +1029,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if err != nil {
 		return nil
 	}
-	if err := self.ersCfg.loadFromJsonCfg(jsnERsCfg, self.generalCfg.RsrSepatarot); err != nil {
+	if err := self.ersCfg.loadFromJsonCfg(jsnERsCfg, self.generalCfg.RSRSep, self.dfltEvRdr); err != nil {
 		return err
 	}
 
@@ -1041,7 +1041,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 					self.CdreProfiles[profileName] = self.dfltCdreProfile.Clone() // Clone default so we do not inherit pointers
 				}
 			}
-			if err = self.CdreProfiles[profileName].loadFromJsonCfg(jsnCdre1Cfg, self.generalCfg.RsrSepatarot); err != nil { // Update the existing profile with content from json config
+			if err = self.CdreProfiles[profileName].loadFromJsonCfg(jsnCdre1Cfg, self.generalCfg.RSRSep); err != nil { // Update the existing profile with content from json config
 				return err
 			}
 		}
@@ -1051,7 +1051,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		// self.loaderCfg = make([]*LoaderSCfg, len(jsnLoaderCfg))
 		for _, profile := range jsnLoaderCfg {
 			loadSCfgp := NewDfltLoaderSCfg()
-			loadSCfgp.loadFromJsonCfg(profile, self.generalCfg.RsrSepatarot)
+			loadSCfgp.loadFromJsonCfg(profile, self.generalCfg.RSRSep)
 			self.loaderCfg = append(self.loaderCfg, loadSCfgp) // use apend so the loaderS profile to be loaded from multiple files
 		}
 	}
@@ -1082,7 +1082,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			if cdrcInstCfg == nil {
 				cdrcInstCfg = self.dfltCdrcProfile.Clone()
 			}
-			if err := cdrcInstCfg.loadFromJsonCfg(jsnCrc1Cfg, self.generalCfg.RsrSepatarot); err != nil {
+			if err := cdrcInstCfg.loadFromJsonCfg(jsnCrc1Cfg, self.generalCfg.RSRSep); err != nil {
 				return err
 			}
 			if cdrcInstCfg.CDRInPath == "" {

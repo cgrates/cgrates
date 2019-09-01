@@ -48,7 +48,7 @@ type GeneralCfg struct {
 	LockingTimeout    time.Duration // locking mechanism timeout to avoid deadlocks
 	DigestSeparator   string        //
 	DigestEqual       string        //
-	RsrSepatarot      string        // separator used to split RSRParser (by degault is used ";")
+	RSRSep            string        // separator used to split RSRParser (by degault is used ";")
 }
 
 //loadFromJsonCfg loads General config from JsonCfg
@@ -127,7 +127,7 @@ func (gencfg *GeneralCfg) loadFromJsonCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 		gencfg.DigestEqual = *jsnGeneralCfg.Digest_equal
 	}
 	if jsnGeneralCfg.Rsr_separator != nil {
-		gencfg.RsrSepatarot = *jsnGeneralCfg.Rsr_separator
+		gencfg.RSRSep = *jsnGeneralCfg.Rsr_separator
 	}
 
 	return nil

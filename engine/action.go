@@ -139,7 +139,7 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 		}
 		for field, rsr := range template {
 			if defaultTemplate[field], err = config.NewRSRParsers(rsr,
-				true, config.CgrConfig().GeneralCfg().RsrSepatarot); err != nil {
+				true, config.CgrConfig().GeneralCfg().RSRSep); err != nil {
 				return
 			}
 		}
@@ -148,7 +148,7 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 	mapExtraData, _ := extraData.(map[string]interface{})
 	for key, val := range mapExtraData {
 		if defaultTemplate[key], err = config.NewRSRParsers(utils.IfaceAsString(val),
-			true, config.CgrConfig().GeneralCfg().RsrSepatarot); err != nil {
+			true, config.CgrConfig().GeneralCfg().RSRSep); err != nil {
 			return
 		}
 	}
