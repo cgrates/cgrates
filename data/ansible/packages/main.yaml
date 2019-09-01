@@ -23,9 +23,7 @@
     ###############################################################
     ##################### GPG Vars #############################
     ###############################################################
-    gpg_generator_user: "root"
     gpg_home: "/root"
-    gpg_user: "root"
     gpg_realname: "CGRateS"
     gpg_useremail: "cgrates@itsyscom.com"
     gpg_pubkeyfileexport: "apt.cgrates.org.gpg.key"
@@ -34,32 +32,41 @@
     gpg_subkeylength: 2048
     gpg_expire: 360
 
-  remote_user: root
+    rootUser : root
+
+    customPath: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+
+  remote_user: cgrates
   tasks:
 ###########################################################################################################################
 ###########################################################################################################################
 # install dependencies
   - name: Install build-essential
+    become: true
     apt:
       name: build-essential
       state: present
 
   - name: Install the git
+    become: true
     apt:
       name: git
       state: present
 
   - name: Install devscripts
+    become: true
     apt:
       name: devscripts
       state: present
       
   - name: Install reprepro
+    become: true
     apt:
       name: reprepro
       state: present
       
   - name: Install NGINX server
+    become: true
     apt:
       name: nginx
       state: present
@@ -73,6 +80,7 @@
     include: gpg.yaml
 
   - name: Check if NGINX needs to be configured
+    become: true
     shell: "ls /etc/nginx/sites-enabled | grep 'apt.cgrates.org.vhost'"
     ignore_errors: true
     register: nginxConfig
@@ -96,15 +104,16 @@
   - name: Install golang
     include: go.yaml
 
-# Install Glide
   - name: install glide
-    command: go get -u github.com/Masterminds/glide
-    become_user: "{{ gouser }}"
+    shell: go get -u github.com/Masterminds/glide
+    environment:
+      PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin"
 
 ###########################################################################################################################
 ###########################################################################################################################
 # Install CGRateS
   - name: create cgrates directory
+    become: yes
     file:
       state: directory
       mode: 'u=rwx,go=rx'
@@ -122,17 +131,27 @@
     become: yes
     become_user: "{{ gouser }}"
 
+# Before installing glide make sure vendor don't exist
+  - name: Remove vendor
+    shell: "sudo rm -rf {{ cgrates_dir }}/vendor"
+    ignore_errors: true
+
   - name:  glide install
-    command: "{{ golang_gopath }}/bin/glide install"
+    shell: '{{ golang_gopath }}/bin/glide install'
+    environment:
+      PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin"
     args:
       chdir: '{{ cgrates_dir }}'
 
   - name:  build cgrates
-    command: 'sh {{ cgrates_dir }}/build.sh'
+    shell: "sh {{ cgrates_dir }}/build.sh"
+    environment:
+      PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
     args:
       chdir: '{{ cgrates_dir }}'
 
   - name: symbol link
+    become: yes
     file:
       src: "{{ cgrates_dir }}/data"
       dest: "/usr/share/cgrates"
@@ -140,17 +159,20 @@
 ###########################################################################################################################
 ###########################################################################################################################
 # Generate package
-#  - name:  Generate package
-#    command: 'make deb'
-#    args:
-#      chdir: '{{ cgrates_dir }}/packages'
+  - name:  Generate package
+    become: yes
+    command: 'sudo env "PATH={{ customPath }}" make deb'
+    args:
+      chdir: '{{ cgrates_dir }}/packages'
 
   - name: Check if the package was generated
-    shell: "ls {{ golang_gopath }}/src/github.com/cgrates | grep 'cgrates_'"
+    become: yes
+    shell: "sudo ls {{ golang_gopath }}/src/github.com/cgrates | grep 'cgrates_'"
     ignore_errors: true
     register: packageVar
 
   - name: Move the files to /var/packages/debian/incoming
+    become: yes
     command: sudo mv {{item}} /var/packages/debian/incoming/
     args:
       chdir: '{{ golang_gopath }}/src/github.com/cgrates'
@@ -158,11 +180,13 @@
     with_items: '{{ packageVar.stdout_lines }}'
 
   - name : Get the name of the changes file
+    become: yes
     shell : "sudo ls /var/packages/debian/incoming/ | grep '.changes'"
     register: changesFileNames
 
 # Include the package with reprepro
   - name : Include the package with reprepro
+    become: yes
     command: sudo reprepro -A amd64 -Vb . include nightly /var/packages/debian/incoming/{{ item }}
     args : 
       chdir: /var/packages/debian

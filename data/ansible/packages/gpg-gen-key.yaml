@@ -1,30 +1,51 @@
 ---
 - name: set defaut gpg options
+  become: true
   template:
     src: gpg.conf.j2
     dest: "{{ gpg_home }}/.gnupg/gpg.conf"
     mode: '0600'
-    owner: "{{ gpg_generator_user }}"
+    owner: "{{ rootUser }}"
 
 - name: copy default template for gpg key generation
+  become: true
   template:
     src: gen-key-script
-    dest: "{{ gpg_home }}/.gnupg/gen-key-script-{{ gpg_user }}"
+    dest: "{{ gpg_home }}/.gnupg/gen-key-script-{{ rootUser }}"
     mode: '0600'
-    owner: "{{ gpg_generator_user }}"
+    owner: "{{ rootUser }}"
 
 - name: create some required file
+  become: true
   shell: "gpg --list-secret-keys --keyid-format LONG"
 
+- name: When starting fresh we need to make sure we have rng-tools
+  become: true
+  apt:
+    name: rng-tools
+    state: present
+  ignore_errors: true
+
+- name: Add HRNGDEVICE=/dev/urandom so we can execute rngd
+  become: true
+  lineinfile:
+    path: /etc/default/rng-tools
+    line: HRNGDEVICE=/dev/urandom
+    insertafter: last
+
 - name: generate randomness
-  shell: "sudo rngd -r /dev/urandom"
+  become: true
+  shell: "sudo /etc/init.d/rng-tools restart"
   ignore_errors: true
 
 - name: generate gpg key
-  shell: "gpg --batch --gen-key {{ gpg_home }}/.gnupg/gen-key-script-{{ gpg_user }}"
+  become: true
+  shell: "sudo gpg --batch --gen-key {{ gpg_home }}/.gnupg/gen-key-script-{{ rootUser }}"
 
 - name: get user armored public key
-  shell: "gpg --armor --output {{ gpg_pubkeyfileexport }} --export {{ gpg_useremail }}"
+  become: true
+  shell: "sudo gpg --armor --output {{ gpg_pubkeyfileexport }} --export {{ gpg_useremail }}"
 
 - name: After export move the key to /var/packages
-  shell: "mv {{ gpg_pubkeyfileexport }} /var/packages"
+  become: true
+  shell: "sudo mv {{ gpg_pubkeyfileexport }} /var/packages"

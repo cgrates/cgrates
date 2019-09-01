@@ -56,6 +56,34 @@
     group: root
     mode: 'u=rw,go=r'
 
+- name: Export GOROOT for root
+  become: yes
+  lineinfile:
+    path: ~/.bashrc
+    line: export GOROOT='{{ golang_install_dir }}'
+    insertafter: last
+
+- name: Add GOROOT to PATH for root
+  become: yes 
+  lineinfile:
+    path: ~/.bashrc
+    line: export PATH=$PATH:$GOROOT/bin
+    insertafter: last
+
+- name: Export GOPATH for root
+  become: yes
+  lineinfile:
+    path: ~/.bashrc
+    line: export GOPATH='{{ golang_gopath }}'
+    insertafter: last
+    
+- name: Add GOPATH to PATH for root
+  become: yes
+  lineinfile:
+    path: ~/.bashrc
+    line: export PATH=$PATH:$GOPATH/bin
+    insertafter: last
+
 - name: Export GOROOT
   lineinfile:
     path: ~/.bashrc
