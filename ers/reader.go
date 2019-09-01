@@ -28,6 +28,7 @@ import (
 type EventReader interface {
 	Config() *config.EventReaderCfg     // reader configuration
 	Init(itmPath, itmName string) error // init will initialize the Reader, ie: open the file to read or http connection
+	Subscribe() error                   // subscribe the reader on the path
 	Read() (*utils.CGREvent, error)     // process a single record in the events file
 	Processed() int64                   // number of records processed
 	Close() error                       // called when the reader should release resources

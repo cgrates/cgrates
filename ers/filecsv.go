@@ -39,6 +39,10 @@ func (csv *CSVFileER) Init(itmPath, itmID string) (err error) {
 	return
 }
 
+func (csv *CSVFileER) Subscribe() (err error) {
+	return
+}
+
 func (csv *CSVFileER) Read() (ev *utils.CGREvent, err error) {
 	return
 }
