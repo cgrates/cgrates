@@ -19,28 +19,48 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"fmt"
+	"strings"
+	"sync"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewCSVFileER(cfg *config.EventReaderCfg) (er EventReader, err error) {
-	return new(CSVFileER), nil
+func NewCSVFileER(cfg *config.EventReaderCfg,
+	rdrExit chan struct{}, appExit chan bool) (er EventReader, err error) {
+	srcPath := cfg.SourcePath
+	if strings.HasSuffix(srcPath, utils.Slash) {
+		srcPath = srcPath[:len(srcPath)-1]
+	}
+	return &CSVFileER{erCfg: cfg, rdrDir: srcPath,
+		rdrExit: rdrExit, appExit: appExit}, nil
 }
 
 // CSVFileER implements EventReader interface for .csv files
 type CSVFileER struct {
+	sync.RWMutex
+	erCfg   *config.EventReaderCfg
+	rdrDir  string
+	rdrExit chan struct{}
+	appExit chan bool
 }
 
-func (csv *CSVFileER) Config() (rdrCfg *config.EventReaderCfg) {
-	return
+func (csv *CSVFileER) Config() *config.EventReaderCfg {
+	return csv.erCfg
 }
 
-func (csv *CSVFileER) Init(itmPath, itmID string) (err error) {
-	return
-}
-
-func (csv *CSVFileER) Subscribe() (err error) {
-	return
+func (csv *CSVFileER) Subscribe() error {
+	go func() {
+		if err := watchDir(csv.rdrDir, csv.processDir,
+			utils.ERs, csv.rdrExit); err != nil {
+			utils.Logger.Crit(
+				fmt.Sprintf("<%s> watching directory <%s> got error: <%s>",
+					utils.ERs, csv.rdrDir, err.Error()))
+			csv.appExit <- true
+		}
+	}()
+	return nil
 }
 
 func (csv *CSVFileER) Read() (ev *utils.CGREvent, err error) {
@@ -52,5 +72,9 @@ func (csv *CSVFileER) Processed() (nrItms int64) {
 }
 
 func (csv *CSVFileER) Close() (err error) {
+	return
+}
+
+func (csv *CSVFileER) processDir(itmPath, itmID string) (err error) {
 	return
 }

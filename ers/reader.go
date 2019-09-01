@@ -26,21 +26,20 @@ import (
 )
 
 type EventReader interface {
-	Config() *config.EventReaderCfg     // reader configuration
-	Init(itmPath, itmName string) error // init will initialize the Reader, ie: open the file to read or http connection
-	Subscribe() error                   // subscribe the reader on the path
-	Read() (*utils.CGREvent, error)     // process a single record in the events file
-	Processed() int64                   // number of records processed
-	Close() error                       // called when the reader should release resources
+	Config() *config.EventReaderCfg
+	Subscribe() error               // subscribe the reader on the path
+	Read() (*utils.CGREvent, error) // process a single record in the events file
+	Processed() int64               // number of records processed
 }
 
 // NewEventReader instantiates the event reader based on configuration at index
-func NewEventReader(rdrCfg *config.EventReaderCfg) (er EventReader, err error) {
+func NewEventReader(rdrCfg *config.EventReaderCfg,
+	rdrExit chan struct{}, appExit chan bool) (er EventReader, err error) {
 	switch rdrCfg.Type {
 	default:
 		err = fmt.Errorf("unsupported reader type: <%s>", rdrCfg.Type)
 	case utils.MetaFileCSV:
-		return NewCSVFileER(rdrCfg)
+		return NewCSVFileER(rdrCfg, rdrExit, appExit)
 	}
 	return
 }

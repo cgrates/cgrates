@@ -46,7 +46,9 @@ type ERService struct {
 	sync.RWMutex
 	cfg      *config.CGRConfig
 	rdrs     map[string]EventReader   // map[rdrID]EventReader
+	rdrPaths map[string]string        // used for reloads in case of path changes
 	stopLsn  map[string]chan struct{} // map[rdrID] chan struct{}
+
 	filterS  *engine.FilterS
 	sS       rpcclient.RpcClientConnection // connection towards SessionS
 	exitChan chan bool
@@ -70,12 +72,12 @@ func (erS *ERService) ListenAndServe(cfgRldChan chan struct{}) (err error) {
 
 // addReader will add a new reader to the service
 func (erS *ERService) addReader(rdrCfg *config.EventReaderCfg) (err error) {
+	erS.stopLsn[rdrCfg.ID] = make(chan struct{})
 	var rdr EventReader
-	if rdr, err = NewEventReader(rdrCfg); err != nil {
+	if rdr, err = NewEventReader(rdrCfg, erS.stopLsn[rdrCfg.ID], erS.exitChan); err != nil {
 		return
 	}
 	erS.rdrs[rdrCfg.ID] = rdr
-	erS.stopLsn[rdrCfg.ID] = make(chan struct{})
 	return rdr.Subscribe()
 }
 
@@ -102,6 +104,7 @@ func (erS *ERService) handleReloads(cfgRldChan chan struct{}) {
 			return
 		case <-cfgRldChan:
 			cfgIDs := make(map[string]*config.EventReaderCfg)
+			pathReloaded := make(map[string]struct{})
 			// index config IDs
 			for _, rdrCfg := range erS.cfg.ERsCfg().Readers {
 				cfgIDs[rdrCfg.ID] = rdrCfg
@@ -109,8 +112,11 @@ func (erS *ERService) handleReloads(cfgRldChan chan struct{}) {
 			erS.Lock()
 			// remove the necessary ids
 			for id := range erS.rdrs {
-				if _, has := cfgIDs[id]; has { // still present
-					continue
+				if newCfg, has := cfgIDs[id]; has { // still present
+					if newCfg.SourcePath == erS.rdrPaths[id] {
+						continue
+					}
+					pathReloaded[id] = struct{}{}
 				}
 				delete(erS.rdrs, id)
 				close(erS.stopLsn[id])
@@ -119,7 +125,9 @@ func (erS *ERService) handleReloads(cfgRldChan chan struct{}) {
 			// add new ids
 			for id, rdrCfg := range cfgIDs {
 				if _, has := erS.rdrs[id]; has {
-					continue
+					if _, has := pathReloaded[id]; !has {
+						continue
+					}
 				}
 				if err := erS.addReader(rdrCfg); err != nil {
 					utils.Logger.Crit(
