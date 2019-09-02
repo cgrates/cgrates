@@ -19,12 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -192,7 +190,8 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.rldChans = make(map[string]chan struct{})
 	cfg.rldChans[ERsJson] = make(chan struct{}, 1)
 
-	cgrJsonCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(CGRATES_CFG_JSON))
+	cgrJsonCfg := new(CgrJsonCfg)
+	err := NewRjReaderFromBytes([]byte(CGRATES_CFG_JSON)).Decode(cgrJsonCfg)
 	if err != nil {
 		return nil, err
 	}
@@ -1464,7 +1463,7 @@ func (cfg *CGRConfig) unlockSections() {
 }
 
 func (cfg *CGRConfig) V1ReloadConfig(args *ConfigReloadWithArgDispatcher, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&args, []string{"Path"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(args, []string{"Path"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err = cfg.loadConfig(args.Path, args.Section); err != nil {
@@ -1532,13 +1531,13 @@ func (cfg *CGRConfig) loadConfig(path, section string) (err error) {
 }
 
 func (_ *CGRConfig) loadConfigFromReader(rdr io.Reader, loadFuncs []func(jsnCfg *CgrJsonCfg) error) (err error) {
-	b, err := ioutil.ReadAll(rdr)
-	if err != nil {
+	var jsnCfg *CgrJsonCfg = new(CgrJsonCfg)
+	var rjr *rjReader
+	if rjr, err = NewRjReader(rdr); err != nil {
 		return
 	}
-	var jsnCfg *CgrJsonCfg
-	if jsnCfg, err = NewCgrJsonCfgFromReader(bytes.NewReader(b)); err != nil { // for the moment we dont't check the error in the rjreader
-		return HandleJSONError(bytes.NewReader(b), err)
+	if err = rjr.Decode(jsnCfg); err != nil {
+		return
 	}
 	for _, loadFunc := range loadFuncs {
 		if err = loadFunc(jsnCfg); err != nil {
