@@ -29,17 +29,25 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+// erEvent is passed from reader to ERs
+type erEvent struct {
+	cgrEvent *utils.CGREvent
+	rdrCfg   *config.EventReaderCfg
+}
+
 // NewERService instantiates the ERService
 func NewERService(cfg *config.CGRConfig, filterS *engine.FilterS,
-	sS rpcclient.RpcClientConnection, exitChan chan bool) (erS *ERService, err error) {
-	erS = &ERService{
-		cfg:      cfg,
-		rdrs:     make(map[string]EventReader),
-		stopLsn:  make(map[string]chan struct{}),
-		sS:       sS,
-		exitChan: exitChan,
+	sS rpcclient.RpcClientConnection, exitChan chan bool) *ERService {
+	return &ERService{
+		cfg:       cfg,
+		rdrs:      make(map[string]EventReader),
+		rdrPaths:  make(map[string]string),
+		stopLsn:   make(map[string]chan struct{}),
+		rdrEvents: make(chan *erEvent),
+		filterS:   filterS,
+		sS:        sS,
+		exitChan:  exitChan,
 	}
-	return
 }
 
 // ERService is managing the EventReaders
@@ -91,7 +99,7 @@ func (erS *ERService) addReader(rdrCfg *config.EventReaderCfg) (err error) {
 		return
 	}
 	erS.rdrs[rdrCfg.ID] = rdr
-	return rdr.Subscribe()
+	return rdr.Init()
 }
 
 // handleReloads will handle the config reloads which are signaled over cfgRldChan

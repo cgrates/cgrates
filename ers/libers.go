@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/fsnotify/fsnotify"
 )
@@ -35,33 +34,34 @@ func watchDir(dirPath string, f func(itmPath, itmID string) error,
 	if watcher, err = fsnotify.NewWatcher(); err != nil {
 		return
 	}
-	defer watcher.Close()
 	if err = watcher.Add(dirPath); err != nil {
+		watcher.Close()
 		return
 	}
 	utils.Logger.Info(fmt.Sprintf("<%s> monitoring <%s> for file moves.", sysID, dirPath))
-	for {
-		select {
-		case <-stopWatching:
-			utils.Logger.Info(fmt.Sprintf("<%s> stop watching path <%s>", sysID, dirPath))
-			return
-		case ev := <-watcher.Events:
-			if ev.Op&fsnotify.Create == fsnotify.Create {
-				go func() { //Enable async processing here
-					if err = f(filepath.Dir(ev.Name), filepath.Base(ev.Name)); err != nil {
-						utils.Logger.Warning(fmt.Sprintf("<%s> processing path <%s>, error: <%s>",
-							sysID, ev.Name, err.Error()))
-					}
-				}()
+	go func() { // read async
+		defer watcher.Close()
+		for {
+			select {
+			case <-stopWatching:
+				utils.Logger.Info(fmt.Sprintf("<%s> stop watching path <%s>", sysID, dirPath))
+				return
+			case ev := <-watcher.Events:
+				if ev.Op&fsnotify.Create == fsnotify.Create {
+					go func() { //Enable async processing here so we can simultaneously process files
+						if err = f(filepath.Dir(ev.Name), filepath.Base(ev.Name)); err != nil {
+							utils.Logger.Warning(fmt.Sprintf("<%s> processing path <%s>, error: <%s>",
+								sysID, ev.Name, err.Error()))
+						}
+					}()
+				}
+			case err = <-watcher.Errors:
+				utils.Logger.Err(
+					fmt.Sprintf("<%s> watching path <%s>, error: <%s>, exiting!",
+						sysID, dirPath, err.Error()))
+				return
 			}
-		case err = <-watcher.Errors:
-			return
 		}
-	}
-}
-
-// erEvent is passed from reader to ERs
-type erEvent struct {
-	cgrEvent *utils.CGREvent
-	rdrCfg   *config.EventReaderCfg
+	}()
+	return
 }

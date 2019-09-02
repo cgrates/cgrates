@@ -50,31 +50,23 @@ func (csv *CSVFileER) Config() *config.EventReaderCfg {
 	return csv.erCfg
 }
 
-func (csv *CSVFileER) Subscribe() error {
-	go func() {
-		if err := watchDir(csv.rdrDir, csv.processDir,
-			utils.ERs, csv.rdrExit); err != nil {
-			utils.Logger.Crit(
-				fmt.Sprintf("<%s> watching directory <%s> got error: <%s>",
-					utils.ERs, csv.rdrDir, err.Error()))
-			csv.appExit <- true
-		}
-	}()
-	return nil
+func (csv *CSVFileER) Init() (err error) {
+	if err := watchDir(csv.rdrDir, csv.processDir,
+		utils.ERs, csv.rdrExit); err != nil {
+		utils.Logger.Crit(
+			fmt.Sprintf("<%s> watching directory <%s> got error: <%s>",
+				utils.ERs, csv.rdrDir, err.Error()))
+		csv.appExit <- true
+	}
+	return
 }
 
 func (csv *CSVFileER) Read() (ev *utils.CGREvent, err error) {
 	return
 }
 
-func (csv *CSVFileER) Processed() (nrItms int64) {
-	return
-}
-
-func (csv *CSVFileER) Close() (err error) {
-	return
-}
-
+// processDir is called for each file in a directory and dispatches erEvents from it
 func (csv *CSVFileER) processDir(itmPath, itmID string) (err error) {
+
 	return
 }

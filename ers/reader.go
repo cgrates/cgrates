@@ -26,10 +26,9 @@ import (
 )
 
 type EventReader interface {
-	Config() *config.EventReaderCfg
-	Subscribe() error               // subscribe the reader on the path
-	Read() (*utils.CGREvent, error) // process a single record in the events file
-	Processed() int64               // number of records processed
+	Config() *config.EventReaderCfg // return it's configuration
+	Init() error                    // subscribe the reader on the path
+	Read() (*utils.CGREvent, error) // produce a single record in the events file
 }
 
 // NewEventReader instantiates the event reader based on configuration at index
