@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -109,7 +108,7 @@ func TestCdrcCfgloadFromJsonCfg(t *testing.T) {
 ],		
 }`
 	expected = cdrcCfg
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnCdrcCfg, err := jsnCfg.CdrcJsonCfg(); err != nil {
 		t.Error(err)

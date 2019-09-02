@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 )
 
@@ -49,7 +48,7 @@ func TestMailerCfgloadFromJsonCfg(t *testing.T) {
 		MailerAuthPass: "CGRateS.org",
 		MailerFromAddr: "cgr-mailer@localhost.localdomain",
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnMailCfg, err := jsnCfg.MailerJsonCfg(); err != nil {
 		t.Error(err)

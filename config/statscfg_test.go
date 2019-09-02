@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 )
@@ -50,7 +49,7 @@ func TestStatSCfgloadFromJsonCfg(t *testing.T) {
 		ThresholdSConns:     []*RemoteHost{},
 		PrefixIndexedFields: &[]string{"index1", "index2"},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnStatSCfg, err := jsnCfg.StatSJsonCfg(); err != nil {
 		t.Error(err)

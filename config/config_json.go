@@ -20,7 +20,6 @@ package config
 
 import (
 	"encoding/json"
-	"io"
 )
 
 const (
@@ -67,16 +66,10 @@ const (
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
-func NewCgrJsonCfgFromReader(r io.Reader) (*CgrJsonCfg, error) {
-	var cgrJsonCfg CgrJsonCfg
-	jr, err := NewRjReader(r)
-	if err != nil {
-		return nil, err
-	}
-	if err := json.NewDecoder(jr).Decode(&cgrJsonCfg); err != nil {
-		return nil, err
-	}
-	return &cgrJsonCfg, nil
+func NewCgrJsonCfgFromBytes(buf []byte) (cgrJsonCfg *CgrJsonCfg, err error) {
+	cgrJsonCfg = new(CgrJsonCfg)
+	err = NewRjReaderFromBytes(buf).Decode(cgrJsonCfg)
+	return
 }
 
 // Main object holding the loaded config as section raw messages

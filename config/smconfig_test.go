@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -117,7 +116,7 @@ func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
 		SessionIndexes:          map[string]bool{},
 		ClientProtocol:          1,
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnSesCfg, err := jsnCfg.SessionSJsonCfg(); err != nil {
 		t.Error(err)
@@ -171,7 +170,7 @@ func TestFsAgentCfgloadFromJsonCfg2(t *testing.T) {
 			Alias:      "127.0.0.1:8021",
 		}},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnFsAgCfg, err := jsnCfg.FreeswitchAgentJsonCfg(); err != nil {
 		t.Error(err)
@@ -274,7 +273,7 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 			Reconnects:      5,
 		}},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnAsAgCfg, err := jsnCfg.AsteriskAgentJsonCfg(); err != nil {
 		t.Error(err)

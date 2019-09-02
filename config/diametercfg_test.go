@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -65,7 +64,7 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 		SyncedConnReqs:   true,
 		Templates:        make(map[string][]*FCTemplate),
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnDaCfg, err := jsnCfg.DiameterAgentJsonCfg(); err != nil {
 		t.Error(err)

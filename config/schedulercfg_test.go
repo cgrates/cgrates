@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 )
 
@@ -45,7 +44,7 @@ func TestSchedulerCfgloadFromJsonCfg(t *testing.T) {
 		Enabled:   true,
 		CDRsConns: []*RemoteHost{},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnSchCfg, err := jsnCfg.SchedulerJsonCfg(); err != nil {
 		t.Error(err)

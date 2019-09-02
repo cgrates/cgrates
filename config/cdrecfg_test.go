@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -132,7 +131,7 @@ func TestCdreCfgloadFromJsonCfg(t *testing.T) {
 		}},
 		TrailerFields: []*FCTemplate{},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnCdreCfg, err := jsnCfg.CdreJsonCfgs(); err != nil {
 		t.Error(err)

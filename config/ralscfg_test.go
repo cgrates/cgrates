@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -66,7 +65,7 @@ func TestRalsCfgFromJsonCfg(t *testing.T) {
 			utils.SMS:   time.Duration(10000),
 		},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnRalsCfg, err := jsnCfg.RalsJsonCfg(); err != nil {
 		t.Error(err)

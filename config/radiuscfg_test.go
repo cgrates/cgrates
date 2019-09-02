@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -63,7 +62,7 @@ func TestRadiusAgentCfgloadFromJsonCfg(t *testing.T) {
 		ClientDictionaries: map[string]string{utils.MetaDefault: "/usr/share/cgrates/radius/dict/"},
 		SessionSConns:      []*RemoteHost{{Address: "*internal"}},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnRaCfg, err := jsnCfg.RadiusAgentJsonCfg(); err != nil {
 		t.Error(err)

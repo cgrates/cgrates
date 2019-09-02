@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 )
 
@@ -53,7 +52,7 @@ func TestListenCfgloadFromJsonCfg(t *testing.T) {
 		RPCGOBTLSListen:  "127.0.0.1:2023",
 		HTTPTLSListen:    "127.0.0.1:2280",
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnLstCfg, err := jsnCfg.ListenJsonCfg(); err != nil {
 		t.Error(err)

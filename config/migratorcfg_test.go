@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 )
 
@@ -67,7 +66,7 @@ func TestMigratorCgrCfgloadFromJsonCfg(t *testing.T) {
 		OutStorDBUser:     "cgrates",
 		OutStorDBPassword: "",
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnThSCfg, err := jsnCfg.MigratorCfgJson(); err != nil {
 		t.Error(err)

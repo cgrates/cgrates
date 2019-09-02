@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 )
 
@@ -53,7 +52,7 @@ func TestHTTPCfgloadFromJsonCfg(t *testing.T) {
 		HTTPUseBasicAuth:      false,
 		HTTPAuthUsers:         map[string]string{},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnhttpCfg, err := jsnCfg.HttpJsonCfg(); err != nil {
 		t.Error(err)
