@@ -20,8 +20,10 @@ package ers
 
 import (
 	"fmt"
+	"io/ioutil"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -46,27 +48,48 @@ type CSVFileER struct {
 	appExit chan bool
 }
 
-func (csv *CSVFileER) Config() *config.EventReaderCfg {
-	return csv.erCfg
+func (rdr *CSVFileER) Config() *config.EventReaderCfg {
+	return rdr.erCfg
 }
 
-func (csv *CSVFileER) Init() (err error) {
-	if err := watchDir(csv.rdrDir, csv.processDir,
-		utils.ERs, csv.rdrExit); err != nil {
-		utils.Logger.Crit(
-			fmt.Sprintf("<%s> watching directory <%s> got error: <%s>",
-				utils.ERs, csv.rdrDir, err.Error()))
-		csv.appExit <- true
+func (rdr *CSVFileER) Init() (err error) {
+	switch rdr.erCfg.RunDelay {
+	case time.Duration(0): // 0 disables the automatic read, maybe per API
+		return
+	case time.Duration(-1):
+		return watchDir(rdr.rdrDir, rdr.processFile,
+			utils.ERs, rdr.rdrExit)
+	default:
+		// Not automated, process and sleep approach
+		for {
+			select {
+			case <-rdr.rdrExit:
+				utils.Logger.Info(
+					fmt.Sprintf("<%s> stop monitoring path <%s>",
+						utils.ERs, rdr.rdrDir))
+				return
+			default:
+			}
+			filesInDir, _ := ioutil.ReadDir(rdr.rdrDir)
+			for _, file := range filesInDir {
+				go func() {
+					if err := rdr.processFile(rdr.rdrDir, file.Name()); err != nil {
+						utils.Logger.Warning(
+							fmt.Sprintf("<%s> processing file %s, error: %s",
+								utils.ERs, file, err.Error()))
+					}
+				}()
+			}
+			time.Sleep(rdr.erCfg.RunDelay)
+		}
 	}
+}
+
+func (rdr *CSVFileER) Read() (ev *utils.CGREvent, err error) {
 	return
 }
 
-func (csv *CSVFileER) Read() (ev *utils.CGREvent, err error) {
-	return
-}
-
-// processDir is called for each file in a directory and dispatches erEvents from it
-func (csv *CSVFileER) processDir(itmPath, itmID string) (err error) {
-
+// processFile is called for each file in a directory and dispatches erEvents from it
+func (rdr *CSVFileER) processFile(itmPath, itmID string) (err error) {
 	return
 }
