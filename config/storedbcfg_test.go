@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 )
 
@@ -61,7 +60,7 @@ func TestStoreDbCfgloadFromJsonCfg(t *testing.T) {
 		StorDBConnMaxLifetime: 0,
 		StorDBCDRSIndexes:     []string{},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnStoreDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN); err != nil {
 		t.Error(err)
@@ -81,7 +80,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 	expected := StorDbCfg{
 		StorDBType: "mongo",
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN); err != nil {
 		t.Error(err)
@@ -100,7 +99,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 		StorDBType: "mongo",
 		StorDBPort: "27017",
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN); err != nil {
 		t.Error(err)
@@ -119,7 +118,7 @@ func TestStoreDbCfgloadFromJsonCfgPort(t *testing.T) {
 		StorDBType: "internal",
 		StorDBPort: "internal",
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN); err != nil {
 		t.Error(err)

@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -62,7 +61,7 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 		CDRSThresholdSConns: []*RemoteHost{},
 		CDRSStatSConns:      []*RemoteHost{},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnCdrsCfg, err := jsnCfg.CdrsJsonCfg(); err != nil {
 		t.Error(err)

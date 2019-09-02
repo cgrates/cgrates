@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -54,7 +53,7 @@ func TestKamAgentCfgloadFromJsonCfg(t *testing.T) {
 		SessionSConns: []*RemoteHost{{Address: "*internal"}},
 		EvapiConns:    []*KamConnCfg{{Address: "127.0.0.1:8448", Reconnects: 5}},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnKamAgCfg, err := jsnCfg.KamAgentJsonCfg(); err != nil {
 		t.Error(err)

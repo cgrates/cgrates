@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 )
 
@@ -55,7 +54,7 @@ func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
 		DataDbPass:         "password",
 		DataDbSentinelName: "sentinel",
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(DATADB_JSN); err != nil {
 		t.Error(err)
@@ -75,7 +74,7 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 	expected := DataDbCfg{
 		DataDbType: "mongo",
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(DATADB_JSN); err != nil {
 		t.Error(err)
@@ -94,7 +93,7 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 		DataDbType: "mongo",
 		DataDbPort: "27017",
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(DATADB_JSN); err != nil {
 		t.Error(err)
@@ -113,7 +112,7 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 		DataDbType: "internal",
 		DataDbPort: "internal",
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnDataDbCfg, err := jsnCfg.DbJsonCfg(DATADB_JSN); err != nil {
 		t.Error(err)

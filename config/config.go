@@ -129,8 +129,8 @@ func SetCgrConfig(cfg *CGRConfig) {
 	cgrCfg = cfg
 }
 
-func NewDefaultCGRConfig() (*CGRConfig, error) {
-	cfg := new(CGRConfig)
+func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
+	cfg = new(CGRConfig)
 	cfg.lks = make(map[string]*sync.RWMutex)
 	cfg.lks[ERsJson] = new(sync.RWMutex)
 	cfg.DataFolderPath = "/usr/share/cgrates/"
@@ -190,13 +190,12 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.rldChans = make(map[string]chan struct{})
 	cfg.rldChans[ERsJson] = make(chan struct{}, 1)
 
-	cgrJsonCfg := new(CgrJsonCfg)
-	err := NewRjReaderFromBytes([]byte(CGRATES_CFG_JSON)).Decode(cgrJsonCfg)
-	if err != nil {
-		return nil, err
+	var cgrJsonCfg *CgrJsonCfg
+	if cgrJsonCfg, err = NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON)); err != nil {
+		return
 	}
-	if err := cfg.loadFromJsonCfg(cgrJsonCfg); err != nil {
-		return nil, err
+	if err = cfg.loadFromJsonCfg(cgrJsonCfg); err != nil {
+		return
 	}
 
 	cfg.dfltCdreProfile = cfg.CdreProfiles[utils.META_DEFAULT].Clone() // So default will stay unique, will have nil pointer in case of no defaults loaded which is an extra check
@@ -212,37 +211,33 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	dfltKamConnConfig = cfg.kamAgentCfg.EvapiConns[0]
 	dfltAstConnCfg = cfg.asteriskAgentCfg.AsteriskConns[0]
 	dfltLoaderConfig = cfg.loaderCfg[0].Clone()
-	if err := cfg.checkConfigSanity(); err != nil {
-		return nil, err
-	}
-	return cfg, nil
+	err = cfg.checkConfigSanity()
+	return
 }
 
-func NewCGRConfigFromJsonStringWithDefaults(cfgJsonStr string) (*CGRConfig, error) {
-	cfg, _ := NewDefaultCGRConfig()
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJsonStr)); err != nil {
-		return nil, err
-	} else if err := cfg.loadFromJsonCfg(jsnCfg); err != nil {
-		return nil, err
+func NewCGRConfigFromJsonStringWithDefaults(cfgJsonStr string) (cfg *CGRConfig, err error) {
+	cfg, _ = NewDefaultCGRConfig()
+	jsnCfg := new(CgrJsonCfg)
+	if err = NewRjReaderFromBytes([]byte(cfgJsonStr)).Decode(jsnCfg); err != nil {
+		return
+	} else if err = cfg.loadFromJsonCfg(jsnCfg); err != nil {
+		return
 	}
-	return cfg, nil
+	return
 }
 
 // Reads all .json files out of a folder/subfolders and loads them up in lexical order
-func NewCGRConfigFromPath(path string) (*CGRConfig, error) {
-	cfg, err := NewDefaultCGRConfig()
-	if err != nil {
-		return nil, err
+func NewCGRConfigFromPath(path string) (cfg *CGRConfig, err error) {
+	if cfg, err = NewDefaultCGRConfig(); err != nil {
+		return
 	}
 	cfg.ConfigPath = path
 
-	if err := cfg.loadConfigFromPath(path, []func(*CgrJsonCfg) error{cfg.loadFromJsonCfg}); err != nil {
-		return nil, err
+	if err = cfg.loadConfigFromPath(path, []func(*CgrJsonCfg) error{cfg.loadFromJsonCfg}); err != nil {
+		return
 	}
-	if err = cfg.checkConfigSanity(); err != nil {
-		return nil, err
-	}
-	return cfg, nil
+	err = cfg.checkConfigSanity()
+	return
 }
 
 func isHidden(fileName string) bool {
@@ -1536,6 +1531,7 @@ func (_ *CGRConfig) loadConfigFromReader(rdr io.Reader, loadFuncs []func(jsnCfg 
 	if rjr, err = NewRjReader(rdr); err != nil {
 		return
 	}
+	defer rjr.Close() // make sure we make the buffer nil
 	if err = rjr.Decode(jsnCfg); err != nil {
 		return
 	}

@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 )
 
@@ -48,7 +47,7 @@ func TestAttributeSCfgloadFromJsonCfg(t *testing.T) {
 		PrefixIndexedFields: &[]string{"index1", "index2"},
 		ProcessRuns:         1,
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnAttSCfg, err := jsnCfg.AttributeServJsonCfg(); err != nil {
 		t.Error(err)

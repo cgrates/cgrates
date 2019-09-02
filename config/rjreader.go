@@ -235,10 +235,8 @@ func (rjr *rjReader) PeekByteWC() (bit byte, err error) {
 
 //checkMeta check if char mach with next char from MetaEnv if not reset the counting
 func (rjr *rjReader) checkMeta() bool {
-	if rjr.indx-1+len(utils.MetaEnv) >= len(rjr.buf) {
-		return false
-	}
-	return utils.MetaEnv == string(rjr.buf[rjr.indx-1:rjr.indx-1+len(utils.MetaEnv)])
+	return rjr.indx-1+len(utils.MetaEnv) < len(rjr.buf) &&
+		utils.MetaEnv == string(rjr.buf[rjr.indx-1:rjr.indx-1+len(utils.MetaEnv)])
 }
 
 //readEnvName reads the enviorment key

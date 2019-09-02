@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -85,7 +84,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 			}},
 		}},
 	}}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnhttpCfg, err := jsnCfg.HttpAgentJsonCfg(); err != nil {
 		t.Error(err)
@@ -196,7 +195,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 				ReplyFields:   []*FCTemplate{},
 			}},
 		}}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnhttpCfg, err := jsnCfg.HttpAgentJsonCfg(); err != nil {
 		t.Error(err)

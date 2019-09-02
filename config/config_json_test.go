@@ -20,7 +20,6 @@ package config
 import (
 	"encoding/json"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -31,7 +30,7 @@ var dfCgrJsonCfg *CgrJsonCfg
 // Loads up the default configuration and  tests it's sections one by one
 func TestDfNewdfCgrJsonCfgFromReader(t *testing.T) {
 	var err error
-	if dfCgrJsonCfg, err = NewCgrJsonCfgFromReader(strings.NewReader(CGRATES_CFG_JSON)); err != nil {
+	if dfCgrJsonCfg, err = NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON)); err != nil {
 		t.Error(err)
 	}
 }

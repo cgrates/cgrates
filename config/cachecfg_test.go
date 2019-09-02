@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -74,7 +73,7 @@ func TestCacheCfgloadFromJsonCfg(t *testing.T) {
 		"rating_plans":         &CacheParamCfg{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
 	}
 	cachecfg = CacheCfg{}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnCacheCfg, err := jsnCfg.CacheJsonCfg(); err != nil {
 		t.Error(err)

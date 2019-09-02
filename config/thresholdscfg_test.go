@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 )
@@ -48,7 +47,7 @@ func TestThresholdSCfgloadFromJsonCfg(t *testing.T) {
 		StoreInterval:       time.Duration(time.Hour * 2),
 		PrefixIndexedFields: &[]string{"index1", "index2"},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnThSCfg, err := jsnCfg.ThresholdSJsonCfg(); err != nil {
 		t.Error(err)

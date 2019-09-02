@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 )
@@ -82,7 +81,7 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 		DigestSeparator:   ",",
 		DigestEqual:       ":",
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnGenCfg, err := jsnCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)

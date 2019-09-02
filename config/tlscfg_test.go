@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 )
 
@@ -56,7 +55,7 @@ func TestTlsCfgloadFromJsonCfg(t *testing.T) {
 		ServerPolicy:     3,
 	}
 
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsntlsCfg, err := jsnCfg.TlsCfgJson(); err != nil {
 		t.Error(err)

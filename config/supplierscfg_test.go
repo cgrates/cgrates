@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 )
 
@@ -57,7 +56,7 @@ func TestSupplierSCfgloadFromJsonCfg(t *testing.T) {
 		StatSConns:          []*RemoteHost{},
 		DefaultRatio:        1,
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnSupSCfg, err := jsnCfg.SupplierSJsonCfg(); err != nil {
 		t.Error(err)

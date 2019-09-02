@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -45,7 +44,7 @@ func TestFilterSCfgloadFromJsonCfg(t *testing.T) {
 	expected = FilterSCfg{
 		StatSConns: []*RemoteHost{{Address: "127.0.0.1", Transport: "", Synchronous: true}},
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnFsCfg, err := jsnCfg.FilterSJsonCfg(); err != nil {
 		t.Error(err)

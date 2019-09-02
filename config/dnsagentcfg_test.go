@@ -19,7 +19,6 @@ package config
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -56,7 +55,7 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 		SessionSConns: []*RemoteHost{{Address: "*internal"}},
 		Timezone:      "UTC",
 	}
-	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJSONStr)); err != nil {
+	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if jsnDaCfg, err := jsnCfg.DNSAgentJsonCfg(); err != nil {
 		t.Error(err)
