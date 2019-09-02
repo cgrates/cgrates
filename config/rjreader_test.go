@@ -18,11 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"bufio"
-	"encoding/json"
 	"os"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -54,7 +51,7 @@ var (
 )
 
 func TestEnvRawJsonReadByte(t *testing.T) {
-	raw := &rawJSON{rdr: bufio.NewReader(strings.NewReader(envStr))}
+	raw := NewRjReaderFromBytes([]byte(envStr))
 	expected := []byte(`{"data_db":{"db_type":"redis","db_host":"127.0.0.1","db_port":6379,"db_name":"10","db_user":"*env:TESTVAR","db_password":",/**/","redis_sentinel":""}}`)
 	rply := []byte{}
 	bit, err := raw.ReadByte()
@@ -67,8 +64,8 @@ func TestEnvRawJsonReadByte(t *testing.T) {
 }
 
 func TestEnvRawJsonconsumeComent(t *testing.T) {
-	raw := &rawJSON{rdr: bufio.NewReader(strings.NewReader(`//comment
-a/*comment*/b`))}
+	raw := NewRjReaderFromBytes([]byte(`//comment
+a/*comment*/b`))
 	expected := (byte)('a')
 	if r, err := raw.consumeComent('d'); err != nil {
 		t.Error(err)
@@ -99,9 +96,9 @@ a/*comment*/b`))}
 }
 
 func TestEnvRawJsonReadByteWC(t *testing.T) {
-	raw := &rawJSON{rdr: bufio.NewReader(strings.NewReader(`c/*first comment*///another comment    
+	raw := NewRjReaderFromBytes([]byte(`c/*first comment*///another comment    
 
-		cgrates`))}
+		cgrates`))
 	expected := (byte)('c')
 	if rply, err := raw.ReadByteWC(); err != nil {
 		t.Error(err)
@@ -116,9 +113,9 @@ func TestEnvRawJsonReadByteWC(t *testing.T) {
 }
 
 func TestEnvRawJsonPeekByteWC(t *testing.T) {
-	raw := &rawJSON{rdr: bufio.NewReader(strings.NewReader(`c/*first comment*///another comment    
+	raw := NewRjReaderFromBytes([]byte(`c/*first comment*///another comment    
 
-		bgrates`))}
+		bgrates`))
 	expected := (byte)('c')
 	if rply, err := raw.PeekByteWC(); err != nil {
 		t.Error(err)
@@ -144,9 +141,9 @@ func TestEnvRawJsonPeekByteWC(t *testing.T) {
 }
 
 func TestEnvRawJsonreadFirstNonWhiteSpace(t *testing.T) {
-	raw := &rawJSON{rdr: bufio.NewReader(strings.NewReader(`    
+	raw := NewRjReaderFromBytes([]byte(`    
 
-		cgrates`))}
+		cgrates`))
 	expected := (byte)('c')
 	if rply, err := raw.readFirstNonWhiteSpace(); err != nil {
 		t.Error(err)
@@ -157,7 +154,7 @@ func TestEnvRawJsonreadFirstNonWhiteSpace(t *testing.T) {
 
 func TestEnvReaderRead(t *testing.T) {
 	os.Setenv("TESTVAR", "cgRates")
-	envR := NewRawJSONReader(strings.NewReader(envStr))
+	envR := NewRjReaderFromBytes([]byte(envStr))
 	expected := []byte(`{"data_db":{"db_type":"redis","db_host":"127.0.0.1","db_port":6379,"db_name":"10","db_user":"cgRates","db_password":",/**/","redis_sentinel":""}}`)
 	rply := []byte{}
 	buf := make([]byte, 20)
@@ -180,7 +177,7 @@ func TestEnvReaderRead(t *testing.T) {
 
 func TestEnvReaderRead2(t *testing.T) {
 	os.Setenv("TESTVARNoZero", "cgr1")
-	envR := NewRawJSONReader(strings.NewReader(`{"origin_host": "*env:TESTVARNoZero",
+	envR := NewRjReaderFromBytes([]byte(`{"origin_host": "*env:TESTVARNoZero",
         "origin_realm": "*env:TESTVARNoZero",}`))
 	expected := []byte(`{"origin_host":"cgr1","origin_realm":"cgr1"}`)
 	rply := []byte{}
@@ -203,20 +200,20 @@ func TestEnvReaderRead2(t *testing.T) {
 }
 
 func TestEnvReaderreadEnvName(t *testing.T) {
-	envR := EnvReader{rd: &rawJSON{rdr: bufio.NewReader(strings.NewReader(`Test_VAR1 } Var2_TEST'`))}}
+	envR := NewRjReaderFromBytes([]byte(`Test_VAR1 } Var2_TEST'`))
 	expected := []byte("Test_VAR1")
-	if rply, bit, err := envR.readEnvName(); err != nil {
+	if rply, endindx, err := envR.readEnvName(0); err != nil {
 		t.Error(err)
-	} else if bit != '}' {
-		t.Errorf("Wrong bit returned %q", bit)
+	} else if endindx != 9 {
+		t.Errorf("Wrong endindx returned %v", endindx)
 	} else if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expected: %+v, recived: %+v", (string(expected)), (string(rply)))
 	}
 	expected = []byte("Var2_TEST")
-	if rply, bit, err := envR.readEnvName(); err != nil {
+	if rply, endindx, err := envR.readEnvName(12); err != nil {
 		t.Error(err)
-	} else if bit != '\'' {
-		t.Errorf("Wrong bit returned %q", bit)
+	} else if endindx != 21 {
+		t.Errorf("Wrong endindx returned %v", endindx)
 	} else if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expected: %+v, recived: %+v", (string(expected)), (string(rply)))
 	}
@@ -225,50 +222,26 @@ func TestEnvReaderreadEnvName(t *testing.T) {
 func TestEnvReaderreplaceEnv(t *testing.T) {
 	os.Setenv("Test_VAR1", "5")
 	os.Setenv("Test_VAR2", "aVeryLongEnviormentalVariable")
-	envR := EnvReader{rd: &rawJSON{rdr: bufio.NewReader(strings.NewReader(`Test_VAR1,/*comment*/ }Test_VAR2"`))}}
-	expected := []byte("5}   ")
-	expectedn := 1
-	rply := make([]byte, 5)
-	if n, err := envR.replaceEnv(rply, 0, 5); err != nil {
+	envR := NewRjReaderFromBytes([]byte(`*env:Test_VAR1,/*comment*/ }*env:Test_VAR2"`))
+	// expected := []byte("5}   ")
+	if err := envR.replaceEnv(0); err != nil {
 		t.Error(err)
-	} else if expectedn != n {
-		t.Errorf("Expected: %+v, recived: %+v", expectedn, n)
-	} else if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expected: %q, recived: %q", (string(expected)), (string(rply)))
 	}
-	expected = []byte("aVery")
-	expectedn = 5
-	rply = make([]byte, 5)
-	if n, err := envR.replaceEnv(rply, 0, 5); err != nil {
+	if err := envR.replaceEnv(15); err != nil {
 		t.Error(err)
-	} else if expectedn != n {
-		t.Errorf("Expected: %+v, recived: %+v", expectedn, n)
-	} else if !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expected: %q, recived: %q", (string(expected)), (string(rply)))
-	} else if bufexp := []byte("LongEnviormentalVariable\""); !reflect.DeepEqual(bufexp, envR.buf) {
-		t.Errorf("Expected: %q, recived: %q", (string(expected)), (string(rply)))
 	}
 }
 
 func TestEnvReadercheckMeta(t *testing.T) {
-	envR := EnvReader{rd: &rawJSON{rdr: bufio.NewReader(strings.NewReader(""))}}
-	envR.m = 2
-	if envR.checkMeta('n') {
-		t.Errorf("Expectiv to get false recived true")
-	} else if envR.m != 3 {
-		t.Errorf("Expectiv the meta offset to incrase")
-	}
-	envR.m = 4
-	if !envR.checkMeta(':') {
+	envR := NewRjReaderFromBytes([]byte("*env:Var"))
+	envR.indx = 1
+	if !envR.checkMeta() {
 		t.Errorf("Expectiv true ")
-	} else if envR.m != 0 {
-		t.Errorf("Expectiv the meta offset to reset")
 	}
-	envR.m = 1
-	if envR.checkMeta('v') {
+	envR = NewRjReaderFromBytes([]byte("*enva:Var"))
+	envR.indx = 1
+	if envR.checkMeta() {
 		t.Errorf("Expectiv to get false recived true")
-	} else if envR.m != 0 {
-		t.Errorf("Expectiv the meta offset to reset")
 	}
 }
 
@@ -333,24 +306,10 @@ func TestGetErrorLine(t *testing.T) {
 	Line3
 	*/
 /**/		}//`
-	r := strings.NewReader(jsonstr)
-	_, err := NewCgrJsonCfgFromReader(r)
-	if err == nil {
-		t.Fatalf("Expected error received %v", err)
-	}
-	var offset int64
-	if realErr, canCast := err.(*json.SyntaxError); !canCast {
-		t.Fatalf("Expected json.SyntaxError received %v<%T>", err.Error(), err)
-	} else {
-		offset = realErr.Offset
-	}
-	var expOffset int64 = 31
-	if offset != expOffset {
-		t.Errorf("Expected offset %v received:%v", expOffset, offset)
-	}
-	r = strings.NewReader(jsonstr)
+	r := NewRjReaderFromBytes([]byte(jsonstr))
+	var offset int64 = 31
 	var expLine, expChar int64 = 10, 23
-	if line, character := getJsonOffsetLine(r, offset); expLine != line {
+	if line, character := r.getJsonOffsetLine(offset); expLine != line {
 		t.Errorf("Expected line %v received:%v", expLine, line)
 	} else if expChar != character {
 		t.Errorf("Expected line %v received:%v", expChar, character)
@@ -381,24 +340,10 @@ func TestGetErrorLine2(t *testing.T) {
 	Line3
 	*/
 /**/		}//`
-	r := strings.NewReader(jsonstr)
-	_, err := NewCgrJsonCfgFromReader(r)
-	if err == nil {
-		t.Fatalf("Expected error received %v", err)
-	}
-	var offset int64
-	if realErr, canCast := err.(*json.SyntaxError); !canCast {
-		t.Fatalf("Expected json.SyntaxError received %v<%T>", err.Error(), err)
-	} else {
-		offset = realErr.Offset
-	}
-	var expOffset int64 = 31
-	if offset != expOffset {
-		t.Errorf("Expected offset %v received:%v", expOffset, offset)
-	}
-	r = strings.NewReader(jsonstr)
+	r := NewRjReaderFromBytes([]byte(jsonstr))
+	var offset int64 = 31
 	var expLine, expChar int64 = 10, 46
-	if line, character := getJsonOffsetLine(r, offset); expLine != line {
+	if line, character := r.getJsonOffsetLine(offset); expLine != line {
 		t.Errorf("Expected line %v received:%v", expLine, line)
 	} else if expChar != character {
 		t.Errorf("Expected line %v received:%v", expChar, character)

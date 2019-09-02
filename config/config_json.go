@@ -21,10 +21,6 @@ package config
 import (
 	"encoding/json"
 	"io"
-	"net/http"
-	"os"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
 const (
@@ -73,54 +69,14 @@ const (
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
 func NewCgrJsonCfgFromReader(r io.Reader) (*CgrJsonCfg, error) {
 	var cgrJsonCfg CgrJsonCfg
-	jr := NewRawJSONReader(r)
+	jr, err := NewRjReader(r)
+	if err != nil {
+		return nil, err
+	}
 	if err := json.NewDecoder(jr).Decode(&cgrJsonCfg); err != nil {
 		return nil, err
 	}
 	return &cgrJsonCfg, nil
-}
-
-// Loads the config out of file
-func NewCgrJsonCfgFromFile(fpath string) (*CgrJsonCfg, error) {
-	cfgFile, err := os.Open(fpath)
-	if err != nil {
-		return nil, err
-	}
-	cfg, err := NewCgrJsonCfgFromReader(cfgFile)
-	cfgFile.Close()
-	if err != nil {
-		// for a better error message
-		cfgFile, oerr := os.Open(fpath)
-		if oerr != nil {
-			return cfg, oerr
-		}
-		defer cfgFile.Close()
-		return cfg, HandleJSONError(cfgFile, err)
-	}
-	return cfg, nil
-}
-
-// Loads the config out of http request
-func NewCgrJsonCfgFromHttp(fpath string) (*CgrJsonCfg, error) {
-	var myClient = &http.Client{
-		Timeout: CgrConfig().GeneralCfg().ReplyTimeout,
-	}
-	cfgReq, err := myClient.Get(fpath)
-	if err != nil {
-		return nil, utils.ErrPathNotReachable(fpath)
-	}
-	cfg, err := NewCgrJsonCfgFromReader(cfgReq.Body)
-	cfgReq.Body.Close()
-	if err != nil {
-		// for a better error message
-		cfgReq, rerr := myClient.Get(fpath)
-		if rerr != nil {
-			return nil, utils.ErrPathNotReachable(fpath)
-		}
-		defer cfgReq.Body.Close()
-		return cfg, HandleJSONError(cfgReq.Body, err)
-	}
-	return cfg, nil
 }
 
 // Main object holding the loaded config as section raw messages
