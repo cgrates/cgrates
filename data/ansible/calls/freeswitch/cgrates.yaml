@@ -1,0 +1,69 @@
+---
+- name: install glide
+  shell: go get -u github.com/Masterminds/glide
+  environment:
+    PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin"
+
+- name: create cgrates directory
+  become: yes
+  file:
+    state: directory
+    mode: 'u=rwx,go=rx'
+    owner: "{{ gouser }}"
+    group: "{{ gouser }}"
+    dest: '{{ cgrates_dir }}'
+  become_user: "{{ gouser }}"
+
+- name: git clone cgrates
+  git:
+    repo: https://github.com/cgrates/cgrates.git
+    dest: '{{ cgrates_dir }}'
+    update: yes
+    force: yes
+  become: yes
+  become_user: "{{ gouser }}"
+
+# Before installing glide make sure vendor don't exist
+- name: Remove vendor
+  shell: "sudo rm -rf {{ cgrates_dir }}/vendor"
+  ignore_errors: true
+
+- name:  glide install
+  shell: '{{ golang_gopath }}/bin/glide install'
+  environment:
+    PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin"
+  args:
+    chdir: '{{ cgrates_dir }}'
+
+- name:  build cgrates
+  shell: "sh {{ cgrates_dir }}/build.sh"
+  environment:
+    PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+  args:
+    chdir: '{{ cgrates_dir }}'
+
+- name: symbol link
+  become: yes
+  file:
+    src: "{{ cgrates_dir }}/data"
+    dest: "/usr/share/cgrates"
+    state: link
+
+- name: symbol link
+  become: yes
+  file:
+    src: "{{ golang_gopath }}/bin/cgr-engine"
+    dest: "/usr/bin/cgr-engine"
+    state: link
+  # post install
+- name:  post install mysql
+  become: yes
+  command: 'sh {{ cgrates_dir }}/data/storage/mysql/setup_cgr_db.sh root CGRateS.org localhost'
+  args:
+    chdir: '{{ cgrates_dir }}/data/storage/mysql/'
+
+- name:  post install postgres2
+  become: yes
+  command: 'sh {{ cgrates_dir }}/data/storage/postgres/create_db_with_users.sh'
+  args:
+    chdir: '{{ cgrates_dir }}/data/storage/postgres/'
