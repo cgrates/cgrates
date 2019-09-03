@@ -44,21 +44,42 @@ func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, sep string, dfltRdrCfg *E
 			erS.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
-	if jsnCfg.Readers != nil {
-		erS.Readers = make([]*EventReaderCfg, len(*jsnCfg.Readers))
-		for idx, rdrs := range *jsnCfg.Readers {
-			if dfltRdrCfg == nil { // when loading defaults dfltRdrCfg is nil ( e.g line 195)
-				erS.Readers[idx] = new(EventReaderCfg)
-			} else {
-				erS.Readers[idx] = dfltRdrCfg.Clone()
-			}
+	if err = erS.appendERsReaders(jsnCfg.Readers, sep, dfltRdrCfg); err != nil {
+		return err
+	}
+	return nil
+}
 
-			if err = erS.Readers[idx].loadFromJsonCfg(rdrs, sep); err != nil {
-				return err
+func (ers *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, separator string,
+	dfltRdrCfg *EventReaderCfg) (err error) {
+	if jsnReaders == nil {
+		return nil
+	}
+	for _, jsnReader := range *jsnReaders {
+		rdr := new(EventReaderCfg)
+		if dfltRdrCfg != nil {
+			rdr = dfltRdrCfg.Clone()
+		}
+		var haveID bool
+		if jsnReader.Id != nil {
+			for _, reader := range ers.Readers {
+				if reader.ID == *jsnReader.Id {
+					rdr = reader
+					haveID = true
+					break
+				}
 			}
 		}
+
+		if err := rdr.loadFromJsonCfg(jsnReader, separator); err != nil {
+			return err
+		}
+		if !haveID {
+			ers.Readers = append(ers.Readers, rdr)
+		}
+
 	}
-	return
+	return nil
 }
 
 // Clone itself into a new ERsCfg
