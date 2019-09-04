@@ -16,7 +16,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -108,6 +107,8 @@ func (fS *FilterS) connRALs(ralSChan chan rpcclient.RpcClientConnection) (err er
 // receives the event as DataProvider so we can accept undecoded data (ie: HttpRequest)
 func (fS *FilterS) Pass(tenant string, filterIDs []string,
 	ev config.DataProvider) (pass bool, err error) {
+	var fieldNameDP config.DataProvider
+	var fieldValuesDP []config.DataProvider
 	if len(filterIDs) == 0 {
 		return true, nil
 	}
@@ -125,18 +126,15 @@ func (fS *FilterS) Pass(tenant string, filterIDs []string,
 			continue
 		}
 		for _, fltr := range f.Rules {
-			// in case we have filters of type *stats,*resources or *accounts we need to send
-			// a rpcclient to get what we need (Metrics,Resource,Accounts)
-			var conn rpcclient.RpcClientConnection
-			switch fltr.Type {
-			case utils.MetaStatS, utils.MetaNotStatS:
-				conn = fS.statSConns
-			case utils.MetaResources, utils.MetaNotResources:
-				conn = fS.resSConns
-			case utils.MetaAccount:
-				conn = fS.ralSConns
+			fieldNameDP, err = fS.getFieldNameDataProvider(ev, fltr.FieldName, tenant)
+			if err != nil {
+				return pass, err
 			}
-			if pass, err = fltr.Pass(ev, conn, tenant); err != nil || !pass {
+			fieldValuesDP, err = fS.getFieldValueDataProviders(ev, fltr.Values, tenant)
+			if err != nil {
+				return pass, err
+			}
+			if pass, err = fltr.Pass(fieldNameDP, fieldValuesDP); err != nil || !pass {
 				return pass, err
 			}
 		}
@@ -315,39 +313,33 @@ func (rf *FilterRule) CompileValues() (err error) {
 }
 
 // Pass is the method which should be used from outside.
-func (fltr *FilterRule) Pass(dP config.DataProvider,
-	rpcClnt rpcclient.RpcClientConnection, tenant string) (result bool, err error) {
+func (fltr *FilterRule) Pass(fieldNameDP config.DataProvider,
+	fieldValuesDP []config.DataProvider) (result bool, err error) {
 	if fltr.negative == nil {
 		fltr.negative = utils.BoolPointer(strings.HasPrefix(fltr.Type, utils.MetaNot))
 	}
 
 	switch fltr.Type {
 	case utils.MetaString, utils.MetaNotString:
-		result, err = fltr.passString(dP)
+		result, err = fltr.passString(fieldNameDP, fieldValuesDP)
 	case utils.MetaEmpty, utils.MetaNotEmpty:
-		result, err = fltr.passEmpty(dP)
+		result, err = fltr.passEmpty(fieldNameDP)
 	case utils.MetaExists, utils.MetaNotExists:
-		result, err = fltr.passExists(dP)
+		result, err = fltr.passExists(fieldNameDP)
 	case utils.MetaPrefix, utils.MetaNotPrefix:
-		result, err = fltr.passStringPrefix(dP)
+		result, err = fltr.passStringPrefix(fieldNameDP, fieldValuesDP)
 	case utils.MetaSuffix, utils.MetaNotSuffix:
-		result, err = fltr.passStringSuffix(dP)
+		result, err = fltr.passStringSuffix(fieldNameDP, fieldValuesDP)
 	case utils.MetaTimings, utils.MetaNotTimings:
-		result, err = fltr.passTimings(dP)
+		result, err = fltr.passTimings(fieldNameDP, fieldValuesDP)
 	case utils.MetaDestinations, utils.MetaNotDestinations:
-		result, err = fltr.passDestinations(dP)
+		result, err = fltr.passDestinations(fieldNameDP, fieldValuesDP)
 	case utils.MetaRSR, utils.MetaNotRSR:
-		result, err = fltr.passRSR(dP)
-	case utils.MetaStatS, utils.MetaNotStatS:
-		result, err = fltr.passStatS(dP, rpcClnt, tenant)
+		result, err = fltr.passRSR(fieldValuesDP)
 	case utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual:
-		result, err = fltr.passGreaterThan(dP)
-	case utils.MetaResources, utils.MetaNotResources:
-		result, err = fltr.passResourceS(dP, rpcClnt, tenant)
+		result, err = fltr.passGreaterThan(fieldNameDP, fieldValuesDP)
 	case utils.MetaEqual, utils.MetaNotEqual:
-		result, err = fltr.passEqualTo(dP)
-	case utils.MetaAccount:
-		result, err = fltr.passAccountS(dP, rpcClnt, tenant)
+		result, err = fltr.passEqualTo(fieldNameDP, fieldValuesDP)
 	default:
 		err = utils.ErrPrefixNotErrNotImplemented(fltr.Type)
 	}
@@ -357,16 +349,16 @@ func (fltr *FilterRule) Pass(dP config.DataProvider,
 	return result != *(fltr.negative), nil
 }
 
-func (fltr *FilterRule) passString(dP config.DataProvider) (bool, error) {
-	strVal, err := config.GetDynamicString(fltr.FieldName, dP)
+func (fltr *FilterRule) passString(fielNameDP config.DataProvider, fieldValuesDP []config.DataProvider) (bool, error) {
+	strVal, err := config.GetDynamicString(fltr.FieldName, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
 		}
 		return false, err
 	}
-	for _, val := range fltr.Values {
-		sval, err := config.GetDynamicString(val, dP)
+	for i, val := range fltr.Values {
+		sval, err := config.GetDynamicString(val, fieldValuesDP[i])
 		if err != nil {
 			continue
 		}
@@ -377,8 +369,8 @@ func (fltr *FilterRule) passString(dP config.DataProvider) (bool, error) {
 	return false, nil
 }
 
-func (fltr *FilterRule) passExists(dP config.DataProvider) (bool, error) {
-	_, err := config.GetDynamicInterface(fltr.FieldName, dP)
+func (fltr *FilterRule) passExists(fielNameDP config.DataProvider) (bool, error) {
+	_, err := config.GetDynamicInterface(fltr.FieldName, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -388,8 +380,8 @@ func (fltr *FilterRule) passExists(dP config.DataProvider) (bool, error) {
 	return true, nil
 }
 
-func (fltr *FilterRule) passEmpty(dP config.DataProvider) (bool, error) {
-	val, err := config.GetDynamicInterface(fltr.FieldName, dP)
+func (fltr *FilterRule) passEmpty(fielNameDP config.DataProvider) (bool, error) {
+	val, err := config.GetDynamicInterface(fltr.FieldName, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return true, nil
@@ -418,16 +410,16 @@ func (fltr *FilterRule) passEmpty(dP config.DataProvider) (bool, error) {
 	}
 }
 
-func (fltr *FilterRule) passStringPrefix(dP config.DataProvider) (bool, error) {
-	strVal, err := config.GetDynamicString(fltr.FieldName, dP)
+func (fltr *FilterRule) passStringPrefix(fielNameDP config.DataProvider, fieldValuesDP []config.DataProvider) (bool, error) {
+	strVal, err := config.GetDynamicString(fltr.FieldName, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
 		}
 		return false, err
 	}
-	for _, prfx := range fltr.Values {
-		prfx, err := config.GetDynamicString(prfx, dP)
+	for i, prfx := range fltr.Values {
+		prfx, err := config.GetDynamicString(prfx, fieldValuesDP[i])
 		if err != nil {
 			continue
 		}
@@ -438,16 +430,16 @@ func (fltr *FilterRule) passStringPrefix(dP config.DataProvider) (bool, error) {
 	return false, nil
 }
 
-func (fltr *FilterRule) passStringSuffix(dP config.DataProvider) (bool, error) {
-	strVal, err := config.GetDynamicString(fltr.FieldName, dP)
+func (fltr *FilterRule) passStringSuffix(fielNameDP config.DataProvider, fieldValuesDP []config.DataProvider) (bool, error) {
+	strVal, err := config.GetDynamicString(fltr.FieldName, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
 		}
 		return false, err
 	}
-	for _, prfx := range fltr.Values {
-		prfx, err := config.GetDynamicString(prfx, dP)
+	for i, prfx := range fltr.Values {
+		prfx, err := config.GetDynamicString(prfx, fieldValuesDP[i])
 		if err != nil {
 			continue
 		}
@@ -459,12 +451,12 @@ func (fltr *FilterRule) passStringSuffix(dP config.DataProvider) (bool, error) {
 }
 
 // ToDo when Timings will be available in DataDb
-func (fltr *FilterRule) passTimings(dP config.DataProvider) (bool, error) {
+func (fltr *FilterRule) passTimings(fielNameDP config.DataProvider, fieldValuesDP []config.DataProvider) (bool, error) {
 	return false, utils.ErrNotImplemented
 }
 
-func (fltr *FilterRule) passDestinations(dP config.DataProvider) (bool, error) {
-	dst, err := config.GetDynamicString(fltr.FieldName, dP)
+func (fltr *FilterRule) passDestinations(fielNameDP config.DataProvider, fieldValuesDP []config.DataProvider) (bool, error) {
+	dst, err := config.GetDynamicString(fltr.FieldName, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -474,8 +466,8 @@ func (fltr *FilterRule) passDestinations(dP config.DataProvider) (bool, error) {
 	for _, p := range utils.SplitPrefix(dst, MIN_PREFIX_MATCH) {
 		if destIDs, err := dm.DataDB().GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 			for _, dID := range destIDs {
-				for _, valDstID := range fltr.Values {
-					valDstID, err := config.GetDynamicString(valDstID, dP)
+				for i, valDstID := range fltr.Values {
+					valDstID, err := config.GetDynamicString(valDstID, fieldValuesDP[i])
 					if err != nil {
 						continue
 					}
@@ -489,8 +481,8 @@ func (fltr *FilterRule) passDestinations(dP config.DataProvider) (bool, error) {
 	return false, nil
 }
 
-func (fltr *FilterRule) passRSR(dP config.DataProvider) (bool, error) {
-	_, err := fltr.rsrFields.ParseDataProviderWithInterfaces(dP, utils.NestingSep)
+func (fltr *FilterRule) passRSR(fieldValuesDP []config.DataProvider) (bool, error) {
+	_, err := fltr.rsrFields.ParseDataProviderWithInterfaces(fieldValuesDP[0], utils.NestingSep)
 	if err != nil {
 		if err == utils.ErrNotFound || err == utils.ErrFilterNotPassingNoCaps {
 			return false, nil
@@ -500,48 +492,48 @@ func (fltr *FilterRule) passRSR(dP config.DataProvider) (bool, error) {
 	return true, nil
 }
 
-func (fltr *FilterRule) passStatS(dP config.DataProvider,
-	stats rpcclient.RpcClientConnection, tenant string) (bool, error) {
-	if stats == nil || reflect.ValueOf(stats).IsNil() {
-		return false, errors.New("Missing StatS information")
-	}
-	for _, statItem := range fltr.statItems {
-		statValues := make(map[string]float64)
-		if err := stats.Call(utils.StatSv1GetQueueFloatMetrics,
-			&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: tenant, ID: statItem.ItemID}}, &statValues); err != nil {
-			return false, err
-		}
-		//convert statValues to map[string]interface{}
-		ifaceStatValues := make(map[string]interface{})
-		for key, val := range statValues {
-			ifaceStatValues[key] = val
-		}
-		//convert ifaceStatValues into a NavigableMap so we can send it to passGreaterThan
-		nM := config.NewNavigableMap(ifaceStatValues)
-		//split the type in exact 2 parts
-		//special cases like *gt#sum#Usage
-		fltrType := strings.SplitN(statItem.FilterType, utils.STATS_CHAR, 2)
-		if len(fltrType) < 2 {
-			return false, errors.New(fmt.Sprintf("<%s> Invalid format for filter of type *stats", utils.FilterS))
-		}
-		//compose the newFilter
-		fltr, err := NewFilterRule(fltrType[0],
-			utils.DynamicDataPrefix+utils.Meta+fltrType[1], []string{statItem.FilterValue})
-		if err != nil {
-			return false, err
-		}
-		//send it to passGreaterThan
-		if val, err := fltr.passGreaterThan(nM); err != nil || !val {
-			//in case of error return false and error
-			//and in case of not pass return false and nil
-			return false, err
-		}
-	}
-	return true, nil
-}
+// func (fltr *FilterRule) passStatS(dP config.DataProvider,
+// 	stats rpcclient.RpcClientConnection, tenant string) (bool, error) {
+// 	if stats == nil || reflect.ValueOf(stats).IsNil() {
+// 		return false, errors.New("Missing StatS information")
+// 	}
+// 	for _, statItem := range fltr.statItems {
+// 		statValues := make(map[string]float64)
+// 		if err := stats.Call(utils.StatSv1GetQueueFloatMetrics,
+// 			&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: tenant, ID: statItem.ItemID}}, &statValues); err != nil {
+// 			return false, err
+// 		}
+// 		//convert statValues to map[string]interface{}
+// 		ifaceStatValues := make(map[string]interface{})
+// 		for key, val := range statValues {
+// 			ifaceStatValues[key] = val
+// 		}
+// 		//convert ifaceStatValues into a NavigableMap so we can send it to passGreaterThan
+// 		nM := config.NewNavigableMap(ifaceStatValues)
+// 		//split the type in exact 2 parts
+// 		//special cases like *gt#sum#Usage
+// 		fltrType := strings.SplitN(statItem.FilterType, utils.STATS_CHAR, 2)
+// 		if len(fltrType) < 2 {
+// 			return false, errors.New(fmt.Sprintf("<%s> Invalid format for filter of type *stats", utils.FilterS))
+// 		}
+// 		//compose the newFilter
+// 		fltr, err := NewFilterRule(fltrType[0],
+// 			utils.DynamicDataPrefix+utils.Meta+fltrType[1], []string{statItem.FilterValue})
+// 		if err != nil {
+// 			return false, err
+// 		}
+// 		//send it to passGreaterThan
+// 		if val, err := fltr.passGreaterThan(nM); err != nil || !val {
+// 			//in case of error return false and error
+// 			//and in case of not pass return false and nil
+// 			return false, err
+// 		}
+// 	}
+// 	return true, nil
+// }
 
-func (fltr *FilterRule) passGreaterThan(dP config.DataProvider) (bool, error) {
-	fldIf, err := config.GetDynamicInterface(fltr.FieldName, dP)
+func (fltr *FilterRule) passGreaterThan(fielNameDP config.DataProvider, fieldValuesDP []config.DataProvider) (bool, error) {
+	fldIf, err := config.GetDynamicInterface(fltr.FieldName, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -556,8 +548,8 @@ func (fltr *FilterRule) passGreaterThan(dP config.DataProvider) (bool, error) {
 		fltr.Type == utils.MetaLessThan {
 		orEqual = true
 	}
-	for _, val := range fltr.Values {
-		sval, err := config.GetDynamicInterface(val, dP)
+	for i, val := range fltr.Values {
+		sval, err := config.GetDynamicInterface(val, fieldValuesDP[i])
 		if err != nil {
 			continue
 		}
@@ -572,73 +564,73 @@ func (fltr *FilterRule) passGreaterThan(dP config.DataProvider) (bool, error) {
 	return false, nil
 }
 
-func (fltr *FilterRule) passResourceS(dP config.DataProvider,
-	resourceS rpcclient.RpcClientConnection, tenant string) (bool, error) {
-	if resourceS == nil || reflect.ValueOf(resourceS).IsNil() {
-		return false, errors.New("Missing ResourceS information")
-	}
-	for _, resItem := range fltr.resourceItems {
-		//take total usage for resource
-		var reply Resource
-		if err := resourceS.Call(utils.ResourceSv1GetResource,
-			&utils.TenantID{Tenant: tenant, ID: resItem.ItemID}, &reply); err != nil {
-			return false, err
-		}
-		data := map[string]interface{}{
-			utils.Usage: reply.totalUsage(),
-		}
-		//convert data into a NavigableMap so we can send it to passGreaterThan
-		nM := config.NewNavigableMap(data)
-		//compose the newFilter
-		fltr, err := NewFilterRule(resItem.FilterType,
-			utils.DynamicDataPrefix+utils.Usage, []string{resItem.FilterValue})
-		if err != nil {
-			return false, err
-		}
-		// send it to passGreaterThan
-		if val, err := fltr.passGreaterThan(nM); err != nil || !val {
-			//in case of error return false and error
-			//and in case of not pass return false and nil
-			return false, err
-		}
-	}
-	return true, nil
-}
+// func (fltr *FilterRule) passResourceS(dP config.DataProvider,
+// 	resourceS rpcclient.RpcClientConnection, tenant string) (bool, error) {
+// 	if resourceS == nil || reflect.ValueOf(resourceS).IsNil() {
+// 		return false, errors.New("Missing ResourceS information")
+// 	}
+// 	for _, resItem := range fltr.resourceItems {
+// 		//take total usage for resource
+// 		var reply Resource
+// 		if err := resourceS.Call(utils.ResourceSv1GetResource,
+// 			&utils.TenantID{Tenant: tenant, ID: resItem.ItemID}, &reply); err != nil {
+// 			return false, err
+// 		}
+// 		data := map[string]interface{}{
+// 			utils.Usage: reply.totalUsage(),
+// 		}
+// 		//convert data into a NavigableMap so we can send it to passGreaterThan
+// 		nM := config.NewNavigableMap(data)
+// 		//compose the newFilter
+// 		fltr, err := NewFilterRule(resItem.FilterType,
+// 			utils.DynamicDataPrefix+utils.Usage, []string{resItem.FilterValue})
+// 		if err != nil {
+// 			return false, err
+// 		}
+// 		// send it to passGreaterThan
+// 		if val, err := fltr.passGreaterThan(nM); err != nil || !val {
+// 			//in case of error return false and error
+// 			//and in case of not pass return false and nil
+// 			return false, err
+// 		}
+// 	}
+// 	return true, nil
+// }
 
-func (fltr *FilterRule) passAccountS(dP config.DataProvider,
-	accountS rpcclient.RpcClientConnection, tenant string) (bool, error) {
-	if accountS == nil || reflect.ValueOf(accountS).IsNil() {
-		return false, errors.New("Missing AccountS information")
-	}
-	for _, accItem := range fltr.accountItems {
-		//split accItem.ItemID in two accountID and actual filter
-		//AccountID.BalanceMap.*monetary[0].Value
-		splittedString := strings.SplitN(accItem.ItemID, utils.NestingSep, 2)
-		accID := splittedString[0]
-		filterID := splittedString[1]
-		var reply Account
-		if err := accountS.Call(utils.ApierV2GetAccount,
-			&utils.AttrGetAccount{Tenant: tenant, Account: accID}, &reply); err != nil {
-			return false, err
-		}
-		//compose the newFilter
-		fltr, err := NewFilterRule(accItem.FilterType,
-			utils.DynamicDataPrefix+filterID, []string{accItem.FilterValue})
-		if err != nil {
-			return false, err
-		}
-		dP, _ := reply.AsNavigableMap(nil)
-		if val, err := fltr.Pass(dP, nil, tenant); err != nil || !val {
-			//in case of error return false and error
-			//and in case of not pass return false and nil
-			return false, err
-		}
-	}
-	return true, nil
-}
+// func (fltr *FilterRule) passAccountS(dP config.DataProvider,
+// 	accountS rpcclient.RpcClientConnection, tenant string) (bool, error) {
+// 	if accountS == nil || reflect.ValueOf(accountS).IsNil() {
+// 		return false, errors.New("Missing AccountS information")
+// 	}
+// 	for _, accItem := range fltr.accountItems {
+// 		//split accItem.ItemID in two accountID and actual filter
+// 		//AccountID.BalanceMap.*monetary[0].Value
+// 		splittedString := strings.SplitN(accItem.ItemID, utils.NestingSep, 2)
+// 		accID := splittedString[0]
+// 		filterID := splittedString[1]
+// 		var reply Account
+// 		if err := accountS.Call(utils.ApierV2GetAccount,
+// 			&utils.AttrGetAccount{Tenant: tenant, Account: accID}, &reply); err != nil {
+// 			return false, err
+// 		}
+// 		//compose the newFilter
+// 		fltr, err := NewFilterRule(accItem.FilterType,
+// 			utils.DynamicDataPrefix+filterID, []string{accItem.FilterValue})
+// 		if err != nil {
+// 			return false, err
+// 		}
+// 		dP, _ := reply.AsNavigableMap(nil)
+// 		if val, err := fltr.Pass(dP, nil, tenant); err != nil || !val {
+// 			//in case of error return false and error
+// 			//and in case of not pass return false and nil
+// 			return false, err
+// 		}
+// 	}
+// 	return true, nil
+// }
 
-func (fltr *FilterRule) passEqualTo(dP config.DataProvider) (bool, error) {
-	fldIf, err := config.GetDynamicInterface(fltr.FieldName, dP)
+func (fltr *FilterRule) passEqualTo(fielNameDP config.DataProvider, fieldValuesDP []config.DataProvider) (bool, error) {
+	fldIf, err := config.GetDynamicInterface(fltr.FieldName, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -648,8 +640,8 @@ func (fltr *FilterRule) passEqualTo(dP config.DataProvider) (bool, error) {
 	if fldStr, castStr := fldIf.(string); castStr { // attempt converting string since deserialization fails here (ie: time.Time fields)
 		fldIf = utils.StringToInterface(fldStr)
 	}
-	for _, val := range fltr.Values {
-		sval, err := config.GetDynamicInterface(val, dP)
+	for i, val := range fltr.Values {
+		sval, err := config.GetDynamicInterface(val, fieldValuesDP[i])
 		if err != nil {
 			continue
 		}
@@ -660,4 +652,42 @@ func (fltr *FilterRule) passEqualTo(dP config.DataProvider) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+func (fS *FilterS) getFieldNameDataProvider(initialDP config.DataProvider, fieldName string, tenant string) (dp config.DataProvider, err error) {
+	switch {
+	case strings.HasPrefix(fieldName, utils.MetaAccounts):
+		//construct dataProvider from account and set it furthder
+		var account *Account
+		//extract the AccountID from fieldName
+		if err = fS.ralSConns.Call(utils.ApierV2GetAccount,
+			&utils.AttrGetAccount{Tenant: tenant, Account: "completeHereWithID"}, &account); err != nil {
+			return
+		}
+	case strings.HasPrefix(fieldName, utils.MetaResources):
+	case strings.HasPrefix(fieldName, utils.MetaStats):
+	default:
+		dp = initialDP
+	}
+	return
+}
+
+func (fS *FilterS) getFieldValueDataProviders(initialDP config.DataProvider, values []string, tenant string) (dp []config.DataProvider, err error) {
+	dp = make([]config.DataProvider, len(values))
+	for i, val := range values {
+		switch {
+		case strings.HasPrefix(val, utils.MetaAccounts):
+			var account *Account
+			//extract the AccountID from fieldName
+			if err = fS.ralSConns.Call(utils.ApierV2GetAccount,
+				&utils.AttrGetAccount{Tenant: tenant, Account: "completeHereWithID"}, &account); err != nil {
+				return
+			}
+		case strings.HasPrefix(val, utils.MetaResources):
+		case strings.HasPrefix(val, utils.MetaStats):
+		default:
+			dp[i] = initialDP
+		}
+	}
+	return
 }

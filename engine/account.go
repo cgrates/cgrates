@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
 	"strings"
 	"time"
 
@@ -1170,4 +1171,58 @@ func (as *AccountSummary) Clone() (cln *AccountSummary) {
 		}
 	}
 	return
+}
+
+// newAccountCache constructs a DataProvider
+func NewAccountDP(account *Account) (dP config.DataProvider) {
+	dP = &AccountDP{account: account, cache: config.NewNavigableMap(nil)}
+	return
+}
+
+// AccountCache implements engine.DataProvider so we can pass it to filters
+type AccountDP struct {
+	account *Account
+	cache   *config.NavigableMap
+}
+
+// String is part of engine.DataProvider interface
+// when called, it will display the already parsed values out of cache
+func (accDP *AccountDP) String() string {
+	return utils.ToJSON(accDP.account)
+}
+
+// FieldAsInterface is part of engine.DataProvider interface
+func (accDP *AccountDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+	if len(fldPath) != 1 {
+		return nil, utils.ErrNotFound
+	}
+	if data, err = accDP.cache.FieldAsInterface(fldPath); err == nil ||
+		err != utils.ErrNotFound { // item found in cache
+		return
+	}
+	err = nil // cancel previous err
+	//check the field in the account
+	accDP.cache.Set(fldPath, data, false, false)
+	return
+}
+
+// FieldAsString is part of engine.DataProvider interface
+func (accDP *AccountDP) FieldAsString(fldPath []string) (data string, err error) {
+	var valIface interface{}
+	valIface, err = accDP.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	return utils.IfaceAsString(valIface), nil
+}
+
+// AsNavigableMap is part of engine.DataProvider interface
+func (accDP *AccountDP) AsNavigableMap([]*config.FCTemplate) (
+	nm *config.NavigableMap, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// RemoteHost is part of engine.DataProvider interface
+func (accDP *AccountDP) RemoteHost() net.Addr {
+	return utils.LocalAddr()
 }
