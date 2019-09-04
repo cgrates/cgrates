@@ -41,7 +41,7 @@
 
     customPath: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
 
-  remote_user: cgrates
+  remote_user: '{{ gouser }}'
   tasks:
 ###########################################################################################################################
 # install dependencies
