@@ -1,46 +1,59 @@
 module github.com/cgrates/cgrates
 
-go 1.12
+go 1.13
 
 require (
-	github.com/antchfx/xmlquery v0.0.0-20180925013719-07935b1c0f2e
-	github.com/antchfx/xpath v0.0.0-20180922041825-3de91f3991a1
-	github.com/aws/aws-sdk-go v0.0.0-20190204225153-38d16b00d959
-	github.com/cenkalti/hub v0.0.0-20160527103212-11382a9960d3
+	cloud.google.com/go v0.41.1-0.20190715155837-570ba224802b
+	github.com/antchfx/xmlquery v1.0.1-0.20190615060324-ebb6e8b1d119
+	github.com/antchfx/xpath v1.0.1-0.20190715042825-b6dbe470e102
+	github.com/aws/aws-sdk-go v1.20.21-0.20190712182448-7a3d36756688
+	github.com/cenkalti/hub v1.0.1-0.20160527103212-11382a9960d3
 	github.com/cenkalti/rpc2 v0.0.0-20180727162946-9642ea02d0aa
 	github.com/cgrates/aringo v0.0.0-20181115151919-f996da7890ea
-	github.com/cgrates/fsock v0.0.0-20180629100914-bcbd5e75c07d
-	github.com/cgrates/go-diameter v0.0.0-20190305181340-74cc2c72ff0c
-	github.com/cgrates/kamevapi v0.0.0-20180423120959-0e0d0379606f
+	github.com/cgrates/fsock v0.0.0-20190623100231-317895b42f1a
+	github.com/cgrates/kamevapi v0.0.0-20190605144325-ec679e017654
 	github.com/cgrates/ltcache v0.0.0-20181016092649-92fb7fa77cca
 	github.com/cgrates/osipsdagram v0.0.0-20150510101557-3d6beed66345
 	github.com/cgrates/radigo v0.0.0-20181207143118-e5c8f3272ccc
 	github.com/cgrates/rpcclient v0.0.0-20190505150825-8fcc68b2c38b
-	github.com/dlintw/goconf v0.0.0-20120228082610-dcc070983490
-	github.com/fsnotify/fsnotify v0.0.0-20180830220226-ccc981bf8038
-	github.com/go-sql-driver/mysql v0.0.0-20180719071942-99ff426eb706
-	github.com/go-stack/stack v1.8.0 // indirect
-	github.com/golang/snappy v0.0.1 // indirect
+	github.com/creack/pty v1.1.7
+	github.com/fiorix/go-diameter v3.0.3-0.20190716165154-f4823472d0e0+incompatible
+	github.com/fsnotify/fsnotify v1.4.8-0.20190312181446-1485a34d5d57
+	github.com/go-sql-driver/mysql v1.4.1
+	github.com/go-stack/stack v1.8.0
+	github.com/golang/protobuf v1.3.2
+	github.com/golang/snappy v0.0.1
 	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
+	github.com/hashicorp/golang-lru v0.5.2-0.20190520140433-59383c442f7d
 	github.com/ishidawataru/sctp v0.0.0-20180918013207-6e2cb1366111
-	github.com/jinzhu/gorm v0.0.0-20180914075349-5be9bd341358
-	github.com/jinzhu/inflection v0.0.0-20170102125226-1c35d901db3d
-	github.com/kr/pty v1.1.3
-	github.com/lib/pq v1.0.0
-	github.com/mattn/go-runewidth v0.0.3
-	github.com/mediocregopher/radix.v2 v0.0.0-20180603022615-94360be26253
-	github.com/miekg/dns v1.1.8
-	github.com/mitchellh/mapstructure v1.0.0
-	github.com/mongodb/mongo-go-driver v0.0.0-20190107203312-4f3b0a882e7d
-	github.com/peterh/liner v1.1.0
-	github.com/streadway/amqp v0.0.0-20180806233856-70e15c650864
+	github.com/jinzhu/gorm v1.9.10
+	github.com/jinzhu/inflection v1.0.0
+	github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af
+	github.com/lib/pq v1.1.2-0.20190507191818-2ff3cb3adc01
+	github.com/mattn/go-runewidth v0.0.5-0.20181218000649-703b5e6b11ae
+	github.com/mediocregopher/radix.v2 v0.0.0-20181115013041-b67df6e626f9
+	github.com/miekg/dns v1.1.15
+	github.com/mitchellh/mapstructure v1.1.2
+	github.com/nyaruka/phonenumbers v1.0.43
+	github.com/peterh/liner v1.1.1-0.20190305032635-6f820f8f90ce
+	github.com/pkg/errors v0.8.2-0.20190227000051-27936f6d90f9
+	github.com/segmentio/kafka-go v0.2.6-0.20190708214315-03ea927bad14
+	github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94
 	github.com/ugorji/go v0.0.0-20171112025056-5a66da2e74af
-	github.com/vcabbage/amqp v0.11.0
-	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
-	github.com/xdg/stringprep v1.0.0 // indirect
-	golang.org/x/crypto v0.0.0-20190530122614-20be4c3c3ed5 // indirect
-	golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3
-	golang.org/x/sync v0.0.0-20190423024810-112230192c58 // indirect
-	golang.org/x/sys v0.0.0-20190412213103-97732733099d
-	golang.org/x/text v0.3.0
+	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c
+	github.com/xdg/stringprep v1.0.1-0.20180714160509-73f8eece6fdc
+	go.mongodb.org/mongo-driver v1.0.1-0.20190712184055-9ec4480161a7
+	go.opencensus.io v0.22.1-0.20190713072201-b4a14686f0a9
+	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
+	golang.org/x/net v0.0.0-20190628185345-da137c7871d7
+	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
+	golang.org/x/sync v0.0.0-20190423024810-112230192c58
+	golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7
+	golang.org/x/text v0.3.2
+	google.golang.org/api v0.7.0
+	google.golang.org/appengine v1.6.1
+	google.golang.org/genproto v0.0.0-20190708153700-3bdd9d9f5532
+	google.golang.org/grpc v1.21.1
+	honnef.co/go/tools v0.0.0-20190523083050-ea95bdfd59fc // indirect
+	pack.ag/amqp v0.11.2
 )

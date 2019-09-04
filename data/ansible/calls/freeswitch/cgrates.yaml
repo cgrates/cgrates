@@ -1,9 +1,4 @@
 ---
-- name: install glide
-  shell: go get -u github.com/Masterminds/glide
-  environment:
-    PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin"
-
 - name: create cgrates directory
   become: yes
   file:
@@ -22,18 +17,6 @@
     force: yes
   become: yes
   become_user: "{{ gouser }}"
-
-# Before installing glide make sure vendor don't exist
-- name: Remove vendor
-  shell: "sudo rm -rf {{ cgrates_dir }}/vendor"
-  ignore_errors: true
-
-- name:  glide install
-  shell: '{{ golang_gopath }}/bin/glide install'
-  environment:
-    PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin"
-  args:
-    chdir: '{{ cgrates_dir }}'
 
 - name:  build cgrates
   shell: "sh {{ cgrates_dir }}/build.sh"

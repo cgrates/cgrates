@@ -5,7 +5,7 @@
     ##################### Golang Vars #############################
     ###############################################################
     # Go language SDK version number
-    golang_version: '1.12.7'
+    golang_version: '1.13'
     # Mirror to download the Go language SDK redistributable package from
     golang_mirror: 'https://storage.googleapis.com/golang'
     # Base installation directory the Go language SDK distribution
@@ -94,10 +94,6 @@
   - name: Install golang
     include: go.yaml
 
-  # glide
-  - name: install glide
-    command: go get -u github.com/Masterminds/glide
-    become_user: "{{ gouser }}"
 ###########################################################################################################################
 
 ###########################################################################################################################
@@ -117,11 +113,6 @@
       dest: '{{ cgrates_dir }}'
     become: yes
     become_user: "{{ gouser }}"
-
-  - name:  glide install
-    command: "{{ golang_gopath }}/bin/glide install"
-    args:
-      chdir: '{{ cgrates_dir }}'
 
   - name:  build cgrates
     command: 'sh {{ cgrates_dir }}/build.sh'
