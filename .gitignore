@@ -16,4 +16,3 @@ data/tutorials/fs_evsock/freeswitch/etc/freeswitch/
 data/tutorial_tests/fs_evsock/freeswitch/etc/freeswitch/
 vendor
 *.test
-glide.lock

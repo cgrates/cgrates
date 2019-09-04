@@ -5,7 +5,7 @@
     ##################### Golang Vars #############################
     ###############################################################
     # Go language SDK version number
-    golang_version: '1.12.7'
+    golang_version: '1.13'
     # Mirror to download the Go language SDK redistributable package from
     golang_mirror: 'https://storage.googleapis.com/golang'
     # Base installation directory the Go language SDK distribution

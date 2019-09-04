@@ -1,4 +1,4 @@
 #! /usr/bin/env sh
 ./build.sh
-go test 
+go test ./...
 exit $?

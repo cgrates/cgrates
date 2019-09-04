@@ -25,8 +25,7 @@ After *post-install* actions are performed, CGRateS will be configured in **/etc
 3.2. Using source
 -----------------
 
-For developing CGRateS and switching between its versions, we are using the **new vendor directory feature** introduced in go 1.6.
-In a nutshell all the dependencies are installed and used from a folder named *vendor* placed in the root of the project.
+For developing CGRateS and switching between its versions, we are using the **new go mods feature** introduced in go 1.13.
 
 3.2.1 Install GO Lang
 ~~~~~~~~~~~~~~~~~~~~~
@@ -46,7 +45,7 @@ In this Tutorial we are going to install Go 1.11
 3.2.2 Build CGRateS from Source
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To configure the project with use the following commands:
+To configure the project with the following commands:
 
 ::
 

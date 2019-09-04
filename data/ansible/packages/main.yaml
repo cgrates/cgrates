@@ -5,7 +5,7 @@
     ##################### Golang Vars #############################
     ###############################################################
     # Go language SDK version number
-    golang_version: '1.12.7'
+    golang_version: '1.13'
     # Mirror to download the Go language SDK redistributable package from
     golang_mirror: 'https://storage.googleapis.com/golang'
     # Base installation directory the Go language SDK distribution
@@ -104,11 +104,6 @@
   - name: Install golang
     include: go.yaml
 
-  - name: install glide
-    shell: go get -u github.com/Masterminds/glide
-    environment:
-      PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin"
-
 ###########################################################################################################################
 ###########################################################################################################################
 # Install CGRateS
@@ -130,18 +125,6 @@
       force: yes
     become: yes
     become_user: "{{ gouser }}"
-
-# Before installing glide make sure vendor don't exist
-  - name: Remove vendor
-    shell: "sudo rm -rf {{ cgrates_dir }}/vendor"
-    ignore_errors: true
-
-  - name:  glide install
-    shell: '{{ golang_gopath }}/bin/glide install'
-    environment:
-      PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin"
-    args:
-      chdir: '{{ cgrates_dir }}'
 
   - name:  build cgrates
     shell: "sh {{ cgrates_dir }}/build.sh"
