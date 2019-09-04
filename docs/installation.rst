@@ -45,7 +45,7 @@ In this Tutorial we are going to install Go 1.11
 3.2.2 Build CGRateS from Source
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To configure the project with the following commands:
+Configure the project with the following commands:
 
 ::
 
