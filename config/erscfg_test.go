@@ -122,8 +122,8 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 				Timezone:       utils.EmptyString,
 				Filters:        []string{},
 				Flags:          utils.FlagsWithParams{},
-				Header_fields:  make([]*FCTemplate, 0),
-				Content_fields: []*FCTemplate{
+				HeaderFields:   make([]*FCTemplate, 0),
+				ContentFields: []*FCTemplate{
 					{Tag: "TOR", FieldId: "ToR", Type: utils.META_COMPOSED,
 						Value: NewRSRParsersMustCompile("~2", true, utils.INFIELD_SEP), Mandatory: true},
 					{Tag: "OriginID", FieldId: "OriginID", Type: utils.META_COMPOSED,
@@ -147,7 +147,7 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 					{Tag: "Usage", FieldId: "Usage", Type: utils.META_COMPOSED,
 						Value: NewRSRParsersMustCompile("~13", true, utils.INFIELD_SEP), Mandatory: true},
 				},
-				Trailer_fields: make([]*FCTemplate, 0),
+				TrailerFields: make([]*FCTemplate, 0),
 			},
 			&EventReaderCfg{
 				ID:             "file_reader1",
