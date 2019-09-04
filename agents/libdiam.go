@@ -477,7 +477,7 @@ func diamErr(m *diam.Message, resCode uint32,
 	reqVars map[string]interface{},
 	tpl []*config.FCTemplate, tnt, tmz string,
 	filterS *engine.FilterS) (a *diam.Message, err error) {
-	aReq := newAgentRequest(
+	aReq := NewAgentRequest(
 		newDADataProvider(nil, m), reqVars,
 		config.NewNavigableMap(nil),
 		config.NewNavigableMap(nil),

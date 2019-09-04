@@ -132,7 +132,7 @@ func TestProcessRequest(t *testing.T) {
 		},
 	}}
 	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaAuth, utils.MetaAccounts})
-	agReq := newAgentRequest(diamDP, reqVars, cgrRplyNM, rply,
+	agReq := NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters)
 	da := &DiameterAgent{
@@ -220,7 +220,7 @@ func TestProcessRequest(t *testing.T) {
 	cgrRplyNM = config.NewNavigableMap(nil)
 	rply = config.NewNavigableMap(nil)
 
-	agReq = newAgentRequest(diamDP, reqVars, cgrRplyNM, rply,
+	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters)
 	da = &DiameterAgent{
@@ -308,7 +308,7 @@ func TestProcessRequest(t *testing.T) {
 		},
 	}}
 
-	agReq = newAgentRequest(diamDP, reqVars, cgrRplyNM, rply,
+	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters)
 	da = &DiameterAgent{
@@ -410,7 +410,7 @@ func TestProcessRequest(t *testing.T) {
 		},
 	}}
 
-	agReq = newAgentRequest(diamDP, reqVars, cgrRplyNM, rply,
+	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters)
 	da = &DiameterAgent{
@@ -498,7 +498,7 @@ func TestProcessRequest(t *testing.T) {
 		},
 	}}
 
-	agReq = newAgentRequest(diamDP, reqVars, cgrRplyNM, rply,
+	agReq = NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply,
 		reqProcessor.Tenant, config.CgrConfig().GeneralCfg().DefaultTenant,
 		config.CgrConfig().GeneralCfg().DefaultTimezone, filters)
 	da = &DiameterAgent{

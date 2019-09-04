@@ -79,7 +79,7 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 	rplyNM := config.NewNavigableMap(nil)
 	var processed bool
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
-		agReq := newAgentRequest(dcdr, nil, cgrRplyNM, rplyNM,
+		agReq := NewAgentRequest(dcdr, nil, cgrRplyNM, rplyNM,
 			reqProcessor.Tenant, ra.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
@@ -116,7 +116,7 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 	rplyNM := config.NewNavigableMap(nil)
 	var processed bool
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
-		agReq := newAgentRequest(dcdr, nil, cgrRplyNM, rplyNM,
+		agReq := NewAgentRequest(dcdr, nil, cgrRplyNM, rplyNM,
 			reqProcessor.Tenant, ra.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
@@ -144,14 +144,14 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 // processRequest represents one processor processing the request
 func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 	agReq *AgentRequest, rply *radigo.Packet) (processed bool, err error) {
-	if pass, err := ra.filterS.Pass(agReq.tenant,
+	if pass, err := ra.filterS.Pass(agReq.Tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
 	}
 	if agReq.CGRRequest, err = agReq.AsNavigableMap(reqProcessor.RequestFields); err != nil {
 		return
 	}
-	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.tenant, utils.NestingSep)
+	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,

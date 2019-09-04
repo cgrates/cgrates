@@ -91,9 +91,9 @@ type EventReaderCfg struct {
 	Timezone       string
 	Filters        []string
 	Flags          utils.FlagsWithParams
-	Header_fields  []*FCTemplate
-	Content_fields []*FCTemplate
-	Trailer_fields []*FCTemplate
+	HeaderFields   []*FCTemplate
+	ContentFields  []*FCTemplate
+	TrailerFields  []*FCTemplate
 	Continue       bool
 }
 
@@ -148,17 +148,17 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string
 		}
 	}
 	if jsnCfg.Header_fields != nil {
-		if er.Header_fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Header_fields, sep); err != nil {
+		if er.HeaderFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Header_fields, sep); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Content_fields != nil {
-		if er.Content_fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Content_fields, sep); err != nil {
+		if er.ContentFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Content_fields, sep); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Trailer_fields != nil {
-		if er.Trailer_fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Trailer_fields, sep); err != nil {
+		if er.TrailerFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Trailer_fields, sep); err != nil {
 			return err
 		}
 	}
@@ -195,17 +195,17 @@ func (er *EventReaderCfg) Clone() (cln *EventReaderCfg) {
 		}
 	}
 	cln.Flags = er.Flags
-	cln.Header_fields = make([]*FCTemplate, len(er.Header_fields))
-	for idx, fld := range er.Header_fields {
-		cln.Header_fields[idx] = fld.Clone()
+	cln.HeaderFields = make([]*FCTemplate, len(er.HeaderFields))
+	for idx, fld := range er.HeaderFields {
+		cln.HeaderFields[idx] = fld.Clone()
 	}
-	cln.Content_fields = make([]*FCTemplate, len(er.Content_fields))
-	for idx, fld := range er.Content_fields {
-		cln.Content_fields[idx] = fld.Clone()
+	cln.ContentFields = make([]*FCTemplate, len(er.ContentFields))
+	for idx, fld := range er.ContentFields {
+		cln.ContentFields[idx] = fld.Clone()
 	}
-	cln.Trailer_fields = make([]*FCTemplate, len(er.Trailer_fields))
-	for idx, fld := range er.Trailer_fields {
-		cln.Trailer_fields[idx] = fld.Clone()
+	cln.TrailerFields = make([]*FCTemplate, len(er.TrailerFields))
+	for idx, fld := range er.TrailerFields {
+		cln.TrailerFields[idx] = fld.Clone()
 	}
 	cln.Continue = er.Continue
 	return

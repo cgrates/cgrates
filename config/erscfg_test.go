@@ -27,14 +27,14 @@ import (
 
 func TestEventRedearClone(t *testing.T) {
 	orig := &EventReaderCfg{
-		ID:            utils.MetaDefault,
-		Type:          "RandomType",
-		FieldSep:      ",",
-		SourceID:      "RandomSource",
-		Filters:       []string{"Filter1", "Filter2"},
-		Tenant:        NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
-		Header_fields: []*FCTemplate{},
-		Content_fields: []*FCTemplate{
+		ID:           utils.MetaDefault,
+		Type:         "RandomType",
+		FieldSep:     ",",
+		SourceID:     "RandomSource",
+		Filters:      []string{"Filter1", "Filter2"},
+		Tenant:       NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
+		HeaderFields: []*FCTemplate{},
+		ContentFields: []*FCTemplate{
 			{
 				Tag:       "TOR",
 				FieldId:   "ToR",
@@ -50,22 +50,22 @@ func TestEventRedearClone(t *testing.T) {
 				Mandatory: true,
 			},
 		},
-		Trailer_fields: []*FCTemplate{},
-		Continue:       true,
+		TrailerFields: []*FCTemplate{},
+		Continue:      true,
 	}
 	cloned := orig.Clone()
 	if !reflect.DeepEqual(cloned, orig) {
 		t.Errorf("expected: %s \n,received: %s", utils.ToJSON(orig), utils.ToJSON(cloned))
 	}
 	initialOrig := &EventReaderCfg{
-		ID:            utils.MetaDefault,
-		Type:          "RandomType",
-		FieldSep:      ",",
-		SourceID:      "RandomSource",
-		Filters:       []string{"Filter1", "Filter2"},
-		Tenant:        NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
-		Header_fields: []*FCTemplate{},
-		Content_fields: []*FCTemplate{
+		ID:           utils.MetaDefault,
+		Type:         "RandomType",
+		FieldSep:     ",",
+		SourceID:     "RandomSource",
+		Filters:      []string{"Filter1", "Filter2"},
+		Tenant:       NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
+		HeaderFields: []*FCTemplate{},
+		ContentFields: []*FCTemplate{
 			{
 				Tag:       "TOR",
 				FieldId:   "ToR",
@@ -81,11 +81,11 @@ func TestEventRedearClone(t *testing.T) {
 				Mandatory: true,
 			},
 		},
-		Trailer_fields: []*FCTemplate{},
-		Continue:       true,
+		TrailerFields: []*FCTemplate{},
+		Continue:      true,
 	}
 	orig.Filters = []string{"SingleFilter"}
-	orig.Content_fields = []*FCTemplate{
+	orig.ContentFields = []*FCTemplate{
 		{
 			Tag:       "TOR",
 			FieldId:   "ToR",
@@ -122,8 +122,8 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 				Timezone:       utils.EmptyString,
 				Filters:        nil,
 				Flags:          utils.FlagsWithParams{},
-				Header_fields:  make([]*FCTemplate, 0),
-				Content_fields: []*FCTemplate{
+				HeaderFields:   make([]*FCTemplate, 0),
+				ContentFields: []*FCTemplate{
 					{Tag: "TOR", FieldId: "ToR", Type: utils.META_COMPOSED,
 						Value: NewRSRParsersMustCompile("~2", true, utils.INFIELD_SEP), Mandatory: true},
 					{Tag: "OriginID", FieldId: "OriginID", Type: utils.META_COMPOSED,
@@ -147,7 +147,7 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 					{Tag: "Usage", FieldId: "Usage", Type: utils.META_COMPOSED,
 						Value: NewRSRParsersMustCompile("~13", true, utils.INFIELD_SEP), Mandatory: true},
 				},
-				Trailer_fields: make([]*FCTemplate, 0),
+				TrailerFields: make([]*FCTemplate, 0),
 			},
 		},
 	}

@@ -101,7 +101,7 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 		var lclProcessed bool
 		lclProcessed, err = da.processRequest(
 			reqProcessor,
-			newAgentRequest(
+			NewAgentRequest(
 				dnsDP, reqVars, cgrRplyNM, rplyNM,
 				reqProcessor.Tenant,
 				da.cgrCfg.GeneralCfg().DefaultTenant,
@@ -150,14 +150,14 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 
 func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 	agReq *AgentRequest) (processed bool, err error) {
-	if pass, err := da.fltrS.Pass(agReq.tenant,
+	if pass, err := da.fltrS.Pass(agReq.Tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
 	}
 	if agReq.CGRRequest, err = agReq.AsNavigableMap(reqProcessor.RequestFields); err != nil {
 		return
 	}
-	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.tenant, utils.NestingSep)
+	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,

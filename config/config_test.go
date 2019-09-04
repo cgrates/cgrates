@@ -191,7 +191,7 @@ func TestCgrCfgCDRC(t *testing.T) {
 	{
 		"id": "*default",
 		"enabled": true,							// enable CDR client functionality
-		"content_fields":[							// import template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+		"Content_fields":[							// import template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 			{"field_id": "ToR", "type": "*composed", "value": "~7:s/^(voice|data|sms|mms|generic)$/*$1/"},
 			{"field_id": "AnswerTime", "type": "*composed", "value": "~1"},
 			{"field_id": "Usage", "type": "*composed", "value": "~9:s/^(\\d+)$/${1}s/"},
@@ -1826,8 +1826,8 @@ func TestCgrCdfEventReader(t *testing.T) {
 				Timezone:       utils.EmptyString,
 				Filters:        []string{},
 				Flags:          utils.FlagsWithParams{},
-				Header_fields:  make([]*FCTemplate, 0),
-				Content_fields: []*FCTemplate{
+				HeaderFields:   make([]*FCTemplate, 0),
+				ContentFields: []*FCTemplate{
 					{Tag: "TOR", FieldId: "ToR", Type: utils.META_COMPOSED,
 						Value: NewRSRParsersMustCompile("~2", true, utils.INFIELD_SEP), Mandatory: true},
 					{Tag: "OriginID", FieldId: "OriginID", Type: utils.META_COMPOSED,
@@ -1851,7 +1851,7 @@ func TestCgrCdfEventReader(t *testing.T) {
 					{Tag: "Usage", FieldId: "Usage", Type: utils.META_COMPOSED,
 						Value: NewRSRParsersMustCompile("~13", true, utils.INFIELD_SEP), Mandatory: true},
 				},
-				Trailer_fields: make([]*FCTemplate, 0),
+				TrailerFields: make([]*FCTemplate, 0),
 			},
 		},
 	}
@@ -1875,8 +1875,8 @@ func TestCgrCfgEventReaderDefault(t *testing.T) {
 		Timezone:       utils.EmptyString,
 		Filters:        nil,
 		Flags:          utils.FlagsWithParams{},
-		Header_fields:  make([]*FCTemplate, 0),
-		Content_fields: []*FCTemplate{
+		HeaderFields:   make([]*FCTemplate, 0),
+		ContentFields: []*FCTemplate{
 			{Tag: "TOR", FieldId: "ToR", Type: utils.META_COMPOSED,
 				Value: NewRSRParsersMustCompile("~2", true, utils.INFIELD_SEP), Mandatory: true},
 			{Tag: "OriginID", FieldId: "OriginID", Type: utils.META_COMPOSED,
@@ -1900,7 +1900,7 @@ func TestCgrCfgEventReaderDefault(t *testing.T) {
 			{Tag: "Usage", FieldId: "Usage", Type: utils.META_COMPOSED,
 				Value: NewRSRParsersMustCompile("~13", true, utils.INFIELD_SEP), Mandatory: true},
 		},
-		Trailer_fields: make([]*FCTemplate, 0),
+		TrailerFields: make([]*FCTemplate, 0),
 	}
 	if !reflect.DeepEqual(cgrCfg.dfltEvRdr, eCfg) {
 		t.Errorf("received: %+v,\n expecting: %+v", utils.ToJSON(cgrCfg.dfltEvRdr), utils.ToJSON(eCfg))

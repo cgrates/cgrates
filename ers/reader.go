@@ -22,23 +22,23 @@ import (
 	"fmt"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 type EventReader interface {
 	Config() *config.EventReaderCfg // return it's configuration
-	Init() error                    // subscribe the reader on the path
-	Read() (*utils.CGREvent, error) // produce a single record in the events file
+	Serve() error                   // subscribe the reader on the path
 }
 
 // NewEventReader instantiates the event reader based on configuration at index
-func NewEventReader(rdrCfg *config.EventReaderCfg,
-	rdrExit chan struct{}, appExit chan bool) (er EventReader, err error) {
-	switch rdrCfg.Type {
+func NewEventReader(cfg *config.CGRConfig, cfgIdx int, rdrEvents chan *erEvent,
+	fltrS *engine.FilterS, rdrExit chan struct{}, appExit chan bool) (er EventReader, err error) {
+	switch cfg.ERsCfg().Readers[cfgIdx].Type {
 	default:
-		err = fmt.Errorf("unsupported reader type: <%s>", rdrCfg.Type)
+		err = fmt.Errorf("unsupported reader type: <%s>", cfg.ERsCfg().Readers[cfgIdx].Type)
 	case utils.MetaFileCSV:
-		return NewCSVFileER(rdrCfg, rdrExit, appExit)
+		return NewCSVFileER(cfg, cfgIdx, rdrEvents, fltrS, rdrExit, appExit)
 	}
 	return
 }

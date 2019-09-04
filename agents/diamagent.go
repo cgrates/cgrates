@@ -208,7 +208,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		var lclProcessed bool
 		lclProcessed, err = da.processRequest(
 			reqProcessor,
-			newAgentRequest(
+			NewAgentRequest(
 				diamDP, reqVars, cgrRplyNM, rply,
 				reqProcessor.Tenant, da.cgrCfg.GeneralCfg().DefaultTenant,
 				utils.FirstNonEmpty(reqProcessor.Timezone,
@@ -248,14 +248,14 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 
 func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 	agReq *AgentRequest) (processed bool, err error) {
-	if pass, err := da.filterS.Pass(agReq.tenant,
+	if pass, err := da.filterS.Pass(agReq.Tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
 	}
 	if agReq.CGRRequest, err = agReq.AsNavigableMap(reqProcessor.RequestFields); err != nil {
 		return
 	}
-	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.tenant, utils.NestingSep)
+	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
 		utils.MetaDryRun, utils.MetaAuth,
@@ -442,7 +442,7 @@ func (da *DiameterAgent) V1DisconnectSession(args utils.AttrDisconnectSession, r
 		return utils.ErrMandatoryIeMissing
 	}
 	dmd := msg.(*diamMsgData)
-	aReq := newAgentRequest(
+	aReq := NewAgentRequest(
 		newDADataProvider(dmd.c, dmd.m),
 		dmd.vars,
 		config.NewNavigableMap(nil),

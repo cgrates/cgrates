@@ -31,7 +31,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func newAgentRequest(req config.DataProvider,
+func NewAgentRequest(req config.DataProvider,
 	vars map[string]interface{},
 	cgrRply *config.NavigableMap,
 	rply *config.NavigableMap,
@@ -50,16 +50,16 @@ func newAgentRequest(req config.DataProvider,
 		CGRRequest: config.NewNavigableMap(nil),
 		CGRReply:   cgrRply,
 		Reply:      rply,
-		timezone:   timezone,
+		Timezone:   timezone,
 		filterS:    filterS,
 	}
 	// populate tenant
 	if tntIf, err := ar.ParseField(
 		&config.FCTemplate{Type: utils.META_COMPOSED,
 			Value: tntTpl}); err == nil && tntIf.(string) != "" {
-		ar.tenant = tntIf.(string)
+		ar.Tenant = tntIf.(string)
 	} else {
-		ar.tenant = dfltTenant
+		ar.Tenant = dfltTenant
 	}
 
 	return
@@ -74,8 +74,8 @@ type AgentRequest struct {
 	CGRReply   *config.NavigableMap
 	CGRAReq    *config.NavigableMap // Used to acces live build in request; both available as active request and active reply
 	Reply      *config.NavigableMap
-	tenant,
-	timezone string
+	Tenant,
+	Timezone string
 	filterS *engine.FilterS
 }
 
@@ -127,7 +127,7 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 	nM *config.NavigableMap, err error) {
 	ar.CGRAReq = config.NewNavigableMap(nil)
 	for _, tplFld := range tplFlds {
-		if pass, err := ar.filterS.Pass(ar.tenant,
+		if pass, err := ar.filterS.Pass(ar.Tenant,
 			tplFld.Filters, ar); err != nil {
 			return nil, err
 		} else if !pass {
@@ -207,11 +207,11 @@ func (aReq *AgentRequest) ParseField(
 		if err != nil {
 			return "", err
 		}
-		tEnd, err := utils.ParseTimeDetectLayout(strVal1, aReq.timezone)
+		tEnd, err := utils.ParseTimeDetectLayout(strVal1, aReq.Timezone)
 		if err != nil {
 			return "", err
 		}
-		tStart, err := utils.ParseTimeDetectLayout(strVal2, aReq.timezone)
+		tStart, err := utils.ParseTimeDetectLayout(strVal2, aReq.Timezone)
 		if err != nil {
 			return "", err
 		}

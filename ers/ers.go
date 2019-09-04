@@ -66,8 +66,8 @@ type ERService struct {
 
 // ListenAndServe keeps the service alive
 func (erS *ERService) ListenAndServe(cfgRldChan chan struct{}) (err error) {
-	for _, rdrCfg := range erS.cfg.ERsCfg().Readers {
-		if err = erS.addReader(rdrCfg); err != nil {
+	for cfgIdx, rdrCfg := range erS.cfg.ERsCfg().Readers {
+		if err = erS.addReader(rdrCfg.ID, cfgIdx); err != nil {
 			utils.Logger.Crit(
 				fmt.Sprintf("<%s> adding reader <%s> got error: <%s>",
 					utils.ERs, rdrCfg.ID, err.Error()))
@@ -92,14 +92,16 @@ func (erS *ERService) ListenAndServe(cfgRldChan chan struct{}) (err error) {
 }
 
 // addReader will add a new reader to the service
-func (erS *ERService) addReader(rdrCfg *config.EventReaderCfg) (err error) {
-	erS.stopLsn[rdrCfg.ID] = make(chan struct{})
+func (erS *ERService) addReader(rdrID string, cfgIdx int) (err error) {
+	erS.stopLsn[rdrID] = make(chan struct{})
 	var rdr EventReader
-	if rdr, err = NewEventReader(rdrCfg, erS.stopLsn[rdrCfg.ID], erS.exitChan); err != nil {
+	if rdr, err = NewEventReader(erS.cfg, cfgIdx,
+		erS.rdrEvents, erS.filterS,
+		erS.stopLsn[rdrID], erS.exitChan); err != nil {
 		return
 	}
-	erS.rdrs[rdrCfg.ID] = rdr
-	return rdr.Init()
+	erS.rdrs[rdrID] = rdr
+	return rdr.Serve()
 }
 
 // handleReloads will handle the config reloads which are signaled over cfgRldChan
@@ -109,17 +111,19 @@ func (erS *ERService) handleReloads(cfgRldChan chan struct{}) {
 		case <-erS.exitChan:
 			return
 		case <-cfgRldChan:
-			cfgIDs := make(map[string]*config.EventReaderCfg)
+			cfgIDs := make(map[string]int)
 			pathReloaded := make(map[string]struct{})
 			// index config IDs
-			for _, rdrCfg := range erS.cfg.ERsCfg().Readers {
-				cfgIDs[rdrCfg.ID] = rdrCfg
+			for i, rdrCfg := range erS.cfg.ERsCfg().Readers {
+				cfgIDs[rdrCfg.ID] = i
 			}
 			erS.Lock()
 			// remove the necessary ids
-			for id := range erS.rdrs {
-				if newCfg, has := cfgIDs[id]; has { // still present
-					if newCfg.SourcePath == erS.rdrPaths[id] {
+			for id, rdr := range erS.rdrs {
+				if cfgIdx, has := cfgIDs[id]; has { // still present
+					newCfg := erS.cfg.ERsCfg().Readers[cfgIdx]
+					if newCfg.SourcePath == erS.rdrPaths[id] &&
+						newCfg.ID == rdr.Config().ID { // make sure the index did not change
 						continue
 					}
 					pathReloaded[id] = struct{}{}
@@ -129,16 +133,16 @@ func (erS *ERService) handleReloads(cfgRldChan chan struct{}) {
 				delete(erS.stopLsn, id)
 			}
 			// add new ids
-			for id, rdrCfg := range cfgIDs {
+			for id, rdrIdx := range cfgIDs {
 				if _, has := erS.rdrs[id]; has {
 					if _, has := pathReloaded[id]; !has {
 						continue
 					}
 				}
-				if err := erS.addReader(rdrCfg); err != nil {
+				if err := erS.addReader(id, rdrIdx); err != nil {
 					utils.Logger.Crit(
 						fmt.Sprintf("<%s> adding reader <%s> got error: <%s>",
-							utils.ERs, rdrCfg.ID, err.Error()))
+							utils.ERs, id, err.Error()))
 					erS.exitChan <- true
 				}
 			}
