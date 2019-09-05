@@ -664,6 +664,7 @@ func (fS *FilterS) getFieldNameDataProvider(initialDP config.DataProvider, field
 			&utils.AttrGetAccount{Tenant: tenant, Account: "completeHereWithID"}, &account); err != nil {
 			return
 		}
+		dp = NewAccountDP(account)
 	case strings.HasPrefix(fieldName, utils.MetaResources):
 	case strings.HasPrefix(fieldName, utils.MetaStats):
 	default:
@@ -683,6 +684,7 @@ func (fS *FilterS) getFieldValueDataProviders(initialDP config.DataProvider, val
 				&utils.AttrGetAccount{Tenant: tenant, Account: "completeHereWithID"}, &account); err != nil {
 				return
 			}
+			dp[i] = NewAccountDP(account)
 		case strings.HasPrefix(val, utils.MetaResources):
 		case strings.HasPrefix(val, utils.MetaStats):
 		default:
