@@ -694,3 +694,48 @@ func TestEqualTo(t *testing.T) {
 		t.Error("should be equal")
 	}
 }
+
+type TestA struct {
+	StrField string
+}
+
+func (_ *TestA) TestFunc() string {
+	return "This is a test function on a structure"
+}
+
+func (_ *TestA) TestFuncWithParam(param string) string {
+	return "Invalid"
+}
+
+func (_ *TestA) TestFuncWithError() (string, error) {
+	return "TestFunction", nil
+}
+func (_ *TestA) TestFuncWithError2() (string, error) {
+	return "TestFunction", ErrPartiallyExecuted
+}
+
+func TestReflectFieldMethodInterface(t *testing.T) {
+	a := &TestA{StrField: "TestStructField"}
+	ifValue, err := ReflectFieldMethodInterface(a, "StrField")
+	if err != nil {
+		t.Error(err)
+	} else if ifValue != "TestStructField" {
+		t.Errorf("Expecting: TestStructField, received: %+v", ifValue)
+	}
+	ifValue, err = ReflectFieldMethodInterface(a, "InexistentField")
+	if err != ErrNotFound {
+		t.Error(err)
+	}
+	ifValue, err = ReflectFieldMethodInterface(a, "TestFunc")
+	if err != nil {
+		t.Error(err)
+	} else if ifValue != "This is a test function on a structure" {
+		t.Errorf("Expecting: This is a test function on a structure, received: %+v", ifValue)
+	}
+	ifValue, err = ReflectFieldMethodInterface(a, "TestFuncWithError")
+	if err != nil {
+		t.Error(err)
+	} else if ifValue != "TestFunction" {
+		t.Errorf("Expecting: TestFunction, received: %+v", ifValue)
+	}
+}

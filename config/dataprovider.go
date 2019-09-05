@@ -49,3 +49,57 @@ func GetDynamicString(dnVal string, dP DataProvider) (string, error) {
 	}
 	return dnVal, nil
 }
+
+//NewObjectDP constructs a DataProvider
+func NewObjectDP(obj interface{}) (dP DataProvider) {
+	dP = &ObjectDP{obj: obj, cache: NewNavigableMap(nil)}
+	return
+}
+
+type ObjectDP struct {
+	obj   interface{}
+	cache *NavigableMap
+}
+
+// String is part of engine.DataProvider interface
+// when called, it will display the already parsed values out of cache
+func (objDP *ObjectDP) String() string {
+	return utils.ToJSON(objDP.obj)
+}
+
+// FieldAsInterface is part of engine.DataProvider interface
+func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+	// []string{ BalanceMap *monetary[0] Value }
+	if data, err = objDP.cache.FieldAsInterface(fldPath); err == nil ||
+		err != utils.ErrNotFound { // item found in cache
+		return
+	}
+	err = nil // cancel previous err
+	// for _, fld := range fldPath {
+
+	// 	//process each field
+	// }
+	objDP.cache.Set(fldPath, data, false, false)
+	return
+}
+
+// FieldAsString is part of engine.DataProvider interface
+func (objDP *ObjectDP) FieldAsString(fldPath []string) (data string, err error) {
+	var valIface interface{}
+	valIface, err = objDP.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	return utils.IfaceAsString(valIface), nil
+}
+
+// AsNavigableMap is part of engine.DataProvider interface
+func (objDP *ObjectDP) AsNavigableMap([]*FCTemplate) (
+	nm *NavigableMap, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// RemoteHost is part of engine.DataProvider interface
+func (objDP *ObjectDP) RemoteHost() net.Addr {
+	return utils.LocalAddr()
+}

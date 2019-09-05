@@ -542,3 +542,54 @@ func Difference(items ...interface{}) (diff interface{}, err error) {
 	}
 	return
 }
+
+// ReflectFieldMethodInterface parses intf attepting to return the field value or error otherwise
+// Supports "ExtraFields" where additional fields are dynamically inserted in map with field name: extraFieldsLabel
+func ReflectFieldMethodInterface(obj interface{}, fldName string) (retIf interface{}, err error) {
+	v := reflect.ValueOf(obj)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	var field reflect.Value
+	switch v.Kind() {
+	case reflect.Struct:
+		field = v.FieldByName(fldName)
+	case reflect.Map:
+		field = v.MapIndex(reflect.ValueOf(fldName))
+	case reflect.Slice, reflect.Array:
+		//convert fldName to int
+		idx, err := strconv.Atoi(fldName)
+		if err != nil {
+			return nil, err
+		}
+		if idx > v.Len() {
+			return nil, fmt.Errorf("out of range")
+		}
+		field = v.Index(idx)
+	default:
+		return nil, fmt.Errorf("unsupported field kind: %v", v.Kind())
+	}
+	if !field.IsValid() {
+		// handle function with pointer
+		v = reflect.ValueOf(obj)
+		field = v.MethodByName(fldName)
+		if !field.IsValid() {
+			return nil, ErrNotFound
+		} else {
+			if field.Type().NumIn() != 0 {
+				return nil, fmt.Errorf("invalid function called")
+			}
+			if field.Type().NumOut() > 2 {
+				return nil, fmt.Errorf("invalid function called")
+			}
+			errorInterface := reflect.TypeOf((*error)(nil)).Elem()
+			if !field.Type().Out(1).Implements(errorInterface) {
+				return nil, fmt.Errorf("invalid function called")
+			}
+			fields := field.Call([]reflect.Value{})
+			//verify if error is not nil
+			return fields[0].Interface(), nil
+		}
+	}
+	return field.Interface(), nil
+}
