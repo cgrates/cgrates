@@ -44,16 +44,13 @@ func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, sep string, dfltRdrCfg *E
 			erS.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
-	if err = erS.appendERsReaders(jsnCfg.Readers, sep, dfltRdrCfg); err != nil {
-		return err
-	}
-	return nil
+	return erS.appendERsReaders(jsnCfg.Readers, sep, dfltRdrCfg)
 }
 
-func (ers *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, separator string,
+func (ers *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, sep string,
 	dfltRdrCfg *EventReaderCfg) (err error) {
 	if jsnReaders == nil {
-		return nil
+		return
 	}
 	for _, jsnReader := range *jsnReaders {
 		rdr := new(EventReaderCfg)
@@ -71,7 +68,7 @@ func (ers *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, separator
 			}
 		}
 
-		if err := rdr.loadFromJsonCfg(jsnReader, separator); err != nil {
+		if err := rdr.loadFromJsonCfg(jsnReader, sep); err != nil {
 			return err
 		}
 		if !haveID {
