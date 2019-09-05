@@ -4,11 +4,9 @@
 # Uncomment this to turn on verbose mode.
 export DH_VERBOSE=1
 
-export GOPATH=$(CURDIR)
-export GO15VENDOREXPERIMENT=1
+export GOPATH=$(CURDIR)/tmp
 
 PKGDIR=debian/cgrates
-SRCDIR=src/github.com/cgrates/cgrates
 
 %:
 	dh $@
@@ -22,8 +20,6 @@ clean:
 binary-arch: clean
 	dh_prep
 	dh_installdirs
-	mkdir -p src/github.com/cgrates
-	ln -sf $(CURDIR) src/github.com/cgrates
 	exec $(CURDIR)/build.sh
 	mkdir -p $(PKGDIR)/usr/bin
 	cp $(GOPATH)/bin/cgr-* $(PKGDIR)/usr/bin/
