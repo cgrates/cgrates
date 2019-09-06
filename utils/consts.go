@@ -311,7 +311,6 @@ const (
 	NodeID                      = "NodeID"
 	ActiveGoroutines            = "ActiveGoroutines"
 	MemoryUsage                 = "MemoryUsage"
-	Footprint                   = "Footprint"
 	RunningSince                = "RunningSince"
 	GoVersion                   = "GoVersion"
 	SessionTTL                  = "SessionTTL"
