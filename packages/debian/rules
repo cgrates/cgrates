@@ -4,6 +4,8 @@
 # Uncomment this to turn on verbose mode.
 export DH_VERBOSE=1
 
+# This should be an empty directory
+# This will be deleted after the package was created
 export GOPATH=$(CURDIR)/tmp
 
 PKGDIR=debian/cgrates
@@ -13,9 +15,8 @@ PKGDIR=debian/cgrates
 
 clean:
 	dh_clean
-	rm -rf $(GOPATH)/bin $(GOPATH)/pkg $(GOPATH)/src
-	rm -rf $(GOPATH)/debian/cgrates.debhelper.log
-	rm -f $(GOPATH)/goinstall.log
+	go clean -modcache
+	rm -rf $(GOPATH)
 
 binary-arch: clean
 	dh_prep
