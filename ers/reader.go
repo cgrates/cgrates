@@ -32,13 +32,14 @@ type EventReader interface {
 }
 
 // NewEventReader instantiates the event reader based on configuration at index
-func NewEventReader(cfg *config.CGRConfig, cfgIdx int, rdrEvents chan *erEvent,
-	fltrS *engine.FilterS, rdrExit chan struct{}, appExit chan bool) (er EventReader, err error) {
+func NewEventReader(cfg *config.CGRConfig, cfgIdx int,
+	rdrEvents chan *erEvent, rdrErr chan error,
+	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
 	switch cfg.ERsCfg().Readers[cfgIdx].Type {
 	default:
 		err = fmt.Errorf("unsupported reader type: <%s>", cfg.ERsCfg().Readers[cfgIdx].Type)
 	case utils.MetaFileCSV:
-		return NewCSVFileER(cfg, cfgIdx, rdrEvents, fltrS, rdrExit, appExit)
+		return NewCSVFileER(cfg, cfgIdx, rdrEvents, rdrErr, fltrS, rdrExit)
 	}
 	return
 }

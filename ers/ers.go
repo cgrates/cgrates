@@ -44,6 +44,7 @@ func NewERService(cfg *config.CGRConfig, filterS *engine.FilterS,
 		rdrPaths:  make(map[string]string),
 		stopLsn:   make(map[string]chan struct{}),
 		rdrEvents: make(chan *erEvent),
+		rdrErr:    make(chan error),
 		filterS:   filterS,
 		sS:        sS,
 		exitChan:  exitChan,
@@ -58,6 +59,7 @@ type ERService struct {
 	rdrPaths  map[string]string        // used for reloads in case of path changes
 	stopLsn   map[string]chan struct{} // map[rdrID] chan struct{}
 	rdrEvents chan *erEvent            // receive here the events from readers
+	rdrErr    chan error               // receive here errors which should stop the app
 
 	filterS  *engine.FilterS
 	sS       rpcclient.RpcClientConnection // connection towards SessionS
@@ -77,9 +79,14 @@ func (erS *ERService) ListenAndServe(cfgRldChan chan struct{}) (err error) {
 	go erS.handleReloads(cfgRldChan)
 	for {
 		select {
+		case err = <-erS.rdrErr: // got application error
+			utils.Logger.Critical(
+					fmt.Sprintf("<%s> running reader got error: <%s>",
+						utils.ERs, utils.ToIJSON(erEv.cgrEvent), err.Error()))
+			return
 		case e := <-erS.exitChan:
 			erS.exitChan <- e // put back for the others listening for shutdown request
-			break
+			return
 		case erEv := <-erS.rdrEvents:
 			if err := erS.processEvent(erEv.cgrEvent, erEv.rdrCfg); err != nil {
 				utils.Logger.Warning(
@@ -96,8 +103,8 @@ func (erS *ERService) addReader(rdrID string, cfgIdx int) (err error) {
 	erS.stopLsn[rdrID] = make(chan struct{})
 	var rdr EventReader
 	if rdr, err = NewEventReader(erS.cfg, cfgIdx,
-		erS.rdrEvents, erS.filterS,
-		erS.stopLsn[rdrID], erS.exitChan); err != nil {
+		erS.rdrEvents, erS.rdrErr,
+		erS.filterS, erS.stopLsn[rdrID]); err != nil {
 		return
 	}
 	erS.rdrs[rdrID] = rdr

@@ -39,8 +39,8 @@ import (
 )
 
 func NewCSVFileER(cfg *config.CGRConfig, cfgIdx int,
-	rdrEvents chan *erEvent, fltrS *engine.FilterS,
-	rdrExit chan struct{}, appExit chan bool) (er EventReader, err error) {
+	rdrEvents chan *erEvent, rdrErr chan error,
+	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
 	srcPath := cfg.ERsCfg().Readers[cfgIdx].SourcePath
 	if strings.HasSuffix(srcPath, utils.Slash) {
 		srcPath = srcPath[:len(srcPath)-1]
@@ -51,8 +51,8 @@ func NewCSVFileER(cfg *config.CGRConfig, cfgIdx int,
 		fltrS:     fltrS,
 		rdrDir:    srcPath,
 		rdrEvents: rdrEvents,
-		rdrExit:   rdrExit,
-		appExit:   appExit}, nil
+		rdrError:  rdrErr,
+		rdrExit:   rdrExit}, nil
 }
 
 // CSVFileER implements EventReader interface for .csv files
@@ -63,8 +63,8 @@ type CSVFileER struct {
 	fltrS     *engine.FilterS
 	rdrDir    string
 	rdrEvents chan *erEvent // channel to dispatch the events created to
+	rdrError  chan error
 	rdrExit   chan struct{}
-	appExit   chan bool
 	conReqs   chan struct{} // limit number of opened files
 }
 
@@ -80,29 +80,32 @@ func (rdr *CSVFileER) Serve() (err error) {
 		return watchDir(rdr.rdrDir, rdr.processFile,
 			utils.ERs, rdr.rdrExit)
 	default:
-		// Not automated, process and sleep approach
-		for {
-			select {
-			case <-rdr.rdrExit:
-				utils.Logger.Info(
-					fmt.Sprintf("<%s> stop monitoring path <%s>",
-						utils.ERs, rdr.rdrDir))
-				return
-			default:
+		go func() {
+			for {
+				// Not automated, process and sleep approach
+				select {
+				case <-rdr.rdrExit:
+					utils.Logger.Info(
+						fmt.Sprintf("<%s> stop monitoring path <%s>",
+							utils.ERs, rdr.rdrDir))
+					return
+				default:
+				}
+				filesInDir, _ := ioutil.ReadDir(rdr.rdrDir)
+				for _, file := range filesInDir {
+					go func() {
+						if err := rdr.processFile(rdr.rdrDir, file.Name()); err != nil {
+							utils.Logger.Warning(
+								fmt.Sprintf("<%s> processing file %s, error: %s",
+									utils.ERs, file, err.Error()))
+						}
+					}()
+				}
+				time.Sleep(rdr.Config().RunDelay)
 			}
-			filesInDir, _ := ioutil.ReadDir(rdr.rdrDir)
-			for _, file := range filesInDir {
-				go func() {
-					if err := rdr.processFile(rdr.rdrDir, file.Name()); err != nil {
-						utils.Logger.Warning(
-							fmt.Sprintf("<%s> processing file %s, error: %s",
-								utils.ERs, file, err.Error()))
-					}
-				}()
-			}
-			time.Sleep(rdr.Config().RunDelay)
-		}
+		}()
 	}
+	return
 }
 
 // processFile is called for each file in a directory and dispatches erEvents from it
