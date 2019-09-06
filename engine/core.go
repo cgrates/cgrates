@@ -55,31 +55,31 @@ func (cS *CoreService) Status(arg *utils.TenantWithArgDispatcher, reply *map[str
 	response[utils.NodeID] = config.CgrConfig().GeneralCfg().NodeID
 	response[utils.MemoryUsage] = utils.SizeFmt(float64(memstats.HeapAlloc), "")
 	response[utils.ActiveGoroutines] = runtime.NumGoroutine()
-	response[utils.Footprint] = utils.SizeFmt(float64(memstats.Sys), "")
 	response[utils.Version] = utils.GetCGRVersion()
 	response[utils.RunningSince] = utils.GetStartTime()
 	response[utils.GoVersion] = runtime.Version()
-	response["Extra MemInfo"] = map[string]interface{}{
-		"Alloc":       utils.SizeFmt((float64)(memstats.Alloc), ""),
-		"TotalAlloc":  utils.SizeFmt((float64)(memstats.TotalAlloc), ""),
-		"Sys":         utils.SizeFmt((float64)(memstats.Sys), ""),
-		"Mallocs":     utils.SizeFmt((float64)(memstats.Mallocs), ""),
-		"Frees":       utils.SizeFmt((float64)(memstats.Frees), ""),
-		"HeapAlloc":   utils.SizeFmt((float64)(memstats.HeapAlloc), ""),
-		"HeapSys":     utils.SizeFmt((float64)(memstats.HeapSys), ""),
-		"HeapIdle":    utils.SizeFmt((float64)(memstats.HeapIdle), ""),
-		"HeapInuse":   utils.SizeFmt((float64)(memstats.HeapInuse), ""),
-		"StackInuse":  utils.SizeFmt((float64)(memstats.StackInuse), ""),
-		"StackSys":    utils.SizeFmt((float64)(memstats.StackSys), ""),
-		"MSpanInuse":  utils.SizeFmt((float64)(memstats.MSpanInuse), ""),
-		"MSpanSys":    utils.SizeFmt((float64)(memstats.MSpanSys), ""),
-		"MCacheInuse": utils.SizeFmt((float64)(memstats.MCacheInuse), ""),
-		"MCacheSys":   utils.SizeFmt((float64)(memstats.MCacheSys), ""),
-		"BuckHashSys": utils.SizeFmt((float64)(memstats.BuckHashSys), ""),
-		"GCSys":       utils.SizeFmt((float64)(memstats.GCSys), ""),
-		"OtherSys":    utils.SizeFmt((float64)(memstats.OtherSys), ""),
-		"NextGC":      utils.SizeFmt((float64)(memstats.NextGC), ""),
-	}
+	// in case we need this info in the future
+	// response["Extra MemInfo"] = map[string]interface{}{
+	// 	"Alloc":       utils.SizeFmt((float64)(memstats.Alloc), ""),
+	// 	"TotalAlloc":  utils.SizeFmt((float64)(memstats.TotalAlloc), ""),
+	// 	"Sys":         utils.SizeFmt((float64)(memstats.Sys), ""),
+	// 	"Mallocs":     utils.SizeFmt((float64)(memstats.Mallocs), ""),
+	// 	"Frees":       utils.SizeFmt((float64)(memstats.Frees), ""),
+	// 	"HeapAlloc":   utils.SizeFmt((float64)(memstats.HeapAlloc), ""),
+	// 	"HeapSys":     utils.SizeFmt((float64)(memstats.HeapSys), ""),
+	// 	"HeapIdle":    utils.SizeFmt((float64)(memstats.HeapIdle), ""),
+	// 	"HeapInuse":   utils.SizeFmt((float64)(memstats.HeapInuse), ""),
+	// 	"StackInuse":  utils.SizeFmt((float64)(memstats.StackInuse), ""),
+	// 	"StackSys":    utils.SizeFmt((float64)(memstats.StackSys), ""),
+	// 	"MSpanInuse":  utils.SizeFmt((float64)(memstats.MSpanInuse), ""),
+	// 	"MSpanSys":    utils.SizeFmt((float64)(memstats.MSpanSys), ""),
+	// 	"MCacheInuse": utils.SizeFmt((float64)(memstats.MCacheInuse), ""),
+	// 	"MCacheSys":   utils.SizeFmt((float64)(memstats.MCacheSys), ""),
+	// 	"BuckHashSys": utils.SizeFmt((float64)(memstats.BuckHashSys), ""),
+	// 	"GCSys":       utils.SizeFmt((float64)(memstats.GCSys), ""),
+	// 	"OtherSys":    utils.SizeFmt((float64)(memstats.OtherSys), ""),
+	// 	"NextGC":      utils.SizeFmt((float64)(memstats.NextGC), ""),
+	// }
 	*reply = response
 	return
 }
