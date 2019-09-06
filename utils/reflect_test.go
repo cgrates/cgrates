@@ -699,6 +699,8 @@ type TestA struct {
 	StrField string
 }
 
+type TestASlice []*TestA
+
 func (_ *TestA) TestFunc() string {
 	return "This is a test function on a structure"
 }
@@ -708,10 +710,10 @@ func (_ *TestA) TestFuncWithParam(param string) string {
 }
 
 func (_ *TestA) TestFuncWithError() (string, error) {
-	return "TestFunction", nil
+	return "TestFuncWithError", nil
 }
 func (_ *TestA) TestFuncWithError2() (string, error) {
-	return "TestFunction", ErrPartiallyExecuted
+	return "TestFuncWithError2", ErrPartiallyExecuted
 }
 
 func TestReflectFieldMethodInterface(t *testing.T) {
@@ -735,7 +737,11 @@ func TestReflectFieldMethodInterface(t *testing.T) {
 	ifValue, err = ReflectFieldMethodInterface(a, "TestFuncWithError")
 	if err != nil {
 		t.Error(err)
-	} else if ifValue != "TestFunction" {
-		t.Errorf("Expecting: TestFunction, received: %+v", ifValue)
+	} else if ifValue != "TestFuncWithError" {
+		t.Errorf("Expecting: TestFuncWithError, received: %+v", ifValue)
+	}
+	ifValue, err = ReflectFieldMethodInterface(a, "TestFuncWithError2")
+	if err == nil || err != ErrPartiallyExecuted {
+		t.Error(err)
 	}
 }
