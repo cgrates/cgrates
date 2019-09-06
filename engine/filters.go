@@ -610,7 +610,7 @@ func (fS *FilterS) getFieldNameDataProvider(initialDP config.DataProvider, field
 		//same of fieldName : ~*accounts.1001.BalanceMap.*monetary[0].Value
 		// split the field name in 3 parts
 		// fieldNameType (~*accounts), accountID(1001) and quried part (BalanceMap.*monetary[0].Value)
-		splitFldName := strings.SplitN(*fieldName, ".", 3)
+		splitFldName := strings.SplitN(*fieldName, utils.NestingSep, 3)
 		if len(splitFldName) != 3 {
 			return nil, fmt.Errorf("invalid fieldname <%s>", *fieldName)
 		}

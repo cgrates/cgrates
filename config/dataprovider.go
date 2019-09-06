@@ -88,9 +88,9 @@ func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data interface{}, err
 	var prevFld string
 	for _, fld := range fldPath {
 		var slctrStr string
-		if splt := strings.Split(fld, "["); len(splt) != 1 { // check if we have selector
+		if splt := strings.Split(fld, utils.IdxStart); len(splt) != 1 { // check if we have selector
 			fld = splt[0]
-			if splt[1][len(splt[1])-1:] != "]" {
+			if splt[1][len(splt[1])-1:] != utils.IdxEnd {
 				return nil, fmt.Errorf("filter rule <%s> needs to end in ]", splt[1])
 			}
 			slctrStr = splt[1][:len(splt[1])-1] // also strip the last ]
@@ -98,7 +98,7 @@ func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data interface{}, err
 		if prevFld == utils.EmptyString {
 			prevFld += fld
 		} else {
-			prevFld += "." + fld
+			prevFld += utils.NestingSep + fld
 		}
 
 		// check if we take the current path from cache
@@ -115,7 +115,7 @@ func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data interface{}, err
 		// change the obj to be the current data and continue the processing
 		objDP.obj = data
 		if slctrStr != utils.EmptyString { //we have selector so we need to do an aditional get
-			prevFld += "[" + slctrStr + "]"
+			prevFld += utils.IdxStart + slctrStr + utils.IdxEnd
 			// check if we take the current path from cache
 			if data, has = objDP.getCache(prevFld); !has {
 				if data, err = utils.ReflectFieldMethodInterface(objDP.obj, slctrStr); err != nil { // take the object the field for current path
@@ -132,7 +132,7 @@ func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data interface{}, err
 
 	}
 	//add in cache the initial path
-	objDP.setCache(strings.Join(fldPath, "."), data)
+	objDP.setCache(strings.Join(fldPath, utils.NestingSep), data)
 	return
 }
 
