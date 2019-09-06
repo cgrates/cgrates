@@ -562,8 +562,8 @@ func ReflectFieldMethodInterface(obj interface{}, fldName string) (retIf interfa
 		if err != nil {
 			return nil, err
 		}
-		if idx > v.Len() {
-			return nil, fmt.Errorf("out of range")
+		if idx > v.Len()-1 {
+			return nil, fmt.Errorf("index out of range")
 		}
 		field = v.Index(idx)
 	default:
@@ -582,12 +582,17 @@ func ReflectFieldMethodInterface(obj interface{}, fldName string) (retIf interfa
 			if field.Type().NumOut() > 2 {
 				return nil, fmt.Errorf("invalid function called")
 			}
-			errorInterface := reflect.TypeOf((*error)(nil)).Elem()
-			if !field.Type().Out(1).Implements(errorInterface) {
-				return nil, fmt.Errorf("invalid function called")
+			// the function have two parameters in return and check if the second is of type error
+			if field.Type().NumOut() == 2 {
+				errorInterface := reflect.TypeOf((*error)(nil)).Elem()
+				if !field.Type().Out(1).Implements(errorInterface) {
+					return nil, fmt.Errorf("invalid function called")
+				}
 			}
 			fields := field.Call([]reflect.Value{})
-			//verify if error is not nil
+			if len(fields) == 2 && !fields[1].IsNil() {
+				return fields[0].Interface(), fields[1].Interface().(error)
+			}
 			return fields[0].Interface(), nil
 		}
 	}

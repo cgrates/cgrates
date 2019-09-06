@@ -126,7 +126,7 @@ func (fS *FilterS) Pass(tenant string, filterIDs []string,
 			continue
 		}
 		for _, fltr := range f.Rules {
-			fieldNameDP, err = fS.getFieldNameDataProvider(ev, fltr.FieldName, tenant)
+			fieldNameDP, err = fS.getFieldNameDataProvider(ev, &fltr.FieldName, tenant)
 			if err != nil {
 				return pass, err
 			}
@@ -186,10 +186,10 @@ func (f *Filter) Compile() (err error) {
 }
 
 var supportedFiltersType *utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix, utils.MetaSuffix,
-	utils.MetaTimings, utils.MetaRSR, utils.MetaStatS, utils.MetaDestinations,
+	utils.MetaTimings, utils.MetaRSR, utils.MetaDestinations,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessThan, utils.MetaLessOrEqual,
-	utils.MetaGreaterThan, utils.MetaGreaterOrEqual, utils.MetaResources, utils.MetaEqual,
-	utils.MetaAccount, utils.MetaNotEqual})
+	utils.MetaGreaterThan, utils.MetaGreaterOrEqual, utils.MetaEqual,
+	utils.MetaNotEqual})
 var needsFieldName *utils.StringSet = utils.NewStringSet([]string{utils.MetaString, utils.MetaPrefix,
 	utils.MetaSuffix, utils.MetaTimings, utils.MetaDestinations, utils.MetaLessThan,
 	utils.MetaEmpty, utils.MetaExists, utils.MetaLessOrEqual, utils.MetaGreaterThan,
@@ -285,24 +285,6 @@ func (rf *FilterRule) CompileValues() (err error) {
 			// valSplt[1] id of the AccountID.FieldToUsed
 			// valSplt[2] value to compare
 			rf.resourceItems[i] = &itemFilter{
-				FilterType:  valSplt[0],
-				ItemID:      valSplt[1],
-				FilterValue: valSplt[2],
-			}
-		}
-	case utils.MetaAccount:
-		//value for filter of type *accounts needs to be in the following form:
-		//*gt:AccountID:ValueOfUsage
-		rf.accountItems = make([]*itemFilter, len(rf.Values))
-		for i, val := range rf.Values {
-			valSplt := strings.Split(val, utils.InInFieldSep)
-			if len(valSplt) != 3 {
-				return fmt.Errorf("Value %s needs to contain at least 3 items", val)
-			}
-			// valSplt[0] filter type
-			// valSplt[1] id of the Resource
-			// valSplt[2] value to compare
-			rf.accountItems[i] = &itemFilter{
 				FilterType:  valSplt[0],
 				ItemID:      valSplt[1],
 				FilterValue: valSplt[2],
@@ -597,38 +579,6 @@ func (fltr *FilterRule) passGreaterThan(fielNameDP config.DataProvider, fieldVal
 // 	return true, nil
 // }
 
-// func (fltr *FilterRule) passAccountS(dP config.DataProvider,
-// 	accountS rpcclient.RpcClientConnection, tenant string) (bool, error) {
-// 	if accountS == nil || reflect.ValueOf(accountS).IsNil() {
-// 		return false, errors.New("Missing AccountS information")
-// 	}
-// 	for _, accItem := range fltr.accountItems {
-// 		//split accItem.ItemID in two accountID and actual filter
-// 		//AccountID.BalanceMap.*monetary[0].Value
-// 		splittedString := strings.SplitN(accItem.ItemID, utils.NestingSep, 2)
-// 		accID := splittedString[0]
-// 		filterID := splittedString[1]
-// 		var reply Account
-// 		if err := accountS.Call(utils.ApierV2GetAccount,
-// 			&utils.AttrGetAccount{Tenant: tenant, Account: accID}, &reply); err != nil {
-// 			return false, err
-// 		}
-// 		//compose the newFilter
-// 		fltr, err := NewFilterRule(accItem.FilterType,
-// 			utils.DynamicDataPrefix+filterID, []string{accItem.FilterValue})
-// 		if err != nil {
-// 			return false, err
-// 		}
-// 		dP, _ := reply.AsNavigableMap(nil)
-// 		if val, err := fltr.Pass(dP, nil, tenant); err != nil || !val {
-// 			//in case of error return false and error
-// 			//and in case of not pass return false and nil
-// 			return false, err
-// 		}
-// 	}
-// 	return true, nil
-// }
-
 func (fltr *FilterRule) passEqualTo(fielNameDP config.DataProvider, fieldValuesDP []config.DataProvider) (bool, error) {
 	fldIf, err := config.GetDynamicInterface(fltr.FieldName, fielNameDP)
 	if err != nil {
@@ -654,41 +604,39 @@ func (fltr *FilterRule) passEqualTo(fielNameDP config.DataProvider, fieldValuesD
 	return false, nil
 }
 
-func (fS *FilterS) getFieldNameDataProvider(initialDP config.DataProvider, fieldName string, tenant string) (dp config.DataProvider, err error) {
+func (fS *FilterS) getFieldNameDataProvider(initialDP config.DataProvider, fieldName *string, tenant string) (dp config.DataProvider, err error) {
 	switch {
-	case strings.HasPrefix(fieldName, utils.MetaAccounts):
-		//construct dataProvider from account and set it furthder
+	case strings.HasPrefix(*fieldName, utils.DynamicDataPrefix+utils.MetaAccounts):
+		//same of fieldName : ~*accounts.1001.BalanceMap.*monetary[0].Value
+		// split the field name in 3 parts
+		// fieldNameType (~*accounts), accountID(1001) and quried part (BalanceMap.*monetary[0].Value)
+		splitFldName := strings.SplitN(*fieldName, ".", 3)
+		if len(splitFldName) != 3 {
+			return nil, fmt.Errorf("invalid fieldname <%s>", *fieldName)
+		}
 		var account *Account
-		//extract the AccountID from fieldName
 		if err = fS.ralSConns.Call(utils.ApierV2GetAccount,
-			&utils.AttrGetAccount{Tenant: tenant, Account: "completeHereWithID"}, &account); err != nil {
+			&utils.AttrGetAccount{Tenant: tenant, Account: splitFldName[1]}, &account); err != nil {
 			return
 		}
+		//construct dataProvider from account and set it furthder
 		dp = config.NewObjectDP(account)
-	case strings.HasPrefix(fieldName, utils.MetaResources):
-	case strings.HasPrefix(fieldName, utils.MetaStats):
+		// remove from fieldname the fielNameType and the AccountID
+		*fieldName = utils.DynamicDataPrefix + splitFldName[2]
+	case strings.HasPrefix(*fieldName, utils.DynamicDataPrefix+utils.MetaResources):
+	case strings.HasPrefix(*fieldName, utils.DynamicDataPrefix+utils.MetaStats):
 	default:
 		dp = initialDP
 	}
 	return
 }
 
-func (fS *FilterS) getFieldValueDataProviders(initialDP config.DataProvider, values []string, tenant string) (dp []config.DataProvider, err error) {
+func (fS *FilterS) getFieldValueDataProviders(initialDP config.DataProvider,
+	values []string, tenant string) (dp []config.DataProvider, err error) {
 	dp = make([]config.DataProvider, len(values))
-	for i, val := range values {
-		switch {
-		case strings.HasPrefix(val, utils.MetaAccounts):
-			var account *Account
-			//extract the AccountID from fieldName
-			if err = fS.ralSConns.Call(utils.ApierV2GetAccount,
-				&utils.AttrGetAccount{Tenant: tenant, Account: "completeHereWithID"}, &account); err != nil {
-				return
-			}
-			dp[i] = config.NewObjectDP(account)
-		case strings.HasPrefix(val, utils.MetaResources):
-		case strings.HasPrefix(val, utils.MetaStats):
-		default:
-			dp[i] = initialDP
+	for i := range values {
+		if dp[i], err = fS.getFieldNameDataProvider(initialDP, &values[i], tenant); err != nil {
+			return
 		}
 	}
 	return

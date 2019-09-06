@@ -48,11 +48,11 @@ var sTestsFltr = []func(t *testing.T){
 	testV1FltrStartEngine,
 	testV1FltrRpcConn,
 	testV1FltrLoadTarrifPlans,
-	testV1FltrAddStats,
-	testV1FltrPupulateThreshold,
-	testV1FltrGetThresholdForEvent,
-	testV1FltrGetThresholdForEvent2,
-	testV1FltrPopulateResources,
+	//testV1FltrAddStats,
+	//testV1FltrPupulateThreshold,
+	//testV1FltrGetThresholdForEvent,
+	//testV1FltrGetThresholdForEvent2,
+	//testV1FltrPopulateResources,
 	testV1FltrAccounts,
 	testV1FltrStopEngine,
 }
@@ -519,15 +519,17 @@ func testV1FltrAccounts(t *testing.T) {
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	//Add a filter of type *accounts and check if *monetary balance of account 1001 is minim 9 ( greater than 9)
-	//we expect that the balance to be 10 so the filter should pass (10 > 9)
+	// Add a filter with fieldName taken value from account 1001
+	// and check if *monetary balance is minim 9 ( greater than 9)
+	// we expect that the balance to be 10 so the filter should pass (10 > 9)
 	filter := &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_TH_Accounts",
 		Rules: []*engine.FilterRule{
 			{
-				Type:   "*account",
-				Values: []string{"*gt:1001.BalanceMap.*monetary[0].Value:9"},
+				Type:      "*gt",
+				FieldName: "~*accounts.1001.BalanceMap.*monetary[0].Value",
+				Values:    []string{"9"},
 			},
 		},
 	}
@@ -538,7 +540,16 @@ func testV1FltrAccounts(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-
+	// Add a log action
+	attrsAA := &utils.AttrSetActions{ActionsId: "LOG", Actions: []*utils.TPAction{
+		{Identifier: utils.LOG},
+	}}
+	if err := fltrRpc.Call("ApierV2.SetActions", attrsAA, &result); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error("Got error on ApierV2.SetActions: ", err.Error())
+	} else if result != utils.OK {
+		t.Errorf("Calling ApierV2.SetActions received: %s", result)
+	}
+	time.Sleep(10 * time.Millisecond)
 	//Add a threshold with filter from above and an inline filter for Account 1010
 	tPrfl := &engine.ThresholdProfile{
 		Tenant:    "cgrates.org",
@@ -581,15 +592,17 @@ func testV1FltrAccounts(t *testing.T) {
 	}
 
 	// update the filter
-	//Add a filter of type *accounts and check if *monetary balance of account 1001 is minim 11 ( greater than 11)
-	//we expect that the balance to be 10 so the filter should not pass (10 > 11)
+	// Add a filter with fieldName taken value from account 1001
+	// and check if *monetary balance is is minim 11 ( greater than 11)
+	// we expect that the balance to be 10 so the filter should not pass (10 > 11)
 	filter = &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_TH_Accounts",
 		Rules: []*engine.FilterRule{
 			{
-				Type:   "*account",
-				Values: []string{"*gt:1001.BalanceMap.*monetary[0].Value:11"},
+				Type:      "*gt",
+				FieldName: "~*accounts.1001.BalanceMap.*monetary[0].Value",
+				Values:    []string{"11"},
 			},
 		},
 	}

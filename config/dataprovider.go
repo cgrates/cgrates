@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"net"
 	"strings"
 
@@ -52,13 +53,22 @@ func GetDynamicString(dnVal string, dP DataProvider) (string, error) {
 
 //NewObjectDP constructs a DataProvider
 func NewObjectDP(obj interface{}) (dP DataProvider) {
-	dP = &ObjectDP{obj: obj, cache: NewNavigableMap(nil)}
+	dP = &ObjectDP{obj: obj, cache: make(map[string]interface{})}
 	return
 }
 
 type ObjectDP struct {
 	obj   interface{}
-	cache *NavigableMap
+	cache map[string]interface{}
+}
+
+func (objDp *ObjectDP) setCache(path string, val interface{}) {
+	objDp.cache[path] = val
+}
+
+func (objDp *ObjectDP) getCache(path string) (val interface{}, has bool) {
+	val, has = objDp.cache[path]
+	return
 }
 
 // String is part of engine.DataProvider interface
@@ -70,16 +80,59 @@ func (objDP *ObjectDP) String() string {
 // FieldAsInterface is part of engine.DataProvider interface
 func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
 	// []string{ BalanceMap *monetary[0] Value }
-	if data, err = objDP.cache.FieldAsInterface(fldPath); err == nil ||
-		err != utils.ErrNotFound { // item found in cache
+	var has bool
+	if data, has = objDP.getCache(strings.Join(fldPath, ".")); has {
 		return
 	}
-	err = nil // cancel previous err
-	// for _, fld := range fldPath {
 
-	// 	//process each field
-	// }
-	objDP.cache.Set(fldPath, data, false, false)
+	var prevFld string
+	for _, fld := range fldPath {
+		var slctrStr string
+		if splt := strings.Split(fld, "["); len(splt) != 1 { // check if we have selector
+			fld = splt[0]
+			if splt[1][len(splt[1])-1:] != "]" {
+				return nil, fmt.Errorf("filter rule <%s> needs to end in ]", splt[1])
+			}
+			slctrStr = splt[1][:len(splt[1])-1] // also strip the last ]
+		}
+		if prevFld == utils.EmptyString {
+			prevFld += fld
+		} else {
+			prevFld += "." + fld
+		}
+
+		// check if we take the current path from cache
+		if data, has = objDP.getCache(prevFld); !has {
+			if data, err = utils.ReflectFieldMethodInterface(objDP.obj, fld); err != nil { // take the object the field for current path
+				// in case of error set nil for the current path and return err
+				objDP.setCache(prevFld, nil)
+				return nil, err
+			}
+			// add the current field in prevFld so we can set in cache the full path with it's data
+			objDP.setCache(prevFld, data)
+		}
+
+		// change the obj to be the current data and continue the processing
+		objDP.obj = data
+		if slctrStr != utils.EmptyString { //we have selector so we need to do an aditional get
+			prevFld += "[" + slctrStr + "]"
+			// check if we take the current path from cache
+			if data, has = objDP.getCache(prevFld); !has {
+				if data, err = utils.ReflectFieldMethodInterface(objDP.obj, slctrStr); err != nil { // take the object the field for current path
+					// in case of error set nil for the current path and return err
+					objDP.setCache(prevFld, nil)
+					return nil, err
+				}
+				// add the current field in prevFld so we can set in cache the full path with it's data
+				objDP.setCache(prevFld, data)
+			}
+			// change the obj to be the current data and continue the processing
+			objDP.obj = data
+		}
+
+	}
+	//add in cache the initial path
+	objDP.setCache(strings.Join(fldPath, "."), data)
 	return
 }
 
