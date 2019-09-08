@@ -479,9 +479,12 @@ func TestCDRsOnExpKafkaPosterFileFailover(t *testing.T) {
 	failoverContent := [][]byte{[]byte(`{"CGRID":"57548d485d61ebcba55afbe5d939c82a8e9ff670"}`), []byte(`{"CGRID":"88ed9c38005f07576a1e1af293063833b60edcc6"}`)}
 
 	reader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers: []string{"localhost:9092"},
-		Topic:   "cgrates_cdrs",
-		GroupID: "tmp",
+		Brokers:          []string{"localhost:9092"},
+		Topic:            "cgrates_cdrs",
+		GroupID:          "tmp",
+		MinBytes:         10e3, // 10KB
+		MaxBytes:         10e6, // 10MB
+		RebalanceTimeout: 1,
 	})
 
 	defer reader.Close()

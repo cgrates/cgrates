@@ -140,6 +140,8 @@ github.com/prometheus/procfs v0.0.0-20190117184657-bf6a532e95b1/go.mod h1:c3At6R
 github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
 github.com/segmentio/kafka-go v0.2.6-0.20190708214315-03ea927bad14 h1:PR5Jl7oQea/vTqr+cS+w1SX8s0txlCxbhL823uSu4Lo=
 github.com/segmentio/kafka-go v0.2.6-0.20190708214315-03ea927bad14/go.mod h1:/D8aoUTJYhf4JKa28ZKxIZszXialN+H5b1Deh224FS4=
+github.com/segmentio/kafka-go v0.3.3 h1:V4Ou5vOe0HXux6G/ZdheugcvgmSRFG3IA69btTGrYdo=
+github.com/segmentio/kafka-go v0.3.3/go.mod h1:OT5KXBPbaJJTcvokhWR2KFmm0niEx3mnccTwjmLvSi4=
 github.com/sirupsen/logrus v1.2.0/go.mod h1:LxeOpSwHxABJmUn/MG1IvRgCAasNZTLOkJPxbbu5VWo=
 github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94 h1:0ngsPmuP6XIjiFRNFYlvKwSr5zff2v+uPHaffZ6/M4k=
 github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94/go.mod h1:AZpEONHx3DKn8O/DFsRAY58/XVQiIPMTMB1SddzLXVw=

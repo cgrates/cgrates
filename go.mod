@@ -37,7 +37,7 @@ require (
 	github.com/nyaruka/phonenumbers v1.0.43
 	github.com/peterh/liner v1.1.1-0.20190305032635-6f820f8f90ce
 	github.com/pkg/errors v0.8.2-0.20190227000051-27936f6d90f9
-	github.com/segmentio/kafka-go v0.2.6-0.20190708214315-03ea927bad14
+	github.com/segmentio/kafka-go v0.3.3
 	github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94
 	github.com/ugorji/go v0.0.0-20171112025056-5a66da2e74af
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c

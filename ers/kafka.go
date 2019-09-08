@@ -45,8 +45,8 @@ const (
 )
 
 func NewKafkaER(cfg *config.CGRConfig, cfgIdx int,
-	rdrEvents chan *erEvent, fltrS *engine.FilterS,
-	rdrExit chan struct{}, appExit chan bool) (er EventReader, err error) {
+	rdrEvents chan *erEvent, rdrErr chan error,
+	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
 
 	rdr := &KafkaER{
 		cgrCfg:    cfg,
@@ -54,8 +54,9 @@ func NewKafkaER(cfg *config.CGRConfig, cfgIdx int,
 		fltrS:     fltrS,
 		rdrEvents: rdrEvents,
 		rdrExit:   rdrExit,
-		appExit:   appExit,
+		rdrErr:    rdrErr,
 	}
+	er = rdr
 	err = rdr.setUrl(rdr.Config().SourcePath)
 	return
 }
@@ -73,7 +74,7 @@ type KafkaER struct {
 
 	rdrEvents chan *erEvent // channel to dispatch the events created to
 	rdrExit   chan struct{}
-	appExit   chan bool
+	rdrErr    chan error
 }
 
 func (rdr *KafkaER) Config() *config.EventReaderCfg {
@@ -82,11 +83,12 @@ func (rdr *KafkaER) Config() *config.EventReaderCfg {
 
 func (rdr *KafkaER) Serve() (err error) {
 	r := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:  []string{rdr.dialURL},
-		GroupID:  rdr.groupID,
-		Topic:    rdr.topic,
-		MinBytes: 10e3, // 10KB
-		MaxBytes: 10e6, // 10MB
+		Brokers:          []string{rdr.dialURL},
+		GroupID:          rdr.groupID,
+		Topic:            rdr.topic,
+		MinBytes:         10e3, // 10KB
+		MaxBytes:         10e6, // 10MB
+		RebalanceTimeout: time.Second,
 	})
 
 	if rdr.Config().RunDelay == time.Duration(0) { // 0 disables the automatic read, maybe done per API
@@ -106,10 +108,14 @@ func (rdr *KafkaER) Serve() (err error) {
 	go func(r *kafka.Reader) { // read until the conection is closed
 		for {
 			msg, err := r.ReadMessage(context.Background())
-			if err != nil && err != io.EOF { // ignore io.EOF received from closing the connection
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> processing message error: %s",
-						utils.ERs, err.Error()))
+			if err != nil {
+				if err == io.EOF {
+					// ignore io.EOF received from closing the connection from our side
+					// this is happening when we stop the reader
+					return
+				}
+				//  send it to the error channel
+				rdr.rdrErr <- err
 				return
 			}
 			if err := rdr.processMessage(msg.Value); err != nil {

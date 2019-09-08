@@ -41,7 +41,7 @@ func NewEventReader(cfg *config.CGRConfig, cfgIdx int,
 	case utils.MetaFileCSV:
 		return NewCSVFileER(cfg, cfgIdx, rdrEvents, rdrErr, fltrS, rdrExit)
 	case utils.MetaKafkajsonMap:
-		return NewKafkaER(cfg, cfgIdx, rdrEvents, fltrS, rdrExit, appExit)
+		return NewKafkaER(cfg, cfgIdx, rdrEvents, rdrErr, fltrS, rdrExit)
 	}
 	return
 }
