@@ -24,10 +24,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net"
 	"os"
 	"path"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -142,7 +140,7 @@ func (rdr *CSVFileER) processFile(fPath, fName string) (err error) {
 		}
 		rowNr++ // increment the rowNr after checking if it's not the end of file
 		agReq := agents.NewAgentRequest(
-			newCsvProvider(record), reqVars,
+			config.NewSliceDP(record), reqVars,
 			nil, nil, rdr.Config().Tenant,
 			rdr.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(rdr.Config().Timezone,
@@ -176,62 +174,4 @@ func (rdr *CSVFileER) processFile(fPath, fName string) (err error) {
 		fmt.Sprintf("%s finished processing file <%s>. Total records processed: %d, events posted: %d, run duration: %s",
 			utils.ERs, absPath, rowNr, evsPosted, time.Now().Sub(timeStart)))
 	return
-}
-
-// newCsvProvider constructs a DataProvider
-func newCsvProvider(record []string) (dP config.DataProvider) {
-	dP = &csvProvider{req: record, cache: config.NewNavigableMap(nil)}
-	return
-}
-
-// csvProvider implements engine.DataProvider so we can pass it to filters
-type csvProvider struct {
-	req   []string
-	cache *config.NavigableMap
-}
-
-// String is part of engine.DataProvider interface
-// when called, it will display the already parsed values out of cache
-func (cP *csvProvider) String() string {
-	return utils.ToJSON(cP)
-}
-
-// FieldAsInterface is part of engine.DataProvider interface
-func (cP *csvProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
-	if len(fldPath) != 1 {
-		return nil, utils.ErrNotFound
-	}
-	if data, err = cP.cache.FieldAsInterface(fldPath); err == nil ||
-		err != utils.ErrNotFound { // item found in cache
-		return
-	}
-	err = nil // cancel previous err
-	if cfgFieldIdx, err := strconv.Atoi(fldPath[0]); err != nil || len(cP.req) <= cfgFieldIdx {
-		return nil, fmt.Errorf("Ignoring record: %v with error : %+v", cP.req, err)
-	} else {
-		data = cP.req[cfgFieldIdx]
-	}
-	cP.cache.Set(fldPath, data, false, false)
-	return
-}
-
-// FieldAsString is part of engine.DataProvider interface
-func (cP *csvProvider) FieldAsString(fldPath []string) (data string, err error) {
-	var valIface interface{}
-	valIface, err = cP.FieldAsInterface(fldPath)
-	if err != nil {
-		return
-	}
-	return utils.IfaceAsString(valIface), nil
-}
-
-// AsNavigableMap is part of engine.DataProvider interface
-func (cP *csvProvider) AsNavigableMap([]*config.FCTemplate) (
-	nm *config.NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// RemoteHost is part of engine.DataProvider interface
-func (cP *csvProvider) RemoteHost() net.Addr {
-	return utils.LocalAddr()
 }

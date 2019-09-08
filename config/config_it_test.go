@@ -19,13 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package config
 
-import (
-	"reflect"
-	"testing"
-
-	"github.com/cgrates/cgrates/utils"
-)
-
 // func TestNewCgrJsonCfgFromHttp(t *testing.T) {
 // 	addr := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/tutmongo/cgrates.json"
 // 	expVal, err := NewCgrJsonCfgFromFile(path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo", "cgrates.json"))
@@ -69,6 +62,7 @@ import (
 
 // }
 
+/* Needs to be rewritten with a static config
 func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
 	expected := map[string]interface{}{
 		"Enabled": true,
@@ -122,3 +116,4 @@ func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
+*/

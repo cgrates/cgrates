@@ -14,6 +14,9 @@ en=$?
 echo 'go test github.com/cgrates/cgrates/cdrc -tags=integration'
 go test github.com/cgrates/cgrates/cdrc -tags=integration
 cdrc=$?
+echo 'go test github.com/cgrates/cgrates/ers -tags=integration'
+go test github.com/cgrates/cgrates/ers -tags=integration
+ers=$?
 echo 'go test github.com/cgrates/cgrates/config -tags=integration'
 go test github.com/cgrates/cgrates/config -tags=integration
 cfg=$?
@@ -39,4 +42,4 @@ echo 'go test github.com/cgrates/cgrates/loaders -tags=integration'
 go test github.com/cgrates/cgrates/loaders -tags=integration
 lds=$?
 
-exit $gen && $ap1 && $ap2 && $en && $cdrc && $cfg && $utl && $gnr && $agts && $smg && $mgr && $dis && $lds
+exit $gen && $ap1 && $ap2 && $en && $cdrc && $cfg && $utl && $gnr && $agts && $smg && $mgr && $dis && $lds && $ers

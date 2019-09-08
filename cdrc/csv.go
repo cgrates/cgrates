@@ -22,7 +22,6 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"net"
 	"strconv"
 	"strings"
 
@@ -108,7 +107,7 @@ func (self *CsvRecordsProcessor) processFlatstoreRecord(record []string) ([]stri
 
 // Takes the record from a slice and turns it into StoredCdrs, posting them to the cdrServer
 func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, error) {
-	csvProvider := newCsvProvider(record)
+	csvProvider := config.NewSliceDP(record)
 	recordCdrs := make([]*engine.CDR, 0)    // More CDRs based on the number of filters and field templates
 	for _, cdrcCfg := range self.cdrcCfgs { // cdrFields coming from more templates will produce individual storCdr records
 		tenant, err := cdrcCfg.Tenant.ParseDataProvider(csvProvider, utils.NestingSep) // each profile of cdrc can have different tenant
@@ -147,7 +146,7 @@ func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, 
 func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *config.CdrcCfg, tenant string) (*engine.CDR, error) {
 	storedCdr := &engine.CDR{OriginHost: "0.0.0.0", Source: cdrcCfg.CdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
 	var err error
-	csvProvider := newCsvProvider(record) // used for filterS and for RSRParsers
+	csvProvider := config.NewSliceDP(record) // used for filterS and for RSRParsers
 	var lazyHttpFields []*config.FCTemplate
 	fldVals := make(map[string]string)
 	for _, cdrFldCfg := range cdrcCfg.ContentFields {
@@ -223,62 +222,4 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 		}
 	}
 	return storedCdr, nil
-}
-
-// newCsvProvider constructs a DataProvider
-func newCsvProvider(record []string) (dP config.DataProvider) {
-	dP = &csvProvider{req: record, cache: config.NewNavigableMap(nil)}
-	return
-}
-
-// csvProvider implements engine.DataProvider so we can pass it to filters
-type csvProvider struct {
-	req   []string
-	cache *config.NavigableMap
-}
-
-// String is part of engine.DataProvider interface
-// when called, it will display the already parsed values out of cache
-func (cP *csvProvider) String() string {
-	return utils.ToJSON(cP)
-}
-
-// FieldAsInterface is part of engine.DataProvider interface
-func (cP *csvProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
-	if len(fldPath) != 1 {
-		return nil, utils.ErrNotFound
-	}
-	if data, err = cP.cache.FieldAsInterface(fldPath); err == nil ||
-		err != utils.ErrNotFound { // item found in cache
-		return
-	}
-	err = nil // cancel previous err
-	if cfgFieldIdx, err := strconv.Atoi(fldPath[0]); err != nil || len(cP.req) <= cfgFieldIdx {
-		return nil, fmt.Errorf("Ignoring record: %v with error : %+v", cP.req, err)
-	} else {
-		data = cP.req[cfgFieldIdx]
-	}
-	cP.cache.Set(fldPath, data, false, false)
-	return
-}
-
-// FieldAsString is part of engine.DataProvider interface
-func (cP *csvProvider) FieldAsString(fldPath []string) (data string, err error) {
-	var valIface interface{}
-	valIface, err = cP.FieldAsInterface(fldPath)
-	if err != nil {
-		return
-	}
-	return utils.IfaceAsString(valIface), nil
-}
-
-// AsNavigableMap is part of engine.DataProvider interface
-func (cP *csvProvider) AsNavigableMap([]*config.FCTemplate) (
-	nm *config.NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// RemoteHost is part of engine.DataProvider interface
-func (cP *csvProvider) RemoteHost() net.Addr {
-	return utils.LocalAddr()
 }
