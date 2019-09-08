@@ -37,7 +37,7 @@ import (
 
 const (
 	defaultTopic   = "cgrates_cdrc"
-	defaultGroupID = "cgrates_conumer"
+	defaultGroupID = "cgrates_consumer"
 
 	// ToDo: export it to utils
 	topic   = "topic"
