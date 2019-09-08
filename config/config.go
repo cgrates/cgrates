@@ -685,6 +685,9 @@ func (self *CGRConfig) checkConfigSanity() error {
 			if !poisbleReaderType.Has(rdr.Type) {
 				return fmt.Errorf("<%s> unsupported data type: %s for reader with ID: %s", utils.ERs, rdr.Type, rdr.ID)
 			}
+			if rdr.FieldSep == utils.EmptyString {
+				return fmt.Errorf("<%s> empty FieldSep for reader with ID: %s", utils.ERs, rdr.ID)
+			}
 		}
 	}
 
