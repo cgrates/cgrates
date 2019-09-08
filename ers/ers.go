@@ -191,7 +191,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 	case utils.MetaDryRun:
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> DRYRUN, reader: <%s>, CGREvent: <%s>",
-				utils.DNSAgent, rdrCfg.ID, utils.ToJSON(cgrEv)))
+				utils.ERs, rdrCfg.ID, utils.ToJSON(cgrEv)))
 	case utils.MetaAuth:
 		authArgs := sessions.NewV1AuthorizeArgs(
 			rdrCfg.Flags.HasKey(utils.MetaAttributes),
