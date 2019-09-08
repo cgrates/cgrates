@@ -133,7 +133,6 @@ func (rdr *CSVFileER) processFile(fPath, fName string) (err error) {
 	timeStart := time.Now()
 	reqVars := make(map[string]interface{})
 	for {
-		rowNr++
 		var record []string
 		if record, err = csvReader.Read(); err != nil {
 			if err == io.EOF {
@@ -141,8 +140,9 @@ func (rdr *CSVFileER) processFile(fPath, fName string) (err error) {
 			}
 			return
 		}
+		rowNr++ // increment the rowNr after checking if it's not the end of file
 		agReq := agents.NewAgentRequest(
-			&csvProvider{req: record}, reqVars,
+			newCsvProvider(record), reqVars,
 			nil, nil, rdr.Config().Tenant,
 			rdr.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(rdr.Config().Timezone,
@@ -175,6 +175,12 @@ func (rdr *CSVFileER) processFile(fPath, fName string) (err error) {
 	utils.Logger.Info(
 		fmt.Sprintf("%s finished processing file <%s>. Total records processed: %d, events posted: %d, run duration: %s",
 			utils.ERs, absPath, rowNr, evsPosted, time.Now().Sub(timeStart)))
+	return
+}
+
+// newCsvProvider constructs a DataProvider
+func newCsvProvider(record []string) (dP config.DataProvider) {
+	dP = &csvProvider{req: record, cache: config.NewNavigableMap(nil)}
 	return
 }
 
