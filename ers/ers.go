@@ -80,9 +80,9 @@ func (erS *ERService) ListenAndServe(cfgRldChan chan struct{}) (err error) {
 	for {
 		select {
 		case err = <-erS.rdrErr: // got application error
-			utils.Logger.Critical(
-					fmt.Sprintf("<%s> running reader got error: <%s>",
-						utils.ERs, utils.ToIJSON(erEv.cgrEvent), err.Error()))
+			utils.Logger.Crit(
+				fmt.Sprintf("<%s> running reader got error: <%s>",
+					utils.ERs, err.Error()))
 			return
 		case e := <-erS.exitChan:
 			erS.exitChan <- e // put back for the others listening for shutdown request
