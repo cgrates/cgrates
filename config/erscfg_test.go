@@ -215,3 +215,24 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 	}
 
 }
+
+func TestEventReaderSanitisation(t *testing.T) {
+	cfgJSONStr := `{
+"ers": {
+	"enabled": true,
+	"readers": [
+		{
+			"id": "file_reader1",
+			"run_delay": -1,
+			"type": "*file_csv",
+			"source_path": "/tmp/ers/in",
+			"processed_path": "/tmp/ers/out",
+		},
+	],
+}
+}`
+
+	if _, err := NewCGRConfigFromJsonStringWithDefaults(cfgJSONStr); err != nil {
+		t.Error(err)
+	}
+}

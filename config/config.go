@@ -306,6 +306,8 @@ var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
 	utils.MetaSuppliers, utils.MetaThresholds, utils.MetaChargers,
 	utils.MetaDispatchers, utils.MetaDispatcherHosts})
 
+var poisbleReaderType = utils.NewStringSet([]string{utils.MetaFileCSV})
+
 func (self *CGRConfig) checkConfigSanity() error {
 	// Rater checks
 	if self.ralsCfg.RALsEnabled && !self.dispatcherSCfg.Enabled {
@@ -664,6 +666,28 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
+	// EventReader sanity checks
+	if self.ersCfg.Enabled {
+		if !self.sessionSCfg.Enabled {
+			for _, connCfg := range self.ersCfg.SessionSConns {
+				if connCfg.Address == utils.MetaInternal {
+					return errors.New("SessionS not enabled but requested by EventReader component.")
+				}
+			}
+		}
+		for _, rdr := range self.ersCfg.Readers {
+			for _, dir := range []string{rdr.ProcessedPath, rdr.SourcePath} {
+				if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
+					return fmt.Errorf("<%s> Nonexistent folder: %s for reader with ID: %s", utils.ERs, dir, rdr.ID)
+				}
+			}
+
+			if !poisbleReaderType.Has(rdr.Type) {
+				return fmt.Errorf("<%s> unsupported data type: %s for reader with ID: %s", utils.ERs, rdr.Type, rdr.ID)
+			}
+		}
+	}
+
 	return nil
 }
 

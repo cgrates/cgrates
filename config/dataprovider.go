@@ -81,7 +81,7 @@ func (objDP *ObjectDP) String() string {
 func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
 	// []string{ BalanceMap *monetary[0] Value }
 	var has bool
-	if data, has = objDP.getCache(strings.Join(fldPath, ".")); has {
+	if data, has = objDP.getCache(strings.Join(fldPath, utils.NestingSep)); has {
 		return
 	}
 
