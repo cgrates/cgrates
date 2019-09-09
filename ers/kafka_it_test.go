@@ -97,7 +97,7 @@ func TestKafkaER(t *testing.T) {
 	case ev := <-rdrEvents:
 		// fmt.Printf("It took %s to proccess the message.\n", time.Now().Sub(tStart))
 		if ev.rdrCfg.ID != "kafka" {
-			t.Errorf("Expected ....")
+			t.Errorf("Expected 'kakfa' received `%s`", ev.rdrCfg.ID)
 		}
 		expected := &utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -110,7 +110,6 @@ func TestKafkaER(t *testing.T) {
 		if !reflect.DeepEqual(ev.cgrEvent, expected) {
 			t.Errorf("Expected %s ,received %s", utils.ToJSON(expected), utils.ToJSON(ev.cgrEvent))
 		}
-
 	case <-time.After(30 * time.Second):
 		t.Errorf("Timeout")
 	}

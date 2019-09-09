@@ -117,8 +117,8 @@ func (rdr *KafkaER) Serve() (err error) {
 			}
 			if err := rdr.processMessage(msg.Value); err != nil {
 				utils.Logger.Warning(
-					fmt.Sprintf("<%s> processing message error: %s",
-						utils.ERs, err.Error()))
+					fmt.Sprintf("<%s> processing message %s error: %s",
+						utils.ERs, string(msg.Key), err.Error()))
 			}
 		}
 	}(r)
