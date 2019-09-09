@@ -1625,7 +1625,6 @@ func TestDfEventReaderCfg(t *testing.T) {
 				Source_path:         utils.StringPointer("/var/spool/cgrates/cdrc/in"),
 				Processed_path:      utils.StringPointer("/var/spool/cgrates/cdrc/out"),
 				Xml_root_path:       utils.StringPointer(utils.EmptyString),
-				Source_id:           utils.StringPointer("ers_csv"),
 				Tenant:              utils.StringPointer(utils.EmptyString),
 				Timezone:            utils.StringPointer(utils.EmptyString),
 				Filters:             &[]string{},
@@ -1633,7 +1632,6 @@ func TestDfEventReaderCfg(t *testing.T) {
 				Header_fields:       &[]*FcTemplateJsonCfg{},
 				Content_fields:      &cdrFields,
 				Trailer_fields:      &[]*FcTemplateJsonCfg{},
-				Continue:            utils.BoolPointer(false),
 			},
 		},
 	}
