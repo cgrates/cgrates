@@ -34,14 +34,10 @@ const (
 	defaultQueueID      = "cgrates_cdrs"
 	defaultExchangeType = "direct"
 	queueID             = "queue_id"
-	topic               = "topic"
 	exchange            = "exchange"
 	exchangeType        = "exchange_type"
 	routingKey          = "routing_key"
 
-	//awsRegion = "aws_region"
-	//awsID     = "aws_key"
-	//awsSecret = "aws_secret"
 	awsToken   = "aws_token"
 	folderPath = "folder_path"
 )

@@ -1171,11 +1171,13 @@ const (
 
 // Poster
 const (
-	SQSPoster = "SQSPoster"
-	S3Poster  = "S3Poster"
-	AWSRegion = "aws_region"
-	AWSKey    = "aws_key"
-	AWSSecret = "aws_secret"
+	SQSPoster    = "SQSPoster"
+	S3Poster     = "S3Poster"
+	AWSRegion    = "aws_region"
+	AWSKey       = "aws_key"
+	AWSSecret    = "aws_secret"
+	KafkaTopic   = "topic"
+	KafkaGroupID = "group_id"
 )
 
 // Google_API
