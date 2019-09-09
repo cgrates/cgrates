@@ -30,7 +30,6 @@ func TestEventRedearClone(t *testing.T) {
 		ID:           utils.MetaDefault,
 		Type:         "RandomType",
 		FieldSep:     ",",
-		SourceID:     "RandomSource",
 		Filters:      []string{"Filter1", "Filter2"},
 		Tenant:       NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 		HeaderFields: []*FCTemplate{},
@@ -51,7 +50,6 @@ func TestEventRedearClone(t *testing.T) {
 			},
 		},
 		TrailerFields: []*FCTemplate{},
-		Continue:      true,
 	}
 	cloned := orig.Clone()
 	if !reflect.DeepEqual(cloned, orig) {
@@ -61,7 +59,6 @@ func TestEventRedearClone(t *testing.T) {
 		ID:           utils.MetaDefault,
 		Type:         "RandomType",
 		FieldSep:     ",",
-		SourceID:     "RandomSource",
 		Filters:      []string{"Filter1", "Filter2"},
 		Tenant:       NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 		HeaderFields: []*FCTemplate{},
@@ -82,7 +79,6 @@ func TestEventRedearClone(t *testing.T) {
 			},
 		},
 		TrailerFields: []*FCTemplate{},
-		Continue:      true,
 	}
 	orig.Filters = []string{"SingleFilter"}
 	orig.ContentFields = []*FCTemplate{
@@ -117,7 +113,6 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 				SourcePath:     "/var/spool/cgrates/cdrc/in",
 				ProcessedPath:  "/var/spool/cgrates/cdrc/out",
 				XmlRootPath:    utils.EmptyString,
-				SourceID:       "ers_csv",
 				Tenant:         nil,
 				Timezone:       utils.EmptyString,
 				Filters:        []string{},
@@ -158,7 +153,6 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 				SourcePath:     "/tmp/ers/in",
 				ProcessedPath:  "/tmp/ers/out",
 				XmlRootPath:    utils.EmptyString,
-				SourceID:       "ers_csv",
 				Tenant:         nil,
 				Timezone:       utils.EmptyString,
 				Filters:        nil,

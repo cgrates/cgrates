@@ -187,7 +187,6 @@ type EventReaderJsonCfg struct {
 	Source_path         *string
 	Processed_path      *string
 	Xml_root_path       *string
-	Source_id           *string
 	Tenant              *string
 	Timezone            *string
 	Filters             *[]string
@@ -195,7 +194,6 @@ type EventReaderJsonCfg struct {
 	Header_fields       *[]*FcTemplateJsonCfg
 	Content_fields      *[]*FcTemplateJsonCfg
 	Trailer_fields      *[]*FcTemplateJsonCfg
-	Continue            *bool
 }
 
 // SM-Generic config section

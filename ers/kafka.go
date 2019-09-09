@@ -38,6 +38,7 @@ import (
 const (
 	defaultTopic   = "cgrates_cdrc"
 	defaultGroupID = "cgrates_consumer"
+	defaultMaxWait = time.Millisecond
 )
 
 // NewKafkaER return a new kafka event reader
@@ -52,6 +53,12 @@ func NewKafkaER(cfg *config.CGRConfig, cfgIdx int,
 		rdrEvents: rdrEvents,
 		rdrExit:   rdrExit,
 		rdrErr:    rdrErr,
+	}
+	if concReq := rdr.Config().ConcurrentReqs; concReq != -1 {
+		rdr.cap = make(chan struct{}, concReq)
+		for i := 0; i < concReq; i++ {
+			rdr.cap <- struct{}{}
+		}
 	}
 	er = rdr
 	err = rdr.setURL(rdr.Config().SourcePath)
@@ -68,24 +75,26 @@ type KafkaER struct {
 	dialURL string
 	topic   string
 	groupID string
+	maxWait time.Duration
 
 	rdrEvents chan *erEvent // channel to dispatch the events created to
 	rdrExit   chan struct{}
 	rdrErr    chan error
+	cap       chan struct{}
 }
 
+// Config returns the curent configuration
 func (rdr *KafkaER) Config() *config.EventReaderCfg {
 	return rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx]
 }
 
+// Serve will start the gorutines needed to watch the kafka topic
 func (rdr *KafkaER) Serve() (err error) {
 	r := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:          []string{rdr.dialURL},
-		GroupID:          rdr.groupID,
-		Topic:            rdr.topic,
-		MinBytes:         10e3, // 10KB
-		MaxBytes:         10e6, // 10MB
-		RebalanceTimeout: time.Second,
+		Brokers: []string{rdr.dialURL},
+		GroupID: rdr.groupID,
+		Topic:   rdr.topic,
+		MaxWait: rdr.maxWait,
 	})
 
 	if rdr.Config().RunDelay == time.Duration(0) { // 0 disables the automatic read, maybe done per API
@@ -102,27 +111,46 @@ func (rdr *KafkaER) Serve() (err error) {
 			return
 		}
 	}(r)
-	go func(r *kafka.Reader) { // read until the conection is closed
-		for {
-			msg, err := r.ReadMessage(context.Background())
-			if err != nil {
-				if err == io.EOF {
-					// ignore io.EOF received from closing the connection from our side
-					// this is happening when we stop the reader
-					return
-				}
-				//  send it to the error channel
-				rdr.rdrErr <- err
+	go rdr.readLoop(r) // read until the conection is closed
+	return
+}
+
+func (rdr *KafkaER) readLoop(r *kafka.Reader) {
+	for {
+		if rdr.Config().ConcurrentReqs != -1 {
+			<-rdr.cap // do not try to read if the limit is reached
+		}
+		msg, err := r.ReadMessage(context.Background())
+		if err != nil {
+			if err == io.EOF {
+				// ignore io.EOF received from closing the connection from our side
+				// this is happening when we stop the reader
 				return
 			}
+			//  send it to the error channel
+			rdr.rdrErr <- err
+			return
+		}
+		go func(msg kafka.Message) {
 			if err := rdr.processMessage(msg.Value); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> processing message %s error: %s",
 						utils.ERs, string(msg.Key), err.Error()))
 			}
-		}
-	}(r)
-	return
+			if rdr.Config().ProcessedPath != utils.EmptyString { // post it
+				if err := engine.PostersCache.PostKafka(rdr.Config().ProcessedPath,
+					rdr.cgrCfg.GeneralCfg().PosterAttempts, msg.Value, "",
+					utils.META_NONE, string(msg.Key)); err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> writing message %s error: %s",
+							utils.ERs, string(msg.Key), err.Error()))
+				}
+			}
+			if rdr.Config().ConcurrentReqs != -1 {
+				rdr.cap <- struct{}{}
+			}
+		}(msg)
+	}
 }
 
 func (rdr *KafkaER) processMessage(msg []byte) (err error) {
@@ -169,6 +197,10 @@ func (rdr *KafkaER) setURL(dialURL string) (err error) {
 	rdr.groupID = defaultGroupID
 	if vals, has := qry[utils.KafkaGroupID]; has && len(vals) != 0 {
 		rdr.groupID = vals[0]
+	}
+	rdr.maxWait = defaultMaxWait
+	if vals, has := qry[utils.KafkaMaxWait]; has && len(vals) != 0 {
+		rdr.maxWait, err = time.ParseDuration(vals[0])
 	}
 	return
 }

@@ -1178,6 +1178,7 @@ const (
 	AWSSecret    = "aws_secret"
 	KafkaTopic   = "topic"
 	KafkaGroupID = "group_id"
+	KafkaMaxWait = "max_wait"
 )
 
 // Google_API

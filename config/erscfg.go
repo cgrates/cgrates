@@ -104,7 +104,6 @@ type EventReaderCfg struct {
 	SourcePath     string
 	ProcessedPath  string
 	XmlRootPath    string
-	SourceID       string
 	Tenant         RSRParsers
 	Timezone       string
 	Filters        []string
@@ -112,7 +111,6 @@ type EventReaderCfg struct {
 	HeaderFields   []*FCTemplate
 	ContentFields  []*FCTemplate
 	TrailerFields  []*FCTemplate
-	Continue       bool
 }
 
 func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string) (err error) {
@@ -142,9 +140,6 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string
 	}
 	if jsnCfg.Xml_root_path != nil {
 		er.XmlRootPath = *jsnCfg.Xml_root_path
-	}
-	if jsnCfg.Source_id != nil {
-		er.SourceID = *jsnCfg.Source_id
 	}
 	if jsnCfg.Tenant != nil {
 		if er.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true, sep); err != nil {
@@ -180,9 +175,6 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string
 			return err
 		}
 	}
-	if jsnCfg.Continue != nil {
-		er.Continue = *jsnCfg.Continue
-	}
 	return
 }
 
@@ -197,7 +189,6 @@ func (er *EventReaderCfg) Clone() (cln *EventReaderCfg) {
 	cln.SourcePath = er.SourcePath
 	cln.ProcessedPath = er.ProcessedPath
 	cln.XmlRootPath = er.XmlRootPath
-	cln.SourceID = er.SourceID
 	if len(er.Tenant) != 0 {
 		cln.Tenant = make(RSRParsers, len(er.Tenant))
 		for idx, val := range er.Tenant {
@@ -225,6 +216,5 @@ func (er *EventReaderCfg) Clone() (cln *EventReaderCfg) {
 	for idx, fld := range er.TrailerFields {
 		cln.TrailerFields[idx] = fld.Clone()
 	}
-	cln.Continue = er.Continue
 	return
 }

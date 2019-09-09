@@ -45,13 +45,12 @@ func TestKafkaER(t *testing.T) {
 	"enabled": true,						// starts the EventReader service: <true|false>
 	"readers": [
 		{
-			"id": "kafka",									// identifier of the EventReader profile
-			"type": "*kafka_json_map",								// reader type <*file_csv>
-			"run_delay": -1,										// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
-			// "concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
-			"source_path": "localhost:9092",		// read data from this path
+			"id": "kafka",										// identifier of the EventReader profile
+			"type": "*kafka_json_map",							// reader type <*file_csv>
+			"run_delay": -1,									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
+			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
+			"source_path": "localhost:9092",					// read data from this path
 			// "processed_path": "/var/spool/cgrates/cdrc/out",	// move processed data here
-			// "source_id": "ers_csv",								// free form field, tag identifying the source of the CDRs within CDRS database
 			"tenant": "cgrates.org",							// tenant used by import
 			"filters": [],										// limit parsing based on the filters
 			"flags": [],										// flags to influence the event processing
@@ -60,7 +59,6 @@ func TestKafkaER(t *testing.T) {
 				{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID", "field_id": "CGRID"},
 			],
 			// "trailer_fields": [],								// template of the import trailer fields
-			"continue": false,									// continue to the next template if executed	
 		},
 	],
 },
@@ -110,9 +108,8 @@ func TestKafkaER(t *testing.T) {
 		if !reflect.DeepEqual(ev.cgrEvent, expected) {
 			t.Errorf("Expected %s ,received %s", utils.ToJSON(expected), utils.ToJSON(ev.cgrEvent))
 		}
-	case <-time.After(30 * time.Second):
+	case <-time.After(10 * time.Second):
 		t.Errorf("Timeout")
 	}
 	rdrExit <- struct{}{}
-
 }
