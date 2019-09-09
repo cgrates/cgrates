@@ -19,9 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"fmt"
 	"net"
-	"strconv"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -36,7 +34,7 @@ type DataProvider interface {
 	RemoteHost() net.Addr
 }
 
-func GetDynamicInterface(dnVal string, dP DataProvider) (interface{}, error) {
+func DPDynamicInterface(dnVal string, dP DataProvider) (interface{}, error) {
 	if strings.HasPrefix(dnVal, utils.DynamicDataPrefix) {
 		dnVal = strings.TrimPrefix(dnVal, utils.DynamicDataPrefix)
 		return dP.FieldAsInterface(strings.Split(dnVal, utils.NestingSep))
@@ -44,174 +42,10 @@ func GetDynamicInterface(dnVal string, dP DataProvider) (interface{}, error) {
 	return utils.StringToInterface(dnVal), nil
 }
 
-func GetDynamicString(dnVal string, dP DataProvider) (string, error) {
+func DPDynamicString(dnVal string, dP DataProvider) (string, error) {
 	if strings.HasPrefix(dnVal, utils.DynamicDataPrefix) {
 		dnVal = strings.TrimPrefix(dnVal, utils.DynamicDataPrefix)
 		return dP.FieldAsString(strings.Split(dnVal, utils.NestingSep))
 	}
 	return dnVal, nil
-}
-
-//NewObjectDP constructs a DataProvider
-func NewObjectDP(obj interface{}) (dP DataProvider) {
-	dP = &ObjectDP{obj: obj, cache: make(map[string]interface{})}
-	return
-}
-
-type ObjectDP struct {
-	obj   interface{}
-	cache map[string]interface{}
-}
-
-func (objDp *ObjectDP) setCache(path string, val interface{}) {
-	objDp.cache[path] = val
-}
-
-func (objDp *ObjectDP) getCache(path string) (val interface{}, has bool) {
-	val, has = objDp.cache[path]
-	return
-}
-
-// String is part of engine.DataProvider interface
-// when called, it will display the already parsed values out of cache
-func (objDP *ObjectDP) String() string {
-	return utils.ToJSON(objDP.obj)
-}
-
-// FieldAsInterface is part of engine.DataProvider interface
-func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
-	// []string{ BalanceMap *monetary[0] Value }
-	var has bool
-	if data, has = objDP.getCache(strings.Join(fldPath, utils.NestingSep)); has {
-		return
-	}
-
-	var prevFld string
-	for _, fld := range fldPath {
-		var slctrStr string
-		if splt := strings.Split(fld, utils.IdxStart); len(splt) != 1 { // check if we have selector
-			fld = splt[0]
-			if splt[1][len(splt[1])-1:] != utils.IdxEnd {
-				return nil, fmt.Errorf("filter rule <%s> needs to end in ]", splt[1])
-			}
-			slctrStr = splt[1][:len(splt[1])-1] // also strip the last ]
-		}
-		if prevFld == utils.EmptyString {
-			prevFld += fld
-		} else {
-			prevFld += utils.NestingSep + fld
-		}
-
-		// check if we take the current path from cache
-		if data, has = objDP.getCache(prevFld); !has {
-			if data, err = utils.ReflectFieldMethodInterface(objDP.obj, fld); err != nil { // take the object the field for current path
-				// in case of error set nil for the current path and return err
-				objDP.setCache(prevFld, nil)
-				return nil, err
-			}
-			// add the current field in prevFld so we can set in cache the full path with it's data
-			objDP.setCache(prevFld, data)
-		}
-
-		// change the obj to be the current data and continue the processing
-		objDP.obj = data
-		if slctrStr != utils.EmptyString { //we have selector so we need to do an aditional get
-			prevFld += utils.IdxStart + slctrStr + utils.IdxEnd
-			// check if we take the current path from cache
-			if data, has = objDP.getCache(prevFld); !has {
-				if data, err = utils.ReflectFieldMethodInterface(objDP.obj, slctrStr); err != nil { // take the object the field for current path
-					// in case of error set nil for the current path and return err
-					objDP.setCache(prevFld, nil)
-					return nil, err
-				}
-				// add the current field in prevFld so we can set in cache the full path with it's data
-				objDP.setCache(prevFld, data)
-			}
-			// change the obj to be the current data and continue the processing
-			objDP.obj = data
-		}
-
-	}
-	//add in cache the initial path
-	objDP.setCache(strings.Join(fldPath, utils.NestingSep), data)
-	return
-}
-
-// FieldAsString is part of engine.DataProvider interface
-func (objDP *ObjectDP) FieldAsString(fldPath []string) (data string, err error) {
-	var valIface interface{}
-	valIface, err = objDP.FieldAsInterface(fldPath)
-	if err != nil {
-		return
-	}
-	return utils.IfaceAsString(valIface), nil
-}
-
-// AsNavigableMap is part of engine.DataProvider interface
-func (objDP *ObjectDP) AsNavigableMap([]*FCTemplate) (
-	nm *NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// RemoteHost is part of engine.DataProvider interface
-func (objDP *ObjectDP) RemoteHost() net.Addr {
-	return utils.LocalAddr()
-}
-
-// NewSliceDP constructs a DataProvider
-func NewSliceDP(record []string) (dP DataProvider) {
-	dP = &SliceDP{req: record, cache: NewNavigableMap(nil)}
-	return
-}
-
-// SliceDP implements engine.DataProvider so we can pass it to filters
-type SliceDP struct {
-	req   []string
-	cache *NavigableMap
-}
-
-// String is part of engine.DataProvider interface
-// when called, it will display the already parsed values out of cache
-func (cP *SliceDP) String() string {
-	return utils.ToJSON(cP)
-}
-
-// FieldAsInterface is part of engine.DataProvider interface
-func (cP *SliceDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
-	if len(fldPath) != 1 {
-		return nil, utils.ErrNotFound
-	}
-	if data, err = cP.cache.FieldAsInterface(fldPath); err == nil ||
-		err != utils.ErrNotFound { // item found in cache
-		return
-	}
-	err = nil // cancel previous err
-	if cfgFieldIdx, err := strconv.Atoi(fldPath[0]); err != nil || len(cP.req) <= cfgFieldIdx {
-		return nil, fmt.Errorf("Ignoring record: %v with error : %+v", cP.req, err)
-	} else {
-		data = cP.req[cfgFieldIdx]
-	}
-	cP.cache.Set(fldPath, data, false, false)
-	return
-}
-
-// FieldAsString is part of engine.DataProvider interface
-func (cP *SliceDP) FieldAsString(fldPath []string) (data string, err error) {
-	var valIface interface{}
-	valIface, err = cP.FieldAsInterface(fldPath)
-	if err != nil {
-		return
-	}
-	return utils.IfaceAsString(valIface), nil
-}
-
-// AsNavigableMap is part of engine.DataProvider interface
-func (cP *SliceDP) AsNavigableMap([]*FCTemplate) (
-	nm *NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// RemoteHost is part of engine.DataProvider interface
-func (cP *SliceDP) RemoteHost() net.Addr {
-	return utils.LocalAddr()
 }

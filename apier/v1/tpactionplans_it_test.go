@@ -1,4 +1,4 @@
-// +build integration
+// +build offline
 
 /*
 Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments

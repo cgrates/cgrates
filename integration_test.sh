@@ -41,8 +41,8 @@ dis=$?
 echo 'go test github.com/cgrates/cgrates/loaders -tags=integration'
 go test github.com/cgrates/cgrates/loaders -tags=integration
 lds=$?
-echo 'go test github.com/cgrates/cgrates/ers -tags=integration'
-go test github.com/cgrates/cgrates/ers -tags=integration
-ers=$?
+echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=offline'
+go test github.com/cgrates/cgrates/apier/v1 -tags=offline
+offline=$?
 
-exit $gen && $ap1 && $ap2 && $en && $cdrc && $cfg && $utl && $gnr && $agts && $smg && $mgr && $dis && $lds && $ers
+exit $gen && $ap1 && $ap2 && $en && $cdrc && $cfg && $utl && $gnr && $agts && $smg && $mgr && $dis && $lds && $ers && offline

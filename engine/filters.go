@@ -332,7 +332,7 @@ func (fltr *FilterRule) Pass(fieldNameDP config.DataProvider,
 }
 
 func (fltr *FilterRule) passString(fielNameDP config.DataProvider, fieldValuesDP []config.DataProvider) (bool, error) {
-	strVal, err := config.GetDynamicString(fltr.FieldName, fielNameDP)
+	strVal, err := config.DPDynamicString(fltr.FieldName, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -340,7 +340,7 @@ func (fltr *FilterRule) passString(fielNameDP config.DataProvider, fieldValuesDP
 		return false, err
 	}
 	for i, val := range fltr.Values {
-		sval, err := config.GetDynamicString(val, fieldValuesDP[i])
+		sval, err := config.DPDynamicString(val, fieldValuesDP[i])
 		if err != nil {
 			continue
 		}
@@ -352,7 +352,7 @@ func (fltr *FilterRule) passString(fielNameDP config.DataProvider, fieldValuesDP
 }
 
 func (fltr *FilterRule) passExists(fielNameDP config.DataProvider) (bool, error) {
-	_, err := config.GetDynamicInterface(fltr.FieldName, fielNameDP)
+	_, err := config.DPDynamicInterface(fltr.FieldName, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -363,7 +363,7 @@ func (fltr *FilterRule) passExists(fielNameDP config.DataProvider) (bool, error)
 }
 
 func (fltr *FilterRule) passEmpty(fielNameDP config.DataProvider) (bool, error) {
-	val, err := config.GetDynamicInterface(fltr.FieldName, fielNameDP)
+	val, err := config.DPDynamicInterface(fltr.FieldName, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return true, nil
@@ -393,7 +393,7 @@ func (fltr *FilterRule) passEmpty(fielNameDP config.DataProvider) (bool, error) 
 }
 
 func (fltr *FilterRule) passStringPrefix(fielNameDP config.DataProvider, fieldValuesDP []config.DataProvider) (bool, error) {
-	strVal, err := config.GetDynamicString(fltr.FieldName, fielNameDP)
+	strVal, err := config.DPDynamicString(fltr.FieldName, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -401,7 +401,7 @@ func (fltr *FilterRule) passStringPrefix(fielNameDP config.DataProvider, fieldVa
 		return false, err
 	}
 	for i, prfx := range fltr.Values {
-		prfx, err := config.GetDynamicString(prfx, fieldValuesDP[i])
+		prfx, err := config.DPDynamicString(prfx, fieldValuesDP[i])
 		if err != nil {
 			continue
 		}
@@ -413,7 +413,7 @@ func (fltr *FilterRule) passStringPrefix(fielNameDP config.DataProvider, fieldVa
 }
 
 func (fltr *FilterRule) passStringSuffix(fielNameDP config.DataProvider, fieldValuesDP []config.DataProvider) (bool, error) {
-	strVal, err := config.GetDynamicString(fltr.FieldName, fielNameDP)
+	strVal, err := config.DPDynamicString(fltr.FieldName, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -421,7 +421,7 @@ func (fltr *FilterRule) passStringSuffix(fielNameDP config.DataProvider, fieldVa
 		return false, err
 	}
 	for i, prfx := range fltr.Values {
-		prfx, err := config.GetDynamicString(prfx, fieldValuesDP[i])
+		prfx, err := config.DPDynamicString(prfx, fieldValuesDP[i])
 		if err != nil {
 			continue
 		}
@@ -438,7 +438,7 @@ func (fltr *FilterRule) passTimings(fielNameDP config.DataProvider, fieldValuesD
 }
 
 func (fltr *FilterRule) passDestinations(fielNameDP config.DataProvider, fieldValuesDP []config.DataProvider) (bool, error) {
-	dst, err := config.GetDynamicString(fltr.FieldName, fielNameDP)
+	dst, err := config.DPDynamicString(fltr.FieldName, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -449,7 +449,7 @@ func (fltr *FilterRule) passDestinations(fielNameDP config.DataProvider, fieldVa
 		if destIDs, err := dm.DataDB().GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 			for _, dID := range destIDs {
 				for i, valDstID := range fltr.Values {
-					valDstID, err := config.GetDynamicString(valDstID, fieldValuesDP[i])
+					valDstID, err := config.DPDynamicString(valDstID, fieldValuesDP[i])
 					if err != nil {
 						continue
 					}
@@ -515,7 +515,7 @@ func (fltr *FilterRule) passRSR(fieldValuesDP []config.DataProvider) (bool, erro
 // }
 
 func (fltr *FilterRule) passGreaterThan(fielNameDP config.DataProvider, fieldValuesDP []config.DataProvider) (bool, error) {
-	fldIf, err := config.GetDynamicInterface(fltr.FieldName, fielNameDP)
+	fldIf, err := config.DPDynamicInterface(fltr.FieldName, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -531,7 +531,7 @@ func (fltr *FilterRule) passGreaterThan(fielNameDP config.DataProvider, fieldVal
 		orEqual = true
 	}
 	for i, val := range fltr.Values {
-		sval, err := config.GetDynamicInterface(val, fieldValuesDP[i])
+		sval, err := config.DPDynamicInterface(val, fieldValuesDP[i])
 		if err != nil {
 			continue
 		}
@@ -580,7 +580,7 @@ func (fltr *FilterRule) passGreaterThan(fielNameDP config.DataProvider, fieldVal
 // }
 
 func (fltr *FilterRule) passEqualTo(fielNameDP config.DataProvider, fieldValuesDP []config.DataProvider) (bool, error) {
-	fldIf, err := config.GetDynamicInterface(fltr.FieldName, fielNameDP)
+	fldIf, err := config.DPDynamicInterface(fltr.FieldName, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -591,7 +591,7 @@ func (fltr *FilterRule) passEqualTo(fielNameDP config.DataProvider, fieldValuesD
 		fldIf = utils.StringToInterface(fldStr)
 	}
 	for i, val := range fltr.Values {
-		sval, err := config.GetDynamicInterface(val, fieldValuesDP[i])
+		sval, err := config.DPDynamicInterface(val, fieldValuesDP[i])
 		if err != nil {
 			continue
 		}
