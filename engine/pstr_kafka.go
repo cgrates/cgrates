@@ -57,7 +57,7 @@ func (pstr *KafkaPoster) parseURL(dialURL string) error {
 
 	pstr.dialURL = strings.Split(dialURL, "?")[0]
 	pstr.topic = defaultQueueID
-	if vals, has := qry[topic]; has && len(vals) != 0 {
+	if vals, has := qry[utils.KafkaTopic]; has && len(vals) != 0 {
 		pstr.topic = vals[0]
 	}
 	return nil

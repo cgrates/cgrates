@@ -38,12 +38,9 @@ import (
 const (
 	defaultTopic   = "cgrates_cdrc"
 	defaultGroupID = "cgrates_consumer"
-
-	// ToDo: export it to utils
-	topic   = "topic"
-	groupID = "group_id"
 )
 
+// NewKafkaER return a new kafka event reader
 func NewKafkaER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents chan *erEvent, rdrErr chan error,
 	fltrS *engine.FilterS, rdrExit chan struct{}) (er EventReader, err error) {
@@ -57,7 +54,7 @@ func NewKafkaER(cfg *config.CGRConfig, cfgIdx int,
 		rdrErr:    rdrErr,
 	}
 	er = rdr
-	err = rdr.setUrl(rdr.Config().SourcePath)
+	err = rdr.setURL(rdr.Config().SourcePath)
 	return
 }
 
@@ -157,7 +154,7 @@ func (rdr *KafkaER) processMessage(msg []byte) (err error) {
 	return
 }
 
-func (rdr *KafkaER) setUrl(dialURL string) (err error) {
+func (rdr *KafkaER) setURL(dialURL string) (err error) {
 	var u *url.URL
 	if u, err = url.Parse(dialURL); err != nil {
 		return
@@ -166,11 +163,11 @@ func (rdr *KafkaER) setUrl(dialURL string) (err error) {
 
 	rdr.dialURL = strings.Split(dialURL, "?")[0]
 	rdr.topic = defaultTopic
-	if vals, has := qry[topic]; has && len(vals) != 0 {
+	if vals, has := qry[utils.KafkaTopic]; has && len(vals) != 0 {
 		rdr.topic = vals[0]
 	}
 	rdr.groupID = defaultGroupID
-	if vals, has := qry[groupID]; has && len(vals) != 0 {
+	if vals, has := qry[utils.KafkaGroupID]; has && len(vals) != 0 {
 		rdr.groupID = vals[0]
 	}
 	return
