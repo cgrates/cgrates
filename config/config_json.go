@@ -53,7 +53,6 @@ const (
 	LoaderJson         = "loaders"
 	MAILER_JSN         = "mailer"
 	SURETAX_JSON       = "suretax"
-	DispatcherJson     = "dispatcher"
 	DispatcherSJson    = "dispatchers"
 	CgrLoaderCfgJson   = "loader"
 	CgrMigratorCfgJson = "migrator"
