@@ -254,42 +254,6 @@ func (rf *FilterRule) CompileValues() (err error) {
 		if rf.rsrFields, err = config.NewRSRParsersFromSlice(rf.Values, true); err != nil {
 			return
 		}
-	case utils.MetaStatS, utils.MetaNotStatS:
-		//value for filter of type *stats needs to be in the following form:
-		//*gt#acd:StatID:ValueOfMetric
-		rf.statItems = make([]*itemFilter, len(rf.Values))
-		for i, val := range rf.Values {
-			valSplt := strings.Split(val, utils.InInFieldSep)
-			if len(valSplt) != 3 {
-				return fmt.Errorf("Value %s needs to contain at least 3 items", val)
-			}
-			// valSplt[0] filter type with metric
-			// valSplt[1] id of the statQueue
-			// valSplt[2] value to compare
-			rf.statItems[i] = &itemFilter{
-				FilterType:  valSplt[0],
-				ItemID:      valSplt[1],
-				FilterValue: valSplt[2],
-			}
-		}
-	case utils.MetaResources, utils.MetaNotResources:
-		//value for filter of type *resources needs to be in the following form:
-		//*gt:ResourceID:ValueOfUsage
-		rf.resourceItems = make([]*itemFilter, len(rf.Values))
-		for i, val := range rf.Values {
-			valSplt := strings.Split(val, utils.InInFieldSep)
-			if len(valSplt) != 3 {
-				return fmt.Errorf("Value %s needs to contain at least 3 items", val)
-			}
-			// valSplt[0] filter type
-			// valSplt[1] id of the AccountID.FieldToUsed
-			// valSplt[2] value to compare
-			rf.resourceItems[i] = &itemFilter{
-				FilterType:  valSplt[0],
-				ItemID:      valSplt[1],
-				FilterValue: valSplt[2],
-			}
-		}
 	}
 	return
 }
@@ -474,46 +438,6 @@ func (fltr *FilterRule) passRSR(fieldValuesDP []config.DataProvider) (bool, erro
 	return true, nil
 }
 
-// func (fltr *FilterRule) passStatS(dP config.DataProvider,
-// 	stats rpcclient.RpcClientConnection, tenant string) (bool, error) {
-// 	if stats == nil || reflect.ValueOf(stats).IsNil() {
-// 		return false, errors.New("Missing StatS information")
-// 	}
-// 	for _, statItem := range fltr.statItems {
-// 		statValues := make(map[string]float64)
-// 		if err := stats.Call(utils.StatSv1GetQueueFloatMetrics,
-// 			&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: tenant, ID: statItem.ItemID}}, &statValues); err != nil {
-// 			return false, err
-// 		}
-// 		//convert statValues to map[string]interface{}
-// 		ifaceStatValues := make(map[string]interface{})
-// 		for key, val := range statValues {
-// 			ifaceStatValues[key] = val
-// 		}
-// 		//convert ifaceStatValues into a NavigableMap so we can send it to passGreaterThan
-// 		nM := config.NewNavigableMap(ifaceStatValues)
-// 		//split the type in exact 2 parts
-// 		//special cases like *gt#sum#Usage
-// 		fltrType := strings.SplitN(statItem.FilterType, utils.STATS_CHAR, 2)
-// 		if len(fltrType) < 2 {
-// 			return false, errors.New(fmt.Sprintf("<%s> Invalid format for filter of type *stats", utils.FilterS))
-// 		}
-// 		//compose the newFilter
-// 		fltr, err := NewFilterRule(fltrType[0],
-// 			utils.DynamicDataPrefix+utils.Meta+fltrType[1], []string{statItem.FilterValue})
-// 		if err != nil {
-// 			return false, err
-// 		}
-// 		//send it to passGreaterThan
-// 		if val, err := fltr.passGreaterThan(nM); err != nil || !val {
-// 			//in case of error return false and error
-// 			//and in case of not pass return false and nil
-// 			return false, err
-// 		}
-// 	}
-// 	return true, nil
-// }
-
 func (fltr *FilterRule) passGreaterThan(fielNameDP config.DataProvider, fieldValuesDP []config.DataProvider) (bool, error) {
 	fldIf, err := config.DPDynamicInterface(fltr.FieldName, fielNameDP)
 	if err != nil {
@@ -604,6 +528,26 @@ func (fS *FilterS) getFieldNameDataProvider(initialDP config.DataProvider, field
 		dp = config.NewObjectDP(reply)
 		*fieldName = utils.DynamicDataPrefix + splitFldName[2]
 	case strings.HasPrefix(*fieldName, utils.DynamicDataPrefix+utils.MetaStats):
+		// sample of fieldName : ~*resources.ResourceID.Field
+		splitFldName := strings.SplitN(*fieldName, utils.NestingSep, 3)
+		if len(splitFldName) != 3 {
+			return nil, fmt.Errorf("invalid fieldname <%s>", *fieldName)
+		}
+		var statValues map[string]float64
+
+		if err := fS.statSConns.Call(utils.StatSv1GetQueueFloatMetrics,
+			&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: tenant, ID: splitFldName[1]}},
+			&statValues); err != nil {
+			return nil, err
+		}
+		//convert statValues to map[string]interface{}
+		ifaceStatValues := make(map[string]interface{})
+		for key, val := range statValues {
+			ifaceStatValues[key] = val
+		}
+		//convert ifaceStatValues into a NavigableMap
+		dp = config.NewNavigableMap(ifaceStatValues)
+		*fieldName = utils.DynamicDataPrefix + splitFldName[2]
 	default:
 		dp = initialDP
 	}

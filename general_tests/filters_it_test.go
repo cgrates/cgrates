@@ -48,10 +48,10 @@ var sTestsFltr = []func(t *testing.T){
 	testV1FltrStartEngine,
 	testV1FltrRpcConn,
 	testV1FltrLoadTarrifPlans,
-	//testV1FltrAddStats,
-	//testV1FltrPupulateThreshold,
-	//testV1FltrGetThresholdForEvent,
-	//testV1FltrGetThresholdForEvent2,
+	testV1FltrAddStats,
+	testV1FltrPupulateThreshold,
+	testV1FltrGetThresholdForEvent,
+	testV1FltrGetThresholdForEvent2,
 	testV1FltrPopulateResources,
 	testV1FltrAccounts,
 	testV1FltrStopEngine,
@@ -243,8 +243,9 @@ func testV1FltrPupulateThreshold(t *testing.T) {
 		ID:     "FLTR_TH_Stats1",
 		Rules: []*engine.FilterRule{
 			{
-				Type:   "*stats",
-				Values: []string{"*gt#acd:Stat_1:10.0"},
+				Type:      "*gt",
+				FieldName: "~*stats.Stat_1.*acd",
+				Values:    []string{"10.0"},
 			},
 		},
 	}
@@ -321,8 +322,9 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 		ID:     "FLTR_TH_Stats1",
 		Rules: []*engine.FilterRule{
 			{
-				Type:   "*stats",
-				Values: []string{"*lt#acd:Stat_1:10.0"},
+				Type:      "*lt",
+				FieldName: "~*stats.Stat_1.*acd",
+				Values:    []string{"10.0"},
 			},
 		},
 	}
