@@ -64,8 +64,9 @@ func TestKafkaER(t *testing.T) {
 },
 }`)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
+
 	rdrEvents = make(chan *erEvent, 1)
 	rdrErr = make(chan error, 1)
 	rdrExit = make(chan struct{}, 1)
