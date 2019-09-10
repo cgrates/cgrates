@@ -52,7 +52,7 @@ var sTestsFltr = []func(t *testing.T){
 	//testV1FltrPupulateThreshold,
 	//testV1FltrGetThresholdForEvent,
 	//testV1FltrGetThresholdForEvent2,
-	//testV1FltrPopulateResources,
+	testV1FltrPopulateResources,
 	testV1FltrAccounts,
 	testV1FltrStopEngine,
 }
@@ -423,8 +423,9 @@ func testV1FltrPopulateResources(t *testing.T) {
 		ID:     "FLTR_TH_Resource",
 		Rules: []*engine.FilterRule{
 			{
-				Type:   "*resources",
-				Values: []string{"*gt:ResTest:2.0"},
+				Type:      "*gt",
+				FieldName: "~*resources.ResTest.TotalUsage",
+				Values:    []string{"2.0"},
 			},
 		},
 	}
@@ -485,8 +486,9 @@ func testV1FltrPopulateResources(t *testing.T) {
 		ID:     "FLTR_TH_Resource",
 		Rules: []*engine.FilterRule{
 			{
-				Type:   "*resources",
-				Values: []string{"*lt:ResTest:2.0"},
+				Type:      "*lt",
+				FieldName: "~*resources.ResTest.TotalUsage",
+				Values:    []string{"2.0"},
 			},
 		},
 	}
