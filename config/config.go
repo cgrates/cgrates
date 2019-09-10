@@ -690,6 +690,9 @@ func (self *CGRConfig) checkConfigSanity() error {
 					return fmt.Errorf("<%s> empty FieldSep for reader with ID: %s", utils.ERs, rdr.ID)
 				}
 			}
+			if rdr.Type == utils.MetaKafkajsonMap && rdr.RunDelay > 0 {
+				return fmt.Errorf("<%s> RunDelay field can not be bigger than zero for reader with ID: %s", utils.ERs, rdr.ID)
+			}
 		}
 	}
 
@@ -1463,8 +1466,8 @@ func (cfg *CGRConfig) loadConfig(path, section string) (err error) {
 	return cfg.loadConfigFromPath(path, loadFuncs)
 }
 
-func (_ *CGRConfig) loadConfigFromReader(rdr io.Reader, loadFuncs []func(jsnCfg *CgrJsonCfg) error) (err error) {
-	var jsnCfg *CgrJsonCfg = new(CgrJsonCfg)
+func (*CGRConfig) loadConfigFromReader(rdr io.Reader, loadFuncs []func(jsnCfg *CgrJsonCfg) error) (err error) {
+	jsnCfg := new(CgrJsonCfg)
 	var rjr *rjReader
 	if rjr, err = NewRjReader(rdr); err != nil {
 		return

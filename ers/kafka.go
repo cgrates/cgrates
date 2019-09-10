@@ -36,8 +36,8 @@ import (
 )
 
 const (
-	defaultTopic   = "cgrates_cdrc"
-	defaultGroupID = "cgrates_consumer"
+	defaultTopic   = "cgrates"
+	defaultGroupID = "cgrates"
 	defaultMaxWait = time.Millisecond
 )
 

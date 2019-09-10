@@ -487,7 +487,7 @@ func TestCDRsOnExpKafkaPosterFileFailover(t *testing.T) {
 
 	defer reader.Close()
 
-	for i := 0; i < 6; i++ {
+	for i := 0; i < 4; i++ {
 		ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 		if m, err := reader.ReadMessage(ctx); err != nil {
 			t.Fatal(err)
