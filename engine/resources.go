@@ -142,6 +142,12 @@ func (r *Resource) totalUsage() (tU float64) {
 	return
 }
 
+// TotalUsage returns the sum of all usage units
+// Exported method to be used by filterS
+func (r *Resource) TotalUsage() (tU float64) {
+	return r.totalUsage()
+}
+
 // recordUsage records a new usage
 func (r *Resource) recordUsage(ru *ResourceUsage) (err error) {
 	if _, hasID := r.Usages[ru.ID]; hasID {

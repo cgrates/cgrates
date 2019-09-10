@@ -546,39 +546,6 @@ func (fltr *FilterRule) passGreaterThan(fielNameDP config.DataProvider, fieldVal
 	return false, nil
 }
 
-// func (fltr *FilterRule) passResourceS(dP config.DataProvider,
-// 	resourceS rpcclient.RpcClientConnection, tenant string) (bool, error) {
-// 	if resourceS == nil || reflect.ValueOf(resourceS).IsNil() {
-// 		return false, errors.New("Missing ResourceS information")
-// 	}
-// 	for _, resItem := range fltr.resourceItems {
-// 		//take total usage for resource
-// 		var reply Resource
-// 		if err := resourceS.Call(utils.ResourceSv1GetResource,
-// 			&utils.TenantID{Tenant: tenant, ID: resItem.ItemID}, &reply); err != nil {
-// 			return false, err
-// 		}
-// 		data := map[string]interface{}{
-// 			utils.Usage: reply.totalUsage(),
-// 		}
-// 		//convert data into a NavigableMap so we can send it to passGreaterThan
-// 		nM := config.NewNavigableMap(data)
-// 		//compose the newFilter
-// 		fltr, err := NewFilterRule(resItem.FilterType,
-// 			utils.DynamicDataPrefix+utils.Usage, []string{resItem.FilterValue})
-// 		if err != nil {
-// 			return false, err
-// 		}
-// 		// send it to passGreaterThan
-// 		if val, err := fltr.passGreaterThan(nM); err != nil || !val {
-// 			//in case of error return false and error
-// 			//and in case of not pass return false and nil
-// 			return false, err
-// 		}
-// 	}
-// 	return true, nil
-// }
-
 func (fltr *FilterRule) passEqualTo(fielNameDP config.DataProvider, fieldValuesDP []config.DataProvider) (bool, error) {
 	fldIf, err := config.DPDynamicInterface(fltr.FieldName, fielNameDP)
 	if err != nil {
@@ -607,7 +574,7 @@ func (fltr *FilterRule) passEqualTo(fielNameDP config.DataProvider, fieldValuesD
 func (fS *FilterS) getFieldNameDataProvider(initialDP config.DataProvider, fieldName *string, tenant string) (dp config.DataProvider, err error) {
 	switch {
 	case strings.HasPrefix(*fieldName, utils.DynamicDataPrefix+utils.MetaAccounts):
-		//same of fieldName : ~*accounts.1001.BalanceMap.*monetary[0].Value
+		// sample of fieldName : ~*accounts.1001.BalanceMap.*monetary[0].Value
 		// split the field name in 3 parts
 		// fieldNameType (~*accounts), accountID(1001) and quried part (BalanceMap.*monetary[0].Value)
 		splitFldName := strings.SplitN(*fieldName, utils.NestingSep, 3)
@@ -624,6 +591,18 @@ func (fS *FilterS) getFieldNameDataProvider(initialDP config.DataProvider, field
 		// remove from fieldname the fielNameType and the AccountID
 		*fieldName = utils.DynamicDataPrefix + splitFldName[2]
 	case strings.HasPrefix(*fieldName, utils.DynamicDataPrefix+utils.MetaResources):
+		// sample of fieldName : ~*resources.ResourceID.Field
+		splitFldName := strings.SplitN(*fieldName, utils.NestingSep, 3)
+		if len(splitFldName) != 3 {
+			return nil, fmt.Errorf("invalid fieldname <%s>", *fieldName)
+		}
+		var reply *Resource
+		if err := fS.resSConns.Call(utils.ResourceSv1GetResource,
+			&utils.TenantID{Tenant: tenant, ID: splitFldName[1]}, &reply); err != nil {
+			return nil, err
+		}
+		dp = config.NewObjectDP(reply)
+		*fieldName = utils.DynamicDataPrefix + splitFldName[2]
 	case strings.HasPrefix(*fieldName, utils.DynamicDataPrefix+utils.MetaStats):
 	default:
 		dp = initialDP
