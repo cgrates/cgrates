@@ -131,8 +131,7 @@ func SetCgrConfig(cfg *CGRConfig) {
 
 func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg = new(CGRConfig)
-	cfg.lks = make(map[string]*sync.RWMutex)
-	cfg.lks[ERsJson] = new(sync.RWMutex)
+	cfg.populteChanels()
 	cfg.DataFolderPath = "/usr/share/cgrates/"
 	cfg.MaxCallDuration = time.Duration(3) * time.Hour // Hardcoded for now
 
@@ -186,9 +185,6 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.ConfigReloads[utils.DIAMETER_AGENT] <- struct{}{} // Unlock the channel
 	cfg.ConfigReloads[utils.SMAsterisk] = make(chan struct{}, 1)
 	cfg.ConfigReloads[utils.SMAsterisk] <- struct{}{} // Unlock the channel
-
-	cfg.rldChans = make(map[string]chan struct{})
-	cfg.rldChans[ERsJson] = make(chan struct{}, 1)
 
 	var cgrJsonCfg *CgrJsonCfg
 	if cgrJsonCfg, err = NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON)); err != nil {
@@ -1431,14 +1427,187 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 	case utils.EmptyString, "*all": // do constant
 		fall = true
 		fallthrough
+	case GENERAL_JSN: // nothing to reload
+		if !fall {
+			break
+		}
+		fallthrough
+	case DATADB_JSN:
+		if !fall {
+			break
+		}
+		fallthrough
+	case STORDB_JSN:
+		if !fall {
+			break
+		}
+		fallthrough
+	case LISTEN_JSN:
+		if !fall {
+			break
+		}
+		fallthrough
+	case TlsCfgJson:
+		if !fall {
+			break
+		}
+		fallthrough
+	case HTTP_JSN:
+		if !fall {
+			break
+		}
+		fallthrough
+	case SCHEDULER_JSN:
+		if !fall {
+			break
+		}
+		fallthrough
+	case CACHE_JSN:
+		if !fall {
+			break
+		}
+		fallthrough
+	case FILTERS_JSON:
+		if !fall {
+			break
+		}
+		fallthrough
+	case RALS_JSN:
+		if !fall {
+			break
+		}
+		fallthrough
+	case CDRS_JSN:
+		if !fall {
+			break
+		}
+		fallthrough
+	case CDRE_JSN:
+		if !fall {
+			break
+		}
+		fallthrough
+	case CDRC_JSN:
+		if !fall {
+			break
+		}
+		fallthrough
 	case ERsJson:
 		cfg.rldChans[ERsJson] <- struct{}{}
 		if !fall {
 			break
 		}
 		fallthrough
-	case GENERAL_JSN: // to be implemented
-
+	case SessionSJson:
+		if !fall {
+			break
+		}
+		fallthrough
+	case AsteriskAgentJSN:
+		if !fall {
+			break
+		}
+		fallthrough
+	case FreeSWITCHAgentJSN:
+		if !fall {
+			break
+		}
+		fallthrough
+	case KamailioAgentJSN:
+		if !fall {
+			break
+		}
+		fallthrough
+	case DA_JSN:
+		if !fall {
+			break
+		}
+		fallthrough
+	case RA_JSN:
+		if !fall {
+			break
+		}
+		fallthrough
+	case HttpAgentJson:
+		if !fall {
+			break
+		}
+		fallthrough
+	case DNSAgentJson:
+		if !fall {
+			break
+		}
+		fallthrough
+	case ATTRIBUTE_JSN:
+		if !fall {
+			break
+		}
+		fallthrough
+	case ChargerSCfgJson:
+		if !fall {
+			break
+		}
+		fallthrough
+	case RESOURCES_JSON:
+		if !fall {
+			break
+		}
+		fallthrough
+	case STATS_JSON:
+		if !fall {
+			break
+		}
+		fallthrough
+	case THRESHOLDS_JSON:
+		if !fall {
+			break
+		}
+		fallthrough
+	case SupplierSJson:
+		if !fall {
+			break
+		}
+		fallthrough
+	case LoaderJson:
+		if !fall {
+			break
+		}
+		fallthrough
+	case MAILER_JSN:
+		if !fall {
+			break
+		}
+		fallthrough
+	case SURETAX_JSON:
+		if !fall {
+			break
+		}
+		fallthrough
+	case CgrLoaderCfgJson:
+		if !fall {
+			break
+		}
+		fallthrough
+	case CgrMigratorCfgJson:
+		if !fall {
+			break
+		}
+		fallthrough
+	case DispatcherSJson:
+		if !fall {
+			break
+		}
+		fallthrough
+	case AnalyzerCfgJson:
+		if !fall {
+			break
+		}
+		fallthrough
+	case Apier:
+		if !fall {
+			break
+		}
+		fallthrough
 	}
 	return
 }
@@ -1452,6 +1621,110 @@ func (cfg *CGRConfig) loadConfig(path, section string) (err error) {
 	case utils.EmptyString, "*all": // do constant
 		fall = true
 		fallthrough
+	case GENERAL_JSN:
+		cfg.lks[GENERAL_JSN].Lock()
+		defer cfg.lks[GENERAL_JSN].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadGeneralCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case DATADB_JSN:
+		cfg.lks[DATADB_JSN].Lock()
+		defer cfg.lks[DATADB_JSN].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadDataDBCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case STORDB_JSN:
+		cfg.lks[STORDB_JSN].Lock()
+		defer cfg.lks[STORDB_JSN].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadStorDBCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case LISTEN_JSN:
+		cfg.lks[LISTEN_JSN].Lock()
+		defer cfg.lks[LISTEN_JSN].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadListenCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case TlsCfgJson:
+		cfg.lks[TlsCfgJson].Lock()
+		defer cfg.lks[TlsCfgJson].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadTlsCgrCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case HTTP_JSN:
+		cfg.lks[HTTP_JSN].Lock()
+		defer cfg.lks[HTTP_JSN].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadHttpCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case SCHEDULER_JSN:
+		cfg.lks[SCHEDULER_JSN].Lock()
+		defer cfg.lks[SCHEDULER_JSN].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadSchedulerCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case CACHE_JSN:
+		cfg.lks[CACHE_JSN].Lock()
+		defer cfg.lks[CACHE_JSN].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadCacheCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case FILTERS_JSON:
+		cfg.lks[FILTERS_JSON].Lock()
+		defer cfg.lks[FILTERS_JSON].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadFilterSCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case RALS_JSN:
+		cfg.lks[RALS_JSN].Lock()
+		defer cfg.lks[RALS_JSN].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadRalSCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case CDRS_JSN:
+		cfg.lks[CDRS_JSN].Lock()
+		defer cfg.lks[CDRS_JSN].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadCdrsCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case CDRE_JSN:
+		cfg.lks[CDRE_JSN].Lock()
+		defer cfg.lks[CDRE_JSN].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadCdreCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case CDRC_JSN:
+		cfg.lks[CDRC_JSN].Lock()
+		defer cfg.lks[CDRC_JSN].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadCdrcCfg)
+		if !fall {
+			break
+		}
+		fallthrough
 	case ERsJson:
 		cfg.lks[ERsJson].Lock()
 		defer cfg.lks[ERsJson].Unlock()
@@ -1460,8 +1733,178 @@ func (cfg *CGRConfig) loadConfig(path, section string) (err error) {
 			break
 		}
 		fallthrough
-	case GENERAL_JSN: // to be implemented
-
+	case SessionSJson:
+		cfg.lks[SessionSJson].Lock()
+		defer cfg.lks[SessionSJson].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadSessionSCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case AsteriskAgentJSN:
+		cfg.lks[AsteriskAgentJSN].Lock()
+		defer cfg.lks[AsteriskAgentJSN].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadAsteriskAgentCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case FreeSWITCHAgentJSN:
+		cfg.lks[FreeSWITCHAgentJSN].Lock()
+		defer cfg.lks[FreeSWITCHAgentJSN].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadFreeswitchAgentCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case KamailioAgentJSN:
+		cfg.lks[KamailioAgentJSN].Lock()
+		defer cfg.lks[KamailioAgentJSN].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadKamAgentCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case DA_JSN:
+		cfg.lks[DA_JSN].Lock()
+		defer cfg.lks[DA_JSN].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadDiameterAgentCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case RA_JSN:
+		cfg.lks[RA_JSN].Lock()
+		defer cfg.lks[RA_JSN].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadRadiusAgentCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case HttpAgentJson:
+		cfg.lks[HttpAgentJson].Lock()
+		defer cfg.lks[HttpAgentJson].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadHttpAgentCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case DNSAgentJson:
+		cfg.lks[DNSAgentJson].Lock()
+		defer cfg.lks[DNSAgentJson].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadDNSAgentCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case ATTRIBUTE_JSN:
+		cfg.lks[ATTRIBUTE_JSN].Lock()
+		defer cfg.lks[ATTRIBUTE_JSN].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadAttributeSCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case ChargerSCfgJson:
+		cfg.lks[ChargerSCfgJson].Lock()
+		defer cfg.lks[ChargerSCfgJson].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadChargerSCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case RESOURCES_JSON:
+		cfg.lks[RESOURCES_JSON].Lock()
+		defer cfg.lks[RESOURCES_JSON].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadResourceSCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case STATS_JSON:
+		cfg.lks[STATS_JSON].Lock()
+		defer cfg.lks[STATS_JSON].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadStatSCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case THRESHOLDS_JSON:
+		cfg.lks[THRESHOLDS_JSON].Lock()
+		defer cfg.lks[THRESHOLDS_JSON].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadThresholdSCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case SupplierSJson:
+		cfg.lks[SupplierSJson].Lock()
+		defer cfg.lks[SupplierSJson].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadSupplierSCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case LoaderJson:
+		cfg.lks[LoaderJson].Lock()
+		defer cfg.lks[LoaderJson].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadLoaderSCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case MAILER_JSN:
+		cfg.lks[MAILER_JSN].Lock()
+		defer cfg.lks[MAILER_JSN].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadMailerCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case SURETAX_JSON:
+		cfg.lks[SURETAX_JSON].Lock()
+		defer cfg.lks[SURETAX_JSON].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadSureTaxCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case CgrLoaderCfgJson:
+		cfg.lks[CgrLoaderCfgJson].Lock()
+		defer cfg.lks[CgrLoaderCfgJson].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadLoaderCgrCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case CgrMigratorCfgJson:
+		cfg.lks[CgrMigratorCfgJson].Lock()
+		defer cfg.lks[CgrMigratorCfgJson].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadMigratorCgrCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case DispatcherSJson:
+		cfg.lks[DispatcherSJson].Lock()
+		defer cfg.lks[DispatcherSJson].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadDispatcherSCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case AnalyzerCfgJson:
+		cfg.lks[AnalyzerCfgJson].Lock()
+		defer cfg.lks[AnalyzerCfgJson].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadAnalyzerCgrCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case Apier:
+		cfg.lks[Apier].Lock()
+		defer cfg.lks[Apier].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadApierCfg)
 	}
 	return cfg.loadConfigFromPath(path, loadFuncs)
 }
@@ -1563,4 +2006,17 @@ func (cfg *CGRConfig) loadConfigFromHttp(urlPaths string, loadFuncs []func(jsnCf
 		}
 	}
 	return
+}
+
+// populates the config locks and the reload channels
+func (cfg *CGRConfig) populteChanels() {
+	cfg.lks = make(map[string]*sync.RWMutex)
+	cfg.rldChans = make(map[string]chan struct{})
+	for _, section := range []string{GENERAL_JSN, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN, SCHEDULER_JSN, CACHE_JSN, FILTERS_JSON, RALS_JSN,
+		CDRS_JSN, CDRE_JSN, CDRC_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN, KamailioAgentJSN,
+		DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
+		SupplierSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson, AnalyzerCfgJson, Apier} {
+		cfg.lks[section] = new(sync.RWMutex)
+		cfg.rldChans[section] = make(chan struct{}, 1)
+	}
 }
