@@ -97,7 +97,7 @@ const CGRATES_CFG_JSON = `
 	"client_key":"",					// path to client key
 	"ca_certificate":"",				// path to CA certificate (populate for self-signed certificate otherwise let it empty)
 	"server_policy":4,					// server_policy determines the TLS Client Authentication (0-NoClientCert, 1-RequestClientCert, 2-RequireAnyClientCert, 3-VerifyClientCertIfGiven, 4-RequireAndVerifyClientCert)
-	"server_name":"",					
+	"server_name":"",
 },
 
 
@@ -193,7 +193,7 @@ const CGRATES_CFG_JSON = `
 	"session_cost_retries": 5,				// number of queries to session_costs before recalculating CDR
 	"chargers_conns": [						// connection to ChargerS for CDR forking, empty to disable billing for CDRs: <""|*internal|x.y.z.y:1234>
 		{"address": "*internal"}
-	],					
+	],
 	"rals_conns": [							// connections to RALs for cost calculation: <""|*internal|x.y.z.y:1234>
 		{"address": "*internal"}
 	],
@@ -316,20 +316,20 @@ const CGRATES_CFG_JSON = `
 			"flags": [],										// flags to influence the event processing
 			"header_fields": [],								// template of the import header fields
 			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-				{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "~2", "mandatory": true},
-				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~3", "mandatory": true},
-				{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~4", "mandatory": true},
-				{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~6", "mandatory": true},
-				{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "~7", "mandatory": true},
-				{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~8", "mandatory": true},
-				{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~9", "mandatory": true},
-				{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~10", "mandatory": true},
-				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~11", "mandatory": true},
-				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~12", "mandatory": true},
-				{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~13", "mandatory": true},
+				{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "~*req.2", "mandatory": true},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~*req.3", "mandatory": true},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~*req.4", "mandatory": true},
+				{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~*req.6", "mandatory": true},
+				{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "~*req.7", "mandatory": true},
+				{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~*req.8", "mandatory": true},
+				{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~*req.9", "mandatory": true},
+				{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~*req.10", "mandatory": true},
+				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~*req.11", "mandatory": true},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~*req.12", "mandatory": true},
+				{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~*req.13", "mandatory": true},
 			],
 			"trailer_fields": [],								// template of the import trailer fields
-			"continue": false,									// continue to the next template if executed	
+			"continue": false,									// continue to the next template if executed
 		},
 	],
 },
@@ -358,7 +358,7 @@ const CGRATES_CFG_JSON = `
 	"session_indexes": [],					// index sessions based on these fields for GetActiveSessions API
 	"client_protocol": 1.0,					// version of protocol to use when acting as JSON-PRC client <"0","1.0">
 	"channel_sync_interval": "0",			// sync channels to detect stale sessions (0 to disable)
-	"terminate_attempts": 5					// attempts to get the session before terminating it 
+	"terminate_attempts": 5					// attempts to get the session before terminating it
 },
 
 
@@ -423,45 +423,45 @@ const CGRATES_CFG_JSON = `
 	"asr_template": "",											// enable AbortSession message being sent to client on DisconnectSession
 	"templates":{												// default message templates
 		"*err": [
-				{"tag": "SessionId", "field_id": "Session-Id", "type": "*composed", 
+				{"tag": "SessionId", "field_id": "Session-Id", "type": "*composed",
 					"value": "~*req.Session-Id", "mandatory": true},
-				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*composed", 
+				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*composed",
 					"value": "~*vars.OriginHost", "mandatory": true},
-				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*composed", 
+				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*composed",
 					"value": "~*vars.OriginRealm", "mandatory": true},
 		],
 		"*cca": [
-				{"tag": "SessionId", "field_id": "Session-Id", "type": "*composed", 
+				{"tag": "SessionId", "field_id": "Session-Id", "type": "*composed",
 					"value": "~*req.Session-Id", "mandatory": true},
-				{"tag": "ResultCode", "field_id": "Result-Code", "type": "*constant", 
+				{"tag": "ResultCode", "field_id": "Result-Code", "type": "*constant",
 					"value": "2001"},
-				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*composed", 
+				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*composed",
 					"value": "~*vars.OriginHost", "mandatory": true},
-				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*composed", 
+				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*composed",
 					"value": "~*vars.OriginRealm", "mandatory": true},
 				{"tag": "AuthApplicationId", "field_id": "Auth-Application-Id", "type": "*composed",
 					 "value": "~*vars.*appid", "mandatory": true},
-				{"tag": "CCRequestType", "field_id": "CC-Request-Type", "type": "*composed", 
+				{"tag": "CCRequestType", "field_id": "CC-Request-Type", "type": "*composed",
 					"value": "~*req.CC-Request-Type", "mandatory": true},
-				{"tag": "CCRequestNumber", "field_id": "CC-Request-Number", "type": "*composed", 
+				{"tag": "CCRequestNumber", "field_id": "CC-Request-Number", "type": "*composed",
 					"value": "~*req.CC-Request-Number", "mandatory": true},
 		],
 		"*asr": [
-				{"tag": "SessionId", "field_id": "Session-Id", "type": "*variable", 
+				{"tag": "SessionId", "field_id": "Session-Id", "type": "*variable",
 					"value": "~*req.Session-Id", "mandatory": true},
-				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*variable", 
+				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*variable",
 					"value": "~*req.Destination-Host", "mandatory": true},
-				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*variable", 
+				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*variable",
 					"value": "~*req.Destination-Realm", "mandatory": true},
-				{"tag": "DestinationRealm", "field_id": "Destination-Realm", "type": "*variable", 
+				{"tag": "DestinationRealm", "field_id": "Destination-Realm", "type": "*variable",
 					"value": "~*req.Origin-Realm", "mandatory": true},
-				{"tag": "DestinationHost", "field_id": "Destination-Host", "type": "*variable", 
+				{"tag": "DestinationHost", "field_id": "Destination-Host", "type": "*variable",
 					"value": "~*req.Origin-Host", "mandatory": true},
 				{"tag": "AuthApplicationId", "field_id": "Auth-Application-Id", "type": "*variable",
 					 "value": "~*vars.*appid", "mandatory": true},
-				{"tag": "UserName", "field_id": "User-Name", "type": "*variable", 
+				{"tag": "UserName", "field_id": "User-Name", "type": "*variable",
 					"value": "~*req.User-Name", "mandatory": true},
-				{"tag": "OriginStateID", "field_id": "Origin-State-Id", "type": "*constant", 
+				{"tag": "OriginStateID", "field_id": "Origin-State-Id", "type": "*constant",
 					"value": "1"},
 		]
 	},
@@ -561,7 +561,7 @@ const CGRATES_CFG_JSON = `
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"attributes_conns": [],					// connections to AttributeS for altering events before supplier queries: <""|*internal|127.0.0.1:2013>
 	"rals_conns": [							// connections to RALs for cost/accounting  <*internal>
-		{"address": "*internal"},			
+		{"address": "*internal"},
 	],
 	"resources_conns": [],					// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// connections to StatS for *stats sorting, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
@@ -569,7 +569,7 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"loaders": [												// LoaderS config 						
+"loaders": [												// LoaderS config
 	{
 		"id": "*default",									// identifier of the Loader
 		"enabled": false,									// starts as service: <true|false>.
@@ -612,7 +612,7 @@ const CGRATES_CFG_JSON = `
 					{"tag": "FilterFieldValues", "field_id": "FilterFieldValues", "type": "*variable", "value": "~4"},
 					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*variable", "value": "~5"},
 				],
-			},	
+			},
 			{
 				"type": "*resources",						// data source type
 				"file_name": "Resources.csv",				// file name in the tp_in_dir
@@ -722,7 +722,7 @@ const CGRATES_CFG_JSON = `
 			},
 			{
 				"type": "*dispatcher_hosts",						// data source type
-				"file_name": "DispatcherHosts.csv",					// file name in the tp_in_dir 
+				"file_name": "DispatcherHosts.csv",					// file name in the tp_in_dir
 				"fields": [
 					{"tag": "Tenant", "field_id": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
 					{"tag": "ID", "field_id": "ID", "type": "*variable", "value": "~1", "mandatory": true},
@@ -820,13 +820,13 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"apier": {	
+"apier": {
 	"caches_conns":[						// connections to CacheS for reloads
 		{"address": "*internal"},
 	],
 	"scheduler_conns": [					// connections to SchedulerS for reloads
 		{"address": "*internal"}
-	],						
+	],
 	"attributes_conns": [],					// connections to AttributeS for CDRExporter
 },
 
