@@ -19,6 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package config
 
+import (
+	"os"
+	"reflect"
+	"testing"
+
+	"github.com/cgrates/cgrates/utils"
+)
+
 // func TestNewCgrJsonCfgFromHttp(t *testing.T) {
 // 	addr := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/tutmongo/cgrates.json"
 // 	expVal, err := NewCgrJsonCfgFromFile(path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo", "cgrates.json"))
@@ -62,8 +70,15 @@ package config
 
 // }
 
-/* Needs to be rewritten with a static config
 func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
+	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out"} {
+		if err := os.RemoveAll(dir); err != nil {
+			t.Fatal("Error removing folder: ", dir, err)
+		}
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Fatal("Error creating folder: ", dir, err)
+		}
+	}
 	expected := map[string]interface{}{
 		"Enabled": true,
 		"Readers": []interface{}{
@@ -102,7 +117,7 @@ func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
 	var rcv map[string]interface{}
 
 	if err := cfg.V1ReloadConfig(&ConfigReloadWithArgDispatcher{
-		Path:    "/usr/share/cgrates/conf/samples/ers",
+		Path:    "/usr/share/cgrates/conf/samples/ers_example",
 		Section: ERsJson,
 	}, &reply); err != nil {
 		t.Fatal(err)
@@ -116,4 +131,3 @@ func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 }
-*/

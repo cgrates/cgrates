@@ -1,0 +1,114 @@
+{
+// CGRateS Configuration file
+//
+// Used for SessionSv1 integration tests
+
+
+"general": {
+    "log_level": 7,
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"stor_db": {
+	"db_password": "CGRateS.org",
+},
+
+
+"rals": {
+	"enabled": true,
+},
+
+
+"scheduler": {
+	"enabled": true,
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"resources": {
+	"enabled": true,
+},
+
+
+"attributes": {
+	"enabled": true,
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"chargers_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"rals_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"sessions": {
+	"enabled": true,
+	"chargers_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"rals_conns": [
+		{"address": "*internal"}
+	],
+	"cdrs_conns": [
+		{"address": "*internal"}
+	],
+	"resources_conns": [
+		{"address": "*internal"}
+	],
+	"attributes_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"ers": {
+	"enabled": true,
+	"sessions_conns": [						// connections to SessionS:  <*internal|127.0.0.1:2012>
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"readers": [
+		{
+			"id": "file_reader1",
+			"run_delay": -1,
+			"type": "*file_csv",
+			"flags": ["*dryrun"],
+			"source_path": "/tmp/ers/in",
+			"processed_path": "/tmp/ers/out",
+			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+				{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "~*req.2", "mandatory": true},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~*req.3", "mandatory": true},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~*req.4", "mandatory": true},
+				{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~*req.6", "mandatory": true},
+				{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "~*req.7", "mandatory": true},
+				{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~*req.8", "mandatory": true},
+				{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~*req.9", "mandatory": true},
+				{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~*req.10", "mandatory": true},
+				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~*req.11", "mandatory": true},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~*req.12", "mandatory": true},
+				{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~*req.13", "mandatory": true},
+			],
+		},
+	],
+},
+
+
+}
