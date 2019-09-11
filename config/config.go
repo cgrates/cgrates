@@ -179,8 +179,6 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.ConfigReloads[utils.CDRC] <- struct{}{} // Unlock the channel
 	cfg.ConfigReloads[utils.CDRE] = make(chan struct{}, 1)
 	cfg.ConfigReloads[utils.CDRE] <- struct{}{} // Unlock the channel
-	cfg.ConfigReloads[utils.SURETAX] = make(chan struct{}, 1)
-	cfg.ConfigReloads[utils.SURETAX] <- struct{}{} // Unlock the channel
 	cfg.ConfigReloads[utils.DIAMETER_AGENT] = make(chan struct{}, 1)
 	cfg.ConfigReloads[utils.DIAMETER_AGENT] <- struct{}{} // Unlock the channel
 	cfg.ConfigReloads[utils.SMAsterisk] = make(chan struct{}, 1)
@@ -1122,25 +1120,32 @@ func (cfg *CGRConfig) loadErsCfg(jsnCfg *CgrJsonCfg) (err error) {
 	return cfg.ersCfg.loadFromJsonCfg(jsnERsCfg, cfg.GeneralCfg().RSRSep, cfg.dfltEvRdr)
 }
 
-// Use locking to retrieve the configuration, possibility later for runtime reload
-func (self *CGRConfig) SureTaxCfg() *SureTaxCfg {
-	cfgChan := <-self.ConfigReloads[utils.SURETAX] // Lock config for read or reloads
-	defer func() { self.ConfigReloads[utils.SURETAX] <- cfgChan }()
-	return self.sureTaxCfg
+// SureTaxCfg use locking to retrieve the configuration, possibility later for runtime reload
+func (cfg *CGRConfig) SureTaxCfg() *SureTaxCfg {
+	cfg.lks[SURETAX_JSON].Lock()
+	defer cfg.lks[SURETAX_JSON].Unlock()
+	return cfg.sureTaxCfg
 }
 
-func (self *CGRConfig) DiameterAgentCfg() *DiameterAgentCfg {
-	cfgChan := <-self.ConfigReloads[utils.DIAMETER_AGENT] // Lock config for read or reloads
-	defer func() { self.ConfigReloads[utils.DIAMETER_AGENT] <- cfgChan }()
-	return self.diameterAgentCfg
+// DiameterAgentCfg returns the config for Diameter Agent
+func (cfg *CGRConfig) DiameterAgentCfg() *DiameterAgentCfg {
+	cfg.lks[DA_JSN].Lock()
+	defer cfg.lks[DA_JSN].Unlock()
+	return cfg.diameterAgentCfg
 }
 
-func (self *CGRConfig) RadiusAgentCfg() *RadiusAgentCfg {
-	return self.radiusAgentCfg
+// RadiusAgentCfg returns the config for Radius Agent
+func (cfg *CGRConfig) RadiusAgentCfg() *RadiusAgentCfg {
+	cfg.lks[RA_JSN].Lock()
+	defer cfg.lks[RA_JSN].Unlock()
+	return cfg.radiusAgentCfg
 }
 
-func (self *CGRConfig) DNSAgentCfg() *DNSAgentCfg {
-	return self.dnsAgentCfg
+// DNSAgentCfg returns the config for DNS Agent
+func (cfg *CGRConfig) DNSAgentCfg() *DNSAgentCfg {
+	cfg.lks[DNSAgentJson].Lock()
+	defer cfg.lks[DNSAgentJson].Unlock()
+	return cfg.dnsAgentCfg
 }
 
 func (cfg *CGRConfig) AttributeSCfg() *AttributeSCfg {
@@ -1534,6 +1539,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case DNSAgentJson:
+		cfg.rldChans[DNSAgentJson] <- struct{}{}
 		if !fall {
 			break
 		}
@@ -1578,7 +1584,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 			break
 		}
 		fallthrough
-	case SURETAX_JSON:
+	case SURETAX_JSON: // doesn't need to be reloaded
 		if !fall {
 			break
 		}
@@ -1607,7 +1613,6 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		if !fall {
 			break
 		}
-		fallthrough
 	}
 	return
 }
