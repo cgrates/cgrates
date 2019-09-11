@@ -21,7 +21,6 @@ package config
 
 import (
 	"os"
-	"reflect"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -79,35 +78,344 @@ func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
 			t.Fatal("Error creating folder: ", dir, err)
 		}
 	}
+	content := []interface{}{
+		map[string]interface{}{
+			"AttributeID":      "",
+			"Blocker":          false,
+			"BreakOnSuccess":   false,
+			"CostShiftDigits":  0,
+			"FieldId":          "ToR",
+			"Filters":          nil,
+			"HandlerId":        "",
+			"Layout":           "",
+			"Mandatory":        true,
+			"MaskDestID":       "",
+			"MaskLen":          0,
+			"NewBranch":        false,
+			"Padding":          "",
+			"RoundingDecimals": 0,
+			"Strip":            "",
+			"Tag":              "TOR",
+			"Timezone":         "",
+			"Type":             "*composed",
+			"Value": []interface{}{
+				map[string]interface{}{
+					"AllFiltersMatch": true,
+					"Rules":           "~*req.2",
+				}},
+			"Width": 0,
+		},
+		map[string]interface{}{
+			"AttributeID":      "",
+			"Blocker":          false,
+			"BreakOnSuccess":   false,
+			"CostShiftDigits":  0,
+			"FieldId":          "OriginID",
+			"Filters":          nil,
+			"HandlerId":        "",
+			"Layout":           "",
+			"Mandatory":        true,
+			"MaskDestID":       "",
+			"MaskLen":          0,
+			"NewBranch":        false,
+			"Padding":          "",
+			"RoundingDecimals": 0,
+			"Strip":            "",
+			"Tag":              "OriginID",
+			"Timezone":         "",
+			"Type":             "*composed",
+			"Value": []interface{}{
+				map[string]interface{}{
+					"AllFiltersMatch": true,
+					"Rules":           "~*req.3",
+				}},
+			"Width": 0,
+		},
+		map[string]interface{}{
+			"AttributeID":      "",
+			"Blocker":          false,
+			"BreakOnSuccess":   false,
+			"CostShiftDigits":  0,
+			"FieldId":          "RequestType",
+			"Filters":          nil,
+			"HandlerId":        "",
+			"Layout":           "",
+			"Mandatory":        true,
+			"MaskDestID":       "",
+			"MaskLen":          0,
+			"NewBranch":        false,
+			"Padding":          "",
+			"RoundingDecimals": 0,
+			"Strip":            "",
+			"Tag":              "RequestType",
+			"Timezone":         "",
+			"Type":             "*composed",
+			"Value": []interface{}{
+				map[string]interface{}{
+					"AllFiltersMatch": true,
+					"Rules":           "~*req.4",
+				}},
+			"Width": 0,
+		},
+		map[string]interface{}{
+			"AttributeID":      "",
+			"Blocker":          false,
+			"BreakOnSuccess":   false,
+			"CostShiftDigits":  0,
+			"FieldId":          "Tenant",
+			"Filters":          nil,
+			"HandlerId":        "",
+			"Layout":           "",
+			"Mandatory":        true,
+			"MaskDestID":       "",
+			"MaskLen":          0,
+			"NewBranch":        false,
+			"Padding":          "",
+			"RoundingDecimals": 0,
+			"Strip":            "",
+			"Tag":              "Tenant",
+			"Timezone":         "",
+			"Type":             "*composed",
+			"Value": []interface{}{
+				map[string]interface{}{
+					"AllFiltersMatch": true,
+					"Rules":           "~*req.6",
+				}},
+			"Width": 0,
+		},
+		map[string]interface{}{
+			"AttributeID":      "",
+			"Blocker":          false,
+			"BreakOnSuccess":   false,
+			"CostShiftDigits":  0,
+			"FieldId":          "Category",
+			"Filters":          nil,
+			"HandlerId":        "",
+			"Layout":           "",
+			"Mandatory":        true,
+			"MaskDestID":       "",
+			"MaskLen":          0,
+			"NewBranch":        false,
+			"Padding":          "",
+			"RoundingDecimals": 0,
+			"Strip":            "",
+			"Tag":              "Category",
+			"Timezone":         "",
+			"Type":             "*composed",
+			"Value": []interface{}{
+				map[string]interface{}{
+					"AllFiltersMatch": true,
+					"Rules":           "~*req.7",
+				}},
+			"Width": 0,
+		},
+		map[string]interface{}{
+			"AttributeID":      "",
+			"Blocker":          false,
+			"BreakOnSuccess":   false,
+			"CostShiftDigits":  0,
+			"FieldId":          "Account",
+			"Filters":          nil,
+			"HandlerId":        "",
+			"Layout":           "",
+			"Mandatory":        true,
+			"MaskDestID":       "",
+			"MaskLen":          0,
+			"NewBranch":        false,
+			"Padding":          "",
+			"RoundingDecimals": 0,
+			"Strip":            "",
+			"Tag":              "Account",
+			"Timezone":         "",
+			"Type":             "*composed",
+			"Value": []interface{}{
+				map[string]interface{}{
+					"AllFiltersMatch": true,
+					"Rules":           "~*req.8",
+				}},
+			"Width": 0,
+		},
+		map[string]interface{}{
+			"AttributeID":      "",
+			"Blocker":          false,
+			"BreakOnSuccess":   false,
+			"CostShiftDigits":  0,
+			"FieldId":          "Subject",
+			"Filters":          nil,
+			"HandlerId":        "",
+			"Layout":           "",
+			"Mandatory":        true,
+			"MaskDestID":       "",
+			"MaskLen":          0,
+			"NewBranch":        false,
+			"Padding":          "",
+			"RoundingDecimals": 0,
+			"Strip":            "",
+			"Tag":              "Subject",
+			"Timezone":         "",
+			"Type":             "*composed",
+			"Value": []interface{}{
+				map[string]interface{}{
+					"AllFiltersMatch": true,
+					"Rules":           "~*req.9",
+				}},
+			"Width": 0,
+		},
+		map[string]interface{}{
+			"AttributeID":      "",
+			"Blocker":          false,
+			"BreakOnSuccess":   false,
+			"CostShiftDigits":  0,
+			"FieldId":          "Destination",
+			"Filters":          nil,
+			"HandlerId":        "",
+			"Layout":           "",
+			"Mandatory":        true,
+			"MaskDestID":       "",
+			"MaskLen":          0,
+			"NewBranch":        false,
+			"Padding":          "",
+			"RoundingDecimals": 0,
+			"Strip":            "",
+			"Tag":              "Destination",
+			"Timezone":         "",
+			"Type":             "*composed",
+			"Value": []interface{}{
+				map[string]interface{}{
+					"AllFiltersMatch": true,
+					"Rules":           "~*req.10",
+				}},
+			"Width": 0,
+		},
+		map[string]interface{}{
+			"AttributeID":      "",
+			"Blocker":          false,
+			"BreakOnSuccess":   false,
+			"CostShiftDigits":  0,
+			"FieldId":          "SetupTime",
+			"Filters":          nil,
+			"HandlerId":        "",
+			"Layout":           "",
+			"Mandatory":        true,
+			"MaskDestID":       "",
+			"MaskLen":          0,
+			"NewBranch":        false,
+			"Padding":          "",
+			"RoundingDecimals": 0,
+			"Strip":            "",
+			"Tag":              "SetupTime",
+			"Timezone":         "",
+			"Type":             "*composed",
+			"Value": []interface{}{
+				map[string]interface{}{
+					"AllFiltersMatch": true,
+					"Rules":           "~*req.11",
+				}},
+			"Width": 0,
+		},
+		map[string]interface{}{
+			"AttributeID":      "",
+			"Blocker":          false,
+			"BreakOnSuccess":   false,
+			"CostShiftDigits":  0,
+			"FieldId":          "AnswerTime",
+			"Filters":          nil,
+			"HandlerId":        "",
+			"Layout":           "",
+			"Mandatory":        true,
+			"MaskDestID":       "",
+			"MaskLen":          0,
+			"NewBranch":        false,
+			"Padding":          "",
+			"RoundingDecimals": 0,
+			"Strip":            "",
+			"Tag":              "AnswerTime",
+			"Timezone":         "",
+			"Type":             "*composed",
+			"Value": []interface{}{
+				map[string]interface{}{
+					"AllFiltersMatch": true,
+					"Rules":           "~*req.12",
+				}},
+			"Width": 0,
+		},
+		map[string]interface{}{
+			"AttributeID":      "",
+			"Blocker":          false,
+			"BreakOnSuccess":   false,
+			"CostShiftDigits":  0,
+			"FieldId":          "Usage",
+			"Filters":          nil,
+			"HandlerId":        "",
+			"Layout":           "",
+			"Mandatory":        true,
+			"MaskDestID":       "",
+			"MaskLen":          0,
+			"NewBranch":        false,
+			"Padding":          "",
+			"RoundingDecimals": 0,
+			"Strip":            "",
+			"Tag":              "Usage",
+			"Timezone":         "",
+			"Type":             "*composed",
+			"Value": []interface{}{
+				map[string]interface{}{
+					"AllFiltersMatch": true,
+					"Rules":           "~*req.13",
+				}},
+			"Width": 0,
+		},
+	}
 	expected := map[string]interface{}{
 		"Enabled": true,
 		"Readers": []interface{}{
 			map[string]interface{}{
-				"ConcurrentReqs": 0.,
-				"Content_fields": nil,
+				"ConcurrentReqs": 1024,
+				"ContentFields":  content,
 				"Continue":       false,
-				"FieldSep":       "",
-				"Filters":        nil,
-				"Flags":          nil,
-				"Header_fields":  nil,
-				"ID":             "file_reader1",
-				"ProcessedPath":  "/tmp/ers/out",
-				"RunDelay":       -1.,
-				"SourceID":       "",
-				"SourcePath":     "/tmp/ers/in",
+				"FieldSep":       ",",
+				"Filters":        []interface{}{},
+				"Flags":          map[string]interface{}{},
+				"HeaderFields":   []interface{}{},
+				"ID":             "*default",
+				"ProcessedPath":  "/var/spool/cgrates/cdrc/out",
+				"RunDelay":       0,
+				"SourceID":       "ers_csv",
+				"SourcePath":     "/var/spool/cgrates/cdrc/in",
 				"Tenant":         nil,
 				"Timezone":       "",
-				"Trailer_fields": nil,
+				"TrailerFields":  []interface{}{},
 				"Type":           "*file_csv",
 				"XmlRootPath":    "",
+			},
+			map[string]interface{}{
+				"ConcurrentReqs": 1024,
+				"Continue":       false,
+				"FieldSep":       ",",
+				"Filters":        nil,
+				"Flags": map[string]interface{}{
+					"*dryrun": []interface{}{},
+				},
+				"HeaderFields":  []interface{}{},
+				"ID":            "file_reader1",
+				"ProcessedPath": "/tmp/ers/out",
+				"RunDelay":      -1.,
+				"SourcePath":    "/tmp/ers/in",
+				"Tenant":        nil,
+				"Timezone":      "",
+				"TrailerFields": []interface{}{},
+				"SourceID":      "ers_csv",
+				"Type":          "*file_csv",
+				"XmlRootPath":   "",
+				"ContentFields": content,
 			},
 		},
 		"SessionSConns": []interface{}{
 			map[string]interface{}{
-				"Address":     "*internal",
+				"Address":     "127.0.0.1:2012",
 				"Synchronous": false,
 				"TLS":         false,
-				"Transport":   "",
+				"Transport":   "*json",
 			},
 		},
 	}
@@ -122,12 +430,18 @@ func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
 	}, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
-		t.Errorf("Expected: %s ,received: %s", utils.OK, reply)
+		t.Errorf("Expected: %s \n,received: %s", utils.OK, reply)
 	}
 
 	if err := cfg.V1GetConfigSection(&StringWithArgDispatcher{Section: ERsJson}, &rcv); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expected, rcv) {
-		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	} else if utils.ToJSON(expected) != utils.ToJSON(rcv) {
+		t.Errorf("Expected: %+v, \n received: %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out"} {
+		if err := os.RemoveAll(dir); err != nil {
+			t.Fatal("Error removing folder: ", dir, err)
+		}
 	}
 }
