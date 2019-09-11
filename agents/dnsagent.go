@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"crypto/tls"
 	"fmt"
 	"strings"
 
@@ -42,31 +43,64 @@ type DNSAgent struct {
 	cgrCfg *config.CGRConfig             // loaded CGRateS configuration
 	fltrS  *engine.FilterS               // connection towards FilterS
 	sS     rpcclient.RpcClientConnection // connection towards CGR-SessionS component
+	server *dns.Server
+}
+
+func (da *DNSAgent) newDNSServer() (err error) {
+	handler := dns.HandlerFunc(func(w dns.ResponseWriter, m *dns.Msg) {
+		go da.handleMessage(w, m)
+	})
+
+	if strings.HasSuffix(da.cgrCfg.DNSAgentCfg().ListenNet, utils.TLSNoCaps) {
+		cert, err := tls.LoadX509KeyPair(da.cgrCfg.TlsCfg().ServerCerificate, da.cgrCfg.TlsCfg().ServerKey)
+		if err != nil {
+			return err
+		}
+
+		config := tls.Config{
+			Certificates: []tls.Certificate{cert},
+		}
+
+		da.server = &dns.Server{
+			Addr:      da.cgrCfg.DNSAgentCfg().Listen,
+			Net:       "tcp-tls",
+			TLSConfig: &config,
+			Handler:   handler,
+		}
+	} else {
+		da.server = &dns.Server{Addr: da.cgrCfg.DNSAgentCfg().Listen, Net: da.cgrCfg.DNSAgentCfg().ListenNet, Handler: handler}
+	}
+	return
 }
 
 // ListenAndServe will run the DNS handler doing also the connection to listen address
-func (da *DNSAgent) ListenAndServe() error {
+func (da *DNSAgent) ListenAndServe() (err error) {
 	utils.Logger.Info(fmt.Sprintf("<%s> start listening on <%s:%s>",
 		utils.DNSAgent, da.cgrCfg.DNSAgentCfg().ListenNet, da.cgrCfg.DNSAgentCfg().Listen))
-	if strings.HasSuffix(da.cgrCfg.DNSAgentCfg().ListenNet, utils.TLSNoCaps) {
-		return dns.ListenAndServeTLS(
-			da.cgrCfg.DNSAgentCfg().Listen,
-			da.cgrCfg.TlsCfg().ServerCerificate,
-			da.cgrCfg.TlsCfg().ServerKey,
-			dns.HandlerFunc(
-				func(w dns.ResponseWriter, m *dns.Msg) {
-					go da.handleMessage(w, m)
-				}),
-		)
+	errChan := make(chan error, 1)
+	rldChan := da.cgrCfg.GetReloadChan(config.DNSAgentJson)
+
+	if err = da.newDNSServer(); err != nil {
+		return
 	}
-	return dns.ListenAndServe(
-		da.cgrCfg.DNSAgentCfg().Listen,
-		da.cgrCfg.DNSAgentCfg().ListenNet,
-		dns.HandlerFunc(
-			func(w dns.ResponseWriter, m *dns.Msg) {
-				go da.handleMessage(w, m)
-			}),
-	)
+	lisenAndServe := func() {
+		errChan <- da.server.ListenAndServe()
+	}
+	go lisenAndServe()
+	for {
+		select {
+		case err = <-errChan:
+			return
+		case <-rldChan:
+			if err = da.Shutdown(); err != nil {
+				return
+			}
+			if err = da.newDNSServer(); err != nil {
+				return
+			}
+			go lisenAndServe() //restart the gorutine
+		}
+	}
 }
 
 // handleMessage is the entry point of all DNS requests
@@ -320,4 +354,9 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 				utils.DNSAgent, agReq.Reply))
 	}
 	return true, nil
+}
+
+// Shutdown stops the DNS server
+func (da *DNSAgent) Shutdown() error {
+	return da.server.Shutdown()
 }
