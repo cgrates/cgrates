@@ -28,20 +28,18 @@ import (
 )
 
 func NewAttributeService(dm *DataManager, filterS *FilterS,
-	stringIndexedFields, prefixIndexedFields *[]string,
-	processRuns int) (*AttributeService, error) {
-	return &AttributeService{dm: dm, filterS: filterS,
-		stringIndexedFields: stringIndexedFields,
-		prefixIndexedFields: prefixIndexedFields,
-		processRuns:         processRuns}, nil
+	cgrcfg *config.CGRConfig) (*AttributeService, error) {
+	return &AttributeService{
+		dm:      dm,
+		filterS: filterS,
+		cgrcfg:  cgrcfg,
+	}, nil
 }
 
 type AttributeService struct {
-	dm                  *DataManager
-	filterS             *FilterS
-	stringIndexedFields *[]string
-	prefixIndexedFields *[]string
-	processRuns         int
+	dm      *DataManager
+	filterS *FilterS
+	cgrcfg  *config.CGRConfig
 }
 
 // ListenAndServe will initialize the service
@@ -70,13 +68,13 @@ func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent
 	if len(args.AttributeIDs) != 0 {
 		attrIDs = args.AttributeIDs
 	} else {
-		aPrflIDs, err := MatchingItemIDsForEvent(args.Event, alS.stringIndexedFields, alS.prefixIndexedFields,
+		aPrflIDs, err := MatchingItemIDsForEvent(args.Event, alS.cgrcfg.AttributeSCfg().StringIndexedFields, alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
 			alS.dm, utils.CacheAttributeFilterIndexes, attrIdxKey, alS.filterS.cfg.AttributeSCfg().IndexedSelects)
 		if err != nil {
 			if err != utils.ErrNotFound {
 				return nil, err
 			}
-			if aPrflIDs, err = MatchingItemIDsForEvent(args.Event, alS.stringIndexedFields, alS.prefixIndexedFields,
+			if aPrflIDs, err = MatchingItemIDsForEvent(args.Event, alS.cgrcfg.AttributeSCfg().StringIndexedFields, alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
 				alS.dm, utils.CacheAttributeFilterIndexes, utils.ConcatenatedKey(args.Tenant, utils.META_ANY),
 				alS.filterS.cfg.AttributeSCfg().IndexedSelects); err != nil {
 				return nil, err
@@ -287,7 +285,7 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	if args.ProcessRuns == nil || *args.ProcessRuns == 0 {
-		args.ProcessRuns = utils.IntPointer(alS.processRuns)
+		args.ProcessRuns = utils.IntPointer(alS.cgrcfg.AttributeSCfg().ProcessRuns)
 	}
 	var apiRply *AttrSProcessEventReply // aggregate response here
 	for i := 0; i < *args.ProcessRuns; i++ {
