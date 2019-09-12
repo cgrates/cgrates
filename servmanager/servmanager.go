@@ -267,6 +267,17 @@ func (srvMngr *ServiceManager) GetConnection(subsystem string, cfg *config.Remot
 // StartServices starts all enabled services
 func (srvMngr *ServiceManager) StartServices() (err error) {
 	// go hendleReloads()
+	if srvMngr.cfg.AttributeSCfg().Enabled {
+		go func() {
+			if attrS, has := srvMngr.subsystems[utils.AttributeS]; !has {
+				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start", utils.AttributeS))
+				srvMngr.engineShutdown <- true
+			} else if err = attrS.Start(srvMngr, true); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start because: %s", utils.AttributeS, err))
+				srvMngr.engineShutdown <- true
+			}
+		}()
+	}
 
 	// startServer()
 	return
