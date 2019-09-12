@@ -1148,7 +1148,10 @@ func (cfg *CGRConfig) DNSAgentCfg() *DNSAgentCfg {
 	return cfg.dnsAgentCfg
 }
 
+// AttributeSCfg returns the config for AttributeS
 func (cfg *CGRConfig) AttributeSCfg() *AttributeSCfg {
+	cfg.lks[ATTRIBUTE_JSN].Lock()
+	defer cfg.lks[ATTRIBUTE_JSN].Unlock()
 	return cfg.attributeSCfg
 }
 

@@ -156,10 +156,13 @@ func TestAttributePopulateAttrService(t *testing.T) {
 	data, _ := NewMapStorage()
 	dmAtr = NewDataManager(data)
 	defaultCfg, err := config.NewDefaultCGRConfig()
+	defaultCfg.AttributeSCfg().ProcessRuns = 1
+	defaultCfg.AttributeSCfg().StringIndexedFields = nil
+	defaultCfg.AttributeSCfg().PrefixIndexedFields = nil
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	attrService, err = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, nil, nil, 1)
+	attrService, err = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -1698,10 +1701,11 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 	data, _ := NewMapStorage()
 	dmAtr = NewDataManager(data)
 	defaultCfg, err := config.NewDefaultCGRConfig()
+	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	if err != nil {
 		b.Errorf("Error: %+v", err)
 	}
-	attrService, err = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, nil, nil, 1)
+	attrService, err = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	if err != nil {
 		b.Errorf("Error: %+v", err)
 	}
@@ -1761,10 +1765,11 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 	data, _ := NewMapStorage()
 	dmAtr = NewDataManager(data)
 	defaultCfg, err := config.NewDefaultCGRConfig()
+	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	if err != nil {
 		b.Errorf("Error: %+v", err)
 	}
-	attrService, err = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, nil, nil, 1)
+	attrService, err = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	if err != nil {
 		b.Errorf("Error: %+v", err)
 	}
