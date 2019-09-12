@@ -1680,6 +1680,22 @@ func main() {
 	internalCoreSv1Chan := make(chan rpcclient.RpcClientConnection, 1)
 	internalRALsv1Chan := make(chan rpcclient.RpcClientConnection, 1)
 
+	// init CacheS
+	cacheS := initCacheS(internalCacheSChan, server, dm, exitChan)
+
+	// init GuardianSv1
+	initGuardianSv1(internalGuardianSChan, server)
+
+	// init CoreSv1
+	initCoreSv1(internalCoreSv1Chan, server)
+
+	// Start ServiceManager
+	srvManager := servmanager.NewServiceManager(cfg, dm, cacheS, cdrDb,
+		loadDb, filterSChan, server, exitChan)
+	go srvManager.StartServices()
+
+	initServiceManagerV1(internalServeManagerChan, srvManager, server)
+
 	// init internalRPCSet
 	engine.IntRPC = engine.NewRPCClientSet()
 	if cfg.DispatcherSCfg().Enabled {
@@ -1705,19 +1721,6 @@ func main() {
 		engine.IntRPC.AddInternalRPCClient(utils.CoreSv1, internalCoreSv1Chan)
 		engine.IntRPC.AddInternalRPCClient(utils.RALsV1, internalRALsv1Chan)
 	}
-
-	// init CacheS
-	cacheS := initCacheS(internalCacheSChan, server, dm, exitChan)
-
-	// init GuardianSv1
-	initGuardianSv1(internalGuardianSChan, server)
-
-	// init CoreSv1
-	initCoreSv1(internalCoreSv1Chan, server)
-
-	// Start ServiceManager
-	srvManager := servmanager.NewServiceManager(cfg, dm, cacheS, exitChan)
-	initServiceManagerV1(internalServeManagerChan, srvManager, server)
 
 	// init SchedulerS
 	initSchedulerS(internalSchedSChan, srvManager, server)
