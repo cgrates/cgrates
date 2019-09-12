@@ -54,6 +54,10 @@ accid23;*rated;cgrates.org;1001;086517174963;2013-02-03 19:54:00;26;val_extra3;"
 	fileContent3 = `cgrates.org,*voice,SessionFromCsv,*prepaid,1001,ANY2CNT,1002,2018-01-07 17:00:00 +0000 UTC,2018-01-07 17:00:10 +0000 UTC,5m
 `
 
+	fileContentForFilter = `accid21;*prepaid;itsyscom.com;1002;086517174963;2013-02-03 19:54:00;62;val_extra3;"";val_extra1
+accid22;*postpaid;itsyscom.com;1002;+4986517174963;2013-02-03 19:54:00;123;val_extra3;"";val_extra1
+accid23;*rated;cgrates.org;1001;086517174963;2013-02-03 19:54:00;26;val_extra3;"";val_extra1`
+
 	csvTests = []func(t *testing.T){
 		testCsvITCreateCdrDirs,
 		testCsvITInitConfig,
@@ -69,7 +73,10 @@ accid23;*rated;cgrates.org;1001;086517174963;2013-02-03 19:54:00;26;val_extra3;"
 		testCsvITTerminateSession,
 		testCsvITProcessCDR,
 		testCsvITAnalyseCDRs,
+		testCsvITProcessFilteredCDR,
+		testCsvITAnalyzeFilteredCDR,
 		testCsvITProcessedFiles,
+		testCsvITCleanupFiles,
 		testCsvITKillEngine,
 	}
 )
@@ -106,7 +113,7 @@ func testCsvITCreateCdrDirs(t *testing.T) {
 	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out",
 		"/tmp/ers2/in", "/tmp/ers2/out", "/tmp/init_session/in", "/tmp/init_session/out",
 		"/tmp/terminate_session/in", "/tmp/terminate_session/out", "/tmp/cdrs/in",
-		"/tmp/cdrs/out"} {
+		"/tmp/cdrs/out", "/tmp/ers_with_filters/in", "/tmp/ers_with_filters/out"} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
 		}
@@ -266,6 +273,34 @@ func testCsvITAnalyseCDRs(t *testing.T) {
 	}
 }
 
+func testCsvITProcessFilteredCDR(t *testing.T) {
+	fileName := "file1.csv"
+	tmpFilePath := path.Join("/tmp", fileName)
+	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContentForFilter), 0644); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := os.Rename(tmpFilePath, path.Join("/tmp/ers_with_filters/in", fileName)); err != nil {
+		t.Fatal("Error moving file to processing directory: ", err)
+	}
+}
+
+func testCsvITAnalyzeFilteredCDR(t *testing.T) {
+	time.Sleep(500 * time.Millisecond)
+
+	var cdrs []*engine.CDR
+	args := utils.RPCCDRsFilter{NotRunIDs: []string{"CustomerCharges", "SupplierCharges"},
+		Sources: []string{"ers_csv"}}
+	if err := csvRPC.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 2 {
+		t.Error("Unexpected number of CDRs returned: ", utils.ToJSON(cdrs))
+	} else if cdrs[0].Account != "1002" || cdrs[1].Account != "1002" {
+		t.Errorf("Expecting: 1002, received: <%s> , <%s>", cdrs[0].Account, cdrs[1].Account)
+	} else if cdrs[0].Tenant != "itsyscom.com" || cdrs[1].Tenant != "itsyscom.com" {
+		t.Errorf("Expecting: itsyscom.com, received: <%s> , <%s>", cdrs[0].Tenant, cdrs[1].Tenant)
+	}
+}
+
 func testCsvITProcessedFiles(t *testing.T) {
 	time.Sleep(time.Duration(1 * time.Second))
 	if outContent1, err := ioutil.ReadFile("/tmp/ers/out/file1.csv"); err != nil {
@@ -282,6 +317,22 @@ func testCsvITProcessedFiles(t *testing.T) {
 		t.Error(err)
 	} else if fileContent3 != string(outContent3) {
 		t.Errorf("Expecting: %q, received: %q", fileContent3, string(outContent3))
+	}
+	if outContent4, err := ioutil.ReadFile("/tmp/ers_with_filters/out/file1.csv"); err != nil {
+		t.Error(err)
+	} else if fileContentForFilter != string(outContent4) {
+		t.Errorf("Expecting: %q, received: %q", fileContentForFilter, string(outContent4))
+	}
+}
+
+func testCsvITCleanupFiles(t *testing.T) {
+	for _, dir := range []string{"/tmp/ers",
+		"/tmp/ers2", "/tmp/init_session",
+		"/tmp/terminate_session", "/tmp/cdrs",
+		"/tmp/ers_with_filters"} {
+		if err := os.RemoveAll(dir); err != nil {
+			t.Fatal("Error removing folder: ", dir, err)
+		}
 	}
 }
 
