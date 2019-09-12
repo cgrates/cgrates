@@ -1548,6 +1548,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case ATTRIBUTE_JSN:
+		cfg.rldChans[ATTRIBUTE_JSN] <- struct{}{}
 		if !fall {
 			break
 		}
