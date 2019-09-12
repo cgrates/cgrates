@@ -260,8 +260,13 @@ func (srvMngr *ServiceManager) GetExitChan() chan bool {
 }
 
 // GetConnection creates a rpcClient to the specified subsystem
-func (srvMngr *ServiceManager) GetConnection(subsystem string, cfg *config.RemoteHost) (rpcclient.RpcClientConnection, error) {
-	return nil, nil
+func (srvMngr *ServiceManager) GetConnection(subsystem string, conns []*config.RemoteHost) (rpcclient.RpcClientConnection, error) {
+	return engine.NewRPCPool(rpcclient.POOL_FIRST,
+		srvMngr.cfg.TlsCfg().ClientKey,
+		srvMngr.cfg.TlsCfg().ClientCerificate, srvMngr.cfg.TlsCfg().CaCertificate,
+		srvMngr.cfg.GeneralCfg().ConnectAttempts, srvMngr.cfg.GeneralCfg().Reconnects,
+		srvMngr.cfg.GeneralCfg().ConnectTimeout, srvMngr.cfg.GeneralCfg().ReplyTimeout,
+		conns, srvMngr.subsystems[subsystem].GetIntenternalChan(), false)
 }
 
 // StartServices starts all enabled services
@@ -349,7 +354,7 @@ type ServiceProvider interface {
 	// GetExitChan returns the exit chanel
 	GetExitChan() chan bool
 	// GetConnection creates a rpcClient to the specified subsystem
-	GetConnection(subsystem string, cfg *config.RemoteHost) (rpcclient.RpcClientConnection, error)
+	GetConnection(subsystem string, cfg []*config.RemoteHost) (rpcclient.RpcClientConnection, error)
 }
 
 // Service interface that describes what functions should a service implement
