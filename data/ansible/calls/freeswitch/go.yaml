@@ -11,6 +11,18 @@
     mode: 'u=rwx,go=rx'
     dest: '{{ golang_download_dir }}'
 
+- name: Register the current Go version (if any)
+  command: /usr/local/go/bin/go version
+  ignore_errors: yes
+  register: go_version
+  changed_when: false
+
+- name: Remove old installation of Go
+  file:
+    path: /usr/local/go
+    state: absent
+  when: go_version is failed or go_version.stdout != go_version_target
+
 - name: download Go language SDK
   get_url:
     url: '{{ golang_mirror }}/{{ golang_redis_filename }}'
@@ -66,44 +78,44 @@
 - name: Add GOROOT to PATH for root
   become: yes 
   lineinfile:
-    path: ~/.bashrc
+    dest: ~/.bashrc
     line: export PATH=$PATH:$GOROOT/bin
     insertafter: last
 
 - name: Export GOPATH for root
   become: yes
   lineinfile:
-    path: ~/.bashrc
+    dest: ~/.bashrc
     line: export GOPATH='{{ golang_gopath }}'
     insertafter: last
     
 - name: Add GOPATH to PATH for root
   become: yes
   lineinfile:
-    path: ~/.bashrc
+    dest: ~/.bashrc
     line: export PATH=$PATH:$GOPATH/bin
     insertafter: last
 
 - name: Export GOROOT
   lineinfile:
-    path: ~/.bashrc
+    dest: ~/.bashrc
     line: export GOROOT='{{ golang_install_dir }}'
     insertafter: last
 
 - name: Add GOROOT to PATH
   lineinfile:
-    path: ~/.bashrc
+    dest: ~/.bashrc
     line: export PATH=$PATH:$GOROOT/bin
     insertafter: last
 
 - name: Export GOPATH
   lineinfile:
-    path: ~/.bashrc
+    dest: ~/.bashrc
     line: export GOPATH='{{ golang_gopath }}'
     insertafter: last
     
 - name: Add GOPATH to PATH
   lineinfile:
-    path: ~/.bashrc
+    dest: ~/.bashrc
     line: export PATH=$PATH:$GOPATH/bin
     insertafter: last
