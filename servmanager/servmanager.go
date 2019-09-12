@@ -266,14 +266,14 @@ func (srvMngr *ServiceManager) GetConnection(subsystem string, cfg *config.Remot
 
 // StartServices starts all enabled services
 func (srvMngr *ServiceManager) StartServices() (err error) {
-	// go hendleReloads()
+	go srvMngr.handleReload()
 	if srvMngr.cfg.AttributeSCfg().Enabled {
 		go func() {
 			if attrS, has := srvMngr.subsystems[utils.AttributeS]; !has {
-				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start", utils.AttributeS))
+				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.AttributeS))
 				srvMngr.engineShutdown <- true
 			} else if err = attrS.Start(srvMngr, true); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start because: %s", utils.AttributeS, err))
+				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start %s because: %s", utils.ServiceManager, utils.AttributeS, err))
 				srvMngr.engineShutdown <- true
 			}
 		}()
@@ -290,6 +290,43 @@ func (srvMngr *ServiceManager) AddService(services ...Service) {
 			continue
 		}
 		srvMngr.subsystems[srv.ServiceName()] = srv
+	}
+}
+
+func (srvMngr *ServiceManager) handleReload() {
+	var err error
+	for {
+		select {
+		case <-srvMngr.cfg.GetReloadChan(config.ATTRIBUTE_JSN):
+			attrS, has := srvMngr.subsystems[utils.AttributeS]
+			if !has {
+				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.AttributeS))
+				srvMngr.engineShutdown <- true
+				return // stop if we encounter an error
+			}
+			if srvMngr.cfg.AttributeSCfg().Enabled {
+				if attrS.IsRunning() {
+					if err = attrS.Reload(srvMngr); err != nil {
+						utils.Logger.Err(fmt.Sprintf("<%s> Failed to reload <%s>", utils.ServiceManager, utils.AttributeS))
+						srvMngr.engineShutdown <- true
+						return // stop if we encounter an error
+					}
+				} else {
+					if err = attrS.Start(srvMngr, true); err != nil {
+						utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.AttributeS))
+						srvMngr.engineShutdown <- true
+						return // stop if we encounter an error
+					}
+				}
+			} else if attrS.IsRunning() {
+				if err = attrS.Shutdown(); err != nil {
+					utils.Logger.Err(fmt.Sprintf("<%s> Failed to stop service <%s>", utils.ServiceManager, utils.AttributeS))
+					srvMngr.engineShutdown <- true
+					return // stop if we encounter an error
+				}
+			}
+		}
+		// handle RPC server
 	}
 }
 
