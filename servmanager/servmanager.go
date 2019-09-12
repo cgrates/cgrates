@@ -186,3 +186,35 @@ func (srvMngr *ServiceManager) V1ServiceStatus(args ArgStartService, reply *stri
 	}
 	return nil
 }
+
+// ServiceProvider should implement this to provide information for service
+type ServiceProvider interface {
+	// GetDM returns the DataManager
+	GetDM() *engine.DataManager
+	// GetCDRStorage returns the CdrStorage
+	GetCDRStorage() engine.CdrStorage
+	// GetLoadStorage returns the LoadStorage
+	GetLoadStorage() engine.LoadStorage
+	// GetConfig returns the Configuration
+	GetConfig() *config.CGRConfig
+	// GetCacheS returns the CacheS
+	GetCacheS() *engine.CacheS
+	// GetFilterS returns the FilterS
+	GetFilterS() *engine.FilterS
+	// GetServer returns the Server
+	GetServer() *utils.Server
+	// GetExitChan returns the exit chanel
+	GetExitChan() chan bool
+	// GetConnection creates a rpcClient to the specified subsystem
+	GetConnection(subsystem string, cfg *config.RemoteHost) (rpcclient.RpcClientConnection, error)
+}
+
+// Service interface that describes what functions should a service implement
+type Service interface {
+	// Start should handle the sercive start
+	Start(sp ServiceProvider)
+	// Reload handles the change of config
+	Reload(sp ServiceProvider)
+	// Shutdown stops the service
+	Shutdown()
+}
