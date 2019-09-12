@@ -42,6 +42,7 @@ import (
 	"github.com/cgrates/cgrates/ers"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/scheduler"
+	"github.com/cgrates/cgrates/services"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
@@ -1692,6 +1693,9 @@ func main() {
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, dm, cacheS, cdrDb,
 		loadDb, filterSChan, server, exitChan)
+	attrS := services.NewAttributeService()
+	srvManager.AddService(attrS)
+	internalAttributeSChan = attrS.GetIntenternalChan()
 	go srvManager.StartServices()
 
 	initServiceManagerV1(internalServeManagerChan, srvManager, server)
@@ -1801,10 +1805,10 @@ func main() {
 	// Start FilterS
 	go startFilterService(filterSChan, cacheS, internalStatSChan, internalRsChan, internalRaterChan, cfg, dm, exitChan)
 
-	if cfg.AttributeSCfg().Enabled {
-		go startAttributeService(internalAttributeSChan, cacheS,
-			cfg, dm, server, filterSChan, exitChan)
-	}
+	// if cfg.AttributeSCfg().Enabled {
+	// go startAttributeService(internalAttributeSChan, cacheS,
+	// cfg, dm, server, filterSChan, exitChan)
+	// }
 	if cfg.ChargerSCfg().Enabled {
 		go startChargerService(internalChargerSChan, internalAttributeSChan,
 			internalDispatcherSChan, cacheS, cfg, dm, server,
