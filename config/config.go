@@ -1155,7 +1155,10 @@ func (cfg *CGRConfig) AttributeSCfg() *AttributeSCfg {
 	return cfg.attributeSCfg
 }
 
+// ChargerSCfg returns the config for ChargerS
 func (cfg *CGRConfig) ChargerSCfg() *ChargerSCfg {
+	cfg.lks[ChargerSCfgJson].Lock()
+	defer cfg.lks[ChargerSCfgJson].Unlock()
 	return cfg.chargerSCfg
 }
 

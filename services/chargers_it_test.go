@@ -30,11 +30,13 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestAttributeSReload(t *testing.T) {
+func TestChargerSReload(t *testing.T) {
+	// utils.Logger.SetLogLevel(7)
 	cfg, err := config.NewDefaultCGRConfig()
 	if err != nil {
 		t.Fatal(err)
 	}
+	cfg.AttributeSCfg().Enabled = true
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	engineShutdown := make(chan bool, 1)
@@ -48,31 +50,31 @@ func TestAttributeSReload(t *testing.T) {
 		chS /*cdrStorage*/, nil,
 		/*loadStorage*/ nil, filterSChan,
 		server, nil, engineShutdown)
-	attrS := NewAttributeService()
-	srvMngr.AddService(attrS, NewChargerService())
+	chrS := NewChargerService()
+	srvMngr.AddService(NewAttributeService(), chrS)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
-	if attrS.IsRunning() {
+	if chrS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 	var reply string
-	if err := cfg.V1ReloadConfig(&config.ConfigReloadWithArgDispatcher{
+	if err = cfg.V1ReloadConfig(&config.ConfigReloadWithArgDispatcher{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.ATTRIBUTE_JSN,
+		Section: config.ChargerSCfgJson,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	if !attrS.IsRunning() {
+	if !chrS.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	cfg.AttributeSCfg().Enabled = false
-	cfg.GetReloadChan(config.ATTRIBUTE_JSN) <- struct{}{}
+	cfg.ChargerSCfg().Enabled = false
+	cfg.GetReloadChan(config.ChargerSCfgJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
-	if attrS.IsRunning() {
+	if chrS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 	engineShutdown <- true

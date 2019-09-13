@@ -28,6 +28,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+// NewAttributeService returns the Attribute Service
 func NewAttributeService() servmanager.Service {
 	return &AttributeService{
 		connChan: make(chan rpcclient.RpcClientConnection, 1),
