@@ -32,6 +32,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+// NewServiceManager returns a service manager
 func NewServiceManager(cfg *config.CGRConfig, dm *engine.DataManager,
 	cacheS *engine.CacheS, cdrStorage engine.CdrStorage,
 	loadStorage engine.LoadStorage, filterSChan chan *engine.FilterS,
@@ -302,6 +303,9 @@ func (srvMngr *ServiceManager) handleReload() {
 	var err error
 	for {
 		select {
+		case ext := <-srvMngr.engineShutdown:
+			srvMngr.engineShutdown <- ext
+			return
 		case <-srvMngr.cfg.GetReloadChan(config.ATTRIBUTE_JSN):
 			attrS, has := srvMngr.subsystems[utils.AttributeS]
 			if !has {
