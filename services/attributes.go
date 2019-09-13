@@ -76,7 +76,9 @@ func (attrS *AttributeService) GetIntenternalChan() (conn chan rpcclient.RpcClie
 }
 
 // Reload handles the change of config
-func (attrS *AttributeService) Reload(sp servmanager.ServiceProvider) (err error) { return }
+func (attrS *AttributeService) Reload(sp servmanager.ServiceProvider) (err error) {
+	return
+}
 
 // Shutdown stops the service
 func (attrS *AttributeService) Shutdown() (err error) {
