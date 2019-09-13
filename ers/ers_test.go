@@ -1,0 +1,52 @@
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
+
+package ers
+
+import (
+	"reflect"
+	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+)
+
+func TestERsNewERService(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	fltrS := &engine.FilterS{}
+	expected := &ERService{cfg: cfg,
+		filterS:   fltrS,
+		rdrs:      make(map[string]EventReader),
+		rdrPaths:  make(map[string]string),
+		stopLsn:   make(map[string]chan struct{}),
+		rdrEvents: make(chan *erEvent),
+		rdrErr:    make(chan error),
+		exitChan:  nil,
+		sS:        nil}
+	rcv := NewERService(cfg, fltrS, nil, nil)
+
+	if !reflect.DeepEqual(expected.cfg, rcv.cfg) {
+		t.Errorf("Expecting: <%+v>, received: <%+v>", expected.cfg, rcv.cfg)
+	} else if !reflect.DeepEqual(expected.filterS, rcv.filterS) {
+		t.Errorf("Expecting: <%+v>, received: <%+v>", expected.filterS, rcv.filterS)
+	}
+}
+
+func TestERsAddReader(t *testing.T) {
+
+}
