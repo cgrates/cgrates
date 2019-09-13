@@ -1692,10 +1692,12 @@ func main() {
 
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, dm, cacheS, cdrDb,
-		loadDb, filterSChan, server, exitChan)
+		loadDb, filterSChan, server, internalDispatcherSChan, exitChan)
 	attrS := services.NewAttributeService()
-	srvManager.AddService(attrS)
+	chrS := services.NewChargerService()
+	srvManager.AddService(attrS, chrS)
 	internalAttributeSChan = attrS.GetIntenternalChan()
+	internalChargerSChan = chrS.GetIntenternalChan()
 	go srvManager.StartServices()
 
 	initServiceManagerV1(internalServeManagerChan, srvManager, server)
@@ -1809,11 +1811,11 @@ func main() {
 	// go startAttributeService(internalAttributeSChan, cacheS,
 	// cfg, dm, server, filterSChan, exitChan)
 	// }
-	if cfg.ChargerSCfg().Enabled {
-		go startChargerService(internalChargerSChan, internalAttributeSChan,
-			internalDispatcherSChan, cacheS, cfg, dm, server,
-			filterSChan, exitChan)
-	}
+	// if cfg.ChargerSCfg().Enabled {
+	// 	go startChargerService(internalChargerSChan, internalAttributeSChan,
+	// 		internalDispatcherSChan, cacheS, cfg, dm, server,
+	// 		filterSChan, exitChan)
+	// }
 
 	// Start RL service
 	if cfg.ResourceSCfg().Enabled {

@@ -36,18 +36,20 @@ import (
 func NewServiceManager(cfg *config.CGRConfig, dm *engine.DataManager,
 	cacheS *engine.CacheS, cdrStorage engine.CdrStorage,
 	loadStorage engine.LoadStorage, filterSChan chan *engine.FilterS,
-	server *utils.Server, engineShutdown chan bool) *ServiceManager {
+	server *utils.Server, dispatcherSChan chan rpcclient.RpcClientConnection,
+	engineShutdown chan bool) *ServiceManager {
 	sm := &ServiceManager{
 		cfg:            cfg,
 		dm:             dm,
 		engineShutdown: engineShutdown,
 		cacheS:         cacheS,
 
-		cdrStorage:  cdrStorage,
-		loadStorage: loadStorage,
-		filterS:     filterSChan,
-		server:      server,
-		subsystems:  make(map[string]Service),
+		cdrStorage:      cdrStorage,
+		loadStorage:     loadStorage,
+		filterS:         filterSChan,
+		server:          server,
+		subsystems:      make(map[string]Service),
+		dispatcherSChan: dispatcherSChan,
 	}
 	return sm
 }
@@ -66,6 +68,8 @@ type ServiceManager struct {
 	filterS     chan *engine.FilterS
 	server      *utils.Server
 	subsystems  map[string]Service
+
+	dispatcherSChan chan rpcclient.RpcClientConnection
 }
 
 func (srvMngr *ServiceManager) StartScheduler(waitCache bool) error {
@@ -262,12 +266,19 @@ func (srvMngr *ServiceManager) GetExitChan() chan bool {
 
 // GetConnection creates a rpcClient to the specified subsystem
 func (srvMngr *ServiceManager) GetConnection(subsystem string, conns []*config.RemoteHost) (rpcclient.RpcClientConnection, error) {
+	if len(conns) == 0 {
+		return nil, nil
+	}
+	internalChan := srvMngr.subsystems[subsystem].GetIntenternalChan()
+	if srvMngr.GetConfig().DispatcherSCfg().Enabled {
+		internalChan = srvMngr.dispatcherSChan
+	}
 	return engine.NewRPCPool(rpcclient.POOL_FIRST,
 		srvMngr.cfg.TlsCfg().ClientKey,
 		srvMngr.cfg.TlsCfg().ClientCerificate, srvMngr.cfg.TlsCfg().CaCertificate,
 		srvMngr.cfg.GeneralCfg().ConnectAttempts, srvMngr.cfg.GeneralCfg().Reconnects,
 		srvMngr.cfg.GeneralCfg().ConnectTimeout, srvMngr.cfg.GeneralCfg().ReplyTimeout,
-		conns, srvMngr.subsystems[subsystem].GetIntenternalChan(), false)
+		conns, internalChan, false)
 }
 
 // StartServices starts all enabled services
@@ -280,6 +291,17 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 				srvMngr.engineShutdown <- true
 			} else if err = attrS.Start(srvMngr, true); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start %s because: %s", utils.ServiceManager, utils.AttributeS, err))
+				srvMngr.engineShutdown <- true
+			}
+		}()
+	}
+	if srvMngr.cfg.ChargerSCfg().Enabled {
+		go func() {
+			if chrS, has := srvMngr.subsystems[utils.ChargerS]; !has {
+				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.ChargerS))
+				srvMngr.engineShutdown <- true
+			} else if err = chrS.Start(srvMngr, true); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start %s because: %s", utils.ServiceManager, utils.ChargerS, err))
 				srvMngr.engineShutdown <- true
 			}
 		}()
@@ -330,6 +352,34 @@ func (srvMngr *ServiceManager) handleReload() {
 			} else if attrS.IsRunning() {
 				if err = attrS.Shutdown(); err != nil {
 					utils.Logger.Err(fmt.Sprintf("<%s> Failed to stop service <%s>", utils.ServiceManager, utils.AttributeS))
+					srvMngr.engineShutdown <- true
+					return // stop if we encounter an error
+				}
+			}
+		case <-srvMngr.cfg.GetReloadChan(config.ChargerSCfgJson):
+			chrS, has := srvMngr.subsystems[utils.ChargerS]
+			if !has {
+				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.ChargerS))
+				srvMngr.engineShutdown <- true
+				return // stop if we encounter an error
+			}
+			if srvMngr.cfg.ChargerSCfg().Enabled {
+				if chrS.IsRunning() {
+					if err = chrS.Reload(srvMngr); err != nil {
+						utils.Logger.Err(fmt.Sprintf("<%s> Failed to reload <%s>", utils.ServiceManager, utils.ChargerS))
+						srvMngr.engineShutdown <- true
+						return // stop if we encounter an error
+					}
+				} else {
+					if err = chrS.Start(srvMngr, true); err != nil {
+						utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.ChargerS))
+						srvMngr.engineShutdown <- true
+						return // stop if we encounter an error
+					}
+				}
+			} else if chrS.IsRunning() {
+				if err = chrS.Shutdown(); err != nil {
+					utils.Logger.Err(fmt.Sprintf("<%s> Failed to stop service <%s>", utils.ServiceManager, utils.ChargerS))
 					srvMngr.engineShutdown <- true
 					return // stop if we encounter an error
 				}

@@ -81,7 +81,7 @@ func TestNewCGRConfigFromPath(t *testing.T) {
 	}
 
 }
-func TestCGRConfigReload(t *testing.T) {
+func TestCGRConfigReloadAttributeS(t *testing.T) {
 	cfg, err := NewDefaultCGRConfig()
 	if err != nil {
 		t.Fatal(err)
@@ -104,6 +104,37 @@ func TestCGRConfigReload(t *testing.T) {
 	}
 	if !reflect.DeepEqual(expAttr, cfg.AttributeSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.AttributeSCfg()))
+	}
+}
+
+func TestCGRConfigReloadChargerS(t *testing.T) {
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var reply string
+	if err = cfg.V1ReloadConfig(&ConfigReloadWithArgDispatcher{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
+		Section: ChargerSCfgJson,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK received: %s", reply)
+	}
+	expAttr := &ChargerSCfg{
+		Enabled:             true,
+		StringIndexedFields: &[]string{utils.Account},
+		PrefixIndexedFields: &[]string{},
+		IndexedSelects:      true,
+		AttributeSConns: []*RemoteHost{
+			&RemoteHost{
+				Address:   "127.0.0.1:2012",
+				Transport: utils.MetaJSONrpc,
+			},
+		},
+	}
+	if !reflect.DeepEqual(expAttr, cfg.ChargerSCfg()) {
+		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.ChargerSCfg()))
 	}
 }
 
