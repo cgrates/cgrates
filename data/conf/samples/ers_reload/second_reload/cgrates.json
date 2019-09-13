@@ -1,0 +1,216 @@
+{
+// CGRateS Configuration file
+//
+// Used for SessionSv1 integration tests
+
+
+"general": {
+    "log_level": 7,
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"stor_db": {
+	"db_password": "CGRateS.org",
+},
+
+
+"rals": {
+	"enabled": true,
+},
+
+
+"scheduler": {
+	"enabled": true,
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"resources": {
+	"enabled": true,
+},
+
+
+"attributes": {
+	"enabled": true,
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"chargers_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"rals_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"sessions": {
+	"enabled": true,
+	"chargers_conns": [
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"rals_conns": [
+		{"address": "*internal"}
+	],
+	"cdrs_conns": [
+		{"address": "*internal"}
+	],
+	"resources_conns": [
+		{"address": "*internal"}
+	],
+	"attributes_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"ers": {
+	"enabled": true,
+	"sessions_conns": [						// connections to SessionS:  <*internal|127.0.0.1:2012>
+		{"address": "127.0.0.1:2012", "transport": "*json"}
+	],
+	"readers": [
+		{
+			"id": "file_reader1",
+			"run_delay": -1,
+			"type": "*file_csv",
+			"flags": ["*dryrun"],
+			"source_path": "/tmp/ers/in",
+			"processed_path": "/tmp/ers/out",
+		},
+		{
+			"id": "file_reader2",
+			"run_delay": -1,
+			"field_separator": ";",
+			"type": "*file_csv",
+			"source_path": "/tmp/ers2/in",
+			"flags": ["*dryrun"],
+			"processed_path": "/tmp/ers2/out",
+			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+				{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~*req.0", "mandatory": true},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~*req.1", "mandatory": true},
+				{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "*out", "mandatory": true},
+				{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~*req.2", "mandatory": true},
+				{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "call", "mandatory": true},
+				{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~*req.3", "mandatory": true},
+				{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~*req.3", "mandatory": true},
+				{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~*req.4:s/0([1-9]\\d+)/+49${1}/", "mandatory": true},
+				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~*req.5", "mandatory": true},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~*req.5", "mandatory": true},
+				{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~*req.6", "mandatory": true},
+				{"tag": "HDRExtra3", "field_id": "HDRExtra3", "type": "*composed", "value": "~*req.6", "mandatory": true},
+				{"tag": "HDRExtra2", "field_id": "HDRExtra2", "type": "*composed", "value": "~*req.6", "mandatory": true},
+				{"tag": "HDRExtra1", "field_id": "HDRExtra1", "type": "*composed", "value": "~*req.6", "mandatory": true},
+			],
+		},
+		{
+			"id": "init_session",
+			"run_delay": -1,
+			"field_separator": ",",
+			"type": "*file_csv",
+			"source_path": "/tmp/init_session/in",
+			"flags": ["*initiate","*accounts","*resources","*attributes","*log"],
+			"processed_path": "/tmp/init_session/out",
+			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+				{"tag": "Tenant", "field_id": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+				{"tag": "TOR", "field_id": "ToR", "type": "*variable", "value": "*voice", "mandatory": true},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*variable", "value": "~*req.2", "mandatory": true},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*variable", "value": "~*req.3", "mandatory": true},
+				{"tag": "Category", "field_id": "Category", "type": "*variable", "value": "call", "mandatory": true},
+				{"tag": "Account", "field_id": "Account", "type": "*variable", "value": "~*req.4", "mandatory": true},
+				{"tag": "Subject", "field_id": "Subject", "type": "*variable", "value": "~*req.5", "mandatory": true},
+				{"tag": "Destination", "field_id": "Destination", "type": "*variable", "value": "~*req.6", "mandatory": true},
+				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*variable", "value": "~*req.7", "mandatory": true},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*variable", "value": "~*req.8", "mandatory": true},
+				{"tag": "Usage", "field_id": "Usage", "type": "*variable", "value": "~*req.9", "mandatory": true},
+			],
+		},
+		{
+			"id": "terminate_session",
+			"run_delay": -1,
+			"field_separator": ",",
+			"type": "*file_csv",
+			"source_path": "/tmp/terminate_session/in",
+			"flags": ["*terminate","*accounts","*resources","*log"],
+			"processed_path": "/tmp/terminate_session/out",
+			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+				{"tag": "Tenant", "field_id": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*variable", "value": "~*req.2", "mandatory": true},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*variable", "value": "~*req.3", "mandatory": true},
+				{"tag": "Usage", "field_id": "Usage", "type": "*variable", "value": "~*req.9", "mandatory": true},
+			],
+		},
+		{
+			"id": "create_cdr",
+			"run_delay": -1,
+			"field_separator": ",",
+			"type": "*file_csv",
+			"source_path": "/tmp/cdrs/in",
+			"flags": ["*cdrs","*log"],
+			"processed_path": "/tmp/cdrs/out",
+			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+				{"tag": "Tenant", "field_id": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
+				{"tag": "TOR", "field_id": "ToR", "type": "*variable", "value": "*voice", "mandatory": true},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*variable", "value": "~*req.2", "mandatory": true},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*variable", "value": "~*req.3", "mandatory": true},
+				{"tag": "Category", "field_id": "Category", "type": "*variable", "value": "call", "mandatory": true},
+				{"tag": "Account", "field_id": "Account", "type": "*variable", "value": "~*req.4", "mandatory": true},
+				{"tag": "Subject", "field_id": "Subject", "type": "*variable", "value": "~*req.5", "mandatory": true},
+				{"tag": "Destination", "field_id": "Destination", "type": "*variable", "value": "~*req.6", "mandatory": true},
+				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*variable", "value": "~*req.7", "mandatory": true},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*variable", "value": "~*req.8", "mandatory": true},
+				{"tag": "Usage", "field_id": "Usage", "type": "*variable", "value": "~*req.9", "mandatory": true},
+				{"tag": "ExtraInfo1", "field_id": "ExtraInfo1", "type": "*constant", "value": "ExtraInfo1", "mandatory": true},
+				{"tag": "ExtraInfo2", "field_id": "ExtraInfo2", "type": "*constant", "value": "ExtraInfo2", "mandatory": true},
+			],
+		},
+		{
+			"id": "file_reader_with_filters",
+			"run_delay": -1,
+			"type": "*file_csv",
+			"flags": ["*dryrun"],
+			"field_separator": ";",
+			"source_path": "/tmp/ers_with_filters/in",
+			"processed_path": "/tmp/ers_with_filters/out",
+			"flags": ["*cdrs","*log"],
+			"filters":["*string:~*req.3:1002"],
+			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+				{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~*req.0", "mandatory": true},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~*req.1", "mandatory": true},
+				{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~*req.2", "mandatory": true},
+				{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "call", "mandatory": true},
+				{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~*req.3", "mandatory": true},
+				{"tag": "Source", "field_id": "Source", "type": "*composed", "value": "ers_csv", "mandatory": true},
+				{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~*req.3", "mandatory": true},
+				{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~*req.4:s/0([1-9]\\d+)/+49${1}/", "mandatory": true},
+				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~*req.5", "mandatory": true},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~*req.5", "mandatory": true},
+				{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~*req.6", "mandatory": true},
+				{"tag": "HDRExtra3", "field_id": "HDRExtra3", "type": "*composed", "value": "~*req.6", "mandatory": true},
+				{"tag": "HDRExtra2", "field_id": "HDRExtra2", "type": "*composed", "value": "~*req.6", "mandatory": true},
+				{"tag": "HDRExtra1", "field_id": "HDRExtra1", "type": "*composed", "value": "~*req.6", "mandatory": true},
+			],
+		},
+	],
+},
+
+
+}
