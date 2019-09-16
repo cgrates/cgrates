@@ -148,9 +148,10 @@ func TestThresholdsPopulateThresholdService(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-
-	thServ, err = NewThresholdService(dmTH, nil, nil, 0,
-		&FilterS{dm: dmTH, cfg: defaultCfg})
+	defaultCfg.ThresholdSCfg().StoreInterval = 0
+	defaultCfg.ThresholdSCfg().StringIndexedFields = nil
+	defaultCfg.ThresholdSCfg().PrefixIndexedFields = nil
+	thServ, err = NewThresholdService(dmTH, defaultCfg, &FilterS{dm: dmTH, cfg: defaultCfg})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

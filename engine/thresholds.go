@@ -114,27 +114,24 @@ func (ts Thresholds) Sort() {
 	sort.Slice(ts, func(i, j int) bool { return ts[i].tPrfl.Weight > ts[j].tPrfl.Weight })
 }
 
-func NewThresholdService(dm *DataManager, stringIndexedFields, prefixIndexedFields *[]string, storeInterval time.Duration,
-	filterS *FilterS) (tS *ThresholdService, err error) {
+func NewThresholdService(dm *DataManager, cgrcfg *config.CGRConfig, filterS *FilterS) (tS *ThresholdService, err error) {
 	return &ThresholdService{dm: dm,
-		stringIndexedFields: stringIndexedFields,
-		prefixIndexedFields: prefixIndexedFields,
-		storeInterval:       storeInterval,
-		filterS:             filterS,
-		stopBackup:          make(chan struct{}),
-		storedTdIDs:         make(utils.StringMap)}, nil
+		cgrcfg:      cgrcfg,
+		filterS:     filterS,
+		stopBackup:  make(chan struct{}),
+		loopStoped:  make(chan struct{}),
+		storedTdIDs: make(utils.StringMap)}, nil
 }
 
 // ThresholdService manages Threshold execution and storing them to dataDB
 type ThresholdService struct {
-	dm                  *DataManager
-	stringIndexedFields *[]string // fields considered when searching for matching thresholds
-	prefixIndexedFields *[]string
-	storeInterval       time.Duration
-	filterS             *FilterS
-	stopBackup          chan struct{}
-	storedTdIDs         utils.StringMap // keep a record of stats which need saving, map[statsTenantID]bool
-	stMux               sync.RWMutex    // protects storedTdIDs
+	dm          *DataManager
+	cgrcfg      *config.CGRConfig
+	filterS     *FilterS
+	stopBackup  chan struct{}
+	loopStoped  chan struct{}
+	storedTdIDs utils.StringMap // keep a record of stats which need saving, map[statsTenantID]bool
+	stMux       sync.RWMutex    // protects storedTdIDs
 }
 
 // Called to start the service
@@ -157,17 +154,19 @@ func (tS *ThresholdService) Shutdown() error {
 
 // backup will regularly store resources changed to dataDB
 func (tS *ThresholdService) runBackup() {
-	if tS.storeInterval <= 0 {
+	storeInterval := tS.cgrcfg.ThresholdSCfg().StoreInterval
+	if storeInterval <= 0 {
+		tS.loopStoped <- struct{}{}
 		return
 	}
 	for {
+		tS.storeThresholds()
 		select {
 		case <-tS.stopBackup:
+			tS.loopStoped <- struct{}{}
 			return
-		default:
+		case <-time.After(storeInterval):
 		}
-		tS.storeThresholds()
-		time.Sleep(tS.storeInterval)
 	}
 }
 
@@ -224,8 +223,8 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 	if len(args.ThresholdIDs) != 0 {
 		tIDs = args.ThresholdIDs
 	} else {
-		tIDsMap, err := MatchingItemIDsForEvent(args.Event, tS.stringIndexedFields,
-			tS.prefixIndexedFields, tS.dm, utils.CacheThresholdFilterIndexes,
+		tIDsMap, err := MatchingItemIDsForEvent(args.Event, tS.cgrcfg.ThresholdSCfg().StringIndexedFields,
+			tS.cgrcfg.ThresholdSCfg().PrefixIndexedFields, tS.dm, utils.CacheThresholdFilterIndexes,
 			args.Tenant, tS.filterS.cfg.ThresholdSCfg().IndexedSelects)
 		if err != nil {
 			return nil, err
@@ -320,7 +319,7 @@ func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (thresholdsIDs 
 		}
 		t.Snooze = time.Now().Add(t.tPrfl.MinSleep)
 		// recurrent threshold
-		if tS.storeInterval == -1 {
+		if tS.cgrcfg.ThresholdSCfg().StoreInterval == -1 {
 			tS.StoreThreshold(t)
 		} else {
 			*t.dirty = true // mark it to be saved
@@ -397,4 +396,17 @@ func (tS *ThresholdService) V1GetThreshold(tntID *utils.TenantID, t *Threshold) 
 		*t = *thd
 	}
 	return
+}
+
+// Reload stops the backupLoop and restarts it
+func (tS *ThresholdService) Reload() {
+	close(tS.stopBackup)
+	<-tS.loopStoped // wait until the loop is done
+	tS.stopBackup = make(chan struct{})
+	go tS.runBackup()
+}
+
+// StartLoop starts the gorutine with the backup loop
+func (tS *ThresholdService) StartLoop() {
+	go tS.runBackup()
 }

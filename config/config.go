@@ -1172,7 +1172,10 @@ func (cfg *CGRConfig) StatSCfg() *StatSCfg {
 	return cfg.statsCfg
 }
 
+// ThresholdSCfg returns the config for ThresholdS
 func (cfg *CGRConfig) ThresholdSCfg() *ThresholdSCfg {
+	cfg.lks[THRESHOLDS_JSON].Lock()
+	defer cfg.lks[THRESHOLDS_JSON].Unlock()
 	return cfg.thresholdSCfg
 }
 
@@ -1405,6 +1408,7 @@ func (cfg *CGRConfig) unlockSections() {
 	}
 }
 
+// V1ReloadConfig reloads the configuration
 func (cfg *CGRConfig) V1ReloadConfig(args *ConfigReloadWithArgDispatcher, reply *string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{"Path"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -1573,6 +1577,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case THRESHOLDS_JSON:
+		cfg.rldChans[THRESHOLDS_JSON] <- struct{}{}
 		if !fall {
 			break
 		}

@@ -904,38 +904,6 @@ func startStatService(internalStatSChan, internalThresholdSChan,
 	internalStatSChan <- stsV1
 }
 
-// startThresholdService fires up the ThresholdS
-func startThresholdService(internalThresholdSChan chan rpcclient.RpcClientConnection,
-	cacheS *engine.CacheS, cfg *config.CGRConfig, dm *engine.DataManager,
-	server *utils.Server, filterSChan chan *engine.FilterS, exitChan chan bool) {
-	filterS := <-filterSChan
-	filterSChan <- filterS
-	<-cacheS.GetPrecacheChannel(utils.CacheThresholdProfiles)
-	<-cacheS.GetPrecacheChannel(utils.CacheThresholds)
-	<-cacheS.GetPrecacheChannel(utils.CacheThresholdFilterIndexes)
-
-	tS, err := engine.NewThresholdService(dm, cfg.ThresholdSCfg().StringIndexedFields,
-		cfg.ThresholdSCfg().PrefixIndexedFields, cfg.ThresholdSCfg().StoreInterval, filterS)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<ThresholdS> Could not init, error: %s", err.Error()))
-		exitChan <- true
-		return
-	}
-	go func() {
-		if err := tS.ListenAndServe(exitChan); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<ThresholdS> Error: %s listening for packets", err.Error()))
-		}
-		tS.Shutdown()
-		exitChan <- true
-		return
-	}()
-	tSv1 := v1.NewThresholdSv1(tS)
-	if !cfg.DispatcherSCfg().Enabled {
-		server.RpcRegister(tSv1)
-	}
-	internalThresholdSChan <- tSv1
-}
-
 // startSupplierService fires up the SupplierS
 func startSupplierService(internalSupplierSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalDispatcherSChan chan rpcclient.RpcClientConnection,
@@ -1606,9 +1574,11 @@ func main() {
 		loadDb, filterSChan, server, internalDispatcherSChan, exitChan)
 	attrS := services.NewAttributeService()
 	chrS := services.NewChargerService()
-	srvManager.AddService(attrS, chrS)
+	tS := services.NewThresholdService()
+	srvManager.AddService(attrS, chrS, tS)
 	internalAttributeSChan = attrS.GetIntenternalChan()
 	internalChargerSChan = chrS.GetIntenternalChan()
+	internalThresholdSChan = tS.GetIntenternalChan()
 	go srvManager.StartServices()
 
 	initServiceManagerV1(internalServeManagerChan, srvManager, server)
@@ -1729,11 +1699,6 @@ func main() {
 		go startStatService(internalStatSChan, internalThresholdSChan,
 			internalDispatcherSChan, cacheS, cfg, dm, server,
 			filterSChan, exitChan)
-	}
-
-	if cfg.ThresholdSCfg().Enabled {
-		go startThresholdService(internalThresholdSChan, cacheS,
-			cfg, dm, server, filterSChan, exitChan)
 	}
 
 	if cfg.SupplierSCfg().Enabled {
