@@ -441,7 +441,6 @@ func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
 			map[string]interface{}{
 				"ConcurrentReqs": 1024,
 				"ContentFields":  content,
-				"Continue":       false,
 				"FieldSep":       ",",
 				"Filters":        []interface{}{},
 				"Flags":          map[string]interface{}{},
@@ -449,7 +448,6 @@ func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"ID":             "*default",
 				"ProcessedPath":  "/var/spool/cgrates/cdrc/out",
 				"RunDelay":       0,
-				"SourceID":       "ers_csv",
 				"SourcePath":     "/var/spool/cgrates/cdrc/in",
 				"Tenant":         nil,
 				"Timezone":       "",
@@ -459,7 +457,6 @@ func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
 			},
 			map[string]interface{}{
 				"ConcurrentReqs": 1024,
-				"Continue":       false,
 				"FieldSep":       ",",
 				"Filters":        nil,
 				"Flags": map[string]interface{}{
@@ -473,7 +470,6 @@ func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"Tenant":        nil,
 				"Timezone":      "",
 				"TrailerFields": []interface{}{},
-				"SourceID":      "ers_csv",
 				"Type":          "*file_csv",
 				"XmlRootPath":   "",
 				"ContentFields": content,

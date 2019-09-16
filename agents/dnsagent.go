@@ -46,7 +46,8 @@ type DNSAgent struct {
 	server *dns.Server
 }
 
-func (da *DNSAgent) newDNSServer() (err error) {
+// initDNSServer instantiates the DNS server
+func (da *DNSAgent) initDNSServer() (err error) {
 	handler := dns.HandlerFunc(func(w dns.ResponseWriter, m *dns.Msg) {
 		go da.handleMessage(w, m)
 	})
@@ -80,13 +81,13 @@ func (da *DNSAgent) ListenAndServe() (err error) {
 	errChan := make(chan error, 1)
 	rldChan := da.cgrCfg.GetReloadChan(config.DNSAgentJson)
 
-	if err = da.newDNSServer(); err != nil {
+	if err = da.initDNSServer(); err != nil {
 		return
 	}
-	lisenAndServe := func() {
+	listenAndServe := func() {
 		errChan <- da.server.ListenAndServe()
 	}
-	go lisenAndServe()
+	go listenAndServe()
 	for {
 		select {
 		case err = <-errChan:
@@ -95,10 +96,10 @@ func (da *DNSAgent) ListenAndServe() (err error) {
 			if err = da.Shutdown(); err != nil {
 				return
 			}
-			if err = da.newDNSServer(); err != nil {
+			if err = da.initDNSServer(); err != nil {
 				return
 			}
-			go lisenAndServe() //restart the gorutine
+			go listenAndServe() //restart the gorutine
 		}
 	}
 }
