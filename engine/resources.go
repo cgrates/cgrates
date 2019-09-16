@@ -296,33 +296,30 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 	return
 }
 
-// Pas the config as a whole so we can ask access concurrently
-func NewResourceService(dm *DataManager, storeInterval time.Duration,
-	thdS rpcclient.RpcClientConnection, filterS *FilterS,
-	stringIndexedFields, prefixIndexedFields *[]string) (*ResourceService, error) {
+// NewResourceService  returns a new ResourceService
+func NewResourceService(dm *DataManager, cgrcfg *config.CGRConfig,
+	thdS rpcclient.RpcClientConnection, filterS *FilterS) (*ResourceService, error) {
 	if thdS != nil && reflect.ValueOf(thdS).IsNil() {
 		thdS = nil
 	}
 	return &ResourceService{dm: dm, thdS: thdS,
-		storedResources:     make(utils.StringMap),
-		storeInterval:       storeInterval,
-		filterS:             filterS,
-		stringIndexedFields: stringIndexedFields,
-		prefixIndexedFields: prefixIndexedFields,
-		stopBackup:          make(chan struct{})}, nil
+		storedResources: make(utils.StringMap),
+		cgrcfg:          cgrcfg,
+		filterS:         filterS,
+		loopStoped:      make(chan struct{}),
+		stopBackup:      make(chan struct{})}, nil
 }
 
 // ResourceService is the service handling resources
 type ResourceService struct {
-	dm                  *DataManager                  // So we can load the data in cache and index it
-	thdS                rpcclient.RpcClientConnection // allows applying filters based on stats
-	filterS             *FilterS
-	stringIndexedFields *[]string // speed up query on indexes
-	prefixIndexedFields *[]string
-	storedResources     utils.StringMap // keep a record of resources which need saving, map[resID]bool
-	srMux               sync.RWMutex    // protects storedResources
-	storeInterval       time.Duration   // interval to dump data on
-	stopBackup          chan struct{}   // control storing process
+	dm              *DataManager                  // So we can load the data in cache and index it
+	thdS            rpcclient.RpcClientConnection // allows applying filters based on stats
+	filterS         *FilterS
+	storedResources utils.StringMap // keep a record of resources which need saving, map[resID]bool
+	srMux           sync.RWMutex    // protects storedResources
+	cgrcfg          *config.CGRConfig
+	stopBackup      chan struct{} // control storing process
+	loopStoped      chan struct{}
 }
 
 // Called to start the service
@@ -397,17 +394,19 @@ func (rS *ResourceService) storeResources() {
 
 // backup will regularly store resources changed to dataDB
 func (rS *ResourceService) runBackup() {
-	if rS.storeInterval <= 0 {
+	storeInterval := rS.cgrcfg.ResourceSCfg().StoreInterval
+	if storeInterval <= 0 {
+		rS.loopStoped <- struct{}{}
 		return
 	}
 	for {
+		rS.storeResources()
 		select {
 		case <-rS.stopBackup:
+			rS.loopStoped <- struct{}{}
 			return
-		default:
+		case <-time.After(storeInterval):
 		}
-		rS.storeResources()
-		time.Sleep(rS.storeInterval)
 	}
 }
 
@@ -458,7 +457,7 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 		}
 		rIDs = x.(utils.StringMap)
 	} else { // select the resourceIDs out of dataDB
-		rIDs, err = MatchingItemIDsForEvent(ev.Event, rS.stringIndexedFields, rS.prefixIndexedFields,
+		rIDs, err = MatchingItemIDsForEvent(ev.Event, rS.cgrcfg.ResourceSCfg().StringIndexedFields, rS.cgrcfg.ResourceSCfg().PrefixIndexedFields,
 			rS.dm, utils.CacheResourceFilterIndexes, ev.Tenant, rS.filterS.cfg.ResourceSCfg().IndexedSelects)
 	}
 	if err != nil {
@@ -664,10 +663,10 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 
 	// index it for storing
 	for _, r := range mtcRLs {
-		if rS.storeInterval == 0 || r.dirty == nil {
+		if rS.cgrcfg.ResourceSCfg().StoreInterval == 0 || r.dirty == nil {
 			continue
 		}
-		if rS.storeInterval == -1 {
+		if rS.cgrcfg.ResourceSCfg().StoreInterval == -1 {
 			rS.StoreResource(r)
 		} else {
 			*r.dirty = true // mark it to be saved
@@ -719,12 +718,12 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 	mtcRLs.clearUsage(args.UsageID)
 
 	// Handle storing
-	if rS.storeInterval != -1 {
+	if rS.cgrcfg.ResourceSCfg().StoreInterval != -1 {
 		rS.srMux.Lock()
 	}
 	for _, r := range mtcRLs {
 		if r.dirty != nil {
-			if rS.storeInterval == -1 {
+			if rS.cgrcfg.ResourceSCfg().StoreInterval == -1 {
 				rS.StoreResource(r)
 			} else {
 				*r.dirty = true // mark it to be saved
@@ -733,7 +732,7 @@ func (rS *ResourceService) V1ReleaseResource(args utils.ArgRSv1ResourceUsage, re
 		}
 		rS.processThresholds(r, args.ArgDispatcher)
 	}
-	if rS.storeInterval != -1 {
+	if rS.cgrcfg.ResourceSCfg().StoreInterval != -1 {
 		rS.srMux.Unlock()
 	}
 
@@ -752,4 +751,17 @@ func (rS *ResourceService) V1GetResource(arg *utils.TenantID, reply *Resource) e
 		*reply = *res
 	}
 	return nil
+}
+
+// Reload stops the backupLoop and restarts it
+func (rS *ResourceService) Reload() {
+	close(rS.stopBackup)
+	<-rS.loopStoped // wait until the loop is done
+	rS.stopBackup = make(chan struct{})
+	go rS.runBackup()
+}
+
+// StartLoop starts the gorutine with the backup loop
+func (rS *ResourceService) StartLoop() {
+	go rS.runBackup()
 }
