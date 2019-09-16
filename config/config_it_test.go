@@ -138,6 +138,31 @@ func TestCGRConfigReloadChargerS(t *testing.T) {
 	}
 }
 
+func TestCGRConfigReloadThresholdS(t *testing.T) {
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var reply string
+	if err = cfg.V1ReloadConfig(&ConfigReloadWithArgDispatcher{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
+		Section: THRESHOLDS_JSON,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK received: %s", reply)
+	}
+	expAttr := &ThresholdSCfg{
+		Enabled:             true,
+		StringIndexedFields: &[]string{utils.Account},
+		PrefixIndexedFields: &[]string{},
+		IndexedSelects:      true,
+	}
+	if !reflect.DeepEqual(expAttr, cfg.ThresholdSCfg()) {
+		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.ThresholdSCfg()))
+	}
+}
+
 func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
 	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out"} {
 		if err := os.RemoveAll(dir); err != nil {

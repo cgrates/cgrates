@@ -306,7 +306,17 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 			}
 		}()
 	}
-
+	if srvMngr.cfg.ThresholdSCfg().Enabled {
+		go func() {
+			if chrS, has := srvMngr.subsystems[utils.ThresholdS]; !has {
+				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.ChargerS))
+				srvMngr.engineShutdown <- true
+			} else if err = chrS.Start(srvMngr, true); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start %s because: %s", utils.ServiceManager, utils.ChargerS, err))
+				srvMngr.engineShutdown <- true
+			}
+		}()
+	}
 	// startServer()
 	return
 }
@@ -380,6 +390,34 @@ func (srvMngr *ServiceManager) handleReload() {
 			} else if chrS.IsRunning() {
 				if err = chrS.Shutdown(); err != nil {
 					utils.Logger.Err(fmt.Sprintf("<%s> Failed to stop service <%s>", utils.ServiceManager, utils.ChargerS))
+					srvMngr.engineShutdown <- true
+					return // stop if we encounter an error
+				}
+			}
+		case <-srvMngr.cfg.GetReloadChan(config.THRESHOLDS_JSON):
+			tS, has := srvMngr.subsystems[utils.ThresholdS]
+			if !has {
+				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.ThresholdS))
+				srvMngr.engineShutdown <- true
+				return // stop if we encounter an error
+			}
+			if srvMngr.cfg.ThresholdSCfg().Enabled {
+				if tS.IsRunning() {
+					if err = tS.Reload(srvMngr); err != nil {
+						utils.Logger.Err(fmt.Sprintf("<%s> Failed to reload <%s>", utils.ServiceManager, utils.ThresholdS))
+						srvMngr.engineShutdown <- true
+						return // stop if we encounter an error
+					}
+				} else {
+					if err = tS.Start(srvMngr, true); err != nil {
+						utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.ThresholdS))
+						srvMngr.engineShutdown <- true
+						return // stop if we encounter an error
+					}
+				}
+			} else if tS.IsRunning() {
+				if err = tS.Shutdown(); err != nil {
+					utils.Logger.Err(fmt.Sprintf("<%s> Failed to stop service <%s>", utils.ServiceManager, utils.ThresholdS))
 					srvMngr.engineShutdown <- true
 					return // stop if we encounter an error
 				}
