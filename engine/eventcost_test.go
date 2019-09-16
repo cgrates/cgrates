@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -2279,5 +2280,29 @@ func TestECSyncKeys(t *testing.T) {
 	if !reflect.DeepEqual(eEC, ec) {
 		t.Errorf("expecting: %s \nreceived: %s",
 			utils.ToIJSON(eEC), utils.ToIJSON(ec))
+	}
+}
+
+func TestECAsDataProvider(t *testing.T) {
+	ecDP := config.NewObjectDP(testEC)
+	if data, err := ecDP.FieldAsInterface([]string{"RunID"}); err != nil {
+		t.Error(err)
+	} else if data != utils.META_DEFAULT {
+		t.Errorf("Expecting: <%s> \nreceived: <%s>", utils.META_DEFAULT, data)
+	}
+	if data, err := ecDP.FieldAsInterface([]string{"AccountSummary", "ID"}); err != nil {
+		t.Error(err)
+	} else if data != "dan" {
+		t.Errorf("Expecting: <%s> \nreceived: <%s>", "data", data)
+	}
+	if data, err := ecDP.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries[1]", "ID"}); err != nil {
+		t.Error(err)
+	} else if data != "4b8b53d7-c1a1-4159-b845-4623a00a0165" {
+		t.Errorf("Expecting: <%s> \nreceived: <%s>", "4b8b53d7-c1a1-4159-b845-4623a00a0165", data)
+	}
+	if data, err := ecDP.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries[2]", "Type"}); err != nil {
+		t.Error(err)
+	} else if data != "*voice" {
+		t.Errorf("Expecting: <%s> \nreceived: <%s>", "*voice", data)
 	}
 }

@@ -54,6 +54,7 @@ func (objDP *ObjectDP) String() string {
 
 // FieldAsInterface is part of engine.DataProvider interface
 func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+	obj := objDP.obj
 	// []string{ BalanceMap *monetary[0] Value }
 	var has bool
 	if data, has = objDP.getCache(strings.Join(fldPath, utils.NestingSep)); has {
@@ -75,10 +76,9 @@ func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data interface{}, err
 		} else {
 			prevFld += utils.NestingSep + fld
 		}
-
 		// check if we take the current path from cache
 		if data, has = objDP.getCache(prevFld); !has {
-			if data, err = utils.ReflectFieldMethodInterface(objDP.obj, fld); err != nil { // take the object the field for current path
+			if data, err = utils.ReflectFieldMethodInterface(obj, fld); err != nil { // take the object the field for current path
 				// in case of error set nil for the current path and return err
 				objDP.setCache(prevFld, nil)
 				return nil, err
@@ -86,14 +86,13 @@ func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data interface{}, err
 			// add the current field in prevFld so we can set in cache the full path with it's data
 			objDP.setCache(prevFld, data)
 		}
-
 		// change the obj to be the current data and continue the processing
-		objDP.obj = data
+		obj = data
 		if slctrStr != utils.EmptyString { //we have selector so we need to do an aditional get
 			prevFld += utils.IdxStart + slctrStr + utils.IdxEnd
 			// check if we take the current path from cache
 			if data, has = objDP.getCache(prevFld); !has {
-				if data, err = utils.ReflectFieldMethodInterface(objDP.obj, slctrStr); err != nil { // take the object the field for current path
+				if data, err = utils.ReflectFieldMethodInterface(obj, slctrStr); err != nil { // take the object the field for current path
 					// in case of error set nil for the current path and return err
 					objDP.setCache(prevFld, nil)
 					return nil, err
@@ -102,7 +101,7 @@ func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data interface{}, err
 				objDP.setCache(prevFld, data)
 			}
 			// change the obj to be the current data and continue the processing
-			objDP.obj = data
+			obj = data
 		}
 
 	}
