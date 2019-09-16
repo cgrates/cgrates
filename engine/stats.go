@@ -32,33 +32,31 @@ import (
 )
 
 // NewStatService initializes a StatService
-func NewStatService(dm *DataManager, storeInterval time.Duration,
-	thdS rpcclient.RpcClientConnection, filterS *FilterS, stringIndexedFields, prefixIndexedFields *[]string) (ss *StatService, err error) {
+func NewStatService(dm *DataManager, cgrcfg *config.CGRConfig,
+	thdS rpcclient.RpcClientConnection, filterS *FilterS) (ss *StatService, err error) {
 	if thdS != nil && reflect.ValueOf(thdS).IsNil() { // fix nil value in interface
 		thdS = nil
 	}
 	return &StatService{
-		dm:                  dm,
-		storeInterval:       storeInterval,
-		thdS:                thdS,
-		filterS:             filterS,
-		stringIndexedFields: stringIndexedFields,
-		prefixIndexedFields: prefixIndexedFields,
-		storedStatQueues:    make(utils.StringMap),
-		stopBackup:          make(chan struct{})}, nil
+		dm:               dm,
+		thdS:             thdS,
+		filterS:          filterS,
+		cgrcfg:           cgrcfg,
+		storedStatQueues: make(utils.StringMap),
+		loopStoped:       make(chan struct{}),
+		stopBackup:       make(chan struct{})}, nil
 }
 
 // StatService builds stats for events
 type StatService struct {
-	dm                  *DataManager
-	storeInterval       time.Duration
-	thdS                rpcclient.RpcClientConnection // rpc connection towards ThresholdS
-	filterS             *FilterS
-	stringIndexedFields *[]string
-	prefixIndexedFields *[]string
-	stopBackup          chan struct{}
-	storedStatQueues    utils.StringMap // keep a record of stats which need saving, map[statsTenantID]bool
-	ssqMux              sync.RWMutex    // protects storedStatQueues
+	dm               *DataManager
+	thdS             rpcclient.RpcClientConnection // rpc connection towards ThresholdS
+	filterS          *FilterS
+	cgrcfg           *config.CGRConfig
+	loopStoped       chan struct{}
+	stopBackup       chan struct{}
+	storedStatQueues utils.StringMap // keep a record of stats which need saving, map[statsTenantID]bool
+	ssqMux           sync.RWMutex    // protects storedStatQueues
 }
 
 // ListenAndServe loops keeps the service alive
@@ -81,17 +79,19 @@ func (sS *StatService) Shutdown() error {
 
 // runBackup will regularly store resources changed to dataDB
 func (sS *StatService) runBackup() {
-	if sS.storeInterval <= 0 {
+	storeInterval := sS.cgrcfg.StatSCfg().StoreInterval
+	if storeInterval <= 0 {
+		sS.loopStoped <- struct{}{}
 		return
 	}
 	for {
+		sS.storeStats()
 		select {
 		case <-sS.stopBackup:
+			sS.loopStoped <- struct{}{}
 			return
-		default:
+		case <-time.After(storeInterval):
 		}
-		sS.storeStats()
-		time.Sleep(sS.storeInterval)
 	}
 }
 
@@ -160,7 +160,7 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 	if len(args.StatIDs) != 0 {
 		sqIDs = args.StatIDs
 	} else {
-		mapIDs, err := MatchingItemIDsForEvent(args.Event, sS.stringIndexedFields, sS.prefixIndexedFields,
+		mapIDs, err := MatchingItemIDsForEvent(args.Event, sS.cgrcfg.StatSCfg().StringIndexedFields, sS.cgrcfg.StatSCfg().PrefixIndexedFields,
 			sS.dm, utils.CacheStatFilterIndexes, args.Tenant, sS.filterS.cfg.StatSCfg().IndexedSelects)
 		if err != nil {
 			return nil, err
@@ -257,8 +257,8 @@ func (sS *StatService) processEvent(args *StatsArgsProcessEvent) (statQueueIDs [
 					sq.TenantID(), args.TenantID(), err.Error()))
 			withErrors = true
 		}
-		if sS.storeInterval != 0 && sq.dirty != nil { // don't save
-			if sS.storeInterval == -1 {
+		if sS.cgrcfg.StatSCfg().StoreInterval != 0 && sq.dirty != nil { // don't save
+			if sS.cgrcfg.StatSCfg().StoreInterval == -1 {
 				sS.StoreStatQueue(sq)
 			} else {
 				*sq.dirty = true // mark it to be saved
@@ -408,4 +408,17 @@ func (sS *StatService) V1GetQueueIDs(tenant string, qIDs *[]string) (err error) 
 	}
 	*qIDs = retIDs
 	return
+}
+
+// Reload stops the backupLoop and restarts it
+func (sS *StatService) Reload() {
+	close(sS.stopBackup)
+	<-sS.loopStoped // wait until the loop is done
+	sS.stopBackup = make(chan struct{})
+	go sS.runBackup()
+}
+
+// StartLoop starsS the gorutine with the backup loop
+func (sS *StatService) StartLoop() {
+	go sS.runBackup()
 }

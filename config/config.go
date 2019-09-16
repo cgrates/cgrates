@@ -1167,8 +1167,10 @@ func (self *CGRConfig) ResourceSCfg() *ResourceSConfig {
 	return self.resourceSCfg
 }
 
-// ToDo: fix locking
-func (cfg *CGRConfig) StatSCfg() *StatSCfg {
+// StatSCfg returns the config for StatS
+func (cfg *CGRConfig) StatSCfg() *StatSCfg { // not done
+	cfg.lks[STATS_JSON].Lock()
+	defer cfg.lks[STATS_JSON].Unlock()
 	return cfg.statsCfg
 }
 
@@ -1572,6 +1574,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case STATS_JSON:
+		cfg.rldChans[STATS_JSON] <- struct{}{}
 		if !fall {
 			break
 		}
