@@ -131,7 +131,7 @@ func SetCgrConfig(cfg *CGRConfig) {
 
 func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg = new(CGRConfig)
-	cfg.populteChanels()
+	cfg.initChanels()
 	cfg.DataFolderPath = "/usr/share/cgrates/"
 	cfg.MaxCallDuration = time.Duration(3) * time.Hour // Hardcoded for now
 
@@ -300,7 +300,7 @@ var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
 	utils.MetaSuppliers, utils.MetaThresholds, utils.MetaChargers,
 	utils.MetaDispatchers, utils.MetaDispatcherHosts})
 
-var poisbleReaderTypes = utils.NewStringSet([]string{utils.MetaFileCSV, utils.MetaKafkajsonMap})
+var possibleReaderTypes = utils.NewStringSet([]string{utils.MetaFileCSV, utils.MetaKafkajsonMap})
 
 func (self *CGRConfig) checkConfigSanity() error {
 	// Rater checks
@@ -670,7 +670,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		for _, rdr := range self.ersCfg.Readers {
-			if !poisbleReaderTypes.Has(rdr.Type) {
+			if !possibleReaderTypes.Has(rdr.Type) {
 				return fmt.Errorf("<%s> unsupported data type: %s for reader with ID: %s", utils.ERs, rdr.Type, rdr.ID)
 			}
 
@@ -1557,6 +1557,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case ChargerSCfgJson:
+		cfg.rldChans[ChargerSCfgJson] <- struct{}{}
 		if !fall {
 			break
 		}
@@ -2021,7 +2022,7 @@ func (cfg *CGRConfig) loadConfigFromHttp(urlPaths string, loadFuncs []func(jsnCf
 }
 
 // populates the config locks and the reload channels
-func (cfg *CGRConfig) populteChanels() {
+func (cfg *CGRConfig) initChanels() {
 	cfg.lks = make(map[string]*sync.RWMutex)
 	cfg.rldChans = make(map[string]chan struct{})
 	for _, section := range []string{GENERAL_JSN, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN, SCHEDULER_JSN, CACHE_JSN, FILTERS_JSON, RALS_JSN,

@@ -28,7 +28,6 @@ import (
 )
 
 func TestNewInvalidReader(t *testing.T) {
-
 	cfg, _ := config.NewDefaultCGRConfig()
 	reader := cfg.ERsCfg().Readers[0]
 	reader.Type = "Invalid"
@@ -43,7 +42,6 @@ func TestNewInvalidReader(t *testing.T) {
 }
 
 func TestNewCsvReader(t *testing.T) {
-
 	cfg, _ := config.NewDefaultCGRConfig()
 	fltr := &engine.FilterS{}
 	reader := cfg.ERsCfg().Readers[0]
@@ -66,12 +64,12 @@ func TestNewCsvReader(t *testing.T) {
 }
 
 func TestNewKafkaReader(t *testing.T) {
-
 	cfg, _ := config.NewDefaultCGRConfig()
 	fltr := &engine.FilterS{}
 	reader := cfg.ERsCfg().Readers[0]
 	reader.Type = utils.MetaKafkajsonMap
 	reader.ID = "file_reader"
+	reader.ConcurrentReqs = -1
 	cfg.ERsCfg().Readers = append(cfg.ERsCfg().Readers, reader)
 	if len(cfg.ERsCfg().Readers) != 2 {
 		t.Errorf("Expecting: <2>, received: <%+v>", len(cfg.ERsCfg().Readers))

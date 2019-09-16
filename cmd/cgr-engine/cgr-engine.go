@@ -798,95 +798,6 @@ func startScheduler(internalSchedulerChan chan *scheduler.Scheduler, cacheDoneCh
 	exitChan <- true // Should not get out of loop though
 }
 
-// startAttributeService fires up the AttributeS
-func startAttributeService(internalAttributeSChan chan rpcclient.RpcClientConnection,
-	cacheS *engine.CacheS, cfg *config.CGRConfig, dm *engine.DataManager,
-	server *utils.Server, filterSChan chan *engine.FilterS, exitChan chan bool) {
-	filterS := <-filterSChan
-	filterSChan <- filterS
-	<-cacheS.GetPrecacheChannel(utils.CacheAttributeProfiles)
-	<-cacheS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes)
-
-	aS, err := engine.NewAttributeService(dm, filterS, cfg)
-	if err != nil {
-		utils.Logger.Crit(
-			fmt.Sprintf("<%s> Could not init, error: %s",
-				utils.AttributeS, err.Error()))
-		exitChan <- true
-		return
-	}
-	go func() {
-		if err := aS.ListenAndServe(exitChan); err != nil {
-			utils.Logger.Crit(
-				fmt.Sprintf("<%s> Error: %s listening for packets",
-					utils.AttributeS, err.Error()))
-		}
-		aS.Shutdown()
-		exitChan <- true
-		return
-	}()
-	aSv1 := v1.NewAttributeSv1(aS)
-	if !cfg.DispatcherSCfg().Enabled {
-		server.RpcRegister(aSv1)
-	}
-	internalAttributeSChan <- aSv1
-}
-
-// startChargerService fires up the ChargerS
-func startChargerService(internalChargerSChan, internalAttributeSChan,
-	internalDispatcherSChan chan rpcclient.RpcClientConnection,
-	cacheS *engine.CacheS, cfg *config.CGRConfig,
-	dm *engine.DataManager, server *utils.Server,
-	filterSChan chan *engine.FilterS, exitChan chan bool) {
-	filterS := <-filterSChan
-	filterSChan <- filterS
-	<-cacheS.GetPrecacheChannel(utils.CacheChargerProfiles)
-	<-cacheS.GetPrecacheChannel(utils.CacheChargerFilterIndexes)
-	var attrSConn rpcclient.RpcClientConnection
-	var err error
-	intAttributeSChan := internalAttributeSChan
-	if cfg.DispatcherSCfg().Enabled {
-		intAttributeSChan = internalDispatcherSChan
-	}
-	if len(cfg.ChargerSCfg().AttributeSConns) != 0 { // AttributeS connection init
-		attrSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.ChargerSCfg().AttributeSConns, intAttributeSChan, false)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.ChargerS, utils.AttributeS, err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	cS, err := engine.NewChargerService(dm, filterS, attrSConn, cfg)
-	if err != nil {
-		utils.Logger.Crit(
-			fmt.Sprintf("<%s> Could not init, error: %s",
-				utils.ChargerS, err.Error()))
-		exitChan <- true
-		return
-	}
-	go func() {
-		if err := cS.ListenAndServe(exitChan); err != nil {
-			utils.Logger.Crit(
-				fmt.Sprintf("<%s> Error: %s listening for packets",
-					utils.ChargerS, err.Error()))
-		}
-		cS.Shutdown()
-		exitChan <- true
-		return
-	}()
-	cSv1 := v1.NewChargerSv1(cS)
-	if !cfg.DispatcherSCfg().Enabled {
-		server.RpcRegister(cSv1)
-	}
-	internalChargerSChan <- cSv1
-}
-
 func startResourceService(internalRsChan, internalThresholdSChan,
 	internalDispatcherSChan chan rpcclient.RpcClientConnection,
 	cacheS *engine.CacheS, cfg *config.CGRConfig,
@@ -1806,16 +1717,6 @@ func main() {
 
 	// Start FilterS
 	go startFilterService(filterSChan, cacheS, internalStatSChan, internalRsChan, internalRaterChan, cfg, dm, exitChan)
-
-	// if cfg.AttributeSCfg().Enabled {
-	// go startAttributeService(internalAttributeSChan, cacheS,
-	// cfg, dm, server, filterSChan, exitChan)
-	// }
-	// if cfg.ChargerSCfg().Enabled {
-	// 	go startChargerService(internalChargerSChan, internalAttributeSChan,
-	// 		internalDispatcherSChan, cacheS, cfg, dm, server,
-	// 		filterSChan, exitChan)
-	// }
 
 	// Start RL service
 	if cfg.ResourceSCfg().Enabled {
