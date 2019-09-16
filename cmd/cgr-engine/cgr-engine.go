@@ -851,59 +851,6 @@ func startResourceService(internalRsChan, internalThresholdSChan,
 	internalRsChan <- rsV1
 }
 
-// startStatService fires up the StatS
-func startStatService(internalStatSChan, internalThresholdSChan,
-	internalDispatcherSChan chan rpcclient.RpcClientConnection,
-	cacheS *engine.CacheS, cfg *config.CGRConfig,
-	dm *engine.DataManager, server *utils.Server,
-	filterSChan chan *engine.FilterS, exitChan chan bool) {
-	var err error
-	var thdSConn rpcclient.RpcClientConnection
-	filterS := <-filterSChan
-	filterSChan <- filterS
-	intThresholdSChan := internalThresholdSChan
-	if cfg.DispatcherSCfg().Enabled {
-		intThresholdSChan = internalDispatcherSChan
-	}
-	if len(cfg.StatSCfg().ThresholdSConns) != 0 { // Stats connection init
-		thdSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.StatSCfg().ThresholdSConns, intThresholdSChan, false)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<StatS> Could not connect to ThresholdS: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	<-cacheS.GetPrecacheChannel(utils.CacheStatQueueProfiles)
-	<-cacheS.GetPrecacheChannel(utils.CacheStatQueues)
-	<-cacheS.GetPrecacheChannel(utils.CacheStatFilterIndexes)
-
-	sS, err := engine.NewStatService(dm, cfg.StatSCfg().StoreInterval,
-		thdSConn, filterS, cfg.StatSCfg().StringIndexedFields, cfg.StatSCfg().PrefixIndexedFields)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<StatS> Could not init, error: %s", err.Error()))
-		exitChan <- true
-		return
-	}
-	go func() {
-		if err := sS.ListenAndServe(exitChan); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<StatS> Error: %s listening for packets", err.Error()))
-		}
-		sS.Shutdown()
-		exitChan <- true
-		return
-	}()
-	stsV1 := v1.NewStatSv1(sS)
-	if !cfg.DispatcherSCfg().Enabled {
-		server.RpcRegister(stsV1)
-	}
-	internalStatSChan <- stsV1
-}
-
 // startSupplierService fires up the SupplierS
 func startSupplierService(internalSupplierSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalDispatcherSChan chan rpcclient.RpcClientConnection,
@@ -1575,10 +1522,12 @@ func main() {
 	attrS := services.NewAttributeService()
 	chrS := services.NewChargerService()
 	tS := services.NewThresholdService()
-	srvManager.AddService(attrS, chrS, tS)
+	stS := services.NewStatService()
+	srvManager.AddService(attrS, chrS, tS, stS)
 	internalAttributeSChan = attrS.GetIntenternalChan()
 	internalChargerSChan = chrS.GetIntenternalChan()
 	internalThresholdSChan = tS.GetIntenternalChan()
+	internalStatSChan = stS.GetIntenternalChan()
 	go srvManager.StartServices()
 
 	initServiceManagerV1(internalServeManagerChan, srvManager, server)
@@ -1691,12 +1640,6 @@ func main() {
 	// Start RL service
 	if cfg.ResourceSCfg().Enabled {
 		go startResourceService(internalRsChan, internalThresholdSChan,
-			internalDispatcherSChan, cacheS, cfg, dm, server,
-			filterSChan, exitChan)
-	}
-
-	if cfg.StatSCfg().Enabled {
-		go startStatService(internalStatSChan, internalThresholdSChan,
 			internalDispatcherSChan, cacheS, cfg, dm, server,
 			filterSChan, exitChan)
 	}

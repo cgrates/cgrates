@@ -59,6 +59,7 @@ func (thrs *ThresholdService) Start(sp servmanager.ServiceProvider, waitCache bo
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.ThresholdS, err.Error()))
 		return
 	}
+	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ThresholdS))
 	thrs.thrs.StartLoop()
 	thrs.rpc = v1.NewThresholdSv1(thrs.thrs)
 	if !sp.GetConfig().DispatcherSCfg().Enabled {

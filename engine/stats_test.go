@@ -149,8 +149,11 @@ func TestStatQueuesPopulateService(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 
-	statService, err = NewStatService(dmSTS, time.Duration(1),
-		nil, &FilterS{dm: dmSTS, cfg: defaultCfg}, nil, nil)
+	defaultCfg.StatSCfg().StoreInterval = 1
+	defaultCfg.StatSCfg().StringIndexedFields = nil
+	defaultCfg.StatSCfg().PrefixIndexedFields = nil
+	statService, err = NewStatService(dmSTS, defaultCfg,
+		nil, &FilterS{dm: dmSTS, cfg: defaultCfg})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
