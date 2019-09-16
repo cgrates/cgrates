@@ -549,8 +549,8 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 					if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 						err.Error() != utils.ErrNotFound.Error() {
 						utils.Logger.Warning(
-							fmt.Sprintf("<AccountS> error: %s processing balance event %+v with ThresholdS.",
-								err.Error(), thEv))
+							fmt.Sprintf("<AccountS> error: <%s> processing balance event <%+v> with ThresholdS.",
+								err.Error(), utils.ToJSON(thEv)))
 					}
 				}
 
