@@ -369,8 +369,11 @@ func TestResourcePopulateResourceService(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	resService, err = NewResourceService(dmRES, time.Duration(1), nil,
-		&FilterS{dm: dmRES, cfg: defaultCfg}, nil, nil)
+	defaultCfg.ResourceSCfg().StoreInterval = 1
+	defaultCfg.ResourceSCfg().StringIndexedFields = nil
+	defaultCfg.ResourceSCfg().PrefixIndexedFields = nil
+	resService, err = NewResourceService(dmRES, defaultCfg, nil,
+		&FilterS{dm: dmRES, cfg: defaultCfg})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -728,8 +731,11 @@ func TestResourceCaching(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	resService, err = NewResourceService(dmRES, time.Duration(1), nil,
-		&FilterS{dm: dmRES, cfg: defaultCfg}, nil, nil)
+	defaultCfg.ResourceSCfg().StoreInterval = 1
+	defaultCfg.ResourceSCfg().StringIndexedFields = nil
+	defaultCfg.ResourceSCfg().PrefixIndexedFields = nil
+	resService, err = NewResourceService(dmRES, defaultCfg, nil,
+		&FilterS{dm: dmRES, cfg: defaultCfg})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

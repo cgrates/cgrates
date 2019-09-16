@@ -1162,9 +1162,11 @@ func (cfg *CGRConfig) ChargerSCfg() *ChargerSCfg {
 	return cfg.chargerSCfg
 }
 
-// ToDo: fix locking here
-func (self *CGRConfig) ResourceSCfg() *ResourceSConfig {
-	return self.resourceSCfg
+// ResourceSCfg returns the config for ResourceS
+func (cfg *CGRConfig) ResourceSCfg() *ResourceSConfig { // not done
+	cfg.lks[RESOURCES_JSON].Lock()
+	defer cfg.lks[RESOURCES_JSON].Unlock()
+	return cfg.resourceSCfg
 }
 
 // StatSCfg returns the config for StatS
@@ -1569,6 +1571,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case RESOURCES_JSON:
+		cfg.rldChans[RESOURCES_JSON] <- struct{}{}
 		if !fall {
 			break
 		}
