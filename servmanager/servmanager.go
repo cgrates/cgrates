@@ -372,176 +372,93 @@ func (srvMngr *ServiceManager) handleReload() {
 			srvMngr.engineShutdown <- ext
 			return
 		case <-srvMngr.cfg.GetReloadChan(config.ATTRIBUTE_JSN):
-			attrS, has := srvMngr.subsystems[utils.AttributeS]
+			srv, has := srvMngr.subsystems[utils.AttributeS]
 			if !has {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.AttributeS))
 				srvMngr.engineShutdown <- true
 				return // stop if we encounter an error
 			}
-			if srvMngr.cfg.AttributeSCfg().Enabled {
-				if attrS.IsRunning() {
-					if err = attrS.Reload(srvMngr); err != nil {
-						utils.Logger.Err(fmt.Sprintf("<%s> Failed to reload <%s>", utils.ServiceManager, utils.AttributeS))
-						srvMngr.engineShutdown <- true
-						return // stop if we encounter an error
-					}
-				} else {
-					if err = attrS.Start(srvMngr, true); err != nil {
-						utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.AttributeS))
-						srvMngr.engineShutdown <- true
-						return // stop if we encounter an error
-					}
-				}
-			} else if attrS.IsRunning() {
-				if err = attrS.Shutdown(); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<%s> Failed to stop service <%s>", utils.ServiceManager, utils.AttributeS))
-					srvMngr.engineShutdown <- true
-					return // stop if we encounter an error
-				}
+			if err = srvMngr.reloadService(srv, srvMngr.cfg.AttributeSCfg().Enabled); err != nil {
+				return
 			}
 		case <-srvMngr.cfg.GetReloadChan(config.ChargerSCfgJson):
-			chrS, has := srvMngr.subsystems[utils.ChargerS]
+			srv, has := srvMngr.subsystems[utils.ChargerS]
 			if !has {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.ChargerS))
 				srvMngr.engineShutdown <- true
 				return // stop if we encounter an error
 			}
-			if srvMngr.cfg.ChargerSCfg().Enabled {
-				if chrS.IsRunning() {
-					if err = chrS.Reload(srvMngr); err != nil {
-						utils.Logger.Err(fmt.Sprintf("<%s> Failed to reload <%s>", utils.ServiceManager, utils.ChargerS))
-						srvMngr.engineShutdown <- true
-						return // stop if we encounter an error
-					}
-				} else {
-					if err = chrS.Start(srvMngr, true); err != nil {
-						utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.ChargerS))
-						srvMngr.engineShutdown <- true
-						return // stop if we encounter an error
-					}
-				}
-			} else if chrS.IsRunning() {
-				if err = chrS.Shutdown(); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<%s> Failed to stop service <%s>", utils.ServiceManager, utils.ChargerS))
-					srvMngr.engineShutdown <- true
-					return // stop if we encounter an error
-				}
+			if err = srvMngr.reloadService(srv, srvMngr.cfg.ChargerSCfg().Enabled); err != nil {
+				return
 			}
 		case <-srvMngr.cfg.GetReloadChan(config.THRESHOLDS_JSON):
-			tS, has := srvMngr.subsystems[utils.ThresholdS]
+			srv, has := srvMngr.subsystems[utils.ThresholdS]
 			if !has {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.ThresholdS))
 				srvMngr.engineShutdown <- true
 				return // stop if we encounter an error
 			}
-			if srvMngr.cfg.ThresholdSCfg().Enabled {
-				if tS.IsRunning() {
-					if err = tS.Reload(srvMngr); err != nil {
-						utils.Logger.Err(fmt.Sprintf("<%s> Failed to reload <%s>", utils.ServiceManager, utils.ThresholdS))
-						srvMngr.engineShutdown <- true
-						return // stop if we encounter an error
-					}
-				} else {
-					if err = tS.Start(srvMngr, true); err != nil {
-						utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.ThresholdS))
-						srvMngr.engineShutdown <- true
-						return // stop if we encounter an error
-					}
-				}
-			} else if tS.IsRunning() {
-				if err = tS.Shutdown(); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<%s> Failed to stop service <%s>", utils.ServiceManager, utils.ThresholdS))
-					srvMngr.engineShutdown <- true
-					return // stop if we encounter an error
-				}
+			if err = srvMngr.reloadService(srv, srvMngr.cfg.ThresholdSCfg().Enabled); err != nil {
+				return
 			}
 		case <-srvMngr.cfg.GetReloadChan(config.STATS_JSON):
-			tS, has := srvMngr.subsystems[utils.StatS]
+			srv, has := srvMngr.subsystems[utils.StatS]
 			if !has {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.StatS))
 				srvMngr.engineShutdown <- true
 				return // stop if we encounter an error
 			}
-			if srvMngr.cfg.StatSCfg().Enabled {
-				if tS.IsRunning() {
-					if err = tS.Reload(srvMngr); err != nil {
-						utils.Logger.Err(fmt.Sprintf("<%s> Failed to reload <%s>", utils.ServiceManager, utils.StatS))
-						srvMngr.engineShutdown <- true
-						return // stop if we encounter an error
-					}
-				} else {
-					if err = tS.Start(srvMngr, true); err != nil {
-						utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.StatS))
-						srvMngr.engineShutdown <- true
-						return // stop if we encounter an error
-					}
-				}
-			} else if tS.IsRunning() {
-				if err = tS.Shutdown(); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<%s> Failed to stop service <%s>", utils.ServiceManager, utils.StatS))
-					srvMngr.engineShutdown <- true
-					return // stop if we encounter an error
-				}
+			if err = srvMngr.reloadService(srv, srvMngr.cfg.StatSCfg().Enabled); err != nil {
+				return
 			}
 		case <-srvMngr.cfg.GetReloadChan(config.RESOURCES_JSON):
-			tS, has := srvMngr.subsystems[utils.ResourceS]
+			srv, has := srvMngr.subsystems[utils.ResourceS]
 			if !has {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.ResourceS))
 				srvMngr.engineShutdown <- true
 				return // stop if we encounter an error
 			}
-			if srvMngr.cfg.ResourceSCfg().Enabled {
-				if tS.IsRunning() {
-					if err = tS.Reload(srvMngr); err != nil {
-						utils.Logger.Err(fmt.Sprintf("<%s> Failed to reload <%s>", utils.ServiceManager, utils.ResourceS))
-						srvMngr.engineShutdown <- true
-						return // stop if we encounter an error
-					}
-				} else {
-					if err = tS.Start(srvMngr, true); err != nil {
-						utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.ResourceS))
-						srvMngr.engineShutdown <- true
-						return // stop if we encounter an error
-					}
-				}
-			} else if tS.IsRunning() {
-				if err = tS.Shutdown(); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<%s> Failed to stop service <%s>", utils.ServiceManager, utils.ResourceS))
-					srvMngr.engineShutdown <- true
-					return // stop if we encounter an error
-				}
+			if err = srvMngr.reloadService(srv, srvMngr.cfg.ResourceSCfg().Enabled); err != nil {
+				return
 			}
 		case <-srvMngr.cfg.GetReloadChan(config.SupplierSJson):
-			tS, has := srvMngr.subsystems[utils.SupplierS]
+			srv, has := srvMngr.subsystems[utils.SupplierS]
 			if !has {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.SupplierS))
 				srvMngr.engineShutdown <- true
 				return // stop if we encounter an error
 			}
-			if srvMngr.cfg.SupplierSCfg().Enabled {
-				if tS.IsRunning() {
-					if err = tS.Reload(srvMngr); err != nil {
-						utils.Logger.Err(fmt.Sprintf("<%s> Failed to reload <%s>", utils.ServiceManager, utils.SupplierS))
-						srvMngr.engineShutdown <- true
-						return // stop if we encounter an error
-					}
-				} else {
-					if err = tS.Start(srvMngr, true); err != nil {
-						utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.SupplierS))
-						srvMngr.engineShutdown <- true
-						return // stop if we encounter an error
-					}
-				}
-			} else if tS.IsRunning() {
-				if err = tS.Shutdown(); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<%s> Failed to stop service <%s>", utils.ServiceManager, utils.SupplierS))
-					srvMngr.engineShutdown <- true
-					return // stop if we encounter an error
-				}
+			if err = srvMngr.reloadService(srv, srvMngr.cfg.SupplierSCfg().Enabled); err != nil {
+				return
 			}
 		}
 		// handle RPC server
 	}
+}
+
+func (srvMngr *ServiceManager) reloadService(srv Service, shouldRun bool) (err error) {
+	if shouldRun {
+		if srv.IsRunning() {
+			if err = srv.Reload(srvMngr); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<%s> Failed to reload <%s>", utils.ServiceManager, srv.ServiceName()))
+				srvMngr.engineShutdown <- true
+				return // stop if we encounter an error
+			}
+		} else {
+			if err = srv.Start(srvMngr, true); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, srv.ServiceName()))
+				srvMngr.engineShutdown <- true
+				return // stop if we encounter an error
+			}
+		}
+	} else if srv.IsRunning() {
+		if err = srv.Shutdown(); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> Failed to stop service <%s>", utils.ServiceManager, srv.ServiceName()))
+			srvMngr.engineShutdown <- true
+			return // stop if we encounter an error
+		}
+	}
+	return
 }
 
 // ServiceProvider should implement this to provide information for service
