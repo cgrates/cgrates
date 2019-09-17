@@ -125,9 +125,6 @@
 
 "suppliers": {
 	"enabled": true,
-	"rals_conns": [
-		{"address": "*internal"},
-	],
 	"resources_conns": [
 		{"address": "*internal"},
 	],

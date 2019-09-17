@@ -25,7 +25,6 @@ type SupplierSCfg struct {
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 	AttributeSConns     []*RemoteHost
-	RALsConns           []*RemoteHost
 	ResourceSConns      []*RemoteHost
 	StatSConns          []*RemoteHost
 	DefaultRatio        int
@@ -60,13 +59,6 @@ func (spl *SupplierSCfg) loadFromJsonCfg(jsnCfg *SupplierSJsonCfg) (err error) {
 		for idx, jsnHaCfg := range *jsnCfg.Attributes_conns {
 			spl.AttributeSConns[idx] = NewDfltRemoteHost()
 			spl.AttributeSConns[idx].loadFromJsonCfg(jsnHaCfg)
-		}
-	}
-	if jsnCfg.Rals_conns != nil {
-		spl.RALsConns = make([]*RemoteHost, len(*jsnCfg.Rals_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Rals_conns {
-			spl.RALsConns[idx] = NewDfltRemoteHost()
-			spl.RALsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Resources_conns != nil {

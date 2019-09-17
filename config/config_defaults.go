@@ -560,9 +560,6 @@ const CGRATES_CFG_JSON = `
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"attributes_conns": [],					// connections to AttributeS for altering events before supplier queries: <""|*internal|127.0.0.1:2013>
-	"rals_conns": [							// connections to RALs for cost/accounting  <*internal>
-		{"address": "*internal"},
-	],
 	"resources_conns": [],					// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// connections to StatS for *stats sorting, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"default_ratio":1						// default ratio used in case of *load strategy

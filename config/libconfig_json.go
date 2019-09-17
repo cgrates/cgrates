@@ -429,7 +429,6 @@ type SupplierSJsonCfg struct {
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
 	Attributes_conns      *[]*RemoteHostJson
-	Rals_conns            *[]*RemoteHostJson
 	Resources_conns       *[]*RemoteHostJson
 	Stats_conns           *[]*RemoteHostJson
 	Default_ratio         *int

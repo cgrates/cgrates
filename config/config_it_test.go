@@ -219,6 +219,35 @@ func TestCGRConfigReloadResourceS(t *testing.T) {
 	}
 }
 
+func TestCGRConfigReloadSupplierS(t *testing.T) {
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var reply string
+	if err = cfg.V1ReloadConfig(&ConfigReloadWithArgDispatcher{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
+		Section: SupplierSJson,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK received: %s", reply)
+	}
+	expAttr := &SupplierSCfg{
+		Enabled:             true,
+		StringIndexedFields: &[]string{"LCRProfile"},
+		PrefixIndexedFields: &[]string{utils.Destination},
+		ResourceSConns:      []*RemoteHost{},
+		StatSConns:          []*RemoteHost{},
+		AttributeSConns:     []*RemoteHost{},
+		IndexedSelects:      true,
+		DefaultRatio:        1,
+	}
+	if !reflect.DeepEqual(expAttr, cfg.SupplierSCfg()) {
+		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SupplierSCfg()))
+	}
+}
+
 func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
 	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out"} {
 		if err := os.RemoveAll(dir); err != nil {

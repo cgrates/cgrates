@@ -854,14 +854,9 @@ func TestDfSupplierSJsonCfg(t *testing.T) {
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
 		Attributes_conns:      &[]*RemoteHostJson{},
-		Rals_conns: &[]*RemoteHostJson{
-			{
-				Address: utils.StringPointer("*internal"),
-			},
-		},
-		Resources_conns: &[]*RemoteHostJson{},
-		Stats_conns:     &[]*RemoteHostJson{},
-		Default_ratio:   utils.IntPointer(1),
+		Resources_conns:       &[]*RemoteHostJson{},
+		Stats_conns:           &[]*RemoteHostJson{},
+		Default_ratio:         utils.IntPointer(1),
 	}
 	if cfg, err := dfCgrJsonCfg.SupplierSJsonCfg(); err != nil {
 		t.Error(err)

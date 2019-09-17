@@ -856,12 +856,9 @@ func TestCgrCfgJSONDefaultSupplierSCfg(t *testing.T) {
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
 		AttributeSConns:     []*RemoteHost{},
-		RALsConns: []*RemoteHost{
-			{Address: "*internal"},
-		},
-		ResourceSConns: []*RemoteHost{},
-		StatSConns:     []*RemoteHost{},
-		DefaultRatio:   1,
+		ResourceSConns:      []*RemoteHost{},
+		StatSConns:          []*RemoteHost{},
+		DefaultRatio:        1,
 	}
 	if !reflect.DeepEqual(eSupplSCfg, cgrCfg.supplierSCfg) {
 		t.Errorf("received: %+v, expecting: %+v", eSupplSCfg, cgrCfg.supplierSCfg)
