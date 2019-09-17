@@ -622,14 +622,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 	}
 	// SupplierS checks
 	if self.supplierSCfg.Enabled && !self.dispatcherSCfg.Enabled {
-		for _, connCfg := range self.supplierSCfg.RALsConns {
-			if connCfg.Address != utils.MetaInternal {
-				return errors.New("Only <*internal> RALs connectivity allowed in SupplierS for now")
-			}
-			if !self.ralsCfg.RALsEnabled {
-				return errors.New("RALs not enabled but requested by SupplierS component.")
-			}
-		}
 		if !self.resourceSCfg.Enabled {
 			for _, connCfg := range self.supplierSCfg.ResourceSConns {
 				if connCfg.Address == utils.MetaInternal {
@@ -637,7 +629,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 				}
 			}
 		}
-		if !self.resourceSCfg.Enabled {
+		if !self.statsCfg.Enabled {
 			for _, connCfg := range self.supplierSCfg.StatSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return errors.New("StatS not enabled but requested by SupplierS component.")
@@ -1183,7 +1175,10 @@ func (cfg *CGRConfig) ThresholdSCfg() *ThresholdSCfg {
 	return cfg.thresholdSCfg
 }
 
+// SupplierSCfg returns the config for SupplierS
 func (cfg *CGRConfig) SupplierSCfg() *SupplierSCfg {
+	cfg.lks[SupplierSJson].Lock()
+	defer cfg.lks[SupplierSJson].Unlock()
 	return cfg.supplierSCfg
 }
 
@@ -1589,6 +1584,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case SupplierSJson:
+		cfg.rldChans[SupplierSJson] <- struct{}{}
 		if !fall {
 			break
 		}

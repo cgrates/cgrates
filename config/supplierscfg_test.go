@@ -40,9 +40,6 @@ func TestSupplierSCfgloadFromJsonCfg(t *testing.T) {
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": ["index1", "index2"],			// query indexes based on these fields for faster processing
 	"attributes_conns": [],					// address where to reach the AttributeS <""|127.0.0.1:2013>
-	"rals_conns": [
-		{"address": "*internal"},			// address where to reach the RALs for cost/accounting  <*internal>
-	],
 	"resources_conns": [],					// address where to reach the Resource service, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// address where to reach the Stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	"default_ratio":1,
@@ -51,7 +48,6 @@ func TestSupplierSCfgloadFromJsonCfg(t *testing.T) {
 	expected = SupplierSCfg{
 		PrefixIndexedFields: &[]string{"index1", "index2"},
 		AttributeSConns:     []*RemoteHost{},
-		RALsConns:           []*RemoteHost{{Address: "*internal"}},
 		ResourceSConns:      []*RemoteHost{},
 		StatSConns:          []*RemoteHost{},
 		DefaultRatio:        1,

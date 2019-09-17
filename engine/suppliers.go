@@ -108,9 +108,9 @@ func (lps SupplierProfiles) Sort() {
 	sort.Slice(lps, func(i, j int) bool { return lps[i].Weight > lps[j].Weight })
 }
 
-// NewLCRService initializes a LCRService
-func NewSupplierService(dm *DataManager, timezone string,
-	filterS *FilterS, stringIndexedFields, prefixIndexedFields *[]string, resourceS,
+// NewSupplierService initializes the Supplier Service
+func NewSupplierService(dm *DataManager,
+	filterS *FilterS, cgrcfg *config.CGRConfig, resourceS,
 	statS, attributeS rpcclient.RpcClientConnection) (spS *SupplierService, err error) {
 	if attributeS != nil && reflect.ValueOf(attributeS).IsNil() { // fix nil value in interface
 		attributeS = nil
@@ -122,14 +122,13 @@ func NewSupplierService(dm *DataManager, timezone string,
 		statS = nil
 	}
 	spS = &SupplierService{
-		dm:                  dm,
-		timezone:            timezone,
-		filterS:             filterS,
-		attributeS:          attributeS,
-		resourceS:           resourceS,
-		statS:               statS,
-		stringIndexedFields: stringIndexedFields,
-		prefixIndexedFields: prefixIndexedFields}
+		dm:         dm,
+		filterS:    filterS,
+		attributeS: attributeS,
+		resourceS:  resourceS,
+		statS:      statS,
+		cgrcfg:     cgrcfg,
+	}
 	if spS.sorter, err = NewSupplierSortDispatcher(spS); err != nil {
 		return nil, err
 	}
@@ -138,15 +137,13 @@ func NewSupplierService(dm *DataManager, timezone string,
 
 // SupplierService is the service computing Supplier queries
 type SupplierService struct {
-	dm                  *DataManager
-	timezone            string
-	filterS             *FilterS
-	stringIndexedFields *[]string
-	prefixIndexedFields *[]string
-	attributeS,
-	resourceS,
-	statS rpcclient.RpcClientConnection
-	sorter SupplierSortDispatcher
+	dm         *DataManager
+	filterS    *FilterS
+	cgrcfg     *config.CGRConfig
+	attributeS rpcclient.RpcClientConnection
+	resourceS  rpcclient.RpcClientConnection
+	statS      rpcclient.RpcClientConnection
+	sorter     SupplierSortDispatcher
 }
 
 // ListenAndServe will initialize the service
@@ -166,7 +163,7 @@ func (spS *SupplierService) Shutdown() error {
 
 // matchingSupplierProfilesForEvent returns ordered list of matching resources which are active by the time of the call
 func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent, singleResult bool) (matchingSLP []*SupplierProfile, err error) {
-	sPrflIDs, err := MatchingItemIDsForEvent(ev.Event, spS.stringIndexedFields, spS.prefixIndexedFields,
+	sPrflIDs, err := MatchingItemIDsForEvent(ev.Event, spS.cgrcfg.SupplierSCfg().StringIndexedFields, spS.cgrcfg.SupplierSCfg().PrefixIndexedFields,
 		spS.dm, utils.CacheSupplierFilterIndexes, ev.Tenant, spS.filterS.cfg.SupplierSCfg().IndexedSelects)
 	if err != nil {
 		return nil, err
@@ -235,7 +232,7 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 		return
 	}
 	var sTime time.Time
-	if sTime, err = ev.FieldAsTime(utils.SetupTime, spS.timezone); err != nil {
+	if sTime, err = ev.FieldAsTime(utils.SetupTime, spS.cgrcfg.GeneralCfg().DefaultTimezone); err != nil {
 		return
 	}
 	var usage time.Duration
