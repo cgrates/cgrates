@@ -1315,12 +1315,13 @@ func (sS *SessionS) initSessionDebitLoops(s *Session) {
 func (sS *SessionS) authSession(tnt string, evStart *engine.SafEvent) (maxUsage time.Duration, err error) {
 	cgrID := GetSetCGRID(evStart)
 	var eventUsage time.Duration
-	eventUsage, err = evStart.GetDuration(utils.Usage)
-	if err != nil {
+
+	if eventUsage, err = evStart.GetDuration(utils.Usage); err != nil {
 		if err != utils.ErrNotFound {
 			return
 		}
 		evStart.Set(utils.Usage, sS.cgrCfg.SessionSCfg().MaxCallDuration) // will be used in CD
+		eventUsage = sS.cgrCfg.SessionSCfg().MaxCallDuration
 		err = nil
 	}
 	s := &Session{
