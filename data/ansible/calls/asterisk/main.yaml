@@ -1,0 +1,128 @@
+---
+- hosts: all
+  vars:
+    ###############################################################
+    ##################### Golang Vars #############################
+    ###############################################################
+    # Go language SDK version number
+    golang_version: '1.13'
+    go_version_target: "go version go{{ golang_version }} linux/amd64"
+    # Mirror to download the Go language SDK redistributable package from
+    golang_mirror: 'https://storage.googleapis.com/golang'
+    # Base installation directory the Go language SDK distribution
+    golang_install_dir: '/usr/local/go'
+    # Directory to store files downloaded for Go language SDK installation
+    golang_download_dir: "{{ x_ansible_download_dir | default(ansible_env.HOME + '/.ansible/tmp/downloads') }}"
+    # Location for GOPATH environment variable
+    golang_gopath: "/home/{{ gouser }}/go"
+    # Filename of Go language SDK redistributable package
+    golang_redis_filename: 'go{{ golang_version }}.linux-amd64.tar.gz'
+    ###############################################################
+    # CGRateS location
+    cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
+
+    rootUser : root
+
+    dependencies:
+      - build-essential
+      - git
+      - redis-server
+      - mariadb-server
+      - postgresql
+      - postgresql-contrib
+      - python-dev
+      - gcc
+      - make
+      - binutils
+      - libasound2-dev
+      - autoconf
+      - openssl
+      - libssl-dev
+      - libsrtp-dev
+      - libxml2-dev
+      - libncurses5-dev
+      - uuid-dev
+      - sqlite3
+      - libsqlite3-dev
+      - pkg-config
+      - libedit-dev
+
+    customPath: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+
+  remote_user: '{{ gouser }}'
+  tasks:
+###########################################################################################################################
+# install dependencies
+  - name: Install dependencies
+    become: yes
+    apt: name={{ dependencies }} state=present
+
+###########################################################################################################################
+# Install Golang
+  - name: install unarchive dependencies (zypper)
+    become: yes
+    zypper:
+      name:
+        - gzip
+        - tar
+      state: present
+    when: ansible_pkg_mgr == 'zypper'
+
+  - name: Install golang
+    include: go.yaml
+
+###########################################################################################################################
+# Install and config CGRateS
+  - name: Install and config CGRateS
+    include: cgrates.yaml
+
+# Configure Asterisk
+  - name: Download files for asterisk
+    become: yes
+    shell: "sudo wget --no-check-certificate https://raw.githubusercontent.com/asterisk/third-party/master/pjproject/2.7.2/pjproject-2.7.2.tar.bz2"
+    args:
+      chdir: '/tmp'
+
+  - name: Download files for asterisk
+    become: yes
+    shell: "sudo wget --no-check-certificate https://raw.githubusercontent.com/asterisk/third-party/master/jansson/2.11/jansson-2.11.tar.bz2"
+    args:
+      chdir: '/tmp'
+
+  - name: Download Asterisk
+    become: yes
+    shell: "sudo wget http://downloads.asterisk.org/pub/telephony/asterisk/asterisk-16-current.tar.gz"
+    args:
+      chdir: '/tmp'
+
+  - name: Unzip Asterisk
+    become: yes
+    shell: "sudo tar xzvf asterisk-16-current.tar.gz"
+    args:
+      chdir: '/tmp'
+
+  - name: Configure Asterisk
+    become: yes
+    shell: "sudo ./configure --with-jansson-bundled"
+    args:
+      chdir: '/tmp/asterisk-16.5.1'
+
+  - name: Make Asterisk
+    become: yes
+    shell: "sudo make"
+    args:
+      chdir: '/tmp/asterisk-16.5.1'
+
+  - name: Make install Asterisk
+    become: yes
+    shell: "sudo make install"
+    args:
+      chdir: '/tmp/asterisk-16.5.1'
+
+  - name: Add user for Asterisk
+    become: yes
+    shell: 'sudo adduser --quiet --system --group --disabled-password --shell /bin/false --gecos "Asterisk" asterisk || true'
+
+# Configure PJSUA
+  - name: Config PJSUA
+    include: pjsua.yaml
