@@ -67,7 +67,7 @@ func (schS *SchedulerService) Start(sp servmanager.ServiceProvider, waitCache bo
 	schS.connChan <- schS.rpc
 
 	// Create connection to CDR Server and share it in engine(used for *cdrlog action)
-	cdrsConn, err := sp.GetConnection(utils.CDRs, sp.GetConfig().SchedulerCfg().CDRsConns)
+	cdrsConn, err := sp.GetConnection(utils.CDRServer, sp.GetConfig().SchedulerCfg().CDRsConns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to CDRServer: %s", utils.SchedulerS, err.Error()))
 		return

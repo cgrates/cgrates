@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"path"
 	"testing"
 	"time"
@@ -78,14 +77,10 @@ func TestSchedulerSReload(t *testing.T) {
 		t.Errorf("Expected service to be running")
 	}
 	cfg.SchedulerCfg().Enabled = false
-	fmt.Println("1")
 	cfg.GetReloadChan(config.SCHEDULER_JSN) <- struct{}{}
-	fmt.Println("2")
 	time.Sleep(10 * time.Millisecond)
 	if schS.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
-	fmt.Println("3")
 	engineShutdown <- true
-	fmt.Println("4")
 }
