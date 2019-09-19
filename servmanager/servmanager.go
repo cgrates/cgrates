@@ -208,8 +208,8 @@ func (srvMngr *ServiceManager) GetConnection(subsystem string, conns []*config.R
 	// srvMngr.RLock()
 	// defer srvMngr.RUnlock()
 	service, has := srvMngr.subsystems[subsystem]
-	if !has { // used to bypass the not implemented services
-		return nil, nil
+	if !has { // used to not cause panics because of services that are not already migrated
+		return nil, errors.New(utils.UnsupportedServiceIDCaps)
 	}
 	internalChan := service.GetIntenternalChan()
 	if srvMngr.GetConfig().DispatcherSCfg().Enabled {
