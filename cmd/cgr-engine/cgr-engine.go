@@ -1098,25 +1098,6 @@ func initLogger(cfg *config.CGRConfig) error {
 	return nil
 }
 
-func schedCDRsConns(internalCDRSChan, internalDispatcherSChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
-	intChan := internalCDRSChan
-	if cfg.DispatcherSCfg().Enabled {
-		intChan = internalDispatcherSChan
-	}
-	cdrsConn, err := engine.NewRPCPool(rpcclient.POOL_FIRST,
-		cfg.TlsCfg().ClientKey,
-		cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-		cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-		cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-		cfg.SchedulerCfg().CDRsConns, intChan, false)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to CDRServer: %s", utils.SchedulerS, err.Error()))
-		exitChan <- true
-		return
-	}
-	engine.SetSchedCdrsConns(cdrsConn)
-}
-
 func initConfigSv1(internalConfigChan chan rpcclient.RpcClientConnection,
 	server *utils.Server) {
 	cfgSv1 := v1.NewConfigSv1(cfg)
@@ -1416,11 +1397,6 @@ func main() {
 		go startCDRS(internalCdrSChan, internalRaterChan, internalAttributeSChan,
 			internalThresholdSChan, internalStatSChan, internalChargerSChan,
 			internalDispatcherSChan, cdrDb, dm, server, filterSChan, exitChan)
-	}
-
-	// Create connection to CDR Server and share it in engine(used for *cdrlog action)
-	if len(cfg.SchedulerCfg().CDRsConns) != 0 {
-		go schedCDRsConns(internalCdrSChan, internalDispatcherSChan, exitChan)
 	}
 
 	// Start CDRC components if necessary
