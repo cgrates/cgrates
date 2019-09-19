@@ -1,13 +1,28 @@
-Original packaging work by:
-    Gustavo Niemeyer <niemeyer@canonical.com> on Wed, 02 Feb 2011 11:38:38 -0200
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: CGRateS
+Source: http://cgrates.org
 
-Downloaded from:
-    http://launchpad.net/lbox
+Files: *
+Copyright: Copyright 2019 DanB <danb@cgrates.org>
+License: GPL-3
 
-The Debian packaging is:
-    Copyright (C) 2011 Canonical Ltd.
-
-Further development:
-    Copyright (C) 2014 ITsysCOM GmbH
-
-License: GPL-3.0
+License: GPL-3
+ Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+ Copyright (C) ITsysCOM GmbH
+ .
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>
+ .
+ On Debian systems, the full text of the GNU General Public
+ License version 3 can be found in the file
+ `/usr/share/common-licenses/GPL-3'.
