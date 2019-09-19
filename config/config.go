@@ -1262,7 +1262,10 @@ func (cfg *CGRConfig) RalsCfg() *RalsCfg {
 	return cfg.ralsCfg
 }
 
+// CdrsCfg returns the config for CDR Server
 func (cfg *CGRConfig) CdrsCfg() *CdrsCfg {
+	cfg.lks[CDRS_JSN].Lock()
+	defer cfg.lks[CDRS_JSN].Unlock()
 	return cfg.cdrsCfg
 }
 
@@ -1496,6 +1499,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case CDRS_JSN:
+		cfg.rldChans[CDRS_JSN] <- struct{}{}
 		if !fall {
 			break
 		}
