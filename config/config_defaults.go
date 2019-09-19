@@ -823,9 +823,7 @@ const CGRATES_CFG_JSON = `
 	"caches_conns":[						// connections to CacheS for reloads
 		{"address": "*internal"},
 	],
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"}
-	],
+	"scheduler_conns": [],					// connections to SchedulerS for reloads
 	"attributes_conns": [],					// connections to AttributeS for CDRExporter
 },
 

@@ -25,7 +25,7 @@ import (
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/servmanager"
+	"github.com/cgrates/cgrates/services"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -34,7 +34,7 @@ import (
 func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThdSChan,
 	internalStatSChan, internalCacheSChan, internalSchedulerSChan, internalAttributeSChan,
 	internalDispatcherSChan, internalRALsChan chan rpcclient.RpcClientConnection,
-	serviceManager *servmanager.ServiceManager, server *utils.Server,
+	/*serviceManager *servmanager.ServiceManager*/ schS *services.SchedulerService, server *utils.Server,
 	dm *engine.DataManager, loadDb engine.LoadStorage, cdrDb engine.CdrStorage,
 	chS *engine.CacheS, // separate from channel for optimization
 	filterSChan chan *engine.FilterS, exitChan chan bool) {
@@ -158,7 +158,7 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 
 	//create scheduler connection
 	var attributeSrpc rpcclient.RpcClientConnection
-	if len(cfg.ApierCfg().SchedulerConns) != 0 {
+	if len(cfg.ApierCfg().AttributeSConns) != 0 {
 		attributeSTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, attributeSTaskChan)
 		go func() {
@@ -205,7 +205,8 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 		CdrDb:       cdrDb,
 		Config:      cfg,
 		Responder:   responder,
-		ServManager: serviceManager,
+		// ServManager: serviceManager,
+		Scheduler: schS,
 		HTTPPoster: engine.NewHTTPPoster(cfg.GeneralCfg().HttpSkipTlsVerify,
 			cfg.GeneralCfg().ReplyTimeout),
 		FilterS:    filterS,

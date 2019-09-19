@@ -27,7 +27,6 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -61,7 +60,6 @@ type ServiceManager struct {
 	dm             *engine.DataManager
 	engineShutdown chan bool
 	cacheS         *engine.CacheS
-	sched          *scheduler.Scheduler
 
 	cdrStorage  engine.CdrStorage
 	loadStorage engine.LoadStorage
@@ -70,62 +68,6 @@ type ServiceManager struct {
 	subsystems  map[string]Service
 
 	dispatcherSChan chan rpcclient.RpcClientConnection
-}
-
-func (srvMngr *ServiceManager) StartScheduler(waitCache bool) error {
-	srvMngr.RLock()
-	schedRunning := srvMngr.sched != nil
-	srvMngr.RUnlock()
-	if schedRunning {
-		return utils.NewCGRError(utils.ServiceManager,
-			utils.CapitalizedMessage(utils.ServiceAlreadyRunning),
-			utils.ServiceAlreadyRunning,
-			"the scheduler is already running")
-	}
-	if waitCache { // Wait for cache to load data before starting
-		<-srvMngr.cacheS.GetPrecacheChannel(utils.CacheActionPlans) // wait for ActionPlans to be cached
-	}
-	utils.Logger.Info("<ServiceManager> Starting CGRateS Scheduler.")
-	sched := scheduler.NewScheduler(srvMngr.dm)
-	srvMngr.Lock()
-	srvMngr.sched = sched
-	srvMngr.Unlock()
-	go func() {
-		sched.Loop()
-		srvMngr.Lock()
-		srvMngr.sched = nil // if we are after loop, the service is down
-		srvMngr.Unlock()
-		if srvMngr.cfg.SchedulerCfg().Enabled {
-			srvMngr.engineShutdown <- true // shutdown engine since this service should be running
-		}
-	}()
-	return nil
-}
-
-func (srvMngr *ServiceManager) StopScheduler() error {
-	var sched *scheduler.Scheduler
-	srvMngr.Lock()
-	if srvMngr.sched != nil {
-		sched = srvMngr.sched
-		srvMngr.sched = nil // optimize the lock and release here
-	}
-	srvMngr.Unlock()
-	if sched == nil {
-		return utils.NewCGRError(utils.ServiceManager,
-			utils.CapitalizedMessage(utils.ServiceNotRunning),
-			utils.ServiceNotRunning,
-			"the scheduler is not running")
-	}
-	utils.Logger.Info("<ServiceManager> Stoping CGRateS Scheduler.")
-	srvMngr.cfg.SchedulerCfg().Enabled = false
-	sched.Shutdown()
-	return nil
-}
-
-func (srvMngr *ServiceManager) GetScheduler() *scheduler.Scheduler {
-	srvMngr.RLock()
-	defer srvMngr.RUnlock()
-	return srvMngr.sched
 }
 
 func (srvMngr *ServiceManager) Call(serviceMethod string, args interface{}, reply interface{}) error {
@@ -162,8 +104,6 @@ type ArgStartService struct {
 // ShutdownService shuts-down a service with ID
 func (srvMngr *ServiceManager) V1StartService(args ArgStartService, reply *string) (err error) {
 	switch args.ServiceID {
-	case utils.MetaScheduler:
-		err = srvMngr.StartScheduler(false)
 	default:
 		err = errors.New(utils.UnsupportedServiceIDCaps)
 	}
@@ -177,8 +117,6 @@ func (srvMngr *ServiceManager) V1StartService(args ArgStartService, reply *strin
 // ShutdownService shuts-down a service with ID
 func (srvMngr *ServiceManager) V1StopService(args ArgStartService, reply *string) (err error) {
 	switch args.ServiceID {
-	case utils.MetaScheduler:
-		err = srvMngr.StopScheduler()
 	default:
 		err = errors.New(utils.UnsupportedServiceIDCaps)
 	}
@@ -195,8 +133,6 @@ func (srvMngr *ServiceManager) V1ServiceStatus(args ArgStartService, reply *stri
 	defer srvMngr.RUnlock()
 	var running bool
 	switch args.ServiceID {
-	case utils.MetaScheduler:
-		running = srvMngr.sched != nil
 	default:
 		return errors.New(utils.UnsupportedServiceIDCaps)
 	}
@@ -269,6 +205,8 @@ func (srvMngr *ServiceManager) GetConnection(subsystem string, conns []*config.R
 	if len(conns) == 0 {
 		return nil, nil
 	}
+	// srvMngr.RLock()
+	// defer srvMngr.RUnlock()
 	internalChan := srvMngr.subsystems[subsystem].GetIntenternalChan()
 	if srvMngr.GetConfig().DispatcherSCfg().Enabled {
 		internalChan = srvMngr.dispatcherSChan
@@ -346,6 +284,18 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 				srvMngr.engineShutdown <- true
 			} else if err = supS.Start(srvMngr, true); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start %s because: %s", utils.ServiceManager, utils.SupplierS, err))
+				srvMngr.engineShutdown <- true
+			}
+		}()
+	}
+	fmt.Println(srvMngr.cfg.SchedulerCfg().Enabled)
+	if srvMngr.cfg.SchedulerCfg().Enabled {
+		go func() {
+			if supS, has := srvMngr.subsystems[utils.SchedulerS]; !has {
+				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.SchedulerS))
+				srvMngr.engineShutdown <- true
+			} else if err = supS.Start(srvMngr, true); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start %s because: %s", utils.ServiceManager, utils.SchedulerS, err))
 				srvMngr.engineShutdown <- true
 			}
 		}()
@@ -429,6 +379,16 @@ func (srvMngr *ServiceManager) handleReload() {
 				return // stop if we encounter an error
 			}
 			if err = srvMngr.reloadService(srv, srvMngr.cfg.SupplierSCfg().Enabled); err != nil {
+				return
+			}
+		case <-srvMngr.cfg.GetReloadChan(config.SCHEDULER_JSN):
+			srv, has := srvMngr.subsystems[utils.SchedulerS]
+			if !has {
+				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.SchedulerS))
+				srvMngr.engineShutdown <- true
+				return // stop if we encounter an error
+			}
+			if err = srvMngr.reloadService(srv, srvMngr.cfg.SchedulerCfg().Enabled); err != nil {
 				return
 			}
 		}
