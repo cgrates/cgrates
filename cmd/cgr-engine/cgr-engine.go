@@ -1345,7 +1345,7 @@ func main() {
 	reS := services.NewResourceService()
 	supS := services.NewSupplierService()
 	schS := services.NewSchedulerService()
-	srvManager.AddService(attrS, chrS, tS, stS, reS, supS, schS)
+	srvManager.AddService(attrS, chrS, tS, stS, reS, supS, schS, services.NewCDRServer(internalCdrSChan))
 	internalAttributeSChan = attrS.GetIntenternalChan()
 	internalChargerSChan = chrS.GetIntenternalChan()
 	internalThresholdSChan = tS.GetIntenternalChan()

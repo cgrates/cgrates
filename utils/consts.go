@@ -605,6 +605,7 @@ const (
 	ChargerS    = "ChargerS"
 	CacheS      = "CacheS"
 	AnalyzerS   = "AnalyzerS"
+	CDRServer   = "CDRServer"
 )
 
 // Lower service names
