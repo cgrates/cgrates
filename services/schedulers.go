@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -51,20 +52,29 @@ func (schS *SchedulerService) Start(sp servmanager.ServiceProvider, waitCache bo
 	}
 
 	schS.Lock()
-
-	if !waitCache { // Wait for cache to load data before starting
+	if waitCache { // Wait for cache to load data before starting
 		<-sp.GetCacheS().GetPrecacheChannel(utils.CacheActionPlans) // wait for ActionPlans to be cached
 	}
 	utils.Logger.Info("<ServiceManager> Starting CGRateS Scheduler.")
 	schS.schS = scheduler.NewScheduler(sp.GetDM())
-	schS.Unlock()
 	go schS.schS.Loop()
 
 	schS.rpc = v1.NewSchedulerSv1(sp.GetConfig())
 	if !sp.GetConfig().DispatcherSCfg().Enabled {
 		sp.GetServer().RpcRegister(schS.rpc)
 	}
+	schS.Unlock()
 	schS.connChan <- schS.rpc
+
+	// Create connection to CDR Server and share it in engine(used for *cdrlog action)
+	cdrsConn, err := sp.GetConnection(utils.CDRs, sp.GetConfig().SchedulerCfg().CDRsConns)
+	if err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to CDRServer: %s", utils.SchedulerS, err.Error()))
+		return
+	}
+
+	// ToDo: this should be send to scheduler
+	engine.SetSchedCdrsConns(cdrsConn)
 
 	return
 }
@@ -76,7 +86,9 @@ func (schS *SchedulerService) GetIntenternalChan() (conn chan rpcclient.RpcClien
 
 // Reload handles the change of config
 func (schS *SchedulerService) Reload(sp servmanager.ServiceProvider) (err error) {
+	schS.RLock()
 	schS.schS.Reload()
+	defer schS.RUnlock()
 	return
 }
 
@@ -93,11 +105,15 @@ func (schS *SchedulerService) Shutdown() (err error) {
 
 // GetRPCInterface returns the interface to register for server
 func (schS *SchedulerService) GetRPCInterface() interface{} {
+	schS.RLock()
+	defer schS.RUnlock()
 	return schS.rpc
 }
 
 // IsRunning returns if the service is running
 func (schS *SchedulerService) IsRunning() bool {
+	schS.RLock()
+	defer schS.RUnlock()
 	return schS != nil && schS.schS != nil
 }
 

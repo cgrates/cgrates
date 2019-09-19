@@ -207,7 +207,11 @@ func (srvMngr *ServiceManager) GetConnection(subsystem string, conns []*config.R
 	}
 	// srvMngr.RLock()
 	// defer srvMngr.RUnlock()
-	internalChan := srvMngr.subsystems[subsystem].GetIntenternalChan()
+	service, has := srvMngr.subsystems[subsystem]
+	if !has { // used to bypass the not implemented services
+		return nil, nil
+	}
+	internalChan := service.GetIntenternalChan()
 	if srvMngr.GetConfig().DispatcherSCfg().Enabled {
 		internalChan = srvMngr.dispatcherSChan
 	}
@@ -288,7 +292,6 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 			}
 		}()
 	}
-	fmt.Println(srvMngr.cfg.SchedulerCfg().Enabled)
 	if srvMngr.cfg.SchedulerCfg().Enabled {
 		go func() {
 			if supS, has := srvMngr.subsystems[utils.SchedulerS]; !has {
