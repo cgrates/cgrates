@@ -20,6 +20,7 @@ package services
 
 import (
 	"fmt"
+	"sync"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
@@ -37,6 +38,7 @@ func NewAttributeService() servmanager.Service {
 
 // AttributeService implements Service interface
 type AttributeService struct {
+	sync.RWMutex
 	attrS    *engine.AttributeService
 	rpc      *v1.AttributeSv1
 	connChan chan rpcclient.RpcClientConnection
@@ -53,6 +55,8 @@ func (attrS *AttributeService) Start(sp servmanager.ServiceProvider, waitCache b
 		<-sp.GetCacheS().GetPrecacheChannel(utils.CacheAttributeFilterIndexes)
 	}
 
+	attrS.Lock()
+	defer attrS.Unlock()
 	attrS.attrS, err = engine.NewAttributeService(sp.GetDM(),
 		sp.GetFilterS(), sp.GetConfig())
 	if err != nil {
@@ -62,12 +66,11 @@ func (attrS *AttributeService) Start(sp servmanager.ServiceProvider, waitCache b
 		return
 	}
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.ServiceManager, utils.AttributeS))
-	aSv1 := v1.NewAttributeSv1(attrS.attrS)
+	attrS.rpc = v1.NewAttributeSv1(attrS.attrS)
 	if !sp.GetConfig().DispatcherSCfg().Enabled {
-		sp.GetServer().RpcRegister(aSv1)
+		sp.GetServer().RpcRegister(attrS.rpc)
 	}
-	attrS.connChan <- aSv1
-	attrS.rpc = aSv1
+	attrS.connChan <- attrS.rpc
 	return
 }
 
@@ -83,6 +86,8 @@ func (attrS *AttributeService) Reload(sp servmanager.ServiceProvider) (err error
 
 // Shutdown stops the service
 func (attrS *AttributeService) Shutdown() (err error) {
+	attrS.Lock()
+	defer attrS.Unlock()
 	if err = attrS.attrS.Shutdown(); err != nil {
 		return
 	}
@@ -99,6 +104,8 @@ func (attrS *AttributeService) GetRPCInterface() interface{} {
 
 // IsRunning returns if the service is running
 func (attrS *AttributeService) IsRunning() bool {
+	attrS.RLock()
+	defer attrS.RUnlock()
 	return attrS != nil && attrS.attrS != nil
 }
 

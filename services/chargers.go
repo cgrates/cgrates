@@ -20,6 +20,7 @@ package services
 
 import (
 	"fmt"
+	"sync"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
@@ -37,6 +38,7 @@ func NewChargerService() servmanager.Service {
 
 // ChargerService implements Service interface
 type ChargerService struct {
+	sync.RWMutex
 	chrS     *engine.ChargerService
 	rpc      *v1.ChargerSv1
 	connChan chan rpcclient.RpcClientConnection
@@ -57,7 +59,8 @@ func (chrS *ChargerService) Start(sp servmanager.ServiceProvider, waitCache bool
 			utils.ChargerS, utils.AttributeS, err.Error()))
 		return
 	}
-
+	chrS.Lock()
+	defer chrS.Unlock()
 	if chrS.chrS, err = engine.NewChargerService(sp.GetDM(), sp.GetFilterS(), chrSConn, sp.GetConfig()); err != nil {
 		utils.Logger.Crit(
 			fmt.Sprintf("<%s> Could not init, error: %s",
@@ -86,6 +89,8 @@ func (chrS *ChargerService) Reload(sp servmanager.ServiceProvider) (err error) {
 
 // Shutdown stops the service
 func (chrS *ChargerService) Shutdown() (err error) {
+	chrS.Lock()
+	defer chrS.Unlock()
 	if err = chrS.chrS.Shutdown(); err != nil {
 		return
 	}
@@ -102,6 +107,8 @@ func (chrS *ChargerService) GetRPCInterface() interface{} {
 
 // IsRunning returns if the service is running
 func (chrS *ChargerService) IsRunning() bool {
+	chrS.RLock()
+	defer chrS.RUnlock()
 	return chrS != nil && chrS.chrS != nil
 }
 
