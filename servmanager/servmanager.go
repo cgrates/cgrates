@@ -60,12 +60,11 @@ type ServiceManager struct {
 	dm             *engine.DataManager
 	engineShutdown chan bool
 	cacheS         *engine.CacheS
-
-	cdrStorage  engine.CdrStorage
-	loadStorage engine.LoadStorage
-	filterS     chan *engine.FilterS
-	server      *utils.Server
-	subsystems  map[string]Service
+	cdrStorage     engine.CdrStorage
+	loadStorage    engine.LoadStorage
+	filterS        chan *engine.FilterS
+	server         *utils.Server
+	subsystems     map[string]Service
 
 	dispatcherSChan chan rpcclient.RpcClientConnection
 }
@@ -104,6 +103,12 @@ type ArgStartService struct {
 // ShutdownService shuts-down a service with ID
 func (srvMngr *ServiceManager) V1StartService(args ArgStartService, reply *string) (err error) {
 	switch args.ServiceID {
+	case utils.MetaScheduler:
+		// stop the service using the config
+		srvMngr.Lock()
+		srvMngr.cfg.SchedulerCfg().Enabled = true
+		srvMngr.Unlock()
+		srvMngr.cfg.GetReloadChan(config.SCHEDULER_JSN) <- struct{}{}
 	default:
 		err = errors.New(utils.UnsupportedServiceIDCaps)
 	}
@@ -117,6 +122,12 @@ func (srvMngr *ServiceManager) V1StartService(args ArgStartService, reply *strin
 // ShutdownService shuts-down a service with ID
 func (srvMngr *ServiceManager) V1StopService(args ArgStartService, reply *string) (err error) {
 	switch args.ServiceID {
+	case utils.MetaScheduler:
+		// stop the service using the config
+		srvMngr.Lock()
+		srvMngr.cfg.SchedulerCfg().Enabled = false
+		srvMngr.Unlock()
+		srvMngr.cfg.GetReloadChan(config.SCHEDULER_JSN) <- struct{}{}
 	default:
 		err = errors.New(utils.UnsupportedServiceIDCaps)
 	}
@@ -133,6 +144,8 @@ func (srvMngr *ServiceManager) V1ServiceStatus(args ArgStartService, reply *stri
 	defer srvMngr.RUnlock()
 	var running bool
 	switch args.ServiceID {
+	case utils.MetaScheduler:
+		running = srvMngr.subsystems[utils.SchedulerS].IsRunning()
 	default:
 		return errors.New(utils.UnsupportedServiceIDCaps)
 	}

@@ -35,6 +35,8 @@ func TestAttributeSReload(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
+	utils.Logger.SetLogLevel(7)
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	engineShutdown := make(chan bool, 1)
