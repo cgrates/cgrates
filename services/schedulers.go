@@ -51,10 +51,13 @@ func (schS *SchedulerService) Start(sp servmanager.ServiceProvider, waitCache bo
 		return fmt.Errorf("service aleady running")
 	}
 
-	schS.Lock()
 	if waitCache { // Wait for cache to load data before starting
 		<-sp.GetCacheS().GetPrecacheChannel(utils.CacheActionPlans) // wait for ActionPlans to be cached
 	}
+
+	schS.Lock()
+	defer schS.Unlock()
+
 	utils.Logger.Info("<ServiceManager> Starting CGRateS Scheduler.")
 	schS.schS = scheduler.NewScheduler(sp.GetDM())
 	go schS.schS.Loop()
@@ -63,7 +66,6 @@ func (schS *SchedulerService) Start(sp servmanager.ServiceProvider, waitCache bo
 	if !sp.GetConfig().DispatcherSCfg().Enabled {
 		sp.GetServer().RpcRegister(schS.rpc)
 	}
-	schS.Unlock()
 	schS.connChan <- schS.rpc
 
 	// Create connection to CDR Server and share it in engine(used for *cdrlog action)
@@ -86,20 +88,20 @@ func (schS *SchedulerService) GetIntenternalChan() (conn chan rpcclient.RpcClien
 
 // Reload handles the change of config
 func (schS *SchedulerService) Reload(sp servmanager.ServiceProvider) (err error) {
-	schS.RLock()
+	schS.Lock()
 	schS.schS.Reload()
-	defer schS.RUnlock()
+	defer schS.Unlock()
 	return
 }
 
 // Shutdown stops the service
 func (schS *SchedulerService) Shutdown() (err error) {
-	schS.schS.Shutdown()
 	schS.Lock()
+	schS.schS.Shutdown()
 	schS.schS = nil
 	schS.rpc = nil
-	schS.Unlock()
 	<-schS.connChan
+	schS.Unlock()
 	return
 }
 

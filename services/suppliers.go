@@ -20,6 +20,7 @@ package services
 
 import (
 	"fmt"
+	"sync"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
@@ -37,6 +38,7 @@ func NewSupplierService() servmanager.Service {
 
 // SupplierService implements Service interface
 type SupplierService struct {
+	sync.RWMutex
 	splS     *engine.SupplierService
 	rpc      *v1.SupplierSv1
 	connChan chan rpcclient.RpcClientConnection
@@ -79,6 +81,8 @@ func (splS *SupplierService) Start(sp servmanager.ServiceProvider, waitCache boo
 			utils.SupplierS, err.Error()))
 		return
 	}
+	splS.Lock()
+	defer splS.Unlock()
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.SupplierS))
 	splS.rpc = v1.NewSupplierSv1(splS.splS)
 	if !sp.GetConfig().DispatcherSCfg().Enabled {
@@ -100,6 +104,8 @@ func (splS *SupplierService) Reload(sp servmanager.ServiceProvider) (err error) 
 
 // Shutdown stops the service
 func (splS *SupplierService) Shutdown() (err error) {
+	splS.Lock()
+	defer splS.Unlock()
 	if err = splS.splS.Shutdown(); err != nil {
 		return
 	}
@@ -116,6 +122,8 @@ func (splS *SupplierService) GetRPCInterface() interface{} {
 
 // IsRunning returns if the service is running
 func (splS *SupplierService) IsRunning() bool {
+	splS.RLock()
+	defer splS.RUnlock()
 	return splS != nil && splS.splS != nil
 }
 
