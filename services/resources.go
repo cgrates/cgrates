@@ -20,6 +20,7 @@ package services
 
 import (
 	"fmt"
+	"sync"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
@@ -37,6 +38,7 @@ func NewResourceService() servmanager.Service {
 
 // ResourceService implements Service interface
 type ResourceService struct {
+	sync.RWMutex
 	reS      *engine.ResourceService
 	rpc      *v1.ResourceSv1
 	connChan chan rpcclient.RpcClientConnection
@@ -58,6 +60,8 @@ func (reS *ResourceService) Start(sp servmanager.ServiceProvider, waitCache bool
 		return
 	}
 
+	reS.Lock()
+	defer reS.Unlock()
 	reS.reS, err = engine.NewResourceService(sp.GetDM(), sp.GetConfig(), thdSConn, sp.GetFilterS())
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.ResourceS, err.Error()))
@@ -80,12 +84,16 @@ func (reS *ResourceService) GetIntenternalChan() (conn chan rpcclient.RpcClientC
 
 // Reload handles the change of config
 func (reS *ResourceService) Reload(sp servmanager.ServiceProvider) (err error) {
+	reS.Lock()
 	reS.reS.Reload()
+	defer reS.Unlock()
 	return
 }
 
 // Shutdown stops the service
 func (reS *ResourceService) Shutdown() (err error) {
+	reS.Lock()
+	defer reS.Unlock()
 	if err = reS.reS.Shutdown(); err != nil {
 		return
 	}
@@ -102,6 +110,8 @@ func (reS *ResourceService) GetRPCInterface() interface{} {
 
 // IsRunning returns if the service is running
 func (reS *ResourceService) IsRunning() bool {
+	reS.RLock()
+	defer reS.RUnlock()
 	return reS != nil && reS.reS != nil
 }
 

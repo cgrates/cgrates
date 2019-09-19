@@ -20,6 +20,7 @@ package services
 
 import (
 	"fmt"
+	"sync"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
@@ -37,6 +38,7 @@ func NewThresholdService() servmanager.Service {
 
 // ThresholdService implements Service interface
 type ThresholdService struct {
+	sync.RWMutex
 	thrs     *engine.ThresholdService
 	rpc      *v1.ThresholdSv1
 	connChan chan rpcclient.RpcClientConnection
@@ -54,6 +56,8 @@ func (thrs *ThresholdService) Start(sp servmanager.ServiceProvider, waitCache bo
 		<-sp.GetCacheS().GetPrecacheChannel(utils.CacheThresholdFilterIndexes)
 	}
 
+	thrs.Lock()
+	defer thrs.Unlock()
 	thrs.thrs, err = engine.NewThresholdService(sp.GetDM(), sp.GetConfig(), sp.GetFilterS())
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.ThresholdS, err.Error()))
@@ -76,12 +80,16 @@ func (thrs *ThresholdService) GetIntenternalChan() (conn chan rpcclient.RpcClien
 
 // Reload handles the change of config
 func (thrs *ThresholdService) Reload(sp servmanager.ServiceProvider) (err error) {
+	thrs.Lock()
 	thrs.thrs.Reload()
+	thrs.Unlock()
 	return
 }
 
 // Shutdown stops the service
 func (thrs *ThresholdService) Shutdown() (err error) {
+	thrs.Lock()
+	defer thrs.Unlock()
 	if err = thrs.thrs.Shutdown(); err != nil {
 		return
 	}
@@ -98,6 +106,8 @@ func (thrs *ThresholdService) GetRPCInterface() interface{} {
 
 // IsRunning returns if the service is running
 func (thrs *ThresholdService) IsRunning() bool {
+	thrs.RLock()
+	defer thrs.RUnlock()
 	return thrs != nil && thrs.thrs != nil
 }
 

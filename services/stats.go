@@ -20,6 +20,7 @@ package services
 
 import (
 	"fmt"
+	"sync"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
@@ -37,6 +38,7 @@ func NewStatService() servmanager.Service {
 
 // StatService implements Service interface
 type StatService struct {
+	sync.RWMutex
 	sts      *engine.StatService
 	rpc      *v1.StatSv1
 	connChan chan rpcclient.RpcClientConnection
@@ -58,6 +60,8 @@ func (sts *StatService) Start(sp servmanager.ServiceProvider, waitCache bool) (e
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.StatS, err.Error()))
 		return
 	}
+	sts.Lock()
+	defer sts.Unlock()
 	sts.sts, err = engine.NewStatService(sp.GetDM(), sp.GetConfig(), thdSConn, sp.GetFilterS())
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<StatS> Could not init, error: %s", err.Error()))
@@ -80,12 +84,16 @@ func (sts *StatService) GetIntenternalChan() (conn chan rpcclient.RpcClientConne
 
 // Reload handles the change of config
 func (sts *StatService) Reload(sp servmanager.ServiceProvider) (err error) {
+	sts.Lock()
 	sts.sts.Reload()
+	sts.Unlock()
 	return
 }
 
 // Shutdown stops the service
 func (sts *StatService) Shutdown() (err error) {
+	sts.Lock()
+	defer sts.Unlock()
 	if err = sts.sts.Shutdown(); err != nil {
 		return
 	}
@@ -102,6 +110,8 @@ func (sts *StatService) GetRPCInterface() interface{} {
 
 // IsRunning returns if the service is running
 func (sts *StatService) IsRunning() bool {
+	sts.RLock()
+	defer sts.RUnlock()
 	return sts != nil && sts.sts != nil
 }
 
