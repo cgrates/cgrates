@@ -28,6 +28,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func TestSchedulerSReload(t *testing.T) {
@@ -56,7 +57,9 @@ func TestSchedulerSReload(t *testing.T) {
 		/*loadStorage*/ nil, filterSChan,
 		server, nil, engineShutdown)
 	schS := NewSchedulerService()
-	srvMngr.AddService(schS)
+	internalCdrSChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalCdrSChan <- nil
+	srvMngr.AddService(schS, NewCDRServer(internalCdrSChan))
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
@@ -65,7 +68,7 @@ func TestSchedulerSReload(t *testing.T) {
 	}
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ConfigReloadWithArgDispatcher{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongonew"),
 		Section: config.SCHEDULER_JSN,
 	}, &reply); err != nil {
 		t.Error(err)
