@@ -67,7 +67,10 @@
 "apier": {	
 	"caches_conns":[						// connections to CacheS for reloads
 		{"address": "127.0.0.1:3012", "transport": "*json"},
-	],						
+	],		
+	"scheduler_conns": [					// connections to SchedulerS for reloads
+		{"address": "*internal"},
+	],				
 },
 
 

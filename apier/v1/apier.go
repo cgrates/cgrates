@@ -31,10 +31,15 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
-	"github.com/cgrates/cgrates/servmanager"
+	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
+
+// SchedulerGeter used to avoid ciclic dependency
+type SchedulerGeter interface {
+	GetScheduler() *scheduler.Scheduler
+}
 
 type ApierV1 struct {
 	StorDb      engine.LoadStorage
@@ -43,12 +48,13 @@ type ApierV1 struct {
 	Config      *config.CGRConfig
 	Responder   *engine.Responder
 	CDRs        rpcclient.RpcClientConnection // FixMe: populate it from cgr-engine
-	ServManager *servmanager.ServiceManager   // Need to have them capitalize so we can export in V2
-	HTTPPoster  *engine.HTTPPoster
-	FilterS     *engine.FilterS //Used for CDR Exporter
-	CacheS      rpcclient.RpcClientConnection
-	SchedulerS  rpcclient.RpcClientConnection
-	AttributeS  rpcclient.RpcClientConnection
+	Scheduler   SchedulerGeter
+	// ServManager *servmanager.ServiceManager   // Need to have them capitalize so we can export in V2
+	HTTPPoster *engine.HTTPPoster
+	FilterS    *engine.FilterS //Used for CDR Exporter
+	CacheS     rpcclient.RpcClientConnection
+	SchedulerS rpcclient.RpcClientConnection
+	AttributeS rpcclient.RpcClientConnection
 }
 
 // Call implements rpcclient.RpcClientConnection interface for internal RPC
@@ -659,7 +665,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err 
 		return err
 	}
 	if attrs.ReloadScheduler {
-		sched := self.ServManager.GetScheduler()
+		sched := self.Scheduler.GetScheduler()
 		if sched == nil {
 			return errors.New(utils.SchedulerNotRunningCaps)
 		}
@@ -771,7 +777,7 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 	}
 	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache
 	// Need to do it before scheduler otherwise actions to run will be unknown
-	sched := self.ServManager.GetScheduler()
+	sched := self.Scheduler.GetScheduler()
 	if sched != nil {
 		sched.Reload()
 	}

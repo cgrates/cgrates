@@ -1227,7 +1227,10 @@ func (cfg *CGRConfig) MigratorCgrCfg() *MigratorCgrCfg {
 	return cfg.migratorCgrCfg
 }
 
+// SchedulerCfg returns the config for Scheduler
 func (cfg *CGRConfig) SchedulerCfg() *SchedulerCfg {
+	cfg.lks[SCHEDULER_JSN].Lock()
+	defer cfg.lks[SCHEDULER_JSN].Unlock()
 	return cfg.schedulerCfg
 }
 
@@ -1472,6 +1475,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case SCHEDULER_JSN:
+		cfg.rldChans[SCHEDULER_JSN] <- struct{}{}
 		if !fall {
 			break
 		}
@@ -1481,7 +1485,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 			break
 		}
 		fallthrough
-	case FILTERS_JSON:
+	case FILTERS_JSON: // no need to reload
 		if !fall {
 			break
 		}

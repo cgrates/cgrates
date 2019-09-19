@@ -18,4 +18,10 @@
 	"enabled": true,					// start the CDR Server service:  <true|false>
 },
 
+"apier": {
+	"scheduler_conns": [					// connections to SchedulerS for reloads
+		{"address": "*internal"},
+	],
+},
+
 }

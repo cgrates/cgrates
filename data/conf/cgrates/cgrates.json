@@ -76,7 +76,7 @@
 // 	"client_key":"",					// path to client key
 // 	"ca_certificate":"",				// path to CA certificate (populate for self-signed certificate otherwise let it empty)
 // 	"server_policy":4,					// server_policy determines the TLS Client Authentication (0-NoClientCert, 1-RequestClientCert, 2-RequireAnyClientCert, 3-VerifyClientCertIfGiven, 4-RequireAndVerifyClientCert)
-// 	"server_name":"",					
+// 	"server_name":"",
 // },
 
 
@@ -138,6 +138,7 @@
 // "filters": {								// Filters configuration (*new)
 // 	"stats_conns": [],						// connections to StatS for <*stats> filters, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 // 	"resources_conns": [],					// connections to ResourceS for <*resources> filters, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+// 	"rals_conns": [],						// connections to RALs for <*accounts> filters, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 // },
 
 
@@ -171,7 +172,7 @@
 // 	"session_cost_retries": 5,				// number of queries to session_costs before recalculating CDR
 // 	"chargers_conns": [						// connection to ChargerS for CDR forking, empty to disable billing for CDRs: <""|*internal|x.y.z.y:1234>
 // 		{"address": "*internal"}
-// 	],					
+// 	],
 // 	"rals_conns": [							// connections to RALs for cost calculation: <""|*internal|x.y.z.y:1234>
 // 		{"address": "*internal"}
 // 	],
@@ -272,6 +273,47 @@
 // ],
 
 
+// "ers": {									// EventReaderService
+// 	"enabled": false,						// starts the EventReader service: <true|false>
+// 	"sessions_conns": [						// connections to SessionS:  <*internal|127.0.0.1:2012>
+// 		{"address": "*internal"}
+// 	],
+// 	"readers": [
+// 		{
+// 			"id": "*default",									// identifier of the EventReader profile
+// 			"type": "*file_csv",								// reader type <*file_csv>
+// 			"field_separator": ",",								// separator used in case of csv files
+// 			"run_delay": 0,										// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
+// 			"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
+// 			"source_path": "/var/spool/cgrates/cdrc/in",		// read data from this path
+// 			"processed_path": "/var/spool/cgrates/cdrc/out",	// move processed data here
+// 			"xml_root_path": "",								// path towards one event in case of XML CDRs
+// 			"source_id": "ers_csv",								// free form field, tag identifying the source of the CDRs within CDRS database
+// 			"tenant": "",										// tenant used by import
+// 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+// 			"filters": [],										// limit parsing based on the filters
+// 			"flags": [],										// flags to influence the event processing
+// 			"header_fields": [],								// template of the import header fields
+// 			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+// 				{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "~*req.2", "mandatory": true},
+// 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~*req.3", "mandatory": true},
+// 				{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~*req.4", "mandatory": true},
+// 				{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~*req.6", "mandatory": true},
+// 				{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "~*req.7", "mandatory": true},
+// 				{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~*req.8", "mandatory": true},
+// 				{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~*req.9", "mandatory": true},
+// 				{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~*req.10", "mandatory": true},
+// 				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~*req.11", "mandatory": true},
+// 				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~*req.12", "mandatory": true},
+// 				{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~*req.13", "mandatory": true},
+// 			],
+// 			"trailer_fields": [],								// template of the import trailer fields
+// 			"continue": false,									// continue to the next template if executed
+// 		},
+// 	],
+// },
+
+
 // "sessions": {
 // 	"enabled": false,						// starts the session service: <true|false>
 // 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
@@ -295,7 +337,7 @@
 // 	"session_indexes": [],					// index sessions based on these fields for GetActiveSessions API
 // 	"client_protocol": 1.0,					// version of protocol to use when acting as JSON-PRC client <"0","1.0">
 // 	"channel_sync_interval": "0",			// sync channels to detect stale sessions (0 to disable)
-// 	"terminate_attempts": 5					// attempts to get the session before terminating it 
+// 	"terminate_attempts": 5					// attempts to get the session before terminating it
 // },
 
 
@@ -355,50 +397,50 @@
 // 	"origin_realm": "cgrates.org",								// diameter Origin-Realm AVP used in replies
 // 	"vendor_id": 0,												// diameter Vendor-Id AVP used in replies
 // 	"product_name": "CGRateS",									// diameter Product-Name AVP used in replies
-// 	"max_active_requests": -1,									// limit the number of active requests processed by the server <-1|0-n>
+// 	"concurrent_requests": -1,									// limit the number of active requests processed by the server <-1|0-n>
 // 	"synced_conn_requests": false,								// process one request at the time per connection
 // 	"asr_template": "",											// enable AbortSession message being sent to client on DisconnectSession
 // 	"templates":{												// default message templates
 // 		"*err": [
-// 				{"tag": "SessionId", "field_id": "Session-Id", "type": "*composed", 
+// 				{"tag": "SessionId", "field_id": "Session-Id", "type": "*composed",
 // 					"value": "~*req.Session-Id", "mandatory": true},
-// 				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*composed", 
+// 				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*composed",
 // 					"value": "~*vars.OriginHost", "mandatory": true},
-// 				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*composed", 
+// 				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*composed",
 // 					"value": "~*vars.OriginRealm", "mandatory": true},
 // 		],
 // 		"*cca": [
-// 				{"tag": "SessionId", "field_id": "Session-Id", "type": "*composed", 
+// 				{"tag": "SessionId", "field_id": "Session-Id", "type": "*composed",
 // 					"value": "~*req.Session-Id", "mandatory": true},
-// 				{"tag": "ResultCode", "field_id": "Result-Code", "type": "*constant", 
+// 				{"tag": "ResultCode", "field_id": "Result-Code", "type": "*constant",
 // 					"value": "2001"},
-// 				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*composed", 
+// 				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*composed",
 // 					"value": "~*vars.OriginHost", "mandatory": true},
-// 				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*composed", 
+// 				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*composed",
 // 					"value": "~*vars.OriginRealm", "mandatory": true},
 // 				{"tag": "AuthApplicationId", "field_id": "Auth-Application-Id", "type": "*composed",
 // 					 "value": "~*vars.*appid", "mandatory": true},
-// 				{"tag": "CCRequestType", "field_id": "CC-Request-Type", "type": "*composed", 
+// 				{"tag": "CCRequestType", "field_id": "CC-Request-Type", "type": "*composed",
 // 					"value": "~*req.CC-Request-Type", "mandatory": true},
-// 				{"tag": "CCRequestNumber", "field_id": "CC-Request-Number", "type": "*composed", 
+// 				{"tag": "CCRequestNumber", "field_id": "CC-Request-Number", "type": "*composed",
 // 					"value": "~*req.CC-Request-Number", "mandatory": true},
 // 		],
 // 		"*asr": [
-// 				{"tag": "SessionId", "field_id": "Session-Id", "type": "*variable", 
+// 				{"tag": "SessionId", "field_id": "Session-Id", "type": "*variable",
 // 					"value": "~*req.Session-Id", "mandatory": true},
-// 				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*variable", 
+// 				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*variable",
 // 					"value": "~*req.Destination-Host", "mandatory": true},
-// 				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*variable", 
+// 				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*variable",
 // 					"value": "~*req.Destination-Realm", "mandatory": true},
-// 				{"tag": "DestinationRealm", "field_id": "Destination-Realm", "type": "*variable", 
+// 				{"tag": "DestinationRealm", "field_id": "Destination-Realm", "type": "*variable",
 // 					"value": "~*req.Origin-Realm", "mandatory": true},
-// 				{"tag": "DestinationHost", "field_id": "Destination-Host", "type": "*variable", 
+// 				{"tag": "DestinationHost", "field_id": "Destination-Host", "type": "*variable",
 // 					"value": "~*req.Origin-Host", "mandatory": true},
 // 				{"tag": "AuthApplicationId", "field_id": "Auth-Application-Id", "type": "*variable",
 // 					 "value": "~*vars.*appid", "mandatory": true},
-// 				{"tag": "UserName", "field_id": "User-Name", "type": "*variable", 
+// 				{"tag": "UserName", "field_id": "User-Name", "type": "*variable",
 // 					"value": "~*req.User-Name", "mandatory": true},
-// 				{"tag": "OriginStateID", "field_id": "Origin-State-Id", "type": "*constant", 
+// 				{"tag": "OriginStateID", "field_id": "Origin-State-Id", "type": "*constant",
 // 					"value": "1"},
 // 		]
 // 	},
@@ -499,10 +541,11 @@
 // 	"attributes_conns": [],					// connections to AttributeS for altering events before supplier queries: <""|*internal|127.0.0.1:2013>
 // 	"resources_conns": [],					// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 // 	"stats_conns": [],						// connections to StatS for *stats sorting, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+// 	"default_ratio":1						// default ratio used in case of *load strategy
 // },
 
 
-// "loaders": [												// LoaderS config 						
+// "loaders": [												// LoaderS config
 // 	{
 // 		"id": "*default",									// identifier of the Loader
 // 		"enabled": false,									// starts as service: <true|false>.
@@ -545,7 +588,7 @@
 // 					{"tag": "FilterFieldValues", "field_id": "FilterFieldValues", "type": "*variable", "value": "~4"},
 // 					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*variable", "value": "~5"},
 // 				],
-// 			},	
+// 			},
 // 			{
 // 				"type": "*resources",						// data source type
 // 				"file_name": "Resources.csv",				// file name in the tp_in_dir
@@ -655,7 +698,7 @@
 // 			},
 // 			{
 // 				"type": "*dispatcher_hosts",						// data source type
-// 				"file_name": "DispatcherHosts.csv",					// file name in the tp_in_dir 
+// 				"file_name": "DispatcherHosts.csv",					// file name in the tp_in_dir
 // 				"fields": [
 // 					{"tag": "Tenant", "field_id": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
 // 					{"tag": "ID", "field_id": "ID", "type": "*variable", "value": "~1", "mandatory": true},
@@ -753,13 +796,11 @@
 // },
 
 
-// "apier": {	
+// "apier": {
 // 	"caches_conns":[						// connections to CacheS for reloads
 // 		{"address": "*internal"},
 // 	],
-// 	"scheduler_conns": [					// connections to SchedulerS for reloads
-// 		{"address": "*internal"}
-// 	],						
+// 	"scheduler_conns": [],					// connections to SchedulerS for reloads
 // 	"attributes_conns": [],					// connections to AttributeS for CDRExporter
 // },
 
