@@ -606,6 +606,7 @@ const (
 	CacheS      = "CacheS"
 	AnalyzerS   = "AnalyzerS"
 	CDRServer   = "CDRServer"
+	ResponderS  = "ResponderS"
 )
 
 // Lower service names

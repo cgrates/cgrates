@@ -241,10 +241,10 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 	go srvMngr.handleReload()
 	if srvMngr.cfg.AttributeSCfg().Enabled {
 		go func() {
-			if attrS, has := srvMngr.subsystems[utils.AttributeS]; !has {
+			if srv, has := srvMngr.subsystems[utils.AttributeS]; !has {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.AttributeS))
 				srvMngr.engineShutdown <- true
-			} else if err = attrS.Start(srvMngr, true); err != nil {
+			} else if err = srv.Start(srvMngr, true); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start %s because: %s", utils.ServiceManager, utils.AttributeS, err))
 				srvMngr.engineShutdown <- true
 			}
@@ -252,10 +252,10 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 	}
 	if srvMngr.cfg.ChargerSCfg().Enabled {
 		go func() {
-			if chrS, has := srvMngr.subsystems[utils.ChargerS]; !has {
+			if srv, has := srvMngr.subsystems[utils.ChargerS]; !has {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.ChargerS))
 				srvMngr.engineShutdown <- true
-			} else if err = chrS.Start(srvMngr, true); err != nil {
+			} else if err = srv.Start(srvMngr, true); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start %s because: %s", utils.ServiceManager, utils.ChargerS, err))
 				srvMngr.engineShutdown <- true
 			}
@@ -263,10 +263,10 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 	}
 	if srvMngr.cfg.ThresholdSCfg().Enabled {
 		go func() {
-			if thrS, has := srvMngr.subsystems[utils.ThresholdS]; !has {
+			if srv, has := srvMngr.subsystems[utils.ThresholdS]; !has {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.ThresholdS))
 				srvMngr.engineShutdown <- true
-			} else if err = thrS.Start(srvMngr, true); err != nil {
+			} else if err = srv.Start(srvMngr, true); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start %s because: %s", utils.ServiceManager, utils.ThresholdS, err))
 				srvMngr.engineShutdown <- true
 			}
@@ -274,10 +274,10 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 	}
 	if srvMngr.cfg.StatSCfg().Enabled {
 		go func() {
-			if stS, has := srvMngr.subsystems[utils.StatS]; !has {
+			if srv, has := srvMngr.subsystems[utils.StatS]; !has {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.StatS))
 				srvMngr.engineShutdown <- true
-			} else if err = stS.Start(srvMngr, true); err != nil {
+			} else if err = srv.Start(srvMngr, true); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start %s because: %s", utils.ServiceManager, utils.StatS, err))
 				srvMngr.engineShutdown <- true
 			}
@@ -285,10 +285,10 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 	}
 	if srvMngr.cfg.ResourceSCfg().Enabled {
 		go func() {
-			if reS, has := srvMngr.subsystems[utils.ResourceS]; !has {
+			if srv, has := srvMngr.subsystems[utils.ResourceS]; !has {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.ResourceS))
 				srvMngr.engineShutdown <- true
-			} else if err = reS.Start(srvMngr, true); err != nil {
+			} else if err = srv.Start(srvMngr, true); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start %s because: %s", utils.ServiceManager, utils.ResourceS, err))
 				srvMngr.engineShutdown <- true
 			}
@@ -296,10 +296,10 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 	}
 	if srvMngr.cfg.SupplierSCfg().Enabled {
 		go func() {
-			if supS, has := srvMngr.subsystems[utils.SupplierS]; !has {
+			if srv, has := srvMngr.subsystems[utils.SupplierS]; !has {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.SupplierS))
 				srvMngr.engineShutdown <- true
-			} else if err = supS.Start(srvMngr, true); err != nil {
+			} else if err = srv.Start(srvMngr, true); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start %s because: %s", utils.ServiceManager, utils.SupplierS, err))
 				srvMngr.engineShutdown <- true
 			}
@@ -307,11 +307,22 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 	}
 	if srvMngr.cfg.SchedulerCfg().Enabled {
 		go func() {
-			if supS, has := srvMngr.subsystems[utils.SchedulerS]; !has {
+			if srv, has := srvMngr.subsystems[utils.SchedulerS]; !has {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.SchedulerS))
 				srvMngr.engineShutdown <- true
-			} else if err = supS.Start(srvMngr, true); err != nil {
+			} else if err = srv.Start(srvMngr, true); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start %s because: %s", utils.ServiceManager, utils.SchedulerS, err))
+				srvMngr.engineShutdown <- true
+			}
+		}()
+	}
+	if srvMngr.cfg.CdrsCfg().CDRSEnabled {
+		go func() {
+			if srv, has := srvMngr.subsystems[utils.CDRServer]; !has {
+				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.CDRServer))
+				srvMngr.engineShutdown <- true
+			} else if err = srv.Start(srvMngr, true); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start %s because: %s", utils.ServiceManager, utils.CDRServer, err))
 				srvMngr.engineShutdown <- true
 			}
 		}()
@@ -401,6 +412,16 @@ func (srvMngr *ServiceManager) handleReload() {
 			srv, has := srvMngr.subsystems[utils.SchedulerS]
 			if !has {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.SchedulerS))
+				srvMngr.engineShutdown <- true
+				return // stop if we encounter an error
+			}
+			if err = srvMngr.reloadService(srv, srvMngr.cfg.SchedulerCfg().Enabled); err != nil {
+				return
+			}
+		case <-srvMngr.cfg.GetReloadChan(config.CDRS_JSN):
+			srv, has := srvMngr.subsystems[utils.CDRServer]
+			if !has {
+				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.CDRServer))
 				srvMngr.engineShutdown <- true
 				return // stop if we encounter an error
 			}
