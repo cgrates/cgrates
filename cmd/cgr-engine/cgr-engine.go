@@ -34,7 +34,6 @@ import (
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/analyzers"
 	v1 "github.com/cgrates/cgrates/apier/v1"
-	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/cdrc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/dispatchers"
@@ -681,110 +680,6 @@ func startHTTPAgent(internalSMGChan, internalDispatcherSChan chan rpcclient.RpcC
 	}
 }
 
-func startCDRS(internalCdrSChan, internalRaterChan, internalAttributeSChan, internalThresholdSChan,
-	internalStatSChan, internalChargerSChan, internalDispatcherSChan chan rpcclient.RpcClientConnection,
-	cdrDb engine.CdrStorage, dm *engine.DataManager, server *utils.Server,
-	filterSChan chan *engine.FilterS, exitChan chan bool) {
-	filterS := <-filterSChan
-	filterSChan <- filterS
-	var err error
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.CDRs))
-
-	var ralConn, attrSConn, thresholdSConn, statsConn, chargerSConn rpcclient.RpcClientConnection
-
-	intChargerSChan := internalChargerSChan
-	intRaterChan := internalRaterChan
-	intAttributeSChan := internalAttributeSChan
-	intThresholdSChan := internalThresholdSChan
-	intStatSChan := internalStatSChan
-	if cfg.DispatcherSCfg().Enabled {
-		intChargerSChan = internalDispatcherSChan
-		intRaterChan = internalDispatcherSChan
-		intAttributeSChan = internalDispatcherSChan
-		intThresholdSChan = internalDispatcherSChan
-		intStatSChan = internalDispatcherSChan
-	}
-	if len(cfg.CdrsCfg().CDRSChargerSConns) != 0 { // Conn pool towards RAL
-		chargerSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.CdrsCfg().CDRSChargerSConns, intChargerSChan, false)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
-				utils.ChargerS, err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.CdrsCfg().CDRSRaterConns) != 0 { // Conn pool towards RAL
-		ralConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.CdrsCfg().CDRSRaterConns, intRaterChan, false)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to RAL: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.CdrsCfg().CDRSAttributeSConns) != 0 { // Users connection init
-		attrSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.CdrsCfg().CDRSAttributeSConns, intAttributeSChan, false)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
-				utils.AttributeS, err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.CdrsCfg().CDRSThresholdSConns) != 0 { // Stats connection init
-		thresholdSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.CdrsCfg().CDRSThresholdSConns, intThresholdSChan, false)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to ThresholdS: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if len(cfg.CdrsCfg().CDRSStatSConns) != 0 { // Stats connection init
-		statsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.CdrsCfg().CDRSStatSConns, intStatSChan, false)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to StatS: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	cdrServer := engine.NewCDRServer(cfg, cdrDb, dm,
-		ralConn, attrSConn,
-		thresholdSConn, statsConn, chargerSConn, filterS)
-	utils.Logger.Info("Registering CDRS HTTP Handlers.")
-	cdrServer.RegisterHandlersToServer(server)
-	utils.Logger.Info("Registering CDRS RPC service.")
-	cdrSrv := v1.NewCDRsV1(cdrServer)
-	server.RpcRegister(cdrSrv)
-	server.RpcRegister(&v2.CDRsV2{CDRsV1: *cdrSrv})
-	// Make the cdr server available for internal communication
-	server.RpcRegister(cdrServer) // register CdrServer for internal usage (TODO: refactor this)
-	internalCdrSChan <- cdrServer // Signal that cdrS is operational
-}
-
 // startFilterService fires up the FilterS
 func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS,
 	internalStatSChan, internalResourceSChan, internalRalSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
@@ -1344,7 +1239,8 @@ func main() {
 	reS := services.NewResourceService()
 	supS := services.NewSupplierService()
 	schS := services.NewSchedulerService()
-	srvManager.AddService(attrS, chrS, tS, stS, reS, supS, schS, services.NewCDRServer(internalCdrSChan))
+	cdrS := services.NewCDRServer()
+	srvManager.AddService(attrS, chrS, tS, stS, reS, supS, schS, cdrS, services.NewResponderService(internalRaterChan))
 	internalAttributeSChan = attrS.GetIntenternalChan()
 	internalChargerSChan = chrS.GetIntenternalChan()
 	internalThresholdSChan = tS.GetIntenternalChan()
@@ -1352,6 +1248,7 @@ func main() {
 	internalRsChan = reS.GetIntenternalChan()
 	internalSupplierSChan = supS.GetIntenternalChan()
 	internalSchedSChan = schS.GetIntenternalChan()
+	internalCdrSChan = cdrS.GetIntenternalChan()
 	go srvManager.StartServices()
 
 	initServiceManagerV1(internalServeManagerChan, srvManager, server)
@@ -1390,13 +1287,6 @@ func main() {
 			internalThresholdSChan, internalStatSChan, internalCacheSChan, internalSchedSChan,
 			internalAttributeSChan, internalDispatcherSChan, internalRALsv1Chan,
 			/*srvManager*/ schS, server, dm, loadDb, cdrDb, cacheS, filterSChan, exitChan)
-	}
-
-	// Start CDR Server
-	if cfg.CdrsCfg().CDRSEnabled {
-		go startCDRS(internalCdrSChan, internalRaterChan, internalAttributeSChan,
-			internalThresholdSChan, internalStatSChan, internalChargerSChan,
-			internalDispatcherSChan, cdrDb, dm, server, filterSChan, exitChan)
 	}
 
 	// Start CDRC components if necessary
