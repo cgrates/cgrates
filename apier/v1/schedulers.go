@@ -19,24 +19,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/servmanager"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewSchedulerSv1(schdS *servmanager.SchedulerS) *SchedulerSv1 {
-	return &SchedulerSv1{schdS: schdS}
+// NewSchedulerSv1 retuns the API for SchedulerS
+func NewSchedulerSv1(cgrcfg *config.CGRConfig) *SchedulerSv1 {
+	return &SchedulerSv1{cgrcfg: cgrcfg}
 }
 
 // SchedulerSv1 is the RPC object implementing scheduler APIs
 type SchedulerSv1 struct {
-	schdS *servmanager.SchedulerS
+	cgrcfg *config.CGRConfig
 }
 
 // Reload reloads scheduler instructions
 func (schdSv1 *SchedulerSv1) Reload(arg *utils.CGREventWithArgDispatcher, reply *string) error {
-	return schdSv1.schdS.V1Reload(arg, reply)
+	schdSv1.cgrcfg.GetReloadChan(config.SCHEDULER_JSN) <- struct{}{}
+	*reply = utils.OK
+	return nil
 }
 
+// Ping returns Pong
 func (schdSv1 *SchedulerSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *string) error {
 	*reply = utils.Pong
 	return nil

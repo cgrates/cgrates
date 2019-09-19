@@ -1764,11 +1764,7 @@ func TestCgrCfgJSONDefaultApierCfg(t *testing.T) {
 				Address: utils.MetaInternal,
 			},
 		},
-		SchedulerConns: []*RemoteHost{
-			{
-				Address: utils.MetaInternal,
-			},
-		},
+		SchedulerConns:  []*RemoteHost{},
 		AttributeSConns: []*RemoteHost{},
 	}
 	if !reflect.DeepEqual(cgrCfg.apier, aCfg) {

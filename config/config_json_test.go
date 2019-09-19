@@ -1565,11 +1565,7 @@ func TestDfApierCfg(t *testing.T) {
 				Address: utils.StringPointer(utils.MetaInternal),
 			},
 		},
-		Scheduler_conns: &[]*RemoteHostJson{
-			{
-				Address: utils.StringPointer(utils.MetaInternal),
-			},
-		},
+		Scheduler_conns:  &[]*RemoteHostJson{},
 		Attributes_conns: &[]*RemoteHostJson{},
 	}
 	if cfg, err := dfCgrJsonCfg.ApierCfgJson(); err != nil {

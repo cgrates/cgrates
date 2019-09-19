@@ -163,10 +163,17 @@
 				{"tag": "RemoteAddr" , "field_id": "RemoteAddr", "type": "*remote_host"},
 			],
 			"reply_fields":[],
-		},
-		
+		},	
 	],
-
 },
+
+
+
+"apier": {
+	"scheduler_conns": [					// connections to SchedulerS for reloads
+		{"address": "*internal"},
+	],
+},
+
 
 }

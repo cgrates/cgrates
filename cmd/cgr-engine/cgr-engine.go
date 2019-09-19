@@ -41,7 +41,6 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/ers"
 	"github.com/cgrates/cgrates/loaders"
-	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/services"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/sessions"
@@ -786,18 +785,6 @@ func startCDRS(internalCdrSChan, internalRaterChan, internalAttributeSChan, inte
 	internalCdrSChan <- cdrServer // Signal that cdrS is operational
 }
 
-func startScheduler(internalSchedulerChan chan *scheduler.Scheduler, cacheDoneChan chan struct{}, dm *engine.DataManager, exitChan chan bool) {
-	// Wait for cache to load data before starting
-	cacheDone := <-cacheDoneChan
-	cacheDoneChan <- cacheDone
-	utils.Logger.Info("Starting CGRateS Scheduler.")
-	sched := scheduler.NewScheduler(dm)
-	internalSchedulerChan <- sched
-
-	sched.Loop()
-	exitChan <- true // Should not get out of loop though
-}
-
 // startFilterService fires up the FilterS
 func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS,
 	internalStatSChan, internalResourceSChan, internalRalSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
@@ -976,15 +963,6 @@ func initCoreSv1(internalCoreSv1Chan chan rpcclient.RpcClientConnection, server 
 		server.RpcRegister(cSv1)
 	}
 	internalCoreSv1Chan <- cSv1
-}
-
-func initSchedulerS(internalSchedSChan chan rpcclient.RpcClientConnection,
-	srvMngr *servmanager.ServiceManager, server *utils.Server) {
-	schdS := servmanager.NewSchedulerS(srvMngr)
-	if !cfg.DispatcherSCfg().Enabled {
-		server.RpcRegister(v1.NewSchedulerSv1(schdS))
-	}
-	internalSchedSChan <- schdS
 }
 
 func initServiceManagerV1(internalServiceManagerChan chan rpcclient.RpcClientConnection,
@@ -1384,13 +1362,15 @@ func main() {
 	stS := services.NewStatService()
 	reS := services.NewResourceService()
 	supS := services.NewSupplierService()
-	srvManager.AddService(attrS, chrS, tS, stS, reS, supS)
+	schS := services.NewSchedulerService()
+	srvManager.AddService(attrS, chrS, tS, stS, reS, supS, schS)
 	internalAttributeSChan = attrS.GetIntenternalChan()
 	internalChargerSChan = chrS.GetIntenternalChan()
 	internalThresholdSChan = tS.GetIntenternalChan()
 	internalStatSChan = stS.GetIntenternalChan()
 	internalRsChan = reS.GetIntenternalChan()
 	internalSupplierSChan = supS.GetIntenternalChan()
+	internalSchedSChan = schS.GetIntenternalChan()
 	go srvManager.StartServices()
 
 	initServiceManagerV1(internalServeManagerChan, srvManager, server)
@@ -1421,22 +1401,14 @@ func main() {
 		engine.IntRPC.AddInternalRPCClient(utils.RALsV1, internalRALsv1Chan)
 	}
 
-	// init SchedulerS
-	initSchedulerS(internalSchedSChan, srvManager, server)
-
 	initConfigSv1(internalConfigChan, server)
-
-	// Start Scheduler
-	if cfg.SchedulerCfg().Enabled {
-		go srvManager.StartScheduler(true)
-	}
 
 	// Start RALs
 	if cfg.RalsCfg().RALsEnabled {
 		go startRater(internalRaterChan, internalApierV1Chan, internalApierV2Chan,
 			internalThresholdSChan, internalStatSChan, internalCacheSChan, internalSchedSChan,
 			internalAttributeSChan, internalDispatcherSChan, internalRALsv1Chan,
-			srvManager, server, dm, loadDb, cdrDb, cacheS, filterSChan, exitChan)
+			/*srvManager*/ schS, server, dm, loadDb, cdrDb, cacheS, filterSChan, exitChan)
 	}
 
 	// Start CDR Server

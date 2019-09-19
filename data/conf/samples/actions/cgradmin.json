@@ -51,4 +51,10 @@
 	"store_interval": "1s",
 },
 
+"apier": {
+	"scheduler_conns": [					// connections to SchedulerS for reloads
+		{"address": "*internal"},
+	],
+},
+
 }

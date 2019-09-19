@@ -72,4 +72,11 @@
 },
 
 
+"apier": {
+	"scheduler_conns": [					// connections to SchedulerS for reloads
+		{"address": "*internal"},
+	],
+},
+
+
 }
