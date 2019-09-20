@@ -53,9 +53,10 @@ func TestSchedulerSReload(t *testing.T) {
 		t.Fatal(err)
 	}
 	srvMngr := servmanager.NewServiceManager(cfg, dm,
-		chS /*cdrStorage*/, nil,
+		/*cdrStorage*/ nil,
 		/*loadStorage*/ nil, filterSChan,
 		server, nil, engineShutdown)
+	srvMngr.SetCacheS(chS)
 	schS := NewSchedulerService()
 	internalCdrSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalCdrSChan <- nil
