@@ -478,6 +478,10 @@ type ServiceProvider interface {
 	GetExitChan() chan bool
 	// GetConnection creates a rpcClient to the specified subsystem
 	GetConnection(subsystem string, cfg []*config.RemoteHost) (rpcclient.RpcClientConnection, error)
+	// GetService returns the named service
+	GetService(subsystem string) (Service, error)
+	// AddService adds the given serices
+	AddService(services ...Service)
 }
 
 // Service interface that describes what functions should a service implement

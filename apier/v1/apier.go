@@ -48,13 +48,12 @@ type ApierV1 struct {
 	Config      *config.CGRConfig
 	Responder   *engine.Responder
 	CDRs        rpcclient.RpcClientConnection // FixMe: populate it from cgr-engine
-	Scheduler   SchedulerGeter
-	// ServManager *servmanager.ServiceManager   // Need to have them capitalize so we can export in V2
-	HTTPPoster *engine.HTTPPoster
-	FilterS    *engine.FilterS //Used for CDR Exporter
-	CacheS     rpcclient.RpcClientConnection
-	SchedulerS rpcclient.RpcClientConnection
-	AttributeS rpcclient.RpcClientConnection
+	Scheduler   SchedulerGeter                // Need to have them capitalize so we can export in V2
+	HTTPPoster  *engine.HTTPPoster
+	FilterS     *engine.FilterS //Used for CDR Exporter
+	CacheS      rpcclient.RpcClientConnection
+	SchedulerS  rpcclient.RpcClientConnection
+	AttributeS  rpcclient.RpcClientConnection
 }
 
 // Call implements rpcclient.RpcClientConnection interface for internal RPC
