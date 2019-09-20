@@ -458,6 +458,15 @@ func (srvMngr *ServiceManager) reloadService(srv Service, shouldRun bool) (err e
 	return
 }
 
+// GetService returns the named service
+func (srvMngr *ServiceManager) GetService(subsystem string) (srv Service, err error) {
+	var has bool
+	if srv, has = srvMngr.subsystems[subsystem]; !has {
+		return nil, utils.ErrNotFound
+	}
+	return
+}
+
 // ServiceProvider should implement this to provide information for service
 type ServiceProvider interface {
 	// GetDM returns the DataManager
