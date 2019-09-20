@@ -116,10 +116,12 @@ func (cdrS *CDRServer) Reload(sp servmanager.ServiceProvider) (err error) {
 
 // Shutdown stops the service
 func (cdrS *CDRServer) Shutdown() (err error) {
+	cdrS.Lock()
 	cdrS.cdrS = nil
 	cdrS.rpcv1 = nil
 	cdrS.rpcv2 = nil
 	<-cdrS.connChan
+	cdrS.Unlock()
 	return
 }
 
@@ -130,6 +132,8 @@ func (cdrS *CDRServer) GetRPCInterface() interface{} {
 
 // IsRunning returns if the service is running
 func (cdrS *CDRServer) IsRunning() bool {
+	cdrS.RLock()
+	defer cdrS.RUnlock()
 	return cdrS != nil && cdrS.cdrS != nil
 }
 
