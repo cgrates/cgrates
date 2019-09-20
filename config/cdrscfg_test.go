@@ -53,13 +53,13 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 	},
 }`
 	expected = CdrsCfg{
-		CDRSStoreCdrs:       true,
-		CDRSSMCostRetries:   5,
-		CDRSChargerSConns:   []*RemoteHost{},
-		CDRSRaterConns:      []*RemoteHost{{Address: utils.MetaInternal}},
-		CDRSAttributeSConns: []*RemoteHost{},
-		CDRSThresholdSConns: []*RemoteHost{},
-		CDRSStatSConns:      []*RemoteHost{},
+		StoreCdrs:       true,
+		SMCostRetries:   5,
+		ChargerSConns:   []*RemoteHost{},
+		RaterConns:      []*RemoteHost{{Address: utils.MetaInternal}},
+		AttributeSConns: []*RemoteHost{},
+		ThresholdSConns: []*RemoteHost{},
+		StatSConns:      []*RemoteHost{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)

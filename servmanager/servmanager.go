@@ -316,7 +316,7 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 			}
 		}()
 	}
-	if srvMngr.cfg.CdrsCfg().CDRSEnabled {
+	if srvMngr.cfg.CdrsCfg().Enabled {
 		go func() {
 			if srv, has := srvMngr.subsystems[utils.CDRServer]; !has {
 				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s>", utils.ServiceManager, utils.CDRServer))
@@ -425,7 +425,7 @@ func (srvMngr *ServiceManager) handleReload() {
 				srvMngr.engineShutdown <- true
 				return // stop if we encounter an error
 			}
-			if err = srvMngr.reloadService(srv, srvMngr.cfg.SchedulerCfg().Enabled); err != nil {
+			if err = srvMngr.reloadService(srv, srvMngr.cfg.CdrsCfg().Enabled); err != nil {
 				return
 			}
 		}
