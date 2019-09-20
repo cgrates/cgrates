@@ -51,9 +51,10 @@ func TestResourceSReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheResourceFilterIndexes))
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg /*dm*/, nil,
-		chS /*cdrStorage*/, nil,
+		/*cdrStorage*/ nil,
 		/*loadStorage*/ nil, filterSChan,
 		server, nil, engineShutdown)
+	srvMngr.SetCacheS(chS)
 	reS := NewResourceService()
 	srvMngr.AddService(NewThresholdService(), reS)
 	if err = srvMngr.StartServices(); err != nil {

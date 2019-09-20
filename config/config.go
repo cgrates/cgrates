@@ -1207,7 +1207,10 @@ func (cfg *CGRConfig) FilterSCfg() *FilterSCfg {
 	return cfg.filterSCfg
 }
 
+// CacheCfg returns the config for Cache
 func (cfg *CGRConfig) CacheCfg() CacheCfg {
+	cfg.lks[CACHE_JSN].Lock()
+	defer cfg.lks[CACHE_JSN].Unlock()
 	return cfg.cacheCfg
 }
 
@@ -1483,7 +1486,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 			break
 		}
 		fallthrough
-	case CACHE_JSN:
+	case CACHE_JSN: // no need to reload
 		if !fall {
 			break
 		}
