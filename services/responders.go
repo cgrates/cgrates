@@ -20,6 +20,7 @@ package services
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -36,6 +37,7 @@ func NewResponderService(connChan chan rpcclient.RpcClientConnection) *Responder
 
 // ResponderService implements Service interface
 type ResponderService struct {
+	sync.RWMutex
 	resp     *engine.Responder
 	connChan chan rpcclient.RpcClientConnection
 }
@@ -67,7 +69,8 @@ func (resp *ResponderService) Start(sp servmanager.ServiceProvider, waitCache bo
 	if stats != nil {
 		engine.SetStatS(stats)
 	}
-
+	resp.Lock()
+	defer resp.Unlock()
 	resp.resp = &engine.Responder{
 		ExitChan:         sp.GetExitChan(),
 		MaxComputedUsage: sp.GetConfig().RalsCfg().RALsMaxComputedUsage,
@@ -95,8 +98,10 @@ func (resp *ResponderService) Reload(sp servmanager.ServiceProvider) (err error)
 
 // Shutdown stops the service
 func (resp *ResponderService) Shutdown() (err error) {
+	resp.Lock()
 	resp.resp = nil
 	<-resp.connChan
+	resp.Unlock()
 	return
 }
 
@@ -107,6 +112,8 @@ func (resp *ResponderService) GetRPCInterface() interface{} {
 
 // IsRunning returns if the service is running
 func (resp *ResponderService) IsRunning() bool {
+	resp.RLock()
+	defer resp.RUnlock()
 	return resp != nil && resp.resp != nil
 }
 
@@ -117,5 +124,7 @@ func (resp *ResponderService) ServiceName() string {
 
 // GetResponder returns the responder created
 func (resp *ResponderService) GetResponder() *engine.Responder {
+	resp.RLock()
+	defer resp.RUnlock()
 	return resp.resp
 }
