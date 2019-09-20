@@ -323,42 +323,42 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// CDRServer checks
-	if self.cdrsCfg.CDRSEnabled && !self.dispatcherSCfg.Enabled {
+	if self.cdrsCfg.Enabled && !self.dispatcherSCfg.Enabled {
 		if !self.chargerSCfg.Enabled {
-			for _, conn := range self.cdrsCfg.CDRSChargerSConns {
+			for _, conn := range self.cdrsCfg.ChargerSConns {
 				if conn.Address == utils.MetaInternal {
 					return errors.New("ChargerS not enabled but requested by CDRS component.")
 				}
 			}
 		}
 		if !self.ralsCfg.RALsEnabled {
-			for _, cdrsRaterConn := range self.cdrsCfg.CDRSRaterConns {
+			for _, cdrsRaterConn := range self.cdrsCfg.RaterConns {
 				if cdrsRaterConn.Address == utils.MetaInternal {
 					return errors.New("RALs not enabled but requested by CDRS component.")
 				}
 			}
 		}
 		if !self.attributeSCfg.Enabled {
-			for _, connCfg := range self.cdrsCfg.CDRSAttributeSConns {
+			for _, connCfg := range self.cdrsCfg.AttributeSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return errors.New("AttributeS not enabled but requested by CDRS component.")
 				}
 			}
 		}
 		if !self.statsCfg.Enabled {
-			for _, connCfg := range self.cdrsCfg.CDRSStatSConns {
+			for _, connCfg := range self.cdrsCfg.StatSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return errors.New("StatS not enabled but requested by CDRS component.")
 				}
 			}
 		}
-		for _, cdrePrfl := range self.cdrsCfg.CDRSOnlineCDRExports {
+		for _, cdrePrfl := range self.cdrsCfg.OnlineCDRExports {
 			if _, hasIt := self.CdreProfiles[cdrePrfl]; !hasIt {
 				return fmt.Errorf("<CDRS> Cannot find CDR export template with ID: <%s>", cdrePrfl)
 			}
 		}
 		if !self.thresholdSCfg.Enabled {
-			for _, connCfg := range self.cdrsCfg.CDRSThresholdSConns {
+			for _, connCfg := range self.cdrsCfg.ThresholdSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return errors.New("ThresholdS not enabled but requested by CDRS component.")
 				}
@@ -374,7 +374,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 			if len(cdrcInst.CdrsConns) == 0 {
 				return fmt.Errorf("<CDRC> Instance: %s, CdrC enabled but no CDRS defined!", cdrcInst.ID)
 			}
-			if !self.cdrsCfg.CDRSEnabled && !self.dispatcherSCfg.Enabled {
+			if !self.cdrsCfg.Enabled && !self.dispatcherSCfg.Enabled {
 				for _, conn := range cdrcInst.CdrsConns {
 					if conn.Address == utils.MetaInternal {
 						return errors.New("CDRS not enabled but referenced from CDRC")
@@ -470,7 +470,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 				}
 			}
 		}
-		if !self.cdrsCfg.CDRSEnabled {
+		if !self.cdrsCfg.Enabled {
 			for _, smgCDRSConn := range self.sessionSCfg.CDRsConns {
 				if smgCDRSConn.Address == utils.MetaInternal {
 					return fmt.Errorf("<%s> CDRS not enabled but referenced by SMGeneric component", utils.SessionS)
@@ -645,7 +645,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// Scheduler check connection with CDR Server
-	if !self.cdrsCfg.CDRSEnabled && !self.dispatcherSCfg.Enabled {
+	if !self.cdrsCfg.Enabled && !self.dispatcherSCfg.Enabled {
 		for _, connCfg := range self.schedulerCfg.CDRsConns {
 			if connCfg.Address == utils.MetaInternal {
 				return errors.New("CDR Server not enabled but requested by Scheduler")
@@ -686,7 +686,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 }
 
 func (self *CGRConfig) LazySanityCheck() {
-	for _, cdrePrfl := range self.cdrsCfg.CDRSOnlineCDRExports {
+	for _, cdrePrfl := range self.cdrsCfg.OnlineCDRExports {
 		if cdreProfile, hasIt := self.CdreProfiles[cdrePrfl]; hasIt && (cdreProfile.ExportFormat == utils.MetaS3jsonMap || cdreProfile.ExportFormat == utils.MetaSQSjsonMap) {
 			poster := utils.SQSPoster
 			if cdreProfile.ExportFormat == utils.MetaS3jsonMap {

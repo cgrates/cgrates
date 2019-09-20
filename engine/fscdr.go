@@ -77,8 +77,8 @@ func (fsCdr FSCdr) getCGRID() string {
 }
 
 func (fsCdr FSCdr) getExtraFields() map[string]string {
-	extraFields := make(map[string]string, len(fsCdr.cgrCfg.CdrsCfg().CDRSExtraFields))
-	for _, field := range fsCdr.cgrCfg.CdrsCfg().CDRSExtraFields {
+	extraFields := make(map[string]string, len(fsCdr.cgrCfg.CdrsCfg().ExtraFields))
+	for _, field := range fsCdr.cgrCfg.CdrsCfg().ExtraFields {
 		origFieldVal, foundInVars := fsCdr.vars[field.Id]
 		if strings.HasPrefix(field.Id, utils.STATIC_VALUE_PREFIX) { // Support for static values injected in the CDRS. it will show up as {^value:value}
 			foundInVars = true

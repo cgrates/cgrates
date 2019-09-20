@@ -158,7 +158,7 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithArgDispatcher) ([]*CDR, error) {
 		if _, hasIT := cdr.ExtraFields[utils.OriginIDPrefix]; hasIT {
 			cgrID = "" // for queries involving originIDPrefix we ignore CGRID
 		}
-		for i := 0; i < cdrS.cgrCfg.CdrsCfg().CDRSSMCostRetries; i++ {
+		for i := 0; i < cdrS.cgrCfg.CdrsCfg().SMCostRetries; i++ {
 			smCosts, err = cdrS.cdrDb.GetSMCosts(cgrID, cdr.RunID, cdr.OriginHost,
 				cdr.ExtraFields[utils.OriginIDPrefix])
 			if err == nil && len(smCosts) != 0 {
@@ -385,7 +385,7 @@ func (cdrS *CDRServer) statSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher)
 
 // exportCDRs will export the CDRs received
 func (cdrS *CDRServer) exportCDRs(cdrs []*CDR) (err error) {
-	for _, exportID := range cdrS.cgrCfg.CdrsCfg().CDRSOnlineCDRExports {
+	for _, exportID := range cdrS.cgrCfg.CdrsCfg().OnlineCDRExports {
 		expTpl := cdrS.cgrCfg.CdreProfiles[exportID] // not checking for existence of profile since this should be done in a higher layer
 		var cdre *CDRExporter
 		if cdre, err = NewCDRExporter(cdrs, expTpl, expTpl.ExportFormat,
@@ -488,7 +488,7 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDRWithArgDispatcher, reply *string) (e
 			return
 		}
 	}
-	if cdrS.cgrCfg.CdrsCfg().CDRSStoreCdrs { // Store *raw CDR
+	if cdrS.cgrCfg.CdrsCfg().StoreCdrs { // Store *raw CDR
 		if err = cdrS.cdrDb.SetCDR(cdr.CDR, false); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> storing primary CDR %+v, got error: %s",
@@ -497,7 +497,7 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDRWithArgDispatcher, reply *string) (e
 			return
 		}
 	}
-	if len(cdrS.cgrCfg.CdrsCfg().CDRSOnlineCDRExports) != 0 {
+	if len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0 {
 		cdrS.exportCDRs([]*CDR{cdr.CDR}) // Replicate raw CDR
 	}
 	if cdrS.thdS != nil {
@@ -508,8 +508,8 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDRWithArgDispatcher, reply *string) (e
 	}
 	if cdrS.chargerS != nil &&
 		utils.SliceHasMember([]string{"", utils.MetaRaw}, cdr.RunID) {
-		go cdrS.chrgProcessEvent(cgrEv, cdrS.attrS != nil, cdrS.cgrCfg.CdrsCfg().CDRSStoreCdrs, false,
-			len(cdrS.cgrCfg.CdrsCfg().CDRSOnlineCDRExports) != 0, cdrS.thdS != nil, cdrS.statS != nil)
+		go cdrS.chrgProcessEvent(cgrEv, cdrS.attrS != nil, cdrS.cgrCfg.CdrsCfg().StoreCdrs, false,
+			len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0, cdrS.thdS != nil, cdrS.statS != nil)
 	}
 	*reply = utils.OK
 
@@ -557,11 +557,11 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	if arg.AttributeS != nil {
 		attrS = *arg.AttributeS
 	}
-	store := cdrS.cgrCfg.CdrsCfg().CDRSStoreCdrs
+	store := cdrS.cgrCfg.CdrsCfg().StoreCdrs
 	if arg.Store != nil {
 		store = *arg.Store
 	}
-	export := len(cdrS.cgrCfg.CdrsCfg().CDRSOnlineCDRExports) != 0
+	export := len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0
 	if arg.Export != nil {
 		export = *arg.Export
 	}
@@ -749,11 +749,11 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 	if err != nil {
 		return err
 	}
-	store := cdrS.cgrCfg.CdrsCfg().CDRSStoreCdrs
+	store := cdrS.cgrCfg.CdrsCfg().StoreCdrs
 	if arg.Store != nil {
 		store = *arg.Store
 	}
-	export := len(cdrS.cgrCfg.CdrsCfg().CDRSOnlineCDRExports) != 0
+	export := len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0
 	if arg.Export != nil {
 		export = *arg.Export
 	}

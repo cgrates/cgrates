@@ -1163,7 +1163,7 @@ func main() {
 			}
 		}
 	}
-	if cfg.RalsCfg().RALsEnabled || cfg.CdrsCfg().CDRSEnabled {
+	if cfg.RalsCfg().RALsEnabled || cfg.CdrsCfg().Enabled {
 		storDb, err := engine.ConfigureStorStorage(cfg.StorDbCfg().StorDBType,
 			cfg.StorDbCfg().StorDBHost, cfg.StorDbCfg().StorDBPort,
 			cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
