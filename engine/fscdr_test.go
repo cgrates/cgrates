@@ -411,7 +411,7 @@ func TestFsCdrFirstNonEmpty(t *testing.T) {
 }
 
 func TestFsCdrCDRFields(t *testing.T) {
-	fsCdrCfg.CdrsCfg().CDRSExtraFields = []*utils.RSRField{{Id: "sip_user_agent"}}
+	fsCdrCfg.CdrsCfg().ExtraFields = []*utils.RSRField{{Id: "sip_user_agent"}}
 	fsCdr, err := NewFSCdr(body, fsCdrCfg)
 	if err != nil {
 		t.Errorf("Error loading cdr: %v", err)
@@ -445,7 +445,7 @@ func TestFsCdrSearchExtraField(t *testing.T) {
 	fsCdr, _ := NewFSCdr(body, fsCdrCfg)
 	rsrSt1, _ := utils.NewRSRField("^injected_value")
 	rsrSt2, _ := utils.NewRSRField("^injected_hdr::injected_value/")
-	fsCdrCfg.CdrsCfg().CDRSExtraFields = []*utils.RSRField{{Id: "caller_id_name"}, rsrSt1, rsrSt2}
+	fsCdrCfg.CdrsCfg().ExtraFields = []*utils.RSRField{{Id: "caller_id_name"}, rsrSt1, rsrSt2}
 	extraFields := fsCdr.getExtraFields()
 	if len(extraFields) != 3 || extraFields["caller_id_name"] != "1001" ||
 		extraFields["injected_value"] != "injected_value" ||
@@ -463,7 +463,7 @@ func TestFsCdrSearchExtraFieldInSlice(t *testing.T) {
 }
 
 func TestFsCdrSearchReplaceInExtraFields(t *testing.T) {
-	fsCdrCfg.CdrsCfg().CDRSExtraFields = utils.ParseRSRFieldsMustCompile(`read_codec;~sip_user_agent:s/([A-Za-z]*).+/$1/;write_codec`, utils.INFIELD_SEP)
+	fsCdrCfg.CdrsCfg().ExtraFields = utils.ParseRSRFieldsMustCompile(`read_codec;~sip_user_agent:s/([A-Za-z]*).+/$1/;write_codec`, utils.INFIELD_SEP)
 	fsCdr, _ := NewFSCdr(body, fsCdrCfg)
 	extraFields := fsCdr.getExtraFields()
 	if len(extraFields) != 3 {
@@ -514,8 +514,8 @@ func TestFsCdrDDazRSRExtraFields(t *testing.T) {
 	expCdrExtra := utils.ParseRSRFieldsMustCompile(`~effective_caller_id_number:s/(\d+)/+$1/`, utils.INFIELD_SEP)
 	if err != nil {
 		t.Error("Could not parse the config", err.Error())
-	} else if !reflect.DeepEqual(expCdrExtra[0], fsCdrCfg.CdrsCfg().CDRSExtraFields[0]) { // Kinda deepEqual bug since without index does not match
-		t.Errorf("Expecting: %+v, received: %+v", expCdrExtra, fsCdrCfg.CdrsCfg().CDRSExtraFields)
+	} else if !reflect.DeepEqual(expCdrExtra[0], fsCdrCfg.CdrsCfg().ExtraFields[0]) { // Kinda deepEqual bug since without index does not match
+		t.Errorf("Expecting: %+v, received: %+v", expCdrExtra, fsCdrCfg.CdrsCfg().ExtraFields)
 	}
 	fsCdr, err := NewFSCdr(simpleJsonCdr, fsCdrCfg)
 	if err != nil {
