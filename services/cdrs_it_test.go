@@ -52,9 +52,10 @@ func TestCdrsReload(t *testing.T) {
 	responderChan <- v1.NewResourceSv1(nil)
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg /*dm*/, nil,
-		chS /*cdrStorage*/, nil,
+		/*cdrStorage*/ nil,
 		/*loadStorage*/ nil, filterSChan,
 		server, nil, engineShutdown)
+	srvMngr.SetCacheS(chS)
 	cdrS := NewCDRServer()
 	srvMngr.AddService(cdrS, NewResponderService(responderChan), NewChargerService())
 	if err = srvMngr.StartServices(); err != nil {

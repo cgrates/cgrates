@@ -33,7 +33,7 @@ import (
 
 // NewServiceManager returns a service manager
 func NewServiceManager(cfg *config.CGRConfig, dm *engine.DataManager,
-	cacheS *engine.CacheS, cdrStorage engine.CdrStorage,
+	cdrStorage engine.CdrStorage,
 	loadStorage engine.LoadStorage, filterSChan chan *engine.FilterS,
 	server *utils.Server, dispatcherSChan chan rpcclient.RpcClientConnection,
 	engineShutdown chan bool) *ServiceManager {
@@ -41,7 +41,6 @@ func NewServiceManager(cfg *config.CGRConfig, dm *engine.DataManager,
 		cfg:            cfg,
 		dm:             dm,
 		engineShutdown: engineShutdown,
-		cacheS:         cacheS,
 
 		cdrStorage:      cdrStorage,
 		loadStorage:     loadStorage,
@@ -238,6 +237,16 @@ func (srvMngr *ServiceManager) GetConnection(subsystem string, conns []*config.R
 
 // StartServices starts all enabled services
 func (srvMngr *ServiceManager) StartServices() (err error) {
+	// start the cacheS
+	if srvMngr.GetCacheS() == nil {
+		var chS Service
+		chS, err = srvMngr.GetService(utils.CacheS)
+		if err != nil {
+			return
+		}
+		chS.Start(srvMngr, true)
+	}
+
 	go srvMngr.handleReload()
 	if srvMngr.cfg.AttributeSCfg().Enabled {
 		go func() {
@@ -461,10 +470,19 @@ func (srvMngr *ServiceManager) reloadService(srv Service, shouldRun bool) (err e
 // GetService returns the named service
 func (srvMngr *ServiceManager) GetService(subsystem string) (srv Service, err error) {
 	var has bool
+	srvMngr.RLock()
 	if srv, has = srvMngr.subsystems[subsystem]; !has {
-		return nil, utils.ErrNotFound
+		err = utils.ErrNotFound
 	}
+	srvMngr.RUnlock()
 	return
+}
+
+// SetCacheS sets the cacheS
+func (srvMngr *ServiceManager) SetCacheS(chS *engine.CacheS) {
+	srvMngr.Lock()
+	srvMngr.cacheS = chS
+	srvMngr.Unlock()
 }
 
 // ServiceProvider should implement this to provide information for service
@@ -491,6 +509,9 @@ type ServiceProvider interface {
 	GetService(subsystem string) (Service, error)
 	// AddService adds the given serices
 	AddService(services ...Service)
+	// SetCacheS sets the cacheS
+	// Called when starting Cache Service
+	SetCacheS(chS *engine.CacheS)
 }
 
 // Service interface that describes what functions should a service implement

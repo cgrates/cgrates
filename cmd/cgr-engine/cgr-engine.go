@@ -825,25 +825,6 @@ func startAnalyzerService(internalAnalyzerSChan chan rpcclient.RpcClientConnecti
 	internalAnalyzerSChan <- aSv1
 }
 
-// initCacheS inits the CacheS and starts precaching as well as populating internal channel for RPC conns
-func initCacheS(internalCacheSChan chan rpcclient.RpcClientConnection,
-	server *utils.Server, dm *engine.DataManager, exitChan chan bool) (chS *engine.CacheS) {
-	chS = engine.NewCacheS(cfg, dm)
-	go func() {
-		if err := chS.Precache(); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> could not init, error: %s", utils.CacheS, err.Error()))
-			exitChan <- true
-		}
-	}()
-
-	chSv1 := v1.NewCacheSv1(chS)
-	if !cfg.DispatcherSCfg().Enabled {
-		server.RpcRegister(chSv1)
-	}
-	internalCacheSChan <- chS
-	return
-}
-
 func initGuardianSv1(internalGuardianSChan chan rpcclient.RpcClientConnection, server *utils.Server) {
 	grdSv1 := v1.NewGuardianSv1()
 	if !cfg.DispatcherSCfg().Enabled {
@@ -1201,17 +1182,8 @@ func main() {
 	filterSChan := make(chan *engine.FilterS, 1)
 	internalDispatcherSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalRaterChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalCdrSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalSMGChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalAttributeSChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalChargerSChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalRsChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalStatSChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalThresholdSChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalSupplierSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalAnalyzerSChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalCacheSChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalSchedSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalGuardianSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalLoaderSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalApierV1Chan := make(chan rpcclient.RpcClientConnection, 1)
@@ -1221,9 +1193,6 @@ func main() {
 	internalCoreSv1Chan := make(chan rpcclient.RpcClientConnection, 1)
 	internalRALsv1Chan := make(chan rpcclient.RpcClientConnection, 1)
 
-	// init CacheS
-	cacheS := initCacheS(internalCacheSChan, server, dm, exitChan)
-
 	// init GuardianSv1
 	initGuardianSv1(internalGuardianSChan, server)
 
@@ -1231,8 +1200,9 @@ func main() {
 	initCoreSv1(internalCoreSv1Chan, server)
 
 	// Start ServiceManager
-	srvManager := servmanager.NewServiceManager(cfg, dm, cacheS, cdrDb,
+	srvManager := servmanager.NewServiceManager(cfg, dm, cdrDb,
 		loadDb, filterSChan, server, internalDispatcherSChan, exitChan)
+	chS := services.NewCacheService()
 	attrS := services.NewAttributeService()
 	chrS := services.NewChargerService()
 	tS := services.NewThresholdService()
@@ -1241,16 +1211,19 @@ func main() {
 	supS := services.NewSupplierService()
 	schS := services.NewSchedulerService()
 	cdrS := services.NewCDRServer()
-	srvManager.AddService(attrS, chrS, tS, stS, reS, supS, schS, cdrS, services.NewResponderService(internalRaterChan))
-	internalAttributeSChan = attrS.GetIntenternalChan()
-	internalChargerSChan = chrS.GetIntenternalChan()
-	internalThresholdSChan = tS.GetIntenternalChan()
-	internalStatSChan = stS.GetIntenternalChan()
-	internalRsChan = reS.GetIntenternalChan()
-	internalSupplierSChan = supS.GetIntenternalChan()
-	internalSchedSChan = schS.GetIntenternalChan()
-	internalCdrSChan = cdrS.GetIntenternalChan()
-	go srvManager.StartServices()
+	srvManager.AddService(chS, attrS, chrS, tS, stS, reS, supS, schS, cdrS, services.NewResponderService(internalRaterChan))
+	internalAttributeSChan := attrS.GetIntenternalChan()
+	internalChargerSChan := chrS.GetIntenternalChan()
+	internalThresholdSChan := tS.GetIntenternalChan()
+	internalStatSChan := stS.GetIntenternalChan()
+	internalRsChan := reS.GetIntenternalChan()
+	internalSupplierSChan := supS.GetIntenternalChan()
+	internalSchedSChan := schS.GetIntenternalChan()
+	internalCdrSChan := cdrS.GetIntenternalChan()
+	internalCacheSChan := chS.GetIntenternalChan()
+	srvManager.StartServices()
+
+	cacheS := srvManager.GetCacheS()
 
 	initServiceManagerV1(internalServeManagerChan, srvManager, server)
 
