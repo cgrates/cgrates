@@ -58,7 +58,7 @@ func TestCdrsReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheTimings))
 
 	cfg.ChargerSCfg().Enabled = true
-	cfg.RalsCfg().RALsEnabled = true
+	cfg.RalsCfg().Enabled = true
 	cacheSChan := make(chan rpcclient.RpcClientConnection, 1)
 	cacheSChan <- chS
 	server := utils.NewServer()

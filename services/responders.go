@@ -50,12 +50,12 @@ func (resp *ResponderService) Start(sp servmanager.ServiceProvider, waitCache bo
 	}
 
 	var thdS, stats rpcclient.RpcClientConnection
-	if thdS, err = sp.GetConnection(utils.ThresholdS, sp.GetConfig().RalsCfg().RALsThresholdSConns); err != nil {
+	if thdS, err = sp.GetConnection(utils.ThresholdS, sp.GetConfig().RalsCfg().ThresholdSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
 			utils.RALService, utils.ThresholdS, err.Error()))
 		return
 	}
-	if stats, err = sp.GetConnection(utils.StatS, sp.GetConfig().RalsCfg().RALsStatSConns); err != nil {
+	if stats, err = sp.GetConnection(utils.StatS, sp.GetConfig().RalsCfg().StatSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
 			utils.RALService, utils.StatS, err.Error()))
 		return
@@ -70,7 +70,7 @@ func (resp *ResponderService) Start(sp servmanager.ServiceProvider, waitCache bo
 	defer resp.Unlock()
 	resp.resp = &engine.Responder{
 		ExitChan:         sp.GetExitChan(),
-		MaxComputedUsage: sp.GetConfig().RalsCfg().RALsMaxComputedUsage,
+		MaxComputedUsage: sp.GetConfig().RalsCfg().MaxComputedUsage,
 	}
 
 	if !sp.GetConfig().DispatcherSCfg().Enabled {
