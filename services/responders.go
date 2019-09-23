@@ -29,9 +29,9 @@ import (
 )
 
 // NewResponderService returns the Resonder Service
-func NewResponderService(connChan chan rpcclient.RpcClientConnection) *ResponderService {
+func NewResponderService() *ResponderService {
 	return &ResponderService{
-		connChan: connChan,
+		connChan: make(chan rpcclient.RpcClientConnection, 1),
 	}
 }
 
@@ -48,9 +48,6 @@ func (resp *ResponderService) Start(sp servmanager.ServiceProvider, waitCache bo
 	if resp.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
-	var waitTasks []chan struct{}
-	cacheTaskChan := make(chan struct{})
-	waitTasks = append(waitTasks, cacheTaskChan)
 
 	var thdS, stats rpcclient.RpcClientConnection
 	if thdS, err = sp.GetConnection(utils.ThresholdS, sp.GetConfig().RalsCfg().RALsThresholdSConns); err != nil {
