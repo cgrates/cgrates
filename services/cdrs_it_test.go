@@ -24,7 +24,6 @@ import (
 	"testing"
 	"time"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -46,10 +45,22 @@ func TestCdrsReload(t *testing.T) {
 
 	close(chS.GetPrecacheChannel(utils.CacheChargerProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheChargerFilterIndexes))
+
+	close(chS.GetPrecacheChannel(utils.CacheDestinations))
+	close(chS.GetPrecacheChannel(utils.CacheReverseDestinations))
+	close(chS.GetPrecacheChannel(utils.CacheRatingPlans))
+	close(chS.GetPrecacheChannel(utils.CacheRatingProfiles))
+	close(chS.GetPrecacheChannel(utils.CacheActions))
+	close(chS.GetPrecacheChannel(utils.CacheActionPlans))
+	close(chS.GetPrecacheChannel(utils.CacheAccountActionPlans))
+	close(chS.GetPrecacheChannel(utils.CacheActionTriggers))
+	close(chS.GetPrecacheChannel(utils.CacheSharedGroups))
+	close(chS.GetPrecacheChannel(utils.CacheTimings))
+
 	cfg.ChargerSCfg().Enabled = true
 	cfg.RalsCfg().RALsEnabled = true
-	responderChan := make(chan rpcclient.RpcClientConnection, 1)
-	responderChan <- v1.NewResourceSv1(nil)
+	cacheSChan := make(chan rpcclient.RpcClientConnection, 1)
+	cacheSChan <- chS
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg /*dm*/, nil,
 		/*cdrStorage*/ nil,
@@ -57,7 +68,7 @@ func TestCdrsReload(t *testing.T) {
 		server, nil, engineShutdown)
 	srvMngr.SetCacheS(chS)
 	cdrS := NewCDRServer()
-	srvMngr.AddService(cdrS, NewResponderService(responderChan), NewChargerService())
+	srvMngr.AddService(cdrS, NewRalService(srvMngr), NewChargerService(), &CacheService{connChan: cacheSChan}, NewSchedulerService())
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

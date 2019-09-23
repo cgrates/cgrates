@@ -1261,7 +1261,10 @@ func (cfg *CGRConfig) HTTPCfg() *HTTPCfg {
 	return cfg.httpCfg
 }
 
+// RalsCfg returns the config for Ral Service
 func (cfg *CGRConfig) RalsCfg() *RalsCfg {
+	cfg.lks[RALS_JSN].Lock()
+	defer cfg.lks[RALS_JSN].Unlock()
 	return cfg.ralsCfg
 }
 
@@ -1497,6 +1500,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case RALS_JSN:
+		cfg.rldChans[RALS_JSN] <- struct{}{}
 		if !fall {
 			break
 		}

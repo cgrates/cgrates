@@ -271,6 +271,9 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 	if srvMngr.GetConfig().CdrsCfg().Enabled {
 		go srvMngr.startService(utils.CDRServer)
 	}
+	if srvMngr.GetConfig().RalsCfg().RALsEnabled {
+		go srvMngr.startService(utils.RALService)
+	}
 	// startServer()
 	return
 }
@@ -294,36 +297,40 @@ func (srvMngr *ServiceManager) handleReload() {
 		case ext := <-srvMngr.engineShutdown:
 			srvMngr.engineShutdown <- ext
 			return
-		case <-srvMngr.cfg.GetReloadChan(config.ATTRIBUTE_JSN):
-			if err = srvMngr.reloadService(utils.AttributeS, srvMngr.cfg.AttributeSCfg().Enabled); err != nil {
+		case <-srvMngr.GetConfig().GetReloadChan(config.ATTRIBUTE_JSN):
+			if err = srvMngr.reloadService(utils.AttributeS, srvMngr.GetConfig().AttributeSCfg().Enabled); err != nil {
 				return
 			}
-		case <-srvMngr.cfg.GetReloadChan(config.ChargerSCfgJson):
-			if err = srvMngr.reloadService(utils.ChargerS, srvMngr.cfg.ChargerSCfg().Enabled); err != nil {
+		case <-srvMngr.GetConfig().GetReloadChan(config.ChargerSCfgJson):
+			if err = srvMngr.reloadService(utils.ChargerS, srvMngr.GetConfig().ChargerSCfg().Enabled); err != nil {
 				return
 			}
-		case <-srvMngr.cfg.GetReloadChan(config.THRESHOLDS_JSON):
-			if err = srvMngr.reloadService(utils.ThresholdS, srvMngr.cfg.ThresholdSCfg().Enabled); err != nil {
+		case <-srvMngr.GetConfig().GetReloadChan(config.THRESHOLDS_JSON):
+			if err = srvMngr.reloadService(utils.ThresholdS, srvMngr.GetConfig().ThresholdSCfg().Enabled); err != nil {
 				return
 			}
-		case <-srvMngr.cfg.GetReloadChan(config.STATS_JSON):
-			if err = srvMngr.reloadService(utils.StatS, srvMngr.cfg.StatSCfg().Enabled); err != nil {
+		case <-srvMngr.GetConfig().GetReloadChan(config.STATS_JSON):
+			if err = srvMngr.reloadService(utils.StatS, srvMngr.GetConfig().StatSCfg().Enabled); err != nil {
 				return
 			}
-		case <-srvMngr.cfg.GetReloadChan(config.RESOURCES_JSON):
-			if err = srvMngr.reloadService(utils.ResourceS, srvMngr.cfg.ResourceSCfg().Enabled); err != nil {
+		case <-srvMngr.GetConfig().GetReloadChan(config.RESOURCES_JSON):
+			if err = srvMngr.reloadService(utils.ResourceS, srvMngr.GetConfig().ResourceSCfg().Enabled); err != nil {
 				return
 			}
-		case <-srvMngr.cfg.GetReloadChan(config.SupplierSJson):
-			if err = srvMngr.reloadService(utils.SupplierS, srvMngr.cfg.SupplierSCfg().Enabled); err != nil {
+		case <-srvMngr.GetConfig().GetReloadChan(config.SupplierSJson):
+			if err = srvMngr.reloadService(utils.SupplierS, srvMngr.GetConfig().SupplierSCfg().Enabled); err != nil {
 				return
 			}
-		case <-srvMngr.cfg.GetReloadChan(config.SCHEDULER_JSN):
-			if err = srvMngr.reloadService(utils.SchedulerS, srvMngr.cfg.SchedulerCfg().Enabled); err != nil {
+		case <-srvMngr.GetConfig().GetReloadChan(config.SCHEDULER_JSN):
+			if err = srvMngr.reloadService(utils.SchedulerS, srvMngr.GetConfig().SchedulerCfg().Enabled); err != nil {
 				return
 			}
-		case <-srvMngr.cfg.GetReloadChan(config.CDRS_JSN):
-			if err = srvMngr.reloadService(utils.CDRServer, srvMngr.cfg.CdrsCfg().Enabled); err != nil {
+		case <-srvMngr.GetConfig().GetReloadChan(config.CDRS_JSN):
+			if err = srvMngr.reloadService(utils.CDRServer, srvMngr.GetConfig().CdrsCfg().Enabled); err != nil {
+				return
+			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.RALS_JSN):
+			if err = srvMngr.reloadService(utils.RALService, srvMngr.GetConfig().RalsCfg().RALsEnabled); err != nil {
 				return
 			}
 		}
