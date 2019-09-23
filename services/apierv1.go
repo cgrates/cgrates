@@ -172,5 +172,7 @@ func (api *ApierV1Service) ServiceName() string {
 
 // GetApierV1 returns the apierV1
 func (api *ApierV1Service) GetApierV1() *v1.ApierV1 {
+	api.RLock()
+	defer api.RUnlock()
 	return api.api
 }
