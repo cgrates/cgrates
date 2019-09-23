@@ -45,6 +45,7 @@ var (
 	keyPath         = cgrConsoleFlags.String("key_path", "", "path to key for tls connection")
 	caPath          = cgrConsoleFlags.String("ca_path", "", "path to CA for tls connection(only for self sign certificate)")
 	tls             = cgrConsoleFlags.Bool("tls", false, "TLS connection")
+	replyTimeOut    = cgrConsoleFlags.Int("reply_timeout", 300, "Reply timeout in seconds ")
 	client          *rpcclient.RpcClient
 )
 
@@ -125,7 +126,7 @@ func main() {
 	}
 	var err error
 	client, err = rpcclient.NewRpcClient("tcp", *server, *tls, *keyPath, *certificatePath, *caPath, 3, 3,
-		time.Duration(1*time.Second), time.Duration(5*time.Minute), strings.TrimPrefix(*rpcEncoding, utils.Meta), nil, false)
+		time.Duration(1*time.Second), time.Duration(*replyTimeOut)*time.Second, strings.TrimPrefix(*rpcEncoding, utils.Meta), nil, false)
 	if err != nil {
 		cgrConsoleFlags.PrintDefaults()
 		log.Fatal("Could not connect to server " + *server)
