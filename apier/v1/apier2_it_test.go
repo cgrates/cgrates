@@ -26,6 +26,7 @@ import (
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -58,6 +59,7 @@ var sTestsAPIer = []func(t *testing.T){
 	testAPIerGetRatingPlanCost2,
 	testAPIerGetRatingPlanCost3,
 	testAPIerGetActionPlanIDs,
+	testAPIerGetRatingPlanIDs,
 	testAPIerKillEngine,
 }
 
@@ -277,10 +279,29 @@ func testAPIerGetActionPlanIDs(t *testing.T) {
 		utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}},
 		&reply); err != nil {
 		t.Error(err)
-	} else if len(reply) != 1  {
+	} else if len(reply) != 1 {
 		t.Errorf("Expected: 1 , received: <%+v>", len(reply))
-	}else if reply[0]!="AP_PACKAGE_10"{
+	} else if reply[0] != "AP_PACKAGE_10" {
 		t.Errorf("Expected: AP_PACKAGE_10 , received: <%+v>", reply[0])
+	}
+}
+
+func testAPIerGetRatingPlanIDs(t *testing.T) {
+	var reply []string
+	expected := []string{"RP_1002_LOW", "RP_1003", "RP_1001", "RP_SMS", "RP_1002"}
+	if err := apierRPC.Call(utils.ApierV1GetRatingPlanIDs,
+		utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}},
+		&reply); err != nil {
+		t.Error(err)
+	} else if len(reply) != 5 {
+		t.Errorf("Expected: 5 , received: <%+v>", len(reply))
+	} else {
+		sort.Strings(reply)
+		sort.Strings(expected)
+		if !reflect.DeepEqual(reply, expected) {
+			t.Errorf("Expected: <%+v> , received: <%+v>", expected, reply)
+
+		}
 	}
 }
 

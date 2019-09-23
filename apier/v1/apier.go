@@ -1254,10 +1254,28 @@ func (self *ApierV1) ComputeActionPlanIndexes(_ string, reply *string) (err erro
 	return nil
 }
 
-// GetActionPlanIDs returns list of attributeProfile IDs registered for a tenant
+// GetActionPlanIDs returns list of ActionPlan IDs registered for a tenant
 func (apierV1 *ApierV1) GetActionPlanIDs(args utils.TenantArgWithPaginator, attrPrfIDs *[]string) error {
 	prfx := utils.ACTION_PLAN_PREFIX
 	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
+	if err != nil {
+		return err
+	}
+	if len(keys) == 0 {
+		return utils.ErrNotFound
+	}
+	retIDs := make([]string, len(keys))
+	for i, key := range keys {
+		retIDs[i] = key[len(prfx):]
+	}
+	*attrPrfIDs = args.PaginateStringSlice(retIDs)
+	return nil
+}
+
+// GetRatingPlanIDs returns list of RatingPlan IDs registered for a tenant
+func (apierV1 *ApierV1) GetRatingPlanIDs(args utils.TenantArgWithPaginator, attrPrfIDs *[]string) error {
+	prfx := utils.RATING_PLAN_PREFIX
+	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(utils.RATING_PLAN_PREFIX)
 	if err != nil {
 		return err
 	}
