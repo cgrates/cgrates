@@ -57,6 +57,7 @@ var sTestsAPIer = []func(t *testing.T){
 	testAPIerGetRatingPlanCost,
 	testAPIerGetRatingPlanCost2,
 	testAPIerGetRatingPlanCost3,
+	testAPIerGetActionPlanIDs,
 	testAPIerKillEngine,
 }
 
@@ -267,6 +268,19 @@ func testAPIerGetRatingPlanCost3(t *testing.T) {
 		t.Error("Unexpected Cost: ", *reply.EventCost.Cost)
 	} else if *reply.EventCost.Usage != time.Duration(time.Hour) {
 		t.Error("Unexpected Usage: ", *reply.EventCost.Usage)
+	}
+}
+
+func testAPIerGetActionPlanIDs(t *testing.T) {
+	var reply []string
+	if err := apierRPC.Call(utils.ApierV1GetActionPlanIDs,
+		utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{Tenant: "cgrates.org"}},
+		&reply); err != nil {
+		t.Error(err)
+	} else if len(reply) != 1  {
+		t.Errorf("Expected: 1 , received: <%+v>", len(reply))
+	}else if reply[0]!="AP_PACKAGE_10"{
+		t.Errorf("Expected: AP_PACKAGE_10 , received: <%+v>", reply[0])
 	}
 }
 
