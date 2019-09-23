@@ -1181,17 +1181,13 @@ func main() {
 	// Define internal connections via channels
 	filterSChan := make(chan *engine.FilterS, 1)
 	internalDispatcherSChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalRaterChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalSMGChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalAnalyzerSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalGuardianSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalLoaderSChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalApierV1Chan := make(chan rpcclient.RpcClientConnection, 1)
-	internalApierV2Chan := make(chan rpcclient.RpcClientConnection, 1)
 	internalServeManagerChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalConfigChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalCoreSv1Chan := make(chan rpcclient.RpcClientConnection, 1)
-	internalRALsv1Chan := make(chan rpcclient.RpcClientConnection, 1)
 
 	// init GuardianSv1
 	initGuardianSv1(internalGuardianSChan, server)
@@ -1211,7 +1207,11 @@ func main() {
 	supS := services.NewSupplierService()
 	schS := services.NewSchedulerService()
 	cdrS := services.NewCDRServer()
-	srvManager.AddService(chS, attrS, chrS, tS, stS, reS, supS, schS, cdrS, services.NewResponderService(internalRaterChan))
+	rals := services.NewRalService(srvManager)
+	apiv1, _ := srvManager.GetService(utils.ApierV1)
+	apiv2, _ := srvManager.GetService(utils.ApierV2)
+	resp, _ := srvManager.GetService(utils.ResponderS)
+	srvManager.AddService(chS, attrS, chrS, tS, stS, reS, supS, schS, cdrS, rals)
 	internalAttributeSChan := attrS.GetIntenternalChan()
 	internalChargerSChan := chrS.GetIntenternalChan()
 	internalThresholdSChan := tS.GetIntenternalChan()
@@ -1221,6 +1221,10 @@ func main() {
 	internalSchedSChan := schS.GetIntenternalChan()
 	internalCdrSChan := cdrS.GetIntenternalChan()
 	internalCacheSChan := chS.GetIntenternalChan()
+	internalApierV1Chan := apiv1.GetIntenternalChan()
+	internalApierV2Chan := apiv2.GetIntenternalChan()
+	internalRaterChan := resp.GetIntenternalChan()
+	internalRALsv1Chan := rals.GetIntenternalChan()
 	srvManager.StartServices()
 
 	cacheS := srvManager.GetCacheS()
@@ -1254,14 +1258,6 @@ func main() {
 	}
 
 	initConfigSv1(internalConfigChan, server)
-
-	// Start RALs
-	if cfg.RalsCfg().Enabled {
-		go startRater(internalRaterChan, internalApierV1Chan, internalApierV2Chan,
-			internalThresholdSChan, internalStatSChan, internalCacheSChan, internalSchedSChan,
-			internalAttributeSChan, internalDispatcherSChan, internalRALsv1Chan,
-			/*srvManager*/ schS, server, dm, loadDb, cdrDb, cacheS, filterSChan, exitChan)
-	}
 
 	// Start CDRC components if necessary
 	go startCdrcs(internalCdrSChan, internalRaterChan, internalDispatcherSChan, filterSChan, exitChan)
