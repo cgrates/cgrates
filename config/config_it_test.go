@@ -320,6 +320,46 @@ func TestCGRConfigReloadCDRs(t *testing.T) {
 	}
 }
 
+func TestCGRConfigReloadRALs(t *testing.T) {
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	blMap := cfg.RalsCfg().BalanceRatingSubject
+	maxComp := cfg.RalsCfg().MaxComputedUsage
+	var reply string
+	if err = cfg.V1ReloadConfig(&ConfigReloadWithArgDispatcher{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
+		Section: RALS_JSN,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK received: %s", reply)
+	}
+	expAttr := &RalsCfg{
+		Enabled:                 true,
+		RpSubjectPrefixMatching: false,
+		RemoveExpired:           true,
+		MaxComputedUsage:        maxComp,
+		BalanceRatingSubject:    blMap,
+		ThresholdSConns: []*RemoteHost{
+			&RemoteHost{
+				Address:   "127.0.0.1:2012",
+				Transport: utils.MetaJSONrpc,
+			},
+		},
+		StatSConns: []*RemoteHost{
+			&RemoteHost{
+				Address:   "127.0.0.1:2012",
+				Transport: utils.MetaJSONrpc,
+			},
+		},
+	}
+	if !reflect.DeepEqual(expAttr, cfg.RalsCfg()) {
+		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.RalsCfg()))
+	}
+}
+
 func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
 	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out"} {
 		if err := os.RemoveAll(dir); err != nil {
