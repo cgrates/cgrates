@@ -455,11 +455,11 @@ func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
 func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 	eHaPoolcfg := []*RemoteHost{}
 
-	if cgrCfg.RalsCfg().RALsEnabled != false {
-		t.Errorf("Expecting: false , received: %+v", cgrCfg.RalsCfg().RALsEnabled)
+	if cgrCfg.RalsCfg().Enabled != false {
+		t.Errorf("Expecting: false , received: %+v", cgrCfg.RalsCfg().Enabled)
 	}
-	if !reflect.DeepEqual(cgrCfg.RalsCfg().RALsThresholdSConns, eHaPoolcfg) {
-		t.Errorf("Expecting: %+v , received: %+v", eHaPoolcfg, cgrCfg.RalsCfg().RALsThresholdSConns)
+	if !reflect.DeepEqual(cgrCfg.RalsCfg().ThresholdSConns, eHaPoolcfg) {
+		t.Errorf("Expecting: %+v , received: %+v", eHaPoolcfg, cgrCfg.RalsCfg().ThresholdSConns)
 	}
 	if cgrCfg.RalsCfg().RpSubjectPrefixMatching != false {
 		t.Errorf("Expecting: false , received: %+v", cgrCfg.RalsCfg().RpSubjectPrefixMatching)
@@ -470,8 +470,8 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 		utils.DATA:  time.Duration(107374182400),
 		utils.SMS:   time.Duration(10000),
 	}
-	if !reflect.DeepEqual(eMaxCU, cgrCfg.RalsCfg().RALsMaxComputedUsage) {
-		t.Errorf("Expecting: %+v , received: %+v", eMaxCU, cgrCfg.RalsCfg().RALsMaxComputedUsage)
+	if !reflect.DeepEqual(eMaxCU, cgrCfg.RalsCfg().MaxComputedUsage) {
+		t.Errorf("Expecting: %+v , received: %+v", eMaxCU, cgrCfg.RalsCfg().MaxComputedUsage)
 	}
 	if cgrCfg.RalsCfg().RALsMaxIncrements != int(1000000) {
 		t.Errorf("Expecting: 1000000 , received: %+v", cgrCfg.RalsCfg().RALsMaxIncrements)
@@ -484,8 +484,8 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 		utils.MONETARY: "*zero1ns",
 		utils.GENERIC:  "*zero1ns",
 	}
-	if !reflect.DeepEqual(eBalRatingSbj, cgrCfg.RalsCfg().RALsBalanceRatingSubject) {
-		t.Errorf("Expecting: %+v , received: %+v", eBalRatingSbj, cgrCfg.RalsCfg().RALsBalanceRatingSubject)
+	if !reflect.DeepEqual(eBalRatingSbj, cgrCfg.RalsCfg().BalanceRatingSubject) {
+		t.Errorf("Expecting: %+v , received: %+v", eBalRatingSbj, cgrCfg.RalsCfg().BalanceRatingSubject)
 	}
 }
 

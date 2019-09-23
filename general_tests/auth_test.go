@@ -35,7 +35,7 @@ func TestAuthSetStorage(t *testing.T) {
 	dbAuth = engine.NewDataManager(data)
 	engine.SetDataStorage(dbAuth)
 	rsponder = &engine.Responder{
-		MaxComputedUsage: config.CgrConfig().RalsCfg().RALsMaxComputedUsage}
+		MaxComputedUsage: config.CgrConfig().RalsCfg().MaxComputedUsage}
 
 }
 

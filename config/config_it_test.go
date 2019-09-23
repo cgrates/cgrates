@@ -281,7 +281,7 @@ func TestCGRConfigReloadCDRs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cfg.RalsCfg().RALsEnabled = true
+	cfg.RalsCfg().Enabled = true
 	var reply string
 	if err = cfg.V1ReloadConfig(&ConfigReloadWithArgDispatcher{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),

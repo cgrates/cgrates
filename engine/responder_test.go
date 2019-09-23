@@ -33,7 +33,7 @@ var rsponder *Responder
 func init() {
 	cfg, _ := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
-	rsponder = &Responder{MaxComputedUsage: cfg.RalsCfg().RALsMaxComputedUsage}
+	rsponder = &Responder{MaxComputedUsage: cfg.RalsCfg().MaxComputedUsage}
 }
 
 func TestResponderGobSMCost(t *testing.T) {

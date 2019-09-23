@@ -1121,7 +1121,7 @@ func main() {
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
 	var dm *engine.DataManager
-	if needsDB := cfg.RalsCfg().RALsEnabled || cfg.SchedulerCfg().Enabled || cfg.ChargerSCfg().Enabled ||
+	if needsDB := cfg.RalsCfg().Enabled || cfg.SchedulerCfg().Enabled || cfg.ChargerSCfg().Enabled ||
 		cfg.AttributeSCfg().Enabled || cfg.ResourceSCfg().Enabled || cfg.StatSCfg().Enabled ||
 		cfg.ThresholdSCfg().Enabled || cfg.SupplierSCfg().Enabled || cfg.DispatcherSCfg().Enabled; needsDB ||
 		cfg.SessionSCfg().Enabled { // Some services can run without db, ie:  CDRC
@@ -1144,7 +1144,7 @@ func main() {
 			}
 		}
 	}
-	if cfg.RalsCfg().RALsEnabled || cfg.CdrsCfg().Enabled {
+	if cfg.RalsCfg().Enabled || cfg.CdrsCfg().Enabled {
 		storDb, err := engine.ConfigureStorStorage(cfg.StorDbCfg().StorDBType,
 			cfg.StorDbCfg().StorDBHost, cfg.StorDbCfg().StorDBPort,
 			cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,

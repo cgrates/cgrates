@@ -271,7 +271,7 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 	if srvMngr.GetConfig().CdrsCfg().Enabled {
 		go srvMngr.startService(utils.CDRServer)
 	}
-	if srvMngr.GetConfig().RalsCfg().RALsEnabled {
+	if srvMngr.GetConfig().RalsCfg().Enabled {
 		go srvMngr.startService(utils.RALService)
 	}
 	// startServer()
@@ -330,7 +330,7 @@ func (srvMngr *ServiceManager) handleReload() {
 				return
 			}
 		case <-srvMngr.GetConfig().GetReloadChan(config.RALS_JSN):
-			if err = srvMngr.reloadService(utils.RALService, srvMngr.GetConfig().RalsCfg().RALsEnabled); err != nil {
+			if err = srvMngr.reloadService(utils.RALService, srvMngr.GetConfig().RalsCfg().Enabled); err != nil {
 				return
 			}
 		}

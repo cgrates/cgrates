@@ -145,8 +145,8 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.httpCfg = new(HTTPCfg)
 	cfg.filterSCfg = new(FilterSCfg)
 	cfg.ralsCfg = new(RalsCfg)
-	cfg.ralsCfg.RALsMaxComputedUsage = make(map[string]time.Duration)
-	cfg.ralsCfg.RALsBalanceRatingSubject = make(map[string]string)
+	cfg.ralsCfg.MaxComputedUsage = make(map[string]time.Duration)
+	cfg.ralsCfg.BalanceRatingSubject = make(map[string]string)
 	cfg.schedulerCfg = new(SchedulerCfg)
 	cfg.cdrsCfg = new(CdrsCfg)
 	cfg.CdreProfiles = make(map[string]*CdreCfg)
@@ -304,9 +304,9 @@ var possibleReaderTypes = utils.NewStringSet([]string{utils.MetaFileCSV, utils.M
 
 func (self *CGRConfig) checkConfigSanity() error {
 	// Rater checks
-	if self.ralsCfg.RALsEnabled && !self.dispatcherSCfg.Enabled {
+	if self.ralsCfg.Enabled && !self.dispatcherSCfg.Enabled {
 		if !self.statsCfg.Enabled {
-			for _, connCfg := range self.ralsCfg.RALsStatSConns {
+			for _, connCfg := range self.ralsCfg.StatSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return fmt.Errorf("%s not enabled but requested by %s component.",
 						utils.StatS, utils.RALService)
@@ -314,7 +314,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 		if !self.thresholdSCfg.Enabled {
-			for _, connCfg := range self.ralsCfg.RALsThresholdSConns {
+			for _, connCfg := range self.ralsCfg.ThresholdSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return fmt.Errorf("%s not enabled but requested by %s component.",
 						utils.ThresholdS, utils.RALService)
@@ -331,7 +331,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 				}
 			}
 		}
-		if !self.ralsCfg.RALsEnabled {
+		if !self.ralsCfg.Enabled {
 			for _, cdrsRaterConn := range self.cdrsCfg.RaterConns {
 				if cdrsRaterConn.Address == utils.MetaInternal {
 					return errors.New("RALs not enabled but requested by CDRS component.")
@@ -428,7 +428,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 				}
 			}
 		}
-		if !self.ralsCfg.RALsEnabled {
+		if !self.ralsCfg.Enabled {
 			for _, smgRALsConn := range self.sessionSCfg.RALsConns {
 				if smgRALsConn.Address == utils.MetaInternal {
 					return fmt.Errorf("<%s> %s not enabled but requested by SMGeneric component.", utils.SessionS, utils.RALService)
