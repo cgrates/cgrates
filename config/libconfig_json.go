@@ -105,6 +105,7 @@ type RalsJsonCfg struct {
 	Rp_subject_prefix_matching *bool
 	Remove_expired             *bool
 	Max_computed_usage         *map[string]string
+	Max_increments             *int
 	Balance_rating_subject     *map[string]string
 }
 

@@ -33,6 +33,7 @@
 
 "rals": {
 	"enabled": true,
+	"max_increments":3000000,
 },
 
 

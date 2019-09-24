@@ -473,6 +473,9 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 	if !reflect.DeepEqual(eMaxCU, cgrCfg.RalsCfg().RALsMaxComputedUsage) {
 		t.Errorf("Expecting: %+v , received: %+v", eMaxCU, cgrCfg.RalsCfg().RALsMaxComputedUsage)
 	}
+	if cgrCfg.RalsCfg().RALsMaxIncrements != int(1000000) {
+		t.Errorf("Expecting: 1000000 , received: %+v", cgrCfg.RalsCfg().RALsMaxIncrements)
+	}
 	eBalRatingSbj := map[string]string{
 		utils.ANY:      "*zero1ns",
 		utils.VOICE:    "*zero1s",

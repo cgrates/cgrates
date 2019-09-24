@@ -238,6 +238,7 @@ func TestDfRalsJsonCfg(t *testing.T) {
 			utils.VOICE: "72h",
 			utils.DATA:  "107374182400",
 			utils.SMS:   "10000"},
+		Max_increments: utils.IntPointer(1000000),
 		Balance_rating_subject: &map[string]string{
 			utils.ANY:      "*zero1ns",
 			utils.VOICE:    "*zero1s",

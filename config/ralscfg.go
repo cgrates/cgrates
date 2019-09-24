@@ -33,6 +33,7 @@ type RalsCfg struct {
 	RemoveExpired            bool
 	RALsMaxComputedUsage     map[string]time.Duration
 	RALsBalanceRatingSubject map[string]string
+	RALsMaxIncrements        int
 }
 
 //loadFromJsonCfg loads Rals config from JsonCfg
@@ -69,6 +70,9 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 				return
 			}
 		}
+	}
+	if jsnRALsCfg.Max_increments != nil {
+		ralsCfg.RALsMaxIncrements = *jsnRALsCfg.Max_increments
 	}
 	if jsnRALsCfg.Balance_rating_subject != nil {
 		for k, v := range *jsnRALsCfg.Balance_rating_subject {

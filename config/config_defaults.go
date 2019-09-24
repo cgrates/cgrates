@@ -175,6 +175,7 @@ const CGRATES_CFG_JSON = `
 		"*data": "107374182400",
 		"*sms": "10000"
 	},
+	"max_increments": 1000000,
 	"balance_rating_subject":{				// default rating subject in case that balance rating subject is empty
 		"*any": "*zero1ns",
 		"*voice": "*zero1s",
