@@ -54,8 +54,10 @@ func (cP *SliceDP) FieldAsInterface(fldPath []string) (data interface{}, err err
 		return
 	}
 	err = nil // cancel previous err
-	if cfgFieldIdx, err := strconv.Atoi(fldPath[0]); err != nil || len(cP.req) <= cfgFieldIdx {
+	if cfgFieldIdx, err := strconv.Atoi(fldPath[0]); err != nil {
 		return nil, fmt.Errorf("Ignoring record: %v with error : %+v", cP.req, err)
+	} else if len(cP.req) <= cfgFieldIdx {
+		return nil, utils.ErrNotFound
 	} else {
 		data = cP.req[cfgFieldIdx]
 	}
