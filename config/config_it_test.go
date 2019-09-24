@@ -427,6 +427,88 @@ func TestCGRConfigReloadSessionS(t *testing.T) {
 	}
 }
 
+func TestCGRConfigReloadERs(t *testing.T) {
+	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out"} {
+		if err := os.RemoveAll(dir); err != nil {
+			t.Fatal("Error removing folder: ", dir, err)
+		}
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Fatal("Error creating folder: ", dir, err)
+		}
+	}
+
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg.SessionSCfg().Enabled = true
+	var reply string
+	if err = cfg.V1ReloadConfig(&ConfigReloadWithArgDispatcher{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "ers_example"),
+		Section: ERsJson,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK received: %s", reply)
+	}
+	flags, _ := utils.FlagsWithParamsFromSlice([]string{"*dryrun"})
+	flagsDefault, _ := utils.FlagsWithParamsFromSlice([]string{})
+	content := []*FCTemplate{
+		&FCTemplate{Tag: "TOR", FieldId: utils.ToR, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP), Mandatory: true},
+		&FCTemplate{Tag: utils.OriginID, FieldId: utils.OriginID, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.3", true, utils.INFIELD_SEP), Mandatory: true},
+		&FCTemplate{Tag: utils.RequestType, FieldId: utils.RequestType, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.4", true, utils.INFIELD_SEP), Mandatory: true},
+		&FCTemplate{Tag: utils.Tenant, FieldId: utils.Tenant, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.6", true, utils.INFIELD_SEP), Mandatory: true},
+		&FCTemplate{Tag: utils.Category, FieldId: utils.Category, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.7", true, utils.INFIELD_SEP), Mandatory: true},
+		&FCTemplate{Tag: utils.Account, FieldId: utils.Account, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.8", true, utils.INFIELD_SEP), Mandatory: true},
+		&FCTemplate{Tag: utils.Subject, FieldId: utils.Subject, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.9", true, utils.INFIELD_SEP), Mandatory: true},
+		&FCTemplate{Tag: utils.Destination, FieldId: utils.Destination, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.10", true, utils.INFIELD_SEP), Mandatory: true},
+		&FCTemplate{Tag: utils.SetupTime, FieldId: utils.SetupTime, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.11", true, utils.INFIELD_SEP), Mandatory: true},
+		&FCTemplate{Tag: utils.AnswerTime, FieldId: utils.AnswerTime, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.12", true, utils.INFIELD_SEP), Mandatory: true},
+		&FCTemplate{Tag: utils.Usage, FieldId: utils.Usage, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.13", true, utils.INFIELD_SEP), Mandatory: true},
+	}
+	expAttr := &ERsCfg{
+		Enabled: true,
+		SessionSConns: []*RemoteHost{
+			&RemoteHost{
+				Address:   "127.0.0.1:2012",
+				Transport: utils.MetaJSONrpc,
+			},
+		},
+		Readers: []*EventReaderCfg{
+			&EventReaderCfg{
+				ID:             utils.META_DEFAULT,
+				Type:           utils.MetaFileCSV,
+				FieldSep:       ",",
+				RunDelay:       0,
+				ConcurrentReqs: 1024,
+				SourcePath:     "/var/spool/cgrates/cdrc/in",
+				ProcessedPath:  "/var/spool/cgrates/cdrc/out",
+				Filters:        []string{},
+				Flags:          flagsDefault,
+				HeaderFields:   []*FCTemplate{},
+				ContentFields:  content,
+				TrailerFields:  []*FCTemplate{},
+			},
+			&EventReaderCfg{
+				ID:             "file_reader1",
+				Type:           utils.MetaFileCSV,
+				FieldSep:       ",",
+				RunDelay:       -1,
+				ConcurrentReqs: 1024,
+				SourcePath:     "/tmp/ers/in",
+				ProcessedPath:  "/tmp/ers/out",
+				Flags:          flags,
+				HeaderFields:   []*FCTemplate{},
+				ContentFields:  content,
+				TrailerFields:  []*FCTemplate{},
+			},
+		},
+	}
+	if !reflect.DeepEqual(expAttr, cfg.ERsCfg()) {
+		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.ERsCfg()))
+	}
+}
+
 func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
 	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out"} {
 		if err := os.RemoveAll(dir); err != nil {
