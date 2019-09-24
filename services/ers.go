@@ -67,10 +67,10 @@ func (erS *EventReaderService) Start(sp servmanager.ServiceProvider, waitCache b
 	// build the service
 	erS.ers = ers.NewERService(sp.GetConfig(), sp.GetFilterS(), sS, erS.stopChan)
 	go func(erS *ers.ERService, rldChan chan struct{}) {
-		if err = erS.ListenAndServe(rldChan); err != nil {
+		if err := erS.ListenAndServe(rldChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.ERs, err.Error()))
+			sp.GetExitChan() <- true
 		}
-		sp.GetExitChan() <- true
 	}(erS.ers, erS.rldChan)
 	return
 }
@@ -82,9 +82,9 @@ func (erS *EventReaderService) GetIntenternalChan() (conn chan rpcclient.RpcClie
 
 // Reload handles the change of config
 func (erS *EventReaderService) Reload(sp servmanager.ServiceProvider) (err error) {
-	erS.Lock()
+	erS.RLock()
 	erS.rldChan <- struct{}{}
-	erS.Unlock()
+	erS.RUnlock()
 	return
 }
 
@@ -93,7 +93,6 @@ func (erS *EventReaderService) Shutdown() (err error) {
 	erS.Lock()
 	close(erS.stopChan)
 	erS.ers = nil
-	<-erS.connChan
 	erS.Unlock()
 	return
 }
