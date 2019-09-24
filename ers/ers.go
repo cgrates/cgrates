@@ -37,7 +37,7 @@ type erEvent struct {
 
 // NewERService instantiates the ERService
 func NewERService(cfg *config.CGRConfig, filterS *engine.FilterS,
-	sS rpcclient.RpcClientConnection, exitChan chan bool) *ERService {
+	sS rpcclient.RpcClientConnection, stopChan chan struct{}) *ERService {
 	return &ERService{
 		cfg:       cfg,
 		rdrs:      make(map[string]EventReader),
@@ -47,7 +47,7 @@ func NewERService(cfg *config.CGRConfig, filterS *engine.FilterS,
 		rdrErr:    make(chan error),
 		filterS:   filterS,
 		sS:        sS,
-		exitChan:  exitChan,
+		stopChan:  stopChan,
 	}
 }
 
@@ -63,7 +63,7 @@ type ERService struct {
 
 	filterS  *engine.FilterS
 	sS       rpcclient.RpcClientConnection // connection towards SessionS
-	exitChan chan bool
+	stopChan chan struct{}
 }
 
 // ListenAndServe keeps the service alive
@@ -84,8 +84,7 @@ func (erS *ERService) ListenAndServe(cfgRldChan chan struct{}) (err error) {
 				fmt.Sprintf("<%s> running reader got error: <%s>",
 					utils.ERs, err.Error()))
 			return
-		case e := <-erS.exitChan:
-			erS.exitChan <- e // put back for the others listening for shutdown request
+		case <-erS.stopChan:
 			return
 		case erEv := <-erS.rdrEvents:
 			if err := erS.processEvent(erEv.cgrEvent, erEv.rdrCfg); err != nil {
@@ -95,7 +94,6 @@ func (erS *ERService) ListenAndServe(cfgRldChan chan struct{}) (err error) {
 			}
 		}
 	}
-	return
 }
 
 // addReader will add a new reader to the service
@@ -115,7 +113,7 @@ func (erS *ERService) addReader(rdrID string, cfgIdx int) (err error) {
 func (erS *ERService) handleReloads(cfgRldChan chan struct{}) {
 	for {
 		select {
-		case <-erS.exitChan:
+		case <-erS.stopChan:
 			return
 		case <-cfgRldChan:
 			cfgIDs := make(map[string]int)
@@ -150,7 +148,7 @@ func (erS *ERService) handleReloads(cfgRldChan chan struct{}) {
 					utils.Logger.Crit(
 						fmt.Sprintf("<%s> adding reader <%s> got error: <%s>",
 							utils.ERs, id, err.Error()))
-					erS.exitChan <- true
+					erS.rdrErr <- err
 				}
 			}
 			erS.Unlock()

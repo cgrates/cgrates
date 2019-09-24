@@ -277,6 +277,9 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 	if srvMngr.GetConfig().SessionSCfg().Enabled {
 		go srvMngr.startService(utils.SessionS)
 	}
+	if srvMngr.GetConfig().ERsCfg().Enabled {
+		go srvMngr.startService(utils.ERs)
+	}
 	// startServer()
 	return
 }
@@ -338,6 +341,10 @@ func (srvMngr *ServiceManager) handleReload() {
 			}
 		case <-srvMngr.GetConfig().GetReloadChan(config.SessionSJson):
 			if err = srvMngr.reloadService(utils.SessionS, srvMngr.GetConfig().SessionSCfg().Enabled); err != nil {
+				return
+			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.ERsJson):
+			if err = srvMngr.reloadService(utils.ERs, srvMngr.GetConfig().ERsCfg().Enabled); err != nil {
 				return
 			}
 		}
