@@ -1182,7 +1182,10 @@ func (cfg *CGRConfig) SupplierSCfg() *SupplierSCfg {
 	return cfg.supplierSCfg
 }
 
+// SessionSCfg returns the config for SessionS
 func (cfg *CGRConfig) SessionSCfg() *SessionSCfg {
+	cfg.lks[SessionSJson].Lock()
+	defer cfg.lks[SessionSJson].Unlock()
 	return cfg.sessionSCfg
 }
 
@@ -1528,6 +1531,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case SessionSJson:
+		cfg.rldChans[SessionSJson] <- struct{}{}
 		if !fall {
 			break
 		}
