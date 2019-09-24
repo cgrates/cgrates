@@ -65,7 +65,7 @@ func (attrS *AttributeService) Start(sp servmanager.ServiceProvider, waitCache b
 				utils.AttributeS, err.Error()))
 		return
 	}
-	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.ServiceManager, utils.AttributeS))
+	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AttributeS))
 	attrS.rpc = v1.NewAttributeSv1(attrS.attrS)
 	if !sp.GetConfig().DispatcherSCfg().Enabled {
 		sp.GetServer().RpcRegister(attrS.rpc)
