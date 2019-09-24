@@ -38,7 +38,7 @@ func TestERsNewERService(t *testing.T) {
 		stopLsn:   make(map[string]chan struct{}),
 		rdrEvents: make(chan *erEvent),
 		rdrErr:    make(chan error),
-		exitChan:  nil,
+		stopChan:  nil,
 		sS:        nil}
 	rcv := NewERService(cfg, fltrS, nil, nil)
 
