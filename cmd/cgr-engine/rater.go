@@ -71,7 +71,7 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 	}
 
 	var thdS rpcclient.RpcClientConnection
-	if len(cfg.RalsCfg().RALsThresholdSConns) != 0 { // Connections to ThresholdS
+	if len(cfg.RalsCfg().ThresholdSConns) != 0 { // Connections to ThresholdS
 		thdsTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, thdsTaskChan)
 		go func() {
@@ -82,7 +82,7 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.RalsCfg().RALsThresholdSConns, intThdSChan, false)
+				cfg.RalsCfg().ThresholdSConns, intThdSChan, false)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to ThresholdS, error: %s", err.Error()))
 				exitChan <- true
@@ -92,7 +92,7 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 	}
 
 	var stats rpcclient.RpcClientConnection
-	if len(cfg.RalsCfg().RALsStatSConns) != 0 { // Connections to StatS
+	if len(cfg.RalsCfg().StatSConns) != 0 { // Connections to StatS
 		statsTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, statsTaskChan)
 		go func() {
@@ -103,7 +103,7 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				cfg.RalsCfg().RALsStatSConns, intStatSChan, false)
+				cfg.RalsCfg().StatSConns, intStatSChan, false)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to StatS, error: %s", err.Error()))
 				exitChan <- true
@@ -185,7 +185,7 @@ func startRater(internalRaterChan, internalApierv1, internalApierv2, internalThd
 
 	responder := &engine.Responder{
 		ExitChan:         exitChan,
-		MaxComputedUsage: cfg.RalsCfg().RALsMaxComputedUsage}
+		MaxComputedUsage: cfg.RalsCfg().MaxComputedUsage}
 
 	// correct reflect on cacheS since there is no APIer init
 	if cacheSrpc != nil && reflect.ValueOf(cacheSrpc).IsNil() {

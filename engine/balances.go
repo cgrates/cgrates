@@ -321,7 +321,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 	if !b.IsActiveAt(cd.TimeStart) || b.GetValue() <= 0 {
 		return
 	}
-	if duration, err := utils.ParseZeroRatingSubject(cd.TOR, b.RatingSubject, config.CgrConfig().RalsCfg().RALsBalanceRatingSubject); err == nil {
+	if duration, err := utils.ParseZeroRatingSubject(cd.TOR, b.RatingSubject, config.CgrConfig().RalsCfg().BalanceRatingSubject); err == nil {
 		// we have *zero based units
 		cc = cd.CreateCallCost()
 		cc.Timespans = append(cc.Timespans, &TimeSpan{
