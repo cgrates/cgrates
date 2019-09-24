@@ -79,6 +79,7 @@ var (
 	DispatcherErrorPrefix       = "DISPATCHER_ERROR"
 	ErrUnsupportedFormat        = errors.New("UNSUPPORTED_FORMAT")
 	ErrNoDatabaseConn           = errors.New("NO_DATA_BASE_CONNECTION")
+	ErrMaxIncrementsExceeded    = errors.New("MAX_INCREMENTS_EXCEEDED")
 )
 
 // NewCGRError initialises a new CGRError

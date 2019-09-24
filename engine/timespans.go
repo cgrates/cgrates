@@ -19,9 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"reflect"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -461,6 +463,10 @@ func (ts *TimeSpan) createIncrementsSlice() {
 	// because ts cost is rounded
 	//incrementCost := rate / rateUnit.Seconds() * rateIncrement.Seconds()
 	nbIncrements := int(ts.GetDuration() / rateIncrement)
+	if nbIncrements > config.CgrConfig().RalsCfg().RALsMaxIncrements {
+		utils.Logger.Warning(fmt.Sprintf("error: <%s with %+v>, when creating increments slice", utils.ErrMaxIncrementsExceeded, nbIncrements))
+		return
+	}
 	incrementCost := ts.CalculateCost() / float64(nbIncrements)
 	incrementCost = utils.Round(incrementCost, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 	for s := 0; s < nbIncrements; s++ {
