@@ -116,11 +116,11 @@ func (smg *SessionService) Start(sp servmanager.ServiceProvider, waitCache bool)
 		statSConns, suplSConns, attrConns, cdrsConn, chargerSConn,
 		sReplConns, sp.GetDM(), sp.GetConfig().GeneralCfg().DefaultTimezone)
 	//start sync session in a separate gorutine
-	go func() {
-		if err = smg.sm.ListenAndServe(sp.GetExitChan()); err != nil {
+	go func(sm *sessions.SessionS) {
+		if err = sm.ListenAndServe(sp.GetExitChan()); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.SessionS, err))
 		}
-	}()
+	}(smg.sm)
 	// Pass internal connection via BiRPCClient
 	smg.connChan <- smg.sm
 	// Register RPC handler
@@ -139,9 +139,8 @@ func (smg *SessionService) Start(sp servmanager.ServiceProvider, waitCache bool)
 		for method, handler := range smg.rpcv1.Handlers() {
 			sp.GetServer().BiRPCRegisterName(method, handler)
 		}
-		sp.GetServer().ServeBiJSON(sp.GetConfig().SessionSCfg().ListenBijson, smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect)
-		return fmt.Errorf("<%s> the session ServeBiJSON should not exit",
-			utils.SessionS) // imposible this should never reach
+		// run this in it's own gorutine
+		go sp.GetServer().ServeBiJSON(sp.GetConfig().SessionSCfg().ListenBijson, smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect)
 	}
 	return
 }

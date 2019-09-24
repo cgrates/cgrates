@@ -360,6 +360,73 @@ func TestCGRConfigReloadRALs(t *testing.T) {
 	}
 }
 
+func TestCGRConfigReloadSessionS(t *testing.T) {
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg.RalsCfg().Enabled = true
+	cfg.ChargerSCfg().Enabled = true
+	cfg.CdrsCfg().Enabled = true
+	var reply string
+	if err = cfg.V1ReloadConfig(&ConfigReloadWithArgDispatcher{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
+		Section: SessionSJson,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK received: %s", reply)
+	}
+	expAttr := &SessionSCfg{
+		Enabled:      true,
+		ListenBijson: "127.0.0.1:2014",
+		ChargerSConns: []*RemoteHost{
+			&RemoteHost{
+				Address: utils.MetaInternal,
+			},
+		},
+		RALsConns: []*RemoteHost{
+			&RemoteHost{
+				Address: utils.MetaInternal,
+			},
+		},
+		ResSConns: []*RemoteHost{
+			&RemoteHost{
+				Address:   "127.0.0.1:2012",
+				Transport: utils.MetaJSONrpc,
+			},
+		},
+		ThreshSConns: []*RemoteHost{},
+		StatSConns:   []*RemoteHost{},
+		SupplSConns: []*RemoteHost{
+			&RemoteHost{
+				Address:   "127.0.0.1:2012",
+				Transport: utils.MetaJSONrpc,
+			},
+		},
+		AttrSConns: []*RemoteHost{
+			&RemoteHost{
+				Address:   "127.0.0.1:2012",
+				Transport: utils.MetaJSONrpc,
+			},
+		},
+		CDRsConns: []*RemoteHost{
+			&RemoteHost{
+				Address: utils.MetaInternal,
+			},
+		},
+
+		SessionReplicationConns: []*RemoteHost{},
+		MaxCallDuration:         3 * time.Hour,
+		SessionIndexes:          utils.NewStringMap(),
+		ClientProtocol:          1,
+		TerminateAttempts:       5,
+	}
+	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
+		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))
+	}
+}
+
 func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
 	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out"} {
 		if err := os.RemoveAll(dir); err != nil {
