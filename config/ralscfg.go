@@ -26,14 +26,14 @@ import (
 
 // Rater config section
 type RalsCfg struct {
-	RALsEnabled              bool          // start standalone server (no balancer)
-	RALsThresholdSConns      []*RemoteHost // address where to reach ThresholdS config
-	RALsStatSConns           []*RemoteHost
-	RpSubjectPrefixMatching  bool // enables prefix matching for the rating profile subject
-	RemoveExpired            bool
-	RALsMaxComputedUsage     map[string]time.Duration
-	RALsBalanceRatingSubject map[string]string
-	RALsMaxIncrements        int
+	Enabled                 bool          // start standalone server (no balancer)
+	ThresholdSConns         []*RemoteHost // address where to reach ThresholdS config
+	StatSConns              []*RemoteHost
+	RpSubjectPrefixMatching bool // enables prefix matching for the rating profile subject
+	RemoveExpired           bool
+	MaxComputedUsage        map[string]time.Duration
+	BalanceRatingSubject    map[string]string
+	MaxIncrements           int
 }
 
 //loadFromJsonCfg loads Rals config from JsonCfg
@@ -42,20 +42,20 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 		return nil
 	}
 	if jsnRALsCfg.Enabled != nil {
-		ralsCfg.RALsEnabled = *jsnRALsCfg.Enabled
+		ralsCfg.Enabled = *jsnRALsCfg.Enabled
 	}
 	if jsnRALsCfg.Thresholds_conns != nil {
-		ralsCfg.RALsThresholdSConns = make([]*RemoteHost, len(*jsnRALsCfg.Thresholds_conns))
+		ralsCfg.ThresholdSConns = make([]*RemoteHost, len(*jsnRALsCfg.Thresholds_conns))
 		for idx, jsnHaCfg := range *jsnRALsCfg.Thresholds_conns {
-			ralsCfg.RALsThresholdSConns[idx] = NewDfltRemoteHost()
-			ralsCfg.RALsThresholdSConns[idx].loadFromJsonCfg(jsnHaCfg)
+			ralsCfg.ThresholdSConns[idx] = NewDfltRemoteHost()
+			ralsCfg.ThresholdSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnRALsCfg.Stats_conns != nil {
-		ralsCfg.RALsStatSConns = make([]*RemoteHost, len(*jsnRALsCfg.Stats_conns))
+		ralsCfg.StatSConns = make([]*RemoteHost, len(*jsnRALsCfg.Stats_conns))
 		for idx, jsnHaCfg := range *jsnRALsCfg.Stats_conns {
-			ralsCfg.RALsStatSConns[idx] = NewDfltRemoteHost()
-			ralsCfg.RALsStatSConns[idx].loadFromJsonCfg(jsnHaCfg)
+			ralsCfg.StatSConns[idx] = NewDfltRemoteHost()
+			ralsCfg.StatSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnRALsCfg.Rp_subject_prefix_matching != nil {
@@ -66,17 +66,17 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 	}
 	if jsnRALsCfg.Max_computed_usage != nil {
 		for k, v := range *jsnRALsCfg.Max_computed_usage {
-			if ralsCfg.RALsMaxComputedUsage[k], err = utils.ParseDurationWithNanosecs(v); err != nil {
+			if ralsCfg.MaxComputedUsage[k], err = utils.ParseDurationWithNanosecs(v); err != nil {
 				return
 			}
 		}
 	}
 	if jsnRALsCfg.Max_increments != nil {
-		ralsCfg.RALsMaxIncrements = *jsnRALsCfg.Max_increments
+		ralsCfg.MaxIncrements = *jsnRALsCfg.Max_increments
 	}
 	if jsnRALsCfg.Balance_rating_subject != nil {
 		for k, v := range *jsnRALsCfg.Balance_rating_subject {
-			ralsCfg.RALsBalanceRatingSubject[k] = v
+			ralsCfg.BalanceRatingSubject[k] = v
 		}
 	}
 
