@@ -90,6 +90,7 @@ func (resp *ResponderService) GetIntenternalChan() (conn chan rpcclient.RpcClien
 
 // Reload handles the change of config
 func (resp *ResponderService) Reload(sp servmanager.ServiceProvider) (err error) {
+	// resp.resp.MaxComputedUsage = sp.GetConfig().RalsCfg().MaxComputedUsage // this may cause concurrency problems
 	return
 }
 
