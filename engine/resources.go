@@ -766,7 +766,7 @@ func (rS *ResourceService) StartLoop() {
 	go rS.runBackup()
 }
 
-// SetThresholdConnection sets the new conection to the threshold service
+// SetThresholdConnection sets the new connection to the threshold service
 // only used on reload
 func (rS *ResourceService) SetThresholdConnection(thdS rpcclient.RpcClientConnection) {
 	rS.thdS = thdS

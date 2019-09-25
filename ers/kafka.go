@@ -111,7 +111,7 @@ func (rdr *KafkaER) Serve() (err error) {
 			return
 		}
 	}(r)
-	go rdr.readLoop(r) // read until the conection is closed
+	go rdr.readLoop(r) // read until the connection is closed
 	return
 }
 

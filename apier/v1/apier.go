@@ -1295,19 +1295,19 @@ func (apierV1 *ApierV1) GetRatingPlanIDs(args utils.TenantArgWithPaginator, attr
 	return nil
 }
 
-// SetAttributeSConnection sets the new conection to the attribute service
+// SetAttributeSConnection sets the new connection to the attribute service
 // only used on reload
 func (v1 *ApierV1) SetAttributeSConnection(attrS rpcclient.RpcClientConnection) {
 	v1.AttributeS = attrS
 }
 
-// SetCacheSConnection sets the new conection to the cache service
+// SetCacheSConnection sets the new connection to the cache service
 // only used on reload
 func (v1 *ApierV1) SetCacheSConnection(chS rpcclient.RpcClientConnection) {
 	v1.CacheS = chS
 }
 
-// SetSchedulerSConnection sets the new conection to the scheduler service
+// SetSchedulerSConnection sets the new connection to the scheduler service
 // only used on reload
 func (v1 *ApierV1) SetSchedulerSConnection(schS rpcclient.RpcClientConnection) {
 	v1.SchedulerS = schS

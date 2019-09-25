@@ -180,7 +180,7 @@ func (cS *ChargerService) V1GetChargersForEvent(args *utils.CGREventWithArgDispa
 	return
 }
 
-// SetAttributeConnection sets the new conection to the attribute service
+// SetAttributeConnection sets the new connection to the attribute service
 // only used on reload
 func (cS *ChargerService) SetAttributeConnection(attrS rpcclient.RpcClientConnection) {
 	cS.attrS = attrS
