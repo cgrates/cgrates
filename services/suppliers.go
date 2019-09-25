@@ -74,6 +74,8 @@ func (splS *SupplierService) Start(sp servmanager.ServiceProvider, waitCache boo
 			utils.SupplierS, err.Error()))
 		return
 	}
+	splS.Lock()
+	defer splS.Unlock()
 	splS.splS, err = engine.NewSupplierService(sp.GetDM(), sp.GetFilterS(), sp.GetConfig(),
 		resourceSConn, statSConn, attrSConn)
 	if err != nil {
@@ -81,8 +83,7 @@ func (splS *SupplierService) Start(sp servmanager.ServiceProvider, waitCache boo
 			utils.SupplierS, err.Error()))
 		return
 	}
-	splS.Lock()
-	defer splS.Unlock()
+
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.SupplierS))
 	splS.rpc = v1.NewSupplierSv1(splS.splS)
 	if !sp.GetConfig().DispatcherSCfg().Enabled {
@@ -99,6 +100,30 @@ func (splS *SupplierService) GetIntenternalChan() (conn chan rpcclient.RpcClient
 
 // Reload handles the change of config
 func (splS *SupplierService) Reload(sp servmanager.ServiceProvider) (err error) {
+	var attrSConn, resourceSConn, statSConn rpcclient.RpcClientConnection
+	attrSConn, err = sp.GetConnection(utils.AttributeS, sp.GetConfig().SupplierSCfg().AttributeSConns)
+	if err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
+			utils.SupplierS, utils.SupplierS, err.Error()))
+		return
+	}
+	statSConn, err = sp.GetConnection(utils.StatS, sp.GetConfig().SupplierSCfg().StatSConns)
+	if err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to StatS: %s",
+			utils.SupplierS, err.Error()))
+		return
+	}
+	resourceSConn, err = sp.GetConnection(utils.ResourceS, sp.GetConfig().SupplierSCfg().ResourceSConns)
+	if err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to StatS: %s",
+			utils.SupplierS, err.Error()))
+		return
+	}
+	splS.Lock()
+	splS.splS.SetAttributeSConnection(attrSConn)
+	splS.splS.SetStatSConnection(statSConn)
+	splS.splS.SetResourceSConnection(resourceSConn)
+	splS.Unlock()
 	return
 }
 
