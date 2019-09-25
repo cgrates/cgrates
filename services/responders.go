@@ -90,7 +90,26 @@ func (resp *ResponderService) GetIntenternalChan() (conn chan rpcclient.RpcClien
 
 // Reload handles the change of config
 func (resp *ResponderService) Reload(sp servmanager.ServiceProvider) (err error) {
-	// resp.resp.MaxComputedUsage = sp.GetConfig().RalsCfg().MaxComputedUsage // this may cause concurrency problems
+	var thdS, stats rpcclient.RpcClientConnection
+	if thdS, err = sp.GetConnection(utils.ThresholdS, sp.GetConfig().RalsCfg().ThresholdSConns); err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
+			utils.RALService, utils.ThresholdS, err.Error()))
+		return
+	}
+	if stats, err = sp.GetConnection(utils.StatS, sp.GetConfig().RalsCfg().StatSConns); err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
+			utils.RALService, utils.StatS, err.Error()))
+		return
+	}
+	resp.Lock()
+	resp.resp.MaxComputedUsage = sp.GetConfig().RalsCfg().MaxComputedUsage // this may cause concurrency problems
+	if thdS != nil {
+		engine.SetThresholdS(thdS) // temporary architectural fix until we will have separate AccountS
+	}
+	if stats != nil {
+		engine.SetStatS(stats)
+	}
+	resp.Unlock()
 	return
 }
 

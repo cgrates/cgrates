@@ -830,8 +830,6 @@ func (cdrS *CDRServer) V1CountCDRs(args *utils.RPCCDRsFilterWithArgDispatcher, c
 	return nil
 }
 
-// var ralConn,  rpcclient.RpcClientConnection
-
 // SetAttributeSConnection sets the new conection to the attribute service
 // only used on reload
 func (cdrS *CDRServer) SetAttributeSConnection(attrS rpcclient.RpcClientConnection) {

@@ -141,6 +141,31 @@ func (api *ApierV1Service) GetIntenternalChan() (conn chan rpcclient.RpcClientCo
 
 // Reload handles the change of config
 func (api *ApierV1Service) Reload(sp servmanager.ServiceProvider) (err error) {
+	var cacheSrpc, schedulerSrpc, attributeSrpc rpcclient.RpcClientConnection
+	if cacheSrpc, err = sp.GetConnection(utils.CacheS, sp.GetConfig().ApierCfg().CachesConns); err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
+			utils.ApierV1, utils.CacheS, err.Error()))
+		return
+	}
+
+	// create scheduler connection
+	if schedulerSrpc, err = sp.GetConnection(utils.SchedulerS, sp.GetConfig().ApierCfg().SchedulerConns); err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
+			utils.ApierV1, utils.SchedulerS, err.Error()))
+		return
+	}
+
+	// create scheduler connection
+	if attributeSrpc, err = sp.GetConnection(utils.AttributeS, sp.GetConfig().ApierCfg().AttributeSConns); err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
+			utils.ApierV1, utils.AttributeS, err.Error()))
+		return
+	}
+	api.Lock()
+	api.api.SetAttributeSConnection(attributeSrpc)
+	api.api.SetCacheSConnection(cacheSrpc)
+	api.api.SetSchedulerSConnection(schedulerSrpc)
+	api.Unlock()
 	return
 }
 
