@@ -829,3 +829,35 @@ func (cdrS *CDRServer) V1CountCDRs(args *utils.RPCCDRsFilterWithArgDispatcher, c
 	}
 	return nil
 }
+
+// var ralConn,  rpcclient.RpcClientConnection
+
+// SetAttributeSConnection sets the new conection to the attribute service
+// only used on reload
+func (cdrS *CDRServer) SetAttributeSConnection(attrS rpcclient.RpcClientConnection) {
+	cdrS.attrS = attrS
+}
+
+// SetThresholSConnection sets the new conection to the threshold service
+// only used on reload
+func (cdrS *CDRServer) SetThresholSConnection(thdS rpcclient.RpcClientConnection) {
+	cdrS.thdS = thdS
+}
+
+// SetStatSConnection sets the new conection to the stat service
+// only used on reload
+func (cdrS *CDRServer) SetStatSConnection(stS rpcclient.RpcClientConnection) {
+	cdrS.statS = stS
+}
+
+// SetChargerSConnection sets the new conection to the charger service
+// only used on reload
+func (cdrS *CDRServer) SetChargerSConnection(chS rpcclient.RpcClientConnection) {
+	cdrS.chargerS = chS
+}
+
+// SetRALsConnection sets the new conection to the RAL service
+// only used on reload
+func (cdrS *CDRServer) SetRALsConnection(rls rpcclient.RpcClientConnection) {
+	cdrS.rals = rls
+}
