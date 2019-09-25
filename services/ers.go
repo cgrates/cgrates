@@ -82,7 +82,14 @@ func (erS *EventReaderService) GetIntenternalChan() (conn chan rpcclient.RpcClie
 
 // Reload handles the change of config
 func (erS *EventReaderService) Reload(sp servmanager.ServiceProvider) (err error) {
+	var sS rpcclient.RpcClientConnection
+	if sS, err = sp.GetConnection(utils.SessionS, sp.GetConfig().ERsCfg().SessionSConns); err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<%s> failed connecting to <%s>, error: <%s>",
+			utils.ERs, utils.SessionS, err.Error()))
+		return
+	}
 	erS.RLock()
+	erS.ers.SetSessionSConnection(sS)
 	erS.rldChan <- struct{}{}
 	erS.RUnlock()
 	return
