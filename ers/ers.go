@@ -291,3 +291,9 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 
 	return
 }
+
+// SetSessionSConnection sets the new connection to the threshold service
+// only used on reload
+func (erS *ERService) SetSessionSConnection(sS rpcclient.RpcClientConnection) {
+	erS.sS = sS
+}
