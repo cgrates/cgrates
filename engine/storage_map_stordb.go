@@ -26,12 +26,35 @@ import (
 func (ms *MapStorage) GetTpIds(colName string) (ids []string, err error) {
 	return nil, utils.ErrNotImplemented
 }
+
 func (ms *MapStorage) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds,
 	filters map[string]string, paginator *utils.PaginatorWithSearch) (ids []string, err error) {
 	return nil, utils.ErrNotImplemented
 }
+
 func (ms *MapStorage) GetTPTimings(tpid, id string) (timings []*utils.ApierTPTiming, err error) {
-	return nil, utils.ErrNotImplemented
+	key := utils.TBLTPTimings + utils.CONCATENATED_KEY_SEP + tpid
+	if id != utils.EmptyString {
+		key = utils.TBLTPTimings + utils.ConcatenatedKey(tpid, id)
+	}
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+	ids, _ := ms.GetKeysForPrefix(key)
+	for _, id := range ids {
+		if values, ok := ms.dict[id]; ok {
+			var result *utils.ApierTPTiming
+			if err = ms.ms.Unmarshal(values, &result); err != nil {
+				return nil, err
+			}
+			timings = append(timings, result)
+		} else {
+			return nil, utils.ErrNotFound
+		}
+	}
+	if len(timings) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return
 }
 func (ms *MapStorage) GetTPDestinations(tpid, id string) (dsts []*utils.TPDestination, err error) {
 	return nil, utils.ErrNotImplemented
@@ -94,10 +117,38 @@ func (ms *MapStorage) GetTPDispatcherHosts(tpid, tenant, id string) (attrs []*ut
 
 //implement LoadWriter interface
 func (ms *MapStorage) RemTpData(table, tpid string, args map[string]string) (err error) {
-	return utils.ErrNotImplemented
+	if table == utils.EmptyString {
+		return ms.Flush(utils.EmptyString)
+	}
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	key := table + utils.CONCATENATED_KEY_SEP + tpid
+	if args != nil {
+		for _, val := range args {
+			key += utils.CONCATENATED_KEY_SEP + val
+		}
+	}
+	ids, _ := ms.GetKeysForPrefix(key)
+	for _, id := range ids {
+		delete(ms.dict, id)
+	}
+	return
 }
+
 func (ms *MapStorage) SetTPTimings(timings []*utils.ApierTPTiming) (err error) {
-	return utils.ErrNotImplemented
+	if len(timings) == 0 {
+		return nil
+	}
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	for _, timing := range timings {
+		result, err := ms.ms.Marshal(timing)
+		if err != nil {
+			return err
+		}
+		ms.dict[utils.ConcatenatedKey(utils.TBLTPTimings, timing.TPid, timing.ID)] = result
+	}
+	return
 }
 func (ms *MapStorage) SetTPDestinations(dests []*utils.TPDestination) (err error) {
 	return utils.ErrNotImplemented
