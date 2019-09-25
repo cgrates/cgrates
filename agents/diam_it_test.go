@@ -309,7 +309,7 @@ func testDiamItDryRun(t *testing.T) {
 			t.Fatal("Diameter client should not be nil")
 		}
 		if diamClnt.conn == nil {
-			t.Fatal("Diameter conection should not be nil")
+			t.Fatal("Diameter connection should not be nil")
 		}
 		if ccr == nil {
 			t.Fatal("The mesage to diameter should not be nil")
@@ -558,7 +558,7 @@ func testDiamItCCRInit(t *testing.T) {
 		t.Fatal("Diameter client should not be nil")
 	}
 	if diamClnt.conn == nil {
-		t.Fatal("Diameter conection should not be nil")
+		t.Fatal("Diameter connection should not be nil")
 	}
 	if m == nil {
 		t.Fatal("The mesage to diameter should not be nil")
@@ -646,7 +646,7 @@ func testDiamItCCRUpdate(t *testing.T) {
 		t.Fatal("Diameter client should not be nil")
 	}
 	if diamClnt.conn == nil {
-		t.Fatal("Diameter conection should not be nil")
+		t.Fatal("Diameter connection should not be nil")
 	}
 	if m == nil {
 		t.Fatal("The mesage to diameter should not be nil")
@@ -734,7 +734,7 @@ func testDiamItCCRTerminate(t *testing.T) {
 		t.Fatal("Diameter client should not be nil")
 	}
 	if diamClnt.conn == nil {
-		t.Fatal("Diameter conection should not be nil")
+		t.Fatal("Diameter connection should not be nil")
 	}
 	if m == nil {
 		t.Fatal("The mesage to diameter should not be nil")
@@ -831,7 +831,7 @@ func testDiamItCCRSMS(t *testing.T) {
 		t.Fatal("Diameter client should not be nil")
 	}
 	if diamClnt.conn == nil {
-		t.Fatal("Diameter conection should not be nil")
+		t.Fatal("Diameter connection should not be nil")
 	}
 	if ccr == nil {
 		t.Fatal("The mesage to diameter should not be nil")
@@ -921,7 +921,7 @@ func testDiamInitWithSessionDisconnect(t *testing.T) {
 		t.Fatal("Diameter client should not be nil")
 	}
 	if diamClnt.conn == nil {
-		t.Fatal("Diameter conection should not be nil")
+		t.Fatal("Diameter connection should not be nil")
 	}
 	if m == nil {
 		t.Fatal("The mesage to diameter should not be nil")

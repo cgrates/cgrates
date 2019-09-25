@@ -3468,3 +3468,57 @@ func (sS *SessionS) BiRPCV1ProcessCDR(clnt rpcclient.RpcClientConnection,
 				Event: ev}},
 		rply)
 }
+
+// SetAttributeSConnection sets the new connection to the attribute service
+// only used on reload
+func (sS *SessionS) SetAttributeSConnection(attrS rpcclient.RpcClientConnection) {
+	sS.attrS = attrS
+}
+
+// SetThresholSConnection sets the new connection to the threshold service
+// only used on reload
+func (sS *SessionS) SetThresholSConnection(thdS rpcclient.RpcClientConnection) {
+	sS.thdS = thdS
+}
+
+// SetStatSConnection sets the new connection to the stat service
+// only used on reload
+func (sS *SessionS) SetStatSConnection(stS rpcclient.RpcClientConnection) {
+	sS.statS = stS
+}
+
+// SetChargerSConnection sets the new connection to the charger service
+// only used on reload
+func (sS *SessionS) SetChargerSConnection(chS rpcclient.RpcClientConnection) {
+	sS.chargerS = chS
+}
+
+// SetRALsConnection sets the new connection to the RAL service
+// only used on reload
+func (sS *SessionS) SetRALsConnection(rls rpcclient.RpcClientConnection) {
+	sS.ralS = rls
+}
+
+// SetResourceSConnection sets the new connection to the resource service
+// only used on reload
+func (sS *SessionS) SetResourceSConnection(rS rpcclient.RpcClientConnection) {
+	sS.resS = rS
+}
+
+// SetSupplierSConnection sets the new connection to the supplier service
+// only used on reload
+func (sS *SessionS) SetSupplierSConnection(splS rpcclient.RpcClientConnection) {
+	sS.splS = splS
+}
+
+// SetCDRSConnection sets the new connection to the CDR server
+// only used on reload
+func (sS *SessionS) SetCDRSConnection(cdrS rpcclient.RpcClientConnection) {
+	sS.cdrS = cdrS
+}
+
+// SetReplicationConnections sets the new connections to the replictes sessions
+// only used on reload
+func (sS *SessionS) SetReplicationConnections(sReplConns []*SReplConn) {
+	sS.sReplConns = sReplConns
+}

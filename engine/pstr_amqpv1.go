@@ -69,7 +69,7 @@ func (pstr *AMQPv1Poster) Post(content []byte, fallbackFileName, _ string) (err 
 			break
 		}
 		// reset client and try again
-		// used in case of closed conection because of idle time
+		// used in case of closed connection because of idle time
 		if pstr.client != nil {
 			pstr.client.Close() // Make shure the connection is closed before reseting it
 		}
