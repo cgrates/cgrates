@@ -82,7 +82,7 @@ func NewMapStorageJson() (mpStorage *MapStorage, err error) {
 
 func (ms *MapStorage) Close() {}
 
-func (ms *MapStorage) Flush(ignore string) error {
+func (ms *MapStorage) Flush(_ string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	ms.dict = make(map[string][]byte)
