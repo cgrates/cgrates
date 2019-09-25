@@ -84,7 +84,13 @@ func (sts *StatService) GetIntenternalChan() (conn chan rpcclient.RpcClientConne
 
 // Reload handles the change of config
 func (sts *StatService) Reload(sp servmanager.ServiceProvider) (err error) {
+	var thdSConn rpcclient.RpcClientConnection
+	if thdSConn, err = sp.GetConnection(utils.ThresholdS, sp.GetConfig().StatSCfg().ThresholdSConns); err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.StatS, err.Error()))
+		return
+	}
 	sts.Lock()
+	sts.sts.SetThresholdConnection(thdSConn)
 	sts.sts.Reload()
 	sts.Unlock()
 	return
