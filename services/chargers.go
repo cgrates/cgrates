@@ -53,15 +53,15 @@ func (chrS *ChargerService) Start(sp servmanager.ServiceProvider, waitCache bool
 		<-sp.GetCacheS().GetPrecacheChannel(utils.CacheChargerProfiles)
 		<-sp.GetCacheS().GetPrecacheChannel(utils.CacheChargerFilterIndexes)
 	}
-	var chrSConn rpcclient.RpcClientConnection
-	if chrSConn, err = sp.GetConnection(utils.AttributeS, sp.GetConfig().ChargerSCfg().AttributeSConns); err != nil {
+	var attrSConn rpcclient.RpcClientConnection
+	if attrSConn, err = sp.GetConnection(utils.AttributeS, sp.GetConfig().ChargerSCfg().AttributeSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.ChargerS, utils.AttributeS, err.Error()))
 		return
 	}
 	chrS.Lock()
 	defer chrS.Unlock()
-	if chrS.chrS, err = engine.NewChargerService(sp.GetDM(), sp.GetFilterS(), chrSConn, sp.GetConfig()); err != nil {
+	if chrS.chrS, err = engine.NewChargerService(sp.GetDM(), sp.GetFilterS(), attrSConn, sp.GetConfig()); err != nil {
 		utils.Logger.Crit(
 			fmt.Sprintf("<%s> Could not init, error: %s",
 				utils.ChargerS, err.Error()))
@@ -83,7 +83,15 @@ func (chrS *ChargerService) GetIntenternalChan() (conn chan rpcclient.RpcClientC
 
 // Reload handles the change of config
 func (chrS *ChargerService) Reload(sp servmanager.ServiceProvider) (err error) {
-	// need to reload the connection to the attributeS
+	var attrSConn rpcclient.RpcClientConnection
+	if attrSConn, err = sp.GetConnection(utils.AttributeS, sp.GetConfig().ChargerSCfg().AttributeSConns); err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
+			utils.ChargerS, utils.AttributeS, err.Error()))
+		return
+	}
+	chrS.Lock()
+	chrS.chrS.SetAttributeConnection(attrSConn)
+	chrS.Unlock()
 	return
 }
 
