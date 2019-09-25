@@ -301,6 +301,15 @@ func (srvMngr *ServiceManager) handleReload() {
 	for {
 		select {
 		case ext := <-srvMngr.engineShutdown:
+			for srviceName, srv := range srvMngr.subsystems {
+				if !srv.IsRunning() {
+					continue
+				}
+				if err := srv.Shutdown(); err != nil {
+					utils.Logger.Err(fmt.Sprintf("<%s> Failed to shutdown subsystem <%s> because: %s",
+						utils.ServiceManager, srviceName, err))
+				}
+			}
 			srvMngr.engineShutdown <- ext
 			return
 		case <-srvMngr.GetConfig().GetReloadChan(config.ATTRIBUTE_JSN):

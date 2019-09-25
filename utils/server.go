@@ -32,6 +32,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"reflect"
+	"strings"
 	"sync"
 	"time"
 
@@ -44,17 +45,19 @@ func NewServer() (s *Server) {
 	s = new(Server)
 	s.httpMux = http.NewServeMux()
 	s.httpsMux = http.NewServeMux()
+	s.stopbiRPCServer = make(chan struct{}, 1)
 	return s
 }
 
 type Server struct {
-	rpcEnabled  bool
-	httpEnabled bool
-	birpcSrv    *rpc2.Server
 	sync.RWMutex
-	httpsMux     *http.ServeMux
-	httpMux      *http.ServeMux
-	isDispatched bool
+	rpcEnabled      bool
+	httpEnabled     bool
+	birpcSrv        *rpc2.Server
+	stopbiRPCServer chan struct{} // used in order to fully stop the biRPC
+	httpsMux        *http.ServeMux
+	httpMux         *http.ServeMux
+	isDispatched    bool
 }
 
 func (s *Server) SetDispatched() {
@@ -287,27 +290,45 @@ func (s *Server) ServeHTTP(addr string, jsonRPCURL string, wsRPCURL string,
 	exitChan <- true
 }
 
-func (s *Server) ServeBiJSON(addr string, onConn func(*rpc2.Client), onDis func(*rpc2.Client)) {
+// ServeBiJSON create a gorutine to listen and serve as BiRPC server
+func (s *Server) ServeBiJSON(addr string, onConn func(*rpc2.Client), onDis func(*rpc2.Client)) (err error) {
 	s.RLock()
 	isNil := s.birpcSrv == nil
 	s.RUnlock()
 	if isNil {
-		return
+		return fmt.Errorf("BiRPCServer should not be nil")
 	}
-	lBiJSON, e := net.Listen("tcp", addr)
-	if e != nil {
-		log.Fatal("ServeBiJSON listen error:", e)
+	var lBiJSON net.Listener
+	lBiJSON, err = net.Listen("tcp", addr)
+	if err != nil {
+		log.Fatal("ServeBiJSON listen error:", err)
+		return
 	}
 	s.birpcSrv.OnConnect(onConn)
 	s.birpcSrv.OnDisconnect(onDis)
 	Logger.Info(fmt.Sprintf("Starting CGRateS BiJSON server at <%s>", addr))
-	for {
-		conn, err := lBiJSON.Accept()
-		if err != nil {
-			log.Fatal(err)
+	go func(l net.Listener) {
+		for {
+			conn, err := l.Accept()
+			if err != nil {
+				if strings.Contains(err.Error(), "use of closed network connection") { // if closed by us do not log
+					return
+				}
+				s.stopbiRPCServer <- struct{}{}
+				log.Fatal(err)
+				return // stop if we get Accept error
+			}
+			go s.birpcSrv.ServeCodec(rpc2_jsonrpc.NewJSONCodec(conn))
 		}
-		go s.birpcSrv.ServeCodec(rpc2_jsonrpc.NewJSONCodec(conn))
-	}
+	}(lBiJSON)
+	<-s.stopbiRPCServer // wait until server is stoped to close the listener
+	lBiJSON.Close()
+	return
+}
+
+// StopBiRPC stops the go rutine create with ServeBiJSON
+func (s *Server) StopBiRPC() {
+	s.stopbiRPCServer <- struct{}{}
 }
 
 // rpcRequest represents a RPC request.
