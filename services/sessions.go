@@ -43,6 +43,10 @@ type SessionService struct {
 	rpc      *v1.SMGenericV1
 	rpcv1    *v1.SessionSv1
 	connChan chan rpcclient.RpcClientConnection
+
+	// in order to stop the bircp server if necesary
+	bircpEnabled bool
+	server       *utils.Server
 }
 
 // Start should handle the sercive start
@@ -133,6 +137,8 @@ func (smg *SessionService) Start(sp servmanager.ServiceProvider, waitCache bool)
 	}
 	// Register BiRpc handlers
 	if sp.GetConfig().SessionSCfg().ListenBijson != "" {
+		smg.bircpEnabled = true
+		smg.server = sp.GetServer()
 		for method, handler := range smg.rpc.Handlers() {
 			sp.GetServer().BiRPCRegisterName(method, handler)
 		}
@@ -140,7 +146,14 @@ func (smg *SessionService) Start(sp servmanager.ServiceProvider, waitCache bool)
 			sp.GetServer().BiRPCRegisterName(method, handler)
 		}
 		// run this in it's own gorutine
-		go sp.GetServer().ServeBiJSON(sp.GetConfig().SessionSCfg().ListenBijson, smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect)
+		go func() {
+			if err := sp.GetServer().ServeBiJSON(sp.GetConfig().SessionSCfg().ListenBijson, smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<%s> serve BiRPC error: %s!", utils.SessionS, err))
+				smg.Lock()
+				smg.bircpEnabled = false
+				smg.Unlock()
+			}
+		}()
 	}
 	return
 }
@@ -230,6 +243,10 @@ func (smg *SessionService) Shutdown() (err error) {
 	defer smg.Unlock()
 	if err = smg.sm.Shutdown(); err != nil {
 		return
+	}
+	if smg.bircpEnabled {
+		smg.server.StopBiRPC()
+		smg.bircpEnabled = false
 	}
 	smg.sm = nil
 	smg.rpc = nil
