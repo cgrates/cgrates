@@ -354,6 +354,7 @@ func TestCGRConfigReloadRALs(t *testing.T) {
 				Transport: utils.MetaJSONrpc,
 			},
 		},
+		MaxIncrements: 1000000,
 	}
 	if !reflect.DeepEqual(expAttr, cfg.RalsCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.RalsCfg()))
