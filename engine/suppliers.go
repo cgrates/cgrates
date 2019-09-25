@@ -616,7 +616,7 @@ func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *Sorted
 	return
 }
 
-// V1GetSupplierProfiles returns the list of valid supplier profiles
+// V1GetSupplierProfilesForEvent returns the list of valid supplier profiles
 func (spS *SupplierService) V1GetSupplierProfilesForEvent(args *utils.CGREventWithArgDispatcher, reply *[]*SupplierProfile) (err error) {
 	if missing := utils.MissingStructFields(args.CGREvent, []string{utils.Tenant, utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)

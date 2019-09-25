@@ -90,7 +90,7 @@ func (schS *SchedulerService) GetIntenternalChan() (conn chan rpcclient.RpcClien
 func (schS *SchedulerService) Reload(sp servmanager.ServiceProvider) (err error) {
 	schS.Lock()
 	schS.schS.Reload()
-	defer schS.Unlock()
+	schS.Unlock()
 	return
 }
 
