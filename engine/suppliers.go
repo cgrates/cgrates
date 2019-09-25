@@ -633,3 +633,21 @@ func (spS *SupplierService) V1GetSupplierProfilesForEvent(args *utils.CGREventWi
 	*reply = sPs
 	return
 }
+
+// SetAttributeSConnection sets the new conection to the attribute service
+// only used on reload
+func (spS *SupplierService) SetAttributeSConnection(attrS rpcclient.RpcClientConnection) {
+	spS.attributeS = attrS
+}
+
+// SetStatSConnection sets the new conection to the stat service
+// only used on reload
+func (spS *SupplierService) SetStatSConnection(stS rpcclient.RpcClientConnection) {
+	spS.statS = stS
+}
+
+// SetResourceSConnection sets the new conection to the resource service
+// only used on reload
+func (spS *SupplierService) SetResourceSConnection(rS rpcclient.RpcClientConnection) {
+	spS.resourceS = rS
+}
