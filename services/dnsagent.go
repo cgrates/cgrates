@@ -37,8 +37,7 @@ func NewDNSAgent() servmanager.Service {
 // DNSAgent implements Agent interface
 type DNSAgent struct {
 	sync.RWMutex
-	dns      *agents.DNSAgent
-	connChan chan rpcclient.RpcClientConnection
+	dns *agents.DNSAgent
 }
 
 // Start should handle the sercive start
@@ -104,7 +103,6 @@ func (dns *DNSAgent) GetIntenternalChan() (conn chan rpcclient.RpcClientConnecti
 // Reload handles the change of config
 func (dns *DNSAgent) Reload(sp servmanager.ServiceProvider) (err error) {
 	var sS rpcclient.RpcClientConnection
-	utils.Logger.Info(fmt.Sprintf("starting %s service", utils.DNSAgent))
 	if !sp.GetConfig().DispatcherSCfg().Enabled && sp.GetConfig().DNSAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
 		// sSInternal = true
 		srvSessionS, has := sp.GetService(utils.SessionS)

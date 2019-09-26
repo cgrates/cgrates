@@ -362,6 +362,7 @@ func (sm *FSsessions) disconnectSession(connIdx int, uuid, redirectNr, notify st
 	return nil
 }
 
+// Shutdown stops all connected fsock connections
 func (sm *FSsessions) Shutdown() (err error) {
 	for connIdx, fSock := range sm.conns {
 		if !fSock.Connected() {
@@ -372,6 +373,10 @@ func (sm *FSsessions) Shutdown() (err error) {
 		if _, err = fSock.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype *prepaid"); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Error on calls shutdown: %s, connection index: %v", utils.FreeSWITCHAgent, err.Error(), connIdx))
 		}
+		if err = fSock.Disconnect(); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> Error on disconnect: %s, connection index: %v", utils.FreeSWITCHAgent, err.Error(), connIdx))
+		}
+
 	}
 	return
 }
@@ -381,7 +386,7 @@ func (sm *FSsessions) Call(serviceMethod string, args interface{}, reply interfa
 	return utils.RPCCall(sm, serviceMethod, args, reply)
 }
 
-// Internal method to disconnect session in FreeSWITCH
+// V1DisconnectSession internal method to disconnect session in FreeSWITCH
 func (fsa *FSsessions) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) (err error) {
 	ev := engine.NewMapEvent(args.EventStart)
 	channelID := ev.GetStringIgnoreErrors(utils.OriginID)
@@ -433,4 +438,17 @@ func (fsa *FSsessions) V1GetActiveSessionIDs(ignParam string,
 	}
 	*sessionIDs = sIDs
 	return
+}
+
+// SetSessionSConnection sets the new connection to the threshold service
+// only used on reload
+func (sm *FSsessions) SetSessionSConnection(sS rpcclient.RpcClientConnection) {
+	sm.sS = sS
+}
+
+// Reload recreates the connection buffers
+// only used on reload
+func (sm *FSsessions) Reload() {
+	sm.conns = make([]*fsock.FSock, len(sm.cfg.EventSocketConns))
+	sm.senderPools = make([]*fsock.FSockPool, len(sm.cfg.EventSocketConns))
 }
