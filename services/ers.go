@@ -31,8 +31,7 @@ import (
 // NewEventReaderService returns the EventReader Service
 func NewEventReaderService() servmanager.Service {
 	return &EventReaderService{
-		connChan: make(chan rpcclient.RpcClientConnection, 1),
-		rldChan:  make(chan struct{}, 1),
+		rldChan: make(chan struct{}, 1),
 	}
 }
 
@@ -42,7 +41,6 @@ type EventReaderService struct {
 	ers      *ers.ERService
 	rldChan  chan struct{}
 	stopChan chan struct{}
-	connChan chan rpcclient.RpcClientConnection
 }
 
 // Start should handle the sercive start
@@ -77,7 +75,7 @@ func (erS *EventReaderService) Start(sp servmanager.ServiceProvider, waitCache b
 
 // GetIntenternalChan returns the internal connection chanel
 func (erS *EventReaderService) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
-	return erS.connChan
+	return nil
 }
 
 // Reload handles the change of config

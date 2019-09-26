@@ -280,6 +280,9 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 	if srvMngr.GetConfig().ERsCfg().Enabled {
 		go srvMngr.startService(utils.ERs)
 	}
+	if srvMngr.GetConfig().DNSAgentCfg().Enabled {
+		go srvMngr.startService(utils.DNSAgent)
+	}
 	// startServer()
 	return
 }
@@ -301,7 +304,7 @@ func (srvMngr *ServiceManager) handleReload() {
 	for {
 		select {
 		case ext := <-srvMngr.engineShutdown:
-			for srviceName, srv := range srvMngr.subsystems {
+			for srviceName, srv := range srvMngr.subsystems { // gracefully stop all running subsystems
 				if !srv.IsRunning() {
 					continue
 				}
@@ -354,6 +357,10 @@ func (srvMngr *ServiceManager) handleReload() {
 			}
 		case <-srvMngr.GetConfig().GetReloadChan(config.ERsJson):
 			if err = srvMngr.reloadService(utils.ERs, srvMngr.GetConfig().ERsCfg().Enabled); err != nil {
+				return
+			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.DNSAgentJson):
+			if err = srvMngr.reloadService(utils.DNSAgent, srvMngr.GetConfig().DNSAgentCfg().Enabled); err != nil {
 				return
 			}
 		}

@@ -35,6 +35,7 @@ import (
 func NewDNSAgent(cgrCfg *config.CGRConfig, fltrS *engine.FilterS,
 	sS rpcclient.RpcClientConnection) (da *DNSAgent, err error) {
 	da = &DNSAgent{cgrCfg: cgrCfg, fltrS: fltrS, sS: sS}
+	err = da.initDNSServer()
 	return
 }
 
@@ -78,30 +79,16 @@ func (da *DNSAgent) initDNSServer() (err error) {
 func (da *DNSAgent) ListenAndServe() (err error) {
 	utils.Logger.Info(fmt.Sprintf("<%s> start listening on <%s:%s>",
 		utils.DNSAgent, da.cgrCfg.DNSAgentCfg().ListenNet, da.cgrCfg.DNSAgentCfg().Listen))
-	errChan := make(chan error, 1)
-	rldChan := da.cgrCfg.GetReloadChan(config.DNSAgentJson)
+	return da.server.ListenAndServe()
+}
 
-	if err = da.initDNSServer(); err != nil {
+// Reload will stop the dns server and reinitialize it but will not start the server again
+// this is in order to monitor if we receive error on ListenAndServe
+func (da *DNSAgent) Reload() (err error) {
+	if err = da.Shutdown(); err != nil {
 		return
 	}
-	listenAndServe := func() {
-		errChan <- da.server.ListenAndServe()
-	}
-	go listenAndServe()
-	for {
-		select {
-		case err = <-errChan:
-			return
-		case <-rldChan:
-			if err = da.Shutdown(); err != nil {
-				return
-			}
-			if err = da.initDNSServer(); err != nil {
-				return
-			}
-			go listenAndServe() //restart the gorutine
-		}
-	}
+	return da.initDNSServer()
 }
 
 // handleMessage is the entry point of all DNS requests
