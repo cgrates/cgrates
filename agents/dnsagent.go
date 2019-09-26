@@ -82,13 +82,16 @@ func (da *DNSAgent) ListenAndServe() (err error) {
 	return da.server.ListenAndServe()
 }
 
-// Reload will stop the dns server and reinitialize it but will not start the server again
+// Reload will reinitialize the server
 // this is in order to monitor if we receive error on ListenAndServe
 func (da *DNSAgent) Reload() (err error) {
-	if err = da.Shutdown(); err != nil {
-		return
-	}
 	return da.initDNSServer()
+}
+
+// SetSessionSConnection sets the new connection to the threshold service
+// only used on reload
+func (da *DNSAgent) SetSessionSConnection(sS rpcclient.RpcClientConnection) {
+	da.sS = sS
 }
 
 // handleMessage is the entry point of all DNS requests

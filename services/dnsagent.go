@@ -103,14 +103,37 @@ func (dns *DNSAgent) GetIntenternalChan() (conn chan rpcclient.RpcClientConnecti
 
 // Reload handles the change of config
 func (dns *DNSAgent) Reload(sp servmanager.ServiceProvider) (err error) {
+	var sS rpcclient.RpcClientConnection
+	utils.Logger.Info(fmt.Sprintf("starting %s service", utils.DNSAgent))
+	if !sp.GetConfig().DispatcherSCfg().Enabled && sp.GetConfig().DNSAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
+		// sSInternal = true
+		srvSessionS, has := sp.GetService(utils.SessionS)
+		if !has {
+			utils.Logger.Err(fmt.Sprintf("<%s> Failed to find needed subsystem <%s>",
+				utils.DNSAgent, utils.SessionS))
+			return utils.ErrNotFound
+		}
+		sSIntConn := <-srvSessionS.GetIntenternalChan()
+		srvSessionS.GetIntenternalChan() <- sSIntConn
+		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
+	} else {
+		if sS, err = sp.GetConnection(utils.SessionS, sp.GetConfig().DNSAgentCfg().SessionSConns); err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
+				utils.DNSAgent, utils.SessionS, err.Error()))
+			return
+		}
+	}
+	if err = dns.Shutdown(); err != nil {
+		return
+	}
 	dns.Lock()
 	defer dns.Unlock()
+	dns.dns.SetSessionSConnection(sS)
 	if err = dns.dns.Reload(); err != nil {
-		dns.dns = nil // make sure we mark this service as stoped to not close server twice
-		return err
+		return
 	}
 	go func() {
-		if err = dns.dns.ListenAndServe(); err != nil {
+		if err := dns.dns.ListenAndServe(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
 			sp.GetExitChan() <- true // stop the engine here
 		}
