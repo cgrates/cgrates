@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"strings"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -29,7 +31,22 @@ func (ms *MapStorage) GetTpIds(colName string) (ids []string, err error) {
 
 func (ms *MapStorage) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds,
 	filters map[string]string, paginator *utils.PaginatorWithSearch) (ids []string, err error) {
-	return nil, utils.ErrNotImplemented
+	key := table + utils.CONCATENATED_KEY_SEP + tpid
+	fullIDs, _ := ms.GetKeysForPrefix(key)
+	for _, fullID := range fullIDs {
+		var buildedID string
+		sliceID := strings.Split(fullID[len(key)+1:], utils.CONCATENATED_KEY_SEP)
+
+		for i := 0; i < len(distinct); i++ {
+			if len(buildedID) == 0 {
+				buildedID += sliceID[len(sliceID)-i-1]
+			} else {
+				buildedID += utils.CONCATENATED_KEY_SEP + sliceID[len(sliceID)-i+1]
+			}
+		}
+		ids = append(ids, buildedID)
+	}
+	return
 }
 
 func (ms *MapStorage) GetTPTimings(tpid, id string) (timings []*utils.ApierTPTiming, err error) {
@@ -503,8 +520,6 @@ func (ms *MapStorage) RemTpData(table, tpid string, args map[string]string) (err
 	if table == utils.EmptyString {
 		return ms.Flush(utils.EmptyString)
 	}
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
 	key := table + utils.CONCATENATED_KEY_SEP + tpid
 	if args != nil {
 		for _, val := range args {
@@ -512,9 +527,11 @@ func (ms *MapStorage) RemTpData(table, tpid string, args map[string]string) (err
 		}
 	}
 	ids, _ := ms.GetKeysForPrefix(key)
+	ms.mu.Lock()
 	for _, id := range ids {
 		delete(ms.dict, id)
 	}
+	ms.mu.Unlock()
 	return
 }
 

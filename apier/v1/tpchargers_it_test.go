@@ -74,6 +74,13 @@ func TestTPChrgsITMongo(t *testing.T) {
 	}
 }
 
+func TestTPChrgsITMapStorage(t *testing.T) {
+	tpChrgsConfigDIR = "tutinternal"
+	for _, stest := range sTestsTPChrgs {
+		t.Run(tpChrgsConfigDIR, stest)
+	}
+}
+
 func testTPChrgsInitCfg(t *testing.T) {
 	var err error
 	tpChrgsCfgPath = path.Join(tpChrgsDataDir, "conf", "samples", tpChrgsConfigDIR)

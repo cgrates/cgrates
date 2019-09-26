@@ -532,8 +532,8 @@ func (ms *MapStorage) SetAccount(ub *Account) (err error) {
 
 func (ms *MapStorage) RemoveAccount(key string) (err error) {
 	ms.mu.Lock()
-	defer ms.mu.Unlock()
 	delete(ms.dict, utils.ACCOUNT_PREFIX+key)
+	ms.mu.Unlock()
 	return
 }
 
