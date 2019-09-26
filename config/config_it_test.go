@@ -510,6 +510,38 @@ func TestCGRConfigReloadERs(t *testing.T) {
 	}
 }
 
+func TestCGRConfigReloadDNSAgent(t *testing.T) {
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg.SessionSCfg().Enabled = true
+	var reply string
+	if err = cfg.V1ReloadConfig(&ConfigReloadWithArgDispatcher{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "dnsagent_reload"),
+		Section: DNSAgentJson,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK received: %s", reply)
+	}
+	expAttr := &DNSAgentCfg{
+		Enabled:   true,
+		Listen:    ":2053",
+		ListenNet: "udp",
+		SessionSConns: []*RemoteHost{
+			&RemoteHost{
+				Address: utils.MetaInternal,
+			},
+		},
+		// Timezone          string
+		// RequestProcessors []*RequestProcessor
+	}
+	if !reflect.DeepEqual(expAttr, cfg.DNSAgentCfg()) {
+		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.DNSAgentCfg()))
+	}
+}
+
 func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
 	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out"} {
 		if err := os.RemoveAll(dir); err != nil {
