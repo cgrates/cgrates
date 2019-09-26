@@ -39,7 +39,6 @@ const (
 	FreeSWITCHAgentJSN = "freeswitch_agent"
 	KamailioAgentJSN   = "kamailio_agent"
 	AsteriskAgentJSN   = "asterisk_agent"
-	FS_JSN             = "freeswitch"
 	OSIPS_JSN          = "opensips"
 	DA_JSN             = "diameter_agent"
 	RA_JSN             = "radius_agent"

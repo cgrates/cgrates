@@ -287,53 +287,6 @@ func startRadiusAgent(internalSMGChan, internalDispatcherSChan chan rpcclient.Rp
 	exitChan <- true
 }
 
-func startFsAgent(internalSMGChan, internalDispatcherSChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
-	var err error
-	var sS rpcclient.RpcClientConnection
-	var sSInternal bool
-	utils.Logger.Info("Starting FreeSWITCH agent")
-	intSMGChan := internalSMGChan
-	if cfg.DispatcherSCfg().Enabled {
-		intSMGChan = internalDispatcherSChan
-	}
-	if !cfg.DispatcherSCfg().Enabled && cfg.FsAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
-		sSInternal = true
-		sSIntConn := <-internalSMGChan
-		internalSMGChan <- sSIntConn
-		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
-	} else {
-		sS, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.FsAgentCfg().SessionSConns, intSMGChan, false)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.FreeSWITCHAgent, utils.SessionS, err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	sm := agents.NewFSsessions(cfg.FsAgentCfg(), sS, cfg.GeneralCfg().DefaultTimezone)
-	if sSInternal { // bidirectional client backwards connection
-		sS.(*utils.BiRPCInternalClient).SetClientConn(sm)
-		var rply string
-		if err := sS.Call(utils.SessionSv1RegisterInternalBiJSONConn,
-			utils.EmptyString, &rply); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.FreeSWITCHAgent, utils.SessionS, err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if err = sm.Connect(); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
-	}
-
-	exitChan <- true
-}
-
 func startKamAgent(internalSMGChan, internalDispatcherSChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
 	var err error
 	var sS rpcclient.RpcClientConnection
@@ -945,7 +898,8 @@ func main() {
 	smg := services.NewSessionService()
 	srvManager.AddService(chS, attrS, chrS, tS, stS, reS, supS, schS, cdrS, rals, smg,
 		services.NewEventReaderService(),
-		services.NewDNSAgent())
+		services.NewDNSAgent(),
+		services.NewFreeswitchAgent())
 	internalAttributeSChan := attrS.GetIntenternalChan()
 	internalChargerSChan := chrS.GetIntenternalChan()
 	internalThresholdSChan := tS.GetIntenternalChan()
@@ -996,11 +950,6 @@ func main() {
 
 	// Start CDRC components if necessary
 	go startCdrcs(internalCdrSChan, internalRaterChan, internalDispatcherSChan, filterSChan, exitChan)
-
-	// Start FreeSWITCHAgent
-	if cfg.FsAgentCfg().Enabled {
-		go startFsAgent(internalSMGChan, internalDispatcherSChan, exitChan)
-	}
 
 	// Start SM-Kamailio
 	if cfg.KamAgentCfg().Enabled {

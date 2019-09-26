@@ -1189,8 +1189,11 @@ func (cfg *CGRConfig) SessionSCfg() *SessionSCfg {
 	return cfg.sessionSCfg
 }
 
-func (self *CGRConfig) FsAgentCfg() *FsAgentCfg {
-	return self.fsAgentCfg
+// FsAgentCfg returns the config for FsAgent
+func (cfg *CGRConfig) FsAgentCfg() *FsAgentCfg {
+	cfg.lks[FreeSWITCHAgentJSN].Lock()
+	defer cfg.lks[FreeSWITCHAgentJSN].Unlock()
+	return cfg.fsAgentCfg
 }
 
 func (self *CGRConfig) KamAgentCfg() *KamAgentCfg {
@@ -1342,7 +1345,7 @@ func (cfg *CGRConfig) V1GetConfigSection(args *StringWithArgDispatcher, reply *m
 		jsonString = utils.ToJSON(cfg.CdrsCfg())
 	case SessionSJson:
 		jsonString = utils.ToJSON(cfg.SessionSCfg())
-	case FS_JSN:
+	case FreeSWITCHAgentJSN:
 		jsonString = utils.ToJSON(cfg.FsAgentCfg())
 	case KamailioAgentJSN:
 		jsonString = utils.ToJSON(cfg.KamAgentCfg())
@@ -1542,6 +1545,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case FreeSWITCHAgentJSN:
+		cfg.rldChans[FreeSWITCHAgentJSN] <- struct{}{}
 		if !fall {
 			break
 		}
