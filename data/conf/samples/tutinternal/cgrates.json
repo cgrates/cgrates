@@ -1,0 +1,122 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"log_level": 7,
+	"reply_timeout": "50s",
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "*internal",						// data_db type: <redis|mongo>
+},
+
+"stor_db": {
+	"db_type": "*internal",
+},
+
+
+"rals": {
+	"enabled": true,
+	"thresholds_conns": [
+		{"address": "*internal"},
+	],
+},
+
+
+"scheduler": {
+	"enabled": true,
+	"cdrs_conns": [
+		{"address": "*internal"},
+	],
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"chargers_conns":[
+		{"address": "*internal"},
+	],
+},
+
+
+"attributes": {
+	"enabled": true,
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": [
+		{"address": "*internal"},
+	],
+},
+
+
+"resources": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"stats": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
+},
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "1s",
+},
+
+
+"suppliers": {
+	"enabled": true,
+	"prefix_indexed_fields":["Destination"],
+	"stats_conns": [
+		{"address": "*internal"},
+	],
+	"resources_conns": [
+		{"address": "*internal"},
+	],
+},
+
+
+"sessions": {
+	"enabled": true,
+	"suppliers_conns": [
+		{"address": "*internal"}
+	],
+	"resources_conns": [
+		{"address": "*internal"}
+	],
+	"attributes_conns": [
+		{"address": "*internal"}
+	],
+	"rals_conns": [
+		{"address": "*internal"},
+	],
+	"cdrs_conns": [
+		{"address": "*internal"}
+	],
+	"chargers_conns": [
+		{"address": "*internal"},
+	],
+},
+
+
+}

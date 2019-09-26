@@ -73,6 +73,13 @@ func TestFilterITMongo(t *testing.T) {
 	}
 }
 
+func TestFilterITInternal(t *testing.T) {
+	filterConfigDIR = "tutinternal"
+	for _, stest := range sTestsFilter {
+		t.Run(filterConfigDIR, stest)
+	}
+}
+
 func testFilterInitCfg(t *testing.T) {
 	var err error
 	filterCfgPath = path.Join(filterDataDir, "conf", "samples", filterConfigDIR)
