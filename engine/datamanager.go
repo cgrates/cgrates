@@ -804,7 +804,7 @@ func (dm *DataManager) SetSharedGroup(sg *SharedGroup,
 }
 
 func (dm *DataManager) RemoveSharedGroup(id, transactionID string) (err error) {
-	if err = dm.DataDB().RemoveSharedGroupDrv(id, transactionID); err != nil {
+	if err = dm.DataDB().RemoveSharedGroupDrv(id); err != nil {
 		return
 	}
 	Cache.Remove(utils.CacheSharedGroups, id,

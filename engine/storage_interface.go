@@ -66,7 +66,7 @@ type DataDB interface {
 	RemoveActionsDrv(string) error
 	GetSharedGroupDrv(string) (*SharedGroup, error)
 	SetSharedGroupDrv(*SharedGroup) error
-	RemoveSharedGroupDrv(id, transactionID string) (err error)
+	RemoveSharedGroupDrv(id string) (err error)
 	GetActionTriggersDrv(string) (ActionTriggers, error)
 	SetActionTriggersDrv(string, ActionTriggers) error
 	RemoveActionTriggersDrv(string) error
