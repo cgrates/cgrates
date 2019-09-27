@@ -725,13 +725,8 @@ func (rs *RedisStorage) SetSharedGroupDrv(sg *SharedGroup) (err error) {
 	return
 }
 
-func (rs *RedisStorage) RemoveSharedGroupDrv(id,
-	transactionID string) (err error) {
-	cCommit := cacheCommit(transactionID)
-	err = rs.Cmd(redis_DEL, utils.SHARED_GROUP_PREFIX+id).Err
-	Cache.Remove(utils.CacheSharedGroups, id, cCommit,
-		transactionID)
-	return err
+func (rs *RedisStorage) RemoveSharedGroupDrv(id string) (err error) {
+	return rs.Cmd(redis_DEL, utils.SHARED_GROUP_PREFIX+id).Err
 }
 
 func (rs *RedisStorage) GetAccount(key string) (*Account, error) {

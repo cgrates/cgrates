@@ -1129,7 +1129,7 @@ func (ms *MongoStorage) SetSharedGroupDrv(sg *SharedGroup) (err error) {
 	})
 }
 
-func (ms *MongoStorage) RemoveSharedGroupDrv(id, transactionID string) (err error) {
+func (ms *MongoStorage) RemoveSharedGroupDrv(id string) (err error) {
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(ColShg).DeleteOne(sctx, bson.M{"id": id})
 		if dr.DeletedCount == 0 {

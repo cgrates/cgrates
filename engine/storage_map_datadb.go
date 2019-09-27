@@ -484,7 +484,7 @@ func (ms *MapStorage) SetSharedGroupDrv(sg *SharedGroup) (err error) {
 	return
 }
 
-func (ms *MapStorage) RemoveSharedGroupDrv(id, transactionID string) (err error) {
+func (ms *MapStorage) RemoveSharedGroupDrv(id string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	delete(ms.dict, utils.SHARED_GROUP_PREFIX+id)
