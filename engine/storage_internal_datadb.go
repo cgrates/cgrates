@@ -21,6 +21,7 @@ package engine
 import (
 	"bytes"
 	"compress/zlib"
+	"errors"
 	"io/ioutil"
 
 	"github.com/cgrates/cgrates/config"
@@ -102,13 +103,14 @@ func (iDB *InternalDB) HasDataDrv(category, subject, tenant string) (bool, error
 	switch category {
 	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
 		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX:
-		return iDB.db.HasItem(utils.CachePrefixToInstance[prefix], subject), nil
+		return iDB.db.HasItem(utils.CachePrefixToInstance[category], subject), nil
 	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
 		utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
 		utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix,
 		utils.ChargerProfilePrefix, utils.DispatcherProfilePrefix, utils.DispatcherHostPrefix:
-		return iDB.db.HasItem(utils.CachePrefixToInstance[prefix], utils.ConcatenatedKey(tenant, subject)), nil
+		return iDB.db.HasItem(utils.CachePrefixToInstance[category], utils.ConcatenatedKey(tenant, subject)), nil
 	}
+	return false, errors.New("Unsupported HasData category")
 }
 
 func (iDB *InternalDB) GetRatingPlanDrv(id string) (rp *RatingPlan, err error) {
