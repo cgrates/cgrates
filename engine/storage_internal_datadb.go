@@ -60,15 +60,8 @@ func (iDB *InternalDB) SelectDatabase(dbName string) (err error) {
 	return nil
 }
 
-func (iDB *InternalDB) GetKeysForPrefix(string) ([]string, error) {
-	// keysForPrefix := make([]string, 0)
-	// for key := range ms.dict {
-	// 	if strings.HasPrefix(key, prefix) {
-	// 		keysForPrefix = append(keysForPrefix, key)
-	// 	}
-	// }
-	// iDB.cache.GetItemIDs(chID, prfx)
-	return nil, utils.ErrNotImplemented
+func (iDB *InternalDB) GetKeysForPrefix(prefix string) ([]string, error) {
+	return iDB.db.GetItemIDs(utils.CachePrefixToInstance[prefix], utils.EmptyString), nil
 }
 
 func (iDB *InternalDB) RebuildReverseForPrefix(string) (err error) {
@@ -96,11 +89,26 @@ func (iDB *InternalDB) GetStorageType() string {
 }
 
 func (iDB *InternalDB) IsDBEmpty() (resp bool, err error) {
-	return false, utils.ErrNotImplemented
+	for cacheInstance, _ := range utils.CacheInstanceToPrefix {
+		if len(iDB.db.GetItemIDs(cacheInstance, utils.EmptyString)) != 0 {
+			return false, nil
+		}
+	}
+
+	return true, nil
 }
 
-func (iDB *InternalDB) HasDataDrv(string, string, string) (bool, error) {
-	return false, utils.ErrNotImplemented
+func (iDB *InternalDB) HasDataDrv(category, subject, tenant string) (bool, error) {
+	switch category {
+	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX,
+		utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX:
+		return iDB.db.HasItem(utils.CachePrefixToInstance[prefix], subject), nil
+	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
+		utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
+		utils.FilterPrefix, utils.SupplierProfilePrefix, utils.AttributeProfilePrefix,
+		utils.ChargerProfilePrefix, utils.DispatcherProfilePrefix, utils.DispatcherHostPrefix:
+		return iDB.db.HasItem(utils.CachePrefixToInstance[prefix], utils.ConcatenatedKey(tenant, subject)), nil
+	}
 }
 
 func (iDB *InternalDB) GetRatingPlanDrv(id string) (rp *RatingPlan, err error) {
@@ -145,16 +153,24 @@ func (iDB *InternalDB) RemoveRatingPlanDrv(id string) (err error) {
 	return
 }
 
-func (iDB *InternalDB) GetRatingProfileDrv(string) (*RatingProfile, error) {
-	return nil, utils.ErrNotImplemented
+func (iDB *InternalDB) GetRatingProfileDrv(id string) (*RatingProfile, error) {
+	x, ok := iDB.db.Get(utils.CacheRatingProfiles, id)
+	if ok && x == nil {
+		return nil, utils.ErrNotFound
+	}
+	return x.(*RatingProfile), nil
 }
 
-func (iDB *InternalDB) SetRatingProfileDrv(*RatingProfile) (err error) {
-	return utils.ErrNotImplemented
+func (iDB *InternalDB) SetRatingProfileDrv(rp *RatingProfile) (err error) {
+	iDB.db.Set(utils.CacheRatingProfiles, rp.Id, rp, nil,
+		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	return
 }
 
-func (iDB *InternalDB) RemoveRatingProfileDrv(string) (err error) {
-	return utils.ErrNotImplemented
+func (iDB *InternalDB) RemoveRatingProfileDrv(id string) (err error) {
+	iDB.db.Remove(utils.CacheRatingProfiles, id,
+		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	return
 }
 
 func (iDB *InternalDB) GetDestination(string, bool, string) (*Destination, error) {
