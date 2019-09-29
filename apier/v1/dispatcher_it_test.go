@@ -80,6 +80,13 @@ func TestDispatcherSITMongo(t *testing.T) {
 	}
 }
 
+func TestDispatcherSITInternal(t *testing.T) {
+	dispatcherConfigDIR = "tutinternal"
+	for _, stest := range sTestsDispatcher {
+		t.Run(dispatcherConfigDIR, stest)
+	}
+}
+
 func testDispatcherSInitCfg(t *testing.T) {
 	var err error
 	dispatcherCfgPath = path.Join(*dataDir, "conf", "samples", dispatcherConfigDIR)

@@ -182,6 +182,13 @@ func TestTSV1ITMongo(t *testing.T) {
 	}
 }
 
+func TestTSV1ITInternal(t *testing.T) {
+	tSv1ConfDIR = "tutinternal"
+	for _, stest := range sTestsThresholdSV1 {
+		t.Run(tSv1ConfDIR, stest)
+	}
+}
+
 func testV1TSLoadConfig(t *testing.T) {
 	var err error
 	tSv1CfgPath = path.Join(*dataDir, "conf", "samples", tSv1ConfDIR)

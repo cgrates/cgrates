@@ -91,6 +91,13 @@ func TestChargerSITMongo(t *testing.T) {
 	}
 }
 
+func TestChargerSITInternal(t *testing.T) {
+	chargerConfigDIR = "tutinternal"
+	for _, stest := range sTestsCharger {
+		t.Run(chargerConfigDIR, stest)
+	}
+}
+
 func testChargerSInitCfg(t *testing.T) {
 	var err error
 	chargerCfgPath = path.Join(*dataDir, "conf", "samples", chargerConfigDIR)

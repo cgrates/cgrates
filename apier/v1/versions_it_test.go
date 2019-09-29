@@ -70,6 +70,14 @@ func TestVrsITMongo(t *testing.T) {
 	}
 }
 
+func TestVrsITInternal(t *testing.T) {
+	vrsConfigDIR = "tutinternal"
+	vrsStorageType = utils.INTERNAL
+	for _, stest := range sTestsVrs {
+		t.Run(vrsConfigDIR, stest)
+	}
+}
+
 func testVrsInitCfg(t *testing.T) {
 	var err error
 	vrsCfgPath = path.Join(vrsDataDir, "conf", "samples", vrsConfigDIR)

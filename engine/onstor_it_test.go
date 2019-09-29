@@ -42,41 +42,41 @@ var (
 var sTestsOnStorIT = []func(t *testing.T){
 	testOnStorITFlush,
 	testOnStorITIsDBEmpty,
-	testOnStorITCacheDestinations,
+	//testOnStorITCacheDestinations,
 	testOnStorITCacheReverseDestinations,
-	testOnStorITCacheActionPlan,
-	testOnStorITCacheAccountActionPlans,
+	// testOnStorITCacheActionPlan,
+	// testOnStorITCacheAccountActionPlans,
 
-	// ToDo: test cache flush for a prefix
-	// ToDo: testOnStorITLoadAccountingCache
-	testOnStorITHasData,
-	testOnStorITPushPop,
-	testOnStorITRatingPlan,
-	testOnStorITRatingProfile,
-	testOnStorITCRUDDestinations,
-	testOnStorITCRUDReverseDestinations,
-	testOnStorITActions,
-	testOnStorITSharedGroup,
-	testOnStorITCRUDActionPlan,
-	testOnStorITCRUDAccountActionPlans,
-	testOnStorITCRUDAccount,
-	testOnStorITResource,
-	testOnStorITResourceProfile,
-	testOnStorITTiming,
-	testOnStorITCRUDHistory,
-	testOnStorITCRUDStructVersion,
-	testOnStorITStatQueueProfile,
-	testOnStorITStatQueue,
-	testOnStorITThresholdProfile,
-	testOnStorITThreshold,
-	testOnStorITFilter,
-	testOnStorITSupplierProfile,
-	testOnStorITAttributeProfile,
-	testOnStorITFlush,
-	testOnStorITIsDBEmpty,
-	testOnStorITTestAttributeSubstituteIface,
-	testOnStorITChargerProfile,
-	testOnStorITDispatcherProfile,
+	// // ToDo: test cache flush for a prefix
+	// // ToDo: testOnStorITLoadAccountingCache
+	// testOnStorITHasData,
+	// testOnStorITPushPop,
+	// testOnStorITRatingPlan,
+	// testOnStorITRatingProfile,
+	// testOnStorITCRUDDestinations,
+	// testOnStorITCRUDReverseDestinations,
+	// testOnStorITActions,
+	// testOnStorITSharedGroup,
+	// testOnStorITCRUDActionPlan,
+	// testOnStorITCRUDAccountActionPlans,
+	// testOnStorITCRUDAccount,
+	// testOnStorITResource,
+	// testOnStorITResourceProfile,
+	// testOnStorITTiming,
+	// //testOnStorITCRUDHistory,
+	// testOnStorITCRUDStructVersion,
+	// testOnStorITStatQueueProfile,
+	// testOnStorITStatQueue,
+	// testOnStorITThresholdProfile,
+	// testOnStorITThreshold,
+	// testOnStorITFilter,
+	// testOnStorITSupplierProfile,
+	// testOnStorITAttributeProfile,
+	// testOnStorITFlush,
+	// testOnStorITIsDBEmpty,
+	// testOnStorITTestAttributeSubstituteIface,
+	// testOnStorITChargerProfile,
+	// testOnStorITDispatcherProfile,
 
 	//testOnStorITCacheActionTriggers,
 	//testOnStorITCRUDActionTriggers,
@@ -115,6 +115,14 @@ func TestOnStorITMongo(t *testing.T) {
 	onStor = NewDataManager(mgoITdb)
 	for _, stest := range sTestsOnStorIT {
 		t.Run("TestOnStorITMongo", stest)
+	}
+}
+
+func TestOnStorITInternal(t *testing.T) {
+	sleepDelay = 10 * time.Millisecond
+	onStor = NewDataManager(NewInternalDB())
+	for _, stest := range sTestsOnStorIT {
+		t.Run("TestOnStorITInternal", stest)
 	}
 }
 
@@ -250,7 +258,7 @@ func testOnStorITCacheActionPlan(t *testing.T) {
 func testOnStorITCacheAccountActionPlans(t *testing.T) {
 	acntID := utils.ConcatenatedKey("cgrates.org", "1001")
 	aAPs := []string{"PACKAGE_10_SHARED_A_5", "USE_SHARED_A", "apl_PACKAGE_1001"}
-	if err := onStor.DataDB().SetAccountActionPlans(acntID, aAPs, true); err != nil {
+	if err := onStor.SetAccountActionPlans(acntID, aAPs, true); err != nil {
 		t.Error(err)
 	}
 	if _, hasIt := Cache.Get(utils.CacheAccountActionPlans, acntID); hasIt {
@@ -1052,21 +1060,21 @@ func testOnStorITCRUDAccountActionPlans(t *testing.T) {
 	expect := []string{"PACKAGE_10_SHARED_A_5", "USE_SHARED_A", "apl_PACKAGE_1001"}
 	aAPs := []string{"PACKAGE_10_SHARED_A_5", "apl_PACKAGE_1001"}
 	aAPs2 := []string{"USE_SHARED_A"}
-	if _, rcvErr := onStor.DataDB().GetAccountActionPlans(acntID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetAccountActionPlans(acntID, false, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.DataDB().SetAccountActionPlans(acntID, aAPs, true); err != nil {
+	if err := onStor.SetAccountActionPlans(acntID, aAPs, true); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetAccountActionPlans(acntID, false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(aAPs, rcv) {
 		t.Errorf("Expecting: %v, received: %v", aAPs, rcv)
 	}
-	if err := onStor.DataDB().SetAccountActionPlans(acntID, aAPs2, false); err != nil {
+	if err := onStor.SetAccountActionPlans(acntID, aAPs2, false); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetAccountActionPlans(acntID, false, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expect, rcv) {
 		t.Errorf("Expecting: %v, received: %v", expect, rcv)
@@ -1079,7 +1087,7 @@ func testOnStorITCRUDAccountActionPlans(t *testing.T) {
 	// 	t.Error(rcvErr)
 	// }
 	//
-	if rcv, err := onStor.DataDB().GetAccountActionPlans(acntID, false, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetAccountActionPlans(acntID, true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expect, rcv) {
 		t.Errorf("Expecting: %v, received: %v", expect, rcv)
@@ -1087,18 +1095,18 @@ func testOnStorITCRUDAccountActionPlans(t *testing.T) {
 	// if err = onStor.DataDB().SelectDatabase(onStorCfg); err != nil {
 	// 	t.Error(err)
 	// }
-	if err := onStor.DataDB().RemAccountActionPlans(acntID, aAPs2); err != nil {
+	if err := onStor.RemAccountActionPlans(acntID, aAPs2); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetAccountActionPlans(acntID, true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(aAPs, rcv) {
 		t.Errorf("Expecting: %v, received: %v", aAPs, rcv)
 	}
-	if err := onStor.DataDB().RemAccountActionPlans(acntID, aAPs); err != nil {
+	if err := onStor.RemAccountActionPlans(acntID, aAPs); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.DataDB().GetAccountActionPlans(acntID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetAccountActionPlans(acntID, true, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

@@ -112,6 +112,13 @@ func TestFIdxV1ITMongo(t *testing.T) {
 	}
 }
 
+func TestFIdxV1ITInternal(t *testing.T) {
+	tSv1ConfDIR = "tutinternal"
+	for _, stest := range sTestsFilterIndexesSV1 {
+		t.Run(tSv1ConfDIR, stest)
+	}
+}
+
 func testV1FIdxLoadConfig(t *testing.T) {
 	tSv1CfgPath = path.Join(*dataDir, "conf", "samples", tSv1ConfDIR)
 	var err error

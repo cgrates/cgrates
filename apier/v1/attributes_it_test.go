@@ -101,6 +101,13 @@ func TestAttributeSITMongo(t *testing.T) {
 	}
 }
 
+func TestAttributeSITInternal(t *testing.T) {
+	alsPrfConfigDIR = "tutinternal"
+	for _, stest := range sTestsAlsPrf {
+		t.Run(alsPrfConfigDIR, stest)
+	}
+}
+
 func testAttributeSInitCfg(t *testing.T) {
 	var err error
 	alsPrfCfgPath = path.Join(alsPrfDataDir, "conf", "samples", alsPrfConfigDIR)

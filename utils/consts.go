@@ -86,6 +86,7 @@ var (
 		CacheChargerFilterIndexes:    ChargerFilterIndexes,
 		CacheDispatcherFilterIndexes: DispatcherFilterIndexes,
 		CacheLoadIDs:                 LoadIDPrefix,
+		CacheAccounts:                ACCOUNT_PREFIX,
 	}
 	CachePrefixToInstance map[string]string // will be built on init
 	PrefixToIndexCache    = map[string]string{
@@ -1147,6 +1148,7 @@ const (
 	MetaPrecaching               = "*precaching"
 	MetaReady                    = "*ready"
 	CacheLoadIDs                 = "load_ids"
+	CacheAccounts                = "*accounts"
 )
 
 // Prefix for indexing

@@ -235,7 +235,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.ACTION_PLAN_PREFIX:
 			_, err = dm.DataDB().GetActionPlan(dataID, true, utils.NonTransactional)
 		case utils.AccountActionPlansPrefix:
-			_, err = dm.DataDB().GetAccountActionPlans(dataID, true, utils.NonTransactional)
+			_, err = dm.GetAccountActionPlans(dataID, false, true, utils.NonTransactional)
 		case utils.ACTION_TRIGGER_PREFIX:
 			_, err = dm.GetActionTriggers(dataID, true, utils.NonTransactional)
 		case utils.SHARED_GROUP_PREFIX:
@@ -1388,4 +1388,48 @@ func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loa
 
 func (dm *DataManager) SetLoadIDs(loadIDs map[string]int64) error {
 	return dm.DataDB().SetLoadIDsDrv(loadIDs)
+}
+
+func (dm *DataManager) GetAccountActionPlans(acntID string,
+	cacheRead, cacheWrite bool, transactionID string) (apIDs []string, err error) {
+	if !cacheRead {
+		if x, ok := Cache.Get(utils.CacheAccountActionPlans, acntID); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.([]string), nil
+		}
+	}
+	apIDs, err = dm.DataDB().GetAccountActionPlansDrv(acntID)
+	if err != nil {
+		if err == utils.ErrNotFound && cacheWrite {
+			Cache.Set(utils.CacheAccountActionPlans, acntID, nil, nil,
+				cacheCommit(transactionID), transactionID)
+		}
+		return nil, err
+	}
+	if cacheWrite {
+		Cache.Set(utils.CacheAccountActionPlans, acntID, apIDs, nil,
+			cacheCommit(transactionID), transactionID)
+	}
+	return
+}
+
+func (dm *DataManager) SetAccountActionPlans(acntID string, aPlIDs []string, overwrite bool) (err error) {
+	if !overwrite {
+		if oldaPlIDs, err := dm.GetAccountActionPlans(acntID, true, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+			return err
+		} else {
+			for _, oldAPid := range oldaPlIDs {
+				if !utils.IsSliceMember(aPlIDs, oldAPid) {
+					aPlIDs = append(aPlIDs, oldAPid)
+				}
+			}
+		}
+	}
+	return dm.DataDB().SetAccountActionPlansDrv(acntID, aPlIDs)
+}
+
+func (dm *DataManager) RemAccountActionPlans(acntID string, aPlIDs []string) (err error) {
+	return dm.DataDB().RemAccountActionPlansDrv(acntID, aPlIDs)
 }
