@@ -612,7 +612,7 @@ func removeAccountAction(ub *Account, a *Action, acs Actions, extraData interfac
 	}
 
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		acntAPids, err := dm.DataDB().GetAccountActionPlans(accID, false, utils.NonTransactional)
+		acntAPids, err := dm.GetAccountActionPlans(accID, true, true, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			utils.Logger.Err(fmt.Sprintf("Could not get action plans: %s: %v", accID, err))
 			return 0, err
@@ -632,7 +632,7 @@ func removeAccountAction(ub *Account, a *Action, acs Actions, extraData interfac
 		if err = dm.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, acntAPids, true); err != nil {
 			return 0, err
 		}
-		if err = dm.DataDB().RemAccountActionPlans(accID, nil); err != nil {
+		if err = dm.RemAccountActionPlans(accID, nil); err != nil {
 			return 0, err
 		}
 		if err = dm.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil && err.Error() != utils.ErrNotFound.Error() {

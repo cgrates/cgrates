@@ -643,7 +643,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err 
 			return 0, utils.NewErrServerError(err)
 		}
 		for acntID := range prevAccountIDs {
-			if err := self.DataManager.DataDB().RemAccountActionPlans(acntID, []string{attrs.Id}); err != nil {
+			if err := self.DataManager.RemAccountActionPlans(acntID, []string{attrs.Id}); err != nil {
 				return 0, utils.NewErrServerError(err)
 			}
 		}
@@ -738,7 +738,7 @@ func (self *ApierV1) RemoveActionPlan(attr AttrGetActionPlan, reply *string) (er
 			return 0, err
 		}
 		for acntID := range prevAccountIDs {
-			if err := self.DataManager.DataDB().RemAccountActionPlans(acntID, []string{attr.ID}); err != nil {
+			if err := self.DataManager.RemAccountActionPlans(acntID, []string{attr.ID}); err != nil {
 				return 0, utils.NewErrServerError(err)
 			}
 		}

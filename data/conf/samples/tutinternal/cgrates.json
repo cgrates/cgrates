@@ -19,10 +19,9 @@
 	"db_type": "*internal",						// data_db type: <redis|mongo>
 },
 
-"stor_db": {
-	"db_type": "*internal",
+"stor_db": {			// for the moment use mysql as stordb until implemted all methods
+	"db_password": "CGRateS.org",
 },
-
 
 "rals": {
 	"enabled": true,

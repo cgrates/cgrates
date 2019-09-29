@@ -498,13 +498,13 @@ func (ms *MapStorage) GetAccount(key string) (ub *Account, err error) {
 	if !ok {
 		return nil, utils.ErrNotFound
 	}
+	if len(values) == 0 {
+		return nil, utils.ErrNotFound
+	}
 	ub = &Account{ID: key}
 	err = ms.ms.Unmarshal(values, &ub)
 	if err != nil {
 		return nil, err
-	}
-	if len(values) == 0 {
-		return nil, utils.ErrNotFound
 	}
 
 	return
@@ -662,45 +662,20 @@ func (ms *MapStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error
 	return
 }
 
-func (ms *MapStorage) GetAccountActionPlans(acntID string,
-	skipCache bool, transactionID string) (apIDs []string, err error) {
+func (ms *MapStorage) GetAccountActionPlansDrv(acntID string) (apIDs []string, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	if !skipCache {
-		if x, ok := Cache.Get(utils.CacheAccountActionPlans, acntID); ok {
-			if x == nil {
-				return nil, utils.ErrNotFound
-			}
-			return x.([]string), nil
-		}
-	}
 	values, ok := ms.dict[utils.AccountActionPlansPrefix+acntID]
 	if !ok {
-		Cache.Set(utils.CacheAccountActionPlans, acntID, nil, nil,
-			cacheCommit(transactionID), transactionID)
-		err = utils.ErrNotFound
-		return nil, err
+		return nil, utils.ErrNotFound
 	}
 	if err = ms.ms.Unmarshal(values, &apIDs); err != nil {
 		return nil, err
 	}
-	Cache.Set(utils.CacheAccountActionPlans, acntID, apIDs, nil,
-		cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (ms *MapStorage) SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error) {
-	if !overwrite {
-		if oldaPlIDs, err := ms.GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
-			return err
-		} else {
-			for _, oldAPid := range oldaPlIDs {
-				if !utils.IsSliceMember(apIDs, oldAPid) {
-					apIDs = append(apIDs, oldAPid)
-				}
-			}
-		}
-	}
+func (ms *MapStorage) SetAccountActionPlansDrv(acntID string, apIDs []string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(apIDs)
@@ -708,17 +683,16 @@ func (ms *MapStorage) SetAccountActionPlans(acntID string, apIDs []string, overw
 		return err
 	}
 	ms.dict[utils.AccountActionPlansPrefix+acntID] = result
-
 	return
 }
 
-func (ms *MapStorage) RemAccountActionPlans(acntID string, apIDs []string) (err error) {
+func (ms *MapStorage) RemAccountActionPlansDrv(acntID string, apIDs []string) (err error) {
 	key := utils.AccountActionPlansPrefix + acntID
 	if len(apIDs) == 0 {
 		delete(ms.dict, key)
 		return
 	}
-	oldaPlIDs, err := ms.GetAccountActionPlans(acntID, true, utils.NonTransactional)
+	oldaPlIDs, err := ms.GetAccountActionPlansDrv(acntID)
 	if err != nil {
 		return err
 	}

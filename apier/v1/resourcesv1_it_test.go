@@ -80,6 +80,13 @@ func TestRsV1ITMongo(t *testing.T) {
 	}
 }
 
+func TestRsV1ITInternal(t *testing.T) {
+	rlsV1ConfDIR = "tutinternal"
+	for _, stest := range sTestsRLSV1 {
+		t.Run(rlsV1ConfDIR, stest)
+	}
+}
+
 func testV1RsLoadConfig(t *testing.T) {
 	var err error
 	rlsV1CfgPath = path.Join(*dataDir, "conf", "samples", rlsV1ConfDIR)
