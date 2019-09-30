@@ -101,7 +101,7 @@ import (
 */
 
 func (self *ApierV1) GetScheduledActions(args scheduler.ArgsGetScheduledActions, reply *[]*scheduler.ScheduledAction) error {
-	sched := self.Scheduler.GetScheduler()
+	sched := self.SchedulerService.GetScheduler()
 	if sched == nil {
 		return errors.New(utils.SchedulerNotRunningCaps)
 	}
