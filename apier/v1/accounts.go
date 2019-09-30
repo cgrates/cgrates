@@ -155,7 +155,7 @@ func (self *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *str
 		return utils.NewErrServerError(err)
 	}
 	if attrs.ReloadScheduler {
-		sched := self.Scheduler.GetScheduler()
+		sched := self.SchedulerService.GetScheduler()
 		if sched == nil {
 			return errors.New(utils.SchedulerNotRunningCaps)
 		}
@@ -277,7 +277,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 		return utils.NewErrServerError(err)
 	}
 	if attr.ReloadScheduler && len(dirtyActionPlans) != 0 {
-		sched := self.Scheduler.GetScheduler()
+		sched := self.SchedulerService.GetScheduler()
 		if sched == nil {
 			return errors.New(utils.SchedulerNotRunningCaps)
 		}

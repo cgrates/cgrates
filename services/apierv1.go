@@ -108,12 +108,12 @@ func (api *ApierV1Service) Start(sp servmanager.ServiceProvider, waitCache bool)
 	}
 
 	api.api = &v1.ApierV1{
-		StorDb:      sp.GetLoadStorage(),
-		DataManager: sp.GetDM(),
-		CdrDb:       sp.GetCDRStorage(),
-		Config:      sp.GetConfig(),
-		Responder:   responder,
-		Scheduler:   schS,
+		StorDb:           sp.GetLoadStorage(),
+		DataManager:      sp.GetDM(),
+		CdrDb:            sp.GetCDRStorage(),
+		Config:           sp.GetConfig(),
+		Responder:        responder,
+		SchedulerService: schS,
 		HTTPPoster: engine.NewHTTPPoster(sp.GetConfig().GeneralCfg().HttpSkipTlsVerify,
 			sp.GetConfig().GeneralCfg().ReplyTimeout),
 		FilterS:    sp.GetFilterS(),
