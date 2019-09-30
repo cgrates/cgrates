@@ -63,7 +63,7 @@ func (dns *DNSAgent) Start(sp servmanager.ServiceProvider, waitCache bool) (err 
 		srvSessionS.GetIntenternalChan() <- sSIntConn
 		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
 	} else {
-		if sS, err = sp.GetConnection(utils.SessionS, sp.GetConfig().DNSAgentCfg().SessionSConns); err != nil {
+		if sS, err = sp.NewConnection(utils.SessionS, sp.GetConfig().DNSAgentCfg().SessionSConns); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 				utils.DNSAgent, utils.SessionS, err.Error()))
 			return
@@ -115,7 +115,7 @@ func (dns *DNSAgent) Reload(sp servmanager.ServiceProvider) (err error) {
 		srvSessionS.GetIntenternalChan() <- sSIntConn
 		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
 	} else {
-		if sS, err = sp.GetConnection(utils.SessionS, sp.GetConfig().DNSAgentCfg().SessionSConns); err != nil {
+		if sS, err = sp.NewConnection(utils.SessionS, sp.GetConfig().DNSAgentCfg().SessionSConns); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 				utils.DNSAgent, utils.SessionS, err.Error()))
 			return

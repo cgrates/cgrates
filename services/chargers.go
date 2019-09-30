@@ -54,7 +54,7 @@ func (chrS *ChargerService) Start(sp servmanager.ServiceProvider, waitCache bool
 		<-sp.GetCacheS().GetPrecacheChannel(utils.CacheChargerFilterIndexes)
 	}
 	var attrSConn rpcclient.RpcClientConnection
-	if attrSConn, err = sp.GetConnection(utils.AttributeS, sp.GetConfig().ChargerSCfg().AttributeSConns); err != nil {
+	if attrSConn, err = sp.NewConnection(utils.AttributeS, sp.GetConfig().ChargerSCfg().AttributeSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.ChargerS, utils.AttributeS, err.Error()))
 		return
@@ -84,7 +84,7 @@ func (chrS *ChargerService) GetIntenternalChan() (conn chan rpcclient.RpcClientC
 // Reload handles the change of config
 func (chrS *ChargerService) Reload(sp servmanager.ServiceProvider) (err error) {
 	var attrSConn rpcclient.RpcClientConnection
-	if attrSConn, err = sp.GetConnection(utils.AttributeS, sp.GetConfig().ChargerSCfg().AttributeSConns); err != nil {
+	if attrSConn, err = sp.NewConnection(utils.AttributeS, sp.GetConfig().ChargerSCfg().AttributeSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.ChargerS, utils.AttributeS, err.Error()))
 		return

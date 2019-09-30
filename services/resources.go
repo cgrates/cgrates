@@ -55,7 +55,7 @@ func (reS *ResourceService) Start(sp servmanager.ServiceProvider, waitCache bool
 		<-sp.GetCacheS().GetPrecacheChannel(utils.CacheResourceFilterIndexes)
 	}
 	var thdSConn rpcclient.RpcClientConnection
-	if thdSConn, err = sp.GetConnection(utils.ThresholdS, sp.GetConfig().ResourceSCfg().ThresholdSConns); err != nil {
+	if thdSConn, err = sp.NewConnection(utils.ThresholdS, sp.GetConfig().ResourceSCfg().ThresholdSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.ResourceS, err.Error()))
 		return
 	}
@@ -85,7 +85,7 @@ func (reS *ResourceService) GetIntenternalChan() (conn chan rpcclient.RpcClientC
 // Reload handles the change of config
 func (reS *ResourceService) Reload(sp servmanager.ServiceProvider) (err error) {
 	var thdSConn rpcclient.RpcClientConnection
-	if thdSConn, err = sp.GetConnection(utils.ThresholdS, sp.GetConfig().ResourceSCfg().ThresholdSConns); err != nil {
+	if thdSConn, err = sp.NewConnection(utils.ThresholdS, sp.GetConfig().ResourceSCfg().ThresholdSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.ResourceS, err.Error()))
 		return
 	}
