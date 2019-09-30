@@ -48,7 +48,6 @@ const (
 	STATS_JSON         = "stats"
 	THRESHOLDS_JSON    = "thresholds"
 	SupplierSJson      = "suppliers"
-	FILTERS_JSON       = "filters"
 	LoaderJson         = "loaders"
 	MAILER_JSN         = "mailer"
 	SURETAX_JSON       = "suretax"

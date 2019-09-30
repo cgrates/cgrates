@@ -1210,6 +1210,8 @@ func (self *CGRConfig) HttpAgentCfg() []*HttpAgentCfg {
 }
 
 func (cfg *CGRConfig) FilterSCfg() *FilterSCfg {
+	cfg.lks[FilterSjsn].Lock()
+	defer cfg.lks[FilterSjsn].Unlock()
 	return cfg.filterSCfg
 }
 
@@ -1335,7 +1337,7 @@ func (cfg *CGRConfig) V1GetConfigSection(args *StringWithArgDispatcher, reply *m
 		jsonString = utils.ToJSON(cfg.ListenCfg())
 	case HTTP_JSN:
 		jsonString = utils.ToJSON(cfg.HTTPCfg())
-	case FILTERS_JSON:
+	case FilterSjsn:
 		jsonString = utils.ToJSON(cfg.FilterSCfg())
 	case RALS_JSN:
 		jsonString = utils.ToJSON(cfg.RalsCfg())
@@ -1500,7 +1502,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 			break
 		}
 		fallthrough
-	case FILTERS_JSON: // no need to reload
+	case FilterSjsn: // no need to reload
 		if !fall {
 			break
 		}
@@ -1728,9 +1730,9 @@ func (cfg *CGRConfig) loadConfig(path, section string) (err error) {
 			break
 		}
 		fallthrough
-	case FILTERS_JSON:
-		cfg.lks[FILTERS_JSON].Lock()
-		defer cfg.lks[FILTERS_JSON].Unlock()
+	case FilterSjsn:
+		cfg.lks[FilterSjsn].Lock()
+		defer cfg.lks[FilterSjsn].Unlock()
 		loadFuncs = append(loadFuncs, cfg.loadFilterSCfg)
 		if !fall {
 			break
@@ -2055,7 +2057,7 @@ func (cfg *CGRConfig) loadConfigFromHttp(urlPaths string, loadFuncs []func(jsnCf
 func (cfg *CGRConfig) initChanels() {
 	cfg.lks = make(map[string]*sync.RWMutex)
 	cfg.rldChans = make(map[string]chan struct{})
-	for _, section := range []string{GENERAL_JSN, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN, SCHEDULER_JSN, CACHE_JSN, FILTERS_JSON, RALS_JSN,
+	for _, section := range []string{GENERAL_JSN, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN, SCHEDULER_JSN, CACHE_JSN, FilterSjsn, RALS_JSN,
 		CDRS_JSN, CDRE_JSN, CDRC_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN, KamailioAgentJSN,
 		DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
 		SupplierSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson, AnalyzerCfgJson, Apier} {
