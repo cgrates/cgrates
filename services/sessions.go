@@ -59,49 +59,49 @@ func (smg *SessionService) Start(sp servmanager.ServiceProvider, waitCache bool)
 	defer smg.Unlock()
 	var ralsConns, resSConns, threshSConns, statSConns, suplSConns, attrConns, cdrsConn, chargerSConn rpcclient.RpcClientConnection
 
-	if chargerSConn, err = sp.GetConnection(utils.ChargerS, sp.GetConfig().SessionSCfg().ChargerSConns); err != nil {
+	if chargerSConn, err = sp.NewConnection(utils.ChargerS, sp.GetConfig().SessionSCfg().ChargerSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.SessionS, utils.ChargerS, err.Error()))
 		return
 	}
 
-	if ralsConns, err = sp.GetConnection(utils.ResponderS, sp.GetConfig().SessionSCfg().RALsConns); err != nil {
+	if ralsConns, err = sp.NewConnection(utils.ResponderS, sp.GetConfig().SessionSCfg().RALsConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.SessionS, utils.ResponderS, err.Error()))
 		return
 	}
 
-	if resSConns, err = sp.GetConnection(utils.ResourceS, sp.GetConfig().SessionSCfg().ResSConns); err != nil {
+	if resSConns, err = sp.NewConnection(utils.ResourceS, sp.GetConfig().SessionSCfg().ResSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.SessionS, utils.ResourceS, err.Error()))
 		return
 	}
 
-	if threshSConns, err = sp.GetConnection(utils.ThresholdS, sp.GetConfig().SessionSCfg().ThreshSConns); err != nil {
+	if threshSConns, err = sp.NewConnection(utils.ThresholdS, sp.GetConfig().SessionSCfg().ThreshSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.SessionS, utils.ThresholdS, err.Error()))
 		return
 	}
 
-	if statSConns, err = sp.GetConnection(utils.StatS, sp.GetConfig().SessionSCfg().StatSConns); err != nil {
+	if statSConns, err = sp.NewConnection(utils.StatS, sp.GetConfig().SessionSCfg().StatSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.SessionS, utils.StatS, err.Error()))
 		return
 	}
 
-	if suplSConns, err = sp.GetConnection(utils.SupplierS, sp.GetConfig().SessionSCfg().SupplSConns); err != nil {
+	if suplSConns, err = sp.NewConnection(utils.SupplierS, sp.GetConfig().SessionSCfg().SupplSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.SessionS, utils.SupplierS, err.Error()))
 		return
 	}
 
-	if attrConns, err = sp.GetConnection(utils.AttributeS, sp.GetConfig().SessionSCfg().AttrSConns); err != nil {
+	if attrConns, err = sp.NewConnection(utils.AttributeS, sp.GetConfig().SessionSCfg().AttrSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.SessionS, utils.AttributeS, err.Error()))
 		return
 	}
 
-	if cdrsConn, err = sp.GetConnection(utils.CDRServer, sp.GetConfig().SessionSCfg().CDRsConns); err != nil {
+	if cdrsConn, err = sp.NewConnection(utils.CDRServer, sp.GetConfig().SessionSCfg().CDRsConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.SessionS, utils.CDRServer, err.Error()))
 		return
@@ -167,49 +167,49 @@ func (smg *SessionService) GetIntenternalChan() (conn chan rpcclient.RpcClientCo
 func (smg *SessionService) Reload(sp servmanager.ServiceProvider) (err error) {
 	var ralsConns, resSConns, threshSConns, statSConns, suplSConns, attrConns, cdrsConn, chargerSConn rpcclient.RpcClientConnection
 
-	if chargerSConn, err = sp.GetConnection(utils.ChargerS, sp.GetConfig().SessionSCfg().ChargerSConns); err != nil {
+	if chargerSConn, err = sp.NewConnection(utils.ChargerS, sp.GetConfig().SessionSCfg().ChargerSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.SessionS, utils.ChargerS, err.Error()))
 		return
 	}
 
-	if ralsConns, err = sp.GetConnection(utils.ResponderS, sp.GetConfig().SessionSCfg().RALsConns); err != nil {
+	if ralsConns, err = sp.NewConnection(utils.ResponderS, sp.GetConfig().SessionSCfg().RALsConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.SessionS, utils.ResponderS, err.Error()))
 		return
 	}
 
-	if resSConns, err = sp.GetConnection(utils.ResourceS, sp.GetConfig().SessionSCfg().ResSConns); err != nil {
+	if resSConns, err = sp.NewConnection(utils.ResourceS, sp.GetConfig().SessionSCfg().ResSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.SessionS, utils.ResourceS, err.Error()))
 		return
 	}
 
-	if threshSConns, err = sp.GetConnection(utils.ThresholdS, sp.GetConfig().SessionSCfg().ThreshSConns); err != nil {
+	if threshSConns, err = sp.NewConnection(utils.ThresholdS, sp.GetConfig().SessionSCfg().ThreshSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.SessionS, utils.ThresholdS, err.Error()))
 		return
 	}
 
-	if statSConns, err = sp.GetConnection(utils.StatS, sp.GetConfig().SessionSCfg().StatSConns); err != nil {
+	if statSConns, err = sp.NewConnection(utils.StatS, sp.GetConfig().SessionSCfg().StatSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.SessionS, utils.StatS, err.Error()))
 		return
 	}
 
-	if suplSConns, err = sp.GetConnection(utils.SupplierS, sp.GetConfig().SessionSCfg().SupplSConns); err != nil {
+	if suplSConns, err = sp.NewConnection(utils.SupplierS, sp.GetConfig().SessionSCfg().SupplSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.SessionS, utils.SupplierS, err.Error()))
 		return
 	}
 
-	if attrConns, err = sp.GetConnection(utils.AttributeS, sp.GetConfig().SessionSCfg().AttrSConns); err != nil {
+	if attrConns, err = sp.NewConnection(utils.AttributeS, sp.GetConfig().SessionSCfg().AttrSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.SessionS, utils.AttributeS, err.Error()))
 		return
 	}
 
-	if cdrsConn, err = sp.GetConnection(utils.CDRServer, sp.GetConfig().SessionSCfg().CDRsConns); err != nil {
+	if cdrsConn, err = sp.NewConnection(utils.CDRServer, sp.GetConfig().SessionSCfg().CDRsConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.SessionS, utils.CDRServer, err.Error()))
 		return

@@ -50,12 +50,12 @@ func (resp *ResponderService) Start(sp servmanager.ServiceProvider, waitCache bo
 	}
 
 	var thdS, stats rpcclient.RpcClientConnection
-	if thdS, err = sp.GetConnection(utils.ThresholdS, sp.GetConfig().RalsCfg().ThresholdSConns); err != nil {
+	if thdS, err = sp.NewConnection(utils.ThresholdS, sp.GetConfig().RalsCfg().ThresholdSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
 			utils.RALService, utils.ThresholdS, err.Error()))
 		return
 	}
-	if stats, err = sp.GetConnection(utils.StatS, sp.GetConfig().RalsCfg().StatSConns); err != nil {
+	if stats, err = sp.NewConnection(utils.StatS, sp.GetConfig().RalsCfg().StatSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
 			utils.RALService, utils.StatS, err.Error()))
 		return
@@ -91,12 +91,12 @@ func (resp *ResponderService) GetIntenternalChan() (conn chan rpcclient.RpcClien
 // Reload handles the change of config
 func (resp *ResponderService) Reload(sp servmanager.ServiceProvider) (err error) {
 	var thdS, stats rpcclient.RpcClientConnection
-	if thdS, err = sp.GetConnection(utils.ThresholdS, sp.GetConfig().RalsCfg().ThresholdSConns); err != nil {
+	if thdS, err = sp.NewConnection(utils.ThresholdS, sp.GetConfig().RalsCfg().ThresholdSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
 			utils.RALService, utils.ThresholdS, err.Error()))
 		return
 	}
-	if stats, err = sp.GetConnection(utils.StatS, sp.GetConfig().RalsCfg().StatSConns); err != nil {
+	if stats, err = sp.NewConnection(utils.StatS, sp.GetConfig().RalsCfg().StatSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
 			utils.RALService, utils.StatS, err.Error()))
 		return

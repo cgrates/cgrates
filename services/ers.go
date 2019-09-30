@@ -57,7 +57,7 @@ func (erS *EventReaderService) Start(sp servmanager.ServiceProvider, waitCache b
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ERs))
 	var sS rpcclient.RpcClientConnection
-	if sS, err = sp.GetConnection(utils.SessionS, sp.GetConfig().ERsCfg().SessionSConns); err != nil {
+	if sS, err = sp.NewConnection(utils.SessionS, sp.GetConfig().ERsCfg().SessionSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> failed connecting to <%s>, error: <%s>",
 			utils.ERs, utils.SessionS, err.Error()))
 		return
@@ -81,7 +81,7 @@ func (erS *EventReaderService) GetIntenternalChan() (conn chan rpcclient.RpcClie
 // Reload handles the change of config
 func (erS *EventReaderService) Reload(sp servmanager.ServiceProvider) (err error) {
 	var sS rpcclient.RpcClientConnection
-	if sS, err = sp.GetConnection(utils.SessionS, sp.GetConfig().ERsCfg().SessionSConns); err != nil {
+	if sS, err = sp.NewConnection(utils.SessionS, sp.GetConfig().ERsCfg().SessionSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> failed connecting to <%s>, error: <%s>",
 			utils.ERs, utils.SessionS, err.Error()))
 		return

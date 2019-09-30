@@ -63,7 +63,7 @@ func (fS *FreeswitchAgent) Start(sp servmanager.ServiceProvider, waitCache bool)
 		srvSessionS.GetIntenternalChan() <- sSIntConn
 		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
 	} else {
-		if sS, err = sp.GetConnection(utils.SessionS, sp.GetConfig().FsAgentCfg().SessionSConns); err != nil {
+		if sS, err = sp.NewConnection(utils.SessionS, sp.GetConfig().FsAgentCfg().SessionSConns); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 				utils.FreeSWITCHAgent, utils.SessionS, err.Error()))
 			return
@@ -112,7 +112,7 @@ func (fS *FreeswitchAgent) Reload(sp servmanager.ServiceProvider) (err error) {
 		srvSessionS.GetIntenternalChan() <- sSIntConn
 		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
 	} else {
-		if sS, err = sp.GetConnection(utils.SessionS, sp.GetConfig().FsAgentCfg().SessionSConns); err != nil {
+		if sS, err = sp.NewConnection(utils.SessionS, sp.GetConfig().FsAgentCfg().SessionSConns); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 				utils.FreeSWITCHAgent, utils.SessionS, err.Error()))
 			return

@@ -55,21 +55,21 @@ func (api *ApierV1Service) Start(sp servmanager.ServiceProvider, waitCache bool)
 
 	// create cache connection
 	var cacheSrpc, schedulerSrpc, attributeSrpc rpcclient.RpcClientConnection
-	if cacheSrpc, err = sp.GetConnection(utils.CacheS, sp.GetConfig().ApierCfg().CachesConns); err != nil {
+	if cacheSrpc, err = sp.NewConnection(utils.CacheS, sp.GetConfig().ApierCfg().CachesConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
 			utils.ApierV1, utils.CacheS, err.Error()))
 		return
 	}
 
 	// create scheduler connection
-	if schedulerSrpc, err = sp.GetConnection(utils.SchedulerS, sp.GetConfig().ApierCfg().SchedulerConns); err != nil {
+	if schedulerSrpc, err = sp.NewConnection(utils.SchedulerS, sp.GetConfig().ApierCfg().SchedulerConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
 			utils.ApierV1, utils.SchedulerS, err.Error()))
 		return
 	}
 
 	// create scheduler connection
-	if attributeSrpc, err = sp.GetConnection(utils.AttributeS, sp.GetConfig().ApierCfg().AttributeSConns); err != nil {
+	if attributeSrpc, err = sp.NewConnection(utils.AttributeS, sp.GetConfig().ApierCfg().AttributeSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
 			utils.ApierV1, utils.AttributeS, err.Error()))
 		return
@@ -142,21 +142,21 @@ func (api *ApierV1Service) GetIntenternalChan() (conn chan rpcclient.RpcClientCo
 // Reload handles the change of config
 func (api *ApierV1Service) Reload(sp servmanager.ServiceProvider) (err error) {
 	var cacheSrpc, schedulerSrpc, attributeSrpc rpcclient.RpcClientConnection
-	if cacheSrpc, err = sp.GetConnection(utils.CacheS, sp.GetConfig().ApierCfg().CachesConns); err != nil {
+	if cacheSrpc, err = sp.NewConnection(utils.CacheS, sp.GetConfig().ApierCfg().CachesConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
 			utils.ApierV1, utils.CacheS, err.Error()))
 		return
 	}
 
 	// create scheduler connection
-	if schedulerSrpc, err = sp.GetConnection(utils.SchedulerS, sp.GetConfig().ApierCfg().SchedulerConns); err != nil {
+	if schedulerSrpc, err = sp.NewConnection(utils.SchedulerS, sp.GetConfig().ApierCfg().SchedulerConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
 			utils.ApierV1, utils.SchedulerS, err.Error()))
 		return
 	}
 
 	// create scheduler connection
-	if attributeSrpc, err = sp.GetConnection(utils.AttributeS, sp.GetConfig().ApierCfg().AttributeSConns); err != nil {
+	if attributeSrpc, err = sp.NewConnection(utils.AttributeS, sp.GetConfig().ApierCfg().AttributeSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
 			utils.ApierV1, utils.AttributeS, err.Error()))
 		return
