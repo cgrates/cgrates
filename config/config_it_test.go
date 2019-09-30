@@ -542,6 +542,45 @@ func TestCGRConfigReloadDNSAgent(t *testing.T) {
 	}
 }
 
+func TestCGRConfigReloadFreeswitchAgent(t *testing.T) {
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg.SessionSCfg().Enabled = true
+	var reply string
+	if err = cfg.V1ReloadConfig(&ConfigReloadWithArgDispatcher{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "freeswitch_reload"),
+		Section: FreeSWITCHAgentJSN,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK received: %s", reply)
+	}
+	expAttr := &FsAgentCfg{
+		Enabled: true,
+		SessionSConns: []*RemoteHost{
+			&RemoteHost{
+				Address: utils.MetaInternal,
+			},
+		},
+		SubscribePark:     true,
+		ExtraFields:       RSRParsers{},
+		MaxWaitConnection: 2 * time.Second,
+		EventSocketConns: []*FsConnCfg{
+			&FsConnCfg{
+				Address:    "1.2.3.4:8021",
+				Password:   "ClueCon",
+				Reconnects: 5,
+				Alias:      "1.2.3.4:8021",
+			},
+		},
+	}
+	if !reflect.DeepEqual(expAttr, cfg.FsAgentCfg()) {
+		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.FsAgentCfg()))
+	}
+}
+
 func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
 	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out"} {
 		if err := os.RemoveAll(dir); err != nil {
