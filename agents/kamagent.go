@@ -89,8 +89,15 @@ func (self *KamailioAgent) Connect() error {
 	return err
 }
 
-func (self *KamailioAgent) Shutdown() error {
-	return nil
+func (self *KamailioAgent) Shutdown() (err error) {
+	for conIndx, conn := range self.conns {
+		if err = conn.Disconnect(); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> can't disconnect connection at index %v because: %s",
+				utils.KamailioAgent, conIndx, err))
+			continue
+		}
+	}
+	return
 }
 
 // rpcclient.RpcClientConnection interface
@@ -102,7 +109,7 @@ func (ka *KamailioAgent) Call(serviceMethod string, args interface{}, reply inte
 func (ka *KamailioAgent) onCgrAuth(evData []byte, connIdx int) {
 	if connIdx >= len(ka.conns) { // protection against index out of range panic
 		err := fmt.Errorf("Index out of range[0,%v): %v ", len(ka.conns), connIdx)
-		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.FreeSWITCHAgent, err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.KamailioAgent, err.Error()))
 		return
 	}
 	kev, err := NewKamEvent(evData, ka.cfg.EvapiConns[connIdx].Alias, ka.conns[connIdx].RemoteAddr().String())
@@ -145,7 +152,7 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connIdx int) {
 func (ka *KamailioAgent) onCallStart(evData []byte, connIdx int) {
 	if connIdx >= len(ka.conns) { // protection against index out of range panic
 		err := fmt.Errorf("Index out of range[0,%v): %v ", len(ka.conns), connIdx)
-		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.FreeSWITCHAgent, err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.KamailioAgent, err.Error()))
 		return
 	}
 	kev, err := NewKamEvent(evData, ka.cfg.EvapiConns[connIdx].Alias, ka.conns[connIdx].RemoteAddr().String())
@@ -187,7 +194,7 @@ func (ka *KamailioAgent) onCallStart(evData []byte, connIdx int) {
 func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 	if connIdx >= len(ka.conns) { // protection against index out of range panic
 		err := fmt.Errorf("Index out of range[0,%v): %v ", len(ka.conns), connIdx)
-		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.FreeSWITCHAgent, err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.KamailioAgent, err.Error()))
 		return
 	}
 	kev, err := NewKamEvent(evData, ka.cfg.EvapiConns[connIdx].Alias, ka.conns[connIdx].RemoteAddr().String())
@@ -254,7 +261,7 @@ func (ka *KamailioAgent) onDlgList(evData []byte, connIdx int) {
 func (ka *KamailioAgent) onCgrProcessMessage(evData []byte, connIdx int) {
 	if connIdx >= len(ka.conns) { // protection against index out of range panic
 		err := fmt.Errorf("Index out of range[0,%v): %v ", len(ka.conns), connIdx)
-		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.FreeSWITCHAgent, err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.KamailioAgent, err.Error()))
 		return
 	}
 	kev, err := NewKamEvent(evData, ka.cfg.EvapiConns[connIdx].Alias, ka.conns[connIdx].RemoteAddr().String())
@@ -307,7 +314,7 @@ func (ka *KamailioAgent) onCgrProcessMessage(evData []byte, connIdx int) {
 func (ka *KamailioAgent) onCgrProcessCDR(evData []byte, connIdx int) {
 	if connIdx >= len(ka.conns) { // protection against index out of range panic
 		err := fmt.Errorf("Index out of range[0,%v): %v ", len(ka.conns), connIdx)
-		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.FreeSWITCHAgent, err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.KamailioAgent, err.Error()))
 		return
 	}
 	kev, err := NewKamEvent(evData, ka.cfg.EvapiConns[connIdx].Alias, ka.conns[connIdx].RemoteAddr().String())
@@ -375,7 +382,7 @@ func (ka *KamailioAgent) V1DisconnectSession(args utils.AttrDisconnectSession, r
 	}
 	if int(connIdx) >= len(ka.conns) { // protection against index out of range panic
 		err = fmt.Errorf("Index out of range[0,%v): %v ", len(ka.conns), connIdx)
-		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.FreeSWITCHAgent, err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.KamailioAgent, err.Error()))
 		return
 	}
 	if err = ka.disconnectSession(int(connIdx),
@@ -402,4 +409,16 @@ func (ka *KamailioAgent) V1GetActiveSessionIDs(ignParam string, sessionIDs *[]*s
 		return errors.New("timeout executing dialog list")
 	}
 	return
+}
+
+// SetSessionSConnection sets the new connection to the session service
+// only used on reload
+func (ka *KamailioAgent) SetSessionSConnection(sS rpcclient.RpcClientConnection) {
+	ka.sessionS = sS
+}
+
+// Reload recreates the connection buffers
+// only used on reload
+func (ka *KamailioAgent) Reload() {
+	ka.conns = make([]*kamevapi.KamEvapi, len(ka.cfg.EvapiConns))
 }

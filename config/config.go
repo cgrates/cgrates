@@ -1196,8 +1196,11 @@ func (cfg *CGRConfig) FsAgentCfg() *FsAgentCfg {
 	return cfg.fsAgentCfg
 }
 
-func (self *CGRConfig) KamAgentCfg() *KamAgentCfg {
-	return self.kamAgentCfg
+// KamAgentCfg returns the config for KamAgent
+func (cfg *CGRConfig) KamAgentCfg() *KamAgentCfg {
+	cfg.lks[KamailioAgentJSN].Lock()
+	defer cfg.lks[KamailioAgentJSN].Unlock()
+	return cfg.kamAgentCfg
 }
 
 // ToDo: fix locking here
@@ -1553,6 +1556,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case KamailioAgentJSN:
+		cfg.rldChans[KamailioAgentJSN] <- struct{}{}
 		if !fall {
 			break
 		}
