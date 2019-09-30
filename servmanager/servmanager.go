@@ -286,6 +286,9 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 	if srvMngr.GetConfig().FsAgentCfg().Enabled {
 		go srvMngr.startService(utils.FreeSWITCHAgent)
 	}
+	if srvMngr.GetConfig().KamAgentCfg().Enabled {
+		go srvMngr.startService(utils.KamailioAgent)
+	}
 	// startServer()
 	return
 }
@@ -368,6 +371,10 @@ func (srvMngr *ServiceManager) handleReload() {
 			}
 		case <-srvMngr.GetConfig().GetReloadChan(config.FreeSWITCHAgentJSN):
 			if err = srvMngr.reloadService(utils.FreeSWITCHAgent, srvMngr.GetConfig().FsAgentCfg().Enabled); err != nil {
+				return
+			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.KamailioAgentJSN):
+			if err = srvMngr.reloadService(utils.KamailioAgent, srvMngr.GetConfig().KamAgentCfg().Enabled); err != nil {
 				return
 			}
 		}

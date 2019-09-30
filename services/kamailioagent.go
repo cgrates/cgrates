@@ -20,6 +20,7 @@ package services
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/cgrates/cgrates/agents"
@@ -29,83 +30,85 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-// NewFreeswitchAgent returns the Freeswitch Agent
-func NewFreeswitchAgent() servmanager.Service {
-	return new(FreeswitchAgent)
+// NewKamailioAgent returns the Kamailio Agent
+func NewKamailioAgent() servmanager.Service {
+	return new(KamailioAgent)
 }
 
-// FreeswitchAgent implements Agent interface
-type FreeswitchAgent struct {
+// KamailioAgent implements Agent interface
+type KamailioAgent struct {
 	sync.RWMutex
-	fS *agents.FSsessions
+	kam *agents.KamailioAgent
 }
 
 // Start should handle the sercive start
-func (fS *FreeswitchAgent) Start(sp servmanager.ServiceProvider, waitCache bool) (err error) {
-	if fS.IsRunning() {
+func (kam *KamailioAgent) Start(sp servmanager.ServiceProvider, waitCache bool) (err error) {
+	if kam.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
 
-	fS.Lock()
-	defer fS.Unlock()
+	kam.Lock()
+	defer kam.Unlock()
 	var sS rpcclient.RpcClientConnection
 	var sSInternal bool
-	utils.Logger.Info("Starting FreeSWITCH agent")
-	if !sp.GetConfig().DispatcherSCfg().Enabled && sp.GetConfig().FsAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
+	utils.Logger.Info("Starting Kamailio agent")
+	if !sp.GetConfig().DispatcherSCfg().Enabled && sp.GetConfig().KamAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
 		sSInternal = true
 		srvSessionS, has := sp.GetService(utils.SessionS)
 		if !has {
 			utils.Logger.Err(fmt.Sprintf("<%s> Failed to find needed subsystem <%s>",
-				utils.FreeSWITCHAgent, utils.SessionS))
+				utils.KamailioAgent, utils.SessionS))
 			return utils.ErrNotFound
 		}
 		sSIntConn := <-srvSessionS.GetIntenternalChan()
 		srvSessionS.GetIntenternalChan() <- sSIntConn
 		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
 	} else {
-		if sS, err = sp.NewConnection(utils.SessionS, sp.GetConfig().FsAgentCfg().SessionSConns); err != nil {
+		if sS, err = sp.NewConnection(utils.SessionS, sp.GetConfig().KamAgentCfg().SessionSConns); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.FreeSWITCHAgent, utils.SessionS, err.Error()))
+				utils.KamailioAgent, utils.SessionS, err.Error()))
 			return
 		}
 	}
-	fS.fS = agents.NewFSsessions(sp.GetConfig().FsAgentCfg(), sS, sp.GetConfig().GeneralCfg().DefaultTimezone)
+	kam.kam = agents.NewKamailioAgent(sp.GetConfig().KamAgentCfg(), sS,
+		utils.FirstNonEmpty(sp.GetConfig().KamAgentCfg().Timezone, sp.GetConfig().GeneralCfg().DefaultTimezone))
 	if sSInternal { // bidirectional client backwards connection
-		sS.(*utils.BiRPCInternalClient).SetClientConn(fS.fS)
+		sS.(*utils.BiRPCInternalClient).SetClientConn(kam.kam)
 		var rply string
 		if err = sS.Call(utils.SessionSv1RegisterInternalBiJSONConn,
 			utils.EmptyString, &rply); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.FreeSWITCHAgent, utils.SessionS, err.Error()))
+				utils.KamailioAgent, utils.SessionS, err.Error()))
 			return
 		}
 	}
-
 	go func() {
-		if err := fS.fS.Connect(); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
-			sp.GetExitChan() <- true // stop the engine here
+		if err = kam.kam.Connect(); err != nil {
+			if strings.Contains(err.Error(), "use of closed network connection") { // if closed by us do not log
+				return
+			}
+			utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.KamailioAgent, err))
+			sp.GetExitChan() <- true
 		}
 	}()
 	return
 }
 
 // GetIntenternalChan returns the internal connection chanel
-// no chanel for FreeswitchAgent
-func (fS *FreeswitchAgent) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (kam *KamailioAgent) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
 	return nil
 }
 
 // Reload handles the change of config
-func (fS *FreeswitchAgent) Reload(sp servmanager.ServiceProvider) (err error) {
+func (kam *KamailioAgent) Reload(sp servmanager.ServiceProvider) (err error) {
 	var sS rpcclient.RpcClientConnection
 	var sSInternal bool
-	if !sp.GetConfig().DispatcherSCfg().Enabled && sp.GetConfig().FsAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
+	if !sp.GetConfig().DispatcherSCfg().Enabled && sp.GetConfig().KamAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
 		sSInternal = true
 		srvSessionS, has := sp.GetService(utils.SessionS)
 		if !has {
 			utils.Logger.Err(fmt.Sprintf("<%s> Failed to find needed subsystem <%s>",
-				utils.FreeSWITCHAgent, utils.SessionS))
+				utils.KamailioAgent, utils.SessionS))
 			return utils.ErrNotFound
 		}
 		sSIntConn := <-srvSessionS.GetIntenternalChan()
@@ -114,60 +117,63 @@ func (fS *FreeswitchAgent) Reload(sp servmanager.ServiceProvider) (err error) {
 	} else {
 		if sS, err = sp.NewConnection(utils.SessionS, sp.GetConfig().FsAgentCfg().SessionSConns); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.FreeSWITCHAgent, utils.SessionS, err.Error()))
+				utils.KamailioAgent, utils.SessionS, err.Error()))
 			return
 		}
 	}
-	if err = fS.Shutdown(); err != nil {
+	if err = kam.Shutdown(); err != nil {
 		return
 	}
-	fS.Lock()
-	defer fS.Unlock()
-	fS.fS.SetSessionSConnection(sS)
-	fS.fS.Reload()
+	kam.Lock()
+	defer kam.Unlock()
+	kam.kam.SetSessionSConnection(sS)
+	kam.kam.Reload()
 	if sSInternal { // bidirectional client backwards connection
-		sS.(*utils.BiRPCInternalClient).SetClientConn(fS.fS)
+		sS.(*utils.BiRPCInternalClient).SetClientConn(kam.kam)
 		var rply string
 		if err = sS.Call(utils.SessionSv1RegisterInternalBiJSONConn,
 			utils.EmptyString, &rply); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.FreeSWITCHAgent, utils.SessionS, err.Error()))
+				utils.KamailioAgent, utils.SessionS, err.Error()))
 			return
 		}
 	}
 	go func() {
-		if err := fS.fS.Connect(); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
-			sp.GetExitChan() <- true // stop the engine here
+		if err = kam.kam.Connect(); err != nil {
+			if strings.Contains(err.Error(), "use of closed network connection") { // if closed by us do not log
+				return
+			}
+			utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.KamailioAgent, err))
+			sp.GetExitChan() <- true
 		}
 	}()
 	return
 }
 
 // Shutdown stops the service
-func (fS *FreeswitchAgent) Shutdown() (err error) {
-	fS.Lock()
-	defer fS.Unlock()
-	if err = fS.fS.Shutdown(); err != nil {
+func (kam *KamailioAgent) Shutdown() (err error) {
+	kam.Lock()
+	defer kam.Unlock()
+	if err = kam.kam.Shutdown(); err != nil {
 		return
 	}
-	fS.fS = nil
+	kam.kam = nil
 	return
 }
 
 // GetRPCInterface returns the interface to register for server
-func (fS *FreeswitchAgent) GetRPCInterface() interface{} {
-	return fS.fS
+func (kam *KamailioAgent) GetRPCInterface() interface{} {
+	return kam.kam
 }
 
 // IsRunning returns if the service is running
-func (fS *FreeswitchAgent) IsRunning() bool {
-	fS.RLock()
-	defer fS.RUnlock()
-	return fS != nil && fS.fS != nil
+func (kam *KamailioAgent) IsRunning() bool {
+	kam.RLock()
+	defer kam.RUnlock()
+	return kam != nil && kam.kam != nil
 }
 
 // ServiceName returns the service name
-func (fS *FreeswitchAgent) ServiceName() string {
-	return utils.FreeSWITCHAgent
+func (kam *KamailioAgent) ServiceName() string {
+	return utils.KamailioAgent
 }
