@@ -56,31 +56,31 @@ func (cdrS *CDRServer) Start(sp servmanager.ServiceProvider, waitCache bool) (er
 
 	var ralConn, attrSConn, thresholdSConn, statsConn, chargerSConn rpcclient.RpcClientConnection
 
-	chargerSConn, err = sp.GetConnection(utils.ChargerS, sp.GetConfig().CdrsCfg().ChargerSConns)
+	chargerSConn, err = sp.NewConnection(utils.ChargerS, sp.GetConfig().CdrsCfg().ChargerSConns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
 			utils.ChargerS, err.Error()))
 		return
 	}
-	ralConn, err = sp.GetConnection(utils.ResponderS, sp.GetConfig().CdrsCfg().RaterConns)
+	ralConn, err = sp.NewConnection(utils.ResponderS, sp.GetConfig().CdrsCfg().RaterConns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
 			utils.RALService, err.Error()))
 		return
 	}
-	attrSConn, err = sp.GetConnection(utils.AttributeS, sp.GetConfig().CdrsCfg().AttributeSConns)
+	attrSConn, err = sp.NewConnection(utils.AttributeS, sp.GetConfig().CdrsCfg().AttributeSConns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
 			utils.AttributeS, err.Error()))
 		return
 	}
-	thresholdSConn, err = sp.GetConnection(utils.ThresholdS, sp.GetConfig().CdrsCfg().ThresholdSConns)
+	thresholdSConn, err = sp.NewConnection(utils.ThresholdS, sp.GetConfig().CdrsCfg().ThresholdSConns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
 			utils.ThresholdS, err.Error()))
 		return
 	}
-	statsConn, err = sp.GetConnection(utils.StatS, sp.GetConfig().CdrsCfg().StatSConns)
+	statsConn, err = sp.NewConnection(utils.StatS, sp.GetConfig().CdrsCfg().StatSConns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
 			utils.StatS, err.Error()))
@@ -113,31 +113,31 @@ func (cdrS *CDRServer) GetIntenternalChan() (conn chan rpcclient.RpcClientConnec
 func (cdrS *CDRServer) Reload(sp servmanager.ServiceProvider) (err error) {
 	var ralConn, attrSConn, thresholdSConn, statsConn, chargerSConn rpcclient.RpcClientConnection
 
-	chargerSConn, err = sp.GetConnection(utils.ChargerS, sp.GetConfig().CdrsCfg().ChargerSConns)
+	chargerSConn, err = sp.NewConnection(utils.ChargerS, sp.GetConfig().CdrsCfg().ChargerSConns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
 			utils.ChargerS, err.Error()))
 		return
 	}
-	ralConn, err = sp.GetConnection(utils.ResponderS, sp.GetConfig().CdrsCfg().RaterConns)
+	ralConn, err = sp.NewConnection(utils.ResponderS, sp.GetConfig().CdrsCfg().RaterConns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
 			utils.RALService, err.Error()))
 		return
 	}
-	attrSConn, err = sp.GetConnection(utils.AttributeS, sp.GetConfig().CdrsCfg().AttributeSConns)
+	attrSConn, err = sp.NewConnection(utils.AttributeS, sp.GetConfig().CdrsCfg().AttributeSConns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
 			utils.AttributeS, err.Error()))
 		return
 	}
-	thresholdSConn, err = sp.GetConnection(utils.ThresholdS, sp.GetConfig().CdrsCfg().ThresholdSConns)
+	thresholdSConn, err = sp.NewConnection(utils.ThresholdS, sp.GetConfig().CdrsCfg().ThresholdSConns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
 			utils.ThresholdS, err.Error()))
 		return
 	}
-	statsConn, err = sp.GetConnection(utils.StatS, sp.GetConfig().CdrsCfg().StatSConns)
+	statsConn, err = sp.NewConnection(utils.StatS, sp.GetConfig().CdrsCfg().StatSConns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
 			utils.StatS, err.Error()))

@@ -212,8 +212,8 @@ func (srvMngr *ServiceManager) GetExitChan() chan bool {
 	return srvMngr.engineShutdown
 }
 
-// GetConnection creates a rpcClient to the specified subsystem
-func (srvMngr *ServiceManager) GetConnection(subsystem string, conns []*config.RemoteHost) (rpcclient.RpcClientConnection, error) {
+// NewConnection creates a rpcClient to the specified subsystem
+func (srvMngr *ServiceManager) NewConnection(subsystem string, conns []*config.RemoteHost) (rpcclient.RpcClientConnection, error) {
 	if len(conns) == 0 {
 		return nil, nil
 	}
@@ -454,8 +454,8 @@ type ServiceProvider interface {
 	GetServer() *utils.Server
 	// GetExitChan returns the exit chanel
 	GetExitChan() chan bool
-	// GetConnection creates a rpcClient to the specified subsystem
-	GetConnection(subsystem string, cfg []*config.RemoteHost) (rpcclient.RpcClientConnection, error)
+	// NewConnection creates a rpcClient to the specified subsystem
+	NewConnection(subsystem string, cfg []*config.RemoteHost) (rpcclient.RpcClientConnection, error)
 	// GetService returns the named service
 	GetService(subsystem string) (Service, bool)
 	// AddService adds the given serices

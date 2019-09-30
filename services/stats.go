@@ -56,7 +56,7 @@ func (sts *StatService) Start(sp servmanager.ServiceProvider, waitCache bool) (e
 	}
 
 	var thdSConn rpcclient.RpcClientConnection
-	if thdSConn, err = sp.GetConnection(utils.ThresholdS, sp.GetConfig().StatSCfg().ThresholdSConns); err != nil {
+	if thdSConn, err = sp.NewConnection(utils.ThresholdS, sp.GetConfig().StatSCfg().ThresholdSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.StatS, err.Error()))
 		return
 	}
@@ -85,7 +85,7 @@ func (sts *StatService) GetIntenternalChan() (conn chan rpcclient.RpcClientConne
 // Reload handles the change of config
 func (sts *StatService) Reload(sp servmanager.ServiceProvider) (err error) {
 	var thdSConn rpcclient.RpcClientConnection
-	if thdSConn, err = sp.GetConnection(utils.ThresholdS, sp.GetConfig().StatSCfg().ThresholdSConns); err != nil {
+	if thdSConn, err = sp.NewConnection(utils.ThresholdS, sp.GetConfig().StatSCfg().ThresholdSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.StatS, err.Error()))
 		return
 	}
