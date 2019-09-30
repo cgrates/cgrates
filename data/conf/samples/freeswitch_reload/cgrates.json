@@ -1,0 +1,21 @@
+{
+
+    // Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+    // Copyright (C) ITsysCOM GmbH
+    
+    "rals": {
+        "enabled": true,						// enable Rater service: <true|false>
+    },
+    
+    "sessions": {
+        "enabled": true,						// enable Rater service: <true|false>
+    },
+    
+    "freeswitch_agent": {
+        "enabled": true,				// starts SessionManager service: <true|false>
+        "event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
+            {"address": "1.2.3.4:8021", "password": "ClueCon", "reconnects": 5},
+        ],
+    },
+}
+    
