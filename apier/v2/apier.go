@@ -85,7 +85,7 @@ func (self *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *str
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, attrs.AccountActionsId); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	sched := self.Scheduler.GetScheduler()
+	sched := self.SchedulerService.GetScheduler()
 	if sched != nil {
 		sched.Reload()
 	}

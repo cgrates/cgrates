@@ -42,18 +42,18 @@ type SchedulerGeter interface {
 }
 
 type ApierV1 struct {
-	StorDb      engine.LoadStorage
-	DataManager *engine.DataManager
-	CdrDb       engine.CdrStorage
-	Config      *config.CGRConfig
-	Responder   *engine.Responder
-	CDRs        rpcclient.RpcClientConnection // FixMe: populate it from cgr-engine
-	Scheduler   SchedulerGeter                // Need to have them capitalize so we can export in V2
-	HTTPPoster  *engine.HTTPPoster
-	FilterS     *engine.FilterS //Used for CDR Exporter
-	CacheS      rpcclient.RpcClientConnection
-	SchedulerS  rpcclient.RpcClientConnection
-	AttributeS  rpcclient.RpcClientConnection
+	StorDb           engine.LoadStorage
+	DataManager      *engine.DataManager
+	CdrDb            engine.CdrStorage
+	Config           *config.CGRConfig
+	Responder        *engine.Responder
+	CDRs             rpcclient.RpcClientConnection // FixMe: populate it from cgr-engine
+	SchedulerService SchedulerGeter                // Need to have them capitalize so we can export in V2
+	HTTPPoster       *engine.HTTPPoster
+	FilterS          *engine.FilterS //Used for CDR Exporter
+	CacheS           rpcclient.RpcClientConnection
+	SchedulerS       rpcclient.RpcClientConnection
+	AttributeS       rpcclient.RpcClientConnection
 }
 
 // Call implements rpcclient.RpcClientConnection interface for internal RPC
@@ -664,7 +664,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err 
 		return err
 	}
 	if attrs.ReloadScheduler {
-		sched := self.Scheduler.GetScheduler()
+		sched := self.SchedulerService.GetScheduler()
 		if sched == nil {
 			return errors.New(utils.SchedulerNotRunningCaps)
 		}
@@ -776,7 +776,7 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 	}
 	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache
 	// Need to do it before scheduler otherwise actions to run will be unknown
-	sched := self.Scheduler.GetScheduler()
+	sched := self.SchedulerService.GetScheduler()
 	if sched != nil {
 		sched.Reload()
 	}
