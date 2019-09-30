@@ -440,7 +440,7 @@ func (fsa *FSsessions) V1GetActiveSessionIDs(ignParam string,
 	return
 }
 
-// SetSessionSConnection sets the new connection to the threshold service
+// SetSessionSConnection sets the new connection to the session service
 // only used on reload
 func (sm *FSsessions) SetSessionSConnection(sS rpcclient.RpcClientConnection) {
 	sm.sS = sS
