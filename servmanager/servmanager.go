@@ -289,6 +289,9 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 	if srvMngr.GetConfig().KamAgentCfg().Enabled {
 		go srvMngr.startService(utils.KamailioAgent)
 	}
+	if srvMngr.GetConfig().AsteriskAgentCfg().Enabled {
+		go srvMngr.startService(utils.AsteriskAgent)
+	}
 	// startServer()
 	return
 }
@@ -375,6 +378,10 @@ func (srvMngr *ServiceManager) handleReload() {
 			}
 		case <-srvMngr.GetConfig().GetReloadChan(config.KamailioAgentJSN):
 			if err = srvMngr.reloadService(utils.KamailioAgent, srvMngr.GetConfig().KamAgentCfg().Enabled); err != nil {
+				return
+			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.AsteriskAgentJSN):
+			if err = srvMngr.reloadService(utils.AsteriskAgent, srvMngr.GetConfig().AsteriskAgentCfg().Enabled); err != nil {
 				return
 			}
 		}
