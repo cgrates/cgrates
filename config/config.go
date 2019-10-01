@@ -1210,8 +1210,11 @@ func (cfg *CGRConfig) AsteriskAgentCfg() *AsteriskAgentCfg {
 	return cfg.asteriskAgentCfg
 }
 
-func (self *CGRConfig) HttpAgentCfg() []*HttpAgentCfg {
-	return self.httpAgentCfg
+// HttpAgentCfg returns the config for HttpAgent
+func (cfg *CGRConfig) HttpAgentCfg() []*HttpAgentCfg {
+	cfg.lks[HttpAgentJson].Lock()
+	defer cfg.lks[HttpAgentJson].Unlock()
+	return cfg.httpAgentCfg
 }
 
 func (cfg *CGRConfig) FilterSCfg() *FilterSCfg {
@@ -1577,6 +1580,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case HttpAgentJson:
+		cfg.rldChans[HttpAgentJson] <- struct{}{}
 		if !fall {
 			break
 		}
