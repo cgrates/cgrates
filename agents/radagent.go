@@ -335,3 +335,9 @@ func (ra *RadiusAgent) ListenAndServe() (err error) {
 	err = <-errListen
 	return
 }
+
+// SetSessionSConnection sets the new connection to the session service
+// only used on reload
+func (ra *RadiusAgent) SetSessionSConnection(sS rpcclient.RpcClientConnection) {
+	ra.sessionS = sS
+}
