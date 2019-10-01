@@ -26,6 +26,7 @@ import (
 	"path"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -78,6 +79,13 @@ func TestTPRatingProfilesITMongo(t *testing.T) {
 
 func TestTPRatingProfilesITPG(t *testing.T) {
 	tpRatingProfileConfigDIR = "tutpostgres"
+	for _, stest := range sTestsTPRatingProfiles {
+		t.Run(tpRatingProfileConfigDIR, stest)
+	}
+}
+
+func TestTPRatingProfilesITInternal(t *testing.T) {
+	tpRatingProfileConfigDIR = "tutinternal"
 	for _, stest := range sTestsTPRatingProfiles {
 		t.Run(tpRatingProfileConfigDIR, stest)
 	}
@@ -276,6 +284,7 @@ func testTPRatingProfilesRemoveTPRatingProfile(t *testing.T) {
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
+	time.Sleep(time.Duration(100 * time.Millisecond))
 }
 
 func testTPRatingProfilesGetTPRatingProfileAfterRemove(t *testing.T) {

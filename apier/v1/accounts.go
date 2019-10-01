@@ -43,7 +43,7 @@ func (self *ApierV1) GetAccountActionPlan(attrs utils.TenantAccount, reply *[]*A
 	}
 	acntID := utils.ConcatenatedKey(attrs.Tenant, attrs.Account)
 	acntATsIf, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		acntAPids, err := self.DataManager.GetAccountActionPlans(acntID, true, true, utils.NonTransactional)
+		acntAPids, err := self.DataManager.DataDB().GetAccountActionPlans(acntID, false, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			return nil, utils.NewErrServerError(err)
 		}
@@ -139,7 +139,7 @@ func (self *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *str
 			return 0, err
 		}
 		for _, acntID := range remAcntAPids {
-			if err = self.DataManager.RemAccountActionPlans(acntID, []string{attrs.ActionPlanId}); err != nil {
+			if err = self.DataManager.DataDB().RemAccountActionPlans(acntID, []string{attrs.ActionPlanId}); err != nil {
 				return 0, nil
 			}
 		}
@@ -183,7 +183,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 		}
 		if attr.ActionPlanId != "" {
 			_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-				acntAPids, err := self.DataManager.GetAccountActionPlans(accID, true, true, utils.NonTransactional)
+				acntAPids, err := self.DataManager.DataDB().GetAccountActionPlans(accID, false, utils.NonTransactional)
 				if err != nil && err != utils.ErrNotFound {
 					return 0, err
 				}
@@ -239,7 +239,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 				if err := self.DataManager.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, apIDs, true); err != nil {
 					return 0, err
 				}
-				if err := self.DataManager.SetAccountActionPlans(accID, acntAPids, true); err != nil {
+				if err := self.DataManager.DataDB().SetAccountActionPlans(accID, acntAPids, true); err != nil {
 					return 0, err
 				}
 				if err = self.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
@@ -331,7 +331,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err = self.DataManager.RemAccountActionPlans(accID, nil); err != nil &&
+	if err = self.DataManager.DataDB().RemAccountActionPlans(accID, nil); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		return err
 	}

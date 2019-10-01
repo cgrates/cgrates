@@ -100,11 +100,7 @@ func TestFilterIndexerITMongo(t *testing.T) {
 }
 
 func TestFilterIndexerITInternal(t *testing.T) {
-	mapDataDB, err := NewMapStorage()
-	if err != nil {
-		t.Fatal(err)
-	}
-	dataManager = NewDataManager(mapDataDB)
+	dataManager = NewDataManager(NewInternalDB())
 	for _, stest := range sTests {
 		t.Run("TestITInternal", stest)
 	}
@@ -311,9 +307,11 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	if err := dataManager.SetFilter(fp2); err != nil {
 		t.Error(err)
 	}
-	th.FilterIDs = []string{"Filter2"}
+	cloneTh1:=new(ThresholdProfile)
+	*cloneTh1 = *th
+	cloneTh1.FilterIDs = []string{"Filter2"}
 	time.Sleep(50 * time.Millisecond)
-	if err := dataManager.SetThresholdProfile(th, true); err != nil {
+	if err := dataManager.SetThresholdProfile(cloneTh1, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringMap{
@@ -356,9 +354,12 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	if err := dataManager.SetFilter(fp3); err != nil {
 		t.Error(err)
 	}
-	th.FilterIDs = []string{"Filter1", "Filter3"}
+	
+	clone2Th1:=new(ThresholdProfile)
+	*clone2Th1 = *th
+	clone2Th1.FilterIDs = []string{"Filter1", "Filter3"}
 	time.Sleep(50 * time.Millisecond)
-	if err := dataManager.SetThresholdProfile(th, true); err != nil {
+	if err := dataManager.SetThresholdProfile(clone2Th1, true); err != nil {
 		t.Error(err)
 	}
 	eIdxes = map[string]utils.StringMap{

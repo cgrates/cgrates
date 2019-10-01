@@ -158,7 +158,17 @@ func (iDB *InternalDB) SetVersions(vrs Versions, overwrite bool) (err error) {
 			return err
 		}
 	}
-	iDB.db.Set(utils.TBLVersions, utils.Version, vrs, nil,
+	x, ok := iDB.db.Get(utils.TBLVersions, utils.Version)
+	if !ok || x == nil {
+		iDB.db.Set(utils.TBLVersions, utils.Version, vrs, nil,
+			cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		return
+	}
+	provVrs := x.(Versions)
+	for key, val := range vrs {
+		provVrs[key] = val
+	}
+	iDB.db.Set(utils.TBLVersions, utils.Version, provVrs, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -253,16 +263,24 @@ func (iDB *InternalDB) RemoveRatingPlanDrv(id string) (err error) {
 	return
 }
 
-func (iDB *InternalDB) GetRatingProfileDrv(id string) (*RatingProfile, error) {
+func (iDB *InternalDB) GetRatingProfileDrv(id string) (rp *RatingProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheRatingProfiles, utils.RATING_PROFILE_PREFIX+id)
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*RatingProfile), nil
+	err = iDB.ms.Unmarshal(x.([]byte), &rp)
+	if err != nil {
+		return nil, err
+	}
+	return
 }
 
 func (iDB *InternalDB) SetRatingProfileDrv(rp *RatingProfile) (err error) {
-	iDB.db.Set(utils.CacheRatingProfiles, utils.RATING_PROFILE_PREFIX+rp.Id, rp, nil,
+	result, err := iDB.ms.Marshal(rp)
+	if err != nil {
+		return err
+	}
+	iDB.db.Set(utils.CacheRatingProfiles, utils.RATING_PROFILE_PREFIX+rp.Id, result, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -350,9 +368,20 @@ func (iDB *InternalDB) RemoveDestination(destID string, transactionID string) (e
 }
 
 func (iDB *InternalDB) SetReverseDestination(dest *Destination, transactionID string) (err error) {
+	var mpRevDst utils.StringMap
 	for _, p := range dest.Prefixes {
+		if iDB.db.HasItem(utils.CacheReverseDestinations, utils.REVERSE_DESTINATION_PREFIX+p) {
+			x, ok := iDB.db.Get(utils.CacheReverseDestinations, utils.REVERSE_DESTINATION_PREFIX+p)
+			if !ok || x == nil {
+				return utils.ErrNotFound
+			}
+			mpRevDst = x.(utils.StringMap)
+		} else {
+			mpRevDst = make(utils.StringMap)
+		}
+		mpRevDst[dest.Id] = true
 		// for ReverseDestination we will use Groups
-		iDB.db.Set(utils.CacheReverseDestinations, utils.REVERSE_DESTINATION_PREFIX+p, dest.Id, nil,
+		iDB.db.Set(utils.CacheReverseDestinations, utils.REVERSE_DESTINATION_PREFIX+p, mpRevDst, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return
@@ -368,9 +397,11 @@ func (iDB *InternalDB) GetReverseDestination(prefix string,
 			return nil, utils.ErrNotFound
 		}
 	}
-
-	ids = iDB.db.GetItemIDs(utils.CacheReverseDestinations, utils.REVERSE_DESTINATION_PREFIX+prefix)
-	fmt.Println(ids)
+	x, ok := iDB.db.Get(utils.CacheReverseDestinations, utils.REVERSE_DESTINATION_PREFIX+prefix)
+	if !ok || x == nil {
+		return nil, utils.ErrNotFound
+	}
+	ids = x.(utils.StringMap).Slice()
 	if len(ids) == 0 {
 		Cache.Set(utils.CacheReverseDestinations, prefix, nil, nil,
 			cacheCommit(transactionID), transactionID)
@@ -384,6 +415,7 @@ func (iDB *InternalDB) GetReverseDestination(prefix string,
 func (iDB *InternalDB) UpdateReverseDestination(oldDest, newDest *Destination,
 	transactionID string) error {
 	var obsoletePrefixes []string
+	var mpRevDst utils.StringMap
 	var addedPrefixes []string
 	var found bool
 	for _, oldPrefix := range oldDest.Prefixes {
@@ -414,32 +446,59 @@ func (iDB *InternalDB) UpdateReverseDestination(oldDest, newDest *Destination,
 	cCommit := cacheCommit(transactionID)
 	var err error
 	for _, obsoletePrefix := range obsoletePrefixes {
-		iDB.db.Remove(utils.CacheReverseDestinations, utils.REVERSE_DESTINATION_PREFIX+obsoletePrefix,
-			cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		if iDB.db.HasItem(utils.CacheReverseDestinations, utils.REVERSE_DESTINATION_PREFIX+obsoletePrefix) {
+			x, ok := iDB.db.Get(utils.CacheReverseDestinations, utils.REVERSE_DESTINATION_PREFIX+obsoletePrefix)
+			if !ok || x == nil {
+				return utils.ErrNotFound
+			}
+			mpRevDst = x.(utils.StringMap)
+			if _, has := mpRevDst[oldDest.Id]; has {
+				delete(mpRevDst, oldDest.Id)
+			}
+			// for ReverseDestination we will use Groups
+			iDB.db.Set(utils.CacheReverseDestinations, utils.REVERSE_DESTINATION_PREFIX+obsoletePrefix, mpRevDst, nil,
+				cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		}
 
 		Cache.Remove(utils.CacheReverseDestinations, obsoletePrefix,
 			cCommit, transactionID)
 	}
 	// add the id to all new prefixes
 	for _, addedPrefix := range addedPrefixes {
-		iDB.db.Set(utils.CacheReverseDestinations, utils.REVERSE_DESTINATION_PREFIX+addedPrefix, nil, []string{newDest.Id},
+		if iDB.db.HasItem(utils.CacheReverseDestinations, utils.REVERSE_DESTINATION_PREFIX+addedPrefix) {
+			x, ok := iDB.db.Get(utils.CacheReverseDestinations, utils.REVERSE_DESTINATION_PREFIX+addedPrefix)
+			if !ok || x == nil {
+				return utils.ErrNotFound
+			}
+			mpRevDst = x.(utils.StringMap)
+		} else {
+			mpRevDst = make(utils.StringMap)
+		}
+		mpRevDst[newDest.Id] = true
+		// for ReverseDestination we will use Groups
+		iDB.db.Set(utils.CacheReverseDestinations, utils.REVERSE_DESTINATION_PREFIX+addedPrefix, mpRevDst, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
-		Cache.Remove(utils.CacheReverseDestinations, addedPrefix,
-			cCommit, transactionID)
 	}
 	return err
 }
 
-func (iDB *InternalDB) GetActionsDrv(id string) (Actions, error) {
+func (iDB *InternalDB) GetActionsDrv(id string) (acts Actions, err error) {
 	x, ok := iDB.db.Get(utils.CacheActions, utils.ACTION_PREFIX+id)
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(Actions), nil
+	if err = iDB.ms.Unmarshal(x.([]byte), &acts); err != nil {
+		return nil, err
+	}
+	return
 }
 
 func (iDB *InternalDB) SetActionsDrv(id string, acts Actions) (err error) {
-	iDB.db.Set(utils.CacheActions, utils.ACTION_PREFIX+id, acts, nil,
+	result, err := iDB.ms.Marshal(acts)
+	if err != nil {
+		return err
+	}
+	iDB.db.Set(utils.CacheActions, utils.ACTION_PREFIX+id, result, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -450,16 +509,23 @@ func (iDB *InternalDB) RemoveActionsDrv(id string) (err error) {
 	return
 }
 
-func (iDB *InternalDB) GetSharedGroupDrv(id string) (*SharedGroup, error) {
+func (iDB *InternalDB) GetSharedGroupDrv(id string) (sh *SharedGroup, err error) {
 	x, ok := iDB.db.Get(utils.CacheSharedGroups, utils.SHARED_GROUP_PREFIX+id)
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*SharedGroup), nil
+	if err = iDB.ms.Unmarshal(x.([]byte), &sh); err != nil {
+		return nil, err
+	}
+	return
 }
 
 func (iDB *InternalDB) SetSharedGroupDrv(sh *SharedGroup) (err error) {
-	iDB.db.Set(utils.CacheSharedGroups, utils.SHARED_GROUP_PREFIX+sh.Id, sh, nil,
+	result, err := iDB.ms.Marshal(sh)
+	if err != nil {
+		return err
+	}
+	iDB.db.Set(utils.CacheSharedGroups, utils.SHARED_GROUP_PREFIX+sh.Id, result, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -470,16 +536,23 @@ func (iDB *InternalDB) RemoveSharedGroupDrv(id string) (err error) {
 	return
 }
 
-func (iDB *InternalDB) GetActionTriggersDrv(id string) (ActionTriggers, error) {
+func (iDB *InternalDB) GetActionTriggersDrv(id string) (at ActionTriggers, err error) {
 	x, ok := iDB.db.Get(utils.CacheActionTriggers, utils.ACTION_TRIGGER_PREFIX+id)
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(ActionTriggers), nil
+	if err = iDB.ms.Unmarshal(x.([]byte), &at); err != nil {
+		return nil, err
+	}
+	return
 }
 
 func (iDB *InternalDB) SetActionTriggersDrv(id string, at ActionTriggers) (err error) {
-	iDB.db.Set(utils.CacheActionTriggers, utils.ACTION_TRIGGER_PREFIX+id, at, nil,
+	result, err := iDB.ms.Marshal(at)
+	if err != nil {
+		return err
+	}
+	iDB.db.Set(utils.CacheActionTriggers, utils.ACTION_TRIGGER_PREFIX+id, result, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -507,7 +580,7 @@ func (iDB *InternalDB) GetActionPlan(key string, skipCache bool, transactionID s
 		return nil, utils.ErrNotFound
 	}
 	err = iDB.ms.Unmarshal(x.([]byte), &ats)
-	Cache.Set(utils.CacheActionPlans, utils.ACTION_PLAN_PREFIX+key, ats, nil,
+	Cache.Set(utils.CacheActionPlans, key, ats, nil,
 		cCommit, transactionID)
 	return
 }
@@ -541,7 +614,6 @@ func (iDB *InternalDB) SetActionPlan(key string, ats *ActionPlan,
 	}
 	iDB.db.Set(utils.CacheActionPlans, utils.ACTION_PLAN_PREFIX+key, result, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	Cache.Remove(utils.CacheActionPlans, key, cCommit, transactionID)
 	return
 }
 
@@ -568,18 +640,43 @@ func (iDB *InternalDB) GetAllActionPlans() (ats map[string]*ActionPlan, err erro
 	return
 }
 
-func (iDB *InternalDB) GetAccountActionPlansDrv(acntID string) (apIDs []string, err error) {
+func (iDB *InternalDB) GetAccountActionPlans(acntID string,
+	skipCache bool, transactionID string) (apIDs []string, err error) {
+	if !skipCache {
+		if x, ok := Cache.Get(utils.CacheAccountActionPlans, acntID); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.([]string), nil
+		}
+	}
 	x, ok := iDB.db.Get(utils.CacheAccountActionPlans, utils.AccountActionPlansPrefix+acntID)
 	if !ok || x == nil {
+		Cache.Set(utils.CacheAccountActionPlans, acntID, nil, nil,
+			cacheCommit(transactionID), transactionID)
 		return nil, utils.ErrNotFound
 	}
 	if err = iDB.ms.Unmarshal(x.([]byte), &apIDs); err != nil {
 		return nil, err
 	}
+	Cache.Set(utils.CacheAccountActionPlans, acntID, apIDs, nil,
+		cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (iDB *InternalDB) SetAccountActionPlansDrv(acntID string, apIDs []string) (err error) {
+
+func (iDB *InternalDB) SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error) {
+	if !overwrite {
+		if oldaPlIDs, err := iDB.GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+			return err
+		} else {
+			for _, oldAPid := range oldaPlIDs {
+				if !utils.IsSliceMember(apIDs, oldAPid) {
+					apIDs = append(apIDs, oldAPid)
+				}
+			}
+		}
+	}
 	result, err := iDB.ms.Marshal(apIDs)
 	if err != nil {
 		return err
@@ -589,13 +686,15 @@ func (iDB *InternalDB) SetAccountActionPlansDrv(acntID string, apIDs []string) (
 	return
 }
 
-func (iDB *InternalDB) RemAccountActionPlansDrv(acntID string, apIDs []string) (err error) {
+
+func (iDB *InternalDB) RemAccountActionPlans(acntID string, apIDs []string) (err error) {
+	key := utils.AccountActionPlansPrefix + acntID
 	if len(apIDs) == 0 {
-		iDB.db.Remove(utils.CacheAccountActionPlans, utils.AccountActionPlansPrefix+acntID,
+		iDB.db.Remove(utils.CacheAccountActionPlans, key,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 		return
 	}
-	oldaPlIDs, err := iDB.GetAccountActionPlansDrv(acntID)
+	oldaPlIDs, err := iDB.GetAccountActionPlans(acntID, true, utils.NonTransactional)
 	if err != nil {
 		return err
 	}
@@ -606,7 +705,6 @@ func (iDB *InternalDB) RemAccountActionPlansDrv(acntID string, apIDs []string) (
 		}
 		i++
 	}
-
 	if len(oldaPlIDs) == 0 {
 		iDB.db.Remove(utils.CacheAccountActionPlans, utils.AccountActionPlansPrefix+acntID,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
@@ -683,16 +781,24 @@ func (iDB *InternalDB) RemoveAccount(id string) (err error) {
 	return
 }
 
-func (iDB *InternalDB) GetResourceProfileDrv(tenant, id string) (*ResourceProfile, error) {
+func (iDB *InternalDB) GetResourceProfileDrv(tenant, id string) (rp *ResourceProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheResourceProfiles, utils.ResourceProfilesPrefix+utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*ResourceProfile), nil
+	err = iDB.ms.Unmarshal(x.([]byte), &rp)
+	if err != nil {
+		return nil, err
+	}
+	return
 }
 
 func (iDB *InternalDB) SetResourceProfileDrv(rp *ResourceProfile) (err error) {
-	iDB.db.Set(utils.CacheResourceProfiles, utils.ResourceProfilesPrefix+rp.TenantID(), rp, nil,
+	result, err := iDB.ms.Marshal(rp)
+	if err != nil {
+		return err
+	}
+	iDB.db.Set(utils.CacheResourceProfiles, utils.ResourceProfilesPrefix+rp.TenantID(), result, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -703,16 +809,24 @@ func (iDB *InternalDB) RemoveResourceProfileDrv(tenant, id string) (err error) {
 	return
 }
 
-func (iDB *InternalDB) GetResourceDrv(tenant, id string) (*Resource, error) {
+func (iDB *InternalDB) GetResourceDrv(tenant, id string) (r *Resource, err error) {
 	x, ok := iDB.db.Get(utils.CacheResources, utils.ResourcesPrefix+utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*Resource), nil
+	err = iDB.ms.Unmarshal(x.([]byte), &r)
+	if err != nil {
+		return nil, err
+	}
+	return
 }
 
 func (iDB *InternalDB) SetResourceDrv(r *Resource) (err error) {
-	iDB.db.Set(utils.CacheResources, utils.ResourcesPrefix+r.TenantID(), r, nil,
+	result, err := iDB.ms.Marshal(r)
+	if err != nil {
+		return err
+	}
+	iDB.db.Set(utils.CacheResources, utils.ResourcesPrefix+r.TenantID(), result, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -723,16 +837,24 @@ func (iDB *InternalDB) RemoveResourceDrv(tenant, id string) (err error) {
 	return
 }
 
-func (iDB *InternalDB) GetTimingDrv(id string) (*utils.TPTiming, error) {
+func (iDB *InternalDB) GetTimingDrv(id string) (tmg *utils.TPTiming, err error) {
 	x, ok := iDB.db.Get(utils.CacheTimings, utils.TimingsPrefix+id)
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*utils.TPTiming), nil
+	err = iDB.ms.Unmarshal(x.([]byte), &tmg)
+	if err != nil {
+		return nil, err
+	}
+	return
 }
 
 func (iDB *InternalDB) SetTimingDrv(timing *utils.TPTiming) (err error) {
-	iDB.db.Set(utils.CacheTimings, utils.TimingsPrefix+timing.ID, timing, nil,
+	result, err := iDB.ms.Marshal(timing)
+	if err != nil {
+		return err
+	}
+	iDB.db.Set(utils.CacheTimings, utils.TimingsPrefix+timing.ID, result, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -815,7 +937,6 @@ func (iDB *InternalDB) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 
 	x, ok := iDB.db.Get(cacheID, dbKey)
 	if !ok || x == nil {
-
 		result, err := iDB.ms.Marshal(toBeAdded)
 		if err != nil {
 			return err
@@ -874,16 +995,24 @@ func (iDB *InternalDB) MatchFilterIndexDrv(cacheID, itemIDPrefix,
 	return
 }
 
-func (iDB *InternalDB) GetStatQueueProfileDrv(tenant string, id string) (*StatQueueProfile, error) {
+func (iDB *InternalDB) GetStatQueueProfileDrv(tenant string, id string) (sq *StatQueueProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheStatQueueProfiles, utils.StatQueueProfilePrefix+utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*StatQueueProfile), nil
+	err = iDB.ms.Unmarshal(x.([]byte), &sq)
+	if err != nil {
+		return nil, err
+	}
+	return
 
 }
 func (iDB *InternalDB) SetStatQueueProfileDrv(sq *StatQueueProfile) (err error) {
-	iDB.db.Set(utils.CacheStatQueueProfiles, utils.StatQueueProfilePrefix+sq.TenantID(), sq, nil,
+	result, err := iDB.ms.Marshal(sq)
+	if err != nil {
+		return err
+	}
+	iDB.db.Set(utils.CacheStatQueueProfiles, utils.StatQueueProfilePrefix+sq.TenantID(), result, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -899,10 +1028,18 @@ func (iDB *InternalDB) GetStoredStatQueueDrv(tenant, id string) (sq *StoredStatQ
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*StoredStatQueue), nil
+	err = iDB.ms.Unmarshal(x.([]byte), &sq)
+	if err != nil {
+		return nil, err
+	}
+	return
 }
 func (iDB *InternalDB) SetStoredStatQueueDrv(sq *StoredStatQueue) (err error) {
-	iDB.db.Set(utils.CacheStatQueues, utils.StatQueuePrefix+utils.ConcatenatedKey(sq.Tenant, sq.ID), sq, nil,
+	result, err := iDB.ms.Marshal(sq)
+	if err != nil {
+		return err
+	}
+	iDB.db.Set(utils.CacheStatQueues, utils.StatQueuePrefix+utils.ConcatenatedKey(sq.Tenant, sq.ID), result, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -932,7 +1069,7 @@ func (iDB *InternalDB) RemThresholdProfileDrv(tenant, id string) (err error) {
 	return
 }
 
-func (iDB *InternalDB) GetThresholdDrv(tenant, id string) (*Threshold, error) {
+func (iDB *InternalDB) GetThresholdDrv(tenant, id string) (th *Threshold, err error) {
 	x, ok := iDB.db.Get(utils.CacheThresholds, utils.ThresholdPrefix+utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -973,12 +1110,11 @@ func (iDB *InternalDB) RemoveFilterDrv(tenant, id string) (err error) {
 	return
 }
 
-func (iDB *InternalDB) GetSupplierProfileDrv(tenant, id string) (*SupplierProfile, error) {
+func (iDB *InternalDB) GetSupplierProfileDrv(tenant, id string) (spp *SupplierProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheSupplierProfiles, utils.SupplierProfilePrefix+utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-
 	return x.(*SupplierProfile), nil
 
 }
@@ -992,7 +1128,7 @@ func (iDB *InternalDB) RemoveSupplierProfileDrv(tenant, id string) (err error) {
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
-func (iDB *InternalDB) GetAttributeProfileDrv(tenant, id string) (*AttributeProfile, error) {
+func (iDB *InternalDB) GetAttributeProfileDrv(tenant, id string) (attr *AttributeProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheAttributeProfiles, utils.AttributeProfilePrefix+utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -1009,7 +1145,7 @@ func (iDB *InternalDB) RemoveAttributeProfileDrv(tenant, id string) (err error) 
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
-func (iDB *InternalDB) GetChargerProfileDrv(tenant, id string) (*ChargerProfile, error) {
+func (iDB *InternalDB) GetChargerProfileDrv(tenant, id string) (ch *ChargerProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheChargerProfiles, utils.ChargerProfilePrefix+utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -1026,7 +1162,7 @@ func (iDB *InternalDB) RemoveChargerProfileDrv(tenant, id string) (err error) {
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
-func (iDB *InternalDB) GetDispatcherProfileDrv(tenant, id string) (*DispatcherProfile, error) {
+func (iDB *InternalDB) GetDispatcherProfileDrv(tenant, id string) (dpp *DispatcherProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheDispatcherProfiles, utils.DispatcherProfilePrefix+utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -1048,7 +1184,10 @@ func (iDB *InternalDB) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[strin
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	loadIDs = x.(map[string]int64)
+	err = iDB.ms.Unmarshal(x.([]byte), &loadIDs)
+	if err != nil {
+		return nil, err
+	}
 	if itemIDPrefix != utils.EmptyString {
 		return map[string]int64{itemIDPrefix: loadIDs[itemIDPrefix]}, nil
 	}
@@ -1056,11 +1195,15 @@ func (iDB *InternalDB) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[strin
 
 }
 func (iDB *InternalDB) SetLoadIDsDrv(loadIDs map[string]int64) (err error) {
-	iDB.db.Set(utils.CacheLoadIDs, utils.LoadIDs, loadIDs, nil,
+	result, err := iDB.ms.Marshal(loadIDs)
+	if err != nil {
+		return err
+	}
+	iDB.db.Set(utils.CacheLoadIDs, utils.LoadIDs, result, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
-func (iDB *InternalDB) GetDispatcherHostDrv(tenant, id string) (*DispatcherHost, error) {
+func (iDB *InternalDB) GetDispatcherHostDrv(tenant, id string) (dpp *DispatcherHost, err error) {
 	x, ok := iDB.db.Get(utils.CacheDispatcherHosts, utils.DispatcherHostPrefix+utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound

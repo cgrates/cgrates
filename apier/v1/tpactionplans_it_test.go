@@ -81,6 +81,13 @@ func TestTPAccPlansITPG(t *testing.T) {
 	}
 }
 
+func TestTPAccPlansITInternal(t *testing.T) {
+	tpAccPlansConfigDIR = "tutinternal"
+	for _, stest := range sTestsTPAccPlans {
+		t.Run(tpAccPlansConfigDIR, stest)
+	}
+}
+
 func testTPAccPlansInitCfg(t *testing.T) {
 	var err error
 	tpAccPlansCfgPath = path.Join(tpAccPlansDataDir, "conf", "samples", tpAccPlansConfigDIR)

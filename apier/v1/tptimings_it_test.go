@@ -80,6 +80,13 @@ func TestTPTimingITPG(t *testing.T) {
 	}
 }
 
+func TestTPTimingITInternal(t *testing.T) {
+	tpTimingConfigDIR = "tutinternal"
+	for _, stest := range sTestsTPTiming {
+		t.Run(tpTimingConfigDIR, stest)
+	}
+}
+
 func testTPTimingsInitCfg(t *testing.T) {
 	var err error
 	tpTimingCfgPath = path.Join(tpTimingDataDir, "conf", "samples", tpTimingConfigDIR)

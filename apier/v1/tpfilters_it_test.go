@@ -82,6 +82,13 @@ func TestTPFilterITPG(t *testing.T) {
 	}
 }
 
+func TestTPFilterITInternal(t *testing.T) {
+	tpFilterConfigDIR = "tutinternal"
+	for _, stest := range sTestsTPFilters {
+		t.Run(tpFilterConfigDIR, stest)
+	}
+}
+
 func testTPFilterInitCfg(t *testing.T) {
 	var err error
 	tpFilterCfgPath = path.Join(tpFilterDataDir, "conf", "samples", tpFilterConfigDIR)

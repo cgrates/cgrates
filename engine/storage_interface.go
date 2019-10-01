@@ -74,9 +74,10 @@ type DataDB interface {
 	SetActionPlan(string, *ActionPlan, bool, string) error
 	RemoveActionPlan(key string, transactionID string) error
 	GetAllActionPlans() (map[string]*ActionPlan, error)
-	GetAccountActionPlansDrv(acntID string) (apIDs []string, err error)
-	SetAccountActionPlansDrv(acntID string, apIDs []string) (err error)
-	RemAccountActionPlansDrv(acntID string, apIDs []string) (err error)
+	GetAccountActionPlans(acntID string, skipCache bool,
+		transactionID string) (apIDs []string, err error)
+	SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error)
+	RemAccountActionPlans(acntID string, apIDs []string) (err error)
 	PushTask(*Task) error
 	PopTask() (*Task, error)
 	GetAccount(string) (*Account, error)

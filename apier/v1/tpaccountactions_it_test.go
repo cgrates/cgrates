@@ -26,6 +26,7 @@ import (
 	"path"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -78,6 +79,13 @@ func TestTPAccActionsITMongo(t *testing.T) {
 
 func TestTPAccActionsITPG(t *testing.T) {
 	tpAccActionsConfigDIR = "tutpostgres"
+	for _, stest := range sTestsTPAccActions {
+		t.Run(tpAccActionsConfigDIR, stest)
+	}
+}
+
+func TestTPAccActionsITInternal(t *testing.T) {
+	tpAccActionsConfigDIR = "tutinternal"
 	for _, stest := range sTestsTPAccActions {
 		t.Run(tpAccActionsConfigDIR, stest)
 	}
@@ -219,7 +227,7 @@ func testTPAccActionsRemTPAccAction(t *testing.T) {
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-
+	time.Sleep(time.Duration(100 * time.Millisecond))
 }
 
 func testTPAccActionsGetTPAccActionAfterRemove(t *testing.T) {
@@ -232,7 +240,7 @@ func testTPAccActionsGetTPAccActionAfterRemove(t *testing.T) {
 }
 
 func testTPAccActionsKillEngine(t *testing.T) {
-	if err := engine.KillEngine(tpDestinationDelay); err != nil {
+	if err := engine.KillEngine(tpAccActionsDelay); err != nil {
 		t.Error(err)
 	}
 }

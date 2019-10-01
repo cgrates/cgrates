@@ -80,6 +80,13 @@ func TestTPRatingPlansITPG(t *testing.T) {
 	}
 }
 
+func TestTPRatingPlansITInternal(t *testing.T) {
+	tpRatingPlanConfigDIR = "tutinternal"
+	for _, stest := range sTestsTPRatingPlans {
+		t.Run(tpRatingPlanConfigDIR, stest)
+	}
+}
+
 func testTPRatingPlansInitCfg(t *testing.T) {
 	var err error
 	tpRatingPlanCfgPath = path.Join(tpRatingPlanDataDir, "conf", "samples", tpRatingPlanConfigDIR)

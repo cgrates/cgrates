@@ -25,6 +25,7 @@ import (
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -771,6 +772,10 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 		t.Fatal(err)
 	}
 	reply.Compile()
+	sort.Strings(reply.FilterIDs)
+	sort.Strings(alsPrf.AttributeProfile.FilterIDs)
+	sort.Strings(reply.Contexts)
+	sort.Strings(alsPrf.AttributeProfile.Contexts)
 	if !reflect.DeepEqual(alsPrf.AttributeProfile, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
 	}

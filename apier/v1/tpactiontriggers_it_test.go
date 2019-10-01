@@ -81,6 +81,13 @@ func TestTPActionTriggersITPG(t *testing.T) {
 	}
 }
 
+func TestTPActionTriggersITInternal(t *testing.T) {
+	tpActionTriggerConfigDIR = "tutinternal"
+	for _, stest := range sTestsTPActionTriggers {
+		t.Run(tpActionTriggerConfigDIR, stest)
+	}
+}
+
 func testTPActionTriggersInitCfg(t *testing.T) {
 	var err error
 	tpActionTriggerCfgPath = path.Join(tpActionTriggerDataDir, "conf", "samples", tpActionTriggerConfigDIR)

@@ -81,6 +81,13 @@ func TestTPStatITPG(t *testing.T) {
 	}
 }
 
+func TestTPStatITInternal(t *testing.T) {
+	tpStatConfigDIR = "tutinternal"
+	for _, stest := range sTestsTPStats {
+		t.Run(tpStatConfigDIR, stest)
+	}
+}
+
 func testTPStatsInitCfg(t *testing.T) {
 	var err error
 	tpStatCfgPath = path.Join(tpStatDataDir, "conf", "samples", tpStatConfigDIR)

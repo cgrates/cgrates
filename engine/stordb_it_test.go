@@ -46,18 +46,18 @@ var sTestsStorDBit = []func(t *testing.T){
 	testStorDBitCRUDTpDestinations,
 	testStorDBitCRUDTpRates,
 	testStorDBitCRUDTpDestinationRates,
-	// testStorDBitCRUDTpRatingPlans,
-	// testStorDBitCRUDTpRatingProfiles,
+	testStorDBitCRUDTpRatingPlans,
+	testStorDBitCRUDTpRatingProfiles,
 	testStorDBitCRUDTpSharedGroups,
 	testStorDBitCRUDTpActions,
 	testStorDBitCRUDTpActionPlans,
 	testStorDBitCRUDTpActionTriggers,
-	// testStorDBitCRUDTpAccountActions,
+	testStorDBitCRUDTpAccountActions,
 	testStorDBitCRUDTpResources,
-	//testStorDBitCRUDTpStats,
-	// testStorDBitCRUDCDRs,
-	// testStorDBitCRUDSMCosts,
-	// testStorDBitCRUDSMCosts2,
+	testStorDBitCRUDTpStats,
+	testStorDBitCRUDCDRs,
+	testStorDBitCRUDSMCosts,
+	testStorDBitCRUDSMCosts2,
 }
 
 func TestStorDBitMySQL(t *testing.T) {
@@ -123,14 +123,12 @@ func TestStorDBitMongo(t *testing.T) {
 	}
 }
 
-func TestStorDBitMapStorage(t *testing.T) {
+func TestStorDBitInternalDB(t *testing.T) {
 	if cfg, err = config.NewDefaultCGRConfig(); err != nil {
 		t.Error(err)
 	}
 	config.SetCgrConfig(cfg)
-	if storDB, err = NewMapStorage(); err != nil {
-		t.Error(err)
-	}
+	storDB = NewInternalDB()
 	for _, stest := range sTestsStorDBit {
 		stestFullName := runtime.FuncForPC(reflect.ValueOf(stest).Pointer()).Name()
 		split := strings.Split(stestFullName, ".")
