@@ -476,3 +476,9 @@ func (da *DiameterAgent) V1GetActiveSessionIDs(ignParam string,
 	sessionIDs *[]*sessions.SessionID) error {
 	return utils.ErrNotImplemented
 }
+
+// SetSessionSConnection sets the new connection to the session service
+// only used on reload
+func (da *DiameterAgent) SetSessionSConnection(sS rpcclient.RpcClientConnection) {
+	da.sS = sS
+}
