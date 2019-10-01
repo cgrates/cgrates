@@ -124,9 +124,6 @@ func (ast *AsteriskAgent) Reload(sp servmanager.ServiceProvider) (err error) {
 			return
 		}
 	}
-	if err = ast.Shutdown(); err != nil {
-		return
-	}
 	ast.Lock()
 	defer ast.Unlock()
 	for _, conn := range ast.smas {

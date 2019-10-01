@@ -41,7 +41,6 @@ import (
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/services"
 	"github.com/cgrates/cgrates/servmanager"
-	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -137,61 +136,6 @@ func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConne
 		exitChan <- true // If run stopped, something is bad, stop the application
 		return
 	}
-}
-
-func startDiameterAgent(internalSsChan, internalDispatcherSChan chan rpcclient.RpcClientConnection,
-	filterSChan chan *engine.FilterS, exitChan chan bool) {
-	var err error
-	utils.Logger.Info("Starting CGRateS DiameterAgent service")
-	filterS := <-filterSChan
-	filterSChan <- filterS
-	var sS rpcclient.RpcClientConnection
-	var sSInternal bool
-	intSsChan := internalSsChan
-	if cfg.DispatcherSCfg().Enabled {
-		intSsChan = internalDispatcherSChan
-	}
-	if !cfg.DispatcherSCfg().Enabled && cfg.DiameterAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
-		sSInternal = true
-		sSIntConn := <-internalSsChan
-		internalSsChan <- sSIntConn
-		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
-	} else {
-		sS, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.DiameterAgentCfg().SessionSConns, intSsChan, false)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.DiameterAgent, utils.SessionS, err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-
-	da, err := agents.NewDiameterAgent(cfg, filterS, sS)
-	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> error: %s!", err))
-		exitChan <- true
-		return
-	}
-	if sSInternal { // bidirectional client backwards connection
-		sS.(*utils.BiRPCInternalClient).SetClientConn(da)
-		var rply string
-		if err := sS.Call(utils.SessionSv1RegisterInternalBiJSONConn,
-			utils.EmptyString, &rply); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.DiameterAgent, utils.SessionS, err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	if err = da.ListenAndServe(); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> error: %s!", err))
-	}
-	exitChan <- true
 }
 
 func startHTTPAgent(internalSMGChan, internalDispatcherSChan chan rpcclient.RpcClientConnection,
@@ -764,6 +708,7 @@ func main() {
 		services.NewKamailioAgent(),
 		services.NewAsteriskAgent(), // partial reload
 		services.NewRadiusAgent(),   // partial reload
+		services.NewDiameterAgent(), // partial reload
 	)
 	internalAttributeSChan := attrS.GetIntenternalChan()
 	internalChargerSChan := chrS.GetIntenternalChan()
@@ -815,10 +760,6 @@ func main() {
 
 	// Start CDRC components if necessary
 	go startCdrcs(internalCdrSChan, internalRaterChan, internalDispatcherSChan, filterSChan, exitChan)
-
-	if cfg.DiameterAgentCfg().Enabled {
-		go startDiameterAgent(internalSMGChan, internalDispatcherSChan, filterSChan, exitChan)
-	}
 
 	if len(cfg.HttpAgentCfg()) != 0 {
 		go startHTTPAgent(internalSMGChan, internalDispatcherSChan, server, filterSChan,
