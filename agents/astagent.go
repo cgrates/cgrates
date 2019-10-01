@@ -362,3 +362,9 @@ func (sma *AsteriskAgent) V1GetActiveSessionIDs(ignParam string,
 	return nil
 
 }
+
+// SetSessionSConnection sets the new connection to the session service
+// only used on reload
+func (sma *AsteriskAgent) SetSessionSConnection(sS rpcclient.RpcClientConnection) {
+	sma.smg = sS
+}

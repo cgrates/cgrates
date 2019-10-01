@@ -1203,9 +1203,11 @@ func (cfg *CGRConfig) KamAgentCfg() *KamAgentCfg {
 	return cfg.kamAgentCfg
 }
 
-// ToDo: fix locking here
-func (self *CGRConfig) AsteriskAgentCfg() *AsteriskAgentCfg {
-	return self.asteriskAgentCfg
+// AsteriskAgentCfg returns the config for AsteriskAgent
+func (cfg *CGRConfig) AsteriskAgentCfg() *AsteriskAgentCfg {
+	cfg.lks[AsteriskAgentJSN].Lock()
+	defer cfg.lks[AsteriskAgentJSN].Unlock()
+	return cfg.asteriskAgentCfg
 }
 
 func (self *CGRConfig) HttpAgentCfg() []*HttpAgentCfg {
@@ -1545,6 +1547,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case AsteriskAgentJSN:
+		cfg.rldChans[AsteriskAgentJSN] <- struct{}{}
 		if !fall {
 			break
 		}
