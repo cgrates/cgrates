@@ -17,7 +17,7 @@ require (
 	github.com/cenkalti/rpc2 v0.0.0-20180727162946-9642ea02d0aa
 	github.com/cgrates/aringo v0.0.0-20181115151919-f996da7890ea
 	github.com/cgrates/fsock v0.0.0-20190623100231-317895b42f1a
-	github.com/cgrates/kamevapi v0.0.0-20190605144325-ec679e017654
+	github.com/cgrates/kamevapi v0.0.0-20191001070356-51d06bab2926
 	github.com/cgrates/ltcache v0.0.0-20181016092649-92fb7fa77cca
 	github.com/cgrates/radigo v0.0.0-20181207143118-e5c8f3272ccc
 	github.com/cgrates/rpcclient v0.0.0-20190505150825-8fcc68b2c38b
