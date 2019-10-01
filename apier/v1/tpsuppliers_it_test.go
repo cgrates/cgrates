@@ -75,6 +75,13 @@ func TestTPSplPrfITMongo(t *testing.T) {
 	}
 }
 
+func TestTPSplPrfITInternal(t *testing.T) {
+	tpSplPrfConfigDIR = "tutinternal"
+	for _, stest := range sTestsTPSplPrf {
+		t.Run(tpSplPrfConfigDIR, stest)
+	}
+}
+
 func testTPSplPrfInitCfg(t *testing.T) {
 	var err error
 	tpSplPrfCfgPath = path.Join(tpSplPrfDataDire, "conf", "samples", tpSplPrfConfigDIR)

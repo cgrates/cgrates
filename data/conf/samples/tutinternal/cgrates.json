@@ -15,12 +15,12 @@
 	"http": ":2080",
 },
 
-"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_type": "*internal",						// data_db type: <redis|mongo>
+"data_db": {
+	"db_type": "*internal",	
 },
 
-"stor_db": {			// for the moment use mysql as stordb until implemted all methods
-	"db_password": "CGRateS.org",
+"stor_db": {
+	"db_type": "*internal",	
 },
 
 "rals": {

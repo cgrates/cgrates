@@ -870,13 +870,6 @@ func (self *SQLStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix stri
 	return smCosts, nil
 }
 
-func (self *SQLStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {
-	return
-}
-func (self *SQLStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
-	return
-}
-
 func (self *SQLStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
 	tx := self.db.Begin()
 	cdrSql := cdr.AsCDRsql()

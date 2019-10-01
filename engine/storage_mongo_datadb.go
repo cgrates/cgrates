@@ -461,7 +461,7 @@ func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) (err error) {
 					return err
 				}
 				for acntID := range apl.AccountIDs {
-					if err = ms.SetAccountActionPlansDrv(acntID, []string{apl.Id}); err != nil {
+					if err = ms.SetAccountActionPlans(acntID, []string{apl.Id}, false); err != nil {
 						return err
 					}
 				}
@@ -514,7 +514,7 @@ func (ms *MongoStorage) RemoveReverseForPrefix(prefix string) (err error) {
 					return err
 				}
 				for acntID := range apl.AccountIDs {
-					if err = ms.RemAccountActionPlansDrv(acntID, []string{apl.Id}); err != nil {
+					if err = ms.RemAccountActionPlans(acntID, []string{apl.Id}); err != nil {
 						return err
 					}
 				}
@@ -1456,7 +1456,15 @@ func (ms *MongoStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err err
 	return
 }
 
-func (ms *MongoStorage) GetAccountActionPlansDrv(acntID string) (aPlIDs []string, err error) {
+func (ms *MongoStorage) GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (aPlIDs []string, err error) {
+	if !skipCache {
+		if x, ok := Cache.Get(utils.CacheAccountActionPlans, acntID); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.([]string), nil
+		}
+	}
 	var kv struct {
 		Key   string
 		Value []string
@@ -1465,7 +1473,9 @@ func (ms *MongoStorage) GetAccountActionPlansDrv(acntID string) (aPlIDs []string
 		cur := ms.getCol(ColAAp).FindOne(sctx, bson.M{"key": acntID})
 		if err := cur.Decode(&kv); err != nil {
 			if err == mongo.ErrNoDocuments {
-				err = utils.ErrNotFound
+				Cache.Set(utils.CacheAccountActionPlans, acntID, nil, nil,
+					cacheCommit(transactionID), transactionID)
+				return utils.ErrNotFound
 			}
 			return err
 		}
@@ -1474,10 +1484,23 @@ func (ms *MongoStorage) GetAccountActionPlansDrv(acntID string) (aPlIDs []string
 		return nil, err
 	}
 	aPlIDs = kv.Value
+	Cache.Set(utils.CacheAccountActionPlans, acntID, aPlIDs, nil,
+		cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (ms *MongoStorage) SetAccountActionPlansDrv(acntID string, aPlIDs []string) (err error) {
+func (ms *MongoStorage) SetAccountActionPlans(acntID string, aPlIDs []string, overwrite bool) (err error) {
+	if !overwrite {
+		if oldaPlIDs, err := ms.GetAccountActionPlans(acntID, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+			return err
+		} else {
+			for _, oldAPid := range oldaPlIDs {
+				if !utils.IsSliceMember(aPlIDs, oldAPid) {
+					aPlIDs = append(aPlIDs, oldAPid)
+				}
+			}
+		}
+	}
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColAAp).UpdateOne(sctx, bson.M{"key": acntID},
 			bson.M{"$set": struct {
@@ -1491,7 +1514,7 @@ func (ms *MongoStorage) SetAccountActionPlansDrv(acntID string, aPlIDs []string)
 }
 
 // ToDo: check return len(aPlIDs) == 0
-func (ms *MongoStorage) RemAccountActionPlansDrv(acntID string, aPlIDs []string) (err error) {
+func (ms *MongoStorage) RemAccountActionPlans(acntID string, aPlIDs []string) (err error) {
 	if len(aPlIDs) == 0 {
 		return ms.query(func(sctx mongo.SessionContext) (err error) {
 			dr, err := ms.getCol(ColAAp).DeleteOne(sctx, bson.M{"key": acntID})
@@ -1501,7 +1524,7 @@ func (ms *MongoStorage) RemAccountActionPlansDrv(acntID string, aPlIDs []string)
 			return err
 		})
 	}
-	oldAPlIDs, err := ms.GetAccountActionPlansDrv(acntID)
+	oldAPlIDs, err := ms.GetAccountActionPlans(acntID, true, utils.NonTransactional)
 	if err != nil {
 		return err
 	}

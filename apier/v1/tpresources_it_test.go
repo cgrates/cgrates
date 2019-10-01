@@ -80,6 +80,13 @@ func TestTPResITPG(t *testing.T) {
 	}
 }
 
+func TestTPResITInternal(t *testing.T) {
+	tpResConfigDIR = "tutinternal"
+	for _, stest := range sTestsTPResources {
+		t.Run(tpResConfigDIR, stest)
+	}
+}
+
 func testTPResInitCfg(t *testing.T) {
 	var err error
 	tpResCfgPath = path.Join(tpResDataDir, "conf", "samples", tpResConfigDIR)

@@ -80,6 +80,13 @@ func TestTPSharedGroupsITPG(t *testing.T) {
 	}
 }
 
+func TestTPSharedGroupsITInternal(t *testing.T) {
+	tpSharedGroupConfigDIR = "tutinternal"
+	for _, stest := range sTestsTPSharedGroups {
+		t.Run(tpSharedGroupConfigDIR, stest)
+	}
+}
+
 func testTPSharedGroupsInitCfg(t *testing.T) {
 	var err error
 	tpSharedGroupCfgPath = path.Join(tpSharedGroupDataDir, "conf", "samples", tpSharedGroupConfigDIR)

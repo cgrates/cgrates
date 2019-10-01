@@ -26,13 +26,14 @@ import (
 	"reflect"
 	"testing"
 	"time"
+	"sort"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-var (
+	var (
 	tSv1CfgPath string
 	tSv1Cfg     *config.CGRConfig
 	tSv1Rpc     *rpc.Client
@@ -403,8 +404,12 @@ func testV1TSUpdateThresholdProfile(t *testing.T) {
 	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
+	} else{
+		sort.Strings(reply.FilterIDs)
+		sort.Strings(tPrfl.ThresholdProfile.FilterIDs)
+		if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
+			t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
+		}
 	}
 }
 

@@ -80,6 +80,13 @@ func TestTPDestinationsITPG(t *testing.T) {
 	}
 }
 
+func TestTPDestinationsITInternal(t *testing.T) {
+	tpDestinationConfigDIR = "tutinternal"
+	for _, stest := range sTestsTPDestinations {
+		t.Run(tpDestinationConfigDIR, stest)
+	}
+}
+
 func testTPDestinationsInitCfg(t *testing.T) {
 	var err error
 	tpDestinationCfgPath = path.Join(tpDestinationDataDir, "conf", "samples", tpDestinationConfigDIR)

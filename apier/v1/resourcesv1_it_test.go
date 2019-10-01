@@ -24,6 +24,7 @@ import (
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -689,8 +690,12 @@ func testV1RsGetResourceProfileAfterUpdate(t *testing.T) {
 	if err := rlsV1Rpc.Call("ApierV1.GetResourceProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsConfig.ID}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(reply, rlsConfig.ResourceProfile) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(rlsConfig.ResourceProfile), utils.ToJSON(reply))
+	} else {
+		sort.Strings(reply.FilterIDs)
+		sort.Strings(rlsConfig.ResourceProfile.FilterIDs)
+		if !reflect.DeepEqual(reply, rlsConfig.ResourceProfile) {
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(rlsConfig.ResourceProfile), utils.ToJSON(reply))
+		}
 	}
 }
 

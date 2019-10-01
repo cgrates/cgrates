@@ -73,6 +73,13 @@ func TestTPDispatcherITMongo(t *testing.T) {
 	}
 }
 
+func TestTPDispatcherITInternal(t *testing.T) {
+	tpDispatcherConfigDIR = "tutinternal"
+	for _, stest := range sTestsTPDispatchers {
+		t.Run(tpDispatcherConfigDIR, stest)
+	}
+}
+
 func testTPDispatcherInitCfg(t *testing.T) {
 	var err error
 	tpDispatcherCfgPath = path.Join(tpDispatcherDataDir, "conf", "samples", tpDispatcherConfigDIR)

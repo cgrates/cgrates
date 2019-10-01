@@ -81,6 +81,13 @@ func TestTPThresholdITPG(t *testing.T) {
 	}
 }
 
+func TestTPThresholdITInternal(t *testing.T) {
+	tpThresholdConfigDIR = "tutinternal"
+	for _, stest := range sTestsTPThreshold {
+		t.Run(tpThresholdConfigDIR, stest)
+	}
+}
+
 func testTPThreholdInitCfg(t *testing.T) {
 	var err error
 	tpThresholdCfgPath = path.Join(tpThresholdDataDir, "conf", "samples", tpThresholdConfigDIR)

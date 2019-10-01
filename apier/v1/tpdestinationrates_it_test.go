@@ -80,6 +80,13 @@ func TestTPDstRateITPG(t *testing.T) {
 	}
 }
 
+func TestTPDstRateITInternal(t *testing.T) {
+	tpDstRateConfigDIR = "tutinternal"
+	for _, stest := range sTestsTPDstRates {
+		t.Run(tpDstRateConfigDIR, stest)
+	}
+}
+
 func testTPDstRateInitCfg(t *testing.T) {
 	var err error
 	tpDstRateCfgPath = path.Join(tpDstRateDataDir, "conf", "samples", tpDstRateConfigDIR)

@@ -296,7 +296,7 @@ func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) (err error) {
 				return err
 			}
 			for acntID := range apl.AccountIDs {
-				if err = rs.SetAccountActionPlansDrv(acntID, []string{apl.Id}); err != nil {
+				if err = rs.SetAccountActionPlans(acntID, []string{apl.Id}, false); err != nil {
 					return err
 				}
 			}
@@ -343,7 +343,7 @@ func (rs *RedisStorage) RemoveReverseForPrefix(prefix string) (err error) {
 				return err
 			}
 			for acntID := range apl.AccountIDs {
-				if err = rs.RemAccountActionPlansDrv(acntID, []string{apl.Id}); err != nil {
+				if err = rs.RemAccountActionPlans(acntID, []string{apl.Id}); err != nil {
 					return err
 				}
 			}
@@ -990,11 +990,22 @@ func (rs *RedisStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err err
 	return
 }
 
-func (rs *RedisStorage) GetAccountActionPlansDrv(acntID string) (aPlIDs []string, err error) {
+func (rs *RedisStorage) GetAccountActionPlans(acntID string, skipCache bool,
+	transactionID string) (aPlIDs []string, err error) {
+	if !skipCache {
+		if x, ok := Cache.Get(utils.CacheAccountActionPlans, acntID); ok {
+			if x == nil {
+				return nil, utils.ErrNotFound
+			}
+			return x.([]string), nil
+		}
+	}
 	var values []byte
 	if values, err = rs.Cmd(redis_GET,
 		utils.AccountActionPlansPrefix+acntID).Bytes(); err != nil {
 		if err == redis.ErrRespNil { // did not find the destination
+			Cache.Set(utils.CacheAccountActionPlans, acntID, nil, nil,
+				cacheCommit(transactionID), transactionID)
 			err = utils.ErrNotFound
 		}
 		return
@@ -1002,11 +1013,23 @@ func (rs *RedisStorage) GetAccountActionPlansDrv(acntID string) (aPlIDs []string
 	if err = rs.ms.Unmarshal(values, &aPlIDs); err != nil {
 		return
 	}
-
+	Cache.Set(utils.CacheAccountActionPlans, acntID, aPlIDs, nil,
+		cacheCommit(transactionID), transactionID)
 	return
 }
 
-func (rs *RedisStorage) SetAccountActionPlansDrv(acntID string, aPlIDs []string) (err error) {
+func (rs *RedisStorage) SetAccountActionPlans(acntID string, aPlIDs []string, overwrite bool) (err error) {
+	if !overwrite {
+		if oldaPlIDs, err := rs.GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+			return err
+		} else {
+			for _, oldAPid := range oldaPlIDs {
+				if !utils.IsSliceMember(aPlIDs, oldAPid) {
+					aPlIDs = append(aPlIDs, oldAPid)
+				}
+			}
+		}
+	}
 	var result []byte
 	if result, err = rs.ms.Marshal(aPlIDs); err != nil {
 		return err
@@ -1014,12 +1037,12 @@ func (rs *RedisStorage) SetAccountActionPlansDrv(acntID string, aPlIDs []string)
 	return rs.Cmd(redis_SET, utils.AccountActionPlansPrefix+acntID, result).Err
 }
 
-func (rs *RedisStorage) RemAccountActionPlansDrv(acntID string, aPlIDs []string) (err error) {
+func (rs *RedisStorage) RemAccountActionPlans(acntID string, aPlIDs []string) (err error) {
 	key := utils.AccountActionPlansPrefix + acntID
 	if len(aPlIDs) == 0 {
 		return rs.Cmd(redis_DEL, key).Err
 	}
-	oldaPlIDs, err := rs.GetAccountActionPlansDrv(acntID)
+	oldaPlIDs, err := rs.GetAccountActionPlans(acntID, true, utils.NonTransactional)
 	if err != nil {
 		return err
 	}

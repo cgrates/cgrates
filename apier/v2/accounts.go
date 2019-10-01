@@ -119,7 +119,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 		}
 		if attr.ActionPlanIDs != nil {
 			_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-				acntAPids, err := self.DataManager.GetAccountActionPlans(accID, false, false, utils.NonTransactional)
+				acntAPids, err := self.DataManager.DataDB().GetAccountActionPlans(accID, false, utils.NonTransactional)
 				if err != nil && err != utils.ErrNotFound {
 					return 0, err
 				}
@@ -189,7 +189,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 				if err := self.DataManager.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, apIDs, true); err != nil {
 					return 0, err
 				}
-				if err := self.DataManager.SetAccountActionPlans(accID, acntAPids, true); err != nil {
+				if err := self.DataManager.DataDB().SetAccountActionPlans(accID, acntAPids, true); err != nil {
 					return 0, err
 				}
 				return 0, self.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true)

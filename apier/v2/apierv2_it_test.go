@@ -230,7 +230,7 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 		ActionPlanIDs: &[]string{argAP1.Id},
 	}
 	acntID := utils.ConcatenatedKey(argSetAcnt1.Tenant, argSetAcnt1.Account)
-	if _, err := dm.GetAccountActionPlans(acntID, false, false, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
+	if _, err := dm.DataDB().GetAccountActionPlans(acntID, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if err := apierRPC.Call("ApierV2.SetAccount", argSetAcnt1, &reply); err != nil {
@@ -242,7 +242,7 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 		t.Errorf("ActionPlan does not contain the accountID: %+v", ap)
 	}
 	eAAPids := []string{argAP1.Id}
-	if aapIDs, err := dm.GetAccountActionPlans(acntID, false, false, utils.NonTransactional); err != nil {
+	if aapIDs, err := dm.DataDB().GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eAAPids, aapIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", eAAPids, aapIDs)
@@ -279,7 +279,7 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 		t.Errorf("ActionPlan does not contain the accountID: %+v", ap)
 	}
 	eAAPids = []string{argAP1.Id, argAP2.Id}
-	if aapIDs, err := dm.GetAccountActionPlans(acntID, false, false, utils.NonTransactional); err != nil {
+	if aapIDs, err := dm.DataDB().GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eAAPids, aapIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", eAAPids, aapIDs)
@@ -305,7 +305,7 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 		t.Errorf("ActionPlan does not contain the accountID: %+v", ap)
 	}
 	eAAPids = []string{argAP2.Id}
-	if aapIDs, err := dm.GetAccountActionPlans(acntID, false, false, utils.NonTransactional); err != nil {
+	if aapIDs, err := dm.DataDB().GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eAAPids, aapIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", eAAPids, aapIDs)
