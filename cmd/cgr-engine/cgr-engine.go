@@ -31,7 +31,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/analyzers"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/cdrc"
@@ -135,38 +134,6 @@ func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConne
 		utils.Logger.Crit(fmt.Sprintf("Cdrc run error: %s", err.Error()))
 		exitChan <- true // If run stopped, something is bad, stop the application
 		return
-	}
-}
-
-func startHTTPAgent(internalSMGChan, internalDispatcherSChan chan rpcclient.RpcClientConnection,
-	server *utils.Server, filterSChan chan *engine.FilterS, dfltTenant string, exitChan chan bool) {
-	filterS := <-filterSChan
-	filterSChan <- filterS
-	var sS rpcclient.RpcClientConnection
-	intSMGChan := internalSMGChan
-	if cfg.DispatcherSCfg().Enabled {
-		intSMGChan = internalDispatcherSChan
-	}
-	utils.Logger.Info("Starting HTTP agent")
-	var err error
-	for _, agntCfg := range cfg.HttpAgentCfg() {
-		if len(agntCfg.SessionSConns) != 0 {
-			sS, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-				cfg.TlsCfg().ClientKey,
-				cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-				cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-				cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-				agntCfg.SessionSConns, intSMGChan, false)
-			if err != nil {
-				utils.Logger.Crit(fmt.Sprintf("<%s> could not connect to %s, error: %s",
-					utils.HTTPAgent, utils.SessionS, err.Error()))
-				exitChan <- true
-				return
-			}
-		}
-		server.RegisterHttpHandler(agntCfg.Url,
-			agents.NewHTTPAgent(sS, filterS, dfltTenant, agntCfg.RequestPayload,
-				agntCfg.ReplyPayload, agntCfg.RequestProcessors))
 	}
 }
 
@@ -709,6 +676,7 @@ func main() {
 		services.NewAsteriskAgent(), // partial reload
 		services.NewRadiusAgent(),   // partial reload
 		services.NewDiameterAgent(), // partial reload
+		services.NewHTTPAgent(),     // no reload
 	)
 	internalAttributeSChan := attrS.GetIntenternalChan()
 	internalChargerSChan := chrS.GetIntenternalChan()
@@ -760,11 +728,6 @@ func main() {
 
 	// Start CDRC components if necessary
 	go startCdrcs(internalCdrSChan, internalRaterChan, internalDispatcherSChan, filterSChan, exitChan)
-
-	if len(cfg.HttpAgentCfg()) != 0 {
-		go startHTTPAgent(internalSMGChan, internalDispatcherSChan, server, filterSChan,
-			cfg.GeneralCfg().DefaultTenant, exitChan)
-	}
 
 	// Start FilterS
 	go startFilterService(filterSChan, cacheS, internalStatSChan, internalRsChan, internalRaterChan, cfg, dm, exitChan)
