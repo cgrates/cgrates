@@ -194,42 +194,6 @@ func startDiameterAgent(internalSsChan, internalDispatcherSChan chan rpcclient.R
 	exitChan <- true
 }
 
-func startRadiusAgent(internalSMGChan, internalDispatcherSChan chan rpcclient.RpcClientConnection,
-	filterSChan chan *engine.FilterS, exitChan chan bool) {
-	filterS := <-filterSChan
-	filterSChan <- filterS
-	utils.Logger.Info("Starting CGRateS RadiusAgent service")
-	var err error
-	var smgConn rpcclient.RpcClientConnection
-	intSMGChan := internalSMGChan
-	if cfg.DispatcherSCfg().Enabled {
-		intSMGChan = internalDispatcherSChan
-	}
-
-	smgConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-		cfg.TlsCfg().ClientKey,
-		cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-		cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-		cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-		cfg.RadiusAgentCfg().SessionSConns, intSMGChan, false)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to SMG: %s", utils.RadiusAgent, err.Error()))
-		exitChan <- true
-		return
-	}
-
-	ra, err := agents.NewRadiusAgent(cfg, filterS, smgConn)
-	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
-		exitChan <- true
-		return
-	}
-	if err = ra.ListenAndServe(); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
-	}
-	exitChan <- true
-}
-
 func startHTTPAgent(internalSMGChan, internalDispatcherSChan chan rpcclient.RpcClientConnection,
 	server *utils.Server, filterSChan chan *engine.FilterS, dfltTenant string, exitChan chan bool) {
 	filterS := <-filterSChan
@@ -798,7 +762,8 @@ func main() {
 		services.NewDNSAgent(),
 		services.NewFreeswitchAgent(),
 		services.NewKamailioAgent(),
-		services.NewAsteriskAgent(),
+		services.NewAsteriskAgent(), // partial reload
+		services.NewRadiusAgent(),   // partial reload
 	)
 	internalAttributeSChan := attrS.GetIntenternalChan()
 	internalChargerSChan := chrS.GetIntenternalChan()
@@ -853,10 +818,6 @@ func main() {
 
 	if cfg.DiameterAgentCfg().Enabled {
 		go startDiameterAgent(internalSMGChan, internalDispatcherSChan, filterSChan, exitChan)
-	}
-
-	if cfg.RadiusAgentCfg().Enabled {
-		go startRadiusAgent(internalSMGChan, internalDispatcherSChan, filterSChan, exitChan)
 	}
 
 	if len(cfg.HttpAgentCfg()) != 0 {
