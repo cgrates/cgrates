@@ -83,8 +83,8 @@ func (rad *RadiusAgent) Reload(sp servmanager.ServiceProvider) (err error) {
 		return
 	}
 	rad.Lock()
-	defer rad.Unlock()
 	rad.rad.SetSessionSConnection(smgConn)
+	rad.Unlock()
 	return // partial reload
 }
 
