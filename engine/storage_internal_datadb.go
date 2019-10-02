@@ -19,11 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"bytes"
-	"compress/zlib"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"sync"
 
 	"github.com/cgrates/cgrates/config"
@@ -226,33 +223,11 @@ func (iDB *InternalDB) GetRatingPlanDrv(id string) (rp *RatingPlan, err error) {
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	b := bytes.NewBuffer(x.([]byte))
-	r, err := zlib.NewReader(b)
-	if err != nil {
-		return nil, err
-	}
-	out, err := ioutil.ReadAll(r)
-	if err != nil {
-		return nil, err
-	}
-	r.Close()
-	err = iDB.ms.Unmarshal(out, &rp)
-	if err != nil {
-		return nil, err
-	}
-	return
+	return x.(*RatingPlan), nil
 }
 
 func (iDB *InternalDB) SetRatingPlanDrv(rp *RatingPlan) (err error) {
-	result, err := iDB.ms.Marshal(rp)
-	if err != nil {
-		return err
-	}
-	var b bytes.Buffer
-	w := zlib.NewWriter(&b)
-	w.Write(result)
-	w.Close()
-	iDB.db.Set(utils.CacheRatingPlans, utils.RATING_PLAN_PREFIX+rp.Id, b.Bytes(), nil,
+	iDB.db.Set(utils.CacheRatingPlans, utils.RATING_PLAN_PREFIX+rp.Id, rp, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -268,19 +243,11 @@ func (iDB *InternalDB) GetRatingProfileDrv(id string) (rp *RatingProfile, err er
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	err = iDB.ms.Unmarshal(x.([]byte), &rp)
-	if err != nil {
-		return nil, err
-	}
-	return
+	return x.(*RatingProfile), nil
 }
 
 func (iDB *InternalDB) SetRatingProfileDrv(rp *RatingProfile) (err error) {
-	result, err := iDB.ms.Marshal(rp)
-	if err != nil {
-		return err
-	}
-	iDB.db.Set(utils.CacheRatingProfiles, utils.RATING_PROFILE_PREFIX+rp.Id, result, nil,
+	iDB.db.Set(utils.CacheRatingProfiles, utils.RATING_PROFILE_PREFIX+rp.Id, rp, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -305,44 +272,16 @@ func (iDB *InternalDB) GetDestination(key string, skipCache bool, transactionID 
 
 	x, ok := iDB.db.Get(utils.CacheDestinations, utils.DESTINATION_PREFIX+key)
 	if !ok || x == nil {
-		return nil, utils.ErrNotFound
-	}
-
-	b := bytes.NewBuffer(x.([]byte))
-	r, err := zlib.NewReader(b)
-	if err != nil {
-		return nil, err
-	}
-	out, err := ioutil.ReadAll(r)
-	if err != nil {
-		return nil, err
-	}
-	r.Close()
-	dest = new(Destination)
-	err = iDB.ms.Unmarshal(out, &dest)
-	if err != nil {
 		Cache.Set(utils.CacheDestinations, key, nil, nil, cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
-
-	if dest == nil {
-		Cache.Set(utils.CacheDestinations, key, nil, nil, cCommit, transactionID)
-		return nil, utils.ErrNotFound
-	}
+	dest = x.(*Destination)
 	Cache.Set(utils.CacheDestinations, key, dest, nil, cCommit, transactionID)
 	return
 }
 
 func (iDB *InternalDB) SetDestination(dest *Destination, transactionID string) (err error) {
-	result, err := iDB.ms.Marshal(dest)
-	if err != nil {
-		return err
-	}
-	var b bytes.Buffer
-	w := zlib.NewWriter(&b)
-	w.Write(result)
-	w.Close()
-	iDB.db.Set(utils.CacheDestinations, utils.DESTINATION_PREFIX+dest.Id, b.Bytes(), nil,
+	iDB.db.Set(utils.CacheDestinations, utils.DESTINATION_PREFIX+dest.Id, dest, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	Cache.Remove(utils.CacheDestinations, dest.Id,
 		cacheCommit(transactionID), transactionID)
@@ -487,18 +426,11 @@ func (iDB *InternalDB) GetActionsDrv(id string) (acts Actions, err error) {
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	if err = iDB.ms.Unmarshal(x.([]byte), &acts); err != nil {
-		return nil, err
-	}
-	return
+	return x.(Actions), err
 }
 
 func (iDB *InternalDB) SetActionsDrv(id string, acts Actions) (err error) {
-	result, err := iDB.ms.Marshal(acts)
-	if err != nil {
-		return err
-	}
-	iDB.db.Set(utils.CacheActions, utils.ACTION_PREFIX+id, result, nil,
+	iDB.db.Set(utils.CacheActions, utils.ACTION_PREFIX+id, acts, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -514,18 +446,11 @@ func (iDB *InternalDB) GetSharedGroupDrv(id string) (sh *SharedGroup, err error)
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	if err = iDB.ms.Unmarshal(x.([]byte), &sh); err != nil {
-		return nil, err
-	}
-	return
+	return x.(*SharedGroup), nil
 }
 
 func (iDB *InternalDB) SetSharedGroupDrv(sh *SharedGroup) (err error) {
-	result, err := iDB.ms.Marshal(sh)
-	if err != nil {
-		return err
-	}
-	iDB.db.Set(utils.CacheSharedGroups, utils.SHARED_GROUP_PREFIX+sh.Id, result, nil,
+	iDB.db.Set(utils.CacheSharedGroups, utils.SHARED_GROUP_PREFIX+sh.Id, sh, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -541,18 +466,11 @@ func (iDB *InternalDB) GetActionTriggersDrv(id string) (at ActionTriggers, err e
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	if err = iDB.ms.Unmarshal(x.([]byte), &at); err != nil {
-		return nil, err
-	}
-	return
+	return x.(ActionTriggers), nil
 }
 
 func (iDB *InternalDB) SetActionTriggersDrv(id string, at ActionTriggers) (err error) {
-	result, err := iDB.ms.Marshal(at)
-	if err != nil {
-		return err
-	}
-	iDB.db.Set(utils.CacheActionTriggers, utils.ACTION_TRIGGER_PREFIX+id, result, nil,
+	iDB.db.Set(utils.CacheActionTriggers, utils.ACTION_TRIGGER_PREFIX+id, at, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -579,7 +497,7 @@ func (iDB *InternalDB) GetActionPlan(key string, skipCache bool, transactionID s
 			cCommit, transactionID)
 		return nil, utils.ErrNotFound
 	}
-	err = iDB.ms.Unmarshal(x.([]byte), &ats)
+	ats = x.(*ActionPlan)
 	Cache.Set(utils.CacheActionPlans, key, ats, nil,
 		cCommit, transactionID)
 	return
@@ -607,12 +525,7 @@ func (iDB *InternalDB) SetActionPlan(key string, ats *ActionPlan,
 			}
 		}
 	}
-
-	result, err := iDB.ms.Marshal(&ats)
-	if err != nil {
-		return err
-	}
-	iDB.db.Set(utils.CacheActionPlans, utils.ACTION_PLAN_PREFIX+key, result, nil,
+	iDB.db.Set(utils.CacheActionPlans, utils.ACTION_PLAN_PREFIX+key, ats, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -656,14 +569,11 @@ func (iDB *InternalDB) GetAccountActionPlans(acntID string,
 			cacheCommit(transactionID), transactionID)
 		return nil, utils.ErrNotFound
 	}
-	if err = iDB.ms.Unmarshal(x.([]byte), &apIDs); err != nil {
-		return nil, err
-	}
+	apIDs = x.([]string)
 	Cache.Set(utils.CacheAccountActionPlans, acntID, apIDs, nil,
 		cacheCommit(transactionID), transactionID)
 	return
 }
-
 
 func (iDB *InternalDB) SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error) {
 	if !overwrite {
@@ -677,15 +587,10 @@ func (iDB *InternalDB) SetAccountActionPlans(acntID string, apIDs []string, over
 			}
 		}
 	}
-	result, err := iDB.ms.Marshal(apIDs)
-	if err != nil {
-		return err
-	}
-	iDB.db.Set(utils.CacheAccountActionPlans, utils.AccountActionPlansPrefix+acntID, result, nil,
+	iDB.db.Set(utils.CacheAccountActionPlans, utils.AccountActionPlansPrefix+acntID, apIDs, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
-
 
 func (iDB *InternalDB) RemAccountActionPlans(acntID string, apIDs []string) (err error) {
 	key := utils.AccountActionPlansPrefix + acntID
@@ -710,11 +615,7 @@ func (iDB *InternalDB) RemAccountActionPlans(acntID string, apIDs []string) (err
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 		return
 	}
-	var result []byte
-	if result, err = iDB.ms.Marshal(oldaPlIDs); err != nil {
-		return err
-	}
-	iDB.db.Set(utils.CacheAccountActionPlans, utils.AccountActionPlansPrefix+acntID, result, nil,
+	iDB.db.Set(utils.CacheAccountActionPlans, utils.AccountActionPlansPrefix+acntID, oldaPlIDs, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -744,12 +645,7 @@ func (iDB *InternalDB) GetAccount(id string) (acc *Account, err error) {
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	acc = &Account{ID: id}
-	err = iDB.ms.Unmarshal(x.([]byte), &acc)
-	if err != nil {
-		return nil, err
-	}
-	return
+	return x.(*Account), nil
 }
 
 func (iDB *InternalDB) SetAccount(acc *Account) (err error) {
@@ -766,11 +662,7 @@ func (iDB *InternalDB) SetAccount(acc *Account) (err error) {
 		}
 	}
 
-	result, err := iDB.ms.Marshal(acc)
-	if err != nil {
-		return err
-	}
-	iDB.db.Set(utils.CacheAccounts, utils.ACCOUNT_PREFIX+acc.ID, result, nil,
+	iDB.db.Set(utils.CacheAccounts, utils.ACCOUNT_PREFIX+acc.ID, acc, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -786,19 +678,11 @@ func (iDB *InternalDB) GetResourceProfileDrv(tenant, id string) (rp *ResourcePro
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	err = iDB.ms.Unmarshal(x.([]byte), &rp)
-	if err != nil {
-		return nil, err
-	}
-	return
+	return x.(*ResourceProfile), nil
 }
 
 func (iDB *InternalDB) SetResourceProfileDrv(rp *ResourceProfile) (err error) {
-	result, err := iDB.ms.Marshal(rp)
-	if err != nil {
-		return err
-	}
-	iDB.db.Set(utils.CacheResourceProfiles, utils.ResourceProfilesPrefix+rp.TenantID(), result, nil,
+	iDB.db.Set(utils.CacheResourceProfiles, utils.ResourceProfilesPrefix+rp.TenantID(), rp, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -814,19 +698,11 @@ func (iDB *InternalDB) GetResourceDrv(tenant, id string) (r *Resource, err error
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	err = iDB.ms.Unmarshal(x.([]byte), &r)
-	if err != nil {
-		return nil, err
-	}
-	return
+	return x.(*Resource), nil
 }
 
 func (iDB *InternalDB) SetResourceDrv(r *Resource) (err error) {
-	result, err := iDB.ms.Marshal(r)
-	if err != nil {
-		return err
-	}
-	iDB.db.Set(utils.CacheResources, utils.ResourcesPrefix+r.TenantID(), result, nil,
+	iDB.db.Set(utils.CacheResources, utils.ResourcesPrefix+r.TenantID(), r, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -842,19 +718,11 @@ func (iDB *InternalDB) GetTimingDrv(id string) (tmg *utils.TPTiming, err error) 
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	err = iDB.ms.Unmarshal(x.([]byte), &tmg)
-	if err != nil {
-		return nil, err
-	}
-	return
+	return x.(*utils.TPTiming), nil
 }
 
 func (iDB *InternalDB) SetTimingDrv(timing *utils.TPTiming) (err error) {
-	result, err := iDB.ms.Marshal(timing)
-	if err != nil {
-		return err
-	}
-	iDB.db.Set(utils.CacheTimings, utils.TimingsPrefix+timing.ID, result, nil,
+	iDB.db.Set(utils.CacheTimings, utils.TimingsPrefix+timing.ID, timing, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -881,10 +749,7 @@ func (iDB *InternalDB) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType str
 		return nil, utils.ErrNotFound
 	}
 	if len(fldNameVal) != 0 {
-		rcvidx := make(map[string]utils.StringMap)
-		if err = iDB.ms.Unmarshal(x.([]byte), &rcvidx); err != nil {
-			return nil, err
-		}
+		rcvidx := x.(map[string]utils.StringMap)
 		indexes = make(map[string]utils.StringMap)
 		for fldName, fldVal := range fldNameVal {
 			if _, has := indexes[utils.ConcatenatedKey(filterType, fldName, fldVal)]; !has {
@@ -898,9 +763,7 @@ func (iDB *InternalDB) GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType str
 		}
 		return
 	} else {
-		if err = iDB.ms.Unmarshal(x.([]byte), &indexes); err != nil {
-			return nil, err
-		}
+		indexes = x.(map[string]utils.StringMap)
 		if len(indexes) == 0 {
 			return nil, utils.ErrNotFound
 		}
@@ -937,20 +800,12 @@ func (iDB *InternalDB) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 
 	x, ok := iDB.db.Get(cacheID, dbKey)
 	if !ok || x == nil {
-		result, err := iDB.ms.Marshal(toBeAdded)
-		if err != nil {
-			return err
-		}
-		iDB.db.Set(cacheID, dbKey, result, nil,
+		iDB.db.Set(cacheID, dbKey, toBeAdded, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 		return err
 	}
 
-	mp := make(map[string]utils.StringMap)
-	err = iDB.ms.Unmarshal(x.([]byte), &mp)
-	if err != nil {
-		return err
-	}
+	mp := x.(map[string]utils.StringMap)
 	for _, key := range toBeDeleted {
 		delete(mp, key)
 	}
@@ -960,11 +815,7 @@ func (iDB *InternalDB) SetFilterIndexesDrv(cacheID, itemIDPrefix string,
 		}
 		mp[key] = strMp
 	}
-	result, err := iDB.ms.Marshal(mp)
-	if err != nil {
-		return err
-	}
-	iDB.db.Set(cacheID, dbKey, result, nil,
+	iDB.db.Set(cacheID, dbKey, mp, nil,
 		cacheCommit(transactionID), transactionID)
 	return nil
 }
@@ -982,10 +833,8 @@ func (iDB *InternalDB) MatchFilterIndexDrv(cacheID, itemIDPrefix,
 		return nil, utils.ErrNotFound
 	}
 
-	var indexes map[string]utils.StringMap
-	if err = iDB.ms.Unmarshal(x.([]byte), &indexes); err != nil {
-		return nil, err
-	}
+	indexes := x.(map[string]utils.StringMap)
+
 	if _, hasIt := indexes[utils.ConcatenatedKey(filterType, fieldName, fieldVal)]; hasIt {
 		itemIDs = indexes[utils.ConcatenatedKey(filterType, fieldName, fieldVal)]
 	}
@@ -1000,19 +849,11 @@ func (iDB *InternalDB) GetStatQueueProfileDrv(tenant string, id string) (sq *Sta
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	err = iDB.ms.Unmarshal(x.([]byte), &sq)
-	if err != nil {
-		return nil, err
-	}
-	return
+	return x.(*StatQueueProfile), nil
 
 }
 func (iDB *InternalDB) SetStatQueueProfileDrv(sq *StatQueueProfile) (err error) {
-	result, err := iDB.ms.Marshal(sq)
-	if err != nil {
-		return err
-	}
-	iDB.db.Set(utils.CacheStatQueueProfiles, utils.StatQueueProfilePrefix+sq.TenantID(), result, nil,
+	iDB.db.Set(utils.CacheStatQueueProfiles, utils.StatQueueProfilePrefix+sq.TenantID(), sq, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -1028,18 +869,10 @@ func (iDB *InternalDB) GetStoredStatQueueDrv(tenant, id string) (sq *StoredStatQ
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	err = iDB.ms.Unmarshal(x.([]byte), &sq)
-	if err != nil {
-		return nil, err
-	}
-	return
+	return x.(*StoredStatQueue), nil
 }
 func (iDB *InternalDB) SetStoredStatQueueDrv(sq *StoredStatQueue) (err error) {
-	result, err := iDB.ms.Marshal(sq)
-	if err != nil {
-		return err
-	}
-	iDB.db.Set(utils.CacheStatQueues, utils.StatQueuePrefix+utils.ConcatenatedKey(sq.Tenant, sq.ID), result, nil,
+	iDB.db.Set(utils.CacheStatQueues, utils.StatQueuePrefix+utils.ConcatenatedKey(sq.Tenant, sq.ID), sq, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
@@ -1184,10 +1017,7 @@ func (iDB *InternalDB) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[strin
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	err = iDB.ms.Unmarshal(x.([]byte), &loadIDs)
-	if err != nil {
-		return nil, err
-	}
+	loadIDs = x.(map[string]int64)
 	if itemIDPrefix != utils.EmptyString {
 		return map[string]int64{itemIDPrefix: loadIDs[itemIDPrefix]}, nil
 	}
@@ -1195,11 +1025,7 @@ func (iDB *InternalDB) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[strin
 
 }
 func (iDB *InternalDB) SetLoadIDsDrv(loadIDs map[string]int64) (err error) {
-	result, err := iDB.ms.Marshal(loadIDs)
-	if err != nil {
-		return err
-	}
-	iDB.db.Set(utils.CacheLoadIDs, utils.LoadIDs, result, nil,
+	iDB.db.Set(utils.CacheLoadIDs, utils.LoadIDs, loadIDs, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }

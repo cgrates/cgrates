@@ -155,3 +155,35 @@ func TestCsvPairToRecord(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestCsvSecondUsage(t *testing.T) {
+	cgrConfig, _ := config.NewDefaultCGRConfig()
+	cdrcConfig := cgrConfig.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0]
+	data, _ := engine.NewMapStorage()
+	dm := engine.NewDataManager(data)
+	filterS := engine.NewFilterS(cgrConfig, nil, nil, nil, dm)
+	cdrcConfig.CdrSourceId = "TEST_CDRC"
+	cdrcConfig.ContentFields = []*config.FCTemplate{
+		{Tag: "TORField", Type: utils.META_COMPOSED, FieldId: utils.ToR,
+			Value: config.NewRSRParsersMustCompile("~0", true, utils.INFIELD_SEP)},
+
+		{Tag: "Usage", Type: utils.META_COMPOSED, FieldId: utils.Usage,
+			Value: config.NewRSRParsersMustCompile("~1;s", true, utils.INFIELD_SEP)},
+	}
+	csvProcessor := &CsvRecordsProcessor{dfltCdrcCfg: cdrcConfig, cdrcCfgs: []*config.CdrcCfg{cdrcConfig}, filterS: filterS}
+
+	cdrRow := []string{"*voice", "12"}
+	expectedCdr := &engine.CDR{
+		CGRID:       utils.Sha1("", "0.0.0.0"),
+		ToR:         cdrRow[0],
+		OriginHost:  "0.0.0.0",
+		Source:      "TEST_CDRC",
+		Usage:       time.Duration(12) * time.Second,
+		ExtraFields: map[string]string{},
+		Cost:        -1,
+	}
+	if rtCdr, _ := csvProcessor.recordToStoredCdr(cdrRow,
+		cdrcConfig, "cgrates.org"); !reflect.DeepEqual(expectedCdr, rtCdr) {
+		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
+	}
+}
