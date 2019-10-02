@@ -26,13 +26,13 @@ import (
 func newMapStorDBMigrator(stor engine.StorDB) (mpMig *mapStorDBMigrator) {
 	return &mapStorDBMigrator{
 		storDB: &stor,
-		mp:     stor.(*engine.MapStorage),
+		iDB:     stor.(*engine.InternalDB),
 	}
 }
 
 type mapStorDBMigrator struct {
 	storDB   *engine.StorDB
-	mp       *engine.MapStorage
+	iDB       *engine.InternalDB
 	dataKeys []string
 	qryIdx   *int
 }
