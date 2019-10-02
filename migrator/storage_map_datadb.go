@@ -25,7 +25,7 @@ import (
 
 type mapMigrator struct {
 	dm       *engine.DataManager
-	mp       *engine.MapStorage
+	iDB       *engine.InternalDB
 	dataKeys []string
 	qryIdx   *int
 }
@@ -33,7 +33,7 @@ type mapMigrator struct {
 func newMapMigrator(dm *engine.DataManager) (mM *mapMigrator) {
 	return &mapMigrator{
 		dm: dm,
-		mp: dm.DataDB().(*engine.MapStorage),
+		iDB: dm.DataDB().(*engine.InternalDB),
 	}
 }
 
