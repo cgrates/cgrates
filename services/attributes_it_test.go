@@ -37,22 +37,20 @@ func TestAttributeSReload(t *testing.T) {
 	}
 	utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
+
 	engineShutdown := make(chan bool, 1)
 	chS := engine.NewCacheS(cfg, nil)
 	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
-	close(chS.GetPrecacheChannel(utils.CacheChargerProfiles))
-	close(chS.GetPrecacheChannel(utils.CacheChargerFilterIndexes))
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg /*dm*/, nil,
-		/*cdrStorage*/ nil,
-		/*loadStorage*/ nil, filterSChan,
-		server, nil, engineShutdown)
+		/*cdrStorage*/ nil /*loadStorage*/, nil,
+		nil /*filterSChan*/, nil /*server*/, nil,
+		engineShutdown)
 	srvMngr.SetCacheS(chS)
-	attrS := NewAttributeService()
-	srvMngr.AddService(attrS, NewChargerService())
+	attrS := NewAttributeService(cfg, nil,
+		chS, nil, server)
+	srvMngr.AddServices(attrS)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

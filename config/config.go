@@ -1337,7 +1337,7 @@ func (cfg *CGRConfig) GetReloadChan(sectID string) chan struct{} {
 // Call implements rpcclient.RpcClientConnection interface for internal RPC
 func (cfg *CGRConfig) Call(serviceMethod string,
 	args interface{}, reply interface{}) error {
-	return utils.APIerRPCCall(cSv1, serviceMethod, args, reply)
+	return utils.APIerRPCCall(cfg, serviceMethod, args, reply)
 }
 
 // ToDo: move this structure in utils as is used in other packages

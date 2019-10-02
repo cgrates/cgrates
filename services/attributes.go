@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -30,8 +31,15 @@ import (
 )
 
 // NewAttributeService returns the Attribute Service
-func NewAttributeService() servmanager.Service {
+func NewAttributeService(cfg *config.CGRConfig, dm *engine.DataManager,
+	cacheS *engine.CacheS, filterS *engine.FilterS,
+	server *utils.Server) servmanager.Service {
 	return &AttributeService{
+		cfg:      cfg,
+		dm:       dm,
+		cacheS:   cacheS,
+		filterS:  filterS,
+		server:   server,
 		connChan: make(chan rpcclient.RpcClientConnection, 1),
 	}
 }
@@ -39,26 +47,30 @@ func NewAttributeService() servmanager.Service {
 // AttributeService implements Service interface
 type AttributeService struct {
 	sync.RWMutex
+	cfg     *config.CGRConfig
+	dm      *engine.DataManager
+	cacheS  *engine.CacheS
+	filterS *engine.FilterS
+	server  *utils.Server
+
 	attrS    *engine.AttributeService
 	rpc      *v1.AttributeSv1
 	connChan chan rpcclient.RpcClientConnection
 }
 
 // Start should handle the sercive start
-func (attrS *AttributeService) Start(sp servmanager.ServiceProvider, waitCache bool) (err error) {
+func (attrS *AttributeService) Start() (err error) {
 	if attrS.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
 
-	if waitCache {
-		<-sp.GetCacheS().GetPrecacheChannel(utils.CacheAttributeProfiles)
-		<-sp.GetCacheS().GetPrecacheChannel(utils.CacheAttributeFilterIndexes)
-	}
+	<-attrS.cacheS.GetPrecacheChannel(utils.CacheAttributeProfiles)
+	<-attrS.cacheS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes)
 
 	attrS.Lock()
 	defer attrS.Unlock()
-	attrS.attrS, err = engine.NewAttributeService(sp.GetDM(),
-		sp.GetFilterS(), sp.GetConfig())
+	attrS.attrS, err = engine.NewAttributeService(attrS.dm,
+		attrS.filterS, attrS.cfg)
 	if err != nil {
 		utils.Logger.Crit(
 			fmt.Sprintf("<%s> Could not init, error: %s",
@@ -67,8 +79,8 @@ func (attrS *AttributeService) Start(sp servmanager.ServiceProvider, waitCache b
 	}
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.AttributeS))
 	attrS.rpc = v1.NewAttributeSv1(attrS.attrS)
-	if !sp.GetConfig().DispatcherSCfg().Enabled {
-		sp.GetServer().RpcRegister(attrS.rpc)
+	if !attrS.cfg.DispatcherSCfg().Enabled {
+		attrS.server.RpcRegister(attrS.rpc)
 	}
 	attrS.connChan <- attrS.rpc
 	return
@@ -80,7 +92,7 @@ func (attrS *AttributeService) GetIntenternalChan() (conn chan rpcclient.RpcClie
 }
 
 // Reload handles the change of config
-func (attrS *AttributeService) Reload(sp servmanager.ServiceProvider) (err error) {
+func (attrS *AttributeService) Reload() (err error) {
 	return // for the momment nothing to reload
 }
 
@@ -97,11 +109,6 @@ func (attrS *AttributeService) Shutdown() (err error) {
 	return
 }
 
-// GetRPCInterface returns the interface to register for server
-func (attrS *AttributeService) GetRPCInterface() interface{} {
-	return attrS.rpc
-}
-
 // IsRunning returns if the service is running
 func (attrS *AttributeService) IsRunning() bool {
 	attrS.RLock()
@@ -112,4 +119,9 @@ func (attrS *AttributeService) IsRunning() bool {
 // ServiceName returns the service name
 func (attrS *AttributeService) ServiceName() string {
 	return utils.AttributeS
+}
+
+// ShouldRun returns if the service should be running
+func (attrS *AttributeService) ShouldRun() bool {
+	return attrS.cfg.AttributeSCfg().Enabled
 }
