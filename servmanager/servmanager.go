@@ -245,6 +245,7 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 		}
 		chS.Start(srvMngr, true)
 	}
+	go srvMngr.startService(utils.GuardianS)
 
 	go srvMngr.handleReload()
 	if srvMngr.GetConfig().AttributeSCfg().Enabled {

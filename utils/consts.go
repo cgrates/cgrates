@@ -607,6 +607,7 @@ const (
 	AnalyzerS   = "AnalyzerS"
 	CDRServer   = "CDRServer"
 	ResponderS  = "ResponderS"
+	GuardianS   = "GuardianS"
 )
 
 // Lower service names

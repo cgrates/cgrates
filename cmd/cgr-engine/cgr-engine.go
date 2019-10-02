@@ -282,14 +282,6 @@ func startAnalyzerService(internalAnalyzerSChan chan rpcclient.RpcClientConnecti
 	internalAnalyzerSChan <- aSv1
 }
 
-func initGuardianSv1(internalGuardianSChan chan rpcclient.RpcClientConnection, server *utils.Server) {
-	grdSv1 := v1.NewGuardianSv1()
-	if !cfg.DispatcherSCfg().Enabled {
-		server.RpcRegister(grdSv1)
-	}
-	internalGuardianSChan <- grdSv1
-}
-
 func initCoreSv1(internalCoreSv1Chan chan rpcclient.RpcClientConnection, server *utils.Server) {
 	cSv1 := v1.NewCoreSv1(engine.NewCoreService())
 	if !cfg.DispatcherSCfg().Enabled {
@@ -639,14 +631,11 @@ func main() {
 	filterSChan := make(chan *engine.FilterS, 1)
 	internalDispatcherSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalAnalyzerSChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalGuardianSChan := make(chan rpcclient.RpcClientConnection, 1)
+
 	internalLoaderSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalServeManagerChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalConfigChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalCoreSv1Chan := make(chan rpcclient.RpcClientConnection, 1)
-
-	// init GuardianSv1
-	initGuardianSv1(internalGuardianSChan, server)
 
 	// init CoreSv1
 	initCoreSv1(internalCoreSv1Chan, server)
@@ -668,7 +657,8 @@ func main() {
 	apiv2, _ := srvManager.GetService(utils.ApierV2)
 	resp, _ := srvManager.GetService(utils.ResponderS)
 	smg := services.NewSessionService()
-	srvManager.AddService(chS, attrS, chrS, tS, stS, reS, supS, schS, cdrS, rals, smg,
+	grd := services.NewGuardianService()
+	srvManager.AddService(chS, attrS, chrS, tS, stS, reS, supS, schS, cdrS, rals, smg, grd,
 		services.NewEventReaderService(),
 		services.NewDNSAgent(),
 		services.NewFreeswitchAgent(),
@@ -692,6 +682,7 @@ func main() {
 	internalRaterChan := resp.GetIntenternalChan()
 	internalRALsv1Chan := rals.GetIntenternalChan()
 	internalSMGChan := smg.GetIntenternalChan()
+	internalGuardianSChan := grd.GetIntenternalChan()
 	srvManager.StartServices()
 
 	cacheS := srvManager.GetCacheS()
