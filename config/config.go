@@ -1217,6 +1217,7 @@ func (cfg *CGRConfig) HttpAgentCfg() []*HttpAgentCfg {
 	return cfg.httpAgentCfg
 }
 
+// FilterSCfg returns the config for FilterS
 func (cfg *CGRConfig) FilterSCfg() *FilterSCfg {
 	cfg.lks[FilterSjsn].Lock()
 	defer cfg.lks[FilterSjsn].Unlock()
@@ -1253,19 +1254,31 @@ func (cfg *CGRConfig) SchedulerCfg() *SchedulerCfg {
 	return cfg.schedulerCfg
 }
 
+// DataDbCfg returns the config for DataDb
 func (cfg *CGRConfig) DataDbCfg() *DataDbCfg {
+	cfg.lks[DATADB_JSN].Lock()
+	defer cfg.lks[DATADB_JSN].Unlock()
 	return cfg.dataDbCfg
 }
 
+// StorDbCfg returns the config for StorDb
 func (cfg *CGRConfig) StorDbCfg() *StorDbCfg {
+	cfg.lks[STORDB_JSN].Lock()
+	defer cfg.lks[STORDB_JSN].Unlock()
 	return cfg.storDbCfg
 }
 
+// GeneralCfg returns the General config section
 func (cfg *CGRConfig) GeneralCfg() *GeneralCfg {
+	cfg.lks[GENERAL_JSN].Lock()
+	defer cfg.lks[GENERAL_JSN].Unlock()
 	return cfg.generalCfg
 }
 
+// TlsCfg returns the config for Tls
 func (cfg *CGRConfig) TlsCfg() *TlsCfg {
+	cfg.lks[TlsCfgJson].Lock()
+	defer cfg.lks[TlsCfgJson].Unlock()
 	return cfg.tlsCfg
 }
 
@@ -1291,7 +1304,10 @@ func (cfg *CGRConfig) CdrsCfg() *CdrsCfg {
 	return cfg.cdrsCfg
 }
 
+// MailerCfg returns the config for Mailer
 func (cfg *CGRConfig) MailerCfg() *MailerCfg {
+	cfg.lks[MAILER_JSN].Lock()
+	defer cfg.lks[MAILER_JSN].Unlock()
 	return cfg.mailerCfg
 }
 
@@ -1299,7 +1315,10 @@ func (cfg *CGRConfig) AnalyzerSCfg() *AnalyzerSCfg {
 	return cfg.analyzerSCfg
 }
 
+// ApierCfg reads the Apier configuration
 func (cfg *CGRConfig) ApierCfg() *ApierCfg {
+	cfg.lks[Apier].Lock()
+	defer cfg.lks[Apier].Unlock()
 	return cfg.apier
 }
 
@@ -1310,12 +1329,13 @@ func (cfg *CGRConfig) ERsCfg() *ERsCfg {
 	return cfg.ersCfg
 }
 
+// GetReloadChan returns the reload chanel for the given section
 func (cfg *CGRConfig) GetReloadChan(sectID string) chan struct{} {
 	return cfg.rldChans[sectID]
 }
 
 // Call implements rpcclient.RpcClientConnection interface for internal RPC
-func (cSv1 *CGRConfig) Call(serviceMethod string,
+func (cfg *CGRConfig) Call(serviceMethod string,
 	args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(cSv1, serviceMethod, args, reply)
 }
@@ -1489,7 +1509,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 			break
 		}
 		fallthrough
-	case TlsCfgJson:
+	case TlsCfgJson: // nothing to reload
 		if !fall {
 			break
 		}
@@ -1632,7 +1652,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 			break
 		}
 		fallthrough
-	case MAILER_JSN:
+	case MAILER_JSN: // no need to reload
 		if !fall {
 			break
 		}
@@ -1663,6 +1683,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case Apier:
+		cfg.rldChans[Apier] <- struct{}{}
 		if !fall {
 			break
 		}
