@@ -232,72 +232,77 @@ func (srvMngr *ServiceManager) NewConnection(subsystem string, conns []*config.R
 // StartServices starts all enabled services
 func (srvMngr *ServiceManager) StartServices() (err error) {
 	// start the cacheS
-	if srvMngr.GetCacheS() == nil {
-		go srvMngr.startService(utils.CacheS)
-		go srvMngr.startService(utils.GuardianS)
-	}
+	/*
+		if srvMngr.GetCacheS() == nil {
+			go srvMngr.startService(utils.CacheS)
+			go srvMngr.startService(utils.GuardianS)
+		}
+	*/
 
 	go srvMngr.handleReload()
+
 	if srvMngr.GetConfig().AttributeSCfg().Enabled {
 		go srvMngr.startService(utils.AttributeS)
 	}
-	if srvMngr.GetConfig().ChargerSCfg().Enabled {
-		go srvMngr.startService(utils.ChargerS)
-	}
-	if srvMngr.GetConfig().ThresholdSCfg().Enabled {
-		go srvMngr.startService(utils.ThresholdS)
-	}
-	if srvMngr.GetConfig().StatSCfg().Enabled {
-		go srvMngr.startService(utils.StatS)
-	}
-	if srvMngr.GetConfig().ResourceSCfg().Enabled {
-		go srvMngr.startService(utils.ResourceS)
-	}
-	if srvMngr.GetConfig().SupplierSCfg().Enabled {
-		go srvMngr.startService(utils.SupplierS)
-	}
-	if srvMngr.GetConfig().SchedulerCfg().Enabled {
-		go srvMngr.startService(utils.SchedulerS)
-	}
-	if srvMngr.GetConfig().CdrsCfg().Enabled {
-		go srvMngr.startService(utils.CDRServer)
-	}
-	if srvMngr.GetConfig().RalsCfg().Enabled {
-		go srvMngr.startService(utils.RALService)
-	}
-	if srvMngr.GetConfig().SessionSCfg().Enabled {
-		go srvMngr.startService(utils.SessionS)
-	}
-	if srvMngr.GetConfig().ERsCfg().Enabled {
-		go srvMngr.startService(utils.ERs)
-	}
-	if srvMngr.GetConfig().DNSAgentCfg().Enabled {
-		go srvMngr.startService(utils.DNSAgent)
-	}
-	if srvMngr.GetConfig().FsAgentCfg().Enabled {
-		go srvMngr.startService(utils.FreeSWITCHAgent)
-	}
-	if srvMngr.GetConfig().KamAgentCfg().Enabled {
-		go srvMngr.startService(utils.KamailioAgent)
-	}
-	if srvMngr.GetConfig().AsteriskAgentCfg().Enabled {
-		go srvMngr.startService(utils.AsteriskAgent)
-	}
-	if srvMngr.GetConfig().RadiusAgentCfg().Enabled {
-		go srvMngr.startService(utils.RadiusAgent)
-	}
-	if srvMngr.GetConfig().DiameterAgentCfg().Enabled {
-		go srvMngr.startService(utils.DiameterAgent)
-	}
-	if len(srvMngr.GetConfig().HttpAgentCfg()) != 0 {
-		go srvMngr.startService(utils.HTTPAgent)
-	}
+	/*
+		if srvMngr.GetConfig().ChargerSCfg().Enabled {
+			go srvMngr.startService(utils.ChargerS)
+		}
+		if srvMngr.GetConfig().ThresholdSCfg().Enabled {
+			go srvMngr.startService(utils.ThresholdS)
+		}
+		if srvMngr.GetConfig().StatSCfg().Enabled {
+			go srvMngr.startService(utils.StatS)
+		}
+		if srvMngr.GetConfig().ResourceSCfg().Enabled {
+			go srvMngr.startService(utils.ResourceS)
+		}
+		if srvMngr.GetConfig().SupplierSCfg().Enabled {
+			go srvMngr.startService(utils.SupplierS)
+		}
+		if srvMngr.GetConfig().SchedulerCfg().Enabled {
+			go srvMngr.startService(utils.SchedulerS)
+		}
+		if srvMngr.GetConfig().CdrsCfg().Enabled {
+			go srvMngr.startService(utils.CDRServer)
+		}
+		if srvMngr.GetConfig().RalsCfg().Enabled {
+			go srvMngr.startService(utils.RALService)
+		}
+		if srvMngr.GetConfig().SessionSCfg().Enabled {
+			go srvMngr.startService(utils.SessionS)
+		}
+		if srvMngr.GetConfig().ERsCfg().Enabled {
+			go srvMngr.startService(utils.ERs)
+		}
+		if srvMngr.GetConfig().DNSAgentCfg().Enabled {
+			go srvMngr.startService(utils.DNSAgent)
+		}
+		if srvMngr.GetConfig().FsAgentCfg().Enabled {
+			go srvMngr.startService(utils.FreeSWITCHAgent)
+		}
+		if srvMngr.GetConfig().KamAgentCfg().Enabled {
+			go srvMngr.startService(utils.KamailioAgent)
+		}
+		if srvMngr.GetConfig().AsteriskAgentCfg().Enabled {
+			go srvMngr.startService(utils.AsteriskAgent)
+		}
+		if srvMngr.GetConfig().RadiusAgentCfg().Enabled {
+			go srvMngr.startService(utils.RadiusAgent)
+		}
+		if srvMngr.GetConfig().DiameterAgentCfg().Enabled {
+			go srvMngr.startService(utils.DiameterAgent)
+		}
+		if len(srvMngr.GetConfig().HttpAgentCfg()) != 0 {
+			go srvMngr.startService(utils.HTTPAgent)
+		}
+	*/
 	// startServer()
 	return
 }
 
-// AddService adds given services
-func (srvMngr *ServiceManager) AddService(services ...Service) {
+// AddServices adds given services
+func (srvMngr *ServiceManager) AddServices(services ...Service) {
 	srvMngr.Lock()
 	for _, srv := range services {
 		if _, has := srvMngr.subsystems[srv.ServiceName()]; has { // do not rewrite the service
@@ -328,78 +333,80 @@ func (srvMngr *ServiceManager) handleReload() {
 			if err = srvMngr.reloadService(utils.AttributeS); err != nil {
 				return
 			}
-		case <-srvMngr.GetConfig().GetReloadChan(config.ChargerSCfgJson):
-			if err = srvMngr.reloadService(utils.ChargerS); err != nil {
-				return
-			}
-		case <-srvMngr.GetConfig().GetReloadChan(config.THRESHOLDS_JSON):
-			if err = srvMngr.reloadService(utils.ThresholdS); err != nil {
-				return
-			}
-		case <-srvMngr.GetConfig().GetReloadChan(config.STATS_JSON):
-			if err = srvMngr.reloadService(utils.StatS); err != nil {
-				return
-			}
-		case <-srvMngr.GetConfig().GetReloadChan(config.RESOURCES_JSON):
-			if err = srvMngr.reloadService(utils.ResourceS); err != nil {
-				return
-			}
-		case <-srvMngr.GetConfig().GetReloadChan(config.SupplierSJson):
-			if err = srvMngr.reloadService(utils.SupplierS); err != nil {
-				return
-			}
-		case <-srvMngr.GetConfig().GetReloadChan(config.SCHEDULER_JSN):
-			if err = srvMngr.reloadService(utils.SchedulerS); err != nil {
-				return
-			}
-		case <-srvMngr.GetConfig().GetReloadChan(config.CDRS_JSN):
-			if err = srvMngr.reloadService(utils.CDRServer); err != nil {
-				return
-			}
-		case <-srvMngr.GetConfig().GetReloadChan(config.RALS_JSN):
-			if err = srvMngr.reloadService(utils.RALService); err != nil {
-				return
-			}
-		case <-srvMngr.GetConfig().GetReloadChan(config.Apier):
-			if err = srvMngr.reloadService(utils.ApierV1); err != nil {
-				return
-			}
-		case <-srvMngr.GetConfig().GetReloadChan(config.SessionSJson):
-			if err = srvMngr.reloadService(utils.SessionS); err != nil {
-				return
-			}
-		case <-srvMngr.GetConfig().GetReloadChan(config.ERsJson):
-			if err = srvMngr.reloadService(utils.ERs); err != nil {
-				return
-			}
-		case <-srvMngr.GetConfig().GetReloadChan(config.DNSAgentJson):
-			if err = srvMngr.reloadService(utils.DNSAgent); err != nil {
-				return
-			}
-		case <-srvMngr.GetConfig().GetReloadChan(config.FreeSWITCHAgentJSN):
-			if err = srvMngr.reloadService(utils.FreeSWITCHAgent); err != nil {
-				return
-			}
-		case <-srvMngr.GetConfig().GetReloadChan(config.KamailioAgentJSN):
-			if err = srvMngr.reloadService(utils.KamailioAgent); err != nil {
-				return
-			}
-		case <-srvMngr.GetConfig().GetReloadChan(config.AsteriskAgentJSN):
-			if err = srvMngr.reloadService(utils.AsteriskAgent); err != nil {
-				return
-			}
-		case <-srvMngr.GetConfig().GetReloadChan(config.RA_JSN):
-			if err = srvMngr.reloadService(utils.RadiusAgent); err != nil {
-				return
-			}
-		case <-srvMngr.GetConfig().GetReloadChan(config.DA_JSN):
-			if err = srvMngr.reloadService(utils.DiameterAgent); err != nil {
-				return
-			}
-		case <-srvMngr.GetConfig().GetReloadChan(config.HttpAgentJson):
-			if err = srvMngr.reloadService(utils.HTTPAgent); err != nil {
-				return
-			}
+			/*
+				case <-srvMngr.GetConfig().GetReloadChan(config.ChargerSCfgJson):
+					if err = srvMngr.reloadService(utils.ChargerS); err != nil {
+						return
+					}
+				case <-srvMngr.GetConfig().GetReloadChan(config.THRESHOLDS_JSON):
+					if err = srvMngr.reloadService(utils.ThresholdS); err != nil {
+						return
+					}
+				case <-srvMngr.GetConfig().GetReloadChan(config.STATS_JSON):
+					if err = srvMngr.reloadService(utils.StatS); err != nil {
+						return
+					}
+				case <-srvMngr.GetConfig().GetReloadChan(config.RESOURCES_JSON):
+					if err = srvMngr.reloadService(utils.ResourceS); err != nil {
+						return
+					}
+				case <-srvMngr.GetConfig().GetReloadChan(config.SupplierSJson):
+					if err = srvMngr.reloadService(utils.SupplierS); err != nil {
+						return
+					}
+				case <-srvMngr.GetConfig().GetReloadChan(config.SCHEDULER_JSN):
+					if err = srvMngr.reloadService(utils.SchedulerS); err != nil {
+						return
+					}
+				case <-srvMngr.GetConfig().GetReloadChan(config.CDRS_JSN):
+					if err = srvMngr.reloadService(utils.CDRServer); err != nil {
+						return
+					}
+				case <-srvMngr.GetConfig().GetReloadChan(config.RALS_JSN):
+					if err = srvMngr.reloadService(utils.RALService); err != nil {
+						return
+					}
+				case <-srvMngr.GetConfig().GetReloadChan(config.Apier):
+					if err = srvMngr.reloadService(utils.ApierV1); err != nil {
+						return
+					}
+				case <-srvMngr.GetConfig().GetReloadChan(config.SessionSJson):
+					if err = srvMngr.reloadService(utils.SessionS); err != nil {
+						return
+					}
+				case <-srvMngr.GetConfig().GetReloadChan(config.ERsJson):
+					if err = srvMngr.reloadService(utils.ERs); err != nil {
+						return
+					}
+				case <-srvMngr.GetConfig().GetReloadChan(config.DNSAgentJson):
+					if err = srvMngr.reloadService(utils.DNSAgent); err != nil {
+						return
+					}
+				case <-srvMngr.GetConfig().GetReloadChan(config.FreeSWITCHAgentJSN):
+					if err = srvMngr.reloadService(utils.FreeSWITCHAgent); err != nil {
+						return
+					}
+				case <-srvMngr.GetConfig().GetReloadChan(config.KamailioAgentJSN):
+					if err = srvMngr.reloadService(utils.KamailioAgent); err != nil {
+						return
+					}
+				case <-srvMngr.GetConfig().GetReloadChan(config.AsteriskAgentJSN):
+					if err = srvMngr.reloadService(utils.AsteriskAgent); err != nil {
+						return
+					}
+				case <-srvMngr.GetConfig().GetReloadChan(config.RA_JSN):
+					if err = srvMngr.reloadService(utils.RadiusAgent); err != nil {
+						return
+					}
+				case <-srvMngr.GetConfig().GetReloadChan(config.DA_JSN):
+					if err = srvMngr.reloadService(utils.DiameterAgent); err != nil {
+						return
+					}
+				case <-srvMngr.GetConfig().GetReloadChan(config.HttpAgentJson):
+					if err = srvMngr.reloadService(utils.HTTPAgent); err != nil {
+						return
+					}
+			*/
 		}
 		// handle RPC server
 	}
