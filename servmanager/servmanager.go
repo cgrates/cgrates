@@ -237,15 +237,9 @@ func (srvMngr *ServiceManager) NewConnection(subsystem string, conns []*config.R
 func (srvMngr *ServiceManager) StartServices() (err error) {
 	// start the cacheS
 	if srvMngr.GetCacheS() == nil {
-		chS, has := srvMngr.GetService(utils.CacheS)
-		if !has {
-			utils.Logger.Err(fmt.Sprintf("<%s> Failed to find needed subsystem <%s>",
-				utils.ServiceManager, utils.CacheS))
-			return
-		}
-		chS.Start(srvMngr, true)
+		go srvMngr.startService(utils.CacheS)
+		go srvMngr.startService(utils.GuardianS)
 	}
-	go srvMngr.startService(utils.GuardianS)
 
 	go srvMngr.handleReload()
 	if srvMngr.GetConfig().AttributeSCfg().Enabled {
@@ -368,6 +362,10 @@ func (srvMngr *ServiceManager) handleReload() {
 			}
 		case <-srvMngr.GetConfig().GetReloadChan(config.RALS_JSN):
 			if err = srvMngr.reloadService(utils.RALService, srvMngr.GetConfig().RalsCfg().Enabled); err != nil {
+				return
+			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.Apier):
+			if err = srvMngr.reloadService(utils.ApierV1, srvMngr.GetConfig().RalsCfg().Enabled); err != nil {
 				return
 			}
 		case <-srvMngr.GetConfig().GetReloadChan(config.SessionSJson):
