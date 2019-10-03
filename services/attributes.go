@@ -32,26 +32,26 @@ import (
 
 // NewAttributeService returns the Attribute Service
 func NewAttributeService(cfg *config.CGRConfig, dm *engine.DataManager,
-	cacheS *engine.CacheS, filterS *engine.FilterS,
+	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *utils.Server) servmanager.Service {
 	return &AttributeService{
-		cfg:      cfg,
-		dm:       dm,
-		cacheS:   cacheS,
-		filterS:  filterS,
-		server:   server,
-		connChan: make(chan rpcclient.RpcClientConnection, 1),
+		cfg:         cfg,
+		dm:          dm,
+		cacheS:      cacheS,
+		filterSChan: filterSChan,
+		server:      server,
+		connChan:    make(chan rpcclient.RpcClientConnection, 1),
 	}
 }
 
 // AttributeService implements Service interface
 type AttributeService struct {
 	sync.RWMutex
-	cfg     *config.CGRConfig
-	dm      *engine.DataManager
-	cacheS  *engine.CacheS
-	filterS *engine.FilterS
-	server  *utils.Server
+	cfg         *config.CGRConfig
+	dm          *engine.DataManager
+	cacheS      *engine.CacheS
+	filterSChan chan *engine.FilterS
+	server      *utils.Server
 
 	attrS    *engine.AttributeService
 	rpc      *v1.AttributeSv1
@@ -67,10 +67,12 @@ func (attrS *AttributeService) Start() (err error) {
 	<-attrS.cacheS.GetPrecacheChannel(utils.CacheAttributeProfiles)
 	<-attrS.cacheS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes)
 
+	filterS := <-attrS.filterSChan
+	attrS.filterSChan <- filterS
+
 	attrS.Lock()
 	defer attrS.Unlock()
-	attrS.attrS, err = engine.NewAttributeService(attrS.dm,
-		attrS.filterS, attrS.cfg)
+	attrS.attrS, err = engine.NewAttributeService(attrS.dm, filterS, attrS.cfg)
 	if err != nil {
 		utils.Logger.Crit(
 			fmt.Sprintf("<%s> Could not init, error: %s",

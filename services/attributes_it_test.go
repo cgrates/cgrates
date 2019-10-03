@@ -40,6 +40,8 @@ func TestAttributeSReload(t *testing.T) {
 
 	engineShutdown := make(chan bool, 1)
 	chS := engine.NewCacheS(cfg, nil)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
 	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
 	server := utils.NewServer()
@@ -49,7 +51,7 @@ func TestAttributeSReload(t *testing.T) {
 		engineShutdown)
 	srvMngr.SetCacheS(chS)
 	attrS := NewAttributeService(cfg, nil,
-		chS, nil, server)
+		chS, filterSChan, server)
 	srvMngr.AddServices(attrS)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
