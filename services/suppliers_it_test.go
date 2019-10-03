@@ -53,8 +53,9 @@ func TestSupplierSReload(t *testing.T) {
 		/*loadStorage*/ nil, filterSChan,
 		server, nil, engineShutdown)
 	srvMngr.SetCacheS(chS)
-	supS := NewSupplierService()
-	srvMngr.AddService(supS, NewStatService())
+	sts := NewStatService(cfg, nil, chS, filterSChan, server, nil, nil)
+	supS := NewSupplierService(cfg, nil, chS, filterSChan, server, nil, sts.GetIntenternalChan(), nil, nil)
+	srvMngr.AddServices(supS, sts)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

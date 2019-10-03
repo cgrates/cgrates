@@ -33,7 +33,7 @@ import (
 // NewStatService returns the Stat Service
 func NewStatService(cfg *config.CGRConfig, dm *engine.DataManager,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, thrsChan chan rpcclient.RpcClientConnection,
+	server *utils.Server, thrsChan,
 	dispatcherChan chan rpcclient.RpcClientConnection) servmanager.Service {
 	return &StatService{
 		connChan:       make(chan rpcclient.RpcClientConnection, 1),
@@ -68,9 +68,10 @@ func (sts *StatService) Start() (err error) {
 	if sts.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
-	sts.cacheS.GetPrecacheChannel(utils.CacheStatQueueProfiles)
-	sts.cacheS.GetPrecacheChannel(utils.CacheStatQueues)
-	sts.cacheS.GetPrecacheChannel(utils.CacheStatFilterIndexes)
+
+	<-sts.cacheS.GetPrecacheChannel(utils.CacheStatQueueProfiles)
+	<-sts.cacheS.GetPrecacheChannel(utils.CacheStatQueues)
+	<-sts.cacheS.GetPrecacheChannel(utils.CacheStatFilterIndexes)
 
 	filterS := <-sts.filterSChan
 	sts.filterSChan <- filterS

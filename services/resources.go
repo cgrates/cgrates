@@ -33,7 +33,7 @@ import (
 // NewResourceService returns the Resource Service
 func NewResourceService(cfg *config.CGRConfig, dm *engine.DataManager,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, thrsChan chan rpcclient.RpcClientConnection,
+	server *utils.Server, thrsChan,
 	dispatcherChan chan rpcclient.RpcClientConnection) servmanager.Service {
 	return &ResourceService{
 		connChan:       make(chan rpcclient.RpcClientConnection, 1),
@@ -69,9 +69,9 @@ func (reS *ResourceService) Start() (err error) {
 		return fmt.Errorf("service aleady running")
 	}
 
-	reS.cacheS.GetPrecacheChannel(utils.CacheResourceProfiles)
-	reS.cacheS.GetPrecacheChannel(utils.CacheResources)
-	reS.cacheS.GetPrecacheChannel(utils.CacheResourceFilterIndexes)
+	<-reS.cacheS.GetPrecacheChannel(utils.CacheResourceProfiles)
+	<-reS.cacheS.GetPrecacheChannel(utils.CacheResources)
+	<-reS.cacheS.GetPrecacheChannel(utils.CacheResourceFilterIndexes)
 
 	filterS := <-reS.filterSChan
 	reS.filterSChan <- filterS

@@ -67,8 +67,9 @@ func (chrS *ChargerService) Start() (err error) {
 	if chrS.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
-	chrS.cacheS.GetPrecacheChannel(utils.CacheChargerProfiles)
-	chrS.cacheS.GetPrecacheChannel(utils.CacheChargerFilterIndexes)
+
+	<-chrS.cacheS.GetPrecacheChannel(utils.CacheChargerProfiles)
+	<-chrS.cacheS.GetPrecacheChannel(utils.CacheChargerFilterIndexes)
 
 	filterS := <-chrS.filterSChan
 	chrS.filterSChan <- filterS

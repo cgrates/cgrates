@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -30,45 +31,69 @@ import (
 )
 
 // NewSupplierService returns the Supplier Service
-func NewSupplierService() servmanager.Service {
+func NewSupplierService(cfg *config.CGRConfig, dm *engine.DataManager,
+	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
+	server *utils.Server, attrsChan, stsChan, resChan,
+	dispatcherChan chan rpcclient.RpcClientConnection) servmanager.Service {
 	return &SupplierService{
-		connChan: make(chan rpcclient.RpcClientConnection, 1),
+		connChan:       make(chan rpcclient.RpcClientConnection, 1),
+		cfg:            cfg,
+		dm:             dm,
+		cacheS:         cacheS,
+		filterSChan:    filterSChan,
+		server:         server,
+		attrsChan:      attrsChan,
+		stsChan:        stsChan,
+		resChan:        resChan,
+		dispatcherChan: dispatcherChan,
 	}
 }
 
 // SupplierService implements Service interface
 type SupplierService struct {
 	sync.RWMutex
+	cfg            *config.CGRConfig
+	dm             *engine.DataManager
+	cacheS         *engine.CacheS
+	filterSChan    chan *engine.FilterS
+	server         *utils.Server
+	attrsChan      chan rpcclient.RpcClientConnection
+	stsChan        chan rpcclient.RpcClientConnection
+	resChan        chan rpcclient.RpcClientConnection
+	dispatcherChan chan rpcclient.RpcClientConnection
+
 	splS     *engine.SupplierService
 	rpc      *v1.SupplierSv1
 	connChan chan rpcclient.RpcClientConnection
 }
 
 // Start should handle the sercive start
-func (splS *SupplierService) Start(sp servmanager.ServiceProvider, waitCache bool) (err error) {
+func (splS *SupplierService) Start() (err error) {
 	if splS.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
 
-	if waitCache {
-		<-sp.GetCacheS().GetPrecacheChannel(utils.CacheSupplierProfiles)
-		<-sp.GetCacheS().GetPrecacheChannel(utils.CacheSupplierFilterIndexes)
-	}
+	<-splS.cacheS.GetPrecacheChannel(utils.CacheSupplierProfiles)
+	<-splS.cacheS.GetPrecacheChannel(utils.CacheSupplierFilterIndexes)
+
+	filterS := <-splS.filterSChan
+	splS.filterSChan <- filterS
+
 	var attrSConn, resourceSConn, statSConn rpcclient.RpcClientConnection
 
-	attrSConn, err = sp.NewConnection(utils.AttributeS, sp.GetConfig().SupplierSCfg().AttributeSConns)
+	attrSConn, err = NewConnection(splS.cfg, splS.attrsChan, splS.dispatcherChan, splS.cfg.SupplierSCfg().AttributeSConns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.SupplierS, utils.SupplierS, err.Error()))
 		return
 	}
-	statSConn, err = sp.NewConnection(utils.StatS, sp.GetConfig().SupplierSCfg().StatSConns)
+	statSConn, err = NewConnection(splS.cfg, splS.stsChan, splS.dispatcherChan, splS.cfg.SupplierSCfg().StatSConns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to StatS: %s",
 			utils.SupplierS, err.Error()))
 		return
 	}
-	resourceSConn, err = sp.NewConnection(utils.ResourceS, sp.GetConfig().SupplierSCfg().ResourceSConns)
+	resourceSConn, err = NewConnection(splS.cfg, splS.resChan, splS.dispatcherChan, splS.cfg.SupplierSCfg().ResourceSConns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to StatS: %s",
 			utils.SupplierS, err.Error()))
@@ -76,7 +101,7 @@ func (splS *SupplierService) Start(sp servmanager.ServiceProvider, waitCache boo
 	}
 	splS.Lock()
 	defer splS.Unlock()
-	splS.splS, err = engine.NewSupplierService(sp.GetDM(), sp.GetFilterS(), sp.GetConfig(),
+	splS.splS, err = engine.NewSupplierService(splS.dm, filterS, splS.cfg,
 		resourceSConn, statSConn, attrSConn)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s",
@@ -86,8 +111,8 @@ func (splS *SupplierService) Start(sp servmanager.ServiceProvider, waitCache boo
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.SupplierS))
 	splS.rpc = v1.NewSupplierSv1(splS.splS)
-	if !sp.GetConfig().DispatcherSCfg().Enabled {
-		sp.GetServer().RpcRegister(splS.rpc)
+	if !splS.cfg.DispatcherSCfg().Enabled {
+		splS.server.RpcRegister(splS.rpc)
 	}
 	splS.connChan <- splS.rpc
 	return
@@ -99,21 +124,21 @@ func (splS *SupplierService) GetIntenternalChan() (conn chan rpcclient.RpcClient
 }
 
 // Reload handles the change of config
-func (splS *SupplierService) Reload(sp servmanager.ServiceProvider) (err error) {
+func (splS *SupplierService) Reload() (err error) {
 	var attrSConn, resourceSConn, statSConn rpcclient.RpcClientConnection
-	attrSConn, err = sp.NewConnection(utils.AttributeS, sp.GetConfig().SupplierSCfg().AttributeSConns)
+	attrSConn, err = NewConnection(splS.cfg, splS.attrsChan, splS.dispatcherChan, splS.cfg.SupplierSCfg().AttributeSConns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.SupplierS, utils.SupplierS, err.Error()))
 		return
 	}
-	statSConn, err = sp.NewConnection(utils.StatS, sp.GetConfig().SupplierSCfg().StatSConns)
+	statSConn, err = NewConnection(splS.cfg, splS.stsChan, splS.dispatcherChan, splS.cfg.SupplierSCfg().StatSConns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to StatS: %s",
 			utils.SupplierS, err.Error()))
 		return
 	}
-	resourceSConn, err = sp.NewConnection(utils.ResourceS, sp.GetConfig().SupplierSCfg().ResourceSConns)
+	resourceSConn, err = NewConnection(splS.cfg, splS.resChan, splS.dispatcherChan, splS.cfg.SupplierSCfg().ResourceSConns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to StatS: %s",
 			utils.SupplierS, err.Error()))
@@ -140,11 +165,6 @@ func (splS *SupplierService) Shutdown() (err error) {
 	return
 }
 
-// GetRPCInterface returns the interface to register for server
-func (splS *SupplierService) GetRPCInterface() interface{} {
-	return splS.rpc
-}
-
 // IsRunning returns if the service is running
 func (splS *SupplierService) IsRunning() bool {
 	splS.RLock()
@@ -155,4 +175,9 @@ func (splS *SupplierService) IsRunning() bool {
 // ServiceName returns the service name
 func (splS *SupplierService) ServiceName() string {
 	return utils.SupplierS
+}
+
+// ShouldRun returns if the service should be running
+func (splS *SupplierService) ShouldRun() bool {
+	return splS.cfg.SupplierSCfg().Enabled
 }
