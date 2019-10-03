@@ -31,7 +31,6 @@ import (
 )
 
 func TestChargerSReload(t *testing.T) {
-	// utils.Logger.SetLogLevel(7)
 	cfg, err := config.NewDefaultCGRConfig()
 	if err != nil {
 		t.Fatal(err)
@@ -39,8 +38,6 @@ func TestChargerSReload(t *testing.T) {
 	utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
 	cfg.AttributeSCfg().Enabled = true
-	filterSChan := make(chan *engine.FilterS, 1)
-	filterSChan <- nil
 	engineShutdown := make(chan bool, 1)
 	chS := engine.NewCacheS(cfg, nil)
 	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
@@ -49,12 +46,12 @@ func TestChargerSReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheChargerFilterIndexes))
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg /*dm*/, nil,
-		/*cdrStorage*/ nil,
-		/*loadStorage*/ nil, filterSChan,
+		/*cdrStorage*/ nil /*loadStorage*/, nil /*filterSChan*/, nil,
 		server, nil, engineShutdown)
 	srvMngr.SetCacheS(chS)
-	chrS := NewChargerService()
-	srvMngr.AddService(NewAttributeService(), chrS)
+	attrS := NewAttributeService(cfg, nil, chS, nil, server)
+	chrS := NewChargerService(cfg, nil, chS, nil, server, attrS.GetIntenternalChan(), nil)
+	srvMngr.AddServices(attrS, chrS)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
