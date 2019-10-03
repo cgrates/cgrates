@@ -51,12 +51,12 @@ func TestStatSReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheStatFilterIndexes))
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg /*dm*/, nil,
-		/*cdrStorage*/ nil,
-		/*loadStorage*/ nil, filterSChan,
+		/*cdrStorage*/ nil /*loadStorage*/, nil /*filterSChan*/, nil,
 		server, nil, engineShutdown)
 	srvMngr.SetCacheS(chS)
-	sS := NewStatService()
-	srvMngr.AddService(&CacheService{chS: chS}, NewThresholdService(), sS)
+	tS := NewThresholdService(cfg, nil, chS, filterSChan, server)
+	sS := NewStatService(cfg, nil, chS, filterSChan, server, tS.GetIntenternalChan(), nil)
+	srvMngr.AddServices(tS, sS)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

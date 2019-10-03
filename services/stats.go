@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -30,39 +31,58 @@ import (
 )
 
 // NewStatService returns the Stat Service
-func NewStatService() servmanager.Service {
+func NewStatService(cfg *config.CGRConfig, dm *engine.DataManager,
+	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
+	server *utils.Server, thrsChan chan rpcclient.RpcClientConnection,
+	dispatcherChan chan rpcclient.RpcClientConnection) servmanager.Service {
 	return &StatService{
-		connChan: make(chan rpcclient.RpcClientConnection, 1),
+		connChan:       make(chan rpcclient.RpcClientConnection, 1),
+		cfg:            cfg,
+		dm:             dm,
+		cacheS:         cacheS,
+		filterSChan:    filterSChan,
+		server:         server,
+		thrsChan:       thrsChan,
+		dispatcherChan: dispatcherChan,
 	}
 }
 
 // StatService implements Service interface
 type StatService struct {
 	sync.RWMutex
+	cfg            *config.CGRConfig
+	dm             *engine.DataManager
+	cacheS         *engine.CacheS
+	filterSChan    chan *engine.FilterS
+	server         *utils.Server
+	thrsChan       chan rpcclient.RpcClientConnection
+	dispatcherChan chan rpcclient.RpcClientConnection
+
 	sts      *engine.StatService
 	rpc      *v1.StatSv1
 	connChan chan rpcclient.RpcClientConnection
 }
 
 // Start should handle the sercive start
-func (sts *StatService) Start(sp servmanager.ServiceProvider, waitCache bool) (err error) {
+func (sts *StatService) Start() (err error) {
 	if sts.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
-	if waitCache {
-		<-sp.GetCacheS().GetPrecacheChannel(utils.CacheStatQueueProfiles)
-		<-sp.GetCacheS().GetPrecacheChannel(utils.CacheStatQueues)
-		<-sp.GetCacheS().GetPrecacheChannel(utils.CacheStatFilterIndexes)
-	}
+	sts.cacheS.GetPrecacheChannel(utils.CacheStatQueueProfiles)
+	sts.cacheS.GetPrecacheChannel(utils.CacheStatQueues)
+	sts.cacheS.GetPrecacheChannel(utils.CacheStatFilterIndexes)
+
+	filterS := <-sts.filterSChan
+	sts.filterSChan <- filterS
 
 	var thdSConn rpcclient.RpcClientConnection
-	if thdSConn, err = sp.NewConnection(utils.ThresholdS, sp.GetConfig().StatSCfg().ThresholdSConns); err != nil {
+	if thdSConn, err = NewConnection(sts.cfg, sts.thrsChan, sts.dispatcherChan, sts.cfg.StatSCfg().ThresholdSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.StatS, err.Error()))
 		return
 	}
 	sts.Lock()
 	defer sts.Unlock()
-	sts.sts, err = engine.NewStatService(sp.GetDM(), sp.GetConfig(), thdSConn, sp.GetFilterS())
+	sts.sts, err = engine.NewStatService(sts.dm, sts.cfg, thdSConn, filterS)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<StatS> Could not init, error: %s", err.Error()))
 		return
@@ -70,8 +90,8 @@ func (sts *StatService) Start(sp servmanager.ServiceProvider, waitCache bool) (e
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.StatS))
 	sts.sts.StartLoop()
 	sts.rpc = v1.NewStatSv1(sts.sts)
-	if !sp.GetConfig().DispatcherSCfg().Enabled {
-		sp.GetServer().RpcRegister(sts.rpc)
+	if !sts.cfg.DispatcherSCfg().Enabled {
+		sts.server.RpcRegister(sts.rpc)
 	}
 	sts.connChan <- sts.rpc
 	return
@@ -83,9 +103,9 @@ func (sts *StatService) GetIntenternalChan() (conn chan rpcclient.RpcClientConne
 }
 
 // Reload handles the change of config
-func (sts *StatService) Reload(sp servmanager.ServiceProvider) (err error) {
+func (sts *StatService) Reload() (err error) {
 	var thdSConn rpcclient.RpcClientConnection
-	if thdSConn, err = sp.NewConnection(utils.ThresholdS, sp.GetConfig().StatSCfg().ThresholdSConns); err != nil {
+	if thdSConn, err = NewConnection(sts.cfg, sts.thrsChan, sts.dispatcherChan, sts.cfg.StatSCfg().ThresholdSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.StatS, err.Error()))
 		return
 	}
@@ -124,4 +144,9 @@ func (sts *StatService) IsRunning() bool {
 // ServiceName returns the service name
 func (sts *StatService) ServiceName() string {
 	return utils.StatS
+}
+
+// ShouldRun returns if the service should be running
+func (sts *StatService) ShouldRun() bool {
+	return sts.cfg.StatSCfg().Enabled
 }
