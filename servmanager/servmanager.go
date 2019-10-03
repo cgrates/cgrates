@@ -252,10 +252,10 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 	}
 	if srvMngr.GetConfig().StatSCfg().Enabled {
 		go srvMngr.startService(utils.StatS)
+	}
+	if srvMngr.GetConfig().ResourceSCfg().Enabled {
+		go srvMngr.startService(utils.ResourceS)
 	} /*
-		if srvMngr.GetConfig().ResourceSCfg().Enabled {
-			go srvMngr.startService(utils.ResourceS)
-		}
 		if srvMngr.GetConfig().SupplierSCfg().Enabled {
 			go srvMngr.startService(utils.SupplierS)
 		}
@@ -343,11 +343,11 @@ func (srvMngr *ServiceManager) handleReload() {
 		case <-srvMngr.GetConfig().GetReloadChan(config.STATS_JSON):
 			if err = srvMngr.reloadService(utils.StatS); err != nil {
 				return
+			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.RESOURCES_JSON):
+			if err = srvMngr.reloadService(utils.ResourceS); err != nil {
+				return
 			} /*
-				case <-srvMngr.GetConfig().GetReloadChan(config.RESOURCES_JSON):
-					if err = srvMngr.reloadService(utils.ResourceS); err != nil {
-						return
-					}
 				case <-srvMngr.GetConfig().GetReloadChan(config.SupplierSJson):
 					if err = srvMngr.reloadService(utils.SupplierS); err != nil {
 						return

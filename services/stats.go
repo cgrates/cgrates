@@ -129,11 +129,6 @@ func (sts *StatService) Shutdown() (err error) {
 	return
 }
 
-// GetRPCInterface returns the interface to register for server
-func (sts *StatService) GetRPCInterface() interface{} {
-	return sts.rpc
-}
-
 // IsRunning returns if the service is running
 func (sts *StatService) IsRunning() bool {
 	sts.RLock()
