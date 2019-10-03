@@ -246,10 +246,10 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 	}
 	if srvMngr.GetConfig().ChargerSCfg().Enabled {
 		go srvMngr.startService(utils.ChargerS)
+	}
+	if srvMngr.GetConfig().ThresholdSCfg().Enabled {
+		go srvMngr.startService(utils.ThresholdS)
 	} /*
-		if srvMngr.GetConfig().ThresholdSCfg().Enabled {
-			go srvMngr.startService(utils.ThresholdS)
-		}
 		if srvMngr.GetConfig().StatSCfg().Enabled {
 			go srvMngr.startService(utils.StatS)
 		}
@@ -335,11 +335,11 @@ func (srvMngr *ServiceManager) handleReload() {
 		case <-srvMngr.GetConfig().GetReloadChan(config.ChargerSCfgJson):
 			if err = srvMngr.reloadService(utils.ChargerS); err != nil {
 				return
+			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.THRESHOLDS_JSON):
+			if err = srvMngr.reloadService(utils.ThresholdS); err != nil {
+				return
 			} /*
-				case <-srvMngr.GetConfig().GetReloadChan(config.THRESHOLDS_JSON):
-					if err = srvMngr.reloadService(utils.ThresholdS); err != nil {
-						return
-					}
 				case <-srvMngr.GetConfig().GetReloadChan(config.STATS_JSON):
 					if err = srvMngr.reloadService(utils.StatS); err != nil {
 						return

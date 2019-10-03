@@ -35,8 +35,7 @@ func NewChargerService(cfg *config.CGRConfig, dm *engine.DataManager,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS, server *utils.Server,
 	attrsChan, dispatcherChan chan rpcclient.RpcClientConnection) servmanager.Service {
 	return &ChargerService{
-		connChan: make(chan rpcclient.RpcClientConnection, 1),
-
+		connChan:       make(chan rpcclient.RpcClientConnection, 1),
 		cfg:            cfg,
 		dm:             dm,
 		cacheS:         cacheS,
