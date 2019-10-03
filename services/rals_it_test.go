@@ -57,8 +57,9 @@ func TestRalsReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheSharedGroups))
 	close(chS.GetPrecacheChannel(utils.CacheTimings))
 
-	cfg.ChargerSCfg().Enabled = true
 	cfg.ThresholdSCfg().Enabled = true
+	internalChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalChan <- nil
 	cacheSChan := make(chan rpcclient.RpcClientConnection, 1)
 	cacheSChan <- chS
 	server := utils.NewServer()
@@ -67,8 +68,12 @@ func TestRalsReload(t *testing.T) {
 		/*loadStorage*/ nil, filterSChan,
 		server, nil, engineShutdown)
 	srvMngr.SetCacheS(chS)
-	ralS := NewRalService(srvMngr)
-	srvMngr.AddService(ralS, NewChargerService(), &CacheService{connChan: cacheSChan}, NewSchedulerService(), NewThresholdService())
+	schS := NewSchedulerService(cfg, nil, chS, server, nil)
+	tS := NewThresholdService(cfg, nil, chS, filterSChan, server)
+	ralS := NewRalService(cfg, nil, nil, nil, chS, filterSChan, server,
+		tS.GetIntenternalChan(), internalChan, cacheSChan, internalChan, internalChan,
+		internalChan, schS, engineShutdown)
+	srvMngr.AddServices(ralS, schS, tS)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
@@ -89,21 +94,15 @@ func TestRalsReload(t *testing.T) {
 		t.Errorf("Expected service to be running")
 	}
 
-	if apiv1, has := srvMngr.GetService(utils.ApierV1); !has {
-		t.Error("Expected to find service")
-	} else if !apiv1.IsRunning() {
+	if apiv1 := ralS.GetAPIv1(); !apiv1.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
 
-	if apiv2, has := srvMngr.GetService(utils.ApierV2); !has {
-		t.Error("Expected to find service")
-	} else if !apiv2.IsRunning() {
+	if apiv2 := ralS.GetAPIv2(); !apiv2.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
 
-	if resp, has := srvMngr.GetService(utils.ResponderS); !has {
-		t.Error("Expected to find service")
-	} else if !resp.IsRunning() {
+	if resp := ralS.GetResponder(); !resp.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
 
@@ -114,21 +113,15 @@ func TestRalsReload(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 
-	if apiv1, has := srvMngr.GetService(utils.ApierV1); !has {
-		t.Error("Expected to find service")
-	} else if apiv1.IsRunning() {
+	if apiv1 := ralS.GetAPIv1(); apiv1.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 
-	if apiv2, has := srvMngr.GetService(utils.ApierV2); !has {
-		t.Error("Expected to find service")
-	} else if apiv2.IsRunning() {
+	if apiv2 := ralS.GetAPIv2(); apiv2.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 
-	if resp, has := srvMngr.GetService(utils.ResponderS); !has {
-		t.Error("Expected to find service")
-	} else if resp.IsRunning() {
+	if resp := ralS.GetResponder(); resp.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 	engineShutdown <- true

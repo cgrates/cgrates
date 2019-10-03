@@ -23,28 +23,39 @@ import (
 	"sync"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
 // NewRalService returns the Ral Service
-func NewRalService(sp servmanager.ServiceProvider) servmanager.Service {
-	apiv1 := NewApierV1Service()
-	apiv2 := NewApierV2Service(apiv1)
-	resp := NewResponderService()
-	sp.AddService(apiv1, apiv2, resp)
+func NewRalService(cfg *config.CGRConfig, dm *engine.DataManager,
+	cdrStorage engine.CdrStorage, loadStorage engine.LoadStorage,
+	cacheS *engine.CacheS, filterSChan chan *engine.FilterS, server *utils.Server,
+	thsChan, stsChan, cacheSChan, schedChan, attrsChan, dispatcherChan chan rpcclient.RpcClientConnection,
+	schedulerService *SchedulerService, exitChan chan bool) *RalService {
+	resp := NewResponderService(cfg, server, thsChan, stsChan, dispatcherChan, exitChan)
+	apiv1 := NewApierV1Service(cfg, dm, cdrStorage, loadStorage, filterSChan, server, cacheSChan, schedChan, attrsChan, dispatcherChan, schedulerService, resp)
+	apiv2 := NewApierV2Service(apiv1, cfg, server)
 	return &RalService{
+		connChan:  make(chan rpcclient.RpcClientConnection, 1),
+		cfg:       cfg,
+		cacheS:    cacheS,
+		server:    server,
 		apiv1:     apiv1,
 		apiv2:     apiv2,
 		responder: resp,
-		connChan:  make(chan rpcclient.RpcClientConnection, 1),
 	}
 }
 
 // RalService implements Service interface
 type RalService struct {
 	sync.RWMutex
+	cfg       *config.CGRConfig
+	cacheS    *engine.CacheS
+	server    *utils.Server
 	rals      *v1.RALsV1
 	apiv1     *ApierV1Service
 	apiv2     *ApierV2Service
@@ -54,7 +65,7 @@ type RalService struct {
 
 // Start should handle the sercive start
 // For this service the start should be called from RAL Service
-func (rals *RalService) Start(sp servmanager.ServiceProvider, waitCache bool) (err error) {
+func (rals *RalService) Start() (err error) {
 	if rals.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
@@ -62,33 +73,33 @@ func (rals *RalService) Start(sp servmanager.ServiceProvider, waitCache bool) (e
 	rals.Lock()
 	defer rals.Unlock()
 
-	<-sp.GetCacheS().GetPrecacheChannel(utils.CacheDestinations)
-	<-sp.GetCacheS().GetPrecacheChannel(utils.CacheReverseDestinations)
-	<-sp.GetCacheS().GetPrecacheChannel(utils.CacheRatingPlans)
-	<-sp.GetCacheS().GetPrecacheChannel(utils.CacheRatingProfiles)
-	<-sp.GetCacheS().GetPrecacheChannel(utils.CacheActions)
-	<-sp.GetCacheS().GetPrecacheChannel(utils.CacheActionPlans)
-	<-sp.GetCacheS().GetPrecacheChannel(utils.CacheAccountActionPlans)
-	<-sp.GetCacheS().GetPrecacheChannel(utils.CacheActionTriggers)
-	<-sp.GetCacheS().GetPrecacheChannel(utils.CacheSharedGroups)
-	<-sp.GetCacheS().GetPrecacheChannel(utils.CacheTimings)
+	<-rals.cacheS.GetPrecacheChannel(utils.CacheDestinations)
+	<-rals.cacheS.GetPrecacheChannel(utils.CacheReverseDestinations)
+	<-rals.cacheS.GetPrecacheChannel(utils.CacheRatingPlans)
+	<-rals.cacheS.GetPrecacheChannel(utils.CacheRatingProfiles)
+	<-rals.cacheS.GetPrecacheChannel(utils.CacheActions)
+	<-rals.cacheS.GetPrecacheChannel(utils.CacheActionPlans)
+	<-rals.cacheS.GetPrecacheChannel(utils.CacheAccountActionPlans)
+	<-rals.cacheS.GetPrecacheChannel(utils.CacheActionTriggers)
+	<-rals.cacheS.GetPrecacheChannel(utils.CacheSharedGroups)
+	<-rals.cacheS.GetPrecacheChannel(utils.CacheTimings)
 
-	if err = rals.responder.Start(sp, waitCache); err != nil {
+	if err = rals.responder.Start(); err != nil {
 		return
 	}
 
-	if err = rals.apiv1.Start(sp, waitCache); err != nil {
+	if err = rals.apiv1.Start(); err != nil {
 		return
 	}
 
-	if err = rals.apiv2.Start(sp, waitCache); err != nil {
+	if err = rals.apiv2.Start(); err != nil {
 		return
 	}
 
 	rals.rals = v1.NewRALsV1()
 
-	if !sp.GetConfig().DispatcherSCfg().Enabled {
-		sp.GetServer().RpcRegister(rals.rals)
+	if !rals.cfg.DispatcherSCfg().Enabled {
+		rals.server.RpcRegister(rals.rals)
 	}
 
 	utils.RegisterRpcParams(utils.RALsV1, rals.rals)
@@ -103,14 +114,14 @@ func (rals *RalService) GetIntenternalChan() (conn chan rpcclient.RpcClientConne
 }
 
 // Reload handles the change of config
-func (rals *RalService) Reload(sp servmanager.ServiceProvider) (err error) {
-	if err = rals.apiv1.Reload(sp); err != nil {
+func (rals *RalService) Reload() (err error) {
+	if err = rals.apiv1.Reload(); err != nil {
 		return
 	}
-	if err = rals.apiv2.Reload(sp); err != nil {
+	if err = rals.apiv2.Reload(); err != nil {
 		return
 	}
-	if err = rals.responder.Reload(sp); err != nil {
+	if err = rals.responder.Reload(); err != nil {
 		return
 	}
 	return
@@ -134,11 +145,6 @@ func (rals *RalService) Shutdown() (err error) {
 	return
 }
 
-// GetRPCInterface returns the interface to register for server
-func (rals *RalService) GetRPCInterface() interface{} {
-	return rals.rals
-}
-
 // IsRunning returns if the service is running
 func (rals *RalService) IsRunning() bool {
 	rals.RLock()
@@ -149,4 +155,24 @@ func (rals *RalService) IsRunning() bool {
 // ServiceName returns the service name
 func (rals *RalService) ServiceName() string {
 	return utils.RALService
+}
+
+// ShouldRun returns if the service should be running
+func (rals *RalService) ShouldRun() bool {
+	return rals.cfg.RalsCfg().Enabled
+}
+
+// GetAPIv1 returns the apiv1 service
+func (rals *RalService) GetAPIv1() servmanager.Service {
+	return rals.apiv1
+}
+
+// GetAPIv2 returns the apiv2 service
+func (rals *RalService) GetAPIv2() servmanager.Service {
+	return rals.apiv2
+}
+
+// GetResponder returns the responder service
+func (rals *RalService) GetResponder() servmanager.Service {
+	return rals.responder
 }

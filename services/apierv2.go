@@ -23,22 +23,28 @@ import (
 	"sync"
 
 	v2 "github.com/cgrates/cgrates/apier/v2"
-	"github.com/cgrates/cgrates/servmanager"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
 // NewApierV2Service returns the ApierV2 Service
-func NewApierV2Service(apiv1 *ApierV1Service) *ApierV2Service {
+func NewApierV2Service(apiv1 *ApierV1Service, cfg *config.CGRConfig,
+	server *utils.Server) *ApierV2Service {
 	return &ApierV2Service{
 		apiv1:    apiv1,
 		connChan: make(chan rpcclient.RpcClientConnection, 1),
+		cfg:      cfg,
+		server:   server,
 	}
 }
 
 // ApierV2Service implements Service interface
 type ApierV2Service struct {
 	sync.RWMutex
+	cfg    *config.CGRConfig
+	server *utils.Server
+
 	apiv1    *ApierV1Service
 	api      *v2.ApierV2
 	connChan chan rpcclient.RpcClientConnection
@@ -46,7 +52,7 @@ type ApierV2Service struct {
 
 // Start should handle the sercive start
 // For this service the start should be called from RAL Service
-func (api *ApierV2Service) Start(sp servmanager.ServiceProvider, waitCache bool) (err error) {
+func (api *ApierV2Service) Start() (err error) {
 	if api.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
@@ -58,8 +64,8 @@ func (api *ApierV2Service) Start(sp servmanager.ServiceProvider, waitCache bool)
 		ApierV1: *api.apiv1.GetApierV1(),
 	}
 
-	if !sp.GetConfig().DispatcherSCfg().Enabled {
-		sp.GetServer().RpcRegister(api.api)
+	if !api.cfg.DispatcherSCfg().Enabled {
+		api.server.RpcRegister(api.api)
 	}
 
 	utils.RegisterRpcParams("", &v2.CDRsV2{})
@@ -75,7 +81,7 @@ func (api *ApierV2Service) GetIntenternalChan() (conn chan rpcclient.RpcClientCo
 }
 
 // Reload handles the change of config
-func (api *ApierV2Service) Reload(sp servmanager.ServiceProvider) (err error) {
+func (api *ApierV2Service) Reload() (err error) {
 	return
 }
 
@@ -88,11 +94,6 @@ func (api *ApierV2Service) Shutdown() (err error) {
 	return
 }
 
-// GetRPCInterface returns the interface to register for server
-func (api *ApierV2Service) GetRPCInterface() interface{} {
-	return api.api
-}
-
 // IsRunning returns if the service is running
 func (api *ApierV2Service) IsRunning() bool {
 	api.RLock()
@@ -103,4 +104,9 @@ func (api *ApierV2Service) IsRunning() bool {
 // ServiceName returns the service name
 func (api *ApierV2Service) ServiceName() string {
 	return utils.ApierV2
+}
+
+// ShouldRun returns if the service should be running
+func (api *ApierV2Service) ShouldRun() bool {
+	return api.cfg.RalsCfg().Enabled
 }
