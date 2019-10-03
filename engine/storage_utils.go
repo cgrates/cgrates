@@ -52,11 +52,9 @@ func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler strin
 		dm = NewDataManager(d.(DataDB))
 	case utils.INTERNAL:
 		if marshaler == utils.JSON {
-			//d, err = NewMapStorageJson()
 			d = NewInternalDBJson()
 		} else {
 			d = NewInternalDB()
-			//d, err = NewMapStorage()
 		}
 		dm = NewDataManager(d.(DataDB))
 	default:

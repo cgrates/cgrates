@@ -79,6 +79,22 @@ func TestITCDRsMongo(t *testing.T) {
 	}
 }
 
+func TestITCDRsInternal(t *testing.T) {
+	cfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "internal"))
+	if err != nil {
+		t.Error(err)
+	}
+	if err := testGetCDRs(cfg); err != nil {
+		t.Error(err)
+	}
+	if err := testSetCDR(cfg); err != nil {
+		t.Error(err)
+	}
+	if err := testSMCosts(cfg); err != nil {
+		t.Error(err)
+	}
+}
+
 // helper function to populate CDRs and check if they were stored in storDb
 func testSetCDR(cfg *config.CGRConfig) error {
 	if err := InitStorDb(cfg); err != nil {

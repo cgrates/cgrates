@@ -1,0 +1,8 @@
+{
+// CGRateS Configuration file used for testing mysql implementation
+
+"stor_db": {								// database used to store offline tariff plans and CDRs
+	"db_type": "internal",						// stor database type to use: <mysql|postgres>
+},
+
+}
