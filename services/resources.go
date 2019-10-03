@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -30,39 +31,60 @@ import (
 )
 
 // NewResourceService returns the Resource Service
-func NewResourceService() servmanager.Service {
+func NewResourceService(cfg *config.CGRConfig, dm *engine.DataManager,
+	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
+	server *utils.Server, thrsChan chan rpcclient.RpcClientConnection,
+	dispatcherChan chan rpcclient.RpcClientConnection) servmanager.Service {
 	return &ResourceService{
-		connChan: make(chan rpcclient.RpcClientConnection, 1),
+		connChan:       make(chan rpcclient.RpcClientConnection, 1),
+		cfg:            cfg,
+		dm:             dm,
+		cacheS:         cacheS,
+		filterSChan:    filterSChan,
+		server:         server,
+		thrsChan:       thrsChan,
+		dispatcherChan: dispatcherChan,
 	}
 }
 
 // ResourceService implements Service interface
 type ResourceService struct {
 	sync.RWMutex
+	cfg            *config.CGRConfig
+	dm             *engine.DataManager
+	cacheS         *engine.CacheS
+	filterSChan    chan *engine.FilterS
+	server         *utils.Server
+	thrsChan       chan rpcclient.RpcClientConnection
+	dispatcherChan chan rpcclient.RpcClientConnection
+
 	reS      *engine.ResourceService
 	rpc      *v1.ResourceSv1
 	connChan chan rpcclient.RpcClientConnection
 }
 
 // Start should handle the sercive start
-func (reS *ResourceService) Start(sp servmanager.ServiceProvider, waitCache bool) (err error) {
+func (reS *ResourceService) Start() (err error) {
 	if reS.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
-	if waitCache {
-		<-sp.GetCacheS().GetPrecacheChannel(utils.CacheResourceProfiles)
-		<-sp.GetCacheS().GetPrecacheChannel(utils.CacheResources)
-		<-sp.GetCacheS().GetPrecacheChannel(utils.CacheResourceFilterIndexes)
-	}
+
+	reS.cacheS.GetPrecacheChannel(utils.CacheResourceProfiles)
+	reS.cacheS.GetPrecacheChannel(utils.CacheResources)
+	reS.cacheS.GetPrecacheChannel(utils.CacheResourceFilterIndexes)
+
+	filterS := <-reS.filterSChan
+	reS.filterSChan <- filterS
+
 	var thdSConn rpcclient.RpcClientConnection
-	if thdSConn, err = sp.NewConnection(utils.ThresholdS, sp.GetConfig().ResourceSCfg().ThresholdSConns); err != nil {
+	if thdSConn, err = NewConnection(reS.cfg, reS.thrsChan, reS.dispatcherChan, reS.cfg.ResourceSCfg().ThresholdSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.ResourceS, err.Error()))
 		return
 	}
 
 	reS.Lock()
 	defer reS.Unlock()
-	reS.reS, err = engine.NewResourceService(sp.GetDM(), sp.GetConfig(), thdSConn, sp.GetFilterS())
+	reS.reS, err = engine.NewResourceService(reS.dm, reS.cfg, thdSConn, filterS)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.ResourceS, err.Error()))
 		return
@@ -70,8 +92,8 @@ func (reS *ResourceService) Start(sp servmanager.ServiceProvider, waitCache bool
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ResourceS))
 	reS.reS.StartLoop()
 	reS.rpc = v1.NewResourceSv1(reS.reS)
-	if !sp.GetConfig().DispatcherSCfg().Enabled {
-		sp.GetServer().RpcRegister(reS.rpc)
+	if !reS.cfg.DispatcherSCfg().Enabled {
+		reS.server.RpcRegister(reS.rpc)
 	}
 	reS.connChan <- reS.rpc
 	return
@@ -83,9 +105,9 @@ func (reS *ResourceService) GetIntenternalChan() (conn chan rpcclient.RpcClientC
 }
 
 // Reload handles the change of config
-func (reS *ResourceService) Reload(sp servmanager.ServiceProvider) (err error) {
+func (reS *ResourceService) Reload() (err error) {
 	var thdSConn rpcclient.RpcClientConnection
-	if thdSConn, err = sp.NewConnection(utils.ThresholdS, sp.GetConfig().ResourceSCfg().ThresholdSConns); err != nil {
+	if thdSConn, err = NewConnection(reS.cfg, reS.thrsChan, reS.dispatcherChan, reS.cfg.ResourceSCfg().ThresholdSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.ResourceS, err.Error()))
 		return
 	}
@@ -109,11 +131,6 @@ func (reS *ResourceService) Shutdown() (err error) {
 	return
 }
 
-// GetRPCInterface returns the interface to register for server
-func (reS *ResourceService) GetRPCInterface() interface{} {
-	return reS.rpc
-}
-
 // IsRunning returns if the service is running
 func (reS *ResourceService) IsRunning() bool {
 	reS.RLock()
@@ -124,4 +141,9 @@ func (reS *ResourceService) IsRunning() bool {
 // ServiceName returns the service name
 func (reS *ResourceService) ServiceName() string {
 	return utils.ResourceS
+}
+
+// ShouldRun returns if the service should be running
+func (reS *ResourceService) ShouldRun() bool {
+	return reS.cfg.ResourceSCfg().Enabled
 }

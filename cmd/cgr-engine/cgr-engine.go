@@ -662,7 +662,6 @@ func main() {
 	internalCacheSChan := make(chan rpcclient.RpcClientConnection, 1)
 
 	// tmp
-	internalRsChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalRaterChan := make(chan rpcclient.RpcClientConnection, 1)
 
 	// init CacheS
@@ -682,9 +681,9 @@ func main() {
 	tS := services.NewThresholdService(cfg, dm, cacheS, filterSChan, server)
 	stS := services.NewStatService(cfg, dm, cacheS, filterSChan, server,
 		tS.GetIntenternalChan(), internalDispatcherSChan)
-	/*
-		reS := services.NewResourceService()
-		supS := services.NewSupplierService()
+	reS := services.NewResourceService(cfg, dm, cacheS, filterSChan, server,
+		tS.GetIntenternalChan(), internalDispatcherSChan)
+	/*	supS := services.NewSupplierService()
 		schS := services.NewSchedulerService()
 		cdrS := services.NewCDRServer()
 		rals := services.NewRalService(srvManager)
@@ -693,7 +692,7 @@ func main() {
 		resp, _ := srvManager.GetService(utils.ResponderS)
 		smg := services.NewSessionService()
 		grd := services.NewGuardianService()*/
-	srvManager.AddServices( /*chS, */ attrS, chrS, tS) /* stS, reS, supS, schS, cdrS, rals, smg, grd,
+	srvManager.AddServices( /*chS, */ attrS, chrS, tS, stS, reS) /*, supS, schS, cdrS, rals, smg, grd,
 	services.NewEventReaderService(),
 	services.NewDNSAgent(),
 	services.NewFreeswitchAgent(),
@@ -722,7 +721,7 @@ func main() {
 	srvManager.StartServices()
 
 	// Start FilterS
-	go startFilterService(filterSChan, cacheS, stS.GetIntenternalChan(), internalRsChan, internalRaterChan, cfg, dm, exitChan)
+	go startFilterService(filterSChan, cacheS, stS.GetIntenternalChan(), reS.GetIntenternalChan(), internalRaterChan, cfg, dm, exitChan)
 
 	/*
 		cacheS := srvManager.GetCacheS()
