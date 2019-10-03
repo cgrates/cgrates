@@ -64,9 +64,9 @@ func (thrs *ThresholdService) Start() (err error) {
 		return fmt.Errorf("service aleady running")
 	}
 
-	thrs.cacheS.GetPrecacheChannel(utils.CacheThresholdProfiles)
-	thrs.cacheS.GetPrecacheChannel(utils.CacheThresholds)
-	thrs.cacheS.GetPrecacheChannel(utils.CacheThresholdFilterIndexes)
+	<-thrs.cacheS.GetPrecacheChannel(utils.CacheThresholdProfiles)
+	<-thrs.cacheS.GetPrecacheChannel(utils.CacheThresholds)
+	<-thrs.cacheS.GetPrecacheChannel(utils.CacheThresholdFilterIndexes)
 
 	filterS := <-thrs.filterSChan
 	thrs.filterSChan <- filterS

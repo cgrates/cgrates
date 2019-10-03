@@ -678,16 +678,17 @@ func main() {
 		tS.GetIntenternalChan(), internalDispatcherSChan)
 	reS := services.NewResourceService(cfg, dm, cacheS, filterSChan, server,
 		tS.GetIntenternalChan(), internalDispatcherSChan)
-	/*	supS := services.NewSupplierService()
-		schS := services.NewSchedulerService()
-		cdrS := services.NewCDRServer()
-		rals := services.NewRalService(srvManager)
-		apiv1, _ := srvManager.GetService(utils.ApierV1)
-		apiv2, _ := srvManager.GetService(utils.ApierV2)
-		resp, _ := srvManager.GetService(utils.ResponderS)
-		smg := services.NewSessionService()
-		grd := services.NewGuardianService()*/
-	srvManager.AddServices( /*chS, */ attrS, chrS, tS, stS, reS) /*, supS, schS, cdrS, rals, smg, grd,
+	supS := services.NewSupplierService(cfg, dm, cacheS, filterSChan, server,
+		attrS.GetIntenternalChan(), stS.GetIntenternalChan(), reS.GetIntenternalChan(), internalDispatcherSChan)
+	/*		schS := services.NewSchedulerService()
+			cdrS := services.NewCDRServer()
+			rals := services.NewRalService(srvManager)
+			apiv1, _ := srvManager.GetService(utils.ApierV1)
+			apiv2, _ := srvManager.GetService(utils.ApierV2)
+			resp, _ := srvManager.GetService(utils.ResponderS)
+			smg := services.NewSessionService()
+			grd := services.NewGuardianService()*/
+	srvManager.AddServices( /*chS, */ attrS, chrS, tS, stS, reS, supS) /*, schS, cdrS, rals, smg, grd,
 	services.NewEventReaderService(),
 	services.NewDNSAgent(),
 	services.NewFreeswitchAgent(),
@@ -699,7 +700,6 @@ func main() {
 	*/
 
 	/*
-		internalSupplierSChan := supS.GetIntenternalChan()
 		internalSchedSChan := schS.GetIntenternalChan()
 		internalCdrSChan := cdrS.GetIntenternalChan()
 		internalCacheSChan := chS.GetIntenternalChan()
@@ -737,11 +737,11 @@ func main() {
 		// engine.IntRPC.AddInternalRPCClient(utils.SchedulerSv1, internalSchedSChan) // server or from apier
 		// engine.IntRPC.AddInternalRPCClient(utils.SessionSv1, internalSMGChan)      // server or from apier
 		engine.IntRPC.AddInternalRPCClient(utils.StatSv1, stS.GetIntenternalChan())
-		// engine.IntRPC.AddInternalRPCClient(utils.SupplierSv1, internalSupplierSChan)
+		engine.IntRPC.AddInternalRPCClient(utils.SupplierSv1, supS.GetIntenternalChan())
 		engine.IntRPC.AddInternalRPCClient(utils.ThresholdSv1, tS.GetIntenternalChan())
 		engine.IntRPC.AddInternalRPCClient(utils.ServiceManagerV1, internalServeManagerChan)
 		engine.IntRPC.AddInternalRPCClient(utils.ConfigSv1, internalConfigChan)
-		// engine.IntRPC.AddInternalRPCClient(utils.CoreSv1, internalCoreSv1Chan)
+		engine.IntRPC.AddInternalRPCClient(utils.CoreSv1, internalCoreSv1Chan)
 		// engine.IntRPC.AddInternalRPCClient(utils.RALsV1, internalRALsv1Chan)
 	}
 
@@ -761,13 +761,15 @@ func main() {
 	}
 
 	go startLoaderS(internalLoaderSChan, internalCacheSChan, cfg, dm, server, filterSChan, exitChan)
+
+	// Serve rpc connections
 	/*
-		// Serve rpc connections
 		go startRpc(server, internalRaterChan, internalCdrSChan,
-			internalRsChan, internalStatSChan,
-			internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
-			internalSupplierSChan, internalSMGChan, internalAnalyzerSChan,
-			internalDispatcherSChan, internalLoaderSChan, internalRALsv1Chan, internalCacheSChan, exitChan)*/
+			reS.GetIntenternalChan(), stS.GetIntenternalChan(),
+			attrS.GetIntenternalChan(), chrS.GetIntenternalChan(), tS.GetIntenternalChan(),
+			supS.GetIntenternalChan(), internalSMGChan, internalAnalyzerSChan,
+			internalDispatcherSChan, internalLoaderSChan, internalRALsv1Chan, internalCacheSChan, exitChan)
+	*/
 	<-exitChan
 
 	if *cpuProfDir != "" { // wait to end cpuProfiling
