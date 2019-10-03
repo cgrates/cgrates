@@ -673,18 +673,15 @@ func main() {
 	initCoreSv1(internalCoreSv1Chan, server)
 
 	// Start FilterS
-	// force a litl
-	startFilterService(filterSChan, cacheS, internalStatSChan, internalRsChan, internalRaterChan, cfg, dm, exitChan)
-	filterS := <-filterSChan
-	filterSChan <- filterS
+	go startFilterService(filterSChan, cacheS, internalStatSChan, internalRsChan, internalRaterChan, cfg, dm, exitChan)
 
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, dm, cdrDb,
 		loadDb, filterSChan, server, internalDispatcherSChan, exitChan)
 
 	// chS := services.NewCacheService()
-	attrS := services.NewAttributeService(cfg, dm, cacheS, filterS, server)
-	chrS := services.NewChargerService(cfg, dm, cacheS, filterS, server,
+	attrS := services.NewAttributeService(cfg, dm, cacheS, filterSChan, server)
+	chrS := services.NewChargerService(cfg, dm, cacheS, filterSChan, server,
 		attrS.GetIntenternalChan(), internalDispatcherSChan)
 	/*
 		tS := services.NewThresholdService()

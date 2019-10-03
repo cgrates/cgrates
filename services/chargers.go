@@ -32,7 +32,7 @@ import (
 
 // NewChargerService returns the Charger Service
 func NewChargerService(cfg *config.CGRConfig, dm *engine.DataManager,
-	cacheS *engine.CacheS, filterS *engine.FilterS, server *utils.Server,
+	cacheS *engine.CacheS, filterSChan chan *engine.FilterS, server *utils.Server,
 	attrsChan, dispatcherChan chan rpcclient.RpcClientConnection) servmanager.Service {
 	return &ChargerService{
 		connChan: make(chan rpcclient.RpcClientConnection, 1),
@@ -40,7 +40,7 @@ func NewChargerService(cfg *config.CGRConfig, dm *engine.DataManager,
 		cfg:            cfg,
 		dm:             dm,
 		cacheS:         cacheS,
-		filterS:        filterS,
+		filterSChan:    filterSChan,
 		server:         server,
 		attrsChan:      attrsChan,
 		dispatcherChan: dispatcherChan,
@@ -53,7 +53,7 @@ type ChargerService struct {
 	cfg            *config.CGRConfig
 	dm             *engine.DataManager
 	cacheS         *engine.CacheS
-	filterS        *engine.FilterS
+	filterSChan    chan *engine.FilterS
 	server         *utils.Server
 	attrsChan      chan rpcclient.RpcClientConnection
 	dispatcherChan chan rpcclient.RpcClientConnection
@@ -71,6 +71,9 @@ func (chrS *ChargerService) Start() (err error) {
 	chrS.cacheS.GetPrecacheChannel(utils.CacheChargerProfiles)
 	chrS.cacheS.GetPrecacheChannel(utils.CacheChargerFilterIndexes)
 
+	filterS := <-chrS.filterSChan
+	chrS.filterSChan <- filterS
+
 	var attrSConn rpcclient.RpcClientConnection
 	if attrSConn, err = NewConnection(chrS.cfg, chrS.attrsChan, chrS.dispatcherChan, chrS.cfg.ChargerSCfg().AttributeSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
@@ -79,7 +82,7 @@ func (chrS *ChargerService) Start() (err error) {
 	}
 	chrS.Lock()
 	defer chrS.Unlock()
-	if chrS.chrS, err = engine.NewChargerService(chrS.dm, chrS.filterS, attrSConn, chrS.cfg); err != nil {
+	if chrS.chrS, err = engine.NewChargerService(chrS.dm, filterS, attrSConn, chrS.cfg); err != nil {
 		utils.Logger.Crit(
 			fmt.Sprintf("<%s> Could not init, error: %s",
 				utils.ChargerS, err.Error()))
