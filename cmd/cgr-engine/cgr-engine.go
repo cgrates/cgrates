@@ -651,8 +651,9 @@ func main() {
 	internalDispatcherSChan := make(chan rpcclient.RpcClientConnection, 1)
 	/*
 		internalAnalyzerSChan := make(chan rpcclient.RpcClientConnection, 1)
-
-		internalLoaderSChan := make(chan rpcclient.RpcClientConnection, 1)
+	*/
+	internalLoaderSChan := make(chan rpcclient.RpcClientConnection, 1)
+	/*
 		internalServeManagerChan := make(chan rpcclient.RpcClientConnection, 1)
 		internalConfigChan := make(chan rpcclient.RpcClientConnection, 1)
 	*/
@@ -682,23 +683,23 @@ func main() {
 		loadDb, filterSChan, server, internalDispatcherSChan, exitChan)
 
 	// chS := services.NewCacheService()
-	attrS := services.NewAttributeService(cfg, dm,
-		cacheS, filterS,
-		server)
-	/*chrS := services.NewChargerService()
-	tS := services.NewThresholdService()
-	stS := services.NewStatService()
-	reS := services.NewResourceService()
-	supS := services.NewSupplierService()
-	schS := services.NewSchedulerService()
-	cdrS := services.NewCDRServer()
-	rals := services.NewRalService(srvManager)
-	apiv1, _ := srvManager.GetService(utils.ApierV1)
-	apiv2, _ := srvManager.GetService(utils.ApierV2)
-	resp, _ := srvManager.GetService(utils.ResponderS)
-	smg := services.NewSessionService()
-	grd := services.NewGuardianService()*/
-	srvManager.AddServices( /*chS, */ attrS) /*chrS, tS, stS, reS, supS, schS, cdrS, rals, smg, grd,
+	attrS := services.NewAttributeService(cfg, dm, cacheS, filterS, server)
+	chrS := services.NewChargerService(cfg, dm, cacheS, filterS, server,
+		attrS.GetIntenternalChan(), internalDispatcherSChan)
+	/*
+		tS := services.NewThresholdService()
+		stS := services.NewStatService()
+		reS := services.NewResourceService()
+		supS := services.NewSupplierService()
+		schS := services.NewSchedulerService()
+		cdrS := services.NewCDRServer()
+		rals := services.NewRalService(srvManager)
+		apiv1, _ := srvManager.GetService(utils.ApierV1)
+		apiv2, _ := srvManager.GetService(utils.ApierV2)
+		resp, _ := srvManager.GetService(utils.ResponderS)
+		smg := services.NewSessionService()
+		grd := services.NewGuardianService()*/
+	srvManager.AddServices( /*chS, */ attrS, chrS) /*, tS, stS, reS, supS, schS, cdrS, rals, smg, grd,
 	services.NewEventReaderService(),
 	services.NewDNSAgent(),
 	services.NewFreeswitchAgent(),
@@ -770,15 +771,15 @@ func main() {
 			if cfg.AnalyzerSCfg().Enabled {
 				go startAnalyzerService(internalAnalyzerSChan, server, exitChan)
 			}
-
-			go startLoaderS(internalLoaderSChan, internalCacheSChan, cfg, dm, server, filterSChan, exitChan)
-
-			// Serve rpc connections
-			go startRpc(server, internalRaterChan, internalCdrSChan,
-				internalRsChan, internalStatSChan,
-				internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
-				internalSupplierSChan, internalSMGChan, internalAnalyzerSChan,
-				internalDispatcherSChan, internalLoaderSChan, internalRALsv1Chan, internalCacheSChan, exitChan)*/
+	*/
+	go startLoaderS(internalLoaderSChan, internalCacheSChan, cfg, dm, server, filterSChan, exitChan)
+	/*
+		// Serve rpc connections
+		go startRpc(server, internalRaterChan, internalCdrSChan,
+			internalRsChan, internalStatSChan,
+			internalAttributeSChan, internalChargerSChan, internalThresholdSChan,
+			internalSupplierSChan, internalSMGChan, internalAnalyzerSChan,
+			internalDispatcherSChan, internalLoaderSChan, internalRALsv1Chan, internalCacheSChan, exitChan)*/
 	<-exitChan
 
 	if *cpuProfDir != "" { // wait to end cpuProfiling

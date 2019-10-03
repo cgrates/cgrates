@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -30,38 +31,55 @@ import (
 )
 
 // NewChargerService returns the Charger Service
-func NewChargerService() servmanager.Service {
+func NewChargerService(cfg *config.CGRConfig, dm *engine.DataManager,
+	cacheS *engine.CacheS, filterS *engine.FilterS, server *utils.Server,
+	attrsChan, dispatcherChan chan rpcclient.RpcClientConnection) servmanager.Service {
 	return &ChargerService{
 		connChan: make(chan rpcclient.RpcClientConnection, 1),
+
+		cfg:            cfg,
+		dm:             dm,
+		cacheS:         cacheS,
+		filterS:        filterS,
+		server:         server,
+		attrsChan:      attrsChan,
+		dispatcherChan: dispatcherChan,
 	}
 }
 
 // ChargerService implements Service interface
 type ChargerService struct {
 	sync.RWMutex
+	cfg            *config.CGRConfig
+	dm             *engine.DataManager
+	cacheS         *engine.CacheS
+	filterS        *engine.FilterS
+	server         *utils.Server
+	attrsChan      chan rpcclient.RpcClientConnection
+	dispatcherChan chan rpcclient.RpcClientConnection
+
 	chrS     *engine.ChargerService
 	rpc      *v1.ChargerSv1
 	connChan chan rpcclient.RpcClientConnection
 }
 
 // Start should handle the sercive start
-func (chrS *ChargerService) Start(sp servmanager.ServiceProvider, waitCache bool) (err error) {
+func (chrS *ChargerService) Start() (err error) {
 	if chrS.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
-	if waitCache {
-		<-sp.GetCacheS().GetPrecacheChannel(utils.CacheChargerProfiles)
-		<-sp.GetCacheS().GetPrecacheChannel(utils.CacheChargerFilterIndexes)
-	}
+	chrS.cacheS.GetPrecacheChannel(utils.CacheChargerProfiles)
+	chrS.cacheS.GetPrecacheChannel(utils.CacheChargerFilterIndexes)
+
 	var attrSConn rpcclient.RpcClientConnection
-	if attrSConn, err = sp.NewConnection(utils.AttributeS, sp.GetConfig().ChargerSCfg().AttributeSConns); err != nil {
+	if attrSConn, err = NewConnection(chrS.cfg, chrS.attrsChan, chrS.dispatcherChan, chrS.cfg.ChargerSCfg().AttributeSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.ChargerS, utils.AttributeS, err.Error()))
 		return
 	}
 	chrS.Lock()
 	defer chrS.Unlock()
-	if chrS.chrS, err = engine.NewChargerService(sp.GetDM(), sp.GetFilterS(), attrSConn, sp.GetConfig()); err != nil {
+	if chrS.chrS, err = engine.NewChargerService(chrS.dm, chrS.filterS, attrSConn, chrS.cfg); err != nil {
 		utils.Logger.Crit(
 			fmt.Sprintf("<%s> Could not init, error: %s",
 				utils.ChargerS, err.Error()))
@@ -69,8 +87,8 @@ func (chrS *ChargerService) Start(sp servmanager.ServiceProvider, waitCache bool
 	}
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ChargerS))
 	cSv1 := v1.NewChargerSv1(chrS.chrS)
-	if !sp.GetConfig().DispatcherSCfg().Enabled {
-		sp.GetServer().RpcRegister(cSv1)
+	if !chrS.cfg.DispatcherSCfg().Enabled {
+		chrS.server.RpcRegister(cSv1)
 	}
 	chrS.connChan <- cSv1
 	return
@@ -82,9 +100,9 @@ func (chrS *ChargerService) GetIntenternalChan() (conn chan rpcclient.RpcClientC
 }
 
 // Reload handles the change of config
-func (chrS *ChargerService) Reload(sp servmanager.ServiceProvider) (err error) {
+func (chrS *ChargerService) Reload() (err error) {
 	var attrSConn rpcclient.RpcClientConnection
-	if attrSConn, err = sp.NewConnection(utils.AttributeS, sp.GetConfig().ChargerSCfg().AttributeSConns); err != nil {
+	if attrSConn, err = NewConnection(chrS.cfg, chrS.attrsChan, chrS.dispatcherChan, chrS.cfg.ChargerSCfg().AttributeSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.ChargerS, utils.AttributeS, err.Error()))
 		return
@@ -108,11 +126,6 @@ func (chrS *ChargerService) Shutdown() (err error) {
 	return
 }
 
-// GetRPCInterface returns the interface to register for server
-func (chrS *ChargerService) GetRPCInterface() interface{} {
-	return chrS.rpc
-}
-
 // IsRunning returns if the service is running
 func (chrS *ChargerService) IsRunning() bool {
 	chrS.RLock()
@@ -123,4 +136,9 @@ func (chrS *ChargerService) IsRunning() bool {
 // ServiceName returns the service name
 func (chrS *ChargerService) ServiceName() string {
 	return utils.ChargerS
+}
+
+// ShouldRun returns if the service should be running
+func (chrS *ChargerService) ShouldRun() bool {
+	return chrS.cfg.ChargerSCfg().Enabled
 }
