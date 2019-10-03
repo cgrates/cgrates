@@ -35,12 +35,12 @@ func NewAttributeService(cfg *config.CGRConfig, dm *engine.DataManager,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *utils.Server) servmanager.Service {
 	return &AttributeService{
+		connChan:    make(chan rpcclient.RpcClientConnection, 1),
 		cfg:         cfg,
 		dm:          dm,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		server:      server,
-		connChan:    make(chan rpcclient.RpcClientConnection, 1),
 	}
 }
 

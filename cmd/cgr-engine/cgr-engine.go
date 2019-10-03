@@ -683,8 +683,8 @@ func main() {
 	attrS := services.NewAttributeService(cfg, dm, cacheS, filterSChan, server)
 	chrS := services.NewChargerService(cfg, dm, cacheS, filterSChan, server,
 		attrS.GetIntenternalChan(), internalDispatcherSChan)
+	tS := services.NewThresholdService(cfg, dm, cacheS, filterSChan, server)
 	/*
-		tS := services.NewThresholdService()
 		stS := services.NewStatService()
 		reS := services.NewResourceService()
 		supS := services.NewSupplierService()
@@ -696,7 +696,7 @@ func main() {
 		resp, _ := srvManager.GetService(utils.ResponderS)
 		smg := services.NewSessionService()
 		grd := services.NewGuardianService()*/
-	srvManager.AddServices( /*chS, */ attrS, chrS) /*, tS, stS, reS, supS, schS, cdrS, rals, smg, grd,
+	srvManager.AddServices( /*chS, */ attrS, chrS, tS) /* stS, reS, supS, schS, cdrS, rals, smg, grd,
 	services.NewEventReaderService(),
 	services.NewDNSAgent(),
 	services.NewFreeswitchAgent(),
