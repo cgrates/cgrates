@@ -23,53 +23,65 @@ import (
 	"sync"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
-	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
 // NewSchedulerService returns the Scheduler Service
-func NewSchedulerService() *SchedulerService {
+func NewSchedulerService(cfg *config.CGRConfig, dm *engine.DataManager,
+	cacheS *engine.CacheS, server *utils.Server,
+	dispatcherChan chan rpcclient.RpcClientConnection) *SchedulerService {
 	return &SchedulerService{
-		connChan: make(chan rpcclient.RpcClientConnection, 1),
+		connChan:       make(chan rpcclient.RpcClientConnection, 1),
+		cfg:            cfg,
+		dm:             dm,
+		cacheS:         cacheS,
+		server:         server,
+		dispatcherChan: dispatcherChan,
 	}
 }
 
 // SchedulerService implements Service interface
 type SchedulerService struct {
 	sync.RWMutex
+	cfg            *config.CGRConfig
+	dm             *engine.DataManager
+	cacheS         *engine.CacheS
+	server         *utils.Server
+	cdrSChan       chan rpcclient.RpcClientConnection
+	dispatcherChan chan rpcclient.RpcClientConnection
+
 	schS     *scheduler.Scheduler
 	rpc      *v1.SchedulerSv1
 	connChan chan rpcclient.RpcClientConnection
 }
 
 // Start should handle the sercive start
-func (schS *SchedulerService) Start(sp servmanager.ServiceProvider, waitCache bool) (err error) {
+func (schS *SchedulerService) Start() (err error) {
 	if schS.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
 
-	if waitCache { // Wait for cache to load data before starting
-		<-sp.GetCacheS().GetPrecacheChannel(utils.CacheActionPlans) // wait for ActionPlans to be cached
-	}
+	<-schS.cacheS.GetPrecacheChannel(utils.CacheActionPlans) // wait for ActionPlans to be cached
 
 	schS.Lock()
 	defer schS.Unlock()
 
 	utils.Logger.Info("<ServiceManager> Starting CGRateS Scheduler.")
-	schS.schS = scheduler.NewScheduler(sp.GetDM())
+	schS.schS = scheduler.NewScheduler(schS.dm)
 	go schS.schS.Loop()
 
-	schS.rpc = v1.NewSchedulerSv1(sp.GetConfig())
-	if !sp.GetConfig().DispatcherSCfg().Enabled {
-		sp.GetServer().RpcRegister(schS.rpc)
+	schS.rpc = v1.NewSchedulerSv1(schS.cfg)
+	if !schS.cfg.DispatcherSCfg().Enabled {
+		schS.server.RpcRegister(schS.rpc)
 	}
 	schS.connChan <- schS.rpc
 
 	// Create connection to CDR Server and share it in engine(used for *cdrlog action)
-	cdrsConn, err := sp.NewConnection(utils.CDRServer, sp.GetConfig().SchedulerCfg().CDRsConns)
+	cdrsConn, err := NewConnection(schS.cfg, schS.cdrSChan, schS.dispatcherChan, schS.cfg.SchedulerCfg().CDRsConns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to CDRServer: %s", utils.SchedulerS, err.Error()))
 		return
@@ -87,7 +99,14 @@ func (schS *SchedulerService) GetIntenternalChan() (conn chan rpcclient.RpcClien
 }
 
 // Reload handles the change of config
-func (schS *SchedulerService) Reload(sp servmanager.ServiceProvider) (err error) {
+func (schS *SchedulerService) Reload() (err error) {
+	cdrsConn, err := NewConnection(schS.cfg, schS.cdrSChan, schS.dispatcherChan, schS.cfg.SchedulerCfg().CDRsConns)
+	if err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to CDRServer: %s", utils.SchedulerS, err.Error()))
+		return
+	}
+	// ToDo: this should be send to scheduler
+	engine.SetSchedCdrsConns(cdrsConn)
 	schS.Lock()
 	schS.schS.Reload()
 	schS.Unlock()
@@ -103,13 +122,6 @@ func (schS *SchedulerService) Shutdown() (err error) {
 	<-schS.connChan
 	schS.Unlock()
 	return
-}
-
-// GetRPCInterface returns the interface to register for server
-func (schS *SchedulerService) GetRPCInterface() interface{} {
-	schS.RLock()
-	defer schS.RUnlock()
-	return schS.rpc
 }
 
 // IsRunning returns if the service is running
@@ -129,4 +141,15 @@ func (schS *SchedulerService) GetScheduler() *scheduler.Scheduler {
 	schS.RLock()
 	defer schS.RUnlock()
 	return schS.schS
+}
+
+// ShouldRun returns if the service should be running
+func (schS *SchedulerService) ShouldRun() bool {
+	return schS.cfg.SchedulerCfg().Enabled
+}
+
+// SetCdrsConns sets the value for cdrSChan
+// this needs to be called before StartServices
+func (schS *SchedulerService) SetCdrsConns(cdrSChan chan rpcclient.RpcClientConnection) {
+	schS.cdrSChan = cdrSChan
 }
