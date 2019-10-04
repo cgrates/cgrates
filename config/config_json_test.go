@@ -207,17 +207,18 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 
 func TestDfStorDBJsonCfg(t *testing.T) {
 	eCfg := &DbJsonCfg{
-		Db_type:           utils.StringPointer("*mysql"),
-		Db_host:           utils.StringPointer("127.0.0.1"),
-		Db_port:           utils.IntPointer(3306),
-		Db_name:           utils.StringPointer("cgrates"),
-		Db_user:           utils.StringPointer("cgrates"),
-		Db_password:       utils.StringPointer(""),
-		Max_open_conns:    utils.IntPointer(100),
-		Max_idle_conns:    utils.IntPointer(10),
-		Conn_max_lifetime: utils.IntPointer(0),
-		Cdrs_indexes:      &[]string{},
-		Query_timeout:     utils.StringPointer("10s"),
+		Db_type:               utils.StringPointer("*mysql"),
+		Db_host:               utils.StringPointer("127.0.0.1"),
+		Db_port:               utils.IntPointer(3306),
+		Db_name:               utils.StringPointer("cgrates"),
+		Db_user:               utils.StringPointer("cgrates"),
+		Db_password:           utils.StringPointer(""),
+		Max_open_conns:        utils.IntPointer(100),
+		Max_idle_conns:        utils.IntPointer(10),
+		Conn_max_lifetime:     utils.IntPointer(0),
+		String_indexed_fields: &[]string{},
+		Prefix_indexed_fields: &[]string{},
+		Query_timeout:         utils.StringPointer("10s"),
 	}
 	if cfg, err := dfCgrJsonCfg.DbJsonCfg(STORDB_JSN); err != nil {
 		t.Error(err)

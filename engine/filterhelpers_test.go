@@ -36,7 +36,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	var stringFilter, prefixFilter, defaultFilter []*FilterRule
 	stringFilterID := "stringFilterID"
 	prefixFilterID := "prefixFilterID"
-	data, _ := NewMapStorage()
+	data := NewInternalDB(nil, nil)
 	dmMatch = NewDataManager(data)
 	context := utils.MetaRating
 	x, err := NewFilterRule(utils.MetaString, "~Field", []string{"profile"})

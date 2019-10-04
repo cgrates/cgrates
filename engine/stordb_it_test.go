@@ -107,7 +107,7 @@ func TestStorDBitMongo(t *testing.T) {
 	if storDB, err = NewMongoStorage(cfg.StorDbCfg().StorDBHost,
 		cfg.StorDbCfg().StorDBPort, cfg.StorDbCfg().StorDBName,
 		cfg.StorDbCfg().StorDBUser, cfg.StorDbCfg().StorDBPass,
-		utils.StorDB, cfg.StorDbCfg().StorDBCDRSIndexes, nil, false); err != nil {
+		utils.StorDB, cfg.StorDbCfg().StorDBStringIndexedFields, nil, false); err != nil {
 		t.Fatal(err)
 	}
 	storDB2ndDBname = "todo"
@@ -128,7 +128,7 @@ func TestStorDBitInternalDB(t *testing.T) {
 		t.Error(err)
 	}
 	config.SetCgrConfig(cfg)
-	storDB = NewInternalDB()
+	storDB = NewInternalDB(nil, nil)
 	for _, stest := range sTestsStorDBit {
 		stestFullName := runtime.FuncForPC(reflect.ValueOf(stest).Pointer()).Name()
 		split := strings.Split(stestFullName, ".")

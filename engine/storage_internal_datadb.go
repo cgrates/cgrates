@@ -29,19 +29,22 @@ import (
 )
 
 type InternalDB struct {
-	tasks []*Task
-	ms    Marshaler
-	db    *ltcache.TransCache
-	mu    sync.RWMutex
+	tasks               []*Task
+	ms                  Marshaler
+	db                  *ltcache.TransCache
+	mu                  sync.RWMutex
+	stringIndexedFields []string
+	prefixIndexedFields []string
 }
 
-func NewInternalDB() *InternalDB {
+func NewInternalDB(stringIndexedFields, prefixIndexedFields []string) *InternalDB {
 	return &InternalDB{db: ltcache.NewTransCache(config.CgrConfig().CacheCfg().AsTransCacheConfig()),
-		ms: NewCodecMsgpackMarshaler()}
+		ms: NewCodecMsgpackMarshaler(), stringIndexedFields: stringIndexedFields,
+		prefixIndexedFields: prefixIndexedFields}
 }
 
-func NewInternalDBJson() (InternalDB *InternalDB) {
-	InternalDB = NewInternalDB()
+func NewInternalDBJson(stringIndexedFields, prefixIndexedFields []string) (InternalDB *InternalDB) {
+	InternalDB = NewInternalDB(stringIndexedFields, prefixIndexedFields)
 	InternalDB.ms = new(JSONBufMarshaler)
 	return
 }

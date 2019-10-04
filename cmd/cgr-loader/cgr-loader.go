@@ -249,7 +249,8 @@ func main() {
 			config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
 			config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
 			config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
-			config.CgrConfig().StorDbCfg().StorDBCDRSIndexes); err != nil {
+			config.CgrConfig().StorDbCfg().StorDBStringIndexedFields,
+			config.CgrConfig().StorDbCfg().StorDBPrefixIndexedFields); err != nil {
 			log.Fatalf("Coud not open storDB connection: %s", err.Error())
 		}
 		defer storDb.Close()

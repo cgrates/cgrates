@@ -45,20 +45,22 @@ func TestStoreDbCfgloadFromJsonCfg(t *testing.T) {
 	"max_open_conns": 100,					// maximum database connections opened, not applying for mongo
 	"max_idle_conns": 10,					// maximum database connections idle, not applying for mongo
 	"conn_max_lifetime": 0, 				// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
-	"cdrs_indexes": [],						// indexes on cdrs table to speed up queries, used only in case of mongo
+	"string_indexed_fields": [],			// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
+	"prefix_indexed_fields":[],				// prefix indexes on cdrs table to speed up queries, used in case of *internal
 	}
 }`
 	expected = StorDbCfg{
-		StorDBType:            "mysql",
-		StorDBHost:            "127.0.0.1",
-		StorDBPort:            "3306",
-		StorDBName:            "cgrates",
-		StorDBUser:            "cgrates",
-		StorDBPass:            "password",
-		StorDBMaxOpenConns:    100,
-		StorDBMaxIdleConns:    10,
-		StorDBConnMaxLifetime: 0,
-		StorDBCDRSIndexes:     []string{},
+		StorDBType:                "mysql",
+		StorDBHost:                "127.0.0.1",
+		StorDBPort:                "3306",
+		StorDBName:                "cgrates",
+		StorDBUser:                "cgrates",
+		StorDBPass:                "password",
+		StorDBMaxOpenConns:        100,
+		StorDBMaxIdleConns:        10,
+		StorDBConnMaxLifetime:     0,
+		StorDBStringIndexedFields: []string{},
+		StorDBPrefixIndexedFields: []string{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)

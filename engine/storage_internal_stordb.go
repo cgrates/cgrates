@@ -843,31 +843,38 @@ func (iDB *InternalDB) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 			return utils.ErrExists
 		}
 	}
-	//idxs := utils.StringMap
-
-	// internal indexes
-	groups := []string{
-		utils.ConcatenatedKey(utils.CGRID, cdr.CGRID),
-		utils.ConcatenatedKey(utils.RunID, cdr.RunID),
-		utils.ConcatenatedKey(utils.OriginHost, cdr.OriginHost),
-		utils.ConcatenatedKey(utils.Source, cdr.Source),
-		utils.ConcatenatedKey(utils.OriginID, cdr.OriginID),
-		utils.ConcatenatedKey(utils.ToR, cdr.ToR),
-		utils.ConcatenatedKey(utils.RequestType, cdr.RequestType),
-		utils.ConcatenatedKey(utils.Tenant, cdr.Tenant),
-		utils.ConcatenatedKey(utils.Category, cdr.Category),
-		utils.ConcatenatedKey(utils.Account, cdr.Account),
-		utils.ConcatenatedKey(utils.Subject, cdr.Subject),
-		utils.ConcatenatedKey(utils.Destination, cdr.Destination), // include the whole Destination
+	idxs := utils.NewStringSet(nil)
+	if len(iDB.stringIndexedFields) == 0 && len(iDB.prefixIndexedFields) == 0 { // add default indexes
+		idxs.Add(utils.ConcatenatedKey(utils.CGRID, cdr.CGRID))
+		idxs.Add(utils.ConcatenatedKey(utils.RunID, cdr.RunID))
+		idxs.Add(utils.ConcatenatedKey(utils.OriginHost, cdr.OriginHost))
+		idxs.Add(utils.ConcatenatedKey(utils.Source, cdr.Source))
+		idxs.Add(utils.ConcatenatedKey(utils.OriginID, cdr.OriginID))
+		idxs.Add(utils.ConcatenatedKey(utils.ToR, cdr.ToR))
+		idxs.Add(utils.ConcatenatedKey(utils.RequestType, cdr.RequestType))
+		idxs.Add(utils.ConcatenatedKey(utils.Tenant, cdr.Tenant))
+		idxs.Add(utils.ConcatenatedKey(utils.Category, cdr.Category))
+		idxs.Add(utils.ConcatenatedKey(utils.Account, cdr.Account))
+		idxs.Add(utils.ConcatenatedKey(utils.Subject, cdr.Subject))
+		idxs.Add(utils.ConcatenatedKey(utils.Destination, cdr.Destination)) // include the whole Destination
+		for i := len(cdr.Destination) - 1; i > 0; i-- {                     // add destination as prefix
+			idxs.Add(utils.ConcatenatedKey(utils.Destination, cdr.Destination[:i]))
+		}
+	} else { // add user indexes
+		mpCDR := cdr.AsMapStringIface()
+		for _, cdrIdx := range iDB.stringIndexedFields {
+			idxs.Add(utils.ConcatenatedKey(cdrIdx, utils.IfaceAsString(mpCDR[cdrIdx])))
+		}
+		for _, cdrIdx := range iDB.prefixIndexedFields {
+			strVal := utils.IfaceAsString(mpCDR[cdrIdx])
+			idxs.Add(utils.ConcatenatedKey(cdrIdx, strVal))
+			for i := len(strVal) - 1; i > 0; i-- {
+				idxs.Add(utils.ConcatenatedKey(cdrIdx, strVal[:i]))
+			}
+		}
 	}
-	// split destination and add it to the groups
-	dstGroup := make([]string, len(cdr.Destination))
-	for i := len(cdr.Destination) - 1; i > 0; i-- {
-		dstGroup[i] = utils.ConcatenatedKey(utils.Destination, cdr.Destination[:i])
-	}
 
-	groups = append(groups, dstGroup...)
-	iDB.db.Set(utils.CDRsTBL, utils.ConcatenatedKey(utils.CDRsTBL, cdr.CGRID, cdr.RunID, cdr.OriginID), cdr, groups,
+	iDB.db.Set(utils.CDRsTBL, utils.ConcatenatedKey(utils.CDRsTBL, cdr.CGRID, cdr.RunID, cdr.OriginID), cdr, idxs.AsSlice(),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 
 	return
@@ -966,66 +973,34 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 		}
 
 	}
-	//cdr IDs filtered by string and not string
 
-	// //
-	// var cdrIDs []string
-	// // convert cdrMpIDs to []string so we can apply Paginator
-	// if len(cdrMpIDs) == 0 { // it means we have other type of filters or we don't have filters
-	// 	cdrIDs =
-	// } else {
-	// 	cdrIDs = cdrMpIDs.Slice()
-	// }
+	if len(cdrMpIDs) == 0 {
+		return nil, 0, utils.ErrNotFound
+	}
 
-	// if len(cdrIDs) == 0 {
-	// 	return nil, 0, utils.ErrNotFound
+	cdrIDs := cdrMpIDs.Slice()
+	//apply paginator
+	cdrIDs = filter.Paginator.PaginateStringSlice(cdrIDs)
+	if filter.Count {
+		return nil, int64(len(cdrIDs)), nil
+	}
 
-	// }
-	// //apply paginator
-	// cdrIDs = filter.Paginator.PaginateStringSlice(cdrIDs)
-	// if filter.Count {
-	// 	return nil, int64(len(cdrIDs)), nil
-	// }
+	if remove {
+		for _, cdrID := range cdrIDs {
+			iDB.db.Remove(utils.CDRsTBL, cdrID,
+				cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		}
+		return nil, 0, nil
+	}
 
-	// if remove {
-	// 	for _, cdrID := range cdrIDs {
-	// 		iDB.db.Remove(utils.CDRsTBL, cdrID,
-	// 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
-	// 	}
-	// 	return nil, 0, nil
-	// }
+	for _, cdrID := range cdrIDs {
+		x, ok := iDB.db.Get(utils.CDRsTBL, cdrID)
+		if !ok || x == nil {
+			return nil, 0, utils.ErrNotFound
+		}
 
-	// for _, cdrID := range cdrIDs {
-
-	// 	for _, fltrSlc := range fltrSlcs {
-	// 		if len(fltrSlc.ids) == 0 {
-	// 			continue
-	// 		}
-	// 		grpMpIDs := make(utils.StringMap)
-	// 		for _, id := range fltrSlc.ids {
-	// 			grpIDs := iDB.db.GetGroupItemIDs(utils.CDRsTBL, utils.ConcatenatedKey(fltrSlc.key, id))
-	// 			for _, id := range grpIDs {
-	// 				grpMpIDs[id] = true
-	// 			}
-	// 		}
-	// 		if len(grpMpIDs) == 0 {
-	// 			return nil, 0, utils.ErrNotFound
-	// 		}
-	// 		if len(cdrMpIDs) == 0 {
-	// 			cdrMpIDs = grpMpIDs
-	// 		} else {
-	// 			for id := range cdrMpIDs {
-	// 				if !grpMpIDs.HasKey(id) {
-	// 					delete(cdrMpIDs, id)
-	// 				}
-	// 			}
-	// 		}
-	// 		if len(cdrMpIDs) == 0 {
-	// 			return nil, 0, utils.ErrNotFound
-	// 		}
-	// 	}
-	// 	cdrs = append(cdrs, x.(*CDR))
-	// }
+		cdrs = append(cdrs, x.(*CDR))
+	}
 	return
 }
 

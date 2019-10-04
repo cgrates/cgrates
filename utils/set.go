@@ -46,3 +46,13 @@ func (s *StringSet) AddSlice(dataSlice []string) {
 		s.Add(val)
 	}
 }
+
+func (s *StringSet) AsSlice() []string {
+	result := make([]string, len(s.data))
+	i := 0
+	for k := range s.data {
+		result[i] = k
+		i++
+	}
+	return result
+}

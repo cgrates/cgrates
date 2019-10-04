@@ -316,7 +316,8 @@ func main() {
 		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
 		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
 		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes); err != nil {
+		config.CgrConfig().StorDbCfg().StorDBStringIndexedFields,
+		config.CgrConfig().StorDbCfg().StorDBPrefixIndexedFields); err != nil {
 		log.Fatal(err)
 	}
 
@@ -327,7 +328,8 @@ func main() {
 		mgrCfg.MigratorCgrCfg().OutStorDBName, mgrCfg.MigratorCgrCfg().OutStorDBUser,
 		mgrCfg.MigratorCgrCfg().OutStorDBPassword, mgrCfg.StorDbCfg().StorDBMaxOpenConns,
 		mgrCfg.StorDbCfg().StorDBMaxIdleConns, mgrCfg.StorDbCfg().StorDBConnMaxLifetime,
-		mgrCfg.StorDbCfg().StorDBCDRSIndexes); err != nil {
+		mgrCfg.StorDbCfg().StorDBStringIndexedFields,
+		mgrCfg.StorDbCfg().StorDBPrefixIndexedFields); err != nil {
 		log.Fatal(err)
 	}
 

@@ -76,18 +76,19 @@ type TlsJsonCfg struct {
 
 // Database config
 type DbJsonCfg struct {
-	Db_type           *string
-	Db_host           *string
-	Db_port           *int
-	Db_name           *string
-	Db_user           *string
-	Db_password       *string
-	Max_open_conns    *int // Used only in case of storDb
-	Max_idle_conns    *int
-	Conn_max_lifetime *int // Used only in case of storDb
-	Cdrs_indexes      *[]string
-	Redis_sentinel    *string
-	Query_timeout     *string
+	Db_type               *string
+	Db_host               *string
+	Db_port               *int
+	Db_name               *string
+	Db_user               *string
+	Db_password           *string
+	Max_open_conns        *int // Used only in case of storDb
+	Max_idle_conns        *int
+	Conn_max_lifetime     *int // Used only in case of storDb
+	String_indexed_fields *[]string
+	Prefix_indexed_fields *[]string
+	Redis_sentinel        *string
+	Query_timeout         *string
 }
 
 // Filters config

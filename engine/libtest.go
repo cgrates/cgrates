@@ -309,7 +309,8 @@ func InitStorDb(cfg *config.CGRConfig) error {
 		cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
 		cfg.StorDbCfg().StorDBPass, cfg.GeneralCfg().DBDataEncoding,
 		cfg.StorDbCfg().StorDBMaxOpenConns, cfg.StorDbCfg().StorDBMaxIdleConns,
-		cfg.StorDbCfg().StorDBConnMaxLifetime, cfg.StorDbCfg().StorDBCDRSIndexes)
+		cfg.StorDbCfg().StorDBConnMaxLifetime, cfg.StorDbCfg().StorDBStringIndexedFields,
+		cfg.StorDbCfg().StorDBPrefixIndexedFields)
 	if err != nil {
 		return err
 	}
