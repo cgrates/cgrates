@@ -1231,19 +1231,31 @@ func (cfg *CGRConfig) CacheCfg() CacheCfg {
 	return cfg.cacheCfg
 }
 
+// LoaderCfg returns the loader profiles config
 func (cfg *CGRConfig) LoaderCfg() []*LoaderSCfg {
+	cfg.lks[LoaderJson].Lock()
+	defer cfg.lks[LoaderJson].Unlock()
 	return cfg.loaderCfg
 }
 
-func (cfg *CGRConfig) DispatcherSCfg() *DispatcherSCfg {
-	return cfg.dispatcherSCfg
-}
-
+// LoaderCgrCfg returns the config for Loader Service
 func (cfg *CGRConfig) LoaderCgrCfg() *LoaderCgrCfg {
+	cfg.lks[CgrLoaderCfgJson].Lock()
+	defer cfg.lks[CgrLoaderCfgJson].Unlock()
 	return cfg.loaderCgrCfg
 }
 
+// DispatcherSCfg returns the config for DispatcherS
+func (cfg *CGRConfig) DispatcherSCfg() *DispatcherSCfg {
+	cfg.lks[DispatcherSJson].Lock()
+	defer cfg.lks[DispatcherSJson].Unlock()
+	return cfg.dispatcherSCfg
+}
+
+// MigratorCgrCfg returns the config for Migrator
 func (cfg *CGRConfig) MigratorCgrCfg() *MigratorCgrCfg {
+	cfg.lks[CgrMigratorCfgJson].Lock()
+	defer cfg.lks[CgrMigratorCfgJson].Unlock()
 	return cfg.migratorCgrCfg
 }
 
@@ -1282,11 +1294,17 @@ func (cfg *CGRConfig) TlsCfg() *TlsCfg {
 	return cfg.tlsCfg
 }
 
+// ListenCfg returns the server Listen config
 func (cfg *CGRConfig) ListenCfg() *ListenCfg {
+	cfg.lks[LISTEN_JSN].Lock()
+	defer cfg.lks[LISTEN_JSN].Unlock()
 	return cfg.listenCfg
 }
 
+// HTTPCfg returns the config for HTTP
 func (cfg *CGRConfig) HTTPCfg() *HTTPCfg {
+	cfg.lks[HTTP_JSN].Lock()
+	defer cfg.lks[HTTP_JSN].Unlock()
 	return cfg.httpCfg
 }
 
@@ -1311,7 +1329,10 @@ func (cfg *CGRConfig) MailerCfg() *MailerCfg {
 	return cfg.mailerCfg
 }
 
+// AnalyzerSCfg returns the config for AnalyzerS
 func (cfg *CGRConfig) AnalyzerSCfg() *AnalyzerSCfg {
+	cfg.lks[AnalyzerCfgJson].Lock()
+	defer cfg.lks[AnalyzerCfgJson].Unlock()
 	return cfg.analyzerSCfg
 }
 
@@ -1525,16 +1546,6 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 			break
 		}
 		fallthrough
-	case CACHE_JSN: // no need to reload
-		if !fall {
-			break
-		}
-		fallthrough
-	case FilterSjsn: // no need to reload
-		if !fall {
-			break
-		}
-		fallthrough
 	case RALS_JSN:
 		cfg.rldChans[RALS_JSN] <- struct{}{}
 		if !fall {
@@ -1543,11 +1554,6 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		fallthrough
 	case CDRS_JSN:
 		cfg.rldChans[CDRS_JSN] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case CDRE_JSN:
 		if !fall {
 			break
 		}
@@ -1652,22 +1658,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 			break
 		}
 		fallthrough
-	case MAILER_JSN: // no need to reload
-		if !fall {
-			break
-		}
-		fallthrough
-	case SURETAX_JSON: // doesn't need to be reloaded
-		if !fall {
-			break
-		}
-		fallthrough
 	case CgrLoaderCfgJson:
-		if !fall {
-			break
-		}
-		fallthrough
-	case CgrMigratorCfgJson:
 		if !fall {
 			break
 		}
