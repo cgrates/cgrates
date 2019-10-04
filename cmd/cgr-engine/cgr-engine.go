@@ -709,9 +709,9 @@ func main() {
 	srvManager.AddServices(attrS, chrS, tS, stS, reS, supS, schS, rals,
 		rals.GetResponder(), rals.GetAPIv1(), rals.GetAPIv2(), cdrS, smg,
 		services.NewEventReaderService(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),
+		services.NewDNSAgent(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),
 	)
 	/*
-		services.NewDNSAgent(),
 		services.NewFreeswitchAgent(),
 		services.NewKamailioAgent(),
 		services.NewAsteriskAgent(), // partial reload
