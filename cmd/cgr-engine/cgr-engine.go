@@ -707,9 +707,10 @@ func main() {
 		attrS.GetIntenternalChan(), cdrS.GetIntenternalChan(), internalDispatcherSChan, exitChan)
 
 	srvManager.AddServices(attrS, chrS, tS, stS, reS, supS, schS, rals,
-		rals.GetResponder(), rals.GetAPIv1(), rals.GetAPIv2(), cdrS, smg)
+		rals.GetResponder(), rals.GetAPIv1(), rals.GetAPIv2(), cdrS, smg,
+		services.NewEventReaderService(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),
+	)
 	/*
-		services.NewEventReaderService(),
 		services.NewDNSAgent(),
 		services.NewFreeswitchAgent(),
 		services.NewKamailioAgent(),
@@ -719,9 +720,6 @@ func main() {
 		services.NewHTTPAgent(),     // no reload
 	*/
 
-	/*
-		internalSMGChan := smg.GetIntenternalChan()
-	*/
 	srvManager.StartServices()
 
 	// Start FilterS

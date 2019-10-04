@@ -270,10 +270,10 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 	}
 	if srvMngr.GetConfig().SessionSCfg().Enabled {
 		go srvMngr.startService(utils.SessionS)
+	}
+	if srvMngr.GetConfig().ERsCfg().Enabled {
+		go srvMngr.startService(utils.ERs)
 	} /*
-		if srvMngr.GetConfig().ERsCfg().Enabled {
-			go srvMngr.startService(utils.ERs)
-		}
 		if srvMngr.GetConfig().DNSAgentCfg().Enabled {
 			go srvMngr.startService(utils.DNSAgent)
 		}
@@ -371,11 +371,11 @@ func (srvMngr *ServiceManager) handleReload() {
 		case <-srvMngr.GetConfig().GetReloadChan(config.SessionSJson):
 			if err = srvMngr.reloadService(utils.SessionS); err != nil {
 				return
+			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.ERsJson):
+			if err = srvMngr.reloadService(utils.ERs); err != nil {
+				return
 			} /*
-				case <-srvMngr.GetConfig().GetReloadChan(config.ERsJson):
-					if err = srvMngr.reloadService(utils.ERs); err != nil {
-						return
-					}
 				case <-srvMngr.GetConfig().GetReloadChan(config.DNSAgentJson):
 					if err = srvMngr.reloadService(utils.DNSAgent); err != nil {
 						return
