@@ -285,10 +285,10 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 	}
 	if srvMngr.GetConfig().AsteriskAgentCfg().Enabled {
 		go srvMngr.startService(utils.AsteriskAgent)
+	}
+	if srvMngr.GetConfig().RadiusAgentCfg().Enabled {
+		go srvMngr.startService(utils.RadiusAgent)
 	} /*
-		if srvMngr.GetConfig().RadiusAgentCfg().Enabled {
-			go srvMngr.startService(utils.RadiusAgent)
-		}
 		if srvMngr.GetConfig().DiameterAgentCfg().Enabled {
 			go srvMngr.startService(utils.DiameterAgent)
 		}
@@ -391,11 +391,11 @@ func (srvMngr *ServiceManager) handleReload() {
 		case <-srvMngr.GetConfig().GetReloadChan(config.AsteriskAgentJSN):
 			if err = srvMngr.reloadService(utils.AsteriskAgent); err != nil {
 				return
+			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.RA_JSN):
+			if err = srvMngr.reloadService(utils.RadiusAgent); err != nil {
+				return
 			} /*
-				case <-srvMngr.GetConfig().GetReloadChan(config.RA_JSN):
-					if err = srvMngr.reloadService(utils.RadiusAgent); err != nil {
-						return
-					}
 				case <-srvMngr.GetConfig().GetReloadChan(config.DA_JSN):
 					if err = srvMngr.reloadService(utils.DiameterAgent); err != nil {
 						return

@@ -23,39 +23,58 @@ import (
 	"sync"
 
 	"github.com/cgrates/cgrates/agents"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
 // NewRadiusAgent returns the Radius Agent
-func NewRadiusAgent() servmanager.Service {
-	return new(RadiusAgent)
+func NewRadiusAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
+	sSChan, dispatcherChan chan rpcclient.RpcClientConnection,
+	exitChan chan bool) servmanager.Service {
+	return &RadiusAgent{
+		cfg:            cfg,
+		filterSChan:    filterSChan,
+		sSChan:         sSChan,
+		dispatcherChan: dispatcherChan,
+		exitChan:       exitChan,
+	}
 }
 
 // RadiusAgent implements Agent interface
 type RadiusAgent struct {
 	sync.RWMutex
+	cfg            *config.CGRConfig
+	filterSChan    chan *engine.FilterS
+	sSChan         chan rpcclient.RpcClientConnection
+	dispatcherChan chan rpcclient.RpcClientConnection
+	exitChan       chan bool
+
 	rad *agents.RadiusAgent
 }
 
 // Start should handle the sercive start
-func (rad *RadiusAgent) Start(sp servmanager.ServiceProvider, waitCache bool) (err error) {
+func (rad *RadiusAgent) Start() (err error) {
 	if rad.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
+
+	filterS := <-rad.filterSChan
+	rad.filterSChan <- filterS
 
 	rad.Lock()
 	defer rad.Unlock()
 	var smgConn rpcclient.RpcClientConnection
 	utils.Logger.Info("Starting Radius agent")
-	if smgConn, err = sp.NewConnection(utils.SessionS, sp.GetConfig().RadiusAgentCfg().SessionSConns); err != nil {
+	if smgConn, err = NewConnection(rad.cfg, rad.sSChan, rad.dispatcherChan, rad.cfg.RadiusAgentCfg().SessionSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.RadiusAgent, utils.SessionS, err.Error()))
 		return
 	}
 
-	if rad.rad, err = agents.NewRadiusAgent(sp.GetConfig(), sp.GetFilterS(), smgConn); err != nil {
+	if rad.rad, err = agents.NewRadiusAgent(rad.cfg, filterS, smgConn); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
 		return
 	}
@@ -64,7 +83,7 @@ func (rad *RadiusAgent) Start(sp servmanager.ServiceProvider, waitCache bool) (e
 		if err = rad.rad.ListenAndServe(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
 		}
-		sp.GetExitChan() <- true
+		rad.exitChan <- true
 	}()
 	return
 }
@@ -75,9 +94,9 @@ func (rad *RadiusAgent) GetIntenternalChan() (conn chan rpcclient.RpcClientConne
 }
 
 // Reload handles the change of config
-func (rad *RadiusAgent) Reload(sp servmanager.ServiceProvider) (err error) {
+func (rad *RadiusAgent) Reload() (err error) {
 	var smgConn rpcclient.RpcClientConnection
-	if smgConn, err = sp.NewConnection(utils.SessionS, sp.GetConfig().RadiusAgentCfg().SessionSConns); err != nil {
+	if smgConn, err = NewConnection(rad.cfg, rad.sSChan, rad.dispatcherChan, rad.cfg.RadiusAgentCfg().SessionSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.RadiusAgent, utils.SessionS, err.Error()))
 		return
@@ -93,11 +112,6 @@ func (rad *RadiusAgent) Shutdown() (err error) {
 	return // no shutdown for the momment
 }
 
-// GetRPCInterface returns the interface to register for server
-func (rad *RadiusAgent) GetRPCInterface() interface{} {
-	return rad.rad
-}
-
 // IsRunning returns if the service is running
 func (rad *RadiusAgent) IsRunning() bool {
 	rad.RLock()
@@ -108,4 +122,9 @@ func (rad *RadiusAgent) IsRunning() bool {
 // ServiceName returns the service name
 func (rad *RadiusAgent) ServiceName() string {
 	return utils.RadiusAgent
+}
+
+// ShouldRun returns if the service should be running
+func (rad *RadiusAgent) ShouldRun() bool {
+	return rad.cfg.RadiusAgentCfg().Enabled
 }
