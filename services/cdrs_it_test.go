@@ -59,16 +59,24 @@ func TestCdrsReload(t *testing.T) {
 
 	cfg.ChargerSCfg().Enabled = true
 	cfg.RalsCfg().Enabled = true
+	internalChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalChan <- nil
 	cacheSChan := make(chan rpcclient.RpcClientConnection, 1)
 	cacheSChan <- chS
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg /*dm*/, nil,
 		/*cdrStorage*/ nil,
-		/*loadStorage*/ nil, filterSChan,
+		/*loadStorage*/ nil /*filterSChan*/, nil,
 		server, nil, engineShutdown)
 	srvMngr.SetCacheS(chS)
-	cdrS := NewCDRServer()
-	srvMngr.AddService(cdrS, NewRalService(srvMngr), NewChargerService(), &CacheService{connChan: cacheSChan}, NewSchedulerService())
+	chrS := NewChargerService(cfg, nil, chS, filterSChan, server, nil, nil)
+	schS := NewSchedulerService(cfg, nil, chS, server, nil)
+	tS := NewThresholdService(cfg, nil, chS, filterSChan, server)
+	ralS := NewRalService(cfg, nil, nil, nil, chS, filterSChan, server,
+		tS.GetIntenternalChan(), internalChan, cacheSChan, internalChan, internalChan,
+		internalChan, schS, engineShutdown)
+	cdrS := NewCDRServer(cfg, nil, nil, filterSChan, server, chrS.GetIntenternalChan(), ralS.GetResponder().GetIntenternalChan(), nil, nil, nil, nil)
+	srvMngr.AddServices(cdrS, ralS, schS, chrS)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
