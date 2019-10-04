@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	"github.com/cgrates/cgrates/agents"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
@@ -30,18 +31,30 @@ import (
 )
 
 // NewFreeswitchAgent returns the Freeswitch Agent
-func NewFreeswitchAgent() servmanager.Service {
-	return new(FreeswitchAgent)
+func NewFreeswitchAgent(cfg *config.CGRConfig,
+	sSChan, dispatcherChan chan rpcclient.RpcClientConnection,
+	exitChan chan bool) servmanager.Service {
+	return &FreeswitchAgent{
+		cfg:            cfg,
+		sSChan:         sSChan,
+		dispatcherChan: dispatcherChan,
+		exitChan:       exitChan,
+	}
 }
 
 // FreeswitchAgent implements Agent interface
 type FreeswitchAgent struct {
 	sync.RWMutex
+	cfg            *config.CGRConfig
+	sSChan         chan rpcclient.RpcClientConnection
+	dispatcherChan chan rpcclient.RpcClientConnection
+	exitChan       chan bool
+
 	fS *agents.FSsessions
 }
 
 // Start should handle the sercive start
-func (fS *FreeswitchAgent) Start(sp servmanager.ServiceProvider, waitCache bool) (err error) {
+func (fS *FreeswitchAgent) Start() (err error) {
 	if fS.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
@@ -51,25 +64,19 @@ func (fS *FreeswitchAgent) Start(sp servmanager.ServiceProvider, waitCache bool)
 	var sS rpcclient.RpcClientConnection
 	var sSInternal bool
 	utils.Logger.Info("Starting FreeSWITCH agent")
-	if !sp.GetConfig().DispatcherSCfg().Enabled && sp.GetConfig().FsAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
+	if !fS.cfg.DispatcherSCfg().Enabled && fS.cfg.FsAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
 		sSInternal = true
-		srvSessionS, has := sp.GetService(utils.SessionS)
-		if !has {
-			utils.Logger.Err(fmt.Sprintf("<%s> Failed to find needed subsystem <%s>",
-				utils.FreeSWITCHAgent, utils.SessionS))
-			return utils.ErrNotFound
-		}
-		sSIntConn := <-srvSessionS.GetIntenternalChan()
-		srvSessionS.GetIntenternalChan() <- sSIntConn
+		sSIntConn := <-fS.sSChan
+		fS.sSChan <- sSIntConn
 		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
 	} else {
-		if sS, err = sp.NewConnection(utils.SessionS, sp.GetConfig().FsAgentCfg().SessionSConns); err != nil {
+		if sS, err = NewConnection(fS.cfg, fS.sSChan, fS.dispatcherChan, fS.cfg.FsAgentCfg().SessionSConns); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 				utils.FreeSWITCHAgent, utils.SessionS, err.Error()))
 			return
 		}
 	}
-	fS.fS = agents.NewFSsessions(sp.GetConfig().FsAgentCfg(), sS, sp.GetConfig().GeneralCfg().DefaultTimezone)
+	fS.fS = agents.NewFSsessions(fS.cfg.FsAgentCfg(), sS, fS.cfg.GeneralCfg().DefaultTimezone)
 	if sSInternal { // bidirectional client backwards connection
 		sS.(*utils.BiRPCInternalClient).SetClientConn(fS.fS)
 		var rply string
@@ -84,7 +91,7 @@ func (fS *FreeswitchAgent) Start(sp servmanager.ServiceProvider, waitCache bool)
 	go func() {
 		if err := fS.fS.Connect(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
-			sp.GetExitChan() <- true // stop the engine here
+			fS.exitChan <- true // stop the engine here
 		}
 	}()
 	return
@@ -97,22 +104,16 @@ func (fS *FreeswitchAgent) GetIntenternalChan() (conn chan rpcclient.RpcClientCo
 }
 
 // Reload handles the change of config
-func (fS *FreeswitchAgent) Reload(sp servmanager.ServiceProvider) (err error) {
+func (fS *FreeswitchAgent) Reload() (err error) {
 	var sS rpcclient.RpcClientConnection
 	var sSInternal bool
-	if !sp.GetConfig().DispatcherSCfg().Enabled && sp.GetConfig().FsAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
+	if !fS.cfg.DispatcherSCfg().Enabled && fS.cfg.FsAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
 		sSInternal = true
-		srvSessionS, has := sp.GetService(utils.SessionS)
-		if !has {
-			utils.Logger.Err(fmt.Sprintf("<%s> Failed to find needed subsystem <%s>",
-				utils.FreeSWITCHAgent, utils.SessionS))
-			return utils.ErrNotFound
-		}
-		sSIntConn := <-srvSessionS.GetIntenternalChan()
-		srvSessionS.GetIntenternalChan() <- sSIntConn
+		sSIntConn := <-fS.sSChan
+		fS.sSChan <- sSIntConn
 		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
 	} else {
-		if sS, err = sp.NewConnection(utils.SessionS, sp.GetConfig().FsAgentCfg().SessionSConns); err != nil {
+		if sS, err = NewConnection(fS.cfg, fS.sSChan, fS.dispatcherChan, fS.cfg.FsAgentCfg().SessionSConns); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 				utils.FreeSWITCHAgent, utils.SessionS, err.Error()))
 			return
@@ -138,7 +139,7 @@ func (fS *FreeswitchAgent) Reload(sp servmanager.ServiceProvider) (err error) {
 	go func() {
 		if err := fS.fS.Connect(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))
-			sp.GetExitChan() <- true // stop the engine here
+			fS.exitChan <- true // stop the engine here
 		}
 	}()
 	return
@@ -155,11 +156,6 @@ func (fS *FreeswitchAgent) Shutdown() (err error) {
 	return
 }
 
-// GetRPCInterface returns the interface to register for server
-func (fS *FreeswitchAgent) GetRPCInterface() interface{} {
-	return fS.fS
-}
-
 // IsRunning returns if the service is running
 func (fS *FreeswitchAgent) IsRunning() bool {
 	fS.RLock()
@@ -170,4 +166,9 @@ func (fS *FreeswitchAgent) IsRunning() bool {
 // ServiceName returns the service name
 func (fS *FreeswitchAgent) ServiceName() string {
 	return utils.FreeSWITCHAgent
+}
+
+// ShouldRun returns if the service should be running
+func (fS *FreeswitchAgent) ShouldRun() bool {
+	return fS.cfg.FsAgentCfg().Enabled
 }
