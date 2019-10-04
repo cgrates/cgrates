@@ -267,10 +267,10 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 	}
 	if srvMngr.GetConfig().CdrsCfg().Enabled {
 		go srvMngr.startService(utils.CDRServer)
+	}
+	if srvMngr.GetConfig().SessionSCfg().Enabled {
+		go srvMngr.startService(utils.SessionS)
 	} /*
-		if srvMngr.GetConfig().SessionSCfg().Enabled {
-			go srvMngr.startService(utils.SessionS)
-		}
 		if srvMngr.GetConfig().ERsCfg().Enabled {
 			go srvMngr.startService(utils.ERs)
 		}
@@ -367,11 +367,11 @@ func (srvMngr *ServiceManager) handleReload() {
 		case <-srvMngr.GetConfig().GetReloadChan(config.CDRS_JSN):
 			if err = srvMngr.reloadService(utils.CDRServer); err != nil {
 				return
+			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.SessionSJson):
+			if err = srvMngr.reloadService(utils.SessionS); err != nil {
+				return
 			} /*
-				case <-srvMngr.GetConfig().GetReloadChan(config.SessionSJson):
-					if err = srvMngr.reloadService(utils.SessionS); err != nil {
-						return
-					}
 				case <-srvMngr.GetConfig().GetReloadChan(config.ERsJson):
 					if err = srvMngr.reloadService(utils.ERs); err != nil {
 						return
