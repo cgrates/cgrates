@@ -53,8 +53,10 @@ func TestDNSAgentReload(t *testing.T) {
 		/*loadStorage*/ nil, filterSChan,
 		server, nil, engineShutdown)
 	srvMngr.SetCacheS(chS)
-	srv := NewDNSAgent()
-	srvMngr.AddService(srv, NewSessionService(), &CacheService{connChan: cacheSChan})
+	sS := NewSessionService(cfg, nil, server, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, engineShutdown)
+	srv := NewDNSAgent(cfg, filterSChan, sS.GetIntenternalChan(), nil, engineShutdown)
+	srvMngr.AddServices(srv, sS)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
