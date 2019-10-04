@@ -153,7 +153,7 @@ func TestAttributePopulateAttrService(t *testing.T) {
 	if err := utils.Clone(expTimeAttributes, &cloneExpTimeAttributes); err != nil {
 		t.Error(err)
 	}
-	data, _ := NewMapStorage()
+	data := NewInternalDB(nil, nil)
 	dmAtr = NewDataManager(data)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
@@ -438,8 +438,10 @@ func TestAttributeIndexer(t *testing.T) {
 		}
 	}
 	//Set AttributeProfile with new context (*sessions)
-	attrPrf.Contexts = []string{utils.MetaSessionS}
-	if err := dmAtr.SetAttributeProfile(attrPrf, true); err != nil {
+	cpAttrPrf := new(AttributeProfile)
+	*cpAttrPrf = *attrPrf
+	cpAttrPrf.Contexts = []string{utils.MetaSessionS}
+	if err := dmAtr.SetAttributeProfile(cpAttrPrf, true); err != nil {
 		t.Error(err)
 	}
 	rfi2 := NewFilterIndexer(dmAtr, utils.AttributeProfilePrefix,
@@ -1698,7 +1700,7 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 }
 
 func BenchmarkAttributeProcessEventConstant(b *testing.B) {
-	data, _ := NewMapStorage()
+	data := NewInternalDB(nil, nil)
 	dmAtr = NewDataManager(data)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
@@ -1762,7 +1764,7 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 }
 
 func BenchmarkAttributeProcessEventVariable(b *testing.B) {
-	data, _ := NewMapStorage()
+	data := NewInternalDB(nil, nil)
 	dmAtr = NewDataManager(data)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	defaultCfg.AttributeSCfg().ProcessRuns = 1

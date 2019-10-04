@@ -100,7 +100,7 @@ func TestFilterIndexerITMongo(t *testing.T) {
 }
 
 func TestFilterIndexerITInternal(t *testing.T) {
-	dataManager = NewDataManager(NewInternalDB())
+	dataManager = NewDataManager(NewInternalDB(nil, nil))
 	for _, stest := range sTests {
 		t.Run("TestITInternal", stest)
 	}
@@ -307,7 +307,7 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	if err := dataManager.SetFilter(fp2); err != nil {
 		t.Error(err)
 	}
-	cloneTh1:=new(ThresholdProfile)
+	cloneTh1 := new(ThresholdProfile)
 	*cloneTh1 = *th
 	cloneTh1.FilterIDs = []string{"Filter2"}
 	time.Sleep(50 * time.Millisecond)
@@ -354,8 +354,8 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 	if err := dataManager.SetFilter(fp3); err != nil {
 		t.Error(err)
 	}
-	
-	clone2Th1:=new(ThresholdProfile)
+
+	clone2Th1 := new(ThresholdProfile)
 	*clone2Th1 = *th
 	clone2Th1.FilterIDs = []string{"Filter1", "Filter3"}
 	time.Sleep(50 * time.Millisecond)

@@ -28,17 +28,18 @@ import (
 
 // StorDbCfg StroreDb config
 type StorDbCfg struct {
-	StorDBType            string // Should reflect the database type used to store logs
-	StorDBHost            string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	StorDBPort            string // Th e port to bind to.
-	StorDBName            string // The name of the database to connect to.
-	StorDBUser            string // The user to sign in as.
-	StorDBPass            string // The user's password.
-	StorDBMaxOpenConns    int    // Maximum database connections opened
-	StorDBMaxIdleConns    int    // Maximum idle connections to keep opened
-	StorDBConnMaxLifetime int
-	StorDBCDRSIndexes     []string
-	QueryTimeout          time.Duration
+	StorDBType                string // Should reflect the database type used to store logs
+	StorDBHost                string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	StorDBPort                string // Th e port to bind to.
+	StorDBName                string // The name of the database to connect to.
+	StorDBUser                string // The user to sign in as.
+	StorDBPass                string // The user's password.
+	StorDBMaxOpenConns        int    // Maximum database connections opened
+	StorDBMaxIdleConns        int    // Maximum idle connections to keep opened
+	StorDBConnMaxLifetime     int
+	StorDBStringIndexedFields []string
+	StorDBPrefixIndexedFields []string
+	QueryTimeout              time.Duration
 }
 
 //loadFromJsonCfg loads StoreDb config from JsonCfg
@@ -77,8 +78,11 @@ func (dbcfg *StorDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg.Conn_max_lifetime != nil {
 		dbcfg.StorDBConnMaxLifetime = *jsnDbCfg.Conn_max_lifetime
 	}
-	if jsnDbCfg.Cdrs_indexes != nil {
-		dbcfg.StorDBCDRSIndexes = *jsnDbCfg.Cdrs_indexes
+	if jsnDbCfg.String_indexed_fields != nil {
+		dbcfg.StorDBStringIndexedFields = *jsnDbCfg.String_indexed_fields
+	}
+	if jsnDbCfg.Prefix_indexed_fields != nil {
+		dbcfg.StorDBPrefixIndexedFields = *jsnDbCfg.Prefix_indexed_fields
 	}
 	if jsnDbCfg.Query_timeout != nil {
 		if dbcfg.QueryTimeout, err = utils.ParseDurationWithNanosecs(*jsnDbCfg.Query_timeout); err != nil {

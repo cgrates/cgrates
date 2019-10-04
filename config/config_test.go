@@ -447,8 +447,11 @@ func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
 	if cgrCfg.StorDbCfg().StorDBMaxIdleConns != 10 {
 		t.Errorf("Expecting: 10 , recived: %+v", cgrCfg.StorDbCfg().StorDBMaxIdleConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.StorDbCfg().StorDBCDRSIndexes, []string{}) {
-		t.Errorf("Expecting: %+v , recived: %+v", []string{}, cgrCfg.StorDbCfg().StorDBCDRSIndexes)
+	if !reflect.DeepEqual(cgrCfg.StorDbCfg().StorDBStringIndexedFields, []string{}) {
+		t.Errorf("Expecting: %+v , recived: %+v", []string{}, cgrCfg.StorDbCfg().StorDBStringIndexedFields)
+	}
+	if !reflect.DeepEqual(cgrCfg.StorDbCfg().StorDBPrefixIndexedFields, []string{}) {
+		t.Errorf("Expecting: %+v , recived: %+v", []string{}, cgrCfg.StorDbCfg().StorDBPrefixIndexedFields)
 	}
 }
 

@@ -101,7 +101,7 @@ var (
 )
 
 func TestChargerPopulateChargerService(t *testing.T) {
-	data, _ := NewMapStorage()
+	data := NewInternalDB(nil, nil)
 	dmCharger = NewDataManager(data)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	if err != nil {

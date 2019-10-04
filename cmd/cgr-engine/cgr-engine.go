@@ -1315,7 +1315,8 @@ func main() {
 			cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
 			cfg.StorDbCfg().StorDBPass, cfg.GeneralCfg().DBDataEncoding,
 			cfg.StorDbCfg().StorDBMaxOpenConns, cfg.StorDbCfg().StorDBMaxIdleConns,
-			cfg.StorDbCfg().StorDBConnMaxLifetime, cfg.StorDbCfg().StorDBCDRSIndexes)
+			cfg.StorDbCfg().StorDBConnMaxLifetime, cfg.StorDbCfg().StorDBStringIndexedFields,
+			cfg.StorDbCfg().StorDBPrefixIndexedFields)
 		if err != nil { // Cannot configure logger database, show stopper
 			utils.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
 			return

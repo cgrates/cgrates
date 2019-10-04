@@ -142,7 +142,7 @@ var (
 )
 
 func TestStatQueuesPopulateService(t *testing.T) {
-	data, _ := NewMapStorage()
+	data := NewInternalDB(nil, nil)
 	dmSTS = NewDataManager(data)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	if err != nil {

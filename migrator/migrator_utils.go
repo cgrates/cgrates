@@ -43,7 +43,7 @@ func NewMigratorDataDB(db_type, host, port, name, user, pass, marshaler string,
 		d = newMongoMigrator(dm)
 		db = d.(MigratorDataDB)
 	case utils.INTERNAL:
-		d = newMapMigrator(dm)
+		d = newInternalMigrator(dm)
 		db = d.(MigratorDataDB)
 	default:
 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s' or '%s or '%s'",
@@ -53,10 +53,11 @@ func NewMigratorDataDB(db_type, host, port, name, user, pass, marshaler string,
 }
 
 func NewMigratorStorDB(db_type, host, port, name, user, pass string,
-	maxConn, maxIdleConn, connMaxLifetime int, cdrsIndexes []string) (db MigratorStorDB, err error) {
+	maxConn, maxIdleConn, connMaxLifetime int,
+	stringIndexedFields, prefixIndexedFields []string) (db MigratorStorDB, err error) {
 	var d MigratorStorDB
 	storDb, err := engine.ConfigureStorDB(db_type, host, port, name, user, pass,
-		maxConn, maxIdleConn, connMaxLifetime, cdrsIndexes)
+		maxConn, maxIdleConn, connMaxLifetime, stringIndexedFields, prefixIndexedFields)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +72,7 @@ func NewMigratorStorDB(db_type, host, port, name, user, pass string,
 		d = newMigratorSQL(storDb)
 		db = d.(MigratorStorDB)
 	case utils.INTERNAL:
-		d = newMapStorDBMigrator(storDb)
+		d = newInternalStorDBMigrator(storDb)
 		db = d.(MigratorStorDB)
 	default:
 		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are [%s, %s, %s, %s]",

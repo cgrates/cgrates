@@ -87,7 +87,8 @@ func testAcc2ITConnect(t *testing.T) {
 		acc2CfgIn.StorDbCfg().StorDBMaxOpenConns,
 		acc2CfgIn.StorDbCfg().StorDBMaxIdleConns,
 		acc2CfgIn.StorDbCfg().StorDBConnMaxLifetime,
-		acc2CfgIn.StorDbCfg().StorDBCDRSIndexes)
+		acc2CfgIn.StorDbCfg().StorDBStringIndexedFields,
+		acc2CfgIn.StorDbCfg().StorDBPrefixIndexedFields)
 	if err != nil {
 		t.Error(err)
 	}
@@ -97,7 +98,8 @@ func testAcc2ITConnect(t *testing.T) {
 		acc2CfgOut.StorDbCfg().StorDBPass, acc2CfgOut.StorDbCfg().StorDBMaxOpenConns,
 		acc2CfgOut.StorDbCfg().StorDBMaxIdleConns,
 		acc2CfgOut.StorDbCfg().StorDBConnMaxLifetime,
-		acc2CfgOut.StorDbCfg().StorDBCDRSIndexes)
+		acc2CfgOut.StorDbCfg().StorDBStringIndexedFields,
+		acc2CfgOut.StorDbCfg().StorDBPrefixIndexedFields)
 	if err != nil {
 		t.Error(err)
 	}

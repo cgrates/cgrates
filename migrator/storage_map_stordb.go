@@ -23,58 +23,58 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func newMapStorDBMigrator(stor engine.StorDB) (mpMig *mapStorDBMigrator) {
-	return &mapStorDBMigrator{
+func newInternalStorDBMigrator(stor engine.StorDB) (iDBMig *internalStorDBMigrator) {
+	return &internalStorDBMigrator{
 		storDB: &stor,
-		iDB:     stor.(*engine.InternalDB),
+		iDB:    stor.(*engine.InternalDB),
 	}
 }
 
-type mapStorDBMigrator struct {
+type internalStorDBMigrator struct {
 	storDB   *engine.StorDB
-	iDB       *engine.InternalDB
+	iDB      *engine.InternalDB
 	dataKeys []string
 	qryIdx   *int
 }
 
-func (mpMig *mapStorDBMigrator) close() {}
+func (iDBMig *internalStorDBMigrator) close() {}
 
-func (mpMig *mapStorDBMigrator) StorDB() engine.StorDB {
-	return *mpMig.storDB
+func (iDBMig *internalStorDBMigrator) StorDB() engine.StorDB {
+	return *iDBMig.storDB
 }
 
 //CDR methods
 //get
-func (mpMig *mapStorDBMigrator) getV1CDR() (v1Cdr *v1Cdrs, err error) {
+func (iDBMig *internalStorDBMigrator) getV1CDR() (v1Cdr *v1Cdrs, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
 //set
-func (mpMig *mapStorDBMigrator) setV1CDR(v1Cdr *v1Cdrs) (err error) {
+func (iDBMig *internalStorDBMigrator) setV1CDR(v1Cdr *v1Cdrs) (err error) {
 	return utils.ErrNotImplemented
 }
 
 //SMCost methods
 //rename
-func (mpMig *mapStorDBMigrator) renameV1SMCosts() (err error) {
+func (iDBMig *internalStorDBMigrator) renameV1SMCosts() (err error) {
 	return utils.ErrNotImplemented
 }
 
-func (mpMig *mapStorDBMigrator) createV1SMCosts() (err error) {
+func (iDBMig *internalStorDBMigrator) createV1SMCosts() (err error) {
 	return utils.ErrNotImplemented
 }
 
 //get
-func (mpMig *mapStorDBMigrator) getV2SMCost() (v2Cost *v2SessionsCost, err error) {
+func (iDBMig *internalStorDBMigrator) getV2SMCost() (v2Cost *v2SessionsCost, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
 //set
-func (mpMig *mapStorDBMigrator) setV2SMCost(v2Cost *v2SessionsCost) (err error) {
+func (iDBMig *internalStorDBMigrator) setV2SMCost(v2Cost *v2SessionsCost) (err error) {
 	return utils.ErrNotImplemented
 }
 
 //remove
-func (mpMig *mapStorDBMigrator) remV2SMCost(v2Cost *v2SessionsCost) (err error) {
+func (iDBMig *internalStorDBMigrator) remV2SMCost(v2Cost *v2SessionsCost) (err error) {
 	return utils.ErrNotImplemented
 }

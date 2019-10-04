@@ -105,7 +105,7 @@ func testSetCDR(cfg *config.CGRConfig) error {
 		cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
 		cfg.StorDbCfg().StorDBPass, cfg.StorDbCfg().StorDBMaxOpenConns,
 		cfg.StorDbCfg().StorDBMaxIdleConns, cfg.StorDbCfg().StorDBConnMaxLifetime,
-		cfg.StorDbCfg().StorDBCDRSIndexes)
+		cfg.StorDbCfg().StorDBStringIndexedFields, cfg.StorDbCfg().StorDBPrefixIndexedFields)
 	if err != nil {
 		return err
 	}
@@ -211,7 +211,7 @@ func testSMCosts(cfg *config.CGRConfig) error {
 		cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
 		cfg.StorDbCfg().StorDBPass, cfg.StorDbCfg().StorDBMaxOpenConns,
 		cfg.StorDbCfg().StorDBMaxIdleConns, cfg.StorDbCfg().StorDBConnMaxLifetime,
-		cfg.StorDbCfg().StorDBCDRSIndexes)
+		cfg.StorDbCfg().StorDBStringIndexedFields, cfg.StorDbCfg().StorDBPrefixIndexedFields)
 	if err != nil {
 		return fmt.Errorf("testSMCosts #2 err: %v", err)
 	}
@@ -264,7 +264,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
 		cfg.StorDbCfg().StorDBPass, cfg.StorDbCfg().StorDBMaxOpenConns,
 		cfg.StorDbCfg().StorDBMaxIdleConns, cfg.StorDbCfg().StorDBConnMaxLifetime,
-		cfg.StorDbCfg().StorDBCDRSIndexes)
+		cfg.StorDbCfg().StorDBStringIndexedFields, cfg.StorDbCfg().StorDBPrefixIndexedFields)
 	if err != nil {
 		return fmt.Errorf("testGetCDRs #2: %v", err)
 	}

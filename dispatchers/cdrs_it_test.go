@@ -33,6 +33,7 @@ var sTestsDspCDRs = []func(t *testing.T){
 	testDspCDRsProcessEvent,
 	testDspCDRsCountCDR,
 	testDspCDRsGetCDR,
+	testDspCDRsGetCDRWithoutTenant,
 	testDspCDRsProcessCDR,
 	testDspCDRsGetCDR2,
 	testDspCDRsProcessExternalCDR,
@@ -136,6 +137,29 @@ func testDspCDRsGetCDR(t *testing.T) {
 			TenantArg: &utils.TenantArg{
 				Tenant: "cgrates.org",
 			},
+			ArgDispatcher: &utils.ArgDispatcher{
+				APIKey: utils.StringPointer("cdrs12345"),
+			},
+		},
+	}
+
+	if err := dispEngine.RCP.Call(utils.CDRsV1GetCDRs, args, &reply); err != nil {
+		t.Error(err)
+	} else if len(reply) != 1 {
+		t.Errorf("Received: %+v", reply)
+	} else if reply[0].CGRID != "9ee4c71fcd67eef5fb25a4bb3f190487de3073f5" {
+		t.Errorf("Expected: 9ee4c71fcd67eef5fb25a4bb3f190487de3073f5 , received:%v", reply[0].CGRID)
+	}
+}
+
+func testDspCDRsGetCDRWithoutTenant(t *testing.T) {
+	var reply []*engine.CDR
+	args := utils.RPCCDRsFilterWithArgDispatcher{
+		RPCCDRsFilter: &utils.RPCCDRsFilter{
+			Accounts: []string{"1001"},
+			RunIDs:   []string{utils.MetaDefault},
+		},
+		TenantWithArgDispatcher: &utils.TenantWithArgDispatcher{
 			ArgDispatcher: &utils.ArgDispatcher{
 				APIKey: utils.StringPointer("cdrs12345"),
 			},

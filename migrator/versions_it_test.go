@@ -86,7 +86,8 @@ func testVrsITConnect(t *testing.T) {
 		vrsCfg.StorDbCfg().StorDBPass, vrsCfg.StorDbCfg().StorDBMaxOpenConns,
 		vrsCfg.StorDbCfg().StorDBMaxIdleConns,
 		vrsCfg.StorDbCfg().StorDBConnMaxLifetime,
-		vrsCfg.StorDbCfg().StorDBCDRSIndexes)
+		vrsCfg.StorDbCfg().StorDBStringIndexedFields,
+		vrsCfg.StorDbCfg().StorDBPrefixIndexedFields)
 	if err != nil {
 		t.Error(err)
 	}

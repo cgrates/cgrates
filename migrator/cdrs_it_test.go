@@ -77,7 +77,8 @@ func testCdrITConnect(t *testing.T) {
 		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
 		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
 		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes)
+		config.CgrConfig().StorDbCfg().StorDBStringIndexedFields,
+		config.CgrConfig().StorDbCfg().StorDBPrefixIndexedFields)
 	if err != nil {
 		t.Error(err)
 	}
@@ -88,7 +89,8 @@ func testCdrITConnect(t *testing.T) {
 		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
 		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
 		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDbCfg().StorDBCDRSIndexes)
+		config.CgrConfig().StorDbCfg().StorDBStringIndexedFields,
+		config.CgrConfig().StorDbCfg().StorDBPrefixIndexedFields)
 	if err != nil {
 		t.Error(err)
 	}
