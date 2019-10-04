@@ -47,6 +47,7 @@ func (dS *DispatcherService) ThresholdSv1Ping(args *utils.CGREventWithArgDispatc
 
 func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(args *engine.ArgsProcessEvent,
 	t *engine.Thresholds) (err error) {
+	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 	}
@@ -67,6 +68,7 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(args *engine.Args
 
 func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *engine.ArgsProcessEvent,
 	tIDs *[]string) (err error) {
+	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 	}
@@ -86,12 +88,16 @@ func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *engine.ArgsProcessEv
 }
 
 func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(args *utils.TenantWithArgDispatcher, tIDs *[]string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.TenantArg != nil && args.TenantArg.Tenant != utils.EmptyString {
+		tnt = args.TenantArg.Tenant
+	}
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 	}
 	if dS.attrS != nil {
 		if err = dS.authorize(utils.ThresholdSv1GetThresholdIDs,
-			args.Tenant, args.APIKey, utils.TimePointer(time.Now())); err != nil {
+			tnt, args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
 	}
@@ -99,17 +105,20 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(args *utils.TenantWithA
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.TenantArg.Tenant}, utils.MetaThresholds, routeID,
+	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaThresholds, routeID,
 		utils.ThresholdSv1GetThresholdIDs, args.TenantArg, tIDs)
 }
 
 func (dS *DispatcherService) ThresholdSv1GetThreshold(args *utils.TenantIDWithArgDispatcher, th *engine.Threshold) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.TenantID != nil && args.TenantID.Tenant != utils.EmptyString {
+		tnt = args.TenantID.Tenant
+	}
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 	}
 	if dS.attrS != nil {
-		if err = dS.authorize(utils.ThresholdSv1GetThreshold,
-			args.TenantID.Tenant,
+		if err = dS.authorize(utils.ThresholdSv1GetThreshold, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
@@ -119,7 +128,7 @@ func (dS *DispatcherService) ThresholdSv1GetThreshold(args *utils.TenantIDWithAr
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{
-		Tenant: args.Tenant,
+		Tenant: tnt,
 		ID:     args.ID,
 	}, utils.MetaThresholds, routeID, utils.ThresholdSv1GetThreshold, args.TenantID, th)
 }

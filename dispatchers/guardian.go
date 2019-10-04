@@ -49,7 +49,10 @@ func (dS *DispatcherService) GuardianSv1Ping(args *utils.CGREventWithArgDispatch
 // RemoteLock will lock a key from remote
 func (dS *DispatcherService) GuardianSv1RemoteLock(args AttrRemoteLockWithApiKey,
 	reply *string) (err error) {
-	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.TenantArg.Tenant != utils.EmptyString {
+		tnt = args.TenantArg.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
@@ -70,7 +73,10 @@ func (dS *DispatcherService) GuardianSv1RemoteLock(args AttrRemoteLockWithApiKey
 // RemoteUnlock will unlock a key from remote based on reference ID
 func (dS *DispatcherService) GuardianSv1RemoteUnlock(args AttrRemoteUnlockWithApiKey,
 	reply *[]string) (err error) {
-	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.TenantArg.Tenant != utils.EmptyString {
+		tnt = args.TenantArg.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)

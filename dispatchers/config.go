@@ -26,7 +26,10 @@ import (
 )
 
 func (dS *DispatcherService) ConfigSv1GetJSONSection(args *config.StringWithArgDispatcher, reply *map[string]interface{}) (err error) {
-	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.TenantArg.Tenant != utils.EmptyString {
+		tnt = args.TenantArg.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
@@ -45,7 +48,10 @@ func (dS *DispatcherService) ConfigSv1GetJSONSection(args *config.StringWithArgD
 }
 
 func (dS *DispatcherService) ConfigSv1ReloadConfig(args *config.ConfigReloadWithArgDispatcher, reply *string) (err error) {
-	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.TenantArg.Tenant != utils.EmptyString {
+		tnt = args.TenantArg.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)

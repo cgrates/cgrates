@@ -48,7 +48,10 @@ func (dS *DispatcherService) ServiceManagerV1Ping(args *utils.CGREventWithArgDis
 
 func (dS *DispatcherService) ServiceManagerV1StartService(args ArgStartServiceWithApiKey,
 	reply *string) (err error) {
-	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.TenantArg.Tenant != utils.EmptyString {
+		tnt = args.TenantArg.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
@@ -68,7 +71,10 @@ func (dS *DispatcherService) ServiceManagerV1StartService(args ArgStartServiceWi
 
 func (dS *DispatcherService) ServiceManagerV1StopService(args ArgStartServiceWithApiKey,
 	reply *string) (err error) {
-	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.TenantArg.Tenant != utils.EmptyString {
+		tnt = args.TenantArg.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
@@ -88,7 +94,10 @@ func (dS *DispatcherService) ServiceManagerV1StopService(args ArgStartServiceWit
 
 func (dS *DispatcherService) ServiceManagerV1ServiceStatus(args ArgStartServiceWithApiKey,
 	reply *string) (err error) {
-	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.TenantArg.Tenant != utils.EmptyString {
+		tnt = args.TenantArg.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)

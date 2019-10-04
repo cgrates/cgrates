@@ -24,13 +24,15 @@ import (
 )
 
 func (dS *DispatcherService) ResourceSv1Ping(args *utils.CGREventWithArgDispatcher, rpl *string) (err error) {
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.ResourceSv1Ping,
-			args.CGREvent.Tenant,
+		if err = dS.authorize(utils.ResourceSv1Ping, tnt,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
@@ -45,12 +47,15 @@ func (dS *DispatcherService) ResourceSv1Ping(args *utils.CGREventWithArgDispatch
 
 func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args utils.ArgRSv1ResourceUsage,
 	reply *engine.Resources) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.ResourceSv1GetResourcesForEvent,
-			args.CGREvent.Tenant,
+		if err = dS.authorize(utils.ResourceSv1GetResourcesForEvent, tnt,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
@@ -66,12 +71,15 @@ func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args utils.ArgRSv1R
 
 func (dS *DispatcherService) ResourceSv1AuthorizeResources(args utils.ArgRSv1ResourceUsage,
 	reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.ResourceSv1AuthorizeResources,
-			args.CGREvent.Tenant,
+		if err = dS.authorize(utils.ResourceSv1AuthorizeResources, tnt,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
@@ -87,12 +95,15 @@ func (dS *DispatcherService) ResourceSv1AuthorizeResources(args utils.ArgRSv1Res
 
 func (dS *DispatcherService) ResourceSv1AllocateResources(args utils.ArgRSv1ResourceUsage,
 	reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.ResourceSv1AllocateResources,
-			args.CGREvent.Tenant,
+		if err = dS.authorize(utils.ResourceSv1AllocateResources, tnt,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
@@ -108,12 +119,15 @@ func (dS *DispatcherService) ResourceSv1AllocateResources(args utils.ArgRSv1Reso
 
 func (dS *DispatcherService) ResourceSv1ReleaseResources(args utils.ArgRSv1ResourceUsage,
 	reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.ResourceSv1ReleaseResources,
-			args.CGREvent.Tenant,
+		if err = dS.authorize(utils.ResourceSv1ReleaseResources, tnt,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}

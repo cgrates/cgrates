@@ -45,6 +45,7 @@ func (dS *DispatcherService) SupplierSv1Ping(args *utils.CGREventWithArgDispatch
 
 func (dS *DispatcherService) SupplierSv1GetSuppliers(args *engine.ArgsGetSuppliers,
 	reply *engine.SortedSuppliers) (err error) {
+	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
@@ -65,6 +66,7 @@ func (dS *DispatcherService) SupplierSv1GetSuppliers(args *engine.ArgsGetSupplie
 
 func (dS *DispatcherService) SupplierSv1GetSupplierProfilesForEvent(args *utils.CGREventWithArgDispatcher,
 	reply *[]*engine.SupplierProfile) (err error) {
+	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)

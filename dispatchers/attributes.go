@@ -26,13 +26,15 @@ import (
 // AttributeSv1Ping interogates AttributeS server responsible to process the event
 func (dS *DispatcherService) AttributeSv1Ping(args *utils.CGREventWithArgDispatcher,
 	reply *string) (err error) {
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.AttributeSv1Ping,
-			args.Tenant,
+		if err = dS.authorize(utils.AttributeSv1Ping, tnt,
 			args.APIKey, args.Time); err != nil {
 			return
 		}
@@ -48,12 +50,15 @@ func (dS *DispatcherService) AttributeSv1Ping(args *utils.CGREventWithArgDispatc
 // AttributeSv1GetAttributeForEvent is the dispatcher method for AttributeSv1.GetAttributeForEvent
 func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *engine.AttrArgsProcessEvent,
 	reply *engine.AttributeProfile) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.AttributeSv1GetAttributeForEvent,
-			args.CGREvent.Tenant,
+		if err = dS.authorize(utils.AttributeSv1GetAttributeForEvent, tnt,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
@@ -68,12 +73,15 @@ func (dS *DispatcherService) AttributeSv1GetAttributeForEvent(args *engine.AttrA
 
 func (dS *DispatcherService) AttributeSv1ProcessEvent(args *engine.AttrArgsProcessEvent,
 	reply *engine.AttrSProcessEventReply) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.AttributeSv1ProcessEvent,
-			args.CGREvent.Tenant,
+		if err = dS.authorize(utils.AttributeSv1ProcessEvent, tnt,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}

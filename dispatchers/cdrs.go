@@ -28,12 +28,15 @@ import (
 // CDRsV1Ping interogates CDRsV1 server responsible to process the event
 func (dS *DispatcherService) CDRsV1Ping(args *utils.CGREventWithArgDispatcher,
 	reply *string) (err error) {
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.CDRsV1Ping, args.CGREvent.Tenant,
+		if err = dS.authorize(utils.CDRsV1Ping, tnt,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
@@ -69,7 +72,10 @@ func (dS *DispatcherService) CDRsV1GetCDRs(args utils.RPCCDRsFilterWithArgDispat
 }
 
 func (dS *DispatcherService) CDRsV1CountCDRs(args *utils.RPCCDRsFilterWithArgDispatcher, reply *int64) (err error) {
-	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.TenantArg != nil && args.TenantArg.Tenant != utils.EmptyString {
+		tnt = args.TenantArg.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
@@ -88,7 +94,10 @@ func (dS *DispatcherService) CDRsV1CountCDRs(args *utils.RPCCDRsFilterWithArgDis
 }
 
 func (dS *DispatcherService) CDRsV1StoreSessionCost(args *engine.AttrCDRSStoreSMCost, reply *string) (err error) {
-	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.TenantArg != nil && args.TenantArg.Tenant != utils.EmptyString {
+		tnt = args.TenantArg.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
@@ -107,7 +116,10 @@ func (dS *DispatcherService) CDRsV1StoreSessionCost(args *engine.AttrCDRSStoreSM
 }
 
 func (dS *DispatcherService) CDRsV1RateCDRs(args *engine.ArgRateCDRs, reply *string) (err error) {
-	tnt := utils.FirstNonEmpty(args.TenantArg.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.TenantArg != nil && args.TenantArg.Tenant != utils.EmptyString {
+		tnt = args.TenantArg.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
@@ -126,12 +138,15 @@ func (dS *DispatcherService) CDRsV1RateCDRs(args *engine.ArgRateCDRs, reply *str
 }
 
 func (dS *DispatcherService) CDRsV1ProcessExternalCDR(args *engine.ExternalCDRWithArgDispatcher, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.CDRsV1ProcessExternalCDR,
-			args.Tenant,
+		if err = dS.authorize(utils.CDRsV1ProcessExternalCDR, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
@@ -140,16 +155,20 @@ func (dS *DispatcherService) CDRsV1ProcessExternalCDR(args *engine.ExternalCDRWi
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaCDRs, routeID,
+	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCDRs, routeID,
 		utils.CDRsV1ProcessExternalCDR, args, reply)
 }
 
 func (dS *DispatcherService) CDRsV1ProcessEvent(args *engine.ArgV1ProcessEvent, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.CDRsV1ProcessEvent, args.CGREvent.Tenant,
+		if err = dS.authorize(utils.CDRsV1ProcessEvent, tnt,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
@@ -163,12 +182,15 @@ func (dS *DispatcherService) CDRsV1ProcessEvent(args *engine.ArgV1ProcessEvent, 
 }
 
 func (dS *DispatcherService) CDRsV1ProcessCDR(args *engine.CDRWithArgDispatcher, reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.Tenant != utils.EmptyString {
+		tnt = args.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.CDRsV1ProcessCDR,
-			args.Tenant,
+		if err = dS.authorize(utils.CDRsV1ProcessCDR, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
@@ -177,6 +199,6 @@ func (dS *DispatcherService) CDRsV1ProcessCDR(args *engine.CDRWithArgDispatcher,
 	if args.ArgDispatcher != nil {
 		routeID = args.ArgDispatcher.RouteID
 	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: args.Tenant}, utils.MetaCDRs, routeID,
+	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCDRs, routeID,
 		utils.CDRsV1ProcessCDR, args, reply)
 }
