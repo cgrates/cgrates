@@ -57,8 +57,10 @@ func TestEventReaderSReload(t *testing.T) {
 		/*loadStorage*/ nil, filterSChan,
 		server, nil, engineShutdown)
 	srvMngr.SetCacheS(chS)
-	attrS := NewEventReaderService()
-	srvMngr.AddService(attrS, NewSessionService())
+	sS := NewSessionService(cfg, nil, server, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, engineShutdown)
+	attrS := NewEventReaderService(cfg, filterSChan, sS.GetIntenternalChan(), nil, engineShutdown)
+	srvMngr.AddServices(attrS, sS)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
