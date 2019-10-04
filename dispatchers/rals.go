@@ -23,13 +23,15 @@ import (
 )
 
 func (dS *DispatcherService) RALsV1Ping(args *utils.CGREventWithArgDispatcher, rpl *string) (err error) {
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.RALsV1Ping,
-			args.CGREvent.Tenant,
+		if err = dS.authorize(utils.RALsV1Ping, tnt,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}

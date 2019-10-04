@@ -184,9 +184,8 @@ func testDspSupTestAuthKey(t *testing.T) {
 	var rpl *engine.SortedSuppliers
 	args := &engine.ArgsGetSuppliers{
 		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     utils.UUIDSha1Prefix(),
-			Time:   &nowTime,
+			ID:   utils.UUIDSha1Prefix(),
+			Time: &nowTime,
 			Event: map[string]interface{}{
 				utils.Account:     "1002",
 				utils.Subject:     "1002",

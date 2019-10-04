@@ -24,13 +24,15 @@ import (
 )
 
 func (dS *DispatcherService) ChargerSv1Ping(args *utils.CGREventWithArgDispatcher, reply *string) (err error) {
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.ChargerSv1Ping,
-			args.Tenant,
+		if err = dS.authorize(utils.ChargerSv1Ping, tnt,
 			args.APIKey, args.Time); err != nil {
 			return
 		}
@@ -45,12 +47,15 @@ func (dS *DispatcherService) ChargerSv1Ping(args *utils.CGREventWithArgDispatche
 
 func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *utils.CGREventWithArgDispatcher,
 	reply *engine.ChargerProfiles) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.ChargerSv1GetChargersForEvent,
-			args.CGREvent.Tenant,
+		if err = dS.authorize(utils.ChargerSv1GetChargersForEvent, tnt,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
@@ -65,12 +70,15 @@ func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *utils.CGREventW
 
 func (dS *DispatcherService) ChargerSv1ProcessEvent(args *utils.CGREventWithArgDispatcher,
 	reply *[]*engine.ChrgSProcessEventReply) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.ChargerSv1ProcessEvent,
-			args.CGREvent.Tenant,
+		if err = dS.authorize(utils.ChargerSv1ProcessEvent, tnt,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}

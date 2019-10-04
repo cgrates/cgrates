@@ -26,7 +26,10 @@ import (
 
 func (dS *DispatcherService) CoreSv1Status(args *utils.TenantWithArgDispatcher,
 	reply *map[string]interface{}) (err error) {
-	tnt := utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.TenantArg != nil && args.TenantArg.Tenant != utils.EmptyString {
+		tnt = args.TenantArg.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
@@ -45,13 +48,15 @@ func (dS *DispatcherService) CoreSv1Status(args *utils.TenantWithArgDispatcher,
 }
 
 func (dS *DispatcherService) CoreSv1Ping(args *utils.CGREventWithArgDispatcher, reply *string) (err error) {
-	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.CoreSv1Ping,
-			args.Tenant,
+		if err = dS.authorize(utils.CoreSv1Ping, tnt,
 			args.APIKey, args.Time); err != nil {
 			return
 		}

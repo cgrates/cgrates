@@ -28,12 +28,15 @@ import (
 // ResponderPing interogates Responder server responsible to process the event
 func (dS *DispatcherService) ResponderPing(args *utils.CGREventWithArgDispatcher,
 	reply *string) (err error) {
+	tnt := dS.cfg.GeneralCfg().DefaultTenant
+	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
+		tnt = args.CGREvent.Tenant
+	}
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.ResponderPing,
-			args.CGREvent.Tenant,
+		if err = dS.authorize(utils.ResponderPing, tnt,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}
