@@ -715,10 +715,8 @@ func main() {
 		services.NewAsteriskAgent(cfg, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),              // partial reload
 		services.NewRadiusAgent(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),   // partial reload
 		services.NewDiameterAgent(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan), // partial reload
+		services.NewHTTPAgent(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, server),       // no reload
 	)
-	/*
-		services.NewHTTPAgent(),     // no reload
-	*/
 
 	srvManager.StartServices()
 
