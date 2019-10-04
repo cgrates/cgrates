@@ -291,11 +291,10 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 	}
 	if srvMngr.GetConfig().DiameterAgentCfg().Enabled {
 		go srvMngr.startService(utils.DiameterAgent)
-	} /*
-		if len(srvMngr.GetConfig().HttpAgentCfg()) != 0 {
-			go srvMngr.startService(utils.HTTPAgent)
-		}
-	*/
+	}
+	if len(srvMngr.GetConfig().HttpAgentCfg()) != 0 {
+		go srvMngr.startService(utils.HTTPAgent)
+	}
 	// startServer()
 	return
 }
@@ -399,12 +398,11 @@ func (srvMngr *ServiceManager) handleReload() {
 		case <-srvMngr.GetConfig().GetReloadChan(config.DA_JSN):
 			if err = srvMngr.reloadService(utils.DiameterAgent); err != nil {
 				return
-			} /*
-				case <-srvMngr.GetConfig().GetReloadChan(config.HttpAgentJson):
-					if err = srvMngr.reloadService(utils.HTTPAgent); err != nil {
-						return
-					}
-			*/
+			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.HttpAgentJson):
+			if err = srvMngr.reloadService(utils.HTTPAgent); err != nil {
+				return
+			}
 		}
 		// handle RPC server
 	}
