@@ -60,17 +60,25 @@ func TestSessionSReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheSharedGroups))
 	close(chS.GetPrecacheChannel(utils.CacheTimings))
 
+	internalChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalChan <- nil
 	cacheSChan := make(chan rpcclient.RpcClientConnection, 1)
 	cacheSChan <- chS
 
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg /*dm*/, nil,
-		/*cdrStorage*/ nil,
-		/*loadStorage*/ nil, filterSChan,
+		/*cdrStorage*/ nil /*loadStorage*/, nil /*filterSChan*/, nil,
 		server, nil, engineShutdown)
 	srvMngr.SetCacheS(chS)
-	attrS := NewSessionService()
-	srvMngr.AddService(attrS, NewChargerService(), NewRalService(srvMngr), &CacheService{connChan: cacheSChan}, NewSchedulerService(), NewCDRServer())
+	chrS := NewChargerService(cfg, nil, chS, filterSChan, server, nil, nil)
+	schS := NewSchedulerService(cfg, nil, chS, server, nil)
+	ralS := NewRalService(cfg, nil, nil, nil, chS, filterSChan, server,
+		/*tS*/ internalChan, internalChan, cacheSChan, internalChan, internalChan,
+		internalChan, schS, engineShutdown)
+	cdrS := NewCDRServer(cfg, nil, nil, filterSChan, server, chrS.GetIntenternalChan(), ralS.GetResponder().GetIntenternalChan(), nil, nil, nil, nil)
+	attrS := NewSessionService(cfg, nil, server, chrS.GetIntenternalChan(),
+		ralS.GetResponder().GetIntenternalChan(), nil, nil, nil, nil, nil, cdrS.GetIntenternalChan(), nil, engineShutdown)
+	srvMngr.AddServices(attrS, chrS, schS, ralS, cdrS)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

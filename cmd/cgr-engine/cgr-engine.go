@@ -700,19 +700,23 @@ func main() {
 		attrS.GetIntenternalChan(), tS.GetIntenternalChan(),
 		stS.GetIntenternalChan(), internalDispatcherSChan)
 	schS.SetCdrsConns(cdrS.GetIntenternalChan())
-	/*
-		smg := services.NewSessionService()
-	*/
+
+	smg := services.NewSessionService(cfg, dm, server, cdrS.GetIntenternalChan(),
+		rals.GetResponder().GetIntenternalChan(), reS.GetIntenternalChan(),
+		tS.GetIntenternalChan(), stS.GetIntenternalChan(), supS.GetIntenternalChan(),
+		attrS.GetIntenternalChan(), cdrS.GetIntenternalChan(), internalDispatcherSChan, exitChan)
+
 	srvManager.AddServices(attrS, chrS, tS, stS, reS, supS, schS, rals,
-		rals.GetResponder(), rals.GetAPIv1(), rals.GetAPIv2(), cdrS) /* smg,
-	services.NewEventReaderService(),
-	services.NewDNSAgent(),
-	services.NewFreeswitchAgent(),
-	services.NewKamailioAgent(),
-	services.NewAsteriskAgent(), // partial reload
-	services.NewRadiusAgent(),   // partial reload
-	services.NewDiameterAgent(), // partial reload
-	services.NewHTTPAgent(),     // no reload
+		rals.GetResponder(), rals.GetAPIv1(), rals.GetAPIv2(), cdrS, smg)
+	/*
+		services.NewEventReaderService(),
+		services.NewDNSAgent(),
+		services.NewFreeswitchAgent(),
+		services.NewKamailioAgent(),
+		services.NewAsteriskAgent(), // partial reload
+		services.NewRadiusAgent(),   // partial reload
+		services.NewDiameterAgent(), // partial reload
+		services.NewHTTPAgent(),     // no reload
 	*/
 
 	/*
@@ -734,7 +738,7 @@ func main() {
 		engine.IntRPC.AddInternalRPCClient(utils.ApierV1, rals.GetAPIv1().GetIntenternalChan())
 		engine.IntRPC.AddInternalRPCClient(utils.ApierV2, rals.GetAPIv2().GetIntenternalChan())
 		engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1, attrS.GetIntenternalChan())
-		engine.IntRPC.AddInternalRPCClient(utils.CacheSv1, internalCacheSChan) // server or from apier
+		engine.IntRPC.AddInternalRPCClient(utils.CacheSv1, internalCacheSChan)
 		engine.IntRPC.AddInternalRPCClient(utils.CDRsV1, cdrS.GetIntenternalChan())
 		engine.IntRPC.AddInternalRPCClient(utils.CDRsV2, cdrS.GetIntenternalChan())
 		engine.IntRPC.AddInternalRPCClient(utils.ChargerSv1, chrS.GetIntenternalChan())
@@ -743,7 +747,7 @@ func main() {
 		engine.IntRPC.AddInternalRPCClient(utils.ResourceSv1, reS.GetIntenternalChan())
 		engine.IntRPC.AddInternalRPCClient(utils.Responder, rals.GetResponder().GetIntenternalChan())
 		engine.IntRPC.AddInternalRPCClient(utils.SchedulerSv1, schS.GetIntenternalChan())
-		// engine.IntRPC.AddInternalRPCClient(utils.SessionSv1, internalSMGChan)      // server or from apier
+		engine.IntRPC.AddInternalRPCClient(utils.SessionSv1, smg.GetIntenternalChan())
 		engine.IntRPC.AddInternalRPCClient(utils.StatSv1, stS.GetIntenternalChan())
 		engine.IntRPC.AddInternalRPCClient(utils.SupplierSv1, supS.GetIntenternalChan())
 		engine.IntRPC.AddInternalRPCClient(utils.ThresholdSv1, tS.GetIntenternalChan())
@@ -771,13 +775,11 @@ func main() {
 	go startLoaderS(internalLoaderSChan, internalCacheSChan, cfg, dm, server, filterSChan, exitChan)
 
 	// Serve rpc connections
-	/*
-		go startRpc(server, internalRaterChan, cdrS.GetIntenternalChan(),
-			reS.GetIntenternalChan(), stS.GetIntenternalChan(),
-			attrS.GetIntenternalChan(), chrS.GetIntenternalChan(), tS.GetIntenternalChan(),
-			supS.GetIntenternalChan(), internalSMGChan, internalAnalyzerSChan,
-			internalDispatcherSChan, internalLoaderSChan, rals.GetIntenternalChan(), internalCacheSChan, exitChan)
-	*/
+	go startRpc(server, rals.GetResponder().GetIntenternalChan(), cdrS.GetIntenternalChan(),
+		reS.GetIntenternalChan(), stS.GetIntenternalChan(),
+		attrS.GetIntenternalChan(), chrS.GetIntenternalChan(), tS.GetIntenternalChan(),
+		supS.GetIntenternalChan(), smg.GetIntenternalChan(), internalAnalyzerSChan,
+		internalDispatcherSChan, internalLoaderSChan, rals.GetIntenternalChan(), internalCacheSChan, exitChan)
 	<-exitChan
 
 	if *cpuProfDir != "" { // wait to end cpuProfiling
