@@ -282,10 +282,10 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 	}
 	if srvMngr.GetConfig().KamAgentCfg().Enabled {
 		go srvMngr.startService(utils.KamailioAgent)
+	}
+	if srvMngr.GetConfig().AsteriskAgentCfg().Enabled {
+		go srvMngr.startService(utils.AsteriskAgent)
 	} /*
-		if srvMngr.GetConfig().AsteriskAgentCfg().Enabled {
-			go srvMngr.startService(utils.AsteriskAgent)
-		}
 		if srvMngr.GetConfig().RadiusAgentCfg().Enabled {
 			go srvMngr.startService(utils.RadiusAgent)
 		}
@@ -387,11 +387,11 @@ func (srvMngr *ServiceManager) handleReload() {
 		case <-srvMngr.GetConfig().GetReloadChan(config.KamailioAgentJSN):
 			if err = srvMngr.reloadService(utils.KamailioAgent); err != nil {
 				return
+			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.AsteriskAgentJSN):
+			if err = srvMngr.reloadService(utils.AsteriskAgent); err != nil {
+				return
 			} /*
-				case <-srvMngr.GetConfig().GetReloadChan(config.AsteriskAgentJSN):
-					if err = srvMngr.reloadService(utils.AsteriskAgent); err != nil {
-						return
-					}
 				case <-srvMngr.GetConfig().GetReloadChan(config.RA_JSN):
 					if err = srvMngr.reloadService(utils.RadiusAgent); err != nil {
 						return

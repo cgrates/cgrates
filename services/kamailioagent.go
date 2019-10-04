@@ -162,11 +162,6 @@ func (kam *KamailioAgent) Shutdown() (err error) {
 	return
 }
 
-// GetRPCInterface returns the interface to register for server
-func (kam *KamailioAgent) GetRPCInterface() interface{} {
-	return kam.kam
-}
-
 // IsRunning returns if the service is running
 func (kam *KamailioAgent) IsRunning() bool {
 	kam.RLock()
