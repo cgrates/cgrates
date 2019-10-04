@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	"github.com/cgrates/cgrates/agents"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
@@ -30,18 +31,30 @@ import (
 )
 
 // NewAsteriskAgent returns the Asterisk Agent
-func NewAsteriskAgent() servmanager.Service {
-	return new(AsteriskAgent)
+func NewAsteriskAgent(cfg *config.CGRConfig, sSChan,
+	dispatcherChan chan rpcclient.RpcClientConnection,
+	exitChan chan bool) servmanager.Service {
+	return &AsteriskAgent{
+		cfg:            cfg,
+		sSChan:         sSChan,
+		dispatcherChan: dispatcherChan,
+		exitChan:       exitChan,
+	}
 }
 
 // AsteriskAgent implements Agent interface
 type AsteriskAgent struct {
 	sync.RWMutex
+	cfg            *config.CGRConfig
+	sSChan         chan rpcclient.RpcClientConnection
+	dispatcherChan chan rpcclient.RpcClientConnection
+	exitChan       chan bool
+
 	smas []*agents.AsteriskAgent
 }
 
 // Start should handle the sercive start
-func (ast *AsteriskAgent) Start(sp servmanager.ServiceProvider, waitCache bool) (err error) {
+func (ast *AsteriskAgent) Start() (err error) {
 	if ast.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
@@ -51,19 +64,13 @@ func (ast *AsteriskAgent) Start(sp servmanager.ServiceProvider, waitCache bool) 
 	var sS rpcclient.RpcClientConnection
 	var sSInternal bool
 	utils.Logger.Info("Starting Asterisk agent")
-	if !sp.GetConfig().DispatcherSCfg().Enabled && sp.GetConfig().AsteriskAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
+	if !ast.cfg.DispatcherSCfg().Enabled && ast.cfg.AsteriskAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
 		sSInternal = true
-		srvSessionS, has := sp.GetService(utils.SessionS)
-		if !has {
-			utils.Logger.Err(fmt.Sprintf("<%s> Failed to find needed subsystem <%s>",
-				utils.AsteriskAgent, utils.SessionS))
-			return utils.ErrNotFound
-		}
-		sSIntConn := <-srvSessionS.GetIntenternalChan()
-		srvSessionS.GetIntenternalChan() <- sSIntConn
+		sSIntConn := <-ast.sSChan
+		ast.sSChan <- sSIntConn
 		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
 	} else {
-		if sS, err = sp.NewConnection(utils.SessionS, sp.GetConfig().AsteriskAgentCfg().SessionSConns); err != nil {
+		if sS, err = NewConnection(ast.cfg, ast.sSChan, ast.dispatcherChan, ast.cfg.AsteriskAgentCfg().SessionSConns); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 				utils.AsteriskAgent, utils.SessionS, err.Error()))
 			return
@@ -76,9 +83,9 @@ func (ast *AsteriskAgent) Start(sp servmanager.ServiceProvider, waitCache bool) 
 		}
 		exitChan <- true
 	}
-	ast.smas = make([]*agents.AsteriskAgent, len(sp.GetConfig().AsteriskAgentCfg().AsteriskConns))
-	for connIdx := range sp.GetConfig().AsteriskAgentCfg().AsteriskConns { // Instantiate connections towards asterisk servers
-		if ast.smas[connIdx], err = agents.NewAsteriskAgent(sp.GetConfig(), connIdx, sS); err != nil {
+	ast.smas = make([]*agents.AsteriskAgent, len(ast.cfg.AsteriskAgentCfg().AsteriskConns))
+	for connIdx := range ast.cfg.AsteriskAgentCfg().AsteriskConns { // Instantiate connections towards asterisk servers
+		if ast.smas[connIdx], err = agents.NewAsteriskAgent(ast.cfg, connIdx, sS); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.AsteriskAgent, err))
 			return
 		}
@@ -92,7 +99,7 @@ func (ast *AsteriskAgent) Start(sp servmanager.ServiceProvider, waitCache bool) 
 				return
 			}
 		}
-		go listenAndServe(ast.smas[connIdx], sp.GetExitChan())
+		go listenAndServe(ast.smas[connIdx], ast.exitChan)
 	}
 	return
 }
@@ -103,22 +110,16 @@ func (ast *AsteriskAgent) GetIntenternalChan() (conn chan rpcclient.RpcClientCon
 }
 
 // Reload handles the change of config
-func (ast *AsteriskAgent) Reload(sp servmanager.ServiceProvider) (err error) {
+func (ast *AsteriskAgent) Reload() (err error) {
 	var sS rpcclient.RpcClientConnection
 	var sSInternal bool
-	if !sp.GetConfig().DispatcherSCfg().Enabled && sp.GetConfig().AsteriskAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
+	if !ast.cfg.DispatcherSCfg().Enabled && ast.cfg.AsteriskAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
 		sSInternal = true
-		srvSessionS, has := sp.GetService(utils.SessionS)
-		if !has {
-			utils.Logger.Err(fmt.Sprintf("<%s> Failed to find needed subsystem <%s>",
-				utils.AsteriskAgent, utils.SessionS))
-			return utils.ErrNotFound
-		}
-		sSIntConn := <-srvSessionS.GetIntenternalChan()
-		srvSessionS.GetIntenternalChan() <- sSIntConn
+		sSIntConn := <-ast.sSChan
+		ast.sSChan <- sSIntConn
 		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
 	} else {
-		if sS, err = sp.NewConnection(utils.SessionS, sp.GetConfig().AsteriskAgentCfg().SessionSConns); err != nil {
+		if sS, err = NewConnection(ast.cfg, ast.sSChan, ast.dispatcherChan, ast.cfg.AsteriskAgentCfg().SessionSConns); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 				utils.AsteriskAgent, utils.SessionS, err.Error()))
 			return
@@ -147,11 +148,6 @@ func (ast *AsteriskAgent) Shutdown() (err error) {
 	return // no shutdown for the momment
 }
 
-// GetRPCInterface returns the interface to register for server
-func (ast *AsteriskAgent) GetRPCInterface() interface{} {
-	return ast.smas
-}
-
 // IsRunning returns if the service is running
 func (ast *AsteriskAgent) IsRunning() bool {
 	ast.RLock()
@@ -162,4 +158,9 @@ func (ast *AsteriskAgent) IsRunning() bool {
 // ServiceName returns the service name
 func (ast *AsteriskAgent) ServiceName() string {
 	return utils.AsteriskAgent
+}
+
+// ShouldRun returns if the service should be running
+func (ast *AsteriskAgent) ShouldRun() bool {
+	return ast.cfg.AsteriskAgentCfg().Enabled
 }
