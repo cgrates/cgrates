@@ -24,6 +24,7 @@ import (
 	"sync"
 
 	"github.com/cgrates/cgrates/agents"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
@@ -31,18 +32,30 @@ import (
 )
 
 // NewKamailioAgent returns the Kamailio Agent
-func NewKamailioAgent() servmanager.Service {
-	return new(KamailioAgent)
+func NewKamailioAgent(cfg *config.CGRConfig, sSChan,
+	dispatcherChan chan rpcclient.RpcClientConnection,
+	exitChan chan bool) servmanager.Service {
+	return &KamailioAgent{
+		cfg:            cfg,
+		sSChan:         sSChan,
+		dispatcherChan: dispatcherChan,
+		exitChan:       exitChan,
+	}
 }
 
 // KamailioAgent implements Agent interface
 type KamailioAgent struct {
 	sync.RWMutex
+	cfg            *config.CGRConfig
+	sSChan         chan rpcclient.RpcClientConnection
+	dispatcherChan chan rpcclient.RpcClientConnection
+	exitChan       chan bool
+
 	kam *agents.KamailioAgent
 }
 
 // Start should handle the sercive start
-func (kam *KamailioAgent) Start(sp servmanager.ServiceProvider, waitCache bool) (err error) {
+func (kam *KamailioAgent) Start() (err error) {
 	if kam.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
@@ -52,26 +65,20 @@ func (kam *KamailioAgent) Start(sp servmanager.ServiceProvider, waitCache bool) 
 	var sS rpcclient.RpcClientConnection
 	var sSInternal bool
 	utils.Logger.Info("Starting Kamailio agent")
-	if !sp.GetConfig().DispatcherSCfg().Enabled && sp.GetConfig().KamAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
+	if !kam.cfg.DispatcherSCfg().Enabled && kam.cfg.KamAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
 		sSInternal = true
-		srvSessionS, has := sp.GetService(utils.SessionS)
-		if !has {
-			utils.Logger.Err(fmt.Sprintf("<%s> Failed to find needed subsystem <%s>",
-				utils.KamailioAgent, utils.SessionS))
-			return utils.ErrNotFound
-		}
-		sSIntConn := <-srvSessionS.GetIntenternalChan()
-		srvSessionS.GetIntenternalChan() <- sSIntConn
+		sSIntConn := <-kam.sSChan
+		kam.sSChan <- sSIntConn
 		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
 	} else {
-		if sS, err = sp.NewConnection(utils.SessionS, sp.GetConfig().KamAgentCfg().SessionSConns); err != nil {
+		if sS, err = NewConnection(kam.cfg, kam.sSChan, kam.dispatcherChan, kam.cfg.KamAgentCfg().SessionSConns); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 				utils.KamailioAgent, utils.SessionS, err.Error()))
 			return
 		}
 	}
-	kam.kam = agents.NewKamailioAgent(sp.GetConfig().KamAgentCfg(), sS,
-		utils.FirstNonEmpty(sp.GetConfig().KamAgentCfg().Timezone, sp.GetConfig().GeneralCfg().DefaultTimezone))
+	kam.kam = agents.NewKamailioAgent(kam.cfg.KamAgentCfg(), sS,
+		utils.FirstNonEmpty(kam.cfg.KamAgentCfg().Timezone, kam.cfg.GeneralCfg().DefaultTimezone))
 	if sSInternal { // bidirectional client backwards connection
 		sS.(*utils.BiRPCInternalClient).SetClientConn(kam.kam)
 		var rply string
@@ -88,7 +95,7 @@ func (kam *KamailioAgent) Start(sp servmanager.ServiceProvider, waitCache bool) 
 				return
 			}
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.KamailioAgent, err))
-			sp.GetExitChan() <- true
+			kam.exitChan <- true
 		}
 	}()
 	return
@@ -100,22 +107,16 @@ func (kam *KamailioAgent) GetIntenternalChan() (conn chan rpcclient.RpcClientCon
 }
 
 // Reload handles the change of config
-func (kam *KamailioAgent) Reload(sp servmanager.ServiceProvider) (err error) {
+func (kam *KamailioAgent) Reload() (err error) {
 	var sS rpcclient.RpcClientConnection
 	var sSInternal bool
-	if !sp.GetConfig().DispatcherSCfg().Enabled && sp.GetConfig().KamAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
+	if !kam.cfg.DispatcherSCfg().Enabled && kam.cfg.KamAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
 		sSInternal = true
-		srvSessionS, has := sp.GetService(utils.SessionS)
-		if !has {
-			utils.Logger.Err(fmt.Sprintf("<%s> Failed to find needed subsystem <%s>",
-				utils.KamailioAgent, utils.SessionS))
-			return utils.ErrNotFound
-		}
-		sSIntConn := <-srvSessionS.GetIntenternalChan()
-		srvSessionS.GetIntenternalChan() <- sSIntConn
+		sSIntConn := <-kam.sSChan
+		kam.sSChan <- sSIntConn
 		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
 	} else {
-		if sS, err = sp.NewConnection(utils.SessionS, sp.GetConfig().KamAgentCfg().SessionSConns); err != nil {
+		if sS, err = NewConnection(kam.cfg, kam.sSChan, kam.dispatcherChan, kam.cfg.KamAgentCfg().SessionSConns); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 				utils.KamailioAgent, utils.SessionS, err.Error()))
 			return
@@ -144,7 +145,7 @@ func (kam *KamailioAgent) Reload(sp servmanager.ServiceProvider) (err error) {
 				return
 			}
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s", utils.KamailioAgent, err))
-			sp.GetExitChan() <- true
+			kam.exitChan <- true
 		}
 	}()
 	return
@@ -176,4 +177,9 @@ func (kam *KamailioAgent) IsRunning() bool {
 // ServiceName returns the service name
 func (kam *KamailioAgent) ServiceName() string {
 	return utils.KamailioAgent
+}
+
+// ShouldRun returns if the service should be running
+func (kam *KamailioAgent) ShouldRun() bool {
+	return kam.cfg.KamAgentCfg().Enabled
 }

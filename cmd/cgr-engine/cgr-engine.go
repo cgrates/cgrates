@@ -711,9 +711,9 @@ func main() {
 		services.NewEventReaderService(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),
 		services.NewDNSAgent(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),
 		services.NewFreeswitchAgent(cfg, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),
+		services.NewKamailioAgent(cfg, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),
 	)
 	/*
-		services.NewKamailioAgent(),
 		services.NewAsteriskAgent(), // partial reload
 		services.NewRadiusAgent(),   // partial reload
 		services.NewDiameterAgent(), // partial reload
