@@ -701,7 +701,7 @@ func main() {
 		stS.GetIntenternalChan(), internalDispatcherSChan)
 	schS.SetCdrsConns(cdrS.GetIntenternalChan())
 
-	smg := services.NewSessionService(cfg, dm, server, cdrS.GetIntenternalChan(),
+	smg := services.NewSessionService(cfg, dm, server, chrS.GetIntenternalChan(),
 		rals.GetResponder().GetIntenternalChan(), reS.GetIntenternalChan(),
 		tS.GetIntenternalChan(), stS.GetIntenternalChan(), supS.GetIntenternalChan(),
 		attrS.GetIntenternalChan(), cdrS.GetIntenternalChan(), internalDispatcherSChan, exitChan)
