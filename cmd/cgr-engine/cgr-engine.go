@@ -712,11 +712,11 @@ func main() {
 		services.NewDNSAgent(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),
 		services.NewFreeswitchAgent(cfg, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),
 		services.NewKamailioAgent(cfg, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),
-		services.NewAsteriskAgent(cfg, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),            // partial reload
-		services.NewRadiusAgent(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan), // partial reload
+		services.NewAsteriskAgent(cfg, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),              // partial reload
+		services.NewRadiusAgent(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),   // partial reload
+		services.NewDiameterAgent(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan), // partial reload
 	)
 	/*
-		services.NewDiameterAgent(), // partial reload
 		services.NewHTTPAgent(),     // no reload
 	*/
 

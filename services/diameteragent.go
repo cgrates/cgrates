@@ -23,6 +23,8 @@ import (
 	"sync"
 
 	"github.com/cgrates/cgrates/agents"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
@@ -30,40 +32,51 @@ import (
 )
 
 // NewDiameterAgent returns the Diameter Agent
-func NewDiameterAgent() servmanager.Service {
-	return new(DiameterAgent)
+func NewDiameterAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
+	sSChan, dispatcherChan chan rpcclient.RpcClientConnection,
+	exitChan chan bool) servmanager.Service {
+	return &DiameterAgent{
+		cfg:            cfg,
+		filterSChan:    filterSChan,
+		sSChan:         sSChan,
+		dispatcherChan: dispatcherChan,
+		exitChan:       exitChan,
+	}
 }
 
 // DiameterAgent implements Agent interface
 type DiameterAgent struct {
 	sync.RWMutex
+	cfg            *config.CGRConfig
+	filterSChan    chan *engine.FilterS
+	sSChan         chan rpcclient.RpcClientConnection
+	dispatcherChan chan rpcclient.RpcClientConnection
+	exitChan       chan bool
+
 	da *agents.DiameterAgent
 }
 
 // Start should handle the sercive start
-func (da *DiameterAgent) Start(sp servmanager.ServiceProvider, waitCache bool) (err error) {
+func (da *DiameterAgent) Start() (err error) {
 	if da.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
+
+	filterS := <-da.filterSChan
+	da.filterSChan <- filterS
 
 	da.Lock()
 	defer da.Unlock()
 	var sS rpcclient.RpcClientConnection
 	var sSInternal bool
 	utils.Logger.Info("Starting Diameter agent")
-	if !sp.GetConfig().DispatcherSCfg().Enabled && sp.GetConfig().DiameterAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
+	if !da.cfg.DispatcherSCfg().Enabled && da.cfg.DiameterAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
 		sSInternal = true
-		srvSessionS, has := sp.GetService(utils.SessionS)
-		if !has {
-			utils.Logger.Err(fmt.Sprintf("<%s> Failed to find needed subsystem <%s>",
-				utils.DiameterAgent, utils.SessionS))
-			return utils.ErrNotFound
-		}
-		sSIntConn := <-srvSessionS.GetIntenternalChan()
-		srvSessionS.GetIntenternalChan() <- sSIntConn
+		sSIntConn := <-da.sSChan
+		da.sSChan <- sSIntConn
 		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
 	} else {
-		if sS, err = sp.NewConnection(utils.SessionS, sp.GetConfig().DiameterAgentCfg().SessionSConns); err != nil {
+		if sS, err = NewConnection(da.cfg, da.sSChan, da.dispatcherChan, da.cfg.DiameterAgentCfg().SessionSConns); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 				utils.DiameterAgent, utils.SessionS, err.Error()))
 			return
@@ -71,9 +84,10 @@ func (da *DiameterAgent) Start(sp servmanager.ServiceProvider, waitCache bool) (
 	}
 	utils.Logger.Info("Starting CGRateS DiameterAgent service")
 
-	da.da, err = agents.NewDiameterAgent(sp.GetConfig(), sp.GetFilterS(), sS)
+	da.da, err = agents.NewDiameterAgent(da.cfg, filterS, sS)
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> error: %s!", err))
+		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
+			utils.DiameterAgent, err))
 		return
 	}
 	if sSInternal { // bidirectional client backwards connection
@@ -92,7 +106,7 @@ func (da *DiameterAgent) Start(sp servmanager.ServiceProvider, waitCache bool) (
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
 				utils.DiameterAgent, err))
 		}
-		sp.GetExitChan() <- true
+		da.exitChan <- true
 	}()
 	return
 }
@@ -103,22 +117,16 @@ func (da *DiameterAgent) GetIntenternalChan() (conn chan rpcclient.RpcClientConn
 }
 
 // Reload handles the change of config
-func (da *DiameterAgent) Reload(sp servmanager.ServiceProvider) (err error) {
+func (da *DiameterAgent) Reload() (err error) {
 	var sS rpcclient.RpcClientConnection
 	var sSInternal bool
-	if !sp.GetConfig().DispatcherSCfg().Enabled && sp.GetConfig().DiameterAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
+	if !da.cfg.DispatcherSCfg().Enabled && da.cfg.DiameterAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
 		sSInternal = true
-		srvSessionS, has := sp.GetService(utils.SessionS)
-		if !has {
-			utils.Logger.Err(fmt.Sprintf("<%s> Failed to find needed subsystem <%s>",
-				utils.DiameterAgent, utils.SessionS))
-			return utils.ErrNotFound
-		}
-		sSIntConn := <-srvSessionS.GetIntenternalChan()
-		srvSessionS.GetIntenternalChan() <- sSIntConn
+		sSIntConn := <-da.sSChan
+		da.sSChan <- sSIntConn
 		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
 	} else {
-		if sS, err = sp.NewConnection(utils.SessionS, sp.GetConfig().DiameterAgentCfg().SessionSConns); err != nil {
+		if sS, err = NewConnection(da.cfg, da.sSChan, da.dispatcherChan, da.cfg.DiameterAgentCfg().SessionSConns); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 				utils.DiameterAgent, utils.SessionS, err.Error()))
 			return
@@ -145,11 +153,6 @@ func (da *DiameterAgent) Shutdown() (err error) {
 	return // no shutdown for the momment
 }
 
-// GetRPCInterface returns the interface to register for server
-func (da *DiameterAgent) GetRPCInterface() interface{} {
-	return da.da
-}
-
 // IsRunning returns if the service is running
 func (da *DiameterAgent) IsRunning() bool {
 	da.RLock()
@@ -160,4 +163,9 @@ func (da *DiameterAgent) IsRunning() bool {
 // ServiceName returns the service name
 func (da *DiameterAgent) ServiceName() string {
 	return utils.DiameterAgent
+}
+
+// ShouldRun returns if the service should be running
+func (da *DiameterAgent) ShouldRun() bool {
+	return da.cfg.DiameterAgentCfg().Enabled
 }
