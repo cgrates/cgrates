@@ -710,9 +710,9 @@ func main() {
 		rals.GetResponder(), rals.GetAPIv1(), rals.GetAPIv2(), cdrS, smg,
 		services.NewEventReaderService(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),
 		services.NewDNSAgent(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),
+		services.NewFreeswitchAgent(cfg, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),
 	)
 	/*
-		services.NewFreeswitchAgent(),
 		services.NewKamailioAgent(),
 		services.NewAsteriskAgent(), // partial reload
 		services.NewRadiusAgent(),   // partial reload
