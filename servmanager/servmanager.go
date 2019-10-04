@@ -264,10 +264,10 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 	}
 	if srvMngr.GetConfig().RalsCfg().Enabled {
 		go srvMngr.startService(utils.RALService)
+	}
+	if srvMngr.GetConfig().CdrsCfg().Enabled {
+		go srvMngr.startService(utils.CDRServer)
 	} /*
-		if srvMngr.GetConfig().CdrsCfg().Enabled {
-			go srvMngr.startService(utils.CDRServer)
-		}
 		if srvMngr.GetConfig().SessionSCfg().Enabled {
 			go srvMngr.startService(utils.SessionS)
 		}
@@ -359,15 +359,15 @@ func (srvMngr *ServiceManager) handleReload() {
 		case <-srvMngr.GetConfig().GetReloadChan(config.RALS_JSN):
 			if err = srvMngr.reloadService(utils.RALService); err != nil {
 				return
+			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.Apier):
+			if err = srvMngr.reloadService(utils.ApierV1); err != nil {
+				return
+			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.CDRS_JSN):
+			if err = srvMngr.reloadService(utils.CDRServer); err != nil {
+				return
 			} /*
-				case <-srvMngr.GetConfig().GetReloadChan(config.CDRS_JSN):
-				if err = srvMngr.reloadService(utils.CDRServer); err != nil {
-					return
-				}
-				case <-srvMngr.GetConfig().GetReloadChan(config.Apier):
-					if err = srvMngr.reloadService(utils.ApierV1); err != nil {
-						return
-					}
 				case <-srvMngr.GetConfig().GetReloadChan(config.SessionSJson):
 					if err = srvMngr.reloadService(utils.SessionS); err != nil {
 						return
