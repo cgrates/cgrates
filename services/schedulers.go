@@ -32,7 +32,7 @@ import (
 
 // NewSchedulerService returns the Scheduler Service
 func NewSchedulerService(cfg *config.CGRConfig, dm *engine.DataManager,
-	cacheS *engine.CacheS, server *utils.Server,
+	cacheS *engine.CacheS, server *utils.Server, internalCDRServerChan,
 	dispatcherChan chan rpcclient.RpcClientConnection) *SchedulerService {
 	return &SchedulerService{
 		connChan:       make(chan rpcclient.RpcClientConnection, 1),
@@ -40,6 +40,7 @@ func NewSchedulerService(cfg *config.CGRConfig, dm *engine.DataManager,
 		dm:             dm,
 		cacheS:         cacheS,
 		server:         server,
+		cdrSChan:       internalCDRServerChan,
 		dispatcherChan: dispatcherChan,
 	}
 }
@@ -146,10 +147,4 @@ func (schS *SchedulerService) GetScheduler() *scheduler.Scheduler {
 // ShouldRun returns if the service should be running
 func (schS *SchedulerService) ShouldRun() bool {
 	return schS.cfg.SchedulerCfg().Enabled
-}
-
-// SetCdrsConns sets the value for cdrSChan
-// this needs to be called before StartServices
-func (schS *SchedulerService) SetCdrsConns(cdrSChan chan rpcclient.RpcClientConnection) {
-	schS.cdrSChan = cdrSChan
 }

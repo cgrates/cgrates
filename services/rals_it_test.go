@@ -68,7 +68,7 @@ func TestRalsReload(t *testing.T) {
 		/*loadStorage*/ nil, filterSChan,
 		server, nil, engineShutdown)
 	srvMngr.SetCacheS(chS)
-	schS := NewSchedulerService(cfg, nil, chS, server, nil)
+	schS := NewSchedulerService(cfg, nil, chS, server,  make(chan rpcclient.RpcClientConnection, 1),nil)
 	tS := NewThresholdService(cfg, nil, chS, filterSChan, server)
 	ralS := NewRalService(cfg, nil, nil, nil, chS, filterSChan, server,
 		tS.GetIntenternalChan(), internalChan, cacheSChan, internalChan, internalChan,

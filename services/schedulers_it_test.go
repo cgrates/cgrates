@@ -54,10 +54,9 @@ func TestSchedulerSReload(t *testing.T) {
 		/*cdrStorage*/ nil /*loadStorage*/, nil /*filterSChan*/, nil,
 		server, nil, engineShutdown)
 	srvMngr.SetCacheS(chS)
-	schS := NewSchedulerService(cfg, dm, chS, server, nil)
 	internalCdrSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalCdrSChan <- nil
-	schS.SetCdrsConns(internalCdrSChan)
+	schS := NewSchedulerService(cfg, dm, chS, server, internalCdrSChan, nil)
 	srvMngr.AddServices(schS)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)

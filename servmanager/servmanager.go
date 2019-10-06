@@ -212,33 +212,8 @@ func (srvMngr *ServiceManager) GetExitChan() chan bool {
 	return srvMngr.engineShutdown
 }
 
-// NewConnection creates a rpcClient to the specified subsystem
-func (srvMngr *ServiceManager) NewConnection(subsystem string, conns []*config.RemoteHost) (rpcclient.RpcClientConnection, error) {
-	if len(conns) == 0 {
-		return nil, nil
-	}
-	internalChan := srvMngr.GetService(subsystem).GetIntenternalChan()
-	if srvMngr.GetConfig().DispatcherSCfg().Enabled {
-		internalChan = srvMngr.dispatcherSChan
-	}
-	return engine.NewRPCPool(rpcclient.POOL_FIRST,
-		srvMngr.GetConfig().TlsCfg().ClientKey,
-		srvMngr.GetConfig().TlsCfg().ClientCerificate, srvMngr.GetConfig().TlsCfg().CaCertificate,
-		srvMngr.GetConfig().GeneralCfg().ConnectAttempts, srvMngr.GetConfig().GeneralCfg().Reconnects,
-		srvMngr.GetConfig().GeneralCfg().ConnectTimeout, srvMngr.GetConfig().GeneralCfg().ReplyTimeout,
-		conns, internalChan, false)
-}
-
 // StartServices starts all enabled services
 func (srvMngr *ServiceManager) StartServices() (err error) {
-	// start the cacheS
-	/*
-		if srvMngr.GetCacheS() == nil {
-			go srvMngr.startService(utils.CacheS)
-			go srvMngr.startService(utils.GuardianS)
-		}
-	*/
-
 	go srvMngr.handleReload()
 
 	if srvMngr.GetConfig().AttributeSCfg().Enabled {
