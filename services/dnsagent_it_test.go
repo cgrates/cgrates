@@ -48,15 +48,11 @@ func TestDNSAgentReload(t *testing.T) {
 	cacheSChan <- chS
 
 	server := utils.NewServer()
-	srvMngr := servmanager.NewServiceManager(cfg /*dm*/, nil,
-		/*cdrStorage*/ nil,
-		/*loadStorage*/ nil, filterSChan,
-		server, nil, engineShutdown)
-	srvMngr.SetCacheS(chS)
+	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	sS := NewSessionService(cfg, nil, server, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, engineShutdown)
 	srv := NewDNSAgent(cfg, filterSChan, sS.GetIntenternalChan(), nil, engineShutdown)
-	srvMngr.AddServices(srv, sS)
+	srvMngr.AddServices(srv, sS, NewLoaderService(cfg, nil, filterSChan, server, cacheSChan, nil, engineShutdown))
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

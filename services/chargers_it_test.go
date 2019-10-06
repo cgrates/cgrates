@@ -47,13 +47,10 @@ func TestChargerSReload(t *testing.T) {
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
 	server := utils.NewServer()
-	srvMngr := servmanager.NewServiceManager(cfg /*dm*/, nil,
-		/*cdrStorage*/ nil /*loadStorage*/, nil /*filterSChan*/, nil,
-		server, nil, engineShutdown)
-	srvMngr.SetCacheS(chS)
+	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	attrS := NewAttributeService(cfg, nil, chS, filterSChan, server)
 	chrS := NewChargerService(cfg, nil, chS, filterSChan, server, attrS.GetIntenternalChan(), nil)
-	srvMngr.AddServices(attrS, chrS)
+	srvMngr.AddServices(attrS, chrS, NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown))
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

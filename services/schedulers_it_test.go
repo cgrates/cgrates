@@ -40,6 +40,8 @@ func TestSchedulerSReload(t *testing.T) {
 	utils.Logger.SetLogLevel(7)
 	engineShutdown := make(chan bool, 1)
 	chS := engine.NewCacheS(cfg, nil)
+	filterSChan := make(chan *engine.FilterS, 1)
+	filterSChan <- nil
 	close(chS.GetPrecacheChannel(utils.CacheActionPlans))
 	server := utils.NewServer()
 	dm, err := engine.ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
@@ -50,14 +52,11 @@ func TestSchedulerSReload(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	srvMngr := servmanager.NewServiceManager(cfg /*dm*/, nil,
-		/*cdrStorage*/ nil /*loadStorage*/, nil /*filterSChan*/, nil,
-		server, nil, engineShutdown)
-	srvMngr.SetCacheS(chS)
+	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	internalCdrSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalCdrSChan <- nil
 	schS := NewSchedulerService(cfg, dm, chS, server, internalCdrSChan, nil)
-	srvMngr.AddServices(schS)
+	srvMngr.AddServices(schS, NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown))
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

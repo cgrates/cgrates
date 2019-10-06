@@ -146,13 +146,30 @@ func (srvMngr *ServiceManager) GetConfig() *config.CGRConfig {
 // StartServices starts all enabled services
 func (srvMngr *ServiceManager) StartServices() (err error) {
 	go srvMngr.handleReload()
-	for _, serviceName := range []string{utils.AttributeS, utils.ChargerS,
-		utils.ThresholdS, utils.StatS, utils.ResourceS, utils.SupplierS,
-		utils.SchedulerS, utils.RALService, utils.CDRServer, utils.SessionS,
-		utils.ERs, utils.DNSAgent, utils.FreeSWITCHAgent, utils.KamailioAgent,
-		utils.AsteriskAgent, utils.RadiusAgent, utils.DiameterAgent, utils.HTTPAgent,
-		utils.LoaderS} {
-		go srvMngr.startServiceIfNeeded(serviceName)
+	for serviceName, shouldRun := range map[string]bool{
+		utils.AttributeS:      srvMngr.GetConfig().AttributeSCfg().Enabled,
+		utils.ChargerS:        srvMngr.GetConfig().ChargerSCfg().Enabled,
+		utils.ThresholdS:      srvMngr.GetConfig().ThresholdSCfg().Enabled,
+		utils.StatS:           srvMngr.GetConfig().StatSCfg().Enabled,
+		utils.ResourceS:       srvMngr.GetConfig().ResourceSCfg().Enabled,
+		utils.SupplierS:       srvMngr.GetConfig().SupplierSCfg().Enabled,
+		utils.SchedulerS:      srvMngr.GetConfig().SchedulerCfg().Enabled,
+		utils.RALService:      srvMngr.GetConfig().RalsCfg().Enabled,
+		utils.CDRServer:       srvMngr.GetConfig().CdrsCfg().Enabled,
+		utils.SessionS:        srvMngr.GetConfig().SessionSCfg().Enabled,
+		utils.ERs:             srvMngr.GetConfig().ERsCfg().Enabled,
+		utils.DNSAgent:        srvMngr.GetConfig().DNSAgentCfg().Enabled,
+		utils.FreeSWITCHAgent: srvMngr.GetConfig().FsAgentCfg().Enabled,
+		utils.KamailioAgent:   srvMngr.GetConfig().KamAgentCfg().Enabled,
+		utils.AsteriskAgent:   srvMngr.GetConfig().AsteriskAgentCfg().Enabled,
+		utils.RadiusAgent:     srvMngr.GetConfig().RadiusAgentCfg().Enabled,
+		utils.DiameterAgent:   srvMngr.GetConfig().DiameterAgentCfg().Enabled,
+		utils.HTTPAgent:       len(srvMngr.GetConfig().HttpAgentCfg()) != 0,
+		utils.LoaderS:         true,
+	} {
+		if shouldRun {
+			go srvMngr.startService(serviceName)
+		}
 	}
 	// startServer()
 	return
@@ -298,11 +315,8 @@ func (srvMngr *ServiceManager) reloadService(srviceName string) (err error) {
 	return
 }
 
-func (srvMngr *ServiceManager) startServiceIfNeeded(srviceName string) {
+func (srvMngr *ServiceManager) startService(srviceName string) {
 	srv := srvMngr.GetService(srviceName)
-	if !srv.ShouldRun() {
-		return
-	}
 	if err := srv.Start(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> Failed to start %s because: %s", utils.ServiceManager, srviceName, err))
 		srvMngr.engineShutdown <- true

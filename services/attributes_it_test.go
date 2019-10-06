@@ -45,14 +45,10 @@ func TestAttributeSReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
 	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
 	server := utils.NewServer()
-	srvMngr := servmanager.NewServiceManager(cfg /*dm*/, nil,
-		/*cdrStorage*/ nil /*loadStorage*/, nil,
-		nil /*filterSChan*/, nil /*server*/, nil,
-		engineShutdown)
-	srvMngr.SetCacheS(chS)
+	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	attrS := NewAttributeService(cfg, nil,
 		chS, filterSChan, server)
-	srvMngr.AddServices(attrS)
+	srvMngr.AddServices(attrS, NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown))
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
