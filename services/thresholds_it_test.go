@@ -46,12 +46,9 @@ func TestThresholdSReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheThresholds))
 	close(chS.GetPrecacheChannel(utils.CacheThresholdFilterIndexes))
 	server := utils.NewServer()
-	srvMngr := servmanager.NewServiceManager(cfg /*dm*/, nil,
-		/*cdrStorage*/ nil /*loadStorage*/, nil /*filterSChan*/, nil,
-		server, nil, engineShutdown)
-	srvMngr.SetCacheS(chS)
+	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	tS := NewThresholdService(cfg, nil, chS, filterSChan, server)
-	srvMngr.AddServices(tS)
+	srvMngr.AddServices(tS, NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown))
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
