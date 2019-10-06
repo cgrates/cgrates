@@ -215,60 +215,13 @@ func (srvMngr *ServiceManager) GetExitChan() chan bool {
 // StartServices starts all enabled services
 func (srvMngr *ServiceManager) StartServices() (err error) {
 	go srvMngr.handleReload()
-
-	if srvMngr.GetConfig().AttributeSCfg().Enabled {
-		go srvMngr.startService(utils.AttributeS)
-	}
-	if srvMngr.GetConfig().ChargerSCfg().Enabled {
-		go srvMngr.startService(utils.ChargerS)
-	}
-	if srvMngr.GetConfig().ThresholdSCfg().Enabled {
-		go srvMngr.startService(utils.ThresholdS)
-	}
-	if srvMngr.GetConfig().StatSCfg().Enabled {
-		go srvMngr.startService(utils.StatS)
-	}
-	if srvMngr.GetConfig().ResourceSCfg().Enabled {
-		go srvMngr.startService(utils.ResourceS)
-	}
-	if srvMngr.GetConfig().SupplierSCfg().Enabled {
-		go srvMngr.startService(utils.SupplierS)
-	}
-	if srvMngr.GetConfig().SchedulerCfg().Enabled {
-		go srvMngr.startService(utils.SchedulerS)
-	}
-	if srvMngr.GetConfig().RalsCfg().Enabled {
-		go srvMngr.startService(utils.RALService)
-	}
-	if srvMngr.GetConfig().CdrsCfg().Enabled {
-		go srvMngr.startService(utils.CDRServer)
-	}
-	if srvMngr.GetConfig().SessionSCfg().Enabled {
-		go srvMngr.startService(utils.SessionS)
-	}
-	if srvMngr.GetConfig().ERsCfg().Enabled {
-		go srvMngr.startService(utils.ERs)
-	}
-	if srvMngr.GetConfig().DNSAgentCfg().Enabled {
-		go srvMngr.startService(utils.DNSAgent)
-	}
-	if srvMngr.GetConfig().FsAgentCfg().Enabled {
-		go srvMngr.startService(utils.FreeSWITCHAgent)
-	}
-	if srvMngr.GetConfig().KamAgentCfg().Enabled {
-		go srvMngr.startService(utils.KamailioAgent)
-	}
-	if srvMngr.GetConfig().AsteriskAgentCfg().Enabled {
-		go srvMngr.startService(utils.AsteriskAgent)
-	}
-	if srvMngr.GetConfig().RadiusAgentCfg().Enabled {
-		go srvMngr.startService(utils.RadiusAgent)
-	}
-	if srvMngr.GetConfig().DiameterAgentCfg().Enabled {
-		go srvMngr.startService(utils.DiameterAgent)
-	}
-	if len(srvMngr.GetConfig().HttpAgentCfg()) != 0 {
-		go srvMngr.startService(utils.HTTPAgent)
+	for _, serviceName := range []string{utils.AttributeS, utils.ChargerS,
+		utils.ThresholdS, utils.StatS, utils.ResourceS, utils.SupplierS,
+		utils.SchedulerS, utils.RALService, utils.CDRServer, utils.SessionS,
+		utils.ERs, utils.DNSAgent, utils.FreeSWITCHAgent, utils.KamailioAgent,
+		utils.AsteriskAgent, utils.RadiusAgent, utils.DiameterAgent, utils.HTTPAgent,
+		utils.LoaderS} {
+		go srvMngr.startServiceIfNeeded(serviceName)
 	}
 	// startServer()
 	return
@@ -378,6 +331,10 @@ func (srvMngr *ServiceManager) handleReload() {
 			if err = srvMngr.reloadService(utils.HTTPAgent); err != nil {
 				return
 			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.LoaderJson):
+			if err = srvMngr.reloadService(utils.LoaderS); err != nil {
+				return
+			}
 		}
 		// handle RPC server
 	}
@@ -410,8 +367,11 @@ func (srvMngr *ServiceManager) reloadService(srviceName string) (err error) {
 	return
 }
 
-func (srvMngr *ServiceManager) startService(srviceName string) {
+func (srvMngr *ServiceManager) startServiceIfNeeded(srviceName string) {
 	srv := srvMngr.GetService(srviceName)
+	if !srv.ShouldRun() {
+		return
+	}
 	if err := srv.Start(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> Failed to start %s because: %s", utils.ServiceManager, srviceName, err))
 		srvMngr.engineShutdown <- true
