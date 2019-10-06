@@ -26,28 +26,16 @@ import (
 	"sync"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
 // NewServiceManager returns a service manager
-func NewServiceManager(cfg *config.CGRConfig, dm *engine.DataManager,
-	cdrStorage engine.CdrStorage,
-	loadStorage engine.LoadStorage, filterSChan chan *engine.FilterS,
-	server *utils.Server, dispatcherSChan chan rpcclient.RpcClientConnection,
-	engineShutdown chan bool) *ServiceManager {
+func NewServiceManager(cfg *config.CGRConfig, engineShutdown chan bool) *ServiceManager {
 	sm := &ServiceManager{
 		cfg:            cfg,
-		dm:             dm,
 		engineShutdown: engineShutdown,
-
-		cdrStorage:      cdrStorage,
-		loadStorage:     loadStorage,
-		filterS:         filterSChan,
-		server:          server,
-		subsystems:      make(map[string]Service),
-		dispatcherSChan: dispatcherSChan,
+		subsystems:     make(map[string]Service),
 	}
 	return sm
 }
@@ -56,16 +44,8 @@ func NewServiceManager(cfg *config.CGRConfig, dm *engine.DataManager,
 type ServiceManager struct {
 	sync.RWMutex   // lock access to any shared data
 	cfg            *config.CGRConfig
-	dm             *engine.DataManager
 	engineShutdown chan bool
-	cacheS         *engine.CacheS
-	cdrStorage     engine.CdrStorage
-	loadStorage    engine.LoadStorage
-	filterS        chan *engine.FilterS
-	server         *utils.Server
 	subsystems     map[string]Service
-
-	dispatcherSChan chan rpcclient.RpcClientConnection
 }
 
 func (srvMngr *ServiceManager) Call(serviceMethod string, args interface{}, reply interface{}) error {
@@ -156,60 +136,11 @@ func (srvMngr *ServiceManager) V1ServiceStatus(args ArgStartService, reply *stri
 	return nil
 }
 
-// GetDM returns the DataManager
-func (srvMngr *ServiceManager) GetDM() *engine.DataManager {
-	srvMngr.RLock()
-	defer srvMngr.RUnlock()
-	return srvMngr.dm
-}
-
-// GetCDRStorage returns the CdrStorage
-func (srvMngr *ServiceManager) GetCDRStorage() engine.CdrStorage {
-	srvMngr.RLock()
-	defer srvMngr.RUnlock()
-	return srvMngr.cdrStorage
-}
-
-// GetLoadStorage returns the LoadStorage
-func (srvMngr *ServiceManager) GetLoadStorage() engine.LoadStorage {
-	srvMngr.RLock()
-	defer srvMngr.RUnlock()
-	return srvMngr.loadStorage
-}
-
 // GetConfig returns the Configuration
 func (srvMngr *ServiceManager) GetConfig() *config.CGRConfig {
 	srvMngr.RLock()
 	defer srvMngr.RUnlock()
 	return srvMngr.cfg
-}
-
-// GetCacheS returns the CacheS
-func (srvMngr *ServiceManager) GetCacheS() *engine.CacheS {
-	srvMngr.RLock()
-	defer srvMngr.RUnlock()
-	return srvMngr.cacheS
-}
-
-// GetFilterS returns the FilterS
-func (srvMngr *ServiceManager) GetFilterS() (fS *engine.FilterS) {
-	srvMngr.RLock()
-	defer srvMngr.RUnlock()
-	fS = <-srvMngr.filterS
-	srvMngr.filterS <- fS
-	return
-}
-
-// GetServer returns the Server
-func (srvMngr *ServiceManager) GetServer() *utils.Server {
-	srvMngr.RLock()
-	defer srvMngr.RUnlock()
-	return srvMngr.server
-}
-
-// GetExitChan returns the exit chanel
-func (srvMngr *ServiceManager) GetExitChan() chan bool {
-	return srvMngr.engineShutdown
 }
 
 // StartServices starts all enabled services
@@ -389,13 +320,6 @@ func (srvMngr ServiceManager) GetService(subsystem string) (srv Service) {
 			utils.ServiceManager, subsystem)) // because this is not dinamic this should not happen
 	}
 	return
-}
-
-// SetCacheS sets the cacheS
-func (srvMngr *ServiceManager) SetCacheS(chS *engine.CacheS) {
-	srvMngr.Lock()
-	srvMngr.cacheS = chS
-	srvMngr.Unlock()
 }
 
 // Service interface that describes what functions should a service implement
