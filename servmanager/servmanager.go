@@ -166,6 +166,7 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 		utils.DiameterAgent:   srvMngr.GetConfig().DiameterAgentCfg().Enabled,
 		utils.HTTPAgent:       len(srvMngr.GetConfig().HttpAgentCfg()) != 0,
 		utils.LoaderS:         true,
+		utils.AnalyzerS:       srvMngr.GetConfig().AnalyzerSCfg().Enabled,
 	} {
 		if shouldRun {
 			go srvMngr.startService(serviceName)
@@ -281,6 +282,10 @@ func (srvMngr *ServiceManager) handleReload() {
 			}
 		case <-srvMngr.GetConfig().GetReloadChan(config.LoaderJson):
 			if err = srvMngr.reloadService(utils.LoaderS); err != nil {
+				return
+			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.AnalyzerCfgJson):
+			if err = srvMngr.reloadService(utils.AnalyzerS); err != nil {
 				return
 			}
 		}
