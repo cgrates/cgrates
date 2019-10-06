@@ -1654,11 +1654,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case LoaderJson:
-		if !fall {
-			break
-		}
-		fallthrough
-	case CgrLoaderCfgJson:
+		cfg.rldChans[LoaderJson] <- struct{}{}
 		if !fall {
 			break
 		}

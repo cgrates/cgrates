@@ -21,6 +21,7 @@ package loaders
 import (
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -43,6 +44,7 @@ func NewLoaderService(dm *engine.DataManager, ldrsCfg []*config.LoaderSCfg,
 
 // LoaderS is the Loader service handling independent Loaders
 type LoaderService struct {
+	sync.RWMutex
 	ldrs map[string]*Loader
 }
 
@@ -57,7 +59,6 @@ func (ldrS *LoaderService) Enabled() bool {
 }
 
 func (ldrS *LoaderService) ListenAndServe(exitChan chan bool) (err error) {
-	// seems useless
 	ldrExitChan := make(chan struct{})
 	for _, ldr := range ldrS.ldrs {
 		go ldr.ListenAndServe(ldrExitChan)
@@ -80,6 +81,8 @@ type ArgsProcessFolder struct {
 
 func (ldrS *LoaderService) V1Load(args *ArgsProcessFolder,
 	rply *string) (err error) {
+	ldrS.RLock()
+	defer ldrS.RUnlock()
 	if args.LoaderID == "" {
 		args.LoaderID = utils.META_DEFAULT
 	}
@@ -111,6 +114,8 @@ func (ldrS *LoaderService) V1Load(args *ArgsProcessFolder,
 
 func (ldrS *LoaderService) V1Remove(args *ArgsProcessFolder,
 	rply *string) (err error) {
+	ldrS.RLock()
+	defer ldrS.RUnlock()
 	if args.LoaderID == "" {
 		args.LoaderID = utils.META_DEFAULT
 	}
@@ -138,4 +143,19 @@ func (ldrS *LoaderService) V1Remove(args *ArgsProcessFolder,
 	}
 	*rply = utils.OK
 	return
+}
+
+// Reload recreates the loaders map thread safe
+func (ldrS *LoaderService) Reload(dm *engine.DataManager, ldrsCfg []*config.LoaderSCfg,
+	timezone string, exitChan chan bool, filterS *engine.FilterS,
+	internalCacheSChan chan rpcclient.RpcClientConnection) {
+	ldrS.Lock()
+	ldrS.ldrs = make(map[string]*Loader)
+	for _, ldrCfg := range ldrsCfg {
+		if !ldrCfg.Enabled {
+			continue
+		}
+		ldrS.ldrs[ldrCfg.Id] = NewLoader(dm, ldrCfg, timezone, exitChan, filterS, internalCacheSChan)
+	}
+	ldrS.Unlock()
 }
