@@ -31,11 +31,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/cgrates/cgrates/analyzers"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/cdrc"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/dispatchers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/services"
 	"github.com/cgrates/cgrates/servmanager"
@@ -142,125 +140,6 @@ func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS,
 	dm *engine.DataManager, exitChan chan bool) {
 	<-cacheS.GetPrecacheChannel(utils.CacheFilters)
 	filterSChan <- engine.NewFilterS(cfg, internalStatSChan, internalResourceSChan, internalRalSChan, dm)
-}
-
-// startDispatcherService fires up the DispatcherS
-func startDispatcherService(internalDispatcherSChan, internalAttributeSChan chan rpcclient.RpcClientConnection,
-	cfg *config.CGRConfig, cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	dm *engine.DataManager, server *utils.Server, exitChan chan bool) {
-	utils.Logger.Info("Starting CGRateS Dispatcher service.")
-	fltrS := <-filterSChan
-	filterSChan <- fltrS
-	<-cacheS.GetPrecacheChannel(utils.CacheDispatcherProfiles)
-	<-cacheS.GetPrecacheChannel(utils.CacheDispatcherHosts)
-	<-cacheS.GetPrecacheChannel(utils.CacheDispatcherFilterIndexes)
-
-	var err error
-	var attrSConn *rpcclient.RpcClientPool
-	if len(cfg.DispatcherSCfg().AttributeSConns) != 0 { // AttributeS connection init
-		attrSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
-			cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.DispatcherSCfg().AttributeSConns, internalAttributeSChan, false)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.DispatcherS, utils.AttributeS, err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-	dspS, err := dispatchers.NewDispatcherService(dm, cfg, fltrS, attrSConn)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.DispatcherS, err.Error()))
-		exitChan <- true
-		return
-	}
-	go func() {
-		if err := dspS.ListenAndServe(exitChan); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Error: %s listening for packets", utils.DispatcherS, err.Error()))
-		}
-		dspS.Shutdown()
-		exitChan <- true
-		return
-	}()
-
-	// for the moment we dispable Apier through dispatcher
-	// until we figured out a better sollution in case of gob server
-	// server.SetDispatched()
-
-	server.RpcRegister(v1.NewDispatcherSv1(dspS))
-
-	server.RpcRegisterName(utils.ThresholdSv1,
-		v1.NewDispatcherThresholdSv1(dspS))
-
-	server.RpcRegisterName(utils.StatSv1,
-		v1.NewDispatcherStatSv1(dspS))
-
-	server.RpcRegisterName(utils.ResourceSv1,
-		v1.NewDispatcherResourceSv1(dspS))
-
-	server.RpcRegisterName(utils.SupplierSv1,
-		v1.NewDispatcherSupplierSv1(dspS))
-
-	server.RpcRegisterName(utils.AttributeSv1,
-		v1.NewDispatcherAttributeSv1(dspS))
-
-	server.RpcRegisterName(utils.SessionSv1,
-		v1.NewDispatcherSessionSv1(dspS))
-
-	server.RpcRegisterName(utils.ChargerSv1,
-		v1.NewDispatcherChargerSv1(dspS))
-
-	server.RpcRegisterName(utils.Responder,
-		v1.NewDispatcherResponder(dspS))
-
-	server.RpcRegisterName(utils.CacheSv1,
-		v1.NewDispatcherCacheSv1(dspS))
-
-	server.RpcRegisterName(utils.GuardianSv1,
-		v1.NewDispatcherGuardianSv1(dspS))
-
-	server.RpcRegisterName(utils.SchedulerSv1,
-		v1.NewDispatcherSchedulerSv1(dspS))
-
-	server.RpcRegisterName(utils.CDRsV1,
-		v1.NewDispatcherSCDRsV1(dspS))
-
-	server.RpcRegisterName(utils.ConfigSv1,
-		v1.NewDispatcherConfigSv1(dspS))
-
-	server.RpcRegisterName(utils.CoreSv1,
-		v1.NewDispatcherCoreSv1(dspS))
-
-	server.RpcRegisterName(utils.RALsV1,
-		v1.NewDispatcherRALsV1(dspS))
-
-	internalDispatcherSChan <- dspS
-}
-
-// startAnalyzerService fires up the AnalyzerS
-func startAnalyzerService(internalAnalyzerSChan chan rpcclient.RpcClientConnection,
-	server *utils.Server, exitChan chan bool) {
-	var err error
-	aS, err := analyzers.NewAnalyzerService()
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.AnalyzerS, err.Error()))
-		exitChan <- true
-		return
-	}
-	go func() {
-		if err := aS.ListenAndServe(exitChan); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Error: %s listening for packets", utils.AnalyzerS, err.Error()))
-		}
-		aS.Shutdown()
-		exitChan <- true
-		return
-	}()
-	aSv1 := v1.NewAnalyzerSv1(aS)
-	server.RpcRegister(aSv1)
-	internalAnalyzerSChan <- aSv1
 }
 
 // initCacheS inits the CacheS and starts precaching as well as populating internal channel for RPC conns
@@ -637,7 +516,6 @@ func main() {
 
 	// Define internal connections via channels
 	filterSChan := make(chan *engine.FilterS, 1)
-	internalDispatcherSChan := make(chan rpcclient.RpcClientConnection, 1)
 
 	internalServeManagerChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalConfigChan := make(chan rpcclient.RpcClientConnection, 1)
@@ -660,44 +538,45 @@ func main() {
 	srvManager := servmanager.NewServiceManager(cfg, exitChan)
 
 	attrS := services.NewAttributeService(cfg, dm, cacheS, filterSChan, server)
+	dspS := services.NewDispatcherService(cfg, dm, cacheS, filterSChan, server, attrS.GetIntenternalChan())
 	chrS := services.NewChargerService(cfg, dm, cacheS, filterSChan, server,
-		attrS.GetIntenternalChan(), internalDispatcherSChan)
+		attrS.GetIntenternalChan(), dspS.GetIntenternalChan())
 	tS := services.NewThresholdService(cfg, dm, cacheS, filterSChan, server)
 	stS := services.NewStatService(cfg, dm, cacheS, filterSChan, server,
-		tS.GetIntenternalChan(), internalDispatcherSChan)
+		tS.GetIntenternalChan(), dspS.GetIntenternalChan())
 	reS := services.NewResourceService(cfg, dm, cacheS, filterSChan, server,
-		tS.GetIntenternalChan(), internalDispatcherSChan)
+		tS.GetIntenternalChan(), dspS.GetIntenternalChan())
 	supS := services.NewSupplierService(cfg, dm, cacheS, filterSChan, server,
 		attrS.GetIntenternalChan(), stS.GetIntenternalChan(),
-		reS.GetIntenternalChan(), internalDispatcherSChan)
-	schS := services.NewSchedulerService(cfg, dm, cacheS, server, internalCDRServerChan, internalDispatcherSChan)
+		reS.GetIntenternalChan(), dspS.GetIntenternalChan())
+	schS := services.NewSchedulerService(cfg, dm, cacheS, server, internalCDRServerChan, dspS.GetIntenternalChan())
 	rals := services.NewRalService(cfg, dm, cdrDb, loadDb, cacheS, filterSChan, server,
 		tS.GetIntenternalChan(), stS.GetIntenternalChan(), internalCacheSChan,
-		schS.GetIntenternalChan(), attrS.GetIntenternalChan(), internalDispatcherSChan,
+		schS.GetIntenternalChan(), attrS.GetIntenternalChan(), dspS.GetIntenternalChan(),
 		schS, exitChan)
 	cdrS := services.NewCDRServer(cfg, dm, cdrDb, filterSChan, server, internalCDRServerChan,
 		chrS.GetIntenternalChan(), rals.GetResponder().GetIntenternalChan(),
 		attrS.GetIntenternalChan(), tS.GetIntenternalChan(),
-		stS.GetIntenternalChan(), internalDispatcherSChan)
+		stS.GetIntenternalChan(), dspS.GetIntenternalChan())
 
 	smg := services.NewSessionService(cfg, dm, server, chrS.GetIntenternalChan(),
 		rals.GetResponder().GetIntenternalChan(), reS.GetIntenternalChan(),
 		tS.GetIntenternalChan(), stS.GetIntenternalChan(), supS.GetIntenternalChan(),
-		attrS.GetIntenternalChan(), cdrS.GetIntenternalChan(), internalDispatcherSChan, exitChan)
+		attrS.GetIntenternalChan(), cdrS.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan)
 
-	ldrs := services.NewLoaderService(cfg, dm, filterSChan, server, internalCacheSChan, internalDispatcherSChan, exitChan)
+	ldrs := services.NewLoaderService(cfg, dm, filterSChan, server, internalCacheSChan, dspS.GetIntenternalChan(), exitChan)
 	anz := services.NewAnalyzerService(cfg, server, exitChan)
 	srvManager.AddServices(attrS, chrS, tS, stS, reS, supS, schS, rals,
 		rals.GetResponder(), rals.GetAPIv1(), rals.GetAPIv2(), cdrS, smg,
-		services.NewEventReaderService(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),
-		services.NewDNSAgent(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),
-		services.NewFreeswitchAgent(cfg, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),
-		services.NewKamailioAgent(cfg, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),
-		services.NewAsteriskAgent(cfg, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),              // partial reload
-		services.NewRadiusAgent(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),   // partial reload
-		services.NewDiameterAgent(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan), // partial reload
-		services.NewHTTPAgent(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, server),       // no reload
-		ldrs, anz,
+		services.NewEventReaderService(cfg, filterSChan, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),
+		services.NewDNSAgent(cfg, filterSChan, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),
+		services.NewFreeswitchAgent(cfg, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),
+		services.NewKamailioAgent(cfg, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),
+		services.NewAsteriskAgent(cfg, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),              // partial reload
+		services.NewRadiusAgent(cfg, filterSChan, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),   // partial reload
+		services.NewDiameterAgent(cfg, filterSChan, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan), // partial reload
+		services.NewHTTPAgent(cfg, filterSChan, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), server),       // no reload
+		ldrs, anz, dspS,
 	)
 
 	srvManager.StartServices()
@@ -738,20 +617,14 @@ func main() {
 	initConfigSv1(internalConfigChan, server)
 
 	// Start CDRC components if necessary
-	go startCdrcs(cdrS.GetIntenternalChan(), rals.GetResponder().GetIntenternalChan(), internalDispatcherSChan, filterSChan, exitChan)
-
-	if cfg.DispatcherSCfg().Enabled {
-		go startDispatcherService(internalDispatcherSChan,
-			attrS.GetIntenternalChan(), cfg, cacheS, filterSChan,
-			dm, server, exitChan)
-	}
+	go startCdrcs(cdrS.GetIntenternalChan(), rals.GetResponder().GetIntenternalChan(), dspS.GetIntenternalChan(), filterSChan, exitChan)
 
 	// Serve rpc connections
 	go startRpc(server, rals.GetResponder().GetIntenternalChan(), cdrS.GetIntenternalChan(),
 		reS.GetIntenternalChan(), stS.GetIntenternalChan(),
 		attrS.GetIntenternalChan(), chrS.GetIntenternalChan(), tS.GetIntenternalChan(),
 		supS.GetIntenternalChan(), smg.GetIntenternalChan(), anz.GetIntenternalChan(),
-		internalDispatcherSChan, ldrs.GetIntenternalChan(), rals.GetIntenternalChan(), internalCacheSChan, exitChan)
+		dspS.GetIntenternalChan(), ldrs.GetIntenternalChan(), rals.GetIntenternalChan(), internalCacheSChan, exitChan)
 	<-exitChan
 
 	if *cpuProfDir != "" { // wait to end cpuProfiling
