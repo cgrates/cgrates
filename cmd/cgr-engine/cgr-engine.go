@@ -638,7 +638,6 @@ func main() {
 	// Define internal connections via channels
 	filterSChan := make(chan *engine.FilterS, 1)
 	internalDispatcherSChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalAnalyzerSChan := make(chan rpcclient.RpcClientConnection, 1)
 
 	internalServeManagerChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalConfigChan := make(chan rpcclient.RpcClientConnection, 1)
@@ -687,6 +686,7 @@ func main() {
 		attrS.GetIntenternalChan(), cdrS.GetIntenternalChan(), internalDispatcherSChan, exitChan)
 
 	ldrs := services.NewLoaderService(cfg, dm, filterSChan, server, internalCacheSChan, internalDispatcherSChan, exitChan)
+	anz := services.NewAnalyzerService(cfg, server, exitChan)
 	srvManager.AddServices(attrS, chrS, tS, stS, reS, supS, schS, rals,
 		rals.GetResponder(), rals.GetAPIv1(), rals.GetAPIv2(), cdrS, smg,
 		services.NewEventReaderService(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),
@@ -697,7 +697,7 @@ func main() {
 		services.NewRadiusAgent(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan),   // partial reload
 		services.NewDiameterAgent(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, exitChan), // partial reload
 		services.NewHTTPAgent(cfg, filterSChan, smg.GetIntenternalChan(), internalDispatcherSChan, server),       // no reload
-		ldrs,
+		ldrs, anz,
 	)
 
 	srvManager.StartServices()
@@ -712,7 +712,7 @@ func main() {
 	// init internalRPCSet
 	engine.IntRPC = engine.NewRPCClientSet()
 	if cfg.DispatcherSCfg().Enabled {
-		engine.IntRPC.AddInternalRPCClient(utils.AnalyzerSv1, internalAnalyzerSChan)
+		engine.IntRPC.AddInternalRPCClient(utils.AnalyzerSv1, anz.GetIntenternalChan())
 		engine.IntRPC.AddInternalRPCClient(utils.ApierV1, rals.GetAPIv1().GetIntenternalChan())
 		engine.IntRPC.AddInternalRPCClient(utils.ApierV2, rals.GetAPIv2().GetIntenternalChan())
 		engine.IntRPC.AddInternalRPCClient(utils.AttributeSv1, attrS.GetIntenternalChan())
@@ -746,15 +746,11 @@ func main() {
 			dm, server, exitChan)
 	}
 
-	if cfg.AnalyzerSCfg().Enabled {
-		go startAnalyzerService(internalAnalyzerSChan, server, exitChan)
-	}
-
 	// Serve rpc connections
 	go startRpc(server, rals.GetResponder().GetIntenternalChan(), cdrS.GetIntenternalChan(),
 		reS.GetIntenternalChan(), stS.GetIntenternalChan(),
 		attrS.GetIntenternalChan(), chrS.GetIntenternalChan(), tS.GetIntenternalChan(),
-		supS.GetIntenternalChan(), smg.GetIntenternalChan(), internalAnalyzerSChan,
+		supS.GetIntenternalChan(), smg.GetIntenternalChan(), anz.GetIntenternalChan(),
 		internalDispatcherSChan, ldrs.GetIntenternalChan(), rals.GetIntenternalChan(), internalCacheSChan, exitChan)
 	<-exitChan
 
