@@ -666,6 +666,8 @@ func main() {
 	internalCacheSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalGuardianSChan := make(chan rpcclient.RpcClientConnection, 1)
 
+	internalCDRServerChan := make(chan rpcclient.RpcClientConnection, 1) // needed to avod cyclic dependency
+
 	// init CacheS
 	cacheS := initCacheS(internalCacheSChan, server, dm, exitChan)
 
@@ -690,16 +692,15 @@ func main() {
 	supS := services.NewSupplierService(cfg, dm, cacheS, filterSChan, server,
 		attrS.GetIntenternalChan(), stS.GetIntenternalChan(),
 		reS.GetIntenternalChan(), internalDispatcherSChan)
-	schS := services.NewSchedulerService(cfg, dm, cacheS, server, internalDispatcherSChan)
+	schS := services.NewSchedulerService(cfg, dm, cacheS, server, internalCDRServerChan, internalDispatcherSChan)
 	rals := services.NewRalService(cfg, dm, cdrDb, loadDb, cacheS, filterSChan, server,
 		tS.GetIntenternalChan(), stS.GetIntenternalChan(), internalCacheSChan,
 		schS.GetIntenternalChan(), attrS.GetIntenternalChan(), internalDispatcherSChan,
 		schS, exitChan)
-	cdrS := services.NewCDRServer(cfg, dm, cdrDb, filterSChan, server,
+	cdrS := services.NewCDRServer(cfg, dm, cdrDb, filterSChan, server, internalCDRServerChan,
 		chrS.GetIntenternalChan(), rals.GetResponder().GetIntenternalChan(),
 		attrS.GetIntenternalChan(), tS.GetIntenternalChan(),
 		stS.GetIntenternalChan(), internalDispatcherSChan)
-	schS.SetCdrsConns(cdrS.GetIntenternalChan())
 
 	smg := services.NewSessionService(cfg, dm, server, chrS.GetIntenternalChan(),
 		rals.GetResponder().GetIntenternalChan(), reS.GetIntenternalChan(),

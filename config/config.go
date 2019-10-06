@@ -1231,14 +1231,14 @@ func (cfg *CGRConfig) CacheCfg() CacheCfg {
 	return cfg.cacheCfg
 }
 
-// LoaderCfg returns the loader profiles config
+// LoaderCfg returns the Loader Service
 func (cfg *CGRConfig) LoaderCfg() []*LoaderSCfg {
 	cfg.lks[LoaderJson].Lock()
 	defer cfg.lks[LoaderJson].Unlock()
 	return cfg.loaderCfg
 }
 
-// LoaderCgrCfg returns the config for Loader Service
+// LoaderCgrCfg returns the config for cgr-loader
 func (cfg *CGRConfig) LoaderCgrCfg() *LoaderCgrCfg {
 	cfg.lks[CgrLoaderCfgJson].Lock()
 	defer cfg.lks[CgrLoaderCfgJson].Unlock()

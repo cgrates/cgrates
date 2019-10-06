@@ -219,7 +219,7 @@ func (ldr *Loader) processContent(loaderType, caching string) (err error) {
 	keepLooping := true // controls looping
 	lineNr := 0
 	for keepLooping {
-		lineNr += 1
+		lineNr++
 		var hasErrors bool
 		lData := make(LoaderData) // one row
 		for fName, rdr := range ldr.rdrs[loaderType] {
@@ -240,8 +240,9 @@ func (ldr *Loader) processContent(loaderType, caching string) (err error) {
 
 			if err := lData.UpdateFromCSV(fName, record,
 				ldr.dataTpls[loaderType], ldr.tenant, ldr.filterS); err != nil {
-				fmt.Sprintf("<%s> <%s> line: %d, error: %s",
-					utils.LoaderS, ldr.ldrID, lineNr, err.Error())
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> <%s> line: %d, error: %s",
+						utils.LoaderS, ldr.ldrID, lineNr, err.Error()))
 				hasErrors = true
 				continue
 			}
@@ -404,11 +405,11 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 				}
 				metrics := make(map[string]engine.StatMetric)
 				for _, metric := range stsPrf.Metrics {
-					if stsMetric, err := engine.NewStatMetric(metric.MetricID, stsPrf.MinItems, metric.FilterIDs); err != nil {
+					stsMetric, err := engine.NewStatMetric(metric.MetricID, stsPrf.MinItems, metric.FilterIDs)
+					if err != nil {
 						return utils.APIErrorHandler(err)
-					} else {
-						metrics[metric.MetricID] = stsMetric
 					}
+					metrics[metric.MetricID] = stsMetric
 				}
 				if err := ldr.dm.SetStatQueue(&engine.StatQueue{Tenant: stsPrf.Tenant, ID: stsPrf.ID, SQMetrics: metrics}); err != nil {
 					return err
@@ -599,7 +600,7 @@ func (ldr *Loader) removeContent(loaderType, caching string) (err error) {
 	keepLooping := true // controls looping
 	lineNr := 0
 	for keepLooping {
-		lineNr += 1
+		lineNr++
 		var hasErrors bool
 		lData := make(LoaderData) // one row
 		for fName, rdr := range ldr.rdrs[loaderType] {
@@ -620,8 +621,9 @@ func (ldr *Loader) removeContent(loaderType, caching string) (err error) {
 
 			if err := lData.UpdateFromCSV(fName, record,
 				ldr.dataTpls[loaderType], ldr.tenant, ldr.filterS); err != nil {
-				fmt.Sprintf("<%s> <%s> line: %d, error: %s",
-					utils.LoaderS, ldr.ldrID, lineNr, err.Error())
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> <%s> line: %d, error: %s",
+						utils.LoaderS, ldr.ldrID, lineNr, err.Error()))
 				hasErrors = true
 				continue
 			}

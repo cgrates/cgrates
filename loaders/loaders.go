@@ -57,6 +57,7 @@ func (ldrS *LoaderService) Enabled() bool {
 }
 
 func (ldrS *LoaderService) ListenAndServe(exitChan chan bool) (err error) {
+	// seems useless
 	ldrExitChan := make(chan struct{})
 	for _, ldr := range ldrS.ldrs {
 		go ldr.ListenAndServe(ldrExitChan)

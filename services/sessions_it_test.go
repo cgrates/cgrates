@@ -71,11 +71,14 @@ func TestSessionSReload(t *testing.T) {
 		server, nil, engineShutdown)
 	srvMngr.SetCacheS(chS)
 	chrS := NewChargerService(cfg, nil, chS, filterSChan, server, nil, nil)
-	schS := NewSchedulerService(cfg, nil, chS, server, nil)
+	schS := NewSchedulerService(cfg, nil, chS, server, make(chan rpcclient.RpcClientConnection, 1), nil)
 	ralS := NewRalService(cfg, nil, nil, nil, chS, filterSChan, server,
 		/*tS*/ internalChan, internalChan, cacheSChan, internalChan, internalChan,
 		internalChan, schS, engineShutdown)
-	cdrS := NewCDRServer(cfg, nil, nil, filterSChan, server, chrS.GetIntenternalChan(), ralS.GetResponder().GetIntenternalChan(), nil, nil, nil, nil)
+	cdrS := NewCDRServer(cfg, nil, nil, filterSChan, server,
+		make(chan rpcclient.RpcClientConnection, 1),
+		chrS.GetIntenternalChan(), ralS.GetResponder().GetIntenternalChan(),
+		nil, nil, nil, nil)
 	attrS := NewSessionService(cfg, nil, server, chrS.GetIntenternalChan(),
 		ralS.GetResponder().GetIntenternalChan(), nil, nil, nil, nil, nil, cdrS.GetIntenternalChan(), nil, engineShutdown)
 	srvMngr.AddServices(attrS, chrS, schS, ralS, cdrS)

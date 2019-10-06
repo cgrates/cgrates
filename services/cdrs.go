@@ -34,10 +34,10 @@ import (
 // NewCDRServer returns the CDR Server
 func NewCDRServer(cfg *config.CGRConfig, dm *engine.DataManager,
 	cdrStorage engine.CdrStorage, filterSChan chan *engine.FilterS,
-	server *utils.Server, chrsChan, respChan, attrsChan, thsChan, stsChan,
+	server *utils.Server, internalCDRServerChan, chrsChan, respChan, attrsChan, thsChan, stsChan,
 	dispatcherChan chan rpcclient.RpcClientConnection) servmanager.Service {
 	return &CDRServer{
-		connChan:       make(chan rpcclient.RpcClientConnection, 1),
+		connChan:       internalCDRServerChan,
 		cfg:            cfg,
 		dm:             dm,
 		cdrStorage:     cdrStorage,
