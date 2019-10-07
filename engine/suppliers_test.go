@@ -294,7 +294,7 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 		t.Error(err)
 	}
 	data := NewInternalDB(nil, nil)
-	dmSPP = NewDataManager(data)
+	dmSPP = NewDataManager(data, config.CgrConfig().CacheCfg())
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	if err != nil {
 		t.Errorf("Error: %+v", err)

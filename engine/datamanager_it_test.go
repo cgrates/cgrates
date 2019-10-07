@@ -44,11 +44,11 @@ func TestDMitRedis(t *testing.T) {
 	dataDB, err := NewRedisStorage(
 		fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
 		4, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-		utils.REDIS_MAX_CONNS, nil, "")
+		utils.REDIS_MAX_CONNS, "")
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}
-	dm2 = NewDataManager(dataDB)
+	dm2 = NewDataManager(dataDB, config.CgrConfig().CacheCfg())
 	for _, stest := range sTestsDMit {
 		t.Run("TestDMitRedis", stest)
 	}
@@ -63,11 +63,11 @@ func TestDMitMongo(t *testing.T) {
 	dataDB, err := NewMongoStorage(mgoITCfg.StorDbCfg().StorDBHost,
 		mgoITCfg.StorDbCfg().StorDBPort, mgoITCfg.StorDbCfg().StorDBName,
 		mgoITCfg.StorDbCfg().StorDBUser, mgoITCfg.StorDbCfg().StorDBPass,
-		utils.StorDB, nil, mgoITCfg.CacheCfg(), false)
+		utils.StorDB, nil, false)
 	if err != nil {
 		t.Fatal("Could not connect to Mongo", err.Error())
 	}
-	dm2 = NewDataManager(dataDB)
+	dm2 = NewDataManager(dataDB, config.CgrConfig().CacheCfg())
 	for _, stest := range sTestsDMit {
 		t.Run("TestDMitMongo", stest)
 	}

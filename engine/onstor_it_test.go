@@ -87,12 +87,12 @@ func TestOnStorITRedis(t *testing.T) {
 	rdsITdb, err = NewRedisStorage(
 		fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
 		4, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-		utils.REDIS_MAX_CONNS, nil, "")
+		utils.REDIS_MAX_CONNS,  "")
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}
 	onStorCfg = cfg.DataDbCfg().DataDbName
-	onStor = NewDataManager(rdsITdb)
+	onStor = NewDataManager(rdsITdb, config.CgrConfig().CacheCfg())
 	for _, stest := range sTestsOnStorIT {
 		t.Run("TestOnStorITRedis", stest)
 	}
@@ -108,11 +108,11 @@ func TestOnStorITMongo(t *testing.T) {
 	if mgoITdb, err = NewMongoStorage(mgoITCfg.StorDbCfg().StorDBHost,
 		mgoITCfg.StorDbCfg().StorDBPort, mgoITCfg.StorDbCfg().StorDBName,
 		mgoITCfg.StorDbCfg().StorDBUser, mgoITCfg.StorDbCfg().StorDBPass,
-		utils.StorDB, nil, mgoITCfg.CacheCfg(), false); err != nil {
+		utils.StorDB, nil, false); err != nil {
 		t.Fatal(err)
 	}
 	onStorCfg = mgoITCfg.StorDbCfg().StorDBName
-	onStor = NewDataManager(mgoITdb)
+	onStor = NewDataManager(mgoITdb, config.CgrConfig().CacheCfg())
 	for _, stest := range sTestsOnStorIT {
 		t.Run("TestOnStorITMongo", stest)
 	}
@@ -120,7 +120,7 @@ func TestOnStorITMongo(t *testing.T) {
 
 func TestOnStorITInternal(t *testing.T) {
 	sleepDelay = 10 * time.Millisecond
-	onStor = NewDataManager(NewInternalDB(nil, nil))
+	onStor = NewDataManager(NewInternalDB(nil, nil), config.CgrConfig().CacheCfg())
 	for _, stest := range sTestsOnStorIT {
 		t.Run("TestOnStorITInternal", stest)
 	}

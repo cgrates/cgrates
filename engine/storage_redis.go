@@ -40,7 +40,6 @@ type RedisStorage struct {
 	dbPool        *pool.Pool
 	maxConns      int
 	ms            Marshaler
-	cacheCfg      config.CacheCfg
 	sentinelName  string
 	sentinelInsts []*sentinelInst
 	db            int    //database number used when recconect sentinel
@@ -81,7 +80,7 @@ const (
 )
 
 func NewRedisStorage(address string, db int, pass, mrshlerStr string,
-	maxConns int, cacheCfg config.CacheCfg, sentinelName string) (*RedisStorage, error) {
+	maxConns int, sentinelName string) (*RedisStorage, error) {
 
 	df := func(network, addr string) (*redis.Client, error) {
 		client, err := redis.Dial(network, addr)
@@ -129,16 +128,23 @@ func NewRedisStorage(address string, db int, pass, mrshlerStr string,
 		if err != nil {
 			return nil, err
 		}
-		return &RedisStorage{maxConns: maxConns, ms: mrshler,
-			cacheCfg: cacheCfg, sentinelName: sentinelName,
-			sentinelInsts: sentinelInsts, db: db, pass: pass}, nil
+		return &RedisStorage{
+			maxConns:      maxConns,
+			ms:            mrshler,
+			sentinelName:  sentinelName,
+			sentinelInsts: sentinelInsts,
+			db:            db,
+			pass:          pass}, nil
 	} else {
 		p, err := pool.NewCustom(utils.TCP, address, maxConns, df)
 		if err != nil {
 			return nil, err
 		}
-		return &RedisStorage{dbPool: p, maxConns: maxConns,
-			ms: mrshler, cacheCfg: cacheCfg}, nil
+		return &RedisStorage{
+			dbPool:   p,
+			maxConns: maxConns,
+			ms:       mrshler,
+		}, nil
 	}
 }
 

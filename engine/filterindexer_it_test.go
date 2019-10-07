@@ -68,12 +68,12 @@ func TestFilterIndexerITRedis(t *testing.T) {
 	redisDB, err := NewRedisStorage(
 		fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
 		4, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-		utils.REDIS_MAX_CONNS, nil, "")
+		utils.REDIS_MAX_CONNS, "")
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}
 	cfgDBName = cfg.DataDbCfg().DataDbName
-	dataManager = NewDataManager(redisDB)
+	dataManager = NewDataManager(redisDB, config.CgrConfig().CacheCfg())
 	for _, stest := range sTests {
 		t.Run("TestITRedis", stest)
 	}
@@ -88,19 +88,19 @@ func TestFilterIndexerITMongo(t *testing.T) {
 	mongoDB, err := NewMongoStorage(mgoITCfg.StorDbCfg().StorDBHost,
 		mgoITCfg.StorDbCfg().StorDBPort, mgoITCfg.StorDbCfg().StorDBName,
 		mgoITCfg.StorDbCfg().StorDBUser, mgoITCfg.StorDbCfg().StorDBPass,
-		utils.StorDB, nil, mgoITCfg.CacheCfg(), false)
+		utils.StorDB, nil, false)
 	if err != nil {
 		t.Fatal(err)
 	}
 	cfgDBName = mgoITCfg.StorDbCfg().StorDBName
-	dataManager = NewDataManager(mongoDB)
+	dataManager = NewDataManager(mongoDB, config.CgrConfig().CacheCfg())
 	for _, stest := range sTests {
 		t.Run("TestITMongo", stest)
 	}
 }
 
 func TestFilterIndexerITInternal(t *testing.T) {
-	dataManager = NewDataManager(NewInternalDB(nil, nil))
+	dataManager = NewDataManager(NewInternalDB(nil, nil), config.CgrConfig().CacheCfg())
 	for _, stest := range sTests {
 		t.Run("TestITInternal", stest)
 	}

@@ -125,7 +125,7 @@ func TimeDecodeValue1(dc bsoncodec.DecodeContext, vr bsonrw.ValueReader, val ref
 
 // NewMongoStorage givese new mongo driver
 func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes []string,
-	cacheCfg config.CacheCfg, isDataDB bool) (ms *MongoStorage, err error) {
+	isDataDB bool) (ms *MongoStorage, err error) {
 	url := host
 	if port != "" {
 		url += ":" + port
@@ -168,7 +168,6 @@ func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes
 		db:          dbName,
 		storageType: storageType,
 		ms:          NewCodecMsgpackMarshaler(),
-		cacheCfg:    cacheCfg,
 		cdrsIndexes: cdrsIndexes,
 		isDataDB:    isDataDB,
 	}
@@ -212,7 +211,6 @@ type MongoStorage struct {
 	db          string
 	storageType string // datadb, stordb
 	ms          Marshaler
-	cacheCfg    config.CacheCfg
 	cdrsIndexes []string
 	cnter       *utils.Counter
 	isDataDB    bool
@@ -224,8 +222,14 @@ func (ms *MongoStorage) query(argfunc func(ctx mongo.SessionContext) error) (err
 	return ms.client.UseSession(ctxSession, argfunc)
 }
 
+// IsDataDB returns if the storeage is used for DataDb
 func (ms *MongoStorage) IsDataDB() bool {
 	return ms.isDataDB
+}
+
+// SetTTL set the context TTL used for queries
+func (ms *MongoStorage) SetTTL(ttl time.Duration) {
+	ms.ctxTTL = ttl
 }
 
 func (ms *MongoStorage) enusureIndex(colName string, uniq bool, keys ...string) error {

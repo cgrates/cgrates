@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -29,7 +30,7 @@ var dbAcntActs *engine.DataManager
 
 func TestAcntActsSetStorage(t *testing.T) {
 	data, _ := engine.NewMapStorageJson()
-	dbAcntActs = engine.NewDataManager(data)
+	dbAcntActs = engine.NewDataManager(data, config.CgrConfig().CacheCfg())
 	engine.SetDataStorage(dbAcntActs)
 }
 

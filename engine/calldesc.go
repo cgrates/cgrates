@@ -49,7 +49,7 @@ func init() {
 		}
 		data, _ = NewMapStorage()
 	}
-	dm = NewDataManager(data)
+	dm = NewDataManager(data, config.CgrConfig().CacheCfg())
 }
 
 var (

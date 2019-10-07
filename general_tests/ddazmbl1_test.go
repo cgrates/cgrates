@@ -21,6 +21,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
@@ -30,7 +31,7 @@ var dataDB *engine.DataManager
 
 func TestDZ1SetStorage(t *testing.T) {
 	data, _ := engine.NewMapStorageJson()
-	dataDB = engine.NewDataManager(data)
+	dataDB = engine.NewDataManager(data, config.CgrConfig().CacheCfg())
 	engine.SetDataStorage(dataDB)
 }
 

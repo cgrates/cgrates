@@ -72,10 +72,10 @@ func TestApierV2itConnectDataDB(t *testing.T) {
 	if rdsITdb, err := engine.NewRedisStorage(
 		fmt.Sprintf("%s:%s", apierCfg.DataDbCfg().DataDbHost, apierCfg.DataDbCfg().DataDbPort),
 		rdsDb, apierCfg.DataDbCfg().DataDbPass, apierCfg.GeneralCfg().DBDataEncoding,
-		utils.REDIS_MAX_CONNS, nil, ""); err != nil {
+		utils.REDIS_MAX_CONNS, ""); err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	} else {
-		dm = engine.NewDataManager(rdsITdb)
+		dm = engine.NewDataManager(rdsITdb, config.CgrConfig().CacheCfg())
 	}
 }
 

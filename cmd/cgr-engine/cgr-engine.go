@@ -457,28 +457,12 @@ func main() {
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
 	var dm *engine.DataManager
-	if needsDB := cfg.RalsCfg().Enabled || cfg.SchedulerCfg().Enabled || cfg.ChargerSCfg().Enabled ||
-		cfg.AttributeSCfg().Enabled || cfg.ResourceSCfg().Enabled || cfg.StatSCfg().Enabled ||
-		cfg.ThresholdSCfg().Enabled || cfg.SupplierSCfg().Enabled || cfg.DispatcherSCfg().Enabled; needsDB ||
-		cfg.SessionSCfg().Enabled { // Some services can run without db, ie:  CDRC
-		dm, err = engine.ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
-			cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
-			cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
-			cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-			cfg.CacheCfg(), cfg.DataDbCfg().DataDbSentinelName)
-		if needsDB && err != nil { // Cannot configure getter database, show stopper
-			utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
+	dmService := services.NewDataDBService(cfg)
+	if dmService.ShouldRun() { // Some services can run without db, ie:  CDRC
+		if err = dmService.Start(); err != nil {
 			return
-		} else if cfg.SessionSCfg().Enabled && err != nil {
-			utils.Logger.Warning(fmt.Sprintf("Could not configure dataDb: %s.Some SessionS APIs will not work", err))
-		} else {
-			defer dm.DataDB().Close()
-			engine.SetDataStorage(dm)
-			if err := engine.CheckVersions(dm.DataDB()); err != nil {
-				fmt.Println(err.Error())
-				return
-			}
 		}
+		dm = dmService.GetDM()
 	}
 	if cfg.RalsCfg().Enabled || cfg.CdrsCfg().Enabled {
 		storDb, err := engine.ConfigureStorStorage(cfg.StorDbCfg().StorDBType,

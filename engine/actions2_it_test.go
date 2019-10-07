@@ -89,7 +89,7 @@ func testActionsInitCdrsStore(t *testing.T) {
 		if actsCdrStore, err = NewMongoStorage(actsCfg.StorDbCfg().StorDBHost,
 			actsCfg.StorDbCfg().StorDBPort, actsCfg.StorDbCfg().StorDBName,
 			actsCfg.StorDbCfg().StorDBUser, actsCfg.StorDbCfg().StorDBPass,
-			utils.StorDB, nil, actsCfg.CacheCfg(), false); err != nil {
+			utils.StorDB, nil, false); err != nil {
 			t.Fatal("Could not connect to mongo", err.Error())
 		}
 	}
