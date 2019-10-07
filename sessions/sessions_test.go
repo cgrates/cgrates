@@ -1311,7 +1311,7 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher2(t *testing.T) {
 func TestSessionSGetIndexedFilters(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
 	mpStr, _ := engine.NewMapStorage()
-	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.NewDataManager(mpStr), "UTC")
+	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg()), "UTC")
 	expIndx := map[string][]string{}
 	expUindx := []*engine.FilterRule{
 		&engine.FilterRule{
@@ -1329,7 +1329,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	sSCfg.SessionSCfg().SessionIndexes = utils.StringMap{
 		"ToR": true,
 	}
-	sS = NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.NewDataManager(mpStr), "UTC")
+	sS = NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg()), "UTC")
 	expIndx = map[string][]string{(utils.DynamicDataPrefix + utils.ToR): []string{utils.VOICE}}
 	expUindx = nil
 	if rplyindx, rplyUnindx := sS.getIndexedFilters("", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {

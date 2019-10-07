@@ -75,3 +75,17 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	}
 	return nil
 }
+
+// Clone returns the cloned object
+func (dbcfg *DataDbCfg) Clone() *DataDbCfg {
+	return &DataDbCfg{
+		DataDbType:         dbcfg.DataDbType,
+		DataDbHost:         dbcfg.DataDbHost,
+		DataDbPort:         dbcfg.DataDbPort,
+		DataDbName:         dbcfg.DataDbName,
+		DataDbUser:         dbcfg.DataDbUser,
+		DataDbPass:         dbcfg.DataDbPass,
+		DataDbSentinelName: dbcfg.DataDbSentinelName,
+		QueryTimeout:       dbcfg.QueryTimeout,
+	}
+}

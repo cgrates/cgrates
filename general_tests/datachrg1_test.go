@@ -21,13 +21,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func TestSetStorageDtChrg1(t *testing.T) {
 	data, _ := engine.NewMapStorageJson()
-	dataDB = engine.NewDataManager(data)
+	dataDB = engine.NewDataManager(data, config.CgrConfig().CacheCfg())
 	engine.SetDataStorage(dataDB)
 }
 

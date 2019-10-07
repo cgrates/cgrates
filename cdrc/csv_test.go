@@ -75,7 +75,7 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
 	cdrcConfig := cgrConfig.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0]
 	data, _ := engine.NewMapStorage()
-	dm := engine.NewDataManager(data)
+	dm := engine.NewDataManager(data, cgrConfig.CacheCfg())
 	filterS := engine.NewFilterS(cgrConfig, nil, nil, nil, dm)
 	cdrcConfig.CdrSourceId = "TEST_CDRC"
 	cdrcConfig.ContentFields = []*config.FCTemplate{
@@ -160,7 +160,7 @@ func TestCsvSecondUsage(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
 	cdrcConfig := cgrConfig.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0]
 	data, _ := engine.NewMapStorage()
-	dm := engine.NewDataManager(data)
+	dm := engine.NewDataManager(data, cgrConfig.CacheCfg())
 	filterS := engine.NewFilterS(cgrConfig, nil, nil, nil, dm)
 	cdrcConfig.CdrSourceId = "TEST_CDRC"
 	cdrcConfig.ContentFields = []*config.FCTemplate{

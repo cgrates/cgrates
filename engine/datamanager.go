@@ -17,6 +17,7 @@ package engine
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
@@ -88,10 +89,11 @@ var (
 	}
 )
 
-func NewDataManager(dataDB DataDB) *DataManager {
+// NewDataManager returns a new DataManager
+func NewDataManager(dataDB DataDB, cacheCfg config.CacheCfg) *DataManager {
 	return &DataManager{
 		dataDB:   dataDB,
-		cacheCfg: config.CgrConfig().CacheCfg(),
+		cacheCfg: cacheCfg,
 	}
 }
 
@@ -1388,4 +1390,42 @@ func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loa
 
 func (dm *DataManager) SetLoadIDs(loadIDs map[string]int64) error {
 	return dm.DataDB().SetLoadIDsDrv(loadIDs)
+}
+
+// Reconnect recconnects to the DB when the config was changes
+func (dm *DataManager) Reconnect(marshaler string, newcfg *config.DataDbCfg) (err error) {
+	var d DataDB
+	switch newcfg.DataDbType {
+	case utils.REDIS:
+		var dbNb int
+		dbNb, err = strconv.Atoi(newcfg.DataDbName)
+		if err != nil {
+			utils.Logger.Crit("Redis db name must be an integer!")
+			return
+		}
+		host := newcfg.DataDbHost
+		if newcfg.DataDbPort != "" && strings.Index(host, ":") == -1 {
+			host += ":" + newcfg.DataDbPort
+		}
+		d, err = NewRedisStorage(host, dbNb, newcfg.DataDbPass, marshaler, utils.REDIS_MAX_CONNS, newcfg.DataDbSentinelName)
+	case utils.MONGO:
+		d, err = NewMongoStorage(newcfg.DataDbHost, newcfg.DataDbPort, newcfg.DataDbName,
+			newcfg.DataDbUser, newcfg.DataDbPass, utils.DataDB, nil, true)
+	case utils.INTERNAL:
+		if marshaler == utils.JSON {
+			d = NewInternalDBJson(nil, nil)
+		} else {
+			d = NewInternalDB(nil, nil)
+		}
+	default:
+		err = fmt.Errorf("unknown db '%s' valid options are '%s' or '%s or '%s'",
+			newcfg.DataDbType, utils.REDIS, utils.MONGO, utils.INTERNAL)
+	}
+	if err != nil {
+		return
+	}
+	// ToDo: consider locking
+	dm.dataDB.Close()
+	dm.dataDB = d
+	return
 }

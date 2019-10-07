@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/structmatcher"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -70,7 +71,7 @@ func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
 	tpr := &TpReader{
 		tpid:       tpid,
 		timezone:   timezone,
-		dm:         NewDataManager(db),
+		dm:         NewDataManager(db, config.CgrConfig().CacheCfg()), // ToDo: add ChacheCfg as parameter to the NewTpReader
 		lr:         lr,
 		cacheS:     cacheS,
 		schedulerS: schedulerS,
