@@ -128,6 +128,15 @@ func (me MapEvent) GetDurationPtrIgnoreErrors(fldName string) (d *time.Duration)
 	return
 }
 
+// GetDurationPtrOrDefault returns pointer or default if fldName is missing
+func (me MapEvent) GetDurationPtrOrDefault(fldName string, dflt *time.Duration) (d *time.Duration, err error) {
+	if d, err = me.GetDurationPtr(fldName); err == utils.ErrNotFound {
+		d = dflt
+		err = nil
+	}
+	return
+}
+
 // GetTime returns a field as Time
 func (me MapEvent) GetTime(fldName string, timezone string) (t time.Time, err error) {
 	fldIface, has := me[fldName]
