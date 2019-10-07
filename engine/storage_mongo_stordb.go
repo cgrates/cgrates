@@ -1572,10 +1572,13 @@ func (ms *MongoStorage) RemoveVersions(vrs Versions) (err error) {
 	if len(vrs) == 0 {
 		return ms.query(func(sctx mongo.SessionContext) (err error) {
 			dr, err := ms.getCol(ColVer).DeleteOne(sctx, bson.D{})
+			if err!=nil{
+				return err
+			}
 			if dr.DeletedCount == 0 {
 				return utils.ErrNotFound
 			}
-			return err
+			return
 		})
 	}
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
