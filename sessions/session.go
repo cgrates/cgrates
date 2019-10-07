@@ -68,10 +68,10 @@ type Session struct {
 	CGRID         string
 	Tenant        string
 	ResourceID    string
-	ClientConnID  string           // connection ID towards the client so we can recover from passive
-	EventStart    *engine.SafEvent // Event which started the session
-	DebitInterval time.Duration    // execute debits for *prepaid runs
-	SRuns         []*SRun          // forked based on ChargerS
+	ClientConnID  string          // connection ID towards the client so we can recover from passive
+	EventStart    engine.MapEvent // Event which started the session
+	DebitInterval time.Duration   // execute debits for *prepaid runs
+	SRuns         []*SRun         // forked based on ChargerS
 
 	debitStop   chan struct{}
 	sTerminator *sTerminator // automatic timeout for the session
@@ -201,7 +201,7 @@ func (s *Session) TotalUsage() (tDur time.Duration) {
 // AsCGREvents is not thread safe since it is supposed to run by the time Session is closed
 func (s *Session) asCGREvents() (cgrEvs []*utils.CGREvent, err error) {
 	cgrEvs = make([]*utils.CGREvent, len(s.SRuns)+1) // so we can gather all cdr info while under lock
-	rawEv := s.EventStart.MapEvent()
+	rawEv := s.EventStart.Clone()
 	rawEv[utils.RunID] = utils.MetaRaw
 	cgrEvs[0] = &utils.CGREvent{
 		Tenant: s.Tenant,

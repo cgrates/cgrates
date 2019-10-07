@@ -39,6 +39,11 @@ var unratedReqs = engine.MapEvent{
 	utils.META_RATED:         struct{}{},
 }
 
+var authReqs = engine.MapEvent{
+	utils.META_PREPAID:       struct{}{},
+	utils.META_PSEUDOPREPAID: struct{}{},
+}
+
 // SessionSClient is the interface implemented by Agents which are able to
 // communicate bidirectionally with SessionS and remote Communication Switch
 type SessionSClient interface {
@@ -81,12 +86,12 @@ func getSessionTTL(ev *engine.SafEvent, cfgSessionTTL time.Duration,
 	return
 }
 
-func GetSetCGRID(ev *engine.SafEvent) (cgrID string) {
+func GetSetCGRID(ev engine.MapEvent) (cgrID string) {
 	cgrID = ev.GetStringIgnoreErrors(utils.CGRID)
 	if cgrID == "" {
 		cgrID = utils.Sha1(ev.GetStringIgnoreErrors(utils.OriginID),
 			ev.GetStringIgnoreErrors(utils.OriginHost))
-		ev.Set(utils.CGRID, cgrID)
+		ev[utils.CGRID] = cgrID
 	}
 	return
 }
