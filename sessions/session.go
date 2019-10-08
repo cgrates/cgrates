@@ -78,19 +78,16 @@ type Session struct {
 	*utils.ArgDispatcher
 }
 
-// CGRid is a thread-safe method to return the CGRID of a session
-func (s *Session) CGRid() (cgrID string) {
-	s.RLock()
+// cgrID is method to return the CGRID of a session
+// not thread safe
+func (s *Session) cgrID() (cgrID string) {
 	cgrID = s.CGRID
-	s.RUnlock()
 	return
 }
 
 // DebitStopChan reads the debit stop
 func (s *Session) DebitStopChan() (dbtStop chan struct{}) {
-	s.RLock()
 	dbtStop = s.debitStop
-	s.RUnlock()
 	return
 }
 
@@ -182,17 +179,16 @@ func (s *Session) AsExternalSession(sr *SRun, tmz, nodeID string) (aS *ExternalS
 	return
 }
 
-// TotalUsage returns the first session run total usage
-func (s *Session) TotalUsage() (tDur time.Duration) {
+// totalUsage returns the first session run total usage
+// not thread save
+func (s *Session) totalUsage() (tDur time.Duration) {
 	if len(s.SRuns) == 0 {
 		return
 	}
-	s.RLock()
 	for _, sr := range s.SRuns {
 		tDur = sr.TotalUsage
 		break // only first
 	}
-	s.RUnlock()
 	return
 }
 

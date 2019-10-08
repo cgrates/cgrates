@@ -27,7 +27,7 @@ import (
 )
 
 func TestLibSessionSGetSetCGRID(t *testing.T) {
-	sEv := engine.NewSafEvent(map[string]interface{}{
+	sEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
 		utils.OriginID:         "12345",
@@ -52,7 +52,7 @@ func TestLibSessionSGetSetCGRID(t *testing.T) {
 		t.Errorf("Unexpected cgrID: %+v", cgrID)
 	}
 	//populate CGRID in event
-	sEv.Set(utils.CGRID, "someRandomVal")
+	sEv[utils.CGRID] = "someRandomVal"
 	cgrID = GetSetCGRID(sEv)
 	if cgrID != "someRandomVal" {
 		t.Errorf("Expecting: someRandomVal, received: %+v", cgrID)
@@ -60,7 +60,7 @@ func TestLibSessionSGetSetCGRID(t *testing.T) {
 }
 
 func TestLibSessionSgetSessionTTL(t *testing.T) {
-	sEv := engine.NewSafEvent(map[string]interface{}{
+	sEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
 		utils.OriginID:         "12345",
@@ -82,15 +82,15 @@ func TestLibSessionSgetSessionTTL(t *testing.T) {
 	})
 
 	//ttl is taken from event
-	if ttl, err := getSessionTTL(sEv, time.Duration(0), nil); err != nil {
+	if ttl, err := getSessionTTL(&sEv, time.Duration(0), nil); err != nil {
 		t.Error(err)
 	} else if ttl != time.Duration(2*time.Second) {
 		t.Errorf("Expecting: %+v, received: %+v",
 			time.Duration(2*time.Second), ttl)
 	}
 	//remove ttl from event
-	sEv.Remove(utils.SessionTTL)
-	if ttl, err := getSessionTTL(sEv, time.Duration(4*time.Second), nil); err != nil {
+	delete(sEv, utils.SessionTTL)
+	if ttl, err := getSessionTTL(&sEv, time.Duration(4*time.Second), nil); err != nil {
 		t.Error(err)
 	} else if ttl != time.Duration(4*time.Second) {
 		t.Errorf("Expecting: %+v, received: %+v",
@@ -98,16 +98,16 @@ func TestLibSessionSgetSessionTTL(t *testing.T) {
 	}
 
 	//add sessionTTLMaxDelay in event
-	sEv.Set(utils.SessionTTLMaxDelay, "1s")
-	if ttl, err := getSessionTTL(sEv, time.Duration(4*time.Second), nil); err != nil {
+	sEv[utils.SessionTTLMaxDelay] = "1s"
+	if ttl, err := getSessionTTL(&sEv, time.Duration(4*time.Second), nil); err != nil {
 		t.Error(err)
 	} else if ttl <= time.Duration(4*time.Second) {
 		t.Errorf("Unexpected ttl : %+v", ttl)
 	}
 
 	//remove sessionTTLMaxDelay from event
-	sEv.Remove(utils.SessionTTLMaxDelay)
-	if ttl, err := getSessionTTL(sEv, time.Duration(7*time.Second),
+	delete(sEv, utils.SessionTTLMaxDelay)
+	if ttl, err := getSessionTTL(&sEv, time.Duration(7*time.Second),
 		utils.DurationPointer(time.Duration(2*time.Second))); err != nil {
 		t.Error(err)
 	} else if ttl <= time.Duration(7*time.Second) {

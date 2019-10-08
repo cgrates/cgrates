@@ -239,7 +239,7 @@ func TestSessionsItUpdateUnexist(t *testing.T) {
 
 func TestSessionsItTerminatePassive(t *testing.T) {
 	//create the event for session
-	sEv := engine.NewSafEvent(map[string]interface{}{
+	sEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "UpdateEvent",
 		utils.ToR:         utils.VOICE,
 		utils.OriginID:    "123789",
@@ -260,7 +260,7 @@ func TestSessionsItTerminatePassive(t *testing.T) {
 		EventStart: sEv,
 		SRuns: []*SRun{
 			&SRun{
-				Event:      engine.NewMapEvent(sEv.AsMapInterface()),
+				Event:      sEv,
 				TotalUsage: time.Minute,
 				CD:         &engine.CallDescriptor{},
 			},

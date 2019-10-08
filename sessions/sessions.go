@@ -300,7 +300,10 @@ func (sS *SessionS) setSTerminator(s *Session) {
 					utils.SessionS, utils.SessionTTLMaxDelay, s.EventStart.String(), err.Error()))
 			return
 		}
-		maxDelay = *sS.cgrCfg.SessionSCfg().SessionTTLMaxDelay
+		err = nil
+		if sS.cgrCfg.SessionSCfg().SessionTTLMaxDelay != nil {
+			maxDelay = *sS.cgrCfg.SessionSCfg().SessionTTLMaxDelay
+		}
 	}
 	if maxDelay != 0 {
 		rand.Seed(time.Now().Unix())
@@ -374,7 +377,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 				utils.Logger.Warning(
 					fmt.Sprintf(
 						"<%s> failed debitting cgrID %s, sRunIdx: %d, err: %s",
-						utils.SessionS, s.CGRid(), i, err.Error()))
+						utils.SessionS, s.cgrID(), i, err.Error()))
 			}
 		}
 	}
@@ -383,7 +386,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 		utils.Logger.Warning(
 			fmt.Sprintf(
 				"<%s> failed force terminating session with ID <%s>, err: <%s>",
-				utils.SessionS, s.CGRid(), err.Error()))
+				utils.SessionS, s.cgrID(), err.Error()))
 	}
 	// post the CDRs
 	if sS.cdrS != nil {
@@ -529,7 +532,7 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 		if maxDebit, err = sS.debitSession(s, sRunIdx, dbtIvl, nil); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> could not complete debit operation on session: <%s>, error: <%s>",
-					utils.SessionS, s.CGRid(), err.Error()))
+					utils.SessionS, s.cgrID(), err.Error()))
 			dscReason := utils.ErrServerError.Error()
 			if err.Error() == utils.ErrUnauthorizedDestination.Error() {
 				dscReason = err.Error()
@@ -542,10 +545,10 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 				}
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> could not disconnect session: %s, error: %s",
-						utils.SessionS, s.CGRid(), err.Error()))
+						utils.SessionS, s.cgrID(), err.Error()))
 			}
 			if err = sS.forceSTerminate(s, 0, nil); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>", utils.SessionS, s.CGRid(), err))
+				utils.Logger.Warning(fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>", utils.SessionS, s.cgrID(), err))
 			}
 			s.Unlock()
 			return
@@ -567,10 +570,10 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 				}
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> could not disconnect session: <%s>, error: <%s>",
-						utils.SessionS, s.CGRid(), err.Error()))
+						utils.SessionS, s.cgrID(), err.Error()))
 				if err = sS.forceSTerminate(s, 0, nil); err != nil {
 					utils.Logger.Warning(fmt.Sprintf("<%s> failed force-terminating session: <%s>, err: <%s>",
-						utils.SessionS, s.CGRid(), err))
+						utils.SessionS, s.cgrID(), err))
 				}
 			}
 			return
@@ -695,7 +698,7 @@ func (sS *SessionS) disconnectSession(s *Session, rsn string) (err error) {
 		return fmt.Errorf("calling %s requires bidirectional JSON connection, connID: <%s>",
 			utils.SessionSv1DisconnectSession, s.ClientConnID)
 	}
-	s.EventStart[utils.Usage] = s.TotalUsage() // Set the usage to total one debitted
+	s.EventStart[utils.Usage] = s.totalUsage() // Set the usage to total one debitted
 	servMethod := utils.SessionSv1DisconnectSession
 	if clnt.proto == 0 { // compatibility with OpenSIPS 2.3
 		servMethod = "SMGClientV1.DisconnectSession"
@@ -2470,7 +2473,6 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
 	}
-
 	// RPC caching
 	if sS.cgrCfg.CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.SessionSv1TerminateSession, args.CGREvent.ID)
@@ -2490,7 +2492,6 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 			nil, true, utils.NonTransactional)
 	}
 	// end of RPC caching
-
 	if !args.TerminateSession && !args.ReleaseResources {
 		return utils.NewErrMandatoryIeMissing("subsystems")
 	}
@@ -3251,7 +3252,7 @@ func (sS *SessionS) BiRPCv1ForceDisconnect(clnt rpcclient.RpcClientConnection,
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> failed force-terminating session with id: <%s>, err: <%s>",
-					utils.SessionS, ss[0].CGRid(), errTerm.Error()))
+					utils.SessionS, ss[0].cgrID(), errTerm.Error()))
 			err = utils.ErrPartiallyExecuted
 		}
 	}

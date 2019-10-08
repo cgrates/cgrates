@@ -972,7 +972,7 @@ variable_rtp_audio_rtcp_octet_count: 0`
 	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	fsCdrCfg, _ = config.NewDefaultCGRConfig()
 	fsCdr, _ := engine.NewFSCdr(body, fsCdrCfg)
-	smGev := engine.NewSafEvent(NewFSEvent(hangUp).AsMapStringInterface(timezone))
+	smGev := engine.NewMapEvent(NewFSEvent(hangUp).AsMapStringInterface(timezone))
 	sessions.GetSetCGRID(smGev)
 	smCDR, err := smGev.AsCDR(fsCdrCfg, utils.EmptyString, timezone)
 	if err != nil {

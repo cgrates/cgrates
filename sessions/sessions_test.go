@@ -60,7 +60,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		"Extra4":  true,
 	}
 	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
-	sEv := engine.NewSafEvent(map[string]interface{}{
+	sEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
 		utils.OriginID:         "12345",
@@ -89,7 +89,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		EventStart: sEv,
 		SRuns: []*SRun{
 			&SRun{
-				Event: sEv.AsMapInterface(),
+				Event: sEv,
 				CD: &engine.CallDescriptor{
 					RunID: utils.DEFAULT_RUNID,
 				},
@@ -143,7 +143,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.aSessionsRIdx)
 	}
 	// Index second session
-	sSEv2 := engine.NewSafEvent(map[string]interface{}{
+	sSEv2 := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT2",
 		utils.OriginID:    "12346",
 		utils.Direction:   "*out",
@@ -159,7 +159,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		EventStart: sSEv2,
 		SRuns: []*SRun{
 			&SRun{
-				Event: sSEv2.AsMapInterface(),
+				Event: sSEv2,
 				CD: &engine.CallDescriptor{
 					RunID: utils.DEFAULT_RUNID,
 				},
@@ -167,7 +167,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		},
 	}
 	sS.indexSession(session2, false)
-	sSEv3 := engine.NewSafEvent(map[string]interface{}{
+	sSEv3 := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME: "TEST_EVENT3",
 		utils.Tenant:     "cgrates.org",
 		utils.OriginID:   "12347",
@@ -180,7 +180,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		EventStart: sSEv3,
 		SRuns: []*SRun{
 			&SRun{
-				Event: sSEv3.AsMapInterface(),
+				Event: sSEv3,
 				CD: &engine.CallDescriptor{
 					RunID: utils.DEFAULT_RUNID,
 				},
@@ -382,7 +382,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
-	sSEv := engine.NewSafEvent(map[string]interface{}{
+	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
 		utils.OriginID:    "111",
@@ -406,7 +406,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		EventStart: sSEv,
 		SRuns: []*SRun{
 			&SRun{
-				Event: sSEv.AsMapInterface(),
+				Event: sSEv,
 				CD: &engine.CallDescriptor{
 					RunID: utils.DEFAULT_RUNID,
 				},
@@ -443,7 +443,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.aSessionsRIdx)
 	}
 
-	sSEv2 := engine.NewSafEvent(map[string]interface{}{
+	sSEv2 := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
 		utils.OriginID:    "222",
@@ -465,7 +465,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		EventStart: sSEv2,
 		SRuns: []*SRun{
 			&SRun{
-				Event: sSEv2.AsMapInterface(),
+				Event: sSEv2,
 				CD: &engine.CallDescriptor{
 					RunID: utils.DEFAULT_RUNID,
 				},
@@ -510,7 +510,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.aSessionsRIdx)
 	}
 
-	sSEv3 := engine.NewSafEvent(map[string]interface{}{
+	sSEv3 := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
 		utils.OriginID:         "111",
@@ -533,7 +533,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 		EventStart: sSEv3,
 		SRuns: []*SRun{
 			&SRun{
-				Event: sSEv3.AsMapInterface(),
+				Event: sSEv3,
 				CD: &engine.CallDescriptor{
 					RunID: utils.DEFAULT_RUNID,
 				},
@@ -598,7 +598,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
-	sSEv := engine.NewSafEvent(map[string]interface{}{
+	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
 		utils.OriginID:    "111",
@@ -622,7 +622,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		EventStart: sSEv,
 		SRuns: []*SRun{
 			&SRun{
-				Event: sSEv.AsMapInterface(),
+				Event: sSEv,
 				CD: &engine.CallDescriptor{
 					RunID: utils.DEFAULT_RUNID,
 				},
@@ -662,7 +662,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.pSessionsRIdx)
 	}
 
-	sSEv2 := engine.NewSafEvent(map[string]interface{}{
+	sSEv2 := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
 		utils.OriginID:    "222",
@@ -684,7 +684,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		EventStart: sSEv2,
 		SRuns: []*SRun{
 			&SRun{
-				Event: sSEv2.AsMapInterface(),
+				Event: sSEv2,
 				CD: &engine.CallDescriptor{
 					RunID: utils.DEFAULT_RUNID,
 				},
@@ -729,7 +729,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eRIdxes, sS.pSessionsRIdx)
 	}
 
-	sSEv3 := engine.NewSafEvent(map[string]interface{}{
+	sSEv3 := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
 		utils.OriginID:         "111",
@@ -752,7 +752,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 		EventStart: sSEv3,
 		SRuns: []*SRun{
 			&SRun{
-				Event: sSEv3.AsMapInterface(),
+				Event: sSEv3,
 				CD:    &engine.CallDescriptor{},
 			},
 		},
@@ -1123,7 +1123,7 @@ func TestSessionSV1ProcessMessageReplyAsNavigableMap(t *testing.T) {
 func TestSessionStransitSState(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
-	sSEv := engine.NewSafEvent(map[string]interface{}{
+	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
 		utils.OriginID:    "111",
@@ -1169,8 +1169,9 @@ func TestSessionStransitSState(t *testing.T) {
 
 func TestSessionSregisterSessionWithTerminator(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
+	config.SetCgrConfig(sSCfg)
 	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
-	sSEv := engine.NewSafEvent(map[string]interface{}{
+	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
 		utils.OriginID:    "111",
@@ -1209,7 +1210,7 @@ func TestSessionSregisterSessionWithTerminator(t *testing.T) {
 func TestSessionSrelocateSessionS(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
-	sSEv := engine.NewSafEvent(map[string]interface{}{
+	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
 		utils.OriginID:    "111",
@@ -1241,13 +1242,13 @@ func TestSessionSrelocateSessionS(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", s, rcvS[0])
 	}
 	//relocate the session
-	sS.relocateSessions("111", "222", "127.0.0.1")
+	sS.relocateSession("111", "222", "127.0.0.1")
 	//check if the session exist with old CGRID
 	rcvS = sS.getSessions(initialCGRID, false)
 	if len(rcvS) != 0 {
 		t.Errorf("Expecting 0, received: %+v", len(rcvS))
 	}
-	ev := engine.NewSafEvent(map[string]interface{}{
+	ev := engine.NewMapEvent(map[string]interface{}{
 		utils.OriginID:   "222",
 		utils.OriginHost: "127.0.0.1"})
 	cgrID := GetSetCGRID(ev)
@@ -1385,7 +1386,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 		"ToR": true,
 	}
 	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
-	sEv := engine.NewSafEvent(map[string]interface{}{
+	sEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
 		utils.OriginID:         "12345",
@@ -1414,7 +1415,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 		EventStart: sEv,
 		SRuns: []*SRun{
 			&SRun{
-				Event: sEv.AsMapInterface(),
+				Event: sEv,
 				CD: &engine.CallDescriptor{
 					RunID: "RunID",
 				},

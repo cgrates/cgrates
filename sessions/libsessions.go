@@ -54,7 +54,7 @@ type SessionSClient interface {
 
 // getSessionTTL retrieves SessionTTL setting out of ev
 // if SessionTTLMaxDelay is present in ev, the return is randomized
-func getSessionTTL(ev *engine.SafEvent, cfgSessionTTL time.Duration,
+func getSessionTTL(ev *engine.MapEvent, cfgSessionTTL time.Duration,
 	cfgSessionTTLMaxDelay *time.Duration) (ttl time.Duration, err error) {
 	if ttl, err = ev.GetDuration(utils.SessionTTL); err != nil {
 		if err != utils.ErrNotFound {

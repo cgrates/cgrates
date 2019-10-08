@@ -231,7 +231,7 @@ func TestSessionSRplUpdate(t *testing.T) {
 		t.Errorf("Error: %v with len(aSessions)=%v , session : %+v", err, len(aSessions), utils.ToJSON(aSessions))
 	}
 
-	cgrID := GetSetCGRID(engine.NewSafEvent(argsUpdate.Event))
+	cgrID := GetSetCGRID(engine.NewMapEvent(argsUpdate.Event))
 	// Make sure session was replicated
 	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetPassiveSessions,
 		nil, &pSessions); err != nil {

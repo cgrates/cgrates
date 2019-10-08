@@ -36,7 +36,7 @@ var (
 	sessionsBiRPCCfgPath string
 	sessionsBiRPCCfg     *config.CGRConfig
 	sessionsBiRPC        *rpc2.Client
-	disconnectEvChan     = make(chan *utils.AttrDisconnectSession)
+	disconnectEvChan     = make(chan *utils.AttrDisconnectSession, 1)
 	err                  error
 )
 
@@ -163,7 +163,6 @@ func TestSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	if *initRpl.MaxUsage != expMaxUsage {
 		t.Errorf("Expecting : %+v, received: %+v", expMaxUsage, *initRpl.MaxUsage)
 	}
-
 	// Make sure we are receiving a disconnect event
 	select {
 	case <-time.After(time.Duration(100 * time.Millisecond)):
@@ -174,7 +173,6 @@ func TestSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		}
 		initArgs.CGREvent.Event[utils.Usage] = disconnectEv.EventStart[utils.Usage]
 	}
-
 	termArgs := &V1TerminateSessionArgs{
 		TerminateSession: true,
 		CGREvent: &utils.CGREvent{
@@ -202,20 +200,17 @@ func TestSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	if err := sessionsBiRPC.Call(utils.SessionSv1TerminateSession, termArgs, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
-
 	time.Sleep(time.Duration(100 * time.Millisecond)) // Give time for  debits to occur
 	if err := sessionsRPC.Call("ApierV2.GetAccount", attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 0 {
 		t.Errorf("Balance should be empty, have: %f", acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
-
 	if err := sessionsBiRPC.Call(utils.SessionSv1ProcessCDR, termArgs.CGREvent, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received reply: %s", reply)
 	}
-
 	time.Sleep(100 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT},
