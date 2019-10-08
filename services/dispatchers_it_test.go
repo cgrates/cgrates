@@ -49,9 +49,10 @@ func TestDispatcherSReload(t *testing.T) {
 	filterSChan <- nil
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
-	attrS := NewAttributeService(cfg, nil, chS, filterSChan, server)
+	db := NewDataDBService(cfg)
+	attrS := NewAttributeService(cfg, db, chS, filterSChan, server)
 	srv := NewDispatcherService(cfg, nil, chS, filterSChan, server, attrS.GetIntenternalChan())
-	srvMngr.AddServices(attrS, srv, NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown))
+	srvMngr.AddServices(attrS, srv, NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

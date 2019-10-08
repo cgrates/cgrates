@@ -293,6 +293,10 @@ func (srvMngr *ServiceManager) handleReload() {
 			if err = srvMngr.reloadService(utils.DispatcherS); err != nil {
 				return
 			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.DATADB_JSN):
+			if err = srvMngr.reloadService(utils.DataDB); err != nil {
+				return
+			}
 		}
 		// handle RPC server
 	}

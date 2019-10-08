@@ -46,13 +46,17 @@ func TestAttributeSReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
-	attrS := NewAttributeService(cfg, nil,
+	db := NewDataDBService(cfg)
+	attrS := NewAttributeService(cfg, db,
 		chS, filterSChan, server)
-	srvMngr.AddServices(attrS, NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown))
+	srvMngr.AddServices(attrS, NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
 	if attrS.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 	var reply string
@@ -66,6 +70,9 @@ func TestAttributeSReload(t *testing.T) {
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if !attrS.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
 	cfg.AttributeSCfg().Enabled = false

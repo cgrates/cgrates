@@ -31,7 +31,7 @@ import (
 )
 
 // NewAttributeService returns the Attribute Service
-func NewAttributeService(cfg *config.CGRConfig, dm *engine.DataManager,
+func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *utils.Server) servmanager.Service {
 	return &AttributeService{
@@ -48,7 +48,7 @@ func NewAttributeService(cfg *config.CGRConfig, dm *engine.DataManager,
 type AttributeService struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
-	dm          *engine.DataManager
+	dm          *DataDBService
 	cacheS      *engine.CacheS
 	filterSChan chan *engine.FilterS
 	server      *utils.Server
@@ -72,7 +72,7 @@ func (attrS *AttributeService) Start() (err error) {
 
 	attrS.Lock()
 	defer attrS.Unlock()
-	attrS.attrS, err = engine.NewAttributeService(attrS.dm, filterS, attrS.cfg)
+	attrS.attrS, err = engine.NewAttributeService(attrS.dm.GetDM(), filterS, attrS.cfg)
 	if err != nil {
 		utils.Logger.Crit(
 			fmt.Sprintf("<%s> Could not init, error: %s",
