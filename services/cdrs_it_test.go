@@ -65,7 +65,8 @@ func TestCdrsReload(t *testing.T) {
 	cacheSChan <- chS
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
-	chrS := NewChargerService(cfg, nil, chS, filterSChan, server, nil, nil)
+	db := NewDataDBService(cfg)
+	chrS := NewChargerService(cfg, db, chS, filterSChan, server, nil, nil)
 	schS := NewSchedulerService(cfg, nil, chS, server, make(chan rpcclient.RpcClientConnection, 1), nil)
 	tS := NewThresholdService(cfg, nil, chS, filterSChan, server)
 	ralS := NewRalService(cfg, nil, nil, nil, chS, filterSChan, server,
@@ -75,7 +76,7 @@ func TestCdrsReload(t *testing.T) {
 		make(chan rpcclient.RpcClientConnection, 1),
 		chrS.GetIntenternalChan(), ralS.GetResponder().GetIntenternalChan(),
 		nil, nil, nil, nil)
-	srvMngr.AddServices(cdrS, ralS, schS, chrS, NewLoaderService(cfg, nil, filterSChan, server, cacheSChan, nil, engineShutdown))
+	srvMngr.AddServices(cdrS, ralS, schS, chrS, NewLoaderService(cfg, nil, filterSChan, server, cacheSChan, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

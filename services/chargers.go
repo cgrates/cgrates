@@ -31,7 +31,7 @@ import (
 )
 
 // NewChargerService returns the Charger Service
-func NewChargerService(cfg *config.CGRConfig, dm *engine.DataManager,
+func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS, server *utils.Server,
 	attrsChan, dispatcherChan chan rpcclient.RpcClientConnection) servmanager.Service {
 	return &ChargerService{
@@ -50,7 +50,7 @@ func NewChargerService(cfg *config.CGRConfig, dm *engine.DataManager,
 type ChargerService struct {
 	sync.RWMutex
 	cfg            *config.CGRConfig
-	dm             *engine.DataManager
+	dm             *DataDBService
 	cacheS         *engine.CacheS
 	filterSChan    chan *engine.FilterS
 	server         *utils.Server
@@ -82,7 +82,7 @@ func (chrS *ChargerService) Start() (err error) {
 	}
 	chrS.Lock()
 	defer chrS.Unlock()
-	if chrS.chrS, err = engine.NewChargerService(chrS.dm, filterS, attrSConn, chrS.cfg); err != nil {
+	if chrS.chrS, err = engine.NewChargerService(chrS.dm.GetDM(), filterS, attrSConn, chrS.cfg); err != nil {
 		utils.Logger.Crit(
 			fmt.Sprintf("<%s> Could not init, error: %s",
 				utils.ChargerS, err.Error()))
