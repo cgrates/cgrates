@@ -1571,9 +1571,10 @@ func (ms *MongoStorage) SetVersions(vrs Versions, overwrite bool) (err error) {
 func (ms *MongoStorage) RemoveVersions(vrs Versions) (err error) {
 	if len(vrs) == 0 {
 		return ms.query(func(sctx mongo.SessionContext) (err error) {
-			dr, err := ms.getCol(ColVer).DeleteOne(sctx, bson.D{})
-			if err!=nil{
-				return err
+			var dr *mongo.DeleteResult
+			dr, err = ms.getCol(ColVer).DeleteOne(sctx, bson.D{})
+			if err != nil {
+				return
 			}
 			if dr.DeletedCount == 0 {
 				return utils.ErrNotFound

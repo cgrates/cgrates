@@ -971,35 +971,136 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 				}
 			}
 		}
-
 	}
 
 	if len(cdrMpIDs) == 0 {
 		return nil, 0, utils.ErrNotFound
 	}
 
-	cdrIDs := cdrMpIDs.Slice()
-	//apply paginator
-	cdrIDs = filter.Paginator.PaginateStringSlice(cdrIDs)
-	if filter.Count {
-		return nil, int64(len(cdrIDs)), nil
-	}
-
-	if remove {
-		for _, cdrID := range cdrIDs {
-			iDB.db.Remove(utils.CDRsTBL, cdrID,
-				cacheCommit(utils.NonTransactional), utils.NonTransactional)
-		}
-		return nil, 0, nil
-	}
-
-	for _, cdrID := range cdrIDs {
-		x, ok := iDB.db.Get(utils.CDRsTBL, cdrID)
+	//pageCounter := 0
+	for key := range cdrMpIDs {
+		x, ok := iDB.db.Get(utils.CDRsTBL, key)
 		if !ok || x == nil {
 			return nil, 0, utils.ErrNotFound
 		}
+		cdr := x.(*CDR)
+		if len(filter.Costs) > 0 {
+			matchCost := false
+			for _, cost := range filter.Costs {
+				if cdr.Cost == cost {
+					matchCost = true
+					break
+				}
+			}
+			if !matchCost {
+				continue
+			}
+		}
+		if len(filter.NotCosts) > 0 {
+			matchCost := true
+			for _, cost := range filter.NotCosts {
+				if cdr.Cost == cost {
+					matchCost = false
+					break
+				}
+			}
+			if !matchCost {
+				continue
+			}
+		}
 
-		cdrs = append(cdrs, x.(*CDR))
+		if filter.OrderIDStart != nil {
+			if cdr.OrderID < *filter.OrderIDStart {
+				continue
+			}
+		}
+		if filter.OrderIDEnd != nil {
+			if cdr.OrderID > *filter.OrderIDEnd {
+				continue
+			}
+		}
+		if filter.AnswerTimeStart != nil && !filter.AnswerTimeStart.IsZero() { // With IsZero we keep backwards compatible with ApierV1
+			if cdr.AnswerTime.Before(*filter.AnswerTimeStart) {
+				continue
+			}
+		}
+		if filter.AnswerTimeEnd != nil && !filter.AnswerTimeEnd.IsZero() {
+			if cdr.AnswerTime.After(*filter.AnswerTimeEnd) {
+				continue
+			}
+		}
+		if filter.SetupTimeStart != nil && !filter.SetupTimeStart.IsZero() {
+			if cdr.SetupTime.Before(*filter.SetupTimeStart) {
+				continue
+			}
+		}
+		if filter.SetupTimeEnd != nil && !filter.SetupTimeEnd.IsZero() {
+			if cdr.SetupTime.Before(*filter.SetupTimeEnd) {
+				continue
+			}
+		}
+
+		if len(filter.MinUsage) != 0 {
+			minUsage, err := utils.ParseDurationWithNanosecs(filter.MinUsage)
+			if err != nil {
+				return nil, 0, err
+			}
+			if cdr.Usage < minUsage {
+				continue
+			}
+		}
+		if len(filter.MaxUsage) != 0 {
+			maxUsage, err := utils.ParseDurationWithNanosecs(filter.MaxUsage)
+			if err != nil {
+				return nil, 0, err
+			}
+			if cdr.Usage > maxUsage {
+				continue
+			}
+		}
+
+		if filter.MinCost != nil {
+			if filter.MaxCost == nil {
+				if cdr.Cost < *filter.MinCost {
+					continue
+				}
+			} else if *filter.MinCost == 0.0 && *filter.MaxCost == -1.0 { // Special case when we want to skip errors
+				if cdr.Cost < 0 {
+					continue
+				}
+			} else {
+				if cdr.Cost < *filter.MinCost && cdr.Cost > *filter.MaxCost {
+					continue
+				}
+			}
+		} else if filter.MaxCost != nil {
+			if *filter.MaxCost == -1.0 { // Non-rated CDRs
+				if cdr.Cost < 0 {
+					continue
+				}
+			} else { // Above limited CDRs, since MinCost is empty, make sure we query also NULL cost
+				if cdr.Cost > 0 {
+					continue
+				}
+			}
+		}
+
+		//pass all filters and append to slice
+		cdrs = append(cdrs, cdr)
+	}
+
+	// //apply paginator
+	// cdrIDs = filter.Paginator.PaginateStringSlice(cdrIDs)
+	// if filter.Count {
+	// 	return nil, int64(len(cdrs)), nil
+	// }
+
+	if remove {
+		for _, cdr := range cdrs {
+			iDB.db.Remove(utils.CDRsTBL, utils.ConcatenatedKey(utils.CDRsTBL, cdr.CGRID, cdr.RunID, cdr.OriginID),
+				cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		}
+		return nil, 0, nil
 	}
 	return
 }
