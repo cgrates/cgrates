@@ -1542,13 +1542,18 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case SCHEDULER_JSN:
-		cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+		if !fall {
+			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+		}
 		cfg.rldChans[SCHEDULER_JSN] <- struct{}{}
 		if !fall {
 			break
 		}
 		fallthrough
 	case RALS_JSN:
+		if !fall {
+			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+		}
 		cfg.rldChans[RALS_JSN] <- struct{}{}
 		if !fall {
 			break
@@ -1620,42 +1625,54 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case ATTRIBUTE_JSN:
-		cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+		if !fall {
+			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+		}
 		cfg.rldChans[ATTRIBUTE_JSN] <- struct{}{}
 		if !fall {
 			break
 		}
 		fallthrough
 	case ChargerSCfgJson:
-		cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+		if !fall {
+			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+		}
 		cfg.rldChans[ChargerSCfgJson] <- struct{}{}
 		if !fall {
 			break
 		}
 		fallthrough
 	case RESOURCES_JSON:
-		cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+		if !fall {
+			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+		}
 		cfg.rldChans[RESOURCES_JSON] <- struct{}{}
 		if !fall {
 			break
 		}
 		fallthrough
 	case STATS_JSON:
-		cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+		if !fall {
+			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+		}
 		cfg.rldChans[STATS_JSON] <- struct{}{}
 		if !fall {
 			break
 		}
 		fallthrough
 	case THRESHOLDS_JSON:
-		cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+		if !fall {
+			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+		}
 		cfg.rldChans[THRESHOLDS_JSON] <- struct{}{}
 		if !fall {
 			break
 		}
 		fallthrough
 	case SupplierSJson:
-		cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+		if !fall {
+			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+		}
 		cfg.rldChans[SupplierSJson] <- struct{}{}
 		if !fall {
 			break
@@ -1668,7 +1685,9 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case DispatcherSJson:
-		cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+		if !fall {
+			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+		}
 		cfg.rldChans[DispatcherSJson] <- struct{}{}
 		if !fall {
 			break
