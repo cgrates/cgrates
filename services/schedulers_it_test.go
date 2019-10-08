@@ -44,23 +44,19 @@ func TestSchedulerSReload(t *testing.T) {
 	filterSChan <- nil
 	close(chS.GetPrecacheChannel(utils.CacheActionPlans))
 	server := utils.NewServer()
-	dm, err := engine.ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
-		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
-		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
-		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-		cfg.CacheCfg(), cfg.DataDbCfg().DataDbSentinelName)
-	if err != nil {
-		t.Fatal(err)
-	}
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	internalCdrSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalCdrSChan <- nil
-	schS := NewSchedulerService(cfg, dm, chS, server, internalCdrSChan, nil)
-	srvMngr.AddServices(schS, NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown))
+	db := NewDataDBService(cfg)
+	schS := NewSchedulerService(cfg, db, chS, server, internalCdrSChan, nil)
+	srvMngr.AddServices(schS, NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
 	if schS.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 	var reply string
@@ -74,6 +70,9 @@ func TestSchedulerSReload(t *testing.T) {
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if !schS.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
 	cfg.SchedulerCfg().Enabled = false
