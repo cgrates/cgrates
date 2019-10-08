@@ -528,7 +528,7 @@ func main() {
 		tS.GetIntenternalChan(), dspS.GetIntenternalChan())
 	reS := services.NewResourceService(cfg, dmService, cacheS, filterSChan, server,
 		tS.GetIntenternalChan(), dspS.GetIntenternalChan())
-	supS := services.NewSupplierService(cfg, dmService.GetDM(), cacheS, filterSChan, server,
+	supS := services.NewSupplierService(cfg, dmService, cacheS, filterSChan, server,
 		attrS.GetIntenternalChan(), stS.GetIntenternalChan(),
 		reS.GetIntenternalChan(), dspS.GetIntenternalChan())
 	schS := services.NewSchedulerService(cfg, dmService.GetDM(), cacheS, server, internalCDRServerChan, dspS.GetIntenternalChan())
