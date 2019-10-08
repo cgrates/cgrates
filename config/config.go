@@ -1580,6 +1580,9 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case SessionSJson:
+		if !fall {
+			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+		}
 		cfg.rldChans[SessionSJson] <- struct{}{}
 		if !fall {
 			break

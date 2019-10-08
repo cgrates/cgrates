@@ -52,10 +52,11 @@ func TestEventReaderSReload(t *testing.T) {
 	engineShutdown := make(chan bool, 1)
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
-	sS := NewSessionService(cfg, nil, server, nil,
+	db := NewDataDBService(cfg)
+	sS := NewSessionService(cfg, db, server, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, engineShutdown)
 	attrS := NewEventReaderService(cfg, filterSChan, sS.GetIntenternalChan(), nil, engineShutdown)
-	srvMngr.AddServices(attrS, sS, NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown))
+	srvMngr.AddServices(attrS, sS, NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
