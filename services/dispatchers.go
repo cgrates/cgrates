@@ -32,7 +32,7 @@ import (
 )
 
 // NewDispatcherService returns the Dispatcher Service
-func NewDispatcherService(cfg *config.CGRConfig, dm *engine.DataManager,
+func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *utils.Server, attrsChan chan rpcclient.RpcClientConnection) servmanager.Service {
 	return &DispatcherService{
@@ -50,7 +50,7 @@ func NewDispatcherService(cfg *config.CGRConfig, dm *engine.DataManager,
 type DispatcherService struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
-	dm          *engine.DataManager
+	dm          *DataDBService
 	cacheS      *engine.CacheS
 	filterSChan chan *engine.FilterS
 	server      *utils.Server
@@ -89,7 +89,7 @@ func (dspS *DispatcherService) Start() (err error) {
 			return
 		}
 	}
-	if dspS.dspS, err = dispatchers.NewDispatcherService(dspS.dm, dspS.cfg, fltrS, attrSConn); err != nil {
+	if dspS.dspS, err = dispatchers.NewDispatcherService(dspS.dm.GetDM(), dspS.cfg, fltrS, attrSConn); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.DispatcherS, err.Error()))
 		return
 	}
