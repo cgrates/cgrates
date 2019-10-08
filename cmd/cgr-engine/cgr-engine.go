@@ -526,7 +526,7 @@ func main() {
 	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan, server)
 	stS := services.NewStatService(cfg, dmService, cacheS, filterSChan, server,
 		tS.GetIntenternalChan(), dspS.GetIntenternalChan())
-	reS := services.NewResourceService(cfg, dmService.GetDM(), cacheS, filterSChan, server,
+	reS := services.NewResourceService(cfg, dmService, cacheS, filterSChan, server,
 		tS.GetIntenternalChan(), dspS.GetIntenternalChan())
 	supS := services.NewSupplierService(cfg, dmService.GetDM(), cacheS, filterSChan, server,
 		attrS.GetIntenternalChan(), stS.GetIntenternalChan(),
