@@ -32,6 +32,7 @@ import (
 func NewDataDBService(cfg *config.CGRConfig) *DataDBService {
 	return &DataDBService{
 		cfg: cfg,
+		db:  engine.NewDataManager(nil, cfg.CacheCfg()),
 	}
 }
 

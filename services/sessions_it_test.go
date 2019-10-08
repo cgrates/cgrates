@@ -73,7 +73,7 @@ func TestSessionSReload(t *testing.T) {
 	ralS := NewRalService(cfg, db, nil, nil, chS, filterSChan, server,
 		/*tS*/ internalChan, internalChan, cacheSChan, internalChan, internalChan,
 		internalChan, schS, engineShutdown)
-	cdrS := NewCDRServer(cfg, nil, nil, filterSChan, server,
+	cdrS := NewCDRServer(cfg, db, nil, filterSChan, server,
 		make(chan rpcclient.RpcClientConnection, 1),
 		chrS.GetIntenternalChan(), ralS.GetResponder().GetIntenternalChan(),
 		nil, nil, nil, nil)
