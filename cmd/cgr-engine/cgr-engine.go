@@ -541,7 +541,7 @@ func main() {
 		attrS.GetIntenternalChan(), tS.GetIntenternalChan(),
 		stS.GetIntenternalChan(), dspS.GetIntenternalChan())
 
-	smg := services.NewSessionService(cfg, dmService.GetDM(), server, chrS.GetIntenternalChan(),
+	smg := services.NewSessionService(cfg, dmService, server, chrS.GetIntenternalChan(),
 		rals.GetResponder().GetIntenternalChan(), reS.GetIntenternalChan(),
 		tS.GetIntenternalChan(), stS.GetIntenternalChan(), supS.GetIntenternalChan(),
 		attrS.GetIntenternalChan(), cdrS.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan)

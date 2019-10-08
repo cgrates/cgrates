@@ -24,7 +24,6 @@ import (
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
@@ -32,7 +31,7 @@ import (
 )
 
 // NewSessionService returns the Session Service
-func NewSessionService(cfg *config.CGRConfig, dm *engine.DataManager,
+func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
 	server *utils.Server, chrsChan, respChan, resChan, thsChan, stsChan,
 	supChan, attrsChan, cdrsChan, dispatcherChan chan rpcclient.RpcClientConnection,
 	exitChan chan bool) servmanager.Service {
@@ -58,7 +57,7 @@ func NewSessionService(cfg *config.CGRConfig, dm *engine.DataManager,
 type SessionService struct {
 	sync.RWMutex
 	cfg            *config.CGRConfig
-	dm             *engine.DataManager
+	dm             *DataDBService
 	server         *utils.Server
 	chrsChan       chan rpcclient.RpcClientConnection
 	respChan       chan rpcclient.RpcClientConnection
@@ -149,7 +148,7 @@ func (smg *SessionService) Start() (err error) {
 
 	smg.sm = sessions.NewSessionS(smg.cfg, ralsConns, resSConns, threshSConns,
 		statSConns, suplSConns, attrConns, cdrsConn, chargerSConn,
-		sReplConns, smg.dm, smg.cfg.GeneralCfg().DefaultTimezone)
+		sReplConns, smg.dm.GetDM(), smg.cfg.GeneralCfg().DefaultTimezone)
 	//start sync session in a separate gorutine
 	go func(sm *sessions.SessionS) {
 		if err = sm.ListenAndServe(smg.exitChan); err != nil {

@@ -77,13 +77,16 @@ func TestSessionSReload(t *testing.T) {
 		make(chan rpcclient.RpcClientConnection, 1),
 		chrS.GetIntenternalChan(), ralS.GetResponder().GetIntenternalChan(),
 		nil, nil, nil, nil)
-	attrS := NewSessionService(cfg, nil, server, chrS.GetIntenternalChan(),
+	srv := NewSessionService(cfg, db, server, chrS.GetIntenternalChan(),
 		ralS.GetResponder().GetIntenternalChan(), nil, nil, nil, nil, nil, cdrS.GetIntenternalChan(), nil, engineShutdown)
-	srvMngr.AddServices(attrS, chrS, schS, ralS, cdrS, NewLoaderService(cfg, nil, filterSChan, server, cacheSChan, nil, engineShutdown), db)
+	srvMngr.AddServices(srv, chrS, schS, ralS, cdrS, NewLoaderService(cfg, nil, filterSChan, server, cacheSChan, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
-	if attrS.IsRunning() {
+	if srv.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 	var reply string
@@ -96,13 +99,16 @@ func TestSessionSReload(t *testing.T) {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	if !attrS.IsRunning() {
+	if !srv.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
 	cfg.SessionSCfg().Enabled = false
 	cfg.GetReloadChan(config.SessionSJson) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
-	if attrS.IsRunning() {
+	if srv.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 	engineShutdown <- true

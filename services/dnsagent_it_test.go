@@ -49,10 +49,11 @@ func TestDNSAgentReload(t *testing.T) {
 
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
-	sS := NewSessionService(cfg, nil, server, nil,
+	db := NewDataDBService(cfg)
+	sS := NewSessionService(cfg, db, server, nil,
 		nil, nil, nil, nil, nil, nil, nil, nil, engineShutdown)
 	srv := NewDNSAgent(cfg, filterSChan, sS.GetIntenternalChan(), nil, engineShutdown)
-	srvMngr.AddServices(srv, sS, NewLoaderService(cfg, nil, filterSChan, server, cacheSChan, nil, engineShutdown))
+	srvMngr.AddServices(srv, sS, NewLoaderService(cfg, nil, filterSChan, server, cacheSChan, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
