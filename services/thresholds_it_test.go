@@ -47,12 +47,16 @@ func TestThresholdSReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheThresholdFilterIndexes))
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
-	tS := NewThresholdService(cfg, nil, chS, filterSChan, server)
-	srvMngr.AddServices(tS, NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown))
+	db := NewDataDBService(cfg)
+	tS := NewThresholdService(cfg, db, chS, filterSChan, server)
+	srvMngr.AddServices(tS, NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
 	if tS.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 	var reply string
@@ -66,6 +70,9 @@ func TestThresholdSReload(t *testing.T) {
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if !tS.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
 	cfg.ThresholdSCfg().Enabled = false
