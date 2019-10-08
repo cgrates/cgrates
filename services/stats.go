@@ -31,7 +31,7 @@ import (
 )
 
 // NewStatService returns the Stat Service
-func NewStatService(cfg *config.CGRConfig, dm *engine.DataManager,
+func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *utils.Server, thrsChan,
 	dispatcherChan chan rpcclient.RpcClientConnection) servmanager.Service {
@@ -51,7 +51,7 @@ func NewStatService(cfg *config.CGRConfig, dm *engine.DataManager,
 type StatService struct {
 	sync.RWMutex
 	cfg            *config.CGRConfig
-	dm             *engine.DataManager
+	dm             *DataDBService
 	cacheS         *engine.CacheS
 	filterSChan    chan *engine.FilterS
 	server         *utils.Server
@@ -83,7 +83,7 @@ func (sts *StatService) Start() (err error) {
 	}
 	sts.Lock()
 	defer sts.Unlock()
-	sts.sts, err = engine.NewStatService(sts.dm, sts.cfg, thdSConn, filterS)
+	sts.sts, err = engine.NewStatService(sts.dm.GetDM(), sts.cfg, thdSConn, filterS)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<StatS> Could not init, error: %s", err.Error()))
 		return
