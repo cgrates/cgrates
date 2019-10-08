@@ -1639,6 +1639,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case STATS_JSON:
+		cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
 		cfg.rldChans[STATS_JSON] <- struct{}{}
 		if !fall {
 			break

@@ -53,12 +53,15 @@ func TestStatSReload(t *testing.T) {
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg)
 	tS := NewThresholdService(cfg, db, chS, filterSChan, server)
-	sS := NewStatService(cfg, nil, chS, filterSChan, server, tS.GetIntenternalChan(), nil)
+	sS := NewStatService(cfg, db, chS, filterSChan, server, tS.GetIntenternalChan(), nil)
 	srvMngr.AddServices(tS, sS, NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
 	if sS.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 	var reply string
@@ -72,6 +75,9 @@ func TestStatSReload(t *testing.T) {
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if !sS.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
 	cfg.StatSCfg().Enabled = false

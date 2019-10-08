@@ -49,9 +49,10 @@ func TestSupplierSReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheStatFilterIndexes))
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
-	sts := NewStatService(cfg, nil, chS, filterSChan, server, nil, nil)
+	db := NewDataDBService(cfg)
+	sts := NewStatService(cfg, db, chS, filterSChan, server, nil, nil)
 	supS := NewSupplierService(cfg, nil, chS, filterSChan, server, nil, sts.GetIntenternalChan(), nil, nil)
-	srvMngr.AddServices(supS, sts, NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown))
+	srvMngr.AddServices(supS, sts, NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
