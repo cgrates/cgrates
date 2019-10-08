@@ -532,7 +532,7 @@ func main() {
 		attrS.GetIntenternalChan(), stS.GetIntenternalChan(),
 		reS.GetIntenternalChan(), dspS.GetIntenternalChan())
 	schS := services.NewSchedulerService(cfg, dmService, cacheS, server, internalCDRServerChan, dspS.GetIntenternalChan())
-	rals := services.NewRalService(cfg, dmService.GetDM(), cdrDb, loadDb, cacheS, filterSChan, server,
+	rals := services.NewRalService(cfg, dmService, cdrDb, loadDb, cacheS, filterSChan, server,
 		tS.GetIntenternalChan(), stS.GetIntenternalChan(), internalCacheSChan,
 		schS.GetIntenternalChan(), attrS.GetIntenternalChan(), dspS.GetIntenternalChan(),
 		schS, exitChan)

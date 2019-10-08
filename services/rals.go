@@ -31,7 +31,7 @@ import (
 )
 
 // NewRalService returns the Ral Service
-func NewRalService(cfg *config.CGRConfig, dm *engine.DataManager,
+func NewRalService(cfg *config.CGRConfig, dm *DataDBService,
 	cdrStorage engine.CdrStorage, loadStorage engine.LoadStorage,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS, server *utils.Server,
 	thsChan, stsChan, cacheSChan, schedChan, attrsChan, dispatcherChan chan rpcclient.RpcClientConnection,

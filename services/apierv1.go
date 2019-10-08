@@ -30,7 +30,7 @@ import (
 )
 
 // NewApierV1Service returns the ApierV1 Service
-func NewApierV1Service(cfg *config.CGRConfig, dm *engine.DataManager,
+func NewApierV1Service(cfg *config.CGRConfig, dm *DataDBService,
 	cdrStorage engine.CdrStorage, loadStorage engine.LoadStorage,
 	filterSChan chan *engine.FilterS,
 	server *utils.Server, cacheSChan, schedChan, attrsChan,
@@ -58,7 +58,7 @@ func NewApierV1Service(cfg *config.CGRConfig, dm *engine.DataManager,
 type ApierV1Service struct {
 	sync.RWMutex
 	cfg              *config.CGRConfig
-	dm               *engine.DataManager
+	dm               *DataDBService
 	cdrStorage       engine.CdrStorage
 	loadStorage      engine.LoadStorage
 	filterSChan      chan *engine.FilterS
@@ -111,7 +111,7 @@ func (api *ApierV1Service) Start() (err error) {
 
 	api.api = &v1.ApierV1{
 		StorDb:           api.loadStorage,
-		DataManager:      api.dm,
+		DataManager:      api.dm.GetDM(),
 		CdrDb:            api.cdrStorage,
 		Config:           api.cfg,
 		Responder:        api.responderService.GetResponder(),
