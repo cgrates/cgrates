@@ -195,7 +195,7 @@ func TestSessionAsCGREventsRawEvent(t *testing.T) {
 	s := &Session{
 		CGRID:      "RandomCGRID",
 		Tenant:     "cgrates.org",
-		EventStart: engine.NewSafEvent(ev),
+		EventStart: engine.NewMapEvent(ev),
 	}
 	if cgrEvs, _ := s.asCGREvents(); len(cgrEvs) != 1 {
 		t.Errorf("Expecting: 1, received: %+v", len(cgrEvs))
@@ -242,7 +242,7 @@ func TestSessionAsCGREvents(t *testing.T) {
 	s := &Session{
 		CGRID:      "RandomCGRID",
 		Tenant:     "cgrates.org",
-		EventStart: engine.NewSafEvent(startEv),
+		EventStart: engine.NewMapEvent(startEv),
 		SRuns: []*SRun{
 			&SRun{
 				Event:      engine.NewMapEvent(ev),
@@ -304,7 +304,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 	s := &Session{
 		CGRID:         "RandomCGRID",
 		Tenant:        "cgrates.org",
-		EventStart:    engine.NewSafEvent(startEv),
+		EventStart:    engine.NewMapEvent(startEv),
 		DebitInterval: time.Second,
 		SRuns: []*SRun{
 			&SRun{
@@ -385,7 +385,7 @@ func TestSessionAsExternalSessions2(t *testing.T) {
 	s := &Session{
 		CGRID:         "RandomCGRID",
 		Tenant:        "cgrates.org",
-		EventStart:    engine.NewSafEvent(startEv),
+		EventStart:    engine.NewMapEvent(startEv),
 		DebitInterval: time.Second,
 		SRuns: []*SRun{
 			&SRun{
@@ -473,7 +473,7 @@ func TestSessionAsExternalSessions3(t *testing.T) {
 	s := &Session{
 		CGRID:         "RandomCGRID",
 		Tenant:        "cgrates.org",
-		EventStart:    engine.NewSafEvent(startEv),
+		EventStart:    engine.NewMapEvent(startEv),
 		DebitInterval: time.Second,
 		SRuns: []*SRun{
 			&SRun{
