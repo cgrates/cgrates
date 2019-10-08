@@ -32,7 +32,7 @@ import (
 )
 
 // NewCDRServer returns the CDR Server
-func NewCDRServer(cfg *config.CGRConfig, dm *engine.DataManager,
+func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 	cdrStorage engine.CdrStorage, filterSChan chan *engine.FilterS,
 	server *utils.Server, internalCDRServerChan, chrsChan, respChan, attrsChan, thsChan, stsChan,
 	dispatcherChan chan rpcclient.RpcClientConnection) servmanager.Service {
@@ -56,7 +56,7 @@ func NewCDRServer(cfg *config.CGRConfig, dm *engine.DataManager,
 type CDRServer struct {
 	sync.RWMutex
 	cfg            *config.CGRConfig
-	dm             *engine.DataManager
+	dm             *DataDBService
 	cdrStorage     engine.CdrStorage
 	filterSChan    chan *engine.FilterS
 	server         *utils.Server
@@ -118,7 +118,7 @@ func (cdrS *CDRServer) Start() (err error) {
 	}
 	cdrS.Lock()
 	defer cdrS.Unlock()
-	cdrS.cdrS = engine.NewCDRServer(cdrS.cfg, cdrS.cdrStorage, cdrS.dm,
+	cdrS.cdrS = engine.NewCDRServer(cdrS.cfg, cdrS.cdrStorage, cdrS.dm.GetDM(),
 		ralConn, attrSConn, thresholdSConn, statsConn, chargerSConn, filterS)
 	utils.Logger.Info("Registering CDRS HTTP Handlers.")
 	cdrS.cdrS.RegisterHandlersToServer(cdrS.server)

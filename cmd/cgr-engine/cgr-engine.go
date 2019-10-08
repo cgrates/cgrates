@@ -536,7 +536,7 @@ func main() {
 		tS.GetIntenternalChan(), stS.GetIntenternalChan(), internalCacheSChan,
 		schS.GetIntenternalChan(), attrS.GetIntenternalChan(), dspS.GetIntenternalChan(),
 		schS, exitChan)
-	cdrS := services.NewCDRServer(cfg, dmService.GetDM(), cdrDb, filterSChan, server, internalCDRServerChan,
+	cdrS := services.NewCDRServer(cfg, dmService, cdrDb, filterSChan, server, internalCDRServerChan,
 		chrS.GetIntenternalChan(), rals.GetResponder().GetIntenternalChan(),
 		attrS.GetIntenternalChan(), tS.GetIntenternalChan(),
 		stS.GetIntenternalChan(), dspS.GetIntenternalChan())

@@ -69,10 +69,10 @@ func TestCdrsReload(t *testing.T) {
 	chrS := NewChargerService(cfg, db, chS, filterSChan, server, nil, nil)
 	schS := NewSchedulerService(cfg, nil, chS, server, make(chan rpcclient.RpcClientConnection, 1), nil)
 	tS := NewThresholdService(cfg, db, chS, filterSChan, server)
-	ralS := NewRalService(cfg, nil, nil, nil, chS, filterSChan, server,
+	ralS := NewRalService(cfg, db, nil, nil, chS, filterSChan, server,
 		tS.GetIntenternalChan(), internalChan, cacheSChan, internalChan, internalChan,
 		internalChan, schS, engineShutdown)
-	cdrS := NewCDRServer(cfg, nil, nil, filterSChan, server,
+	cdrS := NewCDRServer(cfg, db, nil, filterSChan, server,
 		make(chan rpcclient.RpcClientConnection, 1),
 		chrS.GetIntenternalChan(), ralS.GetResponder().GetIntenternalChan(),
 		nil, nil, nil, nil)
@@ -81,6 +81,9 @@ func TestCdrsReload(t *testing.T) {
 		t.Error(err)
 	}
 	if cdrS.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 	var reply string
@@ -94,6 +97,9 @@ func TestCdrsReload(t *testing.T) {
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if !cdrS.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
 	cfg.CdrsCfg().Enabled = false
