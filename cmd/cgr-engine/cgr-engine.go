@@ -456,13 +456,11 @@ func main() {
 
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
-	var dm *engine.DataManager
 	dmService := services.NewDataDBService(cfg)
 	if dmService.ShouldRun() { // Some services can run without db, ie:  CDRC
 		if err = dmService.Start(); err != nil {
 			return
 		}
-		dm = dmService.GetDM()
 	}
 	if cfg.RalsCfg().Enabled || cfg.CdrsCfg().Enabled {
 		storDb, err := engine.ConfigureStorStorage(cfg.StorDbCfg().StorDBType,
@@ -510,7 +508,7 @@ func main() {
 	internalCDRServerChan := make(chan rpcclient.RpcClientConnection, 1) // needed to avod cyclic dependency
 
 	// init CacheS
-	cacheS := initCacheS(internalCacheSChan, server, dm, exitChan)
+	cacheS := initCacheS(internalCacheSChan, server, dmService.GetDM(), exitChan)
 
 	// init GuardianSv1
 	initGuardianSv1(internalGuardianSChan, server)
@@ -522,33 +520,33 @@ func main() {
 	srvManager := servmanager.NewServiceManager(cfg, exitChan)
 
 	attrS := services.NewAttributeService(cfg, dmService, cacheS, filterSChan, server)
-	dspS := services.NewDispatcherService(cfg, dm, cacheS, filterSChan, server, attrS.GetIntenternalChan())
-	chrS := services.NewChargerService(cfg, dm, cacheS, filterSChan, server,
+	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, attrS.GetIntenternalChan())
+	chrS := services.NewChargerService(cfg, dmService.GetDM(), cacheS, filterSChan, server,
 		attrS.GetIntenternalChan(), dspS.GetIntenternalChan())
-	tS := services.NewThresholdService(cfg, dm, cacheS, filterSChan, server)
-	stS := services.NewStatService(cfg, dm, cacheS, filterSChan, server,
+	tS := services.NewThresholdService(cfg, dmService.GetDM(), cacheS, filterSChan, server)
+	stS := services.NewStatService(cfg, dmService.GetDM(), cacheS, filterSChan, server,
 		tS.GetIntenternalChan(), dspS.GetIntenternalChan())
-	reS := services.NewResourceService(cfg, dm, cacheS, filterSChan, server,
+	reS := services.NewResourceService(cfg, dmService.GetDM(), cacheS, filterSChan, server,
 		tS.GetIntenternalChan(), dspS.GetIntenternalChan())
-	supS := services.NewSupplierService(cfg, dm, cacheS, filterSChan, server,
+	supS := services.NewSupplierService(cfg, dmService.GetDM(), cacheS, filterSChan, server,
 		attrS.GetIntenternalChan(), stS.GetIntenternalChan(),
 		reS.GetIntenternalChan(), dspS.GetIntenternalChan())
-	schS := services.NewSchedulerService(cfg, dm, cacheS, server, internalCDRServerChan, dspS.GetIntenternalChan())
-	rals := services.NewRalService(cfg, dm, cdrDb, loadDb, cacheS, filterSChan, server,
+	schS := services.NewSchedulerService(cfg, dmService.GetDM(), cacheS, server, internalCDRServerChan, dspS.GetIntenternalChan())
+	rals := services.NewRalService(cfg, dmService.GetDM(), cdrDb, loadDb, cacheS, filterSChan, server,
 		tS.GetIntenternalChan(), stS.GetIntenternalChan(), internalCacheSChan,
 		schS.GetIntenternalChan(), attrS.GetIntenternalChan(), dspS.GetIntenternalChan(),
 		schS, exitChan)
-	cdrS := services.NewCDRServer(cfg, dm, cdrDb, filterSChan, server, internalCDRServerChan,
+	cdrS := services.NewCDRServer(cfg, dmService.GetDM(), cdrDb, filterSChan, server, internalCDRServerChan,
 		chrS.GetIntenternalChan(), rals.GetResponder().GetIntenternalChan(),
 		attrS.GetIntenternalChan(), tS.GetIntenternalChan(),
 		stS.GetIntenternalChan(), dspS.GetIntenternalChan())
 
-	smg := services.NewSessionService(cfg, dm, server, chrS.GetIntenternalChan(),
+	smg := services.NewSessionService(cfg, dmService.GetDM(), server, chrS.GetIntenternalChan(),
 		rals.GetResponder().GetIntenternalChan(), reS.GetIntenternalChan(),
 		tS.GetIntenternalChan(), stS.GetIntenternalChan(), supS.GetIntenternalChan(),
 		attrS.GetIntenternalChan(), cdrS.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan)
 
-	ldrs := services.NewLoaderService(cfg, dm, filterSChan, server, internalCacheSChan, dspS.GetIntenternalChan(), exitChan)
+	ldrs := services.NewLoaderService(cfg, dmService.GetDM(), filterSChan, server, internalCacheSChan, dspS.GetIntenternalChan(), exitChan)
 	anz := services.NewAnalyzerService(cfg, server, exitChan)
 	srvManager.AddServices(attrS, chrS, tS, stS, reS, supS, schS, rals,
 		rals.GetResponder(), rals.GetAPIv1(), rals.GetAPIv2(), cdrS, smg,
@@ -568,7 +566,7 @@ func main() {
 	// Start FilterS
 	go startFilterService(filterSChan, cacheS, stS.GetIntenternalChan(),
 		reS.GetIntenternalChan(), rals.GetResponder().GetIntenternalChan(),
-		cfg, dm, exitChan)
+		cfg, dmService.GetDM(), exitChan)
 
 	initServiceManagerV1(internalServeManagerChan, srvManager, server)
 

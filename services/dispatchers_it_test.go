@@ -51,12 +51,15 @@ func TestDispatcherSReload(t *testing.T) {
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg)
 	attrS := NewAttributeService(cfg, db, chS, filterSChan, server)
-	srv := NewDispatcherService(cfg, nil, chS, filterSChan, server, attrS.GetIntenternalChan())
+	srv := NewDispatcherService(cfg, db, chS, filterSChan, server, attrS.GetIntenternalChan())
 	srvMngr.AddServices(attrS, srv, NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
 	if srv.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 	var reply string
@@ -70,6 +73,9 @@ func TestDispatcherSReload(t *testing.T) {
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if !srv.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
 	cfg.DispatcherSCfg().Enabled = false
