@@ -31,7 +31,7 @@ import (
 )
 
 // NewResourceService returns the Resource Service
-func NewResourceService(cfg *config.CGRConfig, dm *engine.DataManager,
+func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *utils.Server, thrsChan,
 	dispatcherChan chan rpcclient.RpcClientConnection) servmanager.Service {
@@ -51,7 +51,7 @@ func NewResourceService(cfg *config.CGRConfig, dm *engine.DataManager,
 type ResourceService struct {
 	sync.RWMutex
 	cfg            *config.CGRConfig
-	dm             *engine.DataManager
+	dm             *DataDBService
 	cacheS         *engine.CacheS
 	filterSChan    chan *engine.FilterS
 	server         *utils.Server
@@ -84,7 +84,7 @@ func (reS *ResourceService) Start() (err error) {
 
 	reS.Lock()
 	defer reS.Unlock()
-	reS.reS, err = engine.NewResourceService(reS.dm, reS.cfg, thdSConn, filterS)
+	reS.reS, err = engine.NewResourceService(reS.dm.GetDM(), reS.cfg, thdSConn, filterS)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.ResourceS, err.Error()))
 		return
