@@ -31,7 +31,7 @@ import (
 )
 
 // NewSchedulerService returns the Scheduler Service
-func NewSchedulerService(cfg *config.CGRConfig, dm *engine.DataManager,
+func NewSchedulerService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, server *utils.Server, internalCDRServerChan,
 	dispatcherChan chan rpcclient.RpcClientConnection) *SchedulerService {
 	return &SchedulerService{
@@ -49,7 +49,7 @@ func NewSchedulerService(cfg *config.CGRConfig, dm *engine.DataManager,
 type SchedulerService struct {
 	sync.RWMutex
 	cfg            *config.CGRConfig
-	dm             *engine.DataManager
+	dm             *DataDBService
 	cacheS         *engine.CacheS
 	server         *utils.Server
 	cdrSChan       chan rpcclient.RpcClientConnection
@@ -72,7 +72,7 @@ func (schS *SchedulerService) Start() (err error) {
 	defer schS.Unlock()
 
 	utils.Logger.Info("<ServiceManager> Starting CGRateS Scheduler.")
-	schS.schS = scheduler.NewScheduler(schS.dm)
+	schS.schS = scheduler.NewScheduler(schS.dm.GetDM())
 	go schS.schS.Loop()
 
 	schS.rpc = v1.NewSchedulerSv1(schS.cfg)
