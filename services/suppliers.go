@@ -31,7 +31,7 @@ import (
 )
 
 // NewSupplierService returns the Supplier Service
-func NewSupplierService(cfg *config.CGRConfig, dm *engine.DataManager,
+func NewSupplierService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *utils.Server, attrsChan, stsChan, resChan,
 	dispatcherChan chan rpcclient.RpcClientConnection) servmanager.Service {
@@ -53,7 +53,7 @@ func NewSupplierService(cfg *config.CGRConfig, dm *engine.DataManager,
 type SupplierService struct {
 	sync.RWMutex
 	cfg            *config.CGRConfig
-	dm             *engine.DataManager
+	dm             *DataDBService
 	cacheS         *engine.CacheS
 	filterSChan    chan *engine.FilterS
 	server         *utils.Server
@@ -101,7 +101,7 @@ func (splS *SupplierService) Start() (err error) {
 	}
 	splS.Lock()
 	defer splS.Unlock()
-	splS.splS, err = engine.NewSupplierService(splS.dm, filterS, splS.cfg,
+	splS.splS, err = engine.NewSupplierService(splS.dm.GetDM(), filterS, splS.cfg,
 		resourceSConn, statSConn, attrSConn)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s",

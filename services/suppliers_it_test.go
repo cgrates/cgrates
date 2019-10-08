@@ -51,12 +51,15 @@ func TestSupplierSReload(t *testing.T) {
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg)
 	sts := NewStatService(cfg, db, chS, filterSChan, server, nil, nil)
-	supS := NewSupplierService(cfg, nil, chS, filterSChan, server, nil, sts.GetIntenternalChan(), nil, nil)
+	supS := NewSupplierService(cfg, db, chS, filterSChan, server, nil, sts.GetIntenternalChan(), nil, nil)
 	srvMngr.AddServices(supS, sts, NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
 	if supS.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
+	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 	var reply string
@@ -70,6 +73,9 @@ func TestSupplierSReload(t *testing.T) {
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
 	if !supS.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
 	cfg.SupplierSCfg().Enabled = false
