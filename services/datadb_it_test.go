@@ -21,6 +21,7 @@ package services
 
 import (
 	"path"
+	"reflect"
 	"testing"
 	"time"
 
@@ -30,51 +31,60 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestChargerSReload(t *testing.T) {
+func TestDataDBReload(t *testing.T) {
 	cfg, err := config.NewDefaultCGRConfig()
 	if err != nil {
 		t.Fatal(err)
 	}
 	utils.Newlogger(utils.MetaSysLog, cfg.GeneralCfg().NodeID)
 	utils.Logger.SetLogLevel(7)
-	cfg.AttributeSCfg().Enabled = true
+
 	engineShutdown := make(chan bool, 1)
 	chS := engine.NewCacheS(cfg, nil)
-	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
-	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
-	close(chS.GetPrecacheChannel(utils.CacheChargerProfiles))
-	close(chS.GetPrecacheChannel(utils.CacheChargerFilterIndexes))
 	filterSChan := make(chan *engine.FilterS, 1)
 	filterSChan <- nil
+	close(chS.GetPrecacheChannel(utils.CacheAttributeProfiles))
+	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg)
-	attrS := NewAttributeService(cfg, db, chS, filterSChan, server)
-	chrS := NewChargerService(cfg, nil, chS, filterSChan, server, attrS.GetIntenternalChan(), nil)
-	srvMngr.AddServices(attrS, chrS, NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown), db)
+	srvMngr.AddServices(NewAttributeService(cfg, db,
+		chS, filterSChan, server), NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
-	if chrS.IsRunning() {
+	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 	var reply string
-	if err = cfg.V1ReloadConfig(&config.ConfigReloadWithArgDispatcher{
+	cfg.AttributeSCfg().Enabled = true
+	if err := cfg.V1ReloadConfig(&config.ConfigReloadWithArgDispatcher{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
-		Section: config.ChargerSCfgJson,
+		Section: config.DATADB_JSN,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting OK ,received %s", reply)
 	}
 	time.Sleep(10 * time.Millisecond) //need to switch to gorutine
-	if !chrS.IsRunning() {
+	if !db.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
-	cfg.ChargerSCfg().Enabled = false
-	cfg.GetReloadChan(config.ChargerSCfgJson) <- struct{}{}
+	oldcfg := &config.DataDbCfg{
+		DataDbType:   utils.MONGO,
+		DataDbHost:   "127.0.0.1",
+		DataDbPort:   "27017",
+		DataDbName:   "10",
+		DataDbUser:   "cgrates",
+		QueryTimeout: 10 * time.Second,
+	}
+	if !reflect.DeepEqual(oldcfg, db.oldDBCfg) {
+		t.Errorf("Expected %s received:%s", utils.ToJSON(oldcfg), utils.ToJSON(db.oldDBCfg))
+	}
+	cfg.AttributeSCfg().Enabled = false
+	cfg.GetReloadChan(config.DATADB_JSN) <- struct{}{}
 	time.Sleep(10 * time.Millisecond)
-	if chrS.IsRunning() {
+	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
 	engineShutdown <- true

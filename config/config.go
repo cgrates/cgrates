@@ -1516,6 +1516,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case DATADB_JSN:
+		cfg.rldChans[DATADB_JSN] <- struct{}{}
 		if !fall {
 			break
 		}
@@ -1618,6 +1619,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case ATTRIBUTE_JSN:
+		cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
 		cfg.rldChans[ATTRIBUTE_JSN] <- struct{}{}
 		if !fall {
 			break

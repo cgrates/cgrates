@@ -521,7 +521,7 @@ func main() {
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, exitChan)
 
-	attrS := services.NewAttributeService(cfg, dm, cacheS, filterSChan, server)
+	attrS := services.NewAttributeService(cfg, dmService, cacheS, filterSChan, server)
 	dspS := services.NewDispatcherService(cfg, dm, cacheS, filterSChan, server, attrS.GetIntenternalChan())
 	chrS := services.NewChargerService(cfg, dm, cacheS, filterSChan, server,
 		attrS.GetIntenternalChan(), dspS.GetIntenternalChan())
