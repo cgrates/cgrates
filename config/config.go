@@ -1626,6 +1626,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case ChargerSCfgJson:
+		cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
 		cfg.rldChans[ChargerSCfgJson] <- struct{}{}
 		if !fall {
 			break
