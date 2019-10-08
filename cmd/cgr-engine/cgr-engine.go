@@ -523,7 +523,7 @@ func main() {
 	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, attrS.GetIntenternalChan())
 	chrS := services.NewChargerService(cfg, dmService, cacheS, filterSChan, server,
 		attrS.GetIntenternalChan(), dspS.GetIntenternalChan())
-	tS := services.NewThresholdService(cfg, dmService.GetDM(), cacheS, filterSChan, server)
+	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan, server)
 	stS := services.NewStatService(cfg, dmService.GetDM(), cacheS, filterSChan, server,
 		tS.GetIntenternalChan(), dspS.GetIntenternalChan())
 	reS := services.NewResourceService(cfg, dmService.GetDM(), cacheS, filterSChan, server,

@@ -31,7 +31,7 @@ import (
 )
 
 // NewThresholdService returns the Threshold Service
-func NewThresholdService(cfg *config.CGRConfig, dm *engine.DataManager,
+func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *utils.Server) servmanager.Service {
 	return &ThresholdService{
@@ -48,7 +48,7 @@ func NewThresholdService(cfg *config.CGRConfig, dm *engine.DataManager,
 type ThresholdService struct {
 	sync.RWMutex
 	cfg         *config.CGRConfig
-	dm          *engine.DataManager
+	dm          *DataDBService
 	cacheS      *engine.CacheS
 	filterSChan chan *engine.FilterS
 	server      *utils.Server
@@ -73,7 +73,7 @@ func (thrs *ThresholdService) Start() (err error) {
 
 	thrs.Lock()
 	defer thrs.Unlock()
-	thrs.thrs, err = engine.NewThresholdService(thrs.dm, thrs.cfg, filterS)
+	thrs.thrs, err = engine.NewThresholdService(thrs.dm.GetDM(), thrs.cfg, filterS)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.ThresholdS, err.Error()))
 		return

@@ -68,7 +68,7 @@ func TestCdrsReload(t *testing.T) {
 	db := NewDataDBService(cfg)
 	chrS := NewChargerService(cfg, db, chS, filterSChan, server, nil, nil)
 	schS := NewSchedulerService(cfg, nil, chS, server, make(chan rpcclient.RpcClientConnection, 1), nil)
-	tS := NewThresholdService(cfg, nil, chS, filterSChan, server)
+	tS := NewThresholdService(cfg, db, chS, filterSChan, server)
 	ralS := NewRalService(cfg, nil, nil, nil, chS, filterSChan, server,
 		tS.GetIntenternalChan(), internalChan, cacheSChan, internalChan, internalChan,
 		internalChan, schS, engineShutdown)
