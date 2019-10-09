@@ -135,5 +135,5 @@ func (ldrs *LoaderService) ServiceName() string {
 
 // ShouldRun returns if the service should be running
 func (ldrs *LoaderService) ShouldRun() bool {
-	return true
+	return ldrs.cfg.LoaderCfg().Enabled()
 }
