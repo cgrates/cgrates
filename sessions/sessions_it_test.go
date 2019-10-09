@@ -126,16 +126,15 @@ func TestSessionsItTerminatUnexist(t *testing.T) {
 	if err := sItRPC.Call(utils.SessionSv1TerminateSession, termArgs, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 
-	eAcntVal = 9.40
+	eAcntVal = 9.299800
 	if err := sItRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	time.Sleep(100 * time.Millisecond)
-
 	if err := sItRPC.Call(utils.SessionSv1ProcessCDR, termArgs.CGREvent, &rpl); err != nil {
 		t.Error(err)
 	} else if rpl != utils.OK {
@@ -155,6 +154,9 @@ func TestSessionsItTerminatUnexist(t *testing.T) {
 		if cdrs[0].Usage != "2m0s" {
 			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
 		}
+		if cdrs[0].Cost != 0.7002 {
+			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Cost, cdrs[0])
+		}
 	}
 
 }
@@ -162,7 +164,7 @@ func TestSessionsItTerminatUnexist(t *testing.T) {
 func TestSessionsItUpdateUnexist(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	eAcntVal := 9.4
+	eAcntVal := 9.299800
 	if err := sItRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
@@ -203,7 +205,7 @@ func TestSessionsItUpdateUnexist(t *testing.T) {
 
 	time.Sleep(10 * time.Millisecond)
 
-	eAcntVal = 8.099800
+	eAcntVal = 8.582900
 	if err := sItRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {

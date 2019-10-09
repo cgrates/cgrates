@@ -354,14 +354,12 @@ func (sS *SessionS) setSTerminator(s *Session) {
 	go func() {
 		select {
 		case <-s.sTerminator.timer.C:
-			s.Lock()
 			endUsage := s.sTerminator.ttl
 			if s.sTerminator.ttlUsage != nil {
 				endUsage = *s.sTerminator.ttlUsage
 			}
 			sS.forceSTerminate(s, endUsage,
 				s.sTerminator.ttlLastUsed)
-			s.Unlock()
 		case <-endChan:
 			s.sTerminator.timer.Stop()
 		}
@@ -2524,12 +2522,14 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 				time.Sleep(time.Duration(fib()) * time.Millisecond)
 				continue
 			}
+
 			if s, err = sS.initSession(args.CGREvent.Tenant,
 				ev, sS.biJClntID(clnt),
 				ev.GetStringIgnoreErrors(utils.OriginID), dbtItvl,
 				args.ArgDispatcher); err != nil {
 				return utils.NewErrRALs(err)
 			}
+
 		}
 		if err = sS.endSession(s,
 			ev.GetDurationPtrIgnoreErrors(utils.Usage),
