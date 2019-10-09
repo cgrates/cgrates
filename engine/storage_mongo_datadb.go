@@ -2274,3 +2274,10 @@ func (ms *MongoStorage) SetLoadIDsDrv(loadIDs map[string]int64) (err error) {
 		return err
 	})
 }
+
+func (ms *MongoStorage) RemoveLoadIDsDrv() (err error) {
+	return ms.query(func(sctx mongo.SessionContext) (err error) {
+		_, err = ms.getCol(ColLID).DeleteMany(sctx, bson.M{})
+		return err
+	})
+}

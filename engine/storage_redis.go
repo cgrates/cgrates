@@ -1675,3 +1675,7 @@ func (rs *RedisStorage) GetItemLoadIDsDrv(itemIDPrefix string) (loadIDs map[stri
 func (rs *RedisStorage) SetLoadIDsDrv(loadIDs map[string]int64) error {
 	return rs.Cmd(redis_HMSET, utils.LoadIDs, loadIDs).Err
 }
+
+func (rs *RedisStorage) RemoveLoadIDsDrv() (err error) {
+	return rs.Cmd(redis_DEL, utils.LoadIDs).Err
+}

@@ -1049,3 +1049,7 @@ func (iDB *InternalDB) RemoveDispatcherHostDrv(tenant, id string) (err error) {
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
+
+func (iDB *InternalDB) RemoveLoadIDsDrv() (err error) {
+	return utils.ErrNotImplemented
+}

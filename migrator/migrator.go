@@ -191,6 +191,8 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateTPChargers()
 		case utils.MetaTpDispatchers:
 			err = m.migrateTPDispatchers()
+		case utils.MetaLoadIDs:
+			err = m.migrateLoadIDs()
 			//DATADB ALL
 		case utils.MetaDataDB:
 			if err := m.migrateAccounts(); err != nil {
@@ -255,6 +257,9 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			}
 			if err := m.migrateDispatchers(); err != nil {
 				log.Print("ERROR: ", utils.MetaDispatchers, " ", err)
+			}
+			if err = m.migrateLoadIDs(); err != nil {
+				log.Print("ERROR: ", utils.MetaLoadIDs, " ", err)
 			}
 			err = nil
 			//STORDB ALL
