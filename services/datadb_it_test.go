@@ -49,7 +49,7 @@ func TestDataDBReload(t *testing.T) {
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg)
 	srvMngr.AddServices(NewAttributeService(cfg, db,
-		chS, filterSChan, server), NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown), db)
+		chS, filterSChan, server), NewLoaderService(cfg, db, filterSChan, server, nil, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
