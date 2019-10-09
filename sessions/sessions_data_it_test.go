@@ -559,6 +559,7 @@ func TestSessionsDataTTLExpired(t *testing.T) {
 }
 
 func TestSessionsDataTTLExpMultiUpdates(t *testing.T) {
+
 	var acnt *engine.Account
 	acntAttrs := &utils.AttrGetAccount{
 		Tenant:  "cgrates.org",

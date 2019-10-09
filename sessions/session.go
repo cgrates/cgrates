@@ -112,7 +112,6 @@ func (s Session) Clone() (cln *Session) {
 }
 
 func (s *Session) AsExternalSessions(tmz, nodeID string) (aSs []*ExternalSession) {
-	s.RLock()
 	aSs = make([]*ExternalSession, len(s.SRuns))
 	for i, sr := range s.SRuns {
 		aSs[i] = &ExternalSession{
@@ -143,11 +142,9 @@ func (s *Session) AsExternalSessions(tmz, nodeID string) (aSs []*ExternalSession
 			aSs[i].MaxCostSoFar = sr.CD.MaxCostSoFar
 		}
 	}
-	s.RUnlock()
 	return
 }
 func (s *Session) AsExternalSession(sr *SRun, tmz, nodeID string) (aS *ExternalSession) {
-	s.RLock()
 	aS = &ExternalSession{
 		CGRID:         s.CGRID,
 		RunID:         sr.Event.GetStringIgnoreErrors(utils.RunID),
@@ -175,7 +172,6 @@ func (s *Session) AsExternalSession(sr *SRun, tmz, nodeID string) (aS *ExternalS
 		aS.MaxRateUnit = sr.CD.MaxRateUnit
 		aS.MaxCostSoFar = sr.CD.MaxCostSoFar
 	}
-	s.RUnlock()
 	return
 }
 
