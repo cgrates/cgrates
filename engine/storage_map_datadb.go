@@ -1451,3 +1451,7 @@ func (ms *MapStorage) SetLoadIDsDrv(loadIDs map[string]int64) (err error) {
 	ms.mu.Unlock()
 	return
 }
+
+func (ms *MapStorage) RemoveLoadIDsDrv() (err error) {
+	return utils.ErrNotImplemented
+}

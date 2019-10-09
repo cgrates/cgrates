@@ -414,6 +414,7 @@ const (
 	Chargers                    = "Chargers"
 	Dispatchers                 = "Dispatchers"
 	StatS                       = "Stats"
+	LoadIDsVrs                  = "LoadIDs"
 	RALService                  = "RALs"
 	CostSource                  = "CostSource"
 	ExtraInfo                   = "ExtraInfo"
@@ -695,6 +696,7 @@ const (
 	CapThresholdHits        = "ThresholdHits"
 	CapThresholds           = "Thresholds"
 	CapStatQueues           = "StatQueues"
+	MetaLoadIDs             = "*load_ids"
 )
 
 const (
