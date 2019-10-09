@@ -28,15 +28,15 @@ import (
 // CacheSv1Ping interogates CacheSv1 server responsible to process the event
 func (dS *DispatcherService) CacheSv1Ping(args *utils.CGREventWithArgDispatcher,
 	reply *string) (err error) {
-	tnt := dS.cfg.GeneralCfg().DefaultTenant
-	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
-		tnt = args.CGREvent.Tenant
+	if args == nil {
+		args = utils.NewCGREventWithArgDispatcher()
 	}
+	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.CacheSv1Ping, tnt,
+		if err = dS.authorize(utils.CacheSv1Ping, args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
 			return
 		}

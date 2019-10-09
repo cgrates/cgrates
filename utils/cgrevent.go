@@ -231,6 +231,10 @@ type CGREvents struct {
 	Events []map[string]interface{}
 }
 
+func NewCGREventWithArgDispatcher() *CGREventWithArgDispatcher {
+	return new(CGREventWithArgDispatcher)
+}
+
 type CGREventWithArgDispatcher struct {
 	*CGREvent
 	*ArgDispatcher

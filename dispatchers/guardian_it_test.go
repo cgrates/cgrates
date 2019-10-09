@@ -40,6 +40,11 @@ func TestDspGuardianSTMySQL(t *testing.T) {
 
 func testDspGrdPing(t *testing.T) {
 	var reply string
+	if err := allEngine.RCP.Call(utils.GuardianSv1Ping, nil, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.Pong {
+		t.Errorf("Received: %s", reply)
+	}
 	if err := allEngine.RCP.Call(utils.GuardianSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {

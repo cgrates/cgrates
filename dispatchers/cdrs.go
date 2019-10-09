@@ -28,6 +28,9 @@ import (
 // CDRsV1Ping interogates CDRsV1 server responsible to process the event
 func (dS *DispatcherService) CDRsV1Ping(args *utils.CGREventWithArgDispatcher,
 	reply *string) (err error) {
+	if args == nil {
+		args = utils.NewCGREventWithArgDispatcher()
+	}
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
 		tnt = args.CGREvent.Tenant

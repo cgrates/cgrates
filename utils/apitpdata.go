@@ -628,45 +628,48 @@ type AttrGetCdrs struct {
 	Paginator
 }
 
-func (self *AttrGetCdrs) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
-	cdrFltr := &CDRsFilter{
-		CGRIDs:              self.CgrIds,
-		RunIDs:              self.MediationRunIds,
-		ToRs:                self.TORs,
-		OriginHosts:         self.CdrHosts,
-		Sources:             self.CdrSources,
-		RequestTypes:        self.ReqTypes,
-		Tenants:             self.Tenants,
-		Categories:          self.Categories,
-		Accounts:            self.Accounts,
-		Subjects:            self.Subjects,
-		DestinationPrefixes: self.DestinationPrefixes,
-		OrderIDStart:        self.OrderIdStart,
-		OrderIDEnd:          self.OrderIdEnd,
-		Paginator:           self.Paginator,
-		OrderBy:             self.OrderBy,
+func (fltr *AttrGetCdrs) AsCDRsFilter(timezone string) (cdrFltr *CDRsFilter, err error) {
+	if fltr == nil {
+		return
 	}
-	if len(self.TimeStart) != 0 {
-		if answerTimeStart, err := ParseTimeDetectLayout(self.TimeStart, timezone); err != nil {
+	cdrFltr = &CDRsFilter{
+		CGRIDs:              fltr.CgrIds,
+		RunIDs:              fltr.MediationRunIds,
+		ToRs:                fltr.TORs,
+		OriginHosts:         fltr.CdrHosts,
+		Sources:             fltr.CdrSources,
+		RequestTypes:        fltr.ReqTypes,
+		Tenants:             fltr.Tenants,
+		Categories:          fltr.Categories,
+		Accounts:            fltr.Accounts,
+		Subjects:            fltr.Subjects,
+		DestinationPrefixes: fltr.DestinationPrefixes,
+		OrderIDStart:        fltr.OrderIdStart,
+		OrderIDEnd:          fltr.OrderIdEnd,
+		Paginator:           fltr.Paginator,
+		OrderBy:             fltr.OrderBy,
+	}
+	if len(fltr.TimeStart) != 0 {
+		if answerTimeStart, err := ParseTimeDetectLayout(fltr.TimeStart, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.AnswerTimeStart = &answerTimeStart
 		}
 	}
-	if len(self.TimeEnd) != 0 {
-		if answerTimeEnd, err := ParseTimeDetectLayout(self.TimeEnd, timezone); err != nil {
+	if len(fltr.TimeEnd) != 0 {
+		if answerTimeEnd, err := ParseTimeDetectLayout(fltr.TimeEnd, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.AnswerTimeEnd = &answerTimeEnd
 		}
 	}
-	if self.SkipRated {
+	if fltr.SkipRated {
 		cdrFltr.MaxCost = Float64Pointer(-1.0)
-	} else if self.SkipRated {
+	} else if fltr.SkipRated {
 		cdrFltr.MinCost = Float64Pointer(0.0)
 		cdrFltr.MaxCost = Float64Pointer(-1.0)
 	}
-	return cdrFltr, nil
+	return
 }
 
 type AttrRemCdrs struct {
@@ -835,102 +838,105 @@ type RPCCDRsFilter struct {
 	Paginator                                // Add pagination
 }
 
-func (self *RPCCDRsFilter) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
-	cdrFltr := &CDRsFilter{
-		CGRIDs:                 self.CGRIDs,
-		NotCGRIDs:              self.NotCGRIDs,
-		RunIDs:                 self.RunIDs,
-		NotRunIDs:              self.NotRunIDs,
-		OriginIDs:              self.OriginIDs,
-		NotOriginIDs:           self.NotOriginIDs,
-		ToRs:                   self.ToRs,
-		NotToRs:                self.NotToRs,
-		OriginHosts:            self.OriginHosts,
-		NotOriginHosts:         self.NotOriginHosts,
-		Sources:                self.Sources,
-		NotSources:             self.NotSources,
-		RequestTypes:           self.RequestTypes,
-		NotRequestTypes:        self.NotRequestTypes,
-		Tenants:                self.Tenants,
-		NotTenants:             self.NotTenants,
-		Categories:             self.Categories,
-		NotCategories:          self.NotCategories,
-		Accounts:               self.Accounts,
-		NotAccounts:            self.NotAccounts,
-		Subjects:               self.Subjects,
-		NotSubjects:            self.NotSubjects,
-		DestinationPrefixes:    self.DestinationPrefixes,
-		NotDestinationPrefixes: self.NotDestinationPrefixes,
-		Costs:                  self.Costs,
-		NotCosts:               self.NotCosts,
-		ExtraFields:            self.ExtraFields,
-		NotExtraFields:         self.NotExtraFields,
-		OrderIDStart:           self.OrderIDStart,
-		OrderIDEnd:             self.OrderIDEnd,
-		MinUsage:               self.MinUsage,
-		MaxUsage:               self.MaxUsage,
-		MinCost:                self.MinCost,
-		MaxCost:                self.MaxCost,
-		Paginator:              self.Paginator,
-		OrderBy:                self.OrderBy,
+func (fltr *RPCCDRsFilter) AsCDRsFilter(timezone string) (cdrFltr *CDRsFilter, err error) {
+	if fltr == nil {
+		return
 	}
-	if len(self.SetupTimeStart) != 0 {
-		if sTimeStart, err := ParseTimeDetectLayout(self.SetupTimeStart, timezone); err != nil {
+	cdrFltr = &CDRsFilter{
+		CGRIDs:                 fltr.CGRIDs,
+		NotCGRIDs:              fltr.NotCGRIDs,
+		RunIDs:                 fltr.RunIDs,
+		NotRunIDs:              fltr.NotRunIDs,
+		OriginIDs:              fltr.OriginIDs,
+		NotOriginIDs:           fltr.NotOriginIDs,
+		ToRs:                   fltr.ToRs,
+		NotToRs:                fltr.NotToRs,
+		OriginHosts:            fltr.OriginHosts,
+		NotOriginHosts:         fltr.NotOriginHosts,
+		Sources:                fltr.Sources,
+		NotSources:             fltr.NotSources,
+		RequestTypes:           fltr.RequestTypes,
+		NotRequestTypes:        fltr.NotRequestTypes,
+		Tenants:                fltr.Tenants,
+		NotTenants:             fltr.NotTenants,
+		Categories:             fltr.Categories,
+		NotCategories:          fltr.NotCategories,
+		Accounts:               fltr.Accounts,
+		NotAccounts:            fltr.NotAccounts,
+		Subjects:               fltr.Subjects,
+		NotSubjects:            fltr.NotSubjects,
+		DestinationPrefixes:    fltr.DestinationPrefixes,
+		NotDestinationPrefixes: fltr.NotDestinationPrefixes,
+		Costs:                  fltr.Costs,
+		NotCosts:               fltr.NotCosts,
+		ExtraFields:            fltr.ExtraFields,
+		NotExtraFields:         fltr.NotExtraFields,
+		OrderIDStart:           fltr.OrderIDStart,
+		OrderIDEnd:             fltr.OrderIDEnd,
+		MinUsage:               fltr.MinUsage,
+		MaxUsage:               fltr.MaxUsage,
+		MinCost:                fltr.MinCost,
+		MaxCost:                fltr.MaxCost,
+		Paginator:              fltr.Paginator,
+		OrderBy:                fltr.OrderBy,
+	}
+	if len(fltr.SetupTimeStart) != 0 {
+		if sTimeStart, err := ParseTimeDetectLayout(fltr.SetupTimeStart, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.SetupTimeStart = &sTimeStart
 		}
 	}
-	if len(self.SetupTimeEnd) != 0 {
-		if sTimeEnd, err := ParseTimeDetectLayout(self.SetupTimeEnd, timezone); err != nil {
+	if len(fltr.SetupTimeEnd) != 0 {
+		if sTimeEnd, err := ParseTimeDetectLayout(fltr.SetupTimeEnd, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.SetupTimeEnd = &sTimeEnd
 		}
 	}
-	if len(self.AnswerTimeStart) != 0 {
-		if aTimeStart, err := ParseTimeDetectLayout(self.AnswerTimeStart, timezone); err != nil {
+	if len(fltr.AnswerTimeStart) != 0 {
+		if aTimeStart, err := ParseTimeDetectLayout(fltr.AnswerTimeStart, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.AnswerTimeStart = &aTimeStart
 		}
 	}
-	if len(self.AnswerTimeEnd) != 0 {
-		if aTimeEnd, err := ParseTimeDetectLayout(self.AnswerTimeEnd, timezone); err != nil {
+	if len(fltr.AnswerTimeEnd) != 0 {
+		if aTimeEnd, err := ParseTimeDetectLayout(fltr.AnswerTimeEnd, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.AnswerTimeEnd = &aTimeEnd
 		}
 	}
-	if len(self.CreatedAtStart) != 0 {
-		if tStart, err := ParseTimeDetectLayout(self.CreatedAtStart, timezone); err != nil {
+	if len(fltr.CreatedAtStart) != 0 {
+		if tStart, err := ParseTimeDetectLayout(fltr.CreatedAtStart, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.CreatedAtStart = &tStart
 		}
 	}
-	if len(self.CreatedAtEnd) != 0 {
-		if tEnd, err := ParseTimeDetectLayout(self.CreatedAtEnd, timezone); err != nil {
+	if len(fltr.CreatedAtEnd) != 0 {
+		if tEnd, err := ParseTimeDetectLayout(fltr.CreatedAtEnd, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.CreatedAtEnd = &tEnd
 		}
 	}
-	if len(self.UpdatedAtStart) != 0 {
-		if tStart, err := ParseTimeDetectLayout(self.UpdatedAtStart, timezone); err != nil {
+	if len(fltr.UpdatedAtStart) != 0 {
+		if tStart, err := ParseTimeDetectLayout(fltr.UpdatedAtStart, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.UpdatedAtStart = &tStart
 		}
 	}
-	if len(self.UpdatedAtEnd) != 0 {
-		if tEnd, err := ParseTimeDetectLayout(self.UpdatedAtEnd, timezone); err != nil {
+	if len(fltr.UpdatedAtEnd) != 0 {
+		if tEnd, err := ParseTimeDetectLayout(fltr.UpdatedAtEnd, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.UpdatedAtEnd = &tEnd
 		}
 	}
-	return cdrFltr, nil
+	return
 }
 
 type AttrSetActions struct {
@@ -1361,7 +1367,8 @@ func AppendToSMCostFilter(smcFilter *SMCostFilter, fieldType, fieldName string,
 
 type RPCCDRsFilterWithArgDispatcher struct {
 	*RPCCDRsFilter
-	*TenantWithArgDispatcher
+	*ArgDispatcher
+	*TenantArg
 }
 
 type ArgsGetCacheItemIDsWithArgDispatcher struct {

@@ -27,6 +27,9 @@ import (
 // GuardianSv1Ping interogates GuardianSv1 server responsible to process the event
 func (dS *DispatcherService) GuardianSv1Ping(args *utils.CGREventWithArgDispatcher,
 	reply *string) (err error) {
+	if args == nil {
+		args = utils.NewCGREventWithArgDispatcher()
+	}
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
 	if dS.attrS != nil {
 		if args.ArgDispatcher == nil {
