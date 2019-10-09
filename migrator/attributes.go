@@ -299,8 +299,12 @@ func (v2AttrPrf v2AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 			filterIDs = append(filterIDs, utils.MetaExists+":"+attr.FieldName+":")
 		}
 		//Initial not *any translate to if value of fieldName = initial do stuff
-		if attr.Initial.(string) != utils.META_ANY {
-			filterIDs = append(filterIDs, utils.MetaString+":"+attr.FieldName+":"+attr.Initial.(string))
+		if attr.Initial != nil { // if is nil we take it as default: utils.META_ANY
+			if initStr, canCast := attr.Initial.(string); !canCast {
+				return nil, fmt.Errorf("can't cast initial value to string for AttributeProfile with ID:%s", attrPrf.ID)
+			} else if initStr != utils.META_ANY {
+				filterIDs = append(filterIDs, utils.MetaString+":"+attr.FieldName+":"+initStr)
+			}
 		}
 		attrPrf.Attributes = append(attrPrf.Attributes, &engine.Attribute{
 			FilterIDs: filterIDs,
