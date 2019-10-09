@@ -165,7 +165,7 @@ func (srvMngr *ServiceManager) StartServices() (err error) {
 		utils.RadiusAgent:     srvMngr.GetConfig().RadiusAgentCfg().Enabled,
 		utils.DiameterAgent:   srvMngr.GetConfig().DiameterAgentCfg().Enabled,
 		utils.HTTPAgent:       len(srvMngr.GetConfig().HttpAgentCfg()) != 0,
-		utils.LoaderS:         true,
+		utils.LoaderS:         srvMngr.GetConfig().LoaderCfg().Enabled(),
 		utils.AnalyzerS:       srvMngr.GetConfig().AnalyzerSCfg().Enabled,
 		utils.DispatcherS:     srvMngr.GetConfig().DispatcherSCfg().Enabled,
 	} {

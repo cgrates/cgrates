@@ -1038,7 +1038,7 @@ func TestDbDefaults(t *testing.T) {
 }
 
 func TestCgrLoaderCfgITDefaults(t *testing.T) {
-	eCfg := []*LoaderSCfg{
+	eCfg := LoaderSCfgs{
 		{
 			Id:           utils.META_DEFAULT,
 			Enabled:      false,

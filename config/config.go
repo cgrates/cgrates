@@ -170,7 +170,7 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.loaderCgrCfg = new(LoaderCgrCfg)
 	cfg.migratorCgrCfg = new(MigratorCgrCfg)
 	cfg.mailerCfg = new(MailerCfg)
-	cfg.loaderCfg = make([]*LoaderSCfg, 0)
+	cfg.loaderCfg = make(LoaderSCfgs, 0)
 	cfg.apier = new(ApierCfg)
 	cfg.ersCfg = new(ERsCfg)
 
@@ -255,7 +255,7 @@ type CGRConfig struct {
 
 	CdreProfiles map[string]*CdreCfg   // Cdre config profiles
 	CdrcProfiles map[string][]*CdrcCfg // Number of CDRC instances running imports, format map[dirPath][]{Configs}
-	loaderCfg    []*LoaderSCfg         // LoaderS configs
+	loaderCfg    LoaderSCfgs           // LoaderS configs
 	httpAgentCfg HttpAgentCfgs         // HttpAgent configs
 
 	ConfigReloads map[string]chan struct{} // Signals to specific entities that a config reload should occur
@@ -1021,7 +1021,7 @@ func (cfg *CGRConfig) loadLoaderSCfg(jsnCfg *CgrJsonCfg) (err error) {
 		return
 	}
 	if jsnLoaderCfg != nil {
-		// cfg.loaderCfg = make([]*LoaderSCfg, len(jsnLoaderCfg))
+		// cfg.loaderCfg = make(LoaderSCfgs, len(jsnLoaderCfg))
 		for _, profile := range jsnLoaderCfg {
 			loadSCfgp := NewDfltLoaderSCfg()
 			loadSCfgp.loadFromJsonCfg(profile, cfg.GeneralCfg().RSRSep)
@@ -1232,7 +1232,7 @@ func (cfg *CGRConfig) CacheCfg() CacheCfg {
 }
 
 // LoaderCfg returns the Loader Service
-func (cfg *CGRConfig) LoaderCfg() []*LoaderSCfg {
+func (cfg *CGRConfig) LoaderCfg() LoaderSCfgs {
 	cfg.lks[LoaderJson].Lock()
 	defer cfg.lks[LoaderJson].Unlock()
 	return cfg.loaderCfg
@@ -1685,6 +1685,9 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case LoaderJson:
+		if !fall {
+			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+		}
 		cfg.rldChans[LoaderJson] <- struct{}{}
 		if !fall {
 			break

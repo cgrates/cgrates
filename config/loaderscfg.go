@@ -30,6 +30,19 @@ func NewDfltLoaderSCfg() *LoaderSCfg {
 	return &dfltVal
 }
 
+// LoaderSCfgs to export some methods for LoaderS profiles
+type LoaderSCfgs []*LoaderSCfg
+
+// Enabled returns true if Loader Service is enabled
+func (ldrs LoaderSCfgs) Enabled() bool {
+	for _, ldr := range ldrs {
+		if ldr.Enabled {
+			return true
+		}
+	}
+	return false
+}
+
 type LoaderSCfg struct {
 	Id             string
 	Enabled        bool

@@ -31,8 +31,9 @@ import (
 // NewDataDBService returns the DataDB Service
 func NewDataDBService(cfg *config.CGRConfig) *DataDBService {
 	return &DataDBService{
-		cfg: cfg,
-		db:  engine.NewDataManager(nil, cfg.CacheCfg()),
+		cfg:    cfg,
+		dbchan: make(chan *engine.DataManager, 1),
+		db:     engine.NewDataManager(nil, cfg.CacheCfg()), // to be removed
 	}
 }
 
@@ -42,7 +43,8 @@ type DataDBService struct {
 	cfg      *config.CGRConfig
 	oldDBCfg *config.DataDbCfg
 
-	db *engine.DataManager
+	db     *engine.DataManager
+	dbchan chan *engine.DataManager
 }
 
 // Start should handle the sercive start
@@ -70,6 +72,7 @@ func (db *DataDBService) Start() (err error) {
 		fmt.Println(err)
 		return
 	}
+	db.dbchan <- db.db
 	return
 }
 
@@ -131,7 +134,8 @@ func (db *DataDBService) ShouldRun() bool {
 func (db *DataDBService) needsDB() bool {
 	return db.cfg.RalsCfg().Enabled || db.cfg.SchedulerCfg().Enabled || db.cfg.ChargerSCfg().Enabled ||
 		db.cfg.AttributeSCfg().Enabled || db.cfg.ResourceSCfg().Enabled || db.cfg.StatSCfg().Enabled ||
-		db.cfg.ThresholdSCfg().Enabled || db.cfg.SupplierSCfg().Enabled || db.cfg.DispatcherSCfg().Enabled
+		db.cfg.ThresholdSCfg().Enabled || db.cfg.SupplierSCfg().Enabled || db.cfg.DispatcherSCfg().Enabled ||
+		db.cfg.LoaderCfg().Enabled()
 }
 
 // GetDM returns the DataManager
@@ -155,4 +159,11 @@ func (db *DataDBService) needsConnectionReload() bool {
 		return db.oldDBCfg.DataDbSentinelName != db.cfg.DataDbCfg().DataDbSentinelName
 	}
 	return false
+}
+
+// GetDMChan returns the DataManager chanel
+func (db *DataDBService) GetDMChan() chan *engine.DataManager {
+	db.RLock()
+	defer db.RUnlock()
+	return db.dbchan
 }
