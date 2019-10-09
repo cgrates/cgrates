@@ -68,6 +68,9 @@ func (schS *SchedulerService) Start() (err error) {
 
 	<-schS.cacheS.GetPrecacheChannel(utils.CacheActionPlans) // wait for ActionPlans to be cached
 
+	if !schS.dm.IsRunning() {
+		return fmt.Errorf("schedulerS needs DB")
+	}
 	schS.Lock()
 	defer schS.Unlock()
 

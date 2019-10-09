@@ -32,7 +32,7 @@ import (
 )
 
 // NewLoaderService returns the Loader Service
-func NewLoaderService(cfg *config.CGRConfig, dm *engine.DataManager,
+func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS, server *utils.Server,
 	cacheSChan, dispatcherChan chan rpcclient.RpcClientConnection,
 	exitChan chan bool) servmanager.Service {
@@ -52,7 +52,7 @@ func NewLoaderService(cfg *config.CGRConfig, dm *engine.DataManager,
 type LoaderService struct {
 	sync.RWMutex
 	cfg            *config.CGRConfig
-	dm             *engine.DataManager
+	dm             *DataDBService
 	filterSChan    chan *engine.FilterS
 	server         *utils.Server
 	cacheSChan     chan rpcclient.RpcClientConnection
@@ -80,7 +80,7 @@ func (ldrs *LoaderService) Start() (err error) {
 	ldrs.Lock()
 	defer ldrs.Unlock()
 
-	ldrs.ldrs = loaders.NewLoaderService(ldrs.dm, ldrs.cfg.LoaderCfg(),
+	ldrs.ldrs = loaders.NewLoaderService(ldrs.dm.GetDM(), ldrs.cfg.LoaderCfg(),
 		ldrs.cfg.GeneralCfg().DefaultTimezone, ldrs.exitChan, filterS, internalChan)
 	if !ldrs.ldrs.Enabled() {
 		return
@@ -105,7 +105,7 @@ func (ldrs *LoaderService) Reload() (err error) {
 	if ldrs.cfg.DispatcherSCfg().Enabled {
 		internalChan = ldrs.dispatcherChan
 	}
-	ldrs.ldrs.Reload(ldrs.dm, ldrs.cfg.LoaderCfg(), ldrs.cfg.GeneralCfg().DefaultTimezone,
+	ldrs.ldrs.Reload(ldrs.dm.GetDM(), ldrs.cfg.LoaderCfg(), ldrs.cfg.GeneralCfg().DefaultTimezone,
 		ldrs.exitChan, filterS, internalChan)
 	ldrs.RUnlock()
 	return

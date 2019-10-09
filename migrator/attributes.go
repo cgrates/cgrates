@@ -20,6 +20,7 @@ package migrator
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"

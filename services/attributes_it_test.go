@@ -49,7 +49,7 @@ func TestAttributeSReload(t *testing.T) {
 	db := NewDataDBService(cfg)
 	attrS := NewAttributeService(cfg, db,
 		chS, filterSChan, server)
-	srvMngr.AddServices(attrS, NewLoaderService(cfg, nil, filterSChan, server, nil, nil, engineShutdown), db)
+	srvMngr.AddServices(attrS, NewLoaderService(cfg, db, filterSChan, server, nil, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

@@ -79,7 +79,7 @@ func TestSessionSReload(t *testing.T) {
 		nil, nil, nil, nil)
 	srv := NewSessionService(cfg, db, server, chrS.GetIntenternalChan(),
 		ralS.GetResponder().GetIntenternalChan(), nil, nil, nil, nil, nil, cdrS.GetIntenternalChan(), nil, engineShutdown)
-	srvMngr.AddServices(srv, chrS, schS, ralS, cdrS, NewLoaderService(cfg, nil, filterSChan, server, cacheSChan, nil, engineShutdown), db)
+	srvMngr.AddServices(srv, chrS, schS, ralS, cdrS, NewLoaderService(cfg, db, filterSChan, server, cacheSChan, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
