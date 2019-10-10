@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -153,7 +152,6 @@ func testAPIerVerifyAttributesAfterLoad(t *testing.T) {
 	var attrReply *engine.AttributeProfile
 	if err := apierRPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		ev, &attrReply); err != nil {
-		fmt.Println(err)
 		t.Error(err)
 	}
 	if attrReply == nil {

@@ -1167,46 +1167,6 @@ func TestSessionStransitSState(t *testing.T) {
 	}
 }
 
-func TestSessionSregisterSessionWithTerminator(t *testing.T) {
-	sSCfg, _ := config.NewDefaultCGRConfig()
-	config.SetCgrConfig(sSCfg)
-	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
-	sSEv := engine.NewMapEvent(map[string]interface{}{
-		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.ToR:         "*voice",
-		utils.OriginID:    "111",
-		utils.Direction:   "*out",
-		utils.Account:     "account1",
-		utils.Subject:     "subject1",
-		utils.Destination: "+4986517174963",
-		utils.Category:    "call",
-		utils.Tenant:      "cgrates.org",
-		utils.RequestType: "*prepaid",
-		utils.SetupTime:   "2015-11-09 14:21:24",
-		utils.AnswerTime:  "2015-11-09 14:22:02",
-		utils.Usage:       "1m23s",
-		utils.LastUsed:    "21s",
-		utils.PDD:         "300ms",
-		utils.SUPPLIER:    "supplier1",
-		utils.OriginHost:  "127.0.0.1",
-		utils.SessionTTL:  "2s", //used in setSTerminator
-	})
-	s := &Session{
-		CGRID:      "session1",
-		EventStart: sSEv,
-	}
-	//register the session as active with terminator
-	sS.registerSession(s, false)
-
-	rcvS := sS.getSessions("session1", false)
-	if !reflect.DeepEqual(rcvS[0], s) {
-		t.Errorf("Expecting %+v, received: %+v", s, rcvS[0])
-	} else if rcvS[0].sTerminator.ttl != time.Duration(2*time.Second) {
-		t.Errorf("Expecting %+v, received: %+v",
-			time.Duration(2*time.Second), rcvS[0].sTerminator.ttl)
-	}
-}
-
 func TestSessionSrelocateSessionS(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
 	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")

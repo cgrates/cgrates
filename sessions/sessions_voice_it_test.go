@@ -899,7 +899,6 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 		Value:         utils.Float64Pointer(300 * float64(time.Second)),
 		RatingSubject: utils.StringPointer("*zero50ms"),
 	}
-
 	var reply string
 	if err := sessionsRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
 		t.Error(err)
@@ -1021,7 +1020,6 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	} else if aSessions[0].Usage != time.Duration(150)*time.Second {
 		t.Errorf("Expecting 2m30s, received usage: %v", aSessions[0].Usage)
 	}
-
 	eAcntVal = 150.0 * float64(time.Second)
 	if err := sessionsRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
@@ -1030,7 +1028,7 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 			eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond) // should trigger the TTL from config
 	eAcntVal = 149.95 * float64(time.Second)
 	if err := sessionsRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
