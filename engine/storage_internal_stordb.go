@@ -837,6 +837,9 @@ func (iDB *InternalDB) SetTPDispatcherHosts(dpps []*utils.TPDispatcherHost) (err
 
 //implement CdrStorage interface
 func (iDB *InternalDB) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
+	if cdr.OrderID == 0 {
+		cdr.OrderID = iDB.cnter.Next()
+	}
 	if !allowUpdate {
 		x, ok := iDB.db.Get(utils.CDRsTBL, utils.ConcatenatedKey(utils.CDRsTBL, cdr.CGRID, cdr.RunID, cdr.OriginID))
 		if ok && x != nil {
@@ -933,8 +936,38 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 				}
 			}
 		}
-
 	}
+	//check if we have ExtraFields
+	if len(filter.ExtraFields) != 0 {
+		for extFldID, extrFldVal := range filter.ExtraFields {
+			// need to discuss about this case
+			if extrFldVal == utils.MetaExists {
+
+			}
+			grpMpIDs := make(utils.StringMap)
+			grpIDs := iDB.db.GetGroupItemIDs(utils.CDRsTBL, utils.ConcatenatedKey(extFldID, extrFldVal))
+			for _, id := range grpIDs {
+				grpMpIDs[id] = true
+			}
+
+			if len(grpMpIDs) == 0 {
+				return nil, 0, utils.ErrNotFound
+			}
+			if cdrMpIDs == nil {
+				cdrMpIDs = grpMpIDs
+			} else {
+				for id := range cdrMpIDs {
+					if !grpMpIDs.HasKey(id) {
+						delete(cdrMpIDs, id)
+						if len(cdrMpIDs) == 0 {
+							return nil, 0, utils.ErrNotFound
+						}
+					}
+				}
+			}
+		}
+	}
+
 	if cdrMpIDs == nil {
 		cdrMpIDs = utils.StringMapFromSlice(iDB.db.GetItemIDs(utils.CDRsTBL, utils.EmptyString))
 	}
@@ -972,18 +1005,37 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 			}
 		}
 	}
+	//check if we have ExtraFields
+	if len(filter.NotExtraFields) != 0 {
+		for notExtFldID, notExtFlddVal := range filter.NotExtraFields {
+			// need to discuss about this case
+			if notExtFlddVal == utils.MetaExists {
+
+			}
+			grpIDs := iDB.db.GetGroupItemIDs(utils.CDRsTBL, utils.ConcatenatedKey(notExtFldID, notExtFlddVal))
+			for _, id := range grpIDs {
+				if cdrMpIDs.HasKey(id) {
+					delete(cdrMpIDs, id)
+					if len(cdrMpIDs) == 0 {
+						return nil, 0, utils.ErrNotFound
+					}
+				}
+			}
+		}
+	}
 
 	if len(cdrMpIDs) == 0 {
 		return nil, 0, utils.ErrNotFound
 	}
 
-	//pageCounter := 0
+	paginatorOffsetCounter := 0
 	for key := range cdrMpIDs {
 		x, ok := iDB.db.Get(utils.CDRsTBL, key)
 		if !ok || x == nil {
 			return nil, 0, utils.ErrNotFound
 		}
 		cdr := x.(*CDR)
+
 		if len(filter.Costs) > 0 {
 			matchCost := false
 			for _, cost := range filter.Costs {
@@ -1015,7 +1067,7 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 			}
 		}
 		if filter.OrderIDEnd != nil {
-			if cdr.OrderID > *filter.OrderIDEnd {
+			if cdr.OrderID >= *filter.OrderIDEnd {
 				continue
 			}
 		}
@@ -1069,7 +1121,7 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 					continue
 				}
 			} else {
-				if cdr.Cost < *filter.MinCost && cdr.Cost > *filter.MaxCost {
+				if cdr.Cost < *filter.MinCost || cdr.Cost > *filter.MaxCost {
 					continue
 				}
 			}
@@ -1079,22 +1131,29 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 					continue
 				}
 			} else { // Above limited CDRs, since MinCost is empty, make sure we query also NULL cost
-				if cdr.Cost > 0 {
+				if cdr.Cost >= *filter.MaxCost {
 					continue
 				}
 			}
 		}
 
+		if filter.Paginator.Offset != nil {
+			if paginatorOffsetCounter <= *filter.Paginator.Offset {
+				paginatorOffsetCounter += 1
+				continue
+			}
+		}
+		if filter.Paginator.Limit != nil {
+			if len(cdrs) >= *filter.Paginator.Limit {
+				break
+			}
+		}
 		//pass all filters and append to slice
 		cdrs = append(cdrs, cdr)
 	}
-
-	// //apply paginator
-	// cdrIDs = filter.Paginator.PaginateStringSlice(cdrIDs)
-	// if filter.Count {
-	// 	return nil, int64(len(cdrs)), nil
-	// }
-
+	if filter.Count {
+		return nil, int64(len(cdrs)), nil
+	}
 	if remove {
 		for _, cdr := range cdrs {
 			iDB.db.Remove(utils.CDRsTBL, utils.ConcatenatedKey(utils.CDRsTBL, cdr.CGRID, cdr.RunID, cdr.OriginID),

@@ -259,6 +259,15 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	if err := InitStorDb(cfg); err != nil {
 		return fmt.Errorf("testGetCDRs #1: %v", err)
 	}
+	cfg.StorDbCfg().StorDBStringIndexedFields = []string{utils.CGRID,
+		utils.RunID, utils.OriginHost, utils.Source, utils.OriginID,
+		utils.ToR, utils.RequestType, utils.Tenant,
+		utils.Category, utils.Account, utils.Subject,
+		"Service-Context-Id",
+	}
+	cfg.StorDbCfg().StorDBPrefixIndexedFields = []string{
+		utils.Destination,
+	}
 	cdrStorage, err := ConfigureCdrStorage(cfg.StorDbCfg().StorDBType,
 		cfg.StorDbCfg().StorDBHost, cfg.StorDbCfg().StorDBPort,
 		cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
@@ -499,7 +508,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(5), Offset: utils.IntPointer(0)}}, false); err != nil {
 		return fmt.Errorf("testGetCDRs #9 err: %v", err)
 	} else if len(CDRs) != 5 {
-		return fmt.Errorf("testGetCDRs #10, unexpected number of CDRs returned: %+v", CDRs)
+		return fmt.Errorf("testGetCDRs #10, unexpected number of CDRs returned: %+v", len(CDRs))
 	}
 	// Offset 5
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(5), Offset: utils.IntPointer(0)}}, false); err != nil {
@@ -511,7 +520,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(2), Offset: utils.IntPointer(5)}}, false); err != nil {
 		return fmt.Errorf("testGetCDRs #12 err: %v", err)
 	} else if len(CDRs) != 2 {
-		return fmt.Errorf("testGetCDRs #13, unexpected number of CDRs returned: %+v", CDRs)
+		return fmt.Errorf("testGetCDRs #13, unexpected number of CDRs returned: %+v", len(CDRs))
 	}
 	// Filter on cgrids
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{

@@ -944,7 +944,7 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 		initArgs, &initRpl); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(10 * time.Millisecond))
+	time.Sleep(time.Duration(20 * time.Millisecond))
 	if *initRpl.MaxUsage != usage {
 		t.Errorf("Expected: %+v, received: %+v", usage, *initRpl.MaxUsage)
 	}

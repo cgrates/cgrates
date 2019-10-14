@@ -732,7 +732,7 @@ func testDspSessionPassive(t *testing.T) {
 		CGRID:      rply[0].CGRID,
 		Tenant:     rply[0].Tenant,
 		ResourceID: "TestSSv1It1",
-		EventStart: engine.NewSafEvent(map[string]interface{}{
+		EventStart: engine.NewMapEvent(map[string]interface{}{
 			utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
 			utils.Tenant:      "cgrates.org",
 			utils.Category:    "call",

@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -35,12 +36,13 @@ type InternalDB struct {
 	mu                  sync.RWMutex
 	stringIndexedFields []string
 	prefixIndexedFields []string
+	cnter               *utils.Counter // used for OrderID for cdr
 }
 
 func NewInternalDB(stringIndexedFields, prefixIndexedFields []string) *InternalDB {
 	return &InternalDB{db: ltcache.NewTransCache(config.CgrConfig().CacheCfg().AsTransCacheConfig()),
 		ms: NewCodecMsgpackMarshaler(), stringIndexedFields: stringIndexedFields,
-		prefixIndexedFields: prefixIndexedFields}
+		prefixIndexedFields: prefixIndexedFields, cnter: utils.NewCounter(time.Now().UnixNano(), 0)}
 }
 
 func NewInternalDBJson(stringIndexedFields, prefixIndexedFields []string) (InternalDB *InternalDB) {
