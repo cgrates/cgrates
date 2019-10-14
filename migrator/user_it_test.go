@@ -72,6 +72,7 @@ func testUsrStart(testName, inPath, outPath string, t *testing.T) {
 	for _, stest := range sTestsUsrIT {
 		t.Run(testName, stest)
 	}
+	usrMigrator.Close()
 }
 
 func testUsrITConnect(t *testing.T) {

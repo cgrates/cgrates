@@ -52,6 +52,7 @@ func TestTpShrGrMove(t *testing.T) {
 	for _, stest := range sTestsTpShrGrIT {
 		t.Run("testTpShrGrMove", stest)
 	}
+	tpShrGrMigrator.Close()
 }
 
 func testTpShrGrITConnect(t *testing.T) {

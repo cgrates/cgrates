@@ -62,6 +62,7 @@ func TestRatingPlanITMove1(t *testing.T) {
 	for _, stest := range sTestsRtPlIT {
 		t.Run("TestRatingPlanITMove", stest)
 	}
+	rtplMigrator.Close()
 }
 
 func TestRatingPlanITMove2(t *testing.T) {
@@ -80,6 +81,7 @@ func TestRatingPlanITMove2(t *testing.T) {
 	for _, stest := range sTestsRtPlIT {
 		t.Run("TestRatingPlanITMove", stest)
 	}
+	rtplMigrator.Close()
 }
 
 func TestRatingPlanITMoveEncoding(t *testing.T) {
@@ -98,6 +100,7 @@ func TestRatingPlanITMoveEncoding(t *testing.T) {
 	for _, stest := range sTestsRtPlIT {
 		t.Run("TestRatingPlanITMoveEncoding", stest)
 	}
+	rtplMigrator.Close()
 }
 
 func TestRatingPlanITMoveEncoding2(t *testing.T) {
@@ -116,6 +119,7 @@ func TestRatingPlanITMoveEncoding2(t *testing.T) {
 	for _, stest := range sTestsRtPlIT {
 		t.Run("TestRatingPlanITMoveEncoding2", stest)
 	}
+	rtplMigrator.Close()
 }
 
 func testRtPlITConnect(t *testing.T) {

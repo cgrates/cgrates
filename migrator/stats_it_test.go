@@ -63,6 +63,7 @@ func TestStatsQueueITRedis(t *testing.T) {
 	for _, stest := range sTestsStsIT {
 		t.Run("TestStatsQueueITMigrateRedis", stest)
 	}
+	stsMigrator.Close()
 }
 
 func TestStatsQueueITMongo(t *testing.T) {
@@ -80,6 +81,7 @@ func TestStatsQueueITMongo(t *testing.T) {
 	for _, stest := range sTestsStsIT {
 		t.Run("TestStatsQueueITMigrateMongo", stest)
 	}
+	stsMigrator.Close()
 }
 
 func TestStatsQueueITMove(t *testing.T) {
@@ -98,6 +100,7 @@ func TestStatsQueueITMove(t *testing.T) {
 	for _, stest := range sTestsStsIT {
 		t.Run("TestStatsQueueITMove", stest)
 	}
+	stsMigrator.Close()
 }
 
 func testStsITConnect(t *testing.T) {

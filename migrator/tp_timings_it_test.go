@@ -52,6 +52,7 @@ func TestTpTimMove(t *testing.T) {
 	for _, stest := range sTestsTpTimIT {
 		t.Run("TestTpTimMove", stest)
 	}
+	tpTimMigrator.Close()
 }
 
 func testTpTimITConnect(t *testing.T) {

@@ -61,6 +61,7 @@ func TestSharedGroupITRedis(t *testing.T) {
 	for _, stest := range sTestsShrGrpIT {
 		t.Run("TestSharedGroupITMigrateRedis", stest)
 	}
+	shrGrpMigrator.Close()
 }
 
 func TestSharedGroupITMongo(t *testing.T) {
@@ -78,6 +79,7 @@ func TestSharedGroupITMongo(t *testing.T) {
 	for _, stest := range sTestsShrGrpIT {
 		t.Run("TestSharedGroupITMigrateMongo", stest)
 	}
+	shrGrpMigrator.Close()
 }
 
 func TestSharedGroupITMove(t *testing.T) {
@@ -96,6 +98,7 @@ func TestSharedGroupITMove(t *testing.T) {
 	for _, stest := range sTestsShrGrpIT {
 		t.Run("TestSharedGroupITMove", stest)
 	}
+	shrGrpMigrator.Close()
 }
 
 func TestSharedGroupITMoveEncoding(t *testing.T) {
@@ -114,6 +117,7 @@ func TestSharedGroupITMoveEncoding(t *testing.T) {
 	for _, stest := range sTestsShrGrpIT {
 		t.Run("TestSharedGroupITMoveEncoding", stest)
 	}
+	shrGrpMigrator.Close()
 }
 
 func TestSharedGroupITMoveEncoding2(t *testing.T) {
@@ -132,6 +136,7 @@ func TestSharedGroupITMoveEncoding2(t *testing.T) {
 	for _, stest := range sTestsShrGrpIT {
 		t.Run("TestSharedGroupITMoveEncoding2", stest)
 	}
+	shrGrpMigrator.Close()
 }
 
 func testShrGrpITConnect(t *testing.T) {

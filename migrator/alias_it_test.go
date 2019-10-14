@@ -71,6 +71,7 @@ func testStart(testName, inPath, outPath string, t *testing.T) {
 	for _, stest := range sTestsAlsIT {
 		t.Run(testName, stest)
 	}
+	alsMigrator.Close()
 }
 
 func testAlsITConnect(t *testing.T) {

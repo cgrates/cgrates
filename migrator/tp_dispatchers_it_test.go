@@ -52,6 +52,7 @@ func TestTpDispMove(t *testing.T) {
 	for _, stest := range sTestsTpDispIT {
 		t.Run("TestTpDispMove", stest)
 	}
+	tpDispMigrator.Close()
 }
 
 func testTpDispITConnect(t *testing.T) {

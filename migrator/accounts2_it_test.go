@@ -60,6 +60,7 @@ func TestAccMigrateWithInternal(t *testing.T) {
 	for _, stest := range sTestsAcc2IT {
 		t.Run("TestAccMigrateWithInternal", stest)
 	}
+	acc2Migrator.Close()
 }
 
 func testAcc2ITConnect(t *testing.T) {

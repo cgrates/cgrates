@@ -61,6 +61,7 @@ func TestSessionCostITMongo(t *testing.T) {
 	for _, stest := range sTestssCostIT {
 		t.Run("TestSessionSCostITMigrateMongo", stest)
 	}
+	sCostMigrator.Close()
 }
 
 func TestSessionCostITMySql(t *testing.T) {
@@ -77,6 +78,7 @@ func TestSessionCostITMySql(t *testing.T) {
 	for _, stest := range sTestssCostIT {
 		t.Run("TestSessionSCostITMigrateMySql", stest)
 	}
+	sCostMigrator.Close()
 }
 
 func testSessionCostITConnect(t *testing.T) {

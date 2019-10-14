@@ -53,6 +53,7 @@ func TestTpSplMove(t *testing.T) {
 	for _, stest := range sTestsTpSplIT {
 		t.Run("TestTpSplMove", stest)
 	}
+	tpSplMigrator.Close()
 }
 
 func testTpSplITConnect(t *testing.T) {

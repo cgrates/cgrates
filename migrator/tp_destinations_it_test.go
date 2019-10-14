@@ -52,6 +52,7 @@ func TestTpDstMove(t *testing.T) {
 	for _, stest := range sTestsTpDstIT {
 		t.Run("TestTpDstMove", stest)
 	}
+	tpDstMigrator.Close()
 }
 
 func testTpDstITConnect(t *testing.T) {
