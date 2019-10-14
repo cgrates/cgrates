@@ -159,6 +159,7 @@ func TestSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		initArgs, &initRpl); err != nil {
 		t.Error(err)
 	}
+	time.Sleep(10 * time.Millisecond) // give some time to allow the session to be created
 	expMaxUsage := time.Duration(-1)
 	if *initRpl.MaxUsage != expMaxUsage {
 		t.Errorf("Expecting : %+v, received: %+v", expMaxUsage, *initRpl.MaxUsage)
