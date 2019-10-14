@@ -52,6 +52,7 @@ func TestTpStatsMove(t *testing.T) {
 	for _, stest := range sTestsTpStatsIT {
 		t.Run("TestTpStatsMove", stest)
 	}
+	tpStatsMigrator.Close()
 }
 
 func testTpStatsITConnect(t *testing.T) {

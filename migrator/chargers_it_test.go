@@ -63,6 +63,7 @@ func TestChargersITMove1(t *testing.T) {
 	for _, stest := range sTestsChrgIT {
 		t.Run("TestChargersITMove", stest)
 	}
+	chrgMigrator.Close()
 }
 
 func TestChargersITMove2(t *testing.T) {
@@ -81,6 +82,7 @@ func TestChargersITMove2(t *testing.T) {
 	for _, stest := range sTestsChrgIT {
 		t.Run("TestChargersITMove", stest)
 	}
+	chrgMigrator.Close()
 }
 
 func TestChargersITMoveEncoding(t *testing.T) {
@@ -99,6 +101,7 @@ func TestChargersITMoveEncoding(t *testing.T) {
 	for _, stest := range sTestsChrgIT {
 		t.Run("TestChargersITMoveEncoding", stest)
 	}
+	chrgMigrator.Close()
 }
 
 func TestChargersITMoveEncoding2(t *testing.T) {
@@ -117,6 +120,7 @@ func TestChargersITMoveEncoding2(t *testing.T) {
 	for _, stest := range sTestsChrgIT {
 		t.Run("TestChargersITMoveEncoding2", stest)
 	}
+	chrgMigrator.Close()
 }
 
 func testChrgITConnect(t *testing.T) {

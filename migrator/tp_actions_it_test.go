@@ -52,6 +52,7 @@ func TestTpActMove(t *testing.T) {
 	for _, stest := range sTestsTpActIT {
 		t.Run("TestTpActMove", stest)
 	}
+	tpActMigrator.Close()
 }
 
 func testTpActITConnect(t *testing.T) {

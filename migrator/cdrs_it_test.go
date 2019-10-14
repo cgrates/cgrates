@@ -55,6 +55,7 @@ func TestCdrITMongo(t *testing.T) {
 	for _, stest := range sTestsCdrIT {
 		t.Run("TestCdrITMigrateMongo", stest)
 	}
+	cdrMigrator.Close()
 }
 
 func TestCdrITMySql(t *testing.T) {
@@ -67,6 +68,7 @@ func TestCdrITMySql(t *testing.T) {
 	for _, stest := range sTestsCdrIT {
 		t.Run("TestCdrITMigrateMySql", stest)
 	}
+	cdrMigrator.Close()
 }
 
 func testCdrITConnect(t *testing.T) {

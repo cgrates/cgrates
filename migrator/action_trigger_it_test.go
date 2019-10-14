@@ -63,6 +63,7 @@ func TestActionTriggerITRedis(t *testing.T) {
 	for _, stest := range sTestsActTrgIT {
 		t.Run("TestActionTriggerITMigrateRedis", stest)
 	}
+	actTrgMigrator.Close()
 }
 
 func TestActionTriggerITMongo(t *testing.T) {
@@ -80,6 +81,7 @@ func TestActionTriggerITMongo(t *testing.T) {
 	for _, stest := range sTestsActTrgIT {
 		t.Run("TestActionTriggerITMigrateMongo", stest)
 	}
+	actTrgMigrator.Close()
 }
 
 func TestActionTriggerITMove(t *testing.T) {
@@ -98,6 +100,7 @@ func TestActionTriggerITMove(t *testing.T) {
 	for _, stest := range sTestsActTrgIT {
 		t.Run("TestActionTriggerITMove", stest)
 	}
+	actTrgMigrator.Close()
 }
 
 func TestActionTriggerITMoveEncoding(t *testing.T) {
@@ -116,6 +119,7 @@ func TestActionTriggerITMoveEncoding(t *testing.T) {
 	for _, stest := range sTestsActTrgIT {
 		t.Run("TestActionTriggerITMoveEncoding", stest)
 	}
+	actTrgMigrator.Close()
 }
 
 func TestActionTriggerITMoveEncoding2(t *testing.T) {
@@ -134,6 +138,7 @@ func TestActionTriggerITMoveEncoding2(t *testing.T) {
 	for _, stest := range sTestsActTrgIT {
 		t.Run("TestActionTriggerITMoveEncoding2", stest)
 	}
+	actTrgMigrator.Close()
 }
 
 func testActTrgITConnect(t *testing.T) {

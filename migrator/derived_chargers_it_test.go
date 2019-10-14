@@ -72,6 +72,7 @@ func testStartDC(testName, inPath, outPath string, t *testing.T) {
 	for _, stest := range sTestsDCIT {
 		t.Run(testName, stest)
 	}
+	dcMigrator.Close()
 }
 
 func testDCITConnect(t *testing.T) {

@@ -90,6 +90,7 @@ func testFltrStart(testName, inPath, outPath, action string, t *testing.T) {
 	for _, stest := range sTestsFltrIT {
 		t.Run(testName, stest)
 	}
+	fltrMigrator.Close()
 }
 
 func testFltrITConnect(t *testing.T) {

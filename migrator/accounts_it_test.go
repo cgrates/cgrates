@@ -64,6 +64,7 @@ func TestAccountMigrateITRedis(t *testing.T) {
 	for _, stest := range sTestsAccIT {
 		t.Run("TestAccountITMigrateRedis", stest)
 	}
+	accMigrator.Close()
 }
 
 func TestAccountMigrateITMongo(t *testing.T) {
@@ -81,6 +82,7 @@ func TestAccountMigrateITMongo(t *testing.T) {
 	for _, stest := range sTestsAccIT {
 		t.Run("TestAccountITMigrateMongo", stest)
 	}
+	accMigrator.Close()
 }
 
 func TestAccountITMove(t *testing.T) {
@@ -99,6 +101,7 @@ func TestAccountITMove(t *testing.T) {
 	for _, stest := range sTestsAccIT {
 		t.Run("TestAccountITMove", stest)
 	}
+	accMigrator.Close()
 }
 
 func TestAccountITMigrateMongo2Redis(t *testing.T) {
@@ -117,6 +120,7 @@ func TestAccountITMigrateMongo2Redis(t *testing.T) {
 	for _, stest := range sTestsAccIT {
 		t.Run("TestAccountITMigrateMongo2Redis", stest)
 	}
+	accMigrator.Close()
 }
 
 func TestAccountITMoveEncoding(t *testing.T) {
@@ -135,6 +139,7 @@ func TestAccountITMoveEncoding(t *testing.T) {
 	for _, stest := range sTestsAccIT {
 		t.Run("TestAccountITMove", stest)
 	}
+	accMigrator.Close()
 }
 
 func TestAccountITMoveEncoding2(t *testing.T) {
@@ -153,6 +158,7 @@ func TestAccountITMoveEncoding2(t *testing.T) {
 	for _, stest := range sTestsAccIT {
 		t.Run("TestAccountITMove", stest)
 	}
+	accMigrator.Close()
 }
 
 func testAccITConnect(t *testing.T) {

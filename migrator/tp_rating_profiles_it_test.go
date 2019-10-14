@@ -52,6 +52,7 @@ func TestTpRatPrfMove(t *testing.T) {
 	for _, stest := range sTestsTpRatPrfIT {
 		t.Run("testTpRatPrfMove", stest)
 	}
+	tpRatPrfMigrator.Close()
 }
 
 func testTpRatPrfITConnect(t *testing.T) {

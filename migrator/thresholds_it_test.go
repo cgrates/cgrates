@@ -62,6 +62,7 @@ func TestThresholdsITRedis(t *testing.T) {
 	for _, stest := range sTestsTrsIT {
 		t.Run("TestThresholdsITMigrateRedis", stest)
 	}
+	trsMigrator.Close()
 }
 
 func TestThresholdsITMongo(t *testing.T) {
@@ -79,6 +80,7 @@ func TestThresholdsITMongo(t *testing.T) {
 	for _, stest := range sTestsTrsIT {
 		t.Run("TestThresholdsITMigrateMongo", stest)
 	}
+	trsMigrator.Close()
 }
 
 func TestThresholdsITMove(t *testing.T) {
@@ -97,6 +99,7 @@ func TestThresholdsITMove(t *testing.T) {
 	for _, stest := range sTestsTrsIT {
 		t.Run("TestThresholdsITMove", stest)
 	}
+	trsMigrator.Close()
 }
 
 func TestThresholdsITMoveEncoding(t *testing.T) {
@@ -115,6 +118,7 @@ func TestThresholdsITMoveEncoding(t *testing.T) {
 	for _, stest := range sTestsTrsIT {
 		t.Run("TestThresholdsITMoveEncoding", stest)
 	}
+	trsMigrator.Close()
 }
 
 func TestThresholdsITMoveEncoding2(t *testing.T) {
@@ -133,6 +137,7 @@ func TestThresholdsITMoveEncoding2(t *testing.T) {
 	for _, stest := range sTestsTrsIT {
 		t.Run("TestThresholdsITMoveEncoding2", stest)
 	}
+	trsMigrator.Close()
 }
 
 func testTrsITConnect(t *testing.T) {

@@ -52,6 +52,7 @@ func TestTpFltrMove(t *testing.T) {
 	for _, stest := range sTestsTpFltrIT {
 		t.Run("TestTpFltrMove", stest)
 	}
+	tpFltrMigrator.Close()
 }
 
 func testTpFltrITConnect(t *testing.T) {

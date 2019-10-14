@@ -53,6 +53,7 @@ func TestTpTresMove(t *testing.T) {
 	for _, stest := range sTestsTpTresIT {
 		t.Run("TestTpTresMove", stest)
 	}
+	tpTresMigrator.Close()
 }
 
 func testTpTresITConnect(t *testing.T) {

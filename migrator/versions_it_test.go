@@ -54,6 +54,7 @@ func TestVersionITRedis(t *testing.T) {
 	for _, stest := range sTestsVrsIT {
 		t.Run("TestVrsionITMigrateRedis", stest)
 	}
+	vrsMigrator.Close()
 }
 
 func TestVersionITMongo(t *testing.T) {
@@ -68,6 +69,7 @@ func TestVersionITMongo(t *testing.T) {
 	for _, stest := range sTestsVrsIT {
 		t.Run("TestVrsionITMigrateMongo", stest)
 	}
+	vrsMigrator.Close()
 }
 
 func testVrsITConnect(t *testing.T) {

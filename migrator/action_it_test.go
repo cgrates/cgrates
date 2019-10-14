@@ -61,6 +61,7 @@ func TestActionITRedis(t *testing.T) {
 	for _, stest := range sTestsActIT {
 		t.Run("TestActionITMigrateRedis", stest)
 	}
+	actMigrator.Close()
 }
 
 func TestActionITMongo(t *testing.T) {
@@ -78,6 +79,7 @@ func TestActionITMongo(t *testing.T) {
 	for _, stest := range sTestsActIT {
 		t.Run("TestActionITMigrateMongo", stest)
 	}
+	actMigrator.Close()
 }
 
 func TestActionITMove(t *testing.T) {
@@ -96,6 +98,7 @@ func TestActionITMove(t *testing.T) {
 	for _, stest := range sTestsActIT {
 		t.Run("TestActionITMove", stest)
 	}
+	actMigrator.Close()
 }
 
 func TestActionITMoveEncoding(t *testing.T) {
@@ -114,6 +117,7 @@ func TestActionITMoveEncoding(t *testing.T) {
 	for _, stest := range sTestsActIT {
 		t.Run("TestActionITMoveEncoding", stest)
 	}
+	actMigrator.Close()
 }
 
 func TestActionITMigrateMongo2Redis(t *testing.T) {
@@ -132,6 +136,7 @@ func TestActionITMigrateMongo2Redis(t *testing.T) {
 	for _, stest := range sTestsActIT {
 		t.Run("TestActionITMigrateMongo2Redis", stest)
 	}
+	actMigrator.Close()
 }
 
 func TestActionITMoveEncoding2(t *testing.T) {
@@ -150,6 +155,7 @@ func TestActionITMoveEncoding2(t *testing.T) {
 	for _, stest := range sTestsActIT {
 		t.Run("TestActionITMoveEncoding2", stest)
 	}
+	actMigrator.Close()
 }
 
 func testActITConnect(t *testing.T) {

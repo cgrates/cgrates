@@ -52,6 +52,7 @@ func TestTpRatesMove(t *testing.T) {
 	for _, stest := range sTestsTpRatesIT {
 		t.Run("testTpRatesMove", stest)
 	}
+	tpRatesMigrator.Close()
 }
 
 func testTpRatesITConnect(t *testing.T) {
