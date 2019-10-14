@@ -213,8 +213,8 @@ func main() {
 		}
 	}
 
-	if *rpcEncoding != dfltCfg.LoaderCgrCfg().CachesConns[0].Transport &&
-		len(ldrCfg.LoaderCgrCfg().CachesConns) != 0 {
+	if len(ldrCfg.LoaderCgrCfg().CachesConns) != 0 &&
+		*rpcEncoding != dfltCfg.LoaderCgrCfg().CachesConns[0].Transport {
 		ldrCfg.LoaderCgrCfg().CachesConns[0].Transport = *rpcEncoding
 	}
 
