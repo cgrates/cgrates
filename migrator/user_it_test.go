@@ -188,7 +188,7 @@ func testUsrITMigrateAndMove(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(attrProf), utils.ToJSON(result))
 	}
 	//check if old account was deleted
-	if _, err = usrMigrator.dmIN.getV1Alias(); err != utils.ErrNoMoreData {
+	if _, err = usrMigrator.dmIN.getV1User(); err != utils.ErrNoMoreData {
 		t.Error("Error should be not found : ", err)
 	}
 
