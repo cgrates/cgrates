@@ -297,7 +297,7 @@ func InitDataDb(cfg *config.CGRConfig) error {
 	}
 	//dm.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	//	Write version before starting
-	if err := SetDBVersions(dm.dataDB); err != nil {
+	if err := OverwriteDBVersions(dm.dataDB); err != nil {
 		return err
 	}
 	return nil
