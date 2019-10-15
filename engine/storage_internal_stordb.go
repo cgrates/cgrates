@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -937,36 +939,6 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 			}
 		}
 	}
-	//check if we have ExtraFields
-	if len(filter.ExtraFields) != 0 {
-		for extFldID, extrFldVal := range filter.ExtraFields {
-			// need to discuss about this case
-			if extrFldVal == utils.MetaExists {
-
-			}
-			grpMpIDs := make(utils.StringMap)
-			grpIDs := iDB.db.GetGroupItemIDs(utils.CDRsTBL, utils.ConcatenatedKey(extFldID, extrFldVal))
-			for _, id := range grpIDs {
-				grpMpIDs[id] = true
-			}
-
-			if len(grpMpIDs) == 0 {
-				return nil, 0, utils.ErrNotFound
-			}
-			if cdrMpIDs == nil {
-				cdrMpIDs = grpMpIDs
-			} else {
-				for id := range cdrMpIDs {
-					if !grpMpIDs.HasKey(id) {
-						delete(cdrMpIDs, id)
-						if len(cdrMpIDs) == 0 {
-							return nil, 0, utils.ErrNotFound
-						}
-					}
-				}
-			}
-		}
-	}
 
 	if cdrMpIDs == nil {
 		cdrMpIDs = utils.StringMapFromSlice(iDB.db.GetItemIDs(utils.CDRsTBL, utils.EmptyString))
@@ -995,24 +967,6 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 		}
 		for _, id := range fltrSlc.ids {
 			grpIDs := iDB.db.GetGroupItemIDs(utils.CDRsTBL, utils.ConcatenatedKey(fltrSlc.key, id))
-			for _, id := range grpIDs {
-				if cdrMpIDs.HasKey(id) {
-					delete(cdrMpIDs, id)
-					if len(cdrMpIDs) == 0 {
-						return nil, 0, utils.ErrNotFound
-					}
-				}
-			}
-		}
-	}
-	//check if we have ExtraFields
-	if len(filter.NotExtraFields) != 0 {
-		for notExtFldID, notExtFlddVal := range filter.NotExtraFields {
-			// need to discuss about this case
-			if notExtFlddVal == utils.MetaExists {
-
-			}
-			grpIDs := iDB.db.GetGroupItemIDs(utils.CDRsTBL, utils.ConcatenatedKey(notExtFldID, notExtFlddVal))
 			for _, id := range grpIDs {
 				if cdrMpIDs.HasKey(id) {
 					delete(cdrMpIDs, id)
@@ -1136,6 +1090,41 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 				}
 			}
 		}
+		if len(filter.ExtraFields) != 0 {
+			passFilter := true
+			for extFldID, extFldVal := range filter.ExtraFields {
+				if extFldVal == utils.MetaExists {
+					if _, has := cdr.ExtraFields[extFldID]; !has {
+						passFilter = false
+						break
+					}
+				} else if cdr.ExtraFields[extFldID] != extFldVal {
+					passFilter = false
+					break
+				}
+
+			}
+			if !passFilter {
+				continue
+			}
+		}
+		if len(filter.NotExtraFields) != 0 {
+			passFilter := true
+			for notExtFldID, notExtFldVal := range filter.NotExtraFields {
+				if notExtFldVal == utils.MetaExists {
+					if _, has := cdr.ExtraFields[notExtFldID]; has {
+						passFilter = false
+						break
+					}
+				} else if cdr.ExtraFields[notExtFldID] == notExtFldVal {
+					passFilter = false
+					break
+				}
+			}
+			if !passFilter {
+				continue
+			}
+		}
 
 		if filter.Paginator.Offset != nil {
 			if paginatorOffsetCounter <= *filter.Paginator.Offset {
@@ -1160,6 +1149,73 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 				cacheCommit(utils.NonTransactional), utils.NonTransactional)
 		}
 		return nil, 0, nil
+	}
+	if filter.OrderBy != "" {
+		separateVals := strings.Split(filter.OrderBy, utils.INFIELD_SEP)
+		ascendent := true
+		if len(separateVals) == 2 && separateVals[1] == "desc" {
+			ascendent = false
+		}
+		switch separateVals[0] {
+		case utils.OrderID:
+			if ascendent {
+				sort.Slice(cdrs, func(i, j int) bool {
+					return cdrs[i].OrderID < cdrs[j].OrderID
+				})
+			} else {
+				sort.Slice(cdrs, func(i, j int) bool {
+					return cdrs[i].OrderID > cdrs[j].OrderID
+				})
+			}
+
+		case utils.AnswerTime:
+			if ascendent {
+				sort.Slice(cdrs, func(i, j int) bool {
+					return cdrs[i].AnswerTime.Before(cdrs[j].AnswerTime)
+				})
+			} else {
+				sort.Slice(cdrs, func(i, j int) bool {
+					return cdrs[i].AnswerTime.After(cdrs[j].AnswerTime)
+				})
+			}
+
+		case utils.SetupTime:
+			if ascendent {
+				sort.Slice(cdrs, func(i, j int) bool {
+					return cdrs[i].SetupTime.Before(cdrs[j].SetupTime)
+				})
+			} else {
+				sort.Slice(cdrs, func(i, j int) bool {
+					return cdrs[i].SetupTime.After(cdrs[j].SetupTime)
+				})
+			}
+
+		case utils.Usage:
+			if ascendent {
+				sort.Slice(cdrs, func(i, j int) bool {
+					return cdrs[i].Usage < cdrs[j].Usage
+				})
+			} else {
+				sort.Slice(cdrs, func(i, j int) bool {
+					return cdrs[i].Usage > cdrs[j].Usage
+				})
+			}
+
+		case utils.Cost:
+			if ascendent {
+				sort.Slice(cdrs, func(i, j int) bool {
+					return cdrs[i].Cost < cdrs[j].Cost
+				})
+			} else {
+				sort.Slice(cdrs, func(i, j int) bool {
+					return cdrs[i].Cost > cdrs[j].Cost
+				})
+			}
+
+		default:
+			return nil, 0, fmt.Errorf("Invalid value : %s", separateVals[0])
+		}
+
 	}
 	return
 }

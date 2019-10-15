@@ -799,46 +799,46 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 				break
 			}
 			if CDRs[i].OrderID < CDRs[i+1].OrderID {
-				return fmt.Errorf("%+v should be greater than %+v \n", CDRs[i].OrderID, CDRs[i+1].OrderID)
+				return fmt.Errorf("testGetCDRs #95 %+v should be greater than %+v \n", CDRs[i].OrderID, CDRs[i+1].OrderID)
 			}
 		}
 	}
 	//Filter by OrderID ascendent
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderBy: "OrderID"}, false); err != nil {
-		return fmt.Errorf("testGetCDRs #95, err: %v", err)
+		return fmt.Errorf("testGetCDRs #96, err: %v", err)
 	} else {
 		for i := range CDRs {
 			if i+1 > len(CDRs)-1 {
 				break
 			}
 			if CDRs[i].OrderID > CDRs[i+1].OrderID {
-				return fmt.Errorf("%+v sould be smaller than %+v \n", CDRs[i].OrderID, CDRs[i+1].OrderID)
+				return fmt.Errorf("testGetCDRs #96 %+v sould be smaller than %+v \n", CDRs[i].OrderID, CDRs[i+1].OrderID)
 			}
 		}
 	}
 	//Filter by Cost descendent
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderBy: "Cost;desc"}, false); err != nil {
-		return fmt.Errorf("testGetCDRs #95, err: %v", err)
+		return fmt.Errorf("testGetCDRs #97, err: %v", err)
 	} else {
 		for i := range CDRs {
 			if i+1 > len(CDRs)-1 {
 				break
 			}
 			if CDRs[i].Cost < CDRs[i+1].Cost {
-				return fmt.Errorf("%+v should be greater than %+v \n", CDRs[i].Cost, CDRs[i+1].Cost)
+				return fmt.Errorf("testGetCDRs #97 %+v should be greater than %+v \n", CDRs[i].Cost, CDRs[i+1].Cost)
 			}
 		}
 	}
 	//Filter by Cost ascendent
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderBy: "Cost"}, false); err != nil {
-		return fmt.Errorf("testGetCDRs #95, err: %v", err)
+		return fmt.Errorf("testGetCDRs #98, err: %v", err)
 	} else {
 		for i := range CDRs {
 			if i+1 > len(CDRs)-1 {
 				break
 			}
 			if CDRs[i].Cost > CDRs[i+1].Cost {
-				return fmt.Errorf("%+v sould be smaller than %+v \n", CDRs[i].Cost, CDRs[i+1].Cost)
+				return fmt.Errorf("testGetCDRs #98 %+v sould be smaller than %+v \n", CDRs[i].Cost, CDRs[i+1].Cost)
 			}
 		}
 	}
