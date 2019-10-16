@@ -32,14 +32,14 @@ For developing CGRateS and switching between its versions, we are using the **ne
 
 First we have to setup the GO Lang to our OS. Feel free to download 
 the latest GO binary release from https://golang.org/dl/
-In this Tutorial we are going to install Go 1.11
+In this Tutorial we are going to install Go 1.13
 
 ::
 
    rm -rf /usr/local/go
    cd /tmp
-   wget https://dl.google.com/go/go1.11.linux-amd64.tar.gz
-   sudo tar -xvf go1.11.0.linux-amd64.tar.gz -C /usr/local/
+   wget https://dl.google.com/go/go1.13.1.linux-amd64.tar.gz
+   sudo tar -xvf go1.13.1.linux-amd64.tar.gz -C /usr/local/
    export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
 
 3.2.2 Build CGRateS from Source
