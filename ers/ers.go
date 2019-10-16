@@ -76,7 +76,6 @@ func (erS *ERService) ListenAndServe(cfgRldChan chan struct{}) (err error) {
 			return
 		}
 	}
-	go erS.handleReloads(cfgRldChan)
 	for {
 		select {
 		case err = <-erS.rdrErr: // got application error
@@ -92,30 +91,7 @@ func (erS *ERService) ListenAndServe(cfgRldChan chan struct{}) (err error) {
 					fmt.Sprintf("<%s> reading event: <%s> got error: <%s>",
 						utils.ERs, utils.ToIJSON(erEv.cgrEvent), err.Error()))
 			}
-		}
-	}
-}
-
-// addReader will add a new reader to the service
-func (erS *ERService) addReader(rdrID string, cfgIdx int) (err error) {
-	erS.stopLsn[rdrID] = make(chan struct{})
-	var rdr EventReader
-	if rdr, err = NewEventReader(erS.cfg, cfgIdx,
-		erS.rdrEvents, erS.rdrErr,
-		erS.filterS, erS.stopLsn[rdrID]); err != nil {
-		return
-	}
-	erS.rdrs[rdrID] = rdr
-	return rdr.Serve()
-}
-
-// handleReloads will handle the config reloads which are signaled over cfgRldChan
-func (erS *ERService) handleReloads(cfgRldChan chan struct{}) {
-	for {
-		select {
-		case <-erS.stopChan:
-			return
-		case <-cfgRldChan:
+		case <-cfgRldChan: // handle reload
 			cfgIDs := make(map[string]int)
 			pathReloaded := make(map[string]struct{})
 			// index config IDs
@@ -154,6 +130,19 @@ func (erS *ERService) handleReloads(cfgRldChan chan struct{}) {
 			erS.Unlock()
 		}
 	}
+}
+
+// addReader will add a new reader to the service
+func (erS *ERService) addReader(rdrID string, cfgIdx int) (err error) {
+	erS.stopLsn[rdrID] = make(chan struct{})
+	var rdr EventReader
+	if rdr, err = NewEventReader(erS.cfg, cfgIdx,
+		erS.rdrEvents, erS.rdrErr,
+		erS.filterS, erS.stopLsn[rdrID]); err != nil {
+		return
+	}
+	erS.rdrs[rdrID] = rdr
+	return rdr.Serve()
 }
 
 // processEvent will be called each time a new event is received from readers
