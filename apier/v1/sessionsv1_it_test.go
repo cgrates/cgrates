@@ -285,7 +285,7 @@ func testSSv1ItAuthWithDigest(t *testing.T) {
 	}
 	var rply sessions.V1AuthorizeReplyWithDigest
 	if err := sSv1BiRpc.Call(utils.SessionSv1AuthorizeEventWithDigest, args, &rply); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	// in case of prepaid and pseudoprepade we expect a MaxUsage of 5min
 	// and in case of postpaid and rated we expect -1
@@ -331,7 +331,7 @@ func testSSv1ItInitiateSession(t *testing.T) {
 	var rply sessions.V1InitSessionReply
 	if err := sSv1BiRpc.Call(utils.SessionSv1InitiateSession,
 		args, &rply); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	// in case of prepaid and pseudoprepade we expect a MaxUsage of 5min
 	// and in case of postpaid and rated we expect -1
@@ -480,7 +480,7 @@ func testSSv1ItUpdateSession(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
-		t.Errorf("expecting: %+v, received: %+v",
+		t.Fatalf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
 	}
 	// in case of prepaid and pseudoprepade we expect a MaxUsage of 5min
@@ -590,7 +590,7 @@ func testSSv1ItProcessEvent(t *testing.T) {
 	var rply sessions.V1ProcessMessageReply
 	if err := sSv1BiRpc.Call(utils.SessionSv1ProcessMessage,
 		args, &rply); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	// in case of prepaid and pseudoprepade we expect a MaxUsage of 5min
 	// and in case of postpaid and rated we expect -1
