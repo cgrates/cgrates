@@ -1353,6 +1353,7 @@ func (sS *SessionS) authEvent(tnt string, evStart engine.MapEvent) (maxUsage tim
 	}
 	var maxUsageSet bool // so we know if we have set the 0 on purpose
 	for _, sr := range s.SRuns {
+		fmt.Printf("Checking sr: %s\n", utils.ToIJSON(sr))
 		var rplyMaxUsage time.Duration
 		if !authReqs.HasField(
 			sr.Event.GetStringIgnoreErrors(utils.RequestType)) {
@@ -1362,9 +1363,13 @@ func (sS *SessionS) authEvent(tnt string, evStart engine.MapEvent) (maxUsage tim
 				ArgDispatcher: s.ArgDispatcher}, &rplyMaxUsage); err != nil {
 			return
 		}
+		if rplyMaxUsage > eventUsage {
+			rplyMaxUsage = eventUsage
+		}
 		if !maxUsageSet ||
-			maxUsage == eventUsage ||
-			(rplyMaxUsage < maxUsage && rplyMaxUsage != eventUsage) {
+			//maxUsage == eventUsage ||
+			//(rplyMaxUsage < maxUsage && rplyMaxUsage != eventUsage) {
+			rplyMaxUsage < maxUsage {
 			maxUsage = rplyMaxUsage
 			maxUsageSet = true
 		}
