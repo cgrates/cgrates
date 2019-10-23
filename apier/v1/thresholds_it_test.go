@@ -24,16 +24,16 @@ import (
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
-	"sort"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-	var (
+var (
 	tSv1CfgPath string
 	tSv1Cfg     *config.CGRConfig
 	tSv1Rpc     *rpc.Client
@@ -326,6 +326,10 @@ func testV1TSGetThresholdsAfterProcess(t *testing.T) {
 }
 
 func testV1TSGetThresholdsAfterRestart(t *testing.T) {
+	// in case of internal we skip this test
+	if tSv1ConfDIR == "tutinternal" {
+		t.SkipNow()
+	}
 	time.Sleep(time.Second)
 	if _, err := engine.StopStartEngine(tSv1CfgPath, *waitRater); err != nil {
 		t.Fatal(err)
@@ -404,7 +408,7 @@ func testV1TSUpdateThresholdProfile(t *testing.T) {
 	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &reply); err != nil {
 		t.Error(err)
-	} else{
+	} else {
 		sort.Strings(reply.FilterIDs)
 		sort.Strings(tPrfl.ThresholdProfile.FilterIDs)
 		if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
