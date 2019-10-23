@@ -886,11 +886,91 @@ func (iDB *InternalDB) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 }
 
 func (iDB *InternalDB) RemoveSMCost(smc *SMCost) (err error) {
-	return utils.ErrNotImplemented
+	iDB.db.Remove(utils.SessionCostsTBL, utils.ConcatenatedKey(utils.SessionCostsTBL, smc.CGRID, smc.RunID, smc.OriginHost, smc.OriginID),
+		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	return
 }
 
 func (iDB *InternalDB) RemoveSMCosts(qryFltr *utils.SMCostFilter) error {
-	return utils.ErrNotImplemented
+	var smMpIDs utils.StringMap
+	// Apply string filter
+	for _, fltrSlc := range []struct {
+		key string
+		ids []string
+	}{
+		{utils.CGRID, qryFltr.CGRIDs},
+		{utils.RunID, qryFltr.RunIDs},
+		{utils.OriginID, qryFltr.OriginIDs},
+		{utils.OriginHost, qryFltr.OriginHosts},
+		{utils.CostSource, qryFltr.CostSources},
+	} {
+		if len(fltrSlc.ids) == 0 {
+			continue
+		}
+		grpMpIDs := make(utils.StringMap)
+		for _, id := range fltrSlc.ids {
+			grpIDs := iDB.db.GetGroupItemIDs(utils.SessionCostsTBL, utils.ConcatenatedKey(fltrSlc.key, id))
+			for _, id := range grpIDs {
+				grpMpIDs[id] = true
+			}
+		}
+		if len(grpMpIDs) == 0 {
+			return utils.ErrNotFound
+		}
+		if smMpIDs == nil {
+			smMpIDs = grpMpIDs
+		} else {
+			for id := range smMpIDs {
+				if !grpMpIDs.HasKey(id) {
+					delete(smMpIDs, id)
+					if len(smMpIDs) == 0 {
+						return utils.ErrNotFound
+					}
+				}
+			}
+		}
+	}
+
+	if smMpIDs == nil {
+		smMpIDs = utils.StringMapFromSlice(iDB.db.GetItemIDs(utils.SessionCostsTBL, utils.EmptyString))
+	}
+
+	// check for Not filters
+	for _, fltrSlc := range []struct {
+		key string
+		ids []string
+	}{
+		{utils.CGRID, qryFltr.NotCGRIDs},
+		{utils.RunID, qryFltr.NotRunIDs},
+		{utils.OriginID, qryFltr.NotOriginIDs},
+		{utils.OriginHost, qryFltr.NotOriginHosts},
+		{utils.CostSource, qryFltr.NotCostSources},
+	} {
+		if len(fltrSlc.ids) == 0 {
+			continue
+		}
+		for _, id := range fltrSlc.ids {
+			grpIDs := iDB.db.GetGroupItemIDs(utils.CDRsTBL, utils.ConcatenatedKey(fltrSlc.key, id))
+			for _, id := range grpIDs {
+				if smMpIDs.HasKey(id) {
+					delete(smMpIDs, id)
+					if len(smMpIDs) == 0 {
+						return utils.ErrNotFound
+					}
+				}
+			}
+		}
+	}
+
+	if len(smMpIDs) == 0 {
+		return utils.ErrNotFound
+	}
+
+	for key := range smMpIDs {
+		iDB.db.Remove(utils.SessionCostsTBL, key,
+		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	}
+	return nil
 }
 
 func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*CDR, count int64, err error) {
@@ -1221,18 +1301,72 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 }
 
 func (iDB *InternalDB) GetSMCosts(cgrid, runid, originHost, originIDPrfx string) (smCosts []*SMCost, err error) {
-	return nil, utils.ErrNotImplemented
+	var smMpIDs utils.StringMap
+	for _, fltrSlc := range []struct {
+		key string
+		id  string
+	}{
+		{utils.CGRID, cgrid},
+		{utils.RunID, runid},
+		{utils.OriginHost, originHost},
+	} {
+		if fltrSlc.id == utils.EmptyString {
+			continue
+		}
+		grpMpIDs := make(utils.StringMap)
+
+		grpIDs := iDB.db.GetGroupItemIDs(utils.SessionCostsTBL, utils.ConcatenatedKey(fltrSlc.key, fltrSlc.id))
+		for _, id := range grpIDs {
+			grpMpIDs[id] = true
+		}
+
+		if len(grpMpIDs) == 0 {
+			return nil, utils.ErrNotFound
+		}
+		if smMpIDs == nil {
+			smMpIDs = grpMpIDs
+		} else {
+			for id := range smMpIDs {
+				if !grpMpIDs.HasKey(id) {
+					delete(smMpIDs, id)
+					if len(smMpIDs) == 0 {
+						return nil, utils.ErrNotFound
+					}
+				}
+			}
+		}
+	}
+	if smMpIDs == nil {
+		smMpIDs = utils.StringMapFromSlice(iDB.db.GetItemIDs(utils.SessionCostsTBL, utils.EmptyString))
+	}
+	if len(smMpIDs) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	for key := range smMpIDs {
+		x, ok := iDB.db.Get(utils.SessionCostsTBL, key)
+		if !ok || x == nil {
+			return nil, utils.ErrNotFound
+		}
+		smCost := x.(*SMCost)
+		if originIDPrfx != utils.EmptyString && !strings.HasPrefix(smCost.OriginID, originIDPrfx) {
+			continue
+		}
+		smCosts = append(smCosts, smCost)
+	}
+	return
 }
 
-func (iDB *InternalDB) SetSMCost(smCost *SMCost) error {
+func (iDB *InternalDB) SetSMCost(smCost *SMCost) (err error) {
 	if smCost.CostDetails == nil {
 		return nil
 	}
-	result, err := iDB.ms.Marshal(smCost)
-	if err != nil {
-		return err
-	}
-	iDB.db.Set(utils.SessionCostsTBL, utils.LOG_CALL_COST_PREFIX+smCost.CostSource+smCost.RunID+"_"+smCost.CGRID, result, nil,
+	idxs := utils.NewStringSet(nil)
+	idxs.Add(utils.ConcatenatedKey(utils.CGRID, smCost.CGRID))
+	idxs.Add(utils.ConcatenatedKey(utils.RunID, smCost.RunID))
+	idxs.Add(utils.ConcatenatedKey(utils.OriginHost, smCost.OriginHost))
+	idxs.Add(utils.ConcatenatedKey(utils.OriginID, smCost.OriginID))
+	idxs.Add(utils.ConcatenatedKey(utils.CostSource, smCost.CostSource))
+	iDB.db.Set(utils.SessionCostsTBL, utils.ConcatenatedKey(utils.SessionCostsTBL, smCost.CGRID, smCost.RunID, smCost.OriginHost, smCost.OriginID), smCost, idxs.AsSlice(),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return err
 }
