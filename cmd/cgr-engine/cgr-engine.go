@@ -463,13 +463,13 @@ func main() {
 		}
 	}
 	if cfg.RalsCfg().Enabled || cfg.CdrsCfg().Enabled {
-		storDb, err := engine.ConfigureStorStorage(cfg.StorDbCfg().StorDBType,
-			cfg.StorDbCfg().StorDBHost, cfg.StorDbCfg().StorDBPort,
-			cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
-			cfg.StorDbCfg().StorDBPass, cfg.GeneralCfg().DBDataEncoding,
-			cfg.StorDbCfg().StorDBMaxOpenConns, cfg.StorDbCfg().StorDBMaxIdleConns,
-			cfg.StorDbCfg().StorDBConnMaxLifetime, cfg.StorDbCfg().StorDBStringIndexedFields,
-			cfg.StorDbCfg().StorDBPrefixIndexedFields)
+		storDb, err := engine.ConfigureStorStorage(cfg.StorDbCfg().Type,
+			cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
+			cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
+			cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,
+			cfg.StorDbCfg().MaxOpenConns, cfg.StorDbCfg().MaxIdleConns,
+			cfg.StorDbCfg().ConnMaxLifetime, cfg.StorDbCfg().StringIndexedFields,
+			cfg.StorDbCfg().PrefixIndexedFields)
 		if err != nil { // Cannot configure logger database, show stopper
 			utils.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
 			return

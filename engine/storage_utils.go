@@ -36,8 +36,8 @@ func ConfigureDataStorage(dbType, host, port, name, user, pass, marshaler string
 	var d DataDB
 	switch dbType {
 	case utils.REDIS:
-		var dbNb int
-		dbNb, err = strconv.Atoi(name)
+		var dbNo int
+		dbNo, err = strconv.Atoi(name)
 		if err != nil {
 			utils.Logger.Crit("Redis db name must be an integer!")
 			return nil, err
@@ -45,7 +45,7 @@ func ConfigureDataStorage(dbType, host, port, name, user, pass, marshaler string
 		if port != "" && strings.Index(host, ":") == -1 {
 			host += ":" + port
 		}
-		d, err = NewRedisStorage(host, dbNb, pass, marshaler, utils.REDIS_MAX_CONNS, sentinelName)
+		d, err = NewRedisStorage(host, dbNo, pass, marshaler, utils.REDIS_MAX_CONNS, sentinelName)
 	case utils.MONGO:
 		d, err = NewMongoStorage(host, port, name, user, pass, utils.DataDB, nil, true)
 	case utils.INTERNAL:
@@ -64,96 +64,64 @@ func ConfigureDataStorage(dbType, host, port, name, user, pass, marshaler string
 	return NewDataManager(d, cacheCfg), nil
 }
 
-func ConfigureStorStorage(db_type, host, port, name, user, pass, marshaler string,
-	maxConn, maxIdleConn, connMaxLifetime int,
-	stringIndexedFields, prefixIndexedFields []string) (db Storage, err error) {
-	var d Storage
-	switch db_type {
-	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, stringIndexedFields, false)
-	case utils.POSTGRES:
-		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
-	case utils.MYSQL:
-		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
-	case utils.INTERNAL:
-		d = NewInternalDB(stringIndexedFields, prefixIndexedFields)
-	default:
-		err = fmt.Errorf("unknown db '%s' valid options are [%s, %s, %s, %s]",
-			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL)
-	}
-	if err != nil {
-		return nil, err
-	}
-	return d, nil
-}
-
-func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler string,
-	maxConn, maxIdleConn, connMaxLifetime int,
-	stringIndexedFields, prefixIndexedFields []string) (db LoadStorage, err error) {
-	var d LoadStorage
-	switch db_type {
-	case utils.POSTGRES:
-		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
-	case utils.MYSQL:
-		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
-	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, stringIndexedFields, false)
-	case utils.INTERNAL:
-		d = NewInternalDB(stringIndexedFields, prefixIndexedFields)
-	default:
-		err = fmt.Errorf("unknown db '%s' valid options are [%s, %s, %s, %s]",
-			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL)
-	}
-	if err != nil {
-		return nil, err
-	}
-	return d, nil
-}
-
-func ConfigureCdrStorage(db_type, host, port, name, user, pass string,
-	maxConn, maxIdleConn, connMaxLifetime int,
-	stringIndexedFields, prefixIndexedFields []string) (db CdrStorage, err error) {
-	var d CdrStorage
-	switch db_type {
-	case utils.POSTGRES:
-		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
-	case utils.MYSQL:
-		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
-	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, stringIndexedFields, false)
-	case utils.INTERNAL:
-		d = NewInternalDB(stringIndexedFields, prefixIndexedFields)
-	default:
-		err = fmt.Errorf("unknown db '%s' valid options are [%s, %s, %s, %s]",
-			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL)
-	}
-	if err != nil {
-		return nil, err
-	}
-	return d, nil
-}
-
-func ConfigureStorDB(db_type, host, port, name, user, pass string,
+// ConfigureStorStorage returns a StorDB(implements Storage interface) based on dbType
+func ConfigureStorStorage(dbType, host, port, name, user, pass, sslmode string,
 	maxConn, maxIdleConn, connMaxLifetime int,
 	stringIndexedFields, prefixIndexedFields []string) (db StorDB, err error) {
-	var d StorDB
-	switch db_type {
-	case utils.POSTGRES:
-		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
-	case utils.MYSQL:
-		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
+	switch dbType {
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, stringIndexedFields, false)
+		db, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, stringIndexedFields, false)
+	case utils.POSTGRES:
+		db, err = NewPostgresStorage(host, port, name, user, pass, sslmode, maxConn, maxIdleConn, connMaxLifetime)
+	case utils.MYSQL:
+		db, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
 	case utils.INTERNAL:
-		d = NewInternalDB(stringIndexedFields, prefixIndexedFields)
+		db = NewInternalDB(stringIndexedFields, prefixIndexedFields)
 	default:
 		err = fmt.Errorf("unknown db '%s' valid options are [%s, %s, %s, %s]",
-			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL)
+			dbType, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL)
 	}
-	if err != nil {
-		return nil, err
+	return
+}
+
+// ConfigureLoadStorage returns a LoadStorage based on dbType
+func ConfigureLoadStorage(dbType, host, port, name, user, pass, sslmode string,
+	maxConn, maxIdleConn, connMaxLifetime int,
+	stringIndexedFields, prefixIndexedFields []string) (db LoadStorage, err error) {
+	switch dbType {
+	case utils.POSTGRES:
+		db, err = NewPostgresStorage(host, port, name, user, pass, sslmode, maxConn, maxIdleConn, connMaxLifetime)
+	case utils.MYSQL:
+		db, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
+	case utils.MONGO:
+		db, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, stringIndexedFields, false)
+	case utils.INTERNAL:
+		db = NewInternalDB(stringIndexedFields, prefixIndexedFields)
+	default:
+		err = fmt.Errorf("unknown db '%s' valid options are [%s, %s, %s, %s]",
+			dbType, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL)
 	}
-	return d, nil
+	return
+}
+
+// ConfigureCdrStorage returns a CdrStorage based on dbType
+func ConfigureCdrStorage(dbType, host, port, name, user, pass, sslmode string,
+	maxConn, maxIdleConn, connMaxLifetime int,
+	stringIndexedFields, prefixIndexedFields []string) (db CdrStorage, err error) {
+	switch dbType {
+	case utils.POSTGRES:
+		db, err = NewPostgresStorage(host, port, name, user, pass, sslmode, maxConn, maxIdleConn, connMaxLifetime)
+	case utils.MYSQL:
+		db, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
+	case utils.MONGO:
+		db, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, stringIndexedFields, false)
+	case utils.INTERNAL:
+		db = NewInternalDB(stringIndexedFields, prefixIndexedFields)
+	default:
+		err = fmt.Errorf("unknown db '%s' valid options are [%s, %s, %s, %s]",
+			dbType, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL)
+	}
+	return
 }
 
 // Stores one Cost coming from SM

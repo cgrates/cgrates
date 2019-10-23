@@ -28,66 +28,70 @@ import (
 
 // StorDbCfg StroreDb config
 type StorDbCfg struct {
-	StorDBType                string // Should reflect the database type used to store logs
-	StorDBHost                string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	StorDBPort                string // Th e port to bind to.
-	StorDBName                string // The name of the database to connect to.
-	StorDBUser                string // The user to sign in as.
-	StorDBPass                string // The user's password.
-	StorDBMaxOpenConns        int    // Maximum database connections opened
-	StorDBMaxIdleConns        int    // Maximum idle connections to keep opened
-	StorDBConnMaxLifetime     int
-	StorDBStringIndexedFields []string
-	StorDBPrefixIndexedFields []string
-	QueryTimeout              time.Duration
+	Type                string // Should reflect the database type used to store logs
+	Host                string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	Port                string // Th e port to bind to.
+	Name                string // The name of the database to connect to.
+	User                string // The user to sign in as.
+	Password            string // The user's password.
+	MaxOpenConns        int    // Maximum database connections opened
+	MaxIdleConns        int    // Maximum idle connections to keep opened
+	ConnMaxLifetime     int
+	StringIndexedFields []string
+	PrefixIndexedFields []string
+	QueryTimeout        time.Duration
+	SSLMode             string // for PostgresDB used to change default sslmode
 }
 
-//loadFromJsonCfg loads StoreDb config from JsonCfg
+// loadFromJsonCfg loads StoreDb config from JsonCfg
 func (dbcfg *StorDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg == nil {
 		return nil
 	}
 	if jsnDbCfg.Db_type != nil {
-		dbcfg.StorDBType = strings.TrimPrefix(*jsnDbCfg.Db_type, "*")
+		dbcfg.Type = strings.TrimPrefix(*jsnDbCfg.Db_type, "*")
 	}
 	if jsnDbCfg.Db_host != nil {
-		dbcfg.StorDBHost = *jsnDbCfg.Db_host
+		dbcfg.Host = *jsnDbCfg.Db_host
 	}
 	if jsnDbCfg.Db_port != nil {
 		port := strconv.Itoa(*jsnDbCfg.Db_port)
 		if port == "-1" {
 			port = utils.MetaDynamic
 		}
-		dbcfg.StorDBPort = NewDbDefaults().DBPort(dbcfg.StorDBType, port)
+		dbcfg.Port = NewDbDefaults().DBPort(dbcfg.Type, port)
 	}
 	if jsnDbCfg.Db_name != nil {
-		dbcfg.StorDBName = *jsnDbCfg.Db_name
+		dbcfg.Name = *jsnDbCfg.Db_name
 	}
 	if jsnDbCfg.Db_user != nil {
-		dbcfg.StorDBUser = *jsnDbCfg.Db_user
+		dbcfg.User = *jsnDbCfg.Db_user
 	}
 	if jsnDbCfg.Db_password != nil {
-		dbcfg.StorDBPass = *jsnDbCfg.Db_password
+		dbcfg.Password = *jsnDbCfg.Db_password
 	}
 	if jsnDbCfg.Max_open_conns != nil {
-		dbcfg.StorDBMaxOpenConns = *jsnDbCfg.Max_open_conns
+		dbcfg.MaxOpenConns = *jsnDbCfg.Max_open_conns
 	}
 	if jsnDbCfg.Max_idle_conns != nil {
-		dbcfg.StorDBMaxIdleConns = *jsnDbCfg.Max_idle_conns
+		dbcfg.MaxIdleConns = *jsnDbCfg.Max_idle_conns
 	}
 	if jsnDbCfg.Conn_max_lifetime != nil {
-		dbcfg.StorDBConnMaxLifetime = *jsnDbCfg.Conn_max_lifetime
+		dbcfg.ConnMaxLifetime = *jsnDbCfg.Conn_max_lifetime
 	}
 	if jsnDbCfg.String_indexed_fields != nil {
-		dbcfg.StorDBStringIndexedFields = *jsnDbCfg.String_indexed_fields
+		dbcfg.StringIndexedFields = *jsnDbCfg.String_indexed_fields
 	}
 	if jsnDbCfg.Prefix_indexed_fields != nil {
-		dbcfg.StorDBPrefixIndexedFields = *jsnDbCfg.Prefix_indexed_fields
+		dbcfg.PrefixIndexedFields = *jsnDbCfg.Prefix_indexed_fields
 	}
 	if jsnDbCfg.Query_timeout != nil {
 		if dbcfg.QueryTimeout, err = utils.ParseDurationWithNanosecs(*jsnDbCfg.Query_timeout); err != nil {
 			return err
 		}
+	}
+	if jsnDbCfg.Sslmode != nil {
+		dbcfg.SSLMode = *jsnDbCfg.Sslmode
 	}
 	return nil
 }

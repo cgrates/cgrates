@@ -611,7 +611,7 @@ func TestSessionsDataTTLExpMultiUpdates(t *testing.T) {
 		initArgs, &initRpl); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(10*time.Millisecond) // give some time to allow the session to be created
+	time.Sleep(10 * time.Millisecond) // give some time to allow the session to be created
 	if (*initRpl.MaxUsage).Nanoseconds() != usage {
 		t.Errorf("Expecting : %+v, received: %+v", usage, (*initRpl.MaxUsage).Nanoseconds())
 	}

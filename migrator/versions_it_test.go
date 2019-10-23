@@ -64,7 +64,7 @@ func TestVersionITMongo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	vrsCfg.StorDbCfg().StorDBName = vrsCfg.DataDbCfg().DataDbName
+	vrsCfg.StorDbCfg().Name = vrsCfg.DataDbCfg().DataDbName
 	vrsSameOutDB = true
 	for _, stest := range sTestsVrsIT {
 		t.Run("TestVrsionITMigrateMongo", stest)
@@ -82,14 +82,14 @@ func testVrsITConnect(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	storDBOut, err := NewMigratorStorDB(vrsCfg.StorDbCfg().StorDBType,
-		vrsCfg.StorDbCfg().StorDBHost, vrsCfg.StorDbCfg().StorDBPort,
-		vrsCfg.StorDbCfg().StorDBName, vrsCfg.StorDbCfg().StorDBUser,
-		vrsCfg.StorDbCfg().StorDBPass, vrsCfg.StorDbCfg().StorDBMaxOpenConns,
-		vrsCfg.StorDbCfg().StorDBMaxIdleConns,
-		vrsCfg.StorDbCfg().StorDBConnMaxLifetime,
-		vrsCfg.StorDbCfg().StorDBStringIndexedFields,
-		vrsCfg.StorDbCfg().StorDBPrefixIndexedFields)
+	storDBOut, err := NewMigratorStorDB(vrsCfg.StorDbCfg().Type,
+		vrsCfg.StorDbCfg().Host, vrsCfg.StorDbCfg().Port,
+		vrsCfg.StorDbCfg().Name, vrsCfg.StorDbCfg().User,
+		vrsCfg.StorDbCfg().Password, vrsCfg.StorDbCfg().MaxOpenConns,
+		vrsCfg.StorDbCfg().MaxIdleConns,
+		vrsCfg.StorDbCfg().ConnMaxLifetime,
+		vrsCfg.StorDbCfg().StringIndexedFields,
+		vrsCfg.StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		t.Error(err)
 	}
@@ -103,7 +103,7 @@ func testVrsITConnect(t *testing.T) {
 func testVrsITFlush(t *testing.T) {
 	vrsMigrator.dmOut.DataManager().DataDB().Flush("")
 	vrsMigrator.storDBOut.StorDB().Flush((path.Join(vrsCfg.DataFolderPath, "storage",
-		vrsCfg.StorDbCfg().StorDBType)))
+		vrsCfg.StorDbCfg().Type)))
 	if vrs, err := vrsMigrator.dmOut.DataManager().DataDB().GetVersions(""); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected err=%s recived err=%v and rply=%s", utils.ErrNotFound.Error(), err, utils.ToJSON(vrs))
 	}

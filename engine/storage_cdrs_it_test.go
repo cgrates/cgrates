@@ -100,12 +100,12 @@ func testSetCDR(cfg *config.CGRConfig) error {
 	if err := InitStorDb(cfg); err != nil {
 		return err
 	}
-	cdrStorage, err := ConfigureCdrStorage(cfg.StorDbCfg().StorDBType,
-		cfg.StorDbCfg().StorDBHost, cfg.StorDbCfg().StorDBPort,
-		cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
-		cfg.StorDbCfg().StorDBPass, cfg.StorDbCfg().StorDBMaxOpenConns,
-		cfg.StorDbCfg().StorDBMaxIdleConns, cfg.StorDbCfg().StorDBConnMaxLifetime,
-		cfg.StorDbCfg().StorDBStringIndexedFields, cfg.StorDbCfg().StorDBPrefixIndexedFields)
+	cdrStorage, err := ConfigureCdrStorage(cfg.StorDbCfg().Type,
+		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
+		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
+		cfg.StorDbCfg().Password, cfg.StorDbCfg().MaxOpenConns,
+		cfg.StorDbCfg().MaxIdleConns, cfg.StorDbCfg().ConnMaxLifetime,
+		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		return err
 	}
@@ -206,12 +206,12 @@ func testSMCosts(cfg *config.CGRConfig) error {
 	if err := InitStorDb(cfg); err != nil {
 		return fmt.Errorf("testSMCosts #1 err: %v", err)
 	}
-	cdrStorage, err := ConfigureCdrStorage(cfg.StorDbCfg().StorDBType,
-		cfg.StorDbCfg().StorDBHost, cfg.StorDbCfg().StorDBPort,
-		cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
-		cfg.StorDbCfg().StorDBPass, cfg.StorDbCfg().StorDBMaxOpenConns,
-		cfg.StorDbCfg().StorDBMaxIdleConns, cfg.StorDbCfg().StorDBConnMaxLifetime,
-		cfg.StorDbCfg().StorDBStringIndexedFields, cfg.StorDbCfg().StorDBPrefixIndexedFields)
+	cdrStorage, err := ConfigureCdrStorage(cfg.StorDbCfg().Type,
+		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
+		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
+		cfg.StorDbCfg().Password, cfg.StorDbCfg().MaxOpenConns,
+		cfg.StorDbCfg().MaxIdleConns, cfg.StorDbCfg().ConnMaxLifetime,
+		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		return fmt.Errorf("testSMCosts #2 err: %v", err)
 	}
@@ -259,21 +259,21 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	if err := InitStorDb(cfg); err != nil {
 		return fmt.Errorf("testGetCDRs #1: %v", err)
 	}
-	cfg.StorDbCfg().StorDBStringIndexedFields = []string{utils.CGRID,
+	cfg.StorDbCfg().StringIndexedFields = []string{utils.CGRID,
 		utils.RunID, utils.OriginHost, utils.Source, utils.OriginID,
 		utils.ToR, utils.RequestType, utils.Tenant,
 		utils.Category, utils.Account, utils.Subject,
 		"Service-Context-Id",
 	}
-	cfg.StorDbCfg().StorDBPrefixIndexedFields = []string{
+	cfg.StorDbCfg().PrefixIndexedFields = []string{
 		utils.Destination,
 	}
-	cdrStorage, err := ConfigureCdrStorage(cfg.StorDbCfg().StorDBType,
-		cfg.StorDbCfg().StorDBHost, cfg.StorDbCfg().StorDBPort,
-		cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
-		cfg.StorDbCfg().StorDBPass, cfg.StorDbCfg().StorDBMaxOpenConns,
-		cfg.StorDbCfg().StorDBMaxIdleConns, cfg.StorDbCfg().StorDBConnMaxLifetime,
-		cfg.StorDbCfg().StorDBStringIndexedFields, cfg.StorDbCfg().StorDBPrefixIndexedFields)
+	cdrStorage, err := ConfigureCdrStorage(cfg.StorDbCfg().Type,
+		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
+		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
+		cfg.StorDbCfg().Password, cfg.StorDbCfg().MaxOpenConns,
+		cfg.StorDbCfg().MaxIdleConns, cfg.StorDbCfg().ConnMaxLifetime,
+		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		return fmt.Errorf("testGetCDRs #2: %v", err)
 	}

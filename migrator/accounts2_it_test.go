@@ -81,26 +81,26 @@ func testAcc2ITConnect(t *testing.T) {
 		t.Error(err)
 	}
 
-	storDBIn, err := NewMigratorStorDB(acc2CfgIn.StorDbCfg().StorDBType,
-		acc2CfgIn.StorDbCfg().StorDBHost, acc2CfgIn.StorDbCfg().StorDBPort,
-		acc2CfgIn.StorDbCfg().StorDBName, acc2CfgIn.StorDbCfg().StorDBUser,
-		acc2CfgIn.StorDbCfg().StorDBPass,
-		acc2CfgIn.StorDbCfg().StorDBMaxOpenConns,
-		acc2CfgIn.StorDbCfg().StorDBMaxIdleConns,
-		acc2CfgIn.StorDbCfg().StorDBConnMaxLifetime,
-		acc2CfgIn.StorDbCfg().StorDBStringIndexedFields,
-		acc2CfgIn.StorDbCfg().StorDBPrefixIndexedFields)
+	storDBIn, err := NewMigratorStorDB(acc2CfgIn.StorDbCfg().Type,
+		acc2CfgIn.StorDbCfg().Host, acc2CfgIn.StorDbCfg().Port,
+		acc2CfgIn.StorDbCfg().Name, acc2CfgIn.StorDbCfg().User,
+		acc2CfgIn.StorDbCfg().Password,
+		acc2CfgIn.StorDbCfg().MaxOpenConns,
+		acc2CfgIn.StorDbCfg().MaxIdleConns,
+		acc2CfgIn.StorDbCfg().ConnMaxLifetime,
+		acc2CfgIn.StorDbCfg().StringIndexedFields,
+		acc2CfgIn.StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		t.Error(err)
 	}
-	storDBOut, err := NewMigratorStorDB(acc2CfgOut.StorDbCfg().StorDBType,
-		acc2CfgOut.StorDbCfg().StorDBHost, acc2CfgOut.StorDbCfg().StorDBPort,
-		acc2CfgOut.StorDbCfg().StorDBName, acc2CfgOut.StorDbCfg().StorDBUser,
-		acc2CfgOut.StorDbCfg().StorDBPass, acc2CfgOut.StorDbCfg().StorDBMaxOpenConns,
-		acc2CfgOut.StorDbCfg().StorDBMaxIdleConns,
-		acc2CfgOut.StorDbCfg().StorDBConnMaxLifetime,
-		acc2CfgOut.StorDbCfg().StorDBStringIndexedFields,
-		acc2CfgOut.StorDbCfg().StorDBPrefixIndexedFields)
+	storDBOut, err := NewMigratorStorDB(acc2CfgOut.StorDbCfg().Type,
+		acc2CfgOut.StorDbCfg().Host, acc2CfgOut.StorDbCfg().Port,
+		acc2CfgOut.StorDbCfg().Name, acc2CfgOut.StorDbCfg().User,
+		acc2CfgOut.StorDbCfg().Password, acc2CfgOut.StorDbCfg().MaxOpenConns,
+		acc2CfgOut.StorDbCfg().MaxIdleConns,
+		acc2CfgOut.StorDbCfg().ConnMaxLifetime,
+		acc2CfgOut.StorDbCfg().StringIndexedFields,
+		acc2CfgOut.StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		t.Error(err)
 	}

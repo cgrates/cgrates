@@ -27,8 +27,9 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func NewPostgresStorage(host, port, name, user, password string, maxConn, maxIdleConn, connMaxLifetime int) (*SQLStorage, error) {
-	connectString := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", host, port, name, user, password)
+// NewPostgresStorage returns the posgres storDB
+func NewPostgresStorage(host, port, name, user, password, sslmode string, maxConn, maxIdleConn, connMaxLifetime int) (*SQLStorage, error) {
+	connectString := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s", host, port, name, user, password, sslmode)
 	db, err := gorm.Open("postgres", connectString)
 	if err != nil {
 		return nil, err

@@ -72,27 +72,27 @@ func TestCdrITMySql(t *testing.T) {
 }
 
 func testCdrITConnect(t *testing.T) {
-	storDBIn, err := NewMigratorStorDB(cdrCfgIn.StorDbCfg().StorDBType,
-		cdrCfgIn.StorDbCfg().StorDBHost, cdrCfgIn.StorDbCfg().StorDBPort,
-		cdrCfgIn.StorDbCfg().StorDBName, cdrCfgIn.StorDbCfg().StorDBUser,
-		cdrCfgIn.StorDbCfg().StorDBPass,
-		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
-		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
-		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDbCfg().StorDBStringIndexedFields,
-		config.CgrConfig().StorDbCfg().StorDBPrefixIndexedFields)
+	storDBIn, err := NewMigratorStorDB(cdrCfgIn.StorDbCfg().Type,
+		cdrCfgIn.StorDbCfg().Host, cdrCfgIn.StorDbCfg().Port,
+		cdrCfgIn.StorDbCfg().Name, cdrCfgIn.StorDbCfg().User,
+		cdrCfgIn.StorDbCfg().Password,
+		config.CgrConfig().StorDbCfg().MaxOpenConns,
+		config.CgrConfig().StorDbCfg().MaxIdleConns,
+		config.CgrConfig().StorDbCfg().ConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StringIndexedFields,
+		config.CgrConfig().StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		t.Error(err)
 	}
-	storDBOut, err := NewMigratorStorDB(cdrCfgIn.StorDbCfg().StorDBType,
-		cdrCfgIn.StorDbCfg().StorDBHost, cdrCfgIn.StorDbCfg().StorDBPort,
-		cdrCfgIn.StorDbCfg().StorDBName, cdrCfgIn.StorDbCfg().StorDBUser,
-		cdrCfgIn.StorDbCfg().StorDBPass,
-		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
-		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
-		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDbCfg().StorDBStringIndexedFields,
-		config.CgrConfig().StorDbCfg().StorDBPrefixIndexedFields)
+	storDBOut, err := NewMigratorStorDB(cdrCfgIn.StorDbCfg().Type,
+		cdrCfgIn.StorDbCfg().Host, cdrCfgIn.StorDbCfg().Port,
+		cdrCfgIn.StorDbCfg().Name, cdrCfgIn.StorDbCfg().User,
+		cdrCfgIn.StorDbCfg().Password,
+		config.CgrConfig().StorDbCfg().MaxOpenConns,
+		config.CgrConfig().StorDbCfg().MaxIdleConns,
+		config.CgrConfig().StorDbCfg().ConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StringIndexedFields,
+		config.CgrConfig().StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		t.Error(err)
 	}
@@ -107,7 +107,7 @@ func testCdrITConnect(t *testing.T) {
 
 func testCdrITFlush(t *testing.T) {
 	if err := cdrMigrator.storDBOut.StorDB().Flush(
-		path.Join(cdrCfgIn.DataFolderPath, "storage", cdrCfgIn.StorDbCfg().StorDBType)); err != nil {
+		path.Join(cdrCfgIn.DataFolderPath, "storage", cdrCfgIn.StorDbCfg().Type)); err != nil {
 		t.Error(err)
 	}
 }

@@ -304,22 +304,22 @@ func InitDataDb(cfg *config.CGRConfig) error {
 }
 
 func InitStorDb(cfg *config.CGRConfig) error {
-	storDb, err := ConfigureLoadStorage(cfg.StorDbCfg().StorDBType,
-		cfg.StorDbCfg().StorDBHost, cfg.StorDbCfg().StorDBPort,
-		cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
-		cfg.StorDbCfg().StorDBPass, cfg.GeneralCfg().DBDataEncoding,
-		cfg.StorDbCfg().StorDBMaxOpenConns, cfg.StorDbCfg().StorDBMaxIdleConns,
-		cfg.StorDbCfg().StorDBConnMaxLifetime, cfg.StorDbCfg().StorDBStringIndexedFields,
-		cfg.StorDbCfg().StorDBPrefixIndexedFields)
+	storDb, err := ConfigureLoadStorage(cfg.StorDbCfg().Type,
+		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
+		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
+		cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,
+		cfg.StorDbCfg().MaxOpenConns, cfg.StorDbCfg().MaxIdleConns,
+		cfg.StorDbCfg().ConnMaxLifetime, cfg.StorDbCfg().StringIndexedFields,
+		cfg.StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		return err
 	}
 	if err := storDb.Flush(path.Join(cfg.DataFolderPath, "storage",
-		cfg.StorDbCfg().StorDBType)); err != nil {
+		cfg.StorDbCfg().Type)); err != nil {
 		return err
 	}
 	if utils.IsSliceMember([]string{utils.MONGO, utils.MYSQL, utils.POSTGRES},
-		cfg.StorDbCfg().StorDBType) {
+		cfg.StorDbCfg().Type) {
 		if err := SetDBVersions(storDb); err != nil {
 			return err
 		}

@@ -105,13 +105,13 @@ func TestOnStorITMongo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if mgoITdb, err = NewMongoStorage(mgoITCfg.StorDbCfg().StorDBHost,
-		mgoITCfg.StorDbCfg().StorDBPort, mgoITCfg.StorDbCfg().StorDBName,
-		mgoITCfg.StorDbCfg().StorDBUser, mgoITCfg.StorDbCfg().StorDBPass,
-		utils.StorDB, nil, false); err != nil {
+	if mgoITdb, err = NewMongoStorage(mgoITCfg.StorDbCfg().Host,
+		mgoITCfg.StorDbCfg().Port, mgoITCfg.StorDbCfg().Name,
+		mgoITCfg.StorDbCfg().User, mgoITCfg.StorDbCfg().Password,
+		utils.StorDB, nil, mgoITCfg.CacheCfg(), false); err != nil {
 		t.Fatal(err)
 	}
-	onStorCfg = mgoITCfg.StorDbCfg().StorDBName
+	onStorCfg = mgoITCfg.StorDbCfg().Name
 	onStor = NewDataManager(mgoITdb, config.CgrConfig().CacheCfg())
 	for _, stest := range sTestsOnStorIT {
 		t.Run("TestOnStorITMongo", stest)

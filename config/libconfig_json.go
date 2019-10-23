@@ -90,6 +90,7 @@ type DbJsonCfg struct {
 	Redis_sentinel        *string
 	Query_timeout         *string
 	Preload_url           *string
+	Sslmode               *string // Used only in case of storDb
 }
 
 // Filters config

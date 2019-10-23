@@ -41,7 +41,7 @@ var tpCsvScenario = flag.String("tp_scenario", "testtp", "Use this scenario fold
 // Will use 3 different datadbs in order to be able to see differences in data loaded
 func TestLoaderITConnDataDbs(t *testing.T) {
 	lCfg, _ = config.NewDefaultCGRConfig()
-	lCfg.StorDbCfg().StorDBPass = "CGRateS.org"
+	lCfg.StorDbCfg().Password = "CGRateS.org"
 	var err error
 	if dataDbCsv, err = ConfigureDataStorage(lCfg.DataDbCfg().DataDbType,
 		lCfg.DataDbCfg().DataDbHost, lCfg.DataDbCfg().DataDbPort, "7",
@@ -71,11 +71,11 @@ func TestLoaderITConnDataDbs(t *testing.T) {
 
 // Create/reset storage tariff plan tables, used as database connectin establishment also
 func TestLoaderITCreateStorTpTables(t *testing.T) {
-	db, err := NewMySQLStorage(lCfg.StorDbCfg().StorDBHost,
-		lCfg.StorDbCfg().StorDBPort, lCfg.StorDbCfg().StorDBName,
-		lCfg.StorDbCfg().StorDBUser, lCfg.StorDbCfg().StorDBPass,
-		lCfg.StorDbCfg().StorDBMaxOpenConns, lCfg.StorDbCfg().StorDBMaxIdleConns,
-		lCfg.StorDbCfg().StorDBConnMaxLifetime)
+	db, err := NewMySQLStorage(lCfg.StorDbCfg().Host,
+		lCfg.StorDbCfg().Port, lCfg.StorDbCfg().Name,
+		lCfg.StorDbCfg().User, lCfg.StorDbCfg().Password,
+		lCfg.StorDbCfg().MaxOpenConns, lCfg.StorDbCfg().MaxIdleConns,
+		lCfg.StorDbCfg().ConnMaxLifetime)
 	if err != nil {
 		t.Error("Error on opening database connection: ", err)
 	}

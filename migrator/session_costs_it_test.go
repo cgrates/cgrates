@@ -82,27 +82,27 @@ func TestSessionCostITMySql(t *testing.T) {
 }
 
 func testSessionCostITConnect(t *testing.T) {
-	storDBIn, err := NewMigratorStorDB(sCostCfgIn.StorDbCfg().StorDBType,
-		sCostCfgIn.StorDbCfg().StorDBHost, sCostCfgIn.StorDbCfg().StorDBPort,
-		sCostCfgIn.StorDbCfg().StorDBName, sCostCfgIn.StorDbCfg().StorDBUser,
-		sCostCfgIn.StorDbCfg().StorDBPass,
-		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
-		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
-		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDbCfg().StorDBStringIndexedFields,
-		config.CgrConfig().StorDbCfg().StorDBPrefixIndexedFields)
+	storDBIn, err := NewMigratorStorDB(sCostCfgIn.StorDbCfg().Type,
+		sCostCfgIn.StorDbCfg().Host, sCostCfgIn.StorDbCfg().Port,
+		sCostCfgIn.StorDbCfg().Name, sCostCfgIn.StorDbCfg().User,
+		sCostCfgIn.StorDbCfg().Password,
+		config.CgrConfig().StorDbCfg().MaxOpenConns,
+		config.CgrConfig().StorDbCfg().MaxIdleConns,
+		config.CgrConfig().StorDbCfg().ConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StringIndexedFields,
+		config.CgrConfig().StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		t.Error(err)
 	}
-	storDBOut, err := NewMigratorStorDB(sCostCfgOut.StorDbCfg().StorDBType,
-		sCostCfgOut.StorDbCfg().StorDBHost, sCostCfgOut.StorDbCfg().StorDBPort,
-		sCostCfgOut.StorDbCfg().StorDBName, sCostCfgOut.StorDbCfg().StorDBUser,
-		sCostCfgOut.StorDbCfg().StorDBPass,
-		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
-		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
-		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDbCfg().StorDBStringIndexedFields,
-		config.CgrConfig().StorDbCfg().StorDBPrefixIndexedFields)
+	storDBOut, err := NewMigratorStorDB(sCostCfgOut.StorDbCfg().Type,
+		sCostCfgOut.StorDbCfg().Host, sCostCfgOut.StorDbCfg().Port,
+		sCostCfgOut.StorDbCfg().Name, sCostCfgOut.StorDbCfg().User,
+		sCostCfgOut.StorDbCfg().Password,
+		config.CgrConfig().StorDbCfg().MaxOpenConns,
+		config.CgrConfig().StorDbCfg().MaxIdleConns,
+		config.CgrConfig().StorDbCfg().ConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StringIndexedFields,
+		config.CgrConfig().StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		t.Error(err)
 	}
@@ -145,7 +145,7 @@ func testSessionCostITRename(t *testing.T) {
 
 func testSessionCostITFlush(t *testing.T) {
 	if err := sCostMigrator.storDBOut.StorDB().Flush(
-		path.Join(sCostCfgIn.DataFolderPath, "storage", sCostCfgIn.StorDbCfg().StorDBType)); err != nil {
+		path.Join(sCostCfgIn.DataFolderPath, "storage", sCostCfgIn.StorDbCfg().Type)); err != nil {
 		t.Error(err)
 	}
 }

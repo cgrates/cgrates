@@ -140,10 +140,10 @@ func TestCgrCfgStorDBPortWithoutDynamic(t *testing.T) {
 
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(JSN_CFG); err != nil {
 		t.Error(err)
-	} else if cgrCfg.StorDbCfg().StorDBType != utils.MONGO {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDbCfg().StorDBType, utils.MONGO)
-	} else if cgrCfg.StorDbCfg().StorDBPort != "3306" {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDbCfg().StorDBPort, "3306")
+	} else if cgrCfg.StorDbCfg().Type != utils.MONGO {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDbCfg().Type, utils.MONGO)
+	} else if cgrCfg.StorDbCfg().Port != "3306" {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDbCfg().Port, "3306")
 	}
 }
 
@@ -158,10 +158,10 @@ func TestCgrCfgStorDBPortWithDymanic(t *testing.T) {
 
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(JSN_CFG); err != nil {
 		t.Error(err)
-	} else if cgrCfg.StorDbCfg().StorDBType != utils.MONGO {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDbCfg().StorDBType, utils.MONGO)
-	} else if cgrCfg.StorDbCfg().StorDBPort != "27017" {
-		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDbCfg().StorDBPort, "27017")
+	} else if cgrCfg.StorDbCfg().Type != utils.MONGO {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDbCfg().Type, utils.MONGO)
+	} else if cgrCfg.StorDbCfg().Port != "27017" {
+		t.Errorf("Expected: %+v, received: %+v", cgrCfg.StorDbCfg().Port, "27017")
 	}
 }
 
@@ -426,35 +426,35 @@ func TestCgrCfgJSONDefaultsjsnDataDb(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
-	if cgrCfg.StorDbCfg().StorDBType != "mysql" {
-		t.Errorf("Expecting: mysql , recived: %+v", cgrCfg.StorDbCfg().StorDBType)
+	if cgrCfg.StorDbCfg().Type != "mysql" {
+		t.Errorf("Expecting: mysql , recived: %+v", cgrCfg.StorDbCfg().Type)
 	}
-	if cgrCfg.StorDbCfg().StorDBHost != "127.0.0.1" {
-		t.Errorf("Expecting: 127.0.0.1 , recived: %+v", cgrCfg.StorDbCfg().StorDBHost)
+	if cgrCfg.StorDbCfg().Host != "127.0.0.1" {
+		t.Errorf("Expecting: 127.0.0.1 , recived: %+v", cgrCfg.StorDbCfg().Host)
 	}
-	if cgrCfg.StorDbCfg().StorDBPort != "3306" {
-		t.Errorf("Expecting: 3306 , recived: %+v", cgrCfg.StorDbCfg().StorDBPort)
+	if cgrCfg.StorDbCfg().Port != "3306" {
+		t.Errorf("Expecting: 3306 , recived: %+v", cgrCfg.StorDbCfg().Port)
 	}
-	if cgrCfg.StorDbCfg().StorDBName != "cgrates" {
-		t.Errorf("Expecting: cgrates , recived: %+v", cgrCfg.StorDbCfg().StorDBName)
+	if cgrCfg.StorDbCfg().Name != "cgrates" {
+		t.Errorf("Expecting: cgrates , recived: %+v", cgrCfg.StorDbCfg().Name)
 	}
-	if cgrCfg.StorDbCfg().StorDBUser != "cgrates" {
-		t.Errorf("Expecting: cgrates , recived: %+v", cgrCfg.StorDbCfg().StorDBUser)
+	if cgrCfg.StorDbCfg().User != "cgrates" {
+		t.Errorf("Expecting: cgrates , recived: %+v", cgrCfg.StorDbCfg().User)
 	}
-	if cgrCfg.StorDbCfg().StorDBPass != "" {
-		t.Errorf("Expecting: , recived: %+v", cgrCfg.StorDbCfg().StorDBPass)
+	if cgrCfg.StorDbCfg().Password != "" {
+		t.Errorf("Expecting: , recived: %+v", cgrCfg.StorDbCfg().Password)
 	}
-	if cgrCfg.StorDbCfg().StorDBMaxOpenConns != 100 {
-		t.Errorf("Expecting: 100 , recived: %+v", cgrCfg.StorDbCfg().StorDBMaxOpenConns)
+	if cgrCfg.StorDbCfg().MaxOpenConns != 100 {
+		t.Errorf("Expecting: 100 , recived: %+v", cgrCfg.StorDbCfg().MaxOpenConns)
 	}
-	if cgrCfg.StorDbCfg().StorDBMaxIdleConns != 10 {
-		t.Errorf("Expecting: 10 , recived: %+v", cgrCfg.StorDbCfg().StorDBMaxIdleConns)
+	if cgrCfg.StorDbCfg().MaxIdleConns != 10 {
+		t.Errorf("Expecting: 10 , recived: %+v", cgrCfg.StorDbCfg().MaxIdleConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.StorDbCfg().StorDBStringIndexedFields, []string{}) {
-		t.Errorf("Expecting: %+v , recived: %+v", []string{}, cgrCfg.StorDbCfg().StorDBStringIndexedFields)
+	if !reflect.DeepEqual(cgrCfg.StorDbCfg().StringIndexedFields, []string{}) {
+		t.Errorf("Expecting: %+v , recived: %+v", []string{}, cgrCfg.StorDbCfg().StringIndexedFields)
 	}
-	if !reflect.DeepEqual(cgrCfg.StorDbCfg().StorDBPrefixIndexedFields, []string{}) {
-		t.Errorf("Expecting: %+v , recived: %+v", []string{}, cgrCfg.StorDbCfg().StorDBPrefixIndexedFields)
+	if !reflect.DeepEqual(cgrCfg.StorDbCfg().PrefixIndexedFields, []string{}) {
+		t.Errorf("Expecting: %+v , recived: %+v", []string{}, cgrCfg.StorDbCfg().PrefixIndexedFields)
 	}
 }
 

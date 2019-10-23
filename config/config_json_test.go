@@ -220,6 +220,7 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 		String_indexed_fields: &[]string{},
 		Prefix_indexed_fields: &[]string{},
 		Query_timeout:         utils.StringPointer("10s"),
+		Sslmode:               utils.StringPointer(utils.PostgressSSLModeDisable),
 	}
 	if cfg, err := dfCgrJsonCfg.DbJsonCfg(STORDB_JSN); err != nil {
 		t.Error(err)
