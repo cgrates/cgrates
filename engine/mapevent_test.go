@@ -703,12 +703,12 @@ func TestMapEventGetDurationPtrIgnoreErrors(t *testing.T) {
 func TestMapEventGetDurationPtrOrDefault(t *testing.T) {
 	mapEv := NewMapEvent(nil)
 	dflt := time.Duration(1)
-	if ptr, _ := mapEv.GetDurationPtrOrDefault("test7", &dflt); dflt.String()!=ptr.String() {
+	if ptr, _ := mapEv.GetDurationPtrOrDefault("test7", &dflt); dflt.String() != ptr.String() {
 		t.Errorf("Expected: %+v, received: %+v", dflt, ptr)
 	}
 	newVal := time.Duration(2)
 	mapEv["test7"] = newVal
-	if ptr, _ := mapEv.GetDurationPtrOrDefault("test7", &dflt);newVal.String()!=ptr.String() {
+	if ptr, _ := mapEv.GetDurationPtrOrDefault("test7", &dflt); newVal.String() != ptr.String() {
 		t.Errorf("Expected: %+v, received: %+v", newVal, ptr)
 	}
 }

@@ -1193,6 +1193,16 @@ const (
 	GoogleTokenFileName       = "token.json"
 )
 
+// StorDB
+var (
+	PostgressSSLModeDisable    = "disable"
+	PostgressSSLModeAllow      = "allow"
+	PostgressSSLModePrefer     = "prefer"
+	PostgressSSLModeRequire    = "require"
+	PostgressSSLModeVerifyCa   = "verify-ca"
+	PostgressSSLModeVerifyFull = "verify-full"
+)
+
 func buildCacheInstRevPrefixes() {
 	CachePrefixToInstance = make(map[string]string)
 	for k, v := range CacheInstanceToPrefix {

@@ -67,27 +67,27 @@ func testTpDstITConnect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	storDBIn, err := NewMigratorStorDB(tpDstCfgIn.StorDbCfg().StorDBType,
-		tpDstCfgIn.StorDbCfg().StorDBHost, tpDstCfgIn.StorDbCfg().StorDBPort,
-		tpDstCfgIn.StorDbCfg().StorDBName, tpDstCfgIn.StorDbCfg().StorDBUser,
-		tpDstCfgIn.StorDbCfg().StorDBPass,
-		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
-		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
-		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDbCfg().StorDBStringIndexedFields,
-		config.CgrConfig().StorDbCfg().StorDBPrefixIndexedFields)
+	storDBIn, err := NewMigratorStorDB(tpDstCfgIn.StorDbCfg().Type,
+		tpDstCfgIn.StorDbCfg().Host, tpDstCfgIn.StorDbCfg().Port,
+		tpDstCfgIn.StorDbCfg().Name, tpDstCfgIn.StorDbCfg().User,
+		tpDstCfgIn.StorDbCfg().Password,
+		config.CgrConfig().StorDbCfg().MaxOpenConns,
+		config.CgrConfig().StorDbCfg().MaxIdleConns,
+		config.CgrConfig().StorDbCfg().ConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StringIndexedFields,
+		config.CgrConfig().StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		log.Fatal(err)
 	}
-	storDBOut, err := NewMigratorStorDB(tpDstCfgOut.StorDbCfg().StorDBType,
-		tpDstCfgOut.StorDbCfg().StorDBHost, tpDstCfgOut.StorDbCfg().StorDBPort,
-		tpDstCfgOut.StorDbCfg().StorDBName, tpDstCfgOut.StorDbCfg().StorDBUser,
-		tpDstCfgOut.StorDbCfg().StorDBPass,
-		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
-		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
-		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDbCfg().StorDBStringIndexedFields,
-		config.CgrConfig().StorDbCfg().StorDBPrefixIndexedFields)
+	storDBOut, err := NewMigratorStorDB(tpDstCfgOut.StorDbCfg().Type,
+		tpDstCfgOut.StorDbCfg().Host, tpDstCfgOut.StorDbCfg().Port,
+		tpDstCfgOut.StorDbCfg().Name, tpDstCfgOut.StorDbCfg().User,
+		tpDstCfgOut.StorDbCfg().Password,
+		config.CgrConfig().StorDbCfg().MaxOpenConns,
+		config.CgrConfig().StorDbCfg().MaxIdleConns,
+		config.CgrConfig().StorDbCfg().ConnMaxLifetime,
+		config.CgrConfig().StorDbCfg().StringIndexedFields,
+		config.CgrConfig().StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -99,12 +99,12 @@ func testTpDstITConnect(t *testing.T) {
 
 func testTpDstITFlush(t *testing.T) {
 	if err := tpDstMigrator.storDBIn.StorDB().Flush(
-		path.Join(tpDstCfgIn.DataFolderPath, "storage", tpDstCfgIn.StorDbCfg().StorDBType)); err != nil {
+		path.Join(tpDstCfgIn.DataFolderPath, "storage", tpDstCfgIn.StorDbCfg().Type)); err != nil {
 		t.Error(err)
 	}
 
 	if err := tpDstMigrator.storDBOut.StorDB().Flush(
-		path.Join(tpDstCfgOut.DataFolderPath, "storage", tpDstCfgOut.StorDbCfg().StorDBType)); err != nil {
+		path.Join(tpDstCfgOut.DataFolderPath, "storage", tpDstCfgOut.StorDbCfg().Type)); err != nil {
 		t.Error(err)
 	}
 }

@@ -79,6 +79,7 @@ const CGRATES_CFG_JSON = `
 	"string_indexed_fields": [],			// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
 	"prefix_indexed_fields":[],				// prefix indexes on cdrs table to speed up queries, used in case of *internal
 	"query_timeout":"10s",
+	"sslmode":"disable",					// sslmode in case of *postgres
 },
 
 

@@ -64,11 +64,11 @@ func TestStorDBitMySQL(t *testing.T) {
 	if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "mysql")); err != nil {
 		t.Fatal(err)
 	}
-	if storDB, err = NewMySQLStorage(cfg.StorDbCfg().StorDBHost,
-		cfg.StorDbCfg().StorDBPort, cfg.StorDbCfg().StorDBName,
-		cfg.StorDbCfg().StorDBUser, cfg.StorDbCfg().StorDBPass,
-		cfg.StorDbCfg().StorDBMaxOpenConns, cfg.StorDbCfg().StorDBMaxIdleConns,
-		cfg.StorDbCfg().StorDBConnMaxLifetime); err != nil {
+	if storDB, err = NewMySQLStorage(cfg.StorDbCfg().Host,
+		cfg.StorDbCfg().Port, cfg.StorDbCfg().Name,
+		cfg.StorDbCfg().User, cfg.StorDbCfg().Password,
+		cfg.StorDbCfg().MaxOpenConns, cfg.StorDbCfg().MaxIdleConns,
+		cfg.StorDbCfg().ConnMaxLifetime); err != nil {
 		t.Fatal(err)
 	}
 	storDB2ndDBname = "mysql"
@@ -84,11 +84,11 @@ func TestStorDBitPostgresSQL(t *testing.T) {
 	if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "postgres")); err != nil {
 		t.Fatal(err)
 	}
-	if storDB, err = NewPostgresStorage(cfg.StorDbCfg().StorDBHost,
-		cfg.StorDbCfg().StorDBPort, cfg.StorDbCfg().StorDBName,
-		cfg.StorDbCfg().StorDBUser, cfg.StorDbCfg().StorDBPass,
-		cfg.StorDbCfg().StorDBMaxOpenConns, cfg.StorDbCfg().StorDBMaxIdleConns,
-		cfg.StorDbCfg().StorDBConnMaxLifetime); err != nil {
+	if storDB, err = NewPostgresStorage(cfg.StorDbCfg().Host,
+		cfg.StorDbCfg().Port, cfg.StorDbCfg().Name,
+		cfg.StorDbCfg().User, cfg.StorDbCfg().Password,
+		cfg.StorDbCfg().SSLMode, cfg.StorDbCfg().MaxOpenConns,
+		cfg.StorDbCfg().MaxIdleConns, cfg.StorDbCfg().ConnMaxLifetime); err != nil {
 		t.Fatal(err)
 	}
 	storDB2ndDBname = "postgres"
@@ -104,10 +104,10 @@ func TestStorDBitMongo(t *testing.T) {
 	if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "mongo")); err != nil {
 		t.Fatal(err)
 	}
-	if storDB, err = NewMongoStorage(cfg.StorDbCfg().StorDBHost,
-		cfg.StorDbCfg().StorDBPort, cfg.StorDbCfg().StorDBName,
-		cfg.StorDbCfg().StorDBUser, cfg.StorDbCfg().StorDBPass,
-		utils.StorDB, cfg.StorDbCfg().StorDBStringIndexedFields,  false); err != nil {
+	if storDB, err = NewMongoStorage(cfg.StorDbCfg().Host,
+		cfg.StorDbCfg().Port, cfg.StorDbCfg().Name,
+		cfg.StorDbCfg().User, cfg.StorDbCfg().Password,
+		utils.StorDB, cfg.StorDbCfg().StringIndexedFields, false); err != nil {
 		t.Fatal(err)
 	}
 	storDB2ndDBname = "todo"
@@ -1455,7 +1455,7 @@ func testStorDBitCRUDSMCosts2(t *testing.T) {
 }
 
 func testStorDBitFlush(t *testing.T) {
-	if err := storDB.Flush(path.Join(cfg.DataFolderPath, "storage", cfg.StorDbCfg().StorDBType)); err != nil {
+	if err := storDB.Flush(path.Join(cfg.DataFolderPath, "storage", cfg.StorDbCfg().Type)); err != nil {
 		t.Error(err)
 	}
 }

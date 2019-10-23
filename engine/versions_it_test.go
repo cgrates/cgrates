@@ -52,15 +52,13 @@ func TestVersionsITMongo(t *testing.T) {
 		cfg.CacheCfg(), ""); err != nil {
 		log.Fatal(err)
 	}
-	storageDb, err = ConfigureStorStorage(cfg.StorDbCfg().StorDBType,
-		cfg.StorDbCfg().StorDBHost, cfg.StorDbCfg().StorDBPort,
-		cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
-		cfg.StorDbCfg().StorDBPass, cfg.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
-		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
-		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDbCfg().StorDBStringIndexedFields,
-		config.CgrConfig().StorDbCfg().StorDBPrefixIndexedFields)
+	storageDb, err = ConfigureStorStorage(cfg.StorDbCfg().Type,
+		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
+		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
+		cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,
+		cfg.StorDbCfg().MaxOpenConns, cfg.StorDbCfg().MaxIdleConns,
+		cfg.StorDbCfg().ConnMaxLifetime, cfg.StorDbCfg().StringIndexedFields,
+		cfg.StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -83,15 +81,13 @@ func TestVersionsITRedisMYSQL(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	storageDb, err = ConfigureStorStorage(cfg.StorDbCfg().StorDBType,
-		cfg.StorDbCfg().StorDBHost, cfg.StorDbCfg().StorDBPort,
-		cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
-		cfg.StorDbCfg().StorDBPass, cfg.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
-		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
-		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDbCfg().StorDBStringIndexedFields,
-		config.CgrConfig().StorDbCfg().StorDBPrefixIndexedFields)
+	storageDb, err = ConfigureStorStorage(cfg.StorDbCfg().Type,
+		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
+		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
+		cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,
+		cfg.StorDbCfg().MaxOpenConns, cfg.StorDbCfg().MaxIdleConns,
+		cfg.StorDbCfg().ConnMaxLifetime, cfg.StorDbCfg().StringIndexedFields,
+		cfg.StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -113,15 +109,13 @@ func TestVersionsITRedisPostgres(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	storageDb, err = ConfigureStorStorage(cfg.StorDbCfg().StorDBType,
-		cfg.StorDbCfg().StorDBHost, cfg.StorDbCfg().StorDBPort,
-		cfg.StorDbCfg().StorDBName, cfg.StorDbCfg().StorDBUser,
-		cfg.StorDbCfg().StorDBPass, cfg.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
-		config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
-		config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
-		config.CgrConfig().StorDbCfg().StorDBStringIndexedFields,
-		config.CgrConfig().StorDbCfg().StorDBPrefixIndexedFields)
+	storageDb, err = ConfigureStorStorage(cfg.StorDbCfg().Type,
+		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
+		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
+		cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,
+		cfg.StorDbCfg().MaxOpenConns, cfg.StorDbCfg().MaxIdleConns,
+		cfg.StorDbCfg().ConnMaxLifetime, cfg.StorDbCfg().StringIndexedFields,
+		cfg.StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -137,7 +131,7 @@ func testVersionsFlush(t *testing.T) {
 	if err != nil {
 		t.Error("Error when flushing Mongo ", err.Error())
 	}
-	if err := storageDb.Flush(path.Join(cfg.DataFolderPath, "storage", cfg.StorDbCfg().StorDBType)); err != nil {
+	if err := storageDb.Flush(path.Join(cfg.DataFolderPath, "storage", cfg.StorDbCfg().Type)); err != nil {
 		t.Error(err)
 	}
 	SetDBVersions(storageDb)

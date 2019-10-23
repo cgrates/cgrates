@@ -55,17 +55,17 @@ var (
 	dbRedisSentinel = cgrLoaderFlags.String("redis_sentinel", dfltCfg.DataDbCfg().DataDbSentinelName,
 		"The name of redis sentinel")
 
-	storDBType = cgrLoaderFlags.String("stordb_type", dfltCfg.StorDbCfg().StorDBType,
+	storDBType = cgrLoaderFlags.String("stordb_type", dfltCfg.StorDbCfg().Type,
 		"The type of the storDb database <*mysql|*postgres|*mongo>")
-	storDBHost = cgrLoaderFlags.String("stordb_host", dfltCfg.StorDbCfg().StorDBHost,
+	storDBHost = cgrLoaderFlags.String("stordb_host", dfltCfg.StorDbCfg().Host,
 		"The storDb host to connect to.")
-	storDBPort = cgrLoaderFlags.String("stordb_port", dfltCfg.StorDbCfg().StorDBPort,
+	storDBPort = cgrLoaderFlags.String("stordb_port", dfltCfg.StorDbCfg().Port,
 		"The storDb port to bind to.")
-	storDBName = cgrLoaderFlags.String("stordb_name", dfltCfg.StorDbCfg().StorDBName,
+	storDBName = cgrLoaderFlags.String("stordb_name", dfltCfg.StorDbCfg().Name,
 		"The name/number of the storDb to connect to.")
-	storDBUser = cgrLoaderFlags.String("stordb_user", dfltCfg.StorDbCfg().StorDBUser,
+	storDBUser = cgrLoaderFlags.String("stordb_user", dfltCfg.StorDbCfg().User,
 		"The storDb user to sign in as.")
-	storDBPasswd = cgrLoaderFlags.String("stordb_passwd", dfltCfg.StorDbCfg().StorDBPass,
+	storDBPasswd = cgrLoaderFlags.String("stordb_passwd", dfltCfg.StorDbCfg().Password,
 		"The storDb user's password.")
 
 	cachingArg = cgrLoaderFlags.String("caching", "",
@@ -158,28 +158,28 @@ func main() {
 	}
 
 	// Data for StorDB
-	if *storDBType != dfltCfg.StorDbCfg().StorDBType {
-		ldrCfg.StorDbCfg().StorDBType = strings.TrimPrefix(*storDBType, "*")
+	if *storDBType != dfltCfg.StorDbCfg().Type {
+		ldrCfg.StorDbCfg().Type = strings.TrimPrefix(*storDBType, "*")
 	}
 
-	if *storDBHost != dfltCfg.StorDbCfg().StorDBHost {
-		ldrCfg.StorDbCfg().StorDBHost = *storDBHost
+	if *storDBHost != dfltCfg.StorDbCfg().Host {
+		ldrCfg.StorDbCfg().Host = *storDBHost
 	}
 
-	if *storDBPort != dfltCfg.StorDbCfg().StorDBPort {
-		ldrCfg.StorDbCfg().StorDBPort = *storDBPort
+	if *storDBPort != dfltCfg.StorDbCfg().Port {
+		ldrCfg.StorDbCfg().Port = *storDBPort
 	}
 
-	if *storDBName != dfltCfg.StorDbCfg().StorDBName {
-		ldrCfg.StorDbCfg().StorDBName = *storDBName
+	if *storDBName != dfltCfg.StorDbCfg().Name {
+		ldrCfg.StorDbCfg().Name = *storDBName
 	}
 
-	if *storDBUser != dfltCfg.StorDbCfg().StorDBUser {
-		ldrCfg.StorDbCfg().StorDBUser = *storDBUser
+	if *storDBUser != dfltCfg.StorDbCfg().User {
+		ldrCfg.StorDbCfg().User = *storDBUser
 	}
 
-	if *storDBPasswd != dfltCfg.StorDbCfg().StorDBPass {
-		ldrCfg.StorDbCfg().StorDBPass = *storDBPasswd
+	if *storDBPasswd != dfltCfg.StorDbCfg().Password {
+		ldrCfg.StorDbCfg().Password = *storDBPasswd
 	}
 
 	if *tpid != dfltCfg.LoaderCgrCfg().DataPath {
@@ -242,15 +242,13 @@ func main() {
 	}
 
 	if *fromStorDB || *toStorDB {
-		if storDb, err = engine.ConfigureLoadStorage(ldrCfg.StorDbCfg().StorDBType,
-			ldrCfg.StorDbCfg().StorDBHost, ldrCfg.StorDbCfg().StorDBPort,
-			ldrCfg.StorDbCfg().StorDBName, ldrCfg.StorDbCfg().StorDBUser,
-			ldrCfg.StorDbCfg().StorDBPass, ldrCfg.GeneralCfg().DBDataEncoding,
-			config.CgrConfig().StorDbCfg().StorDBMaxOpenConns,
-			config.CgrConfig().StorDbCfg().StorDBMaxIdleConns,
-			config.CgrConfig().StorDbCfg().StorDBConnMaxLifetime,
-			config.CgrConfig().StorDbCfg().StorDBStringIndexedFields,
-			config.CgrConfig().StorDbCfg().StorDBPrefixIndexedFields); err != nil {
+		if storDb, err = engine.ConfigureLoadStorage(ldrCfg.StorDbCfg().Type,
+			ldrCfg.StorDbCfg().Host, ldrCfg.StorDbCfg().Port,
+			ldrCfg.StorDbCfg().Name, ldrCfg.StorDbCfg().User,
+			ldrCfg.StorDbCfg().Password, ldrCfg.StorDbCfg().SSLMode,
+			ldrCfg.StorDbCfg().MaxOpenConns, ldrCfg.StorDbCfg().MaxIdleConns,
+			ldrCfg.StorDbCfg().ConnMaxLifetime, ldrCfg.StorDbCfg().StringIndexedFields,
+			ldrCfg.StorDbCfg().PrefixIndexedFields); err != nil {
 			log.Fatalf("Coud not open storDB connection: %s", err.Error())
 		}
 		defer storDb.Close()

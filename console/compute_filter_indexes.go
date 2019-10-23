@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -48,13 +47,13 @@ func (self *CmdComputeFilterIndexes) RpcMethod() string {
 }
 
 func (self *CmdComputeFilterIndexes) RpcParams(reset bool) interface{} {
-if reset || self.rpcParams == nil {
+	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.ArgsComputeFilterIndexes{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdComputeFilterIndexes) PostprocessRpcParams() error { 
+func (self *CmdComputeFilterIndexes) PostprocessRpcParams() error {
 	return nil
 }
 
