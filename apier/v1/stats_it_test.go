@@ -297,6 +297,10 @@ func testV1STSProcessEvent(t *testing.T) {
 }
 
 func testV1STSGetStatsAfterRestart(t *testing.T) {
+	// in case of internal we skip this test
+	if stsV1ConfDIR == "tutinternal" {
+		t.SkipNow()
+	}
 	time.Sleep(time.Second)
 	if _, err := engine.StopStartEngine(stsV1CfgPath, *waitRater); err != nil {
 		t.Fatal(err)
