@@ -75,24 +75,20 @@ func testCdrITConnect(t *testing.T) {
 	storDBIn, err := NewMigratorStorDB(cdrCfgIn.StorDbCfg().Type,
 		cdrCfgIn.StorDbCfg().Host, cdrCfgIn.StorDbCfg().Port,
 		cdrCfgIn.StorDbCfg().Name, cdrCfgIn.StorDbCfg().User,
-		cdrCfgIn.StorDbCfg().Password,
-		config.CgrConfig().StorDbCfg().MaxOpenConns,
-		config.CgrConfig().StorDbCfg().MaxIdleConns,
-		config.CgrConfig().StorDbCfg().ConnMaxLifetime,
-		config.CgrConfig().StorDbCfg().StringIndexedFields,
-		config.CgrConfig().StorDbCfg().PrefixIndexedFields)
+		cdrCfgIn.StorDbCfg().Password, cdrCfgIn.StorDbCfg().SSLMode,
+		cdrCfgIn.StorDbCfg().MaxOpenConns, cdrCfgIn.StorDbCfg().MaxIdleConns,
+		cdrCfgIn.StorDbCfg().ConnMaxLifetime, cdrCfgIn.StorDbCfg().StringIndexedFields,
+		cdrCfgIn.StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		t.Error(err)
 	}
 	storDBOut, err := NewMigratorStorDB(cdrCfgIn.StorDbCfg().Type,
 		cdrCfgIn.StorDbCfg().Host, cdrCfgIn.StorDbCfg().Port,
 		cdrCfgIn.StorDbCfg().Name, cdrCfgIn.StorDbCfg().User,
-		cdrCfgIn.StorDbCfg().Password,
-		config.CgrConfig().StorDbCfg().MaxOpenConns,
-		config.CgrConfig().StorDbCfg().MaxIdleConns,
-		config.CgrConfig().StorDbCfg().ConnMaxLifetime,
-		config.CgrConfig().StorDbCfg().StringIndexedFields,
-		config.CgrConfig().StorDbCfg().PrefixIndexedFields)
+		cdrCfgIn.StorDbCfg().Password, cdrCfgIn.StorDbCfg().SSLMode,
+		cdrCfgIn.StorDbCfg().MaxOpenConns, cdrCfgIn.StorDbCfg().MaxIdleConns,
+		cdrCfgIn.StorDbCfg().ConnMaxLifetime, cdrCfgIn.StorDbCfg().StringIndexedFields,
+		cdrCfgIn.StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		t.Error(err)
 	}

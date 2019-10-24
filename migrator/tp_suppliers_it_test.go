@@ -71,24 +71,20 @@ func testTpSplITConnect(t *testing.T) {
 	storDBIn, err := NewMigratorStorDB(tpSplCfgIn.StorDbCfg().Type,
 		tpSplCfgIn.StorDbCfg().Host, tpSplCfgIn.StorDbCfg().Port,
 		tpSplCfgIn.StorDbCfg().Name, tpSplCfgIn.StorDbCfg().User,
-		tpSplCfgIn.StorDbCfg().Password,
-		config.CgrConfig().StorDbCfg().MaxOpenConns,
-		config.CgrConfig().StorDbCfg().MaxIdleConns,
-		config.CgrConfig().StorDbCfg().ConnMaxLifetime,
-		config.CgrConfig().StorDbCfg().StringIndexedFields,
-		config.CgrConfig().StorDbCfg().PrefixIndexedFields)
+		tpSplCfgIn.StorDbCfg().Password, tpSplCfgIn.StorDbCfg().SSLMode,
+		tpSplCfgIn.StorDbCfg().MaxOpenConns, tpSplCfgIn.StorDbCfg().MaxIdleConns,
+		tpSplCfgIn.StorDbCfg().ConnMaxLifetime, tpSplCfgIn.StorDbCfg().StringIndexedFields,
+		tpSplCfgIn.StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		log.Fatal(err)
 	}
 	storDBOut, err := NewMigratorStorDB(tpSplCfgOut.StorDbCfg().Type,
 		tpSplCfgOut.StorDbCfg().Host, tpSplCfgOut.StorDbCfg().Port,
 		tpSplCfgOut.StorDbCfg().Name, tpSplCfgOut.StorDbCfg().User,
-		tpSplCfgOut.StorDbCfg().Password,
-		config.CgrConfig().StorDbCfg().MaxOpenConns,
-		config.CgrConfig().StorDbCfg().MaxIdleConns,
-		config.CgrConfig().StorDbCfg().ConnMaxLifetime,
-		config.CgrConfig().StorDbCfg().StringIndexedFields,
-		config.CgrConfig().StorDbCfg().PrefixIndexedFields)
+		tpSplCfgOut.StorDbCfg().Password, tpSplCfgIn.StorDbCfg().SSLMode,
+		tpSplCfgIn.StorDbCfg().MaxOpenConns, tpSplCfgIn.StorDbCfg().MaxIdleConns,
+		tpSplCfgIn.StorDbCfg().ConnMaxLifetime, tpSplCfgIn.StorDbCfg().StringIndexedFields,
+		tpSplCfgIn.StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		log.Fatal(err)
 	}

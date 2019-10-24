@@ -103,9 +103,10 @@ func testSetCDR(cfg *config.CGRConfig) error {
 	cdrStorage, err := ConfigureCdrStorage(cfg.StorDbCfg().Type,
 		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
-		cfg.StorDbCfg().Password, cfg.StorDbCfg().MaxOpenConns,
-		cfg.StorDbCfg().MaxIdleConns, cfg.StorDbCfg().ConnMaxLifetime,
-		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields)
+		cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,
+		cfg.StorDbCfg().MaxOpenConns, cfg.StorDbCfg().MaxIdleConns,
+		cfg.StorDbCfg().ConnMaxLifetime, cfg.StorDbCfg().StringIndexedFields,
+		cfg.StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		return err
 	}
@@ -209,9 +210,10 @@ func testSMCosts(cfg *config.CGRConfig) error {
 	cdrStorage, err := ConfigureCdrStorage(cfg.StorDbCfg().Type,
 		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
-		cfg.StorDbCfg().Password, cfg.StorDbCfg().MaxOpenConns,
-		cfg.StorDbCfg().MaxIdleConns, cfg.StorDbCfg().ConnMaxLifetime,
-		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields)
+		cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,
+		cfg.StorDbCfg().MaxOpenConns, cfg.StorDbCfg().MaxIdleConns,
+		cfg.StorDbCfg().ConnMaxLifetime, cfg.StorDbCfg().StringIndexedFields,
+		cfg.StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		return fmt.Errorf("testSMCosts #2 err: %v", err)
 	}
@@ -271,9 +273,10 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	cdrStorage, err := ConfigureCdrStorage(cfg.StorDbCfg().Type,
 		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
-		cfg.StorDbCfg().Password, cfg.StorDbCfg().MaxOpenConns,
-		cfg.StorDbCfg().MaxIdleConns, cfg.StorDbCfg().ConnMaxLifetime,
-		cfg.StorDbCfg().StringIndexedFields, cfg.StorDbCfg().PrefixIndexedFields)
+		cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,
+		cfg.StorDbCfg().MaxOpenConns, cfg.StorDbCfg().MaxIdleConns,
+		cfg.StorDbCfg().ConnMaxLifetime, cfg.StorDbCfg().StringIndexedFields,
+		cfg.StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		return fmt.Errorf("testGetCDRs #2: %v", err)
 	}
