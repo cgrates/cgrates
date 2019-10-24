@@ -38,37 +38,65 @@ import (
 )
 
 var (
-	a1CfgPath string
-	a1Cfg     *config.CGRConfig
-	a1rpc     *rpc.Client
+	a1ConfigDir string
+	a1CfgPath   string
+	a1Cfg       *config.CGRConfig
+	a1rpc       *rpc.Client
 )
 
-func TestA1itLoadConfig(t *testing.T) {
-	a1CfgPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
+var sTestsA1it = []func(t *testing.T){
+	testA1itLoadConfig,
+	testA1itResetDataDB,
+	testA1itResetStorDb,
+	testA1itStartEngine,
+	testA1itRPCConn,
+	testA1itLoadTPFromFolder,
+	testA1itAddBalance1,
+	testA1itDataSession1,
+	testA1itConcurrentAPs,
+	testA1itStopCgrEngine,
+}
+
+func TestA1ItMongo(t *testing.T) {
+	a1ConfigDir = "tutmongo"
+	for _, stest := range sTestsA1it {
+		t.Run(a1ConfigDir, stest)
+	}
+}
+
+func TestA1ItInternal(t *testing.T) {
+	a1ConfigDir = "tutinternal"
+	for _, stest := range sTestsA1it {
+		t.Run(a1ConfigDir, stest)
+	}
+}
+
+func testA1itLoadConfig(t *testing.T) {
+	a1CfgPath = path.Join(*dataDir, "conf", "samples", a1ConfigDir)
 	if a1Cfg, err = config.NewCGRConfigFromPath(a1CfgPath); err != nil {
 		t.Error(err)
 	}
 }
 
-func TestA1itResetDataDB(t *testing.T) {
+func testA1itResetDataDB(t *testing.T) {
 	if err := engine.InitDataDb(a1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestA1itResetStorDb(t *testing.T) {
+func testA1itResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(a1Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestA1itStartEngine(t *testing.T) {
+func testA1itStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(a1CfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestA1itRPCConn(t *testing.T) {
+func testA1itRPCConn(t *testing.T) {
 	var err error
 	a1rpc, err = jsonrpc.Dial("tcp", a1Cfg.ListenCfg().RPCJSONListen)
 	if err != nil {
@@ -76,7 +104,7 @@ func TestA1itRPCConn(t *testing.T) {
 	}
 }
 
-func TestA1itLoadTPFromFolder(t *testing.T) {
+func testA1itLoadTPFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "a1")}
 	if err := a1rpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
@@ -118,7 +146,7 @@ func TestA1itLoadTPFromFolder(t *testing.T) {
 	}
 }
 
-func TestA1itAddBalance1(t *testing.T) {
+func testA1itAddBalance1(t *testing.T) {
 	var reply string
 	argAdd := &v1.AttrAddBalance{Tenant: "cgrates.org", Account: "rpdata1",
 		BalanceType: utils.DATA, BalanceId: utils.StringPointer("rpdata1_test"),
@@ -139,7 +167,7 @@ func TestA1itAddBalance1(t *testing.T) {
 	}
 }
 
-func TestA1itDataSession1(t *testing.T) {
+func testA1itDataSession1(t *testing.T) {
 
 	usage := time.Duration(10240)
 	initArgs := &sessions.V1InitSessionArgs{
@@ -282,7 +310,7 @@ func TestA1itDataSession1(t *testing.T) {
 	}
 }
 
-func TestA1itConcurrentAPs(t *testing.T) {
+func testA1itConcurrentAPs(t *testing.T) {
 	var wg sync.WaitGroup
 	var acnts []string
 	for i := 0; i < 1000; i++ {
@@ -362,7 +390,7 @@ func TestA1itConcurrentAPs(t *testing.T) {
 	}
 }
 
-func TestA1itStopCgrEngine(t *testing.T) {
+func testA1itStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
