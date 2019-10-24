@@ -54,8 +54,10 @@
 // 	"max_open_conns": 100,					// maximum database connections opened, not applying for mongo
 // 	"max_idle_conns": 10,					// maximum database connections idle, not applying for mongo
 // 	"conn_max_lifetime": 0, 				// maximum amount of time in seconds a connection may be reused (0 for unlimited), not applying for mongo
-// 	"cdrs_indexes": [],						// indexes on cdrs table to speed up queries, used only in case of mongo
+// 	"string_indexed_fields": [],			// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
+// 	"prefix_indexed_fields":[],				// prefix indexes on cdrs table to speed up queries, used in case of *internal
 // 	"query_timeout":"10s",
+// 	"sslmode":"disable",					// sslmode in case of *postgres
 // },
 
 
@@ -154,6 +156,7 @@
 // 		"*data": "107374182400",
 // 		"*sms": "10000"
 // 	},
+// 	"max_increments": 1000000,
 // 	"balance_rating_subject":{				// default rating subject in case that balance rating subject is empty
 // 		"*any": "*zero1ns",
 // 		"*voice": "*zero1s",
@@ -800,7 +803,9 @@
 // 	"caches_conns":[						// connections to CacheS for reloads
 // 		{"address": "*internal"},
 // 	],
-// 	"scheduler_conns": [],					// connections to SchedulerS for reloads
+// 	"scheduler_conns": [					// connections to SchedulerS for reloads
+// 		{"address": "*internal"}
+// 	],
 // 	"attributes_conns": [],					// connections to AttributeS for CDRExporter
 // },
 

@@ -85,10 +85,9 @@ func testVrsITConnect(t *testing.T) {
 	storDBOut, err := NewMigratorStorDB(vrsCfg.StorDbCfg().Type,
 		vrsCfg.StorDbCfg().Host, vrsCfg.StorDbCfg().Port,
 		vrsCfg.StorDbCfg().Name, vrsCfg.StorDbCfg().User,
-		vrsCfg.StorDbCfg().Password, vrsCfg.StorDbCfg().MaxOpenConns,
-		vrsCfg.StorDbCfg().MaxIdleConns,
-		vrsCfg.StorDbCfg().ConnMaxLifetime,
-		vrsCfg.StorDbCfg().StringIndexedFields,
+		vrsCfg.StorDbCfg().Password, vrsCfg.StorDbCfg().SSLMode,
+		vrsCfg.StorDbCfg().MaxOpenConns, vrsCfg.StorDbCfg().MaxIdleConns,
+		vrsCfg.StorDbCfg().ConnMaxLifetime, vrsCfg.StorDbCfg().StringIndexedFields,
 		vrsCfg.StorDbCfg().PrefixIndexedFields)
 	if err != nil {
 		t.Error(err)
