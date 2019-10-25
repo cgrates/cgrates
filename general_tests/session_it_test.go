@@ -38,35 +38,54 @@ var (
 	sesRPC     *rpc.Client
 	sesAccount = "refundAcc"
 	sesTenant  = "cgrates.org"
+
+	sTestSesIt = []func(t *testing.T){
+		testSesItLoadConfig,
+		testSesItResetDataDB,
+		testSesItResetStorDb,
+		testSesItStartEngine,
+		testSesItRPCConn,
+		testSesItLoadFromFolder,
+		testSesItAddVoiceBalance,
+		testSesItInitSession,
+		testSesItTerminateSession,
+		testSesItStopCgrEngine,
+	}
 )
 
+func TestSesIt(t *testing.T) {
+	for _, stest := range sTestSesIt {
+		t.Run("TestSesIT", stest)
+	}
+}
+
 // test for 0 balance with session terminate with 1s usage
-func TestSesItLoadConfig(t *testing.T) {
+func testSesItLoadConfig(t *testing.T) {
 	sesCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql_internal")
 	if sesCfg, err = config.NewCGRConfigFromPath(sesCfgPath); err != nil {
 		t.Error(err)
 	}
 }
 
-func TestSesItResetDataDB(t *testing.T) {
+func testSesItResetDataDB(t *testing.T) {
 	if err := engine.InitDataDb(sesCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestSesItResetStorDb(t *testing.T) {
+func testSesItResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(sesCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestSesItStartEngine(t *testing.T) {
+func testSesItStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(sesCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestSesItRPCConn(t *testing.T) {
+func testSesItRPCConn(t *testing.T) {
 	var err error
 	sesRPC, err = jsonrpc.Dial("tcp", sesCfg.ListenCfg().RPCJSONListen)
 	if err != nil {
@@ -74,7 +93,7 @@ func TestSesItRPCConn(t *testing.T) {
 	}
 }
 
-func TestSesItLoadFromFolder(t *testing.T) {
+func testSesItLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
 	if err := sesRPC.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
@@ -97,7 +116,7 @@ func testAccountBalance2(t *testing.T, sracc, srten, balType string, expected fl
 	}
 }
 
-func TestSesItAddVoiceBalance(t *testing.T) {
+func testSesItAddVoiceBalance(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:        sesTenant,
 		Account:       sesAccount,
@@ -115,7 +134,7 @@ func TestSesItAddVoiceBalance(t *testing.T) {
 	t.Run("TestAddVoiceBalance", func(t *testing.T) { testAccountBalance2(t, sesAccount, sesTenant, utils.MONETARY, 0) })
 }
 
-func TestSesItInitSession(t *testing.T) {
+func testSesItInitSession(t *testing.T) {
 	args1 := &sessions.V1InitSessionArgs{
 		InitSession: true,
 		CGREvent: &utils.CGREvent{
@@ -147,7 +166,7 @@ func TestSesItInitSession(t *testing.T) {
 	t.Run("TestInitSession", func(t *testing.T) { testAccountBalance2(t, sesAccount, sesTenant, utils.MONETARY, 0) })
 }
 
-func TestSesItTerminateSession(t *testing.T) {
+func testSesItTerminateSession(t *testing.T) {
 	args := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
 		CGREvent: &utils.CGREvent{
@@ -184,7 +203,7 @@ func TestSesItTerminateSession(t *testing.T) {
 	t.Run("TestTerminateSession", func(t *testing.T) { testAccountBalance2(t, sesAccount, sesTenant, utils.MONETARY, 0) })
 }
 
-func TestSesItStopCgrEngine(t *testing.T) {
+func testSesItStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}

@@ -34,10 +34,29 @@ import (
 	"github.com/cgrates/ltcache"
 )
 
-var tutSMGCfgPath string
-var tutSMGCfg *config.CGRConfig
-var tutSMGRpc *rpc.Client
-var smgLoadInst utils.LoadInstance // Share load information between tests
+var (
+	tutSMGCfgPath string
+	tutSMGCfg     *config.CGRConfig
+	tutSMGRpc     *rpc.Client
+	smgLoadInst   utils.LoadInstance // Share load information between tests
+
+	sTestTutSMG = []func(t *testing.T){
+		TestTutSMGInitCfg,
+		TestTutSMGResetDataDb,
+		TestTutSMGResetStorDb,
+		TestTutSMGStartEngine,
+		TestTutSMGRpcConn,
+		TestTutSMGLoadTariffPlanFromFolder,
+		TestTutSMGCacheStats,
+		TestTutSMGStopCgrEngine,
+	}
+)
+
+func TestTutSMG(t *testing.T) {
+	for _, stest := range sTestTutSMG {
+		t.Run("TestTutSMG", stest)
+	}
+}
 
 func TestTutSMGInitCfg(t *testing.T) {
 	tutSMGCfgPath = path.Join(*dataDir, "conf", "samples", "smgeneric")

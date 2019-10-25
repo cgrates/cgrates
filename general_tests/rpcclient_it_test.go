@@ -53,7 +53,32 @@ var ( // configuration opts
 	RemoteRALsAddr2 = "192.168.244.138:2012"
 )
 
-func TestRPCITLclInitCfg(t *testing.T) {
+//subtests to be executed
+var sTestRPCITLcl = []func(t *testing.T){
+	testRPCITLclInitCfg,
+	testRPCITLclStartSecondEngine,
+	testRPCITLclRpcConnPoolFirst,
+	testRPCITLclStatusSecondEngine,
+	testRPCITLclStartFirstEngine,
+	testRPCITLclStatusFirstInitial,
+	testRPCITLclStatusFirstFailover,
+	testRPCITLclStatusFirstFailback,
+	testRPCITLclTDirectedRPC,
+	testRPCITLclRpcConnPoolBcast,
+	testRPCITLclBcastStatusInitial,
+	testRPCITLclBcastStatusNoRals1,
+	testRPCITLclBcastStatusBcastNoRals,
+	testRPCITLclBcastStatusRALs2Up,
+	testRPCITLclStatusBcastRALs1Up,
+}
+
+func TestRPCITLcl(t *testing.T) {
+	for _, stest := range sTestRPCITLcl {
+		t.Run("sTestRPCITLcl", stest)
+	}
+}
+
+func testRPCITLclInitCfg(t *testing.T) {
 	rpcITCfgPath1 = path.Join(*dataDir, "conf", "samples", "multiral1")
 	rpcITCfgPath2 = path.Join(*dataDir, "conf", "samples", "multiral2")
 	rpcITCfg1, err = config.NewCGRConfigFromPath(rpcITCfgPath1)
@@ -69,14 +94,14 @@ func TestRPCITLclInitCfg(t *testing.T) {
 	}
 }
 
-func TestRPCITLclStartSecondEngine(t *testing.T) {
+func testRPCITLclStartSecondEngine(t *testing.T) {
 	if ral2, err = engine.StopStartEngine(rpcITCfgPath2, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestRPCITLclRpcConnPoolFirst(t *testing.T) {
+func testRPCITLclRpcConnPoolFirst(t *testing.T) {
 	rpcPoolFirst = rpcclient.NewRpcClientPool(rpcclient.POOL_FIRST, 0)
 	rpcRAL1, err = rpcclient.NewRpcClient("tcp", rpcITCfg1.ListenCfg().RPCJSONListen, false, "", "", "", 3, 1,
 		time.Duration(1*time.Second), time.Duration(2*time.Second), rpcclient.JSON_RPC, nil, false)
@@ -93,7 +118,7 @@ func TestRPCITLclRpcConnPoolFirst(t *testing.T) {
 }
 
 // Connect rpc client to rater
-func TestRPCITLclStatusSecondEngine(t *testing.T) {
+func testRPCITLclStatusSecondEngine(t *testing.T) {
 	var status map[string]interface{}
 	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err != nil {
 		t.Error(err)
@@ -108,14 +133,14 @@ func TestRPCITLclStatusSecondEngine(t *testing.T) {
 }
 
 // Start first engine
-func TestRPCITLclStartFirstEngine(t *testing.T) {
+func testRPCITLclStartFirstEngine(t *testing.T) {
 	if ral1, err = engine.StartEngine(rpcITCfgPath1, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestRPCITLclStatusFirstInitial(t *testing.T) {
+func testRPCITLclStatusFirstInitial(t *testing.T) {
 	var status map[string]interface{}
 	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err != nil {
 		t.Error(err)
@@ -132,7 +157,7 @@ func TestRPCITLclStatusFirstInitial(t *testing.T) {
 }
 
 // Connect rpc client to rater
-func TestRPCITLclStatusFirstFailover(t *testing.T) {
+func testRPCITLclStatusFirstFailover(t *testing.T) {
 	if err := ral1.Process.Kill(); err != nil { // Kill the first RAL
 		t.Error(err)
 	}
@@ -152,7 +177,7 @@ func TestRPCITLclStatusFirstFailover(t *testing.T) {
 	}
 }
 
-func TestRPCITLclStatusFirstFailback(t *testing.T) {
+func testRPCITLclStatusFirstFailback(t *testing.T) {
 	if ral1, err = engine.StartEngine(rpcITCfgPath1, *waitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -170,14 +195,14 @@ func TestRPCITLclStatusFirstFailback(t *testing.T) {
 }
 
 // Make sure it executes on the first node supporting the command
-func TestRPCITLclTDirectedRPC(t *testing.T) {
+func testRPCITLclTDirectedRPC(t *testing.T) {
 	var sessions []*sessions.ExternalSession
 	if err := rpcPoolFirst.Call(utils.SessionSv1GetActiveSessions, utils.SessionFilter{}, &sessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 
-// func TestRPCITLclTimeout(t *testing.T) {
+// func testRPCITLclTimeout(t *testing.T) {
 // 	var status map[string]interface{}
 // 	if err := rpcPoolFirst.Call(utils.CoreSv1Status, "10s", &status); err == nil {
 // 		t.Error("Expecting timeout")
@@ -187,13 +212,13 @@ func TestRPCITLclTDirectedRPC(t *testing.T) {
 // }
 
 // Connect rpc client to rater
-func TestRPCITLclRpcConnPoolBcast(t *testing.T) {
+func testRPCITLclRpcConnPoolBcast(t *testing.T) {
 	rpcPoolBroadcast = rpcclient.NewRpcClientPool(rpcclient.POOL_BROADCAST, time.Duration(2*time.Second))
 	rpcPoolBroadcast.AddClient(rpcRAL1)
 	rpcPoolBroadcast.AddClient(rpcRAL2)
 }
 
-func TestRPCITLclBcastStatusInitial(t *testing.T) {
+func testRPCITLclBcastStatusInitial(t *testing.T) {
 	var status map[string]interface{}
 	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err != nil {
 		t.Error(err)
@@ -207,7 +232,7 @@ func TestRPCITLclBcastStatusInitial(t *testing.T) {
 	}
 }
 
-func TestRPCITLclBcastStatusNoRals1(t *testing.T) {
+func testRPCITLclBcastStatusNoRals1(t *testing.T) {
 	if err := ral1.Process.Kill(); err != nil { // Kill the first RAL
 		t.Error(err)
 	}
@@ -225,7 +250,7 @@ func TestRPCITLclBcastStatusNoRals1(t *testing.T) {
 	}
 }
 
-func TestRPCITLclBcastStatusBcastNoRals(t *testing.T) {
+func testRPCITLclBcastStatusBcastNoRals(t *testing.T) {
 	if err := ral2.Process.Kill(); err != nil { // Kill the first RAL
 		t.Error(err)
 	}
@@ -236,7 +261,7 @@ func TestRPCITLclBcastStatusBcastNoRals(t *testing.T) {
 	}
 }
 
-func TestRPCITLclBcastStatusRALs2Up(t *testing.T) {
+func testRPCITLclBcastStatusRALs2Up(t *testing.T) {
 	if ral2, err = engine.StartEngine(rpcITCfgPath2, *waitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -253,7 +278,7 @@ func TestRPCITLclBcastStatusRALs2Up(t *testing.T) {
 	}
 }
 
-func TestRPCITLclStatusBcastRALs1Up(t *testing.T) {
+func testRPCITLclStatusBcastRALs1Up(t *testing.T) {
 	if ral1, err = engine.StartEngine(rpcITCfgPath1, *waitRater); err != nil {
 		t.Fatal(err)
 	}

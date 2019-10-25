@@ -40,15 +40,15 @@ var (
 	ses2RPC     *rpc.Client
 
 	ses2Tests = []func(t *testing.T){
-		testSesItLoadConfig,
-		testSesItResetDataDB,
-		testSesItResetStorDb,
-		testSesItStartEngine,
-		testSesItRPCConn,
-		testSesItLoadFromFolder,
-		testSesItInitSession,
-		testSesItAsActiveSessions,
-		testSesItStopCgrEngine,
+		testSes2ItLoadConfig,
+		testSes2ItResetDataDB,
+		testSes2ItResetStorDb,
+		testSes2ItStartEngine,
+		testSes2ItRPCConn,
+		testSes2ItLoadFromFolder,
+		testSes2ItInitSession,
+		testSes2ItAsActiveSessions,
+		testSes2ItStopCgrEngine,
 	}
 )
 
@@ -66,32 +66,32 @@ func TestSes2ItTutMysql(t *testing.T) {
 	}
 }
 
-func testSesItLoadConfig(t *testing.T) {
+func testSes2ItLoadConfig(t *testing.T) {
 	ses2CfgPath = path.Join(*dataDir, "conf", "samples", ses2CfgDir)
 	if ses2Cfg, err = config.NewCGRConfigFromPath(ses2CfgPath); err != nil {
 		t.Error(err)
 	}
 }
 
-func testSesItResetDataDB(t *testing.T) {
+func testSes2ItResetDataDB(t *testing.T) {
 	if err := engine.InitDataDb(ses2Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testSesItResetStorDb(t *testing.T) {
+func testSes2ItResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(ses2Cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testSesItStartEngine(t *testing.T) {
+func testSes2ItStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(ses2CfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testSesItRPCConn(t *testing.T) {
+func testSes2ItRPCConn(t *testing.T) {
 	var err error
 	ses2RPC, err = jsonrpc.Dial("tcp", ses2Cfg.ListenCfg().RPCJSONListen)
 	if err != nil {
@@ -99,7 +99,7 @@ func testSesItRPCConn(t *testing.T) {
 	}
 }
 
-func testSesItLoadFromFolder(t *testing.T) {
+func testSes2ItLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	if err := ses2RPC.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
@@ -108,7 +108,7 @@ func testSesItLoadFromFolder(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 }
 
-func testSesItInitSession(t *testing.T) {
+func testSes2ItInitSession(t *testing.T) {
 	// Set balance
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
@@ -151,7 +151,7 @@ func testSesItInitSession(t *testing.T) {
 
 }
 
-func testSesItAsActiveSessions(t *testing.T) {
+func testSes2ItAsActiveSessions(t *testing.T) {
 	var count int
 	if err := ses2RPC.Call(utils.SessionSv1GetActiveSessionsCount, utils.SessionFilter{
 		Filters: []string{"*string:~Account:1001"},
@@ -169,7 +169,7 @@ func testSesItAsActiveSessions(t *testing.T) {
 	}
 }
 
-func testSesItStopCgrEngine(t *testing.T) {
+func testSes2ItStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}

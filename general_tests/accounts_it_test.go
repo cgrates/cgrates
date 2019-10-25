@@ -39,28 +39,28 @@ var (
 	accConfDIR string //run tests for specific configuration
 	account    *engine.Account
 	accDelay   int
-)
 
-var sTestsAcc = []func(t *testing.T){
-	testV1AccLoadConfig,
-	testV1AccInitDataDb,
-	testAccResetStorDb,
-	testV1AccStartEngine,
-	testV1AccRpcConn,
-	testV1AccGetAccountBeforeSet,
-	testV1AccLoadTarrifPlans,
-	testV1AccGetAccountAfterLoad,
-	testV1AccRemAccount,
-	testV1AccGetAccountAfterDelete,
-	testV1AccSetAccount,
-	testV1AccGetAccountAfterSet,
-	testV1AccRemAccountSet,
-	testV1AccGetAccountSetAfterDelete,
-	//testV1AccRemAccountAfterDelete,
-	testV1AccMonthly,
-	testV1AccSendToThreshold,
-	testV1AccStopEngine,
-}
+	sTestsAcc = []func(t *testing.T){
+		testV1AccLoadConfig,
+		testV1AccInitDataDb,
+		testAccResetStorDb,
+		testV1AccStartEngine,
+		testV1AccRpcConn,
+		testV1AccGetAccountBeforeSet,
+		testV1AccLoadTarrifPlans,
+		testV1AccGetAccountAfterLoad,
+		testV1AccRemAccount,
+		testV1AccGetAccountAfterDelete,
+		testV1AccSetAccount,
+		testV1AccGetAccountAfterSet,
+		testV1AccRemAccountSet,
+		testV1AccGetAccountSetAfterDelete,
+		//testV1AccRemAccountAfterDelete,
+		testV1AccMonthly,
+		testV1AccSendToThreshold,
+		testV1AccStopEngine,
+	}
+)
 
 // Test start here
 func TestAccITMySQL(t *testing.T) {

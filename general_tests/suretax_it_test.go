@@ -38,14 +38,35 @@ Integration tests with SureTax platform.
 Configuration file is kept outside of CGRateS repository since it contains sensitive customer information
 */
 
-var configDir = flag.String("config_path", "", "CGR config dir path here")
-var tpDir = flag.String("tp_dir", "", "CGR config dir path here")
+var (
+	configDir = flag.String("config_path", "", "CGR config dir path here")
+	tpDir     = flag.String("tp_dir", "", "CGR config dir path here")
 
-var stiCfg *config.CGRConfig
-var stiRpc *rpc.Client
-var stiLoadInst utils.LoadInstance
+	stiCfg      *config.CGRConfig
+	stiRpc      *rpc.Client
+	stiLoadInst utils.LoadInstance
 
-func TestSTIInitCfg(t *testing.T) {
+	sTestSTI = []func(t *testing.T){
+		testSTIInitCfg,
+		testSTIResetDataDb,
+		testSTIResetStorDb,
+		testSTIStartEngine,
+		testSTIRpcConn,
+		testSTILoadTariffPlanFromFolder,
+		testSTICacheStats,
+		testSTIProcessExternalCdr,
+		testSTIGetCdrs,
+		testSTIStopCgrEngine,
+	}
+)
+
+func TestSTI(t *testing.T) {
+	for _, stest := range sTestSTI {
+		t.Run("TestSTI", stest)
+	}
+}
+
+func testSTIInitCfg(t *testing.T) {
 	// Init config first
 	var err error
 	stiCfg, err = config.NewCGRConfigFromPath(*configDir)
@@ -55,28 +76,28 @@ func TestSTIInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func TestSTIResetDataDb(t *testing.T) {
+func testSTIResetDataDb(t *testing.T) {
 	if err := engine.InitDataDb(stiCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
-func TestSTIResetStorDb(t *testing.T) {
+func testSTIResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(stiCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine
-func TestSTIStartEngine(t *testing.T) {
+func testSTIStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(*configDir, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestSTIRpcConn(t *testing.T) {
+func testSTIRpcConn(t *testing.T) {
 	var err error
 	stiRpc, err = jsonrpc.Dial("tcp", stiCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -85,7 +106,7 @@ func TestSTIRpcConn(t *testing.T) {
 }
 
 // Load the tariff plan, creating accounts and their balances
-func TestSTILoadTariffPlanFromFolder(t *testing.T) {
+func testSTILoadTariffPlanFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: *tpDir}
 	if err := stiRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &stiLoadInst); err != nil {
 		t.Error(err)
@@ -96,7 +117,7 @@ func TestSTILoadTariffPlanFromFolder(t *testing.T) {
 }
 
 // Check loaded stats
-func TestSTICacheStats(t *testing.T) {
+func testSTICacheStats(t *testing.T) {
 	var rcvStats *utils.CacheStats
 	expectedStats := &utils.CacheStats{Destinations: 1, RatingPlans: 1, RatingProfiles: 1}
 	var args utils.AttrCacheStats
@@ -108,7 +129,7 @@ func TestSTICacheStats(t *testing.T) {
 }
 
 // Test CDR from external sources
-func TestSTIProcessExternalCdr(t *testing.T) {
+func testSTIProcessExternalCdr(t *testing.T) {
 	cdr := &engine.ExternalCDR{ToR: utils.VOICE,
 		OriginID: "teststicdr1", OriginHost: "192.168.1.1", Source: "STI_TEST", RequestType: utils.META_RATED, Direction: utils.META_OUT,
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "+14082342500", Destination: "+16268412300", Supplier: "SUPPL1",
@@ -124,7 +145,7 @@ func TestSTIProcessExternalCdr(t *testing.T) {
 	time.Sleep(time.Duration(2) * time.Second)
 }
 
-func TestSTIGetCdrs(t *testing.T) {
+func testSTIGetCdrs(t *testing.T) {
 	var cdrs []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}}
 	if err := stiRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
@@ -148,7 +169,7 @@ func TestSTIGetCdrs(t *testing.T) {
 	}
 }
 
-func TestSTIStopCgrEngine(t *testing.T) {
+func testSTIStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}

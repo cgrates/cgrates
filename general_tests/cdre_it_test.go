@@ -40,20 +40,20 @@ var (
 	cdreDataDir   = "/usr/share/cgrates"
 	cdreDelay     int
 	cdreConfigDIR string
-)
 
-var sTestsCDRE = []func(t *testing.T){
-	testCDREInitCfg,
-	testCDREInitDataDb,
-	testCDREResetStorDb,
-	testCDREStartEngine,
-	testCDRERpcConn,
-	testCDREGetCdrs,
-	testCDREExportNotFound,
-	testCDREProcessCdr,
-	testCDREExport,
-	testCDREStopEngine,
-}
+	sTestsCDRE = []func(t *testing.T){
+		testCDREInitCfg,
+		testCDREInitDataDb,
+		testCDREResetStorDb,
+		testCDREStartEngine,
+		testCDRERpcConn,
+		testCDREGetCdrs,
+		testCDREExportNotFound,
+		testCDREProcessCdr,
+		testCDREExport,
+		testCDREStopEngine,
+	}
+)
 
 func TestCDREITMySql(t *testing.T) {
 	cdreConfigDIR = "tutmysql"
