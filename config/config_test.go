@@ -420,6 +420,9 @@ func TestCgrCfgJSONDefaultsjsnDataDb(t *testing.T) {
 	if cgrCfg.DataDbCfg().DataDbPass != "" {
 		t.Errorf("Expecting:  , recived: %+v", cgrCfg.DataDbCfg().DataDbPass)
 	}
+	if cgrCfg.DataDbCfg().PreloadURL != "" {
+		t.Errorf("Expecting:  , recived: %+v", cgrCfg.DataDbCfg().PreloadURL)
+	}
 }
 
 func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
