@@ -39,7 +39,6 @@ const (
 	CGRAuthAPP               = "cgrates_auth"
 	CGRMaxSessionTime        = "CGRMaxSessionTime"
 	CGRSupplier              = "CGRSupplier"
-	CGRSParams               = "CGRSParams"
 	ARIStasisStart           = "StasisStart"
 	ARIChannelStateChange    = "ChannelStateChange"
 	ARIChannelDestroyed      = "ChannelDestroyed"
@@ -51,8 +50,6 @@ const (
 	SMAAuthorization         = "SMA_AUTHORIZATION"
 	SMASessionStart          = "SMA_SESSION_START"
 	SMASessionTerminate      = "SMA_SESSION_TERMINATE"
-	ariVariable              = "variable"
-	ariValue                 = "value"
 	ARICGRResourceAllocation = "CGRResourceAllocation"
 )
 
