@@ -89,6 +89,7 @@ type DbJsonCfg struct {
 	Prefix_indexed_fields *[]string
 	Redis_sentinel        *string
 	Query_timeout         *string
+	Preload_url           *string
 }
 
 // Filters config

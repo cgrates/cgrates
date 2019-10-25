@@ -36,6 +36,7 @@ type DataDbCfg struct {
 	DataDbPass         string // The user's password.
 	DataDbSentinelName string
 	QueryTimeout       time.Duration
+	PreloadURL         string
 }
 
 //loadFromJsonCfg loads Database config from JsonCfg
@@ -72,6 +73,9 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		if dbcfg.QueryTimeout, err = utils.ParseDurationWithNanosecs(*jsnDbCfg.Query_timeout); err != nil {
 			return err
 		}
+	}
+	if jsnDbCfg.Preload_url != nil {
+		dbcfg.PreloadURL = *jsnDbCfg.Preload_url
 	}
 	return nil
 }
