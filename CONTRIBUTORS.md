@@ -72,6 +72,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @Trial97 | Alexandru Tripon |
 | @anthonysomerset | Anthony Somerset |
 | @sebastic | Bas Couwenberg |
+| @adragusin | Adrian Drăguşin |
 
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
