@@ -45,19 +45,19 @@ var (
 	node1Exec, node2Exec,
 	stlExec1, stlExec2 *exec.Cmd
 	redisSentinel = flag.Bool("redis_sentinel", false, "Run tests with redis sentinel")
-)
 
-var sTestsRds = []func(t *testing.T){
-	testRedisSentinelStartNodes,
-	testRedisSentinelInitConfig,
-	testRedisSentinelFlushDb,
-	testRedisSentinelStartEngine,
-	testRedisSentinelRPCCon,
-	testRedisSentinelSetGetAttribute,
-	testRedisSentinelInsertion,
-	testRedisSentinelGetAttrAfterFailover,
-	testRedisSentinelKillEngine,
-}
+	sTestsRds = []func(t *testing.T){
+		testRedisSentinelStartNodes,
+		testRedisSentinelInitConfig,
+		testRedisSentinelFlushDb,
+		testRedisSentinelStartEngine,
+		testRedisSentinelRPCCon,
+		testRedisSentinelSetGetAttribute,
+		testRedisSentinelInsertion,
+		testRedisSentinelGetAttrAfterFailover,
+		testRedisSentinelKillEngine,
+	}
+)
 
 // Before running these tests make sure node1.conf, node2.conf, sentinel1.conf are the next
 // Node1 will be master and start at port 16379

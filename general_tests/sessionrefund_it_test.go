@@ -38,34 +38,56 @@ var (
 	srrpc     *rpc.Client
 	sraccount = "refundAcc"
 	srtenant  = "cgrates.org"
+
+	sTestSrIt = []func(t *testing.T){
+		testSrItLoadConfig,
+		testSrItResetDataDB,
+		testSrItResetStorDb,
+		testSrItStartEngine,
+		testSrItRPCConn,
+		testSrItLoadFromFolder,
+		testSrItAddVoiceBalance,
+		testSrItInitSession,
+		testSrItTerminateSession,
+		testSrItAddMonetaryBalance,
+		testSrItInitSession2,
+		testSrItTerminateSession2,
+		testSrItStopCgrEngine,
+	}
 )
 
-func TestSrItLoadConfig(t *testing.T) {
+func TestSrIt(t *testing.T) {
+	for _, stest := range sTestSrIt {
+		t.Run("sTestSrIt", stest)
+	}
+}
+
+func testSrItLoadConfig(t *testing.T) {
 	srCfgPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
 	if srCfg, err = config.NewCGRConfigFromPath(srCfgPath); err != nil {
 		t.Error(err)
 	}
 }
 
-func TestSrItResetDataDB(t *testing.T) {
+func testSrItResetDataDB(t *testing.T) {
 	if err := engine.InitDataDb(srCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestSrItResetStorDb(t *testing.T) {
+func testSrItResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(srCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestSrItStartEngine(t *testing.T) {
+func testSrItStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(srCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestSrItRPCConn(t *testing.T) {
+func testSrItRPCConn(t *testing.T) {
 	var err error
 	srrpc, err = jsonrpc.Dial("tcp", srCfg.ListenCfg().RPCJSONListen)
 	if err != nil {
@@ -73,7 +95,7 @@ func TestSrItRPCConn(t *testing.T) {
 	}
 }
 
-func TestSrItLoadFromFolder(t *testing.T) {
+func testSrItLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	if err := srrpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
@@ -96,7 +118,7 @@ func testAccountBalance(t *testing.T, sracc, srten, balType string, expected flo
 	}
 }
 
-func TestSrItAddVoiceBalance(t *testing.T) {
+func testSrItAddVoiceBalance(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:        srtenant,
 		Account:       sraccount,
@@ -114,7 +136,7 @@ func TestSrItAddVoiceBalance(t *testing.T) {
 	t.Run("TestAddVoiceBalance", func(t *testing.T) { testAccountBalance(t, sraccount, srtenant, utils.VOICE, 5*float64(time.Second)) })
 }
 
-func TestSrItInitSession(t *testing.T) {
+func testSrItInitSession(t *testing.T) {
 	args1 := &sessions.V1InitSessionArgs{
 		InitSession: true,
 		CGREvent: &utils.CGREvent{
@@ -146,7 +168,7 @@ func TestSrItInitSession(t *testing.T) {
 	t.Run("TestInitSession", func(t *testing.T) { testAccountBalance(t, sraccount, srtenant, utils.VOICE, 3*float64(time.Second)) })
 }
 
-func TestSrItTerminateSession(t *testing.T) {
+func testSrItTerminateSession(t *testing.T) {
 	args := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
 		CGREvent: &utils.CGREvent{
@@ -183,7 +205,7 @@ func TestSrItTerminateSession(t *testing.T) {
 	t.Run("TestTerminateSession", func(t *testing.T) { testAccountBalance(t, sraccount, srtenant, utils.VOICE, 5*float64(time.Second)) })
 }
 
-func TestSrItAddMonetaryBalance(t *testing.T) {
+func testSrItAddMonetaryBalance(t *testing.T) {
 	sraccount += "2"
 	attrs := &utils.AttrSetBalance{
 		Tenant:      srtenant,
@@ -201,7 +223,7 @@ func TestSrItAddMonetaryBalance(t *testing.T) {
 	t.Run("TestAddMonetaryBalance", func(t *testing.T) { testAccountBalance(t, sraccount, srtenant, utils.MONETARY, 10.65) })
 }
 
-func TestSrItInitSession2(t *testing.T) {
+func testSrItInitSession2(t *testing.T) {
 	args1 := &sessions.V1InitSessionArgs{
 		InitSession: true,
 		CGREvent: &utils.CGREvent{
@@ -233,7 +255,7 @@ func TestSrItInitSession2(t *testing.T) {
 	t.Run("TestInitSession", func(t *testing.T) { testAccountBalance(t, sraccount, srtenant, utils.MONETARY, 10.3002) })
 }
 
-func TestSrItTerminateSession2(t *testing.T) {
+func testSrItTerminateSession2(t *testing.T) {
 	args := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
 		CGREvent: &utils.CGREvent{
@@ -270,7 +292,7 @@ func TestSrItTerminateSession2(t *testing.T) {
 	t.Run("TestTerminateSession", func(t *testing.T) { testAccountBalance(t, sraccount, srtenant, utils.MONETARY, 10.65) })
 }
 
-func TestSrItStopCgrEngine(t *testing.T) {
+func testSrItStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}

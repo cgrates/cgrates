@@ -39,26 +39,26 @@ var (
 	splSv1Rpc     *rpc.Client
 	splPrf        *engine.SupplierProfile
 	splSv1ConfDIR string //run tests for specific configuration
-)
 
-var sTestsSupplierSV1 = []func(t *testing.T){
-	testV1SplSLoadConfig,
-	testV1SplSInitDataDb,
-	testV1SplSResetStorDb,
-	testV1SplSStartEngine,
-	testV1SplSRpcConn,
-	testV1SplSFromFolder,
-	testV1SplSSetSupplierProfilesWithoutRatingPlanIDs,
-	//tests for *reas sorting strategy
-	testV1SplSAddNewSplPrf,
-	testV1SplSAddNewResPrf,
-	testV1SplSPopulateResUsage,
-	testV1SplSGetSortedSuppliers,
-	//tests for *reds sorting strategy
-	testV1SplSAddNewSplPrf2,
-	testV1SplSGetSortedSuppliers2,
-	testV1SplSStopEngine,
-}
+	sTestsSupplierSV1 = []func(t *testing.T){
+		testV1SplSLoadConfig,
+		testV1SplSInitDataDb,
+		testV1SplSResetStorDb,
+		testV1SplSStartEngine,
+		testV1SplSRpcConn,
+		testV1SplSFromFolder,
+		testV1SplSSetSupplierProfilesWithoutRatingPlanIDs,
+		//tests for *reas sorting strategy
+		testV1SplSAddNewSplPrf,
+		testV1SplSAddNewResPrf,
+		testV1SplSPopulateResUsage,
+		testV1SplSGetSortedSuppliers,
+		//tests for *reds sorting strategy
+		testV1SplSAddNewSplPrf2,
+		testV1SplSGetSortedSuppliers2,
+		testV1SplSStopEngine,
+	}
+)
 
 // Test start here
 func TestSuplSV1ITMySQL(t *testing.T) {

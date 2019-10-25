@@ -34,11 +34,38 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var destCfgPath string
-var destCfg *config.CGRConfig
-var destRPC *rpc.Client
+var (
+	destCfgPath string
+	destCfg *config.CGRConfig
+	destRPC *rpc.Client
 
-func TestDestManagInitCfg(t *testing.T) {
+	sTestDestManag = []func (t *testing.T){
+	testDestManagInitCfg,
+	testDestManagResetDataDb,
+	testDestManagResetStorDb,
+	testDestManagStartEngine,
+	testDestManagRpcConn,
+	testDestManagLoadTariffPlanFromFolderAll,
+	testDestManagAllDestinationLoaded,
+	testDestManagLoadTariffPlanFromFolderRemoveSome,
+	testDestManagRemoveSomeDestinationLoaded,
+	testDestManagLoadTariffPlanFromFolderRemoveSomeFlush,
+	testDestManagRemoveSomeFlushDestinationLoaded,
+	testDestManagLoadTariffPlanFromFolderAddBack,
+	testDestManagAddBackDestinationLoaded,
+	testDestManagLoadTariffPlanFromFolderAddOne,
+	testDestManagAddOneDestinationLoaded,
+	testDestManagCacheWithGetCache,
+	testDestManagCacheWithGetCost,
+	}
+)
+
+func TestDestManag(t *testing.T) {
+	for _, stest := range sTestDestManag {
+		t.Run("TestDestManag", stest)
+	}
+}
+func testDestManagInitCfg(t *testing.T) {
 	destCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
 	// Init config first
 	var err error
@@ -51,28 +78,28 @@ func TestDestManagInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func TestDestManagResetDataDb(t *testing.T) {
+func testDestManagResetDataDb(t *testing.T) {
 	if err := engine.InitDataDb(destCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
-func TestDestManagResetStorDb(t *testing.T) {
+func testDestManagResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(destCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine
-func TestDestManagStartEngine(t *testing.T) {
+func testDestManagStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(destCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestDestManagRpcConn(t *testing.T) {
+func testDestManagRpcConn(t *testing.T) {
 	var err error
 	destRPC, err = jsonrpc.Dial("tcp", destCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -81,7 +108,7 @@ func TestDestManagRpcConn(t *testing.T) {
 }
 
 // Load the tariff plan, creating accounts and their balances
-func TestDestManagLoadTariffPlanFromFolderAll(t *testing.T) {
+func testDestManagLoadTariffPlanFromFolderAll(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "alldests")}
 	var destLoadInst utils.LoadInstance
 	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
@@ -91,7 +118,7 @@ func TestDestManagLoadTariffPlanFromFolderAll(t *testing.T) {
 }
 
 
-func TestDestManagAllDestinationLoaded(t *testing.T) {
+func testDestManagAllDestinationLoaded(t *testing.T) {
 	dests := make([]*engine.Destination, 0)
 	if err := destRPC.Call("ApierV2.GetDestinations", v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
 		t.Error("Got error on ApierV2.GetDestinations: ", err.Error())
@@ -108,7 +135,7 @@ func TestDestManagAllDestinationLoaded(t *testing.T) {
 }
 
 
-func TestDestManagLoadTariffPlanFromFolderRemoveSome(t *testing.T) {
+func testDestManagLoadTariffPlanFromFolderRemoveSome(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "removesome")}
 	var destLoadInst utils.LoadInstance
 	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
@@ -117,7 +144,7 @@ func TestDestManagLoadTariffPlanFromFolderRemoveSome(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func TestDestManagRemoveSomeDestinationLoaded(t *testing.T) {
+func testDestManagRemoveSomeDestinationLoaded(t *testing.T) {
 	dests := make([]*engine.Destination, 0)
 	if err := destRPC.Call("ApierV2.GetDestinations", v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
 		t.Error("Got error on ApierV2.GetDestinations: ", err.Error())
@@ -133,7 +160,7 @@ func TestDestManagRemoveSomeDestinationLoaded(t *testing.T) {
 	}
 }
 
-func TestDestManagLoadTariffPlanFromFolderRemoveSomeFlush(t *testing.T) {
+func testDestManagLoadTariffPlanFromFolderRemoveSomeFlush(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "removesome"), FlushDb: true}
 	var destLoadInst utils.LoadInstance
 	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
@@ -142,7 +169,7 @@ func TestDestManagLoadTariffPlanFromFolderRemoveSomeFlush(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func TestDestManagRemoveSomeFlushDestinationLoaded(t *testing.T) {
+func testDestManagRemoveSomeFlushDestinationLoaded(t *testing.T) {
 	dests := make([]*engine.Destination, 0)
 	if err := destRPC.Call("ApierV2.GetDestinations", v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
 		t.Error("Got error on ApierV2.GetDestinations: ", err.Error())
@@ -158,7 +185,7 @@ func TestDestManagRemoveSomeFlushDestinationLoaded(t *testing.T) {
 	}
 }
 
-func TestDestManagLoadTariffPlanFromFolderAddBack(t *testing.T) {
+func testDestManagLoadTariffPlanFromFolderAddBack(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "addback")}
 	var destLoadInst utils.LoadInstance
 	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
@@ -167,7 +194,7 @@ func TestDestManagLoadTariffPlanFromFolderAddBack(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func TestDestManagAddBackDestinationLoaded(t *testing.T) {
+func testDestManagAddBackDestinationLoaded(t *testing.T) {
 	dests := make([]*engine.Destination, 0)
 	if err := destRPC.Call("ApierV2.GetDestinations", v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
 		t.Error("Got error on ApierV2.GetDestinations: ", err.Error())
@@ -183,7 +210,7 @@ func TestDestManagAddBackDestinationLoaded(t *testing.T) {
 	}
 }
 
-func TestDestManagLoadTariffPlanFromFolderAddOne(t *testing.T) {
+func testDestManagLoadTariffPlanFromFolderAddOne(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "addone")}
 	var destLoadInst utils.LoadInstance
 	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
@@ -192,7 +219,7 @@ func TestDestManagLoadTariffPlanFromFolderAddOne(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func TestDestManagAddOneDestinationLoaded(t *testing.T) {
+func testDestManagAddOneDestinationLoaded(t *testing.T) {
 	dests := make([]*engine.Destination, 0)
 	if err := destRPC.Call("ApierV2.GetDestinations", v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
 		t.Error("Got error on ApierV2.GetDestinations: ", err.Error())
@@ -208,7 +235,7 @@ func TestDestManagAddOneDestinationLoaded(t *testing.T) {
 	}
 }
 
-func TestDestManagCacheWithGetCache(t *testing.T) {
+func testDestManagCacheWithGetCache(t *testing.T) {
 	if err := engine.InitDataDb(destCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -259,7 +286,7 @@ func TestDestManagCacheWithGetCache(t *testing.T) {
 	}
 }
 
-func TestDestManagCacheWithGetCost(t *testing.T) {
+func testDestManagCacheWithGetCost(t *testing.T) {
 	if err := engine.InitDataDb(destCfg); err != nil {
 		t.Fatal(err)
 	}

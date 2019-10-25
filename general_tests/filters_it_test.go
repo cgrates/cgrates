@@ -39,23 +39,23 @@ var (
 	fltrRpc     *rpc.Client
 	fltrConfDIR string //run tests for specific configuration
 	fltrDelay   int
-)
 
-var sTestsFltr = []func(t *testing.T){
-	testV1FltrLoadConfig,
-	testV1FltrInitDataDb,
-	testV1FltrResetStorDb,
-	testV1FltrStartEngine,
-	testV1FltrRpcConn,
-	testV1FltrLoadTarrifPlans,
-	testV1FltrAddStats,
-	testV1FltrPupulateThreshold,
-	testV1FltrGetThresholdForEvent,
-	testV1FltrGetThresholdForEvent2,
-	testV1FltrPopulateResources,
-	testV1FltrAccounts,
-	testV1FltrStopEngine,
-}
+	sTestsFltr = []func(t *testing.T){
+		testV1FltrLoadConfig,
+		testV1FltrInitDataDb,
+		testV1FltrResetStorDb,
+		testV1FltrStartEngine,
+		testV1FltrRpcConn,
+		testV1FltrLoadTarrifPlans,
+		testV1FltrAddStats,
+		testV1FltrPupulateThreshold,
+		testV1FltrGetThresholdForEvent,
+		testV1FltrGetThresholdForEvent2,
+		testV1FltrPopulateResources,
+		testV1FltrAccounts,
+		testV1FltrStopEngine,
+	}
+)
 
 // Test start here
 func TestFltrIT(t *testing.T) {

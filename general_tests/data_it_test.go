@@ -39,26 +39,26 @@ var (
 	dataRpc     *rpc.Client
 	dataConfDIR string //run tests for specific configuration
 	dataDelay   int
-)
 
-var sTestsData = []func(t *testing.T){
-	testV1DataLoadConfig,
-	testV1DataInitDataDb,
-	testV1DataResetStorDb,
-	testV1DataStartEngine,
-	testV1DataRpcConn,
-	testV1DataLoadTarrifPlans,
-	// testV1DataDataDebitUsageWith10Kilo,
-	// testV1DataGetCostWith10Kilo,
-	// testV1DataDebitBalanceWith10Kilo,
-	// testV1DataDataDebitUsage1G0,
-	// testV1DataGetCost1G0,
-	// testV1DataDebitBalance1G0,
-	testV1DataInitSession,
-	testV1DataUpdateWith1Mo,
-	testV1DataUpdateWith1Go,
-	testV1DataStopEngine,
-}
+	sTestsData = []func(t *testing.T){
+		testV1DataLoadConfig,
+		testV1DataInitDataDb,
+		testV1DataResetStorDb,
+		testV1DataStartEngine,
+		testV1DataRpcConn,
+		testV1DataLoadTarrifPlans,
+		// testV1DataDataDebitUsageWith10Kilo,
+		// testV1DataGetCostWith10Kilo,
+		// testV1DataDebitBalanceWith10Kilo,
+		// testV1DataDataDebitUsage1G0,
+		// testV1DataGetCost1G0,
+		// testV1DataDebitBalance1G0,
+		testV1DataInitSession,
+		testV1DataUpdateWith1Mo,
+		testV1DataUpdateWith1Go,
+		testV1DataStopEngine,
+	}
+)
 
 // Test start here
 func TestDataITMongo(t *testing.T) {

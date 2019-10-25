@@ -40,11 +40,38 @@ import (
 	"github.com/streadway/amqp"
 )
 
-var cdrsMasterCfgPath, cdrsSlaveCfgPath string
-var cdrsMasterCfg, cdrsSlaveCfg *config.CGRConfig
-var cdrsMasterRpc *rpcclient.RpcClient
+var (
+	cdrsMasterCfgPath, cdrsSlaveCfgPath string
+	cdrsMasterCfg, cdrsSlaveCfg         *config.CGRConfig
+	cdrsMasterRpc                       *rpcclient.RpcClient
 
-func TestCDRsOnExpInitConfig(t *testing.T) {
+	sTestsCDRsOnExp = []func(t *testing.T){
+		testCDRsOnExpInitConfig,
+		testCDRsOnExpInitCdrDb,
+		testCDRsOnExpStartMasterEngine,
+		testCDRsOnExpStartSlaveEngine,
+		testCDRsOnExpAMQPQueuesCreation,
+		testCDRsOnExpInitMasterRPC,
+		testCDRsOnExpDisableOnlineExport,
+		testCDRsOnExpHttpCdrReplication,
+		testCDRsOnExpAMQPReplication,
+		testCDRsOnExpHTTPPosterFileFailover,
+		testCDRsOnExpAMQPPosterFileFailover,
+		testCDRsOnExpAWSAMQPPosterFileFailover,
+		testCDRsOnExpKafkaPosterFileFailover,
+		testCDRsOnExpSQSPosterFileFailover,
+		testCDRsOnExpS3PosterFileFailover,
+		testCDRsOnExpStopEngine,
+	}
+)
+
+func TestCDRsOnExp(t *testing.T) {
+	for _, stest := range sTestsCDRsOnExp {
+		t.Run("TestCDRsOnExp", stest)
+	}
+}
+
+func testCDRsOnExpInitConfig(t *testing.T) {
 	var err error
 	cdrsMasterCfgPath = path.Join(*dataDir, "conf", "samples", "cdrsonexpmaster")
 	if cdrsMasterCfg, err = config.NewCGRConfigFromPath(cdrsMasterCfgPath); err != nil {
@@ -57,7 +84,7 @@ func TestCDRsOnExpInitConfig(t *testing.T) {
 }
 
 // InitDb so we can rely on count
-func TestCDRsOnExpInitCdrDb(t *testing.T) {
+func testCDRsOnExpInitCdrDb(t *testing.T) {
 	if err := engine.InitStorDb(cdrsMasterCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -74,13 +101,13 @@ func TestCDRsOnExpInitCdrDb(t *testing.T) {
 
 }
 
-func TestCDRsOnExpStartMasterEngine(t *testing.T) {
+func testCDRsOnExpStartMasterEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(cdrsMasterCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestCDRsOnExpStartSlaveEngine(t *testing.T) {
+func testCDRsOnExpStartSlaveEngine(t *testing.T) {
 	if _, err := engine.StartEngine(cdrsSlaveCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -88,7 +115,7 @@ func TestCDRsOnExpStartSlaveEngine(t *testing.T) {
 
 // Create Queues dor amq
 
-func TestCDRsOnExpAMQPQueuesCreation(t *testing.T) {
+func testCDRsOnExpAMQPQueuesCreation(t *testing.T) {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	if err != nil {
 		t.Fatal(err)
@@ -113,7 +140,7 @@ func TestCDRsOnExpAMQPQueuesCreation(t *testing.T) {
 }
 
 // Connect rpc client to rater
-func TestCDRsOnExpInitMasterRPC(t *testing.T) {
+func testCDRsOnExpInitMasterRPC(t *testing.T) {
 	var err error
 	cdrsMasterRpc, err = rpcclient.NewRpcClient("tcp", cdrsMasterCfg.ListenCfg().RPCJSONListen, false, "", "", "", 1, 1,
 		time.Duration(1*time.Second), time.Duration(2*time.Second), "json", nil, false)
@@ -123,7 +150,7 @@ func TestCDRsOnExpInitMasterRPC(t *testing.T) {
 }
 
 // Disable ExportCDR
-func TestCDRsOnExpDisableOnlineExport(t *testing.T) {
+func testCDRsOnExpDisableOnlineExport(t *testing.T) {
 	// stop RabbitMQ server so we can test reconnects
 	if err := exec.Command("service", "rabbitmq-server", "stop").Run(); err != nil {
 		t.Error(err)
@@ -170,7 +197,7 @@ func TestCDRsOnExpDisableOnlineExport(t *testing.T) {
 	time.Sleep(5 * time.Second)
 }
 
-func TestCDRsOnExpHttpCdrReplication(t *testing.T) {
+func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 	//add a default charger
 	chargerProfile := &engine.ChargerProfile{
 		Tenant:       "cgrates.org",
@@ -250,7 +277,7 @@ func TestCDRsOnExpHttpCdrReplication(t *testing.T) {
 	}
 }
 
-func TestCDRsOnExpAMQPReplication(t *testing.T) {
+func testCDRsOnExpAMQPReplication(t *testing.T) {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	if err != nil {
 		t.Fatal(err)
@@ -388,7 +415,7 @@ func TestCDRsOnExpAMQPReplication(t *testing.T) {
 
 }
 
-func TestCDRsOnExpHTTPPosterFileFailover(t *testing.T) {
+func testCDRsOnExpHTTPPosterFileFailover(t *testing.T) {
 	time.Sleep(time.Duration(5 * time.Second))
 	failoverContent := [][]byte{[]byte(`OriginID=httpjsonrpc1`), []byte(`OriginID=amqpreconnect`)}
 	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
@@ -417,7 +444,7 @@ func TestCDRsOnExpHTTPPosterFileFailover(t *testing.T) {
 	}
 }
 
-func TestCDRsOnExpAMQPPosterFileFailover(t *testing.T) {
+func testCDRsOnExpAMQPPosterFileFailover(t *testing.T) {
 	time.Sleep(time.Duration(5 * time.Second))
 	failoverContent := [][]byte{[]byte(`{"CGRID":"57548d485d61ebcba55afbe5d939c82a8e9ff670"}`), []byte(`{"CGRID":"88ed9c38005f07576a1e1af293063833b60edcc6"}`)}
 	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
@@ -446,7 +473,7 @@ func TestCDRsOnExpAMQPPosterFileFailover(t *testing.T) {
 	}
 }
 
-func TestCDRsOnExpAWSAMQPPosterFileFailover(t *testing.T) {
+func testCDRsOnExpAWSAMQPPosterFileFailover(t *testing.T) {
 	time.Sleep(time.Duration(10 * time.Second))
 	failoverContent := [][]byte{[]byte(`{"CGRID":"57548d485d61ebcba55afbe5d939c82a8e9ff670"}`), []byte(`{"CGRID":"88ed9c38005f07576a1e1af293063833b60edcc6"}`)}
 	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
@@ -475,7 +502,7 @@ func TestCDRsOnExpAWSAMQPPosterFileFailover(t *testing.T) {
 	}
 }
 
-func TestCDRsOnExpKafkaPosterFileFailover(t *testing.T) {
+func testCDRsOnExpKafkaPosterFileFailover(t *testing.T) {
 	failoverContent := [][]byte{[]byte(`{"CGRID":"57548d485d61ebcba55afbe5d939c82a8e9ff670"}`), []byte(`{"CGRID":"88ed9c38005f07576a1e1af293063833b60edcc6"}`)}
 
 	reader := kafka.NewReader(kafka.ReaderConfig{
@@ -497,7 +524,7 @@ func TestCDRsOnExpKafkaPosterFileFailover(t *testing.T) {
 	}
 }
 
-func TestCDRsOnExpSQSPosterFileFailover(t *testing.T) {
+func testCDRsOnExpSQSPosterFileFailover(t *testing.T) {
 	time.Sleep(time.Duration(10 * time.Second))
 	failoverContent := [][]byte{[]byte(`{"CGRID":"57548d485d61ebcba55afbe5d939c82a8e9ff670"}`), []byte(`{"CGRID":"88ed9c38005f07576a1e1af293063833b60edcc6"}`)}
 	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
@@ -526,7 +553,7 @@ func TestCDRsOnExpSQSPosterFileFailover(t *testing.T) {
 	}
 }
 
-func TestCDRsOnExpS3PosterFileFailover(t *testing.T) {
+func testCDRsOnExpS3PosterFileFailover(t *testing.T) {
 	time.Sleep(time.Duration(10 * time.Second))
 	failoverContent := [][]byte{[]byte(`{"CGRID":"57548d485d61ebcba55afbe5d939c82a8e9ff670"}`), []byte(`{"CGRID":"88ed9c38005f07576a1e1af293063833b60edcc6"}`)}
 	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
@@ -558,7 +585,7 @@ func TestCDRsOnExpS3PosterFileFailover(t *testing.T) {
 /*
 // Performance test, check `lsof -a -p 8427 | wc -l`
 
-func TestCdrsHttpCdrReplication2(t *testing.T) {
+func testCdrsHttpCdrReplication2(t *testing.T) {
 	cdrs := make([]*engine.CDR, 0)
 	for i := 0; i < 10000; i++ {
 		cdr := &engine.CDR{OriginID: fmt.Sprintf("httpjsonrpc_%d", i),
@@ -579,7 +606,7 @@ func TestCdrsHttpCdrReplication2(t *testing.T) {
 }
 */
 
-func TestCDRsOnExpStopEngine(t *testing.T) {
+func testCDRsOnExpStopEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}

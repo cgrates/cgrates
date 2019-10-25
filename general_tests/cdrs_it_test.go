@@ -35,47 +35,49 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var cdrsCfgPath string
-var cdrsCfg *config.CGRConfig
-var cdrsRpc *rpc.Client
-var cdrsConfDIR string // run the tests for specific configuration
+var (
+	cdrsCfgPath string
+	cdrsCfg     *config.CGRConfig
+	cdrsRpc     *rpc.Client
+	cdrsConfDIR string // run the tests for specific configuration
 
-// subtests to be executed for each confDIR
-var sTestsCDRsIT = []func(t *testing.T){
-	testV2CDRsInitConfig,
-	testV2CDRsInitDataDb,
-	testV2CDRsInitCdrDb,
-	testV2CDRsStartEngine,
-	testV2CDRsRpcConn,
-	testV2CDRsLoadTariffPlanFromFolder,
-	//default process
-	testV2CDRsProcessCDR,
-	testV2CDRsGetCdrs,
-	//custom process
-	testV2CDRsProcessCDR2,
-	testV2CDRsGetCdrs2,
-	testV2CDRsProcessCDR3,
-	testV2CDRsGetCdrs3,
+	// subtests to be executed for each confDIR
+	sTestsCDRsIT = []func(t *testing.T){
+		testV2CDRsInitConfig,
+		testV2CDRsInitDataDb,
+		testV2CDRsInitCdrDb,
+		testV2CDRsStartEngine,
+		testV2CDRsRpcConn,
+		testV2CDRsLoadTariffPlanFromFolder,
+		//default process
+		testV2CDRsProcessCDR,
+		testV2CDRsGetCdrs,
+		//custom process
+		testV2CDRsProcessCDR2,
+		testV2CDRsGetCdrs2,
+		testV2CDRsProcessCDR3,
+		testV2CDRsGetCdrs3,
 
-	testV2CDRsProcessCDR4,
-	testV2CDRsGetCdrs4,
+		testV2CDRsProcessCDR4,
+		testV2CDRsGetCdrs4,
 
-	testV2CDRsSetStats,
-	testV2CDRsSetThresholdProfile,
+		testV2CDRsSetStats,
+		testV2CDRsSetThresholdProfile,
 
-	testV2CDRsProcessCDR5,
-	testV2CDRsGetCdrs5,
-	testV2CDRsGetStats1,
-	testV2CDRsGetThreshold1,
-	testV2CDRsProcessCDR6,
-	testV2CDRsGetCdrs5,
-	testV2CDRsGetStats2,
-	testV2CDRsGetThreshold2,
-	testV2CDRsProcessCDR7,
-	testV2CDRsGetCdrs7,
+		testV2CDRsProcessCDR5,
+		testV2CDRsGetCdrs5,
+		testV2CDRsGetStats1,
+		testV2CDRsGetThreshold1,
+		testV2CDRsProcessCDR6,
+		testV2CDRsGetCdrs5,
+		testV2CDRsGetStats2,
+		testV2CDRsGetThreshold2,
+		testV2CDRsProcessCDR7,
+		testV2CDRsGetCdrs7,
 
-	testV2CDRsKillEngine,
-}
+		testV2CDRsKillEngine,
+	}
+)
 
 // Tests starting here
 func TestCDRsITMySQL(t *testing.T) {

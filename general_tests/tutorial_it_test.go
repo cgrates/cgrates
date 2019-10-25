@@ -41,17 +41,17 @@ var (
 	tutorialRpc       *rpc.Client
 	tutorialConfDIR   string //run tests for specific configuration
 	tutorialDelay     int
-)
 
-var sTestsTutorials = []func(t *testing.T){
-	testTutorialLoadConfig,
-	testTutorialResetDB,
-	testTutorialStartEngine,
-	testTutorialRpcConn,
-	testTutorialFromFolder,
-	testTutorialGetCost,
-	testTutorialStopEngine,
-}
+	sTestsTutorials = []func(t *testing.T){
+		testTutorialLoadConfig,
+		testTutorialResetDB,
+		testTutorialStartEngine,
+		testTutorialRpcConn,
+		testTutorialFromFolder,
+		testTutorialGetCost,
+		testTutorialStopEngine,
+	}
+)
 
 //Test start here
 func TestTutorialMongoAtlas(t *testing.T) {

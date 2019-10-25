@@ -34,12 +34,40 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var tpCfgPath string
-var tpCfg *config.CGRConfig
-var tpRPC *rpc.Client
-var tpLoadInst utils.LoadInstance // Share load information between tests
+var (
+	tpCfgPath  string
+	tpCfg      *config.CGRConfig
+	tpRPC      *rpc.Client
+	tpLoadInst utils.LoadInstance // Share load information between tests
 
-func TestTpInitCfg(t *testing.T) {
+	sTestTp = []func(t *testing.T){
+		testTpInitCfg,
+		testTpResetDataDb,
+		testTpResetStorDb,
+		testTpStartEngine,
+		testTpRpcConn,
+		testTpLoadTariffPlanFromFolder,
+		testTpBalanceCounter,
+		testTpActionTriggers,
+		testTpZeroCost,
+		testTpZeroNegativeCost,
+		testTpExecuteActionCgrRpc,
+		testTpExecuteActionCgrRpcAcc,
+		//testTpExecuteActionCgrRpcCdrStats,
+		testTpCreateExecuteActionMatch,
+		testTpSetRemoveActions,
+		testTpRemoveActionsRefenced,
+		testTpApierResetAccountActionTriggers,
+		testTpStopCgrEngine,
+	}
+)
+
+func TestTp(t *testing.T) {
+	for _, stest := range sTestTp {
+		t.Run("TestTp", stest)
+	}
+}
+func testTpInitCfg(t *testing.T) {
 	tpCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
 	// Init config first
 	var err error
@@ -52,28 +80,28 @@ func TestTpInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func TestTpResetDataDb(t *testing.T) {
+func testTpResetDataDb(t *testing.T) {
 	if err := engine.InitDataDb(tpCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
-func TestTpResetStorDb(t *testing.T) {
+func testTpResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(tpCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine
-func TestTpStartEngine(t *testing.T) {
+func testTpStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(tpCfgPath, 1000); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestTpRpcConn(t *testing.T) {
+func testTpRpcConn(t *testing.T) {
 	var err error
 	tpRPC, err = jsonrpc.Dial("tcp", tpCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -82,7 +110,7 @@ func TestTpRpcConn(t *testing.T) {
 }
 
 // Load the tariff plan, creating accounts and their balances
-func TestTpLoadTariffPlanFromFolder(t *testing.T) {
+func testTpLoadTariffPlanFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
 	if err := tpRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &tpLoadInst); err != nil {
 		t.Error(err)
@@ -90,7 +118,7 @@ func TestTpLoadTariffPlanFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func TestTpBalanceCounter(t *testing.T) {
+func testTpBalanceCounter(t *testing.T) {
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
 	cd := engine.CallDescriptor{
 		Category:      "call",
@@ -116,7 +144,7 @@ func TestTpBalanceCounter(t *testing.T) {
 	}
 }
 
-func TestTpActionTriggers(t *testing.T) {
+func testTpActionTriggers(t *testing.T) {
 	var atrs engine.ActionTriggers
 	if err := tpRPC.Call("ApierV1.GetActionTriggers", v1.AttrGetActionTriggers{GroupIDs: []string{}}, &atrs); err != nil {
 		t.Error("Got error on ApierV1.GetActionTriggers: ", err.Error())
@@ -157,7 +185,7 @@ func TestTpActionTriggers(t *testing.T) {
 	}
 }
 
-func TestTpZeroCost(t *testing.T) {
+func testTpZeroCost(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1012"}
 	if err := tpRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
@@ -195,7 +223,7 @@ func TestTpZeroCost(t *testing.T) {
 	}
 }
 
-func TestTpZeroNegativeCost(t *testing.T) {
+func testTpZeroNegativeCost(t *testing.T) {
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
 	cd := engine.CallDescriptor{
 		Category:      "call",
@@ -222,7 +250,7 @@ func TestTpZeroNegativeCost(t *testing.T) {
 	}
 }
 
-func TestTpExecuteActionCgrRpc(t *testing.T) {
+func testTpExecuteActionCgrRpc(t *testing.T) {
 	var reply string
 	if err := tpRPC.Call("ApierV2.ExecuteAction", utils.AttrExecuteAction{ActionsId: "RPC"}, &reply); err != nil {
 		t.Error("Got error on ApierV2.ExecuteAction: ", err.Error())
@@ -236,7 +264,7 @@ func TestTpExecuteActionCgrRpc(t *testing.T) {
 	}
 }
 
-func TestTpExecuteActionCgrRpcAcc(t *testing.T) {
+func testTpExecuteActionCgrRpcAcc(t *testing.T) {
 	var reply string
 	if err := tpRPC.Call("ApierV2.ExecuteAction", utils.AttrExecuteAction{
 		Tenant:    "cgrates.org",
@@ -255,7 +283,7 @@ func TestTpExecuteActionCgrRpcAcc(t *testing.T) {
 }
 
 // Deprecated
-// func TestTpExecuteActionCgrRpcCdrStats(t *testing.T) {
+// func //(t *testing.T) {
 // 	var reply string
 // 	if err := tpRPC.Call("ApierV2.ExecuteAction", utils.AttrExecuteAction{
 // 		ActionsId: "RPC_CDRSTATS",
@@ -271,7 +299,7 @@ func TestTpExecuteActionCgrRpcAcc(t *testing.T) {
 // 	}
 // }
 
-func TestTpCreateExecuteActionMatch(t *testing.T) {
+func testTpCreateExecuteActionMatch(t *testing.T) {
 	var reply string
 	if err := tpRPC.Call("ApierV2.SetActions", utils.AttrSetActions{
 		ActionsId: "PAYMENT_2056bd2fe137082970f97102b64e42fd",
@@ -319,7 +347,7 @@ func TestTpCreateExecuteActionMatch(t *testing.T) {
 	}
 }
 
-func TestTpSetRemoveActions(t *testing.T) {
+func testTpSetRemoveActions(t *testing.T) {
 	var reply string
 	if err := tpRPC.Call("ApierV2.SetActions", utils.AttrSetActions{
 		ActionsId: "TO_BE_DELETED",
@@ -359,7 +387,7 @@ func TestTpSetRemoveActions(t *testing.T) {
 	}
 }
 
-func TestTpRemoveActionsRefenced(t *testing.T) {
+func testTpRemoveActionsRefenced(t *testing.T) {
 	actionsMap := make(map[string]engine.Actions)
 	if err := tpRPC.Call("ApierV2.GetActions", v2.AttrGetActions{
 		ActionIDs: []string{"TOPUP_VOICE"},
@@ -385,7 +413,7 @@ func TestTpRemoveActionsRefenced(t *testing.T) {
 	*/
 }
 
-func TestTpApierResetAccountActionTriggers(t *testing.T) {
+func testTpApierResetAccountActionTriggers(t *testing.T) {
 	var acnt engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1005"}
 	if err := tpRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
@@ -411,7 +439,7 @@ func TestTpApierResetAccountActionTriggers(t *testing.T) {
 	}
 }
 
-func TestTpStopCgrEngine(t *testing.T) {
+func testTpStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}

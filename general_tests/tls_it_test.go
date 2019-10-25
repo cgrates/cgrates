@@ -39,16 +39,16 @@ var (
 	tlsHTTPJson      *rpcclient.RpcClient
 	tlsConfDIR       string //run tests for specific configuration
 	tlsDelay         int
-)
 
-var sTestsTLS = []func(t *testing.T){
-	testTLSLoadConfig,
-	testTLSInitDataDb,
-	testTLSStartEngine,
-	testTLSRpcConn,
-	testTLSPing,
-	testTLSStopEngine,
-}
+	sTestsTLS = []func(t *testing.T){
+		testTLSLoadConfig,
+		testTLSInitDataDb,
+		testTLSStartEngine,
+		testTLSRpcConn,
+		testTLSPing,
+		testTLSStopEngine,
+	}
+)
 
 // Test start here
 func TestTLS(t *testing.T) {
