@@ -5,7 +5,27 @@ CGRateS can be installed via packages as well as Go automated source install.
 We recommend using source installs for advanced users familiar with Go programming and packages for users not willing to be involved in the code building process.
 
 3.1. Using packages
--------------------
+~~~~~~~~~~~~~
+
+First step import and add the key:
+
+::
+
+    sudo wget -O - http://apt.cgrates.org/apt.cgrates.org.gpg.key | sudo apt-key add -
+
+Second step add the repository in /etc/apt/sources.list ( command need to be executed as root )
+
+::
+
+    echo "deb http://apt.cgrates.org/debian/ nightly main" >> /etc/apt/sources.list
+
+Third step update the apt and install the CGRateS
+
+::
+
+    sudo apt-get update
+    sudo apt-get install cgrates
+
 
 3.1.1. Debian 
 ~~~~~~~~~~~~~
