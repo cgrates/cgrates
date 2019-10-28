@@ -1517,6 +1517,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		fallthrough
 	case DATADB_JSN:
 		cfg.rldChans[DATADB_JSN] <- struct{}{}
+		time.Sleep(1) // to force the context switch( to be sure we start the DB before a service that needs it)
 		if !fall {
 			break
 		}
@@ -1544,6 +1545,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 	case SCHEDULER_JSN:
 		if !fall {
 			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
 		}
 		cfg.rldChans[SCHEDULER_JSN] <- struct{}{}
 		if !fall {
@@ -1553,6 +1555,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 	case RALS_JSN:
 		if !fall {
 			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
 		}
 		cfg.rldChans[RALS_JSN] <- struct{}{}
 		if !fall {
@@ -1562,6 +1565,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 	case CDRS_JSN:
 		if !fall {
 			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
 		}
 		cfg.rldChans[CDRS_JSN] <- struct{}{}
 		if !fall {
@@ -1582,6 +1586,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 	case SessionSJson:
 		if !fall {
 			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
 		}
 		cfg.rldChans[SessionSJson] <- struct{}{}
 		if !fall {
@@ -1633,6 +1638,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 	case ATTRIBUTE_JSN:
 		if !fall {
 			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
 		}
 		cfg.rldChans[ATTRIBUTE_JSN] <- struct{}{}
 		if !fall {
@@ -1642,6 +1648,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 	case ChargerSCfgJson:
 		if !fall {
 			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
 		}
 		cfg.rldChans[ChargerSCfgJson] <- struct{}{}
 		if !fall {
@@ -1651,6 +1658,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 	case RESOURCES_JSON:
 		if !fall {
 			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
 		}
 		cfg.rldChans[RESOURCES_JSON] <- struct{}{}
 		if !fall {
@@ -1660,6 +1668,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 	case STATS_JSON:
 		if !fall {
 			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
 		}
 		cfg.rldChans[STATS_JSON] <- struct{}{}
 		if !fall {
@@ -1669,6 +1678,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 	case THRESHOLDS_JSON:
 		if !fall {
 			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
 		}
 		cfg.rldChans[THRESHOLDS_JSON] <- struct{}{}
 		if !fall {
@@ -1678,6 +1688,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 	case SupplierSJson:
 		if !fall {
 			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
 		}
 		cfg.rldChans[SupplierSJson] <- struct{}{}
 		if !fall {
@@ -1687,6 +1698,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 	case LoaderJson:
 		if !fall {
 			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
 		}
 		cfg.rldChans[LoaderJson] <- struct{}{}
 		if !fall {
@@ -1696,6 +1708,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 	case DispatcherSJson:
 		if !fall {
 			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
 		}
 		cfg.rldChans[DispatcherSJson] <- struct{}{}
 		if !fall {
