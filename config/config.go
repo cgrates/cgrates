@@ -100,18 +100,18 @@ func (DbDefaults) DBHost(dbType string, flagInput string) string {
 	return utils.LOCALHOST
 }
 
-func (self DbDefaults) DBPort(dbType string, flagInput string) string {
+func (dbcfg DbDefaults) DBPort(dbType string, flagInput string) string {
 	if flagInput != utils.MetaDynamic {
 		return flagInput
 	}
-	return self[dbType]["DbPort"]
+	return dbcfg[dbType]["DbPort"]
 }
 
-func (self DbDefaults) DBPass(dbType string, flagInput string) string {
+func (dbcfg DbDefaults) DBPass(dbType string, flagInput string) string {
 	if flagInput != utils.MetaDynamic {
 		return flagInput
 	}
-	return self[dbType]["DbPass"]
+	return dbcfg[dbType]["DbPass"]
 }
 
 func init() {
@@ -302,19 +302,19 @@ var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
 
 var possibleReaderTypes = utils.NewStringSet([]string{utils.MetaFileCSV, utils.MetaKafkajsonMap})
 
-func (self *CGRConfig) checkConfigSanity() error {
+func (cfg *CGRConfig) checkConfigSanity() error {
 	// Rater checks
-	if self.ralsCfg.Enabled && !self.dispatcherSCfg.Enabled {
-		if !self.statsCfg.Enabled {
-			for _, connCfg := range self.ralsCfg.StatSConns {
+	if cfg.ralsCfg.Enabled && !cfg.dispatcherSCfg.Enabled {
+		if !cfg.statsCfg.Enabled {
+			for _, connCfg := range cfg.ralsCfg.StatSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return fmt.Errorf("%s not enabled but requested by %s component.",
 						utils.StatS, utils.RALService)
 				}
 			}
 		}
-		if !self.thresholdSCfg.Enabled {
-			for _, connCfg := range self.ralsCfg.ThresholdSConns {
+		if !cfg.thresholdSCfg.Enabled {
+			for _, connCfg := range cfg.ralsCfg.ThresholdSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return fmt.Errorf("%s not enabled but requested by %s component.",
 						utils.ThresholdS, utils.RALService)
@@ -323,42 +323,42 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// CDRServer checks
-	if self.cdrsCfg.Enabled && !self.dispatcherSCfg.Enabled {
-		if !self.chargerSCfg.Enabled {
-			for _, conn := range self.cdrsCfg.ChargerSConns {
+	if cfg.cdrsCfg.Enabled && !cfg.dispatcherSCfg.Enabled {
+		if !cfg.chargerSCfg.Enabled {
+			for _, conn := range cfg.cdrsCfg.ChargerSConns {
 				if conn.Address == utils.MetaInternal {
 					return errors.New("ChargerS not enabled but requested by CDRS component.")
 				}
 			}
 		}
-		if !self.ralsCfg.Enabled {
-			for _, cdrsRaterConn := range self.cdrsCfg.RaterConns {
+		if !cfg.ralsCfg.Enabled {
+			for _, cdrsRaterConn := range cfg.cdrsCfg.RaterConns {
 				if cdrsRaterConn.Address == utils.MetaInternal {
 					return errors.New("RALs not enabled but requested by CDRS component.")
 				}
 			}
 		}
-		if !self.attributeSCfg.Enabled {
-			for _, connCfg := range self.cdrsCfg.AttributeSConns {
+		if !cfg.attributeSCfg.Enabled {
+			for _, connCfg := range cfg.cdrsCfg.AttributeSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return errors.New("AttributeS not enabled but requested by CDRS component.")
 				}
 			}
 		}
-		if !self.statsCfg.Enabled {
-			for _, connCfg := range self.cdrsCfg.StatSConns {
+		if !cfg.statsCfg.Enabled {
+			for _, connCfg := range cfg.cdrsCfg.StatSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return errors.New("StatS not enabled but requested by CDRS component.")
 				}
 			}
 		}
-		for _, cdrePrfl := range self.cdrsCfg.OnlineCDRExports {
-			if _, hasIt := self.CdreProfiles[cdrePrfl]; !hasIt {
+		for _, cdrePrfl := range cfg.cdrsCfg.OnlineCDRExports {
+			if _, hasIt := cfg.CdreProfiles[cdrePrfl]; !hasIt {
 				return fmt.Errorf("<CDRS> Cannot find CDR export template with ID: <%s>", cdrePrfl)
 			}
 		}
-		if !self.thresholdSCfg.Enabled {
-			for _, connCfg := range self.cdrsCfg.ThresholdSConns {
+		if !cfg.thresholdSCfg.Enabled {
+			for _, connCfg := range cfg.cdrsCfg.ThresholdSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return errors.New("ThresholdS not enabled but requested by CDRS component.")
 				}
@@ -366,7 +366,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// CDRC sanity checks
-	for _, cdrcCfgs := range self.CdrcProfiles {
+	for _, cdrcCfgs := range cfg.CdrcProfiles {
 		for _, cdrcInst := range cdrcCfgs {
 			if !cdrcInst.Enabled {
 				continue
@@ -374,7 +374,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 			if len(cdrcInst.CdrsConns) == 0 {
 				return fmt.Errorf("<CDRC> Instance: %s, CdrC enabled but no CDRS defined!", cdrcInst.ID)
 			}
-			if !self.cdrsCfg.Enabled && !self.dispatcherSCfg.Enabled {
+			if !cfg.cdrsCfg.Enabled && !cfg.dispatcherSCfg.Enabled {
 				for _, conn := range cdrcInst.CdrsConns {
 					if conn.Address == utils.MetaInternal {
 						return errors.New("CDRS not enabled but referenced from CDRC")
@@ -398,7 +398,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// Loaders sanity checks
-	for _, ldrSCfg := range self.loaderCfg {
+	for _, ldrSCfg := range cfg.loaderCfg {
 		if !ldrSCfg.Enabled {
 			continue
 		}
@@ -420,58 +420,61 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// SessionS checks
-	if self.sessionSCfg.Enabled && !self.dispatcherSCfg.Enabled {
-		if !self.chargerSCfg.Enabled {
-			for _, conn := range self.sessionSCfg.ChargerSConns {
+	if cfg.sessionSCfg.Enabled && !cfg.dispatcherSCfg.Enabled {
+		if cfg.sessionSCfg.TerminateAttempts < 1 {
+			return fmt.Errorf("<%s> 'terminate_attempts' should be at least 1", utils.SessionS)
+		}
+		if !cfg.chargerSCfg.Enabled {
+			for _, conn := range cfg.sessionSCfg.ChargerSConns {
 				if conn.Address == utils.MetaInternal {
 					return fmt.Errorf("<%s> %s not enabled", utils.SessionS, utils.ChargerS)
 				}
 			}
 		}
-		if !self.ralsCfg.Enabled {
-			for _, smgRALsConn := range self.sessionSCfg.RALsConns {
+		if !cfg.ralsCfg.Enabled {
+			for _, smgRALsConn := range cfg.sessionSCfg.RALsConns {
 				if smgRALsConn.Address == utils.MetaInternal {
 					return fmt.Errorf("<%s> %s not enabled but requested by SMGeneric component.", utils.SessionS, utils.RALService)
 				}
 			}
 		}
-		if !self.resourceSCfg.Enabled {
-			for _, conn := range self.sessionSCfg.ResSConns {
+		if !cfg.resourceSCfg.Enabled {
+			for _, conn := range cfg.sessionSCfg.ResSConns {
 				if conn.Address == utils.MetaInternal {
 					return fmt.Errorf("<%s> %s not enabled but requested by SMGeneric component.", utils.SessionS, utils.ResourceS)
 				}
 			}
 		}
-		if !self.thresholdSCfg.Enabled {
-			for _, conn := range self.sessionSCfg.ThreshSConns {
+		if !cfg.thresholdSCfg.Enabled {
+			for _, conn := range cfg.sessionSCfg.ThreshSConns {
 				if conn.Address == utils.MetaInternal {
 					return fmt.Errorf("<%s> %s not enabled but requested by SMGeneric component.", utils.SessionS, utils.ThresholdS)
 				}
 			}
 		}
-		if !self.statsCfg.Enabled {
-			for _, conn := range self.sessionSCfg.StatSConns {
+		if !cfg.statsCfg.Enabled {
+			for _, conn := range cfg.sessionSCfg.StatSConns {
 				if conn.Address == utils.MetaInternal {
 					return fmt.Errorf("<%s> %s not enabled but requested by SMGeneric component.", utils.SessionS, utils.StatS)
 				}
 			}
 		}
-		if !self.supplierSCfg.Enabled {
-			for _, conn := range self.sessionSCfg.SupplSConns {
+		if !cfg.supplierSCfg.Enabled {
+			for _, conn := range cfg.sessionSCfg.SupplSConns {
 				if conn.Address == utils.MetaInternal {
 					return fmt.Errorf("<%s> %s not enabled but requested by SMGeneric component.", utils.SessionS, utils.SupplierS)
 				}
 			}
 		}
-		if !self.attributeSCfg.Enabled {
-			for _, conn := range self.sessionSCfg.AttrSConns {
+		if !cfg.attributeSCfg.Enabled {
+			for _, conn := range cfg.sessionSCfg.AttrSConns {
 				if conn.Address == utils.MetaInternal {
 					return fmt.Errorf("<%s> %s not enabled but requested by SMGeneric component.", utils.SessionS, utils.AttributeS)
 				}
 			}
 		}
-		if !self.cdrsCfg.Enabled {
-			for _, smgCDRSConn := range self.sessionSCfg.CDRsConns {
+		if !cfg.cdrsCfg.Enabled {
+			for _, smgCDRSConn := range cfg.sessionSCfg.CDRsConns {
 				if smgCDRSConn.Address == utils.MetaInternal {
 					return fmt.Errorf("<%s> CDRS not enabled but referenced by SMGeneric component", utils.SessionS)
 				}
@@ -479,14 +482,14 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// FreeSWITCHAgent checks
-	if self.fsAgentCfg.Enabled {
-		if len(self.fsAgentCfg.SessionSConns) == 0 {
+	if cfg.fsAgentCfg.Enabled {
+		if len(cfg.fsAgentCfg.SessionSConns) == 0 {
 			return fmt.Errorf("<%s> no %s connections defined",
 				utils.FreeSWITCHAgent, utils.SessionS)
 		}
-		if !self.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
-			!self.sessionSCfg.Enabled {
-			for _, connCfg := range self.fsAgentCfg.SessionSConns {
+		if !cfg.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
+			!cfg.sessionSCfg.Enabled {
+			for _, connCfg := range cfg.fsAgentCfg.SessionSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return fmt.Errorf("%s not enabled but referenced by %s",
 						utils.SessionS, utils.FreeSWITCHAgent)
@@ -495,14 +498,14 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// KamailioAgent checks
-	if self.kamAgentCfg.Enabled {
-		if len(self.kamAgentCfg.SessionSConns) == 0 {
+	if cfg.kamAgentCfg.Enabled {
+		if len(cfg.kamAgentCfg.SessionSConns) == 0 {
 			return fmt.Errorf("<%s> no %s connections defined",
 				utils.KamailioAgent, utils.SessionS)
 		}
-		if !self.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
-			!self.sessionSCfg.Enabled {
-			for _, connCfg := range self.kamAgentCfg.SessionSConns {
+		if !cfg.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
+			!cfg.sessionSCfg.Enabled {
+			for _, connCfg := range cfg.kamAgentCfg.SessionSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return fmt.Errorf("%s not enabled but referenced by %s",
 						utils.SessionS, utils.KamailioAgent)
@@ -511,14 +514,14 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// AsteriskAgent checks
-	if self.asteriskAgentCfg.Enabled {
-		if len(self.asteriskAgentCfg.SessionSConns) == 0 {
+	if cfg.asteriskAgentCfg.Enabled {
+		if len(cfg.asteriskAgentCfg.SessionSConns) == 0 {
 			return fmt.Errorf("<%s> no %s connections defined",
 				utils.AsteriskAgent, utils.SessionS)
 		}
-		if !self.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
-			!self.sessionSCfg.Enabled {
-			for _, smAstSMGConn := range self.asteriskAgentCfg.SessionSConns {
+		if !cfg.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
+			!cfg.sessionSCfg.Enabled {
+			for _, smAstSMGConn := range cfg.asteriskAgentCfg.SessionSConns {
 				if smAstSMGConn.Address == utils.MetaInternal {
 					return fmt.Errorf("%s not enabled but referenced by %s",
 						utils.SessionS, utils.AsteriskAgent)
@@ -527,14 +530,14 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// DAgent checks
-	if self.diameterAgentCfg.Enabled {
-		if len(self.diameterAgentCfg.SessionSConns) == 0 {
+	if cfg.diameterAgentCfg.Enabled {
+		if len(cfg.diameterAgentCfg.SessionSConns) == 0 {
 			return fmt.Errorf("<%s> no %s connections defined",
 				utils.DiameterAgent, utils.SessionS)
 		}
-		if !self.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
-			!self.sessionSCfg.Enabled {
-			for _, daSMGConn := range self.diameterAgentCfg.SessionSConns {
+		if !cfg.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
+			!cfg.sessionSCfg.Enabled {
+			for _, daSMGConn := range cfg.diameterAgentCfg.SessionSConns {
 				if daSMGConn.Address == utils.MetaInternal {
 					return fmt.Errorf("%s not enabled but referenced by %s",
 						utils.SessionS, utils.DiameterAgent)
@@ -542,14 +545,14 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
-	if self.radiusAgentCfg.Enabled {
-		if len(self.radiusAgentCfg.SessionSConns) == 0 {
+	if cfg.radiusAgentCfg.Enabled {
+		if len(cfg.radiusAgentCfg.SessionSConns) == 0 {
 			return fmt.Errorf("<%s> no %s connections defined",
 				utils.RadiusAgent, utils.SessionS)
 		}
-		if !self.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
-			!self.sessionSCfg.Enabled {
-			for _, raSMGConn := range self.radiusAgentCfg.SessionSConns {
+		if !cfg.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
+			!cfg.sessionSCfg.Enabled {
+			for _, raSMGConn := range cfg.radiusAgentCfg.SessionSConns {
 				if raSMGConn.Address == utils.MetaInternal {
 					return fmt.Errorf("%s not enabled but referenced by %s",
 						utils.SessionS, utils.RadiusAgent)
@@ -557,14 +560,14 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
-	if self.dnsAgentCfg.Enabled {
-		if len(self.dnsAgentCfg.SessionSConns) == 0 {
+	if cfg.dnsAgentCfg.Enabled {
+		if len(cfg.dnsAgentCfg.SessionSConns) == 0 {
 			return fmt.Errorf("<%s> no %s connections defined",
 				utils.DNSAgent, utils.SessionS)
 		}
-		if !self.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
-			!self.sessionSCfg.Enabled {
-			for _, sSConn := range self.dnsAgentCfg.SessionSConns {
+		if !cfg.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
+			!cfg.sessionSCfg.Enabled {
+			for _, sSConn := range cfg.dnsAgentCfg.SessionSConns {
 				if sSConn.Address == utils.MetaInternal {
 					return fmt.Errorf("%s not enabled but referenced by %s", utils.SessionS, utils.DNSAgent)
 				}
@@ -572,10 +575,10 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// HTTPAgent checks
-	for _, httpAgentCfg := range self.httpAgentCfg {
+	for _, httpAgentCfg := range cfg.httpAgentCfg {
 		// httpAgent checks
-		if !self.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
-			self.sessionSCfg.Enabled {
+		if !cfg.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
+			cfg.sessionSCfg.Enabled {
 			for _, sSConn := range httpAgentCfg.SessionSConns {
 				if sSConn.Address == utils.MetaInternal {
 					return errors.New("SessionS not enabled but referenced by HttpAgent component")
@@ -591,53 +594,53 @@ func (self *CGRConfig) checkConfigSanity() error {
 				utils.HTTPAgent, httpAgentCfg.ReplyPayload)
 		}
 	}
-	if self.attributeSCfg.Enabled {
-		if self.attributeSCfg.ProcessRuns < 1 {
+	if cfg.attributeSCfg.Enabled {
+		if cfg.attributeSCfg.ProcessRuns < 1 {
 			return fmt.Errorf("<%s> process_runs needs to be bigger than 0", utils.AttributeS)
 		}
 	}
-	if self.chargerSCfg.Enabled && !self.dispatcherSCfg.Enabled &&
-		(self.attributeSCfg == nil || !self.attributeSCfg.Enabled) {
-		for _, connCfg := range self.chargerSCfg.AttributeSConns {
+	if cfg.chargerSCfg.Enabled && !cfg.dispatcherSCfg.Enabled &&
+		(cfg.attributeSCfg == nil || !cfg.attributeSCfg.Enabled) {
+		for _, connCfg := range cfg.chargerSCfg.AttributeSConns {
 			if connCfg.Address == utils.MetaInternal {
 				return errors.New("AttributeS not enabled but requested by ChargerS component.")
 			}
 		}
 	}
 	// ResourceLimiter checks
-	if self.resourceSCfg.Enabled && !self.thresholdSCfg.Enabled && !self.dispatcherSCfg.Enabled {
-		for _, connCfg := range self.resourceSCfg.ThresholdSConns {
+	if cfg.resourceSCfg.Enabled && !cfg.thresholdSCfg.Enabled && !cfg.dispatcherSCfg.Enabled {
+		for _, connCfg := range cfg.resourceSCfg.ThresholdSConns {
 			if connCfg.Address == utils.MetaInternal {
 				return errors.New("ThresholdS not enabled but requested by ResourceS component.")
 			}
 		}
 	}
 	// StatS checks
-	if self.statsCfg.Enabled && !self.thresholdSCfg.Enabled && !self.dispatcherSCfg.Enabled {
-		for _, connCfg := range self.statsCfg.ThresholdSConns {
+	if cfg.statsCfg.Enabled && !cfg.thresholdSCfg.Enabled && !cfg.dispatcherSCfg.Enabled {
+		for _, connCfg := range cfg.statsCfg.ThresholdSConns {
 			if connCfg.Address == utils.MetaInternal {
 				return errors.New("ThresholdS not enabled but requested by StatS component.")
 			}
 		}
 	}
 	// SupplierS checks
-	if self.supplierSCfg.Enabled && !self.dispatcherSCfg.Enabled {
-		if !self.resourceSCfg.Enabled {
-			for _, connCfg := range self.supplierSCfg.ResourceSConns {
+	if cfg.supplierSCfg.Enabled && !cfg.dispatcherSCfg.Enabled {
+		if !cfg.resourceSCfg.Enabled {
+			for _, connCfg := range cfg.supplierSCfg.ResourceSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return errors.New("ResourceS not enabled but requested by SupplierS component.")
 				}
 			}
 		}
-		if !self.statsCfg.Enabled {
-			for _, connCfg := range self.supplierSCfg.StatSConns {
+		if !cfg.statsCfg.Enabled {
+			for _, connCfg := range cfg.supplierSCfg.StatSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return errors.New("StatS not enabled but requested by SupplierS component.")
 				}
 			}
 		}
-		if !self.attributeSCfg.Enabled {
-			for _, connCfg := range self.supplierSCfg.AttributeSConns {
+		if !cfg.attributeSCfg.Enabled {
+			for _, connCfg := range cfg.supplierSCfg.AttributeSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return errors.New("AttributeS not enabled but requested by SupplierS component.")
 				}
@@ -645,23 +648,23 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// Scheduler check connection with CDR Server
-	if !self.cdrsCfg.Enabled && !self.dispatcherSCfg.Enabled {
-		for _, connCfg := range self.schedulerCfg.CDRsConns {
+	if !cfg.cdrsCfg.Enabled && !cfg.dispatcherSCfg.Enabled {
+		for _, connCfg := range cfg.schedulerCfg.CDRsConns {
 			if connCfg.Address == utils.MetaInternal {
 				return errors.New("CDR Server not enabled but requested by Scheduler")
 			}
 		}
 	}
 	// EventReader sanity checks
-	if self.ersCfg.Enabled {
-		if !self.sessionSCfg.Enabled {
-			for _, connCfg := range self.ersCfg.SessionSConns {
+	if cfg.ersCfg.Enabled {
+		if !cfg.sessionSCfg.Enabled {
+			for _, connCfg := range cfg.ersCfg.SessionSConns {
 				if connCfg.Address == utils.MetaInternal {
 					return errors.New("SessionS not enabled but requested by EventReader component.")
 				}
 			}
 		}
-		for _, rdr := range self.ersCfg.Readers {
+		for _, rdr := range cfg.ersCfg.Readers {
 			if !possibleReaderTypes.Has(rdr.Type) {
 				return fmt.Errorf("<%s> unsupported data type: %s for reader with ID: %s", utils.ERs, rdr.Type, rdr.ID)
 			}
@@ -685,9 +688,9 @@ func (self *CGRConfig) checkConfigSanity() error {
 	return nil
 }
 
-func (self *CGRConfig) LazySanityCheck() {
-	for _, cdrePrfl := range self.cdrsCfg.OnlineCDRExports {
-		if cdreProfile, hasIt := self.CdreProfiles[cdrePrfl]; hasIt && (cdreProfile.ExportFormat == utils.MetaS3jsonMap || cdreProfile.ExportFormat == utils.MetaSQSjsonMap) {
+func (cfg *CGRConfig) LazySanityCheck() {
+	for _, cdrePrfl := range cfg.cdrsCfg.OnlineCDRExports {
+		if cdreProfile, hasIt := cfg.CdreProfiles[cdrePrfl]; hasIt && (cdreProfile.ExportFormat == utils.MetaS3jsonMap || cdreProfile.ExportFormat == utils.MetaSQSjsonMap) {
 			poster := utils.SQSPoster
 			if cdreProfile.ExportFormat == utils.MetaS3jsonMap {
 				poster = utils.S3Poster
