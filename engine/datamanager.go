@@ -1429,3 +1429,7 @@ func (dm *DataManager) Reconnect(marshaler string, newcfg *config.DataDbCfg) (er
 	dm.dataDB = d
 	return
 }
+
+func (dm *DataManager) Preload(items []string) error {
+
+}
