@@ -136,9 +136,6 @@ type DataDB interface {
 	RemoveDispatcherHostDrv(string, string) error
 }
 
-type DataDBPreload interface {
-}
-
 type StorDB interface {
 	CdrStorage
 	LoadReader
