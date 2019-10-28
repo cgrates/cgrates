@@ -64,6 +64,13 @@ func TestA1ItMongo(t *testing.T) {
 	}
 }
 
+func TestA1ItRedis(t *testing.T) {
+	a1ConfigDir = "tutmysql"
+	for _, stest := range sTestsA1it {
+		t.Run(a1ConfigDir, stest)
+	}
+}
+
 func TestA1ItInternal(t *testing.T) {
 	a1ConfigDir = "tutinternal"
 	for _, stest := range sTestsA1it {
