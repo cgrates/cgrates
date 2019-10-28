@@ -28,6 +28,7 @@
 	"thresholds_conns": [
 		{"address": "*internal"},
 	],
+	"max_increments":3000000,
 },
 
 
