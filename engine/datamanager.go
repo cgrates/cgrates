@@ -1431,5 +1431,5 @@ func (dm *DataManager) Reconnect(marshaler string, newcfg *config.DataDbCfg) (er
 }
 
 func (dm *DataManager) Preload(items []string) error {
-
+	return utils.ErrNotImplemented
 }
