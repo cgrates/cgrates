@@ -968,7 +968,7 @@ func (iDB *InternalDB) RemoveSMCosts(qryFltr *utils.SMCostFilter) error {
 
 	for key := range smMpIDs {
 		iDB.db.Remove(utils.SessionCostsTBL, key,
-		cacheCommit(utils.NonTransactional), utils.NonTransactional)
+			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
 	return nil
 }

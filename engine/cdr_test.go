@@ -663,7 +663,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", "1", expRecord[0])
 	}
 	data, _ := NewMapStorage()
-	dmForCDR := NewDataManager(data,config.CgrConfig().CacheCfg())
+	dmForCDR := NewDataManager(data, config.CgrConfig().CacheCfg())
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	if err != nil {
 		t.Errorf("Error: %+v", err)

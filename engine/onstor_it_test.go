@@ -87,7 +87,7 @@ func TestOnStorITRedis(t *testing.T) {
 	rdsITdb, err = NewRedisStorage(
 		fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
 		4, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-		utils.REDIS_MAX_CONNS,  "")
+		utils.REDIS_MAX_CONNS, "")
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}
@@ -108,7 +108,7 @@ func TestOnStorITMongo(t *testing.T) {
 	if mgoITdb, err = NewMongoStorage(mgoITCfg.StorDbCfg().Host,
 		mgoITCfg.StorDbCfg().Port, mgoITCfg.StorDbCfg().Name,
 		mgoITCfg.StorDbCfg().User, mgoITCfg.StorDbCfg().Password,
-		utils.StorDB, nil, mgoITCfg.CacheCfg(), false); err != nil {
+		utils.StorDB, nil, false); err != nil {
 		t.Fatal(err)
 	}
 	onStorCfg = mgoITCfg.StorDbCfg().Name

@@ -521,7 +521,7 @@ func testV1RsReleaseResource(t *testing.T) {
 }
 
 func testV1RsDBStore(t *testing.T) {
-	if rlsV1ConfDIR == "tutinternal"{
+	if rlsV1ConfDIR == "tutinternal" {
 		t.SkipNow()
 	}
 	argsRU := utils.ArgRSv1ResourceUsage{

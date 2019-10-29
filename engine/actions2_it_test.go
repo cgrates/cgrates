@@ -84,12 +84,11 @@ func testActionsInitCdrsStore(t *testing.T) {
 			actsCfg.StorDbCfg().ConnMaxLifetime); err != nil {
 			t.Fatal("Could not connect to mysql", err.Error())
 		}
-
 	} else if actsCfgDir == "cdrsv2mongo" {
 		if actsCdrStore, err = NewMongoStorage(actsCfg.StorDbCfg().Host,
 			actsCfg.StorDbCfg().Port, actsCfg.StorDbCfg().Name,
 			actsCfg.StorDbCfg().User, actsCfg.StorDbCfg().Password,
-			utils.StorDB, nil, actsCfg.CacheCfg(), false); err != nil {
+			utils.StorDB, nil, false); err != nil {
 			t.Fatal("Could not connect to mongo", err.Error())
 		}
 	}
