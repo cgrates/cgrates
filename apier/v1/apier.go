@@ -1312,3 +1312,11 @@ func (v1 *ApierV1) SetCacheSConnection(chS rpcclient.RpcClientConnection) {
 func (v1 *ApierV1) SetSchedulerSConnection(schS rpcclient.RpcClientConnection) {
 	v1.SchedulerS = schS
 }
+
+func (v1 *ApierV1) Preload(items []string, reply *string) (err error) {
+	if err = v1.DataManager.Preload(items); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}

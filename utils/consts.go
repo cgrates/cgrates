@@ -28,6 +28,9 @@ var (
 	CDRCFileFormats = NewStringSet([]string{MetaFileCSV, MetaFScsv,
 		MetaKamFlatstore, MetaOsipsFlatstore, MetaPartialCSV, MetaFileFWV, MetaFileXML})
 	PostPaidRatedSlice = []string{META_POSTPAID, META_RATED}
+	ItemList           = NewStringSet([]string{MetaAccounts, MetaAttributes, MetaChargers, MetaDispatchers, MetaDispatcherHosts,
+		MetaFilters, MetaResources, MetaStats, MetaThresholds, MetaSuppliers,
+	})
 
 	GitLastLog                  string // If set, it will be processed as part of versioning
 	PosterTransportContentTypes = map[string]string{
@@ -545,12 +548,9 @@ const (
 	Service                     = "Service"
 	MetaSuppliersLimit          = "*suppliers_limit"
 	MetaSuppliersOffset         = "*suppliers_offset"
-	ActiveSessionPrefix         = "act"
-	PasiveSessionPrefix         = "psv"
 	ApierV                      = "ApierV"
 	MetaApier                   = "*apier"
 	CGREventString              = "CGREvent"
-	MetaPing                    = "*ping"
 	MetaTextPlain               = "*text_plain"
 	MetaIgnoreErrors            = "*ignore_errors"
 	MetaRelease                 = "*release"
@@ -564,6 +564,12 @@ const (
 	Ratio                       = "Ratio"
 	Load                        = "Load"
 	Slash                       = "/"
+	NameLow                     = "name"
+	TypeLow                     = "type"
+	UserLow                     = "user"
+	PassLow                     = "pass"
+	SentinelLow                 = "sentinel"
+	QueryLow                    = "query"
 )
 
 // Migrator Action
@@ -1045,9 +1051,6 @@ const (
 	CGR_CATEGORY         = "cgr_category"
 	CGR_REQTYPE          = "cgr_reqtype"
 	CGR_TENANT           = "cgr_tenant"
-	CGR_TOR              = "cgr_tor"
-	CGR_OriginID         = "cgr_originid"
-	CGR_HOST             = "cgr_host"
 	CGR_PDD              = "cgr_pdd"
 	CGR_DISCONNECT_CAUSE = "cgr_disconnectcause"
 	CGR_COMPUTELCR       = "cgr_computelcr"
@@ -1141,7 +1144,6 @@ const (
 	CacheAttributeFilterIndexes  = "attribute_filter_indexes"
 	CacheChargerFilterIndexes    = "charger_filter_indexes"
 	CacheDispatcherFilterIndexes = "dispatcher_filter_indexes"
-	CacheSessionFilterIndexes    = "session_filter_indexes"
 	CacheDiameterMessages        = "diameter_messages"
 	CacheRPCResponses            = "rpc_responses"
 	CacheClosedSessions          = "closed_sessions"

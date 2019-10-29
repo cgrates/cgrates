@@ -89,8 +89,9 @@ type DbJsonCfg struct {
 	Prefix_indexed_fields *[]string
 	Redis_sentinel        *string
 	Query_timeout         *string
-	Preload_url           *string
 	Sslmode               *string // Used only in case of storDb
+	Remote_db_urls        *[]string
+	Replicate_db_urls     *[]string
 }
 
 // Filters config

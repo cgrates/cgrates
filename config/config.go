@@ -257,6 +257,7 @@ type CGRConfig struct {
 	CdrcProfiles map[string][]*CdrcCfg // Number of CDRC instances running imports, format map[dirPath][]{Configs}
 	loaderCfg    LoaderSCfgs           // LoaderS configs
 	httpAgentCfg HttpAgentCfgs         // HttpAgent configs
+	rmtDataDB    *DataDbCfg            // Remote DataDB, used for preload
 
 	ConfigReloads map[string]chan struct{} // Signals to specific entities that a config reload should occur
 	rldChans      map[string]chan struct{} // index here the channels used for reloads
