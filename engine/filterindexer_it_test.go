@@ -88,7 +88,7 @@ func TestFilterIndexerITMongo(t *testing.T) {
 	mongoDB, err := NewMongoStorage(mgoITCfg.StorDbCfg().Host,
 		mgoITCfg.StorDbCfg().Port, mgoITCfg.StorDbCfg().Name,
 		mgoITCfg.StorDbCfg().User, mgoITCfg.StorDbCfg().Password,
-		utils.StorDB, nil, mgoITCfg.CacheCfg(), false)
+		utils.StorDB, nil, false)
 	if err != nil {
 		t.Fatal(err)
 	}
