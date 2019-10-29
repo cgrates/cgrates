@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -100,8 +102,9 @@ func NewDataManager(dataDB DataDB, cacheCfg config.CacheCfg) *DataManager {
 // DataManager is the data storage manager for CGRateS
 // transparently manages data retrieval, further serialization and caching
 type DataManager struct {
-	dataDB   DataDB
-	cacheCfg config.CacheCfg
+	dataDB    DataDB
+	rmtDataDB DataDB
+	cacheCfg  config.CacheCfg
 }
 
 // DataDB exports access to dataDB
@@ -1430,6 +1433,68 @@ func (dm *DataManager) Reconnect(marshaler string, newcfg *config.DataDbCfg) (er
 	return
 }
 
-func (dm *DataManager) Preload(items []string) error {
-	return utils.ErrNotImplemented
+func (dm *DataManager) Preload(items []string) (err error) {
+	// sourceDbCfg will be taken directly from config
+	sourceDbCfg, err := config.NewDataDBCfgFromPreloadUrl("")
+	if err != nil {
+		return err
+	}
+	switch sourceDbCfg.DataDbType {
+	case utils.REDIS:
+		var dbNb int
+		dbNb, err = strconv.Atoi(sourceDbCfg.DataDbName)
+		if err != nil {
+			utils.Logger.Crit("Redis db name must be an integer!")
+			return err
+		}
+		host := sourceDbCfg.DataDbHost
+		if sourceDbCfg.DataDbPort != "" && strings.Index(host, ":") == -1 {
+			host += ":" + sourceDbCfg.DataDbPort
+		}
+		dm.rmtDataDB, err = NewRedisStorage(host, dbNb, sourceDbCfg.DataDbPass,
+			config.CgrConfig().GeneralCfg().DBDataEncoding, utils.REDIS_MAX_CONNS, sourceDbCfg.DataDbSentinelName)
+	case utils.MONGO:
+		dm.rmtDataDB, err = NewMongoStorage(sourceDbCfg.DataDbHost, sourceDbCfg.DataDbPort, sourceDbCfg.DataDbName,
+			sourceDbCfg.DataDbUser, sourceDbCfg.DataDbPass, utils.DataDB, nil, true)
+	default:
+		err = fmt.Errorf("unknown db '%s' valid options are '%s' or '%s or '%s'",
+			sourceDbCfg.DataDbType, utils.REDIS, utils.MONGO)
+	}
+	if err != nil {
+		return
+	}
+
+	// based on items load items from source into current datadb
+	if len(items) == 0 {
+		// items = listOfAllItems
+	}
+	var wg sync.WaitGroup // wait for sync to finish
+	errChan := make(chan error)
+	doneChan := make(chan struct{})
+	for _, item := range items {
+		wg.Add(1)
+		go func(item string) {
+			var errSync error
+			switch item {
+			case utils.MetaAttributes:
+				errSync = dm.SyncAttributes()
+			case utils.MetaThresholds:
+				fmt.Println("test")
+			}
+			if errSync != nil {
+				errChan <- errSync
+			}
+			wg.Done()
+		}(item)
+	}
+	time.Sleep(1) // switch context
+	go func() {   // report wg.Wait on doneChan
+		wg.Wait()
+		close(doneChan)
+	}()
+	select {
+	case err = <-errChan:
+	case <-doneChan:
+	}
+	return
 }

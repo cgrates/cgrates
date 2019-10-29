@@ -62,7 +62,8 @@ const CGRATES_CFG_JSON = `
 	"db_password": "", 						// password to use when connecting to data_db
 	"redis_sentinel":"",					// the name of sentinel when used
 	"query_timeout":"10s",
-	"preload_url":"",						// url used to import data from other databases to InternalDB when it's used
+	"remote_db_urls":[],
+	"replicate_db_urls":[],
 },
 
 
