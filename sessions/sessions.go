@@ -519,10 +519,11 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 // threadSafe since it will run into it's own goroutine
 func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 	dbtIvl time.Duration) (maxDur time.Duration, err error) {
-	lenSRuns := len(s.SRuns)
-	if sRunIdx >= lenSRuns {
-		err = errors.New("sRunIdx out of range")
-		return
+	// NextAutoDebit works in tandem with session replication
+	now := time.Now()
+	if s.SRuns[sRunIdx].NextAutoDebit != nil &&
+		now.Before(*s.SRuns[sRunIdx].NextAutoDebit) {
+		time.Sleep(now.Sub(*s.SRuns[sRunIdx].NextAutoDebit))
 	}
 	for {
 		s.Lock()
@@ -552,7 +553,9 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 			return
 		}
 		debitStop := s.debitStop // avoid concurrency with endSession
+		s.SRuns[sRunIdx].NextAutoDebit = utils.TimePointer(time.Now().Add(dbtIvl))
 		s.Unlock()
+		sS.replicateSessions(s.CGRID, false, sS.sReplConns)
 		if maxDebit < dbtIvl { // disconnect faster
 			select {
 			case <-debitStop: // call was disconnected already
@@ -1198,7 +1201,9 @@ func (sS *SessionS) transitSState(cgrID string, psv bool) (s *Session) {
 	s = ss[0]
 	sS.unregisterSession(cgrID, !psv)
 	sS.registerSession(s, psv)
-	// ToDo: activate prepaid debits
+	if !psv {
+		sS.initSessionDebitLoops(s)
+	}
 	return
 }
 

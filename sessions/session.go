@@ -219,6 +219,7 @@ type SRun struct {
 	ExtraDuration time.Duration // keeps the current duration debited on top of what has been asked
 	LastUsage     time.Duration // last requested Duration
 	TotalUsage    time.Duration // sum of lastUsage
+	NextAutoDebit *time.Time
 }
 
 // Clone returns the cloned version of SRun
