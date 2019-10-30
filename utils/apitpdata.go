@@ -281,12 +281,10 @@ func FallbackSubjKeys(tenant, tor, fallbackSubjects string) []string {
 				sslice = append(sslice, "")
 				copy(sslice[i+1:], sslice[i:])
 				sslice[i] = newKey
-			} else {
-				if i == len(sslice) {
-					// not found and at the end
-					sslice = append(sslice, newKey)
-				}
-			} // newKey was foundfound
+			} else if i == len(sslice) {
+				// not found and at the end
+				sslice = append(sslice, newKey)
+			} // newKey was found
 		}
 	}
 	return sslice
@@ -385,16 +383,6 @@ type TPActionTrigger struct {
 	Weight                float64 // weight
 }
 
-// Used to rebuild a TPAccountActions (empty ActionTimingsId and ActionTriggersId) out of it's key in nosqldb
-func NewTPAccountActionsFromKeyId(tpid, loadId, keyId string) (*TPAccountActions, error) {
-	// *out:cgrates.org:1001
-	s := strings.Split(keyId, ":")
-	if len(s) != 2 {
-		return nil, fmt.Errorf("Cannot parse key %s into AccountActions", keyId)
-	}
-	return &TPAccountActions{TPid: tpid, LoadId: loadId, Tenant: s[0], Account: s[1]}, nil
-}
-
 type TPAccountActions struct {
 	TPid             string // Tariff plan id
 	LoadId           string // LoadId, used to group actions on a load
@@ -412,11 +400,7 @@ func (aa *TPAccountActions) KeyId() string {
 }
 
 func (aa *TPAccountActions) GetId() string {
-	return aa.LoadId +
-		CONCATENATED_KEY_SEP +
-		aa.Tenant +
-		CONCATENATED_KEY_SEP +
-		aa.Account
+	return aa.LoadId + CONCATENATED_KEY_SEP + aa.Tenant + CONCATENATED_KEY_SEP + aa.Account
 }
 
 func (aa *TPAccountActions) SetAccountActionsId(id string) error {
@@ -537,41 +521,41 @@ type AttrExpFileCdrs struct {
 	Paginator
 }
 
-func (self *AttrExpFileCdrs) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
+func (aefc *AttrExpFileCdrs) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
 	cdrFltr := &CDRsFilter{
-		CGRIDs:              self.CgrIds,
-		RunIDs:              self.MediationRunIds,
+		CGRIDs:              aefc.CgrIds,
+		RunIDs:              aefc.MediationRunIds,
 		NotRunIDs:           []string{MetaRaw}, // In exportv1 automatically filter out *raw CDRs
-		ToRs:                self.TORs,
-		OriginHosts:         self.CdrHosts,
-		Sources:             self.CdrSources,
-		RequestTypes:        self.ReqTypes,
-		Tenants:             self.Tenants,
-		Categories:          self.Categories,
-		Accounts:            self.Accounts,
-		Subjects:            self.Subjects,
-		DestinationPrefixes: self.DestinationPrefixes,
-		OrderIDStart:        self.OrderIdStart,
-		OrderIDEnd:          self.OrderIdEnd,
-		Paginator:           self.Paginator,
+		ToRs:                aefc.TORs,
+		OriginHosts:         aefc.CdrHosts,
+		Sources:             aefc.CdrSources,
+		RequestTypes:        aefc.ReqTypes,
+		Tenants:             aefc.Tenants,
+		Categories:          aefc.Categories,
+		Accounts:            aefc.Accounts,
+		Subjects:            aefc.Subjects,
+		DestinationPrefixes: aefc.DestinationPrefixes,
+		OrderIDStart:        aefc.OrderIdStart,
+		OrderIDEnd:          aefc.OrderIdEnd,
+		Paginator:           aefc.Paginator,
 	}
-	if len(self.TimeStart) != 0 {
-		if answerTimeStart, err := ParseTimeDetectLayout(self.TimeStart, timezone); err != nil {
+	if len(aefc.TimeStart) != 0 {
+		if answerTimeStart, err := ParseTimeDetectLayout(aefc.TimeStart, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.AnswerTimeStart = &answerTimeStart
 		}
 	}
-	if len(self.TimeEnd) != 0 {
-		if answerTimeEnd, err := ParseTimeDetectLayout(self.TimeEnd, timezone); err != nil {
+	if len(aefc.TimeEnd) != 0 {
+		if answerTimeEnd, err := ParseTimeDetectLayout(aefc.TimeEnd, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.AnswerTimeEnd = &answerTimeEnd
 		}
 	}
-	if self.SkipRated {
+	if aefc.SkipRated {
 		cdrFltr.MaxCost = Float64Pointer(-1.0)
-	} else if self.SkipRated {
+	} else { //if aefc.SkipErrors {
 		cdrFltr.MinCost = Float64Pointer(0.0)
 		cdrFltr.MaxCost = Float64Pointer(-1.0)
 	}
@@ -650,7 +634,7 @@ func (fltr *AttrGetCdrs) AsCDRsFilter(timezone string) (cdrFltr *CDRsFilter, err
 	}
 	if fltr.SkipRated {
 		cdrFltr.MaxCost = Float64Pointer(-1.0)
-	} else if fltr.SkipRated {
+	} else { //if fltr.SkipErrors {
 		cdrFltr.MinCost = Float64Pointer(0.0)
 		cdrFltr.MaxCost = Float64Pointer(-1.0)
 	}
