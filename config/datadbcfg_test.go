@@ -20,6 +20,9 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestDataDbCfgloadFromJsonCfg(t *testing.T) {
@@ -120,5 +123,67 @@ func TestDataDbCfgloadFromJsonCfgPort(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, dbcfg) {
 		t.Errorf("Expected: %+v , recived: %+v", expected, dbcfg)
+	}
+}
+
+func TestDataDbNewDataDbFromUrl(t *testing.T) {
+	if _, err := newDataDBCfgFromUrl(utils.EmptyString); err != utils.ErrMandatoryIeMissing {
+		t.Errorf("Expected: %+v , recived: %+v", utils.ErrMandatoryIeMissing, err)
+	}
+
+	url := "127.0.0.1:1234"
+	expected := &DataDbCfg{
+		DataDbType:         utils.REDIS,
+		DataDbHost:         "127.0.0.1",
+		DataDbPort:         "1234",
+		DataDbName:         "10",
+		DataDbUser:         "cgrates",
+		DataDbPass:         "",
+		DataDbSentinelName: "",
+		QueryTimeout:       10 * time.Second,
+		RmtDataDBCfgs:      []*DataDbCfg{},
+		RplDataDBCfgs:      []*DataDbCfg{},
+	}
+	if rcv, err := newDataDBCfgFromUrl(url); err != nil || !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Error: %+v \n, expected: %+v ,\n recived: %+v", err, utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	url = "127.0.0.1:1234/?user=test&pass=test"
+	expected = &DataDbCfg{
+		DataDbType:         utils.REDIS,
+		DataDbHost:         "127.0.0.1",
+		DataDbPort:         "1234",
+		DataDbName:         "10",
+		DataDbUser:         "test",
+		DataDbPass:         "test",
+		DataDbSentinelName: "",
+		QueryTimeout:       10 * time.Second,
+		RmtDataDBCfgs:      []*DataDbCfg{},
+		RplDataDBCfgs:      []*DataDbCfg{},
+	}
+	if rcv, err := newDataDBCfgFromUrl(url); err != nil || !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Error: %+v , expected: %+v , recived: %+v", err, utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	url = "0.0.0.0:1234/?type=*mongo"
+	expected = &DataDbCfg{
+		DataDbType:         utils.MONGO,
+		DataDbHost:         "0.0.0.0",
+		DataDbPort:         "1234",
+		DataDbName:         "10",
+		DataDbUser:         "cgrates",
+		DataDbPass:         "",
+		DataDbSentinelName: "",
+		QueryTimeout:       10 * time.Second,
+		RmtDataDBCfgs:      []*DataDbCfg{},
+		RplDataDBCfgs:      []*DataDbCfg{},
+	}
+	if rcv, err := newDataDBCfgFromUrl(url); err != nil || !reflect.DeepEqual(rcv, expected) {
+		t.Errorf("Error: %+v , expected: %+v , recived: %+v", err, utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
+	url = "0.0.0.0:1234/?type=*mongo&query=error"
+	if _, err := newDataDBCfgFromUrl(url); err == nil || err.Error() != "time: invalid duration error" {
+		t.Errorf("Expected:<time: invalid duration error> , recived: <%+v>", err)
 	}
 }

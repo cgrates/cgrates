@@ -78,7 +78,7 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg.Remote_db_urls != nil {
 		dbcfg.RmtDataDBCfgs = make([]*DataDbCfg, len(*jsnDbCfg.Remote_db_urls))
 		for i, url := range *jsnDbCfg.Remote_db_urls {
-			db, err := newDataDBCfgFromPreloadUrl(url)
+			db, err := newDataDBCfgFromUrl(url)
 			if err != nil {
 				return err
 			}
@@ -88,7 +88,7 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg.Replicate_db_urls != nil {
 		dbcfg.RplDataDBCfgs = make([]*DataDbCfg, len(*jsnDbCfg.Replicate_db_urls))
 		for i, url := range *jsnDbCfg.Replicate_db_urls {
-			db, err := newDataDBCfgFromPreloadUrl(url)
+			db, err := newDataDBCfgFromUrl(url)
 			if err != nil {
 				return err
 			}
@@ -112,10 +112,10 @@ func (dbcfg *DataDbCfg) Clone() *DataDbCfg {
 	}
 }
 
-//newDataDBCfgFromPreloadUrl will create a DataDB configuration out of url
+//newDataDBCfgFromUrl will create a DataDB configuration out of url
 //Format: host:port/?type=valOfType&name=valOFName&etc...
 //Sample: 127.0.0.1:6379
-func newDataDBCfgFromPreloadUrl(pUrl string) (newDbCfg *DataDbCfg, err error) {
+func newDataDBCfgFromUrl(pUrl string) (newDbCfg *DataDbCfg, err error) {
 	newDbCfg = new(DataDbCfg)
 	if pUrl == utils.EmptyString {
 		return nil, utils.ErrMandatoryIeMissing
@@ -128,7 +128,7 @@ func newDataDBCfgFromPreloadUrl(pUrl string) (newDbCfg *DataDbCfg, err error) {
 	newDbCfg.DataDbPort = hostPortSls[1]
 	arg := utils.GetUrlRawArguments(pUrl)
 	if val, has := arg[utils.TypeLow]; has {
-		newDbCfg.DataDbType = val
+		newDbCfg.DataDbType = strings.TrimPrefix(val, "*")
 	}
 	if val, has := arg[utils.UserLow]; has {
 		newDbCfg.DataDbUser = val
