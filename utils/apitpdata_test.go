@@ -206,7 +206,7 @@ func TestNewTiming(t *testing.T) {
 	}
 }
 
-func TestSetTiming(t *testing.T) {
+func TestTPTimingSetTiming(t *testing.T) {
 	tpTiming := &TPTiming{
 		ID:        "1",
 		Years:     Years{2020},
@@ -227,7 +227,7 @@ func TestSetTiming(t *testing.T) {
 	}
 }
 
-func TestKeys(t *testing.T) {
+func TestTPRatingProfileKeys(t *testing.T) {
 	//empty check -> KeyId
 	tpRatingProfile := new(TPRatingProfile)
 	eOut := "*out:::"
@@ -261,7 +261,7 @@ func TestKeys(t *testing.T) {
 	}
 }
 
-func TestSetRatingProfilesId(t *testing.T) {
+func TestTPRatingProfileSetRatingProfilesId(t *testing.T) {
 	//empty check
 	tpRatingProfile := new(TPRatingProfile)
 	tpRatingProfile.SetRatingProfilesId("")
@@ -284,6 +284,222 @@ func TestSetRatingProfilesId(t *testing.T) {
 		t.Error("Wrong TPRatingProfileId sent and no error received")
 	}
 
+}
+
+func TestAttrGetRatingProfileGetID(t *testing.T) {
+	//empty check
+	attrGetRatingProfile := &AttrGetRatingProfile{
+		Tenant:   "",
+		Category: "",
+		Subject:  "",
+	}
+	rcv := attrGetRatingProfile.GetID()
+	eOut := "*out:::"
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %+v, received %+v", eOut, rcv)
+	}
+	//test check
+	attrGetRatingProfile.Tenant = "cgrates"
+	attrGetRatingProfile.Category = "cgrates"
+	attrGetRatingProfile.Subject = "cgrates"
+	rcv = attrGetRatingProfile.GetID()
+	eOut = "*out:cgrates:cgrates:cgrates"
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %+v, received %+v", eOut, rcv)
+	}
+}
+
+func TestFallbackSubjKeys(t *testing.T) {
+	//call with empty slice -> expect an empty slice
+	rcv := FallbackSubjKeys("", "", "")
+	if rcv != nil {
+		t.Errorf("Expected an empty slice")
+	}
+	//check with test vars
+	eOut := []string{"*out:cgrates.org:*voice:1001", "*out:cgrates.org:*voice:1002", "*out:cgrates.org:*voice:1003"}
+	rcv = FallbackSubjKeys("cgrates.org", VOICE, "1001;1003;1002")
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %+v, received %+v", eOut, rcv)
+	}
+}
+
+func TestTPAccountActionsKeyId(t *testing.T) {
+	//empty check KeyIs()
+	tPAccountActions := new(TPAccountActions)
+	rcv := tPAccountActions.KeyId()
+	eOut := ":"
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %+v, received %+v", eOut, rcv)
+	}
+	//empty check GetId()
+	rcv = tPAccountActions.GetId()
+	eOut = "::"
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %+v, received %+v", eOut, rcv)
+	}
+	//empty check SetAccountActionsId()
+	err := tPAccountActions.SetAccountActionsId("")
+	if err == nil {
+		t.Errorf("Wrong TP Account Action Id not received")
+	}
+	//test check SetAccountActionsId()
+	err = tPAccountActions.SetAccountActionsId("loadID:cgrates.org:cgrates")
+	if err != nil {
+		t.Errorf("Expected nil")
+	}
+	expectedOut := &TPAccountActions{
+		LoadId:  "loadID",
+		Tenant:  "cgrates.org",
+		Account: "cgrates",
+	}
+	if !reflect.DeepEqual(expectedOut, tPAccountActions) {
+		t.Errorf("Expected %+v, received %+v", ToJSON(expectedOut), ToJSON(tPAccountActions))
+	}
+	//test check KeyIs() *Tenant, Account setted above via SetAccountActionsId
+	rcv = tPAccountActions.KeyId()
+	eOut = "cgrates.org:cgrates"
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %+v, received %+v", eOut, rcv)
+	}
+	//tect check GetID() *LoadId, tenant, account setted above via SetAccountActionsId
+	rcv = tPAccountActions.GetId()
+	eOut = "loadID:cgrates.org:cgrates"
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %+v, received %+v", eOut, rcv)
+	}
+
+}
+
+func TestAttrGetCdrsAttrExpFileCdrsAsCDRsFilter(t *testing.T) {
+	attrExpFileCdrs := &AttrExpFileCdrs{
+		TimeStart: "2020-04-04T11:45:26.371Z",
+		TimeEnd:   "2020-04-04T11:46:26.371Z",
+		SkipRated: true,
+		CgrIds:    []string{"CGRID"},
+		TORs:      []string{VOICE},
+		Accounts:  []string{"1001"},
+		Subjects:  []string{"1001"},
+	}
+	eOut := &CDRsFilter{
+		CGRIDs:              attrExpFileCdrs.CgrIds,
+		RunIDs:              attrExpFileCdrs.MediationRunIds,
+		NotRunIDs:           []string{MetaRaw},
+		ToRs:                attrExpFileCdrs.TORs,
+		OriginHosts:         attrExpFileCdrs.CdrHosts,
+		Sources:             attrExpFileCdrs.CdrSources,
+		RequestTypes:        attrExpFileCdrs.ReqTypes,
+		Tenants:             attrExpFileCdrs.Tenants,
+		Categories:          attrExpFileCdrs.Categories,
+		Accounts:            attrExpFileCdrs.Accounts,
+		Subjects:            attrExpFileCdrs.Subjects,
+		DestinationPrefixes: attrExpFileCdrs.DestinationPrefixes,
+		OrderIDStart:        attrExpFileCdrs.OrderIdStart,
+		OrderIDEnd:          attrExpFileCdrs.OrderIdEnd,
+		Paginator:           attrExpFileCdrs.Paginator,
+		MaxCost:             Float64Pointer(-1.0),
+	}
+	timeStart, _ := ParseTimeDetectLayout("2020-04-04T11:45:26.371Z", "")
+	eOut.AnswerTimeStart = &timeStart
+	timeEnd, _ := ParseTimeDetectLayout("2020-04-04T11:46:26.371Z", "")
+	eOut.AnswerTimeEnd = &timeEnd
+
+	//check with wrong time-zone
+	rcv, err := attrExpFileCdrs.AsCDRsFilter("wrongtimezone")
+	if err == nil {
+		t.Errorf("ParseTimeDetectLayout error")
+	}
+
+	//check with SkipRated = true
+	rcv, err = attrExpFileCdrs.AsCDRsFilter("")
+
+	if err != nil {
+		t.Errorf("ParseTimeDetectLayout error")
+	}
+
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected: %s ,received: %s ", ToJSON(eOut), ToJSON(rcv))
+	}
+
+	//check with SkipRated = false
+	attrExpFileCdrs.SkipRated = false
+	eOut.MinCost = Float64Pointer(0.0)
+	eOut.MaxCost = Float64Pointer(-1.0)
+	rcv, err = attrExpFileCdrs.AsCDRsFilter("")
+
+	if err != nil {
+		t.Errorf("ParseTimeDetectLayout error")
+	}
+
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected: %s ,received: %s ", ToJSON(eOut), ToJSON(rcv))
+	}
+}
+
+//now working here
+func TestAttrGetCdrsAsCDRsFilter(t *testing.T) {
+	attrGetCdrs := &AttrGetCdrs{
+		TimeStart: "2019-04-04T11:45:26.371Z",
+		TimeEnd:   "2019-04-04T11:46:26.371Z",
+		SkipRated: true,
+		CgrIds:    []string{"CGRID"},
+		TORs:      []string{VOICE},
+		Accounts:  []string{"1001"},
+		Subjects:  []string{"1001"},
+	}
+	eOut := &CDRsFilter{
+		CGRIDs:              attrGetCdrs.CgrIds,
+		RunIDs:              attrGetCdrs.MediationRunIds,
+		ToRs:                attrGetCdrs.TORs,
+		OriginHosts:         attrGetCdrs.CdrHosts,
+		Sources:             attrGetCdrs.CdrSources,
+		RequestTypes:        attrGetCdrs.ReqTypes,
+		Tenants:             attrGetCdrs.Tenants,
+		Categories:          attrGetCdrs.Categories,
+		Accounts:            attrGetCdrs.Accounts,
+		Subjects:            attrGetCdrs.Subjects,
+		DestinationPrefixes: attrGetCdrs.DestinationPrefixes,
+		OrderIDStart:        attrGetCdrs.OrderIdStart,
+		OrderIDEnd:          attrGetCdrs.OrderIdEnd,
+		Paginator:           attrGetCdrs.Paginator,
+		OrderBy:             attrGetCdrs.OrderBy,
+		MaxCost:             Float64Pointer(-1.0),
+	}
+	timeStart, _ := ParseTimeDetectLayout("2019-04-04T11:45:26.371Z", "")
+	eOut.AnswerTimeStart = &timeStart
+	timeEnd, _ := ParseTimeDetectLayout("2019-04-04T11:46:26.371Z", "")
+	eOut.AnswerTimeEnd = &timeEnd
+
+	//check with an empty struct
+	//TBD
+
+	//check with wrong time-zone
+	//attrGetCdrs.TimeStart = "wrongtimezone"
+
+	rcv, err := attrGetCdrs.AsCDRsFilter("wrongtimezone")
+	if err == nil {
+		t.Errorf("ParseTimeDetectLayout error")
+	}
+
+	//check with SkipRated = true
+	rcv, err = attrGetCdrs.AsCDRsFilter("")
+	if err != nil {
+		t.Errorf("ParseTimeDetectLayout error")
+	}
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected: %s ,received: %s ", ToJSON(eOut), ToJSON(rcv))
+	}
+
+	//check with SkipRated = false
+	attrGetCdrs.SkipRated = false
+	eOut.MinCost = Float64Pointer(0.0)
+	eOut.MaxCost = Float64Pointer(-1.0)
+	rcv, err = attrGetCdrs.AsCDRsFilter("")
+
+	if err != nil {
+		t.Errorf("ParseTimeDetectLayout error")
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected: %s ,received: %s ", ToJSON(eOut), ToJSON(rcv))
+	}
 }
 
 func TestAppendToSMCostFilter(t *testing.T) {
