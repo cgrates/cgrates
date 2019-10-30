@@ -88,7 +88,7 @@ func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
 	"stats_conns": [],						// address where to reach the StatS <""|*internal|127.0.0.1:2013>
 	"suppliers_conns": [],					// address where to reach the SupplierS <""|*internal|127.0.0.1:2013>
 	"attributes_conns": [],					// address where to reach the AttributeS <""|*internal|127.0.0.1:2013>
-	"session_replication_conns": [],		// replicate sessions towards these session services
+	"replication_conns": [],				// replicate sessions towards these session services
 	"debit_interval": "0s",					// interval to perform debits on.
 	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
@@ -102,19 +102,19 @@ func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
 },
 }`
 	expected = SessionSCfg{
-		ListenBijson:            "127.0.0.1:2014",
-		ChargerSConns:           []*RemoteHost{},
-		RALsConns:               []*RemoteHost{{Address: "*internal"}},
-		ResSConns:               []*RemoteHost{},
-		ThreshSConns:            []*RemoteHost{},
-		StatSConns:              []*RemoteHost{},
-		SupplSConns:             []*RemoteHost{},
-		AttrSConns:              []*RemoteHost{},
-		CDRsConns:               []*RemoteHost{{Address: "*internal"}},
-		SessionReplicationConns: []*RemoteHost{},
-		MaxCallDuration:         time.Duration(3 * time.Hour),
-		SessionIndexes:          map[string]bool{},
-		ClientProtocol:          1,
+		ListenBijson:     "127.0.0.1:2014",
+		ChargerSConns:    []*RemoteHost{},
+		RALsConns:        []*RemoteHost{{Address: "*internal"}},
+		ResSConns:        []*RemoteHost{},
+		ThreshSConns:     []*RemoteHost{},
+		StatSConns:       []*RemoteHost{},
+		SupplSConns:      []*RemoteHost{},
+		AttrSConns:       []*RemoteHost{},
+		CDRsConns:        []*RemoteHost{{Address: "*internal"}},
+		ReplicationConns: []*RemoteHost{},
+		MaxCallDuration:  time.Duration(3 * time.Hour),
+		SessionIndexes:   map[string]bool{},
+		ClientProtocol:   1,
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)

@@ -197,8 +197,8 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 		Db_password:       utils.StringPointer(""),
 		Redis_sentinel:    utils.StringPointer(""),
 		Query_timeout:     utils.StringPointer("10s"),
-		Replicate_db_urls: &[]string{},
-		Remote_db_urls:    &[]string{},
+		Replication_conns: &[]*DbJsonCfg{},
+		Remote_conns:      &[]*DbJsonCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.DbJsonCfg(DATADB_JSN); err != nil {
 		t.Error(err)
@@ -480,26 +480,26 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 
 func TestSmgJsonCfg(t *testing.T) {
 	eCfg := &SessionSJsonCfg{
-		Enabled:                   utils.BoolPointer(false),
-		Listen_bijson:             utils.StringPointer("127.0.0.1:2014"),
-		Chargers_conns:            &[]*RemoteHostJson{},
-		Rals_conns:                &[]*RemoteHostJson{},
-		Cdrs_conns:                &[]*RemoteHostJson{},
-		Resources_conns:           &[]*RemoteHostJson{},
-		Thresholds_conns:          &[]*RemoteHostJson{},
-		Stats_conns:               &[]*RemoteHostJson{},
-		Suppliers_conns:           &[]*RemoteHostJson{},
-		Attributes_conns:          &[]*RemoteHostJson{},
-		Session_replication_conns: &[]*RemoteHostJson{},
-		Debit_interval:            utils.StringPointer("0s"),
-		Store_session_costs:       utils.BoolPointer(false),
-		Min_call_duration:         utils.StringPointer("0s"),
-		Max_call_duration:         utils.StringPointer("3h"),
-		Session_ttl:               utils.StringPointer("0s"),
-		Session_indexes:           &[]string{},
-		Client_protocol:           utils.Float64Pointer(1.0),
-		Channel_sync_interval:     utils.StringPointer("0"),
-		Terminate_attempts:        utils.IntPointer(5),
+		Enabled:               utils.BoolPointer(false),
+		Listen_bijson:         utils.StringPointer("127.0.0.1:2014"),
+		Chargers_conns:        &[]*RemoteHostJson{},
+		Rals_conns:            &[]*RemoteHostJson{},
+		Cdrs_conns:            &[]*RemoteHostJson{},
+		Resources_conns:       &[]*RemoteHostJson{},
+		Thresholds_conns:      &[]*RemoteHostJson{},
+		Stats_conns:           &[]*RemoteHostJson{},
+		Suppliers_conns:       &[]*RemoteHostJson{},
+		Attributes_conns:      &[]*RemoteHostJson{},
+		Replication_conns:     &[]*RemoteHostJson{},
+		Debit_interval:        utils.StringPointer("0s"),
+		Store_session_costs:   utils.BoolPointer(false),
+		Min_call_duration:     utils.StringPointer("0s"),
+		Max_call_duration:     utils.StringPointer("3h"),
+		Session_ttl:           utils.StringPointer("0s"),
+		Session_indexes:       &[]string{},
+		Client_protocol:       utils.Float64Pointer(1.0),
+		Channel_sync_interval: utils.StringPointer("0"),
+		Terminate_attempts:    utils.IntPointer(5),
 	}
 	if cfg, err := dfCgrJsonCfg.SessionSJsonCfg(); err != nil {
 		t.Error(err)

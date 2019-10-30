@@ -42,7 +42,7 @@
 
 "sessions": {
 	"enabled": true,
-	"session_replication_conns": [
+	"replication_conns": [
 		{"address": "127.0.0.1:22012", "transport": "*json"},
 	],
 	"rals_conns": [

@@ -62,8 +62,8 @@ const CGRATES_CFG_JSON = `
 	"db_password": "", 						// password to use when connecting to data_db
 	"redis_sentinel":"",					// the name of sentinel when used
 	"query_timeout":"10s",
-	"remote_db_urls":[],
-	"replicate_db_urls":[],
+	"remote_conns":[],
+	"replication_conns":[],
 },
 
 
@@ -351,7 +351,7 @@ const CGRATES_CFG_JSON = `
 	"stats_conns": [],						// connections to StatS for reporting session events <""|*internal|127.0.0.1:2013>
 	"suppliers_conns": [],					// connections to SupplierS for querying suppliers for event <""|*internal|127.0.0.1:2013>
 	"attributes_conns": [],					// connections to AttributeS for altering event fields <""|*internal|127.0.0.1:2013>
-	"session_replication_conns": [],		// replicate sessions towards these session services
+	"replication_conns": [],				// replicate sessions towards these session services
 	"debit_interval": "0s",					// interval to perform debits on.
 	"store_session_costs": false,			// enable storing of the session costs within CDRs
 	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this

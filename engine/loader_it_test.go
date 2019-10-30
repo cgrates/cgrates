@@ -43,24 +43,30 @@ func TestLoaderITConnDataDbs(t *testing.T) {
 	lCfg, _ = config.NewDefaultCGRConfig()
 	lCfg.StorDbCfg().Password = "CGRateS.org"
 	var err error
-	if dataDbCsv, err = ConfigureDataStorage(lCfg.DataDbCfg().DataDbType,
+	dbConn, err := NewDataDBConn(lCfg.DataDbCfg().DataDbType,
 		lCfg.DataDbCfg().DataDbHost, lCfg.DataDbCfg().DataDbPort, "7",
 		lCfg.DataDbCfg().DataDbUser, lCfg.DataDbCfg().DataDbPass,
-		lCfg.GeneralCfg().DBDataEncoding, nil, ""); err != nil {
+		lCfg.GeneralCfg().DBDataEncoding, "")
+	if err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
-	if dataDbStor, err = ConfigureDataStorage(lCfg.DataDbCfg().DataDbType,
+	dataDbCsv = NewDataManager(dbConn, nil)
+	dbConn, err = NewDataDBConn(lCfg.DataDbCfg().DataDbType,
 		lCfg.DataDbCfg().DataDbHost, lCfg.DataDbCfg().DataDbPort, "8",
 		lCfg.DataDbCfg().DataDbUser, lCfg.DataDbCfg().DataDbPass,
-		lCfg.GeneralCfg().DBDataEncoding, nil, ""); err != nil {
+		lCfg.GeneralCfg().DBDataEncoding, "")
+	if err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
-	if dataDbApier, err = ConfigureDataStorage(lCfg.DataDbCfg().DataDbType,
+	dataDbStor = NewDataManager(dbConn, nil)
+	dbConn, err = NewDataDBConn(lCfg.DataDbCfg().DataDbType,
 		lCfg.DataDbCfg().DataDbHost, lCfg.DataDbCfg().DataDbPort, "9",
 		lCfg.DataDbCfg().DataDbUser, lCfg.DataDbCfg().DataDbPass,
-		lCfg.GeneralCfg().DBDataEncoding, nil, ""); err != nil {
+		lCfg.GeneralCfg().DBDataEncoding, "")
+	if err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
+	dataDbApier = NewDataManager(dbConn, nil)
 	for _, db := range []Storage{dataDbCsv.DataDB(), dataDbStor.DataDB(), dataDbApier.DataDB(),
 		dataDbCsv.DataDB(), dataDbStor.DataDB(), dataDbApier.DataDB()} {
 		if err = db.Flush(""); err != nil {

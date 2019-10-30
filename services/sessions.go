@@ -137,7 +137,7 @@ func (smg *SessionService) Start() (err error) {
 		return
 	}
 
-	sReplConns, err := sessions.NewSReplConns(smg.cfg.SessionSCfg().SessionReplicationConns,
+	sReplConns, err := sessions.NewSReplConns(smg.cfg.SessionSCfg().ReplicationConns,
 		smg.cfg.GeneralCfg().Reconnects, smg.cfg.GeneralCfg().ConnectTimeout,
 		smg.cfg.GeneralCfg().ReplyTimeout)
 	if err != nil {
@@ -244,7 +244,7 @@ func (smg *SessionService) Reload() (err error) {
 		return
 	}
 
-	sReplConns, err := sessions.NewSReplConns(smg.cfg.SessionSCfg().SessionReplicationConns,
+	sReplConns, err := sessions.NewSReplConns(smg.cfg.SessionSCfg().ReplicationConns,
 		smg.cfg.GeneralCfg().Reconnects, smg.cfg.GeneralCfg().ConnectTimeout,
 		smg.cfg.GeneralCfg().ReplyTimeout)
 	if err != nil {

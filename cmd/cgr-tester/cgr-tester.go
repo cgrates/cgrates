@@ -71,14 +71,15 @@ var (
 )
 
 func durInternalRater(cd *engine.CallDescriptor) (time.Duration, error) {
-	dm, err := engine.ConfigureDataStorage(tstCfg.DataDbCfg().DataDbType,
+	dbConn, err := engine.NewDataDBConn(tstCfg.DataDbCfg().DataDbType,
 		tstCfg.DataDbCfg().DataDbHost, tstCfg.DataDbCfg().DataDbPort,
 		tstCfg.DataDbCfg().DataDbName, tstCfg.DataDbCfg().DataDbUser,
 		tstCfg.DataDbCfg().DataDbPass, tstCfg.GeneralCfg().DBDataEncoding,
-		cgrConfig.CacheCfg(), tstCfg.DataDbCfg().DataDbSentinelName) // for the momentn we use here "" for sentinelName
+		tstCfg.DataDbCfg().DataDbSentinelName)
 	if err != nil {
 		return nilDuration, fmt.Errorf("Could not connect to data database: %s", err.Error())
 	}
+	dm := engine.NewDataManager(dbConn, cgrConfig.CacheCfg()) // for the momentn we use here "" for sentinelName
 	defer dm.DataDB().Close()
 	engine.SetDataStorage(dm)
 	if err := dm.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil,

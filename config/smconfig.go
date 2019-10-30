@@ -99,29 +99,29 @@ func (self *FsConnCfg) loadFromJsonCfg(jsnCfg *FsConnJsonCfg) error {
 }
 
 type SessionSCfg struct {
-	Enabled                 bool
-	ListenBijson            string
-	ChargerSConns           []*RemoteHost
-	RALsConns               []*RemoteHost
-	ResSConns               []*RemoteHost
-	ThreshSConns            []*RemoteHost
-	StatSConns              []*RemoteHost
-	SupplSConns             []*RemoteHost
-	AttrSConns              []*RemoteHost
-	CDRsConns               []*RemoteHost
-	SessionReplicationConns []*RemoteHost
-	DebitInterval           time.Duration
-	StoreSCosts             bool
-	MinCallDuration         time.Duration
-	MaxCallDuration         time.Duration
-	SessionTTL              time.Duration
-	SessionTTLMaxDelay      *time.Duration
-	SessionTTLLastUsed      *time.Duration
-	SessionTTLUsage         *time.Duration
-	SessionIndexes          utils.StringMap
-	ClientProtocol          float64
-	ChannelSyncInterval     time.Duration
-	TerminateAttempts       int
+	Enabled             bool
+	ListenBijson        string
+	ChargerSConns       []*RemoteHost
+	RALsConns           []*RemoteHost
+	ResSConns           []*RemoteHost
+	ThreshSConns        []*RemoteHost
+	StatSConns          []*RemoteHost
+	SupplSConns         []*RemoteHost
+	AttrSConns          []*RemoteHost
+	CDRsConns           []*RemoteHost
+	ReplicationConns    []*RemoteHost
+	DebitInterval       time.Duration
+	StoreSCosts         bool
+	MinCallDuration     time.Duration
+	MaxCallDuration     time.Duration
+	SessionTTL          time.Duration
+	SessionTTLMaxDelay  *time.Duration
+	SessionTTLLastUsed  *time.Duration
+	SessionTTLUsage     *time.Duration
+	SessionIndexes      utils.StringMap
+	ClientProtocol      float64
+	ChannelSyncInterval time.Duration
+	TerminateAttempts   int
 }
 
 func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
@@ -190,11 +190,11 @@ func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			self.CDRsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
-	if jsnCfg.Session_replication_conns != nil {
-		self.SessionReplicationConns = make([]*RemoteHost, len(*jsnCfg.Session_replication_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Session_replication_conns {
-			self.SessionReplicationConns[idx] = NewDfltRemoteHost()
-			self.SessionReplicationConns[idx].loadFromJsonCfg(jsnHaCfg)
+	if jsnCfg.Replication_conns != nil {
+		self.ReplicationConns = make([]*RemoteHost, len(*jsnCfg.Replication_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Replication_conns {
+			self.ReplicationConns[idx] = NewDfltRemoteHost()
+			self.ReplicationConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Debit_interval != nil {

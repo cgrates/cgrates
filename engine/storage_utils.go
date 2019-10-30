@@ -24,16 +24,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // Various helpers to deal with database
 
-// ConfigureDataStorage returns the DataManager using the given config
-func ConfigureDataStorage(dbType, host, port, name, user, pass, marshaler string,
-	cacheCfg config.CacheCfg, sentinelName string) (dm *DataManager, err error) {
-	var d DataDB
+// NewDataDBConn creates a DataDB connection
+func NewDataDBConn(dbType, host, port, name, user,
+	pass, marshaler, sentinelName string) (d DataDB, err error) {
 	switch dbType {
 	case utils.REDIS:
 		var dbNo int
@@ -61,11 +59,11 @@ func ConfigureDataStorage(dbType, host, port, name, user, pass, marshaler string
 	if err != nil {
 		return nil, err
 	}
-	return NewDataManager(d, cacheCfg), nil
+	return
 }
 
-// ConfigureStorStorage returns a StorDB(implements Storage interface) based on dbType
-func ConfigureStorStorage(dbType, host, port, name, user, pass, sslmode string,
+// NewStorDBConn returns a StorDB(implements Storage interface) based on dbType
+func NewStorDBConn(dbType, host, port, name, user, pass, sslmode string,
 	maxConn, maxIdleConn, connMaxLifetime int,
 	stringIndexedFields, prefixIndexedFields []string) (db StorDB, err error) {
 	switch dbType {

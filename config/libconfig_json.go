@@ -90,8 +90,8 @@ type DbJsonCfg struct {
 	Redis_sentinel        *string
 	Query_timeout         *string
 	Sslmode               *string // Used only in case of storDb
-	Remote_db_urls        *[]string
-	Replicate_db_urls     *[]string
+	Remote_conns          *[]*DbJsonCfg
+	Replication_conns     *[]*DbJsonCfg
 }
 
 // Filters config
@@ -203,29 +203,29 @@ type EventReaderJsonCfg struct {
 
 // SM-Generic config section
 type SessionSJsonCfg struct {
-	Enabled                   *bool
-	Listen_bijson             *string
-	Chargers_conns            *[]*RemoteHostJson
-	Rals_conns                *[]*RemoteHostJson
-	Resources_conns           *[]*RemoteHostJson
-	Thresholds_conns          *[]*RemoteHostJson
-	Stats_conns               *[]*RemoteHostJson
-	Suppliers_conns           *[]*RemoteHostJson
-	Cdrs_conns                *[]*RemoteHostJson
-	Session_replication_conns *[]*RemoteHostJson
-	Attributes_conns          *[]*RemoteHostJson
-	Debit_interval            *string
-	Store_session_costs       *bool
-	Min_call_duration         *string
-	Max_call_duration         *string
-	Session_ttl               *string
-	Session_ttl_max_delay     *string
-	Session_ttl_last_used     *string
-	Session_ttl_usage         *string
-	Session_indexes           *[]string
-	Client_protocol           *float64
-	Channel_sync_interval     *string
-	Terminate_attempts        *int
+	Enabled               *bool
+	Listen_bijson         *string
+	Chargers_conns        *[]*RemoteHostJson
+	Rals_conns            *[]*RemoteHostJson
+	Resources_conns       *[]*RemoteHostJson
+	Thresholds_conns      *[]*RemoteHostJson
+	Stats_conns           *[]*RemoteHostJson
+	Suppliers_conns       *[]*RemoteHostJson
+	Cdrs_conns            *[]*RemoteHostJson
+	Replication_conns     *[]*RemoteHostJson
+	Attributes_conns      *[]*RemoteHostJson
+	Debit_interval        *string
+	Store_session_costs   *bool
+	Min_call_duration     *string
+	Max_call_duration     *string
+	Session_ttl           *string
+	Session_ttl_max_delay *string
+	Session_ttl_last_used *string
+	Session_ttl_usage     *string
+	Session_indexes       *[]string
+	Client_protocol       *float64
+	Channel_sync_interval *string
+	Terminate_attempts    *int
 }
 
 // FreeSWITCHAgent config section

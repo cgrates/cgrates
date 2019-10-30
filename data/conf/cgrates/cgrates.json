@@ -328,7 +328,7 @@
 // 	"stats_conns": [],						// connections to StatS for reporting session events <""|*internal|127.0.0.1:2013>
 // 	"suppliers_conns": [],					// connections to SupplierS for querying suppliers for event <""|*internal|127.0.0.1:2013>
 // 	"attributes_conns": [],					// connections to AttributeS for altering event fields <""|*internal|127.0.0.1:2013>
-// 	"session_replication_conns": [],		// replicate sessions towards these session services
+// 	"replication_conns": [],		// replicate sessions towards these session services
 // 	"debit_interval": "0s",					// interval to perform debits on.
 // 	"store_session_costs": false,			// enable storing of the session costs within CDRs
 // 	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this

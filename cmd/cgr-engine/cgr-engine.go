@@ -463,7 +463,7 @@ func main() {
 		}
 	}
 	if cfg.RalsCfg().Enabled || cfg.CdrsCfg().Enabled {
-		storDb, err := engine.ConfigureStorStorage(cfg.StorDbCfg().Type,
+		storDb, err := engine.NewStorDBConn(cfg.StorDbCfg().Type,
 			cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
 			cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
 			cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,

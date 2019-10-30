@@ -29,13 +29,14 @@ import (
 
 func NewMigratorDataDB(db_type, host, port, name, user, pass, marshaler string,
 	cacheCfg config.CacheCfg, sentinelName string) (db MigratorDataDB, err error) {
-	dm, err := engine.ConfigureDataStorage(db_type,
+	dbCon, err := engine.NewDataDBConn(db_type,
 		host, port, name, user, pass, marshaler,
-		cacheCfg, sentinelName)
-	var d MigratorDataDB
+		sentinelName)
 	if err != nil {
 		return nil, err
 	}
+	dm := engine.NewDataManager(dbCon, cacheCfg)
+	var d MigratorDataDB
 	switch db_type {
 	case utils.REDIS:
 		d = newRedisMigrator(dm)
@@ -56,7 +57,7 @@ func NewMigratorStorDB(db_type, host, port, name, user, pass, sslmode string,
 	maxConn, maxIdleConn, connMaxLifetime int,
 	stringIndexedFields, prefixIndexedFields []string) (db MigratorStorDB, err error) {
 	var d MigratorStorDB
-	storDb, err := engine.ConfigureStorStorage(db_type, host, port, name, user, pass, sslmode,
+	storDb, err := engine.NewStorDBConn(db_type, host, port, name, user, pass, sslmode,
 		maxConn, maxIdleConn, connMaxLifetime, stringIndexedFields, prefixIndexedFields)
 	if err != nil {
 		return nil, err
