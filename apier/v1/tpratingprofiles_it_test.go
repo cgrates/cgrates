@@ -279,7 +279,7 @@ func testTPRatingProfilesGetTPRatingProfileIds(t *testing.T) {
 func testTPRatingProfilesRemoveTPRatingProfile(t *testing.T) {
 	var resp string
 	if err := tpRatingProfileRPC.Call("ApierV1.RemoveTPRatingProfile",
-		&AttrGetTPRatingProfile{TPid: "TPRProf1", RatingProfileId: tpRatingProfile.GetRatingProfilesId()}, &resp); err != nil {
+		&AttrGetTPRatingProfile{TPid: "TPRProf1", RatingProfileId: tpRatingProfile.GetId()}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)

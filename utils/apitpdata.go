@@ -29,7 +29,7 @@ import (
 type TPDistinctIds []string
 
 func (tpdi TPDistinctIds) String() string {
-	return strings.Join(tpdi, ",")
+	return strings.Join(tpdi, FIELDS_SEP)
 }
 
 type PaginatorWithSearch struct {
@@ -61,12 +61,10 @@ func (pgnt *Paginator) PaginateStringSlice(in []string) (out []string) {
 	if offset > len(in) {
 		return
 	}
-	if offset != 0 {
+	if offset != 0 && limit != 0 {
 		limit = limit + offset
 	}
-	if limit == 0 {
-		limit = len(in[offset:])
-	} else if limit > len(in) {
+	if limit == 0 || limit > len(in) {
 		limit = len(in)
 	}
 	ret := in[offset:limit]
@@ -84,10 +82,6 @@ type TPDestination struct {
 	Prefixes []string // Prefixes attached to this destination
 }
 
-func (v1TPDst *TPDestination) AsTPDestination() *TPDestination {
-	return &TPDestination{TPid: v1TPDst.TPid, ID: v1TPDst.ID, Prefixes: v1TPDst.Prefixes}
-}
-
 // This file deals with tp_* data definition
 
 type TPRate struct {
@@ -98,8 +92,13 @@ type TPRate struct {
 
 // Needed so we make sure we always use SetDurations() on a newly created value
 func NewRateSlot(connectFee, rate float64, rateUnit, rateIncrement, grpInterval string) (*RateSlot, error) {
-	rs := &RateSlot{ConnectFee: connectFee, Rate: rate, RateUnit: rateUnit, RateIncrement: rateIncrement,
-		GroupIntervalStart: grpInterval}
+	rs := &RateSlot{
+		ConnectFee:         connectFee,
+		Rate:               rate,
+		RateUnit:           rateUnit,
+		RateIncrement:      rateIncrement,
+		GroupIntervalStart: grpInterval,
+	}
 	if err := rs.SetDurations(); err != nil {
 		return nil, err
 	}
@@ -119,27 +118,27 @@ type RateSlot struct {
 }
 
 // Used to set the durations we need out of strings
-func (self *RateSlot) SetDurations() error {
+func (rs *RateSlot) SetDurations() error {
 	var err error
-	if self.rateUnitDur, err = ParseDurationWithNanosecs(self.RateUnit); err != nil {
+	if rs.rateUnitDur, err = ParseDurationWithNanosecs(rs.RateUnit); err != nil {
 		return err
 	}
-	if self.rateIncrementDur, err = ParseDurationWithNanosecs(self.RateIncrement); err != nil {
+	if rs.rateIncrementDur, err = ParseDurationWithNanosecs(rs.RateIncrement); err != nil {
 		return err
 	}
-	if self.groupIntervalStartDur, err = ParseDurationWithNanosecs(self.GroupIntervalStart); err != nil {
+	if rs.groupIntervalStartDur, err = ParseDurationWithNanosecs(rs.GroupIntervalStart); err != nil {
 		return err
 	}
 	return nil
 }
-func (self *RateSlot) RateUnitDuration() time.Duration {
-	return self.rateUnitDur
+func (rs *RateSlot) RateUnitDuration() time.Duration {
+	return rs.rateUnitDur
 }
-func (self *RateSlot) RateIncrementDuration() time.Duration {
-	return self.rateIncrementDur
+func (rs *RateSlot) RateIncrementDuration() time.Duration {
+	return rs.rateIncrementDur
 }
-func (self *RateSlot) GroupIntervalStartDuration() time.Duration {
-	return self.groupIntervalStartDur
+func (rs *RateSlot) GroupIntervalStartDuration() time.Duration {
+	return rs.groupIntervalStartDur
 }
 
 type TPDestinationRate struct {
@@ -178,14 +177,14 @@ type TPTiming struct {
 	EndTime   string
 }
 
-func NewTiming(timingInfo ...string) (rt *TPTiming) {
+func NewTiming(ID, years, mounths, mounthdays, weekdays, time string) (rt *TPTiming) {
 	rt = &TPTiming{}
-	rt.ID = timingInfo[0]
-	rt.Years.Parse(timingInfo[1], INFIELD_SEP)
-	rt.Months.Parse(timingInfo[2], INFIELD_SEP)
-	rt.MonthDays.Parse(timingInfo[3], INFIELD_SEP)
-	rt.WeekDays.Parse(timingInfo[4], INFIELD_SEP)
-	times := strings.Split(timingInfo[5], INFIELD_SEP)
+	rt.ID = ID
+	rt.Years.Parse(years, INFIELD_SEP)
+	rt.Months.Parse(mounths, INFIELD_SEP)
+	rt.MonthDays.Parse(mounthdays, INFIELD_SEP)
+	rt.WeekDays.Parse(weekdays, INFIELD_SEP)
+	times := strings.Split(time, INFIELD_SEP)
 	rt.StartTime = times[0]
 	if len(times) > 1 {
 		rt.EndTime = times[1]
@@ -214,15 +213,6 @@ func (self *TPRatingPlanBinding) Timing() *TPTiming {
 	return self.timing
 }
 
-// Used to rebuild a TPRatingProfile (empty RatingPlanActivations) out of it's key in nosqldb
-func NewTPRatingProfileFromKeyId(tpid, loadId, keyId string) (*TPRatingProfile, error) {
-	s := strings.Split(keyId, ":")
-	if len(s) != 4 {
-		return nil, fmt.Errorf("Cannot parse key %s into RatingProfile", keyId)
-	}
-	return &TPRatingProfile{TPid: tpid, LoadId: loadId, Tenant: s[1], Category: s[2], Subject: s[3]}, nil
-}
-
 type TPRatingProfile struct {
 	TPid                  string                // Tariff plan id
 	LoadId                string                // Gives ability to load specific RatingProfile based on load identifier, hence being able to keep history also in stordb
@@ -233,17 +223,12 @@ type TPRatingProfile struct {
 }
 
 // Used as key in nosql db (eg: redis)
-func (self *TPRatingProfile) KeyId() string {
+func (rpf *TPRatingProfile) KeyId() string {
 	return ConcatenatedKey(META_OUT,
-		self.Tenant, self.Category, self.Subject)
+		rpf.Tenant, rpf.Category, rpf.Subject)
 }
 
-func (self *TPRatingProfile) KeyIdA() string {
-	return ConcatenatedKey(self.LoadId, META_OUT,
-		self.Tenant, self.Category, self.Subject)
-}
-
-func (rpf *TPRatingProfile) GetRatingProfilesId() string {
+func (rpf *TPRatingProfile) GetId() string {
 	return ConcatenatedKey(rpf.LoadId, META_OUT,
 		rpf.Tenant, rpf.Category, rpf.Subject)
 }
