@@ -954,8 +954,8 @@ const (
 	SessionSv1GetActiveSessionIDs        = "SessionSv1.GetActiveSessionIDs"
 	SessionSv1RegisterInternalBiJSONConn = "SessionSv1.RegisterInternalBiJSONConn"
 	SessionSv1ReplicateSessions          = "SessionSv1.ReplicateSessions"
-
-	SMGenericV1InitiateSession = "SMGenericV1.InitiateSession"
+	SessionSv1ActivateSessions           = "SessionSv1.ActivateSessions"
+	SMGenericV1InitiateSession           = "SMGenericV1.InitiateSession"
 )
 
 // Responder APIs

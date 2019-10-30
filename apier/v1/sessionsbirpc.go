@@ -49,6 +49,7 @@ func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 
 		utils.SessionSv1ReplicateSessions: ssv1.BiRPCv1ReplicateSessions,
 		utils.SessionSv1SetPassiveSession: ssv1.BiRPCv1SetPassiveSession,
+		utils.SessionSv1ActivateSessions:  ssv1.BiRPCv1ActivateSessions,
 	}
 }
 
@@ -142,5 +143,10 @@ func (ssv1 *SessionSv1) BiRPCv1ReplicateSessions(clnt *rpc2.Client,
 
 func (ssv1 *SessionSv1) BiRPCv1SetPassiveSession(clnt *rpc2.Client,
 	args *sessions.Session, reply *string) error {
-	return ssv1.BiRPCv1SetPassiveSession(clnt, args, reply)
+	return ssv1.Ss.BiRPCv1SetPassiveSession(clnt, args, reply)
+}
+
+func (ssv1 *SessionSv1) BiRPCv1ActivateSessions(clnt *rpc2.Client,
+	args []string, reply *string) error {
+	return ssv1.Ss.BiRPCv1ActivateSessions(clnt, args, reply)
 }

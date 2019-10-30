@@ -121,6 +121,10 @@ func (ssv1 *SessionSv1) SetPassiveSession(args *sessions.Session,
 	return ssv1.Ss.BiRPCv1SetPassiveSession(nil, args, reply)
 }
 
+func (ssv1 *SessionSv1) ActivateSessions(args []string, reply *string) error {
+	return ssv1.Ss.BiRPCv1ActivateSessions(nil, args, reply)
+}
+
 // Call implements rpcclient.RpcClientConnection interface for internal RPC
 func (ssv1 *SessionSv1) Call(serviceMethod string,
 	args interface{}, reply interface{}) error {

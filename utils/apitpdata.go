@@ -1422,3 +1422,8 @@ type SessionFilter struct {
 	Tenant  string
 	*ArgDispatcher
 }
+
+type ArgDispatcher struct {
+	APIKey  *string
+	RouteID *string
+}

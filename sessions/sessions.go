@@ -3280,6 +3280,32 @@ func (sS *SessionS) BiRPCv1RegisterInternalBiJSONConn(clnt rpcclient.RpcClientCo
 	return nil
 }
 
+// BiRPCv1ActivateSessions is called to activate a list/all sessions
+// returns utils.ErrPartiallyExecuted in case of errors
+func (sS *SessionS) BiRPCv1ActivateSessions(clnt rpcclient.RpcClientConnection,
+	sIDs []string, reply *string) (err error) {
+	if len(sIDs) == 0 {
+		sS.pSsMux.RLock()
+		i := 0
+		sIDs = make([]string, len(sS.pSessions))
+		for sID := range sS.aSessions {
+			sIDs[i] = sID
+			i++
+		}
+		sS.pSsMux.RUnlock()
+	}
+	for _, sID := range sIDs {
+		if s := sS.transitSState(sID, false); s == nil {
+			utils.Logger.Warning(fmt.Sprintf("<%s> no passive session with id: <%s>", utils.SessionS, sID))
+			err = utils.ErrPartiallyExecuted
+		}
+	}
+	if err == nil {
+		*reply = utils.OK
+	}
+	return
+}
+
 // processThreshold will receive the event and send it to ThresholdS to be processed
 func (sS *SessionS) processThreshold(cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher, thIDs []string) (tIDs []string, err error) {
 	if sS.thdS == nil {
