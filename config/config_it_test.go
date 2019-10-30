@@ -417,11 +417,11 @@ func TestCGRConfigReloadSessionS(t *testing.T) {
 			},
 		},
 
-		SessionReplicationConns: []*RemoteHost{},
-		MaxCallDuration:         3 * time.Hour,
-		SessionIndexes:          utils.NewStringMap(),
-		ClientProtocol:          1,
-		TerminateAttempts:       5,
+		ReplicationConns:  []*RemoteHost{},
+		MaxCallDuration:   3 * time.Hour,
+		SessionIndexes:    utils.NewStringMap(),
+		ClientProtocol:    1,
+		TerminateAttempts: 5,
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))

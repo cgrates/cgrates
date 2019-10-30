@@ -231,13 +231,15 @@ func main() {
 	}
 
 	if !*toStorDB {
-		if dm, err = engine.ConfigureDataStorage(ldrCfg.DataDbCfg().DataDbType,
+		d, err := engine.NewDataDBConn(ldrCfg.DataDbCfg().DataDbType,
 			ldrCfg.DataDbCfg().DataDbHost, ldrCfg.DataDbCfg().DataDbPort,
 			ldrCfg.DataDbCfg().DataDbName, ldrCfg.DataDbCfg().DataDbUser,
 			ldrCfg.DataDbCfg().DataDbPass, ldrCfg.GeneralCfg().DBDataEncoding,
-			config.CgrConfig().CacheCfg(), ldrCfg.DataDbCfg().DataDbSentinelName); err != nil {
+			ldrCfg.DataDbCfg().DataDbSentinelName)
+		if err != nil {
 			log.Fatalf("Coud not open dataDB connection: %s", err.Error())
 		}
+		dm = engine.NewDataManager(d, config.CgrConfig().CacheCfg())
 		defer dm.DataDB().Close()
 	}
 

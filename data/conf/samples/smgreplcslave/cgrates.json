@@ -43,7 +43,7 @@
 "sessions": {
 	"enabled": true,						// starts SessionManager service: <true|false>
 	"listen_bijson": "127.0.0.1:22014",		// address where to listen for bidirectional JSON-RPC requests
-		"session_replication_conns": [
+	"replication_conns": [
 		{"address": "127.0.0.1:2012", "transport": "*json"},
 	],
 	"rals_conns": [

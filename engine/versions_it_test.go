@@ -45,14 +45,16 @@ func TestVersionsITMongo(t *testing.T) {
 	if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "tutmongo")); err != nil {
 		t.Fatal(err)
 	}
-	if dm3, err = ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
+	dbConn, err := NewDataDBConn(cfg.DataDbCfg().DataDbType,
 		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
 		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
 		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-		cfg.CacheCfg(), ""); err != nil {
+		"")
+	if err != nil {
 		log.Fatal(err)
 	}
-	storageDb, err = ConfigureStorStorage(cfg.StorDbCfg().Type,
+	dm3 = NewDataManager(dbConn, cfg.CacheCfg())
+	storageDb, err = NewStorDBConn(cfg.StorDbCfg().Type,
 		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
 		cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,
@@ -73,15 +75,17 @@ func TestVersionsITRedisMYSQL(t *testing.T) {
 	if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "tutmysql")); err != nil {
 		t.Fatal(err)
 	}
-	dm3, err = ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
+	dbConn, err := NewDataDBConn(cfg.DataDbCfg().DataDbType,
 		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
 		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
-		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding, cfg.CacheCfg(), "")
+		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+		"")
 	if err != nil {
 		log.Fatal(err)
 	}
+	dm3 = NewDataManager(dbConn, cfg.CacheCfg())
 
-	storageDb, err = ConfigureStorStorage(cfg.StorDbCfg().Type,
+	storageDb, err = NewStorDBConn(cfg.StorDbCfg().Type,
 		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
 		cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,
@@ -102,14 +106,16 @@ func TestVersionsITRedisPostgres(t *testing.T) {
 	if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "postgres")); err != nil {
 		t.Fatal(err)
 	}
-	dm3, err = ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
+	dbConn, err := NewDataDBConn(cfg.DataDbCfg().DataDbType,
 		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
 		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
-		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding, cfg.CacheCfg(), "")
+		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+		"")
 	if err != nil {
 		log.Fatal(err)
 	}
-	storageDb, err = ConfigureStorStorage(cfg.StorDbCfg().Type,
+	dm3 = NewDataManager(dbConn, cfg.CacheCfg())
+	storageDb, err = NewStorDBConn(cfg.StorDbCfg().Type,
 		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
 		cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,

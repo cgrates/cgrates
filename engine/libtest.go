@@ -284,14 +284,16 @@ cgrates.org,ALL1,127.0.0.1:3012,*json,false
 )
 
 func InitDataDb(cfg *config.CGRConfig) error {
-	dm, err := ConfigureDataStorage(cfg.DataDbCfg().DataDbType,
+	d, err := NewDataDBConn(cfg.DataDbCfg().DataDbType,
 		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
 		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
 		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-		cfg.CacheCfg(), cfg.DataDbCfg().DataDbSentinelName)
+		cfg.DataDbCfg().DataDbSentinelName)
 	if err != nil {
 		return err
 	}
+	dm := NewDataManager(d, cfg.CacheCfg())
+
 	if err := dm.DataDB().Flush(""); err != nil {
 		return err
 	}

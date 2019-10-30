@@ -55,11 +55,11 @@ func (db *DataDBService) Start() (err error) {
 	db.Lock()
 	defer db.Unlock()
 	db.oldDBCfg = db.cfg.DataDbCfg().Clone()
-	db.db, err = engine.ConfigureDataStorage(db.cfg.DataDbCfg().DataDbType,
+	d, err := engine.NewDataDBConn(db.cfg.DataDbCfg().DataDbType,
 		db.cfg.DataDbCfg().DataDbHost, db.cfg.DataDbCfg().DataDbPort,
 		db.cfg.DataDbCfg().DataDbName, db.cfg.DataDbCfg().DataDbUser,
 		db.cfg.DataDbCfg().DataDbPass, db.cfg.GeneralCfg().DBDataEncoding,
-		db.cfg.CacheCfg(), db.cfg.DataDbCfg().DataDbSentinelName)
+		db.cfg.DataDbCfg().DataDbSentinelName)
 	if db.needsDB() && err != nil { // Cannot configure getter database, show stopper
 		utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 		return
@@ -67,6 +67,7 @@ func (db *DataDBService) Start() (err error) {
 		utils.Logger.Warning(fmt.Sprintf("Could not configure dataDb: %s.Some SessionS APIs will not work", err))
 		return
 	}
+	db.db = engine.NewDataManager(d, db.cfg.CacheCfg())
 	engine.SetDataStorage(db.db)
 	if err = engine.CheckVersions(db.db.DataDB()); err != nil {
 		fmt.Println(err)

@@ -75,24 +75,16 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 			return err
 		}
 	}
-	if jsnDbCfg.Remote_db_urls != nil {
-		dbcfg.RmtDataDBCfgs = make([]*DataDbCfg, len(*jsnDbCfg.Remote_db_urls))
-		for i, url := range *jsnDbCfg.Remote_db_urls {
-			db, err := newDataDBCfgFromUrl(url)
-			if err != nil {
-				return err
-			}
-			dbcfg.RmtDataDBCfgs[i] = db
+	if jsnDbCfg.Remote_conns != nil {
+		dbcfg.RmtDataDBCfgs = make([]*DataDbCfg, len(*jsnDbCfg.Remote_conns))
+		for i, cfg := range *jsnDbCfg.Remote_conns {
+			dbcfg.RmtDataDBCfgs[i].loadFromJsonCfg(cfg)
 		}
 	}
-	if jsnDbCfg.Replicate_db_urls != nil {
-		dbcfg.RplDataDBCfgs = make([]*DataDbCfg, len(*jsnDbCfg.Replicate_db_urls))
-		for i, url := range *jsnDbCfg.Replicate_db_urls {
-			db, err := newDataDBCfgFromUrl(url)
-			if err != nil {
-				return err
-			}
-			dbcfg.RplDataDBCfgs[i] = db
+	if jsnDbCfg.Replication_conns != nil {
+		dbcfg.RmtDataDBCfgs = make([]*DataDbCfg, len(*jsnDbCfg.Replication_conns))
+		for i, cfg := range *jsnDbCfg.Replication_conns {
+			dbcfg.RplDataDBCfgs[i].loadFromJsonCfg(cfg)
 		}
 	}
 	return nil
@@ -110,41 +102,4 @@ func (dbcfg *DataDbCfg) Clone() *DataDbCfg {
 		DataDbSentinelName: dbcfg.DataDbSentinelName,
 		QueryTimeout:       dbcfg.QueryTimeout,
 	}
-}
-
-//newDataDBCfgFromUrl will create a DataDB configuration out of url
-//Format: host:port/?type=valOfType&name=valOFName&etc...
-//Sample: 127.0.0.1:6379
-func newDataDBCfgFromUrl(pUrl string) (newDbCfg *DataDbCfg, err error) {
-	newDbCfg = new(DataDbCfg)
-	if pUrl == utils.EmptyString {
-		return nil, utils.ErrMandatoryIeMissing
-	}
-	// populate with default dataDBCfg and overwrite in case we found arguments in url
-	dfltCfg, _ := NewDefaultCGRConfig()
-	*newDbCfg = *dfltCfg.dataDbCfg
-	hostPortSls := strings.Split(strings.Split(pUrl, utils.Slash)[0], utils.InInFieldSep)
-	newDbCfg.DataDbHost = hostPortSls[0]
-	newDbCfg.DataDbPort = hostPortSls[1]
-	arg := utils.GetUrlRawArguments(pUrl)
-	if val, has := arg[utils.TypeLow]; has {
-		newDbCfg.DataDbType = strings.TrimPrefix(val, "*")
-	}
-	if val, has := arg[utils.UserLow]; has {
-		newDbCfg.DataDbUser = val
-	}
-	if val, has := arg[utils.PassLow]; has {
-		newDbCfg.DataDbPass = val
-	}
-	if val, has := arg[utils.SentinelLow]; has {
-		newDbCfg.DataDbSentinelName = val
-	}
-	if val, has := arg[utils.QueryLow]; has {
-		dur, err := utils.ParseDurationWithNanosecs(val)
-		if err != nil {
-			return nil, err
-		}
-		newDbCfg.QueryTimeout = dur
-	}
-	return
 }
