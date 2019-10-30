@@ -262,17 +262,7 @@ func (tps TpTimings) AsMapTPTimings() (map[string]*utils.ApierTPTiming, error) {
 func MapTPTimings(tps []*utils.ApierTPTiming) (map[string]*utils.TPTiming, error) {
 	result := make(map[string]*utils.TPTiming)
 	for _, tp := range tps {
-		t := &utils.TPTiming{}
-		t.ID = tp.ID
-		t.Years.Parse(tp.Years, utils.INFIELD_SEP)
-		t.Months.Parse(tp.Months, utils.INFIELD_SEP)
-		t.MonthDays.Parse(tp.MonthDays, utils.INFIELD_SEP)
-		t.WeekDays.Parse(tp.WeekDays, utils.INFIELD_SEP)
-		times := strings.Split(tp.Time, utils.INFIELD_SEP)
-		t.StartTime = times[0]
-		if len(times) > 1 {
-			t.EndTime = times[1]
-		}
+		t := utils.NewTiming(tp.ID, tp.Years, tp.Months, tp.MonthDays, tp.WeekDays, tp.Time)
 		if _, found := result[tp.ID]; found {
 			return nil, fmt.Errorf("duplicate timing tag: %s", tp.ID)
 		}
@@ -610,9 +600,9 @@ func (tps TpRatingProfiles) AsMapTPRatingProfiles() (map[string]*utils.TPRatingP
 			RatingPlanId:     tp.RatingPlanTag,
 			FallbackSubjects: tp.FallbackSubjects,
 		}
-		if existing, exists := result[rp.KeyIdA()]; !exists {
+		if existing, exists := result[rp.GetId()]; !exists {
 			rp.RatingPlanActivations = []*utils.TPRatingActivation{ra}
-			result[rp.KeyIdA()] = rp
+			result[rp.GetId()] = rp
 		} else {
 			existing.RatingPlanActivations = append(existing.RatingPlanActivations, ra)
 		}
@@ -634,10 +624,10 @@ func (tps TpRatingProfiles) AsTPRatingProfiles() (result []*utils.TPRatingProfil
 func MapTPRatingProfiles(s []*utils.TPRatingProfile) (map[string]*utils.TPRatingProfile, error) {
 	result := make(map[string]*utils.TPRatingProfile)
 	for _, e := range s {
-		if _, found := result[e.KeyIdA()]; !found {
-			result[e.KeyIdA()] = e
+		if _, found := result[e.GetId()]; !found {
+			result[e.GetId()] = e
 		} else {
-			return nil, fmt.Errorf("Non unique id %+v", e.KeyIdA())
+			return nil, fmt.Errorf("Non unique id %+v", e.GetId())
 		}
 	}
 	return result, nil

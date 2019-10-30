@@ -19,9 +19,21 @@ package utils
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
+
+func TestTPDistinctIdsString(t *testing.T) {
+	eIn1 := []string{"1", "2", "3", "4"}
+	eIn2 := TPDistinctIds(eIn1)
+	expected := strings.Join(eIn1, FIELDS_SEP)
+	received := eIn2.String()
+
+	if !reflect.DeepEqual(expected, received) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, received)
+	}
+}
 
 func TestNewDTCSFromRPKey(t *testing.T) {
 	rpKey := "*out:tenant12:call:dan12"
@@ -33,8 +45,32 @@ func TestNewDTCSFromRPKey(t *testing.T) {
 }
 
 func TestPaginatorPaginateStringSlice(t *testing.T) {
-	eOut := []string{"1", "2", "3", "4"}
+	//len(in)=0
+	eOut := []string{}
 	pgnt := new(Paginator)
+	rcv := pgnt.PaginateStringSlice(eOut)
+	if len(rcv) != 0 {
+		t.Errorf("Expecting an empty slice, received: %+v", rcv)
+	}
+	//offset > len(in)
+	eOut = []string{"1"}
+	pgnt = &Paginator{Offset: IntPointer(2), Limit: IntPointer(0)}
+	rcv = pgnt.PaginateStringSlice(eOut)
+
+	if len(rcv) != 0 {
+		t.Errorf("Expecting an empty slice, received: %+v", rcv)
+	}
+	//offset != 0 && limit != 0
+	eOut = []string{"3", "4"}
+	pgnt = &Paginator{Offset: IntPointer(2), Limit: IntPointer(0)}
+	rcv = pgnt.PaginateStringSlice([]string{"1", "2", "3", "4"})
+
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting an empty slice, received: %+v", rcv)
+	}
+
+	eOut = []string{"1", "2", "3", "4"}
+	pgnt = new(Paginator)
 	if rcv := pgnt.PaginateStringSlice([]string{"1", "2", "3", "4"}); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
@@ -59,6 +95,195 @@ func TestPaginatorPaginateStringSlice(t *testing.T) {
 	if rcv := pgnt.PaginateStringSlice([]string{"1", "2", "3", "4"}); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
+}
+
+func TestNewRateSlot(t *testing.T) {
+	var err error
+	eOut := &RateSlot{
+		ConnectFee:            1,
+		Rate:                  1.01,
+		RateUnit:              "1",
+		RateIncrement:         "1",
+		GroupIntervalStart:    "1",
+		rateUnitDur:           1,
+		rateIncrementDur:      1,
+		groupIntervalStartDur: 1,
+		tag:                   "",
+	}
+	rcv, err := NewRateSlot(eOut.ConnectFee, eOut.Rate, eOut.RateUnit, eOut.RateIncrement, eOut.GroupIntervalStart)
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected: %+v ,received: %+v ", eOut, rcv)
+	}
+	eOut.RateUnit = "a"
+	rcv, err = NewRateSlot(eOut.ConnectFee, eOut.Rate, eOut.RateUnit, eOut.RateIncrement, eOut.GroupIntervalStart)
+	//must receive from time an error: "invalid duration a"
+	if err == nil {
+		t.Error(err)
+	}
+}
+
+func TestSetDurations(t *testing.T) {
+	eOut := &RateSlot{
+		RateUnit:           "1",
+		RateIncrement:      "1",
+		GroupIntervalStart: "1",
+	}
+	err := eOut.SetDurations()
+	//must receive "nil" with
+	if err != nil {
+		t.Error(err)
+	}
+	eOut.RateUnit = "a"
+	err = eOut.SetDurations()
+	//at RateUnit if, must receive from time an error: "invalid duration a"
+	if err == nil {
+		t.Error(err)
+	}
+	eOut.RateUnit = "1"
+	eOut.RateIncrement = "a"
+	err = eOut.SetDurations()
+	//at RateIncrement, must receive from time an error: "invalid duration a"
+	if err == nil {
+		t.Error(err)
+	}
+	eOut.RateIncrement = "1"
+	eOut.GroupIntervalStart = "a"
+	err = eOut.SetDurations()
+	//at GroupIntervalStart, must receive from time an error: "invalid duration a"
+	if err == nil {
+		t.Error(err)
+	}
+}
+
+func TestRateUnitDuration(t *testing.T) {
+	eOut := &RateSlot{
+		rateUnitDur:           1,
+		rateIncrementDur:      1,
+		groupIntervalStartDur: 1,
+	}
+	rcv := eOut.RateUnitDuration()
+	if rcv != eOut.rateUnitDur {
+		t.Errorf("Expected %+v, received %+v", eOut.rateUnitDur, rcv)
+	}
+	rcv = eOut.RateIncrementDuration()
+	if rcv != eOut.rateIncrementDur {
+		t.Errorf("Expected %+v, received %+v", eOut.rateIncrementDur, rcv)
+	}
+	rcv = eOut.GroupIntervalStartDuration()
+	if rcv != eOut.groupIntervalStartDur {
+		t.Errorf("Expected %+v, received %+v", eOut.groupIntervalStartDur, rcv)
+	}
+}
+
+func TestNewTiming(t *testing.T) {
+	eOut := &TPTiming{
+		ID:        "1",
+		Years:     Years{2020},
+		Months:    []time.Month{time.April},
+		MonthDays: MonthDays{18},
+		WeekDays:  WeekDays{06},
+		StartTime: "00:00:00",
+		EndTime:   "11:11:11",
+	}
+	rcv := NewTiming("1", "2020", "04", "18", "06", "00:00:00;11:11:11")
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %+v, received %+v", eOut, rcv)
+	}
+	//without endtime, check if .Split methong works (only one timestamp)
+	rcv = NewTiming("1", "2020", "04", "18", "06", "00:00:00")
+	eOut.EndTime = ""
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %+v, received %+v", eOut, rcv)
+	}
+	//check if .Split methong works (ignoring the last timestamp)
+	rcv = NewTiming("1", "2020", "04", "18", "06", "00:00:00;11:11:11;22:22:22")
+	eOut.EndTime = "11:11:11"
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %+v, received %+v", eOut, rcv)
+	}
+}
+
+func TestSetTiming(t *testing.T) {
+	tpTiming := &TPTiming{
+		ID:        "1",
+		Years:     Years{2020},
+		Months:    []time.Month{time.April},
+		MonthDays: MonthDays{18},
+		WeekDays:  WeekDays{06},
+		StartTime: "00:00:00",
+		EndTime:   "11:11:11",
+	}
+	tpRatingPlanBinding := new(TPRatingPlanBinding)
+	tpRatingPlanBinding.SetTiming(tpTiming)
+	if !reflect.DeepEqual(tpTiming, tpRatingPlanBinding.timing) {
+		t.Errorf("Expected %+v, received %+v", tpTiming, tpRatingPlanBinding.timing)
+	}
+	rcv := tpRatingPlanBinding.Timing()
+	if !reflect.DeepEqual(tpTiming, rcv) {
+		t.Errorf("Expected %+v, received %+v", tpTiming, rcv)
+	}
+}
+
+func TestKeys(t *testing.T) {
+	//empty check -> KeyId
+	tpRatingProfile := new(TPRatingProfile)
+	eOut := "*out:::"
+	rcv := tpRatingProfile.KeyId()
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %+v, received %+v", eOut, rcv)
+	}
+	//empty check -> GetId
+	eOut = ":*out:::"
+	rcv = tpRatingProfile.GetId()
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %+v, received %+v", eOut, rcv)
+	}
+	// test check -> KeyId
+	tpRatingProfile.Tenant = "test"
+	tpRatingProfile.Category = "test"
+	tpRatingProfile.Subject = "test"
+	eOut = "*out:test:test:test"
+	rcv = tpRatingProfile.KeyId()
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %+v, received %+v", eOut, rcv)
+	}
+	//test check -> GetId
+	eOut = "test:*out:test:test:test"
+	tpRatingProfile.TPid = "test"
+	tpRatingProfile.LoadId = "test"
+
+	rcv = tpRatingProfile.GetId()
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %+v, received %+v", eOut, rcv)
+	}
+}
+
+func TestSetRatingProfilesId(t *testing.T) {
+	//empty check
+	tpRatingProfile := new(TPRatingProfile)
+	tpRatingProfile.SetRatingProfilesId("")
+	eOut := new(TPRatingProfile)
+	if !reflect.DeepEqual(eOut, tpRatingProfile) {
+		t.Errorf("Expected %+v, received %+v", eOut, tpRatingProfile)
+	}
+	//test check
+	tpRatingProfile.SetRatingProfilesId("1:2:3:4:5")
+	eOut.LoadId = "1"
+	eOut.Tenant = "3"
+	eOut.Category = "4"
+	eOut.Subject = "5"
+	if !reflect.DeepEqual(eOut, tpRatingProfile) {
+		t.Errorf("Expected %+v, received %+v", eOut, tpRatingProfile)
+	}
+	//wrong TPRatingProfile sent
+	err := tpRatingProfile.SetRatingProfilesId("1:2:3:4:5:6")
+	if err == nil {
+		t.Error("Wrong TPRatingProfileId sent and no error received")
+	}
+
 }
 
 func TestAppendToSMCostFilter(t *testing.T) {

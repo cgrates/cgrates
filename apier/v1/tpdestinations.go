@@ -27,7 +27,7 @@ func (self *ApierV1) SetTPDestination(attrs utils.TPDestination, reply *string) 
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ID", "Prefixes"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.SetTPDestinations([]*utils.TPDestination{attrs.AsTPDestination()}); err != nil {
+	if err := self.StorDb.SetTPDestinations([]*utils.TPDestination{&attrs}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

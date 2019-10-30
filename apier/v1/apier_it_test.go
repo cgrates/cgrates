@@ -421,13 +421,13 @@ func TestApierTPRatingProfile(t *testing.T) {
 	}
 	// Test get
 	var rplyRpf *utils.TPRatingProfile
-	if err := rater.Call("ApierV1.GetTPRatingProfile", AttrGetTPRatingProfile{TPid: rpfTst.TPid, RatingProfileId: rpfTst.GetRatingProfilesId()}, &rplyRpf); err != nil {
+	if err := rater.Call("ApierV1.GetTPRatingProfile", AttrGetTPRatingProfile{TPid: rpfTst.TPid, RatingProfileId: rpfTst.GetId()}, &rplyRpf); err != nil {
 		t.Error("Calling ApierV1.GetTPRatingProfiles, got error: ", err.Error())
 	} else if !reflect.DeepEqual(rpfTst, rplyRpf) {
 		t.Errorf("Calling ApierV1.GetTPRatingProfiles expected: %v, received: %v", rpfTst, rplyRpf)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemoveTPRatingProfile", AttrGetTPRatingProfile{TPid: rpfTst.TPid, RatingProfileId: rpfTst.GetRatingProfilesId()}, &reply); err != nil {
+	if err := rater.Call("ApierV1.RemoveTPRatingProfile", AttrGetTPRatingProfile{TPid: rpfTst.TPid, RatingProfileId: rpfTst.GetId()}, &reply); err != nil {
 		t.Error("Calling ApierV1.RemoveTPRatingProfile, got error: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.RemoveTPRatingProfile received: ", reply)
