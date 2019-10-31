@@ -1,6 +1,6 @@
 ---
-- name: symlink /usr/bin/python -> /usr/bin/python3
-  hosts: all
+- name: Check and set python version on APT server
+  hosts: apt
   remote_user: '{{ gouser }}'
   gather_facts: false
   tasks:
@@ -11,7 +11,19 @@
         fi
       become: true
 
-- hosts: all
+- name: Check and set python version on PKG server
+  hosts: pkg
+  remote_user: '{{ gouser }}'
+  gather_facts: false
+  tasks:
+    - name: symlink /usr/bin/python -> /usr/bin/python3
+      raw: |
+        if [ -f /usr/bin/python3 ] && [ ! -f /usr/bin/python ]; then
+          ln --symbolic /usr/bin/python3 /usr/bin/python; 
+        fi
+      become: true
+
+- hosts: apt
   vars:
     ###############################################################
     ##################### Golang Vars #############################
@@ -175,6 +187,11 @@
     when : packageVar.stdout_lines|length > 0
     with_items: '{{ packageVar.stdout_lines }}'
 
+  - name : Get the name of the deb file
+    become: yes
+    shell : "sudo ls /var/packages/debian/incoming/ | grep '.deb'"
+    register: debFileName
+
   - name : Get the name of the changes file
     become: yes
     shell : "sudo ls /var/packages/debian/incoming/ | grep '.changes'"
@@ -188,3 +205,10 @@
       chdir: /var/packages/debian
     with_items: '{{ changesFileNames.stdout_lines }}'
 
+# Move the file to PKG server
+  - name : Copy the file to PKG server
+    become: yes
+    command: sudo sshpass -p "{{ pkgPass }} " scp {{ item }} {{ gouser }}@{{ internalPkgAddr }}:{{ internalPkgDir }}
+    args : 
+      chdir: /var/packages/debian
+    with_items: '{{ debFileName.stdout_lines }}'
