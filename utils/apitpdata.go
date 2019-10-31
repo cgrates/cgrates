@@ -555,7 +555,7 @@ func (aefc *AttrExpFileCdrs) AsCDRsFilter(timezone string) (*CDRsFilter, error) 
 	}
 	if aefc.SkipRated {
 		cdrFltr.MaxCost = Float64Pointer(-1.0)
-	} else { //if aefc.SkipErrors {
+	} else if aefc.SkipErrors {
 		cdrFltr.MinCost = Float64Pointer(0.0)
 		cdrFltr.MaxCost = Float64Pointer(-1.0)
 	}
@@ -634,15 +634,11 @@ func (fltr *AttrGetCdrs) AsCDRsFilter(timezone string) (cdrFltr *CDRsFilter, err
 	}
 	if fltr.SkipRated {
 		cdrFltr.MaxCost = Float64Pointer(-1.0)
-	} else { //if fltr.SkipErrors {
+	} else if fltr.SkipErrors {
 		cdrFltr.MinCost = Float64Pointer(0.0)
 		cdrFltr.MaxCost = Float64Pointer(-1.0)
 	}
 	return
-}
-
-type AttrRemCdrs struct {
-	CgrIds []string // List of CgrIds to remove from storeDb
 }
 
 type AttrLoadTpFromFolder struct {
@@ -662,10 +658,6 @@ type AttrImportTPFromFolder struct {
 	ArgDispatcher *ArgDispatcher
 }
 
-type AttrGetDestination struct {
-	Id string
-}
-
 func NewTAFromAccountKey(accountKey string) (*TenantAccount, error) {
 	accountSplt := strings.Split(accountKey, CONCATENATED_KEY_SEP)
 	if len(accountSplt) != 2 {
@@ -676,22 +668,6 @@ func NewTAFromAccountKey(accountKey string) (*TenantAccount, error) {
 
 type TenantAccount struct {
 	Tenant, Account string
-}
-
-func NewDTCSFromRPKey(rpKey string) (*DirectionTenantCategorySubject, error) {
-	rpSplt := strings.Split(rpKey, CONCATENATED_KEY_SEP)
-	if len(rpSplt) != 4 {
-		return nil, fmt.Errorf("Unsupported format for DirectionTenantCategorySubject: %s", rpKey)
-	}
-	return &DirectionTenantCategorySubject{rpSplt[0], rpSplt[1], rpSplt[2], rpSplt[3]}, nil
-}
-
-type DirectionTenantCategorySubject struct {
-	Direction, Tenant, Category, Subject string
-}
-
-type AttrCDRStatsReloadQueues struct {
-	StatsQueueIds []string
 }
 
 type AttrDirExportTP struct {
@@ -936,10 +912,6 @@ type AttrRemoveAccount struct {
 	ReloadScheduler bool
 }
 
-type AttrGetSMASessions struct {
-	SessionManagerIndex int // Index of the session manager queried, defaults to first in the list
-}
-
 type AttrGetCallCost struct {
 	CgrId string // Unique id of the CDR
 	RunId string // Run Id
@@ -984,13 +956,8 @@ type TPResourceProfile struct {
 
 // TPActivationInterval represents an activation interval for an item
 type TPActivationInterval struct {
-	ActivationTime,
-	ExpiryTime string
-}
-
-type AttrRLsCache struct {
-	LoadID      string
-	ResourceIDs []string
+	ActivationTime string
+	ExpiryTime     string
 }
 
 type ArgRSv1ResourceUsage struct {
@@ -999,11 +966,6 @@ type ArgRSv1ResourceUsage struct {
 	UsageTTL *time.Duration
 	Units    float64
 	*ArgDispatcher
-}
-
-// TenantUsageID is used when caching events to resources
-func (args *ArgRSv1ResourceUsage) TenantUsageID() string {
-	return ConcatenatedKey(args.CGREvent.Tenant, args.UsageID)
 }
 
 type ArgsComputeFilterIndexes struct {
@@ -1031,7 +993,8 @@ func (tpAI *TPActivationInterval) AsActivationInterval(timezone string) (ai *Act
 }
 
 type ActivationInterval struct {
-	ActivationTime, ExpiryTime time.Time
+	ActivationTime time.Time
+	ExpiryTime     time.Time
 }
 
 func (ai *ActivationInterval) IsActiveAtTime(atTime time.Time) bool {
