@@ -35,15 +35,6 @@ func TestTPDistinctIdsString(t *testing.T) {
 	}
 }
 
-func TestNewDTCSFromRPKey(t *testing.T) {
-	rpKey := "*out:tenant12:call:dan12"
-	if dtcs, err := NewDTCSFromRPKey(rpKey); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(dtcs, &DirectionTenantCategorySubject{"*out", "tenant12", "call", "dan12"}) {
-		t.Error("Received: ", dtcs)
-	}
-}
-
 func TestPaginatorPaginateStringSlice(t *testing.T) {
 	//len(in)=0
 	eOut := []string{}
@@ -370,7 +361,7 @@ func TestTPAccountActionsKeyId(t *testing.T) {
 
 }
 
-func TestAttrGetCdrsAttrExpFileCdrsAsCDRsFilter(t *testing.T) {
+func TestAttrExpFileCdrsAsCDRsFilter(t *testing.T) {
 	attrExpFileCdrs := &AttrExpFileCdrs{
 		TimeStart: "2020-04-04T11:45:26.371Z",
 		TimeEnd:   "2020-04-04T11:46:26.371Z",
@@ -398,20 +389,35 @@ func TestAttrGetCdrsAttrExpFileCdrsAsCDRsFilter(t *testing.T) {
 		Paginator:           attrExpFileCdrs.Paginator,
 		MaxCost:             Float64Pointer(-1.0),
 	}
-	timeStart, _ := ParseTimeDetectLayout("2020-04-04T11:45:26.371Z", "")
-	eOut.AnswerTimeStart = &timeStart
-	timeEnd, _ := ParseTimeDetectLayout("2020-04-04T11:46:26.371Z", "")
-	eOut.AnswerTimeEnd = &timeEnd
-
 	//check with wrong time-zone
 	rcv, err := attrExpFileCdrs.AsCDRsFilter("wrongtimezone")
 	if err == nil {
 		t.Errorf("ParseTimeDetectLayout error")
 	}
-
-	//check with SkipRated = true
+	//check with wrong TimeStart
+	attrExpFileCdrs.TimeStart = "wrongtimeStart"
 	rcv, err = attrExpFileCdrs.AsCDRsFilter("")
+	if err == nil {
+		t.Errorf("Wrong AnswerTimeStart not processed")
+	}
+	//check with wrong TimeEnd
+	attrExpFileCdrs.TimeStart = "2020-04-04T11:45:26.371Z"
+	attrExpFileCdrs.TimeEnd = "wrongtimeEnd"
+	rcv, err = attrExpFileCdrs.AsCDRsFilter("")
+	if err == nil {
+		t.Errorf("Wrong AnswerTimeEnd not processed")
+	}
 
+	//check with SkipRated = true & normal timeStar/timeEnd
+	attrExpFileCdrs.TimeStart = "2020-04-04T11:45:26.371Z"
+	attrExpFileCdrs.TimeEnd = "2020-04-04T11:46:26.371Z"
+
+	TimeStart, _ := ParseTimeDetectLayout("2020-04-04T11:45:26.371Z", "")
+	eOut.AnswerTimeStart = &TimeStart
+	timeEnd, _ := ParseTimeDetectLayout("2020-04-04T11:46:26.371Z", "")
+	eOut.AnswerTimeEnd = &timeEnd
+
+	rcv, err = attrExpFileCdrs.AsCDRsFilter("")
 	if err != nil {
 		t.Errorf("ParseTimeDetectLayout error")
 	}
@@ -422,8 +428,8 @@ func TestAttrGetCdrsAttrExpFileCdrsAsCDRsFilter(t *testing.T) {
 
 	//check with SkipRated = false
 	attrExpFileCdrs.SkipRated = false
+	attrExpFileCdrs.SkipErrors = true
 	eOut.MinCost = Float64Pointer(0.0)
-	eOut.MaxCost = Float64Pointer(-1.0)
 	rcv, err = attrExpFileCdrs.AsCDRsFilter("")
 
 	if err != nil {
@@ -464,23 +470,42 @@ func TestAttrGetCdrsAsCDRsFilter(t *testing.T) {
 		OrderBy:             attrGetCdrs.OrderBy,
 		MaxCost:             Float64Pointer(-1.0),
 	}
-	timeStart, _ := ParseTimeDetectLayout("2019-04-04T11:45:26.371Z", "")
-	eOut.AnswerTimeStart = &timeStart
-	timeEnd, _ := ParseTimeDetectLayout("2019-04-04T11:46:26.371Z", "")
-	eOut.AnswerTimeEnd = &timeEnd
-
-	//check with an empty struct
-	//TBD
-
+	//chekck with an empty struct
+	var testStruct *AttrGetCdrs
+	rcv, err := testStruct.AsCDRsFilter("")
+	if err != nil {
+		t.Error(err)
+	}
+	if rcv != nil {
+		t.Errorf("Nil struct expected")
+	}
 	//check with wrong time-zone
-	//attrGetCdrs.TimeStart = "wrongtimezone"
-
-	rcv, err := attrGetCdrs.AsCDRsFilter("wrongtimezone")
+	rcv, err = attrGetCdrs.AsCDRsFilter("wrongtimezone")
 	if err == nil {
 		t.Errorf("ParseTimeDetectLayout error")
 	}
+	//check with wrong TimeStart
+	attrGetCdrs.TimeStart = "wrongtimeStart"
+	rcv, err = attrGetCdrs.AsCDRsFilter("")
+	if err == nil {
+		t.Errorf("Wrong AnswerTimeStart not processed")
+	}
+	//check with wrong TimeEnd
+	attrGetCdrs.TimeStart = "2020-04-04T11:45:26.371Z"
+	attrGetCdrs.TimeEnd = "wrongtimeEnd"
+	rcv, err = attrGetCdrs.AsCDRsFilter("")
+	if err == nil {
+		t.Errorf("Wrong AnswerTimeEnd not processed")
+	}
 
-	//check with SkipRated = true
+	//check with SkipRated = true & normal timeStar/timeEnd
+	attrGetCdrs.TimeStart = "2020-04-04T11:45:26.371Z"
+	attrGetCdrs.TimeEnd = "2020-04-04T11:46:26.371Z"
+	TimeStart, _ := ParseTimeDetectLayout("2020-04-04T11:45:26.371Z", "")
+	eOut.AnswerTimeStart = &TimeStart
+	timeEnd, _ := ParseTimeDetectLayout("2020-04-04T11:46:26.371Z", "")
+	eOut.AnswerTimeEnd = &timeEnd
+
 	rcv, err = attrGetCdrs.AsCDRsFilter("")
 	if err != nil {
 		t.Errorf("ParseTimeDetectLayout error")
@@ -491,14 +516,291 @@ func TestAttrGetCdrsAsCDRsFilter(t *testing.T) {
 
 	//check with SkipRated = false
 	attrGetCdrs.SkipRated = false
+	attrGetCdrs.SkipErrors = true
 	eOut.MinCost = Float64Pointer(0.0)
-	eOut.MaxCost = Float64Pointer(-1.0)
 	rcv, err = attrGetCdrs.AsCDRsFilter("")
-
 	if err != nil {
 		t.Errorf("ParseTimeDetectLayout error")
-	} else if !reflect.DeepEqual(eOut, rcv) {
+	}
+	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expected: %s ,received: %s ", ToJSON(eOut), ToJSON(rcv))
+	}
+}
+
+func TestNewTAFromAccountKey(t *testing.T) {
+	//check with empty string
+	eOut := &TenantAccount{
+		Tenant:  "",
+		Account: "",
+	}
+	rcv, err := NewTAFromAccountKey(":")
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected: %s ,received: %s ", ToJSON(eOut), ToJSON(rcv))
+	}
+	//check with test string
+	eOut = &TenantAccount{
+		Tenant:  "cgrates.org",
+		Account: "1001",
+	}
+	rcv, err = NewTAFromAccountKey("cgrates.org:1001")
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected: %s ,received: %s ", ToJSON(eOut), ToJSON(rcv))
+	}
+	//check with wrong TenantAccount
+	rcv, err = NewTAFromAccountKey("")
+	if err == nil {
+		t.Errorf("Unsupported format not processed")
+	}
+}
+
+func TestRPCCDRsFilterAsCDRsFilter(t *testing.T) {
+	//empty check
+	var testStruct *RPCCDRsFilter
+	rcv, err := testStruct.AsCDRsFilter("")
+	if err != nil {
+		t.Error(err)
+	}
+	if rcv != nil {
+		t.Errorf("Nil struct expected")
+	}
+	//check test
+	rpcCDRsFilter := &RPCCDRsFilter{
+		CGRIDs:                 []string{"CGRIDs"},
+		NotCGRIDs:              []string{"NotCGRIDs"},
+		RunIDs:                 []string{"RunIDs"},
+		NotRunIDs:              []string{"NotRunIDs"},
+		OriginIDs:              []string{"OriginIDs"},
+		NotOriginIDs:           []string{"NotOriginIDs"},
+		OriginHosts:            []string{"OriginHosts"},
+		NotOriginHosts:         []string{"NotOriginHosts"},
+		Sources:                []string{"Sources"},
+		NotSources:             []string{"NotSources"},
+		ToRs:                   []string{"ToRs"},
+		NotToRs:                []string{"NotToRs"},
+		RequestTypes:           []string{"RequestTypes"},
+		NotRequestTypes:        []string{"NotRequestTypes"},
+		Tenants:                []string{"Tenants"},
+		NotTenants:             []string{"NotTenants"},
+		Categories:             []string{"Categories"},
+		NotCategories:          []string{"NotCategories"},
+		Accounts:               []string{"Accounts"},
+		NotAccounts:            []string{"NotAccounts"},
+		Subjects:               []string{"Subjects"},
+		NotSubjects:            []string{"NotSubjects"},
+		DestinationPrefixes:    []string{"DestinationPrefixes"},
+		NotDestinationPrefixes: []string{"NotDestinationPrefixes"},
+		Costs:                  []float64{0.1, 0.2},
+		NotCosts:               []float64{0.3, 0.4},
+		ExtraFields:            map[string]string{},
+		NotExtraFields:         map[string]string{},
+		OrderIDStart:           Int64Pointer(0),
+		OrderIDEnd:             Int64Pointer(0),
+		SetupTimeStart:         "2020-04-18T11:46:26.371Z",
+		SetupTimeEnd:           "2020-04-18T11:46:26.371Z",
+		AnswerTimeStart:        "2020-04-18T11:46:26.371Z",
+		AnswerTimeEnd:          "2020-04-18T11:46:26.371Z",
+		CreatedAtStart:         "2020-04-18T11:46:26.371Z",
+		CreatedAtEnd:           "2020-04-18T11:46:26.371Z",
+		UpdatedAtStart:         "2020-04-18T11:46:26.371Z",
+		UpdatedAtEnd:           "2020-04-18T11:46:26.371Z",
+		MinUsage:               "MinUsage",
+		MaxUsage:               "MaxUsage",
+		MinCost:                Float64Pointer(0.),
+		MaxCost:                Float64Pointer(0.),
+		OrderBy:                "OrderBy",
+	}
+	//check the functionality
+	eOut := &CDRsFilter{
+		CGRIDs:                 rpcCDRsFilter.CGRIDs,
+		NotCGRIDs:              rpcCDRsFilter.NotCGRIDs,
+		RunIDs:                 rpcCDRsFilter.RunIDs,
+		NotRunIDs:              rpcCDRsFilter.NotRunIDs,
+		OriginIDs:              rpcCDRsFilter.OriginIDs,
+		NotOriginIDs:           rpcCDRsFilter.NotOriginIDs,
+		ToRs:                   rpcCDRsFilter.ToRs,
+		NotToRs:                rpcCDRsFilter.NotToRs,
+		OriginHosts:            rpcCDRsFilter.OriginHosts,
+		NotOriginHosts:         rpcCDRsFilter.NotOriginHosts,
+		Sources:                rpcCDRsFilter.Sources,
+		NotSources:             rpcCDRsFilter.NotSources,
+		RequestTypes:           rpcCDRsFilter.RequestTypes,
+		NotRequestTypes:        rpcCDRsFilter.NotRequestTypes,
+		Tenants:                rpcCDRsFilter.Tenants,
+		NotTenants:             rpcCDRsFilter.NotTenants,
+		Categories:             rpcCDRsFilter.Categories,
+		NotCategories:          rpcCDRsFilter.NotCategories,
+		Accounts:               rpcCDRsFilter.Accounts,
+		NotAccounts:            rpcCDRsFilter.NotAccounts,
+		Subjects:               rpcCDRsFilter.Subjects,
+		NotSubjects:            rpcCDRsFilter.NotSubjects,
+		DestinationPrefixes:    rpcCDRsFilter.DestinationPrefixes,
+		NotDestinationPrefixes: rpcCDRsFilter.NotDestinationPrefixes,
+		Costs:                  rpcCDRsFilter.Costs,
+		NotCosts:               rpcCDRsFilter.NotCosts,
+		ExtraFields:            rpcCDRsFilter.ExtraFields,
+		NotExtraFields:         rpcCDRsFilter.NotExtraFields,
+		OrderIDStart:           rpcCDRsFilter.OrderIDStart,
+		OrderIDEnd:             rpcCDRsFilter.OrderIDEnd,
+		MinUsage:               rpcCDRsFilter.MinUsage,
+		MaxUsage:               rpcCDRsFilter.MaxUsage,
+		MinCost:                rpcCDRsFilter.MinCost,
+		MaxCost:                rpcCDRsFilter.MaxCost,
+		Paginator:              rpcCDRsFilter.Paginator,
+		OrderBy:                rpcCDRsFilter.OrderBy,
+	}
+	tTime, _ := ParseTimeDetectLayout("2020-04-18T11:46:26.371Z", "")
+	eOut.AnswerTimeEnd = &tTime
+	eOut.UpdatedAtEnd = &tTime
+	eOut.UpdatedAtStart = &tTime
+	eOut.CreatedAtEnd = &tTime
+	eOut.CreatedAtStart = &tTime
+	eOut.AnswerTimeEnd = &tTime
+	eOut.AnswerTimeStart = &tTime
+	eOut.SetupTimeEnd = &tTime
+	eOut.SetupTimeStart = &tTime
+
+	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
+	if err != nil {
+		t.Errorf("ParseTimeDetectLayout error")
+	}
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected: %s ,received: %s ", ToJSON(eOut), ToJSON(rcv))
+	}
+
+	//check with wrong UpdatedAtEnd
+	rpcCDRsFilter.UpdatedAtEnd = "wrongUpdatedAtEnd"
+	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
+	if err == nil {
+		t.Errorf("Wrong UpdatedAtEnd not processed")
+	}
+	//check with wrong SetupTimeEnd
+	rpcCDRsFilter.UpdatedAtStart = "wrongUpdatedAtStart"
+	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
+	if err == nil {
+		t.Errorf("Wrong UpdatedAtStart not processed")
+	}
+	//check with wrong CreatedAtEnd
+	rpcCDRsFilter.CreatedAtEnd = "wrongCreatedAtEnd"
+	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
+	if err == nil {
+		t.Errorf("Wrong CreatedAtEnd not processed")
+	}
+	//check with wrong CreatedAtStart
+	rpcCDRsFilter.CreatedAtStart = "wrongCreatedAtStart"
+	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
+	if err == nil {
+		t.Errorf("Wrong CreatedAtStart not processed")
+	}
+	//check with wrong AnswerTimeEnd
+	rpcCDRsFilter.AnswerTimeEnd = "wrongAnswerTimeEnd"
+	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
+	if err == nil {
+		t.Errorf("Wrong AnswerTimeEnd not processed")
+	}
+	//check with wrong AnswerTimeStart
+	rpcCDRsFilter.AnswerTimeStart = "wrongAnswerTimeStart"
+	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
+	if err == nil {
+		t.Errorf("Wrong AnswerTimeStart not processed")
+	}
+	//check with wrong SetupTimeEnd
+	rpcCDRsFilter.SetupTimeEnd = "wrongSetupTimeEnd"
+	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
+	if err == nil {
+		t.Errorf("Wrong SetupTimeEnd not processed")
+	}
+	//check with wrong SetupTimeStart
+	rpcCDRsFilter.SetupTimeStart = "wrongSetupTimeStart"
+	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
+	if err == nil {
+		t.Errorf("Wrong SetupTimeStart not processed")
+	}
+}
+
+func TestTPActivationIntervalAsActivationInterval(t *testing.T) {
+	tPActivationInterval := &TPActivationInterval{
+		ActivationTime: "2019-04-04T11:45:26.371Z",
+		ExpiryTime:     "2019-04-04T11:46:26.371Z",
+	}
+	eOut := new(ActivationInterval)
+
+	tTime, _ := ParseTimeDetectLayout("2019-04-04T11:45:26.371Z", "")
+	eOut.ActivationTime = tTime
+	tTime, _ = ParseTimeDetectLayout("2019-04-04T11:46:26.371Z", "")
+	eOut.ExpiryTime = tTime
+
+	rcv, err := tPActivationInterval.AsActivationInterval("")
+	if err != nil {
+		t.Errorf("ParseTimeDetectLayout error")
+	}
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected: %s ,received: %s ", ToJSON(eOut), ToJSON(rcv))
+	}
+	//check with wrong time
+	tPActivationInterval.ExpiryTime = "wrongExpiryTime"
+	rcv, err = tPActivationInterval.AsActivationInterval("")
+	if err == nil {
+		t.Errorf("Wrong ExpiryTime not processed")
+	}
+	tPActivationInterval.ActivationTime = "wrongActivationTime"
+	rcv, err = tPActivationInterval.AsActivationInterval("")
+	if err == nil {
+		t.Errorf("Wrong ActivationTime not processed")
+	}
+}
+
+func TestActivationIntervalIsActiveAtTime(t *testing.T) {
+	activationInterval := new(ActivationInterval)
+
+	//case ActivationTime = Expiry = 0001-01-01 00:00:00 +0000 UTC
+	activationInterval.ActivationTime = time.Time{}
+	activationInterval.ExpiryTime = time.Time{}
+	rcv := activationInterval.IsActiveAtTime(time.Time{})
+	if !rcv {
+		t.Errorf("ActivationTime = Expiry = time.Time{}, expecting 0 ")
+	}
+	tTime, _ := ParseTimeDetectLayout("2018-04-04T11:45:26.371Z", "") //start 2018
+	activationInterval.ActivationTime = tTime
+	tTime, _ = ParseTimeDetectLayout("2020-04-04T11:45:26.371Z", "") //end 2020
+	activationInterval.ExpiryTime = tTime
+
+	//atTime < ActivationTime
+	tTime, _ = ParseTimeDetectLayout("2017-04-04T11:45:26.371Z", "") //now
+	atTime := tTime
+	rcv = activationInterval.IsActiveAtTime(atTime)
+	if rcv {
+		t.Errorf("atTime < ActivationTime, expecting 0 ")
+	}
+
+	//atTime > ExpiryTime
+	tTime, _ = ParseTimeDetectLayout("2021-04-04T11:45:26.371Z", "")
+	atTime = tTime
+	rcv = activationInterval.IsActiveAtTime(atTime)
+	if rcv {
+		t.Errorf("atTime > Expiry, expecting 0 ")
+	}
+
+	//ideal case
+	tTime, _ = ParseTimeDetectLayout("2019-04-04T11:45:26.371Z", "")
+	atTime = tTime
+	rcv = activationInterval.IsActiveAtTime(atTime)
+	if !rcv {
+		t.Errorf("ActivationTime < atTime < ExpiryTime. Expecting 1 ")
+	}
+	//ActivationTime > ExpiryTime
+	tTime, _ = ParseTimeDetectLayout("2020-04-04T11:45:26.371Z", "")
+	activationInterval.ActivationTime = tTime
+	tTime, _ = ParseTimeDetectLayout("2018-04-04T11:45:26.371Z", "")
+	activationInterval.ExpiryTime = tTime
+	rcv = activationInterval.IsActiveAtTime(atTime)
+	if rcv {
+		t.Errorf("ActivationTime > ExpiryTime. Expecting 0 ")
 	}
 }
 
