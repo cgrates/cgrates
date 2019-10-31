@@ -78,13 +78,19 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg.Remote_conns != nil {
 		dbcfg.RmtDataDBCfgs = make([]*DataDbCfg, len(*jsnDbCfg.Remote_conns))
 		for i, cfg := range *jsnDbCfg.Remote_conns {
-			dbcfg.RmtDataDBCfgs[i].loadFromJsonCfg(cfg)
+			dbcfg.RmtDataDBCfgs[i] = newDefaultDataDbCfg()
+			if err = dbcfg.RmtDataDBCfgs[i].loadFromJsonCfg(cfg); err != nil {
+				return
+			}
 		}
 	}
 	if jsnDbCfg.Replication_conns != nil {
-		dbcfg.RmtDataDBCfgs = make([]*DataDbCfg, len(*jsnDbCfg.Replication_conns))
+		dbcfg.RplDataDBCfgs = make([]*DataDbCfg, len(*jsnDbCfg.Replication_conns))
 		for i, cfg := range *jsnDbCfg.Replication_conns {
-			dbcfg.RplDataDBCfgs[i].loadFromJsonCfg(cfg)
+			dbcfg.RplDataDBCfgs[i] = newDefaultDataDbCfg()
+			if err = dbcfg.RplDataDBCfgs[i].loadFromJsonCfg(cfg); err != nil {
+				return
+			}
 		}
 	}
 	return nil
@@ -101,5 +107,20 @@ func (dbcfg *DataDbCfg) Clone() *DataDbCfg {
 		DataDbPass:         dbcfg.DataDbPass,
 		DataDbSentinelName: dbcfg.DataDbSentinelName,
 		QueryTimeout:       dbcfg.QueryTimeout,
+	}
+}
+
+func newDefaultDataDbCfg() *DataDbCfg {
+	return &DataDbCfg{
+		DataDbType:         utils.REDIS,
+		DataDbHost:         "127.0.0.1",
+		DataDbPort:         "6379",
+		DataDbName:         "10",
+		DataDbUser:         "cgrates",
+		DataDbPass:         "",
+		DataDbSentinelName: "",
+		QueryTimeout:       10 * time.Second,
+		RmtDataDBCfgs:      nil,
+		RplDataDBCfgs:      nil,
 	}
 }
