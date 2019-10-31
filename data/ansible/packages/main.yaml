@@ -208,7 +208,14 @@
 # Move the file to PKG server
   - name : Copy the file to PKG server
     become: yes
-    command: sudo sshpass -p "{{ pkgPass }} " scp {{ item }} {{ gouser }}@{{ internalPkgAddr }}:{{ internalPkgDir }}
+    command: sudo sshpass -p "{{ pkgPass }} " scp /var/packages/debian/incoming/{{ item }} {{ gouser }}@{{ internalPkgAddr }}:{{ internalPkgDir }}
+    args : 
+      chdir: /var/packages/debian/incoming/
+    with_items: '{{ debFileName.stdout_lines }}'
+
+# Clean the incoming folder
+  - name : Clean the incoming folder
+    become: yes
+    command: sudo rm /var/packages/debian/incoming/*
     args : 
       chdir: /var/packages/debian
-    with_items: '{{ debFileName.stdout_lines }}'
