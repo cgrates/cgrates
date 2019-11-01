@@ -61,40 +61,21 @@
 
     customPath: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
 
+    dependencies:
+      - build-essential
+      - git
+      - devscripts
+      - reprepro
+      - nginx
+
   remote_user: '{{ gouser }}'
   tasks:
 ###########################################################################################################################
 ###########################################################################################################################
 # install dependencies
-  - name: Install build-essential
-    become: true
-    apt:
-      name: build-essential
-      state: present
-
-  - name: Install the git
-    become: true
-    apt:
-      name: git
-      state: present
-
-  - name: Install devscripts
-    become: true
-    apt:
-      name: devscripts
-      state: present
-      
-  - name: Install reprepro
-    become: true
-    apt:
-      name: reprepro
-      state: present
-      
-  - name: Install NGINX server
-    become: true
-    apt:
-      name: nginx
-      state: present
+    - name: Install dependencies
+      become: yes
+      apt: name={{ dependencies }} state=present
 ###########################################################################################################################
 ###########################################################################################################################
 # Prepare for configuration
@@ -205,17 +186,40 @@
       chdir: /var/packages/debian
     with_items: '{{ changesFileNames.stdout_lines }}'
 
-# Move the file to PKG server
-  - name : Copy the file to PKG server
-    become: yes
-    command: sudo sshpass -p "{{ pkgPass }} " scp /var/packages/debian/incoming/{{ item }} {{ gouser }}@{{ internalPkgAddr }}:{{ internalPkgDir }}
-    args : 
-      chdir: /var/packages/debian/incoming/
-    with_items: '{{ debFileName.stdout_lines }}'
+# Before moving the new package from apt we have to include the current deb as an older version and remove the current
+- hosts: pkg
+  remote_user: '{{ gouser }}'
+  tasks:
+    - name: Remove symlink from current deb package
+      become: yes
+      command: sudo rm /var/packages/debian/cgrates_current_amd64.deb
 
-# Clean the incoming folder
-  - name : Clean the incoming folder
-    become: yes
-    command: sudo rm /var/packages/debian/incoming/*
-    args : 
-      chdir: /var/packages/debian
+    - name: Move include the previos package as older version
+      become: yes
+      command: sudo mv {{ internalPkgDir }}/* /var/packages/debian
+
+- hosts: apt
+  remote_user: '{{ gouser }}'
+  tasks:
+    # Move the file to PKG server
+    - name : Copy the file to PKG server
+      become: yes
+      command: sudo sshpass -p "{{ pkgPass }} " scp /var/packages/debian/incoming/{{ item }} {{ gouser }}@{{ internalPkgAddr }}:{{ internalPkgDir }}
+      args :
+        chdir: /var/packages/debian/incoming/
+      with_items: '{{ debFileName.stdout_lines }}'
+
+    # Clean the incoming folder
+    - name : Clean the incoming folder
+      become: yes
+      command: sudo rm /var/packages/debian/incoming/*
+      args :
+        chdir: /var/packages/debian
+
+- hosts: pkg
+  remote_user: '{{ gouser }}'
+  tasks:
+    - name: Copy the new package and change it's name to cgrates_current_amd64.deb
+      become: yes
+      command: sudo cp {{ internalPkgDir }}/{{ item }} /var/packages/debian/cgrates_current_amd64.deb
+      with_items: '{{ debFileName.stdout_lines }}'
