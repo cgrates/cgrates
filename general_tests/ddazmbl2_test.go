@@ -31,7 +31,7 @@ var dataDB2 *engine.DataManager
 
 func TestSetStorage2(t *testing.T) {
 	data, _ := engine.NewMapStorageJson()
-	dataDB2 = engine.NewDataManager(data, config.CgrConfig().CacheCfg())
+	dataDB2 = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
 	engine.SetDataStorage(dataDB2)
 }
 
@@ -62,10 +62,13 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	suppliers := ``
 	attrProfiles := ``
 	chargerProfiles := ``
-	csvr := engine.NewTpReader(dataDB2.DataDB(), engine.NewStringCSVStorage(',', destinations, timings,
+	csvr, err := engine.NewTpReader(dataDB2.DataDB(), engine.NewStringCSVStorage(',', destinations, timings,
 		rates, destinationRates, ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans,
 		actionTriggers, accountActions, resLimits,
 		stats, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, ""), "", "", nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
 	if err := csvr.LoadDestinations(); err != nil {
 		t.Fatal(err)
 	}

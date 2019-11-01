@@ -50,7 +50,7 @@ func TestLoaderITConnDataDbs(t *testing.T) {
 	if err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
-	dataDbCsv = NewDataManager(dbConn, nil)
+	dataDbCsv = NewDataManager(dbConn, nil, nil, nil)
 	dbConn, err = NewDataDBConn(lCfg.DataDbCfg().DataDbType,
 		lCfg.DataDbCfg().DataDbHost, lCfg.DataDbCfg().DataDbPort, "8",
 		lCfg.DataDbCfg().DataDbUser, lCfg.DataDbCfg().DataDbPass,
@@ -58,7 +58,7 @@ func TestLoaderITConnDataDbs(t *testing.T) {
 	if err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
-	dataDbStor = NewDataManager(dbConn, nil)
+	dataDbStor = NewDataManager(dbConn, nil, nil, nil)
 	dbConn, err = NewDataDBConn(lCfg.DataDbCfg().DataDbType,
 		lCfg.DataDbCfg().DataDbHost, lCfg.DataDbCfg().DataDbPort, "9",
 		lCfg.DataDbCfg().DataDbUser, lCfg.DataDbCfg().DataDbPass,
@@ -66,7 +66,7 @@ func TestLoaderITConnDataDbs(t *testing.T) {
 	if err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
-	dataDbApier = NewDataManager(dbConn, nil)
+	dataDbApier = NewDataManager(dbConn, nil, nil, nil)
 	for _, db := range []Storage{dataDbCsv.DataDB(), dataDbStor.DataDB(), dataDbApier.DataDB(),
 		dataDbCsv.DataDB(), dataDbStor.DataDB(), dataDbApier.DataDB()} {
 		if err = db.Flush(""); err != nil {
@@ -95,14 +95,16 @@ func TestLoaderITCreateStorTpTables(t *testing.T) {
 
 // Loads data from csv files in tp scenario to dataDbCsv
 func TestLoaderITRemoveLoad(t *testing.T) {
-	/*var err error
-	for fn, v := range FileValidators {
+	var err error
+	/*for fn, v := range FileValidators {
 		if err = ValidateCSVData(path.Join(*dataDir, "tariffplans", *tpCsvScenario, fn), v.Rule); err != nil {
 			t.Error("Failed validating data: ", err.Error())
 		}
 	}*/
-	loader = NewTpReader(dataDbCsv.DataDB(), NewFileCSVStorage(utils.CSV_SEP, path.Join(*dataDir, "tariffplans", *tpCsvScenario), false), "", "", nil, nil)
-
+	loader, err = NewTpReader(dataDbCsv.DataDB(), NewFileCSVStorage(utils.CSV_SEP, path.Join(*dataDir, "tariffplans", *tpCsvScenario), false), "", "", nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
 	if err = loader.LoadDestinations(); err != nil {
 		t.Error("Failed loading destinations: ", err.Error())
 	}
@@ -170,14 +172,16 @@ func TestLoaderITRemoveLoad(t *testing.T) {
 
 // Loads data from csv files in tp scenario to dataDbCsv
 func TestLoaderITLoadFromCSV(t *testing.T) {
-	/*var err error
-	for fn, v := range FileValidators {
+	var err error
+	/*for fn, v := range FileValidators {
 		if err = ValidateCSVData(path.Join(*dataDir, "tariffplans", *tpCsvScenario, fn), v.Rule); err != nil {
 			t.Error("Failed validating data: ", err.Error())
 		}
 	}*/
-	loader = NewTpReader(dataDbCsv.DataDB(), NewFileCSVStorage(utils.CSV_SEP, path.Join(*dataDir, "tariffplans", *tpCsvScenario), false), "", "", nil, nil)
-
+	loader, err = NewTpReader(dataDbCsv.DataDB(), NewFileCSVStorage(utils.CSV_SEP, path.Join(*dataDir, "tariffplans", *tpCsvScenario), false), "", "", nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
 	if err = loader.LoadDestinations(); err != nil {
 		t.Error("Failed loading destinations: ", err.Error())
 	}
@@ -478,7 +482,7 @@ func TestLoaderITImportToStorDb(t *testing.T) {
 
 // Loads data from storDb into dataDb
 func TestLoaderITLoadFromStorDb(t *testing.T) {
-	loader := NewTpReader(dataDbStor.DataDB(), storDb, utils.TEST_SQL, "", nil, nil)
+	loader, _ := NewTpReader(dataDbStor.DataDB(), storDb, utils.TEST_SQL, "", nil, nil)
 	if err := loader.LoadDestinations(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading destinations: ", err.Error())
 	}
@@ -512,7 +516,7 @@ func TestLoaderITLoadFromStorDb(t *testing.T) {
 }
 
 func TestLoaderITLoadIndividualProfiles(t *testing.T) {
-	loader := NewTpReader(dataDbApier.DataDB(), storDb, utils.TEST_SQL, "", nil, nil)
+	loader, _ := NewTpReader(dataDbApier.DataDB(), storDb, utils.TEST_SQL, "", nil, nil)
 	// Load ratingPlans. This will also set destination keys
 	if rps, err := storDb.GetTPRatingPlans(utils.TEST_SQL, "", nil); err != nil {
 		t.Fatal("Could not retrieve rating plans")

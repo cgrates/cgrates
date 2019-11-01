@@ -55,9 +55,12 @@ func (self *ApierV2) LoadRatingProfile(attrs AttrLoadRatingProfile, reply *strin
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	tpRpf := &utils.TPRatingProfile{TPid: attrs.TPid}
-	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
+	dbReader, err := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
 		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone,
 		self.CacheS, self.SchedulerS)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
 	if err := dbReader.LoadRatingProfilesFiltered(tpRpf); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -75,9 +78,12 @@ func (self *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *str
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
+	dbReader, err := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
 		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone,
 		self.CacheS, self.SchedulerS)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
 	tpAa := &utils.TPAccountActions{TPid: attrs.TPid}
 	tpAa.SetAccountActionsId(attrs.AccountActionsId)
 	if _, err := guardian.Guardian.Guard(func() (interface{}, error) {
@@ -105,9 +111,12 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	} else if !fi.IsDir() {
 		return utils.ErrInvalidPath
 	}
-	loader := engine.NewTpReader(self.DataManager.DataDB(),
+	loader, err := engine.NewTpReader(self.DataManager.DataDB(),
 		engine.NewFileCSVStorage(utils.CSV_SEP, attrs.FolderPath, attrs.Recursive), "", self.Config.GeneralCfg().DefaultTimezone,
 		self.CacheS, self.SchedulerS)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}

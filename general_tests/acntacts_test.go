@@ -30,7 +30,7 @@ var dbAcntActs *engine.DataManager
 
 func TestAcntActsSetStorage(t *testing.T) {
 	data, _ := engine.NewMapStorageJson()
-	dbAcntActs = engine.NewDataManager(data, config.CgrConfig().CacheCfg())
+	dbAcntActs = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
 	engine.SetDataStorage(dbAcntActs)
 }
 
@@ -55,10 +55,13 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,false,false,10`
 	suppliers := ``
 	attrProfiles := ``
 	chargerProfiles := ``
-	csvr := engine.NewTpReader(dbAcntActs.DataDB(), engine.NewStringCSVStorage(',', destinations, timings,
+	csvr, err := engine.NewTpReader(dbAcntActs.DataDB(), engine.NewStringCSVStorage(',', destinations, timings,
 		rates, destinationRates, ratingPlans, ratingProfiles, sharedGroups,
 		actions, actionPlans, actionTriggers, accountActions,
 		resLimits, stats, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, ""), "", "", nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
 	if err := csvr.LoadAll(); err != nil {
 		t.Fatal(err)
 	}

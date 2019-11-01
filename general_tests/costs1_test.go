@@ -29,7 +29,7 @@ func TestCosts1SetStorage(t *testing.T) {
 	config.CgrConfig().CacheCfg()[utils.CacheRatingPlans].Precache = true // precache rating plan
 
 	data, _ := engine.NewMapStorageJson()
-	dataDB = engine.NewDataManager(data, config.CgrConfig().CacheCfg())
+	dataDB = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
 	engine.SetDataStorage(dataDB)
 }
 
@@ -53,9 +53,11 @@ RP_SMS1,DR_SMS_1,ALWAYS,10`
 	ratingProfiles := `cgrates.org,call,*any,2012-01-01T00:00:00Z,RP_RETAIL,
 cgrates.org,data,*any,2012-01-01T00:00:00Z,RP_DATA1,
 cgrates.org,sms,*any,2012-01-01T00:00:00Z,RP_SMS1,`
-	csvr := engine.NewTpReader(dataDB.DataDB(), engine.NewStringCSVStorage(',', dests, timings, rates, destinationRates, ratingPlans, ratingProfiles,
+	csvr, err := engine.NewTpReader(dataDB.DataDB(), engine.NewStringCSVStorage(',', dests, timings, rates, destinationRates, ratingPlans, ratingProfiles,
 		"", "", "", "", "", "", "", "", "", "", "", "", "", ""), "", "", nil, nil)
-
+	if err != nil {
+		t.Error(err)
+	}
 	if err := csvr.LoadTimings(); err != nil {
 		t.Fatal(err)
 	}
