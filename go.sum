@@ -59,6 +59,8 @@ github.com/cgrates/kamevapi v0.0.0-20190605144325-ec679e017654 h1:D2NqOOYKha71Ab
 github.com/cgrates/kamevapi v0.0.0-20190605144325-ec679e017654/go.mod h1:pgHqPlPcEDIQbbs9wyBk7YZTcaVdxMqf3v04XU+mngI=
 github.com/cgrates/kamevapi v0.0.0-20191001070356-51d06bab2926 h1:eb9F8blPHqBnAyLkW5U0eTTV0/j2tMrVTIBVxcm8bXY=
 github.com/cgrates/kamevapi v0.0.0-20191001070356-51d06bab2926/go.mod h1:pgHqPlPcEDIQbbs9wyBk7YZTcaVdxMqf3v04XU+mngI=
+github.com/cgrates/kamevapi v0.0.0-20191001125829-7dbc3ad58817 h1:1Tdv6H/usqmkQVeQbd+x87L5xo6DFmbYpbI00qfrWGw=
+github.com/cgrates/kamevapi v0.0.0-20191001125829-7dbc3ad58817/go.mod h1:pgHqPlPcEDIQbbs9wyBk7YZTcaVdxMqf3v04XU+mngI=
 github.com/cgrates/ltcache v0.0.0-20181016092649-92fb7fa77cca h1:Ejj4m0Ccl8dMMVnoHk4nQMlbR3w24llqQDy66DO9E0A=
 github.com/cgrates/ltcache v0.0.0-20181016092649-92fb7fa77cca/go.mod h1:q7c996DUu8OrJRnewVSQzM+y/bRcxZAHoo+zCD8bFBo=
 github.com/cgrates/radigo v0.0.0-20181207143118-e5c8f3272ccc h1:vOvPAyI9pNhUM5k/Wc3mYvwmGpDrMg41BMkz4AW1wfg=
