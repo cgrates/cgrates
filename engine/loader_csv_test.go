@@ -35,11 +35,14 @@ var (
 var csvr *TpReader
 
 func init() {
-	csvr = NewTpReader(dm.dataDB, NewStringCSVStorage(',', DestinationsCSVContent, TimingsCSVContent, RatesCSVContent, DestinationRatesCSVContent,
+	var err error
+	csvr, err = NewTpReader(dm.dataDB, NewStringCSVStorage(',', DestinationsCSVContent, TimingsCSVContent, RatesCSVContent, DestinationRatesCSVContent,
 		RatingPlansCSVContent, RatingProfilesCSVContent, SharedGroupsCSVContent, ActionsCSVContent, ActionPlansCSVContent, ActionTriggersCSVContent,
 		AccountActionsCSVContent, ResourcesCSVContent, StatsCSVContent, ThresholdsCSVContent, FiltersCSVContent, SuppliersCSVContent, AttributesCSVContent,
 		ChargersCSVContent, DispatcherCSVContent, DispatcherHostCSVContent), testTPID, "", nil, nil)
-
+	if err != nil {
+		log.Print("error when creating TpReader:", err)
+	}
 	if err := csvr.LoadDestinations(); err != nil {
 		log.Print("error in LoadDestinations:", err)
 	}

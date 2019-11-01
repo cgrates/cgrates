@@ -31,7 +31,7 @@ var dataDB3 *engine.DataManager
 
 func TestSetStorage3(t *testing.T) {
 	data, _ := engine.NewMapStorageJson()
-	dataDB3 = engine.NewDataManager(data, config.CgrConfig().CacheCfg())
+	dataDB3 = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
 	engine.SetDataStorage(dataDB3)
 }
 
@@ -60,10 +60,13 @@ cgrates.org,call,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,`
 	suppliers := ``
 	attrProfiles := ``
 	chargerProfiles := ``
-	csvr := engine.NewTpReader(dataDB3.DataDB(), engine.NewStringCSVStorage(',', destinations, timings, rates,
+	csvr, err := engine.NewTpReader(dataDB3.DataDB(), engine.NewStringCSVStorage(',', destinations, timings, rates,
 		destinationRates, ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers,
 		accountActions, resLimits, stats,
 		thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, ""), "", "", nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
 	if err := csvr.LoadDestinations(); err != nil {
 		t.Fatal(err)
 	}

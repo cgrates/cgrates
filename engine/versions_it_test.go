@@ -53,7 +53,7 @@ func TestVersionsITMongo(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	dm3 = NewDataManager(dbConn, cfg.CacheCfg())
+	dm3 = NewDataManager(dbConn, cfg.CacheCfg(), nil, nil)
 	storageDb, err = NewStorDBConn(cfg.StorDbCfg().Type,
 		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
@@ -83,7 +83,7 @@ func TestVersionsITRedisMYSQL(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	dm3 = NewDataManager(dbConn, cfg.CacheCfg())
+	dm3 = NewDataManager(dbConn, cfg.CacheCfg(), nil, nil)
 
 	storageDb, err = NewStorDBConn(cfg.StorDbCfg().Type,
 		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
@@ -114,7 +114,7 @@ func TestVersionsITRedisPostgres(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	dm3 = NewDataManager(dbConn, cfg.CacheCfg())
+	dm3 = NewDataManager(dbConn, cfg.CacheCfg(), nil, nil)
 	storageDb, err = NewStorDBConn(cfg.StorDbCfg().Type,
 		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,

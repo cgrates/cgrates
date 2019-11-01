@@ -239,7 +239,34 @@ func main() {
 		if err != nil {
 			log.Fatalf("Coud not open dataDB connection: %s", err.Error())
 		}
-		dm = engine.NewDataManager(d, config.CgrConfig().CacheCfg())
+		var rmtDBConns, rplDBConns []engine.DataDB
+		if len(ldrCfg.DataDbCfg().RmtDataDBCfgs) != 0 {
+			rmtDBConns = make([]engine.DataDB, len(ldrCfg.DataDbCfg().RmtDataDBCfgs))
+			for i, dbCfg := range ldrCfg.DataDbCfg().RmtDataDBCfgs {
+				rmtDBConns[i], err = engine.NewDataDBConn(dbCfg.DataDbType,
+					dbCfg.DataDbHost, dbCfg.DataDbPort,
+					dbCfg.DataDbName, dbCfg.DataDbUser,
+					dbCfg.DataDbPass, ldrCfg.GeneralCfg().DBDataEncoding,
+					dbCfg.DataDbSentinelName)
+				if err != nil {
+					log.Fatalf("Coud not open dataDB connection: %s", err.Error())
+				}
+			}
+		}
+		if len(ldrCfg.DataDbCfg().RplDataDBCfgs) != 0 {
+			rplDBConns = make([]engine.DataDB, len(ldrCfg.DataDbCfg().RplDataDBCfgs))
+			for i, dbCfg := range ldrCfg.DataDbCfg().RplDataDBCfgs {
+				rplDBConns[i], err = engine.NewDataDBConn(dbCfg.DataDbType,
+					dbCfg.DataDbHost, dbCfg.DataDbPort,
+					dbCfg.DataDbName, dbCfg.DataDbUser,
+					dbCfg.DataDbPass, ldrCfg.GeneralCfg().DBDataEncoding,
+					dbCfg.DataDbSentinelName)
+				if err != nil {
+					log.Fatalf("Coud not open dataDB connection: %s", err.Error())
+				}
+			}
+		}
+		dm = engine.NewDataManager(d, config.CgrConfig().CacheCfg(), rmtDBConns, rplDBConns)
 		defer dm.DataDB().Close()
 	}
 
@@ -321,9 +348,11 @@ func main() {
 		}
 	}
 
-	tpReader := engine.NewTpReader(dm.DataDB(), loader, ldrCfg.LoaderCgrCfg().TpID,
+	tpReader, err := engine.NewTpReader(dm.DataDB(), loader, ldrCfg.LoaderCgrCfg().TpID,
 		ldrCfg.GeneralCfg().DefaultTimezone, cacheS, schedulerS)
-
+	if err != nil {
+		log.Fatal(err)
+	}
 	if err = tpReader.LoadAll(); err != nil {
 		log.Fatal(err)
 	}

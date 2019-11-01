@@ -90,10 +90,12 @@ var (
 )
 
 // NewDataManager returns a new DataManager
-func NewDataManager(dataDB DataDB, cacheCfg config.CacheCfg) *DataManager {
+func NewDataManager(dataDB DataDB, cacheCfg config.CacheCfg, rmtDataDBs, rplDataDBs []DataDB) *DataManager {
 	return &DataManager{
-		dataDB:   dataDB,
-		cacheCfg: cacheCfg,
+		dataDB:     dataDB,
+		cacheCfg:   cacheCfg,
+		rmtDataDBs: rmtDataDBs,
+		rplDataDBs: rplDataDBs,
 	}
 }
 

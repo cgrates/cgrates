@@ -292,7 +292,34 @@ func InitDataDb(cfg *config.CGRConfig) error {
 	if err != nil {
 		return err
 	}
-	dm := NewDataManager(d, cfg.CacheCfg())
+	var rmtDBConns, rplDBConns []DataDB
+	if len(cfg.DataDbCfg().RmtDataDBCfgs) != 0 {
+		rmtDBConns = make([]DataDB, len(cfg.DataDbCfg().RmtDataDBCfgs))
+		for i, dbCfg := range cfg.DataDbCfg().RmtDataDBCfgs {
+			rmtDBConns[i], err = NewDataDBConn(dbCfg.DataDbType,
+				dbCfg.DataDbHost, dbCfg.DataDbPort,
+				dbCfg.DataDbName, dbCfg.DataDbUser,
+				dbCfg.DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+				dbCfg.DataDbSentinelName)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	if len(cfg.DataDbCfg().RplDataDBCfgs) != 0 {
+		rplDBConns = make([]DataDB, len(cfg.DataDbCfg().RplDataDBCfgs))
+		for i, dbCfg := range cfg.DataDbCfg().RplDataDBCfgs {
+			rplDBConns[i], err = NewDataDBConn(dbCfg.DataDbType,
+				dbCfg.DataDbHost, dbCfg.DataDbPort,
+				dbCfg.DataDbName, dbCfg.DataDbUser,
+				dbCfg.DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+				dbCfg.DataDbSentinelName)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	dm := NewDataManager(d, cfg.CacheCfg(), rmtDBConns, rplDBConns)
 
 	if err := dm.DataDB().Flush(""); err != nil {
 		return err
@@ -377,7 +404,10 @@ func StopStartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 
 func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disable_reverse bool,
 	cacheS rpcclient.RpcClientConnection, schedulerS rpcclient.RpcClientConnection) error {
-	loader := NewTpReader(dm.dataDB, NewFileCSVStorage(utils.CSV_SEP, tpPath, false), "", timezone, cacheS, schedulerS)
+	loader, err := NewTpReader(dm.dataDB, NewFileCSVStorage(utils.CSV_SEP, tpPath, false), "", timezone, cacheS, schedulerS)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}

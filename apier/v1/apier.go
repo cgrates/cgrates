@@ -200,9 +200,12 @@ func (self *ApierV1) LoadDestination(attrs AttrLoadDestination, reply *string) e
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
+	dbReader, err := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
 		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone,
 		self.CacheS, self.SchedulerS)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
 	if loaded, err := dbReader.LoadDestinationsFiltered(attrs.ID); err != nil {
 		return utils.NewErrServerError(err)
 	} else if !loaded {
@@ -225,9 +228,12 @@ func (self *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) err
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
+	dbReader, err := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
 		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone,
 		self.CacheS, self.SchedulerS)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
 	if loaded, err := dbReader.LoadRatingPlansFiltered(attrs.RatingPlanId); err != nil {
 		return utils.NewErrServerError(err)
 	} else if !loaded {
@@ -242,9 +248,12 @@ func (self *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *strin
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
+	dbReader, err := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
 		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone,
 		self.CacheS, self.SchedulerS)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
 	if err := dbReader.LoadRatingProfilesFiltered(&attrs); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -262,9 +271,12 @@ func (self *ApierV1) LoadSharedGroup(attrs AttrLoadSharedGroup, reply *string) e
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
+	dbReader, err := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
 		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone,
 		self.CacheS, self.SchedulerS)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
 	if err := dbReader.LoadSharedGroupsFiltered(attrs.SharedGroupId, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -285,9 +297,12 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
+	dbReader, err := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
 		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone,
 		self.CacheS, self.SchedulerS)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
 	if err := dbReader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -766,9 +781,12 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
+	dbReader, err := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
 		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone,
 		self.CacheS, self.SchedulerS)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
 	if _, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		return 0, dbReader.LoadAccountActionsFiltered(&attrs)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, attrs.LoadId); err != nil {
@@ -800,9 +818,12 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	}
 
 	// create the TpReader
-	loader := engine.NewTpReader(self.DataManager.DataDB(),
+	loader, err := engine.NewTpReader(self.DataManager.DataDB(),
 		engine.NewFileCSVStorage(utils.CSV_SEP, attrs.FolderPath, attrs.Recursive), "", self.Config.GeneralCfg().DefaultTimezone,
 		self.CacheS, self.SchedulerS)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
 	//Load the data
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
@@ -854,9 +875,12 @@ func (self *ApierV1) RemoveTPFromFolder(attrs utils.AttrLoadTpFromFolder, reply 
 	}
 
 	// create the TpReader
-	loader := engine.NewTpReader(self.DataManager.DataDB(),
+	loader, err := engine.NewTpReader(self.DataManager.DataDB(),
 		engine.NewFileCSVStorage(utils.CSV_SEP, attrs.FolderPath, attrs.Recursive), "", self.Config.GeneralCfg().DefaultTimezone,
 		self.CacheS, self.SchedulerS)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
 	//Load the data
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
@@ -896,9 +920,12 @@ func (self *ApierV1) RemoveTPFromStorDB(attrs AttrLoadTpFromStorDb, reply *strin
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
+	dbReader, err := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
 		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone,
 		self.CacheS, self.SchedulerS)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
 	if err := dbReader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}

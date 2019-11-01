@@ -20,6 +20,7 @@ package services
 
 import (
 	"fmt"
+	"log"
 	"sync"
 
 	"github.com/cgrates/cgrates/config"
@@ -33,7 +34,7 @@ func NewDataDBService(cfg *config.CGRConfig) *DataDBService {
 	return &DataDBService{
 		cfg:    cfg,
 		dbchan: make(chan *engine.DataManager, 1),
-		db:     engine.NewDataManager(nil, cfg.CacheCfg()), // to be removed
+		db:     engine.NewDataManager(nil, cfg.CacheCfg(), nil, nil), // to be removed
 	}
 }
 
@@ -67,7 +68,34 @@ func (db *DataDBService) Start() (err error) {
 		utils.Logger.Warning(fmt.Sprintf("Could not configure dataDb: %s.Some SessionS APIs will not work", err))
 		return
 	}
-	db.db = engine.NewDataManager(d, db.cfg.CacheCfg())
+	var rmtDBConns, rplDBConns []engine.DataDB
+	if len(db.cfg.DataDbCfg().RmtDataDBCfgs) != 0 {
+		rmtDBConns = make([]engine.DataDB, len(db.cfg.DataDbCfg().RmtDataDBCfgs))
+		for i, dbCfg := range db.cfg.DataDbCfg().RmtDataDBCfgs {
+			rmtDBConns[i], err = engine.NewDataDBConn(dbCfg.DataDbType,
+				dbCfg.DataDbHost, dbCfg.DataDbPort,
+				dbCfg.DataDbName, dbCfg.DataDbUser,
+				dbCfg.DataDbPass, db.cfg.GeneralCfg().DBDataEncoding,
+				dbCfg.DataDbSentinelName)
+			if err != nil {
+				log.Fatalf("Coud not open dataDB connection: %s", err.Error())
+			}
+		}
+	}
+	if len(db.cfg.DataDbCfg().RplDataDBCfgs) != 0 {
+		rplDBConns = make([]engine.DataDB, len(db.cfg.DataDbCfg().RplDataDBCfgs))
+		for i, dbCfg := range db.cfg.DataDbCfg().RplDataDBCfgs {
+			rplDBConns[i], err = engine.NewDataDBConn(dbCfg.DataDbType,
+				dbCfg.DataDbHost, dbCfg.DataDbPort,
+				dbCfg.DataDbName, dbCfg.DataDbUser,
+				dbCfg.DataDbPass, db.cfg.GeneralCfg().DBDataEncoding,
+				dbCfg.DataDbSentinelName)
+			if err != nil {
+				log.Fatalf("Coud not open dataDB connection: %s", err.Error())
+			}
+		}
+	}
+	db.db = engine.NewDataManager(d, db.cfg.CacheCfg(), rmtDBConns, rplDBConns)
 	engine.SetDataStorage(db.db)
 	if err = engine.CheckVersions(db.db.DataDB()); err != nil {
 		fmt.Println(err)
@@ -148,6 +176,7 @@ func (db *DataDBService) GetDM() *engine.DataManager {
 
 // needsConnectionReload returns if the DB connection needs to reloaded
 func (db *DataDBService) needsConnectionReload() bool {
+
 	if db.oldDBCfg.DataDbType != db.cfg.DataDbCfg().DataDbType ||
 		db.oldDBCfg.DataDbHost != db.cfg.DataDbCfg().DataDbHost ||
 		db.oldDBCfg.DataDbName != db.cfg.DataDbCfg().DataDbName ||
