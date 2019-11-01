@@ -765,39 +765,32 @@ func TestActivationIntervalIsActiveAtTime(t *testing.T) {
 	if !rcv {
 		t.Errorf("ActivationTime = Expiry = time.Time{}, expecting 0 ")
 	}
-	tTime, _ := ParseTimeDetectLayout("2018-04-04T11:45:26.371Z", "") //start 2018
-	activationInterval.ActivationTime = tTime
-	tTime, _ = ParseTimeDetectLayout("2020-04-04T11:45:26.371Z", "") //end 2020
-	activationInterval.ExpiryTime = tTime
+	activationInterval.ActivationTime = time.Date(2018, time.April, 18, 23, 0, 0, 0, time.UTC)
+	activationInterval.ExpiryTime = time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
 
 	//atTime < ActivationTime
-	tTime, _ = ParseTimeDetectLayout("2017-04-04T11:45:26.371Z", "") //now
-	atTime := tTime
+	atTime := time.Date(2017, time.April, 18, 23, 0, 0, 0, time.UTC)
 	rcv = activationInterval.IsActiveAtTime(atTime)
 	if rcv {
 		t.Errorf("atTime < ActivationTime, expecting 0 ")
 	}
 
 	//atTime > ExpiryTime
-	tTime, _ = ParseTimeDetectLayout("2021-04-04T11:45:26.371Z", "")
-	atTime = tTime
+	atTime = time.Date(2021, time.April, 18, 23, 0, 0, 0, time.UTC) //tTime
 	rcv = activationInterval.IsActiveAtTime(atTime)
 	if rcv {
 		t.Errorf("atTime > Expiry, expecting 0 ")
 	}
 
 	//ideal case
-	tTime, _ = ParseTimeDetectLayout("2019-04-04T11:45:26.371Z", "")
-	atTime = tTime
+	atTime = time.Date(2019, time.April, 18, 23, 0, 0, 0, time.UTC) //tTime
 	rcv = activationInterval.IsActiveAtTime(atTime)
 	if !rcv {
 		t.Errorf("ActivationTime < atTime < ExpiryTime. Expecting 1 ")
 	}
 	//ActivationTime > ExpiryTime
-	tTime, _ = ParseTimeDetectLayout("2020-04-04T11:45:26.371Z", "")
-	activationInterval.ActivationTime = tTime
-	tTime, _ = ParseTimeDetectLayout("2018-04-04T11:45:26.371Z", "")
-	activationInterval.ExpiryTime = tTime
+	activationInterval.ActivationTime = time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC) //tTime
+	activationInterval.ExpiryTime = time.Date(2018, time.April, 18, 23, 0, 0, 0, time.UTC)     //tTime
 	rcv = activationInterval.IsActiveAtTime(atTime)
 	if rcv {
 		t.Errorf("ActivationTime > ExpiryTime. Expecting 0 ")
@@ -880,6 +873,30 @@ func TestAppendToSMCostFilter(t *testing.T) {
 	if !reflect.DeepEqual(smfltr, expected) {
 		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
 	}
+	if smfltr, err = AppendToSMCostFilter(smfltr, "*prefix", DynamicDataPrefix+RunID, []string{"CGRID1", "CGRID2"}, ""); err == nil || err.Error() != "FilterType: \"*prefix\" not supported for FieldName: \"~RunID\"" {
+		t.Errorf("Expected error: FilterType: \"*prefix\" not supported for FieldName: \"~RunID\" ,received %v", err)
+	}
+	if !reflect.DeepEqual(smfltr, expected) {
+		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
+	}
+	if smfltr, err = AppendToSMCostFilter(smfltr, "*prefix", DynamicDataPrefix+OriginHost, []string{"CGRID1", "CGRID2"}, ""); err == nil || err.Error() != "FilterType: \"*prefix\" not supported for FieldName: \"~OriginHost\"" {
+		t.Errorf("Expected error: FilterType: \"*prefix\" not supported for FieldName: \"~OriginHost\" ,received %v", err)
+	}
+	if !reflect.DeepEqual(smfltr, expected) {
+		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
+	}
+	if smfltr, err = AppendToSMCostFilter(smfltr, "*prefix", DynamicDataPrefix+OriginID, []string{"CGRID1", "CGRID2"}, ""); err == nil || err.Error() != "FilterType: \"*prefix\" not supported for FieldName: \"~OriginID\"" {
+		t.Errorf("Expected error: FilterType: \"*prefix\" not supported for FieldName: \"~OriginID\" ,received %v", err)
+	}
+	if !reflect.DeepEqual(smfltr, expected) {
+		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
+	}
+	if smfltr, err = AppendToSMCostFilter(smfltr, "*prefix", DynamicDataPrefix+CostSource, []string{"CGRID1", "CGRID2"}, ""); err == nil || err.Error() != "FilterType: \"*prefix\" not supported for FieldName: \"~CostSource\"" {
+		t.Errorf("Expected error: FilterType: \"*prefix\" not supported for FieldName: \"~CostSource\" ,received %v", err)
+	}
+	if !reflect.DeepEqual(smfltr, expected) {
+		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
+	}
 	if smfltr, err = AppendToSMCostFilter(smfltr, "*string", CGRID, []string{"CGRID1", "CGRID2"}, ""); err == nil || err.Error() != "FieldName: \"CGRID\" not supported" {
 		t.Errorf("Expected error: FieldName: \"CGRID\" not supported ,received %v", err)
 	}
@@ -913,6 +930,19 @@ func TestAppendToSMCostFilter(t *testing.T) {
 		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
 	}
 
+	if smfltr, err = AppendToSMCostFilter(smfltr, "*lt", DynamicDataPrefix+Usage, []string{"one second"}, ""); err == nil || err.Error() != "Error when converting field: \"*lt\"  value: \"~Usage\" in time.Duration " {
+		t.Errorf("Expected error: Error when converting field: \"*lt\"  value: \"~Usage\" in time.Duration ,received %v", err)
+	}
+	if !reflect.DeepEqual(smfltr, expected) {
+		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
+	}
+	if smfltr, err = AppendToSMCostFilter(smfltr, "*prefix", DynamicDataPrefix+Usage, []string{"CGRID1", "CGRID2"}, ""); err == nil || err.Error() != "FilterType: \"*prefix\" not supported for FieldName: \"~Usage\"" {
+		t.Errorf("Expected error: FilterType: \"*prefix\" not supported for FieldName: \"~Usage\" ,received %v", err)
+	}
+	if !reflect.DeepEqual(smfltr, expected) {
+		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
+	}
+
 	now := time.Now().UTC().Round(time.Second)
 	strNow := now.Format("2006-01-02T15:04:05")
 
@@ -932,6 +962,18 @@ func TestAppendToSMCostFilter(t *testing.T) {
 
 	if smfltr, err = AppendToSMCostFilter(smfltr, "*gte", DynamicDataPrefix+CreatedAt, []string{time.Now().String()}, ""); err == nil || err.Error() != "Error when converting field: \"*gte\"  value: \"~CreatedAt\" in time.Time " {
 		t.Errorf("Expected error: Error when converting field: \"*gte\"  value: \"~CreatedAt\" in time.Time ,received %v", err)
+	}
+	if !reflect.DeepEqual(smfltr, expected) {
+		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
+	}
+	if smfltr, err = AppendToSMCostFilter(smfltr, "*lt", DynamicDataPrefix+CreatedAt, []string{time.Now().String()}, ""); err == nil || err.Error() != "Error when converting field: \"*lt\"  value: \"~CreatedAt\" in time.Time " {
+		t.Errorf("Expected error: Error when converting field: \"*lt\"  value: \"~CreatedAt\" in time.Time ,received %v", err)
+	}
+	if !reflect.DeepEqual(smfltr, expected) {
+		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
+	}
+	if smfltr, err = AppendToSMCostFilter(smfltr, "*prefix", DynamicDataPrefix+CreatedAt, []string{"CGRID1", "CGRID2"}, ""); err == nil || err.Error() != "FilterType: \"*prefix\" not supported for FieldName: \"~CreatedAt\"" {
+		t.Errorf("Expected error: FilterType: \"*prefix\" not supported for FieldName: \"~CreatedAt\" ,received %v", err)
 	}
 	if !reflect.DeepEqual(smfltr, expected) {
 		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
