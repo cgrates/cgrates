@@ -1203,6 +1203,9 @@ func (sS *SessionS) transitSState(cgrID string, psv bool) (s *Session) {
 	sS.registerSession(s, psv)
 	if !psv {
 		sS.initSessionDebitLoops(s)
+	} else { // transit from active with possible STerminator and DebitLoops
+		s.stopSTerminator()
+		s.stopDebitLoops()
 	}
 	return
 }
@@ -1464,12 +1467,9 @@ func (sS *SessionS) terminateSession(s *Session, tUsage, lastUsage *time.Duratio
 func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration, aTime *time.Time) (err error) {
 	//check if we have replicate connection and close the session there
 	defer sS.replicateSessions(s.CGRID, true, sS.sReplConns)
-	if s.sTerminator != nil &&
-		s.sTerminator.endChan != nil {
-		close(s.sTerminator.endChan)
-		s.sTerminator.endChan = nil
-	}
 	sS.unregisterSession(s.CGRID, false)
+	s.stopSTerminator()
+	s.stopDebitLoops()
 	for sRunIdx, sr := range s.SRuns {
 		sUsage := sr.TotalUsage
 		if tUsage != nil {
@@ -1480,11 +1480,6 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration, aTi
 			sr.TotalUsage -= sr.LastUsage
 			sr.TotalUsage += *lastUsage
 			sUsage = sr.TotalUsage
-		}
-		if s.debitStop != nil {
-			close(s.debitStop) // Stop automatic debits
-			time.Sleep(1)
-			s.debitStop = nil
 		}
 		if sr.EventCost != nil {
 			if notCharged := sUsage - sr.EventCost.GetUsage(); notCharged > 0 { // we did not charge enough, make a manual debit here
@@ -1675,24 +1670,19 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(clnt rpcclient.RpcClientConnection,
 	if s.CGRID == "" {
 		return utils.NewErrMandatoryIeMissing(utils.CGRID)
 	}
-	if s.EventStart == nil { // remove instead of
-		s.RLock()
-		removed := sS.unregisterSession(s.CGRID, true)
-		s.RUnlock()
-		if !removed {
-			err = utils.ErrServerError
-			return
+	if s.EventStart == nil { // remove
+		if ureg := sS.unregisterSession(s.CGRID, true); !ureg {
+			return utils.ErrNotFound
 		}
+		*reply = utils.OK
+		return
+	}
+	if aSs := sS.getSessions(s.CGRID, false); len(aSs) != 0 { // found active session, transit to passive
+		aSs[0].Lock()
+		sS.transitSState(s.CGRID, true)
+		aSs[0].Unlock()
 	} else {
-		s.Lock()
-		//if we have an active session with the same CGRID
-		//we unregister it first then regiser the new one
-		if len(sS.getSessions(s.CGRID, false)) != 0 {
-			sS.unregisterSession(s.CGRID, false)
-		}
-		sS.initSessionDebitLoops(s)
 		sS.registerSession(s, true)
-		s.Unlock()
 	}
 	*reply = utils.OK
 	return
@@ -3288,7 +3278,7 @@ func (sS *SessionS) BiRPCv1ActivateSessions(clnt rpcclient.RpcClientConnection,
 		sS.pSsMux.RLock()
 		i := 0
 		sIDs = make([]string, len(sS.pSessions))
-		for sID := range sS.aSessions {
+		for sID := range sS.pSessions {
 			sIDs[i] = sID
 			i++
 		}

@@ -85,12 +85,6 @@ func (s *Session) cgrID() (cgrID string) {
 	return
 }
 
-// DebitStopChan reads the debit stop
-func (s *Session) DebitStopChan() (dbtStop chan struct{}) {
-	dbtStop = s.debitStop
-	return
-}
-
 // Clone is a thread safe method to clone the sessions information
 func (s Session) Clone() (cln *Session) {
 	s.RLock()
@@ -208,6 +202,25 @@ func (s *Session) asCGREvents() (cgrEvs []*utils.CGREvent, err error) {
 		}
 	}
 	return
+}
+
+// stopSTerminator clears the session terminator
+func (s *Session) stopSTerminator() {
+	if s.sTerminator == nil ||
+		s.sTerminator.endChan == nil {
+		return
+	}
+	close(s.sTerminator.endChan)
+	s.sTerminator.endChan = nil
+}
+
+// stopDebitLoops will stop all the active debits on the session
+func (s *Session) stopDebitLoops() {
+	if s.debitStop != nil {
+		close(s.debitStop) // Stop automatic debits
+		time.Sleep(1)
+		s.debitStop = nil
+	}
 }
 
 // SRun is one billing run for the Session
