@@ -117,6 +117,7 @@ type RalsJsonCfg struct {
 type SchedulerJsonCfg struct {
 	Enabled    *bool
 	Cdrs_conns *[]*RemoteHostJson
+	Filters    *[]string
 }
 
 // Cdrs config section

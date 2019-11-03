@@ -263,6 +263,7 @@ func TestDfSchedulerJsonCfg(t *testing.T) {
 	eCfg := &SchedulerJsonCfg{
 		Enabled:    utils.BoolPointer(false),
 		Cdrs_conns: &[]*RemoteHostJson{},
+		Filters:    &[]string{},
 	}
 	if cfg, err := dfCgrJsonCfg.SchedulerJsonCfg(); err != nil {
 		t.Error(err)

@@ -21,6 +21,7 @@ package config
 type SchedulerCfg struct {
 	Enabled   bool
 	CDRsConns []*RemoteHost
+	Filters   []string
 }
 
 func (schdcfg *SchedulerCfg) loadFromJsonCfg(jsnCfg *SchedulerJsonCfg) error {
@@ -30,12 +31,17 @@ func (schdcfg *SchedulerCfg) loadFromJsonCfg(jsnCfg *SchedulerJsonCfg) error {
 	if jsnCfg.Enabled != nil {
 		schdcfg.Enabled = *jsnCfg.Enabled
 	}
-
 	if jsnCfg.Cdrs_conns != nil {
 		schdcfg.CDRsConns = make([]*RemoteHost, len(*jsnCfg.Cdrs_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Cdrs_conns {
 			schdcfg.CDRsConns[idx] = NewDfltRemoteHost()
 			schdcfg.CDRsConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
+	if jsnCfg.Filters != nil {
+		schdcfg.Filters = make([]string, len(*jsnCfg.Filters))
+		for i, fltr := range *jsnCfg.Filters {
+			schdcfg.Filters[i] = fltr
 		}
 	}
 	return nil

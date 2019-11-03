@@ -502,8 +502,8 @@ func TestCgrCfgJSONDefaultsScheduler(t *testing.T) {
 	eSchedulerCfg := &SchedulerCfg{
 		Enabled:   false,
 		CDRsConns: []*RemoteHost{},
+		Filters:   []string{},
 	}
-
 	if !reflect.DeepEqual(cgrCfg.schedulerCfg, eSchedulerCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.schedulerCfg, eSchedulerCfg)
 	}
