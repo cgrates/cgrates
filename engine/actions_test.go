@@ -445,7 +445,7 @@ func TestActionPlanFunctionNotAvailable(t *testing.T) {
 		actions:    []*Action{a},
 	}
 	err := at.Execute(nil, nil)
-	if err != nil {
+	if err != utils.ErrPartiallyExecuted { // because we want to return err if we can't execute all actions  
 		t.Errorf("Faild to detect wrong function type: %v", err)
 	}
 }
