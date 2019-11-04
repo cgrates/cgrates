@@ -79,112 +79,113 @@
 ###########################################################################################################################
 ###########################################################################################################################
 # Prepare for configuration
-  - name: Config reprepro
-    include: reprepro.yaml
+    - name: Config reprepro
+      include: reprepro.yaml
 
-  - name: Generate GPG Key
-    include: gpg.yaml
+    - name: Generate GPG Key
+      include: gpg.yaml
 
-  - name: Check if NGINX needs to be configured
-    become: true
-    shell: "ls /etc/nginx/sites-enabled | grep 'apt.cgrates.org.vhost'"
-    ignore_errors: true
-    register: nginxConfig
+    - name: Check if NGINX needs to be configured
+      become: true
+      shell: "ls /etc/nginx/sites-enabled | grep 'apt.cgrates.org.vhost'"
+      ignore_errors: true
+      register: nginxConfig
 
-  - name: Configure NGINX server 
-    include: nginx.yaml
-    when: nginxConfig.stdout_lines|length < 1
+    - name: Configure NGINX server
+      include: nginx.yaml
+      when: nginxConfig.stdout_lines|length < 1
 
 ###########################################################################################################################
 ###########################################################################################################################
 # Install Golang
-  - name: install unarchive dependencies (zypper)
-    become: yes
-    zypper:
-      name:
-        - gzip
-        - tar
-      state: present
-    when: ansible_pkg_mgr == 'zypper'
+    - name: install unarchive dependencies (zypper)
+      become: yes
+      zypper:
+        name:
+          - gzip
+          - tar
+        state: present
+      when: ansible_pkg_mgr == 'zypper'
 
-  - name: Install golang
-    include: go.yaml
+    - name: Install golang
+      include: go.yaml
 
 ###########################################################################################################################
 ###########################################################################################################################
 # Install CGRateS
-  - name: create cgrates directory
-    become: yes
-    file:
-      state: directory
-      mode: 'u=rwx,go=rx'
-      owner: "{{ gouser }}"
-      group: "{{ gouser }}"
-      dest: '{{ cgrates_dir }}'
-    become_user: "{{ gouser }}"
+    - name: create cgrates directory
+      become: yes
+      file:
+        state: directory
+        mode: 'u=rwx,go=rx'
+        owner: "{{ gouser }}"
+        group: "{{ gouser }}"
+        dest: '{{ cgrates_dir }}'
+      become_user: "{{ gouser }}"
 
-  - name: git clone cgrates
-    git:
-      repo: https://github.com/cgrates/cgrates.git
-      dest: '{{ cgrates_dir }}'
-      update: yes
-      force: yes
-    become: yes
-    become_user: "{{ gouser }}"
+    - name: git clone cgrates
+      git:
+        repo: https://github.com/cgrates/cgrates.git
+        dest: '{{ cgrates_dir }}'
+        update: yes
+        force: yes
+      become: yes
+      become_user: "{{ gouser }}"
 
-  - name:  build cgrates
-    shell: "sh {{ cgrates_dir }}/build.sh"
-    environment:
-      PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
-    args:
-      chdir: '{{ cgrates_dir }}'
+    - name:  build cgrates
+      shell: "sh {{ cgrates_dir }}/build.sh"
+      environment:
+        PATH: "{{ lookup('env','PATH') }}:{{ golang_gopath }}/bin:/usr/local/go/bin:{{ ansible_env.PATH }}"
+      args:
+        chdir: '{{ cgrates_dir }}'
 
-  - name: symbol link
-    become: yes
-    file:
-      src: "{{ cgrates_dir }}/data"
-      dest: "/usr/share/cgrates"
-      state: link
+    - name: symbol link
+      become: yes
+      file:
+        src: "{{ cgrates_dir }}/data"
+        dest: "/usr/share/cgrates"
+        state: link
 ###########################################################################################################################
 ###########################################################################################################################
 # Generate package
-  - name:  Generate package
-    become: yes
-    command: 'sudo env "PATH={{ customPath }}" make deb'
-    args:
-      chdir: '{{ cgrates_dir }}/packages'
+    - name:  Generate package
+      become: yes
+      command: 'sudo env "PATH={{ customPath }}" make deb'
+      args:
+        chdir: '{{ cgrates_dir }}/packages'
 
-  - name: Check if the package was generated
-    become: yes
-    shell: "sudo ls {{ golang_gopath }}/src/github.com/cgrates | grep 'cgrates_'"
-    ignore_errors: true
-    register: packageVar
+    - name: Check if the package was generated
+      become: yes
+      shell: "sudo ls {{ golang_gopath }}/src/github.com/cgrates | grep 'cgrates_'"
+      ignore_errors: true
+      register: packageVar
 
-  - name: Move the files to /var/packages/debian/incoming
-    become: yes
-    command: sudo mv {{item}} /var/packages/debian/incoming/
-    args:
-      chdir: '{{ golang_gopath }}/src/github.com/cgrates'
-    when : packageVar.stdout_lines|length > 0
-    with_items: '{{ packageVar.stdout_lines }}'
+    - name: Move the files to /var/packages/debian/incoming
+      become: yes
+      command: sudo mv {{item}} /var/packages/debian/incoming/
+      args:
+        chdir: '{{ golang_gopath }}/src/github.com/cgrates'
+      when : packageVar.stdout_lines|length > 0
+      with_items: '{{ packageVar.stdout_lines }}'
 
-  - name : Get the name of the deb file
-    become: yes
-    shell : "sudo ls /var/packages/debian/incoming/ | grep '.deb'"
-    register: debFileName
+    - name : Get the name of the deb file
+      become: yes
+      shell : "sudo ls /var/packages/debian/incoming/ | grep '.deb'"
+      register: debFileName
 
-  - name : Get the name of the changes file
-    become: yes
-    shell : "sudo ls /var/packages/debian/incoming/ | grep '.changes'"
-    register: changesFileNames
+    - name : Get the name of the changes file
+      become: yes
+      shell : "sudo ls /var/packages/debian/incoming/ | grep '.changes'"
+      register: changesFileNames
 
-# Include the package with reprepro
-  - name : Include the package with reprepro
-    become: yes
-    command: sudo reprepro -A amd64 -Vb . include nightly /var/packages/debian/incoming/{{ item }}
-    args : 
-      chdir: /var/packages/debian
-    with_items: '{{ changesFileNames.stdout_lines }}'
+  # Include the package with reprepro
+    - name : Include the package with reprepro
+      become: yes
+      command: sudo reprepro -A amd64 -Vb . include nightly /var/packages/debian/incoming/{{ item }}
+      ignore_errors: true
+      args :
+        chdir: /var/packages/debian
+      with_items: '{{ changesFileNames.stdout_lines }}'
 
 # Before moving the new package from apt we have to include the current deb as an older version and remove the current
 - hosts: pkg
@@ -192,11 +193,11 @@
   tasks:
     - name: Remove symlink from current deb package
       become: yes
-      command: sudo rm /var/packages/debian/cgrates_current_amd64.deb
+      shell: "sudo rm /var/packages/debian/cgrates_current_amd64.deb"
 
     - name: Move include the previos package as older version
       become: yes
-      command: sudo mv {{ internalPkgDir }}/* /var/packages/debian
+      shell: "sudo mv {{ internalPkgDir }}/* /var/packages/debian/"
 
 - hosts: apt
   remote_user: '{{ gouser }}'
@@ -204,7 +205,7 @@
     # Move the file to PKG server
     - name : Copy the file to PKG server
       become: yes
-      command: sudo sshpass -p "{{ pkgPass }} " scp /var/packages/debian/incoming/{{ item }} {{ gouser }}@{{ internalPkgAddr }}:{{ internalPkgDir }}
+      shell: 'sudo sshpass -p "{{ pkgPass }}" scp /var/packages/debian/incoming/{{ item }} {{ gouser }}@{{ internalPkgAddr }}:{{ internalPkgDir }}'
       args :
         chdir: /var/packages/debian/incoming/
       with_items: '{{ debFileName.stdout_lines }}'
@@ -212,7 +213,7 @@
     # Clean the incoming folder
     - name : Clean the incoming folder
       become: yes
-      command: sudo rm /var/packages/debian/incoming/*
+      shell: "sudo rm /var/packages/debian/incoming/*"
       args :
         chdir: /var/packages/debian
 
@@ -221,5 +222,5 @@
   tasks:
     - name: Copy the new package and change it's name to cgrates_current_amd64.deb
       become: yes
-      command: sudo cp {{ internalPkgDir }}/{{ item }} /var/packages/debian/cgrates_current_amd64.deb
-      with_items: '{{ debFileName.stdout_lines }}'
+      shell: "sudo ln -s {{ internalPkgDir }}/{{ item }} /var/packages/debian/cgrates_current_amd64.deb"
+      with_items: "{{ hostvars['apt']['debFileName']['stdout_lines'] }}"
