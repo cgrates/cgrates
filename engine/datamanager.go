@@ -90,7 +90,7 @@ var (
 )
 
 // NewDataManager returns a new DataManager
-func NewDataManager(dataDB DataDB, cacheCfg config.CacheCfg, rmtDataDBs, rplDataDBs []DataDB) *DataManager {
+func NewDataManager(dataDB DataDB, cacheCfg config.CacheCfg, rmtDataDBs, rplDataDBs []*DataManager) *DataManager {
 	return &DataManager{
 		dataDB:     dataDB,
 		cacheCfg:   cacheCfg,
@@ -103,8 +103,8 @@ func NewDataManager(dataDB DataDB, cacheCfg config.CacheCfg, rmtDataDBs, rplData
 // transparently manages data retrieval, further serialization and caching
 type DataManager struct {
 	dataDB     DataDB
-	rmtDataDBs []DataDB
-	rplDataDBs []DataDB
+	rmtDataDBs []*DataManager
+	rplDataDBs []*DataManager
 	cacheCfg   config.CacheCfg
 }
 
