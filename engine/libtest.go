@@ -292,11 +292,11 @@ func InitDataDb(cfg *config.CGRConfig) error {
 	if err != nil {
 		return err
 	}
-	var rmtDBConns, rplDBConns []DataDB
+	var rmtDBConns, rplDBConns []*DataManager
 	if len(cfg.DataDbCfg().RmtDataDBCfgs) != 0 {
-		rmtDBConns = make([]DataDB, len(cfg.DataDbCfg().RmtDataDBCfgs))
+		rmtDBConns = make([]*DataManager, len(cfg.DataDbCfg().RmtDataDBCfgs))
 		for i, dbCfg := range cfg.DataDbCfg().RmtDataDBCfgs {
-			rmtDBConns[i], err = NewDataDBConn(dbCfg.DataDbType,
+			dbConn, err := NewDataDBConn(dbCfg.DataDbType,
 				dbCfg.DataDbHost, dbCfg.DataDbPort,
 				dbCfg.DataDbName, dbCfg.DataDbUser,
 				dbCfg.DataDbPass, cfg.GeneralCfg().DBDataEncoding,
@@ -304,12 +304,13 @@ func InitDataDb(cfg *config.CGRConfig) error {
 			if err != nil {
 				return err
 			}
+			rmtDBConns[i] = NewDataManager(dbConn, nil, nil, nil)
 		}
 	}
 	if len(cfg.DataDbCfg().RplDataDBCfgs) != 0 {
-		rplDBConns = make([]DataDB, len(cfg.DataDbCfg().RplDataDBCfgs))
+		rplDBConns = make([]*DataManager, len(cfg.DataDbCfg().RplDataDBCfgs))
 		for i, dbCfg := range cfg.DataDbCfg().RplDataDBCfgs {
-			rplDBConns[i], err = NewDataDBConn(dbCfg.DataDbType,
+			dbConn, err := NewDataDBConn(dbCfg.DataDbType,
 				dbCfg.DataDbHost, dbCfg.DataDbPort,
 				dbCfg.DataDbName, dbCfg.DataDbUser,
 				dbCfg.DataDbPass, cfg.GeneralCfg().DBDataEncoding,
@@ -317,6 +318,7 @@ func InitDataDb(cfg *config.CGRConfig) error {
 			if err != nil {
 				return err
 			}
+			rplDBConns[i] = NewDataManager(dbConn, nil, nil, nil)
 		}
 	}
 	dm := NewDataManager(d, cfg.CacheCfg(), rmtDBConns, rplDBConns)

@@ -68,12 +68,11 @@ type TpReader struct {
 
 func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
 	cacheS rpcclient.RpcClientConnection, schedulerS rpcclient.RpcClientConnection) (*TpReader, error) {
-	var err error
-	var rmtDBConns, rplDBConns []DataDB
+	var rmtDBConns, rplDBConns []*DataManager
 	if len(config.CgrConfig().DataDbCfg().RmtDataDBCfgs) != 0 {
-		rmtDBConns = make([]DataDB, len(config.CgrConfig().DataDbCfg().RmtDataDBCfgs))
+		rmtDBConns = make([]*DataManager, len(config.CgrConfig().DataDbCfg().RmtDataDBCfgs))
 		for i, dbCfg := range config.CgrConfig().DataDbCfg().RmtDataDBCfgs {
-			rmtDBConns[i], err = NewDataDBConn(dbCfg.DataDbType,
+			dbConn, err := NewDataDBConn(dbCfg.DataDbType,
 				dbCfg.DataDbHost, dbCfg.DataDbPort,
 				dbCfg.DataDbName, dbCfg.DataDbUser,
 				dbCfg.DataDbPass, config.CgrConfig().GeneralCfg().DBDataEncoding,
@@ -81,12 +80,13 @@ func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
 			if err != nil {
 				return nil, err
 			}
+			rmtDBConns[i] = NewDataManager(dbConn, nil, nil, nil)
 		}
 	}
 	if len(config.CgrConfig().DataDbCfg().RplDataDBCfgs) != 0 {
-		rplDBConns = make([]DataDB, len(config.CgrConfig().DataDbCfg().RplDataDBCfgs))
+		rplDBConns = make([]*DataManager, len(config.CgrConfig().DataDbCfg().RplDataDBCfgs))
 		for i, dbCfg := range config.CgrConfig().DataDbCfg().RplDataDBCfgs {
-			rplDBConns[i], err = NewDataDBConn(dbCfg.DataDbType,
+			dbConn, err := NewDataDBConn(dbCfg.DataDbType,
 				dbCfg.DataDbHost, dbCfg.DataDbPort,
 				dbCfg.DataDbName, dbCfg.DataDbUser,
 				dbCfg.DataDbPass, config.CgrConfig().GeneralCfg().DBDataEncoding,
@@ -94,6 +94,7 @@ func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
 			if err != nil {
 				return nil, err
 			}
+			rplDBConns[i] = NewDataManager(dbConn, nil, nil, nil)
 		}
 	}
 	tpr := &TpReader{

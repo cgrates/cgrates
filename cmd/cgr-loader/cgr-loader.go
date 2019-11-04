@@ -239,11 +239,11 @@ func main() {
 		if err != nil {
 			log.Fatalf("Coud not open dataDB connection: %s", err.Error())
 		}
-		var rmtDBConns, rplDBConns []engine.DataDB
+		var rmtDBConns, rplDBConns []*engine.DataManager
 		if len(ldrCfg.DataDbCfg().RmtDataDBCfgs) != 0 {
-			rmtDBConns = make([]engine.DataDB, len(ldrCfg.DataDbCfg().RmtDataDBCfgs))
+			rmtDBConns = make([]*engine.DataManager, len(ldrCfg.DataDbCfg().RmtDataDBCfgs))
 			for i, dbCfg := range ldrCfg.DataDbCfg().RmtDataDBCfgs {
-				rmtDBConns[i], err = engine.NewDataDBConn(dbCfg.DataDbType,
+				dbConn, err := engine.NewDataDBConn(dbCfg.DataDbType,
 					dbCfg.DataDbHost, dbCfg.DataDbPort,
 					dbCfg.DataDbName, dbCfg.DataDbUser,
 					dbCfg.DataDbPass, ldrCfg.GeneralCfg().DBDataEncoding,
@@ -251,12 +251,13 @@ func main() {
 				if err != nil {
 					log.Fatalf("Coud not open dataDB connection: %s", err.Error())
 				}
+				rmtDBConns[i] = engine.NewDataManager(dbConn, nil, nil, nil)
 			}
 		}
 		if len(ldrCfg.DataDbCfg().RplDataDBCfgs) != 0 {
-			rplDBConns = make([]engine.DataDB, len(ldrCfg.DataDbCfg().RplDataDBCfgs))
+			rplDBConns = make([]*engine.DataManager, len(ldrCfg.DataDbCfg().RplDataDBCfgs))
 			for i, dbCfg := range ldrCfg.DataDbCfg().RplDataDBCfgs {
-				rplDBConns[i], err = engine.NewDataDBConn(dbCfg.DataDbType,
+				dbConn, err := engine.NewDataDBConn(dbCfg.DataDbType,
 					dbCfg.DataDbHost, dbCfg.DataDbPort,
 					dbCfg.DataDbName, dbCfg.DataDbUser,
 					dbCfg.DataDbPass, ldrCfg.GeneralCfg().DBDataEncoding,
@@ -264,6 +265,7 @@ func main() {
 				if err != nil {
 					log.Fatalf("Coud not open dataDB connection: %s", err.Error())
 				}
+				rplDBConns[i] = engine.NewDataManager(dbConn, nil, nil, nil)
 			}
 		}
 		dm = engine.NewDataManager(d, config.CgrConfig().CacheCfg(), rmtDBConns, rplDBConns)
