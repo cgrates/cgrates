@@ -294,7 +294,8 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 		utils.Logger.Err(fmt.Sprintf("Failed to get actions for %s: %s", at.ActionsID, err))
 		return
 	}
-	for accID, _ := range at.accountIDs {
+	var partialyExecuted bool
+	for accID := range at.accountIDs {
 		_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 			acc, err := dm.DataDB().GetAccount(accID)
 			if err != nil {
@@ -331,11 +332,13 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 					// do not allow the action plan to be rescheduled
 					at.Timing = nil
 					utils.Logger.Err(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
+					partialyExecuted = true
 					transactionFailed = true
 					break
 				}
 				if err := actionFunction(acc, a, aac, at.ExtraData); err != nil {
 					utils.Logger.Err(fmt.Sprintf("Error executing action %s: %v!", a.ActionType, err))
+					partialyExecuted = true
 					transactionFailed = true
 					if failedActions != nil {
 						go func() { failedActions <- a }()
@@ -371,6 +374,7 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 				// do not allow the action plan to be rescheduled
 				at.Timing = nil
 				utils.Logger.Err(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
+				partialyExecuted = true
 				if failedActions != nil {
 					go func() { failedActions <- a }()
 				}
@@ -378,6 +382,7 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 			}
 			if err := actionFunction(nil, a, aac, at.ExtraData); err != nil {
 				utils.Logger.Err(fmt.Sprintf("Error executing accountless action %s: %v!", a.ActionType, err))
+				partialyExecuted = true
 				if failedActions != nil {
 					go func() { failedActions <- a }()
 				}
@@ -391,6 +396,9 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 	if err != nil {
 		utils.Logger.Warning(fmt.Sprintf("Error executing action plan: %v", err))
 		return err
+	}
+	if partialyExecuted {
+		return utils.ErrPartiallyExecuted
 	}
 	return
 }
