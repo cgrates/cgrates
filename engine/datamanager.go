@@ -366,7 +366,17 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue) (err error) {
 	if err != nil {
 		return err
 	}
-	return dm.dataDB.SetStoredStatQueueDrv(ssq)
+	if err = dm.dataDB.SetStoredStatQueueDrv(ssq); err != nil {
+		return
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.dataDB.SetStoredStatQueueDrv(ssq); err != nil {
+				return
+			}
+		}
+	}
+	return
 }
 
 // RemoveStatQueue removes the StoredStatQueue
@@ -431,7 +441,17 @@ func (dm *DataManager) GetFilter(tenant, id string, cacheRead, cacheWrite bool,
 }
 
 func (dm *DataManager) SetFilter(fltr *Filter) (err error) {
-	return dm.DataDB().SetFilterDrv(fltr)
+	if err = dm.DataDB().SetFilterDrv(fltr); err != nil {
+		return
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.SetFilter(fltr); err != nil {
+				return
+			}
+		}
+	}
+	return
 
 }
 
@@ -490,7 +510,17 @@ func (dm *DataManager) GetThreshold(tenant, id string,
 }
 
 func (dm *DataManager) SetThreshold(th *Threshold) (err error) {
-	return dm.DataDB().SetThresholdDrv(th)
+	if err = dm.DataDB().SetThresholdDrv(th); err != nil {
+		return
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.SetThreshold(th); err != nil {
+				return
+			}
+		}
+	}
+	return
 }
 
 func (dm *DataManager) RemoveThreshold(tenant, id, transactionID string) (err error) {
@@ -577,8 +607,8 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 	}
 	if len(dm.rplDataDBs) != 0 {
 		for _, rplDM := range dm.rplDataDBs {
-			if err := rplDM.SetThresholdProfile(th, withIndex); err != nil {
-				return err
+			if err = rplDM.SetThresholdProfile(th, withIndex); err != nil {
+				return
 			}
 		}
 	}
@@ -676,7 +706,17 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 				}
 			}
 		}
-		return createAndIndex(utils.StatQueueProfilePrefix, sqp.Tenant, utils.EmptyString, sqp.ID, sqp.FilterIDs, dm)
+		if err = createAndIndex(utils.StatQueueProfilePrefix, sqp.Tenant,
+			utils.EmptyString, sqp.ID, sqp.FilterIDs, dm); err != nil {
+			return
+		}
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.SetStatQueueProfile(sqp, withIndex); err != nil {
+				return
+			}
+		}
 	}
 	return
 }
@@ -750,7 +790,17 @@ func (dm *DataManager) SetTiming(t *utils.TPTiming) (err error) {
 	if err = dm.DataDB().SetTimingDrv(t); err != nil {
 		return
 	}
-	return dm.CacheDataFromDB(utils.TimingsPrefix, []string{t.ID}, true)
+	if err = dm.CacheDataFromDB(utils.TimingsPrefix, []string{t.ID}, true); err != nil {
+		return
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.DataDB().SetTimingDrv(t); err != nil {
+				return
+			}
+		}
+	}
+	return
 }
 
 func (dm *DataManager) RemoveTiming(id, transactionID string) (err error) {
@@ -812,6 +862,13 @@ func (dm *DataManager) GetResource(tenant, id string, cacheRead, cacheWrite bool
 func (dm *DataManager) SetResource(rs *Resource) (err error) {
 	if err = dm.DataDB().SetResourceDrv(rs); err != nil {
 		return
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.SetResource(rs); err != nil {
+				return
+			}
+		}
 	}
 	return
 }
@@ -897,6 +954,13 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 			return
 		}
 		Cache.Clear([]string{utils.CacheEventResources})
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.SetResourceProfile(rp, withIndex); err != nil {
+				return
+			}
+		}
 	}
 	return
 }
@@ -986,7 +1050,17 @@ func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers,
 	if err = dm.DataDB().SetActionTriggersDrv(key, attr); err != nil {
 		return
 	}
-	return dm.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, []string{key}, true)
+	if err = dm.CacheDataFromDB(utils.ACTION_TRIGGER_PREFIX, []string{key}, true); err != nil {
+		return
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.DataDB().SetActionTriggersDrv(key, attr); err != nil {
+				return
+			}
+		}
+	}
+	return
 }
 
 func (dm *DataManager) GetSharedGroup(key string, skipCache bool,
@@ -1029,8 +1103,18 @@ func (dm *DataManager) SetSharedGroup(sg *SharedGroup,
 	if err = dm.DataDB().SetSharedGroupDrv(sg); err != nil {
 		return
 	}
-	return dm.CacheDataFromDB(utils.SHARED_GROUP_PREFIX,
-		[]string{sg.Id}, true)
+	if err = dm.CacheDataFromDB(utils.SHARED_GROUP_PREFIX,
+		[]string{sg.Id}, true); err != nil {
+		return
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.DataDB().SetSharedGroupDrv(sg); err != nil {
+				return
+			}
+		}
+	}
+	return
 }
 
 func (dm *DataManager) RemoveSharedGroup(id, transactionID string) (err error) {
@@ -1091,7 +1175,17 @@ func (dm *DataManager) SetActions(key string, as Actions, transactionID string) 
 	if err = dm.DataDB().SetActionsDrv(key, as); err != nil {
 		return
 	}
-	return dm.CacheDataFromDB(utils.ACTION_PREFIX, []string{key}, true)
+	if err = dm.CacheDataFromDB(utils.ACTION_PREFIX, []string{key}, true); err != nil {
+		return
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.DataDB().SetActionsDrv(key, as); err != nil {
+				return
+			}
+		}
+	}
+	return
 }
 
 func (dm *DataManager) RemoveActions(key, transactionID string) (err error) {
@@ -1150,7 +1244,17 @@ func (dm *DataManager) SetRatingPlan(rp *RatingPlan, transactionID string) (err 
 	if err = dm.DataDB().SetRatingPlanDrv(rp); err != nil {
 		return
 	}
-	return dm.CacheDataFromDB(utils.RATING_PLAN_PREFIX, []string{rp.Id}, true)
+	if err = dm.CacheDataFromDB(utils.RATING_PLAN_PREFIX, []string{rp.Id}, true); err != nil {
+		return
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.DataDB().SetRatingPlanDrv(rp); err != nil {
+				return
+			}
+		}
+	}
+	return
 }
 
 func (dm *DataManager) RemoveRatingPlan(key string, transactionID string) (err error) {
@@ -1210,7 +1314,17 @@ func (dm *DataManager) SetRatingProfile(rpf *RatingProfile,
 	if err = dm.DataDB().SetRatingProfileDrv(rpf); err != nil {
 		return
 	}
-	return dm.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, []string{rpf.Id}, true)
+	if err = dm.CacheDataFromDB(utils.RATING_PROFILE_PREFIX, []string{rpf.Id}, true); err != nil {
+		return
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.DataDB().SetRatingProfileDrv(rpf); err != nil {
+				return
+			}
+		}
+	}
+	return
 }
 
 func (dm *DataManager) RemoveRatingProfile(key string,
@@ -1257,7 +1371,19 @@ func (dm *DataManager) GetFilterIndexes(cacheID, itemIDPrefix, filterType string
 
 func (dm *DataManager) SetFilterIndexes(cacheID, itemIDPrefix string,
 	indexes map[string]utils.StringMap, commit bool, transactionID string) (err error) {
-	return dm.DataDB().SetFilterIndexesDrv(cacheID, itemIDPrefix, indexes, commit, transactionID)
+	if err = dm.DataDB().SetFilterIndexesDrv(cacheID, itemIDPrefix,
+		indexes, commit, transactionID); err != nil {
+		return
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.DataDB().SetFilterIndexesDrv(cacheID, itemIDPrefix,
+				indexes, commit, transactionID); err != nil {
+				return
+			}
+		}
+	}
+	return
 }
 
 func (dm *DataManager) RemoveFilterIndexes(cacheID, itemIDPrefix string) (err error) {
@@ -1288,6 +1414,7 @@ func (dm *DataManager) MatchFilterIndexFromKey(cacheID, key string) (err error) 
 	_, err = dm.MatchFilterIndex(cacheID, itemIDPrefix, filterType, fieldName, fieldVal)
 	return
 }
+
 func (dm *DataManager) MatchFilterIndex(cacheID, itemIDPrefix,
 	filterType, fieldName, fieldVal string) (itemIDs utils.StringMap, err error) {
 	fieldValKey := utils.ConcatenatedKey(itemIDPrefix, filterType, fieldName, fieldVal)
@@ -1300,11 +1427,24 @@ func (dm *DataManager) MatchFilterIndex(cacheID, itemIDPrefix,
 	// Not found in cache, check in DB
 	itemIDs, err = dm.DataDB().MatchFilterIndexDrv(cacheID, itemIDPrefix, filterType, fieldName, fieldVal)
 	if err != nil {
-		if err == utils.ErrNotFound {
-			Cache.Set(cacheID, fieldValKey, nil, nil,
-				true, utils.NonTransactional)
+		if len(dm.rmtDataDBs) != 0 {
+			var rmtErr error
+			for _, rmtDM := range dm.rmtDataDBs {
+				if itemIDs, rmtErr = rmtDM.MatchFilterIndex(cacheID, itemIDPrefix,
+					filterType, fieldName, fieldVal); rmtErr == nil {
+					break
+				}
+			}
+			err = rmtErr
 		}
-		return nil, err
+		if err != nil {
+			if err == utils.ErrNotFound {
+				Cache.Set(cacheID, fieldValKey, nil, nil,
+					true, utils.NonTransactional)
+
+			}
+			return nil, err
+		}
 	}
 	Cache.Set(cacheID, fieldValKey, itemIDs, nil,
 		true, utils.NonTransactional)
@@ -1377,7 +1517,17 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 				}
 			}
 		}
-		return createAndIndex(utils.SupplierProfilePrefix, supp.Tenant, utils.EmptyString, supp.ID, supp.FilterIDs, dm)
+		if err = createAndIndex(utils.SupplierProfilePrefix, supp.Tenant,
+			utils.EmptyString, supp.ID, supp.FilterIDs, dm); err != nil {
+			return
+		}
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.SetSupplierProfile(supp, withIndex); err != nil {
+				return
+			}
+		}
 	}
 	return
 }
@@ -1488,6 +1638,13 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 			}
 		}
 	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.SetAttributeProfile(ap, withIndex); err != nil {
+				return
+			}
+		}
+	}
 	return
 }
 
@@ -1583,7 +1740,17 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 				}
 			}
 		}
-		return createAndIndex(utils.ChargerProfilePrefix, cpp.Tenant, utils.EmptyString, cpp.ID, cpp.FilterIDs, dm)
+		if err = createAndIndex(utils.ChargerProfilePrefix, cpp.Tenant,
+			utils.EmptyString, cpp.ID, cpp.FilterIDs, dm); err != nil {
+			return
+		}
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.SetChargerProfile(cpp, withIndex); err != nil {
+				return
+			}
+		}
 	}
 	return
 }
@@ -1691,6 +1858,13 @@ func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bo
 			}
 		}
 	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.SetDispatcherProfile(dpp, withIndex); err != nil {
+				return
+			}
+		}
+	}
 	return
 }
 
@@ -1775,7 +1949,16 @@ func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrit
 }
 
 func (dm *DataManager) SetDispatcherHost(dpp *DispatcherHost) (err error) {
-	return dm.DataDB().SetDispatcherHostDrv(dpp)
+	if err = dm.DataDB().SetDispatcherHostDrv(dpp); err != nil {
+		if len(dm.rplDataDBs) != 0 {
+			for _, rplDM := range dm.rplDataDBs {
+				if err = rplDM.SetDispatcherHost(dpp); err != nil {
+					return
+				}
+			}
+		}
+	}
+	return
 }
 
 func (dm *DataManager) RemoveDispatcherHost(tenant, id string,
@@ -1804,13 +1987,25 @@ func (dm *DataManager) RemoveDispatcherHost(tenant, id string,
 func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loadIDs map[string]int64, err error) {
 	loadIDs, err = dm.DataDB().GetItemLoadIDsDrv(itemIDPrefix)
 	if err != nil {
-		if err == utils.ErrNotFound && cacheWrite {
-			for key, _ := range loadIDs {
-				Cache.Set(utils.CacheLoadIDs, key, nil, nil,
-					cacheCommit(utils.NonTransactional), utils.NonTransactional)
+		if len(dm.rmtDataDBs) != 0 {
+			var rmtErr error
+			for _, rmtDM := range dm.rmtDataDBs {
+				if loadIDs, rmtErr = rmtDM.GetItemLoadIDs(itemIDPrefix, false); rmtErr == nil {
+					break
+				}
 			}
+			err = rmtErr
 		}
-		return nil, err
+		if err != nil {
+			if err == utils.ErrNotFound && cacheWrite {
+				for key, _ := range loadIDs {
+					Cache.Set(utils.CacheLoadIDs, key, nil, nil,
+						cacheCommit(utils.NonTransactional), utils.NonTransactional)
+				}
+
+			}
+			return nil, err
+		}
 	}
 	if cacheWrite {
 		for key, val := range loadIDs {
@@ -1821,8 +2016,18 @@ func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loa
 	return
 }
 
-func (dm *DataManager) SetLoadIDs(loadIDs map[string]int64) error {
-	return dm.DataDB().SetLoadIDsDrv(loadIDs)
+func (dm *DataManager) SetLoadIDs(loadIDs map[string]int64) (err error) {
+	if err = dm.DataDB().SetLoadIDsDrv(loadIDs); err != nil {
+		return
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.SetLoadIDs(loadIDs); err != nil {
+				return
+			}
+		}
+	}
+	return
 }
 
 // Reconnect recconnects to the DB when the config was changes
