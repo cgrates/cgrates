@@ -359,7 +359,18 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue) (err error) {
 
 // RemoveStatQueue removes the StoredStatQueue
 func (dm *DataManager) RemoveStatQueue(tenant, id string, transactionID string) (err error) {
-	return dm.dataDB.RemStoredStatQueueDrv(tenant, id)
+	if err = dm.dataDB.RemStoredStatQueueDrv(tenant, id); err != nil {
+		return
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.RemoveStatQueue(tenant, id,
+				utils.NonTransactional); err != nil {
+				return
+			}
+		}
+	}
+	return
 }
 
 // GetFilter returns
@@ -401,7 +412,18 @@ func (dm *DataManager) SetFilter(fltr *Filter) (err error) {
 }
 
 func (dm *DataManager) RemoveFilter(tenant, id, transactionID string) (err error) {
-	return dm.DataDB().RemoveFilterDrv(tenant, id)
+	if err = dm.DataDB().RemoveFilterDrv(tenant, id); err != nil {
+		return
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.RemoveFilter(tenant, id,
+				utils.NonTransactional); err != nil {
+				return
+			}
+		}
+	}
+	return
 }
 
 func (dm *DataManager) GetThreshold(tenant, id string,
@@ -845,6 +867,14 @@ func (dm *DataManager) RemoveActionTriggers(id, transactionID string) (err error
 	if err = dm.DataDB().RemoveActionTriggersDrv(id); err != nil {
 		return
 	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.RemoveActionTriggers(id,
+				utils.NonTransactional); err != nil {
+				return
+			}
+		}
+	}
 	Cache.Remove(utils.CacheActionTriggers, id,
 		cacheCommit(transactionID), transactionID)
 	return
@@ -894,6 +924,14 @@ func (dm *DataManager) RemoveSharedGroup(id, transactionID string) (err error) {
 	if err = dm.DataDB().RemoveSharedGroupDrv(id); err != nil {
 		return
 	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.RemoveSharedGroup(id,
+				utils.NonTransactional); err != nil {
+				return
+			}
+		}
+	}
 	Cache.Remove(utils.CacheSharedGroups, id,
 		cacheCommit(transactionID), transactionID)
 	return
@@ -935,6 +973,14 @@ func (dm *DataManager) RemoveActions(key, transactionID string) (err error) {
 	if err = dm.DataDB().RemoveActionsDrv(key); err != nil {
 		return
 	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.RemoveActions(key,
+				utils.NonTransactional); err != nil {
+				return
+			}
+		}
+	}
 	Cache.Remove(utils.CacheActions, key,
 		cacheCommit(transactionID), transactionID)
 	return
@@ -973,6 +1019,14 @@ func (dm *DataManager) SetRatingPlan(rp *RatingPlan, transactionID string) (err 
 func (dm *DataManager) RemoveRatingPlan(key string, transactionID string) (err error) {
 	if err = dm.DataDB().RemoveRatingPlanDrv(key); err != nil {
 		return
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.RemoveRatingPlan(key,
+				utils.NonTransactional); err != nil {
+				return
+			}
+		}
 	}
 	Cache.Remove(utils.CacheRatingPlans, key,
 		cacheCommit(transactionID), transactionID)
@@ -1015,6 +1069,14 @@ func (dm *DataManager) RemoveRatingProfile(key string,
 	if err = dm.DataDB().RemoveRatingProfileDrv(key); err != nil {
 		return
 	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.RemoveRatingProfile(key,
+				utils.NonTransactional); err != nil {
+				return
+			}
+		}
+	}
 	Cache.Remove(utils.CacheRatingProfiles, key,
 		cacheCommit(transactionID), transactionID)
 	return
@@ -1035,7 +1097,18 @@ func (dm *DataManager) SetFilterIndexes(cacheID, itemIDPrefix string,
 }
 
 func (dm *DataManager) RemoveFilterIndexes(cacheID, itemIDPrefix string) (err error) {
-	return dm.DataDB().RemoveFilterIndexesDrv(cacheID, itemIDPrefix)
+	if err = dm.DataDB().RemoveFilterIndexesDrv(cacheID, itemIDPrefix); err != nil {
+		return
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.RemoveFilterIndexes(cacheID,
+				itemIDPrefix); err != nil {
+				return
+			}
+		}
+	}
+	return
 }
 
 func (dm *DataManager) MatchFilterIndexFromKey(cacheID, key string) (err error) {
@@ -1144,7 +1217,18 @@ func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string, w
 		return utils.ErrNotFound
 	}
 	if withIndex {
-		return NewFilterIndexer(dm, utils.SupplierProfilePrefix, tenant).RemoveItemFromIndex(tenant, id, oldSupp.FilterIDs)
+		if err = NewFilterIndexer(dm, utils.SupplierProfilePrefix,
+			tenant).RemoveItemFromIndex(tenant, id, oldSupp.FilterIDs); err != nil {
+			return
+		}
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.RemoveSupplierProfile(tenant, id,
+				utils.NonTransactional, withIndex); err != nil {
+				return
+			}
+		}
 	}
 	return
 }
@@ -1236,6 +1320,14 @@ func (dm *DataManager) RemoveAttributeProfile(tenant, id string, transactionID s
 			}
 		}
 	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.RemoveAttributeProfile(tenant, id,
+				utils.NonTransactional, withIndex); err != nil {
+				return
+			}
+		}
+	}
 	return
 }
 
@@ -1306,7 +1398,18 @@ func (dm *DataManager) RemoveChargerProfile(tenant, id string,
 		return utils.ErrNotFound
 	}
 	if withIndex {
-		return NewFilterIndexer(dm, utils.ChargerProfilePrefix, tenant).RemoveItemFromIndex(tenant, id, oldCpp.FilterIDs)
+		if err = NewFilterIndexer(dm, utils.ChargerProfilePrefix,
+			tenant).RemoveItemFromIndex(tenant, id, oldCpp.FilterIDs); err != nil {
+			return
+		}
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.RemoveChargerProfile(tenant, id,
+				utils.NonTransactional, withIndex); err != nil {
+				return
+			}
+		}
 	}
 	return
 }
@@ -1395,6 +1498,14 @@ func (dm *DataManager) RemoveDispatcherProfile(tenant, id string,
 			}
 		}
 	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.RemoveDispatcherProfile(tenant, id,
+				utils.NonTransactional, withIndex); err != nil {
+				return
+			}
+		}
+	}
 	return
 }
 
@@ -1449,6 +1560,14 @@ func (dm *DataManager) RemoveDispatcherHost(tenant, id string,
 	}
 	if oldDpp == nil {
 		return utils.ErrNotFound
+	}
+	if len(dm.rplDataDBs) != 0 {
+		for _, rplDM := range dm.rplDataDBs {
+			if err = rplDM.RemoveDispatcherHost(tenant, id,
+				utils.NonTransactional); err != nil {
+				return
+			}
+		}
 	}
 	return
 }
