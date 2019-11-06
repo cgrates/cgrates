@@ -5,21 +5,36 @@ CGRateS can be installed via packages as well as Go automated source install.
 We recommend using source installs for advanced users familiar with Go programming and packages for users not willing to be involved in the code building process.
 
 3.1. Using packages
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Depending on the packaged distribution, following methods are available:
+
+
+3.1.1. Debian 
 ~~~~~~~~~~~~~
 
-First step import and add the key:
+This is for the moment the only packaged and the most recommended to use method to install CGRateS. CGRateS development team maintains official debian packages out of master branch, released under nightly tag in aptitude. 
+
+There are two main ways of installing the maintained packages:
+
+
+3.1.1.1. Aptitude repository 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Add the gpg key:
 
 ::
 
     sudo wget -O - http://apt.cgrates.org/apt.cgrates.org.gpg.key | sudo apt-key add -
 
-Second step add the repository in /etc/apt/sources.list ( command need to be executed as root )
+Add the repository in apt sources list:
 
 ::
 
     echo "deb http://apt.cgrates.org/debian/ nightly main" >> /etc/apt/sources.list
 
-Third step update the apt and install the CGRateS
+Update & install:
 
 ::
 
@@ -27,25 +42,29 @@ Third step update the apt and install the CGRateS
     sudo apt-get install cgrates
 
 
-3.1.1. Debian 
-~~~~~~~~~~~~~
+Once the installation is completed, one should perform the :ref:`post-install` section in order to have the CGRateS properly set and ready to run.
+After *post-install* actions are performed, CGRateS will be configured in **/etc/cgrates/cgrates.json** and enabled in **/etc/default/cgrates**.
 
-This is for the moment the only packaged and the most recommended to use method to install CGRateS.
 
-On the server you want to install CGRateS, simply execute the following commands:
+3.1.1.2. Manual installation of .deb package out of archive server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Run the following commands:
 
 ::
 
-   wget http://www.cgrates.org/tmp_pkg/cgrates_0.9.1~rc8_amd64.deb
-   dpkg -i cgrates_0.9.1~rc8_amd64.deb
+    wget http://pkg.cgrates.org/debian/cgrates_current_amd64.deb
+    dpkg -i cgrates_0.9.1~rc8_amd64.deb
 
-Once the installation is completed, one should perform the :ref:`post-install` section in order to have the CGRateS properly set and ready to run.
-After *post-install* actions are performed, CGRateS will be configured in **/etc/cgrates/cgrates.json** and enabled in **/etc/default/cgrates**.
+As a side note on http://pkg.cgrates.org one can find an entire archive of CGRateS packages.
+
 
 3.2. Using source
 -----------------
 
 For developing CGRateS and switching between its versions, we are using the **new go mods feature** introduced in go 1.13.
+
 
 3.2.1 Install GO Lang
 ~~~~~~~~~~~~~~~~~~~~~
