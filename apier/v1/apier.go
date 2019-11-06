@@ -169,7 +169,10 @@ func (apiv1 *ApierV1) SetDestination(attrs utils.AttrSetDestination, reply *stri
 func (apiv1 *ApierV1) GetRatingPlan(rplnId string, reply *engine.RatingPlan) error {
 	rpln, err := apiv1.DataManager.GetRatingPlan(rplnId, false, utils.NonTransactional)
 	if err != nil {
-		return utils.ErrNotFound
+		if err.Error() == utils.ErrNotFound.Error() {
+			return err
+		}
+		return utils.NewErrServerError(err)
 	}
 	*reply = *rpln
 	return nil
