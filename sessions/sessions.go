@@ -1679,11 +1679,13 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(clnt rpcclient.RpcClientConnection,
 	}
 	if aSs := sS.getSessions(s.CGRID, false); len(aSs) != 0 { // found active session, transit to passive
 		aSs[0].Lock()
-		sS.transitSState(s.CGRID, true)
+		sS.unregisterSession(s.CGRID, false)
+		s.stopSTerminator()
+		s.stopDebitLoops()
 		aSs[0].Unlock()
-	} else {
-		sS.registerSession(s, true)
 	}
+	sS.registerSession(s, true)
+
 	*reply = utils.OK
 	return
 }
