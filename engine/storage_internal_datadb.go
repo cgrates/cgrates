@@ -40,7 +40,8 @@ type InternalDB struct {
 }
 
 func NewInternalDB(stringIndexedFields, prefixIndexedFields []string) *InternalDB {
-	return &InternalDB{db: ltcache.NewTransCache(config.CgrConfig().CacheCfg().AsTransCacheConfig()),
+	dfltCfg, _ := config.NewDefaultCGRConfig()
+	return &InternalDB{db: ltcache.NewTransCache(dfltCfg.CacheCfg().AsTransCacheConfig()),
 		ms: NewCodecMsgpackMarshaler(), stringIndexedFields: stringIndexedFields,
 		prefixIndexedFields: prefixIndexedFields, cnter: utils.NewCounter(time.Now().UnixNano(), 0)}
 }

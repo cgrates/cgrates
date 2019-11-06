@@ -207,6 +207,9 @@ func testDispatcherSUpdateDispatcherProfile(t *testing.T) {
 }
 
 func testDispatcherSGetDispatcherProfileCache(t *testing.T) {
+	if dispatcherConfigDIR == "tutinternal" {
+		t.SkipNow()
+	}
 	var rcvStats map[string]*ltcache.CacheStats
 	if err := dispatcherRPC.Call(utils.CacheSv1GetCacheStats, nil, &rcvStats); err != nil {
 		t.Error(err)
