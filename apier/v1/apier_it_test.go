@@ -893,6 +893,25 @@ func TestApierGetRatingPlan(t *testing.T) {
 	}
 }
 
+func TestApierRemoveRatingPlan(t *testing.T) {
+	rplnId := "RETAIL1"
+	var reply string
+
+	err := rater.Call(utils.ApierV1RemoveRatingPlan, rplnId, &reply)
+	if err != nil {
+		t.Error(err)
+	}
+	if reply != utils.OK {
+		t.Errorf("Expected %s, received %s", utils.OK, reply)
+	}
+	//get rating plan (the one that was removed. should return 'err not found')
+	var ratingPlan *engine.RatingPlan
+	err = rater.Call(utils.ApierV1GetRatingPlan, rplnId, ratingPlan)
+	if err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Expecting error: %s, received: %v", utils.ErrNotFound, err)
+	}
+}
+
 // Test here AddBalance
 func TestApierAddBalance(t *testing.T) {
 	reply := ""

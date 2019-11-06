@@ -821,6 +821,8 @@ const (
 	ApierV1ComputeActionPlanIndexes = "ApierV1.ComputeActionPlanIndexes"
 	ApierV1GetActionPlanIDs         = "ApierV1.GetActionPlanIDs"
 	ApierV1GetRatingPlanIDs         = "ApierV1.GetRatingPlanIDs"
+	ApierV1GetRatingPlan            = "ApierV1.GetRatingPlan"
+	ApierV1RemoveRatingPlan         = "ApierV1.RemoveRatingPlan"
 )
 
 const (
