@@ -320,6 +320,7 @@ func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (thresholdsIDs 
 		t.Snooze = time.Now().Add(t.tPrfl.MinSleep)
 		// recurrent threshold
 		if tS.cgrcfg.ThresholdSCfg().StoreInterval == -1 {
+			*t.dirty = true
 			tS.StoreThreshold(t)
 		} else {
 			*t.dirty = true // mark it to be saved

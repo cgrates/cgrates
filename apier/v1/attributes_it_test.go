@@ -104,7 +104,7 @@ func TestAttributeSITMongo(t *testing.T) {
 
 func TestAttributeSITInternal(t *testing.T) {
 	alsPrfConfigDIR = "tutinternal"
-	for _, stest := range sTestsAlsPrf {
+	for _, stest := range sTestsAlsPrf[:29] {
 		t.Run(alsPrfConfigDIR, stest)
 	}
 }

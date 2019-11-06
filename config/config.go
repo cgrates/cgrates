@@ -777,7 +777,26 @@ func (cfg *CGRConfig) loadDataDBCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnDataDbCfg, err = jsnCfg.DbJsonCfg(DATADB_JSN); err != nil {
 		return
 	}
-	return cfg.dataDbCfg.loadFromJsonCfg(jsnDataDbCfg)
+	if err = cfg.dataDbCfg.loadFromJsonCfg(jsnDataDbCfg); err != nil {
+		return
+	}
+	// in case of internalDB we need to disable the cache
+	// so we enforce it here
+	if cfg.dataDbCfg.DataDbType == utils.INTERNAL {
+		var customCfg *CgrJsonCfg
+		var cacheJsonCfg *CacheJsonCfg
+		if customCfg, err = NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON_DISABLED_CACHE)); err != nil {
+			return
+		}
+		if cacheJsonCfg, err = customCfg.CacheJsonCfg(); err != nil {
+			return
+		}
+		if err = cfg.cacheCfg.loadFromJsonCfg(cacheJsonCfg); err != nil {
+			return
+		}
+	}
+	return
+
 }
 
 // loadStorDBCfg loads the StorDB section of the configuration

@@ -81,3 +81,47 @@ func (cCfg CacheCfg) AsTransCacheConfig() (tcCfg map[string]*ltcache.CacheConfig
 	}
 	return
 }
+
+// CGRATES_CFG_JSON_DISABLED_CACHE is used to populate cache config when DataDB is internal
+const CGRATES_CFG_JSON_DISABLED_CACHE = `
+{
+
+"cache":{
+	"destinations": {"limit": 0},
+	"reverse_destinations": {"limit": 0},
+	"rating_plans": {"limit": 0},
+	"rating_profiles": {"limit": 0},
+	"actions": {"limit": 0},
+	"action_plans": {"limit": 0},
+	"account_action_plans": {"limit": 0},
+	"action_triggers": {"limit": 0},
+	"shared_groups": {"limit": 0},
+	"timings": {"limit": 0},
+	"resource_profiles": {"limit": 0},
+	"resources": {"limit": 0},
+	"event_resources": {"limit": 0},
+	"statqueue_profiles": {"limit": 0},
+	"statqueues": {"limit": 0},
+	"threshold_profiles": {"limit": 0},
+	"thresholds": {"limit": 0},
+	"filters": {"limit": 0},
+	"supplier_profiles": {"limit": 0},
+	"attribute_profiles": {"limit": 0},
+	"charger_profiles": {"limit": 0},
+	"dispatcher_profiles": {"limit": 0},
+	"dispatcher_hosts": {"limit": 0},
+	"resource_filter_indexes" : {"limit": 0},
+	"stat_filter_indexes" : {"limit": 0},
+	"threshold_filter_indexes" : {"limit": 0},
+	"supplier_filter_indexes" : {"limit": 0},
+	"attribute_filter_indexes" : {"limit": 0},
+	"charger_filter_indexes" : {"limit": 0},
+	"dispatcher_filter_indexes" : {"limit": 0},
+	"dispatcher_routes": {"limit": 0},
+	"diameter_messages": {"limit": 0},
+	"rpc_responses": {"limit": 0},
+	"closed_sessions": {"limit": 0},
+	"load_ids": {"limit": 0},
+},
+
+}`

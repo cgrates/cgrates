@@ -667,6 +667,7 @@ func (rS *ResourceService) V1AllocateResource(args utils.ArgRSv1ResourceUsage, r
 			continue
 		}
 		if rS.cgrcfg.ResourceSCfg().StoreInterval == -1 {
+			*r.dirty = true
 			rS.StoreResource(r)
 		} else {
 			*r.dirty = true // mark it to be saved
