@@ -32,13 +32,15 @@ import (
 
 // NewSchedulerService returns the Scheduler Service
 func NewSchedulerService(cfg *config.CGRConfig, dm *DataDBService,
-	cacheS *engine.CacheS, server *utils.Server, internalCDRServerChan,
+	cacheS *engine.CacheS, fltrSChan chan *engine.FilterS,
+	server *utils.Server, internalCDRServerChan,
 	dispatcherChan chan rpcclient.RpcClientConnection) *SchedulerService {
 	return &SchedulerService{
 		connChan:       make(chan rpcclient.RpcClientConnection, 1),
 		cfg:            cfg,
 		dm:             dm,
 		cacheS:         cacheS,
+		fltrSChan:      fltrSChan,
 		server:         server,
 		cdrSChan:       internalCDRServerChan,
 		dispatcherChan: dispatcherChan,
@@ -51,6 +53,7 @@ type SchedulerService struct {
 	cfg            *config.CGRConfig
 	dm             *DataDBService
 	cacheS         *engine.CacheS
+	fltrSChan      chan *engine.FilterS
 	server         *utils.Server
 	cdrSChan       chan rpcclient.RpcClientConnection
 	dispatcherChan chan rpcclient.RpcClientConnection
@@ -68,11 +71,13 @@ func (schS *SchedulerService) Start() (err error) {
 
 	<-schS.cacheS.GetPrecacheChannel(utils.CacheActionPlans) // wait for ActionPlans to be cached
 
+	fltrS := <-schS.fltrSChan
+	schS.fltrSChan <- fltrS
+
 	schS.Lock()
 	defer schS.Unlock()
-
 	utils.Logger.Info("<ServiceManager> Starting CGRateS Scheduler.")
-	schS.schS = scheduler.NewScheduler(schS.dm.GetDM())
+	schS.schS = scheduler.NewScheduler(schS.dm.GetDM(), schS.cfg, fltrS)
 	go schS.schS.Loop()
 
 	schS.rpc = v1.NewSchedulerSv1(schS.cfg)

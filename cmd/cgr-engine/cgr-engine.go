@@ -531,7 +531,7 @@ func main() {
 	supS := services.NewSupplierService(cfg, dmService, cacheS, filterSChan, server,
 		attrS.GetIntenternalChan(), stS.GetIntenternalChan(),
 		reS.GetIntenternalChan(), dspS.GetIntenternalChan())
-	schS := services.NewSchedulerService(cfg, dmService, cacheS, server, internalCDRServerChan, dspS.GetIntenternalChan())
+	schS := services.NewSchedulerService(cfg, dmService, cacheS, filterSChan, server, internalCDRServerChan, dspS.GetIntenternalChan())
 	rals := services.NewRalService(cfg, dmService, cdrDb, loadDb, cacheS, filterSChan, server,
 		tS.GetIntenternalChan(), stS.GetIntenternalChan(), internalCacheSChan,
 		schS.GetIntenternalChan(), attrS.GetIntenternalChan(), dspS.GetIntenternalChan(),

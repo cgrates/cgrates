@@ -45,12 +45,6 @@ type ActionTiming struct {
 	stCache      time.Time       // cached time of the next start
 }
 
-type Task struct {
-	Uuid      string
-	AccountID string
-	ActionsID string
-}
-
 type ActionPlan struct {
 	Id            string // informative purpose only
 	AccountIDs    utils.StringMap
@@ -70,14 +64,6 @@ func (apl *ActionPlan) Clone() (interface{}, error) {
 		return nil, err
 	}
 	return cln, nil
-}
-
-func (t *Task) Execute() error {
-	return (&ActionTiming{
-		Uuid:       t.Uuid,
-		ActionsID:  t.ActionsID,
-		accountIDs: utils.StringMap{t.AccountID: true},
-	}).Execute(nil, nil)
 }
 
 func (at *ActionTiming) GetNextStartTime(now time.Time) (t time.Time) {

@@ -270,6 +270,7 @@ func TestCGRConfigReloadSchedulerS(t *testing.T) {
 				Transport: utils.MetaJSONrpc,
 			},
 		},
+		Filters: []string{},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SchedulerCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SchedulerCfg()))

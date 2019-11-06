@@ -25,6 +25,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -35,6 +36,8 @@ type Scheduler struct {
 	timer                           *time.Timer
 	restartLoop                     chan bool
 	dm                              *engine.DataManager
+	cfg                             *config.CGRConfig
+	fltrS                           *engine.FilterS
 	schedulerStarted                bool
 	actStatsInterval                time.Duration                 // How long time to keep the stats in memory
 	actSucessChan, actFailedChan    chan *engine.Action           // ActionPlan will pass actions via these channels
@@ -42,13 +45,16 @@ type Scheduler struct {
 	actSuccessStats, actFailedStats map[string]map[time.Time]bool // keep here stats regarding executed actions, map[actionType]map[execTime]bool
 }
 
-func NewScheduler(dm *engine.DataManager) *Scheduler {
-	s := &Scheduler{
+func NewScheduler(dm *engine.DataManager, cfg *config.CGRConfig,
+	fltrS *engine.FilterS) (s *Scheduler) {
+	s = &Scheduler{
 		restartLoop: make(chan bool),
 		dm:          dm,
+		cfg:         cfg,
+		fltrS:       fltrS,
 	}
 	s.Reload()
-	return s
+	return
 }
 
 func (s *Scheduler) updateActStats(act *engine.Action, isFailed bool) {
@@ -142,9 +148,18 @@ func (s *Scheduler) loadActionPlans() {
 		if err != nil || task == nil {
 			break
 		}
+		if pass, err := s.fltrS.Pass(s.cfg.GeneralCfg().DefaultTenant,
+			s.cfg.SchedulerCfg().Filters, task); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: <%s> querying filters for path: <%+v>, not executing task <%s> on account <%s>",
+					utils.SchedulerS, err.Error(), s.cfg.SchedulerCfg().Filters[1:], task.ActionsID, task.AccountID))
+			continue
+		} else if !pass {
+			continue
+		}
 		limit <- true
 		go func() {
-			utils.Logger.Info(fmt.Sprintf("<Scheduler> executing task %s on account %s", task.ActionsID, task.AccountID))
+			utils.Logger.Info(fmt.Sprintf("<%s> executing task %s on account %s", utils.SchedulerS, task.ActionsID, task.AccountID))
 			task.Execute()
 			<-limit
 		}()

@@ -126,7 +126,8 @@ cgrates.org,call,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,`
 }
 
 func TestExecuteActions3(t *testing.T) {
-	scheduler.NewScheduler(dataDB3).Reload()
+	scheduler.NewScheduler(dataDB3, config.CgrConfig(),
+		engine.NewFilterS(config.CgrConfig(), nil, nil, nil, dataDB)).Reload()
 	time.Sleep(10 * time.Millisecond) // Give time to scheduler to topup the account
 	if acnt, err := dataDB3.DataDB().GetAccount("cgrates.org:12346"); err != nil {
 		t.Error(err)

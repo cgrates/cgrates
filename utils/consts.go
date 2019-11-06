@@ -570,6 +570,8 @@ const (
 	PassLow                     = "pass"
 	SentinelLow                 = "sentinel"
 	QueryLow                    = "query"
+	UUID                        = "UUID"
+	ActionsID                   = "ActionsID"
 )
 
 // Migrator Action
