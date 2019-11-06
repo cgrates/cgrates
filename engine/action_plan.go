@@ -45,6 +45,27 @@ type ActionTiming struct {
 	stCache      time.Time       // cached time of the next start
 }
 
+// Tasks converts an ActionTiming into multiple Tasks
+func (at *ActionTiming) Tasks() (tsks []*Task) {
+	if len(at.accountIDs) == 0 {
+		return []*Task{
+			&Task{
+				Uuid:      at.Uuid,
+				ActionsID: at.ActionsID,
+			}}
+	}
+	tsks = make([]*Task, len(at.accountIDs))
+	i := 0
+	for acntID := range at.accountIDs {
+		tsks[i] = &Task{
+			Uuid:      at.Uuid,
+			ActionsID: at.ActionsID,
+			AccountID: acntID,
+		}
+	}
+	return
+}
+
 type ActionPlan struct {
 	Id            string // informative purpose only
 	AccountIDs    utils.StringMap
@@ -249,6 +270,13 @@ func (at *ActionTiming) SetActions(as Actions) {
 
 func (at *ActionTiming) SetAccountIDs(accIDs utils.StringMap) {
 	at.accountIDs = accIDs
+}
+
+func (at *ActionTiming) RemoveAccountID(acntID string) (found bool) {
+	if _, found = at.accountIDs[acntID]; found {
+		delete(at.accountIDs, acntID)
+	}
+	return
 }
 
 func (at *ActionTiming) GetAccountIDs() utils.StringMap {
