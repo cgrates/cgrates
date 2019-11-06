@@ -48,7 +48,7 @@ func TestSchedulerSReload(t *testing.T) {
 	internalCdrSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalCdrSChan <- nil
 	db := NewDataDBService(cfg)
-	schS := NewSchedulerService(cfg, db, chS, server, internalCdrSChan, nil)
+	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, internalCdrSChan, nil)
 	srvMngr.AddServices(schS, NewLoaderService(cfg, db, filterSChan, server, nil, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)

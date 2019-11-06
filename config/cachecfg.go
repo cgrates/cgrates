@@ -118,9 +118,9 @@ const CGRATES_CFG_JSON_DISABLED_CACHE = `
 	"charger_filter_indexes" : {"limit": 0},
 	"dispatcher_filter_indexes" : {"limit": 0},
 	"dispatcher_routes": {"limit": 0},
-	"diameter_messages": {"limit": 0},
-	"rpc_responses": {"limit": 0},
-	"closed_sessions": {"limit": 0},
+	"diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false},						// diameter messages caching
+	"rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false},							// RPC responses caching
+	"closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false},						// closed sessions cached for CDRs
 	"load_ids": {"limit": 0},
 },
 

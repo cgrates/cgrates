@@ -69,7 +69,7 @@ func TestSessionSReload(t *testing.T) {
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg)
 	chrS := NewChargerService(cfg, db, chS, filterSChan, server, nil, nil)
-	schS := NewSchedulerService(cfg, db, chS, server, make(chan rpcclient.RpcClientConnection, 1), nil)
+	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.RpcClientConnection, 1), nil)
 	ralS := NewRalService(cfg, db, nil, nil, chS, filterSChan, server,
 		/*tS*/ internalChan, internalChan, cacheSChan, internalChan, internalChan,
 		internalChan, schS, engineShutdown)
