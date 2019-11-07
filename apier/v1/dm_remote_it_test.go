@@ -44,6 +44,7 @@ var sTestsInternalRemoteIT = []func(t *testing.T){
 	testInternalRemoteITDataFlush,
 	testInternalRemoteITCheckEmpty,
 	testInternalRemoteITLoadData,
+	testInternalRemoteITVerifyLoadedDataInRemote,
 	testInternalRemoteITInitCfg,
 	testInternalRemoteITStartEngine,
 	testInternalRemoteITRPCConn,
@@ -73,10 +74,10 @@ func TestInternalRemoteITMongo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dataDB, err := engine.NewMongoStorage(mgoITCfg.StorDbCfg().Host,
-		mgoITCfg.StorDbCfg().Port, mgoITCfg.StorDbCfg().Name,
-		mgoITCfg.StorDbCfg().User, mgoITCfg.StorDbCfg().Password,
-		utils.StorDB, nil, false)
+	dataDB, err := engine.NewMongoStorage(mgoITCfg.DataDbCfg().DataDbHost,
+		mgoITCfg.DataDbCfg().DataDbPort, mgoITCfg.DataDbCfg().DataDbName,
+		mgoITCfg.DataDbCfg().DataDbUser, mgoITCfg.DataDbCfg().DataDbPass,
+		utils.DataDB, nil, false)
 	if err != nil {
 		t.Fatal("Could not connect to Mongo", err.Error())
 	}
@@ -116,6 +117,34 @@ func testInternalRemoteITLoadData(t *testing.T) {
 	}
 }
 
+func testInternalRemoteITVerifyLoadedDataInRemote(t *testing.T) {
+	exp := &engine.AttributeProfile{
+		Tenant:    "cgrates.org",
+		ID:        "ATTR_1001_SIMPLEAUTH",
+		Contexts:  []string{"simpleauth"},
+		FilterIDs: []string{"*string:~Account:1001"},
+		Attributes: []*engine.Attribute{
+			{
+				FieldName: "Password",
+				FilterIDs: []string{},
+				Type:      utils.META_CONSTANT,
+				Value:     config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 20,
+	}
+	if tempAttr, err := rmtDM.GetAttributeProfile("cgrates.org", "ATTR_1001_SIMPLEAUTH",
+		false, false, utils.NonTransactional); err != nil {
+		t.Errorf("Error: %+v", err)
+	} else {
+		exp.Compile()
+		tempAttr.Compile()
+		if !reflect.DeepEqual(exp, tempAttr) {
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(tempAttr))
+		}
+	}
+}
+
 func testInternalRemoteITInitCfg(t *testing.T) {
 	var err error
 	internalCfgPath = path.Join(*dataDir, "conf", "samples", internalCfgDirPath)
@@ -152,6 +181,7 @@ func testInternalRemoteITGetAttribute(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FieldName: "Password",
+					FilterIDs: []string{},
 					Type:      utils.META_CONSTANT,
 					Value:     config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
 				},
@@ -162,7 +192,7 @@ func testInternalRemoteITGetAttribute(t *testing.T) {
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
 	if err := internalRPC.Call("ApierV1.GetAttributeProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()

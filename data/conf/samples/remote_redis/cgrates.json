@@ -5,6 +5,7 @@
 
 "general": {
 	"log_level": 7,
+	"node_id": "RemoteRedis",
 	"reply_timeout": "50s",
 },
 
