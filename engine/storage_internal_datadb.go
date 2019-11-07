@@ -646,7 +646,7 @@ func (iDB *InternalDB) PopTask() (t *Task, err error) {
 	return
 }
 
-func (iDB *InternalDB) GetAccount(id string) (acc *Account, err error) {
+func (iDB *InternalDB) GetAccountDrv(id string) (acc *Account, err error) {
 	x, ok := iDB.db.Get(utils.CacheAccounts, utils.ACCOUNT_PREFIX+id)
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -659,7 +659,7 @@ func (iDB *InternalDB) SetAccount(acc *Account) (err error) {
 	// UPDATE: if all balances expired and were cleaned it makes
 	// sense to write empty balance map
 	if len(acc.BalanceMap) == 0 {
-		if ac, err := iDB.GetAccount(acc.ID); err == nil && !ac.allBalancesExpired() {
+		if ac, err := iDB.GetAccountDrv(acc.ID); err == nil && !ac.allBalancesExpired() {
 			ac.ActionTriggers = acc.ActionTriggers
 			ac.UnitCounters = acc.UnitCounters
 			ac.AllowNegative = acc.AllowNegative

@@ -1143,7 +1143,7 @@ func (ms *MongoStorage) RemoveSharedGroupDrv(id string) (err error) {
 	})
 }
 
-func (ms *MongoStorage) GetAccount(key string) (result *Account, err error) {
+func (ms *MongoStorage) GetAccountDrv(key string) (result *Account, err error) {
 	result = new(Account)
 	err = ms.query(func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(ColAcc).FindOne(sctx, bson.M{"id": key})
@@ -1164,7 +1164,7 @@ func (ms *MongoStorage) SetAccount(acc *Account) error {
 	// UPDATE: if all balances expired and were cleaned it makes
 	// sense to write empty balance map
 	if len(acc.BalanceMap) == 0 {
-		if ac, err := ms.GetAccount(acc.ID); err == nil && !ac.allBalancesExpired() {
+		if ac, err := ms.GetAccountDrv(acc.ID); err == nil && !ac.allBalancesExpired() {
 			ac.ActionTriggers = acc.ActionTriggers
 			ac.UnitCounters = acc.UnitCounters
 			ac.AllowNegative = acc.AllowNegative

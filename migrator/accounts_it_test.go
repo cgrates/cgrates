@@ -307,7 +307,7 @@ func testAccITMigrateAndMove(t *testing.T) {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.Accounts])
 		}
 		//check if account was migrate correctly
-		result, err := accMigrator.dmOut.DataManager().DataDB().GetAccount(testAccount.ID)
+		result, err := accMigrator.dmOut.DataManager().GetAccount(testAccount.ID)
 		if err != nil {
 			t.Error("Error when getting Accounts ", err.Error())
 		}
@@ -335,7 +335,7 @@ func testAccITMigrateAndMove(t *testing.T) {
 			t.Error("Error when accMigratorrating Accounts ", err.Error())
 		}
 		//check if account was migrate correctly
-		result, err := accMigrator.dmOut.DataManager().DataDB().GetAccount(testAccount.ID)
+		result, err := accMigrator.dmOut.DataManager().GetAccount(testAccount.ID)
 		if err != nil {
 			t.Error(err)
 		}
@@ -343,7 +343,7 @@ func testAccITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", testAccount, result)
 		}
 		//check if old account was deleted
-		result, err = accMigrator.dmIN.DataManager().DataDB().GetAccount(testAccount.ID)
+		result, err = accMigrator.dmIN.DataManager().GetAccount(testAccount.ID)
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		}

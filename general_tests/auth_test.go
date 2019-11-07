@@ -72,7 +72,7 @@ cgrates.org,call,*any,2013-01-06T00:00:00Z,RP_ANY,`
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false)
-	if acnt, err := dbAuth.DataDB().GetAccount("cgrates.org:testauthpostpaid1"); err != nil {
+	if acnt, err := dbAuth.GetAccount("cgrates.org:testauthpostpaid1"); err != nil {
 		t.Error(err)
 	} else if acnt == nil {
 		t.Error("No account saved")

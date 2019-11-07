@@ -264,7 +264,7 @@ func (cd *CallDescriptor) AddRatingInfo(ris ...*RatingInfo) {
 // Gets and caches the user balance information.
 func (cd *CallDescriptor) getAccount() (ub *Account, err error) {
 	if cd.account == nil {
-		cd.account, err = dm.DataDB().GetAccount(cd.GetAccountKey())
+		cd.account, err = dm.GetAccount(cd.GetAccountKey())
 	}
 	if cd.account != nil && cd.account.Disabled {
 		return nil, utils.ErrAccountDisabled
@@ -884,7 +884,7 @@ func (cd *CallDescriptor) refundIncrements() (acnt *Account, err error) {
 	for _, increment := range cd.Increments {
 		account, found := accountsCache[increment.BalanceInfo.AccountID]
 		if !found {
-			if acc, err := dm.DataDB().GetAccount(increment.BalanceInfo.AccountID); err == nil && acc != nil {
+			if acc, err := dm.GetAccount(increment.BalanceInfo.AccountID); err == nil && acc != nil {
 				account = acc
 				accountsCache[increment.BalanceInfo.AccountID] = account
 				// will save the account only once at the end of the function
@@ -947,7 +947,7 @@ func (cd *CallDescriptor) refundRounding() (err error) {
 	for _, increment := range cd.Increments {
 		account, found := accountsCache[increment.BalanceInfo.AccountID]
 		if !found {
-			if acc, err := dm.DataDB().GetAccount(increment.BalanceInfo.AccountID); err == nil && acc != nil {
+			if acc, err := dm.GetAccount(increment.BalanceInfo.AccountID); err == nil && acc != nil {
 				account = acc
 				accountsCache[increment.BalanceInfo.AccountID] = account
 				// will save the account only once at the end of the function

@@ -741,7 +741,7 @@ func TestGetMaxSessiontWithBlocker(t *testing.T) {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
 	}
-	acc, err := dm.DataDB().GetAccount("cgrates.org:block")
+	acc, err := dm.GetAccount("cgrates.org:block")
 	if err != nil {
 		t.Error("error getting account: ", err)
 	}
@@ -790,7 +790,7 @@ func TestGetMaxSessiontWithBlockerEmpty(t *testing.T) {
 		at.accountIDs = ap.AccountIDs
 		at.Execute(nil, nil)
 	}
-	acc, err := dm.DataDB().GetAccount("cgrates.org:block_empty")
+	acc, err := dm.GetAccount("cgrates.org:block_empty")
 	if err != nil {
 		t.Error("error getting account: ", err)
 	}
@@ -1001,7 +1001,7 @@ func TestMaxDebitRoundingIssue(t *testing.T) {
 		MaxCostSoFar:    0,
 		PerformRounding: true,
 	}
-	acc, err := dm.DataDB().GetAccount("cgrates.org:dy")
+	acc, err := dm.GetAccount("cgrates.org:dy")
 	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1 {
 		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
 	}
@@ -1012,7 +1012,7 @@ func TestMaxDebitRoundingIssue(t *testing.T) {
 		t.Log(utils.ToIJSON(cc))
 		t.Errorf("Expected %v was %+v (%v)", expected, cc, err)
 	}
-	acc, err = dm.DataDB().GetAccount("cgrates.org:dy")
+	acc, err = dm.GetAccount("cgrates.org:dy")
 	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1-expected {
 		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
 	}
@@ -1035,7 +1035,7 @@ func TestDebitRoundingRefund(t *testing.T) {
 		MaxCostSoFar:    0,
 		PerformRounding: true,
 	}
-	acc, err := dm.DataDB().GetAccount("cgrates.org:dy")
+	acc, err := dm.GetAccount("cgrates.org:dy")
 	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1 {
 		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
 	}
@@ -1046,7 +1046,7 @@ func TestDebitRoundingRefund(t *testing.T) {
 		t.Log(utils.ToIJSON(cc))
 		t.Errorf("Expected %v was %+v (%v)", expected, cc, err)
 	}
-	acc, err = dm.DataDB().GetAccount("cgrates.org:dy")
+	acc, err = dm.GetAccount("cgrates.org:dy")
 	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1-expected {
 		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
 	}
@@ -1192,7 +1192,7 @@ func TestMaxDebitWithAccountShared(t *testing.T) {
 	if len(balanceMap) != 1 || balanceMap[0].GetValue() != 0 {
 		t.Errorf("Wrong shared balance debited: %+v", balanceMap[0])
 	}
-	other, err := dm.DataDB().GetAccount("vdf:empty10")
+	other, err := dm.GetAccount("vdf:empty10")
 	if err != nil || other.BalanceMap[utils.MONETARY][0].GetValue() != 7.5 {
 		t.Errorf("Error debiting shared balance: %+v", other.BalanceMap[utils.MONETARY][0])
 	}
@@ -1319,7 +1319,7 @@ func TestMaxSesionTimeEmptyBalance(t *testing.T) {
 		Account:     "luna",
 		Destination: "0723",
 	}
-	acc, _ := dm.DataDB().GetAccount("vdf:luna")
+	acc, _ := dm.GetAccount("vdf:luna")
 	allowedTime, err := cd.getMaxSessionDuration(acc)
 	if err != nil || allowedTime != 0 {
 		t.Error("Error get max session for 0 acount", err)
@@ -1336,7 +1336,7 @@ func TestMaxSesionTimeEmptyBalanceAndNoCost(t *testing.T) {
 		Account:     "luna",
 		Destination: "112",
 	}
-	acc, _ := dm.DataDB().GetAccount("vdf:luna")
+	acc, _ := dm.GetAccount("vdf:luna")
 	allowedTime, err := cd.getMaxSessionDuration(acc)
 	if err != nil || allowedTime == 0 {
 		t.Error("Error get max session for 0 acount", err)
@@ -1352,7 +1352,7 @@ func TestMaxSesionTimeLong(t *testing.T) {
 		Subject:     "money",
 		Destination: "0723",
 	}
-	acc, _ := dm.DataDB().GetAccount("cgrates.org:money")
+	acc, _ := dm.GetAccount("cgrates.org:money")
 	allowedTime, err := cd.getMaxSessionDuration(acc)
 	if err != nil || allowedTime != cd.TimeEnd.Sub(cd.TimeStart) {
 		t.Error("Error get max session for acount:", allowedTime, err)
@@ -1368,7 +1368,7 @@ func TestMaxSesionTimeLongerThanMoney(t *testing.T) {
 		Subject:     "money",
 		Destination: "0723",
 	}
-	acc, _ := dm.DataDB().GetAccount("cgrates.org:money")
+	acc, _ := dm.GetAccount("cgrates.org:money")
 	allowedTime, err := cd.getMaxSessionDuration(acc)
 	expected, err := time.ParseDuration("9999s") // 1 is the connect fee
 	if err != nil || allowedTime != expected {
@@ -1657,7 +1657,7 @@ func TestCDRefundIncrements(t *testing.T) {
 	}
 	cd := &CallDescriptor{TOR: utils.VOICE, Increments: increments}
 	cd.RefundIncrements()
-	ub, _ = dm.DataDB().GetAccount(ub.ID)
+	ub, _ = dm.GetAccount(ub.ID)
 	if ub.BalanceMap[utils.MONETARY][0].GetValue() != 104 ||
 		ub.BalanceMap[utils.VOICE][0].GetValue() != 13*float64(time.Second) ||
 		ub.BalanceMap[utils.VOICE][1].GetValue() != 14*float64(time.Second) {
@@ -1686,7 +1686,7 @@ func TestCDRefundIncrementsZeroValue(t *testing.T) {
 	}
 	cd := &CallDescriptor{TOR: utils.VOICE, Increments: increments}
 	cd.RefundIncrements()
-	ub, _ = dm.DataDB().GetAccount(ub.ID)
+	ub, _ = dm.GetAccount(ub.ID)
 	if ub.BalanceMap[utils.MONETARY][0].GetValue() != 100 ||
 		ub.BalanceMap[utils.VOICE][0].GetValue() != 10 ||
 		ub.BalanceMap[utils.VOICE][1].GetValue() != 10 {
@@ -1835,7 +1835,7 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 	} else if cc.Cost != 0.6 {
 		t.Errorf("CallCost: %v", cc)
 	}
-	if resAcnt, err := dm.DataDB().GetAccount(acnt.ID); err != nil {
+	if resAcnt, err := dm.GetAccount(acnt.ID); err != nil {
 		t.Error(err)
 	} else if resAcnt.BalanceMap[utils.VOICE][0].ID != "voice1" ||
 		resAcnt.BalanceMap[utils.VOICE][0].Value != 0 {

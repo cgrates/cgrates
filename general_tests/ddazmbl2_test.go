@@ -103,7 +103,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false)
-	if acnt, err := dataDB2.DataDB().GetAccount("cgrates.org:12345"); err != nil {
+	if acnt, err := dataDB2.GetAccount("cgrates.org:12345"); err != nil {
 		t.Error(err)
 	} else if acnt == nil {
 		t.Error("No account saved")
@@ -130,7 +130,7 @@ func TestExecuteActions2(t *testing.T) {
 	scheduler.NewScheduler(dataDB2, config.CgrConfig(),
 		engine.NewFilterS(config.CgrConfig(), nil, nil, nil, dataDB)).Reload()
 	time.Sleep(10 * time.Millisecond) // Give time to scheduler to topup the account
-	if acnt, err := dataDB2.DataDB().GetAccount("cgrates.org:12345"); err != nil {
+	if acnt, err := dataDB2.GetAccount("cgrates.org:12345"); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 2 {
 		t.Error("Account does not have enough balances: ", acnt.BalanceMap)
@@ -156,7 +156,7 @@ func TestDebit2(t *testing.T) {
 	} else if cc.Cost != 0.01 {
 		t.Error("Wrong cost returned: ", cc.Cost)
 	}
-	acnt, err := dataDB2.DataDB().GetAccount("cgrates.org:12345")
+	acnt, err := dataDB2.GetAccount("cgrates.org:12345")
 	if err != nil {
 		t.Error(err)
 	}

@@ -80,7 +80,7 @@ type DataDB interface {
 	RemAccountActionPlans(acntID string, apIDs []string) (err error)
 	PushTask(*Task) error
 	PopTask() (*Task, error)
-	GetAccount(string) (*Account, error)
+	GetAccountDrv(string) (*Account, error)
 	SetAccount(*Account) error
 	RemoveAccount(string) error
 	GetResourceProfileDrv(string, string) (*ResourceProfile, error)

@@ -942,12 +942,12 @@ func TestLoadAccountActions(t *testing.T) {
 		t.Errorf("Error loading account action: %+v", utils.ToIJSON(aa.UnitCounters[utils.VOICE][0].Counters[0].Filter))
 	}
 	// test that it does not overwrite balances
-	existing, err := dm.DataDB().GetAccount(aa.ID)
+	existing, err := dm.GetAccount(aa.ID)
 	if err != nil || len(existing.BalanceMap) != 2 {
 		t.Errorf("The account was not set before load: %+v", existing)
 	}
 	dm.DataDB().SetAccount(aa)
-	existing, err = dm.DataDB().GetAccount(aa.ID)
+	existing, err = dm.GetAccount(aa.ID)
 	if err != nil || len(existing.BalanceMap) != 2 {
 		t.Errorf("The set account altered the balances: %+v", existing)
 	}

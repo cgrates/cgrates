@@ -95,7 +95,7 @@ func TestAccountStorageStoreRestore(t *testing.T) {
 		BalanceMap: map[string]Balances{utils.VOICE: Balances{b1, b2},
 			utils.MONETARY: Balances{&Balance{Value: 21}}}}
 	dm.DataDB().SetAccount(rifsBalance)
-	ub1, err := dm.DataDB().GetAccount("other")
+	ub1, err := dm.GetAccount("other")
 	if err != nil ||
 		!ub1.BalanceMap[utils.MONETARY].Equal(rifsBalance.BalanceMap[utils.MONETARY]) {
 		t.Log("UB: ", ub1)
@@ -172,7 +172,7 @@ func TestAccountStorageStore(t *testing.T) {
 			utils.VOICE:    Balances{b1, b2},
 			utils.MONETARY: Balances{&Balance{Value: 21}}}}
 	dm.DataDB().SetAccount(rifsBalance)
-	result, err := dm.DataDB().GetAccount(rifsBalance.ID)
+	result, err := dm.GetAccount(rifsBalance.ID)
 	if err != nil || rifsBalance.ID != result.ID ||
 		len(rifsBalance.BalanceMap[utils.VOICE]) < 2 ||
 		len(result.BalanceMap[utils.VOICE]) < 2 ||
@@ -1484,7 +1484,7 @@ func TestDebitShared(t *testing.T) {
 	if rif.BalanceMap[utils.MONETARY][0].GetValue() != 0 {
 		t.Errorf("Error debiting from shared group: %+v", rif.BalanceMap[utils.MONETARY][0])
 	}
-	groupie, _ = dm.DataDB().GetAccount("groupie")
+	groupie, _ = dm.GetAccount("groupie")
 	if groupie.BalanceMap[utils.MONETARY][0].GetValue() != 10 {
 		t.Errorf("Error debiting from shared group: %+v", groupie.BalanceMap[utils.MONETARY][0])
 	}
@@ -2350,7 +2350,7 @@ func BenchmarkAccountStorageStoreRestore(b *testing.B) {
 	rifsBalance := &Account{ID: "other", BalanceMap: map[string]Balances{utils.VOICE: Balances{b1, b2}, utils.MONETARY: Balances{&Balance{Value: 21}}}}
 	for i := 0; i < b.N; i++ {
 		dm.DataDB().SetAccount(rifsBalance)
-		dm.DataDB().GetAccount(rifsBalance.ID)
+		dm.GetAccount(rifsBalance.ID)
 	}
 }
 

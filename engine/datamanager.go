@@ -317,6 +317,25 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 	return
 }
 
+func (dm *DataManager) GetAccount(id string) (acc *Account, err error) {
+	acc, err = dm.dataDB.GetAccountDrv(id)
+	if err != nil {
+		if len(dm.rmtDataDBs) != 0 {
+			var rmtErr error
+			for _, rmtDM := range dm.rmtDataDBs {
+				if acc, rmtErr = rmtDM.dataDB.GetAccountDrv(id); rmtErr == nil {
+					break
+				}
+			}
+			err = rmtErr
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	return
+}
+
 // GetStatQueue retrieves a StatQueue from dataDB
 // handles caching and deserialization of metrics
 func (dm *DataManager) GetStatQueue(tenant, id string,

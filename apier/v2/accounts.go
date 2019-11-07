@@ -64,7 +64,7 @@ func (self *ApierV2) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.Ac
 	}
 	retAccounts := make([]*engine.Account, 0)
 	for _, acntKey := range limitedAccounts {
-		if acnt, err := self.DataManager.DataDB().GetAccount(acntKey[len(utils.ACCOUNT_PREFIX):]); err != nil && err != utils.ErrNotFound { // Not found is not an error here
+		if acnt, err := self.DataManager.GetAccount(acntKey[len(utils.ACCOUNT_PREFIX):]); err != nil && err != utils.ErrNotFound { // Not found is not an error here
 			return err
 		} else if acnt != nil {
 			if attr.Disabled != nil && *attr.Disabled != acnt.Disabled {
@@ -80,7 +80,7 @@ func (self *ApierV2) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.Ac
 // Get balance
 func (self *ApierV2) GetAccount(attr *utils.AttrGetAccount, reply *engine.Account) error {
 	tag := utils.ConcatenatedKey(attr.Tenant, attr.Account)
-	account, err := self.DataManager.DataDB().GetAccount(tag)
+	account, err := self.DataManager.GetAccount(tag)
 	if err != nil {
 		return err
 	}
@@ -110,7 +110,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 	var ub *engine.Account
 	var schedNeedsReload bool
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		if bal, _ := self.DataManager.DataDB().GetAccount(accID); bal != nil {
+		if bal, _ := self.DataManager.GetAccount(accID); bal != nil {
 			ub = bal
 		} else { // Not found in db, create it here
 			ub = &engine.Account{

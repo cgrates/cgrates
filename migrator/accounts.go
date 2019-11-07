@@ -42,7 +42,7 @@ func (m *Migrator) migrateCurrentAccounts() (err error) {
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.ACCOUNT_PREFIX)
-		acc, err := m.dmIN.DataManager().DataDB().GetAccount(idg)
+		acc, err := m.dmIN.DataManager().GetAccount(idg)
 		if err != nil {
 			return err
 		}
