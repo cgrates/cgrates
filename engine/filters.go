@@ -495,7 +495,8 @@ func (fltr *FilterRule) passEqualTo(fielNameDP config.DataProvider, fieldValuesD
 	return false, nil
 }
 
-func (fS *FilterS) getFieldNameDataProvider(initialDP config.DataProvider, fieldName *string, tenant string) (dp config.DataProvider, err error) {
+func (fS *FilterS) getFieldNameDataProvider(initialDP config.DataProvider,
+	fieldName *string, tenant string) (dp config.DataProvider, err error) {
 	switch {
 	case strings.HasPrefix(*fieldName, utils.DynamicDataPrefix+utils.MetaAccounts):
 		// sample of fieldName : ~*accounts.1001.BalanceMap.*monetary[0].Value
