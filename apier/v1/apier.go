@@ -179,7 +179,6 @@ func (apiv1 *ApierV1) GetRatingPlan(rplnId string, reply *engine.RatingPlan) err
 }
 
 func (apiv1 *ApierV1) RemoveRatingPlan(ID string, reply *string) error {
-	//add here
 	if len(ID) == 0 {
 		return utils.NewErrMandatoryIeMissing("ID")
 	}
