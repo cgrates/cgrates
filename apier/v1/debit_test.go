@@ -29,13 +29,13 @@ import (
 
 var (
 	apierDebit        *ApierV1
-	apierDebitStorage *engine.MapStorage
+	apierDebitStorage *engine.InternalDB
 	responder         *engine.Responder
 	dm                *engine.DataManager
 )
 
 func init() {
-	apierDebitStorage, _ = engine.NewMapStorage()
+	apierDebitStorage = engine.NewInternalDB(nil, nil)
 	cfg, _ := config.NewDefaultCGRConfig()
 	responder := &engine.Responder{MaxComputedUsage: cfg.RalsCfg().MaxComputedUsage}
 	dm = engine.NewDataManager(apierDebitStorage, config.CgrConfig().CacheCfg(), nil, nil)
