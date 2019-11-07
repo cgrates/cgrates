@@ -26,6 +26,7 @@ import (
 	"path"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -49,6 +50,10 @@ var sTestsInternalRemoteIT = []func(t *testing.T){
 	testInternalRemoteITStartEngine,
 	testInternalRemoteITRPCConn,
 	testInternalRemoteITGetAttribute,
+	testInternalRemoteITGetThreshold,
+	testInternalRemoteITGetThresholdProfile,
+	testInternalRemoteITGetResource,
+	testInternalRemoteITGetResourceProfile,
 	testInternalRemoteITKillEngine,
 }
 
@@ -198,6 +203,84 @@ func testInternalRemoteITGetAttribute(t *testing.T) {
 	reply.Compile()
 	if !reflect.DeepEqual(alsPrf.AttributeProfile, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
+	}
+}
+
+func testInternalRemoteITGetThreshold(t *testing.T) {
+	var td engine.Threshold
+	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}
+	if err := internalRPC.Call(utils.ThresholdSv1GetThreshold,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &td); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eTd, td) {
+		t.Errorf("expecting: %+v, received: %+v", eTd, td)
+	}
+}
+
+func testInternalRemoteITGetThresholdProfile(t *testing.T) {
+	var reply *engine.ThresholdProfile
+	tPrfl = &ThresholdWithCache{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "THD_ACNT_1001",
+			FilterIDs: []string{"FLTR_ACNT_1001"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+			},
+			MaxHits:   1,
+			MinHits:   1,
+			MinSleep:  time.Duration(1 * time.Second),
+			Weight:    10.0,
+			ActionIDs: []string{"ACT_LOG_WARNING"},
+			Async:     true,
+		},
+	}
+	if err := internalRPC.Call("ApierV1.GetThresholdProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(tPrfl.ThresholdProfile), utils.ToJSON(reply))
+	}
+}
+
+func testInternalRemoteITGetResource(t *testing.T) {
+	var reply *engine.Resource
+	expectedResources := &engine.Resource{
+		Tenant: "cgrates.org",
+		ID:     "ResGroup1",
+		Usages: map[string]*engine.ResourceUsage{},
+	}
+	if err := internalRPC.Call(utils.ResourceSv1GetResource,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "ResGroup1"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expectedResources) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectedResources), utils.ToJSON(reply))
+	}
+}
+
+func testInternalRemoteITGetResourceProfile(t *testing.T) {
+	rlsPrf := &ResourceWithCache{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ResGroup1",
+			FilterIDs: []string{"FLTR_RES"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+			},
+			UsageTTL:          time.Duration(-1),
+			Limit:             7,
+			AllocationMessage: "",
+			Stored:            true,
+			Weight:            10,
+			ThresholdIDs:      []string{utils.META_NONE},
+		},
+	}
+	var reply *engine.ResourceProfile
+	if err := internalRPC.Call("ApierV1.GetResourceProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: rlsPrf.ID}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, rlsPrf.ResourceProfile) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(rlsPrf.ResourceProfile), utils.ToJSON(reply))
 	}
 }
 
