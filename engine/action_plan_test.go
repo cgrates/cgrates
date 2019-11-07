@@ -86,6 +86,7 @@ func TestActionPlanRemoveAccountID(t *testing.T) {
 		t.Errorf("Expected AccountID to be not found")
 	}
 }
+
 func TestActionPlanClone(t *testing.T) {
 	at1 := &ActionPlan{
 		Id:         "test",
@@ -99,6 +100,126 @@ func TestActionPlanClone(t *testing.T) {
 	at1Cloned := clned.(*ActionPlan)
 	if !reflect.DeepEqual(at1, at1Cloned) {
 		t.Errorf("Expecting: %+v, received: %+v", at1, at1Cloned)
+	}
+}
+func TestActionTimindSetActions(t *testing.T) {
+	actionTiming := new(ActionTiming)
+
+	actions := Actions{
+		&Action{ActionType: "test", Filter: "test"},
+		&Action{ActionType: "test1", Filter: "test1"},
+	}
+	actionTiming.SetActions(actions)
+	if !reflect.DeepEqual(actions, actionTiming.actions) {
+		t.Errorf("Expecting: %+v, received: %+v", actions, actionTiming.actions)
+	}
+}
+
+func TestActionTimingSetAccountIDs(t *testing.T) {
+	actionTiming := new(ActionTiming)
+	accountIDs := utils.StringMap{"one": true, "two": true, "three": true}
+	actionTiming.SetAccountIDs(accountIDs)
+
+	if !reflect.DeepEqual(accountIDs, actionTiming.accountIDs) {
+		t.Errorf("Expecting: %+v, received: %+v", accountIDs, actionTiming.accountIDs)
+	}
+}
+
+func TestActionTimingGetAccountIDs(t *testing.T) {
+	actionTiming := &ActionTiming{
+		accountIDs: utils.StringMap{"one": true, "two": true, "three": true},
+	}
+	accIDs := utils.StringMap{"one": true, "two": true, "three": true}
+	rcv := actionTiming.GetAccountIDs()
+
+	if !reflect.DeepEqual(accIDs, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", accIDs, rcv)
+	}
+}
+func TestActionTimingSetActionPlanID(t *testing.T) {
+	actionTiming := new(ActionTiming)
+	id := "test"
+	actionTiming.SetActionPlanID(id)
+	if !reflect.DeepEqual(id, actionTiming.actionPlanID) {
+		t.Errorf("Expecting: %+v, received: %+v", id, actionTiming.actionPlanID)
+	}
+}
+
+func TestActionTimingGetActionPlanID(t *testing.T) {
+	id := "test"
+	actionTiming := new(ActionTiming)
+	actionTiming.actionPlanID = id
+
+	rcv := actionTiming.GetActionPlanID()
+	if !reflect.DeepEqual(id, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", id, rcv)
+	}
+}
+
+func TestActionTimingIsASAP(t *testing.T) {
+	actionTiming := new(ActionTiming)
+	if rcv := actionTiming.IsASAP(); rcv {
+		t.Error("Expecting false return")
+	}
+}
+
+func TestAtplLen(t *testing.T) {
+	atpl := &ActionTimingWeightOnlyPriorityList{
+		&ActionTiming{Uuid: "first", accountIDs: utils.StringMap{"1001": true, "1002": true}},
+		&ActionTiming{Uuid: "second", accountIDs: utils.StringMap{"1004": true, "1005": true}},
+		&ActionTiming{Uuid: "third", accountIDs: utils.StringMap{"1001": true, "1002": true}},
+	}
+	eOut := len(*atpl)
+	rcv := atpl.Len()
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+}
+func TestAtplSwap(t *testing.T) {
+	atpl := &ActionTimingWeightOnlyPriorityList{
+		&ActionTiming{Uuid: "first", accountIDs: utils.StringMap{"1001": true, "1002": true}},
+		&ActionTiming{Uuid: "second", accountIDs: utils.StringMap{"1004": true, "1005": true}},
+	}
+	atpl2 := &ActionTimingWeightOnlyPriorityList{
+		&ActionTiming{Uuid: "second", accountIDs: utils.StringMap{"1004": true, "1005": true}},
+		&ActionTiming{Uuid: "first", accountIDs: utils.StringMap{"1001": true, "1002": true}},
+	}
+	atpl.Swap(0, 1)
+	if !reflect.DeepEqual(atpl, atpl2) {
+		t.Errorf("Expecting: %+v, received: %+v", atpl, atpl2)
+	}
+}
+
+func TestAtplLess(t *testing.T) {
+	atpl := &ActionTimingWeightOnlyPriorityList{
+		&ActionTiming{Uuid: "first", Weight: 0.07},
+		&ActionTiming{Uuid: "second", Weight: 1.07},
+	}
+	rcv := atpl.Less(1, 0)
+	if !rcv {
+		t.Errorf("Expecting false, Received: true")
+	}
+	rcv = atpl.Less(0, 1)
+	if rcv {
+		t.Errorf("Expecting true, Received: false")
+	}
+}
+
+func TestAtplSort(t *testing.T) {
+
+	atpl := &ActionTimingWeightOnlyPriorityList{
+		&ActionTiming{Uuid: "first", accountIDs: utils.StringMap{"1001": true, "1002": true}},
+		&ActionTiming{Uuid: "second", accountIDs: utils.StringMap{"1004": true, "1005": true}},
+	}
+	atpl2 := &ActionTimingWeightOnlyPriorityList{
+		&ActionTiming{Uuid: "first", accountIDs: utils.StringMap{"1001": true, "1002": true}},
+		&ActionTiming{Uuid: "second", accountIDs: utils.StringMap{"1004": true, "1005": true}},
+	}
+
+	sort.Sort(atpl)
+	atpl2.Sort()
+	if !reflect.DeepEqual(atpl, atpl2) {
+		t.Errorf("Expecting: %+v, received: %+v", atpl, atpl2)
 	}
 }
 
