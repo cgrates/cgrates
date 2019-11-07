@@ -19,11 +19,35 @@ package engine
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
+func TestActionTimingTasks(t *testing.T) {
+	//empty check
+	actionTiming := new(ActionTiming)
+	eOut := []*Task{&Task{Uuid: "", ActionsID: ""}}
+	rcv := actionTiming.Tasks()
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	//multiple check
+	actionTiming.ActionsID = "test"
+	actionTiming.Uuid = "test"
+	actionTiming.accountIDs = utils.StringMap{"1001": true, "1002": true, "1003": true}
+	eOut = []*Task{
+		&Task{Uuid: "test", AccountID: "1001", ActionsID: "test"},
+		&Task{Uuid: "test", AccountID: "1002", ActionsID: "test"},
+		&Task{Uuid: "test", AccountID: "1003", ActionsID: "test"},
+	}
+	rcv = actionTiming.Tasks()
+	sort.Slice(rcv, func(i, j int) bool { return rcv[i].AccountID < rcv[j].AccountID })
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+}
 func TestActionPlanClone(t *testing.T) {
 	at1 := &ActionPlan{
 		Id:         "test",
