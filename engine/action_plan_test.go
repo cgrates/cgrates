@@ -48,6 +48,44 @@ func TestActionTimingTasks(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
 }
+
+func TestActionTimingRemoveAccountID(t *testing.T) {
+	actionTiming := &ActionTiming{
+		accountIDs: utils.StringMap{"1001": true, "1002": true, "1003": true},
+	}
+	eOut := utils.StringMap{"1002": true, "1003": true}
+	rcv := actionTiming.RemoveAccountID("1001")
+	if !rcv {
+		t.Errorf("Account ID not found ")
+	}
+	if !reflect.DeepEqual(eOut, actionTiming.accountIDs) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, actionTiming.accountIDs)
+	}
+	//check for Account ID not found
+	rcv = actionTiming.RemoveAccountID("1001")
+	if rcv {
+		t.Errorf("Expected AccountID to be not found")
+	}
+}
+
+func TestActionPlanRemoveAccountID(t *testing.T) {
+	actionPlan := &ActionPlan{
+		AccountIDs: utils.StringMap{"1001": true, "1002": true, "1003": true},
+	}
+	eOut := utils.StringMap{"1002": true, "1003": true}
+	rcv := actionPlan.RemoveAccountID("1001")
+	if !rcv {
+		t.Errorf("Account ID not found ")
+	}
+	if !reflect.DeepEqual(eOut, actionPlan.AccountIDs) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, actionPlan.AccountIDs)
+	}
+	//check for Account ID not found
+	rcv = actionPlan.RemoveAccountID("1001")
+	if rcv {
+		t.Errorf("Expected AccountID to be not found")
+	}
+}
 func TestActionPlanClone(t *testing.T) {
 	at1 := &ActionPlan{
 		Id:         "test",
