@@ -4,14 +4,15 @@
 CGRateS can be installed via packages as well as Go automated source install.
 We recommend using source installs for advanced users familiar with Go programming and packages for users not willing to be involved in the code building process.
 
+
 3.1. Using packages
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 Depending on the packaged distribution, following methods are available:
 
 
 3.1.1. Debian 
-~~~~~~~~~~~~~
+-------------
 
 This is for the moment the only packaged and the most recommended to use method to install CGRateS. CGRateS development team maintains official debian packages out of master branch, released under nightly tag in aptitude. 
 
@@ -19,7 +20,7 @@ There are two main ways of installing the maintained packages:
 
 
 3.1.1.1. Aptitude repository 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++++++
 
 
 Add the gpg key:
@@ -47,7 +48,7 @@ After *post-install* actions are performed, CGRateS will be configured in **/etc
 
 
 3.1.1.2. Manual installation of .deb package out of archive server
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 Run the following commands:
@@ -61,13 +62,13 @@ As a side note on http://pkg.cgrates.org one can find an entire archive of CGRat
 
 
 3.2. Using source
------------------
+~~~~~~~~~~~~~~~~~
 
 For developing CGRateS and switching between its versions, we are using the **new go mods feature** introduced in go 1.13.
 
 
 3.2.1 Install GO Lang
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 First we have to setup the GO Lang to our OS. Feel free to download 
 the latest GO binary release from https://golang.org/dl/
@@ -81,8 +82,9 @@ In this Tutorial we are going to install Go 1.13
    sudo tar -xvf go1.13.1.linux-amd64.tar.gz -C /usr/local/
    export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
 
+
 3.2.2 Build CGRateS from Source
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------
 
 Configure the project with the following commands:
 
@@ -93,10 +95,8 @@ Configure the project with the following commands:
    ./build.sh
 
 
-.. _post-install:
-
 3.2.3 Create Debian / Ubuntu Packages from Source
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------------------
 
 After compiling the source code you are ready to create the .deb packages
 for your Debian like OS. But First lets install some dependencies. 
@@ -116,19 +116,22 @@ sure that we delete the old one first.
 
 After some time and maybe some console warnings, your CGRateS package will be ready.
 
+
 3.2.4 Install Custom Debian / Ubuntu Package
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------------
 
 ::
 
    cd $GOPATH/src/github.com/cgrates
    sudo dpkg -i cgrates_*.deb
 
+
+.. _post-install:
 3.3. Post-install
------------------
+~~~~~~~~~~~~~~~~~
 
 3.3.1. Database setup
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 For its operation CGRateS uses **one or more** database types, depending on its nature, install and configuration being further necessary.
 
@@ -177,7 +180,7 @@ Once MongoDB is installed, CGRateS database needs to be set-up out of provided s
 .. _MongoDB: http://www.mongodb.org
 
 3.3.2 Set versions data
-~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 Once database setup is completed, we need to write the versions data. To do this, run migrator tool with the parameters specific to your database. 
 
 Sample usage for MySQL: 
@@ -187,7 +190,7 @@ Sample usage for MySQL:
 
 
 3.3.3.Git
-~~~~~~~~~
+---------
 
 The **historys** (History Service) component will use `Git`_ to archive *tariff plan changes* in a local repository,
 hence `Git`_ installation is necessary if you want to use this service.

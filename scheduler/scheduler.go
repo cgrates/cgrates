@@ -152,7 +152,7 @@ func (s *Scheduler) loadActionPlans() {
 			s.cfg.SchedulerCfg().Filters, task); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: <%s> querying filters for path: <%+v>, not executing task <%s> on account <%s>",
-					utils.SchedulerS, err.Error(), s.cfg.SchedulerCfg().Filters[1:], task.ActionsID, task.AccountID))
+					utils.SchedulerS, err.Error(), s.cfg.SchedulerCfg().Filters, task.ActionsID, task.AccountID))
 			if err := s.dm.DataDB().PushTask(task); err != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> failed pushing task <%s> back to DataDB, err <%s>",
@@ -207,7 +207,7 @@ func (s *Scheduler) loadActionPlans() {
 					s.cfg.SchedulerCfg().Filters, task); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> error: <%s> querying filters for path: <%+v>, not executing action <%s> on account <%s>",
-							utils.SchedulerS, err.Error(), s.cfg.SchedulerCfg().Filters[1:], task.ActionsID, task.AccountID))
+							utils.SchedulerS, err.Error(), s.cfg.SchedulerCfg().Filters, task.ActionsID, task.AccountID))
 					at.RemoveAccountID(task.AccountID)
 				} else if !pass {
 					at.RemoveAccountID(task.AccountID)
