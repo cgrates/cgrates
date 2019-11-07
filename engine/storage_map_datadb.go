@@ -491,7 +491,7 @@ func (ms *MapStorage) RemoveSharedGroupDrv(id string) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetAccount(key string) (ub *Account, err error) {
+func (ms *MapStorage) GetAccountDrv(key string) (ub *Account, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	values, ok := ms.dict[utils.ACCOUNT_PREFIX+key]
@@ -515,7 +515,7 @@ func (ms *MapStorage) SetAccount(ub *Account) (err error) {
 	// UPDATE: if all balances expired and were cleaned it makes
 	// sense to write empty balance map
 	if len(ub.BalanceMap) == 0 {
-		if ac, err := ms.GetAccount(ub.ID); err == nil && !ac.allBalancesExpired() {
+		if ac, err := ms.GetAccountDrv(ub.ID); err == nil && !ac.allBalancesExpired() {
 			ac.ActionTriggers = ub.ActionTriggers
 			ac.UnitCounters = ub.UnitCounters
 			ac.AllowNegative = ub.AllowNegative

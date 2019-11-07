@@ -276,7 +276,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, ub := range loader.accountActions {
-		rcv, err := loader.dm.DataDB().GetAccount(k)
+		rcv, err := loader.dm.GetAccount(k)
 		if err != nil {
 			t.Error("Failed GetAccount: ", err.Error())
 		}

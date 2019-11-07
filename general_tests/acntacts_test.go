@@ -72,7 +72,7 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,false,false,10`
 		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	expectAcnt := &engine.Account{ID: "cgrates.org:1"}
-	if acnt, err := dbAcntActs.DataDB().GetAccount("cgrates.org:1"); err != nil {
+	if acnt, err := dbAcntActs.GetAccount("cgrates.org:1"); err != nil {
 		t.Error(err)
 	} else if acnt == nil {
 		t.Error("No account created")
@@ -91,7 +91,7 @@ func TestAcntActsDisableAcnt(t *testing.T) {
 		t.Error(err)
 	}
 	expectAcnt := &engine.Account{ID: "cgrates.org:1", Disabled: true}
-	if acnt, err := dbAcntActs.DataDB().GetAccount(acnt1Tag); err != nil {
+	if acnt, err := dbAcntActs.GetAccount(acnt1Tag); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectAcnt, acnt) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectAcnt), utils.ToJSON(acnt))
@@ -108,7 +108,7 @@ func TestAcntActsEnableAcnt(t *testing.T) {
 		t.Error(err)
 	}
 	expectAcnt := &engine.Account{ID: "cgrates.org:1", Disabled: false}
-	if acnt, err := dbAcntActs.DataDB().GetAccount(acnt1Tag); err != nil {
+	if acnt, err := dbAcntActs.GetAccount(acnt1Tag); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectAcnt, acnt) {
 		t.Errorf("Expecting: %+v, received: %+v", expectAcnt, acnt)

@@ -137,7 +137,7 @@ func TestDebitUsageWithOptions(t *testing.T) {
 	}
 
 	// Reload the account and verify that the usage of $1 was removed from the monetary balance
-	resolvedAccount, err := apierDebitStorage.GetAccount(cgrAcnt1.ID)
+	resolvedAccount, err := apierDebitStorage.GetAccountDrv(cgrAcnt1.ID)
 	if err != nil {
 		t.Error(err)
 	}

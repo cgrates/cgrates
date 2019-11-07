@@ -1411,7 +1411,7 @@ func TestActionMakeNegative(t *testing.T) {
 }
 
 func TestRemoveAction(t *testing.T) {
-	if _, err := dm.DataDB().GetAccount("cgrates.org:remo"); err != nil {
+	if _, err := dm.GetAccount("cgrates.org:remo"); err != nil {
 		t.Errorf("account to be removed not found: %v", err)
 	}
 	a := &Action{
@@ -1423,14 +1423,14 @@ func TestRemoveAction(t *testing.T) {
 		actions:    Actions{a},
 	}
 	at.Execute(nil, nil)
-	afterUb, err := dm.DataDB().GetAccount("cgrates.org:remo")
+	afterUb, err := dm.GetAccount("cgrates.org:remo")
 	if err == nil || afterUb != nil {
 		t.Error("error removing account: ", err, afterUb)
 	}
 }
 
 func TestTopupAction(t *testing.T) {
-	initialUb, _ := dm.DataDB().GetAccount("vdf:minu")
+	initialUb, _ := dm.GetAccount("vdf:minu")
 	a := &Action{
 		ActionType: utils.TOPUP,
 		Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: &utils.ValueFormula{Static: 25},
@@ -1444,7 +1444,7 @@ func TestTopupAction(t *testing.T) {
 	}
 
 	at.Execute(nil, nil)
-	afterUb, _ := dm.DataDB().GetAccount("vdf:minu")
+	afterUb, _ := dm.GetAccount("vdf:minu")
 	initialValue := initialUb.BalanceMap[utils.MONETARY].GetTotalValue()
 	afterValue := afterUb.BalanceMap[utils.MONETARY].GetTotalValue()
 	if afterValue != initialValue+25 {
@@ -1453,7 +1453,7 @@ func TestTopupAction(t *testing.T) {
 }
 
 func TestTopupActionLoaded(t *testing.T) {
-	initialUb, _ := dm.DataDB().GetAccount("vdf:minitsboy")
+	initialUb, _ := dm.GetAccount("vdf:minitsboy")
 	a := &Action{
 		ActionType: utils.TOPUP,
 		Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY),
@@ -1468,7 +1468,7 @@ func TestTopupActionLoaded(t *testing.T) {
 	}
 
 	at.Execute(nil, nil)
-	afterUb, _ := dm.DataDB().GetAccount("vdf:minitsboy")
+	afterUb, _ := dm.GetAccount("vdf:minitsboy")
 	initialValue := initialUb.BalanceMap[utils.MONETARY].GetTotalValue()
 	afterValue := afterUb.BalanceMap[utils.MONETARY].GetTotalValue()
 	if afterValue != initialValue+25 {
@@ -1561,7 +1561,7 @@ func TestActionTransactionFuncType(t *testing.T) {
 		},
 	}
 	err = at.Execute(nil, nil)
-	acc, err := dm.DataDB().GetAccount("cgrates.org:trans")
+	acc, err := dm.GetAccount("cgrates.org:trans")
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
 	}
@@ -1598,7 +1598,7 @@ func TestActionTransactionBalanceType(t *testing.T) {
 		},
 	}
 	err = at.Execute(nil, nil)
-	acc, err := dm.DataDB().GetAccount("cgrates.org:trans")
+	acc, err := dm.GetAccount("cgrates.org:trans")
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
 	}
@@ -1635,7 +1635,7 @@ func TestActionTransactionBalanceNotType(t *testing.T) {
 		},
 	}
 	err = at.Execute(nil, nil)
-	acc, err := dm.DataDB().GetAccount("cgrates.org:trans")
+	acc, err := dm.GetAccount("cgrates.org:trans")
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
 	}
@@ -1678,7 +1678,7 @@ func TestActionWithExpireWithoutExpire(t *testing.T) {
 		},
 	}
 	err = at.Execute(nil, nil)
-	acc, err := dm.DataDB().GetAccount("cgrates.org:exp")
+	acc, err := dm.GetAccount("cgrates.org:exp")
 	if err != nil || acc == nil {
 		t.Errorf("Error getting account: %+v: %v", acc, err)
 	}
@@ -1725,7 +1725,7 @@ func TestActionRemoveBalance(t *testing.T) {
 		},
 	}
 	err = at.Execute(nil, nil)
-	acc, err := dm.DataDB().GetAccount("cgrates.org:rembal")
+	acc, err := dm.GetAccount("cgrates.org:rembal")
 	if err != nil || acc == nil {
 		t.Errorf("Error getting account: %+v: %v", acc, err)
 	}
@@ -1778,7 +1778,7 @@ func TestActionRemoveExpiredBalance(t *testing.T) {
 		},
 	}
 	err = at.Execute(nil, nil)
-	acc, err := dm.DataDB().GetAccount("cgrates.org:rembal2")
+	acc, err := dm.GetAccount("cgrates.org:rembal2")
 	if err != nil || acc == nil {
 		t.Errorf("Error getting account: %+v: %v", acc, err)
 	}
@@ -1828,7 +1828,7 @@ func TestActionTransferMonetaryDefault(t *testing.T) {
 	}
 	at.Execute(nil, nil)
 
-	afterUb, err := dm.DataDB().GetAccount("cgrates.org:trans")
+	afterUb, err := dm.GetAccount("cgrates.org:trans")
 	if err != nil {
 		t.Error("account not found: ", err, afterUb)
 	}
@@ -1889,7 +1889,7 @@ func TestActionTransferMonetaryDefaultFilter(t *testing.T) {
 	}
 	at.Execute(nil, nil)
 
-	afterUb, err := dm.DataDB().GetAccount("cgrates.org:trans")
+	afterUb, err := dm.GetAccount("cgrates.org:trans")
 	if err != nil {
 		t.Error("account not found: ", err, afterUb)
 	}
@@ -1955,7 +1955,7 @@ func TestActionConditionalTopup(t *testing.T) {
 	}
 	at.Execute(nil, nil)
 
-	afterUb, err := dm.DataDB().GetAccount("cgrates.org:cond")
+	afterUb, err := dm.GetAccount("cgrates.org:cond")
 	if err != nil {
 		t.Error("account not found: ", err, afterUb)
 	}
@@ -2019,7 +2019,7 @@ func TestActionConditionalTopupNoMatch(t *testing.T) {
 	}
 	at.Execute(nil, nil)
 
-	afterUb, err := dm.DataDB().GetAccount("cgrates.org:cond")
+	afterUb, err := dm.GetAccount("cgrates.org:cond")
 	if err != nil {
 		t.Error("account not found: ", err, afterUb)
 	}
@@ -2083,7 +2083,7 @@ func TestActionConditionalTopupExistingBalance(t *testing.T) {
 	}
 	at.Execute(nil, nil)
 
-	afterUb, err := dm.DataDB().GetAccount("cgrates.org:cond")
+	afterUb, err := dm.GetAccount("cgrates.org:cond")
 	if err != nil {
 		t.Error("account not found: ", err, afterUb)
 	}
@@ -2233,7 +2233,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 	}
 	at.Execute(nil, nil)
 
-	afterUb, err := dm.DataDB().GetAccount("cgrates.org:af")
+	afterUb, err := dm.GetAccount("cgrates.org:af")
 	if err != nil {
 		t.Error("account not found: ", err, afterUb)
 	}
@@ -2304,7 +2304,7 @@ func TestActionSetBalance(t *testing.T) {
 	}
 	at.Execute(nil, nil)
 
-	afterUb, err := dm.DataDB().GetAccount("cgrates.org:setb")
+	afterUb, err := dm.GetAccount("cgrates.org:setb")
 	if err != nil {
 		t.Error("account not found: ", err, afterUb)
 	}
@@ -2340,7 +2340,7 @@ func TestActionExpirationTime(t *testing.T) {
 	}
 	for rep := 0; rep < 5; rep++ {
 		at.Execute(nil, nil)
-		afterUb, err := dm.DataDB().GetAccount("cgrates.org:expo")
+		afterUb, err := dm.GetAccount("cgrates.org:expo")
 		if err != nil ||
 			len(afterUb.BalanceMap[utils.VOICE]) != rep+1 {
 			t.Error("error topuping expiration balance: ", utils.ToIJSON(afterUb))
@@ -2363,7 +2363,7 @@ func TestActionExpNoExp(t *testing.T) {
 		actions:    exp,
 	}
 	at.Execute(nil, nil)
-	afterUb, err := dm.DataDB().GetAccount("cgrates.org:expnoexp")
+	afterUb, err := dm.GetAccount("cgrates.org:expnoexp")
 	if err != nil ||
 		len(afterUb.BalanceMap[utils.VOICE]) != 2 {
 		t.Error("error topuping expiration balance: ", utils.ToIJSON(afterUb))
@@ -2404,7 +2404,7 @@ func TestActionTopUpZeroNegative(t *testing.T) {
 		},
 	}
 	err = at.Execute(nil, nil)
-	acc, err := dm.DataDB().GetAccount("cgrates.org:zeroNegative")
+	acc, err := dm.GetAccount("cgrates.org:zeroNegative")
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
 	}
@@ -2460,7 +2460,7 @@ func TestActionSetExpiry(t *testing.T) {
 		},
 	}
 	err = at.Execute(nil, nil)
-	acc, err := dm.DataDB().GetAccount("cgrates.org:zeroNegative")
+	acc, err := dm.GetAccount("cgrates.org:zeroNegative")
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
 	}
@@ -2533,7 +2533,7 @@ func TestCgrRpcAction(t *testing.T) {
 }
 
 func TestValueFormulaDebit(t *testing.T) {
-	if _, err := dm.DataDB().GetAccount("cgrates.org:vf"); err != nil {
+	if _, err := dm.GetAccount("cgrates.org:vf"); err != nil {
 		t.Errorf("account to be removed not found: %v", err)
 	}
 
@@ -2542,7 +2542,7 @@ func TestValueFormulaDebit(t *testing.T) {
 		ActionsID:  "VF",
 	}
 	at.Execute(nil, nil)
-	afterUb, err := dm.DataDB().GetAccount("cgrates.org:vf")
+	afterUb, err := dm.GetAccount("cgrates.org:vf")
 	// not an exact value, depends of month
 	v := afterUb.BalanceMap[utils.MONETARY].GetTotalValue()
 	if err != nil || v > -0.30 || v < -0.36 {

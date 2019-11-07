@@ -237,7 +237,7 @@ func testAcc2ITMigrate(t *testing.T) {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.Accounts])
 	}
 	//check if account was migrate correctly
-	result, err := acc2Migrator.dmOut.DataManager().DataDB().GetAccount(testAccount.ID)
+	result, err := acc2Migrator.dmOut.DataManager().GetAccount(testAccount.ID)
 	if err != nil {
 		t.Error("Error when getting Accounts ", err.Error())
 	}

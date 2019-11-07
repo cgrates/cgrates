@@ -32,7 +32,7 @@ func (self *ApierV1) GetAccountActionTriggers(attrs utils.TenantAccount, reply *
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if account, err := self.DataManager.DataDB().GetAccount(utils.ConcatenatedKey(attrs.Tenant, attrs.Account)); err != nil {
+	if account, err := self.DataManager.GetAccount(utils.ConcatenatedKey(attrs.Tenant, attrs.Account)); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		ats := account.ActionTriggers
@@ -66,7 +66,7 @@ func (self *ApierV1) AddAccountActionTriggers(attr AttrAddAccountActionTriggers,
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	var account *engine.Account
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
-		if acc, err := self.DataManager.DataDB().GetAccount(accID); err == nil {
+		if acc, err := self.DataManager.GetAccount(accID); err == nil {
 			account = acc
 		} else {
 			return 0, err
@@ -121,7 +121,7 @@ func (self *ApierV1) RemoveAccountActionTriggers(attr AttrRemoveAccountActionTri
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		var account *engine.Account
-		if acc, err := self.DataManager.DataDB().GetAccount(accID); err == nil {
+		if acc, err := self.DataManager.GetAccount(accID); err == nil {
 			account = acc
 		} else {
 			return 0, err
@@ -163,7 +163,7 @@ func (self *ApierV1) ResetAccountActionTriggers(attr AttrResetAccountActionTrigg
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	var account *engine.Account
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		if acc, err := self.DataManager.DataDB().GetAccount(accID); err == nil {
+		if acc, err := self.DataManager.GetAccount(accID); err == nil {
 			account = acc
 		} else {
 			return 0, err
@@ -225,7 +225,7 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	var account *engine.Account
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		if acc, err := self.DataManager.DataDB().GetAccount(accID); err == nil {
+		if acc, err := self.DataManager.GetAccount(accID); err == nil {
 			account = acc
 		} else {
 			return 0, err
@@ -602,7 +602,7 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 	}
 	acntID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		acnt, err := self.DataManager.DataDB().GetAccount(acntID)
+		acnt, err := self.DataManager.GetAccount(acntID)
 		if err != nil {
 			return 0, err
 		}

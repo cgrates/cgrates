@@ -160,7 +160,7 @@ func (self *ApierV2) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	var account *engine.Account
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		if acc, err := self.DataManager.DataDB().GetAccount(accID); err == nil {
+		if acc, err := self.DataManager.GetAccount(accID); err == nil {
 			account = acc
 		} else {
 			return 0, err

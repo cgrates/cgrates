@@ -312,7 +312,7 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 	var partialyExecuted bool
 	for accID := range at.accountIDs {
 		_, err = guardian.Guardian.Guard(func() (interface{}, error) {
-			acc, err := dm.DataDB().GetAccount(accID)
+			acc, err := dm.GetAccount(accID)
 			if err != nil {
 				utils.Logger.Warning(fmt.Sprintf("Could not get account id: %s. Skipping!", accID))
 				return 0, err

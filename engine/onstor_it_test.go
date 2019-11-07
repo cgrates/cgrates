@@ -1116,13 +1116,13 @@ func testOnStorITCRUDAccount(t *testing.T) {
 		ID:         utils.ConcatenatedKey("cgrates.org", "account2"),
 		BalanceMap: map[string]Balances{utils.MONETARY: {&Balance{Value: 10, Weight: 10}}},
 	}
-	if _, rcvErr := onStor.DataDB().GetAccount(acc.ID); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetAccount(acc.ID); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.DataDB().SetAccount(acc); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetAccount(acc.ID); err != nil {
+	if rcv, err := onStor.GetAccount(acc.ID); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(acc.ID, rcv.ID) {
 		t.Errorf("Expecting: %v, received: %v", acc.ID, rcv.ID)
@@ -1134,7 +1134,7 @@ func testOnStorITCRUDAccount(t *testing.T) {
 	if err := onStor.DataDB().RemoveAccount(acc.ID); err != nil {
 		t.Error(err)
 	}
-	if _, rcvErr := onStor.DataDB().GetAccount(acc.ID); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetAccount(acc.ID); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

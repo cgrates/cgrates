@@ -97,7 +97,7 @@ func (sg *SharedGroup) GetBalances(destination, category, balanceType string, ub
 		if ubId == ub.ID { // skip the initiating user
 			nUb = ub
 		} else {
-			nUb, _ = dm.DataDB().GetAccount(ubId)
+			nUb, _ = dm.GetAccount(ubId)
 			if nUb == nil || nUb.Disabled {
 				continue
 			}

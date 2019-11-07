@@ -735,7 +735,7 @@ func (rs *RedisStorage) RemoveSharedGroupDrv(id string) (err error) {
 	return rs.Cmd(redis_DEL, utils.SHARED_GROUP_PREFIX+id).Err
 }
 
-func (rs *RedisStorage) GetAccount(key string) (*Account, error) {
+func (rs *RedisStorage) GetAccountDrv(key string) (*Account, error) {
 	rpl := rs.Cmd(redis_GET, utils.ACCOUNT_PREFIX+key)
 	if rpl.Err != nil {
 		return nil, rpl.Err
@@ -758,7 +758,7 @@ func (rs *RedisStorage) SetAccount(ub *Account) (err error) {
 	// UPDATE: if all balances expired and were cleaned it makes
 	// sense to write empty balance map
 	if len(ub.BalanceMap) == 0 {
-		if ac, err := rs.GetAccount(ub.ID); err == nil && !ac.allBalancesExpired() {
+		if ac, err := rs.GetAccountDrv(ub.ID); err == nil && !ac.allBalancesExpired() {
 			ac.ActionTriggers = ub.ActionTriggers
 			ac.UnitCounters = ub.UnitCounters
 			ac.AllowNegative = ub.AllowNegative

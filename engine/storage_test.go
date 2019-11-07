@@ -115,7 +115,7 @@ func TestStorageCacheRefresh(t *testing.T) {
 */
 
 func TestStorageDisabledAccount(t *testing.T) {
-	acc, err := dm.DataDB().GetAccount("cgrates.org:alodis")
+	acc, err := dm.GetAccount("cgrates.org:alodis")
 	if err != nil || acc == nil {
 		t.Error("Error loading disabled user account: ", err, acc)
 	}
@@ -133,11 +133,11 @@ func TestStoreInterfaces(t *testing.T) {
 }
 
 func TestDifferentUuid(t *testing.T) {
-	a1, err := dm.DataDB().GetAccount("cgrates.org:12345")
+	a1, err := dm.GetAccount("cgrates.org:12345")
 	if err != nil {
 		t.Error("Error getting account: ", err)
 	}
-	a2, err := dm.DataDB().GetAccount("cgrates.org:123456")
+	a2, err := dm.GetAccount("cgrates.org:123456")
 	if err != nil {
 		t.Error("Error getting account: ", err)
 	}

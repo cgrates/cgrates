@@ -174,7 +174,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 	dirtyActionPlans := make(map[string]*engine.ActionPlan)
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		var ub *engine.Account
-		if bal, _ := self.DataManager.DataDB().GetAccount(accID); bal != nil {
+		if bal, _ := self.DataManager.GetAccount(accID); bal != nil {
 			ub = bal
 		} else { // Not found in db, create it here
 			ub = &engine.Account{
@@ -374,7 +374,7 @@ func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{
 	}
 	retAccounts := make([]interface{}, 0)
 	for _, acntKey := range limitedAccounts {
-		if acnt, err := self.DataManager.DataDB().GetAccount(acntKey[len(utils.ACCOUNT_PREFIX):]); err != nil && err != utils.ErrNotFound { // Not found is not an error here
+		if acnt, err := self.DataManager.GetAccount(acntKey[len(utils.ACCOUNT_PREFIX):]); err != nil && err != utils.ErrNotFound { // Not found is not an error here
 			return err
 		} else if acnt != nil {
 			if attr.Disabled != nil && *attr.Disabled != acnt.Disabled {
@@ -390,7 +390,7 @@ func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{
 // Get balance
 func (self *ApierV1) GetAccount(attr *utils.AttrGetAccount, reply *interface{}) error {
 	tag := utils.ConcatenatedKey(attr.Tenant, attr.Account)
-	userBalance, err := self.DataManager.DataDB().GetAccount(tag)
+	userBalance, err := self.DataManager.GetAccount(tag)
 	if err != nil {
 		return err
 	}
@@ -443,7 +443,7 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 		expTime = &expTimeVal
 	}
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
-	if _, err := self.DataManager.DataDB().GetAccount(accID); err != nil {
+	if _, err := self.DataManager.GetAccount(accID); err != nil {
 		// create account if does not exist
 		account := &engine.Account{
 			ID: accID,
@@ -526,7 +526,7 @@ func (self *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) error
 		expTime = &expTimeVal
 	}
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
-	if _, err := self.DataManager.DataDB().GetAccount(accID); err != nil {
+	if _, err := self.DataManager.GetAccount(accID); err != nil {
 		// create account if not exists
 		account := &engine.Account{
 			ID: accID,
@@ -603,7 +603,7 @@ func (self *ApierV1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) e
 		expTime = &expTimeVal
 	}
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
-	if _, err := self.DataManager.DataDB().GetAccount(accID); err != nil {
+	if _, err := self.DataManager.GetAccount(accID); err != nil {
 		return utils.ErrNotFound
 	}
 

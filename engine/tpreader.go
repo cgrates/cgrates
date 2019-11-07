@@ -1068,7 +1068,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 				return err
 			}
 		}
-		ub, err := tpr.dm.DataDB().GetAccount(id)
+		ub, err := tpr.dm.GetAccount(id)
 		if err != nil {
 			ub = &Account{
 				ID: id,
