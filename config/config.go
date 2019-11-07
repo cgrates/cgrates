@@ -480,7 +480,11 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				}
 			}
 		}
+		if cfg.cacheCfg[utils.CacheClosedSessions].Limit == 0 {
+			return fmt.Errorf("<%s> %s needs to be != 0, received: %d", utils.CacheS, utils.CacheClosedSessions, cfg.cacheCfg[utils.CacheClosedSessions].Limit)
+		}
 	}
+
 	// FreeSWITCHAgent checks
 	if cfg.fsAgentCfg.Enabled {
 		if len(cfg.fsAgentCfg.SessionSConns) == 0 {
@@ -690,6 +694,29 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			utils.PostgressSSLModePrefer, utils.PostgressSSLModeRequire, utils.PostgressSSLModeVerifyCa,
 			utils.PostgressSSLModeVerifyFull}, cfg.storDbCfg.SSLMode) {
 			return fmt.Errorf("<%s> Unsuported sslmode for storDB", utils.StorDB)
+		}
+	}
+	// DataDB sanity checks
+	if cfg.DataDbCfg().DataDbType == utils.MetaInternal {
+		for key, config := range cfg.cacheCfg {
+			if key == utils.CacheDiameterMessages || key == utils.CacheClosedSessions {
+				if config.Limit == 0 {
+					return fmt.Errorf("<%s> %s needs to be != 0 when DataBD is *internal, found 0.", utils.CacheS, key)
+				}
+				continue
+			}
+			if config.Limit != 0 {
+				return fmt.Errorf("<%s> %s needs to be 0 when DataBD is *internal, received : %d", utils.CacheS, key, config.Limit)
+			}
+		}
+		if cfg.resourceSCfg.StoreInterval != -1 {
+			return fmt.Errorf("<%s> StoreInterval needs to be -1 when DataBD is *internal, received : %d", utils.ResourceS, cfg.resourceSCfg.StoreInterval)
+		}
+		if cfg.StatSCfg().StoreInterval != -1 {
+			return fmt.Errorf("<%s> StoreInterval needs to be -1 when DataBD is *internal, received : %d", utils.StatS, cfg.StatSCfg().StoreInterval)
+		}
+		if cfg.thresholdSCfg.StoreInterval != -1 {
+			return fmt.Errorf("<%s> StoreInterval needs to be -1 when DataBD is *internal, received : %d", utils.ThresholdS, cfg.thresholdSCfg.StoreInterval)
 		}
 	}
 	return nil
