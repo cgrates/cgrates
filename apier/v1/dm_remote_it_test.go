@@ -62,7 +62,7 @@ func TestInternalRemoteITRedis(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	dataDB, err := engine.NewRedisStorage(
 		fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
-		4, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+		10, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
 		utils.REDIS_MAX_CONNS, "")
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
@@ -202,7 +202,7 @@ func testInternalRemoteITGetAttribute(t *testing.T) {
 	}
 	reply.Compile()
 	if !reflect.DeepEqual(alsPrf.AttributeProfile, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(alsPrf.AttributeProfile), utils.ToJSON(reply))
 	}
 }
 

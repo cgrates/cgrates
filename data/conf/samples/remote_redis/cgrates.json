@@ -21,7 +21,7 @@
 	"db_type": "*internal",
 	"remote_conns": [
 		{
-			"db_type": "redis",
+			"db_type": "*redis",
 			"db_port": 6379,
 			"db_name": "10",
 		}

@@ -198,7 +198,7 @@ func testSchedVeifyAccount1001(t *testing.T) {
 }
 
 func testSchedVeifyAccount1002and1003(t *testing.T) {
-	if schedConfDIR == "tutmysql" || schedConfDIR == "filtered_scheduler1" {
+	if schedConfDIR == "tutmysql" || schedConfDIR == "filtered_scheduler" {
 		t.SkipNow()
 	}
 	var acnt *engine.Account
