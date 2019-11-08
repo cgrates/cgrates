@@ -35,7 +35,7 @@
 
 "scheduler": {
 	"enabled": true,
-	"filters": ["*suffix:~AccountID:1001"],
+	"filters": ["*suffix:~*act.AccountID:1001"],
 },
 
 
