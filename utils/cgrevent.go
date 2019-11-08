@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"reflect"
-	"strings"
 	"time"
 )
 
@@ -88,6 +86,7 @@ func (ev *CGREvent) TenantID() string {
 	return ConcatenatedKey(ev.Tenant, ev.ID)
 }
 
+/*
 func (ev *CGREvent) FilterableEvent(fltredFields []string) (fEv map[string]interface{}) {
 	fEv = make(map[string]interface{})
 	if len(fltredFields) == 0 {
@@ -112,6 +111,7 @@ func (ev *CGREvent) FilterableEvent(fltredFields []string) (fEv map[string]inter
 	}
 	return
 }
+*/
 
 func (ev *CGREvent) Clone() (clned *CGREvent) {
 	clned = &CGREvent{
@@ -128,16 +128,6 @@ func (ev *CGREvent) Clone() (clned *CGREvent) {
 	return
 }
 
-// RemFldsWithPrefix will remove fields starting with prefix from event
-func (ev *CGREvent) RemFldsWithPrefix(prfx string) {
-	for fldName := range ev.Event {
-		if strings.HasPrefix(fldName, prfx) {
-			delete(ev.Event, fldName)
-		}
-	}
-}
-
-// RemFldsWithPrefix will remove fields starting with prefix from event
 func (ev *CGREvent) consumeArgDispatcher() (arg *ArgDispatcher) {
 	if ev == nil {
 		return
