@@ -24,6 +24,83 @@ import (
 	"time"
 )
 
+func TestCGREventHasField(t *testing.T) {
+	//empty check
+	cgrEvent := new(CGREvent)
+	rcv := cgrEvent.HasField("")
+	if rcv {
+		t.Error("Expecting: false, received: ", rcv)
+	}
+	//normal check
+	cgrEvent = &CGREvent{
+		Event: map[string]interface{}{
+			Usage: time.Duration(20 * time.Second),
+		},
+	}
+	rcv = cgrEvent.HasField("Usage")
+	if !rcv {
+		t.Error("Expecting: true, received: ", rcv)
+	}
+}
+
+func TestCGREventCheckMandatoryFields(t *testing.T) {
+	//empty check
+	cgrEvent := new(CGREvent)
+	fldNames := []string{}
+	err := cgrEvent.CheckMandatoryFields(fldNames)
+	if err != nil {
+		t.Error(err)
+	}
+	cgrEvent = &CGREvent{
+		Event: map[string]interface{}{
+			Usage:   time.Duration(20 * time.Second),
+			"test1": 1,
+			"test2": 2,
+			"test3": 3,
+		},
+	}
+	//normal check
+	fldNames = []string{"test1", "test2"}
+	err = cgrEvent.CheckMandatoryFields(fldNames)
+	if err != nil {
+		t.Error(err)
+	}
+	//MANDATORY_IE_MISSING
+	fldNames = []string{"test4", "test5"}
+	err = cgrEvent.CheckMandatoryFields(fldNames)
+	if err == nil || err.Error() != NewErrMandatoryIeMissing("test4").Error() {
+		t.Errorf("Expected %s, received %s", NewErrMandatoryIeMissing("test4"), err)
+	}
+}
+
+func TestCGREventFielAsString(t *testing.T) {
+	//empty check
+	cgrEvent := new(CGREvent)
+	fldname := "test"
+	_, err := cgrEvent.FieldAsString(fldname)
+	if err == nil || err.Error() != ErrNotFound.Error() {
+		t.Errorf("Expected %s, received %s", ErrNotFound, err)
+	}
+	//normal check
+	cgrEvent = &CGREvent{
+		Event: map[string]interface{}{
+			Usage:   time.Duration(20 * time.Second),
+			"test1": 1,
+			"test2": 2,
+			"test3": 3,
+		},
+	}
+	fldname = "test1"
+	rcv, err := cgrEvent.FieldAsString(fldname)
+	if err != nil {
+		t.Error(err)
+	}
+	if rcv != "1" {
+		t.Errorf("Expected: 1, received %+q", rcv)
+	}
+
+}
+
 func TestLibSuppliersUsage(t *testing.T) {
 	se := &CGREvent{
 		Tenant: "cgrates.org",
@@ -144,11 +221,9 @@ func TestCGREventFieldAsFloat64(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", se.Event["Weight"], answ)
 	}
 	answ, err = se.FieldAsFloat64("PddInterval")
-	//TODO: Make an error to be expected :
-	//	cgrEvent_test.go:149: strconv.ParseFloat: parsing "1s": invalid syntax
-	// if err != nil {
-	// 	t.Error(err)
-	// }
+	if err == nil || err.Error() != `strconv.ParseFloat: parsing "1s": invalid syntax` {
+		t.Errorf("Expected %s, received %s", `strconv.ParseFloat: parsing "1s": invalid syntax`, err)
+	}
 	if answ != 0 {
 		t.Errorf("Expecting: %+v, received: %+v", 0, answ)
 	}
@@ -156,7 +231,34 @@ func TestCGREventFieldAsFloat64(t *testing.T) {
 	if _, err := se.FieldAsFloat64(AnswerTime); err == nil || !strings.HasPrefix(err.Error(), "cannot convert field") {
 		t.Errorf("Unexpected error : %+v", err)
 	}
+	if _, err := se.FieldAsFloat64(Account); err == nil || err.Error() != ErrNotFound.Error() {
+		t.Errorf("Expected %s, received %s", ErrNotFound, err)
+	}
+	// }
 }
+
+// }
+func TestCGREventTenantID(t *testing.T) {
+	//empty check
+	cgrEvent := new(CGREvent)
+	rcv := cgrEvent.TenantID()
+	eOut := ":"
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	//normal check
+	cgrEvent = &CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "supplierEvent1",
+	}
+	rcv = cgrEvent.TenantID()
+	eOut = "cgrates.org:supplierEvent1"
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+
+}
+
 func TestCGREventClone(t *testing.T) {
 	now := time.Now()
 	ev := &CGREvent{
@@ -178,5 +280,4 @@ func TestCGREventClone(t *testing.T) {
 	if cloned.Time == ev.Time {
 		t.Errorf("Expecting: different pointer but received: %+v", cloned.Time)
 	}
-
 }
