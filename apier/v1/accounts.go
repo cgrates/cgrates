@@ -49,7 +49,7 @@ func (self *ApierV1) GetAccountActionPlan(attrs utils.TenantAccount, reply *[]*A
 		}
 		var acntAPs []*engine.ActionPlan
 		for _, apID := range acntAPids {
-			if ap, err := self.DataManager.DataDB().GetActionPlan(apID, false, utils.NonTransactional); err != nil {
+			if ap, err := self.DataManager.GetActionPlan(apID, false, utils.NonTransactional); err != nil {
 				return nil, err
 			} else if ap != nil {
 				acntAPs = append(acntAPs, ap)
@@ -99,7 +99,7 @@ func (self *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *str
 
 	var remAcntAPids []string // list of accounts who's indexes need modification
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
-		ap, err := self.DataManager.DataDB().GetActionPlan(attrs.ActionPlanId, false, utils.NonTransactional)
+		ap, err := self.DataManager.GetActionPlan(attrs.ActionPlanId, false, utils.NonTransactional)
 		if err != nil {
 			return 0, err
 		} else if ap == nil {
@@ -194,7 +194,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 						i++ // increase index since we don't remove from slice
 						continue
 					}
-					ap, err := self.DataManager.DataDB().GetActionPlan(apID, false, utils.NonTransactional)
+					ap, err := self.DataManager.GetActionPlan(apID, false, utils.NonTransactional)
 					if err != nil {
 						return 0, err
 					}
@@ -203,7 +203,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 					acntAPids = append(acntAPids[:i], acntAPids[i+1:]...) // remove the item from the list so we can overwrite the real list
 				}
 				if !utils.IsSliceMember(acntAPids, attr.ActionPlanId) { // Account not yet attached to action plan, do it here
-					ap, err := self.DataManager.DataDB().GetActionPlan(attr.ActionPlanId, false, utils.NonTransactional)
+					ap, err := self.DataManager.GetActionPlan(attr.ActionPlanId, false, utils.NonTransactional)
 					if err != nil {
 						return 0, err
 					}
@@ -296,7 +296,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		// remove it from all action plans
 		_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-			actionPlansMap, err := self.DataManager.DataDB().GetAllActionPlans()
+			actionPlansMap, err := self.DataManager.GetAllActionPlans()
 			if err == utils.ErrNotFound {
 				// no action plans
 				return 0, nil

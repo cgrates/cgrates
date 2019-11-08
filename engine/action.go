@@ -618,7 +618,7 @@ func removeAccountAction(ub *Account, a *Action, acs Actions, extraData interfac
 			return 0, err
 		}
 		for _, apID := range acntAPids {
-			ap, err := dm.DataDB().GetActionPlan(apID, false, utils.NonTransactional)
+			ap, err := dm.GetActionPlan(apID, false, utils.NonTransactional)
 			if err != nil {
 				utils.Logger.Err(fmt.Sprintf("Could not retrieve action plan: %s: %v", apID, err))
 				return 0, err

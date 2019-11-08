@@ -460,7 +460,7 @@ func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) (err error) {
 				return err
 			}
 			for _, key := range keys {
-				apl, err := ms.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):], true, utils.NonTransactional)
+				apl, err := ms.GetActionPlanDrv(key[len(utils.ACTION_PLAN_PREFIX):], true, utils.NonTransactional)
 				if err != nil {
 					return err
 				}
@@ -513,7 +513,7 @@ func (ms *MongoStorage) RemoveReverseForPrefix(prefix string) (err error) {
 				return err
 			}
 			for _, key := range keys {
-				apl, err := ms.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):], true, utils.NonTransactional)
+				apl, err := ms.GetActionPlanDrv(key[len(utils.ACTION_PLAN_PREFIX):], true, utils.NonTransactional)
 				if err != nil {
 					return err
 				}
@@ -694,6 +694,9 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		}
 		return err
 	})
+	if len(result) == 0 {
+		return nil, utils.ErrNotFound
+	}
 	return
 }
 
@@ -1341,7 +1344,7 @@ func (ms *MongoStorage) RemoveActionTriggersDrv(key string) error {
 	})
 }
 
-func (ms *MongoStorage) GetActionPlan(key string, skipCache bool,
+func (ms *MongoStorage) GetActionPlanDrv(key string, skipCache bool,
 	transactionID string) (ats *ActionPlan, err error) {
 	if !skipCache {
 		if x, err := Cache.GetCloned(utils.CacheActionPlans, key); err != nil {
@@ -1405,7 +1408,7 @@ func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan,
 	}
 	if !overwrite {
 		// get existing action plan to merge the account ids
-		if existingAts, _ := ms.GetActionPlan(key, true, transactionID); existingAts != nil {
+		if existingAts, _ := ms.GetActionPlanDrv(key, true, transactionID); existingAts != nil {
 			if ats.AccountIDs == nil && len(existingAts.AccountIDs) > 0 {
 				ats.AccountIDs = make(utils.StringMap)
 			}
@@ -1443,14 +1446,15 @@ func (ms *MongoStorage) RemoveActionPlan(key string, transactionID string) error
 	})
 }
 
-func (ms *MongoStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
+func (ms *MongoStorage) GetAllActionPlansDrv() (ats map[string]*ActionPlan, err error) {
 	keys, err := ms.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
 	if err != nil {
 		return nil, err
 	}
+	utils.Logger.Debug(fmt.Sprintf("keys in mongo: %+v", keys))
 	ats = make(map[string]*ActionPlan, len(keys))
 	for _, key := range keys {
-		ap, err := ms.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):],
+		ap, err := ms.GetActionPlanDrv(key[len(utils.ACTION_PLAN_PREFIX):],
 			false, utils.NonTransactional)
 		if err != nil {
 			return nil, err

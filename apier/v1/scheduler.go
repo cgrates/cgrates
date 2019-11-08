@@ -116,7 +116,7 @@ type AttrsExecuteScheduledActions struct {
 
 func (self *ApierV1) ExecuteScheduledActions(attr AttrsExecuteScheduledActions, reply *string) error {
 	if attr.ActionPlanID != "" { // execute by ActionPlanID
-		apl, err := self.DataManager.DataDB().GetActionPlan(attr.ActionPlanID, false, utils.NonTransactional)
+		apl, err := self.DataManager.GetActionPlan(attr.ActionPlanID, false, utils.NonTransactional)
 		if err != nil {
 			*reply = err.Error()
 			return err
@@ -141,7 +141,7 @@ func (self *ApierV1) ExecuteScheduledActions(attr AttrsExecuteScheduledActions, 
 		}
 	}
 	if !attr.TimeStart.IsZero() && !attr.TimeEnd.IsZero() { // execute between two dates
-		actionPlans, err := self.DataManager.DataDB().GetAllActionPlans()
+		actionPlans, err := self.DataManager.GetAllActionPlans()
 		if err != nil && err != utils.ErrNotFound {
 			err := fmt.Errorf("cannot get action plans: %v", err)
 			*reply = err.Error()

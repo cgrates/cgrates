@@ -20,6 +20,7 @@ package v2
 
 import (
 	"errors"
+	"fmt"
 	"math"
 
 	"github.com/cgrates/cgrates/config"
@@ -84,7 +85,7 @@ func (self *ApierV2) GetAccount(attr *utils.AttrGetAccount, reply *engine.Accoun
 	if err != nil {
 		return err
 	}
-
+	fmt.Println("Account : %+v", utils.ToJSON(account))
 	*reply = *account
 	return nil
 }
@@ -131,7 +132,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 							i++      // increase index since we don't remove from slice
 							continue // not removing the ones where
 						}
-						ap, err := self.DataManager.DataDB().GetActionPlan(apID, false, utils.NonTransactional)
+						ap, err := self.DataManager.GetActionPlan(apID, false, utils.NonTransactional)
 						if err != nil {
 							return 0, err
 						}
@@ -141,7 +142,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 					}
 				}
 				for _, apID := range *attr.ActionPlanIDs {
-					ap, err := self.DataManager.DataDB().GetActionPlan(apID, false, utils.NonTransactional)
+					ap, err := self.DataManager.GetActionPlan(apID, false, utils.NonTransactional)
 					if err != nil {
 						return 0, err
 					}

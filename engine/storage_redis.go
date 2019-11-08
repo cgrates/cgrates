@@ -255,7 +255,7 @@ func (rs *RedisStorage) SelectDatabase(dbName string) (err error) {
 func (rs *RedisStorage) IsDBEmpty() (resp bool, err error) {
 	var keys []string
 	keys, err = rs.GetKeysForPrefix("")
-	if err != nil {
+	if err != nil && err != utils.ErrNotFound {
 		return
 	}
 	if len(keys) != 0 {
@@ -297,7 +297,7 @@ func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) (err error) {
 			return
 		}
 		for _, key := range keys {
-			apl, err := rs.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):], true, utils.NonTransactional) // skipCache on get since loader checks and caches empty data for loaded objects
+			apl, err := rs.GetActionPlanDrv(key[len(utils.ACTION_PLAN_PREFIX):], true, utils.NonTransactional) // skipCache on get since loader checks and caches empty data for loaded objects
 			if err != nil {
 				return err
 			}
@@ -344,7 +344,7 @@ func (rs *RedisStorage) RemoveReverseForPrefix(prefix string) (err error) {
 			return
 		}
 		for _, key := range keys {
-			apl, err := rs.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):], true, utils.NonTransactional) // skipCache on get since loader checks and caches empty data for loaded objects
+			apl, err := rs.GetActionPlanDrv(key[len(utils.ACTION_PLAN_PREFIX):], true, utils.NonTransactional) // skipCache on get since loader checks and caches empty data for loaded objects
 			if err != nil {
 				return err
 			}
@@ -398,13 +398,14 @@ func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	if r.Err != nil {
 		return nil, r.Err
 	}
-	if keys, _ := r.List(); len(keys) != 0 {
-		if filterIndexesPrefixMap.HasKey(prefix) {
-			return rs.getKeysForFilterIndexesKeys(keys)
-		}
-		return keys, nil
+	keys, _ := r.List()
+	if len(keys) == 0 {
+		return nil, utils.ErrNotFound
 	}
-	return nil, nil
+	if filterIndexesPrefixMap.HasKey(prefix) {
+		return rs.getKeysForFilterIndexesKeys(keys)
+	}
+	return keys, nil
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
@@ -890,7 +891,7 @@ func (rs *RedisStorage) RemoveActionTriggersDrv(key string) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetActionPlan(key string, skipCache bool,
+func (rs *RedisStorage) GetActionPlanDrv(key string, skipCache bool,
 	transactionID string) (ats *ActionPlan, err error) {
 	if !skipCache {
 		if x, err := Cache.GetCloned(utils.CacheActionPlans, key); err != nil {
@@ -956,7 +957,7 @@ func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan,
 	}
 	if !overwrite {
 		// get existing action plan to merge the account ids
-		if existingAts, _ := rs.GetActionPlan(key, true, transactionID); existingAts != nil {
+		if existingAts, _ := rs.GetActionPlanDrv(key, true, transactionID); existingAts != nil {
 			if ats.AccountIDs == nil && len(existingAts.AccountIDs) > 0 {
 				ats.AccountIDs = make(utils.StringMap)
 			}
@@ -979,14 +980,14 @@ func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan,
 	return rs.Cmd(redis_SET, utils.ACTION_PLAN_PREFIX+key, b.Bytes()).Err
 }
 
-func (rs *RedisStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
+func (rs *RedisStorage) GetAllActionPlansDrv() (ats map[string]*ActionPlan, err error) {
 	keys, err := rs.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
 	if err != nil {
 		return nil, err
 	}
 	ats = make(map[string]*ActionPlan, len(keys))
 	for _, key := range keys {
-		ap, err := rs.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):],
+		ap, err := rs.GetActionPlanDrv(key[len(utils.ACTION_PLAN_PREFIX):],
 			false, utils.NonTransactional)
 		if err != nil {
 			return nil, err

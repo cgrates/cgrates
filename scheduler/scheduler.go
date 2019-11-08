@@ -176,7 +176,7 @@ func (s *Scheduler) loadActionPlans() {
 		}()
 	}
 
-	actionPlans, err := s.dm.DataDB().GetAllActionPlans()
+	actionPlans, err := s.dm.GetAllActionPlans()
 	if err != nil && err != utils.ErrNotFound {
 		utils.Logger.Warning(fmt.Sprintf("<Scheduler> Cannot get action plans: %v", err))
 	}

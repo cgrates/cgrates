@@ -238,7 +238,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.ACTION_PREFIX:
 			_, err = dm.GetActions(dataID, true, utils.NonTransactional)
 		case utils.ACTION_PLAN_PREFIX:
-			_, err = dm.DataDB().GetActionPlan(dataID, true, utils.NonTransactional)
+			_, err = dm.GetActionPlan(dataID, true, utils.NonTransactional)
 		case utils.AccountActionPlansPrefix:
 			_, err = dm.DataDB().GetAccountActionPlans(dataID, true, utils.NonTransactional)
 		case utils.ACTION_TRIGGER_PREFIX:
@@ -1220,6 +1220,46 @@ func (dm *DataManager) RemoveActions(key, transactionID string) (err error) {
 	}
 	Cache.Remove(utils.CacheActions, key,
 		cacheCommit(transactionID), transactionID)
+	return
+}
+
+func (dm *DataManager) GetActionPlan(key string, skipCache bool, transactionID string) (ats *ActionPlan, err error) {
+	ats, err = dm.dataDB.GetActionPlanDrv(key, skipCache, transactionID)
+	if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
+		var rmtErr error
+		for _, rmtDM := range dm.rmtDataDBs {
+			if ats, rmtErr = rmtDM.GetActionPlan(key, true,
+				utils.NonTransactional); rmtErr == nil {
+				break
+			}
+		}
+		err = rmtErr
+	}
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func (dm *DataManager) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
+	utils.Logger.Debug("Enter in DM GetAllActionsPlans")
+	ats, err = dm.dataDB.GetAllActionPlansDrv()
+	utils.Logger.Debug(fmt.Sprintf("error when quierying for ats: %+v", err))
+	utils.Logger.Debug(fmt.Sprintf("ats: %+v", ats))
+	if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
+		utils.Logger.Debug("Enter here with not found ")
+		var rmtErr error
+		for _, rmtDM := range dm.rmtDataDBs {
+			if ats, rmtErr = rmtDM.GetAllActionPlans(); rmtErr == nil {
+				break
+			}
+		}
+		utils.Logger.Debug(fmt.Sprintf("Leave remote with ats : %+v", utils.ToJSON(ats)))
+		err = rmtErr
+	}
+	if err != nil {
+		return nil, err
+	}
 	return
 }
 

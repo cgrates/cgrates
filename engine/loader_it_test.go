@@ -101,7 +101,8 @@ func TestLoaderITRemoveLoad(t *testing.T) {
 			t.Error("Failed validating data: ", err.Error())
 		}
 	}*/
-	loader, err = NewTpReader(dataDbCsv.DataDB(), NewFileCSVStorage(utils.CSV_SEP, path.Join(*dataDir, "tariffplans", *tpCsvScenario), false), "", "", nil, nil)
+	loader, err = NewTpReader(dataDbCsv.DataDB(), NewFileCSVStorage(utils.CSV_SEP,
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario), false), "", "", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -256,7 +257,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, ap := range loader.actionPlans {
-		rcv, err := loader.dm.DataDB().GetActionPlan(k, true, utils.NonTransactional)
+		rcv, err := loader.dm.GetActionPlan(k, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Failed GetActionPlan: ", err.Error())
 		}

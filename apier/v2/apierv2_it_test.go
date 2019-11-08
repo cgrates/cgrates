@@ -216,7 +216,7 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 			{ActionsId: argActs1.ActionsId,
 				Time:   fmt.Sprintf("%v:%v:%v", tNow.Hour(), tNow.Minute(), tNow.Second()), // 10:4:12
 				Weight: 20.0}}}
-	if _, err := dm.DataDB().GetActionPlan(argAP1.Id, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
+	if _, err := dm.GetActionPlan(argAP1.Id, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if err := apierRPC.Call("ApierV1.SetActionPlan", argAP1, &reply); err != nil {
@@ -236,7 +236,7 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 	if err := apierRPC.Call("ApierV2.SetAccount", argSetAcnt1, &reply); err != nil {
 		t.Fatal(err)
 	}
-	if ap, err := dm.DataDB().GetActionPlan(argAP1.Id, true, utils.NonTransactional); err != nil {
+	if ap, err := dm.GetActionPlan(argAP1.Id, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if _, hasIt := ap.AccountIDs[acntID]; !hasIt {
 		t.Errorf("ActionPlan does not contain the accountID: %+v", ap)
@@ -251,7 +251,7 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 	argAP2 := &v1.AttrSetActionPlan{Id: "TestApierV2itSetAccountWithAP_AP_2",
 		ActionPlan: []*v1.AttrActionPlan{
 			{ActionsId: argActs1.ActionsId, MonthDays: "1", Time: "00:00:00", Weight: 20.0}}}
-	if _, err := dm.DataDB().GetActionPlan(argAP2.Id, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
+	if _, err := dm.GetActionPlan(argAP2.Id, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
 		t.Error(err)
 	}
 	if err := apierRPC.Call("ApierV2.SetActionPlan", argAP2, &reply); err != nil {
@@ -268,12 +268,12 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 	if err := apierRPC.Call("ApierV2.SetAccount", argSetAcnt2, &reply); err != nil {
 		t.Fatal(err)
 	}
-	if ap, err := dm.DataDB().GetActionPlan(argAP2.Id, true, utils.NonTransactional); err != nil {
+	if ap, err := dm.GetActionPlan(argAP2.Id, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if _, hasIt := ap.AccountIDs[acntID]; !hasIt {
 		t.Errorf("ActionPlan does not contain the accountID: %+v", ap)
 	}
-	if ap, err := dm.DataDB().GetActionPlan(argAP1.Id, true, utils.NonTransactional); err != nil {
+	if ap, err := dm.GetActionPlan(argAP1.Id, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if _, hasIt := ap.AccountIDs[acntID]; !hasIt {
 		t.Errorf("ActionPlan does not contain the accountID: %+v", ap)
@@ -294,12 +294,12 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 	if err := apierRPC.Call("ApierV2.SetAccount", argSetAcnt2, &reply); err != nil {
 		t.Fatal(err)
 	}
-	if ap, err := dm.DataDB().GetActionPlan(argAP1.Id, true, utils.NonTransactional); err != nil {
+	if ap, err := dm.GetActionPlan(argAP1.Id, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if _, hasIt := ap.AccountIDs[acntID]; hasIt {
 		t.Errorf("ActionPlan does contain the accountID: %+v", ap)
 	}
-	if ap, err := dm.DataDB().GetActionPlan(argAP2.Id, true, utils.NonTransactional); err != nil {
+	if ap, err := dm.GetActionPlan(argAP2.Id, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if _, hasIt := ap.AccountIDs[acntID]; !hasIt {
 		t.Errorf("ActionPlan does not contain the accountID: %+v", ap)

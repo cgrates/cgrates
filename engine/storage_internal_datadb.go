@@ -81,13 +81,17 @@ func (iDB *InternalDB) SelectDatabase(dbName string) (err error) {
 	return nil
 }
 
-func (iDB *InternalDB) GetKeysForPrefix(prefix string) ([]string, error) {
+func (iDB *InternalDB) GetKeysForPrefix(prefix string) (ids []string, err error) {
 	keyLen := len(utils.DESTINATION_PREFIX)
 	if len(prefix) < keyLen {
 		return nil, fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
 	}
 	category := prefix[:keyLen] // prefix length
-	return iDB.db.GetItemIDs(utils.CachePrefixToInstance[category], prefix), nil
+	ids = iDB.db.GetItemIDs(utils.CachePrefixToInstance[category], prefix)
+	if len(ids) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return
 }
 
 func (iDB *InternalDB) RebuildReverseForPrefix(prefix string) (err error) {
@@ -501,7 +505,8 @@ func (iDB *InternalDB) RemoveActionTriggersDrv(id string) (err error) {
 	return
 }
 
-func (iDB *InternalDB) GetActionPlan(key string, skipCache bool, transactionID string) (ats *ActionPlan, err error) {
+func (iDB *InternalDB) GetActionPlanDrv(key string, skipCache bool,
+	transactionID string) (ats *ActionPlan, err error) {
 	if !skipCache {
 		if x, ok := Cache.Get(utils.CacheActionPlans, key); ok {
 			if x != nil {
@@ -535,7 +540,7 @@ func (iDB *InternalDB) SetActionPlan(key string, ats *ActionPlan,
 	}
 	if !overwrite {
 		// get existing action plan to merge the account ids
-		if existingAts, _ := iDB.GetActionPlan(key, true,
+		if existingAts, _ := iDB.GetActionPlanDrv(key, true,
 			transactionID); existingAts != nil {
 			if ats.AccountIDs == nil && len(existingAts.AccountIDs) > 0 {
 				ats.AccountIDs = make(utils.StringMap)
@@ -557,14 +562,17 @@ func (iDB *InternalDB) RemoveActionPlan(key string, transactionID string) (err e
 	return
 }
 
-func (iDB *InternalDB) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
+func (iDB *InternalDB) GetAllActionPlansDrv() (ats map[string]*ActionPlan, err error) {
 	keys, err := iDB.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
+	utils.Logger.Debug(fmt.Sprintf("keys in internal: %+v", keys))
+	utils.Logger.Debug(fmt.Sprintf("error when getting keys in internal: %+v", err))
 	if err != nil {
 		return nil, err
 	}
+
 	ats = make(map[string]*ActionPlan, len(keys))
 	for _, key := range keys {
-		ap, err := iDB.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):], false, utils.NonTransactional)
+		ap, err := iDB.GetActionPlanDrv(key[len(utils.ACTION_PLAN_PREFIX):], false, utils.NonTransactional)
 		if err != nil {
 			return nil, err
 		}
