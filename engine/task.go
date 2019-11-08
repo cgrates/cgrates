@@ -48,7 +48,7 @@ func (t *Task) String() string {
 
 // AsNavigableMap implements config.DataProvider
 func (t *Task) AsNavigableMap(_ []*config.FCTemplate) (nm *config.NavigableMap, err error) {
-	nm = new(config.NavigableMap)
+	nm = config.NewNavigableMap(nil)
 	nm.Set([]string{utils.UUID}, t.Uuid, false, false)
 	nm.Set([]string{utils.AccountID}, t.AccountID, false, false)
 	nm.Set([]string{utils.ActionsID}, t.ActionsID, false, false)
