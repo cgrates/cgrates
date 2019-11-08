@@ -88,6 +88,9 @@ func TestCdrsReload(t *testing.T) {
 	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
+	if stordb.IsRunning() {
+		t.Errorf("Expected service to be down")
+	}
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ConfigReloadWithArgDispatcher{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
@@ -102,6 +105,9 @@ func TestCdrsReload(t *testing.T) {
 		t.Errorf("Expected service to be running")
 	}
 	if !db.IsRunning() {
+		t.Errorf("Expected service to be running")
+	}
+	if !stordb.IsRunning() {
 		t.Errorf("Expected service to be running")
 	}
 	cfg.CdrsCfg().Enabled = false
