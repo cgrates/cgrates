@@ -539,7 +539,7 @@ func main() {
 		services.NewRadiusAgent(cfg, filterSChan, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),   // partial reload
 		services.NewDiameterAgent(cfg, filterSChan, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan), // partial reload
 		services.NewHTTPAgent(cfg, filterSChan, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), server),       // no reload
-		ldrs, anz, dspS,
+		ldrs, anz, dspS, dmService, storDBService,
 	)
 
 	srvManager.StartServices()
