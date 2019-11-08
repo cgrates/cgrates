@@ -572,6 +572,7 @@ const (
 	QueryLow                    = "query"
 	UUID                        = "UUID"
 	ActionsID                   = "ActionsID"
+	MetaAct                     = "*act"
 )
 
 // Migrator Action

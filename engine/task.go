@@ -67,7 +67,10 @@ func (t *Task) FieldAsString(fldPath []string) (s string, err error) {
 	if len(fldPath) == 0 {
 		return
 	}
-	switch fldPath[0] {
+	if fldPath[0] != utils.MetaAct || len(fldPath) < 2 {
+		return "", utils.ErrPrefixNotFound(strings.Join(fldPath, utils.NestingSep))
+	}
+	switch fldPath[1] {
 	case utils.UUID:
 		return t.Uuid, nil
 	case utils.AccountID:
