@@ -454,31 +454,15 @@ func main() {
 
 	cfg.LazySanityCheck()
 
-	// we should use only one database for StorDB
-	var storDb engine.StorDB
-	// var cdrDb engine.CdrStorage
 	dmService := services.NewDataDBService(cfg)
+	storDBService := services.NewStorDBService(cfg)
 	if dmService.ShouldRun() { // Some services can run without db, ie:  CDRC
 		if err = dmService.Start(); err != nil {
 			return
 		}
 	}
-	if cfg.RalsCfg().Enabled || cfg.CdrsCfg().Enabled {
-		storDb, err := engine.NewStorDBConn(cfg.StorDbCfg().Type,
-			cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
-			cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
-			cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,
-			cfg.StorDbCfg().MaxOpenConns, cfg.StorDbCfg().MaxIdleConns,
-			cfg.StorDbCfg().ConnMaxLifetime, cfg.StorDbCfg().StringIndexedFields,
-			cfg.StorDbCfg().PrefixIndexedFields)
-		if err != nil { // Cannot configure logger database, show stopper
-			utils.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
-			return
-		}
-		defer storDb.Close()
-		engine.SetCdrStorage(storDb)
-		if err := engine.CheckVersions(storDb); err != nil {
-			fmt.Println(err.Error())
+	if storDBService.ShouldRun() {
+		if err = storDBService.Start(); err != nil {
 			return
 		}
 	}
@@ -529,11 +513,11 @@ func main() {
 		attrS.GetIntenternalChan(), stS.GetIntenternalChan(),
 		reS.GetIntenternalChan(), dspS.GetIntenternalChan())
 	schS := services.NewSchedulerService(cfg, dmService, cacheS, filterSChan, server, internalCDRServerChan, dspS.GetIntenternalChan())
-	rals := services.NewRalService(cfg, dmService, storDb, storDb, cacheS, filterSChan, server,
+	rals := services.NewRalService(cfg, dmService, storDBService, cacheS, filterSChan, server,
 		tS.GetIntenternalChan(), stS.GetIntenternalChan(), internalCacheSChan,
 		schS.GetIntenternalChan(), attrS.GetIntenternalChan(), dspS.GetIntenternalChan(),
 		schS, exitChan)
-	cdrS := services.NewCDRServer(cfg, dmService, storDb, filterSChan, server, internalCDRServerChan,
+	cdrS := services.NewCDRServer(cfg, dmService, storDBService, filterSChan, server, internalCDRServerChan,
 		chrS.GetIntenternalChan(), rals.GetResponder().GetIntenternalChan(),
 		attrS.GetIntenternalChan(), tS.GetIntenternalChan(),
 		stS.GetIntenternalChan(), dspS.GetIntenternalChan())

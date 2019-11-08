@@ -85,10 +85,16 @@ func NewCDRServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, r
 	if chargerS != nil && reflect.ValueOf(chargerS).IsNil() {
 		chargerS = nil
 	}
-	return &CDRServer{cgrCfg: cgrCfg, cdrDb: cdrDb, dm: dm,
-		rals: rater, attrS: attrS,
-		statS: statS, thdS: thdS,
-		chargerS: chargerS, guard: guardian.Guardian,
+	return &CDRServer{
+		cgrCfg:   cgrCfg,
+		cdrDb:    cdrDb,
+		dm:       dm,
+		rals:     rater,
+		attrS:    attrS,
+		statS:    statS,
+		thdS:     thdS,
+		chargerS: chargerS,
+		guard:    guardian.Guardian,
 		httpPoster: NewHTTPPoster(cgrCfg.GeneralCfg().HttpSkipTlsVerify,
 			cgrCfg.GeneralCfg().ReplyTimeout), filterS: filterS}
 }
@@ -858,4 +864,10 @@ func (cdrS *CDRServer) SetChargerSConnection(chS rpcclient.RpcClientConnection) 
 // only used on reload
 func (cdrS *CDRServer) SetRALsConnection(rls rpcclient.RpcClientConnection) {
 	cdrS.rals = rls
+}
+
+// SetStorDB sets the new StorDB
+// only used on reload
+func (cdrS *CDRServer) SetStorDB(cdrDb CdrStorage) {
+	cdrS.cdrDb = cdrDb
 }

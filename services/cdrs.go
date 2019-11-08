@@ -33,14 +33,14 @@ import (
 
 // NewCDRServer returns the CDR Server
 func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
-	cdrStorage engine.CdrStorage, filterSChan chan *engine.FilterS,
+	storDB *StorDBService, filterSChan chan *engine.FilterS,
 	server *utils.Server, internalCDRServerChan, chrsChan, respChan, attrsChan, thsChan, stsChan,
 	dispatcherChan chan rpcclient.RpcClientConnection) servmanager.Service {
 	return &CDRServer{
 		connChan:       internalCDRServerChan,
 		cfg:            cfg,
 		dm:             dm,
-		cdrStorage:     cdrStorage,
+		storDB:         storDB,
 		filterSChan:    filterSChan,
 		server:         server,
 		chrsChan:       chrsChan,
@@ -57,7 +57,7 @@ type CDRServer struct {
 	sync.RWMutex
 	cfg            *config.CGRConfig
 	dm             *DataDBService
-	cdrStorage     engine.CdrStorage
+	storDB         *StorDBService
 	filterSChan    chan *engine.FilterS
 	server         *utils.Server
 	chrsChan       chan rpcclient.RpcClientConnection
@@ -118,7 +118,7 @@ func (cdrS *CDRServer) Start() (err error) {
 	}
 	cdrS.Lock()
 	defer cdrS.Unlock()
-	cdrS.cdrS = engine.NewCDRServer(cdrS.cfg, cdrS.cdrStorage, cdrS.dm.GetDM(),
+	cdrS.cdrS = engine.NewCDRServer(cdrS.cfg, cdrS.storDB.GetDM(), cdrS.dm.GetDM(),
 		ralConn, attrSConn, thresholdSConn, statsConn, chargerSConn, filterS)
 	utils.Logger.Info("Registering CDRS HTTP Handlers.")
 	cdrS.cdrS.RegisterHandlersToServer(cdrS.server)
@@ -173,6 +173,9 @@ func (cdrS *CDRServer) Reload() (err error) {
 		return
 	}
 	cdrS.Lock()
+	if cdrS.storDB.WasReconnected() { // rewrite the connection if was changed
+		cdrS.cdrS.SetStorDB(cdrS.storDB.GetDM())
+	}
 	cdrS.cdrS.SetRALsConnection(ralConn)
 	cdrS.cdrS.SetAttributeSConnection(attrSConn)
 	cdrS.cdrS.SetThresholSConnection(thresholdSConn)

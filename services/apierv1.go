@@ -31,8 +31,7 @@ import (
 
 // NewApierV1Service returns the ApierV1 Service
 func NewApierV1Service(cfg *config.CGRConfig, dm *DataDBService,
-	cdrStorage engine.CdrStorage, loadStorage engine.LoadStorage,
-	filterSChan chan *engine.FilterS,
+	storDB *StorDBService, filterSChan chan *engine.FilterS,
 	server *utils.Server, cacheSChan, schedChan, attrsChan,
 	dispatcherChan chan rpcclient.RpcClientConnection,
 	schedService *SchedulerService,
@@ -41,8 +40,7 @@ func NewApierV1Service(cfg *config.CGRConfig, dm *DataDBService,
 		connChan:         make(chan rpcclient.RpcClientConnection, 1),
 		cfg:              cfg,
 		dm:               dm,
-		cdrStorage:       cdrStorage,
-		loadStorage:      loadStorage,
+		storDB:           storDB,
 		filterSChan:      filterSChan,
 		server:           server,
 		cacheSChan:       cacheSChan,
@@ -59,8 +57,7 @@ type ApierV1Service struct {
 	sync.RWMutex
 	cfg              *config.CGRConfig
 	dm               *DataDBService
-	cdrStorage       engine.CdrStorage
-	loadStorage      engine.LoadStorage
+	storDB           *StorDBService
 	filterSChan      chan *engine.FilterS
 	server           *utils.Server
 	cacheSChan       chan rpcclient.RpcClientConnection
@@ -110,9 +107,9 @@ func (api *ApierV1Service) Start() (err error) {
 	}
 
 	api.api = &v1.ApierV1{
-		StorDb:           api.loadStorage,
 		DataManager:      api.dm.GetDM(),
-		CdrDb:            api.cdrStorage,
+		CdrDb:            api.storDB.GetDM(),
+		StorDb:           api.storDB.GetDM(),
 		Config:           api.cfg,
 		Responder:        api.responderService.GetResponder(),
 		SchedulerService: api.schedService,
@@ -164,6 +161,9 @@ func (api *ApierV1Service) Reload() (err error) {
 		return
 	}
 	api.Lock()
+	if api.storDB.WasReconnected() { // rewrite the connection if was changed
+		api.api.SetStorDB(api.storDB.GetDM())
+	}
 	api.api.SetAttributeSConnection(attributeSrpc)
 	api.api.SetCacheSConnection(cacheSrpc)
 	api.api.SetSchedulerSConnection(schedulerSrpc)

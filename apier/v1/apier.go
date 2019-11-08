@@ -42,9 +42,9 @@ type SchedulerGeter interface {
 }
 
 type ApierV1 struct {
-	StorDb           engine.LoadStorage
-	DataManager      *engine.DataManager
+	StorDb           engine.LoadStorage // we should consider keeping only one of StorDB type
 	CdrDb            engine.CdrStorage
+	DataManager      *engine.DataManager
 	Config           *config.CGRConfig
 	Responder        *engine.Responder
 	CDRs             rpcclient.RpcClientConnection // FixMe: populate it from cgr-engine
@@ -96,12 +96,12 @@ func (apiv1 *ApierV1) RemoveDestination(attr AttrRemoveDestination, reply *strin
 }
 
 // GetReverseDestination retrieves revese destination list for a prefix
-func (apierv1 *ApierV1) GetReverseDestination(prefix string, reply *[]string) (err error) {
+func (apiv1 *ApierV1) GetReverseDestination(prefix string, reply *[]string) (err error) {
 	if prefix == "" {
 		return utils.NewErrMandatoryIeMissing("prefix")
 	}
 	var revLst []string
-	if revLst, err = apierv1.DataManager.DataDB().GetReverseDestination(prefix, false, utils.NonTransactional); err != nil {
+	if revLst, err = apiv1.DataManager.DataDB().GetReverseDestination(prefix, false, utils.NonTransactional); err != nil {
 		return
 	}
 	*reply = revLst
@@ -109,8 +109,8 @@ func (apierv1 *ApierV1) GetReverseDestination(prefix string, reply *[]string) (e
 }
 
 // ComputeReverseDestinations will rebuild complete reverse destinations data
-func (apierv1 *ApierV1) ComputeReverseDestinations(ignr string, reply *string) (err error) {
-	if err = apierv1.DataManager.DataDB().RebuildReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
+func (apiv1 *ApierV1) ComputeReverseDestinations(ignr string, reply *string) (err error) {
+	if err = apiv1.DataManager.DataDB().RebuildReverseForPrefix(utils.REVERSE_DESTINATION_PREFIX); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -118,16 +118,16 @@ func (apierv1 *ApierV1) ComputeReverseDestinations(ignr string, reply *string) (
 }
 
 // ComputeAccountActionPlans will rebuild complete reverse accountActions data
-func (apierv1 *ApierV1) ComputeAccountActionPlans(ignr string, reply *string) (err error) {
-	if err = apierv1.DataManager.DataDB().RebuildReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
+func (apiv1 *ApierV1) ComputeAccountActionPlans(ignr string, reply *string) (err error) {
+	if err = apiv1.DataManager.DataDB().RebuildReverseForPrefix(utils.AccountActionPlansPrefix); err != nil {
 		return
 	}
 	*reply = utils.OK
 	return
 }
 
-func (apierv1 *ApierV1) GetSharedGroup(sgId string, reply *engine.SharedGroup) error {
-	if sg, err := apierv1.DataManager.GetSharedGroup(sgId, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound { // Not found is not an error here
+func (apiv1 *ApierV1) GetSharedGroup(sgId string, reply *engine.SharedGroup) error {
+	if sg, err := apiv1.DataManager.GetSharedGroup(sgId, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound { // Not found is not an error here
 		return err
 	} else {
 		if sg != nil {
@@ -436,12 +436,12 @@ func (apiv1 *ApierV1) SetRatingProfile(attrs utils.AttrSetRatingProfile, reply *
 }
 
 // GetRatingProfileIDs returns list of resourceProfile IDs registered for a tenant
-func (apierV1 *ApierV1) GetRatingProfileIDs(args utils.TenantArgWithPaginator, rsPrfIDs *[]string) error {
+func (apiv1 *ApierV1) GetRatingProfileIDs(args utils.TenantArgWithPaginator, rsPrfIDs *[]string) error {
 	if missing := utils.MissingStructFields(&args, []string{utils.Tenant}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	prfx := utils.RATING_PROFILE_PREFIX + "*out:" + args.Tenant + ":"
-	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(prfx)
+	keys, err := apiv1.DataManager.DataDB().GetKeysForPrefix(prfx)
 	if err != nil {
 		return err
 	}
@@ -1132,8 +1132,8 @@ type ArgsReplyFailedPosts struct {
 }
 
 // ReplayFailedPosts will repost failed requests found in the FailedRequestsInDir
-func (apierv1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (err error) {
-	failedReqsInDir := apierv1.Config.GeneralCfg().FailedPostsDir
+func (apiv1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string) (err error) {
+	failedReqsInDir := apiv1.Config.GeneralCfg().FailedPostsDir
 	if args.FailedRequestsInDir != nil && *args.FailedRequestsInDir != "" {
 		failedReqsInDir = *args.FailedRequestsInDir
 	}
@@ -1172,7 +1172,7 @@ func (apierv1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *stri
 				return 0, err
 			}
 			return 0, os.Remove(filePath)
-		}, apierv1.Config.GeneralCfg().LockingTimeout, utils.FileLockPrefix+filePath)
+		}, apiv1.Config.GeneralCfg().LockingTimeout, utils.FileLockPrefix+filePath)
 		if err != nil {
 			return utils.NewErrServerError(err)
 		}
@@ -1182,26 +1182,26 @@ func (apierv1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *stri
 		}
 		switch ffn.Transport {
 		case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap, utils.MetaHTTPjson, utils.META_HTTP_POST:
-			_, err = engine.NewHTTPPoster(apierv1.Config.GeneralCfg().HttpSkipTlsVerify,
-				apierv1.Config.GeneralCfg().ReplyTimeout).Post(ffn.Address,
+			_, err = engine.NewHTTPPoster(apiv1.Config.GeneralCfg().HttpSkipTlsVerify,
+				apiv1.Config.GeneralCfg().ReplyTimeout).Post(ffn.Address,
 				utils.PosterTransportContentTypes[ffn.Transport], fileContent,
-				apierv1.Config.GeneralCfg().PosterAttempts, failoverPath)
+				apiv1.Config.GeneralCfg().PosterAttempts, failoverPath)
 		case utils.MetaAMQPjsonCDR, utils.MetaAMQPjsonMap:
 			err = engine.PostersCache.PostAMQP(ffn.Address,
-				apierv1.Config.GeneralCfg().PosterAttempts, fileContent,
+				apiv1.Config.GeneralCfg().PosterAttempts, fileContent,
 				utils.PosterTransportContentTypes[ffn.Transport],
 				failedReqsOutDir, file.Name())
 		case utils.MetaAMQPV1jsonMap:
-			err = engine.PostersCache.PostAMQPv1(ffn.Address, apierv1.Config.GeneralCfg().PosterAttempts,
+			err = engine.PostersCache.PostAMQPv1(ffn.Address, apiv1.Config.GeneralCfg().PosterAttempts,
 				fileContent, failedReqsOutDir, file.Name())
 		case utils.MetaSQSjsonMap:
-			err = engine.PostersCache.PostSQS(ffn.Address, apierv1.Config.GeneralCfg().PosterAttempts,
+			err = engine.PostersCache.PostSQS(ffn.Address, apiv1.Config.GeneralCfg().PosterAttempts,
 				fileContent, failedReqsOutDir, file.Name())
 		case utils.MetaKafkajsonMap:
-			err = engine.PostersCache.PostKafka(ffn.Address, apierv1.Config.GeneralCfg().PosterAttempts,
+			err = engine.PostersCache.PostKafka(ffn.Address, apiv1.Config.GeneralCfg().PosterAttempts,
 				fileContent, failedReqsOutDir, file.Name(), utils.UUIDSha1Prefix())
 		case utils.MetaS3jsonMap:
-			err = engine.PostersCache.PostS3(ffn.Address, apierv1.Config.GeneralCfg().PosterAttempts,
+			err = engine.PostersCache.PostS3(ffn.Address, apiv1.Config.GeneralCfg().PosterAttempts,
 				fileContent, failedReqsOutDir, file.Name(), utils.UUIDSha1Prefix())
 		default:
 			err = fmt.Errorf("unsupported replication transport: %s", ffn.Transport)
@@ -1218,7 +1218,7 @@ func (apierv1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *stri
 				_, err = fileOut.Write(fileContent)
 				fileOut.Close()
 				return 0, err
-			}, apierv1.Config.GeneralCfg().LockingTimeout, utils.FileLockPrefix+failoverPath)
+			}, apiv1.Config.GeneralCfg().LockingTimeout, utils.FileLockPrefix+failoverPath)
 			if err != nil {
 				return utils.NewErrServerError(err)
 			}
@@ -1230,28 +1230,28 @@ func (apierv1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *stri
 
 // CallCache caching the item based on cacheopt
 // visible in ApierV2
-func (apierv1 *ApierV1) CallCache(cacheOpt string, args utils.ArgsGetCacheItem) (err error) {
+func (apiv1 *ApierV1) CallCache(cacheOpt string, args utils.ArgsGetCacheItem) (err error) {
 	var reply string
 	switch cacheOpt {
 	case utils.META_NONE:
 		return
 	case utils.MetaReload:
-		if err = apierv1.CacheS.Call(utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+		if err = apiv1.CacheS.Call(utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
 			AttrReloadCache: composeArgsReload(args)}, &reply); err != nil {
 			return err
 		}
 	case utils.MetaLoad:
-		if err = apierv1.CacheS.Call(utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
+		if err = apiv1.CacheS.Call(utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
 			AttrReloadCache: composeArgsReload(args)}, &reply); err != nil {
 			return err
 		}
 	case utils.MetaRemove:
-		if err = apierv1.CacheS.Call(utils.CacheSv1RemoveItem,
+		if err = apiv1.CacheS.Call(utils.CacheSv1RemoveItem,
 			&utils.ArgsGetCacheItemWithArgDispatcher{ArgsGetCacheItem: args}, &reply); err != nil {
 			return err
 		}
 	case utils.MetaClear:
-		if err = apierv1.CacheS.Call(utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
+		if err = apiv1.CacheS.Call(utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
 			AttrReloadCache: composeArgsReload(args)}, &reply); err != nil {
 			return err
 		}
@@ -1259,8 +1259,8 @@ func (apierv1 *ApierV1) CallCache(cacheOpt string, args utils.ArgsGetCacheItem) 
 	return
 }
 
-func (apierv1 *ApierV1) GetLoadIDs(args string, reply *map[string]int64) (err error) {
-	if loadIDs, err := apierv1.DataManager.GetItemLoadIDs(args, false); err != nil {
+func (apiv1 *ApierV1) GetLoadIDs(args string, reply *map[string]int64) (err error) {
+	if loadIDs, err := apiv1.DataManager.GetItemLoadIDs(args, false); err != nil {
 		return err
 	} else {
 		*reply = loadIDs
@@ -1273,8 +1273,8 @@ type LoadTimeArgs struct {
 	Item     string
 }
 
-func (apierv1 *ApierV1) GetLoadTimes(args LoadTimeArgs, reply *map[string]string) (err error) {
-	if loadIDs, err := apierv1.DataManager.GetItemLoadIDs(args.Item, false); err != nil {
+func (apiv1 *ApierV1) GetLoadTimes(args LoadTimeArgs, reply *map[string]string) (err error) {
+	if loadIDs, err := apiv1.DataManager.GetItemLoadIDs(args.Item, false); err != nil {
 		return err
 	} else {
 		provMp := make(map[string]string)
@@ -1306,9 +1306,9 @@ func (apiv1 *ApierV1) ComputeActionPlanIndexes(_ string, reply *string) (err err
 }
 
 // GetActionPlanIDs returns list of ActionPlan IDs registered for a tenant
-func (apierV1 *ApierV1) GetActionPlanIDs(args utils.TenantArgWithPaginator, attrPrfIDs *[]string) error {
+func (apiv1 *ApierV1) GetActionPlanIDs(args utils.TenantArgWithPaginator, attrPrfIDs *[]string) error {
 	prfx := utils.ACTION_PLAN_PREFIX
-	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
+	keys, err := apiv1.DataManager.DataDB().GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
 	if err != nil {
 		return err
 	}
@@ -1324,9 +1324,9 @@ func (apierV1 *ApierV1) GetActionPlanIDs(args utils.TenantArgWithPaginator, attr
 }
 
 // GetRatingPlanIDs returns list of RatingPlan IDs registered for a tenant
-func (apierV1 *ApierV1) GetRatingPlanIDs(args utils.TenantArgWithPaginator, attrPrfIDs *[]string) error {
+func (apiv1 *ApierV1) GetRatingPlanIDs(args utils.TenantArgWithPaginator, attrPrfIDs *[]string) error {
 	prfx := utils.RATING_PLAN_PREFIX
-	keys, err := apierV1.DataManager.DataDB().GetKeysForPrefix(utils.RATING_PLAN_PREFIX)
+	keys, err := apiv1.DataManager.DataDB().GetKeysForPrefix(utils.RATING_PLAN_PREFIX)
 	if err != nil {
 		return err
 	}
@@ -1343,18 +1343,25 @@ func (apierV1 *ApierV1) GetRatingPlanIDs(args utils.TenantArgWithPaginator, attr
 
 // SetAttributeSConnection sets the new connection to the attribute service
 // only used on reload
-func (apierv1 *ApierV1) SetAttributeSConnection(attrS rpcclient.RpcClientConnection) {
-	apierv1.AttributeS = attrS
+func (apiv1 *ApierV1) SetAttributeSConnection(attrS rpcclient.RpcClientConnection) {
+	apiv1.AttributeS = attrS
 }
 
 // SetCacheSConnection sets the new connection to the cache service
 // only used on reload
-func (apierv1 *ApierV1) SetCacheSConnection(chS rpcclient.RpcClientConnection) {
-	apierv1.CacheS = chS
+func (apiv1 *ApierV1) SetCacheSConnection(chS rpcclient.RpcClientConnection) {
+	apiv1.CacheS = chS
 }
 
 // SetSchedulerSConnection sets the new connection to the scheduler service
 // only used on reload
-func (apierv1 *ApierV1) SetSchedulerSConnection(schS rpcclient.RpcClientConnection) {
-	apierv1.SchedulerS = schS
+func (apiv1 *ApierV1) SetSchedulerSConnection(schS rpcclient.RpcClientConnection) {
+	apiv1.SchedulerS = schS
+}
+
+// SetStorDB sets the new connection for StorDB
+// only used on reload
+func (apiv1 *ApierV1) SetStorDB(storDB engine.StorDB) {
+	apiv1.CdrDb = storDB
+	apiv1.StorDb = storDB
 }
