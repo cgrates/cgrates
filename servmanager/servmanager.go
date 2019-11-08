@@ -241,6 +241,9 @@ func (srvMngr *ServiceManager) handleReload() {
 			if err = srvMngr.reloadService(utils.ApierV1); err != nil {
 				return
 			}
+			if err = srvMngr.reloadService(utils.ApierV2); err != nil {
+				return
+			}
 		case <-srvMngr.GetConfig().GetReloadChan(config.CDRS_JSN):
 			if err = srvMngr.reloadService(utils.CDRServer); err != nil {
 				return
@@ -295,6 +298,10 @@ func (srvMngr *ServiceManager) handleReload() {
 			}
 		case <-srvMngr.GetConfig().GetReloadChan(config.DATADB_JSN):
 			if err = srvMngr.reloadService(utils.DataDB); err != nil {
+				return
+			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.STORDB_JSN):
+			if err = srvMngr.reloadService(utils.StorDB); err != nil {
 				return
 			}
 		}

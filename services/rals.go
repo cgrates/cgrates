@@ -32,12 +32,11 @@ import (
 
 // NewRalService returns the Ral Service
 func NewRalService(cfg *config.CGRConfig, dm *DataDBService,
-	cdrStorage engine.CdrStorage, loadStorage engine.LoadStorage,
-	cacheS *engine.CacheS, filterSChan chan *engine.FilterS, server *utils.Server,
+	storDB *StorDBService, cacheS *engine.CacheS, filterSChan chan *engine.FilterS, server *utils.Server,
 	thsChan, stsChan, cacheSChan, schedChan, attrsChan, dispatcherChan chan rpcclient.RpcClientConnection,
 	schedulerService *SchedulerService, exitChan chan bool) *RalService {
 	resp := NewResponderService(cfg, server, thsChan, stsChan, dispatcherChan, exitChan)
-	apiv1 := NewApierV1Service(cfg, dm, cdrStorage, loadStorage, filterSChan, server, cacheSChan, schedChan, attrsChan, dispatcherChan, schedulerService, resp)
+	apiv1 := NewApierV1Service(cfg, dm, storDB, filterSChan, server, cacheSChan, schedChan, attrsChan, dispatcherChan, schedulerService, resp)
 	apiv2 := NewApierV2Service(apiv1, cfg, server)
 	return &RalService{
 		connChan:  make(chan rpcclient.RpcClientConnection, 1),

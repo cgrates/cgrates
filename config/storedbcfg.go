@@ -95,3 +95,22 @@ func (dbcfg *StorDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	}
 	return nil
 }
+
+// Clone returns the cloned object
+func (dbcfg *StorDbCfg) Clone() *StorDbCfg {
+	return &StorDbCfg{
+		Type:                dbcfg.Type,
+		Host:                dbcfg.Host,
+		Port:                dbcfg.Port,
+		Name:                dbcfg.Name,
+		User:                dbcfg.User,
+		Password:            dbcfg.Password,
+		MaxOpenConns:        dbcfg.MaxOpenConns,
+		MaxIdleConns:        dbcfg.MaxIdleConns,
+		ConnMaxLifetime:     dbcfg.ConnMaxLifetime,
+		StringIndexedFields: dbcfg.StringIndexedFields,
+		PrefixIndexedFields: dbcfg.PrefixIndexedFields,
+		QueryTimeout:        dbcfg.QueryTimeout,
+		SSLMode:             dbcfg.SSLMode,
+	}
+}

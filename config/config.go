@@ -1575,7 +1575,11 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case STORDB_JSN:
+		cfg.rldChans[STORDB_JSN] <- struct{}{}
+		time.Sleep(1) // to force the context switch( to be sure we start the DB before a service that needs it)
 		if !fall {
+			cfg.rldChans[CDRS_JSN] <- struct{}{}
+			cfg.rldChans[Apier] <- struct{}{}
 			break
 		}
 		fallthrough
@@ -1607,7 +1611,8 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 	case RALS_JSN:
 		if !fall {
 			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
+			cfg.rldChans[STORDB_JSN] <- struct{}{}
+			time.Sleep(1) // to force the context switch( to be sure we start the DB before a service that needs it)
 		}
 		cfg.rldChans[RALS_JSN] <- struct{}{}
 		if !fall {
@@ -1617,7 +1622,8 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 	case CDRS_JSN:
 		if !fall {
 			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
+			cfg.rldChans[STORDB_JSN] <- struct{}{}
+			time.Sleep(1) // to force the context switch( to be sure we start the DB before a service that needs it)
 		}
 		cfg.rldChans[CDRS_JSN] <- struct{}{}
 		if !fall {
@@ -1773,6 +1779,10 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		fallthrough
 	case Apier:
+		if !fall {
+			cfg.rldChans[STORDB_JSN] <- struct{}{}
+			time.Sleep(1) // to force the context switch( to be sure we start the DB before a service that needs it)
+		}
 		cfg.rldChans[Apier] <- struct{}{}
 		if !fall {
 			break

@@ -41,15 +41,29 @@ type InternalDB struct {
 
 func NewInternalDB(stringIndexedFields, prefixIndexedFields []string) *InternalDB {
 	dfltCfg, _ := config.NewDefaultCGRConfig()
-	return &InternalDB{db: ltcache.NewTransCache(dfltCfg.CacheCfg().AsTransCacheConfig()),
-		ms: NewCodecMsgpackMarshaler(), stringIndexedFields: stringIndexedFields,
-		prefixIndexedFields: prefixIndexedFields, cnter: utils.NewCounter(time.Now().UnixNano(), 0)}
+	return &InternalDB{
+		db:                  ltcache.NewTransCache(dfltCfg.CacheCfg().AsTransCacheConfig()),
+		ms:                  NewCodecMsgpackMarshaler(),
+		stringIndexedFields: stringIndexedFields,
+		prefixIndexedFields: prefixIndexedFields,
+		cnter:               utils.NewCounter(time.Now().UnixNano(), 0),
+	}
 }
 
 func NewInternalDBJson(stringIndexedFields, prefixIndexedFields []string) (InternalDB *InternalDB) {
 	InternalDB = NewInternalDB(stringIndexedFields, prefixIndexedFields)
 	InternalDB.ms = new(JSONBufMarshaler)
 	return
+}
+
+// SetStringIndexedFields set the stringIndexedFields, used at StorDB reload
+func (iDB *InternalDB) SetStringIndexedFields(stringIndexedFields []string) {
+	iDB.stringIndexedFields = stringIndexedFields
+}
+
+// SetPrefixIndexedFields set the prefixIndexedFields, used at StorDB reload
+func (iDB *InternalDB) SetPrefixIndexedFields(prefixIndexedFields []string) {
+	iDB.prefixIndexedFields = prefixIndexedFields
 }
 
 func (iDB *InternalDB) Close() {}
