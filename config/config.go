@@ -179,10 +179,6 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.ConfigReloads[utils.CDRC] <- struct{}{} // Unlock the channel
 	cfg.ConfigReloads[utils.CDRE] = make(chan struct{}, 1)
 	cfg.ConfigReloads[utils.CDRE] <- struct{}{} // Unlock the channel
-	cfg.ConfigReloads[utils.DIAMETER_AGENT] = make(chan struct{}, 1)
-	cfg.ConfigReloads[utils.DIAMETER_AGENT] <- struct{}{} // Unlock the channel
-	cfg.ConfigReloads[utils.SMAsterisk] = make(chan struct{}, 1)
-	cfg.ConfigReloads[utils.SMAsterisk] <- struct{}{} // Unlock the channel
 
 	var cgrJsonCfg *CgrJsonCfg
 	if cgrJsonCfg, err = NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON)); err != nil {

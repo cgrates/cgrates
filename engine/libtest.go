@@ -335,7 +335,7 @@ func InitDataDb(cfg *config.CGRConfig) error {
 }
 
 func InitStorDb(cfg *config.CGRConfig) error {
-	storDb, err := ConfigureLoadStorage(cfg.StorDbCfg().Type,
+	storDb, err := NewStorDBConn(cfg.StorDbCfg().Type,
 		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
 		cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,

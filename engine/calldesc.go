@@ -63,7 +63,7 @@ var (
 	rpSubjectPrefixMatching bool
 )
 
-// Exported method to set the storage getter.
+// SetDataStorage is the exported method to set the storage getter.
 func SetDataStorage(dm2 *DataManager) {
 	dm = dm2
 }
@@ -76,7 +76,7 @@ func SetStatS(stsS rpcclient.RpcClientConnection) {
 	statS = stsS
 }
 
-// Sets the global rounding method and decimal precision for GetCost method
+// SetRoundingDecimals sets the global rounding method and decimal precision for GetCost method
 func SetRoundingDecimals(rd int) {
 	globalRoundingDecimals = rd
 }
@@ -85,13 +85,12 @@ func SetRpSubjectPrefixMatching(flag bool) {
 	rpSubjectPrefixMatching = flag
 }
 
-/*
-Sets the database for CDR storing, used by *cdrlog in first place
-*/
+// SetCdrStorage sets the database for CDR storing, used by *cdrlog in first place
 func SetCdrStorage(cStorage CdrStorage) {
 	cdrStorage = cStorage
 }
 
+// SetSchedCdrsConns sets the connection between action and CDRServer
 func SetSchedCdrsConns(sc rpcclient.RpcClientConnection) {
 	schedCdrsConns = sc
 	if schedCdrsConns != nil && reflect.ValueOf(schedCdrsConns).IsNil() {

@@ -82,47 +82,7 @@ func NewStorDBConn(dbType, host, port, name, user, pass, sslmode string,
 	return
 }
 
-// ConfigureLoadStorage returns a LoadStorage based on dbType
-func ConfigureLoadStorage(dbType, host, port, name, user, pass, sslmode string,
-	maxConn, maxIdleConn, connMaxLifetime int,
-	stringIndexedFields, prefixIndexedFields []string) (db LoadStorage, err error) {
-	switch dbType {
-	case utils.POSTGRES:
-		db, err = NewPostgresStorage(host, port, name, user, pass, sslmode, maxConn, maxIdleConn, connMaxLifetime)
-	case utils.MYSQL:
-		db, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
-	case utils.MONGO:
-		db, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, stringIndexedFields, false)
-	case utils.INTERNAL:
-		db = NewInternalDB(stringIndexedFields, prefixIndexedFields)
-	default:
-		err = fmt.Errorf("unknown db '%s' valid options are [%s, %s, %s, %s]",
-			dbType, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL)
-	}
-	return
-}
-
-// ConfigureCdrStorage returns a CdrStorage based on dbType
-func ConfigureCdrStorage(dbType, host, port, name, user, pass, sslmode string,
-	maxConn, maxIdleConn, connMaxLifetime int,
-	stringIndexedFields, prefixIndexedFields []string) (db CdrStorage, err error) {
-	switch dbType {
-	case utils.POSTGRES:
-		db, err = NewPostgresStorage(host, port, name, user, pass, sslmode, maxConn, maxIdleConn, connMaxLifetime)
-	case utils.MYSQL:
-		db, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
-	case utils.MONGO:
-		db, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, stringIndexedFields, false)
-	case utils.INTERNAL:
-		db = NewInternalDB(stringIndexedFields, prefixIndexedFields)
-	default:
-		err = fmt.Errorf("unknown db '%s' valid options are [%s, %s, %s, %s]",
-			dbType, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL)
-	}
-	return
-}
-
-// Stores one Cost coming from SM
+// SMCost stores one Cost coming from SM
 type SMCost struct {
 	CGRID       string
 	RunID       string

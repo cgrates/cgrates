@@ -100,7 +100,7 @@ func testSetCDR(cfg *config.CGRConfig) error {
 	if err := InitStorDb(cfg); err != nil {
 		return err
 	}
-	cdrStorage, err := ConfigureCdrStorage(cfg.StorDbCfg().Type,
+	cdrStorage, err := NewStorDBConn(cfg.StorDbCfg().Type,
 		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
 		cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,
@@ -207,7 +207,7 @@ func testSMCosts(cfg *config.CGRConfig) error {
 	if err := InitStorDb(cfg); err != nil {
 		return fmt.Errorf("testSMCosts #1 err: %v", err)
 	}
-	cdrStorage, err := ConfigureCdrStorage(cfg.StorDbCfg().Type,
+	cdrStorage, err := NewStorDBConn(cfg.StorDbCfg().Type,
 		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
 		cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,
@@ -270,7 +270,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	cfg.StorDbCfg().PrefixIndexedFields = []string{
 		utils.Destination,
 	}
-	cdrStorage, err := ConfigureCdrStorage(cfg.StorDbCfg().Type,
+	cdrStorage, err := NewStorDBConn(cfg.StorDbCfg().Type,
 		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
 		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
 		cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,

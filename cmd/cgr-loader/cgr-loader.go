@@ -273,7 +273,7 @@ func main() {
 	}
 
 	if *fromStorDB || *toStorDB {
-		if storDb, err = engine.ConfigureLoadStorage(ldrCfg.StorDbCfg().Type,
+		if storDb, err = engine.NewStorDBConn(ldrCfg.StorDbCfg().Type,
 			ldrCfg.StorDbCfg().Host, ldrCfg.StorDbCfg().Port,
 			ldrCfg.StorDbCfg().Name, ldrCfg.StorDbCfg().User,
 			ldrCfg.StorDbCfg().Password, ldrCfg.StorDbCfg().SSLMode,
