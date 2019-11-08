@@ -75,7 +75,7 @@ func TestTaskAsMavigableMap(t *testing.T) {
 func TestTaskFieldAsinterface(t *testing.T) {
 	//empty check
 	task := new(Task)
-	fldPath := []string{utils.UUID, utils.ActionsID}
+	fldPath := []string{utils.MetaAct, utils.UUID, utils.ActionsID}
 	rcv, err := task.FieldAsInterface(fldPath)
 	eOut := ""
 	if err != nil {
@@ -119,7 +119,7 @@ func TestTaskFieldAsString(t *testing.T) {
 		AccountID: "test2",
 		ActionsID: "test3",
 	}
-	fldPath = []string{utils.UUID, "string2"}
+	fldPath = []string{utils.MetaAct, utils.UUID, "string2"}
 	eOut = "test"
 	rcv, err = task.FieldAsString(fldPath)
 	if err != nil {
@@ -129,7 +129,7 @@ func TestTaskFieldAsString(t *testing.T) {
 		t.Errorf("Expecting: %q, received: %q", eOut, rcv)
 	}
 	//AccountID check
-	fldPath = []string{utils.AccountID, "string2"}
+	fldPath = []string{utils.MetaAct, utils.AccountID, "string2"}
 	eOut = "test2"
 	rcv, err = task.FieldAsString(fldPath)
 	if err != nil {
@@ -139,7 +139,7 @@ func TestTaskFieldAsString(t *testing.T) {
 		t.Errorf("Expecting: %q, received: %q", eOut, rcv)
 	}
 	//ActionsID check
-	fldPath = []string{utils.ActionsID, "string2"}
+	fldPath = []string{utils.MetaAct, utils.ActionsID, "string2"}
 	eOut = "test3"
 	rcv, err = task.FieldAsString(fldPath)
 	if err != nil {
@@ -149,7 +149,7 @@ func TestTaskFieldAsString(t *testing.T) {
 		t.Errorf("Expecting: %q, received: %q", eOut, rcv)
 	}
 	//default check
-	fldPath = []string{"default", "case"}
+	fldPath = []string{utils.MetaAct, "default", "case"}
 	eOut = ""
 	rcv, err = task.FieldAsString(fldPath)
 	if err == nil {
