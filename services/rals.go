@@ -70,6 +70,7 @@ func (rals *RalService) Start() (err error) {
 		return fmt.Errorf("service aleady running")
 	}
 
+	engine.SetRpSubjectPrefixMatching(rals.cfg.RalsCfg().RpSubjectPrefixMatching)
 	rals.Lock()
 	defer rals.Unlock()
 
@@ -115,6 +116,7 @@ func (rals *RalService) GetIntenternalChan() (conn chan rpcclient.RpcClientConne
 
 // Reload handles the change of config
 func (rals *RalService) Reload() (err error) {
+	engine.SetRpSubjectPrefixMatching(rals.cfg.RalsCfg().RpSubjectPrefixMatching)
 	if err = rals.apiv1.Reload(); err != nil {
 		return
 	}

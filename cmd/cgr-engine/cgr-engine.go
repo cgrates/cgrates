@@ -454,8 +454,9 @@ func main() {
 
 	cfg.LazySanityCheck()
 
-	var loadDb engine.LoadStorage
-	var cdrDb engine.CdrStorage
+	// we should use only one database for StorDB
+	var storDb engine.StorDB
+	// var cdrDb engine.CdrStorage
 	dmService := services.NewDataDBService(cfg)
 	if dmService.ShouldRun() { // Some services can run without db, ie:  CDRC
 		if err = dmService.Start(); err != nil {
@@ -475,10 +476,7 @@ func main() {
 			return
 		}
 		defer storDb.Close()
-		// loadDb,cdrDb and storDb are all mapped on the same stordb storage
-		loadDb = storDb.(engine.LoadStorage)
-		cdrDb = storDb.(engine.CdrStorage)
-		engine.SetCdrStorage(cdrDb)
+		engine.SetCdrStorage(storDb)
 		if err := engine.CheckVersions(storDb); err != nil {
 			fmt.Println(err.Error())
 			return
@@ -486,7 +484,6 @@ func main() {
 	}
 	// Done initing DBs
 	engine.SetRoundingDecimals(cfg.GeneralCfg().RoundingDecimals)
-	engine.SetRpSubjectPrefixMatching(cfg.RalsCfg().RpSubjectPrefixMatching)
 
 	// Rpc/http server
 	server := utils.NewServer()
@@ -532,11 +529,11 @@ func main() {
 		attrS.GetIntenternalChan(), stS.GetIntenternalChan(),
 		reS.GetIntenternalChan(), dspS.GetIntenternalChan())
 	schS := services.NewSchedulerService(cfg, dmService, cacheS, filterSChan, server, internalCDRServerChan, dspS.GetIntenternalChan())
-	rals := services.NewRalService(cfg, dmService, cdrDb, loadDb, cacheS, filterSChan, server,
+	rals := services.NewRalService(cfg, dmService, storDb, storDb, cacheS, filterSChan, server,
 		tS.GetIntenternalChan(), stS.GetIntenternalChan(), internalCacheSChan,
 		schS.GetIntenternalChan(), attrS.GetIntenternalChan(), dspS.GetIntenternalChan(),
 		schS, exitChan)
-	cdrS := services.NewCDRServer(cfg, dmService, cdrDb, filterSChan, server, internalCDRServerChan,
+	cdrS := services.NewCDRServer(cfg, dmService, storDb, filterSChan, server, internalCDRServerChan,
 		chrS.GetIntenternalChan(), rals.GetResponder().GetIntenternalChan(),
 		attrS.GetIntenternalChan(), tS.GetIntenternalChan(),
 		stS.GetIntenternalChan(), dspS.GetIntenternalChan())
