@@ -58,6 +58,10 @@ var sTestsInternalRemoteIT = []func(t *testing.T){
 	testInternalRemoteITGetStatQueueProfile,
 	testInternalRemoteITGetSupplier,
 	testInternalRemoteITGetFilter,
+	testInternalRemoteITGetRatingPlan,
+	testInternalRemoteITGetRatingProfile,
+	testInternalRemoteITGetAction,
+	testInternalRemoteITGetActionPlan,
 	testInternalRemoteITKillEngine,
 }
 
@@ -361,12 +365,37 @@ func testInternalRemoteITGetStatQueueProfile(t *testing.T) {
 		Weight:       30,
 		ThresholdIDs: []string{utils.META_NONE},
 	}
+	//reverse metric order
+	expStq2 := &engine.StatQueueProfile{
+		Tenant:    "cgrates.org",
+		ID:        "Stats2",
+		FilterIDs: []string{"FLTR_ACNT_1001_1002"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+		},
+		QueueLength: 100,
+		TTL:         -1,
+		MinItems:    0,
+		Metrics: []*engine.MetricWithFilters{
+			&engine.MetricWithFilters{
+				MetricID: utils.MetaTCD,
+			},
+			&engine.MetricWithFilters{
+				MetricID: utils.MetaTCC,
+			},
+		},
+		Stored:       false,
+		Blocker:      true,
+		Weight:       30,
+		ThresholdIDs: []string{utils.META_NONE},
+	}
 	var reply *engine.StatQueueProfile
 	if err := internalRPC.Call("ApierV1.GetStatQueueProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expStq, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expStq), utils.ToJSON(reply))
+	} else if !reflect.DeepEqual(expStq, reply) && !reflect.DeepEqual(expStq, expStq2) {
+		t.Errorf("Expecting: %+v or %+v, received: %+v", utils.ToJSON(expStq),
+			utils.ToJSON(expStq2), utils.ToJSON(reply))
 	}
 }
 
@@ -393,11 +422,33 @@ func testInternalRemoteITGetSupplier(t *testing.T) {
 		},
 		Weight: 20,
 	}
+	// supplier in reverse order
+	splPrf2 := &engine.SupplierProfile{
+		Tenant:    "cgrates.org",
+		ID:        "SPL_ACNT_1001",
+		FilterIDs: []string{"FLTR_ACNT_1001"},
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Date(2017, 11, 27, 0, 0, 0, 0, time.UTC),
+		},
+		Sorting:           utils.MetaWeight,
+		SortingParameters: []string{},
+		Suppliers: []*engine.Supplier{
+			{
+				ID:     "supplier2",
+				Weight: 20,
+			},
+			{
+				ID:     "supplier1",
+				Weight: 10,
+			},
+		},
+		Weight: 20,
+	}
 
 	if err := internalRPC.Call("ApierV1.GetSupplierProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ACNT_1001"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(splPrf, reply) {
+	} else if !reflect.DeepEqual(splPrf, reply) && !reflect.DeepEqual(splPrf2, reply) {
 		t.Errorf("Expecting: %+v, \n received: %+v", utils.ToJSON(splPrf), utils.ToJSON(reply))
 	}
 }
@@ -423,6 +474,69 @@ func testInternalRemoteITGetFilter(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expFltr, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expFltr), utils.ToJSON(reply))
+	}
+}
+
+func testInternalRemoteITGetRatingPlan(t *testing.T) {
+	var reply engine.RatingPlan
+	if err := internalRPC.Call("ApierV1.GetRatingPlan", "RP_1001", &reply); err != nil {
+		t.Error(err.Error())
+	} else if reply.Id != "RP_1001" {
+		t.Errorf("Expected: %+v, received: %+v", "RP_1001", reply.Id)
+	}
+}
+
+func testInternalRemoteITGetRatingProfile(t *testing.T) {
+	var rpl engine.RatingProfile
+	attrGetRatingPlan := &utils.AttrGetRatingProfile{
+		Tenant: "cgrates.org", Category: "call", Subject: "1001"}
+	actTime, err := utils.ParseTimeDetectLayout("2014-01-14T00:00:00Z", "")
+	if err != nil {
+		t.Error(err)
+	}
+	expected := engine.RatingProfile{
+		Id: "*out:cgrates.org:call:1001",
+		RatingPlanActivations: engine.RatingPlanActivations{
+			{
+				ActivationTime: actTime,
+				RatingPlanId:   "RP_1001",
+			},
+		},
+	}
+	if err := internalRPC.Call("ApierV1.GetRatingProfile", attrGetRatingPlan, &rpl); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rpl) {
+		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rpl))
+	}
+}
+
+func testInternalRemoteITGetAction(t *testing.T) {
+	expectActs := []*utils.TPAction{
+		{Identifier: utils.TOPUP_RESET, BalanceId: "test", BalanceType: utils.MONETARY,
+			Units: "10", BalanceWeight: "10", BalanceBlocker: "false",
+			BalanceDisabled: "false", ExpiryTime: utils.UNLIMITED, Weight: 10.0}}
+
+	var reply []*utils.TPAction
+	if err := internalRPC.Call("ApierV1.GetActions", "ACT_TOPUP_RST_10", &reply); err != nil {
+		t.Error("Got error on ApierV1.GetActions: ", err.Error())
+	} else if !reflect.DeepEqual(expectActs, reply) {
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(expectActs), utils.ToJSON(reply))
+	}
+}
+
+func testInternalRemoteITGetActionPlan(t *testing.T) {
+	var aps *[]*engine.ActionPlan
+	//if err := internalRPC.Call("ApierV1.GetActionPlan",
+	//	AttrGetActionPlan{ID: "AP_PACKAGE_10"}, &aps); err != nil {
+	//	t.Error(err)
+	//} else {
+	//	fmt.Println(utils.ToJSON(aps))
+	//}
+	if err := internalRPC.Call("ApierV1.GetActionPlan",
+		AttrGetActionPlan{ID: utils.EmptyString}, &aps); err != nil {
+		t.Error(err)
+	} else {
+		fmt.Println(utils.ToJSON(aps))
 	}
 }
 

@@ -774,7 +774,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 		if accountAction.ActionPlanId != "" {
 			// get old userBalanceIds
 			exitingAccountIds := make(utils.StringMap)
-			existingActionPlan, err := tpr.dm.DataDB().GetActionPlan(accountAction.ActionPlanId, true, utils.NonTransactional)
+			existingActionPlan, err := tpr.dm.GetActionPlan(accountAction.ActionPlanId, true, utils.NonTransactional)
 			if err == nil && existingActionPlan != nil {
 				exitingAccountIds = existingActionPlan.AccountIDs
 			}

@@ -193,6 +193,9 @@ func testOnStorITCacheReverseDestinations(t *testing.T) {
 }
 
 func testOnStorITCacheActionPlan(t *testing.T) {
+	if _, err := onStor.DataDB().GetKeysForPrefix(utils.ACTION_PLAN_PREFIX); err == nil || err != utils.ErrNotFound {
+		t.Error(err)
+	}
 	ap := &ActionPlan{
 		Id:         "MORE_MINUTES",
 		AccountIDs: utils.StringMap{"vdf:minitsboy": true},
@@ -1021,13 +1024,13 @@ func testOnStorITCRUDActionPlan(t *testing.T) {
 			},
 		},
 	}
-	if _, rcvErr := onStor.DataDB().GetActionPlan(ap.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := onStor.GetActionPlan(ap.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if err := onStor.DataDB().SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if rcv, err := onStor.DataDB().GetActionPlan(ap.Id, true, utils.NonTransactional); err != nil {
+	if rcv, err := onStor.GetActionPlan(ap.Id, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ap, rcv) {
 		t.Errorf("Expecting: %v, received: %v", ap, rcv)
@@ -1036,11 +1039,11 @@ func testOnStorITCRUDActionPlan(t *testing.T) {
 	// if err = onStor.DataDB().SelectDatabase("13"); err != nil {
 	// 	t.Error(err)
 	// }
-	// if _, rcvErr := onStor.DataDB().GetActionPlan(ap.Id, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
+	// if _, rcvErr := onStor.GetActionPlan(ap.Id, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 	// 	t.Error(rcvErr)
 	// }
 	//
-	// if rcv, err := onStor.DataDB().GetActionPlan(ap.Id, false, utils.NonTransactional); err != nil {
+	// if rcv, err := onStor.GetActionPlan(ap.Id, false, utils.NonTransactional); err != nil {
 	// 	t.Error(err)
 	// } else if !reflect.DeepEqual(ap, rcv) {
 	// 	t.Errorf("Expecting: %v, received: %v", ap, rcv)
@@ -1048,7 +1051,7 @@ func testOnStorITCRUDActionPlan(t *testing.T) {
 	// if err = onStor.DataDB().SelectDatabase(onStorCfg); err != nil {
 	// 	t.Error(err)
 	// }
-	if rcv, err := onStor.DataDB().GetAllActionPlans(); err != nil {
+	if rcv, err := onStor.GetAllActionPlans(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ap.Id, rcv[ap.Id].Id) {
 		t.Errorf("Expecting: %v, received: %v", ap.Id, rcv[ap.Id].Id)

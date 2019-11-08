@@ -613,7 +613,7 @@ func TestActionPlansRemoveMember(t *testing.T) {
 		t.Errorf("Execute Action: %v", err)
 	}
 
-	apr, err1 := dm.DataDB().GetActionPlan(ap1.Id, false, utils.NonTransactional)
+	apr, err1 := dm.GetActionPlan(ap1.Id, false, utils.NonTransactional)
 
 	if err1 != nil {
 		t.Errorf("Get action plan test: %v", err1)

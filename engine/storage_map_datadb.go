@@ -581,7 +581,8 @@ func (ms *MapStorage) RemoveActionTriggersDrv(key string) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetActionPlan(key string, skipCache bool, transactionID string) (ats *ActionPlan, err error) {
+func (ms *MapStorage) GetActionPlanDrv(key string, skipCache bool,
+	transactionID string) (ats *ActionPlan, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	if !skipCache {
@@ -619,7 +620,7 @@ func (ms *MapStorage) SetActionPlan(key string, ats *ActionPlan,
 	}
 	if !overwrite {
 		// get existing action plan to merge the account ids
-		if existingAts, _ := ms.GetActionPlan(key, true,
+		if existingAts, _ := ms.GetActionPlanDrv(key, true,
 			transactionID); existingAts != nil {
 			if ats.AccountIDs == nil && len(existingAts.AccountIDs) > 0 {
 				ats.AccountIDs = make(utils.StringMap)
@@ -646,14 +647,14 @@ func (ms *MapStorage) RemoveActionPlan(key string, transactionID string) error {
 	return nil
 }
 
-func (ms *MapStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
+func (ms *MapStorage) GetAllActionPlansDrv() (ats map[string]*ActionPlan, err error) {
 	keys, err := ms.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
 	if err != nil {
 		return nil, err
 	}
 	ats = make(map[string]*ActionPlan, len(keys))
 	for _, key := range keys {
-		ap, err := ms.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):], false, utils.NonTransactional)
+		ap, err := ms.GetActionPlanDrv(key[len(utils.ACTION_PLAN_PREFIX):], false, utils.NonTransactional)
 		if err != nil {
 			return nil, err
 		}

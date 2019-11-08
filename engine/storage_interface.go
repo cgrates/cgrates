@@ -70,10 +70,10 @@ type DataDB interface {
 	GetActionTriggersDrv(string) (ActionTriggers, error)
 	SetActionTriggersDrv(string, ActionTriggers) error
 	RemoveActionTriggersDrv(string) error
-	GetActionPlan(string, bool, string) (*ActionPlan, error)
+	GetActionPlanDrv(string, bool, string) (*ActionPlan, error)
 	SetActionPlan(string, *ActionPlan, bool, string) error
 	RemoveActionPlan(key string, transactionID string) error
-	GetAllActionPlans() (map[string]*ActionPlan, error)
+	GetAllActionPlansDrv() (map[string]*ActionPlan, error)
 	GetAccountActionPlans(acntID string, skipCache bool,
 		transactionID string) (apIDs []string, err error)
 	SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error)

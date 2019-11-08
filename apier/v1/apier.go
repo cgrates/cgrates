@@ -643,7 +643,7 @@ func (apiv1 *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err
 	}
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		var prevAccountIDs utils.StringMap
-		if prevAP, err := apiv1.DataManager.DataDB().GetActionPlan(attrs.Id, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+		if prevAP, err := apiv1.DataManager.GetActionPlan(attrs.Id, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return 0, utils.NewErrServerError(err)
 		} else if err == nil && !attrs.Overwrite {
 			return 0, utils.ErrExists
@@ -742,23 +742,32 @@ type AttrGetActionPlan struct {
 }
 
 func (apiv1 *ApierV1) GetActionPlan(attr AttrGetActionPlan, reply *[]*engine.ActionPlan) error {
+	utils.Logger.Debug("Enter in ApierV1 GetActionPlan")
 	var result []*engine.ActionPlan
 	if attr.ID == "" || attr.ID == "*" {
-		aplsMap, err := apiv1.DataManager.DataDB().GetAllActionPlans()
+		result = make([]*engine.ActionPlan, 0)
+		aplsMap, err := apiv1.DataManager.GetAllActionPlans()
 		if err != nil {
+			utils.Logger.Debug(fmt.Sprintf("Error #1 : %+v", utils.ToJSON(err)))
 			return err
 		}
+		utils.Logger.Debug(fmt.Sprintf("aplsMap : %+v", utils.ToJSON(aplsMap)))
 		for _, apls := range aplsMap {
 			result = append(result, apls)
 		}
 	} else {
-		apls, err := apiv1.DataManager.DataDB().GetActionPlan(attr.ID, false, utils.NonTransactional)
+		apls, err := apiv1.DataManager.GetActionPlan(attr.ID, false, utils.NonTransactional)
 		if err != nil {
+			utils.Logger.Debug(fmt.Sprintf("Error #2 : %+v", utils.ToJSON(err)))
 			return err
 		}
 		result = append(result, apls)
 	}
+	utils.Logger.Debug(fmt.Sprintf("result : %+v", utils.ToJSON(result)))
 	*reply = result
+	utils.Logger.Debug("Leave ApierV1 GetActionPlan")
+	utils.Logger.Debug(fmt.Sprintf("Reply : %+v", utils.ToJSON(reply)))
+
 	return nil
 }
 
@@ -768,7 +777,7 @@ func (apiv1 *ApierV1) RemoveActionPlan(attr AttrGetActionPlan, reply *string) (e
 	}
 	if _, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		var prevAccountIDs utils.StringMap
-		if prevAP, err := apiv1.DataManager.DataDB().GetActionPlan(attr.ID, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+		if prevAP, err := apiv1.DataManager.GetActionPlan(attr.ID, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return 0, err
 		} else if prevAP != nil {
 			prevAccountIDs = prevAP.AccountIDs
@@ -1095,7 +1104,7 @@ func (apiv1 *ApierV1) RemoveActions(attr AttrRemoveActions, reply *string) error
 				}
 			}
 		}
-		allAplsMap, err := apiv1.DataManager.DataDB().GetAllActionPlans()
+		allAplsMap, err := apiv1.DataManager.GetAllActionPlans()
 		if err != nil && err != utils.ErrNotFound {
 			*reply = err.Error()
 			return err
