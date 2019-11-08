@@ -320,7 +320,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 func (dm *DataManager) GetAccount(id string) (acc *Account, err error) {
 	acc, err = dm.dataDB.GetAccountDrv(id)
 	if err != nil {
-		if len(dm.rmtDataDBs) != 0 {
+		if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
 			var rmtErr error
 			for _, rmtDM := range dm.rmtDataDBs {
 				if acc, rmtErr = rmtDM.dataDB.GetAccountDrv(id); rmtErr == nil {
@@ -351,7 +351,7 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 	}
 	ssq, err := dm.dataDB.GetStoredStatQueueDrv(tenant, id)
 	if err != nil {
-		if len(dm.rmtDataDBs) != 0 {
+		if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
 			var rmtErr error
 			for _, rmtDM := range dm.rmtDataDBs {
 				if ssq, rmtErr = rmtDM.dataDB.GetStoredStatQueueDrv(tenant, id); rmtErr == nil {
@@ -432,7 +432,7 @@ func (dm *DataManager) GetFilter(tenant, id string, cacheRead, cacheWrite bool,
 		fltr, err = dm.DataDB().GetFilterDrv(tenant, id)
 	}
 	if err != nil {
-		if len(dm.rmtDataDBs) != 0 {
+		if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
 			var rmtErr error
 			for _, rmtDM := range dm.rmtDataDBs {
 				if fltr, rmtErr = rmtDM.GetFilter(tenant, id, false,
@@ -502,7 +502,7 @@ func (dm *DataManager) GetThreshold(tenant, id string,
 	}
 	th, err = dm.dataDB.GetThresholdDrv(tenant, id)
 	if err != nil {
-		if len(dm.rmtDataDBs) != 0 {
+		if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
 			var rmtErr error
 			for _, rmtDM := range dm.rmtDataDBs {
 				if th, rmtErr = rmtDM.GetThreshold(tenant, id, false,
@@ -570,7 +570,7 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, cacheRead, cacheWr
 	}
 	th, err = dm.dataDB.GetThresholdProfileDrv(tenant, id)
 	if err != nil {
-		if len(dm.rmtDataDBs) != 0 {
+		if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
 			var rmtErr error
 			for _, rmtDM := range dm.rmtDataDBs {
 				if th, rmtErr = rmtDM.GetThresholdProfile(tenant, id, false,
@@ -676,7 +676,7 @@ func (dm *DataManager) GetStatQueueProfile(tenant, id string, cacheRead, cacheWr
 	}
 	sqp, err = dm.dataDB.GetStatQueueProfileDrv(tenant, id)
 	if err != nil {
-		if len(dm.rmtDataDBs) != 0 {
+		if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
 			var rmtErr error
 			for _, rmtDM := range dm.rmtDataDBs {
 				if sqp, rmtErr = rmtDM.GetStatQueueProfile(tenant, id, false,
@@ -781,7 +781,7 @@ func (dm *DataManager) GetTiming(id string, skipCache bool,
 	}
 	t, err = dm.dataDB.GetTimingDrv(id)
 	if err != nil {
-		if len(dm.rmtDataDBs) != 0 {
+		if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
 			var rmtErr error
 			for _, rmtDM := range dm.rmtDataDBs {
 				if t, rmtErr = rmtDM.GetTiming(id, false,
@@ -852,7 +852,7 @@ func (dm *DataManager) GetResource(tenant, id string, cacheRead, cacheWrite bool
 	}
 	rs, err = dm.dataDB.GetResourceDrv(tenant, id)
 	if err != nil {
-		if len(dm.rmtDataDBs) != 0 {
+		if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
 			var rmtErr error
 			for _, rmtDM := range dm.rmtDataDBs {
 				if rs, rmtErr = rmtDM.GetResource(tenant, id, false,
@@ -920,7 +920,7 @@ func (dm *DataManager) GetResourceProfile(tenant, id string, cacheRead, cacheWri
 	}
 	rp, err = dm.dataDB.GetResourceProfileDrv(tenant, id)
 	if err != nil {
-		if len(dm.rmtDataDBs) != 0 {
+		if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
 			var rmtErr error
 			for _, rmtDM := range dm.rmtDataDBs {
 				if rp, rmtErr = rmtDM.GetResourceProfile(tenant, id, false,
@@ -1024,7 +1024,7 @@ func (dm *DataManager) GetActionTriggers(id string, skipCache bool,
 	}
 	attrs, err = dm.dataDB.GetActionTriggersDrv(id)
 	if err != nil {
-		if len(dm.rmtDataDBs) != 0 {
+		if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
 			var rmtErr error
 			for _, rmtDM := range dm.rmtDataDBs {
 				if attrs, rmtErr = rmtDM.GetActionTriggers(id, true,
@@ -1094,7 +1094,7 @@ func (dm *DataManager) GetSharedGroup(key string, skipCache bool,
 	}
 	sg, err = dm.DataDB().GetSharedGroupDrv(key)
 	if err != nil {
-		if len(dm.rmtDataDBs) != 0 {
+		if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
 			var rmtErr error
 			for _, rmtDM := range dm.rmtDataDBs {
 				if sg, rmtErr = rmtDM.GetSharedGroup(key, true,
@@ -1167,7 +1167,7 @@ func (dm *DataManager) GetActions(key string, skipCache bool, transactionID stri
 	}
 	as, err = dm.DataDB().GetActionsDrv(key)
 	if err != nil {
-		if len(dm.rmtDataDBs) != 0 {
+		if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
 			var rmtErr error
 			for _, rmtDM := range dm.rmtDataDBs {
 				if as, rmtErr = rmtDM.GetActions(key, true,
@@ -1236,7 +1236,7 @@ func (dm *DataManager) GetRatingPlan(key string, skipCache bool,
 	}
 	rp, err = dm.DataDB().GetRatingPlanDrv(key)
 	if err != nil {
-		if len(dm.rmtDataDBs) != 0 {
+		if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
 			var rmtErr error
 			for _, rmtDM := range dm.rmtDataDBs {
 				if rp, rmtErr = rmtDM.GetRatingPlan(key, true,
@@ -1305,7 +1305,7 @@ func (dm *DataManager) GetRatingProfile(key string, skipCache bool,
 	}
 	rpf, err = dm.DataDB().GetRatingProfileDrv(key)
 	if err != nil {
-		if len(dm.rmtDataDBs) != 0 {
+		if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
 			var rmtErr error
 			for _, rmtDM := range dm.rmtDataDBs {
 				if rpf, rmtErr = rmtDM.GetRatingProfile(key, true,
@@ -1371,7 +1371,7 @@ func (dm *DataManager) HasData(category, subject, tenant string) (has bool, err 
 func (dm *DataManager) GetFilterIndexes(cacheID, itemIDPrefix, filterType string,
 	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	if indexes, err = dm.DataDB().GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType, fldNameVal); err != nil {
-		if len(dm.rmtDataDBs) != 0 {
+		if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
 			var rmtErr error
 			for _, rmtDM := range dm.rmtDataDBs {
 				if indexes, rmtErr = rmtDM.GetFilterIndexes(cacheID, itemIDPrefix,
@@ -1446,7 +1446,7 @@ func (dm *DataManager) MatchFilterIndex(cacheID, itemIDPrefix,
 	// Not found in cache, check in DB
 	itemIDs, err = dm.DataDB().MatchFilterIndexDrv(cacheID, itemIDPrefix, filterType, fieldName, fieldVal)
 	if err != nil {
-		if len(dm.rmtDataDBs) != 0 {
+		if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
 			var rmtErr error
 			for _, rmtDM := range dm.rmtDataDBs {
 				if itemIDs, rmtErr = rmtDM.MatchFilterIndex(cacheID, itemIDPrefix,
@@ -1483,7 +1483,7 @@ func (dm *DataManager) GetSupplierProfile(tenant, id string, cacheRead, cacheWri
 	}
 	supp, err = dm.dataDB.GetSupplierProfileDrv(tenant, id)
 	if err != nil {
-		if len(dm.rmtDataDBs) != 0 {
+		if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
 			var rmtErr error
 			for _, rmtDM := range dm.rmtDataDBs {
 				if supp, rmtErr = rmtDM.GetSupplierProfile(tenant, id, false,
@@ -1592,7 +1592,7 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWr
 	}
 	attrPrfl, err = dm.dataDB.GetAttributeProfileDrv(tenant, id)
 	if err != nil {
-		if len(dm.rmtDataDBs) != 0 {
+		if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
 			var rmtErr error
 			for _, rmtDM := range dm.rmtDataDBs {
 				if attrPrfl, rmtErr = rmtDM.GetAttributeProfile(tenant, id, false,
@@ -1710,7 +1710,7 @@ func (dm *DataManager) GetChargerProfile(tenant, id string, cacheRead, cacheWrit
 	}
 	cpp, err = dm.dataDB.GetChargerProfileDrv(tenant, id)
 	if err != nil {
-		if len(dm.rmtDataDBs) != 0 {
+		if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
 			var rmtErr error
 			for _, rmtDM := range dm.rmtDataDBs {
 				if cpp, rmtErr = rmtDM.GetChargerProfile(tenant, id, false,
@@ -1816,7 +1816,7 @@ func (dm *DataManager) GetDispatcherProfile(tenant, id string, cacheRead, cacheW
 	}
 	dpp, err = dm.dataDB.GetDispatcherProfileDrv(tenant, id)
 	if err != nil {
-		if len(dm.rmtDataDBs) != 0 {
+		if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
 			var rmtErr error
 			for _, rmtDM := range dm.rmtDataDBs {
 				if dpp, rmtErr = rmtDM.GetDispatcherProfile(tenant, id, false,
@@ -1931,7 +1931,7 @@ func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrit
 	}
 	dH, err = dm.dataDB.GetDispatcherHostDrv(tenant, id)
 	if err != nil {
-		if len(dm.rmtDataDBs) != 0 {
+		if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
 			var rmtErr error
 			for _, rmtDM := range dm.rmtDataDBs {
 				if dH, rmtErr = rmtDM.GetDispatcherHost(tenant, id, false,
@@ -2006,7 +2006,7 @@ func (dm *DataManager) RemoveDispatcherHost(tenant, id string,
 func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loadIDs map[string]int64, err error) {
 	loadIDs, err = dm.DataDB().GetItemLoadIDsDrv(itemIDPrefix)
 	if err != nil {
-		if len(dm.rmtDataDBs) != 0 {
+		if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
 			var rmtErr error
 			for _, rmtDM := range dm.rmtDataDBs {
 				if loadIDs, rmtErr = rmtDM.GetItemLoadIDs(itemIDPrefix, false); rmtErr == nil {
