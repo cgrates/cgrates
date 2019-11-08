@@ -693,7 +693,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// DataDB sanity checks
-	if cfg.DataDbCfg().DataDbType == utils.MetaInternal {
+	if cfg.dataDbCfg.DataDbType == utils.MetaInternal {
 		for key, config := range cfg.cacheCfg {
 			if key == utils.CacheDiameterMessages || key == utils.CacheClosedSessions {
 				if config.Limit == 0 {
@@ -708,8 +708,8 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		if cfg.resourceSCfg.StoreInterval != -1 {
 			return fmt.Errorf("<%s> StoreInterval needs to be -1 when DataBD is *internal, received : %d", utils.ResourceS, cfg.resourceSCfg.StoreInterval)
 		}
-		if cfg.StatSCfg().StoreInterval != -1 {
-			return fmt.Errorf("<%s> StoreInterval needs to be -1 when DataBD is *internal, received : %d", utils.StatS, cfg.StatSCfg().StoreInterval)
+		if cfg.statsCfg.StoreInterval != -1 {
+			return fmt.Errorf("<%s> StoreInterval needs to be -1 when DataBD is *internal, received : %d", utils.StatS, cfg.statsCfg.StoreInterval)
 		}
 		if cfg.thresholdSCfg.StoreInterval != -1 {
 			return fmt.Errorf("<%s> StoreInterval needs to be -1 when DataBD is *internal, received : %d", utils.ThresholdS, cfg.thresholdSCfg.StoreInterval)
