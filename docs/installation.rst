@@ -188,11 +188,3 @@ Sample usage for MySQL:
 
    cgr-migrator -stordb_passwd="CGRateS.org" -exec="*set_versions"
 
-
-3.3.3.Git
----------
-
-The **historys** (History Service) component will use `Git`_ to archive *tariff plan changes* in a local repository,
-hence `Git`_ installation is necessary if you want to use this service.
-
-.. _Git: http://git-scm.com

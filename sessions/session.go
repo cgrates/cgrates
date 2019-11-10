@@ -60,6 +60,7 @@ type ExternalSession struct {
 	MaxRateUnit   time.Duration
 	MaxCostSoFar  float64
 	DebitInterval time.Duration
+	NextAutoDebit time.Time
 }
 
 type Session struct {
@@ -127,6 +128,9 @@ func (s *Session) AsExternalSessions(tmz, nodeID string) (aSs []*ExternalSession
 			ExtraFields:   sr.Event.AsMapString(utils.MainCDRFields),
 			NodeID:        nodeID,
 			DebitInterval: s.DebitInterval,
+		}
+		if sr.NextAutoDebit != nil {
+			aSs[i].NextAutoDebit = *sr.NextAutoDebit
 		}
 		if sr.CD != nil {
 			aSs[i].LoopIndex = sr.CD.LoopIndex
@@ -242,6 +246,7 @@ func (sr *SRun) Clone() (clsr *SRun) {
 		ExtraDuration: sr.ExtraDuration,
 		LastUsage:     sr.LastUsage,
 		TotalUsage:    sr.TotalUsage,
+		NextAutoDebit: sr.NextAutoDebit,
 	}
 	if sr.CD != nil {
 		clsr.CD = sr.CD.Clone()

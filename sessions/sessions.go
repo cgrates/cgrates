@@ -519,6 +519,7 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 // threadSafe since it will run into it's own goroutine
 func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 	dbtIvl time.Duration) (maxDur time.Duration, err error) {
+	fmt.Sprintf("Entering debitLoopSession for session: %s, sRunIdx: %d. dbtIvl: %v\n", utils.ToIJSON(s), sRunIdx, dbtIvl)
 	// NextAutoDebit works in tandem with session replication
 	now := time.Now()
 	if s.SRuns[sRunIdx].NextAutoDebit != nil &&
