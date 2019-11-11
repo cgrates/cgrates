@@ -240,7 +240,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		case utils.ACTION_PLAN_PREFIX:
 			_, err = dm.GetActionPlan(dataID, true, utils.NonTransactional)
 		case utils.AccountActionPlansPrefix:
-			_, err = dm.DataDB().GetAccountActionPlans(dataID, true, utils.NonTransactional)
+			_, err = dm.GetAccountActionPlans(dataID, true, utils.NonTransactional)
 		case utils.ACTION_TRIGGER_PREFIX:
 			_, err = dm.GetActionTriggers(dataID, true, utils.NonTransactional)
 		case utils.SHARED_GROUP_PREFIX:
@@ -1247,6 +1247,24 @@ func (dm *DataManager) GetAllActionPlans() (ats map[string]*ActionPlan, err erro
 		var rmtErr error
 		for _, rmtDM := range dm.rmtDataDBs {
 			if ats, rmtErr = rmtDM.GetAllActionPlans(); rmtErr == nil {
+				break
+			}
+		}
+		err = rmtErr
+	}
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func (dm *DataManager) GetAccountActionPlans(acntID string,
+	skipCache bool, transactionID string) (apIDs []string, err error) {
+	apIDs, err = dm.dataDB.GetAccountActionPlansDrv(acntID, skipCache, transactionID)
+	if ((err == nil && len(apIDs) == 0) || err == utils.ErrNotFound) && len(dm.rmtDataDBs) != 0 {
+		var rmtErr error
+		for _, rmtDM := range dm.rmtDataDBs {
+			if apIDs, rmtErr = rmtDM.dataDB.GetAccountActionPlansDrv(acntID, skipCache, utils.NonTransactional); rmtErr == nil {
 				break
 			}
 		}

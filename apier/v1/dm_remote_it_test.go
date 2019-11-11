@@ -62,6 +62,7 @@ var sTestsInternalRemoteIT = []func(t *testing.T){
 	testInternalRemoteITGetRatingProfile,
 	testInternalRemoteITGetAction,
 	testInternalRemoteITGetActionPlan,
+	testInternalRemoteITGetAccountActionPlan,
 	testInternalRemoteITKillEngine,
 }
 
@@ -550,6 +551,23 @@ func testInternalRemoteITGetActionPlan(t *testing.T) {
 		t.Errorf("Expected: %v,\n received: %v", "AP_PACKAGE_10", aps[0].Id)
 	} else if !reflect.DeepEqual(aps[0].AccountIDs, accIDsStrMp) {
 		t.Errorf("Expected: %v,\n received: %v", accIDsStrMp, aps[0].AccountIDs)
+	}
+}
+
+func testInternalRemoteITGetAccountActionPlan(t *testing.T) {
+	var aap []*AccountActionTiming
+	if err := internalRPC.Call("ApierV1.GetAccountActionPlan",
+		utils.TenantAccount{
+			Tenant:  "cgrates.org",
+			Account: "1001",
+		}, &aap); err != nil {
+		t.Error(err)
+	} else if len(aap) != 1 {
+		t.Errorf("Expected: %v,\n received: %v", 1, len(aap))
+	} else if aap[0].ActionPlanId != "AP_PACKAGE_10" {
+		t.Errorf("Expected: %v,\n received: %v", "AP_PACKAGE_10", aap[0].ActionPlanId)
+	} else if aap[0].ActionsId != "ACT_TOPUP_RST_10" {
+		t.Errorf("Expected: %v,\n received: %v", "ACT_TOPUP_RST_10", aap[0].ActionsId)
 	}
 }
 

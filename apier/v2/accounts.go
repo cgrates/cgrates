@@ -118,7 +118,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 		}
 		if attr.ActionPlanIDs != nil {
 			_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-				acntAPids, err := self.DataManager.DataDB().GetAccountActionPlans(accID, false, utils.NonTransactional)
+				acntAPids, err := self.DataManager.GetAccountActionPlans(accID, false, utils.NonTransactional)
 				if err != nil && err != utils.ErrNotFound {
 					return 0, err
 				}

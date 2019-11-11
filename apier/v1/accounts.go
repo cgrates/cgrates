@@ -43,7 +43,7 @@ func (self *ApierV1) GetAccountActionPlan(attrs utils.TenantAccount, reply *[]*A
 	}
 	acntID := utils.ConcatenatedKey(attrs.Tenant, attrs.Account)
 	acntATsIf, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		acntAPids, err := self.DataManager.DataDB().GetAccountActionPlans(acntID, false, utils.NonTransactional)
+		acntAPids, err := self.DataManager.GetAccountActionPlans(acntID, false, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			return nil, utils.NewErrServerError(err)
 		}
@@ -183,7 +183,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 		}
 		if attr.ActionPlanId != "" {
 			_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-				acntAPids, err := self.DataManager.DataDB().GetAccountActionPlans(accID, false, utils.NonTransactional)
+				acntAPids, err := self.DataManager.GetAccountActionPlans(accID, false, utils.NonTransactional)
 				if err != nil && err != utils.ErrNotFound {
 					return 0, err
 				}

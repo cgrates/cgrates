@@ -584,7 +584,7 @@ func TestActionPlansRemoveMember(t *testing.T) {
 		[]string{account1.ID}, true); err != nil {
 		t.Error(err)
 	}
-	dm.DataDB().GetAccountActionPlans(account1.ID, true, utils.NonTransactional) // FixMe: remove here after finishing testing of map
+	dm.GetAccountActionPlans(account1.ID, true, utils.NonTransactional) // FixMe: remove here after finishing testing of map
 	if err = dm.DataDB().SetAccountActionPlans(account2.ID,
 		[]string{ap2.Id}, false); err != nil {
 		t.Error(err)
