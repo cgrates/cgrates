@@ -742,32 +742,24 @@ type AttrGetActionPlan struct {
 }
 
 func (apiv1 *ApierV1) GetActionPlan(attr AttrGetActionPlan, reply *[]*engine.ActionPlan) error {
-	utils.Logger.Debug("Enter in ApierV1 GetActionPlan")
 	var result []*engine.ActionPlan
 	if attr.ID == "" || attr.ID == "*" {
 		result = make([]*engine.ActionPlan, 0)
 		aplsMap, err := apiv1.DataManager.GetAllActionPlans()
 		if err != nil {
-			utils.Logger.Debug(fmt.Sprintf("Error #1 : %+v", utils.ToJSON(err)))
 			return err
 		}
-		utils.Logger.Debug(fmt.Sprintf("aplsMap : %+v", utils.ToJSON(aplsMap)))
 		for _, apls := range aplsMap {
 			result = append(result, apls)
 		}
 	} else {
 		apls, err := apiv1.DataManager.GetActionPlan(attr.ID, false, utils.NonTransactional)
 		if err != nil {
-			utils.Logger.Debug(fmt.Sprintf("Error #2 : %+v", utils.ToJSON(err)))
 			return err
 		}
 		result = append(result, apls)
 	}
-	utils.Logger.Debug(fmt.Sprintf("result : %+v", utils.ToJSON(result)))
 	*reply = result
-	utils.Logger.Debug("Leave ApierV1 GetActionPlan")
-	utils.Logger.Debug(fmt.Sprintf("Reply : %+v", utils.ToJSON(reply)))
-
 	return nil
 }
 

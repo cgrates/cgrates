@@ -1451,7 +1451,6 @@ func (ms *MongoStorage) GetAllActionPlansDrv() (ats map[string]*ActionPlan, err 
 	if err != nil {
 		return nil, err
 	}
-	utils.Logger.Debug(fmt.Sprintf("keys in mongo: %+v", keys))
 	ats = make(map[string]*ActionPlan, len(keys))
 	for _, key := range keys {
 		ap, err := ms.GetActionPlanDrv(key[len(utils.ACTION_PLAN_PREFIX):],

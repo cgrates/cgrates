@@ -1242,19 +1242,14 @@ func (dm *DataManager) GetActionPlan(key string, skipCache bool, transactionID s
 }
 
 func (dm *DataManager) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
-	utils.Logger.Debug("Enter in DM GetAllActionsPlans")
 	ats, err = dm.dataDB.GetAllActionPlansDrv()
-	utils.Logger.Debug(fmt.Sprintf("error when quierying for ats: %+v", err))
-	utils.Logger.Debug(fmt.Sprintf("ats: %+v", ats))
-	if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
-		utils.Logger.Debug("Enter here with not found ")
+	if ((err == nil && len(ats) == 0) || err == utils.ErrNotFound) && len(dm.rmtDataDBs) != 0 {
 		var rmtErr error
 		for _, rmtDM := range dm.rmtDataDBs {
 			if ats, rmtErr = rmtDM.GetAllActionPlans(); rmtErr == nil {
 				break
 			}
 		}
-		utils.Logger.Debug(fmt.Sprintf("Leave remote with ats : %+v", utils.ToJSON(ats)))
 		err = rmtErr
 	}
 	if err != nil {

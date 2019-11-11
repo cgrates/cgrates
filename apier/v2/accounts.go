@@ -20,7 +20,6 @@ package v2
 
 import (
 	"errors"
-	"fmt"
 	"math"
 
 	"github.com/cgrates/cgrates/config"
@@ -85,7 +84,6 @@ func (self *ApierV2) GetAccount(attr *utils.AttrGetAccount, reply *engine.Accoun
 	if err != nil {
 		return err
 	}
-	fmt.Println("Account : %+v", utils.ToJSON(account))
 	*reply = *account
 	return nil
 }
