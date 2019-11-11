@@ -2048,7 +2048,7 @@ func (dm *DataManager) SetLoadIDs(loadIDs map[string]int64) (err error) {
 	return
 }
 
-// Reconnect recconnects to the DB when the config was changes
+// Reconnect recconnects to the DB when the config was changed
 func (dm *DataManager) Reconnect(marshaler string, newcfg *config.DataDbCfg) (err error) {
 	d, err := NewDataDBConn(newcfg.DataDbType, newcfg.DataDbHost, newcfg.DataDbPort, newcfg.DataDbName,
 		newcfg.DataDbUser, newcfg.DataDbPass, marshaler, newcfg.DataDbSentinelName)
