@@ -81,17 +81,13 @@ func (iDB *InternalDB) SelectDatabase(dbName string) (err error) {
 	return nil
 }
 
-func (iDB *InternalDB) GetKeysForPrefix(prefix string) (ids []string, err error) {
+func (iDB *InternalDB) GetKeysForPrefix(prefix string) ([]string, error) {
 	keyLen := len(utils.DESTINATION_PREFIX)
 	if len(prefix) < keyLen {
 		return nil, fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
 	}
 	category := prefix[:keyLen] // prefix length
-	ids = iDB.db.GetItemIDs(utils.CachePrefixToInstance[category], prefix)
-	if len(ids) == 0 {
-		return nil, utils.ErrNotFound
-	}
-	return
+	return iDB.db.GetItemIDs(utils.CachePrefixToInstance[category], prefix), nil
 }
 
 func (iDB *InternalDB) RebuildReverseForPrefix(prefix string) (err error) {
