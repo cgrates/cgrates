@@ -1,7 +1,0 @@
-#ID,Years,Months,MonthDays,WeekDays,Time
-PEAK,*any,2,1,1;2;3;4;5,08:00:00
-OFFPEAK_MORNING,*any,*any,*any,1;2;3;4;5,00:00:00
-OFFPEAK_EVENING,*any,*any,*any,1;2;3;4;5,19:00:00
-OFFPEAK_WEEKEND,*any,*any,*any,6;7,00:00:00
-NEW_YEAR,*any,1,1,*any,00:00:00
-TM_NOON,*any,*any,*any,*any,12:00:00

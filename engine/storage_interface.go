@@ -74,7 +74,7 @@ type DataDB interface {
 	SetActionPlan(string, *ActionPlan, bool, string) error
 	RemoveActionPlan(key string, transactionID string) error
 	GetAllActionPlansDrv() (map[string]*ActionPlan, error)
-	GetAccountActionPlans(acntID string, skipCache bool,
+	GetAccountActionPlansDrv(acntID string, skipCache bool,
 		transactionID string) (apIDs []string, err error)
 	SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error)
 	RemAccountActionPlans(acntID string, apIDs []string) (err error)

@@ -663,7 +663,7 @@ func (ms *MapStorage) GetAllActionPlansDrv() (ats map[string]*ActionPlan, err er
 	return
 }
 
-func (ms *MapStorage) GetAccountActionPlans(acntID string,
+func (ms *MapStorage) GetAccountActionPlansDrv(acntID string,
 	skipCache bool, transactionID string) (apIDs []string, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
@@ -692,7 +692,7 @@ func (ms *MapStorage) GetAccountActionPlans(acntID string,
 
 func (ms *MapStorage) SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error) {
 	if !overwrite {
-		if oldaPlIDs, err := ms.GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+		if oldaPlIDs, err := ms.GetAccountActionPlansDrv(acntID, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return err
 		} else {
 			for _, oldAPid := range oldaPlIDs {
@@ -719,7 +719,7 @@ func (ms *MapStorage) RemAccountActionPlans(acntID string, apIDs []string) (err 
 		delete(ms.dict, key)
 		return
 	}
-	oldaPlIDs, err := ms.GetAccountActionPlans(acntID, true, utils.NonTransactional)
+	oldaPlIDs, err := ms.GetAccountActionPlansDrv(acntID, true, utils.NonTransactional)
 	if err != nil {
 		return err
 	}

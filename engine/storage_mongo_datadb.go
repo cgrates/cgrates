@@ -694,9 +694,6 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		}
 		return err
 	})
-	if len(result) == 0 {
-		return nil, utils.ErrNotFound
-	}
 	return
 }
 
@@ -1463,7 +1460,7 @@ func (ms *MongoStorage) GetAllActionPlansDrv() (ats map[string]*ActionPlan, err 
 	return
 }
 
-func (ms *MongoStorage) GetAccountActionPlans(acntID string, skipCache bool, transactionID string) (aPlIDs []string, err error) {
+func (ms *MongoStorage) GetAccountActionPlansDrv(acntID string, skipCache bool, transactionID string) (aPlIDs []string, err error) {
 	if !skipCache {
 		if x, ok := Cache.Get(utils.CacheAccountActionPlans, acntID); ok {
 			if x == nil {
@@ -1498,7 +1495,7 @@ func (ms *MongoStorage) GetAccountActionPlans(acntID string, skipCache bool, tra
 
 func (ms *MongoStorage) SetAccountActionPlans(acntID string, aPlIDs []string, overwrite bool) (err error) {
 	if !overwrite {
-		if oldaPlIDs, err := ms.GetAccountActionPlans(acntID, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+		if oldaPlIDs, err := ms.GetAccountActionPlansDrv(acntID, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return err
 		} else {
 			for _, oldAPid := range oldaPlIDs {
@@ -1531,7 +1528,7 @@ func (ms *MongoStorage) RemAccountActionPlans(acntID string, aPlIDs []string) (e
 			return err
 		})
 	}
-	oldAPlIDs, err := ms.GetAccountActionPlans(acntID, true, utils.NonTransactional)
+	oldAPlIDs, err := ms.GetAccountActionPlansDrv(acntID, true, utils.NonTransactional)
 	if err != nil {
 		return err
 	}

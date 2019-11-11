@@ -996,7 +996,7 @@ func (rs *RedisStorage) GetAllActionPlansDrv() (ats map[string]*ActionPlan, err 
 	return
 }
 
-func (rs *RedisStorage) GetAccountActionPlans(acntID string, skipCache bool,
+func (rs *RedisStorage) GetAccountActionPlansDrv(acntID string, skipCache bool,
 	transactionID string) (aPlIDs []string, err error) {
 	if !skipCache {
 		if x, ok := Cache.Get(utils.CacheAccountActionPlans, acntID); ok {
@@ -1026,7 +1026,7 @@ func (rs *RedisStorage) GetAccountActionPlans(acntID string, skipCache bool,
 
 func (rs *RedisStorage) SetAccountActionPlans(acntID string, aPlIDs []string, overwrite bool) (err error) {
 	if !overwrite {
-		if oldaPlIDs, err := rs.GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
+		if oldaPlIDs, err := rs.GetAccountActionPlansDrv(acntID, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return err
 		} else {
 			for _, oldAPid := range oldaPlIDs {
@@ -1048,7 +1048,7 @@ func (rs *RedisStorage) RemAccountActionPlans(acntID string, aPlIDs []string) (e
 	if len(aPlIDs) == 0 {
 		return rs.Cmd(redis_DEL, key).Err
 	}
-	oldaPlIDs, err := rs.GetAccountActionPlans(acntID, true, utils.NonTransactional)
+	oldaPlIDs, err := rs.GetAccountActionPlansDrv(acntID, true, utils.NonTransactional)
 	if err != nil {
 		return err
 	}
