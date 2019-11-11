@@ -27,6 +27,74 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+func TestSessionIDCGRID(t *testing.T) {
+	//empty check
+	sessionID := new(SessionID)
+	rcv := sessionID.CGRID()
+	eOut := "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	//normal check
+	sessionID.OriginHost = "testhost"
+	sessionID.OriginID = "testid"
+	rcv = sessionID.CGRID()
+	eOut = "2aaff7e3e832de08b0604a79a18ccc6bba823360"
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+}
+
+func TestSessionCgrID(t *testing.T) {
+	//empty check
+	session := new(Session)
+	rcv := session.cgrID()
+	eOut := ""
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	//normal check
+	session.CGRID = "testID"
+	eOut = "testID"
+	rcv = session.cgrID()
+	if !reflect.DeepEqual(eOut, rcv) && session.CGRID == "testID" {
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+
+}
+
+func TestSessionClone(t *testing.T) {
+	//empty check
+	session := new(Session)
+	rcv := session.Clone()
+	eOut := new(Session)
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	//normal check
+	session = &Session{
+		CGRID:         "CGRID",
+		Tenant:        "cgrates.org",
+		ResourceID:    "resourceID",
+		ClientConnID:  "ClientConnID",
+		EventStart:    engine.NewMapEvent(nil),
+		DebitInterval: time.Duration(18),
+	}
+	eOut = &Session{
+		CGRID:         "CGRID",
+		Tenant:        "cgrates.org",
+		ResourceID:    "resourceID",
+		ClientConnID:  "ClientConnID",
+		EventStart:    engine.NewMapEvent(nil),
+		DebitInterval: time.Duration(18),
+	}
+	rcv = session.Clone()
+	if !reflect.DeepEqual(eOut, rcv) && session.CGRID == "testID" {
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+
+}
+
 //Test1 ExtraDuration 0 and LastUsage < initial
 
 //Test1 ExtraDuration 0 and LastUsage < initial

@@ -154,6 +154,9 @@ func (me MapEvent) GetTimeIgnoreErrors(fldName string, tmz string) (t time.Time)
 
 // Clone returns the cloned map
 func (me MapEvent) Clone() (mp MapEvent) {
+	if me == nil {
+		return nil
+	}
 	mp = make(MapEvent, len(me))
 	for k, v := range me {
 		mp[k] = v
