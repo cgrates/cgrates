@@ -90,11 +90,12 @@ func (s *Session) cgrID() (cgrID string) {
 func (s Session) Clone() (cln *Session) {
 	s.RLock()
 	cln = &Session{
-		CGRID:        s.CGRID,
-		Tenant:       s.Tenant,
-		ResourceID:   s.ResourceID,
-		EventStart:   s.EventStart.Clone(),
-		ClientConnID: s.ClientConnID,
+		CGRID:         s.CGRID,
+		Tenant:        s.Tenant,
+		ResourceID:    s.ResourceID,
+		ClientConnID:  s.ClientConnID,
+		EventStart:    s.EventStart.Clone(),
+		DebitInterval: s.DebitInterval,
 	}
 	if s.SRuns != nil {
 		cln.SRuns = make([]*SRun, len(s.SRuns))
