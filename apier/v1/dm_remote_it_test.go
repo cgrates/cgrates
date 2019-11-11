@@ -393,7 +393,7 @@ func testInternalRemoteITGetStatQueueProfile(t *testing.T) {
 	if err := internalRPC.Call("ApierV1.GetStatQueueProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expStq, reply) && !reflect.DeepEqual(expStq, expStq2) {
+	} else if !reflect.DeepEqual(expStq, reply) && !reflect.DeepEqual(reply, expStq2) {
 		t.Errorf("Expecting: %+v or %+v, received: %+v", utils.ToJSON(expStq),
 			utils.ToJSON(expStq2), utils.ToJSON(reply))
 	}
@@ -520,23 +520,36 @@ func testInternalRemoteITGetAction(t *testing.T) {
 	if err := internalRPC.Call("ApierV1.GetActions", "ACT_TOPUP_RST_10", &reply); err != nil {
 		t.Error("Got error on ApierV1.GetActions: ", err.Error())
 	} else if !reflect.DeepEqual(expectActs, reply) {
-		t.Errorf("Expected: %v, received: %v", utils.ToJSON(expectActs), utils.ToJSON(reply))
+		t.Errorf("Expected: %v,\n received: %v", utils.ToJSON(expectActs), utils.ToJSON(reply))
 	}
 }
 
 func testInternalRemoteITGetActionPlan(t *testing.T) {
-	var aps *[]*engine.ActionPlan
-	//if err := internalRPC.Call("ApierV1.GetActionPlan",
-	//	AttrGetActionPlan{ID: "AP_PACKAGE_10"}, &aps); err != nil {
-	//	t.Error(err)
-	//} else {
-	//	fmt.Println(utils.ToJSON(aps))
-	//}
+	var aps []*engine.ActionPlan
+	accIDsStrMp := utils.StringMap{
+		"cgrates.org:1001": true,
+		"cgrates.org:1002": true,
+		"cgrates.org:1003": true,
+	}
+	if err := internalRPC.Call("ApierV1.GetActionPlan",
+		AttrGetActionPlan{ID: "AP_PACKAGE_10"}, &aps); err != nil {
+		t.Error(err)
+	} else if len(aps) != 1 {
+		t.Errorf("Expected: %v,\n received: %v", 1, len(aps))
+	} else if aps[0].Id != "AP_PACKAGE_10" {
+		t.Errorf("Expected: %v,\n received: %v", "AP_PACKAGE_10", aps[0].Id)
+	} else if !reflect.DeepEqual(aps[0].AccountIDs, accIDsStrMp) {
+		t.Errorf("Expected: %v,\n received: %v", accIDsStrMp, aps[0].AccountIDs)
+	}
 	if err := internalRPC.Call("ApierV1.GetActionPlan",
 		AttrGetActionPlan{ID: utils.EmptyString}, &aps); err != nil {
 		t.Error(err)
-	} else {
-		fmt.Println(utils.ToJSON(aps))
+	} else if len(aps) != 1 {
+		t.Errorf("Expected: %v,\n received: %v", 1, len(aps))
+	} else if aps[0].Id != "AP_PACKAGE_10" {
+		t.Errorf("Expected: %v,\n received: %v", "AP_PACKAGE_10", aps[0].Id)
+	} else if !reflect.DeepEqual(aps[0].AccountIDs, accIDsStrMp) {
+		t.Errorf("Expected: %v,\n received: %v", accIDsStrMp, aps[0].AccountIDs)
 	}
 }
 

@@ -255,7 +255,7 @@ func (rs *RedisStorage) SelectDatabase(dbName string) (err error) {
 func (rs *RedisStorage) IsDBEmpty() (resp bool, err error) {
 	var keys []string
 	keys, err = rs.GetKeysForPrefix("")
-	if err != nil && err != utils.ErrNotFound {
+	if err != nil {
 		return
 	}
 	if len(keys) != 0 {
@@ -398,14 +398,13 @@ func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	if r.Err != nil {
 		return nil, r.Err
 	}
-	keys, _ := r.List()
-	if len(keys) == 0 {
-		return nil, utils.ErrNotFound
+	if keys, _ := r.List(); len(keys) != 0 {
+		if filterIndexesPrefixMap.HasKey(prefix) {
+			return rs.getKeysForFilterIndexesKeys(keys)
+		}
+		return keys, nil
 	}
-	if filterIndexesPrefixMap.HasKey(prefix) {
-		return rs.getKeysForFilterIndexesKeys(keys)
-	}
-	return keys, nil
+	return nil, nil
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity

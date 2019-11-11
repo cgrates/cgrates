@@ -564,8 +564,6 @@ func (iDB *InternalDB) RemoveActionPlan(key string, transactionID string) (err e
 
 func (iDB *InternalDB) GetAllActionPlansDrv() (ats map[string]*ActionPlan, err error) {
 	keys, err := iDB.GetKeysForPrefix(utils.ACTION_PLAN_PREFIX)
-	utils.Logger.Debug(fmt.Sprintf("keys in internal: %+v", keys))
-	utils.Logger.Debug(fmt.Sprintf("error when getting keys in internal: %+v", err))
 	if err != nil {
 		return nil, err
 	}

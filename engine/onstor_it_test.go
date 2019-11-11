@@ -193,9 +193,6 @@ func testOnStorITCacheReverseDestinations(t *testing.T) {
 }
 
 func testOnStorITCacheActionPlan(t *testing.T) {
-	if _, err := onStor.DataDB().GetKeysForPrefix(utils.ACTION_PLAN_PREFIX); err == nil || err != utils.ErrNotFound {
-		t.Error(err)
-	}
 	ap := &ActionPlan{
 		Id:         "MORE_MINUTES",
 		AccountIDs: utils.StringMap{"vdf:minitsboy": true},
