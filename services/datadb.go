@@ -117,7 +117,6 @@ func (db *DataDBService) Reload() (err error) {
 	db.Lock()
 	defer db.Unlock()
 	if db.needsConnectionReload() {
-		// db.db.DataDB().Close() // already closed in reconnect
 		if err = db.db.Reconnect(db.cfg.GeneralCfg().DBDataEncoding, db.cfg.DataDbCfg()); err != nil {
 			return
 		}

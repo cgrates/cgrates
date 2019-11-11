@@ -315,20 +315,20 @@ func (srvMngr *ServiceManager) reloadService(srviceName string) (err error) {
 	if srv.ShouldRun() {
 		if srv.IsRunning() {
 			if err = srv.Reload(); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<%s> Failed to reload <%s> because: %s", utils.ServiceManager, srv.ServiceName(), err))
+				utils.Logger.Err(fmt.Sprintf("<%s> failed to reload <%s> err <%s>", utils.ServiceManager, srv.ServiceName(), err))
 				srvMngr.engineShutdown <- true
 				return // stop if we encounter an error
 			}
 		} else {
 			if err = srv.Start(); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<%s> Failed to start <%s> because: %s", utils.ServiceManager, srv.ServiceName(), err))
+				utils.Logger.Err(fmt.Sprintf("<%s> failed to start <%s> err <%s>", utils.ServiceManager, srv.ServiceName(), err))
 				srvMngr.engineShutdown <- true
 				return // stop if we encounter an error
 			}
 		}
 	} else if srv.IsRunning() {
 		if err = srv.Shutdown(); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> Failed to stop service <%s> because: %s", utils.ServiceManager, srv.ServiceName(), err))
+			utils.Logger.Err(fmt.Sprintf("<%s> failed to stop service <%s> err <%s>", utils.ServiceManager, srv.ServiceName(), err))
 			srvMngr.engineShutdown <- true
 			return // stop if we encounter an error
 		}
