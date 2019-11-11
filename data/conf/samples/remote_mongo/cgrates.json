@@ -25,6 +25,13 @@
 			"db_name": "10",
 			"db_port": 27017
 		}
+	],
+	"replication_conns": [
+		{
+			"db_type": "mongo",
+			"db_name": "10",
+			"db_port": 27017
+		}
 	]
 },
 
