@@ -63,6 +63,7 @@ var sTestsInternalRemoteIT = []func(t *testing.T){
 	testInternalRemoteITGetAction,
 	testInternalRemoteITGetActionPlan,
 	testInternalRemoteITGetAccountActionPlan,
+	testInternalReplicationSetThreshold,
 	testInternalRemoteITKillEngine,
 }
 
@@ -568,6 +569,72 @@ func testInternalRemoteITGetAccountActionPlan(t *testing.T) {
 		t.Errorf("Expected: %v,\n received: %v", "AP_PACKAGE_10", aap[0].ActionPlanId)
 	} else if aap[0].ActionsId != "ACT_TOPUP_RST_10" {
 		t.Errorf("Expected: %v,\n received: %v", "ACT_TOPUP_RST_10", aap[0].ActionsId)
+	}
+}
+
+func testInternalReplicationSetThreshold(t *testing.T) {
+	var reply *engine.ThresholdProfile
+	var result string
+	if err := internalRPC.Call("ApierV1.GetThresholdProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Replication"}, &reply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	tPrfl := &ThresholdWithCache{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "THD_Replication",
+			FilterIDs: []string{"*string:~Account:1001", "*string:~CustomField:CustomValue"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   -1,
+			MinSleep:  time.Duration(5 * time.Minute),
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_1"},
+			Async:     true,
+		},
+	}
+	if err := internalRPC.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+
+	if err := internalRPC.Call("ApierV1.GetThresholdProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Replication"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
+	}
+
+	// verify threshold profile in replication dataDB
+	if rcv, err := rmtDM.GetThresholdProfile("cgrates.org", "THD_Replication",
+		false, false, utils.NonTransactional); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rcv)
+	}
+	//
+	eIdxes := map[string]utils.StringMap{
+		"*string:~Account:1001": {
+			"THD_ACNT_1001":   true,
+			"THD_Replication": true,
+		},
+		"*string:~Account:1002": {
+			"THD_ACNT_1002": true,
+		},
+		"*string:~CustomField:CustomValue": {
+			"THD_Replication": true,
+		},
+	}
+	if rcvIdx, err := rmtDM.GetFilterIndexes(
+		utils.PrefixToIndexCache[utils.ThresholdProfilePrefix], tPrfl.Tenant,
+		utils.EmptyString, nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
 	}
 }
 

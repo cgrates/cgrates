@@ -152,6 +152,12 @@ func (bf *BalanceFilter) LoadFromBalance(b *Balance) *BalanceFilter {
 	if !b.TimingIDs.IsEmpty() {
 		bf.TimingIDs = &b.TimingIDs
 	}
+	if len(b.Timings) != 0 {
+		bf.Timings = make([]*RITiming, len(b.Timings))
+		for i, timing := range b.Timings {
+			bf.Timings[i] = timing
+		}
+	}
 	if len(b.Factor) != 0 {
 		bf.Factor = &b.Factor
 	}
@@ -319,6 +325,12 @@ func (bf *BalanceFilter) ModifyBalance(b *Balance) {
 	}
 	if bf.TimingIDs != nil {
 		b.TimingIDs = *bf.TimingIDs
+	}
+	if bf.Timings != nil && len(bf.Timings) != 0 {
+		b.Timings = make([]*RITiming, len(bf.Timings))
+		for i, timing := range bf.Timings {
+			b.Timings[i] = timing
+		}
 	}
 	if bf.Weight != nil {
 		b.Weight = *bf.Weight
