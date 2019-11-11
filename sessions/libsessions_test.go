@@ -78,8 +78,25 @@ func TestLibSessionSgetSessionTTL(t *testing.T) {
 		utils.SUPPLIER:         "supplier1",
 		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
 		utils.OriginHost:       "127.0.0.1",
-		utils.SessionTTL:       "2s",
 	})
+
+	sEv[utils.SessionTTL] = "notanumber"
+	_, err := getSessionTTL(&sEv, time.Duration(0), nil)
+	if err == nil {
+		t.Errorf("Expecting: NOT_FOUND, received: %+v", err)
+	}
+	sEv[utils.SessionTTL] = 0
+	if ttl, err := getSessionTTL(&sEv, time.Duration(0), nil); err != nil {
+		t.Error(err)
+	} else if ttl != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, ttl)
+	}
+	sEv[utils.SessionTTL] = "2s"
+	sEv[utils.SessionTTLMaxDelay] = "notanumber"
+	if _, err := getSessionTTL(&sEv, time.Duration(0), nil); err == nil {
+		t.Error("Expecting: invalid duration, received: ", err)
+	}
+	sEv[utils.SessionTTLMaxDelay] = 0
 
 	//ttl is taken from event
 	if ttl, err := getSessionTTL(&sEv, time.Duration(0), nil); err != nil {
