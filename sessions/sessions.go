@@ -1333,8 +1333,8 @@ func (sS *SessionS) authEvent(tnt string, evStart engine.MapEvent) (maxUsage tim
 			return
 		}
 		err = nil
-		evStart[utils.Usage] = sS.cgrCfg.SessionSCfg().MaxCallDuration // will be used in CD
 		eventUsage = sS.cgrCfg.SessionSCfg().MaxCallDuration
+		evStart[utils.Usage] = eventUsage // will be used in CD
 	}
 	s := &Session{
 		CGRID:      cgrID,
@@ -1375,10 +1375,7 @@ func (sS *SessionS) authEvent(tnt string, evStart engine.MapEvent) (maxUsage tim
 		if rplyMaxUsage > eventUsage {
 			rplyMaxUsage = eventUsage
 		}
-		if !maxUsageSet ||
-			//maxUsage == eventUsage ||
-			//(rplyMaxUsage < maxUsage && rplyMaxUsage != eventUsage) {
-			rplyMaxUsage < maxUsage {
+		if !maxUsageSet || rplyMaxUsage < maxUsage {
 			maxUsage = rplyMaxUsage
 			maxUsageSet = true
 		}
@@ -1425,6 +1422,7 @@ func (sS *SessionS) updateSession(s *Session, updtEv engine.MapEvent) (maxUsage 
 	if updtEv == nil {
 		updtEv = engine.MapEvent(s.EventStart.Clone())
 	}
+
 	var reqMaxUsage time.Duration
 	if reqMaxUsage, err = updtEv.GetDuration(utils.Usage); err != nil {
 		if err != utils.ErrNotFound {
@@ -1432,21 +1430,22 @@ func (sS *SessionS) updateSession(s *Session, updtEv engine.MapEvent) (maxUsage 
 		}
 		err = nil
 		reqMaxUsage = sS.cgrCfg.SessionSCfg().MaxCallDuration
+		updtEv[utils.Usage] = reqMaxUsage
 	}
 	var maxUsageSet bool // so we know if we have set the 0 on purpose
-	prepaidReqs := []string{utils.META_PREPAID, utils.META_PSEUDOPREPAID}
 	for i, sr := range s.SRuns {
 		var rplyMaxUsage time.Duration
-		if !utils.IsSliceMember(prepaidReqs,
+		if !authReqs.HasField(
 			sr.Event.GetStringIgnoreErrors(utils.RequestType)) {
-			rplyMaxUsage = time.Duration(-1)
+			rplyMaxUsage = reqMaxUsage
 		} else if rplyMaxUsage, err = sS.debitSession(s, i, reqMaxUsage,
 			updtEv.GetDurationPtrIgnoreErrors(utils.LastUsed)); err != nil {
 			return
 		}
-		if !maxUsageSet ||
-			maxUsage == time.Duration(-1) ||
-			(rplyMaxUsage < maxUsage && rplyMaxUsage != time.Duration(-1)) {
+		if rplyMaxUsage > reqMaxUsage {
+			rplyMaxUsage = reqMaxUsage
+		}
+		if !maxUsageSet || rplyMaxUsage < maxUsage {
 			maxUsage = rplyMaxUsage
 			maxUsageSet = true
 		}
@@ -1994,10 +1993,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.RpcClientConn
 		authReply.ResourceAllocation = initAuthRply.ResourceAllocation
 	}
 	if args.GetMaxUsage {
-		authReply.MaxUsage = utils.Float64Pointer(-1.0)
-		if *initAuthRply.MaxUsage != time.Duration(-1) {
-			authReply.MaxUsage = utils.Float64Pointer(initAuthRply.MaxUsage.Seconds())
-		}
+		authReply.MaxUsage = utils.Float64Pointer(initAuthRply.MaxUsage.Seconds())
 	}
 	if args.GetSuppliers {
 		authReply.SuppliersDigest = utils.StringPointer(initAuthRply.Suppliers.Digest())
@@ -2201,8 +2197,8 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		if err != nil {
 			return utils.NewErrRALs(err)
 		}
-		if dbtItvl > 0 { //active debit
-			rply.MaxUsage = utils.DurationPointer(time.Duration(-1))
+		if s.debitStop != nil { //active debit
+			rply.MaxUsage = utils.DurationPointer(sS.cgrCfg.SessionSCfg().MaxCallDuration)
 		} else {
 			if maxUsage, err := sS.updateSession(s, nil); err != nil {
 				return utils.NewErrRALs(err)
@@ -2265,10 +2261,7 @@ func (sS *SessionS) BiRPCv1InitiateSessionWithDigest(clnt rpcclient.RpcClientCon
 	}
 
 	if args.InitSession {
-		initReply.MaxUsage = utils.Float64Pointer(-1.0)
-		if *initSessionRply.MaxUsage != time.Duration(-1) {
-			initReply.MaxUsage = utils.Float64Pointer(initSessionRply.MaxUsage.Seconds())
-		}
+		initReply.MaxUsage = utils.Float64Pointer(initSessionRply.MaxUsage.Seconds())
 	}
 
 	if args.ProcessThresholds {
@@ -3102,8 +3095,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 				if err != nil {
 					return utils.NewErrRALs(err)
 				}
-				if dbtItvl > 0 { //active debit
-					rply.MaxUsage = utils.DurationPointer(time.Duration(-1))
+				if s.debitStop != nil { //active debit
+					rply.MaxUsage = utils.DurationPointer(sS.cgrCfg.SessionSCfg().MaxCallDuration)
 				} else {
 					if maxUsage, err := sS.updateSession(s, nil); err != nil {
 						return utils.NewErrRALs(err)
@@ -3400,11 +3393,7 @@ func (sS *SessionS) BiRPCV1GetMaxUsage(clnt rpcclient.RpcClientConnection,
 		rply); err != nil {
 		return
 	}
-	if *rply.MaxUsage == time.Duration(-1) {
-		*maxUsage = -1.0
-	} else {
-		*maxUsage = rply.MaxUsage.Seconds()
-	}
+	*maxUsage = rply.MaxUsage.Seconds()
 	return nil
 }
 
@@ -3427,11 +3416,7 @@ func (sS *SessionS) BiRPCV1InitiateSession(clnt rpcclient.RpcClientConnection,
 		rply); err != nil {
 		return
 	}
-	if *rply.MaxUsage == time.Duration(-1) {
-		*maxUsage = -1.0
-	} else {
-		*maxUsage = rply.MaxUsage.Seconds()
-	}
+	*maxUsage = rply.MaxUsage.Seconds()
 	return
 }
 
@@ -3454,11 +3439,7 @@ func (sS *SessionS) BiRPCV1UpdateSession(clnt rpcclient.RpcClientConnection,
 		rply); err != nil {
 		return
 	}
-	if *rply.MaxUsage == time.Duration(-1) {
-		*maxUsage = -1.0
-	} else {
-		*maxUsage = rply.MaxUsage.Seconds()
-	}
+	*maxUsage = rply.MaxUsage.Seconds()
 	return
 }
 
