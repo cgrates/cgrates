@@ -1750,14 +1750,6 @@ func NewV1AuthorizeArgs(attrs bool, attributeIDs []string,
 	return
 }
 
-func getFlagIDs(flag string) []string {
-	flagWithIDs := strings.Split(flag, utils.InInFieldSep)
-	if len(flagWithIDs) <= 1 {
-		return nil
-	}
-	return strings.Split(flagWithIDs[1], utils.INFIELD_SEP)
-}
-
 // V1AuthorizeArgs are options available in auth request
 type V1AuthorizeArgs struct {
 	GetAttributes         bool
