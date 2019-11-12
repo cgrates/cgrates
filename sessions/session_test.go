@@ -72,6 +72,8 @@ func TestSessionClone(t *testing.T) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 	//normal check
+	tTime := time.Now()
+	tTime2 := time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
 	session = &Session{
 		CGRID:         "CGRID",
 		Tenant:        "cgrates.org",
@@ -79,6 +81,24 @@ func TestSessionClone(t *testing.T) {
 		ClientConnID:  "ClientConnID",
 		EventStart:    engine.NewMapEvent(nil),
 		DebitInterval: time.Duration(18),
+		SRuns: []*SRun{
+			{Event: engine.NewMapEvent(nil),
+				CD:            &engine.CallDescriptor{Category: "test"},
+				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
+				ExtraDuration: time.Duration(1),
+				LastUsage:     time.Duration(2),
+				TotalUsage:    time.Duration(3),
+				NextAutoDebit: &tTime,
+			},
+			{Event: engine.NewMapEvent(nil),
+				CD:            &engine.CallDescriptor{Category: "test2"},
+				EventCost:     &engine.EventCost{CGRID: "testCGRID2"},
+				ExtraDuration: time.Duration(4),
+				LastUsage:     time.Duration(5),
+				TotalUsage:    time.Duration(6),
+				NextAutoDebit: &tTime2,
+			},
+		},
 	}
 	eOut = &Session{
 		CGRID:         "CGRID",
@@ -87,10 +107,44 @@ func TestSessionClone(t *testing.T) {
 		ClientConnID:  "ClientConnID",
 		EventStart:    engine.NewMapEvent(nil),
 		DebitInterval: time.Duration(18),
+		SRuns: []*SRun{
+			{Event: engine.NewMapEvent(nil),
+				CD:            &engine.CallDescriptor{Category: "test"},
+				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
+				ExtraDuration: time.Duration(1),
+				LastUsage:     time.Duration(2),
+				TotalUsage:    time.Duration(3),
+				NextAutoDebit: &tTime,
+			},
+			{Event: engine.NewMapEvent(nil),
+				CD:            &engine.CallDescriptor{Category: "test2"},
+				EventCost:     &engine.EventCost{CGRID: "testCGRID2"},
+				ExtraDuration: time.Duration(4),
+				LastUsage:     time.Duration(5),
+				TotalUsage:    time.Duration(6),
+				NextAutoDebit: &tTime2,
+			},
+		},
 	}
 	rcv = session.Clone()
 	if !reflect.DeepEqual(eOut, rcv) && session.CGRID == "testID" {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	//check clone
+	rcv.CGRID = "newCGRID"
+
+	if session.CGRID == "newCGRID" {
+		t.Errorf("Expecting: CGRID, received: newCGRID")
+	}
+	rcv.SRuns[1].TotalUsage = time.Duration(10)
+	if session.SRuns[1].TotalUsage == time.Duration(10) {
+		t.Errorf("Expecting: %s, received: %s", time.Duration(3), time.Duration(10))
+	}
+	tTimeNow := time.Now()
+	*rcv.SRuns[1].NextAutoDebit = tTimeNow
+	if *session.SRuns[1].NextAutoDebit == tTimeNow {
+		t.Errorf("Expecting: %s, received: %s", time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC), tTimeNow)
+
 	}
 
 }
@@ -369,6 +423,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 		utils.Usage:       time.Duration(2 * time.Second),
 		utils.Cost:        12.13,
 	}
+	tTime := time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
 	s := &Session{
 		CGRID:         "RandomCGRID",
 		Tenant:        "cgrates.org",
@@ -376,8 +431,9 @@ func TestSessionAsExternalSessions(t *testing.T) {
 		DebitInterval: time.Second,
 		SRuns: []*SRun{
 			&SRun{
-				Event:      engine.NewMapEvent(ev),
-				TotalUsage: time.Duration(2 * time.Second),
+				Event:         engine.NewMapEvent(ev),
+				TotalUsage:    time.Duration(2 * time.Second),
+				NextAutoDebit: &tTime,
 			},
 		},
 	}
@@ -403,6 +459,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 			},
 			NodeID:        "ALL",
 			DebitInterval: time.Second,
+			NextAutoDebit: tTime,
 			// aSs[i].LoopIndex:     sr.CD.LoopIndex,
 			// aSs[i].DurationIndex: sr.CD.DurationIndex,
 			// aSs[i].MaxRate:       sr.CD.MaxRate,
@@ -588,6 +645,79 @@ func TestSessionAsExternalSessions3(t *testing.T) {
 	rply := s.AsExternalSession(s.SRuns[0], "", "ALL")
 	if !reflect.DeepEqual(exp, rply) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(exp), utils.ToJSON(rply))
+	}
+
+}
+
+func TestSessiontotalUsage(t *testing.T) {
+	//empty check
+	session := new(Session)
+	rcv := session.totalUsage()
+	eOut := time.Duration(0)
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	//normal check
+	tTime := time.Now()
+	tTime2 := time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
+	session = &Session{
+		CGRID:         "CGRID",
+		Tenant:        "cgrates.org",
+		ResourceID:    "resourceID",
+		ClientConnID:  "ClientConnID",
+		EventStart:    engine.NewMapEvent(nil),
+		DebitInterval: time.Duration(18),
+		SRuns: []*SRun{
+			{Event: engine.NewMapEvent(nil),
+				CD:            &engine.CallDescriptor{Category: "test"},
+				EventCost:     &engine.EventCost{CGRID: "testCGRID"},
+				ExtraDuration: time.Duration(1),
+				LastUsage:     time.Duration(2),
+				TotalUsage:    time.Duration(5),
+				NextAutoDebit: &tTime,
+			},
+			{Event: engine.NewMapEvent(nil),
+				CD:            &engine.CallDescriptor{Category: "test2"},
+				EventCost:     &engine.EventCost{CGRID: "testCGRID2"},
+				ExtraDuration: time.Duration(4),
+				LastUsage:     time.Duration(5),
+				TotalUsage:    time.Duration(6),
+				NextAutoDebit: &tTime2,
+			},
+		},
+	}
+	eOut = time.Duration(5)
+	rcv = session.totalUsage()
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+}
+
+func TestSessionstopSTerminator(t *testing.T) {
+	//empty check
+	session := new(Session)
+	rcv := session.totalUsage()
+	eOut := time.Duration(0)
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	//normal check
+	session = &Session{
+		sTerminator: &sTerminator{endChan: make(chan struct{})},
+	}
+	session.stopSTerminator()
+	if session.sTerminator.endChan != nil {
+		t.Errorf("Expecting: nil, received: %s", utils.ToJSON(session.sTerminator.endChan))
+	}
+}
+
+func TestSessionstopDebitLoops(t *testing.T) {
+	session := &Session{
+		debitStop: make(chan struct{}),
+	}
+	session.stopDebitLoops()
+	if session.debitStop != nil {
+		t.Errorf("Expecting: nil, received: %s", utils.ToJSON(session.debitStop))
 	}
 
 }
