@@ -874,6 +874,13 @@ func TestSessionSNewV1UpdateSessionArgs(t *testing.T) {
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
+	//test with len(AttributeIDs) != 0
+	attributeIDs := []string{"ATTR1", "ATTR2"}
+	rply = NewV1UpdateSessionArgs(false, attributeIDs, true, cgrEv, nil)
+	expected.AttributeIDs = []string{"ATTR1", "ATTR2"}
+	if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
 }
 
 func TestSessionSNewV1TerminateSessionArgs(t *testing.T) {
@@ -901,6 +908,19 @@ func TestSessionSNewV1TerminateSessionArgs(t *testing.T) {
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
+	//test with len(thresholdIDs) != 0 && len(StatIDs) != 0
+	thresholdIDs := []string{"ID1", "ID2"}
+	statIDs := []string{"test1", "test2"}
+	expected = &V1TerminateSessionArgs{
+		CGREvent:     cgrEv,
+		ThresholdIDs: []string{"ID1", "ID2"},
+		StatIDs:      []string{"test1", "test2"},
+	}
+	rply = NewV1TerminateSessionArgs(false, false, false, thresholdIDs, false, statIDs, cgrEv, nil)
+	if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
+
 }
 
 func TestSessionSNewV1ProcessMessageArgs(t *testing.T) {
@@ -935,9 +955,31 @@ func TestSessionSNewV1ProcessMessageArgs(t *testing.T) {
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
+	//test with len(thresholdIDs) != 0 && len(StatIDs) != 0
+	attributeIDs := []string{"ATTR1", "ATTR2"}
+	thresholdIDs := []string{"ID1", "ID2"}
+	statIDs := []string{"test3", "test4"}
+
+	expected = &V1ProcessMessageArgs{
+		AllocateResources:     true,
+		GetAttributes:         true,
+		CGREvent:              cgrEv,
+		GetSuppliers:          true,
+		SuppliersMaxCost:      utils.MetaSuppliersEventCost,
+		SuppliersIgnoreErrors: true,
+		AttributeIDs:          []string{"ATTR1", "ATTR2"},
+		ThresholdIDs:          []string{"ID1", "ID2"},
+		StatIDs:               []string{"test3", "test4"},
+	}
+	rply = NewV1ProcessMessageArgs(true, attributeIDs, false, thresholdIDs, false, statIDs, true, false, true, true, true, cgrEv, nil, utils.Paginator{})
+	if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
+
 }
 
 func TestSessionSNewV1InitSessionArgs(t *testing.T) {
+	//t1
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "Event",
@@ -946,7 +988,35 @@ func TestSessionSNewV1InitSessionArgs(t *testing.T) {
 			utils.Destination: "1002",
 		},
 	}
+	attributeIDs := []string{"ATTR1", "ATTR2"}
+	thresholdIDs := []string{"test1", "test2"}
+	statIDs := []string{"test3", "test4"}
 	expected := &V1InitSessionArgs{
+		GetAttributes:     true,
+		AllocateResources: true,
+		InitSession:       true,
+		ProcessThresholds: true,
+		ProcessStats:      true,
+		AttributeIDs:      []string{"ATTR1", "ATTR2"},
+		ThresholdIDs:      []string{"test1", "test2"},
+		StatIDs:           []string{"test3", "test4"},
+		CGREvent:          cgrEv,
+	}
+	rply := NewV1InitSessionArgs(true, attributeIDs, true, thresholdIDs, true, statIDs, true, true, cgrEv, nil)
+	if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rply)
+	}
+
+	//t2
+	cgrEv = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "Event",
+		Event: map[string]interface{}{
+			utils.Account:     "1001",
+			utils.Destination: "1002",
+		},
+	}
+	expected = &V1InitSessionArgs{
 		GetAttributes:     true,
 		AllocateResources: true,
 		InitSession:       true,
@@ -954,7 +1024,7 @@ func TestSessionSNewV1InitSessionArgs(t *testing.T) {
 		ProcessStats:      true,
 		CGREvent:          cgrEv,
 	}
-	rply := NewV1InitSessionArgs(true, nil, true, nil, true, nil, true, true, cgrEv, nil)
+	rply = NewV1InitSessionArgs(true, nil, true, nil, true, nil, true, true, cgrEv, nil)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", expected, rply)
 	}
@@ -1412,3 +1482,21 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expmatchingSRuns), utils.ToJSON(matchingSRuns))
 	}
 }
+
+/*
+
+type testRPCClientConnection struct {}
+func (testRPCClientConnection) Call(string, interface{}, interface{}) error { return nil }
+func TestNewSessionS(t *testing.T) {
+	cgrCGF := &config.CGRConfig{MaxCallDuration: time.Duration(10)}
+
+
+
+	rpc := rpcclient.RpcClientConnection{Call(string, interface{},interface{}) error {return nil}}
+
+	}
+	//var rcv *SessionS
+	sS := NewSessionS(cgrCGF, rpc, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
+	fmt.println("rcv: ",sS)
+}
+*/

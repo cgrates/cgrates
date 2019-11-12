@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -128,5 +129,20 @@ func TestLibSessionSgetSessionTTL(t *testing.T) {
 		t.Error(err)
 	} else if ttl <= time.Duration(7*time.Second) {
 		t.Errorf("Unexpected ttl : %+v", ttl)
+	}
+}
+
+func TestGetFlagIDs(t *testing.T) {
+	//empty check
+	rcv := getFlagIDs("")
+	var eOut []string
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %s , received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	//normal check
+	rcv = getFlagIDs("*attributes:ATTR1;ATTR2")
+	eOut = []string{"ATTR1", "ATTR2"}
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %s , received: %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 }

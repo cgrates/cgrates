@@ -20,6 +20,7 @@ package sessions
 
 import (
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -94,4 +95,12 @@ func GetSetCGRID(ev engine.MapEvent) (cgrID string) {
 		ev[utils.CGRID] = cgrID
 	}
 	return
+}
+
+func getFlagIDs(flag string) []string {
+	flagWithIDs := strings.Split(flag, utils.InInFieldSep)
+	if len(flagWithIDs) <= 1 {
+		return nil
+	}
+	return strings.Split(flagWithIDs[1], utils.INFIELD_SEP)
 }
