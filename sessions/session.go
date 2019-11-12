@@ -247,13 +247,15 @@ func (sr *SRun) Clone() (clsr *SRun) {
 		ExtraDuration: sr.ExtraDuration,
 		LastUsage:     sr.LastUsage,
 		TotalUsage:    sr.TotalUsage,
-		NextAutoDebit: sr.NextAutoDebit,
 	}
 	if sr.CD != nil {
 		clsr.CD = sr.CD.Clone()
 	}
 	if sr.EventCost != nil {
 		clsr.EventCost = sr.EventCost.Clone()
+	}
+	if sr.NextAutoDebit != nil {
+		clsr.NextAutoDebit = utils.TimePointer(*sr.NextAutoDebit)
 	}
 	return
 }

@@ -81,8 +81,7 @@ func TestLibSessionSgetSessionTTL(t *testing.T) {
 	})
 
 	sEv[utils.SessionTTL] = "notanumber"
-	_, err := getSessionTTL(&sEv, time.Duration(0), nil)
-	if err == nil {
+	if _, err := getSessionTTL(&sEv, time.Duration(0), nil); err == nil {
 		t.Errorf("Expecting: NOT_FOUND, received: %+v", err)
 	}
 	sEv[utils.SessionTTL] = 0
