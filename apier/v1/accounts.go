@@ -489,21 +489,18 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 	}
 	if attr.TimingIds != nil {
 		a.Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.TimingIds))
-	}
-	if attr.TimingIds != nil && *attr.TimingIds != "" {
-		timingIds := strings.Split(*attr.TimingIds, utils.INFIELD_SEP)
-		for _, timingID := range timingIds {
-			timing, err := self.DataManager.GetTiming(timingID, false, utils.NonTransactional)
+		for _, timingID := range strings.Split(*attr.TimingIds, utils.INFIELD_SEP) {
+			tmg, err := self.DataManager.GetTiming(timingID, false, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
 			a.Balance.Timings = append(a.Balance.Timings, &engine.RITiming{
-				Years:     timing.Years,
-				Months:    timing.Months,
-				MonthDays: timing.MonthDays,
-				WeekDays:  timing.WeekDays,
-				StartTime: timing.StartTime,
-				EndTime:   timing.EndTime,
+				Years:     tmg.Years,
+				Months:    tmg.Months,
+				MonthDays: tmg.MonthDays,
+				WeekDays:  tmg.WeekDays,
+				StartTime: tmg.StartTime,
+				EndTime:   tmg.EndTime,
 			})
 		}
 	}
@@ -587,22 +584,18 @@ func (self *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) error
 	}
 	if attr.TimingIds != nil {
 		a.Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.TimingIds))
-	}
-
-	if attr.TimingIds != nil && *attr.TimingIds != "" {
-		timingIds := strings.Split(*attr.TimingIds, utils.INFIELD_SEP)
-		for _, timingID := range timingIds {
-			timing, err := self.DataManager.GetTiming(timingID, false, utils.NonTransactional)
+		for _, timingID := range strings.Split(*attr.TimingIds, utils.INFIELD_SEP) {
+			tmg, err := self.DataManager.GetTiming(timingID, false, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
 			a.Balance.Timings = append(a.Balance.Timings, &engine.RITiming{
-				Years:     timing.Years,
-				Months:    timing.Months,
-				MonthDays: timing.MonthDays,
-				WeekDays:  timing.WeekDays,
-				StartTime: timing.StartTime,
-				EndTime:   timing.EndTime,
+				Years:     tmg.Years,
+				Months:    tmg.Months,
+				MonthDays: tmg.MonthDays,
+				WeekDays:  tmg.WeekDays,
+				StartTime: tmg.StartTime,
+				EndTime:   tmg.EndTime,
 			})
 		}
 	}

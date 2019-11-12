@@ -593,18 +593,22 @@ func (tpr *TpReader) LoadActions() (err error) {
 			if tpact.TimingTags != "" {
 				timingIds := strings.Split(tpact.TimingTags, utils.INFIELD_SEP)
 				for _, timingID := range timingIds {
-					if timing, found := tpr.timings[timingID]; found {
-						acts[idx].Balance.Timings = append(acts[idx].Balance.Timings, &RITiming{
-							Years:     timing.Years,
-							Months:    timing.Months,
-							MonthDays: timing.MonthDays,
-							WeekDays:  timing.WeekDays,
-							StartTime: timing.StartTime,
-							EndTime:   timing.EndTime,
-						})
-					} else {
-						return fmt.Errorf("could not find timing: %v", timingID)
+					timing, found := tpr.timings[timingID]
+					if !found {
+						if timing, err = tpr.dm.GetTiming(timingID, false,
+							utils.NonTransactional); err != nil {
+							return fmt.Errorf("error: <%s> querying timing with id: <%s>",
+								err.Error(), timingID)
+						}
 					}
+					acts[idx].Balance.Timings = append(acts[idx].Balance.Timings, &RITiming{
+						Years:     timing.Years,
+						Months:    timing.Months,
+						MonthDays: timing.MonthDays,
+						WeekDays:  timing.WeekDays,
+						StartTime: timing.StartTime,
+						EndTime:   timing.EndTime,
+					})
 				}
 			}
 		}
