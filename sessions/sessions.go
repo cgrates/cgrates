@@ -1314,10 +1314,12 @@ func (sS *SessionS) initSessionDebitLoops(s *Session) {
 	if s.debitStop != nil { // already initialized
 		return
 	}
-	s.debitStop = make(chan struct{})
 	for i, sr := range s.SRuns {
 		if s.DebitInterval != 0 &&
 			sr.Event.GetStringIgnoreErrors(utils.RequestType) == utils.META_PREPAID {
+			if s.debitStop == nil { // init the debitStop only for the first sRun with DebitInterval and RequestType META_PREPAID
+				s.debitStop = make(chan struct{})
+			}
 			go sS.debitLoopSession(s, i, s.DebitInterval)
 			time.Sleep(1) // allow the goroutine to be executed
 		}
@@ -2189,7 +2191,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		if err != nil {
 			return utils.NewErrRALs(err)
 		}
-		if dbtItvl > 0 { //active debit
+		if s.debitStop != nil { //active debit
 			rply.MaxUsage = utils.DurationPointer(sS.cgrCfg.SessionSCfg().MaxCallDuration)
 		} else {
 			if maxUsage, err := sS.updateSession(s, nil); err != nil {
@@ -3087,7 +3089,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 				if err != nil {
 					return utils.NewErrRALs(err)
 				}
-				if dbtItvl > 0 { //active debit
+				if s.debitStop != nil { //active debit
 					rply.MaxUsage = utils.DurationPointer(sS.cgrCfg.SessionSCfg().MaxCallDuration)
 				} else {
 					if maxUsage, err := sS.updateSession(s, nil); err != nil {
