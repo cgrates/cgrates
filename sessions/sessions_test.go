@@ -551,7 +551,12 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	}
 
 	//unregister the session and check if the index was removed
-	sS.unregisterSession("session1", false)
+	if !sS.unregisterSession("session1", false) {
+		t.Error("Expectinv: true, received: false")
+	}
+	if sS.unregisterSession("session1", false) {
+		t.Error("Expectinv: false, received: true")
+	}
 
 	eIndexes = map[string]map[string]map[string]utils.StringMap{
 		"OriginID": map[string]map[string]utils.StringMap{
@@ -1557,6 +1562,24 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	} else if !reflect.DeepEqual(expUindx, rplyUnindx) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expUindx), utils.ToJSON(rplyUnindx))
 	}
+	//t2
+	mpStr.SetFilterDrv(&engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR1",
+		ActivationInterval: &utils.ActivationInterval{
+			ActivationTime: time.Now().Add(-2 * time.Hour),
+			ExpiryTime:     time.Now().Add(-time.Hour),
+		},
+	})
+	sS = NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil, nil))
+	expIndx = map[string][]string{}
+	expUindx = nil
+	fltrs = []string{"FLTR1", "FLTR2"}
+	if rplyindx, rplyUnindx := sS.getIndexedFilters("cgrates.org", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
+		t.Errorf("Expected %s , received: %s", utils.ToJSON(expIndx), utils.ToJSON(rplyindx))
+	} else if !reflect.DeepEqual(expUindx, rplyUnindx) {
+		t.Errorf("Expected %s , received: %s", utils.ToJSON(expUindx), utils.ToJSON(rplyUnindx))
+	}
 
 }
 
@@ -1631,6 +1654,44 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 	} else if !reflect.DeepEqual(expmatchingSRuns, matchingSRuns) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expmatchingSRuns), utils.ToJSON(matchingSRuns))
 	}
+	//t3
+	session.SRuns = []*SRun{
+		&SRun{
+			Event: sEv,
+			CD: &engine.CallDescriptor{
+				RunID: "RunID",
+			},
+		},
+		&SRun{
+			Event: engine.NewMapEvent(map[string]interface{}{
+				utils.EVENT_NAME: "TEST_EVENT",
+				utils.ToR:        "*voice"}),
+			CD: &engine.CallDescriptor{
+				RunID: "RunID2",
+			},
+		},
+	}
+	sSCfg.SessionSCfg().SessionIndexes = utils.StringMap{
+		"ToR":    true,
+		"Extra2": true,
+	}
+	sS = NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	sS.indexSession(session, true)
+	indx = map[string][]string{
+		"~ToR":    []string{utils.VOICE, utils.DATA},
+		"~Extra2": []string{"5"},
+	}
+
+	expCGRIDs = []string{cgrID}
+	expmatchingSRuns = map[string]utils.StringMap{cgrID: utils.StringMap{
+		"RunID": true,
+	}}
+	if cgrIDs, matchingSRuns := sS.getSessionIDsMatchingIndexes(indx, true); !reflect.DeepEqual(expCGRIDs, cgrIDs) {
+		t.Errorf("Expected %s , received: %s", utils.ToJSON(expCGRIDs), utils.ToJSON(cgrIDs))
+	} else if !reflect.DeepEqual(expmatchingSRuns, matchingSRuns) {
+		t.Errorf("Expected %s , received: %s", utils.ToJSON(expmatchingSRuns), utils.ToJSON(matchingSRuns))
+	}
+
 }
 
 type testRPCClientConnection struct{}
@@ -1694,7 +1755,7 @@ func TestV1InitSessionArgsParseFlags(t *testing.T) {
 		StatIDs:           []string{"st1", "st2", "st3"},
 	}
 
-	strArg = "*accounts,*resources,*suppliers,*suppliers_ignore_errors,*suppliers_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	strArg = "*accounts,*resources,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
 	v1authArgs.ParseFlags(strArg)
 	if !reflect.DeepEqual(eOut, v1authArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
@@ -1713,7 +1774,53 @@ func TestV1InitSessionArgsParseFlags(t *testing.T) {
 		StatIDs:           []string{"st1", "st2", "st3"},
 	}
 
-	strArg = "*accounts,*resources,,*dispatchers,*suppliers,*suppliers_ignore_errors,*suppliers_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	strArg = "*accounts,*resources,*dispatchers,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	v1authArgs.ParseFlags(strArg)
+	if !reflect.DeepEqual(eOut, v1authArgs) {
+		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
+	}
+
+}
+
+func TestV1TerminateSessionArgsParseFlags(t *testing.T) {
+	v1authArgs := new(V1TerminateSessionArgs)
+	eOut := new(V1TerminateSessionArgs)
+	//empty check
+	strArg := ""
+	v1authArgs.ParseFlags(strArg)
+	if !reflect.DeepEqual(eOut, v1authArgs) {
+		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1authArgs)
+	}
+	//normal check -> without *dispatchers
+	cgrArgs := v1authArgs.CGREvent.ConsumeArgs(false, true)
+	eOut = &V1TerminateSessionArgs{
+		TerminateSession:  true,
+		ReleaseResources:  true,
+		ProcessThresholds: true,
+		ThresholdIDs:      []string{"tr1", "tr2", "tr3"},
+		ProcessStats:      true,
+		StatIDs:           []string{"st1", "st2", "st3"},
+		ArgDispatcher:     cgrArgs.ArgDispatcher,
+	}
+
+	strArg = "*accounts,*resources,*suppliers,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	v1authArgs.ParseFlags(strArg)
+	if !reflect.DeepEqual(eOut, v1authArgs) {
+		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
+	}
+	// //normal check -> with *dispatchers
+	cgrArgs = v1authArgs.CGREvent.ConsumeArgs(true, true)
+	eOut = &V1TerminateSessionArgs{
+		TerminateSession:  true,
+		ReleaseResources:  true,
+		ProcessThresholds: true,
+		ThresholdIDs:      []string{"tr1", "tr2", "tr3"},
+		ProcessStats:      true,
+		StatIDs:           []string{"st1", "st2", "st3"},
+		ArgDispatcher:     cgrArgs.ArgDispatcher,
+	}
+
+	strArg = "*accounts,*resources,,*dispatchers,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
 	v1authArgs.ParseFlags(strArg)
 	if !reflect.DeepEqual(eOut, v1authArgs) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))

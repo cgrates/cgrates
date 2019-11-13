@@ -806,16 +806,9 @@ func (sS *SessionS) indexSession(s *Session, pSessions bool) {
 	defer idxMux.Unlock()
 	for fieldName := range sS.cgrCfg.SessionSCfg().SessionIndexes {
 		for _, sr := range s.SRuns {
-			fieldVal, err := sr.Event.GetString(fieldName)
+			fieldVal, err := sr.Event.GetString(fieldName) // the only error from GetString is ErrNotFound
 			if err != nil {
-				if err == utils.ErrNotFound {
-					fieldVal = utils.NOT_AVAILABLE
-				} else {
-					utils.Logger.Err(
-						fmt.Sprintf("<%s> retrieving field: %s from event: %+v, err: <%s>",
-							utils.SessionS, fieldName, s.EventStart, err))
-					continue
-				}
+				fieldVal = utils.NOT_AVAILABLE
 			}
 			if fieldVal == "" {
 				fieldVal = utils.MetaEmpty
