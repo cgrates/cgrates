@@ -166,7 +166,7 @@ func TestDataDBRemoteReplication(t *testing.T) {
 				DataDbPass:    "",
 				QueryTimeout:  10 * time.Second,
 				RmtDataDBCfgs: nil,
-				RplDataDBCfgs: nil,
+				RplConns:      nil,
 			},
 		},
 	}
@@ -192,14 +192,7 @@ func TestDataDBRemoteReplication(t *testing.T) {
 		},
 	],
 	"replication_conns":[
-		{
-		"db_type": "*mongo",
-		"db_host": "1.1.1.1",					// data_db host address
-		"db_port": 1234,	 						// data_db port to reach the database
-		"db_name": "test", 						// data_db database name to connect to
-		"db_user": "user", 					// username to use when connecting to data_db
-		"db_password": "pass",
-		},
+		{"address": "127.0.0.1:2022","transport":"*json"},
 	],
 	}
 }`
@@ -223,15 +216,10 @@ func TestDataDBRemoteReplication(t *testing.T) {
 				QueryTimeout: 10 * time.Second,
 			},
 		},
-		RplDataDBCfgs: []*DataDbCfg{
-			&DataDbCfg{
-				DataDbType:   utils.MONGO,
-				DataDbHost:   "1.1.1.1",
-				DataDbPort:   "1234",
-				DataDbName:   "test",
-				DataDbUser:   "user",
-				DataDbPass:   "pass",
-				QueryTimeout: 10 * time.Second,
+		RplConns: []*RemoteHost{
+			&RemoteHost{
+				Address:   "127.0.0.1:2022",
+				Transport: "*json",
 			},
 		},
 	}
@@ -259,24 +247,14 @@ func TestDataDBRemoteReplication(t *testing.T) {
 		"db_type": "*mongo",
 		"db_host": "1.2.3.4",					// data_db host address
 		"db_port": 1235,	 						// data_db port to reach the database
-		"db_name": "remote_mongo", 						// data_db database name to connect to
+		"db_name": "internal_mongo", 						// data_db database name to connect to
 		"db_user": "remote_mongo_user", 					// username to use when connecting to data_db
 		},
 	],
 	"replication_conns":[
-		{
-		"db_type": "*mongo",
-		"db_host": "1.1.1.1",					// data_db host address
-		"db_port": 1234,	 						// data_db port to reach the database
-		"db_name": "replication_mongo", 						// data_db database name to connect to
-		"db_user": "user", 					// username to use when connecting to data_db
-		"db_password": "pass",
-		},
-		{
-		"db_host": "127.0.0.1",					// data_db host address
-		"db_port": 8888,	 						// data_db port to reach the database
-		"db_name": "15", 						// data_db database name to connect to
-		},
+		{"address": "127.0.0.1:2032","transport":"*json"},
+		{"address": "127.0.0.1:2042","transport":"*json"},
+		{"address": "127.0.0.1:2052","transport":"*json"},
 	],
 	}
 }`
@@ -303,30 +281,24 @@ func TestDataDBRemoteReplication(t *testing.T) {
 				DataDbType:   utils.MONGO,
 				DataDbHost:   "1.2.3.4",
 				DataDbPort:   "1235",
-				DataDbName:   "remote_mongo",
+				DataDbName:   "internal_mongo",
 				DataDbUser:   "remote_mongo_user",
 				DataDbPass:   "",
 				QueryTimeout: 10 * time.Second,
 			},
 		},
-		RplDataDBCfgs: []*DataDbCfg{
-			&DataDbCfg{
-				DataDbType:   utils.MONGO,
-				DataDbHost:   "1.1.1.1",
-				DataDbPort:   "1234",
-				DataDbName:   "replication_mongo",
-				DataDbUser:   "user",
-				DataDbPass:   "pass",
-				QueryTimeout: 10 * time.Second,
+		RplConns: []*RemoteHost{
+			&RemoteHost{
+				Address:   "127.0.0.1:2032",
+				Transport: "*json",
 			},
-			&DataDbCfg{
-				DataDbType:   utils.REDIS,
-				DataDbHost:   "127.0.0.1",
-				DataDbPort:   "8888",
-				DataDbName:   "15",
-				DataDbUser:   "cgrates",
-				DataDbPass:   "",
-				QueryTimeout: 10 * time.Second,
+			&RemoteHost{
+				Address:   "127.0.0.1:2042",
+				Transport: "*json",
+			},
+			&RemoteHost{
+				Address:   "127.0.0.1:2052",
+				Transport: "*json",
 			},
 		},
 	}

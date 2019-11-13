@@ -423,8 +423,8 @@ func TestCgrCfgJSONDefaultsjsnDataDb(t *testing.T) {
 	if len(cgrCfg.DataDbCfg().RmtDataDBCfgs) != 0 {
 		t.Errorf("Expecting:  0, recived: %+v", len(cgrCfg.DataDbCfg().RmtDataDBCfgs))
 	}
-	if len(cgrCfg.DataDbCfg().RplDataDBCfgs) != 0 {
-		t.Errorf("Expecting:  0, recived: %+v", len(cgrCfg.DataDbCfg().RplDataDBCfgs))
+	if len(cgrCfg.DataDbCfg().RplConns) != 0 {
+		t.Errorf("Expecting:  0, recived: %+v", len(cgrCfg.DataDbCfg().RplConns))
 	}
 }
 

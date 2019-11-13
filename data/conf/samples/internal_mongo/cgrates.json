@@ -1,19 +1,15 @@
 {
-// CGRateS Configuration file
-//
-
-
 "general": {
 	"log_level": 7,
-	"node_id": "RemoteRedis",
-	"reply_timeout": "50s",
+	"node_id": "RemoteMongo",
+	"reply_timeout": "50s"
 },
 
 
 "listen": {
 	"rpc_json": ":2012",
 	"rpc_gob": ":2013",
-	"http": ":2080",
+	"http": ":2080"
 },
 
 
@@ -21,61 +17,57 @@
 	"db_type": "*internal",
 	"remote_conns": [
 		{
-			"db_type": "*redis",
-			"db_port": 6379,
+			"db_type": "mongo",
 			"db_name": "10",
+			"db_port": 27017
 		}
 	],
 	"replication_conns": [
-		{
-			"db_type": "*redis",
-			"db_port": 6379,
-			"db_name": "10",
-		}
+		{"address": "127.0.0.1:2022", "transport":"*json"}
 	]
 },
 
 
 "stor_db": {
-	"db_type": "*internal",	
+	"db_type": "*internal"
 },
 
 
 "rals": {
 	"enabled": true,
 	"thresholds_conns": [
-		{"address": "*internal"},
+		{"address": "*internal"}
 	],
-	"max_increments":3000000,
+	"max_increments":3000000
 },
 
 
 "scheduler": {
 	"enabled": true,
 	"cdrs_conns": [
-		{"address": "*internal"},
-	],
+		{"address": "*internal"}
+	]
 },
 
 
 "cdrs": {
 	"enabled": true,
 	"chargers_conns":[
-		{"address": "*internal"},
-	],
+		{"address": "*internal"}
+	]
 },
 
 
 "attributes": {
-	"enabled": true,
+	"enabled": true
 },
 
 
 "chargers": {
 	"enabled": true,
 	"attributes_conns": [
-		{"address": "*internal"},
-	],
+		{"address": "*internal"}
+	]
 },
 
 
@@ -84,7 +76,7 @@
 	"store_interval": "-1",
 	"thresholds_conns": [
 		{"address": "*internal"}
-	],
+	]
 },
 
 
@@ -93,12 +85,12 @@
 	"store_interval": "-1",
 	"thresholds_conns": [
 		{"address": "*internal"}
-	],
+	]
 },
 
 "thresholds": {
 	"enabled": true,
-	"store_interval": "-1",
+	"store_interval": "-1"
 },
 
 
@@ -106,11 +98,11 @@
 	"enabled": true,
 	"prefix_indexed_fields":["Destination"],
 	"stats_conns": [
-		{"address": "*internal"},
+		{"address": "*internal"}
 	],
 	"resources_conns": [
-		{"address": "*internal"},
-	],
+		{"address": "*internal"}
+	]
 },
 
 
@@ -126,20 +118,20 @@
 		{"address": "*internal"}
 	],
 	"rals_conns": [
-		{"address": "*internal"},
+		{"address": "*internal"}
 	],
 	"cdrs_conns": [
 		{"address": "*internal"}
 	],
 	"chargers_conns": [
-		{"address": "*internal"},
-	],
+		{"address": "*internal"}
+	]
 },
 
 
 	"apier": {
-		"scheduler_conns": [					// connections to SchedulerS for reloads
-			{"address": "*internal"},
-		],
-	},
+		"scheduler_conns": [
+			{"address": "*internal"}
+		]
+	}
 }

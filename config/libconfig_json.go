@@ -91,7 +91,7 @@ type DbJsonCfg struct {
 	Query_timeout         *string
 	Sslmode               *string // Used only in case of storDb
 	Remote_conns          *[]*DbJsonCfg
-	Replication_conns     *[]*DbJsonCfg
+	Replication_conns     *[]*RemoteHostJson
 }
 
 // Filters config

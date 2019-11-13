@@ -1,0 +1,49 @@
+{
+// CGRateS Configuration file
+
+
+"general": {
+	"log_level": 7,
+	"reply_timeout": "30s",
+},
+
+
+"listen": {
+	"rpc_json": ":2022",
+	"rpc_gob": ":2023",
+	"http": ":2280"
+},
+
+
+"data_db": {
+	"db_type": "mongo",
+	"db_name": "10",
+	"db_port": 27017,
+},
+
+
+"stor_db": {
+	"db_type": "mongo",
+	"db_name": "cgrates",
+	"db_port": 27017,
+},
+
+
+"rals": {
+	"enabled": true,
+},
+
+
+"scheduler": {
+	"enabled": true,
+},
+
+
+"apier": {
+	"scheduler_conns": [					// connections to SchedulerS for reloads
+		{"address": "*internal"},
+	],
+},
+
+
+}

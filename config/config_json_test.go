@@ -197,7 +197,7 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 		Db_password:       utils.StringPointer(""),
 		Redis_sentinel:    utils.StringPointer(""),
 		Query_timeout:     utils.StringPointer("10s"),
-		Replication_conns: &[]*DbJsonCfg{},
+		Replication_conns: &[]*RemoteHostJson{},
 		Remote_conns:      &[]*DbJsonCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.DbJsonCfg(DATADB_JSN); err != nil {
