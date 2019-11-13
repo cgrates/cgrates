@@ -26,6 +26,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 var attrs = &engine.AttrSProcessEventReply{
@@ -59,7 +60,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		"Extra3":  true,
 		"Extra4":  true,
 	}
-	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
+	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	sEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
@@ -381,7 +382,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 
 func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
+	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
@@ -597,7 +598,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 
 func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
+	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
@@ -844,6 +845,85 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 	rply = NewV1AuthorizeArgs(true, nil, false, nil, true, nil, false, true, false, true, true, cgrEv, nil, utils.Paginator{})
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v,\n received: %+v", expected, rply)
+	}
+	//test with len(attributeIDs) && len(thresholdIDs) && len(StatIDs) != 0
+	attributeIDs := []string{"ATTR1", "ATTR2"}
+	thresholdIDs := []string{"ID1", "ID2"}
+	statIDs := []string{"test3", "test4"}
+	expected = &V1AuthorizeArgs{
+		GetAttributes:         true,
+		AuthorizeResources:    false,
+		GetMaxUsage:           true,
+		ProcessThresholds:     false,
+		ProcessStats:          true,
+		GetSuppliers:          false,
+		SuppliersIgnoreErrors: true,
+		SuppliersMaxCost:      utils.MetaSuppliersEventCost,
+		CGREvent:              cgrEv,
+		AttributeIDs:          []string{"ATTR1", "ATTR2"},
+		ThresholdIDs:          []string{"ID1", "ID2"},
+		StatIDs:               []string{"test3", "test4"},
+	}
+	rply = NewV1AuthorizeArgs(true, attributeIDs, false, thresholdIDs, true, statIDs, false, true, false, true, true, cgrEv, nil, utils.Paginator{})
+	if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting %+v,\n received: %+v", expected, rply)
+	}
+}
+
+func TestV1AuthorizeArgsParseFlags(t *testing.T) {
+	v1authArgs := new(V1AuthorizeArgs)
+	eOut := new(V1AuthorizeArgs)
+	//empty check
+	strArg := ""
+	v1authArgs.ParseFlags(strArg)
+	if !reflect.DeepEqual(eOut, v1authArgs) {
+		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1authArgs)
+	}
+	//normal check -> without *dispatchers
+	cgrArgs := v1authArgs.CGREvent.ConsumeArgs(false, true)
+	eOut = &V1AuthorizeArgs{
+		GetMaxUsage:           true,
+		AuthorizeResources:    true,
+		GetSuppliers:          true,
+		SuppliersIgnoreErrors: true,
+		SuppliersMaxCost:      utils.MetaEventCost,
+		GetAttributes:         true,
+		AttributeIDs:          []string{"Attr1", "Attr2"},
+		ProcessThresholds:     true,
+		ThresholdIDs:          []string{"tr1", "tr2", "tr3"},
+		ProcessStats:          true,
+		StatIDs:               []string{"st1", "st2", "st3"},
+		ArgDispatcher:         cgrArgs.ArgDispatcher,
+		Paginator:             *cgrArgs.SupplierPaginator,
+	}
+
+	strArg = "*accounts,*resources,*suppliers,*suppliers_ignore_errors,*suppliers_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	v1authArgs.ParseFlags(strArg)
+	if !reflect.DeepEqual(eOut, v1authArgs) {
+		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
+	}
+	// //normal check -> with *dispatchers
+	cgrArgs = v1authArgs.CGREvent.ConsumeArgs(true, true)
+	eOut = &V1AuthorizeArgs{
+		GetMaxUsage:           true,
+		AuthorizeResources:    true,
+		GetSuppliers:          true,
+		SuppliersIgnoreErrors: true,
+		SuppliersMaxCost:      utils.MetaEventCost,
+		GetAttributes:         true,
+		AttributeIDs:          []string{"Attr1", "Attr2"},
+		ProcessThresholds:     true,
+		ThresholdIDs:          []string{"tr1", "tr2", "tr3"},
+		ProcessStats:          true,
+		StatIDs:               []string{"st1", "st2", "st3"},
+		ArgDispatcher:         cgrArgs.ArgDispatcher,
+		Paginator:             *cgrArgs.SupplierPaginator,
+	}
+
+	strArg = "*accounts,*resources,,*dispatchers,*suppliers,*suppliers_ignore_errors,*suppliers_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	v1authArgs.ParseFlags(strArg)
+	if !reflect.DeepEqual(eOut, v1authArgs) {
+		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
 	}
 }
 
@@ -1169,30 +1249,100 @@ func TestSessionSV1ProcessMessageReplyAsNavigableMap(t *testing.T) {
 	if rply, _ := v1PrcEvRpl.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
+
 	v1PrcEvRpl.Attributes = attrs
-	expected.Set([]string{utils.CapAttributes},
-		map[string]interface{}{"OfficeGroup": "Marketing"},
-		false, false)
+	expected.Set([]string{utils.CapAttributes}, map[string]interface{}{"OfficeGroup": "Marketing"}, false, false)
 	if rply, _ := v1PrcEvRpl.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
+
 	v1PrcEvRpl.MaxUsage = utils.DurationPointer(5 * time.Minute)
-	expected.Set([]string{utils.CapMaxUsage},
-		5*time.Minute, false, false)
+	expected.Set([]string{utils.CapMaxUsage}, 5*time.Minute, false, false)
 	if rply, _ := v1PrcEvRpl.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
+
 	v1PrcEvRpl.ResourceAllocation = utils.StringPointer("ResGr1")
-	expected.Set([]string{utils.CapResourceAllocation},
-		"ResGr1", false, false)
+	expected.Set([]string{utils.CapResourceAllocation}, "ResGr1", false, false)
+	if rply, _ := v1PrcEvRpl.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
+	}
+
+	//test with Suppliers, ThresholdIDs, StatQueueIDs != nil
+	tmpTresholdIDs := []string{"ID1", "ID2"}
+	tmpStatQueueIDs := []string{"Que1", "Que2"}
+	tmpSuppliers := &engine.SortedSuppliers{
+		ProfileID: "Supplier1",
+		Count:     1,
+	}
+	v1PrcEvRpl.Suppliers = tmpSuppliers
+	v1PrcEvRpl.ThresholdIDs = &tmpTresholdIDs
+	v1PrcEvRpl.StatQueueIDs = &tmpStatQueueIDs
+	expected.Set([]string{utils.CapResourceAllocation}, "ResGr1", false, false)
+	expected.Set([]string{utils.CapSuppliers}, tmpSuppliers.AsNavigableMap(), false, false)
+	expected.Set([]string{utils.CapThresholds}, tmpTresholdIDs, false, false)
+	expected.Set([]string{utils.CapStatQueues}, tmpStatQueueIDs, false, false)
+
 	if rply, _ := v1PrcEvRpl.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 }
 
+func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
+	//empty check
+	v1per := new(V1ProcessEventReply)
+	expected := config.NewNavigableMap(map[string]interface{}{})
+	if rply, _ := v1per.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
+	}
+	//max usage check
+	v1per.MaxUsage = utils.DurationPointer(5 * time.Minute)
+	expected.Set([]string{utils.CapMaxUsage}, 5*time.Minute, false, false)
+	if rply, _ := v1per.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
+	}
+	//resource message check
+	v1per.ResourceMessage = utils.StringPointer("Resource")
+	expected.Set([]string{utils.CapResourceMessage}, "Resource", false, false)
+	if rply, _ := v1per.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
+	}
+	//attributes check
+	v1per.Attributes = attrs
+	expected.Set([]string{utils.CapAttributes}, map[string]interface{}{"OfficeGroup": "Marketing"}, false, false)
+	if rply, _ := v1per.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
+	}
+	//suppliers check
+	tmpSuppliers := &engine.SortedSuppliers{
+		ProfileID: "Supplier1",
+		Count:     1,
+	}
+	v1per.Suppliers = tmpSuppliers
+	expected.Set([]string{utils.CapSuppliers}, tmpSuppliers.AsNavigableMap(), false, false)
+	if rply, _ := v1per.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
+	}
+	//tmpTresholdIDs check
+	tmpTresholdIDs := []string{"ID1", "ID2"}
+	v1per.ThresholdIDs = &tmpTresholdIDs
+	expected.Set([]string{utils.CapThresholds}, tmpTresholdIDs, false, false)
+	if rply, _ := v1per.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
+	}
+	//StatQueue check
+	tmpStatQueueIDs := []string{"Que1", "Que2"}
+	v1per.StatQueueIDs = &tmpStatQueueIDs
+	expected.Set([]string{utils.CapStatQueues}, tmpStatQueueIDs, false, false)
+	if rply, _ := v1per.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
+	}
+
+}
+
 func TestSessionStransitSState(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
+	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
@@ -1239,7 +1389,7 @@ func TestSessionStransitSState(t *testing.T) {
 
 func TestSessionSrelocateSessionS(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
+	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
@@ -1381,7 +1531,7 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher2(t *testing.T) {
 func TestSessionSGetIndexedFilters(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
 	mpStr, _ := engine.NewMapStorage()
-	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil, nil), "UTC")
+	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil, nil))
 	expIndx := map[string][]string{}
 	expUindx := []*engine.FilterRule{
 		&engine.FilterRule{
@@ -1399,7 +1549,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	sSCfg.SessionSCfg().SessionIndexes = utils.StringMap{
 		"ToR": true,
 	}
-	sS = NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil, nil), "UTC")
+	sS = NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil, nil))
 	expIndx = map[string][]string{(utils.DynamicDataPrefix + utils.ToR): []string{utils.VOICE}}
 	expUindx = nil
 	if rplyindx, rplyUnindx := sS.getIndexedFilters("", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
@@ -1415,7 +1565,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 	sSCfg.SessionSCfg().SessionIndexes = utils.StringMap{
 		"ToR": true,
 	}
-	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
+	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	sEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
@@ -1468,7 +1618,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 		"ToR":    true,
 		"Extra3": true,
 	}
-	sS = NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
+	sS = NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	sS.indexSession(session, false)
 	indx = map[string][]string{
 		"~ToR":    []string{utils.VOICE, utils.DATA},
@@ -1483,20 +1633,90 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 	}
 }
 
-/*
+type testRPCClientConnection struct{}
 
-type testRPCClientConnection struct {}
-func (testRPCClientConnection) Call(string, interface{}, interface{}) error { return nil }
+func (*testRPCClientConnection) Call(string, interface{}, interface{}) error { return nil }
+
 func TestNewSessionS(t *testing.T) {
-	cgrCGF := &config.CGRConfig{MaxCallDuration: time.Duration(10)}
+	cgrCGF, _ := config.NewDefaultCGRConfig()
 
+	var rpc rpcclient.RpcClientConnection
+	var ttest *testRPCClientConnection
 
-
-	rpc := rpcclient.RpcClientConnection{Call(string, interface{},interface{}) error {return nil}}
-
+	rpc = ttest
+	eOut := &SessionS{
+		cgrCfg:        cgrCGF,
+		dm:            nil,
+		chargerS:      nil,
+		ralS:          nil,
+		resS:          nil,
+		thdS:          nil,
+		statS:         nil,
+		splS:          nil,
+		attrS:         nil,
+		cdrS:          nil,
+		sReplConns:    nil,
+		biJClnts:      make(map[rpcclient.RpcClientConnection]string),
+		biJIDs:        make(map[string]*biJClient),
+		aSessions:     make(map[string]*Session),
+		aSessionsIdx:  make(map[string]map[string]map[string]utils.StringMap),
+		aSessionsRIdx: make(map[string][]*riFieldNameVal),
+		pSessions:     make(map[string]*Session),
+		pSessionsIdx:  make(map[string]map[string]map[string]utils.StringMap),
+		pSessionsRIdx: make(map[string][]*riFieldNameVal),
 	}
-	//var rcv *SessionS
-	sS := NewSessionS(cgrCGF, rpc, nil, nil, nil, nil, nil, nil, nil, nil, nil, "UTC")
-	fmt.println("rcv: ",sS)
+	sS := NewSessionS(cgrCGF, rpc, rpc, rpc, rpc, rpc, rpc, rpc, rpc, nil, nil)
+	if !reflect.DeepEqual(sS, eOut) {
+		t.Errorf("Expected %s , received: %s", utils.ToJSON(sS), utils.ToJSON(eOut))
+	}
 }
-*/
+
+func TestV1InitSessionArgsParseFlags(t *testing.T) {
+	v1authArgs := new(V1InitSessionArgs)
+	eOut := new(V1InitSessionArgs)
+	//empty check
+	strArg := ""
+	v1authArgs.ParseFlags(strArg)
+	if !reflect.DeepEqual(eOut, v1authArgs) {
+		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1authArgs)
+	}
+	//normal check -> without *dispatchers
+	cgrArgs := v1authArgs.CGREvent.ConsumeArgs(false, true)
+	eOut = &V1InitSessionArgs{
+		InitSession:       true,
+		AllocateResources: true,
+		ArgDispatcher:     cgrArgs.ArgDispatcher,
+		GetAttributes:     true,
+		AttributeIDs:      []string{"Attr1", "Attr2"},
+		ProcessThresholds: true,
+		ThresholdIDs:      []string{"tr1", "tr2", "tr3"},
+		ProcessStats:      true,
+		StatIDs:           []string{"st1", "st2", "st3"},
+	}
+
+	strArg = "*accounts,*resources,*suppliers,*suppliers_ignore_errors,*suppliers_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	v1authArgs.ParseFlags(strArg)
+	if !reflect.DeepEqual(eOut, v1authArgs) {
+		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
+	}
+	// //normal check -> with *dispatchers
+	cgrArgs = v1authArgs.CGREvent.ConsumeArgs(true, true)
+	eOut = &V1InitSessionArgs{
+		InitSession:       true,
+		AllocateResources: true,
+		ArgDispatcher:     cgrArgs.ArgDispatcher,
+		GetAttributes:     true,
+		AttributeIDs:      []string{"Attr1", "Attr2"},
+		ProcessThresholds: true,
+		ThresholdIDs:      []string{"tr1", "tr2", "tr3"},
+		ProcessStats:      true,
+		StatIDs:           []string{"st1", "st2", "st3"},
+	}
+
+	strArg = "*accounts,*resources,,*dispatchers,*suppliers,*suppliers_ignore_errors,*suppliers_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	v1authArgs.ParseFlags(strArg)
+	if !reflect.DeepEqual(eOut, v1authArgs) {
+		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
+	}
+
+}
