@@ -120,9 +120,9 @@ func (b *Balance) IsDefault() bool {
 	return b.ID == utils.META_DEFAULT
 }
 
-func (b *Balance) IsExpired() bool {
+func (b *Balance) IsExpiredAt(t time.Time) bool {
 	// check if it expires in the next second
-	return !b.ExpirationDate.IsZero() && b.ExpirationDate.Before(time.Now().Add(1*time.Second))
+	return !b.ExpirationDate.IsZero() && b.ExpirationDate.Before(t)
 }
 
 func (b *Balance) IsActive() bool {
@@ -770,7 +770,7 @@ func (bc Balances) Sort() {
 
 func (bc Balances) GetTotalValue() (total float64) {
 	for _, b := range bc {
-		if !b.IsExpired() && b.IsActive() {
+		if !b.IsExpiredAt(time.Now()) && b.IsActive() {
 			total += b.GetValue()
 		}
 	}

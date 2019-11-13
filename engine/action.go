@@ -1014,7 +1014,7 @@ func removeExpired(acc *Account, action *Action, _ Actions, extraData interface{
 	bChain := acc.BalanceMap[action.Balance.GetType()]
 	found := false
 	for i := 0; i < len(bChain); i++ {
-		if bChain[i].IsExpired() {
+		if bChain[i].IsExpiredAt(time.Now()) {
 			// delete without preserving order
 			bChain[i] = bChain[len(bChain)-1]
 			bChain = bChain[:len(bChain)-1]

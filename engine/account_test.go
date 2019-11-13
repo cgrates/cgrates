@@ -1284,11 +1284,11 @@ func TestAccountExpActionTrigger(t *testing.T) {
 		},
 	}
 	ub.ExecuteActionTriggers(nil)
-	if ub.BalanceMap[utils.MONETARY][0].IsExpired() ||
+	if ub.BalanceMap[utils.MONETARY][0].IsExpiredAt(time.Now()) ||
 		ub.BalanceMap[utils.MONETARY][0].GetValue() != 10 || // expired was cleaned
 		ub.BalanceMap[utils.VOICE][0].GetValue() != 20*float64(time.Second) ||
 		ub.ActionTriggers[0].Executed != true {
-		t.Log(ub.BalanceMap[utils.MONETARY][0].IsExpired())
+		t.Log(ub.BalanceMap[utils.MONETARY][0].IsExpiredAt(time.Now()))
 		t.Error("Error executing triggered actions",
 			ub.BalanceMap[utils.MONETARY][0].GetValue(),
 			ub.BalanceMap[utils.VOICE][0].GetValue(),
@@ -1315,11 +1315,11 @@ func TestAccountExpActionTriggerNotActivated(t *testing.T) {
 		},
 	}
 	ub.ExecuteActionTriggers(nil)
-	if ub.BalanceMap[utils.MONETARY][0].IsExpired() ||
+	if ub.BalanceMap[utils.MONETARY][0].IsExpiredAt(time.Now()) ||
 		ub.BalanceMap[utils.MONETARY][0].GetValue() != 100 ||
 		ub.BalanceMap[utils.VOICE][0].GetValue() != 10 ||
 		ub.ActionTriggers[0].Executed != false {
-		t.Log(ub.BalanceMap[utils.MONETARY][0].IsExpired())
+		t.Log(ub.BalanceMap[utils.MONETARY][0].IsExpiredAt(time.Now()))
 		t.Error("Error executing triggered actions", ub.BalanceMap[utils.MONETARY][0].GetValue(), ub.BalanceMap[utils.VOICE][0].GetValue(), len(ub.BalanceMap[utils.MONETARY]))
 	}
 }
@@ -1341,11 +1341,11 @@ func TestAccountExpActionTriggerExpired(t *testing.T) {
 		},
 	}
 	ub.ExecuteActionTriggers(nil)
-	if ub.BalanceMap[utils.MONETARY][0].IsExpired() ||
+	if ub.BalanceMap[utils.MONETARY][0].IsExpiredAt(time.Now()) ||
 		ub.BalanceMap[utils.MONETARY][0].GetValue() != 100 ||
 		ub.BalanceMap[utils.VOICE][0].GetValue() != 10 ||
 		len(ub.ActionTriggers) != 0 {
-		t.Log(ub.BalanceMap[utils.MONETARY][0].IsExpired())
+		t.Log(ub.BalanceMap[utils.MONETARY][0].IsExpiredAt(time.Now()))
 		t.Error("Error executing triggered actions",
 			ub.BalanceMap[utils.MONETARY][0].GetValue(),
 			ub.BalanceMap[utils.VOICE][0].GetValue(),
@@ -2085,7 +2085,7 @@ func TestAccountGetBalancesForPrefixMixed(t *testing.T) {
 			},
 		},
 	}
-	bcs := acc.getBalancesForPrefix("999123", "", utils.MONETARY, "")
+	bcs := acc.getBalancesForPrefix("999123", "", utils.MONETARY, "", time.Now())
 	if len(bcs) != 0 {
 		t.Error("error excluding on mixed balances")
 	}
@@ -2102,7 +2102,7 @@ func TestAccountGetBalancesForPrefixAllExcl(t *testing.T) {
 			},
 		},
 	}
-	bcs := acc.getBalancesForPrefix("999123", "", utils.MONETARY, "")
+	bcs := acc.getBalancesForPrefix("999123", "", utils.MONETARY, "", time.Now())
 	if len(bcs) == 0 {
 		t.Error("error finding balance on all excluded")
 	}
@@ -2120,7 +2120,7 @@ func TestAccountGetBalancesForPrefixMixedGood(t *testing.T) {
 		},
 	}
 
-	bcs := acc.getBalancesForPrefix("999123", "", utils.MONETARY, "")
+	bcs := acc.getBalancesForPrefix("999123", "", utils.MONETARY, "", time.Now())
 	if len(bcs) == 0 {
 		t.Error("error finding on mixed balances good")
 	}
@@ -2137,7 +2137,7 @@ func TestAccountGetBalancesForPrefixMixedBad(t *testing.T) {
 			},
 		},
 	}
-	bcs := acc.getBalancesForPrefix("999123", "", utils.MONETARY, "")
+	bcs := acc.getBalancesForPrefix("999123", "", utils.MONETARY, "", time.Now())
 	if len(bcs) != 0 {
 		t.Error("error excluding on mixed balances bad")
 	}
@@ -2209,7 +2209,7 @@ func TestAccountGetBalancesGetBalanceWithSameWeight(t *testing.T) {
 			},
 		},
 	}
-	bcs := acc.getBalancesForPrefix("", "", utils.MONETARY, "")
+	bcs := acc.getBalancesForPrefix("", "", utils.MONETARY, "", time.Now())
 	if len(bcs) != 2 && bcs[0].ID != "SpecialBalance1" && bcs[1].ID != "SpecialBalance2" {
 		t.Errorf("Unexpected order balances : %+v", utils.ToJSON(bcs))
 	}
@@ -2232,7 +2232,7 @@ func TestAccountGetBalancesForPrefix2(t *testing.T) {
 			},
 		},
 	}
-	bcs := acc.getBalancesForPrefix("", "", utils.MONETARY, "")
+	bcs := acc.getBalancesForPrefix("", "", utils.MONETARY, "", time.Now())
 	if len(bcs) != 2 && bcs[0].ID != "SpecialBalance2" && bcs[0].Weight != 20.0 {
 		t.Errorf("Unexpected order balances : %+v", utils.ToJSON(bcs))
 	}
@@ -2270,7 +2270,7 @@ func TestAccountGetMultipleBalancesForPrefixWithSameWeight(t *testing.T) {
 			},
 		},
 	}
-	bcs := acc.getBalancesForPrefix("", "", utils.MONETARY, "")
+	bcs := acc.getBalancesForPrefix("", "", utils.MONETARY, "", time.Now())
 	if len(bcs) != 5 &&
 		bcs[0].ID != "SpecialBalance1" && bcs[1].ID != "SpecialBalance2" &&
 		bcs[2].ID != "SpecialBalance3" && bcs[3].ID != "SpecialBalance4" &&
