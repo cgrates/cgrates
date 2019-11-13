@@ -189,11 +189,9 @@ func testSSv1ItProcessEventInitiateSession(t *testing.T) {
 		t.Error(err)
 	}
 	// in case of prepaid and pseudoprepade we expect a MaxUsage of 5min
-	// and in case of postpaid and rated we expect -1
-	if ((sSV1RequestType == utils.META_PREPAID ||
-		sSV1RequestType == utils.META_PSEUDOPREPAID) && *rply.MaxUsage != initUsage) ||
-		((sSV1RequestType == utils.META_POSTPAID ||
-			sSV1RequestType == utils.META_RATED) && *rply.MaxUsage != -1) {
+	// and in case of postpaid and rated we expect the value of Usage field
+	// if this was missing the MaxUsage should be equal to MaxCallDuration from config
+	if *rply.MaxUsage != initUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceMessage != "RES_ACNT_1001" {
@@ -285,11 +283,9 @@ func testSSv1ItProcessEventUpdateSession(t *testing.T) {
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
 	}
 	// in case of prepaid and pseudoprepade we expect a MaxUsage of 5min
-	// and in case of postpaid and rated we expect -1
-	if ((sSV1RequestType == utils.META_PREPAID ||
-		sSV1RequestType == utils.META_PSEUDOPREPAID) && *rply.MaxUsage != reqUsage) ||
-		((sSV1RequestType == utils.META_POSTPAID ||
-			sSV1RequestType == utils.META_RATED) && *rply.MaxUsage != -1) {
+	// and in case of postpaid and rated we expect the value of Usage field
+	// if this was missing the MaxUsage should be equal to MaxCallDuration from config
+	if *rply.MaxUsage != reqUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)
