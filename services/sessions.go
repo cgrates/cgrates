@@ -148,7 +148,7 @@ func (smg *SessionService) Start() (err error) {
 
 	smg.sm = sessions.NewSessionS(smg.cfg, ralsConns, resSConns, threshSConns,
 		statSConns, suplSConns, attrConns, cdrsConn, chargerSConn,
-		sReplConns, smg.dm.GetDM(), smg.cfg.GeneralCfg().DefaultTimezone)
+		sReplConns, smg.dm.GetDM())
 	//start sync session in a separate gorutine
 	go func(sm *sessions.SessionS) {
 		if err = sm.ListenAndServe(smg.exitChan); err != nil {

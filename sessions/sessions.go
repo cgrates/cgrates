@@ -72,7 +72,7 @@ type SReplConn struct {
 // NewSessionS constructs  a new SessionS instance
 func NewSessionS(cgrCfg *config.CGRConfig, ralS, resS, thdS,
 	statS, splS, attrS, cdrS, chargerS rpcclient.RpcClientConnection,
-	sReplConns []*SReplConn, dm *engine.DataManager, tmz string) *SessionS {
+	sReplConns []*SReplConn, dm *engine.DataManager) *SessionS {
 	cgrCfg.SessionSCfg().SessionIndexes[utils.OriginID] = true // Make sure we have indexing for OriginID since it is a requirement on prefix searching
 	if chargerS != nil && reflect.ValueOf(chargerS).IsNil() {
 		chargerS = nil
