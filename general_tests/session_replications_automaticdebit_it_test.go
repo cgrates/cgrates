@@ -185,8 +185,9 @@ func testSessionSRplInitiate(t *testing.T) {
 		t.Error(err)
 	}
 	//compare the value
-	if *initRpl.MaxUsage != -1 {
-		t.Errorf("Expecting : %+v, received: %+v", -1, initRpl.MaxUsage)
+	eMaxUsage := 3 * time.Hour // MaxCallDuration from config
+	if *initRpl.MaxUsage != eMaxUsage {
+		t.Errorf("Expecting : %+v, received: %+v", eMaxUsage, initRpl.MaxUsage)
 	}
 
 	//check active session

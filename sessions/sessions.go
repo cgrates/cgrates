@@ -499,7 +499,7 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 	sr.CD.DurationIndex -= rDur
 	sr.CD.DurationIndex += ccDuration
 	sr.CD.MaxCostSoFar += cc.Cost
-	sr.CD.LoopIndex += 1
+	sr.CD.LoopIndex++
 	sr.TotalUsage += sr.LastUsage
 	ec := engine.NewEventCostFromCallCost(cc, s.CGRID,
 		sr.Event.GetStringIgnoreErrors(utils.RunID))
@@ -2189,7 +2189,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		if err != nil {
 			return utils.NewErrRALs(err)
 		}
-		if s.debitStop != nil { //active debit
+		if dbtItvl > 0 { //active debit
 			rply.MaxUsage = utils.DurationPointer(sS.cgrCfg.SessionSCfg().MaxCallDuration)
 		} else {
 			if maxUsage, err := sS.updateSession(s, nil); err != nil {
@@ -3087,7 +3087,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 				if err != nil {
 					return utils.NewErrRALs(err)
 				}
-				if s.debitStop != nil { //active debit
+				if dbtItvl > 0 { //active debit
 					rply.MaxUsage = utils.DurationPointer(sS.cgrCfg.SessionSCfg().MaxCallDuration)
 				} else {
 					if maxUsage, err := sS.updateSession(s, nil); err != nil {

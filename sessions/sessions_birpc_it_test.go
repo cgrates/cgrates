@@ -160,7 +160,7 @@ func TestSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(10 * time.Millisecond) // give some time to allow the session to be created
-	expMaxUsage := time.Duration(-1)
+	expMaxUsage := 3 * time.Hour      // MaxCallDuration from config
 	if *initRpl.MaxUsage != expMaxUsage {
 		t.Errorf("Expecting : %+v, received: %+v", expMaxUsage, *initRpl.MaxUsage)
 	}
@@ -279,7 +279,7 @@ func TestSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 		t.Error(err)
 	}
 
-	expMaxUsage := time.Duration(-1)
+	expMaxUsage := 3 * time.Hour // MaxCallDuration from config
 	if *initRpl.MaxUsage != expMaxUsage {
 		t.Errorf("Expecting : %+v, received: %+v", expMaxUsage, *initRpl.MaxUsage)
 	}
