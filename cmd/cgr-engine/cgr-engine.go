@@ -526,7 +526,6 @@ func main() {
 		rals.GetResponder().GetIntenternalChan(), reS.GetIntenternalChan(),
 		tS.GetIntenternalChan(), stS.GetIntenternalChan(), supS.GetIntenternalChan(),
 		attrS.GetIntenternalChan(), cdrS.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan)
-
 	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server, internalCacheSChan, dspS.GetIntenternalChan(), exitChan)
 	anz := services.NewAnalyzerService(cfg, server, exitChan)
 	srvManager.AddServices(attrS, chrS, tS, stS, reS, supS, schS, rals,

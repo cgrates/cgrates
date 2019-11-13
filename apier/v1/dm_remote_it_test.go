@@ -63,12 +63,12 @@ var sTestsInternalRemoteIT = []func(t *testing.T){
 	testInternalRemoteITGetAction,
 	testInternalRemoteITGetActionPlan,
 	testInternalRemoteITGetAccountActionPlan,
-	testInternalReplicationSetThreshold,
+	//testInternalReplicationSetThreshold,
 	testInternalRemoteITKillEngine,
 }
 
 func TestInternalRemoteITRedis(t *testing.T) {
-	internalCfgDirPath = "remote_redis"
+	internalCfgDirPath = "internal_redis"
 	cfg, _ := config.NewDefaultCGRConfig()
 	dataDB, err := engine.NewRedisStorage(
 		fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
@@ -84,7 +84,7 @@ func TestInternalRemoteITRedis(t *testing.T) {
 }
 
 func TestInternalRemoteITMongo(t *testing.T) {
-	internalCfgDirPath = "remote_mongo"
+	internalCfgDirPath = "internal_mongo"
 	mgoITCfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "tutmongo"))
 	if err != nil {
 		t.Fatal(err)

@@ -36,8 +36,8 @@ type DataDbCfg struct {
 	DataDbPass         string // The user's password.
 	DataDbSentinelName string
 	QueryTimeout       time.Duration
-	RmtDataDBCfgs      []*DataDbCfg // Remote DataDB  configurations
-	RplDataDBCfgs      []*DataDbCfg // Replication DataDB configurations
+	RmtDataDBCfgs      []*DataDbCfg  // Remote DataDB  configurations
+	RplConns           []*RemoteHost // Replication conns
 }
 
 //loadFromJsonCfg loads Database config from JsonCfg
@@ -85,12 +85,10 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		}
 	}
 	if jsnDbCfg.Replication_conns != nil {
-		dbcfg.RplDataDBCfgs = make([]*DataDbCfg, len(*jsnDbCfg.Replication_conns))
-		for i, cfg := range *jsnDbCfg.Replication_conns {
-			dbcfg.RplDataDBCfgs[i] = newDefaultDataDbCfg()
-			if err = dbcfg.RplDataDBCfgs[i].loadFromJsonCfg(cfg); err != nil {
-				return
-			}
+		dbcfg.RplConns = make([]*RemoteHost, len(*jsnDbCfg.Replication_conns))
+		for idx, jsnRplCfg := range *jsnDbCfg.Replication_conns {
+			dbcfg.RplConns[idx] = NewDfltRemoteHost()
+			dbcfg.RplConns[idx].loadFromJsonCfg(jsnRplCfg)
 		}
 	}
 	return nil
@@ -121,6 +119,6 @@ func newDefaultDataDbCfg() *DataDbCfg {
 		DataDbSentinelName: "",
 		QueryTimeout:       10 * time.Second,
 		RmtDataDBCfgs:      nil,
-		RplDataDBCfgs:      nil,
+		RplConns:           nil,
 	}
 }

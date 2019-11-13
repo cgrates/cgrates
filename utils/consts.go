@@ -628,6 +628,7 @@ const (
 	SchedulerSLow  = "schedulers"
 	LoaderSLow     = "loaders"
 	RALsLow        = "rals"
+	ReplicatorLow  = "replicator"
 )
 
 // Actions
@@ -787,6 +788,13 @@ const (
 	MetaNotDestinations = "*notdestinations"
 	MetaNotResources    = "*notresources"
 	MetaNotEqual        = "*noteq"
+)
+
+// ReplicatorSv1 APIs
+const (
+	ReplicatorSv1                    = "ReplicatorSv1"
+	ReplicatorSv1Ping                = "ReplicatorSv1.Ping"
+	ReplicatorSv1SetThresholdProfile = "ReplicatorSv1.SetThresholdProfile"
 )
 
 // ApierV1 APIs

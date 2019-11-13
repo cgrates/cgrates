@@ -122,6 +122,7 @@ func (api *ApierV1Service) Start() (err error) {
 
 	if !api.cfg.DispatcherSCfg().Enabled {
 		api.server.RpcRegister(api.api)
+		api.server.RpcRegister(v1.NewReplicatorSv1(api.dm.GetDM()))
 	}
 
 	utils.RegisterRpcParams("", &v1.CDRsV1{})

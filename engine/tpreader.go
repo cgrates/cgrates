@@ -68,7 +68,8 @@ type TpReader struct {
 
 func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
 	cacheS rpcclient.RpcClientConnection, schedulerS rpcclient.RpcClientConnection) (*TpReader, error) {
-	var rmtDBConns, rplDBConns []*DataManager
+	var rmtDBConns []*DataManager
+	var rplConns *rpcclient.RpcClientPool
 	if len(config.CgrConfig().DataDbCfg().RmtDataDBCfgs) != 0 {
 		rmtDBConns = make([]*DataManager, len(config.CgrConfig().DataDbCfg().RmtDataDBCfgs))
 		for i, dbCfg := range config.CgrConfig().DataDbCfg().RmtDataDBCfgs {
@@ -83,24 +84,21 @@ func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
 			rmtDBConns[i] = NewDataManager(dbConn, nil, nil, nil)
 		}
 	}
-	if len(config.CgrConfig().DataDbCfg().RplDataDBCfgs) != 0 {
-		rplDBConns = make([]*DataManager, len(config.CgrConfig().DataDbCfg().RplDataDBCfgs))
-		for i, dbCfg := range config.CgrConfig().DataDbCfg().RplDataDBCfgs {
-			dbConn, err := NewDataDBConn(dbCfg.DataDbType,
-				dbCfg.DataDbHost, dbCfg.DataDbPort,
-				dbCfg.DataDbName, dbCfg.DataDbUser,
-				dbCfg.DataDbPass, config.CgrConfig().GeneralCfg().DBDataEncoding,
-				dbCfg.DataDbSentinelName)
-			if err != nil {
-				return nil, err
-			}
-			rplDBConns[i] = NewDataManager(dbConn, nil, nil, nil)
+	if len(config.CgrConfig().DataDbCfg().RplConns) != 0 {
+		var err error
+		rplConns, err = NewRPCPool(rpcclient.POOL_BROADCAST, config.CgrConfig().TlsCfg().ClientKey,
+			config.CgrConfig().TlsCfg().ClientCerificate, config.CgrConfig().TlsCfg().CaCertificate,
+			config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
+			config.CgrConfig().GeneralCfg().ConnectTimeout, config.CgrConfig().GeneralCfg().ReplyTimeout,
+			config.CgrConfig().DataDbCfg().RplConns, nil, false)
+		if err != nil {
+			return nil, err
 		}
 	}
 	tpr := &TpReader{
 		tpid:       tpid,
 		timezone:   timezone,
-		dm:         NewDataManager(db, config.CgrConfig().CacheCfg(), rmtDBConns, rplDBConns), // ToDo: add ChacheCfg as parameter to the NewTpReader
+		dm:         NewDataManager(db, config.CgrConfig().CacheCfg(), rmtDBConns, rplConns), // ToDo: add ChacheCfg as parameter to the NewTpReader
 		lr:         lr,
 		cacheS:     cacheS,
 		schedulerS: schedulerS,
