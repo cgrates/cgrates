@@ -281,3 +281,68 @@ func TestCGREventClone(t *testing.T) {
 		t.Errorf("Expecting: different pointer but received: %+v", cloned.Time)
 	}
 }
+
+func TestCGREventConsumeArgs(t *testing.T) {
+	//empty check
+	ev := new(CGREvent)
+	eOut := ConsumeArgs{
+		ArgDispatcher: ev.consumeArgDispatcher(),
+	}
+	// false false
+	rcv := ev.ConsumeArgs(false, false)
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	// false true
+	rcv = ev.ConsumeArgs(false, true)
+	eOut.SupplierPaginator = ev.consumeSupplierPaginator()
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	//true false
+	eOut = ConsumeArgs{
+		ArgDispatcher:     new(ArgDispatcher),
+		SupplierPaginator: nil,
+	}
+	rcv = ev.ConsumeArgs(true, false)
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	//true true
+	rcv = ev.ConsumeArgs(true, true)
+	eOut = ConsumeArgs{
+		SupplierPaginator: ev.consumeSupplierPaginator(),
+		ArgDispatcher:     new(ArgDispatcher),
+	}
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+
+}
+
+func TestNewCGREventWithArgDispatcher(t *testing.T) {
+	eOut := new(CGREventWithArgDispatcher)
+	rcv := NewCGREventWithArgDispatcher()
+
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+}
+
+func TestCGREventWithArgDispatcherClone(t *testing.T) {
+	//normal check
+	now := time.Now()
+	cgrEventWithArgDispatcher := &CGREventWithArgDispatcher{
+		CGREvent: &CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "IDtest",
+			Time:   &now,
+			Event:  make(map[string]interface{}),
+		},
+	}
+
+	rcv := cgrEventWithArgDispatcher.Clone()
+	if !reflect.DeepEqual(cgrEventWithArgDispatcher, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", cgrEventWithArgDispatcher, rcv)
+	}
+}
