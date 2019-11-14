@@ -22,6 +22,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os"
@@ -40,37 +41,37 @@ var (
 	tstCfg         = config.CgrConfig()
 	cpuprofile     = cgrTesterFlags.String("cpuprofile", "", "write cpu profile to file")
 	memprofile     = cgrTesterFlags.String("memprofile", "", "write memory profile to this file")
-	runs           = cgrTesterFlags.Int("runs", 10000, "stress cycle number")
+	runs           = cgrTesterFlags.Int("runs", int(math.Pow10(5)), "stress cycle number")
 
 	cfgPath = cgrTesterFlags.String("config_path", "",
 		"Configuration directory path.")
 
-	parallel        = cgrTesterFlags.Int("parallel", 0, "run n requests in parallel")
-	datadb_type     = cgrTesterFlags.String("datadb_type", cgrConfig.DataDbCfg().DataDbType, "The type of the DataDb database <redis>")
-	datadb_host     = cgrTesterFlags.String("datadb_host", cgrConfig.DataDbCfg().DataDbHost, "The DataDb host to connect to.")
-	datadb_port     = cgrTesterFlags.String("datadb_port", cgrConfig.DataDbCfg().DataDbPort, "The DataDb port to bind to.")
-	datadb_name     = cgrTesterFlags.String("datadb_name", cgrConfig.DataDbCfg().DataDbName, "The name/number of the DataDb to connect to.")
-	datadb_user     = cgrTesterFlags.String("datadb_user", cgrConfig.DataDbCfg().DataDbUser, "The DataDb user to sign in as.")
-	datadb_pass     = cgrTesterFlags.String("datadb_pass", cgrConfig.DataDbCfg().DataDbPass, "The DataDb user's password.")
-	dbdata_encoding = cgrTesterFlags.String("dbdata_encoding", cgrConfig.GeneralCfg().DBDataEncoding, "The encoding used to store object data in strings.")
-	redis_sentinel  = cgrTesterFlags.String("redis_sentinel", cgrConfig.DataDbCfg().DataDbSentinelName, "The name of redis sentinel")
-	raterAddress    = cgrTesterFlags.String("rater_address", "", "Rater address for remote tests. Empty for internal rater.")
-	tor             = cgrTesterFlags.String("tor", utils.VOICE, "The type of record to use in queries.")
-	category        = cgrTesterFlags.String("category", "call", "The Record category to test.")
-	tenant          = cgrTesterFlags.String("tenant", "cgrates.org", "The type of record to use in queries.")
-	subject         = cgrTesterFlags.String("subject", "1001", "The rating subject to use in queries.")
-	destination     = cgrTesterFlags.String("destination", "1002", "The destination to use in queries.")
-	json            = cgrTesterFlags.Bool("json", false, "Use JSON RPC")
-	version         = cgrTesterFlags.Bool("version", false, "Prints the application version.")
-	nilDuration     = time.Duration(0)
-	usage           = cgrTesterFlags.String("usage", "1m", "The duration to use in call simulation.")
-	fPath           = cgrTesterFlags.String("file_path", "", "read requests from file with path")
-	reqSep          = cgrTesterFlags.String("req_separator", "\n\n", "separator for requests in file")
+	parallel       = cgrTesterFlags.Int("parallel", 0, "run n requests in parallel")
+	datadbType     = cgrTesterFlags.String("datadb_type", cgrConfig.DataDbCfg().DataDbType, "The type of the DataDb database <redis>")
+	datadbHost     = cgrTesterFlags.String("datadb_host", cgrConfig.DataDbCfg().DataDbHost, "The DataDb host to connect to.")
+	datadbPort     = cgrTesterFlags.String("datadb_port", cgrConfig.DataDbCfg().DataDbPort, "The DataDb port to bind to.")
+	datadbName     = cgrTesterFlags.String("datadb_name", cgrConfig.DataDbCfg().DataDbName, "The name/number of the DataDb to connect to.")
+	datadbUser     = cgrTesterFlags.String("datadb_user", cgrConfig.DataDbCfg().DataDbUser, "The DataDb user to sign in as.")
+	datadbPass     = cgrTesterFlags.String("datadb_pass", cgrConfig.DataDbCfg().DataDbPass, "The DataDb user's password.")
+	dbdataEncoding = cgrTesterFlags.String("dbdata_encoding", cgrConfig.GeneralCfg().DBDataEncoding, "The encoding used to store object data in strings.")
+	redisSentinel  = cgrTesterFlags.String("redis_sentinel", cgrConfig.DataDbCfg().DataDbSentinelName, "The name of redis sentinel")
+	raterAddress   = cgrTesterFlags.String("rater_address", "", "Rater address for remote tests. Empty for internal rater.")
+	tor            = cgrTesterFlags.String("tor", utils.VOICE, "The type of record to use in queries.")
+	category       = cgrTesterFlags.String("category", "call", "The Record category to test.")
+	tenant         = cgrTesterFlags.String("tenant", "cgrates.org", "The type of record to use in queries.")
+	subject        = cgrTesterFlags.String("subject", "1001", "The rating subject to use in queries.")
+	destination    = cgrTesterFlags.String("destination", "1002", "The destination to use in queries.")
+	json           = cgrTesterFlags.Bool("json", false, "Use JSON RPC")
+	version        = cgrTesterFlags.Bool("version", false, "Prints the application version.")
+	nilDuration    = time.Duration(0)
+	usage          = cgrTesterFlags.String("usage", "1m", "The duration to use in call simulation.")
+	fPath          = cgrTesterFlags.String("file_path", "", "read requests from file with path")
+	reqSep         = cgrTesterFlags.String("req_separator", "\n\n", "separator for requests in file")
 
 	err error
 )
 
-func durInternalRater(cd *engine.CallDescriptor) (time.Duration, error) {
+func durInternalRater(cd *engine.CallDescriptorWithArgDispatcher) (time.Duration, error) {
 	dbConn, err := engine.NewDataDBConn(tstCfg.DataDbCfg().DataDbType,
 		tstCfg.DataDbCfg().DataDbHost, tstCfg.DataDbCfg().DataDbPort,
 		tstCfg.DataDbCfg().DataDbName, tstCfg.DataDbCfg().DataDbUser,
@@ -88,7 +89,6 @@ func durInternalRater(cd *engine.CallDescriptor) (time.Duration, error) {
 	}
 	log.Printf("Runnning %d cycles...", *runs)
 	var result *engine.CallCost
-	j := 0
 	start := time.Now()
 	for i := 0; i < *runs; i++ {
 		result, err = cd.GetCost()
@@ -103,9 +103,8 @@ func durInternalRater(cd *engine.CallDescriptor) (time.Duration, error) {
 			f.Close()
 			break
 		}
-		j = i
 	}
-	log.Print(result, j, err)
+	log.Printf("Result:%s\n", utils.ToJSON(result))
 
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)
@@ -114,7 +113,7 @@ func durInternalRater(cd *engine.CallDescriptor) (time.Duration, error) {
 	return time.Since(start), nil
 }
 
-func durRemoteRater(cd *engine.CallDescriptor) (time.Duration, error) {
+func durRemoteRater(cd *engine.CallDescriptorWithArgDispatcher) (time.Duration, error) {
 	result := engine.CallCost{}
 	var client *rpc.Client
 	var err error
@@ -151,7 +150,7 @@ func durRemoteRater(cd *engine.CallDescriptor) (time.Duration, error) {
 			client.Call("Responder.GetCost", cd, &result)
 		}
 	}
-	log.Println(result)
+	log.Printf("Result:%s\n", utils.ToJSON(result))
 	return time.Since(start), nil
 }
 
@@ -171,29 +170,29 @@ func main() {
 		}
 	}
 
-	if *datadb_type != cgrConfig.DataDbCfg().DataDbType {
-		tstCfg.DataDbCfg().DataDbType = *datadb_type
+	if *datadbType != cgrConfig.DataDbCfg().DataDbType {
+		tstCfg.DataDbCfg().DataDbType = *datadbType
 	}
-	if *datadb_host != cgrConfig.DataDbCfg().DataDbHost {
-		tstCfg.DataDbCfg().DataDbHost = *datadb_host
+	if *datadbHost != cgrConfig.DataDbCfg().DataDbHost {
+		tstCfg.DataDbCfg().DataDbHost = *datadbHost
 	}
-	if *datadb_port != cgrConfig.DataDbCfg().DataDbPort {
-		tstCfg.DataDbCfg().DataDbPort = *datadb_port
+	if *datadbPort != cgrConfig.DataDbCfg().DataDbPort {
+		tstCfg.DataDbCfg().DataDbPort = *datadbPort
 	}
-	if *datadb_name != cgrConfig.DataDbCfg().DataDbName {
-		tstCfg.DataDbCfg().DataDbName = *datadb_name
+	if *datadbName != cgrConfig.DataDbCfg().DataDbName {
+		tstCfg.DataDbCfg().DataDbName = *datadbName
 	}
-	if *datadb_user != cgrConfig.DataDbCfg().DataDbUser {
-		tstCfg.DataDbCfg().DataDbUser = *datadb_user
+	if *datadbUser != cgrConfig.DataDbCfg().DataDbUser {
+		tstCfg.DataDbCfg().DataDbUser = *datadbUser
 	}
-	if *datadb_pass != cgrConfig.DataDbCfg().DataDbPass {
-		tstCfg.DataDbCfg().DataDbPass = *datadb_pass
+	if *datadbPass != cgrConfig.DataDbCfg().DataDbPass {
+		tstCfg.DataDbCfg().DataDbPass = *datadbPass
 	}
-	if *dbdata_encoding != "" {
-		tstCfg.GeneralCfg().DBDataEncoding = *dbdata_encoding
+	if *dbdataEncoding != "" {
+		tstCfg.GeneralCfg().DBDataEncoding = *dbdataEncoding
 	}
-	if *redis_sentinel != "" {
-		tstCfg.DataDbCfg().DataDbSentinelName = *redis_sentinel
+	if *redisSentinel != "" {
+		tstCfg.DataDbCfg().DataDbSentinelName = *redisSentinel
 	}
 
 	if *cpuprofile != "" {
@@ -221,15 +220,17 @@ func main() {
 	tstart := time.Now()
 	timeparsed, err = utils.ParseDurationWithNanosecs(*usage)
 	tend := tstart.Add(timeparsed)
-	cd := &engine.CallDescriptor{
-		TimeStart:     tstart,
-		TimeEnd:       tend,
-		DurationIndex: 60 * time.Second,
-		TOR:           *tor,
-		Category:      *category,
-		Tenant:        *tenant,
-		Subject:       *subject,
-		Destination:   *destination,
+	cd := &engine.CallDescriptorWithArgDispatcher{
+		CallDescriptor: &engine.CallDescriptor{
+			TimeStart:     tstart,
+			TimeEnd:       tend,
+			DurationIndex: 60 * time.Second,
+			TOR:           *tor,
+			Category:      *category,
+			Tenant:        *tenant,
+			Subject:       *subject,
+			Destination:   *destination,
+		},
 	}
 	var duration time.Duration
 	if len(*raterAddress) == 0 {
@@ -240,6 +241,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	} else {
-		log.Printf("Elapsed: %d resulted: %f req/s.", duration, float64(*runs)/duration.Seconds())
+		log.Printf("Elapsed: %s resulted: %f req/s.", duration, float64(*runs)/duration.Seconds())
 	}
 }
