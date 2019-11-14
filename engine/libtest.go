@@ -292,33 +292,7 @@ func InitDataDb(cfg *config.CGRConfig) error {
 	if err != nil {
 		return err
 	}
-	var rmtDBConns []*DataManager
-	var rplConns *rpcclient.RpcClientPool
-	if len(cfg.DataDbCfg().RmtDataDBCfgs) != 0 {
-		rmtDBConns = make([]*DataManager, len(cfg.DataDbCfg().RmtDataDBCfgs))
-		for i, dbCfg := range cfg.DataDbCfg().RmtDataDBCfgs {
-			dbConn, err := NewDataDBConn(dbCfg.DataDbType,
-				dbCfg.DataDbHost, dbCfg.DataDbPort,
-				dbCfg.DataDbName, dbCfg.DataDbUser,
-				dbCfg.DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-				dbCfg.DataDbSentinelName)
-			if err != nil {
-				return err
-			}
-			rmtDBConns[i] = NewDataManager(dbConn, nil, nil, nil)
-		}
-	}
-	if len(cfg.DataDbCfg().RplConns) != 0 {
-		rplConns, err = NewRPCPool(rpcclient.POOL_BROADCAST, cfg.TlsCfg().ClientKey,
-			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-			cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-			cfg.DataDbCfg().RplConns, nil, false)
-		if err != nil {
-			return err
-		}
-	}
-	dm := NewDataManager(d, cfg.CacheCfg(), rmtDBConns, rplConns)
+	dm := NewDataManager(d, cfg.CacheCfg(), nil, nil)
 
 	if err := dm.DataDB().Flush(""); err != nil {
 		return err

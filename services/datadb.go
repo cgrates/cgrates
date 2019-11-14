@@ -68,20 +68,16 @@ func (db *DataDBService) Start() (err error) {
 		utils.Logger.Warning(fmt.Sprintf("Could not configure dataDb: %s.Some SessionS APIs will not work", err))
 		return
 	}
-	var rmtDBConns []*engine.DataManager
-	var rplConns *rpcclient.RpcClientPool
-	if len(db.cfg.DataDbCfg().RmtDataDBCfgs) != 0 {
-		rmtDBConns = make([]*engine.DataManager, len(db.cfg.DataDbCfg().RmtDataDBCfgs))
-		for i, dbCfg := range db.cfg.DataDbCfg().RmtDataDBCfgs {
-			dbConn, err := engine.NewDataDBConn(dbCfg.DataDbType,
-				dbCfg.DataDbHost, dbCfg.DataDbPort,
-				dbCfg.DataDbName, dbCfg.DataDbUser,
-				dbCfg.DataDbPass, db.cfg.GeneralCfg().DBDataEncoding,
-				dbCfg.DataDbSentinelName)
-			if err != nil {
-				log.Fatalf("Coud not open dataDB connection: %s", err.Error())
-			}
-			rmtDBConns[i] = engine.NewDataManager(dbConn, nil, nil, nil)
+	var rmtConns, rplConns *rpcclient.RpcClientPool
+	if len(db.cfg.DataDbCfg().RmtConns) != 0 {
+		var err error
+		rmtConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, db.cfg.TlsCfg().ClientKey,
+			db.cfg.TlsCfg().ClientCerificate, db.cfg.TlsCfg().CaCertificate,
+			db.cfg.GeneralCfg().ConnectAttempts, db.cfg.GeneralCfg().Reconnects,
+			db.cfg.GeneralCfg().ConnectTimeout, db.cfg.GeneralCfg().ReplyTimeout,
+			db.cfg.DataDbCfg().RmtConns, nil, false)
+		if err != nil {
+			log.Fatalf("Coud not confignure dataDB remote connections: %s", err.Error())
 		}
 	}
 	if len(config.CgrConfig().DataDbCfg().RplConns) != 0 {
@@ -95,7 +91,7 @@ func (db *DataDBService) Start() (err error) {
 			log.Fatalf("Coud not confignure dataDB replication connections: %s", err.Error())
 		}
 	}
-	db.db = engine.NewDataManager(d, db.cfg.CacheCfg(), rmtDBConns, rplConns)
+	db.db = engine.NewDataManager(d, db.cfg.CacheCfg(), rmtConns, rplConns)
 	engine.SetDataStorage(db.db)
 	if err = engine.CheckVersions(db.db.DataDB()); err != nil {
 		fmt.Println(err)

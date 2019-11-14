@@ -35,159 +35,111 @@ import (
 
 var (
 	internalCfgPath    string
-	internalCfgDirPath string
+	internalCfgDirPath = "internal"
 	internalCfg        *config.CGRConfig
 	internalRPC        *rpc.Client
-	rmtDM              *engine.DataManager
+
+	engineOneCfgPath    string
+	engineOneCfgDirPath string
+	engineOneCfg        *config.CGRConfig
+	engineOneRPC        *rpc.Client
+
+	engineTwoCfgPath    string
+	engineTwoCfgDirPath string
+	engineTwoCfg        *config.CGRConfig
+	engineTwoRPC        *rpc.Client
 )
 
 var sTestsInternalRemoteIT = []func(t *testing.T){
-	testInternalRemoteITDataFlush,
-	testInternalRemoteITCheckEmpty,
-	testInternalRemoteITLoadData,
-	testInternalRemoteITVerifyLoadedDataInRemote,
 	testInternalRemoteITInitCfg,
+	testInternalRemoteITDataFlush,
 	testInternalRemoteITStartEngine,
 	testInternalRemoteITRPCConn,
+	testInternalRemoteLoadDataInEngineTwo,
 	testInternalRemoteITGetAccount,
-	testInternalRemoteITGetAttribute,
-	testInternalRemoteITGetThreshold,
-	testInternalRemoteITGetThresholdProfile,
-	testInternalRemoteITGetResource,
-	testInternalRemoteITGetResourceProfile,
-	testInternalRemoteITGetStatQueueProfile,
-	testInternalRemoteITGetSupplier,
-	testInternalRemoteITGetFilter,
-	testInternalRemoteITGetRatingPlan,
-	testInternalRemoteITGetRatingProfile,
-	testInternalRemoteITGetAction,
-	testInternalRemoteITGetActionPlan,
-	testInternalRemoteITGetAccountActionPlan,
-	//testInternalReplicationSetThreshold,
+	//testInternalRemoteITGetAttribute,
+	//testInternalRemoteITGetThreshold,
+	//testInternalRemoteITGetThresholdProfile,
+	//testInternalRemoteITGetResource,
+	//testInternalRemoteITGetResourceProfile,
+	//testInternalRemoteITGetStatQueueProfile,
+	//testInternalRemoteITGetSupplier,
+	//testInternalRemoteITGetFilter,
+	//testInternalRemoteITGetRatingPlan,
+	//testInternalRemoteITGetRatingProfile,
+	//testInternalRemoteITGetAction,
+	//testInternalRemoteITGetActionPlan,
+	//testInternalRemoteITGetAccountActionPlan,
+	////testInternalReplicationSetThreshold,
 	testInternalRemoteITKillEngine,
 }
 
 func TestInternalRemoteITRedis(t *testing.T) {
-	internalCfgDirPath = "internal_redis"
-	cfg, _ := config.NewDefaultCGRConfig()
-	dataDB, err := engine.NewRedisStorage(
-		fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
-		10, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-		utils.REDIS_MAX_CONNS, "")
-	if err != nil {
-		t.Fatal("Could not connect to Redis", err.Error())
-	}
-	rmtDM = engine.NewDataManager(dataDB, nil, nil, nil)
+	engineOneCfgDirPath = "engine1_redis"
+	engineTwoCfgDirPath = "engine2_redis"
 	for _, stest := range sTestsInternalRemoteIT {
 		t.Run("TestInternalRemoteITRedis", stest)
 	}
 }
 
 func TestInternalRemoteITMongo(t *testing.T) {
-	internalCfgDirPath = "internal_mongo"
-	mgoITCfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "tutmongo"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	dataDB, err := engine.NewMongoStorage(mgoITCfg.DataDbCfg().DataDbHost,
-		mgoITCfg.DataDbCfg().DataDbPort, mgoITCfg.DataDbCfg().DataDbName,
-		mgoITCfg.DataDbCfg().DataDbUser, mgoITCfg.DataDbCfg().DataDbPass,
-		utils.DataDB, nil, false)
-	if err != nil {
-		t.Fatal("Could not connect to Mongo", err.Error())
-	}
-	rmtDM = engine.NewDataManager(dataDB, nil, nil, nil)
+	engineOneCfgDirPath = "engine1_mongo"
+	engineTwoCfgDirPath = "engine2_mongo"
 	for _, stest := range sTestsInternalRemoteIT {
 		t.Run("TestInternalRemoteITMongo", stest)
 	}
 }
 
-func testInternalRemoteITDataFlush(t *testing.T) {
-	if err := rmtDM.DataDB().Flush(""); err != nil {
-		t.Error(err)
-	}
-}
-
-func testInternalRemoteITCheckEmpty(t *testing.T) {
-	test, err := rmtDM.DataDB().IsDBEmpty()
-	if err != nil {
-		t.Error(err)
-	} else if test != true {
-		t.Errorf("\nExpecting: true got :%+v", test)
-	}
-}
-
-func testInternalRemoteITLoadData(t *testing.T) {
-	loader, err := engine.NewTpReader(rmtDM.DataDB(),
-		engine.NewFileCSVStorage(utils.CSV_SEP, path.Join(*dataDir, "tariffplans", "tutorial"), false),
-		"", "", nil, nil)
-	if err != nil {
-		t.Error(err)
-	}
-	if err := loader.LoadAll(); err != nil {
-		t.Error(err)
-	}
-	if err := loader.WriteToDatabase(false, false); err != nil {
-		t.Error(err)
-	}
-	acc := &engine.Account{
-		ID: "cgrates.org:testAccount",
-		BalanceMap: map[string]engine.Balances{
-			"utils.MONETARY": []*engine.Balance{
-				{
-					ID:     "testAccount",
-					Value:  10,
-					Weight: 10,
-				},
-			},
-		},
-	}
-	if err := rmtDM.DataDB().SetAccount(acc); err != nil {
-		t.Error(err)
-	}
-}
-
-func testInternalRemoteITVerifyLoadedDataInRemote(t *testing.T) {
-	exp := &engine.AttributeProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ATTR_1001_SIMPLEAUTH",
-		Contexts:  []string{"simpleauth"},
-		FilterIDs: []string{"*string:~Account:1001"},
-		Attributes: []*engine.Attribute{
-			{
-				FieldName: "Password",
-				FilterIDs: []string{},
-				Type:      utils.META_CONSTANT,
-				Value:     config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
-			},
-		},
-		Weight: 20,
-	}
-	if tempAttr, err := rmtDM.GetAttributeProfile("cgrates.org", "ATTR_1001_SIMPLEAUTH",
-		false, false, utils.NonTransactional); err != nil {
-		t.Errorf("Error: %+v", err)
-	} else {
-		exp.Compile()
-		tempAttr.Compile()
-		if !reflect.DeepEqual(exp, tempAttr) {
-			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(exp), utils.ToJSON(tempAttr))
-		}
-	}
-}
-
 func testInternalRemoteITInitCfg(t *testing.T) {
 	var err error
-	internalCfgPath = path.Join(*dataDir, "conf", "samples", internalCfgDirPath)
+	internalCfgPath = path.Join(*dataDir, "conf", "samples",
+		"remote_replication", internalCfgDirPath)
 	internalCfg, err = config.NewCGRConfigFromPath(internalCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
 	internalCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(internalCfg)
+
+	// prepare config for engine1
+	engineOneCfgPath = path.Join(*dataDir, "conf", "samples",
+		"remote_replication", engineOneCfgDirPath)
+	engineOneCfg, err = config.NewCGRConfigFromPath(engineOneCfgPath)
+	if err != nil {
+		t.Error(err)
+	}
+	engineOneCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+
+	// prepare config for engine2
+	engineTwoCfgPath = path.Join(*dataDir, "conf", "samples",
+		"remote_replication", engineTwoCfgDirPath)
+	engineTwoCfg, err = config.NewCGRConfigFromPath(engineTwoCfgPath)
+	if err != nil {
+		t.Error(err)
+	}
+	engineTwoCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+
+}
+
+func testInternalRemoteITDataFlush(t *testing.T) {
+	if err := engine.InitDataDb(engineOneCfg); err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(100 * time.Millisecond)
+	if err := engine.InitDataDb(engineTwoCfg); err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(100 * time.Millisecond)
 }
 
 func testInternalRemoteITStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(internalCfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(engineOneCfgPath, 500); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := engine.StartEngine(engineTwoCfgPath, 500); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := engine.StartEngine(internalCfgPath, 500); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -196,8 +148,31 @@ func testInternalRemoteITRPCConn(t *testing.T) {
 	var err error
 	internalRPC, err = jsonrpc.Dial("tcp", internalCfg.ListenCfg().RPCJSONListen)
 	if err != nil {
+		fmt.Println(err)
 		t.Fatal(err)
 	}
+	time.Sleep(200 * time.Millisecond)
+	engineOneRPC, err = jsonrpc.Dial("tcp", engineOneCfg.ListenCfg().RPCJSONListen)
+	if err != nil {
+		fmt.Println(err)
+		t.Fatal(err)
+	}
+	time.Sleep(200 * time.Millisecond)
+	engineTwoRPC, err = jsonrpc.Dial("tcp", engineTwoCfg.ListenCfg().RPCJSONListen)
+	if err != nil {
+		fmt.Println(err)
+		t.Fatal(err)
+	}
+	time.Sleep(200 * time.Millisecond)
+}
+
+func testInternalRemoteLoadDataInEngineTwo(t *testing.T) {
+	var reply string
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	if err := engineTwoRPC.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(500 * time.Millisecond)
 }
 
 func testInternalRemoteITGetAccount(t *testing.T) {
@@ -609,33 +584,33 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
 	}
 
-	// verify threshold profile in replication dataDB
-	if rcv, err := rmtDM.GetThresholdProfile("cgrates.org", "THD_Replication",
-		false, false, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rcv)
-	}
-	//
-	eIdxes := map[string]utils.StringMap{
-		"*string:~Account:1001": {
-			"THD_ACNT_1001":   true,
-			"THD_Replication": true,
-		},
-		"*string:~Account:1002": {
-			"THD_ACNT_1002": true,
-		},
-		"*string:~CustomField:CustomValue": {
-			"THD_Replication": true,
-		},
-	}
-	if rcvIdx, err := rmtDM.GetFilterIndexes(
-		utils.PrefixToIndexCache[utils.ThresholdProfilePrefix], tPrfl.Tenant,
-		utils.EmptyString, nil); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
-		t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
-	}
+	//// verify threshold profile in replication dataDB
+	//if rcv, err := rmtDM.GetThresholdProfile("cgrates.org", "THD_Replication",
+	//	false, false, utils.NonTransactional); err != nil {
+	//	t.Error(err)
+	//} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rcv) {
+	//	t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rcv)
+	//}
+	////
+	//eIdxes := map[string]utils.StringMap{
+	//	"*string:~Account:1001": {
+	//		"THD_ACNT_1001":   true,
+	//		"THD_Replication": true,
+	//	},
+	//	"*string:~Account:1002": {
+	//		"THD_ACNT_1002": true,
+	//	},
+	//	"*string:~CustomField:CustomValue": {
+	//		"THD_Replication": true,
+	//	},
+	//}
+	//if rcvIdx, err := rmtDM.GetFilterIndexes(
+	//	utils.PrefixToIndexCache[utils.ThresholdProfilePrefix], tPrfl.Tenant,
+	//	utils.EmptyString, nil); err != nil {
+	//	t.Error(err)
+	//} else if !reflect.DeepEqual(eIdxes, rcvIdx) {
+	//	t.Errorf("Expecting %+v, received: %+v", eIdxes, rcvIdx)
+	//}
 }
 
 func testInternalRemoteITKillEngine(t *testing.T) {

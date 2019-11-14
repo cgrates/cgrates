@@ -239,20 +239,16 @@ func main() {
 		if err != nil {
 			log.Fatalf("Coud not open dataDB connection: %s", err.Error())
 		}
-		var rmtDBConns []*engine.DataManager
-		var rplConns *rpcclient.RpcClientPool
-		if len(ldrCfg.DataDbCfg().RmtDataDBCfgs) != 0 {
-			rmtDBConns = make([]*engine.DataManager, len(ldrCfg.DataDbCfg().RmtDataDBCfgs))
-			for i, dbCfg := range ldrCfg.DataDbCfg().RmtDataDBCfgs {
-				dbConn, err := engine.NewDataDBConn(dbCfg.DataDbType,
-					dbCfg.DataDbHost, dbCfg.DataDbPort,
-					dbCfg.DataDbName, dbCfg.DataDbUser,
-					dbCfg.DataDbPass, ldrCfg.GeneralCfg().DBDataEncoding,
-					dbCfg.DataDbSentinelName)
-				if err != nil {
-					log.Fatalf("Coud not open dataDB connection: %s", err.Error())
-				}
-				rmtDBConns[i] = engine.NewDataManager(dbConn, nil, nil, nil)
+		var rmtConns, rplConns *rpcclient.RpcClientPool
+		if len(ldrCfg.DataDbCfg().RmtConns) != 0 {
+			var err error
+			rmtConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, ldrCfg.TlsCfg().ClientKey,
+				ldrCfg.TlsCfg().ClientCerificate, ldrCfg.TlsCfg().CaCertificate,
+				ldrCfg.GeneralCfg().ConnectAttempts, ldrCfg.GeneralCfg().Reconnects,
+				ldrCfg.GeneralCfg().ConnectTimeout, ldrCfg.GeneralCfg().ReplyTimeout,
+				ldrCfg.DataDbCfg().RmtConns, nil, false)
+			if err != nil {
+				log.Fatalf("Coud not confignure dataDB remote connections: %s", err.Error())
 			}
 		}
 		if len(ldrCfg.DataDbCfg().RplConns) != 0 {
@@ -266,7 +262,7 @@ func main() {
 				log.Fatalf("Coud not confignure dataDB replication connections: %s", err.Error())
 			}
 		}
-		dm = engine.NewDataManager(d, config.CgrConfig().CacheCfg(), rmtDBConns, rplConns)
+		dm = engine.NewDataManager(d, config.CgrConfig().CacheCfg(), rmtConns, rplConns)
 		defer dm.DataDB().Close()
 	}
 

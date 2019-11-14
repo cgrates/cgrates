@@ -1,0 +1,46 @@
+{
+"general": {
+	"log_level": 7,
+	"node_id" : "EngineMongo2",
+},
+
+
+"listen": {
+	"rpc_json": ":2032",
+	"rpc_gob": ":2033",
+	"http": ":2380",
+},
+
+
+"data_db": {
+	"db_type": "mongo",
+	"db_name": "11",
+	"db_port": 27017,
+},
+
+
+"stor_db": {
+	"db_type": "mongo",
+	"db_name": "cgrates",
+	"db_port": 27017,
+},
+
+
+"rals": {
+	"enabled": true,
+},
+
+
+"scheduler": {
+	"enabled": true,
+},
+
+
+"apier": {
+	"scheduler_conns": [
+		{"address": "*internal"},
+	],
+},
+
+
+}
