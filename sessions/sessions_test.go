@@ -1733,16 +1733,16 @@ func TestNewSessionS(t *testing.T) {
 }
 
 func TestV1InitSessionArgsParseFlags(t *testing.T) {
-	v1authArgs := new(V1InitSessionArgs)
+	v1InitSsArgs := new(V1InitSessionArgs)
 	eOut := new(V1InitSessionArgs)
 	//empty check
 	strArg := ""
-	v1authArgs.ParseFlags(strArg)
-	if !reflect.DeepEqual(eOut, v1authArgs) {
-		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1authArgs)
+	v1InitSsArgs.ParseFlags(strArg)
+	if !reflect.DeepEqual(eOut, v1InitSsArgs) {
+		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1InitSsArgs)
 	}
 	//normal check -> without *dispatchers
-	cgrArgs := v1authArgs.CGREvent.ConsumeArgs(false, true)
+	cgrArgs := v1InitSsArgs.CGREvent.ConsumeArgs(false, true)
 	eOut = &V1InitSessionArgs{
 		InitSession:       true,
 		AllocateResources: true,
@@ -1756,12 +1756,12 @@ func TestV1InitSessionArgsParseFlags(t *testing.T) {
 	}
 
 	strArg = "*accounts,*resources,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
-	v1authArgs.ParseFlags(strArg)
-	if !reflect.DeepEqual(eOut, v1authArgs) {
-		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
+	v1InitSsArgs.ParseFlags(strArg)
+	if !reflect.DeepEqual(eOut, v1InitSsArgs) {
+		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1InitSsArgs))
 	}
 	// //normal check -> with *dispatchers
-	cgrArgs = v1authArgs.CGREvent.ConsumeArgs(true, true)
+	cgrArgs = v1InitSsArgs.CGREvent.ConsumeArgs(true, true)
 	eOut = &V1InitSessionArgs{
 		InitSession:       true,
 		AllocateResources: true,
@@ -1775,24 +1775,24 @@ func TestV1InitSessionArgsParseFlags(t *testing.T) {
 	}
 
 	strArg = "*accounts,*resources,*dispatchers,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
-	v1authArgs.ParseFlags(strArg)
-	if !reflect.DeepEqual(eOut, v1authArgs) {
-		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
+	v1InitSsArgs.ParseFlags(strArg)
+	if !reflect.DeepEqual(eOut, v1InitSsArgs) {
+		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1InitSsArgs))
 	}
 
 }
 
 func TestV1TerminateSessionArgsParseFlags(t *testing.T) {
-	v1authArgs := new(V1TerminateSessionArgs)
+	v1TerminateSsArgs := new(V1TerminateSessionArgs)
 	eOut := new(V1TerminateSessionArgs)
 	//empty check
 	strArg := ""
-	v1authArgs.ParseFlags(strArg)
-	if !reflect.DeepEqual(eOut, v1authArgs) {
-		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1authArgs)
+	v1TerminateSsArgs.ParseFlags(strArg)
+	if !reflect.DeepEqual(eOut, v1TerminateSsArgs) {
+		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1TerminateSsArgs)
 	}
 	//normal check -> without *dispatchers
-	cgrArgs := v1authArgs.CGREvent.ConsumeArgs(false, true)
+	cgrArgs := v1TerminateSsArgs.CGREvent.ConsumeArgs(false, true)
 	eOut = &V1TerminateSessionArgs{
 		TerminateSession:  true,
 		ReleaseResources:  true,
@@ -1804,12 +1804,12 @@ func TestV1TerminateSessionArgsParseFlags(t *testing.T) {
 	}
 
 	strArg = "*accounts,*resources,*suppliers,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
-	v1authArgs.ParseFlags(strArg)
-	if !reflect.DeepEqual(eOut, v1authArgs) {
-		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
+	v1TerminateSsArgs.ParseFlags(strArg)
+	if !reflect.DeepEqual(eOut, v1TerminateSsArgs) {
+		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1TerminateSsArgs))
 	}
 	// //normal check -> with *dispatchers
-	cgrArgs = v1authArgs.CGREvent.ConsumeArgs(true, true)
+	cgrArgs = v1TerminateSsArgs.CGREvent.ConsumeArgs(true, true)
 	eOut = &V1TerminateSessionArgs{
 		TerminateSession:  true,
 		ReleaseResources:  true,
@@ -1821,9 +1821,213 @@ func TestV1TerminateSessionArgsParseFlags(t *testing.T) {
 	}
 
 	strArg = "*accounts,*resources,,*dispatchers,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
-	v1authArgs.ParseFlags(strArg)
-	if !reflect.DeepEqual(eOut, v1authArgs) {
-		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
+	v1TerminateSsArgs.ParseFlags(strArg)
+	if !reflect.DeepEqual(eOut, v1TerminateSsArgs) {
+		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1TerminateSsArgs))
 	}
 
+}
+
+func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
+	v1ProcessMsgArgs := new(V1ProcessMessageArgs)
+	eOut := new(V1ProcessMessageArgs)
+	//empty check
+	strArg := ""
+	v1ProcessMsgArgs.ParseFlags(strArg)
+	if !reflect.DeepEqual(eOut, v1ProcessMsgArgs) {
+		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1ProcessMsgArgs)
+	}
+	//normal check -> without *dispatchers
+	cgrArgs := v1ProcessMsgArgs.CGREvent.ConsumeArgs(false, true)
+	eOut = &V1ProcessMessageArgs{
+		Debit:                 true,
+		AllocateResources:     true,
+		GetSuppliers:          true,
+		SuppliersIgnoreErrors: true,
+		SuppliersMaxCost:      utils.MetaEventCost,
+		GetAttributes:         true,
+		AttributeIDs:          []string{"Attr1", "Attr2"},
+		ProcessThresholds:     true,
+		ThresholdIDs:          []string{"tr1", "tr2", "tr3"},
+		ProcessStats:          true,
+		StatIDs:               []string{"st1", "st2", "st3"},
+		ArgDispatcher:         cgrArgs.ArgDispatcher,
+	}
+
+	strArg = "*accounts,*resources,*suppliers,*suppliers_ignore_errors,*suppliers_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	v1ProcessMsgArgs.ParseFlags(strArg)
+	if !reflect.DeepEqual(eOut, v1ProcessMsgArgs) {
+		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1ProcessMsgArgs))
+	}
+
+	//normal check -> with *dispatchers
+	cgrArgs = v1ProcessMsgArgs.CGREvent.ConsumeArgs(true, true)
+	eOut = &V1ProcessMessageArgs{
+		Debit:                 true,
+		AllocateResources:     true,
+		GetSuppliers:          true,
+		SuppliersIgnoreErrors: true,
+		SuppliersMaxCost:      utils.MetaEventCost,
+		GetAttributes:         true,
+		AttributeIDs:          []string{"Attr1", "Attr2"},
+		ProcessThresholds:     true,
+		ThresholdIDs:          []string{"tr1", "tr2", "tr3"},
+		ProcessStats:          true,
+		StatIDs:               []string{"st1", "st2", "st3"},
+		ArgDispatcher:         cgrArgs.ArgDispatcher,
+	}
+
+	strArg = "*accounts,*resources,*dispatchers,*suppliers,*suppliers_ignore_errors,*suppliers_event_cost,*attributes:Attr1;Attr2,*thresholds:tr1;tr2;tr3,*stats:st1;st2;st3"
+	v1ProcessMsgArgs.ParseFlags(strArg)
+	if !reflect.DeepEqual(eOut, v1ProcessMsgArgs) {
+		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1ProcessMsgArgs))
+	}
+
+}
+
+func TestSessionSgetSession(t *testing.T) {
+	sSCfg, _ := config.NewDefaultCGRConfig()
+	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	sSEv := engine.NewMapEvent(map[string]interface{}{
+		utils.EVENT_NAME:  "TEST_EVENT",
+		utils.ToR:         "*voice",
+		utils.OriginID:    "111",
+		utils.Direction:   "*out",
+		utils.Account:     "account1",
+		utils.Subject:     "subject1",
+		utils.Destination: "+4986517174963",
+		utils.Category:    "call",
+		utils.Tenant:      "cgrates.org",
+		utils.RequestType: "*prepaid",
+		utils.SetupTime:   "2015-11-09 14:21:24",
+		utils.AnswerTime:  "2015-11-09 14:22:02",
+		utils.Usage:       "1m23s",
+		utils.LastUsed:    "21s",
+		utils.PDD:         "300ms",
+		utils.SUPPLIER:    "supplier1",
+		utils.OriginHost:  "127.0.0.1",
+	})
+	s := &Session{
+		CGRID:      "session1",
+		EventStart: sSEv,
+		SRuns: []*SRun{
+			&SRun{
+				Event: sSEv,
+				CD: &engine.CallDescriptor{
+					RunID: utils.DEFAULT_RUNID,
+				},
+			},
+		},
+	}
+	//register the session
+	sS.registerSession(s, false)
+	//check if the session was registered with success
+	rcvS := sS.getSessions("", false)
+
+	if len(rcvS) != 1 || !reflect.DeepEqual(rcvS[0], s) {
+		t.Errorf("Expecting %+v, received: %+v", s, rcvS)
+	}
+
+}
+
+func TestSessionsSetConnections(t *testing.T) {
+	sSCfg, _ := config.NewDefaultCGRConfig()
+	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	var ttest *testRPCClientConnection
+	//normal check AttributeS
+	sS.SetAttributeSConnection(new(testRPCClientConnection))
+	if sS.attrS == nil {
+		t.Errorf("Expecting %+v, received: %+v", new(testRPCClientConnection), sS.attrS)
+	}
+	//empty check AttributeS
+	sS.SetAttributeSConnection(ttest)
+	if sS.attrS != nil {
+		t.Errorf("Expecting nil, received: %+v", sS.attrS)
+	}
+	//normal check ThresholS
+	sS.SetThresholSConnection(new(testRPCClientConnection))
+	if sS.thdS == nil {
+		t.Errorf("Expecting %+v, received: %+v", new(testRPCClientConnection), sS.thdS)
+	}
+	//empty check ThresholS
+	sS.SetThresholSConnection(ttest)
+	if sS.thdS != nil {
+		t.Errorf("Expecting nil, received: %+v", sS.thdS)
+	}
+	//normal check StatS
+	sS.SetStatSConnection(new(testRPCClientConnection))
+	if sS.statS == nil {
+		t.Errorf("Expecting %+v, received: %+v", new(testRPCClientConnection), sS.statS)
+	}
+	//empty check StatS
+	sS.SetStatSConnection(ttest)
+	if sS.statS != nil {
+		t.Errorf("Expecting nil, received: %+v", sS.statS)
+	}
+	//normal check ChargerS
+	sS.SetChargerSConnection(new(testRPCClientConnection))
+	if sS.chargerS == nil {
+		t.Errorf("Expecting %+v, received: %+v", new(testRPCClientConnection), sS.chargerS)
+	}
+	//empty check ChargerS
+	sS.SetChargerSConnection(ttest)
+	if sS.chargerS != nil {
+		t.Errorf("Expecting nil, received: %+v", sS.chargerS)
+	}
+	//normal check RALs
+	sS.SetRALsConnection(new(testRPCClientConnection))
+	if sS.ralS == nil {
+		t.Errorf("Expecting %+v, received: %+v", new(testRPCClientConnection), sS.ralS)
+	}
+	//empty check RALs
+	sS.SetRALsConnection(ttest)
+	if sS.ralS != nil {
+		t.Errorf("Expecting nil, received: %+v", sS.ralS)
+	}
+	//normal check ResourceS
+	sS.SetResourceSConnection(new(testRPCClientConnection))
+	if sS.resS == nil {
+		t.Errorf("Expecting %+v, received: %+v", new(testRPCClientConnection), sS.resS)
+	}
+	//empty check ResourceS
+	sS.SetResourceSConnection(ttest)
+	if sS.resS != nil {
+		t.Errorf("Expecting nil, received: %+v", sS.resS)
+	}
+	//normal check SupplierS
+	sS.SetSupplierSConnection(new(testRPCClientConnection))
+	if sS.splS == nil {
+		t.Errorf("Expecting %+v, received: %+v", new(testRPCClientConnection), sS.splS)
+	}
+	//empty check SupplierS
+	sS.SetSupplierSConnection(ttest)
+	if sS.splS != nil {
+		t.Errorf("Expecting nil, received: %+v", sS.splS)
+	}
+	//normal check CDRS
+	sS.SetCDRSConnection(new(testRPCClientConnection))
+	if sS.cdrS == nil {
+		t.Errorf("Expecting %+v, received: %+v", new(testRPCClientConnection), sS.cdrS)
+	}
+	//empty check CDRS
+	sS.SetCDRSConnection(ttest)
+	if sS.cdrS != nil {
+		t.Errorf("Expecting nil, received: %+v", sS.cdrS)
+	}
+	//normal check Replication
+	sReplConn := []*SReplConn{
+		&SReplConn{
+			Connection:  new(testRPCClientConnection),
+			Synchronous: true,
+		},
+	}
+	sS.SetReplicationConnections(sReplConn)
+	if sS.sReplConns == nil {
+		t.Errorf("Expecting %+v, received: %+v", sReplConn, sS.sReplConns)
+	}
+	//empty check Replication
+	sS.SetReplicationConnections(nil)
+	if sS.sReplConns != nil {
+		t.Errorf("Expecting nil, received: %+v", sS.sReplConns)
+	}
 }
