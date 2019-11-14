@@ -206,6 +206,8 @@ func testSessionSRplInitiate(t *testing.T) {
 		t.Errorf("Expecting : ~%+v, received: %+v", 10*time.Millisecond, aSessions[0].Usage) //here
 	}
 	//check passive session
+	var autoDebit1, autoDebit2 time.Time
+
 	var pSessions []*sessions.ExternalSession
 	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions,
 		utils.SessionFilter{
@@ -218,7 +220,10 @@ func testSessionSRplInitiate(t *testing.T) {
 		t.Errorf("PassiveSessions: %+v", pSessions)
 	} else if pSessions[0].Usage < 5*time.Millisecond || pSessions[0].Usage > 15*time.Millisecond {
 		t.Errorf("Expecting : %+v, received: %+v", 10*time.Millisecond, pSessions[0].Usage)
+	} else if autoDebit1 = pSessions[0].NextAutoDebit; autoDebit1.IsZero() {
+		t.Errorf("unexpected NextAutoDebit: %s", utils.ToIJSON(aSessions[0]))
 	}
+
 	//check active session (II)
 	time.Sleep(10 * time.Millisecond)
 	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions,
@@ -234,6 +239,7 @@ func testSessionSRplInitiate(t *testing.T) {
 	} else if aSessions[0].Usage < 15*time.Millisecond || aSessions[0].Usage > 25*time.Millisecond {
 		t.Errorf("Expecting : ~%+v, received: %+v", 20*time.Millisecond, aSessions[0].Usage) //here
 	}
+
 	//check passive session (II)
 	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions,
 		utils.SessionFilter{
@@ -246,6 +252,10 @@ func testSessionSRplInitiate(t *testing.T) {
 		t.Errorf("PassiveSessions: %+v", pSessions)
 	} else if pSessions[0].Usage < 15*time.Millisecond || pSessions[0].Usage > 25*time.Millisecond {
 		t.Errorf("Expecting : %+v, received: %+v", 20*time.Millisecond, pSessions[0].Usage)
+	} else if autoDebit2 = pSessions[0].NextAutoDebit; autoDebit2.IsZero() {
+		t.Errorf("unexpected NextAutoDebit: %s", utils.ToIJSON(aSessions[0]))
+	} else if autoDebit1 == autoDebit2 {
+		t.Error("Expecting NextAutoDebit to be different from the previous one")
 	}
 
 	//get balance
