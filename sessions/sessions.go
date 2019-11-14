@@ -2711,7 +2711,7 @@ type V1ProcessMessageArgs struct {
 	*utils.ArgDispatcher
 }
 
-func (args V1ProcessMessageArgs) ParseFlags(flags string) {
+func (args *V1ProcessMessageArgs) ParseFlags(flags string) {
 	dispatcherFlag := false
 	for _, subsystem := range strings.Split(flags, utils.FIELDS_SEP) {
 		switch {
@@ -3468,48 +3468,72 @@ func (sS *SessionS) BiRPCV1ProcessCDR(clnt rpcclient.RpcClientConnection,
 // SetAttributeSConnection sets the new connection to the attribute service
 // only used on reload
 func (sS *SessionS) SetAttributeSConnection(attrS rpcclient.RpcClientConnection) {
+	if attrS != nil && reflect.ValueOf(attrS).IsNil() {
+		attrS = nil
+	}
 	sS.attrS = attrS
 }
 
 // SetThresholSConnection sets the new connection to the threshold service
 // only used on reload
 func (sS *SessionS) SetThresholSConnection(thdS rpcclient.RpcClientConnection) {
+	if thdS != nil && reflect.ValueOf(thdS).IsNil() {
+		thdS = nil
+	}
 	sS.thdS = thdS
 }
 
 // SetStatSConnection sets the new connection to the stat service
 // only used on reload
 func (sS *SessionS) SetStatSConnection(stS rpcclient.RpcClientConnection) {
+	if stS != nil && reflect.ValueOf(stS).IsNil() {
+		stS = nil
+	}
 	sS.statS = stS
 }
 
 // SetChargerSConnection sets the new connection to the charger service
 // only used on reload
 func (sS *SessionS) SetChargerSConnection(chS rpcclient.RpcClientConnection) {
+	if chS != nil && reflect.ValueOf(chS).IsNil() {
+		chS = nil
+	}
 	sS.chargerS = chS
 }
 
 // SetRALsConnection sets the new connection to the RAL service
 // only used on reload
 func (sS *SessionS) SetRALsConnection(rls rpcclient.RpcClientConnection) {
+	if rls != nil && reflect.ValueOf(rls).IsNil() {
+		rls = nil
+	}
 	sS.ralS = rls
 }
 
 // SetResourceSConnection sets the new connection to the resource service
 // only used on reload
 func (sS *SessionS) SetResourceSConnection(rS rpcclient.RpcClientConnection) {
+	if rS != nil && reflect.ValueOf(rS).IsNil() {
+		rS = nil
+	}
 	sS.resS = rS
 }
 
 // SetSupplierSConnection sets the new connection to the supplier service
 // only used on reload
 func (sS *SessionS) SetSupplierSConnection(splS rpcclient.RpcClientConnection) {
+	if splS != nil && reflect.ValueOf(splS).IsNil() {
+		splS = nil
+	}
 	sS.splS = splS
 }
 
 // SetCDRSConnection sets the new connection to the CDR server
 // only used on reload
 func (sS *SessionS) SetCDRSConnection(cdrS rpcclient.RpcClientConnection) {
+	if cdrS != nil && reflect.ValueOf(cdrS).IsNil() {
+		cdrS = nil
+	}
 	sS.cdrS = cdrS
 }
 
