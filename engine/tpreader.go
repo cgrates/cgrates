@@ -68,20 +68,16 @@ type TpReader struct {
 
 func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
 	cacheS rpcclient.RpcClientConnection, schedulerS rpcclient.RpcClientConnection) (*TpReader, error) {
-	var rmtDBConns []*DataManager
-	var rplConns *rpcclient.RpcClientPool
-	if len(config.CgrConfig().DataDbCfg().RmtDataDBCfgs) != 0 {
-		rmtDBConns = make([]*DataManager, len(config.CgrConfig().DataDbCfg().RmtDataDBCfgs))
-		for i, dbCfg := range config.CgrConfig().DataDbCfg().RmtDataDBCfgs {
-			dbConn, err := NewDataDBConn(dbCfg.DataDbType,
-				dbCfg.DataDbHost, dbCfg.DataDbPort,
-				dbCfg.DataDbName, dbCfg.DataDbUser,
-				dbCfg.DataDbPass, config.CgrConfig().GeneralCfg().DBDataEncoding,
-				dbCfg.DataDbSentinelName)
-			if err != nil {
-				return nil, err
-			}
-			rmtDBConns[i] = NewDataManager(dbConn, nil, nil, nil)
+	var rmtConns, rplConns *rpcclient.RpcClientPool
+	if len(config.CgrConfig().DataDbCfg().RmtConns) != 0 {
+		var err error
+		rmtConns, err = NewRPCPool(rpcclient.POOL_FIRST, config.CgrConfig().TlsCfg().ClientKey,
+			config.CgrConfig().TlsCfg().ClientCerificate, config.CgrConfig().TlsCfg().CaCertificate,
+			config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
+			config.CgrConfig().GeneralCfg().ConnectTimeout, config.CgrConfig().GeneralCfg().ReplyTimeout,
+			config.CgrConfig().DataDbCfg().RmtConns, nil, false)
+		if err != nil {
+			return nil, err
 		}
 	}
 	if len(config.CgrConfig().DataDbCfg().RplConns) != 0 {
@@ -98,7 +94,7 @@ func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
 	tpr := &TpReader{
 		tpid:       tpid,
 		timezone:   timezone,
-		dm:         NewDataManager(db, config.CgrConfig().CacheCfg(), rmtDBConns, rplConns), // ToDo: add ChacheCfg as parameter to the NewTpReader
+		dm:         NewDataManager(db, config.CgrConfig().CacheCfg(), rmtConns, rplConns), // ToDo: add ChacheCfg as parameter to the NewTpReader
 		lr:         lr,
 		cacheS:     cacheS,
 		schedulerS: schedulerS,

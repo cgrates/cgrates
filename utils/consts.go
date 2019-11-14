@@ -792,9 +792,32 @@ const (
 
 // ReplicatorSv1 APIs
 const (
-	ReplicatorSv1                    = "ReplicatorSv1"
-	ReplicatorSv1Ping                = "ReplicatorSv1.Ping"
-	ReplicatorSv1SetThresholdProfile = "ReplicatorSv1.SetThresholdProfile"
+	ReplicatorSv1                      = "ReplicatorSv1"
+	ReplicatorSv1Ping                  = "ReplicatorSv1.Ping"
+	ReplicatorSv1GetAccount            = "ReplicatorSv1.GetAccount"
+	ReplicatorSv1GetStatQueue          = "ReplicatorSv1.GetStatQueue"
+	ReplicatorSv1GetFilter             = "ReplicatorSv1.GetFilter"
+	ReplicatorSv1GetThreshold          = "ReplicatorSv1.GetThreshold"
+	ReplicatorSv1GetThresholdProfile   = "ReplicatorSv1.GetThresholdProfile"
+	ReplicatorSv1GetStatQueueProfile   = "ReplicatorSv1.GetStatQueueProfile"
+	ReplicatorSv1GetTiming             = "ReplicatorSv1.GetTiming"
+	ReplicatorSv1GetResource           = "ReplicatorSv1.GetResource"
+	ReplicatorSv1GetResourceProfile    = "ReplicatorSv1.GetResourceProfile"
+	ReplicatorSv1GetActionTriggers     = "ReplicatorSv1.GetActionTriggers"
+	ReplicatorSv1GetShareGroup         = "ReplicatorSv1.GetShareGroup"
+	ReplicatorSv1GetActions            = "ReplicatorSv1.GetActions"
+	ReplicatorSv1GetActionPlan         = "ReplicatorSv1.GetActionPlan"
+	ReplicatorSv1GetAllActionPlans     = "ReplicatorSv1.GetAllActionPlans"
+	ReplicatorSv1GetAccountActionPlans = "ReplicatorSv1.GetAccountActionPlans"
+	ReplicatorSv1GetRatingPlan         = "ReplicatorSv1.GetRatingPlan"
+	ReplicatorSv1GetRatingProfile      = "ReplicatorSv1.GetRatingProfile"
+	ReplicatorSv1GetSupplierProfile    = "ReplicatorSv1.GetSupplierProfile"
+	ReplicatorSv1GetAttributeProfile   = "ReplicatorSv1.GetAttributeProfile"
+	ReplicatorSv1GetChargerProfile     = "ReplicatorSv1.GetChargerProfile"
+	ReplicatorSv1GetDispatcherProfile  = "ReplicatorSv1.GetDispatcherProfile"
+	ReplicatorSv1GetDispatcherHost     = "ReplicatorSv1.GetDispatcheHost"
+	ReplicatorSv1GetItemLoadIDs        = "ReplicatorSv1.GetItemLoadIDs"
+	ReplicatorSv1SetThresholdProfile   = "ReplicatorSv1.SetThresholdProfile"
 )
 
 // ApierV1 APIs

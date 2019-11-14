@@ -1,0 +1,37 @@
+{
+"general": {
+	"log_level": 7,
+	"node_id": "InternalEngine",
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"data_db": {
+	"db_type": "*internal",
+	"remote_conns": [
+		{"address": "127.0.0.1:2022", "transport":"*json"},
+		{"address": "127.0.0.1:2032", "transport":"*json"}
+	],
+	"replication_conns": [
+		{"address": "127.0.0.1:2022", "transport":"*json"},
+		{"address": "127.0.0.1:2032", "transport":"*json"}
+	]
+},
+
+
+"stor_db": {
+	"db_type": "*internal",	
+},
+
+
+"rals": {
+	"enabled": true,
+},
+
+}

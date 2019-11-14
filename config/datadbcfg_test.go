@@ -20,7 +20,6 @@ package config
 import (
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -138,12 +137,7 @@ func TestDataDBRemoteReplication(t *testing.T) {
 	"db_password": "password",				// password to use when connecting to data_db
 	"redis_sentinel":"sentinel",			// redis_sentinel is the name of sentinel
 	"remote_conns":[
-		{
-		"db_host": "0.0.0.0",					// data_db host address
-		"db_port": 1234,	 						// data_db port to reach the database
-		"db_name": "1", 						// data_db database name to connect to
-		"db_user": "cgrates", 					// username to use when connecting to data_db
-		},
+		{"address": "127.0.0.1:2022","transport":"*json"},
 	],
 	}
 }`
@@ -156,17 +150,10 @@ func TestDataDBRemoteReplication(t *testing.T) {
 		DataDbUser:         "cgrates",
 		DataDbPass:         "password",
 		DataDbSentinelName: "sentinel",
-		RmtDataDBCfgs: []*DataDbCfg{
-			&DataDbCfg{
-				DataDbType:    utils.REDIS,
-				DataDbHost:    "0.0.0.0",
-				DataDbPort:    "1234",
-				DataDbName:    "1",
-				DataDbUser:    "cgrates",
-				DataDbPass:    "",
-				QueryTimeout:  10 * time.Second,
-				RmtDataDBCfgs: nil,
-				RplConns:      nil,
+		RmtConns: []*RemoteHost{
+			&RemoteHost{
+				Address:   "127.0.0.1:2022",
+				Transport: "*json",
 			},
 		},
 	}
@@ -184,12 +171,7 @@ func TestDataDBRemoteReplication(t *testing.T) {
 "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
 	"db_type": "*internal",					// data_db type: <*redis|*mongo|*internal>
 	"remote_conns":[
-		{
-		"db_host": "0.0.0.0",					// data_db host address
-		"db_port": 1234,	 						// data_db port to reach the database
-		"db_name": "1", 						// data_db database name to connect to
-		"db_user": "cgrates", 					// username to use when connecting to data_db
-		},
+		{"address": "127.0.0.1:2022","transport":"*json"},
 	],
 	"replication_conns":[
 		{"address": "127.0.0.1:2022","transport":"*json"},
@@ -205,15 +187,10 @@ func TestDataDBRemoteReplication(t *testing.T) {
 		DataDbUser:         "cgrates",
 		DataDbPass:         "password",
 		DataDbSentinelName: "sentinel",
-		RmtDataDBCfgs: []*DataDbCfg{
-			&DataDbCfg{
-				DataDbType:   utils.REDIS,
-				DataDbHost:   "0.0.0.0",
-				DataDbPort:   "1234",
-				DataDbName:   "1",
-				DataDbUser:   "cgrates",
-				DataDbPass:   "",
-				QueryTimeout: 10 * time.Second,
+		RmtConns: []*RemoteHost{
+			&RemoteHost{
+				Address:   "127.0.0.1:2022",
+				Transport: "*json",
 			},
 		},
 		RplConns: []*RemoteHost{
@@ -237,19 +214,9 @@ func TestDataDBRemoteReplication(t *testing.T) {
 "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
 	"db_type": "*internal",					// data_db type: <*redis|*mongo|*internal>
 	"remote_conns":[
-		{
-		"db_host": "0.0.0.0",					// data_db host address
-		"db_port": 1234,	 						// data_db port to reach the database
-		"db_name": "1", 						// data_db database name to connect to
-		"db_user": "cgrates", 					// username to use when connecting to data_db
-		},
-		{
-		"db_type": "*mongo",
-		"db_host": "1.2.3.4",					// data_db host address
-		"db_port": 1235,	 						// data_db port to reach the database
-		"db_name": "internal_mongo", 						// data_db database name to connect to
-		"db_user": "remote_mongo_user", 					// username to use when connecting to data_db
-		},
+		{"address": "127.0.0.1:2032","transport":"*json"},
+		{"address": "127.0.0.1:2042","transport":"*json"},
+		{"address": "127.0.0.1:2052","transport":"*json"},
 	],
 	"replication_conns":[
 		{"address": "127.0.0.1:2032","transport":"*json"},
@@ -267,24 +234,18 @@ func TestDataDBRemoteReplication(t *testing.T) {
 		DataDbUser:         "cgrates",
 		DataDbPass:         "password",
 		DataDbSentinelName: "sentinel",
-		RmtDataDBCfgs: []*DataDbCfg{
-			&DataDbCfg{
-				DataDbType:   utils.REDIS,
-				DataDbHost:   "0.0.0.0",
-				DataDbPort:   "1234",
-				DataDbName:   "1",
-				DataDbUser:   "cgrates",
-				DataDbPass:   "",
-				QueryTimeout: 10 * time.Second,
+		RmtConns: []*RemoteHost{
+			&RemoteHost{
+				Address:   "127.0.0.1:2032",
+				Transport: "*json",
 			},
-			&DataDbCfg{
-				DataDbType:   utils.MONGO,
-				DataDbHost:   "1.2.3.4",
-				DataDbPort:   "1235",
-				DataDbName:   "internal_mongo",
-				DataDbUser:   "remote_mongo_user",
-				DataDbPass:   "",
-				QueryTimeout: 10 * time.Second,
+			&RemoteHost{
+				Address:   "127.0.0.1:2042",
+				Transport: "*json",
+			},
+			&RemoteHost{
+				Address:   "127.0.0.1:2052",
+				Transport: "*json",
 			},
 		},
 		RplConns: []*RemoteHost{
