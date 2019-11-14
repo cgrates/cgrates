@@ -595,6 +595,8 @@ func TestSessionAsExternalSessions3(t *testing.T) {
 		utils.Usage:       time.Duration(2 * time.Second),
 		utils.Cost:        12.13,
 	}
+	tTime := time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC)
+
 	s := &Session{
 		CGRID:         "RandomCGRID",
 		Tenant:        "cgrates.org",
@@ -611,6 +613,7 @@ func TestSessionAsExternalSessions3(t *testing.T) {
 					MaxRateUnit:   30 * time.Second,
 					MaxCostSoFar:  20,
 				},
+				NextAutoDebit: &tTime,
 			},
 		},
 	}
@@ -640,6 +643,7 @@ func TestSessionAsExternalSessions3(t *testing.T) {
 		MaxRate:       11,
 		MaxRateUnit:   30 * time.Second,
 		MaxCostSoFar:  20,
+		NextAutoDebit: tTime,
 	}
 	//check for some fields if populated correct
 	rply := s.AsExternalSession(s.SRuns[0], "", "ALL")

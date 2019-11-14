@@ -164,6 +164,9 @@ func (s *Session) AsExternalSession(sr *SRun, tmz, nodeID string) (aS *ExternalS
 		NodeID:        nodeID,
 		DebitInterval: s.DebitInterval,
 	}
+	if sr.NextAutoDebit != nil {
+		aS.NextAutoDebit = *sr.NextAutoDebit
+	}
 	if sr.CD != nil {
 		aS.LoopIndex = sr.CD.LoopIndex
 		aS.DurationIndex = sr.CD.DurationIndex
