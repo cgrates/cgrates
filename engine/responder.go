@@ -58,6 +58,25 @@ func (rs *Responder) usageAllowed(tor string, reqUsage time.Duration) (allowed b
 RPC method thet provides the external RPC interface for getting the rating information.
 */
 func (rs *Responder) GetCost(arg *CallDescriptorWithArgDispatcher, reply *CallCost) (err error) {
+	// RPC caching
+	if config.CgrConfig().CacheCfg()[utils.CacheRPCResponses].Limit != 0 {
+		cacheKey := utils.ConcatenatedKey(utils.ResponderGetCost, arg.CgrID)
+		refID := guardian.Guardian.GuardIDs("",
+			config.CgrConfig().GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
+		defer guardian.Guardian.UnguardIDs(refID)
+
+		if itm, has := Cache.Get(utils.CacheRPCResponses, cacheKey); has {
+			cachedResp := itm.(*utils.CachedRPCResponse)
+			if cachedResp.Error == nil {
+				*reply = *cachedResp.Result.(*CallCost)
+			}
+			return cachedResp.Error
+		}
+		defer Cache.Set(utils.CacheRPCResponses, cacheKey,
+			&utils.CachedRPCResponse{Result: reply, Error: err},
+			nil, true, utils.NonTransactional)
+	}
+	// end of RPC caching
 	if arg.Tenant == "" {
 		arg.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
 	}
