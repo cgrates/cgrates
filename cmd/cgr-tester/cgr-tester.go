@@ -163,7 +163,6 @@ func main() {
 		return
 	}
 
-	tstCfg := cgrConfig
 	if *cfgPath != "" {
 		if tstCfg, err = config.NewCGRConfigFromPath(*cfgPath); err != nil {
 			log.Fatalf("error loading config file %s", err.Error())
