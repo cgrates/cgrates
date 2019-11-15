@@ -330,19 +330,47 @@ func TestNewCGREventWithArgDispatcher(t *testing.T) {
 }
 
 func TestCGREventWithArgDispatcherClone(t *testing.T) {
-	//normal check
-	now := time.Now()
-	cgrEventWithArgDispatcher := &CGREventWithArgDispatcher{
-		CGREvent: &CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "IDtest",
-			Time:   &now,
-			Event:  make(map[string]interface{}),
-		},
-	}
-
+	//empty check
+	cgrEventWithArgDispatcher := new(CGREventWithArgDispatcher)
 	rcv := cgrEventWithArgDispatcher.Clone()
 	if !reflect.DeepEqual(cgrEventWithArgDispatcher, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", cgrEventWithArgDispatcher, rcv)
 	}
+	//nil check
+	cgrEventWithArgDispatcher = nil
+	rcv = cgrEventWithArgDispatcher.Clone()
+	if !reflect.DeepEqual(cgrEventWithArgDispatcher, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", cgrEventWithArgDispatcher, rcv)
+	}
+	//normal check
+	now := time.Now()
+	cgrEventWithArgDispatcher = &CGREventWithArgDispatcher{
+		CGREvent: &CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "IDtest",
+			Time:   &now,
+			Event: map[string]interface{}{
+				"test1": 1,
+				"test2": 2,
+				"test3": 3,
+			},
+		},
+		ArgDispatcher: new(ArgDispatcher),
+	}
+	rcv = cgrEventWithArgDispatcher.Clone()
+	if !reflect.DeepEqual(cgrEventWithArgDispatcher, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", cgrEventWithArgDispatcher, rcv)
+	}
+	//check vars
+	apiKey := "apikey"
+	routeID := "routeid"
+
+	rcv.ArgDispatcher = &ArgDispatcher{
+		APIKey:  &apiKey,
+		RouteID: &routeID,
+	}
+	if reflect.DeepEqual(cgrEventWithArgDispatcher.ArgDispatcher, rcv.ArgDispatcher) {
+		t.Errorf("Expected to be different")
+	}
+
 }
