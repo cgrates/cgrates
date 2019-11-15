@@ -44,7 +44,7 @@ func (ev *CGREvent) CheckMandatoryFields(fldNames []string) error {
 	return nil
 }
 
-// AnswerTime returns a field as string instance
+// FieldAsString returns a field as string instance
 func (ev *CGREvent) FieldAsString(fldName string) (val string, err error) {
 	iface, has := ev.Event[fldName]
 	if !has {
