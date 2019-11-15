@@ -135,7 +135,7 @@ func durRemoteRater(cd *engine.CallDescriptorWithArgDispatcher) (time.Duration, 
 		for i := 0; i < *runs; i++ {
 			go func() {
 				sem <- 1
-				client.Call("Responder.GetCost", cd, &result)
+				client.Call(utils.ResponderGetCost, cd, &result)
 				<-sem
 				finish <- 1
 				// divCall = client.Go("Responder.GetCost", cd, &result, nil)
@@ -147,7 +147,7 @@ func durRemoteRater(cd *engine.CallDescriptorWithArgDispatcher) (time.Duration, 
 		// <-divCall.Done
 	} else {
 		for j := 0; j < *runs; j++ {
-			client.Call("Responder.GetCost", cd, &result)
+			client.Call(utils.ResponderGetCost, cd, &result)
 		}
 	}
 	log.Printf("Result:%s\n", utils.ToJSON(result))
