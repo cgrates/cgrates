@@ -282,6 +282,132 @@ func TestCGREventClone(t *testing.T) {
 	}
 }
 
+func TestCGREventconsumeArgDispatcher(t *testing.T) {
+	//empty check
+	cgrEvent := new(CGREvent)
+	rcv := cgrEvent.consumeArgDispatcher()
+	if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	//nil check
+	cgrEvent = nil
+	rcv = cgrEvent.consumeArgDispatcher()
+	if rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", rcv)
+	}
+	//normal check without APIkey
+	routeID := "route"
+	cgrEvent = &CGREvent{
+		Event: map[string]interface{}{
+			MetaRouteID: routeID,
+		},
+	}
+	eOut := &ArgDispatcher{
+		RouteID: &routeID,
+	}
+	rcv = cgrEvent.consumeArgDispatcher()
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
+	}
+	//check if *route_id was deleted
+	if _, has := cgrEvent.Event[MetaRouteID]; has {
+		t.Errorf("*route_id wasn't deleted")
+	}
+	//normal check with routeID and APIKey
+	apiKey := "key"
+	cgrEvent.Event = map[string]interface{}{MetaRouteID: routeID, MetaApiKey: apiKey}
+	eOut.APIKey = &apiKey
+
+	rcv = cgrEvent.consumeArgDispatcher()
+	//check if *api_key and *route_id was deleted
+	if _, has := cgrEvent.Event[MetaApiKey]; has {
+		t.Errorf("*api_key wasn't deleted")
+	} else if _, has := cgrEvent.Event[MetaRouteID]; has {
+		t.Errorf("*route_id wasn't deleted")
+	}
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
+	}
+
+}
+
+func TestCGREventconsumeSupplierPaginator(t *testing.T) {
+	//empty check
+	cgrEvent := new(CGREvent)
+	rcv := cgrEvent.consumeSupplierPaginator()
+	eOut := new(Paginator)
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
+	}
+	cgrEvent = nil
+	rcv = cgrEvent.consumeSupplierPaginator()
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
+	}
+	//normal check
+	cgrEvent = &CGREvent{
+		Event: map[string]interface{}{
+			MetaSuppliersLimit:  18,
+			MetaSuppliersOffset: 20,
+		},
+	}
+
+	eOut = &Paginator{
+		Limit:  IntPointer(18),
+		Offset: IntPointer(20),
+	}
+	rcv = cgrEvent.consumeSupplierPaginator()
+	//check if *suppliers_limit and *suppliers_offset was deleted
+	if _, has := cgrEvent.Event[MetaSuppliersLimit]; has {
+		t.Errorf("*suppliers_limit wasn't deleted")
+	} else if _, has := cgrEvent.Event[MetaSuppliersOffset]; has {
+		t.Errorf("*suppliers_offset wasn't deleted")
+	}
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
+	}
+	//check without *suppliers_limit, but with *suppliers_offset
+	cgrEvent = &CGREvent{
+		Event: map[string]interface{}{
+			MetaSuppliersOffset: 20,
+		},
+	}
+
+	eOut = &Paginator{
+		Offset: IntPointer(20),
+	}
+	rcv = cgrEvent.consumeSupplierPaginator()
+	//check if *suppliers_limit and *suppliers_offset was deleted
+	if _, has := cgrEvent.Event[MetaSuppliersLimit]; has {
+		t.Errorf("*suppliers_limit wasn't deleted")
+	} else if _, has := cgrEvent.Event[MetaSuppliersOffset]; has {
+		t.Errorf("*suppliers_offset wasn't deleted")
+	}
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
+	}
+	//check with notAnInt at *suppliers_limit
+	cgrEvent = &CGREvent{Event: map[string]interface{}{
+		MetaSuppliersLimit: "Not an int",
+	},
+	}
+	eOut = new(Paginator)
+	rcv = cgrEvent.consumeSupplierPaginator()
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
+	}
+	//check with notAnInt at and *suppliers_offset
+	cgrEvent = &CGREvent{Event: map[string]interface{}{
+		MetaSuppliersOffset: "Not an int",
+	},
+	}
+	eOut = new(Paginator)
+	rcv = cgrEvent.consumeSupplierPaginator()
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting:  %+v, received: %+v", eOut, rcv)
+	}
+}
+
 func TestCGREventConsumeArgs(t *testing.T) {
 	//empty check
 	ev := new(CGREvent)
