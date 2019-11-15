@@ -57,19 +57,19 @@ var sTestsInternalRemoteIT = []func(t *testing.T){
 	testInternalRemoteITRPCConn,
 	testInternalRemoteLoadDataInEngineTwo,
 	testInternalRemoteITGetAccount,
-	//testInternalRemoteITGetAttribute,
-	//testInternalRemoteITGetThreshold,
-	//testInternalRemoteITGetThresholdProfile,
-	//testInternalRemoteITGetResource,
-	//testInternalRemoteITGetResourceProfile,
-	//testInternalRemoteITGetStatQueueProfile,
-	//testInternalRemoteITGetSupplier,
-	//testInternalRemoteITGetFilter,
-	//testInternalRemoteITGetRatingPlan,
-	//testInternalRemoteITGetRatingProfile,
-	//testInternalRemoteITGetAction,
-	//testInternalRemoteITGetActionPlan,
-	//testInternalRemoteITGetAccountActionPlan,
+	testInternalRemoteITGetAttribute,
+	testInternalRemoteITGetThreshold,
+	testInternalRemoteITGetThresholdProfile,
+	testInternalRemoteITGetResource,
+	testInternalRemoteITGetResourceProfile,
+	testInternalRemoteITGetStatQueueProfile,
+	testInternalRemoteITGetSupplier,
+	testInternalRemoteITGetFilter,
+	testInternalRemoteITGetRatingPlan,
+	testInternalRemoteITGetRatingProfile,
+	testInternalRemoteITGetAction,
+	testInternalRemoteITGetActionPlan,
+	testInternalRemoteITGetAccountActionPlan,
 	////testInternalReplicationSetThreshold,
 	testInternalRemoteITKillEngine,
 }
@@ -178,9 +178,9 @@ func testInternalRemoteLoadDataInEngineTwo(t *testing.T) {
 func testInternalRemoteITGetAccount(t *testing.T) {
 	var acnt *engine.Account
 	expAcc := &engine.Account{
-		ID: "cgrates.org:testAccount",
+		ID: "cgrates.org:1001",
 		BalanceMap: map[string]engine.Balances{
-			"utils.MONETARY": []*engine.Balance{
+			utils.MONETARY: []*engine.Balance{
 				{
 					ID:     "testAccount",
 					Value:  10,
@@ -191,12 +191,23 @@ func testInternalRemoteITGetAccount(t *testing.T) {
 	}
 	attrs := &utils.AttrGetAccount{
 		Tenant:  "cgrates.org",
-		Account: "testAccount",
+		Account: "1001",
 	}
+	// make sure account exist in engine2
+	if err := engineTwoRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.ID != expAcc.ID {
+		t.Errorf("expecting: %+v, received: %+v", expAcc.ID, acnt.ID)
+	} else if len(acnt.BalanceMap) != 1 {
+		t.Errorf("unexpected number of balances received: %+v", utils.ToJSON(acnt))
+	}
+	// check the account in internal
 	if err := internalRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(expAcc, acnt) {
-		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(expAcc), utils.ToJSON(acnt))
+	} else if acnt.ID != expAcc.ID {
+		t.Errorf("expecting: %+v, received: %+v", expAcc.ID, acnt.ID)
+	} else if len(acnt.BalanceMap) != 1 {
+		t.Errorf("unexpected number of balances received: %+v", utils.ToJSON(acnt))
 	}
 
 	attrs = &utils.AttrGetAccount{

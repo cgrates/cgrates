@@ -71,7 +71,7 @@ func (db *DataDBService) Start() (err error) {
 	var rmtConns, rplConns *rpcclient.RpcClientPool
 	if len(db.cfg.DataDbCfg().RmtConns) != 0 {
 		var err error
-		rmtConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, db.cfg.TlsCfg().ClientKey,
+		rmtConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST_POSITIVE, db.cfg.TlsCfg().ClientKey,
 			db.cfg.TlsCfg().ClientCerificate, db.cfg.TlsCfg().CaCertificate,
 			db.cfg.GeneralCfg().ConnectAttempts, db.cfg.GeneralCfg().Reconnects,
 			db.cfg.GeneralCfg().ConnectTimeout, db.cfg.GeneralCfg().ReplyTimeout,

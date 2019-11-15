@@ -1448,6 +1448,9 @@ func (ms *MongoStorage) GetAllActionPlansDrv() (ats map[string]*ActionPlan, err 
 	if err != nil {
 		return nil, err
 	}
+	if len(keys) == 0 {
+		return nil, utils.ErrNotFound
+	}
 	ats = make(map[string]*ActionPlan, len(keys))
 	for _, key := range keys {
 		ap, err := ms.GetActionPlanDrv(key[len(utils.ACTION_PLAN_PREFIX):],
