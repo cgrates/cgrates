@@ -71,7 +71,7 @@ func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
 	var rmtConns, rplConns *rpcclient.RpcClientPool
 	if len(config.CgrConfig().DataDbCfg().RmtConns) != 0 {
 		var err error
-		rmtConns, err = NewRPCPool(rpcclient.POOL_FIRST, config.CgrConfig().TlsCfg().ClientKey,
+		rmtConns, err = NewRPCPool(rpcclient.POOL_FIRST_POSITIVE, config.CgrConfig().TlsCfg().ClientKey,
 			config.CgrConfig().TlsCfg().ClientCerificate, config.CgrConfig().TlsCfg().CaCertificate,
 			config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
 			config.CgrConfig().GeneralCfg().ConnectTimeout, config.CgrConfig().GeneralCfg().ReplyTimeout,

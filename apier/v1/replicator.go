@@ -148,11 +148,11 @@ func (rplSv1 *ReplicatorSv1) GetShareGroup(id string, reply *engine.SharedGroup)
 }
 
 //GetActions
-func (rplSv1 *ReplicatorSv1) GetActions(id string, reply engine.Actions) error {
+func (rplSv1 *ReplicatorSv1) GetActions(id string, reply *engine.Actions) error {
 	if rcv, err := rplSv1.dm.DataDB().GetActionsDrv(id); err != nil {
 		return err
 	} else {
-		reply = rcv
+		*reply = rcv
 	}
 	return nil
 }
@@ -162,7 +162,7 @@ func (rplSv1 *ReplicatorSv1) GetActionPlan(id string, reply *engine.ActionPlan) 
 	if rcv, err := rplSv1.dm.DataDB().GetActionPlanDrv(id, true, utils.NonTransactional); err != nil {
 		return err
 	} else {
-		reply = rcv
+		*reply = *rcv
 	}
 	return nil
 }

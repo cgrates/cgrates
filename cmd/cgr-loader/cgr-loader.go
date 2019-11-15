@@ -242,7 +242,7 @@ func main() {
 		var rmtConns, rplConns *rpcclient.RpcClientPool
 		if len(ldrCfg.DataDbCfg().RmtConns) != 0 {
 			var err error
-			rmtConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, ldrCfg.TlsCfg().ClientKey,
+			rmtConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST_POSITIVE, ldrCfg.TlsCfg().ClientKey,
 				ldrCfg.TlsCfg().ClientCerificate, ldrCfg.TlsCfg().CaCertificate,
 				ldrCfg.GeneralCfg().ConnectAttempts, ldrCfg.GeneralCfg().Reconnects,
 				ldrCfg.GeneralCfg().ConnectTimeout, ldrCfg.GeneralCfg().ReplyTimeout,
