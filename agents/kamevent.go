@@ -305,7 +305,7 @@ func (kev KamEvent) V1ProcessCDRArgs() (args *utils.CGREventWithArgDispatcher) {
 	if !has {
 		return
 	}
-	cgrArgs := cgrEv.ConsumeArgs(strings.Index(subsystems, utils.MetaDispatchers) != -1, true)
+	cgrArgs := cgrEv.ExtractArgs(strings.Index(subsystems, utils.MetaDispatchers) != -1, true)
 	args.ArgDispatcher = cgrArgs.ArgDispatcher
 	return
 }

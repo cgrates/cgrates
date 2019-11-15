@@ -194,13 +194,15 @@ func (ev *CGREvent) consumeSupplierPaginator() (args *Paginator) {
 	return
 }
 
-type ConsumeArgs struct {
+// ExtractedArgs stores the extracted arguments from CGREvent
+type ExtractedArgs struct {
 	ArgDispatcher     *ArgDispatcher
 	SupplierPaginator *Paginator
 }
 
-func (ev *CGREvent) ConsumeArgs(dispatcherFlag, consumeSupplierPaginator bool) (ca ConsumeArgs) {
-	ca = ConsumeArgs{
+// ExtractArgs extracts the ArgDispatcher and SupplierPaginator from the received event
+func (ev *CGREvent) ExtractArgs(dispatcherFlag, consumeSupplierPaginator bool) (ca ExtractedArgs) {
+	ca = ExtractedArgs{
 		ArgDispatcher: ev.consumeArgDispatcher(),
 	}
 	if dispatcherFlag && ca.ArgDispatcher == nil {

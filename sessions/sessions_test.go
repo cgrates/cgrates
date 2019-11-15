@@ -885,7 +885,7 @@ func TestV1AuthorizeArgsParseFlags(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1authArgs)
 	}
 	//normal check -> without *dispatchers
-	cgrArgs := v1authArgs.CGREvent.ConsumeArgs(false, true)
+	cgrArgs := v1authArgs.CGREvent.ExtractArgs(false, true)
 	eOut = &V1AuthorizeArgs{
 		GetMaxUsage:           true,
 		AuthorizeResources:    true,
@@ -908,7 +908,7 @@ func TestV1AuthorizeArgsParseFlags(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1authArgs))
 	}
 	// //normal check -> with *dispatchers
-	cgrArgs = v1authArgs.CGREvent.ConsumeArgs(true, true)
+	cgrArgs = v1authArgs.CGREvent.ExtractArgs(true, true)
 	eOut = &V1AuthorizeArgs{
 		GetMaxUsage:           true,
 		AuthorizeResources:    true,
@@ -1464,7 +1464,7 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher(t *testing.T) {
 			RouteID: utils.StringPointer("testrouteid"),
 		},
 	}
-	cgrArgs := cgrEv.ConsumeArgs(true, true)
+	cgrArgs := cgrEv.ExtractArgs(true, true)
 	rply := NewV1AuthorizeArgs(true, nil, false, nil, false, nil, true, false, false, false, false, cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
@@ -1508,7 +1508,7 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher2(t *testing.T) {
 			RouteID: utils.StringPointer("testrouteid"),
 		},
 	}
-	cgrArgs := cgrEv.ConsumeArgs(true, true)
+	cgrArgs := cgrEv.ExtractArgs(true, true)
 	rply := NewV1AuthorizeArgs(true, nil, false, nil, false, nil, true, false, false, false, false, cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
 	if !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rply))
@@ -1742,7 +1742,7 @@ func TestV1InitSessionArgsParseFlags(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1InitSsArgs)
 	}
 	//normal check -> without *dispatchers
-	cgrArgs := v1InitSsArgs.CGREvent.ConsumeArgs(false, true)
+	cgrArgs := v1InitSsArgs.CGREvent.ExtractArgs(false, true)
 	eOut = &V1InitSessionArgs{
 		InitSession:       true,
 		AllocateResources: true,
@@ -1761,7 +1761,7 @@ func TestV1InitSessionArgsParseFlags(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1InitSsArgs))
 	}
 	// //normal check -> with *dispatchers
-	cgrArgs = v1InitSsArgs.CGREvent.ConsumeArgs(true, true)
+	cgrArgs = v1InitSsArgs.CGREvent.ExtractArgs(true, true)
 	eOut = &V1InitSessionArgs{
 		InitSession:       true,
 		AllocateResources: true,
@@ -1792,7 +1792,7 @@ func TestV1TerminateSessionArgsParseFlags(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1TerminateSsArgs)
 	}
 	//normal check -> without *dispatchers
-	cgrArgs := v1TerminateSsArgs.CGREvent.ConsumeArgs(false, true)
+	cgrArgs := v1TerminateSsArgs.CGREvent.ExtractArgs(false, true)
 	eOut = &V1TerminateSessionArgs{
 		TerminateSession:  true,
 		ReleaseResources:  true,
@@ -1809,7 +1809,7 @@ func TestV1TerminateSessionArgsParseFlags(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v\n", utils.ToJSON(eOut), utils.ToJSON(v1TerminateSsArgs))
 	}
 	// //normal check -> with *dispatchers
-	cgrArgs = v1TerminateSsArgs.CGREvent.ConsumeArgs(true, true)
+	cgrArgs = v1TerminateSsArgs.CGREvent.ExtractArgs(true, true)
 	eOut = &V1TerminateSessionArgs{
 		TerminateSession:  true,
 		ReleaseResources:  true,
@@ -1838,7 +1838,7 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 		t.Errorf("Expecting %+v,\n received: %+v", eOut, v1ProcessMsgArgs)
 	}
 	//normal check -> without *dispatchers
-	cgrArgs := v1ProcessMsgArgs.CGREvent.ConsumeArgs(false, true)
+	cgrArgs := v1ProcessMsgArgs.CGREvent.ExtractArgs(false, true)
 	eOut = &V1ProcessMessageArgs{
 		Debit:                 true,
 		AllocateResources:     true,
@@ -1861,7 +1861,7 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 	}
 
 	//normal check -> with *dispatchers
-	cgrArgs = v1ProcessMsgArgs.CGREvent.ConsumeArgs(true, true)
+	cgrArgs = v1ProcessMsgArgs.CGREvent.ExtractArgs(true, true)
 	eOut = &V1ProcessMessageArgs{
 		Debit:                 true,
 		AllocateResources:     true,

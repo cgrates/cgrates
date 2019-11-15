@@ -166,7 +166,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 		}
 	}
 	// execute the action based on reqType
-	cgrArgs := cgrEv.ConsumeArgs(
+	cgrArgs := cgrEv.ExtractArgs(
 		rdrCfg.Flags.HasKey(utils.MetaDispatchers),
 		reqType == utils.MetaAuth ||
 			reqType == utils.MetaMessage ||

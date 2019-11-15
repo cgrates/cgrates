@@ -1790,7 +1790,7 @@ func (args *V1AuthorizeArgs) ParseFlags(flags string) {
 			args.StatIDs = getFlagIDs(subsystem)
 		}
 	}
-	cgrArgs := args.CGREvent.ConsumeArgs(dispatcherFlag, true)
+	cgrArgs := args.CGREvent.ExtractArgs(dispatcherFlag, true)
 	args.ArgDispatcher = cgrArgs.ArgDispatcher
 	args.Paginator = *cgrArgs.SupplierPaginator
 }
@@ -2057,7 +2057,7 @@ func (args *V1InitSessionArgs) ParseFlags(flags string) {
 			args.StatIDs = getFlagIDs(subsystem)
 		}
 	}
-	cgrArgs := args.CGREvent.ConsumeArgs(dispatcherFlag, false)
+	cgrArgs := args.CGREvent.ExtractArgs(dispatcherFlag, false)
 	args.ArgDispatcher = cgrArgs.ArgDispatcher
 }
 
@@ -2442,7 +2442,7 @@ func (args *V1TerminateSessionArgs) ParseFlags(flags string) {
 			args.StatIDs = getFlagIDs(subsystem)
 		}
 	}
-	cgrArgs := args.CGREvent.ConsumeArgs(dispatcherFlag, false)
+	cgrArgs := args.CGREvent.ExtractArgs(dispatcherFlag, false)
 	args.ArgDispatcher = cgrArgs.ArgDispatcher
 }
 
@@ -2738,7 +2738,7 @@ func (args *V1ProcessMessageArgs) ParseFlags(flags string) {
 			args.StatIDs = getFlagIDs(subsystem)
 		}
 	}
-	cgrArgs := args.CGREvent.ConsumeArgs(dispatcherFlag, true)
+	cgrArgs := args.CGREvent.ExtractArgs(dispatcherFlag, true)
 	args.ArgDispatcher = cgrArgs.ArgDispatcher
 	args.Paginator = *cgrArgs.SupplierPaginator
 }
