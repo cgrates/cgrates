@@ -36,10 +36,13 @@ var csvr *TpReader
 
 func init() {
 	var err error
-	csvr, err = NewTpReader(dm.dataDB, NewStringCSVStorage(',', DestinationsCSVContent, TimingsCSVContent, RatesCSVContent, DestinationRatesCSVContent,
-		RatingPlansCSVContent, RatingProfilesCSVContent, SharedGroupsCSVContent, ActionsCSVContent, ActionPlansCSVContent, ActionTriggersCSVContent,
-		AccountActionsCSVContent, ResourcesCSVContent, StatsCSVContent, ThresholdsCSVContent, FiltersCSVContent, SuppliersCSVContent, AttributesCSVContent,
-		ChargersCSVContent, DispatcherCSVContent, DispatcherHostCSVContent), testTPID, "", nil, nil)
+	csvr, err = NewTpReader(dm.dataDB, NewStringCSVStorage(',',
+		DestinationsCSVContent, TimingsCSVContent, RatesCSVContent, DestinationRatesCSVContent,
+		RatingPlansCSVContent, RatingProfilesCSVContent, SharedGroupsCSVContent,
+		ActionsCSVContent, ActionPlansCSVContent, ActionTriggersCSVContent, AccountActionsCSVContent,
+		ResourcesCSVContent, StatsCSVContent, ThresholdsCSVContent, FiltersCSVContent,
+		SuppliersCSVContent, AttributesCSVContent, ChargersCSVContent, DispatcherCSVContent,
+		DispatcherHostCSVContent), testTPID, "", nil, nil)
 	if err != nil {
 		log.Print("error when creating TpReader:", err)
 	}
@@ -103,9 +106,10 @@ func init() {
 	if err := csvr.LoadDispatcherHosts(); err != nil {
 		log.Print("error in LoadDispatcherHosts:", err)
 	}
-	csvr.WriteToDatabase(false, false)
+	if err := csvr.WriteToDatabase(false, false); err != nil {
+		log.Print("error when writing into database", err)
+	}
 	Cache.Clear(nil)
-	//dm.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 }
 
 func TestLoadDestinations(t *testing.T) {

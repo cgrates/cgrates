@@ -555,12 +555,6 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 		if err = dm.rplConns.Call("ReplicatorSv1.SetThresholdProfile", th, &reply); err != nil {
 			return
 		}
-		if err = dm.rplConns.Call("ReplicatorSv1.SetIndexes", th, &reply); err != nil {
-			return
-		}
-		if err = dm.rplConns.Call("ReplicatorSv1.SetThreshold", th, &reply); err != nil {
-			return
-		}
 	}
 	return
 }
