@@ -163,7 +163,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 			break
 		}
 	}
-	cgrArgs := cgrEv.ConsumeArgs(reqProcessor.Flags.HasKey(utils.MetaDispatchers),
+	cgrArgs := cgrEv.ExtractArgs(reqProcessor.Flags.HasKey(utils.MetaDispatchers),
 		reqType == utils.MetaAuth || reqType == utils.MetaMessage || reqType == utils.MetaEvent)
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(

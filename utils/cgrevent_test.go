@@ -411,32 +411,32 @@ func TestCGREventconsumeSupplierPaginator(t *testing.T) {
 func TestCGREventConsumeArgs(t *testing.T) {
 	//empty check
 	ev := new(CGREvent)
-	eOut := ConsumeArgs{
+	eOut := ExtractedArgs{
 		ArgDispatcher: ev.consumeArgDispatcher(),
 	}
 	// false false
-	rcv := ev.ConsumeArgs(false, false)
+	rcv := ev.ExtractArgs(false, false)
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
 	// false true
-	rcv = ev.ConsumeArgs(false, true)
+	rcv = ev.ExtractArgs(false, true)
 	eOut.SupplierPaginator = ev.consumeSupplierPaginator()
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
 	//true false
-	eOut = ConsumeArgs{
+	eOut = ExtractedArgs{
 		ArgDispatcher:     new(ArgDispatcher),
 		SupplierPaginator: nil,
 	}
-	rcv = ev.ConsumeArgs(true, false)
+	rcv = ev.ExtractArgs(true, false)
 	if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
 	//true true
-	rcv = ev.ConsumeArgs(true, true)
-	eOut = ConsumeArgs{
+	rcv = ev.ExtractArgs(true, true)
+	eOut = ExtractedArgs{
 		SupplierPaginator: ev.consumeSupplierPaginator(),
 		ArgDispatcher:     new(ArgDispatcher),
 	}
