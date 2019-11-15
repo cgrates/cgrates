@@ -817,7 +817,11 @@ const (
 	ReplicatorSv1GetDispatcherProfile  = "ReplicatorSv1.GetDispatcherProfile"
 	ReplicatorSv1GetDispatcherHost     = "ReplicatorSv1.GetDispatcheHost"
 	ReplicatorSv1GetItemLoadIDs        = "ReplicatorSv1.GetItemLoadIDs"
+	ReplicatorSv1GetFilterIndexes      = "ReplicatorSv1.GetFilterIndexes"
+	ReplicatorSv1MatchFilterIndex      = "ReplicatorSv1.MatchFilterIndex"
 	ReplicatorSv1SetThresholdProfile   = "ReplicatorSv1.SetThresholdProfile"
+	ReplicatorSv1SetThreshold          = "ReplicatorSv1.SetThreshold"
+	ReplicatorSv1SetFilterIndexes      = "ReplicatorSv1.SetFilterIndexes"
 )
 
 // ApierV1 APIs
