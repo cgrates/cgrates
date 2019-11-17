@@ -87,7 +87,7 @@ func (s *Session) cgrID() (cgrID string) {
 }
 
 // Clone is a thread safe method to clone the sessions information
-func (s Session) Clone() (cln *Session) {
+func (s *Session) Clone() (cln *Session) {
 	s.RLock()
 	cln = &Session{
 		CGRID:         s.CGRID,
