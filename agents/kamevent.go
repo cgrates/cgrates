@@ -234,7 +234,7 @@ func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
 	if authArgs.GetAttributes && authReply.Attributes != nil {
 		kar.Attributes = authReply.Attributes.Digest()
 	}
-	if authArgs.AuthorizeResources {
+	if authArgs.AuthorizeResources && authReply.ResourceAllocation != nil {
 		kar.ResourceAllocation = *authReply.ResourceAllocation
 	}
 	if authArgs.GetMaxUsage {
@@ -248,10 +248,10 @@ func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
 		kar.Suppliers = authReply.Suppliers.Digest()
 	}
 
-	if authArgs.ProcessThresholds {
+	if authArgs.ProcessThresholds && authReply.ThresholdIDs != nil {
 		kar.Thresholds = strings.Join(*authReply.ThresholdIDs, utils.FIELDS_SEP)
 	}
-	if authArgs.ProcessStats {
+	if authArgs.ProcessStats && authReply.StatQueueIDs != nil {
 		kar.StatQueues = strings.Join(*authReply.StatQueueIDs, utils.FIELDS_SEP)
 	}
 	return
