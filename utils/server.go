@@ -22,6 +22,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/gob"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -41,6 +42,12 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+func init() {
+	gob.Register(map[string]interface{}{})
+	gob.Register([]interface{}{})
+	gob.Register(time.Duration(0))
+	gob.Register(time.Time{})
+}
 func NewServer() (s *Server) {
 	s = new(Server)
 	s.httpMux = http.NewServeMux()
