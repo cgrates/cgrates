@@ -91,13 +91,16 @@ func (rdr *CSVFileER) Serve() (err error) {
 				}
 				filesInDir, _ := ioutil.ReadDir(rdr.rdrDir)
 				for _, file := range filesInDir {
-					go func() {
-						if err := rdr.processFile(rdr.rdrDir, file.Name()); err != nil {
+					if !strings.HasSuffix(file.Name(), utils.CSVSuffix) { // hardcoded file extension for csv event reader
+						continue // used in order to filter the files from directory
+					}
+					go func(fileName string) {
+						if err := rdr.processFile(rdr.rdrDir, fileName); err != nil {
 							utils.Logger.Warning(
 								fmt.Sprintf("<%s> processing file %s, error: %s",
-									utils.ERs, file, err.Error()))
+									utils.ERs, fileName, err.Error()))
 						}
-					}()
+					}(file.Name())
 				}
 				time.Sleep(rdr.Config().RunDelay)
 			}
