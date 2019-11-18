@@ -286,6 +286,11 @@ func (cdrS *CDRServer) rateCDRWithErr(cdr *CDRWithArgDispatcher) (ratedCDRs []*C
 	return
 }
 
+func (cdrS *CDRServer) refundCDR(cdr *CDR) (err error) {
+
+	return
+}
+
 // chrgProcessEvent will process the CGREvent with ChargerS subsystem
 // it is designed to run in it's own goroutine
 func (cdrS *CDRServer) chrgProcessEvent(cgrEv *utils.CGREventWithArgDispatcher,

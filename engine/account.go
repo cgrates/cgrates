@@ -1161,7 +1161,7 @@ func NewAccountSummaryFromJSON(jsn string) (acntSummary *AccountSummary, err err
 type AccountSummary struct {
 	Tenant           string
 	ID               string
-	BalanceSummaries []*BalanceSummary
+	BalanceSummaries BalanceSummaries
 	AllowNegative    bool
 	Disabled         bool
 }
@@ -1173,7 +1173,7 @@ func (as *AccountSummary) Clone() (cln *AccountSummary) {
 	cln.AllowNegative = as.AllowNegative
 	cln.Disabled = as.Disabled
 	if as.BalanceSummaries != nil {
-		cln.BalanceSummaries = make([]*BalanceSummary, len(as.BalanceSummaries))
+		cln.BalanceSummaries = make(BalanceSummaries, len(as.BalanceSummaries))
 		for i, bs := range as.BalanceSummaries {
 			cln.BalanceSummaries[i] = new(BalanceSummary)
 			*cln.BalanceSummaries[i] = *bs

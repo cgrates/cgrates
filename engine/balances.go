@@ -896,3 +896,16 @@ type BalanceSummary struct {
 	Value    float64
 	Disabled bool
 }
+
+type BalanceSummaries []*BalanceSummary
+
+// GetBalanceSummary returns a BalanceSummary based on an UUID
+func (bs BalanceSummaries) BalanceSummaryWithUUD(bsUUID string) (b *BalanceSummary) {
+	for _, blc := range bs {
+		if blc.UUID == bsUUID {
+			b = blc
+			break
+		}
+	}
+	return
+}

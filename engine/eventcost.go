@@ -254,6 +254,62 @@ func (ec *EventCost) ComputeEventCostUsageIndexes() {
 	}
 }
 
+// AsCallDescriptor converts an EventCost into a CallDescriptor
+func (ec *EventCost) AsRefundIncrements(tor string) (cd *CallDescriptor) {
+	cd = &CallDescriptor{
+		CgrID:         ec.CGRID,
+		RunID:         ec.RunID,
+		TOR:           tor,
+		TimeStart:     ec.StartTime,
+		TimeEnd:       ec.StartTime.Add(ec.GetUsage()),
+		DurationIndex: ec.GetUsage(),
+	}
+	if len(ec.Charges) == 0 {
+		return
+	}
+	var nrIcrms int
+	for _, cIl := range ec.Charges {
+		nrIcrms += (cIl.CompressFactor * len(cIl.Increments))
+	}
+	cd.Increments = make(Increments, nrIcrms)
+	var iIdx int
+	for _, cIl := range ec.Charges {
+		for i := 0; i < cIl.CompressFactor; i++ {
+			for _, cIcrm := range cIl.Increments {
+				cd.Increments[iIdx] = &Increment{
+					Cost:           cIcrm.Cost,
+					Duration:       cIcrm.Usage,
+					CompressFactor: cIcrm.CompressFactor,
+				}
+				if cIcrm.AccountingID != utils.EmptyString {
+					cd.Increments[iIdx].BalanceInfo = &DebitInfo{
+						AccountID: ec.Accounting[cIcrm.AccountingID].AccountID,
+					}
+					blncSmry := ec.AccountSummary.BalanceSummaries.BalanceSummaryWithUUD(ec.Accounting[cIcrm.AccountingID].BalanceUUID)
+					if blncSmry.Type == utils.MONETARY {
+						cd.Increments[iIdx].BalanceInfo.Monetary = &MonetaryInfo{UUID: blncSmry.UUID}
+					} else if NonMonetaryBalances.HasField(blncSmry.Type) {
+						cd.Increments[iIdx].BalanceInfo.Unit = &UnitInfo{UUID: blncSmry.UUID}
+					}
+					if ec.Accounting[cIcrm.AccountingID].ExtraChargeID == utils.META_NONE ||
+						ec.Accounting[cIcrm.AccountingID].ExtraChargeID == utils.EmptyString {
+						continue
+					}
+					// extra charges, ie: non-free *voice
+					extraSmry := ec.AccountSummary.BalanceSummaries.BalanceSummaryWithUUD(ec.Accounting[cIcrm.AccountingID].ExtraChargeID)
+					if extraSmry.Type == utils.MONETARY {
+						cd.Increments[iIdx].BalanceInfo.Monetary = &MonetaryInfo{UUID: extraSmry.UUID}
+					} else if NonMonetaryBalances.HasField(blncSmry.Type) {
+						cd.Increments[iIdx].BalanceInfo.Unit = &UnitInfo{UUID: extraSmry.UUID}
+					}
+				}
+			}
+		}
+	}
+	return
+}
+
+// AsCallCost converts an EventCost into a CallCost
 func (ec *EventCost) AsCallCost() *CallCost {
 	cc := &CallCost{
 		Cost: ec.GetCost(), RatedUsage: float64(ec.GetUsage().Nanoseconds()),
@@ -271,10 +327,10 @@ func (ec *EventCost) AsCallCost() *CallCost {
 		if cIl.RatingID != "" {
 			if ec.Rating[cIl.RatingID].RatingFiltersID != "" {
 				rfs := ec.RatingFilters[ec.Rating[cIl.RatingID].RatingFiltersID]
-				ts.MatchedSubject = rfs["Subject"].(string)
-				ts.MatchedPrefix = rfs["DestinationPrefix"].(string)
-				ts.MatchedDestId = rfs["DestinationID"].(string)
-				ts.RatingPlanId = rfs["RatingPlanID"].(string)
+				ts.MatchedSubject = rfs[utils.Subject].(string)
+				ts.MatchedPrefix = rfs[utils.DestinationPrefix].(string)
+				ts.MatchedDestId = rfs[utils.DestinationID].(string)
+				ts.RatingPlanId = rfs[utils.RatingPlanID].(string)
 			}
 		}
 		ts.RateInterval = ec.rateIntervalForRatingID(cIl.RatingID)

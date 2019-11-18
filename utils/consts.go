@@ -548,6 +548,8 @@ const (
 	UUID                        = "UUID"
 	ActionsID                   = "ActionsID"
 	MetaAct                     = "*act"
+	DestinationPrefix           = "DestinationPrefix"
+	DestinationID               = "DestinationID"
 )
 
 // Migrator Action
