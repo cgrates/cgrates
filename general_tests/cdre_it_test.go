@@ -109,7 +109,7 @@ func testCDRERpcConn(t *testing.T) {
 func testCDREGetCdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
 	req := utils.RPCCDRsFilter{}
-	if err := cdreRPC.Call("ApierV1.GetCDRs", req, &reply); err.Error() != utils.ErrNotFound.Error() {
+	if err := cdreRPC.Call(utils.ApierV1GetCDRs, req, &reply); err.Error() != utils.ErrNotFound.Error() {
 		t.Error("Unexpected error: ", err.Error())
 	}
 }

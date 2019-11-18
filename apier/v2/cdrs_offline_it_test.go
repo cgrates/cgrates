@@ -204,7 +204,7 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 		t.Error("Unexpected error received: ", err)
 	}
 	//process cdr should trigger balance update event
-	if err := cdrsOfflineRpc.Call("CDRsV1.ProcessCDR", cdr, &reply); err != nil {
+	if err := cdrsOfflineRpc.Call(utils.CDRsV1ProcessCDR, cdr, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)

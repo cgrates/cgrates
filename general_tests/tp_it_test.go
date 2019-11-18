@@ -130,7 +130,7 @@ func testTpBalanceCounter(t *testing.T) {
 		TimeEnd:       tStart.Add(time.Duration(20) * time.Second),
 	}
 	var cc engine.CallCost
-	if err := tpRPC.Call("Responder.Debit", cd, &cc); err != nil {
+	if err := tpRPC.Call(utils.ResponderDebit, cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
 	} else if cc.GetDuration() != 20*time.Second {
 		t.Errorf("Calling Responder.MaxDebit got callcost: %v", cc.GetDuration())
@@ -211,7 +211,7 @@ func testTpZeroCost(t *testing.T) {
 		TimeEnd:       tStart.Add(time.Duration(20) * time.Second),
 	}
 	var cc engine.CallCost
-	if err := tpRPC.Call("Responder.Debit", cd, &cc); err != nil {
+	if err := tpRPC.Call(utils.ResponderDebit, cd, &cc); err != nil {
 		t.Error("Got error on Responder.Debit: ", err.Error())
 	} else if cc.GetDuration() != 20*time.Second {
 		t.Errorf("Calling Responder.MaxDebit got callcost: %v", utils.ToIJSON(cc))
@@ -236,7 +236,7 @@ func testTpZeroNegativeCost(t *testing.T) {
 		TimeEnd:       tStart.Add(time.Duration(20) * time.Second),
 	}
 	var cc engine.CallCost
-	if err := tpRPC.Call("Responder.Debit", cd, &cc); err != nil {
+	if err := tpRPC.Call(utils.ResponderDebit, cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
 	} else if cc.GetDuration() != 20*time.Second {
 		t.Errorf("Calling Responder.MaxDebit got callcost: %v", utils.ToIJSON(cc))

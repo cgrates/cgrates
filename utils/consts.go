@@ -866,8 +866,20 @@ const (
 	ApierV1AddBalance               = "ApierV1.AddBalance"
 	ApierV1DebitBalance             = "ApierV1.DebitBalance"
 	ApierV1SetAccount               = "ApierV1.SetAccount"
+	ApierV1GetDataDBVersions        = "ApierV1.GetDataDBVersions"
+	ApierV1GetStorDBVersions        = "ApierV1.GetStorDBVersions"
+	ApierV1GetCDRs                  = "ApierV1.GetCDRs"
 )
 
+// ApierV1 TP APIs
+const (
+	ApierV1SetTPTiming    = "ApierV1.SetTPTiming"
+	ApierV1GetTPTiming    = "ApierV1.GetTPTiming"
+	ApierV1RemoveTPTiming = "ApierV1.RemoveTPTiming"
+	ApierV1GetTPTimingIds = "ApierV1.GetTPTimingIds"
+)
+
+// ApierV2 APIs
 const (
 	ApierV2                         = "ApierV2"
 	ApierV2LoadTariffPlanFromFolder = "ApierV2.LoadTariffPlanFromFolder"

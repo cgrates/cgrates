@@ -460,7 +460,7 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 		},
 		Cache: utils.StringPointer(utils.MetaReload),
 	}
-	if err := cdrsRpc.Call("ApierV1.SetChargerProfile", chargerProfile, &result); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

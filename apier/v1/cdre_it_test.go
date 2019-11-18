@@ -147,7 +147,7 @@ func testCDReAddCDRs(t *testing.T) {
 	}
 	for _, cdr := range storedCdrs {
 		var reply string
-		if err := cdreRPC.Call("CDRsV1.ProcessCDR", cdr, &reply); err != nil {
+		if err := cdreRPC.Call(utils.CDRsV1ProcessCDR, cdr, &reply); err != nil {
 			t.Error("Unexpected error: ", err.Error())
 		} else if reply != utils.OK {
 			t.Error("Unexpected reply received: ", reply)
