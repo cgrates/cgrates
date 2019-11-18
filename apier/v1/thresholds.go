@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -67,8 +66,6 @@ func (apierV1 *ApierV1) GetThresholdProfile(arg *utils.TenantID, reply *engine.T
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if th, err := apierV1.DataManager.GetThresholdProfile(arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
-		utils.Logger.Debug(fmt.Sprintf("API RTURNER IN ERR : %+v", err))
-		utils.Logger.Debug(fmt.Sprintf("API RTURNER IN ERR : %+v", utils.APIErrorHandler(err)))
 		return utils.APIErrorHandler(err)
 	} else {
 		*reply = *th

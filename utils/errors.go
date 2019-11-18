@@ -44,7 +44,6 @@ var (
 	ErrRatingPlanNotFound       = errors.New("RATING_PLAN_NOT_FOUND")
 	ErrAccountNotFound          = errors.New("ACCOUNT_NOT_FOUND")
 	ErrAccountDisabled          = errors.New("ACCOUNT_DISABLED")
-	ErrUserNotFound             = errors.New("USER_NOT_FOUND")
 	ErrInsufficientCredit       = errors.New("INSUFFICIENT_CREDIT")
 	ErrNotConvertible           = errors.New("NOT_CONVERTIBLE")
 	ErrResourceUnavailable      = errors.New("RESOURCE_UNAVAILABLE")
@@ -52,23 +51,15 @@ var (
 	ErrNoActiveSession          = errors.New("NO_ACTIVE_SESSION")
 	ErrPartiallyExecuted        = errors.New("PARTIALLY_EXECUTED")
 	ErrMaxUsageExceeded         = errors.New("MAX_USAGE_EXCEEDED")
-	ErrUnallocatedResource      = errors.New("UNALLOCATED_RESOURCE")
-	ErrNotFoundNoCaps           = errors.New("not found")
 	ErrFilterNotPassingNoCaps   = errors.New("filter not passing")
 	ErrNotConvertibleNoCaps     = errors.New("not convertible")
 	ErrMandatoryIeMissingNoCaps = errors.New("mandatory information missing")
 	ErrUnauthorizedApi          = errors.New("UNAUTHORIZED_API")
 	ErrUnknownApiKey            = errors.New("UNKNOWN_API_KEY")
-	ErrIncompatible             = errors.New("INCOMPATIBLE")
 	ErrReqUnsynchronized        = errors.New("REQ_UNSYNCHRONIZED")
 	ErrUnsupporteServiceMethod  = errors.New("UNSUPPORTED_SERVICE_METHOD")
-	ErrWrongArgsType            = errors.New("WRONG_ARGS_TYPE")
-	ErrWrongReplyType           = errors.New("WRONG_REPLY_TYPE")
 	ErrDisconnected             = errors.New("DISCONNECTED")
 	ErrReplyTimeout             = errors.New("REPLY_TIMEOUT")
-	ErrFailedReconnect          = errors.New("FAILED_RECONNECT")
-	ErrInternallyDisconnected   = errors.New("INTERNALLY_DISCONNECTED")
-	ErrUnsupportedCodec         = errors.New("UNSUPPORTED_CODEC")
 	ErrSessionNotFound          = errors.New("SESSION_NOT_FOUND")
 	ErrJsonIncompleteComment    = errors.New("JSON_INCOMPLETE_COMMENT")
 	ErrCDRCNoProfileID          = errors.New("CDRC_PROFILE_WITHOUT_ID")
@@ -80,6 +71,45 @@ var (
 	ErrUnsupportedFormat        = errors.New("UNSUPPORTED_FORMAT")
 	ErrNoDatabaseConn           = errors.New("NO_DATA_BASE_CONNECTION")
 	ErrMaxIncrementsExceeded    = errors.New("MAX_INCREMENTS_EXCEEDED")
+
+	ErrMap = map[string]error{
+		ErrNoMoreData.Error():              ErrNoMoreData,
+		ErrNotImplemented.Error():          ErrNotImplemented,
+		ErrNotFound.Error():                ErrNotFound,
+		ErrTimedOut.Error():                ErrTimedOut,
+		ErrServerError.Error():             ErrServerError,
+		ErrMaxRecursionDepth.Error():       ErrMaxRecursionDepth,
+		ErrExists.Error():                  ErrExists,
+		ErrBrokenReference.Error():         ErrBrokenReference,
+		ErrParserError.Error():             ErrParserError,
+		ErrInvalidPath.Error():             ErrInvalidPath,
+		ErrInvalidKey.Error():              ErrInvalidKey,
+		ErrUnauthorizedDestination.Error(): ErrUnauthorizedDestination,
+		ErrRatingPlanNotFound.Error():      ErrRatingPlanNotFound,
+		ErrInsufficientCredit.Error():      ErrInsufficientCredit,
+		ErrNotConvertible.Error():          ErrNotConvertible,
+		ErrResourceUnavailable.Error():     ErrResourceUnavailable,
+		ErrResourceUnauthorized.Error():    ErrResourceUnauthorized,
+		ErrNoActiveSession.Error():         ErrNoActiveSession,
+		ErrPartiallyExecuted.Error():       ErrPartiallyExecuted,
+		ErrMaxUsageExceeded.Error():        ErrMaxUsageExceeded,
+		ErrFilterNotPassingNoCaps.Error():  ErrFilterNotPassingNoCaps,
+		ErrNotConvertibleNoCaps.Error():    ErrNotConvertibleNoCaps,
+		ErrUnauthorizedApi.Error():         ErrUnauthorizedApi,
+		ErrUnknownApiKey.Error():           ErrUnknownApiKey,
+		ErrReqUnsynchronized.Error():       ErrReqUnsynchronized,
+		ErrUnsupporteServiceMethod.Error(): ErrUnsupporteServiceMethod,
+		ErrDisconnected.Error():            ErrDisconnected,
+		ErrReplyTimeout.Error():            ErrReplyTimeout,
+		ErrSessionNotFound.Error():         ErrSessionNotFound,
+		ErrJsonIncompleteComment.Error():   ErrJsonIncompleteComment,
+		ErrCDRCNoProfileID.Error():         ErrCDRCNoProfileID,
+		ErrCDRCNoInPath.Error():            ErrCDRCNoInPath,
+		ErrNotEnoughParameters.Error():     ErrNotEnoughParameters,
+		ErrUnsupportedFormat.Error():       ErrUnsupportedFormat,
+		ErrNoDatabaseConn.Error():          ErrNoDatabaseConn,
+		ErrMaxIncrementsExceeded.Error():   ErrMaxIncrementsExceeded,
+	}
 )
 
 // NewCGRError initialises a new CGRError
