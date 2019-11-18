@@ -21,7 +21,6 @@ package v1
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
@@ -61,14 +60,22 @@ var (
 )
 
 func TestAccITWithRemove(t *testing.T) {
-	accCfgPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	if *encoding == utils.MetaJSONrpc {
+		accCfgPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	} else if *encoding == utils.MetaGOBrpc {
+		accCfgPath = path.Join(*dataDir, "conf", "samples", "gob", "tutmongo")
+	}
 	for _, test := range accTests {
 		t.Run("TestAccIT", test)
 	}
 }
 
 func TestAccITWithoutRemove(t *testing.T) {
-	accCfgPath = path.Join(*dataDir, "conf", "samples", "acc_balance_keep")
+	if *encoding == utils.MetaJSONrpc {
+		accCfgPath = path.Join(*dataDir, "conf", "samples", "acc_balance_keep")
+	} else if *encoding == utils.MetaGOBrpc {
+		accCfgPath = path.Join(*dataDir, "conf", "samples", "gob", "apier", "acc_balance_keep")
+	}
 	accExist = true
 	for _, test := range accTests {
 		t.Run("TestAccIT", test)
@@ -102,8 +109,7 @@ func testAccITStartEngine(t *testing.T) {
 
 func testAccITRPCConn(t *testing.T) {
 	var err error
-	accRPC, err = jsonrpc.Dial("tcp", accCfg.ListenCfg().RPCJSONListen)
-	if err != nil {
+	if accRPC, err = newRPCClient(accCfg.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -278,9 +284,14 @@ func testAccITAddBalance(t *testing.T) {
 
 func testAccITSetBalance(t *testing.T) {
 	var reply string
-	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "testAccSetBalance",
-		BalanceId:   utils.StringPointer("testAccSetBalance"),
-		BalanceType: "*monetary", Value: 1.5, Cdrlog: utils.BoolPointer(true)}
+	attrs := &utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "testAccSetBalance",
+		BalanceID:   utils.StringPointer("testAccSetBalance"),
+		BalanceType: "*monetary",
+		Value:       utils.Float64Pointer(1.5),
+		Cdrlog:      utils.BoolPointer(true),
+	}
 	if err := accRPC.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
 	} else if reply != "OK" {
@@ -303,10 +314,15 @@ func testAccITSetBalanceWithExtraData(t *testing.T) {
 		"ExtraField2": "RandomValue",
 	}
 	var reply string
-	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "testAccITSetBalanceWithExtraData",
-		BalanceId:   utils.StringPointer("testAccITSetBalanceWithExtraData"),
-		BalanceType: "*monetary", Value: 1.5, Cdrlog: utils.BoolPointer(true),
-		ExtraData: &extraDataMap}
+	attrs := &utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "testAccITSetBalanceWithExtraData",
+		BalanceID:   utils.StringPointer("testAccITSetBalanceWithExtraData"),
+		BalanceType: "*monetary",
+		Value:       utils.Float64Pointer(1.5),
+		Cdrlog:      utils.BoolPointer(true),
+		ExtraData:   &extraDataMap,
+	}
 	if err := accRPC.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
 	} else if reply != "OK" {
@@ -331,10 +347,15 @@ func testAccITSetBalanceWithExtraData2(t *testing.T) {
 		"ActionVal":  "~ActionValue",
 	}
 	var reply string
-	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "testAccITSetBalanceWithExtraData2",
-		BalanceId:   utils.StringPointer("testAccITSetBalanceWithExtraData2"),
-		BalanceType: "*monetary", Value: 1.5, Cdrlog: utils.BoolPointer(true),
-		ExtraData: &extraDataMap}
+	attrs := &utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "testAccITSetBalanceWithExtraData2",
+		BalanceID:   utils.StringPointer("testAccITSetBalanceWithExtraData2"),
+		BalanceType: "*monetary",
+		Value:       utils.Float64Pointer(1.5),
+		Cdrlog:      utils.BoolPointer(true),
+		ExtraData:   &extraDataMap,
+	}
 	if err := accRPC.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
 	} else if reply != "OK" {
@@ -443,7 +464,7 @@ func testAccITGetDisabledAccounts(t *testing.T) {
 	}
 
 	var acnts []*engine.Account
-	if err := accRPC.Call(utils.ApierV2GetAccount, utils.AttrGetAccounts{Tenant: "cgrates.org", Disabled: utils.BoolPointer(true)},
+	if err := accRPC.Call(utils.ApierV2GetAccounts, utils.AttrGetAccounts{Tenant: "cgrates.org", Disabled: utils.BoolPointer(true)},
 		&acnts); err != nil {
 		t.Error(err)
 	} else if len(acnts) != 3 {
