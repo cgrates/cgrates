@@ -131,7 +131,8 @@ func TestApierTPTiming(t *testing.T) {
 	tmAlways2 := new(utils.ApierTPTiming)
 	*tmAlways2 = *tmAlways
 	tmAlways2.ID = "ALWAYS2"
-	tmAsap := &utils.ApierTPTiming{TPid: utils.TEST_SQL,
+	tmAsap := &utils.ApierTPTiming{
+		TPid:      utils.TEST_SQL,
 		ID:        "ASAP",
 		Years:     "*any",
 		Months:    "*any",
