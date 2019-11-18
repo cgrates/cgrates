@@ -478,6 +478,12 @@ func (dm *DataManager) SetThreshold(th *Threshold) (err error) {
 	if err = dm.DataDB().SetThresholdDrv(th); err != nil {
 		return
 	}
+	if dm.rplConns != nil {
+		var reply string
+		if err = dm.rplConns.Call("ReplicatorSv1.SetThreshold", th, &reply); err != nil {
+			return
+		}
+	}
 	return
 }
 
@@ -505,6 +511,7 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, cacheRead, cacheWr
 			err = dm.rmtConns.Call(utils.ReplicatorSv1GetThresholdProfile,
 				&utils.TenantID{Tenant: tenant, ID: id}, &th)
 		}
+		err = utils.CastRPCErrToErr(err)
 		if err != nil {
 			if err == utils.ErrNotFound && cacheWrite {
 				Cache.Set(utils.CacheThresholdProfiles, tntID, nil, nil,
@@ -1137,17 +1144,17 @@ func (dm *DataManager) HasData(category, subject, tenant string) (has bool, err 
 func (dm *DataManager) GetFilterIndexes(cacheID, itemIDPrefix, filterType string,
 	fldNameVal map[string]string) (indexes map[string]utils.StringMap, err error) {
 	if indexes, err = dm.DataDB().GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType, fldNameVal); err != nil {
-		//if err == utils.ErrNotFound && len(dm.rmtDataDBs) != 0 {
-		//	var rmtErr error
-		//	for _, rmtDM := range dm.rmtDataDBs {
-		//		if indexes, rmtErr = rmtDM.GetFilterIndexes(cacheID, itemIDPrefix,
-		//			filterType, fldNameVal); rmtErr == nil {
-		//			break
-		//		}
-		//	}
-		//	err = rmtErr
-		//}
+		if err == utils.ErrNotFound && dm.rmtConns != nil {
+			err = dm.rmtConns.Call(utils.ReplicatorSv1GetFilterIndexes,
+				&utils.GetFilterIndexesArg{
+					CacheID:      cacheID,
+					ItemIDPrefix: itemIDPrefix,
+					FilterType:   filterType,
+					FldNameVal:   fldNameVal,
+				}, &indexes)
+		}
 		if err != nil {
+			err = utils.CastRPCErrToErr(err)
 			return nil, err
 		}
 	}
@@ -1159,6 +1166,17 @@ func (dm *DataManager) SetFilterIndexes(cacheID, itemIDPrefix string,
 	if err = dm.DataDB().SetFilterIndexesDrv(cacheID, itemIDPrefix,
 		indexes, commit, transactionID); err != nil {
 		return
+	}
+	if dm.rplConns != nil {
+		var reply string
+		if err = dm.rplConns.Call("ReplicatorSv1.SetFilterIndexes",
+			&utils.SetFilterIndexesArg{
+				CacheID:      cacheID,
+				ItemIDPrefix: itemIDPrefix,
+				Indexes:      indexes,
+			}, &reply); err != nil {
+			return
+		}
 	}
 	return
 }
@@ -1238,6 +1256,7 @@ func (dm *DataManager) GetSupplierProfile(tenant, id string, cacheRead, cacheWri
 				&utils.TenantID{Tenant: tenant, ID: id}, &supp)
 		}
 		if err != nil {
+			err = utils.CastRPCErrToErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
 				Cache.Set(utils.CacheSupplierProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID)
