@@ -22,7 +22,7 @@ import (
 	"io"
 )
 
-// Writer for one line, compatible with csv.Writer interface on Write
+// CgrRecordWriter is a writer for one line, compatible with csv.Writer interface on Write
 // Used in TP exporter
 type CgrRecordWriter interface {
 	Write([]string) error
@@ -39,6 +39,7 @@ type CgrIORecordWriter struct {
 	w io.Writer
 }
 
+// Write into the Writer the record
 func (rw *CgrIORecordWriter) Write(record []string) error {
 	for _, fld := range append(record, "\n") { // Postpend the new line char and write record in the writer
 		if _, err := io.WriteString(rw.w, fld); err != nil {
@@ -48,6 +49,7 @@ func (rw *CgrIORecordWriter) Write(record []string) error {
 	return nil
 }
 
+// Flush only to implement CgrRecordWriter
 // ToDo: make sure we properly handle this method
 func (*CgrIORecordWriter) Flush() {
 	return
