@@ -873,6 +873,7 @@ const (
 	ApierV2LoadTariffPlanFromFolder = "ApierV2.LoadTariffPlanFromFolder"
 	ApierV2GetCDRs                  = "ApierV2.GetCDRs"
 	ApierV2GetAccount               = "ApierV2.GetAccount"
+	ApierV2GetAccounts              = "ApierV2.GetAccounts"
 	ApierV2SetAccount               = "ApierV2.SetAccount"
 	ApierV2CountCDRs                = "ApierV2.CountCDRs"
 	ApierV2SetBalance               = "ApierV2.SetBalance"

@@ -1,0 +1,154 @@
+{
+// CGRateS Configuration file
+
+
+"general": {
+	"log_level": 7,
+	"reply_timeout": "30s",
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"data_db": {
+	"db_type": "mongo",
+	"db_name": "10",
+	"db_port": 27017,
+},
+
+
+"stor_db": {
+	"db_type": "mongo",
+	"db_name": "cgrates",
+	"db_port": 27017,
+},
+
+
+"rals": {
+	"enabled": true,
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
+	"max_increments":3000000,
+},
+
+
+"scheduler": {
+	"enabled": true,
+	"cdrs_conns": [
+		{"address": "127.0.0.1:2013", "transport":"*gob"},
+	],
+},
+
+
+"cdrs": {
+	"enabled": true,
+},
+
+
+"cdre": {
+	"TestTutITExportCDR": {
+		"content_fields": [
+			{"tag": "CGRID", "type": "*composed", "value": "~CGRID"},
+			{"tag": "RunID", "type": "*composed", "value": "~RunID"},
+			{"tag":"OriginID", "type": "*composed", "value": "~OriginID"},
+			{"tag":"RequestType", "type": "*composed", "value": "~RequestType"},
+			{"tag":"Tenant", "type": "*composed", "value": "~Tenant"},
+			{"tag":"Category", "type": "*composed", "value": "~Category"},
+			{"tag":"Account", "type": "*composed", "value": "~Account"},
+			{"tag":"Destination", "type": "*composed", "value": "~Destination"},
+			{"tag":"AnswerTime", "type": "*composed", "value": "~AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag":"Usage", "type": "*composed", "value": "~Usage"},
+			{"tag":"Cost", "type": "*composed", "value": "~Cost", "rounding_decimals": 4},
+			{"tag":"MatchedDestinationID", "type": "*composed", "value": "~CostDetails:s/\"MatchedDestId\":.*_(\\w{4})/${1}/:s/\"MatchedDestId\":\"INTERNAL\"/ON010/"},
+		],
+	},
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"resources": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"stats": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "1s",
+},
+
+
+"suppliers": {
+	"enabled": true,
+	"stats_conns": [
+		{"address": "127.0.0.1:2013", "transport":"*gob"},
+	],
+	"resources_conns": [
+		{"address": "127.0.0.1:2013", "transport":"*gob"},
+	],
+},
+
+
+"attributes": {							// Attribute service
+	"enabled": true,				// starts Attribute service: <true|false>.
+},
+
+
+"sessions": {
+	"enabled": true,
+	"rals_conns": [
+		{"address": "*internal"}
+	],
+	"cdrs_conns": [
+		{"address": "*internal"}
+	],
+	"chargers_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"migrator": {
+	"out_datadb_type": "mongo",
+	"out_datadb_port": "27017",
+	"out_datadb_name": "10",
+	"out_stordb_type": "mongo",
+	"out_stordb_port": "27017",
+	"out_stordb_name": "cgrates",
+	"users_filters":["Account"],
+},
+
+
+"apier": {
+	"scheduler_conns": [					// connections to SchedulerS for reloads
+		{"address": "*internal"},
+	],
+},
+
+
+}

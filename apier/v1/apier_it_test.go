@@ -21,6 +21,7 @@ package v1
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -67,6 +68,18 @@ var rater *rpc.Client
 
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 var waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for rater to start and cache")
+var encoding = flag.String("rpc", utils.MetaJSONrpc, "what encoding whould be uused for rpc comunication")
+
+func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
+	switch *encoding {
+	case utils.MetaJSONrpc:
+		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
+	case utils.MetaGOBrpc:
+		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+	default:
+		return nil, errors.New("UNSUPPORTED_RPC")
+	}
+}
 
 func TestApierLoadConfig(t *testing.T) {
 	var err error
