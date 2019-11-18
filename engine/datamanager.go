@@ -459,6 +459,7 @@ func (dm *DataManager) GetThreshold(tenant, id string,
 				&utils.TenantID{Tenant: tenant, ID: id}, &th)
 		}
 		if err != nil {
+			err = utils.CastRPCErrToErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
 				Cache.Set(utils.CacheThresholds, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID)
@@ -511,8 +512,8 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, cacheRead, cacheWr
 			err = dm.rmtConns.Call(utils.ReplicatorSv1GetThresholdProfile,
 				&utils.TenantID{Tenant: tenant, ID: id}, &th)
 		}
-		err = utils.CastRPCErrToErr(err)
 		if err != nil {
+			err = utils.CastRPCErrToErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
 				Cache.Set(utils.CacheThresholdProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID)
@@ -606,6 +607,7 @@ func (dm *DataManager) GetStatQueueProfile(tenant, id string, cacheRead, cacheWr
 				&utils.TenantID{Tenant: tenant, ID: id}, &sqp)
 		}
 		if err != nil {
+			err = utils.CastRPCErrToErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
 				Cache.Set(utils.CacheStatQueueProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID)
@@ -690,6 +692,7 @@ func (dm *DataManager) GetTiming(id string, skipCache bool,
 				id, &t)
 		}
 		if err != nil {
+			err = utils.CastRPCErrToErr(err)
 			if err == utils.ErrNotFound {
 				Cache.Set(utils.CacheTimings, id, nil, nil,
 					cacheCommit(transactionID), transactionID)
@@ -740,6 +743,7 @@ func (dm *DataManager) GetResource(tenant, id string, cacheRead, cacheWrite bool
 				&utils.TenantID{Tenant: tenant, ID: id}, &rs)
 		}
 		if err != nil {
+			err = utils.CastRPCErrToErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
 				Cache.Set(utils.CacheResources, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID)
@@ -787,6 +791,7 @@ func (dm *DataManager) GetResourceProfile(tenant, id string, cacheRead, cacheWri
 				&utils.TenantID{Tenant: tenant, ID: id}, &rp)
 		}
 		if err != nil {
+			err = utils.CastRPCErrToErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
 				Cache.Set(utils.CacheResourceProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID)
@@ -870,6 +875,7 @@ func (dm *DataManager) GetActionTriggers(id string, skipCache bool,
 				id, attrs)
 		}
 		if err != nil {
+			err = utils.CastRPCErrToErr(err)
 			if err == utils.ErrNotFound {
 				Cache.Set(utils.CacheActionTriggers, id, nil, nil,
 					cacheCommit(transactionID), transactionID)
@@ -919,6 +925,7 @@ func (dm *DataManager) GetSharedGroup(key string, skipCache bool,
 				key, &sg)
 		}
 		if err != nil {
+			err = utils.CastRPCErrToErr(err)
 			if err == utils.ErrNotFound {
 				Cache.Set(utils.CacheSharedGroups, key, nil, nil,
 					cacheCommit(transactionID), transactionID)
@@ -1056,6 +1063,7 @@ func (dm *DataManager) GetRatingPlan(key string, skipCache bool,
 				key, &rp)
 		}
 		if err != nil {
+			err = utils.CastRPCErrToErr(err)
 			if err == utils.ErrNotFound {
 				Cache.Set(utils.CacheRatingPlans, key, nil, nil,
 					cacheCommit(transactionID), transactionID)
@@ -1104,6 +1112,7 @@ func (dm *DataManager) GetRatingProfile(key string, skipCache bool,
 				key, &rpf)
 		}
 		if err != nil {
+			err = utils.CastRPCErrToErr(err)
 			if err == utils.ErrNotFound {
 				Cache.Set(utils.CacheRatingProfiles, key, nil, nil,
 					cacheCommit(transactionID), transactionID)
@@ -1345,6 +1354,7 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWr
 				&utils.TenantID{Tenant: tenant, ID: id}, &attrPrfl)
 		}
 		if err != nil {
+			err = utils.CastRPCErrToErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
 				Cache.Set(utils.CacheAttributeProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID)
@@ -1527,6 +1537,7 @@ func (dm *DataManager) GetDispatcherProfile(tenant, id string, cacheRead, cacheW
 				&utils.TenantID{Tenant: tenant, ID: id}, &dpp)
 		}
 		if err != nil {
+			err = utils.CastRPCErrToErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
 				Cache.Set(utils.CacheDispatcherProfiles, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID)
@@ -1621,6 +1632,7 @@ func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrit
 				&utils.TenantID{Tenant: tenant, ID: id}, &dH)
 		}
 		if err != nil {
+			err = utils.CastRPCErrToErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
 				Cache.Set(utils.CacheDispatcherHosts, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID)
@@ -1676,6 +1688,7 @@ func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loa
 				itemIDPrefix, &loadIDs)
 		}
 		if err != nil {
+			err = utils.CastRPCErrToErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
 				for key, _ := range loadIDs {
 					Cache.Set(utils.CacheLoadIDs, key, nil, nil,
