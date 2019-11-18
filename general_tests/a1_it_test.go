@@ -131,7 +131,7 @@ func testA1itLoadTPFromFolder(t *testing.T) {
 		TimeEnd:     tEnd,
 	}
 	var cc engine.CallCost
-	if err := a1rpc.Call("Responder.GetCost", cd, &cc); err != nil {
+	if err := a1rpc.Call(utils.ResponderGetCost, cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
 	} else if cc.Cost != 0.0 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc)
@@ -146,7 +146,7 @@ func testA1itLoadTPFromFolder(t *testing.T) {
 		Weight:       20,
 	}
 	var result string
-	if err := a1rpc.Call("ApierV1.SetChargerProfile", chargerProfile, &result); err != nil {
+	if err := a1rpc.Call(utils.ApierV1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

@@ -191,7 +191,7 @@ func testTPitTimings(t *testing.T) {
 	}
 	var rplyTmIDs []string
 	expectedTmIDs := []string{"OFFPEAK_EVENING", "OFFPEAK_MORNING", "OFFPEAK_WEEKEND", "PEAK", tmDummyRemove.ID}
-	if err := tpRPC.Call("ApierV1.GetTPTimingIds", v1.AttrGetTPTimingIds{testTPid, utils.PaginatorWithSearch{}}, &rplyTmIDs); err != nil {
+	if err := tpRPC.Call(utils.ApierV1GetTPTimingIds, v1.AttrGetTPTimingIds{testTPid, utils.PaginatorWithSearch{}}, &rplyTmIDs); err != nil {
 		t.Error("Calling ApierV1.GetTPTimingIds, got error: ", err.Error())
 	} else if len(expectedTmIDs) != len(rplyTmIDs) {
 		t.Errorf("Calling ApierV1.GetTPTimingIds expected: %v, received: %v", expectedTmIDs, rplyTmIDs)
@@ -205,7 +205,7 @@ func testTPitTimings(t *testing.T) {
 	// Test getIds
 	rplyTmIDs = []string{}
 	expectedTmIDs = []string{"OFFPEAK_EVENING", "OFFPEAK_MORNING", "OFFPEAK_WEEKEND", "PEAK"}
-	if err := tpRPC.Call("ApierV1.GetTPTimingIds", v1.AttrGetTPTimingIds{testTPid, utils.PaginatorWithSearch{}}, &rplyTmIDs); err != nil {
+	if err := tpRPC.Call(utils.ApierV1GetTPTimingIds, v1.AttrGetTPTimingIds{testTPid, utils.PaginatorWithSearch{}}, &rplyTmIDs); err != nil {
 		t.Error("Calling ApierV1.GetTPTimingIds, got error: ", err.Error())
 	} else if len(expectedTmIDs) != len(rplyTmIDs) {
 		t.Errorf("Calling ApierV1.GetTPTimingIds expected: %v, received: %v", expectedTmIDs, rplyTmIDs)

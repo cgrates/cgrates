@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdMaxDebit{
 		name:       "debit_max",
-		rpcMethod:  "Responder.MaxDebit",
+		rpcMethod:  utils.ResponderMaxDebit,
 		clientArgs: []string{"Direction", "Category", "TOR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
 	}
 	commands[c.Name()] = c

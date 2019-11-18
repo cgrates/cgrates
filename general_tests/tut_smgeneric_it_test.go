@@ -144,7 +144,7 @@ func TestTutSMGCacheStats(t *testing.T) {
 	expectedStats[utils.CacheActionTriggers].Items = 1
 	expectedStats[utils.CacheLoadIDs].Items = 20
 	expectedStats[utils.CacheChargerProfiles].Items = 1
-	if err := tutSMGRpc.Call("CacheSv1.GetCacheStats", nil, &rcvStats); err != nil {
+	if err := tutSMGRpc.Call(utils.CacheSv1GetCacheStats, nil, &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 		t.Errorf("Calling ApierV2.CacheSv1 expected: %+v,\n received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))

@@ -154,7 +154,7 @@ func testChargerSLoadAddCharger(t *testing.T) {
 	}
 
 	var result string
-	if err := chargerRPC.Call("ApierV1.SetChargerProfile", chargerProfile, &result); err != nil {
+	if err := chargerRPC.Call(utils.ApierV1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -257,7 +257,7 @@ func testChargerSSetChargerProfile(t *testing.T) {
 		},
 	}
 	var result string
-	if err := chargerRPC.Call("ApierV1.SetChargerProfile", chargerProfile, &result); err != nil {
+	if err := chargerRPC.Call(utils.ApierV1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -292,7 +292,7 @@ func testChargerSGetChargerProfileIDs(t *testing.T) {
 func testChargerSUpdateChargerProfile(t *testing.T) {
 	chargerProfile.RunID = "*rated"
 	var result string
-	if err := chargerRPC.Call("ApierV1.SetChargerProfile", chargerProfile, &result); err != nil {
+	if err := chargerRPC.Call(utils.ApierV1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

@@ -138,7 +138,7 @@ func durRemoteRater(cd *engine.CallDescriptorWithArgDispatcher) (time.Duration, 
 				client.Call(utils.ResponderGetCost, cd, &result)
 				<-sem
 				finish <- 1
-				// divCall = client.Go("Responder.GetCost", cd, &result, nil)
+				// divCall = client.Go(utils.ResponderGetCost, cd, &result, nil)
 			}()
 		}
 		for i := 0; i < *runs; i++ {

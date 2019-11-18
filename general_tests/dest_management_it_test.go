@@ -320,7 +320,7 @@ func testDestManagCacheWithGetCost(t *testing.T) {
 		TimeStart:   time.Date(2016, 2, 24, 0, 0, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2016, 2, 24, 0, 0, 10, 0, time.UTC),
 	}
-	if err := destRPC.Call("Responder.GetCost", cd, &cc); err != nil {
+	if err := destRPC.Call(utils.ResponderGetCost, cd, &cc); err != nil {
 		t.Error(err)
 	} else if cc.Cost != 1.6667 {
 		t.Error("Empty loadId received, loadInstance: ", utils.ToIJSON(cc))
@@ -339,7 +339,7 @@ func testDestManagCacheWithGetCost(t *testing.T) {
 		t.Errorf("Calling ApierV2.GetDestinations got reply: %v", utils.ToIJSON(dests))
 	}
 
-	if err := destRPC.Call("Responder.GetCost", cd, &cc); err.Error() != utils.ErrUnauthorizedDestination.Error() {
+	if err := destRPC.Call(utils.ResponderGetCost, cd, &cc); err.Error() != utils.ErrUnauthorizedDestination.Error() {
 		t.Error(err)
 	}
 }
