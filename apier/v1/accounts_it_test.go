@@ -23,6 +23,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
+	"reflect"
 	"testing"
 	"time"
 
@@ -52,6 +53,7 @@ var (
 		testAccITSetBalance,
 		testAccITSetBalanceWithExtraData,
 		testAccITSetBalanceWithExtraData2,
+		testAccITSetBalanceTimingIds,
 		testAccITAddBalanceWithNegative,
 		testAccITGetDisabledAccounts,
 		testAccITStopCgrEngine,
@@ -157,6 +159,74 @@ func testAccITAddVoiceBalance(t *testing.T) {
 	t.Run("TestAddVoiceBalance", func(t *testing.T) { testAccountBalance(t, accAcount, accTenant, utils.VOICE, 2*float64(time.Second)) })
 }
 
+func testAccITSetBalanceTimingIds(t *testing.T) {
+	tpTiming := &utils.ApierTPTiming{
+		TPid:      "TEST_TPID1",
+		ID:        "Timing",
+		Years:     "2017",
+		Months:    "05",
+		MonthDays: "01",
+		WeekDays:  "1",
+		Time:      "15:00:00Z",
+	}
+	var reply string
+	if err := accRPC.Call("ApierV1.SetTPTiming", tpTiming, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+
+	if err := accRPC.Call("ApierV1.LoadTariffPlanFromStorDb",
+		AttrLoadTpFromStorDb{TPid: "TEST_TPID1"}, &reply); err != nil {
+		t.Error("Got error on ApierV1.LoadTariffPlanFromStorDb: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling ApierV1.LoadTariffPlanFromStorDb got reply: ", reply)
+	}
+
+	args := &utils.AttrSetBalance{
+		Tenant:      accTenant,
+		Account:     accAcount,
+		TimingIds:   utils.StringPointer("Timing"),
+		BalanceType: utils.VOICE,
+		BalanceID:   utils.StringPointer("testBalanceID"),
+	}
+	if err := accRPC.Call(utils.ApierV1SetBalance, args, &reply); err != nil {
+		t.Error("Got error on SetBalance: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling SetBalance received: %s", reply)
+	}
+
+	// verify if Timing IDs is populated
+	var acnt engine.Account
+	attrAcc := &utils.AttrGetAccount{
+		Tenant:  accTenant,
+		Account: accAcount,
+	}
+	eOut := []*engine.RITiming{
+		{
+			Years:     utils.Years{2017},
+			Months:    utils.Months{05},
+			MonthDays: utils.MonthDays{1},
+			WeekDays:  utils.WeekDays{1},
+			StartTime: "15:00:00Z",
+			EndTime:   "",
+		},
+	}
+	if err := accRPC.Call("ApierV2.GetAccount", attrAcc, &acnt); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, value := range acnt.BalanceMap[utils.VOICE] {
+		// check only where balance ID is testBalanceID (SetBalance function call was made with this Balance ID)
+		if value.ID == "testBalanceID" {
+			if !reflect.DeepEqual(eOut, value.Timings) {
+				t.Errorf("\nExpecting %+v, \nreceived: %+v", utils.ToJSON(eOut), utils.ToJSON(value.Timings))
+			}
+			break
+		}
+	}
+}
+
 func testAccITDebitBalance(t *testing.T) {
 	time.Sleep(5 * time.Second)
 	var reply string
@@ -186,7 +256,7 @@ func testAccITAddBalance(t *testing.T) {
 	attrs := &AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testAccAddBalance",
-		BalanceType: "*monetary",
+		BalanceType: utils.MONETARY,
 		Value:       1.5,
 		Cdrlog:      utils.BoolPointer(true),
 	}
