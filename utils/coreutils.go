@@ -69,10 +69,13 @@ func init() {
 	startCGRateSTime = time.Now()
 }
 
+/*
 func GetTimeElapsedFromStart() string {
 	return time.Now().Sub(startCGRateSTime).Round(time.Second).String()
 }
+*/
 
+// GetStartTime return the Start time of engine (in UNIX format)
 func GetStartTime() string {
 	return startCGRateSTime.Format(time.UnixDate)
 }
@@ -112,7 +115,7 @@ func FirstNonEmpty(vals ...string) string {
 			return val
 		}
 	}
-	return ""
+	return EmptyString
 }
 
 func Sha1(attrs ...string) string {
