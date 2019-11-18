@@ -77,7 +77,7 @@ func testDspSessionAddBalacne(t *testing.T) {
 		RatingSubject: utils.StringPointer("*zero5ms"),
 	}
 	var reply string
-	if err := allEngine.RCP.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := allEngine.RCP.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -94,7 +94,7 @@ func testDspSessionAddBalacne(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v",
 			time.Duration(eAcntVal), time.Duration(acnt.BalanceMap[utils.VOICE].GetTotalValue()))
 	}
-	if err := allEngine2.RCP.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := allEngine2.RCP.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)

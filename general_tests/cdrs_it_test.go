@@ -511,7 +511,7 @@ func testV2CDRsSetThresholdProfile(t *testing.T) {
 
 	// Set Account
 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "testV2CDRsProcessCDR5"}
-	if err := cdrsRpc.Call("ApierV1.SetAccount", attrsSetAccount, &actreply); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV1SetAccount, attrsSetAccount, &actreply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if actreply != utils.OK {
 		t.Errorf("Calling ApierV1.SetAccount received: %s", actreply)

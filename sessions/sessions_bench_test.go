@@ -82,7 +82,7 @@ func addBalance(sBenchRPC *rpc.Client, sraccount string) {
 		Value:       utils.Float64Pointer(5 * float64(time.Hour)),
 	}
 	var reply string
-	if err := sBenchRPC.Call("ApierV2.SetBalance",
+	if err := sBenchRPC.Call(utils.ApierV2SetBalance,
 		attrSetBalance, &reply); err != nil {
 		log.Fatal(err)
 	}

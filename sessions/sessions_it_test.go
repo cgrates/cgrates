@@ -343,7 +343,7 @@ func TestSessionsItEventCostCompressing(t *testing.T) {
 		RatingSubject: utils.StringPointer("*zero50ms"),
 	}
 	var reply string
-	if err := sItRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := sItRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)

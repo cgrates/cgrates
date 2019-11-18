@@ -239,7 +239,7 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 		BalanceID:   utils.StringPointer("TestSessionsDataLastUsedMultipleData"),
 		Value:       utils.Float64Pointer(eAcntVal)}
 	var reply string
-	if err := sDataRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -498,7 +498,7 @@ func TestSessionsDataTTLExpired(t *testing.T) {
 		BalanceID:   utils.StringPointer("TestSessionsDataTTLExpired"),
 		Value:       utils.Float64Pointer(eAcntVal)}
 	var reply string
-	if err := sDataRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -572,7 +572,7 @@ func TestSessionsDataTTLExpMultiUpdates(t *testing.T) {
 		BalanceID:   utils.StringPointer("TestSessionsDataTTLExpMultiUpdates"),
 		Value:       utils.Float64Pointer(eAcntVal)}
 	var reply string
-	if err := sDataRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -695,7 +695,7 @@ func TestSessionsDataMultipleDataNoUsage(t *testing.T) {
 		BalanceID:   utils.StringPointer("TestSessionsDataTTLExpMultiUpdates"),
 		Value:       utils.Float64Pointer(eAcntVal)}
 	var reply string
-	if err := sDataRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -900,7 +900,7 @@ func TestSessionsDataTTLUsageProtection(t *testing.T) {
 		Value:       utils.Float64Pointer(eAcntVal),
 	}
 	var reply string
-	if err := sDataRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)

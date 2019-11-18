@@ -104,7 +104,7 @@ func TestApierV2itAddBalance(t *testing.T) {
 		Weight:      utils.Float64Pointer(10.0),
 	}
 	var reply string
-	if err := apierRPC.Call("ApierV2.SetBalance", attrs, &reply); err != nil {
+	if err := apierRPC.Call(utils.ApierV2SetBalance, attrs, &reply); err != nil {
 		t.Fatal(err)
 	}
 	var acnt engine.Account
@@ -172,7 +172,7 @@ func TestApierV2itFraudMitigation(t *testing.T) {
 		Weight:      utils.Float64Pointer(10.0),
 	}
 	var reply string
-	if err := apierRPC.Call("ApierV2.SetBalance", attrs, &reply); err != nil {
+	if err := apierRPC.Call(utils.ApierV2SetBalance, attrs, &reply); err != nil {
 		t.Fatal(err)
 	}
 	var acnt engine.Account
@@ -315,7 +315,7 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 func TestApierV2itSetActionWithCategory(t *testing.T) {
 	var reply string
 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "TestApierV2itSetActionWithCategory"}
-	if err := apierRPC.Call("ApierV1.SetAccount", attrsSetAccount, &reply); err != nil {
+	if err := apierRPC.Call(utils.ApierV1SetAccount, attrsSetAccount, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)

@@ -79,7 +79,7 @@ func TestActionsitRpcConn(t *testing.T) {
 func TestActionsitSetCdrlogDebit(t *testing.T) {
 	var reply string
 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan2904"}
-	if err := actsLclRpc.Call("ApierV1.SetAccount", attrsSetAccount, &reply); err != nil {
+	if err := actsLclRpc.Call(utils.ApierV1SetAccount, attrsSetAccount, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
@@ -122,7 +122,7 @@ func TestActionsitSetCdrlogDebit(t *testing.T) {
 func TestActionsitSetCdrlogTopup(t *testing.T) {
 	var reply string
 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan2905"}
-	if err := actsLclRpc.Call("ApierV1.SetAccount", attrsSetAccount, &reply); err != nil {
+	if err := actsLclRpc.Call(utils.ApierV1SetAccount, attrsSetAccount, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
@@ -241,7 +241,7 @@ func TestActionsitThresholdCDrLog(t *testing.T) {
 	var reply string
 
 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "th_acc"}
-	if err := actsLclRpc.Call("ApierV1.SetAccount", attrsSetAccount, &reply); err != nil {
+	if err := actsLclRpc.Call(utils.ApierV1SetAccount, attrsSetAccount, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
@@ -366,7 +366,7 @@ func TestActionsitCDRAccount(t *testing.T) {
 		Value:       float64(30 * time.Second),
 		Overwrite:   true,
 	}
-	if err := actsLclRpc.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
+	if err := actsLclRpc.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)

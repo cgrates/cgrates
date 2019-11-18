@@ -865,7 +865,7 @@ func testDiamInitWithSessionDisconnect(t *testing.T) {
 		Value:         utils.Float64Pointer(1 * float64(time.Second)),
 		RatingSubject: utils.StringPointer("*zero1ms")}
 	var reply string
-	if err := apierRpc.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := apierRpc.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)

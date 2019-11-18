@@ -116,7 +116,7 @@ func TestSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		Value:         utils.Float64Pointer(0.01 * float64(time.Second)),
 		RatingSubject: utils.StringPointer("*zero1ms")}
 	var reply string
-	if err := sessionsRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := sessionsRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -237,7 +237,7 @@ func TestSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 		Value:         utils.Float64Pointer(1 * float64(time.Second)),
 		RatingSubject: utils.StringPointer("*zero1ms")}
 	var reply string
-	if err := sessionsRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := sessionsRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)

@@ -131,7 +131,7 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 		Weight:      utils.Float64Pointer(10.0),
 	}
 	var reply string
-	if err := cdrsOfflineRpc.Call("ApierV2.SetBalance", attrs, &reply); err != nil {
+	if err := cdrsOfflineRpc.Call(utils.ApierV2SetBalance, attrs, &reply); err != nil {
 		t.Fatal(err)
 	}
 	var acnt *engine.Account
@@ -338,11 +338,11 @@ func testV2CDRsBalancesWithSameWeight(t *testing.T) {
 		Weight:      utils.Float64Pointer(10.0),
 	}
 	var reply string
-	if err := cdrsOfflineRpc.Call("ApierV2.SetBalance", attrs, &reply); err != nil {
+	if err := cdrsOfflineRpc.Call(utils.ApierV2SetBalance, attrs, &reply); err != nil {
 		t.Fatal(err)
 	}
 	attrs.BalanceID = utils.StringPointer("SpecialBalance2")
-	if err := cdrsOfflineRpc.Call("ApierV2.SetBalance", attrs, &reply); err != nil {
+	if err := cdrsOfflineRpc.Call(utils.ApierV2SetBalance, attrs, &reply); err != nil {
 		t.Fatal(err)
 	}
 	var acnt *engine.Account
