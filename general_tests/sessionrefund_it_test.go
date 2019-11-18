@@ -128,7 +128,7 @@ func testSrItAddVoiceBalance(t *testing.T) {
 		RatingSubject: utils.StringPointer("*zero5ms"),
 	}
 	var reply string
-	if err := srrpc.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := srrpc.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -215,7 +215,7 @@ func testSrItAddMonetaryBalance(t *testing.T) {
 		Value:       utils.Float64Pointer(10.65),
 	}
 	var reply string
-	if err := srrpc.Call("ApierV2.SetBalance", attrs, &reply); err != nil {
+	if err := srrpc.Call(utils.ApierV2SetBalance, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)

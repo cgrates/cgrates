@@ -114,7 +114,7 @@ func testAccountBalance(t *testing.T, sracc, srten, balType string, expected flo
 		Tenant:  srten,
 		Account: sracc,
 	}
-	if err := accRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	if err := accRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[balType].GetTotalValue(); rply != expected {
 		t.Errorf("Expecting: %v, received: %v",
@@ -128,7 +128,7 @@ func testBalanceIfExists(t *testing.T, acc, ten, balType, balID string) (has boo
 		Tenant:  ten,
 		Account: acc,
 	}
-	if err := accRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	if err := accRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 		return false
 	}
@@ -151,7 +151,7 @@ func testAccITAddVoiceBalance(t *testing.T) {
 		ExpiryTime:    utils.StringPointer(time.Now().Add(5 * time.Second).Format("2006-01-02 15:04:05")),
 	}
 	var reply string
-	if err := accRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := accRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -230,7 +230,7 @@ func testAccITSetBalanceTimingIds(t *testing.T) {
 func testAccITDebitBalance(t *testing.T) {
 	time.Sleep(5 * time.Second)
 	var reply string
-	if err := accRPC.Call("ApierV1.DebitBalance", &AttrAddBalance{
+	if err := accRPC.Call(utils.ApierV1DebitBalance, &AttrAddBalance{
 		Tenant:      accTenant,
 		Account:     accAcount,
 		BalanceType: utils.VOICE,
@@ -260,7 +260,7 @@ func testAccITAddBalance(t *testing.T) {
 		Value:       1.5,
 		Cdrlog:      utils.BoolPointer(true),
 	}
-	if err := accRPC.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
+	if err := accRPC.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
@@ -281,7 +281,7 @@ func testAccITSetBalance(t *testing.T) {
 	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "testAccSetBalance",
 		BalanceId:   utils.StringPointer("testAccSetBalance"),
 		BalanceType: "*monetary", Value: 1.5, Cdrlog: utils.BoolPointer(true)}
-	if err := accRPC.Call("ApierV1.SetBalance", attrs, &reply); err != nil {
+	if err := accRPC.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.SetBalance received: %s", reply)
@@ -307,7 +307,7 @@ func testAccITSetBalanceWithExtraData(t *testing.T) {
 		BalanceId:   utils.StringPointer("testAccITSetBalanceWithExtraData"),
 		BalanceType: "*monetary", Value: 1.5, Cdrlog: utils.BoolPointer(true),
 		ExtraData: &extraDataMap}
-	if err := accRPC.Call("ApierV1.SetBalance", attrs, &reply); err != nil {
+	if err := accRPC.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.SetBalance received: %s", reply)
@@ -335,7 +335,7 @@ func testAccITSetBalanceWithExtraData2(t *testing.T) {
 		BalanceId:   utils.StringPointer("testAccITSetBalanceWithExtraData2"),
 		BalanceType: "*monetary", Value: 1.5, Cdrlog: utils.BoolPointer(true),
 		ExtraData: &extraDataMap}
-	if err := accRPC.Call("ApierV1.SetBalance", attrs, &reply); err != nil {
+	if err := accRPC.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.SetBalance received: %s", reply)
@@ -362,7 +362,7 @@ func testAccITAddBalanceWithNegative(t *testing.T) {
 		Account: "AddBalanceWithNegative",
 	}
 
-	if err := accRPC.Call("ApierV2.GetAccount", attrAcc, &acnt); err.Error() != utils.ErrNotFound.Error() {
+	if err := accRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
@@ -374,7 +374,7 @@ func testAccITAddBalanceWithNegative(t *testing.T) {
 		BalanceType: "*monetary",
 		Value:       -3.5,
 	}
-	if err := accRPC.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
+	if err := accRPC.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
@@ -386,13 +386,13 @@ func testAccITAddBalanceWithNegative(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "AddBalanceWithNegative",
 	}
-	if err := accRPC.Call("ApierV2.GetAccount", attrAcc, &acnt); err != nil {
+	if err := accRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 3.5 {
 		t.Errorf("Unexpected balance received : %+v", acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 
-	if err := accRPC.Call("ApierV1.DebitBalance", &AttrAddBalance{
+	if err := accRPC.Call(utils.ApierV1DebitBalance, &AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     "AddBalanceWithNegative",
 		BalanceType: utils.MONETARY,
@@ -403,13 +403,13 @@ func testAccITAddBalanceWithNegative(t *testing.T) {
 		t.Errorf("Received: %s", reply)
 	}
 
-	if err := accRPC.Call("ApierV2.GetAccount", attrAcc, &acnt); err != nil {
+	if err := accRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 1.5 {
 		t.Errorf("Unexpected balance received : %+v", acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 
-	if err := accRPC.Call("ApierV1.DebitBalance", &AttrAddBalance{
+	if err := accRPC.Call(utils.ApierV1DebitBalance, &AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     "AddBalanceWithNegative",
 		BalanceType: utils.MONETARY,
@@ -420,7 +420,7 @@ func testAccITAddBalanceWithNegative(t *testing.T) {
 		t.Errorf("Received: %s", reply)
 	}
 
-	if err := accRPC.Call("ApierV2.GetAccount", attrAcc, &acnt); err != nil {
+	if err := accRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 0.5 {
 		t.Errorf("Unexpected balance received : %+v", acnt.BalanceMap[utils.MONETARY].GetTotalValue())
@@ -435,7 +435,7 @@ func testAccITGetDisabledAccounts(t *testing.T) {
 	acnt4 := utils.AttrSetAccount{Tenant: "cgrates.org", Account: "account4", Disabled: utils.BoolPointer(true)}
 
 	for _, account := range []utils.AttrSetAccount{acnt1, acnt2, acnt3, acnt4} {
-		if err := accRPC.Call("ApierV1.SetAccount", account, &reply); err != nil {
+		if err := accRPC.Call(utils.ApierV1SetAccount, account, &reply); err != nil {
 			t.Error(err)
 		} else if reply != utils.OK {
 			t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
@@ -443,7 +443,7 @@ func testAccITGetDisabledAccounts(t *testing.T) {
 	}
 
 	var acnts []*engine.Account
-	if err := accRPC.Call("ApierV2.GetAccounts", utils.AttrGetAccounts{Tenant: "cgrates.org", Disabled: utils.BoolPointer(true)},
+	if err := accRPC.Call(utils.ApierV2GetAccount, utils.AttrGetAccounts{Tenant: "cgrates.org", Disabled: utils.BoolPointer(true)},
 		&acnts); err != nil {
 		t.Error(err)
 	} else if len(acnts) != 3 {

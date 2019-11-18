@@ -158,7 +158,7 @@ func testA1itAddBalance1(t *testing.T) {
 	argAdd := &v1.AttrAddBalance{Tenant: "cgrates.org", Account: "rpdata1",
 		BalanceType: utils.DATA, BalanceId: utils.StringPointer("rpdata1_test"),
 		Value: 10000000000}
-	if err := a1rpc.Call("ApierV1.AddBalance", argAdd, &reply); err != nil {
+	if err := a1rpc.Call(utils.ApierV1AddBalance, argAdd, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf(reply)

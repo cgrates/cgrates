@@ -227,7 +227,7 @@ func testActionsExecuteRemoveSMCos2(t *testing.T) {
 func testActionsUpdateBalance(t *testing.T) {
 	var reply string
 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "testAcc"}
-	if err := actsRPC.Call("ApierV1.SetAccount", attrsSetAccount, &reply); err != nil {
+	if err := actsRPC.Call(utils.ApierV1SetAccount, attrsSetAccount, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)

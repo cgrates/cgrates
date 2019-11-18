@@ -66,7 +66,6 @@ var cfg *config.CGRConfig
 var rater *rpc.Client
 
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-var storDbType = flag.String("stordb_type", "mysql", "The type of the storDb database <mysql>")
 var waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for rater to start and cache")
 
 func TestApierLoadConfig(t *testing.T) {
@@ -917,43 +916,43 @@ func TestApierRemoveRatingPlan(t *testing.T) {
 func TestApierAddBalance(t *testing.T) {
 	reply := ""
 	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "1001", BalanceType: "*monetary", Value: 1.5}
-	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
+	if err := rater.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
 	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan", BalanceType: "*monetary", Value: 1.5}
-	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
+	if err := rater.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
 	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan2", BalanceType: "*monetary", Value: 1.5}
-	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
+	if err := rater.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
 	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan3", BalanceType: "*monetary", Value: 1.5}
-	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
+	if err := rater.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
 	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan3", BalanceType: "*monetary", Value: 2.1}
-	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
+	if err := rater.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
 	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan6", BalanceType: "*monetary", Value: 2.1}
-	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
+	if err := rater.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
 	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan6", BalanceType: "*monetary", Value: 1, Overwrite: true}
-	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
+	if err := rater.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
@@ -1027,7 +1026,7 @@ func TestApierSetActionPlan(t *testing.T) {
 func TestApierAddTriggeredAction(t *testing.T) {
 	var reply string
 	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "dan32", BalanceType: "*monetary", Value: 1.5}
-	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
+	if err := rater.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
@@ -1159,7 +1158,7 @@ func TestApierRemAccountActionTriggers(t *testing.T) {
 func TestApierSetAccount(t *testing.T) {
 	reply := ""
 	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan7", ActionPlanId: "ATMS_1", ReloadScheduler: true}
-	if err := rater.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
+	if err := rater.Call(utils.ApierV1SetAccount, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
@@ -1169,7 +1168,7 @@ func TestApierSetAccount(t *testing.T) {
 	*attrs2 = *attrs
 	attrs2.ActionPlanId = "DUMMY_DATA" // Does not exist so it should error when adding triggers on it
 	// Add account with actions timing which does not exist
-	if err := rater.Call("ApierV1.SetAccount", attrs2, &reply2); err == nil || reply2 == "OK" { // OK is not welcomed
+	if err := rater.Call(utils.ApierV1SetAccount, attrs2, &reply2); err == nil || reply2 == "OK" { // OK is not welcomed
 		t.Error("Expecting error on ApierV1.SetAccount.", err, reply2)
 	}
 }
@@ -1260,13 +1259,13 @@ func TestApierGetAccount(t *testing.T) {
 func TestApierTriggersExecute(t *testing.T) {
 	reply := ""
 	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan8", ReloadScheduler: true}
-	if err := rater.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
+	if err := rater.Call(utils.ApierV1SetAccount, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
 	}
 	attrAddBlnc := &AttrAddBalance{Tenant: "cgrates.org", Account: "1008", BalanceType: "*monetary", Value: 2}
-	if err := rater.Call("ApierV1.AddBalance", attrAddBlnc, &reply); err != nil {
+	if err := rater.Call(utils.ApierV1AddBalance, attrAddBlnc, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)

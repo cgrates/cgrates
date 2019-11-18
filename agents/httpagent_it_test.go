@@ -193,7 +193,7 @@ func testHAitAuth1001(t *testing.T) {
 		RatingSubject: utils.StringPointer("*zero5ms"),
 	}
 	var reply string
-	if err := haRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := haRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)

@@ -134,7 +134,7 @@ func testV1DataDataDebitUsageWith10Kilo(t *testing.T) {
 		RatingSubject: utils.StringPointer("*zero10000ns"),
 	}
 	var reply string
-	if err := dataRpc.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := dataRpc.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -211,7 +211,7 @@ func testV1DataDebitBalanceWith10Kilo(t *testing.T) {
 		RatingSubject: utils.StringPointer("*zero10000ns"),
 	}
 	var reply string
-	if err := dataRpc.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := dataRpc.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -230,7 +230,7 @@ func testV1DataDebitBalanceWith10Kilo(t *testing.T) {
 			expected, rply)
 	}
 	tStart := time.Now()
-	if err := dataRpc.Call("ApierV1.DebitBalance", &v1.AttrAddBalance{
+	if err := dataRpc.Call(utils.ApierV1DebitBalance, &v1.AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testV1DataDebitBalance",
 		BalanceType: utils.DATA,
@@ -268,7 +268,7 @@ func testV1DataDataDebitUsage1G0(t *testing.T) {
 		RatingSubject: utils.StringPointer("*zero10000ns"),
 	}
 	var reply string
-	if err := dataRpc.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := dataRpc.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -345,7 +345,7 @@ func testV1DataDebitBalance1G0(t *testing.T) {
 		RatingSubject: utils.StringPointer("*zero10000ns"),
 	}
 	var reply string
-	if err := dataRpc.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := dataRpc.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -364,7 +364,7 @@ func testV1DataDebitBalance1G0(t *testing.T) {
 			expected, rply)
 	}
 	tStart := time.Now()
-	if err := dataRpc.Call("ApierV1.DebitBalance", &v1.AttrAddBalance{
+	if err := dataRpc.Call(utils.ApierV1DebitBalance, &v1.AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testV1DataDebitBalance1G0",
 		BalanceType: utils.DATA,
@@ -402,7 +402,7 @@ func testV1DataInitSession(t *testing.T) {
 		RatingSubject: utils.StringPointer("*zero10000ns"),
 	}
 	var reply string
-	if err := dataRpc.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := dataRpc.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)

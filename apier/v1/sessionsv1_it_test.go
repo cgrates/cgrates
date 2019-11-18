@@ -839,7 +839,7 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 		Value:         utils.Float64Pointer(2 * float64(time.Second)),
 		RatingSubject: utils.StringPointer("*zero5ms")}
 	var reply string
-	if err := sSApierRpc.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := sSApierRpc.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)

@@ -126,7 +126,7 @@ func testSesItAddVoiceBalance(t *testing.T) {
 		RatingSubject: utils.StringPointer("*zero1s"),
 	}
 	var reply string
-	if err := sesRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := sesRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)

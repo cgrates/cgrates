@@ -118,7 +118,7 @@ func testSes2ItInitSession(t *testing.T) {
 		Value:       utils.Float64Pointer(float64(time.Hour)),
 	}
 	var reply string
-	if err := ses2RPC.Call("ApierV2.SetBalance",
+	if err := ses2RPC.Call(utils.ApierV2SetBalance,
 		attrSetBalance, &reply); err != nil {
 		t.Fatal(err)
 	}

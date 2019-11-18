@@ -23,7 +23,7 @@ import "github.com/cgrates/cgrates/apier/v1"
 func init() {
 	c := &CmdBalanceDebit{
 		name:      "balance_debit",
-		rpcMethod: "ApierV1.DebitBalance",
+		rpcMethod: utils.ApierV1DebitBalance,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

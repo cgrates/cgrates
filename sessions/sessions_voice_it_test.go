@@ -900,7 +900,7 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 		RatingSubject: utils.StringPointer("*zero50ms"),
 	}
 	var reply string
-	if err := sessionsRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := sessionsRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -1069,7 +1069,7 @@ func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		RatingSubject: utils.StringPointer("*zero1s"),
 	}
 	var reply string
-	if err := sessionsRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+	if err := sessionsRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
