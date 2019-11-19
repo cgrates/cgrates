@@ -63,7 +63,7 @@ func (apiv1 *ApierV1) Call(serviceMethod string,
 }
 
 func (apiv1 *ApierV1) GetDestination(dstId string, reply *engine.Destination) error {
-	if dst, err := apiv1.DataManager.DataDB().GetDestination(dstId, false, utils.NonTransactional); err != nil {
+	if dst, err := apiv1.DataManager.GetDestination(dstId, false, utils.NonTransactional); err != nil {
 		return utils.ErrNotFound
 	} else {
 		*reply = *dst
@@ -79,7 +79,7 @@ type AttrRemoveDestination struct {
 func (apiv1 *ApierV1) RemoveDestination(attr AttrRemoveDestination, reply *string) (err error) {
 	for _, dstID := range attr.DestinationIDs {
 		if len(attr.Prefixes) == 0 {
-			if err = apiv1.DataManager.DataDB().RemoveDestination(dstID, utils.NonTransactional); err != nil {
+			if err = apiv1.DataManager.RemoveDestination(dstID, utils.NonTransactional); err != nil {
 				*reply = err.Error()
 				break
 			} else {
@@ -101,7 +101,7 @@ func (apiv1 *ApierV1) GetReverseDestination(prefix string, reply *[]string) (err
 		return utils.NewErrMandatoryIeMissing("prefix")
 	}
 	var revLst []string
-	if revLst, err = apiv1.DataManager.DataDB().GetReverseDestination(prefix, false, utils.NonTransactional); err != nil {
+	if revLst, err = apiv1.DataManager.GetReverseDestination(prefix, false, utils.NonTransactional); err != nil {
 		return
 	}
 	*reply = revLst
@@ -143,20 +143,20 @@ func (apiv1 *ApierV1) SetDestination(attrs utils.AttrSetDestination, reply *stri
 	}
 	dest := &engine.Destination{Id: attrs.Id, Prefixes: attrs.Prefixes}
 	var oldDest *engine.Destination
-	if oldDest, err = apiv1.DataManager.DataDB().GetDestination(attrs.Id, false, utils.NonTransactional); err != nil {
+	if oldDest, err = apiv1.DataManager.GetDestination(attrs.Id, false, utils.NonTransactional); err != nil {
 		if err != utils.ErrNotFound {
 			return utils.NewErrServerError(err)
 		}
 	} else if !attrs.Overwrite {
 		return utils.ErrExists
 	}
-	if err := apiv1.DataManager.DataDB().SetDestination(dest, utils.NonTransactional); err != nil {
+	if err := apiv1.DataManager.SetDestination(dest, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if err = apiv1.DataManager.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{attrs.Id}, true); err != nil {
 		return
 	}
-	if err = apiv1.DataManager.DataDB().UpdateReverseDestination(oldDest, dest, utils.NonTransactional); err != nil {
+	if err = apiv1.DataManager.UpdateReverseDestination(oldDest, dest, utils.NonTransactional); err != nil {
 		return
 	}
 	if err = apiv1.DataManager.CacheDataFromDB(utils.REVERSE_DESTINATION_PREFIX, dest.Prefixes, true); err != nil {

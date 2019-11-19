@@ -73,7 +73,7 @@ func TestMsgpackTime(t *testing.T) {
 }
 
 func TestStorageDestinationContainsPrefixShort(t *testing.T) {
-	dest, err := dm.DataDB().GetDestination("NAT", true, utils.NonTransactional)
+	dest, err := dm.GetDestination("NAT", true, utils.NonTransactional)
 	precision := dest.containsPrefix("0723")
 	if err != nil || precision != 4 {
 		t.Error("Error finding prefix: ", err, precision)
@@ -81,7 +81,7 @@ func TestStorageDestinationContainsPrefixShort(t *testing.T) {
 }
 
 func TestStorageDestinationContainsPrefixLong(t *testing.T) {
-	dest, err := dm.DataDB().GetDestination("NAT", true, utils.NonTransactional)
+	dest, err := dm.GetDestination("NAT", true, utils.NonTransactional)
 	precision := dest.containsPrefix("0723045326")
 	if err != nil || precision != 4 {
 		t.Error("Error finding prefix: ", err, precision)
@@ -89,7 +89,7 @@ func TestStorageDestinationContainsPrefixLong(t *testing.T) {
 }
 
 func TestStorageDestinationContainsPrefixNotExisting(t *testing.T) {
-	dest, err := dm.DataDB().GetDestination("NAT", true, utils.NonTransactional)
+	dest, err := dm.GetDestination("NAT", true, utils.NonTransactional)
 	precision := dest.containsPrefix("072")
 	if err != nil || precision != 0 {
 		t.Error("Error finding prefix: ", err, precision)
@@ -98,15 +98,15 @@ func TestStorageDestinationContainsPrefixNotExisting(t *testing.T) {
 
 /*
 func TestStorageCacheRefresh(t *testing.T) {
-	dm.DataDB().SetDestination(&Destination{"T11", []string{"0"}}, utils.NonTransactional)
-	dm.DataDB().GetDestination("T11", false, utils.NonTransactional)
-	dm.DataDB().SetDestination(&Destination{"T11", []string{"1"}}, utils.NonTransactional)
+	dm.SetDestination(&Destination{"T11", []string{"0"}}, utils.NonTransactional)
+	dm.GetDestination("T11", false, utils.NonTransactional)
+	dm.SetDestination(&Destination{"T11", []string{"1"}}, utils.NonTransactional)
 	t.Log("Test cache refresh")
 	err := dm.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		t.Error("Error cache rating: ", err)
 	}
-	d, err := dm.DataDB().GetDestination("T11", false, utils.NonTransactional)
+	d, err := dm.GetDestination("T11", false, utils.NonTransactional)
 	p := d.containsPrefix("1")
 	if err != nil || p == 0 {
 		t.Error("Error refreshing cache:", d)

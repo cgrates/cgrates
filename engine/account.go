@@ -301,7 +301,7 @@ func (ub *Account) getBalancesForPrefix(prefix, category, tor,
 
 		if len(b.DestinationIDs) > 0 && b.DestinationIDs[utils.ANY] == false {
 			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
-				if destIDs, err := dm.DataDB().GetReverseDestination(p, false, utils.NonTransactional); err == nil {
+				if destIDs, err := dm.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 					foundResult := false
 					allInclude := true // whether it is excluded or included
 					for _, dId := range destIDs {

@@ -71,7 +71,7 @@ var sTestsInternalRemoteIT = []func(t *testing.T){
 	testInternalRemoteITGetAction,
 	testInternalRemoteITGetActionPlan,
 	testInternalRemoteITGetAccountActionPlan,
-	//testInternalReplicationSetThreshold,
+	testInternalReplicationSetThreshold,
 	testInternalRemoteITKillEngine,
 }
 
@@ -571,7 +571,6 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 	var indexes []string
 	expectedIDX := []string{"*string:~Account:1001:THD_ACNT_1001",
 		"*string:~Account:1002:THD_ACNT_1002"}
-	// verify index on engine2
 	if err := engineTwoRPC.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: "cgrates.org", FilterType: utils.MetaString},
 		&indexes); err != nil {
@@ -582,6 +581,18 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v",
 			expectedIDX, utils.ToJSON(indexes))
 	}
+	//verify indexes on internal before adding new threshold profile
+	if err := internalRPC.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
+		ItemType: utils.MetaThresholds, Tenant: "cgrates.org", FilterType: utils.MetaString},
+		&indexes); err != nil {
+		t.Error(err)
+	}
+	sort.Strings(indexes)
+	if !reflect.DeepEqual(expectedIDX, indexes) {
+		t.Errorf("Expecting: %+v, received: %+v",
+			expectedIDX, utils.ToJSON(indexes))
+	}
+
 	tPrfl := &ThresholdWithCache{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
@@ -604,66 +615,70 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	//if err := internalRPC.Call("ApierV1.GetThresholdProfile",
-	//	&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Replication"}, &reply); err != nil {
-	//	t.Error(err)
-	//} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
-	//	t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
-	//}
-	//expectedIDX = []string{"*string:~Account:1001:THD_Replication",
-	//	"*string:~CustomField:CustomValue:THD_Replication"}
-	//// verify index on internal
-	//sort.Strings(expectedIDX)
-	//if err := internalRPC.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-	//	ItemType: utils.MetaThresholds, Tenant: "cgrates.org", FilterType: utils.MetaString},
-	//	&indexes); err != nil {
-	//	t.Error(err)
-	//}
-	//sort.Strings(indexes)
-	//if !reflect.DeepEqual(expectedIDX, indexes) {
-	//	t.Errorf("Expecting: %+v, received: %+v",
-	//		expectedIDX, utils.ToJSON(indexes))
-	//}
-	//// verify data on engine1
-	//if err := engineOneRPC.Call("ApierV1.GetThresholdProfile",
-	//	&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Replication"}, &reply); err != nil {
-	//	t.Error(err)
-	//} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
-	//	t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
-	//}
-	//// verify indexes on engine1 (should be the same as internal)
-	//if err := engineOneRPC.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-	//	ItemType: utils.MetaThresholds, Tenant: "cgrates.org", FilterType: utils.MetaString},
-	//	&indexes); err != nil {
-	//	t.Error(err)
-	//}
-	//sort.Strings(indexes)
-	//if !reflect.DeepEqual(expectedIDX, indexes) {
-	//	t.Errorf("Expecting: %+v, received: %+v",
-	//		expectedIDX, utils.ToJSON(indexes))
-	//}
-	//// verify data on engine2
-	//if err := engineTwoRPC.Call("ApierV1.GetThresholdProfile",
-	//	&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Replication"}, &reply); err != nil {
-	//	t.Error(err)
-	//} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
-	//	t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
-	//}
-	//expectedIDX = []string{"*string:~Account:1001:THD_ACNT_1001",
-	//	"*string:~Account:1001:THD_Replication",
-	//	"*string:~Account:1001:THD_ACNT_1002",
-	//	"*string:~CustomField:CustomValue:THD_Replication"}
-	//// check if indexes was created correctly on engine2
-	//if err := engineTwoRPC.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
-	//	ItemType: utils.MetaThresholds, Tenant: "cgrates.org", FilterType: utils.MetaString},
-	//	&indexes); err != nil {
-	//	t.Error(err)
-	//}
-	//sort.Strings(indexes)
-	//if !reflect.DeepEqual(expectedIDX, indexes) {
-	//	t.Errorf("Expecting: %+v,\n received: %+v",
-	//		expectedIDX, utils.ToJSON(indexes))
-	//}
+	if err := internalRPC.Call("ApierV1.GetThresholdProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Replication"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
+	}
+	expectedIDX = []string{
+		"*string:~Account:1001:THD_ACNT_1001",
+		"*string:~Account:1001:THD_Replication",
+		"*string:~CustomField:CustomValue:THD_Replication",
+	}
+	// verify index on internal
+	sort.Strings(expectedIDX)
+	if err := internalRPC.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
+		ItemType: utils.MetaThresholds, Tenant: "cgrates.org", FilterType: utils.MetaString},
+		&indexes); err != nil {
+		t.Error(err)
+	}
+	sort.Strings(indexes)
+	if !reflect.DeepEqual(expectedIDX, indexes) {
+		t.Errorf("Expecting: %+v, received: %+v",
+			expectedIDX, utils.ToJSON(indexes))
+	}
+	// verify data on engine1
+	if err := engineOneRPC.Call("ApierV1.GetThresholdProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Replication"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
+	}
+	// verify indexes on engine1 (should be the same as internal)
+	if err := engineOneRPC.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
+		ItemType: utils.MetaThresholds, Tenant: "cgrates.org", FilterType: utils.MetaString},
+		&indexes); err != nil {
+		t.Error(err)
+	}
+	sort.Strings(indexes)
+	if !reflect.DeepEqual(expectedIDX, indexes) {
+		t.Errorf("Expecting: %+v, received: %+v",
+			expectedIDX, utils.ToJSON(indexes))
+	}
+	// verify data on engine2
+	if err := engineTwoRPC.Call("ApierV1.GetThresholdProfile",
+		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Replication"}, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
+	}
+	expectedIDX = []string{"*string:~Account:1001:THD_ACNT_1001",
+		"*string:~Account:1001:THD_Replication",
+		"*string:~Account:1002:THD_ACNT_1002",
+		"*string:~CustomField:CustomValue:THD_Replication",
+	}
+	// check if indexes was created correctly on engine2
+	if err := engineTwoRPC.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
+		ItemType: utils.MetaThresholds, Tenant: "cgrates.org", FilterType: utils.MetaString},
+		&indexes); err != nil {
+		t.Error(err)
+	}
+	sort.Strings(indexes)
+	if !reflect.DeepEqual(expectedIDX, indexes) {
+		t.Errorf("Expecting: %+v,\n received: %+v",
+			expectedIDX, utils.ToJSON(indexes))
+	}
 
 }
 

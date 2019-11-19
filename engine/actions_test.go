@@ -1484,24 +1484,24 @@ func TestActionSetDDestination(t *testing.T) {
 	acc := &Account{BalanceMap: map[string]Balances{
 		utils.MONETARY: Balances{&Balance{DestinationIDs: utils.NewStringMap("*ddc_test")}}}}
 	origD := &Destination{Id: "*ddc_test", Prefixes: []string{"111", "222"}}
-	dm.DataDB().SetDestination(origD, utils.NonTransactional)
-	dm.DataDB().SetReverseDestination(origD, utils.NonTransactional)
+	dm.SetDestination(origD, utils.NonTransactional)
+	dm.SetReverseDestination(origD, utils.NonTransactional)
 	// check redis and cache
-	if d, err := dm.DataDB().GetDestination("*ddc_test", false, utils.NonTransactional); err != nil || !reflect.DeepEqual(d, origD) {
+	if d, err := dm.GetDestination("*ddc_test", false, utils.NonTransactional); err != nil || !reflect.DeepEqual(d, origD) {
 		t.Error("Error storing destination: ", d, err)
 	}
-	dm.DataDB().GetReverseDestination("111", false, utils.NonTransactional)
+	dm.GetReverseDestination("111", false, utils.NonTransactional)
 	x1, found := Cache.Get(utils.CacheReverseDestinations, "111")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	dm.DataDB().GetReverseDestination("222", false, utils.NonTransactional)
+	dm.GetReverseDestination("222", false, utils.NonTransactional)
 	x1, found = Cache.Get(utils.CacheReverseDestinations, "222")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
 	setddestinations(acc, &CDRStatsQueueTriggered{Metrics: map[string]float64{"333": 1, "666": 1}}, nil, nil)
-	d, err := dm.DataDB().GetDestination("*ddc_test", false, utils.NonTransactional)
+	d, err := dm.GetDestination("*ddc_test", false, utils.NonTransactional)
 	if err != nil ||
 		d.Id != origD.Id ||
 		len(d.Prefixes) != 2 ||
@@ -1519,12 +1519,12 @@ func TestActionSetDDestination(t *testing.T) {
 	if ok {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	dm.DataDB().GetReverseDestination("333", false, utils.NonTransactional)
+	dm.GetReverseDestination("333", false, utils.NonTransactional)
 	x1, found = Cache.Get(utils.CacheReverseDestinations, "333")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)
 	}
-	dm.DataDB().GetReverseDestination("666", false, utils.NonTransactional)
+	dm.GetReverseDestination("666", false, utils.NonTransactional)
 	x1, found = Cache.Get(utils.CacheReverseDestinations, "666")
 	if !found || len(x1.([]string)) != 1 {
 		t.Error("Error cacheing destination: ", x1)

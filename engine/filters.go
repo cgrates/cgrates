@@ -410,7 +410,7 @@ func (fltr *FilterRule) passDestinations(fielNameDP config.DataProvider, fieldVa
 		return false, err
 	}
 	for _, p := range utils.SplitPrefix(dst, MIN_PREFIX_MATCH) {
-		if destIDs, err := dm.DataDB().GetReverseDestination(p, false, utils.NonTransactional); err == nil {
+		if destIDs, err := dm.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 			for _, dID := range destIDs {
 				for i, valDstID := range fltr.Values {
 					valDstID, err := config.DPDynamicString(valDstID, fieldValuesDP[i])

@@ -38,11 +38,11 @@ func TestDestinationStoreRestore(t *testing.T) {
 func TestDestinationStorageStore(t *testing.T) {
 	nationale := &Destination{Id: "nat",
 		Prefixes: []string{"0257", "0256", "0723"}}
-	err := dm.DataDB().SetDestination(nationale, utils.NonTransactional)
+	err := dm.SetDestination(nationale, utils.NonTransactional)
 	if err != nil {
 		t.Error("Error storing destination: ", err)
 	}
-	result, err := dm.DataDB().GetDestination(nationale.Id,
+	result, err := dm.GetDestination(nationale.Id,
 		false, utils.NonTransactional)
 	if nationale.containsPrefix("0257") == 0 ||
 		nationale.containsPrefix("0256") == 0 ||
@@ -76,14 +76,14 @@ func TestDestinationContainsPrefixWrong(t *testing.T) {
 }
 
 func TestDestinationGetExists(t *testing.T) {
-	d, err := dm.DataDB().GetDestination("NAT", false, utils.NonTransactional)
+	d, err := dm.GetDestination("NAT", false, utils.NonTransactional)
 	if err != nil || d == nil {
 		t.Error("Could not get destination: ", d)
 	}
 }
 
 func TestDestinationReverseGetExistsCache(t *testing.T) {
-	dm.DataDB().GetReverseDestination("0256", false, utils.NonTransactional)
+	dm.GetReverseDestination("0256", false, utils.NonTransactional)
 	if _, ok := Cache.Get(utils.CacheReverseDestinations, "0256"); !ok {
 		t.Error("Destination not cached:", err)
 	}
@@ -93,7 +93,7 @@ func TestDestinationGetNotExists(t *testing.T) {
 	if d, ok := Cache.Get(utils.CacheDestinations, "not existing"); ok {
 		t.Error("Bad destination cached: ", d)
 	}
-	d, err := dm.DataDB().GetDestination("not existing", false, utils.NonTransactional)
+	d, err := dm.GetDestination("not existing", false, utils.NonTransactional)
 	if d != nil {
 		t.Error("Got false destination: ", d, err)
 	}
@@ -146,7 +146,7 @@ func TestCleanStalePrefixes(t *testing.T) {
 func BenchmarkDestinationStorageStoreRestore(b *testing.B) {
 	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	for i := 0; i < b.N; i++ {
-		dm.DataDB().SetDestination(nationale, utils.NonTransactional)
-		dm.DataDB().GetDestination(nationale.Id, true, utils.NonTransactional)
+		dm.SetDestination(nationale, utils.NonTransactional)
+		dm.GetDestination(nationale.Id, true, utils.NonTransactional)
 	}
 }

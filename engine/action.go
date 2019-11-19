@@ -563,12 +563,12 @@ func setddestinations(ub *Account, a *Action, acs Actions, extraData interface{}
 		// 	i++
 		// }
 		newDest := &Destination{Id: ddcDestId}
-		oldDest, err := dm.DataDB().GetDestination(ddcDestId, false, utils.NonTransactional)
+		oldDest, err := dm.GetDestination(ddcDestId, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
 		// update destid in storage
-		if err = dm.DataDB().SetDestination(newDest, utils.NonTransactional); err != nil {
+		if err = dm.SetDestination(newDest, utils.NonTransactional); err != nil {
 			return err
 		}
 		if err = dm.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{ddcDestId}, true); err != nil {
@@ -576,7 +576,7 @@ func setddestinations(ub *Account, a *Action, acs Actions, extraData interface{}
 		}
 
 		if err == nil && oldDest != nil {
-			if err = dm.DataDB().UpdateReverseDestination(oldDest, newDest, utils.NonTransactional); err != nil {
+			if err = dm.UpdateReverseDestination(oldDest, newDest, utils.NonTransactional); err != nil {
 				return err
 			}
 		}

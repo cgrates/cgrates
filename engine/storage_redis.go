@@ -284,11 +284,11 @@ func (rs *RedisStorage) RebuildReverseForPrefix(prefix string) (err error) {
 			return
 		}
 		for _, key := range keys {
-			dest, err := rs.GetDestination(key[len(utils.DESTINATION_PREFIX):], true, utils.NonTransactional)
+			dest, err := rs.GetDestinationDrv(key[len(utils.DESTINATION_PREFIX):], true, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
-			if err = rs.SetReverseDestination(dest, utils.NonTransactional); err != nil {
+			if err = rs.SetReverseDestinationDrv(dest, utils.NonTransactional); err != nil {
 				return err
 			}
 		}
@@ -331,11 +331,11 @@ func (rs *RedisStorage) RemoveReverseForPrefix(prefix string) (err error) {
 			return
 		}
 		for _, key := range keys {
-			dest, err := rs.GetDestination(key[len(utils.DESTINATION_PREFIX):], true, utils.NonTransactional)
+			dest, err := rs.GetDestinationDrv(key[len(utils.DESTINATION_PREFIX):], true, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
-			if err := rs.RemoveDestination(dest.Id, utils.NonTransactional); err != nil {
+			if err := rs.RemoveDestinationDrv(dest.Id, utils.NonTransactional); err != nil {
 				return err
 			}
 		}
@@ -514,7 +514,7 @@ func (rs *RedisStorage) RemoveRatingProfileDrv(key string) error {
 }
 
 // GetDestination retrieves a destination with id from  tp_db
-func (rs *RedisStorage) GetDestination(key string, skipCache bool,
+func (rs *RedisStorage) GetDestinationDrv(key string, skipCache bool,
 	transactionID string) (dest *Destination, err error) {
 	if !skipCache {
 		if x, ok := Cache.Get(utils.CacheDestinations, key); ok {
@@ -552,7 +552,7 @@ func (rs *RedisStorage) GetDestination(key string, skipCache bool,
 	return
 }
 
-func (rs *RedisStorage) SetDestination(dest *Destination, transactionID string) (err error) {
+func (rs *RedisStorage) SetDestinationDrv(dest *Destination, transactionID string) (err error) {
 	result, err := rs.ms.Marshal(dest)
 	if err != nil {
 		return err
@@ -568,7 +568,7 @@ func (rs *RedisStorage) SetDestination(dest *Destination, transactionID string) 
 	return
 }
 
-func (rs *RedisStorage) GetReverseDestination(key string,
+func (rs *RedisStorage) GetReverseDestinationDrv(key string,
 	skipCache bool, transactionID string) (ids []string, err error) {
 	if !skipCache {
 		if x, ok := Cache.Get(utils.CacheReverseDestinations, key); ok {
@@ -591,7 +591,7 @@ func (rs *RedisStorage) GetReverseDestination(key string,
 	return
 }
 
-func (rs *RedisStorage) SetReverseDestination(dest *Destination, transactionID string) (err error) {
+func (rs *RedisStorage) SetReverseDestinationDrv(dest *Destination, transactionID string) (err error) {
 	for _, p := range dest.Prefixes {
 		key := utils.REVERSE_DESTINATION_PREFIX + p
 		if err = rs.Cmd(redis_SADD, key, dest.Id).Err; err != nil {
@@ -601,9 +601,9 @@ func (rs *RedisStorage) SetReverseDestination(dest *Destination, transactionID s
 	return
 }
 
-func (rs *RedisStorage) RemoveDestination(destID, transactionID string) (err error) {
+func (rs *RedisStorage) RemoveDestinationDrv(destID, transactionID string) (err error) {
 	// get destination for prefix list
-	d, err := rs.GetDestination(destID, false, transactionID)
+	d, err := rs.GetDestinationDrv(destID, false, transactionID)
 	if err != nil {
 		return
 	}
@@ -621,12 +621,12 @@ func (rs *RedisStorage) RemoveDestination(destID, transactionID string) (err err
 		if err != nil {
 			return err
 		}
-		rs.GetReverseDestination(prefix, true, transactionID) // it will recache the destination
+		rs.GetReverseDestinationDrv(prefix, true, transactionID) // it will recache the destination
 	}
 	return
 }
 
-func (rs *RedisStorage) UpdateReverseDestination(oldDest, newDest *Destination, transactionID string) error {
+func (rs *RedisStorage) UpdateReverseDestinationDrv(oldDest, newDest *Destination, transactionID string) error {
 	//log.Printf("Old: %+v, New: %+v", oldDest, newDest)
 	var obsoletePrefixes []string
 	var addedPrefixes []string
