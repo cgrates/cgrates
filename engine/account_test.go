@@ -2327,6 +2327,53 @@ func TestAccountAsNavigableMap(t *testing.T) {
 	}
 }
 
+func TestAccountClone(t *testing.T) {
+	//empty check
+	// account := &Account{}
+	// eOut := &Account{}
+	// if	rcv := account.Clone(); reflect.DeepEqual(eOut, rcv) {
+	// 	t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	// }
+	//normal check
+	account := &Account{
+		ID: "testID",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: {&Balance{Value: 10, Weight: 10}}},
+		ActionTriggers: []*ActionTrigger{
+			&ActionTrigger{
+				ID: "ActionTriggerID1",
+			},
+			&ActionTrigger{
+				ID: "ActionTriggerID2",
+			},
+		},
+		AllowNegative:     true,
+		Disabled:          true,
+		executingTriggers: true,
+	}
+	eOut := &Account{
+		ID: "testID",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: {&Balance{Value: 10, Weight: 10}}},
+		ActionTriggers: []*ActionTrigger{
+			&ActionTrigger{
+				ID: "ActionTriggerID1",
+			},
+			&ActionTrigger{
+				ID: "ActionTriggerID2",
+			},
+		},
+		AllowNegative:     true,
+		Disabled:          true,
+		executingTriggers: true,
+	}
+	
+	if rcv := account.Clone(); reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+
+}
+
 /*********************************** Benchmarks *******************************/
 
 func BenchmarkGetSecondForPrefix(b *testing.B) {

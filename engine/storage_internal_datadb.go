@@ -466,7 +466,7 @@ func (iDB *InternalDB) GetSharedGroupDrv(id string) (sh *SharedGroup, err error)
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*SharedGroup), nil
+	return x.(*SharedGroup).Clone(), nil
 }
 
 func (iDB *InternalDB) SetSharedGroupDrv(sh *SharedGroup) (err error) {
@@ -667,7 +667,7 @@ func (iDB *InternalDB) GetAccountDrv(id string) (acc *Account, err error) {
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*Account), nil
+	return x.(*Account).Clone(), nil
 }
 
 func (iDB *InternalDB) SetAccount(acc *Account) (err error) {

@@ -29,8 +29,7 @@ import (
 var dbAcntActs *engine.DataManager
 
 func TestAcntActsSetStorage(t *testing.T) {
-	data, _ := engine.NewMapStorageJson()
-	dbAcntActs = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
+	dbAcntActs = engine.NewDataManager(engine.NewInternalDB(nil, nil), config.CgrConfig().CacheCfg(), nil, nil)
 	engine.SetDataStorage(dbAcntActs)
 }
 

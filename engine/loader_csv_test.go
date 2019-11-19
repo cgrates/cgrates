@@ -795,7 +795,7 @@ func TestLoadSharedGroups(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(sg2, expected) {
-		t.Error("Error loading shared group: ", sg2.AccountParameters)
+		t.Errorf("Expected: %s, received %s ", utils.ToJSON(expected), utils.ToJSON(sg2))
 	}
 	/*sg, _ := dataStorage.GetSharedGroup("SG1", false)
 	  if len(sg.Members) != 0 {

@@ -49,6 +49,34 @@ type SharingParameters struct {
 	RatingSubject string
 }
 
+// Clone clones *SharedGroup
+func (sg *SharedGroup) Clone() (sharedGroup *SharedGroup) {
+	if sg == nil {
+		return
+	}
+	sharedGroup = &SharedGroup{
+		Id: sg.Id,
+	}
+	if sg.AccountParameters != nil {
+		sharedGroup.AccountParameters = make(map[string]*SharingParameters, len(sg.AccountParameters))
+	}
+	if sg.MemberIds != nil {
+		sharedGroup.MemberIds = sg.MemberIds.Clone()
+	}
+	for id, _ := range sg.AccountParameters {
+		sharedGroup.AccountParameters[id] = sg.AccountParameters[id].Clone()
+	}
+	return
+}
+
+//Clone clones *SharingParameters
+func (sp *SharingParameters) Clone() *SharingParameters {
+	return &SharingParameters{
+		Strategy:      sp.Strategy,
+		RatingSubject: sp.RatingSubject,
+	}
+}
+
 func (sg *SharedGroup) SortBalancesByStrategy(myBalance *Balance, bc Balances) Balances {
 	sharingParameters := sg.AccountParameters[utils.ANY]
 	if sp, hasParamsForAccount := sg.AccountParameters[myBalance.account.ID]; hasParamsForAccount {

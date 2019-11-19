@@ -24,6 +24,87 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+func TestSharedGroupClone(t *testing.T) {
+	//empty check
+	sharedGroup := &SharedGroup{}
+	eOut := &SharedGroup{}
+	if rcv := sharedGroup.Clone(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	//normal check
+	sharedGroup = &SharedGroup{
+		Id: "testID",
+		AccountParameters: map[string]*SharingParameters{
+			"string1": &SharingParameters{
+				Strategy:      "strategyTEST1",
+				RatingSubject: "RatingSubjectTEST1",
+			},
+			"string2": &SharingParameters{
+				Strategy:      "strategyTEST2",
+				RatingSubject: "RatingSubjectTEST2",
+			},
+		},
+		MemberIds: utils.StringMap{
+			"string1": true,
+			"string2": false,
+		},
+	}
+	eOut = &SharedGroup{
+		Id: "testID",
+		AccountParameters: map[string]*SharingParameters{
+			"string1": &SharingParameters{
+				Strategy:      "strategyTEST1",
+				RatingSubject: "RatingSubjectTEST1",
+			},
+			"string2": &SharingParameters{
+				Strategy:      "strategyTEST2",
+				RatingSubject: "RatingSubjectTEST2",
+			},
+		},
+		MemberIds: utils.StringMap{
+			"string1": true,
+			"string2": false,
+		},
+	}
+	rcv := sharedGroup.Clone()
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	//double check
+	rcv.AccountParameters["string1"].Strategy = "updated"
+	if sharedGroup.AccountParameters["string1"].Strategy == "updated" {
+		t.Errorf("Original SharedGroup was modified")
+	}
+
+}
+
+func TestSharingParametersClone(t *testing.T) {
+	//nil check
+	sharingParameters := &SharingParameters{}
+	eOut := &SharingParameters{}
+	if rcv := sharingParameters.Clone(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	//empty check
+	sharingParameters = &SharingParameters{Strategy: "", RatingSubject: ""}
+	eOut = &SharingParameters{Strategy: "", RatingSubject: ""}
+	if rcv := sharingParameters.Clone(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	//normal check
+	sharingParameters = &SharingParameters{
+		Strategy:      "StrategyTEST",
+		RatingSubject: "RatingSubjectTEST",
+	}
+	eOut = &SharingParameters{
+		Strategy:      "StrategyTEST",
+		RatingSubject: "RatingSubjectTEST",
+	}
+	if rcv := sharingParameters.Clone(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+}
+
 func TestSharedSetGet(t *testing.T) {
 	id := "TEST_SG100"
 	sg := &SharedGroup{

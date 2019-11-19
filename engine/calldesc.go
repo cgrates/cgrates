@@ -47,7 +47,7 @@ func init() {
 			cgrCfg, _ = config.NewDefaultCGRConfig()
 			config.SetCgrConfig(cgrCfg)
 		}
-		data, _ = NewMapStorage()
+		data = NewInternalDB(nil, nil)
 	}
 	dm = NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
 }

@@ -118,7 +118,7 @@ func (dm *DataManager) DataDB() DataDB {
 func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs, aplIDs,
 	aaPlIDs, atrgIDs, sgIDs, rpIDs, resIDs, stqIDs, stqpIDs, thIDs, thpIDs, fltrIDs,
 	splPrflIDs, alsPrfIDs, cppIDs, dppIDs, dphIDs []string) (err error) {
-	if dm.DataDB().GetStorageType() == utils.MAPSTOR {
+	if dm.DataDB().GetStorageType() == utils.INTERNAL {
 		if dm.cacheCfg == nil {
 			return
 		}
