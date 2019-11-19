@@ -105,18 +105,19 @@ var testEC = &EventCost{
 		ID:     "dan",
 		BalanceSummaries: []*BalanceSummary{
 			&BalanceSummary{
-				Type:     "*monetary",
-				Value:    50,
-				Disabled: false},
+				UUID:  "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+				Type:  utils.MONETARY,
+				Value: 50,
+			},
 			&BalanceSummary{
-				ID:       "4b8b53d7-c1a1-4159-b845-4623a00a0165",
-				Type:     "*monetary",
-				Value:    25,
-				Disabled: false},
+				UUID:  "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
+				Type:  utils.MONETARY,
+				Value: 25,
+			},
 			&BalanceSummary{
-				Type:     "*voice",
-				Value:    200,
-				Disabled: false,
+				UUID:  "4b8b53d7-c1a1-4159-b845-4623a00a0165",
+				Type:  utils.VOICE,
+				Value: 200,
 			},
 		},
 		AllowNegative: false,
@@ -157,14 +158,14 @@ var testEC = &EventCost{
 		},
 		"44d6c02": &BalanceCharge{
 			AccountID:     "cgrates.org:dan",
-			BalanceUUID:   "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
+			BalanceUUID:   "4b8b53d7-c1a1-4159-b845-4623a00a0165",
 			RatingID:      "3cd6425",
 			Units:         1,
 			ExtraChargeID: "188bfa6",
 		},
 		"3455b83": &BalanceCharge{
 			AccountID:     "cgrates.org:dan",
-			BalanceUUID:   "9d54a9e9-d610-4c82-bcb5-a315b9a65089",
+			BalanceUUID:   "4b8b53d7-c1a1-4159-b845-4623a00a0165",
 			Units:         1,
 			ExtraChargeID: "*none",
 		},
@@ -685,6 +686,242 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 	}
 	if !reflect.DeepEqual(eEC.AccountSummary, ec.AccountSummary) {
 		t.Errorf("Expecting: %+v, received: %+v", eEC, ec)
+	}
+}
+
+func TestECAsRefundIncrements(t *testing.T) {
+	eCD := &CallDescriptor{
+		CgrID:         "164b0422fdc6a5117031b427439482c6a4f90e41",
+		RunID:         utils.META_DEFAULT,
+		TOR:           utils.VOICE,
+		TimeStart:     time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
+		TimeEnd:       time.Date(2017, 1, 9, 16, 28, 21, 0, time.UTC),
+		DurationIndex: time.Duration(10 * time.Minute),
+	}
+	eCD.Increments = Increments{
+		&Increment{
+			Duration:       time.Duration(0),
+			Cost:           0.1,
+			CompressFactor: 1,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Monetary: &MonetaryInfo{
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+		},
+		&Increment{
+			Duration:       time.Duration(1 * time.Second),
+			Cost:           0,
+			CompressFactor: 10,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Unit: &UnitInfo{
+					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"}},
+		},
+		&Increment{
+			Duration:       time.Duration(10 * time.Second),
+			Cost:           0.01,
+			CompressFactor: 2,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Monetary: &MonetaryInfo{
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+		},
+		&Increment{
+			Duration:       time.Duration(1 * time.Second),
+			Cost:           0.005,
+			CompressFactor: 30,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Unit: &UnitInfo{
+					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"},
+				Monetary: &MonetaryInfo{
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+		},
+		&Increment{
+			Duration:       time.Duration(1 * time.Second),
+			Cost:           0.01,
+			CompressFactor: 60,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Monetary: &MonetaryInfo{
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+		},
+		&Increment{
+			Duration:       time.Duration(1 * time.Second),
+			Cost:           0.01,
+			CompressFactor: 60,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Monetary: &MonetaryInfo{
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+		},
+		&Increment{
+			Duration:       time.Duration(1 * time.Second),
+			Cost:           0.01,
+			CompressFactor: 60,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Monetary: &MonetaryInfo{
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+		},
+		&Increment{
+			Duration:       time.Duration(1 * time.Second),
+			Cost:           0.01,
+			CompressFactor: 60,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Monetary: &MonetaryInfo{
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+		},
+		&Increment{
+			Duration:       time.Duration(1 * time.Second),
+			Cost:           0,
+			CompressFactor: 10,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Unit: &UnitInfo{
+					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"}},
+		},
+		&Increment{
+			Duration:       time.Duration(10 * time.Second),
+			Cost:           0.01,
+			CompressFactor: 2,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Monetary: &MonetaryInfo{
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+		},
+		&Increment{
+			Duration:       time.Duration(1 * time.Second),
+			Cost:           0.005,
+			CompressFactor: 30,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Unit: &UnitInfo{
+					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"},
+				Monetary: &MonetaryInfo{
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+		},
+		&Increment{
+			Duration:       time.Duration(1 * time.Second),
+			Cost:           0,
+			CompressFactor: 10,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Unit: &UnitInfo{
+					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"}},
+		},
+		&Increment{
+			Duration:       time.Duration(10 * time.Second),
+			Cost:           0.01,
+			CompressFactor: 2,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Monetary: &MonetaryInfo{
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+		},
+		&Increment{
+			Duration:       time.Duration(1 * time.Second),
+			Cost:           0.005,
+			CompressFactor: 30,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Unit: &UnitInfo{
+					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"},
+				Monetary: &MonetaryInfo{
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+		},
+		&Increment{
+			Duration:       time.Duration(1 * time.Second),
+			Cost:           0,
+			CompressFactor: 10,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Unit: &UnitInfo{
+					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"}},
+		},
+		&Increment{
+			Duration:       time.Duration(10 * time.Second),
+			Cost:           0.01,
+			CompressFactor: 2,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Monetary: &MonetaryInfo{
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+		},
+		&Increment{
+			Duration:       time.Duration(1 * time.Second),
+			Cost:           0.005,
+			CompressFactor: 30,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Unit: &UnitInfo{
+					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"},
+				Monetary: &MonetaryInfo{
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+		},
+		&Increment{
+			Duration:       time.Duration(1 * time.Second),
+			Cost:           0,
+			CompressFactor: 10,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Unit: &UnitInfo{
+					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"}},
+		},
+		&Increment{
+			Duration:       time.Duration(10 * time.Second),
+			Cost:           0.01,
+			CompressFactor: 2,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Monetary: &MonetaryInfo{
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+		},
+		&Increment{
+			Duration:       time.Duration(1 * time.Second),
+			Cost:           0.005,
+			CompressFactor: 30,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Unit: &UnitInfo{
+					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"},
+				Monetary: &MonetaryInfo{
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+		},
+		&Increment{
+			Duration:       time.Duration(1 * time.Second),
+			Cost:           0,
+			CompressFactor: 10,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Unit: &UnitInfo{
+					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"}},
+		},
+		&Increment{
+			Duration:       time.Duration(10 * time.Second),
+			Cost:           0.01,
+			CompressFactor: 2,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Monetary: &MonetaryInfo{
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+		},
+		&Increment{
+			Duration:       time.Duration(1 * time.Second),
+			Cost:           0.005,
+			CompressFactor: 30,
+			BalanceInfo: &DebitInfo{
+				AccountID: "cgrates.org:dan",
+				Unit: &UnitInfo{
+					UUID: "4b8b53d7-c1a1-4159-b845-4623a00a0165"},
+				Monetary: &MonetaryInfo{
+					UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010"}},
+		},
+	}
+
+	if cd := testEC.Clone().AsRefundIncrements(utils.VOICE); !reflect.DeepEqual(eCD, cd) {
+		t.Errorf("expecting: %s\n\n, received: %s", utils.ToIJSON(eCD), utils.ToIJSON(cd))
 	}
 }
 
@@ -2127,7 +2364,7 @@ func TestECSyncKeys(t *testing.T) {
 					&ChargingIncrement{
 						Usage:          time.Duration(1 * time.Second),
 						Cost:           0.005,
-						AccountingID:   "24d6c02",
+						AccountingID:   "44d6c02",
 						CompressFactor: 30,
 					},
 				},
@@ -2163,7 +2400,7 @@ func TestECSyncKeys(t *testing.T) {
 					&ChargingIncrement{
 						Usage:          time.Duration(1 * time.Second),
 						Cost:           0.005,
-						AccountingID:   "24d6c02",
+						AccountingID:   "44d6c02",
 						CompressFactor: 30,
 					},
 				},
@@ -2175,15 +2412,17 @@ func TestECSyncKeys(t *testing.T) {
 			ID:     "dan",
 			BalanceSummaries: []*BalanceSummary{
 				&BalanceSummary{
-					Type:     "*monetary",
+					UUID:     "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
+					Type:     utils.MONETARY,
 					Value:    50,
 					Disabled: false},
 				&BalanceSummary{
-					ID:       "4b8b53d7-c1a1-4159-b845-4623a00a0165",
-					Type:     "*monetary",
+					UUID:     "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
+					Type:     utils.MONETARY,
 					Value:    25,
 					Disabled: false},
 				&BalanceSummary{
+					UUID:     "4b8b53d7-c1a1-4159-b845-4623a00a0165",
 					Type:     "*voice",
 					Value:    200,
 					Disabled: false,
@@ -2226,16 +2465,16 @@ func TestECSyncKeys(t *testing.T) {
 				BalanceUUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
 				Units:       0.1,
 			},
-			"24d6c02": &BalanceCharge{
+			"44d6c02": &BalanceCharge{
 				AccountID:     "cgrates.org:dan",
-				BalanceUUID:   "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
+				BalanceUUID:   "4b8b53d7-c1a1-4159-b845-4623a00a0165",
 				RatingID:      "3cd6425",
 				Units:         1,
 				ExtraChargeID: "288bfa6",
 			},
 			"3455b83": &BalanceCharge{
 				AccountID:     "cgrates.org:dan",
-				BalanceUUID:   "9d54a9e9-d610-4c82-bcb5-a315b9a65089",
+				BalanceUUID:   "4b8b53d7-c1a1-4159-b845-4623a00a0165",
 				Units:         1,
 				ExtraChargeID: "*none",
 			},
@@ -2295,9 +2534,9 @@ func TestECAsDataProvider(t *testing.T) {
 	} else if data != "dan" {
 		t.Errorf("Expecting: <%s> \nreceived: <%s>", "data", data)
 	}
-	if data, err := ecDP.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries[1]", "ID"}); err != nil {
+	if data, err := ecDP.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries[1]", "UUID"}); err != nil {
 		t.Error(err)
-	} else if data != "4b8b53d7-c1a1-4159-b845-4623a00a0165" {
+	} else if data != "7a54a9e9-d610-4c82-bcb5-a315b9a65010" {
 		t.Errorf("Expecting: <%s> \nreceived: <%s>", "4b8b53d7-c1a1-4159-b845-4623a00a0165", data)
 	}
 	if data, err := ecDP.FieldAsInterface([]string{"AccountSummary", "BalanceSummaries[2]", "Type"}); err != nil {

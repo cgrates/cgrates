@@ -293,16 +293,19 @@ func (ec *EventCost) AsRefundIncrements(tor string) (cd *CallDescriptor) {
 					}
 					if ec.Accounting[cIcrm.AccountingID].ExtraChargeID == utils.META_NONE ||
 						ec.Accounting[cIcrm.AccountingID].ExtraChargeID == utils.EmptyString {
+						iIdx++
 						continue
 					}
 					// extra charges, ie: non-free *voice
-					extraSmry := ec.AccountSummary.BalanceSummaries.BalanceSummaryWithUUD(ec.Accounting[cIcrm.AccountingID].ExtraChargeID)
+					extraSmry := ec.AccountSummary.BalanceSummaries.BalanceSummaryWithUUD(
+						ec.Accounting[ec.Accounting[cIcrm.AccountingID].ExtraChargeID].BalanceUUID)
 					if extraSmry.Type == utils.MONETARY {
 						cd.Increments[iIdx].BalanceInfo.Monetary = &MonetaryInfo{UUID: extraSmry.UUID}
 					} else if NonMonetaryBalances.HasField(blncSmry.Type) {
 						cd.Increments[iIdx].BalanceInfo.Unit = &UnitInfo{UUID: extraSmry.UUID}
 					}
 				}
+				iIdx++
 			}
 		}
 	}
