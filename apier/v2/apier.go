@@ -229,7 +229,7 @@ func (self *ApierV2) GetDestinations(attr AttrGetDestinations, reply *[]*engine.
 		}
 	}
 	for _, destID := range attr.DestinationIDs {
-		dst, err := self.DataManager.DataDB().GetDestination(destID, false, utils.NonTransactional)
+		dst, err := self.DataManager.GetDestination(destID, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}

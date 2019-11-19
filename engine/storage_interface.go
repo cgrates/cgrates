@@ -55,12 +55,12 @@ type DataDB interface {
 	GetRatingProfileDrv(string) (*RatingProfile, error)
 	SetRatingProfileDrv(*RatingProfile) error
 	RemoveRatingProfileDrv(string) error
-	GetDestination(string, bool, string) (*Destination, error)
-	SetDestination(*Destination, string) error
-	RemoveDestination(string, string) error
-	SetReverseDestination(*Destination, string) error
-	GetReverseDestination(string, bool, string) ([]string, error)
-	UpdateReverseDestination(*Destination, *Destination, string) error
+	GetDestinationDrv(string, bool, string) (*Destination, error)
+	SetDestinationDrv(*Destination, string) error
+	RemoveDestinationDrv(string, string) error
+	SetReverseDestinationDrv(*Destination, string) error
+	GetReverseDestinationDrv(string, bool, string) ([]string, error)
+	UpdateReverseDestinationDrv(*Destination, *Destination, string) error
 	GetActionsDrv(string) (Actions, error)
 	SetActionsDrv(string, Actions) error
 	RemoveActionsDrv(string) error

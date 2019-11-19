@@ -447,11 +447,11 @@ func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) (err error) {
 				return err
 			}
 			for _, key := range keys {
-				dest, err := ms.GetDestination(key[len(utils.DESTINATION_PREFIX):], true, utils.NonTransactional)
+				dest, err := ms.GetDestinationDrv(key[len(utils.DESTINATION_PREFIX):], true, utils.NonTransactional)
 				if err != nil {
 					return err
 				}
-				if err = ms.SetReverseDestination(dest, utils.NonTransactional); err != nil {
+				if err = ms.SetReverseDestinationDrv(dest, utils.NonTransactional); err != nil {
 					return err
 				}
 			}
@@ -500,11 +500,11 @@ func (ms *MongoStorage) RemoveReverseForPrefix(prefix string) (err error) {
 				return err
 			}
 			for _, key := range keys {
-				dest, err := ms.GetDestination(key[len(utils.DESTINATION_PREFIX):], true, utils.NonTransactional)
+				dest, err := ms.GetDestinationDrv(key[len(utils.DESTINATION_PREFIX):], true, utils.NonTransactional)
 				if err != nil {
 					return err
 				}
-				if err := ms.RemoveDestination(dest.Id, utils.NonTransactional); err != nil {
+				if err := ms.RemoveDestinationDrv(dest.Id, utils.NonTransactional); err != nil {
 					return err
 				}
 			}
@@ -847,7 +847,7 @@ func (ms *MongoStorage) RemoveRatingProfileDrv(key string) error {
 	})
 }
 
-func (ms *MongoStorage) GetDestination(key string, skipCache bool,
+func (ms *MongoStorage) GetDestinationDrv(key string, skipCache bool,
 	transactionID string) (result *Destination, err error) {
 	if !skipCache {
 		if x, ok := Cache.Get(utils.CacheDestinations, key); ok {
@@ -894,7 +894,7 @@ func (ms *MongoStorage) GetDestination(key string, skipCache bool,
 	return
 }
 
-func (ms *MongoStorage) SetDestination(dest *Destination, transactionID string) (err error) {
+func (ms *MongoStorage) SetDestinationDrv(dest *Destination, transactionID string) (err error) {
 	result, err := ms.ms.Marshal(dest)
 	if err != nil {
 		return err
@@ -915,10 +915,10 @@ func (ms *MongoStorage) SetDestination(dest *Destination, transactionID string) 
 	})
 }
 
-func (ms *MongoStorage) RemoveDestination(destID string,
+func (ms *MongoStorage) RemoveDestinationDrv(destID string,
 	transactionID string) (err error) {
 	// get destination for prefix list
-	d, err := ms.GetDestination(destID, false, transactionID)
+	d, err := ms.GetDestinationDrv(destID, false, transactionID)
 	if err != nil {
 		return
 	}
@@ -942,12 +942,12 @@ func (ms *MongoStorage) RemoveDestination(destID string,
 		}); err != nil {
 			return err
 		}
-		ms.GetReverseDestination(prefix, true, transactionID) // it will recache the destination
+		ms.GetReverseDestinationDrv(prefix, true, transactionID) // it will recache the destination
 	}
 	return
 }
 
-func (ms *MongoStorage) GetReverseDestination(prefix string, skipCache bool,
+func (ms *MongoStorage) GetReverseDestinationDrv(prefix string, skipCache bool,
 	transactionID string) (ids []string, err error) {
 	if !skipCache {
 		if x, ok := Cache.Get(utils.CacheReverseDestinations, prefix); ok {
@@ -981,7 +981,7 @@ func (ms *MongoStorage) GetReverseDestination(prefix string, skipCache bool,
 	return
 }
 
-func (ms *MongoStorage) SetReverseDestination(dest *Destination,
+func (ms *MongoStorage) SetReverseDestinationDrv(dest *Destination,
 	transactionID string) (err error) {
 	for _, p := range dest.Prefixes {
 		if err = ms.query(func(sctx mongo.SessionContext) (err error) {
@@ -998,7 +998,7 @@ func (ms *MongoStorage) SetReverseDestination(dest *Destination,
 	return nil
 }
 
-func (ms *MongoStorage) UpdateReverseDestination(oldDest, newDest *Destination,
+func (ms *MongoStorage) UpdateReverseDestinationDrv(oldDest, newDest *Destination,
 	transactionID string) error {
 	//log.Printf("Old: %+v, New: %+v", oldDest, newDest)
 	var obsoletePrefixes []string

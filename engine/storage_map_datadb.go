@@ -115,11 +115,11 @@ func (ms *MapStorage) RebuildReverseForPrefix(prefix string) error {
 			return err
 		}
 		for _, key := range keys {
-			dest, err := ms.GetDestination(key[len(utils.DESTINATION_PREFIX):], false, utils.NonTransactional)
+			dest, err := ms.GetDestinationDrv(key[len(utils.DESTINATION_PREFIX):], false, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
-			if err := ms.SetReverseDestination(dest, utils.NonTransactional); err != nil {
+			if err := ms.SetReverseDestinationDrv(dest, utils.NonTransactional); err != nil {
 				return err
 			}
 		}
@@ -149,11 +149,11 @@ func (ms *MapStorage) RemoveReverseForPrefix(prefix string) error {
 			return err
 		}
 		for _, key := range keys {
-			dest, err := ms.GetDestination(key[len(utils.DESTINATION_PREFIX):], false, utils.NonTransactional)
+			dest, err := ms.GetDestinationDrv(key[len(utils.DESTINATION_PREFIX):], false, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
-			if err := ms.RemoveDestination(dest.Id, utils.NonTransactional); err != nil {
+			if err := ms.RemoveDestinationDrv(dest.Id, utils.NonTransactional); err != nil {
 				return err
 			}
 		}
@@ -280,7 +280,7 @@ func (ms *MapStorage) RemoveRatingProfileDrv(key string) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetDestination(key string, skipCache bool, transactionID string) (dest *Destination, err error) {
+func (ms *MapStorage) GetDestinationDrv(key string, skipCache bool, transactionID string) (dest *Destination, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	cCommit := cacheCommit(transactionID)
@@ -319,7 +319,7 @@ func (ms *MapStorage) GetDestination(key string, skipCache bool, transactionID s
 	return
 }
 
-func (ms *MapStorage) SetDestination(dest *Destination, transactionID string) (err error) {
+func (ms *MapStorage) SetDestinationDrv(dest *Destination, transactionID string) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(dest)
@@ -333,7 +333,7 @@ func (ms *MapStorage) SetDestination(dest *Destination, transactionID string) (e
 	return
 }
 
-func (ms *MapStorage) GetReverseDestination(prefix string,
+func (ms *MapStorage) GetReverseDestinationDrv(prefix string,
 	skipCache bool, transactionID string) (ids []string, err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
@@ -357,7 +357,7 @@ func (ms *MapStorage) GetReverseDestination(prefix string,
 	return
 }
 
-func (ms *MapStorage) SetReverseDestination(dest *Destination, transactionID string) (err error) {
+func (ms *MapStorage) SetReverseDestinationDrv(dest *Destination, transactionID string) (err error) {
 	for _, p := range dest.Prefixes {
 		ms.mu.Lock()
 		ms.dict.sadd(utils.REVERSE_DESTINATION_PREFIX+p, dest.Id, ms.ms)
@@ -368,9 +368,9 @@ func (ms *MapStorage) SetReverseDestination(dest *Destination, transactionID str
 	return
 }
 
-func (ms *MapStorage) RemoveDestination(destID string, transactionID string) (err error) {
+func (ms *MapStorage) RemoveDestinationDrv(destID string, transactionID string) (err error) {
 	// get destination for prefix list
-	d, err := ms.GetDestination(destID, false, transactionID)
+	d, err := ms.GetDestinationDrv(destID, false, transactionID)
 	if err != nil {
 		return
 	}
@@ -383,12 +383,12 @@ func (ms *MapStorage) RemoveDestination(destID string, transactionID string) (er
 		ms.mu.Lock()
 		ms.dict.srem(utils.REVERSE_DESTINATION_PREFIX+prefix, destID, ms.ms)
 		ms.mu.Unlock()
-		ms.GetReverseDestination(prefix, true, transactionID) // it will recache the destination
+		ms.GetReverseDestinationDrv(prefix, true, transactionID) // it will recache the destination
 	}
 	return
 }
 
-func (ms *MapStorage) UpdateReverseDestination(oldDest, newDest *Destination,
+func (ms *MapStorage) UpdateReverseDestinationDrv(oldDest, newDest *Destination,
 	transactionID string) error {
 	var obsoletePrefixes []string
 	var addedPrefixes []string

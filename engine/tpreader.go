@@ -176,10 +176,10 @@ func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
 	for _, tpDst := range tpDests {
 		dst := NewDestinationFromTPDestination(tpDst)
 		// ToDo: Fix transactions at onlineDB level
-		if err = tpr.dm.DataDB().SetDestination(dst, transID); err != nil {
+		if err = tpr.dm.SetDestination(dst, transID); err != nil {
 			Cache.RollbackTransaction(transID)
 		}
-		if err = tpr.dm.DataDB().SetReverseDestination(dst, transID); err != nil {
+		if err = tpr.dm.SetReverseDestination(dst, transID); err != nil {
 			Cache.RollbackTransaction(transID)
 		}
 	}
@@ -346,8 +346,8 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 					return false, fmt.Errorf("could not get destination for tag %v", drate.DestinationId)
 				}
 				for _, destination := range dms {
-					tpr.dm.DataDB().SetDestination(destination, utils.NonTransactional)
-					tpr.dm.DataDB().SetReverseDestination(destination, utils.NonTransactional)
+					tpr.dm.SetDestination(destination, utils.NonTransactional)
+					tpr.dm.SetReverseDestination(destination, utils.NonTransactional)
 				}
 			}
 		}
@@ -1399,7 +1399,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disable_reverse bool) (err error) 
 		log.Print("Destinations:")
 	}
 	for _, d := range tpr.destinations {
-		err = tpr.dm.DataDB().SetDestination(d, utils.NonTransactional)
+		err = tpr.dm.SetDestination(d, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -2036,7 +2036,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 	loadID := time.Now().UnixNano()
 	loadIDs := make(map[string]int64)
 	for _, d := range tpr.destinations {
-		err = tpr.dm.DataDB().RemoveDestination(d.Id, utils.NonTransactional)
+		err = tpr.dm.RemoveDestination(d.Id, utils.NonTransactional)
 		if err != nil {
 			return err
 		}

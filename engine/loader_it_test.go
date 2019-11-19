@@ -287,7 +287,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for k, d := range loader.destinations {
-		rcv, err := loader.dm.DataDB().GetDestination(k, true, utils.NonTransactional)
+		rcv, err := loader.dm.GetDestination(k, true, utils.NonTransactional)
 		if err != nil {
 			t.Error("Failed GetDestination: ", err.Error())
 		}

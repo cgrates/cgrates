@@ -228,9 +228,9 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		}
 		switch prfx {
 		case utils.DESTINATION_PREFIX:
-			_, err = dm.DataDB().GetDestination(dataID, true, utils.NonTransactional)
+			_, err = dm.GetDestination(dataID, true, utils.NonTransactional)
 		case utils.REVERSE_DESTINATION_PREFIX:
-			_, err = dm.DataDB().GetReverseDestination(dataID, true, utils.NonTransactional)
+			_, err = dm.GetReverseDestination(dataID, true, utils.NonTransactional)
 		case utils.RATING_PLAN_PREFIX:
 			_, err = dm.GetRatingPlan(dataID, true, utils.NonTransactional)
 		case utils.RATING_PROFILE_PREFIX:
@@ -314,6 +314,32 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 		}
 	}
 	return
+}
+
+func (dm *DataManager) GetDestination(key string, skipCache bool, transactionID string) (dest *Destination, err error) {
+	return dm.dataDB.GetDestinationDrv(key, skipCache, transactionID)
+}
+
+func (dm *DataManager) SetDestination(dest *Destination, transactionID string) (err error) {
+	return dm.dataDB.SetDestinationDrv(dest, transactionID)
+}
+
+func (dm *DataManager) RemoveDestination(destID string, transactionID string) (err error) {
+	return dm.dataDB.RemoveDestinationDrv(destID, transactionID)
+}
+
+func (dm *DataManager) SetReverseDestination(dest *Destination, transactionID string) (err error) {
+	return dm.dataDB.SetReverseDestinationDrv(dest, transactionID)
+}
+
+func (dm *DataManager) GetReverseDestination(prefix string,
+	skipCache bool, transactionID string) (ids []string, err error) {
+	return dm.dataDB.GetReverseDestinationDrv(prefix, skipCache, transactionID)
+}
+
+func (dm *DataManager) UpdateReverseDestination(oldDest, newDest *Destination,
+	transactionID string) error {
+	return dm.dataDB.UpdateReverseDestinationDrv(oldDest, newDest, transactionID)
 }
 
 func (dm *DataManager) GetAccount(id string) (acc *Account, err error) {

@@ -207,7 +207,7 @@ func (b *Balance) AsNavigableMap(_ []*config.FCTemplate) (*config.NavigableMap, 
 func (b *Balance) getMatchingPrefixAndDestID(dest string) (prefix, destId string) {
 	if len(b.DestinationIDs) != 0 && b.DestinationIDs[utils.ANY] == false {
 		for _, p := range utils.SplitPrefix(dest, MIN_PREFIX_MATCH) {
-			if destIDs, err := dm.DataDB().GetReverseDestination(p, false, utils.NonTransactional); err == nil {
+			if destIDs, err := dm.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 				for _, dID := range destIDs {
 					if b.DestinationIDs[dID] == true {
 						return p, dID

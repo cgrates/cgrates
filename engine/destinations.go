@@ -65,7 +65,7 @@ func (d *Destination) AddPrefix(pfx string) {
 
 // Reverse search in cache to see if prefix belongs to destination id
 func CachedDestHasPrefix(destId, prefix string) bool {
-	if cached, err := dm.DataDB().GetReverseDestination(prefix, false, utils.NonTransactional); err == nil {
+	if cached, err := dm.GetReverseDestination(prefix, false, utils.NonTransactional); err == nil {
 		return utils.IsSliceMember(cached, destId)
 	}
 	return false

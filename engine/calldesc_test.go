@@ -1705,8 +1705,8 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 	}
 	dm.DataDB().SetAccount(acnt)
 	dst := &Destination{Id: "DST_TCDDBSWF", Prefixes: []string{"1716"}}
-	dm.DataDB().SetDestination(dst, utils.NonTransactional)
-	dm.DataDB().SetReverseDestination(dst, utils.NonTransactional)
+	dm.SetDestination(dst, utils.NonTransactional)
+	dm.SetReverseDestination(dst, utils.NonTransactional)
 	rpSubj := &RatingPlan{
 		Id: "RP_TCDDBSWF",
 		Timings: map[string]*RITiming{

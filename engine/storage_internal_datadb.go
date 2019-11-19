@@ -106,11 +106,11 @@ func (iDB *InternalDB) RebuildReverseForPrefix(prefix string) (err error) {
 			return err
 		}
 		for _, key := range keys {
-			dest, err := iDB.GetDestination(key[len(utils.DESTINATION_PREFIX):], false, utils.NonTransactional)
+			dest, err := iDB.GetDestinationDrv(key[len(utils.DESTINATION_PREFIX):], false, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
-			if err := iDB.SetReverseDestination(dest, utils.NonTransactional); err != nil {
+			if err := iDB.SetReverseDestinationDrv(dest, utils.NonTransactional); err != nil {
 				return err
 			}
 		}
@@ -138,11 +138,11 @@ func (iDB *InternalDB) RemoveReverseForPrefix(prefix string) (err error) {
 			return err
 		}
 		for _, key := range keys {
-			dest, err := iDB.GetDestination(key[len(utils.DESTINATION_PREFIX):], false, utils.NonTransactional)
+			dest, err := iDB.GetDestinationDrv(key[len(utils.DESTINATION_PREFIX):], false, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
-			if err := iDB.RemoveDestination(dest.Id, utils.NonTransactional); err != nil {
+			if err := iDB.RemoveDestinationDrv(dest.Id, utils.NonTransactional); err != nil {
 				return err
 			}
 		}
@@ -278,7 +278,7 @@ func (iDB *InternalDB) RemoveRatingProfileDrv(id string) (err error) {
 	return
 }
 
-func (iDB *InternalDB) GetDestination(key string, skipCache bool, transactionID string) (dest *Destination, err error) {
+func (iDB *InternalDB) GetDestinationDrv(key string, skipCache bool, transactionID string) (dest *Destination, err error) {
 	cCommit := cacheCommit(transactionID)
 
 	if !skipCache {
@@ -300,7 +300,7 @@ func (iDB *InternalDB) GetDestination(key string, skipCache bool, transactionID 
 	return
 }
 
-func (iDB *InternalDB) SetDestination(dest *Destination, transactionID string) (err error) {
+func (iDB *InternalDB) SetDestinationDrv(dest *Destination, transactionID string) (err error) {
 	iDB.db.Set(utils.CacheDestinations, utils.DESTINATION_PREFIX+dest.Id, dest, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	Cache.Remove(utils.CacheDestinations, dest.Id,
@@ -308,9 +308,9 @@ func (iDB *InternalDB) SetDestination(dest *Destination, transactionID string) (
 	return
 }
 
-func (iDB *InternalDB) RemoveDestination(destID string, transactionID string) (err error) {
+func (iDB *InternalDB) RemoveDestinationDrv(destID string, transactionID string) (err error) {
 	// get destination for prefix list
-	d, err := iDB.GetDestination(destID, false, transactionID)
+	d, err := iDB.GetDestinationDrv(destID, false, transactionID)
 	if err != nil {
 		return
 	}
@@ -321,12 +321,12 @@ func (iDB *InternalDB) RemoveDestination(destID string, transactionID string) (e
 	for _, prefix := range d.Prefixes {
 		iDB.db.Remove(utils.CacheReverseDestinations, utils.REVERSE_DESTINATION_PREFIX+prefix,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
-		iDB.GetReverseDestination(prefix, true, transactionID) // it will recache the destination
+		iDB.GetReverseDestinationDrv(prefix, true, transactionID) // it will recache the destination
 	}
 	return
 }
 
-func (iDB *InternalDB) SetReverseDestination(dest *Destination, transactionID string) (err error) {
+func (iDB *InternalDB) SetReverseDestinationDrv(dest *Destination, transactionID string) (err error) {
 	var mpRevDst utils.StringMap
 	for _, p := range dest.Prefixes {
 		if iDB.db.HasItem(utils.CacheReverseDestinations, utils.REVERSE_DESTINATION_PREFIX+p) {
@@ -346,7 +346,7 @@ func (iDB *InternalDB) SetReverseDestination(dest *Destination, transactionID st
 	return
 }
 
-func (iDB *InternalDB) GetReverseDestination(prefix string,
+func (iDB *InternalDB) GetReverseDestinationDrv(prefix string,
 	skipCache bool, transactionID string) (ids []string, err error) {
 	if !skipCache {
 		if x, ok := Cache.Get(utils.CacheReverseDestinations, prefix); ok {
@@ -371,7 +371,7 @@ func (iDB *InternalDB) GetReverseDestination(prefix string,
 	return
 }
 
-func (iDB *InternalDB) UpdateReverseDestination(oldDest, newDest *Destination,
+func (iDB *InternalDB) UpdateReverseDestinationDrv(oldDest, newDest *Destination,
 	transactionID string) error {
 	var obsoletePrefixes []string
 	var mpRevDst utils.StringMap

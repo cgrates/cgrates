@@ -171,7 +171,7 @@ func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error
 			}
 		} else {
 			for _, p := range utils.SplitPrefix(cd.Destination, MIN_PREFIX_MATCH) {
-				if destIDs, err := dm.DataDB().GetReverseDestination(p, false, utils.NonTransactional); err == nil {
+				if destIDs, err := dm.GetReverseDestination(p, false, utils.NonTransactional); err == nil {
 					var bestWeight *float64
 					for _, dID := range destIDs {
 						var timeChecker bool
