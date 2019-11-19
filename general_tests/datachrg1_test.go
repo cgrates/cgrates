@@ -27,8 +27,7 @@ import (
 )
 
 func TestSetStorageDtChrg1(t *testing.T) {
-	data, _ := engine.NewMapStorageJson()
-	dataDB = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
+	dataDB = engine.NewDataManager(engine.NewInternalDB(nil, nil), config.CgrConfig().CacheCfg(), nil, nil)
 	engine.SetDataStorage(dataDB)
 }
 

@@ -28,11 +28,11 @@ import (
 
 var (
 	apierAcnts            *ApierV1
-	apierAcntsAcntStorage *engine.MapStorage
+	apierAcntsAcntStorage *engine.InternalDB
 )
 
 func init() {
-	apierAcntsAcntStorage, _ = engine.NewMapStorage()
+	apierAcntsAcntStorage = engine.NewInternalDB(nil, nil)
 	cfg, _ := config.NewDefaultCGRConfig()
 	apierAcnts = &ApierV1{DataManager: engine.NewDataManager(apierAcntsAcntStorage, config.CgrConfig().CacheCfg(), nil, nil), Config: cfg}
 }
