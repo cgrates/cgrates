@@ -19,6 +19,7 @@ package engine
 
 import (
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -263,4 +264,30 @@ func TestBalanceIsDefault(t *testing.T) {
 	if !b.IsDefault() {
 		t.Errorf("Balance should be default: %+v", b)
 	}
+}
+
+func TestBalanceIsExpiredAt(t *testing.T) {
+	//expiration date is 0
+	balance := &Balance{}
+	var date2 time.Time
+	if rcv := balance.IsExpiredAt(date2); rcv {
+		t.Errorf("Expecting: false , received: %+v", rcv)
+	}
+	//expiration date before time t
+	balance.ExpirationDate = time.Date(2020, time.April, 18, 23, 0, 3, 0, time.UTC)
+	date2 = time.Date(2020, time.April, 18, 23, 0, 4, 0, time.UTC)
+	if rcv := balance.IsExpiredAt(date2); !rcv {
+		t.Errorf("Expecting: true , received: %+v", rcv)
+	}
+	//expiration date after time t
+	date2 = time.Date(2020, time.April, 18, 23, 0, 2, 0, time.UTC)
+	if rcv := balance.IsExpiredAt(date2); rcv {
+		t.Errorf("Expecting: false , received: %+v", rcv)
+	}
+	//time t = 0
+	var date3 time.Time
+	if rcv := balance.IsExpiredAt(date3); rcv {
+		t.Errorf("Expecting: false , received: %+v", rcv)
+	}
+
 }
