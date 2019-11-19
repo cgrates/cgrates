@@ -35,6 +35,12 @@ var NonMonetaryBalances = MapEvent{
 	utils.GENERIC: struct{}{},
 }
 
+var AccountableRequestTypes = MapEvent{
+	utils.MetaPrepaid:       struct{}{},
+	utils.MetaPostpaid:      struct{}{},
+	utils.MetaPseudoprepaid: struct{}{},
+}
+
 // ChargingInterval represents one interval out of Usage providing charging info
 // eg: PEAK vs OFFPEAK
 type ChargingInterval struct {

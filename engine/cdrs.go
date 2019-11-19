@@ -286,9 +286,20 @@ func (cdrS *CDRServer) rateCDRWithErr(cdr *CDRWithArgDispatcher) (ratedCDRs []*C
 	return
 }
 
+// refundCDR will refund the EventCost within the CDR
 func (cdrS *CDRServer) refundCDR(cdr *CDR) (err error) {
-
-	return
+	if !AccountableRequestTypes.HasField(cdr.RequestType) || cdr.CostDetails == nil {
+		return // non refundable
+	}
+	cd := cdr.CostDetails.AsRefundIncrements(cdr.ToR)
+	if cd == nil || len(cd.Increments) == 0 {
+		return
+	}
+	var acnt engine.Account
+	if err = cdrS.rals.Call(utils.ResponderRefundIncrements,
+		&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd}, &acnt); err != nil {
+		return
+	}
 }
 
 // chrgProcessEvent will process the CGREvent with ChargerS subsystem
