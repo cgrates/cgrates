@@ -414,7 +414,6 @@ func (ka *KamailioAgent) V1GetActiveSessionIDs(ignParam string, sessionIDs *[]*s
 			return errors.New("timeout executing dialog list")
 		}
 	}
-	fmt.Println(utils.ToJSON(*sessionIDs))
 	return
 }
 
