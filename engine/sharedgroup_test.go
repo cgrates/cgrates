@@ -25,8 +25,13 @@ import (
 )
 
 func TestSharedGroupClone(t *testing.T) {
+	//nil check
+	var sharedGroup *SharedGroup
+	if rcv := sharedGroup.Clone(); rcv != nil {
+		t.Errorf("Expecting: nil, received: %+v", utils.ToJSON(rcv))
+	}
 	//empty check
-	sharedGroup := &SharedGroup{}
+	sharedGroup = &SharedGroup{}
 	eOut := &SharedGroup{}
 	if rcv := sharedGroup.Clone(); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
@@ -80,14 +85,13 @@ func TestSharedGroupClone(t *testing.T) {
 
 func TestSharingParametersClone(t *testing.T) {
 	//nil check
-	sharingParameters := &SharingParameters{}
-	eOut := &SharingParameters{}
-	if rcv := sharingParameters.Clone(); !reflect.DeepEqual(eOut, rcv) {
-		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	var sharingParameters *SharingParameters
+	if rcv := sharingParameters.Clone(); rcv != nil {
+		t.Errorf("Expecting:nil, received: %+v", utils.ToJSON(rcv))
 	}
 	//empty check
-	sharingParameters = &SharingParameters{Strategy: "", RatingSubject: ""}
-	eOut = &SharingParameters{Strategy: "", RatingSubject: ""}
+	sharingParameters = &SharingParameters{}
+	eOut := &SharingParameters{}
 	if rcv := sharingParameters.Clone(); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
