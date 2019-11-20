@@ -321,7 +321,9 @@ func (dm *DataManager) GetDestination(key string, skipCache bool, transactionID 
 	if err != nil {
 		if err == utils.ErrNotFound && dm.rmtConns != nil &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaDestinations].Remote {
-			err = dm.rmtConns.Call(utils.ReplicatorSv1GetDestination, key, &dest)
+			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetDestination, key, &dest); err == nil {
+				err = dm.dataDB.SetDestinationDrv(dest, utils.NonTransactional)
+			}
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
@@ -558,15 +560,16 @@ func (dm *DataManager) GetThreshold(tenant, id string,
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaThresholds].Remote {
-			err = dm.rmtConns.Call(utils.ReplicatorSv1GetThreshold,
-				&utils.TenantID{Tenant: tenant, ID: id}, &th)
+			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetThreshold,
+				&utils.TenantID{Tenant: tenant, ID: id}, &th); err == nil {
+				err = dm.dataDB.SetThresholdDrv(th)
+			}
 		}
 		if err != nil {
 			err = utils.CastRPCErr(err)
 			if err == utils.ErrNotFound && cacheWrite {
 				Cache.Set(utils.CacheThresholds, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID)
-
 			}
 			return nil, err
 		}
@@ -595,6 +598,11 @@ func (dm *DataManager) SetThreshold(th *Threshold) (err error) {
 func (dm *DataManager) RemoveThreshold(tenant, id, transactionID string) (err error) {
 	if err = dm.DataDB().RemoveThresholdDrv(tenant, id); err != nil {
 		return
+	}
+	if config.CgrConfig().DataDbCfg().Items[utils.MetaThresholds].Replicate {
+		var reply string
+		dm.rplConns.Call(utils.ReplicatorSv1RemoveThreshold,
+			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
 	}
 	return
 }

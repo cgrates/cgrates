@@ -842,6 +842,7 @@ const (
 	ReplicatorSv1SetDispatcherProfile  = "ReplicatorSv1.SetDispatcherProfile"
 	ReplicatorSv1SetDispatcherHost     = "ReplicatorSv1.SetDispatcherHost"
 	ReplicatorSv1SetLoadIDs            = "ReplicatorSv1.SetLoadIDs"
+	ReplicatorSv1RemoveThreshold       = "ReplicatorSv1.RemoveThreshold"
 )
 
 // ApierV1 APIs

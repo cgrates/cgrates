@@ -494,6 +494,14 @@ func (rplSv1 *ReplicatorSv1) SetDispatcherHost(dpp *engine.DispatcherHost, reply
 	return nil
 }
 
+func (rplSv1 *ReplicatorSv1) RemoveThreshold(args *utils.TenantID, reply *string) error {
+	if err := rplSv1.dm.DataDB().RemoveThresholdDrv(args.Tenant, args.ID); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
+
 func (rplSv1 *ReplicatorSv1) SetLoadIDs(loadIDs map[string]int64, reply *string) error {
 	if err := rplSv1.dm.DataDB().SetLoadIDsDrv(loadIDs); err != nil {
 		return err

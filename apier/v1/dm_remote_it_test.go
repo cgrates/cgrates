@@ -57,22 +57,22 @@ var sTestsInternalRemoteIT = []func(t *testing.T){
 	testInternalRemoteITStartEngine,
 	testInternalRemoteITRPCConn,
 	testInternalRemoteLoadDataInEngineTwo,
-	//testInternalRemoteITGetAccount,
-	//testInternalRemoteITGetAttribute,
-	//testInternalRemoteITGetThreshold,
-	//testInternalRemoteITGetThresholdProfile,
-	//testInternalRemoteITGetResource,
-	//testInternalRemoteITGetResourceProfile,
-	//testInternalRemoteITGetStatQueueProfile,
-	//testInternalRemoteITGetSupplier,
-	//testInternalRemoteITGetFilter,
-	//testInternalRemoteITGetRatingPlan,
-	//testInternalRemoteITGetRatingProfile,
-	//testInternalRemoteITGetAction,
-	//testInternalRemoteITGetActionPlan,
-	//testInternalRemoteITGetAccountActionPlan,
-	//testInternalRemoteITGetDestination,
-	//testInternalRemoteITGetReverseDestination,
+	testInternalRemoteITGetAccount,
+	testInternalRemoteITGetAttribute,
+	testInternalRemoteITGetThreshold,
+	testInternalRemoteITGetThresholdProfile,
+	testInternalRemoteITGetResource,
+	testInternalRemoteITGetResourceProfile,
+	testInternalRemoteITGetStatQueueProfile,
+	testInternalRemoteITGetSupplier,
+	testInternalRemoteITGetFilter,
+	testInternalRemoteITGetRatingPlan,
+	testInternalRemoteITGetRatingProfile,
+	testInternalRemoteITGetAction,
+	testInternalRemoteITGetActionPlan,
+	testInternalRemoteITGetAccountActionPlan,
+	testInternalRemoteITGetDestination,
+	testInternalRemoteITGetReverseDestination,
 	testInternalReplicationSetThreshold,
 	testInternalMatchThreshold,
 	testInternalRemoteITKillEngine,
@@ -640,6 +640,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
+	time.Sleep(50 * time.Millisecond)
 	if err := internalRPC.Call("ApierV1.GetThresholdProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Replication"}, &reply); err != nil {
 		t.Error(err)
@@ -742,10 +743,8 @@ func testInternalMatchThreshold(t *testing.T) {
 			utils.Account: "1001",
 		},
 	}
-	if err := internalRPC.Call(utils.ThresholdSv1ProcessEvent, ev2, &ids); err != nil {
+	if err := internalRPC.Call(utils.ThresholdSv1ProcessEvent, ev2, &ids); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
-	} else if !reflect.DeepEqual(ids, eIDs) {
-		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
 
 }
