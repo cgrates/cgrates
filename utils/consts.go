@@ -114,7 +114,6 @@ const (
 	MYSQL                         = "mysql"
 	MONGO                         = "mongo"
 	REDIS                         = "redis"
-	MAPSTOR                       = "mapstor"
 	INTERNAL                      = "internal"
 	DataManager                   = "DataManager"
 	LOCALHOST                     = "127.0.0.1"
