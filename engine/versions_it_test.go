@@ -160,7 +160,7 @@ func testVersion(t *testing.T) {
 
 	storType := dm3.DataDB().GetStorageType()
 	switch storType {
-	case utils.MAPSTOR:
+	case utils.INTERNAL:
 		currentVersion = allVersions
 		testVersion = allVersions
 		testVersion[utils.Accounts] = 1
@@ -202,7 +202,7 @@ func testVersion(t *testing.T) {
 	}
 	storType = storageDb.GetStorageType()
 	switch storType {
-	case utils.MAPSTOR:
+	case utils.INTERNAL:
 		currentVersion = allVersions
 		testVersion = allVersions
 		testVersion[utils.Accounts] = 1
