@@ -51,10 +51,12 @@ func (uc *UnitCounter) Clone() (newUnit *UnitCounter) {
 	}
 	newUnit = &UnitCounter{
 		CounterType: uc.CounterType,
-		Counters:    make(CounterFilters, len(uc.Counters)),
 	}
-	for i, counter := range uc.Counters {
-		newUnit.Counters[i] = counter.Clone()
+	if uc.Counters != nil {
+		newUnit.Counters = make(CounterFilters, len(uc.Counters))
+		for i, counter := range uc.Counters {
+			newUnit.Counters[i] = counter.Clone()
+		}
 	}
 	return newUnit
 }
@@ -70,7 +72,7 @@ func (cfs *CounterFilter) Clone() *CounterFilter {
 	}
 }
 
-// Clone clones *UnitCounters
+// Clone clones UnitCounters
 func (ucs UnitCounters) Clone() UnitCounters {
 	if ucs == nil {
 		return nil
