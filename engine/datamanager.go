@@ -317,7 +317,16 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 }
 
 func (dm *DataManager) GetDestination(key string, skipCache bool, transactionID string) (dest *Destination, err error) {
-	return dm.dataDB.GetDestinationDrv(key, skipCache, transactionID)
+	dest, err = dm.dataDB.GetDestinationDrv(key, skipCache, transactionID)
+	if err != nil {
+		if err == utils.ErrNotFound && dm.rmtConns != nil {
+			err = dm.rmtConns.Call(utils.ReplicatorSv1GetDestination, key, &dest)
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	return
 }
 
 func (dm *DataManager) SetDestination(dest *Destination, transactionID string) (err error) {
@@ -334,7 +343,16 @@ func (dm *DataManager) SetReverseDestination(dest *Destination, transactionID st
 
 func (dm *DataManager) GetReverseDestination(prefix string,
 	skipCache bool, transactionID string) (ids []string, err error) {
-	return dm.dataDB.GetReverseDestinationDrv(prefix, skipCache, transactionID)
+	ids, err = dm.dataDB.GetReverseDestinationDrv(prefix, skipCache, transactionID)
+	if err != nil {
+		if err == utils.ErrNotFound && dm.rmtConns != nil {
+			err = dm.rmtConns.Call(utils.ReplicatorSv1GetReverseDestination, prefix, &ids)
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	return
 }
 
 func (dm *DataManager) UpdateReverseDestination(oldDest, newDest *Destination,

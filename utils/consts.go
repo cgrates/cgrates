@@ -795,6 +795,8 @@ const (
 	ReplicatorSv1                      = "ReplicatorSv1"
 	ReplicatorSv1Ping                  = "ReplicatorSv1.Ping"
 	ReplicatorSv1GetAccount            = "ReplicatorSv1.GetAccount"
+	ReplicatorSv1GetDestination        = "ReplicatorSv1.GetDestination"
+	ReplicatorSv1GetReverseDestination = "ReplicatorSv1.GetReverseDestination"
 	ReplicatorSv1GetStatQueue          = "ReplicatorSv1.GetStatQueue"
 	ReplicatorSv1GetFilter             = "ReplicatorSv1.GetFilter"
 	ReplicatorSv1GetThreshold          = "ReplicatorSv1.GetThreshold"
@@ -859,6 +861,8 @@ const (
 	ApierV1GetRatingPlanIDs         = "ApierV1.GetRatingPlanIDs"
 	ApierV1GetRatingPlan            = "ApierV1.GetRatingPlan"
 	ApierV1RemoveRatingPlan         = "ApierV1.RemoveRatingPlan"
+	ApierV1GetDestination           = "ApierV1.GetDestination"
+	ApierV1GetReverseDestination    = "ApierV1.GetReverseDestination"
 )
 
 const (
