@@ -152,9 +152,25 @@ func (at *ActionTrigger) CreateBalance() *Balance {
 
 // makes a shallow copy of the receiver
 func (at *ActionTrigger) Clone() *ActionTrigger {
-	clone := new(ActionTrigger)
-	*clone = *at
-	return clone
+	if at == nil {
+		return nil
+	}
+	return &ActionTrigger{
+		ID:                at.ID,
+		UniqueID:          at.UniqueID,
+		ThresholdType:     at.ThresholdType,
+		ThresholdValue:    at.ThresholdValue,
+		Recurrent:         at.Recurrent,
+		MinSleep:          at.MinSleep,
+		ExpirationDate:    at.ExpirationDate,
+		ActivationDate:    at.ActivationDate,
+		Weight:            at.Weight,
+		ActionsID:         at.ActionsID,
+		MinQueuedItems:    at.MinQueuedItems,
+		Executed:          at.Executed,
+		LastExecutionTime: at.LastExecutionTime,
+		Balance:           at.Balance.Clone(),
+	}
 }
 
 func (at *ActionTrigger) Equals(oat *ActionTrigger) bool {
@@ -188,4 +204,15 @@ func (atpl ActionTriggers) Less(j, i int) bool {
 
 func (atpl ActionTriggers) Sort() {
 	sort.Sort(atpl)
+}
+
+func (atpl ActionTriggers) Clone() ActionTriggers {
+	if atpl == nil {
+		return nil
+	}
+	clone := make(ActionTriggers, len(atpl))
+	for i, at := range atpl {
+		clone[i] = at.Clone()
+	}
+	return clone
 }

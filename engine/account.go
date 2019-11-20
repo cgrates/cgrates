@@ -834,17 +834,22 @@ func (account *Account) GetUniqueSharedGroupMembers(cd *CallDescriptor) (utils.S
 
 func (acc *Account) Clone() *Account {
 	newAcc := &Account{
-		ID:             acc.ID,
-		UnitCounters:   nil, // not used when cloned (dryRun)
-		ActionTriggers: nil, // not used when cloned (dryRun)
-		AllowNegative:  acc.AllowNegative,
-		Disabled:       acc.Disabled,
+		ID:            acc.ID,
+		UnitCounters:  acc.UnitCounters.Clone(), // not used when cloned (dryRun)
+		AllowNegative: acc.AllowNegative,
+		Disabled:      acc.Disabled,
 	}
 	if acc.BalanceMap != nil {
 		newAcc.BalanceMap = make(map[string]Balances, len(acc.BalanceMap))
+		for key, balanceChain := range acc.BalanceMap {
+			newAcc.BalanceMap[key] = balanceChain.Clone()
+		}
 	}
-	for key, balanceChain := range acc.BalanceMap {
-		newAcc.BalanceMap[key] = balanceChain.Clone()
+	if acc.ActionTriggers != nil {
+		newAcc.ActionTriggers = make(ActionTriggers, len(acc.ActionTriggers))
+		for key, actionTrigger := range acc.ActionTriggers {
+			newAcc.ActionTriggers[key] = actionTrigger.Clone()
+		}
 	}
 	return newAcc
 }

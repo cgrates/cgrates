@@ -64,6 +64,9 @@ func (bp *BalanceFilter) CreateBalance() *Balance {
 }
 
 func (bf *BalanceFilter) Clone() *BalanceFilter {
+	if bf == nil {
+		return nil
+	}
 	result := &BalanceFilter{}
 	if bf.Uuid != nil {
 		result.Uuid = new(string)

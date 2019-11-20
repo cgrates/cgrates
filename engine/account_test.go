@@ -2328,13 +2328,11 @@ func TestAccountAsNavigableMap(t *testing.T) {
 }
 
 func TestAccountClone(t *testing.T) {
-	//empty check
 	account := &Account{}
 	eOut := &Account{}
-	if	rcv := account.Clone(); !reflect.DeepEqual(eOut, rcv) {
+	if rcv := account.Clone(); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
-	//normal check
 	account = &Account{
 		ID: "testID",
 		BalanceMap: map[string]Balances{
@@ -2347,9 +2345,8 @@ func TestAccountClone(t *testing.T) {
 				ID: "ActionTriggerID2",
 			},
 		},
-		AllowNegative:     true,
-		Disabled:          true,
-		executingTriggers: true,
+		AllowNegative: true,
+		Disabled:      true,
 	}
 	eOut = &Account{
 		ID: "testID",
@@ -2363,11 +2360,10 @@ func TestAccountClone(t *testing.T) {
 				ID: "ActionTriggerID2",
 			},
 		},
-		AllowNegative:     true,
-		Disabled:          true,
-		executingTriggers: true,
+		AllowNegative: true,
+		Disabled:      true,
 	}
-	
+
 	if rcv := account.Clone(); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}

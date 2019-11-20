@@ -118,6 +118,7 @@ func FirstNonEmpty(vals ...string) string {
 	return EmptyString
 }
 
+// Sha1 generate the SHA1 hash from any string
 func Sha1(attrs ...string) string {
 	hasher := sha1.New()
 	for _, attr := range attrs {
@@ -126,9 +127,9 @@ func Sha1(attrs ...string) string {
 	return fmt.Sprintf("%x", hasher.Sum(nil))
 }
 
-func NewTPid() string {
-	return Sha1(GenUUID())
-}
+// func NewTPid() string {
+// 	return Sha1(GenUUID())
+// }
 
 // helper function for uuid generation
 func GenUUID() string {

@@ -882,7 +882,7 @@ func TestLoadActionTriggers(t *testing.T) {
 		Executed:  false,
 	}
 	if !reflect.DeepEqual(atr, expected) {
-		t.Errorf("Error loading action trigger: %+v", utils.ToIJSON(atr.Balance))
+		t.Errorf("Expected: %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(atr))
 	}
 	atr = csvr.actionsTriggers["STANDARD_TRIGGER"][1]
 	expected = &ActionTrigger{
