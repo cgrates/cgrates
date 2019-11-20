@@ -71,6 +71,9 @@ func (sg *SharedGroup) Clone() (sharedGroup *SharedGroup) {
 
 //Clone clones *SharingParameters
 func (sp *SharingParameters) Clone() *SharingParameters {
+	if sp == nil {
+		return nil
+	}
 	return &SharingParameters{
 		Strategy:      sp.Strategy,
 		RatingSubject: sp.RatingSubject,
