@@ -199,6 +199,83 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 		Query_timeout:     utils.StringPointer("10s"),
 		Replication_conns: &[]*RemoteHostJson{},
 		Remote_conns:      &[]*RemoteHostJson{},
+		Items: &map[string]*ItemRmtRplOptJson{
+			utils.MetaAccounts: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaReverseDestinations: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaDestinations: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaRatingPlans: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaRatingProfiles: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaActions: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaActionPlans: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaAccountActionPlans: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaActionTriggers: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaSharedGroups: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaTimings: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaResourceProfile: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaStatQueues: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaResources: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaStatQueueProfiles: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaThresholds: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaThresholdProfiles: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaFilters: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaSupplierProfiles: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaAttributeProfiles: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaDispatcherHosts: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaChargerProfiles: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaDispatcherProfiles: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaFilterIndexes: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+			utils.MetaLoadIDs: &ItemRmtRplOptJson{
+				Replicate: utils.BoolPointer(false),
+				Remote:    utils.BoolPointer(false)},
+		},
 	}
 	if cfg, err := dfCgrJsonCfg.DbJsonCfg(DATADB_JSN); err != nil {
 		t.Error(err)

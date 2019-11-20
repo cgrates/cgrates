@@ -56,7 +56,7 @@ func TestDebitUsageWithOptions(t *testing.T) {
 			utils.MONETARY: {b10},
 		},
 	}
-	if err := apierDebitStorage.SetAccount(cgrAcnt1); err != nil {
+	if err := apierDebitStorage.SetAccountDrv(cgrAcnt1); err != nil {
 		t.Error(err)
 	}
 

@@ -851,7 +851,7 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 			}
 		}
 		if b.account != nil && b.account != acc && b.dirty && savedAccounts[b.account.ID] == nil {
-			dm.DataDB().SetAccount(b.account)
+			dm.SetAccount(b.account)
 			savedAccounts[b.account.ID] = b.account
 		}
 	}

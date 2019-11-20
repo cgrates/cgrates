@@ -49,7 +49,7 @@ func (m *Migrator) migrateCurrentAccounts() (err error) {
 		if acc == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().DataDB().SetAccount(acc); err != nil {
+		if err := m.dmOut.DataManager().SetAccount(acc); err != nil {
 			return err
 		}
 		if err := m.dmIN.DataManager().DataDB().RemoveAccount(idg); err != nil {
@@ -74,7 +74,7 @@ func (m *Migrator) migrateV1Accounts() (err error) {
 			continue
 		}
 		acnt := v1Acnt.V1toV3Account()
-		if err = m.dmOut.DataManager().DataDB().SetAccount(acnt); err != nil {
+		if err = m.dmOut.DataManager().SetAccount(acnt); err != nil {
 			return err
 		}
 		if err = m.dmIN.remV1Account(v1Acnt.Id); err != nil {
@@ -110,7 +110,7 @@ func (m *Migrator) migrateV2Accounts() (err error) {
 			continue
 		}
 		acnt := v2Acnt.V2toV3Account()
-		if err = m.dmOut.DataManager().DataDB().SetAccount(acnt); err != nil {
+		if err = m.dmOut.DataManager().SetAccount(acnt); err != nil {
 			return err
 		}
 		if err = m.dmIN.remV2Account(v2Acnt.ID); err != nil {

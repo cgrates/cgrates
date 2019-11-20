@@ -268,7 +268,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 			ub.Disabled = *attr.Disabled
 		}
 		// All prepared, save account
-		if err := self.DataManager.DataDB().SetAccount(ub); err != nil {
+		if err := self.DataManager.SetAccount(ub); err != nil {
 			return 0, err
 		}
 		return 0, nil
@@ -448,7 +448,7 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 		account := &engine.Account{
 			ID: accID,
 		}
-		if err := self.DataManager.DataDB().SetAccount(account); err != nil {
+		if err := self.DataManager.SetAccount(account); err != nil {
 			*reply = err.Error()
 			return err
 		}
@@ -545,7 +545,7 @@ func (self *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) error
 		account := &engine.Account{
 			ID: accID,
 		}
-		if err := self.DataManager.DataDB().SetAccount(account); err != nil {
+		if err := self.DataManager.SetAccount(account); err != nil {
 			*reply = err.Error()
 			return err
 		}

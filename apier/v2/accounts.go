@@ -230,7 +230,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 			ub.Disabled = *attr.Disabled
 		}
 		// All prepared, save account
-		return 0, self.DataManager.DataDB().SetAccount(ub)
+		return 0, self.DataManager.SetAccount(ub)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+accID)
 	if err != nil {
 		return utils.NewErrServerError(err)

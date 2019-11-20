@@ -109,7 +109,7 @@ func (at *ActionTrigger) Execute(ub *Account) (err error) {
 		at.Executed = false
 	}
 	if !transactionFailed && ub != nil && !removeAccountActionFound {
-		dm.DataDB().SetAccount(ub)
+		dm.SetAccount(ub)
 	}
 	return
 }

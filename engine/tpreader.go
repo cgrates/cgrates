@@ -1075,7 +1075,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 		ub.ActionTriggers = actionTriggers
 		// init counters
 		ub.InitCounters()
-		if err := tpr.dm.DataDB().SetAccount(ub); err != nil {
+		if err := tpr.dm.SetAccount(ub); err != nil {
 			return err
 		}
 	}
@@ -1549,7 +1549,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disable_reverse bool) (err error) 
 		log.Print("Account Actions:")
 	}
 	for _, ub := range tpr.accountActions {
-		err = tpr.dm.DataDB().SetAccount(ub)
+		err = tpr.dm.SetAccount(ub)
 		if err != nil {
 			return err
 		}

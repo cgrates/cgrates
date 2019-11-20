@@ -1119,7 +1119,7 @@ func testOnStorITCRUDAccount(t *testing.T) {
 	if _, rcvErr := onStor.GetAccount(acc.ID); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.DataDB().SetAccount(acc); err != nil {
+	if err := onStor.SetAccount(acc); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetAccount(acc.ID); err != nil {

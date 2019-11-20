@@ -670,7 +670,7 @@ func (iDB *InternalDB) GetAccountDrv(id string) (acc *Account, err error) {
 	return x.(*Account).Clone(), nil
 }
 
-func (iDB *InternalDB) SetAccount(acc *Account) (err error) {
+func (iDB *InternalDB) SetAccountDrv(acc *Account) (err error) {
 	// never override existing account with an empty one
 	// UPDATE: if all balances expired and were cleaned it makes
 	// sense to write empty balance map

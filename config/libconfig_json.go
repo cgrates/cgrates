@@ -92,6 +92,12 @@ type DbJsonCfg struct {
 	Sslmode               *string // Used only in case of storDb
 	Remote_conns          *[]*RemoteHostJson
 	Replication_conns     *[]*RemoteHostJson
+	Items                 *map[string]*ItemRmtRplOptJson
+}
+
+type ItemRmtRplOptJson struct {
+	Remote    *bool
+	Replicate *bool
 }
 
 // Filters config

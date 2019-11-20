@@ -693,7 +693,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// DataDB sanity checks
-	if cfg.dataDbCfg.DataDbType == utils.MetaInternal {
+	if cfg.dataDbCfg.DataDbType == utils.INTERNAL {
 		for key, config := range cfg.cacheCfg {
 			if key == utils.CacheDiameterMessages || key == utils.CacheClosedSessions {
 				if config.Limit == 0 {
@@ -713,6 +713,14 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 		if cfg.thresholdSCfg.StoreInterval != -1 {
 			return fmt.Errorf("<%s> StoreInterval needs to be -1 when DataBD is *internal, received : %d", utils.ThresholdS, cfg.thresholdSCfg.StoreInterval)
+		}
+	}
+	for item, val := range cfg.dataDbCfg.Items {
+		if val.Remote == true && len(cfg.dataDbCfg.RmtConns) == 0 {
+			return fmt.Errorf("Remote connections required by: <%s>", item)
+		}
+		if val.Replicate == true && len(cfg.dataDbCfg.RplConns) == 0 {
+			return fmt.Errorf("Replicate connections required by: <%s>", item)
 		}
 	}
 	return nil
