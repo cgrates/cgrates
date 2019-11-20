@@ -782,7 +782,7 @@ func TestLoadSharedGroups(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(sg1, expected) {
-		t.Error("Error loading shared group: ", sg1.AccountParameters["SG1"])
+		t.Errorf("Expected: %s, received %s ", utils.ToJSON(expected), utils.ToJSON(sg1))
 	}
 	sg2 := csvr.sharedGroups["SG2"]
 	expected = &SharedGroup{
