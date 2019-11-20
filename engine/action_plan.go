@@ -368,7 +368,7 @@ func (at *ActionTiming) Execute(successActions, failedActions chan *Action) (err
 				}
 			}
 			if !transactionFailed && !removeAccountActionFound {
-				dm.DataDB().SetAccount(acc)
+				dm.SetAccount(acc)
 			}
 			return 0, nil
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+accID)

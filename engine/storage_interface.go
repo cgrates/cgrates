@@ -81,7 +81,7 @@ type DataDB interface {
 	PushTask(*Task) error
 	PopTask() (*Task, error)
 	GetAccountDrv(string) (*Account, error)
-	SetAccount(*Account) error
+	SetAccountDrv(*Account) error
 	RemoveAccount(string) error
 	GetResourceProfileDrv(string, string) (*ResourceProfile, error)
 	SetResourceProfileDrv(*ResourceProfile) error

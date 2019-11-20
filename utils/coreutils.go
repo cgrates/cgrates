@@ -1021,7 +1021,7 @@ type SetFilterIndexesArg struct {
 	Indexes      map[string]StringMap
 }
 
-func CastRPCErrToErr(err error) error {
+func CastRPCErr(err error) error {
 	if _, has := ErrMap[err.Error()]; has {
 		return ErrMap[err.Error()]
 	} else {

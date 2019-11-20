@@ -320,7 +320,7 @@ func testAccITMigrateAndMove(t *testing.T) {
 		}
 	case utils.Move:
 		//set an account in dmIN
-		if err := accMigrator.dmIN.DataManager().DataDB().SetAccount(testAccount); err != nil {
+		if err := accMigrator.dmIN.DataManager().SetAccount(testAccount); err != nil {
 			t.Error(err)
 		}
 		//set versions for account

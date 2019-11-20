@@ -950,7 +950,7 @@ func TestLoadAccountActions(t *testing.T) {
 	if err != nil || len(existing.BalanceMap) != 2 {
 		t.Errorf("The account was not set before load: %+v", existing)
 	}
-	dm.DataDB().SetAccount(aa)
+	dm.SetAccount(aa)
 	existing, err = dm.GetAccount(aa.ID)
 	if err != nil || len(existing.BalanceMap) != 2 {
 		t.Errorf("The set account altered the balances: %+v", existing)

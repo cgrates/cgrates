@@ -118,12 +118,12 @@ func populateDB() {
 	if dm.dataDB != nil {
 		dm.SetActions("TEST_ACTIONS", ats, utils.NonTransactional)
 		dm.SetActions("TEST_ACTIONS_ORDER", ats1, utils.NonTransactional)
-		dm.DataDB().SetAccount(broker)
-		dm.DataDB().SetAccount(minu)
-		dm.DataDB().SetAccount(minitsboy)
-		dm.DataDB().SetAccount(luna)
-		dm.DataDB().SetAccount(max)
-		dm.DataDB().SetAccount(money)
+		dm.SetAccount(broker)
+		dm.SetAccount(minu)
+		dm.SetAccount(minitsboy)
+		dm.SetAccount(luna)
+		dm.SetAccount(max)
+		dm.SetAccount(money)
 	} else {
 		log.Fatal("Could not connect to db!")
 	}
@@ -153,7 +153,7 @@ func TestSerialDebit(t *testing.T) {
 				&Balance{Value: initialBalance, Weight: 10},
 			}},
 	}
-	if err := dm.DataDB().SetAccount(moneyConcurent); err != nil {
+	if err := dm.SetAccount(moneyConcurent); err != nil {
 		t.Error(err)
 	}
 	debitsToDo := 50
@@ -190,7 +190,7 @@ func TestParallelDebit(t *testing.T) {
 				&Balance{Value: initialBalance, Weight: 10},
 			}},
 	}
-	if err := dm.DataDB().SetAccount(moneyConcurent); err != nil {
+	if err := dm.SetAccount(moneyConcurent); err != nil {
 		t.Error(err)
 	}
 	debitsToDo := 50
@@ -1645,7 +1645,7 @@ func TestCDRefundIncrements(t *testing.T) {
 			},
 		},
 	}
-	dm.DataDB().SetAccount(ub)
+	dm.SetAccount(ub)
 	increments := Increments{
 		&Increment{Cost: 2, BalanceInfo: &DebitInfo{
 			Monetary: &MonetaryInfo{UUID: "moneya"}, AccountID: ub.ID}},
@@ -1678,7 +1678,7 @@ func TestCDRefundIncrementsZeroValue(t *testing.T) {
 			},
 		},
 	}
-	dm.DataDB().SetAccount(ub)
+	dm.SetAccount(ub)
 	increments := Increments{
 		&Increment{Cost: 0, BalanceInfo: &DebitInfo{AccountID: ub.ID}},
 		&Increment{Cost: 0, Duration: 3 * time.Second, BalanceInfo: &DebitInfo{AccountID: ub.ID}},
@@ -1703,7 +1703,7 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 					RatingSubject: "SubjTCDDBSWF"},
 			}},
 	}
-	dm.DataDB().SetAccount(acnt)
+	dm.SetAccount(acnt)
 	dst := &Destination{Id: "DST_TCDDBSWF", Prefixes: []string{"1716"}}
 	dm.SetDestination(dst, utils.NonTransactional)
 	dm.SetReverseDestination(dst, utils.NonTransactional)

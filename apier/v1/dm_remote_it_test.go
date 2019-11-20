@@ -57,23 +57,24 @@ var sTestsInternalRemoteIT = []func(t *testing.T){
 	testInternalRemoteITStartEngine,
 	testInternalRemoteITRPCConn,
 	testInternalRemoteLoadDataInEngineTwo,
-	testInternalRemoteITGetAccount,
-	testInternalRemoteITGetAttribute,
-	testInternalRemoteITGetThreshold,
-	testInternalRemoteITGetThresholdProfile,
-	testInternalRemoteITGetResource,
-	testInternalRemoteITGetResourceProfile,
-	testInternalRemoteITGetStatQueueProfile,
-	testInternalRemoteITGetSupplier,
-	testInternalRemoteITGetFilter,
-	testInternalRemoteITGetRatingPlan,
-	testInternalRemoteITGetRatingProfile,
-	testInternalRemoteITGetAction,
-	testInternalRemoteITGetActionPlan,
-	testInternalRemoteITGetAccountActionPlan,
-	testInternalRemoteITGetDestination,
-	testInternalRemoteITGetReverseDestination,
+	//testInternalRemoteITGetAccount,
+	//testInternalRemoteITGetAttribute,
+	//testInternalRemoteITGetThreshold,
+	//testInternalRemoteITGetThresholdProfile,
+	//testInternalRemoteITGetResource,
+	//testInternalRemoteITGetResourceProfile,
+	//testInternalRemoteITGetStatQueueProfile,
+	//testInternalRemoteITGetSupplier,
+	//testInternalRemoteITGetFilter,
+	//testInternalRemoteITGetRatingPlan,
+	//testInternalRemoteITGetRatingProfile,
+	//testInternalRemoteITGetAction,
+	//testInternalRemoteITGetActionPlan,
+	//testInternalRemoteITGetAccountActionPlan,
+	//testInternalRemoteITGetDestination,
+	//testInternalRemoteITGetReverseDestination,
 	testInternalReplicationSetThreshold,
+	testInternalMatchThreshold,
 	testInternalRemoteITKillEngine,
 }
 
@@ -630,7 +631,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 			MinSleep:  time.Duration(5 * time.Minute),
 			Blocker:   false,
 			Weight:    20.0,
-			ActionIDs: []string{"ACT_1"},
+			ActionIDs: []string{"ACT_LOG_WARNING"},
 			Async:     true,
 		},
 	}
@@ -639,7 +640,6 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-
 	if err := internalRPC.Call("ApierV1.GetThresholdProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Replication"}, &reply); err != nil {
 		t.Error(err)
@@ -703,6 +703,49 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 	if !reflect.DeepEqual(expectedIDX, indexes) {
 		t.Errorf("Expecting: %+v,\n received: %+v",
 			expectedIDX, utils.ToJSON(indexes))
+	}
+
+}
+
+func testInternalMatchThreshold(t *testing.T) {
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event2",
+		Event: map[string]interface{}{
+			utils.Account: "1002",
+		},
+	}
+	var ids []string
+	eIDs := []string{"THD_ACNT_1002"}
+	if err := internalRPC.Call(utils.ThresholdSv1ProcessEvent, ev, &ids); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
+	}
+	ev = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event2",
+		Event: map[string]interface{}{
+			utils.Account: "1001",
+		},
+	}
+	eIDs = []string{"THD_ACNT_1001"}
+	if err := internalRPC.Call(utils.ThresholdSv1ProcessEvent, ev, &ids); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
+	}
+	ev2 := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event3",
+		Event: map[string]interface{}{
+			utils.Account: "1001",
+		},
+	}
+	if err := internalRPC.Call(utils.ThresholdSv1ProcessEvent, ev2, &ids); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
 
 }

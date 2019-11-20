@@ -52,7 +52,7 @@ func TestSetAccounts(t *testing.T) {
 	iscAcnt2 := &engine.Account{ID: utils.ConcatenatedKey(iscTenant, "account2"),
 		BalanceMap: map[string]engine.Balances{utils.MONETARY + utils.META_OUT: engine.Balances{b10}}}
 	for _, account := range []*engine.Account{cgrAcnt1, cgrAcnt2, cgrAcnt3, iscAcnt1, iscAcnt2} {
-		if err := apierAcntsAcntStorage.SetAccount(account); err != nil {
+		if err := apierAcntsAcntStorage.SetAccountDrv(account); err != nil {
 			t.Error(err)
 		}
 	}

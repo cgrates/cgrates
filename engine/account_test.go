@@ -94,7 +94,7 @@ func TestAccountStorageStoreRestore(t *testing.T) {
 	rifsBalance := &Account{ID: "other",
 		BalanceMap: map[string]Balances{utils.VOICE: Balances{b1, b2},
 			utils.MONETARY: Balances{&Balance{Value: 21}}}}
-	dm.DataDB().SetAccount(rifsBalance)
+	dm.SetAccount(rifsBalance)
 	ub1, err := dm.GetAccount("other")
 	if err != nil ||
 		!ub1.BalanceMap[utils.MONETARY].Equal(rifsBalance.BalanceMap[utils.MONETARY]) {
@@ -171,7 +171,7 @@ func TestAccountStorageStore(t *testing.T) {
 		BalanceMap: map[string]Balances{
 			utils.VOICE:    Balances{b1, b2},
 			utils.MONETARY: Balances{&Balance{Value: 21}}}}
-	dm.DataDB().SetAccount(rifsBalance)
+	dm.SetAccount(rifsBalance)
 	result, err := dm.GetAccount(rifsBalance.ID)
 	if err != nil || rifsBalance.ID != result.ID ||
 		len(rifsBalance.BalanceMap[utils.VOICE]) < 2 ||
@@ -1475,7 +1475,7 @@ func TestDebitShared(t *testing.T) {
 
 	sg := &SharedGroup{Id: "SG_TEST", MemberIds: utils.NewStringMap(rif.ID, groupie.ID), AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}
 
-	dm.DataDB().SetAccount(groupie)
+	dm.SetAccount(groupie)
 	dm.SetSharedGroup(sg, utils.NonTransactional)
 	cc, err := rif.debitCreditBalance(cd, false, false, true)
 	if err != nil {
@@ -1546,7 +1546,7 @@ func TestMaxDurationShared(t *testing.T) {
 
 	sg := &SharedGroup{Id: "SG_TEST", MemberIds: utils.NewStringMap(rif.ID, groupie.ID), AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}
 
-	dm.DataDB().SetAccount(groupie)
+	dm.SetAccount(groupie)
 	dm.SetSharedGroup(sg, utils.NonTransactional)
 	duration, err := cd.getMaxSessionDuration(rif)
 	if err != nil {
@@ -2392,7 +2392,7 @@ func BenchmarkAccountStorageStoreRestore(b *testing.B) {
 	b2 := &Balance{Value: 100, Weight: 20, DestinationIDs: utils.StringMap{"RET": true}}
 	rifsBalance := &Account{ID: "other", BalanceMap: map[string]Balances{utils.VOICE: Balances{b1, b2}, utils.MONETARY: Balances{&Balance{Value: 21}}}}
 	for i := 0; i < b.N; i++ {
-		dm.DataDB().SetAccount(rifsBalance)
+		dm.SetAccount(rifsBalance)
 		dm.GetAccount(rifsBalance.ID)
 	}
 }

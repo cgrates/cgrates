@@ -1159,7 +1159,7 @@ func (ms *MongoStorage) GetAccountDrv(key string) (result *Account, err error) {
 	return
 }
 
-func (ms *MongoStorage) SetAccount(acc *Account) error {
+func (ms *MongoStorage) SetAccountDrv(acc *Account) error {
 	// never override existing account with an empty one
 	// UPDATE: if all balances expired and were cleaned it makes
 	// sense to write empty balance map

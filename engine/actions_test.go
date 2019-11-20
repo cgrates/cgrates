@@ -519,8 +519,8 @@ func TestActionPlansRemoveMember(t *testing.T) {
 	account1 := &Account{ID: "one"}
 	account2 := &Account{ID: "two"}
 
-	dm.DataDB().SetAccount(account1)
-	dm.DataDB().SetAccount(account2)
+	dm.SetAccount(account1)
+	dm.SetAccount(account2)
 
 	ap1 := &ActionPlan{
 		Id:         "TestActionPlansRemoveMember1",
@@ -1533,7 +1533,7 @@ func TestActionSetDDestination(t *testing.T) {
 */
 
 func TestActionTransactionFuncType(t *testing.T) {
-	err := dm.DataDB().SetAccount(&Account{
+	err := dm.SetAccount(&Account{
 		ID: "cgrates.org:trans",
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{&Balance{
@@ -1571,7 +1571,7 @@ func TestActionTransactionFuncType(t *testing.T) {
 }
 
 func TestActionTransactionBalanceType(t *testing.T) {
-	err := dm.DataDB().SetAccount(&Account{
+	err := dm.SetAccount(&Account{
 		ID: "cgrates.org:trans",
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{&Balance{
@@ -1608,7 +1608,7 @@ func TestActionTransactionBalanceType(t *testing.T) {
 }
 
 func TestActionTransactionBalanceNotType(t *testing.T) {
-	err := dm.DataDB().SetAccount(&Account{
+	err := dm.SetAccount(&Account{
 		ID: "cgrates.org:trans",
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{&Balance{
@@ -1645,7 +1645,7 @@ func TestActionTransactionBalanceNotType(t *testing.T) {
 }
 
 func TestActionWithExpireWithoutExpire(t *testing.T) {
-	err := dm.DataDB().SetAccount(&Account{
+	err := dm.SetAccount(&Account{
 		ID: "cgrates.org:exp",
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{&Balance{
@@ -1689,7 +1689,7 @@ func TestActionWithExpireWithoutExpire(t *testing.T) {
 }
 
 func TestActionRemoveBalance(t *testing.T) {
-	err := dm.DataDB().SetAccount(&Account{
+	err := dm.SetAccount(&Account{
 		ID: "cgrates.org:rembal",
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{
@@ -1736,7 +1736,7 @@ func TestActionRemoveBalance(t *testing.T) {
 }
 
 func TestActionRemoveExpiredBalance(t *testing.T) {
-	err := dm.DataDB().SetAccount(&Account{
+	err := dm.SetAccount(&Account{
 		ID: "cgrates.org:rembal2",
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{
@@ -1789,7 +1789,7 @@ func TestActionRemoveExpiredBalance(t *testing.T) {
 }
 
 func TestActionTransferMonetaryDefault(t *testing.T) {
-	err := dm.DataDB().SetAccount(
+	err := dm.SetAccount(
 		&Account{
 			ID: "cgrates.org:trans",
 			BalanceMap: map[string]Balances{
@@ -1845,7 +1845,7 @@ func TestActionTransferMonetaryDefault(t *testing.T) {
 }
 
 func TestActionTransferMonetaryDefaultFilter(t *testing.T) {
-	err := dm.DataDB().SetAccount(
+	err := dm.SetAccount(
 		&Account{
 			ID: "cgrates.org:trans",
 			BalanceMap: map[string]Balances{
@@ -1906,7 +1906,7 @@ func TestActionTransferMonetaryDefaultFilter(t *testing.T) {
 }
 
 func TestActionConditionalTopup(t *testing.T) {
-	err := dm.DataDB().SetAccount(
+	err := dm.SetAccount(
 		&Account{
 			ID: "cgrates.org:cond",
 			BalanceMap: map[string]Balances{
@@ -1970,7 +1970,7 @@ func TestActionConditionalTopup(t *testing.T) {
 }
 
 func TestActionConditionalTopupNoMatch(t *testing.T) {
-	err := dm.DataDB().SetAccount(
+	err := dm.SetAccount(
 		&Account{
 			ID: "cgrates.org:cond",
 			BalanceMap: map[string]Balances{
@@ -2033,7 +2033,7 @@ func TestActionConditionalTopupNoMatch(t *testing.T) {
 }
 
 func TestActionConditionalTopupExistingBalance(t *testing.T) {
-	err := dm.DataDB().SetAccount(
+	err := dm.SetAccount(
 		&Account{
 			ID: "cgrates.org:cond",
 			BalanceMap: map[string]Balances{
@@ -2097,7 +2097,7 @@ func TestActionConditionalTopupExistingBalance(t *testing.T) {
 }
 
 func TestActionConditionalDisabledIfNegative(t *testing.T) {
-	err := dm.DataDB().SetAccount(
+	err := dm.SetAccount(
 		&Account{
 			ID: "cgrates.org:af",
 			BalanceMap: map[string]Balances{
@@ -2250,7 +2250,7 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 }
 
 func TestActionSetBalance(t *testing.T) {
-	err := dm.DataDB().SetAccount(
+	err := dm.SetAccount(
 		&Account{
 			ID: "cgrates.org:setb",
 			BalanceMap: map[string]Balances{
@@ -2386,7 +2386,7 @@ func TestActionTopUpZeroNegative(t *testing.T) {
 			},
 		},
 	}
-	err := dm.DataDB().SetAccount(account)
+	err := dm.SetAccount(account)
 	if err != nil {
 		t.Error("Error setting account: ", err)
 	}
@@ -2440,7 +2440,7 @@ func TestActionSetExpiry(t *testing.T) {
 			},
 		},
 	}
-	err := dm.DataDB().SetAccount(account)
+	err := dm.SetAccount(account)
 	if err != nil {
 		t.Error("Error setting account: ", err)
 	}

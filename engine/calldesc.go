@@ -767,7 +767,7 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 	cc.UpdateRatedUsage()
 	cc.Timespans.Compress()
 	if !dryRun {
-		dm.DataDB().SetAccount(account)
+		dm.SetAccount(account)
 	}
 	if cd.PerformRounding {
 		cc.Round()
@@ -887,7 +887,7 @@ func (cd *CallDescriptor) refundIncrements() (acnt *Account, err error) {
 				account = acc
 				accountsCache[increment.BalanceInfo.AccountID] = account
 				// will save the account only once at the end of the function
-				defer dm.DataDB().SetAccount(account)
+				defer dm.SetAccount(account)
 			}
 		}
 		if account == nil {
@@ -950,7 +950,7 @@ func (cd *CallDescriptor) refundRounding() (err error) {
 				account = acc
 				accountsCache[increment.BalanceInfo.AccountID] = account
 				// will save the account only once at the end of the function
-				defer dm.DataDB().SetAccount(account)
+				defer dm.SetAccount(account)
 			}
 		}
 		if account == nil {
