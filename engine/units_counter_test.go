@@ -18,10 +18,133 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
 )
+
+func TestUnitCounterClone(t *testing.T) {
+	var uc *UnitCounter
+	if rcv := uc.Clone(); rcv != nil {
+		t.Errorf("Expecting nil, received: %s", utils.ToJSON(rcv))
+	}
+	uc = &UnitCounter{}
+	eOut := &UnitCounter{}
+	if rcv := uc.Clone(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %s, received %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+
+	uc = &UnitCounter{
+		CounterType: "testCounterType",
+		Counters: []*CounterFilter{
+			&CounterFilter{
+				Value: 0.7,
+			},
+			&CounterFilter{
+				Value: 0.8,
+			},
+		},
+	}
+	eOut = &UnitCounter{
+		CounterType: "testCounterType",
+		Counters: []*CounterFilter{
+			&CounterFilter{
+				Value: 0.7,
+			},
+			&CounterFilter{
+				Value: 0.8,
+			},
+		},
+	}
+	if rcv := uc.Clone(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %s, received %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+}
+
+func TestCounterFilterClone(t *testing.T) {
+	var cfs *CounterFilter
+	if rcv := cfs.Clone(); rcv != nil {
+		t.Errorf("Expecting nil, received: %s", utils.ToJSON(rcv))
+	}
+	cfs = &CounterFilter{}
+	eOut := &CounterFilter{}
+	if rcv := cfs.Clone(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %s, received %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	cfs = &CounterFilter{
+		Value: 0.7,
+		Filter: &BalanceFilter{
+			Uuid: utils.StringPointer("testUuid"),
+		},
+	}
+	eOut = &CounterFilter{
+		Value: 0.7,
+		Filter: &BalanceFilter{
+			Uuid: utils.StringPointer("testUuid"),
+		},
+	}
+	if rcv := cfs.Clone(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %s, received %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+
+}
+
+func TestUnitCountersClone(t *testing.T) {
+	var ucs UnitCounters
+	if rcv := ucs.Clone(); rcv != nil {
+		t.Errorf("Expecting nil, received: %s", utils.ToJSON(rcv))
+	}
+	ucs = UnitCounters{}
+	eOut := UnitCounters{}
+	if rcv := ucs.Clone(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %s, received %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	ucs = UnitCounters{
+		"string1": []*UnitCounter{
+			&UnitCounter{
+				CounterType: "testCounterType1.1",
+			},
+			&UnitCounter{
+				CounterType: "testCounterType1.2",
+			},
+		},
+		"string2": []*UnitCounter{
+			&UnitCounter{
+				CounterType: "testCounterType2.1",
+			},
+			&UnitCounter{
+				CounterType: "testCounterType2.2",
+			},
+		},
+	}
+	eOut = UnitCounters{
+		"string1": []*UnitCounter{
+			&UnitCounter{
+				CounterType: "testCounterType1.1",
+			},
+			&UnitCounter{
+				CounterType: "testCounterType1.2",
+			},
+		},
+		"string2": []*UnitCounter{
+			&UnitCounter{
+				CounterType: "testCounterType2.1",
+			},
+			&UnitCounter{
+				CounterType: "testCounterType2.2",
+			},
+		},
+	}
+	rcv := ucs.Clone()
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %s, received %s", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
+	rcv["string1"][0].CounterType = "modified"
+	if ucs["string1"][0].CounterType == "modified" {
+		t.Error("Original struct was modified")
+	}
+}
 
 func TestUnitsCounterAddBalance(t *testing.T) {
 	uc := &UnitCounter{

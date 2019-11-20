@@ -835,7 +835,7 @@ func (account *Account) GetUniqueSharedGroupMembers(cd *CallDescriptor) (utils.S
 func (acc *Account) Clone() *Account {
 	newAcc := &Account{
 		ID:            acc.ID,
-		UnitCounters:  acc.UnitCounters.Clone(), // not used when cloned (dryRun)
+		UnitCounters:  acc.UnitCounters.Clone(),
 		AllowNegative: acc.AllowNegative,
 		Disabled:      acc.Disabled,
 	}
