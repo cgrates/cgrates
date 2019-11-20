@@ -2329,13 +2329,13 @@ func TestAccountAsNavigableMap(t *testing.T) {
 
 func TestAccountClone(t *testing.T) {
 	//empty check
-	// account := &Account{}
-	// eOut := &Account{}
-	// if	rcv := account.Clone(); reflect.DeepEqual(eOut, rcv) {
-	// 	t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
-	// }
+	account := &Account{}
+	eOut := &Account{}
+	if	rcv := account.Clone(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
+	}
 	//normal check
-	account := &Account{
+	account = &Account{
 		ID: "testID",
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: {&Balance{Value: 10, Weight: 10}}},
@@ -2351,7 +2351,7 @@ func TestAccountClone(t *testing.T) {
 		Disabled:          true,
 		executingTriggers: true,
 	}
-	eOut := &Account{
+	eOut = &Account{
 		ID: "testID",
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: {&Balance{Value: 10, Weight: 10}}},
@@ -2368,7 +2368,7 @@ func TestAccountClone(t *testing.T) {
 		executingTriggers: true,
 	}
 	
-	if rcv := account.Clone(); reflect.DeepEqual(eOut, rcv) {
+	if rcv := account.Clone(); !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(rcv))
 	}
 
