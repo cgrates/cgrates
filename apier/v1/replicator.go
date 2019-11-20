@@ -47,6 +47,26 @@ func (rplSv1 *ReplicatorSv1) GetAccount(id string, reply *engine.Account) error 
 	return nil
 }
 
+//GetDestination
+func (rplSv1 *ReplicatorSv1) GetDestination(key string, reply *engine.Destination) error {
+	if rcv, err := rplSv1.dm.DataDB().GetDestinationDrv(key, true, utils.NonTransactional); err != nil {
+		return err
+	} else {
+		*reply = *rcv
+	}
+	return nil
+}
+
+//GetDestination
+func (rplSv1 *ReplicatorSv1) GetReverseDestination(key string, reply *[]string) error {
+	if rcv, err := rplSv1.dm.DataDB().GetReverseDestinationDrv(key, true, utils.NonTransactional); err != nil {
+		return err
+	} else {
+		*reply = rcv
+	}
+	return nil
+}
+
 //GetStatQueue
 func (rplSv1 *ReplicatorSv1) GetStatQueue(tntID *utils.TenantID, reply *engine.StoredStatQueue) error {
 	if rcv, err := rplSv1.dm.DataDB().GetStoredStatQueueDrv(tntID.Tenant, tntID.ID); err != nil {

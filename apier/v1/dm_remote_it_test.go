@@ -71,6 +71,8 @@ var sTestsInternalRemoteIT = []func(t *testing.T){
 	testInternalRemoteITGetAction,
 	testInternalRemoteITGetActionPlan,
 	testInternalRemoteITGetAccountActionPlan,
+	testInternalRemoteITGetDestination,
+	testInternalRemoteITGetReverseDestination,
 	testInternalReplicationSetThreshold,
 	testInternalRemoteITKillEngine,
 }
@@ -556,6 +558,29 @@ func testInternalRemoteITGetAccountActionPlan(t *testing.T) {
 		t.Errorf("Expected: %v,\n received: %v", "AP_PACKAGE_10", aap[0].ActionPlanId)
 	} else if aap[0].ActionsId != "ACT_TOPUP_RST_10" {
 		t.Errorf("Expected: %v,\n received: %v", "ACT_TOPUP_RST_10", aap[0].ActionsId)
+	}
+}
+
+func testInternalRemoteITGetDestination(t *testing.T) {
+	var dst *engine.Destination
+	eDst := &engine.Destination{
+		Id:       "DST_1002",
+		Prefixes: []string{"1002"},
+	}
+	if err := internalRPC.Call(utils.ApierV1GetDestination, "DST_1002", &dst); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eDst, dst) {
+		t.Errorf("Expected: %v,\n received: %v", eDst, dst)
+	}
+}
+
+func testInternalRemoteITGetReverseDestination(t *testing.T) {
+	var ids []string
+	eIDs := []string{"DST_1002"}
+	if err := internalRPC.Call(utils.ApierV1GetReverseDestination, "1002", &ids); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eIDs, ids) {
+		t.Errorf("Expected: %v,\n received: %v", eIDs, ids)
 	}
 }
 
