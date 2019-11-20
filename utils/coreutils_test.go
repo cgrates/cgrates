@@ -51,10 +51,51 @@ func TestFirstNonEmpty(t *testing.T) {
 	}
 }
 
+func TestSha1(t *testing.T) {
+	//empty check
+	rcv := Sha1(" ")
+	eOut := "b858cb282617fb0956d960215c8e84d1ccf909c6"
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %s, received: %s", eOut, rcv)
+	}
+	//normal check
+	rcv = Sha1("teststring")
+	eOut = "b8473b86d4c2072ca9b08bd28e373e8253e865c4"
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %s, received: %s", eOut, rcv)
+	}
+	rcv = Sha1("test1", "test2")
+	eOut = "dff964f6e3c1761b6288f5c75c319d36fb09b2b9"
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %s, received: %s", eOut, rcv)
+	}
+}
+
 func TestUUID(t *testing.T) {
 	uuid := GenUUID()
 	if len(uuid) == 0 {
 		t.Fatalf("GenUUID error %s", uuid)
+	}
+	uuid2 := GenUUID()
+	if len(uuid2) == 0 {
+		t.Fatalf("GenUUID error %s", uuid)
+	}
+	if uuid == uuid2 {
+		t.Error("GenUUID error.")
+	}
+}
+
+func TestUUIDSha1Prefix(t *testing.T) {
+	rcv := UUIDSha1Prefix()
+	if len(rcv) != 7 {
+		t.Errorf("Expected len: 7, received %d", len(rcv))
+	}
+	rcv2 := UUIDSha1Prefix()
+	if len(rcv2) != 7 {
+		t.Errorf("Expected len: 7, received %d", len(rcv))
+	}
+	if rcv == rcv2 {
+		t.Error("UUIDSha1Prefix error")
 	}
 }
 

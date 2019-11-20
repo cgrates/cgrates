@@ -486,7 +486,7 @@ func (iDB *InternalDB) GetActionTriggersDrv(id string) (at ActionTriggers, err e
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(ActionTriggers), nil
+	return x.(ActionTriggers).Clone(), nil
 }
 
 func (iDB *InternalDB) SetActionTriggersDrv(id string, at ActionTriggers) (err error) {

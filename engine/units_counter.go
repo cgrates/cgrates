@@ -44,6 +44,48 @@ func (cfs CounterFilters) HasCounter(cf *CounterFilter) bool {
 	return false
 }
 
+// Clone clones *UnitCounter
+func (uc *UnitCounter) Clone() (newUnit *UnitCounter) {
+	if uc == nil {
+		return
+	}
+	newUnit = &UnitCounter{
+		CounterType: uc.CounterType,
+		Counters:    make(CounterFilters, len(uc.Counters)),
+	}
+	for i, counter := range uc.Counters {
+		newUnit.Counters[i] = counter.Clone()
+	}
+	return newUnit
+}
+
+// Clone clones *CounterFilter
+func (cfs *CounterFilter) Clone() *CounterFilter {
+	if cfs == nil {
+		return nil
+	}
+	return &CounterFilter{
+		Value:  cfs.Value,
+		Filter: cfs.Filter.Clone(),
+	}
+}
+
+// Clone clones *UnitCounters
+func (ucs UnitCounters) Clone() UnitCounters {
+	if ucs == nil {
+		return nil
+	}
+	newUnitCounters := make(UnitCounters)
+	for key, unitCounter := range ucs {
+		newal := make([]*UnitCounter, len(unitCounter))
+		for i, uc := range unitCounter {
+			newal[i] = uc.Clone()
+		}
+		newUnitCounters[key] = newal
+	}
+	return newUnitCounters
+}
+
 // Returns true if the counters were of the same type
 // Copies the value from old balances
 func (uc *UnitCounter) CopyCounterValues(oldUc *UnitCounter) bool {
