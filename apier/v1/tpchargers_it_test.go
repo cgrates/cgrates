@@ -74,13 +74,6 @@ func TestTPChrgsITMongo(t *testing.T) {
 	}
 }
 
-func TestTPChrgsITMapStorage(t *testing.T) {
-	tpChrgsConfigDIR = "tutinternal"
-	for _, stest := range sTestsTPChrgs {
-		t.Run(tpChrgsConfigDIR, stest)
-	}
-}
-
 func TestTPChrgsITInternal(t *testing.T) {
 	tpChrgsConfigDIR = "tutinternal"
 	for _, stest := range sTestsTPChrgs {

@@ -163,7 +163,7 @@ func (dm *DataManager) LoadDataDBCache(dstIDs, rvDstIDs, rplIDs, rpfIDs, actIDs,
 	return
 }
 
-//Used for MapStorage
+//Used for InternalDB
 func (dm *DataManager) PreloadCacheForPrefix(prefix string) error {
 	transID := Cache.BeginTransaction()
 	Cache.Clear([]string{utils.CachePrefixToInstance[prefix]})
