@@ -179,7 +179,7 @@ func testChargerSLoadAddCharger(t *testing.T) {
 			Weight:  10,
 		},
 	}
-	if err := chargerRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+	if err := chargerRPC.Call(utils.ApierV1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -263,7 +263,7 @@ func testChargerSSetChargerProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.ChargerProfile
-	if err := chargerRPC.Call("ApierV1.GetChargerProfile",
+	if err := chargerRPC.Call(utils.ApierV1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, reply) {
@@ -298,7 +298,7 @@ func testChargerSUpdateChargerProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.ChargerProfile
-	if err := chargerRPC.Call("ApierV1.GetChargerProfile",
+	if err := chargerRPC.Call(utils.ApierV1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, reply) {
@@ -308,19 +308,19 @@ func testChargerSUpdateChargerProfile(t *testing.T) {
 
 func testChargerSRemChargerProfile(t *testing.T) {
 	var resp string
-	if err := chargerRPC.Call("ApierV1.RemoveChargerProfile",
+	if err := chargerRPC.Call(utils.ApierV1RemoveChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 	var reply *engine.AttributeProfile
-	if err := chargerRPC.Call("ApierV1.GetChargerProfile",
+	if err := chargerRPC.Call(utils.ApierV1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := chargerRPC.Call("ApierV1.RemoveChargerProfile",
+	if err := chargerRPC.Call(utils.ApierV1RemoveChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &resp); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
 	}

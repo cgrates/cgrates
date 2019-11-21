@@ -129,7 +129,7 @@ func testSchedVeifyAllAccounts(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1001",
 	}
-	if err := schedRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	if err := schedRpc.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != 10 {
 		t.Errorf("Expecting: %v, received: %v",
@@ -139,7 +139,7 @@ func testSchedVeifyAllAccounts(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1002",
 	}
-	if err := schedRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	if err := schedRpc.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != 10 {
 		t.Errorf("Expecting: %v, received: %v",
@@ -149,7 +149,7 @@ func testSchedVeifyAllAccounts(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1003",
 	}
-	if err := schedRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	if err := schedRpc.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != 10 {
 		t.Errorf("Expecting: %v, received: %v",
@@ -166,7 +166,7 @@ func testSchedVeifyAccount1001(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1001",
 	}
-	if err := schedRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	if err := schedRpc.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != 10 {
 		t.Errorf("Expecting: %v, received: %v",
@@ -177,7 +177,7 @@ func testSchedVeifyAccount1001(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1002",
 	}
-	if err := schedRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	if err := schedRpc.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if lenBal := len(acnt.BalanceMap[utils.MONETARY]); lenBal != 0 {
 		t.Errorf("Expecting: %v, received: %v",
@@ -188,7 +188,7 @@ func testSchedVeifyAccount1001(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1003",
 	}
-	if err := schedRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	if err := schedRpc.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if lenBal := len(acnt.BalanceMap[utils.MONETARY]); lenBal != 0 {
 		t.Errorf("Expecting: %v, received: %v",
@@ -206,7 +206,7 @@ func testSchedVeifyAccount1002and1003(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1001",
 	}
-	if err := schedRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	if err := schedRpc.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if lenBal := len(acnt.BalanceMap[utils.MONETARY]); lenBal != 0 {
 		t.Errorf("Expecting: %v, received: %v",
@@ -217,7 +217,7 @@ func testSchedVeifyAccount1002and1003(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1002",
 	}
-	if err := schedRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	if err := schedRpc.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != 10 {
 		t.Errorf("Expecting: %v, received: %v",
@@ -228,7 +228,7 @@ func testSchedVeifyAccount1002and1003(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1003",
 	}
-	if err := schedRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	if err := schedRpc.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != 10 {
 		t.Errorf("Expecting: %v, received: %v",

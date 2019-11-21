@@ -236,7 +236,7 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1001",
 	}
-	if err := rpcRpc.Call("ApierV2.GetAccount", attrAcc, &acnt); err != nil {
+	if err := rpcRpc.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.Disabled != true {
 		t.Errorf("Expecting: true, received: %v", acnt.Disabled)
@@ -329,7 +329,7 @@ func testRPCMethodsInitSession(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1001",
 	}
-	if err := rpcRpc.Call("ApierV2.GetAccount", attrAcc, &acnt); err != nil {
+	if err := rpcRpc.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.Disabled != true {
 		t.Errorf("Expecting: true, received: %v", acnt.Disabled)
@@ -422,7 +422,7 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1001",
 	}
-	if err := rpcRpc.Call("ApierV2.GetAccount", attrAcc, &acnt); err != nil {
+	if err := rpcRpc.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.Disabled != true {
 		t.Errorf("Expecting: true, received: %v", acnt.Disabled)
@@ -632,7 +632,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1001",
 	}
-	if err := rpcRpc.Call("ApierV2.GetAccount", attrAcc, &acnt); err != nil {
+	if err := rpcRpc.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.Disabled != true {
 		t.Errorf("Expecting: true, received: %v", acnt.Disabled)

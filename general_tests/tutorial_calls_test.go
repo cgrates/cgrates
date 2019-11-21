@@ -263,21 +263,21 @@ func testCallLoadTariffPlanFromFolder(t *testing.T) {
 func testCallAccountsBefore(t *testing.T) {
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := tutorialCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
+	if err := tutorialCallsRpc.Call(utils.ApierV2GetAccount, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 {
 		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	var reply2 *engine.Account
 	attrs2 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1002"}
-	if err := tutorialCallsRpc.Call("ApierV2.GetAccount", attrs2, &reply2); err != nil {
+	if err := tutorialCallsRpc.Call(utils.ApierV2GetAccount, attrs2, &reply2); err != nil {
 		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
 	} else if reply2.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 {
 		t.Errorf("Calling ApierV1.GetBalance received: %f", reply2.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	var reply3 *engine.Account
 	attrs3 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1003"}
-	if err := tutorialCallsRpc.Call("ApierV2.GetAccount", attrs3, &reply3); err != nil {
+	if err := tutorialCallsRpc.Call(utils.ApierV2GetAccount, attrs3, &reply3); err != nil {
 		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
 	} else if reply3.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 {
 		t.Errorf("Calling ApierV1.GetBalance received: %f", reply3.BalanceMap[utils.MONETARY].GetTotalValue())
@@ -478,7 +478,7 @@ func testCallCheckResourceAllocation(t *testing.T) {
 func testCallAccount1001(t *testing.T) {
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := tutorialCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
+	if err := tutorialCallsRpc.Call(utils.ApierV2GetAccount, attrs, &reply); err != nil {
 		t.Error(err.Error())
 	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() == 10.0 { // Make sure we debitted
 		t.Errorf("Expected: 10, received: %+v", reply.BalanceMap[utils.MONETARY].GetTotalValue())

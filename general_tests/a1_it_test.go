@@ -165,7 +165,7 @@ func testA1itAddBalance1(t *testing.T) {
 	}
 	argGet := &utils.AttrGetAccount{Tenant: argAdd.Tenant, Account: argAdd.Account}
 	var acnt *engine.Account
-	if err := a1rpc.Call("ApierV2.GetAccount", argGet, &acnt); err != nil {
+	if err := a1rpc.Call(utils.ApierV2GetAccount, argGet, &acnt); err != nil {
 		t.Error(err)
 	} else {
 		if acnt.BalanceMap[utils.DATA].GetTotalValue() != argAdd.Value { // We expect 11.5 since we have added in the previous test 1.5
@@ -309,7 +309,7 @@ func testA1itDataSession1(t *testing.T) {
 	}
 	expBalance := float64(10000000000 - 2202800) // initial - total usage
 	var acnt *engine.Account
-	if err := a1rpc.Call("ApierV2.GetAccount",
+	if err := a1rpc.Call(utils.ApierV2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "rpdata1"}, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != expBalance { // We expect 11.5 since we have added in the previous test 1.5

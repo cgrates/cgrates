@@ -265,7 +265,7 @@ func testSes3ItAddVoiceBalance(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1002",
 	}
-	if err := ses3RPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	if err := ses3RPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != float64(5*time.Second) {
 		t.Errorf("Expecting: %v, received: %v",
@@ -352,7 +352,7 @@ func testSes3ItBalance(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "1002",
 	}
-	if err := ses3RPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	if err := ses3RPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != float64(3*time.Second) {
 		t.Errorf("Expecting: %v, received: %v",

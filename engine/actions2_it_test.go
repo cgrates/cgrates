@@ -263,7 +263,7 @@ func testActionsUpdateBalance(t *testing.T) {
 	}
 	var acc Account
 	attrs2 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testAcc"}
-	if err := actsRPC.Call("ApierV2.GetAccount", attrs2, &acc); err != nil {
+	if err := actsRPC.Call(utils.ApierV2GetAccount, attrs2, &acc); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else if acc.BalanceMap[utils.MONETARY][0].ID != "test" {
 		t.Errorf("Expected test result received %v ", acc.BalanceMap[utils.MONETARY][0].ID)

@@ -135,7 +135,7 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 		t.Fatal(err)
 	}
 	var acnt *engine.Account
-	if err := cdrsOfflineRpc.Call("ApierV2.GetAccount", &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "test"}, &acnt); err != nil {
+	if err := cdrsOfflineRpc.Call(utils.ApierV2GetAccount, &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "test"}, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MONETARY][0].Value != 10.0 {
 		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MONETARY][0])
@@ -248,7 +248,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 	var acnt *engine.Account
 	//verify if the third balance was added
-	if err := cdrsOfflineRpc.Call("ApierV2.GetAccount",
+	if err := cdrsOfflineRpc.Call(utils.ApierV2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "test2"}, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].Len() != 1 {
@@ -346,7 +346,7 @@ func testV2CDRsBalancesWithSameWeight(t *testing.T) {
 		t.Fatal(err)
 	}
 	var acnt *engine.Account
-	if err := cdrsOfflineRpc.Call("ApierV2.GetAccount",
+	if err := cdrsOfflineRpc.Call(utils.ApierV2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "specialTest"}, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 1 || len(acnt.BalanceMap[utils.MONETARY]) != 2 {

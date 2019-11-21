@@ -105,7 +105,7 @@ func testV1DataRpcConn(t *testing.T) {
 
 func testV1DataGetAccountBeforeSet(t *testing.T) {
 	var reply *engine.Account
-	if err := dataRpc.Call("ApierV2.GetAccount",
+	if err := dataRpc.Call(utils.ApierV2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -142,7 +142,7 @@ func testV1DataDataDebitUsageWith10Kilo(t *testing.T) {
 
 	expected := 356000000.0
 	var acc *engine.Account
-	if err := dataRpc.Call("ApierV2.GetAccount",
+	if err := dataRpc.Call(utils.ApierV2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDataCost"},
 		&acc); err != nil {
 		t.Error(err)
@@ -173,7 +173,7 @@ func testV1DataDataDebitUsageWith10Kilo(t *testing.T) {
 	}
 
 	expected = 100000000.0
-	if err := dataRpc.Call("ApierV2.GetAccount",
+	if err := dataRpc.Call(utils.ApierV2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDataCost"},
 		&acc); err != nil {
 		t.Error(err)
@@ -219,7 +219,7 @@ func testV1DataDebitBalanceWith10Kilo(t *testing.T) {
 
 	expected := 356000000.0
 	var acc *engine.Account
-	if err := dataRpc.Call("ApierV2.GetAccount",
+	if err := dataRpc.Call(utils.ApierV2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDebitBalance"},
 		&acc); err != nil {
 		t.Error(err)
@@ -245,7 +245,7 @@ func testV1DataDebitBalanceWith10Kilo(t *testing.T) {
 	}
 
 	expected = 100000000.0
-	if err := dataRpc.Call("ApierV2.GetAccount",
+	if err := dataRpc.Call(utils.ApierV2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDebitBalance"},
 		&acc); err != nil {
 		t.Error(err)
@@ -276,7 +276,7 @@ func testV1DataDataDebitUsage1G0(t *testing.T) {
 
 	expected := 1100000000.0
 	var acc *engine.Account
-	if err := dataRpc.Call("ApierV2.GetAccount",
+	if err := dataRpc.Call(utils.ApierV2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDataDebitUsage1G0"},
 		&acc); err != nil {
 		t.Error(err)
@@ -307,7 +307,7 @@ func testV1DataDataDebitUsage1G0(t *testing.T) {
 	}
 
 	expected = 100000000.0
-	if err := dataRpc.Call("ApierV2.GetAccount",
+	if err := dataRpc.Call(utils.ApierV2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDataDebitUsage1G0"},
 		&acc); err != nil {
 		t.Error(err)
@@ -353,7 +353,7 @@ func testV1DataDebitBalance1G0(t *testing.T) {
 
 	expected := 1100000000.0
 	var acc *engine.Account
-	if err := dataRpc.Call("ApierV2.GetAccount",
+	if err := dataRpc.Call(utils.ApierV2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDebitBalance1G0"},
 		&acc); err != nil {
 		t.Error(err)
@@ -379,7 +379,7 @@ func testV1DataDebitBalance1G0(t *testing.T) {
 	}
 
 	expected = 100000000.0
-	if err := dataRpc.Call("ApierV2.GetAccount",
+	if err := dataRpc.Call(utils.ApierV2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataDebitBalance1G0"},
 		&acc); err != nil {
 		t.Error(err)
@@ -410,7 +410,7 @@ func testV1DataInitSession(t *testing.T) {
 
 	expected := 1100000000.0
 	var acc *engine.Account
-	if err := dataRpc.Call("ApierV2.GetAccount",
+	if err := dataRpc.Call(utils.ApierV2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testV1DataInitSession"},
 		&acc); err != nil {
 		t.Error(err)

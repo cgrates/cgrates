@@ -125,7 +125,7 @@ func TestSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	attrGetAcnt := &utils.AttrGetAccount{Tenant: attrSetBalance.Tenant,
 		Account: attrSetBalance.Account}
 	eAcntVal := 0.01 * float64(time.Second)
-	if err := sessionsRPC.Call("ApierV2.GetAccount", attrGetAcnt, &acnt); err != nil {
+	if err := sessionsRPC.Call(utils.ApierV2GetAccount, attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %f, received: %f", eAcntVal,
@@ -202,7 +202,7 @@ func TestSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(100 * time.Millisecond)) // Give time for  debits to occur
-	if err := sessionsRPC.Call("ApierV2.GetAccount", attrGetAcnt, &acnt); err != nil {
+	if err := sessionsRPC.Call(utils.ApierV2GetAccount, attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 0 {
 		t.Errorf("Balance should be empty, have: %f", acnt.BalanceMap[utils.VOICE].GetTotalValue())
@@ -245,7 +245,7 @@ func TestSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 	var acnt *engine.Account
 	attrGetAcnt := &utils.AttrGetAccount{Tenant: attrSetBalance.Tenant, Account: attrSetBalance.Account}
 	eAcntVal := 1.0 * float64(time.Second)
-	if err := sessionsRPC.Call("ApierV2.GetAccount", attrGetAcnt, &acnt); err != nil {
+	if err := sessionsRPC.Call(utils.ApierV2GetAccount, attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
@@ -314,7 +314,7 @@ func TestSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 	}
 
 	time.Sleep(time.Duration(50 * time.Millisecond)) // Give time for  debits to occur
-	if err := sessionsRPC.Call("ApierV2.GetAccount", attrGetAcnt, &acnt); err != nil {
+	if err := sessionsRPC.Call(utils.ApierV2GetAccount, attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() > 0.995*float64(time.Second) { // FixMe: should be not 0.93?
 		t.Errorf("Balance value: %f", acnt.BalanceMap[utils.VOICE].GetTotalValue())

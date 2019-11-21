@@ -88,7 +88,7 @@ func testDspSessionAddBalacne(t *testing.T) {
 		Account: attrSetBalance.Account,
 	}
 	eAcntVal := float64(initUsage)
-	if err := allEngine.RCP.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	if err := allEngine.RCP.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %v, received: %v",
@@ -99,7 +99,7 @@ func testDspSessionAddBalacne(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := allEngine2.RCP.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	if err := allEngine2.RCP.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %v, received: %v",

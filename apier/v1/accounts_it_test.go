@@ -176,17 +176,17 @@ func testAccITSetBalanceTimingIds(t *testing.T) {
 		Time:      "15:00:00Z",
 	}
 	var reply string
-	if err := accRPC.Call("ApierV1.SetTPTiming", tpTiming, &reply); err != nil {
+	if err := accRPC.Call(utils.ApierV1SetTPTiming, tpTiming, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
 	}
 
-	if err := accRPC.Call("ApierV1.LoadTariffPlanFromStorDb",
+	if err := accRPC.Call(utils.ApierV1LoadTariffPlanFromStorDb,
 		AttrLoadTpFromStorDb{TPid: "TEST_TPID1"}, &reply); err != nil {
-		t.Error("Got error on ApierV1.LoadTariffPlanFromStorDb: ", err.Error())
+		t.Errorf("Got error on %s: %+v", utils.ApierV1LoadTariffPlanFromStorDb, err.Error())
 	} else if reply != utils.OK {
-		t.Error("Calling ApierV1.LoadTariffPlanFromStorDb got reply: ", reply)
+		t.Errorf("Calling %s got reply: %+v", utils.ApierV1LoadTariffPlanFromStorDb, reply)
 	}
 
 	args := &utils.AttrSetBalance{
@@ -218,7 +218,7 @@ func testAccITSetBalanceTimingIds(t *testing.T) {
 			EndTime:   "",
 		},
 	}
-	if err := accRPC.Call("ApierV2.GetAccount", attrAcc, &acnt); err != nil {
+	if err := accRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
 		t.Fatal(err)
 	}
 

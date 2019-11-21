@@ -113,7 +113,7 @@ func testAPIerRPCConn(t *testing.T) {
 func testAPIerLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := apierRPC.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+	if err := apierRPC.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -170,7 +170,7 @@ func testAPIerVerifyAttributesAfterLoad(t *testing.T) {
 func testAPIerRemoveTPFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := apierRPC.Call("ApierV1.RemoveTPFromFolder", attrs, &reply); err != nil {
+	if err := apierRPC.Call(utils.ApierV1RemoveTPFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -178,13 +178,13 @@ func testAPIerRemoveTPFromFolder(t *testing.T) {
 
 func testAPIerAfterDelete(t *testing.T) {
 	var reply *engine.AttributeProfile
-	if err := apierRPC.Call("ApierV1.GetAttributeProfile",
+	if err := apierRPC.Call(utils.ApierV1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
 	}
 	var replyTh *engine.ThresholdProfile
-	if err := apierRPC.Call("ApierV1.GetThresholdProfile",
+	if err := apierRPC.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &replyTh); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

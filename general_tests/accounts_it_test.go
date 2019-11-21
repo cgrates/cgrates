@@ -114,7 +114,7 @@ func testV1AccRpcConn(t *testing.T) {
 
 func testV1AccGetAccountBeforeSet(t *testing.T) {
 	var reply *engine.Account
-	if err := accRpc.Call("ApierV2.GetAccount",
+	if err := accRpc.Call(utils.ApierV2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -154,7 +154,7 @@ func testV1AccRemAccount(t *testing.T) {
 
 func testV1AccGetAccountAfterDelete(t *testing.T) {
 	var reply *engine.Account
-	if err := accRpc.Call("ApierV2.GetAccount",
+	if err := accRpc.Call(utils.ApierV2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -173,7 +173,7 @@ func testV1AccSetAccount(t *testing.T) {
 
 func testV1AccGetAccountAfterSet(t *testing.T) {
 	var reply *engine.Account
-	if err := accRpc.Call("ApierV2.GetAccount",
+	if err := accRpc.Call(utils.ApierV2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testacc"}, &reply); err != nil {
 		t.Error(err)
 	}
@@ -192,7 +192,7 @@ func testV1AccRemAccountSet(t *testing.T) {
 
 func testV1AccGetAccountSetAfterDelete(t *testing.T) {
 	var reply *engine.Account
-	if err := accRpc.Call("ApierV2.GetAccount",
+	if err := accRpc.Call(utils.ApierV2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "testacc"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -216,7 +216,7 @@ func testV1AccMonthly(t *testing.T) {
 	timeAfter := time.Now().Add(10*time.Second).AddDate(0, 1, 0)
 	timeBefore := time.Now().Add(-10*time.Second).AddDate(0, 1, 0)
 	var reply *engine.Account
-	if err := accRpc.Call("ApierV2.GetAccount",
+	if err := accRpc.Call(utils.ApierV2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1002"},
 		&reply); err != nil {
 		t.Error(err)
@@ -281,7 +281,7 @@ func testV1AccSendToThreshold(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "testAccThreshold",
 	}
-	if err := accRpc.Call("ApierV2.GetAccount", attrAcc, &acnt); err != nil {
+	if err := accRpc.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.Disabled != true {
 		t.Errorf("Expecting: true, received: %v", acnt.Disabled)
