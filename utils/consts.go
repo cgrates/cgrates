@@ -834,6 +834,8 @@ const (
 	ReplicatorSv1SetActionTriggers     = "ReplicatorSv1.SetActionTriggers"
 	ReplicatorSv1SetSharedGroup        = "ReplicatorSv1.SetSharedGroup"
 	ReplicatorSv1SetActions            = "ReplicatorSv1.SetActions"
+	ReplicatorSv1SetActionPlan         = "ReplicatorSv1.SetActionPlan"
+	ReplicatorSv1SetAccountActionPlans = "ReplicatorSv1.SetAccountActionPlans"
 	ReplicatorSv1SetRatingPlan         = "ReplicatorSv1.SetRatingPlan"
 	ReplicatorSv1SetRatingProfile      = "ReplicatorSv1.SetRatingProfile"
 	ReplicatorSv1SetSupplierProfile    = "ReplicatorSv1.SetSupplierProfile"

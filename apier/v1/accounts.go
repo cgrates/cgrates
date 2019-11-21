@@ -108,7 +108,7 @@ func (self *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *str
 		if accID != "" {
 			delete(ap.AccountIDs, accID)
 			remAcntAPids = append(remAcntAPids, accID)
-			err = self.DataManager.DataDB().SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
+			err = self.DataManager.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
 			goto UPDATE
 		}
 		if attrs.ActionTimingId != "" { // delete only a action timing from action plan
@@ -119,7 +119,7 @@ func (self *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *str
 					break
 				}
 			}
-			err = self.DataManager.DataDB().SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
+			err = self.DataManager.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
 			goto UPDATE
 		}
 		if attrs.ActionPlanId != "" { // delete the entire action plan
@@ -127,7 +127,7 @@ func (self *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *str
 			for acntID := range ap.AccountIDs { // Make sure we clear indexes for all accounts
 				remAcntAPids = append(remAcntAPids, acntID)
 			}
-			err = self.DataManager.DataDB().SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
+			err = self.DataManager.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
 			goto UPDATE
 		}
 
@@ -139,7 +139,7 @@ func (self *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *str
 			return 0, err
 		}
 		for _, acntID := range remAcntAPids {
-			if err = self.DataManager.DataDB().RemAccountActionPlans(acntID, []string{attrs.ActionPlanId}); err != nil {
+			if err = self.DataManager.RemAccountActionPlans(acntID, []string{attrs.ActionPlanId}); err != nil {
 				return 0, nil
 			}
 		}
@@ -230,7 +230,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 				apIDs := make([]string, len(dirtyActionPlans))
 				i := 0
 				for actionPlanID, ap := range dirtyActionPlans {
-					if err := self.DataManager.DataDB().SetActionPlan(actionPlanID, ap, true, utils.NonTransactional); err != nil {
+					if err := self.DataManager.SetActionPlan(actionPlanID, ap, true, utils.NonTransactional); err != nil {
 						return 0, err
 					}
 					apIDs[i] = actionPlanID
@@ -239,7 +239,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 				if err := self.DataManager.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, apIDs, true); err != nil {
 					return 0, err
 				}
-				if err := self.DataManager.DataDB().SetAccountActionPlans(accID, acntAPids, true); err != nil {
+				if err := self.DataManager.SetAccountActionPlans(accID, acntAPids, true); err != nil {
 					return 0, err
 				}
 				if err = self.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
@@ -313,7 +313,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 			}
 
 			for actionPlanID, ap := range dirtyActionPlans {
-				if err := self.DataManager.DataDB().SetActionPlan(actionPlanID, ap, true,
+				if err := self.DataManager.SetActionPlan(actionPlanID, ap, true,
 					utils.NonTransactional); err != nil {
 					return 0, err
 				}
@@ -323,7 +323,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 		if err != nil {
 			return 0, err
 		}
-		if err := self.DataManager.DataDB().RemoveAccount(accID); err != nil {
+		if err := self.DataManager.RemoveAccount(accID); err != nil {
 			return 0, err
 		}
 		return 0, nil
@@ -331,7 +331,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err = self.DataManager.DataDB().RemAccountActionPlans(accID, nil); err != nil &&
+	if err = self.DataManager.RemAccountActionPlans(accID, nil); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		return err
 	}

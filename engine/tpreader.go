@@ -849,10 +849,10 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 				}
 			}
 			// write action plan
-			if err = tpr.dm.DataDB().SetActionPlan(accountAction.ActionPlanId, actionPlan, false, utils.NonTransactional); err != nil {
+			if err = tpr.dm.SetActionPlan(accountAction.ActionPlanId, actionPlan, false, utils.NonTransactional); err != nil {
 				return errors.New(err.Error() + " (SetActionPlan): " + accountAction.ActionPlanId)
 			}
-			if err = tpr.dm.DataDB().SetAccountActionPlans(id, []string{accountAction.ActionPlanId}, false); err != nil {
+			if err = tpr.dm.SetAccountActionPlans(id, []string{accountAction.ActionPlanId}, false); err != nil {
 				return err
 			}
 			if err = tpr.dm.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{id}, true); err != nil {
@@ -1480,7 +1480,7 @@ func (tpr *TpReader) WriteToDatabase(verbose, disable_reverse bool) (err error) 
 				}
 			}
 		}
-		err = tpr.dm.DataDB().SetActionPlan(k, ap, false, utils.NonTransactional)
+		err = tpr.dm.SetActionPlan(k, ap, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -2078,7 +2078,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 		log.Print("Action Plans:")
 	}
 	for k := range tpr.actionPlans {
-		err = tpr.dm.DataDB().RemoveActionPlan(k, utils.NonTransactional)
+		err = tpr.dm.RemoveActionPlan(k, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -2132,7 +2132,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 		log.Print("Account Actions:")
 	}
 	for _, ub := range tpr.accountActions {
-		err = tpr.dm.DataDB().RemoveAccount(ub.ID)
+		err = tpr.dm.RemoveAccount(ub.ID)
 		if err != nil {
 			return err
 		}

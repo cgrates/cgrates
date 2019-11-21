@@ -524,7 +524,7 @@ func (iDB *InternalDB) GetActionPlanDrv(key string, skipCache bool,
 	return
 }
 
-func (iDB *InternalDB) SetActionPlan(key string, ats *ActionPlan,
+func (iDB *InternalDB) SetActionPlanDrv(key string, ats *ActionPlan,
 	overwrite bool, transactionID string) (err error) {
 	cCommit := cacheCommit(transactionID)
 	if len(ats.ActionTimings) == 0 {
@@ -551,7 +551,7 @@ func (iDB *InternalDB) SetActionPlan(key string, ats *ActionPlan,
 	return
 }
 
-func (iDB *InternalDB) RemoveActionPlan(key string, transactionID string) (err error) {
+func (iDB *InternalDB) RemoveActionPlanDrv(key string, transactionID string) (err error) {
 	iDB.db.Remove(utils.CacheActionPlans, utils.ACTION_PLAN_PREFIX+key,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	Cache.Remove(utils.CacheActionPlans, key, cacheCommit(transactionID), transactionID)
@@ -597,7 +597,7 @@ func (iDB *InternalDB) GetAccountActionPlansDrv(acntID string,
 	return
 }
 
-func (iDB *InternalDB) SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error) {
+func (iDB *InternalDB) SetAccountActionPlansDrv(acntID string, apIDs []string, overwrite bool) (err error) {
 	if !overwrite {
 		if oldaPlIDs, err := iDB.GetAccountActionPlansDrv(acntID, true, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return err
@@ -614,7 +614,7 @@ func (iDB *InternalDB) SetAccountActionPlans(acntID string, apIDs []string, over
 	return
 }
 
-func (iDB *InternalDB) RemAccountActionPlans(acntID string, apIDs []string) (err error) {
+func (iDB *InternalDB) RemAccountActionPlansDrv(acntID string, apIDs []string) (err error) {
 	key := utils.AccountActionPlansPrefix + acntID
 	if len(apIDs) == 0 {
 		iDB.db.Remove(utils.CacheAccountActionPlans, key,
@@ -689,7 +689,7 @@ func (iDB *InternalDB) SetAccountDrv(acc *Account) (err error) {
 	return
 }
 
-func (iDB *InternalDB) RemoveAccount(id string) (err error) {
+func (iDB *InternalDB) RemoveAccountDrv(id string) (err error) {
 	iDB.db.Remove(utils.CacheAccounts, utils.ACCOUNT_PREFIX+id,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return

@@ -62,10 +62,10 @@ func (m *Migrator) migrateCurrentActionPlans() (err error) {
 		if acts == nil || m.dryRun {
 			continue
 		}
-		if err := m.dmOut.DataManager().DataDB().SetActionPlan(idg, acts, true, utils.NonTransactional); err != nil {
+		if err := m.dmOut.DataManager().SetActionPlan(idg, acts, true, utils.NonTransactional); err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().DataDB().RemoveActionPlan(idg, utils.NonTransactional); err != nil {
+		if err := m.dmIN.DataManager().RemoveActionPlan(idg, utils.NonTransactional); err != nil {
 			return err
 		}
 		m.stats[utils.ActionPlans] += 1
@@ -88,7 +88,7 @@ func (m *Migrator) migrateV1ActionPlans() (err error) {
 		}
 		for _, v1ap := range *v1APs {
 			ap := v1ap.AsActionPlan()
-			if err = m.dmOut.DataManager().DataDB().SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
+			if err = m.dmOut.DataManager().SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
 				return err
 			}
 			m.stats[utils.ActionPlans] += 1

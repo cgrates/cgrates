@@ -606,7 +606,7 @@ func removeAccountAction(ub *Account, a *Action, acs Actions, extraData interfac
 		return utils.ErrInvalidKey
 	}
 
-	if err := dm.DataDB().RemoveAccount(accID); err != nil {
+	if err := dm.RemoveAccount(accID); err != nil {
 		utils.Logger.Err(fmt.Sprintf("Could not remove account Id: %s: %v", accID, err))
 		return err
 	}
@@ -624,7 +624,7 @@ func removeAccountAction(ub *Account, a *Action, acs Actions, extraData interfac
 				return 0, err
 			}
 			delete(ap.AccountIDs, accID)
-			if err := dm.DataDB().SetActionPlan(apID, ap, true, utils.NonTransactional); err != nil {
+			if err := dm.SetActionPlan(apID, ap, true, utils.NonTransactional); err != nil {
 				utils.Logger.Err(fmt.Sprintf("Could not save action plan: %s: %v", apID, err))
 				return 0, err
 			}
@@ -632,7 +632,7 @@ func removeAccountAction(ub *Account, a *Action, acs Actions, extraData interfac
 		if err = dm.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, acntAPids, true); err != nil {
 			return 0, err
 		}
-		if err = dm.DataDB().RemAccountActionPlans(accID, nil); err != nil {
+		if err = dm.RemAccountActionPlans(accID, nil); err != nil {
 			return 0, err
 		}
 		if err = dm.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil && err.Error() != utils.ErrNotFound.Error() {
