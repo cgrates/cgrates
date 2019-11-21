@@ -564,11 +564,11 @@ func TestActionPlansRemoveMember(t *testing.T) {
 		},
 	}
 
-	if err := dm.DataDB().SetActionPlan(ap1.Id, ap1, true,
+	if err := dm.SetActionPlan(ap1.Id, ap1, true,
 		utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if err = dm.DataDB().SetActionPlan(ap2.Id, ap2, true,
+	if err = dm.SetActionPlan(ap2.Id, ap2, true,
 		utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
@@ -576,7 +576,7 @@ func TestActionPlansRemoveMember(t *testing.T) {
 		[]string{ap1.Id, ap2.Id}, true); err != nil {
 		t.Error(err)
 	}
-	if err = dm.DataDB().SetAccountActionPlans(account1.ID,
+	if err = dm.SetAccountActionPlans(account1.ID,
 		[]string{ap1.Id}, false); err != nil {
 		t.Error(err)
 	}
@@ -585,7 +585,7 @@ func TestActionPlansRemoveMember(t *testing.T) {
 		t.Error(err)
 	}
 	dm.GetAccountActionPlans(account1.ID, true, utils.NonTransactional) // FixMe: remove here after finishing testing of map
-	if err = dm.DataDB().SetAccountActionPlans(account2.ID,
+	if err = dm.SetAccountActionPlans(account2.ID,
 		[]string{ap2.Id}, false); err != nil {
 		t.Error(err)
 	}

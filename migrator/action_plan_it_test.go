@@ -258,7 +258,7 @@ func testActPlnITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", actPln.ActionTimings[0].Timing, result.ActionTimings[0].Timing)
 		}
 	case utils.Move:
-		if err := actPlnMigrator.dmIN.DataManager().DataDB().SetActionPlan((*v1actPln)[0].Id, actPln, true, utils.NonTransactional); err != nil {
+		if err := actPlnMigrator.dmIN.DataManager().SetActionPlan((*v1actPln)[0].Id, actPln, true, utils.NonTransactional); err != nil {
 			t.Error("Error when setting ActionPlan ", err.Error())
 		}
 		currentVersion := engine.CurrentDataDBVersions()

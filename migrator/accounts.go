@@ -52,7 +52,7 @@ func (m *Migrator) migrateCurrentAccounts() (err error) {
 		if err := m.dmOut.DataManager().SetAccount(acc); err != nil {
 			return err
 		}
-		if err := m.dmIN.DataManager().DataDB().RemoveAccount(idg); err != nil {
+		if err := m.dmIN.DataManager().RemoveAccount(idg); err != nil {
 			return err
 		}
 		m.stats[utils.Accounts] += 1

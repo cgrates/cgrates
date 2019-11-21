@@ -465,7 +465,7 @@ func (ms *MongoStorage) RebuildReverseForPrefix(prefix string) (err error) {
 					return err
 				}
 				for acntID := range apl.AccountIDs {
-					if err = ms.SetAccountActionPlans(acntID, []string{apl.Id}, false); err != nil {
+					if err = ms.SetAccountActionPlansDrv(acntID, []string{apl.Id}, false); err != nil {
 						return err
 					}
 				}
@@ -518,7 +518,7 @@ func (ms *MongoStorage) RemoveReverseForPrefix(prefix string) (err error) {
 					return err
 				}
 				for acntID := range apl.AccountIDs {
-					if err = ms.RemAccountActionPlans(acntID, []string{apl.Id}); err != nil {
+					if err = ms.RemAccountActionPlansDrv(acntID, []string{apl.Id}); err != nil {
 						return err
 					}
 				}
@@ -1181,7 +1181,7 @@ func (ms *MongoStorage) SetAccountDrv(acc *Account) error {
 	})
 }
 
-func (ms *MongoStorage) RemoveAccount(key string) (err error) {
+func (ms *MongoStorage) RemoveAccountDrv(key string) (err error) {
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(ColAcc).DeleteOne(sctx, bson.M{"id": key})
 		if dr.DeletedCount == 0 {
@@ -1390,7 +1390,7 @@ func (ms *MongoStorage) GetActionPlanDrv(key string, skipCache bool,
 	return
 }
 
-func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan,
+func (ms *MongoStorage) SetActionPlanDrv(key string, ats *ActionPlan,
 	overwrite bool, transactionID string) (err error) {
 	// clean dots from account ids map
 	cCommit := cacheCommit(transactionID)
@@ -1434,7 +1434,7 @@ func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan,
 	})
 }
 
-func (ms *MongoStorage) RemoveActionPlan(key string, transactionID string) error {
+func (ms *MongoStorage) RemoveActionPlanDrv(key string, transactionID string) error {
 	cCommit := cacheCommit(transactionID)
 	Cache.Remove(utils.CacheActionPlans, key, cCommit, transactionID)
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
@@ -1496,7 +1496,7 @@ func (ms *MongoStorage) GetAccountActionPlansDrv(acntID string, skipCache bool, 
 	return
 }
 
-func (ms *MongoStorage) SetAccountActionPlans(acntID string, aPlIDs []string, overwrite bool) (err error) {
+func (ms *MongoStorage) SetAccountActionPlansDrv(acntID string, aPlIDs []string, overwrite bool) (err error) {
 	if !overwrite {
 		if oldaPlIDs, err := ms.GetAccountActionPlansDrv(acntID, false, utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 			return err
@@ -1521,7 +1521,7 @@ func (ms *MongoStorage) SetAccountActionPlans(acntID string, aPlIDs []string, ov
 }
 
 // ToDo: check return len(aPlIDs) == 0
-func (ms *MongoStorage) RemAccountActionPlans(acntID string, aPlIDs []string) (err error) {
+func (ms *MongoStorage) RemAccountActionPlansDrv(acntID string, aPlIDs []string) (err error) {
 	if len(aPlIDs) == 0 {
 		return ms.query(func(sctx mongo.SessionContext) (err error) {
 			dr, err := ms.getCol(ColAAp).DeleteOne(sctx, bson.M{"key": acntID})

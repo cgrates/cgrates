@@ -179,7 +179,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 				apIDs := make([]string, len(dirtyActionPlans))
 				i := 0
 				for actionPlanID, ap := range dirtyActionPlans {
-					if err := self.DataManager.DataDB().SetActionPlan(actionPlanID, ap, true, utils.NonTransactional); err != nil {
+					if err := self.DataManager.SetActionPlan(actionPlanID, ap, true, utils.NonTransactional); err != nil {
 						return 0, err
 					}
 					apIDs[i] = actionPlanID
@@ -188,7 +188,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 				if err := self.DataManager.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, apIDs, true); err != nil {
 					return 0, err
 				}
-				if err := self.DataManager.DataDB().SetAccountActionPlans(accID, acntAPids, true); err != nil {
+				if err := self.DataManager.SetAccountActionPlans(accID, acntAPids, true); err != nil {
 					return 0, err
 				}
 				return 0, self.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true)

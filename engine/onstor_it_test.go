@@ -227,7 +227,7 @@ func testOnStorITCacheActionPlan(t *testing.T) {
 			},
 		},
 	}
-	if err := onStor.DataDB().SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
+	if err := onStor.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	expectedCAp := []string{"apl_MORE_MINUTES"}
@@ -247,10 +247,10 @@ func testOnStorITCacheActionPlan(t *testing.T) {
 	} else if rcv := itm.(*ActionPlan); !reflect.DeepEqual(ap, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", ap, rcv)
 	}
-	if err := onStor.DataDB().RemoveActionPlan(ap.Id, utils.NonTransactional); err != nil {
+	if err := onStor.RemoveActionPlan(ap.Id, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
-	if err := onStor.DataDB().SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
+	if err := onStor.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 }
@@ -258,7 +258,7 @@ func testOnStorITCacheActionPlan(t *testing.T) {
 func testOnStorITCacheAccountActionPlans(t *testing.T) {
 	acntID := utils.ConcatenatedKey("cgrates.org", "1001")
 	aAPs := []string{"PACKAGE_10_SHARED_A_5", "USE_SHARED_A", "apl_PACKAGE_1001"}
-	if err := onStor.DataDB().SetAccountActionPlans(acntID, aAPs, true); err != nil {
+	if err := onStor.SetAccountActionPlans(acntID, aAPs, true); err != nil {
 		t.Error(err)
 	}
 	if _, hasIt := Cache.Get(utils.CacheAccountActionPlans, acntID); hasIt {
@@ -1024,7 +1024,7 @@ func testOnStorITCRUDActionPlan(t *testing.T) {
 	if _, rcvErr := onStor.GetActionPlan(ap.Id, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.DataDB().SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
+	if err := onStor.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetActionPlan(ap.Id, true, utils.NonTransactional); err != nil {
@@ -1063,7 +1063,7 @@ func testOnStorITCRUDAccountActionPlans(t *testing.T) {
 	if _, rcvErr := onStor.GetAccountActionPlans(acntID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
-	if err := onStor.DataDB().SetAccountActionPlans(acntID, aAPs, true); err != nil {
+	if err := onStor.SetAccountActionPlans(acntID, aAPs, true); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil {
@@ -1071,7 +1071,7 @@ func testOnStorITCRUDAccountActionPlans(t *testing.T) {
 	} else if !reflect.DeepEqual(aAPs, rcv) {
 		t.Errorf("Expecting: %v, received: %v", aAPs, rcv)
 	}
-	if err := onStor.DataDB().SetAccountActionPlans(acntID, aAPs2, false); err != nil {
+	if err := onStor.SetAccountActionPlans(acntID, aAPs2, false); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil {
@@ -1095,7 +1095,7 @@ func testOnStorITCRUDAccountActionPlans(t *testing.T) {
 	// if err = onStor.DataDB().SelectDatabase(onStorCfg); err != nil {
 	// 	t.Error(err)
 	// }
-	if err := onStor.DataDB().RemAccountActionPlans(acntID, aAPs2); err != nil {
+	if err := onStor.RemAccountActionPlans(acntID, aAPs2); err != nil {
 		t.Error(err)
 	}
 	if rcv, err := onStor.GetAccountActionPlans(acntID, true, utils.NonTransactional); err != nil {
@@ -1103,7 +1103,7 @@ func testOnStorITCRUDAccountActionPlans(t *testing.T) {
 	} else if !reflect.DeepEqual(aAPs, rcv) {
 		t.Errorf("Expecting: %v, received: %v", aAPs, rcv)
 	}
-	if err := onStor.DataDB().RemAccountActionPlans(acntID, aAPs); err != nil {
+	if err := onStor.RemAccountActionPlans(acntID, aAPs); err != nil {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetAccountActionPlans(acntID, true, utils.NonTransactional); rcvErr != utils.ErrNotFound {
@@ -1131,7 +1131,7 @@ func testOnStorITCRUDAccount(t *testing.T) {
 	} else if !reflect.DeepEqual(acc.BalanceMap[utils.MONETARY][0].Weight, rcv.BalanceMap[utils.MONETARY][0].Weight) {
 		t.Errorf("Expecting: %v, received: %v", acc.BalanceMap[utils.MONETARY][0].Weight, rcv.BalanceMap[utils.MONETARY][0].Weight)
 	}
-	if err := onStor.DataDB().RemoveAccount(acc.ID); err != nil {
+	if err := onStor.RemoveAccount(acc.ID); err != nil {
 		t.Error(err)
 	}
 	if _, rcvErr := onStor.GetAccount(acc.ID); rcvErr != utils.ErrNotFound {

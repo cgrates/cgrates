@@ -675,14 +675,14 @@ func (apiv1 *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err
 				ActionsID: apiAtm.ActionsId,
 			})
 		}
-		if err := apiv1.DataManager.DataDB().SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
+		if err := apiv1.DataManager.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
 			return 0, utils.NewErrServerError(err)
 		}
 		if err = apiv1.DataManager.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{ap.Id}, true); err != nil {
 			return 0, utils.NewErrServerError(err)
 		}
 		for acntID := range prevAccountIDs {
-			if err := apiv1.DataManager.DataDB().RemAccountActionPlans(acntID, []string{attrs.Id}); err != nil {
+			if err := apiv1.DataManager.RemAccountActionPlans(acntID, []string{attrs.Id}); err != nil {
 				return 0, utils.NewErrServerError(err)
 			}
 		}
@@ -774,11 +774,11 @@ func (apiv1 *ApierV1) RemoveActionPlan(attr AttrGetActionPlan, reply *string) (e
 		} else if prevAP != nil {
 			prevAccountIDs = prevAP.AccountIDs
 		}
-		if err := apiv1.DataManager.DataDB().RemoveActionPlan(attr.ID, utils.NonTransactional); err != nil {
+		if err := apiv1.DataManager.RemoveActionPlan(attr.ID, utils.NonTransactional); err != nil {
 			return 0, err
 		}
 		for acntID := range prevAccountIDs {
-			if err := apiv1.DataManager.DataDB().RemAccountActionPlans(acntID, []string{attr.ID}); err != nil {
+			if err := apiv1.DataManager.RemAccountActionPlans(acntID, []string{attr.ID}); err != nil {
 				return 0, utils.NewErrServerError(err)
 			}
 		}

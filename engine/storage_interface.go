@@ -71,18 +71,18 @@ type DataDB interface {
 	SetActionTriggersDrv(string, ActionTriggers) error
 	RemoveActionTriggersDrv(string) error
 	GetActionPlanDrv(string, bool, string) (*ActionPlan, error)
-	SetActionPlan(string, *ActionPlan, bool, string) error
-	RemoveActionPlan(key string, transactionID string) error
+	SetActionPlanDrv(string, *ActionPlan, bool, string) error
+	RemoveActionPlanDrv(key string, transactionID string) error
 	GetAllActionPlansDrv() (map[string]*ActionPlan, error)
 	GetAccountActionPlansDrv(acntID string, skipCache bool,
 		transactionID string) (apIDs []string, err error)
-	SetAccountActionPlans(acntID string, apIDs []string, overwrite bool) (err error)
-	RemAccountActionPlans(acntID string, apIDs []string) (err error)
+	SetAccountActionPlansDrv(acntID string, apIDs []string, overwrite bool) (err error)
+	RemAccountActionPlansDrv(acntID string, apIDs []string) (err error)
 	PushTask(*Task) error
 	PopTask() (*Task, error)
 	GetAccountDrv(string) (*Account, error)
 	SetAccountDrv(*Account) error
-	RemoveAccount(string) error
+	RemoveAccountDrv(string) error
 	GetResourceProfileDrv(string, string) (*ResourceProfile, error)
 	SetResourceProfileDrv(*ResourceProfile) error
 	RemoveResourceProfileDrv(string, string) error
