@@ -127,10 +127,6 @@ func Sha1(attrs ...string) string {
 	return fmt.Sprintf("%x", hasher.Sum(nil))
 }
 
-// func NewTPid() string {
-// 	return Sha1(GenUUID())
-// }
-
 // helper function for uuid generation
 func GenUUID() string {
 	b := make([]byte, 16)
