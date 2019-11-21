@@ -486,7 +486,7 @@ func (rplSv1 *ReplicatorSv1) SetDispatcherProfile(dpp *engine.DispatcherProfile,
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) ReplicatorSv1SetActionPlan(args *engine.SetActionPlanArg, reply *string) error {
+func (rplSv1 *ReplicatorSv1) SetActionPlan(args *engine.SetActionPlanArg, reply *string) error {
 	if err := rplSv1.dm.DataDB().SetActionPlanDrv(args.Key, args.Ats, args.Overwrite, utils.NonTransactional); err != nil {
 		return err
 	}
@@ -494,7 +494,7 @@ func (rplSv1 *ReplicatorSv1) ReplicatorSv1SetActionPlan(args *engine.SetActionPl
 	return nil
 }
 
-func (rplSv1 *ReplicatorSv1) ReplicatorSv1SetAccountActionPlans(args *engine.SetAccountActionPlansArg, reply *string) error {
+func (rplSv1 *ReplicatorSv1) SetAccountActionPlans(args *engine.SetAccountActionPlansArg, reply *string) error {
 	if err := rplSv1.dm.DataDB().SetAccountActionPlansDrv(args.AcntID, args.AplIDs, args.Overwrite); err != nil {
 		return err
 	}
