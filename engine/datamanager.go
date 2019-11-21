@@ -348,7 +348,15 @@ func (dm *DataManager) SetDestination(dest *Destination, transactionID string) (
 }
 
 func (dm *DataManager) RemoveDestination(destID string, transactionID string) (err error) {
-	return dm.dataDB.RemoveDestinationDrv(destID, transactionID)
+	if err = dm.dataDB.RemoveDestinationDrv(destID, transactionID); err != nil {
+		return
+	}
+	if config.CgrConfig().DataDbCfg().Items[utils.MetaDestinations].Replicate {
+		var reply string
+		dm.rplConns.Call(utils.ReplicatorSv1RemoveDestination,
+			destID, &reply)
+	}
+	return
 }
 
 func (dm *DataManager) SetReverseDestination(dest *Destination, transactionID string) (err error) {
@@ -423,6 +431,11 @@ func (dm *DataManager) RemoveAccount(id string) (err error) {
 	if err = dm.dataDB.RemoveAccountDrv(id); err != nil {
 		return
 	}
+	if config.CgrConfig().DataDbCfg().Items[utils.MetaAccounts].Replicate {
+		var reply string
+		dm.rplConns.Call(utils.ReplicatorSv1RemoveAccount,
+			id, &reply)
+	}
 	return
 }
 
@@ -492,6 +505,11 @@ func (dm *DataManager) RemoveStatQueue(tenant, id string, transactionID string) 
 	if err = dm.dataDB.RemStoredStatQueueDrv(tenant, id); err != nil {
 		return
 	}
+	if config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues].Replicate {
+		var reply string
+		dm.rplConns.Call(utils.ReplicatorSv1RemoveStatQueue,
+			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
+	}
 	return
 }
 
@@ -556,6 +574,11 @@ func (dm *DataManager) SetFilter(fltr *Filter) (err error) {
 func (dm *DataManager) RemoveFilter(tenant, id, transactionID string) (err error) {
 	if err = dm.DataDB().RemoveFilterDrv(tenant, id); err != nil {
 		return
+	}
+	if config.CgrConfig().DataDbCfg().Items[utils.MetaFilters].Replicate {
+		var reply string
+		dm.rplConns.Call(utils.ReplicatorSv1RemoveFilter,
+			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
 	}
 	return
 }
@@ -715,7 +738,11 @@ func (dm *DataManager) RemoveThresholdProfile(tenant, id,
 			return
 		}
 	}
-
+	if config.CgrConfig().DataDbCfg().Items[utils.MetaThresholdProfiles].Replicate {
+		var reply string
+		dm.rplConns.Call(utils.ReplicatorSv1RemoveThresholdProfile,
+			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
+	}
 	return
 }
 
@@ -812,6 +839,11 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id,
 			return
 		}
 	}
+	if config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueueProfiles].Replicate {
+		var reply string
+		dm.rplConns.Call(utils.ReplicatorSv1RemoveStatQueueProfile,
+			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
+	}
 	return
 }
 
@@ -872,6 +904,11 @@ func (dm *DataManager) RemoveTiming(id, transactionID string) (err error) {
 	}
 	Cache.Remove(utils.CacheTimings, id,
 		cacheCommit(transactionID), transactionID)
+	if config.CgrConfig().DataDbCfg().Items[utils.MetaTimings].Replicate {
+		var reply string
+		dm.rplConns.Call(utils.ReplicatorSv1RemoveTiming,
+			id, &reply)
+	}
 	return
 }
 
@@ -929,6 +966,11 @@ func (dm *DataManager) SetResource(rs *Resource) (err error) {
 func (dm *DataManager) RemoveResource(tenant, id, transactionID string) (err error) {
 	if err = dm.DataDB().RemoveResourceDrv(tenant, id); err != nil {
 		return
+	}
+	if config.CgrConfig().DataDbCfg().Items[utils.MetaResources].Replicate {
+		var reply string
+		dm.rplConns.Call(utils.ReplicatorSv1RemoveResource,
+			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
 	}
 	return
 }
@@ -1025,6 +1067,11 @@ func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, w
 			return
 		}
 	}
+	if config.CgrConfig().DataDbCfg().Items[utils.MetaResourceProfile].Replicate {
+		var reply string
+		dm.rplConns.Call(utils.ReplicatorSv1RemoveResourceProfile,
+			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
+	}
 	return
 }
 
@@ -1067,6 +1114,11 @@ func (dm *DataManager) RemoveActionTriggers(id, transactionID string) (err error
 	}
 	Cache.Remove(utils.CacheActionTriggers, id,
 		cacheCommit(transactionID), transactionID)
+	if config.CgrConfig().DataDbCfg().Items[utils.MetaActionTriggers].Replicate {
+		var reply string
+		dm.rplConns.Call(utils.ReplicatorSv1RemoveActionTriggers,
+			id, &reply)
+	}
 	return
 }
 
@@ -1153,6 +1205,11 @@ func (dm *DataManager) RemoveSharedGroup(id, transactionID string) (err error) {
 	}
 	Cache.Remove(utils.CacheSharedGroups, id,
 		cacheCommit(transactionID), transactionID)
+	if config.CgrConfig().DataDbCfg().Items[utils.MetaSharedGroups].Replicate {
+		var reply string
+		dm.rplConns.Call(utils.ReplicatorSv1RemoveSharedGroup,
+			id, &reply)
+	}
 	return
 }
 
@@ -1221,6 +1278,11 @@ func (dm *DataManager) RemoveActions(key, transactionID string) (err error) {
 	}
 	Cache.Remove(utils.CacheActions, key,
 		cacheCommit(transactionID), transactionID)
+	if config.CgrConfig().DataDbCfg().Items[utils.MetaActions].Replicate {
+		var reply string
+		dm.rplConns.Call(utils.ReplicatorSv1RemoveActions,
+			key, &reply)
+	}
 	return
 }
 
@@ -1283,6 +1345,11 @@ func (dm *DataManager) RemoveActionPlan(key string, transactionID string) (err e
 	if err = dm.dataDB.RemoveActionPlanDrv(key, transactionID); err != nil {
 		return
 	}
+	if config.CgrConfig().DataDbCfg().Items[utils.MetaActionPlans].Replicate {
+		var reply string
+		dm.rplConns.Call(utils.ReplicatorSv1RemoveActionPlan,
+			key, &reply)
+	}
 	return
 }
 func (dm *DataManager) GetAccountActionPlans(acntID string,
@@ -1326,9 +1393,19 @@ func (dm *DataManager) SetAccountActionPlans(acntID string, aPlIDs []string, ove
 	return
 }
 
+type RemAccountActionPlansArgs struct {
+	AcntID string
+	ApIDs  []string
+}
+
 func (dm *DataManager) RemAccountActionPlans(acntID string, apIDs []string) (err error) {
 	if err = dm.dataDB.RemAccountActionPlansDrv(acntID, apIDs); err != nil {
 		return
+	}
+	if config.CgrConfig().DataDbCfg().Items[utils.MetaAccountActionPlans].Replicate {
+		var reply string
+		dm.rplConns.Call(utils.ReplicatorSv1RemAccountActionPlans,
+			&RemAccountActionPlansArgs{AcntID: acntID, ApIDs: apIDs}, &reply)
 	}
 	return
 }
@@ -1388,6 +1465,11 @@ func (dm *DataManager) RemoveRatingPlan(key string, transactionID string) (err e
 	}
 	Cache.Remove(utils.CacheRatingPlans, key,
 		cacheCommit(transactionID), transactionID)
+	if config.CgrConfig().DataDbCfg().Items[utils.MetaRatingPlans].Replicate {
+		var reply string
+		dm.rplConns.Call(utils.ReplicatorSv1RemoveRatingPlan,
+			key, &reply)
+	}
 	return
 }
 
@@ -1449,6 +1531,11 @@ func (dm *DataManager) RemoveRatingProfile(key string,
 	}
 	Cache.Remove(utils.CacheRatingProfiles, key,
 		cacheCommit(transactionID), transactionID)
+	if config.CgrConfig().DataDbCfg().Items[utils.MetaRatingProfiles].Replicate {
+		var reply string
+		dm.rplConns.Call(utils.ReplicatorSv1RemoveRatingProfile,
+			key, &reply)
+	}
 	return
 }
 
@@ -1655,6 +1742,11 @@ func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string, w
 			return
 		}
 	}
+	if config.CgrConfig().DataDbCfg().Items[utils.MetaSupplierProfiles].Replicate {
+		var reply string
+		dm.rplConns.Call(utils.ReplicatorSv1RemoveSupplierProfile,
+			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
+	}
 	return
 }
 
@@ -1763,6 +1855,11 @@ func (dm *DataManager) RemoveAttributeProfile(tenant, id string, transactionID s
 			}
 		}
 	}
+	if config.CgrConfig().DataDbCfg().Items[utils.MetaAttributeProfiles].Replicate {
+		var reply string
+		dm.rplConns.Call(utils.ReplicatorSv1RemoveAttributeProfile,
+			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
+	}
 	return
 }
 
@@ -1858,6 +1955,11 @@ func (dm *DataManager) RemoveChargerProfile(tenant, id string,
 			tenant).RemoveItemFromIndex(tenant, id, oldCpp.FilterIDs); err != nil {
 			return
 		}
+	}
+	if config.CgrConfig().DataDbCfg().Items[utils.MetaChargerProfiles].Replicate {
+		var reply string
+		dm.rplConns.Call(utils.ReplicatorSv1RemoveChargerProfile,
+			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
 	}
 	return
 }
@@ -1964,6 +2066,11 @@ func (dm *DataManager) RemoveDispatcherProfile(tenant, id string,
 			}
 		}
 	}
+	if config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles].Replicate {
+		var reply string
+		dm.rplConns.Call(utils.ReplicatorSv1RemoveDispatcherProfile,
+			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
+	}
 	return
 }
 
@@ -2039,6 +2146,11 @@ func (dm *DataManager) RemoveDispatcherHost(tenant, id string,
 	}
 	if oldDpp == nil {
 		return utils.ErrNotFound
+	}
+	if config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherHosts].Replicate {
+		var reply string
+		dm.rplConns.Call(utils.ReplicatorSv1RemoveDispatcherHost,
+			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
 	}
 	return
 }
