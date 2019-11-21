@@ -172,7 +172,7 @@ func testCDReExportCDRs(t *testing.T) {
 func testCDReFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := cdreRPC.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+	if err := cdreRPC.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -197,7 +197,7 @@ func testCDReProcessExternalCdr(t *testing.T) {
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
 	var reply string
-	if err := cdreRPC.Call("CDRsV1.ProcessExternalCDR", cdr, &reply); err != nil {
+	if err := cdreRPC.Call(utils.CDRsV1ProcessExternalCDR, cdr, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -292,13 +292,13 @@ func testCDReAddAttributes(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var result string
-	if err := cdreRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+	if err := cdreRPC.Call(utils.ApierV1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.AttributeProfile
-	if err := cdreRPC.Call("ApierV1.GetAttributeProfile",
+	if err := cdreRPC.Call(utils.ApierV1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_CDRE"}, &reply); err != nil {
 		t.Fatal(err)
 	}

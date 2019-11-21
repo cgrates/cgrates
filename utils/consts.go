@@ -915,10 +915,12 @@ const (
 
 // ApierV1 TP APIs
 const (
-	ApierV1SetTPTiming    = "ApierV1.SetTPTiming"
-	ApierV1GetTPTiming    = "ApierV1.GetTPTiming"
-	ApierV1RemoveTPTiming = "ApierV1.RemoveTPTiming"
-	ApierV1GetTPTimingIds = "ApierV1.GetTPTimingIds"
+	ApierV1SetTPTiming              = "ApierV1.SetTPTiming"
+	ApierV1GetTPTiming              = "ApierV1.GetTPTiming"
+	ApierV1RemoveTPTiming           = "ApierV1.RemoveTPTiming"
+	ApierV1GetTPTimingIds           = "ApierV1.GetTPTimingIds"
+	ApierV1LoadTariffPlanFromStorDb = "ApierV1.LoadTariffPlanFromStorDb"
+	ApierV1RemoveTPFromFolder       = "ApierV1.RemoveTPFromFolder"
 )
 
 // ApierV2 APIs
@@ -973,6 +975,7 @@ const (
 
 // AttributeS APIs
 const (
+	ApierV1SetAttributeProfile       = "ApierV1.SetAttributeProfile"
 	ApierV1GetAttributeProfile       = "ApierV1.GetAttributeProfile"
 	ApierV1GetAttributeProfileIDs    = "ApierV1.GetAttributeProfileIDs"
 	ApierV1RemoveAttributeProfile    = "ApierV1.RemoveAttributeProfile"

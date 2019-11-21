@@ -91,7 +91,7 @@ func TestSessionsDataLastUsedData(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 102400.0
-	if err := sDataRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f",
@@ -148,7 +148,7 @@ func TestSessionsDataLastUsedData(t *testing.T) {
 	}
 
 	eAcntVal = 97280.0 // 100 -5
-	if err := sDataRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f",
@@ -187,7 +187,7 @@ func TestSessionsDataLastUsedData(t *testing.T) {
 	}
 
 	eAcntVal = 93184.0 // 100-9
-	if err := sDataRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
@@ -220,7 +220,7 @@ func TestSessionsDataLastUsedData(t *testing.T) {
 		t.Error(err)
 	}
 	eAcntVal = 98304.0 //100-4
-	if err := sDataRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f",
@@ -244,7 +244,7 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := sDataRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, totalVal)
@@ -283,7 +283,7 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	}
 
 	eAcntVal = 96256 // 100-6
-	if err := sDataRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, totalVal)
@@ -329,7 +329,7 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	}
 
 	eAcntVal = 87040.000000 // 15MB used
-	if err := sDataRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, totalVal)
@@ -373,7 +373,7 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	}
 
 	eAcntVal = 87040.000000 // the amount is not modified and there will be 1024 extra left in SMG
-	if err := sDataRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, totalVal)
@@ -416,7 +416,7 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	}
 
 	eAcntVal = 87040.000000
-	if err := sDataRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, totalVal)
@@ -456,7 +456,7 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	}
 
 	eAcntVal = 89088.000000
-	if err := sDataRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, totalVal)
@@ -503,7 +503,7 @@ func TestSessionsDataTTLExpired(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := sDataRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, totalVal)
@@ -543,7 +543,7 @@ func TestSessionsDataTTLExpired(t *testing.T) {
 	}
 
 	eAcntVal = 101376.000000
-	if err := sDataRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
@@ -551,7 +551,7 @@ func TestSessionsDataTTLExpired(t *testing.T) {
 	time.Sleep(70 * time.Millisecond)
 
 	eAcntVal = 99328.000000
-	if err := sDataRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
@@ -577,7 +577,7 @@ func TestSessionsDataTTLExpMultiUpdates(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := sDataRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, totalVal)
@@ -617,7 +617,7 @@ func TestSessionsDataTTLExpMultiUpdates(t *testing.T) {
 	}
 
 	eAcntVal = 98304.000000 //96MB
-	if err := sDataRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
@@ -665,7 +665,7 @@ func TestSessionsDataTTLExpMultiUpdates(t *testing.T) {
 	}
 
 	eAcntVal = 97280.000000 // 20480
-	if err := sDataRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
@@ -673,7 +673,7 @@ func TestSessionsDataTTLExpMultiUpdates(t *testing.T) {
 	time.Sleep(60 * time.Millisecond) // TTL will kick in
 
 	eAcntVal = 98304.000000 // 1MB is returned
-	if err := sDataRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
@@ -700,7 +700,7 @@ func TestSessionsDataMultipleDataNoUsage(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := sDataRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, totalVal)
@@ -739,7 +739,7 @@ func TestSessionsDataMultipleDataNoUsage(t *testing.T) {
 	}
 
 	eAcntVal = 100352.000000 // 1054720
-	if err := sDataRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
@@ -786,7 +786,7 @@ func TestSessionsDataMultipleDataNoUsage(t *testing.T) {
 	}
 
 	eAcntVal = 100352.000000
-	if err := sDataRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
@@ -832,7 +832,7 @@ func TestSessionsDataMultipleDataNoUsage(t *testing.T) {
 	}
 
 	eAcntVal = 100352.000000
-	if err := sDataRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)
@@ -873,7 +873,7 @@ func TestSessionsDataMultipleDataNoUsage(t *testing.T) {
 	}
 
 	eAcntVal = 101376.000000 // refunded last 1MB reserved and unused
-	if err := sDataRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f",
@@ -905,7 +905,7 @@ func TestSessionsDataTTLUsageProtection(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := sDataRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if totalVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); totalVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, totalVal)
@@ -944,7 +944,7 @@ func TestSessionsDataTTLUsageProtection(t *testing.T) {
 	}
 
 	eAcntVal = 100352.000000 // 1054720
-	if err := sDataRPC.Call("ApierV2.GetAccount", acntAttrs, &acnt); err != nil {
+	if err := sDataRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
 	} else if dataVal := acnt.BalanceMap[utils.DATA].GetTotalValue(); dataVal != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, dataVal)

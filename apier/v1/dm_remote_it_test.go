@@ -198,7 +198,7 @@ func testInternalRemoteITGetAccount(t *testing.T) {
 		Account: "1001",
 	}
 	// make sure account exist in engine2
-	if err := engineTwoRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	if err := engineTwoRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.ID != expAcc.ID {
 		t.Errorf("expecting: %+v, received: %+v", expAcc.ID, acnt.ID)
@@ -206,7 +206,7 @@ func testInternalRemoteITGetAccount(t *testing.T) {
 		t.Errorf("unexpected number of balances received: %+v", utils.ToJSON(acnt))
 	}
 	// check the account in internal
-	if err := internalRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	if err := internalRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.ID != expAcc.ID {
 		t.Errorf("expecting: %+v, received: %+v", expAcc.ID, acnt.ID)
@@ -218,7 +218,7 @@ func testInternalRemoteITGetAccount(t *testing.T) {
 		Tenant:  "cgrates.org",
 		Account: "nonexistAccount",
 	}
-	if err := internalRPC.Call("ApierV2.GetAccount", attrs, &acnt); err == nil ||
+	if err := internalRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("expecting: %+v, received: %+v", utils.ErrNotFound, err)
 	}

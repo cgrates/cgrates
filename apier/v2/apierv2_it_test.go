@@ -108,7 +108,7 @@ func TestApierV2itAddBalance(t *testing.T) {
 		t.Fatal(err)
 	}
 	var acnt engine.Account
-	if err := apierRPC.Call("ApierV2.GetAccount", &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan"}, &acnt); err != nil {
+	if err := apierRPC.Call(utils.ApierV2GetAccount, &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan"}, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY][0].Value != 5.0 {
 		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MONETARY][0])
@@ -176,7 +176,7 @@ func TestApierV2itFraudMitigation(t *testing.T) {
 		t.Fatal(err)
 	}
 	var acnt engine.Account
-	if err := apierRPC.Call("ApierV2.GetAccount", &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan"}, &acnt); err != nil {
+	if err := apierRPC.Call(utils.ApierV2GetAccount, &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan"}, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MONETARY][0].Value != 60.0 {
 		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MONETARY][0])
@@ -191,7 +191,7 @@ func TestApierV2itFraudMitigation(t *testing.T) {
 	if err := apierRPC.Call("ApierV2.SetAccount", attrSetAcnt, &reply); err != nil {
 		t.Fatal(err)
 	}
-	if err := apierRPC.Call("ApierV2.GetAccount", &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan"}, &acnt); err != nil {
+	if err := apierRPC.Call(utils.ApierV2GetAccount, &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan"}, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MONETARY][0].Value != 60.0 {
 		t.Errorf("Unexpected balance received: %+v", acnt.BalanceMap[utils.MONETARY][0])
@@ -339,7 +339,7 @@ func TestApierV2itSetActionWithCategory(t *testing.T) {
 	}
 
 	var acnt engine.Account
-	if err := apierRPC.Call("ApierV2.GetAccount", &utils.AttrGetAccount{Tenant: "cgrates.org",
+	if err := apierRPC.Call(utils.ApierV2GetAccount, &utils.AttrGetAccount{Tenant: "cgrates.org",
 		Account: "TestApierV2itSetActionWithCategory"}, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MONETARY][0].Value != 5.0 {

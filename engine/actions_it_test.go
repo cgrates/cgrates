@@ -387,7 +387,7 @@ func TestActionsitCDRAccount(t *testing.T) {
 	var acc Account
 	attrs2 := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: acnt}
 	var uuid string
-	if err := actsLclRpc.Call("ApierV2.GetAccount", attrs2, &acc); err != nil {
+	if err := actsLclRpc.Call(utils.ApierV2GetAccount, attrs2, &acc); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else {
 		voice := acc.BalanceMap[utils.VOICE]
@@ -443,7 +443,7 @@ func TestActionsitCDRAccount(t *testing.T) {
 		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
 	}
 
-	if err := actsLclRpc.Call("ApierV2.GetAccount", attrs2, &acc); err != nil {
+	if err := actsLclRpc.Call(utils.ApierV2GetAccount, attrs2, &acc); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else if tv := acc.BalanceMap[utils.VOICE].GetTotalValue(); tv != float64(10*time.Second) {
 		t.Errorf("Calling ApierV1.GetBalance expected: %f, received: %f", float64(10*time.Second), tv)

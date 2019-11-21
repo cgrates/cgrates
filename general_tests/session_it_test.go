@@ -108,7 +108,7 @@ func testAccountBalance2(t *testing.T, sracc, srten, balType string, expected fl
 		Tenant:  srten,
 		Account: sracc,
 	}
-	if err := sesRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+	if err := sesRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if rply := acnt.BalanceMap[balType].GetTotalValue(); rply != expected {
 		t.Errorf("Expecting: %v, received: %v",

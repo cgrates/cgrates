@@ -151,7 +151,7 @@ func testAttributeSRPCConn(t *testing.T) {
 
 func testAttributeSGetAlsPrfBeforeSet(t *testing.T) {
 	var reply *engine.AttributeProfile
-	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
+	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -161,7 +161,7 @@ func testAttributeSGetAlsPrfBeforeSet(t *testing.T) {
 func testAttributeSLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
-	if err := attrSRPC.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -251,13 +251,13 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 	}
 	eAttrPrf2.Compile()
 	var result string
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", eAttrPrf2, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, eAttrPrf2, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.AttributeProfile
-	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
+	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_3"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -303,13 +303,13 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 	}
 	eAttrPrf2.Compile()
 	var result string
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", eAttrPrf2, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, eAttrPrf2, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.AttributeProfile
-	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
+	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_2"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -456,7 +456,7 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var result string
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -522,7 +522,7 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 		},
 	}
 	var result string
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -601,7 +601,7 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 		},
 	}
 	var result string
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -650,7 +650,7 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 		},
 	}
 	var result string
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf1, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, attrPrf1, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -732,13 +732,13 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var result string
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.AttributeProfile
-	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
+	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -761,13 +761,13 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var result string
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.AttributeProfile
-	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
+	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -783,21 +783,21 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 
 func testAttributeSRemAlsPrf(t *testing.T) {
 	var resp string
-	if err := attrSRPC.Call("ApierV1.RemoveAttributeProfile",
+	if err := attrSRPC.Call(utils.ApierV1RemoveAttributeProfile,
 		&utils.TenantIDWithCache{Tenant: alsPrf.Tenant, ID: alsPrf.ID}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 	var reply *engine.AttributeProfile
-	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
+	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	// remove twice shoud return not found
 	resp = ""
-	if err := attrSRPC.Call("ApierV1.RemoveAttributeProfile",
+	if err := attrSRPC.Call(utils.ApierV1RemoveAttributeProfile,
 		&utils.TenantIDWithCache{Tenant: alsPrf.Tenant, ID: alsPrf.ID}, &resp); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
 	}
@@ -831,13 +831,13 @@ func testAttributeSSetAlsPrf2(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var result string
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.AttributeProfile
-	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
+	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
 		&utils.TenantID{Tenant: "golant", ID: "ATTR_972587832508_SESSIONAUTH"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -873,7 +873,7 @@ func testAttributeSSetAlsPrf3(t *testing.T) {
 		},
 	}
 	var result string
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err == nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, alsPrf, &result); err == nil {
 		t.Error(err)
 	}
 }
@@ -902,7 +902,7 @@ func testAttributeSSetAlsPrf4(t *testing.T) {
 		},
 	}
 	var result string
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err == nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, alsPrf, &result); err == nil {
 		t.Error(err)
 	}
 }
@@ -937,7 +937,7 @@ func testAttributeSProcessEventWithSearchAndReplace(t *testing.T) {
 		},
 	}
 	var result string
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf1, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, attrPrf1, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1031,17 +1031,17 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 	}
 	// Add attribute in DM
 	var result string
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf1, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, attrPrf1, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf2, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, attrPrf2, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf3, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, attrPrf3, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1141,17 +1141,17 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 	}
 	// Add attributeProfiles
 	var result string
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf1, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, attrPrf1, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf2, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, attrPrf2, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf3, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, attrPrf3, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1225,7 +1225,7 @@ func testAttributeSCachingMetaNone(t *testing.T) {
 	}
 	// set the profile
 	var result string
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf1, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, attrPrf1, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1284,7 +1284,7 @@ func testAttributeSCachingMetaLoad(t *testing.T) {
 	}
 	// set the profile
 	var result string
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf1, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, attrPrf1, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1321,7 +1321,7 @@ func testAttributeSCachingMetaLoad(t *testing.T) {
 	}
 	//remove from cache and DataManager the profile
 	var resp string
-	if err := attrSRPC.Call("ApierV1.RemoveAttributeProfile",
+	if err := attrSRPC.Call(utils.ApierV1RemoveAttributeProfile,
 		&utils.TenantIDWithCache{Tenant: attrPrf1.Tenant, ID: attrPrf1.ID,
 			Cache: utils.StringPointer(utils.MetaRemove)}, &resp); err != nil {
 		t.Error(err)
@@ -1376,7 +1376,7 @@ func testAttributeSCachingMetaReload1(t *testing.T) {
 	}
 	// set the profile
 	var result string
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf1, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, attrPrf1, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1435,14 +1435,14 @@ func testAttributeSCachingMetaReload2(t *testing.T) {
 	}
 	// set the profile
 	var result string
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf1, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, attrPrf1, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 
 	var reply *engine.AttributeProfile
-	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
+	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -1474,13 +1474,13 @@ func testAttributeSCachingMetaReload2(t *testing.T) {
 		Cache: utils.StringPointer(utils.MetaReload),
 	}
 	// set the profile
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf2, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, attrPrf2, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
+	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -1514,7 +1514,7 @@ func testAttributeSCachingMetaRemove(t *testing.T) {
 	}
 	// set the profile
 	var result string
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf1, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, attrPrf1, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1563,7 +1563,7 @@ func testAttributeSCachingMetaRemove(t *testing.T) {
 		Cache: utils.StringPointer(utils.MetaRemove),
 	}
 	// set the profile
-	if err := attrSRPC.Call("ApierV1.SetAttributeProfile", attrPrf2, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV1SetAttributeProfile, attrPrf2, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
