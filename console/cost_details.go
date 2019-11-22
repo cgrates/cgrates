@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdGetCostDetails{
 		name:      "cost_details",
-		rpcMethod: "ApierV1.GetEventCost",
+		rpcMethod: utils.ApierV1GetEventCost,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

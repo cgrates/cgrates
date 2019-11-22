@@ -21,7 +21,6 @@ package v1
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
@@ -122,7 +121,7 @@ func testV1FIdxCaStartEngine(t *testing.T) {
 
 func testV1FIdxCaRpcConn(t *testing.T) {
 	var err error
-	tFIdxCaRpc, err = jsonrpc.Dial("tcp", tSv1Cfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tFIdxCaRpc, err = newRPCClient(tSv1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -197,7 +196,7 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 		},
 	}
 
-	if err := tFIdxCaRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -288,7 +287,7 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 			Async:    true,
 		},
 	}
-	if err := tFIdxCaRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -368,7 +367,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 	}
 	reply.FilterIDs = []string{"TestFilter3"}
 
-	if err := tFIdxCaRpc.Call("ApierV1.SetThresholdProfile", reply, &result); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ApierV1SetThresholdProfile, &ThresholdWithCache{ThresholdProfile: reply}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -472,12 +471,14 @@ func testV1FIdxCaRemoveThresholdProfile(t *testing.T) {
 //StatQueue
 func testV1FIdxCaGetStatQueuesWithNotFound(t *testing.T) {
 	var reply *[]string
-	tEv := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.EventType: utils.AccountUpdate,
-			utils.Account:   "1001",
+	tEv := &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.EventType: utils.AccountUpdate,
+				utils.Account:   "1001",
+			},
 		},
 	}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv, &reply); err == nil ||
@@ -538,19 +539,21 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 			MinItems:     1,
 		},
 	}
-	if err := tFIdxCaRpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ApierV1SetStatQueueProfile, statConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	tEv := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.EventType: utils.AccountUpdate,
-			utils.Account:   "1001",
-			"Val":           10,
+	tEv := &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.EventType: utils.AccountUpdate,
+				utils.Account:   "1001",
+				"Val":           10,
+			},
 		},
 	}
 	var reply []string
@@ -566,58 +569,72 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 func testV1FIdxCaGetStatQueuesFromTP(t *testing.T) {
 	var reply []string
 	expected := []string{"Stats1"}
-	ev2 := utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event2",
-		Event: map[string]interface{}{
-			utils.Account:    "1002",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(45 * time.Second),
-			utils.Cost:       12.1}}
-	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, &ev2, &reply); err != nil {
+	ev2 := &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event2",
+			Event: map[string]interface{}{
+				utils.Account:    "1002",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(45 * time.Second),
+				utils.Cost:       12.1,
+			},
+		},
+	}
+	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, ev2, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-	ev3 := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event3",
-		Event: map[string]interface{}{
-			utils.Account:    "1002",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(45 * time.Second),
-			utils.Cost:       12.1}}
+	ev3 := &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event3",
+			Event: map[string]interface{}{
+				utils.Account:    "1002",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(45 * time.Second),
+				utils.Cost:       12.1,
+			},
+		},
+	}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, &ev3, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 
-	tEv := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.EventType:  utils.AccountUpdate,
-			utils.Account:    "1001",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(45 * time.Second),
-			utils.Cost:       12.1,
-		}}
+	tEv := &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.EventType:  utils.AccountUpdate,
+				utils.Account:    "1001",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(45 * time.Second),
+				utils.Cost:       12.1,
+			},
+		},
+	}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, &tEv, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
-	tEv2 := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.EventType:  utils.AccountUpdate,
-			utils.Account:    "1001",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(45 * time.Second),
-			utils.Cost:       12.1,
-		}}
+	tEv2 := &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.EventType:  utils.AccountUpdate,
+				utils.Account:    "1001",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(45 * time.Second),
+				utils.Cost:       12.1,
+			},
+		},
+	}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, &tEv2, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
@@ -675,21 +692,24 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 			MinItems:     1,
 		},
 	}
-	if err := tFIdxCaRpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ApierV1SetStatQueueProfile, statConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply []string
 	expected := []string{"TEST_PROFILE1"}
-	tEv := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.EventType: utils.BalanceUpdate,
-			utils.Account:   "1003",
-			"Val":           10,
-		}}
+	tEv := &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.EventType: utils.BalanceUpdate,
+				utils.Account:   "1003",
+				"Val":           10,
+			},
+		},
+	}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
@@ -732,22 +752,25 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 	}
 	reply.FilterIDs = []string{"FLTR_3"}
 	reply.ActivationInterval = &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}
-	if err := tFIdxCaRpc.Call("ApierV1.SetStatQueueProfile",
-		reply, &result); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ApierV1SetStatQueueProfile,
+		&StatQueueWithCache{StatQueueProfile: &reply}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	tEv := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.EventType:  utils.AccountUpdate,
-			utils.Account:    "1003",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(45 * time.Second),
-			utils.Cost:       12.1,
-		}}
+	tEv := &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.EventType:  utils.AccountUpdate,
+				utils.Account:    "1003",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(45 * time.Second),
+				utils.Cost:       12.1,
+			},
+		},
+	}
 	var ids []string
 	expected := []string{"Stats1"}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent,
@@ -761,29 +784,36 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 func testV1FIdxCaRemoveStatQueueProfile(t *testing.T) {
 	var reply []string
 	expected := []string{"TEST_PROFILE1"}
-	tEv := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.EventType: utils.BalanceUpdate,
-			utils.Account:   "1003",
-			"Val":           10,
-		}}
+	tEv := &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.EventType: utils.BalanceUpdate,
+				utils.Account:   "1003",
+				"Val":           10,
+			},
+		},
+	}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 	expected = []string{"Stats1"}
-	tEv2 := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.EventType:  utils.AccountUpdate,
-			utils.Account:    "1003",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(45 * time.Second),
-			utils.Cost:       12.1}}
+	tEv2 := &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.EventType:  utils.AccountUpdate,
+				utils.Account:    "1003",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(45 * time.Second),
+				utils.Cost:       12.1,
+			},
+		},
+	}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent, tEv2, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
@@ -898,7 +928,7 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 			Weight: 20,
 		},
 	}
-	if err := tFIdxCaRpc.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ApierV1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -991,7 +1021,7 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 			Weight: 20,
 		},
 	}
-	if err := tFIdxCaRpc.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ApierV1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1043,11 +1073,13 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply engine.AttributeProfile
-	if err := tFIdxCaRpc.Call("ApierV1.GetAttributeProfile", &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}, &reply); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ApierV1GetAttributeProfile,
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}},
+		&reply); err != nil {
 		t.Error(err)
 	}
 	reply.FilterIDs = []string{"TestFilter3"}
-	if err := tFIdxCaRpc.Call("ApierV1.SetAttributeProfile", reply, &result); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ApierV1SetAttributeProfile, &AttributeWithCache{AttributeProfile: &reply}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1111,8 +1143,9 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 	}
 	var sqp *engine.AttributeProfile
 	//Test the remove
-	if err := tFIdxCaRpc.Call("ApierV1.GetAttributeProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &sqp); err == nil ||
+	if err := tFIdxCaRpc.Call(utils.ApierV1GetAttributeProfile,
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}},
+		&sqp); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -1124,8 +1157,9 @@ func testV1FIdxCaRemoveAttributeProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", resp)
 	}
 	//Test the remove
-	if err := tFIdxCaRpc.Call("ApierV1.GetAttributeProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}, &sqp); err == nil ||
+	if err := tFIdxCaRpc.Call(utils.ApierV1GetAttributeProfile,
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}},
+		&sqp); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -1213,7 +1247,7 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 			ThresholdIDs:      []string{"Val1", "Val2"},
 		},
 	}
-	if err := tFIdxCaRpc.Call("ApierV1.SetResourceProfile", rlsConfig, &result); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ApierV1SetResourceProfile, rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -1342,7 +1376,7 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 			ThresholdIDs:      []string{"Val1", "Val2"},
 		},
 	}
-	if err := tFIdxCaRpc.Call("ApierV1.SetResourceProfile",
+	if err := tFIdxCaRpc.Call(utils.ApierV1SetResourceProfile,
 		rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -1409,7 +1443,7 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 	reply.FilterIDs = []string{"FLTR_RES_RCFG3"}
 	reply.ActivationInterval = &utils.ActivationInterval{ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC)}
 
-	if err := tFIdxCaRpc.Call("ApierV1.SetResourceProfile", &reply, &result); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ApierV1SetResourceProfile, &ResourceWithCache{ResourceProfile: &reply}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

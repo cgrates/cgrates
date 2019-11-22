@@ -22,7 +22,6 @@ package v1
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
@@ -94,7 +93,7 @@ func testPrecacheStartEngine(t *testing.T) {
 
 func testPrecacheRpcConn(t *testing.T) {
 	var err error
-	precacheRPC, err = jsonrpc.Dial("tcp", precacheCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	precacheRPC, err = newRPCClient(precacheCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -139,7 +138,7 @@ func testPrecacheRestartEngine(t *testing.T) {
 		t.Fatal(err)
 	}
 	var err error
-	precacheRPC, err = jsonrpc.Dial("tcp", precacheCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	precacheRPC, err = newRPCClient(precacheCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

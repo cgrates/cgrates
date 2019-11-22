@@ -258,7 +258,7 @@ func testV1AccSendToThreshold(t *testing.T) {
 		ActionIDs: []string{"DISABLE_LOG"},
 	}
 
-	if err := accRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &reply); err != nil {
+	if err := accRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)

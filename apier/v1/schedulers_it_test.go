@@ -21,7 +21,6 @@ package v1
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"testing"
 	"time"
@@ -104,7 +103,7 @@ func testSchedStartEngine(t *testing.T) {
 
 func testSchedRpcConn(t *testing.T) {
 	var err error
-	schedRpc, err = jsonrpc.Dial("tcp", schedCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	schedRpc, err = newRPCClient(schedCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

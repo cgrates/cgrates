@@ -22,7 +22,6 @@ package v1
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"sort"
@@ -143,7 +142,7 @@ func testAttributeSStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testAttributeSRPCConn(t *testing.T) {
 	var err error
-	attrSRPC, err = jsonrpc.Dial("tcp", alsPrfCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	attrSRPC, err = newRPCClient(alsPrfCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -152,7 +151,7 @@ func testAttributeSRPCConn(t *testing.T) {
 func testAttributeSGetAlsPrfBeforeSet(t *testing.T) {
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"},
+		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -258,7 +257,7 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_3"}, &reply); err != nil {
+		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_3"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -310,7 +309,7 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_2"}, &reply); err != nil {
+		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_2"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -739,7 +738,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
+		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -768,7 +767,7 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &reply); err != nil {
+		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -791,7 +790,7 @@ func testAttributeSRemAlsPrf(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"},
+		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -838,7 +837,7 @@ func testAttributeSSetAlsPrf2(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
-		&utils.TenantID{Tenant: "golant", ID: "ATTR_972587832508_SESSIONAUTH"}, &reply); err != nil {
+		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "golant", ID: "ATTR_972587832508_SESSIONAUTH"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -1443,7 +1442,7 @@ func testAttributeSCachingMetaReload2(t *testing.T) {
 
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}, &reply); err != nil {
+		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	attrPrf1.Compile()
@@ -1481,7 +1480,7 @@ func testAttributeSCachingMetaReload2(t *testing.T) {
 	}
 
 	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}, &reply); err != nil {
+		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	attrPrf2.Compile()

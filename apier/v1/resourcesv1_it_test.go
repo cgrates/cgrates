@@ -21,7 +21,6 @@ package v1
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"sort"
@@ -117,7 +116,7 @@ func testV1RsStartEngine(t *testing.T) {
 
 func testV1RsRpcConn(t *testing.T) {
 	var err error
-	rlsV1Rpc, err = jsonrpc.Dial("tcp", rlsV1Cfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	rlsV1Rpc, err = newRPCClient(rlsV1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -584,7 +583,7 @@ func testV1RsDBStore(t *testing.T) {
 		t.Fatal(err)
 	}
 	var err error
-	rlsV1Rpc, err = jsonrpc.Dial("tcp", rlsV1Cfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	rlsV1Rpc, err = newRPCClient(rlsV1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -651,7 +650,7 @@ func testV1RsSetResourceProfile(t *testing.T) {
 
 	var result string
 
-	if err := rlsV1Rpc.Call("ApierV1.SetResourceProfile", rlsConfig, &result); err != nil {
+	if err := rlsV1Rpc.Call(utils.ApierV1SetResourceProfile, rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -681,7 +680,7 @@ func testV1RsGetResourceProfileAfterSet(t *testing.T) {
 func testV1RsUpdateResourceProfile(t *testing.T) {
 	var result string
 	rlsConfig.FilterIDs = []string{"*string:~Account:1001", "*prefix:~DST:10"}
-	if err := rlsV1Rpc.Call("ApierV1.SetResourceProfile", rlsConfig, &result); err != nil {
+	if err := rlsV1Rpc.Call(utils.ApierV1SetResourceProfile, rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

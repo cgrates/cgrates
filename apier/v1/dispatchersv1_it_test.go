@@ -22,7 +22,6 @@ package v1
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os/exec"
 	"path"
 	"reflect"
@@ -96,7 +95,7 @@ func testDspITStartEngine(t *testing.T) {
 
 func testDspITRPCConn(t *testing.T) {
 	var err error
-	dspRPC, err = jsonrpc.Dial("tcp", dspCfg.ListenCfg().RPCJSONListen)
+	dspRPC, err = newRPCClient(dspCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}

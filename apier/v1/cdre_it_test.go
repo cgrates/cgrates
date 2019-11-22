@@ -23,7 +23,6 @@ package v1
 import (
 	"io/ioutil"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
@@ -108,7 +107,7 @@ func testCDReStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testCDReRPCConn(t *testing.T) {
 	var err error
-	cdreRPC, err = jsonrpc.Dial("tcp", cdreCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdreRPC, err = newRPCClient(cdreCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -147,7 +146,7 @@ func testCDReAddCDRs(t *testing.T) {
 	}
 	for _, cdr := range storedCdrs {
 		var reply string
-		if err := cdreRPC.Call(utils.CDRsV1ProcessCDR, cdr, &reply); err != nil {
+		if err := cdreRPC.Call(utils.CDRsV1ProcessCDR, &engine.CDRWithArgDispatcher{CDR: cdr}, &reply); err != nil {
 			t.Error("Unexpected error: ", err.Error())
 		} else if reply != utils.OK {
 			t.Error("Unexpected reply received: ", reply)
@@ -162,7 +161,7 @@ func testCDReExportCDRs(t *testing.T) {
 		Verbose:        true,
 	}
 	var rply *RplExportedCDRs
-	if err := cdreRPC.Call("ApierV1.ExportCDRs", attr, &rply); err != nil {
+	if err := cdreRPC.Call(utils.ApierV1ExportCDRs, attr, &rply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rply.ExportedCGRIDs) != 2 {
 		t.Errorf("Unexpected number of CDR exported: %s ", utils.ToJSON(rply))
@@ -197,7 +196,7 @@ func testCDReProcessExternalCdr(t *testing.T) {
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
 	var reply string
-	if err := cdreRPC.Call(utils.CDRsV1ProcessExternalCDR, cdr, &reply); err != nil {
+	if err := cdreRPC.Call(utils.CDRsV1ProcessExternalCDR, engine.ExternalCDRWithArgDispatcher{ExternalCDR: cdr}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -299,7 +298,7 @@ func testCDReAddAttributes(t *testing.T) {
 	}
 	var reply *engine.AttributeProfile
 	if err := cdreRPC.Call(utils.ApierV1GetAttributeProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_CDRE"}, &reply); err != nil {
+		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_CDRE"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -314,8 +313,8 @@ func testCDReExportCDRsWithAttributes(t *testing.T) {
 		Verbose:        true,
 	}
 	var rply *RplExportedCDRs
-	if err := cdreRPC.Call("ApierV1.ExportCDRs", attr, &rply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
+	if err := cdreRPC.Call(utils.ApierV1ExportCDRs, attr, &rply); err != nil {
+		t.Fatal("Unexpected error: ", err.Error())
 	} else if len(rply.ExportedCGRIDs) != 2 {
 		t.Errorf("Unexpected number of CDR exported: %s ", utils.ToJSON(rply))
 	}

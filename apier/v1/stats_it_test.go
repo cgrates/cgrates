@@ -22,7 +22,6 @@ package v1
 import (
 	"math/rand"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
@@ -134,7 +133,7 @@ func testV1STSStartEngine(t *testing.T) {
 
 func testV1STSRpcConn(t *testing.T) {
 	var err error
-	stsV1Rpc, err = jsonrpc.Dial("tcp", stsV1Cfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	stsV1Rpc, err = newRPCClient(stsV1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -152,7 +151,7 @@ func testV1STSFromFolder(t *testing.T) {
 func testV1STSGetStats(t *testing.T) {
 	var reply []string
 	expectedIDs := []string{"Stats1"}
-	if err := stsV1Rpc.Call(utils.StatSv1GetQueueIDs, &utils.TenantArg{"cgrates.org"}, &reply); err != nil {
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueIDs, &utils.TenantWithArgDispatcher{TenantArg: &utils.TenantArg{"cgrates.org"}}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedIDs, reply) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedIDs, reply)
@@ -169,7 +168,7 @@ func testV1STSGetStats(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaAverage, utils.DynamicDataPrefix+utils.Usage): utils.NOT_AVAILABLE,
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &metrics); err != nil {
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -207,7 +206,7 @@ func testV1STSProcessEvent(t *testing.T) {
 	}
 	var metrics map[string]string
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics); err != nil {
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -226,7 +225,7 @@ func testV1STSProcessEvent(t *testing.T) {
 	}
 	var floatMetrics map[string]float64
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueFloatMetrics,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &floatMetrics); err != nil {
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}}, &floatMetrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedFloatMetrics, floatMetrics) {
 		t.Errorf("expecting: %+v, received reply: %+v", expectedFloatMetrics, floatMetrics)
@@ -271,7 +270,8 @@ func testV1STSProcessEvent(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaAverage, utils.DynamicDataPrefix+utils.Usage): "60000000000",
 	}
 	var metrics2 map[string]string
-	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics, &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics2); err != nil {
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}}, &metrics2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics2, metrics2) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics2, metrics2)
@@ -288,7 +288,8 @@ func testV1STSProcessEvent(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaAverage, utils.DynamicDataPrefix+utils.Usage): 60000000000,
 	}
 	var floatMetrics2 map[string]float64
-	if err := stsV1Rpc.Call(utils.StatSv1GetQueueFloatMetrics, &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &floatMetrics2); err != nil {
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueFloatMetrics,
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}}, &floatMetrics2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedFloatMetrics2, floatMetrics2) {
 		t.Errorf("expecting: %+v, received reply: %+v", expectedFloatMetrics2, floatMetrics2)
@@ -306,7 +307,7 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 		t.Fatal(err)
 	}
 	var err error
-	stsV1Rpc, err = jsonrpc.Dial("tcp", stsV1Cfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	stsV1Rpc, err = newRPCClient(stsV1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -323,7 +324,8 @@ func testV1STSGetStatsAfterRestart(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaAverage, utils.DynamicDataPrefix+utils.Usage): "60000000000",
 	}
 	var metrics2 map[string]string
-	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics, &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}, &metrics2); err != nil {
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stats1"}}, &metrics2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics2, metrics2) {
 		t.Errorf("After restat expecting: %+v, received reply: %s", expectedMetrics2, metrics2)
@@ -387,7 +389,7 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		},
 	}
 
-	if err := stsV1Rpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
+	if err := stsV1Rpc.Call(utils.ApierV1SetStatQueueProfile, statConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -435,7 +437,7 @@ func testV1STSUpdateStatQueueProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	statConfig.FilterIDs = []string{"FLTR_1", "FLTR_2"}
-	if err := stsV1Rpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
+	if err := stsV1Rpc.Call(utils.ApierV1SetStatQueueProfile, statConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -502,7 +504,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 	}
 	//set the custom statProfile
 	var result string
-	if err := stsV1Rpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
+	if err := stsV1Rpc.Call(utils.ApierV1SetStatQueueProfile, statConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -524,7 +526,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaSum, "~CustomValue"): utils.NOT_AVAILABLE,
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &metrics); err != nil {
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -552,7 +554,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaSum, "~CustomValue"): utils.NOT_AVAILABLE,
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &metrics); err != nil {
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -578,7 +580,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaSum, "~CustomValue"): "10",
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &metrics); err != nil {
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -613,7 +615,7 @@ func testV1STSProcessStaticMetrics(t *testing.T) {
 	}
 	//set the custom statProfile
 	var result string
-	if err := stsV1Rpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
+	if err := stsV1Rpc.Call(utils.ApierV1SetStatQueueProfile, statConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -656,7 +658,7 @@ func testV1STSProcessStaticMetrics(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaAverage, "2"): "2",
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &metrics); err != nil {
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -672,7 +674,7 @@ func testV1STSProcessStaticMetrics(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaAverage, "2"): "2",
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &metrics); err != nil {
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -713,7 +715,7 @@ func testV1STSProcessStatWithThreshold(t *testing.T) {
 		},
 	}
 	var result string
-	if err := stsV1Rpc.Call("ApierV1.SetStatQueueProfile", stTh, &result); err != nil {
+	if err := stsV1Rpc.Call(utils.ApierV1SetStatQueueProfile, stTh, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -734,7 +736,7 @@ func testV1STSProcessStatWithThreshold(t *testing.T) {
 			Async:     true,
 		},
 	}
-	if err := stsV1Rpc.Call("ApierV1.SetThresholdProfile", thSts, &result); err != nil {
+	if err := stsV1Rpc.Call(utils.ApierV1SetThresholdProfile, thSts, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -761,7 +763,7 @@ func testV1STSProcessStatWithThreshold(t *testing.T) {
 	var td engine.Threshold
 	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_Stat", Hits: 1}
 	if err := stsV1Rpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Stat"}, &td); err != nil {
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Stat"}}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd.Hits, td.Hits) {
 		t.Errorf("expecting: %+v, received: %+v", eTd, td)
@@ -782,7 +784,7 @@ func BenchmarkSTSV1SetEvent(b *testing.B) {
 	}
 	b.StopTimer()
 	var err error
-	stsV1Rpc, err = jsonrpc.Dial("tcp", stsV1Cfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	stsV1Rpc, err = newRPCClient(stsV1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		b.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -803,7 +805,7 @@ func BenchmarkSTSV1GetQueueStringMetrics(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		var metrics map[string]string
 		if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-			&utils.TenantID{Tenant: "cgrates.org", ID: "STATS_1"},
+			&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "STATS_1"}},
 			&metrics); err != nil {
 			b.Error(err)
 		}

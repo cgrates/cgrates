@@ -119,7 +119,7 @@ func testV1RsSetProfile(t *testing.T) {
 		},
 	}
 	var result string
-	if err := rlsV1Rpc.Call("ApierV1.SetResourceProfile", rls, &result); err != nil {
+	if err := rlsV1Rpc.Call(utils.ApierV1SetResourceProfile, rls, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
