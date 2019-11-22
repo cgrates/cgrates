@@ -120,7 +120,7 @@ func testMCDRCApierLoadTariffPlanFromFolder(t *testing.T) {
 	reply := ""
 	// Simple test that command is executed without errors
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
-	if err := rater.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+	if err := rater.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.LoadTariffPlanFromFolder: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)

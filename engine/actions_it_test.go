@@ -256,7 +256,7 @@ func TestActionsitThresholdCDrLog(t *testing.T) {
 		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
 	}
 	//make sure that the threshold don't exit
-	if err := actsLclRpc.Call("ApierV1.GetThresholdProfile",
+	if err := actsLclRpc.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &thReply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -281,7 +281,7 @@ func TestActionsitThresholdCDrLog(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := actsLclRpc.Call("ApierV1.GetThresholdProfile",
+	if err := actsLclRpc.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &thReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl, thReply) {
@@ -465,7 +465,7 @@ func TestActionsitThresholdPostEvent(t *testing.T) {
 		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
 	}
 	//make sure that the threshold don't exit
-	if err := actsLclRpc.Call("ApierV1.GetThresholdProfile",
+	if err := actsLclRpc.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_PostEvent"}, &thReply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -489,7 +489,7 @@ func TestActionsitThresholdPostEvent(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := actsLclRpc.Call("ApierV1.GetThresholdProfile",
+	if err := actsLclRpc.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_PostEvent"}, &thReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl, thReply) {

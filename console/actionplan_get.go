@@ -21,12 +21,13 @@ package console
 import (
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
 	c := &CmdGetActionPlan{
 		name:      "actionplan_get",
-		rpcMethod: "ApierV1.GetActionPlan",
+		rpcMethod: utils.ApierV1GetActionPlan,
 		rpcParams: &v1.AttrGetActionPlan{},
 	}
 	commands[c.Name()] = c

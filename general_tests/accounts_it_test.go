@@ -124,7 +124,7 @@ func testV1AccGetAccountBeforeSet(t *testing.T) {
 func testV1AccLoadTarrifPlans(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-	if err := accRpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+	if err := accRpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)

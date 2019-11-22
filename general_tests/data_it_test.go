@@ -115,7 +115,7 @@ func testV1DataGetAccountBeforeSet(t *testing.T) {
 func testV1DataLoadTarrifPlans(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testData")}
-	if err := dataRpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+	if err := dataRpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)

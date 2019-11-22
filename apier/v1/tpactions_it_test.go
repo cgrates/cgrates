@@ -130,7 +130,7 @@ func testTPActionsRpcConn(t *testing.T) {
 
 func testTPActionsGetTPActionBeforeSet(t *testing.T) {
 	var reply *utils.TPActionPlan
-	if err := tpActionRPC.Call("ApierV1.GetTPActions",
+	if err := tpActionRPC.Call(utils.ApierV1GetTPActions,
 		&AttrGetTPActions{TPid: "TPAcc", ID: "ID"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -191,7 +191,7 @@ func testTPActionsSetTPAction(t *testing.T) {
 
 func testTPActionsGetTPActionAfterSet(t *testing.T) {
 	var reply *utils.TPActions
-	if err := tpActionRPC.Call("ApierV1.GetTPActions",
+	if err := tpActionRPC.Call(utils.ApierV1GetTPActions,
 		&AttrGetTPActions{TPid: "TPAcc", ID: "ID"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpActions.TPid, reply.TPid) {
@@ -285,7 +285,7 @@ func testTPActionsUpdateTPAction(t *testing.T) {
 
 func testTPActionsGetTPActionAfterUpdate(t *testing.T) {
 	var reply *utils.TPActions
-	if err := tpActionRPC.Call("ApierV1.GetTPActions",
+	if err := tpActionRPC.Call(utils.ApierV1GetTPActions,
 		&AttrGetTPActions{TPid: "TPAcc", ID: "ID"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpActions.TPid, reply.TPid) {
@@ -311,7 +311,7 @@ func testTPActionsRemTPAction(t *testing.T) {
 
 func testTPActionsGetTPActionAfterRemove(t *testing.T) {
 	var reply *utils.TPActionPlan
-	if err := tpActionRPC.Call("ApierV1.GetTPActions",
+	if err := tpActionRPC.Call(utils.ApierV1GetTPActions,
 		&AttrGetTPActions{TPid: "TPAcc", ID: "ID"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

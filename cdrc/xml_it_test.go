@@ -479,7 +479,7 @@ func TestXmlIT5AddFilters(t *testing.T) {
 		},
 	}
 	var result string
-	if err := cdrcXmlRPC.Call("ApierV1.SetFilter", filter, &result); err != nil {
+	if err := cdrcXmlRPC.Call(utils.ApierV1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

@@ -125,7 +125,7 @@ func testTPStatsRpcConn(t *testing.T) {
 
 func testTPStatsGetTPStatBeforeSet(t *testing.T) {
 	var reply *utils.TPStatProfile
-	if err := tpStatRPC.Call("ApierV1.GetTPStat",
+	if err := tpStatRPC.Call(utils.ApierV1GetTPStat,
 		&utils.TPTntID{TPid: "TPS1", Tenant: "cgrates.org", ID: "Stat1"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -156,7 +156,7 @@ func testTPStatsSetTPStat(t *testing.T) {
 	}
 	sort.Strings(tpStat.ThresholdIDs)
 	var result string
-	if err := tpStatRPC.Call("ApierV1.SetTPStat", tpStat, &result); err != nil {
+	if err := tpStatRPC.Call(utils.ApierV1SetTPStat, tpStat, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -165,7 +165,7 @@ func testTPStatsSetTPStat(t *testing.T) {
 
 func testTPStatsGetTPStatAfterSet(t *testing.T) {
 	var respond *utils.TPStatProfile
-	if err := tpStatRPC.Call("ApierV1.GetTPStat",
+	if err := tpStatRPC.Call(utils.ApierV1GetTPStat,
 		&utils.TPTntID{TPid: "TPS1", Tenant: "cgrates.org", ID: "Stat1"}, &respond); err != nil {
 		t.Fatal(err)
 	}
@@ -189,7 +189,7 @@ func testTPStatsUpdateTPStat(t *testing.T) {
 	sort.Slice(tpStat.Metrics, func(i, j int) bool {
 		return strings.Compare(tpStat.Metrics[i].MetricID, tpStat.Metrics[j].MetricID) == -1
 	})
-	if err := tpStatRPC.Call("ApierV1.SetTPStat", tpStat, &result); err != nil {
+	if err := tpStatRPC.Call(utils.ApierV1SetTPStat, tpStat, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -198,7 +198,7 @@ func testTPStatsUpdateTPStat(t *testing.T) {
 
 func testTPStatsGetTPStatAfterUpdate(t *testing.T) {
 	var expectedTPS *utils.TPStatProfile
-	if err := tpStatRPC.Call("ApierV1.GetTPStat",
+	if err := tpStatRPC.Call(utils.ApierV1GetTPStat,
 		&utils.TPTntID{TPid: "TPS1", Tenant: "cgrates.org", ID: "Stat1"}, &expectedTPS); err != nil {
 		t.Fatal(err)
 	}
@@ -213,7 +213,7 @@ func testTPStatsGetTPStatAfterUpdate(t *testing.T) {
 
 func testTPStatsRemoveTPStat(t *testing.T) {
 	var resp string
-	if err := tpStatRPC.Call("ApierV1.RemoveTPStat",
+	if err := tpStatRPC.Call(utils.ApierV1RemoveTPStat,
 		&utils.TPTntID{TPid: "TPS1", Tenant: "cgrates.org", ID: "Stat1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -223,7 +223,7 @@ func testTPStatsRemoveTPStat(t *testing.T) {
 
 func testTPStatsGetTPStatAfterRemove(t *testing.T) {
 	var respond *utils.TPStatProfile
-	if err := tpStatRPC.Call("ApierV1.GetTPStat",
+	if err := tpStatRPC.Call(utils.ApierV1GetTPStat,
 		&utils.TPTntID{TPid: "TPS1", Tenant: "cgrates.org", ID: "Stat1"},
 		&respond); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

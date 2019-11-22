@@ -180,7 +180,7 @@ func testInternalRemoteITRPCConn(t *testing.T) {
 func testInternalRemoteLoadDataInEngineTwo(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := engineTwoRPC.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+	if err := engineTwoRPC.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -291,7 +291,7 @@ func testInternalRemoteITGetThresholdProfile(t *testing.T) {
 			Async:     true,
 		},
 	}
-	if err := internalRPC.Call("ApierV1.GetThresholdProfile",
+	if err := internalRPC.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
@@ -332,7 +332,7 @@ func testInternalRemoteITGetResourceProfile(t *testing.T) {
 		},
 	}
 	var reply *engine.ResourceProfile
-	if err := internalRPC.Call("ApierV1.GetResourceProfile",
+	if err := internalRPC.Call(utils.ApierV1GetResourceProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: rlsPrf.ID}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, rlsPrf.ResourceProfile) {
@@ -389,7 +389,7 @@ func testInternalRemoteITGetStatQueueProfile(t *testing.T) {
 		ThresholdIDs: []string{utils.META_NONE},
 	}
 	var reply *engine.StatQueueProfile
-	if err := internalRPC.Call("ApierV1.GetStatQueueProfile",
+	if err := internalRPC.Call(utils.ApierV1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stats2"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expStq, reply) && !reflect.DeepEqual(reply, expStq2) {
@@ -468,7 +468,7 @@ func testInternalRemoteITGetFilter(t *testing.T) {
 		},
 	}
 	var reply *engine.Filter
-	if err := internalRPC.Call("ApierV1.GetFilter",
+	if err := internalRPC.Call(utils.ApierV1GetFilter,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "FLTR_ACNT_1001"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expFltr, reply) {
@@ -478,7 +478,7 @@ func testInternalRemoteITGetFilter(t *testing.T) {
 
 func testInternalRemoteITGetRatingPlan(t *testing.T) {
 	var reply engine.RatingPlan
-	if err := internalRPC.Call("ApierV1.GetRatingPlan", "RP_1001", &reply); err != nil {
+	if err := internalRPC.Call(utils.ApierV1GetRatingPlan, "RP_1001", &reply); err != nil {
 		t.Error(err.Error())
 	} else if reply.Id != "RP_1001" {
 		t.Errorf("Expected: %+v, received: %+v", "RP_1001", reply.Id)
@@ -502,7 +502,7 @@ func testInternalRemoteITGetRatingProfile(t *testing.T) {
 			},
 		},
 	}
-	if err := internalRPC.Call("ApierV1.GetRatingProfile", attrGetRatingPlan, &rpl); err != nil {
+	if err := internalRPC.Call(utils.ApierV1GetRatingProfile, attrGetRatingPlan, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, rpl) {
 		t.Errorf("Expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rpl))
@@ -516,7 +516,7 @@ func testInternalRemoteITGetAction(t *testing.T) {
 			BalanceDisabled: "false", ExpiryTime: utils.UNLIMITED, Weight: 10.0}}
 
 	var reply []*utils.TPAction
-	if err := internalRPC.Call("ApierV1.GetActions", "ACT_TOPUP_RST_10", &reply); err != nil {
+	if err := internalRPC.Call(utils.ApierV1GetActions, "ACT_TOPUP_RST_10", &reply); err != nil {
 		t.Error("Got error on ApierV1.GetActions: ", err.Error())
 	} else if !reflect.DeepEqual(expectActs, reply) {
 		t.Errorf("Expected: %v,\n received: %v", utils.ToJSON(expectActs), utils.ToJSON(reply))
@@ -530,7 +530,7 @@ func testInternalRemoteITGetActionPlan(t *testing.T) {
 		"cgrates.org:1002": true,
 		"cgrates.org:1003": true,
 	}
-	if err := internalRPC.Call("ApierV1.GetActionPlan",
+	if err := internalRPC.Call(utils.ApierV1GetActionPlan,
 		AttrGetActionPlan{ID: "AP_PACKAGE_10"}, &aps); err != nil {
 		t.Error(err)
 	} else if len(aps) != 1 {
@@ -540,7 +540,7 @@ func testInternalRemoteITGetActionPlan(t *testing.T) {
 	} else if !reflect.DeepEqual(aps[0].AccountIDs, accIDsStrMp) {
 		t.Errorf("Expected: %v,\n received: %v", accIDsStrMp, aps[0].AccountIDs)
 	}
-	if err := internalRPC.Call("ApierV1.GetActionPlan",
+	if err := internalRPC.Call(utils.ApierV1GetActionPlan,
 		AttrGetActionPlan{ID: utils.EmptyString}, &aps); err != nil {
 		t.Error(err)
 	} else if len(aps) != 1 {
@@ -554,7 +554,7 @@ func testInternalRemoteITGetActionPlan(t *testing.T) {
 
 func testInternalRemoteITGetAccountActionPlan(t *testing.T) {
 	var aap []*AccountActionTiming
-	if err := internalRPC.Call("ApierV1.GetAccountActionPlan",
+	if err := internalRPC.Call(utils.ApierV1GetAccountActionPlan,
 		utils.TenantAccount{
 			Tenant:  "cgrates.org",
 			Account: "1001",
@@ -595,7 +595,7 @@ func testInternalRemoteITGetReverseDestination(t *testing.T) {
 func testInternalReplicationSetThreshold(t *testing.T) {
 	var reply *engine.ThresholdProfile
 	var result string
-	if err := internalRPC.Call("ApierV1.GetThresholdProfile",
+	if err := internalRPC.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Replication"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -604,7 +604,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 	var indexes []string
 	expectedIDX := []string{"*string:~Account:1001:THD_ACNT_1001",
 		"*string:~Account:1002:THD_ACNT_1002"}
-	if err := engineTwoRPC.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
+	if err := engineTwoRPC.Call(utils.ApierV1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: "cgrates.org", FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -615,7 +615,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 			expectedIDX, utils.ToJSON(indexes))
 	}
 	//verify indexes on internal before adding new threshold profile
-	if err := internalRPC.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
+	if err := internalRPC.Call(utils.ApierV1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: "cgrates.org", FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -648,7 +648,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	time.Sleep(50 * time.Millisecond)
-	if err := internalRPC.Call("ApierV1.GetThresholdProfile",
+	if err := internalRPC.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Replication"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
@@ -662,7 +662,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 	}
 	// verify index on internal
 	sort.Strings(expectedIDX)
-	if err := internalRPC.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
+	if err := internalRPC.Call(utils.ApierV1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: "cgrates.org", FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -673,7 +673,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 			expectedIDX, utils.ToJSON(indexes))
 	}
 	// verify data on engine1
-	if err := engineOneRPC.Call("ApierV1.GetThresholdProfile",
+	if err := engineOneRPC.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Replication"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
@@ -685,7 +685,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 		"*string:~CustomField:CustomValue:THD_Replication",
 	}
 	// verify indexes on engine1 (should be the same as internal)
-	if err := engineOneRPC.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
+	if err := engineOneRPC.Call(utils.ApierV1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: "cgrates.org", FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)
@@ -696,7 +696,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 			expectedIDX2, utils.ToJSON(indexes))
 	}
 	// verify data on engine2
-	if err := engineTwoRPC.Call("ApierV1.GetThresholdProfile",
+	if err := engineTwoRPC.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Replication"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
@@ -708,7 +708,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 		"*string:~CustomField:CustomValue:THD_Replication",
 	}
 	// check if indexes was created correctly on engine2
-	if err := engineTwoRPC.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
+	if err := engineTwoRPC.Call(utils.ApierV1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: "cgrates.org", FilterType: utils.MetaString},
 		&indexes); err != nil {
 		t.Error(err)

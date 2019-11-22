@@ -66,7 +66,7 @@ func loadTP() {
 	attrs := &utils.AttrLoadTpFromFolder{
 		FolderPath: path.Join(config.CgrConfig().DataFolderPath, "tariffplans", "tutorial")}
 	var tpLoadInst utils.LoadInstance
-	if err := sBenchRPC.Call("ApierV2.LoadTariffPlanFromFolder",
+	if err := sBenchRPC.Call(utils.ApierV2LoadTariffPlanFromFolder,
 		attrs, &tpLoadInst); err != nil {
 		log.Fatal(err)
 	}

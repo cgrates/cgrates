@@ -142,7 +142,7 @@ func testV1STSRpcConn(t *testing.T) {
 func testV1STSFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
-	if err := stsV1Rpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+	if err := stsV1Rpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -352,12 +352,12 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 		},
 	}
 	var result string
-	if err := stsV1Rpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
+	if err := stsV1Rpc.Call(utils.ApierV1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
+	if err := stsV1Rpc.Call(utils.ApierV1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -394,7 +394,7 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
+	if err := stsV1Rpc.Call(utils.ApierV1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, reply) {
@@ -431,7 +431,7 @@ func testV1STSUpdateStatQueueProfile(t *testing.T) {
 			},
 		},
 	}
-	if err := stsV1Rpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
+	if err := stsV1Rpc.Call(utils.ApierV1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -443,7 +443,7 @@ func testV1STSUpdateStatQueueProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.StatQueueProfile
-	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
+	if err := stsV1Rpc.Call(utils.ApierV1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, reply) {
@@ -453,18 +453,18 @@ func testV1STSUpdateStatQueueProfile(t *testing.T) {
 
 func testV1STSRemoveStatQueueProfile(t *testing.T) {
 	var resp string
-	if err := stsV1Rpc.Call("ApierV1.RemoveStatQueueProfile",
+	if err := stsV1Rpc.Call(utils.ApierV1RemoveStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 	var sqp *engine.StatQueueProfile
-	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
+	if err := stsV1Rpc.Call(utils.ApierV1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &sqp); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := stsV1Rpc.Call("ApierV1.RemoveStatQueueProfile",
+	if err := stsV1Rpc.Call(utils.ApierV1RemoveStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
 	}
@@ -511,7 +511,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 	}
 	//verify it
 	var reply *engine.StatQueueProfile
-	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
+	if err := stsV1Rpc.Call(utils.ApierV1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "CustomStatProfile"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, reply) {
@@ -622,7 +622,7 @@ func testV1STSProcessStaticMetrics(t *testing.T) {
 	}
 	//verify it
 	var reply *engine.StatQueueProfile
-	if err := stsV1Rpc.Call("ApierV1.GetStatQueueProfile",
+	if err := stsV1Rpc.Call(utils.ApierV1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "StaticStatQueue"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, reply) {

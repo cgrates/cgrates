@@ -96,7 +96,7 @@ func testSesItRPCConn(t *testing.T) {
 func testSesItLoadFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-	if err := sesRPC.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+	if err := sesRPC.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)

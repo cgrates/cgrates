@@ -111,7 +111,7 @@ func testDestManagRpcConn(t *testing.T) {
 func testDestManagLoadTariffPlanFromFolderAll(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "alldests")}
 	var destLoadInst utils.LoadInstance
-	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
+	if err := destRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -138,7 +138,7 @@ func testDestManagAllDestinationLoaded(t *testing.T) {
 func testDestManagLoadTariffPlanFromFolderRemoveSome(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "removesome")}
 	var destLoadInst utils.LoadInstance
-	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
+	if err := destRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -163,7 +163,7 @@ func testDestManagRemoveSomeDestinationLoaded(t *testing.T) {
 func testDestManagLoadTariffPlanFromFolderRemoveSomeFlush(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "removesome"), FlushDb: true}
 	var destLoadInst utils.LoadInstance
-	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
+	if err := destRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -188,7 +188,7 @@ func testDestManagRemoveSomeFlushDestinationLoaded(t *testing.T) {
 func testDestManagLoadTariffPlanFromFolderAddBack(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "addback")}
 	var destLoadInst utils.LoadInstance
-	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
+	if err := destRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -213,7 +213,7 @@ func testDestManagAddBackDestinationLoaded(t *testing.T) {
 func testDestManagLoadTariffPlanFromFolderAddOne(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "addone")}
 	var destLoadInst utils.LoadInstance
-	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
+	if err := destRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -247,7 +247,7 @@ func testDestManagCacheWithGetCache(t *testing.T) {
 	}
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "cacheall"), FlushDb: true}
 	var destLoadInst utils.LoadInstance
-	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
+	if err := destRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -267,7 +267,7 @@ func testDestManagCacheWithGetCache(t *testing.T) {
 	}
 
 	attrs = &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "cacheone"), FlushDb: true}
-	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
+	if err := destRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -298,7 +298,7 @@ func testDestManagCacheWithGetCost(t *testing.T) {
 	}
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "cacheall"), FlushDb: true}
 	var destLoadInst utils.LoadInstance
-	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
+	if err := destRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
@@ -327,7 +327,7 @@ func testDestManagCacheWithGetCost(t *testing.T) {
 	}
 
 	attrs = &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "cacheone"), FlushDb: true}
-	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
+	if err := destRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &destLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups

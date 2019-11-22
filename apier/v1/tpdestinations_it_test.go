@@ -129,7 +129,7 @@ func testTPDestinationsRpcConn(t *testing.T) {
 
 func testTPDestinationsGetTPDestinationBeforeSet(t *testing.T) {
 	var reply *utils.TPDestination
-	if err := tpDestinationRPC.Call("ApierV1.GetTPDestination",
+	if err := tpDestinationRPC.Call(utils.ApierV1GetTPDestination,
 		&AttrGetTPDestination{TPid: "TPD", ID: "GERMANY"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -143,7 +143,7 @@ func testTPDestinationsSetTPDestination(t *testing.T) {
 		Prefixes: []string{"+49", "+4915"},
 	}
 	var result string
-	if err := tpDestinationRPC.Call("ApierV1.SetTPDestination", tpDestination, &result); err != nil {
+	if err := tpDestinationRPC.Call(utils.ApierV1SetTPDestination, tpDestination, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -152,7 +152,7 @@ func testTPDestinationsSetTPDestination(t *testing.T) {
 
 func testTPDestinationsGetTPDestinationAfterSet(t *testing.T) {
 	var reply *utils.TPDestination
-	if err := tpDestinationRPC.Call("ApierV1.GetTPDestination",
+	if err := tpDestinationRPC.Call(utils.ApierV1GetTPDestination,
 		&AttrGetTPDestination{TPid: "TPD", ID: "GERMANY"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpDestination.TPid, reply.TPid) {
@@ -168,7 +168,7 @@ func testTPDestinationsGetTPDestinationAfterSet(t *testing.T) {
 func testTPDestinationsGetTPDestinationIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"GERMANY"}
-	if err := tpDestinationRPC.Call("ApierV1.GetTPDestinationIDs",
+	if err := tpDestinationRPC.Call(utils.ApierV1GetTPDestinationIDs,
 		&AttrGetTPDestinationIds{TPid: "TPD"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
@@ -180,7 +180,7 @@ func testTPDestinationsGetTPDestinationIds(t *testing.T) {
 func testTPDestinationsUpdateTPDestination(t *testing.T) {
 	tpDestination.Prefixes = []string{"+49", "+4915", "+4916"}
 	var result string
-	if err := tpDestinationRPC.Call("ApierV1.SetTPDestination", tpDestination, &result); err != nil {
+	if err := tpDestinationRPC.Call(utils.ApierV1SetTPDestination, tpDestination, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -190,7 +190,7 @@ func testTPDestinationsUpdateTPDestination(t *testing.T) {
 
 func testTPDestinationsGetTPDestinationAfterUpdate(t *testing.T) {
 	var reply *utils.TPDestination
-	if err := tpDestinationRPC.Call("ApierV1.GetTPDestination",
+	if err := tpDestinationRPC.Call(utils.ApierV1GetTPDestination,
 		&AttrGetTPDestination{TPid: "TPD", ID: "GERMANY"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpDestination.TPid, reply.TPid) {
@@ -205,7 +205,7 @@ func testTPDestinationsGetTPDestinationAfterUpdate(t *testing.T) {
 
 func testTPDestinationsRemoveTPDestination(t *testing.T) {
 	var resp string
-	if err := tpDestinationRPC.Call("ApierV1.RemoveTPDestination",
+	if err := tpDestinationRPC.Call(utils.ApierV1RemoveTPDestination,
 		&AttrGetTPDestination{TPid: "TPD", ID: "GERMANY"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -216,7 +216,7 @@ func testTPDestinationsRemoveTPDestination(t *testing.T) {
 
 func testTPDestinationsGetTPDestinationAfterRemove(t *testing.T) {
 	var reply *utils.TPDestination
-	if err := tpDestinationRPC.Call("ApierV1.GetTPDestination",
+	if err := tpDestinationRPC.Call(utils.ApierV1GetTPDestination,
 		&AttrGetTPDestination{TPid: "TPD", ID: "GERMANY"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

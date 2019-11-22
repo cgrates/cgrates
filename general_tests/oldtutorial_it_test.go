@@ -87,7 +87,7 @@ package general_tests
 // // Load the tariff plan, creating accounts and their balances
 // func TestTutITLoadTariffPlanFromFolder(t *testing.T) {
 // 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
-// 	if err := tutLocalRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
+// 	if err := tutLocalRpc.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 // 		t.Error(err)
 // 	}
 // 	time.Sleep(100*time.Millisecond + time.Duration(*waitRater)*time.Millisecond) // Give time for scheduler to execute topups

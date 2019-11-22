@@ -108,7 +108,7 @@ func testSTIRpcConn(t *testing.T) {
 // Load the tariff plan, creating accounts and their balances
 func testSTILoadTariffPlanFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: *tpDir}
-	if err := stiRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &stiLoadInst); err != nil {
+	if err := stiRpc.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &stiLoadInst); err != nil {
 		t.Error(err)
 	} else if stiLoadInst.RatingLoadID == "" || stiLoadInst.AccountingLoadID == "" {
 		t.Error("Empty loadId received, loadInstance: ", stiLoadInst)

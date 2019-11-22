@@ -130,7 +130,7 @@ func testTPAccPlansRpcConn(t *testing.T) {
 
 func testTPAccPlansGetTPAccPlanBeforeSet(t *testing.T) {
 	var reply *utils.TPActionPlan
-	if err := tpAccPlansRPC.Call("ApierV1.GetTPActionPlan",
+	if err := tpAccPlansRPC.Call(utils.ApierV1GetTPActionPlan,
 		&AttrGetTPActionPlan{TPid: "TPAcc", ID: "ID"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -154,7 +154,7 @@ func testTPAccPlansSetTPAccPlan(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tpAccPlansRPC.Call("ApierV1.SetTPActionPlan", tpAccPlan, &result); err != nil {
+	if err := tpAccPlansRPC.Call(utils.ApierV1SetTPActionPlan, tpAccPlan, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -163,7 +163,7 @@ func testTPAccPlansSetTPAccPlan(t *testing.T) {
 
 func testTPAccPlansGetTPAccPlanAfterSet(t *testing.T) {
 	var reply *utils.TPActionPlan
-	if err := tpAccPlansRPC.Call("ApierV1.GetTPActionPlan",
+	if err := tpAccPlansRPC.Call(utils.ApierV1GetTPActionPlan,
 		&AttrGetTPActionPlan{TPid: "TPAcc", ID: "ID"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpAccPlan.TPid, reply.TPid) {
@@ -178,7 +178,7 @@ func testTPAccPlansGetTPAccPlanAfterSet(t *testing.T) {
 func testTPAccPlansGetTPAccPlanIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"ID"}
-	if err := tpAccPlansRPC.Call("ApierV1.GetTPActionPlanIds",
+	if err := tpAccPlansRPC.Call(utils.ApierV1GetTPActionPlanIds,
 		&AttrGetTPActionPlanIds{TPid: "TPAcc"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
@@ -206,7 +206,7 @@ func testTPAccPlansUpdateTPAccPlan(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tpAccPlansRPC.Call("ApierV1.SetTPActionPlan", tpAccPlan, &result); err != nil {
+	if err := tpAccPlansRPC.Call(utils.ApierV1SetTPActionPlan, tpAccPlan, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -216,7 +216,7 @@ func testTPAccPlansUpdateTPAccPlan(t *testing.T) {
 
 func testTPAccPlansGetTPAccPlanAfterUpdate(t *testing.T) {
 	var reply *utils.TPActionPlan
-	if err := tpAccPlansRPC.Call("ApierV1.GetTPActionPlan",
+	if err := tpAccPlansRPC.Call(utils.ApierV1GetTPActionPlan,
 		&AttrGetTPActionPlan{TPid: "TPAcc", ID: "ID"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpAccPlan.TPid, reply.TPid) {
@@ -231,7 +231,7 @@ func testTPAccPlansGetTPAccPlanAfterUpdate(t *testing.T) {
 
 func testTPAccPlansRemTPAccPlan(t *testing.T) {
 	var resp string
-	if err := tpAccPlansRPC.Call("ApierV1.RemoveTPActionPlan",
+	if err := tpAccPlansRPC.Call(utils.ApierV1RemoveTPActionPlan,
 		&AttrGetTPActionPlan{TPid: "TPAcc", ID: "ID"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -242,7 +242,7 @@ func testTPAccPlansRemTPAccPlan(t *testing.T) {
 
 func testTPAccPlansGetTPAccPlanAfterRemove(t *testing.T) {
 	var reply *utils.TPActionPlan
-	if err := tpAccPlansRPC.Call("ApierV1.GetTPActionPlan",
+	if err := tpAccPlansRPC.Call(utils.ApierV1GetTPActionPlan,
 		&AttrGetTPActionPlan{TPid: "TPAcc", ID: "ID"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

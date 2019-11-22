@@ -115,7 +115,7 @@ func testRPCMethodsRpcConn(t *testing.T) {
 func testRPCMethodsFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-	if err := rpcRpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+	if err := rpcRpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -123,7 +123,7 @@ func testRPCMethodsFromFolder(t *testing.T) {
 
 func testRPCMethodsAddData(t *testing.T) {
 	var resp string
-	if err := rpcRpc.Call("ApierV1.RemoveThresholdProfile",
+	if err := rpcRpc.Call(utils.ApierV1RemoveThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -793,7 +793,7 @@ func testRPCMethodsCdrsStoreSessionCost(t *testing.T) {
 // Load the tariff plan, creating accounts and their balances
 func testRPCMethodsLoadData(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
-	if err := rpcRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &tpLoadInst); err != nil {
+	if err := rpcRpc.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &tpLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups

@@ -114,7 +114,7 @@ func testA1itRPCConn(t *testing.T) {
 func testA1itLoadTPFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "a1")}
-	if err := a1rpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+	if err := a1rpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error(reply)
@@ -342,7 +342,7 @@ func testA1itConcurrentAPs(t *testing.T) {
 	wg.Wait()
 	// Make sure action plan was properly set
 	var aps []*engine.ActionPlan
-	if err := a1rpc.Call("ApierV1.GetActionPlan", v1.AttrGetActionPlan{ID: "PACKAGE_1"}, &aps); err != nil {
+	if err := a1rpc.Call(utils.ApierV1GetActionPlan, v1.AttrGetActionPlan{ID: "PACKAGE_1"}, &aps); err != nil {
 		t.Error(err)
 	} else if len(aps[0].AccountIDs.Slice()) != len(acnts) {
 		t.Errorf("Received: %+v", aps[0])
@@ -384,13 +384,13 @@ func testA1itConcurrentAPs(t *testing.T) {
 	wg.Wait()
 	// Make sure action plan was properly rem/set
 	aps = []*engine.ActionPlan{}
-	if err := a1rpc.Call("ApierV1.GetActionPlan", v1.AttrGetActionPlan{ID: "PACKAGE_1"}, &aps); err != nil {
+	if err := a1rpc.Call(utils.ApierV1GetActionPlan, v1.AttrGetActionPlan{ID: "PACKAGE_1"}, &aps); err != nil {
 		t.Error(err)
 	} else if len(aps[0].AccountIDs.Slice()) != 0 {
 		t.Errorf("Received: %+v", aps[0])
 	}
 	aps = []*engine.ActionPlan{}
-	if err := a1rpc.Call("ApierV1.GetActionPlan", v1.AttrGetActionPlan{ID: "PACKAGE_2"}, &aps); err != nil {
+	if err := a1rpc.Call(utils.ApierV1GetActionPlan, v1.AttrGetActionPlan{ID: "PACKAGE_2"}, &aps); err != nil {
 		t.Error(err)
 	} else if len(aps[0].AccountIDs.Slice()) != len(acnts) {
 		t.Errorf("Received: %+v", aps[0])
