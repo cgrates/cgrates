@@ -22,7 +22,6 @@ package v2
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
@@ -103,7 +102,7 @@ func testAttributeSStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testAttributeSRPCConn(t *testing.T) {
 	var err error
-	attrSRPC, err = jsonrpc.Dial("tcp", alsPrfCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	attrSRPC, err = newRPCClient(alsPrfCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -158,7 +157,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ExternalAttribute"}, &reply); err != nil {
+		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ExternalAttribute"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -224,7 +223,7 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ExternalAttribute"}, &reply); err != nil {
+		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ExternalAttribute"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
