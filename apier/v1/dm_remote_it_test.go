@@ -74,6 +74,8 @@ var sTestsInternalRemoteIT = []func(t *testing.T){
 	testInternalRemoteITGetReverseDestination,
 	testInternalReplicationSetThreshold,
 	testInternalMatchThreshold,
+	testInternalAccountBalanceOperations,
+	testInternalSetAccount,
 	testInternalRemoteITKillEngine,
 }
 
@@ -655,6 +657,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 	expectedIDX = []string{
 		"*string:~Account:1001:THD_ACNT_1001",
 		"*string:~Account:1001:THD_Replication",
+		"*string:~Account:1002:THD_ACNT_1002",
 		"*string:~CustomField:CustomValue:THD_Replication",
 	}
 	// verify index on internal
@@ -758,6 +761,158 @@ func testInternalMatchThreshold(t *testing.T) {
 		t.Error(err)
 	}
 
+}
+
+func testInternalAccountBalanceOperations(t *testing.T) {
+	var reply string
+	attrs := &utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "testAccount1",
+		BalanceID:   utils.StringPointer("testAccSetBalance"),
+		BalanceType: utils.MONETARY,
+		Value:       utils.Float64Pointer(17.4),
+	}
+	if err := internalRPC.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
+		t.Error(err)
+	}
+
+	var acnt *engine.Account
+	attrAcc := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "testAccount1",
+	}
+	// verify account on engineOne
+	if err := engineOneRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+		t.Error(err)
+	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
+		t.Errorf("Expecting: %+v, received: %+v",
+			1, len(acnt.BalanceMap[utils.MONETARY]))
+	} else if val := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); val != 17.4 {
+		t.Errorf("Expecting: %+v, received: %+v",
+			17.4, val)
+	}
+
+	// verify account on engineTwo
+	if err := engineTwoRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+		t.Error(err)
+	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
+		t.Errorf("Expecting: %+v, received: %+v",
+			1, len(acnt.BalanceMap[utils.MONETARY]))
+	} else if val := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); val != 17.4 {
+		t.Errorf("Expecting: %+v, received: %+v",
+			17.4, val)
+	}
+
+	// debit balance on internal and the account should be replicated to other engines
+	if err := internalRPC.Call(utils.ApierV1DebitBalance, &AttrAddBalance{
+		Tenant:      "cgrates.org",
+		Account:     "testAccount1",
+		BalanceType: utils.MONETARY,
+		Value:       3.62,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+
+	// verify debited account on engineOne
+	if err := engineOneRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+		t.Error(err)
+	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
+		t.Errorf("Expecting: %+v, received: %+v",
+			1, len(acnt.BalanceMap[utils.MONETARY]))
+	} else if val := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); val != 13.78 {
+		t.Errorf("Expecting: %+v, received: %+v",
+			13.78, val)
+	}
+
+	// verify debited account on engineTwo
+	if err := engineTwoRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+		t.Error(err)
+	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
+		t.Errorf("Expecting: %+v, received: %+v",
+			1, len(acnt.BalanceMap[utils.MONETARY]))
+	} else if val := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); val != 13.78 {
+		t.Errorf("Expecting: %+v, received: %+v",
+			13.78, val)
+	}
+
+	addBal := &AttrAddBalance{
+		Tenant:      "cgrates.org",
+		Account:     "testAccount1",
+		BalanceType: utils.MONETARY,
+		Value:       12.765,
+	}
+	// add balance for the account on internal and this should be replicated to other engines
+	if err := internalRPC.Call(utils.ApierV1AddBalance, addBal, &reply); err != nil {
+		t.Error(err)
+	}
+
+	// verify account on engineOne
+	if err := engineOneRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+		t.Error(err)
+	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
+		t.Errorf("Expecting: %+v, received: %+v",
+			1, len(acnt.BalanceMap[utils.MONETARY]))
+	} else if val := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); val != 26.545 {
+		t.Errorf("Expecting: %+v, received: %+v",
+			26.545, val)
+	}
+
+	// verify account on engineTwo
+	if err := engineTwoRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+		t.Error(err)
+	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
+		t.Errorf("Expecting: %+v, received: %+v",
+			1, len(acnt.BalanceMap[utils.MONETARY]))
+	} else if val := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); val != 26.545 {
+		t.Errorf("Expecting: %+v, received: %+v",
+			26.545, val)
+	}
+
+}
+
+func testInternalSetAccount(t *testing.T) {
+	var reply string
+
+	if err := internalRPC.Call(utils.ApierV1SetAccount,
+		utils.AttrSetAccount{
+			Tenant:          "cgrates.org",
+			Account:         "testSetAccount",
+			ActionPlanId:    "AP_PACKAGE_10",
+			ReloadScheduler: true,
+		}, &reply); err != nil {
+		t.Error(err)
+	}
+	// give some time to scheduler to execute the action
+	time.Sleep(50 * time.Millisecond)
+
+	var acnt *engine.Account
+	attrAcc := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "testSetAccount",
+	}
+	// verify account on engineOne
+	if err := engineOneRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+		t.Error(err)
+	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
+		t.Errorf("Expecting: %+v, received: %+v",
+			1, len(acnt.BalanceMap[utils.MONETARY]))
+	} else if val := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); val != 10 {
+		t.Errorf("Expecting: %+v, received: %+v",
+			10, val)
+	}
+
+	// verify account on engineTwo
+	if err := engineTwoRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+		t.Error(err)
+	} else if len(acnt.BalanceMap[utils.MONETARY]) != 1 {
+		t.Errorf("Expecting: %+v, received: %+v",
+			1, len(acnt.BalanceMap[utils.MONETARY]))
+	} else if val := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); val != 10 {
+		t.Errorf("Expecting: %+v, received: %+v",
+			10, val)
+	}
 }
 
 func testInternalRemoteITKillEngine(t *testing.T) {
