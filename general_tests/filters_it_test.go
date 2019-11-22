@@ -261,7 +261,7 @@ func testV1FltrPupulateThreshold(t *testing.T) {
 	attrsAA := &utils.AttrSetActions{ActionsId: "LOG", Actions: []*utils.TPAction{
 		{Identifier: utils.LOG},
 	}}
-	if err := fltrRpc.Call("ApierV2.SetActions", attrsAA, &result); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := fltrRpc.Call(utils.ApierV2SetActions, attrsAA, &result); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
 	} else if result != utils.OK {
 		t.Errorf("Calling ApierV2.SetActions received: %s", result)
@@ -548,7 +548,7 @@ func testV1FltrAccounts(t *testing.T) {
 	attrsAA := &utils.AttrSetActions{ActionsId: "LOG", Actions: []*utils.TPAction{
 		{Identifier: utils.LOG},
 	}}
-	if err := fltrRpc.Call("ApierV2.SetActions", attrsAA, &result); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := fltrRpc.Call(utils.ApierV2SetActions, attrsAA, &result); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
 	} else if result != utils.OK {
 		t.Errorf("Calling ApierV2.SetActions received: %s", result)

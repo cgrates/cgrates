@@ -129,7 +129,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 		},
 	}
 	var result string
-	if err := attrSRPC.Call("ApierV2.SetAttributeProfile", extAlsPrf, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV2SetAttributeProfile, extAlsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -191,7 +191,7 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 		},
 	}
 	var result string
-	if err := attrSRPC.Call("ApierV2.SetAttributeProfile", extAlsPrf, &result); err != nil {
+	if err := attrSRPC.Call(utils.ApierV2SetAttributeProfile, extAlsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

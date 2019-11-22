@@ -21,12 +21,13 @@ package console
 import (
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
 	c := &CmdGetTriggers{
 		name:      "triggers",
-		rpcMethod: "ApierV1.GetActionTriggers",
+		rpcMethod: utils.ApierV1GetActionTriggers,
 		rpcParams: &v1.AttrGetActionTriggers{},
 	}
 	commands[c.Name()] = c

@@ -20,12 +20,13 @@ package console
 
 import (
 	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
 	c := &CmdRemoveActionPlan{
 		name:      "actionplan_remove",
-		rpcMethod: "ApierV1.RemoveActionPlan",
+		rpcMethod: utils.ApierV1RemoveActionPlan,
 		rpcParams: &v1.AttrGetActionPlan{},
 	}
 	commands[c.Name()] = c

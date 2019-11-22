@@ -333,7 +333,7 @@ func testA1itConcurrentAPs(t *testing.T) {
 				ActionPlanIDs: &[]string{"PACKAGE_1"},
 			}
 			var reply string
-			if err := a1rpc.Call("ApierV2.SetAccount", attrSetAcnt, &reply); err != nil {
+			if err := a1rpc.Call(utils.ApierV2SetAccount, attrSetAcnt, &reply); err != nil {
 				t.Error(err)
 			}
 			wg.Done()
@@ -362,7 +362,7 @@ func testA1itConcurrentAPs(t *testing.T) {
 		}(acnt)
 		go func(acnt string) {
 			var reply string
-			if err := a1rpc.Call("ApierV1.RemoveActionTiming",
+			if err := a1rpc.Call(utils.ApierV1RemoveActionTiming,
 				v1.AttrRemoveActionTiming{Tenant: "cgrates.org", Account: acnt, ActionPlanId: "PACKAGE_1"}, &reply); err != nil {
 				t.Error(err)
 			}
@@ -375,7 +375,7 @@ func testA1itConcurrentAPs(t *testing.T) {
 				ActionPlanIDs: &[]string{"PACKAGE_2"},
 			}
 			var reply string
-			if err := a1rpc.Call("ApierV2.SetAccount", attrSetAcnt, &reply); err != nil {
+			if err := a1rpc.Call(utils.ApierV2SetAccount, attrSetAcnt, &reply); err != nil {
 				t.Error(err)
 			}
 			wg.Done()

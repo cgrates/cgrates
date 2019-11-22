@@ -88,13 +88,13 @@ func TestActionsitSetCdrlogDebit(t *testing.T) {
 		{Identifier: utils.DEBIT, BalanceType: utils.MONETARY, Units: "5", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
 		{Identifier: utils.CDRLOG},
 	}}
-	if err := actsLclRpc.Call("ApierV2.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsLclRpc.Call(utils.ApierV2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: attrsAA.ActionsId}
-	if err := actsLclRpc.Call("ApierV1.ExecuteAction", attrsEA, &reply); err != nil {
+	if err := actsLclRpc.Call(utils.ApierV1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
@@ -131,13 +131,13 @@ func TestActionsitSetCdrlogTopup(t *testing.T) {
 		{Identifier: utils.TOPUP, BalanceType: utils.MONETARY, Units: "5", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
 		{Identifier: utils.CDRLOG},
 	}}
-	if err := actsLclRpc.Call("ApierV2.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsLclRpc.Call(utils.ApierV2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: attrsAA.ActionsId}
-	if err := actsLclRpc.Call("ApierV1.ExecuteAction", attrsEA, &reply); err != nil {
+	if err := actsLclRpc.Call(utils.ApierV1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
@@ -170,13 +170,13 @@ func TestActionsitCdrlogEmpty(t *testing.T) {
 			Units: "5", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
 		{Identifier: utils.CDRLOG},
 	}}
-	if err := actsLclRpc.Call("ApierV2.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsLclRpc.Call(utils.ApierV2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: attrsAA.ActionsId}
-	if err := actsLclRpc.Call("ApierV1.ExecuteAction", attrsEA, &reply); err != nil {
+	if err := actsLclRpc.Call(utils.ApierV1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
@@ -209,13 +209,13 @@ func TestActionsitCdrlogWithParams(t *testing.T) {
 				DestinationIds: "RET", Units: "25", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
 		},
 	}
-	if err := actsLclRpc.Call("ApierV2.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsLclRpc.Call(utils.ApierV2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: attrsAA.ActionsId}
-	if err := actsLclRpc.Call("ApierV1.ExecuteAction", attrsEA, &reply); err != nil {
+	if err := actsLclRpc.Call(utils.ApierV1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
@@ -250,7 +250,7 @@ func TestActionsitThresholdCDrLog(t *testing.T) {
 		{Identifier: utils.TOPUP, BalanceType: utils.MONETARY, Units: "5", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
 		{Identifier: utils.CDRLOG},
 	}}
-	if err := actsLclRpc.Call("ApierV2.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsLclRpc.Call(utils.ApierV2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
@@ -378,7 +378,7 @@ func TestActionsitCDRAccount(t *testing.T) {
 			{Identifier: utils.MetaCDRAccount, ExpiryTime: utils.UNLIMITED, Weight: 20.0},
 		},
 	}
-	if err := actsLclRpc.Call("ApierV2.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsLclRpc.Call(utils.ApierV2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
@@ -437,7 +437,7 @@ func TestActionsitCDRAccount(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", Account: acnt, ActionsId: attrsAA.ActionsId}
-	if err := actsLclRpc.Call("ApierV1.ExecuteAction", attrsEA, &reply); err != nil {
+	if err := actsLclRpc.Call(utils.ApierV1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
@@ -459,7 +459,7 @@ func TestActionsitThresholdPostEvent(t *testing.T) {
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACT_TH_POSTEVENT", Actions: []*utils.TPAction{
 		&utils.TPAction{Identifier: utils.MetaPostEvent, ExtraParameters: "http://127.0.0.1:12080/invalid_json"},
 	}}
-	if err := actsLclRpc.Call("ApierV2.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsLclRpc.Call(utils.ApierV2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV2.SetActions received: %s", reply)

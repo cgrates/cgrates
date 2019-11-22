@@ -147,7 +147,7 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACT_LOG", Actions: []*utils.TPAction{
 		{Identifier: utils.LOG},
 	}}
-	if err := cdrsOfflineRpc.Call("ApierV2.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := cdrsOfflineRpc.Call(utils.ApierV2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
@@ -223,7 +223,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 		&utils.TPAction{Identifier: utils.TOPUP, BalanceType: utils.MONETARY, BalanceId: "NewBalance", Units: "10",
 			ExpiryTime: utils.UNLIMITED, BalanceWeight: "10", Weight: 20.0},
 	}}
-	if err := cdrsOfflineRpc.Call("ApierV2.SetActions", acc, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := cdrsOfflineRpc.Call(utils.ApierV2SetActions, acc, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
@@ -231,13 +231,13 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 
 	atm1 := &v1.AttrActionPlan{ActionsId: "ACT_TOPUP_TEST2", Time: "*asap", Weight: 20.0}
 	atms1 := &v1.AttrSetActionPlan{Id: "AP_TEST2", ActionPlan: []*v1.AttrActionPlan{atm1}}
-	if err := cdrsOfflineRpc.Call("ApierV1.SetActionPlan", atms1, &reply); err != nil {
+	if err := cdrsOfflineRpc.Call(utils.ApierV1SetActionPlan, atms1, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetActionPlan: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.SetActionPlan received: %s", reply)
 	}
 
-	if err := cdrsOfflineRpc.Call("ApierV2.SetAccount",
+	if err := cdrsOfflineRpc.Call(utils.ApierV2SetAccount,
 		&AttrSetAccount{Tenant: "cgrates.org", Account: "test2",
 			ActionPlanIDs: &[]string{"AP_TEST2"}, ReloadScheduler: true},
 		&reply); err != nil {
@@ -263,7 +263,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 	attrsA := &utils.AttrSetActions{ActionsId: "ACT_LOG", Actions: []*utils.TPAction{
 		{Identifier: utils.LOG},
 	}}
-	if err := cdrsOfflineRpc.Call("ApierV2.SetActions", attrsA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := cdrsOfflineRpc.Call(utils.ApierV2SetActions, attrsA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV2.SetActions received: %s", reply)

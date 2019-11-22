@@ -108,7 +108,7 @@ package general_tests
 // 		ThresholdProfiles: 7, Filters: 16, SupplierProfiles: 3, AttributeProfiles: 1,
 // 		CdrStats: 0, Users: 0} // CdrStats and Users are 0 because deprecated. To be removed
 // 	var args utils.AttrCacheStats
-// 	if err := tutLocalRpc.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
+// 	if err := tutLocalRpc.Call(utils.ApierV1GetCacheStats, args, &rcvStats); err != nil {
 // 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 // 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 // 		t.Errorf("Calling ApierV1.GetCacheStats expected: %+v, received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
@@ -120,7 +120,7 @@ package general_tests
 // 	var rcvKeys utils.ArgsCache
 // 	argsAPI := utils.ArgsCacheKeys{ArgsCache: utils.ArgsCache{
 // 		DestinationIDs: &[]string{}, RatingPlanIDs: &[]string{"RP_RETAIL1", "RP_GENERIC", "NONEXISTENT"}}}
-// 	if err := tutLocalRpc.Call("ApierV1.GetCacheKeys", argsAPI, &rcvKeys); err != nil {
+// 	if err := tutLocalRpc.Call(utils.ApierV1GetCacheKeys, argsAPI, &rcvKeys); err != nil {
 // 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 // 	} else {
 // 		if rcvKeys.DestinationIDs == nil {
@@ -145,7 +145,7 @@ package general_tests
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	if err := tutLocalRpc.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
+// 	if err := tutLocalRpc.Call(utils.ApierV1GetCacheStats, args, &rcvStats); err != nil {
 // 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 // 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 // 		t.Errorf("Calling ApierV1.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
@@ -1186,7 +1186,7 @@ package general_tests
 // func TestTutITSetAccount(t *testing.T) {
 // 	var reply string
 // 	attrs := &v2.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", ActionPlanIDs: &[]string{"PACKAGE_10"}, ActionTriggerIDs: &[]string{"STANDARD_TRIGGERS"}, ReloadScheduler: true}
-// 	if err := tutLocalRpc.Call("ApierV2.SetAccount", attrs, &reply); err != nil {
+// 	if err := tutLocalRpc.Call(utils.ApierV2SetAccount, attrs, &reply); err != nil {
 // 		t.Error("Got error on ApierV2.SetAccount: ", err.Error())
 // 	} else if reply != "OK" {
 // 		t.Errorf("Calling ApierV2.SetAccount received: %s", reply)
@@ -1225,7 +1225,7 @@ package general_tests
 // 	}
 // 	attrs = &v2.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", ActionPlanIDs: &[]string{"PACKAGE_10"}, ActionTriggerIDs: &[]string{"STANDARD_TRIGGERS"}, AllowNegative: utils.BoolPointer(true), Disabled: utils.BoolPointer(true), ReloadScheduler: true}
 
-// 	if err := tutLocalRpc.Call("ApierV2.SetAccount", attrs, &reply); err != nil {
+// 	if err := tutLocalRpc.Call(utils.ApierV2SetAccount, attrs, &reply); err != nil {
 // 		t.Error("Got error on ApierV2.SetAccount: ", err.Error())
 // 	} else if reply != "OK" {
 // 		t.Errorf("Calling ApierV2.SetAccount received: %s", reply)
@@ -1255,7 +1255,7 @@ package general_tests
 // 	}
 // 	attrs = &v2.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", ActionPlanIDs: &[]string{"PACKAGE_1001"}, ActionTriggerIDs: &[]string{"CDRST1_WARN"}, AllowNegative: utils.BoolPointer(true), Disabled: utils.BoolPointer(true), ReloadScheduler: true}
 
-// 	if err := tutLocalRpc.Call("ApierV2.SetAccount", attrs, &reply); err != nil {
+// 	if err := tutLocalRpc.Call(utils.ApierV2SetAccount, attrs, &reply); err != nil {
 // 		t.Error("Got error on ApierV2.SetAccount: ", err.Error())
 // 	} else if reply != "OK" {
 // 		t.Errorf("Calling ApierV2.SetAccount received: %s", reply)

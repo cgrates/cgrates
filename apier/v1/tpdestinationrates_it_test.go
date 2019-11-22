@@ -145,7 +145,7 @@ func testTPDstRateSetTPDstRate(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tpDstRateRPC.Call("ApierV1.SetTPDestinationRate", tpDstRate, &result); err != nil {
+	if err := tpDstRateRPC.Call(utils.ApierV1SetTPDestinationRate, tpDstRate, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -165,7 +165,7 @@ func testTPDstRateGetTPDstRateAfterSet(t *testing.T) {
 func testTPDstRateGetTPDstRateIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"DR_FREESWITCH_USERS"}
-	if err := tpDstRateRPC.Call("ApierV1.GetTPDestinationRateIds",
+	if err := tpDstRateRPC.Call(utils.ApierV1GetTPDestinationRateIds,
 		&AttrTPDestinationRateIds{TPid: "TP1"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
@@ -190,7 +190,7 @@ func testTPDstRateGetTPDstRateAfterUpdate(t *testing.T) {
 
 func testTPDstRateRemTPDstRate(t *testing.T) {
 	var resp string
-	if err := tpDstRateRPC.Call("ApierV1.RemoveTPDestinationRate",
+	if err := tpDstRateRPC.Call(utils.ApierV1RemoveTPDestinationRate,
 		&AttrGetTPDestinationRate{TPid: "TP1", ID: "DR_FREESWITCH_USERS"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

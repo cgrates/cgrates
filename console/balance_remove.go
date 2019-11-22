@@ -19,14 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/apier/v1"
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
 	c := &CmdRemoveBalance{
 		name:      "balance_remove",
-		rpcMethod: "ApierV1.RemoveBalances",
+		rpcMethod: utils.ApierV1RemoveBalances,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

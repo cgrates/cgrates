@@ -18,12 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/apier/v1"
+import (
+	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/utils"
+)
 
 func init() {
 	c := &CmdSetTriggers{
 		name:      "triggers_set",
-		rpcMethod: "ApierV1.SetActionTrigger",
+		rpcMethod: utils.ApierV1SetActionTrigger,
 		rpcParams: &v1.AttrSetActionTrigger{},
 	}
 	commands[c.Name()] = c

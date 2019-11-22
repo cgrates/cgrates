@@ -173,13 +173,13 @@ func testActionsExecuteRemoveSMCos1(t *testing.T) {
 			},
 		},
 	}
-	if err := actsRPC.Call("ApierV2.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsRPC.Call(utils.ApierV2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", ActionsId: attrsAA.ActionsId}
-	if err := actsRPC.Call("ApierV1.ExecuteAction", attrsEA, &reply); err != nil {
+	if err := actsRPC.Call(utils.ApierV1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
@@ -206,13 +206,13 @@ func testActionsExecuteRemoveSMCos2(t *testing.T) {
 			},
 		},
 	}
-	if err := actsRPC.Call("ApierV2.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsRPC.Call(utils.ApierV2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", ActionsId: attrsAA.ActionsId}
-	if err := actsRPC.Call("ApierV1.ExecuteAction", attrsEA, &reply); err != nil {
+	if err := actsRPC.Call(utils.ApierV1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
@@ -235,7 +235,7 @@ func testActionsUpdateBalance(t *testing.T) {
 	topupAction := &utils.AttrSetActions{ActionsId: "ACT_TOPUP_RST", Actions: []*utils.TPAction{
 		{Identifier: utils.TOPUP, BalanceId: "test", BalanceType: utils.MONETARY, Units: "5", ExpiryTime: utils.UNLIMITED, Weight: 20.0},
 	}}
-	if err := actsRPC.Call("ApierV2.SetActions", topupAction, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsRPC.Call(utils.ApierV2SetActions, topupAction, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
@@ -243,20 +243,20 @@ func testActionsUpdateBalance(t *testing.T) {
 	changeBlockerAction := &utils.AttrSetActions{ActionsId: "ACT_BAL_UPDT", Actions: []*utils.TPAction{
 		{Identifier: utils.SET_BALANCE, BalanceId: "test", BalanceBlocker: "true"},
 	}}
-	if err := actsRPC.Call("ApierV2.SetActions", changeBlockerAction, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := actsRPC.Call(utils.ApierV2SetActions, changeBlockerAction, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
 	}
 	attrsEA := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: topupAction.ActionsId}
-	if err := actsRPC.Call("ApierV1.ExecuteAction", attrsEA, &reply); err != nil {
+	if err := actsRPC.Call(utils.ApierV1ExecuteAction, attrsEA, &reply); err != nil {
 		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
 	}
 	time.Sleep(1)
 	attrsEA2 := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: changeBlockerAction.ActionsId}
-	if err := actsRPC.Call("ApierV1.ExecuteAction", attrsEA2, &reply); err != nil {
+	if err := actsRPC.Call(utils.ApierV1ExecuteAction, attrsEA2, &reply); err != nil {
 		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)

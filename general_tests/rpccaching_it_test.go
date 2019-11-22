@@ -135,7 +135,7 @@ func testRPCMethodsAddData(t *testing.T) {
 		{Identifier: utils.DISABLE_ACCOUNT},
 		{Identifier: utils.LOG},
 	}}
-	if err := rpcRpc.Call("ApierV2.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := rpcRpc.Call(utils.ApierV2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
@@ -145,7 +145,7 @@ func testRPCMethodsAddData(t *testing.T) {
 		{Identifier: utils.ENABLE_ACCOUNT},
 		{Identifier: utils.LOG},
 	}}
-	if err := rpcRpc.Call("ApierV2.SetActions", attrsAA2, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := rpcRpc.Call(utils.ApierV2SetActions, attrsAA2, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV2.SetActions received: %s", reply)

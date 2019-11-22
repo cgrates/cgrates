@@ -20,12 +20,13 @@ package console
 
 import (
 	"github.com/cgrates/cgrates/scheduler"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
 	c := &CmdGetScheduledActions{
 		name:      "scheduler_queue",
-		rpcMethod: "ApierV1.GetScheduledActions",
+		rpcMethod: utils.ApierV1GetScheduledActions,
 		rpcParams: &scheduler.ArgsGetScheduledActions{},
 	}
 	commands[c.Name()] = c

@@ -59,7 +59,7 @@ func main() {
 	}
 	var reply string
 	for _, cdr := range cdrs {
-		if err := cdrsMasterRpc.Call("CdrsV2.ProcessCdr", cdr, &reply); err != nil {
+		if err := cdrsMasterRpc.Call(utils.CdrsV2ProcessCdr, cdr, &reply); err != nil {
 			log.Fatal("Unexpected error: ", err.Error())
 		} else if reply != utils.OK {
 			log.Fatal("Unexpected reply received: ", reply)

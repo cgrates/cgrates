@@ -33,7 +33,7 @@ func (dS *DispatcherService) DispatcherServicePing(ev *utils.CGREvent, reply *st
 func TestDispatcherCall1(t *testing.T) {
 	dS := &DispatcherService{}
 	var reply string
-	if err := dS.Call("DispatcherService.Ping", &utils.CGREvent{}, &reply); err != nil {
+	if err := dS.Call(utils.DispatcherServicePing, &utils.CGREvent{}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Expected: %s , received: %s", utils.Pong, reply)

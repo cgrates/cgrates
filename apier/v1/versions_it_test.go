@@ -146,7 +146,7 @@ func testVrsSetDataDBVrs(t *testing.T) {
 			"Attributes": 3,
 		},
 	}
-	if err := vrsRPC.Call("ApierV1.SetDataDBVersions", args, &reply); err != nil {
+	if err := vrsRPC.Call(utils.ApierV1SetDataDBVersions, args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting: %+v, received: %+v", utils.OK, reply)
@@ -167,7 +167,7 @@ func testVrsSetDataDBVrs(t *testing.T) {
 	args = SetVersionsArg{
 		Versions: nil,
 	}
-	if err := vrsRPC.Call("ApierV1.SetDataDBVersions", args, &reply); err != nil {
+	if err := vrsRPC.Call(utils.ApierV1SetDataDBVersions, args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting: %+v, received: %+v", utils.OK, reply)
@@ -181,7 +181,7 @@ func testVrsSetStorDBVrs(t *testing.T) {
 			"TpResources": 2,
 		},
 	}
-	if err := vrsRPC.Call("ApierV1.SetStorDBVersions", args, &reply); err != nil {
+	if err := vrsRPC.Call(utils.ApierV1SetStorDBVersions, args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting: %+v, received: %+v", utils.OK, reply)
@@ -202,7 +202,7 @@ func testVrsSetStorDBVrs(t *testing.T) {
 	args = SetVersionsArg{
 		Versions: nil,
 	}
-	if err := vrsRPC.Call("ApierV1.SetStorDBVersions", args, &reply); err != nil {
+	if err := vrsRPC.Call(utils.ApierV1SetStorDBVersions, args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expecting: %+v, received: %+v", utils.OK, reply)

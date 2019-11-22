@@ -25,7 +25,7 @@ import (
 func init() {
 	c := &CmdExecuteAction{
 		name:      "action_execute",
-		rpcMethod: "ApierV1.ExecuteAction",
+		rpcMethod: utils.ApierV1ExecuteAction,
 		rpcParams: &utils.AttrExecuteAction{},
 	}
 	commands[c.Name()] = c

@@ -20,12 +20,13 @@ package console
 
 import (
 	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
 	c := &CmdLoadTimes{
 		name:      "get_load_times",
-		rpcMethod: "ApierV1.GetLoadTimes",
+		rpcMethod: utils.ApierV1GetLoadTimes,
 		rpcParams: &v1.LoadTimeArgs{},
 	}
 	commands[c.Name()] = c

@@ -143,7 +143,7 @@ func testV1AccGetAccountAfterLoad(t *testing.T) {
 
 func testV1AccRemAccount(t *testing.T) {
 	var reply string
-	if err := accRpc.Call("ApierV1.RemoveAccount",
+	if err := accRpc.Call(utils.ApierV1RemoveAccount,
 		&utils.AttrRemoveAccount{Tenant: "cgrates.org", Account: "1001"},
 		&reply); err != nil {
 		t.Error(err)
@@ -163,7 +163,7 @@ func testV1AccGetAccountAfterDelete(t *testing.T) {
 
 func testV1AccSetAccount(t *testing.T) {
 	var reply string
-	if err := accRpc.Call("ApierV2.SetAccount",
+	if err := accRpc.Call(utils.ApierV2SetAccount,
 		&utils.AttrSetAccount{Tenant: "cgrates.org", Account: "testacc"}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -181,7 +181,7 @@ func testV1AccGetAccountAfterSet(t *testing.T) {
 
 func testV1AccRemAccountSet(t *testing.T) {
 	var reply string
-	if err := accRpc.Call("ApierV1.RemoveAccount",
+	if err := accRpc.Call(utils.ApierV1RemoveAccount,
 		&utils.AttrRemoveAccount{Tenant: "cgrates.org", Account: "testacc"},
 		&reply); err != nil {
 		t.Error(err)
@@ -203,7 +203,7 @@ func testV1AccGetAccountSetAfterDelete(t *testing.T) {
 Need to investigate for redis why didn't return not found
 func testV1AccRemAccountAfterDelete(t *testing.T) {
 	var reply string
-	if err := accRpc.Call("ApierV1.RemoveAccount",
+	if err := accRpc.Call(utils.ApierV1RemoveAccount,
 		&utils.AttrRemoveAccount{Tenant: "cgrates.org", Account: "testacc"},
 		&reply); err == nil || err.Error() != utils.NewErrServerError(utils.ErrNotFound).Error() {
 		t.Error(err)
@@ -240,7 +240,7 @@ func testV1AccSendToThreshold(t *testing.T) {
 		{Identifier: utils.DISABLE_ACCOUNT},
 		{Identifier: utils.LOG},
 	}}
-	if err := accRpc.Call("ApierV2.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := accRpc.Call(utils.ApierV2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
