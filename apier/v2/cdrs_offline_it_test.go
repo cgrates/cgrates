@@ -180,7 +180,7 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 	if err := cdrsOfflineRpc.Call("ApierV1.GetThresholdProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &thReply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(tPrfl, thReply) {
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, thReply) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl, thReply)
 	}
 
@@ -300,7 +300,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 	if err := cdrsOfflineRpc.Call("ApierV1.GetThresholdProfile",
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test2"}, &thReply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(tPrfl, thReply) {
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, thReply) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl, thReply)
 	}
 
