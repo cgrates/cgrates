@@ -128,7 +128,7 @@ func testV1SplSRpcConn(t *testing.T) {
 func testV1SplSFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-	if err := splSv1Rpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+	if err := splSv1Rpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -787,7 +787,7 @@ func testV1SplSSetSupplierProfiles(t *testing.T) {
 	}
 
 	var result string
-	if err := splSv1Rpc.Call("ApierV1.SetSupplierProfile", splPrf, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.ApierV1SetSupplierProfile, splPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -862,7 +862,7 @@ func testV1SplSUpdateSupplierProfiles(t *testing.T) {
 		},
 	}
 	var result string
-	if err := splSv1Rpc.Call("ApierV1.SetSupplierProfile", splPrf, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.ApierV1SetSupplierProfile, splPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -878,7 +878,7 @@ func testV1SplSUpdateSupplierProfiles(t *testing.T) {
 
 func testV1SplSRemSupplierProfiles(t *testing.T) {
 	var resp string
-	if err := splSv1Rpc.Call("ApierV1.RemoveSupplierProfile",
+	if err := splSv1Rpc.Call(utils.ApierV1RemoveSupplierProfile,
 		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -890,7 +890,7 @@ func testV1SplSRemSupplierProfiles(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	if err := splSv1Rpc.Call("ApierV1.RemoveSupplierProfile",
+	if err := splSv1Rpc.Call(utils.ApierV1RemoveSupplierProfile,
 		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &resp); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
 	}
@@ -1005,7 +1005,7 @@ func testV1SplsOneSupplierWithoutDestination(t *testing.T) {
 	}
 
 	var result string
-	if err := splSv1Rpc.Call("ApierV1.SetSupplierProfile", splPrf, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.ApierV1SetSupplierProfile, splPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

@@ -131,7 +131,7 @@ func testV2CDRsRpcConn(t *testing.T) {
 
 func testV2CDRsLoadTariffPlanFromFolder(t *testing.T) {
 	var loadInst utils.LoadInstance
-	if err := cdrsRpc.Call("ApierV2.LoadTariffPlanFromFolder",
+	if err := cdrsRpc.Call(utils.ApierV2LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
 			*dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
 		t.Error(err)
@@ -461,7 +461,7 @@ func testV2CDRsGetCdrs5(t *testing.T) {
 
 func testV2CDRsSetStats(t *testing.T) {
 	var reply *engine.StatQueueProfile
-	if err := cdrsRpc.Call("ApierV1.GetStatQueueProfile",
+	if err := cdrsRpc.Call(utils.ApierV1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "STS_PoccessCDR"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -490,7 +490,7 @@ func testV2CDRsSetStats(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := cdrsRpc.Call("ApierV1.GetStatQueueProfile",
+	if err := cdrsRpc.Call(utils.ApierV1GetStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "STS_PoccessCDR"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, reply) {
@@ -520,7 +520,7 @@ func testV2CDRsSetThresholdProfile(t *testing.T) {
 	// Set Threshold
 	var reply *engine.ThresholdProfile
 	var result string
-	if err := cdrsRpc.Call("ApierV1.GetThresholdProfile",
+	if err := cdrsRpc.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_PoccessCDR"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -542,7 +542,7 @@ func testV2CDRsSetThresholdProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := cdrsRpc.Call("ApierV1.GetThresholdProfile",
+	if err := cdrsRpc.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_PoccessCDR"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {

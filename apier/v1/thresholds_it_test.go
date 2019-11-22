@@ -258,7 +258,7 @@ func testV1TSRpcConn(t *testing.T) {
 func testV1TSFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
-	if err := tSv1Rpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+	if err := tSv1Rpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
@@ -393,7 +393,7 @@ func testv1TSGetThresholdProfileIDs(t *testing.T) {
 func testV1TSSetThresholdProfile(t *testing.T) {
 	var reply *engine.ThresholdProfile
 	var result string
-	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
+	if err := tSv1Rpc.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -420,7 +420,7 @@ func testV1TSSetThresholdProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
+	if err := tSv1Rpc.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
@@ -437,7 +437,7 @@ func testV1TSUpdateThresholdProfile(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.ThresholdProfile
-	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
+	if err := tSv1Rpc.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &reply); err != nil {
 		t.Error(err)
 	} else {
@@ -451,19 +451,19 @@ func testV1TSUpdateThresholdProfile(t *testing.T) {
 
 func testV1TSRemoveThresholdProfile(t *testing.T) {
 	var resp string
-	if err := tSv1Rpc.Call("ApierV1.RemoveThresholdProfile",
+	if err := tSv1Rpc.Call(utils.ApierV1RemoveThresholdProfile,
 		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "THD_Test"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 	var sqp *engine.ThresholdProfile
-	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
+	if err := tSv1Rpc.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &sqp); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Recived %s and the error:%+v", utils.ToJSON(sqp), err)
 	}
-	if err := tSv1Rpc.Call("ApierV1.RemoveThresholdProfile",
+	if err := tSv1Rpc.Call(utils.ApierV1RemoveThresholdProfile,
 		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "THD_Test"}, &resp); err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error: %v recived: %v", utils.ErrNotFound, err)
 	}
@@ -472,7 +472,7 @@ func testV1TSRemoveThresholdProfile(t *testing.T) {
 func testV1TSMaxHits(t *testing.T) {
 	var reply string
 	// check if exist
-	if err := tSv1Rpc.Call("ApierV1.GetThresholdProfile",
+	if err := tSv1Rpc.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TH3"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

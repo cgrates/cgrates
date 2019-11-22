@@ -305,7 +305,7 @@ func TestRPCITStatusBcastCmd(t *testing.T) {
 	}
 	var loadInst utils.LoadInstance
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
-	if err := rpcRAL1.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
+	if err := rpcRAL1.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	} else if loadInst.RatingLoadID == "" || loadInst.AccountingLoadID == "" {
 		t.Errorf("Empty loadId received, loadInstance: %+v", loadInst)

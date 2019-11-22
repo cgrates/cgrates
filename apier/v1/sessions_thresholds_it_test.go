@@ -126,7 +126,7 @@ func TestSessionSv1ItGetThreshold(t *testing.T) {
 		Async:     false,
 	}
 	var reply *engine.ThresholdProfile
-	if err := sSApierRpc2.Call("ApierV1.GetThresholdProfile",
+	if err := sSApierRpc2.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org",
 			ID: "THD_ACNT_1001"}, &reply); err != nil {
 		t.Error(err)
@@ -473,7 +473,7 @@ func TestSessionSv1ItTerminateNotFoundThreshold(t *testing.T) {
 
 func TestSessionSv1ItAuthNotFoundThresholdAndStats(t *testing.T) {
 	var resp string
-	if err := sSApierRpc2.Call("ApierV1.RemoveStatQueueProfile",
+	if err := sSApierRpc2.Call(utils.ApierV1RemoveStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stat_2"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

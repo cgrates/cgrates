@@ -112,7 +112,7 @@ func testTpRpcConn(t *testing.T) {
 // Load the tariff plan, creating accounts and their balances
 func testTpLoadTariffPlanFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
-	if err := tpRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &tpLoadInst); err != nil {
+	if err := tpRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &tpLoadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups

@@ -115,7 +115,7 @@ func testFilterRpcConn(t *testing.T) {
 
 func testFilterGetFilterBeforeSet(t *testing.T) {
 	var reply *engine.Filter
-	if err := filterRPC.Call("ApierV1.GetFilter", &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err == nil ||
+	if err := filterRPC.Call(utils.ApierV1GetFilter, &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -141,7 +141,7 @@ func testFilterSetFilter(t *testing.T) {
 	}
 
 	var result string
-	if err := filterRPC.Call("ApierV1.SetFilter", filter, &result); err != nil {
+	if err := filterRPC.Call(utils.ApierV1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -160,7 +160,7 @@ func testFilterGetFilterIDs(t *testing.T) {
 
 func testFilterGetFilterAfterSet(t *testing.T) {
 	var reply *engine.Filter
-	if err := filterRPC.Call("ApierV1.GetFilter", &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err != nil {
+	if err := filterRPC.Call(utils.ApierV1GetFilter, &utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(filter.Filter, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", filter.Filter, reply)
@@ -181,7 +181,7 @@ func testFilterUpdateFilter(t *testing.T) {
 		},
 	}
 	var result string
-	if err := filterRPC.Call("ApierV1.SetFilter", filter, &result); err != nil {
+	if err := filterRPC.Call(utils.ApierV1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -190,7 +190,7 @@ func testFilterUpdateFilter(t *testing.T) {
 
 func testFilterGetFilterAfterUpdate(t *testing.T) {
 	var reply *engine.Filter
-	if err := filterRPC.Call("ApierV1.GetFilter",
+	if err := filterRPC.Call(utils.ApierV1GetFilter,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(filter.Filter, reply) {
@@ -200,7 +200,7 @@ func testFilterGetFilterAfterUpdate(t *testing.T) {
 
 func testFilterRemoveFilter(t *testing.T) {
 	var resp string
-	if err := filterRPC.Call("ApierV1.RemoveFilter",
+	if err := filterRPC.Call(utils.ApierV1RemoveFilter,
 		&utils.TenantIDWithCache{Tenant: "cgrates.org", ID: "Filter1"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -210,7 +210,7 @@ func testFilterRemoveFilter(t *testing.T) {
 
 func testFilterGetFilterAfterRemove(t *testing.T) {
 	var reply *engine.Filter
-	if err := filterRPC.Call("ApierV1.GetFilter",
+	if err := filterRPC.Call(utils.ApierV1GetFilter,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Filter1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

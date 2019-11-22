@@ -118,7 +118,7 @@ func testTutorialRpcConn(t *testing.T) {
 func testTutorialFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := tutorialRpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+	if err := tutorialRpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)

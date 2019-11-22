@@ -129,7 +129,7 @@ func testTPRatesRpcConn(t *testing.T) {
 
 func testTPRatesGetTPRateforeSet(t *testing.T) {
 	var reply *utils.TPRate
-	if err := tpRateRPC.Call("ApierV1.GetTPRate",
+	if err := tpRateRPC.Call(utils.ApierV1GetTPRate,
 		&AttrGetTPRate{TPid: "TPidTpRate", ID: "RT_FS_USERS"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -157,7 +157,7 @@ func testTPRatesSetTPRate(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tpRateRPC.Call("ApierV1.SetTPRate", tpRate, &result); err != nil {
+	if err := tpRateRPC.Call(utils.ApierV1SetTPRate, tpRate, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -166,7 +166,7 @@ func testTPRatesSetTPRate(t *testing.T) {
 
 func testTPRatesGetTPRateAfterSet(t *testing.T) {
 	var reply *utils.TPRate
-	if err := tpRateRPC.Call("ApierV1.GetTPRate", &AttrGetTPRate{TPid: "TPidTpRate", ID: tpRate.ID}, &reply); err != nil {
+	if err := tpRateRPC.Call(utils.ApierV1GetTPRate, &AttrGetTPRate{TPid: "TPidTpRate", ID: tpRate.ID}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpRate, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", tpRate, reply)
@@ -176,7 +176,7 @@ func testTPRatesGetTPRateAfterSet(t *testing.T) {
 func testTPRatesGetTPRateIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"RT_FS_USERS"}
-	if err := tpRateRPC.Call("ApierV1.GetTPRateIds", &AttrGetTPRateIds{TPid: "TPidTpRate"}, &result); err != nil {
+	if err := tpRateRPC.Call(utils.ApierV1GetTPRateIds, &AttrGetTPRateIds{TPid: "TPidTpRate"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedTPID, result)
@@ -208,7 +208,7 @@ func testTPRatesUpdateTPRate(t *testing.T) {
 			GroupIntervalStart: "3s",
 		},
 	}
-	if err := tpRateRPC.Call("ApierV1.SetTPRate", tpRate, &result); err != nil {
+	if err := tpRateRPC.Call(utils.ApierV1SetTPRate, tpRate, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -217,7 +217,7 @@ func testTPRatesUpdateTPRate(t *testing.T) {
 
 func testTPRatesGetTPRateAfterUpdate(t *testing.T) {
 	var reply *utils.TPRate
-	if err := tpRateRPC.Call("ApierV1.GetTPRate",
+	if err := tpRateRPC.Call(utils.ApierV1GetTPRate,
 		&AttrGetTPRate{TPid: "TPidTpRate", ID: tpRate.ID}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tpRate, reply) {
@@ -228,7 +228,7 @@ func testTPRatesGetTPRateAfterUpdate(t *testing.T) {
 
 func testTPRatesRemoveTPRate(t *testing.T) {
 	var resp string
-	if err := tpRateRPC.Call("ApierV1.RemoveTPRate",
+	if err := tpRateRPC.Call(utils.ApierV1RemoveTPRate,
 		&AttrGetTPRate{TPid: "TPidTpRate", ID: "RT_FS_USERS"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
@@ -238,7 +238,7 @@ func testTPRatesRemoveTPRate(t *testing.T) {
 
 func testTPRatesGetTPRateAfterRemove(t *testing.T) {
 	var reply *utils.TPRate
-	if err := tpRateRPC.Call("ApierV1.GetTPRate",
+	if err := tpRateRPC.Call(utils.ApierV1GetTPRate,
 		&AttrGetTPRate{TPid: "TPidTpRate", ID: "RT_FS_USERS"}, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

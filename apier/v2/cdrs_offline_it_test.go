@@ -111,7 +111,7 @@ func testV2cdrsOfflineRpcConn(t *testing.T) {
 
 func testV2CDRsOfflineLoadData(t *testing.T) {
 	var loadInst utils.LoadInstance
-	if err := cdrsOfflineRpc.Call("ApierV2.LoadTariffPlanFromFolder",
+	if err := cdrsOfflineRpc.Call(utils.ApierV2LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
 			*dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
 		t.Error(err)
@@ -153,7 +153,7 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
 	}
 	//make sure that the threshold don't exit
-	if err := cdrsOfflineRpc.Call("ApierV1.GetThresholdProfile",
+	if err := cdrsOfflineRpc.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &thReply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -177,7 +177,7 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := cdrsOfflineRpc.Call("ApierV1.GetThresholdProfile",
+	if err := cdrsOfflineRpc.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &thReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, thReply) {
@@ -269,7 +269,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
 	}
 	//make sure that the threshold don't exit
-	if err := cdrsOfflineRpc.Call("ApierV1.GetThresholdProfile",
+	if err := cdrsOfflineRpc.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test2"}, &thReply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -297,7 +297,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := cdrsOfflineRpc.Call("ApierV1.GetThresholdProfile",
+	if err := cdrsOfflineRpc.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test2"}, &thReply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, thReply) {

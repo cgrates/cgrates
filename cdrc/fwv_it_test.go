@@ -336,7 +336,7 @@ func TestFwvit3AddFilters(t *testing.T) {
 		},
 	}
 	var result string
-	if err := fwvRpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
+	if err := fwvRpc.Call(utils.ApierV1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

@@ -507,7 +507,7 @@ func TestCsvIT5AddFilters(t *testing.T) {
 		},
 	}
 	var result string
-	if err := cdrcRpc.Call("ApierV1.SetFilter", filter, &result); err != nil {
+	if err := cdrcRpc.Call(utils.ApierV1SetFilter, filter, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -523,7 +523,7 @@ func TestCsvIT5AddFilters(t *testing.T) {
 			},
 		},
 	}
-	if err := cdrcRpc.Call("ApierV1.SetFilter", filter2, &result); err != nil {
+	if err := cdrcRpc.Call(utils.ApierV1SetFilter, filter2, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

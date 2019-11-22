@@ -101,7 +101,7 @@ func TestSessionsBiRPCApierRpcConn(t *testing.T) {
 func TestSessionsBiRPCTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	var loadInst utils.LoadInstance
-	if err := sessionsRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
+	if err := sessionsRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups

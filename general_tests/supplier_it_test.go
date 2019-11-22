@@ -113,7 +113,7 @@ func testV1SplSRpcConn(t *testing.T) {
 func testV1SplSFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
-	if err := splSv1Rpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+	if err := splSv1Rpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(100 * time.Millisecond)
@@ -142,7 +142,7 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 		Weight: 10,
 	}
 	var result string
-	if err := splSv1Rpc.Call("ApierV1.SetSupplierProfile", splPrf, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.ApierV1SetSupplierProfile, splPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -171,7 +171,7 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 		ev, &suplsReply); err.Error() != utils.NewErrServerError(utils.NewErrMandatoryIeMissing("RatingPlanIDs")).Error() {
 		t.Errorf("Expected error MANDATORY_IE_MISSING: [RatingPlanIDs] recieved:%v\n", err)
 	}
-	if err := splSv1Rpc.Call("ApierV1.RemoveSupplierProfile", utils.TenantID{
+	if err := splSv1Rpc.Call(utils.ApierV1RemoveSupplierProfile, utils.TenantID{
 		Tenant: splPrf.Tenant,
 		ID:     splPrf.ID,
 	}, &result); err != nil {
@@ -219,7 +219,7 @@ func testV1SplSAddNewSplPrf(t *testing.T) {
 		Weight: 10,
 	}
 	var result string
-	if err := splSv1Rpc.Call("ApierV1.SetSupplierProfile", splPrf, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.ApierV1SetSupplierProfile, splPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -482,7 +482,7 @@ func testV1SplSAddNewSplPrf2(t *testing.T) {
 		Weight: 10,
 	}
 	var result string
-	if err := splSv1Rpc.Call("ApierV1.SetSupplierProfile", splPrf, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.ApierV1SetSupplierProfile, splPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

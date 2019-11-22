@@ -121,7 +121,7 @@ func testV2CDRsRpcConn(t *testing.T) {
 
 func testV2CDRsLoadTariffPlanFromFolder(t *testing.T) {
 	var loadInst utils.LoadInstance
-	if err := cdrsRpc.Call("ApierV2.LoadTariffPlanFromFolder",
+	if err := cdrsRpc.Call(utils.ApierV2LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
 			*dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
 		t.Error(err)
@@ -230,7 +230,7 @@ func testV2CDRsRateCDRs(t *testing.T) {
 			},
 		},
 	}
-	if err := cdrsRpc.Call("ApierV1.GetRatingProfile", attrGetRatingPlan, &rpl); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV1GetRatingProfile, attrGetRatingPlan, &rpl); err != nil {
 		t.Errorf("Got error on ApierV1.GetRatingProfile: %+v", err)
 	} else if !reflect.DeepEqual(expected, rpl) {
 		t.Errorf("Calling ApierV1.GetRatingProfile expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rpl))
@@ -262,7 +262,7 @@ func testV2CDRsRateCDRs(t *testing.T) {
 			},
 		},
 	}
-	if err := cdrsRpc.Call("ApierV1.GetRatingProfile", attrGetRatingPlan, &rpl); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV1GetRatingProfile, attrGetRatingPlan, &rpl); err != nil {
 		t.Errorf("Got error on ApierV1.GetRatingProfile: %+v", err)
 	} else if !reflect.DeepEqual(expected, rpl) {
 		t.Errorf("Calling ApierV1.GetRatingProfile expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rpl))
