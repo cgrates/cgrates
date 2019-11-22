@@ -62,15 +62,15 @@ func TestCacheCfgloadFromJsonCfg(t *testing.T) {
 	}
 	cfgJSONStr := `{
 "cache":{
-	"destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			
-	"reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	
-	"rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},
+	"*destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			
+	"*reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	
+	"*rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},
 	}		
 }`
 	expected = CacheCfg{
-		"destinations":         &CacheParamCfg{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		"reverse_destinations": &CacheParamCfg{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
-		"rating_plans":         &CacheParamCfg{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		"*destinations":         &CacheParamCfg{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		"*reverse_destinations": &CacheParamCfg{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		"*rating_plans":         &CacheParamCfg{Limit: -1, TTL: time.Duration(0), StaticTTL: false, Precache: false},
 	}
 	cachecfg = CacheCfg{}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {

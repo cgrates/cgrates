@@ -24,7 +24,7 @@
 },
 
 "cache":{
- 	"dispatcher_routes": {"limit": -1, "ttl": "2s"}
+ 	"*dispatcher_routes": {"limit": -1, "ttl": "2s"}
 },
 
 
