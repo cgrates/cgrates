@@ -679,6 +679,11 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
 	}
+	expectedIDX2 := []string{
+		"*string:~Account:1001:THD_ACNT_1001",
+		"*string:~Account:1001:THD_Replication",
+		"*string:~CustomField:CustomValue:THD_Replication",
+	}
 	// verify indexes on engine1 (should be the same as internal)
 	if err := engineOneRPC.Call("ApierV1.GetFilterIndexes", &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: "cgrates.org", FilterType: utils.MetaString},
@@ -686,9 +691,9 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 		t.Error(err)
 	}
 	sort.Strings(indexes)
-	if !reflect.DeepEqual(expectedIDX, indexes) {
+	if !reflect.DeepEqual(expectedIDX2, indexes) {
 		t.Errorf("Expecting: %+v, received: %+v",
-			expectedIDX, utils.ToJSON(indexes))
+			expectedIDX2, utils.ToJSON(indexes))
 	}
 	// verify data on engine2
 	if err := engineTwoRPC.Call("ApierV1.GetThresholdProfile",
@@ -775,7 +780,7 @@ func testInternalAccountBalanceOperations(t *testing.T) {
 	if err := internalRPC.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
 		t.Error(err)
 	}
-
+	time.Sleep(50 * time.Millisecond)
 	var acnt *engine.Account
 	attrAcc := &utils.AttrGetAccount{
 		Tenant:  "cgrates.org",
@@ -814,7 +819,7 @@ func testInternalAccountBalanceOperations(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
-
+	time.Sleep(50 * time.Millisecond)
 	// verify debited account on engineOne
 	if err := engineOneRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
@@ -847,7 +852,7 @@ func testInternalAccountBalanceOperations(t *testing.T) {
 	if err := internalRPC.Call(utils.ApierV1AddBalance, addBal, &reply); err != nil {
 		t.Error(err)
 	}
-
+	time.Sleep(50 * time.Millisecond)
 	// verify account on engineOne
 	if err := engineOneRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
