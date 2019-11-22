@@ -138,14 +138,14 @@ func testV2CDRsLoadTariffPlanFromFolder(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 	var resp string
-	if err := cdrsRpc.Call("ApierV1.RemoveChargerProfile",
+	if err := cdrsRpc.Call(utils.ApierV1RemoveChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SupplierCharges"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
 	var reply *engine.AttributeProfile
-	if err := cdrsRpc.Call("ApierV1.GetChargerProfile",
+	if err := cdrsRpc.Call(utils.ApierV1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SupplierCharges"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -185,7 +185,7 @@ func testV2CDRsProcessCDR(t *testing.T) {
 func testV2CDRsGetCdrs(t *testing.T) {
 	var cdrCnt int64
 	req := utils.AttrGetCdrs{}
-	if err := cdrsRpc.Call("ApierV2.CountCDRs", req, &cdrCnt); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV2CountCDRs, req, &cdrCnt); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if cdrCnt != 2 {
 		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
@@ -256,7 +256,7 @@ func testV2CDRsProcessCDR2(t *testing.T) {
 func testV2CDRsGetCdrs2(t *testing.T) {
 	var cdrCnt int64
 	req := utils.AttrGetCdrs{Accounts: []string{"testV2CDRsProcessCDR2"}}
-	if err := cdrsRpc.Call("ApierV2.CountCDRs", req, &cdrCnt); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV2CountCDRs, req, &cdrCnt); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if cdrCnt != 2 {
 		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
@@ -330,7 +330,7 @@ func testV2CDRsProcessCDR3(t *testing.T) {
 func testV2CDRsGetCdrs3(t *testing.T) {
 	var cdrCnt int64
 	req := utils.AttrGetCdrs{Accounts: []string{"testV2CDRsProcessCDR3"}}
-	if err := cdrsRpc.Call("ApierV2.CountCDRs", req, &cdrCnt); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV2CountCDRs, req, &cdrCnt); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if cdrCnt != 1 {
 		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
@@ -503,7 +503,7 @@ func testV2CDRsSetThresholdProfile(t *testing.T) {
 
 	// Set Action
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACT_THD_PoccessCDR", Actions: []*utils.TPAction{{Identifier: utils.LOG}}}
-	if err := cdrsRpc.Call("ApierV2.SetActions", attrsAA, &actreply); err != nil && err.Error() != utils.ErrExists.Error() {
+	if err := cdrsRpc.Call(utils.ApierV2SetActions, attrsAA, &actreply); err != nil && err.Error() != utils.ErrExists.Error() {
 		t.Error("Got error on ApierV2.SetActions: ", err.Error())
 	} else if actreply != utils.OK {
 		t.Errorf("Calling ApierV2.SetActions received: %s", actreply)
@@ -600,7 +600,7 @@ func testV2CDRsGetStats1(t *testing.T) {
 func testV2CDRsGetThreshold1(t *testing.T) {
 	expected := []string{"THD_ACNT_1001", "THD_PoccessCDR"}
 	var result []string
-	if err := cdrsRpc.Call("ApierV1.GetThresholdProfileIDs",
+	if err := cdrsRpc.Call(utils.ApierV1GetThresholdProfileIDs,
 		utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{"cgrates.org"}}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {

@@ -175,7 +175,7 @@ func testTPitTimings(t *testing.T) {
 	// Test set
 	var reply string
 	for _, tm := range []*utils.ApierTPTiming{tmPeak, tmOffPeakMorning, tmOffPeakEvening, tmOffPeakWeekend, tmDummyRemove} {
-		if err := tpRPC.Call("ApierV2.SetTPTiming", tm, &reply); err != nil {
+		if err := tpRPC.Call(utils.ApierV2SetTPTiming, tm, &reply); err != nil {
 			t.Error("Got error on ApierV2.SetTPTiming: ", err.Error())
 		} else if reply != utils.OK {
 			t.Error("Unexpected reply received when calling ApierV2.SetTPTiming: ", reply)
@@ -183,7 +183,7 @@ func testTPitTimings(t *testing.T) {
 	}
 	// Test get
 	var rplyTmDummy *utils.ApierTPTiming
-	if err := tpRPC.Call("ApierV2.GetTPTiming", v1.AttrGetTPTiming{tmDummyRemove.TPid, tmDummyRemove.ID}, &rplyTmDummy); err != nil {
+	if err := tpRPC.Call(utils.ApierV2GetTPTiming, v1.AttrGetTPTiming{tmDummyRemove.TPid, tmDummyRemove.ID}, &rplyTmDummy); err != nil {
 		t.Error("Calling ApierV2.GetTPTiming, got error: ", err.Error())
 	} else if !reflect.DeepEqual(tmDummyRemove, rplyTmDummy) {
 		t.Errorf("Calling ApierV2.GetTPTiming expected: %v, received: %v", tmDummyRemove, rplyTmDummy)
@@ -196,7 +196,7 @@ func testTPitTimings(t *testing.T) {
 		t.Errorf("Calling ApierV1.GetTPTimingIds expected: %v, received: %v", expectedTmIDs, rplyTmIDs)
 	}
 	// Test remove
-	if err := tpRPC.Call("ApierV2.RemoveTPTiming", v1.AttrGetTPTiming{tmDummyRemove.TPid, tmDummyRemove.ID}, &reply); err != nil {
+	if err := tpRPC.Call(utils.ApierV2RemoveTPTiming, v1.AttrGetTPTiming{tmDummyRemove.TPid, tmDummyRemove.ID}, &reply); err != nil {
 		t.Error("Calling ApierV2.RemoveTPTiming, got error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling ApierV2.RemoveTPTiming received: ", reply)
@@ -227,7 +227,7 @@ func testTPitDestinations(t *testing.T) {
 	dstDEMobile := &utils.TPDestination{TPid: testTPid, ID: "DST_DE_MOBILE", Prefixes: []string{"+49151", "+49161", "+49171"}}
 	dstDUMMY := &utils.TPDestination{TPid: testTPid, ID: "DUMMY_REMOVE", Prefixes: []string{"999"}}
 	for _, dst := range []*utils.TPDestination{dst1002, dst1003, dst1007, dstFS, dstDEMobile, dstDUMMY} {
-		if err := tpRPC.Call("ApierV2.SetTPDestination", dst, &reply); err != nil {
+		if err := tpRPC.Call(utils.ApierV2SetTPDestination, dst, &reply); err != nil {
 			t.Error("Got error on ApierV2.SetTPDestination: ", err.Error())
 		} else if reply != utils.OK {
 			t.Error("Unexpected reply received when calling ApierV2.SetTPDestination: ", reply)
@@ -235,13 +235,13 @@ func testTPitDestinations(t *testing.T) {
 	}
 	// Test get
 	var rplyDst *utils.TPDestination
-	if err := tpRPC.Call("ApierV2.GetTPDestination", AttrGetTPDestination{testTPid, dstDEMobile.ID}, &rplyDst); err != nil {
+	if err := tpRPC.Call(utils.ApierV2GetTPDestination, AttrGetTPDestination{testTPid, dstDEMobile.ID}, &rplyDst); err != nil {
 		t.Error("Calling ApierV2.GetTPDestination, got error: ", err.Error())
 	} else if len(dstDEMobile.Prefixes) != len(rplyDst.Prefixes) {
 		t.Errorf("Calling ApierV2.GetTPDestination expected: %v, received: %v", dstDEMobile, rplyDst)
 	}
 	// Test remove
-	if err := tpRPC.Call("ApierV2.RemoveTPDestination", AttrGetTPDestination{testTPid, dstDUMMY.ID}, &reply); err != nil {
+	if err := tpRPC.Call(utils.ApierV2RemoveTPDestination, AttrGetTPDestination{testTPid, dstDUMMY.ID}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Received: ", reply)
@@ -249,7 +249,7 @@ func testTPitDestinations(t *testing.T) {
 	// Test getIds
 	var rplyDstIds []string
 	expectedDstIds := []string{"DST_1002", "DST_1003", "DST_1007", "DST_DE_MOBILE", "DST_FS"}
-	if err := tpRPC.Call("ApierV2.GetTPDestinationIDs", v1.AttrGetTPDestinationIds{TPid: testTPid}, &rplyDstIds); err != nil {
+	if err := tpRPC.Call(utils.ApierV2GetTPDestinationIDs, v1.AttrGetTPDestinationIds{TPid: testTPid}, &rplyDstIds); err != nil {
 		t.Error("Calling ApierV1.GetTPDestinationIDs, got error: ", err.Error())
 	} else if len(expectedDstIds) != len(rplyDstIds) {
 		t.Errorf("Calling ApierV2.GetTPDestinationIDs expected: %v, received: %v", expectedDstIds, rplyDstIds)

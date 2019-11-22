@@ -18,12 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/engine"
-
+import (
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+)
 func init() {
 	c := &CmdGetSharedGroup{
 		name:      "sharedgroup",
-		rpcMethod: "ApierV1.GetSharedGroup",
+		rpcMethod: utils.ApierV1GetSharedGroup,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

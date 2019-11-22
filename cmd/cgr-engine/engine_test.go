@@ -20,6 +20,7 @@ package main
 import (
 	"net/rpc"
 	"testing"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func BenchmarkRPCGet(b *testing.B) {
@@ -28,6 +29,6 @@ func BenchmarkRPCGet(b *testing.B) {
 	b.StartTimer()
 	var reply string
 	for i := 0; i < b.N; i++ {
-		client.Call("Responder.Get", "test", &reply)
+		client.Call(utils.ResponderGet, "test", &reply)
 	}
 }

@@ -1292,7 +1292,7 @@ func TestSMGDataDerivedChargingNoCredit(t *testing.T) {
 		utils.Usage:       "100",
 	}
 	var maxUsage float64
-	if err := sessionsRPC.Call("SMGenericV2.InitiateSession", smgEv, &maxUsage); err != nil {
+	if err := sessionsRPC.Call(utils.SMGenericV2InitiateSession, smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	// the second derived charging run has no credit

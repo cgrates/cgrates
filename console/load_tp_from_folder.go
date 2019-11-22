@@ -23,7 +23,7 @@ import "github.com/cgrates/cgrates/utils"
 func init() {
 	c := &LoadTpFromFolder{
 		name:      "load_tp_from_folder",
-		rpcMethod: "ApierV1.LoadTariffPlanFromFolder",
+		rpcMethod: utils.ApierV1LoadTariffPlanFromFolder,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

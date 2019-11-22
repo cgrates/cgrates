@@ -162,7 +162,7 @@ func testV2CDRsProcessCDR(t *testing.T) {
 func testV2CDRsGetCdrs(t *testing.T) {
 	var cdrCnt int64
 	req := utils.AttrGetCdrs{}
-	if err := cdrsRpc.Call("ApierV2.CountCDRs", req, &cdrCnt); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV2CountCDRs, req, &cdrCnt); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if cdrCnt != 3 {
 		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
@@ -247,7 +247,7 @@ func testV2CDRsRateCDRs(t *testing.T) {
 		Overwrite: true,
 	}
 	var reply string
-	if err := cdrsRpc.Call("ApierV1.SetRatingProfile", rpf, &reply); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV1SetRatingProfile, rpf, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetRatingProfile: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.SetRatingProfile got reply: ", reply)
@@ -282,7 +282,7 @@ func testV2CDRsRateCDRs(t *testing.T) {
 func testV2CDRsGetCdrs2(t *testing.T) {
 	var cdrCnt int64
 	req := utils.AttrGetCdrs{}
-	if err := cdrsRpc.Call("ApierV2.CountCDRs", req, &cdrCnt); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV2CountCDRs, req, &cdrCnt); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if cdrCnt != 3 {
 		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
@@ -465,7 +465,7 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply2 *engine.ChargerProfile
-	if err := cdrsRpc.Call("ApierV1.GetChargerProfile",
+	if err := cdrsRpc.Call(utils.ApierV1GetChargerProfile,
 		&utils.TenantID{Tenant: "CustomTenant", ID: "CustomCharger"}, &reply2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, reply2) {
@@ -567,7 +567,7 @@ func testV2CDRsProcessCDRNoRattingPlan(t *testing.T) {
 func testV2CDRsGetCdrsNoRattingPlan(t *testing.T) {
 	var cdrCnt int64
 	req := utils.AttrGetCdrs{}
-	if err := cdrsRpc.Call("ApierV2.CountCDRs", req, &cdrCnt); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV2CountCDRs, req, &cdrCnt); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if cdrCnt != 11 {
 		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
@@ -624,7 +624,7 @@ func testV2CDRsRateCDRsWithRatingPlan(t *testing.T) {
 		Overwrite: true,
 	}
 	var reply string
-	if err := cdrsRpc.Call("ApierV1.SetRatingProfile", rpf, &reply); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV1SetRatingProfile, rpf, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetRatingProfile: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.SetRatingProfile got reply: ", reply)
@@ -640,7 +640,7 @@ func testV2CDRsRateCDRsWithRatingPlan(t *testing.T) {
 				RatingPlanId:   "RP_TESTIT1"}},
 		Overwrite: true,
 	}
-	if err := cdrsRpc.Call("ApierV1.SetRatingProfile", rpf, &reply); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV1SetRatingProfile, rpf, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetRatingProfile: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.SetRatingProfile got reply: ", reply)
@@ -660,7 +660,7 @@ func testV2CDRsRateCDRsWithRatingPlan(t *testing.T) {
 func testV2CDRsGetCdrsWithRattingPlan(t *testing.T) {
 	var cdrCnt int64
 	req := utils.AttrGetCdrs{}
-	if err := cdrsRpc.Call("ApierV2.CountCDRs", req, &cdrCnt); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV2CountCDRs, req, &cdrCnt); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if cdrCnt != 11 {
 		t.Error("Unexpected number of CDRs returned: ", cdrCnt)

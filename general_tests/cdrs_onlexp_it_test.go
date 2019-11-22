@@ -597,7 +597,7 @@ func testCdrsHttpCdrReplication2(t *testing.T) {
 	}
 	var reply string
 	for _, cdr := range cdrs {
-		if err := cdrsMasterRpc.Call("CdrsV2.ProcessCdr", cdr, &reply); err != nil {
+		if err := cdrsMasterRpc.Call(utils.CdrsV2ProcessCdr, cdr, &reply); err != nil {
 			t.Error("Unexpected error: ", err.Error())
 		} else if reply != utils.OK {
 			t.Error("Unexpected reply received: ", reply)

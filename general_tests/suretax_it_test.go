@@ -121,7 +121,7 @@ func testSTICacheStats(t *testing.T) {
 	var rcvStats *utils.CacheStats
 	expectedStats := &utils.CacheStats{Destinations: 1, RatingPlans: 1, RatingProfiles: 1}
 	var args utils.AttrCacheStats
-	if err := stiRpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
+	if err := stiRpc.Call(utils.ApierV2GetCacheStats, args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV2.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 		t.Errorf("Calling ApierV2.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
@@ -137,7 +137,7 @@ func testSTIProcessExternalCdr(t *testing.T) {
 		Usage: "15s", PDD: "7.0", ExtraFields: map[string]string{"CustomerNumber": "000000534", "ZipCode": ""},
 	}
 	var reply string
-	if err := stiRpc.Call("CdrsV2.ProcessExternalCdr", cdr, &reply); err != nil {
+	if err := stiRpc.Call(utils.CdrsV2ProcessExternalCdr, cdr, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)

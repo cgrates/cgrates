@@ -109,7 +109,7 @@ func testTPRpcConn(t *testing.T) {
 
 func testTPImportTPFromFolderPath(t *testing.T) {
 	var reply string
-	if err := tpRPC.Call("ApierV1.ImportTariffPlanFromFolder",
+	if err := tpRPC.Call(utils.ApierV1ImportTariffPlanFromFolder,
 		utils.AttrImportTPFromFolder{TPid: "TEST_TPID2",
 			FolderPath: path.Join(tpDataDir, "tariffplans", "tutorial")}, &reply); err != nil {
 		t.Error("Got error on ApierV1.ImportTarrifPlanFromFolder: ", err.Error())
@@ -132,7 +132,7 @@ func testTPExportTPToFolder(t *testing.T) {
 	tpid := "TEST_TPID2"
 	compress := true
 	exportPath := "/tmp/"
-	if err := tpRPC.Call("ApierV1.ExportTPToFolder", &utils.AttrDirExportTP{TPid: &tpid, ExportPath: &exportPath, Compress: &compress}, &reply); err != nil {
+	if err := tpRPC.Call(utils.ApierV1ExportTPToFolder, &utils.AttrDirExportTP{TPid: &tpid, ExportPath: &exportPath, Compress: &compress}, &reply); err != nil {
 		t.Error("Got error on ApierV1.ExportTPToFolder: ", err.Error())
 	} else if !reflect.DeepEqual(reply.ExportPath, expectedTPStas.ExportPath) {
 		t.Errorf("Expecting : %+v, received: %+v", expectedTPStas.ExportPath, reply.ExportPath)

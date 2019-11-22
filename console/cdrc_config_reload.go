@@ -20,12 +20,13 @@ package console
 
 import (
 	"github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
 	c := &CmdCdrcConfigReload{
 		name:      "cdrc_config_reload",
-		rpcMethod: "ApierV1.ReloadCdrcConfig",
+		rpcMethod: utils.ApierV1ReloadCdrcConfig,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

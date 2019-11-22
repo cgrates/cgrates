@@ -18,10 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
+import "github.com/cgrates/cgrates/utils"
+
 func init() {
 	c := &CmdCacheVersions{
 		name:      "get_load_ids",
-		rpcMethod: "ApierV1.GetLoadIDs",
+		rpcMethod: utils.ApierV1GetLoadIDs ,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

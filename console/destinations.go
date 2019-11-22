@@ -19,14 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/apier/v2"
+	v2 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
 	c := &CmdGetDestination{
 		name:      "destinations",
-		rpcMethod: "ApierV2.GetDestinations",
+		rpcMethod: utils.ApierV2GetDestinations,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

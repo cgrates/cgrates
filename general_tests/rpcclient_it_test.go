@@ -298,7 +298,7 @@ func testRPCITLclStatusBcastRALs1Up(t *testing.T) {
 /*
 func TestRPCITStatusBcastCmd(t *testing.T) {
 	var stats utils.CacheStats
-	if err := rpcRAL1.Call("ApierV2.GetCacheStats", utils.AttrCacheStats{}, &stats); err != nil {
+	if err := rpcRAL1.Call(utils.ApierV2GetCacheStats, utils.AttrCacheStats{}, &stats); err != nil {
 		t.Error(err)
 	} else if stats.LastRatingLoadID != utils.NOT_AVAILABLE || stats.LastAccountingLoadID != utils.NOT_AVAILABLE {
 		t.Errorf("Received unexpected stats: %+v", stats)
@@ -311,17 +311,17 @@ func TestRPCITStatusBcastCmd(t *testing.T) {
 		t.Errorf("Empty loadId received, loadInstance: %+v", loadInst)
 	}
 	var reply string
-	if err := rpcPoolBroadcast.Call("ApierV1.ReloadCache", utils.AttrReloadCache{}, &reply); err != nil {
+	if err := rpcPoolBroadcast.Call(utils.ApierV1ReloadCache, utils.AttrReloadCache{}, &reply); err != nil {
 		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
 	}
-	if err := rpcRAL1.Call("ApierV2.GetCacheStats", utils.AttrCacheStats{}, &stats); err != nil {
+	if err := rpcRAL1.Call(utils.ApierV2GetCacheStats, utils.AttrCacheStats{}, &stats); err != nil {
 		t.Error(err)
 	} else if stats.LastRatingLoadID != loadInst.RatingLoadID {
 		t.Errorf("Received unexpected stats:  %+v vs %+v", stats, loadInst)
 	}
-	if err := rpcRAL2.Call("ApierV2.GetCacheStats", utils.AttrCacheStats{}, &stats); err != nil {
+	if err := rpcRAL2.Call(utils.ApierV2GetCacheStats, utils.AttrCacheStats{}, &stats); err != nil {
 		t.Error(err)
 	} else if stats.LastRatingLoadID != loadInst.RatingLoadID {
 		t.Errorf("Received unexpected stats: %+v vs %+v", stats, loadInst)

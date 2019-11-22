@@ -18,12 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/apier/v1"
+import (
+	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/utils"
+)
 
 func init() {
 	c := &LoadTpFromStorDb{
 		name:      "load_tp_from_stordb",
-		rpcMethod: "ApierV1.LoadTariffPlanFromStorDb",
+		rpcMethod: utils.ApierV1LoadTariffPlanFromStorDb,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

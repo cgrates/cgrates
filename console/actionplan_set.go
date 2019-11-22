@@ -18,12 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/apier/v1"
-
+import (
+	"github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/utils"
+)
 func init() {
 	c := &CmdSetActionPlan{
 		name:      "actionplan_set",
-		rpcMethod: "ApierV1.SetActionPlan",
+		rpcMethod: utils.ApierV1SetActionPlan,
 		rpcParams: &v1.AttrSetActionPlan{},
 	}
 	commands[c.Name()] = c

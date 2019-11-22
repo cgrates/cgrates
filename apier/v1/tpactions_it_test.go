@@ -182,7 +182,7 @@ func testTPActionsSetTPAction(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tpActionRPC.Call("ApierV1.SetTPActions", tpActions, &result); err != nil {
+	if err := tpActionRPC.Call(utils.ApierV1SetTPActions, tpActions, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -206,7 +206,7 @@ func testTPActionsGetTPActionAfterSet(t *testing.T) {
 func testTPActionsGetTPActionIds(t *testing.T) {
 	var result []string
 	expectedTPID := []string{"ID"}
-	if err := tpActionRPC.Call("ApierV1.GetTPActionIds",
+	if err := tpActionRPC.Call(utils.ApierV1GetTPActionIds,
 		&AttrGetTPActionIds{TPid: "TPAcc"}, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedTPID, result) {
@@ -275,7 +275,7 @@ func testTPActionsUpdateTPAction(t *testing.T) {
 		},
 	}
 	var result string
-	if err := tpActionRPC.Call("ApierV1.SetTPActions", tpActions, &result); err != nil {
+	if err := tpActionRPC.Call(utils.ApierV1SetTPActions, tpActions, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -300,7 +300,7 @@ func testTPActionsGetTPActionAfterUpdate(t *testing.T) {
 
 func testTPActionsRemTPAction(t *testing.T) {
 	var resp string
-	if err := tpActionRPC.Call("ApierV1.RemoveTPActions",
+	if err := tpActionRPC.Call(utils.ApierV1RemoveTPActions,
 		&AttrGetTPActions{TPid: "TPAcc", ID: "ID"}, &resp); err != nil {
 		t.Error(err)
 	} else if resp != utils.OK {

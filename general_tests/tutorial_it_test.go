@@ -134,7 +134,7 @@ func testTutorialGetCost(t *testing.T) {
 		Usage:       "2m10s",
 	}
 	var rply *engine.EventCost
-	if err := tutorialRpc.Call("ApierV1.GetCost", attrs, &rply); err != nil {
+	if err := tutorialRpc.Call(utils.ApierV1GetCost, attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if *rply.Cost != 0.716900 {
 		t.Errorf("Unexpected cost received: %f", *rply.Cost)

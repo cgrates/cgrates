@@ -18,12 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/apier/v2"
-
+import (
+	"github.com/cgrates/cgrates/apier/v2"
+	"github.com/cgrates/cgrates/utils"
+)
 func init() {
 	c := &CmdAddAccount{
 		name:      "account_set",
-		rpcMethod: "ApierV2.SetAccount",
+		rpcMethod: utils.ApierV2SetAccount,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

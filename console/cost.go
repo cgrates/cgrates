@@ -27,7 +27,7 @@ import (
 func init() {
 	c := &CmdGetCost{
 		name:       "cost",
-		rpcMethod:  "ApierV1.GetCost",
+		rpcMethod:  utils.ApierV1GetCost,
 		clientArgs: []string{"Tenant", "Category", "Subject", "AnswerTime", "Destination", "Usage"},
 		rpcParams:  &v1.AttrGetCost{},
 	}

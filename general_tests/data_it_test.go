@@ -164,7 +164,7 @@ func testV1DataDataDebitUsageWith10Kilo(t *testing.T) {
 		AnswerTime:  time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC).String(),
 	}
 	tStart := time.Now()
-	if err := dataRpc.Call("ApierV1.DebitUsage",
+	if err := dataRpc.Call(utils.ApierV1DebitUsage,
 		engine.UsageRecordWithArgDispatcher{UsageRecord: usageRecord}, &reply); err != nil {
 		t.Error(err)
 	}
@@ -190,7 +190,7 @@ func testV1DataGetCostWith10Kilo(t *testing.T) {
 		Subject: "10kilo", AnswerTime: "*now", Usage: 256000000}
 	var rply *engine.DataCost
 	tStart := time.Now()
-	if err := dataRpc.Call("ApierV1.GetDataCost", attrs, &rply); err != nil {
+	if err := dataRpc.Call(utils.ApierV1GetDataCost, attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if rply.Cost != 25600.000000 {
 		t.Errorf("Unexpected cost received: %f", rply.Cost)
@@ -298,7 +298,7 @@ func testV1DataDataDebitUsage1G0(t *testing.T) {
 		AnswerTime:  time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC).String(),
 	}
 	tStart := time.Now()
-	if err := dataRpc.Call("ApierV1.DebitUsage",
+	if err := dataRpc.Call(utils.ApierV1DebitUsage,
 		engine.UsageRecordWithArgDispatcher{UsageRecord: usageRecord}, &reply); err != nil {
 		t.Error(err)
 	}
@@ -324,7 +324,7 @@ func testV1DataGetCost1G0(t *testing.T) {
 		Subject: "10kilo", AnswerTime: "*now", Usage: 1000000000}
 	var rply *engine.DataCost
 	tStart := time.Now()
-	if err := dataRpc.Call("ApierV1.GetDataCost", attrs, &rply); err != nil {
+	if err := dataRpc.Call(utils.ApierV1GetDataCost, attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if rply.Cost != 100000.000000 {
 		t.Errorf("Unexpected cost received: %f", rply.Cost)
