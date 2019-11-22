@@ -27,20 +27,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// NonMonetaryBalances are types of balances which are not handled as monetary
-var NonMonetaryBalances = MapEvent{
-	utils.VOICE:   struct{}{},
-	utils.SMS:     struct{}{},
-	utils.DATA:    struct{}{},
-	utils.GENERIC: struct{}{},
-}
-
-var AccountableRequestTypes = MapEvent{
-	utils.MetaPrepaid:       struct{}{},
-	utils.MetaPostpaid:      struct{}{},
-	utils.MetaPseudoprepaid: struct{}{},
-}
-
 // ChargingInterval represents one interval out of Usage providing charging info
 // eg: PEAK vs OFFPEAK
 type ChargingInterval struct {

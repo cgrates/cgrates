@@ -288,7 +288,7 @@ func (ec *EventCost) AsRefundIncrements(tor string) (cd *CallDescriptor) {
 					blncSmry := ec.AccountSummary.BalanceSummaries.BalanceSummaryWithUUD(ec.Accounting[cIcrm.AccountingID].BalanceUUID)
 					if blncSmry.Type == utils.MONETARY {
 						cd.Increments[iIdx].BalanceInfo.Monetary = &MonetaryInfo{UUID: blncSmry.UUID}
-					} else if NonMonetaryBalances.HasField(blncSmry.Type) {
+					} else if utils.NonMonetaryBalances.Has(blncSmry.Type) {
 						cd.Increments[iIdx].BalanceInfo.Unit = &UnitInfo{UUID: blncSmry.UUID}
 					}
 					if ec.Accounting[cIcrm.AccountingID].ExtraChargeID == utils.META_NONE ||
@@ -301,7 +301,7 @@ func (ec *EventCost) AsRefundIncrements(tor string) (cd *CallDescriptor) {
 						ec.Accounting[ec.Accounting[cIcrm.AccountingID].ExtraChargeID].BalanceUUID)
 					if extraSmry.Type == utils.MONETARY {
 						cd.Increments[iIdx].BalanceInfo.Monetary = &MonetaryInfo{UUID: extraSmry.UUID}
-					} else if NonMonetaryBalances.HasField(blncSmry.Type) {
+					} else if utils.NonMonetaryBalances.Has(blncSmry.Type) {
 						cd.Increments[iIdx].BalanceInfo.Unit = &UnitInfo{UUID: extraSmry.UUID}
 					}
 				}

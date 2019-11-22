@@ -24,6 +24,7 @@ func NewStringSet(dataSlice []string) (s *StringSet) {
 	return s
 }
 
+// StringSet will manage data within a set
 type StringSet struct {
 	data map[string]struct{}
 }

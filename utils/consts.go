@@ -102,6 +102,12 @@ var (
 		DispatcherProfilePrefix: CacheDispatcherFilterIndexes,
 	}
 	CacheIndexesToPrefix map[string]string // will be built on init
+
+	// NonMonetaryBalances are types of balances which are not handled as monetary
+	NonMonetaryBalances = NewStringSet([]string{VOICE, SMS, DATA, GENERIC})
+
+	// AccountableRequestTypes are the ones handled by Accounting subsystem
+	AccountableRequestTypes = NewStringSet([]string{META_PREPAID, META_POSTPAID, META_PSEUDOPREPAID})
 )
 
 const (
@@ -508,6 +514,7 @@ const (
 	MetaRemove                  = "*remove"
 	MetaStore                   = "*store"
 	MetaClear                   = "*clear"
+	MetaExport                  = "*export"
 	LoadIDs                     = "load_ids"
 	DNSAgent                    = "DNSAgent"
 	TLSNoCaps                   = "tls"

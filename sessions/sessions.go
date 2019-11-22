@@ -397,14 +397,14 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 			var reply string
 			for _, cgrEv := range cgrEvs {
 				argsProc := &engine.ArgV1ProcessEvent{
+					Flags: []string{fmt.Sprintf("%s:false", utils.MetaChargers),
+						fmt.Sprintf("%s:false", utils.MetaAttributes)},
 					CGREvent:      *cgrEv,
-					ChargerS:      utils.BoolPointer(false),
-					AttributeS:    utils.BoolPointer(false),
 					ArgDispatcher: s.ArgDispatcher,
 				}
 				if unratedReqs.HasField( // order additional rating for unrated request types
 					engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RequestType)) {
-					argsProc.RALs = utils.BoolPointer(true)
+					argsProc.Flags = append(argsProc.Flags, fmt.Sprintf("%s:true", utils.MetaRALs))
 				}
 				if err = sS.cdrS.Call(utils.CDRsV1ProcessEvent, argsProc, &reply); err != nil {
 					utils.Logger.Warning(
@@ -2637,14 +2637,14 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 	var withErrors bool
 	for _, cgrEv := range cgrEvs {
 		argsProc := &engine.ArgV1ProcessEvent{
+			Flags: []string{fmt.Sprintf("%s:false", utils.MetaChargers),
+				fmt.Sprintf("%s:false", utils.MetaAttributes)},
 			CGREvent:      *cgrEv,
-			ChargerS:      utils.BoolPointer(false),
-			AttributeS:    utils.BoolPointer(false),
 			ArgDispatcher: cgrEvWithArgDisp.ArgDispatcher,
 		}
 		if mp := engine.MapEvent(cgrEv.Event); mp.GetStringIgnoreErrors(utils.RunID) != utils.MetaRaw && // check if is *raw
 			unratedReqs.HasField(mp.GetStringIgnoreErrors(utils.RequestType)) { // order additional rating for unrated request types
-			argsProc.RALs = utils.BoolPointer(true)
+			argsProc.Flags = append(argsProc.Flags, fmt.Sprintf("%s:true", utils.MetaRALs))
 		}
 		if err = sS.cdrS.Call(utils.CDRsV1ProcessEvent,
 			argsProc, rply); err != nil {
@@ -2990,8 +2990,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 	dbtItvl := sS.cgrCfg.SessionSCfg().DebitInterval
 
 	//convert from Flags []string to utils.FlagsWithParams
-	argsFlagsWithParams, err := utils.FlagsWithParamsFromSlice(args.Flags)
-	if err != nil {
+	var argsFlagsWithParams utils.FlagsWithParams
+	if argsFlagsWithParams, err = utils.FlagsWithParamsFromSlice(args.Flags); err != nil {
 		return
 	}
 	// check for *attribute

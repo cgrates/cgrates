@@ -288,3 +288,15 @@ func (fWp FlagsWithParams) SliceFlags() (sls []string) {
 	}
 	return
 }
+
+// GetBool returns the flag as boolean
+func (fWp FlagsWithParams) GetBool(key string) (b bool) {
+	var v interface{}
+	if _, b = fWp[key]; !b {
+		return // not present means false
+	}
+	if v.(string) != "" && v.(string) != "true" {
+		return // not empty nor true means false again
+	}
+	return true
+}
