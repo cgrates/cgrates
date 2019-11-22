@@ -157,7 +157,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
-	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
+	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ExternalAttribute"}, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -223,7 +223,7 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
-	if err := attrSRPC.Call("ApierV1.GetAttributeProfile",
+	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ExternalAttribute"}, &reply); err != nil {
 		t.Fatal(err)
 	}

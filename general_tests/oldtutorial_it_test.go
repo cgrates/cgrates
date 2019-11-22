@@ -1468,7 +1468,7 @@ package general_tests
 // 		ExportFileName: utils.StringPointer("TestTutITExportCDR.csv"),
 // 		ExportTemplate: utils.StringPointer("TestTutITExportCDR"),
 // 		RPCCDRsFilter:  utils.RPCCDRsFilter{CGRIDs: []string{cdr.CGRID}, NotRunIDs: []string{utils.MetaRaw}}}
-// 	if err := tutLocalRpc.Call("ApierV1.ExportCDRs", exportArgs, &replyExport); err != nil {
+// 	if err := tutLocalRpc.Call(utils.ApierV1ExportCDRs, exportArgs, &replyExport); err != nil {
 // 		t.Error(err)
 // 	}
 // 	eExportContent := `f0a92222a7d21b4d9f72744aabe82daef52e20d8,*default,testexportcdr1,*rated,cgrates.org,call,1001,1003,2016-11-30T18:06:04+01:00,98,1.33340,RETA

@@ -911,6 +911,7 @@ const (
 	ApierV1GetDataDBVersions        = "ApierV1.GetDataDBVersions"
 	ApierV1GetStorDBVersions        = "ApierV1.GetStorDBVersions"
 	ApierV1GetCDRs                  = "ApierV1.GetCDRs"
+	ApierV1ExportCDRs               = "ApierV1.ExportCDRs"
 )
 
 // ApierV1 TP APIs

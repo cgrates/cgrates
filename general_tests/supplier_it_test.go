@@ -121,7 +121,7 @@ func testV1SplSFromFolder(t *testing.T) {
 
 func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 	var reply *engine.SupplierProfile
-	if err := splSv1Rpc.Call("ApierV1.GetSupplierProfile",
+	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE2"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -147,7 +147,7 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := splSv1Rpc.Call("ApierV1.GetSupplierProfile",
+	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE2"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(splPrf, reply) {
@@ -183,7 +183,7 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 
 func testV1SplSAddNewSplPrf(t *testing.T) {
 	var reply *engine.SupplierProfile
-	if err := splSv1Rpc.Call("ApierV1.GetSupplierProfile",
+	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ResourceTest"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -224,7 +224,7 @@ func testV1SplSAddNewSplPrf(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := splSv1Rpc.Call("ApierV1.GetSupplierProfile",
+	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ResourceTest"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(splPrf, reply) {
@@ -250,7 +250,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		ThresholdIDs: []string{utils.META_NONE},
 	}
 
-	if err := splSv1Rpc.Call("ApierV1.SetResourceProfile", rPrf, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.ApierV1SetResourceProfile, rPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -271,7 +271,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		ThresholdIDs: []string{utils.META_NONE},
 	}
 
-	if err := splSv1Rpc.Call("ApierV1.SetResourceProfile", rPrf2, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.ApierV1SetResourceProfile, rPrf2, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -292,7 +292,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		ThresholdIDs: []string{utils.META_NONE},
 	}
 
-	if err := splSv1Rpc.Call("ApierV1.SetResourceProfile", rPrf3, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.ApierV1SetResourceProfile, rPrf3, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -313,7 +313,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		ThresholdIDs: []string{utils.META_NONE},
 	}
 
-	if err := splSv1Rpc.Call("ApierV1.SetResourceProfile", rPrf4, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.ApierV1SetResourceProfile, rPrf4, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -446,7 +446,7 @@ func testV1SplSGetSortedSuppliers(t *testing.T) {
 
 func testV1SplSAddNewSplPrf2(t *testing.T) {
 	var reply *engine.SupplierProfile
-	if err := splSv1Rpc.Call("ApierV1.GetSupplierProfile",
+	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ResourceDescendent"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -487,7 +487,7 @@ func testV1SplSAddNewSplPrf2(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := splSv1Rpc.Call("ApierV1.GetSupplierProfile",
+	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ResourceDescendent"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(splPrf, reply) {

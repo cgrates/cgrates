@@ -162,7 +162,7 @@ func testRPCMethodsAddData(t *testing.T) {
 		Weight:    30.0,
 		ActionIDs: []string{"DISABLE_LOG"},
 	}
-	if err := rpcRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &reply); err != nil {
+	if err := rpcRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -177,7 +177,7 @@ func testRPCMethodsAddData(t *testing.T) {
 		Weight:    30.0,
 		ActionIDs: []string{"ENABLE_LOG"},
 	}
-	if err := rpcRpc.Call("ApierV1.SetThresholdProfile", tPrfl2, &reply); err != nil {
+	if err := rpcRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl2, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)

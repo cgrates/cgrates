@@ -171,7 +171,7 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 		ActionIDs: []string{"ACT_LOG"},
 		Async:     false,
 	}
-	if err := cdrsOfflineRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
+	if err := cdrsOfflineRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -289,7 +289,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 		ActionIDs: []string{"ACT_LOG"},
 		Async:     false,
 	}
-	if err := cdrsOfflineRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
+	if err := cdrsOfflineRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

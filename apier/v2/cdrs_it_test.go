@@ -431,13 +431,13 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var result string
-	if err := cdrsRpc.Call("ApierV1.SetAttributeProfile", alsPrf, &result); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV1SetAttributeProfile, alsPrf, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.AttributeProfile
-	if err := cdrsRpc.Call("ApierV1.GetAttributeProfile",
+	if err := cdrsRpc.Call(utils.ApierV1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.com", ID: "ATTR_Tenant"}, &reply); err != nil {
 		t.Fatal(err)
 	}

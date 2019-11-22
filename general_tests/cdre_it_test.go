@@ -122,7 +122,7 @@ func testCDREExportNotFound(t *testing.T) {
 		ExportTemplate: utils.StringPointer("TestTutITExportCDR"),
 		RPCCDRsFilter:  utils.RPCCDRsFilter{},
 	}
-	if err := cdreRPC.Call("ApierV1.ExportCDRs", exportArgs,
+	if err := cdreRPC.Call(utils.ApierV1ExportCDRs, exportArgs,
 		&replyExport); err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -156,7 +156,7 @@ func testCDREExport(t *testing.T) {
 		ExportTemplate: utils.StringPointer("TestTutITExportCDR"),
 		RPCCDRsFilter:  utils.RPCCDRsFilter{},
 	}
-	if err := cdreRPC.Call("ApierV1.ExportCDRs", exportArgs, &replyExport); err != nil {
+	if err := cdreRPC.Call(utils.ApierV1ExportCDRs, exportArgs, &replyExport); err != nil {
 		t.Error(err)
 	} else if replyExport.TotalRecords != 1 {
 		t.Errorf("Unexpected total records: %+v", replyExport.TotalRecords)

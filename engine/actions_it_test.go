@@ -276,7 +276,7 @@ func TestActionsitThresholdCDrLog(t *testing.T) {
 		ActionIDs: []string{"ACT_TH_CDRLOG"},
 		Async:     false,
 	}
-	if err := actsLclRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
+	if err := actsLclRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -484,7 +484,7 @@ func TestActionsitThresholdPostEvent(t *testing.T) {
 		ActionIDs: []string{"ACT_TH_POSTEVENT"},
 		Async:     false,
 	}
-	if err := actsLclRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
+	if err := actsLclRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

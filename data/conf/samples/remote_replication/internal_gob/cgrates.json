@@ -1,0 +1,82 @@
+{
+"general": {
+	"log_level": 7,
+	"node_id": "InternalEngine",
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"data_db": {
+	"db_type": "*internal",
+	"remote_conns": [
+		{"address": "127.0.0.1:2033", "transport":"*gob"}
+	],
+	"replication_conns": [
+		{"address": "127.0.0.1:2023", "transport":"*gob"},
+		{"address": "127.0.0.1:2033", "transport":"*gob"}
+	],
+	"items":{
+		"*accounts":{"remote":true,"replicate":true},
+		"*reverse_destinations": {"remote":true,"replicate":true},
+		"*destinations": {"remote":true,"replicate":true},
+		"*rating_plans": {"remote":true,"replicate":true},
+		"*rating_profiles":{"remote":true,"replicate":true},
+		"*actions":{"remote":true,"replicate":true},
+		"*action_plans": {"remote":true,"replicate":true},
+		"*account_action_plans":{"remote":true,"replicate":true},
+		"*action_triggers":{"remote":true,"replicate":true},
+		"*shared_groups":{"remote":true,"replicate":true},
+		"*timings": {"remote":true,"replicate":true},
+		"*resource_profiles":{"remote":true,"replicate":true},
+		"*resources":{"remote":true,"replicate":true},
+		"*statqueue_profiles": {"remote":true,"replicate":true},
+		"*statqueues": {"remote":true,"replicate":true},
+		"*threshold_profiles": {"remote":true,"replicate":true},
+		"*thresholds": {"remote":true,"replicate":true},
+		"*filters": {"remote":true,"replicate":true},
+		"*supplier_profiles":{"remote":true,"replicate":true},
+		"*attribute_profiles":{"remote":true,"replicate":true},
+		"*charger_profiles": {"remote":true,"replicate":true},
+		"*dispatcher_profiles":{"remote":true,"replicate":true},
+		"*dispatcher_hosts":{"remote":true,"replicate":true},
+		"*filter_indexes" :{"remote":true,"replicate":true},
+		"*load_ids":{"remote":true,"replicate":true},
+	},
+},
+
+
+"stor_db": {
+	"db_type": "*internal",	
+},
+
+
+"rals": {
+	"enabled": true,
+},
+
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "-1",
+},
+
+
+"resources": {
+	"enabled": true,
+	"store_interval": "-1",
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
+},
+
+	"stats": {
+		"enabled": false,
+		"store_interval": "-1",
+	}
+}

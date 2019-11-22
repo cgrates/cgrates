@@ -1521,12 +1521,12 @@ func TestApierGetCallCostLog(t *testing.T) {
 	var cc engine.EventCost
 	var attrs utils.AttrGetCallCost
 	// Simple test that command is executed without errors
-	if err := rater.Call("ApierV1.GetEventCost", attrs, &cc); err == nil {
+	if err := rater.Call(utils.ApierV1GetEventCost, attrs, &cc); err == nil {
 		t.Error("Failed to detect missing fields in ApierV1.GetCallCostLog")
 	}
 	attrs.CgrId = "dummyid"
 	attrs.RunId = "default"
-	if err := rater.Call("ApierV1.GetEventCost", attrs, &cc); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := rater.Call(utils.ApierV1GetEventCost, attrs, &cc); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error("ApierV1.GetCallCostLog: should return NOT_FOUND, got:", err)
 	}
 	tm := time.Now().Truncate(time.Millisecond)
@@ -1579,7 +1579,7 @@ func TestApierGetCallCostLog(t *testing.T) {
 	}
 	attrs.CgrId = "Cdr1"
 	attrs.RunId = ""
-	if err := rater.Call("ApierV1.GetEventCost", attrs, &cc); err != nil {
+	if err := rater.Call(utils.ApierV1GetEventCost, attrs, &cc); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cc) {
 		t.Errorf("Expecting %s ,recived %s", utils.ToJSON(expected), utils.ToJSON(cc))

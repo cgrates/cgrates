@@ -485,7 +485,7 @@ func testV2CDRsSetStats(t *testing.T) {
 		},
 	}
 	var result string
-	if err := cdrsRpc.Call("ApierV1.SetStatQueueProfile", statConfig, &result); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV1SetStatQueueProfile, statConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -537,7 +537,7 @@ func testV2CDRsSetThresholdProfile(t *testing.T) {
 			Async:     false,
 		},
 	}
-	if err := cdrsRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
+	if err := cdrsRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

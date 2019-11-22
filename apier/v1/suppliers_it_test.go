@@ -21,7 +21,6 @@ package v1
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"sort"
@@ -120,7 +119,7 @@ func testV1SplSStartEngine(t *testing.T) {
 
 func testV1SplSRpcConn(t *testing.T) {
 	var err error
-	splSv1Rpc, err = jsonrpc.Dial("tcp", splSv1Cfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	splSv1Rpc, err = newRPCClient(splSv1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -428,121 +427,135 @@ func testV1SplSGetLeastCostSuppliersErr(t *testing.T) {
 func testV1SplSPolulateStatsForQOS(t *testing.T) {
 	var reply []string
 	expected := []string{"Stat_1"}
-	ev1 := utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.Account:    "1001",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(11 * time.Second),
-			utils.COST:       10.0,
+	ev1 := &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Account:    "1001",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(11 * time.Second),
+				utils.COST:       10.0,
+			},
 		},
 	}
-	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
+	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 
 	expected = []string{"Stat_1"}
-	ev1 = utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event2",
-		Event: map[string]interface{}{
-			utils.Account:    "1001",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(11 * time.Second),
-			utils.COST:       10.5,
+	ev1 = &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event2",
+			Event: map[string]interface{}{
+				utils.Account:    "1001",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(11 * time.Second),
+				utils.COST:       10.5,
+			},
 		},
 	}
-	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
+	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 
 	expected = []string{"Stat_2"}
-	ev1 = utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event2",
-		Event: map[string]interface{}{
-			utils.Account:    "1002",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(5 * time.Second),
-			utils.COST:       12.5,
+	ev1 = &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event2",
+			Event: map[string]interface{}{
+				utils.Account:    "1002",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(5 * time.Second),
+				utils.COST:       12.5,
+			},
 		},
 	}
-	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
+	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 
 	expected = []string{"Stat_2"}
-	ev1 = utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event2",
-		Event: map[string]interface{}{
-			utils.Account:    "1002",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(6 * time.Second),
-			utils.COST:       17.5,
+	ev1 = &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event2",
+			Event: map[string]interface{}{
+				utils.Account:    "1002",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(6 * time.Second),
+				utils.COST:       17.5,
+			},
 		},
 	}
-	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
+	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 
 	expected = []string{"Stat_3"}
-	ev1 = utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event3",
-		Event: map[string]interface{}{
-			utils.Account:    "1003",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(11 * time.Second),
-			utils.COST:       12.5,
+	ev1 = &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event3",
+			Event: map[string]interface{}{
+				utils.Account:    "1003",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(11 * time.Second),
+				utils.COST:       12.5,
+			},
 		},
 	}
-	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
+	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 
 	expected = []string{"Stat_1_1"}
-	ev1 = utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event3",
-		Event: map[string]interface{}{
-			"Stat":           "Stat1_1",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(11 * time.Second),
-			utils.COST:       12.5,
-			utils.PDD:        time.Duration(12 * time.Second),
+	ev1 = &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event3",
+			Event: map[string]interface{}{
+				"Stat":           "Stat1_1",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(11 * time.Second),
+				utils.COST:       12.5,
+				utils.PDD:        time.Duration(12 * time.Second),
+			},
 		},
 	}
-	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
+	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
 	}
 
 	expected = []string{"Stat_1_1"}
-	ev1 = utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event3",
-		Event: map[string]interface{}{
-			"Stat":           "Stat1_1",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(15 * time.Second),
-			utils.COST:       15.5,
-			utils.PDD:        time.Duration(15 * time.Second),
+	ev1 = &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event3",
+			Event: map[string]interface{}{
+				"Stat":           "Stat1_1",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(15 * time.Second),
+				utils.COST:       15.5,
+				utils.PDD:        time.Duration(15 * time.Second),
+			},
 		},
 	}
-	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
+	if err := splSv1Rpc.Call(utils.StatSv1ProcessEvent, ev1, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -744,7 +757,7 @@ func testV1SplSGetSupplierWithoutFilter(t *testing.T) {
 
 func testV1SplSSetSupplierProfiles(t *testing.T) {
 	var reply *engine.SupplierProfile
-	if err := splSv1Rpc.Call("ApierV1.GetSupplierProfile",
+	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -779,7 +792,7 @@ func testV1SplSSetSupplierProfiles(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	if err := splSv1Rpc.Call("ApierV1.GetSupplierProfile",
+	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(splPrf.SupplierProfile, reply) {
@@ -791,7 +804,8 @@ func testV1SplSGetSupplierProfileIDs(t *testing.T) {
 	expected := []string{"SPL_HIGHESTCOST_1", "SPL_QOS_1", "SPL_QOS_2", "SPL_QOS_FILTRED", "SPL_QOS_FILTRED2",
 		"SPL_ACNT_1001", "SPL_LEASTCOST_1", "SPL_WEIGHT_2", "SPL_WEIGHT_1", "SPL_QOS_3", "TEST_PROFILE1", "SPL_LCR"}
 	var result []string
-	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfileIDs, utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{"cgrates.org"}}, &result); err != nil {
+	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfileIDs,
+		&utils.TenantArgWithPaginator{TenantArg: utils.TenantArg{"cgrates.org"}}, &result); err != nil {
 		t.Error(err)
 	} else if len(expected) != len(result) {
 		t.Errorf("Expecting : %+v, received: %+v", expected, result)
@@ -854,7 +868,7 @@ func testV1SplSUpdateSupplierProfiles(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	var reply *engine.SupplierProfile
-	if err := splSv1Rpc.Call("ApierV1.GetSupplierProfile",
+	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(splPrf.Suppliers, reply.Suppliers) && !reflect.DeepEqual(reverseSuppliers, reply.Suppliers) {
@@ -871,7 +885,7 @@ func testV1SplSRemSupplierProfiles(t *testing.T) {
 		t.Error("Unexpected reply returned", resp)
 	}
 	var reply *engine.SupplierProfile
-	if err := splSv1Rpc.Call("ApierV1.GetSupplierProfile",
+	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE1"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
@@ -962,7 +976,7 @@ func testV1SplSGetSupplierForEvent(t *testing.T) {
 // supplier1 have attached RP_LOCAL and supplier2 have attach RP_MOBILE
 func testV1SplsOneSupplierWithoutDestination(t *testing.T) {
 	var reply *engine.SupplierProfile
-	if err := splSv1Rpc.Call("ApierV1.GetSupplierProfile",
+	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_DESTINATION"}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

@@ -22,7 +22,6 @@ package v1
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"testing"
 	"time"
@@ -93,7 +92,7 @@ func testCostStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testCostRPCConn(t *testing.T) {
 	var err error
-	costRPC, err = jsonrpc.Dial("tcp", costCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	costRPC, err = newRPCClient(costCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

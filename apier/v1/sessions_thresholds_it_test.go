@@ -22,7 +22,6 @@ package v1
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
@@ -93,7 +92,7 @@ func TestSessionSv1ItRpcConn(t *testing.T) {
 		clntHandlers); err != nil {
 		t.Fatal(err)
 	}
-	if sSApierRpc2, err = jsonrpc.Dial("tcp", sSv1Cfg2.ListenCfg().RPCJSONListen); err != nil {
+	if sSApierRpc2, err = newRPCClient(sSv1Cfg2.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
 	dummyClnt.Close() // close so we don't get EOF error when disconnecting server

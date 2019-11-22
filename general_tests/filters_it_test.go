@@ -283,7 +283,7 @@ func testV1FltrPupulateThreshold(t *testing.T) {
 		ActionIDs: []string{"LOG"},
 		Async:     true,
 	}
-	if err := fltrRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
+	if err := fltrRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -350,7 +350,7 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 		Weight:    10.0,
 		ActionIDs: []string{"LOG"},
 	}
-	if err := fltrRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
+	if err := fltrRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -387,7 +387,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 	}
 
 	var result string
-	if err := fltrRpc.Call("ApierV1.SetResourceProfile", rlsConfig, &result); err != nil {
+	if err := fltrRpc.Call(utils.ApierV1SetResourceProfile, rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -452,7 +452,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 		ActionIDs: []string{"LOG"},
 		Async:     true,
 	}
-	if err := fltrRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
+	if err := fltrRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -502,7 +502,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 	}
 
 	//Overwrite the threshold
-	if err := fltrRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
+	if err := fltrRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -569,7 +569,7 @@ func testV1FltrAccounts(t *testing.T) {
 		ActionIDs: []string{"LOG"},
 		Async:     true,
 	}
-	if err := fltrRpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
+	if err := fltrRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

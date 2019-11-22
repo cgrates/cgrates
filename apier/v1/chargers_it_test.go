@@ -22,7 +22,6 @@ package v1
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
@@ -41,20 +40,24 @@ var (
 	chargerConfigDIR string //run tests for specific configuration
 )
 
-var chargerEvent = []*utils.CGREvent{
-	{ // matching Charger1
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.Account: "1001",
+var chargerEvent = []*utils.CGREventWithArgDispatcher{
+	{
+		CGREvent: &utils.CGREvent{ // matching Charger1
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Account: "1001",
+			},
 		},
 	},
-	{ // no matching
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.Account:   "1010",
-			"DistinctMatch": "cgrates",
+	{
+		CGREvent: &utils.CGREvent{ // no matching
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Account:   "1010",
+				"DistinctMatch": "cgrates",
+			},
 		},
 	},
 }
@@ -132,7 +135,7 @@ func testChargerSStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testChargerSRPCConn(t *testing.T) {
 	var err error
-	chargerRPC, err = jsonrpc.Dial("tcp", chargerCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	chargerRPC, err = newRPCClient(chargerCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -22,7 +22,6 @@ package v1
 import (
 	"fmt"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"sort"
@@ -79,6 +78,9 @@ var sTestsInternalRemoteIT = []func(t *testing.T){
 }
 
 func TestInternalRemoteITRedis(t *testing.T) {
+	if *encoding == utils.MetaGOBrpc {
+		internalCfgDirPath = "internal_gob"
+	}
 	engineOneCfgDirPath = "engine1_redis"
 	engineTwoCfgDirPath = "engine2_redis"
 	for _, stest := range sTestsInternalRemoteIT {
@@ -87,6 +89,9 @@ func TestInternalRemoteITRedis(t *testing.T) {
 }
 
 func TestInternalRemoteITMongo(t *testing.T) {
+	if *encoding == utils.MetaGOBrpc {
+		internalCfgDirPath = "internal_gob"
+	}
 	engineOneCfgDirPath = "engine1_mongo"
 	engineTwoCfgDirPath = "engine2_mongo"
 	for _, stest := range sTestsInternalRemoteIT {
@@ -150,19 +155,19 @@ func testInternalRemoteITStartEngine(t *testing.T) {
 
 func testInternalRemoteITRPCConn(t *testing.T) {
 	var err error
-	internalRPC, err = jsonrpc.Dial("tcp", internalCfg.ListenCfg().RPCJSONListen)
+	internalRPC, err = newRPCClient(internalCfg.ListenCfg())
 	if err != nil {
 		fmt.Println(err)
 		t.Fatal(err)
 	}
 	time.Sleep(200 * time.Millisecond)
-	engineOneRPC, err = jsonrpc.Dial("tcp", engineOneCfg.ListenCfg().RPCJSONListen)
+	engineOneRPC, err = newRPCClient(engineOneCfg.ListenCfg())
 	if err != nil {
 		fmt.Println(err)
 		t.Fatal(err)
 	}
 	time.Sleep(200 * time.Millisecond)
-	engineTwoRPC, err = jsonrpc.Dial("tcp", engineTwoCfg.ListenCfg().RPCJSONListen)
+	engineTwoRPC, err = newRPCClient(engineTwoCfg.ListenCfg())
 	if err != nil {
 		fmt.Println(err)
 		t.Fatal(err)
@@ -245,8 +250,8 @@ func testInternalRemoteITGetAttribute(t *testing.T) {
 	}
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
-	if err := internalRPC.Call("ApierV1.GetAttributeProfile",
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}, &reply); err != nil {
+	if err := internalRPC.Call(utils.ApierV1GetAttributeProfile,
+		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	reply.Compile()
@@ -259,7 +264,7 @@ func testInternalRemoteITGetThreshold(t *testing.T) {
 	var td engine.Threshold
 	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}
 	if err := internalRPC.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &td); err != nil {
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd, td) {
 		t.Errorf("expecting: %+v, received: %+v", eTd, td)
@@ -437,7 +442,7 @@ func testInternalRemoteITGetSupplier(t *testing.T) {
 		Weight: 20,
 	}
 
-	if err := internalRPC.Call("ApierV1.GetSupplierProfile",
+	if err := internalRPC.Call(utils.ApierV1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ACNT_1001"}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(splPrf, reply) && !reflect.DeepEqual(splPrf2, reply) {
@@ -635,7 +640,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 			Async:     true,
 		},
 	}
-	if err := internalRPC.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
+	if err := internalRPC.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -709,11 +714,13 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 }
 
 func testInternalMatchThreshold(t *testing.T) {
-	ev := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event2",
-		Event: map[string]interface{}{
-			utils.Account: "1002",
+	ev := &engine.ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event2",
+			Event: map[string]interface{}{
+				utils.Account: "1002",
+			},
 		},
 	}
 	var ids []string
@@ -723,11 +730,13 @@ func testInternalMatchThreshold(t *testing.T) {
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	ev = &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event2",
-		Event: map[string]interface{}{
-			utils.Account: "1001",
+	ev = &engine.ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event2",
+			Event: map[string]interface{}{
+				utils.Account: "1001",
+			},
 		},
 	}
 	eIDs = []string{"THD_ACNT_1001"}
@@ -736,11 +745,13 @@ func testInternalMatchThreshold(t *testing.T) {
 	} else if !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
 	}
-	ev2 := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event3",
-		Event: map[string]interface{}{
-			utils.Account: "1001",
+	ev2 := &engine.ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event3",
+			Event: map[string]interface{}{
+				utils.Account: "1001",
+			},
 		},
 	}
 	if err := internalRPC.Call(utils.ThresholdSv1ProcessEvent, ev2, &ids); err == nil || err.Error() != utils.ErrNotFound.Error() {

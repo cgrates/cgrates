@@ -22,7 +22,6 @@ package v1
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
@@ -151,7 +150,7 @@ func testSSv1ItRpcConn(t *testing.T) {
 		clntHandlers); err != nil {
 		t.Fatal(err)
 	}
-	if sSApierRpc, err = jsonrpc.Dial("tcp", sSv1Cfg.ListenCfg().RPCJSONListen); err != nil {
+	if sSApierRpc, err = newRPCClient(sSv1Cfg.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
 	dummyClnt.Close() // close so we don't get EOF error when disconnecting server
@@ -639,7 +638,7 @@ func testSSv1ItProcessEvent(t *testing.T) {
 
 func testSSv1ItCDRsGetCdrs(t *testing.T) {
 	var cdrCnt int64
-	req := utils.AttrGetCdrs{}
+	req := &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{}}
 	if err := sSApierRpc.Call(utils.CDRsV1CountCDRs, req, &cdrCnt); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if cdrCnt != 6 { // 3 for each CDR
@@ -647,7 +646,7 @@ func testSSv1ItCDRsGetCdrs(t *testing.T) {
 	}
 
 	var cdrs []*engine.CDR
-	args := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}
+	args := &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 2 {
@@ -657,8 +656,8 @@ func testSSv1ItCDRsGetCdrs(t *testing.T) {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
 	}
-	args = utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"},
-		OriginIDs: []string{"TestSSv1It1"}}
+	args = &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"},
+		OriginIDs: []string{"TestSSv1It1"}}}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -668,8 +667,8 @@ func testSSv1ItCDRsGetCdrs(t *testing.T) {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
 	}
-	args = utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"},
-		OriginIDs: []string{"TestSSv1It1"}}
+	args = &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"},
+		OriginIDs: []string{"TestSSv1It1"}}}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -680,8 +679,8 @@ func testSSv1ItCDRsGetCdrs(t *testing.T) {
 		}
 	}
 
-	args = utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"},
-		OriginIDs: []string{"TestSSv1It2"}}
+	args = &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"},
+		OriginIDs: []string{"TestSSv1It2"}}}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -691,8 +690,8 @@ func testSSv1ItCDRsGetCdrs(t *testing.T) {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
 	}
-	args = utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"},
-		OriginIDs: []string{"TestSSv1It2"}}
+	args = &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"},
+		OriginIDs: []string{"TestSSv1It2"}}}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -743,7 +742,7 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 	var rply sessions.V1UpdateSessionReply
 	if err := sSv1BiRpc.Call(utils.SessionSv1UpdateSession,
 		args, &rply); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
@@ -769,7 +768,7 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
-		t.Errorf("expecting: %+v, received: %+v",
+		t.Fatalf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
 	}
 	if *rply.MaxUsage != reqUsage {
@@ -807,7 +806,12 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 	}
 	time.Sleep(100 * time.Millisecond)
 	var cdrs []*engine.CDR
-	argsCDR := utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"}, OriginIDs: []string{"TestSSv1It"}}
+	argsCDR := &utils.RPCCDRsFilterWithArgDispatcher{
+		RPCCDRsFilter: &utils.RPCCDRsFilter{
+			RunIDs:    []string{"CustomerCharges"},
+			OriginIDs: []string{"TestSSv1It"},
+		},
+	}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, argsCDR, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -817,8 +821,12 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
 	}
-	argsCDR = utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"},
-		OriginIDs: []string{"TestSSv1It"}}
+	argsCDR = &utils.RPCCDRsFilterWithArgDispatcher{
+		RPCCDRsFilter: &utils.RPCCDRsFilter{
+			RunIDs:    []string{"SupplierCharges"},
+			OriginIDs: []string{"TestSSv1It"},
+		},
+	}
 	if err := sSApierRpc.Call(utils.CDRsV1GetCDRs, argsCDR, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {

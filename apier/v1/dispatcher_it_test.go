@@ -22,7 +22,6 @@ package v1
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
@@ -120,7 +119,7 @@ func testDispatcherSStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testDispatcherSRPCConn(t *testing.T) {
 	var err error
-	dispatcherRPC, err = jsonrpc.Dial("tcp", dispatcherCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	dispatcherRPC, err = newRPCClient(dispatcherCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -211,7 +210,7 @@ func testDispatcherSGetDispatcherProfileCache(t *testing.T) {
 		t.SkipNow()
 	}
 	var rcvStats map[string]*ltcache.CacheStats
-	if err := dispatcherRPC.Call(utils.CacheSv1GetCacheStats, nil, &rcvStats); err != nil {
+	if err := dispatcherRPC.Call(utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithArgDispatcher{}, &rcvStats); err != nil {
 		t.Error(err)
 	} else if rcvStats[utils.CacheDispatcherProfiles].Items != 1 {
 		t.Errorf("Expecting: 1 DispatcherProfiles, received: %+v", rcvStats[utils.CacheDispatcherProfiles])
@@ -326,7 +325,7 @@ func testDispatcherSUpdateDispatcherHost(t *testing.T) {
 
 func testDispatcherSGetDispatcherHostCache(t *testing.T) {
 	var rcvStats map[string]*ltcache.CacheStats
-	if err := dispatcherRPC.Call(utils.CacheSv1GetCacheStats, nil, &rcvStats); err != nil {
+	if err := dispatcherRPC.Call(utils.CacheSv1GetCacheStats, &utils.AttrCacheIDsWithArgDispatcher{}, &rcvStats); err != nil {
 		t.Error(err)
 	} else if rcvStats[utils.CacheDispatcherHosts].Items != 0 {
 		t.Errorf("Expecting: 0 DispatcherProfiles, received: %+v", rcvStats[utils.CacheDispatcherProfiles])

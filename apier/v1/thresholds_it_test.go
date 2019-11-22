@@ -21,7 +21,6 @@ package v1
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"sort"
@@ -41,112 +40,143 @@ var (
 	tSv1ConfDIR string //run tests for specific configuration
 )
 
-var tEvs = []*utils.CGREvent{
-	{ // hitting THD_ACNT_BALANCE_1
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.EventType:     utils.AccountUpdate,
-			utils.Account:       "1002",
-			utils.AllowNegative: true,
-			utils.Disabled:      false,
-			utils.Units:         12.3}},
-	{ // hitting THD_ACNT_BALANCE_1
-		Tenant: "cgrates.org",
-		ID:     "event2",
-		Event: map[string]interface{}{
-			utils.EventType:  utils.BalanceUpdate,
-			utils.Account:    "1002",
-			utils.BalanceID:  utils.META_DEFAULT,
-			utils.Units:      12.3,
-			utils.ExpiryTime: time.Date(2009, 11, 10, 23, 00, 0, 0, time.UTC),
-		}},
-	{ // hitting THD_STATS_1
-		Tenant: "cgrates.org",
-		ID:     "event3",
-		Event: map[string]interface{}{
-			utils.EventType: utils.StatUpdate,
-			utils.StatID:    "Stats1",
-			utils.Account:   "1002",
-			"ASR":           35.0,
-			"ACD":           "2m45s",
-			"TCC":           12.7,
-			"TCD":           "12m15s",
-			"ACC":           0.75,
-			"PDD":           "2s",
-		}},
-	{ // hitting THD_STATS_1 and THD_STATS_2
-		Tenant: "cgrates.org",
-		ID:     "event4",
-		Event: map[string]interface{}{
-			utils.EventType: utils.StatUpdate,
-			utils.StatID:    "STATS_HOURLY_DE",
-			utils.Account:   "1002",
-			"ASR":           35.0,
-			"ACD":           "2m45s",
-			"TCD":           "1h",
-		}},
-	{ // hitting THD_STATS_3
-		Tenant: "cgrates.org",
-		ID:     "event5",
-		Event: map[string]interface{}{
-			utils.EventType: utils.StatUpdate,
-			utils.StatID:    "STATS_DAILY_DE",
-			utils.Account:   "1002",
-			"ACD":           "2m45s",
-			"TCD":           "3h1s",
-		}},
-	{ // hitting THD_RES_1
-		Tenant: "cgrates.org",
-		ID:     "event6",
-		Event: map[string]interface{}{
-			utils.EventType:  utils.ResourceUpdate,
-			utils.Account:    "1002",
-			utils.ResourceID: "RES_GRP_1",
-			utils.Usage:      10.0}},
-	{ // hitting THD_RES_1
-		Tenant: "cgrates.org",
-		ID:     "event6",
-		Event: map[string]interface{}{
-			utils.EventType:  utils.ResourceUpdate,
-			utils.Account:    "1002",
-			utils.ResourceID: "RES_GRP_1",
-			utils.Usage:      10.0}},
-	{ // hitting THD_RES_1
-		Tenant: "cgrates.org",
-		ID:     "event6",
-		Event: map[string]interface{}{
-			utils.EventType:  utils.ResourceUpdate,
-			utils.Account:    "1002",
-			utils.ResourceID: "RES_GRP_1",
-			utils.Usage:      10.0}},
-	{ // hitting THD_CDRS_1
-		Tenant: "cgrates.org",
-		ID:     "cdrev1",
-		Event: map[string]interface{}{
-			utils.EventType:   utils.CDR,
-			"field_extr1":     "val_extr1",
-			"fieldextr2":      "valextr2",
-			utils.CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
-			utils.RunID:       utils.MetaRaw,
-			utils.OrderID:     123,
-			utils.OriginHost:  "192.168.1.1",
-			utils.Source:      utils.UNIT_TEST,
-			utils.OriginID:    "dsafdsaf",
-			utils.ToR:         utils.VOICE,
-			utils.RequestType: utils.META_RATED,
-			utils.Direction:   "*out",
-			utils.Tenant:      "cgrates.org",
-			utils.Category:    "call",
-			utils.Account:     "1007",
-			utils.Subject:     "1007",
-			utils.Destination: "+4986517174963",
-			utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
-			utils.PDD:         time.Duration(0) * time.Second,
-			utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-			utils.Usage:       time.Duration(10) * time.Second,
-			utils.SUPPLIER:    "SUPPL1",
-			utils.COST:        -1.0}},
+var tEvs = []*engine.ArgsProcessEvent{
+	{
+		CGREvent: &utils.CGREvent{ // hitting THD_ACNT_BALANCE_1
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.EventType:     utils.AccountUpdate,
+				utils.Account:       "1002",
+				utils.AllowNegative: true,
+				utils.Disabled:      false,
+				utils.Units:         12.3},
+		},
+	},
+	{
+		CGREvent: &utils.CGREvent{ // hitting THD_ACNT_BALANCE_1
+			Tenant: "cgrates.org",
+			ID:     "event2",
+			Event: map[string]interface{}{
+				utils.EventType:  utils.BalanceUpdate,
+				utils.Account:    "1002",
+				utils.BalanceID:  utils.META_DEFAULT,
+				utils.Units:      12.3,
+				utils.ExpiryTime: time.Date(2009, 11, 10, 23, 00, 0, 0, time.UTC),
+			},
+		},
+	},
+	{
+		CGREvent: &utils.CGREvent{ // hitting THD_STATS_1
+			Tenant: "cgrates.org",
+			ID:     "event3",
+			Event: map[string]interface{}{
+				utils.EventType: utils.StatUpdate,
+				utils.StatID:    "Stats1",
+				utils.Account:   "1002",
+				"ASR":           35.0,
+				"ACD":           "2m45s",
+				"TCC":           12.7,
+				"TCD":           "12m15s",
+				"ACC":           0.75,
+				"PDD":           "2s",
+			},
+		},
+	},
+	{
+		CGREvent: &utils.CGREvent{ // hitting THD_STATS_1 and THD_STATS_2
+			Tenant: "cgrates.org",
+			ID:     "event4",
+			Event: map[string]interface{}{
+				utils.EventType: utils.StatUpdate,
+				utils.StatID:    "STATS_HOURLY_DE",
+				utils.Account:   "1002",
+				"ASR":           35.0,
+				"ACD":           "2m45s",
+				"TCD":           "1h",
+			},
+		},
+	},
+	{
+		CGREvent: &utils.CGREvent{ // hitting THD_STATS_3
+			Tenant: "cgrates.org",
+			ID:     "event5",
+			Event: map[string]interface{}{
+				utils.EventType: utils.StatUpdate,
+				utils.StatID:    "STATS_DAILY_DE",
+				utils.Account:   "1002",
+				"ACD":           "2m45s",
+				"TCD":           "3h1s",
+			},
+		},
+	},
+	{
+		CGREvent: &utils.CGREvent{ // hitting THD_RES_1
+			Tenant: "cgrates.org",
+			ID:     "event6",
+			Event: map[string]interface{}{
+				utils.EventType:  utils.ResourceUpdate,
+				utils.Account:    "1002",
+				utils.ResourceID: "RES_GRP_1",
+				utils.Usage:      10.0,
+			},
+		},
+	},
+	{
+		CGREvent: &utils.CGREvent{ // hitting THD_RES_1
+			Tenant: "cgrates.org",
+			ID:     "event6",
+			Event: map[string]interface{}{
+				utils.EventType:  utils.ResourceUpdate,
+				utils.Account:    "1002",
+				utils.ResourceID: "RES_GRP_1",
+				utils.Usage:      10.0,
+			},
+		},
+	},
+	{
+		CGREvent: &utils.CGREvent{ // hitting THD_RES_1
+			Tenant: "cgrates.org",
+			ID:     "event6",
+			Event: map[string]interface{}{
+				utils.EventType:  utils.ResourceUpdate,
+				utils.Account:    "1002",
+				utils.ResourceID: "RES_GRP_1",
+				utils.Usage:      10.0,
+			},
+		},
+	},
+	{
+		CGREvent: &utils.CGREvent{ // hitting THD_CDRS_1
+			Tenant: "cgrates.org",
+			ID:     "cdrev1",
+			Event: map[string]interface{}{
+				utils.EventType:   utils.CDR,
+				"field_extr1":     "val_extr1",
+				"fieldextr2":      "valextr2",
+				utils.CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+				utils.RunID:       utils.MetaRaw,
+				utils.OrderID:     123,
+				utils.OriginHost:  "192.168.1.1",
+				utils.Source:      utils.UNIT_TEST,
+				utils.OriginID:    "dsafdsaf",
+				utils.ToR:         utils.VOICE,
+				utils.RequestType: utils.META_RATED,
+				utils.Direction:   "*out",
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.Account:     "1007",
+				utils.Subject:     "1007",
+				utils.Destination: "+4986517174963",
+				utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+				utils.PDD:         time.Duration(0) * time.Second,
+				utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+				utils.Usage:       time.Duration(10) * time.Second,
+				utils.SUPPLIER:    "SUPPL1",
+				utils.COST:        -1.0,
+			},
+		},
+	},
 }
 
 var sTestsThresholdSV1 = []func(t *testing.T){
@@ -219,7 +249,7 @@ func testV1TSStartEngine(t *testing.T) {
 
 func testV1TSRpcConn(t *testing.T) {
 	var err error
-	tSv1Rpc, err = jsonrpc.Dial("tcp", tSv1Cfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tSv1Rpc, err = newRPCClient(tSv1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -237,7 +267,8 @@ func testV1TSFromFolder(t *testing.T) {
 func testV1TSGetThresholds(t *testing.T) {
 	var tIDs []string
 	expectedIDs := []string{"THD_RES_1", "THD_STATS_2", "THD_STATS_1", "THD_ACNT_BALANCE_1", "THD_ACNT_EXPIRED", "THD_STATS_3", "THD_CDRS_1"}
-	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThresholdIDs, &utils.TenantArg{Tenant: "cgrates.org"}, &tIDs); err != nil {
+	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThresholdIDs,
+		&utils.TenantWithArgDispatcher{TenantArg: &utils.TenantArg{Tenant: "cgrates.org"}}, &tIDs); err != nil {
 		t.Error(err)
 	} else if len(expectedIDs) != len(tIDs) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedIDs, tIDs)
@@ -245,7 +276,7 @@ func testV1TSGetThresholds(t *testing.T) {
 	var td engine.Threshold
 	eTd := engine.Threshold{Tenant: "cgrates.org", ID: expectedIDs[0]}
 	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &td); err != nil {
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd, td) {
 		t.Errorf("expecting: %+v, received: %+v", eTd, td)
@@ -311,14 +342,15 @@ func testV1TSProcessEvent(t *testing.T) {
 func testV1TSGetThresholdsAfterProcess(t *testing.T) {
 	var tIDs []string
 	expectedIDs := []string{"THD_RES_1", "THD_STATS_2", "THD_STATS_1", "THD_ACNT_BALANCE_1", "THD_ACNT_EXPIRED"}
-	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThresholdIDs, &utils.TenantArg{Tenant: "cgrates.org"}, &tIDs); err != nil {
+	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThresholdIDs,
+		&utils.TenantWithArgDispatcher{TenantArg: &utils.TenantArg{Tenant: "cgrates.org"}}, &tIDs); err != nil {
 		t.Error(err)
 	} else if len(expectedIDs) != len(tIDs) { // THD_STATS_3 is not reccurent, so it was removed
 		t.Errorf("expecting: %+v, received reply: %s", expectedIDs, tIDs)
 	}
 	var td engine.Threshold
 	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_BALANCE_1"}, &td); err != nil {
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_BALANCE_1"}}, &td); err != nil {
 		t.Error(err)
 	} else if td.Snooze.IsZero() { // make sure Snooze time was reset during execution
 		t.Errorf("received: %+v", td)
@@ -335,13 +367,13 @@ func testV1TSGetThresholdsAfterRestart(t *testing.T) {
 		t.Fatal(err)
 	}
 	var err error
-	tSv1Rpc, err = jsonrpc.Dial("tcp", tSv1Cfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tSv1Rpc, err = newRPCClient(tSv1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
 	var td engine.Threshold
 	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_BALANCE_1"}, &td); err != nil {
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_BALANCE_1"}}, &td); err != nil {
 		t.Error(err)
 	} else if td.Snooze.IsZero() { // make sure Snooze time was reset during execution
 		t.Errorf("received: %+v", td)
@@ -383,7 +415,7 @@ func testV1TSSetThresholdProfile(t *testing.T) {
 			Async:     true,
 		},
 	}
-	if err := tSv1Rpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
+	if err := tSv1Rpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -399,7 +431,7 @@ func testV1TSSetThresholdProfile(t *testing.T) {
 func testV1TSUpdateThresholdProfile(t *testing.T) {
 	var result string
 	tPrfl.FilterIDs = []string{"*string:~Account:1001", "*prefix:~DST:10"}
-	if err := tSv1Rpc.Call("ApierV1.SetThresholdProfile", tPrfl, &result); err != nil {
+	if err := tSv1Rpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -453,7 +485,7 @@ func testV1TSMaxHits(t *testing.T) {
 		},
 	}
 	//set
-	if err := tSv1Rpc.Call("ApierV1.SetThresholdProfile", tPrfl, &reply); err != nil {
+	if err := tSv1Rpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply returned", reply)
@@ -461,11 +493,13 @@ func testV1TSMaxHits(t *testing.T) {
 
 	var ids []string
 	eIDs := []string{"TH3"}
-	thEvent := &utils.CGREvent{ // hitting TH3
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.Account: "1002",
+	thEvent := &engine.ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{ // hitting TH3
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Account: "1002",
+			},
 		},
 	}
 	//process event
@@ -478,7 +512,7 @@ func testV1TSMaxHits(t *testing.T) {
 	var td engine.Threshold
 	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "TH3", Hits: 1}
 	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "TH3"}, &td); err != nil {
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TH3"}}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd.Hits, td.Hits) {
 		t.Errorf("expecting: %+v, received: %+v", eTd, td)
@@ -506,7 +540,7 @@ func testV1TSMaxHits(t *testing.T) {
 	//check threshold after second process ( hits : 2)
 	eTd.Hits = 2
 	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "TH3"}, &td); err != nil {
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TH3"}}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd.Hits, td.Hits) {
 		t.Errorf("expecting: %+v, received: %+v", eTd, td)
@@ -520,7 +554,7 @@ func testV1TSMaxHits(t *testing.T) {
 	}
 	//check threshold after third process (reached the maximum hits and should be removed)
 	if err := tSv1Rpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "TH3"}, &td); err == nil ||
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "TH3"}}, &td); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Err : %+v \n, td : %+v", err, utils.ToJSON(td))
 	}

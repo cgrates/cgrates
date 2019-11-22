@@ -22,7 +22,6 @@ package v1
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
@@ -108,7 +107,7 @@ func testFilterStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testFilterRpcConn(t *testing.T) {
 	var err error
-	filterRPC, err = jsonrpc.Dial("tcp", filterCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	filterRPC, err = newRPCClient(filterCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -22,7 +22,6 @@ package v1
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"sort"
@@ -64,7 +63,7 @@ var sTestsAPIer = []func(t *testing.T){
 
 //Test start here
 func TestAPIerIT(t *testing.T) {
-	apierConfigDIR = "tutmysql"
+	apierConfigDIR = "tutmysql" // no need for a new config with *gob transport in this case
 	for _, stest := range sTestsAPIer {
 		t.Run(apierConfigDIR, stest)
 	}
@@ -104,7 +103,7 @@ func testAPIerStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testAPIerRPCConn(t *testing.T) {
 	var err error
-	apierRPC, err = jsonrpc.Dial("tcp", apierCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	apierRPC, err = newRPCClient(apierCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -179,7 +178,7 @@ func testAPIerRemoveTPFromFolder(t *testing.T) {
 func testAPIerAfterDelete(t *testing.T) {
 	var reply *engine.AttributeProfile
 	if err := apierRPC.Call(utils.ApierV1GetAttributeProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}, &reply); err == nil ||
+		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}}, &reply); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Fatal(err)
 	}
