@@ -21,7 +21,6 @@ package v2
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
@@ -104,7 +103,7 @@ func testV2CDRsOfflineStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testV2cdrsOfflineRpcConn(t *testing.T) {
-	cdrsOfflineRpc, err = jsonrpc.Dial("tcp", cdrsOfflineCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrsOfflineRpc, err = newRPCClient(cdrsOfflineCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -160,16 +159,18 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 		t.Error(err)
 	}
 	//create a threshold that match out account
-	tPrfl := &engine.ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "THD_Test",
-		FilterIDs: []string{"*string:Account:test"},
-		MaxHits:   -1,
-		MinSleep:  time.Duration(time.Second),
-		Blocker:   false,
-		Weight:    20.0,
-		ActionIDs: []string{"ACT_LOG"},
-		Async:     false,
+	tPrfl := v1.ThresholdWithCache{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "THD_Test",
+			FilterIDs: []string{"*string:Account:test"},
+			MaxHits:   -1,
+			MinSleep:  time.Duration(time.Second),
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_LOG"},
+			Async:     false,
+		},
 	}
 	if err := cdrsOfflineRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
@@ -204,7 +205,7 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 		t.Error("Unexpected error received: ", err)
 	}
 	//process cdr should trigger balance update event
-	if err := cdrsOfflineRpc.Call(utils.CDRsV1ProcessCDR, cdr, &reply); err != nil {
+	if err := cdrsOfflineRpc.Call(utils.CDRsV1ProcessCDR, &engine.CDRWithArgDispatcher{CDR: cdr}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -274,20 +275,22 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 		t.Error(err)
 	}
 	//create a threshold that match out account
-	tPrfl := &engine.ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "THD_Test2",
-		FilterIDs: []string{"*string:Account:test2"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+	tPrfl := &v1.ThresholdWithCache{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "THD_Test2",
+			FilterIDs: []string{"*string:Account:test2"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   -1,
+			MinSleep:  time.Duration(0),
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_LOG"},
+			Async:     false,
 		},
-		MaxHits:   -1,
-		MinSleep:  time.Duration(0),
-		Blocker:   false,
-		Weight:    20.0,
-		ActionIDs: []string{"ACT_LOG"},
-		Async:     false,
 	}
 	if err := cdrsOfflineRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
@@ -374,7 +377,7 @@ func testV2CDRsBalancesWithSameWeight(t *testing.T) {
 		t.Error("Unexpected error received: ", err)
 	}
 	//process cdr should trigger balance update event
-	if err := cdrsOfflineRpc.Call(utils.CDRsV1ProcessCDR, cdr, &reply); err != nil {
+	if err := cdrsOfflineRpc.Call(utils.CDRsV1ProcessCDR, &engine.CDRWithArgDispatcher{CDR: cdr}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)

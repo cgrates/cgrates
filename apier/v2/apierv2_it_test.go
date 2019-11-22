@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"net/rpc"
@@ -37,15 +38,25 @@ import (
 )
 
 var (
-	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	waitRater = flag.Int("wait_rater", 1500, "Number of miliseconds to wait for rater to start and cache")
+	dataDir      = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
+	waitRater    = flag.Int("wait_rater", 1500, "Number of miliseconds to wait for rater to start and cache")
+	encoding     = flag.String("rpc", utils.MetaJSONrpc, "what encoding whould be uused for rpc comunication")
+	apierCfgPath string
+	apierCfg     *config.CGRConfig
+	apierRPC     *rpc.Client
+	dm           *engine.DataManager // share db connection here so we can check data we set through APIs
 )
 
-var apierCfgPath string
-var apierCfg *config.CGRConfig
-var apierRPC *rpc.Client
-var dm *engine.DataManager // share db connection here so we can check data we set through APIs
-
+func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
+	switch *encoding {
+	case utils.MetaJSONrpc:
+		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
+	case utils.MetaGOBrpc:
+		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+	default:
+		return nil, errors.New("UNSUPPORTED_RPC")
+	}
+}
 func TestApierV2itLoadConfig(t *testing.T) {
 	apierCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
 	if apierCfg, err = config.NewCGRConfigFromPath(apierCfgPath); err != nil {
@@ -88,7 +99,7 @@ func TestApierV2itStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestApierV2itRpcConn(t *testing.T) {
-	apierRPC, err = jsonrpc.Dial("tcp", apierCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	apierRPC, err = newRPCClient(apierCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
