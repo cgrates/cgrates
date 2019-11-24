@@ -1377,7 +1377,10 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-
+	if err := tFIdxRpc.Call(utils.ApierV1GetAttributeProfile,
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{
+			Tenant: tenant, ID: "ApierTest2"}}, &reply); err != nil {
+		t.Error(err)
 		t.Error(err)
 	} else if !reflect.DeepEqual(alsPrf.FilterIDs, reply.FilterIDs) {
 		t.Errorf("Expecting : %+v, received: %+v", alsPrf.FilterIDs, reply.FilterIDs)

@@ -758,6 +758,19 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
+	tEv := &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.EventType:  utils.AccountUpdate,
+				utils.Account:    "1003",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(45 * time.Second),
+				utils.Cost:       12.1,
+			},
+		},
+	}
 	var ids []string
 	expected := []string{"Stats1"}
 	if err := tFIdxCaRpc.Call(utils.StatSv1ProcessEvent,
