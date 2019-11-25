@@ -224,7 +224,7 @@ func testV2CDRsGetCdrs(t *testing.T) {
 //Disable Attributes process
 func testV2CDRsProcessCDR2(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
-		AttributeS: utils.BoolPointer(false),
+		Flags: []string{"*attributes:false"},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
@@ -297,8 +297,7 @@ func testV2CDRsGetCdrs2(t *testing.T) {
 //Disable Attributes and Charger process
 func testV2CDRsProcessCDR3(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
-		AttributeS: utils.BoolPointer(false),
-		ChargerS:   utils.BoolPointer(false),
+		Flags: []string{"*attributes:false", "*chargers:false"},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
@@ -360,7 +359,7 @@ func testV2CDRsGetCdrs3(t *testing.T) {
 // Enable Attributes process
 func testV2CDRsProcessCDR4(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
-		AttributeS: utils.BoolPointer(true),
+		Flags: []string{"*attributes:true"},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
@@ -552,9 +551,7 @@ func testV2CDRsSetThresholdProfile(t *testing.T) {
 
 func testV2CDRsProcessCDR5(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
-		Store:      utils.BoolPointer(false),
-		StatS:      utils.BoolPointer(false),
-		ThresholdS: utils.BoolPointer(false),
+		Flags: []string{"*store:false", "*stats:false", "*thresholds:false"},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
@@ -617,9 +614,7 @@ func testV2CDRsGetThreshold1(t *testing.T) {
 
 func testV2CDRsProcessCDR6(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
-		Store:      utils.BoolPointer(false),
-		StatS:      utils.BoolPointer(true),
-		ThresholdS: utils.BoolPointer(true),
+		Flags: []string{"*store:false", "*stats:true", "*thresholds:true"},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
@@ -674,8 +669,7 @@ func testV2CDRsGetThreshold2(t *testing.T) {
 
 func testV2CDRsProcessCDR7(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
-		Store: utils.BoolPointer(true),
-		RALs:  utils.BoolPointer(true),
+		Flags: []string{"*store:true", "*rals:true"},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{

@@ -47,7 +47,12 @@
 
 "thresholds": {
 	"store_interval": "-1"
-}
+},
 
+"apier": {
+	"scheduler_conns": [					// connections to SchedulerS for reloads
+		{"address": "*internal"},
+	],
+},
 
 }
