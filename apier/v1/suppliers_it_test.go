@@ -953,6 +953,9 @@ func testV1SplSGetSupplierForEvent(t *testing.T) {
 		},
 		Weight: 50,
 	}
+	if *encoding == utils.MetaGOBrpc { // in gob emtpty slice is encoded as nil
+		expected.SortingParameters = nil
+	}
 	var supProf []*engine.SupplierProfile
 	if err := splSv1Rpc.Call(utils.SupplierSv1GetSupplierProfilesForEvent,
 		ev, &supProf); err != nil {
