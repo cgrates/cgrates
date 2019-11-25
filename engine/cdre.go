@@ -388,10 +388,8 @@ func (cdre *CDRExporter) processCDRs() (err error) {
 			if cdre.exportTemplate.Tenant == "" {
 				cdre.exportTemplate.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
 			}
-			cgrDp := config.NewNavigableMap(nil)
-			cgrDp.Set([]string{utils.MetaReq}, cdr.AsMapStringIface(), false, false)
 			if pass, err := cdre.filterS.Pass(cdre.exportTemplate.Tenant,
-				cdre.exportTemplate.Filters, cgrDp); err != nil || !pass {
+				cdre.exportTemplate.Filters, config.NewNavigableMap(cdr.AsMapStringIface())); err != nil || !pass {
 				continue // Not passes filters, ignore this CDR
 			}
 		}

@@ -79,7 +79,7 @@ func MatchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 					fldVals = utils.SplitPrefix(fldVal, 1) // all prefixes till last digit
 				}
 				if fldName != utils.META_ANY {
-					fldName = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + fldName
+					fldName = utils.DynamicDataPrefix + fldName
 				}
 				var dbItemIDs utils.StringMap // list of items matched in DB
 				for _, val := range fldVals {

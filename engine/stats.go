@@ -167,8 +167,6 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 		}
 		sqIDs = mapIDs.Slice()
 	}
-	evNm := config.NewNavigableMap(nil)
-	evNm.Set([]string{utils.MetaReq}, args.Event, false, false)
 	for _, sqID := range sqIDs {
 		sqPrfl, err := sS.dm.GetStatQueueProfile(args.Tenant, sqID, true, true, utils.NonTransactional)
 		if err != nil {
@@ -182,7 +180,7 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 			continue
 		}
 		if pass, err := sS.filterS.Pass(args.Tenant, sqPrfl.FilterIDs,
-			evNm); err != nil {
+			config.NewNavigableMap(args.Event)); err != nil {
 			return nil, err
 		} else if !pass {
 			continue

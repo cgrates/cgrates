@@ -69,8 +69,6 @@ func (cS *ChargerService) matchingChargerProfilesForEvent(cgrEv *utils.CGREventW
 	if err != nil {
 		return nil, err
 	}
-	evNm := config.NewNavigableMap(nil)
-	evNm.Set([]string{utils.MetaReq}, cgrEv.Event, false, false)
 	matchingCPs := make(map[string]*ChargerProfile)
 	for cpID := range cpIDs {
 		cP, err := cS.dm.GetChargerProfile(cgrEv.Tenant, cpID, true, true, utils.NonTransactional)
@@ -85,7 +83,7 @@ func (cS *ChargerService) matchingChargerProfilesForEvent(cgrEv *utils.CGREventW
 			continue
 		}
 		if pass, err := cS.filterS.Pass(cgrEv.Tenant, cP.FilterIDs,
-			evNm); err != nil {
+			config.NewNavigableMap(cgrEv.Event)); err != nil {
 			return nil, err
 		} else if !pass {
 			continue
