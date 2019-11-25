@@ -147,6 +147,9 @@ func testAPIerVerifyAttributesAfterLoad(t *testing.T) {
 			Weight: 20.0,
 		},
 	}
+	if *encoding == utils.MetaGOBrpc {
+		eAttrPrf.Attributes[0].FilterIDs = nil // in gob emtpty slice is encoded as nil
+	}
 	eAttrPrf.Compile()
 	var attrReply *engine.AttributeProfile
 	if err := apierRPC.Call(utils.AttributeSv1GetAttributeForEvent,

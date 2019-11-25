@@ -159,6 +159,10 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 			},
 		},
 	}
+	if *encoding == utils.MetaGOBrpc { // in gob emtpty slice is encoded as nil
+		expected.Hosts[0].FilterIDs = nil
+		expected.Hosts[1].FilterIDs = nil
+	}
 	expected.Hosts.Sort()
 	if err := dspRPC.Call(utils.DispatcherSv1GetProfileForEvent, &arg, &reply); err != nil {
 		t.Error(err)
