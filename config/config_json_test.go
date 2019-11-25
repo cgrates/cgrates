@@ -355,14 +355,8 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Extra_fields:         &[]string{},
 		Store_cdrs:           utils.BoolPointer(true),
 		Session_cost_retries: utils.IntPointer(5),
-		Chargers_conns: &[]*RemoteHostJson{
-			{
-				Address: utils.StringPointer("*internal"),
-			}},
-		Rals_conns: &[]*RemoteHostJson{
-			{
-				Address: utils.StringPointer("*internal"),
-			}},
+		Chargers_conns: &[]*RemoteHostJson{},
+		Rals_conns: &[]*RemoteHostJson{},
 		Attributes_conns:   &[]*RemoteHostJson{},
 		Thresholds_conns:   &[]*RemoteHostJson{},
 		Stats_conns:        &[]*RemoteHostJson{},

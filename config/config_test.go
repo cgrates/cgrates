@@ -524,11 +524,11 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	if cgrCfg.CdrsCfg().SMCostRetries != 5 {
 		t.Errorf("Expecting: 5 , received: %+v", cgrCfg.CdrsCfg().SMCostRetries)
 	}
-	if expected := []*RemoteHost{{Address: utils.MetaInternal}}; !reflect.DeepEqual(cgrCfg.CdrsCfg().RaterConns, expected) {
-		t.Errorf("Expecting: %+v , received: %+v", expected, cgrCfg.CdrsCfg().RaterConns)
+	if !reflect.DeepEqual(cgrCfg.CdrsCfg().RaterConns, eHaPoolCfg) {
+		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().RaterConns)
 	}
-	if expected := []*RemoteHost{{Address: utils.MetaInternal}}; !reflect.DeepEqual(cgrCfg.CdrsCfg().ChargerSConns, expected) {
-		t.Errorf("Expecting: %+v , received: %+v", expected, cgrCfg.CdrsCfg().ChargerSConns)
+	if !reflect.DeepEqual(cgrCfg.CdrsCfg().ChargerSConns, eHaPoolCfg) {
+		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().ChargerSConns)
 	}
 	if !reflect.DeepEqual(cgrCfg.CdrsCfg().AttributeSConns, eHaPoolCfg) {
 		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().AttributeSConns)
