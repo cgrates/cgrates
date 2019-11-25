@@ -373,6 +373,13 @@ func main() {
 		}); err != nil {
 			log.Fatal("Could not reload cache: ", err)
 		}
+		if schedulerS != nil {
+			if err := tpReader.ReloadScheduler(*verbose); err != nil {
+				log.Fatal("Could not reload scheduler: ", err)
+			}
+		}
+		// release the reader with it's structures
+		tpReader.Init()
 	} else {
 		if err := tpReader.RemoveFromDatabase(*verbose, *disableReverse); err != nil {
 			log.Fatal("Could not delete from database: ", err)

@@ -37,18 +37,6 @@
 },
 
 
-"resources": {
-	"store_interval": "-1"
-},
-
-"stats": {
-	"store_interval": "-1"
-},
-
-"thresholds": {
-	"store_interval": "-1"
-},
-
 "apier": {
 	"scheduler_conns": [					// connections to SchedulerS for reloads
 		{"address": "*internal"},

@@ -348,7 +348,14 @@ func (apiv1 *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply
 	if err := dbReader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
-
+	if apiv1.SchedulerS != nil {
+		utils.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading scheduler.")
+		if err := dbReader.ReloadScheduler(true); err != nil {
+			return utils.NewErrServerError(err)
+		}
+	}
+	// release the reader with it's structures
+	dbReader.Init()
 	*reply = utils.OK
 	return nil
 }
@@ -839,7 +846,8 @@ func (apiv1 *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder,
 
 	// create the TpReader
 	loader, err := engine.NewTpReader(apiv1.DataManager.DataDB(),
-		engine.NewFileCSVStorage(utils.CSV_SEP, attrs.FolderPath, attrs.Recursive), "", apiv1.Config.GeneralCfg().DefaultTimezone,
+		engine.NewFileCSVStorage(utils.CSV_SEP, attrs.FolderPath, attrs.Recursive),
+		"", apiv1.Config.GeneralCfg().DefaultTimezone,
 		apiv1.CacheS, apiv1.SchedulerS)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -873,6 +881,14 @@ func (apiv1 *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder,
 	if err := loader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
+	if apiv1.SchedulerS != nil {
+		utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading scheduler.")
+		if err := loader.ReloadScheduler(true); err != nil {
+			return utils.NewErrServerError(err)
+		}
+	}
+	// release the reader with it's structures
+	loader.Init()
 	*reply = utils.OK
 	return nil
 }
@@ -930,6 +946,14 @@ func (apiv1 *ApierV1) RemoveTPFromFolder(attrs utils.AttrLoadTpFromFolder, reply
 	if err := loader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
+	if apiv1.SchedulerS != nil {
+		utils.Logger.Info("ApierV1.RemoveTPFromFolder, reloading scheduler.")
+		if err := loader.ReloadScheduler(true); err != nil {
+			return utils.NewErrServerError(err)
+		}
+	}
+	// release the reader with it's structures
+	loader.Init()
 	*reply = utils.OK
 	return nil
 }
@@ -973,7 +997,14 @@ func (apiv1 *ApierV1) RemoveTPFromStorDB(attrs AttrLoadTpFromStorDb, reply *stri
 	if err := dbReader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
-
+	if apiv1.SchedulerS != nil {
+		utils.Logger.Info("ApierV1.RemoveTPFromStorDB, reloading scheduler.")
+		if err := dbReader.ReloadScheduler(true); err != nil {
+			return utils.NewErrServerError(err)
+		}
+	}
+	// release the reader with it's structures
+	dbReader.Init()
 	*reply = utils.OK
 	return nil
 }

@@ -107,6 +107,7 @@ func (fS *FilterS) connRALs(ralSChan chan rpcclient.RpcClientConnection) (err er
 // receives the event as DataProvider so we can accept undecoded data (ie: HttpRequest)
 func (fS *FilterS) Pass(tenant string, filterIDs []string,
 	ev config.DataProvider) (pass bool, err error) {
+	fmt.Println("filterIDs: ", filterIDs)
 	var fieldNameDP config.DataProvider
 	var fieldValuesDP []config.DataProvider
 	if len(filterIDs) == 0 {
@@ -549,8 +550,10 @@ func (fS *FilterS) getFieldNameDataProvider(initialDP config.DataProvider,
 		//convert ifaceStatValues into a NavigableMap
 		dp = config.NewNavigableMap(ifaceStatValues)
 		*fieldName = utils.DynamicDataPrefix + splitFldName[2]
-	default:
+	case strings.HasPrefix(*fieldName, utils.DynamicDataPrefix+utils.MetaReq):
 		dp = initialDP
+	default:
+		return nil, utils.ErrPrefixNotFound(fmt.Sprintf(" data provider prefix for <%s>", *fieldName))
 	}
 	return
 }

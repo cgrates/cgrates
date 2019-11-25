@@ -59,6 +59,7 @@ func (alS *AttributeService) Shutdown() (err error) {
 
 // matchingAttributeProfilesForEvent returns ordered list of matching resources which are active by the time of the call
 func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent) (matchAttrPrfl *AttributeProfile, err error) {
+	fmt.Println("enter in attributeProfile for Event")
 	var attrIDs []string
 	contextVal := utils.META_DEFAULT
 	if args.Context != nil && *args.Context != "" {
@@ -74,14 +75,19 @@ func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent
 			if err != utils.ErrNotFound {
 				return nil, err
 			}
-			if aPrflIDs, err = MatchingItemIDsForEvent(args.Event, alS.cgrcfg.AttributeSCfg().StringIndexedFields, alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
+			if aPrflIDs, err = MatchingItemIDsForEvent(args.Event, alS.cgrcfg.AttributeSCfg().StringIndexedFields,
+				alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
 				alS.dm, utils.CacheAttributeFilterIndexes, utils.ConcatenatedKey(args.Tenant, utils.META_ANY),
 				alS.filterS.cfg.AttributeSCfg().IndexedSelects); err != nil {
+				fmt.Println("exit with not found")
 				return nil, err
 			}
 		}
 		attrIDs = aPrflIDs.Slice()
 	}
+	fmt.Println("attrIDs :", attrIDs)
+	evNm := config.NewNavigableMap(nil)
+	evNm.Set([]string{utils.MetaReq}, args.Event, false, false)
 	for _, apID := range attrIDs {
 		aPrfl, err := alS.dm.GetAttributeProfile(args.Tenant, apID, true, true, utils.NonTransactional)
 		if err != nil {
@@ -95,7 +101,7 @@ func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent
 			continue
 		}
 		if pass, err := alS.filterS.Pass(args.Tenant, aPrfl.FilterIDs,
-			config.NewNavigableMap(args.Event)); err != nil {
+			evNm); err != nil {
 			return nil, err
 		} else if !pass {
 			continue
@@ -159,12 +165,13 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 		MatchedProfiles: []string{attrPrf.ID},
 		CGREvent:        args.Clone(),
 		blocker:         attrPrf.Blocker}
-
+	evNm := config.NewNavigableMap(nil)
+	evNm.Set([]string{utils.MetaReq}, args.Event, false, false)
 	for _, attribute := range attrPrf.Attributes {
 		//in case that we have filter for attribute send them to FilterS to be processed
 		if len(attribute.FilterIDs) != 0 {
 			if pass, err := alS.filterS.Pass(args.Tenant, attribute.FilterIDs,
-				config.NewNavigableMap(args.Event)); err != nil {
+				evNm); err != nil {
 				return nil, err
 			} else if !pass {
 				continue

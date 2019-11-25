@@ -75,13 +75,16 @@
 	],
 },
 
-"stats": {
-	"enabled": false,
-	"store_interval": "-1",
-},
 
 "scheduler": {
 	"enabled": true,
+},
+
+
+"apier": {
+	"scheduler_conns": [
+		{"address": "*internal"},
+	],
 },
 
 }
