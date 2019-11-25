@@ -532,6 +532,40 @@ func TestConcatenatedKey(t *testing.T) {
 	}
 }
 
+func TestSplitConcatenatedKey(t *testing.T) {
+	key := "test1:test2:test3"
+	eOut := []string{"test1", "test2", "test3"}
+	if rcv := SplitConcatenatedKey(key); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+}
+
+func TestInfieldJoin(t *testing.T) {
+	if rcv := InfieldJoin(""); rcv != "" {
+		t.Errorf("Expecting: empty string, received: %+v", ToJSON(rcv))
+	}
+	key := "test1;test2;test3"
+
+	eOut := "test1;test2;test3"
+	if rcv := InfieldJoin(key); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", ToJSON(eOut), ToJSON(rcv))
+	}
+	key2 := "test10;test12"
+
+	eOut = "test1;test2;test3;test10;test12"
+	if rcv := InfieldJoin(key, key2); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", ToJSON(eOut), ToJSON(rcv))
+	}
+}
+
+func TestInfieldSplit(t *testing.T) {
+	key := "test1;test2;test3"
+	eOut := []string{"test1", "test2", "test3"}
+	if rcv := InfieldSplit(key); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+}
+
 func TestMandatory(t *testing.T) {
 	_, err := FmtFieldWidth("", "", 0, "", "", true)
 	if err == nil {
