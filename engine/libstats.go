@@ -216,9 +216,11 @@ func (sq *StatQueue) addStatEvent(ev *utils.CGREvent, filterS *FilterS) (err err
 			ExpiryTime *time.Time
 		}{ev.ID, expTime})
 	var pass bool
+	evNm := config.NewNavigableMap(nil)
+	evNm.Set([]string{utils.MetaReq}, ev.Event, false, false)
 	for metricID, metric := range sq.SQMetrics {
 		if pass, err = filterS.Pass(ev.Tenant, metric.GetFilterIDs(),
-			config.NewNavigableMap(ev.Event)); err != nil {
+			evNm); err != nil {
 			return
 		} else if !pass {
 			continue

@@ -421,9 +421,11 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, httpSkipTlsCheck bool,
 // ExportRecord is a []string to keep it compatible with encoding/csv Writer
 func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
 	httpSkipTlsCheck bool, groupedCDRs []*CDR, filterS *FilterS) (expRecord []string, err error) {
+	nM := config.NewNavigableMap(nil)
+	nM.Set([]string{utils.MetaReq}, cdr.AsMapStringIface(), false, false)
 	for _, cfgFld := range exportFields {
 		if pass, err := filterS.Pass(cdr.Tenant,
-			cfgFld.Filters, config.NewNavigableMap(cdr.AsMapStringIface())); err != nil {
+			cfgFld.Filters, nM); err != nil {
 			return []string{}, err
 		} else if !pass {
 			continue
@@ -444,9 +446,11 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
 func (cdr *CDR) AsExportMap(exportFields []*config.FCTemplate, httpSkipTlsCheck bool,
 	groupedCDRs []*CDR, filterS *FilterS) (expMap map[string]string, err error) {
 	expMap = make(map[string]string)
+	nM := config.NewNavigableMap(nil)
+	nM.Set([]string{utils.MetaReq}, cdr.AsMapStringIface(), false, false)
 	for _, cfgFld := range exportFields {
 		if pass, err := filterS.Pass(cdr.Tenant,
-			cfgFld.Filters, config.NewNavigableMap(cdr.AsMapStringIface())); err != nil {
+			cfgFld.Filters, nM); err != nil {
 			return nil, err
 		} else if !pass {
 			continue

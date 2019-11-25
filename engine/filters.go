@@ -549,8 +549,10 @@ func (fS *FilterS) getFieldNameDataProvider(initialDP config.DataProvider,
 		//convert ifaceStatValues into a NavigableMap
 		dp = config.NewNavigableMap(ifaceStatValues)
 		*fieldName = utils.DynamicDataPrefix + splitFldName[2]
-	default:
+	case strings.HasPrefix(*fieldName, utils.DynamicDataPrefix+utils.MetaReq):
 		dp = initialDP
+	default:
+		return nil, utils.ErrPrefixNotFound(fmt.Sprintf(" data provider prefix for <%s>", *fieldName))
 	}
 	return
 }
