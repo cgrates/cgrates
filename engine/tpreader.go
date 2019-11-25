@@ -2512,8 +2512,6 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 		Cache.Set(utils.CacheLoadIDs, key, val, nil,
 			cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	}
-	// release the reader with it's structures
-	tpr.Init()
 	return
 }
 

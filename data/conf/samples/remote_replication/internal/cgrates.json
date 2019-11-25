@@ -81,4 +81,10 @@
 },
 
 
+"apier": {
+	"scheduler_conns": [
+		{"address": "*internal"},
+	],
+},
+
 }

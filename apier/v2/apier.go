@@ -150,6 +150,8 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 			return utils.NewErrServerError(err)
 		}
 	}
+	// release the reader with it's structures
+	loader.Init()
 	loadHistList, err := self.DataManager.DataDB().GetLoadHistory(1, true, utils.NonTransactional)
 	if err != nil {
 		return err

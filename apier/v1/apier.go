@@ -354,6 +354,8 @@ func (apiv1 *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply
 			return utils.NewErrServerError(err)
 		}
 	}
+	// release the reader with it's structures
+	dbReader.Init()
 	*reply = utils.OK
 	return nil
 }
@@ -885,6 +887,8 @@ func (apiv1 *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder,
 			return utils.NewErrServerError(err)
 		}
 	}
+	// release the reader with it's structures
+	loader.Init()
 	*reply = utils.OK
 	return nil
 }
@@ -948,6 +952,8 @@ func (apiv1 *ApierV1) RemoveTPFromFolder(attrs utils.AttrLoadTpFromFolder, reply
 			return utils.NewErrServerError(err)
 		}
 	}
+	// release the reader with it's structures
+	loader.Init()
 	*reply = utils.OK
 	return nil
 }
@@ -997,7 +1003,8 @@ func (apiv1 *ApierV1) RemoveTPFromStorDB(attrs AttrLoadTpFromStorDb, reply *stri
 			return utils.NewErrServerError(err)
 		}
 	}
-
+	// release the reader with it's structures
+	dbReader.Init()
 	*reply = utils.OK
 	return nil
 }
