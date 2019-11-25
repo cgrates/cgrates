@@ -305,11 +305,7 @@ func TestCGRConfigReloadCDRs(t *testing.T) {
 				Transport: utils.MetaJSONrpc,
 			},
 		},
-		RaterConns: []*RemoteHost{
-			&RemoteHost{
-				Address: utils.MetaInternal,
-			},
-		},
+		RaterConns:      []*RemoteHost{},
 		AttributeSConns: []*RemoteHost{},
 		ThresholdSConns: []*RemoteHost{},
 		StatSConns:      []*RemoteHost{},
