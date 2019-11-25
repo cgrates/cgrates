@@ -178,8 +178,8 @@ func testCDRsOnExpDisableOnlineExport(t *testing.T) {
 	var reply string
 	if err := cdrsMasterRpc.Call(utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
+			Flags:[]string{"*export:false"},
 			CGREvent: *testCdr.AsCGREvent(),
-			Export:   utils.BoolPointer(false),
 		}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
@@ -363,8 +363,8 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 	var reply string
 	if err := cdrsMasterRpc.Call(utils.CDRsV1ProcessEvent,
 		&engine.ArgV1ProcessEvent{
+			Flags:[]string{"*export:true"},
 			CGREvent: *testCdr.AsCGREvent(),
-			Export:   utils.BoolPointer(true),
 		}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {

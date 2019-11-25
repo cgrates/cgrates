@@ -249,6 +249,7 @@ func MapStringToInt64(in map[string]string) (out map[string]int64, err error) {
 	return mapout, nil
 }
 
+// FlagsWithParamsFromSlice construct a  FlagsWithParams from the given slice
 func FlagsWithParamsFromSlice(s []string) (FlagsWithParams, error) {
 	result := make(FlagsWithParams, len(s))
 	for _, v := range s {
@@ -263,23 +264,26 @@ func FlagsWithParamsFromSlice(s []string) (FlagsWithParams, error) {
 	return result, nil
 }
 
-type FlagsWithParams map[string]interface{}
+// FlagsWithParams should store a list of profiles for each subsystem
+type FlagsWithParams map[string][]string
 
+// HasKey returns if the key was mentioned in flags
 func (fWp FlagsWithParams) HasKey(key string) (has bool) {
 	_, has = fWp[key]
 	return
 }
 
+// ParamsSlice returns the list of profiles for the subsystem
 func (fWp FlagsWithParams) ParamsSlice(subs string) (ps []string) {
 	if psIfc, has := fWp[subs]; has {
-		ps, _ = psIfc.([]string)
+		ps = psIfc
 	}
-	return ps
+	return
 }
 
-//func to convert from FlagsWithParams back to []string
+// SliceFlags converts from FlagsWithParams back to []string
 func (fWp FlagsWithParams) SliceFlags() (sls []string) {
-	for key, _ := range fWp {
+	for key := range fWp {
 		if prmSlice := fWp.ParamsSlice(key); !reflect.DeepEqual(prmSlice, []string{}) {
 			sls = append(sls, ConcatenatedKey(key, strings.Join(prmSlice, INFIELD_SEP)))
 		} else {
@@ -291,12 +295,12 @@ func (fWp FlagsWithParams) SliceFlags() (sls []string) {
 
 // GetBool returns the flag as boolean
 func (fWp FlagsWithParams) GetBool(key string) (b bool) {
-	var v interface{}
-	if _, b = fWp[key]; !b {
+	var v []string
+	if v, b = fWp[key]; !b {
 		return // not present means false
 	}
-	if v.(string) != "" && v.(string) != "true" {
-		return // not empty nor true means false again
+	if v != nil && len(v) != 0 {
+		return false // empty slice
 	}
-	return true
+	return v[0] == "true" // check only the first element
 }

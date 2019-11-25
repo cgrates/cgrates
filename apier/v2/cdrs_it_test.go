@@ -473,11 +473,7 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 	}
 
 	argsCdr := &engine.ArgV1ProcessEvent{
-		AttributeS: utils.BoolPointer(true),
-		ChargerS:   utils.BoolPointer(true),
-		StatS:      utils.BoolPointer(false),
-		ThresholdS: utils.BoolPointer(false),
-		Store:      utils.BoolPointer(true),
+		Flags: []string{"*attributes:true", "*chargers:true", "*stats:false", "*thresholds:false", "*store:true"},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.com",
 			Event: map[string]interface{}{

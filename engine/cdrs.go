@@ -365,8 +365,8 @@ func (cdrS *CDRServer) chrgrSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher
 	cgrEvs = make([]*utils.CGREventWithArgDispatcher, len(chrgrs))
 	for i, cgrPrfl := range chrgrs {
 		cgrEvs[i] = &utils.CGREventWithArgDispatcher{
-			cgrPrfl.CGREvent,
-			cgrEv.ArgDispatcher,
+			CGREvent:      cgrPrfl.CGREvent,
+			ArgDispatcher: cgrEv.ArgDispatcher,
 		}
 	}
 	return
