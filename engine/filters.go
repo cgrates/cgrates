@@ -107,6 +107,7 @@ func (fS *FilterS) connRALs(ralSChan chan rpcclient.RpcClientConnection) (err er
 // receives the event as DataProvider so we can accept undecoded data (ie: HttpRequest)
 func (fS *FilterS) Pass(tenant string, filterIDs []string,
 	ev config.DataProvider) (pass bool, err error) {
+	fmt.Println("filterIDs: ", filterIDs)
 	var fieldNameDP config.DataProvider
 	var fieldValuesDP []config.DataProvider
 	if len(filterIDs) == 0 {

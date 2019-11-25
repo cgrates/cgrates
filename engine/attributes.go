@@ -59,6 +59,7 @@ func (alS *AttributeService) Shutdown() (err error) {
 
 // matchingAttributeProfilesForEvent returns ordered list of matching resources which are active by the time of the call
 func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent) (matchAttrPrfl *AttributeProfile, err error) {
+	fmt.Println("enter in attributeProfile for Event")
 	var attrIDs []string
 	contextVal := utils.META_DEFAULT
 	if args.Context != nil && *args.Context != "" {
@@ -74,14 +75,17 @@ func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent
 			if err != utils.ErrNotFound {
 				return nil, err
 			}
-			if aPrflIDs, err = MatchingItemIDsForEvent(args.Event, alS.cgrcfg.AttributeSCfg().StringIndexedFields, alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
+			if aPrflIDs, err = MatchingItemIDsForEvent(args.Event, alS.cgrcfg.AttributeSCfg().StringIndexedFields,
+				alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
 				alS.dm, utils.CacheAttributeFilterIndexes, utils.ConcatenatedKey(args.Tenant, utils.META_ANY),
 				alS.filterS.cfg.AttributeSCfg().IndexedSelects); err != nil {
+				fmt.Println("exit with not found")
 				return nil, err
 			}
 		}
 		attrIDs = aPrflIDs.Slice()
 	}
+	fmt.Println("attrIDs :", attrIDs)
 	evNm := config.NewNavigableMap(nil)
 	evNm.Set([]string{utils.MetaReq}, args.Event, false, false)
 	for _, apID := range attrIDs {
