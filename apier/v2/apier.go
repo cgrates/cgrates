@@ -144,6 +144,10 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	if err := loader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
+	utils.Logger.Info("ApierV2.LoadTariffPlanFromFolder, reloading scheduler.")
+	if err := loader.ReloadScheduler(true); err != nil {
+		return utils.NewErrServerError(err)
+	}
 	loadHistList, err := self.DataManager.DataDB().GetLoadHistory(1, true, utils.NonTransactional)
 	if err != nil {
 		return err

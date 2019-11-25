@@ -2502,17 +2502,6 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 		log.Printf("WARNING: Got error on cache clear: %s\n", err.Error())
 	}
 
-	// in case we have action plans reload the scheduler
-	if len(aps) != 0 {
-		if verbose {
-			log.Print("Reloading scheduler")
-		}
-		if err = tpr.schedulerS.Call(utils.SchedulerSv1Reload,
-			new(utils.CGREventWithArgDispatcher), &reply); err != nil {
-			log.Printf("WARNING: Got error on scheduler reload: %s\n", err.Error())
-		}
-	}
-
 	//get loadIDs for all types
 	loadIDs, err := tpr.dm.GetItemLoadIDs(utils.EmptyString, false)
 	if err != nil {
@@ -2525,5 +2514,25 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 	}
 	// release the reader with it's structures
 	tpr.Init()
+	return
+}
+
+func (tpr *TpReader) ReloadScheduler(verbose bool) (err error) {
+	var reply string
+	aps, _ := tpr.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
+	// in case we have action plans reload the scheduler
+	if len(aps) != 0 {
+		if tpr.schedulerS == nil {
+			log.Print("Scheduler required but the connection is nil")
+			return
+		}
+		if verbose {
+			log.Print("Reloading scheduler")
+		}
+		if err = tpr.schedulerS.Call(utils.SchedulerSv1Reload,
+			new(utils.CGREventWithArgDispatcher), &reply); err != nil {
+			log.Printf("WARNING: Got error on scheduler reload: %s\n", err.Error())
+		}
+	}
 	return
 }
