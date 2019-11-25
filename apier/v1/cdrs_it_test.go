@@ -92,8 +92,8 @@ func testV1CDRsRpcConn(t *testing.T) {
 }
 
 func testV1CDRsLoadTariffPlanFromFolder(t *testing.T) {
-	var loadInst utils.LoadInstance
-	if err := cdrsRpc.Call(utils.ApierV2LoadTariffPlanFromFolder,
+	var loadInst string
+	if err := cdrsRpc.Call(utils.ApierV1LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
 			*dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
 		t.Error(err)
