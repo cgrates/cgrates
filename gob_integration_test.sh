@@ -2,10 +2,10 @@
 go clean --cache
 ./test.sh
 gen=$?
-echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration'
+echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -rpc=*gob'
 go test github.com/cgrates/cgrates/apier/v1 -tags=integration -rpc=*gob
 ap1=$?
-echo 'go test github.com/cgrates/cgrates/apier/v2 -tags=integration'
+echo 'go test github.com/cgrates/cgrates/apier/v2 -tags=integration -rpc=*gob'
 go test github.com/cgrates/cgrates/apier/v2 -tags=integration -rpc=*gob
 ap2=$?
 # echo 'go test github.com/cgrates/cgrates/engine  -tags=integration'

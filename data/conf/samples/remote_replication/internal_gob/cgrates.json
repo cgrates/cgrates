@@ -76,6 +76,12 @@
 },
 
 
+"stats": {
+	"enabled": false,
+	"store_interval": "-1",
+},
+
+
 "scheduler": {
 	"enabled": true,
 },

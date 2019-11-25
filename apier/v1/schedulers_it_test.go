@@ -172,6 +172,7 @@ func testSchedVeifyAccount1001(t *testing.T) {
 			10, rply)
 	}
 
+	acnt = nil // in case of gob ( it doesn't update the empty fields)
 	attrs = &utils.AttrGetAccount{
 		Tenant:  "cgrates.org",
 		Account: "1002",

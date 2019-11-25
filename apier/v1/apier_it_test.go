@@ -1577,6 +1577,10 @@ func TestApierGetCallCostLog(t *testing.T) {
 		Rates:          engine.ChargedRates{},
 		Timings:        engine.ChargedTimings{},
 	}
+	if *encoding == utils.MetaGOBrpc {
+		expected.Usage = nil // 0 value are encoded as nil in gob
+		expected.Cost = nil
+	}
 	attrs.CgrId = "Cdr1"
 	attrs.RunId = ""
 	if err := rater.Call(utils.ApierV1GetEventCost, attrs, &cc); err != nil {

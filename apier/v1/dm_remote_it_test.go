@@ -256,6 +256,9 @@ func testInternalRemoteITGetAttribute(t *testing.T) {
 		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
+	if *encoding == utils.MetaGOBrpc { // in gob emtpty slice is encoded as nil
+		alsPrf.AttributeProfile.Attributes[0].FilterIDs = nil
+	}
 	reply.Compile()
 	if !reflect.DeepEqual(alsPrf.AttributeProfile, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(alsPrf.AttributeProfile), utils.ToJSON(reply))
@@ -442,6 +445,10 @@ func testInternalRemoteITGetSupplier(t *testing.T) {
 			},
 		},
 		Weight: 20,
+	}
+	if *encoding == utils.MetaGOBrpc { // in gob emtpty slice is encoded as nil
+		splPrf.SortingParameters = nil
+		splPrf2.SortingParameters = nil
 	}
 
 	if err := internalRPC.Call(utils.ApierV1GetSupplierProfile,
