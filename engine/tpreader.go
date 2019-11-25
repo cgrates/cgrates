@@ -2522,10 +2522,6 @@ func (tpr *TpReader) ReloadScheduler(verbose bool) (err error) {
 	aps, _ := tpr.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
 	// in case we have action plans reload the scheduler
 	if len(aps) != 0 {
-		if tpr.schedulerS == nil {
-			log.Print("Scheduler required but the connection is nil")
-			return
-		}
 		if verbose {
 			log.Print("Reloading scheduler")
 		}

@@ -348,9 +348,11 @@ func (apiv1 *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply
 	if err := dbReader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	utils.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading scheduler.")
-	if err := dbReader.ReloadScheduler(true); err != nil {
-		return utils.NewErrServerError(err)
+	if apiv1.SchedulerS != nil {
+		utils.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading scheduler.")
+		if err := dbReader.ReloadScheduler(true); err != nil {
+			return utils.NewErrServerError(err)
+		}
 	}
 	*reply = utils.OK
 	return nil
@@ -877,9 +879,11 @@ func (apiv1 *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder,
 	if err := loader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading scheduler.")
-	if err := loader.ReloadScheduler(true); err != nil {
-		return utils.NewErrServerError(err)
+	if apiv1.SchedulerS != nil {
+		utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading scheduler.")
+		if err := loader.ReloadScheduler(true); err != nil {
+			return utils.NewErrServerError(err)
+		}
 	}
 	*reply = utils.OK
 	return nil
@@ -938,9 +942,11 @@ func (apiv1 *ApierV1) RemoveTPFromFolder(attrs utils.AttrLoadTpFromFolder, reply
 	if err := loader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	utils.Logger.Info("ApierV1.RemoveTPFromFolder, reloading scheduler.")
-	if err := loader.ReloadScheduler(true); err != nil {
-		return utils.NewErrServerError(err)
+	if apiv1.SchedulerS != nil {
+		utils.Logger.Info("ApierV1.RemoveTPFromFolder, reloading scheduler.")
+		if err := loader.ReloadScheduler(true); err != nil {
+			return utils.NewErrServerError(err)
+		}
 	}
 	*reply = utils.OK
 	return nil
@@ -985,10 +991,13 @@ func (apiv1 *ApierV1) RemoveTPFromStorDB(attrs AttrLoadTpFromStorDb, reply *stri
 	if err := dbReader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	utils.Logger.Info("ApierV1.RemoveTPFromStorDB, reloading scheduler.")
-	if err := dbReader.ReloadScheduler(true); err != nil {
-		return utils.NewErrServerError(err)
+	if apiv1.SchedulerS != nil {
+		utils.Logger.Info("ApierV1.RemoveTPFromStorDB, reloading scheduler.")
+		if err := dbReader.ReloadScheduler(true); err != nil {
+			return utils.NewErrServerError(err)
+		}
 	}
+
 	*reply = utils.OK
 	return nil
 }
