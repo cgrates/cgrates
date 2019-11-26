@@ -1,8 +1,8 @@
 #Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,FieldName,Type,Value,Blocker,Weight
-cgrates.org,LRN_Dst3125650565,lrn,*string:~Destination:3125650565,,,Destination,*constant,13128543000,false,10
+cgrates.org,LRN_Dst3125650565,lrn,*string:~*req.Destination:3125650565,,,Destination,*constant,13128543000,false,10
 cgrates.org,LRN_Dst3125650565,,,,,OriginalDestination,*constant,3125650565,false,10
-cgrates.org,LRN_LATA_Dst13128543000,lrn,*string:~Destination:13128543000;*rsr::~OriginalDestination(!^$),,,DestinationLATA,*constant,358,false,20
-cgrates.org,LRN_LATA_Cli9174269000,lrn,*string:~Account:9174269000;*rsr::~DestinationLATA(!^$),,,CallerLATA,*constant,132,false,30
+cgrates.org,LRN_LATA_Dst13128543000,lrn,*string:~*req.Destination:13128543000;*rsr::~*req.OriginalDestination(!^$),,,DestinationLATA,*constant,358,false,20
+cgrates.org,LRN_LATA_Cli9174269000,lrn,*string:~*req.Account:9174269000;*rsr::~*req.DestinationLATA(!^$),,,CallerLATA,*constant,132,false,30
 cgrates.org,LRN_JURISDICTION_NY,lrn,FLTR_INTRALATA_NEWYORK,,,LRNJurisdiction,*constant,INTRA,false,50
 cgrates.org,LRN_JURISDICTION_IL,lrn,FLTR_INTRALATA_ILLINOIS,,,LRNJurisdiction,*constant,INTRA,false,50
-cgrates.org,LRN_JURISDICTION_INTER,lrn,*string:~Destination:13128543000;*rsr::~CallerLATA(!^$),,,LRNJurisdiction,*constant,INTER,false,40
+cgrates.org,LRN_JURISDICTION_INTER,lrn,*string:~*req.Destination:13128543000;*rsr::~*req.CallerLATA(!^$),,,LRNJurisdiction,*constant,INTER,false,40

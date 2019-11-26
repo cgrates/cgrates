@@ -156,7 +156,7 @@ func testRPCMethodsAddData(t *testing.T) {
 	tPrfl := &engine.ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "THD_AccDisableAndLog",
-		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~DisableAction:DisableAction"},
+		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.DisableAction:DisableAction"},
 		MaxHits:   -1,
 		MinSleep:  time.Duration(1 * time.Second),
 		Weight:    30.0,
@@ -171,7 +171,7 @@ func testRPCMethodsAddData(t *testing.T) {
 	tPrfl2 := &engine.ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "THD_AccEnableAndLog",
-		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~EnableAction:EnableAction"},
+		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.EnableAction:EnableAction"},
 		MaxHits:   -1,
 		MinSleep:  time.Duration(1 * time.Second),
 		Weight:    30.0,

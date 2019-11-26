@@ -466,7 +466,7 @@ func testInternalRemoteITGetFilter(t *testing.T) {
 		Rules: []*engine.FilterRule{
 			{
 				Type:      "*string",
-				FieldName: "~Account",
+				FieldName: "~*req.Account",
 				Values:    []string{"1001"},
 			},
 		},
@@ -609,8 +609,8 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 	}
 	//verify indexes on engine2 before adding new threshold profile
 	var indexes []string
-	expectedIDX := []string{"*string:~Account:1001:THD_ACNT_1001",
-		"*string:~Account:1002:THD_ACNT_1002"}
+	expectedIDX := []string{"*string:~*req.Account:1001:THD_ACNT_1001",
+		"*string:~*req.Account:1002:THD_ACNT_1002"}
 	if err := engineTwoRPC.Call(utils.ApierV1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaThresholds, Tenant: "cgrates.org", FilterType: utils.MetaString},
 		&indexes); err != nil {
@@ -637,7 +637,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_Replication",
-			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~CustomField:CustomValue"},
+			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.CustomField:CustomValue"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
@@ -662,10 +662,10 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
 	}
 	expectedIDX = []string{
-		"*string:~Account:1001:THD_ACNT_1001",
-		"*string:~Account:1001:THD_Replication",
-		"*string:~Account:1002:THD_ACNT_1002",
-		"*string:~CustomField:CustomValue:THD_Replication",
+		"*string:~*req.Account:1001:THD_ACNT_1001",
+		"*string:~*req.Account:1001:THD_Replication",
+		"*string:~*req.Account:1002:THD_ACNT_1002",
+		"*string:~*req.CustomField:CustomValue:THD_Replication",
 	}
 	// verify index on internal
 	sort.Strings(expectedIDX)
@@ -687,9 +687,9 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
 	}
 	expectedIDX2 := []string{
-		"*string:~Account:1001:THD_ACNT_1001",
-		"*string:~Account:1001:THD_Replication",
-		"*string:~CustomField:CustomValue:THD_Replication",
+		"*string:~*req.Account:1001:THD_ACNT_1001",
+		"*string:~*req.Account:1001:THD_Replication",
+		"*string:~*req.CustomField:CustomValue:THD_Replication",
 	}
 	// verify indexes on engine1 (should be the same as internal)
 	if err := engineOneRPC.Call(utils.ApierV1GetFilterIndexes, &AttrGetFilterIndexes{
@@ -709,10 +709,10 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, reply) {
 		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, reply)
 	}
-	expectedIDX = []string{"*string:~Account:1001:THD_ACNT_1001",
-		"*string:~Account:1001:THD_Replication",
-		"*string:~Account:1002:THD_ACNT_1002",
-		"*string:~CustomField:CustomValue:THD_Replication",
+	expectedIDX = []string{"*string:~*req.Account:1001:THD_ACNT_1001",
+		"*string:~*req.Account:1001:THD_Replication",
+		"*string:~*req.Account:1002:THD_ACNT_1002",
+		"*string:~*req.CustomField:CustomValue:THD_Replication",
 	}
 	// check if indexes was created correctly on engine2
 	if err := engineTwoRPC.Call(utils.ApierV1GetFilterIndexes, &AttrGetFilterIndexes{

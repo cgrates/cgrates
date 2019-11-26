@@ -135,6 +135,8 @@ func (dS *DispatcherService) dispatcherProfileForEvent(ev *utils.CGREvent,
 			return nil, err
 		}
 	}
+	evNm := config.NewNavigableMap(nil)
+	evNm.Set([]string{utils.MetaReq}, ev.Event, false, false)
 	for prflID := range prflIDs {
 		prfl, err := dS.dm.GetDispatcherProfile(ev.Tenant, prflID, true, true, utils.NonTransactional)
 		if err != nil {
@@ -148,7 +150,7 @@ func (dS *DispatcherService) dispatcherProfileForEvent(ev *utils.CGREvent,
 			continue
 		}
 		if pass, err := dS.fltrS.Pass(ev.Tenant, prfl.FilterIDs,
-			config.NewNavigableMap(ev.Event)); err != nil {
+			evNm); err != nil {
 			return nil, err
 		} else if !pass {
 			continue

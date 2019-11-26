@@ -161,9 +161,9 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 		if utils.SliceHasMember([]string{utils.MetaKamFlatstore, utils.MetaOsipsFlatstore}, self.dfltCdrcCfg.CdrFormat) { // Hardcode some values in case of flatstore
 			switch cdrFldCfg.FieldId {
 			case utils.OriginID:
-				cdrFldCfg.Value = config.NewRSRParsersMustCompile("~3;~1;~2", true, utils.INFIELD_SEP) // in case of flatstore, accounting id is made up out of callid, from_tag and to_tag
+				cdrFldCfg.Value = config.NewRSRParsersMustCompile("~*req.3;~*req.1;~*req.2", true, utils.INFIELD_SEP) // in case of flatstore, accounting id is made up out of callid, from_tag and to_tag
 			case utils.Usage:
-				cdrFldCfg.Value = config.NewRSRParsersMustCompile("~"+strconv.Itoa(len(record)-1), true, utils.INFIELD_SEP) // in case of flatstore, last element will be the duration computed by us
+				cdrFldCfg.Value = config.NewRSRParsersMustCompile("~*req."+strconv.Itoa(len(record)-1), true, utils.INFIELD_SEP) // in case of flatstore, last element will be the duration computed by us
 			}
 		}
 		switch cdrFldCfg.Type {

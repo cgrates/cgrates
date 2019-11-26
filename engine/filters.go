@@ -554,7 +554,8 @@ func (fS *FilterS) getFieldNameDataProvider(initialDP config.DataProvider,
 		strings.HasPrefix(*fieldName, utils.DynamicDataPrefix+utils.MetaCgreq),
 		strings.HasPrefix(*fieldName, utils.DynamicDataPrefix+utils.MetaCgrep),
 		strings.HasPrefix(*fieldName, utils.DynamicDataPrefix+utils.MetaRep),
-		strings.HasPrefix(*fieldName, utils.DynamicDataPrefix+utils.MetaCGRAReq):
+		strings.HasPrefix(*fieldName, utils.DynamicDataPrefix+utils.MetaCGRAReq),
+		strings.HasPrefix(*fieldName, utils.DynamicDataPrefix+utils.MetaAct):
 		dp = initialDP
 	// don't need to take out the prefix because the navigable map have ~*req prefix
 	case *fieldName == utils.EmptyString:
@@ -634,7 +635,8 @@ func (fS *FilterS) getFieldValueDataProvider(initialDP config.DataProvider,
 		strings.HasPrefix(*fieldValue, utils.DynamicDataPrefix+utils.MetaCgreq),
 		strings.HasPrefix(*fieldValue, utils.DynamicDataPrefix+utils.MetaCgrep),
 		strings.HasPrefix(*fieldValue, utils.DynamicDataPrefix+utils.MetaRep),
-		strings.HasPrefix(*fieldValue, utils.DynamicDataPrefix+utils.MetaCGRAReq):
+		strings.HasPrefix(*fieldValue, utils.DynamicDataPrefix+utils.MetaCGRAReq),
+		strings.HasPrefix(*fieldValue, utils.DynamicDataPrefix+utils.MetaAct):
 		dp = initialDP
 	default: // in case of constant we give an empty DataProvider ( empty navigable map )
 		dp = config.NewNavigableMap(nil)
