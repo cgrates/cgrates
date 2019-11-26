@@ -466,6 +466,8 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 		}
 		return
 	}
+	evNm := config.NewNavigableMap(nil)
+	evNm.Set([]string{utils.MetaReq}, ev.Event, false, false)
 	lockIDs := utils.PrefixSliceItems(rs.IDs(), utils.ResourcesPrefix)
 	guardian.Guardian.Guard(func() (gIface interface{}, gErr error) {
 		for resName := range rIDs {
@@ -482,7 +484,7 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 				continue
 			}
 			if pass, err := rS.filterS.Pass(ev.Tenant, rPrf.FilterIDs,
-				config.NewNavigableMap(ev.Event)); err != nil {
+				evNm); err != nil {
 				return nil, err
 			} else if !pass {
 				continue
