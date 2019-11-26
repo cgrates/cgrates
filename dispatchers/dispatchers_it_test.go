@@ -86,7 +86,7 @@ func testDspApierGetAttributes(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ATTR_Dispatcher",
 		Contexts:  []string{utils.MetaSessionS},
-		FilterIDs: []string{"*string:~Account:1234"},
+		FilterIDs: []string{"*string:~*req.Account:1234"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),

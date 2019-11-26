@@ -237,7 +237,7 @@ func testInternalRemoteITGetAttribute(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_1001_SIMPLEAUTH",
 			Contexts:  []string{"simpleauth"},
-			FilterIDs: []string{"*string:~Account:1001"},
+			FilterIDs: []string{"*string:~*req.Account:1001"},
 
 			Attributes: []*engine.Attribute{
 				{
@@ -637,7 +637,7 @@ func testInternalReplicationSetThreshold(t *testing.T) {
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_Replication",
-			FilterIDs: []string{"*string:~Account:1001", "*string:~CustomField:CustomValue"},
+			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~CustomField:CustomValue"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},

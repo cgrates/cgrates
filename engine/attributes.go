@@ -78,12 +78,13 @@ func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent
 				alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
 				alS.dm, utils.CacheAttributeFilterIndexes, utils.ConcatenatedKey(args.Tenant, utils.META_ANY),
 				alS.filterS.cfg.AttributeSCfg().IndexedSelects); err != nil {
-				fmt.Println("exit with not found")
 				return nil, err
 			}
 		}
 		attrIDs = aPrflIDs.Slice()
 	}
+	evNm := config.NewNavigableMap(nil)
+	evNm.Set([]string{utils.MetaReq}, args.Event, false, false)
 	for _, apID := range attrIDs {
 		aPrfl, err := alS.dm.GetAttributeProfile(args.Tenant, apID, true, true, utils.NonTransactional)
 		if err != nil {
@@ -97,7 +98,7 @@ func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent
 			continue
 		}
 		if pass, err := alS.filterS.Pass(args.Tenant, aPrfl.FilterIDs,
-			config.NewNavigableMap(args.Event)); err != nil {
+			evNm); err != nil {
 			return nil, err
 		} else if !pass {
 			continue

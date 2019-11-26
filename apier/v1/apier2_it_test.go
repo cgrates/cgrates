@@ -134,7 +134,7 @@ func testAPIerVerifyAttributesAfterLoad(t *testing.T) {
 		AttributeProfile: &engine.AttributeProfile{
 			Tenant:    ev.Tenant,
 			ID:        "ATTR_1001_SIMPLEAUTH",
-			FilterIDs: []string{"*string:~Account:1001"},
+			FilterIDs: []string{"*string:~*req.Account:1001"},
 			Contexts:  []string{"simpleauth"},
 			Attributes: []*engine.Attribute{
 				{

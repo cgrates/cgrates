@@ -475,7 +475,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "CustomStatProfile",
-			FilterIDs: []string{"*string:~DistinctVal:RandomVal"}, //custom filter for event
+			FilterIDs: []string{"*string:~*req.DistinctVal:RandomVal"}, //custom filter for event
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
@@ -592,7 +592,7 @@ func testV1STSProcessStaticMetrics(t *testing.T) {
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "StaticStatQueue",
-			FilterIDs: []string{"*string:~StaticMetrics:StaticMetrics"}, //custom filter for event
+			FilterIDs: []string{"*string:~*req.StaticMetrics:StaticMetrics"}, //custom filter for event
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
@@ -695,7 +695,7 @@ func testV1STSProcessStatWithThreshold(t *testing.T) {
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "StatWithThreshold",
-			FilterIDs: []string{"*string:~CustomEvent:CustomEvent"}, //custom filter for event
+			FilterIDs: []string{"*string:~*req.CustomEvent:CustomEvent"}, //custom filter for event
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
@@ -724,7 +724,7 @@ func testV1STSProcessStatWithThreshold(t *testing.T) {
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant: "cgrates.org",
 			ID:     "THD_Stat",
-			FilterIDs: []string{"*string:~EventType:StatUpdate",
+			FilterIDs: []string{"*string:~*req.EventType:StatUpdate",
 				"*string:~StatID:StatWithThreshold", "*exists:*tcd:", "*gte:~*tcd:1s"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),

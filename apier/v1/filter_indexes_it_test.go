@@ -1539,7 +1539,7 @@ func testV1FIdxPopulateDatabase(t *testing.T) {
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant: tenant,
 			ID:     "ResProfile1",
-			FilterIDs: []string{"*string:~Account:1001",
+			FilterIDs: []string{"*string:~*req.Account:1001",
 				"*string:~Destination:1001",
 				"*string:~Destination:2001",
 				"*string:~Account:1002",
@@ -1558,7 +1558,7 @@ func testV1FIdxPopulateDatabase(t *testing.T) {
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant: tenant,
 			ID:     "ResProfile2",
-			FilterIDs: []string{"*string:~Account:1001",
+			FilterIDs: []string{"*string:~*req.Account:1001",
 				"*string:~Destination:1001",
 				"*string:~Destination:2001",
 				"*string:~Account:2002",
@@ -1577,7 +1577,7 @@ func testV1FIdxPopulateDatabase(t *testing.T) {
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant: tenant,
 			ID:     "ResProfile3",
-			FilterIDs: []string{"*string:~Account:3001",
+			FilterIDs: []string{"*string:~*req.Account:3001",
 				"*string:~Destination:1001",
 				"*string:~Destination:2001",
 				"*string:~Account:1002",

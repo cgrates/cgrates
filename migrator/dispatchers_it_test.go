@@ -177,7 +177,7 @@ func testDspITMigrateAndMove(t *testing.T) {
 	dspPrf := &engine.DispatcherProfile{
 		Tenant:    "cgrates.org",
 		ID:        "Dsp1",
-		FilterIDs: []string{"*string:~Accont:1001"},
+		FilterIDs: []string{"*string:~*req.Accont:1001"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),

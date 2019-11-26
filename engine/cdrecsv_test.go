@@ -127,13 +127,13 @@ func TestExportVoiceWithConvert(t *testing.T) {
 			Value:  config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"AnswerTime", true, utils.INFIELD_SEP),
 			Layout: "2006-01-02T15:04:05Z07:00"},
 		{Tag: "UsageVoice", Type: "*composed",
-			Filters: []string{"*string:~ToR:*voice"},
+			Filters: []string{"*string:~*req.ToR:*voice"},
 			Value:   config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Usage{*duration_seconds}", true, utils.INFIELD_SEP)},
 		{Tag: "UsageData", Type: "*composed",
-			Filters: []string{"*string:~ToR:*data"},
+			Filters: []string{"*string:~*req.ToR:*data"},
 			Value:   config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
 		{Tag: "UsageSMS", Type: "*composed",
-			Filters: []string{"*string:~ToR:*sms"},
+			Filters: []string{"*string:~*req.ToR:*sms"},
 			Value:   config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
 		{Tag: "Cost", Type: "*composed",
 			Value:            config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Cost", true, utils.INFIELD_SEP),
@@ -204,7 +204,7 @@ func TestExportWithFilter(t *testing.T) {
 	writer := &bytes.Buffer{}
 	cfg, _ := config.NewDefaultCGRConfig()
 	cdreCfg := cfg.CdreProfiles[utils.MetaDefault]
-	cdreCfg.Filters = []string{"*string:~Tenant:cgrates.org"}
+	cdreCfg.Filters = []string{"*string:~*req.Tenant:cgrates.org"}
 	cdreCfg.ContentFields = []*config.FCTemplate{
 		{Tag: "ToR", Type: "*composed",
 			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"ToR", true, utils.INFIELD_SEP)},
@@ -224,13 +224,13 @@ func TestExportWithFilter(t *testing.T) {
 			Value:  config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"AnswerTime", true, utils.INFIELD_SEP),
 			Layout: "2006-01-02T15:04:05Z07:00"},
 		{Tag: "UsageVoice", Type: "*composed",
-			Filters: []string{"*string:~ToR:*voice"},
+			Filters: []string{"*string:~*req.ToR:*voice"},
 			Value:   config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Usage{*duration_seconds}", true, utils.INFIELD_SEP)},
 		{Tag: "UsageData", Type: "*composed",
-			Filters: []string{"*string:~ToR:*data"},
+			Filters: []string{"*string:~*req.ToR:*data"},
 			Value:   config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
 		{Tag: "UsageSMS", Type: "*composed",
-			Filters: []string{"*string:~ToR:*sms"},
+			Filters: []string{"*string:~*req.ToR:*sms"},
 			Value:   config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
 		{Tag: "Cost", Type: "*composed",
 			Value:            config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Cost", true, utils.INFIELD_SEP),
@@ -300,7 +300,7 @@ func TestExportWithFilter2(t *testing.T) {
 	writer := &bytes.Buffer{}
 	cfg, _ := config.NewDefaultCGRConfig()
 	cdreCfg := cfg.CdreProfiles[utils.MetaDefault]
-	cdreCfg.Filters = []string{"*string:~Tenant:cgrates.org", "*lte:~Cost:0.5"}
+	cdreCfg.Filters = []string{"*string:~*req.Tenant:cgrates.org", "*lte:~*req.Cost:0.5"}
 	cdreCfg.ContentFields = []*config.FCTemplate{
 		{Tag: "ToR", Type: "*composed",
 			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"ToR", true, utils.INFIELD_SEP)},
@@ -320,13 +320,13 @@ func TestExportWithFilter2(t *testing.T) {
 			Value:  config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"AnswerTime", true, utils.INFIELD_SEP),
 			Layout: "2006-01-02T15:04:05Z07:00"},
 		{Tag: "UsageVoice", Type: "*composed",
-			Filters: []string{"*string:~ToR:*voice"},
+			Filters: []string{"*string:~*req.ToR:*voice"},
 			Value:   config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Usage{*duration_seconds}", true, utils.INFIELD_SEP)},
 		{Tag: "UsageData", Type: "*composed",
-			Filters: []string{"*string:~ToR:*data"},
+			Filters: []string{"*string:~*req.ToR:*data"},
 			Value:   config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
 		{Tag: "UsageSMS", Type: "*composed",
-			Filters: []string{"*string:~ToR:*sms"},
+			Filters: []string{"*string:~*req.ToR:*sms"},
 			Value:   config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
 		{Tag: "Cost", Type: "*composed",
 			Value:            config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"Cost", true, utils.INFIELD_SEP),

@@ -198,7 +198,7 @@ func TestXMLHandlerSubstractUsage(t *testing.T) {
 	cdrs := xmlquery.Find(doc, path.Join("/broadWorksCDR/cdrData/"))
 	cdrWithUsage := cdrs[1]
 	if usage, err := handlerSubstractUsage(cdrWithUsage,
-		config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.releaseTime;|;~broadWorksCDR.cdrData.basicModule.answerTime", true, utils.INFIELD_SEP),
+		config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.releaseTime;|;~*req.broadWorksCDR.cdrData.basicModule.answerTime", true, utils.INFIELD_SEP),
 		utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}), "UTC"); err != nil {
 		t.Error(err)
 	} else if usage != time.Duration(13483000000) {
@@ -218,24 +218,24 @@ func TestXMLRPProcess(t *testing.T) {
 				{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.ToR,
 					Value: config.NewRSRParsersMustCompile("*voice", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "OriginID", Type: utils.META_COMPOSED, FieldId: utils.OriginID,
-					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.localCallId", true, utils.INFIELD_SEP), Mandatory: true},
+					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.localCallId", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "RequestType", Type: utils.META_COMPOSED, FieldId: utils.RequestType,
 					Value: config.NewRSRParsersMustCompile("*rated", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "Tenant", Type: utils.META_COMPOSED, FieldId: utils.Tenant,
-					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.userId:s/.*@(.*)/${1}/", true, utils.INFIELD_SEP), Mandatory: true},
+					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.userId:s/.*@(.*)/${1}/", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "Category", Type: utils.META_COMPOSED, FieldId: utils.Category,
 					Value: config.NewRSRParsersMustCompile("call", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "Account", Type: utils.META_COMPOSED, FieldId: utils.Account,
-					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.userNumber", true, utils.INFIELD_SEP), Mandatory: true},
+					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.userNumber", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "Destination", Type: utils.META_COMPOSED, FieldId: utils.Destination,
-					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.calledNumber", true, utils.INFIELD_SEP), Mandatory: true},
+					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.calledNumber", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "SetupTime", Type: utils.META_COMPOSED, FieldId: utils.SetupTime,
-					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.startTime", true, utils.INFIELD_SEP), Mandatory: true},
+					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.startTime", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "AnswerTime", Type: utils.META_COMPOSED, FieldId: utils.AnswerTime,
-					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.answerTime", true, utils.INFIELD_SEP), Mandatory: true},
+					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.answerTime", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "Usage", Type: utils.META_HANDLER,
 					FieldId: utils.Usage, HandlerId: utils.HandlerSubstractUsage,
-					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.releaseTime;|;~broadWorksCDR.cdrData.basicModule.answerTime",
+					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.releaseTime;|;~*req.broadWorksCDR.cdrData.basicModule.answerTime",
 						true, utils.INFIELD_SEP), Mandatory: true},
 			},
 		},
@@ -287,29 +287,29 @@ func TestXMLRPProcessWithNewFilters(t *testing.T) {
 			CdrFormat:   "xml",
 			CDRRootPath: utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}),
 			CdrSourceId: "XMLWithFilters",
-			Filters:     []string{"*string:~broadWorksCDR.cdrData.headerModule.type:Normal"},
+			Filters:     []string{"*string:~*req.broadWorksCDR.cdrData.headerModule.type:Normal"},
 			ContentFields: []*config.FCTemplate{
 				{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.ToR,
 					Value: config.NewRSRParsersMustCompile("*voice", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "OriginID", Type: utils.META_COMPOSED, FieldId: utils.OriginID,
-					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.localCallId", true, utils.INFIELD_SEP), Mandatory: true},
+					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.localCallId", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "RequestType", Type: utils.META_COMPOSED, FieldId: utils.RequestType,
 					Value: config.NewRSRParsersMustCompile("*rated", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "Tenant", Type: utils.META_COMPOSED, FieldId: utils.Tenant,
-					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.userId:s/.*@(.*)/${1}/", true, utils.INFIELD_SEP), Mandatory: true},
+					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.userId:s/.*@(.*)/${1}/", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "Category", Type: utils.META_COMPOSED, FieldId: utils.Category,
 					Value: config.NewRSRParsersMustCompile("call", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "Account", Type: utils.META_COMPOSED, FieldId: utils.Account,
-					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.userNumber", true, utils.INFIELD_SEP), Mandatory: true},
+					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.userNumber", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "Destination", Type: utils.META_COMPOSED, FieldId: utils.Destination,
-					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.calledNumber", true, utils.INFIELD_SEP), Mandatory: true},
+					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.calledNumber", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "SetupTime", Type: utils.META_COMPOSED, FieldId: utils.SetupTime,
-					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.startTime", true, utils.INFIELD_SEP), Mandatory: true},
+					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.startTime", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "AnswerTime", Type: utils.META_COMPOSED, FieldId: utils.AnswerTime,
-					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.answerTime", true, utils.INFIELD_SEP), Mandatory: true},
+					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.answerTime", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "Usage", Type: utils.META_HANDLER,
 					FieldId: utils.Usage, HandlerId: utils.HandlerSubstractUsage,
-					Value: config.NewRSRParsersMustCompile("~broadWorksCDR.cdrData.basicModule.releaseTime;|;~broadWorksCDR.cdrData.basicModule.answerTime",
+					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.releaseTime;|;~*req.broadWorksCDR.cdrData.basicModule.answerTime",
 						true, utils.INFIELD_SEP), Mandatory: true},
 			},
 		},
@@ -321,7 +321,8 @@ func TestXMLRPProcessWithNewFilters(t *testing.T) {
 	}
 	xmlRP, err := NewXMLRecordsProcessor(bytes.NewBufferString(cdrXmlBroadsoft),
 		utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}), "UTC", true,
-		cdrcCfgs, engine.NewFilterS(defaultCfg, nil, nil, nil, engine.NewDataManager(data, defaultCfg.CacheCfg(), nil, nil)))
+		cdrcCfgs, engine.NewFilterS(defaultCfg, nil, nil, nil,
+			engine.NewDataManager(data, defaultCfg.CacheCfg(), nil, nil)))
 	if err != nil {
 		t.Error(err)
 	}
@@ -559,7 +560,7 @@ func TestXMLRPNestingSeparator(t *testing.T) {
 				{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.ToR,
 					Value: config.NewRSRParsersMustCompile("*voice", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "OriginID", Type: utils.META_COMPOSED, FieldId: utils.OriginID,
-					Value: config.NewRSRParsersMustCompile("~File.CDRs.Call.SignalingInfo.PChargingVector.icidvalue", true, utils.INFIELD_SEP), Mandatory: true},
+					Value: config.NewRSRParsersMustCompile("~*req.File.CDRs.Call.SignalingInfo.PChargingVector.icidvalue", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "RequestType", Type: utils.META_COMPOSED, FieldId: utils.RequestType,
 					Value: config.NewRSRParsersMustCompile("*rated", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "Tenant", Type: utils.META_COMPOSED, FieldId: utils.Tenant,
@@ -567,16 +568,16 @@ func TestXMLRPNestingSeparator(t *testing.T) {
 				{Tag: "Category", Type: utils.META_COMPOSED, FieldId: utils.Category,
 					Value: config.NewRSRParsersMustCompile("call", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "Account", Type: utils.META_COMPOSED, FieldId: utils.Account,
-					Value: config.NewRSRParsersMustCompile("~File.CDRs.Call.OrigParty.SubscriberAddr", true, utils.INFIELD_SEP), Mandatory: true},
+					Value: config.NewRSRParsersMustCompile("~*req.File.CDRs.Call.OrigParty.SubscriberAddr", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "Destination", Type: utils.META_COMPOSED, FieldId: utils.Destination,
-					Value: config.NewRSRParsersMustCompile("~File.CDRs.Call.RoutingInfo.DestAddr", true, utils.INFIELD_SEP), Mandatory: true},
+					Value: config.NewRSRParsersMustCompile("~*req.File.CDRs.Call.RoutingInfo.DestAddr", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "SetupTime", Type: utils.META_COMPOSED, FieldId: utils.SetupTime,
-					Value: config.NewRSRParsersMustCompile("~File.CDRs.Call.RingingTime", true, utils.INFIELD_SEP), Mandatory: true},
+					Value: config.NewRSRParsersMustCompile("~*req.File.CDRs.Call.RingingTime", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "AnswerTime", Type: utils.META_COMPOSED, FieldId: utils.AnswerTime,
-					Value: config.NewRSRParsersMustCompile("~File.CDRs.Call.ConnectTime", true, utils.INFIELD_SEP), Mandatory: true},
+					Value: config.NewRSRParsersMustCompile("~*req.File.CDRs.Call.ConnectTime", true, utils.INFIELD_SEP), Mandatory: true},
 				{Tag: "Usage", Type: utils.META_HANDLER,
 					FieldId: utils.Usage, HandlerId: utils.HandlerSubstractUsage,
-					Value: config.NewRSRParsersMustCompile("~File.CDRs.Call.ReleaseTime;|;~File.CDRs.Call.ConnectTime",
+					Value: config.NewRSRParsersMustCompile("~*req.File.CDRs.Call.ReleaseTime;|;~*req.File.CDRs.Call.ConnectTime",
 						true, utils.INFIELD_SEP), Mandatory: true},
 			},
 		},
@@ -588,7 +589,8 @@ func TestXMLRPNestingSeparator(t *testing.T) {
 	}
 	xmlRP, err := NewXMLRecordsProcessor(bytes.NewBufferString(xmlContent),
 		utils.HierarchyPath([]string{"File", "CDRs", "Call"}), "UTC", true,
-		cdrcCfgs, engine.NewFilterS(defaultCfg, nil, nil, nil, engine.NewDataManager(data, defaultCfg.CacheCfg(), nil, nil)))
+		cdrcCfgs, engine.NewFilterS(defaultCfg, nil, nil, nil,
+			engine.NewDataManager(data, defaultCfg.CacheCfg(), nil, nil)))
 	if err != nil {
 		t.Error(err)
 	}
@@ -667,27 +669,27 @@ func TestXMLIndexes(t *testing.T) {
 		t.Error(err)
 	}
 	dP := newXmlProvider(doc, utils.HierarchyPath([]string{}))
-	if data, err := dP.FieldAsString([]string{"complete-success-notification", "userid"}); err != nil {
+	if data, err := dP.FieldAsString([]string{"*req", "complete-success-notification", "userid"}); err != nil {
 		t.Error(err)
 	} else if data != "386" {
 		t.Errorf("expecting: 386, received: <%s>", data)
 	}
-	if data, err := dP.FieldAsString([]string{"complete-success-notification", "username"}); err != nil {
+	if data, err := dP.FieldAsString([]string{"*req", "complete-success-notification", "username"}); err != nil {
 		t.Error(err)
 	} else if data != "sampleusername" {
 		t.Errorf("expecting: sampleusername, received: <%s>", data)
 	}
-	if data, err := dP.FieldAsString([]string{"complete-success-notification", "callleg", "seconds"}); err != nil {
+	if data, err := dP.FieldAsString([]string{"*req", "complete-success-notification", "callleg", "seconds"}); err != nil {
 		t.Error(err)
 	} else if data != "38" {
 		t.Errorf("expecting: 38, received: <%s>", data)
 	}
-	if data, err := dP.FieldAsString([]string{"complete-success-notification", "callleg[1]", "seconds"}); err != nil {
+	if data, err := dP.FieldAsString([]string{"*req", "complete-success-notification", "callleg[1]", "seconds"}); err != nil {
 		t.Error(err)
 	} else if data != "37" {
 		t.Errorf("expecting: 37, received: <%s>", data)
 	}
-	if data, err := dP.FieldAsString([]string{"complete-success-notification", "callleg[@calllegid='222147']", "seconds"}); err != nil {
+	if data, err := dP.FieldAsString([]string{"*req", "complete-success-notification", "callleg[@calllegid='222147']", "seconds"}); err != nil {
 		t.Error(err)
 	} else if data != "37" {
 		t.Errorf("expecting: 37, received: <%s>", data)

@@ -27,7 +27,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -379,17 +378,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 			if len(cdrcInst.ContentFields) == 0 {
 				return errors.New("CdrC enabled but no fields to be processed defined!")
-			}
-			if cdrcInst.CdrFormat == utils.MetaFileCSV {
-				for _, cdrFld := range cdrcInst.ContentFields {
-					for _, rsrFld := range cdrFld.Value {
-						if rsrFld.attrName != "" {
-							if _, errConv := strconv.Atoi(rsrFld.attrName); errConv != nil {
-								return fmt.Errorf("CDR fields must be indices in case of .csv files, have instead: %s", rsrFld.attrName)
-							}
-						}
-					}
-				}
 			}
 		}
 	}
