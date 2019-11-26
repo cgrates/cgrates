@@ -785,6 +785,7 @@ type RPCCDRsFilter struct {
 
 func (fltr *RPCCDRsFilter) AsCDRsFilter(timezone string) (cdrFltr *CDRsFilter, err error) {
 	if fltr == nil {
+		cdrFltr = new(CDRsFilter)
 		return
 	}
 	cdrFltr = &CDRsFilter{

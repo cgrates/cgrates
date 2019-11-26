@@ -99,43 +99,58 @@ func TestUUIDSha1Prefix(t *testing.T) {
 	}
 }
 
-func TestRoundByMethodUp1(t *testing.T) {
+func TestRound(t *testing.T) {
 	result := Round(12.49, 1, ROUNDING_UP)
 	expected := 12.5
 	if result != expected {
 		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
 	}
-}
 
-func TestRoundByMethodUp2(t *testing.T) {
-	result := Round(12.21, 1, ROUNDING_UP)
-	expected := 12.3
+	result = Round(12.21, 1, ROUNDING_UP)
+	expected = 12.3
 	if result != expected {
 		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
 	}
-}
 
-func TestRoundByMethodUp3(t *testing.T) {
-	result := Round(0.0701, 2, ROUNDING_UP)
-	expected := 0.08
+	result = Round(0.0701, 2, ROUNDING_UP)
+	expected = 0.08
 	if result != expected {
 		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
 	}
-}
 
-func TestRoundByMethodDown1(t *testing.T) {
-	result := Round(12.49, 1, ROUNDING_DOWN)
-	expected := 12.4
+	result = Round(12.49, 1, ROUNDING_DOWN)
+	expected = 12.4
 	if result != expected {
 		t.Errorf("Error rounding down: sould be %v was %v", expected, result)
 	}
-}
 
-func TestRoundByMethodDown2(t *testing.T) {
-	result := Round(12.21, 1, ROUNDING_DOWN)
-	expected := 12.2
+	result = Round(12.21, 1, ROUNDING_DOWN)
+	expected = 12.2
 	if result != expected {
 		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+	}
+
+	//AlredyHavingPrecision
+	x := 0.07
+	if y := Round(x, 2, ROUNDING_UP); y != x {
+		t.Error("Error rounding when already has desired precision: ", y)
+	}
+	if y := Round(x, 2, ROUNDING_MIDDLE); y != x {
+		t.Error("Error rounding when already has desired precision: ", y)
+	}
+	if y := Round(x, 2, ROUNDING_DOWN); y != x {
+		t.Error("Error rounding when already has desired precision: ", y)
+	}
+
+	result = Round(14.37, 8, ROUNDING_DOWN)
+	expected = 14.37
+	if result != expected {
+		t.Errorf("Expecting: %v, received:  %v", expected, result)
+	}
+	result = Round(14.37, 8, "ROUNDING_NOWHERE")
+	expected = 14.37
+	if result != expected {
+		t.Errorf("Expecting: %v, received:  %v", expected, result)
 	}
 }
 
@@ -232,6 +247,32 @@ func TestParseTimeDetectLayout(t *testing.T) {
 		t.Error(err)
 	} else if !fsTm.Equal(expectedTime) {
 		t.Errorf("Unexpected time parsed: %v, expecting: %v", fsTm, expectedTime)
+	}
+	fsTmstampStr = "9999999999999999"
+	fsTm, err = ParseTimeDetectLayout(fsTmstampStr, "")
+	if err == nil {
+		t.Error("Error expected: 'value out of range', received nil")
+	}
+	fsTmstampStr = "1394291049287234286"
+	fsTm, err = ParseTimeDetectLayout(fsTmstampStr, "")
+	expectedTime = time.Date(2014, 3, 8, 15, 4, 9, 287234286, time.UTC)
+	if err != nil {
+		t.Error(err)
+	} else if !fsTm.Equal(expectedTime) {
+		t.Errorf("Unexpected time parsed: %v, expecting: %v", fsTm, expectedTime)
+	}
+	fsTmstampStr = "9999999999999999999"
+	fsTm, err = ParseTimeDetectLayout(fsTmstampStr, "")
+	if err == nil {
+		t.Error("Error expected: 'value out of range', received nil")
+	}
+	var nilTime time.Time
+	fsTmstampStr = "+9999999999999999999"
+	fsTm, err = ParseTimeDetectLayout(fsTmstampStr, "")
+	if err == nil {
+		t.Error("Error expected: 'value out of range', received nil")
+	} else if fsTm != nilTime {
+		t.Errorf("Expecting nilTime, received: %+v", fsTm)
 	}
 	fsTmstampStr = "0"
 	fsTm, err = ParseTimeDetectLayout(fsTmstampStr, "")
@@ -335,9 +376,20 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	if err != nil || date.Sub(expected).Seconds() > 20 || date.Sub(expected).Seconds() < 19 {
 		t.Error("error parsing date: ", date.Sub(expected).Seconds())
 	}
-
+	expected = time.Now().AddDate(0, 0, 1)
+	if date, err := ParseTimeDetectLayout("*daily", ""); err != nil {
+		t.Error(err)
+	} else if expected.Sub(date).Seconds() > 1 {
+		t.Errorf("received: %+v", date)
+	}
 	expected = time.Now().AddDate(0, 1, 0)
 	if date, err := ParseTimeDetectLayout("*monthly", ""); err != nil {
+		t.Error(err)
+	} else if expected.Sub(date).Seconds() > 1 {
+		t.Errorf("received: %+v", date)
+	}
+	expected = time.Now().AddDate(1, 0, 0)
+	if date, err := ParseTimeDetectLayout("*yearly", ""); err != nil {
 		t.Error(err)
 	} else if expected.Sub(date).Seconds() > 1 {
 		t.Errorf("received: %+v", date)
@@ -354,6 +406,11 @@ func TestParseTimeDetectLayout(t *testing.T) {
 		t.Error(err)
 	} else if !date.Equal(expected) {
 		t.Errorf("expecting: %+v, received: %+v", expected, date)
+	}
+	if date, err := ParseTimeDetectLayout("*month_end+xyz", ""); err == nil {
+		t.Error("Expecting error 'time: invalid time duration', received: nil")
+	} else if date != nilTime {
+		t.Errorf("Expecting nilTime, received: %+v", date)
 	}
 
 	date, err = ParseTimeDetectLayout("2013-07-30T19:33:10Z", "")
@@ -414,43 +471,40 @@ func TestRoundDuration(t *testing.T) {
 	}
 }
 
-func TestRoundAlredyHavingPrecision(t *testing.T) {
-	x := 0.07
-	if y := Round(x, 2, ROUNDING_UP); y != x {
-		t.Error("Error rounding when already has desired precision: ", y)
-	}
-	if y := Round(x, 2, ROUNDING_MIDDLE); y != x {
-		t.Error("Error rounding when already has desired precision: ", y)
-	}
-	if y := Round(x, 2, ROUNDING_DOWN); y != x {
-		t.Error("Error rounding when already has desired precision: ", y)
-	}
-}
-
 func TestSplitPrefix(t *testing.T) {
-	a := SplitPrefix("0123456789", 1)
-	if len(a) != 10 {
+	if a := SplitPrefix("0123456789", 1); len(a) != 10 {
+		t.Error("Error splitting prefix: ", a)
+	}
+	if a := SplitPrefix("0123456789", 5); len(a) != 6 {
+		t.Error("Error splitting prefix: ", a)
+	}
+	if a := SplitPrefix("", 1); len(a) != 0 {
 		t.Error("Error splitting prefix: ", a)
 	}
 }
 
-func TestSplitPrefixFive(t *testing.T) {
-	a := SplitPrefix("0123456789", 5)
-	if len(a) != 6 {
-		t.Error("Error splitting prefix: ", a)
+func TestCopyHour(t *testing.T) {
+	var src, dst, eOut time.Time
+	if rcv := CopyHour(src, dst); !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
-}
-
-func TestSplitPrefixEmpty(t *testing.T) {
-	a := SplitPrefix("", 1)
-	if len(a) != 0 {
-		t.Error("Error splitting prefix: ", a)
+	src = time.Date(2020, time.April, 18, 20, 10, 11, 01, time.UTC)
+	dst = time.Date(2019, time.May, 25, 23, 0, 4, 0, time.UTC)
+	eOut = time.Date(2019, time.May, 25, 20, 10, 11, 01, time.UTC)
+	if rcv := CopyHour(src, dst); !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
 }
 
 func TestParseDurationWithSecs(t *testing.T) {
+	var durExpected time.Duration
+	if rcv, err := ParseDurationWithSecs(""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, durExpected) {
+		t.Errorf("Expecting: 0s, received: %+v", rcv)
+	}
 	durStr := "2"
-	durExpected := time.Duration(2) * time.Second
+	durExpected = time.Duration(2) * time.Second
 	if parsed, err := ParseDurationWithSecs(durStr); err != nil {
 		t.Error(err)
 	} else if parsed != durExpected {
@@ -482,6 +536,27 @@ func TestParseDurationWithSecs(t *testing.T) {
 		t.Error(err)
 	} else if parsed != durExpected {
 		t.Error("Parsed different than expected")
+	}
+}
+
+func TestParseDurationWithNanosecs(t *testing.T) {
+	var eOut time.Duration
+	if rcv, err := ParseDurationWithNanosecs(""); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	eOut, _ = time.ParseDuration("-1ns")
+	if rcv, err := ParseDurationWithNanosecs(UNLIMITED); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	eOut, _ = time.ParseDuration("28ns")
+	if rcv, err := ParseDurationWithNanosecs("28"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
 }
 

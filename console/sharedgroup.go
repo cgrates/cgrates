@@ -22,6 +22,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
+
 func init() {
 	c := &CmdGetSharedGroup{
 		name:      "sharedgroup",

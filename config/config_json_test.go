@@ -355,12 +355,12 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Extra_fields:         &[]string{},
 		Store_cdrs:           utils.BoolPointer(true),
 		Session_cost_retries: utils.IntPointer(5),
-		Chargers_conns: &[]*RemoteHostJson{},
-		Rals_conns: &[]*RemoteHostJson{},
-		Attributes_conns:   &[]*RemoteHostJson{},
-		Thresholds_conns:   &[]*RemoteHostJson{},
-		Stats_conns:        &[]*RemoteHostJson{},
-		Online_cdr_exports: &[]string{},
+		Chargers_conns:       &[]*RemoteHostJson{},
+		Rals_conns:           &[]*RemoteHostJson{},
+		Attributes_conns:     &[]*RemoteHostJson{},
+		Thresholds_conns:     &[]*RemoteHostJson{},
+		Stats_conns:          &[]*RemoteHostJson{},
+		Online_cdr_exports:   &[]string{},
 	}
 	if cfg, err := dfCgrJsonCfg.CdrsJsonCfg(); err != nil {
 		t.Error(err)
