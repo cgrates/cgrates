@@ -230,12 +230,12 @@ cgrates.org,round,TOPUP10_AT,,false,false
 `
 	ResourcesCSVContent = `
 #Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],Weight[9],Thresholds[10]
-cgrates.org,ResGroup21,*string:~Account:1001,2014-07-29T15:00:00Z,1s,2,call,true,true,10,
-cgrates.org,ResGroup22,*string:~Account:dan,2014-07-29T15:00:00Z,3600s,2,premium_call,true,true,10,
+cgrates.org,ResGroup21,*string:~*req.Account:1001,2014-07-29T15:00:00Z,1s,2,call,true,true,10,
+cgrates.org,ResGroup22,*string:~*req.Account:dan,2014-07-29T15:00:00Z,3600s,2,premium_call,true,true,10,
 `
 	StatsCSVContent = `
 #Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],QueueLength[4],TTL[5],MinItems[6],Metrics[7],MetricFilterIDs[8],Stored[9],Blocker[10],Weight[11],ThresholdIDs[12]
-cgrates.org,TestStats,*string:~Account:1001,2014-07-29T15:00:00Z,100,1s,2,*sum:~Value;*average:~Value,,true,true,20,Th1;Th2
+cgrates.org,TestStats,*string:~*req.Account:1001,2014-07-29T15:00:00Z,100,1s,2,*sum:~Value;*average:~Value,,true,true,20,Th1;Th2
 cgrates.org,TestStats,,,,,2,*sum:~Usage,,true,true,20,
 cgrates.org,TestStats2,FLTR_1,2014-07-29T15:00:00Z,100,1s,2,*sum:~Value;*sum:~Usage;*average:~Value;*average:~Usage,,true,true,20,Th
 cgrates.org,TestStats2,,,,,2,*sum:~Cost;*average:~Cost,,true,true,20,
@@ -243,38 +243,38 @@ cgrates.org,TestStats2,,,,,2,*sum:~Cost;*average:~Cost,,true,true,20,
 
 	ThresholdsCSVContent = `
 #Tenant[0],Id[1],FilterIDs[2],ActivationInterval[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],Weight[8],ActionIDs[9],Async[10]
-cgrates.org,Threshold1,*string:~Account:1001;*string:~RunID:*default,2014-07-29T15:00:00Z,12,10,1s,true,10,THRESH1,true
+cgrates.org,Threshold1,*string:~*req.Account:1001;*string:~*req.RunID:*default,2014-07-29T15:00:00Z,12,10,1s,true,10,THRESH1,true
 `
 
 	FiltersCSVContent = `
 #Tenant[0],ID[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5]
-cgrates.org,FLTR_1,*string,Account,1001;1002,2014-07-29T15:00:00Z
-cgrates.org,FLTR_1,*prefix,Destination,10;20,2014-07-29T15:00:00Z
-cgrates.org,FLTR_1,*rsr,,Subject(~^1.*1$);Destination(1002),
-cgrates.org,FLTR_ACNT_dan,*string,Account,dan,2014-07-29T15:00:00Z
-cgrates.org,FLTR_DST_DE,*destinations,Destination,DST_DE,2014-07-29T15:00:00Z
-cgrates.org,FLTR_DST_NL,*destinations,Destination,DST_NL,2014-07-29T15:00:00Z
+cgrates.org,FLTR_1,*string,~*req.Account,1001;1002,2014-07-29T15:00:00Z
+cgrates.org,FLTR_1,*prefix,~*req.Destination,10;20,2014-07-29T15:00:00Z
+cgrates.org,FLTR_1,*rsr,,~*req.Subject(~^1.*1$);~*req.Destination(1002),
+cgrates.org,FLTR_ACNT_dan,*string,~*req.Account,dan,2014-07-29T15:00:00Z
+cgrates.org,FLTR_DST_DE,*destinations,~*req.Destination,DST_DE,2014-07-29T15:00:00Z
+cgrates.org,FLTR_DST_NL,*destinations,~*req.Destination,DST_NL,2014-07-29T15:00:00Z
 `
 	SuppliersCSVContent = `
 #Tenant[0],ID[1],FilterIDs[2],ActivationInterval[3],Sorting[4],SortingParameters[5],SupplierID[6],SupplierFilterIDs[7],SupplierAccountIDs[8],SupplierRatingPlanIDs[9],SupplierResourceIDs[10],SupplierStatIDs[11],SupplierWeight[12],SupplierBlocker[13],SupplierParameters[14],Weight[15]
-cgrates.org,SPP_1,*string:~Account:dan,2014-07-29T15:00:00Z,*least_cost,,supplier1,FLTR_ACNT_dan,Account1;Account1_1,RPL_1,ResGroup1,Stat1,10,true,param1,20
+cgrates.org,SPP_1,*string:~*req.Account:dan,2014-07-29T15:00:00Z,*least_cost,,supplier1,FLTR_ACNT_dan,Account1;Account1_1,RPL_1,ResGroup1,Stat1,10,true,param1,20
 cgrates.org,SPP_1,,,,,supplier1,,,RPL_2,ResGroup2,,10,,,
 cgrates.org,SPP_1,,,,,supplier1,FLTR_DST_DE,Account2,RPL_3,ResGroup3,Stat2,10,,,
 cgrates.org,SPP_1,,,,,supplier1,,,,ResGroup4,Stat3,10,,,
 `
 	AttributesCSVContent = `
 #Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,FieldName,Type,Value,Blocker,Weight
-cgrates.org,ALS1,con1,*string:~Account:1001,2014-07-29T15:00:00Z,*string:~Field1:Initial,Field1,*variable,Sub1,true,20
+cgrates.org,ALS1,con1,*string:~*req.Account:1001,2014-07-29T15:00:00Z,*string:~*req.Field1:Initial,Field1,*variable,Sub1,true,20
 cgrates.org,ALS1,con2;con3,,,,Field2,*variable,Sub2,true,20
 `
 	ChargersCSVContent = `
 #Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
-cgrates.org,Charger1,*string:~Account:1001,2014-07-29T15:00:00Z,*rated,ATTR_1001_SIMPLEAUTH,20
+cgrates.org,Charger1,*string:~*req.Account:1001,2014-07-29T15:00:00Z,*rated,ATTR_1001_SIMPLEAUTH,20
 `
 	DispatcherCSVContent = `
 #Tenant,ID,FilterIDs,ActivationInterval,Strategy,Hosts,Weight
-cgrates.org,D1,*any,*string:~Account:1001,2014-07-29T15:00:00Z,*first,,C1,*gt:~Usage:10,10,false,192.168.56.203,20
-cgrates.org,D1,,,,*first,,C2,*lt:~Usage:10,10,false,192.168.56.204,
+cgrates.org,D1,*any,*string:~*req.Account:1001,2014-07-29T15:00:00Z,*first,,C1,*gt:~*req.Usage:10,10,false,192.168.56.203,20
+cgrates.org,D1,,,,*first,,C2,*lt:~*req.Usage:10,10,false,192.168.56.204,
 `
 	DispatcherHostCSVContent = `
 #Tenant[0],ID[1],Address[2],Transport[3],TLS[4]

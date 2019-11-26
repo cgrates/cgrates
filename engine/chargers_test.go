@@ -121,12 +121,12 @@ func TestChargerAddFilter(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      utils.MetaString,
-				FieldName: "~Charger",
+				FieldName: "~*req.Charger",
 				Values:    []string{"ChargerProfile1"},
 			},
 			{
 				Type:      utils.MetaGreaterOrEqual,
-				FieldName: "~UsageInterval",
+				FieldName: "~*req.UsageInterval",
 				Values:    []string{(1 * time.Second).String()},
 			},
 		},
@@ -138,7 +138,7 @@ func TestChargerAddFilter(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      utils.MetaString,
-				FieldName: "~Charger",
+				FieldName: "~*req.Charger",
 				Values:    []string{"ChargerProfile2"},
 			},
 		},
@@ -150,7 +150,7 @@ func TestChargerAddFilter(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      utils.MetaPrefix,
-				FieldName: "~harger",
+				FieldName: "~*req.harger",
 				Values:    []string{"Charger"},
 			},
 		},
@@ -162,7 +162,7 @@ func TestChargerAddFilter(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.Weight,
+				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
 				Values:    []string{"200.00"},
 			},
 		},

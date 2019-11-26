@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+	"strings"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -46,15 +47,18 @@ func (cP *SliceDP) String() string {
 
 // FieldAsInterface is part of engine.DataProvider interface
 func (cP *SliceDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
-	if len(fldPath) != 1 {
-		return nil, utils.ErrNotFound
+	if len(fldPath) == 0 {
+		return
+	}
+	if fldPath[0] != utils.MetaReq || len(fldPath) < 2 {
+		return "", utils.ErrPrefixNotFound(strings.Join(fldPath, utils.NestingSep))
 	}
 	if data, err = cP.cache.FieldAsInterface(fldPath); err == nil ||
 		err != utils.ErrNotFound { // item found in cache
 		return
 	}
 	err = nil // cancel previous err
-	if cfgFieldIdx, err := strconv.Atoi(fldPath[0]); err != nil {
+	if cfgFieldIdx, err := strconv.Atoi(fldPath[1]); err != nil {
 		return nil, fmt.Errorf("Ignoring record: %v with error : %+v", cP.req, err)
 	} else if len(cP.req) <= cfgFieldIdx {
 		return nil, utils.ErrNotFound

@@ -963,7 +963,7 @@ func TestLoadResourceProfiles(t *testing.T) {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "ResGroup21",
-			FilterIDs: []string{"*string:~Account:1001"},
+			FilterIDs: []string{"*string:~*req.Account:1001"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
@@ -978,7 +978,7 @@ func TestLoadResourceProfiles(t *testing.T) {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "ResGroup22",
-			FilterIDs: []string{"*string:~Account:dan"},
+			FilterIDs: []string{"*string:~*req.Account:dan"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
@@ -1004,7 +1004,7 @@ func TestLoadStatQueueProfiles(t *testing.T) {
 			Tenant:    "cgrates.org",
 			TPid:      testTPID,
 			ID:        "TestStats",
-			FilterIDs: []string{"*string:~Account:1001"},
+			FilterIDs: []string{"*string:~*req.Account:1001"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
@@ -1102,7 +1102,7 @@ func TestLoadThresholdProfiles(t *testing.T) {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "Threshold1",
-			FilterIDs: []string{"*string:~Account:1001", "*string:~RunID:*default"},
+			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.RunID:*default"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
@@ -1120,7 +1120,7 @@ func TestLoadThresholdProfiles(t *testing.T) {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "Threshold1",
-			FilterIDs: []string{"*string:~RunID:*default", "*string:~Account:1001"},
+			FilterIDs: []string{"*string:~*req.RunID:*default", "*string:~*req.Account:1001"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
@@ -1151,19 +1151,19 @@ func TestLoadFilters(t *testing.T) {
 			ID:     "FLTR_1",
 			Filters: []*utils.TPFilter{
 				&utils.TPFilter{
-					FieldName: "Account",
+					FieldName: "~*req.Account",
 					Type:      utils.MetaString,
 					Values:    []string{"1001", "1002"},
 				},
 				&utils.TPFilter{
-					FieldName: "Destination",
+					FieldName: "~*req.Destination",
 					Type:      utils.MetaPrefix,
 					Values:    []string{"10", "20"},
 				},
 				&utils.TPFilter{
 					FieldName: "",
 					Type:      utils.MetaRSR,
-					Values:    []string{"Subject(~^1.*1$)", "Destination(1002)"},
+					Values:    []string{"~*req.Subject(~^1.*1$)", "~*req.Destination(1002)"},
 				},
 			},
 			ActivationInterval: &utils.TPActivationInterval{
@@ -1176,7 +1176,7 @@ func TestLoadFilters(t *testing.T) {
 			ID:     "FLTR_ACNT_dan",
 			Filters: []*utils.TPFilter{
 				&utils.TPFilter{
-					FieldName: "Account",
+					FieldName: "~*req.Account",
 					Type:      utils.MetaString,
 					Values:    []string{"dan"},
 				},
@@ -1191,7 +1191,7 @@ func TestLoadFilters(t *testing.T) {
 			ID:     "FLTR_DST_DE",
 			Filters: []*utils.TPFilter{
 				&utils.TPFilter{
-					FieldName: "Destination",
+					FieldName: "~*req.Destination",
 					Type:      utils.MetaDestinations,
 					Values:    []string{"DST_DE"},
 				},
@@ -1206,7 +1206,7 @@ func TestLoadFilters(t *testing.T) {
 			ID:     "FLTR_DST_NL",
 			Filters: []*utils.TPFilter{
 				&utils.TPFilter{
-					FieldName: "Destination",
+					FieldName: "~*req.Destination",
 					Type:      utils.MetaDestinations,
 					Values:    []string{"DST_NL"},
 				},
@@ -1230,7 +1230,7 @@ func TestLoadSupplierProfiles(t *testing.T) {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "SPP_1",
-			FilterIDs: []string{"*string:~Account:dan"},
+			FilterIDs: []string{"*string:~*req.Account:dan"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
@@ -1267,13 +1267,13 @@ func TestLoadAttributeProfiles(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ALS1",
 			Contexts:  []string{"con1", "con2", "con3"},
-			FilterIDs: []string{"*string:~Account:1001"},
+			FilterIDs: []string{"*string:~*req.Account:1001"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
 			Attributes: []*utils.TPAttribute{
 				&utils.TPAttribute{
-					FilterIDs: []string{"*string:~Field1:Initial"},
+					FilterIDs: []string{"*string:~*req.Field1:Initial"},
 					FieldName: "Field1",
 					Type:      utils.MetaVariable,
 					Value:     "Sub1",
@@ -1315,7 +1315,7 @@ func TestLoadChargerProfiles(t *testing.T) {
 			TPid:      testTPID,
 			Tenant:    "cgrates.org",
 			ID:        "Charger1",
-			FilterIDs: []string{"*string:~Account:1001"},
+			FilterIDs: []string{"*string:~*req.Account:1001"},
 			ActivationInterval: &utils.TPActivationInterval{
 				ActivationTime: "2014-07-29T15:00:00Z",
 			},
@@ -1338,7 +1338,7 @@ func TestLoadDispatcherProfiles(t *testing.T) {
 		Tenant:     "cgrates.org",
 		ID:         "D1",
 		Subsystems: []string{"*any"},
-		FilterIDs:  []string{"*string:~Account:1001"},
+		FilterIDs:  []string{"*string:~*req.Account:1001"},
 		ActivationInterval: &utils.TPActivationInterval{
 			ActivationTime: "2014-07-29T15:00:00Z",
 		},
@@ -1347,14 +1347,14 @@ func TestLoadDispatcherProfiles(t *testing.T) {
 		Hosts: []*utils.TPDispatcherHostProfile{
 			&utils.TPDispatcherHostProfile{
 				ID:        "C1",
-				FilterIDs: []string{"*gt:~Usage:10"},
+				FilterIDs: []string{"*gt:~*req.Usage:10"},
 				Weight:    10,
 				Params:    []interface{}{"192.168.56.203"},
 				Blocker:   false,
 			},
 			&utils.TPDispatcherHostProfile{
 				ID:        "C2",
-				FilterIDs: []string{"*lt:~Usage:10"},
+				FilterIDs: []string{"*lt:~*req.Usage:10"},
 				Weight:    10,
 				Params:    []interface{}{"192.168.56.204"},
 				Blocker:   false,

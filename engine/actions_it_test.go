@@ -264,7 +264,7 @@ func TestActionsitThresholdCDrLog(t *testing.T) {
 	tPrfl := &ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "THD_Test",
-		FilterIDs: []string{"*string:~Account:th_acc"},
+		FilterIDs: []string{"*string:~*req.Account:th_acc"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),

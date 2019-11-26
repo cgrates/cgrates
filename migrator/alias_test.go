@@ -180,7 +180,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
-					FilterIDs: []string{"*string:~Account:1001"},
+					FilterIDs: []string{"*string:~*req.Account:1001"},
 					FieldName: "Account",
 					Type:      utils.MetaVariable,
 					Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
@@ -197,13 +197,13 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
-					FilterIDs: []string{"*string:~Account:1001"},
+					FilterIDs: []string{"*string:~*req.Account:1001"},
 					FieldName: "Account",
 					Type:      utils.MetaVariable,
 					Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 				},
 				{
-					FilterIDs: []string{"*string:~Account:1003"},
+					FilterIDs: []string{"*string:~*req.Account:1003"},
 					FieldName: "Account",
 					Type:      utils.MetaVariable,
 					Value:     config.NewRSRParsersMustCompile("1004", true, utils.INFIELD_SEP),
@@ -220,13 +220,13 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
-					FilterIDs: []string{"*string:~Account:1001"},
+					FilterIDs: []string{"*string:~*req.Account:1001"},
 					FieldName: "Account",
 					Type:      utils.MetaVariable,
 					Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 				},
 				{
-					FilterIDs: []string{"*string:~Account:1003"},
+					FilterIDs: []string{"*string:~*req.Account:1003"},
 					FieldName: "Account",
 					Type:      utils.MetaVariable,
 					Value:     config.NewRSRParsersMustCompile("1004", true, utils.INFIELD_SEP),
@@ -240,9 +240,9 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ID:       aliases[4].GetId(),
 			Contexts: []string{utils.META_ANY},
 			FilterIDs: []string{
-				"*string:~Category:*voice",
-				"*string:~Account:1001",
-				"*destinations:~Destination:DST_1003",
+				"*string:~*req.Category:*voice",
+				"*string:~*req.Account:1001",
+				"*destinations:~*req.Destination:DST_1003",
 			},
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
@@ -265,9 +265,9 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ID:       aliases[5].GetId(),
 			Contexts: []string{utils.META_ANY},
 			FilterIDs: []string{
-				"*string:~Account:1001",
-				"*string:~Subject:call_1001",
-				"*destinations:~Destination:DST_1003",
+				"*string:~*req.Account:1001",
+				"*string:~*req.Subject:call_1001",
+				"*destinations:~*req.Destination:DST_1003",
 			},
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
@@ -279,7 +279,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 				{
 					FieldName: "Category",
 					Type:      utils.MetaVariable,
-					FilterIDs: []string{"*string:~Category:call_1001"},
+					FilterIDs: []string{"*string:~*req.Category:call_1001"},
 					Value:     config.NewRSRParsersMustCompile("call_1002", true, utils.INFIELD_SEP),
 				},
 			},
@@ -291,7 +291,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ID:       aliases[6].GetId(),
 			Contexts: []string{utils.META_ANY},
 			FilterIDs: []string{
-				"*string:~Category:somecateg_5141",
+				"*string:~*req.Category:somecateg_5141",
 			},
 			Attributes: []*engine.Attribute{
 				{

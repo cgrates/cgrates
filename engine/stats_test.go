@@ -166,22 +166,22 @@ func TestStatQueuesAddFilters(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      utils.MetaString,
-				FieldName: "~Stats",
+				FieldName: "~*req.Stats",
 				Values:    []string{"StatQueueProfile1"},
 			},
 			{
 				Type:      utils.MetaGreaterOrEqual,
-				FieldName: "~UsageInterval",
+				FieldName: "~*req.UsageInterval",
 				Values:    []string{(1 * time.Second).String()},
 			},
 			{
 				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.Usage,
+				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
 				Values:    []string{(1 * time.Second).String()},
 			},
 			{
 				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.Weight,
+				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
 				Values:    []string{"9.0"},
 			},
 		},
@@ -193,22 +193,22 @@ func TestStatQueuesAddFilters(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      utils.MetaString,
-				FieldName: "~Stats",
+				FieldName: "~*req.Stats",
 				Values:    []string{"StatQueueProfile2"},
 			},
 			{
 				Type:      utils.MetaGreaterOrEqual,
-				FieldName: "~PddInterval",
+				FieldName: "~*req.PddInterval",
 				Values:    []string{(1 * time.Second).String()},
 			},
 			{
 				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.Usage,
+				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
 				Values:    []string{(1 * time.Second).String()},
 			},
 			{
 				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.Weight,
+				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
 				Values:    []string{"15.0"},
 			},
 		},
@@ -220,7 +220,7 @@ func TestStatQueuesAddFilters(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      utils.MetaPrefix,
-				FieldName: "~Stats",
+				FieldName: "~*req.Stats",
 				Values:    []string{"StatQueueProfilePrefix"},
 			},
 		},

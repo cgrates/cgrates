@@ -149,7 +149,7 @@ func testAlsITMigrateAndMove(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 			},
 			{
-				FilterIDs: []string{"*string:~Category:call_1001"},
+				FilterIDs: []string{"*string:~*req.Category:call_1001"},
 				FieldName: "Category",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("call_1002", true, utils.INFIELD_SEP),

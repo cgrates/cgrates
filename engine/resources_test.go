@@ -412,22 +412,22 @@ func TestResourceAddFilters(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      utils.MetaString,
-				FieldName: "~Resources",
+				FieldName: "~*req.Resources",
 				Values:    []string{"ResourceProfile1"},
 			},
 			{
 				Type:      utils.MetaGreaterOrEqual,
-				FieldName: "~UsageInterval",
+				FieldName: "~*req.UsageInterval",
 				Values:    []string{(1 * time.Second).String()},
 			},
 			{
 				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.Usage,
+				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
 				Values:    []string{(1 * time.Second).String()},
 			},
 			{
 				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.Weight,
+				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
 				Values:    []string{"9.0"},
 			},
 		},
@@ -439,22 +439,22 @@ func TestResourceAddFilters(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      utils.MetaString,
-				FieldName: "~Resources",
+				FieldName: "~*req.Resources",
 				Values:    []string{"ResourceProfile2"},
 			},
 			{
 				Type:      utils.MetaGreaterOrEqual,
-				FieldName: "~PddInterval",
+				FieldName: "~*req.PddInterval",
 				Values:    []string{(1 * time.Second).String()},
 			},
 			{
 				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.Usage,
+				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
 				Values:    []string{(1 * time.Second).String()},
 			},
 			{
 				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.Weight,
+				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
 				Values:    []string{"15.0"},
 			},
 		},
@@ -466,7 +466,7 @@ func TestResourceAddFilters(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      utils.MetaPrefix,
-				FieldName: "~Resources",
+				FieldName: "~*req.Resources",
 				Values:    []string{"ResourceProfilePrefix"},
 			},
 		},
@@ -743,7 +743,7 @@ func TestResourceCaching(t *testing.T) {
 	resProf := &ResourceProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ResourceProfileCached",
-		FilterIDs: []string{"*string:~Account:1001"},
+		FilterIDs: []string{"*string:~*req.Account:1001"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},

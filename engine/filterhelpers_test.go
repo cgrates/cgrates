@@ -39,7 +39,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	data := NewInternalDB(nil, nil)
 	dmMatch = NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
 	context := utils.MetaRating
-	x, err := NewFilterRule(utils.MetaString, "~Field", []string{"profile"})
+	x, err := NewFilterRule(utils.MetaString, "~*req.Field", []string{"profile"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -49,7 +49,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 		ID:     "stringFilter",
 		Rules:  stringFilter}
 	dmMatch.SetFilter(attribStringF)
-	x, err = NewFilterRule(utils.MetaPrefix, "~Field", []string{"profilePrefix"})
+	x, err = NewFilterRule(utils.MetaPrefix, "~*req.Field", []string{"profilePrefix"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -59,7 +59,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 		ID:     "prefFilter",
 		Rules:  prefixFilter}
 	dmMatch.SetFilter(attribPrefF)
-	x, err = NewFilterRule(utils.MetaGreaterOrEqual, "~Weight", []string{"200.00"})
+	x, err = NewFilterRule(utils.MetaGreaterOrEqual, "~*req.Weight", []string{"200.00"})
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

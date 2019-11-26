@@ -988,7 +988,7 @@ func testV1SplsOneSupplierWithoutDestination(t *testing.T) {
 		SupplierProfile: &engine.SupplierProfile{
 			Tenant:    "cgrates.org",
 			ID:        "SPL_DESTINATION",
-			FilterIDs: []string{"*string:~Account:SpecialCase"},
+			FilterIDs: []string{"*string:~*req.Account:SpecialCase"},
 			Sorting:   utils.MetaLC,
 			Suppliers: []*engine.Supplier{
 				{
