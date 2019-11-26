@@ -213,3 +213,27 @@ func TestFlagsToSlice(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", sls, flgSls)
 	}
 }
+
+func TestFlagsWithParamsGetBool(t *testing.T) {
+	flagsWithParams := &FlagsWithParams{
+		"test":  []string{"string1", "string2"},
+		"test2": []string{"true", "string2"},
+		"empty": []string{},
+	}
+	key := "notpresent"
+	if rcv := flagsWithParams.GetBool(key); rcv != false {
+		t.Errorf("Expecting: false, received: %+v", ToJSON(rcv))
+	}
+	key = "empty"
+	if rcv := flagsWithParams.GetBool(key); rcv != false {
+		t.Errorf("Expecting: false, received: %+v", ToJSON(rcv))
+	}
+	key = "test"
+	if rcv := flagsWithParams.GetBool(key); rcv != false {
+		t.Errorf("Expecting: false, received: %+v", ToJSON(rcv))
+	}
+	key = "test2"
+	if rcv := flagsWithParams.GetBool(key); rcv != true {
+		t.Errorf("Expecting: true, received: %+v", ToJSON(rcv))
+	}
+}
