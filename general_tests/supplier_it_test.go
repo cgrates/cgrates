@@ -238,7 +238,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 	rPrf := &engine.ResourceProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ResourceSupplier1",
-		FilterIDs: []string{"*string:~*req.Supplier:supplier1", "*string:~ResID:ResourceSupplier1"},
+		FilterIDs: []string{"*string:~*req.Supplier:supplier1", "*string:~*req.ResID:ResourceSupplier1"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -259,7 +259,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 	rPrf2 := &engine.ResourceProfile{
 		Tenant:    "cgrates.org",
 		ID:        "Resource2Supplier1",
-		FilterIDs: []string{"*string:~*req.Supplier:supplier1", "*string:~ResID:Resource2Supplier1"},
+		FilterIDs: []string{"*string:~*req.Supplier:supplier1", "*string:~*req.ResID:Resource2Supplier1"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -280,7 +280,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 	rPrf3 := &engine.ResourceProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ResourceSupplier2",
-		FilterIDs: []string{"*string:~*req.Supplier:supplier2", "*string:~ResID:ResourceSupplier2"},
+		FilterIDs: []string{"*string:~*req.Supplier:supplier2", "*string:~*req.ResID:ResourceSupplier2"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -301,7 +301,7 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 	rPrf4 := &engine.ResourceProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ResourceSupplier3",
-		FilterIDs: []string{"*string:~*req.Supplier:supplier3", "*string:~ResID:ResourceSupplier3"},
+		FilterIDs: []string{"*string:~*req.Supplier:supplier3", "*string:~*req.ResID:ResourceSupplier3"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),

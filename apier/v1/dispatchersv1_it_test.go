@@ -140,7 +140,7 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 		Tenant:         "cgrates.org",
 		ID:             "EVENT1",
 		Subsystems:     []string{utils.META_ANY},
-		FilterIDs:      []string{"*string:~EventName:Event1"},
+		FilterIDs:      []string{"*string:~*req.EventName:Event1"},
 		StrategyParams: make(map[string]interface{}),
 		Strategy:       utils.MetaWeight,
 		Weight:         30,
@@ -169,7 +169,7 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 	}
 	reply.Hosts.Sort()
 	if !reflect.DeepEqual(expected, reply) {
-		t.Errorf("expected: %s , received: %s", utils.ToJSON(expected), utils.ToJSON(reply))
+		t.Errorf("expected: %s ,\n received: %s", utils.ToJSON(expected), utils.ToJSON(reply))
 	}
 }
 

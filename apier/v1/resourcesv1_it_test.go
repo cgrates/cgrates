@@ -679,7 +679,7 @@ func testV1RsGetResourceProfileAfterSet(t *testing.T) {
 
 func testV1RsUpdateResourceProfile(t *testing.T) {
 	var result string
-	rlsConfig.FilterIDs = []string{"*string:~Account:1001", "*prefix:~DST:10"}
+	rlsConfig.FilterIDs = []string{"*string:~*req.Account:1001", "*prefix:~*req.DST:10"}
 	if err := rlsV1Rpc.Call(utils.ApierV1SetResourceProfile, rlsConfig, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
