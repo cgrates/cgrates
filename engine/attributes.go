@@ -162,11 +162,13 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 		MatchedProfiles: []string{attrPrf.ID},
 		CGREvent:        args.Clone(),
 		blocker:         attrPrf.Blocker}
+	evNm := config.NewNavigableMap(nil)
+	evNm.Set([]string{utils.MetaReq}, args.Event, false, false)
 	for _, attribute := range attrPrf.Attributes {
 		//in case that we have filter for attribute send them to FilterS to be processed
 		if len(attribute.FilterIDs) != 0 {
 			if pass, err := alS.filterS.Pass(args.Tenant, attribute.FilterIDs,
-				config.NewNavigableMap(args.Event)); err != nil {
+				evNm); err != nil {
 				return nil, err
 			} else if !pass {
 				continue

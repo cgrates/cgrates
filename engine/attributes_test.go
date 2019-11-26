@@ -132,7 +132,7 @@ var (
 			Tenant:    config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:        "AttributeIDMatch",
 			Contexts:  []string{utils.MetaSessionS},
-			FilterIDs: []string{"*gte:~DistinctMatch:20"},
+			FilterIDs: []string{"*gte:~*req.DistinctMatch:20"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     cloneExpTimeAttributes,
@@ -175,17 +175,17 @@ func TestAttributeAddFilters(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      utils.MetaString,
-				FieldName: "~Attribute",
+				FieldName: "~*req.Attribute",
 				Values:    []string{"AttributeProfile1"},
 			},
 			{
 				Type:      utils.MetaGreaterOrEqual,
-				FieldName: "~UsageInterval",
+				FieldName: "~*req.UsageInterval",
 				Values:    []string{(1 * time.Second).String()},
 			},
 			{
 				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.Weight,
+				FieldName: "~*req." + utils.Weight,
 				Values:    []string{"9.0"},
 			},
 		},
@@ -197,7 +197,7 @@ func TestAttributeAddFilters(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      utils.MetaString,
-				FieldName: "~Attribute",
+				FieldName: "~*req.Attribute",
 				Values:    []string{"AttributeProfile2"},
 			},
 		},
@@ -209,7 +209,7 @@ func TestAttributeAddFilters(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      utils.MetaPrefix,
-				FieldName: "~Attribute",
+				FieldName: "~*req.Attribute",
 				Values:    []string{"AttributeProfilePrefix"},
 			},
 		},
@@ -221,7 +221,7 @@ func TestAttributeAddFilters(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.Weight,
+				FieldName: "~*req." + utils.Weight,
 				Values:    []string{"200.00"},
 			},
 		},
