@@ -968,16 +968,28 @@ type ArgRSv1ResourceUsage struct {
 	*ArgDispatcher
 }
 
-type ArgsComputeFilterIndexes struct {
+type ArgsComputeFilterIndexIDs struct {
 	Tenant        string
 	Context       string
-	AttributeIDs  *[]string
-	ResourceIDs   *[]string
-	StatIDs       *[]string
-	SupplierIDs   *[]string
-	ThresholdIDs  *[]string
-	ChargerIDs    *[]string
-	DispatcherIDs *[]string
+	AttributeIDs  []string
+	ResourceIDs   []string
+	StatIDs       []string
+	SupplierIDs   []string
+	ThresholdIDs  []string
+	ChargerIDs    []string
+	DispatcherIDs []string
+}
+
+type ArgsComputeFilterIndexes struct {
+	Tenant      string
+	Context     string
+	AttributeS  bool
+	ResourceS   bool
+	StatS       bool
+	SupplierS   bool
+	ThresholdS  bool
+	ChargerS    bool
+	DispatcherS bool
 }
 
 // AsActivationTime converts TPActivationInterval into ActivationInterval

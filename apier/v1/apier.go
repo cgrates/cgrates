@@ -92,7 +92,7 @@ func (apiv1 *ApierV1) RemoveDestination(attr AttrRemoveDestination, reply *strin
 			// set destinastion
 		}
 	}
-	return err
+	return
 }
 
 // GetReverseDestination retrieves revese destination list for a prefix
