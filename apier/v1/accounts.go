@@ -508,7 +508,7 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 		ActionType: utils.MetaPublishBalance,
 	}
 	acts := engine.Actions{a, publishAction}
-	if attr.Cdrlog != nil && *attr.Cdrlog == true {
+	if attr.Cdrlog != nil && *attr.Cdrlog {
 		acts = engine.Actions{a, publishAction, &engine.Action{
 			ActionType: utils.CDRLOG,
 		}}
@@ -603,7 +603,7 @@ func (self *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) error
 		ActionType: utils.MetaPublishBalance,
 	}
 	acts := engine.Actions{a, publishAction}
-	if attr.Cdrlog != nil && *attr.Cdrlog == true {
+	if attr.Cdrlog != nil && *attr.Cdrlog {
 		acts = engine.Actions{a, publishAction, &engine.Action{
 			ActionType: utils.CDRLOG,
 		}}

@@ -41,7 +41,6 @@ type AttrSetAccountActionTriggers struct {
 	ActivationDate        *string
 	BalanceID             *string
 	BalanceType           *string
-	BalanceDirections     *[]string
 	BalanceDestinationIds *[]string
 	BalanceWeight         *float64
 	BalanceExpirationDate *string

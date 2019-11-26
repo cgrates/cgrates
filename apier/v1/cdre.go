@@ -39,11 +39,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (self *ApierV1) ExportCdrsToZipString(attr utils.AttrExpFileCdrs, reply *string) error {
+func (api *ApierV1) ExportCdrsToZipString(attr utils.AttrExpFileCdrs, reply *string) error {
 	tmpDir := "/tmp"
 	attr.ExportDir = &tmpDir // Enforce exporting to tmp always so we avoid cleanup issues
 	efc := utils.ExportedFileCdrs{}
-	if err := self.ExportCdrsToFile(attr, &efc); err != nil {
+	if err := api.ExportCdrsToFile(attr, &efc); err != nil {
 		return err
 	} else if efc.TotalRecords == 0 || len(efc.ExportedFilePath) == 0 {
 		return errors.New("No CDR records to export")
@@ -92,11 +92,11 @@ func (self *ApierV1) ExportCdrsToZipString(attr utils.AttrExpFileCdrs, reply *st
 }
 
 // Deprecated by AttrExportCDRsToFile
-func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.ExportedFileCdrs) (err error) {
-	exportTemplate := self.Config.CdreProfiles[utils.META_DEFAULT]
+func (api *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.ExportedFileCdrs) (err error) {
+	exportTemplate := api.Config.CdreProfiles[utils.META_DEFAULT]
 	if attr.ExportTemplate != nil && len(*attr.ExportTemplate) != 0 { // Export template prefered, use it
 		var hasIt bool
-		if exportTemplate, hasIt = self.Config.CdreProfiles[*attr.ExportTemplate]; !hasIt {
+		if exportTemplate, hasIt = api.Config.CdreProfiles[*attr.ExportTemplate]; !hasIt {
 			return fmt.Errorf("%s:ExportTemplate", utils.ErrNotFound.Error())
 		}
 	}
@@ -133,11 +133,11 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if exportFormat == utils.DRYRUN {
 		filePath = utils.DRYRUN
 	}
-	cdrsFltr, err := attr.AsCDRsFilter(self.Config.GeneralCfg().DefaultTimezone)
+	cdrsFltr, err := attr.AsCDRsFilter(api.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	cdrs, _, err := self.CdrDb.GetCDRs(cdrsFltr, false)
+	cdrs, _, err := api.CdrDb.GetCDRs(cdrsFltr, false)
 	if err != nil {
 		return err
 	} else if len(cdrs) == 0 {
@@ -147,8 +147,8 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat,
 		filePath, utils.META_NONE, exportID, exportTemplate.Synchronous,
 		exportTemplate.Attempts, fieldSep,
-		self.Config.GeneralCfg().HttpSkipTlsVerify, self.HTTPPoster,
-		self.AttributeS, self.FilterS)
+		api.Config.GeneralCfg().HttpSkipTlsVerify, api.HTTPPoster,
+		api.AttributeS, api.FilterS)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -211,13 +211,13 @@ type RplExportedCDRs struct {
 }
 
 // ExportCDRs exports CDRs on a path (file or remote)
-func (self *ApierV1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err error) {
-	cdreReloadStruct := <-self.Config.ConfigReloads[utils.CDRE]                  // Read the content of the channel, locking it
-	defer func() { self.Config.ConfigReloads[utils.CDRE] <- cdreReloadStruct }() // Unlock reloads at exit
-	exportTemplate := self.Config.CdreProfiles[utils.META_DEFAULT]
+func (api *ApierV1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err error) {
+	cdreReloadStruct := <-api.Config.ConfigReloads[utils.CDRE]                  // Read the content of the channel, locking it
+	defer func() { api.Config.ConfigReloads[utils.CDRE] <- cdreReloadStruct }() // Unlock reloads at exit
+	exportTemplate := api.Config.CdreProfiles[utils.META_DEFAULT]
 	if arg.ExportTemplate != nil && len(*arg.ExportTemplate) != 0 { // Export template prefered, use it
 		var hasIt bool
-		if exportTemplate, hasIt = self.Config.CdreProfiles[*arg.ExportTemplate]; !hasIt {
+		if exportTemplate, hasIt = api.Config.CdreProfiles[*arg.ExportTemplate]; !hasIt {
 			return fmt.Errorf("%s:ExportTemplate", utils.ErrNotFound)
 		}
 	}
@@ -275,11 +275,11 @@ func (self *ApierV1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err 
 		u.Path = path.Join(u.Path, fileName)
 		filePath = u.String()
 	}
-	cdrsFltr, err := arg.RPCCDRsFilter.AsCDRsFilter(self.Config.GeneralCfg().DefaultTimezone)
+	cdrsFltr, err := arg.RPCCDRsFilter.AsCDRsFilter(api.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	cdrs, _, err := self.CdrDb.GetCDRs(cdrsFltr, false)
+	cdrs, _, err := api.CdrDb.GetCDRs(cdrsFltr, false)
 	if err != nil {
 		return err
 	} else if len(cdrs) == 0 {
@@ -288,8 +288,8 @@ func (self *ApierV1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err 
 	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat,
 		filePath, utils.META_NONE, exportID,
 		synchronous, attempts, fieldSep,
-		self.Config.GeneralCfg().HttpSkipTlsVerify,
-		self.HTTPPoster, self.AttributeS, self.FilterS)
+		api.Config.GeneralCfg().HttpSkipTlsVerify,
+		api.HTTPPoster, api.AttributeS, api.FilterS)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

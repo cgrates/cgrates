@@ -20,6 +20,7 @@ package v1
 
 import (
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -28,11 +29,11 @@ import (
 )
 
 // Returns a list of ActionTriggers on an account
-func (self *ApierV1) GetAccountActionTriggers(attrs utils.TenantAccount, reply *engine.ActionTriggers) error {
+func (api *ApierV1) GetAccountActionTriggers(attrs utils.TenantAccount, reply *engine.ActionTriggers) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if account, err := self.DataManager.GetAccount(utils.ConcatenatedKey(attrs.Tenant, attrs.Account)); err != nil {
+	if account, err := api.DataManager.GetAccount(utils.ConcatenatedKey(attrs.Tenant, attrs.Account)); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		ats := account.ActionTriggers
@@ -47,64 +48,58 @@ func (self *ApierV1) GetAccountActionTriggers(attrs utils.TenantAccount, reply *
 type AttrAddAccountActionTriggers struct {
 	Tenant                 string
 	Account                string
-	ActionTriggerIDs       *[]string
+	ActionTriggerIDs       []string
 	ActionTriggerOverwrite bool
 	ActivationDate         string
 	Executed               bool
 }
 
-func (self *ApierV1) AddAccountActionTriggers(attr AttrAddAccountActionTriggers, reply *string) error {
+func (api *ApierV1) AddAccountActionTriggers(attr AttrAddAccountActionTriggers, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	actTime, err := utils.ParseTimeDetectLayout(attr.ActivationDate,
-		self.Config.GeneralCfg().DefaultTimezone)
-	if err != nil {
-		*reply = err.Error()
-		return err
+	var actTime time.Time
+	if actTime, err = utils.ParseTimeDetectLayout(attr.ActivationDate,
+		api.Config.GeneralCfg().DefaultTimezone); err != nil {
+		return
 	}
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	var account *engine.Account
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
-		if acc, err := self.DataManager.GetAccount(accID); err == nil {
-			account = acc
-		} else {
+		if account, err = api.DataManager.GetAccount(accID); err != nil {
 			return 0, err
 		}
-		if attr.ActionTriggerIDs != nil {
-			if attr.ActionTriggerOverwrite {
-				account.ActionTriggers = make(engine.ActionTriggers, 0)
+		if attr.ActionTriggerOverwrite {
+			account.ActionTriggers = make(engine.ActionTriggers, 0)
+		}
+		for _, actionTriggerID := range attr.ActionTriggerIDs {
+			atrs, err := api.DataManager.GetActionTriggers(actionTriggerID, false, utils.NonTransactional)
+			if err != nil {
+				return 0, err
 			}
-			for _, actionTriggerID := range *attr.ActionTriggerIDs {
-				atrs, err := self.DataManager.GetActionTriggers(actionTriggerID, false, utils.NonTransactional)
-				if err != nil {
-					return 0, err
+			for _, at := range atrs {
+				var found bool
+				for _, existingAt := range account.ActionTriggers {
+					if existingAt.Equals(at) {
+						found = true
+						break
+					}
 				}
-				for _, at := range atrs {
-					var found bool
-					for _, existingAt := range account.ActionTriggers {
-						if existingAt.Equals(at) {
-							found = true
-							break
-						}
-					}
-					at.ActivationDate = actTime
-					at.Executed = attr.Executed
-					if !found {
-						account.ActionTriggers = append(account.ActionTriggers, at)
-					}
+				at.ActivationDate = actTime
+				at.Executed = attr.Executed
+				if !found {
+					account.ActionTriggers = append(account.ActionTriggers, at)
 				}
 			}
 		}
 		account.InitCounters()
-		return 0, self.DataManager.SetAccount(account)
+		return 0, api.DataManager.SetAccount(account)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+accID)
 	if err != nil {
-		*reply = err.Error()
-		return err
+		return
 	}
 	*reply = utils.OK
-	return nil
+	return
 }
 
 type AttrRemoveAccountActionTriggers struct {
@@ -114,14 +109,14 @@ type AttrRemoveAccountActionTriggers struct {
 	UniqueID string
 }
 
-func (self *ApierV1) RemoveAccountActionTriggers(attr AttrRemoveAccountActionTriggers, reply *string) error {
+func (api *ApierV1) RemoveAccountActionTriggers(attr AttrRemoveAccountActionTriggers, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 		var account *engine.Account
-		if acc, err := self.DataManager.GetAccount(accID); err == nil {
+		if acc, err := api.DataManager.GetAccount(accID); err == nil {
 			account = acc
 		} else {
 			return 0, err
@@ -137,7 +132,7 @@ func (self *ApierV1) RemoveAccountActionTriggers(attr AttrRemoveAccountActionTri
 		}
 		account.ActionTriggers = newActionTriggers
 		account.InitCounters()
-		return 0, self.DataManager.SetAccount(account)
+		return 0, api.DataManager.SetAccount(account)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, accID)
 	if err != nil {
 		*reply = err.Error()
@@ -155,7 +150,7 @@ type AttrResetAccountActionTriggers struct {
 	Executed bool
 }
 
-func (self *ApierV1) ResetAccountActionTriggers(attr AttrResetAccountActionTriggers, reply *string) error {
+func (api *ApierV1) ResetAccountActionTriggers(attr AttrResetAccountActionTriggers, reply *string) error {
 
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -163,7 +158,7 @@ func (self *ApierV1) ResetAccountActionTriggers(attr AttrResetAccountActionTrigg
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	var account *engine.Account
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		if acc, err := self.DataManager.GetAccount(accID); err == nil {
+		if acc, err := api.DataManager.GetAccount(accID); err == nil {
 			account = acc
 		} else {
 			return 0, err
@@ -179,7 +174,7 @@ func (self *ApierV1) ResetAccountActionTriggers(attr AttrResetAccountActionTrigg
 		if attr.Executed == false {
 			account.ExecuteActionTriggers(nil)
 		}
-		return 0, self.DataManager.SetAccount(account)
+		return 0, api.DataManager.SetAccount(account)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+accID)
 	if err != nil {
 		*reply = err.Error()
@@ -203,7 +198,6 @@ type AttrSetAccountActionTriggers struct {
 	ActivationDate        *string
 	BalanceID             *string
 	BalanceType           *string
-	BalanceDirections     *[]string
 	BalanceDestinationIds *[]string
 	BalanceWeight         *float64
 	BalanceExpirationDate *string
@@ -217,7 +211,7 @@ type AttrSetAccountActionTriggers struct {
 	ActionsID             *string
 }
 
-func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers, reply *string) error {
+func (api *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers, reply *string) error {
 
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -225,7 +219,7 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	var account *engine.Account
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		if acc, err := self.DataManager.GetAccount(accID); err == nil {
+		if acc, err := api.DataManager.GetAccount(accID); err == nil {
 			account = acc
 		} else {
 			return 0, err
@@ -255,7 +249,7 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 				}
 				if attr.ExpirationDate != nil {
 					expTime, err := utils.ParseTimeDetectLayout(*attr.ExpirationDate,
-						self.Config.GeneralCfg().DefaultTimezone)
+						api.Config.GeneralCfg().DefaultTimezone)
 					if err != nil {
 						return 0, err
 					}
@@ -263,7 +257,7 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 				}
 				if attr.ActivationDate != nil {
 					actTime, err := utils.ParseTimeDetectLayout(*attr.ActivationDate,
-						self.Config.GeneralCfg().DefaultTimezone)
+						api.Config.GeneralCfg().DefaultTimezone)
 					if err != nil {
 						return 0, err
 					}
@@ -284,7 +278,7 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 				}
 				if attr.BalanceExpirationDate != nil {
 					balanceExpTime, err := utils.ParseTimeDetectLayout(*attr.BalanceExpirationDate,
-						self.Config.GeneralCfg().DefaultTimezone)
+						api.Config.GeneralCfg().DefaultTimezone)
 					if err != nil {
 						return 0, err
 					}
@@ -318,7 +312,7 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 
 		}
 		account.ExecuteActionTriggers(nil)
-		return 0, self.DataManager.SetAccount(account)
+		return 0, api.DataManager.SetAccount(account)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+accID)
 	if err != nil {
 		*reply = err.Error()
@@ -333,12 +327,12 @@ type AttrRemoveActionTrigger struct {
 	UniqueID string
 }
 
-func (self *ApierV1) RemoveActionTrigger(attr AttrRemoveActionTrigger, reply *string) error {
+func (api *ApierV1) RemoveActionTrigger(attr AttrRemoveActionTrigger, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"GroupID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if attr.UniqueID == "" {
-		err := self.DataManager.RemoveActionTriggers(attr.GroupID, utils.NonTransactional)
+		err := api.DataManager.RemoveActionTriggers(attr.GroupID, utils.NonTransactional)
 		if err != nil {
 			*reply = err.Error()
 		} else {
@@ -346,7 +340,7 @@ func (self *ApierV1) RemoveActionTrigger(attr AttrRemoveActionTrigger, reply *st
 		}
 		return err
 	} else {
-		atrs, err := self.DataManager.GetActionTriggers(attr.GroupID, false, utils.NonTransactional)
+		atrs, err := api.DataManager.GetActionTriggers(attr.GroupID, false, utils.NonTransactional)
 		if err != nil {
 			*reply = err.Error()
 			return err
@@ -359,7 +353,7 @@ func (self *ApierV1) RemoveActionTrigger(attr AttrRemoveActionTrigger, reply *st
 			remainingAtrs = append(remainingAtrs, atr)
 		}
 		// set the cleared list back
-		err = self.DataManager.SetActionTriggers(attr.GroupID, remainingAtrs, utils.NonTransactional)
+		err = api.DataManager.SetActionTriggers(attr.GroupID, remainingAtrs, utils.NonTransactional)
 		if err != nil {
 			*reply = err.Error()
 		} else {
@@ -380,7 +374,6 @@ type AttrSetActionTrigger struct {
 	ActivationDate        *string
 	BalanceID             *string
 	BalanceType           *string
-	BalanceDirections     *[]string
 	BalanceDestinationIds *[]string
 	BalanceWeight         *float64
 	BalanceExpirationDate *string
@@ -394,13 +387,13 @@ type AttrSetActionTrigger struct {
 	ActionsID             *string
 }
 
-func (self *ApierV1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) (err error) {
+func (api *ApierV1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) (err error) {
 
 	if missing := utils.MissingStructFields(&attr, []string{"GroupID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 
-	atrs, _ := self.DataManager.GetActionTriggers(attr.GroupID, false, utils.NonTransactional)
+	atrs, _ := api.DataManager.GetActionTriggers(attr.GroupID, false, utils.NonTransactional)
 	var newAtr *engine.ActionTrigger
 	if attr.UniqueID != "" {
 		//search for exiting one
@@ -442,7 +435,7 @@ func (self *ApierV1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) 
 	}
 	if attr.ExpirationDate != nil {
 		expTime, err := utils.ParseTimeDetectLayout(*attr.ExpirationDate,
-			self.Config.GeneralCfg().DefaultTimezone)
+			api.Config.GeneralCfg().DefaultTimezone)
 		if err != nil {
 			*reply = err.Error()
 			return err
@@ -451,7 +444,7 @@ func (self *ApierV1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) 
 	}
 	if attr.ActivationDate != nil {
 		actTime, err := utils.ParseTimeDetectLayout(*attr.ActivationDate,
-			self.Config.GeneralCfg().DefaultTimezone)
+			api.Config.GeneralCfg().DefaultTimezone)
 		if err != nil {
 			*reply = err.Error()
 			return err
@@ -473,7 +466,7 @@ func (self *ApierV1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) 
 	}
 	if attr.BalanceExpirationDate != nil {
 		balanceExpTime, err := utils.ParseTimeDetectLayout(*attr.BalanceExpirationDate,
-			self.Config.GeneralCfg().DefaultTimezone)
+			api.Config.GeneralCfg().DefaultTimezone)
 		if err != nil {
 			*reply = err.Error()
 			return err
@@ -504,7 +497,7 @@ func (self *ApierV1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) 
 	if attr.ActionsID != nil {
 		newAtr.ActionsID = *attr.ActionsID
 	}
-	if err = self.DataManager.SetActionTriggers(attr.GroupID, atrs, utils.NonTransactional); err != nil {
+	if err = api.DataManager.SetActionTriggers(attr.GroupID, atrs, utils.NonTransactional); err != nil {
 		return
 	}
 	//no cache for action triggers
@@ -516,11 +509,11 @@ type AttrGetActionTriggers struct {
 	GroupIDs []string
 }
 
-func (self *ApierV1) GetActionTriggers(attr AttrGetActionTriggers, atrs *engine.ActionTriggers) error {
+func (api *ApierV1) GetActionTriggers(attr AttrGetActionTriggers, atrs *engine.ActionTriggers) error {
 	var allAttrs engine.ActionTriggers
 	if len(attr.GroupIDs) > 0 {
 		for _, key := range attr.GroupIDs {
-			getAttrs, err := self.DataManager.GetActionTriggers(key, false, utils.NonTransactional)
+			getAttrs, err := api.DataManager.GetActionTriggers(key, false, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
@@ -528,12 +521,12 @@ func (self *ApierV1) GetActionTriggers(attr AttrGetActionTriggers, atrs *engine.
 		}
 
 	} else {
-		keys, err := self.DataManager.DataDB().GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX)
+		keys, err := api.DataManager.DataDB().GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX)
 		if err != nil {
 			return err
 		}
 		for _, key := range keys {
-			getAttrs, err := self.DataManager.GetActionTriggers(key[len(utils.ACTION_TRIGGER_PREFIX):], false, utils.NonTransactional)
+			getAttrs, err := api.DataManager.GetActionTriggers(key[len(utils.ACTION_TRIGGER_PREFIX):], false, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
@@ -563,7 +556,7 @@ type AttrAddActionTrigger struct {
 }
 
 // Deprecated in rc8, replaced by AddAccountActionTriggers
-func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string) error {
+func (api *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -592,7 +585,7 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 		at.Balance.Weight = utils.Float64Pointer(attr.BalanceWeight)
 	}
 	if balExpiryTime, err := utils.ParseTimeDetectLayout(attr.BalanceExpiryTime,
-		self.Config.GeneralCfg().DefaultTimezone); err != nil {
+		api.Config.GeneralCfg().DefaultTimezone); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		at.Balance.ExpirationDate = &balExpiryTime
@@ -602,13 +595,13 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 	}
 	acntID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		acnt, err := self.DataManager.GetAccount(acntID)
+		acnt, err := api.DataManager.GetAccount(acntID)
 		if err != nil {
 			return 0, err
 		}
 		acnt.ActionTriggers = append(acnt.ActionTriggers, at)
 
-		return 0, self.DataManager.SetAccount(acnt)
+		return 0, api.DataManager.SetAccount(acnt)
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACCOUNT_PREFIX+acntID)
 	if err != nil {
 		return err

@@ -41,23 +41,14 @@ type AttrExportCdrsToFile struct {
 	utils.RPCCDRsFilter         // Inherit the CDR filter attributes
 }
 
-type ExportedFileCdrs struct {
-	ExportedFilePath          string            // Full path to the newly generated export file
-	TotalRecords              int               // Number of CDRs to be exported
-	TotalCost                 float64           // Sum of all costs in exported CDRs
-	FirstOrderId, LastOrderId int64             // The order id of the last exported CDR
-	ExportedCgrIds            []string          // List of successfuly exported cgrids in the file
-	UnexportedCgrIds          map[string]string // Map of errored CDRs, map key is cgrid, value will be the error string
-}
-
 // Deprecated, please use ApierV1.ExportCDRs instead
-func (self *ApierV2) ExportCdrsToFile(attr AttrExportCdrsToFile, reply *ExportedFileCdrs) (err error) {
-	cdreReloadStruct := <-self.Config.ConfigReloads[utils.CDRE]                  // Read the content of the channel, locking it
-	defer func() { self.Config.ConfigReloads[utils.CDRE] <- cdreReloadStruct }() // Unlock reloads at exit
-	exportTemplate := self.Config.CdreProfiles[utils.META_DEFAULT]
+func (apiv2 *ApierV2) ExportCdrsToFile(attr AttrExportCdrsToFile, reply *utils.ExportedFileCdrs) (err error) {
+	cdreReloadStruct := <-apiv2.Config.ConfigReloads[utils.CDRE]                  // Read the content of the channel, locking it
+	defer func() { apiv2.Config.ConfigReloads[utils.CDRE] <- cdreReloadStruct }() // Unlock reloads at exit
+	exportTemplate := apiv2.Config.CdreProfiles[utils.META_DEFAULT]
 	if attr.ExportTemplate != nil && len(*attr.ExportTemplate) != 0 { // Export template prefered, use it
 		var hasIt bool
-		if exportTemplate, hasIt = self.Config.CdreProfiles[*attr.ExportTemplate]; !hasIt {
+		if exportTemplate, hasIt = apiv2.Config.CdreProfiles[*attr.ExportTemplate]; !hasIt {
 			return fmt.Errorf("%s:ExportTemplate", utils.ErrNotFound)
 		}
 	}
@@ -100,21 +91,21 @@ func (self *ApierV2) ExportCdrsToFile(attr AttrExportCdrsToFile, reply *Exported
 	if exportFormat == utils.DRYRUN {
 		filePath = utils.DRYRUN
 	}
-	cdrsFltr, err := attr.RPCCDRsFilter.AsCDRsFilter(self.Config.GeneralCfg().DefaultTimezone)
+	cdrsFltr, err := attr.RPCCDRsFilter.AsCDRsFilter(apiv2.Config.GeneralCfg().DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	cdrs, _, err := self.CdrDb.GetCDRs(cdrsFltr, false)
+	cdrs, _, err := apiv2.CdrDb.GetCDRs(cdrsFltr, false)
 	if err != nil {
 		return err
 	} else if len(cdrs) == 0 {
-		*reply = ExportedFileCdrs{ExportedFilePath: ""}
+		*reply = utils.ExportedFileCdrs{ExportedFilePath: ""}
 		return nil
 	}
 	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat,
 		filePath, utils.META_NONE, exportID, exportTemplate.Synchronous,
-		exportTemplate.Attempts, fieldSep, self.Config.GeneralCfg().HttpSkipTlsVerify,
-		self.HTTPPoster, self.AttributeS, self.FilterS)
+		exportTemplate.Attempts, fieldSep, apiv2.Config.GeneralCfg().HttpSkipTlsVerify,
+		apiv2.HTTPPoster, apiv2.AttributeS, apiv2.FilterS)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -122,10 +113,10 @@ func (self *ApierV2) ExportCdrsToFile(attr AttrExportCdrsToFile, reply *Exported
 		return utils.NewErrServerError(err)
 	}
 	if cdrexp.TotalExportedCdrs() == 0 {
-		*reply = ExportedFileCdrs{ExportedFilePath: ""}
+		*reply = utils.ExportedFileCdrs{ExportedFilePath: ""}
 		return nil
 	}
-	*reply = ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs),
+	*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs),
 		TotalCost: cdrexp.TotalCost(), FirstOrderId: cdrexp.FirstOrderId(), LastOrderId: cdrexp.LastOrderId()}
 	if !attr.Verbose {
 		reply.ExportedCgrIds = cdrexp.PositiveExports()
