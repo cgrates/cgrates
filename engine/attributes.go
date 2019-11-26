@@ -78,7 +78,6 @@ func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent
 				alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
 				alS.dm, utils.CacheAttributeFilterIndexes, utils.ConcatenatedKey(args.Tenant, utils.META_ANY),
 				alS.filterS.cfg.AttributeSCfg().IndexedSelects); err != nil {
-				fmt.Println("exit with not found")
 				return nil, err
 			}
 		}
