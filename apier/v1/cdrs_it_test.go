@@ -43,7 +43,7 @@ var sTestsCDRsIT = []func(t *testing.T){
 	testV1CDRsStartEngine,
 	testV1CDRsRpcConn,
 	testV1CDRsLoadTariffPlanFromFolder,
-	testV1CDRsProcessEventDebit,
+	testV1CDRsProcessEventWithRefund,
 	testV1CDRsKillEngine,
 }
 
@@ -101,7 +101,28 @@ func testV1CDRsLoadTariffPlanFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func testV1CDRsProcessEventDebit(t *testing.T) {
+func testV1CDRsProcessEventWithRefund(t *testing.T) {
+	args := &engine.ArgV1ProcessEvent{
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:    "testV1CDRsProcessEventWithRefund",
+				utils.RequestType: utils.META_PSEUDOPREPAID,
+				utils.Account:     "testV1CDRsProcessEventWithRefund",
+				utils.Destination: "+4986517174963",
+				utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+				utils.Usage:       time.Duration(3) * time.Minute,
+			},
+		},
+	}
+
+	var reply string
+	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
 	return
 }
 
