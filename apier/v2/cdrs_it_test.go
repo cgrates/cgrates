@@ -270,7 +270,7 @@ func testV2CDRsRateCDRs(t *testing.T) {
 
 	if err := cdrsRpc.Call(utils.CDRsV1RateCDRs, &engine.ArgRateCDRs{
 		RPCCDRsFilter: utils.RPCCDRsFilter{NotRunIDs: []string{utils.MetaRaw}},
-		ChargerS:      utils.BoolPointer(true),
+		Flags:         []string{"*chargers:true"},
 	}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
@@ -646,7 +646,7 @@ func testV2CDRsRateCDRsWithRatingPlan(t *testing.T) {
 
 	if err := cdrsRpc.Call(utils.CDRsV1RateCDRs, &engine.ArgRateCDRs{
 		RPCCDRsFilter: utils.RPCCDRsFilter{NotRunIDs: []string{utils.MetaRaw}, Accounts: []string{"testV2CDRsProcessCDR4"}},
-		ChargerS:      utils.BoolPointer(true),
+		Flags:         []string{"*chargers:true"},
 	}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
