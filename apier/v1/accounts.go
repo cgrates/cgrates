@@ -37,19 +37,19 @@ type AccountActionTiming struct {
 	NextExecTime time.Time // Next execution time
 }
 
-func (self *ApierV1) GetAccountActionPlan(attrs utils.TenantAccount, reply *[]*AccountActionTiming) error {
+func (api *ApierV1) GetAccountActionPlan(attrs utils.TenantAccount, reply *[]*AccountActionTiming) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(strings.Join(missing, ","), "")
 	}
 	acntID := utils.ConcatenatedKey(attrs.Tenant, attrs.Account)
 	acntATsIf, err := guardian.Guardian.Guard(func() (interface{}, error) {
-		acntAPids, err := self.DataManager.GetAccountActionPlans(acntID, false, utils.NonTransactional)
+		acntAPids, err := api.DataManager.GetAccountActionPlans(acntID, false, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {
 			return nil, utils.NewErrServerError(err)
 		}
 		var acntAPs []*engine.ActionPlan
 		for _, apID := range acntAPids {
-			if ap, err := self.DataManager.GetActionPlan(apID, false, utils.NonTransactional); err != nil {
+			if ap, err := api.DataManager.GetActionPlan(apID, false, utils.NonTransactional); err != nil {
 				return nil, err
 			} else if ap != nil {
 				acntAPs = append(acntAPs, ap)
@@ -85,7 +85,7 @@ type AttrRemoveActionTiming struct {
 }
 
 // Removes an ActionTimings or parts of it depending on filters being set
-func (self *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *string) (err error) {
+func (api *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&attrs, []string{"ActionPlanId"}); len(missing) != 0 { // Only mandatory ActionPlanId
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -99,7 +99,7 @@ func (self *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *str
 
 	var remAcntAPids []string // list of accounts who's indexes need modification
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
-		ap, err := self.DataManager.GetActionPlan(attrs.ActionPlanId, false, utils.NonTransactional)
+		ap, err := api.DataManager.GetActionPlan(attrs.ActionPlanId, false, utils.NonTransactional)
 		if err != nil {
 			return 0, err
 		} else if ap == nil {
@@ -108,7 +108,7 @@ func (self *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *str
 		if accID != "" {
 			delete(ap.AccountIDs, accID)
 			remAcntAPids = append(remAcntAPids, accID)
-			err = self.DataManager.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
+			err = api.DataManager.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
 			goto UPDATE
 		}
 		if attrs.ActionTimingId != "" { // delete only a action timing from action plan
@@ -119,7 +119,7 @@ func (self *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *str
 					break
 				}
 			}
-			err = self.DataManager.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
+			err = api.DataManager.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
 			goto UPDATE
 		}
 		if attrs.ActionPlanId != "" { // delete the entire action plan
@@ -127,7 +127,7 @@ func (self *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *str
 			for acntID := range ap.AccountIDs { // Make sure we clear indexes for all accounts
 				remAcntAPids = append(remAcntAPids, acntID)
 			}
-			err = self.DataManager.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
+			err = api.DataManager.SetActionPlan(ap.Id, ap, true, utils.NonTransactional)
 			goto UPDATE
 		}
 
@@ -135,16 +135,16 @@ func (self *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *str
 		if err != nil {
 			return 0, err
 		}
-		if err = self.DataManager.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{attrs.ActionPlanId}, true); err != nil {
+		if err = api.DataManager.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{attrs.ActionPlanId}, true); err != nil {
 			return 0, err
 		}
 		for _, acntID := range remAcntAPids {
-			if err = self.DataManager.RemAccountActionPlans(acntID, []string{attrs.ActionPlanId}); err != nil {
+			if err = api.DataManager.RemAccountActionPlans(acntID, []string{attrs.ActionPlanId}); err != nil {
 				return 0, nil
 			}
 		}
 		if len(remAcntAPids) != 0 {
-			if err = self.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, remAcntAPids, true); err != nil {
+			if err = api.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, remAcntAPids, true); err != nil {
 				return 0, nil
 			}
 		}
@@ -155,7 +155,7 @@ func (self *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *str
 		return utils.NewErrServerError(err)
 	}
 	if attrs.ReloadScheduler {
-		sched := self.SchedulerService.GetScheduler()
+		sched := api.SchedulerService.GetScheduler()
 		if sched == nil {
 			return errors.New(utils.SchedulerNotRunningCaps)
 		}
@@ -166,7 +166,7 @@ func (self *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *str
 }
 
 // Ads a new account into dataDb. If already defined, returns success.
-func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err error) {
+func (api *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -174,7 +174,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 	dirtyActionPlans := make(map[string]*engine.ActionPlan)
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		var ub *engine.Account
-		if bal, _ := self.DataManager.GetAccount(accID); bal != nil {
+		if bal, _ := api.DataManager.GetAccount(accID); bal != nil {
 			ub = bal
 		} else { // Not found in db, create it here
 			ub = &engine.Account{
@@ -183,7 +183,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 		}
 		if attr.ActionPlanId != "" {
 			_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-				acntAPids, err := self.DataManager.GetAccountActionPlans(accID, false, utils.NonTransactional)
+				acntAPids, err := api.DataManager.GetAccountActionPlans(accID, false, utils.NonTransactional)
 				if err != nil && err != utils.ErrNotFound {
 					return 0, err
 				}
@@ -194,7 +194,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 						i++ // increase index since we don't remove from slice
 						continue
 					}
-					ap, err := self.DataManager.GetActionPlan(apID, false, utils.NonTransactional)
+					ap, err := api.DataManager.GetActionPlan(apID, false, utils.NonTransactional)
 					if err != nil {
 						return 0, err
 					}
@@ -203,7 +203,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 					acntAPids = append(acntAPids[:i], acntAPids[i+1:]...) // remove the item from the list so we can overwrite the real list
 				}
 				if !utils.IsSliceMember(acntAPids, attr.ActionPlanId) { // Account not yet attached to action plan, do it here
-					ap, err := self.DataManager.GetActionPlan(attr.ActionPlanId, false, utils.NonTransactional)
+					ap, err := api.DataManager.GetActionPlan(attr.ActionPlanId, false, utils.NonTransactional)
 					if err != nil {
 						return 0, err
 					}
@@ -221,7 +221,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 								AccountID: accID,
 								ActionsID: at.ActionsID,
 							}
-							if err = self.DataManager.DataDB().PushTask(t); err != nil {
+							if err = api.DataManager.DataDB().PushTask(t); err != nil {
 								return 0, err
 							}
 						}
@@ -230,19 +230,19 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 				apIDs := make([]string, len(dirtyActionPlans))
 				i := 0
 				for actionPlanID, ap := range dirtyActionPlans {
-					if err := self.DataManager.SetActionPlan(actionPlanID, ap, true, utils.NonTransactional); err != nil {
+					if err := api.DataManager.SetActionPlan(actionPlanID, ap, true, utils.NonTransactional); err != nil {
 						return 0, err
 					}
 					apIDs[i] = actionPlanID
 					i++
 				}
-				if err := self.DataManager.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, apIDs, true); err != nil {
+				if err := api.DataManager.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, apIDs, true); err != nil {
 					return 0, err
 				}
-				if err := self.DataManager.SetAccountActionPlans(accID, acntAPids, true); err != nil {
+				if err := api.DataManager.SetAccountActionPlans(accID, acntAPids, true); err != nil {
 					return 0, err
 				}
-				if err = self.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
+				if err = api.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
 					return 0, err
 				}
 				return 0, nil
@@ -253,7 +253,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 		}
 
 		if attr.ActionTriggersId != "" {
-			atrs, err := self.DataManager.GetActionTriggers(attr.ActionTriggersId, false, utils.NonTransactional)
+			atrs, err := api.DataManager.GetActionTriggers(attr.ActionTriggersId, false, utils.NonTransactional)
 			if err != nil {
 				return 0, err
 			}
@@ -268,7 +268,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 			ub.Disabled = *attr.Disabled
 		}
 		// All prepared, save account
-		if err := self.DataManager.SetAccount(ub); err != nil {
+		if err := api.DataManager.SetAccount(ub); err != nil {
 			return 0, err
 		}
 		return 0, nil
@@ -277,7 +277,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 		return utils.NewErrServerError(err)
 	}
 	if attr.ReloadScheduler && len(dirtyActionPlans) != 0 {
-		sched := self.SchedulerService.GetScheduler()
+		sched := api.SchedulerService.GetScheduler()
 		if sched == nil {
 			return errors.New(utils.SchedulerNotRunningCaps)
 		}
@@ -287,7 +287,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err e
 	return nil
 }
 
-func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) (err error) {
+func (api *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -296,7 +296,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
 		// remove it from all action plans
 		_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-			actionPlansMap, err := self.DataManager.GetAllActionPlans()
+			actionPlansMap, err := api.DataManager.GetAllActionPlans()
 			if err == utils.ErrNotFound {
 				// no action plans
 				return 0, nil
@@ -313,7 +313,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 			}
 
 			for actionPlanID, ap := range dirtyActionPlans {
-				if err := self.DataManager.SetActionPlan(actionPlanID, ap, true,
+				if err := api.DataManager.SetActionPlan(actionPlanID, ap, true,
 					utils.NonTransactional); err != nil {
 					return 0, err
 				}
@@ -323,7 +323,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 		if err != nil {
 			return 0, err
 		}
-		if err := self.DataManager.RemoveAccount(accID); err != nil {
+		if err := api.DataManager.RemoveAccount(accID); err != nil {
 			return 0, err
 		}
 		return 0, nil
@@ -331,11 +331,11 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err = self.DataManager.RemAccountActionPlans(accID, nil); err != nil &&
+	if err = api.DataManager.RemAccountActionPlans(accID, nil); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		return err
 	}
-	if err = self.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix,
+	if err = api.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix,
 		[]string{accID}, true); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		return err
@@ -344,14 +344,14 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	return nil
 }
 
-func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{}) error {
+func (api *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{}) error {
 	if len(attr.Tenant) == 0 {
 		return utils.NewErrMandatoryIeMissing("Tenant")
 	}
 	var accountKeys []string
 	var err error
 	if len(attr.AccountIds) == 0 {
-		if accountKeys, err = self.DataManager.DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX + attr.Tenant); err != nil {
+		if accountKeys, err = api.DataManager.DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX + attr.Tenant); err != nil {
 			return err
 		}
 	} else {
@@ -374,7 +374,7 @@ func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{
 	}
 	retAccounts := make([]interface{}, 0)
 	for _, acntKey := range limitedAccounts {
-		if acnt, err := self.DataManager.GetAccount(acntKey[len(utils.ACCOUNT_PREFIX):]); err != nil && err != utils.ErrNotFound { // Not found is not an error here
+		if acnt, err := api.DataManager.GetAccount(acntKey[len(utils.ACCOUNT_PREFIX):]); err != nil && err != utils.ErrNotFound { // Not found is not an error here
 			return err
 		} else if acnt != nil {
 			if attr.Disabled != nil && *attr.Disabled != acnt.Disabled {
@@ -388,9 +388,9 @@ func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{
 }
 
 // Get balance
-func (self *ApierV1) GetAccount(attr *utils.AttrGetAccount, reply *interface{}) error {
+func (api *ApierV1) GetAccount(attr *utils.AttrGetAccount, reply *interface{}) error {
 	tag := utils.ConcatenatedKey(attr.Tenant, attr.Account)
-	userBalance, err := self.DataManager.GetAccount(tag)
+	userBalance, err := api.DataManager.GetAccount(tag)
 	if err != nil {
 		return err
 	}
@@ -421,21 +421,21 @@ type AttrAddBalance struct {
 	ExtraData      *map[string]interface{}
 }
 
-func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
-	return self.modifyBalance(utils.TOPUP, attr, reply)
+func (api *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
+	return api.modifyBalance(utils.TOPUP, attr, reply)
 }
-func (self *ApierV1) DebitBalance(attr *AttrAddBalance, reply *string) error {
-	return self.modifyBalance(utils.DEBIT, attr, reply)
+func (api *ApierV1) DebitBalance(attr *AttrAddBalance, reply *string) error {
+	return api.modifyBalance(utils.DEBIT, attr, reply)
 }
 
-func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *string) error {
+func (api *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType", "Value"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	var expTime *time.Time
 	if attr.ExpiryTime != nil {
 		expTimeVal, err := utils.ParseTimeDetectLayout(*attr.ExpiryTime,
-			self.Config.GeneralCfg().DefaultTimezone)
+			api.Config.GeneralCfg().DefaultTimezone)
 		if err != nil {
 			*reply = err.Error()
 			return err
@@ -443,12 +443,12 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 		expTime = &expTimeVal
 	}
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
-	if _, err := self.DataManager.GetAccount(accID); err != nil {
+	if _, err := api.DataManager.GetAccount(accID); err != nil {
 		// create account if does not exist
 		account := &engine.Account{
 			ID: accID,
 		}
-		if err := self.DataManager.SetAccount(account); err != nil {
+		if err := api.DataManager.SetAccount(account); err != nil {
 			*reply = err.Error()
 			return err
 		}
@@ -490,7 +490,7 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 	if attr.TimingIds != nil {
 		a.Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.TimingIds))
 		for _, timingID := range strings.Split(*attr.TimingIds, utils.INFIELD_SEP) {
-			tmg, err := self.DataManager.GetTiming(timingID, false, utils.NonTransactional)
+			tmg, err := api.DataManager.GetTiming(timingID, false, utils.NonTransactional)
 			if err != nil {
 				return err
 			}
@@ -521,75 +521,45 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 	return nil
 }
 
-func (self *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) error {
+// SetBalance sets the balance for the given account
+// if the account is not already created it will create the account also
+func (api *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if (attr.BalanceID == nil || *attr.BalanceID == "") &&
-		(attr.BalanceUUID == nil || *attr.BalanceUUID == "") {
+	var balance *engine.BalanceFilter
+	if balance, err = engine.NewBalanceFilter(attr.Balance, api.Config.GeneralCfg().DefaultTimezone); err != nil {
+		return
+	}
+	balance.Type = utils.StringPointer(attr.BalanceType)
+	if (balance.ID == nil || *balance.ID == "") &&
+		(balance.Uuid == nil || *balance.Uuid == "") {
 		return utils.NewErrMandatoryIeMissing("BalanceID", "or", "BalanceUUID")
 	}
-	var expTime *time.Time
-	if attr.ExpiryTime != nil {
-		expTimeVal, err := utils.ParseTimeDetectLayout(*attr.ExpiryTime,
-			self.Config.GeneralCfg().DefaultTimezone)
-		if err != nil {
-			*reply = err.Error()
-			return err
-		}
-		expTime = &expTimeVal
-	}
+
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
-	if _, err := self.DataManager.GetAccount(accID); err != nil {
+	if _, err = api.DataManager.GetAccount(accID); err != nil {
 		// create account if not exists
 		account := &engine.Account{
 			ID: accID,
 		}
-		if err := self.DataManager.SetAccount(account); err != nil {
-			*reply = err.Error()
-			return err
+		if err = api.DataManager.SetAccount(account); err != nil {
+			return
 		}
 	}
 	at := &engine.ActionTiming{}
 	//check if we have extra data
-	if attr.ExtraData != nil && len(*attr.ExtraData) != 0 {
-		at.ExtraData = *attr.ExtraData
+	if attr.ActionExtraData != nil && len(*attr.ActionExtraData) != 0 {
+		at.ExtraData = *attr.ActionExtraData
 	}
 	at.SetAccountIDs(utils.StringMap{accID: true})
-
-	a := &engine.Action{
-		ActionType: utils.SET_BALANCE,
-		Balance: &engine.BalanceFilter{
-			Uuid:           attr.BalanceUUID,
-			ID:             attr.BalanceID,
-			Type:           utils.StringPointer(attr.BalanceType),
-			ExpirationDate: expTime,
-			RatingSubject:  attr.RatingSubject,
-			Weight:         attr.Weight,
-			Blocker:        attr.Blocker,
-			Disabled:       attr.Disabled,
-		},
-	}
-	if attr.Value != nil {
-		a.Balance.Value = &utils.ValueFormula{Static: math.Abs(*attr.Value)}
-	}
-	if attr.DestinationIds != nil {
-		a.Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.DestinationIds))
-	}
-	if attr.Categories != nil {
-		a.Balance.Categories = utils.StringMapPointer(utils.ParseStringMap(*attr.Categories))
-	}
-	if attr.SharedGroups != nil {
-		a.Balance.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(*attr.SharedGroups))
-	}
-	if attr.TimingIds != nil {
-		a.Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.TimingIds))
-		for _, timingID := range strings.Split(*attr.TimingIds, utils.INFIELD_SEP) {
-			tmg, err := self.DataManager.GetTiming(timingID, false, utils.NonTransactional)
-			if err != nil {
-				return err
+	if balance.TimingIDs != nil {
+		for _, timingID := range balance.TimingIDs.Slice() {
+			var tmg *utils.TPTiming
+			if tmg, err = api.DataManager.GetTiming(timingID, false, utils.NonTransactional); err != nil {
+				return
 			}
-			a.Balance.Timings = append(a.Balance.Timings, &engine.RITiming{
+			balance.Timings = append(balance.Timings, &engine.RITiming{
 				Years:     tmg.Years,
 				Months:    tmg.Months,
 				MonthDays: tmg.MonthDays,
@@ -599,75 +569,53 @@ func (self *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) error
 			})
 		}
 	}
+
+	a := &engine.Action{
+		ActionType: utils.SET_BALANCE,
+		Balance:    balance,
+	}
 	publishAction := &engine.Action{
 		ActionType: utils.MetaPublishBalance,
 	}
 	acts := engine.Actions{a, publishAction}
-	if attr.Cdrlog != nil && *attr.Cdrlog {
+	if attr.Cdrlog {
 		acts = engine.Actions{a, publishAction, &engine.Action{
 			ActionType: utils.CDRLOG,
 		}}
 	}
 	at.SetActions(acts)
-	if err := at.Execute(nil, nil); err != nil {
-		return err
+	if err = at.Execute(nil, nil); err != nil {
+		return
 	}
 	*reply = utils.OK
-	return nil
+	return
 }
 
-func (self *ApierV1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) error {
+// RemoveBalances remove the matching balances for the account
+func (api *ApierV1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	var expTime *time.Time
-	if attr.ExpiryTime != nil {
-		expTimeVal, err := utils.ParseTimeDetectLayout(*attr.ExpiryTime,
-			self.Config.GeneralCfg().DefaultTimezone)
-		if err != nil {
-			*reply = err.Error()
-			return err
-		}
-		expTime = &expTimeVal
+	var balance *engine.BalanceFilter
+	if balance, err = engine.NewBalanceFilter(attr.Balance, api.Config.GeneralCfg().DefaultTimezone); err != nil {
+		return
 	}
+	balance.Type = utils.StringPointer(attr.BalanceType)
+
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
-	if _, err := self.DataManager.GetAccount(accID); err != nil {
+	if _, err := api.DataManager.GetAccount(accID); err != nil {
 		return utils.ErrNotFound
 	}
 
 	at := &engine.ActionTiming{}
 	//check if we have extra data
-	if attr.ExtraData != nil && len(*attr.ExtraData) != 0 {
-		at.ExtraData = *attr.ExtraData
+	if attr.ActionExtraData != nil && len(*attr.ActionExtraData) != 0 {
+		at.ExtraData = *attr.ActionExtraData
 	}
 	at.SetAccountIDs(utils.StringMap{accID: true})
 	a := &engine.Action{
 		ActionType: utils.REMOVE_BALANCE,
-		Balance: &engine.BalanceFilter{
-			Uuid:           attr.BalanceUUID,
-			ID:             attr.BalanceID,
-			Type:           utils.StringPointer(attr.BalanceType),
-			ExpirationDate: expTime,
-			RatingSubject:  attr.RatingSubject,
-			Weight:         attr.Weight,
-			Blocker:        attr.Blocker,
-			Disabled:       attr.Disabled,
-		},
-	}
-	if attr.Value != nil {
-		a.Balance.Value = &utils.ValueFormula{Static: math.Abs(*attr.Value)}
-	}
-	if attr.DestinationIds != nil {
-		a.Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.DestinationIds))
-	}
-	if attr.Categories != nil {
-		a.Balance.Categories = utils.StringMapPointer(utils.ParseStringMap(*attr.Categories))
-	}
-	if attr.SharedGroups != nil {
-		a.Balance.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(*attr.SharedGroups))
-	}
-	if attr.TimingIds != nil {
-		a.Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.TimingIds))
+		Balance:    balance,
 	}
 	at.SetActions(engine.Actions{a})
 	if err := at.Execute(nil, nil); err != nil {

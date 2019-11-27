@@ -228,6 +228,9 @@ func (apiv2 *ApierV2) GetDestinations(attr AttrGetDestinations, reply *[]*engine
 		if attr.DestinationIDs, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.DESTINATION_PREFIX); err != nil {
 			return
 		}
+		for i, destID := range attr.DestinationIDs {
+			attr.DestinationIDs[i] = destID[len(utils.DESTINATION_PREFIX):]
+		}
 	}
 	dests := make([]*engine.Destination, len(attr.DestinationIDs))
 	for i, destID := range attr.DestinationIDs {

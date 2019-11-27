@@ -63,12 +63,14 @@ func TestSessionSRpl(t *testing.T) {
 //topup
 func testSessionSRplAddVoiceBalance(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
-		Tenant:        "cgrates.org",
-		Account:       "1005",
-		BalanceType:   utils.VOICE,
-		BalanceID:     utils.StringPointer("TestDynamicDebitBalance"),
-		Value:         utils.Float64Pointer(5 * float64(time.Second)), //value -> 20ms for future
-		RatingSubject: utils.StringPointer("*zero5ms"),
+		Tenant:      "cgrates.org",
+		Account:     "1005",
+		BalanceType: utils.VOICE,
+		Balance: map[string]interface{}{
+			utils.ID:            "TestDynamicDebitBalance",
+			utils.Value:         5 * float64(time.Second), //value -> 20ms for future
+			utils.RatingSubject: "*zero5ms",
+		},
 	}
 	var reply string
 	if err := smgRplcMstrRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {

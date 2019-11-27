@@ -118,12 +118,14 @@ func testAccountBalance2(t *testing.T, sracc, srten, balType string, expected fl
 
 func testSesItAddVoiceBalance(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
-		Tenant:        sesTenant,
-		Account:       sesAccount,
-		BalanceType:   utils.MONETARY,
-		BalanceID:     utils.StringPointer("TestDynamicDebitBalance"),
-		Value:         utils.Float64Pointer(0),
-		RatingSubject: utils.StringPointer("*zero1s"),
+		Tenant:      sesTenant,
+		Account:     sesAccount,
+		BalanceType: utils.MONETARY,
+		Balance: map[string]interface{}{
+			utils.ID:            "TestDynamicDebitBalance",
+			utils.Value:         0,
+			utils.RatingSubject: "*zero1s",
+		},
 	}
 	var reply string
 	if err := sesRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {

@@ -236,8 +236,11 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant: acntAttrs.Tenant, Account: acntAttrs.Account,
 		BalanceType: utils.DATA,
-		BalanceID:   utils.StringPointer("TestSessionsDataLastUsedMultipleData"),
-		Value:       utils.Float64Pointer(eAcntVal)}
+		Balance: map[string]interface{}{
+			utils.ID:    "TestSessionsDataLastUsedMultipleData",
+			utils.Value: eAcntVal,
+		},
+	}
 	var reply string
 	if err := sDataRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
@@ -495,8 +498,11 @@ func TestSessionsDataTTLExpired(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant: acntAttrs.Tenant, Account: acntAttrs.Account,
 		BalanceType: utils.DATA,
-		BalanceID:   utils.StringPointer("TestSessionsDataTTLExpired"),
-		Value:       utils.Float64Pointer(eAcntVal)}
+		Balance: map[string]interface{}{
+			utils.ID:    "TestSessionsDataTTLExpired",
+			utils.Value: eAcntVal,
+		},
+	}
 	var reply string
 	if err := sDataRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
@@ -569,8 +575,11 @@ func TestSessionsDataTTLExpMultiUpdates(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant: acntAttrs.Tenant, Account: acntAttrs.Account,
 		BalanceType: utils.DATA,
-		BalanceID:   utils.StringPointer("TestSessionsDataTTLExpMultiUpdates"),
-		Value:       utils.Float64Pointer(eAcntVal)}
+		Balance: map[string]interface{}{
+			utils.ID:    "TestSessionsDataTTLExpMultiUpdates",
+			utils.Value: eAcntVal,
+		},
+	}
 	var reply string
 	if err := sDataRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
@@ -692,8 +701,11 @@ func TestSessionsDataMultipleDataNoUsage(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant: acntAttrs.Tenant, Account: acntAttrs.Account,
 		BalanceType: utils.DATA,
-		BalanceID:   utils.StringPointer("TestSessionsDataTTLExpMultiUpdates"),
-		Value:       utils.Float64Pointer(eAcntVal)}
+		Balance: map[string]interface{}{
+			utils.ID:    "TestSessionsDataTTLExpMultiUpdates",
+			utils.Value: eAcntVal,
+		},
+	}
 	var reply string
 	if err := sDataRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
@@ -896,8 +908,10 @@ func TestSessionsDataTTLUsageProtection(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant: acntAttrs.Tenant, Account: acntAttrs.Account,
 		BalanceType: utils.DATA,
-		BalanceID:   utils.StringPointer("TestSessionsDataTTLUsageProtection"),
-		Value:       utils.Float64Pointer(eAcntVal),
+		Balance: map[string]interface{}{
+			utils.ID:    "TestSessionsDataTTLUsageProtection",
+			utils.Value: eAcntVal,
+		},
 	}
 	var reply string
 	if err := sDataRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {

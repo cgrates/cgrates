@@ -148,13 +148,15 @@ func testBalanceIfExists(t *testing.T, acc, ten, balType, balID string) (has boo
 
 func testAccITAddVoiceBalance(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
-		Tenant:        accTenant,
-		Account:       accAcount,
-		BalanceType:   utils.VOICE,
-		BalanceID:     utils.StringPointer(accBallID),
-		Value:         utils.Float64Pointer(2 * float64(time.Second)),
-		RatingSubject: utils.StringPointer("*zero5ms"),
-		ExpiryTime:    utils.StringPointer(time.Now().Add(5 * time.Second).Format("2006-01-02 15:04:05")),
+		Tenant:      accTenant,
+		Account:     accAcount,
+		BalanceType: utils.VOICE,
+		Balance: map[string]interface{}{
+			utils.ID:            accBallID,
+			utils.Value:         2 * float64(time.Second),
+			utils.RatingSubject: "*zero5ms",
+			utils.ExpiryTime:    time.Now().Add(5 * time.Second).Format("2006-01-02 15:04:05"),
+		},
 	}
 	var reply string
 	if err := accRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
@@ -192,9 +194,11 @@ func testAccITSetBalanceTimingIds(t *testing.T) {
 	args := &utils.AttrSetBalance{
 		Tenant:      accTenant,
 		Account:     accAcount,
-		TimingIds:   utils.StringPointer("Timing"),
 		BalanceType: utils.VOICE,
-		BalanceID:   utils.StringPointer("testBalanceID"),
+		Balance: map[string]interface{}{
+			utils.ID:        "testBalanceID",
+			utils.TimingIDs: "Timing",
+		},
 	}
 	if err := accRPC.Call(utils.ApierV1SetBalance, args, &reply); err != nil {
 		t.Error("Got error on SetBalance: ", err.Error())
@@ -287,10 +291,12 @@ func testAccITSetBalance(t *testing.T) {
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testAccSetBalance",
-		BalanceID:   utils.StringPointer("testAccSetBalance"),
 		BalanceType: "*monetary",
-		Value:       utils.Float64Pointer(1.5),
-		Cdrlog:      utils.BoolPointer(true),
+		Balance: map[string]interface{}{
+			utils.ID:    "testAccSetBalance",
+			utils.Value: 1.5,
+		},
+		Cdrlog: true,
 	}
 	if err := accRPC.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
@@ -317,11 +323,13 @@ func testAccITSetBalanceWithExtraData(t *testing.T) {
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testAccITSetBalanceWithExtraData",
-		BalanceID:   utils.StringPointer("testAccITSetBalanceWithExtraData"),
 		BalanceType: "*monetary",
-		Value:       utils.Float64Pointer(1.5),
-		Cdrlog:      utils.BoolPointer(true),
-		ExtraData:   &extraDataMap,
+		Balance: map[string]interface{}{
+			utils.ID:    "testAccITSetBalanceWithExtraData",
+			utils.Value: 1.5,
+		},
+		Cdrlog:          true,
+		ActionExtraData: &extraDataMap,
 	}
 	if err := accRPC.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
@@ -350,11 +358,13 @@ func testAccITSetBalanceWithExtraData2(t *testing.T) {
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testAccITSetBalanceWithExtraData2",
-		BalanceID:   utils.StringPointer("testAccITSetBalanceWithExtraData2"),
 		BalanceType: "*monetary",
-		Value:       utils.Float64Pointer(1.5),
-		Cdrlog:      utils.BoolPointer(true),
-		ExtraData:   &extraDataMap,
+		Balance: map[string]interface{}{
+			utils.ID:    "testAccITSetBalanceWithExtraData2",
+			utils.Value: 1.5,
+		},
+		Cdrlog:          true,
+		ActionExtraData: &extraDataMap,
 	}
 	if err := accRPC.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetBalance: ", err.Error())

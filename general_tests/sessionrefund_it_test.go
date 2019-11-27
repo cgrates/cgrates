@@ -120,12 +120,14 @@ func testAccountBalance(t *testing.T, sracc, srten, balType string, expected flo
 
 func testSrItAddVoiceBalance(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
-		Tenant:        srtenant,
-		Account:       sraccount,
-		BalanceType:   utils.VOICE,
-		BalanceID:     utils.StringPointer("TestDynamicDebitBalance"),
-		Value:         utils.Float64Pointer(5 * float64(time.Second)),
-		RatingSubject: utils.StringPointer("*zero5ms"),
+		Tenant:      srtenant,
+		Account:     sraccount,
+		BalanceType: utils.VOICE,
+		Balance: map[string]interface{}{
+			utils.ID:            "TestDynamicDebitBalance",
+			utils.Value:         5 * float64(time.Second),
+			utils.RatingSubject: "*zero5ms",
+		},
 	}
 	var reply string
 	if err := srrpc.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
@@ -211,8 +213,10 @@ func testSrItAddMonetaryBalance(t *testing.T) {
 		Tenant:      srtenant,
 		Account:     sraccount,
 		BalanceType: utils.MONETARY,
-		BalanceID:   utils.StringPointer(utils.META_DEFAULT),
-		Value:       utils.Float64Pointer(10.65),
+		Balance: map[string]interface{}{
+			utils.ID:    utils.META_DEFAULT,
+			utils.Value: 10.65,
+		},
 	}
 	var reply string
 	if err := srrpc.Call(utils.ApierV2SetBalance, attrs, &reply); err != nil {

@@ -78,8 +78,10 @@ func addBalance(sBenchRPC *rpc.Client, sraccount string) {
 		Tenant:      "cgrates.org",
 		Account:     sraccount,
 		BalanceType: utils.VOICE,
-		BalanceID:   utils.StringPointer("TestDynamicDebitBalance"),
-		Value:       utils.Float64Pointer(5 * float64(time.Hour)),
+		Balance: map[string]interface{}{
+			utils.ID:    "TestDynamicDebitBalance",
+			utils.Value: 5 * float64(time.Hour),
+		},
 	}
 	var reply string
 	if err := sBenchRPC.Call(utils.ApierV2SetBalance,

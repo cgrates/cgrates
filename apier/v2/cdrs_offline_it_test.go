@@ -125,9 +125,11 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "test",
 		BalanceType: utils.MONETARY,
-		BalanceID:   utils.StringPointer(utils.META_DEFAULT),
-		Value:       utils.Float64Pointer(10.0),
-		Weight:      utils.Float64Pointer(10.0),
+		Balance: map[string]interface{}{
+			utils.ID:     utils.META_DEFAULT,
+			utils.Value:  10.0,
+			utils.Weight: 10.0,
+		},
 	}
 	var reply string
 	if err := cdrsOfflineRpc.Call(utils.ApierV2SetBalance, attrs, &reply); err != nil {
@@ -336,15 +338,17 @@ func testV2CDRsBalancesWithSameWeight(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "specialTest",
 		BalanceType: utils.MONETARY,
-		BalanceID:   utils.StringPointer("SpecialBalance1"),
-		Value:       utils.Float64Pointer(10.0),
-		Weight:      utils.Float64Pointer(10.0),
+		Balance: map[string]interface{}{
+			utils.ID:     "SpecialBalance1",
+			utils.Value:  10.0,
+			utils.Weight: 10.0,
+		},
 	}
 	var reply string
 	if err := cdrsOfflineRpc.Call(utils.ApierV2SetBalance, attrs, &reply); err != nil {
 		t.Fatal(err)
 	}
-	attrs.BalanceID = utils.StringPointer("SpecialBalance2")
+	attrs.Balance[utils.ID] = "SpecialBalance2"
 	if err := cdrsOfflineRpc.Call(utils.ApierV2SetBalance, attrs, &reply); err != nil {
 		t.Fatal(err)
 	}

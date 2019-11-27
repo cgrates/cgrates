@@ -892,12 +892,14 @@ func TestSessionsVoiceSessionTTL(t *testing.T) {
 
 func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
-		Tenant:        "cgrates.org",
-		Account:       "TestTTLWithRelocate",
-		BalanceType:   utils.VOICE,
-		BalanceID:     utils.StringPointer("TestTTLWithRelocate"),
-		Value:         utils.Float64Pointer(300 * float64(time.Second)),
-		RatingSubject: utils.StringPointer("*zero50ms"),
+		Tenant:      "cgrates.org",
+		Account:     "TestTTLWithRelocate",
+		BalanceType: utils.VOICE,
+		Balance: map[string]interface{}{
+			utils.ID:            "TestTTLWithRelocate",
+			utils.Value:         300 * float64(time.Second),
+			utils.RatingSubject: "*zero50ms",
+		},
 	}
 	var reply string
 	if err := sessionsRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
@@ -906,8 +908,10 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 		t.Errorf("Received: %s", reply)
 	}
 	var acnt *engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: attrSetBalance.Tenant,
-		Account: attrSetBalance.Account}
+	attrs := &utils.AttrGetAccount{
+		Tenant:  attrSetBalance.Tenant,
+		Account: attrSetBalance.Account,
+	}
 	eAcntVal := 300.0 * float64(time.Second)
 	if err := sessionsRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
@@ -1061,12 +1065,14 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 
 func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
-		Tenant:        "cgrates.org",
-		Account:       "TestRelocateWithOriginIDPrefix",
-		BalanceType:   utils.VOICE,
-		BalanceID:     utils.StringPointer("TestRelocateWithOriginIDPrefix"),
-		Value:         utils.Float64Pointer(300 * float64(time.Second)),
-		RatingSubject: utils.StringPointer("*zero1s"),
+		Tenant:      "cgrates.org",
+		Account:     "TestRelocateWithOriginIDPrefix",
+		BalanceType: utils.VOICE,
+		Balance: map[string]interface{}{
+			utils.ID:            "TestRelocateWithOriginIDPrefix",
+			utils.Value:         300 * float64(time.Second),
+			utils.RatingSubject: "*zero1s",
+		},
 	}
 	var reply string
 	if err := sessionsRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
@@ -1075,8 +1081,10 @@ func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		t.Errorf("Received: %s", reply)
 	}
 	var acnt *engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: attrSetBalance.Tenant,
-		Account: attrSetBalance.Account}
+	attrs := &utils.AttrGetAccount{
+		Tenant:  attrSetBalance.Tenant,
+		Account: attrSetBalance.Account,
+	}
 	eAcntVal := 300.0 * float64(time.Second)
 	if err := sessionsRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)

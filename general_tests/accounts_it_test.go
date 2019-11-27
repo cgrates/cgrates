@@ -26,7 +26,6 @@ import (
 	"testing"
 	"time"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -264,9 +263,15 @@ func testV1AccSendToThreshold(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 	// Add an account
-	attrs := &v1.AttrAddBalance{Tenant: "cgrates.org", Account: "testAccThreshold",
-		BalanceId:   utils.StringPointer("testAccSetBalance"),
-		BalanceType: "*monetary", Value: 1.5}
+	attrs := &utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "testAccThreshold",
+		BalanceType: "*monetary",
+		Balance: map[string]interface{}{
+			utils.ID:    "testAccSetBalance",
+			utils.Value: 1.5,
+		},
+	}
 	if err := accRpc.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
 	} else if reply != "OK" {

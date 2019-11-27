@@ -335,12 +335,14 @@ func TestSessionsItTerminatePassive(t *testing.T) {
 
 func TestSessionsItEventCostCompressing(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
-		Tenant:        "cgrates.org",
-		Account:       "TestSessionsItEventCostCompressing",
-		BalanceType:   utils.VOICE,
-		BalanceID:     utils.StringPointer("TestSessionsItEventCostCompressing"),
-		Value:         utils.Float64Pointer(float64(5) * float64(time.Second)),
-		RatingSubject: utils.StringPointer("*zero50ms"),
+		Tenant:      "cgrates.org",
+		Account:     "TestSessionsItEventCostCompressing",
+		BalanceType: utils.VOICE,
+		Balance: map[string]interface{}{
+			utils.ID:            "TestSessionsItEventCostCompressing",
+			utils.Value:         float64(5) * float64(time.Second),
+			utils.RatingSubject: "*zero50ms",
+		},
 	}
 	var reply string
 	if err := sItRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {

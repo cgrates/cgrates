@@ -185,12 +185,14 @@ func testHAitAuth1001(t *testing.T) {
 	maxDuration := 60
 
 	attrSetBalance := utils.AttrSetBalance{
-		Tenant:        "cgrates.org",
-		Account:       acnt,
-		BalanceType:   utils.VOICE,
-		BalanceID:     utils.StringPointer("TestDynamicDebitBalance"),
-		Value:         utils.Float64Pointer(float64(maxDuration) * float64(time.Second)),
-		RatingSubject: utils.StringPointer("*zero5ms"),
+		Tenant:      "cgrates.org",
+		Account:     acnt,
+		BalanceType: utils.VOICE,
+		Balance: map[string]interface{}{
+			utils.ID:            "TestDynamicDebitBalance",
+			utils.Value:         float64(maxDuration) * float64(time.Second),
+			utils.RatingSubject: "*zero5ms",
+		},
 	}
 	var reply string
 	if err := haRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {

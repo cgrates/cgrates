@@ -110,9 +110,11 @@ func TestApierV2itAddBalance(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "dan",
 		BalanceType: utils.MONETARY,
-		BalanceID:   utils.StringPointer(utils.META_DEFAULT),
-		Value:       utils.Float64Pointer(5.0),
-		Weight:      utils.Float64Pointer(10.0),
+		Balance: map[string]interface{}{
+			utils.ID:     utils.META_DEFAULT,
+			utils.Value:  5.0,
+			utils.Weight: 10.0,
+		},
 	}
 	var reply string
 	if err := apierRPC.Call(utils.ApierV2SetBalance, attrs, &reply); err != nil {
@@ -178,9 +180,11 @@ func TestApierV2itFraudMitigation(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "dan",
 		BalanceType: utils.MONETARY,
-		BalanceID:   utils.StringPointer(utils.META_DEFAULT),
-		Value:       utils.Float64Pointer(60.0),
-		Weight:      utils.Float64Pointer(10.0),
+		Balance: map[string]interface{}{
+			utils.ID:     utils.META_DEFAULT,
+			utils.Value:  60.0,
+			utils.Weight: 10.0,
+		},
 	}
 	var reply string
 	if err := apierRPC.Call(utils.ApierV2SetBalance, attrs, &reply); err != nil {

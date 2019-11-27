@@ -919,24 +919,12 @@ type AttrGetCallCost struct {
 }
 
 type AttrSetBalance struct {
-	Tenant         string
-	Account        string
-	BalanceType    string
-	BalanceUUID    *string
-	BalanceID      *string
-	Directions     *string
-	Value          *float64
-	ExpiryTime     *string
-	RatingSubject  *string
-	Categories     *string
-	DestinationIds *string
-	TimingIds      *string
-	Weight         *float64
-	SharedGroups   *string
-	Blocker        *bool
-	Disabled       *bool
-	Cdrlog         *bool
-	ExtraData      *map[string]interface{}
+	Tenant          string
+	Account         string
+	BalanceType     string
+	Balance         map[string]interface{}
+	ActionExtraData *map[string]interface{}
+	Cdrlog          bool
 }
 
 // TPResourceProfile is used in APIs to manage remotely offline ResourceProfile
