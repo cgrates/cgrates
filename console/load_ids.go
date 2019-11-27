@@ -23,7 +23,7 @@ import "github.com/cgrates/cgrates/utils"
 func init() {
 	c := &CmdCacheVersions{
 		name:      "get_load_ids",
-		rpcMethod: utils.ApierV1GetLoadIDs ,
+		rpcMethod: utils.ApierV1GetLoadIDs,
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

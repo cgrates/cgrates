@@ -22,6 +22,7 @@ import (
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/utils"
 )
+
 func init() {
 	c := &CmdExecuteScheduledActions{
 		name:      "scheduler_execute",

@@ -22,6 +22,7 @@ import (
 	"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/utils"
 )
+
 func init() {
 	c := &CmdAddAccount{
 		name:      "account_set",

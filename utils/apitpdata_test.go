@@ -560,16 +560,14 @@ func TestNewTAFromAccountKey(t *testing.T) {
 }
 
 func TestRPCCDRsFilterAsCDRsFilter(t *testing.T) {
-	//empty check
 	var testStruct *RPCCDRsFilter
 	rcv, err := testStruct.AsCDRsFilter("")
 	if err != nil {
 		t.Error(err)
 	}
-	if rcv != nil {
-		t.Errorf("Nil struct expected")
+	if !reflect.DeepEqual(rcv, new(CDRsFilter)) {
+		t.Errorf("Empty struct expected")
 	}
-	//check test
 	rpcCDRsFilter := &RPCCDRsFilter{
 		CGRIDs:                 []string{"CGRIDs"},
 		NotCGRIDs:              []string{"NotCGRIDs"},
@@ -615,7 +613,6 @@ func TestRPCCDRsFilterAsCDRsFilter(t *testing.T) {
 		MaxCost:                Float64Pointer(0.),
 		OrderBy:                "OrderBy",
 	}
-	//check the functionality
 	eOut := &CDRsFilter{
 		CGRIDs:                 rpcCDRsFilter.CGRIDs,
 		NotCGRIDs:              rpcCDRsFilter.NotCGRIDs,
@@ -673,49 +670,41 @@ func TestRPCCDRsFilterAsCDRsFilter(t *testing.T) {
 		t.Errorf("Expected: %s ,received: %s ", ToJSON(eOut), ToJSON(rcv))
 	}
 
-	//check with wrong UpdatedAtEnd
 	rpcCDRsFilter.UpdatedAtEnd = "wrongUpdatedAtEnd"
 	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
 	if err == nil {
 		t.Errorf("Wrong UpdatedAtEnd not processed")
 	}
-	//check with wrong SetupTimeEnd
 	rpcCDRsFilter.UpdatedAtStart = "wrongUpdatedAtStart"
 	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
 	if err == nil {
 		t.Errorf("Wrong UpdatedAtStart not processed")
 	}
-	//check with wrong CreatedAtEnd
 	rpcCDRsFilter.CreatedAtEnd = "wrongCreatedAtEnd"
 	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
 	if err == nil {
 		t.Errorf("Wrong CreatedAtEnd not processed")
 	}
-	//check with wrong CreatedAtStart
 	rpcCDRsFilter.CreatedAtStart = "wrongCreatedAtStart"
 	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
 	if err == nil {
 		t.Errorf("Wrong CreatedAtStart not processed")
 	}
-	//check with wrong AnswerTimeEnd
 	rpcCDRsFilter.AnswerTimeEnd = "wrongAnswerTimeEnd"
 	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
 	if err == nil {
 		t.Errorf("Wrong AnswerTimeEnd not processed")
 	}
-	//check with wrong AnswerTimeStart
 	rpcCDRsFilter.AnswerTimeStart = "wrongAnswerTimeStart"
 	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
 	if err == nil {
 		t.Errorf("Wrong AnswerTimeStart not processed")
 	}
-	//check with wrong SetupTimeEnd
 	rpcCDRsFilter.SetupTimeEnd = "wrongSetupTimeEnd"
 	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
 	if err == nil {
 		t.Errorf("Wrong SetupTimeEnd not processed")
 	}
-	//check with wrong SetupTimeStart
 	rpcCDRsFilter.SetupTimeStart = "wrongSetupTimeStart"
 	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
 	if err == nil {

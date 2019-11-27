@@ -22,6 +22,7 @@ import (
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/utils"
 )
+
 func init() {
 	c := &CmdAccountResetTriggers{
 		name:      "account_triggers_reset",
