@@ -248,13 +248,13 @@ func TestStatRemOnQueueLength2(t *testing.T) {
 		},
 		SQMetrics: map[string]StatMetric{
 			utils.MetaTCD: &StatTCD{
-				FilterIDs: []string{"*string:~Account:1002"},
+				FilterIDs: []string{"*string:~*req.Account:1002"},
 				Events: map[string]*DurationWithCompress{
 					"cgrates.org:TestStatRemExpired_2": &DurationWithCompress{Duration: 1 * time.Minute, CompressFactor: 1},
 				},
 			},
 			utils.MetaASR: &StatASR{
-				FilterIDs: []string{"*string:~Account:1001"},
+				FilterIDs: []string{"*string:~*req.Account:1001"},
 				Events: map[string]*StatWithCompress{
 					"cgrates.org:TestStatRemExpired_1": &StatWithCompress{Stat: 1, CompressFactor: 1},
 				},

@@ -501,7 +501,7 @@ func TestCsvIT5AddFilters(t *testing.T) {
 		Rules: []*engine.FilterRule{
 			{
 				Type:      "*string",
-				FieldName: "~3",
+				FieldName: "~*req.3",
 				Values:    []string{"1002"},
 			},
 		},
@@ -518,7 +518,7 @@ func TestCsvIT5AddFilters(t *testing.T) {
 		Rules: []*engine.FilterRule{
 			{
 				Type:      "*string",
-				FieldName: "~3",
+				FieldName: "~*req.3",
 				Values:    []string{"1001"},
 			},
 		},

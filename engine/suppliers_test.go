@@ -317,17 +317,17 @@ func TestSuppliersAddFilters(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      utils.MetaString,
-				FieldName: "~Supplier",
+				FieldName: "~*req.Supplier",
 				Values:    []string{"SupplierProfile1"},
 			},
 			{
 				Type:      utils.MetaGreaterOrEqual,
-				FieldName: "~UsageInterval",
+				FieldName: "~*req.UsageInterval",
 				Values:    []string{(1 * time.Second).String()},
 			},
 			{
 				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.Weight,
+				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
 				Values:    []string{"9.0"},
 			},
 		},
@@ -339,17 +339,17 @@ func TestSuppliersAddFilters(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      utils.MetaString,
-				FieldName: "~Supplier",
+				FieldName: "~*req.Supplier",
 				Values:    []string{"SupplierProfile2"},
 			},
 			{
 				Type:      utils.MetaGreaterOrEqual,
-				FieldName: "~PddInterval",
+				FieldName: "~*req.PddInterval",
 				Values:    []string{(1 * time.Second).String()},
 			},
 			{
 				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.Weight,
+				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
 				Values:    []string{"15.0"},
 			},
 		},
@@ -361,7 +361,7 @@ func TestSuppliersAddFilters(t *testing.T) {
 		Rules: []*FilterRule{
 			{
 				Type:      utils.MetaPrefix,
-				FieldName: "~Supplier",
+				FieldName: "~*req.Supplier",
 				Values:    []string{"SupplierProfilePrefix"},
 			},
 		},

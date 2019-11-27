@@ -46,7 +46,7 @@
 		"export_format": "*file_csv",
 		"export_path": "/tmp/",
 		"attributes_context":"*cdre",
-		"filters" :["*string:~Source:test2"],
+		"filters" :["*string:~*req.Source:test2"],
 		"content_fields": [
 			{"tag": "CGRID", "type": "*composed", "value": "~CGRID"},
 			{"tag": "RunID", "type": "*composed", "value": "~RunID"},

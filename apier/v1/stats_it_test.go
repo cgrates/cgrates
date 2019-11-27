@@ -151,7 +151,8 @@ func testV1STSFromFolder(t *testing.T) {
 func testV1STSGetStats(t *testing.T) {
 	var reply []string
 	expectedIDs := []string{"Stats1"}
-	if err := stsV1Rpc.Call(utils.StatSv1GetQueueIDs, &utils.TenantWithArgDispatcher{TenantArg: &utils.TenantArg{"cgrates.org"}}, &reply); err != nil {
+	if err := stsV1Rpc.Call(utils.StatSv1GetQueueIDs,
+		&utils.TenantWithArgDispatcher{TenantArg: &utils.TenantArg{"cgrates.org"}}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedIDs, reply) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedIDs, reply)
@@ -168,7 +169,8 @@ func testV1STSGetStats(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaAverage, utils.DynamicDataPrefix+utils.Usage): utils.NOT_AVAILABLE,
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}},
+		&metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -340,7 +342,7 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 			ID:     "FLTR_1",
 			Rules: []*engine.FilterRule{
 				{
-					FieldName: "~Account",
+					FieldName: "~*req.Account",
 					Type:      "*string",
 					Values:    []string{"1001"},
 				},
@@ -420,7 +422,7 @@ func testV1STSUpdateStatQueueProfile(t *testing.T) {
 			ID:     "FLTR_2",
 			Rules: []*engine.FilterRule{
 				{
-					FieldName: "~Account",
+					FieldName: "~*req.Account",
 					Type:      "*string",
 					Values:    []string{"1001"},
 				},
@@ -475,7 +477,7 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "CustomStatProfile",
-			FilterIDs: []string{"*string:~DistinctVal:RandomVal"}, //custom filter for event
+			FilterIDs: []string{"*string:~*req.DistinctVal:RandomVal"}, //custom filter for event
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
@@ -484,15 +486,15 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 			Metrics: []*engine.MetricWithFilters{
 				&engine.MetricWithFilters{
 					MetricID:  "*acd",
-					FilterIDs: []string{"*rsr::~Usage{*duration}(>10s)"},
+					FilterIDs: []string{"*rsr::~*req.Usage{*duration}(>10s)"},
 				},
 				&engine.MetricWithFilters{
 					MetricID:  "*tcd",
-					FilterIDs: []string{"*gt:~Usage:5s"},
+					FilterIDs: []string{"*gt:~*req.Usage:5s"},
 				},
 				&engine.MetricWithFilters{
 					MetricID:  "*sum:~CustomValue",
-					FilterIDs: []string{"*exists:~CustomValue:", "*gte:~CustomValue:10.0"},
+					FilterIDs: []string{"*exists:~*req.CustomValue:", "*gte:~*req.CustomValue:10.0"},
 				},
 			},
 			ThresholdIDs: []string{"*none"},
@@ -554,7 +556,8 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaSum, "~CustomValue"): utils.NOT_AVAILABLE,
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
+		&utils.TenantIDWithArgDispatcher{
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -580,7 +583,8 @@ func testV1STSProcessMetricsWithFilter(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaSum, "~CustomValue"): "10",
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
+		&utils.TenantIDWithArgDispatcher{
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -592,7 +596,7 @@ func testV1STSProcessStaticMetrics(t *testing.T) {
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "StaticStatQueue",
-			FilterIDs: []string{"*string:~StaticMetrics:StaticMetrics"}, //custom filter for event
+			FilterIDs: []string{"*string:~*req.StaticMetrics:StaticMetrics"}, //custom filter for event
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
@@ -658,7 +662,8 @@ func testV1STSProcessStaticMetrics(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaAverage, "2"): "2",
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
+		&utils.TenantIDWithArgDispatcher{
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -674,7 +679,8 @@ func testV1STSProcessStaticMetrics(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaAverage, "2"): "2",
 	}
 	if err := stsV1Rpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
+		&utils.TenantIDWithArgDispatcher{
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -695,7 +701,7 @@ func testV1STSProcessStatWithThreshold(t *testing.T) {
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "StatWithThreshold",
-			FilterIDs: []string{"*string:~CustomEvent:CustomEvent"}, //custom filter for event
+			FilterIDs: []string{"*string:~*req.CustomEvent:CustomEvent"}, //custom filter for event
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 			},
@@ -724,8 +730,8 @@ func testV1STSProcessStatWithThreshold(t *testing.T) {
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant: "cgrates.org",
 			ID:     "THD_Stat",
-			FilterIDs: []string{"*string:~EventType:StatUpdate",
-				"*string:~StatID:StatWithThreshold", "*exists:*tcd:", "*gte:~*tcd:1s"},
+			FilterIDs: []string{"*string:~*req.EventType:StatUpdate",
+				"*string:~*req.StatID:StatWithThreshold", "*exists:~*req.*tcd:", "*gte:~*req.*tcd:1s"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},

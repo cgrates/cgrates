@@ -64,7 +64,7 @@ func migrateFilterV1(fl *engine.Filter) *engine.Filter {
 			filterTypes.Has(rule.Type) {
 			continue
 		}
-		fl.Rules[i].FieldName = utils.DynamicDataPrefix + rule.FieldName
+		fl.Rules[i].FieldName = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + rule.FieldName
 	}
 	return fl
 }
@@ -82,7 +82,7 @@ func migrateInlineFilter(fl string) string {
 		filterTypes.Has(ruleSplt[0]) {
 		return fl
 	}
-	return fmt.Sprintf("%s:~%s:%s", ruleSplt[0], ruleSplt[1], strings.Join(ruleSplt[2:], utils.InInFieldSep))
+	return fmt.Sprintf("%s:~%s:%s", ruleSplt[0], utils.MetaReq+utils.NestingSep+ruleSplt[1], strings.Join(ruleSplt[2:], utils.InInFieldSep))
 }
 
 func (m *Migrator) migrateRequestFilterV1() (err error) {

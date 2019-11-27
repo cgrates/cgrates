@@ -107,7 +107,7 @@ func (self *CsvRecordsProcessor) processFlatstoreRecord(record []string) ([]stri
 
 // Takes the record from a slice and turns it into StoredCdrs, posting them to the cdrServer
 func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, error) {
-	csvProvider := config.NewSliceDP(record)
+	csvProvider := config.NewSliceDP(record, utils.MetaReq)
 	recordCdrs := make([]*engine.CDR, 0)    // More CDRs based on the number of filters and field templates
 	for _, cdrcCfg := range self.cdrcCfgs { // cdrFields coming from more templates will produce individual storCdr records
 		tenant, err := cdrcCfg.Tenant.ParseDataProvider(csvProvider, utils.NestingSep) // each profile of cdrc can have different tenant
@@ -146,7 +146,7 @@ func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, 
 func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *config.CdrcCfg, tenant string) (*engine.CDR, error) {
 	storedCdr := &engine.CDR{OriginHost: "0.0.0.0", Source: cdrcCfg.CdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
 	var err error
-	csvProvider := config.NewSliceDP(record) // used for filterS and for RSRParsers
+	csvProvider := config.NewSliceDP(record, utils.MetaReq) // used for filterS and for RSRParsers
 	var lazyHttpFields []*config.FCTemplate
 	fldVals := make(map[string]string)
 	for _, cdrFldCfg := range cdrcCfg.ContentFields {
@@ -161,9 +161,9 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *con
 		if utils.SliceHasMember([]string{utils.MetaKamFlatstore, utils.MetaOsipsFlatstore}, self.dfltCdrcCfg.CdrFormat) { // Hardcode some values in case of flatstore
 			switch cdrFldCfg.FieldId {
 			case utils.OriginID:
-				cdrFldCfg.Value = config.NewRSRParsersMustCompile("~3;~1;~2", true, utils.INFIELD_SEP) // in case of flatstore, accounting id is made up out of callid, from_tag and to_tag
+				cdrFldCfg.Value = config.NewRSRParsersMustCompile("~*req.3;~*req.1;~*req.2", true, utils.INFIELD_SEP) // in case of flatstore, accounting id is made up out of callid, from_tag and to_tag
 			case utils.Usage:
-				cdrFldCfg.Value = config.NewRSRParsersMustCompile("~"+strconv.Itoa(len(record)-1), true, utils.INFIELD_SEP) // in case of flatstore, last element will be the duration computed by us
+				cdrFldCfg.Value = config.NewRSRParsersMustCompile("~*req."+strconv.Itoa(len(record)-1), true, utils.INFIELD_SEP) // in case of flatstore, last element will be the duration computed by us
 			}
 		}
 		switch cdrFldCfg.Type {

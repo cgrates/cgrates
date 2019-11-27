@@ -269,17 +269,20 @@ func (fP *fwvProvider) String() string {
 
 // FieldAsInterface is part of engine.DataProvider interface
 func (fP *fwvProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
-	if len(fldPath) != 1 {
-		return nil, utils.ErrNotFound
+	if len(fldPath) == 0 {
+		return
+	}
+	if fldPath[0] != utils.MetaReq || len(fldPath) < 2 {
+		return "", utils.ErrPrefixNotFound(strings.Join(fldPath, utils.NestingSep))
 	}
 	if data, err = fP.cache.FieldAsInterface(fldPath); err == nil ||
 		err != utils.ErrNotFound { // item found in cache
 		return
 	}
 	err = nil // cancel previous err
-	indexes := strings.Split(fldPath[0], "-")
+	indexes := strings.Split(fldPath[1], "-")
 	if len(indexes) != 2 {
-		return "", fmt.Errorf("Invalid format for index : %+v", fldPath[0])
+		return "", fmt.Errorf("Invalid format for index : %+v", fldPath[1])
 	}
 	startIndex, err := strconv.Atoi(indexes[0])
 	if err != nil {

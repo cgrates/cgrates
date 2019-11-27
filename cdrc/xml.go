@@ -47,7 +47,8 @@ func elementText(xmlElement *xmlquery.Node, elmntPath string) (string, error) {
 
 // handlerUsageDiff will calculate the usage as difference between timeEnd and timeStart
 // Expects the 2 arguments in template separated by |
-func handlerSubstractUsage(xmlElement *xmlquery.Node, argsTpl config.RSRParsers, cdrPath utils.HierarchyPath, timezone string) (time.Duration, error) {
+func handlerSubstractUsage(xmlElement *xmlquery.Node, argsTpl config.RSRParsers,
+	cdrPath utils.HierarchyPath, timezone string) (time.Duration, error) {
 	var argsStr string
 	for _, rsrArg := range argsTpl {
 		if rsrArg.Rules == utils.HandlerArgSep {
@@ -55,7 +56,7 @@ func handlerSubstractUsage(xmlElement *xmlquery.Node, argsTpl config.RSRParsers,
 			continue
 		}
 		absolutePath := utils.ParseHierarchyPath(rsrArg.Rules, "")
-		relPath := utils.HierarchyPath(absolutePath[len(cdrPath):]) // Need relative path to the xmlElmnt
+		relPath := utils.HierarchyPath(absolutePath[len(cdrPath)+1:]) // Need relative path to the xmlElmnt
 		argStr, _ := elementText(xmlElement, relPath.AsString("/", false))
 		argsStr += argStr
 	}
@@ -231,12 +232,15 @@ func (xP *xmlProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 	if len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
+	if fldPath[0] != utils.MetaReq {
+		return "", utils.ErrPrefixNotFound(strings.Join(fldPath, utils.NestingSep))
+	}
 	if data, err = xP.cache.FieldAsInterface(fldPath); err == nil ||
 		err != utils.ErrNotFound { // item found in cache
 		return
 	}
-	err = nil                                                 // cancel previous err
-	relPath := utils.HierarchyPath(fldPath[len(xP.cdrPath):]) // Need relative path to the xmlElmnt
+	err = nil                                                   // cancel previous err
+	relPath := utils.HierarchyPath(fldPath[len(xP.cdrPath)+1:]) // Need relative path to the xmlElmnt
 	var slctrStr string
 	for i := range relPath {
 		if sIdx := strings.Index(relPath[i], "["); sIdx != -1 {

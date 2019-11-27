@@ -271,7 +271,7 @@ func testCDReAddAttributes(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ATTR_CDRE",
 			Contexts:  []string{"*cdre"},
-			FilterIDs: []string{"*string:~Subject:1001"},
+			FilterIDs: []string{"*string:~*req.Subject:1001"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),

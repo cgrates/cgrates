@@ -290,17 +290,17 @@ const CGRATES_CFG_JSON = `
 		"partial_cache_expiry_action": "*dump_to_file",	// action taken when cache when records in cache are timed-out <*dump_to_file|*post_cdr>
 		"header_fields": [],							// template of the import header fields
 		"content_fields":[								// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "~2", "mandatory": true},
-			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~3", "mandatory": true},
-			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~4", "mandatory": true},
-			{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~6", "mandatory": true},
-			{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "~7", "mandatory": true},
-			{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~8", "mandatory": true},
-			{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~9", "mandatory": true},
-			{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~10", "mandatory": true},
-			{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~11", "mandatory": true},
-			{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~12", "mandatory": true},
-			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~13", "mandatory": true},
+			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "~*req.2", "mandatory": true},
+			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~*req.3", "mandatory": true},
+			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~*req.4", "mandatory": true},
+			{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~*req.6", "mandatory": true},
+			{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "~*req.7", "mandatory": true},
+			{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~*req.8", "mandatory": true},
+			{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~*req.9", "mandatory": true},
+			{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~*req.10", "mandatory": true},
+			{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~*req.11", "mandatory": true},
+			{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~*req.12", "mandatory": true},
+			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~*req.13", "mandatory": true},
 		],
 		"trailer_fields": [],							// template of the import trailer fields
 		"cache_dump_fields": [							// template used when dumping cached CDR, eg: partial CDRs

@@ -152,12 +152,12 @@ func TestDerivedChargers2AttributeProfile(t *testing.T) {
 			},
 			Tenant:  defaultTenant,
 			Key:     "key1",
-			Filters: []string{"*string:~Subject:1005"},
+			Filters: []string{"*string:~*req.Subject:1005"},
 			Expected: &engine.AttributeProfile{
 				Tenant:             defaultTenant,
 				ID:                 "key1",
 				Contexts:           []string{utils.MetaChargers},
-				FilterIDs:          []string{"*string:~Subject:1005"},
+				FilterIDs:          []string{"*string:~*req.Subject:1005"},
 				ActivationInterval: nil,
 				Attributes: []*engine.Attribute{
 					&engine.Attribute{
@@ -213,16 +213,16 @@ func TestDerivedChargers2Charger(t *testing.T) {
 			Tenant: defaultTenant,
 			Key:    "key2",
 			Filters: []string{
-				"*string:~Category:*voice1",
-				"*string:~Account:1001",
+				"*string:~*req.Category:*voice1",
+				"*string:~*req.Account:1001",
 			},
 			Expected: &engine.ChargerProfile{
 				Tenant: defaultTenant,
 				ID:     "key2",
 				FilterIDs: []string{
-					"*string:~Category:*voice1",
-					"*string:~Account:1001",
-					"*rsr::~Header4:s/a/${1}b/{*duration_seconds&*round:2}(b&c)",
+					"*string:~*req.Category:*voice1",
+					"*string:~*req.Account:1001",
+					"*rsr::~*req.Header4:s/a/${1}b/{*duration_seconds&*round:2}(b&c)",
 				},
 				ActivationInterval: nil,
 				RunID:              "runID",
@@ -242,7 +242,7 @@ func TestDerivedChargers2Charger(t *testing.T) {
 			Expected: &engine.ChargerProfile{
 				Tenant:             defaultTenant,
 				ID:                 "key2",
-				FilterIDs:          []string{"*rsr::1003"},
+				FilterIDs:          []string{"*rsr::~*req.1003"},
 				ActivationInterval: nil,
 				RunID:              "runID2",
 				AttributeIDs:       make([]string, 0),
@@ -252,7 +252,7 @@ func TestDerivedChargers2Charger(t *testing.T) {
 	}
 	for i, v := range tests {
 		if rply := derivedChargers2Charger(v.DC, v.Tenant, v.Key, v.Filters); !reflect.DeepEqual(v.Expected, rply) {
-			t.Errorf("For %v expected: %s ,recieved: %s", i, utils.ToJSON(v.Expected), utils.ToJSON(rply))
+			t.Errorf("For %v expected: %s ,\n recieved: %s", i, utils.ToJSON(v.Expected), utils.ToJSON(rply))
 		}
 	}
 }
