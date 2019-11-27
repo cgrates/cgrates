@@ -1910,3 +1910,170 @@ func TestCgrCfgEventReaderDefault(t *testing.T) {
 	}
 
 }
+
+func TestCheckConfigSanity(t *testing.T) {
+	// Rater checks
+	cfg, _ := NewDefaultCGRConfig()
+	cfg.ralsCfg = &RalsCfg{
+		Enabled: true,
+		StatSConns: []*RemoteHost{
+			&RemoteHost{
+				Address: utils.MetaInternal,
+			},
+		},
+	}
+	expected := "<Stats> not enabled but requested by <RALs> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.statsCfg.Enabled = true
+	cfg.ralsCfg.ThresholdSConns = []*RemoteHost{
+		&RemoteHost{
+			Address: utils.MetaInternal,
+		},
+	}
+	expected = "<ThresholdS> not enabled but requested by <RALs> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.ralsCfg = &RalsCfg{
+		Enabled:         false,
+		StatSConns:      []*RemoteHost{},
+		ThresholdSConns: []*RemoteHost{},
+	}
+	// CDRServer checks
+	cfg.thresholdSCfg.Enabled = true
+	cfg.cdrsCfg = &CdrsCfg{
+		Enabled: true,
+		ChargerSConns: []*RemoteHost{
+			&RemoteHost{
+				Address: utils.MetaInternal,
+			},
+		},
+	}
+	expected = "<Chargers> not enabled but requested by <CDRs> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.chargerSCfg.Enabled = true
+	cfg.cdrsCfg.RaterConns = []*RemoteHost{
+		&RemoteHost{
+			Address: utils.MetaInternal,
+		},
+	}
+	expected = "<RALs> not enabled but requested by <CDRs> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.ralsCfg.Enabled = true
+	cfg.cdrsCfg.AttributeSConns = []*RemoteHost{
+		&RemoteHost{
+			Address: utils.MetaInternal,
+		},
+	}
+	expected = "<AttributeS> not enabled but requested by <CDRs> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.statsCfg.Enabled = false
+	cfg.attributeSCfg.Enabled = true
+	cfg.cdrsCfg.StatSConns = []*RemoteHost{
+		&RemoteHost{
+			Address: utils.MetaInternal,
+		},
+	}
+	expected = "<StatS> not enabled but requested by <CDRs> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.statsCfg.Enabled = true
+	cfg.cdrsCfg.OnlineCDRExports = []string{"stringy"}
+	cfg.CdreProfiles = map[string]*CdreCfg{"stringx": &CdreCfg{}}
+	expected = "<CDRs> Cannot find CDR export template with ID: <stringy>"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.thresholdSCfg.Enabled = false
+	cfg.cdrsCfg.OnlineCDRExports = []string{"stringx"}
+	cfg.cdrsCfg.ThresholdSConns = []*RemoteHost{
+		&RemoteHost{
+			Address: utils.MetaInternal,
+		},
+	}
+	expected = "ThresholdS not enabled but requested by CDRs component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	// CDRC sanity checks
+	cfg, _ = NewDefaultCGRConfig()
+	cfg.CdrcProfiles = map[string][]*CdrcCfg{
+		"test": []*CdrcCfg{
+			&CdrcCfg{
+				Enabled: true,
+			},
+		},
+	}
+	expected = "<cdrc> Instance: , cdrc enabled but no CDRs defined!"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.dispatcherSCfg.Enabled = false
+	cfg.CdrcProfiles = map[string][]*CdrcCfg{
+		"test": []*CdrcCfg{
+			&CdrcCfg{
+				Enabled: true,
+				CdrsConns: []*RemoteHost{
+					&RemoteHost{Address: utils.MetaInternal},
+				},
+			},
+		},
+	}
+	expected = "<CDRs> not enabled but referenced from <cdrc>"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.CdrcProfiles = map[string][]*CdrcCfg{
+		"test": []*CdrcCfg{
+			&CdrcCfg{
+				Enabled: true,
+				CdrsConns: []*RemoteHost{
+					&RemoteHost{Address: utils.MetaInternal},
+				},
+				ContentFields: []*FCTemplate{},
+			},
+		},
+	}
+	cfg.cdrsCfg = &CdrsCfg{
+		Enabled: true,
+	}
+
+	expected = "<cdrc> enabled but no fields to be processed defined!"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.CdrcProfiles = map[string][]*CdrcCfg{
+		"test": []*CdrcCfg{
+			&CdrcCfg{
+				Enabled: true,
+				CdrsConns: []*RemoteHost{
+					&RemoteHost{Address: utils.MetaInternal},
+				},
+				CdrFormat: utils.MetaFileCSV,
+				ContentFields: []*FCTemplate{
+					&FCTemplate{
+						Value: RSRParsers{
+							&RSRParser{
+								attrName: "test1",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	expected = "<CDR> fields must be indices in case of .csv files, have instead: test1"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+}
