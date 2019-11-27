@@ -136,6 +136,7 @@ const (
 	ROUNDING_MIDDLE              = "*middle"
 	ROUNDING_DOWN                = "*down"
 	ANY                          = "*any"
+	MetaAll                      = "*all"
 	ZERO                         = "*zero"
 	ASAP                         = "*asap"
 	COMMENT_CHAR                 = '#'
@@ -881,6 +882,7 @@ const (
 const (
 	ApierV1                            = "ApierV1"
 	ApierV1ComputeFilterIndexes        = "ApierV1.ComputeFilterIndexes"
+	ApierV1ComputeFilterIndexIDs       = "ApierV1.ComputeFilterIndexIDs"
 	ApierV1Ping                        = "ApierV1.Ping"
 	ApierV1SetDispatcherProfile        = "ApierV1.SetDispatcherProfile"
 	ApierV1GetDispatcherProfile        = "ApierV1.GetDispatcherProfile"

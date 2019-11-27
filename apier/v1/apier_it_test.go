@@ -1078,7 +1078,7 @@ func TestApierGetAccountActionTriggers(t *testing.T) {
 func TestApierAddTriggeredAction2(t *testing.T) {
 	reply := ""
 	// Add balance to a previously known account
-	attrs := &AttrAddAccountActionTriggers{ActionTriggerIDs: &[]string{"STANDARD_TRIGGERS"}, Tenant: "cgrates.org", Account: "dan2"}
+	attrs := &AttrAddAccountActionTriggers{ActionTriggerIDs: []string{"STANDARD_TRIGGERS"}, Tenant: "cgrates.org", Account: "dan2"}
 	if err := rater.Call(utils.ApierV1AddAccountActionTriggers, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddAccountActionTriggers: ", err.Error())
 	} else if reply != "OK" {

@@ -227,15 +227,9 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 func testV1FIdxComputeThresholdsIndexes(t *testing.T) {
 	var reply2 string
 	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes,
-		utils.ArgsComputeFilterIndexIDs{
-			Tenant:        tenant,
-			ThresholdIDs:  nil,
-			AttributeIDs:  &emptySlice,
-			ResourceIDs:   &emptySlice,
-			StatIDs:       &emptySlice,
-			SupplierIDs:   &emptySlice,
-			ChargerIDs:    &emptySlice,
-			DispatcherIDs: &emptySlice,
+		utils.ArgsComputeFilterIndexes{
+			Tenant:     tenant,
+			ThresholdS: true,
 		}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -328,16 +322,10 @@ func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 func testV1FIdxSecondComputeThresholdsIndexes(t *testing.T) {
 	thid := []string{"TEST_PROFILE2"}
 	var result string
-	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes,
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexIDs,
 		utils.ArgsComputeFilterIndexIDs{
-			Tenant:        tenant,
-			ThresholdIDs:  &thid,
-			AttributeIDs:  &emptySlice,
-			ResourceIDs:   &emptySlice,
-			StatIDs:       &emptySlice,
-			SupplierIDs:   &emptySlice,
-			ChargerIDs:    &emptySlice,
-			DispatcherIDs: &emptySlice,
+			Tenant:       tenant,
+			ThresholdIDs: thid,
 		}, &result); err != nil {
 		t.Error(err)
 	}
@@ -358,15 +346,9 @@ func testV1FIdxSecondComputeThresholdsIndexes(t *testing.T) {
 
 func testV1FIdxThirdComputeThresholdsIndexes(t *testing.T) {
 	var result string
-	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexIDs{
-		Tenant:        tenant,
-		ThresholdIDs:  nil,
-		AttributeIDs:  &emptySlice,
-		ResourceIDs:   &emptySlice,
-		StatIDs:       &emptySlice,
-		SupplierIDs:   &emptySlice,
-		ChargerIDs:    &emptySlice,
-		DispatcherIDs: &emptySlice,
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexes{
+		Tenant:     tenant,
+		ThresholdS: true,
 	}, &result); err != nil {
 		t.Error(err)
 	}
@@ -390,15 +372,9 @@ func testV1FIdxThirdComputeThresholdsIndexes(t *testing.T) {
 
 func testV1FIdxRemoveThresholdProfile(t *testing.T) {
 	var result string
-	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexIDs{
-		Tenant:        tenant,
-		ThresholdIDs:  nil,
-		AttributeIDs:  &emptySlice,
-		ResourceIDs:   &emptySlice,
-		StatIDs:       &emptySlice,
-		SupplierIDs:   &emptySlice,
-		ChargerIDs:    &emptySlice,
-		DispatcherIDs: &emptySlice,
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexes{
+		Tenant:     tenant,
+		ThresholdS: true,
 	}, &result); err != nil {
 		t.Error(err)
 	}
@@ -518,15 +494,9 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 
 func testV1FIdxComputeStatQueueProfileIndexes(t *testing.T) {
 	var result string
-	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexIDs{
-		Tenant:        tenant,
-		ThresholdIDs:  &emptySlice,
-		AttributeIDs:  &emptySlice,
-		ResourceIDs:   &emptySlice,
-		StatIDs:       nil,
-		SupplierIDs:   &emptySlice,
-		ChargerIDs:    &emptySlice,
-		DispatcherIDs: &emptySlice,
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexes{
+		Tenant: tenant,
+		StatS:  true,
 	}, &result); err != nil {
 		t.Error(err)
 	}
@@ -628,15 +598,9 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 func testV1FIdxSecondComputeStatQueueProfileIndexes(t *testing.T) {
 	var result string
 	if err := tFIdxRpc.Call(
-		utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexIDs{
-			Tenant:        tenant,
-			ThresholdIDs:  &emptySlice,
-			AttributeIDs:  &emptySlice,
-			ResourceIDs:   &emptySlice,
-			StatIDs:       &[]string{"TEST_PROFILE2"},
-			SupplierIDs:   &emptySlice,
-			ChargerIDs:    &emptySlice,
-			DispatcherIDs: &emptySlice,
+		utils.ApierV1ComputeFilterIndexIDs, utils.ArgsComputeFilterIndexIDs{
+			Tenant:  tenant,
+			StatIDs: []string{"TEST_PROFILE2"},
 		}, &result); err != nil {
 		t.Error(err)
 	}
@@ -658,15 +622,9 @@ func testV1FIdxSecondComputeStatQueueProfileIndexes(t *testing.T) {
 
 func testV1FIdxRemoveStatQueueProfile(t *testing.T) {
 	var result string
-	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexIDs{
-		Tenant:        tenant,
-		ThresholdIDs:  &emptySlice,
-		AttributeIDs:  &emptySlice,
-		ResourceIDs:   &emptySlice,
-		StatIDs:       nil,
-		SupplierIDs:   &emptySlice,
-		ChargerIDs:    &emptySlice,
-		DispatcherIDs: &emptySlice,
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexes{
+		Tenant: tenant,
+		StatS:  true,
 	}, &result); err != nil {
 		t.Error(err)
 	}
@@ -775,15 +733,9 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 
 func testV1FIdxComputeResourceProfileIndexes(t *testing.T) {
 	var reply2 string
-	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexIDs{
-		Tenant:        tenant,
-		ThresholdIDs:  &emptySlice,
-		AttributeIDs:  &emptySlice,
-		ResourceIDs:   nil,
-		StatIDs:       &emptySlice,
-		SupplierIDs:   &emptySlice,
-		ChargerIDs:    &emptySlice,
-		DispatcherIDs: &emptySlice,
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexes{
+		Tenant:    tenant,
+		ResourceS: true,
 	}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -875,16 +827,10 @@ func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 func testV1FIdxSecondComputeResourceProfileIndexes(t *testing.T) {
 	rsid := []string{"RCFG2"}
 	var reply2 string
-	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes,
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexIDs,
 		utils.ArgsComputeFilterIndexIDs{
-			Tenant:        tenant,
-			ThresholdIDs:  &emptySlice,
-			AttributeIDs:  &emptySlice,
-			ResourceIDs:   &rsid,
-			StatIDs:       &emptySlice,
-			SupplierIDs:   &emptySlice,
-			ChargerIDs:    &emptySlice,
-			DispatcherIDs: &emptySlice,
+			Tenant:      tenant,
+			ResourceIDs: rsid,
 		}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -906,15 +852,9 @@ func testV1FIdxSecondComputeResourceProfileIndexes(t *testing.T) {
 func testV1FIdxRemoveResourceProfile(t *testing.T) {
 	var resp string
 	var reply2 string
-	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexIDs{
-		Tenant:        tenant,
-		ThresholdIDs:  &emptySlice,
-		AttributeIDs:  &emptySlice,
-		ResourceIDs:   nil,
-		StatIDs:       &emptySlice,
-		SupplierIDs:   &emptySlice,
-		ChargerIDs:    &emptySlice,
-		DispatcherIDs: &emptySlice,
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexes{
+		Tenant:    tenant,
+		ResourceS: true,
 	}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -1028,15 +968,9 @@ func testV1FIdxSetSupplierProfileIndexes(t *testing.T) {
 
 func testV1FIdxComputeSupplierProfileIndexes(t *testing.T) {
 	var reply2 string
-	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexIDs{
-		Tenant:        tenant,
-		ThresholdIDs:  &emptySlice,
-		AttributeIDs:  &emptySlice,
-		ResourceIDs:   &emptySlice,
-		StatIDs:       &emptySlice,
-		SupplierIDs:   nil,
-		ChargerIDs:    &emptySlice,
-		DispatcherIDs: &emptySlice,
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexes{
+		Tenant:    tenant,
+		SupplierS: true,
 	}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -1132,16 +1066,10 @@ func testV1FIdxSetSecondSupplierProfileIndexes(t *testing.T) {
 func testV1FIdxSecondComputeSupplierProfileIndexes(t *testing.T) {
 	spid := []string{"TEST_PROFILE2"}
 	var reply2 string
-	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes,
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexIDs,
 		utils.ArgsComputeFilterIndexIDs{
-			Tenant:        tenant,
-			ThresholdIDs:  &emptySlice,
-			AttributeIDs:  &emptySlice,
-			ResourceIDs:   &emptySlice,
-			StatIDs:       &emptySlice,
-			SupplierIDs:   &spid,
-			ChargerIDs:    &emptySlice,
-			DispatcherIDs: &emptySlice,
+			Tenant:      tenant,
+			SupplierIDs: spid,
 		}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -1164,15 +1092,9 @@ func testV1FIdxSecondComputeSupplierProfileIndexes(t *testing.T) {
 func testV1FIdxRemoveSupplierProfile(t *testing.T) {
 	var resp string
 	var reply2 string
-	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexIDs{
-		Tenant:        tenant,
-		ThresholdIDs:  &emptySlice,
-		AttributeIDs:  &emptySlice,
-		ResourceIDs:   &emptySlice,
-		StatIDs:       &emptySlice,
-		SupplierIDs:   nil,
-		ChargerIDs:    &emptySlice,
-		DispatcherIDs: &emptySlice,
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes, utils.ArgsComputeFilterIndexes{
+		Tenant:    tenant,
+		SupplierS: true,
 	}, &reply2); err != nil {
 		t.Error(err)
 	}
@@ -1296,16 +1218,10 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 func testV1FIdxComputeAttributeProfileIndexes(t *testing.T) {
 	var result string
 	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes,
-		utils.ArgsComputeFilterIndexIDs{
-			Tenant:        tenant,
-			Context:       utils.MetaSessionS,
-			ThresholdIDs:  &emptySlice,
-			AttributeIDs:  nil,
-			ResourceIDs:   &emptySlice,
-			StatIDs:       &emptySlice,
-			SupplierIDs:   &emptySlice,
-			ChargerIDs:    &emptySlice,
-			DispatcherIDs: &emptySlice,
+		utils.ArgsComputeFilterIndexes{
+			Tenant:     tenant,
+			Context:    utils.MetaSessionS,
+			AttributeS: true,
 		}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -1411,17 +1327,11 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 
 func testV1FIdxSecondComputeAttributeProfileIndexes(t *testing.T) {
 	var result string
-	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes,
+	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexIDs,
 		utils.ArgsComputeFilterIndexIDs{
-			Tenant:        tenant,
-			Context:       utils.MetaSessionS,
-			ThresholdIDs:  &emptySlice,
-			AttributeIDs:  &[]string{"ApierTest2"},
-			ResourceIDs:   &emptySlice,
-			StatIDs:       &emptySlice,
-			SupplierIDs:   &emptySlice,
-			ChargerIDs:    &emptySlice,
-			DispatcherIDs: &emptySlice,
+			Tenant:       tenant,
+			Context:      utils.MetaSessionS,
+			AttributeIDs: []string{"ApierTest2"},
 		}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -1445,16 +1355,10 @@ func testV1FIdxSecondComputeAttributeProfileIndexes(t *testing.T) {
 func testV1FIdxComputeWithAnotherContext(t *testing.T) {
 	var result string
 	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes,
-		utils.ArgsComputeFilterIndexIDs{
-			Tenant:        tenant,
-			Context:       utils.META_ANY,
-			ThresholdIDs:  &emptySlice,
-			AttributeIDs:  nil,
-			ResourceIDs:   &emptySlice,
-			StatIDs:       &emptySlice,
-			SupplierIDs:   &emptySlice,
-			ChargerIDs:    &emptySlice,
-			DispatcherIDs: &emptySlice,
+		utils.ArgsComputeFilterIndexes{
+			Tenant:     tenant,
+			Context:    utils.META_ANY,
+			AttributeS: true,
 		}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -1480,16 +1384,10 @@ func testV1FIdxComputeWithAnotherContext(t *testing.T) {
 func testV1FIdxRemoveAttributeProfile(t *testing.T) {
 	var result string
 	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes,
-		utils.ArgsComputeFilterIndexIDs{
-			Tenant:        tenant,
-			Context:       utils.MetaSessionS,
-			ThresholdIDs:  &emptySlice,
-			AttributeIDs:  nil,
-			ResourceIDs:   &emptySlice,
-			StatIDs:       &emptySlice,
-			SupplierIDs:   &emptySlice,
-			ChargerIDs:    &emptySlice,
-			DispatcherIDs: &emptySlice,
+		utils.ArgsComputeFilterIndexes{
+			Tenant:     tenant,
+			Context:    utils.MetaSessionS,
+			AttributeS: true,
 		}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -1824,16 +1722,10 @@ func testV1FIdxComputeDispatcherProfileIndexes(t *testing.T) {
 	var result string
 	//recompute indexes for dispatcherProfile for *sessions subsystem
 	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes,
-		utils.ArgsComputeFilterIndexIDs{
-			Tenant:        tenant,
-			Context:       utils.MetaSessionS,
-			ThresholdIDs:  &emptySlice,
-			AttributeIDs:  &emptySlice,
-			ResourceIDs:   &emptySlice,
-			StatIDs:       &emptySlice,
-			SupplierIDs:   &emptySlice,
-			ChargerIDs:    &emptySlice,
-			DispatcherIDs: nil,
+		utils.ArgsComputeFilterIndexes{
+			Tenant:      tenant,
+			Context:     utils.MetaSessionS,
+			DispatcherS: true,
 		}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -1977,16 +1869,10 @@ func testV1FIdxComputeDispatcherProfileIndexes2(t *testing.T) {
 	var result string
 	//recompute indexes for dispatcherProfile for *sessions subsystem
 	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes,
-		utils.ArgsComputeFilterIndexIDs{
-			Tenant:        tenant,
-			Context:       utils.MetaSessionS,
-			ThresholdIDs:  &emptySlice,
-			AttributeIDs:  &emptySlice,
-			ResourceIDs:   &emptySlice,
-			StatIDs:       &emptySlice,
-			SupplierIDs:   &emptySlice,
-			ChargerIDs:    &emptySlice,
-			DispatcherIDs: nil,
+		utils.ArgsComputeFilterIndexes{
+			Tenant:      tenant,
+			Context:     utils.MetaSessionS,
+			DispatcherS: true,
 		}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
@@ -2011,16 +1897,10 @@ func testV1FIdxComputeDispatcherProfileIndexes2(t *testing.T) {
 
 	//recompute indexes for dispatcherProfile for *attributes subsystem
 	if err := tFIdxRpc.Call(utils.ApierV1ComputeFilterIndexes,
-		utils.ArgsComputeFilterIndexIDs{
-			Tenant:        tenant,
-			Context:       utils.MetaAttributes,
-			ThresholdIDs:  &emptySlice,
-			AttributeIDs:  &emptySlice,
-			ResourceIDs:   &emptySlice,
-			StatIDs:       &emptySlice,
-			SupplierIDs:   &emptySlice,
-			ChargerIDs:    &emptySlice,
-			DispatcherIDs: nil,
+		utils.ArgsComputeFilterIndexes{
+			Tenant:      tenant,
+			Context:     utils.MetaAttributes,
+			DispatcherS: true,
 		}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {

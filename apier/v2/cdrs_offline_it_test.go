@@ -239,7 +239,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 
 	if err := cdrsOfflineRpc.Call(utils.ApierV2SetAccount,
 		&AttrSetAccount{Tenant: "cgrates.org", Account: "test2",
-			ActionPlanIDs: &[]string{"AP_TEST2"}, ReloadScheduler: true},
+			ActionPlanIDs: []string{"AP_TEST2"}, ReloadScheduler: true},
 		&reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

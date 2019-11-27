@@ -238,7 +238,7 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 	argSetAcnt1 := AttrSetAccount{
 		Tenant:        "cgrates.org",
 		Account:       "TestApierV2itSetAccountWithAP1",
-		ActionPlanIDs: &[]string{argAP1.Id},
+		ActionPlanIDs: []string{argAP1.Id},
 	}
 	acntID := utils.ConcatenatedKey(argSetAcnt1.Tenant, argSetAcnt1.Account)
 	if _, err := dm.GetAccountActionPlans(acntID, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
@@ -274,7 +274,7 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 	argSetAcnt2 := AttrSetAccount{
 		Tenant:        "cgrates.org",
 		Account:       "TestApierV2itSetAccountWithAP1",
-		ActionPlanIDs: &[]string{argAP2.Id},
+		ActionPlanIDs: []string{argAP2.Id},
 	}
 	if err := apierRPC.Call(utils.ApierV2SetAccount, argSetAcnt2, &reply); err != nil {
 		t.Fatal(err)
@@ -299,7 +299,7 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 	argSetAcnt2 = AttrSetAccount{
 		Tenant:               "cgrates.org",
 		Account:              "TestApierV2itSetAccountWithAP1",
-		ActionPlanIDs:        &[]string{argAP2.Id},
+		ActionPlanIDs:        []string{argAP2.Id},
 		ActionPlansOverwrite: true,
 	}
 	if err := apierRPC.Call(utils.ApierV2SetAccount, argSetAcnt2, &reply); err != nil {

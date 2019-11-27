@@ -200,42 +200,64 @@ func (api *ApierV1) GetFilterIndexes(arg AttrGetFilterIndexes, reply *[]string) 
 	return nil
 }
 
-func (api *ApierV1) ComputeAllFilterIndexes(args utils.ArgsComputeFilterIndexes, reply *string) (err error) {
+// ComputeFilterIndexes selects which index filters to recompute
+func (api *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexes, reply *string) (err error) {
 	transactionID := utils.GenUUID()
 	//ThresholdProfile Indexes
-	thdsIndexers, err := api.computeThresholdIndexes(args.Tenant, nil, transactionID)
-	if err != nil && err != utils.ErrNotFound {
-		return utils.APIErrorHandler(err)
+	var thdsIndexers *engine.FilterIndexer
+	if args.ThresholdS {
+		thdsIndexers, err = api.computeThresholdIndexes(args.Tenant, nil, transactionID)
+		if err != nil && err != utils.ErrNotFound {
+			return utils.APIErrorHandler(err)
+		}
 	}
 	//StatQueueProfile Indexes
-	sqpIndexers, err := api.computeStatIndexes(args.Tenant, nil, transactionID)
-	if err != nil && err != utils.ErrNotFound {
-		return utils.APIErrorHandler(err)
+	var sqpIndexers *engine.FilterIndexer
+	if args.StatS {
+		sqpIndexers, err = api.computeStatIndexes(args.Tenant, nil, transactionID)
+		if err != nil && err != utils.ErrNotFound {
+			return utils.APIErrorHandler(err)
+		}
 	}
 	//ResourceProfile Indexes
-	rsIndexes, err := api.computeResourceIndexes(args.Tenant, nil, transactionID)
-	if err != nil && err != utils.ErrNotFound {
-		return utils.APIErrorHandler(err)
+	var rsIndexes *engine.FilterIndexer
+	if args.ResourceS {
+		rsIndexes, err = api.computeResourceIndexes(args.Tenant, nil, transactionID)
+		if err != nil && err != utils.ErrNotFound {
+			return utils.APIErrorHandler(err)
+		}
 	}
 	//SupplierProfile Indexes
-	sppIndexes, err := api.computeSupplierIndexes(args.Tenant, nil, transactionID)
-	if err != nil && err != utils.ErrNotFound {
-		return utils.APIErrorHandler(err)
+	var sppIndexes *engine.FilterIndexer
+	if args.SupplierS {
+		sppIndexes, err = api.computeSupplierIndexes(args.Tenant, nil, transactionID)
+		if err != nil && err != utils.ErrNotFound {
+			return utils.APIErrorHandler(err)
+		}
 	}
 	//AttributeProfile Indexes
-	attrIndexes, err := api.computeAttributeIndexes(args.Tenant, args.Context, nil, transactionID)
-	if err != nil && err != utils.ErrNotFound {
-		return utils.APIErrorHandler(err)
+	var attrIndexes *engine.FilterIndexer
+	if args.AttributeS {
+		attrIndexes, err = api.computeAttributeIndexes(args.Tenant, args.Context, nil, transactionID)
+		if err != nil && err != utils.ErrNotFound {
+			return utils.APIErrorHandler(err)
+		}
 	}
 	//ChargerProfile  Indexes
-	cppIndexes, err := api.computeChargerIndexes(args.Tenant, nil, transactionID)
-	if err != nil && err != utils.ErrNotFound {
-		return utils.APIErrorHandler(err)
+	var cppIndexes *engine.FilterIndexer
+	if args.ChargerS {
+		cppIndexes, err = api.computeChargerIndexes(args.Tenant, nil, transactionID)
+		if err != nil && err != utils.ErrNotFound {
+			return utils.APIErrorHandler(err)
+		}
 	}
 	//DispatcherProfile Indexes
-	dspIndexes, err := api.computeDispatcherIndexes(args.Tenant, args.Context, nil, transactionID)
-	if err != nil && err != utils.ErrNotFound {
-		return utils.APIErrorHandler(err)
+	var dspIndexes *engine.FilterIndexer
+	if args.DispatcherS {
+		dspIndexes, err = api.computeDispatcherIndexes(args.Tenant, args.Context, nil, transactionID)
+		if err != nil && err != utils.ErrNotFound {
+			return utils.APIErrorHandler(err)
+		}
 	}
 
 	//Now we move from tmpKey to the right key for each type
@@ -285,7 +307,8 @@ func (api *ApierV1) ComputeAllFilterIndexes(args utils.ArgsComputeFilterIndexes,
 	return nil
 }
 
-func (api *ApierV1) ComputeFilterIndexes(args utils.ArgsComputeFilterIndexIDs, reply *string) (err error) {
+// ComputeFilterIndexIDs computes specific filter indexes
+func (api *ApierV1) ComputeFilterIndexIDs(args utils.ArgsComputeFilterIndexIDs, reply *string) (err error) {
 	transactionID := utils.GenUUID()
 	//ThresholdProfile Indexes
 	thdsIndexers, err := api.computeThresholdIndexes(args.Tenant, &args.ThresholdIDs, transactionID)

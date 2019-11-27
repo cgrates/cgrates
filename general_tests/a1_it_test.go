@@ -330,7 +330,7 @@ func testA1itConcurrentAPs(t *testing.T) {
 			attrSetAcnt := v2.AttrSetAccount{
 				Tenant:        "cgrates.org",
 				Account:       acnt,
-				ActionPlanIDs: &[]string{"PACKAGE_1"},
+				ActionPlanIDs: []string{"PACKAGE_1"},
 			}
 			var reply string
 			if err := a1rpc.Call(utils.ApierV2SetAccount, attrSetAcnt, &reply); err != nil {
@@ -372,7 +372,7 @@ func testA1itConcurrentAPs(t *testing.T) {
 			attrSetAcnt := v2.AttrSetAccount{
 				Tenant:        "cgrates.org",
 				Account:       acnt,
-				ActionPlanIDs: &[]string{"PACKAGE_2"},
+				ActionPlanIDs: []string{"PACKAGE_2"},
 			}
 			var reply string
 			if err := a1rpc.Call(utils.ApierV2SetAccount, attrSetAcnt, &reply); err != nil {

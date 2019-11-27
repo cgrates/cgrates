@@ -362,6 +362,7 @@ func testV2CDRsUsageNegative(t *testing.T) {
 			t.Errorf("Unexpected usage for CDR: %s", cdrs[0].Usage)
 		}
 	}
+	cdrs = nil // gob doesn't modify zero-value fields
 	args = utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"}, OriginIDs: []string{"testV2CDRsUsageNegative"}}
 	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -375,6 +376,7 @@ func testV2CDRsUsageNegative(t *testing.T) {
 			t.Errorf("Unexpected usage for CDR: %s", cdrs[0].Usage)
 		}
 	}
+	cdrs = nil // gob doesn't modify zero-value fields
 	args = utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"}, OriginIDs: []string{"testV2CDRsUsageNegative"}}
 	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
