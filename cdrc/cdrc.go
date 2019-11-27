@@ -154,11 +154,11 @@ func (self *Cdrc) processCdrDir() error {
 	filesInDir, _ := ioutil.ReadDir(self.dfltCdrcCfg.CDRInPath)
 	for _, file := range filesInDir {
 		if self.dfltCdrcCfg.CdrFormat != utils.MetaFScsv || path.Ext(file.Name()) != ".csv" {
-			go func() { //Enable async processing here
+			go func(file os.FileInfo) { //Enable async processing here
 				if err := self.processFile(path.Join(self.dfltCdrcCfg.CDRInPath, file.Name())); err != nil {
 					utils.Logger.Err(fmt.Sprintf("Processing file %s, error: %s", file, err.Error()))
 				}
-			}()
+			}(file)
 		}
 	}
 	return nil
