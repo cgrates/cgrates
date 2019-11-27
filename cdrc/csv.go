@@ -107,7 +107,7 @@ func (self *CsvRecordsProcessor) processFlatstoreRecord(record []string) ([]stri
 
 // Takes the record from a slice and turns it into StoredCdrs, posting them to the cdrServer
 func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, error) {
-	csvProvider := config.NewSliceDP(record)
+	csvProvider := config.NewSliceDP(record, utils.MetaReq)
 	recordCdrs := make([]*engine.CDR, 0)    // More CDRs based on the number of filters and field templates
 	for _, cdrcCfg := range self.cdrcCfgs { // cdrFields coming from more templates will produce individual storCdr records
 		tenant, err := cdrcCfg.Tenant.ParseDataProvider(csvProvider, utils.NestingSep) // each profile of cdrc can have different tenant
@@ -146,7 +146,7 @@ func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, 
 func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcCfg *config.CdrcCfg, tenant string) (*engine.CDR, error) {
 	storedCdr := &engine.CDR{OriginHost: "0.0.0.0", Source: cdrcCfg.CdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
 	var err error
-	csvProvider := config.NewSliceDP(record) // used for filterS and for RSRParsers
+	csvProvider := config.NewSliceDP(record, utils.MetaReq) // used for filterS and for RSRParsers
 	var lazyHttpFields []*config.FCTemplate
 	fldVals := make(map[string]string)
 	for _, cdrFldCfg := range cdrcCfg.ContentFields {

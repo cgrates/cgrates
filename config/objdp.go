@@ -27,14 +27,15 @@ import (
 )
 
 //NewObjectDP constructs a DataProvider
-func NewObjectDP(obj interface{}) (dP DataProvider) {
-	dP = &ObjectDP{obj: obj, cache: make(map[string]interface{})}
+func NewObjectDP(obj interface{}, prfxSls []string) (dP DataProvider) {
+	dP = &ObjectDP{obj: obj, cache: make(map[string]interface{}), prfxSls: prfxSls}
 	return
 }
 
 type ObjectDP struct {
-	obj   interface{}
-	cache map[string]interface{}
+	obj     interface{}
+	cache   map[string]interface{}
+	prfxSls []string
 }
 
 func (objDp *ObjectDP) setCache(path string, val interface{}) {
@@ -55,14 +56,26 @@ func (objDP *ObjectDP) String() string {
 // FieldAsInterface is part of engine.DataProvider interface
 func (objDP *ObjectDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
 	obj := objDP.obj
+	clnFldPath := fldPath
 	// []string{ BalanceMap *monetary[0] Value }
 	var has bool
 	if data, has = objDP.getCache(strings.Join(fldPath, utils.NestingSep)); has {
 		return
 	}
+	if len(objDP.prfxSls) != 0 {
+		if len(clnFldPath) < len(objDP.prfxSls) {
+			return nil, fmt.Errorf("invalid path <%s> compared to prefix <%s>", clnFldPath, objDP.prfxSls)
+		}
+		for i, prfx := range objDP.prfxSls {
+			if clnFldPath[i] != prfx {
+				return nil, fmt.Errorf("wrong prefix when compared <%s> with <%s>", clnFldPath, objDP.prfxSls)
+			}
+		}
+		clnFldPath = clnFldPath[len(objDP.prfxSls):]
+	}
 
 	var prevFld string
-	for _, fld := range fldPath {
+	for _, fld := range clnFldPath {
 		var slctrStr string
 		if splt := strings.Split(fld, utils.IdxStart); len(splt) != 1 { // check if we have selector
 			fld = splt[0]

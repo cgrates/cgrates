@@ -34,7 +34,7 @@
 		{
 			"id": "data_update_grp1",
 			"filters": ["*string:~*vars.*cmd:CCR", "*string:~*req.CC-Request-Type:2", 
-				"*string:*req.Multiple-Services-Credit-Control.Rating-Group:1", "*prefix:*req.Service-Context-Id:gprs"],
+				"*string:~*req.Multiple-Services-Credit-Control.Rating-Group:1", "*prefix:~*req.Service-Context-Id:gprs"],
 			"flags": ["*update", "*accounts"],
 			"request_fields":[
 				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*data"},
