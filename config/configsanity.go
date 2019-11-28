@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
@@ -189,7 +188,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		if !cfg.cdrsCfg.Enabled {
 			for _, smgCDRSConn := range cfg.sessionSCfg.CDRsConns {
 				if smgCDRSConn.Address == utils.MetaInternal {
-					return fmt.Errorf("<%s> CDRS not enabled but referenced by SMGeneric component", utils.SessionS)
+					return fmt.Errorf("<%s> CDRS not enabled but referenced by SMGeneric component.", utils.SessionS)
 				}
 			}
 		}
@@ -208,7 +207,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			!cfg.sessionSCfg.Enabled {
 			for _, connCfg := range cfg.fsAgentCfg.SessionSConns {
 				if connCfg.Address == utils.MetaInternal {
-					return fmt.Errorf("%s not enabled but referenced by %s",
+					return fmt.Errorf("<%s> not enabled but referenced by <%s>",
 						utils.SessionS, utils.FreeSWITCHAgent)
 				}
 			}
@@ -224,7 +223,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			!cfg.sessionSCfg.Enabled {
 			for _, connCfg := range cfg.kamAgentCfg.SessionSConns {
 				if connCfg.Address == utils.MetaInternal {
-					return fmt.Errorf("%s not enabled but referenced by %s",
+					return fmt.Errorf("<%s> not enabled but referenced by <%s>",
 						utils.SessionS, utils.KamailioAgent)
 				}
 			}
@@ -240,7 +239,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			!cfg.sessionSCfg.Enabled {
 			for _, smAstSMGConn := range cfg.asteriskAgentCfg.SessionSConns {
 				if smAstSMGConn.Address == utils.MetaInternal {
-					return fmt.Errorf("%s not enabled but referenced by %s",
+					return fmt.Errorf("<%s> not enabled but referenced by <%s>",
 						utils.SessionS, utils.AsteriskAgent)
 				}
 			}
@@ -256,12 +255,13 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			!cfg.sessionSCfg.Enabled {
 			for _, daSMGConn := range cfg.diameterAgentCfg.SessionSConns {
 				if daSMGConn.Address == utils.MetaInternal {
-					return fmt.Errorf("%s not enabled but referenced by %s",
+					return fmt.Errorf("<%s> not enabled but referenced by <%s>",
 						utils.SessionS, utils.DiameterAgent)
 				}
 			}
 		}
 	}
+	//Radius Agent
 	if cfg.radiusAgentCfg.Enabled {
 		if len(cfg.radiusAgentCfg.SessionSConns) == 0 {
 			return fmt.Errorf("<%s> no %s connections defined",
@@ -271,12 +271,13 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			!cfg.sessionSCfg.Enabled {
 			for _, raSMGConn := range cfg.radiusAgentCfg.SessionSConns {
 				if raSMGConn.Address == utils.MetaInternal {
-					return fmt.Errorf("%s not enabled but referenced by %s",
+					return fmt.Errorf("<%s> not enabled but referenced by <%s>",
 						utils.SessionS, utils.RadiusAgent)
 				}
 			}
 		}
 	}
+	//DNS Agent
 	if cfg.dnsAgentCfg.Enabled {
 		if len(cfg.dnsAgentCfg.SessionSConns) == 0 {
 			return fmt.Errorf("<%s> no %s connections defined",
@@ -286,7 +287,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			!cfg.sessionSCfg.Enabled {
 			for _, sSConn := range cfg.dnsAgentCfg.SessionSConns {
 				if sSConn.Address == utils.MetaInternal {
-					return fmt.Errorf("%s not enabled but referenced by %s", utils.SessionS, utils.DNSAgent)
+					return fmt.Errorf("<%s> not enabled but referenced by <%s>", utils.SessionS, utils.DNSAgent)
 				}
 			}
 		}
@@ -298,17 +299,15 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			cfg.sessionSCfg.Enabled {
 			for _, sSConn := range httpAgentCfg.SessionSConns {
 				if sSConn.Address == utils.MetaInternal {
-					return errors.New("SessionS not enabled but referenced by HttpAgent component")
+					return fmt.Errorf("<%s> not enabled but referenced by <%s> component", utils.SessionS, utils.HTTPAgent)
 				}
 			}
 		}
 		if !utils.SliceHasMember([]string{utils.MetaUrl, utils.MetaXml}, httpAgentCfg.RequestPayload) {
-			return fmt.Errorf("<%s> unsupported request payload %s",
-				utils.HTTPAgent, httpAgentCfg.RequestPayload)
+			return fmt.Errorf("<%s> unsupported request payload %s", utils.HTTPAgent, httpAgentCfg.RequestPayload)
 		}
 		if !utils.SliceHasMember([]string{utils.MetaTextPlain, utils.MetaXml}, httpAgentCfg.ReplyPayload) {
-			return fmt.Errorf("<%s> unsupported reply payload %s",
-				utils.HTTPAgent, httpAgentCfg.ReplyPayload)
+			return fmt.Errorf("<%s> unsupported reply payload %s", utils.HTTPAgent, httpAgentCfg.ReplyPayload)
 		}
 	}
 	if cfg.attributeSCfg.Enabled {
@@ -320,7 +319,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		(cfg.attributeSCfg == nil || !cfg.attributeSCfg.Enabled) {
 		for _, connCfg := range cfg.chargerSCfg.AttributeSConns {
 			if connCfg.Address == utils.MetaInternal {
-				return errors.New("AttributeS not enabled but requested by ChargerS component.")
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.AttributeS, utils.ChargerS)
 			}
 		}
 	}
@@ -328,7 +327,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	if cfg.resourceSCfg.Enabled && !cfg.thresholdSCfg.Enabled && !cfg.dispatcherSCfg.Enabled {
 		for _, connCfg := range cfg.resourceSCfg.ThresholdSConns {
 			if connCfg.Address == utils.MetaInternal {
-				return errors.New("ThresholdS not enabled but requested by ResourceS component.")
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.ThresholdS, utils.ResourceS)
 			}
 		}
 	}
@@ -336,7 +335,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	if cfg.statsCfg.Enabled && !cfg.thresholdSCfg.Enabled && !cfg.dispatcherSCfg.Enabled {
 		for _, connCfg := range cfg.statsCfg.ThresholdSConns {
 			if connCfg.Address == utils.MetaInternal {
-				return errors.New("ThresholdS not enabled but requested by StatS component.")
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.ThresholdS, utils.StatService)
 			}
 		}
 	}
@@ -345,21 +344,21 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		if !cfg.resourceSCfg.Enabled {
 			for _, connCfg := range cfg.supplierSCfg.ResourceSConns {
 				if connCfg.Address == utils.MetaInternal {
-					return errors.New("ResourceS not enabled but requested by SupplierS component.")
+					return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.ResourceS, utils.SupplierS)
 				}
 			}
 		}
 		if !cfg.statsCfg.Enabled {
 			for _, connCfg := range cfg.supplierSCfg.StatSConns {
 				if connCfg.Address == utils.MetaInternal {
-					return errors.New("StatS not enabled but requested by SupplierS component.")
+					return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.StatService, utils.SupplierS)
 				}
 			}
 		}
 		if !cfg.attributeSCfg.Enabled {
 			for _, connCfg := range cfg.supplierSCfg.AttributeSConns {
 				if connCfg.Address == utils.MetaInternal {
-					return errors.New("AttributeS not enabled but requested by SupplierS component.")
+					return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.AttributeS, utils.SupplierS)
 				}
 			}
 		}
@@ -368,7 +367,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	if !cfg.cdrsCfg.Enabled && !cfg.dispatcherSCfg.Enabled {
 		for _, connCfg := range cfg.schedulerCfg.CDRsConns {
 			if connCfg.Address == utils.MetaInternal {
-				return errors.New("CDR Server not enabled but requested by Scheduler")
+				return fmt.Errorf("%s Server not enabled but requested by %s", utils.CDR, utils.SchedulerS)
 			}
 		}
 	}
@@ -377,7 +376,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		if !cfg.sessionSCfg.Enabled {
 			for _, connCfg := range cfg.ersCfg.SessionSConns {
 				if connCfg.Address == utils.MetaInternal {
-					return errors.New("SessionS not enabled but requested by EventReader component.")
+					return fmt.Errorf("<%s> not enabled but requested by EventReader component.", utils.SessionS)
 				}
 			}
 		}
