@@ -400,25 +400,14 @@ func (api *ApierV1) GetAccount(attr *utils.AttrGetAccount, reply *interface{}) e
 }
 
 type AttrAddBalance struct {
-	Tenant         string
-	Account        string
-	BalanceUuid    *string
-	BalanceId      *string
-	BalanceType    string
-	Directions     *string
-	Value          float64
-	ExpiryTime     *string
-	RatingSubject  *string
-	Categories     *string
-	DestinationIds *string
-	TimingIds      *string
-	Weight         *float64
-	SharedGroups   *string
-	Overwrite      bool // When true it will reset if the balance is already there
-	Blocker        *bool
-	Disabled       *bool
-	Cdrlog         *bool
-	ExtraData      *map[string]interface{}
+	Tenant          string
+	Account         string
+	BalanceType     string
+	Value           float64
+	Balance         map[string]interface{}
+	ActionExtraData *map[string]interface{}
+	Overwrite       bool // When true it will reset if the balance is already there
+	Cdrlog          bool
 }
 
 func (api *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
@@ -428,73 +417,44 @@ func (api *ApierV1) DebitBalance(attr *AttrAddBalance, reply *string) error {
 	return api.modifyBalance(utils.DEBIT, attr, reply)
 }
 
-func (api *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *string) error {
+func (api *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *string) (err error) {
 	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType", "Value"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	var expTime *time.Time
-	if attr.ExpiryTime != nil {
-		expTimeVal, err := utils.ParseTimeDetectLayout(*attr.ExpiryTime,
-			api.Config.GeneralCfg().DefaultTimezone)
-		if err != nil {
-			*reply = err.Error()
-			return err
-		}
-		expTime = &expTimeVal
+	var balance *engine.BalanceFilter
+	if balance, err = engine.NewBalanceFilter(attr.Balance, api.Config.GeneralCfg().DefaultTimezone); err != nil {
+		return
 	}
+	balance.Type = utils.StringPointer(attr.BalanceType)
+	balance.Value = &utils.ValueFormula{Static: math.Abs(attr.Value)}
+
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
-	if _, err := api.DataManager.GetAccount(accID); err != nil {
+	if _, err = api.DataManager.GetAccount(accID); err != nil {
 		// create account if does not exist
 		account := &engine.Account{
 			ID: accID,
 		}
-		if err := api.DataManager.SetAccount(account); err != nil {
-			*reply = err.Error()
-			return err
+		if err = api.DataManager.SetAccount(account); err != nil {
+			return
 		}
 	}
 	at := &engine.ActionTiming{}
 	//check if we have extra data
-	if attr.ExtraData != nil && len(*attr.ExtraData) != 0 {
-		at.ExtraData = *attr.ExtraData
+	if attr.ActionExtraData != nil && len(*attr.ActionExtraData) != 0 {
+		at.ExtraData = *attr.ActionExtraData
 	}
 	at.SetAccountIDs(utils.StringMap{accID: true})
 
 	if attr.Overwrite {
 		aType += "_reset" // => *topup_reset/*debit_reset
 	}
-
-	a := &engine.Action{
-		ActionType: aType,
-		Balance: &engine.BalanceFilter{
-			Uuid:           attr.BalanceUuid,
-			ID:             attr.BalanceId,
-			Type:           utils.StringPointer(attr.BalanceType),
-			Value:          &utils.ValueFormula{Static: math.Abs(attr.Value)},
-			ExpirationDate: expTime,
-			RatingSubject:  attr.RatingSubject,
-			Weight:         attr.Weight,
-			Blocker:        attr.Blocker,
-			Disabled:       attr.Disabled,
-		},
-	}
-	if attr.DestinationIds != nil {
-		a.Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.DestinationIds))
-	}
-	if attr.Categories != nil {
-		a.Balance.Categories = utils.StringMapPointer(utils.ParseStringMap(*attr.Categories))
-	}
-	if attr.SharedGroups != nil {
-		a.Balance.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(*attr.SharedGroups))
-	}
-	if attr.TimingIds != nil {
-		a.Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.TimingIds))
-		for _, timingID := range strings.Split(*attr.TimingIds, utils.INFIELD_SEP) {
-			tmg, err := api.DataManager.GetTiming(timingID, false, utils.NonTransactional)
-			if err != nil {
-				return err
+	if balance.TimingIDs != nil {
+		for _, timingID := range balance.TimingIDs.Slice() {
+			var tmg *utils.TPTiming
+			if tmg, err = api.DataManager.GetTiming(timingID, false, utils.NonTransactional); err != nil {
+				return
 			}
-			a.Balance.Timings = append(a.Balance.Timings, &engine.RITiming{
+			balance.Timings = append(balance.Timings, &engine.RITiming{
 				Years:     tmg.Years,
 				Months:    tmg.Months,
 				MonthDays: tmg.MonthDays,
@@ -504,11 +464,16 @@ func (api *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *str
 			})
 		}
 	}
+
+	a := &engine.Action{
+		ActionType: aType,
+		Balance:    balance,
+	}
 	publishAction := &engine.Action{
 		ActionType: utils.MetaPublishBalance,
 	}
 	acts := engine.Actions{a, publishAction}
-	if attr.Cdrlog != nil && *attr.Cdrlog {
+	if attr.Cdrlog {
 		acts = engine.Actions{a, publishAction, &engine.Action{
 			ActionType: utils.CDRLOG,
 		}}

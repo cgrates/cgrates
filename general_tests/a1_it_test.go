@@ -155,9 +155,15 @@ func testA1itLoadTPFromFolder(t *testing.T) {
 
 func testA1itAddBalance1(t *testing.T) {
 	var reply string
-	argAdd := &v1.AttrAddBalance{Tenant: "cgrates.org", Account: "rpdata1",
-		BalanceType: utils.DATA, BalanceId: utils.StringPointer("rpdata1_test"),
-		Value: 10000000000}
+	argAdd := &v1.AttrAddBalance{
+		Tenant:      "cgrates.org",
+		Account:     "rpdata1",
+		BalanceType: utils.DATA,
+		Value:       10000000000,
+		Balance: map[string]interface{}{
+			utils.ID: "rpdata1_test",
+		},
+	}
 	if err := a1rpc.Call(utils.ApierV1AddBalance, argAdd, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

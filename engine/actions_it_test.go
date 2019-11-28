@@ -351,20 +351,21 @@ func TestActionsitCDRAccount(t *testing.T) {
 	type AttrAddBalance struct {
 		Tenant      string
 		Account     string
-		BalanceUuid *string
-		BalanceId   *string
 		BalanceType string
 		Value       float64
+		Balance     map[string]interface{}
 		Overwrite   bool
 	}
 	attrs := &AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     acnt,
 		BalanceType: utils.VOICE,
-		BalanceUuid: utils.StringPointer("testUUID"),
-		BalanceId:   utils.StringPointer("TestID"),
 		Value:       float64(30 * time.Second),
-		Overwrite:   true,
+		Balance: map[string]interface{}{
+			utils.UUID: "testUUID",
+			utils.ID:   "TestID",
+		},
+		Overwrite: true,
 	}
 	if err := actsLclRpc.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())

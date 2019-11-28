@@ -268,7 +268,7 @@ func testAccITAddBalance(t *testing.T) {
 		Account:     "testAccAddBalance",
 		BalanceType: utils.MONETARY,
 		Value:       1.5,
-		Cdrlog:      utils.BoolPointer(true),
+		Cdrlog:      true,
 	}
 	if err := accRPC.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
