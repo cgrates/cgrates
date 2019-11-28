@@ -1119,7 +1119,14 @@ func TestApierSetAccountActionTriggers(t *testing.T) {
 		t.Errorf("Unexpected action triggers received %v", reply)
 	}
 	var setReply string
-	setReq := AttrSetAccountActionTriggers{Tenant: "cgrates.org", Account: "dan2", UniqueID: reply[0].UniqueID, ActivationDate: utils.StringPointer("2016-02-05T18:00:00Z")}
+	setReq := AttrSetAccountActionTriggers{
+		Tenant:   "cgrates.org",
+		Account:  "dan2",
+		UniqueID: reply[0].UniqueID,
+		ActionTrigger: map[string]interface{}{
+			utils.ActivationDate: "2016-02-05T18:00:00Z",
+		},
+	}
 	if err := rater.Call(utils.ApierV1ResetAccountActionTriggers, setReq, &setReply); err != nil {
 		t.Error("Got error on ApierV1.ResetActionTiming: ", err.Error())
 	} else if setReply != utils.OK {

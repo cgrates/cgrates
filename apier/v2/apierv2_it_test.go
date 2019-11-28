@@ -145,14 +145,16 @@ func TestApierV2itSetAction(t *testing.T) {
 }
 
 func TestApierV2itSetAccountActionTriggers(t *testing.T) {
-	attrs := AttrSetAccountActionTriggers{
-		Tenant:         "cgrates.org",
-		Account:        "dan",
-		GroupID:        utils.StringPointer("MONITOR_MAX_BALANCE"),
-		ThresholdType:  utils.StringPointer(utils.TRIGGER_MAX_BALANCE),
-		ThresholdValue: utils.Float64Pointer(50),
-		BalanceType:    utils.StringPointer(utils.MONETARY),
-		ActionsID:      utils.StringPointer("DISABLE_ACCOUNT"),
+	attrs := v1.AttrSetAccountActionTriggers{
+		Tenant:  "cgrates.org",
+		Account: "dan",
+		GroupID: "MONITOR_MAX_BALANCE",
+		ActionTrigger: map[string]interface{}{
+			utils.ThresholdType:  utils.TRIGGER_MAX_BALANCE,
+			utils.ThresholdValue: 50,
+			utils.BalanceType:    utils.MONETARY,
+			utils.ActionsID:      "DISABLE_ACCOUNT",
+		},
 	}
 	var reply string
 	if err := apierRPC.Call(utils.ApierV2SetAccountActionTriggers, attrs, &reply); err != nil {
@@ -161,16 +163,16 @@ func TestApierV2itSetAccountActionTriggers(t *testing.T) {
 	var ats engine.ActionTriggers
 	if err := apierRPC.Call(utils.ApierV2GetAccountActionTriggers, utils.TenantAccount{Tenant: "cgrates.org", Account: "dan"}, &ats); err != nil {
 		t.Error(err)
-	} else if len(ats) != 1 || ats[0].ID != *attrs.GroupID || ats[0].ThresholdValue != 50.0 {
+	} else if len(ats) != 1 || ats[0].ID != attrs.GroupID || ats[0].ThresholdValue != 50.0 {
 		t.Errorf("Received: %+v", ats)
 	}
-	attrs.ThresholdValue = utils.Float64Pointer(55) // Change the threshold
+	attrs.ActionTrigger[utils.ThresholdValue] = 55 // Change the threshold
 	if err := apierRPC.Call(utils.ApierV2SetAccountActionTriggers, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	if err := apierRPC.Call(utils.ApierV2GetAccountActionTriggers, utils.TenantAccount{Tenant: "cgrates.org", Account: "dan"}, &ats); err != nil {
 		t.Error(err)
-	} else if len(ats) != 1 || ats[0].ID != *attrs.GroupID || ats[0].ThresholdValue != 55.0 {
+	} else if len(ats) != 1 || ats[0].ID != attrs.GroupID || ats[0].ThresholdValue != 55.0 {
 		t.Errorf("Received: %+v", ats)
 	}
 }

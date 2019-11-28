@@ -68,6 +68,28 @@ func NonemptyStructFields(s interface{}) map[string]interface{} {
 	return fields
 }
 
+// MissingMapFields detects missing field values based on mandatory field names from a map[string]interface{}
+func MissingMapFields(s map[string]interface{}, mandatories []string) []string {
+	missing := []string{}
+	for _, fieldName := range mandatories {
+		if fldval, has := s[fieldName]; !has {
+			missing = append(missing, fieldName)
+		} else {
+			fld := reflect.ValueOf(fldval)
+			// sanitize the string fields before checking
+			if fld.Kind() == reflect.String && fld.CanSet() {
+				fld.SetString(strings.TrimSpace(fld.String()))
+			}
+			if (fld.Kind() == reflect.String && fld.String() == "") ||
+				((fld.Kind() == reflect.Slice || fld.Kind() == reflect.Map) && fld.Len() == 0) ||
+				(fld.Kind() == reflect.Int && fld.Int() == 0) {
+				missing = append(missing, fieldName)
+			}
+		}
+	}
+	return missing
+}
+
 // Converts a struct to map
 /*func StrucToMap(s interface{}) map[string]interface{} {
 	mp := make(map[string]interface{})

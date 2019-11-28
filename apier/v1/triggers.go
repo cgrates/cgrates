@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"errors"
 	"strings"
 	"time"
 
@@ -185,34 +186,154 @@ func (api *ApierV1) ResetAccountActionTriggers(attr AttrResetAccountActionTrigge
 }
 
 type AttrSetAccountActionTriggers struct {
-	Tenant                string
-	Account               string
-	GroupID               string
-	UniqueID              string
-	ThresholdType         *string
-	ThresholdValue        *float64
-	Recurrent             *bool
-	Executed              *bool
-	MinSleep              *string
-	ExpirationDate        *string
-	ActivationDate        *string
-	BalanceID             *string
-	BalanceType           *string
-	BalanceDestinationIds *[]string
-	BalanceWeight         *float64
-	BalanceExpirationDate *string
-	BalanceTimingTags     *[]string
-	BalanceRatingSubject  *string
-	BalanceCategories     *[]string
-	BalanceSharedGroups   *[]string
-	BalanceBlocker        *bool
-	BalanceDisabled       *bool
-	MinQueuedItems        *int
-	ActionsID             *string
+	Tenant        string
+	Account       string
+	GroupID       string
+	UniqueID      string
+	ActionTrigger map[string]interface{}
 }
 
-func (api *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers, reply *string) error {
+// UpdateActionTrigger updates the ActionTrigger if is matching
+func (attr *AttrSetAccountActionTriggers) UpdateActionTrigger(at *engine.ActionTrigger, timezone string) (updated bool, err error) {
+	if at == nil {
+		return false, errors.New("Empty ActionTrigger")
+	}
+	if at.ID == utils.EmptyString { // New AT, update it's data
+		if attr.GroupID == utils.EmptyString {
+			return false, utils.NewErrMandatoryIeMissing(utils.GroupID)
+		}
+		if missing := utils.MissingMapFields(attr.ActionTrigger, []string{"ThresholdType", "ThresholdValue"}); len(missing) != 0 {
+			return false, utils.NewErrMandatoryIeMissing(missing...)
+		}
+		at.ID = attr.GroupID
+		if attr.UniqueID != utils.EmptyString {
+			at.UniqueID = attr.UniqueID
+		}
+	}
+	if attr.GroupID != utils.EmptyString && attr.GroupID != at.ID {
+		return
+	}
+	if attr.UniqueID != utils.EmptyString && attr.UniqueID != at.UniqueID {
+		return
+	}
+	// at matches
+	updated = true
+	if thr, has := attr.ActionTrigger[utils.ThresholdType]; has {
+		at.ThresholdType = utils.IfaceAsString(thr)
+	}
+	if thr, has := attr.ActionTrigger[utils.ThresholdValue]; has {
+		if at.ThresholdValue, err = utils.IfaceAsFloat64(thr); err != nil {
+			return
+		}
+	}
+	if rec, has := attr.ActionTrigger[utils.Recurrent]; has {
+		if at.Recurrent, err = utils.IfaceAsBool(rec); err != nil {
+			return
+		}
+	}
+	if exec, has := attr.ActionTrigger[utils.Executed]; has {
+		if at.Executed, err = utils.IfaceAsBool(exec); err != nil {
+			return
+		}
+	}
+	if minS, has := attr.ActionTrigger[utils.MinSleep]; has {
+		if at.MinSleep, err = utils.IfaceAsDuration(minS); err != nil {
+			return
+		}
+	}
+	if exp, has := attr.ActionTrigger[utils.ExpirationDate]; has {
+		if at.ExpirationDate, err = utils.IfaceAsTime(exp, timezone); err != nil {
+			return
+		}
+	}
+	if act, has := attr.ActionTrigger[utils.ActivationDate]; has {
+		if at.ActivationDate, err = utils.IfaceAsTime(act, timezone); err != nil {
+			return
+		}
+	}
+	if at.Balance == nil {
+		at.Balance = &engine.BalanceFilter{}
+	}
+	if bid, has := attr.ActionTrigger[utils.BalanceID]; has {
+		at.Balance.ID = utils.StringPointer(utils.IfaceAsString(bid))
+	}
+	if btype, has := attr.ActionTrigger[utils.BalanceType]; has {
+		at.Balance.Type = utils.StringPointer(utils.IfaceAsString(btype))
+	}
+	if bdest, has := attr.ActionTrigger[utils.BalanceDestinationIds]; has {
+		var bdIds []string
+		if bdIds, err = utils.IfaceAsSliceString(bdest); err != nil {
+			return
+		}
+		at.Balance.DestinationIDs = utils.StringMapPointer(utils.NewStringMap(bdIds...))
+	}
+	if bweight, has := attr.ActionTrigger[utils.BalanceWeight]; has {
+		var bw float64
+		if bw, err = utils.IfaceAsFloat64(bweight); err != nil {
+			return
+		}
+		at.Balance.Weight = utils.Float64Pointer(bw)
+	}
+	if exp, has := attr.ActionTrigger[utils.BalanceExpirationDate]; has {
+		var balanceExpTime time.Time
+		if balanceExpTime, err = utils.IfaceAsTime(exp, timezone); err != nil {
+			return
+		}
+		at.Balance.ExpirationDate = utils.TimePointer(balanceExpTime)
+	}
+	if bTimeTag, has := attr.ActionTrigger[utils.BalanceTimingTags]; has {
+		var timeTag []string
+		if timeTag, err = utils.IfaceAsSliceString(bTimeTag); err != nil {
+			return
+		}
+		at.Balance.TimingIDs = utils.StringMapPointer(utils.NewStringMap(timeTag...))
+	}
+	if brs, has := attr.ActionTrigger[utils.BalanceRatingSubject]; has {
+		at.Balance.RatingSubject = utils.StringPointer(utils.IfaceAsString(brs))
+	}
+	if bcat, has := attr.ActionTrigger[utils.BalanceCategories]; has {
+		var cat []string
+		if cat, err = utils.IfaceAsSliceString(bcat); err != nil {
+			return
+		}
+		at.Balance.Categories = utils.StringMapPointer(utils.NewStringMap(cat...))
+	}
+	if bsg, has := attr.ActionTrigger[utils.BalanceSharedGroups]; has {
+		var shrgrps []string
+		if shrgrps, err = utils.IfaceAsSliceString(bsg); err != nil {
+			return
+		}
+		at.Balance.SharedGroups = utils.StringMapPointer(utils.NewStringMap(shrgrps...))
+	}
+	if bb, has := attr.ActionTrigger[utils.BalanceBlocker]; has {
+		var bBlocker bool
+		if bBlocker, err = utils.IfaceAsBool(bb); err != nil {
+			return
+		}
+		at.Balance.Blocker = utils.BoolPointer(bBlocker)
+	}
+	if bd, has := attr.ActionTrigger[utils.BalanceDisabled]; has {
+		var bDis bool
+		if bDis, err = utils.IfaceAsBool(bd); err != nil {
+			return
+		}
+		at.Balance.Disabled = utils.BoolPointer(bDis)
+	}
+	if minQ, has := attr.ActionTrigger[utils.MinQueuedItems]; has {
+		var mQ int64
+		if mQ, err = utils.IfaceAsInt64(minQ); err != nil {
+			return
+		}
+		at.MinQueuedItems = int(mQ)
+	}
+	if accID, has := attr.ActionTrigger[utils.ActionsID]; has {
+		at.ActionsID = utils.IfaceAsString(accID)
+	}
+	return
+}
 
+// SetAccountActionTriggers updates or creates if not present the ActionTrigger for an Account
+func (api *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -224,92 +345,23 @@ func (api *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers, 
 		} else {
 			return 0, err
 		}
+		var foundOne bool
 		for _, at := range account.ActionTriggers {
-			if (attr.UniqueID == "" || at.UniqueID == attr.UniqueID) &&
-				(attr.GroupID == "" || at.ID == attr.GroupID) {
-				// we have a winner
-				if attr.ThresholdType != nil {
-					at.ThresholdType = *attr.ThresholdType
-				}
-				if attr.ThresholdValue != nil {
-					at.ThresholdValue = *attr.ThresholdValue
-				}
-				if attr.Recurrent != nil {
-					at.Recurrent = *attr.Recurrent
-				}
-				if attr.Executed != nil {
-					at.Executed = *attr.Executed
-				}
-				if attr.MinSleep != nil {
-					minSleep, err := utils.ParseDurationWithNanosecs(*attr.MinSleep)
-					if err != nil {
-						return 0, err
-					}
-					at.MinSleep = minSleep
-				}
-				if attr.ExpirationDate != nil {
-					expTime, err := utils.ParseTimeDetectLayout(*attr.ExpirationDate,
-						api.Config.GeneralCfg().DefaultTimezone)
-					if err != nil {
-						return 0, err
-					}
-					at.ExpirationDate = expTime
-				}
-				if attr.ActivationDate != nil {
-					actTime, err := utils.ParseTimeDetectLayout(*attr.ActivationDate,
-						api.Config.GeneralCfg().DefaultTimezone)
-					if err != nil {
-						return 0, err
-					}
-					at.ActivationDate = actTime
-				}
-				at.Balance = &engine.BalanceFilter{}
-				if attr.BalanceID != nil {
-					at.Balance.ID = attr.BalanceID
-				}
-				if attr.BalanceType != nil {
-					at.Balance.Type = attr.BalanceType
-				}
-				if attr.BalanceDestinationIds != nil {
-					at.Balance.DestinationIDs = utils.StringMapPointer(utils.NewStringMap(*attr.BalanceDestinationIds...))
-				}
-				if attr.BalanceWeight != nil {
-					at.Balance.Weight = attr.BalanceWeight
-				}
-				if attr.BalanceExpirationDate != nil {
-					balanceExpTime, err := utils.ParseTimeDetectLayout(*attr.BalanceExpirationDate,
-						api.Config.GeneralCfg().DefaultTimezone)
-					if err != nil {
-						return 0, err
-					}
-					at.Balance.ExpirationDate = &balanceExpTime
-				}
-				if attr.BalanceTimingTags != nil {
-					at.Balance.TimingIDs = utils.StringMapPointer(utils.NewStringMap(*attr.BalanceTimingTags...))
-				}
-				if attr.BalanceRatingSubject != nil {
-					at.Balance.RatingSubject = attr.BalanceRatingSubject
-				}
-				if attr.BalanceCategories != nil {
-					at.Balance.Categories = utils.StringMapPointer(utils.NewStringMap(*attr.BalanceCategories...))
-				}
-				if attr.BalanceSharedGroups != nil {
-					at.Balance.SharedGroups = utils.StringMapPointer(utils.NewStringMap(*attr.BalanceSharedGroups...))
-				}
-				if attr.BalanceBlocker != nil {
-					at.Balance.Blocker = attr.BalanceBlocker
-				}
-				if attr.BalanceDisabled != nil {
-					at.Balance.Disabled = attr.BalanceDisabled
-				}
-				if attr.MinQueuedItems != nil {
-					at.MinQueuedItems = *attr.MinQueuedItems
-				}
-				if attr.ActionsID != nil {
-					at.ActionsID = *attr.ActionsID
-				}
+			if updated, err := attr.UpdateActionTrigger(at,
+				api.Config.GeneralCfg().DefaultTimezone); err != nil {
+				return 0, err
+			} else if updated && !foundOne {
+				foundOne = true
 			}
-
+		}
+		if !foundOne { // Did not find one to update, create a new AT
+			at := new(engine.ActionTrigger)
+			if updated, err := attr.UpdateActionTrigger(at,
+				api.Config.GeneralCfg().DefaultTimezone); err != nil {
+				return 0, err
+			} else if updated { // Adding a new AT
+				account.ActionTriggers = append(account.ActionTriggers, at)
+			}
 		}
 		account.ExecuteActionTriggers(nil)
 		return 0, api.DataManager.SetAccount(account)
