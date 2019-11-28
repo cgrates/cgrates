@@ -303,7 +303,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		if !cfg.statsCfg.Enabled {
 			for _, connCfg := range cfg.ralsCfg.StatSConns {
 				if connCfg.Address == utils.MetaInternal {
-					return fmt.Errorf("%s not enabled but requested by %s component.",
+					return fmt.Errorf("<%s> not enabled but requested by <%s> component.",
 						utils.StatS, utils.RALService)
 				}
 			}
@@ -311,7 +311,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		if !cfg.thresholdSCfg.Enabled {
 			for _, connCfg := range cfg.ralsCfg.ThresholdSConns {
 				if connCfg.Address == utils.MetaInternal {
-					return fmt.Errorf("%s not enabled but requested by %s component.",
+					return fmt.Errorf("<%s> not enabled but requested by <%s> component.",
 						utils.ThresholdS, utils.RALService)
 				}
 			}
@@ -322,40 +322,40 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		if !cfg.chargerSCfg.Enabled {
 			for _, conn := range cfg.cdrsCfg.ChargerSConns {
 				if conn.Address == utils.MetaInternal {
-					return errors.New("ChargerS not enabled but requested by CDRS component.")
+					return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.Chargers, utils.CDRs)
 				}
 			}
 		}
 		if !cfg.ralsCfg.Enabled {
 			for _, cdrsRaterConn := range cfg.cdrsCfg.RaterConns {
 				if cdrsRaterConn.Address == utils.MetaInternal {
-					return errors.New("RALs not enabled but requested by CDRS component.")
+					return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.RALService, utils.CDRs)
 				}
 			}
 		}
 		if !cfg.attributeSCfg.Enabled {
 			for _, connCfg := range cfg.cdrsCfg.AttributeSConns {
 				if connCfg.Address == utils.MetaInternal {
-					return errors.New("AttributeS not enabled but requested by CDRS component.")
+					return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.AttributeS, utils.CDRs)
 				}
 			}
 		}
 		if !cfg.statsCfg.Enabled {
 			for _, connCfg := range cfg.cdrsCfg.StatSConns {
 				if connCfg.Address == utils.MetaInternal {
-					return errors.New("StatS not enabled but requested by CDRS component.")
+					return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.StatService, utils.CDRs)
 				}
 			}
 		}
 		for _, cdrePrfl := range cfg.cdrsCfg.OnlineCDRExports {
 			if _, hasIt := cfg.CdreProfiles[cdrePrfl]; !hasIt {
-				return fmt.Errorf("<CDRS> Cannot find CDR export template with ID: <%s>", cdrePrfl)
+				return fmt.Errorf("<%s> Cannot find CDR export template with ID: <%s>", utils.CDRs, cdrePrfl)
 			}
 		}
 		if !cfg.thresholdSCfg.Enabled {
 			for _, connCfg := range cfg.cdrsCfg.ThresholdSConns {
 				if connCfg.Address == utils.MetaInternal {
-					return errors.New("ThresholdS not enabled but requested by CDRS component.")
+					return fmt.Errorf("%s not enabled but requested by %s component.", utils.ThresholdS, utils.CDRs)
 				}
 			}
 		}
@@ -367,17 +367,17 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				continue
 			}
 			if len(cdrcInst.CdrsConns) == 0 {
-				return fmt.Errorf("<CDRC> Instance: %s, CdrC enabled but no CDRS defined!", cdrcInst.ID)
+				return fmt.Errorf("<%s> Instance: %s, %s enabled but no %s defined!", utils.CDRC, cdrcInst.ID, utils.CDRC, utils.CDRs)
 			}
 			if !cfg.cdrsCfg.Enabled && !cfg.dispatcherSCfg.Enabled {
 				for _, conn := range cdrcInst.CdrsConns {
 					if conn.Address == utils.MetaInternal {
-						return errors.New("CDRS not enabled but referenced from CDRC")
+						return fmt.Errorf("<%s> not enabled but referenced from <%s>", utils.CDRs, utils.CDRC)
 					}
 				}
 			}
 			if len(cdrcInst.ContentFields) == 0 {
-				return errors.New("CdrC enabled but no fields to be processed defined!")
+				return fmt.Errorf("<%s> enabled but no fields to be processed defined!", utils.CDRC)
 			}
 		}
 	}
