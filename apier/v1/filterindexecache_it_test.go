@@ -158,12 +158,12 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 			ID:     "TestFilter",
 			Rules: []*engine.FilterRule{
 				{
-					FieldName: utils.DynamicDataPrefix + utils.Account,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 					Type:      "*string",
 					Values:    []string{"1001"},
 				},
 				{
-					FieldName: utils.DynamicDataPrefix + utils.EventType,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.EventType,
 					Type:      "*string",
 					Values:    []string{utils.BalanceUpdate},
 				},
@@ -252,12 +252,12 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 			ID:     "TestFilter2",
 			Rules: []*engine.FilterRule{
 				{
-					FieldName: utils.DynamicDataPrefix + utils.Account,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 					Type:      "*string",
 					Values:    []string{"1002"},
 				},
 				{
-					FieldName: utils.DynamicDataPrefix + utils.EventType,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.EventType,
 					Type:      "*string",
 					Values:    []string{utils.AccountUpdate},
 				},
@@ -332,12 +332,12 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 			ID:     "TestFilter3",
 			Rules: []*engine.FilterRule{
 				{
-					FieldName: utils.DynamicDataPrefix + utils.Account,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 					Type:      "*string",
 					Values:    []string{"1003"},
 				},
 				{
-					FieldName: utils.DynamicDataPrefix + utils.EventType,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.EventType,
 					Type:      "*string",
 					Values:    []string{utils.BalanceUpdate},
 				},
@@ -495,12 +495,12 @@ func testV1FIdxCaSetStatQueueProfile(t *testing.T) {
 			ID:     "FLTR_1",
 			Rules: []*engine.FilterRule{
 				{
-					FieldName: utils.DynamicDataPrefix + utils.Account,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 					Type:      "*string",
 					Values:    []string{"1001"},
 				},
 				{
-					FieldName: utils.DynamicDataPrefix + utils.EventType,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.EventType,
 					Type:      "*string",
 					Values:    []string{utils.AccountUpdate},
 				},
@@ -649,12 +649,12 @@ func testV1FIdxCaUpdateStatQueueProfile(t *testing.T) {
 			ID:     "FLTR_2",
 			Rules: []*engine.FilterRule{
 				{
-					FieldName: utils.DynamicDataPrefix + utils.Account,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 					Type:      "*string",
 					Values:    []string{"1003"},
 				},
 				{
-					FieldName: utils.DynamicDataPrefix + utils.EventType,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.EventType,
 					Type:      "*string",
 					Values:    []string{utils.BalanceUpdate},
 				},
@@ -724,12 +724,12 @@ func testV1FIdxCaUpdateStatQueueProfileFromTP(t *testing.T) {
 			ID:     "FLTR_3",
 			Rules: []*engine.FilterRule{
 				{
-					FieldName: utils.DynamicDataPrefix + utils.Account,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 					Type:      "*string",
 					Values:    []string{"1003"},
 				},
 				{
-					FieldName: utils.DynamicDataPrefix + utils.EventType,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.EventType,
 					Type:      "*string",
 					Values:    []string{utils.AccountUpdate},
 				},
@@ -885,12 +885,12 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 			ID:     "TestFilter",
 			Rules: []*engine.FilterRule{
 				{
-					FieldName: utils.DynamicDataPrefix + utils.Account,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 					Type:      "*string",
 					Values:    []string{"1009"},
 				},
 				{
-					FieldName: utils.DynamicDataPrefix + utils.Destination,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
 					Type:      "*string",
 					Values:    []string{"+491511231234"},
 				},
@@ -978,12 +978,12 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 			ID:     "TestFilter2",
 			Rules: []*engine.FilterRule{
 				{
-					FieldName: utils.DynamicDataPrefix + utils.Account,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 					Type:      "*string",
 					Values:    []string{"2009"},
 				},
 				{
-					FieldName: utils.DynamicDataPrefix + utils.Destination,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
 					Type:      "*string",
 					Values:    []string{"+492511231234"},
 				},
@@ -1051,12 +1051,12 @@ func testV1FIdxCaUpdateAttributeProfileFromTP(t *testing.T) {
 			ID:     "TestFilter3",
 			Rules: []*engine.FilterRule{
 				{
-					FieldName: utils.DynamicDataPrefix + utils.Account,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 					Type:      "*string",
 					Values:    []string{"3009"},
 				},
 				{
-					FieldName: utils.DynamicDataPrefix + utils.Destination,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
 					Type:      "*string",
 					Values:    []string{"+492511231234"},
 				},
@@ -1204,17 +1204,17 @@ func testV1FIdxCaSetResourceProfile(t *testing.T) {
 			ID:     "FLTR_RES_RCFG1",
 			Rules: []*engine.FilterRule{
 				{
-					FieldName: utils.DynamicDataPrefix + utils.Account,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 					Type:      "*string",
 					Values:    []string{"1001"},
 				},
 				{
-					FieldName: utils.DynamicDataPrefix + utils.Subject,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Subject,
 					Type:      "*string",
 					Values:    []string{"1002"},
 				},
 				{
-					FieldName: utils.DynamicDataPrefix + utils.Destination,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
 					Type:      "*string",
 					Values:    []string{"1001"},
 				},
@@ -1333,17 +1333,17 @@ func testV1FIdxCaUpdateResourceProfile(t *testing.T) {
 			ID:     "FLTR_RES_RCFG2",
 			Rules: []*engine.FilterRule{
 				{
-					FieldName: utils.DynamicDataPrefix + utils.Account,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 					Type:      "*string",
 					Values:    []string{"2002"},
 				},
 				{
-					FieldName: utils.DynamicDataPrefix + utils.Subject,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Subject,
 					Type:      "*string",
 					Values:    []string{"2001"},
 				},
 				{
-					FieldName: utils.DynamicDataPrefix + utils.Destination,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
 					Type:      "*string",
 					Values:    []string{"2002"},
 				},
@@ -1409,17 +1409,17 @@ func testV1FIdxCaUpdateResourceProfileFromTP(t *testing.T) {
 			ID:     "FLTR_RES_RCFG3",
 			Rules: []*engine.FilterRule{
 				{
-					FieldName: utils.DynamicDataPrefix + utils.Account,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 					Type:      "*string",
 					Values:    []string{"1002"},
 				},
 				{
-					FieldName: utils.DynamicDataPrefix + utils.Subject,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Subject,
 					Type:      "*string",
 					Values:    []string{"1001"},
 				},
 				{
-					FieldName: utils.DynamicDataPrefix + utils.Destination,
+					FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
 					Type:      "*string",
 					Values:    []string{"1002"},
 				},

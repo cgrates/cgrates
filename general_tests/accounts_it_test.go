@@ -250,7 +250,7 @@ func testV1AccSendToThreshold(t *testing.T) {
 	tPrfl := &engine.ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "THD_AccDisableAndLog",
-		FilterIDs: []string{"*string:~Account:testAccThreshold"},
+		FilterIDs: []string{"*string:~*req.Account:testAccThreshold"},
 		MaxHits:   -1,
 		MinSleep:  time.Duration(1 * time.Second),
 		Weight:    20.0,

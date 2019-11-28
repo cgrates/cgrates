@@ -617,27 +617,31 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	passEvent := map[string]interface{}{
 		"Account": "1007",
 	}
+	fEv := config.NewNavigableMap(nil)
+	fEv.Set([]string{utils.MetaReq}, failEvent, false, false)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*string:~Account:1007:error"}, config.NewNavigableMap(failEvent)); err != nil {
+		[]string{"*string:~*req.Account:1007:error"}, fEv); err != nil {
 		t.Error(err)
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*string:~Account:1007"}, config.NewNavigableMap(failEvent)); err != nil {
+		[]string{"*string:~*req.Account:1007"}, fEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
+	pEv := config.NewNavigableMap(nil)
+	pEv.Set([]string{utils.MetaReq}, passEvent, false, false)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*string:~Account:1007"}, config.NewNavigableMap(passEvent)); err != nil {
+		[]string{"*string:~*req.Account:1007"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 	//not
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*notstring:~Account:1007"}, config.NewNavigableMap(passEvent)); err != nil {
+		[]string{"*notstring:~*req.Account:1007"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
@@ -648,33 +652,37 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	passEvent = map[string]interface{}{
 		"Account": "1007",
 	}
+	fEv = config.NewNavigableMap(nil)
+	fEv.Set([]string{utils.MetaReq}, failEvent, false, false)
+	pEv = config.NewNavigableMap(nil)
+	pEv.Set([]string{utils.MetaReq}, passEvent, false, false)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*prefix:~Account:10"}, config.NewNavigableMap(failEvent)); err != nil {
+		[]string{"*prefix:~*req.Account:10"}, fEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*prefix:~Account:10"}, config.NewNavigableMap(passEvent)); err != nil {
+		[]string{"*prefix:~*req.Account:10"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*suffix:~Account:07"}, config.NewNavigableMap(failEvent)); err != nil {
+		[]string{"*suffix:~*req.Account:07"}, fEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*suffix:~Account:07"}, config.NewNavigableMap(passEvent)); err != nil {
+		[]string{"*suffix:~*req.Account:07"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 	//not
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*notsuffix:~Account:07"}, config.NewNavigableMap(passEvent)); err != nil {
+		[]string{"*notsuffix:~*req.Account:07"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
@@ -685,21 +693,25 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	passEvent = map[string]interface{}{
 		"Tenant": "cgrates.org",
 	}
+	fEv = config.NewNavigableMap(nil)
+	fEv.Set([]string{utils.MetaReq}, failEvent, false, false)
+	pEv = config.NewNavigableMap(nil)
+	pEv.Set([]string{utils.MetaReq}, passEvent, false, false)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~Tenant(~^cgr.*\\.org$)"}, config.NewNavigableMap(failEvent)); err != nil {
+		[]string{"*rsr::~Tenant(~^cgr.*\\.org$)"}, fEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~Tenant(~^cgr.*\\.org$)"}, config.NewNavigableMap(passEvent)); err != nil {
+		[]string{"*rsr::~*req.Tenant(~^cgr.*\\.org$)"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
 	}
 	//not
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*notrsr::~Tenant(~^cgr.*\\.org$)"}, config.NewNavigableMap(passEvent)); err != nil {
+		[]string{"*notrsr::~*req.Tenant(~^cgr.*\\.org$)"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
@@ -712,14 +724,18 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	passEvent = map[string]interface{}{
 		utils.Destination: "+4986517174963",
 	}
+	fEv = config.NewNavigableMap(nil)
+	fEv.Set([]string{utils.MetaReq}, failEvent, false, false)
+	pEv = config.NewNavigableMap(nil)
+	pEv.Set([]string{utils.MetaReq}, passEvent, false, false)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*destinations:~Destination:EU"}, config.NewNavigableMap(failEvent)); err != nil {
+		[]string{"*destinations:~*req.Destination:EU"}, fEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*destinations:~Destination:EU_LANDLINE"}, config.NewNavigableMap(passEvent)); err != nil {
+		[]string{"*destinations:~*req.Destination:EU_LANDLINE"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
@@ -730,14 +746,18 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	passEvent = map[string]interface{}{
 		utils.Weight: 20,
 	}
+	fEv = config.NewNavigableMap(nil)
+	fEv.Set([]string{utils.MetaReq}, failEvent, false, false)
+	pEv = config.NewNavigableMap(nil)
+	pEv.Set([]string{utils.MetaReq}, passEvent, false, false)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*gte:~Weight:20"}, config.NewNavigableMap(failEvent)); err != nil {
+		[]string{"*gte:~*req.Weight:20"}, fEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*gte:~Weight:10"}, config.NewNavigableMap(passEvent)); err != nil {
+		[]string{"*gte:~*req.Weight:10"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
@@ -763,28 +783,32 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 		"EmptyPtrSlice": &[]string{},
 		"EmptyPtrMap":   &map[string]string{},
 	}
+	fEv = config.NewNavigableMap(nil)
+	fEv.Set([]string{utils.MetaReq}, failEvent, false, false)
+	pEv = config.NewNavigableMap(nil)
+	pEv.Set([]string{utils.MetaReq}, passEvent, false, false)
 	for key := range failEvent {
-		if pass, err := filterS.Pass("cgrates.org", []string{"*empty:~" + key + ":"},
-			config.NewNavigableMap(failEvent)); err != nil {
+		if pass, err := filterS.Pass("cgrates.org", []string{"*empty:~*req." + key + ":"},
+			fEv); err != nil {
 			t.Errorf(err.Error())
 		} else if pass {
 			t.Errorf("For %s expecting: %+v, received: %+v", key, false, pass)
 		}
-		if pass, err := filterS.Pass("cgrates.org", []string{"*empty:~" + key + ":"},
-			config.NewNavigableMap(passEvent)); err != nil {
+		if pass, err := filterS.Pass("cgrates.org", []string{"*empty:~*req." + key + ":"},
+			pEv); err != nil {
 			t.Errorf(err.Error())
 		} else if !pass {
 			t.Errorf("For %s expecting: %+v, received: %+v", key, true, pass)
 		}
 	}
-	if pass, err := filterS.Pass("cgrates.org", []string{"*exists:~NewKey:"},
-		config.NewNavigableMap(failEvent)); err != nil {
+	if pass, err := filterS.Pass("cgrates.org", []string{"*exists:~*req.NewKey:"},
+		fEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("For NewKey expecting: %+v, received: %+v", false, pass)
 	}
-	if pass, err := filterS.Pass("cgrates.org", []string{"*notexists:~NewKey:"},
-		config.NewNavigableMap(failEvent)); err != nil {
+	if pass, err := filterS.Pass("cgrates.org", []string{"*notexists:~*req.NewKey:"},
+		fEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("For NewKey expecting: %+v, received: %+v", true, pass)
@@ -811,14 +835,18 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 		utils.Destination: "+4986517174963",
 		utils.Weight:      20,
 	}
+	pEv1 := config.NewNavigableMap(nil)
+	pEv1.Set([]string{utils.MetaReq}, passEvent1, false, false)
+	pEv2 := config.NewNavigableMap(nil)
+	pEv2.Set([]string{utils.MetaReq}, passEvent2, false, false)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{}, config.NewNavigableMap(passEvent1)); err != nil {
+		[]string{}, pEv1); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
 	}
 	if pass, err := filterS.Pass("itsyscom.com",
-		[]string{}, config.NewNavigableMap(passEvent2)); err != nil {
+		[]string{}, pEv2); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
@@ -826,8 +854,10 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	ev := map[string]interface{}{
 		"Test": "MultipleCharacter",
 	}
+	pEv := config.NewNavigableMap(nil)
+	pEv.Set([]string{utils.MetaReq}, ev, false, false)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~Test(~^\\w{30,})"}, config.NewNavigableMap(ev)); err != nil {
+		[]string{"*rsr::~*req.Test(~^\\w{30,})"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
@@ -835,8 +865,10 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	ev = map[string]interface{}{
 		"Test": "MultipleCharacter123456789MoreThan30Character",
 	}
+	pEv = config.NewNavigableMap(nil)
+	pEv.Set([]string{utils.MetaReq}, ev, false, false)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~Test(~^\\w{30,})"}, config.NewNavigableMap(ev)); err != nil {
+		[]string{"*rsr::~*req.Test(~^\\w{30,})"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
@@ -847,8 +879,10 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 			"Test2": "MultipleCharacter",
 		},
 	}
+	pEv = config.NewNavigableMap(nil)
+	pEv.Set([]string{utils.MetaReq}, ev, false, false)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~Test.Test2(~^\\w{30,})"}, config.NewNavigableMap(ev)); err != nil {
+		[]string{"*rsr::~*req.Test.Test2(~^\\w{30,})"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
@@ -858,8 +892,10 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 			"Test2": "MultipleCharacter123456789MoreThan30Character",
 		},
 	}
+	pEv = config.NewNavigableMap(nil)
+	pEv.Set([]string{utils.MetaReq}, ev, false, false)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~Test.Test2(~^\\w{30,})"}, config.NewNavigableMap(ev)); err != nil {
+		[]string{"*rsr::~*req.Test.Test2(~^\\w{30,})"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", false, pass)
@@ -872,9 +908,12 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 		utils.SetupTime:   time.Date(2017, 12, 1, 14, 25, 0, 0, time.UTC),
 		utils.Usage:       "1m20s",
 	}
+	pEv = config.NewNavigableMap(nil)
+	pEv.Set([]string{utils.MetaReq}, ev, false, false)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*string:~Account:1003", "*prefix:~Destination:10", "*suffix:~Subject:03", "*rsr::~Destination(1002)"},
-		config.NewNavigableMap(ev)); err != nil {
+		[]string{"*string:~*req.Account:1003", "*prefix:~*req.Destination:10",
+			"*suffix:~*req.Subject:03", "*rsr::~*req.Destination(1002)"},
+		pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: %+v, received: %+v", true, pass)
@@ -893,8 +932,10 @@ func TestPassFilterMaxCost(t *testing.T) {
 	passEvent1 := map[string]interface{}{
 		"MaxUsage": time.Duration(-1),
 	}
+	pEv := config.NewNavigableMap(nil)
+	pEv.Set([]string{utils.MetaReq}, passEvent1, false, false)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~MaxUsage{*duration_nanoseconds}(>0)"}, config.NewNavigableMap(passEvent1)); err != nil {
+		[]string{"*rsr::~*req.MaxUsage{*duration_nanoseconds}(>0)"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: false , received: %+v", pass)
@@ -903,8 +944,10 @@ func TestPassFilterMaxCost(t *testing.T) {
 	passEvent2 := map[string]interface{}{
 		"MaxUsage": time.Duration(0),
 	}
+	pEv = config.NewNavigableMap(nil)
+	pEv.Set([]string{utils.MetaReq}, passEvent2, false, false)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~MaxUsage{*duration_nanoseconds}(>0)"}, config.NewNavigableMap(passEvent2)); err != nil {
+		[]string{"*rsr::~*req.MaxUsage{*duration_nanoseconds}(>0)"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: false, received: %+v", pass)
@@ -913,14 +956,16 @@ func TestPassFilterMaxCost(t *testing.T) {
 	passEvent3 := map[string]interface{}{
 		"MaxUsage": time.Duration(123),
 	}
+	pEv = config.NewNavigableMap(nil)
+	pEv.Set([]string{utils.MetaReq}, passEvent3, false, false)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~MaxUsage{*duration_nanoseconds}(>0)"}, config.NewNavigableMap(passEvent3)); err != nil {
+		[]string{"*rsr::~*req.MaxUsage{*duration_nanoseconds}(>0)"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: true, received: %+v", pass)
 	}
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*gt:~MaxUsage:0"}, config.NewNavigableMap(passEvent3)); err != nil {
+		[]string{"*gt:~*req.MaxUsage:0"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: true, received: %+v", pass)
@@ -939,8 +984,10 @@ func TestPassFilterMissingField(t *testing.T) {
 	passEvent1 := map[string]interface{}{
 		"test": "call",
 	}
+	pEv := config.NewNavigableMap(nil)
+	pEv.Set([]string{utils.MetaReq}, passEvent1, false, false)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~Category(^$)"}, config.NewNavigableMap(passEvent1)); err != nil {
+		[]string{"*rsr::~*req.Category(^$)"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: true , received: %+v", pass)
@@ -949,8 +996,10 @@ func TestPassFilterMissingField(t *testing.T) {
 	passEvent2 := map[string]interface{}{
 		"Category": "",
 	}
+	pEv = config.NewNavigableMap(nil)
+	pEv.Set([]string{utils.MetaReq}, passEvent2, false, false)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~Category(^$)"}, config.NewNavigableMap(passEvent2)); err != nil {
+		[]string{"*rsr::~Category(^$)"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if !pass {
 		t.Errorf("Expecting: true , received: %+v", pass)
@@ -959,8 +1008,10 @@ func TestPassFilterMissingField(t *testing.T) {
 	passEvent3 := map[string]interface{}{
 		"Category": "call",
 	}
+	pEv = config.NewNavigableMap(nil)
+	pEv.Set([]string{utils.MetaReq}, passEvent3, false, false)
 	if pass, err := filterS.Pass("cgrates.org",
-		[]string{"*rsr::~Category(^$)"}, config.NewNavigableMap(passEvent3)); err != nil {
+		[]string{"*rsr::~*req.Category(^$)"}, pEv); err != nil {
 		t.Errorf(err.Error())
 	} else if pass {
 		t.Errorf("Expecting: false , received: %+v", pass)

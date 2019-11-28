@@ -105,12 +105,12 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		Contexts:  []string{"con1", "con2", "con3"},
-		FilterIDs: []string{"*string:~Account:1001"},
+		FilterIDs: []string{"*string:~*req.Account:1001"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC)},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FilterIDs: []string{"*string:~Field1:Initial"},
+				FilterIDs: []string{"*string:~*req.Field1:Initial"},
 				FieldName: "Field1",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("Sub1", true, utils.INFIELD_SEP),
@@ -288,7 +288,7 @@ func TestLoaderProcessResource(t *testing.T) {
 	eResPrf1 := &engine.ResourceProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ResGroup21",
-		FilterIDs: []string{"*string:~Account:1001"},
+		FilterIDs: []string{"*string:~*req.Account:1001"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 		},
@@ -303,7 +303,7 @@ func TestLoaderProcessResource(t *testing.T) {
 	eResPrf2 := &engine.ResourceProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ResGroup22",
-		FilterIDs: []string{"*string:~Account:dan"},
+		FilterIDs: []string{"*string:~*req.Account:dan"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 		},
@@ -389,18 +389,18 @@ func TestLoaderProcessFilters(t *testing.T) {
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
 				Type:      utils.MetaString,
-				FieldName: utils.Account,
+				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
 				Values:    []string{"1001", "1002"},
 			},
 			&engine.FilterRule{
 				Type:      "*prefix",
-				FieldName: utils.Destination,
+				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
 				Values:    []string{"10", "20"},
 			},
 			&engine.FilterRule{
 				Type:      "*rsr",
 				FieldName: "",
-				Values:    []string{"Subject(~^1.*1$)", "Destination(1002)"},
+				Values:    []string{"~*req.Subject(~^1.*1$)", "~*req.Destination(1002)"},
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
@@ -417,7 +417,7 @@ func TestLoaderProcessFilters(t *testing.T) {
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
 				Type:      "*destinations",
-				FieldName: utils.Destination,
+				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
 				Values:    []string{"DST_DE"},
 			},
 		},
@@ -520,7 +520,7 @@ func TestLoaderProcessThresholds(t *testing.T) {
 	eTh1 := &engine.ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "Threshold1",
-		FilterIDs: []string{"*string:~Account:1001", "*string:~RunID:*default"},
+		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.RunID:*default"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC)},
 		MaxHits:   12,
@@ -627,7 +627,7 @@ func TestLoaderProcessStats(t *testing.T) {
 	eSt1 := &engine.StatQueueProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TestStats",
-		FilterIDs: []string{"*string:~Account:1001"},
+		FilterIDs: []string{"*string:~*req.Account:1001"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 00, 0, 0, time.UTC),
 		},
@@ -761,7 +761,7 @@ func TestLoaderProcessSuppliers(t *testing.T) {
 	eSp3 := &engine.SupplierProfile{
 		Tenant:    "cgrates.org",
 		ID:        "SPP_1",
-		FilterIDs: []string{"*string:~Account:dan"},
+		FilterIDs: []string{"*string:~*req.Account:dan"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 		},
@@ -851,7 +851,7 @@ func TestLoaderProcessChargers(t *testing.T) {
 	eCharger1 := &engine.ChargerProfile{
 		Tenant:    "cgrates.org",
 		ID:        "Charger1",
-		FilterIDs: []string{"*string:~Account:1001"},
+		FilterIDs: []string{"*string:~*req.Account:1001"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 00, 0, 0, time.UTC),
 		},
@@ -984,7 +984,7 @@ func TestLoaderProcessDispatches(t *testing.T) {
 		Tenant:     "cgrates.org",
 		ID:         "D1",
 		Subsystems: []string{"*any"},
-		FilterIDs:  []string{"*string:~Account:1001"},
+		FilterIDs:  []string{"*string:~*req.Account:1001"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 00, 0, 0, time.UTC),
 		},
@@ -994,14 +994,14 @@ func TestLoaderProcessDispatches(t *testing.T) {
 		Hosts: engine.DispatcherHostProfiles{
 			&engine.DispatcherHostProfile{
 				ID:        "C1",
-				FilterIDs: []string{"*gt:~Usage:10"},
+				FilterIDs: []string{"*gt:~*req.Usage:10"},
 				Weight:    10,
 				Params:    map[string]interface{}{"0": "192.168.56.203"},
 				Blocker:   false,
 			},
 			&engine.DispatcherHostProfile{
 				ID:        "C2",
-				FilterIDs: []string{"*lt:~Usage:10"},
+				FilterIDs: []string{"*lt:~*req.Usage:10"},
 				Weight:    10,
 				Params:    map[string]interface{}{"0": "192.168.56.204"},
 				Blocker:   false,
@@ -1145,12 +1145,12 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		Contexts:  []string{"con1", "con2", "con3"},
-		FilterIDs: []string{"*string:~Account:1001"},
+		FilterIDs: []string{"*string:~*req.Account:1001"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC)},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FilterIDs: []string{"*string:~Field1:Initial"},
+				FilterIDs: []string{"*string:~*req.Field1:Initial"},
 				FieldName: "Field1",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("Sub1", true, utils.INFIELD_SEP),

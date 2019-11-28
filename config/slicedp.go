@@ -22,20 +22,23 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+	"strings"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewSliceDP constructs a DataProvider
-func NewSliceDP(record []string) (dP DataProvider) {
-	dP = &SliceDP{req: record, cache: NewNavigableMap(nil)}
+func NewSliceDP(record []string, pathPrfx string) (dP DataProvider) {
+	dP = &SliceDP{req: record, cache: NewNavigableMap(nil), pathPrfx: pathPrfx}
 	return
 }
 
 // SliceDP implements engine.DataProvider so we can pass it to filters
 type SliceDP struct {
-	req   []string
-	cache *NavigableMap
+	req      []string
+	cache    *NavigableMap
+	pathPrfx string // if this comes in path it will be ignored
+	// pathPrfx should be reviewed once the cdrc is removed
 }
 
 // String is part of engine.DataProvider interface
@@ -46,15 +49,22 @@ func (cP *SliceDP) String() string {
 
 // FieldAsInterface is part of engine.DataProvider interface
 func (cP *SliceDP) FieldAsInterface(fldPath []string) (data interface{}, err error) {
-	if len(fldPath) != 1 {
-		return nil, utils.ErrNotFound
+	if len(fldPath) == 0 {
+		return
+	}
+	idx := fldPath[0]
+	if len(fldPath) == 2 {
+		idx = fldPath[1]
+	}
+	if cP.pathPrfx != utils.EmptyString && (fldPath[0] != cP.pathPrfx || len(fldPath) < 2) {
+		return "", utils.ErrPrefixNotFound(strings.Join(fldPath, utils.NestingSep))
 	}
 	if data, err = cP.cache.FieldAsInterface(fldPath); err == nil ||
 		err != utils.ErrNotFound { // item found in cache
 		return
 	}
 	err = nil // cancel previous err
-	if cfgFieldIdx, err := strconv.Atoi(fldPath[0]); err != nil {
+	if cfgFieldIdx, err := strconv.Atoi(idx); err != nil {
 		return nil, fmt.Errorf("Ignoring record: %v with error : %+v", cP.req, err)
 	} else if len(cP.req) <= cfgFieldIdx {
 		return nil, utils.ErrNotFound

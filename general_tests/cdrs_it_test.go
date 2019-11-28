@@ -469,7 +469,7 @@ func testV2CDRsSetStats(t *testing.T) {
 		StatQueueProfile: &engine.StatQueueProfile{
 			Tenant:    "cgrates.org",
 			ID:        "STS_PoccessCDR",
-			FilterIDs: []string{"*string:~OriginID:testV2CDRsProcessCDR5"},
+			FilterIDs: []string{"*string:~*req.OriginID:testV2CDRsProcessCDR5"},
 			// QueueLength: 10,
 			Metrics: []*engine.MetricWithFilters{
 				&engine.MetricWithFilters{
@@ -528,7 +528,7 @@ func testV2CDRsSetThresholdProfile(t *testing.T) {
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_PoccessCDR",
-			FilterIDs: []string{"*string:~OriginID:testV2CDRsProcessCDR5"},
+			FilterIDs: []string{"*string:~*req.OriginID:testV2CDRsProcessCDR5"},
 			MaxHits:   -1,
 			Blocker:   false,
 			Weight:    20.0,

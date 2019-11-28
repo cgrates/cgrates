@@ -171,6 +171,8 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent,
 	if singleResult {
 		matchingSLP = make([]*SupplierProfile, 1)
 	}
+	evNm := config.NewNavigableMap(nil)
+	evNm.Set([]string{utils.MetaReq}, ev.Event, false, false)
 	for lpID := range sPrflIDs {
 		splPrfl, err := spS.dm.GetSupplierProfile(ev.Tenant, lpID, true, true, utils.NonTransactional)
 		if err != nil {
@@ -184,7 +186,7 @@ func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent,
 			continue
 		}
 		if pass, err := spS.filterS.Pass(ev.Tenant, splPrfl.FilterIDs,
-			config.NewNavigableMap(ev.Event)); err != nil {
+			evNm); err != nil {
 			return nil, err
 		} else if !pass {
 			continue

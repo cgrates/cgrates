@@ -37,7 +37,7 @@ func TestAccountNewObjectDPFieldAsInterface(t *testing.T) {
 			},
 		},
 	}
-	accDP := config.NewObjectDP(acc)
+	accDP := config.NewObjectDP(acc, nil)
 	if data, err := accDP.FieldAsInterface([]string{"BalanceMap", "*monetary[0]", "Value"}); err != nil {
 		t.Error(err)
 	} else if data != 20. {
@@ -65,7 +65,7 @@ func TestAccountNewObjectDPFieldAsInterfaceFromCache(t *testing.T) {
 			},
 		},
 	}
-	accDP := config.NewObjectDP(acc)
+	accDP := config.NewObjectDP(acc, nil)
 
 	if data, err := accDP.FieldAsInterface([]string{"BalanceMap", "*monetary[0]", "Value"}); err != nil {
 		t.Error(err)

@@ -272,7 +272,7 @@ func testV1FltrPupulateThreshold(t *testing.T) {
 	tPrfl := &engine.ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TH_Stats1",
-		FilterIDs: []string{"FLTR_TH_Stats1", "*string:~Account:1010"},
+		FilterIDs: []string{"FLTR_TH_Stats1", "*string:~*req.Account:1010"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -340,7 +340,7 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 	tPrfl := &engine.ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TH_Stats1",
-		FilterIDs: []string{"FLTR_TH_Stats1", "*string:~Account:1010"},
+		FilterIDs: []string{"FLTR_TH_Stats1", "*string:~*req.Account:1010"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -372,12 +372,8 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 func testV1FltrPopulateResources(t *testing.T) {
 	//create a resourceProfile
 	rlsConfig := &engine.ResourceProfile{
-		Tenant: "cgrates.org",
-		ID:     "ResTest",
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-		},
+		Tenant:            "cgrates.org",
+		ID:                "ResTest",
 		UsageTTL:          time.Duration(1) * time.Minute,
 		Limit:             10,
 		AllocationMessage: "MessageAllocation",
@@ -441,11 +437,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 	tPrfl := &engine.ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TH_ResTest",
-		FilterIDs: []string{"FLTR_TH_Resource", "*string:~Account:2020"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
+		FilterIDs: []string{"FLTR_TH_Resource", "*string:~*req.Account:2020"},
 		MaxHits:   -1,
 		MinSleep:  time.Duration(1 * time.Millisecond),
 		Weight:    10.0,
@@ -558,11 +550,7 @@ func testV1FltrAccounts(t *testing.T) {
 	tPrfl := &engine.ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "TH_Account",
-		FilterIDs: []string{"FLTR_TH_Accounts", "*string:~Account:1001"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-		},
+		FilterIDs: []string{"FLTR_TH_Accounts", "*string:~*req.Account:1001"},
 		MaxHits:   -1,
 		MinSleep:  time.Duration(1 * time.Millisecond),
 		Weight:    90.0,

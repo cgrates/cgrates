@@ -106,7 +106,7 @@ func testV1RsSetProfile(t *testing.T) {
 		ResourceProfile: &engine.ResourceProfile{
 			Tenant:    "cgrates.org",
 			ID:        "RES_GR_TEST",
-			FilterIDs: []string{"*string:~Account:1001"},
+			FilterIDs: []string{"*string:~*req.Account:1001"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),

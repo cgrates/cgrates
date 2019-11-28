@@ -153,12 +153,12 @@ func testLoaderCheckAttributes(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ALS1",
 		Contexts:  []string{"con1", "con2", "con3"},
-		FilterIDs: []string{"*string:~Account:1001"},
+		FilterIDs: []string{"*string:~*req.Account:1001"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC)},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FilterIDs: []string{"*string:~Field1:Initial"},
+				FilterIDs: []string{"*string:~*req.Field1:Initial"},
 				FieldName: "Field1",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("Sub1", true, utils.INFIELD_SEP),

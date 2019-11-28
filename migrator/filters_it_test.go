@@ -146,7 +146,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
 				Type:      utils.MetaPrefix,
-				FieldName: "~Account",
+				FieldName: "~*req.Account",
 				Values:    []string{"1001"},
 			},
 		},
@@ -171,11 +171,11 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		Tenant:             "cgrates.org",
 		ID:                 "ATTR_1",
 		Contexts:           []string{utils.META_ANY},
-		FilterIDs:          []string{"*string:~Account:1001", "FLTR_2"},
+		FilterIDs:          []string{"*string:~*req.Account:1001", "FLTR_2"},
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
 			{
-				FilterIDs: []string{"*string:~Account:1001"},
+				FilterIDs: []string{"*string:~*req.Account:1001"},
 				FieldName: "Account",
 				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 			},
@@ -233,8 +233,8 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expAttrProf), utils.ToJSON(resultattr))
 		}
 		expFltrIdx := map[string]utils.StringMap{
-			"*prefix:~Account:1001": utils.StringMap{"ATTR_1": true},
-			"*string:~Account:1001": utils.StringMap{"ATTR_1": true}}
+			"*prefix:~*req.Account:1001": utils.StringMap{"ATTR_1": true},
+			"*string:~*req.Account:1001": utils.StringMap{"ATTR_1": true}}
 
 		if fltridx, err := fltrMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix], utils.ConcatenatedKey(attrProf.Tenant, utils.META_ANY), utils.MetaString, nil); err != nil {
 			t.Error(err)

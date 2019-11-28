@@ -402,7 +402,7 @@ func testV1TSSetThresholdProfile(t *testing.T) {
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_Test",
-			FilterIDs: []string{"*string:~Account:1001"},
+			FilterIDs: []string{"*string:~*req.Account:1001"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),

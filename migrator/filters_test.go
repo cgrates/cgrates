@@ -30,7 +30,7 @@ func TestFiltersInlineMigrate(t *testing.T) {
 	data := []struct{ in, exp string }{
 		{
 			in:  "*string:Account:1002",
-			exp: "*string:~Account:1002",
+			exp: "*string:~*req.Account:1002",
 		},
 		{
 			in:  "*string:~Account:1002",
@@ -77,7 +77,7 @@ func TestFiltersMigrate(t *testing.T) {
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
 						Type:      utils.MetaString,
-						FieldName: "~Account",
+						FieldName: "~*req.Account",
 						Values:    []string{},
 					},
 				},

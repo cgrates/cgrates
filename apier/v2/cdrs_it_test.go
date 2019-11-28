@@ -397,7 +397,7 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 			Tenant:    "cgrates.com",
 			ID:        "ATTR_Tenant",
 			Contexts:  []string{utils.META_ANY},
-			FilterIDs: []string{"*string:~Tenant:cgrates.com"},
+			FilterIDs: []string{"*string:~*req.Tenant:cgrates.com"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},

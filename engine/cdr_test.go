@@ -670,7 +670,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 	}
 
 	cfgCdrFld = &config.FCTemplate{Tag: "destination", Type: utils.META_COMPOSED,
-		FieldId: utils.Destination, Value: prsr, Filters: []string{"*string:Tenant:itsyscom.com"}, Timezone: "UTC"}
+		FieldId: utils.Destination, Value: prsr, Filters: []string{"*string:~*req.Tenant:itsyscom.com"}, Timezone: "UTC"}
 	if rcrd, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, &FilterS{dm: dmForCDR, cfg: defaultCfg}); err != nil {
 		t.Error(err)
 	} else if len(rcrd) != 0 {
@@ -690,7 +690,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 
 	// Test filter
 	cfgCdrFld = &config.FCTemplate{Tag: "stop_time", Type: utils.MetaDateTime,
-		FieldId: "stop_time", Value: prsr, Filters: []string{"*string:Tenant:itsyscom.com"},
+		FieldId: "stop_time", Value: prsr, Filters: []string{"*string:~*req.Tenant:itsyscom.com"},
 		Layout: layout, Timezone: "UTC"}
 	if rcrd, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, &FilterS{dm: dmForCDR, cfg: defaultCfg}); err != nil {
 		t.Error(err)
