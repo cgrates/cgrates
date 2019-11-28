@@ -2052,28 +2052,4 @@ func TestCheckConfigSanity(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.CdrcProfiles = map[string][]*CdrcCfg{
-		"test": []*CdrcCfg{
-			&CdrcCfg{
-				Enabled: true,
-				CdrsConns: []*RemoteHost{
-					&RemoteHost{Address: utils.MetaInternal},
-				},
-				CdrFormat: utils.MetaFileCSV,
-				ContentFields: []*FCTemplate{
-					&FCTemplate{
-						Value: RSRParsers{
-							&RSRParser{
-								attrName: "test1",
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-	expected = "<CDR> fields must be indices in case of .csv files, have instead: test1"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
 }
