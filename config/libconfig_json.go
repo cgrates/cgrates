@@ -256,7 +256,7 @@ type FsConnJsonCfg struct {
 	Alias      *string
 }
 
-type RpcConnsJson struct {
+type RPCConnsJson struct {
 	Strategy *string
 	PoolSize *int
 	Conns    *[]*RemoteHostJson

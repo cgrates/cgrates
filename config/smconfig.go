@@ -25,68 +25,6 @@ import (
 )
 
 // Returns the first cached default value for a FreeSWITCHAgent connection
-func NewDfltRemoteHost() *RemoteHost {
-	if dfltRemoteHost == nil {
-		return new(RemoteHost) // No defaults, most probably we are building the defaults now
-	}
-	dfltVal := *dfltRemoteHost // Copy the value instead of it's pointer
-	return &dfltVal
-}
-
-type RpcConn struct {
-	Strategy string
-	PoolSize int
-	Conns    []*RemoteHost
-}
-
-func (rC *RpcConn) loadFromJsonCfg(jsnCfg *RpcConnsJson) (err error) {
-	if jsnCfg == nil {
-		return
-	}
-	if jsnCfg.Strategy != nil {
-		rC.Strategy = *jsnCfg.Strategy
-	}
-	if jsnCfg.PoolSize != nil {
-		rC.PoolSize = *jsnCfg.PoolSize
-	}
-	if jsnCfg.Conns != nil {
-		rC.Conns = make([]*RemoteHost, len(*jsnCfg.Conns))
-		for idx, jsnHaCfg := range *jsnCfg.Conns {
-			rC.Conns[idx] = NewDfltRemoteHost()
-			rC.Conns[idx].loadFromJsonCfg(jsnHaCfg)
-		}
-	}
-	return
-}
-
-// One connection to Rater
-type RemoteHost struct {
-	Address     string
-	Transport   string
-	Synchronous bool
-	TLS         bool
-}
-
-func (self *RemoteHost) loadFromJsonCfg(jsnCfg *RemoteHostJson) error {
-	if jsnCfg == nil {
-		return nil
-	}
-	if jsnCfg.Address != nil {
-		self.Address = *jsnCfg.Address
-	}
-	if jsnCfg.Transport != nil {
-		self.Transport = *jsnCfg.Transport
-	}
-	if jsnCfg.Synchronous != nil {
-		self.Synchronous = *jsnCfg.Synchronous
-	}
-	if jsnCfg.Tls != nil {
-		self.TLS = *jsnCfg.Tls
-	}
-	return nil
-}
-
-// Returns the first cached default value for a FreeSWITCHAgent connection
 func NewDfltFsConnConfig() *FsConnCfg {
 	if dfltFsConnConfig == nil {
 		return new(FsConnCfg) // No defaults, most probably we are building the defaults now

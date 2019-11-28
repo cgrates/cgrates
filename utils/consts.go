@@ -193,6 +193,7 @@ const (
 	DRYRUN                       = "dry_run"
 	META_COMBIMED                = "*combimed"
 	MetaInternal                 = "*internal"
+	MetaLocalHost                = "*localhost"
 	ZERO_RATING_SUBJECT_PREFIX   = "*zero"
 	OK                           = "OK"
 	MetaFileXML                  = "*file_xml"
