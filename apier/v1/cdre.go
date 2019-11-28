@@ -188,16 +188,9 @@ func (apier *ApierV1) ReloadCdreConfig(attrs AttrReloadConfig, reply *string) er
 
 // ArgExportCDRs are the arguments passed to ExportCDRs method
 type ArgExportCDRs struct {
-	ExportTemplate      *string // Exported fields template  <""|fld1,fld2|>
-	ExportFormat        *string
-	ExportPath          *string
-	Synchronous         *bool
-	Attempts            *int
-	FieldSeparator      *string
-	ExportID            *string // Optional exportid
-	ExportFileName      *string // If provided the output filename will be set to this
-	Verbose             bool    // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
-	utils.RPCCDRsFilter         // Inherit the CDR filter attributes
+	ExportArgs          map[string]interface{}
+	Verbose             bool // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
+	utils.RPCCDRsFilter      // Inherit the CDR filter attributes
 }
 
 // RplExportedCDRs contain the reply of the ExportCDRs API
@@ -215,54 +208,60 @@ func (api *ApierV1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err e
 	cdreReloadStruct := <-api.Config.ConfigReloads[utils.CDRE]                  // Read the content of the channel, locking it
 	defer func() { api.Config.ConfigReloads[utils.CDRE] <- cdreReloadStruct }() // Unlock reloads at exit
 	exportTemplate := api.Config.CdreProfiles[utils.META_DEFAULT]
-	if arg.ExportTemplate != nil && len(*arg.ExportTemplate) != 0 { // Export template prefered, use it
+	if expTemplate, has := arg.ExportArgs[utils.ExportTemplate]; has {
 		var hasIt bool
-		if exportTemplate, hasIt = api.Config.CdreProfiles[*arg.ExportTemplate]; !hasIt {
+		if exportTemplate, hasIt = api.Config.CdreProfiles[utils.IfaceAsString(expTemplate)]; !hasIt {
 			return fmt.Errorf("%s:ExportTemplate", utils.ErrNotFound)
 		}
 	}
 	exportFormat := exportTemplate.ExportFormat
-	if arg.ExportFormat != nil && len(*arg.ExportFormat) != 0 {
-		exportFormat = strings.ToLower(*arg.ExportFormat)
+	if expformat, has := arg.ExportArgs[utils.ExportFormat]; has {
+		exportFormat = strings.ToLower(utils.IfaceAsString(expformat))
 	}
 	if !utils.CDRExportFormats.Has(exportFormat) {
 		return utils.NewErrMandatoryIeMissing("CdrFormat")
 	}
 	synchronous := exportTemplate.Synchronous
-	if arg.Synchronous != nil {
-		synchronous = *arg.Synchronous
+	if sync, has := arg.ExportArgs[utils.Synchronous]; has {
+		if synchronous, err = utils.IfaceAsBool(sync); err != nil {
+			return
+		}
 	}
 	attempts := exportTemplate.Attempts
-	if arg.Attempts != nil && *arg.Attempts != 0 {
-		attempts = *arg.Attempts
+	if ate, has := arg.ExportArgs[utils.Attempts]; has {
+		var atte int64
+		if atte, err = utils.IfaceAsTInt64(ate); err != nil {
+			return
+		}
+		attempts = int(atte)
 	}
 	fieldSep := exportTemplate.FieldSeparator
-	if arg.FieldSeparator != nil && len(*arg.FieldSeparator) != 0 {
-		fieldSep, _ = utf8.DecodeRuneInString(*arg.FieldSeparator)
+	if fieldS, has := arg.ExportArgs[utils.FieldSeparator]; has {
+		fieldSep, _ = utf8.DecodeRuneInString(utils.IfaceAsString(fieldS))
 		if fieldSep == utf8.RuneError {
 			return fmt.Errorf("%s:FieldSeparator:%s", utils.ErrServerError, "Invalid")
 		}
 	}
 	eDir := exportTemplate.ExportPath
-	if arg.ExportPath != nil && len(*arg.ExportPath) != 0 {
-		eDir = *arg.ExportPath
+	if expPath, has := arg.ExportArgs[utils.ExportPath]; has {
+		eDir = utils.IfaceAsString(expPath)
 	}
 	exportID := strconv.FormatInt(time.Now().Unix(), 10)
-	if arg.ExportID != nil && len(*arg.ExportID) != 0 {
-		exportID = *arg.ExportID
+	if expID, has := arg.ExportArgs[utils.ExportID]; has {
+		exportID = utils.IfaceAsString(expID)
 	}
 	var expFormat string
 	switch exportFormat {
 	case utils.MetaFileFWV:
-		expFormat = "fwv"
+		expFormat = utils.FWV
 	case utils.MetaFileCSV:
-		expFormat = "csv"
+		expFormat = utils.CSV
 	default:
 		expFormat = exportFormat
 	}
 	fileName := fmt.Sprintf("cdre_%s.%s", exportID, expFormat)
-	if arg.ExportFileName != nil && len(*arg.ExportFileName) != 0 {
-		fileName = *arg.ExportFileName
+	if expFn, has := arg.ExportArgs[utils.ExportFileName]; has {
+		fileName = utils.IfaceAsString(expFn)
 	}
 	var filePath string
 	switch exportFormat {

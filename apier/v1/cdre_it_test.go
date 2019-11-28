@@ -157,8 +157,10 @@ func testCDReAddCDRs(t *testing.T) {
 
 func testCDReExportCDRs(t *testing.T) {
 	attr := ArgExportCDRs{
-		ExportTemplate: utils.StringPointer("TemplateWithFilter"),
-		Verbose:        true,
+		ExportArgs: map[string]interface{}{
+			utils.ExportTemplate: "TemplateWithFilter",
+		},
+		Verbose: true,
 	}
 	var rply *RplExportedCDRs
 	if err := cdreRPC.Call(utils.ApierV1ExportCDRs, attr, &rply); err != nil {
@@ -309,8 +311,10 @@ func testCDReAddAttributes(t *testing.T) {
 
 func testCDReExportCDRsWithAttributes(t *testing.T) {
 	attr := ArgExportCDRs{
-		ExportTemplate: utils.StringPointer("TemplateWithAttributeS"),
-		Verbose:        true,
+		ExportArgs: map[string]interface{}{
+			utils.ExportTemplate: "TemplateWithAttributeS",
+		},
+		Verbose: true,
 	}
 	var rply *RplExportedCDRs
 	if err := cdreRPC.Call(utils.ApierV1ExportCDRs, attr, &rply); err != nil {

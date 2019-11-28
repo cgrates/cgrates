@@ -188,6 +188,7 @@ const (
 	META_DEFAULT                 = "*default"
 	STATIC_VALUE_PREFIX          = "^"
 	CSV                          = "csv"
+	FWV                          = "fwv"
 	MetaPartialCSV               = "*partial_csv"
 	DRYRUN                       = "dry_run"
 	META_COMBIMED                = "*combimed"
@@ -563,6 +564,14 @@ const (
 	MetaAct                     = "*act"
 	DestinationPrefix           = "DestinationPrefix"
 	DestinationID               = "DestinationID"
+	ExportTemplate              = "ExportTemplate"
+	ExportFormat                = "ExportFormat"
+	Synchronous                 = "Synchronous"
+	Attempts                    = "Attempts"
+	FieldSeparator              = "FieldSeparator"
+	ExportPath                  = "ExportPath"
+	ExportID                    = "ExportID"
+	ExportFileName              = "ExportFileName"
 )
 
 // Migrator Action
