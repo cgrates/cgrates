@@ -74,6 +74,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @sebastic | Bas Couwenberg |
 | @adragusin | Adrian Drăguşin |
 | @JDLK7 | Jose Domenech |
+| @mintos5 | Michal Škuta |
 
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
