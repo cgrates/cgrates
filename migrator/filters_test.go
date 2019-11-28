@@ -114,3 +114,164 @@ func TestFiltersMigrate(t *testing.T) {
 		}
 	}
 }
+
+func TestFiltersMigrateV2(t *testing.T) {
+	data := []struct{ in, exp *engine.Filter }{
+		{
+			in: &engine.Filter{
+				Tenant: "cgrates.org",
+				ID:     "FLTR_1",
+				Rules: []*engine.FilterRule{
+					&engine.FilterRule{
+						Type:      utils.MetaString,
+						FieldName: "~Account",
+						Values:    []string{},
+					},
+				},
+			},
+			exp: &engine.Filter{
+				Tenant: "cgrates.org",
+				ID:     "FLTR_1",
+				Rules: []*engine.FilterRule{
+					&engine.FilterRule{
+						Type:      utils.MetaString,
+						FieldName: "~*req.Account",
+						Values:    []string{},
+					},
+				},
+			},
+		},
+		{
+			in: &engine.Filter{
+				Tenant: "cgrates.org",
+				ID:     "FLTR_2",
+				Rules: []*engine.FilterRule{
+					&engine.FilterRule{
+						Type:      utils.MetaPrefix,
+						FieldName: "~*req.Account",
+						Values:    []string{},
+					},
+				},
+			},
+			exp: &engine.Filter{
+				Tenant: "cgrates.org",
+				ID:     "FLTR_2",
+				Rules: []*engine.FilterRule{
+					&engine.FilterRule{
+						Type:      utils.MetaPrefix,
+						FieldName: "~*req.Account",
+						Values:    []string{},
+					},
+				},
+			},
+		},
+		{
+			in: &engine.Filter{
+				Tenant: "cgrates.org",
+				ID:     "FLTR_3",
+				Rules: []*engine.FilterRule{
+					&engine.FilterRule{
+						Type:      utils.MetaPrefix,
+						FieldName: "~*act.Account",
+						Values:    []string{},
+					},
+				},
+			},
+			exp: &engine.Filter{
+				Tenant: "cgrates.org",
+				ID:     "FLTR_3",
+				Rules: []*engine.FilterRule{
+					&engine.FilterRule{
+						Type:      utils.MetaPrefix,
+						FieldName: "~*act.Account",
+						Values:    []string{},
+					},
+				},
+			},
+		},
+		{
+			in: &engine.Filter{
+				Tenant: "cgrates.org",
+				ID:     "FLTR_4",
+				Rules: []*engine.FilterRule{
+					&engine.FilterRule{
+						Type:      utils.MetaPrefix,
+						FieldName: "~*act.Account",
+						Values:    []string{},
+					},
+				},
+			},
+			exp: &engine.Filter{
+				Tenant: "cgrates.org",
+				ID:     "FLTR_4",
+				Rules: []*engine.FilterRule{
+					&engine.FilterRule{
+						Type:      utils.MetaPrefix,
+						FieldName: "~*act.Account",
+						Values:    []string{},
+					},
+				},
+			},
+		},
+		{
+			in: &engine.Filter{
+				Tenant: "cgrates.org",
+				ID:     "FLTR_5",
+				Rules: []*engine.FilterRule{
+					&engine.FilterRule{
+						Type:      utils.MetaPrefix,
+						FieldName: "~*vars.Account",
+						Values:    []string{},
+					},
+				},
+			},
+			exp: &engine.Filter{
+				Tenant: "cgrates.org",
+				ID:     "FLTR_5",
+				Rules: []*engine.FilterRule{
+					&engine.FilterRule{
+						Type:      utils.MetaPrefix,
+						FieldName: "~*vars.Account",
+						Values:    []string{},
+					},
+				},
+			},
+		},
+	}
+	for _, m := range data {
+		if rply := migrateFilterV2(m.in); !reflect.DeepEqual(rply, m.exp) {
+			t.Errorf("Expected: %s, recived: %s", utils.ToJSON(m.exp), utils.ToJSON(rply))
+		}
+	}
+}
+
+func TestFiltersInlineV2Migrate(t *testing.T) {
+	data := []struct{ in, exp string }{
+		{
+			in:  "*string:~Account:1002",
+			exp: "*string:~*req.Account:1002",
+		},
+		{
+			in:  "*string:~*req.Account:1002",
+			exp: "*string:~*req.Account:1002",
+		},
+		{
+			in:  "FLTR_1",
+			exp: "FLTR_1",
+		},
+		{
+			in:  "",
+			exp: "",
+		},
+		{
+			in:  "*rsr::~Tenant(~^cgr.*\\.org$)",
+			exp: "*rsr::~*req.Tenant(~^cgr.*\\.org$)",
+		},
+	}
+	for _, m := range data {
+		if rply := migrateInlineFilterV2(m.in); rply != m.exp {
+			t.Errorf("Expected: %s, recived: %s", m.exp, rply)
+		}
+	}
+
+}

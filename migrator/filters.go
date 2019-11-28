@@ -69,6 +69,37 @@ func migrateFilterV1(fl *engine.Filter) *engine.Filter {
 	return fl
 }
 
+func migrateFilterV2(fl *engine.Filter) *engine.Filter {
+	for i, rule := range fl.Rules {
+		if (rule.FieldName == "" && rule.Type != utils.MetaRSR) ||
+			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaReq) ||
+			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaVars) ||
+			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaCgreq) ||
+			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaCgrep) ||
+			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaRep) ||
+			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaCGRAReq) ||
+			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaAct) {
+			continue
+		}
+		if rule.Type != utils.MetaRSR {
+			// in case we found dynamic data prefix we remove it
+			if strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix) {
+				fl.Rules[i].FieldName = fl.Rules[i].FieldName[1:]
+			}
+			fl.Rules[i].FieldName = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + rule.FieldName
+		} else {
+			for idx, val := range rule.Values {
+				if strings.HasPrefix(val, utils.DynamicDataPrefix) {
+					// remove dynamic data prefix from fieldName
+					val = val[1:]
+				}
+				fl.Rules[i].Values[idx] = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + val
+			}
+		}
+	}
+	return fl
+}
+
 func migrateInlineFilter(fl string) string {
 	if fl == "" || !strings.HasPrefix(fl, utils.Meta) {
 		return fl
@@ -83,6 +114,41 @@ func migrateInlineFilter(fl string) string {
 		return fl
 	}
 	return fmt.Sprintf("%s:~%s:%s", ruleSplt[0], utils.MetaReq+utils.NestingSep+ruleSplt[1], strings.Join(ruleSplt[2:], utils.InInFieldSep))
+}
+
+func migrateInlineFilterV2(fl string) string {
+	if fl == "" || !strings.HasPrefix(fl, utils.Meta) {
+		return fl
+	}
+	ruleSplt := strings.Split(fl, utils.InInFieldSep)
+	if len(ruleSplt) < 3 {
+		return fl
+	}
+	if ruleSplt[1] != utils.EmptyString && // no need conversion
+		(strings.HasPrefix(ruleSplt[1], utils.DynamicDataPrefix+utils.MetaReq) ||
+			strings.HasPrefix(ruleSplt[1], utils.DynamicDataPrefix+utils.MetaVars) ||
+			strings.HasPrefix(ruleSplt[1], utils.DynamicDataPrefix+utils.MetaCgreq) ||
+			strings.HasPrefix(ruleSplt[1], utils.DynamicDataPrefix+utils.MetaCgrep) ||
+			strings.HasPrefix(ruleSplt[1], utils.DynamicDataPrefix+utils.MetaRep) ||
+			strings.HasPrefix(ruleSplt[1], utils.DynamicDataPrefix+utils.MetaCGRAReq) ||
+			strings.HasPrefix(ruleSplt[1], utils.DynamicDataPrefix+utils.MetaAct)) {
+		return fl
+	}
+
+	if ruleSplt[0] != utils.MetaRSR {
+		if strings.HasPrefix(ruleSplt[1], utils.DynamicDataPrefix) {
+			// remove dynamic data prefix from fieldName
+			ruleSplt[1] = ruleSplt[1][1:]
+		}
+		return fmt.Sprintf("%s:~%s:%s", ruleSplt[0], utils.MetaReq+utils.NestingSep+ruleSplt[1], strings.Join(ruleSplt[2:], utils.InInFieldSep))
+	} else { // in case of *rsr filter we need to add the prefix at fieldValue
+		if strings.HasPrefix(ruleSplt[2], utils.DynamicDataPrefix) {
+			// remove dynamic data prefix from fieldName
+			ruleSplt[2] = ruleSplt[2][1:]
+		}
+		return fmt.Sprintf("%s::~%s", ruleSplt[0], utils.MetaReq+utils.NestingSep+strings.Join(ruleSplt[2:], utils.InInFieldSep))
+	}
+
 }
 
 func (m *Migrator) migrateRequestFilterV1() (err error) {
@@ -127,6 +193,58 @@ func (m *Migrator) migrateRequestFilterV1() (err error) {
 	if err = m.migrateDispatcherProfileFiltersV1(); err != nil {
 		return err
 	}
+	vrs := engine.Versions{utils.RQF: 2}
+	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating Filters version into dataDB", err.Error()))
+	}
+	return
+}
+
+func (m *Migrator) migrateRequestFilterV2() (err error) {
+	var ids []string
+	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.FilterPrefix)
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		idg := strings.TrimPrefix(id, utils.FilterPrefix+tenant+":")
+		fl, err := m.dmIN.DataManager().GetFilter(tenant, idg, false, false, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if m.dryRun || fl == nil {
+			continue
+		}
+		if err := m.dmOut.DataManager().SetFilter(migrateFilterV2(fl)); err != nil {
+			return err
+		}
+		m.stats[utils.RQF] += 1
+	}
+	if err = m.migrateResourceProfileFiltersV2(); err != nil {
+		return err
+	}
+	if err = m.migrateStatQueueProfileFiltersV2(); err != nil {
+		return err
+	}
+	if err = m.migrateThresholdsProfileFiltersV2(); err != nil {
+		return err
+	}
+	if err = m.migrateSupplierProfileFiltersV2(); err != nil {
+		return err
+	}
+	if err = m.migrateAttributeProfileFiltersV2(); err != nil {
+		return err
+	}
+	if err = m.migrateChargerProfileFiltersV2(); err != nil {
+		return err
+	}
+	if err = m.migrateDispatcherProfileFiltersV2(); err != nil {
+		return err
+	}
 	vrs := engine.Versions{utils.RQF: engine.CurrentDataDBVersions()[utils.RQF]}
 	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
@@ -153,6 +271,10 @@ func (m *Migrator) migrateFilters() (err error) {
 			"version number is not defined for ActionTriggers model")
 	}
 	switch vrs[utils.RQF] {
+	case 2:
+		if err = m.migrateRequestFilterV2(); err != nil {
+			return err
+		}
 	case 1:
 		if err = m.migrateRequestFilterV1(); err != nil {
 			return err
@@ -353,6 +475,201 @@ func (m *Migrator) migrateDispatcherProfileFiltersV1() (err error) {
 		}
 		for i, fl := range dpp.FilterIDs {
 			dpp.FilterIDs[i] = migrateInlineFilter(fl)
+		}
+		if err := m.dmOut.DataManager().SetDispatcherProfile(dpp, true); err != nil {
+			return err
+		}
+		m.stats[utils.RQF] += 1
+	}
+	return
+}
+
+// migrate filters from v2 to v3 for items
+func (m *Migrator) migrateResourceProfileFiltersV2() (err error) {
+	var ids []string
+	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ResourceProfilesPrefix)
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		idg := strings.TrimPrefix(id, utils.ResourceProfilesPrefix+tenant+":")
+		res, err := m.dmIN.DataManager().GetResourceProfile(tenant, idg, false, false, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if m.dryRun || res == nil {
+			continue
+		}
+		for i, fl := range res.FilterIDs {
+			res.FilterIDs[i] = migrateInlineFilterV2(fl)
+		}
+		if err := m.dmOut.DataManager().SetResourceProfile(res, true); err != nil {
+			return err
+		}
+		m.stats[utils.RQF] += 1
+	}
+	return
+}
+
+func (m *Migrator) migrateStatQueueProfileFiltersV2() (err error) {
+	var ids []string
+	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix)
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		idg := strings.TrimPrefix(id, utils.StatQueueProfilePrefix+tenant+":")
+		sgs, err := m.dmIN.DataManager().GetStatQueueProfile(tenant, idg, false, false, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if sgs == nil || m.dryRun {
+			continue
+		}
+		for i, fl := range sgs.FilterIDs {
+			sgs.FilterIDs[i] = migrateInlineFilterV2(fl)
+		}
+		if err = m.dmOut.DataManager().SetStatQueueProfile(sgs, true); err != nil {
+			return err
+		}
+		m.stats[utils.RQF] += 1
+	}
+	return
+}
+
+func (m *Migrator) migrateThresholdsProfileFiltersV2() (err error) {
+	var ids []string
+	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ThresholdProfilePrefix)
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		idg := strings.TrimPrefix(id, utils.ThresholdProfilePrefix+tenant+":")
+		ths, err := m.dmIN.DataManager().GetThresholdProfile(tenant, idg, false, false, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if ths == nil || m.dryRun {
+			continue
+		}
+		for i, fl := range ths.FilterIDs {
+			ths.FilterIDs[i] = migrateInlineFilterV2(fl)
+		}
+		if err := m.dmOut.DataManager().SetThresholdProfile(ths, true); err != nil {
+			return err
+		}
+		m.stats[utils.RQF] += 1
+	}
+	return
+}
+
+func (m *Migrator) migrateSupplierProfileFiltersV2() (err error) {
+	var ids []string
+	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.SupplierProfilePrefix)
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		idg := strings.TrimPrefix(id, utils.SupplierProfilePrefix)
+		splp, err := m.dmIN.DataManager().GetSupplierProfile(tenant, idg, false, false, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if splp == nil || m.dryRun {
+			continue
+		}
+		for i, fl := range splp.FilterIDs {
+			splp.FilterIDs[i] = migrateInlineFilterV2(fl)
+		}
+		if err := m.dmOut.DataManager().SetSupplierProfile(splp, true); err != nil {
+			return err
+		}
+		m.stats[utils.RQF] += 1
+	}
+	return
+}
+
+func (m *Migrator) migrateAttributeProfileFiltersV2() (err error) {
+	var ids []string
+	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix)
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		idg := strings.TrimPrefix(id, utils.AttributeProfilePrefix+tenant+":")
+		attrPrf, err := m.dmIN.DataManager().GetAttributeProfile(tenant, idg, false, false, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if attrPrf == nil || m.dryRun {
+			continue
+		}
+		for i, fl := range attrPrf.FilterIDs {
+			attrPrf.FilterIDs[i] = migrateInlineFilterV2(fl)
+		}
+		for i, attr := range attrPrf.Attributes {
+			for j, fl := range attr.FilterIDs {
+				attrPrf.Attributes[i].FilterIDs[j] = migrateInlineFilterV2(fl)
+			}
+		}
+		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
+			return err
+		}
+		m.stats[utils.RQF] += 1
+	}
+	return
+}
+
+func (m *Migrator) migrateChargerProfileFiltersV2() (err error) {
+	var ids []string
+	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ChargerProfilePrefix)
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		idg := strings.TrimPrefix(id, utils.ChargerProfilePrefix+tenant+":")
+		cpp, err := m.dmIN.DataManager().GetChargerProfile(tenant, idg, false, false, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if cpp == nil || m.dryRun {
+			continue
+		}
+		for i, fl := range cpp.FilterIDs {
+			cpp.FilterIDs[i] = migrateInlineFilterV2(fl)
+		}
+		if err := m.dmOut.DataManager().SetChargerProfile(cpp, true); err != nil {
+			return err
+		}
+		m.stats[utils.RQF] += 1
+	}
+	return
+}
+
+func (m *Migrator) migrateDispatcherProfileFiltersV2() (err error) {
+	var ids []string
+	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
+	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DispatcherProfilePrefix)
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		idg := strings.TrimPrefix(id, utils.DispatcherProfilePrefix+tenant+":")
+		dpp, err := m.dmIN.DataManager().GetDispatcherProfile(tenant, idg, false, false, utils.NonTransactional)
+		if err != nil {
+			return err
+		}
+		if dpp == nil || m.dryRun {
+			continue
+		}
+		for i, fl := range dpp.FilterIDs {
+			dpp.FilterIDs[i] = migrateInlineFilterV2(fl)
 		}
 		if err := m.dmOut.DataManager().SetDispatcherProfile(dpp, true); err != nil {
 			return err

@@ -42,6 +42,7 @@ var sTestsFltrIT = []func(t *testing.T){
 	testFltrITConnect,
 	testFltrITFlush,
 	testFltrITMigrateAndMove,
+	testFltrITMigratev2,
 }
 
 func TestFiltersMigrateITRedis(t *testing.T) {
@@ -269,5 +270,144 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		}
+	}
+}
+
+func testFltrITMigratev2(t *testing.T) {
+	if fltrAction != utils.Migrate {
+		t.SkipNow()
+	}
+	filters := &engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_2",
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
+				Type:      utils.MetaString,
+				FieldName: "~Account",
+				Values:    []string{"1001"},
+			},
+			&engine.FilterRule{
+				Type:      utils.MetaString,
+				FieldName: "~*req.Subject",
+				Values:    []string{"1001"},
+			},
+			&engine.FilterRule{
+				Type:      utils.MetaRSR,
+				FieldName: utils.EmptyString,
+				Values:    []string{"~Tenant(~^cgr.*\\.org$)"},
+			},
+		},
+	}
+	expFilters := &engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_2",
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
+				Type:      utils.MetaString,
+				FieldName: "~*req.Account",
+				Values:    []string{"1001"},
+			},
+			&engine.FilterRule{
+				Type:      utils.MetaString,
+				FieldName: "~*req.Subject",
+				Values:    []string{"1001"},
+			},
+			&engine.FilterRule{
+				Type:      utils.MetaRSR,
+				FieldName: utils.EmptyString,
+				Values:    []string{"~*req.Tenant(~^cgr.*\\.org$)"},
+			},
+		},
+	}
+	expFilters.Compile()
+	attrProf := &engine.AttributeProfile{
+		Tenant:             "cgrates.org",
+		ID:                 "ATTR_1",
+		Contexts:           []string{utils.META_ANY},
+		FilterIDs:          []string{"*string:~Account:1001", "FLTR_2"},
+		ActivationInterval: nil,
+		Attributes: []*engine.Attribute{
+			{
+				FilterIDs: []string{"*string:~Account:1001"},
+				FieldName: "Account",
+				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 10,
+	}
+	expAttrProf := &engine.AttributeProfile{
+		Tenant:             "cgrates.org",
+		ID:                 "ATTR_1",
+		Contexts:           []string{utils.META_ANY},
+		FilterIDs:          []string{"*string:~*req.Account:1001", "FLTR_2"},
+		ActivationInterval: nil,
+		Attributes: []*engine.Attribute{
+			{
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				FieldName: "Account",
+				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
+			},
+		},
+		Weight: 10,
+	}
+	expAttrProf.Compile()
+	attrProf.Compile()
+
+	if err := fltrMigrator.dmIN.DataManager().SetFilter(filters); err != nil {
+		t.Error("Error when setting v1 Filters ", err.Error())
+	}
+	if err := fltrMigrator.dmIN.DataManager().SetAttributeProfile(attrProf, false); err != nil {
+		t.Error("Error when setting attribute profile for v1 Filters ", err.Error())
+	}
+	currentVersion := engine.Versions{utils.RQF: 2}
+	err := fltrMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
+	if err != nil {
+		t.Error("Error when setting version for Filters ", err.Error())
+	}
+	//check if version was set correctly
+	if vrs, err := fltrMigrator.dmIN.DataManager().DataDB().GetVersions(""); err != nil {
+		t.Error(err)
+	} else if vrs[utils.RQF] != 2 {
+		t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
+	}
+	//migrate Filters
+	err, _ = fltrMigrator.Migrate([]string{utils.MetaFilters})
+	if err != nil {
+		t.Error("Error when migrating Filters ", err.Error())
+	}
+	//check if version was updated
+	if vrs, err := fltrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
+		t.Error(err)
+	} else if vrs[utils.RQF] != 3 {
+		t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
+	}
+	//check if Filters was migrate correctly
+	result, err := fltrMigrator.dmOut.DataManager().GetFilter(filters.Tenant, filters.ID, false, false, utils.NonTransactional)
+	if err != nil {
+		t.Fatalf("Error when getting filters %v", err.Error())
+	}
+	result.Compile()
+	if !reflect.DeepEqual(*expFilters, *result) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expFilters), utils.ToJSON(result))
+	}
+
+	resultAttr, err := fltrMigrator.dmOut.DataManager().DataDB().GetAttributeProfileDrv(attrProf.Tenant, attrProf.ID)
+	if err != nil {
+		t.Fatalf("Error when getting Attributes %v", err.Error())
+	}
+	resultAttr.Compile()
+	if !reflect.DeepEqual(*expAttrProf, *resultAttr) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expAttrProf), utils.ToJSON(resultAttr))
+	}
+	expFltrIdx := map[string]utils.StringMap{
+		"*prefix:~*req.Account:1001": utils.StringMap{"ATTR_1": true},
+		"*string:~*req.Account:1001": utils.StringMap{"ATTR_1": true},
+		"*string:~*req.Subject:1001": utils.StringMap{"ATTR_1": true},
+	}
+
+	if fltridx, err := fltrMigrator.dmOut.DataManager().GetFilterIndexes(utils.PrefixToIndexCache[utils.AttributeProfilePrefix], utils.ConcatenatedKey(attrProf.Tenant, utils.META_ANY), utils.MetaString, nil); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expFltrIdx, fltridx) {
+		t.Errorf("Expected %v, recived: %v", utils.ToJSON(expFltrIdx), utils.ToJSON(fltridx))
 	}
 }
