@@ -1078,7 +1078,7 @@ func TestApierGetAccountActionTriggers(t *testing.T) {
 func TestApierAddTriggeredAction2(t *testing.T) {
 	reply := ""
 	// Add balance to a previously known account
-	attrs := &AttrAddAccountActionTriggers{ActionTriggerIDs: &[]string{"STANDARD_TRIGGERS"}, Tenant: "cgrates.org", Account: "dan2"}
+	attrs := &AttrAddAccountActionTriggers{ActionTriggerIDs: []string{"STANDARD_TRIGGERS"}, Tenant: "cgrates.org", Account: "dan2"}
 	if err := rater.Call(utils.ApierV1AddAccountActionTriggers, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddAccountActionTriggers: ", err.Error())
 	} else if reply != "OK" {
@@ -1119,7 +1119,16 @@ func TestApierSetAccountActionTriggers(t *testing.T) {
 		t.Errorf("Unexpected action triggers received %v", reply)
 	}
 	var setReply string
-	setReq := AttrSetAccountActionTriggers{Tenant: "cgrates.org", Account: "dan2", UniqueID: reply[0].UniqueID, ActivationDate: utils.StringPointer("2016-02-05T18:00:00Z")}
+	setReq := AttrSetAccountActionTriggers{
+		Tenant:  "cgrates.org",
+		Account: "dan2",
+		AttrSetActionTrigger: AttrSetActionTrigger{
+			UniqueID: reply[0].UniqueID,
+			ActionTrigger: map[string]interface{}{
+				utils.ActivationDate: "2016-02-05T18:00:00Z",
+			},
+		},
+	}
 	if err := rater.Call(utils.ApierV1ResetAccountActionTriggers, setReq, &setReply); err != nil {
 		t.Error("Got error on ApierV1.ResetActionTiming: ", err.Error())
 	} else if setReply != utils.OK {
@@ -1172,7 +1181,7 @@ func TestApierRemAccountActionTriggers(t *testing.T) {
 // Test here SetAccount
 func TestApierSetAccount(t *testing.T) {
 	reply := ""
-	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan7", ActionPlanId: "ATMS_1", ReloadScheduler: true}
+	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan7", ActionPlanID: "ATMS_1", ReloadScheduler: true}
 	if err := rater.Call(utils.ApierV1SetAccount, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != "OK" {
@@ -1181,7 +1190,7 @@ func TestApierSetAccount(t *testing.T) {
 	reply2 := ""
 	attrs2 := new(utils.AttrSetAccount)
 	*attrs2 = *attrs
-	attrs2.ActionPlanId = "DUMMY_DATA" // Does not exist so it should error when adding triggers on it
+	attrs2.ActionPlanID = "DUMMY_DATA" // Does not exist so it should error when adding triggers on it
 	// Add account with actions timing which does not exist
 	if err := rater.Call(utils.ApierV1SetAccount, attrs2, &reply2); err == nil || reply2 == "OK" { // OK is not welcomed
 		t.Error("Expecting error on ApierV1.SetAccount.", err, reply2)

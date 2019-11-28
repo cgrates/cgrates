@@ -272,6 +272,84 @@ func IfaceAsString(fld interface{}) (out string) {
 	}
 }
 
+// IfaceAsSliceString is trying to convert the interface to a slice of strings
+func IfaceAsSliceString(fld interface{}) (out []string, err error) {
+	switch value := fld.(type) {
+	case nil:
+		return
+	case []int:
+		out = make([]string, len(value))
+		for i, val := range value {
+			out[i] = strconv.Itoa(val)
+		}
+	case []int32:
+		out = make([]string, len(value))
+		for i, val := range value {
+			out[i] = strconv.FormatInt(int64(val), 10)
+		}
+	case []int64:
+		out = make([]string, len(value))
+		for i, val := range value {
+			out[i] = strconv.FormatInt(val, 10)
+		}
+	case []uint32:
+		out = make([]string, len(value))
+		for i, val := range value {
+			out[i] = strconv.FormatUint(uint64(val), 10)
+		}
+	case []uint64:
+		out = make([]string, len(value))
+		for i, val := range value {
+			out[i] = strconv.FormatUint(val, 10)
+		}
+	case []bool:
+		out = make([]string, len(value))
+		for i, val := range value {
+			out[i] = strconv.FormatBool(val)
+		}
+	case []float32:
+		out = make([]string, len(value))
+		for i, val := range value {
+			out[i] = strconv.FormatFloat(float64(val), 'f', -1, 64)
+		}
+	case []float64:
+		out = make([]string, len(value))
+		for i, val := range value {
+			out[i] = strconv.FormatFloat(val, 'f', -1, 64)
+		}
+	case [][]uint8:
+		out = make([]string, len(value))
+		for i, val := range value {
+			out[i] = string(val) // byte is an alias for uint8 conversions implicit
+		}
+	case []time.Duration:
+		out = make([]string, len(value))
+		for i, val := range value {
+			out[i] = val.String()
+		}
+	case []time.Time:
+		out = make([]string, len(value))
+		for i, val := range value {
+			out[i] = val.Format(time.RFC3339)
+		}
+	case []net.IP:
+		out = make([]string, len(value))
+		for i, val := range value {
+			out[i] = val.String()
+		}
+	case []string:
+		out = value
+	case []interface{}:
+		out = make([]string, len(value))
+		for i, val := range value {
+			out[i] = IfaceAsString(val)
+		}
+	default: // Maybe we are lucky and the value converts to string
+		err = fmt.Errorf("cannot convert field: %+v to bool", value)
+	}
+	return
+}
+
 // AsMapStringIface converts an item (mostly struct) as map[string]interface{}
 func AsMapStringIface(item interface{}) (map[string]interface{}, error) {
 	out := make(map[string]interface{})

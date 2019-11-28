@@ -69,12 +69,14 @@ func TestDspSessionSMongo(t *testing.T) {
 func testDspSessionAddBalacne(t *testing.T) {
 	initUsage := 40 * time.Minute
 	attrSetBalance := utils.AttrSetBalance{
-		Tenant:        "cgrates.org",
-		Account:       "1001",
-		BalanceType:   utils.VOICE,
-		BalanceID:     utils.StringPointer("SessionBalance"),
-		Value:         utils.Float64Pointer(float64(initUsage)),
-		RatingSubject: utils.StringPointer("*zero5ms"),
+		Tenant:      "cgrates.org",
+		Account:     "1001",
+		BalanceType: utils.VOICE,
+		Balance: map[string]interface{}{
+			utils.ID:            "SessionBalance",
+			utils.Value:         float64(initUsage),
+			utils.RatingSubject: "*zero5ms",
+		},
 	}
 	var reply string
 	if err := allEngine.RCP.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {

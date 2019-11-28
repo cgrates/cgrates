@@ -859,11 +859,14 @@ func testDiamItCCRSMS(t *testing.T) {
 
 func testDiamInitWithSessionDisconnect(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org",
-		Account:       "testDiamInitWithSessionDisconnect",
-		BalanceType:   utils.VOICE,
-		BalanceID:     utils.StringPointer("testDiamInitWithSessionDisconnect"),
-		Value:         utils.Float64Pointer(1 * float64(time.Second)),
-		RatingSubject: utils.StringPointer("*zero1ms")}
+		Account:     "testDiamInitWithSessionDisconnect",
+		BalanceType: utils.VOICE,
+		Balance: map[string]interface{}{
+			utils.ID:            "testDiamInitWithSessionDisconnect",
+			utils.Value:         float64(time.Second),
+			utils.RatingSubject: "*zero1ms",
+		},
+	}
 	var reply string
 	if err := apierRpc.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)

@@ -889,12 +889,8 @@ func (cdrS *CDRServer) V2StoreSessionCost(args *ArgsV2CDRSStoreSMCost, reply *st
 }
 
 type ArgRateCDRs struct {
+	Flags []string
 	utils.RPCCDRsFilter
-	ChargerS   *bool
-	Store      *bool
-	Export     *bool // Replicate results
-	ThresholdS *bool
-	StatS      *bool // Set to true if the CDRs should be sent to stats server
 	*utils.ArgDispatcher
 	*utils.TenantArg
 }
@@ -902,35 +898,39 @@ type ArgRateCDRs struct {
 // V1RateCDRs is used for re-/rate CDRs which are already stored within StorDB
 // FixMe: add RPC caching
 func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
-	cdrFltr, err := arg.RPCCDRsFilter.AsCDRsFilter(cdrS.cgrCfg.GeneralCfg().DefaultTimezone)
-	if err != nil {
+	var cdrFltr *utils.CDRsFilter
+	if cdrFltr, err = arg.RPCCDRsFilter.AsCDRsFilter(cdrS.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	cdrs, _, err := cdrS.cdrDb.GetCDRs(cdrFltr, false)
 	if err != nil {
-		return err
+		return
+	}
+	var flgs utils.FlagsWithParams
+	if flgs, err = utils.FlagsWithParamsFromSlice(arg.Flags); err != nil {
+		return
 	}
 	store := cdrS.cgrCfg.CdrsCfg().StoreCdrs
-	if arg.Store != nil {
-		store = *arg.Store
+	if flgs.HasKey(utils.MetaStore) {
+		store = flgs.GetBool(utils.MetaStore)
 	}
 	export := len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0
-	if arg.Export != nil {
-		export = *arg.Export
+	if flgs.HasKey(utils.MetaExport) {
+		export = flgs.GetBool(utils.MetaExport)
 	}
 	thdS := cdrS.thdS != nil
-	if arg.ThresholdS != nil {
-		thdS = *arg.ThresholdS
+	if flgs.HasKey(utils.MetaThresholds) {
+		thdS = flgs.GetBool(utils.MetaThresholds)
 	}
 	statS := cdrS.statS != nil
-	if arg.StatS != nil {
-		statS = *arg.StatS
+	if flgs.HasKey(utils.MetaStatS) {
+		statS = flgs.GetBool(utils.MetaStatS)
 	}
-	for _, cdr := range cdrs {
-		if arg.ChargerS != nil && *arg.ChargerS {
-			if cdrS.chargerS == nil {
-				return utils.NewErrNotConnected(utils.ChargerS)
-			}
+	if flgs.GetBool(utils.MetaChargers) {
+		if cdrS.chargerS == nil {
+			return utils.NewErrNotConnected(utils.ChargerS)
+		}
+		for _, cdr := range cdrs {
 			argCharger := &utils.CGREventWithArgDispatcher{
 				CGREvent:      cdr.AsCGREvent(),
 				ArgDispatcher: arg.ArgDispatcher,

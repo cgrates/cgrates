@@ -114,8 +114,10 @@ func testSes2ItInitSession(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "1001",
 		BalanceType: utils.VOICE,
-		BalanceID:   utils.StringPointer("TestDynamicDebitBalance"),
-		Value:       utils.Float64Pointer(float64(time.Hour)),
+		Balance: map[string]interface{}{
+			utils.ID:    "TestDynamicDebitBalance",
+			utils.Value: float64(time.Hour),
+		},
 	}
 	var reply string
 	if err := ses2RPC.Call(utils.ApierV2SetBalance,

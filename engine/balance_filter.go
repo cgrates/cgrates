@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"math"
 	"reflect"
 	"time"
 
@@ -41,6 +42,71 @@ type BalanceFilter struct {
 	Disabled       *bool
 	Factor         *ValueFactor
 	Blocker        *bool
+}
+
+// NewBalanceFilter creates a new BalanceFilter based on given filter
+func NewBalanceFilter(filter map[string]interface{}, defaultTimezone string) (bf *BalanceFilter, err error) {
+	bf = new(BalanceFilter)
+	if id, has := filter[utils.ID]; has {
+		bf.ID = utils.StringPointer(utils.IfaceAsString(id))
+	}
+	if uuid, has := filter[utils.UUID]; has {
+		bf.Uuid = utils.StringPointer(utils.IfaceAsString(uuid))
+	}
+	// if ty, has := filter[utils.Type]; has {
+	// 	bf.Uuid = utils.StringPointer(utils.IfaceAsString(ty))
+	// }
+	if val, has := filter[utils.Value]; has {
+		var value float64
+		if value, err = utils.IfaceAsFloat64(val); err != nil {
+			return
+		}
+		bf.Value = &utils.ValueFormula{Static: math.Abs(value)}
+	}
+	if exp, has := filter[utils.ExpiryTime]; has {
+		var expTime time.Time
+		if expTime, err = utils.IfaceAsTime(exp, defaultTimezone); err != nil {
+			return
+		}
+		bf.ExpirationDate = utils.TimePointer(expTime)
+	}
+	if weight, has := filter[utils.Weight]; has {
+		var value float64
+		if value, err = utils.IfaceAsFloat64(weight); err != nil {
+			return
+		}
+		bf.Weight = utils.Float64Pointer(value)
+	}
+	if dst, has := filter[utils.DestinationIDs]; has {
+		bf.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(utils.IfaceAsString(dst)))
+	}
+	if rs, has := filter[utils.RatingSubject]; has {
+		bf.RatingSubject = utils.StringPointer(utils.IfaceAsString(rs))
+	}
+	if cat, has := filter[utils.Categories]; has {
+		bf.Categories = utils.StringMapPointer(utils.ParseStringMap(utils.IfaceAsString(cat)))
+	}
+	if grps, has := filter[utils.SharedGroups]; has {
+		bf.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(utils.IfaceAsString(grps)))
+	}
+	if tim, has := filter[utils.TimingIDs]; has {
+		bf.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(utils.IfaceAsString(tim)))
+	}
+	if dis, has := filter[utils.Disabled]; has {
+		var value bool
+		if value, err = utils.IfaceAsBool(dis); err != nil {
+			return
+		}
+		bf.Disabled = utils.BoolPointer(value)
+	}
+	if blk, has := filter[utils.Blocker]; has {
+		var value bool
+		if value, err = utils.IfaceAsBool(blk); err != nil {
+			return
+		}
+		bf.Blocker = utils.BoolPointer(value)
+	}
+	return
 }
 
 func (bp *BalanceFilter) CreateBalance() *Balance {

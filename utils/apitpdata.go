@@ -421,10 +421,10 @@ type AttrGetAccount struct {
 
 type AttrGetAccounts struct {
 	Tenant     string
-	AccountIds []string
+	AccountIDs []string
 	Offset     int // Set the item offset
 	Limit      int // Limit number of items retrieved
-	Disabled   *bool
+	Filter     map[string]bool
 }
 
 type ArgsCache struct {
@@ -900,10 +900,9 @@ type AttrExecuteAction struct {
 type AttrSetAccount struct {
 	Tenant           string
 	Account          string
-	ActionPlanId     string
-	ActionTriggersId string
-	AllowNegative    *bool
-	Disabled         *bool
+	ActionPlanID     string
+	ActionTriggersID string
+	ExtraOptions     map[string]bool
 	ReloadScheduler  bool
 }
 
@@ -919,24 +918,12 @@ type AttrGetCallCost struct {
 }
 
 type AttrSetBalance struct {
-	Tenant         string
-	Account        string
-	BalanceType    string
-	BalanceUUID    *string
-	BalanceID      *string
-	Directions     *string
-	Value          *float64
-	ExpiryTime     *string
-	RatingSubject  *string
-	Categories     *string
-	DestinationIds *string
-	TimingIds      *string
-	Weight         *float64
-	SharedGroups   *string
-	Blocker        *bool
-	Disabled       *bool
-	Cdrlog         *bool
-	ExtraData      *map[string]interface{}
+	Tenant          string
+	Account         string
+	BalanceType     string
+	Balance         map[string]interface{}
+	ActionExtraData *map[string]interface{}
+	Cdrlog          bool
 }
 
 // TPResourceProfile is used in APIs to manage remotely offline ResourceProfile
@@ -969,16 +956,28 @@ type ArgRSv1ResourceUsage struct {
 	*ArgDispatcher
 }
 
-type ArgsComputeFilterIndexes struct {
+type ArgsComputeFilterIndexIDs struct {
 	Tenant        string
 	Context       string
-	AttributeIDs  *[]string
-	ResourceIDs   *[]string
-	StatIDs       *[]string
-	SupplierIDs   *[]string
-	ThresholdIDs  *[]string
-	ChargerIDs    *[]string
-	DispatcherIDs *[]string
+	AttributeIDs  []string
+	ResourceIDs   []string
+	StatIDs       []string
+	SupplierIDs   []string
+	ThresholdIDs  []string
+	ChargerIDs    []string
+	DispatcherIDs []string
+}
+
+type ArgsComputeFilterIndexes struct {
+	Tenant      string
+	Context     string
+	AttributeS  bool
+	ResourceS   bool
+	StatS       bool
+	SupplierS   bool
+	ThresholdS  bool
+	ChargerS    bool
+	DispatcherS bool
 }
 
 // AsActivationTime converts TPActivationInterval into ActivationInterval

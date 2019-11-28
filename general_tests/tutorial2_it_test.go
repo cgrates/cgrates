@@ -276,9 +276,15 @@ func testTutAccounts(t *testing.T) {
 		t.Errorf("received account: %s", utils.ToIJSON(acnt))
 	}
 	// test ActionTriggers
-	attrs := &v1.AttrAddBalance{Tenant: "cgrates.org", Account: "1001",
-		BalanceId:   utils.StringPointer(utils.MetaDefault),
-		BalanceType: utils.MONETARY, Value: 101}
+	attrs := utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "1001",
+		BalanceType: utils.MONETARY,
+		Balance: map[string]interface{}{
+			utils.ID:    utils.MetaDefault,
+			utils.Value: 101,
+		},
+	}
 	var reply string
 	if err := tutRpc.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
@@ -293,9 +299,11 @@ func testTutAccounts(t *testing.T) {
 	// enable the account again
 	if err := tutRpc.Call(utils.ApierV2SetAccount,
 		v2.AttrSetAccount{
-			Tenant:   "cgrates.org",
-			Account:  "1001",
-			Disabled: utils.BoolPointer(false),
+			Tenant:  "cgrates.org",
+			Account: "1001",
+			ExtraOptions: map[string]bool{
+				utils.Disabled: false,
+			},
 		}, &reply); err != nil {
 		t.Error(err)
 	}

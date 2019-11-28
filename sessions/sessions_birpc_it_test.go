@@ -110,11 +110,14 @@ func TestSessionsBiRPCTPFromFolder(t *testing.T) {
 func TestSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	// Create a balance with 1 second inside and rating increments of 1ms (to be compatible with debit interval)
 	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org",
-		Account:       "TestSessionsBiRPCSessionAutomaticDisconnects",
-		BalanceType:   utils.VOICE,
-		BalanceID:     utils.StringPointer("TestSessionsBiRPCSessionAutomaticDisconnects"),
-		Value:         utils.Float64Pointer(0.01 * float64(time.Second)),
-		RatingSubject: utils.StringPointer("*zero1ms")}
+		Account:     "TestSessionsBiRPCSessionAutomaticDisconnects",
+		BalanceType: utils.VOICE,
+		Balance: map[string]interface{}{
+			utils.ID:            "TestSessionsBiRPCSessionAutomaticDisconnects",
+			utils.Value:         0.01 * float64(time.Second),
+			utils.RatingSubject: "*zero1ms",
+		},
+	}
 	var reply string
 	if err := sessionsRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
@@ -122,8 +125,10 @@ func TestSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 		t.Errorf("Received: %s", reply)
 	}
 	var acnt *engine.Account
-	attrGetAcnt := &utils.AttrGetAccount{Tenant: attrSetBalance.Tenant,
-		Account: attrSetBalance.Account}
+	attrGetAcnt := &utils.AttrGetAccount{
+		Tenant:  attrSetBalance.Tenant,
+		Account: attrSetBalance.Account,
+	}
 	eAcntVal := 0.01 * float64(time.Second)
 	if err := sessionsRPC.Call(utils.ApierV2GetAccount, attrGetAcnt, &acnt); err != nil {
 		t.Error(err)
@@ -230,12 +235,16 @@ func TestSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 }
 
 func TestSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
-	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org",
-		Account:       "TestSessionsBiRPCSessionOriginatorTerminate",
-		BalanceType:   utils.VOICE,
-		BalanceID:     utils.StringPointer("TestSessionsBiRPCSessionOriginatorTerminate"),
-		Value:         utils.Float64Pointer(1 * float64(time.Second)),
-		RatingSubject: utils.StringPointer("*zero1ms")}
+	attrSetBalance := utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "TestSessionsBiRPCSessionOriginatorTerminate",
+		BalanceType: utils.VOICE,
+		Balance: map[string]interface{}{
+			utils.ID:            "TestSessionsBiRPCSessionOriginatorTerminate",
+			utils.Value:         float64(time.Second),
+			utils.RatingSubject: "*zero1ms",
+		},
+	}
 	var reply string
 	if err := sessionsRPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)

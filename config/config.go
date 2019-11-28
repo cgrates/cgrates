@@ -1568,7 +1568,7 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 	switch section {
 	default:
 		return fmt.Errorf("Invalid section: <%s>", section)
-	case utils.EmptyString, "*all": // do constant
+	case utils.EmptyString, utils.MetaAll:
 		fall = true
 		fallthrough
 	case GENERAL_JSN: // nothing to reload
@@ -1806,7 +1806,7 @@ func (cfg *CGRConfig) loadConfig(path, section string) (err error) {
 	switch section {
 	default:
 		return fmt.Errorf("Invalid section: <%s>", section)
-	case utils.EmptyString, "*all": // do constant
+	case utils.EmptyString, utils.MetaAll:
 		fall = true
 		fallthrough
 	case GENERAL_JSN:

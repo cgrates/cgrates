@@ -153,9 +153,11 @@ func testTpActionTriggers(t *testing.T) {
 	}
 	var reply string
 	if err := tpRPC.Call(utils.ApierV1SetActionTrigger, v1.AttrSetActionTrigger{
-		GroupID:   "TestATR",
-		UniqueID:  "Unique atr id",
-		BalanceID: utils.StringPointer("BID1"),
+		GroupID:  "TestATR",
+		UniqueID: "Unique atr id",
+		ActionTrigger: map[string]interface{}{
+			utils.BalanceID: utils.StringPointer("BID1"),
+		},
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

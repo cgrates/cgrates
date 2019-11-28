@@ -840,12 +840,15 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 
 func testSSv1ItDynamicDebit(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
-		Tenant:        "cgrates.org",
-		Account:       "TestDynamicDebit",
-		BalanceType:   utils.VOICE,
-		BalanceID:     utils.StringPointer("TestDynamicDebitBalance"),
-		Value:         utils.Float64Pointer(2 * float64(time.Second)),
-		RatingSubject: utils.StringPointer("*zero5ms")}
+		Tenant:      "cgrates.org",
+		Account:     "TestDynamicDebit",
+		BalanceType: utils.VOICE,
+		Balance: map[string]interface{}{
+			utils.ID:            "TestDynamicDebitBalance",
+			utils.Value:         2 * float64(time.Second),
+			utils.RatingSubject: "*zero5ms",
+		},
+	}
 	var reply string
 	if err := sSApierRpc.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)

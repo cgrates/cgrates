@@ -117,10 +117,12 @@ func testCDREGetCdrs(t *testing.T) {
 func testCDREExportNotFound(t *testing.T) {
 	var replyExport v1.RplExportedCDRs
 	exportArgs := v1.ArgExportCDRs{
-		ExportPath:     utils.StringPointer("/tmp"),
-		ExportFileName: utils.StringPointer("TestTutITExportCDR.csv"),
-		ExportTemplate: utils.StringPointer("TestTutITExportCDR"),
-		RPCCDRsFilter:  utils.RPCCDRsFilter{},
+		ExportArgs: map[string]interface{}{
+			utils.ExportPath:     "/tmp",
+			utils.ExportFileName: "TestTutITExportCDR.csv",
+			utils.ExportTemplate: "TestTutITExportCDR",
+		},
+		RPCCDRsFilter: utils.RPCCDRsFilter{},
 	}
 	if err := cdreRPC.Call(utils.ApierV1ExportCDRs, exportArgs,
 		&replyExport); err.Error() != utils.ErrNotFound.Error() {
@@ -151,10 +153,12 @@ func testCDREExport(t *testing.T) {
 	// time.Sleep(100 * time.Millisecond)
 	var replyExport v1.RplExportedCDRs
 	exportArgs := v1.ArgExportCDRs{
-		ExportPath:     utils.StringPointer("/tmp"),
-		ExportFileName: utils.StringPointer("TestTutITExportCDR.csv"),
-		ExportTemplate: utils.StringPointer("TestTutITExportCDR"),
-		RPCCDRsFilter:  utils.RPCCDRsFilter{},
+		ExportArgs: map[string]interface{}{
+			utils.ExportPath:     "/tmp",
+			utils.ExportFileName: "TestTutITExportCDR.csv",
+			utils.ExportTemplate: "TestTutITExportCDR",
+		},
+		RPCCDRsFilter: utils.RPCCDRsFilter{},
 	}
 	if err := cdreRPC.Call(utils.ApierV1ExportCDRs, exportArgs, &replyExport); err != nil {
 		t.Error(err)

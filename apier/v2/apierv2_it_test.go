@@ -110,9 +110,11 @@ func TestApierV2itAddBalance(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "dan",
 		BalanceType: utils.MONETARY,
-		BalanceID:   utils.StringPointer(utils.META_DEFAULT),
-		Value:       utils.Float64Pointer(5.0),
-		Weight:      utils.Float64Pointer(10.0),
+		Balance: map[string]interface{}{
+			utils.ID:     utils.META_DEFAULT,
+			utils.Value:  5.0,
+			utils.Weight: 10.0,
+		},
 	}
 	var reply string
 	if err := apierRPC.Call(utils.ApierV2SetBalance, attrs, &reply); err != nil {
@@ -143,14 +145,18 @@ func TestApierV2itSetAction(t *testing.T) {
 }
 
 func TestApierV2itSetAccountActionTriggers(t *testing.T) {
-	attrs := AttrSetAccountActionTriggers{
-		Tenant:         "cgrates.org",
-		Account:        "dan",
-		GroupID:        utils.StringPointer("MONITOR_MAX_BALANCE"),
-		ThresholdType:  utils.StringPointer(utils.TRIGGER_MAX_BALANCE),
-		ThresholdValue: utils.Float64Pointer(50),
-		BalanceType:    utils.StringPointer(utils.MONETARY),
-		ActionsID:      utils.StringPointer("DISABLE_ACCOUNT"),
+	attrs := v1.AttrSetAccountActionTriggers{
+		Tenant:  "cgrates.org",
+		Account: "dan",
+		AttrSetActionTrigger: v1.AttrSetActionTrigger{
+			GroupID: "MONITOR_MAX_BALANCE",
+			ActionTrigger: map[string]interface{}{
+				utils.ThresholdType:  utils.TRIGGER_MAX_BALANCE,
+				utils.ThresholdValue: 50,
+				utils.BalanceType:    utils.MONETARY,
+				utils.ActionsID:      "DISABLE_ACCOUNT",
+			},
+		},
 	}
 	var reply string
 	if err := apierRPC.Call(utils.ApierV2SetAccountActionTriggers, attrs, &reply); err != nil {
@@ -159,16 +165,16 @@ func TestApierV2itSetAccountActionTriggers(t *testing.T) {
 	var ats engine.ActionTriggers
 	if err := apierRPC.Call(utils.ApierV2GetAccountActionTriggers, utils.TenantAccount{Tenant: "cgrates.org", Account: "dan"}, &ats); err != nil {
 		t.Error(err)
-	} else if len(ats) != 1 || ats[0].ID != *attrs.GroupID || ats[0].ThresholdValue != 50.0 {
+	} else if len(ats) != 1 || ats[0].ID != attrs.GroupID || ats[0].ThresholdValue != 50.0 {
 		t.Errorf("Received: %+v", ats)
 	}
-	attrs.ThresholdValue = utils.Float64Pointer(55) // Change the threshold
+	attrs.ActionTrigger[utils.ThresholdValue] = 55 // Change the threshold
 	if err := apierRPC.Call(utils.ApierV2SetAccountActionTriggers, attrs, &reply); err != nil {
 		t.Error(err)
 	}
 	if err := apierRPC.Call(utils.ApierV2GetAccountActionTriggers, utils.TenantAccount{Tenant: "cgrates.org", Account: "dan"}, &ats); err != nil {
 		t.Error(err)
-	} else if len(ats) != 1 || ats[0].ID != *attrs.GroupID || ats[0].ThresholdValue != 55.0 {
+	} else if len(ats) != 1 || ats[0].ID != attrs.GroupID || ats[0].ThresholdValue != 55.0 {
 		t.Errorf("Received: %+v", ats)
 	}
 }
@@ -178,9 +184,11 @@ func TestApierV2itFraudMitigation(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "dan",
 		BalanceType: utils.MONETARY,
-		BalanceID:   utils.StringPointer(utils.META_DEFAULT),
-		Value:       utils.Float64Pointer(60.0),
-		Weight:      utils.Float64Pointer(10.0),
+		Balance: map[string]interface{}{
+			utils.ID:     utils.META_DEFAULT,
+			utils.Value:  60.0,
+			utils.Weight: 10.0,
+		},
 	}
 	var reply string
 	if err := apierRPC.Call(utils.ApierV2SetBalance, attrs, &reply); err != nil {
@@ -195,9 +203,11 @@ func TestApierV2itFraudMitigation(t *testing.T) {
 		t.Fatalf("Received account: %+v", acnt)
 	}
 	attrSetAcnt := AttrSetAccount{
-		Tenant:   "cgrates.org",
-		Account:  "dan",
-		Disabled: utils.BoolPointer(false),
+		Tenant:  "cgrates.org",
+		Account: "dan",
+		ExtraOptions: map[string]bool{
+			utils.Disabled: false,
+		},
 	}
 	if err := apierRPC.Call(utils.ApierV2SetAccount, attrSetAcnt, &reply); err != nil {
 		t.Fatal(err)
@@ -238,7 +248,7 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 	argSetAcnt1 := AttrSetAccount{
 		Tenant:        "cgrates.org",
 		Account:       "TestApierV2itSetAccountWithAP1",
-		ActionPlanIDs: &[]string{argAP1.Id},
+		ActionPlanIDs: []string{argAP1.Id},
 	}
 	acntID := utils.ConcatenatedKey(argSetAcnt1.Tenant, argSetAcnt1.Account)
 	if _, err := dm.GetAccountActionPlans(acntID, true, utils.NonTransactional); err == nil || err != utils.ErrNotFound {
@@ -274,7 +284,7 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 	argSetAcnt2 := AttrSetAccount{
 		Tenant:        "cgrates.org",
 		Account:       "TestApierV2itSetAccountWithAP1",
-		ActionPlanIDs: &[]string{argAP2.Id},
+		ActionPlanIDs: []string{argAP2.Id},
 	}
 	if err := apierRPC.Call(utils.ApierV2SetAccount, argSetAcnt2, &reply); err != nil {
 		t.Fatal(err)
@@ -299,7 +309,7 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 	argSetAcnt2 = AttrSetAccount{
 		Tenant:               "cgrates.org",
 		Account:              "TestApierV2itSetAccountWithAP1",
-		ActionPlanIDs:        &[]string{argAP2.Id},
+		ActionPlanIDs:        []string{argAP2.Id},
 		ActionPlansOverwrite: true,
 	}
 	if err := apierRPC.Call(utils.ApierV2SetAccount, argSetAcnt2, &reply); err != nil {

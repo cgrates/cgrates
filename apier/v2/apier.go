@@ -39,9 +39,9 @@ type ApierV2 struct {
 }
 
 // Call implements rpcclient.RpcClientConnection interface for internal RPC
-func (self *ApierV2) Call(serviceMethod string,
+func (apiv2 *ApierV2) Call(serviceMethod string,
 	args interface{}, reply interface{}) error {
-	return utils.APIerRPCCall(self, serviceMethod, args, reply)
+	return utils.APIerRPCCall(apiv2, serviceMethod, args, reply)
 }
 
 type AttrLoadRatingProfile struct {
@@ -50,14 +50,14 @@ type AttrLoadRatingProfile struct {
 }
 
 // Process dependencies and load a specific rating profile from storDb into dataDb.
-func (self *ApierV2) LoadRatingProfile(attrs AttrLoadRatingProfile, reply *string) error {
+func (apiv2 *ApierV2) LoadRatingProfile(attrs AttrLoadRatingProfile, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	tpRpf := &utils.TPRatingProfile{TPid: attrs.TPid}
-	dbReader, err := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
-		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone,
-		self.CacheS, self.SchedulerS)
+	dbReader, err := engine.NewTpReader(apiv2.DataManager.DataDB(), apiv2.StorDb,
+		attrs.TPid, apiv2.Config.GeneralCfg().DefaultTimezone,
+		apiv2.CacheS, apiv2.SchedulerS)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -74,13 +74,13 @@ type AttrLoadAccountActions struct {
 }
 
 // Process dependencies and load a specific AccountActions profile from storDb into dataDb.
-func (self *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *string) error {
+func (apiv2 *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader, err := engine.NewTpReader(self.DataManager.DataDB(), self.StorDb,
-		attrs.TPid, self.Config.GeneralCfg().DefaultTimezone,
-		self.CacheS, self.SchedulerS)
+	dbReader, err := engine.NewTpReader(apiv2.DataManager.DataDB(), apiv2.StorDb,
+		attrs.TPid, apiv2.Config.GeneralCfg().DefaultTimezone,
+		apiv2.CacheS, apiv2.SchedulerS)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -91,7 +91,7 @@ func (self *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *str
 	}, config.CgrConfig().GeneralCfg().LockingTimeout, attrs.AccountActionsId); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	sched := self.SchedulerService.GetScheduler()
+	sched := apiv2.SchedulerService.GetScheduler()
 	if sched != nil {
 		sched.Reload()
 	}
@@ -99,7 +99,7 @@ func (self *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *str
 	return nil
 }
 
-func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, reply *utils.LoadInstance) error {
+func (apiv2 *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, reply *utils.LoadInstance) error {
 	if len(attrs.FolderPath) == 0 {
 		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "FolderPath")
 	}
@@ -111,9 +111,9 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	} else if !fi.IsDir() {
 		return utils.ErrInvalidPath
 	}
-	loader, err := engine.NewTpReader(self.DataManager.DataDB(),
-		engine.NewFileCSVStorage(utils.CSV_SEP, attrs.FolderPath, attrs.Recursive), "", self.Config.GeneralCfg().DefaultTimezone,
-		self.CacheS, self.SchedulerS)
+	loader, err := engine.NewTpReader(apiv2.DataManager.DataDB(),
+		engine.NewFileCSVStorage(utils.CSV_SEP, attrs.FolderPath, attrs.Recursive), "", apiv2.Config.GeneralCfg().DefaultTimezone,
+		apiv2.CacheS, apiv2.SchedulerS)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -144,7 +144,7 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	if err := loader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if self.SchedulerS != nil {
+	if apiv2.SchedulerS != nil {
 		utils.Logger.Info("ApierV2.LoadTariffPlanFromFolder, reloading scheduler.")
 		if err := loader.ReloadScheduler(true); err != nil {
 			return utils.NewErrServerError(err)
@@ -152,7 +152,7 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	}
 	// release the reader with it's structures
 	loader.Init()
-	loadHistList, err := self.DataManager.DataDB().GetLoadHistory(1, true, utils.NonTransactional)
+	loadHistList, err := apiv2.DataManager.DataDB().GetLoadHistory(1, true, utils.NonTransactional)
 	if err != nil {
 		return err
 	}
@@ -169,11 +169,11 @@ type AttrGetActions struct {
 }
 
 // Retrieves actions attached to specific ActionsId within cache
-func (self *ApierV2) GetActions(attr AttrGetActions, reply *map[string]engine.Actions) error {
+func (apiv2 *ApierV2) GetActions(attr AttrGetActions, reply *map[string]engine.Actions) error {
 	var actionKeys []string
 	var err error
 	if len(attr.ActionIDs) == 0 {
-		if actionKeys, err = self.DataManager.DataDB().GetKeysForPrefix(utils.ACTION_PREFIX); err != nil {
+		if actionKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.ACTION_PREFIX); err != nil {
 			return err
 		}
 	} else {
@@ -203,7 +203,7 @@ func (self *ApierV2) GetActions(attr AttrGetActions, reply *map[string]engine.Ac
 	retActions := make(map[string]engine.Actions)
 	for _, accKey := range limitedActions {
 		key := accKey[len(utils.ACTION_PREFIX):]
-		acts, err := self.DataManager.GetActions(key, false, utils.NonTransactional)
+		acts, err := apiv2.DataManager.GetActions(key, false, utils.NonTransactional)
 		if err != nil {
 			return utils.NewErrServerError(err)
 		}
@@ -221,34 +221,28 @@ type AttrGetDestinations struct {
 	DestinationIDs []string
 }
 
-func (self *ApierV2) GetDestinations(attr AttrGetDestinations, reply *[]*engine.Destination) error {
-	dests := make([]*engine.Destination, 0)
-	if attr.DestinationIDs == nil {
-		return utils.NewErrMandatoryIeMissing("DestIDs")
-	}
+// GetDestinations returns a list of destination based on the destinationIDs given
+func (apiv2 *ApierV2) GetDestinations(attr AttrGetDestinations, reply *[]*engine.Destination) (err error) {
 	if len(attr.DestinationIDs) == 0 {
 		// get all destination ids
-		destIDs, err := self.DataManager.DataDB().GetKeysForPrefix(utils.DESTINATION_PREFIX)
-		if err != nil {
-			return err
+		if attr.DestinationIDs, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.DESTINATION_PREFIX); err != nil {
+			return
 		}
-		for _, destID := range destIDs {
-			attr.DestinationIDs = append(attr.DestinationIDs, destID[len(utils.DESTINATION_PREFIX):])
+		for i, destID := range attr.DestinationIDs {
+			attr.DestinationIDs[i] = destID[len(utils.DESTINATION_PREFIX):]
 		}
 	}
-	for _, destID := range attr.DestinationIDs {
-		dst, err := self.DataManager.GetDestination(destID, false, utils.NonTransactional)
-		if err != nil {
-			return err
+	dests := make([]*engine.Destination, len(attr.DestinationIDs))
+	for i, destID := range attr.DestinationIDs {
+		if dests[i], err = apiv2.DataManager.GetDestination(destID, false, utils.NonTransactional); err != nil {
+			return
 		}
-		dests = append(dests, dst)
 	}
-
 	*reply = dests
-	return nil
+	return
 }
 
-func (self *ApierV2) SetActions(attrs utils.AttrSetActions, reply *string) error {
+func (apiv2 *ApierV2) SetActions(attrs utils.AttrSetActions, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"ActionsId", "Actions"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -262,7 +256,7 @@ func (self *ApierV2) SetActions(attrs utils.AttrSetActions, reply *string) error
 		}
 	}
 	if !attrs.Overwrite {
-		if exists, err := self.DataManager.HasData(utils.ACTION_PREFIX, attrs.ActionsId, ""); err != nil {
+		if exists, err := apiv2.DataManager.HasData(utils.ACTION_PREFIX, attrs.ActionsId, ""); err != nil {
 			return utils.NewErrServerError(err)
 		} else if exists {
 			return utils.ErrExists
@@ -330,11 +324,11 @@ func (self *ApierV2) SetActions(attrs utils.AttrSetActions, reply *string) error
 		}
 		storeActions[idx] = a
 	}
-	if err := self.DataManager.SetActions(attrs.ActionsId, storeActions, utils.NonTransactional); err != nil {
+	if err := apiv2.DataManager.SetActions(attrs.ActionsId, storeActions, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	//generate a loadID for CacheActions and store it in database
-	if err := self.DataManager.SetLoadIDs(map[string]int64{utils.CacheActions: time.Now().UnixNano()}); err != nil {
+	if err := apiv2.DataManager.SetLoadIDs(map[string]int64{utils.CacheActions: time.Now().UnixNano()}); err != nil {
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK

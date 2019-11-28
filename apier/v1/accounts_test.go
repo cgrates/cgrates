@@ -85,13 +85,13 @@ func TestGetAccounts(t *testing.T) {
 	} else if len(accounts) != 2 {
 		t.Errorf("Accounts returned: %+v", accounts)
 	}
-	attrs = utils.AttrGetAccounts{Tenant: "cgrates.org", AccountIds: []string{"account1"}}
+	attrs = utils.AttrGetAccounts{Tenant: "cgrates.org", AccountIDs: []string{"account1"}}
 	if err := apierAcnts.GetAccounts(attrs, &accounts); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if len(accounts) != 1 {
 		t.Errorf("Accounts returned: %+v", accounts)
 	}
-	attrs = utils.AttrGetAccounts{Tenant: "itsyscom.com", AccountIds: []string{"INVALID"}}
+	attrs = utils.AttrGetAccounts{Tenant: "itsyscom.com", AccountIDs: []string{"INVALID"}}
 	if err := apierAcnts.GetAccounts(attrs, &accounts); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if len(accounts) != 0 {
