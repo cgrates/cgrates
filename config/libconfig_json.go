@@ -256,6 +256,12 @@ type FsConnJsonCfg struct {
 	Alias      *string
 }
 
+type RpcConnsJson struct {
+	Strategy *string
+	PoolSize *int
+	Conns    *[]*RemoteHostJson
+}
+
 // Represents one connection instance towards a rater/cdrs server
 type RemoteHostJson struct {
 	Address     *string
