@@ -893,7 +893,7 @@ func testInternalSetAccount(t *testing.T) {
 		utils.AttrSetAccount{
 			Tenant:          "cgrates.org",
 			Account:         "testSetAccount",
-			ActionPlanId:    "AP_PACKAGE_10",
+			ActionPlanID:    "AP_PACKAGE_10",
 			ReloadScheduler: true,
 		}, &reply); err != nil {
 		t.Error(err)

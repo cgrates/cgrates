@@ -181,7 +181,7 @@ func (api *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err er
 				ID: accID,
 			}
 		}
-		if attr.ActionPlanId != "" {
+		if attr.ActionPlanID != "" {
 			_, err := guardian.Guardian.Guard(func() (interface{}, error) {
 				acntAPids, err := api.DataManager.GetAccountActionPlans(accID, false, utils.NonTransactional)
 				if err != nil && err != utils.ErrNotFound {
@@ -190,7 +190,7 @@ func (api *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err er
 				// clean previous action plans
 				for i := 0; i < len(acntAPids); {
 					apID := acntAPids[i]
-					if apID == attr.ActionPlanId {
+					if apID == attr.ActionPlanID {
 						i++ // increase index since we don't remove from slice
 						continue
 					}
@@ -202,8 +202,8 @@ func (api *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err er
 					dirtyActionPlans[apID] = ap
 					acntAPids = append(acntAPids[:i], acntAPids[i+1:]...) // remove the item from the list so we can overwrite the real list
 				}
-				if !utils.IsSliceMember(acntAPids, attr.ActionPlanId) { // Account not yet attached to action plan, do it here
-					ap, err := api.DataManager.GetActionPlan(attr.ActionPlanId, false, utils.NonTransactional)
+				if !utils.IsSliceMember(acntAPids, attr.ActionPlanID) { // Account not yet attached to action plan, do it here
+					ap, err := api.DataManager.GetActionPlan(attr.ActionPlanID, false, utils.NonTransactional)
 					if err != nil {
 						return 0, err
 					}
@@ -211,8 +211,8 @@ func (api *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err er
 						ap.AccountIDs = make(utils.StringMap)
 					}
 					ap.AccountIDs[accID] = true
-					dirtyActionPlans[attr.ActionPlanId] = ap
-					acntAPids = append(acntAPids, attr.ActionPlanId)
+					dirtyActionPlans[attr.ActionPlanID] = ap
+					acntAPids = append(acntAPids, attr.ActionPlanID)
 					// create tasks
 					for _, at := range ap.ActionTimings {
 						if at.IsASAP() {
@@ -252,8 +252,8 @@ func (api *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err er
 			}
 		}
 
-		if attr.ActionTriggersId != "" {
-			atrs, err := api.DataManager.GetActionTriggers(attr.ActionTriggersId, false, utils.NonTransactional)
+		if attr.ActionTriggersID != "" {
+			atrs, err := api.DataManager.GetActionTriggers(attr.ActionTriggersID, false, utils.NonTransactional)
 			if err != nil {
 				return 0, err
 			}
@@ -261,11 +261,11 @@ func (api *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err er
 			ub.InitCounters()
 		}
 
-		if attr.AllowNegative != nil {
-			ub.AllowNegative = *attr.AllowNegative
+		if alNeg, has := attr.ExtraOptions[utils.AllowNegative]; has {
+			ub.AllowNegative = alNeg
 		}
-		if attr.Disabled != nil {
-			ub.Disabled = *attr.Disabled
+		if dis, has := attr.ExtraOptions[utils.Disabled]; has {
+			ub.Disabled = dis
 		}
 		// All prepared, save account
 		if err := api.DataManager.SetAccount(ub); err != nil {
@@ -350,16 +350,16 @@ func (api *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{}
 	}
 	var accountKeys []string
 	var err error
-	if len(attr.AccountIds) == 0 {
+	if len(attr.AccountIDs) == 0 {
 		if accountKeys, err = api.DataManager.DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX + attr.Tenant); err != nil {
 			return err
 		}
 	} else {
-		for _, acntId := range attr.AccountIds {
-			if len(acntId) == 0 { // Source of error returned from redis (key not found)
+		for _, acntID := range attr.AccountIDs {
+			if len(acntID) == 0 { // Source of error returned from redis (key not found)
 				continue
 			}
-			accountKeys = append(accountKeys, utils.ACCOUNT_PREFIX+utils.ConcatenatedKey(attr.Tenant, acntId))
+			accountKeys = append(accountKeys, utils.ACCOUNT_PREFIX+utils.ConcatenatedKey(attr.Tenant, acntID))
 		}
 	}
 	if len(accountKeys) == 0 {
@@ -377,7 +377,10 @@ func (api *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{}
 		if acnt, err := api.DataManager.GetAccount(acntKey[len(utils.ACCOUNT_PREFIX):]); err != nil && err != utils.ErrNotFound { // Not found is not an error here
 			return err
 		} else if acnt != nil {
-			if attr.Disabled != nil && *attr.Disabled != acnt.Disabled {
+			if alNeg, has := attr.Filter[utils.AllowNegative]; has && alNeg != acnt.AllowNegative {
+				continue
+			}
+			if dis, has := attr.Filter[utils.Disabled]; has && dis != acnt.Disabled {
 				continue
 			}
 			retAccounts = append(retAccounts, acnt.AsOldStructure())

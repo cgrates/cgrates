@@ -34,16 +34,16 @@ func (apiv2 *ApierV2) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.A
 	}
 	var accountKeys []string
 	var err error
-	if len(attr.AccountIds) == 0 {
+	if len(attr.AccountIDs) == 0 {
 		if accountKeys, err = apiv2.DataManager.DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX + attr.Tenant); err != nil {
 			return err
 		}
 	} else {
-		for _, acntId := range attr.AccountIds {
-			if len(acntId) == 0 { // Source of error returned from redis (key not found)
+		for _, acntID := range attr.AccountIDs {
+			if len(acntID) == 0 { // Source of error returned from redis (key not found)
 				continue
 			}
-			accountKeys = append(accountKeys, utils.ACCOUNT_PREFIX+utils.ConcatenatedKey(attr.Tenant, acntId))
+			accountKeys = append(accountKeys, utils.ACCOUNT_PREFIX+utils.ConcatenatedKey(attr.Tenant, acntID))
 		}
 	}
 	if len(accountKeys) == 0 {
@@ -67,7 +67,10 @@ func (apiv2 *ApierV2) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.A
 		if acnt, err := apiv2.DataManager.GetAccount(acntKey[len(utils.ACCOUNT_PREFIX):]); err != nil && err != utils.ErrNotFound { // Not found is not an error here
 			return err
 		} else if acnt != nil {
-			if attr.Disabled != nil && *attr.Disabled != acnt.Disabled {
+			if alNeg, has := attr.Filter[utils.AllowNegative]; has && alNeg != acnt.AllowNegative {
+				continue
+			}
+			if dis, has := attr.Filter[utils.Disabled]; has && dis != acnt.Disabled {
 				continue
 			}
 			retAccounts = append(retAccounts, acnt)
@@ -95,8 +98,7 @@ type AttrSetAccount struct {
 	ActionPlansOverwrite   bool
 	ActionTriggerIDs       []string
 	ActionTriggerOverwrite bool
-	AllowNegative          *bool
-	Disabled               *bool
+	ExtraOptions           map[string]bool
 	ReloadScheduler        bool
 }
 
@@ -219,11 +221,11 @@ func (apiv2 *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 		}
 
 		ub.InitCounters()
-		if attr.AllowNegative != nil {
-			ub.AllowNegative = *attr.AllowNegative
+		if alNeg, has := attr.ExtraOptions[utils.AllowNegative]; has {
+			ub.AllowNegative = alNeg
 		}
-		if attr.Disabled != nil {
-			ub.Disabled = *attr.Disabled
+		if dis, has := attr.ExtraOptions[utils.Disabled]; has {
+			ub.Disabled = dis
 		}
 		// All prepared, save account
 		return 0, apiv2.DataManager.SetAccount(ub)

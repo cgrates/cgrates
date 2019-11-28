@@ -203,9 +203,11 @@ func TestApierV2itFraudMitigation(t *testing.T) {
 		t.Fatalf("Received account: %+v", acnt)
 	}
 	attrSetAcnt := AttrSetAccount{
-		Tenant:   "cgrates.org",
-		Account:  "dan",
-		Disabled: utils.BoolPointer(false),
+		Tenant:  "cgrates.org",
+		Account: "dan",
+		ExtraOptions: map[string]bool{
+			utils.Disabled: false,
+		},
 	}
 	if err := apierRPC.Call(utils.ApierV2SetAccount, attrSetAcnt, &reply); err != nil {
 		t.Fatal(err)

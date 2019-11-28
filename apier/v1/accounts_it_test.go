@@ -460,10 +460,10 @@ func testAccITAddBalanceWithNegative(t *testing.T) {
 
 func testAccITGetDisabledAccounts(t *testing.T) {
 	var reply string
-	acnt1 := utils.AttrSetAccount{Tenant: "cgrates.org", Account: "account1", Disabled: utils.BoolPointer(true)}
-	acnt2 := utils.AttrSetAccount{Tenant: "cgrates.org", Account: "account2", Disabled: utils.BoolPointer(false)}
-	acnt3 := utils.AttrSetAccount{Tenant: "cgrates.org", Account: "account3", Disabled: utils.BoolPointer(true)}
-	acnt4 := utils.AttrSetAccount{Tenant: "cgrates.org", Account: "account4", Disabled: utils.BoolPointer(true)}
+	acnt1 := utils.AttrSetAccount{Tenant: "cgrates.org", Account: "account1", ExtraOptions: map[string]bool{utils.Disabled: true}}
+	acnt2 := utils.AttrSetAccount{Tenant: "cgrates.org", Account: "account2", ExtraOptions: map[string]bool{utils.Disabled: false}}
+	acnt3 := utils.AttrSetAccount{Tenant: "cgrates.org", Account: "account3", ExtraOptions: map[string]bool{utils.Disabled: true}}
+	acnt4 := utils.AttrSetAccount{Tenant: "cgrates.org", Account: "account4", ExtraOptions: map[string]bool{utils.Disabled: true}}
 
 	for _, account := range []utils.AttrSetAccount{acnt1, acnt2, acnt3, acnt4} {
 		if err := accRPC.Call(utils.ApierV1SetAccount, account, &reply); err != nil {
@@ -474,7 +474,7 @@ func testAccITGetDisabledAccounts(t *testing.T) {
 	}
 
 	var acnts []*engine.Account
-	if err := accRPC.Call(utils.ApierV2GetAccounts, utils.AttrGetAccounts{Tenant: "cgrates.org", Disabled: utils.BoolPointer(true)},
+	if err := accRPC.Call(utils.ApierV2GetAccounts, utils.AttrGetAccounts{Tenant: "cgrates.org", Filter: map[string]bool{utils.Disabled: true}},
 		&acnts); err != nil {
 		t.Error(err)
 	} else if len(acnts) != 3 {

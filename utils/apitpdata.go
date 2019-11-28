@@ -421,10 +421,10 @@ type AttrGetAccount struct {
 
 type AttrGetAccounts struct {
 	Tenant     string
-	AccountIds []string
+	AccountIDs []string
 	Offset     int // Set the item offset
 	Limit      int // Limit number of items retrieved
-	Disabled   *bool
+	Filter     map[string]bool
 }
 
 type ArgsCache struct {
@@ -900,10 +900,9 @@ type AttrExecuteAction struct {
 type AttrSetAccount struct {
 	Tenant           string
 	Account          string
-	ActionPlanId     string
-	ActionTriggersId string
-	AllowNegative    *bool
-	Disabled         *bool
+	ActionPlanID     string
+	ActionTriggersID string
+	ExtraOptions     map[string]bool
 	ReloadScheduler  bool
 }
 

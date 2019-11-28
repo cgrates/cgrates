@@ -1181,7 +1181,7 @@ func TestApierRemAccountActionTriggers(t *testing.T) {
 // Test here SetAccount
 func TestApierSetAccount(t *testing.T) {
 	reply := ""
-	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan7", ActionPlanId: "ATMS_1", ReloadScheduler: true}
+	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan7", ActionPlanID: "ATMS_1", ReloadScheduler: true}
 	if err := rater.Call(utils.ApierV1SetAccount, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != "OK" {
@@ -1190,7 +1190,7 @@ func TestApierSetAccount(t *testing.T) {
 	reply2 := ""
 	attrs2 := new(utils.AttrSetAccount)
 	*attrs2 = *attrs
-	attrs2.ActionPlanId = "DUMMY_DATA" // Does not exist so it should error when adding triggers on it
+	attrs2.ActionPlanID = "DUMMY_DATA" // Does not exist so it should error when adding triggers on it
 	// Add account with actions timing which does not exist
 	if err := rater.Call(utils.ApierV1SetAccount, attrs2, &reply2); err == nil || reply2 == "OK" { // OK is not welcomed
 		t.Error("Expecting error on ApierV1.SetAccount.", err, reply2)
