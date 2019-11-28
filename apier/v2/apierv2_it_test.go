@@ -148,12 +148,14 @@ func TestApierV2itSetAccountActionTriggers(t *testing.T) {
 	attrs := v1.AttrSetAccountActionTriggers{
 		Tenant:  "cgrates.org",
 		Account: "dan",
-		GroupID: "MONITOR_MAX_BALANCE",
-		ActionTrigger: map[string]interface{}{
-			utils.ThresholdType:  utils.TRIGGER_MAX_BALANCE,
-			utils.ThresholdValue: 50,
-			utils.BalanceType:    utils.MONETARY,
-			utils.ActionsID:      "DISABLE_ACCOUNT",
+		AttrSetActionTrigger: v1.AttrSetActionTrigger{
+			GroupID: "MONITOR_MAX_BALANCE",
+			ActionTrigger: map[string]interface{}{
+				utils.ThresholdType:  utils.TRIGGER_MAX_BALANCE,
+				utils.ThresholdValue: 50,
+				utils.BalanceType:    utils.MONETARY,
+				utils.ActionsID:      "DISABLE_ACCOUNT",
+			},
 		},
 	}
 	var reply string

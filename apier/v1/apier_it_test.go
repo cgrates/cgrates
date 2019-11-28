@@ -1120,11 +1120,13 @@ func TestApierSetAccountActionTriggers(t *testing.T) {
 	}
 	var setReply string
 	setReq := AttrSetAccountActionTriggers{
-		Tenant:   "cgrates.org",
-		Account:  "dan2",
-		UniqueID: reply[0].UniqueID,
-		ActionTrigger: map[string]interface{}{
-			utils.ActivationDate: "2016-02-05T18:00:00Z",
+		Tenant:  "cgrates.org",
+		Account: "dan2",
+		AttrSetActionTrigger: AttrSetActionTrigger{
+			UniqueID: reply[0].UniqueID,
+			ActionTrigger: map[string]interface{}{
+				utils.ActivationDate: "2016-02-05T18:00:00Z",
+			},
 		},
 	}
 	if err := rater.Call(utils.ApierV1ResetAccountActionTriggers, setReq, &setReply); err != nil {
