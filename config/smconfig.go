@@ -33,6 +33,32 @@ func NewDfltRemoteHost() *RemoteHost {
 	return &dfltVal
 }
 
+type RpcConn struct {
+	Strategy string
+	PoolSize int
+	Conns    []*RemoteHost
+}
+
+func (rC *RpcConn) loadFromJsonCfg(jsnCfg *RpcConnsJson) (err error) {
+	if jsnCfg == nil {
+		return
+	}
+	if jsnCfg.Strategy != nil {
+		rC.Strategy = *jsnCfg.Strategy
+	}
+	if jsnCfg.PoolSize != nil {
+		rC.PoolSize = *jsnCfg.PoolSize
+	}
+	if jsnCfg.Conns != nil {
+		rC.Conns = make([]*RemoteHost, len(*jsnCfg.Conns))
+		for idx, jsnHaCfg := range *jsnCfg.Conns {
+			rC.Conns[idx] = NewDfltRemoteHost()
+			rC.Conns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
+	return
+}
+
 // One connection to Rater
 type RemoteHost struct {
 	Address     string

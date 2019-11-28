@@ -46,7 +46,7 @@ var (
 		"Configuration directory path.")
 
 	exec = cgrMigratorFlags.String("exec", "", "fire up automatic migration "+
-		"<*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups|*stordb|*datadb>")
+		"<*set_versions|*cost_details|*accounts|*actions|*action_triggers|*action_plans|*shared_groups|*filters|*stordb|*datadb>")
 	version = cgrMigratorFlags.Bool("version", false, "prints the application version")
 
 	inDataDBType = cgrMigratorFlags.String("datadb_type", dfltCfg.DataDbCfg().DataDbType,

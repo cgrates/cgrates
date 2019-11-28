@@ -125,6 +125,8 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateThresholds()
 		case utils.MetaAttributes:
 			err = m.migrateAttributeProfile()
+		case utils.MetaFilters:
+			err = m.migrateFilters()
 		//only Move
 		case utils.MetaRatingPlans:
 			err = m.migrateRatingPlans()
@@ -136,8 +138,6 @@ func (m *Migrator) Migrate(taskIDs []string) (err error, stats map[string]int) {
 			err = m.migrateReverseDestinations()
 		case utils.MetaTimings:
 			err = m.migrateTimings()
-		case utils.MetaFilters:
-			err = m.migrateFilters()
 		case utils.MetaResources:
 			err = m.migrateResources()
 		case MetaAliases:

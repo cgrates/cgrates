@@ -134,6 +134,7 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.DataFolderPath = "/usr/share/cgrates/"
 	cfg.MaxCallDuration = time.Duration(3) * time.Hour // Hardcoded for now
 
+	cfg.rpcConns = make(map[string]*RpcConn)
 	cfg.generalCfg = new(GeneralCfg)
 	cfg.generalCfg.NodeID = utils.UUIDSha1Prefix()
 	cfg.dataDbCfg = new(DataDbCfg)
@@ -255,6 +256,8 @@ type CGRConfig struct {
 
 	ConfigReloads map[string]chan struct{} // Signals to specific entities that a config reload should occur
 	rldChans      map[string]chan struct{} // index here the channels used for reloads
+
+	rpcConns map[string]*RpcConn
 
 	generalCfg       *GeneralCfg       // General config
 	dataDbCfg        *DataDbCfg        // Database config
@@ -735,6 +738,7 @@ func (cfg *CGRConfig) LazySanityCheck() {
 func (cfg *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	// Load sections out of JSON config, stop on error
 	for _, loadFunc := range []func(*CgrJsonCfg) error{
+		cfg.loadRpcConns,
 		cfg.loadGeneralCfg, cfg.loadCacheCfg, cfg.loadListenCfg,
 		cfg.loadHttpCfg, cfg.loadDataDBCfg, cfg.loadStorDBCfg,
 		cfg.loadFilterSCfg, cfg.loadRalSCfg, cfg.loadSchedulerCfg,
@@ -751,6 +755,15 @@ func (cfg *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 			return
 		}
 	}
+	return
+}
+
+// loadRpcConns loads the RPCConns section of the configuration
+func (cfg *CGRConfig) loadRpcConns(jsnCfg *CgrJsonCfg) (err error) {
+	//var jsnRpcConns map[string]*RpcConnsJson
+	//if jsnRpcConns, err = jsnCfg.RpcConnJsonCfg(); err != nil {
+	//	return
+	//}
 	return
 }
 
