@@ -34,7 +34,7 @@ var (
 		utils.SharedGroups:   "cgr-migrator -exec=*shared_groups",
 		utils.Thresholds:     "cgr-migrator -exec=*thresholds",
 		utils.LoadIDsVrs:     "cgr-migrator -exec=*load_ids",
-		utils.Filters:        "cgr-migrator -exec=*filters",
+		utils.RQF:            "cgr-migrator -exec=*filters",
 	}
 	storDBVers = map[string]string{
 		utils.CostDetails:   "cgr-migrator -exec=*cost_details",

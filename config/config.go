@@ -760,10 +760,11 @@ func (cfg *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 
 // loadRpcConns loads the RPCConns section of the configuration
 func (cfg *CGRConfig) loadRpcConns(jsnCfg *CgrJsonCfg) (err error) {
-	var jsnRpcConns map[string]*RpcConn
-	if jsnRpcConns, err = jsnCfg.RpcConnJsonCfg(); err != nil {
-		return
-	}
+	//var jsnRpcConns map[string]*RpcConnsJson
+	//if jsnRpcConns, err = jsnCfg.RpcConnJsonCfg(); err != nil {
+	//	return
+	//}
+	return
 }
 
 // loadGeneralCfg loads the General section of the configuration
