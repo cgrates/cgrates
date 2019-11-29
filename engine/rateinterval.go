@@ -425,3 +425,48 @@ func (il *RateIntervalTimeSorter) Sort() []*RateInterval {
 	sort.Sort(il)
 	return il.ris
 }
+
+// Clone clones RateInterval
+func (i *RateInterval) Clone() (cln *RateInterval) {
+	if i == nil {
+		return
+	}
+	cln = &RateInterval{
+		Timing: i.Timing.Clone(),
+		Rating: i.Rating.Clone(),
+		Weight: i.Weight,
+	}
+	return
+}
+
+// Clone clones RITiming
+func (rit *RITiming) Clone() (cln *RITiming) {
+	if rit == nil {
+		return
+	}
+	cln = &RITiming{
+		Years:     rit.Years,
+		Months:    rit.Months,
+		MonthDays: rit.MonthDays,
+		WeekDays:  rit.WeekDays,
+		StartTime: rit.StartTime,
+		EndTime:   rit.EndTime,
+	}
+	return
+}
+
+// Clone clones RIRate
+func (rit *RIRate) Clone() (cln *RIRate) {
+	if rit == nil {
+		return
+	}
+	cln = &RIRate{
+		ConnectFee:       rit.ConnectFee,
+		RoundingMethod:   rit.RoundingMethod,
+		RoundingDecimals: rit.RoundingDecimals,
+		MaxCost:          rit.MaxCost,
+		MaxCostStrategy:  rit.MaxCostStrategy,
+		Rates:            rit.Rates,
+	}
+	return cln
+}
