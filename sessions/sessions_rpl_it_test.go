@@ -194,8 +194,8 @@ func TestSessionSRplUpdate(t *testing.T) {
 		argsUpdate, &updtRpl); err != nil {
 		t.Error(err)
 	}
-	if *updtRpl.MaxUsage != usage {
-		t.Errorf("Expecting : %+v, received: %+v", usage, *updtRpl.MaxUsage)
+	if updtRpl.MaxUsage != usage {
+		t.Errorf("Expecting : %+v, received: %+v", usage, updtRpl.MaxUsage)
 	}
 
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated

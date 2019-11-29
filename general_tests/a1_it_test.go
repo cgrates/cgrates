@@ -249,8 +249,8 @@ func testA1itDataSession1(t *testing.T) {
 	if err := a1rpc.Call(utils.SessionSv1UpdateSession, updateArgs, &updateRpl); err != nil {
 		t.Error(err)
 	}
-	if *updateRpl.MaxUsage != usage {
-		t.Errorf("Expected: %+v, received: %+v", usage, *updateRpl.MaxUsage)
+	if updateRpl.MaxUsage != usage {
+		t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage)
 	}
 
 	usage = time.Duration(1 * time.Minute)

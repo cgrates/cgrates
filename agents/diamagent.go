@@ -331,6 +331,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1UpdateSessionReply)
 		err = da.sS.Call(utils.SessionSv1UpdateSession,
 			updateArgs, rply)
+		rply.SetMaxUsageNeeded(updateArgs.UpdateSession)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}

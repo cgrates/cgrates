@@ -1244,9 +1244,10 @@ func TestSessionSV1UpdateSessionReplyAsNavigableMap(t *testing.T) {
 	if rply, _ := v1UpdtRpl.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
-	v1UpdtRpl.MaxUsage = utils.DurationPointer(5 * time.Minute)
+	v1UpdtRpl.MaxUsage = 5 * time.Minute
 	expected.Set([]string{utils.CapMaxUsage},
 		5*time.Minute, false, false)
+	v1UpdtRpl.SetMaxUsageNeeded(true)
 	if rply, _ := v1UpdtRpl.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}

@@ -381,7 +381,7 @@ func testDspSessionUpdate(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
 	}
-	if rply.MaxUsage == nil || *rply.MaxUsage != reqUsage {
+	if rply.MaxUsage != reqUsage {
 		t.Errorf("Unexpected MaxUsage: %v", utils.ToJSON(rply))
 	}
 }
@@ -449,7 +449,7 @@ func testDspSessionUpdate2(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
 	}
-	if rply.MaxUsage == nil || *rply.MaxUsage != reqUsage {
+	if rply.MaxUsage != reqUsage {
 		t.Errorf("Unexpected MaxUsage: %v", utils.ToJSON(rply))
 	}
 }

@@ -481,8 +481,8 @@ func testSSv1ItUpdateSession(t *testing.T) {
 	// in case of prepaid and pseudoprepade we expect a MaxUsage of 5min
 	// and in case of postpaid and rated we expect the value of Usage field
 	// if this was missing the MaxUsage should be equal to MaxCallDuration from config
-	if *rply.MaxUsage != reqUsage {
-		t.Errorf("Unexpected MaxUsage: %v", *rply.MaxUsage)
+	if rply.MaxUsage != reqUsage {
+		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
@@ -771,7 +771,7 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 		t.Fatalf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
 	}
-	if *rply.MaxUsage != reqUsage {
+	if rply.MaxUsage != reqUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	aSessions = make([]*sessions.ExternalSession, 0)

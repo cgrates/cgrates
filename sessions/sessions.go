@@ -2297,8 +2297,17 @@ type V1UpdateSessionArgs struct {
 
 // V1UpdateSessionReply contains options for session update reply
 type V1UpdateSessionReply struct {
-	Attributes *engine.AttrSProcessEventReply
-	MaxUsage   *time.Duration
+	Attributes  *engine.AttrSProcessEventReply
+	MaxUsage    time.Duration
+	getMaxUsage bool
+}
+
+// SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
+func (v1Rply *V1UpdateSessionReply) SetMaxUsageNeeded(getMaxUsage bool) {
+	if v1Rply == nil {
+		return
+	}
+	v1Rply.getMaxUsage = getMaxUsage
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
@@ -2315,8 +2324,8 @@ func (v1Rply *V1UpdateSessionReply) AsNavigableMap(
 			}
 			cgrReply[utils.CapAttributes] = attrs
 		}
-		if v1Rply.MaxUsage != nil {
-			cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
+		if v1Rply.getMaxUsage {
+			cgrReply[utils.CapMaxUsage] = v1Rply.MaxUsage
 		}
 	}
 	return config.NewNavigableMap(cgrReply), nil
@@ -2391,11 +2400,9 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 				return utils.NewErrRALs(err)
 			}
 		}
-		var maxUsage time.Duration
-		if maxUsage, err = sS.updateSession(s, ev.Clone()); err != nil {
+		if rply.MaxUsage, err = sS.updateSession(s, ev.Clone()); err != nil {
 			return utils.NewErrRALs(err)
 		}
-		rply.MaxUsage = &maxUsage
 	}
 	return
 }

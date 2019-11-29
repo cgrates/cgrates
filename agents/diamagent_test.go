@@ -302,7 +302,7 @@ func TestProcessRequest(t *testing.T) {
 						},
 					},
 				},
-				MaxUsage: utils.DurationPointer(10 * time.Second),
+				MaxUsage: 10 * time.Second,
 			}
 			return nil
 		},

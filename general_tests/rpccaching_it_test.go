@@ -395,7 +395,7 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 		args, &rplyFirst); err != nil {
 		t.Error(err)
 	}
-	if *rplyFirst.MaxUsage != reqUsage {
+	if rplyFirst.MaxUsage != reqUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rplyFirst.MaxUsage)
 	}
 

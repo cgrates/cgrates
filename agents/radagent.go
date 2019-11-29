@@ -227,6 +227,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1UpdateSessionReply)
 		err = ra.sessionS.Call(utils.SessionSv1UpdateSession,
 			updateArgs, rply)
+		rply.SetMaxUsageNeeded(updateArgs.UpdateSession)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}

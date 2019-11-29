@@ -182,8 +182,8 @@ func TestSessionsDataLastUsedData(t *testing.T) {
 	if err := sDataRPC.Call(utils.SessionSv1UpdateSession, updateArgs, &updateRpl); err != nil {
 		t.Error(err)
 	}
-	if (*updateRpl.MaxUsage).Nanoseconds() != usage {
-		t.Errorf("Expected: %+v, received: %+v", usage, (*updateRpl.MaxUsage).Nanoseconds())
+	if updateRpl.MaxUsage.Nanoseconds() != usage {
+		t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage.Nanoseconds())
 	}
 
 	eAcntVal = 93184.0 // 100-9
@@ -327,8 +327,8 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	if err := sDataRPC.Call(utils.SessionSv1UpdateSession, updateArgs, &updateRpl); err != nil {
 		t.Error(err)
 	}
-	if (*updateRpl.MaxUsage).Nanoseconds() != usage {
-		t.Errorf("Expected: %+v, received: %+v", usage, (*updateRpl.MaxUsage).Nanoseconds())
+	if updateRpl.MaxUsage.Nanoseconds() != usage {
+		t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage.Nanoseconds())
 	}
 
 	eAcntVal = 87040.000000 // 15MB used
@@ -371,8 +371,8 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	if err := sDataRPC.Call(utils.SessionSv1UpdateSession, updateArgs, &updateRpl); err != nil {
 		t.Error(err)
 	}
-	if (*updateRpl.MaxUsage).Nanoseconds() != usage {
-		t.Errorf("Expected: %+v, received: %+v", usage, (*updateRpl.MaxUsage).Nanoseconds())
+	if updateRpl.MaxUsage.Nanoseconds() != usage {
+		t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage.Nanoseconds())
 	}
 
 	eAcntVal = 87040.000000 // the amount is not modified and there will be 1024 extra left in SMG
@@ -414,8 +414,8 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	if err := sDataRPC.Call(utils.SessionSv1UpdateSession, updateArgs, &updateRpl); err != nil {
 		t.Error(err)
 	}
-	if (*updateRpl.MaxUsage).Nanoseconds() != usage {
-		t.Errorf("Expected: %+v, received: %+v", usage, (*updateRpl.MaxUsage).Nanoseconds())
+	if updateRpl.MaxUsage.Nanoseconds() != usage {
+		t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage.Nanoseconds())
 	}
 
 	eAcntVal = 87040.000000
@@ -669,8 +669,8 @@ func TestSessionsDataTTLExpMultiUpdates(t *testing.T) {
 	if err := sDataRPC.Call(utils.SessionSv1UpdateSession, updateArgs, &updateRpl); err != nil {
 		t.Error(err)
 	}
-	if (*updateRpl.MaxUsage).Nanoseconds() != usage {
-		t.Errorf("Expected: %+v, received: %+v", usage, (*updateRpl.MaxUsage).Nanoseconds())
+	if updateRpl.MaxUsage.Nanoseconds() != usage {
+		t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage.Nanoseconds())
 	}
 
 	eAcntVal = 97280.000000 // 20480
@@ -793,8 +793,8 @@ func TestSessionsDataMultipleDataNoUsage(t *testing.T) {
 	if err := sDataRPC.Call(utils.SessionSv1UpdateSession, updateArgs, &updateRpl); err != nil {
 		t.Error(err)
 	}
-	if (*updateRpl.MaxUsage).Nanoseconds() != usage {
-		t.Errorf("Expected: %+v, received: %+v", usage, (*updateRpl.MaxUsage).Nanoseconds())
+	if updateRpl.MaxUsage.Nanoseconds() != usage {
+		t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage.Nanoseconds())
 	}
 
 	eAcntVal = 100352.000000
@@ -839,8 +839,8 @@ func TestSessionsDataMultipleDataNoUsage(t *testing.T) {
 	if err := sDataRPC.Call(utils.SessionSv1UpdateSession, updateArgs, &updateRpl); err != nil {
 		t.Error(err)
 	}
-	if (*updateRpl.MaxUsage).Nanoseconds() != usage {
-		t.Errorf("Expected: %+v, received: %+v", usage, (*updateRpl.MaxUsage).Nanoseconds())
+	if updateRpl.MaxUsage.Nanoseconds() != usage {
+		t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage.Nanoseconds())
 	}
 
 	eAcntVal = 100352.000000
