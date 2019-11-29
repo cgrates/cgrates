@@ -597,8 +597,6 @@ func TestRPCCDRsFilterAsCDRsFilter(t *testing.T) {
 		NotCosts:               []float64{0.3, 0.4},
 		ExtraFields:            map[string]string{},
 		NotExtraFields:         map[string]string{},
-		OrderIDStart:           Int64Pointer(0),
-		OrderIDEnd:             Int64Pointer(0),
 		SetupTimeStart:         "2020-04-18T11:46:26.371Z",
 		SetupTimeEnd:           "2020-04-18T11:46:26.371Z",
 		AnswerTimeStart:        "2020-04-18T11:46:26.371Z",
@@ -609,9 +607,13 @@ func TestRPCCDRsFilterAsCDRsFilter(t *testing.T) {
 		UpdatedAtEnd:           "2020-04-18T11:46:26.371Z",
 		MinUsage:               "MinUsage",
 		MaxUsage:               "MaxUsage",
-		MinCost:                Float64Pointer(0.),
-		MaxCost:                Float64Pointer(0.),
 		OrderBy:                "OrderBy",
+		ExtraArgs: map[string]interface{}{
+			OrderIDStart: 0,
+			OrderIDEnd:   0,
+			MinCost:      0.,
+			MaxCost:      0.,
+		},
 	}
 	eOut := &CDRsFilter{
 		CGRIDs:                 rpcCDRsFilter.CGRIDs,
@@ -642,12 +644,12 @@ func TestRPCCDRsFilterAsCDRsFilter(t *testing.T) {
 		NotCosts:               rpcCDRsFilter.NotCosts,
 		ExtraFields:            rpcCDRsFilter.ExtraFields,
 		NotExtraFields:         rpcCDRsFilter.NotExtraFields,
-		OrderIDStart:           rpcCDRsFilter.OrderIDStart,
-		OrderIDEnd:             rpcCDRsFilter.OrderIDEnd,
+		OrderIDStart:           Int64Pointer(0),
+		OrderIDEnd:             Int64Pointer(0),
 		MinUsage:               rpcCDRsFilter.MinUsage,
 		MaxUsage:               rpcCDRsFilter.MaxUsage,
-		MinCost:                rpcCDRsFilter.MinCost,
-		MaxCost:                rpcCDRsFilter.MaxCost,
+		MinCost:                Float64Pointer(0.),
+		MaxCost:                Float64Pointer(0.),
 		Paginator:              rpcCDRsFilter.Paginator,
 		OrderBy:                rpcCDRsFilter.OrderBy,
 	}
@@ -662,53 +664,61 @@ func TestRPCCDRsFilterAsCDRsFilter(t *testing.T) {
 	eOut.SetupTimeEnd = &tTime
 	eOut.SetupTimeStart = &tTime
 
-	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
-	if err != nil {
+	if rcv, err = rpcCDRsFilter.AsCDRsFilter(""); err != nil {
 		t.Errorf("ParseTimeDetectLayout error")
-	}
-	if !reflect.DeepEqual(eOut, rcv) {
+	} else if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expected: %s ,received: %s ", ToJSON(eOut), ToJSON(rcv))
 	}
 
+	rpcCDRsFilter.ExtraArgs[MaxCost] = "notFloat64"
+	if rcv, err = rpcCDRsFilter.AsCDRsFilter(""); err == nil {
+		t.Errorf("MaxCost should not be processed")
+	}
+
+	rpcCDRsFilter.ExtraArgs[MinCost] = "notFloat64"
+	if rcv, err = rpcCDRsFilter.AsCDRsFilter(""); err == nil {
+		t.Errorf("MinCost should not be processed")
+	}
+	rpcCDRsFilter.ExtraArgs[OrderIDEnd] = "notInt64"
+	if rcv, err = rpcCDRsFilter.AsCDRsFilter(""); err == nil {
+		t.Errorf("OrderIDEnd should not be processed")
+	}
+	rpcCDRsFilter.ExtraArgs[OrderIDStart] = "notInt64"
+	if rcv, err = rpcCDRsFilter.AsCDRsFilter(""); err == nil {
+		t.Errorf("OrderIDStart should not be processed")
+	}
+
 	rpcCDRsFilter.UpdatedAtEnd = "wrongUpdatedAtEnd"
-	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
-	if err == nil {
-		t.Errorf("Wrong UpdatedAtEnd not processed")
+	if rcv, err = rpcCDRsFilter.AsCDRsFilter(""); err == nil {
+		t.Errorf("UpdatedAtEnd should not be processed")
 	}
 	rpcCDRsFilter.UpdatedAtStart = "wrongUpdatedAtStart"
-	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
-	if err == nil {
-		t.Errorf("Wrong UpdatedAtStart not processed")
+	if rcv, err = rpcCDRsFilter.AsCDRsFilter(""); err == nil {
+		t.Errorf("UpdatedAtStart should not be processed")
 	}
 	rpcCDRsFilter.CreatedAtEnd = "wrongCreatedAtEnd"
-	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
-	if err == nil {
-		t.Errorf("Wrong CreatedAtEnd not processed")
+	if rcv, err = rpcCDRsFilter.AsCDRsFilter(""); err == nil {
+		t.Errorf("CreatedAtEnd should not be processed")
 	}
 	rpcCDRsFilter.CreatedAtStart = "wrongCreatedAtStart"
-	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
-	if err == nil {
-		t.Errorf("Wrong CreatedAtStart not processed")
+	if rcv, err = rpcCDRsFilter.AsCDRsFilter(""); err == nil {
+		t.Errorf("CreatedAtStart should not be processed")
 	}
 	rpcCDRsFilter.AnswerTimeEnd = "wrongAnswerTimeEnd"
-	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
-	if err == nil {
-		t.Errorf("Wrong AnswerTimeEnd not processed")
+	if rcv, err = rpcCDRsFilter.AsCDRsFilter(""); err == nil {
+		t.Errorf("AnswerTimeEnd should not be processed")
 	}
 	rpcCDRsFilter.AnswerTimeStart = "wrongAnswerTimeStart"
-	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
-	if err == nil {
-		t.Errorf("Wrong AnswerTimeStart not processed")
+	if rcv, err = rpcCDRsFilter.AsCDRsFilter(""); err == nil {
+		t.Errorf("AnswerTimeStart should not be processed")
 	}
 	rpcCDRsFilter.SetupTimeEnd = "wrongSetupTimeEnd"
-	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
-	if err == nil {
-		t.Errorf("Wrong SetupTimeEnd not processed")
+	if rcv, err = rpcCDRsFilter.AsCDRsFilter(""); err == nil {
+		t.Errorf("SetupTimeEnd should not be processed")
 	}
 	rpcCDRsFilter.SetupTimeStart = "wrongSetupTimeStart"
-	rcv, err = rpcCDRsFilter.AsCDRsFilter("")
-	if err == nil {
-		t.Errorf("Wrong SetupTimeStart not processed")
+	if rcv, err = rpcCDRsFilter.AsCDRsFilter(""); err == nil {
+		t.Errorf("SetupTimeStart should not be processed")
 	}
 }
 

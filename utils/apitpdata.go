@@ -737,50 +737,47 @@ type CDRsFilter struct {
 // RPCCDRsFilter is a filter used in Rpc calls
 // RPCCDRsFilter is slightly different than CDRsFilter by using string instead of Time filters
 type RPCCDRsFilter struct {
-	CGRIDs                 []string          // If provided, it will filter based on the cgrids present in list
-	NotCGRIDs              []string          // Filter specific CgrIds out
-	RunIDs                 []string          // If provided, it will filter on mediation runid
-	NotRunIDs              []string          // Filter specific runIds out
-	OriginIDs              []string          // If provided, it will filter on OriginIDs
-	NotOriginIDs           []string          // Filter specific OriginIDs out
-	OriginHosts            []string          // If provided, it will filter cdrhost
-	NotOriginHosts         []string          // Filter out specific cdr hosts
-	Sources                []string          // If provided, it will filter cdrsource
-	NotSources             []string          // Filter out specific CDR sources
-	ToRs                   []string          // If provided, filter on TypeOfRecord
-	NotToRs                []string          // Filter specific TORs out
-	RequestTypes           []string          // If provided, it will fiter reqtype
-	NotRequestTypes        []string          // Filter out specific request types
-	Tenants                []string          // If provided, it will filter tenant
-	NotTenants             []string          // If provided, it will filter tenant
-	Categories             []string          // If provided, it will filter çategory
-	NotCategories          []string          // Filter out specific categories
-	Accounts               []string          // If provided, it will filter account
-	NotAccounts            []string          // Filter out specific Accounts
-	Subjects               []string          // If provided, it will filter the rating subject
-	NotSubjects            []string          // Filter out specific subjects
-	DestinationPrefixes    []string          // If provided, it will filter on destination prefix
-	NotDestinationPrefixes []string          // Filter out specific destination prefixes
-	Costs                  []float64         // Query based on costs specified
-	NotCosts               []float64         // Filter out specific costs out from result
-	ExtraFields            map[string]string // Query based on extra fields content
-	NotExtraFields         map[string]string // Filter out based on extra fields content
-	OrderIDStart           *int64            // Export from this order identifier
-	OrderIDEnd             *int64            // Export smaller than this order identifier
-	SetupTimeStart         string            // Start of interval, bigger or equal than configured
-	SetupTimeEnd           string            // End interval, smaller than setupTime
-	AnswerTimeStart        string            // Start of interval, bigger or equal than configured
-	AnswerTimeEnd          string            // End interval, smaller than answerTime
-	CreatedAtStart         string            // Start of interval, bigger or equal than configured
-	CreatedAtEnd           string            // End interval, smaller than
-	UpdatedAtStart         string            // Start of interval, bigger or equal than configured
-	UpdatedAtEnd           string            // End interval, smaller than
-	MinUsage               string            // Start of the usage interval (>=)
-	MaxUsage               string            // End of the usage interval (<)
-	MinCost                *float64          // Start of the cost interval (>=)
-	MaxCost                *float64          // End of the usage interval (<)
-	OrderBy                string            // Ascendent/Descendent
-	Paginator                                // Add pagination
+	CGRIDs                 []string               // If provided, it will filter based on the cgrids present in list
+	NotCGRIDs              []string               // Filter specific CgrIds out
+	RunIDs                 []string               // If provided, it will filter on mediation runid
+	NotRunIDs              []string               // Filter specific runIds out
+	OriginIDs              []string               // If provided, it will filter on OriginIDs
+	NotOriginIDs           []string               // Filter specific OriginIDs out
+	OriginHosts            []string               // If provided, it will filter cdrhost
+	NotOriginHosts         []string               // Filter out specific cdr hosts
+	Sources                []string               // If provided, it will filter cdrsource
+	NotSources             []string               // Filter out specific CDR sources
+	ToRs                   []string               // If provided, filter on TypeOfRecord
+	NotToRs                []string               // Filter specific TORs out
+	RequestTypes           []string               // If provided, it will fiter reqtype
+	NotRequestTypes        []string               // Filter out specific request types
+	Tenants                []string               // If provided, it will filter tenant
+	NotTenants             []string               // If provided, it will filter tenant
+	Categories             []string               // If provided, it will filter çategory
+	NotCategories          []string               // Filter out specific categories
+	Accounts               []string               // If provided, it will filter account
+	NotAccounts            []string               // Filter out specific Accounts
+	Subjects               []string               // If provided, it will filter the rating subject
+	NotSubjects            []string               // Filter out specific subjects
+	DestinationPrefixes    []string               // If provided, it will filter on destination prefix
+	NotDestinationPrefixes []string               // Filter out specific destination prefixes
+	Costs                  []float64              // Query based on costs specified
+	NotCosts               []float64              // Filter out specific costs out from result
+	ExtraFields            map[string]string      // Query based on extra fields content
+	NotExtraFields         map[string]string      // Filter out based on extra fields content
+	SetupTimeStart         string                 // Start of interval, bigger or equal than configured
+	SetupTimeEnd           string                 // End interval, smaller than setupTime
+	AnswerTimeStart        string                 // Start of interval, bigger or equal than configured
+	AnswerTimeEnd          string                 // End interval, smaller than answerTime
+	CreatedAtStart         string                 // Start of interval, bigger or equal than configured
+	CreatedAtEnd           string                 // End interval, smaller than
+	UpdatedAtStart         string                 // Start of interval, bigger or equal than configured
+	UpdatedAtEnd           string                 // End interval, smaller than
+	MinUsage               string                 // Start of the usage interval (>=)
+	MaxUsage               string                 // End of the usage interval (<)
+	OrderBy                string                 // Ascendent/Descendent
+	ExtraArgs              map[string]interface{} // it will contain optional arguments like: OrderIDStart,OrderIDEnd,MinCost and MaxCost
+	Paginator                                     // Add pagination
 }
 
 func (fltr *RPCCDRsFilter) AsCDRsFilter(timezone string) (cdrFltr *CDRsFilter, err error) {
@@ -817,70 +814,94 @@ func (fltr *RPCCDRsFilter) AsCDRsFilter(timezone string) (cdrFltr *CDRsFilter, e
 		NotCosts:               fltr.NotCosts,
 		ExtraFields:            fltr.ExtraFields,
 		NotExtraFields:         fltr.NotExtraFields,
-		OrderIDStart:           fltr.OrderIDStart,
-		OrderIDEnd:             fltr.OrderIDEnd,
 		MinUsage:               fltr.MinUsage,
 		MaxUsage:               fltr.MaxUsage,
-		MinCost:                fltr.MinCost,
-		MaxCost:                fltr.MaxCost,
 		Paginator:              fltr.Paginator,
 		OrderBy:                fltr.OrderBy,
 	}
 	if len(fltr.SetupTimeStart) != 0 {
-		if sTimeStart, err := ParseTimeDetectLayout(fltr.SetupTimeStart, timezone); err != nil {
-			return nil, err
-		} else {
-			cdrFltr.SetupTimeStart = &sTimeStart
+		var sTimeStart time.Time
+		if sTimeStart, err = ParseTimeDetectLayout(fltr.SetupTimeStart, timezone); err != nil {
+			return
 		}
+		cdrFltr.SetupTimeStart = TimePointer(sTimeStart)
 	}
 	if len(fltr.SetupTimeEnd) != 0 {
-		if sTimeEnd, err := ParseTimeDetectLayout(fltr.SetupTimeEnd, timezone); err != nil {
-			return nil, err
-		} else {
-			cdrFltr.SetupTimeEnd = &sTimeEnd
+		var sTimeEnd time.Time
+		if sTimeEnd, err = ParseTimeDetectLayout(fltr.SetupTimeEnd, timezone); err != nil {
+			return
 		}
+		cdrFltr.SetupTimeEnd = TimePointer(sTimeEnd)
 	}
 	if len(fltr.AnswerTimeStart) != 0 {
-		if aTimeStart, err := ParseTimeDetectLayout(fltr.AnswerTimeStart, timezone); err != nil {
-			return nil, err
-		} else {
-			cdrFltr.AnswerTimeStart = &aTimeStart
+		var aTimeStart time.Time
+		if aTimeStart, err = ParseTimeDetectLayout(fltr.AnswerTimeStart, timezone); err != nil {
+			return
 		}
+		cdrFltr.AnswerTimeStart = TimePointer(aTimeStart)
 	}
 	if len(fltr.AnswerTimeEnd) != 0 {
-		if aTimeEnd, err := ParseTimeDetectLayout(fltr.AnswerTimeEnd, timezone); err != nil {
-			return nil, err
-		} else {
-			cdrFltr.AnswerTimeEnd = &aTimeEnd
+		var aTimeEnd time.Time
+		if aTimeEnd, err = ParseTimeDetectLayout(fltr.AnswerTimeEnd, timezone); err != nil {
+			return
 		}
+		cdrFltr.AnswerTimeEnd = TimePointer(aTimeEnd)
 	}
 	if len(fltr.CreatedAtStart) != 0 {
-		if tStart, err := ParseTimeDetectLayout(fltr.CreatedAtStart, timezone); err != nil {
-			return nil, err
-		} else {
-			cdrFltr.CreatedAtStart = &tStart
+		var tStart time.Time
+		if tStart, err = ParseTimeDetectLayout(fltr.CreatedAtStart, timezone); err != nil {
+			return
 		}
+		cdrFltr.CreatedAtStart = TimePointer(tStart)
 	}
 	if len(fltr.CreatedAtEnd) != 0 {
-		if tEnd, err := ParseTimeDetectLayout(fltr.CreatedAtEnd, timezone); err != nil {
-			return nil, err
-		} else {
-			cdrFltr.CreatedAtEnd = &tEnd
+		var tEnd time.Time
+		if tEnd, err = ParseTimeDetectLayout(fltr.CreatedAtEnd, timezone); err != nil {
+			return
 		}
+		cdrFltr.CreatedAtEnd = TimePointer(tEnd)
 	}
 	if len(fltr.UpdatedAtStart) != 0 {
-		if tStart, err := ParseTimeDetectLayout(fltr.UpdatedAtStart, timezone); err != nil {
-			return nil, err
-		} else {
-			cdrFltr.UpdatedAtStart = &tStart
+		var tStart time.Time
+		if tStart, err = ParseTimeDetectLayout(fltr.UpdatedAtStart, timezone); err != nil {
+			return
 		}
+		cdrFltr.UpdatedAtStart = TimePointer(tStart)
 	}
 	if len(fltr.UpdatedAtEnd) != 0 {
-		if tEnd, err := ParseTimeDetectLayout(fltr.UpdatedAtEnd, timezone); err != nil {
-			return nil, err
-		} else {
-			cdrFltr.UpdatedAtEnd = &tEnd
+		var tEnd time.Time
+		if tEnd, err = ParseTimeDetectLayout(fltr.UpdatedAtEnd, timezone); err != nil {
+			return
 		}
+		cdrFltr.UpdatedAtEnd = TimePointer(tEnd)
+	}
+	if oIDstart, has := fltr.ExtraArgs[OrderIDStart]; has {
+		var oID int64
+		if oID, err = IfaceAsTInt64(oIDstart); err != nil {
+			return
+		}
+		cdrFltr.OrderIDStart = Int64Pointer(oID)
+	}
+	if oIDend, has := fltr.ExtraArgs[OrderIDEnd]; has {
+		var oID int64
+		if oID, err = IfaceAsTInt64(oIDend); err != nil {
+			return
+		}
+		cdrFltr.OrderIDEnd = Int64Pointer(oID)
+	}
+	if mcost, has := fltr.ExtraArgs[MinCost]; has {
+		var mc float64
+		if mc, err = IfaceAsFloat64(mcost); err != nil {
+			return
+		}
+		cdrFltr.MinCost = Float64Pointer(mc)
+	}
+	if mcost, has := fltr.ExtraArgs[MaxCost]; has {
+		var mc float64
+		if mc, err = IfaceAsFloat64(mcost); err != nil {
+			return
+		}
+		cdrFltr.MaxCost = Float64Pointer(mc)
 	}
 	return
 }
