@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cdrc
 
 import (
+	"errors"
 	"flag"
 	"io/ioutil"
 	"net/rpc"
@@ -32,6 +33,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	v1 "github.com/cgrates/cgrates/apier/v1"
 )
 
 /*
@@ -47,23 +49,37 @@ README:
   *
 */
 
-var csvCfgPath string
-var csvCfg *config.CGRConfig
-var cdrcCfgs []*config.CdrcCfg
-var cdrcCfg *config.CdrcCfg
-var cdrcRpc *rpc.Client
+var (
+	csvCfgPath string
+	csvCfg     *config.CGRConfig
+	cdrcCfgs   []*config.CdrcCfg
+	cdrcCfg    *config.CdrcCfg
+	cdrcRpc    *rpc.Client
 
-var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-var waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for rater to start and cache")
+	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
+	waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for rater to start and cache")
+	encoding  = flag.String("rpc", utils.MetaJSONrpc, "what encoding whould be uused for rpc comunication")
 
-var fileContent1 = `dbafe9c8614c785a65aabd116dd3959c3c56f7f6,default,*voice,dsafdsaf,*rated,*out,cgrates.org,call,1001,1001,+4986517174963,2013-11-07 08:42:25 +0000 UTC,2013-11-07 08:42:26 +0000 UTC,10s,1.0100,val_extra3,"",val_extra1
+	fileContent1 = `dbafe9c8614c785a65aabd116dd3959c3c56f7f6,default,*voice,dsafdsaf,*rated,*out,cgrates.org,call,1001,1001,+4986517174963,2013-11-07 08:42:25 +0000 UTC,2013-11-07 08:42:26 +0000 UTC,10s,1.0100,val_extra3,"",val_extra1
 dbafe9c8614c785a65aabd116dd3959c3c56f7f7,default,*voice,dsafdsag,*rated,*out,cgrates.org,call,1001,1001,+4986517174964,2013-11-07 09:42:25 +0000 UTC,2013-11-07 09:42:26 +0000 UTC,20s,1.0100,val_extra3,"",val_extra1
 `
 
-var fileContent2 = `accid21;*prepaid;itsyscom.com;1001;086517174963;2013-02-03 19:54:00;62;val_extra3;"";val_extra1
+	fileContent2 = `accid21;*prepaid;itsyscom.com;1001;086517174963;2013-02-03 19:54:00;62;val_extra3;"";val_extra1
 accid22;*postpaid;itsyscom.com;1001;+4986517174963;2013-02-03 19:54:00;123;val_extra3;"";val_extra1
 #accid1;*pseudoprepaid;itsyscom.com;1001;+4986517174963;2013-02-03 19:54:00;12;val_extra3;"";val_extra1
 accid23;*rated;cgrates.org;1001;086517174963;2013-02-03 19:54:00;26;val_extra3;"";val_extra1`
+)
+
+func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
+	switch *encoding {
+	case utils.MetaJSONrpc:
+		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
+	case utils.MetaGOBrpc:
+		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+	default:
+		return nil, errors.New("UNSUPPORTED_RPC")
+	}
+}
 
 func TestCsvITInitConfig(t *testing.T) {
 	var err error
@@ -114,7 +130,7 @@ func TestCsvITStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestCsvITRpcConn(t *testing.T) {
 	var err error
-	cdrcRpc, err = jsonrpc.Dial("tcp", csvCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrcRpc, err = newRPCClient(csvCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -222,7 +238,7 @@ func TestCsvIT2StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestCsvIT2RpcConn(t *testing.T) {
 	var err error
-	cdrcRpc, err = jsonrpc.Dial("tcp", csvCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrcRpc, err = newRPCClient(csvCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -314,7 +330,7 @@ func TestCsvIT3StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestCsvIT3RpcConn(t *testing.T) {
 	var err error
-	cdrcRpc, err = jsonrpc.Dial("tcp", csvCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrcRpc, err = newRPCClient(csvCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -401,7 +417,7 @@ func TestCsvIT4StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestCsvIT4RpcConn(t *testing.T) {
 	var err error
-	cdrcRpc, err = jsonrpc.Dial("tcp", csvCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrcRpc, err = newRPCClient(csvCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -488,21 +504,23 @@ func TestCsvIT5StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestCsvIT5RpcConn(t *testing.T) {
 	var err error
-	cdrcRpc, err = jsonrpc.Dial("tcp", csvCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrcRpc, err = newRPCClient(csvCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
 }
 
 func TestCsvIT5AddFilters(t *testing.T) {
-	filter := &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "FLTR_CDRC_ACC",
-		Rules: []*engine.FilterRule{
-			{
-				Type:      "*string",
-				FieldName: "~*req.3",
-				Values:    []string{"1002"},
+	filter := v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_CDRC_ACC",
+			Rules: []*engine.FilterRule{
+				{
+					Type:      "*string",
+					FieldName: "~*req.3",
+					Values:    []string{"1002"},
+				},
 			},
 		},
 	}
@@ -512,14 +530,16 @@ func TestCsvIT5AddFilters(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	filter2 := &engine.Filter{
-		Tenant: "itsyscom.com",
-		ID:     "FLTR_CDRC_ACC",
-		Rules: []*engine.FilterRule{
-			{
-				Type:      "*string",
-				FieldName: "~*req.3",
-				Values:    []string{"1001"},
+	filter2 := v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "itsyscom.com",
+			ID:     "FLTR_CDRC_ACC",
+			Rules: []*engine.FilterRule{
+				{
+					Type:      "*string",
+					FieldName: "~*req.3",
+					Values:    []string{"1001"},
+				},
 			},
 		},
 	}

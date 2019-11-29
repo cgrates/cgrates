@@ -22,12 +22,12 @@ package cdrc
 import (
 	"io/ioutil"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os"
 	"path"
 	"testing"
 	"time"
 
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -93,7 +93,7 @@ func TestXmlITStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestXmlITRpcConn(t *testing.T) {
 	var err error
-	cdrcXmlRPC, err = jsonrpc.Dial("tcp", xmlCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrcXmlRPC, err = newRPCClient(xmlCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -188,7 +188,7 @@ func TestXmlIT2StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestXmlIT2RpcConn(t *testing.T) {
 	var err error
-	cdrcXmlRPC, err = jsonrpc.Dial("tcp", xmlCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrcXmlRPC, err = newRPCClient(xmlCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -277,7 +277,7 @@ func TestXmlIT3StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestXmlIT3RpcConn(t *testing.T) {
 	var err error
-	cdrcXmlRPC, err = jsonrpc.Dial("tcp", xmlCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrcXmlRPC, err = newRPCClient(xmlCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -366,7 +366,7 @@ func TestXmlIT4StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestXmlIT4RpcConn(t *testing.T) {
 	var err error
-	cdrcXmlRPC, err = jsonrpc.Dial("tcp", xmlCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrcXmlRPC, err = newRPCClient(xmlCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -455,26 +455,28 @@ func TestXmlIT5StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestXmlIT5RpcConn(t *testing.T) {
 	var err error
-	cdrcXmlRPC, err = jsonrpc.Dial("tcp", xmlCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrcXmlRPC, err = newRPCClient(xmlCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
 }
 
 func TestXmlIT5AddFilters(t *testing.T) {
-	filter := &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "FLTR_XML",
-		Rules: []*engine.FilterRule{
-			{
-				Type:      "*string",
-				FieldName: "~*req.broadWorksCDR.cdrData.basicModule.userNumber",
-				Values:    []string{"1002"},
-			},
-			{
-				Type:      "*string",
-				FieldName: "~*req.broadWorksCDR.cdrData.headerModule.type",
-				Values:    []string{"Normal"},
+	filter := v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_XML",
+			Rules: []*engine.FilterRule{
+				{
+					Type:      "*string",
+					FieldName: "~*req.broadWorksCDR.cdrData.basicModule.userNumber",
+					Values:    []string{"1002"},
+				},
+				{
+					Type:      "*string",
+					FieldName: "~*req.broadWorksCDR.cdrData.headerModule.type",
+					Values:    []string{"Normal"},
+				},
 			},
 		},
 	}
@@ -569,7 +571,7 @@ func TestXmlIT6StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestXmlIT6RpcConn(t *testing.T) {
 	var err error
-	cdrcXmlRPC, err = jsonrpc.Dial("tcp", xmlCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrcXmlRPC, err = newRPCClient(xmlCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

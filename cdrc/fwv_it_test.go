@@ -23,12 +23,12 @@ package cdrc
 import (
 	"io/ioutil"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os"
 	"path"
 	"testing"
 	"time"
 
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -120,7 +120,7 @@ func TestFwvitStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestFwvitRpcConn(t *testing.T) {
 	var err error
-	fwvRpc, err = jsonrpc.Dial("tcp", fwvCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	fwvRpc, err = newRPCClient(fwvCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -221,7 +221,7 @@ func TestFwvit2StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestFwvit2RpcConn(t *testing.T) {
 	var err error
-	fwvRpc, err = jsonrpc.Dial("tcp", fwvCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	fwvRpc, err = newRPCClient(fwvCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -317,21 +317,23 @@ func TestFwvit3StartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestFwvit3RpcConn(t *testing.T) {
 	var err error
-	fwvRpc, err = jsonrpc.Dial("tcp", fwvCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	fwvRpc, err = newRPCClient(fwvCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
 }
 
 func TestFwvit3AddFilters(t *testing.T) {
-	filter := &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "FLTR_FWV",
-		Rules: []*engine.FilterRule{
-			{
-				Type:      "*string",
-				FieldName: "0-10",
-				Values:    []string{"CDR0000010"},
+	filter := v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_FWV",
+			Rules: []*engine.FilterRule{
+				{
+					Type:      "*string",
+					FieldName: "0-10",
+					Values:    []string{"CDR0000010"},
+				},
 			},
 		},
 	}

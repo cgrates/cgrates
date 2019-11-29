@@ -22,7 +22,6 @@ package cdrc
 import (
 	"io/ioutil"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os"
 	"path"
 	"testing"
@@ -113,7 +112,7 @@ func TestFlatstoreitStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestFlatstoreitRpcConn(t *testing.T) {
 	var err error
-	flatstoreRpc, err = jsonrpc.Dial("tcp", flatstoreCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	flatstoreRpc, err = newRPCClient(flatstoreCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

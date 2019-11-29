@@ -11,9 +11,9 @@ ap2=$?
 echo 'go test github.com/cgrates/cgrates/engine  -tags=integration -rpc=*gob'
 go test github.com/cgrates/cgrates/engine -tags=integration -rpc=*gob
 en=$?
-# echo 'go test github.com/cgrates/cgrates/cdrc -tags=integration'
-# go test github.com/cgrates/cgrates/cdrc -tags=integration
-# cdrc=$?
+echo 'go test github.com/cgrates/cgrates/cdrc -tags=integration -rpc=*gob'
+go test github.com/cgrates/cgrates/cdrc -tags=integration -rpc=*gob
+cdrc=$?
 # echo 'go test github.com/cgrates/cgrates/ers -tags=integration'
 # go test github.com/cgrates/cgrates/ers -tags=integration
 # ers=$?
@@ -48,4 +48,4 @@ en=$?
 # go test github.com/cgrates/cgrates/apier/v1 -tags=offline
 # offline=$?
 
-exit $gen && $ap1 && $ap2 && $en #&& $cdrc && $cfg && $utl && $gnr && $agts && $smg && $mgr && $dis && $lds && $ers && $srv && $offline
+exit $gen && $ap1 && $ap2 && $en && $cdrc #&& $cfg && $utl && $gnr && $agts && $smg && $mgr && $dis && $lds && $ers && $srv && $offline
