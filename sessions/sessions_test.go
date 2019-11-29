@@ -1160,16 +1160,17 @@ func TestSessionSV1AuthorizeReplyAsNavigableMap(t *testing.T) {
 	if rply, _ := v1AuthRpl.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
-	v1AuthRpl.MaxUsage = utils.DurationPointer(5 * time.Minute)
+	v1AuthRpl.MaxUsage = 5 * time.Minute
 	expected.Set([]string{utils.CapMaxUsage},
 		5*time.Minute, false, false)
+	v1AuthRpl.SetMaxUsageNeeded(true)
 	if rply, _ := v1AuthRpl.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	v1AuthRpl = &V1AuthorizeReply{
 		Attributes:         attrs,
 		ResourceAllocation: utils.StringPointer("ResGr1"),
-		MaxUsage:           utils.DurationPointer(5 * time.Minute),
+		MaxUsage:           5 * time.Minute,
 		Suppliers:          splrs,
 		ThresholdIDs:       thIDs,
 		StatQueueIDs:       statIDs,
@@ -1182,6 +1183,7 @@ func TestSessionSV1AuthorizeReplyAsNavigableMap(t *testing.T) {
 		utils.CapThresholds:         *thIDs,
 		utils.CapStatQueues:         *statIDs,
 	})
+	v1AuthRpl.SetMaxUsageNeeded(true)
 	if rply, _ := v1AuthRpl.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
@@ -1202,16 +1204,17 @@ func TestSessionSV1InitSessionReplyAsNavigableMap(t *testing.T) {
 	if rply, _ := v1InitRpl.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
-	v1InitRpl.MaxUsage = utils.DurationPointer(5 * time.Minute)
+	v1InitRpl.MaxUsage = 5 * time.Minute
 	expected.Set([]string{utils.CapMaxUsage},
 		5*time.Minute, false, false)
+	v1InitRpl.SetMaxUsageNeeded(true)
 	if rply, _ := v1InitRpl.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	v1InitRpl = &V1InitSessionReply{
 		Attributes:         attrs,
 		ResourceAllocation: utils.StringPointer("ResGr1"),
-		MaxUsage:           utils.DurationPointer(5 * time.Minute),
+		MaxUsage:           5 * time.Minute,
 		ThresholdIDs:       thIDs,
 		StatQueueIDs:       statIDs,
 	}
@@ -1222,6 +1225,7 @@ func TestSessionSV1InitSessionReplyAsNavigableMap(t *testing.T) {
 		utils.CapThresholds:         *thIDs,
 		utils.CapStatQueues:         *statIDs,
 	})
+	v1InitRpl.SetMaxUsageNeeded(true)
 	if rply, _ := v1InitRpl.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
@@ -1240,9 +1244,10 @@ func TestSessionSV1UpdateSessionReplyAsNavigableMap(t *testing.T) {
 	if rply, _ := v1UpdtRpl.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
-	v1UpdtRpl.MaxUsage = utils.DurationPointer(5 * time.Minute)
+	v1UpdtRpl.MaxUsage = 5 * time.Minute
 	expected.Set([]string{utils.CapMaxUsage},
 		5*time.Minute, false, false)
+	v1UpdtRpl.SetMaxUsageNeeded(true)
 	if rply, _ := v1UpdtRpl.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
@@ -1261,8 +1266,9 @@ func TestSessionSV1ProcessMessageReplyAsNavigableMap(t *testing.T) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 
-	v1PrcEvRpl.MaxUsage = utils.DurationPointer(5 * time.Minute)
+	v1PrcEvRpl.MaxUsage = 5 * time.Minute
 	expected.Set([]string{utils.CapMaxUsage}, 5*time.Minute, false, false)
+	v1PrcEvRpl.SetMaxUsageNeeded(true)
 	if rply, _ := v1PrcEvRpl.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
@@ -1287,7 +1293,7 @@ func TestSessionSV1ProcessMessageReplyAsNavigableMap(t *testing.T) {
 	expected.Set([]string{utils.CapSuppliers}, tmpSuppliers.AsNavigableMap(), false, false)
 	expected.Set([]string{utils.CapThresholds}, tmpTresholdIDs, false, false)
 	expected.Set([]string{utils.CapStatQueues}, tmpStatQueueIDs, false, false)
-
+	v1PrcEvRpl.SetMaxUsageNeeded(true)
 	if rply, _ := v1PrcEvRpl.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
@@ -1301,8 +1307,9 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	//max usage check
-	v1per.MaxUsage = utils.DurationPointer(5 * time.Minute)
+	v1per.MaxUsage = 5 * time.Minute
 	expected.Set([]string{utils.CapMaxUsage}, 5*time.Minute, false, false)
+	v1per.SetMaxUsageNeeded(true)
 	if rply, _ := v1per.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}

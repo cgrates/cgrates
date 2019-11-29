@@ -176,16 +176,14 @@ func (sm *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 			}
 		}
 	}
-	if authReply.MaxUsage != nil {
-		if *authReply.MaxUsage != -1 { // For calls different than unlimited, set limits
-			if *authReply.MaxUsage == 0 {
-				sm.unparkCall(fsev.GetUUID(), connIdx,
-					fsev.GetCallDestNr(utils.META_DEFAULT), utils.ErrInsufficientCredit.Error())
-				return
-			}
-			sm.setMaxCallDuration(fsev.GetUUID(), connIdx,
-				*authReply.MaxUsage, fsev.GetCallDestNr(utils.META_DEFAULT))
+	if authArgs.GetMaxUsage {
+		if authReply.MaxUsage == 0 {
+			sm.unparkCall(fsev.GetUUID(), connIdx,
+				fsev.GetCallDestNr(utils.META_DEFAULT), utils.ErrInsufficientCredit.Error())
+			return
 		}
+		sm.setMaxCallDuration(fsev.GetUUID(), connIdx,
+			authReply.MaxUsage, fsev.GetCallDestNr(utils.META_DEFAULT))
 	}
 	if authReply.ResourceAllocation != nil {
 		if _, err := sm.conns[connIdx].SendApiCmd(fmt.Sprintf("uuid_setvar %s %s %s\n\n",

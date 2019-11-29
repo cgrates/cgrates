@@ -591,6 +591,10 @@ const (
 	ActivationDate              = "ActivationDate"
 	ExpirationDate              = "ExpirationDate"
 	MinQueuedItems              = "MinQueuedItems"
+	OrderIDStart                = "OrderIDStart"
+	OrderIDEnd                  = "OrderIDEnd"
+	MinCost                     = "MinCost"
+	MaxCost                     = "MaxCost"
 )
 
 // Migrator Action

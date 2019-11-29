@@ -121,8 +121,8 @@ func TestSessionsVoiceMonetaryRefund(t *testing.T) {
 		initArgs, &initRpl); err != nil {
 		t.Error(err)
 	}
-	if *initRpl.MaxUsage != usage {
-		t.Errorf("Expecting : %+v, received: %+v", usage, *initRpl.MaxUsage)
+	if initRpl.MaxUsage != usage {
+		t.Errorf("Expecting : %+v, received: %+v", usage, initRpl.MaxUsage)
 	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
@@ -198,8 +198,8 @@ func TestSessionsVoiceVoiceRefund(t *testing.T) {
 		initArgs, &initRpl); err != nil {
 		t.Error(err)
 	}
-	if *initRpl.MaxUsage != usage {
-		t.Errorf("Expecting : %+v, received: %+v", usage, *initRpl.MaxUsage)
+	if initRpl.MaxUsage != usage {
+		t.Errorf("Expecting : %+v, received: %+v", usage, initRpl.MaxUsage)
 	}
 
 	var acnt *engine.Account
@@ -283,8 +283,8 @@ func TestSessionsVoiceMixedRefund(t *testing.T) {
 		initArgs, &initRpl); err != nil {
 		t.Error(err)
 	}
-	if *initRpl.MaxUsage != usage {
-		t.Errorf("Expecting : %+v, received: %+v", usage, *initRpl.MaxUsage)
+	if initRpl.MaxUsage != usage {
+		t.Errorf("Expecting : %+v, received: %+v", usage, initRpl.MaxUsage)
 	}
 
 	//var acnt *engine.Account
@@ -380,8 +380,8 @@ func TestSessionsVoiceLastUsed(t *testing.T) {
 		initArgs, &initRpl); err != nil {
 		t.Error(err)
 	}
-	if *initRpl.MaxUsage != usage {
-		t.Errorf("Expecting : %+v, received: %+v", usage, *initRpl.MaxUsage)
+	if initRpl.MaxUsage != usage {
+		t.Errorf("Expecting : %+v, received: %+v", usage, initRpl.MaxUsage)
 	}
 
 	eAcntVal = 7.39002
@@ -417,8 +417,8 @@ func TestSessionsVoiceLastUsed(t *testing.T) {
 	if err := sessionsRPC.Call(utils.SessionSv1UpdateSession, updateArgs, &updateRpl); err != nil {
 		t.Error(err)
 	}
-	if *updateRpl.MaxUsage != usage {
-		t.Errorf("Expected: %+v, received: %+v", usage, *updateRpl.MaxUsage)
+	if updateRpl.MaxUsage != usage {
+		t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage)
 	}
 
 	eAcntVal = 7.09005
@@ -455,8 +455,8 @@ func TestSessionsVoiceLastUsed(t *testing.T) {
 	if err := sessionsRPC.Call(utils.SessionSv1UpdateSession, updateArgs, &updateRpl); err != nil {
 		t.Error(err)
 	}
-	if *updateRpl.MaxUsage != usage {
-		t.Errorf("Expected: %+v, received: %+v", usage, *updateRpl.MaxUsage)
+	if updateRpl.MaxUsage != usage {
+		t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage)
 	}
 
 	eAcntVal = 6.590100
@@ -541,8 +541,8 @@ func TestSessionsVoiceLastUsedEnd(t *testing.T) {
 		initArgs, &initRpl); err != nil {
 		t.Error(err)
 	}
-	if *initRpl.MaxUsage != usage {
-		t.Errorf("Expected: %+v, received: %+v", usage, *initRpl.MaxUsage)
+	if initRpl.MaxUsage != usage {
+		t.Errorf("Expected: %+v, received: %+v", usage, initRpl.MaxUsage)
 	}
 
 	eAcntVal = 6.190020
@@ -579,8 +579,8 @@ func TestSessionsVoiceLastUsedEnd(t *testing.T) {
 		updateArgs, &updateRpl); err != nil {
 		t.Error(err)
 	}
-	if *updateRpl.MaxUsage != usage {
-		t.Errorf("Expected: %+v, received: %+v", usage, *updateRpl.MaxUsage)
+	if updateRpl.MaxUsage != usage {
+		t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage)
 	}
 
 	eAcntVal = 6.090030
@@ -663,8 +663,8 @@ func TestSessionsVoiceLastUsedNotFixed(t *testing.T) {
 		initArgs, &initRpl); err != nil {
 		t.Error(err)
 	}
-	if *initRpl.MaxUsage != usage {
-		t.Errorf("Expected: %+v, received: %+v", usage, *initRpl.MaxUsage)
+	if initRpl.MaxUsage != usage {
+		t.Errorf("Expected: %+v, received: %+v", usage, initRpl.MaxUsage)
 	}
 
 	eAcntVal = 5.190020
@@ -701,8 +701,8 @@ func TestSessionsVoiceLastUsedNotFixed(t *testing.T) {
 	if err := sessionsRPC.Call(utils.SessionSv1UpdateSession, updateArgs, &updateRpl); err != nil {
 		t.Error(err)
 	}
-	if *updateRpl.MaxUsage != usage {
-		t.Errorf("Expected: %+v, received: %+v", usage, *updateRpl.MaxUsage)
+	if updateRpl.MaxUsage != usage {
+		t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage)
 	}
 
 	eAcntVal = 5.123360
@@ -788,8 +788,8 @@ func TestSessionsVoiceSessionTTL(t *testing.T) {
 	}
 
 	time.Sleep(time.Duration(30 * time.Millisecond))
-	if *initRpl.MaxUsage != usage {
-		t.Errorf("Expected: %+v, received: %+v", usage, *initRpl.MaxUsage)
+	if initRpl.MaxUsage != usage {
+		t.Errorf("Expected: %+v, received: %+v", usage, initRpl.MaxUsage)
 	}
 
 	var aSessions []*ExternalSession
@@ -842,8 +842,8 @@ func TestSessionsVoiceSessionTTL(t *testing.T) {
 		t.Fatal(err)
 	}
 	time.Sleep(time.Duration(10 * time.Millisecond))
-	if *updateRpl.MaxUsage != usage {
-		t.Errorf("Expected: %+v, received: %+v", usage, *updateRpl.MaxUsage)
+	if updateRpl.MaxUsage != usage {
+		t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage)
 	}
 
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
@@ -949,8 +949,8 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(20 * time.Millisecond))
-	if *initRpl.MaxUsage != usage {
-		t.Errorf("Expected: %+v, received: %+v", usage, *initRpl.MaxUsage)
+	if initRpl.MaxUsage != usage {
+		t.Errorf("Expected: %+v, received: %+v", usage, initRpl.MaxUsage)
 	}
 
 	var aSessions []*ExternalSession
@@ -1006,8 +1006,8 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 		updateArgs, &updateRpl); err != nil {
 		t.Error(err)
 	}
-	if *updateRpl.MaxUsage != usage {
-		t.Errorf("Expected: %+v, received: %+v", usage, *updateRpl.MaxUsage)
+	if updateRpl.MaxUsage != usage {
+		t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage)
 	}
 
 	time.Sleep(time.Duration(20) * time.Millisecond)
@@ -1121,8 +1121,8 @@ func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		initArgs, &initRpl); err != nil {
 		t.Error(err)
 	}
-	if *initRpl.MaxUsage != usage {
-		t.Errorf("Expected: %+v, received: %+v", usage, *initRpl.MaxUsage)
+	if initRpl.MaxUsage != usage {
+		t.Errorf("Expected: %+v, received: %+v", usage, initRpl.MaxUsage)
 	}
 
 	time.Sleep(time.Duration(20) * time.Millisecond)
@@ -1179,8 +1179,8 @@ func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		updateArgs, &updateRpl); err != nil {
 		t.Error(err)
 	}
-	if *updateRpl.MaxUsage != usage {
-		t.Errorf("Expected: %+v, received: %+v", usage, *updateRpl.MaxUsage)
+	if updateRpl.MaxUsage != usage {
+		t.Errorf("Expected: %+v, received: %+v", usage, updateRpl.MaxUsage)
 	}
 
 	time.Sleep(time.Duration(20) * time.Millisecond)

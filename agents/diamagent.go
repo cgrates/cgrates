@@ -300,6 +300,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1AuthorizeReply)
 		err = da.sS.Call(utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
+		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
@@ -317,6 +318,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1InitSessionReply)
 		err = da.sS.Call(utils.SessionSv1InitiateSession,
 			initArgs, rply)
+		rply.SetMaxUsageNeeded(initArgs.InitSession)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
@@ -329,6 +331,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1UpdateSessionReply)
 		err = da.sS.Call(utils.SessionSv1UpdateSession,
 			updateArgs, rply)
+		rply.SetMaxUsageNeeded(updateArgs.UpdateSession)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
@@ -366,9 +369,10 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			msgArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		} else if rply.MaxUsage != nil {
-			cgrEv.Event[utils.Usage] = *rply.MaxUsage // make sure the CDR reflects the debit
+		} else if msgArgs.Debit {
+			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
+		rply.SetMaxUsageNeeded(msgArgs.Debit)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
@@ -379,14 +383,18 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			ArgDispatcher: cgrArgs.ArgDispatcher,
 			Paginator:     *cgrArgs.SupplierPaginator,
 		}
+		needMaxUsage := reqProcessor.Flags.HasKey(utils.MetaAuth) ||
+			reqProcessor.Flags.HasKey(utils.MetaInit) ||
+			reqProcessor.Flags.HasKey(utils.MetaUpdate)
 		rply := new(sessions.V1ProcessEventReply)
 		err = da.sS.Call(utils.SessionSv1ProcessEvent,
 			evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		} else if rply.MaxUsage != nil {
-			cgrEv.Event[utils.Usage] = *rply.MaxUsage // make sure the CDR reflects the debit
+		} else if needMaxUsage {
+			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
+		rply.SetMaxUsageNeeded(needMaxUsage)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}

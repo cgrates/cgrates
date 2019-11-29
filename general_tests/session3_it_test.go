@@ -147,7 +147,7 @@ func testSes3ItProcessEvent(t *testing.T) {
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}
-	if *rply.MaxUsage != initUsage {
+	if rply.MaxUsage != initUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceAllocation != "RES_ACNT_1001" {
@@ -337,7 +337,7 @@ func testSes3ItInitAfterTerminate(t *testing.T) {
 		args1, &rply1); err != nil {
 		t.Error(err)
 		return
-	} else if *rply1.MaxUsage != 0 {
+	} else if rply1.MaxUsage != 0 {
 		t.Errorf("Unexpected MaxUsage: %v", rply1.MaxUsage)
 	}
 	time.Sleep(5 * time.Millisecond)

@@ -192,12 +192,10 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 			}
 		}
 	}
-	if authReply.MaxUsage != nil {
-		if *authReply.MaxUsage == time.Duration(0) {
+	if authArgs.GetMaxUsage {
+		if authReply.MaxUsage == time.Duration(0) {
 			sma.hangupChannel(ev.ChannelID(), "")
 			return
-		} else if *authReply.MaxUsage == time.Duration(-1) {
-			*authReply.MaxUsage = sma.cgrCfg.SessionSCfg().MaxCallDuration
 		}
 		//  Set absolute timeout for non-postpaid calls
 		if !sma.setChannelVar(ev.ChannelID(), CGRMaxSessionTime,
@@ -271,7 +269,7 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 			fmt.Sprintf("<%s> error: %s when attempting to initiate session for channelID: %s",
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
 		return
-	} else if initReply.MaxUsage != nil && *initReply.MaxUsage == time.Duration(0) {
+	} else if initSessionArgs.InitSession && initReply.MaxUsage == time.Duration(0) {
 		sma.hangupChannel(ev.ChannelID(), "")
 		return
 	}

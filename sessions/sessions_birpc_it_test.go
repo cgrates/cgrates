@@ -166,8 +166,8 @@ func TestSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	}
 	time.Sleep(10 * time.Millisecond) // give some time to allow the session to be created
 	expMaxUsage := 3 * time.Hour      // MaxCallDuration from config
-	if *initRpl.MaxUsage != expMaxUsage {
-		t.Errorf("Expecting : %+v, received: %+v", expMaxUsage, *initRpl.MaxUsage)
+	if initRpl.MaxUsage != expMaxUsage {
+		t.Errorf("Expecting : %+v, received: %+v", expMaxUsage, initRpl.MaxUsage)
 	}
 	// Make sure we are receiving a disconnect event
 	select {
@@ -289,8 +289,8 @@ func TestSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 	}
 
 	expMaxUsage := 3 * time.Hour // MaxCallDuration from config
-	if *initRpl.MaxUsage != expMaxUsage {
-		t.Errorf("Expecting : %+v, received: %+v", expMaxUsage, *initRpl.MaxUsage)
+	if initRpl.MaxUsage != expMaxUsage {
+		t.Errorf("Expecting : %+v, received: %+v", expMaxUsage, initRpl.MaxUsage)
 	}
 
 	time.Sleep(time.Duration(10 * time.Millisecond)) // Give time for  debits to occur

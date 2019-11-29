@@ -230,8 +230,8 @@ func testDspSessionAuthorize(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if *rply.MaxUsage != authUsage.Seconds() {
-		t.Errorf("Unexpected MaxUsage: %v", *rply.MaxUsage)
+	if rply.MaxUsage != authUsage.Seconds() {
+		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceAllocation == "" {
 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
@@ -281,8 +281,8 @@ func testDspSessionInit(t *testing.T) {
 		argsInit, &rply); err != nil {
 		t.Fatal(err)
 	}
-	if *rply.MaxUsage != initUsage.Seconds() {
-		t.Errorf("Unexpected MaxUsage: %v", *rply.MaxUsage)
+	if rply.MaxUsage != initUsage.Seconds() {
+		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceAllocation != "RES_ACNT_1001" {
 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
@@ -381,7 +381,7 @@ func testDspSessionUpdate(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
 	}
-	if rply.MaxUsage == nil || *rply.MaxUsage != reqUsage {
+	if rply.MaxUsage != reqUsage {
 		t.Errorf("Unexpected MaxUsage: %v", utils.ToJSON(rply))
 	}
 }
@@ -449,7 +449,7 @@ func testDspSessionUpdate2(t *testing.T) {
 		t.Errorf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
 	}
-	if rply.MaxUsage == nil || *rply.MaxUsage != reqUsage {
+	if rply.MaxUsage != reqUsage {
 		t.Errorf("Unexpected MaxUsage: %v", utils.ToJSON(rply))
 	}
 }
@@ -553,7 +553,7 @@ func testDspSessionProcessEvent(t *testing.T) {
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}
-	if *rply.MaxUsage != initUsage {
+	if rply.MaxUsage != initUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceAllocation != "RES_ACNT_1001" {
@@ -620,7 +620,7 @@ func testDspSessionProcessEvent2(t *testing.T) {
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}
-	if *rply.MaxUsage != initUsage {
+	if rply.MaxUsage != initUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceAllocation != "RES_ACNT_1001" {
