@@ -1307,8 +1307,9 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 	//max usage check
-	v1per.MaxUsage = utils.DurationPointer(5 * time.Minute)
+	v1per.MaxUsage = 5 * time.Minute
 	expected.Set([]string{utils.CapMaxUsage}, 5*time.Minute, false, false)
+	v1per.SetMaxUsageNeeded(true)
 	if rply, _ := v1per.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}

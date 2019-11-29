@@ -2937,12 +2937,21 @@ type V1ProcessEventArgs struct {
 
 // V1ProcessEventReply is the reply for the ProcessEvent API
 type V1ProcessEventReply struct {
-	MaxUsage        *time.Duration
+	MaxUsage        time.Duration
 	ResourceMessage *string
 	Attributes      *engine.AttrSProcessEventReply
 	Suppliers       *engine.SortedSuppliers
 	ThresholdIDs    *[]string
 	StatQueueIDs    *[]string
+	getMaxUsage     bool
+}
+
+// SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
+func (v1Rply *V1ProcessEventReply) SetMaxUsageNeeded(getMaxUsage bool) {
+	if v1Rply == nil {
+		return
+	}
+	v1Rply.getMaxUsage = getMaxUsage
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
@@ -2950,8 +2959,8 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap(
 	ignr []*config.FCTemplate) (*config.NavigableMap, error) {
 	cgrReply := make(map[string]interface{})
 	if v1Rply != nil {
-		if v1Rply.MaxUsage != nil {
-			cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
+		if v1Rply.getMaxUsage {
+			cgrReply[utils.CapMaxUsage] = v1Rply.MaxUsage
 		}
 		if v1Rply.ResourceMessage != nil {
 			cgrReply[utils.CapResourceMessage] = *v1Rply.ResourceMessage
@@ -3093,7 +3102,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 				if err != nil {
 					return utils.NewErrRALs(err)
 				}
-				rply.MaxUsage = &maxUsage
+				rply.MaxUsage = maxUsage
 			// check for init session
 			case ralsFlagsWithParams.HasKey(utils.MetaInit):
 				if ev.HasField(utils.CGRDebitInterval) { // dynamic DebitInterval via CGRDebitInterval
@@ -3107,13 +3116,13 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 					return utils.NewErrRALs(err)
 				}
 				if s.debitStop != nil { //active debit
-					rply.MaxUsage = utils.DurationPointer(sS.cgrCfg.SessionSCfg().MaxCallDuration)
+					rply.MaxUsage = sS.cgrCfg.SessionSCfg().MaxCallDuration
 				} else {
 					var maxUsage time.Duration
 					if maxUsage, err = sS.updateSession(s, nil); err != nil {
 						return utils.NewErrRALs(err)
 					}
-					rply.MaxUsage = &maxUsage
+					rply.MaxUsage = maxUsage
 				}
 			//check for update session
 			case ralsFlagsWithParams.HasKey(utils.MetaUpdate):
@@ -3139,7 +3148,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 				if maxUsage, err = sS.updateSession(s, ev); err != nil {
 					return utils.NewErrRALs(err)
 				}
-				rply.MaxUsage = &maxUsage
+				rply.MaxUsage = maxUsage
 			// check for terminate session
 			case ralsFlagsWithParams.HasKey(utils.MetaTerminate):
 				if ev.HasField(utils.CGRDebitInterval) { // dynamic DebitInterval via CGRDebitInterval

@@ -278,14 +278,18 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 			ArgDispatcher: cgrArgs.ArgDispatcher,
 			Paginator:     *cgrArgs.SupplierPaginator,
 		}
+		needMaxUsage := reqProcessor.Flags.HasKey(utils.MetaAuth) ||
+			reqProcessor.Flags.HasKey(utils.MetaInit) ||
+			reqProcessor.Flags.HasKey(utils.MetaUpdate)
 		rply := new(sessions.V1ProcessEventReply)
 		err = ra.sessionS.Call(utils.SessionSv1ProcessEvent,
 			evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		} else if rply.MaxUsage != nil {
-			cgrEv.Event[utils.Usage] = *rply.MaxUsage // make sure the CDR reflects the debit
+		} else if needMaxUsage {
+			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
+		rply.SetMaxUsageNeeded(needMaxUsage)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
