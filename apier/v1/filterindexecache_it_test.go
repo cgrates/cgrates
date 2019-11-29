@@ -179,7 +179,7 @@ func testV1FIdxCaSetThresholdProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	tPrfl = &ThresholdWithCache{
+	tPrfl = &engine.ThresholdWithCache{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TEST_PROFILE1",
@@ -272,7 +272,7 @@ func testV1FIdxCaUpdateThresholdProfile(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	tPrfl = &ThresholdWithCache{
+	tPrfl = &engine.ThresholdWithCache{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "TEST_PROFILE1",
@@ -367,7 +367,7 @@ func testV1FIdxCaUpdateThresholdProfileFromTP(t *testing.T) {
 	}
 	reply.FilterIDs = []string{"TestFilter3"}
 
-	if err := tFIdxCaRpc.Call(utils.ApierV1SetThresholdProfile, &ThresholdWithCache{ThresholdProfile: reply}, &result); err != nil {
+	if err := tFIdxCaRpc.Call(utils.ApierV1SetThresholdProfile, &engine.ThresholdWithCache{ThresholdProfile: reply}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)

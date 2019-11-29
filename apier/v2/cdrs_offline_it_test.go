@@ -161,7 +161,7 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 		t.Error(err)
 	}
 	//create a threshold that match out account
-	tPrfl := v1.ThresholdWithCache{
+	tPrfl := engine.ThresholdWithCache{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_Test",
@@ -277,7 +277,7 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 		t.Error(err)
 	}
 	//create a threshold that match out account
-	tPrfl := &v1.ThresholdWithCache{
+	tPrfl := &engine.ThresholdWithCache{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_Test2",

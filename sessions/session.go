@@ -26,11 +26,13 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// SessionID is given by an agent as the answer to GetActiveSessionIDs API
 type SessionID struct {
 	OriginHost string
 	OriginID   string
 }
 
+// CGRID returns the CGRID formated using the SessionID
 func (s *SessionID) CGRID() string {
 	return utils.Sha1(s.OriginID, s.OriginHost)
 }
@@ -63,6 +65,7 @@ type ExternalSession struct {
 	NextAutoDebit time.Time
 }
 
+// Session is the main structure to describe a call
 type Session struct {
 	sync.RWMutex
 
@@ -107,6 +110,7 @@ func (s *Session) Clone() (cln *Session) {
 	return
 }
 
+// AsExternalSessions returns the session as a list of ExternalSession using all SRuns
 func (s *Session) AsExternalSessions(tmz, nodeID string) (aSs []*ExternalSession) {
 	aSs = make([]*ExternalSession, len(s.SRuns))
 	for i, sr := range s.SRuns {
@@ -143,6 +147,8 @@ func (s *Session) AsExternalSessions(tmz, nodeID string) (aSs []*ExternalSession
 	}
 	return
 }
+
+// AsExternalSession returns the session as an ExternalSession using the SRuns given
 func (s *Session) AsExternalSession(sr *SRun, tmz, nodeID string) (aS *ExternalSession) {
 	aS = &ExternalSession{
 		CGRID:         s.CGRID,

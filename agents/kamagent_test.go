@@ -24,5 +24,5 @@ import (
 )
 
 func TestKAsSessionSClientIface(t *testing.T) {
-	_ = sessions.SessionSClient(new(KamailioAgent))
+	_ = sessions.BiRPClient(new(KamailioAgent))
 }

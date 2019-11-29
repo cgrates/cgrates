@@ -22,7 +22,6 @@ package cdrc
 import (
 	"io/ioutil"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os"
 	"path"
 	"strings"
@@ -104,7 +103,7 @@ func TestPartcsvITStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestPartcsvITRpcConn(t *testing.T) {
 	var err error
-	partcsvRPC, err = jsonrpc.Dial("tcp", partcsvCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	partcsvRPC, err = newRPCClient(partcsvCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

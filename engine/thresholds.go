@@ -29,6 +29,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type ThresholdWithCache struct {
+	*ThresholdProfile
+	Cache *string
+}
+
 type ThresholdProfile struct {
 	Tenant             string
 	ID                 string

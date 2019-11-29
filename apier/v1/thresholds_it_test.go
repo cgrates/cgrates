@@ -36,7 +36,7 @@ var (
 	tSv1CfgPath string
 	tSv1Cfg     *config.CGRConfig
 	tSv1Rpc     *rpc.Client
-	tPrfl       *ThresholdWithCache
+	tPrfl       *engine.ThresholdWithCache
 	tSv1ConfDIR string //run tests for specific configuration
 )
 
@@ -398,7 +398,7 @@ func testV1TSSetThresholdProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl = &ThresholdWithCache{
+	tPrfl = &engine.ThresholdWithCache{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    "cgrates.org",
 			ID:        "THD_Test",
@@ -477,7 +477,7 @@ func testV1TSMaxHits(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl = &ThresholdWithCache{
+	tPrfl = &engine.ThresholdWithCache{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:  "cgrates.org",
 			ID:      "TH3",

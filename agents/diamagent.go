@@ -433,7 +433,7 @@ func (da *DiameterAgent) Call(serviceMethod string, args interface{}, reply inte
 	return utils.RPCCall(da, serviceMethod, args, reply)
 }
 
-// V1DisconnectSession is part of the sessions.SessionSClient
+// V1DisconnectSession is part of the sessions.BiRPClient
 func (da *DiameterAgent) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) (err error) {
 	ssID, has := args.EventStart[utils.OriginID]
 	if !has {
@@ -479,7 +479,7 @@ func (da *DiameterAgent) V1DisconnectSession(args utils.AttrDisconnectSession, r
 	return
 }
 
-// V1GetActiveSessionIDs is part of the sessions.SessionSClient
+// V1GetActiveSessionIDs is part of the sessions.BiRPClient
 func (da *DiameterAgent) V1GetActiveSessionIDs(ignParam string,
 	sessionIDs *[]*sessions.SessionID) error {
 	return utils.ErrNotImplemented
