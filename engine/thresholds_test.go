@@ -142,7 +142,7 @@ func TestThresholdsSort(t *testing.T) {
 }
 
 func TestThresholdsPopulateThresholdService(t *testing.T) {
-	data := NewInternalDB(nil, nil)
+	data, _ := NewInternalDB(nil, nil, utils.MetaMSGPACK)
 	dmTH = NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	if err != nil {

@@ -39,20 +39,23 @@ type InternalDB struct {
 	cnter               *utils.Counter // used for OrderID for cdr
 }
 
-func NewInternalDB(stringIndexedFields, prefixIndexedFields []string) *InternalDB {
+// NewInternalDB constructs an InternalDB
+func NewInternalDB(stringIndexedFields, prefixIndexedFields []string, mrshlr string) (iDB *InternalDB, err error) {
 	dfltCfg, _ := config.NewDefaultCGRConfig()
-	return &InternalDB{
+	iDB = &InternalDB{
 		db:                  ltcache.NewTransCache(dfltCfg.CacheCfg().AsTransCacheConfig()),
-		ms:                  NewCodecMsgpackMarshaler(),
 		stringIndexedFields: stringIndexedFields,
 		prefixIndexedFields: prefixIndexedFields,
 		cnter:               utils.NewCounter(time.Now().UnixNano(), 0),
 	}
-}
-
-func NewInternalDBJson(stringIndexedFields, prefixIndexedFields []string) (InternalDB *InternalDB) {
-	InternalDB = NewInternalDB(stringIndexedFields, prefixIndexedFields)
-	InternalDB.ms = new(JSONBufMarshaler)
+	switch mrshlr {
+	case utils.MetaMSGPACK:
+		iDB.ms = NewCodecMsgpackMarshaler()
+	case utils.MetaJSON:
+		iDB.ms = new(JSONBufMarshaler)
+	default:
+		return nil, fmt.Errorf("unsupported DB marshaler: <%s>", mrshlr)
+	}
 	return
 }
 

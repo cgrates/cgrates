@@ -65,7 +65,7 @@ func (db *DataDBService) Start() (err error) {
 		utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 		return
 	} else if db.cfg.SessionSCfg().Enabled && err != nil {
-		utils.Logger.Warning(fmt.Sprintf("Could not configure dataDb: %s.Some SessionS APIs will not work", err))
+		utils.Logger.Warning(fmt.Sprintf("Could not configure dataDb: %s. Some SessionS APIs will not work", err))
 		return
 	}
 	var rmtConns, rplConns *rpcclient.RpcClientPool

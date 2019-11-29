@@ -1565,13 +1565,13 @@ func TestDfLoaderCfg(t *testing.T) {
 		Caches_conns: &[]*RemoteHostJson{
 			{
 				Address:   utils.StringPointer("127.0.0.1:2012"),
-				Transport: utils.StringPointer(utils.MetaJSONrpc),
+				Transport: utils.StringPointer(utils.MetaJSON),
 			},
 		},
 		Scheduler_conns: &[]*RemoteHostJson{
 			{
 				Address:   utils.StringPointer("127.0.0.1:2012"),
-				Transport: utils.StringPointer(utils.MetaJSONrpc),
+				Transport: utils.StringPointer(utils.MetaJSON),
 			},
 		},
 	}

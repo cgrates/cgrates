@@ -142,7 +142,7 @@ var (
 )
 
 func TestStatQueuesPopulateService(t *testing.T) {
-	data := NewInternalDB(nil, nil)
+	data, _ := NewInternalDB(nil, nil, utils.MetaMSGPACK)
 	dmSTS = NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	if err != nil {

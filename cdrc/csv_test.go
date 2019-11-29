@@ -74,7 +74,7 @@ func TestCsvRecordToCDR(t *testing.T) {
 func TestCsvDataMultiplyFactor(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
 	cdrcConfig := cgrConfig.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0]
-	data := engine.NewInternalDB(nil, nil)
+	data, _ := engine.NewInternalDB(nil, nil, utils.MetaMSGPACK)
 	dm := engine.NewDataManager(data, cgrConfig.CacheCfg(), nil, nil)
 	filterS := engine.NewFilterS(cgrConfig, nil, nil, nil, dm)
 	cdrcConfig.CdrSourceId = "TEST_CDRC"
@@ -159,7 +159,7 @@ func TestCsvPairToRecord(t *testing.T) {
 func TestCsvSecondUsage(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
 	cdrcConfig := cgrConfig.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0]
-	data := engine.NewInternalDB(nil, nil)
+	data, _ := engine.NewInternalDB(nil, nil, utils.MetaMSGPACK)
 	dm := engine.NewDataManager(data, cgrConfig.CacheCfg(), nil, nil)
 	filterS := engine.NewFilterS(cgrConfig, nil, nil, nil, dm)
 	cdrcConfig.CdrSourceId = "TEST_CDRC"

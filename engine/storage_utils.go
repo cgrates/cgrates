@@ -47,17 +47,9 @@ func NewDataDBConn(dbType, host, port, name, user,
 	case utils.MONGO:
 		d, err = NewMongoStorage(host, port, name, user, pass, utils.DataDB, nil, true)
 	case utils.INTERNAL:
-		if marshaler == utils.JSON {
-			d = NewInternalDBJson(nil, nil)
-		} else {
-			d = NewInternalDB(nil, nil)
-		}
+		d, err = NewInternalDB(nil, nil, marshaler)
 	default:
-		err = fmt.Errorf("unknown db '%s' valid options are '%s' or '%s or '%s'",
-			dbType, utils.REDIS, utils.MONGO, utils.INTERNAL)
-	}
-	if err != nil {
-		return nil, err
+		err = fmt.Errorf("unsupported db_type <%s>", dbType)
 	}
 	return
 }
@@ -74,7 +66,7 @@ func NewStorDBConn(dbType, host, port, name, user, pass, sslmode string,
 	case utils.MYSQL:
 		db, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
 	case utils.INTERNAL:
-		db = NewInternalDB(stringIndexedFields, prefixIndexedFields)
+		db, err = NewInternalDB(stringIndexedFields, prefixIndexedFields, utils.MetaMSGPACK)
 	default:
 		err = fmt.Errorf("unknown db '%s' valid options are [%s, %s, %s, %s]",
 			dbType, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL)

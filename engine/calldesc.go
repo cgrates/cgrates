@@ -47,7 +47,7 @@ func init() {
 			cgrCfg, _ = config.NewDefaultCGRConfig()
 			config.SetCgrConfig(cgrCfg)
 		}
-		data = NewInternalDB(nil, nil)
+		data, _ = NewInternalDB(nil, nil, utils.MetaMSGPACK)
 	}
 	dm = NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
 }

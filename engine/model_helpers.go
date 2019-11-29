@@ -2607,7 +2607,7 @@ func (tps TPDispatcherHosts) AsTPDispatcherHosts() (result []*utils.TPDispatcher
 			continue
 		}
 		if len(tp.Transport) == 0 {
-			tp.Transport = utils.MetaJSONrpc
+			tp.Transport = utils.MetaJSON
 		}
 		tenantID := utils.ConcatenatedKey(tp.Tenant, tp.ID)
 		if th, has := hostsMap[tenantID]; !has || th == nil {

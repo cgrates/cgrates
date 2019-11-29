@@ -30,7 +30,7 @@ import (
 var dataDB *engine.DataManager
 
 func TestDZ1SetStorage(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil)
+	data, _ := engine.NewInternalDB(nil, nil, utils.MetaMSGPACK)
 	dataDB = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
 	engine.SetDataStorage(dataDB)
 }

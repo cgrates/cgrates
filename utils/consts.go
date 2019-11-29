@@ -314,8 +314,9 @@ const (
 	SessionTTLUsage             = "SessionTTLUsage"
 	HandlerSubstractUsage       = "*substract_usage"
 	XML                         = "xml"
-	MetaGOBrpc                  = "*gob"
-	MetaJSONrpc                 = "*json"
+	MetaGOB                     = "*gob"
+	MetaJSON                    = "*json"
+	MetaMSGPACK                 = "*msgpack"
 	MetaDateTime                = "*datetime"
 	MetaMaskedDestination       = "*masked_destination"
 	MetaUnixTimestamp           = "*unix_timestamp"
@@ -1074,6 +1075,7 @@ const (
 	ApierV1ExecuteScheduledActions     = "ApierV1.ExecuteScheduledActions"
 	ApierV1GetSharedGroup              = "ApierV1.GetSharedGroup"
 	ApierV1RemoveActionTrigger         = "ApierV1.RemoveActionTrigger"
+	ApierV1GetAccount                  = "ApierV1.GetAccount"
 )
 
 // ApierV1 TP APIs

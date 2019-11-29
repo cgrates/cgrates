@@ -28,7 +28,7 @@ import (
 
 func TestSMSSetStorageSmsChrg1(t *testing.T) {
 	config.CgrConfig().CacheCfg()[utils.CacheRatingPlans].Precache = true // precache rating plan
-	data := engine.NewInternalDB(nil, nil)
+	data, _ := engine.NewInternalDB(nil, nil, utils.MetaMSGPACK)
 	dataDB = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
 	engine.SetDataStorage(dataDB)
 }

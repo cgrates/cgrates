@@ -31,7 +31,8 @@ var rsponder *engine.Responder
 
 func TestAuthSetStorage(t *testing.T) {
 	config.CgrConfig().CacheCfg()[utils.CacheRatingPlans].Precache = true // precache rating plan
-	dbAuth = engine.NewDataManager(engine.NewInternalDB(nil, nil), config.CgrConfig().CacheCfg(), nil, nil)
+	dataDB, _ := engine.NewInternalDB(nil, nil, utils.MetaMSGPACK)
+	dbAuth = engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil, nil)
 	engine.SetDataStorage(dbAuth)
 	rsponder = &engine.Responder{
 		MaxComputedUsage: config.CgrConfig().RalsCfg().MaxComputedUsage}

@@ -1386,12 +1386,12 @@ func TestLoadDispatcherHosts(t *testing.T) {
 		Conns: []*utils.TPDispatcherHostConn{
 			&utils.TPDispatcherHostConn{
 				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSONrpc,
+				Transport: utils.MetaJSON,
 				TLS:       true,
 			},
 			&utils.TPDispatcherHostConn{
 				Address:   "127.0.0.1:3012",
-				Transport: utils.MetaJSONrpc,
+				Transport: utils.MetaJSON,
 				TLS:       false,
 			},
 		},

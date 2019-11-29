@@ -662,7 +662,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 	} else if expRecord[0] != "1" {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", "1", expRecord[0])
 	}
-	data := NewInternalDB(nil, nil)
+	data, _ := NewInternalDB(nil, nil, utils.MetaMSGPACK)
 	dmForCDR := NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	if err != nil {

@@ -102,6 +102,35 @@ func testV1CDRsLoadTariffPlanFromFolder(t *testing.T) {
 }
 
 func testV1CDRsProcessEventWithRefund(t *testing.T) {
+	var acnt *engine.Account
+	acntAttrs := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "testV1CDRsProcessEventWithRefund"}
+	attrSetBalance := utils.AttrSetBalance{
+		Tenant:      acntAttrs.Tenant,
+		Account:     acntAttrs.Account,
+		BalanceType: utils.VOICE,
+		BalanceID:   utils.StringPointer("BALANCE1"),
+		Value:       utils.Float64Pointer(120000000000),
+		Weight:      utils.Float64Pointer(20)}
+	var reply string
+	if err := cdrsRpc.Call(utils.ApierV1SetBalance, attrSetBalance, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("received: %s", reply)
+	}
+	attrSetBalance = utils.AttrSetBalance{
+		Tenant:      acntAttrs.Tenant,
+		Account:     acntAttrs.Account,
+		BalanceType: utils.VOICE,
+		BalanceID:   utils.StringPointer("BALANCE2"),
+		Value:       utils.Float64Pointer(180000000000),
+		Weight:      utils.Float64Pointer(10)}
+	if err := cdrsRpc.Call(utils.ApierV1SetBalance, attrSetBalance, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("received: %s", reply)
+	}
 	args := &engine.ArgV1ProcessEvent{
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
@@ -115,14 +144,33 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 			},
 		},
 	}
-
-	var reply string
+	expectedVoice := 300000000000.0
+	if err := cdrsRpc.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
+		t.Error(err)
+	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != expectedVoice {
+		t.Errorf("Expecting: %v, received: %v", expectedVoice, rply)
+	}
 	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+
+	var cdrs []*engine.ExternalCDR
+	if err := cdrsRpc.Call(utils.ApierV1GetCDRs, utils.AttrGetCdrs{}, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Cost != -1.0 {
+			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
+		}
+		if cdrs[0].ExtraFields["PayPalAccount"] != "paypal@cgrates.org" {
+			t.Errorf("PayPalAccount should be added by AttributeS, have: %s",
+				cdrs[0].ExtraFields["PayPalAccount"])
+		}
+	}
 	return
 }
 

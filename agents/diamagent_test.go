@@ -49,7 +49,7 @@ func (s *testMockSessionConn) Call(method string, arg interface{}, rply interfac
 }
 
 func TestProcessRequest(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil)
+	data, _ := engine.NewInternalDB(nil, nil, utils.MetaMSGPACK)
 	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
 	filters := engine.NewFilterS(config.CgrConfig(), nil, nil, nil, dm) // no need for filterS but stiil try to configure the dm :D
 

@@ -16,12 +16,12 @@
 
 
 "data_db": {
-    "db_type": "internal",                   
+    "db_type": "*internal",                   
  },
 
 
 "stor_db": {
-	"db_type": "internal",
+	"db_type": "*internal",
 },
 
 "rals": {

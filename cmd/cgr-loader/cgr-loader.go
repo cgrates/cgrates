@@ -86,7 +86,7 @@ var (
 
 	fromStorDB    = cgrLoaderFlags.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
 	toStorDB      = cgrLoaderFlags.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
-	rpcEncoding   = cgrLoaderFlags.String("rpc_encoding", utils.MetaJSONrpc, "RPC encoding used <*gob|*json>")
+	rpcEncoding   = cgrLoaderFlags.String("rpc_encoding", utils.MetaJSON, "RPC encoding used <*gob|*json>")
 	cacheSAddress = cgrLoaderFlags.String("caches_address", dfltCfg.LoaderCgrCfg().CachesConns[0].Address,
 		"CacheS component to contact for cache reloads, empty to disable automatic cache reloads")
 	schedulerAddress = cgrLoaderFlags.String("scheduler_address", dfltCfg.LoaderCgrCfg().SchedulerConns[0].Address, "")

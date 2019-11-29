@@ -1552,13 +1552,13 @@ func TestCgrLoaderCfgDefault(t *testing.T) {
 		CachesConns: []*RemoteHost{
 			{
 				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSONrpc,
+				Transport: utils.MetaJSON,
 			},
 		},
 		SchedulerConns: []*RemoteHost{
 			{
 				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSONrpc,
+				Transport: utils.MetaJSON,
 			},
 		},
 	}

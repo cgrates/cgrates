@@ -35,7 +35,7 @@ var (
 )
 
 func init() {
-	apierDebitStorage = engine.NewInternalDB(nil, nil)
+	apierDebitStorage, _ = engine.NewInternalDB(nil, nil, utils.MetaMSGPACK)
 	cfg, _ := config.NewDefaultCGRConfig()
 	responder := &engine.Responder{MaxComputedUsage: cfg.RalsCfg().MaxComputedUsage}
 	dm = engine.NewDataManager(apierDebitStorage, config.CgrConfig().CacheCfg(), nil, nil)
