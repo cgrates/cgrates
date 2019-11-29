@@ -238,11 +238,7 @@ func (kev KamEvent) AsKamAuthReply(authArgs *sessions.V1AuthorizeArgs,
 		kar.ResourceAllocation = *authReply.ResourceAllocation
 	}
 	if authArgs.GetMaxUsage {
-		if *authReply.MaxUsage == -1 { // For calls different than unlimited, set limits
-			kar.MaxUsage = -1
-		} else {
-			kar.MaxUsage = int(utils.Round(authReply.MaxUsage.Seconds(), 0, utils.ROUNDING_MIDDLE))
-		}
+		kar.MaxUsage = int(utils.Round(authReply.MaxUsage.Seconds(), 0, utils.ROUNDING_MIDDLE))
 	}
 	if authArgs.GetSuppliers && authReply.Suppliers != nil {
 		kar.Suppliers = authReply.Suppliers.Digest()

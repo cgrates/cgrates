@@ -407,12 +407,9 @@ func TestSessionSv1ItInitNotFoundThreshold(t *testing.T) {
 		args, &rply); err != nil {
 		t.Error(err)
 	}
-	if rply.MaxUsage == nil {
-		t.Errorf("Expecting not nil, received: %s",
-			rply.MaxUsage)
-	} else if *rply.MaxUsage != time.Duration(1024) {
+	if rply.MaxUsage != time.Duration(1024) {
 		t.Errorf("Expecting: %+v, received: %+v",
-			time.Duration(1024), *rply.MaxUsage)
+			time.Duration(1024), rply.MaxUsage)
 	}
 	if rply.ThresholdIDs != nil {
 		t.Errorf("Expecting: nil, received: %s",
@@ -543,12 +540,9 @@ func TestSessionSv1ItInitNotFoundThresholdAndStats(t *testing.T) {
 		args, &rply); err != nil {
 		t.Error(err)
 	}
-	if rply.MaxUsage == nil {
-		t.Errorf("Expecting not nil, received: %s",
-			rply.MaxUsage)
-	} else if *rply.MaxUsage != time.Duration(1024) {
+	if rply.MaxUsage != time.Duration(1024) {
 		t.Errorf("Expecting: %+v, received: %+v",
-			time.Duration(1024), *rply.MaxUsage)
+			time.Duration(1024), rply.MaxUsage)
 	}
 	if rply.ThresholdIDs != nil {
 		t.Errorf("Expecting: nil, received: %s",

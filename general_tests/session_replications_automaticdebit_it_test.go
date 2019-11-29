@@ -188,7 +188,7 @@ func testSessionSRplInitiate(t *testing.T) {
 	}
 	//compare the value
 	eMaxUsage := 3 * time.Hour // MaxCallDuration from config
-	if *initRpl.MaxUsage != eMaxUsage {
+	if initRpl.MaxUsage != eMaxUsage {
 		t.Errorf("Expecting : %+v, received: %+v", eMaxUsage, initRpl.MaxUsage)
 	}
 

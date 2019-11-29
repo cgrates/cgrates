@@ -1791,10 +1791,19 @@ func (args *V1AuthorizeArgs) ParseFlags(flags string) {
 type V1AuthorizeReply struct {
 	Attributes         *engine.AttrSProcessEventReply
 	ResourceAllocation *string
-	MaxUsage           *time.Duration
+	MaxUsage           time.Duration
 	Suppliers          *engine.SortedSuppliers
 	ThresholdIDs       *[]string
 	StatQueueIDs       *[]string
+	getMaxUsage        bool // used by AsNavigableMap to know if MaxUsage is needed
+}
+
+// SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
+func (v1AuthReply *V1AuthorizeReply) SetMaxUsageNeeded(getMaxUsage bool) {
+	if v1AuthReply == nil {
+		return
+	}
+	v1AuthReply.getMaxUsage = getMaxUsage
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
@@ -1814,8 +1823,8 @@ func (v1AuthReply *V1AuthorizeReply) AsNavigableMap(
 		if v1AuthReply.ResourceAllocation != nil {
 			cgrReply[utils.CapResourceAllocation] = *v1AuthReply.ResourceAllocation
 		}
-		if v1AuthReply.MaxUsage != nil {
-			cgrReply[utils.CapMaxUsage] = *v1AuthReply.MaxUsage
+		if v1AuthReply.getMaxUsage {
+			cgrReply[utils.CapMaxUsage] = v1AuthReply.MaxUsage
 		}
 		if v1AuthReply.Suppliers != nil {
 			cgrReply[utils.CapSuppliers] = v1AuthReply.Suppliers.AsNavigableMap()
@@ -1880,12 +1889,10 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 		}
 	}
 	if args.GetMaxUsage {
-		maxUsage, err := sS.authEvent(args.CGREvent.Tenant,
-			args.CGREvent.Event)
-		if err != nil {
+		if authReply.MaxUsage, err = sS.authEvent(args.CGREvent.Tenant,
+			args.CGREvent.Event); err != nil {
 			return utils.NewErrRALs(err)
 		}
-		authReply.MaxUsage = &maxUsage
 	}
 	if args.AuthorizeResources {
 		if sS.resS == nil {
@@ -1951,7 +1958,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
 type V1AuthorizeReplyWithDigest struct {
 	AttributesDigest   *string
 	ResourceAllocation *string
-	MaxUsage           *float64 // special treat returning time.Duration.Seconds()
+	MaxUsage           float64 // special treat returning time.Duration.Seconds()
 	SuppliersDigest    *string
 	Thresholds         *string
 	StatQueues         *string
@@ -1972,7 +1979,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.RpcClientConn
 		authReply.ResourceAllocation = initAuthRply.ResourceAllocation
 	}
 	if args.GetMaxUsage {
-		authReply.MaxUsage = utils.Float64Pointer(initAuthRply.MaxUsage.Seconds())
+		authReply.MaxUsage = initAuthRply.MaxUsage.Seconds()
 	}
 	if args.GetSuppliers {
 		authReply.SuppliersDigest = utils.StringPointer(initAuthRply.Suppliers.Digest())
@@ -2057,9 +2064,18 @@ func (args *V1InitSessionArgs) ParseFlags(flags string) {
 type V1InitSessionReply struct {
 	Attributes         *engine.AttrSProcessEventReply
 	ResourceAllocation *string
-	MaxUsage           *time.Duration
+	MaxUsage           time.Duration
 	ThresholdIDs       *[]string
 	StatQueueIDs       *[]string
+	getMaxUsage        bool
+}
+
+// SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
+func (v1AuthReply *V1InitSessionReply) SetMaxUsageNeeded(getMaxUsage bool) {
+	if v1AuthReply == nil {
+		return
+	}
+	v1AuthReply.getMaxUsage = getMaxUsage
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
@@ -2079,8 +2095,8 @@ func (v1Rply *V1InitSessionReply) AsNavigableMap(
 		if v1Rply.ResourceAllocation != nil {
 			cgrReply[utils.CapResourceAllocation] = *v1Rply.ResourceAllocation
 		}
-		if v1Rply.MaxUsage != nil {
-			cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
+		if v1Rply.getMaxUsage {
+			cgrReply[utils.CapMaxUsage] = v1Rply.MaxUsage
 		}
 		if v1Rply.ThresholdIDs != nil {
 			cgrReply[utils.CapThresholds] = *v1Rply.ThresholdIDs
@@ -2177,13 +2193,13 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 			return utils.NewErrRALs(err)
 		}
 		if s.debitStop != nil { //active debit
-			rply.MaxUsage = utils.DurationPointer(sS.cgrCfg.SessionSCfg().MaxCallDuration)
+			rply.MaxUsage = sS.cgrCfg.SessionSCfg().MaxCallDuration
 		} else {
 			var maxUsage time.Duration
 			if maxUsage, err = sS.updateSession(s, nil); err != nil {
 				return utils.NewErrRALs(err)
 			}
-			rply.MaxUsage = &maxUsage
+			rply.MaxUsage = maxUsage
 		}
 	}
 	if args.ProcessThresholds {
@@ -2218,7 +2234,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 type V1InitReplyWithDigest struct {
 	AttributesDigest   *string
 	ResourceAllocation *string
-	MaxUsage           *float64
+	MaxUsage           float64
 	Thresholds         *string
 	StatQueues         *string
 }
@@ -2240,7 +2256,7 @@ func (sS *SessionS) BiRPCv1InitiateSessionWithDigest(clnt rpcclient.RpcClientCon
 	}
 
 	if args.InitSession {
-		initReply.MaxUsage = utils.Float64Pointer(initSessionRply.MaxUsage.Seconds())
+		initReply.MaxUsage = initSessionRply.MaxUsage.Seconds()
 	}
 
 	if args.ProcessThresholds {

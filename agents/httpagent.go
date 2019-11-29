@@ -150,6 +150,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1AuthorizeReply)
 		err = ha.sessionS.Call(utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
+		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}
@@ -167,6 +168,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		rply := new(sessions.V1InitSessionReply)
 		err = ha.sessionS.Call(utils.SessionSv1InitiateSession,
 			initArgs, rply)
+		rply.SetMaxUsageNeeded(initArgs.InitSession)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}

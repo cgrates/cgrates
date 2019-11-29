@@ -204,7 +204,7 @@ func testSSv1ItAuth(t *testing.T) {
 	if err := sSv1BiRpc.Call(utils.SessionSv1AuthorizeEvent, args, &rply); err != nil {
 		t.Fatal(err)
 	}
-	if *rply.MaxUsage != authUsage {
+	if rply.MaxUsage != authUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceAllocation == "" {
@@ -288,7 +288,7 @@ func testSSv1ItAuthWithDigest(t *testing.T) {
 	}
 	// in case of prepaid and pseudoprepade we expect a MaxUsage of 5min
 	// and in case of postpaid and rated we expect -1
-	if *rply.MaxUsage != authUsage.Seconds() {
+	if rply.MaxUsage != authUsage.Seconds() {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceAllocation == "" {
@@ -335,7 +335,7 @@ func testSSv1ItInitiateSession(t *testing.T) {
 	// in case of prepaid and pseudoprepade we expect a MaxUsage of 5min
 	// and in case of postpaid and rated we expect the value of Usage field
 	// if this was missing the MaxUsage should be equal to MaxCallDuration from config
-	if *rply.MaxUsage != initUsage {
+	if rply.MaxUsage != initUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceAllocation != "RES_ACNT_1001" {
@@ -406,8 +406,8 @@ func testSSv1ItInitiateSessionWithDigest(t *testing.T) {
 	// in case of prepaid and pseudoprepade we expect a MaxUsage of 5min
 	// and in case of postpaid and rated we expect the value of Usage field
 	// if this was missing the MaxUsage should be equal to MaxCallDuration from config
-	if *rply.MaxUsage != initUsage.Seconds() {
-		t.Errorf("Unexpected MaxUsage: %v", *rply.MaxUsage)
+	if rply.MaxUsage != initUsage.Seconds() {
+		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceAllocation != "RES_ACNT_1001" {
 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)
@@ -895,7 +895,7 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 		args1, &rply1); err != nil {
 		t.Error(err)
 		return
-	} else if *rply1.MaxUsage != 3*time.Hour /* MaxCallDuration from config*/ {
+	} else if rply1.MaxUsage != 3*time.Hour /* MaxCallDuration from config*/ {
 		t.Errorf("Unexpected MaxUsage: %v", rply1.MaxUsage)
 	}
 

@@ -130,7 +130,7 @@ func TestSessionSRplInitiate(t *testing.T) {
 		t.Error(err)
 	}
 	//compare the value
-	if *initRpl.MaxUsage != usage {
+	if initRpl.MaxUsage != usage {
 		t.Errorf("Expecting : %+v, received: %+v", usage, initRpl.MaxUsage)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
@@ -358,7 +358,7 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 		if err := smgRplcMstrRPC.Call(utils.SessionSv1InitiateSession, args, &initRpl); err != nil {
 			t.Error(err)
 		}
-		if *initRpl.MaxUsage != time.Duration(90*time.Second) {
+		if initRpl.MaxUsage != time.Duration(90*time.Second) {
 			t.Error("Bad max usage: ", initRpl.MaxUsage)
 		}
 	}

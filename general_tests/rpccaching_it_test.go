@@ -209,7 +209,7 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 	if err := rpcRpc.Call(utils.SessionSv1AuthorizeEvent, args, &rplyFirst); err != nil {
 		t.Fatal(err)
 	}
-	if *rplyFirst.MaxUsage != authUsage {
+	if rplyFirst.MaxUsage != authUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rplyFirst.MaxUsage)
 	}
 
@@ -302,7 +302,7 @@ func testRPCMethodsInitSession(t *testing.T) {
 		args, &rplyFirst); err != nil {
 		t.Error(err)
 	}
-	if *rplyFirst.MaxUsage != initUsage {
+	if rplyFirst.MaxUsage != initUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rplyFirst.MaxUsage)
 	}
 

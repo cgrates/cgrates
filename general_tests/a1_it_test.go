@@ -213,8 +213,8 @@ func testA1itDataSession1(t *testing.T) {
 		initArgs, &initRpl); err != nil {
 		t.Error(err)
 	}
-	if *initRpl.MaxUsage != usage {
-		t.Errorf("Expecting : %+v, received: %+v", usage, *initRpl.MaxUsage)
+	if initRpl.MaxUsage != usage {
+		t.Errorf("Expecting : %+v, received: %+v", usage, initRpl.MaxUsage)
 	}
 
 	updateArgs := &sessions.V1UpdateSessionArgs{
