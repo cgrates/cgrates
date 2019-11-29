@@ -187,8 +187,8 @@ func TestConfigSanityLoaders(t *testing.T) {
 	cfg.loaderCfg = LoaderSCfgs{
 		&LoaderSCfg{
 			Enabled:  true,
-			TpInDir:  "/usr/share/cgrates",
-			TpOutDir: "/usr/share/cgrates",
+			TpInDir:  "/",
+			TpOutDir: "/",
 			Data: []*LoaderDataType{
 				&LoaderDataType{
 					Type: "wrongtype",
@@ -204,8 +204,8 @@ func TestConfigSanityLoaders(t *testing.T) {
 	cfg.loaderCfg = LoaderSCfgs{
 		&LoaderSCfg{
 			Enabled:  true,
-			TpInDir:  "/usr/share/cgrates",
-			TpOutDir: "/usr/share/cgrates",
+			TpInDir:  "/",
+			TpOutDir: "/",
 			Data: []*LoaderDataType{
 				&LoaderDataType{
 					Type: utils.MetaStats,
@@ -657,8 +657,8 @@ func TestConfigSanityEventReader(t *testing.T) {
 		&EventReaderCfg{
 			ID:            "test3",
 			Type:          utils.MetaFileCSV,
-			ProcessedPath: "/usr/share/cgrates",
-			SourcePath:    "/usr/share/cgrates",
+			ProcessedPath: "/",
+			SourcePath:    "/",
 			FieldSep:      "",
 		},
 	}
