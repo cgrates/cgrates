@@ -1931,7 +1931,7 @@ func TestRpcConnsDefaults(t *testing.T) {
 		Conns: []*RemoteHost{
 			&RemoteHost{
 				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSONrpc,
+				Transport: utils.MetaJSON,
 			},
 		},
 	}
