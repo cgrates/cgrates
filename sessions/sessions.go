@@ -36,15 +36,9 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-const (
-	MaxTimespansInCost = 50
-	MaxSessionTTL      = 10000 // maximum session TTL in miliseconds
-)
-
 var (
-	ErrActiveSession    = errors.New("ACTIVE_SESSION")
+	// ErrForcedDisconnect is used to specify the reason why the session was disconnected
 	ErrForcedDisconnect = errors.New("FORCED_DISCONNECT")
-	debug               bool
 )
 
 // NewSReplConns initiates the connections configured for session replication
@@ -52,13 +46,13 @@ func NewSReplConns(conns []*config.RemoteHost, reconnects int,
 	connTimeout, replyTimeout time.Duration) (sReplConns []*SReplConn, err error) {
 	sReplConns = make([]*SReplConn, len(conns))
 	for i, replConnCfg := range conns {
-		if replCon, err := rpcclient.NewRpcClient(utils.TCP, replConnCfg.Address,
+		var replCon *rpcclient.RpcClient
+		if replCon, err = rpcclient.NewRpcClient(utils.TCP, replConnCfg.Address,
 			replConnCfg.TLS, "", "", "", 0, reconnects, connTimeout,
 			replyTimeout, replConnCfg.Transport[1:], nil, true); err != nil {
 			return nil, err
-		} else {
-			sReplConns[i] = &SReplConn{Connection: replCon, Synchronous: replConnCfg.Synchronous}
 		}
+		sReplConns[i] = &SReplConn{Connection: replCon, Synchronous: replConnCfg.Synchronous}
 	}
 	return
 }
@@ -519,7 +513,6 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 // threadSafe since it will run into it's own goroutine
 func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 	dbtIvl time.Duration) (maxDur time.Duration, err error) {
-	fmt.Sprintf("Entering debitLoopSession for session: %s, sRunIdx: %d. dbtIvl: %v\n", utils.ToIJSON(s), sRunIdx, dbtIvl)
 	// NextAutoDebit works in tandem with session replication
 	now := time.Now()
 	if s.SRuns[sRunIdx].NextAutoDebit != nil &&
@@ -587,7 +580,6 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 			continue
 		}
 	}
-	return
 }
 
 // refundSession will refund the extra usage debitted by the end of session
@@ -928,7 +920,7 @@ func (sS *SessionS) getSessionIDsMatchingIndexes(fltrs map[string][]string,
 	}
 	for fltrName, fltrVals := range fltrs {
 		matchedIndx := getMatchingIndexes(fltrName, fltrVals)
-		checkNr += 1
+		checkNr++
 		if checkNr == 1 { // First run will init the MatchingSessions
 			matchingSessions = matchedIndx
 			continue
@@ -988,7 +980,7 @@ func (sS *SessionS) filterSessions(sf *utils.SessionFilter, psv bool) (aSs []*Ex
 		for _, fltr := range filterRules {
 			// we don't know how many values we have so we need to build the fieldValues DataProvider
 			fieldValuesDP := make([]config.DataProvider, len(fltr.Values))
-			for i, _ := range fltr.Values {
+			for i := range fltr.Values {
 				fieldValuesDP[i] = ev
 			}
 			if pass, err = fltr.Pass(ev, fieldValuesDP); err != nil || !pass {
@@ -1045,7 +1037,7 @@ func (sS *SessionS) filterSessionsCount(sf *utils.SessionFilter, psv bool) (coun
 		for _, fltr := range filterRules {
 			// we don't know how many values we have so we need to build the fieldValues DataProvider
 			fieldValuesDP := make([]config.DataProvider, len(fltr.Values))
-			for i, _ := range fltr.Values {
+			for i := range fltr.Values {
 				fieldValuesDP[i] = ev
 			}
 			if pass, err = fltr.Pass(ev, fieldValuesDP); err != nil || !pass {
@@ -1062,7 +1054,7 @@ func (sS *SessionS) filterSessionsCount(sf *utils.SessionFilter, psv bool) (coun
 				continue
 			}
 			if pass(unindx, sr.Event) {
-				count += 1
+				count++
 			}
 		}
 		s.RUnlock()
@@ -1659,7 +1651,7 @@ func (sS *SessionS) BiRPCv1GetPassiveSessionsCount(clnt rpcclient.RpcClientConne
 	return nil
 }
 
-// BiRPCv1SetPassiveSessions used for replicating Sessions
+// BiRPCv1SetPassiveSession used for replicating Sessions
 func (sS *SessionS) BiRPCv1SetPassiveSession(clnt rpcclient.RpcClientConnection,
 	s *Session, reply *string) (err error) {
 	if s.CGRID == "" {
@@ -2187,11 +2179,11 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 		if s.debitStop != nil { //active debit
 			rply.MaxUsage = utils.DurationPointer(sS.cgrCfg.SessionSCfg().MaxCallDuration)
 		} else {
-			if maxUsage, err := sS.updateSession(s, nil); err != nil {
+			var maxUsage time.Duration
+			if maxUsage, err = sS.updateSession(s, nil); err != nil {
 				return utils.NewErrRALs(err)
-			} else {
-				rply.MaxUsage = &maxUsage
 			}
+			rply.MaxUsage = &maxUsage
 		}
 	}
 	if args.ProcessThresholds {
@@ -2383,11 +2375,11 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 				return utils.NewErrRALs(err)
 			}
 		}
-		if maxUsage, err := sS.updateSession(s, ev.Clone()); err != nil {
+		var maxUsage time.Duration
+		if maxUsage, err = sS.updateSession(s, ev.Clone()); err != nil {
 			return utils.NewErrRALs(err)
-		} else {
-			rply.MaxUsage = &maxUsage
 		}
+		rply.MaxUsage = &maxUsage
 	}
 	return
 }
@@ -2446,7 +2438,7 @@ func (args *V1TerminateSessionArgs) ParseFlags(flags string) {
 	args.ArgDispatcher = cgrArgs.ArgDispatcher
 }
 
-// BiRPCV1TerminateSession will stop debit loops as well as release any used resources
+// BiRPCv1TerminateSession will stop debit loops as well as release any used resources
 func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 	args *V1TerminateSessionArgs, rply *string) (err error) {
 	var withErrors bool
@@ -2786,7 +2778,7 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap(
 	return config.NewNavigableMap(cgrReply), nil
 }
 
-// BiRPCv1ProcessEvent processes one event with the right subsystems based on arguments received
+// BiRPCv1ProcessMessage processes one event with the right subsystems based on arguments received
 func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.RpcClientConnection,
 	args *V1ProcessMessageArgs, rply *V1ProcessMessageReply) (err error) {
 	var withErrors bool
@@ -2866,12 +2858,12 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.RpcClientConnection,
 		}
 	}
 	if args.Debit {
-		if maxUsage, err := sS.chargeEvent(args.CGREvent.Tenant,
+		var maxUsage time.Duration
+		if maxUsage, err = sS.chargeEvent(args.CGREvent.Tenant,
 			engine.MapEvent(args.CGREvent.Event), args.ArgDispatcher); err != nil {
 			return utils.NewErrRALs(err)
-		} else {
-			rply.MaxUsage = &maxUsage
 		}
+		rply.MaxUsage = &maxUsage
 	}
 	if args.ProcessThresholds {
 		tIDs, err := sS.processThreshold(args.CGREvent, args.ArgDispatcher,
@@ -3085,11 +3077,11 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 				if s.debitStop != nil { //active debit
 					rply.MaxUsage = utils.DurationPointer(sS.cgrCfg.SessionSCfg().MaxCallDuration)
 				} else {
-					if maxUsage, err := sS.updateSession(s, nil); err != nil {
+					var maxUsage time.Duration
+					if maxUsage, err = sS.updateSession(s, nil); err != nil {
 						return utils.NewErrRALs(err)
-					} else {
-						rply.MaxUsage = &maxUsage
 					}
+					rply.MaxUsage = &maxUsage
 				}
 			//check for update session
 			case ralsFlagsWithParams.HasKey(utils.MetaUpdate):
@@ -3111,11 +3103,11 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 						return utils.NewErrRALs(err)
 					}
 				}
-				if maxUsage, err := sS.updateSession(s, ev); err != nil {
+				var maxUsage time.Duration
+				if maxUsage, err = sS.updateSession(s, ev); err != nil {
 					return utils.NewErrRALs(err)
-				} else {
-					rply.MaxUsage = &maxUsage
 				}
+				rply.MaxUsage = &maxUsage
 			// check for terminate session
 			case ralsFlagsWithParams.HasKey(utils.MetaTerminate):
 				if ev.HasField(utils.CGRDebitInterval) { // dynamic DebitInterval via CGRDebitInterval

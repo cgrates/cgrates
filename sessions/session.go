@@ -35,7 +35,7 @@ func (s *SessionID) CGRID() string {
 	return utils.Sha1(s.OriginID, s.OriginHost)
 }
 
-// Will be used when displaying active sessions via RPC
+// ExternalSession is used when displaying active sessions via RPC
 type ExternalSession struct {
 	CGRID         string
 	RunID         string
