@@ -114,14 +114,14 @@ func testVrsRpcConn(t *testing.T) {
 func testVrsDataDB(t *testing.T) {
 	var result engine.Versions
 	expectedVrs := engine.Versions{"ActionTriggers": 2,
-		"Actions": 2, "RQF": 1, "ReverseDestinations": 1, "Attributes": 4, "RatingPlan": 1,
+		"Actions": 2, "RQF": 3, "ReverseDestinations": 1, "Attributes": 4, "RatingPlan": 1,
 		"RatingProfile": 1, "User": 1, "Accounts": 3, "ActionPlans": 3, "Chargers": 1,
 		"Destinations": 1, "LoadIDs": 1, "SharedGroups": 2, "Stats": 2, "Resource": 1,
 		"Subscribers": 1, "Suppliers": 1, "Thresholds": 3, "Timing": 1}
 	if err := vrsRPC.Call(utils.ApierV1GetDataDBVersions, "", &result); err != nil {
 		t.Error(err)
 	} else if expectedVrs.Compare(result, vrsStorageType, true) != "" {
-		t.Errorf("Expecting: %+v, received: %+v", result, expectedVrs)
+		t.Errorf("Expecting: %+v, received: %+v", expectedVrs, result)
 	}
 }
 
@@ -154,14 +154,14 @@ func testVrsSetDataDBVrs(t *testing.T) {
 
 	var result engine.Versions
 	expectedVrs := engine.Versions{"ActionTriggers": 2,
-		"Actions": 2, "RQF": 1, "ReverseDestinations": 1, "Attributes": 3, "RatingPlan": 1,
+		"Actions": 2, "RQF": 3, "ReverseDestinations": 1, "Attributes": 3, "RatingPlan": 1,
 		"RatingProfile": 1, "User": 1, "Accounts": 3, "ActionPlans": 3, "Chargers": 1,
 		"Destinations": 1, "LoadIDs": 1, "SharedGroups": 2, "Stats": 2, "Resource": 1,
 		"Subscribers": 1, "Suppliers": 1, "Thresholds": 3, "Timing": 1}
 	if err := vrsRPC.Call(utils.ApierV1GetDataDBVersions, "", &result); err != nil {
 		t.Error(err)
 	} else if expectedVrs.Compare(result, vrsStorageType, true) != "" {
-		t.Errorf("Expecting: %+v, received: %+v", result, expectedVrs)
+		t.Errorf("Expecting: %+v, received: %+v", expectedVrs, result)
 	}
 
 	args = SetVersionsArg{

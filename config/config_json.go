@@ -39,7 +39,6 @@ const (
 	FreeSWITCHAgentJSN = "freeswitch_agent"
 	KamailioAgentJSN   = "kamailio_agent"
 	AsteriskAgentJSN   = "asterisk_agent"
-	OSIPS_JSN          = "opensips"
 	DA_JSN             = "diameter_agent"
 	RA_JSN             = "radius_agent"
 	HttpAgentJson      = "http_agent"
@@ -60,7 +59,7 @@ const (
 	Apier              = "apier"
 	DNSAgentJson       = "dns_agent"
 	ERsJson            = "ers"
-	RpcConnsJsonName   = "rpc_conns"
+	RPCConnsJsonName   = "rpc_conns"
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -85,13 +84,13 @@ func (self CgrJsonCfg) GeneralJsonCfg() (*GeneralJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) RpcConnJsonCfg() (map[string]*RpcConnsJson, error) {
-	rawCfg, hasKey := self[RpcConnsJsonName]
+func (self CgrJsonCfg) RPCConnJsonCfg() (map[string]*RPCConnsJson, error) {
+	rawCfg, hasKey := self[RPCConnsJsonName]
 	if !hasKey {
 		return nil, nil
 	}
-	cfg := make(map[string]*RpcConnsJson)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+	cfg := make(map[string]*RPCConnsJson)
+	if err := json.Unmarshal(*rawCfg, &cfg); err != nil {
 		return nil, err
 	}
 	return cfg, nil

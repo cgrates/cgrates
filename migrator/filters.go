@@ -208,42 +208,51 @@ func (m *Migrator) migrateRequestFilterV2() (err error) {
 	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.FilterPrefix)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error: <%s> when getting filter IDs for migration", err.Error())
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.FilterPrefix+tenant+":")
 		fl, err := m.dmIN.DataManager().GetFilter(tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
-			return err
+			return fmt.Errorf("Error: <%s> when getting filter with tenant: <%s> and id: <%s> for migration",
+				err.Error(), tenant, idg)
 		}
 		if m.dryRun || fl == nil {
 			continue
 		}
 		if err := m.dmOut.DataManager().SetFilter(migrateFilterV2(fl)); err != nil {
-			return err
+			return fmt.Errorf("Error: <%s> when setting filter with tenant: <%s> and id: <%s> after migration",
+				err.Error(), tenant, idg)
 		}
 		m.stats[utils.RQF] += 1
 	}
 	if err = m.migrateResourceProfileFiltersV2(); err != nil {
-		return err
+		return fmt.Errorf("Error: <%s> when trying to migrate filter for ResourceProfiles",
+			err.Error())
 	}
 	if err = m.migrateStatQueueProfileFiltersV2(); err != nil {
-		return err
+		return fmt.Errorf("Error: <%s> when trying to migrate filter for StatQueueProfiles",
+			err.Error())
 	}
 	if err = m.migrateThresholdsProfileFiltersV2(); err != nil {
-		return err
+		return fmt.Errorf("Error: <%s> when trying to migrate filter for ThresholdProfiles",
+			err.Error())
 	}
 	if err = m.migrateSupplierProfileFiltersV2(); err != nil {
-		return err
+		return fmt.Errorf("Error: <%s> when trying to migrate filter for SupplierProfiles",
+			err.Error())
 	}
 	if err = m.migrateAttributeProfileFiltersV2(); err != nil {
-		return err
+		return fmt.Errorf("Error: <%s> when trying to migrate filter for AttributeProfiles",
+			err.Error())
 	}
 	if err = m.migrateChargerProfileFiltersV2(); err != nil {
-		return err
+		return fmt.Errorf("Error: <%s> when trying to migrate filter for ChargerProfiles",
+			err.Error())
 	}
 	if err = m.migrateDispatcherProfileFiltersV2(); err != nil {
-		return err
+		return fmt.Errorf("Error: <%s> when trying to migrate filter for DispatcherProfiles",
+			err.Error())
 	}
 	vrs := engine.Versions{utils.RQF: engine.CurrentDataDBVersions()[utils.RQF]}
 	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
@@ -490,13 +499,14 @@ func (m *Migrator) migrateResourceProfileFiltersV2() (err error) {
 	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ResourceProfilesPrefix)
 	if err != nil {
-		return err
+		return fmt.Errorf("error: <%s> when getting resource profile IDs", err.Error())
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.ResourceProfilesPrefix+tenant+":")
 		res, err := m.dmIN.DataManager().GetResourceProfile(tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
-			return err
+			return fmt.Errorf("error: <%s> when getting resource profile with tenant: <%s> and id: <%s>",
+				err.Error(), tenant, idg)
 		}
 		if m.dryRun || res == nil {
 			continue
@@ -505,7 +515,8 @@ func (m *Migrator) migrateResourceProfileFiltersV2() (err error) {
 			res.FilterIDs[i] = migrateInlineFilterV2(fl)
 		}
 		if err := m.dmOut.DataManager().SetResourceProfile(res, true); err != nil {
-			return err
+			return fmt.Errorf("error: <%s> when setting resource profile with tenant: <%s> and id: <%s>",
+				err.Error(), tenant, idg)
 		}
 		m.stats[utils.RQF] += 1
 	}
@@ -517,13 +528,14 @@ func (m *Migrator) migrateStatQueueProfileFiltersV2() (err error) {
 	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.StatQueueProfilePrefix)
 	if err != nil {
-		return err
+		return fmt.Errorf("error: <%s> when getting statQueue profile IDs", err.Error())
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.StatQueueProfilePrefix+tenant+":")
 		sgs, err := m.dmIN.DataManager().GetStatQueueProfile(tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
-			return err
+			return fmt.Errorf("error: <%s> when getting statQueue profile with tenant: <%s> and id: <%s>",
+				err.Error(), tenant, idg)
 		}
 		if sgs == nil || m.dryRun {
 			continue
@@ -532,7 +544,8 @@ func (m *Migrator) migrateStatQueueProfileFiltersV2() (err error) {
 			sgs.FilterIDs[i] = migrateInlineFilterV2(fl)
 		}
 		if err = m.dmOut.DataManager().SetStatQueueProfile(sgs, true); err != nil {
-			return err
+			return fmt.Errorf("error: <%s> when setting statQueue profile with tenant: <%s> and id: <%s>",
+				err.Error(), tenant, idg)
 		}
 		m.stats[utils.RQF] += 1
 	}
@@ -544,13 +557,14 @@ func (m *Migrator) migrateThresholdsProfileFiltersV2() (err error) {
 	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ThresholdProfilePrefix)
 	if err != nil {
-		return err
+		return fmt.Errorf("error: <%s> when getting threshold profile IDs", err)
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.ThresholdProfilePrefix+tenant+":")
 		ths, err := m.dmIN.DataManager().GetThresholdProfile(tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
-			return err
+			return fmt.Errorf("error: <%s> when getting threshold profile with tenant: <%s> and id: <%s>",
+				err.Error(), tenant, idg)
 		}
 		if ths == nil || m.dryRun {
 			continue
@@ -559,7 +573,8 @@ func (m *Migrator) migrateThresholdsProfileFiltersV2() (err error) {
 			ths.FilterIDs[i] = migrateInlineFilterV2(fl)
 		}
 		if err := m.dmOut.DataManager().SetThresholdProfile(ths, true); err != nil {
-			return err
+			return fmt.Errorf("error: <%s> when setting threshold profile with tenant: <%s> and id: <%s>",
+				err.Error(), tenant, idg)
 		}
 		m.stats[utils.RQF] += 1
 	}
@@ -571,13 +586,14 @@ func (m *Migrator) migrateSupplierProfileFiltersV2() (err error) {
 	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.SupplierProfilePrefix)
 	if err != nil {
-		return err
+		return fmt.Errorf("error: <%s> when getting supplier profile IDs", err)
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.SupplierProfilePrefix)
 		splp, err := m.dmIN.DataManager().GetSupplierProfile(tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
-			return err
+			return fmt.Errorf("error: <%s> when getting supplier profile with tenant: <%s> and id: <%s>",
+				err.Error(), tenant, idg)
 		}
 		if splp == nil || m.dryRun {
 			continue
@@ -586,7 +602,8 @@ func (m *Migrator) migrateSupplierProfileFiltersV2() (err error) {
 			splp.FilterIDs[i] = migrateInlineFilterV2(fl)
 		}
 		if err := m.dmOut.DataManager().SetSupplierProfile(splp, true); err != nil {
-			return err
+			return fmt.Errorf("error: <%s> when setting supplier profile with tenant: <%s> and id: <%s>",
+				err.Error(), tenant, idg)
 		}
 		m.stats[utils.RQF] += 1
 	}
@@ -598,13 +615,14 @@ func (m *Migrator) migrateAttributeProfileFiltersV2() (err error) {
 	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.AttributeProfilePrefix)
 	if err != nil {
-		return err
+		return fmt.Errorf("error: <%s> when getting attribute profile IDs", err)
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.AttributeProfilePrefix+tenant+":")
 		attrPrf, err := m.dmIN.DataManager().GetAttributeProfile(tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
-			return err
+			return fmt.Errorf("error: <%s> when getting attribute profile with tenant: <%s> and id: <%s>",
+				err.Error(), tenant, idg)
 		}
 		if attrPrf == nil || m.dryRun {
 			continue
@@ -618,7 +636,8 @@ func (m *Migrator) migrateAttributeProfileFiltersV2() (err error) {
 			}
 		}
 		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
-			return err
+			return fmt.Errorf("error: <%s> when setting attribute profile with tenant: <%s> and id: <%s>",
+				err.Error(), tenant, idg)
 		}
 		m.stats[utils.RQF] += 1
 	}
@@ -630,13 +649,14 @@ func (m *Migrator) migrateChargerProfileFiltersV2() (err error) {
 	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.ChargerProfilePrefix)
 	if err != nil {
-		return err
+		return fmt.Errorf("error: <%s> when getting charger profile IDs", err)
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.ChargerProfilePrefix+tenant+":")
 		cpp, err := m.dmIN.DataManager().GetChargerProfile(tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
-			return err
+			return fmt.Errorf("error: <%s> when getting charger profile with tenant: <%s> and id: <%s>",
+				err.Error(), tenant, idg)
 		}
 		if cpp == nil || m.dryRun {
 			continue
@@ -645,7 +665,8 @@ func (m *Migrator) migrateChargerProfileFiltersV2() (err error) {
 			cpp.FilterIDs[i] = migrateInlineFilterV2(fl)
 		}
 		if err := m.dmOut.DataManager().SetChargerProfile(cpp, true); err != nil {
-			return err
+			return fmt.Errorf("error: <%s> when setting charger profile with tenant: <%s> and id: <%s>",
+				err.Error(), tenant, idg)
 		}
 		m.stats[utils.RQF] += 1
 	}
@@ -657,13 +678,14 @@ func (m *Migrator) migrateDispatcherProfileFiltersV2() (err error) {
 	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
 	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.DispatcherProfilePrefix)
 	if err != nil {
-		return err
+		return fmt.Errorf("error: <%s> when getting dispatcher profile IDs", err)
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.DispatcherProfilePrefix+tenant+":")
 		dpp, err := m.dmIN.DataManager().GetDispatcherProfile(tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
-			return err
+			return fmt.Errorf("error: <%s> when getting dispatcher profile with tenant: <%s> and id: <%s>",
+				err.Error(), tenant, idg)
 		}
 		if dpp == nil || m.dryRun {
 			continue
@@ -672,7 +694,8 @@ func (m *Migrator) migrateDispatcherProfileFiltersV2() (err error) {
 			dpp.FilterIDs[i] = migrateInlineFilterV2(fl)
 		}
 		if err := m.dmOut.DataManager().SetDispatcherProfile(dpp, true); err != nil {
-			return err
+			return fmt.Errorf("error: <%s> when setting dispatcher profile with tenant: <%s> and id: <%s>",
+				err.Error(), tenant, idg)
 		}
 		m.stats[utils.RQF] += 1
 	}

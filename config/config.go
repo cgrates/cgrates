@@ -31,6 +31,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cgrates/rpcclient"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -134,7 +136,7 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.DataFolderPath = "/usr/share/cgrates/"
 	cfg.MaxCallDuration = time.Duration(3) * time.Hour // Hardcoded for now
 
-	cfg.rpcConns = make(map[string]*RpcConn)
+	cfg.rpcConns = make(map[string]*RPCConn)
 	cfg.generalCfg = new(GeneralCfg)
 	cfg.generalCfg.NodeID = utils.UUIDSha1Prefix()
 	cfg.dataDbCfg = new(DataDbCfg)
@@ -257,7 +259,7 @@ type CGRConfig struct {
 	ConfigReloads map[string]chan struct{} // Signals to specific entities that a config reload should occur
 	rldChans      map[string]chan struct{} // index here the channels used for reloads
 
-	rpcConns map[string]*RpcConn
+	rpcConns map[string]*RPCConn
 
 	generalCfg       *GeneralCfg       // General config
 	dataDbCfg        *DataDbCfg        // Database config
@@ -321,7 +323,7 @@ func (cfg *CGRConfig) LazySanityCheck() {
 func (cfg *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	// Load sections out of JSON config, stop on error
 	for _, loadFunc := range []func(*CgrJsonCfg) error{
-		cfg.loadRpcConns,
+		cfg.loadRPCConns,
 		cfg.loadGeneralCfg, cfg.loadCacheCfg, cfg.loadListenCfg,
 		cfg.loadHttpCfg, cfg.loadDataDBCfg, cfg.loadStorDBCfg,
 		cfg.loadFilterSCfg, cfg.loadRalSCfg, cfg.loadSchedulerCfg,
@@ -341,12 +343,37 @@ func (cfg *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	return
 }
 
-// loadRpcConns loads the RPCConns section of the configuration
-func (cfg *CGRConfig) loadRpcConns(jsnCfg *CgrJsonCfg) (err error) {
-	//var jsnRpcConns map[string]*RpcConnsJson
-	//if jsnRpcConns, err = jsnCfg.RpcConnJsonCfg(); err != nil {
-	//	return
-	//}
+// loadRPCConns loads the RPCConns section of the configuration
+func (cfg *CGRConfig) loadRPCConns(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnRpcConns map[string]*RPCConnsJson
+	if jsnRpcConns, err = jsnCfg.RPCConnJsonCfg(); err != nil {
+		return
+	}
+	// hardoded the *internal and *localhost connections
+	cfg.rpcConns[utils.MetaInternal] = &RPCConn{
+		Strategy: rpcclient.POOL_FIRST,
+		PoolSize: 0,
+		Conns: []*RemoteHost{
+			&RemoteHost{
+				Address: utils.MetaInternal,
+			},
+		},
+	}
+	cfg.rpcConns[utils.MetaLocalHost] = &RPCConn{
+		Strategy: rpcclient.POOL_FIRST,
+		PoolSize: 0,
+		Conns: []*RemoteHost{
+			&RemoteHost{
+				Address:   "127.0.0.1:2012",
+				Transport: utils.MetaJSONrpc,
+			},
+		},
+	}
+	for key, val := range jsnRpcConns {
+		if err = cfg.rpcConns[key].loadFromJsonCfg(val); err != nil {
+			return
+		}
+	}
 	return
 }
 

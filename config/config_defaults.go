@@ -53,6 +53,9 @@ const CGRATES_CFG_JSON = `
 },
 
 
+"rpc_conns": {},							// rpc connections definitions
+
+
 "data_db": {								// database used to store runtime data (eg: accounts)
 	"db_type": "*redis",					// data_db type: <*redis|*mongo>
 	"db_host": "127.0.0.1",					// data_db host address
