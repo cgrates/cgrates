@@ -87,6 +87,7 @@ func getSessionTTL(ev *engine.MapEvent, cfgSessionTTL time.Duration,
 	return
 }
 
+// GetSetCGRID will populate the CGRID key if not present and return it
 func GetSetCGRID(ev engine.MapEvent) (cgrID string) {
 	cgrID = ev.GetStringIgnoreErrors(utils.CGRID)
 	if cgrID == "" {

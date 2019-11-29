@@ -1677,6 +1677,7 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(clnt rpcclient.RpcClientConnection,
 	return
 }
 
+// ArgsReplicateSessions used to specify wich Session to replicate over the given connections
 type ArgsReplicateSessions struct {
 	CGRID       string
 	Passive     bool
@@ -1755,6 +1756,7 @@ type V1AuthorizeArgs struct {
 	*utils.ArgDispatcher
 }
 
+// ParseFlags will populate the V1AuthorizeArgs flags
 func (args *V1AuthorizeArgs) ParseFlags(flags string) {
 	dispatcherFlag := false
 	for _, subsystem := range strings.Split(flags, utils.FIELDS_SEP) {
@@ -2035,6 +2037,7 @@ type V1InitSessionArgs struct {
 	*utils.ArgDispatcher
 }
 
+// ParseFlags will populate the V1InitSessionArgs flags
 func (args *V1InitSessionArgs) ParseFlags(flags string) {
 	dispatcherFlag := false
 	for _, subsystem := range strings.Split(flags, utils.FIELDS_SEP) {
@@ -2071,11 +2074,11 @@ type V1InitSessionReply struct {
 }
 
 // SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
-func (v1AuthReply *V1InitSessionReply) SetMaxUsageNeeded(getMaxUsage bool) {
-	if v1AuthReply == nil {
+func (v1Rply *V1InitSessionReply) SetMaxUsageNeeded(getMaxUsage bool) {
+	if v1Rply == nil {
 		return
 	}
-	v1AuthReply.getMaxUsage = getMaxUsage
+	v1Rply.getMaxUsage = getMaxUsage
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
@@ -2231,6 +2234,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
 	return
 }
 
+// V1InitReplyWithDigest is the formated reply
 type V1InitReplyWithDigest struct {
 	AttributesDigest   *string
 	ResourceAllocation *string
@@ -2239,6 +2243,7 @@ type V1InitReplyWithDigest struct {
 	StatQueues         *string
 }
 
+// BiRPCv1InitiateSessionWithDigest returns the formated result of InitiateSession
 func (sS *SessionS) BiRPCv1InitiateSessionWithDigest(clnt rpcclient.RpcClientConnection,
 	args *V1InitSessionArgs, initReply *V1InitReplyWithDigest) (err error) {
 	var initSessionRply V1InitSessionReply
@@ -2407,6 +2412,7 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
 	return
 }
 
+// NewV1TerminateSessionArgs creates a new V1TerminateSessionArgs using the given arguments
 func NewV1TerminateSessionArgs(acnts, resrc,
 	thrds bool, thresholdIDs []string, stats bool,
 	statIDs []string, cgrEv *utils.CGREvent,
@@ -2428,6 +2434,7 @@ func NewV1TerminateSessionArgs(acnts, resrc,
 	return
 }
 
+// V1TerminateSessionArgs is used as argumen for TerminateSession
 type V1TerminateSessionArgs struct {
 	TerminateSession  bool
 	ReleaseResources  bool
@@ -2439,6 +2446,7 @@ type V1TerminateSessionArgs struct {
 	*utils.ArgDispatcher
 }
 
+// ParseFlags will populate the V1TerminateSessionArgs flags
 func (args *V1TerminateSessionArgs) ParseFlags(flags string) {
 	dispatcherFlag := false
 	for _, subsystem := range strings.Split(flags, utils.FIELDS_SEP) {
@@ -2726,6 +2734,7 @@ type V1ProcessMessageArgs struct {
 	*utils.ArgDispatcher
 }
 
+// ParseFlags will populate the V1ProcessMessageArgs flags
 func (args *V1ProcessMessageArgs) ParseFlags(flags string) {
 	dispatcherFlag := false
 	for _, subsystem := range strings.Split(flags, utils.FIELDS_SEP) {
@@ -3279,6 +3288,7 @@ func (sS *SessionS) BiRPCv1ForceDisconnect(clnt rpcclient.RpcClientConnection,
 	return nil
 }
 
+// BiRPCv1RegisterInternalBiJSONConn will register the client for a bidirectional comunication
 func (sS *SessionS) BiRPCv1RegisterInternalBiJSONConn(clnt rpcclient.RpcClientConnection,
 	ign string, reply *string) error {
 	sS.RegisterIntBiJConn(clnt)
