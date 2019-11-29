@@ -91,7 +91,16 @@ func TestActionPlanClone(t *testing.T) {
 	at1 := &ActionPlan{
 		Id:         "test",
 		AccountIDs: utils.StringMap{"one": true, "two": true, "three": true},
-		//ActionTimings: []*ActionTiming{},
+		ActionTimings: []*ActionTiming{
+			&ActionTiming{
+				Uuid:      "Uuid_test1",
+				ActionsID: "ActionsID_test1",
+				Weight:    0.8,
+				Timing: &RateInterval{
+					Weight: 0.7,
+				},
+			},
+		},
 	}
 	clned, err := at1.Clone()
 	if err != nil {
@@ -99,7 +108,7 @@ func TestActionPlanClone(t *testing.T) {
 	}
 	at1Cloned := clned.(*ActionPlan)
 	if !reflect.DeepEqual(at1, at1Cloned) {
-		t.Errorf("Expecting: %+v, received: %+v", at1, at1Cloned)
+		t.Errorf("\nExpecting: %+v,\n received: %+v", at1, at1Cloned)
 	}
 }
 func TestActionTimindSetActions(t *testing.T) {

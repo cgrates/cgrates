@@ -80,12 +80,34 @@ func (apl *ActionPlan) RemoveAccountID(accID string) (found bool) {
 	return
 }
 
+// Clone clones *ActionPlan
 func (apl *ActionPlan) Clone() (interface{}, error) {
-	cln := new(ActionPlan)
-	if err := utils.Clone(*apl, cln); err != nil {
-		return nil, err
+	cln := &ActionPlan{
+		Id:         apl.Id,
+		AccountIDs: apl.AccountIDs.Clone(),
+	}
+	if apl.ActionTimings != nil {
+		cln.ActionTimings = make([]*ActionTiming, len(apl.ActionTimings))
+		for i, act := range apl.ActionTimings {
+			cln.ActionTimings[i] = act.Clone()
+		}
 	}
 	return cln, nil
+}
+
+// Clone clones ActionTiming
+func (at *ActionTiming) Clone() (cln *ActionTiming) {
+	if at == nil {
+		return
+	}
+	cln = &ActionTiming{
+		Uuid:      at.Uuid,
+		ActionsID: at.ActionsID,
+		Weight:    at.Weight,
+		ExtraData: at.ExtraData,
+		Timing:    at.Timing.Clone(),
+	}
+	return
 }
 
 func (at *ActionTiming) GetNextStartTime(now time.Time) (t time.Time) {
