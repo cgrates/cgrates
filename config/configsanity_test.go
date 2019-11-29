@@ -688,3 +688,80 @@ func TestConfigSanityStorDB(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 }
+
+func TestConfigSanityDataDB(t *testing.T) {
+	cfg, _ = NewDefaultCGRConfig()
+	cfg.dataDbCfg.DataDbType = utils.INTERNAL
+	cfg.cacheCfg = CacheCfg{
+		utils.CacheDiameterMessages: &CacheParamCfg{
+			Limit: 0,
+		},
+	}
+	expected := "<CacheS> *diameter_messages needs to be != 0 when DataBD is *internal, found 0."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.cacheCfg = CacheCfg{
+		utils.CacheDiameterMessages: &CacheParamCfg{
+			Limit: 1,
+		},
+	}
+	if err := cfg.checkConfigSanity(); err != nil {
+		t.Errorf("Expecting: nil  received: %+q", err)
+	}
+
+	cfg.cacheCfg = CacheCfg{
+		"test": &CacheParamCfg{
+			Limit: 1,
+		},
+	}
+	expected = "<CacheS> test needs to be 0 when DataBD is *internal, received : 1"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.cacheCfg["test"].Limit = 0
+
+	cfg.resourceSCfg.Enabled = true
+	expected = "<ResourceS> StoreInterval needs to be -1 when DataBD is *internal, received : 0"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.resourceSCfg.Enabled = false
+
+	cfg.statsCfg.Enabled = true
+	expected = "<Stats> StoreInterval needs to be -1 when DataBD is *internal, received : 0"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.statsCfg.Enabled = false
+
+	cfg.thresholdSCfg.Enabled = true
+	expected = "<ThresholdS> StoreInterval needs to be -1 when DataBD is *internal, received : 0"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.thresholdSCfg.Enabled = false
+
+	cfg.dataDbCfg.Items = map[string]*ItemRmtRplOpt{
+		"test1": &ItemRmtRplOpt{
+			Remote: true,
+		},
+	}
+	expected = "Remote connections required by: <test1>"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.dataDbCfg.Items = map[string]*ItemRmtRplOpt{
+		"test2": &ItemRmtRplOpt{
+			Remote:    false,
+			Replicate: true,
+		},
+	}
+	expected = "Replicate connections required by: <test2>"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+}
