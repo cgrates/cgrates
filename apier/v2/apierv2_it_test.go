@@ -212,6 +212,7 @@ func TestApierV2itFraudMitigation(t *testing.T) {
 	if err := apierRPC.Call(utils.ApierV2SetAccount, attrSetAcnt, &reply); err != nil {
 		t.Fatal(err)
 	}
+	acnt = engine.Account{} // gob doesn't update the fields with default values
 	if err := apierRPC.Call(utils.ApierV2GetAccount, &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan"}, &acnt); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 1 || acnt.BalanceMap[utils.MONETARY][0].Value != 60.0 {
