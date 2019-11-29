@@ -94,13 +94,8 @@ func (apierV1 *ApierV1) GetThresholdProfileIDs(args utils.TenantArgWithPaginator
 	return nil
 }
 
-type ThresholdWithCache struct {
-	*engine.ThresholdProfile
-	Cache *string
-}
-
 // SetThresholdProfile alters/creates a ThresholdProfile
-func (apierV1 *ApierV1) SetThresholdProfile(args *ThresholdWithCache, reply *string) error {
+func (apierV1 *ApierV1) SetThresholdProfile(args *engine.ThresholdWithCache, reply *string) error {
 	if missing := utils.MissingStructFields(args.ThresholdProfile, []string{"Tenant", "ID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

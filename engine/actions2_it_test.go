@@ -21,7 +21,6 @@ package engine
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"testing"
 	"time"
@@ -69,6 +68,9 @@ func TestActionsITRemoveSMCostMongo(t *testing.T) {
 func testActionsInitCfg(t *testing.T) {
 	var err error
 	actsCfgPath = path.Join(*dataDir, "conf", "samples", actsCfgDir)
+	if *encoding == utils.MetaGOBrpc {
+		actsCfgPath = path.Join(*dataDir, "conf", "samples", "gob", actsCfgDir)
+	}
 	actsCfg, err = config.NewCGRConfigFromPath(actsCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -117,7 +119,7 @@ func testActionsStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testActionsRPCConn(t *testing.T) {
 	var err error
-	actsRPC, err = jsonrpc.Dial("tcp", actsCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	actsRPC, err = newRPCClient(actsCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

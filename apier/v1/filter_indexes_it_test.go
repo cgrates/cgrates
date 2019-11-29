@@ -182,7 +182,7 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl = &ThresholdWithCache{
+	tPrfl = &engine.ThresholdWithCache{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    tenant,
 			ID:        "TEST_PROFILE1",
@@ -277,7 +277,7 @@ func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl = &ThresholdWithCache{
+	tPrfl = &engine.ThresholdWithCache{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant:    tenant,
 			ID:        "TEST_PROFILE2",

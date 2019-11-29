@@ -31,7 +31,7 @@ import (
 )
 
 func TestDAsSessionSClientIface(t *testing.T) {
-	_ = sessions.SessionSClient(new(DiameterAgent))
+	_ = sessions.BiRPClient(new(DiameterAgent))
 }
 
 type testMockSessionConn struct {

@@ -726,7 +726,7 @@ func testV1STSProcessStatWithThreshold(t *testing.T) {
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
 	}
-	thSts := &ThresholdWithCache{
+	thSts := &engine.ThresholdWithCache{
 		ThresholdProfile: &engine.ThresholdProfile{
 			Tenant: "cgrates.org",
 			ID:     "THD_Stat",

@@ -45,9 +45,9 @@ var authReqs = engine.MapEvent{
 	utils.META_PSEUDOPREPAID: struct{}{},
 }
 
-// SessionSClient is the interface implemented by Agents which are able to
+// BiRPClient is the interface implemented by Agents which are able to
 // communicate bidirectionally with SessionS and remote Communication Switch
-type SessionSClient interface {
+type BiRPClient interface {
 	Call(serviceMethod string, args interface{}, reply interface{}) error
 	V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) (err error)
 	V1GetActiveSessionIDs(ignParam string, sessionIDs *[]*SessionID) (err error)

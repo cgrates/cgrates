@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"flag"
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -33,13 +34,30 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var actsLclCfg *config.CGRConfig
-var actsLclRpc *rpc.Client
-var actsLclCfgPath = path.Join(*dataDir, "conf", "samples", "actions")
+var (
+	actsLclCfg     *config.CGRConfig
+	actsLclRpc     *rpc.Client
+	actsLclCfgPath = path.Join(*dataDir, "conf", "samples", "actions")
 
-var waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for rater to start and cache")
+	waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for rater to start and cache")
+	encoding  = flag.String("rpc", utils.MetaJSONrpc, "what encoding whould be uused for rpc comunication")
+)
+
+func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
+	switch *encoding {
+	case utils.MetaJSONrpc:
+		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
+	case utils.MetaGOBrpc:
+		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+	default:
+		return nil, errors.New("UNSUPPORTED_RPC")
+	}
+}
 
 func TestActionsitInitCfg(t *testing.T) {
+	if *encoding == utils.MetaGOBrpc {
+		actsLclCfgPath = path.Join(*dataDir, "conf", "samples", "gob", "actions")
+	}
 	// Init config first
 	var err error
 	actsLclCfg, err = config.NewCGRConfigFromPath(actsLclCfgPath)
@@ -70,7 +88,7 @@ func TestActionsitStartEngine(t *testing.T) {
 func TestActionsitRpcConn(t *testing.T) {
 	var err error
 	// time.Sleep(500 * time.Millisecond)
-	actsLclRpc, err = jsonrpc.Dial("tcp", actsLclCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	actsLclRpc, err = newRPCClient(actsLclCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -261,20 +279,22 @@ func TestActionsitThresholdCDrLog(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl := &ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "THD_Test",
-		FilterIDs: []string{"*string:~*req.Account:th_acc"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+	tPrfl := ThresholdWithCache{
+		ThresholdProfile: &ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "THD_Test",
+			FilterIDs: []string{"*string:~*req.Account:th_acc"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   -1,
+			MinSleep:  time.Duration(5 * time.Minute),
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_TH_CDRLOG"},
+			Async:     false,
 		},
-		MaxHits:   -1,
-		MinSleep:  time.Duration(5 * time.Minute),
-		Blocker:   false,
-		Weight:    20.0,
-		ActionIDs: []string{"ACT_TH_CDRLOG"},
-		Async:     false,
 	}
 	if err := actsLclRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
@@ -284,36 +304,38 @@ func TestActionsitThresholdCDrLog(t *testing.T) {
 	if err := actsLclRpc.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}, &thReply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(tPrfl, thReply) {
-		t.Errorf("Expecting: %+v, received: %+v", tPrfl, thReply)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, thReply) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, thReply)
 	}
-	ev := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "cdrev1",
-		Event: map[string]interface{}{
-			utils.EventType:   utils.CDR,
-			"field_extr1":     "val_extr1",
-			"fieldextr2":      "valextr2",
-			utils.CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
-			utils.RunID:       utils.MetaRaw,
-			utils.OrderID:     123,
-			utils.OriginHost:  "192.168.1.1",
-			utils.Source:      utils.UNIT_TEST,
-			utils.OriginID:    "dsafdsaf",
-			utils.ToR:         utils.VOICE,
-			utils.RequestType: utils.META_RATED,
-			utils.Direction:   "*out",
-			utils.Tenant:      "cgrates.org",
-			utils.Category:    "call",
-			utils.Account:     "th_acc",
-			utils.Subject:     "th_acc",
-			utils.Destination: "+4986517174963",
-			utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
-			utils.PDD:         time.Duration(0) * time.Second,
-			utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-			utils.Usage:       time.Duration(10) * time.Second,
-			utils.SUPPLIER:    "SUPPL1",
-			utils.COST:        -1.0,
+	ev := &ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "cdrev1",
+			Event: map[string]interface{}{
+				utils.EventType:   utils.CDR,
+				"field_extr1":     "val_extr1",
+				"fieldextr2":      "valextr2",
+				utils.CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+				utils.RunID:       utils.MetaRaw,
+				utils.OrderID:     123,
+				utils.OriginHost:  "192.168.1.1",
+				utils.Source:      utils.UNIT_TEST,
+				utils.OriginID:    "dsafdsaf",
+				utils.ToR:         utils.VOICE,
+				utils.RequestType: utils.META_RATED,
+				utils.Direction:   "*out",
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.Account:     "th_acc",
+				utils.Subject:     "th_acc",
+				utils.Destination: "+4986517174963",
+				utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+				utils.PDD:         time.Duration(0) * time.Second,
+				utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+				utils.Usage:       time.Duration(10) * time.Second,
+				utils.SUPPLIER:    "SUPPL1",
+				utils.COST:        -1.0,
+			},
 		},
 	}
 	var ids []string
@@ -471,19 +493,21 @@ func TestActionsitThresholdPostEvent(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	tPrfl := &ThresholdProfile{
-		Tenant: "cgrates.org",
-		ID:     "THD_PostEvent",
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+	tPrfl := &ThresholdWithCache{
+		ThresholdProfile: &ThresholdProfile{
+			Tenant: "cgrates.org",
+			ID:     "THD_PostEvent",
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   -1,
+			MinSleep:  time.Duration(5 * time.Minute),
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_TH_POSTEVENT"},
+			Async:     false,
 		},
-		MaxHits:   -1,
-		MinSleep:  time.Duration(5 * time.Minute),
-		Blocker:   false,
-		Weight:    20.0,
-		ActionIDs: []string{"ACT_TH_POSTEVENT"},
-		Async:     false,
 	}
 	if err := actsLclRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
@@ -493,8 +517,8 @@ func TestActionsitThresholdPostEvent(t *testing.T) {
 	if err := actsLclRpc.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_PostEvent"}, &thReply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(tPrfl, thReply) {
-		t.Errorf("Expecting: %+v, received: %+v", tPrfl, thReply)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, thReply) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, thReply)
 	}
 	ev := &utils.CGREvent{
 		Tenant: "cgrates.org",
