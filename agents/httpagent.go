@@ -219,9 +219,10 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		} else if rply.MaxUsage != nil {
-			cgrEv.Event[utils.Usage] = *rply.MaxUsage // make sure the CDR reflects the debit
+		} else if evArgs.Debit {
+			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
+		rply.SetMaxUsageNeeded(evArgs.Debit)
 		if err = agReq.setCGRReply(nil, err); err != nil {
 			return
 		}

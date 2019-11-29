@@ -403,7 +403,7 @@ func TestKamEvAsKamProcessEventReply(t *testing.T) {
 		},
 	}
 	procEvhRply := &sessions.V1ProcessMessageReply{
-		MaxUsage: utils.DurationPointer(time.Duration(5 * time.Second)),
+		MaxUsage: 5 * time.Second,
 	}
 	expected := &KamReply{
 		Event:    CGR_PROCESS_MESSAGE,

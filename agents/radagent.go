@@ -264,9 +264,10 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 		err = ra.sessionS.Call(utils.SessionSv1ProcessMessage, evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		} else if rply.MaxUsage != nil {
-			cgrEv.Event[utils.Usage] = *rply.MaxUsage // make sure the CDR reflects the debit
+		} else if evArgs.Debit {
+			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
+		rply.SetMaxUsageNeeded(evArgs.Debit)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}

@@ -369,9 +369,10 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			msgArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		} else if rply.MaxUsage != nil {
-			cgrEv.Event[utils.Usage] = *rply.MaxUsage // make sure the CDR reflects the debit
+		} else if msgArgs.Debit {
+			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
 		}
+		rply.SetMaxUsageNeeded(msgArgs.Debit)
 		if err = agReq.setCGRReply(rply, err); err != nil {
 			return
 		}

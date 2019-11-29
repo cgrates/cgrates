@@ -605,7 +605,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 	if err := rpcRpc.Call(utils.SessionSv1ProcessMessage,
 		args, &rplyFirst); err != nil {
 		t.Error(err)
-	} else if *rplyFirst.MaxUsage != initUsage {
+	} else if rplyFirst.MaxUsage != initUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rplyFirst.MaxUsage)
 	}
 

@@ -2760,12 +2760,21 @@ func (args *V1ProcessMessageArgs) ParseFlags(flags string) {
 
 // V1ProcessMessageReply is the reply for the ProcessMessage API
 type V1ProcessMessageReply struct {
-	MaxUsage           *time.Duration
+	MaxUsage           time.Duration
 	ResourceAllocation *string
 	Attributes         *engine.AttrSProcessEventReply
 	Suppliers          *engine.SortedSuppliers
 	ThresholdIDs       *[]string
 	StatQueueIDs       *[]string
+	getMaxUsage        bool
+}
+
+// SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
+func (v1Rply *V1ProcessMessageReply) SetMaxUsageNeeded(getMaxUsage bool) {
+	if v1Rply == nil {
+		return
+	}
+	v1Rply.getMaxUsage = getMaxUsage
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
@@ -2773,8 +2782,8 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap(
 	ignr []*config.FCTemplate) (*config.NavigableMap, error) {
 	cgrReply := make(map[string]interface{})
 	if v1Rply != nil {
-		if v1Rply.MaxUsage != nil {
-			cgrReply[utils.CapMaxUsage] = *v1Rply.MaxUsage
+		if v1Rply.getMaxUsage {
+			cgrReply[utils.CapMaxUsage] = v1Rply.MaxUsage
 		}
 		if v1Rply.ResourceAllocation != nil {
 			cgrReply[utils.CapResourceAllocation] = *v1Rply.ResourceAllocation
@@ -2886,7 +2895,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.RpcClientConnection,
 			engine.MapEvent(args.CGREvent.Event), args.ArgDispatcher); err != nil {
 			return utils.NewErrRALs(err)
 		}
-		rply.MaxUsage = &maxUsage
+		rply.MaxUsage = maxUsage
 	}
 	if args.ProcessThresholds {
 		tIDs, err := sS.processThreshold(args.CGREvent, args.ArgDispatcher,

@@ -588,8 +588,8 @@ func testSSv1ItProcessEvent(t *testing.T) {
 	// in case of prepaid and pseudoprepade we expect a MaxUsage of 5min
 	// and in case of postpaid and rated we expect the value of Usage field
 	// if this was missing the MaxUsage should be equal to MaxCallDuration from config
-	if *rply.MaxUsage != initUsage {
-		t.Errorf("Unexpected MaxUsage: %v", *rply.MaxUsage)
+	if rply.MaxUsage != initUsage {
+		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
 	if *rply.ResourceAllocation != "RES_ACNT_1001" {
 		t.Errorf("Unexpected ResourceAllocation: %s", *rply.ResourceAllocation)

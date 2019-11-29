@@ -1266,8 +1266,9 @@ func TestSessionSV1ProcessMessageReplyAsNavigableMap(t *testing.T) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 
-	v1PrcEvRpl.MaxUsage = utils.DurationPointer(5 * time.Minute)
+	v1PrcEvRpl.MaxUsage = 5 * time.Minute
 	expected.Set([]string{utils.CapMaxUsage}, 5*time.Minute, false, false)
+	v1PrcEvRpl.SetMaxUsageNeeded(true)
 	if rply, _ := v1PrcEvRpl.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
@@ -1292,7 +1293,7 @@ func TestSessionSV1ProcessMessageReplyAsNavigableMap(t *testing.T) {
 	expected.Set([]string{utils.CapSuppliers}, tmpSuppliers.AsNavigableMap(), false, false)
 	expected.Set([]string{utils.CapThresholds}, tmpTresholdIDs, false, false)
 	expected.Set([]string{utils.CapStatQueues}, tmpStatQueueIDs, false, false)
-
+	v1PrcEvRpl.SetMaxUsageNeeded(true)
 	if rply, _ := v1PrcEvRpl.AsNavigableMap(nil); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}

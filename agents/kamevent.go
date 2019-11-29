@@ -328,11 +328,7 @@ func (kev KamEvent) AsKamProcessMessageReply(procEvArgs *sessions.V1ProcessMessa
 		kar.ResourceAllocation = *procEvReply.ResourceAllocation
 	}
 	if procEvArgs.Debit {
-		if *procEvReply.MaxUsage == -1 { // For calls different than unlimited, set limits
-			kar.MaxUsage = -1
-		} else {
-			kar.MaxUsage = int(utils.Round(procEvReply.MaxUsage.Seconds(), 0, utils.ROUNDING_MIDDLE))
-		}
+		kar.MaxUsage = int(utils.Round(procEvReply.MaxUsage.Seconds(), 0, utils.ROUNDING_MIDDLE))
 	}
 	if procEvArgs.GetSuppliers && procEvReply.Suppliers != nil {
 		kar.Suppliers = procEvReply.Suppliers.Digest()
