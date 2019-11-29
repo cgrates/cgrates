@@ -1446,6 +1446,7 @@ const (
 	MetaReady                    = "*ready"
 	CacheLoadIDs                 = "*load_ids"
 	CacheAccounts                = "*accounts"
+	CacheRPCConnections          = "*rpc_connections"
 )
 
 // Prefix for indexing

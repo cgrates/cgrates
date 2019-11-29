@@ -1021,6 +1021,13 @@ func (cfg *CGRConfig) ERsCfg() *ERsCfg {
 	return cfg.ersCfg
 }
 
+// RPCConns reads the RPCConns configuration
+func (cfg *CGRConfig) RPCConns() map[string]*RPCConn {
+	cfg.lks[RPCConnsJsonName].RLock()
+	defer cfg.lks[RPCConnsJsonName].RUnlock()
+	return cfg.rpcConns
+}
+
 // GetReloadChan returns the reload chanel for the given section
 func (cfg *CGRConfig) GetReloadChan(sectID string) chan struct{} {
 	return cfg.rldChans[sectID]

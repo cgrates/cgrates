@@ -56,6 +56,7 @@ var precachedPartitions = utils.StringMap{
 	utils.CacheChargerProfiles:     true,
 	utils.CacheDispatcherProfiles:  true,
 	utils.CacheDispatcherHosts:     true,
+	utils.CacheRPCConnections:      true,
 
 	utils.CacheAttributeFilterIndexes:  true,
 	utils.CacheResourceFilterIndexes:   true,

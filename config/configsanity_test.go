@@ -617,18 +617,14 @@ func TestConfigSanityScheduler(t *testing.T) {
 func TestConfigSanityEventReader(t *testing.T) {
 	cfg, _ = NewDefaultCGRConfig()
 	cfg.ersCfg = &ERsCfg{
-		Enabled: true,
-		SessionSConns: []*RemoteHost{
-			&RemoteHost{
-				Address: utils.MetaInternal,
-			},
-		},
+		Enabled:       true,
+		SessionSConns: []string{"unexistedConn"},
 	}
-	expected := "<SessionS> not enabled but requested by EventReader component."
+	expected := "<ERs> Connection with id: <unexistedConn> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.sessionSCfg.Enabled = true
+	cfg.ersCfg.SessionSConns = []string{utils.MetaInternal}
 
 	cfg.ersCfg.Readers = []*EventReaderCfg{
 		&EventReaderCfg{

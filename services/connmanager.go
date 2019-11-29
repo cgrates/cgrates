@@ -20,24 +20,17 @@ package services
 
 import (
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/rpcclient"
 )
 
-// NewConnection returns a new connection
-func NewConnection(cfg *config.CGRConfig, serviceConnChan, dispatcherSChan chan rpcclient.RpcClientConnection,
-	conns []*config.RemoteHost) (rpcclient.RpcClientConnection, error) {
-	if len(conns) == 0 {
-		return nil, nil
-	}
-	internalChan := serviceConnChan
-	if cfg.DispatcherSCfg().Enabled {
-		internalChan = dispatcherSChan
-	}
-	return engine.NewRPCPool(rpcclient.POOL_FIRST,
-		cfg.TlsCfg().ClientKey,
-		cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-		cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-		cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-		conns, internalChan, false)
+// NewConnManager returns the Connection Manager
+func NewConnManager(cfg *config.CGRConfig) (cM *ConnManager) {
+
+	return
+}
+
+type ConnManager struct {
+}
+
+func (cM *ConnManager) GetConn() {
+
 }

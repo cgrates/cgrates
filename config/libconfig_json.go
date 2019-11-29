@@ -185,7 +185,7 @@ type CdrcJsonCfg struct {
 // EventReaderSJsonCfg contains the configuration of EventReaderService
 type ERsJsonCfg struct {
 	Enabled        *bool
-	Sessions_conns *[]*RemoteHostJson
+	Sessions_conns *[]string
 	Readers        *[]*EventReaderJsonCfg
 }
 
