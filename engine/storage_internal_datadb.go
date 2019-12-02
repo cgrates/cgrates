@@ -29,6 +29,24 @@ import (
 	"github.com/cgrates/ltcache"
 )
 
+// InternalDataDBParts indexes the internal DataDB partitions
+var InternalDataDBParts []string = []string{
+	ColDst, ColRds, ColAct, ColApl, ColAAp, ColTsk, ColAtr, ColRpl,
+	ColRpf, ColAcc, ColShg, ColLht, ColVer, ColRsP, ColRFI, ColTmg, ColRes,
+	ColSqs, ColSqp, ColTps, ColThs, ColFlt, ColSpp, ColAttr, ColCDRs, ColCpp,
+	ColDpp, ColDph, ColLID,
+}
+
+// InternalStorDBParts indexes the internal StorDB partitions
+var InternalStorDBParts []string = []string{
+	utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates,
+	utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
+	utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionTriggers,
+	utils.TBLTPAccountActions, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
+	utils.TBLTPFilters, utils.SessionCostsTBL, utils.CDRsTBL, utils.TBLTPActionPlans,
+	utils.TBLVersions, utils.TBLTPSuppliers, utils.TBLTPAttributes, utils.TBLTPChargers,
+}
+
 type InternalDB struct {
 	tasks               []*Task
 	db                  *ltcache.TransCache
