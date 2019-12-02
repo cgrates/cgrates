@@ -259,7 +259,7 @@ func testDispatcherSSetDispatcherHost(t *testing.T) {
 				},
 				&config.RemoteHost{
 					Address:   ":2012",
-					Transport: utils.MetaJSONrpc,
+					Transport: utils.MetaJSON,
 					TLS:       true,
 				},
 			},
@@ -303,7 +303,7 @@ func testDispatcherSUpdateDispatcherHost(t *testing.T) {
 	var result string
 	dispatcherHost.Conns = append(dispatcherHost.Conns, &config.RemoteHost{
 		Address:   ":4012",
-		Transport: utils.MetaGOBrpc,
+		Transport: utils.MetaGOB,
 		TLS:       false,
 	})
 	if err := dispatcherRPC.Call(utils.ApierV1SetDispatcherHost,

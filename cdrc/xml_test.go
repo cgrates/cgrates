@@ -314,7 +314,7 @@ func TestXMLRPProcessWithNewFilters(t *testing.T) {
 			},
 		},
 	}
-	data, _ := engine.NewInternalDB(nil, nil, utils.MetaMSGPACK)
+	data := engine.NewInternalDB(nil, nil)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -582,7 +582,7 @@ func TestXMLRPNestingSeparator(t *testing.T) {
 			},
 		},
 	}
-	data, _ := engine.NewInternalDB(nil, nil, utils.MetaMSGPACK)
+	data := engine.NewInternalDB(nil, nil)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	if err != nil {
 		t.Errorf("Error: %+v", err)

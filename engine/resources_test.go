@@ -363,7 +363,7 @@ func TestRSCacheSetGet(t *testing.T) {
 }
 
 func TestResourcePopulateResourceService(t *testing.T) {
-	data, _ := NewInternalDB(nil, nil, utils.MetaMSGPACK)
+	data := NewInternalDB(nil, nil)
 	dmRES = NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	if err != nil {
@@ -725,7 +725,7 @@ func TestResourceCaching(t *testing.T) {
 	//clear the cache
 	Cache.Clear(nil)
 	// start fresh with new dataManager
-	data, _ := NewInternalDB(nil, nil, utils.MetaMSGPACK)
+	data := NewInternalDB(nil, nil)
 	dmRES = NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	if err != nil {

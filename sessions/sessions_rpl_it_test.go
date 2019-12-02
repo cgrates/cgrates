@@ -394,7 +394,7 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 		Connections: []*config.RemoteHost{
 			{
 				Address:     smgRplcSlaveCfg.ListenCfg().RPCJSONListen,
-				Transport:   utils.MetaJSONrpc,
+				Transport:   utils.MetaJSON,
 				Synchronous: true},
 		},
 	}
@@ -442,7 +442,7 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 		Connections: []*config.RemoteHost{
 			{
 				Address:     smgRplcMasterCfg.ListenCfg().RPCJSONListen,
-				Transport:   utils.MetaJSONrpc,
+				Transport:   utils.MetaJSON,
 				Synchronous: true},
 		}}
 	if err := smgRplcSlvRPC.Call(utils.SessionSv1ReplicateSessions, argsRepl, &repply); err != nil {

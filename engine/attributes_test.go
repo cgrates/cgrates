@@ -152,8 +152,7 @@ func TestAttributePopulateAttrService(t *testing.T) {
 	//Need clone because time.Now adds extra information that DeepEqual doesn't like
 	if err := utils.Clone(expTimeAttributes, &cloneExpTimeAttributes); err != nil {
 		t.Error(err)
-	}
-	data, _ := NewInternalDB(nil, nil, utils.MetaMSGPACK)
+	data:= NewInternalDB(nil,nil)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
@@ -1700,7 +1699,7 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 }
 
 func BenchmarkAttributeProcessEventConstant(b *testing.B) {
-	data, _ := NewInternalDB(nil, nil, utils.MetaMSGPACK)
+	data:= NewInternalDB(nil, nil)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
@@ -1764,7 +1763,7 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 }
 
 func BenchmarkAttributeProcessEventVariable(b *testing.B) {
-	data, _ := NewInternalDB(nil, nil, utils.MetaMSGPACK)
+	data:= NewInternalDB(nil, nil)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	defaultCfg.AttributeSCfg().ProcessRuns = 1

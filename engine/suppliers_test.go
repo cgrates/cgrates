@@ -293,7 +293,7 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 	if err := utils.Clone(expTimeSuppliers, &cloneExpTimeSuppliers); err != nil {
 		t.Error(err)
 	}
-	data, _ := NewInternalDB(nil, nil, utils.MetaMSGPACK)
+	data := NewInternalDB(nil, nil)
 	dmSPP = NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	if err != nil {

@@ -68,13 +68,13 @@ var rater *rpc.Client
 
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 var waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for rater to start and cache")
-var encoding = flag.String("rpc", utils.MetaJSONrpc, "what encoding whould be uused for rpc comunication")
+var encoding = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
 
 func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
 	switch *encoding {
-	case utils.MetaJSONrpc:
+	case utils.MetaJSON:
 		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOBrpc:
+	case utils.MetaGOB:
 		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
 	default:
 		return nil, errors.New("UNSUPPORTED_RPC")
@@ -1586,7 +1586,7 @@ func TestApierGetCallCostLog(t *testing.T) {
 		Rates:          engine.ChargedRates{},
 		Timings:        engine.ChargedTimings{},
 	}
-	if *encoding == utils.MetaGOBrpc {
+	if *encoding == utils.MetaGOB {
 		expected.Usage = nil // 0 value are encoded as nil in gob
 		expected.Cost = nil
 	}

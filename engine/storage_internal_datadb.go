@@ -40,7 +40,7 @@ type InternalDB struct {
 }
 
 // NewInternalDB constructs an InternalDB
-func NewInternalDB(stringIndexedFields, prefixIndexedFields []string, mrshlr string) (iDB *InternalDB, err error) {
+func NewInternalDB(stringIndexedFields, prefixIndexedFields []string) (iDB *InternalDB) {
 	dfltCfg, _ := config.NewDefaultCGRConfig()
 	iDB = &InternalDB{
 		db:                  ltcache.NewTransCache(dfltCfg.CacheCfg().AsTransCacheConfig()),
@@ -48,14 +48,7 @@ func NewInternalDB(stringIndexedFields, prefixIndexedFields []string, mrshlr str
 		prefixIndexedFields: prefixIndexedFields,
 		cnter:               utils.NewCounter(time.Now().UnixNano(), 0),
 	}
-	switch mrshlr {
-	case utils.MetaMSGPACK:
-		iDB.ms = NewCodecMsgpackMarshaler()
-	case utils.MetaJSON:
-		iDB.ms = new(JSONBufMarshaler)
-	default:
-		return nil, fmt.Errorf("unsupported DB marshaler: <%s>", mrshlr)
-	}
+	iDB.ms = new(GOBMarshaler)
 	return
 }
 

@@ -32,9 +32,12 @@ var (
 )
 
 func init() {
-	apierAcntsAcntStorage, _ = engine.NewInternalDB(nil, nil, utils.MetaMSGPACK)
+	apierAcntsAcntStorage = engine.NewInternalDB(nil, nil)
 	cfg, _ := config.NewDefaultCGRConfig()
-	apierAcnts = &ApierV1{DataManager: engine.NewDataManager(apierAcntsAcntStorage, config.CgrConfig().CacheCfg(), nil, nil), Config: cfg}
+	apierAcnts = &ApierV1{
+		DataManager: engine.NewDataManager(apierAcntsAcntStorage, config.CgrConfig().CacheCfg(), nil, nil),
+		Config:      cfg,
+	}
 }
 
 func TestSetAccounts(t *testing.T) {
