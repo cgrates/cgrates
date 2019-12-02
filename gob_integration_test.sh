@@ -17,9 +17,9 @@ cdrc=$?
 echo 'go test github.com/cgrates/cgrates/ers -tags=integration -rpc=*gob'
 go test github.com/cgrates/cgrates/ers -tags=integration -rpc=*gob
 ers=$?
-# echo 'go test github.com/cgrates/cgrates/general_tests -tags=integration'
-# go test github.com/cgrates/cgrates/general_tests -tags=integration
-# gnr=$?
+echo 'go test github.com/cgrates/cgrates/general_tests -tags=integration -rpc=*gob'
+go test github.com/cgrates/cgrates/general_tests -tags=integration -rpc=*gob
+gnr=$?
 # echo 'go test github.com/cgrates/cgrates/agents -tags=integration'
 # go test github.com/cgrates/cgrates/agents -tags=integration
 # agts=$?

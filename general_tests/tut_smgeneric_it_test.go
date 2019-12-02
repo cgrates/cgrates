@@ -22,7 +22,6 @@ package general_tests
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
@@ -41,14 +40,14 @@ var (
 	smgLoadInst   utils.LoadInstance // Share load information between tests
 
 	sTestTutSMG = []func(t *testing.T){
-		TestTutSMGInitCfg,
-		TestTutSMGResetDataDb,
-		TestTutSMGResetStorDb,
-		TestTutSMGStartEngine,
-		TestTutSMGRpcConn,
-		TestTutSMGLoadTariffPlanFromFolder,
-		TestTutSMGCacheStats,
-		TestTutSMGStopCgrEngine,
+		testTutSMGInitCfg,
+		testTutSMGResetDataDb,
+		testTutSMGResetStorDb,
+		testTutSMGStartEngine,
+		testTutSMGRpcConn,
+		testTutSMGLoadTariffPlanFromFolder,
+		testTutSMGCacheStats,
+		testTutSMGStopCgrEngine,
 	}
 )
 
@@ -58,7 +57,7 @@ func TestTutSMG(t *testing.T) {
 	}
 }
 
-func TestTutSMGInitCfg(t *testing.T) {
+func testTutSMGInitCfg(t *testing.T) {
 	tutSMGCfgPath = path.Join(*dataDir, "conf", "samples", "smgeneric")
 	// Init config first
 	var err error
@@ -71,37 +70,37 @@ func TestTutSMGInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func TestTutSMGResetDataDb(t *testing.T) {
+func testTutSMGResetDataDb(t *testing.T) {
 	if err := engine.InitDataDb(tutSMGCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
-func TestTutSMGResetStorDb(t *testing.T) {
+func testTutSMGResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(tutSMGCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine
-func TestTutSMGStartEngine(t *testing.T) {
+func testTutSMGStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(tutSMGCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestTutSMGRpcConn(t *testing.T) {
+func testTutSMGRpcConn(t *testing.T) {
 	var err error
-	tutSMGRpc, err = jsonrpc.Dial("tcp", tutSMGCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tutSMGRpc, err = newRPCClient(tutSMGCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Load the tariff plan, creating accounts and their balances
-func TestTutSMGLoadTariffPlanFromFolder(t *testing.T) {
+func testTutSMGLoadTariffPlanFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	if err := tutSMGRpc.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &smgLoadInst); err != nil {
 		t.Error(err)
@@ -110,7 +109,7 @@ func TestTutSMGLoadTariffPlanFromFolder(t *testing.T) {
 }
 
 // Check loaded stats
-func TestTutSMGCacheStats(t *testing.T) {
+func testTutSMGCacheStats(t *testing.T) {
 	var reply string
 	if err := tutSMGRpc.Call(utils.CacheSv1LoadCache, utils.AttrReloadCache{}, &reply); err != nil {
 		t.Error(err)
@@ -144,14 +143,14 @@ func TestTutSMGCacheStats(t *testing.T) {
 	expectedStats[utils.CacheActionTriggers].Items = 1
 	expectedStats[utils.CacheLoadIDs].Items = 20
 	expectedStats[utils.CacheChargerProfiles].Items = 1
-	if err := tutSMGRpc.Call(utils.CacheSv1GetCacheStats, nil, &rcvStats); err != nil {
+	if err := tutSMGRpc.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithArgDispatcher), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 		t.Errorf("Calling ApierV2.CacheSv1 expected: %+v,\n received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
 	}
 }
 
-func TestTutSMGStopCgrEngine(t *testing.T) {
+func testTutSMGStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}

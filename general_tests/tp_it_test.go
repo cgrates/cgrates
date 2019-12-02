@@ -22,7 +22,6 @@ package general_tests
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"testing"
 	"time"
@@ -103,7 +102,7 @@ func testTpStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTpRpcConn(t *testing.T) {
 	var err error
-	tpRPC, err = jsonrpc.Dial("tcp", tpCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpRPC, err = newRPCClient(tpCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -120,14 +119,16 @@ func testTpLoadTariffPlanFromFolder(t *testing.T) {
 
 func testTpBalanceCounter(t *testing.T) {
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
-	cd := engine.CallDescriptor{
-		Category:      "call",
-		Tenant:        "cgrates.org",
-		Subject:       "1001",
-		Destination:   "+49",
-		DurationIndex: 0,
-		TimeStart:     tStart,
-		TimeEnd:       tStart.Add(time.Duration(20) * time.Second),
+	cd := &engine.CallDescriptorWithArgDispatcher{
+		CallDescriptor: &engine.CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "1001",
+			Destination:   "+49",
+			DurationIndex: 0,
+			TimeStart:     tStart,
+			TimeEnd:       tStart.Add(time.Duration(20) * time.Second),
+		},
 	}
 	var cc engine.CallCost
 	if err := tpRPC.Call(utils.ResponderDebit, cd, &cc); err != nil {
@@ -202,15 +203,17 @@ func testTpZeroCost(t *testing.T) {
 	}
 	balanceValueBefore := acnt.BalanceMap[utils.MONETARY][0].Value
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
-	cd := engine.CallDescriptor{
-		Category:      "call",
-		Tenant:        "cgrates.org",
-		Subject:       "free",
-		Account:       "1012",
-		Destination:   "+49",
-		DurationIndex: 0,
-		TimeStart:     tStart,
-		TimeEnd:       tStart.Add(time.Duration(20) * time.Second),
+	cd := &engine.CallDescriptorWithArgDispatcher{
+		CallDescriptor: &engine.CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "free",
+			Account:       "1012",
+			Destination:   "+49",
+			DurationIndex: 0,
+			TimeStart:     tStart,
+			TimeEnd:       tStart.Add(time.Duration(20) * time.Second),
+		},
 	}
 	var cc engine.CallCost
 	if err := tpRPC.Call(utils.ResponderDebit, cd, &cc); err != nil {
@@ -227,15 +230,17 @@ func testTpZeroCost(t *testing.T) {
 
 func testTpZeroNegativeCost(t *testing.T) {
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
-	cd := engine.CallDescriptor{
-		Category:      "call",
-		Tenant:        "cgrates.org",
-		Subject:       "free",
-		Account:       "1013",
-		Destination:   "+4915",
-		DurationIndex: 0,
-		TimeStart:     tStart,
-		TimeEnd:       tStart.Add(time.Duration(20) * time.Second),
+	cd := &engine.CallDescriptorWithArgDispatcher{
+		CallDescriptor: &engine.CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "free",
+			Account:       "1013",
+			Destination:   "+4915",
+			DurationIndex: 0,
+			TimeStart:     tStart,
+			TimeEnd:       tStart.Add(time.Duration(20) * time.Second),
+		},
 	}
 	var cc engine.CallCost
 	if err := tpRPC.Call(utils.ResponderDebit, cd, &cc); err != nil {

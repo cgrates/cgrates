@@ -22,7 +22,6 @@ package general_tests
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
@@ -123,7 +122,7 @@ func testV2CDRsStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testV2CDRsRpcConn(t *testing.T) {
-	cdrsRpc, err = jsonrpc.Dial("tcp", cdrsCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrsRpc, err = newRPCClient(cdrsCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -587,7 +586,9 @@ func testV2CDRsGetStats1(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.Usage): utils.NOT_AVAILABLE,
 	}
 	if err := cdrsRpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &metrics); err != nil {
+		&utils.TenantIDWithArgDispatcher{
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]},
+		}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -605,7 +606,9 @@ func testV2CDRsGetThreshold1(t *testing.T) {
 	}
 	var td engine.Threshold
 	if err := cdrsRpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_PoccessCDR"}, &td); err != nil {
+		&utils.TenantIDWithArgDispatcher{
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_PoccessCDR"},
+		}, &td); err != nil {
 		t.Error(err)
 	} else if td.Hits != 0 {
 		t.Errorf("received: %+v", td)
@@ -650,7 +653,9 @@ func testV2CDRsGetStats2(t *testing.T) {
 		utils.ConcatenatedKey(utils.MetaSum, utils.DynamicDataPrefix+utils.Usage): "60000000000",
 	}
 	if err := cdrsRpc.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]}, &metrics); err != nil {
+		&utils.TenantIDWithArgDispatcher{
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: expectedIDs[0]},
+		}, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
 		t.Errorf("expecting: %+v, received reply: %s", expectedMetrics, metrics)
@@ -660,7 +665,9 @@ func testV2CDRsGetStats2(t *testing.T) {
 func testV2CDRsGetThreshold2(t *testing.T) {
 	var td engine.Threshold
 	if err := cdrsRpc.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_PoccessCDR"}, &td); err != nil {
+		&utils.TenantIDWithArgDispatcher{
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_PoccessCDR"},
+		}, &td); err != nil {
 		t.Error(err)
 	} else if td.Hits != 2 { // 2 Chargers
 		t.Errorf("received: %+v", td)

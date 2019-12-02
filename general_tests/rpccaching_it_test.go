@@ -22,7 +22,6 @@ package general_tests
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
@@ -106,7 +105,7 @@ func testRPCMethodsStartEngine(t *testing.T) {
 
 func testRPCMethodsRpcConn(t *testing.T) {
 	var err error
-	rpcRpc, err = jsonrpc.Dial("tcp", rpcCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	rpcRpc, err = newRPCClient(rpcCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -153,14 +152,16 @@ func testRPCMethodsAddData(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 
 	//Add a thresholdProfile to disable account
-	tPrfl := &engine.ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "THD_AccDisableAndLog",
-		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.DisableAction:DisableAction"},
-		MaxHits:   -1,
-		MinSleep:  time.Duration(1 * time.Second),
-		Weight:    30.0,
-		ActionIDs: []string{"DISABLE_LOG"},
+	tPrfl := &engine.ThresholdWithCache{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "THD_AccDisableAndLog",
+			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.DisableAction:DisableAction"},
+			MaxHits:   -1,
+			MinSleep:  time.Duration(1 * time.Second),
+			Weight:    30.0,
+			ActionIDs: []string{"DISABLE_LOG"},
+		},
 	}
 	if err := rpcRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &reply); err != nil {
 		t.Error(err)
@@ -168,14 +169,16 @@ func testRPCMethodsAddData(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 	//Add a thresholdProfile to enable account
-	tPrfl2 := &engine.ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "THD_AccEnableAndLog",
-		FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.EnableAction:EnableAction"},
-		MaxHits:   -1,
-		MinSleep:  time.Duration(1 * time.Second),
-		Weight:    30.0,
-		ActionIDs: []string{"ENABLE_LOG"},
+	tPrfl2 := &engine.ThresholdWithCache{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "THD_AccEnableAndLog",
+			FilterIDs: []string{"*string:~*req.Account:1001", "*string:~*req.EnableAction:EnableAction"},
+			MaxHits:   -1,
+			MinSleep:  time.Duration(1 * time.Second),
+			Weight:    30.0,
+			ActionIDs: []string{"ENABLE_LOG"},
+		},
 	}
 	if err := rpcRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl2, &reply); err != nil {
 		t.Error(err)
@@ -215,12 +218,14 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 
 	//disable the account
 	var ids []string
-	thEvent := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "DisableAccount",
-		Event: map[string]interface{}{
-			utils.Account:   "1001",
-			"DisableAction": "DisableAction",
+	thEvent := &engine.ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "DisableAccount",
+			Event: map[string]interface{}{
+				utils.Account:   "1001",
+				"DisableAction": "DisableAction",
+			},
 		},
 	}
 	//process event
@@ -260,7 +265,7 @@ func testRPCMethodsAuthorizeSession(t *testing.T) {
 	}
 
 	//enable the account
-	thEvent = &utils.CGREvent{
+	thEvent.CGREvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EnableAccount",
 		Event: map[string]interface{}{
@@ -308,12 +313,14 @@ func testRPCMethodsInitSession(t *testing.T) {
 
 	//disable the account
 	var ids []string
-	thEvent := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "DisableAccount",
-		Event: map[string]interface{}{
-			utils.Account:   "1001",
-			"DisableAction": "DisableAction",
+	thEvent := &engine.ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "DisableAccount",
+			Event: map[string]interface{}{
+				utils.Account:   "1001",
+				"DisableAction": "DisableAction",
+			},
 		},
 	}
 	//process event
@@ -353,7 +360,7 @@ func testRPCMethodsInitSession(t *testing.T) {
 	}
 
 	//enable the account
-	thEvent = &utils.CGREvent{
+	thEvent.CGREvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EnableAccount",
 		Event: map[string]interface{}{
@@ -401,12 +408,14 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 
 	//disable the account
 	var ids []string
-	thEvent := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "DisableAccount",
-		Event: map[string]interface{}{
-			utils.Account:   "1001",
-			"DisableAction": "DisableAction",
+	thEvent := &engine.ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "DisableAccount",
+			Event: map[string]interface{}{
+				utils.Account:   "1001",
+				"DisableAction": "DisableAction",
+			},
 		},
 	}
 	//process event
@@ -446,7 +455,7 @@ func testRPCMethodsUpdateSession(t *testing.T) {
 	}
 
 	//enable the account
-	thEvent = &utils.CGREvent{
+	thEvent.CGREvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EnableAccount",
 		Event: map[string]interface{}{
@@ -511,20 +520,22 @@ func testRPCMethodsTerminateSession(t *testing.T) {
 }
 
 func testRPCMethodsProcessCDR(t *testing.T) {
-	args := utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "testRPCMethodsProcessCDR",
-		Event: map[string]interface{}{
-			utils.Tenant:      "cgrates.org",
-			utils.ToR:         utils.VOICE,
-			utils.OriginID:    "testRPCMethodsProcessCDR",
-			utils.RequestType: utils.META_PREPAID,
-			utils.Account:     "1001",
-			utils.Subject:     "ANY2CNT",
-			utils.Destination: "1002",
-			utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-			utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-			utils.Usage:       10 * time.Minute,
+	args := &engine.ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testRPCMethodsProcessCDR",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "testRPCMethodsProcessCDR",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       10 * time.Minute,
+			},
 		},
 	}
 	var rply string
@@ -537,7 +548,7 @@ func testRPCMethodsProcessCDR(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	//verify the CDR
 	var cdrs []*engine.CDR
-	argsCDR := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}
+	argsCDR := &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}}
 	if err := rpcRpc.Call(utils.CDRsV1GetCDRs, argsCDR, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -611,12 +622,14 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 
 	//disable the account
 	var ids []string
-	thEvent := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "DisableAccount",
-		Event: map[string]interface{}{
-			utils.Account:   "1001",
-			"DisableAction": "DisableAction",
+	thEvent := &engine.ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "DisableAccount",
+			Event: map[string]interface{}{
+				utils.Account:   "1001",
+				"DisableAction": "DisableAction",
+			},
 		},
 	}
 	//process event
@@ -657,7 +670,7 @@ func testRPCMethodsProcessEvent(t *testing.T) {
 	}
 
 	//enable the account
-	thEvent = &utils.CGREvent{
+	thEvent.CGREvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EnableAccount",
 		Event: map[string]interface{}{
@@ -700,7 +713,7 @@ func testRPCMethodsCdrsProcessCDR(t *testing.T) {
 	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
 	//verify the CDR
 	var cdrs []*engine.CDR
-	argsCDR := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}
+	argsCDR := utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}}
 	if err := rpcRpc.Call(utils.CDRsV1GetCDRs, argsCDR, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -801,15 +814,17 @@ func testRPCMethodsLoadData(t *testing.T) {
 
 func testRPCMethodsResponderDebit(t *testing.T) {
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
-	cd := engine.CallDescriptor{
-		CgrID:         "testRPCMethodsResponderDebit",
-		Category:      "call",
-		Tenant:        "cgrates.org",
-		Subject:       "1001",
-		Destination:   "+49",
-		DurationIndex: 0,
-		TimeStart:     tStart,
-		TimeEnd:       tStart.Add(time.Duration(15) * time.Second),
+	cd := &engine.CallDescriptorWithArgDispatcher{
+		CallDescriptor: &engine.CallDescriptor{
+			CgrID:         "testRPCMethodsResponderDebit",
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "1001",
+			Destination:   "+49",
+			DurationIndex: 0,
+			TimeStart:     tStart,
+			TimeEnd:       tStart.Add(time.Duration(15) * time.Second),
+		},
 	}
 	var cc engine.CallCost
 	//cache the response
@@ -822,8 +837,10 @@ func testRPCMethodsResponderDebit(t *testing.T) {
 		t.Errorf("Expecting: %+v, \n received: %+v",
 			15, cc.Cost)
 	}
-	cd2 := engine.CallDescriptor{
-		CgrID: "testRPCMethodsResponderDebit",
+	cd2 := &engine.CallDescriptorWithArgDispatcher{
+		CallDescriptor: &engine.CallDescriptor{
+			CgrID: "testRPCMethodsResponderDebit",
+		},
 	}
 	var ccCache engine.CallCost
 	//cache the response
@@ -842,16 +859,18 @@ func testRPCMethodsResponderDebit(t *testing.T) {
 
 func testRPCMethodsResponderMaxDebit(t *testing.T) {
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
-	cd := engine.CallDescriptor{
-		CgrID:         "testRPCMethodsResponderMaxDebit",
-		Category:      "call",
-		Tenant:        "cgrates.org",
-		Account:       "1001",
-		Subject:       "free",
-		Destination:   "+49",
-		DurationIndex: 0,
-		TimeStart:     tStart,
-		TimeEnd:       tStart.Add(time.Duration(15) * time.Second),
+	cd := &engine.CallDescriptorWithArgDispatcher{
+		CallDescriptor: &engine.CallDescriptor{
+			CgrID:         "testRPCMethodsResponderMaxDebit",
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Account:       "1001",
+			Subject:       "free",
+			Destination:   "+49",
+			DurationIndex: 0,
+			TimeStart:     tStart,
+			TimeEnd:       tStart.Add(time.Duration(15) * time.Second),
+		},
 	}
 	var cc engine.CallCost
 	//cache the response
@@ -864,8 +883,10 @@ func testRPCMethodsResponderMaxDebit(t *testing.T) {
 		t.Errorf("Expecting: %+v, \n received: %+v",
 			0, cc.Cost)
 	}
-	cd2 := engine.CallDescriptor{
-		CgrID: "testRPCMethodsResponderMaxDebit",
+	cd2 := &engine.CallDescriptorWithArgDispatcher{
+		CallDescriptor: &engine.CallDescriptor{
+			CgrID: "testRPCMethodsResponderMaxDebit",
+		},
 	}
 	var ccCache engine.CallCost
 	//cache the response

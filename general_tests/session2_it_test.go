@@ -22,7 +22,6 @@ package general_tests
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"testing"
 	"time"
@@ -93,7 +92,7 @@ func testSes2ItStartEngine(t *testing.T) {
 
 func testSes2ItRPCConn(t *testing.T) {
 	var err error
-	ses2RPC, err = jsonrpc.Dial("tcp", ses2Cfg.ListenCfg().RPCJSONListen)
+	ses2RPC, err = newRPCClient(ses2Cfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}

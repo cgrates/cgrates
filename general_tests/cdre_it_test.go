@@ -22,7 +22,6 @@ package general_tests
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"testing"
 	"time"
@@ -100,7 +99,7 @@ func testCDREStartEngine(t *testing.T) {
 
 func testCDRERpcConn(t *testing.T) {
 	var err error
-	cdreRPC, err = jsonrpc.Dial("tcp", cdreCfg.ListenCfg().RPCJSONListen)
+	cdreRPC, err = newRPCClient(cdreCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}

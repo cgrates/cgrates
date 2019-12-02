@@ -24,7 +24,6 @@ import (
 	"flag"
 	"io/ioutil"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os"
 	"path"
 	"testing"
@@ -109,7 +108,7 @@ func testMCDRCStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testMCDRCRpcConn(t *testing.T) {
 	var err error
-	rater, err = jsonrpc.Dial("tcp", cfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	rater, err = newRPCClient(cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
