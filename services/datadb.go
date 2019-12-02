@@ -34,7 +34,7 @@ func NewDataDBService(cfg *config.CGRConfig) *DataDBService {
 	return &DataDBService{
 		cfg:    cfg,
 		dbchan: make(chan *engine.DataManager, 1),
-		db:     engine.NewDataManager(nil, cfg.CacheCfg(), nil, nil), // to be removed
+		// db:     engine.NewDataManager(nil, cfg.CacheCfg(), nil, nil), // to be removed
 	}
 }
 

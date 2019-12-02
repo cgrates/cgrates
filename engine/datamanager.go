@@ -506,7 +506,7 @@ func (dm *DataManager) RemoveStatQueue(tenant, id string, transactionID string) 
 	return
 }
 
-// GetFilter returns
+// GetFilter returns a filter based on the given ID
 func (dm *DataManager) GetFilter(tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (fltr *Filter, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
@@ -520,6 +520,9 @@ func (dm *DataManager) GetFilter(tenant, id string, cacheRead, cacheWrite bool,
 	}
 	if strings.HasPrefix(id, utils.Meta) {
 		fltr, err = NewFilterFromInline(tenant, id)
+	} else if dm == nil || dm.DataDB() == nil { // in case we want the filter from dataDB but the connection to dataDB a optional (e.g. SessionS)
+		err = utils.ErrNoDatabaseConn
+		return
 	} else {
 		fltr, err = dm.DataDB().GetFilterDrv(tenant, id)
 	}
@@ -536,11 +539,9 @@ func (dm *DataManager) GetFilter(tenant, id string, cacheRead, cacheWrite bool,
 			if err == utils.ErrNotFound && cacheWrite {
 				Cache.Set(utils.CacheFilters, tntID, nil, nil,
 					cacheCommit(transactionID), transactionID)
-
 			}
-			return nil, err
+			return
 		}
-
 	}
 	if cacheWrite {
 		Cache.Set(utils.CacheFilters, tntID, fltr, nil,
