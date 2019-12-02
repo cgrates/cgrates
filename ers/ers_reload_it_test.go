@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"errors"
+	"flag"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os"
@@ -47,7 +49,19 @@ var (
 		testReloadVerifyFirstReload,
 		testReloadITKillEngine,
 	}
+	encoding = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
 )
+
+func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
+	switch *encoding {
+	case utils.MetaJSON:
+		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
+	case utils.MetaGOB:
+		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+	default:
+		return nil, errors.New("UNSUPPORTED_RPC")
+	}
+}
 
 func TestERsReload(t *testing.T) {
 	reloadCfgPath = path.Join(*dataDir, "conf", "samples", "ers_reload", "disabled")
@@ -98,7 +112,7 @@ func testReloadITStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testReloadITRpcConn(t *testing.T) {
 	var err error
-	reloadRPC, err = jsonrpc.Dial("tcp", reloadCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	reloadRPC, err = newRPCClient(reloadCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
