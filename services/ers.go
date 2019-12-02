@@ -33,7 +33,7 @@ import (
 // NewEventReaderService returns the EventReader Service
 func NewEventReaderService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
 	sSChan, dispatcherChan chan rpcclient.RpcClientConnection,
-	exitChan chan bool) servmanager.Service {
+	exitChan chan bool, connMgr *ConnManager) servmanager.Service {
 	return &EventReaderService{
 		rldChan:        make(chan struct{}, 1),
 		cfg:            cfg,
@@ -41,6 +41,7 @@ func NewEventReaderService(cfg *config.CGRConfig, filterSChan chan *engine.Filte
 		sSChan:         sSChan,
 		dispatcherChan: dispatcherChan,
 		exitChan:       exitChan,
+		connMgr:        connMgr,
 	}
 }
 
@@ -56,6 +57,7 @@ type EventReaderService struct {
 	ers      *ers.ERService
 	rldChan  chan struct{}
 	stopChan chan struct{}
+	connMgr  *ConnManager
 }
 
 // Start should handle the sercive start
@@ -75,11 +77,14 @@ func (erS *EventReaderService) Start() (err error) {
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ERs))
 	var sS rpcclient.RpcClientConnection
-	//if sS, err = NewConnection(erS.cfg, erS.sSChan, erS.dispatcherChan, erS.cfg.ERsCfg().SessionSConns); err != nil {
-	//	utils.Logger.Crit(fmt.Sprintf("<%s> failed connecting to <%s>, error: <%s>",
-	//		utils.ERs, utils.SessionS, err.Error()))
-	//	return
-	//}
+
+	if sS, err = NewConnectionPool(erS.cfg, erS.sSChan, erS.dispatcherChan,
+		erS.cfg.ERsCfg().SessionSConns, erS.connMgr); err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<%s> failed connecting to <%s>, error: <%s>",
+			utils.ERs, utils.SessionS, err.Error()))
+		return
+	}
+
 	// build the service
 	erS.ers = ers.NewERService(erS.cfg, filterS, sS, erS.stopChan)
 	go func(ers *ers.ERService, rldChan chan struct{}) {
@@ -99,11 +104,12 @@ func (erS *EventReaderService) GetIntenternalChan() (conn chan rpcclient.RpcClie
 // Reload handles the change of config
 func (erS *EventReaderService) Reload() (err error) {
 	var sS rpcclient.RpcClientConnection
-	//if sS, err = NewConnection(erS.cfg, erS.sSChan, erS.dispatcherChan, erS.cfg.ERsCfg().SessionSConns); err != nil {
-	//	utils.Logger.Crit(fmt.Sprintf("<%s> failed connecting to <%s>, error: <%s>",
-	//		utils.ERs, utils.SessionS, err.Error()))
-	//	return
-	//}
+	if sS, err = NewConnectionPool(erS.cfg, erS.sSChan,
+		erS.dispatcherChan, erS.cfg.ERsCfg().SessionSConns, erS.connMgr); err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<%s> failed connecting to <%s>, error: <%s>",
+			utils.ERs, utils.SessionS, err.Error()))
+		return
+	}
 	erS.RLock()
 	erS.ers.SetSessionSConnection(sS)
 	erS.rldChan <- struct{}{}

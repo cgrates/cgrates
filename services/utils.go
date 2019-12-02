@@ -41,3 +41,30 @@ func NewConnection(cfg *config.CGRConfig, serviceConnChan, dispatcherSChan chan 
 		cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
 		conns, internalChan, false)
 }
+
+// NewConnection returns a new connection
+func NewConnectionPool(cfg *config.CGRConfig, serviceConnChan, dispatcherSChan chan rpcclient.RpcClientConnection,
+	connsIDs []string, connMgr *ConnManager) (rpcclient.RpcClientConnection, error) {
+	var rpcClient *rpcclient.RpcClientPool
+	var err error
+	if len(connsIDs) == 0 {
+		return nil, nil
+	}
+	internalChan := serviceConnChan
+	if cfg.DispatcherSCfg().Enabled {
+		internalChan = dispatcherSChan
+	}
+	rpcPool := rpcclient.NewRpcClientPool(rpcclient.POOL_FIRST, cfg.GeneralCfg().ReplyTimeout)
+	atLestOneConnected := false // If one connected we don't longer return errors
+	for _, connID := range connsIDs {
+		rpcClient, err = connMgr.GetConn(connID, internalChan)
+		if err == nil {
+			atLestOneConnected = true
+		}
+		rpcPool.AddClient(rpcClient)
+	}
+	if atLestOneConnected {
+		err = nil
+	}
+	return rpcPool, err
+}

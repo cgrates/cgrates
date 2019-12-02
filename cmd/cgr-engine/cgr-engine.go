@@ -500,8 +500,9 @@ func main() {
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, exitChan)
 
+	connManager := services.NewConnManager(cfg)
 	attrS := services.NewAttributeService(cfg, dmService, cacheS, filterSChan, server)
-	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, attrS.GetIntenternalChan())
+	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, attrS.GetIntenternalChan(), connManager)
 	chrS := services.NewChargerService(cfg, dmService, cacheS, filterSChan, server,
 		attrS.GetIntenternalChan(), dspS.GetIntenternalChan())
 	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan, server)
@@ -528,9 +529,9 @@ func main() {
 		attrS.GetIntenternalChan(), cdrS.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan)
 	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server, internalCacheSChan, dspS.GetIntenternalChan(), exitChan)
 	anz := services.NewAnalyzerService(cfg, server, exitChan)
-	srvManager.AddServices(attrS, chrS, tS, stS, reS, supS, schS, rals,
+	srvManager.AddServices(connManager, attrS, chrS, tS, stS, reS, supS, schS, rals,
 		rals.GetResponder(), rals.GetAPIv1(), rals.GetAPIv2(), cdrS, smg,
-		services.NewEventReaderService(cfg, filterSChan, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),
+		services.NewEventReaderService(cfg, filterSChan, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan, connManager),
 		services.NewDNSAgent(cfg, filterSChan, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),
 		services.NewFreeswitchAgent(cfg, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),
 		services.NewKamailioAgent(cfg, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),

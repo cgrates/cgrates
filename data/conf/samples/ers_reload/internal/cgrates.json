@@ -82,9 +82,7 @@
     
     "ers": {
         "enabled": true,
-        "sessions_conns": [						// connections to SessionS:  <*internal|127.0.0.1:2012>
-            {"address": "*internal"}
-        ],
+        "sessions_conns": ["*internal"],
         "readers": [
             {
                 "id": "file_reader1",
