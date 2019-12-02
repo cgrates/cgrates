@@ -93,6 +93,9 @@ func (ssq *StoredStatQueue) SqID() string {
 
 // AsStatQueue converts into StatQueue unmarshaling SQMetrics
 func (ssq *StoredStatQueue) AsStatQueue(ms Marshaler) (sq *StatQueue, err error) {
+	if ssq == nil {
+		return
+	}
 	sq = &StatQueue{
 		Tenant:    ssq.Tenant,
 		ID:        ssq.ID,

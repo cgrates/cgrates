@@ -452,13 +452,13 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 			return x.(*StatQueue), nil
 		}
 	}
-	ssq, err := dm.dataDB.GetStoredStatQueueDrv(tenant, id)
+	sq, err = dm.dataDB.GetStatQueueDrv(tenant, id)
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues].Remote {
 			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetStatQueue,
-				&utils.TenantID{Tenant: tenant, ID: id}, &ssq); err == nil {
-				err = dm.dataDB.SetStoredStatQueueDrv(ssq)
+				&utils.TenantID{Tenant: tenant, ID: id}, sq); err == nil {
+				err = dm.dataDB.SetStatQueueDrv(sq)
 			}
 		}
 		if err != nil {
@@ -471,9 +471,6 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 			return nil, err
 		}
 	}
-	if sq, err = ssq.AsStatQueue(dm.dataDB.Marshaler()); err != nil {
-		return nil, err
-	}
 	if cacheWrite {
 		Cache.Set(utils.CacheStatQueues, tntID, sq, nil,
 			cacheCommit(transactionID), transactionID)
@@ -483,16 +480,12 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 
 // SetStatQueue converts to StoredStatQueue and stores the result in dataDB
 func (dm *DataManager) SetStatQueue(sq *StatQueue) (err error) {
-	ssq, err := NewStoredStatQueue(sq, dm.dataDB.Marshaler())
-	if err != nil {
-		return err
-	}
-	if err = dm.dataDB.SetStoredStatQueueDrv(ssq); err != nil {
+	if err = dm.dataDB.SetStatQueueDrv(sq); err != nil {
 		return
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetStatQueue, ssq, &reply); err != nil {
+		if err = dm.rplConns.Call(utils.ReplicatorSv1SetStatQueue, sq, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -502,7 +495,7 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue) (err error) {
 
 // RemoveStatQueue removes the StoredStatQueue
 func (dm *DataManager) RemoveStatQueue(tenant, id string, transactionID string) (err error) {
-	if err = dm.dataDB.RemStoredStatQueueDrv(tenant, id); err != nil {
+	if err = dm.dataDB.RemStatQueueDrv(tenant, id); err != nil {
 		return
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues].Replicate {
