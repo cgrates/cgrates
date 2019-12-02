@@ -66,6 +66,7 @@ func (db *DataDBService) Start() (err error) {
 		return
 	} else if db.cfg.SessionSCfg().Enabled && err != nil {
 		utils.Logger.Warning(fmt.Sprintf("Could not configure dataDb: %s. Some SessionS APIs will not work", err))
+		err = nil // reset the error in case of only SessionS active
 		return
 	}
 	var rmtConns, rplConns *rpcclient.RpcClientPool
