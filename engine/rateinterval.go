@@ -466,7 +466,26 @@ func (rit *RIRate) Clone() (cln *RIRate) {
 		RoundingDecimals: rit.RoundingDecimals,
 		MaxCost:          rit.MaxCost,
 		MaxCostStrategy:  rit.MaxCostStrategy,
-		Rates:            rit.Rates,
+	}
+	if rit.Rates != nil {
+		cln.Rates = make([]*Rate, len(rit.Rates))
+		for i, rate := range rit.Rates {
+			cln.Rates[i] = rate.Clone()
+		}
 	}
 	return cln
+}
+
+// Clone clones Rates
+func (r *Rate) Clone() (cln *Rate) {
+	if r == nil {
+		return
+	}
+	cln = &Rate{
+		GroupIntervalStart: r.GroupIntervalStart,
+		Value:              r.Value,
+		RateIncrement:      r.RateIncrement,
+		RateUnit:           r.RateUnit,
+	}
+	return
 }
