@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package loaders
 
 import (
+	"errors"
+	"flag"
 	"io/ioutil"
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -42,7 +44,19 @@ var (
 	loaderDataDir               = "/usr/share/cgrates"
 	loaderConfigDIR             string //run tests for specific configuration
 	loaderPathIn, loaderPathOut string
+	encoding                    = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
 )
+
+func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
+	switch *encoding {
+	case utils.MetaJSON:
+		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
+	case utils.MetaGOB:
+		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+	default:
+		return nil, errors.New("UNSUPPORTED_RPC")
+	}
+}
 
 var sTestsLoader = []func(t *testing.T){
 	testLoaderMakeFolders,
@@ -114,7 +128,7 @@ func testLoaderStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testLoaderRPCConn(t *testing.T) {
 	var err error
-	loaderRPC, err = jsonrpc.Dial("tcp", loaderCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	loaderRPC, err = newRPCClient(loaderCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -172,10 +186,14 @@ func testLoaderCheckAttributes(t *testing.T) {
 		Blocker: true,
 		Weight:  20,
 	}
-
+	if *encoding == utils.MetaGOB { // gob threats empty slices as nil values
+		eAttrPrf.Attributes[1].FilterIDs = nil
+	}
 	var reply *engine.AttributeProfile
 	if err := loaderRPC.Call(utils.ApierV1GetAttributeProfile,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"}, &reply); err != nil {
+		&utils.TenantIDWithArgDispatcher{
+			TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ALS1"},
+		}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	eAttrPrf.Compile()
@@ -183,7 +201,7 @@ func testLoaderCheckAttributes(t *testing.T) {
 	sort.Strings(eAttrPrf.Contexts)
 	sort.Strings(reply.Contexts)
 	if !reflect.DeepEqual(eAttrPrf, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", eAttrPrf, reply)
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eAttrPrf), utils.ToJSON(reply))
 	}
 }
 

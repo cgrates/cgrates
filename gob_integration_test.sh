@@ -29,8 +29,8 @@ ers=$?
 # echo 'go test github.com/cgrates/cgrates/dispatchers -tags=integration'
 # go test github.com/cgrates/cgrates/dispatchers -tags=integration
 # dis=$?
-# echo 'go test github.com/cgrates/cgrates/loaders -tags=integration'
-# go test github.com/cgrates/cgrates/loaders -tags=integration
-# lds=$?
+echo 'go test github.com/cgrates/cgrates/loaders -tags=integration -rpc=*gob'
+go test github.com/cgrates/cgrates/loaders -tags=integration -rpc=*gob
+lds=$?
 
 exit $gen && $ap1 && $ap2 && $en && $cdrc #&& $gnr && $agts && $smg && $dis && $lds && $ers 
