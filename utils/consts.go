@@ -1243,6 +1243,7 @@ const (
 	SessionSv1RegisterInternalBiJSONConn = "SessionSv1.RegisterInternalBiJSONConn"
 	SessionSv1ReplicateSessions          = "SessionSv1.ReplicateSessions"
 	SessionSv1ActivateSessions           = "SessionSv1.ActivateSessions"
+	SessionSv1DeactivateSessions         = "SessionSv1.DeactivateSessions"
 	SMGenericV1InitiateSession           = "SMGenericV1.InitiateSession"
 )
 

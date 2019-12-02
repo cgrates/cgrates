@@ -60,6 +60,7 @@ var (
 		testSSv1ItCDRsGetCdrs,
 		testSSv1ItForceUpdateSession,
 		testSSv1ItDynamicDebit,
+		testSSv1ItDeactivateSessions,
 		testSSv1ItStopCgrEngine,
 	}
 )
@@ -950,6 +951,65 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+}
+
+func testSSv1ItDeactivateSessions(t *testing.T) {
+	initUsage := 5 * time.Minute
+	args := &sessions.V1InitSessionArgs{
+		InitSession:       true,
+		AllocateResources: true,
+		GetAttributes:     true,
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItInitiateSession",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "TestSSv1It1",
+				utils.RequestType: sSV1RequestType,
+				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       initUsage,
+			},
+		},
+	}
+	var rply sessions.V1InitSessionReply
+	if err := sSv1BiRpc.Call(utils.SessionSv1InitiateSession,
+		args, &rply); err != nil {
+		t.Fatal(err)
+	}
+	aSessions := make([]*sessions.ExternalSession, 0)
+	pSessions := make([]*sessions.ExternalSession, 0)
+	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 2 {
+		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v", utils.ToJSON(aSessions), len(aSessions))
+	}
+	if err := sSv1BiRpc.Call(utils.SessionSv1GetPassiveSessions, &utils.SessionFilter{}, &pSessions); err != nil {
+		t.Error(err)
+	} else if len(pSessions) != 0 {
+		t.Errorf("Expecting: 0, received: %+v", len(pSessions))
+	}
+	var reply string
+	err := sSv1BiRpc.Call(utils.SessionSv1DeactivateSessions, nil, &reply)
+	if err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting: OK, received : %+v", reply)
+	}
+	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 0 {
+		t.Errorf("Expecting: 0, received: %+v", len(aSessions))
+	}
+	if err := sSv1BiRpc.Call(utils.SessionSv1GetPassiveSessions, &utils.SessionFilter{}, &pSessions); err != nil {
+		t.Error(err)
+	} else if len(pSessions) != 2 {
+		t.Errorf("Expecting: 2, received: %+v", len(pSessions))
 	}
 }
 

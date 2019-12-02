@@ -150,3 +150,8 @@ func (ssv1 *SessionSv1) BiRPCv1ActivateSessions(clnt *rpc2.Client,
 	args []string, reply *string) error {
 	return ssv1.Ss.BiRPCv1ActivateSessions(clnt, args, reply)
 }
+
+func (ssv1 *SessionSv1) BiRPCv1DeactivateSessions(clnt *rpc2.Client,
+	args []string, reply *string) error {
+	return ssv1.Ss.BiRPCv1DeactivateSessions(clnt, args, reply)
+}

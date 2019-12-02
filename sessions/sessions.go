@@ -3310,6 +3310,32 @@ func (sS *SessionS) BiRPCv1ActivateSessions(clnt rpcclient.RpcClientConnection,
 	return
 }
 
+// BiRPCv1DeactivateSessions is called to deactivate a list/all active sessios
+// returns utils.ErrPartiallyExecuted in case of errors
+func (sS *SessionS) BiRPCv1DeactivateSessions(clnt rpcclient.RpcClientConnection,
+	sIDs []string, reply *string) (err error) {
+	if len(sIDs) == 0 {
+		sS.aSsMux.RLock()
+		i := 0
+		sIDs = make([]string, len(sS.aSessions))
+		for sID := range sS.aSessions {
+			sIDs[i] = sID
+			i++
+		}
+		sS.aSsMux.RUnlock()
+	}
+	for _, sID := range sIDs {
+		if s := sS.transitSState(sID, true); s == nil {
+			utils.Logger.Warning(fmt.Sprintf("<%s> no active session with id: <%s>", utils.SessionS, sID))
+			err = utils.ErrPartiallyExecuted
+		}
+	}
+	if err == nil {
+		*reply = utils.OK
+	}
+	return
+}
+
 // processThreshold will receive the event and send it to ThresholdS to be processed
 func (sS *SessionS) processThreshold(cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher, thIDs []string) (tIDs []string, err error) {
 	if sS.thdS == nil {
