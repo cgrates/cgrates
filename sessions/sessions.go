@@ -859,7 +859,7 @@ func (sS *SessionS) getIndexedFilters(tenant string, fltrs []string) (
 	indexedFltr map[string][]string, unindexedFltr []*engine.FilterRule) {
 	indexedFltr = make(map[string][]string)
 	for _, fltrID := range fltrs {
-		f, err := sS.dm.GetFilter(tenant, fltrID,
+		f, err := engine.GetFilter(sS.dm, tenant, fltrID,
 			true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {

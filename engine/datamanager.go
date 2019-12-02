@@ -267,7 +267,7 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 			_, err = dm.GetThreshold(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.FilterPrefix:
 			tntID := utils.NewTenantID(dataID)
-			_, err = dm.GetFilter(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
+			_, err = GetFilter(dm, tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
 		case utils.SupplierProfilePrefix:
 			tntID := utils.NewTenantID(dataID)
 			_, err = dm.GetSupplierProfile(tntID.Tenant, tntID.ID, false, true, utils.NonTransactional)
@@ -507,7 +507,7 @@ func (dm *DataManager) RemoveStatQueue(tenant, id string, transactionID string) 
 }
 
 // GetFilter returns a filter based on the given ID
-func (dm *DataManager) GetFilter(tenant, id string, cacheRead, cacheWrite bool,
+func GetFilter(dm *DataManager, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (fltr *Filter, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead {
@@ -520,7 +520,7 @@ func (dm *DataManager) GetFilter(tenant, id string, cacheRead, cacheWrite bool,
 	}
 	if strings.HasPrefix(id, utils.Meta) {
 		fltr, err = NewFilterFromInline(tenant, id)
-	} else if dm == nil || dm.DataDB() == nil { // in case we want the filter from dataDB but the connection to dataDB a optional (e.g. SessionS)
+	} else if dm == nil  { // in case we want the filter from dataDB but the connection to dataDB a optional (e.g. SessionS)
 		err = utils.ErrNoDatabaseConn
 		return
 	} else {

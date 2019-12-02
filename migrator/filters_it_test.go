@@ -216,7 +216,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
 		}
 		//check if Filters was migrate correctly
-		result, err := fltrMigrator.dmOut.DataManager().GetFilter(Filters.Tenant, Filters.ID, false, false, utils.NonTransactional)
+		result, err := engine.GetFilter(fltrMigrator.dmOut.DataManager(), Filters.Tenant, Filters.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Fatalf("Error when getting Attributes %v", err.Error())
 		}
@@ -257,7 +257,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			t.Error("Error when fltrMigratorrating Filters ", err.Error())
 		}
 		//check if account was migrate correctly
-		result, err := fltrMigrator.dmOut.DataManager().GetFilter(Filters.Tenant, Filters.ID, false, false, utils.NonTransactional)
+		result, err := engine.GetFilter(fltrMigrator.dmOut.DataManager(), Filters.Tenant, Filters.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Error(err)
 		}
@@ -266,7 +266,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", Filters, result)
 		}
 		// check if old account was deleted
-		result, err = fltrMigrator.dmIN.DataManager().GetFilter(Filters.Tenant, Filters.ID, false, false, utils.NonTransactional)
+		result, err = engine.GetFilter(fltrMigrator.dmIN.DataManager(), Filters.Tenant, Filters.ID, false, false, utils.NonTransactional)
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		}
@@ -382,7 +382,7 @@ func testFltrITMigratev2(t *testing.T) {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
 	}
 	//check if Filters was migrate correctly
-	result, err := fltrMigrator.dmOut.DataManager().GetFilter(filters.Tenant, filters.ID, false, false, utils.NonTransactional)
+	result, err := engine.GetFilter(fltrMigrator.dmOut.DataManager(), filters.Tenant, filters.ID, false, false, utils.NonTransactional)
 	if err != nil {
 		t.Fatalf("Error when getting filters %v", err.Error())
 	}

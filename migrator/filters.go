@@ -36,7 +36,7 @@ func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.FilterPrefix+tenant+":")
-		fl, err := m.dmIN.DataManager().GetFilter(tenant, idg, false, false, utils.NonTransactional)
+		fl, err := engine.GetFilter(m.dmIN.DataManager(), tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -160,7 +160,7 @@ func (m *Migrator) migrateRequestFilterV1() (err error) {
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.FilterPrefix+tenant+":")
-		fl, err := m.dmIN.DataManager().GetFilter(tenant, idg, false, false, utils.NonTransactional)
+		fl, err := engine.GetFilter(m.dmIN.DataManager(), tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -212,7 +212,7 @@ func (m *Migrator) migrateRequestFilterV2() (err error) {
 	}
 	for _, id := range ids {
 		idg := strings.TrimPrefix(id, utils.FilterPrefix+tenant+":")
-		fl, err := m.dmIN.DataManager().GetFilter(tenant, idg, false, false, utils.NonTransactional)
+		fl, err := engine.GetFilter(m.dmIN.DataManager(), tenant, idg, false, false, utils.NonTransactional)
 		if err != nil {
 			return fmt.Errorf("Error: <%s> when getting filter with tenant: <%s> and id: <%s> for migration",
 				err.Error(), tenant, idg)
