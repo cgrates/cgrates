@@ -22,7 +22,6 @@ package general_tests
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"testing"
 	"time"
@@ -94,7 +93,7 @@ func testTutStartEngine(t *testing.T) {
 
 func testTutRpcConn(t *testing.T) {
 	var err error
-	if tutRpc, err = jsonrpc.Dial("tcp", tutCfg.ListenCfg().RPCJSONListen); err != nil {
+	if tutRpc, err = newRPCClient(tutCfg.ListenCfg()); err != nil {
 		t.Fatal("could not connect to rater: ", err.Error())
 	}
 }
@@ -307,12 +306,13 @@ func testTutAccounts(t *testing.T) {
 		}, &reply); err != nil {
 		t.Error(err)
 	}
+	acnt = &engine.Account{}
 	if err := tutRpc.Call(utils.ApierV2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"},
 		&acnt); err != nil {
 		t.Error(err)
 	} else if acnt.Disabled {
-		t.Errorf("account: %s", utils.ToIJSON(acnt))
+		t.Errorf("account: %s", utils.ToJSON(acnt))
 	}
 }
 

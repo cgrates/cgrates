@@ -22,12 +22,12 @@ package general_tests
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -94,7 +94,7 @@ func testV1FltrStartEngine(t *testing.T) {
 
 func testV1FltrRpcConn(t *testing.T) {
 	var err error
-	fltrRpc, err = jsonrpc.Dial("tcp", fltrCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	fltrRpc, err = newRPCClient(fltrCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -114,14 +114,16 @@ func testV1FltrLoadTarrifPlans(t *testing.T) {
 func testV1FltrAddStats(t *testing.T) {
 	var reply []string
 	expected := []string{"Stat_1"}
-	ev1 := utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.Account:    "1001",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(11 * time.Second),
-			utils.COST:       10.0,
+	ev1 := &engine.StatsArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Account:    "1001",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(11 * time.Second),
+				utils.COST:       10.0,
+			},
 		},
 	}
 	if err := fltrRpc.Call(utils.StatSv1ProcessEvent, &ev1, &reply); err != nil {
@@ -131,7 +133,7 @@ func testV1FltrAddStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_1"}
-	ev1 = utils.CGREvent{
+	ev1.CGREvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]interface{}{
@@ -148,7 +150,7 @@ func testV1FltrAddStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_2"}
-	ev1 = utils.CGREvent{
+	ev1.CGREvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]interface{}{
@@ -165,7 +167,7 @@ func testV1FltrAddStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_2"}
-	ev1 = utils.CGREvent{
+	ev1.CGREvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event2",
 		Event: map[string]interface{}{
@@ -182,7 +184,7 @@ func testV1FltrAddStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_3"}
-	ev1 = utils.CGREvent{
+	ev1.CGREvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]interface{}{
@@ -199,7 +201,7 @@ func testV1FltrAddStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_1_1"}
-	ev1 = utils.CGREvent{
+	ev1.CGREvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]interface{}{
@@ -217,7 +219,7 @@ func testV1FltrAddStats(t *testing.T) {
 	}
 
 	expected = []string{"Stat_1_1"}
-	ev1 = utils.CGREvent{
+	ev1.CGREvent = &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "event3",
 		Event: map[string]interface{}{
@@ -238,14 +240,16 @@ func testV1FltrAddStats(t *testing.T) {
 func testV1FltrPupulateThreshold(t *testing.T) {
 	//Add a filter of type *stats and check if acd metric is minim 10 ( greater than 10)
 	//we expect that acd from Stat_1 to be 11 so the filter should pass (11 > 10)
-	filter := &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "FLTR_TH_Stats1",
-		Rules: []*engine.FilterRule{
-			{
-				Type:      "*gt",
-				FieldName: "~*stats.Stat_1.*acd",
-				Values:    []string{"10.0"},
+	filter := &v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_TH_Stats1",
+			Rules: []*engine.FilterRule{
+				{
+					Type:      "*gt",
+					FieldName: "~*stats.Stat_1.*acd",
+					Values:    []string{"10.0"},
+				},
 			},
 		},
 	}
@@ -269,19 +273,21 @@ func testV1FltrPupulateThreshold(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 
 	//Add a threshold with filter from above and an inline filter for Account 1010
-	tPrfl := &engine.ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TH_Stats1",
-		FilterIDs: []string{"FLTR_TH_Stats1", "*string:~*req.Account:1010"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+	tPrfl := &engine.ThresholdWithCache{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TH_Stats1",
+			FilterIDs: []string{"FLTR_TH_Stats1", "*string:~*req.Account:1010"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   -1,
+			MinSleep:  time.Duration(1 * time.Millisecond),
+			Weight:    10.0,
+			ActionIDs: []string{"LOG"},
+			Async:     true,
 		},
-		MaxHits:   -1,
-		MinSleep:  time.Duration(1 * time.Millisecond),
-		Weight:    10.0,
-		ActionIDs: []string{"LOG"},
-		Async:     true,
 	}
 	if err := fltrRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
@@ -292,18 +298,20 @@ func testV1FltrPupulateThreshold(t *testing.T) {
 	if err := fltrRpc.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: tPrfl.Tenant, ID: tPrfl.ID}, &rcvTh); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(tPrfl, rcvTh) {
-		t.Errorf("Expecting: %+v, received: %+v", tPrfl, rcvTh)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rcvTh) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rcvTh)
 	}
 }
 
 func testV1FltrGetThresholdForEvent(t *testing.T) {
 	// check the event
-	tEv := utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.Account: "1010"},
+	tEv := &engine.ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Account: "1010"},
+		},
 	}
 	var ids []string
 	eIDs := []string{"TH_Stats1"}
@@ -317,14 +325,16 @@ func testV1FltrGetThresholdForEvent(t *testing.T) {
 func testV1FltrGetThresholdForEvent2(t *testing.T) {
 	//Add a filter of type *stats and check if acd metric is maximum 10 ( lower than 10)
 	//we expect that acd from Stat_1 to be 11 so the filter should not pass (11 > 10)
-	filter := &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "FLTR_TH_Stats1",
-		Rules: []*engine.FilterRule{
-			{
-				Type:      "*lt",
-				FieldName: "~*stats.Stat_1.*acd",
-				Values:    []string{"10.0"},
+	filter := &v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_TH_Stats1",
+			Rules: []*engine.FilterRule{
+				{
+					Type:      "*lt",
+					FieldName: "~*stats.Stat_1.*acd",
+					Values:    []string{"10.0"},
+				},
 			},
 		},
 	}
@@ -337,18 +347,20 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 	}
 
 	//update the threshold with new filter
-	tPrfl := &engine.ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TH_Stats1",
-		FilterIDs: []string{"FLTR_TH_Stats1", "*string:~*req.Account:1010"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+	tPrfl := &engine.ThresholdWithCache{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TH_Stats1",
+			FilterIDs: []string{"FLTR_TH_Stats1", "*string:~*req.Account:1010"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   -1,
+			MinSleep:  time.Duration(1 * time.Millisecond),
+			Weight:    10.0,
+			ActionIDs: []string{"LOG"},
 		},
-		MaxHits:   -1,
-		MinSleep:  time.Duration(1 * time.Millisecond),
-		Weight:    10.0,
-		ActionIDs: []string{"LOG"},
 	}
 	if err := fltrRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
@@ -356,11 +368,13 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	tEv := utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.Account: "1010"},
+	tEv := &engine.ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Account: "1010"},
+		},
 	}
 	var ids []string
 	if err := fltrRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &ids); err == nil ||
@@ -383,7 +397,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 	}
 
 	var result string
-	if err := fltrRpc.Call(utils.ApierV1SetResourceProfile, rlsConfig, &result); err != nil {
+	if err := fltrRpc.Call(utils.ApierV1SetResourceProfile, &v1.ResourceWithCache{ResourceProfile: rlsConfig}, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -416,14 +430,16 @@ func testV1FltrPopulateResources(t *testing.T) {
 
 	//we allocate 3 units to resource and add a filter for Usages > 2
 	//should match (3>2)
-	filter := &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "FLTR_TH_Resource",
-		Rules: []*engine.FilterRule{
-			{
-				Type:      "*gt",
-				FieldName: "~*resources.ResTest.TotalUsage",
-				Values:    []string{"2.0"},
+	filter := v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_TH_Resource",
+			Rules: []*engine.FilterRule{
+				{
+					Type:      "*gt",
+					FieldName: "~*resources.ResTest.TotalUsage",
+					Values:    []string{"2.0"},
+				},
 			},
 		},
 	}
@@ -434,15 +450,17 @@ func testV1FltrPopulateResources(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 
-	tPrfl := &engine.ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TH_ResTest",
-		FilterIDs: []string{"FLTR_TH_Resource", "*string:~*req.Account:2020"},
-		MaxHits:   -1,
-		MinSleep:  time.Duration(1 * time.Millisecond),
-		Weight:    10.0,
-		ActionIDs: []string{"LOG"},
-		Async:     true,
+	tPrfl := &engine.ThresholdWithCache{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TH_ResTest",
+			FilterIDs: []string{"FLTR_TH_Resource", "*string:~*req.Account:2020"},
+			MaxHits:   -1,
+			MinSleep:  time.Duration(1 * time.Millisecond),
+			Weight:    10.0,
+			ActionIDs: []string{"LOG"},
+			Async:     true,
+		},
 	}
 	if err := fltrRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
@@ -453,16 +471,18 @@ func testV1FltrPopulateResources(t *testing.T) {
 	if err := fltrRpc.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: tPrfl.Tenant, ID: tPrfl.ID}, &rcvTh); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(tPrfl, rcvTh) {
-		t.Errorf("Expecting: %+v, received: %+v", tPrfl, rcvTh)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rcvTh) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rcvTh)
 	}
 
 	// check the event
-	tEv := utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.Account: "2020"},
+	tEv := &engine.ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Account: "2020"},
+		},
 	}
 	var ids []string
 	eIDs := []string{"TH_ResTest"}
@@ -475,7 +495,7 @@ func testV1FltrPopulateResources(t *testing.T) {
 	//change the filter
 	//we allocate 3 units to resource and add a filter for Usages < 2
 	//should fail (3<2)
-	filter = &engine.Filter{
+	filter.Filter = &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_TH_Resource",
 		Rules: []*engine.FilterRule{
@@ -518,14 +538,16 @@ func testV1FltrAccounts(t *testing.T) {
 	// Add a filter with fieldName taken value from account 1001
 	// and check if *monetary balance is minim 9 ( greater than 9)
 	// we expect that the balance to be 10 so the filter should pass (10 > 9)
-	filter := &engine.Filter{
-		Tenant: "cgrates.org",
-		ID:     "FLTR_TH_Accounts",
-		Rules: []*engine.FilterRule{
-			{
-				Type:      "*gt",
-				FieldName: "~*accounts.1001.BalanceMap.*monetary[0].Value",
-				Values:    []string{"9"},
+	filter := v1.FilterWithCache{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     "FLTR_TH_Accounts",
+			Rules: []*engine.FilterRule{
+				{
+					Type:      "*gt",
+					FieldName: "~*accounts.1001.BalanceMap.*monetary[0].Value",
+					Values:    []string{"9"},
+				},
 			},
 		},
 	}
@@ -547,15 +569,17 @@ func testV1FltrAccounts(t *testing.T) {
 	}
 	time.Sleep(10 * time.Millisecond)
 	//Add a threshold with filter from above and an inline filter for Account 1010
-	tPrfl := &engine.ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "TH_Account",
-		FilterIDs: []string{"FLTR_TH_Accounts", "*string:~*req.Account:1001"},
-		MaxHits:   -1,
-		MinSleep:  time.Duration(1 * time.Millisecond),
-		Weight:    90.0,
-		ActionIDs: []string{"LOG"},
-		Async:     true,
+	tPrfl := &engine.ThresholdWithCache{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TH_Account",
+			FilterIDs: []string{"FLTR_TH_Accounts", "*string:~*req.Account:1001"},
+			MaxHits:   -1,
+			MinSleep:  time.Duration(1 * time.Millisecond),
+			Weight:    90.0,
+			ActionIDs: []string{"LOG"},
+			Async:     true,
+		},
 	}
 	if err := fltrRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
 		t.Error(err)
@@ -566,15 +590,17 @@ func testV1FltrAccounts(t *testing.T) {
 	if err := fltrRpc.Call(utils.ApierV1GetThresholdProfile,
 		&utils.TenantID{Tenant: tPrfl.Tenant, ID: tPrfl.ID}, &rcvTh); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(tPrfl, rcvTh) {
-		t.Errorf("Expecting: %+v, received: %+v", tPrfl, rcvTh)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, rcvTh) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, rcvTh)
 	}
 
-	tEv := utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.Account: "1001"},
+	tEv := &engine.ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Account: "1001"},
+		},
 	}
 	var ids []string
 	if err := fltrRpc.Call(utils.ThresholdSv1ProcessEvent, tEv, &ids); err != nil {
@@ -587,7 +613,7 @@ func testV1FltrAccounts(t *testing.T) {
 	// Add a filter with fieldName taken value from account 1001
 	// and check if *monetary balance is is minim 11 ( greater than 11)
 	// we expect that the balance to be 10 so the filter should not pass (10 > 11)
-	filter = &engine.Filter{
+	filter.Filter = &engine.Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_TH_Accounts",
 		Rules: []*engine.FilterRule{

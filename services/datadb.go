@@ -34,7 +34,7 @@ func NewDataDBService(cfg *config.CGRConfig) *DataDBService {
 	return &DataDBService{
 		cfg:    cfg,
 		dbchan: make(chan *engine.DataManager, 1),
-		db:     engine.NewDataManager(nil, cfg.CacheCfg(), nil, nil), // to be removed
+		// db:     engine.NewDataManager(nil, cfg.CacheCfg(), nil, nil), // to be removed
 	}
 }
 
@@ -61,11 +61,12 @@ func (db *DataDBService) Start() (err error) {
 		db.cfg.DataDbCfg().DataDbName, db.cfg.DataDbCfg().DataDbUser,
 		db.cfg.DataDbCfg().DataDbPass, db.cfg.GeneralCfg().DBDataEncoding,
 		db.cfg.DataDbCfg().DataDbSentinelName)
-	if db.needsDB() && err != nil { // Cannot configure getter database, show stopper
+	if db.mandatoryDB() && err != nil { // Cannot configure getter database, show stopper
 		utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 		return
 	} else if db.cfg.SessionSCfg().Enabled && err != nil {
 		utils.Logger.Warning(fmt.Sprintf("Could not configure dataDb: %s. Some SessionS APIs will not work", err))
+		err = nil // reset the error in case of only SessionS active
 		return
 	}
 	var rmtConns, rplConns *rpcclient.RpcClientPool
@@ -151,11 +152,11 @@ func (db *DataDBService) ServiceName() string {
 
 // ShouldRun returns if the service should be running
 func (db *DataDBService) ShouldRun() bool {
-	return db.needsDB() || db.cfg.SessionSCfg().Enabled
+	return db.mandatoryDB() || db.cfg.SessionSCfg().Enabled
 }
 
-// needsDB returns if the current configuration needs the DB
-func (db *DataDBService) needsDB() bool {
+// mandatoryDB returns if the current configuration needs the DB
+func (db *DataDBService) mandatoryDB() bool {
 	return db.cfg.RalsCfg().Enabled || db.cfg.SchedulerCfg().Enabled || db.cfg.ChargerSCfg().Enabled ||
 		db.cfg.AttributeSCfg().Enabled || db.cfg.ResourceSCfg().Enabled || db.cfg.StatSCfg().Enabled ||
 		db.cfg.ThresholdSCfg().Enabled || db.cfg.SupplierSCfg().Enabled || db.cfg.DispatcherSCfg().Enabled ||

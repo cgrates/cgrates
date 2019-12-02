@@ -40,14 +40,14 @@ var (
 	actsLclCfgPath = path.Join(*dataDir, "conf", "samples", "actions")
 
 	waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for rater to start and cache")
-	encoding  = flag.String("rpc", utils.MetaJSONrpc, "what encoding whould be uused for rpc comunication")
+	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
 )
 
 func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
 	switch *encoding {
-	case utils.MetaJSONrpc:
+	case utils.MetaJSON:
 		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOBrpc:
+	case utils.MetaGOB:
 		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
 	default:
 		return nil, errors.New("UNSUPPORTED_RPC")
@@ -55,7 +55,7 @@ func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
 }
 
 func TestActionsitInitCfg(t *testing.T) {
-	if *encoding == utils.MetaGOBrpc {
+	if *encoding == utils.MetaGOB {
 		actsLclCfgPath = path.Join(*dataDir, "conf", "samples", "gob", "actions")
 	}
 	// Init config first

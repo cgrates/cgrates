@@ -31,7 +31,6 @@ import (
 
 type InternalDB struct {
 	tasks               []*Task
-	ms                  Marshaler
 	db                  *ltcache.TransCache
 	mu                  sync.RWMutex
 	stringIndexedFields []string
@@ -40,21 +39,13 @@ type InternalDB struct {
 }
 
 // NewInternalDB constructs an InternalDB
-func NewInternalDB(stringIndexedFields, prefixIndexedFields []string, mrshlr string) (iDB *InternalDB, err error) {
+func NewInternalDB(stringIndexedFields, prefixIndexedFields []string) (iDB *InternalDB) {
 	dfltCfg, _ := config.NewDefaultCGRConfig()
 	iDB = &InternalDB{
 		db:                  ltcache.NewTransCache(dfltCfg.CacheCfg().AsTransCacheConfig()),
 		stringIndexedFields: stringIndexedFields,
 		prefixIndexedFields: prefixIndexedFields,
 		cnter:               utils.NewCounter(time.Now().UnixNano(), 0),
-	}
-	switch mrshlr {
-	case utils.MetaMSGPACK:
-		iDB.ms = NewCodecMsgpackMarshaler()
-	case utils.MetaJSON:
-		iDB.ms = new(JSONBufMarshaler)
-	default:
-		return nil, fmt.Errorf("unsupported DB marshaler: <%s>", mrshlr)
 	}
 	return
 }
@@ -74,10 +65,6 @@ func (iDB *InternalDB) Close() {}
 func (iDB *InternalDB) Flush(_ string) error {
 	iDB.db = ltcache.NewTransCache(config.CgrConfig().CacheCfg().AsTransCacheConfig())
 	return nil
-}
-
-func (iDB *InternalDB) Marshaler() Marshaler {
-	return iDB.ms
 }
 
 func (iDB *InternalDB) SelectDatabase(dbName string) (err error) {
@@ -889,19 +876,19 @@ func (iDB *InternalDB) RemStatQueueProfileDrv(tenant, id string) (err error) {
 	return
 }
 
-func (iDB *InternalDB) GetStoredStatQueueDrv(tenant, id string) (sq *StoredStatQueue, err error) {
+func (iDB *InternalDB) GetStatQueueDrv(tenant, id string) (sq *StatQueue, err error) {
 	x, ok := iDB.db.Get(utils.CacheStatQueues, utils.StatQueuePrefix+utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
-	return x.(*StoredStatQueue), nil
+	return x.(*StatQueue), nil
 }
-func (iDB *InternalDB) SetStoredStatQueueDrv(sq *StoredStatQueue) (err error) {
+func (iDB *InternalDB) SetStatQueueDrv(sq *StatQueue) (err error) {
 	iDB.db.Set(utils.CacheStatQueues, utils.StatQueuePrefix+utils.ConcatenatedKey(sq.Tenant, sq.ID), sq, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return
 }
-func (iDB *InternalDB) RemStoredStatQueueDrv(tenant, id string) (err error) {
+func (iDB *InternalDB) RemStatQueueDrv(tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheStatQueues, utils.StatQueuePrefix+utils.ConcatenatedKey(tenant, id),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return

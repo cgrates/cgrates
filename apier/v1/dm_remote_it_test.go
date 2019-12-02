@@ -80,7 +80,7 @@ var sTestsInternalRemoteIT = []func(t *testing.T){
 }
 
 func TestInternalRemoteITRedis(t *testing.T) {
-	if *encoding == utils.MetaGOBrpc {
+	if *encoding == utils.MetaGOB {
 		internalCfgDirPath = "internal_gob"
 	}
 	engineOneCfgDirPath = "engine1_redis"
@@ -91,7 +91,7 @@ func TestInternalRemoteITRedis(t *testing.T) {
 }
 
 func TestInternalRemoteITMongo(t *testing.T) {
-	if *encoding == utils.MetaGOBrpc {
+	if *encoding == utils.MetaGOB {
 		internalCfgDirPath = "internal_gob"
 	}
 	engineOneCfgDirPath = "engine1_mongo"
@@ -256,7 +256,7 @@ func testInternalRemoteITGetAttribute(t *testing.T) {
 		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1001_SIMPLEAUTH"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
-	if *encoding == utils.MetaGOBrpc { // in gob emtpty slice is encoded as nil
+	if *encoding == utils.MetaGOB { // in gob emtpty slice is encoded as nil
 		alsPrf.AttributeProfile.Attributes[0].FilterIDs = nil
 	}
 	reply.Compile()
@@ -446,7 +446,7 @@ func testInternalRemoteITGetSupplier(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	if *encoding == utils.MetaGOBrpc { // in gob emtpty slice is encoded as nil
+	if *encoding == utils.MetaGOB { // in gob emtpty slice is encoded as nil
 		splPrf.SortingParameters = nil
 		splPrf2.SortingParameters = nil
 	}

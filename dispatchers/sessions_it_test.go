@@ -676,7 +676,7 @@ func testDspSessionReplicate(t *testing.T) {
 			Connections: []*config.RemoteHost{
 				&config.RemoteHost{
 					Address:   "127.0.0.1:7012",
-					Transport: utils.MetaJSONrpc,
+					Transport: utils.MetaJSON,
 				},
 			},
 		},

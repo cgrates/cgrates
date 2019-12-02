@@ -953,7 +953,7 @@ func testV1SplSGetSupplierForEvent(t *testing.T) {
 		},
 		Weight: 50,
 	}
-	if *encoding == utils.MetaGOBrpc { // in gob emtpty slice is encoded as nil
+	if *encoding == utils.MetaGOB { // in gob emtpty slice is encoded as nil
 		expected.SortingParameters = nil
 	}
 	var supProf []*engine.SupplierProfile

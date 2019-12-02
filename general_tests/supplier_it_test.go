@@ -22,12 +22,12 @@ package general_tests
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -37,7 +37,7 @@ var (
 	splSv1CfgPath string
 	splSv1Cfg     *config.CGRConfig
 	splSv1Rpc     *rpc.Client
-	splPrf        *engine.SupplierProfile
+	splPrf        *v1.SupplierWithCache
 	splSv1ConfDIR string //run tests for specific configuration
 
 	sTestsSupplierSV1 = []func(t *testing.T){
@@ -104,7 +104,7 @@ func testV1SplSStartEngine(t *testing.T) {
 
 func testV1SplSRpcConn(t *testing.T) {
 	var err error
-	splSv1Rpc, err = jsonrpc.Dial("tcp", splSv1Cfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	splSv1Rpc, err = newRPCClient(splSv1Cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -126,20 +126,22 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
-	splPrf = &engine.SupplierProfile{
-		Tenant:  "cgrates.org",
-		ID:      "TEST_PROFILE2",
-		Sorting: utils.MetaLC,
-		Suppliers: []*engine.Supplier{
-			{
-				ID:         "SPL1",
-				FilterIDs:  []string{"FLTR_1"},
-				AccountIDs: []string{"accc"},
-				Weight:     20,
-				Blocker:    false,
+	splPrf = &v1.SupplierWithCache{
+		SupplierProfile: &engine.SupplierProfile{
+			Tenant:  "cgrates.org",
+			ID:      "TEST_PROFILE2",
+			Sorting: utils.MetaLC,
+			Suppliers: []*engine.Supplier{
+				{
+					ID:         "SPL1",
+					FilterIDs:  []string{"FLTR_1"},
+					AccountIDs: []string{"accc"},
+					Weight:     20,
+					Blocker:    false,
+				},
 			},
+			Weight: 10,
 		},
-		Weight: 10,
 	}
 	var result string
 	if err := splSv1Rpc.Call(utils.ApierV1SetSupplierProfile, splPrf, &result); err != nil {
@@ -150,8 +152,8 @@ func testV1SplSSetSupplierProfilesWithoutRatingPlanIDs(t *testing.T) {
 	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "TEST_PROFILE2"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(splPrf, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", splPrf, reply)
+	} else if !reflect.DeepEqual(splPrf.SupplierProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", splPrf.SupplierProfile, reply)
 	}
 	ev := &engine.ArgsGetSuppliers{
 		CGREvent: &utils.CGREvent{
@@ -189,34 +191,36 @@ func testV1SplSAddNewSplPrf(t *testing.T) {
 		t.Error(err)
 	}
 	//create a new Supplier Profile to test *reas and *reds sorting strategy
-	splPrf = &engine.SupplierProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SPL_ResourceTest",
-		Sorting:   utils.MetaReas,
-		FilterIDs: []string{"*string:~*req.CustomField:ResourceTest"},
-		Suppliers: []*engine.Supplier{
-			//supplier1 will have ResourceUsage = 11
-			{
-				ID:          "supplier1",
-				ResourceIDs: []string{"ResourceSupplier1", "Resource2Supplier1"},
-				Weight:      20,
-				Blocker:     false,
+	splPrf = &v1.SupplierWithCache{
+		SupplierProfile: &engine.SupplierProfile{
+			Tenant:    "cgrates.org",
+			ID:        "SPL_ResourceTest",
+			Sorting:   utils.MetaReas,
+			FilterIDs: []string{"*string:~*req.CustomField:ResourceTest"},
+			Suppliers: []*engine.Supplier{
+				//supplier1 will have ResourceUsage = 11
+				{
+					ID:          "supplier1",
+					ResourceIDs: []string{"ResourceSupplier1", "Resource2Supplier1"},
+					Weight:      20,
+					Blocker:     false,
+				},
+				//supplier2 and supplier3 will have the same ResourceUsage = 7
+				{
+					ID:          "supplier2",
+					ResourceIDs: []string{"ResourceSupplier2"},
+					Weight:      20,
+					Blocker:     false,
+				},
+				{
+					ID:          "supplier3",
+					ResourceIDs: []string{"ResourceSupplier3"},
+					Weight:      35,
+					Blocker:     false,
+				},
 			},
-			//supplier2 and supplier3 will have the same ResourceUsage = 7
-			{
-				ID:          "supplier2",
-				ResourceIDs: []string{"ResourceSupplier2"},
-				Weight:      20,
-				Blocker:     false,
-			},
-			{
-				ID:          "supplier3",
-				ResourceIDs: []string{"ResourceSupplier3"},
-				Weight:      35,
-				Blocker:     false,
-			},
+			Weight: 10,
 		},
-		Weight: 10,
 	}
 	var result string
 	if err := splSv1Rpc.Call(utils.ApierV1SetSupplierProfile, splPrf, &result); err != nil {
@@ -227,27 +231,29 @@ func testV1SplSAddNewSplPrf(t *testing.T) {
 	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ResourceTest"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(splPrf, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", splPrf, reply)
+	} else if !reflect.DeepEqual(splPrf.SupplierProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", splPrf.SupplierProfile, reply)
 	}
 }
 
 func testV1SplSAddNewResPrf(t *testing.T) {
 	var result string
 	//add ResourceSupplier1
-	rPrf := &engine.ResourceProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ResourceSupplier1",
-		FilterIDs: []string{"*string:~*req.Supplier:supplier1", "*string:~*req.ResID:ResourceSupplier1"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	rPrf := &v1.ResourceWithCache{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ResourceSupplier1",
+			FilterIDs: []string{"*string:~*req.Supplier:supplier1", "*string:~*req.ResID:ResourceSupplier1"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			UsageTTL:     time.Duration(1) * time.Minute,
+			Limit:        10,
+			Stored:       true,
+			Weight:       20,
+			ThresholdIDs: []string{utils.META_NONE},
 		},
-		UsageTTL:     time.Duration(1) * time.Minute,
-		Limit:        10,
-		Stored:       true,
-		Weight:       20,
-		ThresholdIDs: []string{utils.META_NONE},
 	}
 
 	if err := splSv1Rpc.Call(utils.ApierV1SetResourceProfile, rPrf, &result); err != nil {
@@ -256,19 +262,21 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	//add Resource2Supplier1
-	rPrf2 := &engine.ResourceProfile{
-		Tenant:    "cgrates.org",
-		ID:        "Resource2Supplier1",
-		FilterIDs: []string{"*string:~*req.Supplier:supplier1", "*string:~*req.ResID:Resource2Supplier1"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	rPrf2 := &v1.ResourceWithCache{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "Resource2Supplier1",
+			FilterIDs: []string{"*string:~*req.Supplier:supplier1", "*string:~*req.ResID:Resource2Supplier1"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			UsageTTL:     time.Duration(1) * time.Minute,
+			Limit:        10,
+			Stored:       true,
+			Weight:       30,
+			ThresholdIDs: []string{utils.META_NONE},
 		},
-		UsageTTL:     time.Duration(1) * time.Minute,
-		Limit:        10,
-		Stored:       true,
-		Weight:       30,
-		ThresholdIDs: []string{utils.META_NONE},
 	}
 
 	if err := splSv1Rpc.Call(utils.ApierV1SetResourceProfile, rPrf2, &result); err != nil {
@@ -277,19 +285,21 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	//add ResourceSupplier2
-	rPrf3 := &engine.ResourceProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ResourceSupplier2",
-		FilterIDs: []string{"*string:~*req.Supplier:supplier2", "*string:~*req.ResID:ResourceSupplier2"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	rPrf3 := &v1.ResourceWithCache{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ResourceSupplier2",
+			FilterIDs: []string{"*string:~*req.Supplier:supplier2", "*string:~*req.ResID:ResourceSupplier2"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			UsageTTL:     time.Duration(1) * time.Minute,
+			Limit:        10,
+			Stored:       true,
+			Weight:       20,
+			ThresholdIDs: []string{utils.META_NONE},
 		},
-		UsageTTL:     time.Duration(1) * time.Minute,
-		Limit:        10,
-		Stored:       true,
-		Weight:       20,
-		ThresholdIDs: []string{utils.META_NONE},
 	}
 
 	if err := splSv1Rpc.Call(utils.ApierV1SetResourceProfile, rPrf3, &result); err != nil {
@@ -298,19 +308,21 @@ func testV1SplSAddNewResPrf(t *testing.T) {
 		t.Error("Unexpected reply returned", result)
 	}
 	//add ResourceSupplier2
-	rPrf4 := &engine.ResourceProfile{
-		Tenant:    "cgrates.org",
-		ID:        "ResourceSupplier3",
-		FilterIDs: []string{"*string:~*req.Supplier:supplier3", "*string:~*req.ResID:ResourceSupplier3"},
-		ActivationInterval: &utils.ActivationInterval{
-			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+	rPrf4 := &v1.ResourceWithCache{
+		ResourceProfile: &engine.ResourceProfile{
+			Tenant:    "cgrates.org",
+			ID:        "ResourceSupplier3",
+			FilterIDs: []string{"*string:~*req.Supplier:supplier3", "*string:~*req.ResID:ResourceSupplier3"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			UsageTTL:     time.Duration(1) * time.Minute,
+			Limit:        10,
+			Stored:       true,
+			Weight:       20,
+			ThresholdIDs: []string{utils.META_NONE},
 		},
-		UsageTTL:     time.Duration(1) * time.Minute,
-		Limit:        10,
-		Stored:       true,
-		Weight:       20,
-		ThresholdIDs: []string{utils.META_NONE},
 	}
 
 	if err := splSv1Rpc.Call(utils.ApierV1SetResourceProfile, rPrf4, &result); err != nil {
@@ -452,34 +464,36 @@ func testV1SplSAddNewSplPrf2(t *testing.T) {
 		t.Error(err)
 	}
 	//create a new Supplier Profile to test *reas and *reds sorting strategy
-	splPrf = &engine.SupplierProfile{
-		Tenant:    "cgrates.org",
-		ID:        "SPL_ResourceDescendent",
-		Sorting:   utils.MetaReds,
-		FilterIDs: []string{"*string:~*req.CustomField:ResourceDescendent"},
-		Suppliers: []*engine.Supplier{
-			//supplier1 will have ResourceUsage = 11
-			{
-				ID:          "supplier1",
-				ResourceIDs: []string{"ResourceSupplier1", "Resource2Supplier1"},
-				Weight:      20,
-				Blocker:     false,
+	splPrf = &v1.SupplierWithCache{
+		SupplierProfile: &engine.SupplierProfile{
+			Tenant:    "cgrates.org",
+			ID:        "SPL_ResourceDescendent",
+			Sorting:   utils.MetaReds,
+			FilterIDs: []string{"*string:~*req.CustomField:ResourceDescendent"},
+			Suppliers: []*engine.Supplier{
+				//supplier1 will have ResourceUsage = 11
+				{
+					ID:          "supplier1",
+					ResourceIDs: []string{"ResourceSupplier1", "Resource2Supplier1"},
+					Weight:      20,
+					Blocker:     false,
+				},
+				//supplier2 and supplier3 will have the same ResourceUsage = 7
+				{
+					ID:          "supplier2",
+					ResourceIDs: []string{"ResourceSupplier2"},
+					Weight:      20,
+					Blocker:     false,
+				},
+				{
+					ID:          "supplier3",
+					ResourceIDs: []string{"ResourceSupplier3"},
+					Weight:      35,
+					Blocker:     false,
+				},
 			},
-			//supplier2 and supplier3 will have the same ResourceUsage = 7
-			{
-				ID:          "supplier2",
-				ResourceIDs: []string{"ResourceSupplier2"},
-				Weight:      20,
-				Blocker:     false,
-			},
-			{
-				ID:          "supplier3",
-				ResourceIDs: []string{"ResourceSupplier3"},
-				Weight:      35,
-				Blocker:     false,
-			},
+			Weight: 10,
 		},
-		Weight: 10,
 	}
 	var result string
 	if err := splSv1Rpc.Call(utils.ApierV1SetSupplierProfile, splPrf, &result); err != nil {
@@ -490,8 +504,8 @@ func testV1SplSAddNewSplPrf2(t *testing.T) {
 	if err := splSv1Rpc.Call(utils.ApierV1GetSupplierProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SPL_ResourceDescendent"}, &reply); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(splPrf, reply) {
-		t.Errorf("Expecting: %+v, received: %+v", splPrf, reply)
+	} else if !reflect.DeepEqual(splPrf.SupplierProfile, reply) {
+		t.Errorf("Expecting: %+v, received: %+v", splPrf.SupplierProfile, reply)
 	}
 }
 

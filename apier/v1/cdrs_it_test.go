@@ -110,9 +110,12 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 		Tenant:      acntAttrs.Tenant,
 		Account:     acntAttrs.Account,
 		BalanceType: utils.VOICE,
-		BalanceID:   utils.StringPointer("BALANCE1"),
-		Value:       utils.Float64Pointer(120000000000),
-		Weight:      utils.Float64Pointer(20)}
+		Balance: map[string]interface{}{
+			utils.ID:     "BALANCE1",
+			utils.Value:  120000000000,
+			utils.Weight: 20,
+		},
+	}
 	var reply string
 	if err := cdrsRpc.Call(utils.ApierV1SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
@@ -123,9 +126,12 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 		Tenant:      acntAttrs.Tenant,
 		Account:     acntAttrs.Account,
 		BalanceType: utils.VOICE,
-		BalanceID:   utils.StringPointer("BALANCE2"),
-		Value:       utils.Float64Pointer(180000000000),
-		Weight:      utils.Float64Pointer(10)}
+		Balance: map[string]interface{}{
+			utils.ID:     "BALANCE2",
+			utils.Value:  180000000000,
+			utils.Weight: 10,
+		},
+	}
 	if err := cdrsRpc.Call(utils.ApierV1SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -155,7 +161,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond) // Give time for CDR to be rated
+	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 
 	var cdrs []*engine.ExternalCDR
 	if err := cdrsRpc.Call(utils.ApierV1GetCDRs, utils.AttrGetCdrs{}, &cdrs); err != nil {

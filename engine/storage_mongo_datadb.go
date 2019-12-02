@@ -410,11 +410,6 @@ func (ms *MongoStorage) Flush(ignore string) (err error) {
 	})
 }
 
-// Marshaler returns the marshall
-func (ms *MongoStorage) Marshaler() Marshaler {
-	return ms.ms
-}
-
 // DB returnes a database object
 func (ms *MongoStorage) DB() *mongo.Database {
 	return ms.client.Database(ms.db)
@@ -1913,12 +1908,12 @@ func (ms *MongoStorage) RemStatQueueProfileDrv(tenant, id string) (err error) {
 	})
 }
 
-// GetStoredStatQueueDrv retrieves a StoredStatQueue
-func (ms *MongoStorage) GetStoredStatQueueDrv(tenant, id string) (sq *StoredStatQueue, err error) {
-	sq = new(StoredStatQueue)
-	err = ms.query(func(sctx mongo.SessionContext) (err error) {
+// GetStatQueueDrv retrieves a StoredStatQueue
+func (ms *MongoStorage) GetStatQueueDrv(tenant, id string) (sq *StatQueue, err error) {
+	ssq := new(StoredStatQueue)
+	if err = ms.query(func(sctx mongo.SessionContext) (err error) {
 		cur := ms.getCol(ColSqs).FindOne(sctx, bson.M{"tenant": tenant, "id": id})
-		if err := cur.Decode(sq); err != nil {
+		if err := cur.Decode(ssq); err != nil {
 			sq = nil
 			if err == mongo.ErrNoDocuments {
 				return utils.ErrNotFound
@@ -1926,23 +1921,30 @@ func (ms *MongoStorage) GetStoredStatQueueDrv(tenant, id string) (sq *StoredStat
 			return err
 		}
 		return nil
-	})
+	}); err != nil {
+		return
+	}
+	sq, err = ssq.AsStatQueue(ms.ms)
 	return
 }
 
-// SetStoredStatQueueDrv stores the metrics for a StoredStatQueue
-func (ms *MongoStorage) SetStoredStatQueueDrv(sq *StoredStatQueue) (err error) {
+// SetStatQueueDrv stores the metrics for a StoredStatQueue
+func (ms *MongoStorage) SetStatQueueDrv(sq *StatQueue) (err error) {
+	var ssq *StoredStatQueue
+	if ssq, err = NewStoredStatQueue(sq, ms.ms); err != nil {
+		return
+	}
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColSqs).UpdateOne(sctx, bson.M{"tenant": sq.Tenant, "id": sq.ID},
-			bson.M{"$set": sq},
+			bson.M{"$set": ssq},
 			options.Update().SetUpsert(true),
 		)
 		return err
 	})
 }
 
-// RemStoredStatQueueDrv removes stored metrics for a StoredStatQueue
-func (ms *MongoStorage) RemStoredStatQueueDrv(tenant, id string) (err error) {
+// RemStatQueueDrv removes stored metrics for a StoredStatQueue
+func (ms *MongoStorage) RemStatQueueDrv(tenant, id string) (err error) {
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		dr, err := ms.getCol(ColSqs).DeleteOne(sctx, bson.M{"tenant": tenant, "id": id})
 		if dr.DeletedCount == 0 {

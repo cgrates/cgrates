@@ -47,7 +47,6 @@ type Storage interface {
 // OnlineStorage contains methods to use for administering online data
 type DataDB interface {
 	Storage
-	Marshaler() Marshaler
 	HasDataDrv(string, string, string) (bool, error)
 	GetRatingPlanDrv(string) (*RatingPlan, error)
 	SetRatingPlanDrv(*RatingPlan) error
@@ -104,9 +103,9 @@ type DataDB interface {
 	GetStatQueueProfileDrv(tenant string, ID string) (sq *StatQueueProfile, err error)
 	SetStatQueueProfileDrv(sq *StatQueueProfile) (err error)
 	RemStatQueueProfileDrv(tenant, id string) (err error)
-	GetStoredStatQueueDrv(tenant, id string) (sq *StoredStatQueue, err error)
-	SetStoredStatQueueDrv(sq *StoredStatQueue) (err error)
-	RemStoredStatQueueDrv(tenant, id string) (err error)
+	GetStatQueueDrv(tenant, id string) (sq *StatQueue, err error)
+	SetStatQueueDrv(sq *StatQueue) (err error)
+	RemStatQueueDrv(tenant, id string) (err error)
 	GetThresholdProfileDrv(tenant string, ID string) (tp *ThresholdProfile, err error)
 	SetThresholdProfileDrv(tp *ThresholdProfile) (err error)
 	RemThresholdProfileDrv(tenant, id string) (err error)

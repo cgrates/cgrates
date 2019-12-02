@@ -22,7 +22,6 @@ package general_tests
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
@@ -56,7 +55,7 @@ var (
 
 		testSes3ItAddVoiceBalance,
 		testSes3ItTerminatWithoutInit,
-		testSes3ItInitAfterTerminate,
+		// testSes3ItInitAfterTerminate,
 		testSes3ItBalance,
 		testSes3ItCDRs,
 
@@ -98,7 +97,7 @@ func testSes3ItStartEngine(t *testing.T) {
 
 func testSes3ItRPCConn(t *testing.T) {
 	var err error
-	ses3RPC, err = jsonrpc.Dial("tcp", ses3Cfg.ListenCfg().RPCJSONListen)
+	ses3RPC, err = newRPCClient(ses3Cfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -175,9 +174,14 @@ func testSes3ItProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
+	if *encoding == utils.MetaGOB {
+		eAttrs.CGREvent.Event[utils.Usage] = 5 * time.Minute
+		eAttrs.CGREvent.Event[utils.SetupTime], _ = utils.IfaceAsTime("2018-01-07T17:00:00Z", "")
+		eAttrs.CGREvent.Event[utils.AnswerTime], _ = utils.IfaceAsTime("2018-01-07T17:00:10Z", "")
+	}
+	if !reflect.DeepEqual(*eAttrs, *rply.Attributes) {
 		t.Errorf("expecting: %+v, received: %+v",
-			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
+			eAttrs.CGREvent, rply.Attributes.CGREvent)
 	}
 }
 
@@ -185,7 +189,7 @@ func testSes3ItThreshold1002After(t *testing.T) {
 	var td engine.Threshold
 	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1001", Hits: 1}
 	if err := ses3RPC.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &td); err != nil {
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd.Tenant, td.Tenant) {
 		t.Errorf("expecting: %+v, received: %+v", eTd.Tenant, td.Tenant)
@@ -205,7 +209,7 @@ func testSes3ItStatMetricsAfter(t *testing.T) {
 	}
 
 	if err := ses3RPC.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}, &metrics); err != nil {
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}}, &metrics); err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(statMetrics, metrics) {
@@ -217,7 +221,7 @@ func testSes3ItThreshold1002After2(t *testing.T) {
 	var td engine.Threshold
 	eTd := engine.Threshold{Tenant: "cgrates.org", ID: "THD_ACNT_1001", Hits: 2}
 	if err := ses3RPC.Call(utils.ThresholdSv1GetThreshold,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}, &td); err != nil {
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_ACNT_1001"}}, &td); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eTd.Tenant, td.Tenant) {
 		t.Errorf("expecting: %+v, received: %+v", eTd.Tenant, td.Tenant)
@@ -237,7 +241,7 @@ func testSes3ItStatMetricsAfter2(t *testing.T) {
 	}
 
 	if err := ses3RPC.Call(utils.StatSv1GetQueueStringMetrics,
-		&utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}, &metrics); err != nil {
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}}, &metrics); err != nil {
 		t.Error(err)
 	}
 	if !reflect.DeepEqual(statMetrics, metrics) {
@@ -301,16 +305,16 @@ func testSes3ItTerminatWithoutInit(t *testing.T) {
 		var rply string
 		if err := ses3RPC.Call(utils.SessionSv1TerminateSession,
 			args, &rply); err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 		if rply != utils.OK {
 			t.Errorf("Unexpected reply: %s", rply)
 		}
 	}()
 
-}
+	// }
 
-func testSes3ItInitAfterTerminate(t *testing.T) {
+	// func testSes3ItInitAfterTerminate(t *testing.T) {
 	time.Sleep(3 * time.Millisecond)
 	args1 := &sessions.V1InitSessionArgs{
 		InitSession: true,
@@ -342,14 +346,14 @@ func testSes3ItInitAfterTerminate(t *testing.T) {
 	}
 	time.Sleep(5 * time.Millisecond)
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := ses3RPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
+	if err := ses3RPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 }
 func testSes3ItBalance(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
-	var acnt *engine.Account
+	var acnt engine.Account
 	attrs := &utils.AttrGetAccount{
 		Tenant:  "cgrates.org",
 		Account: "1002",
@@ -364,22 +368,25 @@ func testSes3ItBalance(t *testing.T) {
 
 func testSes3ItCDRs(t *testing.T) {
 	var reply string
-	if err := ses3RPC.Call(utils.SessionSv1ProcessCDR, &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "TestSesItProccesCDR",
-		Event: map[string]interface{}{
-			utils.Tenant:      "cgrates.org",
-			utils.Category:    "call",
-			utils.ToR:         utils.VOICE,
-			utils.OriginID:    "TestTerminate",
-			utils.RequestType: utils.META_PREPAID,
-			utils.Account:     "1002",
-			utils.Subject:     "1001",
-			utils.Destination: "1001",
-			utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-			utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-			utils.Usage:       2 * time.Second,
-		}}, &reply); err != nil {
+	if err := ses3RPC.Call(utils.SessionSv1ProcessCDR, &engine.ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSesItProccesCDR",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "TestTerminate",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "1002",
+				utils.Subject:     "1001",
+				utils.Destination: "1001",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       2 * time.Second,
+			},
+		},
+	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received reply: %s", reply)

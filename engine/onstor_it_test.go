@@ -1671,7 +1671,7 @@ func testOnStorITFilter(t *testing.T) {
 			ExpiryTime:     time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		},
 	}
-	if _, rcvErr := onStor.GetFilter("cgrates.org", "Filter1",
+	if _, rcvErr := GetFilter(onStor, "cgrates.org", "Filter1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
@@ -1679,14 +1679,14 @@ func testOnStorITFilter(t *testing.T) {
 		t.Error(err)
 	}
 	//get from cache
-	if rcv, err := onStor.GetFilter("cgrates.org", "Filter1",
+	if rcv, err := GetFilter(onStor, "cgrates.org", "Filter1",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(fp, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", fp, rcv)
 	}
 	//get from database
-	if rcv, err := onStor.GetFilter("cgrates.org", "Filter1",
+	if rcv, err := GetFilter(onStor, "cgrates.org", "Filter1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(fp, rcv)) {
@@ -1716,14 +1716,14 @@ func testOnStorITFilter(t *testing.T) {
 	}
 	time.Sleep(sleepDelay)
 	//get from cache
-	if rcv, err := onStor.GetFilter("cgrates.org", "Filter1",
+	if rcv, err := GetFilter(onStor, "cgrates.org", "Filter1",
 		true, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(fp, rcv)) {
 		t.Errorf("Expecting: %v, received: %v", fp, rcv)
 	}
 	//get from database
-	if rcv, err := onStor.GetFilter("cgrates.org", "Filter1",
+	if rcv, err := GetFilter(onStor, "cgrates.org", "Filter1",
 		false, false, utils.NonTransactional); err != nil {
 		t.Error(err)
 	} else if !(reflect.DeepEqual(fp, rcv)) {
@@ -1733,12 +1733,12 @@ func testOnStorITFilter(t *testing.T) {
 		t.Error(err)
 	}
 	//check cache if removed
-	if _, rcvErr := onStor.GetFilter("cgrates.org", "Filter1",
+	if _, rcvErr := GetFilter(onStor, "cgrates.org", "Filter1",
 		true, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	//check database if removed
-	if _, rcvErr := onStor.GetFilter("cgrates.org", "Filter1",
+	if _, rcvErr := GetFilter(onStor, "cgrates.org", "Filter1",
 		false, false, utils.NonTransactional); rcvErr != nil && rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}

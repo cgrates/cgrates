@@ -21,7 +21,6 @@ package general_tests
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"testing"
 	"time"
@@ -89,7 +88,7 @@ func testSrItStartEngine(t *testing.T) {
 
 func testSrItRPCConn(t *testing.T) {
 	var err error
-	srrpc, err = jsonrpc.Dial("tcp", srCfg.ListenCfg().RPCJSONListen)
+	srrpc, err = newRPCClient(srCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -200,7 +199,7 @@ func testSrItTerminateSession(t *testing.T) {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := srrpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
+	if err := srrpc.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -289,7 +288,7 @@ func testSrItTerminateSession2(t *testing.T) {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := srrpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
+	if err := srrpc.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

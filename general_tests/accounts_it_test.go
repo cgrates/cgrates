@@ -21,7 +21,6 @@ package general_tests
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"testing"
 	"time"
@@ -105,7 +104,7 @@ func testV1AccStartEngine(t *testing.T) {
 
 func testV1AccRpcConn(t *testing.T) {
 	var err error
-	accRpc, err = jsonrpc.Dial("tcp", accCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	accRpc, err = newRPCClient(accCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -246,15 +245,17 @@ func testV1AccSendToThreshold(t *testing.T) {
 	}
 	time.Sleep(10 * time.Millisecond)
 
-	tPrfl := &engine.ThresholdProfile{
-		Tenant:    "cgrates.org",
-		ID:        "THD_AccDisableAndLog",
-		FilterIDs: []string{"*string:~*req.Account:testAccThreshold"},
-		MaxHits:   -1,
-		MinSleep:  time.Duration(1 * time.Second),
-		Weight:    20.0,
-		Async:     true,
-		ActionIDs: []string{"DISABLE_LOG"},
+	tPrfl := &engine.ThresholdWithCache{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "THD_AccDisableAndLog",
+			FilterIDs: []string{"*string:~*req.Account:testAccThreshold"},
+			MaxHits:   -1,
+			MinSleep:  time.Duration(1 * time.Second),
+			Weight:    20.0,
+			Async:     true,
+			ActionIDs: []string{"DISABLE_LOG"},
+		},
 	}
 
 	if err := accRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &reply); err != nil {

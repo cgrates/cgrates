@@ -337,7 +337,7 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 	}
 
 	for tenantid, fltr := range loader.filters {
-		rcv, err := loader.dm.GetFilter(tenantid.Tenant, tenantid.ID, false, false, utils.NonTransactional)
+		rcv, err := GetFilter(loader.dm, tenantid.Tenant, tenantid.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Error("Failed GetFilter: ", err.Error())
 		}

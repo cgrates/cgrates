@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"net/rpc/jsonrpc"
 	"path"
 	"testing"
 	"time"
@@ -81,7 +80,7 @@ func testDestinationStartEngine(t *testing.T) {
 
 func testDestinationRpcConn(t *testing.T) {
 	var err error
-	tutorialRpc, err = jsonrpc.Dial("tcp", tutorialCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tutorialRpc, err = newRPCClient(tutorialCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

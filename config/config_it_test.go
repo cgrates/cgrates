@@ -129,7 +129,7 @@ func TestCGRConfigReloadChargerS(t *testing.T) {
 		AttributeSConns: []*RemoteHost{
 			&RemoteHost{
 				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSONrpc,
+				Transport: utils.MetaJSON,
 			},
 		},
 	}
@@ -183,7 +183,7 @@ func TestCGRConfigReloadStatS(t *testing.T) {
 		PrefixIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		ThresholdSConns: []*RemoteHost{
-			&RemoteHost{Address: "127.0.0.1:2012", Transport: utils.MetaJSONrpc},
+			&RemoteHost{Address: "127.0.0.1:2012", Transport: utils.MetaJSON},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.StatSCfg()) {
@@ -211,7 +211,7 @@ func TestCGRConfigReloadResourceS(t *testing.T) {
 		PrefixIndexedFields: &[]string{},
 		IndexedSelects:      true,
 		ThresholdSConns: []*RemoteHost{
-			&RemoteHost{Address: "127.0.0.1:2012", Transport: utils.MetaJSONrpc},
+			&RemoteHost{Address: "127.0.0.1:2012", Transport: utils.MetaJSON},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.ResourceSCfg()) {
@@ -267,7 +267,7 @@ func TestCGRConfigReloadSchedulerS(t *testing.T) {
 		CDRsConns: []*RemoteHost{
 			&RemoteHost{
 				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSONrpc,
+				Transport: utils.MetaJSON,
 			},
 		},
 		Filters: []string{},
@@ -302,7 +302,7 @@ func TestCGRConfigReloadCDRs(t *testing.T) {
 		ChargerSConns: []*RemoteHost{
 			&RemoteHost{
 				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSONrpc,
+				Transport: utils.MetaJSON,
 			},
 		},
 		RaterConns:      []*RemoteHost{},
@@ -342,13 +342,13 @@ func TestCGRConfigReloadRALs(t *testing.T) {
 		ThresholdSConns: []*RemoteHost{
 			&RemoteHost{
 				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSONrpc,
+				Transport: utils.MetaJSON,
 			},
 		},
 		StatSConns: []*RemoteHost{
 			&RemoteHost{
 				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSONrpc,
+				Transport: utils.MetaJSON,
 			},
 		},
 		MaxIncrements: 1000000,
@@ -391,7 +391,7 @@ func TestCGRConfigReloadSessionS(t *testing.T) {
 		ResSConns: []*RemoteHost{
 			&RemoteHost{
 				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSONrpc,
+				Transport: utils.MetaJSON,
 			},
 		},
 		ThreshSConns: []*RemoteHost{},
@@ -399,13 +399,13 @@ func TestCGRConfigReloadSessionS(t *testing.T) {
 		SupplSConns: []*RemoteHost{
 			&RemoteHost{
 				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSONrpc,
+				Transport: utils.MetaJSON,
 			},
 		},
 		AttrSConns: []*RemoteHost{
 			&RemoteHost{
 				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSONrpc,
+				Transport: utils.MetaJSON,
 			},
 		},
 		CDRsConns: []*RemoteHost{
@@ -469,7 +469,7 @@ func TestCGRConfigReloadERs(t *testing.T) {
 		SessionSConns: []*RemoteHost{
 			&RemoteHost{
 				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSONrpc,
+				Transport: utils.MetaJSON,
 			},
 		},
 		Readers: []*EventReaderCfg{

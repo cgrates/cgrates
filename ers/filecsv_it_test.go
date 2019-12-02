@@ -23,7 +23,6 @@ import (
 	"flag"
 	"io/ioutil"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os"
 	"path"
 	"testing"
@@ -132,7 +131,7 @@ func testCsvITStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testCsvITRpcConn(t *testing.T) {
 	var err error
-	csvRPC, err = jsonrpc.Dial("tcp", csvCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	csvRPC, err = newRPCClient(csvCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -219,7 +218,7 @@ func testCsvITTerminateSession(t *testing.T) {
 	}
 	time.Sleep(100 * time.Millisecond)
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := csvRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
+	if err := csvRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -240,8 +239,12 @@ func testCsvITAnalyseCDRs(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 
 	var cdrs []*engine.CDR
-	args := utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"},
-		OriginIDs: []string{"SessionFromCsv"}}
+	args := &utils.RPCCDRsFilterWithArgDispatcher{
+		RPCCDRsFilter: &utils.RPCCDRsFilter{
+			RunIDs:    []string{"CustomerCharges"},
+			OriginIDs: []string{"SessionFromCsv"},
+		},
+	}
 	if err := csvRPC.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -251,7 +254,7 @@ func testCsvITAnalyseCDRs(t *testing.T) {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
 	}
-	args = utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"},
+	args.RPCCDRsFilter = &utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"},
 		OriginIDs: []string{"SessionFromCsv"}}
 	if err := csvRPC.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -288,8 +291,12 @@ func testCsvITAnalyzeFilteredCDR(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 
 	var cdrs []*engine.CDR
-	args := utils.RPCCDRsFilter{NotRunIDs: []string{"CustomerCharges", "SupplierCharges"},
-		Sources: []string{"ers_csv"}}
+	args := &utils.RPCCDRsFilterWithArgDispatcher{
+		RPCCDRsFilter: &utils.RPCCDRsFilter{
+			NotRunIDs: []string{"CustomerCharges", "SupplierCharges"},
+			Sources:   []string{"ers_csv"},
+		},
+	}
 	if err := csvRPC.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 2 {

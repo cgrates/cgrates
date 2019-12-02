@@ -22,7 +22,6 @@ package general_tests
 import (
 	"fmt"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os/exec"
 	"path"
 	"testing"
@@ -129,10 +128,10 @@ func testSessionSRplStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func testSessionSRplApierRpcConn(t *testing.T) {
-	if smgRplcMstrRPC, err = jsonrpc.Dial("tcp", smgRplcMasterCfg.ListenCfg().RPCJSONListen); err != nil {
+	if smgRplcMstrRPC, err = newRPCClient(smgRplcMasterCfg.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
-	if smgRplcSlvRPC, err = jsonrpc.Dial("tcp", smgRplcSlaveCfg.ListenCfg().RPCJSONListen); err != nil {
+	if smgRplcSlvRPC, err = newRPCClient(smgRplcSlaveCfg.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -151,11 +150,11 @@ func testSessionSRplInitiate(t *testing.T) {
 	var aSessions []*sessions.ExternalSession
 	//make sure we don't have active sessions on master and passive on slave
 	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions,
-		nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		new(utils.SessionFilter), &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions,
-		nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		new(utils.SessionFilter), &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
@@ -299,14 +298,14 @@ func testSessionSRplActivateSlave(t *testing.T) {
 	}
 	// activate sessions on slave
 	var rplActivate string
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1ActivateSessions, nil, &rplActivate); err != nil {
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1ActivateSessions, []string{}, &rplActivate); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(5 * time.Millisecond)
 	//check if the active session is on slave now
 	var aSessions []*sessions.ExternalSession
 	var autoDebit1, autoDebit2 time.Time
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", utils.ToIJSON(aSessions))
@@ -317,7 +316,7 @@ func testSessionSRplActivateSlave(t *testing.T) {
 		t.Errorf("unexpected NextAutoDebit: %s", utils.ToIJSON(aSessions[0]))
 	}
 	time.Sleep(10 * time.Millisecond)
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", utils.ToIJSON(aSessions))
@@ -378,13 +377,13 @@ func testSessionSRplTerminate(t *testing.T) {
 
 	//check if the session was terminated on slave
 	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetActiveSessions,
-		nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		new(utils.SessionFilter), &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %v with len(aSessions)=%v , session : %+v", err, len(aSessions), utils.ToIJSON(aSessions))
 	}
 	// check to don't have passive session on slave
 	var pSessions []*sessions.ExternalSession
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, nil,
-		&pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions,
+		new(utils.SessionFilter), &pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %v with len(pSessions)=%v , session : %+v", err, len(pSessions), utils.ToIJSON(pSessions))
 	}
 

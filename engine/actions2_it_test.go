@@ -68,7 +68,7 @@ func TestActionsITRemoveSMCostMongo(t *testing.T) {
 func testActionsInitCfg(t *testing.T) {
 	var err error
 	actsCfgPath = path.Join(*dataDir, "conf", "samples", actsCfgDir)
-	if *encoding == utils.MetaGOBrpc {
+	if *encoding == utils.MetaGOB {
 		actsCfgPath = path.Join(*dataDir, "conf", "samples", "gob", actsCfgDir)
 	}
 	actsCfg, err = config.NewCGRConfigFromPath(actsCfgPath)

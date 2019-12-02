@@ -21,6 +21,8 @@ package general_tests
 
 import (
 	"encoding/json"
+	"errors"
+	"flag"
 	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -42,7 +44,19 @@ var (
 	a1CfgPath   string
 	a1Cfg       *config.CGRConfig
 	a1rpc       *rpc.Client
+	encoding    = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
 )
+
+func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
+	switch *encoding {
+	case utils.MetaJSON:
+		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
+	case utils.MetaGOB:
+		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+	default:
+		return nil, errors.New("UNSUPPORTED_RPC")
+	}
+}
 
 var sTestsA1it = []func(t *testing.T){
 	testA1itLoadConfig,
@@ -105,7 +119,7 @@ func testA1itStartEngine(t *testing.T) {
 
 func testA1itRPCConn(t *testing.T) {
 	var err error
-	a1rpc, err = jsonrpc.Dial("tcp", a1Cfg.ListenCfg().RPCJSONListen)
+	a1rpc, err = newRPCClient(a1Cfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -122,13 +136,15 @@ func testA1itLoadTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(100 * time.Millisecond))
 	tStart := time.Date(2017, 3, 3, 10, 39, 33, 0, time.UTC)
 	tEnd := time.Date(2017, 3, 3, 10, 39, 33, 10240, time.UTC)
-	cd := engine.CallDescriptor{
-		Category:    "data1",
-		Tenant:      "cgrates.org",
-		Subject:     "rpdata1",
-		Destination: "data",
-		TimeStart:   tStart,
-		TimeEnd:     tEnd,
+	cd := &engine.CallDescriptorWithArgDispatcher{
+		CallDescriptor: &engine.CallDescriptor{
+			Category:    "data1",
+			Tenant:      "cgrates.org",
+			Subject:     "rpdata1",
+			Destination: "data",
+			TimeStart:   tStart,
+			TimeEnd:     tEnd,
+		},
 	}
 	var cc engine.CallCost
 	if err := a1rpc.Call(utils.ResponderGetCost, cd, &cc); err != nil {
@@ -138,12 +154,14 @@ func testA1itLoadTPFromFolder(t *testing.T) {
 	}
 
 	//add a default charger
-	chargerProfile := &engine.ChargerProfile{
-		Tenant:       "cgrates.org",
-		ID:           "Default",
-		RunID:        utils.MetaDefault,
-		AttributeIDs: []string{"*none"},
-		Weight:       20,
+	chargerProfile := &v1.ChargerWithCache{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant:       "cgrates.org",
+			ID:           "Default",
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"*none"},
+			Weight:       20,
+		},
 	}
 	var result string
 	if err := a1rpc.Call(utils.ApierV1SetChargerProfile, chargerProfile, &result); err != nil {
@@ -211,7 +229,7 @@ func testA1itDataSession1(t *testing.T) {
 	var initRpl *sessions.V1InitSessionReply
 	if err := a1rpc.Call(utils.SessionSv1InitiateSession,
 		initArgs, &initRpl); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if initRpl.MaxUsage != usage {
 		t.Errorf("Expecting : %+v, received: %+v", usage, initRpl.MaxUsage)
@@ -282,7 +300,7 @@ func testA1itDataSession1(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := a1rpc.Call(utils.SessionSv1ProcessCDR, termArgs.CGREvent, &rpl); err != nil {
+	if err := a1rpc.Call(utils.SessionSv1ProcessCDR, &utils.CGREventWithArgDispatcher{CGREvent: termArgs.CGREvent}, &rpl); err != nil {
 		t.Error(err)
 	} else if rpl != utils.OK {
 		t.Errorf("Received reply: %s", rpl)

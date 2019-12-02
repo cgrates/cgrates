@@ -18,9 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
+	"github.com/cgrates/cgrates/utils"
 	"net/rpc"
 	"testing"
-	"github.com/cgrates/cgrates/utils"
 )
 
 func BenchmarkRPCGet(b *testing.B) {

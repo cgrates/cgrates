@@ -191,7 +191,7 @@ func testDspITMigrateAndMove(t *testing.T) {
 		Conns: []*config.RemoteHost{
 			&config.RemoteHost{
 				Address:   "127.0.0.1",
-				Transport: utils.MetaJSONrpc,
+				Transport: utils.MetaJSON,
 			},
 		},
 	}

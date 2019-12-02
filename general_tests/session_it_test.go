@@ -21,7 +21,6 @@ package general_tests
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"testing"
 	"time"
@@ -87,7 +86,7 @@ func testSesItStartEngine(t *testing.T) {
 
 func testSesItRPCConn(t *testing.T) {
 	var err error
-	sesRPC, err = jsonrpc.Dial("tcp", sesCfg.ListenCfg().RPCJSONListen)
+	sesRPC, err = newRPCClient(sesCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -103,7 +102,7 @@ func testSesItLoadFromFolder(t *testing.T) {
 }
 
 func testAccountBalance2(t *testing.T, sracc, srten, balType string, expected float64) {
-	var acnt *engine.Account
+	var acnt engine.Account
 	attrs := &utils.AttrGetAccount{
 		Tenant:  srten,
 		Account: sracc,
@@ -198,7 +197,7 @@ func testSesItTerminateSession(t *testing.T) {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := sesRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
+	if err := sesRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}

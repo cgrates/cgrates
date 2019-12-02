@@ -859,7 +859,7 @@ func (sS *SessionS) getIndexedFilters(tenant string, fltrs []string) (
 	indexedFltr map[string][]string, unindexedFltr []*engine.FilterRule) {
 	indexedFltr = make(map[string][]string)
 	for _, fltrID := range fltrs {
-		f, err := sS.dm.GetFilter(tenant, fltrID,
+		f, err := engine.GetFilter(sS.dm, tenant, fltrID,
 			true, true, utils.NonTransactional)
 		if err != nil {
 			if err == utils.ErrNotFound {
@@ -1597,9 +1597,6 @@ func (sS *SessionS) BiRPCv1GetActiveSessions(clnt rpcclient.RpcClientConnection,
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
 	}
-	if len(args.Filters) != 0 && sS.dm == nil {
-		return utils.ErrNoDatabaseConn
-	}
 	aSs := sS.filterSessions(args, false)
 	if len(aSs) == 0 {
 		return utils.ErrNotFound
@@ -1614,9 +1611,6 @@ func (sS *SessionS) BiRPCv1GetActiveSessionsCount(clnt rpcclient.RpcClientConnec
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
 	}
-	if len(args.Filters) != 0 && sS.dm == nil {
-		return utils.ErrNoDatabaseConn
-	}
 	*reply = sS.filterSessionsCount(args, false)
 	return nil
 }
@@ -1626,9 +1620,6 @@ func (sS *SessionS) BiRPCv1GetPassiveSessions(clnt rpcclient.RpcClientConnection
 	args *utils.SessionFilter, reply *[]*ExternalSession) error {
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
-	}
-	if len(args.Filters) != 0 && sS.dm == nil {
-		return utils.ErrNoDatabaseConn
 	}
 	pSs := sS.filterSessions(args, true)
 	if len(pSs) == 0 {
@@ -1643,9 +1634,6 @@ func (sS *SessionS) BiRPCv1GetPassiveSessionsCount(clnt rpcclient.RpcClientConne
 	args *utils.SessionFilter, reply *int) error {
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
-	}
-	if len(args.Filters) != 0 && sS.dm == nil {
-		return utils.ErrNoDatabaseConn
 	}
 	*reply = sS.filterSessionsCount(args, true)
 	return nil

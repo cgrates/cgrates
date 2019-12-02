@@ -40,7 +40,7 @@ import (
 var (
 	dataDir      = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 	waitRater    = flag.Int("wait_rater", 1500, "Number of miliseconds to wait for rater to start and cache")
-	encoding     = flag.String("rpc", utils.MetaJSONrpc, "what encoding whould be uused for rpc comunication")
+	encoding     = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
 	apierCfgPath string
 	apierCfg     *config.CGRConfig
 	apierRPC     *rpc.Client
@@ -49,9 +49,9 @@ var (
 
 func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
 	switch *encoding {
-	case utils.MetaJSONrpc:
+	case utils.MetaJSON:
 		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOBrpc:
+	case utils.MetaGOB:
 		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
 	default:
 		return nil, errors.New("UNSUPPORTED_RPC")

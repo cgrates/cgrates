@@ -68,8 +68,8 @@ func (rplSv1 *ReplicatorSv1) GetReverseDestination(key string, reply *[]string) 
 }
 
 //GetStatQueue
-func (rplSv1 *ReplicatorSv1) GetStatQueue(tntID *utils.TenantID, reply *engine.StoredStatQueue) error {
-	if rcv, err := rplSv1.dm.DataDB().GetStoredStatQueueDrv(tntID.Tenant, tntID.ID); err != nil {
+func (rplSv1 *ReplicatorSv1) GetStatQueue(tntID *utils.TenantID, reply *engine.StatQueue) error {
+	if rcv, err := rplSv1.dm.DataDB().GetStatQueueDrv(tntID.Tenant, tntID.ID); err != nil {
 		return err
 	} else {
 		*reply = *rcv
@@ -365,8 +365,8 @@ func (rplSv1 *ReplicatorSv1) SetReverseDestination(dst *engine.Destination, repl
 }
 
 // SetDestination
-func (rplSv1 *ReplicatorSv1) SetStatQueue(ssq *engine.StoredStatQueue, reply *string) error {
-	if err := rplSv1.dm.DataDB().SetStoredStatQueueDrv(ssq); err != nil {
+func (rplSv1 *ReplicatorSv1) SetStatQueue(sq *engine.StatQueue, reply *string) error {
+	if err := rplSv1.dm.DataDB().SetStatQueueDrv(sq); err != nil {
 		return err
 	}
 	*reply = utils.OK
@@ -543,7 +543,7 @@ func (rplSv1 *ReplicatorSv1) RemoveAccount(id string, reply *string) error {
 }
 
 func (rplSv1 *ReplicatorSv1) RemoveStatQueue(args *utils.TenantID, reply *string) error {
-	if err := rplSv1.dm.DataDB().RemStoredStatQueueDrv(args.Tenant, args.ID); err != nil {
+	if err := rplSv1.dm.DataDB().RemStatQueueDrv(args.Tenant, args.ID); err != nil {
 		return err
 	}
 	*reply = utils.OK
