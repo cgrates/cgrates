@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"net/rpc"
@@ -33,12 +34,26 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var waitRater = flag.Int("wait_rater", 150, "Number of miliseconds to wait for rater to start and cache")
-var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
+var (
+	waitRater = flag.Int("wait_rater", 150, "Number of miliseconds to wait for rater to start and cache")
+	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 
-var voiceCfgPath string
-var voiceCfg *config.CGRConfig
-var sessionsRPC *rpc.Client
+	voiceCfgPath string
+	voiceCfg     *config.CGRConfig
+	sessionsRPC  *rpc.Client
+	encoding     = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
+)
+
+func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
+	switch *encoding {
+	case utils.MetaJSON:
+		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
+	case utils.MetaGOB:
+		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+	default:
+		return nil, errors.New("UNSUPPORTED_RPC")
+	}
+}
 
 func TestSessionsVoiceInitCfg(t *testing.T) {
 	voiceCfgPath = path.Join(*dataDir, "conf", "samples", "smg")
@@ -76,7 +91,7 @@ func TestSessionsVoiceStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestSessionsVoiceApierRpcConn(t *testing.T) {
 	var err error
-	sessionsRPC, err = jsonrpc.Dial("tcp", voiceCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	sessionsRPC, err = newRPCClient(voiceCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1253,7 +1268,7 @@ func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 			eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
-	if err := sessionsRPC.Call(utils.SessionSv1ProcessCDR, termArgs.CGREvent, &reply); err != nil {
+	if err := sessionsRPC.Call(utils.SessionSv1ProcessCDR, &utils.CGREventWithArgDispatcher{CGREvent: termArgs.CGREvent}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received reply: %s", reply)

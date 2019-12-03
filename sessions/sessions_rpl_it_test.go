@@ -22,7 +22,6 @@ package sessions
 import (
 	"fmt"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"testing"
 	"time"
@@ -71,10 +70,10 @@ func TestSessionSRplStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestSessionSRplApierRpcConn(t *testing.T) {
-	if smgRplcMstrRPC, err = jsonrpc.Dial("tcp", smgRplcMasterCfg.ListenCfg().RPCJSONListen); err != nil {
+	if smgRplcMstrRPC, err = newRPCClient(smgRplcMasterCfg.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
-	if smgRplcSlvRPC, err = jsonrpc.Dial("tcp", smgRplcSlaveCfg.ListenCfg().RPCJSONListen); err != nil {
+	if smgRplcSlvRPC, err = newRPCClient(smgRplcSlaveCfg.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -93,11 +92,11 @@ func TestSessionSRplInitiate(t *testing.T) {
 	var aSessions []*ExternalSession
 	//make sure we don't have active sessions on master and passive on slave
 	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions,
-		nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		new(utils.SessionFilter), &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions,
-		nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		new(utils.SessionFilter), &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
@@ -215,7 +214,7 @@ func TestSessionSRplUpdate(t *testing.T) {
 
 	var pSessions []*ExternalSession
 	// Make sure we don't have passive session on active host
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, nil,
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, new(utils.SessionFilter),
 		&pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -234,7 +233,7 @@ func TestSessionSRplUpdate(t *testing.T) {
 	cgrID := GetSetCGRID(engine.NewMapEvent(argsUpdate.Event))
 	// Make sure session was replicated
 	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetPassiveSessions,
-		nil, &pSessions); err != nil {
+		new(utils.SessionFilter), &pSessions); err != nil {
 		t.Error(err)
 	} else if len(pSessions) != 1 {
 		t.Errorf("PassiveSessions: %+v", pSessions)
@@ -285,16 +284,16 @@ func TestSessionSRplTerminate(t *testing.T) {
 	}
 	//check if the session was terminated on slave
 	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetActiveSessions,
-		nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		new(utils.SessionFilter), &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %v with len(aSessions)=%v , session : %+v", err, len(aSessions), utils.ToIJSON(aSessions))
 	}
 	// check to don't have passive session on master and slave
 	var pSessions []*ExternalSession
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, nil,
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, new(utils.SessionFilter),
 		&pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %v with len(pSessions)=%v , session : %+v", err, len(pSessions), utils.ToIJSON(pSessions))
 	}
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, nil,
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, new(utils.SessionFilter),
 		&pSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %v with len(pSessions)=%v , session : %+v", err, len(pSessions), utils.ToIJSON(pSessions))
 	}
@@ -305,7 +304,7 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 	if err != nil { // Kill both and start Master
 		t.Fatal(err)
 	}
-	if smgRplcMstrRPC, err = jsonrpc.Dial("tcp", smgRplcMasterCfg.ListenCfg().RPCJSONListen); err != nil {
+	if smgRplcMstrRPC, err = newRPCClient(smgRplcMasterCfg.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
 	// create two sessions
@@ -364,7 +363,7 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 	}
 	//verify if the sessions was created on master and are active
 	var aSessions []*ExternalSession
-	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
 		t.Errorf("Unexpected number of sessions received: %+v", utils.ToJSON(aSessions))
@@ -382,11 +381,11 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 	if _, err := engine.StartEngine(smgRplcSlaveCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
-	if smgRplcSlvRPC, err = jsonrpc.Dial("tcp", smgRplcSlaveCfg.ListenCfg().RPCJSONListen); err != nil {
+	if smgRplcSlvRPC, err = newRPCClient(smgRplcSlaveCfg.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
 	// when we start slave after master we expect to don't have sessions
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, nil, &aSessions); err == nil ||
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
@@ -404,7 +403,7 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
-	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, nil, &aSessions); err != nil {
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
@@ -426,14 +425,14 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 	if _, err := engine.StartEngine(smgRplcMasterCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
-	if smgRplcMstrRPC, err = jsonrpc.Dial("tcp", smgRplcMasterCfg.ListenCfg().RPCJSONListen); err != nil {
+	if smgRplcMstrRPC, err = newRPCClient(smgRplcMasterCfg.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
 	// Master should have no session active/passive
-	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
-	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetPassiveSessions, nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetPassiveSessions, new(utils.SessionFilter), &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
 	// recover passive sessions from slave
@@ -450,10 +449,10 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
 	// Master should have no session active/passive
-	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, aSessions)
 	}
-	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetPassiveSessions, nil, &aSessions); err != nil {
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetPassiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)

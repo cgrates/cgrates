@@ -96,6 +96,9 @@ func TestCDRsITMongo(t *testing.T) {
 func testV2CDRsInitConfig(t *testing.T) {
 	var err error
 	cdrsCfgPath = path.Join(*dataDir, "conf", "samples", cdrsConfDIR)
+	if *encoding == utils.MetaGOB {
+		cdrsCfgPath = path.Join(*dataDir, "conf", "samples", "gob", cdrsConfDIR)
+	}
 	if cdrsCfg, err = config.NewCGRConfigFromPath(cdrsCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}

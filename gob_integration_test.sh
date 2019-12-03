@@ -23,9 +23,9 @@ gnr=$?
 # echo 'go test github.com/cgrates/cgrates/agents -tags=integration'
 # go test github.com/cgrates/cgrates/agents -tags=integration
 # agts=$?
-# echo 'go test github.com/cgrates/cgrates/sessions -tags=integration'
-# go test github.com/cgrates/cgrates/sessions -tags=integration
-# smg=$?
+echo 'go test github.com/cgrates/cgrates/sessions -tags=integration -rpc=*gob'
+go test github.com/cgrates/cgrates/sessions -tags=integration -rpc=*gob
+smg=$?
 # echo 'go test github.com/cgrates/cgrates/dispatchers -tags=integration'
 # go test github.com/cgrates/cgrates/dispatchers -tags=integration
 # dis=$?

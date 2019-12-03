@@ -1,0 +1,109 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"log_level": 7,
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+	"rpc_json_tls":":2022",
+	"rpc_gob_tls":":2023",
+	"http_tls": ":2280",			
+},
+
+"tls": {
+	"server_certificate" : "/usr/share/cgrates/tls/server.crt",			// path to server certificate(must conatin server.crt + ca.crt)
+	"server_key":"/usr/share/cgrates/tls/server.key",					// path to server key
+	"client_certificate" : "/usr/share/cgrates/tls/client.crt",			// path to client certificate(must conatin client.crt + ca.crt)
+	"client_key":"/usr/share/cgrates/tls/client.key",					// path to client key
+	"ca_certificate":"/usr/share/cgrates/tls/ca.crt",
+},
+
+
+"http": {										// HTTP server configuration
+	"json_rpc_url": "/jsonrpc",					// JSON RPC relative URL ("" to disable)
+	"ws_url": "/ws",							// WebSockets relative URL ("" to disable)
+	"freeswitch_cdrs_url": "/freeswitch_json",	// Freeswitch CDRS relative URL ("" to disable)
+	"http_cdrs": "/cdr_http",					// CDRS relative URL ("" to disable)
+	"use_basic_auth": false,					// use basic authentication
+	"auth_users": {},							// basic authentication usernames and base64-encoded passwords (eg: { "username1": "cGFzc3dvcmQ=", "username2": "cGFzc3dvcmQy "})
+},
+
+
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "redis",						// data_db type: <redis|mongo>
+	"db_port": 6379, 						// data_db port to reach the database
+	"db_name": "10", 						// data_db database name to connect to
+},
+
+
+"stor_db": {
+	"db_password": "CGRateS.org",
+},
+
+
+"rals": {
+	"enabled": true,
+},
+
+
+"resources": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": [
+		{"address": "127.0.0.1:2013", "transport": "*gob"}
+	],
+},
+
+
+"stats": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": [
+		{"address": "127.0.0.1:2013", "transport": "*gob"}
+	],
+},
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "1s",
+},
+
+"sessions": {
+	"enabled": true,
+	"rals_conns": [
+		{"address": "127.0.0.1:2013", "transport": "*gob"}
+	],
+	"resources_conns": [
+		{"address": "127.0.0.1:2013", "transport": "*gob"}
+	],
+	"attributes_conns": [
+		{"address": "127.0.0.1:2013", "transport": "*gob"}
+	],
+},
+
+"attributes": {
+	"enabled": true,
+},
+
+"cdrs": {
+	"enabled": true,
+	"chargers_conns":[
+		{"address": "*internal"}
+	],
+},
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": [
+		{"address": "*internal"}
+	],
+},
+
+}

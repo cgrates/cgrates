@@ -67,7 +67,7 @@ type ExternalSession struct {
 
 // Session is the main structure to describe a call
 type Session struct {
-	sync.RWMutex
+	lk sync.RWMutex
 
 	CGRID         string
 	Tenant        string
@@ -80,6 +80,26 @@ type Session struct {
 	debitStop   chan struct{}
 	sTerminator *sTerminator // automatic timeout for the session
 	*utils.ArgDispatcher
+}
+
+// Lock exported function from sync.RWMutex
+func (s *Session) Lock() {
+	s.lk.Lock()
+}
+
+// Unlock exported function from sync.RWMutex
+func (s *Session) Unlock() {
+	s.lk.Unlock()
+}
+
+// RLock exported function from sync.RWMutex
+func (s *Session) RLock() {
+	s.lk.RLock()
+}
+
+// RUnlock exported function from sync.RWMutex
+func (s *Session) RUnlock() {
+	s.lk.RUnlock()
 }
 
 // cgrID is method to return the CGRID of a session

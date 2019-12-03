@@ -1,0 +1,77 @@
+{
+// CGRateS Configuration file
+//
+// Used in apier_local_tests
+// Starts rater, cdrs and mediator connecting over internal channel
+
+"general": {
+	"log_level": 7,
+},
+
+
+"stor_db": {
+	"db_password": "CGRateS.org",
+},
+
+
+"rals": {
+	"enabled": true,
+	"thresholds_conns": [
+		{"address": "127.0.0.1:2013", "transport":"*gob"},
+	],
+},
+
+"scheduler": {
+	"enabled": true,
+},
+
+"cdrs": {
+	"enabled": true,
+	"attributes_conns":[
+		{"address": "*internal"},
+	],
+	"chargers_conns":[
+		{"address": "127.0.0.1:2013", "transport":"*gob"},
+	],
+	"rals_conns": [
+		{"address": "127.0.0.1:2013", "transport":"*gob"},
+	],
+	"stats_conns": [
+		{"address": "127.0.0.1:2013", "transport":"*gob"},
+	],				
+	"thresholds_conns": [
+		{"address": "127.0.0.1:2013", "transport":"*gob"},
+	],
+},
+
+"attributes": {
+	"enabled": true,
+},
+
+"stats": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": [
+		{"address": "*internal"}
+	],
+},
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "1s",
+},
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": [
+		{"address": "*internal"},
+	],
+},
+
+"apier": {
+	"scheduler_conns": [					// connections to SchedulerS for reloads
+		{"address": "*internal"},
+	],
+},
+
+}

@@ -1,0 +1,85 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"log_level": 7,
+	"node_id": "CGRFilterS",
+},
+
+
+"liste3": {
+	"rpc_gob": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "redis",						// data_db type: <redis|mongo>
+	"db_port": 6379, 						// data_db port to reach the database
+	"db_name": "10", 						// data_db database name to connect to
+},
+
+
+"stor_db": {
+	"db_password": "CGRateS.org",
+},
+
+
+"rals": {
+	"enabled": true,
+	"thresholds_conns": [
+		{"address": "127.0.0.1:2013", "transport":"*gob"},
+	],
+},
+
+"scheduler": {
+	"enabled": true,				
+},
+
+"filters": {								
+	"stats_conns": [
+		{"address": "127.0.0.1:2013", "transport":"*gob"},
+	],						
+	"resources_conns": [
+		{"address": "127.0.0.1:2013", "transport":"*gob"},
+	],
+	"rals_conns": [
+		{"address": "127.0.0.1:2013", "transport":"*gob"},
+	],
+},
+
+
+"resources": {
+	"enabled": true,
+	"indexed_selects":false,					
+	"store_interval": "1s",
+},
+
+
+"stats": {
+	"enabled": true,
+	"indexed_selects":false,					
+	"store_interval": "1s",
+},
+
+
+"thresholds": {
+	"enabled": true,
+	"indexed_selects":false,					
+	"store_interval": "1s",
+},
+
+"apier": {	
+	"caches_conns":[						// connections to CacheS for reloads
+		{"address": "127.0.0.1:2012",3"transport": "*gob"},
+	],		
+	"scheduler_conns": [					// connections to SchedulerS for reloads
+		{"address": "*internal"},
+	],				
+},
+
+
+}

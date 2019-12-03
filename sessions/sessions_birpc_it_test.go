@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
-	"net/rpc/jsonrpc"
 	"path"
 	"testing"
 	"time"
@@ -91,7 +90,7 @@ func TestSessionsBiRPCApierRpcConn(t *testing.T) {
 		clntHandlers); err != nil {
 		t.Fatal(err)
 	}
-	if sessionsRPC, err = jsonrpc.Dial("tcp", sessionsBiRPCCfg.ListenCfg().RPCJSONListen); err != nil { // Connect also simple RPC so we can check accounts and such
+	if sessionsRPC, err = newRPCClient(sessionsBiRPCCfg.ListenCfg()); err != nil { // Connect also simple RPC so we can check accounts and such
 		t.Fatal(err)
 	}
 	dummyClnt.Close() // close so we don't get EOF error when disconnecting server
@@ -329,7 +328,7 @@ func TestSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 		t.Errorf("Balance value: %f", acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
-	if err := sessionsRPC.Call(utils.SessionSv1ProcessCDR, termArgs.CGREvent, &reply); err != nil {
+	if err := sessionsRPC.Call(utils.SessionSv1ProcessCDR, &utils.CGREventWithArgDispatcher{CGREvent: termArgs.CGREvent}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received reply: %s", reply)
