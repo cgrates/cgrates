@@ -47,9 +47,10 @@ func (ssv1 *SessionSv1) Handlers() map[string]interface{} {
 		utils.SessionSv1RegisterInternalBiJSONConn: ssv1.BiRPCv1RegisterInternalBiJSONConn,
 		utils.SessionSv1Ping:                       ssv1.BiRPCPing,
 
-		utils.SessionSv1ReplicateSessions: ssv1.BiRPCv1ReplicateSessions,
-		utils.SessionSv1SetPassiveSession: ssv1.BiRPCv1SetPassiveSession,
-		utils.SessionSv1ActivateSessions:  ssv1.BiRPCv1ActivateSessions,
+		utils.SessionSv1ReplicateSessions:  ssv1.BiRPCv1ReplicateSessions,
+		utils.SessionSv1SetPassiveSession:  ssv1.BiRPCv1SetPassiveSession,
+		utils.SessionSv1ActivateSessions:   ssv1.BiRPCv1ActivateSessions,
+		utils.SessionSv1DeactivateSessions: ssv1.BiRPCv1DeactivateSessions,
 	}
 }
 
