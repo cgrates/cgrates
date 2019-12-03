@@ -1815,7 +1815,7 @@ func TestCgrCfgV1GetConfigSection(t *testing.T) {
 func TestCgrCdfEventReader(t *testing.T) {
 	eCfg := &ERsCfg{
 		Enabled:       false,
-		SessionSConns: []string{utils.MetaInternal},
+		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		Readers: []*EventReaderCfg{
 			&EventReaderCfg{
 				ID:             utils.MetaDefault,

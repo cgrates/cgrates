@@ -42,7 +42,7 @@ func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, sep string, dfltRdrCfg *E
 		for i, fID := range *jsnCfg.Sessions_conns {
 			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
 			if fID == utils.MetaInternal {
-				erS.SessionSConns[i] = utils.SessionSv1
+				erS.SessionSConns[i] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
 			} else {
 				erS.SessionSConns[i] = fID
 			}
