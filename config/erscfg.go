@@ -40,7 +40,12 @@ func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, sep string, dfltRdrCfg *E
 	if jsnCfg.Sessions_conns != nil {
 		erS.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
 		for i, fID := range *jsnCfg.Sessions_conns {
-			erS.SessionSConns[i] = fID
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if fID == utils.MetaInternal {
+				erS.SessionSConns[i] = utils.SessionSv1
+			} else {
+				erS.SessionSConns[i] = fID
+			}
 		}
 	}
 	return erS.appendERsReaders(jsnCfg.Readers, sep, dfltRdrCfg)
