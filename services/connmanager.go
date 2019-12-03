@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package services
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/cgrates/cgrates/config"
@@ -29,8 +28,6 @@ import (
 )
 
 func NewConnManagerService(cfg *config.CGRConfig, intConns map[string]chan rpcclient.RpcClientConnection) *ConnManagerService {
-	fmt.Println("Enter in NewConnManagerService")
-	fmt.Println(intConns)
 	return &ConnManagerService{
 		cfg:     cfg,
 		connMgr: engine.NewConnManager(cfg, intConns),

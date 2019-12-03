@@ -29,11 +29,14 @@ func NewConnManager(cfg *config.CGRConfig, rpcInternal map[string]chan rpcclient
 	return &ConnManager{cfg: cfg, rpcInternal: rpcInternal}
 }
 
+//ConnManager handle the RPC connections
 type ConnManager struct {
 	cfg         *config.CGRConfig
 	rpcInternal map[string]chan rpcclient.RpcClientConnection
 }
 
+//getConn is used to retrieves a connection from cache
+//in case this doesn't exist create it and cache it
 func (cM *ConnManager) getConn(connID string) (connPool *rpcclient.RpcClientPool, err error) {
 	//try to get the connection from cache
 	if x, ok := Cache.Get(utils.CacheRPCConnections, connID); ok {
@@ -42,7 +45,7 @@ func (cM *ConnManager) getConn(connID string) (connPool *rpcclient.RpcClientPool
 		}
 		return x.(*rpcclient.RpcClientPool), nil
 	}
-	// in case we don't found in cache create the connection and add this in cache
+	// in case we don't find in cache create the connection and add this in cache
 	var intChan chan rpcclient.RpcClientConnection
 	var connCfg *config.RPCConn
 	if internalChan, has := cM.rpcInternal[connID]; has {
