@@ -60,6 +60,7 @@ var (
 		testSSv1ItCDRsGetCdrs,
 		testSSv1ItForceUpdateSession,
 		testSSv1ItDynamicDebit,
+		testSSv1ItDeactivateSessions,
 		testSSv1ItStopCgrEngine,
 	}
 )
@@ -87,21 +88,21 @@ func TestSSv1ItWithPrepaid(t *testing.T) {
 
 func TestSSv1ItWithPostPaid(t *testing.T) {
 	sSV1RequestType = utils.META_POSTPAID
-	for _, stest := range append(sTestSessionSv1[:len(sTestSessionSv1)-3], testSSv1ItStopCgrEngine) {
+	for _, stest := range sTestSessionSv1 {
 		t.Run(sSV1RequestType, stest)
 	}
 }
 
 func TestSSv1ItWithRated(t *testing.T) {
 	sSV1RequestType = utils.META_RATED
-	for _, stest := range append(sTestSessionSv1[:len(sTestSessionSv1)-3], testSSv1ItStopCgrEngine) {
+	for _, stest := range sTestSessionSv1 {
 		t.Run(sSV1RequestType, stest)
 	}
 }
 
 func TestSSv1ItWithPseudoPrepaid(t *testing.T) {
 	sSV1RequestType = utils.META_PSEUDOPREPAID
-	for _, stest := range append(sTestSessionSv1[:len(sTestSessionSv1)-3], testSSv1ItStopCgrEngine) {
+	for _, stest := range sTestSessionSv1 {
 		t.Run(sSV1RequestType, stest)
 	}
 }
@@ -368,7 +369,7 @@ func testSSv1ItInitiateSession(t *testing.T) {
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err != nil {
+	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 2 {
 		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v", utils.ToJSON(aSessions), len(aSessions))
@@ -704,6 +705,10 @@ func testSSv1ItCDRsGetCdrs(t *testing.T) {
 }
 
 func testSSv1ItForceUpdateSession(t *testing.T) {
+	if sSV1RequestType != utils.META_PREPAID {
+		t.SkipNow()
+		return
+	}
 	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Error: %v with len(asessions)=%v", err, len(aSessions))
@@ -839,6 +844,10 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 }
 
 func testSSv1ItDynamicDebit(t *testing.T) {
+	if sSV1RequestType != utils.META_PREPAID {
+		t.SkipNow()
+		return
+	}
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "TestDynamicDebit",
@@ -950,6 +959,65 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
+	}
+}
+
+func testSSv1ItDeactivateSessions(t *testing.T) {
+	aSessions := make([]*sessions.ExternalSession, 0)
+	pSessions := make([]*sessions.ExternalSession, 0)
+	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil && err.Error() != utils.NotFoundCaps {
+		t.Error(err)
+	}
+	if err := sSv1BiRpc.Call(utils.SessionSv1GetPassiveSessions, new(utils.SessionFilter), &pSessions); err != nil && err.Error() != utils.NotFoundCaps {
+		t.Error(err)
+	}
+	initUsage := 5 * time.Minute
+	args := &sessions.V1InitSessionArgs{
+		InitSession:   true,
+		GetAttributes: true,
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "TestSSv1ItInitiateSession",
+			Event: map[string]interface{}{
+				utils.Tenant:      "cgrates.org",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "TestSSv1It1",
+				utils.RequestType: sSV1RequestType,
+				utils.Account:     "1001",
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "1002",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       initUsage,
+			},
+		},
+	}
+	var rply sessions.V1InitSessionReply
+	if err := sSv1BiRpc.Call(utils.SessionSv1InitiateSession, args, &rply); err != nil {
+		t.Fatal(err)
+	}
+	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 2 {
+		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v", utils.ToJSON(aSessions), len(aSessions))
+	}
+	if err := sSv1BiRpc.Call(utils.SessionSv1GetPassiveSessions, new(utils.SessionFilter), &pSessions); err != nil && err.Error() != utils.NotFoundCaps {
+		t.Error(err)
+	}
+	var reply string
+	err := sSv1BiRpc.Call(utils.SessionSv1DeactivateSessions, []string{}, &reply)
+	if err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expecting: OK, received : %+v", reply)
+	}
+	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil && err.Error() != utils.NotFoundCaps {
+		t.Error(err)
+	}
+	if err := sSv1BiRpc.Call(utils.SessionSv1GetPassiveSessions, new(utils.SessionFilter), &pSessions); err != nil {
+		t.Error(err)
+	} else if len(pSessions) != 2 {
+		t.Errorf("Expecting: 2, received: %+v", len(pSessions))
 	}
 }
 

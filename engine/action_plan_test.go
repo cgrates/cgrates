@@ -111,6 +111,18 @@ func TestActionPlanClone(t *testing.T) {
 		t.Errorf("\nExpecting: %+v,\n received: %+v", at1, at1Cloned)
 	}
 }
+
+func TestActionTimingClone(t *testing.T) {
+	at := &ActionTiming{
+		Uuid:      "Uuid_test",
+		ActionsID: "ActionsID_test",
+		Weight:    0.7,
+	}
+	if cloned := at.Clone(); !reflect.DeepEqual(at, cloned) {
+		t.Errorf("\nExpecting: %+v,\n received: %+v", at, cloned)
+	}
+}
+
 func TestActionTimindSetActions(t *testing.T) {
 	actionTiming := new(ActionTiming)
 

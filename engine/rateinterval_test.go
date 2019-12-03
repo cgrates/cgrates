@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -442,6 +443,98 @@ func TestRateGroupsEquals(t *testing.T) {
 	}
 	if rg1.Equals(rg2) {
 		t.Error("equals")
+	}
+}
+
+func TestRateIntervalClone(t *testing.T) {
+	var i, cln RateInterval
+	if cloned := i.Clone(); !reflect.DeepEqual(cln, *cloned) {
+		t.Errorf("Expecting: %+v, received: %+v", cln, *cloned)
+	}
+	i = RateInterval{
+		Weight: 0.7,
+	}
+	cln = RateInterval{
+		Weight: 0.7,
+	}
+	if cloned := i.Clone(); !reflect.DeepEqual(cln, *cloned) {
+		t.Errorf("Expecting: %+v, received: %+v", cln, *cloned)
+	}
+}
+
+func TestRITimingClone(t *testing.T) {
+	var rit, cln RITiming
+	if cloned := rit.Clone(); !reflect.DeepEqual(cln, *cloned) {
+		t.Errorf("Expecting: %+v, received: %+v", cln, *cloned)
+	}
+	rit = RITiming{
+		Years:     utils.Years{2019},
+		Months:    utils.Months{4},
+		MonthDays: utils.MonthDays{18},
+		WeekDays:  utils.WeekDays{5},
+		StartTime: "StartTime_test",
+		EndTime:   "EndTime_test",
+	}
+	cln = RITiming{
+		Years:     utils.Years{2019},
+		Months:    utils.Months{4},
+		MonthDays: utils.MonthDays{18},
+		WeekDays:  utils.WeekDays{5},
+		StartTime: "StartTime_test",
+		EndTime:   "EndTime_test",
+	}
+	cloned := rit.Clone()
+	if !reflect.DeepEqual(cln, *cloned) {
+		t.Errorf("Expecting: %+v, received: %+v", cln, *cloned)
+	}
+	rit.Years = utils.Years{2020}
+	if cloned.Years[0] != cln.Years[0] {
+		t.Errorf("Expecting: 2019, received: %+v", cloned.Years)
+	}
+}
+
+func TestRIRateClone(t *testing.T) {
+	var rit, cln RIRate
+	if cloned := rit.Clone(); !reflect.DeepEqual(cln, *cloned) {
+		t.Errorf("\nExpecting: %+v,\n received: %+v", cln, *cloned)
+	}
+	rit = RIRate{
+		ConnectFee:       0.7,
+		RoundingMethod:   "RoundingMethod_test",
+		RoundingDecimals: 7,
+		MaxCost:          0.7,
+		MaxCostStrategy:  "MaxCostStrategy_test",
+		Rates: RateGroups{
+			&Rate{
+				GroupIntervalStart: time.Duration(10),
+				Value:              0.7,
+				RateIncrement:      time.Duration(10),
+				RateUnit:           time.Duration(10),
+			},
+		},
+	}
+	cln = RIRate{
+		ConnectFee:       0.7,
+		RoundingMethod:   "RoundingMethod_test",
+		RoundingDecimals: 7,
+		MaxCost:          0.7,
+		MaxCostStrategy:  "MaxCostStrategy_test",
+		Rates: RateGroups{
+			&Rate{
+				GroupIntervalStart: time.Duration(10),
+				Value:              0.7,
+				RateIncrement:      time.Duration(10),
+				RateUnit:           time.Duration(10),
+			},
+		},
+	}
+	cloned := rit.Clone()
+	if !reflect.DeepEqual(cln, *cloned) {
+		t.Errorf("Expecting: %+v, received: %+v", cln, *cloned)
+	}
+	rit.Rates[0].GroupIntervalStart = time.Duration(7)
+	if cloned.Rates[0].GroupIntervalStart != time.Duration(10) {
+		t.Errorf("\nExpecting: 10,\n received: %+v", cloned.Rates[0].GroupIntervalStart)
 	}
 }
 
