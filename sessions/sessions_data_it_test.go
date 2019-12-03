@@ -36,6 +36,9 @@ var sDataRPC *rpc.Client
 
 func TestSessionsDataInitCfg(t *testing.T) {
 	dataCfgPath = path.Join(*dataDir, "conf", "samples", "smg")
+	if *encoding == utils.MetaGOB {
+		dataCfgPath = path.Join(*dataDir, "conf", "samples", "gob", "smg")
+	}
 	// Init config first
 	var err error
 	dataCfg, err = config.NewCGRConfigFromPath(dataCfgPath)

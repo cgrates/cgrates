@@ -57,6 +57,9 @@ func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
 
 func TestSessionsVoiceInitCfg(t *testing.T) {
 	voiceCfgPath = path.Join(*dataDir, "conf", "samples", "smg")
+	if *encoding == utils.MetaGOB {
+		dataCfgPath = path.Join(*dataDir, "conf", "samples", "gob", "smg")
+	}
 	// Init config first
 	var err error
 	voiceCfg, err = config.NewCGRConfigFromPath(voiceCfgPath)
