@@ -1,0 +1,182 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"node_id": "CGRateSTutorial",
+	"log_level": 7
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"data_db": {
+	"db_type": "mongo",
+	"db_port": 27017,
+},
+
+
+"stor_db": {
+	"db_type": "mongo",
+	"db_port": 27017,
+},
+
+
+
+"scheduler": {
+	"enabled": true,
+	"cdrs_conns": [
+		{"address": "127.0.0.1:2013", "transport":"*gob"},
+	],
+},
+
+
+"rals": {
+	"enabled": true,
+	"thresholds_conns": [
+		{"address": "127.0.0.1:2013", "transport":"*gob"},
+	],
+	"stats_conns": [
+		{"address": "127.0.0.1:2013", "transport":"*gob"},
+	],
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"extra_fields": ["PayPalAccount", "LCRProfile", "ResourceID"],
+	"chargers_conns":[
+		{"address": "127.0.0.1:2013", "transport":"*gob"},
+	],
+	"store_cdrs": true,
+	"online_cdr_exports": []
+},
+
+
+"cdre": {
+	"amqp_localhost": {
+		"export_format": "*amqp_json_map",
+		"export_path": "amqp://guest:guest@localhost:5672/?queue_id=cgrates_cdrs",
+		"content_fields": [
+			{"field_id": "CGRID", "type": "*variable", "value": "~CGRID"},
+			{"field_id": "RunID", "type": "*variable", "value": "~RunID"},
+			{"field_id": "ToR", "type": "*variable", "value": "~ToR"},
+			{"field_id": "OriginID", "type": "*variable", "value": "~OriginID"},
+			{"field_id": "OriginHost", "type": "*variable", "value": "~OriginHost"},
+			{"field_id": "RequestType", "type": "*variable", "value": "~RequestType", },
+			{"field_id": "Tenant", "type": "*variable", "value": "~Tenant"},
+			{"field_id": "Category", "type": "*variable", "value": "~Category"},
+			{"field_id": "Account", "type": "*variable", "value": "~Account"},
+			{"field_id": "Destination", "type": "*variable", "value": "~Destination"},
+			{"field_id": "SetupTime", "type": "*variable", "value": "~SetupTime"},
+			{"field_id": "AnswerTime", "type": "*variable", "value": "~AnswerTime"},
+			{"field_id": "Usage", "type": "*variable", "value": "~Usage"},
+			{"field_id": "Cost", "type": "*variable", "value": "~Cost"},
+			{"field_id": "PayPalAccount", "type": "*variable", "value": "~PayPalAccount"},
+			{"field_id": "LCRProfile", "type": "*variable", "value": "~LCRProfile", },
+			{"field_id": "ResourceID", "type": "*variable", "value": "~ResourceID", },
+		],
+	},
+},
+
+
+"cdrc": [
+	{
+		"id": "tutorial_csv_cdr",
+		"enabled": true,
+		"cdr_source_id": "cgr_tutorial",
+		"content_fields":[
+			{"field_id": "OriginID", "type": "*composed", "value": "~3", "mandatory": true},
+			{"field_id": "Account", "type": "*composed", "value": "~8", "mandatory": true},
+			{"field_id": "Destination", "type": "*composed", "value": "~10", "mandatory": true},
+			{"field_id": "SetupTime", "type": "*composed", "value": "~11", "mandatory": true},
+			{"field_id": "AnswerTime", "type": "*composed", "value": "~12", "mandatory": true},
+			{"field_id": "Usage", "type": "*composed", "value": "~13", "mandatory": true},
+		],
+	},
+],
+
+
+"sessions": {
+	"enabled": true,
+	"resources_conns": [
+		{"address": "127.0.0.1:2013", "transport":"*gob"}
+	],
+	"suppliers_conns": [
+		{"address": "127.0.0.1:2013", "transport":"*gob"}
+	],
+	"attributes_conns": [
+		{"address": "127.0.0.1:2013", "transport":"*gob"}
+	],
+	"rals_conns": [
+		{"address": "*internal"}
+	],
+	"cdrs_conns": [
+		{"address": "*internal"}
+	],
+	"chargers_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"attributes": {
+	"enabled": true,
+	"string_indexed_fields": ["Account"]
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": [
+		{"address": "127.0.0.1:2013", "transport":"*gob"}
+	],
+	"string_indexed_fields": ["Account"]
+},
+
+
+"resources": {
+	"enabled": true,
+	"thresholds_conns": [
+		{"address": "127.0.0.1:2013", "transport":"*gob"}
+	],
+	"string_indexed_fields": ["Account"]
+},
+
+
+"stats": {
+	"enabled": true,
+	"thresholds_conns": [
+		{"address": "127.0.0.1:2013", "transport":"*gob"}
+	],
+	"string_indexed_fields": ["Account"]
+},
+
+
+"thresholds": {
+	"enabled": true,
+	"string_indexed_fields": ["Account"]
+},
+
+
+"suppliers": {
+	"enabled": true,
+	"string_indexed_fields": ["LCRProfile"],
+	"prefix_indexed_fields":["Destination"],
+},
+
+
+"apier": {
+	"scheduler_conns": [					// connections to SchedulerS for reloads
+		{"address": "*internal"},
+	],
+},
+
+
+}

@@ -23,7 +23,6 @@ package agents
 import (
 	"fmt"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os/exec"
 	"path"
 	"reflect"
@@ -68,6 +67,10 @@ func TestRAit(t *testing.T) {
 }
 
 func TestRAitDispatcher(t *testing.T) {
+	if *encoding == utils.MetaGOB {
+		t.SkipNow()
+		return
+	}
 	isDispatcherActive = true
 	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all"), 200)
 	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all2"), 200)
@@ -82,6 +85,9 @@ func TestRAitDispatcher(t *testing.T) {
 
 func testRAitInitCfg(t *testing.T) {
 	raCfgPath = path.Join(*dataDir, "conf", "samples", raonfigDIR)
+	if *encoding == utils.MetaGOB {
+		raCfgPath = path.Join(*dataDir, "conf", "samples", "gob", raonfigDIR)
+	}
 	// Init config first
 	var err error
 	raCfg, err = config.NewCGRConfigFromPath(raCfgPath)
@@ -133,7 +139,7 @@ func testRAitStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testRAitApierRpcConn(t *testing.T) {
 	var err error
-	raRPC, err = jsonrpc.Dial("tcp", raCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	raRPC, err = newRPCClient(raCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

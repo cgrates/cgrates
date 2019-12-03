@@ -88,99 +88,99 @@ type SessionSCfg struct {
 	TerminateAttempts   int
 }
 
-func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
+func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return nil
 	}
 	if jsnCfg.Enabled != nil {
-		self.Enabled = *jsnCfg.Enabled
+		scfg.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Listen_bijson != nil {
-		self.ListenBijson = *jsnCfg.Listen_bijson
+		scfg.ListenBijson = *jsnCfg.Listen_bijson
 	}
 	if jsnCfg.Chargers_conns != nil {
-		self.ChargerSConns = make([]*RemoteHost, len(*jsnCfg.Chargers_conns))
+		scfg.ChargerSConns = make([]*RemoteHost, len(*jsnCfg.Chargers_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Chargers_conns {
-			self.ChargerSConns[idx] = NewDfltRemoteHost()
-			self.ChargerSConns[idx].loadFromJsonCfg(jsnHaCfg)
+			scfg.ChargerSConns[idx] = NewDfltRemoteHost()
+			scfg.ChargerSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Rals_conns != nil {
-		self.RALsConns = make([]*RemoteHost, len(*jsnCfg.Rals_conns))
+		scfg.RALsConns = make([]*RemoteHost, len(*jsnCfg.Rals_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Rals_conns {
-			self.RALsConns[idx] = NewDfltRemoteHost()
-			self.RALsConns[idx].loadFromJsonCfg(jsnHaCfg)
+			scfg.RALsConns[idx] = NewDfltRemoteHost()
+			scfg.RALsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Resources_conns != nil {
-		self.ResSConns = make([]*RemoteHost, len(*jsnCfg.Resources_conns))
+		scfg.ResSConns = make([]*RemoteHost, len(*jsnCfg.Resources_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Resources_conns {
-			self.ResSConns[idx] = NewDfltRemoteHost()
-			self.ResSConns[idx].loadFromJsonCfg(jsnHaCfg)
+			scfg.ResSConns[idx] = NewDfltRemoteHost()
+			scfg.ResSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Thresholds_conns != nil {
-		self.ThreshSConns = make([]*RemoteHost, len(*jsnCfg.Thresholds_conns))
+		scfg.ThreshSConns = make([]*RemoteHost, len(*jsnCfg.Thresholds_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Thresholds_conns {
-			self.ThreshSConns[idx] = NewDfltRemoteHost()
-			self.ThreshSConns[idx].loadFromJsonCfg(jsnHaCfg)
+			scfg.ThreshSConns[idx] = NewDfltRemoteHost()
+			scfg.ThreshSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Stats_conns != nil {
-		self.StatSConns = make([]*RemoteHost, len(*jsnCfg.Stats_conns))
+		scfg.StatSConns = make([]*RemoteHost, len(*jsnCfg.Stats_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Stats_conns {
-			self.StatSConns[idx] = NewDfltRemoteHost()
-			self.StatSConns[idx].loadFromJsonCfg(jsnHaCfg)
+			scfg.StatSConns[idx] = NewDfltRemoteHost()
+			scfg.StatSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Suppliers_conns != nil {
-		self.SupplSConns = make([]*RemoteHost, len(*jsnCfg.Suppliers_conns))
+		scfg.SupplSConns = make([]*RemoteHost, len(*jsnCfg.Suppliers_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Suppliers_conns {
-			self.SupplSConns[idx] = NewDfltRemoteHost()
-			self.SupplSConns[idx].loadFromJsonCfg(jsnHaCfg)
+			scfg.SupplSConns[idx] = NewDfltRemoteHost()
+			scfg.SupplSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Attributes_conns != nil {
-		self.AttrSConns = make([]*RemoteHost, len(*jsnCfg.Attributes_conns))
+		scfg.AttrSConns = make([]*RemoteHost, len(*jsnCfg.Attributes_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Attributes_conns {
-			self.AttrSConns[idx] = NewDfltRemoteHost()
-			self.AttrSConns[idx].loadFromJsonCfg(jsnHaCfg)
+			scfg.AttrSConns[idx] = NewDfltRemoteHost()
+			scfg.AttrSConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Cdrs_conns != nil {
-		self.CDRsConns = make([]*RemoteHost, len(*jsnCfg.Cdrs_conns))
+		scfg.CDRsConns = make([]*RemoteHost, len(*jsnCfg.Cdrs_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Cdrs_conns {
-			self.CDRsConns[idx] = NewDfltRemoteHost()
-			self.CDRsConns[idx].loadFromJsonCfg(jsnHaCfg)
+			scfg.CDRsConns[idx] = NewDfltRemoteHost()
+			scfg.CDRsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Replication_conns != nil {
-		self.ReplicationConns = make([]*RemoteHost, len(*jsnCfg.Replication_conns))
+		scfg.ReplicationConns = make([]*RemoteHost, len(*jsnCfg.Replication_conns))
 		for idx, jsnHaCfg := range *jsnCfg.Replication_conns {
-			self.ReplicationConns[idx] = NewDfltRemoteHost()
-			self.ReplicationConns[idx].loadFromJsonCfg(jsnHaCfg)
+			scfg.ReplicationConns[idx] = NewDfltRemoteHost()
+			scfg.ReplicationConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Debit_interval != nil {
-		if self.DebitInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Debit_interval); err != nil {
+		if scfg.DebitInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Debit_interval); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Store_session_costs != nil {
-		self.StoreSCosts = *jsnCfg.Store_session_costs
+		scfg.StoreSCosts = *jsnCfg.Store_session_costs
 	}
 	if jsnCfg.Min_call_duration != nil {
-		if self.MinCallDuration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Min_call_duration); err != nil {
+		if scfg.MinCallDuration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Min_call_duration); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Max_call_duration != nil {
-		if self.MaxCallDuration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_call_duration); err != nil {
+		if scfg.MaxCallDuration, err = utils.ParseDurationWithNanosecs(*jsnCfg.Max_call_duration); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Session_ttl != nil {
-		if self.SessionTTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl); err != nil {
+		if scfg.SessionTTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl); err != nil {
 			return err
 		}
 	}
@@ -188,29 +188,29 @@ func (self *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		if maxTTLDelay, err := utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl_max_delay); err != nil {
 			return err
 		} else {
-			self.SessionTTLMaxDelay = &maxTTLDelay
+			scfg.SessionTTLMaxDelay = &maxTTLDelay
 		}
 	}
 	if jsnCfg.Session_ttl_last_used != nil {
 		if sessionTTLLastUsed, err := utils.ParseDurationWithNanosecs(*jsnCfg.Session_ttl_last_used); err != nil {
 			return err
 		} else {
-			self.SessionTTLLastUsed = &sessionTTLLastUsed
+			scfg.SessionTTLLastUsed = &sessionTTLLastUsed
 		}
 	}
 	if jsnCfg.Session_indexes != nil {
-		self.SessionIndexes = utils.StringMapFromSlice(*jsnCfg.Session_indexes)
+		scfg.SessionIndexes = utils.StringMapFromSlice(*jsnCfg.Session_indexes)
 	}
 	if jsnCfg.Client_protocol != nil {
-		self.ClientProtocol = *jsnCfg.Client_protocol
+		scfg.ClientProtocol = *jsnCfg.Client_protocol
 	}
 	if jsnCfg.Channel_sync_interval != nil {
-		if self.ChannelSyncInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Channel_sync_interval); err != nil {
+		if scfg.ChannelSyncInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.Channel_sync_interval); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Terminate_attempts != nil {
-		self.TerminateAttempts = *jsnCfg.Terminate_attempts
+		scfg.TerminateAttempts = *jsnCfg.Terminate_attempts
 	}
 	return nil
 }

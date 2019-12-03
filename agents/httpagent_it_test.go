@@ -28,7 +28,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
@@ -63,6 +62,9 @@ var sTestsHA = []func(t *testing.T){
 
 func TestHAitSimple(t *testing.T) {
 	haCfgPath = path.Join(*dataDir, "conf", "samples", "httpagent")
+	if *encoding == utils.MetaGOB {
+		haCfgPath = path.Join(*dataDir, "conf", "samples", "gob", "httpagent")
+	}
 	// Init config first
 	var err error
 	haCfg, err = config.NewCGRConfigFromPath(haCfgPath)
@@ -79,6 +81,9 @@ func TestHAitSimple(t *testing.T) {
 
 func TestHA2itWithTls(t *testing.T) {
 	haCfgPath = path.Join(*dataDir, "conf", "samples", "httpagenttls")
+	if *encoding == utils.MetaGOB {
+		haCfgPath = path.Join(*dataDir, "conf", "samples", "gob", "httpagenttls")
+	}
 	// Init config first
 	var err error
 	haCfg, err = config.NewCGRConfigFromPath(haCfgPath)
@@ -136,7 +141,7 @@ func testHAitStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testHAitApierRpcConn(t *testing.T) {
 	var err error
-	haRPC, err = jsonrpc.Dial("tcp", haCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	haRPC, err = newRPCClient(haCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

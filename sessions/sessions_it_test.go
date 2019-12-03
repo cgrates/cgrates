@@ -22,7 +22,6 @@ package sessions
 import (
 	"fmt"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"testing"
 	"time"
@@ -38,6 +37,9 @@ var sItRPC *rpc.Client
 
 func TestSessionsItInitCfg(t *testing.T) {
 	sItCfgPath = path.Join(*dataDir, "conf", "samples", "smg")
+	if *encoding == utils.MetaGOB {
+		dataCfgPath = path.Join(*dataDir, "conf", "samples", "gob", "smg")
+	}
 	// Init config first
 	var err error
 	sItCfg, err = config.NewCGRConfigFromPath(sItCfgPath)
@@ -72,7 +74,7 @@ func TestSessionsItStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func TestSessionsItApierRpcConn(t *testing.T) {
 	var err error
-	sItRPC, err = jsonrpc.Dial("tcp", sItCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	sItRPC, err = newRPCClient(sItCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -135,7 +137,7 @@ func TestSessionsItTerminatUnexist(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	time.Sleep(100 * time.Millisecond)
-	if err := sItRPC.Call(utils.SessionSv1ProcessCDR, termArgs.CGREvent, &rpl); err != nil {
+	if err := sItRPC.Call(utils.SessionSv1ProcessCDR, &utils.CGREventWithArgDispatcher{CGREvent: termArgs.CGREvent}, &rpl); err != nil {
 		t.Error(err)
 	} else if rpl != utils.OK {
 		t.Errorf("Received reply: %s", rpl)
@@ -280,7 +282,7 @@ func TestSessionsItTerminatePassive(t *testing.T) {
 	var pSessions []*ExternalSession
 	//check if the passive session was created
 	if err := sItRPC.Call(utils.SessionSv1GetPassiveSessions,
-		utils.SessionFilter{
+		&utils.SessionFilter{
 			Filters: []string{
 				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "123789"),
 			},
@@ -420,7 +422,7 @@ func TestSessionsItEventCostCompressing(t *testing.T) {
 		t.Error(err)
 	}
 	if err := sItRPC.Call(utils.SessionSv1ProcessCDR,
-		termArgs.CGREvent, &reply); err != nil {
+		&utils.CGREventWithArgDispatcher{CGREvent: termArgs.CGREvent}, &reply); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(20 * time.Millisecond)

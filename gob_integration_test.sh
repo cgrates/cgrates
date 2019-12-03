@@ -20,12 +20,12 @@ ers=$?
 echo 'go test github.com/cgrates/cgrates/general_tests -tags=integration -rpc=*gob'
 go test github.com/cgrates/cgrates/general_tests -tags=integration -rpc=*gob
 gnr=$?
-# echo 'go test github.com/cgrates/cgrates/agents -tags=integration'
-# go test github.com/cgrates/cgrates/agents -tags=integration
-# agts=$?
-# echo 'go test github.com/cgrates/cgrates/sessions -tags=integration'
-# go test github.com/cgrates/cgrates/sessions -tags=integration
-# smg=$?
+echo 'go test github.com/cgrates/cgrates/agents -tags=integration -rpc=*gob'
+go test github.com/cgrates/cgrates/agents -tags=integration -rpc=*gob
+agts=$?
+echo 'go test github.com/cgrates/cgrates/sessions -tags=integration -rpc=*gob'
+go test github.com/cgrates/cgrates/sessions -tags=integration -rpc=*gob
+smg=$?
 # echo 'go test github.com/cgrates/cgrates/dispatchers -tags=integration'
 # go test github.com/cgrates/cgrates/dispatchers -tags=integration
 # dis=$?
@@ -33,4 +33,4 @@ echo 'go test github.com/cgrates/cgrates/loaders -tags=integration -rpc=*gob'
 go test github.com/cgrates/cgrates/loaders -tags=integration -rpc=*gob
 lds=$?
 
-exit $gen && $ap1 && $ap2 && $en && $cdrc #&& $gnr && $agts && $smg && $dis && $lds && $ers 
+exit $gen && $ap1 && $ap2 && $en && $cdrc && $gnr && $agts && $smg #&& $dis && $lds && $ers 
