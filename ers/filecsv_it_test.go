@@ -62,7 +62,7 @@ accid23;*rated;cgrates.org;1001;086517174963;2013-02-03 19:54:00;26;val_extra3;"
 		testCsvITInitConfig,
 		testCsvITInitCdrDb,
 		testCsvITResetDataDb,
-		//testCsvITStartEngine,
+		testCsvITStartEngine,
 		testCsvITRpcConn,
 		testCsvITLoadTPFromFolder,
 		testCsvITHandleCdr1File,
@@ -75,7 +75,7 @@ accid23;*rated;cgrates.org;1001;086517174963;2013-02-03 19:54:00;26;val_extra3;"
 		testCsvITProcessFilteredCDR,
 		testCsvITAnalyzeFilteredCDR,
 		testCsvITProcessedFiles,
-		//testCsvITCleanupFiles,
+		testCsvITCleanupFiles,
 		testCsvITKillEngine,
 	}
 )

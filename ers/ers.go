@@ -193,10 +193,8 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
 		)
 		rply := new(sessions.V1AuthorizeReply)
-		fmt.Println("Call Auth")
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
-		fmt.Println(" Finish Call Auth")
 	case utils.MetaInitiate:
 		initArgs := sessions.NewV1InitSessionArgs(
 			rdrCfg.Flags.HasKey(utils.MetaAttributes),
@@ -209,10 +207,8 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 			rdrCfg.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher)
 		rply := new(sessions.V1InitSessionReply)
-		fmt.Println("Call Init")
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1InitiateSession,
 			initArgs, rply)
-		fmt.Println(" Finish Call Init")
 	case utils.MetaUpdate:
 		updateArgs := sessions.NewV1UpdateSessionArgs(
 			rdrCfg.Flags.HasKey(utils.MetaAttributes),
@@ -220,10 +216,8 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 			rdrCfg.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher)
 		rply := new(sessions.V1UpdateSessionReply)
-		fmt.Println("Call Update")
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
-		fmt.Println(" Finish Call Update")
 	case utils.MetaTerminate:
 		terminateArgs := sessions.NewV1TerminateSessionArgs(
 			rdrCfg.Flags.HasKey(utils.MetaAccounts),
@@ -234,10 +228,8 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 			rdrCfg.Flags.ParamsSlice(utils.MetaStats),
 			cgrEv, cgrArgs.ArgDispatcher)
 		rply := utils.StringPointer("")
-		fmt.Println("Call Terminate")
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1TerminateSession,
 			terminateArgs, rply)
-		fmt.Println(" Finish Call Terminate")
 	case utils.MetaMessage:
 		evArgs := sessions.NewV1ProcessMessageArgs(
 			rdrCfg.Flags.HasKey(utils.MetaAttributes),
@@ -253,10 +245,8 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 			rdrCfg.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
 		rply := new(sessions.V1ProcessMessageReply) // need it so rpcclient can clone
-		fmt.Println("Call ProcMsg")
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1ProcessMessage,
 			evArgs, rply)
-		fmt.Println("Finish Call ProcMsg")
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
 		} else if evArgs.Debit {
@@ -270,10 +260,8 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 			Paginator:     *cgrArgs.SupplierPaginator,
 		}
 		rply := new(sessions.V1ProcessEventReply)
-		fmt.Println("Call Event")
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1ProcessEvent,
 			evArgs, rply)
-		fmt.Println("Finish Call Event")
 	case utils.MetaCDRs: // allow CDR processing
 	}
 	if err != nil {
@@ -283,11 +271,9 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 	if rdrCfg.Flags.HasKey(utils.MetaCDRs) &&
 		!rdrCfg.Flags.HasKey(utils.MetaDryRun) {
 		rplyCDRs := utils.StringPointer("")
-		fmt.Println("Call cdrs")
 		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
-				ArgDispatcher: cgrArgs.ArgDispatcher}, &rplyCDRs)
-		fmt.Println("finish Call cdrs")
+				ArgDispatcher: cgrArgs.ArgDispatcher}, rplyCDRs)
 	}
 
 	return

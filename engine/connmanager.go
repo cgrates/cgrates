@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -28,8 +26,6 @@ import (
 
 // NewConnManager returns the Connection Manager
 func NewConnManager(cfg *config.CGRConfig, rpcInternal map[string]chan rpcclient.RpcClientConnection) (cM *ConnManager) {
-	fmt.Println("Enter in engine NewConn Manager")
-	fmt.Println(rpcInternal)
 	return &ConnManager{cfg: cfg, rpcInternal: rpcInternal}
 }
 
@@ -49,10 +45,6 @@ func (cM *ConnManager) getConn(connID string) (connPool *rpcclient.RpcClientPool
 	// in case we don't found in cache create the connection and add this in cache
 	var intChan chan rpcclient.RpcClientConnection
 	var connCfg *config.RPCConn
-	fmt.Println("TEST ?? ")
-	fmt.Println(cM)
-	fmt.Println(cM.rpcInternal)
-	fmt.Println(connID)
 	if internalChan, has := cM.rpcInternal[connID]; has {
 		connCfg = cM.cfg.RPCConns()[utils.MetaInternal]
 		intChan = internalChan
