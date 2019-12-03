@@ -51,13 +51,12 @@ func (cM *ConnManager) getConn(connID string) (connPool *rpcclient.RpcClientPool
 	} else {
 		connCfg = cM.cfg.RPCConns()[connID]
 	}
-	connPool, err = NewRPCPool(connCfg.Strategy,
+	if connPool, err = NewRPCPool(connCfg.Strategy,
 		cM.cfg.TlsCfg().ClientKey,
 		cM.cfg.TlsCfg().ClientCerificate, cM.cfg.TlsCfg().CaCertificate,
 		cM.cfg.GeneralCfg().ConnectAttempts, cM.cfg.GeneralCfg().Reconnects,
 		cM.cfg.GeneralCfg().ConnectTimeout, cM.cfg.GeneralCfg().ReplyTimeout,
-		connCfg.Conns, intChan, false)
-	if err != nil {
+		connCfg.Conns, intChan, false); err != nil {
 		return
 	}
 	Cache.Set(utils.CacheRPCConnections, connID, connPool, nil,
@@ -66,13 +65,12 @@ func (cM *ConnManager) getConn(connID string) (connPool *rpcclient.RpcClientPool
 }
 
 func (cM *ConnManager) Call(connIDs []string, method string, arg, reply interface{}) (err error) {
+	var conn *rpcclient.RpcClientPool
 	for _, connID := range connIDs {
-		conn, err := cM.getConn(connID)
-		if err == nil {
-			if err := conn.Call(method, arg, reply); err != nil {
-				return err
-			}
+		if conn, err = cM.getConn(connID); err != nil {
+			continue
 		}
+		return conn.Call(method, arg, reply)
 	}
-	return nil
+	return
 }
