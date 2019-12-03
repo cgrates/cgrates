@@ -120,7 +120,8 @@ func TestOnStorITMongo(t *testing.T) {
 
 func TestOnStorITInternal(t *testing.T) {
 	sleepDelay = 10 * time.Millisecond
-	onStor = NewDataManager(NewInternalDB(nil, nil), config.CgrConfig().CacheCfg(), nil, nil)
+	onStor = NewDataManager(NewInternalDB(nil, nil),
+		config.CgrConfig().CacheCfg(), nil, nil)
 	for _, stest := range sTestsOnStorIT {
 		t.Run("TestOnStorITInternal", stest)
 	}
