@@ -1,0 +1,81 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"log_level": 7,
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"stor_db": {
+	"db_password": "CGRateS.org",
+},
+
+
+"rals": {
+	"enabled": true,
+	"max_increments":3000000,
+},
+
+
+"scheduler": {
+	"enabled": true,
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"chargers_conns": [
+		{"address": "*internal"}
+	],
+	"rals_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"attributes": {
+	"enabled": true,
+},
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"sessions": {
+	"enabled": true,
+	"attributes_conns": [
+		{"address": "127.0.0.1:2013", "transport": "*gob"}
+	],
+	"cdrs_conns": [
+		{"address": "127.0.0.1:2013", "transport": "*gob"}
+	],
+	"rals_conns": [
+		{"address": "127.0.0.1:2013", "transport": "*gob"}
+	],
+	"chargers_conns": [
+		{"address": "*internal"}
+	],
+},
+
+
+"apier": {
+	"scheduler_conns": [					// connections to SchedulerS for reloads
+		{"address": "*internal"},
+	],
+},
+
+
+}

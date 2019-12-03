@@ -22,7 +22,6 @@ package agents
 
 import (
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"testing"
 	"time"
@@ -87,7 +86,7 @@ func testDNSitStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testDNSitApierRpcConn(t *testing.T) {
 	var err error
-	dnsRPC, err = jsonrpc.Dial("tcp", dnsCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	dnsRPC, err = newRPCClient(dnsCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

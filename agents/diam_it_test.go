@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"errors"
 	"flag"
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -41,6 +42,7 @@ var (
 	dataDir      = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 	interations  = flag.Int("iterations", 1, "Number of iterations to do for dry run simulation")
 	replyTimeout = flag.String("reply_timeout", "1s", "Maximum duration to wait for a reply")
+	encoding     = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
 
 	daCfgPath, diamConfigDIR string
 	daCfg                    *config.CGRConfig
@@ -68,6 +70,17 @@ var (
 	}
 )
 
+func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
+	switch *encoding {
+	case utils.MetaJSON:
+		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
+	case utils.MetaGOB:
+		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+	default:
+		return nil, errors.New("UNSUPPORTED_RPC")
+	}
+}
+
 // Test start here
 func TestDiamItTcp(t *testing.T) {
 	engine.KillEngine(0)
@@ -78,6 +91,10 @@ func TestDiamItTcp(t *testing.T) {
 }
 
 func TestDiamItDispatcher(t *testing.T) {
+	if *encoding == utils.MetaGOB {
+		t.SkipNow()
+		return
+	}
 	isDispatcherActive = true
 	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all"), 200)
 	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all2"), 200)
@@ -182,7 +199,7 @@ func testDiamItConnectDiameterClient(t *testing.T) {
 // Connect rpc client to rater
 func testDiamItApierRpcConn(t *testing.T) {
 	var err error
-	apierRpc, err = jsonrpc.Dial("tcp", daCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	apierRpc, err = newRPCClient(daCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -760,7 +777,7 @@ func testDiamItCCRTerminate(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	var cdrs []*engine.CDR
-	args := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}
+	args := utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}}
 	if err := apierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -845,7 +862,7 @@ func testDiamItCCRSMS(t *testing.T) {
 	diamClnt.ReceivedMessage(rplyTimeout)
 
 	var cdrs []*engine.CDR
-	args := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}, ToRs: []string{utils.SMS}}
+	args := &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}, ToRs: []string{utils.SMS}}}
 	if err := apierRpc.Call(utils.CDRsV1GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
