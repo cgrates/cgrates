@@ -731,6 +731,8 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 			TTL: time.Duration(10 * time.Second), StaticTTL: false},
 		utils.CacheLoadIDs: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
+		utils.CacheRPCConnections: &CacheParamCfg{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false},
 	}
 
 	if !reflect.DeepEqual(eCacheCfg, cgrCfg.CacheCfg()) {
@@ -1812,12 +1814,8 @@ func TestCgrCfgV1GetConfigSection(t *testing.T) {
 
 func TestCgrCdfEventReader(t *testing.T) {
 	eCfg := &ERsCfg{
-		Enabled: false,
-		SessionSConns: []*RemoteHost{
-			{
-				Address: utils.MetaInternal,
-			},
-		},
+		Enabled:       false,
+		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		Readers: []*EventReaderCfg{
 			&EventReaderCfg{
 				ID:             utils.MetaDefault,

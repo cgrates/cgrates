@@ -21,6 +21,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -373,11 +374,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 	// EventReader sanity checks
 	if cfg.ersCfg.Enabled {
-		if !cfg.sessionSCfg.Enabled {
-			for _, connCfg := range cfg.ersCfg.SessionSConns {
-				if connCfg.Address == utils.MetaInternal {
-					return fmt.Errorf("<%s> not enabled but requested by EventReader component.", utils.SessionS)
-				}
+		for _, connID := range cfg.ersCfg.SessionSConns {
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.ERs, connID)
 			}
 		}
 		for _, rdr := range cfg.ersCfg.Readers {

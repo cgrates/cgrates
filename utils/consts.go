@@ -659,6 +659,7 @@ const (
 	CDRServer   = "CDRServer"
 	ResponderS  = "ResponderS"
 	GuardianS   = "GuardianS"
+	RPCConnS    = "RPCConnS"
 )
 
 // Lower service names
@@ -1446,6 +1447,7 @@ const (
 	MetaReady                    = "*ready"
 	CacheLoadIDs                 = "*load_ids"
 	CacheAccounts                = "*accounts"
+	CacheRPCConnections          = "*rpc_connections"
 )
 
 // Prefix for indexing

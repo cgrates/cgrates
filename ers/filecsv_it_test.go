@@ -120,6 +120,7 @@ func testCsvITCreateCdrDirs(t *testing.T) {
 			t.Fatal("Error creating folder: ", dir, err)
 		}
 	}
+	time.Sleep(10 * time.Second)
 }
 
 func testCsvITStartEngine(t *testing.T) {

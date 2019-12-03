@@ -26,7 +26,6 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // erEvent is passed from reader to ERs
@@ -36,8 +35,7 @@ type erEvent struct {
 }
 
 // NewERService instantiates the ERService
-func NewERService(cfg *config.CGRConfig, filterS *engine.FilterS,
-	sS rpcclient.RpcClientConnection, stopChan chan struct{}) *ERService {
+func NewERService(cfg *config.CGRConfig, filterS *engine.FilterS, stopChan chan struct{}, connMgr *engine.ConnManager) *ERService {
 	return &ERService{
 		cfg:       cfg,
 		rdrs:      make(map[string]EventReader),
@@ -46,8 +44,8 @@ func NewERService(cfg *config.CGRConfig, filterS *engine.FilterS,
 		rdrEvents: make(chan *erEvent),
 		rdrErr:    make(chan error),
 		filterS:   filterS,
-		sS:        sS,
 		stopChan:  stopChan,
+		connMgr:   connMgr,
 	}
 }
 
@@ -62,8 +60,8 @@ type ERService struct {
 	rdrErr    chan error               // receive here errors which should stop the app
 
 	filterS  *engine.FilterS
-	sS       rpcclient.RpcClientConnection // connection towards SessionS
 	stopChan chan struct{}
+	connMgr  *engine.ConnManager
 }
 
 // ListenAndServe keeps the service alive
@@ -195,7 +193,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
 		)
 		rply := new(sessions.V1AuthorizeReply)
-		err = erS.sS.Call(utils.SessionSv1AuthorizeEvent,
+		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
 	case utils.MetaInitiate:
 		initArgs := sessions.NewV1InitSessionArgs(
@@ -209,7 +207,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 			rdrCfg.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher)
 		rply := new(sessions.V1InitSessionReply)
-		err = erS.sS.Call(utils.SessionSv1InitiateSession,
+		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1InitiateSession,
 			initArgs, rply)
 	case utils.MetaUpdate:
 		updateArgs := sessions.NewV1UpdateSessionArgs(
@@ -218,7 +216,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 			rdrCfg.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher)
 		rply := new(sessions.V1UpdateSessionReply)
-		err = erS.sS.Call(utils.SessionSv1UpdateSession,
+		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
 	case utils.MetaTerminate:
 		terminateArgs := sessions.NewV1TerminateSessionArgs(
@@ -230,7 +228,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 			rdrCfg.Flags.ParamsSlice(utils.MetaStats),
 			cgrEv, cgrArgs.ArgDispatcher)
 		rply := utils.StringPointer("")
-		err = erS.sS.Call(utils.SessionSv1TerminateSession,
+		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1TerminateSession,
 			terminateArgs, rply)
 	case utils.MetaMessage:
 		evArgs := sessions.NewV1ProcessMessageArgs(
@@ -247,7 +245,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 			rdrCfg.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
 		rply := new(sessions.V1ProcessMessageReply) // need it so rpcclient can clone
-		err = erS.sS.Call(utils.SessionSv1ProcessMessage,
+		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1ProcessMessage,
 			evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
@@ -262,7 +260,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 			Paginator:     *cgrArgs.SupplierPaginator,
 		}
 		rply := new(sessions.V1ProcessEventReply)
-		err = erS.sS.Call(utils.SessionSv1ProcessEvent,
+		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1ProcessEvent,
 			evArgs, rply)
 	case utils.MetaCDRs: // allow CDR processing
 	}
@@ -273,16 +271,10 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent, rdrCfg *config.EventRe
 	if rdrCfg.Flags.HasKey(utils.MetaCDRs) &&
 		!rdrCfg.Flags.HasKey(utils.MetaDryRun) {
 		rplyCDRs := utils.StringPointer("")
-		err = erS.sS.Call(utils.SessionSv1ProcessCDR,
+		err = erS.connMgr.Call(erS.cfg.ERsCfg().SessionSConns, utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
-				ArgDispatcher: cgrArgs.ArgDispatcher}, &rplyCDRs)
+				ArgDispatcher: cgrArgs.ArgDispatcher}, rplyCDRs)
 	}
 
 	return
-}
-
-// SetSessionSConnection sets the new connection to the threshold service
-// only used on reload
-func (erS *ERService) SetSessionSConnection(sS rpcclient.RpcClientConnection) {
-	erS.sS = sS
 }

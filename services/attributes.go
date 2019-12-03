@@ -33,9 +33,9 @@ import (
 // NewAttributeService returns the Attribute Service
 func NewAttributeService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server) servmanager.Service {
+	server *utils.Server, internalChan chan rpcclient.RpcClientConnection) servmanager.Service {
 	return &AttributeService{
-		connChan:    make(chan rpcclient.RpcClientConnection, 1),
+		connChan:    internalChan,
 		cfg:         cfg,
 		dm:          dm,
 		cacheS:      cacheS,

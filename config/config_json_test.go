@@ -162,6 +162,8 @@ func TestCacheJsonCfg(t *testing.T) {
 		utils.CacheLoadIDs: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},
+		utils.CacheRPCConnections: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
+			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false)},
 	}
 
 	if gCfg, err := dfCgrJsonCfg.CacheJsonCfg(); err != nil {
@@ -1677,12 +1679,8 @@ func TestDfEventReaderCfg(t *testing.T) {
 			Value: utils.StringPointer("~*req.13"), Mandatory: utils.BoolPointer(true)},
 	}
 	eCfg := &ERsJsonCfg{
-		Enabled: utils.BoolPointer(false),
-		Sessions_conns: &[]*RemoteHostJson{
-			{
-				Address: utils.StringPointer(utils.MetaInternal),
-			},
-		},
+		Enabled:        utils.BoolPointer(false),
+		Sessions_conns: &[]string{utils.MetaInternal},
 		Readers: &[]*EventReaderJsonCfg{
 			&EventReaderJsonCfg{
 				Id:                  utils.StringPointer(utils.MetaDefault),

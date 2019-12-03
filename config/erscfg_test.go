@@ -97,12 +97,8 @@ func TestEventRedearClone(t *testing.T) {
 
 func TestEventReaderLoadFromJSON(t *testing.T) {
 	expectedERsCfg := &ERsCfg{
-		Enabled: true,
-		SessionSConns: []*RemoteHost{
-			{
-				Address: utils.MetaInternal,
-			},
-		},
+		Enabled:       true,
+		SessionSConns: []string{"conn1", "conn3"},
 		Readers: []*EventReaderCfg{
 			&EventReaderCfg{
 				ID:             utils.MetaDefault,
@@ -190,6 +186,7 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 	cfgJSONStr := `{
 "ers": {
 	"enabled": true,
+	"sessions_conns":["conn1","conn3"],
 	"readers": [
 		{
 			"id": "file_reader1",

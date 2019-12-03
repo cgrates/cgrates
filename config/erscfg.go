@@ -26,7 +26,7 @@ import (
 
 type ERsCfg struct {
 	Enabled       bool
-	SessionSConns []*RemoteHost
+	SessionSConns []string
 	Readers       []*EventReaderCfg
 }
 
@@ -38,10 +38,14 @@ func (erS *ERsCfg) loadFromJsonCfg(jsnCfg *ERsJsonCfg, sep string, dfltRdrCfg *E
 		erS.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Sessions_conns != nil {
-		erS.SessionSConns = make([]*RemoteHost, len(*jsnCfg.Sessions_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
-			erS.SessionSConns[idx] = NewDfltRemoteHost()
-			erS.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		erS.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
+		for i, fID := range *jsnCfg.Sessions_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if fID == utils.MetaInternal {
+				erS.SessionSConns[i] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+			} else {
+				erS.SessionSConns[i] = fID
+			}
 		}
 	}
 	return erS.appendERsReaders(jsnCfg.Readers, sep, dfltRdrCfg)
@@ -83,10 +87,9 @@ func (ers *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, sep strin
 func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 	cln = new(ERsCfg)
 	cln.Enabled = erS.Enabled
-	cln.SessionSConns = make([]*RemoteHost, len(erS.SessionSConns))
+	cln.SessionSConns = make([]string, len(erS.SessionSConns))
 	for idx, sConn := range erS.SessionSConns {
-		clonedVal := *sConn
-		cln.SessionSConns[idx] = &clonedVal
+		cln.SessionSConns[idx] = sConn
 	}
 	cln.Readers = make([]*EventReaderCfg, len(erS.Readers))
 	for idx, rdr := range erS.Readers {

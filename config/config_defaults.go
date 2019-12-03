@@ -188,6 +188,7 @@ const CGRATES_CFG_JSON = `
 	"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false},							// RPC responses caching
 	"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false},						// closed sessions cached for CDRs
 	"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control the load_ids for items
+	"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false},							// RPC connections caching
 },
 
 
@@ -328,9 +329,7 @@ const CGRATES_CFG_JSON = `
 
 "ers": {									// EventReaderService
 	"enabled": false,						// starts the EventReader service: <true|false>
-	"sessions_conns": [						// connections to SessionS:  <*internal|127.0.0.1:2012>
-		{"address": "*internal"}
-	],
+	"sessions_conns":["*internal"],			// RPC Connections IDs
 	"readers": [
 		{
 			"id": "*default",									// identifier of the EventReader profile

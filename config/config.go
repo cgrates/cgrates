@@ -1021,6 +1021,13 @@ func (cfg *CGRConfig) ERsCfg() *ERsCfg {
 	return cfg.ersCfg
 }
 
+// RPCConns reads the RPCConns configuration
+func (cfg *CGRConfig) RPCConns() map[string]*RPCConn {
+	cfg.lks[RPCConnsJsonName].RLock()
+	defer cfg.lks[RPCConnsJsonName].RUnlock()
+	return cfg.rpcConns
+}
+
 // GetReloadChan returns the reload chanel for the given section
 func (cfg *CGRConfig) GetReloadChan(sectID string) chan struct{} {
 	return cfg.rldChans[sectID]
@@ -1109,6 +1116,8 @@ func (cfg *CGRConfig) V1GetConfigSection(args *StringWithArgDispatcher, reply *m
 		jsonString = utils.ToJSON(cfg.CdreProfiles)
 	case ERsJson:
 		jsonString = utils.ToJSON(cfg.ERsCfg())
+	case RPCConnsJsonName:
+		jsonString = utils.ToJSON(cfg.RPCConns())
 	default:
 		return errors.New("Invalid section")
 	}
@@ -1703,6 +1712,14 @@ func (cfg *CGRConfig) loadConfig(path, section string) (err error) {
 		cfg.lks[Apier].Lock()
 		defer cfg.lks[Apier].Unlock()
 		loadFuncs = append(loadFuncs, cfg.loadApierCfg)
+		if !fall {
+			break
+		}
+		fallthrough
+	case RPCConnsJsonName:
+		cfg.lks[RPCConnsJsonName].Lock()
+		defer cfg.lks[RPCConnsJsonName].Unlock()
+		loadFuncs = append(loadFuncs, cfg.loadRPCConns)
 	}
 	return cfg.loadConfigFromPath(path, loadFuncs)
 }
@@ -1813,7 +1830,7 @@ func (cfg *CGRConfig) initChanels() {
 	for _, section := range []string{GENERAL_JSN, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN, SCHEDULER_JSN, CACHE_JSN, FilterSjsn, RALS_JSN,
 		CDRS_JSN, CDRE_JSN, CDRC_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN, KamailioAgentJSN,
 		DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
-		SupplierSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson, AnalyzerCfgJson, Apier} {
+		SupplierSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson, AnalyzerCfgJson, Apier, RPCConnsJsonName} {
 		cfg.lks[section] = new(sync.RWMutex)
 		cfg.rldChans[section] = make(chan struct{}, 1)
 	}

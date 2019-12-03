@@ -33,10 +33,10 @@ import (
 // NewSessionService returns the Session Service
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
 	server *utils.Server, chrsChan, respChan, resChan, thsChan, stsChan,
-	supChan, attrsChan, cdrsChan, dispatcherChan chan rpcclient.RpcClientConnection,
+	supChan, attrsChan, cdrsChan, dispatcherChan, internalChan chan rpcclient.RpcClientConnection,
 	exitChan chan bool) servmanager.Service {
 	return &SessionService{
-		connChan:       make(chan rpcclient.RpcClientConnection, 1),
+		connChan:       internalChan,
 		cfg:            cfg,
 		dm:             dm,
 		server:         server,

@@ -32,30 +32,27 @@ import (
 
 // NewEventReaderService returns the EventReader Service
 func NewEventReaderService(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	sSChan, dispatcherChan chan rpcclient.RpcClientConnection,
-	exitChan chan bool) servmanager.Service {
+	exitChan chan bool, connMgr *engine.ConnManager) servmanager.Service {
 	return &EventReaderService{
-		rldChan:        make(chan struct{}, 1),
-		cfg:            cfg,
-		filterSChan:    filterSChan,
-		sSChan:         sSChan,
-		dispatcherChan: dispatcherChan,
-		exitChan:       exitChan,
+		rldChan:     make(chan struct{}, 1),
+		cfg:         cfg,
+		filterSChan: filterSChan,
+		exitChan:    exitChan,
+		connMgr:     connMgr,
 	}
 }
 
 // EventReaderService implements Service interface
 type EventReaderService struct {
 	sync.RWMutex
-	cfg            *config.CGRConfig
-	filterSChan    chan *engine.FilterS
-	sSChan         chan rpcclient.RpcClientConnection
-	dispatcherChan chan rpcclient.RpcClientConnection
-	exitChan       chan bool
+	cfg         *config.CGRConfig
+	filterSChan chan *engine.FilterS
+	exitChan    chan bool
 
 	ers      *ers.ERService
 	rldChan  chan struct{}
 	stopChan chan struct{}
+	connMgr  *engine.ConnManager
 }
 
 // Start should handle the sercive start
@@ -74,14 +71,9 @@ func (erS *EventReaderService) Start() (err error) {
 	erS.stopChan = make(chan struct{}, 1)
 
 	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ERs))
-	var sS rpcclient.RpcClientConnection
-	if sS, err = NewConnection(erS.cfg, erS.sSChan, erS.dispatcherChan, erS.cfg.ERsCfg().SessionSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> failed connecting to <%s>, error: <%s>",
-			utils.ERs, utils.SessionS, err.Error()))
-		return
-	}
+
 	// build the service
-	erS.ers = ers.NewERService(erS.cfg, filterS, sS, erS.stopChan)
+	erS.ers = ers.NewERService(erS.cfg, filterS, erS.stopChan, erS.connMgr)
 	go func(ers *ers.ERService, rldChan chan struct{}) {
 		if err := ers.ListenAndServe(rldChan); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.ERs, err.Error()))
@@ -98,14 +90,7 @@ func (erS *EventReaderService) GetIntenternalChan() (conn chan rpcclient.RpcClie
 
 // Reload handles the change of config
 func (erS *EventReaderService) Reload() (err error) {
-	var sS rpcclient.RpcClientConnection
-	if sS, err = NewConnection(erS.cfg, erS.sSChan, erS.dispatcherChan, erS.cfg.ERsCfg().SessionSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> failed connecting to <%s>, error: <%s>",
-			utils.ERs, utils.SessionS, err.Error()))
-		return
-	}
 	erS.RLock()
-	erS.ers.SetSessionSConnection(sS)
 	erS.rldChan <- struct{}{}
 	erS.RUnlock()
 	return

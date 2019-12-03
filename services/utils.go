@@ -25,7 +25,8 @@ import (
 )
 
 // NewConnection returns a new connection
-func NewConnection(cfg *config.CGRConfig, serviceConnChan, dispatcherSChan chan rpcclient.RpcClientConnection, conns []*config.RemoteHost) (rpcclient.RpcClientConnection, error) {
+func NewConnection(cfg *config.CGRConfig, serviceConnChan, dispatcherSChan chan rpcclient.RpcClientConnection,
+	conns []*config.RemoteHost) (rpcclient.RpcClientConnection, error) {
 	if len(conns) == 0 {
 		return nil, nil
 	}

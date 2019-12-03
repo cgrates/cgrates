@@ -34,9 +34,9 @@ import (
 // NewDispatcherService returns the Dispatcher Service
 func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, attrsChan chan rpcclient.RpcClientConnection) servmanager.Service {
+	server *utils.Server, attrsChan, internalChan chan rpcclient.RpcClientConnection) servmanager.Service {
 	return &DispatcherService{
-		connChan:    make(chan rpcclient.RpcClientConnection, 1),
+		connChan:    internalChan,
 		cfg:         cfg,
 		dm:          dm,
 		cacheS:      cacheS,
