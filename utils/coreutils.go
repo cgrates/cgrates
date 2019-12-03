@@ -21,7 +21,6 @@ package utils
 import (
 	"archive/zip"
 	"bytes"
-	"compress/gzip"
 	"crypto/rand"
 	"crypto/sha1"
 	"encoding/gob"
@@ -29,7 +28,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"math"
 	"net/url"
@@ -37,7 +35,6 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
-	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -402,31 +399,6 @@ func Unzip(src, dest string) error {
 	return nil
 }
 
-// ZIPContent compresses src into zipped slice of bytes
-func GZIPContent(src []byte) (dst []byte, err error) {
-	var b bytes.Buffer
-	gz := gzip.NewWriter(&b)
-	if _, err = gz.Write(src); err != nil {
-		return
-	}
-	if err = gz.Flush(); err != nil {
-		return
-	}
-	if err = gz.Close(); err != nil {
-		return
-	}
-	return b.Bytes(), nil
-}
-
-func GUnZIPContent(src []byte) (dst []byte, err error) {
-	rdata := bytes.NewReader(src)
-	var r *gzip.Reader
-	if r, err = gzip.NewReader(rdata); err != nil {
-		return
-	}
-	return ioutil.ReadAll(r)
-}
-
 // successive Fibonacci numbers.
 func Fib() func() int {
 	a, b := 0, 1
@@ -439,7 +411,7 @@ func Fib() func() int {
 // Utilities to provide pointers where we need to define ad-hoc
 func StringPointer(str string) *string {
 	if str == ZERO {
-		str = ""
+		str = EmptyString
 		return &str
 	}
 	return &str
@@ -477,12 +449,6 @@ func DurationPointer(d time.Duration) *time.Duration {
 	return &d
 }
 
-func ReflectFuncLocation(handler interface{}) (file string, line int) {
-	f := runtime.FuncForPC(reflect.ValueOf(handler).Pointer())
-	entry := f.Entry()
-	return f.FileLine(entry)
-}
-
 func ToIJSON(v interface{}) string {
 	b, _ := json.MarshalIndent(v, "", " ")
 	return string(b)
@@ -509,11 +475,6 @@ func Clone(a, b interface{}) error {
 		return err
 	}
 	return nil
-}
-
-// Cloner is an interface for objects to clone themselves into interface
-type Cloner interface {
-	Clone() (interface{}, error)
 }
 
 // Used as generic function logic for various fields

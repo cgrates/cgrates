@@ -593,6 +593,10 @@ func TestParseZeroRatingSubject(t *testing.T) {
 	if d, err := ParseZeroRatingSubject(MONETARY, EmptyString, dfltRatingSubject); err != nil || d != time.Nanosecond {
 		t.Error("Error parsing rating subject: ", EmptyString, d, err)
 	}
+	expecting := "malformed rating subject: test"
+	if _, err := ParseZeroRatingSubject(MONETARY, "test", dfltRatingSubject); err == nil || err.Error() != expecting {
+		t.Errorf("Expecting: %+v, received: %+v ", expecting, err)
+	}
 }
 
 func TestConcatenatedKey(t *testing.T) {
@@ -641,96 +645,92 @@ func TestInfieldSplit(t *testing.T) {
 	}
 }
 
-func TestMandatory(t *testing.T) {
-	_, err := FmtFieldWidth("", "", 0, "", "", true)
-	if err == nil {
+func TestFmtFieldWidth(t *testing.T) {
+	//Mandatory0
+	if _, err := FmtFieldWidth("", "", 0, "", "", true); err == nil {
 		t.Errorf("Failed to detect mandatory value")
 	}
-}
-
-func TestMaxLen(t *testing.T) {
-	result, err := FmtFieldWidth("", "test", 4, "", "", false)
-	expected := "test"
-	if err != nil || result != expected {
-		t.Errorf("Expected \"test\" was \"%s\"", result)
+	//width = 0
+	if result, err := FmtFieldWidth("", "test", 0, "", "", false); err != nil {
+		t.Error(err)
+	} else if result != "test" {
+		t.Errorf("Expecting 'test', received %+q", result)
 	}
-}
-
-func TestRPadding(t *testing.T) {
-	result, err := FmtFieldWidth("", "test", 8, "", "right", false)
-	expected := "test    "
-	if err != nil || result != expected {
-		t.Errorf("Expected \"%s \" was \"%s\"", expected, result)
+	//MaxLen
+	if result, err := FmtFieldWidth("", "test", 4, "", "", false); err != nil {
+		t.Error(err)
+	} else if result != "test" {
+		t.Errorf("Expected \"test\" received: \"%s\"", result)
 	}
-}
-
-func TestPaddingFiller(t *testing.T) {
-	result, err := FmtFieldWidth("", "", 8, "", "right", false)
+	//RPadding
+	if result, err := FmtFieldWidth("", "test", 8, "", "right", false); err != nil {
+		t.Error(err)
+	} else if result != "test    " {
+		t.Errorf("Expected <\"test    \"> \" received: \"%s\"", result)
+	}
+	//PaddingFiller
 	expected := "        "
-	if err != nil || result != expected {
-		t.Errorf("Expected \"%s \" was \"%s\"", expected, result)
+	if result, err := FmtFieldWidth("", "", 8, "", "right", false); err != nil {
+		t.Error(err)
+	} else if result != expected {
+		t.Errorf("Expected \"%s \" received: \"%s\"", expected, result)
 	}
-}
-
-func TestLPadding(t *testing.T) {
-	result, err := FmtFieldWidth("", "test", 8, "", "left", false)
-	expected := "    test"
-	if err != nil || result != expected {
-		t.Errorf("Expected \"%s \" was \"%s\"", expected, result)
+	//LPadding
+	expected = "    test"
+	if result, err := FmtFieldWidth("", "test", 8, "", "left", false); err != nil {
+		t.Error(err)
+	} else if result != expected {
+		t.Errorf("Expected \"%s \" received: \"%s\"", expected, result)
 	}
-}
-
-func TestZeroLPadding(t *testing.T) {
-	result, err := FmtFieldWidth("", "test", 8, "", "zeroleft", false)
-	expected := "0000test"
-	if err != nil || result != expected {
-		t.Errorf("Expected \"%s \" was \"%s\"", expected, result)
+	//ZeroLPadding
+	expected = "0000test"
+	if result, err := FmtFieldWidth("", "test", 8, "", "zeroleft", false); err != nil {
+		t.Error(err)
+	} else if result != expected {
+		t.Errorf("Expected \"%s \" received: \"%s\"", expected, result)
 	}
-}
-
-func TestRStrip(t *testing.T) {
-	result, err := FmtFieldWidth("", "test", 2, "right", "", false)
-	expected := "te"
-	if err != nil || result != expected {
-		t.Errorf("Expected \"%s \" was \"%s\"", expected, result)
+	//RStrip
+	expected = "te"
+	if result, err := FmtFieldWidth("", "test", 2, "right", "", false); err != nil {
+		t.Error(err)
+	} else if result != expected {
+		t.Errorf("Expected \"%s \" received: \"%s\"", expected, result)
 	}
-}
-
-func TestXRStrip(t *testing.T) {
-	result, err := FmtFieldWidth("", "test", 3, "xright", "", false)
-	expected := "tex"
-	if err != nil || result != expected {
-		t.Errorf("Expected \"%s \" was \"%s\"", expected, result)
+	//XRStrip
+	expected = "tex"
+	if result, err := FmtFieldWidth("", "test", 3, "xright", "", false); err != nil {
+		t.Error(err)
+	} else if result != expected {
+		t.Errorf("Expected \"%s \" received: \"%s\"", expected, result)
 	}
-}
-
-func TestLStrip(t *testing.T) {
-	result, err := FmtFieldWidth("", "test", 2, "left", "", false)
-	expected := "st"
-	if err != nil || result != expected {
-		t.Errorf("Expected \"%s \" was \"%s\"", expected, result)
+	//LStrip
+	expected = "st"
+	if result, err := FmtFieldWidth("", "test", 2, "left", "", false); err != nil {
+		t.Error(err)
+	} else if result != expected {
+		t.Errorf("Expected \"%s \" received: \"%s\"", expected, result)
 	}
-}
-
-func TestXLStrip(t *testing.T) {
-	result, err := FmtFieldWidth("", "test", 3, "xleft", "", false)
-	expected := "xst"
-	if err != nil || result != expected {
-		t.Errorf("Expected \"%s \" was \"%s\"", expected, result)
+	//XLStrip
+	expected = "xst"
+	if result, err := FmtFieldWidth("", "test", 3, "xleft", "", false); err != nil {
+		t.Error(err)
+	} else if result != expected {
+		t.Errorf("Expected \"%s \" received: \"%s\"", expected, result)
 	}
-}
-
-func TestStripNotAllowed(t *testing.T) {
-	_, err := FmtFieldWidth("", "test", 3, "", "", false)
-	if err == nil {
+	//StripNotAllowed
+	if _, err := FmtFieldWidth("", "test", 3, "", "", false); err == nil {
 		t.Error("Expected error")
 	}
-}
-
-func TestPaddingNotAllowed(t *testing.T) {
-	_, err := FmtFieldWidth("", "test", 5, "", "", false)
-	if err == nil {
+	//PaddingNotAllowed
+	if _, err := FmtFieldWidth("", "test", 5, "", "", false); err == nil {
 		t.Error("Expected error")
+	}
+	//
+	expected = "test"
+	if result, err := FmtFieldWidth("", "test", 3, "wrong", "", false); err != nil {
+		t.Error(err)
+	} else if result != expected {
+		t.Errorf("Expected \"%s \" received: \"%s\"", expected, result)
 	}
 }
 
@@ -747,12 +747,36 @@ func TestCastIfToString(t *testing.T) {
 	} else if sOut != "1" {
 		t.Errorf("Received: %+v", sOut)
 	}
+	v = interface{}((int64)(1))
+	if sOut, casts := CastIfToString(v); !casts {
+		t.Error("Does not cast")
+	} else if sOut != "1" {
+		t.Errorf("Received: %+v", sOut)
+	}
+	v = interface{}(true)
+	if sOut, casts := CastIfToString(v); !casts {
+		t.Error("Does not cast")
+	} else if sOut != "true" {
+		t.Errorf("Received: %+v", sOut)
+	}
+	v = interface{}([]byte("test"))
+	if sOut, casts := CastIfToString(v); !casts {
+		t.Error("Does not cast")
+	} else if sOut != "test" {
+		t.Errorf("Received: %+v", sOut)
+	}
 	v = interface{}(1.2)
 	if sOut, casts := CastIfToString(v); !casts {
 		t.Error("Does not cast")
 	} else if sOut != "1.2" {
 		t.Errorf("Received: %+v", sOut)
 	}
+	//default
+	v = interface{}([]string{"test"})
+	if _, casts := CastIfToString(v); casts {
+		t.Error("Does cast")
+	}
+
 }
 
 func TestEndOfMonth(t *testing.T) {
@@ -779,6 +803,10 @@ func TestEndOfMonth(t *testing.T) {
 	eom = GetEndOfMonth(time.Date(2016, time.July, 31, 23, 59, 59, 0, time.UTC))
 	expected = time.Date(2016, time.July, 31, 23, 59, 59, 0, time.UTC)
 	if !eom.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, eom)
+	}
+	eom = GetEndOfMonth(time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC))
+	if time.Now().Add(-1).Before(eom) {
 		t.Errorf("Expected %v was %v", expected, eom)
 	}
 }
@@ -855,12 +883,43 @@ func TestClone(t *testing.T) {
 	}
 }
 
+func TestFib(t *testing.T) {
+	fib := Fib()
+	if tmp := fib(); tmp != 1 {
+		t.Error("Expecting: 1, received ", tmp)
+	}
+	if tmp := fib(); tmp != 1 {
+		t.Error("Expecting: 1, received ", tmp)
+	}
+	if tmp := fib(); tmp != 2 {
+		t.Error("Expecting: 2, received ", tmp)
+	}
+	if tmp := fib(); tmp != 3 {
+		t.Error("Expecting: 3, received ", tmp)
+	}
+	if tmp := fib(); tmp != 5 {
+		t.Error("Expecting: 5, received ", tmp)
+	}
+}
+
+func TestStringPointer(t *testing.T) {
+	result := StringPointer("*zero")
+	if *result != EmptyString {
+		t.Errorf("Expecting: `%+q`, received `%+q`", EmptyString, *result)
+	}
+	str := "test_string"
+	result = StringPointer(str)
+	expected := &str
+	if *result != *expected {
+		t.Errorf("Expecting: %+v, received: %+v", &str, result)
+	}
+}
 func TestIntPointer(t *testing.T) {
 	t1 := 14
 	result := IntPointer(t1)
 	expected := &t1
 	if *expected != *result {
-		t.Error("Expected:", expected, ", received:", result)
+		t.Errorf("Expecting: %+v, received: %+v", expected, result)
 	}
 }
 
@@ -900,6 +959,15 @@ func TestStringMapPointer(t *testing.T) {
 	}
 }
 
+func TestMapStringStringPointer(t *testing.T) {
+	mp := map[string]string{"string1": "string2"}
+	result := MapStringStringPointer(mp)
+	expected := &mp
+	if *result == nil {
+		t.Errorf("Expected: %+q, received: nil", expected)
+	}
+}
+
 func TestTimePointer(t *testing.T) {
 	t1, err := time.Parse(time.RFC3339, "2012-11-01T22:08:41+00:00")
 	if err != nil {
@@ -909,6 +977,24 @@ func TestTimePointer(t *testing.T) {
 	expected := &t1
 	if *expected != *result {
 		t.Error("Expected:", expected, ", received:", result)
+	}
+}
+
+func TestDurationPointer(t *testing.T) {
+	duration := time.Duration(10)
+	result := DurationPointer(duration)
+	expected := &duration
+	if *expected != *result {
+		t.Errorf("Expected: %+q, received: %+q", expected, result)
+	}
+}
+
+func TestToIJSON(t *testing.T) {
+	str := "string"
+	received := ToIJSON(str)
+	expected := "\"string\""
+	if !reflect.DeepEqual(received, expected) {
+		t.Errorf("Expected: %+q, received: %+q", expected, received)
 	}
 }
 
@@ -995,19 +1081,6 @@ func TestCounterConcurrent(t *testing.T) {
 	}
 	if cnter.Value() != 0 {
 		t.Error("Counter was not reseted to 0")
-	}
-}
-
-func TestGZIPGUnZIP(t *testing.T) {
-	src := []byte("CGRateS.org")
-	gzipped, err := GZIPContent(src)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if dst, err := GUnZIPContent(gzipped); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(src, dst) {
-		t.Error("not matching initial source")
 	}
 }
 
