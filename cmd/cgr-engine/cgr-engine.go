@@ -394,9 +394,12 @@ func main() {
 	if err := cgrEngineFlags.Parse(os.Args[1:]); err != nil {
 		return
 	}
-	vers := utils.GetCGRVersion()
 	if *version {
-		fmt.Println(vers)
+		if vers, err := utils.GetCGRVersion(); err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Println(vers)
+		}
 		return
 	}
 	if *pidFile != "" {
