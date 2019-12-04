@@ -51,7 +51,7 @@ func TestDspStatSMongo(t *testing.T) {
 
 func testDspStsPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.StatSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.StatSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -64,19 +64,19 @@ func testDspStsPingFailover(t *testing.T) {
 			APIKey: utils.StringPointer("stat12345"),
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.StatSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.StatSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine.stopEngine(t)
-	if err := dispEngine.RCP.Call(utils.StatSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.StatSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine2.stopEngine(t)
-	if err := dispEngine.RCP.Call(utils.StatSv1Ping, &ev, &reply); err == nil {
+	if err := dispEngine.RPC.Call(utils.StatSv1Ping, &ev, &reply); err == nil {
 		t.Errorf("Expected error but recived %v and reply %v\n", err, reply)
 	}
 	allEngine.startEngine(t)
@@ -104,7 +104,7 @@ func testDspStsGetStatFailover(t *testing.T) {
 			APIKey: utils.StringPointer("stat12345"),
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.StatSv1ProcessEvent, args, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.StatSv1ProcessEvent, args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -120,7 +120,7 @@ func testDspStsGetStatFailover(t *testing.T) {
 		},
 	}
 	allEngine.stopEngine(t)
-	if err := dispEngine.RCP.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := dispEngine.RPC.Call(utils.StatSv1GetQueueStringMetrics,
 		args2, &metrics); err != nil {
 		t.Error(err)
 	}
@@ -128,7 +128,7 @@ func testDspStsGetStatFailover(t *testing.T) {
 	allEngine.startEngine(t)
 	allEngine2.stopEngine(t)
 
-	if err := dispEngine.RCP.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := dispEngine.RPC.Call(utils.StatSv1GetQueueStringMetrics,
 		args2, &metrics); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error NOT_FOUND but recived %v and reply %v\n", err, reply)
 	}
@@ -137,12 +137,12 @@ func testDspStsGetStatFailover(t *testing.T) {
 
 func testDspStsPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.StatSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.StatSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RCP.Call(utils.StatSv1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.StatSv1Ping, &utils.CGREventWithArgDispatcher{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
@@ -173,7 +173,7 @@ func testDspStsTestAuthKey(t *testing.T) {
 			APIKey: utils.StringPointer("12345"),
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.StatSv1ProcessEvent,
+	if err := dispEngine.RPC.Call(utils.StatSv1ProcessEvent,
 		args, &reply); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
@@ -189,7 +189,7 @@ func testDspStsTestAuthKey(t *testing.T) {
 	}
 
 	var metrics map[string]string
-	if err := dispEngine.RCP.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := dispEngine.RPC.Call(utils.StatSv1GetQueueStringMetrics,
 		args2, &metrics); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
@@ -215,7 +215,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 			APIKey: utils.StringPointer("stat12345"),
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.StatSv1ProcessEvent, args, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.StatSv1ProcessEvent, args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -235,7 +235,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 		utils.MetaTCD: "2m15s",
 	}
 
-	if err := dispEngine.RCP.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := dispEngine.RPC.Call(utils.StatSv1GetQueueStringMetrics,
 		args2, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -259,7 +259,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 			APIKey: utils.StringPointer("stat12345"),
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.StatSv1ProcessEvent, args, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.StatSv1ProcessEvent, args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {
 		t.Errorf("Expecting: %+v, received: %+v", expected, reply)
@@ -269,7 +269,7 @@ func testDspStsTestAuthKey2(t *testing.T) {
 		utils.MetaTCC: "133",
 		utils.MetaTCD: "3m0s",
 	}
-	if err := dispEngine.RCP.Call(utils.StatSv1GetQueueStringMetrics,
+	if err := dispEngine.RPC.Call(utils.StatSv1GetQueueStringMetrics,
 		args2, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -295,7 +295,7 @@ func testDspStsTestAuthKey3(t *testing.T) {
 		utils.MetaTCD: 180,
 	}
 
-	if err := dispEngine.RCP.Call(utils.StatSv1GetQueueFloatMetrics,
+	if err := dispEngine.RPC.Call(utils.StatSv1GetQueueFloatMetrics,
 		args2, &metrics); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedMetrics, metrics) {
@@ -303,7 +303,7 @@ func testDspStsTestAuthKey3(t *testing.T) {
 	}
 
 	estats := []string{"Stats2", "Stats2_1"}
-	if err := dispEngine.RCP.Call(utils.StatSv1GetQueueIDs,
+	if err := dispEngine.RPC.Call(utils.StatSv1GetQueueIDs,
 		&utils.TenantWithArgDispatcher{
 			TenantArg: &utils.TenantArg{
 				Tenant: "cgrates.org",
@@ -321,7 +321,7 @@ func testDspStsTestAuthKey3(t *testing.T) {
 	}
 
 	estats = []string{"Stats2"}
-	if err := dispEngine.RCP.Call(utils.StatSv1GetStatQueuesForEvent,
+	if err := dispEngine.RPC.Call(utils.StatSv1GetStatQueuesForEvent,
 		&engine.StatsArgsProcessEvent{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",

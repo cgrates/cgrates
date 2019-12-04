@@ -26,11 +26,11 @@ agts=$?
 echo 'go test github.com/cgrates/cgrates/sessions -tags=integration -rpc=*gob'
 go test github.com/cgrates/cgrates/sessions -tags=integration -rpc=*gob
 smg=$?
-# echo 'go test github.com/cgrates/cgrates/dispatchers -tags=integration'
-# go test github.com/cgrates/cgrates/dispatchers -tags=integration
-# dis=$?
+echo 'go test github.com/cgrates/cgrates/dispatchers -tags=integration -rpc=*gob'
+go test github.com/cgrates/cgrates/dispatchers -tags=integration -rpc=*gob
+dis=$?
 echo 'go test github.com/cgrates/cgrates/loaders -tags=integration -rpc=*gob'
 go test github.com/cgrates/cgrates/loaders -tags=integration -rpc=*gob
 lds=$?
 
-exit $gen && $ap1 && $ap2 && $en && $cdrc && $gnr && $agts && $smg #&& $dis && $lds && $ers 
+exit $gen && $ap1 && $ap2 && $en && $cdrc && $gnr && $agts && $smg && $dis && $lds && $ers 

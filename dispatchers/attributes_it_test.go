@@ -47,11 +47,19 @@ var sTestsDspAttr = []func(t *testing.T){
 
 //Test start here
 func TestDspAttributeSTMySQL(t *testing.T) {
-	testDsp(t, sTestsDspAttr, "TestDspAttributeS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspAttr, "TestDspAttributeS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspAttr, "TestDspAttributeS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	}
 }
 
 func TestDspAttributeSMongo(t *testing.T) {
-	testDsp(t, sTestsDspAttr, "TestDspAttributeS", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspAttr, "TestDspAttributeS", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspAttr, "TestDspAttributeS", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+	}
 }
 
 func TestDspAttributeSNoConn(t *testing.T) {
@@ -64,13 +72,13 @@ func TestDspAttributeSNoConn(t *testing.T) {
 
 func testDspAttrPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.AttributeSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.AttributeSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	reply = ""
-	if err := allEngine2.RCP.Call(utils.AttributeSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine2.RPC.Call(utils.AttributeSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -84,27 +92,27 @@ func testDspAttrPingFailover(t *testing.T) {
 			APIKey: utils.StringPointer("attr12345"),
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.AttributeSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.AttributeSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine.stopEngine(t)
 	reply = ""
-	if err := dispEngine.RCP.Call(utils.AttributeSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.AttributeSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine2.stopEngine(t)
 	reply = ""
-	if err := dispEngine.RCP.Call(utils.AttributeSv1Ping, &ev, &reply); err == nil {
+	if err := dispEngine.RPC.Call(utils.AttributeSv1Ping, &ev, &reply); err == nil {
 		t.Errorf("Expected error but recived %v and reply %v\n", err, reply)
 	}
 	allEngine.startEngine(t)
 	allEngine2.startEngine(t)
 	reply = ""
-	if err := dispEngine.RCP.Call(utils.AttributeSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.AttributeSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -142,6 +150,9 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 		Weight: 20.0,
 	}
 	eAttrPrf.Compile()
+	if *encoding == utils.MetaGOB {
+		eAttrPrf.Attributes[0].FilterIDs = nil // empty slice are nil in gob
+	}
 
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1002_SIMPLEAUTH"},
@@ -159,12 +170,12 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 
 	var attrReply *engine.AttributeProfile
 	var rplyEv engine.AttrSProcessEventReply
-	if err := dispEngine.RCP.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		args, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
-	if err := dispEngine.RCP.Call(utils.AttributeSv1ProcessEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1ProcessEvent,
 		args, &rplyEv); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	} else if reflect.DeepEqual(eRply, &rplyEv) {
@@ -174,7 +185,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 
 	allEngine2.stopEngine(t)
 
-	if err := dispEngine.RCP.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		args, &attrReply); err != nil {
 		t.Error(err)
 	}
@@ -185,7 +196,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 		t.Errorf("Expecting: %s, received: %s", utils.ToJSON(eAttrPrf), utils.ToJSON(attrReply))
 	}
 
-	if err := dispEngine.RCP.Call(utils.AttributeSv1ProcessEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1ProcessEvent,
 		args, &rplyEv); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRply, &rplyEv) {
@@ -198,15 +209,15 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 
 func testDspAttrPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.AttributeSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.AttributeSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if dispEngine.RCP == nil {
-		t.Fatal(dispEngine.RCP)
+	if dispEngine.RPC == nil {
+		t.Fatal(dispEngine.RPC)
 	}
-	if err := dispEngine.RCP.Call(utils.AttributeSv1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.AttributeSv1Ping, &utils.CGREventWithArgDispatcher{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
@@ -232,7 +243,7 @@ func testDspAttrTestMissingArgDispatcher(t *testing.T) {
 		},
 	}
 	var attrReply *engine.AttributeProfile
-	if err := dispEngine.RCP.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		args, &attrReply); err == nil || err.Error() != utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField).Error() {
 		t.Errorf("Error:%v rply=%s", err, utils.ToJSON(attrReply))
 	}
@@ -251,7 +262,7 @@ func testDspAttrTestMissingApiKey(t *testing.T) {
 		ArgDispatcher: &utils.ArgDispatcher{},
 	}
 	var attrReply *engine.AttributeProfile
-	if err := dispEngine.RCP.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		args, &attrReply); err == nil || err.Error() != utils.NewErrMandatoryIeMissing(utils.APIKey).Error() {
 		t.Errorf("Error:%v rply=%s", err, utils.ToJSON(attrReply))
 	}
@@ -272,7 +283,7 @@ func testDspAttrTestUnknownApiKey(t *testing.T) {
 		},
 	}
 	var attrReply *engine.AttributeProfile
-	if err := dispEngine.RCP.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		args, &attrReply); err == nil || err.Error() != utils.ErrUnknownApiKey.Error() {
 		t.Error(err)
 	}
@@ -293,7 +304,7 @@ func testDspAttrTestAuthKey(t *testing.T) {
 		},
 	}
 	var attrReply *engine.AttributeProfile
-	if err := dispEngine.RCP.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		args, &attrReply); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
@@ -329,8 +340,11 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 		Weight: 20.0,
 	}
 	eAttrPrf.Compile()
+	if *encoding == utils.MetaGOB {
+		eAttrPrf.Attributes[0].FilterIDs = nil // empty slice are nil in gob
+	}
 	var attrReply *engine.AttributeProfile
-	if err := dispEngine.RCP.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		args, &attrReply); err != nil {
 		t.Error(err)
 	}
@@ -355,7 +369,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 	}
 
 	var rplyEv engine.AttrSProcessEventReply
-	if err := dispEngine.RCP.Call(utils.AttributeSv1ProcessEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1ProcessEvent,
 		args, &rplyEv); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRply, &rplyEv) {
@@ -380,7 +394,7 @@ func testDspAttrTestAuthKey3(t *testing.T) {
 		},
 	}
 	var attrReply *engine.AttributeProfile
-	if err := dispEngine.RCP.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		args, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
@@ -417,6 +431,9 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 		Weight: 20.0,
 	}
 	eAttrPrf.Compile()
+	if *encoding == utils.MetaGOB {
+		eAttrPrf.Attributes[0].FilterIDs = nil // empty slice are nil in gob
+	}
 
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1002_SIMPLEAUTH"},
@@ -435,13 +452,13 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 	var attrReply *engine.AttributeProfile
 	var rplyEv engine.AttrSProcessEventReply
 	// To ALL2
-	if err := dispEngine.RCP.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		args, &attrReply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	}
 
 	// To ALL
-	if err := dispEngine.RCP.Call(utils.AttributeSv1GetAttributeForEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1GetAttributeForEvent,
 		args, &attrReply); err != nil {
 		t.Error(err)
 	}
@@ -453,7 +470,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 	}
 
 	// To ALL2
-	if err := dispEngine.RCP.Call(utils.AttributeSv1ProcessEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1ProcessEvent,
 		args, &rplyEv); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)
 	} else if reflect.DeepEqual(eRply, &rplyEv) {
@@ -462,7 +479,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 	}
 
 	// To ALL
-	if err := dispEngine.RCP.Call(utils.AttributeSv1ProcessEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1ProcessEvent,
 		args, &rplyEv); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRply, &rplyEv) {
@@ -502,7 +519,7 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 	}
 
 	var rplyEv engine.AttrSProcessEventReply
-	if err := dispEngine.RCP.Call(utils.AttributeSv1ProcessEvent,
+	if err := dispEngine.RPC.Call(utils.AttributeSv1ProcessEvent,
 		args, &rplyEv); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRply, &rplyEv) {
@@ -513,15 +530,15 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 
 func testDspAttrPingNoArgDispatcher(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.AttributeSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.AttributeSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if dispEngine.RCP == nil {
-		t.Fatal(dispEngine.RCP)
+	if dispEngine.RPC == nil {
+		t.Fatal(dispEngine.RPC)
 	}
-	if err := dispEngine.RCP.Call(utils.AttributeSv1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.AttributeSv1Ping, &utils.CGREventWithArgDispatcher{
 		CGREvent: &utils.CGREvent{Tenant: "cgrates.org"},
 	}, &reply); err != nil {
 		t.Error(err)

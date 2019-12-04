@@ -52,12 +52,12 @@ func TestDspSupplierSMongo(t *testing.T) {
 
 func testDspSupPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.SupplierSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.SupplierSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RCP.Call(utils.SupplierSv1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.SupplierSv1Ping, &utils.CGREventWithArgDispatcher{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
@@ -73,7 +73,7 @@ func testDspSupPing(t *testing.T) {
 
 func testDspSupPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.SupplierSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.SupplierSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -86,19 +86,19 @@ func testDspSupPingFailover(t *testing.T) {
 			APIKey: utils.StringPointer("sup12345"),
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.SupplierSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.SupplierSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine.stopEngine(t)
-	if err := dispEngine.RCP.Call(utils.SupplierSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.SupplierSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine2.stopEngine(t)
-	if err := dispEngine.RCP.Call(utils.SupplierSv1Ping, &ev, &reply); err == nil {
+	if err := dispEngine.RPC.Call(utils.SupplierSv1Ping, &ev, &reply); err == nil {
 		t.Errorf("Expected error but recived %v and reply %v\n", err, reply)
 	}
 	allEngine.startEngine(t)
@@ -164,14 +164,14 @@ func testDspSupGetSupFailover(t *testing.T) {
 			APIKey: utils.StringPointer("sup12345"),
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.SupplierSv1GetSuppliers,
+	if err := dispEngine.RPC.Call(utils.SupplierSv1GetSuppliers,
 		args, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRpl1, rpl) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eRpl1), utils.ToJSON(rpl))
 	}
 	allEngine2.stopEngine(t)
-	if err := dispEngine.RCP.Call(utils.SupplierSv1GetSuppliers,
+	if err := dispEngine.RPC.Call(utils.SupplierSv1GetSuppliers,
 		args, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRpl, rpl) {
@@ -198,7 +198,7 @@ func testDspSupTestAuthKey(t *testing.T) {
 			APIKey: utils.StringPointer("12345"),
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.SupplierSv1GetSuppliers,
+	if err := dispEngine.RPC.Call(utils.SupplierSv1GetSuppliers,
 		args, &rpl); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
@@ -248,7 +248,7 @@ func testDspSupTestAuthKey2(t *testing.T) {
 			APIKey: utils.StringPointer("sup12345"),
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.SupplierSv1GetSuppliers,
+	if err := dispEngine.RPC.Call(utils.SupplierSv1GetSuppliers,
 		args, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRpl, rpl) {
@@ -315,13 +315,13 @@ func testDspSupGetSupRoundRobin(t *testing.T) {
 			APIKey: utils.StringPointer("sup12345"),
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.SupplierSv1GetSuppliers,
+	if err := dispEngine.RPC.Call(utils.SupplierSv1GetSuppliers,
 		args, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRpl1, rpl) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eRpl1), utils.ToJSON(rpl))
 	}
-	if err := dispEngine.RCP.Call(utils.SupplierSv1GetSuppliers,
+	if err := dispEngine.RPC.Call(utils.SupplierSv1GetSuppliers,
 		args, &rpl); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRpl, rpl) {
@@ -382,7 +382,7 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 		Weight: 10,
 	}
 	var supProf []*engine.SupplierProfile
-	if err := dispEngine.RCP.Call(utils.SupplierSv1GetSupplierProfilesForEvent,
+	if err := dispEngine.RPC.Call(utils.SupplierSv1GetSupplierProfilesForEvent,
 		ev, &supProf); err != nil {
 		t.Fatal(err)
 	}

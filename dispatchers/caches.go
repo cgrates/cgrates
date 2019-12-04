@@ -213,7 +213,7 @@ func (dS *DispatcherService) CacheSv1GetCacheStats(args *utils.AttrCacheIDsWithA
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1GetCacheStats, args.CacheIDs, reply)
+		utils.CacheSv1GetCacheStats, args, reply)
 }
 
 // PrecacheStatus checks status of active precache processes

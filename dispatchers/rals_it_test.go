@@ -39,12 +39,12 @@ func TestDspRALsITMySQL(t *testing.T) {
 
 func testDspRALsPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.RALsV1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.RALsV1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RCP.Call(utils.RALsV1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.RALsV1Ping, &utils.CGREventWithArgDispatcher{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
@@ -69,7 +69,7 @@ func testDspRALsGetRatingPlanCost(t *testing.T) {
 		},
 	}
 	var reply RatingPlanCost
-	if err := dispEngine.RCP.Call(utils.RALsV1GetRatingPlansCost, arg, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.RALsV1GetRatingPlansCost, arg, &reply); err != nil {
 		t.Error(err)
 	} else if reply.RatingPlanID != "RP_1001" {
 		t.Error("Unexpected RatingPlanID: ", reply.RatingPlanID)

@@ -51,7 +51,7 @@ func TestDspThresholdSMongo(t *testing.T) {
 
 func testDspThPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.ThresholdSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.ThresholdSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -64,19 +64,19 @@ func testDspThPingFailover(t *testing.T) {
 			APIKey: utils.StringPointer("thr12345"),
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.ThresholdSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.ThresholdSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine.stopEngine(t)
-	if err := dispEngine.RCP.Call(utils.ThresholdSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.ThresholdSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine2.stopEngine(t)
-	if err := dispEngine.RCP.Call(utils.ThresholdSv1Ping, &ev, &reply); err == nil {
+	if err := dispEngine.RPC.Call(utils.ThresholdSv1Ping, &ev, &reply); err == nil {
 		t.Errorf("Expected error but recived %v and reply %v\n", err, reply)
 	}
 	allEngine.startEngine(t)
@@ -101,12 +101,12 @@ func testDspThProcessEventFailover(t *testing.T) {
 		},
 	}
 
-	if err := dispEngine.RCP.Call(utils.ThresholdSv1ProcessEvent, args,
+	if err := dispEngine.RPC.Call(utils.ThresholdSv1ProcessEvent, args,
 		&ids); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error NOT_FOUND but recived %v and reply %v\n", err, ids)
 	}
 	allEngine2.stopEngine(t)
-	if err := dispEngine.RCP.Call(utils.ThresholdSv1ProcessEvent, args, &ids); err != nil {
+	if err := dispEngine.RPC.Call(utils.ThresholdSv1ProcessEvent, args, &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIDs, ids) {
 		t.Errorf("expecting: %+v, received: %+v", eIDs, ids)
@@ -116,12 +116,12 @@ func testDspThProcessEventFailover(t *testing.T) {
 
 func testDspThPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.ThresholdSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.ThresholdSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RCP.Call(utils.ThresholdSv1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.ThresholdSv1Ping, &utils.CGREventWithArgDispatcher{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
@@ -151,12 +151,12 @@ func testDspThTestAuthKey(t *testing.T) {
 		},
 	}
 
-	if err := dispEngine.RCP.Call(utils.ThresholdSv1ProcessEvent,
+	if err := dispEngine.RPC.Call(utils.ThresholdSv1ProcessEvent,
 		args, &ids); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
 	var th *engine.Thresholds
-	if err := dispEngine.RCP.Call(utils.ThresholdSv1GetThresholdsForEvent, args,
+	if err := dispEngine.RPC.Call(utils.ThresholdSv1GetThresholdsForEvent, args,
 		&th); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
@@ -179,7 +179,7 @@ func testDspThTestAuthKey2(t *testing.T) {
 		},
 	}
 
-	if err := dispEngine.RCP.Call(utils.ThresholdSv1ProcessEvent, args, &ids); err != nil {
+	if err := dispEngine.RPC.Call(utils.ThresholdSv1ProcessEvent, args, &ids); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eIDs, ids) {
 		t.Errorf("expecting: %+v, received: %+v", eIDs, ids)
@@ -192,7 +192,7 @@ func testDspThTestAuthKey2(t *testing.T) {
 			Hits:   1,
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.ThresholdSv1GetThresholdsForEvent, args, &th); err != nil {
+	if err := dispEngine.RPC.Call(utils.ThresholdSv1GetThresholdsForEvent, args, &th); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual((*eTh)[0].Tenant, (*th)[0].Tenant) {
 		t.Errorf("expecting: %+v, received: %+v", (*eTh)[0].Tenant, (*th)[0].Tenant)
@@ -210,7 +210,7 @@ func testDspThTestAuthKey3(t *testing.T) {
 		ID:     "THD_ACNT_1002",
 		Hits:   1,
 	}
-	if err := dispEngine.RCP.Call(utils.ThresholdSv1GetThreshold, &utils.TenantIDWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.ThresholdSv1GetThreshold, &utils.TenantIDWithArgDispatcher{
 		TenantID: &utils.TenantID{
 			Tenant: "cgrates.org",
 			ID:     "THD_ACNT_1002",
@@ -231,7 +231,7 @@ func testDspThTestAuthKey3(t *testing.T) {
 	var ids []string
 	eIDs := []string{"THD_ACNT_1002"}
 
-	if err := dispEngine.RCP.Call(utils.ThresholdSv1GetThresholdIDs, &utils.TenantWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.ThresholdSv1GetThresholdIDs, &utils.TenantWithArgDispatcher{
 		TenantArg: &utils.TenantArg{
 			Tenant: "cgrates.org",
 		},

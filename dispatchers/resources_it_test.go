@@ -48,7 +48,7 @@ func TestDspResourceSITMongo(t *testing.T) {
 
 func testDspResPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.ResourceSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.ResourceSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -61,19 +61,19 @@ func testDspResPingFailover(t *testing.T) {
 			APIKey: utils.StringPointer("res12345"),
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.ResourceSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.ResourceSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine.stopEngine(t)
-	if err := dispEngine.RCP.Call(utils.ResourceSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.ResourceSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine2.stopEngine(t)
-	if err := dispEngine.RCP.Call(utils.ResourceSv1Ping, &ev, &reply); err == nil {
+	if err := dispEngine.RPC.Call(utils.ResourceSv1Ping, &ev, &reply); err == nil {
 		t.Errorf("Expected error but recived %v and reply %v\n", err, reply)
 	}
 	allEngine.startEngine(t)
@@ -82,12 +82,12 @@ func testDspResPingFailover(t *testing.T) {
 
 func testDspResPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.ResourceSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.ResourceSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RCP.Call(utils.ResourceSv1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.ResourceSv1Ping, &utils.CGREventWithArgDispatcher{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
@@ -118,7 +118,7 @@ func testDspResTestAuthKey(t *testing.T) {
 		},
 	}
 
-	if err := dispEngine.RCP.Call(utils.ResourceSv1GetResourcesForEvent,
+	if err := dispEngine.RPC.Call(utils.ResourceSv1GetResourcesForEvent,
 		args, &rs); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
@@ -148,7 +148,7 @@ func testDspResTestAuthKey2(t *testing.T) {
 		},
 	}
 
-	if err := dispEngine.RCP.Call(utils.ResourceSv1GetResourcesForEvent,
+	if err := dispEngine.RPC.Call(utils.ResourceSv1GetResourcesForEvent,
 		args, &rs); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eRs, rs) {
@@ -174,7 +174,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 			APIKey: utils.StringPointer("res12345"),
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.ResourceSv1AllocateResources,
+	if err := dispEngine.RPC.Call(utils.ResourceSv1AllocateResources,
 		argsRU, &reply); err != nil {
 		t.Error(err)
 	}
@@ -183,7 +183,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
 	}
 
-	if err := dispEngine.RCP.Call(utils.ResourceSv1AuthorizeResources, argsRU, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.ResourceSv1AuthorizeResources, argsRU, &reply); err != nil {
 		t.Error(err)
 	} else if reply != eAllocationMsg { // already 3 usages active before allow call, we should have now more than allowed
 		t.Errorf("Expecting: %+v, received: %+v", eAllocationMsg, reply)
@@ -203,7 +203,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 			APIKey: utils.StringPointer("res12345"),
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.ResourceSv1AuthorizeResources,
+	if err := dispEngine.RPC.Call(utils.ResourceSv1AuthorizeResources,
 		argsRU, &reply); err == nil || err.Error() != utils.ErrResourceUnauthorized.Error() {
 		t.Error(err)
 	}
@@ -223,7 +223,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 			APIKey: utils.StringPointer("res12345"),
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.ResourceSv1ReleaseResources,
+	if err := dispEngine.RPC.Call(utils.ResourceSv1ReleaseResources,
 		argsRU, &reply); err != nil {
 		t.Error(err)
 	}
@@ -244,7 +244,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 			APIKey: utils.StringPointer("res12345"),
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.ResourceSv1AuthorizeResources, argsRU, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.ResourceSv1AuthorizeResources, argsRU, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "ResGroup1" {
 		t.Error("Unexpected reply returned", reply)
@@ -264,7 +264,7 @@ func testDspResTestAuthKey3(t *testing.T) {
 			APIKey: utils.StringPointer("res12345"),
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
+	if err := dispEngine.RPC.Call(utils.ResourceSv1GetResourcesForEvent, args, &rs); err != nil {
 		t.Error(err)
 	} else if len(*rs) != 1 {
 		t.Errorf("Resources: %+v", utils.ToJSON(rs))

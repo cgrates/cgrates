@@ -79,7 +79,7 @@ func testDspSessionAddBalacne(t *testing.T) {
 		},
 	}
 	var reply string
-	if err := allEngine.RCP.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
@@ -90,18 +90,18 @@ func testDspSessionAddBalacne(t *testing.T) {
 		Account: attrSetBalance.Account,
 	}
 	eAcntVal := float64(initUsage)
-	if err := allEngine.RCP.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := allEngine.RPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %v, received: %v",
 			time.Duration(eAcntVal), time.Duration(acnt.BalanceMap[utils.VOICE].GetTotalValue()))
 	}
-	if err := allEngine2.RCP.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
+	if err := allEngine2.RPC.Call(utils.ApierV2SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := allEngine2.RCP.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
+	if err := allEngine2.RPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
 		t.Errorf("Expecting: %v, received: %v",
@@ -111,12 +111,12 @@ func testDspSessionAddBalacne(t *testing.T) {
 
 func testDspSessionPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.SessionSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.SessionSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RCP.Call(utils.SessionSv1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.SessionSv1Ping, &utils.CGREventWithArgDispatcher{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
@@ -132,7 +132,7 @@ func testDspSessionPing(t *testing.T) {
 
 func testDspSessionPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.SessionSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.SessionSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -145,19 +145,19 @@ func testDspSessionPingFailover(t *testing.T) {
 			APIKey: utils.StringPointer("ses12345"),
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.SessionSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.SessionSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine.stopEngine(t)
-	if err := dispEngine.RCP.Call(utils.SessionSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.SessionSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine2.stopEngine(t)
-	if err := dispEngine.RCP.Call(utils.SessionSv1Ping, &ev, &reply); err == nil {
+	if err := dispEngine.RPC.Call(utils.SessionSv1Ping, &ev, &reply); err == nil {
 		t.Errorf("Expected error but recived %v and reply %v\n", err, reply)
 	}
 	allEngine.startEngine(t)
@@ -191,7 +191,7 @@ func testDspSessionTestAuthKey(t *testing.T) {
 		},
 	}
 	var rply sessions.V1AuthorizeReplyWithDigest
-	if err := dispEngine.RCP.Call(utils.SessionSv1AuthorizeEventWithDigest,
+	if err := dispEngine.RPC.Call(utils.SessionSv1AuthorizeEventWithDigest,
 		args, &rply); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
@@ -225,7 +225,7 @@ func testDspSessionAuthorize(t *testing.T) {
 		},
 	}
 	var rply sessions.V1AuthorizeReplyWithDigest
-	if err := dispEngine.RCP.Call(utils.SessionSv1AuthorizeEventWithDigest,
+	if err := dispEngine.RPC.Call(utils.SessionSv1AuthorizeEventWithDigest,
 		argsAuth, &rply); err != nil {
 		t.Error(err)
 		return
@@ -277,7 +277,7 @@ func testDspSessionInit(t *testing.T) {
 		},
 	}
 	var rply sessions.V1InitReplyWithDigest
-	if err := dispEngine.RCP.Call(utils.SessionSv1InitiateSessionWithDigest,
+	if err := dispEngine.RPC.Call(utils.SessionSv1InitiateSessionWithDigest,
 		argsInit, &rply); err != nil {
 		t.Fatal(err)
 	}
@@ -298,28 +298,28 @@ func testDspGetSessions(t *testing.T) {
 		Filters: []string{},
 	}
 	var reply int
-	if err := dispEngine.RCP.Call(utils.SessionSv1GetActiveSessionsCount,
+	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessionsCount,
 		&filtr, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != 2 {
 		t.Errorf("Expected 2 active sessions recived %v", reply)
 	}
 	var rply []*sessions.ExternalSession
-	if err := dispEngine.RCP.Call(utils.SessionSv1GetActiveSessions,
+	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessions,
 		&filtr, &rply); err != nil {
 		t.Fatal(err)
 	} else if len(rply) != 2 {
 		t.Errorf("Unexpected number of sessions returned %v :%s", len(rply), utils.ToJSON(rply))
 	}
 
-	if err := dispEngine.RCP.Call(utils.SessionSv1GetPassiveSessionsCount,
+	if err := dispEngine.RPC.Call(utils.SessionSv1GetPassiveSessionsCount,
 		&filtr, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != 0 {
 		t.Errorf("Expected no pasive sessions recived %v", reply)
 	}
 	rply = nil
-	if err := dispEngine.RCP.Call(utils.SessionSv1GetPassiveSessions,
+	if err := dispEngine.RPC.Call(utils.SessionSv1GetPassiveSessions,
 		&filtr, &rply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Fatalf("Expected %v recived %v with reply %s", utils.ErrNotFound, err, utils.ToJSON(rply))
 	}
@@ -351,7 +351,7 @@ func testDspSessionUpdate(t *testing.T) {
 		},
 	}
 	var rply sessions.V1UpdateSessionReply
-	if err := dispEngine.RCP.Call(utils.SessionSv1UpdateSession,
+	if err := dispEngine.RPC.Call(utils.SessionSv1UpdateSession,
 		argsUpdate, &rply); err != nil {
 		t.Error(err)
 	}
@@ -413,7 +413,7 @@ func testDspSessionUpdate2(t *testing.T) {
 		},
 	}
 	var rply sessions.V1UpdateSessionReply
-	if err := dispEngine.RCP.Call(utils.SessionSv1UpdateSession,
+	if err := dispEngine.RPC.Call(utils.SessionSv1UpdateSession,
 		argsUpdate, &rply); err != nil {
 		t.Fatal(err)
 	}
@@ -479,7 +479,7 @@ func testDspSessionTerminate(t *testing.T) {
 		},
 	}
 	var rply string
-	if err := dispEngine.RCP.Call(utils.SessionSv1TerminateSession,
+	if err := dispEngine.RPC.Call(utils.SessionSv1TerminateSession,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
@@ -512,7 +512,7 @@ func testDspSessionProcessCDR(t *testing.T) {
 	}
 
 	var rply string
-	if err := dispEngine.RCP.Call(utils.SessionSv1ProcessCDR,
+	if err := dispEngine.RPC.Call(utils.SessionSv1ProcessCDR,
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}
@@ -549,7 +549,7 @@ func testDspSessionProcessEvent(t *testing.T) {
 		},
 	}
 	var rply sessions.V1ProcessMessageReply
-	if err := dispEngine.RCP.Call(utils.SessionSv1ProcessMessage,
+	if err := dispEngine.RPC.Call(utils.SessionSv1ProcessMessage,
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}
@@ -616,7 +616,7 @@ func testDspSessionProcessEvent2(t *testing.T) {
 		},
 	}
 	var rply sessions.V1ProcessMessageReply
-	if err := dispEngine.RCP.Call(utils.SessionSv1ProcessMessage,
+	if err := dispEngine.RPC.Call(utils.SessionSv1ProcessMessage,
 		args, &rply); err != nil {
 		t.Fatal(err)
 	}
@@ -663,7 +663,7 @@ func testDspSessionReplicate(t *testing.T) {
 	testDspSessionInit(t)
 
 	var reply string
-	if err := dispEngine.RCP.Call(utils.SessionSv1ReplicateSessions, ArgsReplicateSessionsWithApiKey{
+	if err := dispEngine.RPC.Call(utils.SessionSv1ReplicateSessions, ArgsReplicateSessionsWithApiKey{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("ses12345"),
 		},
@@ -688,7 +688,7 @@ func testDspSessionReplicate(t *testing.T) {
 
 	var repl int
 	time.Sleep(10 * time.Millisecond)
-	if err := allEngine2.RCP.Call(utils.SessionSv1GetPassiveSessionsCount,
+	if err := allEngine2.RPC.Call(utils.SessionSv1GetPassiveSessionsCount,
 		nil, &repl); err != nil {
 		t.Fatal(err)
 	} else if repl != 2 {
@@ -708,13 +708,13 @@ func testDspSessionPassive(t *testing.T) {
 		Filters: []string{},
 	}
 	time.Sleep(10 * time.Millisecond)
-	if err := dispEngine.RCP.Call(utils.SessionSv1GetPassiveSessionsCount,
+	if err := dispEngine.RPC.Call(utils.SessionSv1GetPassiveSessionsCount,
 		filtr, &repl); err != nil {
 		t.Fatal(err)
 	} else if repl != 0 {
 		t.Errorf("Expected no passive sessions recived %v", repl)
 	}
-	if err := dispEngine.RCP.Call(utils.SessionSv1GetActiveSessionsCount,
+	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessionsCount,
 		filtr, &repl); err != nil {
 		t.Fatal(err)
 	} else if repl != 2 {
@@ -722,7 +722,7 @@ func testDspSessionPassive(t *testing.T) {
 	}
 
 	var rply []*sessions.ExternalSession
-	if err := dispEngine.RCP.Call(utils.SessionSv1GetActiveSessions,
+	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessions,
 		&filtr, &rply); err != nil {
 		t.Fatal(err)
 	} else if len(rply) != 2 {
@@ -730,7 +730,7 @@ func testDspSessionPassive(t *testing.T) {
 	}
 
 	var reply string
-	if err := dispEngine.RCP.Call(utils.SessionSv1SetPassiveSession, sessions.Session{
+	if err := dispEngine.RPC.Call(utils.SessionSv1SetPassiveSession, sessions.Session{
 		CGRID:      rply[0].CGRID,
 		Tenant:     rply[0].Tenant,
 		ResourceID: "TestSSv1It1",
@@ -779,13 +779,13 @@ func testDspSessionPassive(t *testing.T) {
 		t.Errorf("Unexpected reply %s", reply)
 	}
 	time.Sleep(10 * time.Millisecond)
-	if err := dispEngine.RCP.Call(utils.SessionSv1GetPassiveSessionsCount,
+	if err := dispEngine.RPC.Call(utils.SessionSv1GetPassiveSessionsCount,
 		filtr, &repl); err != nil {
 		t.Fatal(err)
 	} else if repl != 1 {
 		t.Errorf("Expected 1 passive sessions recived %v", repl)
 	}
-	if err := dispEngine.RCP.Call(utils.SessionSv1GetActiveSessionsCount,
+	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessionsCount,
 		filtr, &repl); err != nil {
 		t.Fatal(err)
 	} else if repl != 0 {
@@ -810,13 +810,13 @@ func testDspSessionForceDisconect(t *testing.T) {
 		Filters: []string{},
 	}
 	time.Sleep(10 * time.Millisecond)
-	if err := dispEngine.RCP.Call(utils.SessionSv1GetPassiveSessionsCount,
+	if err := dispEngine.RPC.Call(utils.SessionSv1GetPassiveSessionsCount,
 		filtr, &repl); err != nil {
 		t.Fatal(err)
 	} else if repl != 0 {
 		t.Errorf("Expected no passive sessions recived %v", repl)
 	}
-	if err := dispEngine.RCP.Call(utils.SessionSv1GetActiveSessionsCount,
+	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessionsCount,
 		filtr, &repl); err != nil {
 		t.Fatal(err)
 	} else if repl != 2 {
@@ -824,7 +824,7 @@ func testDspSessionForceDisconect(t *testing.T) {
 	}
 
 	var rply []*sessions.ExternalSession
-	if err := dispEngine.RCP.Call(utils.SessionSv1GetActiveSessions,
+	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessions,
 		&filtr, &rply); err != nil {
 		t.Fatal(err)
 	} else if len(rply) != 2 {
@@ -832,19 +832,19 @@ func testDspSessionForceDisconect(t *testing.T) {
 	}
 
 	var reply string
-	if err := dispEngine.RCP.Call(utils.SessionSv1ForceDisconnect, &filtr, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.SessionSv1ForceDisconnect, &filtr, &reply); err != nil {
 		t.Fatal(err)
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply %s", reply)
 	}
 	time.Sleep(10 * time.Millisecond)
-	if err := dispEngine.RCP.Call(utils.SessionSv1GetPassiveSessionsCount,
+	if err := dispEngine.RPC.Call(utils.SessionSv1GetPassiveSessionsCount,
 		filtr, &repl); err != nil {
 		t.Fatal(err)
 	} else if repl != 0 {
 		t.Errorf("Expected 1 passive sessions recived %v", repl)
 	}
-	if err := dispEngine.RCP.Call(utils.SessionSv1GetActiveSessionsCount,
+	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessionsCount,
 		filtr, &repl); err != nil {
 		t.Fatal(err)
 	} else if repl != 0 {
@@ -876,13 +876,13 @@ func testDspSessionProcessEvent3(t *testing.T) {
 		},
 	}
 	var rply sessions.V1ProcessEventReply
-	if err := dispEngine.RCP.Call(utils.SessionSv1ProcessEvent,
+	if err := dispEngine.RPC.Call(utils.SessionSv1ProcessEvent,
 		args, &rply); err != nil {
 		t.Error(err)
 	}
 
 	var repl int
-	if err := dispEngine.RCP.Call(utils.SessionSv1GetActiveSessionsCount,
+	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessionsCount,
 		utils.SessionFilter{
 			ArgDispatcher: &utils.ArgDispatcher{
 				APIKey: utils.StringPointer("ses12345"),

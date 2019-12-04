@@ -49,7 +49,7 @@ func TestDspChargerSMongo(t *testing.T) {
 
 func testDspCppPingFailover(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.ChargerSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.ChargerSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
@@ -62,19 +62,19 @@ func testDspCppPingFailover(t *testing.T) {
 			APIKey: utils.StringPointer("chrg12345"),
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.ChargerSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.ChargerSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine.stopEngine(t)
-	if err := dispEngine.RCP.Call(utils.ChargerSv1Ping, &ev, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.ChargerSv1Ping, &ev, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
 	allEngine2.stopEngine(t)
-	if err := dispEngine.RCP.Call(utils.ChargerSv1Ping, &ev, &reply); err == nil {
+	if err := dispEngine.RPC.Call(utils.ChargerSv1Ping, &ev, &reply); err == nil {
 		t.Errorf("Expected error but recived %v and reply %v\n", err, reply)
 	}
 	allEngine.startEngine(t)
@@ -106,7 +106,7 @@ func testDspCppGetChtgFailover(t *testing.T) {
 		},
 	}
 	var reply *engine.ChargerProfiles
-	if err := dispEngine.RCP.Call(utils.ChargerSv1GetChargersForEvent,
+	if err := dispEngine.RPC.Call(utils.ChargerSv1GetChargersForEvent,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eChargers, reply) {
@@ -115,7 +115,7 @@ func testDspCppGetChtgFailover(t *testing.T) {
 
 	allEngine2.stopEngine(t)
 
-	if err := dispEngine.RCP.Call(utils.ChargerSv1GetChargersForEvent,
+	if err := dispEngine.RPC.Call(utils.ChargerSv1GetChargersForEvent,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eChargers, reply) {
@@ -127,12 +127,12 @@ func testDspCppGetChtgFailover(t *testing.T) {
 
 func testDspCppPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.ChargerSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.ChargerSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RCP.Call(utils.ChargerSv1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.ChargerSv1Ping, &utils.CGREventWithArgDispatcher{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
@@ -160,7 +160,7 @@ func testDspCppTestAuthKey(t *testing.T) {
 		},
 	}
 	var reply *engine.ChargerProfiles
-	if err := dispEngine.RCP.Call(utils.ChargerSv1GetChargersForEvent,
+	if err := dispEngine.RPC.Call(utils.ChargerSv1GetChargersForEvent,
 		args, &reply); err == nil || err.Error() != utils.ErrUnauthorizedApi.Error() {
 		t.Error(err)
 	}
@@ -190,7 +190,7 @@ func testDspCppTestAuthKey2(t *testing.T) {
 		},
 	}
 	var reply *engine.ChargerProfiles
-	if err := dispEngine.RCP.Call(utils.ChargerSv1GetChargersForEvent,
+	if err := dispEngine.RPC.Call(utils.ChargerSv1GetChargersForEvent,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eChargers, reply) {
@@ -224,14 +224,14 @@ func testDspCppGetChtgRoundRobin(t *testing.T) {
 	}
 	var reply *engine.ChargerProfiles
 	// To ALL2
-	if err := dispEngine.RCP.Call(utils.ChargerSv1GetChargersForEvent,
+	if err := dispEngine.RPC.Call(utils.ChargerSv1GetChargersForEvent,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eChargers, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eChargers), utils.ToJSON(reply))
 	}
 	// To ALL
-	if err := dispEngine.RCP.Call(utils.ChargerSv1GetChargersForEvent,
+	if err := dispEngine.RPC.Call(utils.ChargerSv1GetChargersForEvent,
 		args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eChargers, reply) {
