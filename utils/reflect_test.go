@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"fmt"
 	"net"
 	"reflect"
 	"strings"
@@ -743,5 +744,125 @@ func TestReflectFieldMethodInterface(t *testing.T) {
 	ifValue, err = ReflectFieldMethodInterface(a, "TestFuncWithError2")
 	if err == nil || err != ErrPartiallyExecuted {
 		t.Error(err)
+	}
+}
+
+func TestIfaceAsSliceString(t *testing.T) {
+	var attrs interface{}
+	var expected []string
+	if rply, err := IfaceAsSliceString(attrs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting: %s ,received: %s", expected, rply)
+	}
+
+	attrs = []int{1, 2, 3}
+	expected = []string{"1", "2", "3"}
+	if rply, err := IfaceAsSliceString(attrs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting: %s ,received: %s", expected, rply)
+	}
+	attrs = []int32{1, 2, 3}
+	if rply, err := IfaceAsSliceString(attrs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting: %s ,received: %s", expected, rply)
+	}
+	attrs = []int64{1, 2, 3}
+	if rply, err := IfaceAsSliceString(attrs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting: %s ,received: %s", expected, rply)
+	}
+	attrs = []uint{1, 2, 3}
+	if rply, err := IfaceAsSliceString(attrs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting: %s ,received: %s", expected, rply)
+	}
+	attrs = []uint{1, 2, 3}
+	if rply, err := IfaceAsSliceString(attrs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting: %s ,received: %s", expected, rply)
+	}
+	attrs = []uint32{1, 2, 3}
+	if rply, err := IfaceAsSliceString(attrs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting: %s ,received: %s", expected, rply)
+	}
+	attrs = []uint64{1, 2, 3}
+	if rply, err := IfaceAsSliceString(attrs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting: %s ,received: %s", expected, rply)
+	}
+	attrs = []float32{1, 2, 3}
+	if rply, err := IfaceAsSliceString(attrs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting: %s ,received: %s", expected, rply)
+	}
+	attrs = []float64{1, 2, 3}
+	if rply, err := IfaceAsSliceString(attrs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting: %s ,received: %s", expected, rply)
+	}
+	attrs = []string{"1", "2", "3"}
+	if rply, err := IfaceAsSliceString(attrs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting: %s ,received: %s", expected, rply)
+	}
+	attrs = [][]byte{[]byte("1"), []byte("2"), []byte("3")}
+	if rply, err := IfaceAsSliceString(attrs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting: %s ,received: %s", expected, rply)
+	}
+	attrs = []bool{true, false}
+	expected = []string{"true", "false"}
+	if rply, err := IfaceAsSliceString(attrs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting: %s ,received: %s", expected, rply)
+	}
+
+	attrs = []time.Duration{time.Second, time.Minute}
+	expected = []string{"1s", "1m0s"}
+	if rply, err := IfaceAsSliceString(attrs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting: %s ,received: %s", expected, rply)
+	}
+	tNow := time.Now()
+	attrs = []time.Time{tNow}
+	expected = []string{tNow.Format(time.RFC3339)}
+	if rply, err := IfaceAsSliceString(attrs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting: %s ,received: %s", expected, rply)
+	}
+	attrs = []net.IP{net.ParseIP("127.0.0.1")}
+	expected = []string{"127.0.0.1"}
+	if rply, err := IfaceAsSliceString(attrs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting: %s ,received: %s", expected, rply)
+	}
+	attrs = []interface{}{true, 10, "two"}
+	expected = []string{"true", "10", "two"}
+	if rply, err := IfaceAsSliceString(attrs); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting: %s ,received: %s", expected, rply)
+	}
+	attrs = "notSlice"
+	expError := fmt.Errorf("cannot convert field: %T to []string", attrs)
+	if _, err := IfaceAsSliceString(attrs); err == nil || err.Error() != expError.Error() {
+		t.Errorf("Expected error %s ,received: %v", expError, err)
 	}
 }
