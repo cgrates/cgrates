@@ -105,6 +105,7 @@ func (self *SQLStorage) IsDBEmpty() (resp bool, err error) {
 		utils.TBLTPAccountActions, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
 		utils.TBLTPFilters, utils.SessionCostsTBL, utils.CDRsTBL, utils.TBLTPActionPlans,
 		utils.TBLVersions, utils.TBLTPSuppliers, utils.TBLTPAttributes, utils.TBLTPChargers,
+		utils.TBLTPDispatchers, utils.TBLTPDispatcherHosts,
 	}
 	for _, tbl := range tbls {
 		if self.db.HasTable(tbl) {
@@ -238,7 +239,7 @@ func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) er
 			utils.TBLTPActionTriggers, utils.TBLTPAccountActions,
 			utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPFilters,
 			utils.TBLTPSuppliers, utils.TBLTPAttributes,
-			utils.TBLTPChargers, utils.TBLTPDispatchers} {
+			utils.TBLTPChargers, utils.TBLTPDispatchers, utils.TBLTPDispatcherHosts} {
 			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
 				tx.Rollback()
 				return err
