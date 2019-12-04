@@ -535,10 +535,6 @@ func (dS *DispatcherResponder) Shutdown(args *utils.TenantWithArgDispatcher, rep
 	return dS.dS.ResponderShutdown(args, reply)
 }
 
-func (dS *DispatcherResponder) GetTimeout(args *utils.TenantWithArgDispatcher, reply *time.Duration) error {
-	return dS.dS.ResponderGetTimeout(args, reply)
-}
-
 // Ping used to detreminate if component is active
 func (dS *DispatcherResponder) Ping(args *utils.CGREventWithArgDispatcher, reply *string) error {
 	return dS.dS.ResponderPing(args, reply)

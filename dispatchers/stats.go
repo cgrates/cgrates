@@ -90,7 +90,7 @@ func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *utils.TenantIDWi
 		Tenant: args.Tenant,
 		ID:     args.ID,
 	}, utils.MetaStats, routeID, utils.StatSv1GetQueueStringMetrics,
-		args.TenantID, reply)
+		args, reply)
 }
 
 func (dS *DispatcherService) StatSv1ProcessEvent(args *engine.StatsArgsProcessEvent,
@@ -134,7 +134,7 @@ func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(args *utils.TenantIDWit
 		Tenant: args.Tenant,
 		ID:     args.ID,
 	}, utils.MetaStats, routeID, utils.StatSv1GetQueueFloatMetrics,
-		args.TenantID, reply)
+		args, reply)
 }
 
 func (dS *DispatcherService) StatSv1GetQueueIDs(args *utils.TenantWithArgDispatcher,
@@ -158,5 +158,5 @@ func (dS *DispatcherService) StatSv1GetQueueIDs(args *utils.TenantWithArgDispatc
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt},
 		utils.MetaStats, routeID, utils.StatSv1GetQueueIDs,
-		args.TenantArg, reply)
+		args, reply)
 }

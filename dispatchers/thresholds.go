@@ -109,7 +109,7 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(args *utils.TenantWithA
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaThresholds, routeID,
-		utils.ThresholdSv1GetThresholdIDs, args.TenantArg, tIDs)
+		utils.ThresholdSv1GetThresholdIDs, args, tIDs)
 }
 
 func (dS *DispatcherService) ThresholdSv1GetThreshold(args *utils.TenantIDWithArgDispatcher, th *engine.Threshold) (err error) {
@@ -133,5 +133,5 @@ func (dS *DispatcherService) ThresholdSv1GetThreshold(args *utils.TenantIDWithAr
 	return dS.Dispatch(&utils.CGREvent{
 		Tenant: tnt,
 		ID:     args.ID,
-	}, utils.MetaThresholds, routeID, utils.ThresholdSv1GetThreshold, args.TenantID, th)
+	}, utils.MetaThresholds, routeID, utils.ThresholdSv1GetThreshold, args, th)
 }

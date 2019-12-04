@@ -69,7 +69,7 @@ func testV1FltrLoadConfig(t *testing.T) {
 	var err error
 	fltrCfgPath = path.Join(*dataDir, "conf", "samples", fltrConfDIR)
 	if *encoding == utils.MetaGOB {
-		cdrsCfgPath = path.Join(*dataDir, "conf", "samples", "gob", fltrConfDIR)
+		cdrsCfgPath = path.Join(*dataDir, "conf", "samples", fltrConfDIR+"_gob")
 	}
 	if fltrCfg, err = config.NewCGRConfigFromPath(fltrCfgPath); err != nil {
 		t.Error(err)

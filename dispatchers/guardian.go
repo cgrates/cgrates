@@ -70,7 +70,7 @@ func (dS *DispatcherService) GuardianSv1RemoteLock(args AttrRemoteLockWithApiKey
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaGuardian, routeID,
-		utils.GuardianSv1RemoteLock, args.AttrRemoteLock, reply)
+		utils.GuardianSv1RemoteLock, args, reply)
 }
 
 // RemoteUnlock will unlock a key from remote based on reference ID

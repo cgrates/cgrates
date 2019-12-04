@@ -86,7 +86,7 @@ func TestRAitDispatcher(t *testing.T) {
 func testRAitInitCfg(t *testing.T) {
 	raCfgPath = path.Join(*dataDir, "conf", "samples", raonfigDIR)
 	if *encoding == utils.MetaGOB {
-		raCfgPath = path.Join(*dataDir, "conf", "samples", "gob", raonfigDIR)
+		raCfgPath = path.Join(*dataDir, "conf", "samples", raonfigDIR+"_gob")
 	}
 	// Init config first
 	var err error

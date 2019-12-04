@@ -292,6 +292,11 @@ func IfaceAsSliceString(fld interface{}) (out []string, err error) {
 		for i, val := range value {
 			out[i] = strconv.FormatInt(val, 10)
 		}
+	case []uint:
+		out = make([]string, len(value))
+		for i, val := range value {
+			out[i] = strconv.FormatUint(uint64(val), 10)
+		}
 	case []uint32:
 		out = make([]string, len(value))
 		for i, val := range value {
@@ -344,8 +349,8 @@ func IfaceAsSliceString(fld interface{}) (out []string, err error) {
 		for i, val := range value {
 			out[i] = IfaceAsString(val)
 		}
-	default: // Maybe we are lucky and the value converts to string
-		err = fmt.Errorf("cannot convert field: %+v to bool", value)
+	default:
+		err = fmt.Errorf("cannot convert field: %T to []string", value)
 	}
 	return
 }
@@ -383,6 +388,7 @@ func GetUniformType(item interface{}) (interface{}, error) {
 	}
 	return item, nil
 }
+
 func GetBasicType(item interface{}) interface{} {
 	valItm := reflect.ValueOf(item)
 	switch valItm.Kind() { // convert evreting to float64

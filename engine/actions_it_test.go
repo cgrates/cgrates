@@ -56,7 +56,7 @@ func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
 
 func TestActionsitInitCfg(t *testing.T) {
 	if *encoding == utils.MetaGOB {
-		actsLclCfgPath = path.Join(*dataDir, "conf", "samples", "gob", "actions")
+		actsLclCfgPath = path.Join(*dataDir, "conf", "samples", "actions"+"_gob")
 	}
 	// Init config first
 	var err error

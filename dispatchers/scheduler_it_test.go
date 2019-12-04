@@ -32,17 +32,21 @@ var sTestsDspSched = []func(t *testing.T){
 
 //Test start here
 func TestDspSchedulerSTMySQL(t *testing.T) {
-	testDsp(t, sTestsDspSched, "TestDspSchedulerSTMySQL", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspSched, "TestDspSchedulerSTMySQL", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspSched, "TestDspSchedulerSTMySQL", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	}
 }
 
 func testDspSchedPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.SchedulerSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.SchedulerSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := dispEngine.RCP.Call(utils.SchedulerSv1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.SchedulerSv1Ping, &utils.CGREventWithArgDispatcher{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},

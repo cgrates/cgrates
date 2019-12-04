@@ -70,7 +70,7 @@ func (dS *DispatcherService) CacheSv1GetItemIDs(args *utils.ArgsGetCacheItemIDsW
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1GetItemIDs, &args.ArgsGetCacheItemIDs, reply)
+		utils.CacheSv1GetItemIDs, args, reply)
 }
 
 // HasItem verifies the existence of an Item in cache
@@ -94,7 +94,7 @@ func (dS *DispatcherService) CacheSv1HasItem(args *utils.ArgsGetCacheItemWithArg
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1HasItem, &args.ArgsGetCacheItem, reply)
+		utils.CacheSv1HasItem, args, reply)
 }
 
 // GetItemExpiryTime returns the expiryTime for an item
@@ -118,7 +118,7 @@ func (dS *DispatcherService) CacheSv1GetItemExpiryTime(args *utils.ArgsGetCacheI
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1GetItemExpiryTime, &args.ArgsGetCacheItem, reply)
+		utils.CacheSv1GetItemExpiryTime, args, reply)
 }
 
 // RemoveItem removes the Item with ID from cache
@@ -142,7 +142,7 @@ func (dS *DispatcherService) CacheSv1RemoveItem(args *utils.ArgsGetCacheItemWith
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1RemoveItem, &args.ArgsGetCacheItem, reply)
+		utils.CacheSv1RemoveItem, args, reply)
 }
 
 // Clear will clear partitions in the cache (nil fol all, empty slice for none)
@@ -166,7 +166,7 @@ func (dS *DispatcherService) CacheSv1Clear(args *utils.AttrCacheIDsWithArgDispat
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1Clear, args.CacheIDs, reply)
+		utils.CacheSv1Clear, args, reply)
 }
 
 // FlushCache wipes out cache for a prefix or completely
@@ -189,7 +189,7 @@ func (dS *DispatcherService) CacheSv1FlushCache(args utils.AttrReloadCacheWithAr
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1FlushCache, args.AttrReloadCache, reply)
+		utils.CacheSv1FlushCache, args, reply)
 }
 
 // GetCacheStats returns CacheStats filtered by cacheIDs
@@ -213,7 +213,7 @@ func (dS *DispatcherService) CacheSv1GetCacheStats(args *utils.AttrCacheIDsWithA
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1GetCacheStats, args.CacheIDs, reply)
+		utils.CacheSv1GetCacheStats, args, reply)
 }
 
 // PrecacheStatus checks status of active precache processes
@@ -236,7 +236,7 @@ func (dS *DispatcherService) CacheSv1PrecacheStatus(args *utils.AttrCacheIDsWith
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1PrecacheStatus, args.CacheIDs, reply)
+		utils.CacheSv1PrecacheStatus, args, reply)
 }
 
 // HasGroup checks existence of a group in cache
@@ -260,7 +260,7 @@ func (dS *DispatcherService) CacheSv1HasGroup(args *utils.ArgsGetGroupWithArgDis
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1HasGroup, args.ArgsGetGroup, reply)
+		utils.CacheSv1HasGroup, args, reply)
 }
 
 // GetGroupItemIDs returns a list of itemIDs in a cache group
@@ -284,7 +284,7 @@ func (dS *DispatcherService) CacheSv1GetGroupItemIDs(args *utils.ArgsGetGroupWit
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1GetGroupItemIDs, args.ArgsGetGroup, reply)
+		utils.CacheSv1GetGroupItemIDs, args, reply)
 }
 
 // RemoveGroup will remove a group and all items belonging to it from cache
@@ -307,7 +307,7 @@ func (dS *DispatcherService) CacheSv1RemoveGroup(args *utils.ArgsGetGroupWithArg
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1RemoveGroup, args.ArgsGetGroup, reply)
+		utils.CacheSv1RemoveGroup, args, reply)
 }
 
 // ReloadCache reloads cache from DB for a prefix or completely
@@ -330,7 +330,7 @@ func (dS *DispatcherService) CacheSv1ReloadCache(args utils.AttrReloadCacheWithA
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1ReloadCache, args.AttrReloadCache, reply)
+		utils.CacheSv1ReloadCache, args, reply)
 }
 
 // LoadCache loads cache from DB for a prefix or completely
@@ -353,5 +353,5 @@ func (dS *DispatcherService) CacheSv1LoadCache(args utils.AttrReloadCacheWithArg
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCaches, routeID,
-		utils.CacheSv1LoadCache, args.AttrReloadCache, reply)
+		utils.CacheSv1LoadCache, args, reply)
 }

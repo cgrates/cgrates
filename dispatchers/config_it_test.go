@@ -34,7 +34,11 @@ var sTestsDspConfig = []func(t *testing.T){
 
 //Test start here
 func TestDspConfigITMySQL(t *testing.T) {
-	testDsp(t, sTestsDspConfig, "TestDspConfigITMySQL", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspConfig, "TestDspConfigITMySQL", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspConfig, "TestDspConfigITMySQL", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	}
 }
 
 func testDspConfigSv1GetJSONSection(t *testing.T) {
@@ -47,7 +51,7 @@ func testDspConfigSv1GetJSONSection(t *testing.T) {
 		"RPCJSONTLSListen": "127.0.0.1:2022",
 	}
 	var reply map[string]interface{}
-	if err := dispEngine.RCP.Call(utils.ConfigSv1GetJSONSection, &config.StringWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.ConfigSv1GetJSONSection, &config.StringWithArgDispatcher{
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
 		},

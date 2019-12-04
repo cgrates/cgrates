@@ -63,7 +63,7 @@ var sTestsHA = []func(t *testing.T){
 func TestHAitSimple(t *testing.T) {
 	haCfgPath = path.Join(*dataDir, "conf", "samples", "httpagent")
 	if *encoding == utils.MetaGOB {
-		haCfgPath = path.Join(*dataDir, "conf", "samples", "gob", "httpagent")
+		haCfgPath = path.Join(*dataDir, "conf", "samples", "httpagent"+"_gob")
 	}
 	// Init config first
 	var err error
@@ -82,7 +82,7 @@ func TestHAitSimple(t *testing.T) {
 func TestHA2itWithTls(t *testing.T) {
 	haCfgPath = path.Join(*dataDir, "conf", "samples", "httpagenttls")
 	if *encoding == utils.MetaGOB {
-		haCfgPath = path.Join(*dataDir, "conf", "samples", "gob", "httpagenttls")
+		haCfgPath = path.Join(*dataDir, "conf", "samples", "httpagenttls"+"_gob")
 	}
 	// Init config first
 	var err error

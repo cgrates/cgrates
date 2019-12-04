@@ -1258,9 +1258,7 @@ const (
 	ResponderRefundRounding    = "Responder.RefundRounding"
 	ResponderGetCost           = "Responder.GetCost"
 	ResponderShutdown          = "Responder.Shutdown"
-	ResponderGetTimeout        = "Responder.GetTimeout"
 	ResponderPing              = "Responder.Ping"
-	ResponderGet               = "Responder.Get"
 )
 
 // DispatcherS APIs

@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package dispatchers
 
 import (
+	"errors"
+	"flag"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os/exec"
@@ -37,11 +39,25 @@ var (
 	allEngine  *testDispatcher
 	allEngine2 *testDispatcher
 )
+var (
+	encoding = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
+)
+
+func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
+	switch *encoding {
+	case utils.MetaJSON:
+		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
+	case utils.MetaGOB:
+		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+	default:
+		return nil, errors.New("UNSUPPORTED_RPC")
+	}
+}
 
 type testDispatcher struct {
 	CfgParh string
 	Cfg     *config.CGRConfig
-	RCP     *rpc.Client
+	RPC     *rpc.Client
 	cmd     *exec.Cmd
 }
 
@@ -72,7 +88,7 @@ func (d *testDispatcher) startEngine(t *testing.T) {
 		t.Fatalf("Error at engine start:%v\n", err)
 	}
 
-	if d.RCP, err = jsonrpc.Dial("tcp", d.Cfg.ListenCfg().RPCJSONListen); err != nil {
+	if d.RPC, err = newRPCClient(d.Cfg.ListenCfg()); err != nil {
 		t.Fatalf("Error at dialing rcp client:%v\n", err)
 	}
 }
@@ -102,7 +118,7 @@ func (d *testDispatcher) resetStorDb(t *testing.T) {
 func (d *testDispatcher) loadData(t *testing.T, path string) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path}
-	if err := d.RCP.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
+	if err := d.RPC.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Errorf("<%s>Error at loading data from folder :%v", d.CfgParh, err)
 	}
 }

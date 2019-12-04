@@ -45,24 +45,32 @@ var sTestsDspChc = []func(t *testing.T){
 
 //Test start here
 func TestDspCacheSv1TMySQL(t *testing.T) {
-	testDsp(t, sTestsDspChc, "TestDspCacheSv1", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspChc, "TestDspCacheSv1", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspChc, "TestDspCacheSv1", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	}
 }
 
 func TestDspCacheSv1Mongo(t *testing.T) {
-	testDsp(t, sTestsDspChc, "TestDspCacheSv1", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspChc, "TestDspCacheSv1", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspChc, "TestDspCacheSv1", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+	}
 }
 
 func testDspChcPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.CacheSv1Ping, new(utils.CGREvent), &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.CacheSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if dispEngine.RCP == nil {
-		t.Fatal(dispEngine.RCP)
+	if dispEngine.RPC == nil {
+		t.Fatal(dispEngine.RPC)
 	}
-	if err := dispEngine.RCP.Call(utils.CacheSv1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.CacheSv1Ping, &utils.CGREventWithArgDispatcher{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
@@ -92,14 +100,14 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.CacheSv1GetCacheStats, args, &rcvStats); err != nil {
+	if err := dispEngine.RPC.Call(utils.CacheSv1GetCacheStats, args, &rcvStats); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expStats, rcvStats) {
 		t.Errorf("Expecting: %+v, \n received: %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
 	}
 	reply := ""
 	// Simple test that command is executed without errors
-	if err := dispEngine.RCP.Call(utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("chc12345"),
 		},
@@ -126,7 +134,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats[utils.CacheThresholdProfiles].Items = 2
 	expStats[utils.CacheThresholds].Items = 2
 	expStats[utils.CacheLoadIDs].Items = 20
-	if err := dispEngine.RCP.Call(utils.CacheSv1GetCacheStats, &args, &rcvStats); err != nil {
+	if err := dispEngine.RPC.Call(utils.CacheSv1GetCacheStats, &args, &rcvStats); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expStats, rcvStats) {
 		t.Errorf("Expecting: %+v, \n received: %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
@@ -169,7 +177,7 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.CacheLoadIDs:                 utils.MetaReady,
 	}
 
-	if err := dispEngine.RCP.Call(utils.CacheSv1PrecacheStatus, utils.AttrCacheIDsWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.CacheSv1PrecacheStatus, utils.AttrCacheIDsWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("chc12345"),
 		},
@@ -197,7 +205,7 @@ func testDspChcGetItemIDs(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
+	if err := dispEngine.RPC.Call(utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
 		t.Fatalf("Got error on ApierV1.GetCacheStats: %s ", err.Error())
 	}
 	if !reflect.DeepEqual(expKeys, rcvKeys) {
@@ -220,7 +228,7 @@ func testDspChcHasItem(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
 		t.Error(err)
 	} else if !reply {
 		t.Errorf("Expected: %v , received:%v", expected, reply)
@@ -242,7 +250,7 @@ func testDspChcGetItemExpiryTime(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.CacheSv1GetItemExpiryTime, argsAPI, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.CacheSv1GetItemExpiryTime, argsAPI, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, reply) {
 		t.Errorf("Expected: %v , received:%v", expected, reply)
@@ -251,7 +259,7 @@ func testDspChcGetItemExpiryTime(t *testing.T) {
 
 func testDspChcReloadCache(t *testing.T) {
 	reply := ""
-	if err := dispEngine.RCP.Call(utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("chc12345"),
 		},
@@ -279,18 +287,18 @@ func testDspChcRemoveItem(t *testing.T) {
 			Tenant: "cgrates.org",
 		},
 	}
-	if err := dispEngine.RCP.Call(utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
 		t.Error(err)
 	} else if !reply {
 		t.Errorf("Expected: %v , received:%v", true, reply)
 	}
 	var remReply string
-	if err := dispEngine.RCP.Call(utils.CacheSv1RemoveItem, argsAPI, &remReply); err != nil {
+	if err := dispEngine.RPC.Call(utils.CacheSv1RemoveItem, argsAPI, &remReply); err != nil {
 		t.Error(err)
 	} else if remReply != utils.OK {
 		t.Errorf("Expected: %v , received:%v", utils.OK, remReply)
 	}
-	if err := dispEngine.RCP.Call(utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
+	if err := dispEngine.RPC.Call(utils.CacheSv1HasItem, argsAPI, &reply); err != nil {
 		t.Error(err)
 	} else if reply {
 		t.Errorf("Expected: %v , received:%v", false, reply)
@@ -299,7 +307,7 @@ func testDspChcRemoveItem(t *testing.T) {
 
 func testDspChcClear(t *testing.T) {
 	reply := ""
-	if err := dispEngine.RCP.Call(utils.CacheSv1Clear, utils.AttrCacheIDsWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.CacheSv1Clear, utils.AttrCacheIDsWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("chc12345"),
 		},
@@ -313,7 +321,7 @@ func testDspChcClear(t *testing.T) {
 	}
 	var rcvStats map[string]*ltcache.CacheStats
 	expStats := engine.GetDefaultEmptyCacheStats()
-	if err := dispEngine.RCP.Call(utils.CacheSv1GetCacheStats, utils.AttrCacheIDsWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.CacheSv1GetCacheStats, utils.AttrCacheIDsWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("chc12345"),
 		},
@@ -329,7 +337,7 @@ func testDspChcClear(t *testing.T) {
 
 func testDspChcFlush(t *testing.T) {
 	reply := ""
-	if err := dispEngine.RCP.Call(utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("chc12345"),
 		},
@@ -346,7 +354,7 @@ func testDspChcFlush(t *testing.T) {
 	}
 	var rcvStats map[string]*ltcache.CacheStats
 	expStats := engine.GetDefaultEmptyCacheStats()
-	if err := dispEngine.RCP.Call(utils.CacheSv1GetCacheStats, utils.AttrCacheIDsWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.CacheSv1GetCacheStats, utils.AttrCacheIDsWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("chc12345"),
 		},

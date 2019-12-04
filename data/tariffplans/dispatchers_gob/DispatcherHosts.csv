@@ -1,0 +1,4 @@
+#Tenant[0],ID[1],Address[2],Transport[3],TLS[4]
+cgrates.org,SELF,*internal,,
+cgrates.org,ALL,127.0.0.1:6013,*gob,false
+cgrates.org,ALL2,127.0.0.1:7013,*gob,false

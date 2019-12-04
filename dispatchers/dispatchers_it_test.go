@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package dispatchers
 
+// for the moment we dispable Apier through dispatcher
+// until we figured out a better sollution in case of gob server
 /*
 import (
 	"reflect"
@@ -72,7 +74,7 @@ func testDspApierSetAttributes(t *testing.T) {
 		utils.APIKey: utils.StringPointer("apier12345"),
 	}
 	var result string
-	if err := dispEngine.RCP.Call(utils.ApierV1SetAttributeProfile, ev, &result); err != nil {
+	if err := dispEngine.RPC.Call(utils.ApierV1SetAttributeProfile, ev, &result); err != nil {
 		t.Error(err)
 	} else if result != utils.OK {
 		t.Error("Unexpected reply returned", result)
@@ -105,7 +107,7 @@ func testDspApierGetAttributes(t *testing.T) {
 		Weight: 10,
 	}
 	alsPrf.Compile()
-	if err := dispEngine.RCP.Call(utils.ApierV1GetAttributeProfile,
+	if err := dispEngine.RPC.Call(utils.ApierV1GetAttributeProfile,
 		utils.TenantIDWithArgDispatcher{
 			TenantID:      &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_Dispatcher"},
 			ArgDispatcher: &utils.ArgDispatcher{APIKey: utils.StringPointer("apier12345")},
@@ -121,7 +123,7 @@ func testDspApierGetAttributes(t *testing.T) {
 
 func testDspApierUnkownAPiKey(t *testing.T) {
 	var reply *engine.AttributeProfile
-	if err := dispEngine.RCP.Call(utils.ApierV1GetAttributeProfile,
+	if err := dispEngine.RPC.Call(utils.ApierV1GetAttributeProfile,
 		utils.TenantIDWithArgDispatcher{
 			TenantID:      &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_Dispatcher"},
 			ArgDispatcher: &utils.ArgDispatcher{APIKey: utils.StringPointer("RandomApiKey")},

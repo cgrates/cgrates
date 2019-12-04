@@ -35,22 +35,21 @@ var sTestsDspGrd = []func(t *testing.T){
 
 //Test start here
 func TestDspGuardianSTMySQL(t *testing.T) {
-	testDsp(t, sTestsDspGrd, "TestDspGuardianS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspGrd, "TestDspGuardianS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspGrd, "TestDspGuardianS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	}
 }
 
 func testDspGrdPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RCP.Call(utils.GuardianSv1Ping, nil, &reply); err != nil {
+	if err := allEngine.RPC.Call(utils.GuardianSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {
 		t.Errorf("Received: %s", reply)
 	}
-	if err := allEngine.RCP.Call(utils.GuardianSv1Ping, new(utils.CGREvent), &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.Pong {
-		t.Errorf("Received: %s", reply)
-	}
-	if err := dispEngine.RCP.Call(utils.GuardianSv1Ping, &utils.CGREventWithArgDispatcher{
+	if err := dispEngine.RPC.Call(utils.GuardianSv1Ping, &utils.CGREventWithArgDispatcher{
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 		},
@@ -72,7 +71,7 @@ func testDspGrdLock(t *testing.T) {
 		Timeout:     500 * time.Millisecond,
 	}
 	var reply string
-	if err := dispEngine.RCP.Call(utils.GuardianSv1RemoteLock, &AttrRemoteLockWithApiKey{
+	if err := dispEngine.RPC.Call(utils.GuardianSv1RemoteLock, &AttrRemoteLockWithApiKey{
 		AttrRemoteLock: args,
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",
@@ -85,7 +84,7 @@ func testDspGrdLock(t *testing.T) {
 	}
 
 	var unlockReply []string
-	if err := dispEngine.RCP.Call(utils.GuardianSv1RemoteUnlock, &AttrRemoteUnlockWithApiKey{
+	if err := dispEngine.RPC.Call(utils.GuardianSv1RemoteUnlock, &AttrRemoteUnlockWithApiKey{
 		RefID: reply,
 		TenantArg: utils.TenantArg{
 			Tenant: "cgrates.org",

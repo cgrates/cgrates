@@ -170,7 +170,7 @@ func (dS *DispatcherService) SessionSv1SyncSessions(args *utils.TenantWithArgDis
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaSessionS, routeID,
-		utils.SessionSv1SyncSessions, &tnt, reply)
+		utils.SessionSv1SyncSessions, args, reply)
 }
 
 func (dS *DispatcherService) SessionSv1TerminateSession(args *sessions.V1TerminateSessionArgs,
@@ -392,7 +392,7 @@ func (dS *DispatcherService) SessionSv1ReplicateSessions(args ArgsReplicateSessi
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaSessionS, routeID,
-		utils.SessionSv1ReplicateSessions, args.ArgsReplicateSessions, reply)
+		utils.SessionSv1ReplicateSessions, args, reply)
 }
 
 func (dS *DispatcherService) SessionSv1SetPassiveSession(args *sessions.Session,

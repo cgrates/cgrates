@@ -182,23 +182,3 @@ func (dS *DispatcherService) ResponderShutdown(args *utils.TenantWithArgDispatch
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaResponder,
 		routeID, utils.ResponderShutdown, args, reply)
 }
-
-func (dS *DispatcherService) ResponderGetTimeout(args *utils.TenantWithArgDispatcher,
-	reply *time.Duration) (err error) {
-	tnt := utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if dS.attrS != nil {
-		if args.ArgDispatcher == nil {
-			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
-		}
-		if err = dS.authorize(utils.ResponderGetTimeout, tnt,
-			args.APIKey, utils.TimePointer(time.Now())); err != nil {
-			return
-		}
-	}
-	var routeID *string
-	if args.ArgDispatcher != nil {
-		routeID = args.ArgDispatcher.RouteID
-	}
-	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaResponder,
-		routeID, utils.ResponderGetTimeout, 0, reply)
-}
