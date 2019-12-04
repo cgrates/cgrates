@@ -66,8 +66,6 @@ var internalDBCacheCfg = map[string]*ltcache.CacheConfig{
 	utils.CacheDispatcherFilterIndexes: unlimitedCfg,
 	utils.CacheDispatcherProfiles:      unlimitedCfg,
 	utils.CacheDispatcherHosts:         unlimitedCfg,
-	utils.CacheDiameterMessages:        unlimitedCfg,
-	utils.CacheEventResources:          unlimitedCfg,
 	utils.CacheLoadIDs:                 unlimitedCfg,
 	utils.TBLTPTimings:                 unlimitedCfg,
 	utils.TBLTPDestinations:            unlimitedCfg,
@@ -88,6 +86,9 @@ var internalDBCacheCfg = map[string]*ltcache.CacheConfig{
 	utils.TBLTPSuppliers:               unlimitedCfg,
 	utils.TBLTPAttributes:              unlimitedCfg,
 	utils.TBLTPChargers:                unlimitedCfg,
+	utils.TBLTPDispatchers:             unlimitedCfg,
+	utils.TBLTPDispatcherHosts:         unlimitedCfg,
+	utils.CDRsTBL:                      unlimitedCfg,
 }
 
 type InternalDB struct {
