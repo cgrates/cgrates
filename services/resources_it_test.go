@@ -54,7 +54,7 @@ func TestResourceSReload(t *testing.T) {
 	db := NewDataDBService(cfg)
 	tS := NewThresholdService(cfg, db, chS, filterSChan, server)
 	reS := NewResourceService(cfg, db, chS, filterSChan, server, tS.GetIntenternalChan(), nil)
-	srvMngr.AddServices(tS, reS, NewLoaderService(cfg, db, filterSChan, server, nil, nil, engineShutdown), db)
+	srvMngr.AddServices(NewConnManagerService(cfg, nil), tS, reS, NewLoaderService(cfg, db, filterSChan, server, nil, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

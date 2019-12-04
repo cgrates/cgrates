@@ -52,7 +52,7 @@ func TestSupplierSReload(t *testing.T) {
 	db := NewDataDBService(cfg)
 	sts := NewStatService(cfg, db, chS, filterSChan, server, nil, nil)
 	supS := NewSupplierService(cfg, db, chS, filterSChan, server, nil, sts.GetIntenternalChan(), nil, nil)
-	srvMngr.AddServices(supS, sts, NewLoaderService(cfg, db, filterSChan, server, nil, nil, engineShutdown), db)
+	srvMngr.AddServices(NewConnManagerService(cfg, nil), supS, sts, NewLoaderService(cfg, db, filterSChan, server, nil, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

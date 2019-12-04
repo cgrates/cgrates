@@ -425,17 +425,50 @@ func (cfg *CGRConfig) loadDataDBCfg(jsnCfg *CgrJsonCfg) (err error) {
 	// in case of internalDB we need to disable the cache
 	// so we enforce it here
 	if cfg.dataDbCfg.DataDbType == utils.INTERNAL {
-		var customCfg *CgrJsonCfg
-		var cacheJsonCfg *CacheJsonCfg
-		if customCfg, err = NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON_DISABLED_CACHE)); err != nil {
-			return
+		zeroLimit := &CacheParamCfg{Limit: 0,
+			TTL: time.Duration(0), StaticTTL: false, Precache: false}
+		disabledCache := CacheCfg{
+			utils.CacheDestinations:            zeroLimit,
+			utils.CacheReverseDestinations:     zeroLimit,
+			utils.CacheRatingPlans:             zeroLimit,
+			utils.CacheRatingProfiles:          zeroLimit,
+			utils.CacheActions:                 zeroLimit,
+			utils.CacheActionPlans:             zeroLimit,
+			utils.CacheAccountActionPlans:      zeroLimit,
+			utils.CacheActionTriggers:          zeroLimit,
+			utils.CacheSharedGroups:            zeroLimit,
+			utils.CacheTimings:                 zeroLimit,
+			utils.CacheResourceProfiles:        zeroLimit,
+			utils.CacheResources:               zeroLimit,
+			utils.CacheEventResources:          zeroLimit,
+			utils.CacheStatQueueProfiles:       zeroLimit,
+			utils.CacheStatQueues:              zeroLimit,
+			utils.CacheThresholdProfiles:       zeroLimit,
+			utils.CacheThresholds:              zeroLimit,
+			utils.CacheFilters:                 zeroLimit,
+			utils.CacheSupplierProfiles:        zeroLimit,
+			utils.CacheAttributeProfiles:       zeroLimit,
+			utils.CacheChargerProfiles:         zeroLimit,
+			utils.CacheDispatcherProfiles:      zeroLimit,
+			utils.CacheDispatcherHosts:         zeroLimit,
+			utils.CacheResourceFilterIndexes:   zeroLimit,
+			utils.CacheStatFilterIndexes:       zeroLimit,
+			utils.CacheThresholdFilterIndexes:  zeroLimit,
+			utils.CacheSupplierFilterIndexes:   zeroLimit,
+			utils.CacheAttributeFilterIndexes:  zeroLimit,
+			utils.CacheChargerFilterIndexes:    zeroLimit,
+			utils.CacheDispatcherFilterIndexes: zeroLimit,
+			utils.CacheDispatcherRoutes:        zeroLimit,
+			utils.CacheRPCResponses:            zeroLimit,
+			utils.CacheLoadIDs:                 zeroLimit,
+			utils.CacheDiameterMessages: &CacheParamCfg{Limit: -1,
+				TTL: time.Duration(3 * time.Hour), StaticTTL: false},
+			utils.CacheClosedSessions: &CacheParamCfg{Limit: -1,
+				TTL: time.Duration(10 * time.Second), StaticTTL: false},
+			utils.CacheRPCConnections: &CacheParamCfg{Limit: -1,
+				TTL: time.Duration(0), StaticTTL: false},
 		}
-		if cacheJsonCfg, err = customCfg.CacheJsonCfg(); err != nil {
-			return
-		}
-		if err = cfg.cacheCfg.loadFromJsonCfg(cacheJsonCfg); err != nil {
-			return
-		}
+		cfg.cacheCfg = disabledCache
 	}
 	return
 
@@ -1412,6 +1445,12 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 			time.Sleep(1) // to force the context switch( to be sure we start the DB before a service that needs it)
 		}
 		cfg.rldChans[Apier] <- struct{}{}
+		if !fall {
+			break
+		}
+		fallthrough
+	case RPCConnsJsonName:
+		cfg.rldChans[RPCConnsJsonName] <- struct{}{}
 		if !fall {
 			break
 		}

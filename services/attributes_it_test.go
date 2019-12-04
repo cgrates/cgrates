@@ -24,6 +24,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/rpcclient"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -48,8 +50,10 @@ func TestAttributeSReload(t *testing.T) {
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg)
 	attrS := NewAttributeService(cfg, db,
-		chS, filterSChan, server)
-	srvMngr.AddServices(attrS, NewLoaderService(cfg, db, filterSChan, server, nil, nil, engineShutdown), db)
+		chS, filterSChan, server, make(chan rpcclient.RpcClientConnection, 1),
+	)
+	srvMngr.AddServices(NewConnManagerService(cfg, nil), attrS,
+		NewLoaderService(cfg, db, filterSChan, server, nil, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
@@ -59,6 +63,7 @@ func TestAttributeSReload(t *testing.T) {
 	if db.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
+
 	var reply string
 	if err := cfg.V1ReloadConfig(&config.ConfigReloadWithArgDispatcher{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),

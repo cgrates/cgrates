@@ -25,6 +25,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/rpcclient"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -54,9 +56,10 @@ func TestEventReaderSReload(t *testing.T) {
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg)
 	sS := NewSessionService(cfg, db, server, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, engineShutdown)
-	attrS := NewEventReaderService(cfg, filterSChan, sS.GetIntenternalChan(), nil, engineShutdown)
-	srvMngr.AddServices(attrS, sS, NewLoaderService(cfg, db, filterSChan, server, nil, nil, engineShutdown), db)
+		nil, nil, nil, nil,
+		nil, nil, nil, nil, make(chan rpcclient.RpcClientConnection, 1), engineShutdown)
+	attrS := NewEventReaderService(cfg, filterSChan, engineShutdown, nil)
+	srvMngr.AddServices(NewConnManagerService(cfg, nil), attrS, sS, NewLoaderService(cfg, db, filterSChan, server, nil, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

@@ -567,9 +567,7 @@ func main() {
 		services.NewHTTPAgent(cfg, filterSChan, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), server),       // no reload
 		ldrs, anz, dspS, dmService, storDBService,
 	)
-
 	srvManager.StartServices()
-
 	// Start FilterS
 	go startFilterService(filterSChan, cacheS, stS.GetIntenternalChan(),
 		reS.GetIntenternalChan(), rals.GetResponder().GetIntenternalChan(),

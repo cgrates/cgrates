@@ -910,13 +910,8 @@ func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"ContentFields": content,
 			},
 		},
-		"SessionSConns": []interface{}{
-			map[string]interface{}{
-				"Address":     "127.0.0.1:2012",
-				"Synchronous": false,
-				"TLS":         false,
-				"Transport":   "*json",
-			},
+		"SessionSConns": []string{
+			utils.MetaLocalHost,
 		},
 	}
 

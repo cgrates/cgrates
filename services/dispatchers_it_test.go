@@ -24,6 +24,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/rpcclient"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -50,9 +52,9 @@ func TestDispatcherSReload(t *testing.T) {
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg)
-	attrS := NewAttributeService(cfg, db, chS, filterSChan, server)
-	srv := NewDispatcherService(cfg, db, chS, filterSChan, server, attrS.GetIntenternalChan())
-	srvMngr.AddServices(attrS, srv, NewLoaderService(cfg, db, filterSChan, server, nil, nil, engineShutdown), db)
+	attrS := NewAttributeService(cfg, db, chS, filterSChan, server, make(chan rpcclient.RpcClientConnection, 1))
+	srv := NewDispatcherService(cfg, db, chS, filterSChan, server, attrS.GetIntenternalChan(), make(chan rpcclient.RpcClientConnection, 1))
+	srvMngr.AddServices(NewConnManagerService(cfg, nil), attrS, srv, NewLoaderService(cfg, db, filterSChan, server, nil, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
