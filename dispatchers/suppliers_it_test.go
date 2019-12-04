@@ -43,11 +43,19 @@ var sTestsDspSup = []func(t *testing.T){
 
 //Test start here
 func TestDspSupplierSTMySQL(t *testing.T) {
-	testDsp(t, sTestsDspSup, "TestDspSupplierS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspSup, "TestDspSupplierS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspSup, "TestDspSupplierS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	}
 }
 
 func TestDspSupplierSMongo(t *testing.T) {
-	testDsp(t, sTestsDspSup, "TestDspSupplierS", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspSup, "TestDspSupplierS", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspSup, "TestDspSupplierS", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+	}
 }
 
 func testDspSupPing(t *testing.T) {
@@ -380,6 +388,9 @@ func testDspSupGetSupplierForEvent(t *testing.T) {
 			},
 		},
 		Weight: 10,
+	}
+	if *encoding == utils.MetaGOB {
+		expected.SortingParameters = nil // empty slices are nil in gob
 	}
 	var supProf []*engine.SupplierProfile
 	if err := dispEngine.RPC.Call(utils.SupplierSv1GetSupplierProfilesForEvent,

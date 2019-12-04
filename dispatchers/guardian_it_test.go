@@ -35,16 +35,15 @@ var sTestsDspGrd = []func(t *testing.T){
 
 //Test start here
 func TestDspGuardianSTMySQL(t *testing.T) {
-	testDsp(t, sTestsDspGrd, "TestDspGuardianS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspGrd, "TestDspGuardianS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspGrd, "TestDspGuardianS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	}
 }
 
 func testDspGrdPing(t *testing.T) {
 	var reply string
-	if err := allEngine.RPC.Call(utils.GuardianSv1Ping, nil, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.Pong {
-		t.Errorf("Received: %s", reply)
-	}
 	if err := allEngine.RPC.Call(utils.GuardianSv1Ping, new(utils.CGREvent), &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.Pong {

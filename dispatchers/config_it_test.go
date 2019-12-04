@@ -34,7 +34,11 @@ var sTestsDspConfig = []func(t *testing.T){
 
 //Test start here
 func TestDspConfigITMySQL(t *testing.T) {
-	testDsp(t, sTestsDspConfig, "TestDspConfigITMySQL", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspConfig, "TestDspConfigITMySQL", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspConfig, "TestDspConfigITMySQL", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	}
 }
 
 func testDspConfigSv1GetJSONSection(t *testing.T) {

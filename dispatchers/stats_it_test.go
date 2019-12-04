@@ -42,11 +42,19 @@ var sTestsDspSts = []func(t *testing.T){
 
 //Test start here
 func TestDspStatSTMySQL(t *testing.T) {
-	testDsp(t, sTestsDspSts, "TestDspStatS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspSts, "TestDspStatS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspSts, "TestDspStatS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	}
 }
 
 func TestDspStatSMongo(t *testing.T) {
-	testDsp(t, sTestsDspSts, "TestDspStatS", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspSts, "TestDspStatS", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspSts, "TestDspStatS", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+	}
 }
 
 func testDspStsPingFailover(t *testing.T) {

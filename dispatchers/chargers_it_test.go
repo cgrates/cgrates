@@ -40,11 +40,19 @@ var sTestsDspCpp = []func(t *testing.T){
 
 //Test start here
 func TestDspChargerSTMySQL(t *testing.T) {
-	testDsp(t, sTestsDspCpp, "TestDspChargerS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspCpp, "TestDspChargerS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspCpp, "TestDspChargerS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	}
 }
 
 func TestDspChargerSMongo(t *testing.T) {
-	testDsp(t, sTestsDspCpp, "TestDspChargerS", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspCpp, "TestDspChargerS", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspCpp, "TestDspChargerS", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+	}
 }
 
 func testDspCppPingFailover(t *testing.T) {
@@ -104,6 +112,9 @@ func testDspCppGetChtgFailover(t *testing.T) {
 			AttributeIDs: []string{"*none"},
 			Weight:       0,
 		},
+	}
+	if *encoding == utils.MetaGOB {
+		(*eChargers)[0].FilterIDs = nil // empty slice are nil in gob
 	}
 	var reply *engine.ChargerProfiles
 	if err := dispEngine.RPC.Call(utils.ChargerSv1GetChargersForEvent,
@@ -189,6 +200,9 @@ func testDspCppTestAuthKey2(t *testing.T) {
 			Weight:       0,
 		},
 	}
+	if *encoding == utils.MetaGOB {
+		(*eChargers)[0].FilterIDs = nil // empty slice are nil in gob
+	}
 	var reply *engine.ChargerProfiles
 	if err := dispEngine.RPC.Call(utils.ChargerSv1GetChargersForEvent,
 		args, &reply); err != nil {
@@ -221,6 +235,9 @@ func testDspCppGetChtgRoundRobin(t *testing.T) {
 			AttributeIDs: []string{"*none"},
 			Weight:       0,
 		},
+	}
+	if *encoding == utils.MetaGOB {
+		(*eChargers)[0].FilterIDs = nil // empty slice are nil in gob
 	}
 	var reply *engine.ChargerProfiles
 	// To ALL2

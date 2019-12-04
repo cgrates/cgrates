@@ -59,11 +59,19 @@ var sTestsDspSession = []func(t *testing.T){
 
 //Test start here
 func TestDspSessionSTMySQL(t *testing.T) {
-	testDsp(t, sTestsDspSession, "TestDspSessionS", "all", "all2", "dispatchers", "testit", "tutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspSession, "TestDspSessionS", "all", "all2", "dispatchers", "testit", "tutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspSession, "TestDspSessionS", "all", "all2", "dispatchers", "testit", "tutorial", "dispatchers")
+	}
 }
 
 func TestDspSessionSMongo(t *testing.T) {
-	testDsp(t, sTestsDspSession, "TestDspSessionS", "all", "all2", "dispatchers_mongo", "testit", "tutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspSession, "TestDspSessionS", "all", "all2", "dispatchers_mongo", "testit", "tutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspSession, "TestDspSessionS", "all", "all2", "dispatchers_mongo", "testit", "tutorial", "dispatchers")
+	}
 }
 
 func testDspSessionAddBalacne(t *testing.T) {
@@ -377,6 +385,11 @@ func testDspSessionUpdate(t *testing.T) {
 			},
 		},
 	}
+	if *encoding == utils.MetaGOB { // gob maintains the variable type
+		eAttrs.CGREvent.Event[utils.Usage] = reqUsage
+		eAttrs.CGREvent.Event[utils.SetupTime] = argsUpdate.CGREvent.Event[utils.SetupTime]
+		eAttrs.CGREvent.Event[utils.AnswerTime] = argsUpdate.CGREvent.Event[utils.AnswerTime]
+	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
 		t.Errorf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
@@ -442,6 +455,11 @@ func testDspSessionUpdate2(t *testing.T) {
 		},
 	}
 	sort.Strings(eAttrs.AlteredFields)
+	if *encoding == utils.MetaGOB { // gob maintains the variable type
+		eAttrs.CGREvent.Event[utils.Usage] = reqUsage
+		eAttrs.CGREvent.Event[utils.SetupTime] = argsUpdate.CGREvent.Event[utils.SetupTime]
+		eAttrs.CGREvent.Event[utils.AnswerTime] = argsUpdate.CGREvent.Event[utils.AnswerTime]
+	}
 	if rply.Attributes != nil && rply.Attributes.AlteredFields != nil {
 		sort.Strings(rply.Attributes.AlteredFields)
 	}
@@ -581,6 +599,11 @@ func testDspSessionProcessEvent(t *testing.T) {
 			},
 		},
 	}
+	if *encoding == utils.MetaGOB { // gob maintains the variable type
+		eAttrs.CGREvent.Event[utils.Usage] = initUsage
+		eAttrs.CGREvent.Event[utils.SetupTime] = args.CGREvent.Event[utils.SetupTime]
+		eAttrs.CGREvent.Event[utils.AnswerTime] = args.CGREvent.Event[utils.AnswerTime]
+	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
 		t.Errorf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
@@ -648,6 +671,11 @@ func testDspSessionProcessEvent2(t *testing.T) {
 			},
 		},
 	}
+	if *encoding == utils.MetaGOB { // gob maintains the variable type
+		eAttrs.CGREvent.Event[utils.Usage] = initUsage
+		eAttrs.CGREvent.Event[utils.SetupTime] = args.CGREvent.Event[utils.SetupTime]
+		eAttrs.CGREvent.Event[utils.AnswerTime] = args.CGREvent.Event[utils.AnswerTime]
+	}
 	if !reflect.DeepEqual(eAttrs, rply.Attributes) {
 		t.Errorf("expecting: %+v, received: %+v",
 			utils.ToJSON(eAttrs), utils.ToJSON(rply.Attributes))
@@ -689,7 +717,7 @@ func testDspSessionReplicate(t *testing.T) {
 	var repl int
 	time.Sleep(10 * time.Millisecond)
 	if err := allEngine2.RPC.Call(utils.SessionSv1GetPassiveSessionsCount,
-		nil, &repl); err != nil {
+		new(utils.SessionFilter), &repl); err != nil {
 		t.Fatal(err)
 	} else if repl != 2 {
 		t.Errorf("Expected 1 sessions recived %v", repl)

@@ -38,11 +38,19 @@ var sTestsDspRsp = []func(t *testing.T){
 
 //Test start here
 func TestDspResponderTMySQL(t *testing.T) {
-	testDsp(t, sTestsDspRsp, "TestDspResponder", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspRsp, "TestDspResponder", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspRsp, "TestDspResponder", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	}
 }
 
 func TestDspResponderMongo(t *testing.T) {
-	testDsp(t, sTestsDspRsp, "TestDspResponder", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspRsp, "TestDspResponder", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspRsp, "TestDspResponder", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+	}
 }
 
 func testDspResponderStatus(t *testing.T) {

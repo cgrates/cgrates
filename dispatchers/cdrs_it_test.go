@@ -54,15 +54,27 @@ var sTestsDspCDRsWithoutAuth = []func(t *testing.T){
 
 //Test start here
 func TestDspCDRsITMySQL(t *testing.T) {
-	testDsp(t, sTestsDspCDRs, "TestDspCDRs", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspCDRs, "TestDspCDRs", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspCDRs, "TestDspCDRs", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	}
 }
 
 func TestDspCDRsITMySQLWithoutAuth(t *testing.T) {
-	testDsp(t, sTestsDspCDRsWithoutAuth, "TestDspCDRsWithoutAuth", "all", "all2", "dispatchers_no_attributes", "tutorial", "oldtutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspCDRsWithoutAuth, "TestDspCDRsWithoutAuth", "all", "all2", "dispatchers_no_attributes", "tutorial", "oldtutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspCDRsWithoutAuth, "TestDspCDRsWithoutAuth", "all", "all2", "dispatchers_no_attributes", "tutorial", "oldtutorial", "dispatchers")
+	}
 }
 
 func TestDspCDRsITMongo(t *testing.T) {
-	testDsp(t, sTestsDspCDRs, "TestDspCDRs", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspCDRs, "TestDspCDRs", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspCDRs, "TestDspCDRs", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+	}
 }
 
 func testDspCDRsPing(t *testing.T) {

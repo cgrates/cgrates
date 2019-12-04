@@ -42,11 +42,19 @@ var sTestsDspTh = []func(t *testing.T){
 
 //Test start here
 func TestDspThresholdSTMySQL(t *testing.T) {
-	testDsp(t, sTestsDspTh, "TestDspThresholdS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspTh, "TestDspThresholdS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspTh, "TestDspThresholdS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	}
 }
 
 func TestDspThresholdSMongo(t *testing.T) {
-	testDsp(t, sTestsDspTh, "TestDspThresholdS", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+	if *encoding == utils.MetaGOB {
+		testDsp(t, sTestsDspTh, "TestDspThresholdS", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers_gob")
+	} else {
+		testDsp(t, sTestsDspTh, "TestDspThresholdS", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+	}
 }
 
 func testDspThPingFailover(t *testing.T) {
