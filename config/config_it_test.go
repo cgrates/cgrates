@@ -465,13 +465,8 @@ func TestCGRConfigReloadERs(t *testing.T) {
 		&FCTemplate{Tag: utils.Usage, FieldId: utils.Usage, Type: utils.META_COMPOSED, Value: NewRSRParsersMustCompile("~*req.13", true, utils.INFIELD_SEP), Mandatory: true},
 	}
 	expAttr := &ERsCfg{
-		Enabled: true,
-		SessionSConns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSON,
-			},
-		},
+		Enabled:       true,
+		SessionSConns: []string{utils.MetaLocalHost},
 		Readers: []*EventReaderCfg{
 			&EventReaderCfg{
 				ID:             utils.META_DEFAULT,

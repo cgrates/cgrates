@@ -610,5 +610,9 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 			Items:  0,
 			Groups: 0,
 		},
+		utils.CacheRPCConnections: {
+			Items:  0,
+			Groups: 0,
+		},
 	}
 }
