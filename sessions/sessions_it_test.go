@@ -38,7 +38,7 @@ var sItRPC *rpc.Client
 func TestSessionsItInitCfg(t *testing.T) {
 	sItCfgPath = path.Join(*dataDir, "conf", "samples", "smg")
 	if *encoding == utils.MetaGOB {
-		dataCfgPath = path.Join(*dataDir, "conf", "samples", "gob", "smg")
+		dataCfgPath = path.Join(*dataDir, "conf", "samples", "smg"+"_gob")
 	}
 	// Init config first
 	var err error

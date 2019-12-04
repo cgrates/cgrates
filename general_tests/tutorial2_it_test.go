@@ -71,7 +71,7 @@ func testTutLoadConfig(t *testing.T) {
 	var err error
 	tutCfgPath = path.Join(*dataDir, "conf", "samples", tutCfgDir)
 	if *encoding == utils.MetaGOB {
-		tutCfgPath = path.Join(*dataDir, "conf", "samples", "gob", tutCfgDir)
+		tutCfgPath = path.Join(*dataDir, "conf", "samples", tutCfgDir+"_gob")
 	}
 	if tutCfg, err = config.NewCGRConfigFromPath(tutCfgPath); err != nil {
 		t.Error(err)
