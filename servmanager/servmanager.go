@@ -305,6 +305,10 @@ func (srvMngr *ServiceManager) handleReload() {
 			if err = srvMngr.reloadService(utils.StorDB); err != nil {
 				return
 			}
+		case <-srvMngr.GetConfig().GetReloadChan(config.RPCConnsJsonName):
+			if err = srvMngr.reloadService(utils.RPCConnS); err != nil {
+				return
+			}
 		}
 		// handle RPC server
 	}
@@ -312,7 +316,6 @@ func (srvMngr *ServiceManager) handleReload() {
 
 func (srvMngr *ServiceManager) reloadService(srviceName string) (err error) {
 	srv := srvMngr.GetService(srviceName)
-
 	if srv.ShouldRun() {
 		if srv.IsRunning() {
 			if err = srv.Reload(); err != nil {

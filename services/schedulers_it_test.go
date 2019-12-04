@@ -49,7 +49,7 @@ func TestSchedulerSReload(t *testing.T) {
 	internalCdrSChan <- nil
 	db := NewDataDBService(cfg)
 	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, internalCdrSChan, nil)
-	srvMngr.AddServices(schS, NewLoaderService(cfg, db, filterSChan, server, nil, nil, engineShutdown), db)
+	srvMngr.AddServices(NewConnManagerService(cfg, nil), schS, NewLoaderService(cfg, db, filterSChan, server, nil, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

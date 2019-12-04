@@ -29,23 +29,69 @@ import (
 	"github.com/cgrates/ltcache"
 )
 
-// InternalDataDBParts indexes the internal DataDB partitions
-var InternalDataDBParts []string = []string{
-	ColDst, ColRds, ColAct, ColApl, ColAAp, ColTsk, ColAtr, ColRpl,
-	ColRpf, ColAcc, ColShg, ColLht, ColVer, ColRsP, ColRFI, ColTmg, ColRes,
-	ColSqs, ColSqp, ColTps, ColThs, ColFlt, ColSpp, ColAttr, ColCDRs, ColCpp,
-	ColDpp, ColDph, ColLID,
+var unlimitedCfg = &ltcache.CacheConfig{
+	MaxItems: -1,
+}
+
+// internalDBCacheCfg indexes the internal DataDB partitions
+var internalDBCacheCfg = map[string]*ltcache.CacheConfig{
+	utils.CacheDestinations:            unlimitedCfg,
+	utils.CacheReverseDestinations:     unlimitedCfg,
+	utils.CacheActions:                 unlimitedCfg,
+	utils.CacheActionPlans:             unlimitedCfg,
+	utils.CacheAccountActionPlans:      unlimitedCfg,
+	utils.CacheActionTriggers:          unlimitedCfg,
+	utils.CacheRatingPlans:             unlimitedCfg,
+	utils.CacheRatingProfiles:          unlimitedCfg,
+	utils.CacheAccounts:                unlimitedCfg,
+	utils.CacheSharedGroups:            unlimitedCfg,
+	utils.TBLVersions:                  unlimitedCfg,
+	utils.CacheTimings:                 unlimitedCfg,
+	utils.CacheFilters:                 unlimitedCfg,
+	utils.CacheResourceProfiles:        unlimitedCfg,
+	utils.CacheResourceFilterIndexes:   unlimitedCfg,
+	utils.CacheResources:               unlimitedCfg,
+	utils.CacheStatFilterIndexes:       unlimitedCfg,
+	utils.CacheStatQueueProfiles:       unlimitedCfg,
+	utils.CacheStatQueues:              unlimitedCfg,
+	utils.CacheThresholdFilterIndexes:  unlimitedCfg,
+	utils.CacheThresholdProfiles:       unlimitedCfg,
+	utils.CacheThresholds:              unlimitedCfg,
+	utils.CacheSupplierFilterIndexes:   unlimitedCfg,
+	utils.CacheSupplierProfiles:        unlimitedCfg,
+	utils.CacheChargerFilterIndexes:    unlimitedCfg,
+	utils.CacheChargerProfiles:         unlimitedCfg,
+	utils.CacheAttributeFilterIndexes:  unlimitedCfg,
+	utils.CacheAttributeProfiles:       unlimitedCfg,
+	utils.CacheDispatcherFilterIndexes: unlimitedCfg,
+	utils.CacheDispatcherProfiles:      unlimitedCfg,
+	utils.CacheDispatcherHosts:         unlimitedCfg,
+	utils.CacheDiameterMessages:        unlimitedCfg,
+	utils.CacheEventResources:          unlimitedCfg,
+	utils.CacheLoadIDs:                 unlimitedCfg,
+	utils.TBLTPTimings:                 unlimitedCfg,
+	utils.TBLTPDestinations:            unlimitedCfg,
+	utils.TBLTPRates:                   unlimitedCfg,
+	utils.TBLTPDestinationRates:        unlimitedCfg,
+	utils.TBLTPRatingPlans:             unlimitedCfg,
+	utils.TBLTPRateProfiles:            unlimitedCfg,
+	utils.TBLTPSharedGroups:            unlimitedCfg,
+	utils.TBLTPActions:                 unlimitedCfg,
+	utils.TBLTPActionTriggers:          unlimitedCfg,
+	utils.TBLTPAccountActions:          unlimitedCfg,
+	utils.TBLTPResources:               unlimitedCfg,
+	utils.TBLTPStats:                   unlimitedCfg,
+	utils.TBLTPThresholds:              unlimitedCfg,
+	utils.TBLTPFilters:                 unlimitedCfg,
+	utils.SessionCostsTBL:              unlimitedCfg,
+	utils.TBLTPActionPlans:             unlimitedCfg,
+	utils.TBLTPSuppliers:               unlimitedCfg,
+	utils.TBLTPAttributes:              unlimitedCfg,
+	utils.TBLTPChargers:                unlimitedCfg,
 }
 
 // InternalStorDBParts indexes the internal StorDB partitions
-var InternalStorDBParts []string = []string{
-	utils.TBLTPTimings, utils.TBLTPDestinations, utils.TBLTPRates,
-	utils.TBLTPDestinationRates, utils.TBLTPRatingPlans, utils.TBLTPRateProfiles,
-	utils.TBLTPSharedGroups, utils.TBLTPActions, utils.TBLTPActionTriggers,
-	utils.TBLTPAccountActions, utils.TBLTPResources, utils.TBLTPStats, utils.TBLTPThresholds,
-	utils.TBLTPFilters, utils.SessionCostsTBL, utils.CDRsTBL, utils.TBLTPActionPlans,
-	utils.TBLVersions, utils.TBLTPSuppliers, utils.TBLTPAttributes, utils.TBLTPChargers,
-}
+var InternalStorDBParts []string = []string{}
 
 type InternalDB struct {
 	tasks               []*Task
@@ -58,9 +104,8 @@ type InternalDB struct {
 
 // NewInternalDB constructs an InternalDB
 func NewInternalDB(stringIndexedFields, prefixIndexedFields []string) (iDB *InternalDB) {
-	dfltCfg, _ := config.NewDefaultCGRConfig()
 	iDB = &InternalDB{
-		db:                  ltcache.NewTransCache(dfltCfg.CacheCfg().AsTransCacheConfig()),
+		db:                  ltcache.NewTransCache(internalDBCacheCfg),
 		stringIndexedFields: stringIndexedFields,
 		prefixIndexedFields: prefixIndexedFields,
 		cnter:               utils.NewCounter(time.Now().UnixNano(), 0),

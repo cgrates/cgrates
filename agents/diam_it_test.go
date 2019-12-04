@@ -95,11 +95,11 @@ func TestDiamItDispatcher(t *testing.T) {
 		t.SkipNow()
 		return
 	}
+	testDiamItResetAllDB(t)
 	isDispatcherActive = true
 	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all"), 200)
 	engine.StartEngine(path.Join(*dataDir, "conf", "samples", "dispatchers", "all2"), 200)
 	diamConfigDIR = "dispatchers/diamagent"
-	testDiamItResetAllDB(t)
 	for _, stest := range sTestsDiam {
 		t.Run(diamConfigDIR, stest)
 	}

@@ -147,6 +147,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 				utils.Destination: "+4986517174963",
 				utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
 				utils.Usage:       time.Duration(3) * time.Minute,
+				utils.Subject:     "ANY2CNT",
 			},
 		},
 	}

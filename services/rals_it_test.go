@@ -72,7 +72,7 @@ func TestRalsReload(t *testing.T) {
 	ralS := NewRalService(cfg, db, stordb, chS, filterSChan, server,
 		tS.GetIntenternalChan(), internalChan, cacheSChan, internalChan, internalChan,
 		internalChan, schS, engineShutdown)
-	srvMngr.AddServices(ralS, schS, tS, NewLoaderService(cfg, db, filterSChan, server, cacheSChan, nil, engineShutdown), db, stordb)
+	srvMngr.AddServices(NewConnManagerService(cfg, nil), ralS, schS, tS, NewLoaderService(cfg, db, filterSChan, server, cacheSChan, nil, engineShutdown), db, stordb)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}
