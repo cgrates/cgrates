@@ -18,11 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/cgrates/rpcclient"
 )
 
 func TestGetStartTime(t *testing.T) {
@@ -811,6 +814,52 @@ func TestEndOfMonth(t *testing.T) {
 	}
 }
 
+func TestSizeFmt(t *testing.T) {
+	if str := SizeFmt(0, EmptyString); str != "0.0B" {
+		t.Errorf("Expecting: 0.0B, received: %+q", str)
+	}
+	if str := SizeFmt(1023, EmptyString); str != "1023.0B" {
+		t.Errorf("Expecting: 1023.0B, received: %+q", str)
+	}
+	if str := SizeFmt(1024, EmptyString); str != "1.0KiB" {
+		t.Errorf("Expecting: 1.0KiB, received: %+q", str)
+	}
+	if str := SizeFmt(1048575, EmptyString); str != "1024.0KiB" {
+		t.Errorf("Expecting: 1024.0KiB, received: %+q", str)
+	}
+	if str := SizeFmt(1048576, EmptyString); str != "1.0MiB" {
+		t.Errorf("Expecting: 1.0MiB, received: %+q", str)
+	}
+	if str := SizeFmt(1073741823, EmptyString); str != "1024.0MiB" {
+		t.Errorf("Expecting: 1024.0MiB, received: %+q", str)
+	}
+	if str := SizeFmt(1073741824, EmptyString); str != "1.0GiB" {
+		t.Errorf("Expecting: 1.0GiB, received: %+q", str)
+	}
+	if str := SizeFmt(1099511627775, EmptyString); str != "1024.0GiB" {
+		t.Errorf("Expecting: 1024.0GiB, received: %+q", str)
+	}
+	if str := SizeFmt(1099511627776, EmptyString); str != "1.0TiB" {
+		t.Errorf("Expecting: 1.0TiB, received: %+q", str)
+	}
+	if str := SizeFmt(1125899906842623, EmptyString); str != "1024.0TiB" {
+		t.Errorf("Expecting: 1024.0TiB, received: %+q", str)
+	}
+	if str := SizeFmt(1125899906842624, EmptyString); str != "1.0PiB" {
+		t.Errorf("Expecting: 1.0PiB, received: %+q", str)
+	}
+	if str := SizeFmt(1152921504606847000, EmptyString); str != "1.0EiB" {
+		t.Errorf("Expecting: 1.0EiB, received: %+q", str)
+	}
+	if str := SizeFmt(1180591620717411303424, EmptyString); str != "1.0ZiB" {
+		t.Errorf("Expecting: 1.0ZiB, received: %+q", str)
+	}
+	if str := SizeFmt(9000000000000000000000000, EmptyString); str != "7.4YiB" {
+		t.Errorf("Expecting: 7.4YiB, received: %+q", str)
+	}
+
+}
+
 func TestParseHierarchyPath(t *testing.T) {
 	eHP := HierarchyPath([]string{"Root", "CGRateS"})
 	if hp := ParseHierarchyPath("/Root/CGRateS/", ""); !reflect.DeepEqual(hp, eHP) {
@@ -827,6 +876,11 @@ func TestHierarchyPathAsString(t *testing.T) {
 	if hpStr := hp.AsString("/", true); hpStr != eStr {
 		t.Errorf("Expecting: %q, received: %q", eStr, hpStr)
 	}
+	hp = HierarchyPath([]string{})
+	if hpStr := hp.AsString(EmptyString, true); hpStr != EmptyString {
+		t.Errorf("Expecting: %q, received: %q", EmptyString, hpStr)
+	}
+
 }
 
 func TestMaskSuffix(t *testing.T) {
@@ -1035,11 +1089,115 @@ func TestGetCGRVersion(t *testing.T) {
 Author: DanB <danb@cgrates.org>
 Date:   Fri Dec 30 19:48:09 2016 +0100
 
-    Fixes for db driver to avoid returning new values in case of errors`
+	Fixes for db driver to avoid returning new values in case of errors
+`
 	eVers := "CGRateS 0.9.1~rc8 git+73014da (2016-12-30T19:48:09+01:00)"
-	if vers := GetCGRVersion(); vers != eVers {
+	if vers, err := GetCGRVersion(); err != nil {
+		t.Error(err)
+	} else if vers != eVers {
 		t.Errorf("Expecting: <%s>, received: <%s>", eVers, vers)
 	}
+	GitLastLog = ""
+	if vers, err := GetCGRVersion(); err != nil {
+		t.Error(err)
+	} else if vers != "CGRateS 0.9.1~rc8" {
+		t.Errorf("Expecting: <CGRateS 0.9.1~rc8>, received: <%s>", vers)
+	}
+	GitLastLog = "\n"
+	if vers, err := GetCGRVersion(); err == nil || err.Error() != "Building version - error: <EOF> reading line from file" {
+		t.Error(err)
+	} else if vers != "CGRateS 0.9.1~rc8" {
+		t.Errorf("Expecting: <CGRateS 0.9.1~rc8>, received: <%s>", vers)
+	}
+	GitLastLog = `commit . . .
+`
+	if vers, err := GetCGRVersion(); err == nil || err.Error() != "Building version - cannot extract commit hash" {
+		t.Error(err)
+	} else if vers != "CGRateS 0.9.1~rc8" {
+		t.Errorf("Expecting: <CGRateS 0.9.1~rc8>, received: <%s>", vers)
+	}
+	GitLastLog = `Date: : :
+`
+	if vers, err := GetCGRVersion(); err == nil || err.Error() != "Building version - cannot split commit date" {
+		t.Error(err)
+	} else if vers != "CGRateS 0.9.1~rc8" {
+		t.Errorf("Expecting: <CGRateS 0.9.1~rc8>, received: <%s>", vers)
+	}
+	GitLastLog = `Date: wrong format
+`
+	if vers, err := GetCGRVersion(); err == nil || err.Error() != `Building version - error: <parsing time "wrong format" as "Mon Jan 2 15:04:05 2006 -0700": cannot parse "wrong format" as "Mon"> compiling commit date` {
+		t.Error(err)
+	} else if vers != "CGRateS 0.9.1~rc8" {
+		t.Errorf("Expecting: <CGRateS 0.9.1~rc8>, received: <%s>", vers)
+	}
+	GitLastLog = `ommit 73014daa0c1d7edcb532d5fe600b8a20d588cdf8
+Author: DanB <danb@cgrates.org>
+Date:   Fri Dec 30 19:48:09 2016 +0100
+	
+	Fixes for db driver to avoid returning new values in case of errors
+`
+	if vers, err := GetCGRVersion(); err == nil || err.Error() != "Cannot find commitHash or commitDate information" {
+		t.Error(err)
+	} else if vers != "CGRateS 0.9.1~rc8" {
+		t.Errorf("Expecting: <CGRateS 0.9.1~rc8>, received: <%s>", vers)
+	}
+}
+
+func TestNewTenantID(t *testing.T) {
+	eOut := &TenantID{ID: EmptyString}
+	if rcv := NewTenantID(EmptyString); *rcv != *eOut {
+		t.Errorf("Expecting: %+v, received %+v", eOut, rcv)
+	}
+	eOut = &TenantID{Tenant: "Test"}
+	if rcv := NewTenantID("Test:"); *rcv != *eOut {
+		t.Errorf("Expecting: %+v, received %+v", eOut, rcv)
+	}
+	eOut = &TenantID{Tenant: "cgrates.org", ID: "id"}
+	if rcv := NewTenantID("cgrates.org:id"); *rcv != *eOut {
+		t.Errorf("Expecting: %+v, received %+v", eOut, rcv)
+	}
+}
+
+func TestTenantID(t *testing.T) {
+	tID := &TenantID{Tenant: EmptyString, ID: EmptyString}
+	eOut := ":"
+	if rcv := tID.TenantID(); rcv != eOut {
+		t.Errorf("Expecting: %q, received: %q", eOut, rcv)
+	}
+	tID = &TenantID{Tenant: "cgrates.org", ID: "id"}
+	eOut = "cgrates.org:id"
+	if rcv := tID.TenantID(); rcv != eOut {
+		t.Errorf("Expecting: %q, received: %q", eOut, rcv)
+	}
+}
+
+func TestTenantIDWithCache(t *testing.T) {
+	tID := &TenantIDWithCache{Tenant: EmptyString, ID: EmptyString}
+	eOut := ":"
+	if rcv := tID.TenantID(); rcv != eOut {
+		t.Errorf("Expecting: %q, received: %q", eOut, rcv)
+	}
+	tID = &TenantIDWithCache{Tenant: "cgrates.org", ID: "id"}
+	eOut = "cgrates.org:id"
+	if rcv := tID.TenantID(); rcv != eOut {
+		t.Errorf("Expecting: %q, received: %q", eOut, rcv)
+	}
+}
+
+type testRPC struct {
+}
+
+func (tRPC *testRPC) Name(args interface{}, reply interface{}) error {
+	return errors.New("err_test")
+}
+func (tRPC *testRPC) V1Name(args interface{}, reply interface{}) error {
+	return errors.New("V1_err_test")
+}
+func TestRPCCall(t *testing.T) {
+	if err := RPCCall("wrong", "test", nil, nil); err == nil || err != rpcclient.ErrUnsupporteServiceMethod {
+		t.Errorf("Expecting: %+v, received: %+v", rpcclient.ErrUnsupporteServiceMethod, err)
+	}
+
 }
 
 func TestCounter(t *testing.T) {

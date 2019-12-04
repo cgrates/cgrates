@@ -55,7 +55,10 @@ func (cS *CoreService) Status(arg *utils.TenantWithArgDispatcher, reply *map[str
 	response[utils.NodeID] = config.CgrConfig().GeneralCfg().NodeID
 	response[utils.MemoryUsage] = utils.SizeFmt(float64(memstats.HeapAlloc), "")
 	response[utils.ActiveGoroutines] = runtime.NumGoroutine()
-	response[utils.Version] = utils.GetCGRVersion()
+	if response[utils.Version], err = utils.GetCGRVersion(); err != nil {
+		utils.Logger.Err(err.Error())
+		err = nil
+	}
 	response[utils.RunningSince] = utils.GetStartTime()
 	response[utils.GoVersion] = runtime.Version()
 	*reply = response

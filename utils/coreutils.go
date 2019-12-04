@@ -575,7 +575,7 @@ func GetEndOfMonth(ref time.Time) time.Time {
 
 // formats number in K,M,G, etc.
 func SizeFmt(num float64, suffix string) string {
-	if suffix == "" {
+	if suffix == EmptyString {
 		suffix = "B"
 	}
 	for _, unit := range []string{"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"} {
@@ -592,7 +592,7 @@ func TimeIs0h(t time.Time) bool {
 }
 
 func ParseHierarchyPath(path string, sep string) HierarchyPath {
-	if sep == "" {
+	if sep == EmptyString {
 		for _, sep = range []string{"/", NestingSep} {
 			if idx := strings.Index(path, sep); idx != -1 {
 				break
@@ -608,9 +608,9 @@ type HierarchyPath []string
 
 func (h HierarchyPath) AsString(sep string, prefix bool) string {
 	if len(h) == 0 {
-		return ""
+		return EmptyString
 	}
-	retStr := ""
+	retStr := EmptyString
 	for idx, itm := range h {
 		if idx == 0 {
 			if prefix {
@@ -659,29 +659,24 @@ func CapitalizedMessage(errMessage string) (capStr string) {
 	return
 }
 
-func GetCGRVersion() (vers string) {
+func GetCGRVersion() (vers string, err error) {
 	vers = fmt.Sprintf("%s %s", CGRateS, VERSION)
 	if GitLastLog == "" {
-		return
+		return vers, nil
 	}
 	rdr := bytes.NewBufferString(GitLastLog)
 	var commitHash string
 	var commitDate time.Time
 	for i := 0; i < 5; i++ { // read a maximum of 5 lines
-		ln, err := rdr.ReadString('\n')
+		var ln string
+		ln, err = rdr.ReadString('\n')
 		if err != nil {
-			Logger.Err(fmt.Sprintf("Building version - error: <%s> reading line from file", err.Error()))
-			return
-		}
-		if ln == "" {
-			return
+			return vers, fmt.Errorf("Building version - error: <%s> reading line from file", err.Error()) //or errorsNew()
 		}
 		if strings.HasPrefix(ln, "commit ") {
 			commitSplt := strings.Split(ln, " ")
 			if len(commitSplt) != 2 {
-				Logger.Err("Building version - cannot extract commit hash")
-				fmt.Println("Building version - cannot extract commit hash")
-				return
+				return vers, fmt.Errorf("Building version - cannot extract commit hash")
 			}
 			commitHash = commitSplt[1]
 			continue
@@ -689,39 +684,20 @@ func GetCGRVersion() (vers string) {
 		if strings.HasPrefix(ln, "Date:") {
 			dateSplt := strings.Split(ln, ": ")
 			if len(dateSplt) != 2 {
-				Logger.Err("Building version - cannot split commit date")
-				fmt.Println("Building version - cannot split commit date")
-				return
+				return vers, fmt.Errorf("Building version - cannot split commit date")
 			}
 			commitDate, err = time.Parse("Mon Jan 2 15:04:05 2006 -0700", strings.TrimSpace(dateSplt[1]))
 			if err != nil {
-				Logger.Err(fmt.Sprintf("Building version - error: <%s> compiling commit date", err.Error()))
-				fmt.Printf("Building version - error: <%s> compiling commit date\n", err.Error())
-				return
+				return vers, fmt.Errorf("Building version - error: <%s> compiling commit date", err.Error())
 			}
 			break
 		}
 	}
 	if commitHash == "" || commitDate.IsZero() {
-		Logger.Err("Cannot find commitHash or commitDate information")
-		return
+		return vers, fmt.Errorf("Cannot find commitHash or commitDate information")
 	}
 	//CGRateS 0.9.1~rc8 git+73014da (2016-12-30T19:48:09+01:00)
-	return fmt.Sprintf("%s %s git+%s (%s)", CGRateS, VERSION, commitHash[:7], commitDate.Format(time.RFC3339))
-}
-
-// AppendToFile is a convenience function to be used for appending to an already existing file
-func AppendToFile(fName, text string) error {
-	f, err := os.OpenFile(fName, os.O_APPEND|os.O_WRONLY, 0666)
-	if err != nil {
-		return err
-	}
-	if _, err := f.WriteString(text); err != nil {
-		return err
-	}
-	f.Sync()
-	f.Close()
-	return nil
+	return fmt.Sprintf("%s %s git+%s (%s)", CGRateS, VERSION, commitHash[:7], commitDate.Format(time.RFC3339)), nil
 }
 
 func NewTenantID(tntID string) *TenantID {
@@ -729,9 +705,6 @@ func NewTenantID(tntID string) *TenantID {
 		return &TenantID{ID: tntID}
 	}
 	tIDSplt := strings.Split(tntID, CONCATENATED_KEY_SEP)
-	if len(tIDSplt) == 1 { // only Tenant present
-		return &TenantID{Tenant: tIDSplt[0]}
-	}
 	return &TenantID{Tenant: tIDSplt[0], ID: ConcatenatedKey(tIDSplt[1:]...)}
 }
 

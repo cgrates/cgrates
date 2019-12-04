@@ -119,7 +119,11 @@ func main() {
 		return
 	}
 	if *version {
-		fmt.Println(utils.GetCGRVersion())
+		if rcv, err := utils.GetCGRVersion(); err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Println(rcv)
+		}
 		return
 	}
 
