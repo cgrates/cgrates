@@ -90,9 +90,6 @@ var internalDBCacheCfg = map[string]*ltcache.CacheConfig{
 	utils.TBLTPChargers:                unlimitedCfg,
 }
 
-// InternalStorDBParts indexes the internal StorDB partitions
-var InternalStorDBParts []string = []string{}
-
 type InternalDB struct {
 	tasks               []*Task
 	db                  *ltcache.TransCache

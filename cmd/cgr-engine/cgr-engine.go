@@ -555,7 +555,6 @@ func main() {
 		utils.CoreSv1:          internalCoreSv1Chan,
 		utils.RALsV1:           rals.GetIntenternalChan(),
 	})
-	fmt.Println("BEfore srvManager.AddServices")
 	srvManager.AddServices(connManager, attrS, chrS, tS, stS, reS, supS, schS, rals,
 		rals.GetResponder(), rals.GetAPIv1(), rals.GetAPIv2(), cdrS, smg,
 		services.NewEventReaderService(cfg, filterSChan, exitChan, connManager.GetConnMgr()),
@@ -568,10 +567,7 @@ func main() {
 		services.NewHTTPAgent(cfg, filterSChan, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), server),       // no reload
 		ldrs, anz, dspS, dmService, storDBService,
 	)
-	fmt.Println("After srvManager.AddServices")
-	fmt.Println("srvManager Start")
 	srvManager.StartServices()
-	fmt.Println("srvManager Start success")
 	// Start FilterS
 	go startFilterService(filterSChan, cacheS, stS.GetIntenternalChan(),
 		reS.GetIntenternalChan(), rals.GetResponder().GetIntenternalChan(),

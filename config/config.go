@@ -1361,7 +1361,6 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 		}
 		cfg.rldChans[ATTRIBUTE_JSN] <- struct{}{}
 		if !fall {
-			fmt.Println("Exit here from V1Reload")
 			break
 		}
 		fallthrough
