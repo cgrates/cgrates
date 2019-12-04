@@ -84,6 +84,12 @@ func TestCDRsITMongo(t *testing.T) {
 	}
 }
 
+func TestCDRsITInternal(t *testing.T) {
+	cdrsConfDIR = "cdrsv2internal"
+	for _, stest := range sTestsCDRsIT {
+		t.Run(cdrsConfDIR, stest)
+	}
+}
 func testV2CDRsInitConfig(t *testing.T) {
 	var err error
 	cdrsCfgPath = path.Join(*dataDir, "conf", "samples", cdrsConfDIR)
