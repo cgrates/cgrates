@@ -54,7 +54,7 @@ func NewBalanceFilter(filter map[string]interface{}, defaultTimezone string) (bf
 		bf.Uuid = utils.StringPointer(utils.IfaceAsString(uuid))
 	}
 	// if ty, has := filter[utils.Type]; has {
-	// 	bf.Uuid = utils.StringPointer(utils.IfaceAsString(ty))
+	// 	bf.Type = utils.StringPointer(utils.IfaceAsString(ty))
 	// }
 	if val, has := filter[utils.Value]; has {
 		var value float64
