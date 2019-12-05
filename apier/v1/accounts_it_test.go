@@ -63,7 +63,7 @@ func TestAccITWithRemove(t *testing.T) {
 	if *encoding == utils.MetaJSON {
 		accCfgPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
 	} else if *encoding == utils.MetaGOB {
-		accCfgPath = path.Join(*dataDir, "conf", "samples", "tutmongo"+"_gob")
+		accCfgPath = path.Join(*dataDir, "conf", "samples", "tutmongo_gob")
 	}
 	for _, test := range accTests {
 		t.Run("TestAccIT", test)
@@ -74,7 +74,7 @@ func TestAccITWithoutRemove(t *testing.T) {
 	if *encoding == utils.MetaJSON {
 		accCfgPath = path.Join(*dataDir, "conf", "samples", "acc_balance_keep")
 	} else if *encoding == utils.MetaGOB {
-		accCfgPath = path.Join(*dataDir, "conf", "samples", "acc_balance_keep"+"_gob")
+		accCfgPath = path.Join(*dataDir, "conf", "samples", "acc_balance_keep_gob")
 	}
 	accExist = true
 	for _, test := range accTests {
