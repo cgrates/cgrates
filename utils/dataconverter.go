@@ -48,8 +48,7 @@ type DataConverter interface {
 }
 
 // NewDataConverter is a factory of converters
-func NewDataConverter(params string) (
-	conv DataConverter, err error) {
+func NewDataConverter(params string) (conv DataConverter, err error) {
 	switch {
 	case params == MetaDurationSeconds:
 		return NewDurationSecondsConverter("")
@@ -73,11 +72,12 @@ func NewDataConverter(params string) (
 	case params == MetaDuration:
 		return NewDurationConverter("")
 	case strings.HasPrefix(params, MetaLibPhoneNumber):
+		if len(params) == len(MetaLibPhoneNumber) {
+			return NewPhoneNumberConverter("")
+		}
 		return NewPhoneNumberConverter(params[len(MetaLibPhoneNumber)+1:])
 	default:
-		return nil,
-			fmt.Errorf("unsupported converter definition: <%s>",
-				params)
+		return nil, fmt.Errorf("unsupported converter definition: <%s>", params)
 	}
 }
 
@@ -166,8 +166,7 @@ func (rnd *RoundConverter) Convert(in interface{}) (
 	return
 }
 
-func NewMultiplyConverter(constructParams string) (
-	hdlr DataConverter, err error) {
+func NewMultiplyConverter(constructParams string) (hdlr DataConverter, err error) {
 	if constructParams == "" {
 		return nil, ErrMandatoryIeMissingNoCaps
 	}

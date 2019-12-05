@@ -1276,11 +1276,36 @@ func TestFFNNewFallbackFileNameFronString(t *testing.T) {
 	} else if !reflect.DeepEqual(eFFN, ffn) {
 		t.Errorf("Expecting: %+v, received: %+v", eFFN, ffn)
 	}
+	fileName = "***|"
+	if _, err := NewFallbackFileNameFronString(fileName); err == nil || err.Error() != "unsupported module: ***" {
+		t.Error(err)
+	}
+	fileName = "act>*call_url|***|"
+	if _, err := NewFallbackFileNameFronString(fileName); err == nil || err.Error() != "unsupported transport in fallback file path: act>*call_url|***|" {
+		t.Error(err)
+	}
+	fileName = "act>*call_url|*http_json|***"
+	if _, err := NewFallbackFileNameFronString(fileName); err == nil || err.Error() != "cannot find request ID in fallback file path: act>*call_url|*http_json|***" {
+		t.Error(err)
+	}
+	fileName = "act>*call_url|*http_json|%|.json"
+	if _, err := NewFallbackFileNameFronString(fileName); err == nil || err.Error() != `invalid URL escape "%"` {
+		t.Error(err)
+	}
+	fileName = "act>*call_url|*http_json|http%3A%2F%2Flocalhost%3A2080%2Flog_warning|.test"
+	if _, err := NewFallbackFileNameFronString(fileName); err == nil || err.Error() != "unsupported suffix in fallback file path: act>*call_url|*http_json|http%3A%2F%2Flocalhost%3A2080%2Flog_warning|.test" {
+		t.Error(err)
+	}
+
 }
 
 func TestFFNFallbackFileNameAsString(t *testing.T) {
+	ffn := &FallbackFileName{}
+	if rcv := ffn.AsString(); rcv != "|||" {
+		t.Errorf("Expecting |||, received: <%+q>", rcv)
+	}
 	eFn := "cdr|*http_json_cdr|http%3A%2F%2F127.0.0.1%3A12080%2Finvalid_json|1acce2c9-3f2d-4774-8662-c28872dad515.json"
-	ffn := &FallbackFileName{
+	ffn = &FallbackFileName{
 		Module:     "cdr",
 		Transport:  MetaHTTPjsonCDR,
 		Address:    "http://127.0.0.1:12080/invalid_json",
@@ -1288,5 +1313,60 @@ func TestFFNFallbackFileNameAsString(t *testing.T) {
 		FileSuffix: JSNSuffix}
 	if ffnStr := ffn.AsString(); ffnStr != eFn {
 		t.Errorf("Expecting: <%q>, received: <%q>", eFn, ffnStr)
+	}
+}
+
+func TestReverseString(t *testing.T) {
+	if rcv := ReverseString(EmptyString); rcv != EmptyString {
+		t.Errorf("Expecting <%+q>, received: <%+q>", EmptyString, rcv)
+	}
+	if rcv := ReverseString("test"); rcv != "tset" {
+		t.Errorf("Expecting <tset>, received: <%+q>", rcv)
+	}
+}
+
+func TestGetUrlRawArguments(t *testing.T) {
+	eOut := map[string]string{}
+	if rcv := GetUrlRawArguments(EmptyString); !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expectinc: %+v, received: %+v", eOut, rcv)
+	}
+	if rcv := GetUrlRawArguments("test"); !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expectinc: %+v, received: %+v", eOut, rcv)
+	}
+	if rcv := GetUrlRawArguments("test?"); !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expectinc: %+v, received: %+v", eOut, rcv)
+	}
+	eOut = map[string]string{"test": "1"}
+	if rcv := GetUrlRawArguments("?test=1"); !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expectinc: %+v, received: %+v", eOut, rcv)
+	}
+	eOut = map[string]string{"test": "1", "test2": "2"}
+	if rcv := GetUrlRawArguments("?test=1&test2=2"); !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expectinc: %+v, received: %+v", eOut, rcv)
+	}
+	eOut = map[string]string{"test": "1", "test2": "2", EmptyString: "5"}
+	if rcv := GetUrlRawArguments("?test=1&test2=2&=5"); !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expectinc: %+v, received: %+v", eOut, rcv)
+	}
+	eOut = map[string]string{"test": "1", "test2": "2"}
+	if rcv := GetUrlRawArguments("?test=1&test2=2&5"); !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expectinc: %+v, received: %+v", eOut, rcv)
+	}
+}
+
+func TestWarnExecTime(t *testing.T) {
+	//without Log
+	WarnExecTime(time.Now(), "MyTestFunc", time.Duration(1*time.Second))
+	//With Log
+	WarnExecTime(time.Now(), "MyTestFunc", time.Duration(1*time.Nanosecond))
+}
+
+func TestCastRPCErr(t *testing.T) {
+	err := errors.New("test")
+	if rcv := CastRPCErr(err); rcv != err {
+		t.Errorf("Expecting: %+q, received %+q", err, rcv)
+	}
+	if rcv := CastRPCErr(ErrNoMoreData); rcv.Error() != ErrNoMoreData.Error() {
+		t.Errorf("Expecting: %+v, received %+v", ErrNoMoreData.Error(), rcv)
 	}
 }
