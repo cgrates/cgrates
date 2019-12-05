@@ -134,9 +134,7 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"}
-	],
+	"attributes_conns": ["*localhost"],
 	"string_indexed_fields": ["Account"]
 },
 

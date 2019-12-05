@@ -405,7 +405,7 @@ type AttributeSJsonCfg struct {
 type ChargerSJsonCfg struct {
 	Enabled               *bool
 	Indexed_selects       *bool
-	Attributes_conns      *[]*RemoteHostJson
+	Attributes_conns      *[]string
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
 }

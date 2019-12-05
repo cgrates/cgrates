@@ -19,31 +19,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"errors"
 	"fmt"
-	"reflect"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func NewChargerService(dm *DataManager, filterS *FilterS,
-	attrS rpcclient.ClientConnector,
-	cfg *config.CGRConfig) (*ChargerService, error) {
-	if attrS != nil && reflect.ValueOf(attrS).IsNil() {
-		attrS = nil
-	}
+	cfg *config.CGRConfig, connMgr *ConnManager) (*ChargerService, error) {
+
 	return &ChargerService{dm: dm, filterS: filterS,
-		attrS: attrS, cfg: cfg}, nil
+		cfg: cfg, connMgr: connMgr}, nil
 }
 
 // ChargerService is performing charging
 type ChargerService struct {
 	dm      *DataManager
 	filterS *FilterS
-	attrS   rpcclient.ClientConnector
 	cfg     *config.CGRConfig
+	connMgr *ConnManager
 }
 
 // ListenAndServe will initialize the service
@@ -126,9 +120,6 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithArgDispatcher) (
 		if len(cP.AttributeIDs) == 1 && cP.AttributeIDs[0] == utils.META_NONE {
 			continue // AttributeS disabled
 		}
-		if cS.attrS == nil {
-			return nil, errors.New("no connection to AttributeS")
-		}
 
 		args := &AttrArgsProcessEvent{
 			AttributeIDs:  cP.AttributeIDs,
@@ -138,7 +129,7 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithArgDispatcher) (
 			ArgDispatcher: clonedEv.ArgDispatcher,
 		}
 		var evReply AttrSProcessEventReply
-		if err = cS.attrS.Call(utils.AttributeSv1ProcessEvent,
+		if err = cS.connMgr.Call(cS.cfg.ChargerSCfg().AttributeSConns, utils.AttributeSv1ProcessEvent,
 			args, &evReply); err != nil {
 			return nil, err
 		}
@@ -180,10 +171,4 @@ func (cS *ChargerService) V1GetChargersForEvent(args *utils.CGREventWithArgDispa
 	}
 	*rply = cPs
 	return
-}
-
-// SetAttributeConnection sets the new connection to the attribute service
-// only used on reload
-func (cS *ChargerService) SetAttributeConnection(attrS rpcclient.ClientConnector) {
-	cS.attrS = attrS
 }

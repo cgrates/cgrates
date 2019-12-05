@@ -316,11 +316,13 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> process_runs needs to be bigger than 0", utils.AttributeS)
 		}
 	}
-	if cfg.chargerSCfg.Enabled && !cfg.dispatcherSCfg.Enabled &&
-		(cfg.attributeSCfg == nil || !cfg.attributeSCfg.Enabled) {
-		for _, connCfg := range cfg.chargerSCfg.AttributeSConns {
-			if connCfg.Address == utils.MetaInternal {
+	if cfg.chargerSCfg.Enabled {
+		for _, connID := range cfg.chargerSCfg.AttributeSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.attributeSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.AttributeS, utils.ChargerS)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.ChargerS, connID)
 			}
 		}
 	}
@@ -375,6 +377,9 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	// EventReader sanity checks
 	if cfg.ersCfg.Enabled {
 		for _, connID := range cfg.ersCfg.SessionSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.SessionS, utils.ERs)
+			}
 			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
 				return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.ERs, connID)
 			}

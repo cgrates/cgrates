@@ -108,7 +108,7 @@ func TestChargerPopulateChargerService(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	chargerSrv, err = NewChargerService(dmCharger,
-		&FilterS{dm: dmCharger, cfg: defaultCfg}, nil, defaultCfg)
+		&FilterS{dm: dmCharger, cfg: defaultCfg}, defaultCfg, nil)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

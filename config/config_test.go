@@ -816,7 +816,7 @@ func TestCgrCfgJSONDefaultSChargerSCfg(t *testing.T) {
 	eChargerSCfg := &ChargerSCfg{
 		Enabled:             false,
 		IndexedSelects:      true,
-		AttributeSConns:     []*RemoteHost{},
+		AttributeSConns:     []string{},
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
 	}

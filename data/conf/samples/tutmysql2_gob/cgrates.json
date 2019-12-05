@@ -9,6 +9,14 @@
 },
 
 
+"rpc_conns": {
+	"conn1": {
+		"strategy": "first",
+		"conns": [{{"address": "127.0.0.1:2013", "transport":"*gob"},}],
+	},
+},
+
+
 "listen": {
 	"rpc_json": ":2012",
 	"rpc_gob": ":2013",
@@ -99,9 +107,7 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"}
-	],
+	"attributes_conns": ["conn1"],
 	"string_indexed_fields": ["Account"]
 },
 

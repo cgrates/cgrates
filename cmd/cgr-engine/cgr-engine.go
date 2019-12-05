@@ -489,10 +489,11 @@ func main() {
 	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
 	internalGuardianSChan := make(chan rpcclient.ClientConnector, 1)
 
-	internalCDRServerChan := make(chan rpcclient.ClientConnector, 1)   // needed to avod cyclic dependency
-	internalAttributeSChan := make(chan rpcclient.ClientConnector, 1)  // needed to avod cyclic dependency
-	internalDispatcherSChan := make(chan rpcclient.ClientConnector, 1) // needed to avod cyclic dependency
-	internalSessionSChan := make(chan rpcclient.ClientConnector, 1)    // needed to avod cyclic dependency
+	internalCDRServerChan := make(chan rpcclient.RpcClientConnection, 1)   // needed to avod cyclic dependency
+	internalAttributeSChan := make(chan rpcclient.RpcClientConnection, 1)  // needed to avod cyclic dependency
+	internalDispatcherSChan := make(chan rpcclient.RpcClientConnection, 1) // needed to avod cyclic dependency
+	internalSessionSChan := make(chan rpcclient.RpcClientConnection, 1)    // needed to avod cyclic dependency
+	internalChargerSChan := make(chan rpcclient.RpcClientConnection, 1)    // needed to avod cyclic dependency
 
 	// init CacheS
 	cacheS := initCacheS(internalCacheSChan, server, dmService.GetDM(), exitChan)
@@ -505,11 +506,34 @@ func main() {
 
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, exitChan)
+	connManager := services.NewConnManagerService(cfg, map[string]chan rpcclient.RpcClientConnection{
+		//utils.AnalyzerSv1:  anz.GetIntenternalChan(),
+		//utils.ApierV1:      rals.GetAPIv1().GetIntenternalChan(),
+		//utils.ApierV2:      rals.GetAPIv2().GetIntenternalChan(),
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): internalAttributeSChan,
+		utils.CacheSv1: internalCacheSChan,
+		//utils.CDRsV1:       cdrS.GetIntenternalChan(),
+		//utils.CDRsV2:       cdrS.GetIntenternalChan(),
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): internalChargerSChan,
+		utils.GuardianSv1: internalGuardianSChan,
+		//utils.LoaderSv1:    ldrs.GetIntenternalChan(),
+		//utils.ResourceSv1:  reS.GetIntenternalChan(),
+		//utils.Responder:    rals.GetResponder().GetIntenternalChan(),
+		//utils.SchedulerSv1: schS.GetIntenternalChan(),
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS): internalSessionSChan,
+		//utils.StatSv1:          stS.GetIntenternalChan(),
+		//utils.SupplierSv1:      supS.GetIntenternalChan(),
+		//utils.ThresholdSv1:     tS.GetIntenternalChan(),
+		utils.ServiceManagerV1: internalServeManagerChan,
+		utils.ConfigSv1:        internalConfigChan,
+		utils.CoreSv1:          internalCoreSv1Chan,
+		//utils.RALsV1:           rals.GetIntenternalChan(),
+	})
 
 	attrS := services.NewAttributeService(cfg, dmService, cacheS, filterSChan, server, internalAttributeSChan)
 	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, internalAttributeSChan, internalDispatcherSChan)
 	chrS := services.NewChargerService(cfg, dmService, cacheS, filterSChan, server,
-		attrS.GetIntenternalChan(), dspS.GetIntenternalChan())
+		internalChargerSChan, connManager.GetConnMgr())
 	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan, server)
 	stS := services.NewStatService(cfg, dmService, cacheS, filterSChan, server,
 		tS.GetIntenternalChan(), dspS.GetIntenternalChan())
@@ -535,29 +559,6 @@ func main() {
 	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server, internalCacheSChan, dspS.GetIntenternalChan(), exitChan)
 	anz := services.NewAnalyzerService(cfg, server, exitChan)
 
-	connManager := services.NewConnManagerService(cfg, map[string]chan rpcclient.ClientConnector{
-		utils.AnalyzerSv1:  anz.GetIntenternalChan(),
-		utils.ApierV1:      rals.GetAPIv1().GetIntenternalChan(),
-		utils.ApierV2:      rals.GetAPIv2().GetIntenternalChan(),
-		utils.AttributeSv1: internalAttributeSChan,
-		utils.CacheSv1:     internalCacheSChan,
-		utils.CDRsV1:       cdrS.GetIntenternalChan(),
-		utils.CDRsV2:       cdrS.GetIntenternalChan(),
-		utils.ChargerSv1:   chrS.GetIntenternalChan(),
-		utils.GuardianSv1:  internalGuardianSChan,
-		utils.LoaderSv1:    ldrs.GetIntenternalChan(),
-		utils.ResourceSv1:  reS.GetIntenternalChan(),
-		utils.Responder:    rals.GetResponder().GetIntenternalChan(),
-		utils.SchedulerSv1: schS.GetIntenternalChan(),
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS): internalSessionSChan,
-		utils.StatSv1:          stS.GetIntenternalChan(),
-		utils.SupplierSv1:      supS.GetIntenternalChan(),
-		utils.ThresholdSv1:     tS.GetIntenternalChan(),
-		utils.ServiceManagerV1: internalServeManagerChan,
-		utils.ConfigSv1:        internalConfigChan,
-		utils.CoreSv1:          internalCoreSv1Chan,
-		utils.RALsV1:           rals.GetIntenternalChan(),
-	})
 	srvManager.AddServices(connManager, attrS, chrS, tS, stS, reS, supS, schS, rals,
 		rals.GetResponder(), rals.GetAPIv1(), rals.GetAPIv2(), cdrS, smg,
 		services.NewEventReaderService(cfg, filterSChan, exitChan, connManager.GetConnMgr()),

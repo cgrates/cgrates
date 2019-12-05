@@ -18,11 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import "github.com/cgrates/cgrates/utils"
+
 // SupplierSCfg is the configuration of supplier service
 type ChargerSCfg struct {
 	Enabled             bool
 	IndexedSelects      bool
-	AttributeSConns     []*RemoteHost
+	AttributeSConns     []string
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 }
@@ -38,10 +40,14 @@ func (cS *ChargerSCfg) loadFromJsonCfg(jsnCfg *ChargerSJsonCfg) (err error) {
 		cS.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.Attributes_conns != nil {
-		cS.AttributeSConns = make([]*RemoteHost, len(*jsnCfg.Attributes_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Attributes_conns {
-			cS.AttributeSConns[idx] = NewDfltRemoteHost()
-			cS.AttributeSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		cS.AttributeSConns = make([]string, len(*jsnCfg.Attributes_conns))
+		for idx, attrConn := range *jsnCfg.Attributes_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if attrConn == utils.MetaInternal {
+				cS.AttributeSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
+			} else {
+				cS.AttributeSConns[idx] = attrConn
+			}
 		}
 	}
 	if jsnCfg.String_indexed_fields != nil {

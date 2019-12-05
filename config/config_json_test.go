@@ -863,7 +863,7 @@ func TestDfChargerServJsonCfg(t *testing.T) {
 	eCfg := &ChargerSJsonCfg{
 		Enabled:               utils.BoolPointer(false),
 		Indexed_selects:       utils.BoolPointer(true),
-		Attributes_conns:      &[]*RemoteHostJson{},
+		Attributes_conns:      &[]string{},
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
 	}

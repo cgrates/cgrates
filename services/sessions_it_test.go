@@ -70,8 +70,8 @@ func TestSessionSReload(t *testing.T) {
 	db := NewDataDBService(cfg)
 	cfg.StorDbCfg().Type = utils.INTERNAL
 	stordb := NewStorDBService(cfg)
-	chrS := NewChargerService(cfg, db, chS, filterSChan, server, nil, nil)
-	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil)
+	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.RpcClientConnection, 1), nil)
+	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.RpcClientConnection, 1), nil)
 	ralS := NewRalService(cfg, db, stordb, chS, filterSChan, server,
 		/*tS*/ internalChan, internalChan, cacheSChan, internalChan, internalChan,
 		internalChan, schS, engineShutdown)

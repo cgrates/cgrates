@@ -78,9 +78,7 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": [
-		{"address": "*internal"}
-	],
+	"attributes_conns": ["*internal"],
 },
 
 

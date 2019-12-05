@@ -126,12 +126,7 @@ func TestCGRConfigReloadChargerS(t *testing.T) {
 		StringIndexedFields: &[]string{utils.Account},
 		PrefixIndexedFields: &[]string{},
 		IndexedSelects:      true,
-		AttributeSConns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSON,
-			},
-		},
+		AttributeSConns:     []string{"*localhost"},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.ChargerSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.ChargerSCfg()))

@@ -517,12 +517,9 @@ func TestConfigSanityHTTPAgent(t *testing.T) {
 	}
 
 	cfg.chargerSCfg.Enabled = true
-	cfg.chargerSCfg.AttributeSConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
-	expected = "<AttributeS> not enabled but requested by <ChargerS> component."
+	cfg.chargerSCfg.AttributeSConns = []string{"Invalid"}
+
+	expected = "<ChargerS> Connection with id: <Invalid> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
