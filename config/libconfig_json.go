@@ -426,7 +426,7 @@ type StatServJsonCfg struct {
 	Indexed_selects          *bool
 	Store_interval           *string
 	Store_uncompressed_limit *int
-	Thresholds_conns         *[]*RemoteHostJson
+	Thresholds_conns         *[]string
 	String_indexed_fields    *[]string
 	Prefix_indexed_fields    *[]string
 }

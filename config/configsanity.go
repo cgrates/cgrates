@@ -335,10 +335,13 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// StatS checks
-	if cfg.statsCfg.Enabled && !cfg.thresholdSCfg.Enabled && !cfg.dispatcherSCfg.Enabled {
-		for _, connCfg := range cfg.statsCfg.ThresholdSConns {
-			if connCfg.Address == utils.MetaInternal {
-				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.ThresholdS, utils.StatService)
+	if cfg.statsCfg.Enabled {
+		for _, connID := range cfg.statsCfg.ThresholdSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.thresholdSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.ThresholdS, utils.StatS)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.StatS, connID)
 			}
 		}
 	}

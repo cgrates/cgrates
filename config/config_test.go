@@ -845,7 +845,7 @@ func TestCgrCfgJSONDefaultStatsCfg(t *testing.T) {
 		Enabled:             false,
 		IndexedSelects:      true,
 		StoreInterval:       0,
-		ThresholdSConns:     []*RemoteHost{},
+		ThresholdSConns:     []string{},
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
 	}

@@ -150,9 +150,7 @@
 
 "stats": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"}
-	],
+	"thresholds_conns": ["*localhost"],
 	"string_indexed_fields": ["Account"]
 },
 

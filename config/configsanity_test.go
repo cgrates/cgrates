@@ -544,14 +544,10 @@ func TestConfigSanityResourceLimiter(t *testing.T) {
 func TestConfigSanityStatS(t *testing.T) {
 	cfg, _ = NewDefaultCGRConfig()
 	cfg.statsCfg = &StatSCfg{
-		Enabled: true,
-		ThresholdSConns: []*RemoteHost{
-			&RemoteHost{
-				Address: utils.MetaInternal,
-			},
-		},
+		Enabled:         true,
+		ThresholdSConns: []string{utils.MetaInternal},
 	}
-	expected := "<ThresholdS> not enabled but requested by <StatS> component."
+	expected := "<ThresholdS> not enabled but requested by <Stats> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -622,7 +618,11 @@ func TestConfigSanityEventReader(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.ersCfg.SessionSConns = []string{utils.MetaInternal}
-
+	expected = "<SessionS> not enabled but requested by <ERs> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.sessionSCfg.Enabled = true
 	cfg.ersCfg.Readers = []*EventReaderCfg{
 		&EventReaderCfg{
 			ID:   "test",

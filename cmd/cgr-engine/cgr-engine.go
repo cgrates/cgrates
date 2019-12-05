@@ -494,6 +494,8 @@ func main() {
 	internalDispatcherSChan := make(chan rpcclient.RpcClientConnection, 1) // needed to avod cyclic dependency
 	internalSessionSChan := make(chan rpcclient.RpcClientConnection, 1)    // needed to avod cyclic dependency
 	internalChargerSChan := make(chan rpcclient.RpcClientConnection, 1)    // needed to avod cyclic dependency
+	internalThresholdSChan := make(chan rpcclient.RpcClientConnection, 1)  // needed to avod cyclic dependency
+	internalStatSChan := make(chan rpcclient.RpcClientConnection, 1)       // needed to avod cyclic dependency
 
 	// init CacheS
 	cacheS := initCacheS(internalCacheSChan, server, dmService.GetDM(), exitChan)
@@ -511,7 +513,7 @@ func main() {
 		//utils.ApierV1:      rals.GetAPIv1().GetIntenternalChan(),
 		//utils.ApierV2:      rals.GetAPIv2().GetIntenternalChan(),
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): internalAttributeSChan,
-		utils.CacheSv1: internalCacheSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):     internalCacheSChan,
 		//utils.CDRsV1:       cdrS.GetIntenternalChan(),
 		//utils.CDRsV2:       cdrS.GetIntenternalChan(),
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): internalChargerSChan,
@@ -521,12 +523,12 @@ func main() {
 		//utils.Responder:    rals.GetResponder().GetIntenternalChan(),
 		//utils.SchedulerSv1: schS.GetIntenternalChan(),
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS): internalSessionSChan,
-		//utils.StatSv1:          stS.GetIntenternalChan(),
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS):    internalStatSChan,
 		//utils.SupplierSv1:      supS.GetIntenternalChan(),
-		//utils.ThresholdSv1:     tS.GetIntenternalChan(),
-		utils.ServiceManagerV1: internalServeManagerChan,
-		utils.ConfigSv1:        internalConfigChan,
-		utils.CoreSv1:          internalCoreSv1Chan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds):     internalThresholdSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaServiceManager): internalServeManagerChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaConfig):         internalConfigChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCore):           internalCoreSv1Chan,
 		//utils.RALsV1:           rals.GetIntenternalChan(),
 	})
 
@@ -534,9 +536,9 @@ func main() {
 	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, internalAttributeSChan, internalDispatcherSChan)
 	chrS := services.NewChargerService(cfg, dmService, cacheS, filterSChan, server,
 		internalChargerSChan, connManager.GetConnMgr())
-	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan, server)
+	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan, server, internalThresholdSChan)
 	stS := services.NewStatService(cfg, dmService, cacheS, filterSChan, server,
-		tS.GetIntenternalChan(), dspS.GetIntenternalChan())
+		internalStatSChan, connManager.GetConnMgr())
 	reS := services.NewResourceService(cfg, dmService, cacheS, filterSChan, server,
 		tS.GetIntenternalChan(), dspS.GetIntenternalChan())
 	supS := services.NewSupplierService(cfg, dmService, cacheS, filterSChan, server,

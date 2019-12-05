@@ -909,7 +909,7 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 		Indexed_selects:          utils.BoolPointer(true),
 		Store_interval:           utils.StringPointer(""),
 		Store_uncompressed_limit: utils.IntPointer(0),
-		Thresholds_conns:         &[]*RemoteHostJson{},
+		Thresholds_conns:         &[]string{},
 		String_indexed_fields:    nil,
 		Prefix_indexed_fields:    &[]string{},
 	}

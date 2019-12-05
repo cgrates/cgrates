@@ -105,9 +105,7 @@
 
 "stats": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "*internal"}
-	],
+	"thresholds_conns": ["*internal"],
 	"string_indexed_fields": ["Account"],
 },
 

@@ -67,8 +67,8 @@ func TestRalsReload(t *testing.T) {
 	db := NewDataDBService(cfg)
 	cfg.StorDbCfg().Type = utils.INTERNAL
 	stordb := NewStorDBService(cfg)
-	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil)
-	tS := NewThresholdService(cfg, db, chS, filterSChan, server)
+	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.RpcClientConnection, 1), nil)
+	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan rpcclient.RpcClientConnection, 1))
 	ralS := NewRalService(cfg, db, stordb, chS, filterSChan, server,
 		tS.GetIntenternalChan(), internalChan, cacheSChan, internalChan, internalChan,
 		internalChan, schS, engineShutdown)
