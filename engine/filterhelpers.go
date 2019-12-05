@@ -36,7 +36,6 @@ func MatchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 	// Guard will protect the function with automatic locking
 	lockID := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
 	guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
-
 		if !indexedSelects {
 			var keysWithID []string
 			if keysWithID, err = dm.DataDB().GetKeysForPrefix(utils.CacheIndexesToPrefix[cacheID]); err != nil {
@@ -53,14 +52,11 @@ func MatchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 		i := 0
 		for fldID := range ev {
 			allFieldIDs[i] = fldID
-			i += 1
+			i++
 		}
-		stringFieldVals := map[string]string{utils.ANY: utils.ANY} // cache here field string values, start with default one
-		filterIndexTypes := []string{utils.MetaString, utils.MetaPrefix, utils.META_NONE}
-		for i, fieldIDs := range []*[]string{stringFldIDs, prefixFldIDs, nil} { // same routine for both string and prefix filter types
-			if filterIndexTypes[i] == utils.META_NONE {
-				fieldIDs = &[]string{utils.ANY} // so we can query DB for unindexed filters
-			}
+		stringFieldVals := map[string]string{utils.ANY: utils.ANY}                               // cache here field string values, start with default one
+		filterIndexTypes := []string{utils.MetaString, utils.MetaPrefix, utils.META_NONE}        // the META_NONE is used for all items that do not have filters
+		for i, fieldIDs := range []*[]string{stringFldIDs, prefixFldIDs, &[]string{utils.ANY}} { // same routine for both string and prefix filter types
 			if fieldIDs == nil {
 				fieldIDs = &allFieldIDs
 			}
