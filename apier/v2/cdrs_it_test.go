@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
+	"fmt"
 	"net/rpc"
 	"path"
 	"reflect"
@@ -58,6 +59,10 @@ var sTestsCDRsIT = []func(t *testing.T){
 
 	testV2CDRsRateCDRsWithRatingPlan,
 	testV2CDRsGetCdrsWithRattingPlan,
+
+	testV2CDRsSetThreshold,
+	testV2CDRsProcessCDRWithThreshold,
+	testV2CDRsGetThreshold,
 
 	testV2CDRsKillEngine,
 }
@@ -705,6 +710,101 @@ func testV2CDRsGetCdrsWithRattingPlan(t *testing.T) {
 		if cdrs[0].ExtraInfo != "" {
 			t.Errorf("Expected ExtraInfo : %s received :%s", "", cdrs[0].ExtraInfo)
 		}
+	}
+}
+func testV2CDRsSetThreshold(t *testing.T) {
+	var reply string
+	if err := cdrsRpc.Call(utils.ApierV2SetActions, &utils.AttrSetActions{
+		ActionsId: "ACT_LOG",
+		Actions:   []*utils.TPAction{{Identifier: utils.LOG}},
+	}, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
+	}
+	tPrfl := engine.ThresholdWithCache{
+		ThresholdProfile: &engine.ThresholdProfile{
+			Tenant: "cgrates.org",
+			ID:     "THD_Test",
+			FilterIDs: []string{
+				"*lt:~*req.CostDetails.AccountSummary.BalanceSummaries[0].Value:10",
+				"*string:~*req.Account:1005", // only for indexes
+			},
+			MaxHits:   -1,
+			Weight:    30,
+			ActionIDs: []string{"ACT_LOG"},
+		},
+	}
+	if err := cdrsRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	attrSetAcnt := AttrSetAccount{
+		Tenant:  "cgrates.org",
+		Account: "1005",
+		ExtraOptions: map[string]bool{
+			utils.AllowNegative: true,
+		},
+	}
+	if err := cdrsRpc.Call(utils.ApierV2SetAccount, attrSetAcnt, &reply); err != nil {
+		t.Fatal(err)
+	}
+	attrs := &utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "1005",
+		BalanceType: utils.MONETARY,
+		Balance: map[string]interface{}{
+			utils.ID:     utils.META_DEFAULT,
+			utils.Value:  1,
+			utils.Weight: 10.0,
+		},
+	}
+	if err := cdrsRpc.Call(utils.ApierV2SetBalance, attrs, &reply); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testV2CDRsProcessCDRWithThreshold(t *testing.T) {
+	args := &engine.ArgV1ProcessEvent{
+		Flags: []string{
+			fmt.Sprintf("%s:true", utils.MetaThresholds),
+			fmt.Sprintf("%s:true", utils.MetaRALs),
+		},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:    "testV2CDRsProcessCDRWithThreshold",
+				utils.OriginHost:  "192.168.1.1",
+				utils.Source:      "testV2CDRsProcessCDRWithThreshold",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Category:    "call",
+				utils.Account:     "1005",
+				utils.Subject:     "ANY2CNT",
+				utils.Destination: "+4986517174963",
+				utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:       100 * time.Minute,
+				"field_extr1":     "val_extr1",
+				"fieldextr2":      "valextr2",
+			},
+		},
+	}
+	var reply string
+	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(time.Duration(100) * time.Millisecond) // Give time for CDR to be rated
+}
+
+func testV2CDRsGetThreshold(t *testing.T) {
+	var td engine.Threshold
+	if err := cdrsRpc.Call(utils.ThresholdSv1GetThreshold,
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "THD_Test"}}, &td); err != nil {
+		t.Error(err)
+	} else if td.Hits != 1 {
+		t.Errorf("Expecting threshold to be hit once")
 	}
 }
 

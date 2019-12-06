@@ -646,7 +646,7 @@ func ReflectFieldMethodInterface(obj interface{}, fldName string) (retIf interfa
 		if err != nil {
 			return nil, err
 		}
-		if idx > v.Len()-1 {
+		if idx >= v.Len() {
 			return nil, fmt.Errorf("index out of range")
 		}
 		field = v.Index(idx)

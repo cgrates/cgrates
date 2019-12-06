@@ -38,7 +38,7 @@ var smgRplcMstrRPC, smgRplcSlvRPC *rpc.Client
 func TestSessionSRplInitCfg(t *testing.T) {
 	smgRplcMasterCfgPath = path.Join(*dataDir, "conf", "samples", "smgreplcmaster")
 	if *encoding == utils.MetaGOB {
-		smgRplcMasterCfgPath = path.Join(*dataDir, "conf", "samples", "smgreplcmaster"+"_gob")
+		smgRplcMasterCfgPath = path.Join(*dataDir, "conf", "samples", "smgreplcmaster_gob")
 	}
 	if smgRplcMasterCfg, err = config.NewCGRConfigFromPath(smgRplcMasterCfgPath); err != nil {
 		t.Fatal(err)
@@ -47,7 +47,7 @@ func TestSessionSRplInitCfg(t *testing.T) {
 	config.SetCgrConfig(smgRplcMasterCfg)
 	smgRplcSlaveCfgPath = path.Join(*dataDir, "conf", "samples", "smgreplcslave")
 	if *encoding == utils.MetaGOB {
-		smgRplcSlaveCfgPath = path.Join(*dataDir, "conf", "samples", "smgreplcslave"+"_gob")
+		smgRplcSlaveCfgPath = path.Join(*dataDir, "conf", "samples", "smgreplcslave_gob")
 	}
 	if smgRplcSlaveCfg, err = config.NewCGRConfigFromPath(smgRplcSlaveCfgPath); err != nil {
 		t.Fatal(err)

@@ -299,7 +299,7 @@ func (tS *ThresholdService) processEvent(args *ArgsProcessEvent) (thresholdsIDs 
 	var tIDs []string
 	for _, t := range matchTs {
 		tIDs = append(tIDs, t.ID)
-		t.Hits += 1
+		t.Hits++
 		err = t.ProcessEvent(args, tS.dm)
 		if err != nil {
 			utils.Logger.Warning(
