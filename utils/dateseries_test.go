@@ -24,6 +24,50 @@ import (
 	"time"
 )
 
+func TestYearsSort(t *testing.T) {
+	ys := &Years{}
+	ys.Sort()
+	if !reflect.DeepEqual(ys, &Years{}) {
+		t.Errorf("Expecting %+v received: %+v", &Years{}, ys)
+	}
+	ys = &Years{2019, 2010, 2020, 2005, 2018, 2007}
+	ysSorted := &Years{2005, 2007, 2010, 2018, 2019, 2020}
+	ys.Sort()
+	if !reflect.DeepEqual(ys, ysSorted) {
+		t.Errorf("Expecting %+v received: %+v", ysSorted, ys)
+	}
+}
+
+func TestYearsLen(t *testing.T) {
+	ys := &Years{}
+	if rcv := ys.Len(); rcv != 0 {
+		t.Errorf("Expecting %+v received: %+v", 0, rcv)
+	}
+	ys = &Years{2019, 2010, 2020, 2005, 2018, 2007}
+	if rcv := ys.Len(); rcv != 6 {
+		t.Errorf("Expecting %+v received: %+v", 6, rcv)
+	}
+}
+
+func TestYearsSwap(t *testing.T) {
+	ys := &Years{2019, 2010, 2020, 2005, 2018, 2007}
+	ys.Swap(0, 1)
+	ysSwapped := &Years{2010, 2019, 2020, 2005, 2018, 2007}
+	if !reflect.DeepEqual(ys, ysSwapped) {
+		t.Errorf("Expecting %+v received: %+v", ysSwapped, ys)
+	}
+}
+
+func TestYearsLess(t *testing.T) {
+	ys := &Years{2019, 2010, 2020, 2005, 2018, 2007}
+	if rcv := ys.Less(0, 1); rcv {
+		t.Errorf("Expecting false received: %+v", rcv)
+	}
+	if rcv := ys.Less(1, 2); !rcv {
+		t.Errorf("Expecting true received: %+v", rcv)
+	}
+}
+
 func TestDateseriesMonthStoreRestoreJson(t *testing.T) {
 	m := Months{5, 6, 7, 8}
 	r, _ := json.Marshal(m)

@@ -89,8 +89,7 @@ func NewDataConverterMustCompile(params string) (conv DataConverter) {
 	return
 }
 
-func NewDurationSecondsConverter(params string) (
-	hdlr DataConverter, err error) {
+func NewDurationSecondsConverter(params string) (hdlr DataConverter, err error) {
 	return new(DurationSecondsConverter), nil
 }
 
@@ -128,21 +127,24 @@ func (mS *DurationNanosecondsConverter) Convert(in interface{}) (
 func NewRoundConverter(params string) (hdlr DataConverter, err error) {
 	rc := new(RoundConverter)
 	var paramsSplt []string
-	if params != "" {
+	if params != EmptyString {
 		paramsSplt = strings.Split(params, InInFieldSep)
 	}
 	switch len(paramsSplt) {
-	case 2:
-		rc.Method = paramsSplt[1]
-		fallthrough
+	case 0:
+		rc.Method = ROUNDING_MIDDLE
 	case 1:
 		if rc.Decimals, err = strconv.Atoi(paramsSplt[0]); err != nil {
 			return nil, fmt.Errorf("%s converter needs integer as decimals, have: <%s>",
 				MetaRound, paramsSplt[0])
 		}
-		fallthrough
-	case 0:
 		rc.Method = ROUNDING_MIDDLE
+	case 2:
+		rc.Method = paramsSplt[1]
+		if rc.Decimals, err = strconv.Atoi(paramsSplt[0]); err != nil {
+			return nil, fmt.Errorf("%s converter needs integer as decimals, have: <%s>",
+				MetaRound, paramsSplt[0])
+		}
 	default:
 		return nil, fmt.Errorf("unsupported %s converter parameters: <%s>",
 			MetaRound, params)
@@ -156,8 +158,7 @@ type RoundConverter struct {
 	Method   string
 }
 
-func (rnd *RoundConverter) Convert(in interface{}) (
-	out interface{}, err error) {
+func (rnd *RoundConverter) Convert(in interface{}) (out interface{}, err error) {
 	var inFloat float64
 	if inFloat, err = IfaceAsFloat64(in); err != nil {
 		return
@@ -167,7 +168,7 @@ func (rnd *RoundConverter) Convert(in interface{}) (
 }
 
 func NewMultiplyConverter(constructParams string) (hdlr DataConverter, err error) {
-	if constructParams == "" {
+	if constructParams == EmptyString {
 		return nil, ErrMandatoryIeMissingNoCaps
 	}
 	var val float64
@@ -183,8 +184,7 @@ type MultiplyConverter struct {
 	Value float64
 }
 
-func (m *MultiplyConverter) Convert(in interface{}) (
-	out interface{}, err error) {
+func (m *MultiplyConverter) Convert(in interface{}) (out interface{}, err error) {
 	var inFloat64 float64
 	if inFloat64, err = IfaceAsFloat64(in); err != nil {
 		return nil, err
@@ -193,8 +193,7 @@ func (m *MultiplyConverter) Convert(in interface{}) (
 	return
 }
 
-func NewDivideConverter(constructParams string) (
-	hdlr DataConverter, err error) {
+func NewDivideConverter(constructParams string) (hdlr DataConverter, err error) {
 	if constructParams == "" {
 		return nil, ErrMandatoryIeMissingNoCaps
 	}
@@ -211,8 +210,7 @@ type DivideConverter struct {
 	Value float64
 }
 
-func (m *DivideConverter) Convert(in interface{}) (
-	out interface{}, err error) {
+func (m *DivideConverter) Convert(in interface{}) (out interface{}, err error) {
 	var inFloat64 float64
 	if inFloat64, err = IfaceAsFloat64(in); err != nil {
 		return nil, err
@@ -221,8 +219,7 @@ func (m *DivideConverter) Convert(in interface{}) (
 	return
 }
 
-func NewDurationConverter(params string) (
-	hdlr DataConverter, err error) {
+func NewDurationConverter(params string) (hdlr DataConverter, err error) {
 	return new(DurationConverter), nil
 }
 
@@ -242,7 +239,7 @@ func NewPhoneNumberConverter(params string) (
 	pbDC DataConverter, err error) {
 	lc := new(PhoneNumberConverter)
 	var paramsSplt []string
-	if params != "" {
+	if params != EmptyString {
 		paramsSplt = strings.Split(params, InInFieldSep)
 	}
 	switch len(paramsSplt) {
@@ -269,8 +266,7 @@ type PhoneNumberConverter struct {
 	Format      phonenumbers.PhoneNumberFormat
 }
 
-func (lc *PhoneNumberConverter) Convert(in interface{}) (
-	out interface{}, err error) {
+func (lc *PhoneNumberConverter) Convert(in interface{}) (out interface{}, err error) {
 	num, err := phonenumbers.Parse(IfaceAsString(in), lc.CountryCode)
 	if err != nil {
 		return nil, err
