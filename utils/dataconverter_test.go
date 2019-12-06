@@ -25,17 +25,127 @@ import (
 	"github.com/nyaruka/phonenumbers"
 )
 
+func TestDataConvertersConvertString(t *testing.T) {
+	dcs := &DataConverters{}
+	if rcv, err := dcs.ConvertString(EmptyString); err != nil {
+		t.Error(err)
+	} else if rcv != EmptyString {
+		t.Errorf("Expecting: <%+q>, received: <%+q>", EmptyString, rcv)
+	}
+	if rcv, err := dcs.ConvertString("test"); err != nil {
+		t.Error(err)
+	} else if rcv != "test" {
+		t.Errorf("Expecting: <test>, received: <%+q>", rcv)
+	}
+}
+
 func TestNewDataConverter(t *testing.T) {
 	a, err := NewDataConverter(MetaDurationSeconds)
 	if err != nil {
 		t.Error(err.Error())
 	}
-	b, err := NewDurationSecondsConverter("")
+	b, err := NewDurationSecondsConverter(EmptyString)
 	if err != nil {
 		t.Error(err.Error())
 	}
 	if !reflect.DeepEqual(a, b) {
 		t.Error("Error reflect")
+	}
+	a, err = NewDataConverter(MetaDuration)
+	if err != nil {
+		t.Error(err)
+	}
+	b, err = NewDurationConverter(EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(a, b) {
+		t.Error("Error reflect")
+	}
+	a, err = NewDataConverter(MetaDurationNanoseconds)
+	if err != nil {
+		t.Error(err)
+	}
+	b, err = NewDurationNanosecondsConverter(EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(a, b) {
+		t.Error("Error reflect")
+	}
+	a, err = NewDataConverter(MetaRound)
+	if err != nil {
+		t.Error(err)
+	}
+	b, err = NewRoundConverter(EmptyString)
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(a, b) {
+		t.Error("Error reflect")
+	}
+	a, err = NewDataConverter("*round:07")
+	if err != nil {
+		t.Error(err)
+	}
+	b, err = NewRoundConverter("7")
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(a, b) {
+		t.Error("Error reflect")
+	}
+	if a, err = NewDataConverter(MetaMultiply); err == nil || err != ErrMandatoryIeMissingNoCaps {
+		t.Error(err)
+	}
+	a, err = NewDataConverter("*multiply:3.3")
+	if err != nil {
+		t.Error(err)
+	}
+	b, err = NewMultiplyConverter("3.3")
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(a, b) {
+		t.Error("Error reflect")
+	}
+	if a, err = NewDataConverter(MetaDivide); err == nil || err != ErrMandatoryIeMissingNoCaps {
+		t.Error(err)
+	}
+	a, err = NewDataConverter("*divide:3.3")
+	if err != nil {
+		t.Error(err)
+	}
+	b, err = NewDivideConverter("3.3")
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(a, b) {
+		t.Error("Error reflect")
+	}
+	if a, err = NewDataConverter(MetaLibPhoneNumber); err == nil || err.Error() != "unsupported *libphonenumber converter parameters: <>" {
+		t.Error(err)
+	}
+	a, err = NewDataConverter("*libphonenumber:US")
+	if err != nil {
+		t.Error(err)
+	}
+	b, err = NewPhoneNumberConverter("US")
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(a, b) {
+		t.Error("Error reflect")
+	}
+	if _, err := NewDataConverter("unsupported"); err == nil || err.Error() != "unsupported converter definition: <unsupported>" {
+	}
+
+}
+
+func TestNewDataConverterMustCompile(t *testing.T) {
+	eOut, _ := NewDataConverter(MetaDurationSeconds)
+	if rcv := NewDataConverterMustCompile(MetaDurationSeconds); rcv != eOut {
+		t.Errorf("Expecting:  received: %+q", rcv)
 	}
 }
 
@@ -198,6 +308,9 @@ func TestDivideConverter(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expOut, out) {
 		t.Errorf("expecting: %+v, received: %+v", expOut, out)
+	}
+	if _, err := eDvd.Convert("strionmg"); err == nil || err.Error() != `strconv.ParseFloat: parsing "strionmg": invalid syntax` {
+		t.Error(err)
 	}
 }
 
