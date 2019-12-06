@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"math"
 	"reflect"
 	"testing"
 	"time"
@@ -42,11 +43,11 @@ func TestDataConvertersConvertString(t *testing.T) {
 func TestNewDataConverter(t *testing.T) {
 	a, err := NewDataConverter(MetaDurationSeconds)
 	if err != nil {
-		t.Error(err.Error())
+		t.Error(err)
 	}
 	b, err := NewDurationSecondsConverter(EmptyString)
 	if err != nil {
-		t.Error(err.Error())
+		t.Error(err)
 	}
 	if !reflect.DeepEqual(a, b) {
 		t.Error("Error reflect")
@@ -146,6 +147,198 @@ func TestNewDataConverterMustCompile(t *testing.T) {
 	eOut, _ := NewDataConverter(MetaDurationSeconds)
 	if rcv := NewDataConverterMustCompile(MetaDurationSeconds); rcv != eOut {
 		t.Errorf("Expecting:  received: %+q", rcv)
+	}
+}
+
+func TestNewDurationSecondsConverter(t *testing.T) {
+	eOut := DurationSecondsConverter{}
+	if rcv, err := NewDurationSecondsConverter("test"); err != nil {
+		t.Error(err)
+	} else if reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expected %+v received: %+v", eOut, rcv)
+	}
+}
+
+func TestDurationSecondsConverterConvert(t *testing.T) {
+	mS := &DurationSecondsConverter{}
+	if _, err := mS.Convert("string"); err.Error() != "time: invalid duration string" {
+		t.Error(err)
+	}
+}
+
+func TestDurationNanosecondsConverterConvert(t *testing.T) {
+	nS := &DurationNanosecondsConverter{}
+	if _, err := nS.Convert("string"); err.Error() != "time: invalid duration string" {
+		t.Error(err)
+	}
+}
+func TestNewRoundConverter(t *testing.T) {
+	if _, err := NewRoundConverter("test"); err == nil || err.Error() != "*round converter needs integer as decimals, have: <test>" {
+		t.Error(err)
+	}
+	if _, err := NewRoundConverter(":test"); err == nil || err.Error() != "*round converter needs integer as decimals, have: <>" {
+		t.Error(err)
+	}
+	if _, err := NewRoundConverter("test:"); err == nil || err.Error() != "*round converter needs integer as decimals, have: <test>" {
+		t.Error(err)
+	}
+	eOut := &RoundConverter{
+		Method: ROUNDING_MIDDLE,
+	}
+	if rcv, err := NewRoundConverter(EmptyString); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expected %+v received: %+v", eOut, rcv)
+	}
+	eOut = &RoundConverter{
+		Decimals: 12,
+		Method:   ROUNDING_UP,
+	}
+	if rcv, err := NewRoundConverter("12:*up"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expected %+v received: %+v", eOut, rcv)
+	}
+	eOut = &RoundConverter{
+		Decimals: 12,
+		Method:   ROUNDING_DOWN,
+	}
+	if rcv, err := NewRoundConverter("12:*down"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expected %+v received: %+v", eOut, rcv)
+	}
+	eOut = &RoundConverter{
+		Decimals: 12,
+		Method:   ROUNDING_MIDDLE,
+	}
+	if rcv, err := NewRoundConverter("12:*middle"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expected %+v received: %+v", eOut, rcv)
+	}
+	eOut = &RoundConverter{}
+	if rcv, err := NewRoundConverter("12:*middle:wrong_length"); err == nil || err.Error() != "unsupported *round converter parameters: <12:*middle:wrong_length>" {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, nil) {
+		t.Errorf("Expected %+v received: %+v", nil, rcv)
+	}
+
+}
+
+func TestRoundConverterConvert(t *testing.T) {
+	rnd := &RoundConverter{}
+	if rcv, err := rnd.Convert("string_test"); err == nil || err.Error() != `strconv.ParseFloat: parsing "string_test": invalid syntax` {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, nil) {
+		t.Errorf("Expected %+v received: %+v", nil, rcv)
+	}
+	eOut := Round(18, rnd.Decimals, rnd.Method)
+	if rcv, err := rnd.Convert(18); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %+v received: %+v", eOut, rcv)
+	}
+}
+
+func TestNewMultiplyConverter(t *testing.T) {
+	if rcv, err := NewMultiplyConverter(EmptyString); err == nil || err != ErrMandatoryIeMissingNoCaps {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, nil) {
+		t.Errorf("Expected %+v received: %+v", nil, rcv)
+	}
+	if rcv, err := NewMultiplyConverter("string_test"); err == nil || err.Error() != `strconv.ParseFloat: parsing "string_test": invalid syntax` {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, nil) {
+		t.Errorf("Expected %+v received: %+v", nil, rcv)
+	}
+	eOut := &MultiplyConverter{Value: 0.7}
+	if rcv, err := NewMultiplyConverter("0.7"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expected %+v received: %+v", eOut, rcv)
+	}
+}
+
+func TestMultiplyConverterConvert(t *testing.T) {
+	m := &MultiplyConverter{}
+	if rcv, err := m.Convert(EmptyString); err == nil || err.Error() != `strconv.ParseFloat: parsing "": invalid syntax` {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, nil) {
+		t.Errorf("Expected %+v received: %+v", nil, rcv)
+	}
+	if rcv, err := m.Convert("string_test"); err == nil || err.Error() != `strconv.ParseFloat: parsing "string_test": invalid syntax` {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, nil) {
+		t.Errorf("Expected %+v received: %+v", nil, rcv)
+	}
+	if rcv, err := m.Convert(3); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, 0.0) {
+		t.Errorf("Expected %+v received: %+v", 0, rcv)
+	}
+}
+
+func TestNewDivideConverter(t *testing.T) {
+	if rcv, err := NewDivideConverter(EmptyString); err == nil || err != ErrMandatoryIeMissingNoCaps {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, nil) {
+		t.Errorf("Expected %+v received: %+v", nil, rcv)
+	}
+	if rcv, err := NewDivideConverter("string_test"); err == nil || err.Error() != `strconv.ParseFloat: parsing "string_test": invalid syntax` {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, nil) {
+		t.Errorf("Expected %+v received: %+v", nil, rcv)
+	}
+	eOut := &DivideConverter{Value: 0.7}
+	if rcv, err := NewDivideConverter("0.7"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %+v received: %+v", eOut, rcv)
+	}
+}
+
+func TestDivideConverterConvert(t *testing.T) {
+	m := DivideConverter{}
+	if rcv, err := m.Convert("string_test"); err == nil || err.Error() != `strconv.ParseFloat: parsing "string_test": invalid syntax` {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcv, nil) {
+		t.Errorf("Expected %+v received: %+v", nil, rcv)
+	}
+	eOut := math.Inf(1)
+	if rcv, err := m.Convert("96"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %+v received: %+v", eOut, rcv)
+	}
+	eOut = math.Inf(-1)
+	if rcv, err := m.Convert("-96"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %+v received: %+v", eOut, rcv)
+	}
+	m = DivideConverter{Value: 0.7}
+	eOut = 137.14285714285714
+	if rcv, err := m.Convert("96"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %+v received: %+v", eOut, rcv)
+	}
+}
+
+func TestNewDurationConverter(t *testing.T) {
+	nS := &DurationConverter{}
+	eOut := time.Duration(0 * time.Second)
+	if rcv, err := nS.Convert(EmptyString); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %+v received: %+v", eOut, rcv)
+	}
+	eOut = time.Duration(7 * time.Nanosecond)
+	if rcv, err := nS.Convert(7); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected %+v received: %+v", eOut, rcv)
 	}
 }
 
@@ -344,11 +537,18 @@ func TestDurationConverter(t *testing.T) {
 
 func TestPhoneNumberConverter(t *testing.T) {
 	// test for error
-	if _, err := NewDataConverter("*libphonenumber:US:1:2:error"); err == nil ||
-		err.Error() != "unsupported *libphonenumber converter parameters: <US:1:2:error>" {
+	if rcv, err := NewDataConverter("*libphonenumber:US:1:2:error"); err == nil || err.Error() != "unsupported *libphonenumber converter parameters: <US:1:2:error>" {
 		t.Error(err)
+	} else if !reflect.DeepEqual(nil, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", nil, rcv)
+	}
+	if rcv, err := NewDataConverter("*libphonenumber:US:X"); err == nil || err.Error() != `strconv.Atoi: parsing "X": invalid syntax` {
+		t.Error(err)
+	} else if !reflect.DeepEqual(nil, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", nil, rcv)
 	}
 
+	// US/National
 	eLc := &PhoneNumberConverter{CountryCode: "US", Format: phonenumbers.NATIONAL}
 	d, err := NewDataConverter("*libphonenumber:US")
 	if err != nil {
@@ -363,40 +563,36 @@ func TestPhoneNumberConverter(t *testing.T) {
 	} else if !reflect.DeepEqual(phoneNumberConverted, "(443) 123-4567") {
 		t.Errorf("expecting: %+v, received: %+v", "(443) 123-4567", phoneNumberConverted)
 	}
-}
-
-func TestPhoneNumberConverter2(t *testing.T) {
-	eLc := &PhoneNumberConverter{CountryCode: "US", Format: phonenumbers.INTERNATIONAL}
-	d, err := NewDataConverter("*libphonenumber:US:1")
+	//US/International
+	eLc = &PhoneNumberConverter{CountryCode: "US", Format: phonenumbers.INTERNATIONAL}
+	d, err = NewDataConverter("*libphonenumber:US:1")
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eLc, d) {
 		t.Errorf("expecting: %+v, received: %+v", eLc, d)
 	}
 	// simulate an E164 number and Format it into a National number
-	phoneNumberConverted, err := d.Convert("+14431234567")
+	phoneNumberConverted, err = d.Convert("+14431234567")
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(phoneNumberConverted, "+1 443-123-4567") {
 		t.Errorf("expecting: %+v, received: %+v", "+1 443-123-4567", phoneNumberConverted)
 	}
-}
-
-func TestPhoneNumberConverter3(t *testing.T) {
-	eLc := &PhoneNumberConverter{CountryCode: "DE", Format: phonenumbers.INTERNATIONAL}
-	d, err := NewDataConverter("*libphonenumber:DE:1")
+	// DE/International
+	eLc = &PhoneNumberConverter{CountryCode: "DE", Format: phonenumbers.INTERNATIONAL}
+	d, err = NewDataConverter("*libphonenumber:DE:1")
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eLc, d) {
 		t.Errorf("expecting: %+v, received: %+v", eLc, d)
 	}
-	phoneNumberConverted, err := d.Convert("6502530000")
+	phoneNumberConverted, err = d.Convert("6502530000")
 	if err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(phoneNumberConverted, "+49 6502 530000") {
 		t.Errorf("expecting: %+v, received: %+v", "+49 6502 530000", phoneNumberConverted)
 	}
-
+	// DE/E164
 	eLc = &PhoneNumberConverter{CountryCode: "DE", Format: phonenumbers.E164}
 	d, err = NewDataConverter("*libphonenumber:DE:0")
 	if err != nil {
