@@ -135,21 +135,7 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 	if err := cdrsRpc.Call(utils.ApierV1SetBalance, attrSetBalance, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
-		t.Errorf("received: %s", reply)
-	}
-	args := &engine.ArgV1ProcessEvent{
-		CGREvent: utils.CGREvent{
-			Tenant: "cgrates.org",
-			Event: map[string]interface{}{
-				utils.OriginID:    "testV1CDRsProcessEventWithRefund",
-				utils.RequestType: utils.META_PSEUDOPREPAID,
-				utils.Account:     "testV1CDRsProcessEventWithRefund",
-				utils.Destination: "+4986517174963",
-				utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
-				utils.Usage:       time.Duration(3) * time.Minute,
-				utils.Subject:     "ANY2CNT",
-			},
-		},
+		t.Errorf("received: <%s>", reply)
 	}
 	expectedVoice := 300000000000.0
 	if err := cdrsRpc.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
@@ -157,26 +143,80 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != expectedVoice {
 		t.Errorf("Expecting: %v, received: %v", expectedVoice, rply)
 	}
-	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+	argsEv := &engine.ArgV1ProcessEvent{
+		Flags: []string{utils.MetaRALs},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.RunID:       "testv1",
+				utils.OriginID:    "testV1CDRsProcessEventWithRefund",
+				utils.RequestType: utils.META_PSEUDOPREPAID,
+				utils.Account:     "testV1CDRsProcessEventWithRefund",
+				utils.Destination: "+4986517174963",
+				utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+				utils.Usage:       time.Duration(3) * time.Minute,
+			},
+		},
+	}
+	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
-
 	var cdrs []*engine.ExternalCDR
 	if err := cdrsRpc.Call(utils.ApierV1GetCDRs, utils.AttrGetCdrs{}, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	} else {
-		if cdrs[0].Cost != -1.0 {
+		if cdrs[0].Cost != 0 {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
-		if cdrs[0].ExtraFields["PayPalAccount"] != "paypal@cgrates.org" {
-			t.Errorf("PayPalAccount should be added by AttributeS, have: %s",
-				cdrs[0].ExtraFields["PayPalAccount"])
-		}
+	}
+	if err := cdrsRpc.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
+		t.Error(err)
+	} else if blc1 := acnt.GetBalanceWithID(utils.VOICE, "BALANCE1"); blc1.Value != 0 {
+		t.Errorf("Balance1 is: %s", utils.ToIJSON(blc1))
+	} else if blc2 := acnt.GetBalanceWithID(utils.VOICE, "BALANCE2"); blc2.Value != 120000000000 {
+		t.Errorf("Balance2 is: %s", utils.ToIJSON(blc2))
+	}
+	// without re-rate we should be denied
+	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err == nil {
+		t.Error("should receive error here")
+	}
+	if err := cdrsRpc.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
+		t.Error(err)
+	} else if blc1 := acnt.GetBalanceWithID(utils.VOICE, "BALANCE1"); blc1.Value != 0 {
+		t.Errorf("Balance1 is: %s", utils.ToIJSON(blc1))
+	} else if blc2 := acnt.GetBalanceWithID(utils.VOICE, "BALANCE2"); blc2.Value != 120000000000 {
+		t.Errorf("Balance2 is: %s", utils.ToIJSON(blc2))
+	}
+	argsEv = &engine.ArgV1ProcessEvent{
+		Flags: []string{utils.MetaRALs, utils.MetaRerate},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.RunID:       "testv1",
+				utils.OriginID:    "testV1CDRsProcessEventWithRefund",
+				utils.RequestType: utils.META_PSEUDOPREPAID,
+				utils.Account:     "testV1CDRsProcessEventWithRefund",
+				utils.Destination: "+4986517174963",
+				utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+				utils.Usage:       time.Duration(1) * time.Minute,
+			},
+		},
+	}
+	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	if err := cdrsRpc.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
+		t.Error(err)
+	} else if blc1 := acnt.GetBalanceWithID(utils.VOICE, "BALANCE1"); blc1.Value != 120000000000 { // refund is done after debit
+		t.Errorf("Balance1 is: %s", utils.ToIJSON(blc1))
+	} else if blc2 := acnt.GetBalanceWithID(utils.VOICE, "BALANCE2"); blc2.Value != 120000000000 {
+		t.Errorf("Balance2 is: %s", utils.ToIJSON(blc2))
 	}
 	return
 }

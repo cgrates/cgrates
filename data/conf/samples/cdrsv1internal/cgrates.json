@@ -24,30 +24,11 @@
 },
 
 
-"chargers": {
-	"enabled": true,
-	"attributes_conns": [
-		{"address": "*internal"},
-	],
-},
-
-
-"attributes": {
-	"enabled": true,
-},
-
-
 "cdrs": {
 	"enabled": true,
 	"rals_conns": [
 		{"address": "127.0.0.1:2012", "transport":"*json"},
 	],
-	"attributes_conns":[
-		{"address": "127.0.0.1:2012", "transport":"*json"}
-	],
-	"chargers_conns":[
-		{"address": "127.0.0.1:2012", "transport":"*json"},
-	]
 },
 
 

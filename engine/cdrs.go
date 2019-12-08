@@ -507,27 +507,44 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithArgDispatcher,
 		}
 	}
 	if store {
+		refundCDRCosts := func() { // will be used to refund all CDRs on errors
+			for _, cdr := range cdrs { // refund what we have charged since duplicates are not allowed
+				if errRfd := cdrS.refundEventCost(cdr.CostDetails,
+					cdr.RequestType, cdr.ToR); errRfd != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> error: <%s> refunding CDR %+v",
+							utils.CDRs, errRfd.Error(), cdr))
+				}
+			}
+		}
 		for _, cdr := range cdrs {
 			if err = cdrS.cdrDb.SetCDR(cdr, false); err != nil {
-				if err.Error() == "duplicate" && reRate { // fix error name here
-					if err = cdrS.refundEventCost(cdr.CostDetails,
-						cdr.RequestType, cdr.ToR); err != nil {
-						utils.Logger.Warning(
-							fmt.Sprintf("<%s> error: <%s> refunding CDR %+v",
-								utils.CDRs, err.Error(), cdr))
-						err = utils.ErrPartiallyExecuted
-						return
-					}
-					// after refund we can force update
-					if err = cdrS.cdrDb.SetCDR(cdr, true); err != nil {
-						utils.Logger.Warning(
-							fmt.Sprintf("<%s> error: <%s> updating CDR %+v",
-								utils.CDRs, err.Error(), cdr))
-						err = utils.ErrPartiallyExecuted
-						return
-					}
+				if err != utils.ErrExists || !reRate {
+					refundCDRCosts()
+					return
 				}
-				return
+				// CDR was found in StorDB
+				// reRate is allowed, refund the previous CDR
+				var prevCDRs []*CDR // only one should be returned
+				if prevCDRs, _, err = cdrS.cdrDb.GetCDRs(
+					&utils.CDRsFilter{CGRIDs: []string{cdr.CGRID},
+						RunIDs: []string{cdr.RunID}}, false); err != nil {
+					refundCDRCosts()
+					return
+				}
+				if err = cdrS.refundEventCost(prevCDRs[0].CostDetails,
+					cdr.RequestType, cdr.ToR); err != nil {
+					refundCDRCosts()
+					return
+				}
+				// after refund we can force update
+				if err = cdrS.cdrDb.SetCDR(cdr, true); err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> error: <%s> updating CDR %+v",
+							utils.CDRs, err.Error(), cdr))
+					err = utils.ErrPartiallyExecuted
+					return
+				}
 			}
 		}
 	}
@@ -682,7 +699,7 @@ type ArgV1ProcessEvent struct {
 	*utils.ArgDispatcher
 }
 
-// V2ProcessCDR will process the CDR out of CGREvent
+// V1ProcessCDR will process the CDR out of CGREvent
 func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (err error) {
 	if arg.CGREvent.ID == "" {
 		arg.CGREvent.ID = utils.GenUUID()
@@ -728,17 +745,25 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	if flgs.HasKey(utils.MetaThresholds) {
 		thdS = flgs.GetBool(utils.MetaThresholds)
 	}
-	statS := cdrS.statS != nil
+	stS := cdrS.statS != nil
 	if flgs.HasKey(utils.MetaStats) {
-		statS = flgs.GetBool(utils.MetaStats)
+		stS = flgs.GetBool(utils.MetaStats)
 	}
 	chrgS := cdrS.chargerS != nil // activate charging for the Event
 	if flgs.HasKey(utils.MetaChargers) {
 		chrgS = flgs.GetBool(utils.MetaChargers)
 	}
 	var ralS bool // activate single rating for the CDR
+	fmt.Printf("flags: %s HasKeyRALs: %v\n", utils.ToIJSON(flgs), flgs.GetBool(utils.MetaRALs))
 	if flgs.HasKey(utils.MetaRALs) {
 		ralS = flgs.GetBool(utils.MetaRALs)
+	}
+	var reRate bool
+	if flgs.HasKey(utils.MetaRerate) {
+		reRate = flgs.GetBool(utils.MetaRerate)
+		if reRate {
+			ralS = true
+		}
 	}
 	// end of processing options
 
@@ -748,47 +773,9 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	if arg.ArgDispatcher != nil {
 		cgrEv.ArgDispatcher = arg.ArgDispatcher
 	}
-
-	if !ralS {
-		if err = cdrS.attrStoExpThdStat(cgrEv,
-			attrS, store, false, export, thdS, statS); err != nil {
-			err = utils.NewErrServerError(err)
-			return
-		}
-	} else { // we want rating for this CDR
-		var partExec bool
-		cdr, errProc := NewMapEvent(cgrEv.Event).AsCDR(cdrS.cgrCfg,
-			cgrEv.Tenant, cdrS.cgrCfg.GeneralCfg().DefaultTimezone)
-		if err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error: %s converting event %+v to CDR",
-					utils.CDRs, errProc.Error(), cgrEv))
-			err = utils.ErrPartiallyExecuted
-			return
-		}
-		for _, rtCDR := range cdrS.rateCDRWithErr(&CDRWithArgDispatcher{CDR: cdr,
-			ArgDispatcher: arg.ArgDispatcher}) {
-			cgrEv := &utils.CGREventWithArgDispatcher{
-				CGREvent:      rtCDR.AsCGREvent(),
-				ArgDispatcher: arg.ArgDispatcher,
-			}
-			if errProc := cdrS.attrStoExpThdStat(cgrEv,
-				attrS, store, false, export, thdS, statS); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error: %s processing event %+v ",
-						utils.CDRs, errProc.Error(), cgrEv))
-				partExec = true
-				continue
-			}
-		}
-		if partExec {
-			err = utils.ErrPartiallyExecuted
-			return
-		}
-	}
-	if chrgS {
-		go cdrS.chrgProcessEvent(cgrEv,
-			attrS, store, false, export, thdS, statS)
+	if err = cdrS.processEvent(cgrEv,
+		chrgS, attrS, ralS, store, reRate, export, thdS, stS); err != nil {
+		return
 	}
 	*reply = utils.OK
 	return nil

@@ -225,7 +225,7 @@ func TestFlagsWithParamsGetBool(t *testing.T) {
 		t.Errorf("Expecting: false, received: %+v", ToJSON(rcv))
 	}
 	key = "empty"
-	if rcv := flagsWithParams.GetBool(key); rcv != false {
+	if rcv := flagsWithParams.GetBool(key); rcv != true {
 		t.Errorf("Expecting: false, received: %+v", ToJSON(rcv))
 	}
 	key = "test"

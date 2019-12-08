@@ -1181,3 +1181,13 @@ func (as *AccountSummary) Clone() (cln *AccountSummary) {
 	}
 	return
 }
+
+// GetBalanceWithID returns a Balance given balance type and balance ID
+func (acnt *Account) GetBalanceWithID(blcType, blcID string) (blc *Balance) {
+	for _, blc = range acnt.BalanceMap[blcType] {
+		if blc.ID == blcID {
+			return
+		}
+	}
+	return nil
+}

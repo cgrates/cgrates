@@ -842,9 +842,9 @@ func (iDB *InternalDB) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 	if cdr.OrderID == 0 {
 		cdr.OrderID = iDB.cnter.Next()
 	}
+	cdrKey := utils.ConcatenatedKey(cdr.CGRID, cdr.RunID, cdr.OriginID)
 	if !allowUpdate {
-		x, ok := iDB.db.Get(utils.CDRsTBL, utils.ConcatenatedKey(cdr.CGRID, cdr.RunID, cdr.OriginID))
-		if ok && x != nil {
+		if _, has := iDB.db.Get(utils.CDRsTBL, cdrKey); has {
 			return utils.ErrExists
 		}
 	}
@@ -879,7 +879,7 @@ func (iDB *InternalDB) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 		}
 	}
 
-	iDB.db.Set(utils.CDRsTBL, utils.ConcatenatedKey(cdr.CGRID, cdr.RunID, cdr.OriginID), cdr, idxs.AsSlice(),
+	iDB.db.Set(utils.CDRsTBL, cdrKey, cdr, idxs.AsSlice(),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 
 	return

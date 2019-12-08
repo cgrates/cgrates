@@ -282,7 +282,7 @@ func (fWp FlagsWithParams) GetBool(key string) (b bool) {
 		return // not present means false
 	}
 	if v == nil || len(v) == 0 {
-		return false // empty slice
+		return true // empty slice
 	}
 	return v[0] == "true" // check only the first element
 }
