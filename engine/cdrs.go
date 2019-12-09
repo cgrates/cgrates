@@ -289,6 +289,9 @@ func (cdrS *CDRServer) rateCDRWithErr(cdr *CDRWithArgDispatcher) (ratedCDRs []*C
 
 // refundEventCost will refund the EventCost using RefundIncrements
 func (cdrS *CDRServer) refundEventCost(ec *EventCost, reqType, tor string) (err error) {
+	if cdrS.rals == nil {
+		return utils.NewErrNotConnected(utils.RALService)
+	}
 	if ec == nil || !utils.AccountableRequestTypes.Has(reqType) {
 		return // non refundable
 	}
@@ -754,7 +757,6 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 		chrgS = flgs.GetBool(utils.MetaChargers)
 	}
 	var ralS bool // activate single rating for the CDR
-	fmt.Printf("flags: %s HasKeyRALs: %v\n", utils.ToIJSON(flgs), flgs.GetBool(utils.MetaRALs))
 	if flgs.HasKey(utils.MetaRALs) {
 		ralS = flgs.GetBool(utils.MetaRALs)
 	}

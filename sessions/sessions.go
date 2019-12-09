@@ -2627,6 +2627,7 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.ClientConnector,
 	} else { // no cached session, CDR will be handled by CDRs
 		return sS.cdrS.Call(utils.CDRsV1ProcessEvent,
 			&engine.ArgV1ProcessEvent{
+				Flags:         []string{utils.MetaRALs},
 				CGREvent:      *cgrEvWithArgDisp.CGREvent,
 				ArgDispatcher: cgrEvWithArgDisp.ArgDispatcher}, rply)
 	}
