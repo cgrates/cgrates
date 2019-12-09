@@ -593,3 +593,15 @@ func (api *ApierV1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) (e
 	*reply = utils.OK
 	return nil
 }
+
+func (api *ApierV1) CountAccounts(attr utils.TenantArg, reply *int) (err error) {
+	if len(attr.Tenant) == 0 {
+		return utils.NewErrMandatoryIeMissing("Tenant")
+	}
+	var accountKeys []string
+	if accountKeys, err = api.DataManager.DataDB().GetKeysForPrefix(utils.ACCOUNT_PREFIX + attr.Tenant); err != nil {
+		return
+	}
+	*reply = len(accountKeys)
+	return
+}
