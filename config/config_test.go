@@ -464,7 +464,7 @@ func TestCgrCfgJSONDefaultsStorDB(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
-	eHaPoolcfg := []*RemoteHost{}
+	eHaPoolcfg := []string{}
 
 	if cgrCfg.RalsCfg().Enabled != false {
 		t.Errorf("Expecting: false , received: %+v", cgrCfg.RalsCfg().Enabled)
@@ -503,7 +503,7 @@ func TestCgrCfgJSONDefaultsRALs(t *testing.T) {
 func TestCgrCfgJSONDefaultsScheduler(t *testing.T) {
 	eSchedulerCfg := &SchedulerCfg{
 		Enabled:   false,
-		CDRsConns: []*RemoteHost{},
+		CDRsConns: []string{},
 		Filters:   []string{},
 	}
 	if !reflect.DeepEqual(cgrCfg.schedulerCfg, eSchedulerCfg) {
@@ -1553,18 +1553,8 @@ func TestCgrLoaderCfgDefault(t *testing.T) {
 		DataPath:       "./",
 		DisableReverse: false,
 		FieldSeparator: rune(','),
-		CachesConns: []*RemoteHost{
-			{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSON,
-			},
-		},
-		SchedulerConns: []*RemoteHost{
-			{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSON,
-			},
-		},
+		CachesConns:    []string{utils.MetaLocalHost},
+		SchedulerConns: []string{utils.MetaLocalHost},
 	}
 	if !reflect.DeepEqual(cgrCfg.LoaderCgrCfg(), eLdrCfg) {
 		t.Errorf("received: %+v, expecting: %+v", utils.ToJSON(cgrCfg.LoaderCgrCfg()), utils.ToJSON(eLdrCfg))
@@ -1774,13 +1764,9 @@ func TestNewCGRConfigFromPathNotFound(t *testing.T) {
 
 func TestCgrCfgJSONDefaultApierCfg(t *testing.T) {
 	aCfg := &ApierCfg{
-		CachesConns: []*RemoteHost{
-			{
-				Address: utils.MetaInternal,
-			},
-		},
-		SchedulerConns:  []*RemoteHost{},
-		AttributeSConns: []*RemoteHost{},
+		CachesConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
+		SchedulerConns:  []string{},
+		AttributeSConns: []string{},
 	}
 	if !reflect.DeepEqual(cgrCfg.apier, aCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.apier, aCfg)
@@ -1944,31 +1930,24 @@ func TestCheckConfigSanity(t *testing.T) {
 	// Rater checks
 	cfg, _ := NewDefaultCGRConfig()
 	cfg.ralsCfg = &RalsCfg{
-		Enabled: true,
-		StatSConns: []*RemoteHost{
-			&RemoteHost{
-				Address: utils.MetaInternal,
-			},
-		},
+		Enabled:    true,
+		StatSConns: []string{utils.MetaInternal},
 	}
-	expected := "<Stats> not enabled but requested by <RALs> component."
+	expected := "<StatS> not enabled but requested by <RALs> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.statsCfg.Enabled = true
-	cfg.ralsCfg.ThresholdSConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
+	cfg.ralsCfg.ThresholdSConns = []string{utils.MetaInternal}
+
 	expected = "<ThresholdS> not enabled but requested by <RALs> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.ralsCfg = &RalsCfg{
 		Enabled:         false,
-		StatSConns:      []*RemoteHost{},
-		ThresholdSConns: []*RemoteHost{},
+		StatSConns:      []string{},
+		ThresholdSConns: []string{},
 	}
 	// CDRServer checks
 	cfg.thresholdSCfg.Enabled = true

@@ -31,7 +31,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
-	"github.com/cgrates/rpcclient"
 	"github.com/creack/pty"
 )
 
@@ -376,8 +375,9 @@ func StopStartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 }
 
 func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disable_reverse bool,
-	cacheS rpcclient.ClientConnector, schedulerS rpcclient.ClientConnector) error {
-	loader, err := NewTpReader(dm.dataDB, NewFileCSVStorage(utils.CSV_SEP, tpPath, false), "", timezone, cacheS, schedulerS)
+	cacheConns, schedConns []string) error {
+	loader, err := NewTpReader(dm.dataDB, NewFileCSVStorage(utils.CSV_SEP, tpPath, false), "",
+		timezone, cacheConns, schedConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

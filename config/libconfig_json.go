@@ -110,8 +110,8 @@ type FilterSJsonCfg struct {
 // Rater config section
 type RalsJsonCfg struct {
 	Enabled                    *bool
-	Thresholds_conns           *[]*RemoteHostJson
-	Stats_conns                *[]*RemoteHostJson
+	Thresholds_conns           *[]string
+	Stats_conns                *[]string
 	Rp_subject_prefix_matching *bool
 	Remove_expired             *bool
 	Max_computed_usage         *map[string]string
@@ -122,7 +122,7 @@ type RalsJsonCfg struct {
 // Scheduler config section
 type SchedulerJsonCfg struct {
 	Enabled    *bool
-	Cdrs_conns *[]*RemoteHostJson
+	Cdrs_conns *[]string
 	Filters    *[]string
 }
 
@@ -523,8 +523,8 @@ type LoaderCfgJson struct {
 	Data_path       *string
 	Disable_reverse *bool
 	Field_separator *string
-	Caches_conns    *[]*RemoteHostJson
-	Scheduler_conns *[]*RemoteHostJson
+	Caches_conns    *[]string
+	Scheduler_conns *[]string
 }
 
 type MigratorCfgJson struct {
@@ -574,7 +574,7 @@ type AnalyzerSJsonCfg struct {
 }
 
 type ApierJsonCfg struct {
-	Caches_conns     *[]*RemoteHostJson
-	Scheduler_conns  *[]*RemoteHostJson
-	Attributes_conns *[]*RemoteHostJson
+	Caches_conns     *[]string
+	Scheduler_conns  *[]string
+	Attributes_conns *[]string
 }

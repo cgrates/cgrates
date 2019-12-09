@@ -34,7 +34,6 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 const (
@@ -54,7 +53,7 @@ const (
 
 func NewCDRExporter(cdrs []*CDR, exportTemplate *config.CdreCfg, exportFormat, exportPath, fallbackPath, exportID string,
 	synchronous bool, attempts int, fieldSeparator rune,
-	httpSkipTlsCheck bool, httpPoster *HTTPPoster, attrS rpcclient.ClientConnector, filterS *FilterS) (*CDRExporter, error) {
+	httpSkipTlsCheck bool, httpPoster *HTTPPoster, attrsConns []string, filterS *FilterS) (*CDRExporter, error) {
 	if len(cdrs) == 0 { // Nothing to export
 		return nil, nil
 	}
@@ -71,7 +70,7 @@ func NewCDRExporter(cdrs []*CDR, exportTemplate *config.CdreCfg, exportFormat, e
 		httpSkipTlsCheck: httpSkipTlsCheck,
 		httpPoster:       httpPoster,
 		negativeExports:  make(map[string]string),
-		attrS:            attrS,
+		attrsConns:       attrsConns,
 		filterS:          filterS,
 	}
 	return cdre, nil
@@ -103,8 +102,8 @@ type CDRExporter struct {
 	positiveExports                 []string          // CGRIDs of successfully exported CDRs
 	negativeExports                 map[string]string // CGRIDs of failed exports
 
-	attrS   rpcclient.ClientConnector
-	filterS *FilterS
+	attrsConns []string
+	filterS    *FilterS
 }
 
 // Handle various meta functions used in header/trailer
@@ -302,7 +301,7 @@ func (cdre *CDRExporter) processCDR(cdr *CDR) (err error) {
 	}
 	// send the cdr to be processed by attributeS
 	if cdre.exportTemplate.AttributeSContext != utils.EmptyString {
-		if cdre.attrS == nil {
+		if len(cdre.attrsConns) == 0 {
 			return errors.New("no connection to AttributeS")
 		}
 		args := &AttrArgsProcessEvent{
@@ -310,7 +309,8 @@ func (cdre *CDRExporter) processCDR(cdr *CDR) (err error) {
 			CGREvent: cdr.AsCGREvent(),
 		}
 		var evReply AttrSProcessEventReply
-		if err = cdre.attrS.Call(utils.AttributeSv1ProcessEvent,
+		if err = connMgr.Call(cdre.attrsConns,
+			utils.AttributeSv1ProcessEvent,
 			args, &evReply); err != nil {
 			return err
 		}

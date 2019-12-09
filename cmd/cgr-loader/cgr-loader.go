@@ -24,7 +24,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -84,12 +83,6 @@ var (
 		`Separator for csv file (by default "," is used)`)
 	recursive = cgrLoaderFlags.Bool("recursive", false, "Loads data from folder recursive.")
 
-	fromStorDB    = cgrLoaderFlags.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
-	toStorDB      = cgrLoaderFlags.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
-	rpcEncoding   = cgrLoaderFlags.String("rpc_encoding", utils.MetaJSON, "RPC encoding used <*gob|*json>")
-	cacheSAddress = cgrLoaderFlags.String("caches_address", dfltCfg.LoaderCgrCfg().CachesConns[0].Address,
-		"CacheS component to contact for cache reloads, empty to disable automatic cache reloads")
-	schedulerAddress = cgrLoaderFlags.String("scheduler_address", dfltCfg.LoaderCgrCfg().SchedulerConns[0].Address, "")
 
 	importID       = cgrLoaderFlags.String("import_id", "", "Uniquely identify an import/load, postpended to some automatic fields")
 	timezone       = cgrLoaderFlags.String("timezone", "", `Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>`)
@@ -99,12 +92,10 @@ var (
 	apiKey         = cgrLoaderFlags.String("api_key", "", "Api Key used to comosed ArgDispatcher")
 	routeID        = cgrLoaderFlags.String("route_id", "", "RouteID used to comosed ArgDispatcher")
 
-	err        error
-	dm         *engine.DataManager
-	storDb     engine.LoadStorage
-	cacheS     rpcclient.ClientConnector
-	schedulerS rpcclient.ClientConnector
-	loader     engine.LoadReader
+	err    error
+	dm     *engine.DataManager
+	storDb engine.LoadStorage
+	loader engine.LoadReader
 )
 
 func main() {
@@ -198,29 +189,30 @@ func main() {
 		ldrCfg.LoaderCgrCfg().FieldSeparator = rune((*fieldSep)[0])
 	}
 
-	if *cacheSAddress != dfltCfg.LoaderCgrCfg().CachesConns[0].Address {
-		ldrCfg.LoaderCgrCfg().CachesConns = make([]*config.RemoteHost, 0)
-		if *cacheSAddress != "" {
-			ldrCfg.LoaderCgrCfg().CachesConns = append(ldrCfg.LoaderCgrCfg().CachesConns,
-				&config.RemoteHost{
-					Address:   *cacheSAddress,
-					Transport: *rpcEncoding,
-				})
-		}
-	}
-
-	if *schedulerAddress != dfltCfg.LoaderCgrCfg().SchedulerConns[0].Address {
-		ldrCfg.LoaderCgrCfg().SchedulerConns = make([]*config.RemoteHost, 0)
-		if *schedulerAddress != "" {
-			ldrCfg.LoaderCgrCfg().SchedulerConns = append(ldrCfg.LoaderCgrCfg().SchedulerConns,
-				&config.RemoteHost{Address: *schedulerAddress})
-		}
-	}
-
-	if len(ldrCfg.LoaderCgrCfg().CachesConns) != 0 &&
-		*rpcEncoding != dfltCfg.LoaderCgrCfg().CachesConns[0].Transport {
-		ldrCfg.LoaderCgrCfg().CachesConns[0].Transport = *rpcEncoding
-	}
+	// DON"T FORGET TO UPDATE CGR_LOADER WITH CACHEID AND SCHEDID
+	//if *cacheSAddress != dfltCfg.LoaderCgrCfg().CachesConns[0].Address {
+	//	ldrCfg.LoaderCgrCfg().CachesConns = make([]*config.RemoteHost, 0)
+	//	if *cacheSAddress != "" {
+	//		ldrCfg.LoaderCgrCfg().CachesConns = append(ldrCfg.LoaderCgrCfg().CachesConns,
+	//			&config.RemoteHost{
+	//				Address:   *cacheSAddress,
+	//				Transport: *rpcEncoding,
+	//			})
+	//	}
+	//}
+	//
+	//if *schedulerAddress != dfltCfg.LoaderCgrCfg().SchedulerConns[0].Address {
+	//	ldrCfg.LoaderCgrCfg().SchedulerConns = make([]*config.RemoteHost, 0)
+	//	if *schedulerAddress != "" {
+	//		ldrCfg.LoaderCgrCfg().SchedulerConns = append(ldrCfg.LoaderCgrCfg().SchedulerConns,
+	//			&config.RemoteHost{Address: *schedulerAddress})
+	//	}
+	//}
+	//
+	//if len(ldrCfg.LoaderCgrCfg().CachesConns) != 0 &&
+	//	*rpcEncoding != dfltCfg.LoaderCgrCfg().CachesConns[0].Transport {
+	//	ldrCfg.LoaderCgrCfg().CachesConns[0].Transport = *rpcEncoding
+	//}
 
 	if *importID == "" {
 		*importID = utils.UUIDSha1Prefix()
@@ -320,36 +312,8 @@ func main() {
 		loader = engine.NewFileCSVStorage(ldrCfg.LoaderCgrCfg().FieldSeparator, *dataPath, *recursive)
 	}
 
-	if len(ldrCfg.LoaderCgrCfg().CachesConns) != 0 { // Init connection to CacheS so we can reload it's data
-		if cacheS, err = rpcclient.NewRPCClient(utils.TCP,
-			ldrCfg.LoaderCgrCfg().CachesConns[0].Address,
-			ldrCfg.LoaderCgrCfg().CachesConns[0].TLS, ldrCfg.TlsCfg().ClientKey,
-			ldrCfg.TlsCfg().ClientCerificate, ldrCfg.TlsCfg().CaCertificate, 3, 3,
-			time.Duration(1*time.Second), time.Duration(5*time.Minute),
-			ldrCfg.LoaderCgrCfg().CachesConns[0].Transport,
-			nil, false); err != nil {
-			log.Fatalf("Could not connect to CacheS: %s", err.Error())
-			return
-		}
-	} else {
-		log.Print("WARNING: automatic cache reloading is disabled!")
-	}
-
-	if len(ldrCfg.LoaderCgrCfg().SchedulerConns) != 0 { // Init connection to Scheduler so we can reload it's data
-		if schedulerS, err = rpcclient.NewRPCClient(utils.TCP,
-			ldrCfg.LoaderCgrCfg().SchedulerConns[0].Address,
-			ldrCfg.LoaderCgrCfg().SchedulerConns[0].TLS, ldrCfg.TlsCfg().ClientKey,
-			ldrCfg.TlsCfg().ClientCerificate, ldrCfg.TlsCfg().CaCertificate, 3, 3,
-			time.Duration(1*time.Second), time.Duration(5*time.Minute),
-			ldrCfg.LoaderCgrCfg().SchedulerConns[0].Transport,
-			nil, false); err != nil {
-			log.Fatalf("Could not connect to Scheduler: %s", err.Error())
-			return
-		}
-	}
-
 	tpReader, err := engine.NewTpReader(dm.DataDB(), loader, ldrCfg.LoaderCgrCfg().TpID,
-		ldrCfg.GeneralCfg().DefaultTimezone, cacheS, schedulerS)
+		ldrCfg.GeneralCfg().DefaultTimezone, ldrCfg.LoaderCgrCfg().CachesConns, ldrCfg.LoaderCgrCfg().SchedulerConns)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -377,7 +341,7 @@ func main() {
 		}); err != nil {
 			log.Fatal("Could not reload cache: ", err)
 		}
-		if schedulerS != nil {
+		if len(ldrCfg.LoaderCgrCfg().SchedulerConns) != 0 {
 			if err := tpReader.ReloadScheduler(*verbose); err != nil {
 				log.Fatal("Could not reload scheduler: ", err)
 			}

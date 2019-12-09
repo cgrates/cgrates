@@ -33,9 +33,7 @@
 
 
 "apier": {
-	"scheduler_conns": [
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 }

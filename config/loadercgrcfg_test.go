@@ -42,18 +42,14 @@ func TestLoaderCgrCfgloadFromJsonCfg(t *testing.T) {
 	"data_path": "",						// path towards tariff plan files
 	"disable_reverse": false,				// disable reverse computing
 	"field_separator": ";",					// separator used in case of csv files
-	"caches_conns":[						// addresses towards cacheS components for reloads
-		{"address": "127.0.0.1:2012", "transport": "*json"}
-	],
-	"scheduler_conns": [
-		{"address": "127.0.0.1:2012"}
-	],
+	"caches_conns":["*localhost"],
+	"scheduler_conns": ["*localhost"],
 },
 }`
 	expected = LoaderCgrCfg{
 		FieldSeparator: rune(';'),
-		CachesConns:    []*RemoteHost{{Address: "127.0.0.1:2012", Transport: "*json"}},
-		SchedulerConns: []*RemoteHost{{Address: "127.0.0.1:2012"}},
+		CachesConns:    []string{utils.MetaLocalHost},
+		SchedulerConns: []string{utils.MetaLocalHost},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)

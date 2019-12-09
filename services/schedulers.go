@@ -33,34 +33,32 @@ import (
 // NewSchedulerService returns the Scheduler Service
 func NewSchedulerService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, fltrSChan chan *engine.FilterS,
-	server *utils.Server, internalCDRServerChan,
-	dispatcherChan chan rpcclient.ClientConnector) *SchedulerService {
+	server *utils.Server, internalSchedulerrSChan chan rpcclient.RpcClientConnection,
+	connMgr *engine.ConnManager) *SchedulerService {
 	return &SchedulerService{
-		connChan:       make(chan rpcclient.ClientConnector, 1),
-		cfg:            cfg,
-		dm:             dm,
-		cacheS:         cacheS,
-		fltrSChan:      fltrSChan,
-		server:         server,
-		cdrSChan:       internalCDRServerChan,
-		dispatcherChan: dispatcherChan,
+		connChan:  internalSchedulerrSChan,
+		cfg:       cfg,
+		dm:        dm,
+		cacheS:    cacheS,
+		fltrSChan: fltrSChan,
+		server:    server,
+		connMgr:   connMgr,
 	}
 }
 
 // SchedulerService implements Service interface
 type SchedulerService struct {
 	sync.RWMutex
-	cfg            *config.CGRConfig
-	dm             *DataDBService
-	cacheS         *engine.CacheS
-	fltrSChan      chan *engine.FilterS
-	server         *utils.Server
-	cdrSChan       chan rpcclient.ClientConnector
-	dispatcherChan chan rpcclient.ClientConnector
+	cfg       *config.CGRConfig
+	dm        *DataDBService
+	cacheS    *engine.CacheS
+	fltrSChan chan *engine.FilterS
+	server    *utils.Server
 
 	schS     *scheduler.Scheduler
 	rpc      *v1.SchedulerSv1
 	connChan chan rpcclient.ClientConnector
+	connMgr  *engine.ConnManager
 }
 
 // Start should handle the sercive start
@@ -86,16 +84,6 @@ func (schS *SchedulerService) Start() (err error) {
 	}
 	schS.connChan <- schS.rpc
 
-	// Create connection to CDR Server and share it in engine(used for *cdrlog action)
-	cdrsConn, err := NewConnection(schS.cfg, schS.cdrSChan, schS.dispatcherChan, schS.cfg.SchedulerCfg().CDRsConns)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to CDRServer: %s", utils.SchedulerS, err.Error()))
-		return
-	}
-
-	// ToDo: this should be send to scheduler
-	engine.SetSchedCdrsConns(cdrsConn)
-
 	return
 }
 
@@ -106,13 +94,6 @@ func (schS *SchedulerService) GetIntenternalChan() (conn chan rpcclient.ClientCo
 
 // Reload handles the change of config
 func (schS *SchedulerService) Reload() (err error) {
-	cdrsConn, err := NewConnection(schS.cfg, schS.cdrSChan, schS.dispatcherChan, schS.cfg.SchedulerCfg().CDRsConns)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to CDRServer: %s", utils.SchedulerS, err.Error()))
-		return
-	}
-	// ToDo: this should be send to scheduler
-	engine.SetSchedCdrsConns(cdrsConn)
 	schS.Lock()
 	schS.schS.Reload()
 	schS.Unlock()

@@ -45,11 +45,10 @@ func TestSchedulerSReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheActionPlans))
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
-	internalCdrSChan := make(chan rpcclient.ClientConnector, 1)
-	internalCdrSChan <- nil
 	db := NewDataDBService(cfg)
-	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, internalCdrSChan, nil)
-	srvMngr.AddServices(NewConnManagerService(cfg, nil), schS, NewLoaderService(cfg, db, filterSChan, server, nil, nil, engineShutdown), db)
+	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.RpcClientConnection, 1), nil)
+	srvMngr.AddServices(NewConnManagerService(cfg, nil), schS,
+		NewLoaderService(cfg, db, filterSChan, server, nil, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

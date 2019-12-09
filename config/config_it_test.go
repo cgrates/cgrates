@@ -254,14 +254,9 @@ func TestCGRConfigReloadSchedulerS(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	expAttr := &SchedulerCfg{
-		Enabled: true,
-		CDRsConns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSON,
-			},
-		},
-		Filters: []string{},
+		Enabled:   true,
+		CDRsConns: []string{utils.MetaLocalHost},
+		Filters:   []string{},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SchedulerCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SchedulerCfg()))
@@ -330,19 +325,9 @@ func TestCGRConfigReloadRALs(t *testing.T) {
 		RemoveExpired:           true,
 		MaxComputedUsage:        maxComp,
 		BalanceRatingSubject:    blMap,
-		ThresholdSConns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSON,
-			},
-		},
-		StatSConns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSON,
-			},
-		},
-		MaxIncrements: 1000000,
+		ThresholdSConns:         []string{utils.MetaLocalHost},
+		StatSConns:              []string{utils.MetaLocalHost},
+		MaxIncrements:           1000000,
 	}
 	if !reflect.DeepEqual(expAttr, cfg.RalsCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.RalsCfg()))

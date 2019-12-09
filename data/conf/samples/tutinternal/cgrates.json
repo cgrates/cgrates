@@ -28,18 +28,14 @@
 
 "rals": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "*internal"},
-	],
+	"thresholds_conns": ["*internal"],
 	"max_increments":3000000,
 },
 
 
 "scheduler": {
 	"enabled": true,
-	"cdrs_conns": [
-		{"address": "*internal"},
-	],
+	"cdrs_conns": ["*internal"],
 },
 
 
@@ -112,9 +108,9 @@
 },
 
 
-	"apier": {
-		"scheduler_conns": [					// connections to SchedulerS for reloads
-			{"address": "*internal"},
-		],
-	},
+"apier": {
+	"scheduler_conns": ["*internal"],
+},
+
+
 }

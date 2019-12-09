@@ -143,6 +143,7 @@ func testTutSMGCacheStats(t *testing.T) {
 	expectedStats[utils.CacheActionTriggers].Items = 1
 	expectedStats[utils.CacheLoadIDs].Items = 20
 	expectedStats[utils.CacheChargerProfiles].Items = 1
+	expectedStats[utils.CacheRPCConnections].Items = 2
 	if err := tutSMGRpc.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithArgDispatcher), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {

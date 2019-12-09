@@ -321,8 +321,8 @@ func TestDfStorDBJsonCfg(t *testing.T) {
 func TestDfRalsJsonCfg(t *testing.T) {
 	eCfg := &RalsJsonCfg{
 		Enabled:                    utils.BoolPointer(false),
-		Thresholds_conns:           &[]*RemoteHostJson{},
-		Stats_conns:                &[]*RemoteHostJson{},
+		Thresholds_conns:           &[]string{},
+		Stats_conns:                &[]string{},
 		Rp_subject_prefix_matching: utils.BoolPointer(false),
 		Remove_expired:             utils.BoolPointer(true),
 		Max_computed_usage: &map[string]string{
@@ -350,7 +350,7 @@ func TestDfRalsJsonCfg(t *testing.T) {
 func TestDfSchedulerJsonCfg(t *testing.T) {
 	eCfg := &SchedulerJsonCfg{
 		Enabled:    utils.BoolPointer(false),
-		Cdrs_conns: &[]*RemoteHostJson{},
+		Cdrs_conns: &[]string{},
 		Filters:    &[]string{},
 	}
 	if cfg, err := dfCgrJsonCfg.SchedulerJsonCfg(); err != nil {
@@ -1573,18 +1573,8 @@ func TestDfLoaderCfg(t *testing.T) {
 		Data_path:       utils.StringPointer("./"),
 		Disable_reverse: utils.BoolPointer(false),
 		Field_separator: utils.StringPointer(","),
-		Caches_conns: &[]*RemoteHostJson{
-			{
-				Address:   utils.StringPointer("127.0.0.1:2012"),
-				Transport: utils.StringPointer(utils.MetaJSON),
-			},
-		},
-		Scheduler_conns: &[]*RemoteHostJson{
-			{
-				Address:   utils.StringPointer("127.0.0.1:2012"),
-				Transport: utils.StringPointer(utils.MetaJSON),
-			},
-		},
+		Caches_conns:    &[]string{utils.MetaLocalHost},
+		Scheduler_conns: &[]string{utils.MetaLocalHost},
 	}
 	if cfg, err := dfCgrJsonCfg.LoaderCfgJson(); err != nil {
 		t.Error(err)
@@ -1647,13 +1637,9 @@ func TestDfAnalyzerCfg(t *testing.T) {
 
 func TestDfApierCfg(t *testing.T) {
 	eCfg := &ApierJsonCfg{
-		Caches_conns: &[]*RemoteHostJson{
-			{
-				Address: utils.StringPointer(utils.MetaInternal),
-			},
-		},
-		Scheduler_conns:  &[]*RemoteHostJson{},
-		Attributes_conns: &[]*RemoteHostJson{},
+		Caches_conns:     &[]string{utils.MetaInternal},
+		Scheduler_conns:  &[]string{},
+		Attributes_conns: &[]string{},
 	}
 	if cfg, err := dfCgrJsonCfg.ApierCfgJson(); err != nil {
 		t.Error(err)

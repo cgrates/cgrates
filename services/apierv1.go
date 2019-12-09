@@ -32,23 +32,21 @@ import (
 // NewApierV1Service returns the ApierV1 Service
 func NewApierV1Service(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, filterSChan chan *engine.FilterS,
-	server *utils.Server, cacheSChan, schedChan, attrsChan,
-	dispatcherChan chan rpcclient.ClientConnector,
+	server *utils.Server,
 	schedService *SchedulerService,
-	responderService *ResponderService) *ApierV1Service {
+	responderService *ResponderService,
+	internalAPIerV1Chan chan rpcclient.RpcClientConnection,
+	connMgr *engine.ConnManager) *ApierV1Service {
 	return &ApierV1Service{
-		connChan:         make(chan rpcclient.ClientConnector, 1),
+		connChan:         internalAPIerV1Chan,
 		cfg:              cfg,
 		dm:               dm,
 		storDB:           storDB,
 		filterSChan:      filterSChan,
 		server:           server,
-		cacheSChan:       cacheSChan,
-		schedChan:        schedChan,
-		attrsChan:        attrsChan,
-		dispatcherChan:   dispatcherChan,
 		schedService:     schedService,
 		responderService: responderService,
+		connMgr:          connMgr,
 	}
 }
 
@@ -60,12 +58,9 @@ type ApierV1Service struct {
 	storDB           *StorDBService
 	filterSChan      chan *engine.FilterS
 	server           *utils.Server
-	cacheSChan       chan rpcclient.ClientConnector
-	schedChan        chan rpcclient.ClientConnector
-	attrsChan        chan rpcclient.ClientConnector
-	dispatcherChan   chan rpcclient.ClientConnector
 	schedService     *SchedulerService
 	responderService *ResponderService
+	connMgr          *engine.ConnManager
 
 	api      *v1.ApierV1
 	connChan chan rpcclient.ClientConnector
@@ -84,28 +79,6 @@ func (api *ApierV1Service) Start() (err error) {
 	api.Lock()
 	defer api.Unlock()
 
-	// create cache connection
-	var cacheSrpc, schedulerSrpc, attributeSrpc rpcclient.ClientConnector
-	if cacheSrpc, err = NewConnection(api.cfg, api.cacheSChan, api.dispatcherChan, api.cfg.ApierCfg().CachesConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
-			utils.ApierV1, utils.CacheS, err.Error()))
-		return
-	}
-
-	// create scheduler connection
-	if schedulerSrpc, err = NewConnection(api.cfg, api.schedChan, api.dispatcherChan, api.cfg.ApierCfg().SchedulerConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
-			utils.ApierV1, utils.SchedulerS, err.Error()))
-		return
-	}
-
-	// create scheduler connection
-	if attributeSrpc, err = NewConnection(api.cfg, api.attrsChan, api.dispatcherChan, api.cfg.ApierCfg().AttributeSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
-			utils.ApierV1, utils.AttributeS, err.Error()))
-		return
-	}
-
 	api.api = &v1.ApierV1{
 		DataManager:      api.dm.GetDM(),
 		CdrDb:            api.storDB.GetDM(),
@@ -115,10 +88,9 @@ func (api *ApierV1Service) Start() (err error) {
 		SchedulerService: api.schedService,
 		HTTPPoster: engine.NewHTTPPoster(api.cfg.GeneralCfg().HttpSkipTlsVerify,
 			api.cfg.GeneralCfg().ReplyTimeout),
-		FilterS:    filterS,
-		CacheS:     cacheSrpc,
-		SchedulerS: schedulerSrpc,
-		AttributeS: attributeSrpc}
+		FilterS: filterS,
+		ConnMgr: api.connMgr,
+	}
 
 	if !api.cfg.DispatcherSCfg().Enabled {
 		api.server.RpcRegister(api.api)
@@ -141,33 +113,10 @@ func (api *ApierV1Service) GetIntenternalChan() (conn chan rpcclient.ClientConne
 
 // Reload handles the change of config
 func (api *ApierV1Service) Reload() (err error) {
-	var cacheSrpc, schedulerSrpc, attributeSrpc rpcclient.ClientConnector
-	if cacheSrpc, err = NewConnection(api.cfg, api.cacheSChan, api.dispatcherChan, api.cfg.ApierCfg().CachesConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
-			utils.ApierV1, utils.CacheS, err.Error()))
-		return
-	}
-
-	// create scheduler connection
-	if schedulerSrpc, err = NewConnection(api.cfg, api.schedChan, api.dispatcherChan, api.cfg.ApierCfg().SchedulerConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
-			utils.ApierV1, utils.SchedulerS, err.Error()))
-		return
-	}
-
-	// create scheduler connection
-	if attributeSrpc, err = NewConnection(api.cfg, api.attrsChan, api.dispatcherChan, api.cfg.ApierCfg().AttributeSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
-			utils.ApierV1, utils.AttributeS, err.Error()))
-		return
-	}
 	api.Lock()
 	if api.storDB.WasReconnected() { // rewrite the connection if was changed
 		api.api.SetStorDB(api.storDB.GetDM())
 	}
-	api.api.SetAttributeSConnection(attributeSrpc)
-	api.api.SetCacheSConnection(cacheSrpc)
-	api.api.SetSchedulerSConnection(schedulerSrpc)
 	api.Unlock()
 	return
 }

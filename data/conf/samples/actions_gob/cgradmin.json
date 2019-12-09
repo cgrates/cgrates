@@ -26,9 +26,7 @@
 
 "scheduler": {
 	"enabled": true,						// start Scheduler service: <true|false>
-	"cdrs_conns": [
-		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
-	],
+	"cdrs_conns": ["*internal"],
 },
 
 "cdrs": {
@@ -52,9 +50,7 @@
 },
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 }

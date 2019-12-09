@@ -14,6 +14,13 @@
 	"http": ":2080",
 },
 
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],
+	},
+},
+
 
 "stor_db": {
 	"db_password": "CGRateS.org",
@@ -70,9 +77,7 @@
 
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 

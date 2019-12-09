@@ -75,15 +75,9 @@
 },
 
 "apier": {	
-	"caches_conns":[						// connections to CacheS for reloads
-		{"address": "*internal"},
-	],
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"}
-	],						
-	"attributes_conns": [
-		{"address": "*internal"}
-	],					// connections to AttributeS for CDRExporter
+	"caches_conns":["*internal"],
+	"scheduler_conns": ["*internal"],
+	"attributes_conns": ["*internal"],					// connections to AttributeS for CDRExporter
 },
 
 }

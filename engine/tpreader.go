@@ -62,13 +62,13 @@ type TpReader struct {
 	thresholds         []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
 	revDests,
 	acntActionPlans map[string][]string
-	cacheS     rpcclient.ClientConnector
-	schedulerS rpcclient.ClientConnector
+	cacheConns     []string
+	schedulerConns []string
 }
 
 func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
-	cacheS rpcclient.ClientConnector, schedulerS rpcclient.ClientConnector) (*TpReader, error) {
-	var rmtConns, rplConns *rpcclient.RPCPool
+	cacheConns, schedulerConns []string) (*TpReader, error) {
+	var rmtConns, rplConns *rpcclient.RpcClientPool
 	if len(config.CgrConfig().DataDbCfg().RmtConns) != 0 {
 		var err error
 		rmtConns, err = NewRPCPool(rpcclient.PoolFirstPositive, config.CgrConfig().TlsCfg().ClientKey,
@@ -92,12 +92,12 @@ func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
 		}
 	}
 	tpr := &TpReader{
-		tpid:       tpid,
-		timezone:   timezone,
-		dm:         NewDataManager(db, config.CgrConfig().CacheCfg(), rmtConns, rplConns), // ToDo: add ChacheCfg as parameter to the NewTpReader
-		lr:         lr,
-		cacheS:     cacheS,
-		schedulerS: schedulerS,
+		tpid:           tpid,
+		timezone:       timezone,
+		dm:             NewDataManager(db, config.CgrConfig().CacheCfg(), rmtConns, rplConns), // ToDo: add ChacheCfg as parameter to the NewTpReader
+		lr:             lr,
+		cacheConns:     cacheConns,
+		schedulerConns: schedulerConns,
 	}
 	tpr.Init()
 	//add *any and *asap timing tag (in case of no timings file)
@@ -2385,7 +2385,7 @@ func (tpr *TpReader) RemoveFromDatabase(verbose, disable_reverse bool) (err erro
 }
 
 func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *utils.ArgDispatcher) (err error) {
-	if tpr.cacheS == nil {
+	if len(tpr.cacheConns) == 0 {
 		log.Print("Disabled automatic reload")
 		return
 	}
@@ -2450,20 +2450,20 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 	case utils.META_NONE:
 		return
 	case utils.MetaReload:
-		if err = tpr.cacheS.Call(utils.CacheSv1ReloadCache, cacheArgs, &reply); err != nil {
+		if err = connMgr.Call(tpr.cacheConns, utils.CacheSv1ReloadCache, cacheArgs, &reply); err != nil {
 			return
 		}
 	case utils.MetaLoad:
-		if err = tpr.cacheS.Call(utils.CacheSv1LoadCache, cacheArgs, &reply); err != nil {
+		if err = connMgr.Call(tpr.cacheConns, utils.CacheSv1LoadCache, cacheArgs, &reply); err != nil {
 			return
 		}
 	case utils.MetaRemove:
-		if err = tpr.cacheS.Call(utils.CacheSv1FlushCache, cacheArgs, &reply); err != nil {
+		if err = connMgr.Call(tpr.cacheConns, utils.CacheSv1FlushCache, cacheArgs, &reply); err != nil {
 			return
 		}
 	case utils.MetaClear:
 		cacheArgs.FlushAll = true
-		if err = tpr.cacheS.Call(utils.CacheSv1FlushCache, cacheArgs, &reply); err != nil {
+		if err = connMgr.Call(tpr.cacheConns, utils.CacheSv1FlushCache, cacheArgs, &reply); err != nil {
 			return
 		}
 	}
@@ -2498,7 +2498,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 		ArgDispatcher: argDispatcher,
 		CacheIDs:      cacheIDs,
 	}
-	if err = tpr.cacheS.Call(utils.CacheSv1Clear, clearArgs, &reply); err != nil {
+	if err = connMgr.Call(tpr.cacheConns, utils.CacheSv1Clear, clearArgs, &reply); err != nil {
 		log.Printf("WARNING: Got error on cache clear: %s\n", err.Error())
 	}
 
@@ -2523,7 +2523,7 @@ func (tpr *TpReader) ReloadScheduler(verbose bool) (err error) {
 		if verbose {
 			log.Print("Reloading scheduler")
 		}
-		if err = tpr.schedulerS.Call(utils.SchedulerSv1Reload,
+		if err = connMgr.Call(tpr.schedulerConns, utils.SchedulerSv1Reload,
 			new(utils.CGREventWithArgDispatcher), &reply); err != nil {
 			log.Printf("WARNING: Got error on scheduler reload: %s\n", err.Error())
 		}

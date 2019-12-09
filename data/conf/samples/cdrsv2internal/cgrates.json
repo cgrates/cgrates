@@ -15,9 +15,7 @@
 
 "rals": {
 	"enabled": true,						// enable Rater service: <true|false>
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"},
-	],
+	"thresholds_conns": ["*localhost"],
 },
 
 "scheduler": {
@@ -64,9 +62,7 @@
 },
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 }

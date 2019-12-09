@@ -7,6 +7,13 @@
 	"reply_timeout": "30s",
 },
 
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],
+	},
+},
+
 
 "listen": {
 	"rpc_json": ":2012",
@@ -31,18 +38,14 @@
 
 "rals": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "*internal"}
-	],
+	"thresholds_conns": ["*internal"],
 	"remove_expired":false,
 },
 
 
 "scheduler": {
 	"enabled": true,
-	"cdrs_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
+	"cdrs_conns": ["conn1"],
 },
 
 
@@ -127,9 +130,7 @@
 
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 

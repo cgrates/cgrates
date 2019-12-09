@@ -12,6 +12,15 @@
  	"http": "0.0.0.0:3080",				// HTTP listening address
  },
 
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [
+			{"address": "127.0.0.1:3012", "transport":"*json"}
+		],
+	},
+},
+
 
 "stor_db": {								// database used to store offline tariff plans and CDRs
 	"db_password": "CGRateS.org",			// password to use when connecting to stordb
@@ -63,12 +72,8 @@
 },
 
 "apier": {	
-	"caches_conns":[						// connections to CacheS for reloads
-		{"address": "127.0.0.1:3012", "transport": "*json"},
-	],		
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],				
+	"caches_conns":["conn1"],
+	"scheduler_conns": ["*internal"],
 },
 
 

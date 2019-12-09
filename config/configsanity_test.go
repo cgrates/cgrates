@@ -27,24 +27,16 @@ func TestConfigSanityRater(t *testing.T) {
 	cfg, _ := NewDefaultCGRConfig()
 
 	cfg.ralsCfg = &RalsCfg{
-		Enabled: true,
-		StatSConns: []*RemoteHost{
-			&RemoteHost{
-				Address: utils.MetaInternal,
-			},
-		},
+		Enabled:    true,
+		StatSConns: []string{utils.MetaInternal},
 	}
-	expected := "<Stats> not enabled but requested by <RALs> component."
+	expected := "<StatS> not enabled but requested by <RALs> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.statsCfg.Enabled = true
 
-	cfg.ralsCfg.ThresholdSConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
+	cfg.ralsCfg.ThresholdSConns = []string{utils.MetaInternal}
 	expected = "<ThresholdS> not enabled but requested by <RALs> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -578,14 +570,10 @@ func TestConfigSanitySupplierS(t *testing.T) {
 func TestConfigSanityScheduler(t *testing.T) {
 	cfg, _ = NewDefaultCGRConfig()
 	cfg.schedulerCfg = &SchedulerCfg{
-		Enabled: true,
-		CDRsConns: []*RemoteHost{
-			&RemoteHost{
-				Address: utils.MetaInternal,
-			},
-		},
+		Enabled:   true,
+		CDRsConns: []string{utils.MetaInternal},
 	}
-	expected := "CDR Server not enabled but requested by SchedulerS"
+	expected := "<CDRs> not enabled but requested by <SchedulerS> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}

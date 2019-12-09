@@ -28,9 +28,7 @@
 
 "rals": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "*internal"}
-	],
+	"thresholds_conns": ["*internal"],
 },
 
 
@@ -102,8 +100,6 @@
 
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 }

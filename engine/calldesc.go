@@ -57,9 +57,8 @@ var (
 	cdrStorage              CdrStorage
 	debitPeriod             = 10 * time.Second
 	globalRoundingDecimals  = 6
-	thresholdS              rpcclient.ClientConnector // used by RALs to communicate with ThresholdS
-	statS                   rpcclient.ClientConnector
-	schedCdrsConns          rpcclient.ClientConnector
+	connMgr                 *ConnManager
+	schedCdrsConns          rpcclient.RpcClientConnection
 	rpSubjectPrefixMatching bool
 )
 
@@ -68,12 +67,9 @@ func SetDataStorage(dm2 *DataManager) {
 	dm = dm2
 }
 
-func SetThresholdS(thdS rpcclient.ClientConnector) {
-	thresholdS = thdS
-}
-
-func SetStatS(stsS rpcclient.ClientConnector) {
-	statS = stsS
+// SetConnManager is the exported method to set the connectionManager used when operate on an account.
+func SetConnManager(conMgr *ConnManager) {
+	connMgr = conMgr
 }
 
 // SetRoundingDecimals sets the global rounding method and decimal precision for GetCost method

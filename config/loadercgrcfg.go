@@ -18,13 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import "github.com/cgrates/cgrates/utils"
+
 type LoaderCgrCfg struct {
 	TpID           string
 	DataPath       string
 	DisableReverse bool
 	FieldSeparator rune // The separator to use when reading csvs
-	CachesConns    []*RemoteHost
-	SchedulerConns []*RemoteHost
+	CachesConns    []string
+	SchedulerConns []string
 }
 
 func (ld *LoaderCgrCfg) loadFromJsonCfg(jsnCfg *LoaderCfgJson) (err error) {
@@ -45,17 +47,25 @@ func (ld *LoaderCgrCfg) loadFromJsonCfg(jsnCfg *LoaderCfgJson) (err error) {
 		ld.FieldSeparator = rune(sepStr[0])
 	}
 	if jsnCfg.Caches_conns != nil {
-		ld.CachesConns = make([]*RemoteHost, len(*jsnCfg.Caches_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Caches_conns {
-			ld.CachesConns[idx] = NewDfltRemoteHost()
-			ld.CachesConns[idx].loadFromJsonCfg(jsnHaCfg)
+		ld.CachesConns = make([]string, len(*jsnCfg.Caches_conns))
+		for idx, conn := range *jsnCfg.Caches_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if conn == utils.MetaInternal {
+				ld.CachesConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
+			} else {
+				ld.CachesConns[idx] = conn
+			}
 		}
 	}
 	if jsnCfg.Scheduler_conns != nil {
-		ld.SchedulerConns = make([]*RemoteHost, len(*jsnCfg.Scheduler_conns))
-		for idx, jsnScheHaCfg := range *jsnCfg.Scheduler_conns {
-			ld.SchedulerConns[idx] = NewDfltRemoteHost()
-			ld.SchedulerConns[idx].loadFromJsonCfg(jsnScheHaCfg)
+		ld.SchedulerConns = make([]string, len(*jsnCfg.Caches_conns))
+		for idx, conn := range *jsnCfg.Caches_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if conn == utils.MetaInternal {
+				ld.SchedulerConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)
+			} else {
+				ld.SchedulerConns[idx] = conn
+			}
 		}
 	}
 	return nil

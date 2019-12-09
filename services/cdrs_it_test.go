@@ -70,10 +70,9 @@ func TestCdrsReload(t *testing.T) {
 	stordb := NewStorDBService(cfg)
 	chrS := NewChargerService(cfg, db, chS, filterSChan, server, nil, nil)
 	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.RpcClientConnection, 1), nil)
-	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan rpcclient.RpcClientConnection, 1))
 	ralS := NewRalService(cfg, db, stordb, chS, filterSChan, server,
-		tS.GetIntenternalChan(), internalChan, cacheSChan, internalChan, internalChan,
-		internalChan, schS, engineShutdown)
+		make(chan rpcclient.RpcClientConnection, 1), make(chan rpcclient.RpcClientConnection, 1), make(chan rpcclient.RpcClientConnection, 1), make(chan rpcclient.RpcClientConnection, 1),
+		schS, engineShutdown, nil)
 	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
 		make(chan rpcclient.ClientConnector, 1),
 		chrS.GetIntenternalChan(), ralS.GetResponder().GetIntenternalChan(),

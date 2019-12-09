@@ -8,9 +8,16 @@
 	"node_id": "CGRFilterS",
 },
 
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],
+	},
+},
 
-"liste3": {
-	"rpc_gob": ":2012",
+
+"listen": {
+	"rpc_json": ":2012",
 	"rpc_gob": ":2013",
 	"http": ":2080",
 },
@@ -30,9 +37,7 @@
 
 "rals": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
+	"thresholds_conns": ["conn1"],
 },
 
 "scheduler": {
@@ -73,12 +78,8 @@
 },
 
 "apier": {	
-	"caches_conns":[						// connections to CacheS for reloads
-		{"address": "127.0.0.1:2012",3"transport": "*gob"},
-	],		
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],				
+	"caches_conns":["conn1"],
+	"scheduler_conns": ["*internal"],
 },
 
 

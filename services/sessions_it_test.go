@@ -73,8 +73,8 @@ func TestSessionSReload(t *testing.T) {
 	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.RpcClientConnection, 1), nil)
 	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.RpcClientConnection, 1), nil)
 	ralS := NewRalService(cfg, db, stordb, chS, filterSChan, server,
-		/*tS*/ internalChan, internalChan, cacheSChan, internalChan, internalChan,
-		internalChan, schS, engineShutdown)
+		make(chan rpcclient.RpcClientConnection, 1), make(chan rpcclient.RpcClientConnection, 1), make(chan rpcclient.RpcClientConnection, 1), make(chan rpcclient.RpcClientConnection, 1),
+		schS, engineShutdown, nil)
 	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
 		make(chan rpcclient.ClientConnector, 1),
 		chrS.GetIntenternalChan(), ralS.GetResponder().GetIntenternalChan(),

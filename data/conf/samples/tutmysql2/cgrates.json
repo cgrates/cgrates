@@ -23,20 +23,14 @@
 
 "scheduler": {
 	"enabled": true,
-	"cdrs_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"},
-	],
+	"cdrs_conns": ["*localhost"],
 },
 
 
 "rals": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"},
-	],
-	"stats_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"},
-	],
+	"thresholds_conns": ["*localhost"],
+	"stats_conns": ["*localhost"],
 },
 
 
@@ -133,8 +127,6 @@
 
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*localhost"],
 },
 }

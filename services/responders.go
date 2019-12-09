@@ -30,28 +30,22 @@ import (
 
 // NewResponderService returns the Resonder Service
 func NewResponderService(cfg *config.CGRConfig, server *utils.Server,
-	thsChan, stsChan, dispatcherChan chan rpcclient.ClientConnector,
+	internalRALsChan chan rpcclient.RpcClientConnection,
 	exitChan chan bool) *ResponderService {
 	return &ResponderService{
-		connChan:       make(chan rpcclient.ClientConnector, 1),
-		cfg:            cfg,
-		server:         server,
-		thsChan:        thsChan,
-		stsChan:        stsChan,
-		dispatcherChan: dispatcherChan,
-		exitChan:       exitChan,
+		connChan: internalRALsChan,
+		cfg:      cfg,
+		server:   server,
+		exitChan: exitChan,
 	}
 }
 
 // ResponderService implements Service interface
 type ResponderService struct {
 	sync.RWMutex
-	cfg            *config.CGRConfig
-	server         *utils.Server
-	thsChan        chan rpcclient.ClientConnector
-	stsChan        chan rpcclient.ClientConnector
-	dispatcherChan chan rpcclient.ClientConnector
-	exitChan       chan bool
+	cfg      *config.CGRConfig
+	server   *utils.Server
+	exitChan chan bool
 
 	resp     *engine.Responder
 	connChan chan rpcclient.ClientConnector
@@ -64,23 +58,6 @@ func (resp *ResponderService) Start() (err error) {
 		return fmt.Errorf("service aleady running")
 	}
 
-	var thdS, stats rpcclient.ClientConnector
-	if thdS, err = NewConnection(resp.cfg, resp.thsChan, resp.dispatcherChan, resp.cfg.RalsCfg().ThresholdSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
-			utils.RALService, utils.ThresholdS, err.Error()))
-		return
-	}
-	if stats, err = NewConnection(resp.cfg, resp.stsChan, resp.dispatcherChan, resp.cfg.RalsCfg().StatSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
-			utils.RALService, utils.StatS, err.Error()))
-		return
-	}
-	if thdS != nil {
-		engine.SetThresholdS(thdS) // temporary architectural fix until we will have separate AccountS
-	}
-	if stats != nil {
-		engine.SetStatS(stats)
-	}
 	resp.Lock()
 	defer resp.Unlock()
 	resp.resp = &engine.Responder{
@@ -105,25 +82,8 @@ func (resp *ResponderService) GetIntenternalChan() (conn chan rpcclient.ClientCo
 
 // Reload handles the change of config
 func (resp *ResponderService) Reload() (err error) {
-	var thdS, stats rpcclient.ClientConnector
-	if thdS, err = NewConnection(resp.cfg, resp.thsChan, resp.dispatcherChan, resp.cfg.RalsCfg().ThresholdSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
-			utils.RALService, utils.ThresholdS, err.Error()))
-		return
-	}
-	if stats, err = NewConnection(resp.cfg, resp.stsChan, resp.dispatcherChan, resp.cfg.RalsCfg().StatSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
-			utils.RALService, utils.StatS, err.Error()))
-		return
-	}
 	resp.Lock()
 	resp.resp.MaxComputedUsage = resp.cfg.RalsCfg().MaxComputedUsage // this may cause concurrency problems
-	if thdS != nil {
-		engine.SetThresholdS(thdS) // temporary architectural fix until we will have separate AccountS
-	}
-	if stats != nil {
-		engine.SetStatS(stats)
-	}
 	resp.Unlock()
 	return
 }

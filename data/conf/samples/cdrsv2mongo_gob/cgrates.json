@@ -8,6 +8,15 @@
     "log_level": 7,
 },
 
+
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],
+	},
+},
+
+
 "stor_db": {
 	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
 	"db_port": 27017, 						// the port to reach the stordb
@@ -16,9 +25,7 @@
 
 "rals": {
 	"enabled": true,						// enable Rater service: <true|false>
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
+	"thresholds_conns": ["conn1"],
 },
 
 "scheduler": {
@@ -65,9 +72,7 @@
 },
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 }

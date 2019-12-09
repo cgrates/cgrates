@@ -21,6 +21,15 @@
 	"db_name": "11", 						// data_db database name to connect to
 },
 
+
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:6012", "transport":"*json"}],
+	},
+},
+
+
 "stor_db": {
 	"db_password": "CGRateS.org",
 },
@@ -92,12 +101,8 @@
 },
 
 "apier": {	
-	"caches_conns":[						// connections to CacheS for reloads
-		{"address": "127.0.0.1:6012", "transport": "*json"},
-	],				
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],		
+	"caches_conns":["conn1"],
+	"scheduler_conns": ["*internal"],
 },
 
 }

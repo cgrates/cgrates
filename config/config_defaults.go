@@ -808,12 +808,8 @@ const CGRATES_CFG_JSON = `
 	"data_path": "./",						// path towards tariff plan files
 	"disable_reverse": false,				// disable reverse computing
 	"field_separator": ",",					// separator used in case of csv files
-	"caches_conns":[						// connections to CacheS for reloads
-		{"address": "127.0.0.1:2012", "transport": "*json"}
-	],
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "127.0.0.1:2012", "transport": "*json"}
-	],
+	"caches_conns":["*localhost"],
+	"scheduler_conns": ["*localhost"],
 },
 
 
@@ -850,9 +846,7 @@ const CGRATES_CFG_JSON = `
 
 
 "apier": {
-	"caches_conns":[						// connections to CacheS for reloads
-		{"address": "*internal"},
-	],
+	"caches_conns":["*internal"],
 	"scheduler_conns": [],					// connections to SchedulerS for reloads
 	"attributes_conns": [],					// connections to AttributeS for CDRExporter
 },

@@ -19,9 +19,7 @@
     
     "scheduler": {
         "enabled": true,
-        "cdrs_conns": [
-            {"address": "*internal"},
-        ],
+        "cdrs_conns": ["*internal"],
     },
     
     
@@ -83,8 +81,6 @@
     
     
     "apier": {
-        "scheduler_conns": [					// connections to SchedulerS for reloads
-            {"address": "*internal"},
-        ],
+        "scheduler_conns": ["*internal"],
     },
     }

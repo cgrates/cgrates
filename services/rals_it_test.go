@@ -70,8 +70,8 @@ func TestRalsReload(t *testing.T) {
 	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.RpcClientConnection, 1), nil)
 	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan rpcclient.RpcClientConnection, 1))
 	ralS := NewRalService(cfg, db, stordb, chS, filterSChan, server,
-		tS.GetIntenternalChan(), internalChan, cacheSChan, internalChan, internalChan,
-		internalChan, schS, engineShutdown)
+		make(chan rpcclient.RpcClientConnection, 1), make(chan rpcclient.RpcClientConnection, 1), make(chan rpcclient.RpcClientConnection, 1), make(chan rpcclient.RpcClientConnection, 1),
+		schS, engineShutdown, nil)
 	srvMngr.AddServices(NewConnManagerService(cfg, nil), ralS, schS, tS, NewLoaderService(cfg, db, filterSChan, server, cacheSChan, nil, engineShutdown), db, stordb)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
