@@ -33,9 +33,9 @@ import (
 // NewChargerService returns the Charger Service
 func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS, server *utils.Server,
-	attrsChan, dispatcherChan chan rpcclient.RpcClientConnection) servmanager.Service {
+	attrsChan, dispatcherChan chan rpcclient.ClientConnector) servmanager.Service {
 	return &ChargerService{
-		connChan:       make(chan rpcclient.RpcClientConnection, 1),
+		connChan:       make(chan rpcclient.ClientConnector, 1),
 		cfg:            cfg,
 		dm:             dm,
 		cacheS:         cacheS,
@@ -54,12 +54,12 @@ type ChargerService struct {
 	cacheS         *engine.CacheS
 	filterSChan    chan *engine.FilterS
 	server         *utils.Server
-	attrsChan      chan rpcclient.RpcClientConnection
-	dispatcherChan chan rpcclient.RpcClientConnection
+	attrsChan      chan rpcclient.ClientConnector
+	dispatcherChan chan rpcclient.ClientConnector
 
 	chrS     *engine.ChargerService
 	rpc      *v1.ChargerSv1
-	connChan chan rpcclient.RpcClientConnection
+	connChan chan rpcclient.ClientConnector
 }
 
 // Start should handle the sercive start
@@ -74,7 +74,7 @@ func (chrS *ChargerService) Start() (err error) {
 	filterS := <-chrS.filterSChan
 	chrS.filterSChan <- filterS
 
-	var attrSConn rpcclient.RpcClientConnection
+	var attrSConn rpcclient.ClientConnector
 	if attrSConn, err = NewConnection(chrS.cfg, chrS.attrsChan, chrS.dispatcherChan, chrS.cfg.ChargerSCfg().AttributeSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.ChargerS, utils.AttributeS, err.Error()))
@@ -98,13 +98,13 @@ func (chrS *ChargerService) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (chrS *ChargerService) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (chrS *ChargerService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return chrS.connChan
 }
 
 // Reload handles the change of config
 func (chrS *ChargerService) Reload() (err error) {
-	var attrSConn rpcclient.RpcClientConnection
+	var attrSConn rpcclient.ClientConnector
 	if attrSConn, err = NewConnection(chrS.cfg, chrS.attrsChan, chrS.dispatcherChan, chrS.cfg.ChargerSCfg().AttributeSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.ChargerS, utils.AttributeS, err.Error()))

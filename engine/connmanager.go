@@ -25,28 +25,28 @@ import (
 )
 
 // NewConnManager returns the Connection Manager
-func NewConnManager(cfg *config.CGRConfig, rpcInternal map[string]chan rpcclient.RpcClientConnection) (cM *ConnManager) {
+func NewConnManager(cfg *config.CGRConfig, rpcInternal map[string]chan rpcclient.ClientConnector) (cM *ConnManager) {
 	return &ConnManager{cfg: cfg, rpcInternal: rpcInternal}
 }
 
 //ConnManager handle the RPC connections
 type ConnManager struct {
 	cfg         *config.CGRConfig
-	rpcInternal map[string]chan rpcclient.RpcClientConnection
+	rpcInternal map[string]chan rpcclient.ClientConnector
 }
 
 //getConn is used to retrieves a connection from cache
 //in case this doesn't exist create it and cache it
-func (cM *ConnManager) getConn(connID string) (connPool *rpcclient.RpcClientPool, err error) {
+func (cM *ConnManager) getConn(connID string) (connPool *rpcclient.RPCPool, err error) {
 	//try to get the connection from cache
 	if x, ok := Cache.Get(utils.CacheRPCConnections, connID); ok {
 		if x == nil {
 			return nil, utils.ErrNotFound
 		}
-		return x.(*rpcclient.RpcClientPool), nil
+		return x.(*rpcclient.RPCPool), nil
 	}
 	// in case we don't find in cache create the connection and add this in cache
-	var intChan chan rpcclient.RpcClientConnection
+	var intChan chan rpcclient.ClientConnector
 	var connCfg *config.RPCConn
 	if internalChan, has := cM.rpcInternal[connID]; has {
 		connCfg = cM.cfg.RPCConns()[utils.MetaInternal]
@@ -68,7 +68,7 @@ func (cM *ConnManager) getConn(connID string) (connPool *rpcclient.RpcClientPool
 }
 
 func (cM *ConnManager) Call(connIDs []string, method string, arg, reply interface{}) (err error) {
-	var conn *rpcclient.RpcClientPool
+	var conn *rpcclient.RPCPool
 	for _, connID := range connIDs {
 		if conn, err = cM.getConn(connID); err != nil {
 			continue

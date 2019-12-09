@@ -130,7 +130,7 @@ type DispatcherHost struct {
 	Tenant  string
 	ID      string
 	Conns   []*config.RemoteHost
-	rpcConn rpcclient.RpcClientConnection
+	rpcConn rpcclient.ClientConnector
 }
 
 func (dH *DispatcherHost) TenantID() string {

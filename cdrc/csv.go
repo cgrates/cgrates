@@ -34,7 +34,7 @@ import (
 func NewCsvRecordsProcessor(csvReader *csv.Reader, timezone, fileName string,
 	dfltCdrcCfg *config.CdrcCfg, cdrcCfgs []*config.CdrcCfg,
 	httpSkipTlsCheck bool, cacheDumpFields []*config.FCTemplate,
-	filterS *engine.FilterS, cdrs rpcclient.RpcClientConnection,
+	filterS *engine.FilterS, cdrs rpcclient.ClientConnector,
 	unp *UnpairedRecordsCache, prt *PartialRecordsCache) *CsvRecordsProcessor {
 	return &CsvRecordsProcessor{csvReader: csvReader,
 		timezone: timezone, fileName: fileName,

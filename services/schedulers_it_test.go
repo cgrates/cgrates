@@ -45,7 +45,7 @@ func TestSchedulerSReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheActionPlans))
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
-	internalCdrSChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalCdrSChan := make(chan rpcclient.ClientConnector, 1)
 	internalCdrSChan <- nil
 	db := NewDataDBService(cfg)
 	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, internalCdrSChan, nil)

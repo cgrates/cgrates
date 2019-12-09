@@ -33,7 +33,7 @@ import (
 
 // NewStatService initializes a StatService
 func NewStatService(dm *DataManager, cgrcfg *config.CGRConfig,
-	thdS rpcclient.RpcClientConnection, filterS *FilterS) (ss *StatService, err error) {
+	thdS rpcclient.ClientConnector, filterS *FilterS) (ss *StatService, err error) {
 	if thdS != nil && reflect.ValueOf(thdS).IsNil() { // fix nil value in interface
 		thdS = nil
 	}
@@ -50,7 +50,7 @@ func NewStatService(dm *DataManager, cgrcfg *config.CGRConfig,
 // StatService builds stats for events
 type StatService struct {
 	dm               *DataManager
-	thdS             rpcclient.RpcClientConnection // rpc connection towards ThresholdS
+	thdS             rpcclient.ClientConnector // rpc connection towards ThresholdS
 	filterS          *FilterS
 	cgrcfg           *config.CGRConfig
 	loopStoped       chan struct{}
@@ -222,7 +222,7 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 	return
 }
 
-// Call implements rpcclient.RpcClientConnection interface for internal RPC
+// Call implements rpcclient.ClientConnector interface for internal RPC
 // here for cases when passing StatsService as rpccclient.RpcClientConnection
 func (ss *StatService) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.RPCCall(ss, serviceMethod, args, reply)
@@ -428,6 +428,6 @@ func (sS *StatService) StartLoop() {
 
 // SetThresholdConnection sets the new connection to the threshold service
 // only used on reload
-func (sS *StatService) SetThresholdConnection(thdS rpcclient.RpcClientConnection) {
+func (sS *StatService) SetThresholdConnection(thdS rpcclient.ClientConnector) {
 	sS.thdS = thdS
 }

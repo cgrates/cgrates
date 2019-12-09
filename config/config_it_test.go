@@ -42,7 +42,7 @@ func TestNewCgrJsonCfgFromHttp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err = net.DialTimeout("tcp", addr, time.Second); err != nil { // check if site is up
+	if _, err = net.DialTimeout(utils.TCP, addr, time.Second); err != nil { // check if site is up
 		return
 	}
 
@@ -70,7 +70,7 @@ func TestNewCGRConfigFromPath(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err = net.DialTimeout("tcp", addr, time.Second); err != nil { // check if site is up
+	if _, err = net.DialTimeout(utils.TCP, addr, time.Second); err != nil { // check if site is up
 		return
 	}
 

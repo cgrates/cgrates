@@ -30,21 +30,21 @@ import (
 
 func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connAttempts, reconnects int,
 	connectTimeout, replyTimeout time.Duration, rpcConnCfgs []*config.RemoteHost,
-	internalConnChan chan rpcclient.RpcClientConnection, lazyConnect bool) (*rpcclient.RpcClientPool, error) {
-	var rpcClient *rpcclient.RpcClient
+	internalConnChan chan rpcclient.ClientConnector, lazyConnect bool) (*rpcclient.RPCPool, error) {
+	var rpcClient *rpcclient.RPCClient
 	var err error
-	rpcPool := rpcclient.NewRpcClientPool(dispatchStrategy, replyTimeout)
+	rpcPool := rpcclient.NewRPCPool(dispatchStrategy, replyTimeout)
 	atLestOneConnected := false // If one connected we don't longer return errors
 	for _, rpcConnCfg := range rpcConnCfgs {
 		if rpcConnCfg.Address == utils.MetaInternal {
-			rpcClient, err = rpcclient.NewRpcClient("", "", rpcConnCfg.TLS, keyPath, certPath, caPath, connAttempts,
-				reconnects, connectTimeout, replyTimeout, rpcclient.INTERNAL_RPC, internalConnChan, lazyConnect)
+			rpcClient, err = rpcclient.NewRPCClient("", "", rpcConnCfg.TLS, keyPath, certPath, caPath, connAttempts,
+				reconnects, connectTimeout, replyTimeout, rpcclient.InternalRPC, internalConnChan, lazyConnect)
 		} else if utils.SliceHasMember([]string{utils.EmptyString, utils.MetaGOB, utils.MetaJSON}, rpcConnCfg.Transport) {
-			codec := utils.GOB
+			codec := rpcclient.GOBrpc
 			if rpcConnCfg.Transport != "" {
-				codec = rpcConnCfg.Transport[1:] // Transport contains always * before codec understood by rpcclient
+				codec = rpcConnCfg.Transport
 			}
-			rpcClient, err = rpcclient.NewRpcClient("tcp", rpcConnCfg.Address, rpcConnCfg.TLS, keyPath, certPath, caPath,
+			rpcClient, err = rpcclient.NewRPCClient(utils.TCP, rpcConnCfg.Address, rpcConnCfg.TLS, keyPath, certPath, caPath,
 				connAttempts, reconnects, connectTimeout, replyTimeout, codec, nil, lazyConnect)
 		} else {
 			return nil, fmt.Errorf("Unsupported transport: <%s>", rpcConnCfg.Transport)
@@ -63,22 +63,22 @@ func NewRPCPool(dispatchStrategy string, keyPath, certPath, caPath string, connA
 var IntRPC *RPCClientSet
 
 func NewRPCClientSet() (s *RPCClientSet) {
-	return &RPCClientSet{set: make(map[string]*rpcclient.RpcClient)}
+	return &RPCClientSet{set: make(map[string]*rpcclient.RPCClient)}
 }
 
 type RPCClientSet struct {
-	set map[string]*rpcclient.RpcClient
+	set map[string]*rpcclient.RPCClient
 }
 
-func (s *RPCClientSet) AddRPCClient(name string, rpc *rpcclient.RpcClient) {
+func (s *RPCClientSet) AddRPCClient(name string, rpc *rpcclient.RPCClient) {
 	s.set[name] = rpc
 }
 
 func (s *RPCClientSet) AddRPCConnection(name, transport, addr string, tls bool,
 	key_path, cert_path, ca_path string, connectAttempts, reconnects int,
 	connTimeout, replyTimeout time.Duration, codec string,
-	internalChan chan rpcclient.RpcClientConnection, lazyConnect bool) error {
-	rpc, err := rpcclient.NewRpcClient(transport, addr, tls, key_path, cert_path,
+	internalChan chan rpcclient.ClientConnector, lazyConnect bool) error {
+	rpc, err := rpcclient.NewRPCClient(transport, addr, tls, key_path, cert_path,
 		ca_path, connectAttempts, reconnects, connTimeout, replyTimeout,
 		codec, internalChan, lazyConnect)
 	if err != nil {
@@ -88,19 +88,19 @@ func (s *RPCClientSet) AddRPCConnection(name, transport, addr string, tls bool,
 	return nil
 }
 
-func (s *RPCClientSet) AddInternalRPCClient(name string, connChan chan rpcclient.RpcClientConnection) {
+func (s *RPCClientSet) AddInternalRPCClient(name string, connChan chan rpcclient.ClientConnector) {
 	err := s.AddRPCConnection(name, utils.EmptyString, utils.EmptyString,
 		false, utils.EmptyString, utils.EmptyString, utils.EmptyString,
 		config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
 		config.CgrConfig().GeneralCfg().ConnectTimeout, config.CgrConfig().GeneralCfg().ReplyTimeout,
-		rpcclient.INTERNAL_RPC, connChan, true)
+		rpcclient.InternalRPC, connChan, true)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<InternalRCP> Error adding %s to the set: %v", name, err.Error()))
 	}
 }
 
-func (s *RPCClientSet) GetInternalChanel() chan rpcclient.RpcClientConnection {
-	connChan := make(chan rpcclient.RpcClientConnection, 1)
+func (s *RPCClientSet) GetInternalChanel() chan rpcclient.ClientConnector {
+	connChan := make(chan rpcclient.ClientConnector, 1)
 	connChan <- s
 	return connChan
 }

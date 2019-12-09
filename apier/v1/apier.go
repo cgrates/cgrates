@@ -47,16 +47,16 @@ type ApierV1 struct {
 	DataManager      *engine.DataManager
 	Config           *config.CGRConfig
 	Responder        *engine.Responder
-	CDRs             rpcclient.RpcClientConnection // FixMe: populate it from cgr-engine
-	SchedulerService SchedulerGeter                // Need to have them capitalize so we can export in V2
+	CDRs             rpcclient.ClientConnector // FixMe: populate it from cgr-engine
+	SchedulerService SchedulerGeter            // Need to have them capitalize so we can export in V2
 	HTTPPoster       *engine.HTTPPoster
 	FilterS          *engine.FilterS //Used for CDR Exporter
-	CacheS           rpcclient.RpcClientConnection
-	SchedulerS       rpcclient.RpcClientConnection
-	AttributeS       rpcclient.RpcClientConnection
+	CacheS           rpcclient.ClientConnector
+	SchedulerS       rpcclient.ClientConnector
+	AttributeS       rpcclient.ClientConnector
 }
 
-// Call implements rpcclient.RpcClientConnection interface for internal RPC
+// Call implements rpcclient.ClientConnector interface for internal RPC
 func (apiv1 *ApierV1) Call(serviceMethod string,
 	args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(apiv1, serviceMethod, args, reply)
@@ -1375,19 +1375,19 @@ func (apiv1 *ApierV1) GetRatingPlanIDs(args utils.TenantArgWithPaginator, attrPr
 
 // SetAttributeSConnection sets the new connection to the attribute service
 // only used on reload
-func (apiv1 *ApierV1) SetAttributeSConnection(attrS rpcclient.RpcClientConnection) {
+func (apiv1 *ApierV1) SetAttributeSConnection(attrS rpcclient.ClientConnector) {
 	apiv1.AttributeS = attrS
 }
 
 // SetCacheSConnection sets the new connection to the cache service
 // only used on reload
-func (apiv1 *ApierV1) SetCacheSConnection(chS rpcclient.RpcClientConnection) {
+func (apiv1 *ApierV1) SetCacheSConnection(chS rpcclient.ClientConnector) {
 	apiv1.CacheS = chS
 }
 
 // SetSchedulerSConnection sets the new connection to the scheduler service
 // only used on reload
-func (apiv1 *ApierV1) SetSchedulerSConnection(schS rpcclient.RpcClientConnection) {
+func (apiv1 *ApierV1) SetSchedulerSConnection(schS rpcclient.ClientConnector) {
 	apiv1.SchedulerS = schS
 }
 

@@ -30,7 +30,7 @@ import (
 )
 
 // NewHttpAgent will construct a HTTPAgent
-func NewHTTPAgent(sessionS rpcclient.RpcClientConnection,
+func NewHTTPAgent(sessionS rpcclient.ClientConnector,
 	filterS *engine.FilterS, dfltTenant, reqPayload, rplyPayload string,
 	reqProcessors []*config.RequestProcessor) *HTTPAgent {
 	return &HTTPAgent{sessionS: sessionS, filterS: filterS,
@@ -41,7 +41,7 @@ func NewHTTPAgent(sessionS rpcclient.RpcClientConnection,
 
 // HTTPAgent is a handler for HTTP requests
 type HTTPAgent struct {
-	sessionS rpcclient.RpcClientConnection
+	sessionS rpcclient.ClientConnector
 	filterS  *engine.FilterS
 	dfltTenant,
 	reqPayload,

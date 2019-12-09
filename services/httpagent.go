@@ -32,7 +32,7 @@ import (
 
 // NewHTTPAgent returns the HTTP Agent
 func NewHTTPAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	sSChan, dispatcherChan chan rpcclient.RpcClientConnection,
+	sSChan, dispatcherChan chan rpcclient.ClientConnector,
 	server *utils.Server) servmanager.Service {
 	return &HTTPAgent{
 		cfg:            cfg,
@@ -48,8 +48,8 @@ type HTTPAgent struct {
 	sync.RWMutex
 	cfg            *config.CGRConfig
 	filterSChan    chan *engine.FilterS
-	sSChan         chan rpcclient.RpcClientConnection
-	dispatcherChan chan rpcclient.RpcClientConnection
+	sSChan         chan rpcclient.ClientConnector
+	dispatcherChan chan rpcclient.ClientConnector
 	server         *utils.Server
 
 	ha *agents.HTTPAgent
@@ -68,7 +68,7 @@ func (ha *HTTPAgent) Start() (err error) {
 	defer ha.Unlock()
 	utils.Logger.Info("Starting HTTP agent")
 	for _, agntCfg := range ha.cfg.HttpAgentCfg() {
-		var sS rpcclient.RpcClientConnection
+		var sS rpcclient.ClientConnector
 		if sS, err = NewConnection(ha.cfg, ha.sSChan, ha.dispatcherChan, agntCfg.SessionSConns); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> could not connect to %s, error: %s",
 				utils.HTTPAgent, utils.SessionS, err.Error()))
@@ -82,7 +82,7 @@ func (ha *HTTPAgent) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (ha *HTTPAgent) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (ha *HTTPAgent) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return nil
 }
 

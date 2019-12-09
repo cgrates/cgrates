@@ -885,7 +885,7 @@ func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 	testDA := &DiameterAgentCfg{
 		Enabled:          false,
 		Listen:           "127.0.0.1:3868",
-		ListenNet:        "tcp",
+		ListenNet:        utils.TCP,
 		DictionariesPath: "/usr/share/cgrates/diameter/dict/",
 		SessionSConns: []*RemoteHost{
 			{Address: "*internal"}},
@@ -1915,7 +1915,7 @@ func TestRpcConnsDefaults(t *testing.T) {
 	eCfg := make(map[string]*RPCConn)
 	// hardoded the *internal and *localhost connections
 	eCfg[utils.MetaInternal] = &RPCConn{
-		Strategy: rpcclient.POOL_FIRST,
+		Strategy: rpcclient.PoolFirst,
 		PoolSize: 0,
 		Conns: []*RemoteHost{
 			&RemoteHost{
@@ -1924,7 +1924,7 @@ func TestRpcConnsDefaults(t *testing.T) {
 		},
 	}
 	eCfg[utils.MetaLocalHost] = &RPCConn{
-		Strategy: rpcclient.POOL_FIRST,
+		Strategy: rpcclient.PoolFirst,
 		PoolSize: 0,
 		Conns: []*RemoteHost{
 			&RemoteHost{

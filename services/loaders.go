@@ -34,10 +34,10 @@ import (
 // NewLoaderService returns the Loader Service
 func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS, server *utils.Server,
-	cacheSChan, dispatcherChan chan rpcclient.RpcClientConnection,
+	cacheSChan, dispatcherChan chan rpcclient.ClientConnector,
 	exitChan chan bool) servmanager.Service {
 	return &LoaderService{
-		connChan:       make(chan rpcclient.RpcClientConnection, 1),
+		connChan:       make(chan rpcclient.ClientConnector, 1),
 		cfg:            cfg,
 		dm:             dm,
 		cacheSChan:     cacheSChan,
@@ -55,13 +55,13 @@ type LoaderService struct {
 	dm             *DataDBService
 	filterSChan    chan *engine.FilterS
 	server         *utils.Server
-	cacheSChan     chan rpcclient.RpcClientConnection
-	dispatcherChan chan rpcclient.RpcClientConnection
+	cacheSChan     chan rpcclient.ClientConnector
+	dispatcherChan chan rpcclient.ClientConnector
 	exitChan       chan bool
 
 	ldrs     *loaders.LoaderService
 	rpc      *v1.LoaderSv1
-	connChan chan rpcclient.RpcClientConnection
+	connChan chan rpcclient.ClientConnector
 }
 
 // Start should handle the sercive start
@@ -92,7 +92,7 @@ func (ldrs *LoaderService) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (ldrs *LoaderService) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (ldrs *LoaderService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return ldrs.connChan
 }
 

@@ -121,7 +121,7 @@ func testTPSharedGroupsStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTPSharedGroupsRpcConn(t *testing.T) {
 	var err error
-	tpSharedGroupRPC, err = jsonrpc.Dial("tcp", tpSharedGroupCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpSharedGroupRPC, err = jsonrpc.Dial(utils.TCP, tpSharedGroupCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

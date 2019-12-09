@@ -33,7 +33,7 @@ type AnalyzerSv1 struct {
 	aS *analyzers.AnalyzerService
 }
 
-// Call implements rpcclient.RpcClientConnection interface for internal RPC
+// Call implements rpcclient.ClientConnector interface for internal RPC
 func (aSv1 *AnalyzerSv1) Call(serviceMethod string,
 	args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(aSv1, serviceMethod, args, reply)

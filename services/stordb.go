@@ -78,7 +78,7 @@ func (db *StorDBService) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (db *StorDBService) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (db *StorDBService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return nil
 }
 

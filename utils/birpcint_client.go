@@ -28,7 +28,7 @@ import (
 
 // NewBiJSONrpcClient will create a bidirectional JSON client connection
 func NewBiJSONrpcClient(addr string, handlers map[string]interface{}) (*rpc2.Client, error) {
-	conn, err := net.Dial("tcp", addr)
+	conn, err := net.Dial(TCP, addr)
 	if err != nil {
 		return nil, err
 	}
@@ -42,8 +42,8 @@ func NewBiJSONrpcClient(addr string, handlers map[string]interface{}) (*rpc2.Cli
 
 // Interface which the server needs to work as BiRPCServer
 type BiRPCServer interface {
-	Call(string, interface{}, interface{}) error // So we can use it also as rpcclient.RpcClientConnection
-	CallBiRPC(rpcclient.RpcClientConnection, string, interface{}, interface{}) error
+	Call(string, interface{}, interface{}) error // So we can use it also as rpcclient.ClientConnector
+	CallBiRPC(rpcclient.ClientConnector, string, interface{}, interface{}) error
 }
 
 func NewBiRPCInternalClient(serverConn BiRPCServer) *BiRPCInternalClient {
@@ -53,15 +53,15 @@ func NewBiRPCInternalClient(serverConn BiRPCServer) *BiRPCInternalClient {
 // Need separate client from the original RpcClientConnection since diretly passing the server is not enough without passing the client's reference
 type BiRPCInternalClient struct {
 	serverConn BiRPCServer
-	clntConn   rpcclient.RpcClientConnection // conn to reach client and do calls over it
+	clntConn   rpcclient.ClientConnector // conn to reach client and do calls over it
 }
 
 // Used in case when clientConn is not available at init time (eg: SMGAsterisk who needs the biRPCConn at initialization)
-func (clnt *BiRPCInternalClient) SetClientConn(clntConn rpcclient.RpcClientConnection) {
+func (clnt *BiRPCInternalClient) SetClientConn(clntConn rpcclient.ClientConnector) {
 	clnt.clntConn = clntConn
 }
 
-// Part of rpcclient.RpcClientConnection interface
+// Part of rpcclient.ClientConnector interface
 func (clnt *BiRPCInternalClient) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return clnt.serverConn.CallBiRPC(clnt.clntConn, serviceMethod, args, reply)
 }

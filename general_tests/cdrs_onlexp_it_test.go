@@ -43,7 +43,7 @@ import (
 var (
 	cdrsMasterCfgPath, cdrsSlaveCfgPath string
 	cdrsMasterCfg, cdrsSlaveCfg         *config.CGRConfig
-	cdrsMasterRpc                       *rpcclient.RpcClient
+	cdrsMasterRpc                       *rpcclient.RPCClient
 
 	sTestsCDRsOnExp = []func(t *testing.T){
 		testCDRsOnExpInitConfig,
@@ -142,8 +142,8 @@ func testCDRsOnExpAMQPQueuesCreation(t *testing.T) {
 // Connect rpc client to rater
 func testCDRsOnExpInitMasterRPC(t *testing.T) {
 	var err error
-	cdrsMasterRpc, err = rpcclient.NewRpcClient("tcp", cdrsMasterCfg.ListenCfg().RPCJSONListen, false, "", "", "", 1, 1,
-		time.Duration(1*time.Second), time.Duration(2*time.Second), "json", nil, false)
+	cdrsMasterRpc, err = rpcclient.NewRPCClient(utils.TCP, cdrsMasterCfg.ListenCfg().RPCJSONListen, false, "", "", "", 1, 1,
+		time.Duration(1*time.Second), time.Duration(2*time.Second), rpcclient.JSONrpc, nil, false)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -240,8 +240,8 @@ func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	cdrsSlaveRpc, err := rpcclient.NewRpcClient("tcp", "127.0.0.1:12012", false, "", "", "", 1, 1,
-		time.Duration(1*time.Second), time.Duration(2*time.Second), "json", nil, false)
+	cdrsSlaveRpc, err := rpcclient.NewRPCClient(utils.TCP, "127.0.0.1:12012", false, "", "", "", 1, 1,
+		time.Duration(1*time.Second), time.Duration(2*time.Second), rpcclient.JSONrpc, nil, false)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

@@ -33,7 +33,7 @@ func NewRALsV1() *RALsV1 {
 type RALsV1 struct {
 }
 
-// Call implements rpcclient.RpcClientConnection interface for internal RPC
+// Call implements rpcclient.ClientConnector interface for internal RPC
 func (rsv1 *RALsV1) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(rsv1, serviceMethod, args, reply)
 }

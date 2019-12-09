@@ -118,7 +118,7 @@ func testTPThreholdStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTPThreholdRpcConn(t *testing.T) {
 	var err error
-	tpThresholdRPC, err = jsonrpc.Dial("tcp", tpThresholdCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpThresholdRPC, err = jsonrpc.Dial(utils.TCP, tpThresholdCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

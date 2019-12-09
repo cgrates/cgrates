@@ -33,7 +33,7 @@ import (
 
 // NewDNSAgent returns the DNS Agent
 func NewDNSAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	sSChan, dispatcherChan chan rpcclient.RpcClientConnection,
+	sSChan, dispatcherChan chan rpcclient.ClientConnector,
 	exitChan chan bool) servmanager.Service {
 	return &DNSAgent{
 		cfg:            cfg,
@@ -49,8 +49,8 @@ type DNSAgent struct {
 	sync.RWMutex
 	cfg            *config.CGRConfig
 	filterSChan    chan *engine.FilterS
-	sSChan         chan rpcclient.RpcClientConnection
-	dispatcherChan chan rpcclient.RpcClientConnection
+	sSChan         chan rpcclient.ClientConnector
+	dispatcherChan chan rpcclient.ClientConnector
 	exitChan       chan bool
 
 	dns *agents.DNSAgent
@@ -68,7 +68,7 @@ func (dns *DNSAgent) Start() (err error) {
 	dns.Lock()
 	defer dns.Unlock()
 	// var sSInternal bool
-	var sS rpcclient.RpcClientConnection
+	var sS rpcclient.ClientConnector
 	utils.Logger.Info(fmt.Sprintf("starting %s service", utils.DNSAgent))
 	if !dns.cfg.DispatcherSCfg().Enabled && dns.cfg.DNSAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
 		// sSInternal = true
@@ -109,13 +109,13 @@ func (dns *DNSAgent) Start() (err error) {
 
 // GetIntenternalChan returns the internal connection chanel
 // no chanel for DNSAgent
-func (dns *DNSAgent) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (dns *DNSAgent) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return nil
 }
 
 // Reload handles the change of config
 func (dns *DNSAgent) Reload() (err error) {
-	var sS rpcclient.RpcClientConnection
+	var sS rpcclient.ClientConnector
 	if !dns.cfg.DispatcherSCfg().Enabled && dns.cfg.DNSAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
 		// sSInternal = true
 		sSIntConn := <-dns.sSChan

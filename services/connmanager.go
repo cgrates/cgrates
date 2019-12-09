@@ -27,7 +27,7 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func NewConnManagerService(cfg *config.CGRConfig, intConns map[string]chan rpcclient.RpcClientConnection) *ConnManagerService {
+func NewConnManagerService(cfg *config.CGRConfig, intConns map[string]chan rpcclient.ClientConnector) *ConnManagerService {
 	return &ConnManagerService{
 		cfg:     cfg,
 		connMgr: engine.NewConnManager(cfg, intConns),
@@ -46,7 +46,7 @@ func (cM *ConnManagerService) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (cM *ConnManagerService) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (cM *ConnManagerService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return nil
 }
 

@@ -118,9 +118,9 @@ func durRemoteRater(cd *engine.CallDescriptorWithArgDispatcher) (time.Duration, 
 	var client *rpc.Client
 	var err error
 	if *json {
-		client, err = jsonrpc.Dial("tcp", *raterAddress)
+		client, err = jsonrpc.Dial(utils.TCP, *raterAddress)
 	} else {
-		client, err = rpc.Dial("tcp", *raterAddress)
+		client, err = rpc.Dial(utils.TCP, *raterAddress)
 	}
 
 	if err != nil {

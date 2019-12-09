@@ -28,7 +28,7 @@ import (
 )
 
 func NewFilterS(cfg *config.CGRConfig,
-	statSChan, resSChan, ralSChan chan rpcclient.RpcClientConnection, dm *DataManager) (fS *FilterS) {
+	statSChan, resSChan, ralSChan chan rpcclient.ClientConnector, dm *DataManager) (fS *FilterS) {
 	fS = &FilterS{
 		dm:  dm,
 		cfg: cfg,
@@ -49,19 +49,19 @@ func NewFilterS(cfg *config.CGRConfig,
 // uses lazy connections where necessary to avoid deadlocks on service startup
 type FilterS struct {
 	cfg                               *config.CGRConfig
-	statSConns, resSConns, ralSConns  rpcclient.RpcClientConnection
+	statSConns, resSConns, ralSConns  rpcclient.ClientConnector
 	sSConnMux, rSConnMux, ralSConnMux sync.RWMutex // make sure only one goroutine attempts connecting
 	dm                                *DataManager
 }
 
 // connStatS returns will connect towards StatS
-func (fS *FilterS) connStatS(statSChan chan rpcclient.RpcClientConnection) (err error) {
+func (fS *FilterS) connStatS(statSChan chan rpcclient.ClientConnector) (err error) {
 	fS.sSConnMux.Lock()
 	defer fS.sSConnMux.Unlock()
 	if fS.statSConns != nil { // connection was populated between locks
 		return
 	}
-	fS.statSConns, err = NewRPCPool(rpcclient.POOL_FIRST,
+	fS.statSConns, err = NewRPCPool(rpcclient.PoolFirst,
 		fS.cfg.TlsCfg().ClientKey, fS.cfg.TlsCfg().ClientCerificate,
 		fS.cfg.TlsCfg().CaCertificate, fS.cfg.GeneralCfg().ConnectAttempts,
 		fS.cfg.GeneralCfg().Reconnects, fS.cfg.GeneralCfg().ConnectTimeout,
@@ -71,13 +71,13 @@ func (fS *FilterS) connStatS(statSChan chan rpcclient.RpcClientConnection) (err 
 }
 
 // connResourceS returns will connect towards ResourceS
-func (fS *FilterS) connResourceS(resSChan chan rpcclient.RpcClientConnection) (err error) {
+func (fS *FilterS) connResourceS(resSChan chan rpcclient.ClientConnector) (err error) {
 	fS.rSConnMux.Lock()
 	defer fS.rSConnMux.Unlock()
 	if fS.resSConns != nil { // connection was populated between locks
 		return
 	}
-	fS.resSConns, err = NewRPCPool(rpcclient.POOL_FIRST,
+	fS.resSConns, err = NewRPCPool(rpcclient.PoolFirst,
 		fS.cfg.TlsCfg().ClientKey, fS.cfg.TlsCfg().ClientCerificate,
 		fS.cfg.TlsCfg().CaCertificate, fS.cfg.GeneralCfg().ConnectAttempts,
 		fS.cfg.GeneralCfg().Reconnects, fS.cfg.GeneralCfg().ConnectTimeout,
@@ -87,13 +87,13 @@ func (fS *FilterS) connResourceS(resSChan chan rpcclient.RpcClientConnection) (e
 }
 
 // connRALs returns will connect towards RALs
-func (fS *FilterS) connRALs(ralSChan chan rpcclient.RpcClientConnection) (err error) {
+func (fS *FilterS) connRALs(ralSChan chan rpcclient.ClientConnector) (err error) {
 	fS.ralSConnMux.Lock()
 	defer fS.ralSConnMux.Unlock()
 	if fS.ralSConns != nil { // connection was populated between locks
 		return
 	}
-	fS.ralSConns, err = NewRPCPool(rpcclient.POOL_FIRST,
+	fS.ralSConns, err = NewRPCPool(rpcclient.PoolFirst,
 		fS.cfg.TlsCfg().ClientKey, fS.cfg.TlsCfg().ClientCerificate,
 		fS.cfg.TlsCfg().CaCertificate, fS.cfg.GeneralCfg().ConnectAttempts,
 		fS.cfg.GeneralCfg().Reconnects, fS.cfg.GeneralCfg().ConnectTimeout,

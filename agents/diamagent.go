@@ -36,7 +36,7 @@ import (
 )
 
 func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
-	sS rpcclient.RpcClientConnection) (*DiameterAgent, error) {
+	sS rpcclient.ClientConnector) (*DiameterAgent, error) {
 	if sS != nil && reflect.ValueOf(sS).IsNil() {
 		sS = nil
 	}
@@ -67,7 +67,7 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 type DiameterAgent struct {
 	cgrCfg   *config.CGRConfig
 	filterS  *engine.FilterS
-	sS       rpcclient.RpcClientConnection // Connection towards CGR-SessionS component
+	sS       rpcclient.ClientConnector // Connection towards CGR-SessionS component
 	aReqs    int
 	aReqsLck sync.RWMutex
 }
@@ -428,7 +428,7 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 	return true, nil
 }
 
-// rpcclient.RpcClientConnection interface
+// rpcclient.ClientConnector interface
 func (da *DiameterAgent) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.RPCCall(da, serviceMethod, args, reply)
 }
@@ -487,6 +487,6 @@ func (da *DiameterAgent) V1GetActiveSessionIDs(ignParam string,
 
 // SetSessionSConnection sets the new connection to the session service
 // only used on reload
-func (da *DiameterAgent) SetSessionSConnection(sS rpcclient.RpcClientConnection) {
+func (da *DiameterAgent) SetSessionSConnection(sS rpcclient.ClientConnector) {
 	da.sS = sS
 }

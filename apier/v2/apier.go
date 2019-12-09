@@ -38,7 +38,7 @@ type ApierV2 struct {
 	v1.ApierV1
 }
 
-// Call implements rpcclient.RpcClientConnection interface for internal RPC
+// Call implements rpcclient.ClientConnector interface for internal RPC
 func (apiv2 *ApierV2) Call(serviceMethod string,
 	args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(apiv2, serviceMethod, args, reply)

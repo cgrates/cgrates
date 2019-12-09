@@ -32,7 +32,7 @@ import (
 
 // NewAsteriskAgent returns the Asterisk Agent
 func NewAsteriskAgent(cfg *config.CGRConfig, sSChan,
-	dispatcherChan chan rpcclient.RpcClientConnection,
+	dispatcherChan chan rpcclient.ClientConnector,
 	exitChan chan bool) servmanager.Service {
 	return &AsteriskAgent{
 		cfg:            cfg,
@@ -46,8 +46,8 @@ func NewAsteriskAgent(cfg *config.CGRConfig, sSChan,
 type AsteriskAgent struct {
 	sync.RWMutex
 	cfg            *config.CGRConfig
-	sSChan         chan rpcclient.RpcClientConnection
-	dispatcherChan chan rpcclient.RpcClientConnection
+	sSChan         chan rpcclient.ClientConnector
+	dispatcherChan chan rpcclient.ClientConnector
 	exitChan       chan bool
 
 	smas []*agents.AsteriskAgent
@@ -61,7 +61,7 @@ func (ast *AsteriskAgent) Start() (err error) {
 
 	ast.Lock()
 	defer ast.Unlock()
-	var sS rpcclient.RpcClientConnection
+	var sS rpcclient.ClientConnector
 	var sSInternal bool
 	utils.Logger.Info("Starting Asterisk agent")
 	if !ast.cfg.DispatcherSCfg().Enabled && ast.cfg.AsteriskAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
@@ -105,13 +105,13 @@ func (ast *AsteriskAgent) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (ast *AsteriskAgent) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (ast *AsteriskAgent) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return nil
 }
 
 // Reload handles the change of config
 func (ast *AsteriskAgent) Reload() (err error) {
-	var sS rpcclient.RpcClientConnection
+	var sS rpcclient.ClientConnector
 	var sSInternal bool
 	if !ast.cfg.DispatcherSCfg().Enabled && ast.cfg.AsteriskAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
 		sSInternal = true

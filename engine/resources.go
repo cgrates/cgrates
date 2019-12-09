@@ -298,7 +298,7 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 
 // NewResourceService  returns a new ResourceService
 func NewResourceService(dm *DataManager, cgrcfg *config.CGRConfig,
-	thdS rpcclient.RpcClientConnection, filterS *FilterS) (*ResourceService, error) {
+	thdS rpcclient.ClientConnector, filterS *FilterS) (*ResourceService, error) {
 	if thdS != nil && reflect.ValueOf(thdS).IsNil() {
 		thdS = nil
 	}
@@ -312,8 +312,8 @@ func NewResourceService(dm *DataManager, cgrcfg *config.CGRConfig,
 
 // ResourceService is the service handling resources
 type ResourceService struct {
-	dm              *DataManager                  // So we can load the data in cache and index it
-	thdS            rpcclient.RpcClientConnection // allows applying filters based on stats
+	dm              *DataManager              // So we can load the data in cache and index it
+	thdS            rpcclient.ClientConnector // allows applying filters based on stats
 	filterS         *FilterS
 	storedResources utils.StringMap // keep a record of resources which need saving, map[resID]bool
 	srMux           sync.RWMutex    // protects storedResources
@@ -771,6 +771,6 @@ func (rS *ResourceService) StartLoop() {
 
 // SetThresholdConnection sets the new connection to the threshold service
 // only used on reload
-func (rS *ResourceService) SetThresholdConnection(thdS rpcclient.RpcClientConnection) {
+func (rS *ResourceService) SetThresholdConnection(thdS rpcclient.ClientConnector) {
 	rS.thdS = thdS
 }

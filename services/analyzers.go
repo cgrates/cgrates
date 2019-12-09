@@ -33,7 +33,7 @@ import (
 // NewAnalyzerService returns the Analyzer Service
 func NewAnalyzerService(cfg *config.CGRConfig, server *utils.Server, exitChan chan bool) servmanager.Service {
 	return &AnalyzerService{
-		connChan: make(chan rpcclient.RpcClientConnection, 1),
+		connChan: make(chan rpcclient.ClientConnector, 1),
 		cfg:      cfg,
 		server:   server,
 		exitChan: exitChan,
@@ -49,7 +49,7 @@ type AnalyzerService struct {
 
 	anz      *analyzers.AnalyzerService
 	rpc      *v1.AnalyzerSv1
-	connChan chan rpcclient.RpcClientConnection
+	connChan chan rpcclient.ClientConnector
 }
 
 // Start should handle the sercive start
@@ -78,7 +78,7 @@ func (anz *AnalyzerService) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (anz *AnalyzerService) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (anz *AnalyzerService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return anz.connChan
 }
 

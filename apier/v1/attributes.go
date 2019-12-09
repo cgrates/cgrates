@@ -136,7 +136,7 @@ type AttributeSv1 struct {
 	attrS *engine.AttributeService
 }
 
-// Call implements rpcclient.RpcClientConnection interface for internal RPC
+// Call implements rpcclient.ClientConnector interface for internal RPC
 func (alSv1 *AttributeSv1) Call(serviceMethod string,
 	args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(alSv1, serviceMethod, args, reply)

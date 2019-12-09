@@ -111,7 +111,7 @@ func testTPAlsPrfStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTPAlsPrfRPCConn(t *testing.T) {
 	var err error
-	tpAlsPrfRPC, err = jsonrpc.Dial("tcp", tpAlsPrfCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpAlsPrfRPC, err = jsonrpc.Dial(utils.TCP, tpAlsPrfCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

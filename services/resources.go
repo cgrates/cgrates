@@ -34,9 +34,9 @@ import (
 func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *utils.Server, thrsChan,
-	dispatcherChan chan rpcclient.RpcClientConnection) servmanager.Service {
+	dispatcherChan chan rpcclient.ClientConnector) servmanager.Service {
 	return &ResourceService{
-		connChan:       make(chan rpcclient.RpcClientConnection, 1),
+		connChan:       make(chan rpcclient.ClientConnector, 1),
 		cfg:            cfg,
 		dm:             dm,
 		cacheS:         cacheS,
@@ -55,12 +55,12 @@ type ResourceService struct {
 	cacheS         *engine.CacheS
 	filterSChan    chan *engine.FilterS
 	server         *utils.Server
-	thrsChan       chan rpcclient.RpcClientConnection
-	dispatcherChan chan rpcclient.RpcClientConnection
+	thrsChan       chan rpcclient.ClientConnector
+	dispatcherChan chan rpcclient.ClientConnector
 
 	reS      *engine.ResourceService
 	rpc      *v1.ResourceSv1
-	connChan chan rpcclient.RpcClientConnection
+	connChan chan rpcclient.ClientConnector
 }
 
 // Start should handle the sercive start
@@ -76,7 +76,7 @@ func (reS *ResourceService) Start() (err error) {
 	filterS := <-reS.filterSChan
 	reS.filterSChan <- filterS
 
-	var thdSConn rpcclient.RpcClientConnection
+	var thdSConn rpcclient.ClientConnector
 	if thdSConn, err = NewConnection(reS.cfg, reS.thrsChan, reS.dispatcherChan, reS.cfg.ResourceSCfg().ThresholdSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.ResourceS, err.Error()))
 		return
@@ -100,13 +100,13 @@ func (reS *ResourceService) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (reS *ResourceService) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (reS *ResourceService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return reS.connChan
 }
 
 // Reload handles the change of config
 func (reS *ResourceService) Reload() (err error) {
-	var thdSConn rpcclient.RpcClientConnection
+	var thdSConn rpcclient.ClientConnector
 	if thdSConn, err = NewConnection(reS.cfg, reS.thrsChan, reS.dispatcherChan, reS.cfg.ResourceSCfg().ThresholdSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.ResourceS, err.Error()))
 		return

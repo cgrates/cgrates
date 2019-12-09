@@ -69,10 +69,10 @@ func (db *DataDBService) Start() (err error) {
 		err = nil // reset the error in case of only SessionS active
 		return
 	}
-	var rmtConns, rplConns *rpcclient.RpcClientPool
+	var rmtConns, rplConns *rpcclient.RPCPool
 	if len(db.cfg.DataDbCfg().RmtConns) != 0 {
 		var err error
-		rmtConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST_POSITIVE, db.cfg.TlsCfg().ClientKey,
+		rmtConns, err = engine.NewRPCPool(rpcclient.PoolFirstPositive, db.cfg.TlsCfg().ClientKey,
 			db.cfg.TlsCfg().ClientCerificate, db.cfg.TlsCfg().CaCertificate,
 			db.cfg.GeneralCfg().ConnectAttempts, db.cfg.GeneralCfg().Reconnects,
 			db.cfg.GeneralCfg().ConnectTimeout, db.cfg.GeneralCfg().ReplyTimeout,
@@ -83,7 +83,7 @@ func (db *DataDBService) Start() (err error) {
 	}
 	if len(config.CgrConfig().DataDbCfg().RplConns) != 0 {
 		var err error
-		rplConns, err = engine.NewRPCPool(rpcclient.POOL_BROADCAST, db.cfg.TlsCfg().ClientKey,
+		rplConns, err = engine.NewRPCPool(rpcclient.PoolBroadcast, db.cfg.TlsCfg().ClientKey,
 			db.cfg.TlsCfg().ClientCerificate, db.cfg.TlsCfg().CaCertificate,
 			db.cfg.GeneralCfg().ConnectAttempts, db.cfg.GeneralCfg().Reconnects,
 			db.cfg.GeneralCfg().ConnectTimeout, db.cfg.GeneralCfg().ReplyTimeout,
@@ -103,7 +103,7 @@ func (db *DataDBService) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (db *DataDBService) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (db *DataDBService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return nil
 }
 

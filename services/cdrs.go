@@ -35,7 +35,7 @@ import (
 func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, filterSChan chan *engine.FilterS,
 	server *utils.Server, internalCDRServerChan, chrsChan, respChan, attrsChan, thsChan, stsChan,
-	dispatcherChan chan rpcclient.RpcClientConnection) servmanager.Service {
+	dispatcherChan chan rpcclient.ClientConnector) servmanager.Service {
 	return &CDRServer{
 		connChan:       internalCDRServerChan,
 		cfg:            cfg,
@@ -60,17 +60,17 @@ type CDRServer struct {
 	storDB         *StorDBService
 	filterSChan    chan *engine.FilterS
 	server         *utils.Server
-	chrsChan       chan rpcclient.RpcClientConnection
-	respChan       chan rpcclient.RpcClientConnection
-	attrsChan      chan rpcclient.RpcClientConnection
-	thsChan        chan rpcclient.RpcClientConnection
-	stsChan        chan rpcclient.RpcClientConnection
-	dispatcherChan chan rpcclient.RpcClientConnection
+	chrsChan       chan rpcclient.ClientConnector
+	respChan       chan rpcclient.ClientConnector
+	attrsChan      chan rpcclient.ClientConnector
+	thsChan        chan rpcclient.ClientConnector
+	stsChan        chan rpcclient.ClientConnector
+	dispatcherChan chan rpcclient.ClientConnector
 
 	cdrS     *engine.CDRServer
 	rpcv1    *v1.CDRsV1
 	rpcv2    *v2.CDRsV2
-	connChan chan rpcclient.RpcClientConnection
+	connChan chan rpcclient.ClientConnector
 }
 
 // Start should handle the sercive start
@@ -84,7 +84,7 @@ func (cdrS *CDRServer) Start() (err error) {
 	filterS := <-cdrS.filterSChan
 	cdrS.filterSChan <- filterS
 
-	var ralConn, attrSConn, thresholdSConn, statsConn, chargerSConn rpcclient.RpcClientConnection
+	var ralConn, attrSConn, thresholdSConn, statsConn, chargerSConn rpcclient.ClientConnector
 
 	chargerSConn, err = NewConnection(cdrS.cfg, cdrS.chrsChan, cdrS.dispatcherChan, cdrS.cfg.CdrsCfg().ChargerSConns)
 	if err != nil {
@@ -134,13 +134,13 @@ func (cdrS *CDRServer) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (cdrS *CDRServer) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (cdrS *CDRServer) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return cdrS.connChan
 }
 
 // Reload handles the change of config
 func (cdrS *CDRServer) Reload() (err error) {
-	var ralConn, attrSConn, thresholdSConn, statsConn, chargerSConn rpcclient.RpcClientConnection
+	var ralConn, attrSConn, thresholdSConn, statsConn, chargerSConn rpcclient.ClientConnector
 
 	chargerSConn, err = NewConnection(cdrS.cfg, cdrS.chrsChan, cdrS.dispatcherChan, cdrS.cfg.CdrsCfg().ChargerSConns)
 	if err != nil {

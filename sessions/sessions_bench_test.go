@@ -51,7 +51,7 @@ func startRPC() {
 		log.Fatal(err)
 	}
 	config.SetCgrConfig(sBenchCfg)
-	if sBenchRPC, err = jsonrpc.Dial("tcp", sBenchCfg.ListenCfg().RPCJSONListen); err != nil {
+	if sBenchRPC, err = jsonrpc.Dial(utils.TCP, sBenchCfg.ListenCfg().RPCJSONListen); err != nil {
 		log.Fatalf("Error at dialing rcp client:%v\n", err)
 	}
 }
@@ -197,7 +197,7 @@ func BenchmarkEncodingJSON(b *testing.B) {
 		log.Fatal(err)
 	}
 
-	if sBenchRPC, err = jsonrpc.Dial("tcp", sBenchCfg.ListenCfg().RPCJSONListen); err != nil {
+	if sBenchRPC, err = jsonrpc.Dial(utils.TCP, sBenchCfg.ListenCfg().RPCJSONListen); err != nil {
 		log.Fatalf("Error at dialing rcp client:%v\n", err)
 	}
 	b.ResetTimer()
@@ -219,7 +219,7 @@ func BenchmarkEncodingGOB(b *testing.B) {
 		log.Fatal(err)
 	}
 
-	if sBenchRPC, err = rpc.Dial("tcp", sBenchCfg.ListenCfg().RPCGOBListen); err != nil {
+	if sBenchRPC, err = rpc.Dial(utils.TCP, sBenchCfg.ListenCfg().RPCGOBListen); err != nil {
 		log.Fatalf("Error at dialing rcp client:%v\n", err)
 	}
 	b.ResetTimer()

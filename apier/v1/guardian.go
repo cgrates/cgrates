@@ -48,7 +48,7 @@ func (self *GuardianSv1) Ping(ign *utils.CGREventWithArgDispatcher, reply *strin
 	return nil
 }
 
-// Call implements rpcclient.RpcClientConnection interface for internal RPC
+// Call implements rpcclient.ClientConnector interface for internal RPC
 func (self *GuardianSv1) Call(serviceMethod string,
 	args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(self, serviceMethod, args, reply)

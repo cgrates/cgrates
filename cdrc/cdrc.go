@@ -52,7 +52,7 @@ Common parameters within configs processed:
 Parameters specific per config instance:
  * cdrSourceId, cdrFilter, cdrFields
 */
-func NewCdrc(cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool, cdrs rpcclient.RpcClientConnection,
+func NewCdrc(cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool, cdrs rpcclient.ClientConnector,
 	closeChan chan struct{}, dfltTimezone string, filterS *engine.FilterS) (cdrc *Cdrc, err error) {
 	cdrcCfg := cdrcCfgs[0]
 	cdrc = &Cdrc{
@@ -91,7 +91,7 @@ type Cdrc struct {
 	cdrcCfgs             []*config.CdrcCfg // All cdrc config profiles attached to this CDRC (key will be profile instance name)
 	dfltCdrcCfg          *config.CdrcCfg
 	timezone             string
-	cdrs                 rpcclient.RpcClientConnection
+	cdrs                 rpcclient.ClientConnector
 	closeChan            chan struct{} // Used to signal config reloads when we need to span different CDRC-Client
 	maxOpenFiles         chan struct{} // Maximum number of simultaneous files processed
 	filterS              *engine.FilterS

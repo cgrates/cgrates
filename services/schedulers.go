@@ -34,9 +34,9 @@ import (
 func NewSchedulerService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, fltrSChan chan *engine.FilterS,
 	server *utils.Server, internalCDRServerChan,
-	dispatcherChan chan rpcclient.RpcClientConnection) *SchedulerService {
+	dispatcherChan chan rpcclient.ClientConnector) *SchedulerService {
 	return &SchedulerService{
-		connChan:       make(chan rpcclient.RpcClientConnection, 1),
+		connChan:       make(chan rpcclient.ClientConnector, 1),
 		cfg:            cfg,
 		dm:             dm,
 		cacheS:         cacheS,
@@ -55,12 +55,12 @@ type SchedulerService struct {
 	cacheS         *engine.CacheS
 	fltrSChan      chan *engine.FilterS
 	server         *utils.Server
-	cdrSChan       chan rpcclient.RpcClientConnection
-	dispatcherChan chan rpcclient.RpcClientConnection
+	cdrSChan       chan rpcclient.ClientConnector
+	dispatcherChan chan rpcclient.ClientConnector
 
 	schS     *scheduler.Scheduler
 	rpc      *v1.SchedulerSv1
-	connChan chan rpcclient.RpcClientConnection
+	connChan chan rpcclient.ClientConnector
 }
 
 // Start should handle the sercive start
@@ -100,7 +100,7 @@ func (schS *SchedulerService) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (schS *SchedulerService) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (schS *SchedulerService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return schS.connChan
 }
 

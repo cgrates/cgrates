@@ -755,16 +755,16 @@ func cgrRPCAction(ub *Account, a *Action, acs Actions, extraData interface{}) er
 	if err != nil {
 		return err
 	}
-	var client rpcclient.RpcClientConnection
+	var client rpcclient.ClientConnector
 	if req.Address != utils.MetaInternal {
-		if client, err = rpcclient.NewRpcClient("tcp", req.Address, false, "", "", "",
+		if client, err = rpcclient.NewRPCClient(utils.TCP, req.Address, false, "", "", "",
 			req.Attempts, 0, config.CgrConfig().GeneralCfg().ConnectTimeout,
 			config.CgrConfig().GeneralCfg().ReplyTimeout, req.Transport,
 			nil, false); err != nil {
 			return err
 		}
 	} else {
-		client = params.Object.(rpcclient.RpcClientConnection)
+		client = params.Object.(rpcclient.ClientConnector)
 	}
 	in, out := params.InParam, params.OutParam
 	//utils.Logger.Info("Params: " + utils.ToJSON(req.Params))

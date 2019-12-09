@@ -347,7 +347,7 @@ func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	var connected bool
 	for i := 0; i < 200; i++ {
 		time.Sleep(time.Duration(fib()) * time.Millisecond)
-		if _, err := jsonrpc.Dial("tcp", cfg.ListenCfg().RPCJSONListen); err != nil {
+		if _, err := jsonrpc.Dial(utils.TCP, cfg.ListenCfg().RPCJSONListen); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("Error <%s> when opening test connection to: <%s>",
 				err.Error(), cfg.ListenCfg().RPCJSONListen))
 		} else {
@@ -376,7 +376,7 @@ func StopStartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 }
 
 func LoadTariffPlanFromFolder(tpPath, timezone string, dm *DataManager, disable_reverse bool,
-	cacheS rpcclient.RpcClientConnection, schedulerS rpcclient.RpcClientConnection) error {
+	cacheS rpcclient.ClientConnector, schedulerS rpcclient.ClientConnector) error {
 	loader, err := NewTpReader(dm.dataDB, NewFileCSVStorage(utils.CSV_SEP, tpPath, false), "", timezone, cacheS, schedulerS)
 	if err != nil {
 		return utils.NewErrServerError(err)

@@ -30,10 +30,10 @@ import (
 
 // NewResponderService returns the Resonder Service
 func NewResponderService(cfg *config.CGRConfig, server *utils.Server,
-	thsChan, stsChan, dispatcherChan chan rpcclient.RpcClientConnection,
+	thsChan, stsChan, dispatcherChan chan rpcclient.ClientConnector,
 	exitChan chan bool) *ResponderService {
 	return &ResponderService{
-		connChan:       make(chan rpcclient.RpcClientConnection, 1),
+		connChan:       make(chan rpcclient.ClientConnector, 1),
 		cfg:            cfg,
 		server:         server,
 		thsChan:        thsChan,
@@ -48,13 +48,13 @@ type ResponderService struct {
 	sync.RWMutex
 	cfg            *config.CGRConfig
 	server         *utils.Server
-	thsChan        chan rpcclient.RpcClientConnection
-	stsChan        chan rpcclient.RpcClientConnection
-	dispatcherChan chan rpcclient.RpcClientConnection
+	thsChan        chan rpcclient.ClientConnector
+	stsChan        chan rpcclient.ClientConnector
+	dispatcherChan chan rpcclient.ClientConnector
 	exitChan       chan bool
 
 	resp     *engine.Responder
-	connChan chan rpcclient.RpcClientConnection
+	connChan chan rpcclient.ClientConnector
 }
 
 // Start should handle the sercive start
@@ -64,7 +64,7 @@ func (resp *ResponderService) Start() (err error) {
 		return fmt.Errorf("service aleady running")
 	}
 
-	var thdS, stats rpcclient.RpcClientConnection
+	var thdS, stats rpcclient.ClientConnector
 	if thdS, err = NewConnection(resp.cfg, resp.thsChan, resp.dispatcherChan, resp.cfg.RalsCfg().ThresholdSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
 			utils.RALService, utils.ThresholdS, err.Error()))
@@ -99,13 +99,13 @@ func (resp *ResponderService) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (resp *ResponderService) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (resp *ResponderService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return resp.connChan
 }
 
 // Reload handles the change of config
 func (resp *ResponderService) Reload() (err error) {
-	var thdS, stats rpcclient.RpcClientConnection
+	var thdS, stats rpcclient.ClientConnector
 	if thdS, err = NewConnection(resp.cfg, resp.thsChan, resp.dispatcherChan, resp.cfg.RalsCfg().ThresholdSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
 			utils.RALService, utils.ThresholdS, err.Error()))

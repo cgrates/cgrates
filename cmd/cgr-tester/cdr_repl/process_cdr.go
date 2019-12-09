@@ -36,15 +36,15 @@ var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path h
 func main() {
 	flag.Parse()
 	var err error
-	var cdrsMasterRpc *rpcclient.RpcClient
+	var cdrsMasterRpc *rpcclient.RPCClient
 	var cdrsMasterCfgPath string
 	var cdrsMasterCfg *config.CGRConfig
 	cdrsMasterCfgPath = path.Join(*dataDir, "conf", "samples", "cdrsreplicationmaster")
 	if cdrsMasterCfg, err = config.NewCGRConfigFromPath(cdrsMasterCfgPath); err != nil {
 		log.Fatal("Got config error: ", err.Error())
 	}
-	cdrsMasterRpc, err = rpcclient.NewRpcClient("tcp", cdrsMasterCfg.ListenCfg().RPCJSONListen, false, "", "", "", 1, 1,
-		time.Duration(1*time.Second), time.Duration(2*time.Second), "json", nil, false)
+	cdrsMasterRpc, err = rpcclient.NewRPCClient(utils.TCP, cdrsMasterCfg.ListenCfg().RPCJSONListen, false, "", "", "", 1, 1,
+		time.Duration(1*time.Second), time.Duration(2*time.Second), rpcclient.JSONrpc, nil, false)
 	if err != nil {
 		log.Fatal("Could not connect to rater: ", err.Error())
 	}

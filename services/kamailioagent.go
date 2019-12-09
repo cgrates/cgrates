@@ -33,7 +33,7 @@ import (
 
 // NewKamailioAgent returns the Kamailio Agent
 func NewKamailioAgent(cfg *config.CGRConfig, sSChan,
-	dispatcherChan chan rpcclient.RpcClientConnection,
+	dispatcherChan chan rpcclient.ClientConnector,
 	exitChan chan bool) servmanager.Service {
 	return &KamailioAgent{
 		cfg:            cfg,
@@ -47,8 +47,8 @@ func NewKamailioAgent(cfg *config.CGRConfig, sSChan,
 type KamailioAgent struct {
 	sync.RWMutex
 	cfg            *config.CGRConfig
-	sSChan         chan rpcclient.RpcClientConnection
-	dispatcherChan chan rpcclient.RpcClientConnection
+	sSChan         chan rpcclient.ClientConnector
+	dispatcherChan chan rpcclient.ClientConnector
 	exitChan       chan bool
 
 	kam *agents.KamailioAgent
@@ -62,7 +62,7 @@ func (kam *KamailioAgent) Start() (err error) {
 
 	kam.Lock()
 	defer kam.Unlock()
-	var sS rpcclient.RpcClientConnection
+	var sS rpcclient.ClientConnector
 	var sSInternal bool
 	utils.Logger.Info("Starting Kamailio agent")
 	if !kam.cfg.DispatcherSCfg().Enabled && kam.cfg.KamAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
@@ -102,13 +102,13 @@ func (kam *KamailioAgent) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (kam *KamailioAgent) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (kam *KamailioAgent) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return nil
 }
 
 // Reload handles the change of config
 func (kam *KamailioAgent) Reload() (err error) {
-	var sS rpcclient.RpcClientConnection
+	var sS rpcclient.ClientConnector
 	var sSInternal bool
 	if !kam.cfg.DispatcherSCfg().Enabled && kam.cfg.KamAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
 		sSInternal = true

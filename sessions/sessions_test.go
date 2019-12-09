@@ -1732,7 +1732,7 @@ func (*testRPCClientConnection) Call(string, interface{}, interface{}) error { r
 func TestNewSessionS(t *testing.T) {
 	cgrCGF, _ := config.NewDefaultCGRConfig()
 
-	var rpc rpcclient.RpcClientConnection
+	var rpc rpcclient.ClientConnector
 	var ttest *testRPCClientConnection
 
 	rpc = ttest
@@ -1748,7 +1748,7 @@ func TestNewSessionS(t *testing.T) {
 		attrS:         nil,
 		cdrS:          nil,
 		sReplConns:    nil,
-		biJClnts:      make(map[rpcclient.RpcClientConnection]string),
+		biJClnts:      make(map[rpcclient.ClientConnector]string),
 		biJIDs:        make(map[string]*biJClient),
 		aSessions:     make(map[string]*Session),
 		aSessionsIdx:  make(map[string]map[string]map[string]utils.StringMap),

@@ -34,9 +34,9 @@ import (
 func NewSupplierService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *utils.Server, attrsChan, stsChan, resChan,
-	dispatcherChan chan rpcclient.RpcClientConnection) servmanager.Service {
+	dispatcherChan chan rpcclient.ClientConnector) servmanager.Service {
 	return &SupplierService{
-		connChan:       make(chan rpcclient.RpcClientConnection, 1),
+		connChan:       make(chan rpcclient.ClientConnector, 1),
 		cfg:            cfg,
 		dm:             dm,
 		cacheS:         cacheS,
@@ -57,14 +57,14 @@ type SupplierService struct {
 	cacheS         *engine.CacheS
 	filterSChan    chan *engine.FilterS
 	server         *utils.Server
-	attrsChan      chan rpcclient.RpcClientConnection
-	stsChan        chan rpcclient.RpcClientConnection
-	resChan        chan rpcclient.RpcClientConnection
-	dispatcherChan chan rpcclient.RpcClientConnection
+	attrsChan      chan rpcclient.ClientConnector
+	stsChan        chan rpcclient.ClientConnector
+	resChan        chan rpcclient.ClientConnector
+	dispatcherChan chan rpcclient.ClientConnector
 
 	splS     *engine.SupplierService
 	rpc      *v1.SupplierSv1
-	connChan chan rpcclient.RpcClientConnection
+	connChan chan rpcclient.ClientConnector
 }
 
 // Start should handle the sercive start
@@ -79,7 +79,7 @@ func (splS *SupplierService) Start() (err error) {
 	filterS := <-splS.filterSChan
 	splS.filterSChan <- filterS
 
-	var attrSConn, resourceSConn, statSConn rpcclient.RpcClientConnection
+	var attrSConn, resourceSConn, statSConn rpcclient.ClientConnector
 
 	attrSConn, err = NewConnection(splS.cfg, splS.attrsChan, splS.dispatcherChan, splS.cfg.SupplierSCfg().AttributeSConns)
 	if err != nil {
@@ -119,13 +119,13 @@ func (splS *SupplierService) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (splS *SupplierService) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (splS *SupplierService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return splS.connChan
 }
 
 // Reload handles the change of config
 func (splS *SupplierService) Reload() (err error) {
-	var attrSConn, resourceSConn, statSConn rpcclient.RpcClientConnection
+	var attrSConn, resourceSConn, statSConn rpcclient.ClientConnector
 	attrSConn, err = NewConnection(splS.cfg, splS.attrsChan, splS.dispatcherChan, splS.cfg.SupplierSCfg().AttributeSConns)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",

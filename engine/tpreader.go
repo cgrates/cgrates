@@ -62,16 +62,16 @@ type TpReader struct {
 	thresholds         []*utils.TenantID // IDs of thresholds which need creation based on thresholdProfiles
 	revDests,
 	acntActionPlans map[string][]string
-	cacheS     rpcclient.RpcClientConnection
-	schedulerS rpcclient.RpcClientConnection
+	cacheS     rpcclient.ClientConnector
+	schedulerS rpcclient.ClientConnector
 }
 
 func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
-	cacheS rpcclient.RpcClientConnection, schedulerS rpcclient.RpcClientConnection) (*TpReader, error) {
-	var rmtConns, rplConns *rpcclient.RpcClientPool
+	cacheS rpcclient.ClientConnector, schedulerS rpcclient.ClientConnector) (*TpReader, error) {
+	var rmtConns, rplConns *rpcclient.RPCPool
 	if len(config.CgrConfig().DataDbCfg().RmtConns) != 0 {
 		var err error
-		rmtConns, err = NewRPCPool(rpcclient.POOL_FIRST_POSITIVE, config.CgrConfig().TlsCfg().ClientKey,
+		rmtConns, err = NewRPCPool(rpcclient.PoolFirstPositive, config.CgrConfig().TlsCfg().ClientKey,
 			config.CgrConfig().TlsCfg().ClientCerificate, config.CgrConfig().TlsCfg().CaCertificate,
 			config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
 			config.CgrConfig().GeneralCfg().ConnectTimeout, config.CgrConfig().GeneralCfg().ReplyTimeout,
@@ -82,7 +82,7 @@ func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
 	}
 	if len(config.CgrConfig().DataDbCfg().RplConns) != 0 {
 		var err error
-		rplConns, err = NewRPCPool(rpcclient.POOL_BROADCAST, config.CgrConfig().TlsCfg().ClientKey,
+		rplConns, err = NewRPCPool(rpcclient.PoolBroadcast, config.CgrConfig().TlsCfg().ClientKey,
 			config.CgrConfig().TlsCfg().ClientCerificate, config.CgrConfig().TlsCfg().CaCertificate,
 			config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
 			config.CgrConfig().GeneralCfg().ConnectTimeout, config.CgrConfig().GeneralCfg().ReplyTimeout,

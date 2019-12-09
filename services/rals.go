@@ -33,13 +33,13 @@ import (
 // NewRalService returns the Ral Service
 func NewRalService(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, cacheS *engine.CacheS, filterSChan chan *engine.FilterS, server *utils.Server,
-	thsChan, stsChan, cacheSChan, schedChan, attrsChan, dispatcherChan chan rpcclient.RpcClientConnection,
+	thsChan, stsChan, cacheSChan, schedChan, attrsChan, dispatcherChan chan rpcclient.ClientConnector,
 	schedulerService *SchedulerService, exitChan chan bool) *RalService {
 	resp := NewResponderService(cfg, server, thsChan, stsChan, dispatcherChan, exitChan)
 	apiv1 := NewApierV1Service(cfg, dm, storDB, filterSChan, server, cacheSChan, schedChan, attrsChan, dispatcherChan, schedulerService, resp)
 	apiv2 := NewApierV2Service(apiv1, cfg, server)
 	return &RalService{
-		connChan:  make(chan rpcclient.RpcClientConnection, 1),
+		connChan:  make(chan rpcclient.ClientConnector, 1),
 		cfg:       cfg,
 		cacheS:    cacheS,
 		server:    server,
@@ -59,7 +59,7 @@ type RalService struct {
 	apiv1     *ApierV1Service
 	apiv2     *ApierV2Service
 	responder *ResponderService
-	connChan  chan rpcclient.RpcClientConnection
+	connChan  chan rpcclient.ClientConnector
 }
 
 // Start should handle the sercive start
@@ -109,7 +109,7 @@ func (rals *RalService) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (rals *RalService) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (rals *RalService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return rals.connChan
 }
 

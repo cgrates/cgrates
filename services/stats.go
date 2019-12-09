@@ -34,9 +34,9 @@ import (
 func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *utils.Server, thrsChan,
-	dispatcherChan chan rpcclient.RpcClientConnection) servmanager.Service {
+	dispatcherChan chan rpcclient.ClientConnector) servmanager.Service {
 	return &StatService{
-		connChan:       make(chan rpcclient.RpcClientConnection, 1),
+		connChan:       make(chan rpcclient.ClientConnector, 1),
 		cfg:            cfg,
 		dm:             dm,
 		cacheS:         cacheS,
@@ -55,12 +55,12 @@ type StatService struct {
 	cacheS         *engine.CacheS
 	filterSChan    chan *engine.FilterS
 	server         *utils.Server
-	thrsChan       chan rpcclient.RpcClientConnection
-	dispatcherChan chan rpcclient.RpcClientConnection
+	thrsChan       chan rpcclient.ClientConnector
+	dispatcherChan chan rpcclient.ClientConnector
 
 	sts      *engine.StatService
 	rpc      *v1.StatSv1
-	connChan chan rpcclient.RpcClientConnection
+	connChan chan rpcclient.ClientConnector
 }
 
 // Start should handle the sercive start
@@ -76,7 +76,7 @@ func (sts *StatService) Start() (err error) {
 	filterS := <-sts.filterSChan
 	sts.filterSChan <- filterS
 
-	var thdSConn rpcclient.RpcClientConnection
+	var thdSConn rpcclient.ClientConnector
 	if thdSConn, err = NewConnection(sts.cfg, sts.thrsChan, sts.dispatcherChan, sts.cfg.StatSCfg().ThresholdSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.StatS, err.Error()))
 		return
@@ -99,13 +99,13 @@ func (sts *StatService) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (sts *StatService) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (sts *StatService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return sts.connChan
 }
 
 // Reload handles the change of config
 func (sts *StatService) Reload() (err error) {
-	var thdSConn rpcclient.RpcClientConnection
+	var thdSConn rpcclient.ClientConnector
 	if thdSConn, err = NewConnection(sts.cfg, sts.thrsChan, sts.dispatcherChan, sts.cfg.StatSCfg().ThresholdSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.StatS, err.Error()))
 		return

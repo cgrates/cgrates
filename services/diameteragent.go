@@ -33,7 +33,7 @@ import (
 
 // NewDiameterAgent returns the Diameter Agent
 func NewDiameterAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	sSChan, dispatcherChan chan rpcclient.RpcClientConnection,
+	sSChan, dispatcherChan chan rpcclient.ClientConnector,
 	exitChan chan bool) servmanager.Service {
 	return &DiameterAgent{
 		cfg:            cfg,
@@ -49,8 +49,8 @@ type DiameterAgent struct {
 	sync.RWMutex
 	cfg            *config.CGRConfig
 	filterSChan    chan *engine.FilterS
-	sSChan         chan rpcclient.RpcClientConnection
-	dispatcherChan chan rpcclient.RpcClientConnection
+	sSChan         chan rpcclient.ClientConnector
+	dispatcherChan chan rpcclient.ClientConnector
 	exitChan       chan bool
 
 	da *agents.DiameterAgent
@@ -67,7 +67,7 @@ func (da *DiameterAgent) Start() (err error) {
 
 	da.Lock()
 	defer da.Unlock()
-	var sS rpcclient.RpcClientConnection
+	var sS rpcclient.ClientConnector
 	var sSInternal bool
 	utils.Logger.Info("Starting Diameter agent")
 	if !da.cfg.DispatcherSCfg().Enabled && da.cfg.DiameterAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
@@ -112,13 +112,13 @@ func (da *DiameterAgent) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (da *DiameterAgent) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (da *DiameterAgent) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return nil
 }
 
 // Reload handles the change of config
 func (da *DiameterAgent) Reload() (err error) {
-	var sS rpcclient.RpcClientConnection
+	var sS rpcclient.ClientConnector
 	var sSInternal bool
 	if !da.cfg.DispatcherSCfg().Enabled && da.cfg.DiameterAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
 		sSInternal = true

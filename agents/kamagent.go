@@ -44,7 +44,7 @@ var (
 )
 
 func NewKamailioAgent(kaCfg *config.KamAgentCfg,
-	sessionS rpcclient.RpcClientConnection, timezone string) (ka *KamailioAgent) {
+	sessionS rpcclient.ClientConnector, timezone string) (ka *KamailioAgent) {
 	ka = &KamailioAgent{
 		cfg:              kaCfg,
 		sessionS:         sessionS,
@@ -57,7 +57,7 @@ func NewKamailioAgent(kaCfg *config.KamAgentCfg,
 
 type KamailioAgent struct {
 	cfg              *config.KamAgentCfg
-	sessionS         rpcclient.RpcClientConnection
+	sessionS         rpcclient.ClientConnector
 	timezone         string
 	conns            []*kamevapi.KamEvapi
 	activeSessionIDs chan []*sessions.SessionID
@@ -99,7 +99,7 @@ func (self *KamailioAgent) Shutdown() (err error) {
 	return
 }
 
-// rpcclient.RpcClientConnection interface
+// rpcclient.ClientConnector interface
 func (ka *KamailioAgent) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.RPCCall(ka, serviceMethod, args, reply)
 }
@@ -419,7 +419,7 @@ func (ka *KamailioAgent) V1GetActiveSessionIDs(ignParam string, sessionIDs *[]*s
 
 // SetSessionSConnection sets the new connection to the session service
 // only used on reload
-func (ka *KamailioAgent) SetSessionSConnection(sS rpcclient.RpcClientConnection) {
+func (ka *KamailioAgent) SetSessionSConnection(sS rpcclient.ClientConnector) {
 	ka.sessionS = sS
 }
 

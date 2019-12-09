@@ -84,7 +84,7 @@ func (erS *EventReaderService) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (erS *EventReaderService) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (erS *EventReaderService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return nil
 }
 

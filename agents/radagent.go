@@ -37,7 +37,7 @@ const (
 )
 
 func NewRadiusAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
-	sessionS rpcclient.RpcClientConnection) (ra *RadiusAgent, err error) {
+	sessionS rpcclient.ClientConnector) (ra *RadiusAgent, err error) {
 	dts := make(map[string]*radigo.Dictionary, len(cgrCfg.RadiusAgentCfg().ClientDictionaries))
 	for clntID, dictPath := range cgrCfg.RadiusAgentCfg().ClientDictionaries {
 		utils.Logger.Info(
@@ -62,8 +62,8 @@ func NewRadiusAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 }
 
 type RadiusAgent struct {
-	cgrCfg   *config.CGRConfig             // reference for future config reloads
-	sessionS rpcclient.RpcClientConnection // Connection towards CGR-SessionS component
+	cgrCfg   *config.CGRConfig         // reference for future config reloads
+	sessionS rpcclient.ClientConnector // Connection towards CGR-SessionS component
 	filterS  *engine.FilterS
 	rsAuth   *radigo.Server
 	rsAcct   *radigo.Server
@@ -346,6 +346,6 @@ func (ra *RadiusAgent) ListenAndServe() (err error) {
 
 // SetSessionSConnection sets the new connection to the session service
 // only used on reload
-func (ra *RadiusAgent) SetSessionSConnection(sS rpcclient.RpcClientConnection) {
+func (ra *RadiusAgent) SetSessionSConnection(sS rpcclient.ClientConnector) {
 	ra.sessionS = sS
 }
