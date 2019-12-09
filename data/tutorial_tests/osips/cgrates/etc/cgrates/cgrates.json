@@ -116,12 +116,8 @@
 
 "suppliers": {
 	"enabled": true,
-	"resources_conns": [
-		{"address": "*internal"}
-	],
-	"stats_conns": [
-		{"address": "*internal"}	
-	],
+	"resources_conns": ["*internal"],
+	"stats_conns": ["*internal"],
 	"string_indexed_fields": ["Account"],
 	"prefix_indexed_fields": ["Destination"],
 },

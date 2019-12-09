@@ -497,6 +497,7 @@ func main() {
 	internalThresholdSChan := make(chan rpcclient.RpcClientConnection, 1)  // needed to avod cyclic dependency
 	internalStatSChan := make(chan rpcclient.RpcClientConnection, 1)       // needed to avod cyclic dependency
 	internalResourceSChan := make(chan rpcclient.RpcClientConnection, 1)   // needed to avod cyclic dependency
+	internalSupplierSChan := make(chan rpcclient.RpcClientConnection, 1)   // needed to avod cyclic dependency
 
 	// init CacheS
 	cacheS := initCacheS(internalCacheSChan, server, dmService.GetDM(), exitChan)
@@ -542,9 +543,7 @@ func main() {
 		internalStatSChan, connManager.GetConnMgr())
 	reS := services.NewResourceService(cfg, dmService, cacheS, filterSChan, server,
 		internalResourceSChan, connManager.GetConnMgr())
-	supS := services.NewSupplierService(cfg, dmService, cacheS, filterSChan, server,
-		attrS.GetIntenternalChan(), stS.GetIntenternalChan(),
-		reS.GetIntenternalChan(), dspS.GetIntenternalChan())
+	supS := services.NewSupplierService(cfg, dmService, cacheS, filterSChan, server, internalSupplierSChan, connManager.GetConnMgr())
 	schS := services.NewSchedulerService(cfg, dmService, cacheS, filterSChan, server, internalCDRServerChan, dspS.GetIntenternalChan())
 	rals := services.NewRalService(cfg, dmService, storDBService, cacheS, filterSChan, server,
 		tS.GetIntenternalChan(), stS.GetIntenternalChan(), internalCacheSChan,

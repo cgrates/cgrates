@@ -223,9 +223,7 @@
 "suppliers": {
 	"enabled": true,
 	"prefix_indexed_fields":["Destination",],
-	"stats_conns": [
-		{"address": "*internal"},
-	],
+	"stats_conns": ["*internal"],
 },
 
 

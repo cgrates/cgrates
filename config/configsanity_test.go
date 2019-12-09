@@ -553,33 +553,22 @@ func TestConfigSanitySupplierS(t *testing.T) {
 	cfg, _ = NewDefaultCGRConfig()
 	cfg.supplierSCfg.Enabled = true
 
-	cfg.supplierSCfg.ResourceSConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
+	cfg.supplierSCfg.ResourceSConns = []string{utils.MetaInternal}
+
 	expected := "<ResourceS> not enabled but requested by <SupplierS> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.resourceSCfg.Enabled = true
 
-	cfg.supplierSCfg.StatSConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
+	cfg.supplierSCfg.StatSConns = []string{utils.MetaInternal}
 	expected = "<StatS> not enabled but requested by <SupplierS> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.statsCfg.Enabled = true
 
-	cfg.supplierSCfg.AttributeSConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
+	cfg.supplierSCfg.AttributeSConns = []string{utils.MetaInternal}
 	expected = "<AttributeS> not enabled but requested by <SupplierS> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)

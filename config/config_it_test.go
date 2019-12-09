@@ -228,9 +228,9 @@ func TestCGRConfigReloadSupplierS(t *testing.T) {
 		Enabled:             true,
 		StringIndexedFields: &[]string{"LCRProfile"},
 		PrefixIndexedFields: &[]string{utils.Destination},
-		ResourceSConns:      []*RemoteHost{},
-		StatSConns:          []*RemoteHost{},
-		AttributeSConns:     []*RemoteHost{},
+		ResourceSConns:      []string{},
+		StatSConns:          []string{},
+		AttributeSConns:     []string{},
 		IndexedSelects:      true,
 		DefaultRatio:        1,
 	}

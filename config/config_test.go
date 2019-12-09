@@ -873,9 +873,9 @@ func TestCgrCfgJSONDefaultSupplierSCfg(t *testing.T) {
 		IndexedSelects:      true,
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},
-		AttributeSConns:     []*RemoteHost{},
-		ResourceSConns:      []*RemoteHost{},
-		StatSConns:          []*RemoteHost{},
+		AttributeSConns:     []string{},
+		ResourceSConns:      []string{},
+		StatSConns:          []string{},
 		DefaultRatio:        1,
 	}
 	if !reflect.DeepEqual(eSupplSCfg, cgrCfg.supplierSCfg) {

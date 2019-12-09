@@ -349,26 +349,29 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// SupplierS checks
-	if cfg.supplierSCfg.Enabled && !cfg.dispatcherSCfg.Enabled {
-		if !cfg.resourceSCfg.Enabled {
-			for _, connCfg := range cfg.supplierSCfg.ResourceSConns {
-				if connCfg.Address == utils.MetaInternal {
-					return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.ResourceS, utils.SupplierS)
-				}
+	if cfg.supplierSCfg.Enabled {
+		for _, connID := range cfg.supplierSCfg.AttributeSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.attributeSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.AttributeS, utils.SupplierS)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.SupplierS, connID)
 			}
 		}
-		if !cfg.statsCfg.Enabled {
-			for _, connCfg := range cfg.supplierSCfg.StatSConns {
-				if connCfg.Address == utils.MetaInternal {
-					return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.StatService, utils.SupplierS)
-				}
+		for _, connID := range cfg.supplierSCfg.StatSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.statsCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.StatService, utils.SupplierS)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.SupplierS, connID)
 			}
 		}
-		if !cfg.attributeSCfg.Enabled {
-			for _, connCfg := range cfg.supplierSCfg.AttributeSConns {
-				if connCfg.Address == utils.MetaInternal {
-					return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.AttributeS, utils.SupplierS)
-				}
+		for _, connID := range cfg.supplierSCfg.ResourceSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.resourceSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.ResourceS, utils.SupplierS)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.SupplierS, connID)
 			}
 		}
 	}

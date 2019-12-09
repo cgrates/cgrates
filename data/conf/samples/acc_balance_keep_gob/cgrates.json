@@ -102,9 +102,7 @@
 
 "suppliers": {
 	"enabled": true,
-	"stats_conns": [
-		{"address": "*internal"},
-	],
+	"stats_conns": ["*internal"],
 },
 
 

@@ -33,34 +33,28 @@ import (
 // NewSupplierService returns the Supplier Service
 func NewSupplierService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, attrsChan, stsChan, resChan,
-	dispatcherChan chan rpcclient.ClientConnector) servmanager.Service {
+	server *utils.Server, internalSupplierSChan chan rpcclient.RpcClientConnection,
+	connMgr *engine.ConnManager) servmanager.Service {
 	return &SupplierService{
-		connChan:       make(chan rpcclient.ClientConnector, 1),
-		cfg:            cfg,
-		dm:             dm,
-		cacheS:         cacheS,
-		filterSChan:    filterSChan,
-		server:         server,
-		attrsChan:      attrsChan,
-		stsChan:        stsChan,
-		resChan:        resChan,
-		dispatcherChan: dispatcherChan,
+		connChan:    internalSupplierSChan,
+		cfg:         cfg,
+		dm:          dm,
+		cacheS:      cacheS,
+		filterSChan: filterSChan,
+		server:      server,
+		connMgr:     connMgr,
 	}
 }
 
 // SupplierService implements Service interface
 type SupplierService struct {
 	sync.RWMutex
-	cfg            *config.CGRConfig
-	dm             *DataDBService
-	cacheS         *engine.CacheS
-	filterSChan    chan *engine.FilterS
-	server         *utils.Server
-	attrsChan      chan rpcclient.ClientConnector
-	stsChan        chan rpcclient.ClientConnector
-	resChan        chan rpcclient.ClientConnector
-	dispatcherChan chan rpcclient.ClientConnector
+	cfg         *config.CGRConfig
+	dm          *DataDBService
+	cacheS      *engine.CacheS
+	filterSChan chan *engine.FilterS
+	server      *utils.Server
+	connMgr     *engine.ConnManager
 
 	splS     *engine.SupplierService
 	rpc      *v1.SupplierSv1
@@ -79,30 +73,10 @@ func (splS *SupplierService) Start() (err error) {
 	filterS := <-splS.filterSChan
 	splS.filterSChan <- filterS
 
-	var attrSConn, resourceSConn, statSConn rpcclient.ClientConnector
-
-	attrSConn, err = NewConnection(splS.cfg, splS.attrsChan, splS.dispatcherChan, splS.cfg.SupplierSCfg().AttributeSConns)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-			utils.SupplierS, utils.SupplierS, err.Error()))
-		return
-	}
-	statSConn, err = NewConnection(splS.cfg, splS.stsChan, splS.dispatcherChan, splS.cfg.SupplierSCfg().StatSConns)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to StatS: %s",
-			utils.SupplierS, err.Error()))
-		return
-	}
-	resourceSConn, err = NewConnection(splS.cfg, splS.resChan, splS.dispatcherChan, splS.cfg.SupplierSCfg().ResourceSConns)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to StatS: %s",
-			utils.SupplierS, err.Error()))
-		return
-	}
 	splS.Lock()
 	defer splS.Unlock()
 	splS.splS, err = engine.NewSupplierService(splS.dm.GetDM(), filterS, splS.cfg,
-		resourceSConn, statSConn, attrSConn)
+		splS.connMgr)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s",
 			utils.SupplierS, err.Error()))
@@ -125,30 +99,6 @@ func (splS *SupplierService) GetIntenternalChan() (conn chan rpcclient.ClientCon
 
 // Reload handles the change of config
 func (splS *SupplierService) Reload() (err error) {
-	var attrSConn, resourceSConn, statSConn rpcclient.ClientConnector
-	attrSConn, err = NewConnection(splS.cfg, splS.attrsChan, splS.dispatcherChan, splS.cfg.SupplierSCfg().AttributeSConns)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-			utils.SupplierS, utils.SupplierS, err.Error()))
-		return
-	}
-	statSConn, err = NewConnection(splS.cfg, splS.stsChan, splS.dispatcherChan, splS.cfg.SupplierSCfg().StatSConns)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to StatS: %s",
-			utils.SupplierS, err.Error()))
-		return
-	}
-	resourceSConn, err = NewConnection(splS.cfg, splS.resChan, splS.dispatcherChan, splS.cfg.SupplierSCfg().ResourceSConns)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to StatS: %s",
-			utils.SupplierS, err.Error()))
-		return
-	}
-	splS.Lock()
-	splS.splS.SetAttributeSConnection(attrSConn)
-	splS.splS.SetStatSConnection(statSConn)
-	splS.splS.SetResourceSConnection(resourceSConn)
-	splS.Unlock()
 	return
 }
 

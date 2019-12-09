@@ -303,8 +303,7 @@ func TestSuppliersPopulateSupplierService(t *testing.T) {
 	defaultCfg.SupplierSCfg().StringIndexedFields = nil
 	defaultCfg.SupplierSCfg().PrefixIndexedFields = nil
 	splService, err = NewSupplierService(dmSPP, &FilterS{
-		dm:  dmSPP,
-		cfg: defaultCfg}, defaultCfg, nil, nil, nil)
+		dm: dmSPP, cfg: defaultCfg}, defaultCfg, nil)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

@@ -20,7 +20,6 @@ package engine
 
 import (
 	"fmt"
-	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -28,7 +27,6 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // Supplier defines supplier related information used within a SupplierProfile
@@ -110,24 +108,12 @@ func (lps SupplierProfiles) Sort() {
 
 // NewSupplierService initializes the Supplier Service
 func NewSupplierService(dm *DataManager,
-	filterS *FilterS, cgrcfg *config.CGRConfig, resourceS,
-	statS, attributeS rpcclient.ClientConnector) (spS *SupplierService, err error) {
-	if attributeS != nil && reflect.ValueOf(attributeS).IsNil() { // fix nil value in interface
-		attributeS = nil
-	}
-	if resourceS != nil && reflect.ValueOf(resourceS).IsNil() { // fix nil value in interface
-		resourceS = nil
-	}
-	if statS != nil && reflect.ValueOf(statS).IsNil() { // fix nil value in interface
-		statS = nil
-	}
+	filterS *FilterS, cgrcfg *config.CGRConfig, connMgr *ConnManager) (spS *SupplierService, err error) {
 	spS = &SupplierService{
-		dm:         dm,
-		filterS:    filterS,
-		attributeS: attributeS,
-		resourceS:  resourceS,
-		statS:      statS,
-		cgrcfg:     cgrcfg,
+		dm:      dm,
+		filterS: filterS,
+		cgrcfg:  cgrcfg,
+		connMgr: connMgr,
 	}
 	if spS.sorter, err = NewSupplierSortDispatcher(spS); err != nil {
 		return nil, err
@@ -137,13 +123,11 @@ func NewSupplierService(dm *DataManager,
 
 // SupplierService is the service computing Supplier queries
 type SupplierService struct {
-	dm         *DataManager
-	filterS    *FilterS
-	cgrcfg     *config.CGRConfig
-	attributeS rpcclient.ClientConnector
-	resourceS  rpcclient.ClientConnector
-	statS      rpcclient.ClientConnector
-	sorter     SupplierSortDispatcher
+	dm      *DataManager
+	filterS *FilterS
+	cgrcfg  *config.CGRConfig
+	sorter  SupplierSortDispatcher
+	connMgr *ConnManager
 }
 
 // ListenAndServe will initialize the service
@@ -309,10 +293,10 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 func (spS *SupplierService) statMetrics(statIDs []string, tenant string) (stsMetric map[string]float64, err error) {
 	stsMetric = make(map[string]float64)
 	provStsMetrics := make(map[string][]float64)
-	if spS.statS != nil {
+	if len(spS.cgrcfg.SupplierSCfg().StatSConns) != 0 {
 		for _, statID := range statIDs {
 			var metrics map[string]float64
-			if err = spS.statS.Call(utils.StatSv1GetQueueFloatMetrics,
+			if err = spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().StatSConns, utils.StatSv1GetQueueFloatMetrics,
 				&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: tenant, ID: statID}}, &metrics); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
@@ -338,12 +322,12 @@ func (spS *SupplierService) statMetrics(statIDs []string, tenant string) (stsMet
 // first metric found is always returned
 func (spS *SupplierService) statMetricsForLoadDistribution(statIDs []string, tenant string) (result float64, err error) {
 	provStsMetrics := make(map[string][]float64)
-	if spS.statS != nil {
+	if len(spS.cgrcfg.SupplierSCfg().StatSConns) != 0 {
 		for _, statID := range statIDs {
 			// check if we get an ID in the following form (StatID:MetricID)
 			statWithMetric := strings.Split(statID, utils.InInFieldSep)
 			var metrics map[string]float64
-			if err = spS.statS.Call(utils.StatSv1GetQueueFloatMetrics,
+			if err = spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().StatSConns, utils.StatSv1GetQueueFloatMetrics,
 				&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: tenant, ID: statWithMetric[0]}}, &metrics); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
@@ -376,10 +360,10 @@ func (spS *SupplierService) statMetricsForLoadDistribution(statIDs []string, ten
 
 // resourceUsage returns sum of all resource usages out of list
 func (spS *SupplierService) resourceUsage(resIDs []string, tenant string) (tUsage float64, err error) {
-	if spS.resourceS != nil {
+	if len(spS.cgrcfg.SupplierSCfg().ResourceSConns) != 0 {
 		for _, resID := range resIDs {
 			var res Resource
-			if err = spS.resourceS.Call(utils.ResourceSv1GetResource,
+			if err = spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().ResourceSConns, utils.ResourceSv1GetResource,
 				&utils.TenantID{Tenant: tenant, ID: resID}, &res); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
@@ -593,14 +577,14 @@ func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *Sorted
 	} else if args.CGREvent.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
-	if spS.attributeS != nil {
+	if len(spS.cgrcfg.SupplierSCfg().AttributeSConns) != 0 {
 		attrArgs := &AttrArgsProcessEvent{
 			Context:       utils.StringPointer(utils.MetaSuppliers),
 			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		var rplyEv AttrSProcessEventReply
-		if err := spS.attributeS.Call(utils.AttributeSv1ProcessEvent,
+		if err := spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().AttributeSConns, utils.AttributeSv1ProcessEvent,
 			attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 			args.CGREvent = rplyEv.CGREvent
 		} else if err.Error() != utils.ErrNotFound.Error() {
@@ -634,22 +618,4 @@ func (spS *SupplierService) V1GetSupplierProfilesForEvent(args *utils.CGREventWi
 	}
 	*reply = sPs
 	return
-}
-
-// SetAttributeSConnection sets the new connection to the attribute service
-// only used on reload
-func (spS *SupplierService) SetAttributeSConnection(attrS rpcclient.ClientConnector) {
-	spS.attributeS = attrS
-}
-
-// SetStatSConnection sets the new connection to the stat service
-// only used on reload
-func (spS *SupplierService) SetStatSConnection(stS rpcclient.ClientConnector) {
-	spS.statS = stS
-}
-
-// SetResourceSConnection sets the new connection to the resource service
-// only used on reload
-func (spS *SupplierService) SetResourceSConnection(rS rpcclient.ClientConnector) {
-	spS.resourceS = rS
 }
