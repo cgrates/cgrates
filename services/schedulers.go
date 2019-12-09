@@ -33,7 +33,7 @@ import (
 // NewSchedulerService returns the Scheduler Service
 func NewSchedulerService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, fltrSChan chan *engine.FilterS,
-	server *utils.Server, internalSchedulerrSChan chan rpcclient.RpcClientConnection,
+	server *utils.Server, internalSchedulerrSChan chan rpcclient.ClientConnector,
 	connMgr *engine.ConnManager) *SchedulerService {
 	return &SchedulerService{
 		connChan:  internalSchedulerrSChan,

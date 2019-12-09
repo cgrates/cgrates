@@ -33,7 +33,7 @@ import (
 // NewStatService returns the Stat Service
 func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, internalStatSChan chan rpcclient.RpcClientConnection, connMgr *engine.ConnManager) servmanager.Service {
+	server *utils.Server, internalStatSChan chan rpcclient.ClientConnector, connMgr *engine.ConnManager) servmanager.Service {
 	return &StatService{
 		connChan:    internalStatSChan,
 		cfg:         cfg,

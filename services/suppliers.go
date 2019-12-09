@@ -33,7 +33,7 @@ import (
 // NewSupplierService returns the Supplier Service
 func NewSupplierService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, internalSupplierSChan chan rpcclient.RpcClientConnection,
+	server *utils.Server, internalSupplierSChan chan rpcclient.ClientConnector,
 	connMgr *engine.ConnManager) servmanager.Service {
 	return &SupplierService{
 		connChan:    internalSupplierSChan,

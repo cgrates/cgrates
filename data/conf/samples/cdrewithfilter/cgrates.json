@@ -28,9 +28,7 @@
 
 "rals": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "*internal"}
-	],
+	"thresholds_conns": ["*internal"],
 },
 
 

@@ -33,7 +33,7 @@ import (
 // NewResourceService returns the Resource Service
 func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, internalResourceSChan chan rpcclient.RpcClientConnection,
+	server *utils.Server, internalResourceSChan chan rpcclient.ClientConnector,
 	connMgr *engine.ConnManager) servmanager.Service {
 	return &ResourceService{
 		connChan:    internalResourceSChan,
@@ -57,7 +57,7 @@ type ResourceService struct {
 
 	reS      *engine.ResourceService
 	rpc      *v1.ResourceSv1
-	connChan chan rpcclient.RpcClientConnection
+	connChan chan rpcclient.ClientConnector
 	connMgr  *engine.ConnManager
 }
 

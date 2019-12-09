@@ -28,13 +28,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Individual session run
-type SessionRun struct {
-	RequestType    string
-	CallDescriptor *CallDescriptor
-	CallCosts      []*CallCost
-}
-
 type Responder struct {
 	ExitChan         chan bool
 	Timeout          time.Duration
@@ -55,7 +48,7 @@ func (rs *Responder) usageAllowed(tor string, reqUsage time.Duration) (allowed b
 }
 
 /*
-RPC method thet provides the external RPC interface for getting the rating information.
+RPC method that provides the external RPC interface for getting the rating information.
 */
 func (rs *Responder) GetCost(arg *CallDescriptorWithArgDispatcher, reply *CallCost) (err error) {
 	// RPC caching

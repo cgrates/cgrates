@@ -22,13 +22,11 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"reflect"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 const (
@@ -58,7 +56,6 @@ var (
 	debitPeriod             = 10 * time.Second
 	globalRoundingDecimals  = 6
 	connMgr                 *ConnManager
-	schedCdrsConns          rpcclient.RpcClientConnection
 	rpSubjectPrefixMatching bool
 )
 
@@ -84,14 +81,6 @@ func SetRpSubjectPrefixMatching(flag bool) {
 // SetCdrStorage sets the database for CDR storing, used by *cdrlog in first place
 func SetCdrStorage(cStorage CdrStorage) {
 	cdrStorage = cStorage
-}
-
-// SetSchedCdrsConns sets the connection between action and CDRServer
-func SetSchedCdrsConns(sc rpcclient.ClientConnector) {
-	schedCdrsConns = sc
-	if schedCdrsConns != nil && reflect.ValueOf(schedCdrsConns).IsNil() {
-		schedCdrsConns = nil
-	}
 }
 
 // NewCallDescriptorFromCGREvent converts a CGREvent into CallDescriptor

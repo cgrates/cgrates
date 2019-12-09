@@ -30,7 +30,7 @@ import (
 
 // NewResponderService returns the Resonder Service
 func NewResponderService(cfg *config.CGRConfig, server *utils.Server,
-	internalRALsChan chan rpcclient.RpcClientConnection,
+	internalRALsChan chan rpcclient.ClientConnector,
 	exitChan chan bool) *ResponderService {
 	return &ResponderService{
 		connChan: internalRALsChan,

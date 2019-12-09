@@ -33,7 +33,7 @@ import (
 // NewRalService returns the Ral Service
 func NewRalService(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, cacheS *engine.CacheS, filterSChan chan *engine.FilterS, server *utils.Server,
-	internalRALsChan, internalResponderChan, internalAPIerV1Chan, internalAPIerV2Chan chan rpcclient.RpcClientConnection,
+	internalRALsChan, internalResponderChan, internalAPIerV1Chan, internalAPIerV2Chan chan rpcclient.ClientConnector,
 	schedulerService *SchedulerService, exitChan chan bool,
 	connMgr *engine.ConnManager) *RalService {
 	resp := NewResponderService(cfg, server, internalResponderChan, exitChan)
@@ -71,7 +71,6 @@ func (rals *RalService) Start() (err error) {
 	if rals.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
-	engine.SetConnManager(rals.connMgr)
 	engine.SetRpSubjectPrefixMatching(rals.cfg.RalsCfg().RpSubjectPrefixMatching)
 	rals.Lock()
 	defer rals.Unlock()

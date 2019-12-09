@@ -35,7 +35,7 @@ func NewApierV1Service(cfg *config.CGRConfig, dm *DataDBService,
 	server *utils.Server,
 	schedService *SchedulerService,
 	responderService *ResponderService,
-	internalAPIerV1Chan chan rpcclient.RpcClientConnection,
+	internalAPIerV1Chan chan rpcclient.ClientConnector,
 	connMgr *engine.ConnManager) *ApierV1Service {
 	return &ApierV1Service{
 		connChan:         internalAPIerV1Chan,

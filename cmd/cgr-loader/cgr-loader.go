@@ -83,7 +83,6 @@ var (
 		`Separator for csv file (by default "," is used)`)
 	recursive = cgrLoaderFlags.Bool("recursive", false, "Loads data from folder recursive.")
 
-
 	importID       = cgrLoaderFlags.String("import_id", "", "Uniquely identify an import/load, postpended to some automatic fields")
 	timezone       = cgrLoaderFlags.String("timezone", "", `Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>`)
 	disableReverse = cgrLoaderFlags.Bool("disable_reverse_mappings", false, "Will disable reverse mappings rebuilding")
@@ -96,6 +95,9 @@ var (
 	dm     *engine.DataManager
 	storDb engine.LoadStorage
 	loader engine.LoadReader
+
+	fromStorDB = cgrLoaderFlags.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
+	toStorDB   = cgrLoaderFlags.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
 )
 
 func main() {

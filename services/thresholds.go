@@ -33,7 +33,7 @@ import (
 // NewThresholdService returns the Threshold Service
 func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, internalThresholdSChan chan rpcclient.RpcClientConnection) servmanager.Service {
+	server *utils.Server, internalThresholdSChan chan rpcclient.ClientConnector) servmanager.Service {
 	return &ThresholdService{
 		connChan:    internalThresholdSChan,
 		cfg:         cfg,

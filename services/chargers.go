@@ -33,7 +33,7 @@ import (
 // NewChargerService returns the Charger Service
 func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS, server *utils.Server,
-	internalChargerSChan chan rpcclient.RpcClientConnection, connMgr *engine.ConnManager) servmanager.Service {
+	internalChargerSChan chan rpcclient.ClientConnector, connMgr *engine.ConnManager) servmanager.Service {
 	return &ChargerService{
 		connChan:    internalChargerSChan,
 		cfg:         cfg,

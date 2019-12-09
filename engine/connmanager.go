@@ -26,7 +26,9 @@ import (
 
 // NewConnManager returns the Connection Manager
 func NewConnManager(cfg *config.CGRConfig, rpcInternal map[string]chan rpcclient.ClientConnector) (cM *ConnManager) {
-	return &ConnManager{cfg: cfg, rpcInternal: rpcInternal}
+	cM = &ConnManager{cfg: cfg, rpcInternal: rpcInternal}
+	SetConnManager(cM)
+	return
 }
 
 //ConnManager handle the RPC connections

@@ -68,7 +68,7 @@ type TpReader struct {
 
 func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
 	cacheConns, schedulerConns []string) (*TpReader, error) {
-	var rmtConns, rplConns *rpcclient.RpcClientPool
+	var rmtConns, rplConns *rpcclient.RPCPool
 	if len(config.CgrConfig().DataDbCfg().RmtConns) != 0 {
 		var err error
 		rmtConns, err = NewRPCPool(rpcclient.PoolFirstPositive, config.CgrConfig().TlsCfg().ClientKey,

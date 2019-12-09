@@ -489,20 +489,20 @@ func main() {
 	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
 	internalGuardianSChan := make(chan rpcclient.ClientConnector, 1)
 
-	internalCDRServerChan := make(chan rpcclient.RpcClientConnection, 1)   // needed to avod cyclic dependency
-	internalAttributeSChan := make(chan rpcclient.RpcClientConnection, 1)  // needed to avod cyclic dependency
-	internalDispatcherSChan := make(chan rpcclient.RpcClientConnection, 1) // needed to avod cyclic dependency
-	internalSessionSChan := make(chan rpcclient.RpcClientConnection, 1)    // needed to avod cyclic dependency
-	internalChargerSChan := make(chan rpcclient.RpcClientConnection, 1)    // needed to avod cyclic dependency
-	internalThresholdSChan := make(chan rpcclient.RpcClientConnection, 1)  // needed to avod cyclic dependency
-	internalStatSChan := make(chan rpcclient.RpcClientConnection, 1)       // needed to avod cyclic dependency
-	internalResourceSChan := make(chan rpcclient.RpcClientConnection, 1)   // needed to avod cyclic dependency
-	internalSupplierSChan := make(chan rpcclient.RpcClientConnection, 1)   // needed to avod cyclic dependency
-	internalSchedulerSChan := make(chan rpcclient.RpcClientConnection, 1)  // needed to avod cyclic dependency
-	internalRALsChan := make(chan rpcclient.RpcClientConnection, 1)        // needed to avod cyclic dependency
-	internalResponderChan := make(chan rpcclient.RpcClientConnection, 1)   // needed to avod cyclic dependency
-	internalAPIerV1Chan := make(chan rpcclient.RpcClientConnection, 1)     // needed to avod cyclic dependency
-	internalAPIerV2Chan := make(chan rpcclient.RpcClientConnection, 1)     // needed to avod cyclic dependency
+	internalCDRServerChan := make(chan rpcclient.ClientConnector, 1)   // needed to avod cyclic dependency
+	internalAttributeSChan := make(chan rpcclient.ClientConnector, 1)  // needed to avod cyclic dependency
+	internalDispatcherSChan := make(chan rpcclient.ClientConnector, 1) // needed to avod cyclic dependency
+	internalSessionSChan := make(chan rpcclient.ClientConnector, 1)    // needed to avod cyclic dependency
+	internalChargerSChan := make(chan rpcclient.ClientConnector, 1)    // needed to avod cyclic dependency
+	internalThresholdSChan := make(chan rpcclient.ClientConnector, 1)  // needed to avod cyclic dependency
+	internalStatSChan := make(chan rpcclient.ClientConnector, 1)       // needed to avod cyclic dependency
+	internalResourceSChan := make(chan rpcclient.ClientConnector, 1)   // needed to avod cyclic dependency
+	internalSupplierSChan := make(chan rpcclient.ClientConnector, 1)   // needed to avod cyclic dependency
+	internalSchedulerSChan := make(chan rpcclient.ClientConnector, 1)  // needed to avod cyclic dependency
+	internalRALsChan := make(chan rpcclient.ClientConnector, 1)        // needed to avod cyclic dependency
+	internalResponderChan := make(chan rpcclient.ClientConnector, 1)   // needed to avod cyclic dependency
+	internalAPIerV1Chan := make(chan rpcclient.ClientConnector, 1)     // needed to avod cyclic dependency
+	internalAPIerV2Chan := make(chan rpcclient.ClientConnector, 1)     // needed to avod cyclic dependency
 
 	// init CacheS
 	cacheS := initCacheS(internalCacheSChan, server, dmService.GetDM(), exitChan)
@@ -515,7 +515,7 @@ func main() {
 
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, exitChan)
-	connManager := services.NewConnManagerService(cfg, map[string]chan rpcclient.RpcClientConnection{
+	connManager := services.NewConnManagerService(cfg, map[string]chan rpcclient.ClientConnector{
 		//utils.AnalyzerSv1:  anz.GetIntenternalChan(),
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier):      internalAPIerV1Chan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): internalAttributeSChan,
@@ -523,7 +523,7 @@ func main() {
 		//utils.CDRsV1:       cdrS.GetIntenternalChan(),
 		//utils.CDRsV2:       cdrS.GetIntenternalChan(),
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): internalChargerSChan,
-		utils.GuardianSv1: internalGuardianSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaGuardian): internalGuardianSChan,
 		//utils.LoaderSv1:    ldrs.GetIntenternalChan(),
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources):      internalResourceSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder):      internalResponderChan,

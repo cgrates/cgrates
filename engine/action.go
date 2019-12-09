@@ -128,7 +128,7 @@ func logAction(ub *Account, a *Action, acs Actions, extraData interface{}) (err 
 }
 
 func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (err error) {
-	if schedCdrsConns == nil {
+	if len(config.CgrConfig().SchedulerCfg().CDRsConns) == 0 {
 		return fmt.Errorf("No connection with CDR Server")
 	}
 	defaultTemplate := map[string]config.RSRParsers{
@@ -204,11 +204,11 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 		cdrs = append(cdrs, cdr)
 		var rply string
 		// After compute the CDR send it to CDR Server to be processed
-		if err := schedCdrsConns.Call(utils.CDRsV1ProcessEvent,
+		if err := connMgr.Call(config.CgrConfig().SchedulerCfg().CDRsConns,
+			utils.CDRsV1ProcessEvent,
 			&ArgV1ProcessEvent{
-				Flags:    []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}, // do not try to get the chargers for cdrlog
-				CGREvent: *cdr.AsCGREvent(),
-			}, &rply); err != nil {
+			Flags:    []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}, // do not try to get the chargers for cdrlog
+			CGREvent: *cdr.AsCGREvent()}, &rply); err != nil {
 			return err
 		}
 	}
