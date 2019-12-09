@@ -30,9 +30,6 @@
 
 "resources": {
 	"enabled": true,
-	"stats_conns": [
-		//{"address": "*internal"}
-	],
 	"cache_dump_interval": "0s",
 	"usage_ttl": "3h",
 },

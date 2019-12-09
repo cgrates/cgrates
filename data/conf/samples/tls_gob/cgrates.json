@@ -64,9 +64,7 @@
 "resources": {
 	"enabled": true,
 	"store_interval": "1s",
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2013", "transport": "*gob"}
-	],
+	"thresholds_conns": ["conn1"],
 },
 
 

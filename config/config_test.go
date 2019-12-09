@@ -829,7 +829,7 @@ func TestCgrCfgJSONDefaultsResLimCfg(t *testing.T) {
 	eResLiCfg := &ResourceSConfig{
 		Enabled:             false,
 		IndexedSelects:      true,
-		ThresholdSConns:     []*RemoteHost{},
+		ThresholdSConns:     []string{},
 		StoreInterval:       0,
 		StringIndexedFields: nil,
 		PrefixIndexedFields: &[]string{},

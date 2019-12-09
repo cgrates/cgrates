@@ -528,12 +528,8 @@ func TestConfigSanityHTTPAgent(t *testing.T) {
 func TestConfigSanityResourceLimiter(t *testing.T) {
 	cfg, _ = NewDefaultCGRConfig()
 	cfg.resourceSCfg = &ResourceSConfig{
-		Enabled: true,
-		ThresholdSConns: []*RemoteHost{
-			&RemoteHost{
-				Address: utils.MetaInternal,
-			},
-		},
+		Enabled:         true,
+		ThresholdSConns: []string{utils.MetaInternal},
 	}
 	expected := "<ThresholdS> not enabled but requested by <ResourceS> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {

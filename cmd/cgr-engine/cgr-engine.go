@@ -496,6 +496,7 @@ func main() {
 	internalChargerSChan := make(chan rpcclient.RpcClientConnection, 1)    // needed to avod cyclic dependency
 	internalThresholdSChan := make(chan rpcclient.RpcClientConnection, 1)  // needed to avod cyclic dependency
 	internalStatSChan := make(chan rpcclient.RpcClientConnection, 1)       // needed to avod cyclic dependency
+	internalResourceSChan := make(chan rpcclient.RpcClientConnection, 1)   // needed to avod cyclic dependency
 
 	// init CacheS
 	cacheS := initCacheS(internalCacheSChan, server, dmService.GetDM(), exitChan)
@@ -519,7 +520,7 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): internalChargerSChan,
 		utils.GuardianSv1: internalGuardianSChan,
 		//utils.LoaderSv1:    ldrs.GetIntenternalChan(),
-		//utils.ResourceSv1:  reS.GetIntenternalChan(),
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources): internalResourceSChan,
 		//utils.Responder:    rals.GetResponder().GetIntenternalChan(),
 		//utils.SchedulerSv1: schS.GetIntenternalChan(),
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS): internalSessionSChan,
@@ -540,7 +541,7 @@ func main() {
 	stS := services.NewStatService(cfg, dmService, cacheS, filterSChan, server,
 		internalStatSChan, connManager.GetConnMgr())
 	reS := services.NewResourceService(cfg, dmService, cacheS, filterSChan, server,
-		tS.GetIntenternalChan(), dspS.GetIntenternalChan())
+		internalResourceSChan, connManager.GetConnMgr())
 	supS := services.NewSupplierService(cfg, dmService, cacheS, filterSChan, server,
 		attrS.GetIntenternalChan(), stS.GetIntenternalChan(),
 		reS.GetIntenternalChan(), dspS.GetIntenternalChan())

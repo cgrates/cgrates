@@ -414,7 +414,7 @@ type ChargerSJsonCfg struct {
 type ResourceSJsonCfg struct {
 	Enabled               *bool
 	Indexed_selects       *bool
-	Thresholds_conns      *[]*RemoteHostJson
+	Thresholds_conns      *[]string
 	Store_interval        *string
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string

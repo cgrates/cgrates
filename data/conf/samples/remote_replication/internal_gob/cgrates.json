@@ -70,9 +70,7 @@
 "resources": {
 	"enabled": true,
 	"store_interval": "-1",
-	"thresholds_conns": [
-		{"address": "*internal"}
-	],
+	"thresholds_conns": ["*internal"],
 },
 
 

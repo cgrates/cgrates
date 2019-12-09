@@ -327,10 +327,13 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 	}
 	// ResourceLimiter checks
-	if cfg.resourceSCfg.Enabled && !cfg.thresholdSCfg.Enabled && !cfg.dispatcherSCfg.Enabled {
-		for _, connCfg := range cfg.resourceSCfg.ThresholdSConns {
-			if connCfg.Address == utils.MetaInternal {
+	if cfg.resourceSCfg.Enabled {
+		for _, connID := range cfg.resourceSCfg.ThresholdSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.thresholdSCfg.Enabled {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.ThresholdS, utils.ResourceS)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.ResourceS, connID)
 			}
 		}
 	}

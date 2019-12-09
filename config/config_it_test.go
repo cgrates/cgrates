@@ -203,9 +203,7 @@ func TestCGRConfigReloadResourceS(t *testing.T) {
 		StringIndexedFields: &[]string{utils.Account},
 		PrefixIndexedFields: &[]string{},
 		IndexedSelects:      true,
-		ThresholdSConns: []*RemoteHost{
-			&RemoteHost{Address: "127.0.0.1:2012", Transport: utils.MetaJSON},
-		},
+		ThresholdSConns:     []string{utils.MetaLocalHost},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.ResourceSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.ResourceSCfg()))
