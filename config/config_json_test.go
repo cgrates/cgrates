@@ -159,6 +159,8 @@ func TestCacheJsonCfg(t *testing.T) {
 			Ttl: utils.StringPointer("2s"), Static_ttl: utils.BoolPointer(false)},
 		utils.CacheClosedSessions: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer("10s"), Static_ttl: utils.BoolPointer(false)},
+		utils.CacheCDRIDs: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
+			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false)},
 		utils.CacheLoadIDs: &CacheParamJsonCfg{Limit: utils.IntPointer(-1),
 			Ttl: utils.StringPointer(""), Static_ttl: utils.BoolPointer(false),
 			Precache: utils.BoolPointer(false)},

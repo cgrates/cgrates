@@ -58,6 +58,46 @@ var (
 		MetaFileCSV:       CSVSuffix,
 		MetaFileFWV:       FWVSuffix,
 	}
+	// CachePartitions enables creation of cache partitions
+	CachePartitions = StringMap{
+		CacheDestinations:            true,
+		CacheReverseDestinations:     true,
+		CacheRatingPlans:             true,
+		CacheRatingProfiles:          true,
+		CacheActions:                 true,
+		CacheActionPlans:             true,
+		CacheAccountActionPlans:      true,
+		CacheActionTriggers:          true,
+		CacheSharedGroups:            true,
+		CacheTimings:                 true,
+		CacheResourceProfiles:        true,
+		CacheResources:               true,
+		CacheEventResources:          true,
+		CacheStatQueueProfiles:       true,
+		CacheStatQueues:              true,
+		CacheThresholdProfiles:       true,
+		CacheThresholds:              true,
+		CacheFilters:                 true,
+		CacheSupplierProfiles:        true,
+		CacheAttributeProfiles:       true,
+		CacheChargerProfiles:         true,
+		CacheDispatcherProfiles:      true,
+		CacheDispatcherHosts:         true,
+		CacheResourceFilterIndexes:   true,
+		CacheStatFilterIndexes:       true,
+		CacheThresholdFilterIndexes:  true,
+		CacheSupplierFilterIndexes:   true,
+		CacheAttributeFilterIndexes:  true,
+		CacheChargerFilterIndexes:    true,
+		CacheDispatcherFilterIndexes: true,
+		CacheDispatcherRoutes:        true,
+		CacheDiameterMessages:        true,
+		CacheRPCResponses:            true,
+		CacheClosedSessions:          true,
+		CacheCDRIDs:                  true,
+		CacheLoadIDs:                 true,
+		CacheRPCConnections:          true,
+	}
 	CacheInstanceToPrefix = map[string]string{
 		CacheDestinations:            DESTINATION_PREFIX,
 		CacheReverseDestinations:     REVERSE_DESTINATION_PREFIX,
@@ -1447,6 +1487,7 @@ const (
 	CacheLoadIDs                 = "*load_ids"
 	CacheAccounts                = "*accounts"
 	CacheRPCConnections          = "*rpc_connections"
+	CacheCDRIDs                  = "*cdr_ids"
 )
 
 // Prefix for indexing

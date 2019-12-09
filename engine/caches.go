@@ -34,42 +34,6 @@ func init() {
 	InitCache(nil)
 }
 
-var precachedPartitions = utils.StringMap{
-	utils.CacheDestinations:        true,
-	utils.CacheReverseDestinations: true,
-	utils.CacheRatingPlans:         true,
-	utils.CacheRatingProfiles:      true,
-	utils.CacheActions:             true,
-	utils.CacheActionPlans:         true,
-	utils.CacheAccountActionPlans:  true,
-	utils.CacheActionTriggers:      true,
-	utils.CacheSharedGroups:        true,
-	utils.CacheResourceProfiles:    true,
-	utils.CacheResources:           true,
-	utils.CacheStatQueueProfiles:   true,
-	utils.CacheStatQueues:          true,
-	utils.CacheThresholdProfiles:   true,
-	utils.CacheThresholds:          true,
-	utils.CacheFilters:             true,
-	utils.CacheSupplierProfiles:    true,
-	utils.CacheAttributeProfiles:   true,
-	utils.CacheChargerProfiles:     true,
-	utils.CacheDispatcherProfiles:  true,
-	utils.CacheDispatcherHosts:     true,
-
-	utils.CacheAttributeFilterIndexes:  true,
-	utils.CacheResourceFilterIndexes:   true,
-	utils.CacheStatFilterIndexes:       true,
-	utils.CacheThresholdFilterIndexes:  true,
-	utils.CacheSupplierFilterIndexes:   true,
-	utils.CacheChargerFilterIndexes:    true,
-	utils.CacheDispatcherFilterIndexes: true,
-
-	utils.CacheDiameterMessages: true,
-	utils.CacheTimings:          true,
-	utils.CacheLoadIDs:          true,
-}
-
 // InitCache will instantiate the cache with specific or default configuraiton
 func InitCache(cfg config.CacheCfg) {
 	if cfg == nil {
@@ -84,9 +48,6 @@ func NewCacheS(cfg *config.CGRConfig, dm *DataManager) (c *CacheS) {
 	c = &CacheS{cfg: cfg, dm: dm,
 		pcItems: make(map[string]chan struct{})}
 	for cacheID := range cfg.CacheCfg() {
-		if !precachedPartitions.HasKey(cacheID) {
-			continue
-		}
 		c.pcItems[cacheID] = make(chan struct{})
 	}
 	return
@@ -110,9 +71,6 @@ func (chS *CacheS) Precache() (err error) {
 	errChan := make(chan error)
 	doneChan := make(chan struct{})
 	for cacheID, cacheCfg := range chS.cfg.CacheCfg() {
-		if !precachedPartitions.HasKey(cacheID) {
-			continue
-		}
 		if !cacheCfg.Precache {
 			close(chS.pcItems[cacheID]) // no need of precache
 			continue
@@ -197,7 +155,7 @@ func (chS *CacheS) V1GetCacheStats(args *utils.AttrCacheIDsWithArgDispatcher,
 
 func (chS *CacheS) V1PrecacheStatus(args *utils.AttrCacheIDsWithArgDispatcher, rply *map[string]string) (err error) {
 	if len(args.CacheIDs) == 0 {
-		for cacheID := range precachedPartitions {
+		for cacheID := range utils.CachePartitions {
 			args.CacheIDs = append(args.CacheIDs, cacheID)
 		}
 	}

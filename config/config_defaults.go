@@ -166,20 +166,20 @@ const CGRATES_CFG_JSON = `
 	"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control resource profiles caching
 	"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control resources caching
 	"*event_resources": {"limit": -1, "ttl": "", "static_ttl": false},							// matching resources to events
-	"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// statqueue profiles
-	"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// statqueues with metrics
-	"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control threshold profiles caching
-	"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control thresholds caching
+	"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// statqueue profiles
+	"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// statqueues with metrics
+	"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// control threshold profiles caching
+	"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// control thresholds caching
 	"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control filters caching
 	"*supplier_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control supplier profile caching
-	"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control attribute profile caching
+	"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// control attribute profile caching
 	"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control charger profile caching
 	"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// control dispatcher profile caching
 	"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control dispatcher hosts caching
-	"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control resource filter indexes caching
-	"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 						// control stat filter indexes caching
+	"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control resource filter indexes caching
+	"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control stat filter indexes caching
 	"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control threshold filter indexes caching
-	"*supplier_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control supplier filter indexes caching
+	"*supplier_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control supplier filter indexes caching
 	"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control attribute filter indexes caching
 	"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control charger filter indexes caching
 	"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control dispatcher filter indexes caching
@@ -187,6 +187,7 @@ const CGRATES_CFG_JSON = `
 	"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false},						// diameter messages caching
 	"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false},							// RPC responses caching
 	"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false},						// closed sessions cached for CDRs
+	"*cdr_ids": {"limit": -1, "ttl": "", "static_ttl": false},									// protects CDRs against double-charging
 	"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control the load_ids for items
 	"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false},							// RPC connections caching
 },

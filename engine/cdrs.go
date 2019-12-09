@@ -477,6 +477,23 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithArgDispatcher,
 			}
 		}
 	}
+	// Check if the unique ID was not already processed
+	for _, cgrEv := range cgrEvs {
+		me := MapEvent(cgrEv.CGREvent.Event)
+		uID := utils.ConcatenatedKey(
+			me.GetStringIgnoreErrors(utils.CGRID),
+			me.GetStringIgnoreErrors(utils.RunID),
+		)
+		if Cache.HasItem(utils.CacheCDRIDs, uID) {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
+					utils.CDRs, err.Error(), cgrEv, utils.CacheS))
+			return utils.ErrExists
+		}
+		Cache.Set(utils.CacheCDRIDs, uID, true, nil,
+			cacheCommit(utils.NonTransactional), utils.NonTransactional)
+	}
+	// Populate CDR list out of events
 	cdrs := make([]*CDR, len(cgrEvs))
 	if ralS || store || reRate || export {
 		for i, cgrEv := range cgrEvs {

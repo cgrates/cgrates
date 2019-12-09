@@ -729,6 +729,8 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 			TTL: time.Duration(2 * time.Second), StaticTTL: false},
 		utils.CacheClosedSessions: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(10 * time.Second), StaticTTL: false},
+		utils.CacheCDRIDs: &CacheParamCfg{Limit: -1,
+			TTL: time.Duration(0), StaticTTL: false},
 		utils.CacheLoadIDs: &CacheParamCfg{Limit: -1,
 			TTL: time.Duration(0), StaticTTL: false, Precache: false},
 		utils.CacheRPCConnections: &CacheParamCfg{Limit: -1,
