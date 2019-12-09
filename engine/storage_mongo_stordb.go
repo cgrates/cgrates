@@ -943,6 +943,9 @@ func (ms *MongoStorage) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 			// return err
 		} else {
 			_, err = ms.getCol(ColCDRs).InsertOne(sctx, cdr)
+			if err != nil && strings.Contains(err.Error(), "E11000") { // Mongo returns E11000 when key is duplicated
+				err = utils.ErrExists
+			}
 		}
 		return err
 	})

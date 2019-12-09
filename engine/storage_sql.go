@@ -879,6 +879,9 @@ func (self *SQLStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
 	if saved.Error != nil {
 		tx.Rollback()
 		if !allowUpdate {
+			if strings.Contains(saved.Error.Error(), "1062") || strings.Contains(saved.Error.Error(), "duplicate key") { // returns 1062/pq when key is duplicated
+				return utils.ErrExists
+			}
 			return saved.Error
 		}
 		tx = self.db.Begin()
