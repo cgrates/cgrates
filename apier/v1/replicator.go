@@ -32,7 +32,7 @@ type ReplicatorSv1 struct {
 	dm *engine.DataManager
 }
 
-// Call implements rpcclient.RpcClientConnection interface for internal RPC
+// Call implements rpcclient.ClientConnector interface for internal RPC
 func (rplSv1 *ReplicatorSv1) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(rplSv1, serviceMethod, args, reply)
 }

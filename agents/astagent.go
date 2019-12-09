@@ -54,7 +54,7 @@ const (
 )
 
 func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
-	smgConn rpcclient.RpcClientConnection) (*AsteriskAgent, error) {
+	smgConn rpcclient.ClientConnector) (*AsteriskAgent, error) {
 	sma := &AsteriskAgent{
 		cgrCfg:      cgrCfg,
 		astConnIdx:  astConnIdx,
@@ -67,7 +67,7 @@ func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
 type AsteriskAgent struct {
 	cgrCfg      *config.CGRConfig // Separate from smCfg since there can be multiple
 	astConnIdx  int
-	smg         rpcclient.RpcClientConnection
+	smg         rpcclient.ClientConnector
 	astConn     *aringo.ARInGO
 	astEvChan   chan map[string]interface{}
 	astErrChan  chan error
@@ -329,7 +329,7 @@ func (sma *AsteriskAgent) V1DisconnectSession(args utils.AttrDisconnectSession, 
 	return nil
 }
 
-// rpcclient.RpcClientConnection interface
+// rpcclient.ClientConnector interface
 func (sma *AsteriskAgent) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.RPCCall(sma, serviceMethod, args, reply)
 }
@@ -360,6 +360,6 @@ func (sma *AsteriskAgent) V1GetActiveSessionIDs(ignParam string,
 
 // SetSessionSConnection sets the new connection to the session service
 // only used on reload
-func (sma *AsteriskAgent) SetSessionSConnection(sS rpcclient.RpcClientConnection) {
+func (sma *AsteriskAgent) SetSessionSConnection(sS rpcclient.ClientConnector) {
 	sma.smg = sS
 }

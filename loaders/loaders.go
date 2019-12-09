@@ -31,7 +31,7 @@ import (
 
 func NewLoaderService(dm *engine.DataManager, ldrsCfg []*config.LoaderSCfg,
 	timezone string, exitChan chan bool, filterS *engine.FilterS,
-	internalCacheSChan chan rpcclient.RpcClientConnection) (ldrS *LoaderService) {
+	internalCacheSChan chan rpcclient.ClientConnector) (ldrS *LoaderService) {
 	ldrS = &LoaderService{ldrs: make(map[string]*Loader)}
 	for _, ldrCfg := range ldrsCfg {
 		if !ldrCfg.Enabled {
@@ -148,7 +148,7 @@ func (ldrS *LoaderService) V1Remove(args *ArgsProcessFolder,
 // Reload recreates the loaders map thread safe
 func (ldrS *LoaderService) Reload(dm *engine.DataManager, ldrsCfg []*config.LoaderSCfg,
 	timezone string, exitChan chan bool, filterS *engine.FilterS,
-	internalCacheSChan chan rpcclient.RpcClientConnection) {
+	internalCacheSChan chan rpcclient.ClientConnector) {
 	ldrS.Lock()
 	ldrS.ldrs = make(map[string]*Loader)
 	for _, ldrCfg := range ldrsCfg {

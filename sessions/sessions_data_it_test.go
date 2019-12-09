@@ -976,7 +976,7 @@ func TestSessionsDataTTLUsageProtection(t *testing.T) {
 	time.Sleep(60 * time.Millisecond)
 	if err := sDataRPC.Call(utils.SessionSv1GetActiveSessions,
 		new(utils.SessionFilter), &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err, aSessions)
+		t.Error(err, utils.ToJSON(aSessions))
 	}
 }
 

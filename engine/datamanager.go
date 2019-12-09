@@ -90,7 +90,7 @@ var (
 
 // NewDataManager returns a new DataManager
 func NewDataManager(dataDB DataDB, cacheCfg config.CacheCfg, rmtConns,
-	rplConns *rpcclient.RpcClientPool) *DataManager {
+	rplConns *rpcclient.RPCPool) *DataManager {
 	return &DataManager{
 		dataDB:   dataDB,
 		cacheCfg: cacheCfg,
@@ -104,7 +104,7 @@ func NewDataManager(dataDB DataDB, cacheCfg config.CacheCfg, rmtConns,
 type DataManager struct {
 	dataDB             DataDB
 	cacheCfg           config.CacheCfg
-	rmtConns, rplConns *rpcclient.RpcClientPool
+	rmtConns, rplConns *rpcclient.RPCPool
 }
 
 // DataDB exports access to dataDB
@@ -520,7 +520,7 @@ func GetFilter(dm *DataManager, tenant, id string, cacheRead, cacheWrite bool,
 	}
 	if strings.HasPrefix(id, utils.Meta) {
 		fltr, err = NewFilterFromInline(tenant, id)
-	} else if dm == nil  { // in case we want the filter from dataDB but the connection to dataDB a optional (e.g. SessionS)
+	} else if dm == nil { // in case we want the filter from dataDB but the connection to dataDB a optional (e.g. SessionS)
 		err = utils.ErrNoDatabaseConn
 		return
 	} else {
@@ -2101,7 +2101,7 @@ func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrit
 	if cacheWrite {
 		cfg := config.CgrConfig()
 		if dH.rpcConn, err = NewRPCPool(
-			rpcclient.POOL_FIRST,
+			rpcclient.PoolFirst,
 			cfg.TlsCfg().ClientKey,
 			cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 			cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,

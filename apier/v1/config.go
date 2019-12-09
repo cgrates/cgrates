@@ -40,7 +40,7 @@ func (cSv1 *ConfigSv1) ReloadConfig(args *config.ConfigReloadWithArgDispatcher, 
 	return cSv1.cfg.V1ReloadConfig(args, reply)
 }
 
-// Call implements rpcclient.RpcClientConnection interface for internal RPC
+// Call implements rpcclient.ClientConnector interface for internal RPC
 func (cSv1 *ConfigSv1) Call(serviceMethod string,
 	args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(cSv1, serviceMethod, args, reply)

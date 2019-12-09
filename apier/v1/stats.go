@@ -163,7 +163,7 @@ type StatSv1 struct {
 	sS *engine.StatService
 }
 
-// Call implements rpcclient.RpcClientConnection interface for internal RPC
+// Call implements rpcclient.ClientConnector interface for internal RPC
 func (stsv1 *StatSv1) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(stsv1, serviceMethod, args, reply)
 }

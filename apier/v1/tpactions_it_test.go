@@ -122,7 +122,7 @@ func testTPActionsStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTPActionsRpcConn(t *testing.T) {
 	var err error
-	tpActionRPC, err = jsonrpc.Dial("tcp", tpActionCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpActionRPC, err = jsonrpc.Dial(utils.TCP, tpActionCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

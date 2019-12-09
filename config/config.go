@@ -351,7 +351,7 @@ func (cfg *CGRConfig) loadRPCConns(jsnCfg *CgrJsonCfg) (err error) {
 	}
 	// hardoded the *internal and *localhost connections
 	cfg.rpcConns[utils.MetaInternal] = &RPCConn{
-		Strategy: rpcclient.POOL_FIRST,
+		Strategy: rpcclient.PoolFirst,
 		PoolSize: 0,
 		Conns: []*RemoteHost{
 			&RemoteHost{
@@ -360,7 +360,7 @@ func (cfg *CGRConfig) loadRPCConns(jsnCfg *CgrJsonCfg) (err error) {
 		},
 	}
 	cfg.rpcConns[utils.MetaLocalHost] = &RPCConn{
-		Strategy: rpcclient.POOL_FIRST,
+		Strategy: rpcclient.PoolFirst,
 		PoolSize: 0,
 		Conns: []*RemoteHost{
 			&RemoteHost{
@@ -1066,7 +1066,7 @@ func (cfg *CGRConfig) GetReloadChan(sectID string) chan struct{} {
 	return cfg.rldChans[sectID]
 }
 
-// Call implements rpcclient.RpcClientConnection interface for internal RPC
+// Call implements rpcclient.ClientConnector interface for internal RPC
 func (cfg *CGRConfig) Call(serviceMethod string,
 	args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(cfg, serviceMethod, args, reply)

@@ -46,10 +46,10 @@ func NewSReplConns(conns []*config.RemoteHost, reconnects int,
 	connTimeout, replyTimeout time.Duration) (sReplConns []*SReplConn, err error) {
 	sReplConns = make([]*SReplConn, len(conns))
 	for i, replConnCfg := range conns {
-		var replCon *rpcclient.RpcClient
-		if replCon, err = rpcclient.NewRpcClient(utils.TCP, replConnCfg.Address,
+		var replCon *rpcclient.RPCClient
+		if replCon, err = rpcclient.NewRPCClient(utils.TCP, replConnCfg.Address,
 			replConnCfg.TLS, "", "", "", 0, reconnects, connTimeout,
-			replyTimeout, replConnCfg.Transport[1:], nil, true); err != nil {
+			replyTimeout, replConnCfg.Transport, nil, true); err != nil {
 			return nil, err
 		}
 		sReplConns[i] = &SReplConn{Connection: replCon, Synchronous: replConnCfg.Synchronous}
@@ -59,13 +59,13 @@ func NewSReplConns(conns []*config.RemoteHost, reconnects int,
 
 // SReplConn represents one connection to a passive node where we will replicate session data
 type SReplConn struct {
-	Connection  rpcclient.RpcClientConnection
+	Connection  rpcclient.ClientConnector
 	Synchronous bool
 }
 
 // NewSessionS constructs  a new SessionS instance
 func NewSessionS(cgrCfg *config.CGRConfig, ralS, resS, thdS,
-	statS, splS, attrS, cdrS, chargerS rpcclient.RpcClientConnection,
+	statS, splS, attrS, cdrS, chargerS rpcclient.ClientConnector,
 	sReplConns []*SReplConn, dm *engine.DataManager) *SessionS {
 	cgrCfg.SessionSCfg().SessionIndexes[utils.OriginID] = true // Make sure we have indexing for OriginID since it is a requirement on prefix searching
 	if chargerS != nil && reflect.ValueOf(chargerS).IsNil() {
@@ -104,7 +104,7 @@ func NewSessionS(cgrCfg *config.CGRConfig, ralS, resS, thdS,
 		attrS:         attrS,
 		cdrS:          cdrS,
 		sReplConns:    sReplConns,
-		biJClnts:      make(map[rpcclient.RpcClientConnection]string),
+		biJClnts:      make(map[rpcclient.ClientConnector]string),
 		biJIDs:        make(map[string]*biJClient),
 		aSessions:     make(map[string]*Session),
 		aSessionsIdx:  make(map[string]map[string]map[string]utils.StringMap),
@@ -117,8 +117,8 @@ func NewSessionS(cgrCfg *config.CGRConfig, ralS, resS, thdS,
 
 // biJClient contains info we need to reach back a bidirectional json client
 type biJClient struct {
-	conn  rpcclient.RpcClientConnection // connection towards BiJ client
-	proto float64                       // client protocol version
+	conn  rpcclient.ClientConnector // connection towards BiJ client
+	proto float64                   // client protocol version
 }
 
 // SessionS represents the session service
@@ -126,18 +126,18 @@ type SessionS struct {
 	cgrCfg *config.CGRConfig // Separate from smCfg since there can be multiple
 	dm     *engine.DataManager
 
-	chargerS rpcclient.RpcClientConnection
-	ralS     rpcclient.RpcClientConnection // RALs connections
-	resS     rpcclient.RpcClientConnection // ResourceS connections
-	thdS     rpcclient.RpcClientConnection // ThresholdS connections
-	statS    rpcclient.RpcClientConnection // StatS connections
-	splS     rpcclient.RpcClientConnection // SupplierS connections
-	attrS    rpcclient.RpcClientConnection // AttributeS connections
-	cdrS     rpcclient.RpcClientConnection // CDR server connections
+	chargerS rpcclient.ClientConnector
+	ralS     rpcclient.ClientConnector // RALs connections
+	resS     rpcclient.ClientConnector // ResourceS connections
+	thdS     rpcclient.ClientConnector // ThresholdS connections
+	statS    rpcclient.ClientConnector // StatS connections
+	splS     rpcclient.ClientConnector // SupplierS connections
+	attrS    rpcclient.ClientConnector // AttributeS connections
+	cdrS     rpcclient.ClientConnector // CDR server connections
 
-	biJMux   sync.RWMutex                             // mux protecting BI-JSON connections
-	biJClnts map[rpcclient.RpcClientConnection]string // index BiJSONConnection so we can sync them later
-	biJIDs   map[string]*biJClient                    // identifiers of bidirectional JSON conns, used to call RPC based on connIDs
+	biJMux   sync.RWMutex                         // mux protecting BI-JSON connections
+	biJClnts map[rpcclient.ClientConnector]string // index BiJSONConnection so we can sync them later
+	biJIDs   map[string]*biJClient                // identifiers of bidirectional JSON conns, used to call RPC based on connIDs
 
 	aSsMux    sync.RWMutex        // protects aSessions
 	aSessions map[string]*Session // group sessions per sessionId
@@ -209,7 +209,7 @@ func (sS *SessionS) OnBiJSONDisconnect(c *rpc2.Client) {
 }
 
 // RegisterIntBiJConn is called on internal BiJ connection towards SessionS
-func (sS *SessionS) RegisterIntBiJConn(c rpcclient.RpcClientConnection) {
+func (sS *SessionS) RegisterIntBiJConn(c rpcclient.ClientConnector) {
 	sS.biJMux.Lock()
 	nodeID := sS.cgrCfg.GeneralCfg().NodeID
 	sS.biJClnts[c] = nodeID
@@ -231,7 +231,7 @@ func (sS *SessionS) biJClnt(connID string) (clnt *biJClient) {
 }
 
 // biJClnt returns connection ID based on bidirectional connection received
-func (sS *SessionS) biJClntID(c rpcclient.RpcClientConnection) (clntConnID string) {
+func (sS *SessionS) biJClntID(c rpcclient.ClientConnector) (clntConnID string) {
 	if c == nil {
 		return
 	}
@@ -727,7 +727,7 @@ func (sS *SessionS) replicateSessions(cgrID string, psv bool, rplConns []*SReplC
 		if rplConn.Synchronous {
 			wg.Add(1)
 		}
-		go func(conn rpcclient.RpcClientConnection, sync bool, ss []*Session) {
+		go func(conn rpcclient.ClientConnector, sync bool, ss []*Session) {
 			for _, s := range ss {
 				sCln := s.Clone()
 				var rply string
@@ -1554,8 +1554,8 @@ func (sS *SessionS) Call(serviceMethod string, args interface{}, reply interface
 	return sS.CallBiRPC(nil, serviceMethod, args, reply)
 }
 
-// CallBiRPC is part of utils.BiRPCServer interface to help internal connections do calls over rpcclient.RpcClientConnection interface
-func (sS *SessionS) CallBiRPC(clnt rpcclient.RpcClientConnection,
+// CallBiRPC is part of utils.BiRPCServer interface to help internal connections do calls over rpcclient.ClientConnector interface
+func (sS *SessionS) CallBiRPC(clnt rpcclient.ClientConnector,
 	serviceMethod string, args interface{}, reply interface{}) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
@@ -1592,7 +1592,7 @@ func (sS *SessionS) CallBiRPC(clnt rpcclient.RpcClientConnection,
 }
 
 // BiRPCv1GetActiveSessions returns the list of active sessions based on filter
-func (sS *SessionS) BiRPCv1GetActiveSessions(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCv1GetActiveSessions(clnt rpcclient.ClientConnector,
 	args *utils.SessionFilter, reply *[]*ExternalSession) (err error) {
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
@@ -1606,7 +1606,7 @@ func (sS *SessionS) BiRPCv1GetActiveSessions(clnt rpcclient.RpcClientConnection,
 }
 
 // BiRPCv1GetActiveSessionsCount counts the active sessions
-func (sS *SessionS) BiRPCv1GetActiveSessionsCount(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCv1GetActiveSessionsCount(clnt rpcclient.ClientConnector,
 	args *utils.SessionFilter, reply *int) error {
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
@@ -1616,7 +1616,7 @@ func (sS *SessionS) BiRPCv1GetActiveSessionsCount(clnt rpcclient.RpcClientConnec
 }
 
 // BiRPCv1GetPassiveSessions returns the passive sessions handled by SessionS
-func (sS *SessionS) BiRPCv1GetPassiveSessions(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCv1GetPassiveSessions(clnt rpcclient.ClientConnector,
 	args *utils.SessionFilter, reply *[]*ExternalSession) error {
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
@@ -1630,7 +1630,7 @@ func (sS *SessionS) BiRPCv1GetPassiveSessions(clnt rpcclient.RpcClientConnection
 }
 
 // BiRPCv1GetPassiveSessionsCount counts the passive sessions handled by the system
-func (sS *SessionS) BiRPCv1GetPassiveSessionsCount(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCv1GetPassiveSessionsCount(clnt rpcclient.ClientConnector,
 	args *utils.SessionFilter, reply *int) error {
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
@@ -1640,7 +1640,7 @@ func (sS *SessionS) BiRPCv1GetPassiveSessionsCount(clnt rpcclient.RpcClientConne
 }
 
 // BiRPCv1SetPassiveSession used for replicating Sessions
-func (sS *SessionS) BiRPCv1SetPassiveSession(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCv1SetPassiveSession(clnt rpcclient.ClientConnector,
 	s *Session, reply *string) (err error) {
 	if s.CGRID == "" {
 		return utils.NewErrMandatoryIeMissing(utils.CGRID)
@@ -1674,7 +1674,7 @@ type ArgsReplicateSessions struct {
 
 // BiRPCv1ReplicateSessions will replicate active sessions to either args.Connections or the internal configured ones
 // args.Filter is used to filter the sessions which are replicated, CGRID is the only one possible for now
-func (sS *SessionS) BiRPCv1ReplicateSessions(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCv1ReplicateSessions(clnt rpcclient.ClientConnector,
 	args ArgsReplicateSessions, reply *string) (err error) {
 	sSConns := sS.sReplConns
 	if len(args.Connections) != 0 {
@@ -1830,7 +1830,7 @@ func (v1AuthReply *V1AuthorizeReply) AsNavigableMap(
 }
 
 // BiRPCv1AuthorizeEvent performs authorization for CGREvent based on specific components
-func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 	args *V1AuthorizeArgs, authReply *V1AuthorizeReply) (err error) {
 	var withErrors bool
 	if args.CGREvent.ID == "" {
@@ -1956,7 +1956,7 @@ type V1AuthorizeReplyWithDigest struct {
 
 // BiRPCv1AuthorizeEventWithDigest performs authorization for CGREvent based on specific components
 // returning one level fields instead of multiple ones returned by BiRPCv1AuthorizeEvent
-func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCv1AuthorizeEventWithDigest(clnt rpcclient.ClientConnector,
 	args *V1AuthorizeArgs, authReply *V1AuthorizeReplyWithDigest) (err error) {
 	var initAuthRply V1AuthorizeReply
 	if err = sS.BiRPCv1AuthorizeEvent(clnt, args, &initAuthRply); err != nil {
@@ -2100,7 +2100,7 @@ func (v1Rply *V1InitSessionReply) AsNavigableMap(
 }
 
 // BiRPCv1InitiateSession initiates a new session
-func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 	args *V1InitSessionArgs, rply *V1InitSessionReply) (err error) {
 	var withErrors bool
 	if args.CGREvent.ID == "" {
@@ -2232,7 +2232,7 @@ type V1InitReplyWithDigest struct {
 }
 
 // BiRPCv1InitiateSessionWithDigest returns the formated result of InitiateSession
-func (sS *SessionS) BiRPCv1InitiateSessionWithDigest(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCv1InitiateSessionWithDigest(clnt rpcclient.ClientConnector,
 	args *V1InitSessionArgs, initReply *V1InitReplyWithDigest) (err error) {
 	var initSessionRply V1InitSessionReply
 	if err = sS.BiRPCv1InitiateSession(clnt, args, &initSessionRply); err != nil {
@@ -2325,7 +2325,7 @@ func (v1Rply *V1UpdateSessionReply) AsNavigableMap(
 }
 
 // BiRPCv1UpdateSession updates an existing session, returning the duration which the session can still last
-func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.ClientConnector,
 	args *V1UpdateSessionArgs, rply *V1UpdateSessionReply) (err error) {
 	if args.CGREvent.ID == "" {
 		args.CGREvent.ID = utils.GenUUID()
@@ -2458,7 +2458,7 @@ func (args *V1TerminateSessionArgs) ParseFlags(flags string) {
 }
 
 // BiRPCv1TerminateSession will stop debit loops as well as release any used resources
-func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 	args *V1TerminateSessionArgs, rply *string) (err error) {
 	var withErrors bool
 	if args.CGREvent.ID == "" {
@@ -2581,7 +2581,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.RpcClientConnection,
 }
 
 // BiRPCv1ProcessCDR sends the CDR to CDRs
-func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.ClientConnector,
 	cgrEvWithArgDisp *utils.CGREventWithArgDispatcher, rply *string) (err error) {
 	if cgrEvWithArgDisp.ID == "" {
 		cgrEvWithArgDisp.ID = utils.GenUUID()
@@ -2627,6 +2627,7 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.RpcClientConnection,
 	} else { // no cached session, CDR will be handled by CDRs
 		return sS.cdrS.Call(utils.CDRsV1ProcessEvent,
 			&engine.ArgV1ProcessEvent{
+				Flags:         []string{utils.MetaRALs},
 				CGREvent:      *cgrEvWithArgDisp.CGREvent,
 				ArgDispatcher: cgrEvWithArgDisp.ArgDispatcher}, rply)
 	}
@@ -2808,7 +2809,7 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap(
 }
 
 // BiRPCv1ProcessMessage processes one event with the right subsystems based on arguments received
-func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 	args *V1ProcessMessageArgs, rply *V1ProcessMessageReply) (err error) {
 	var withErrors bool
 	if args.CGREvent.ID == "" {
@@ -2985,7 +2986,7 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap(
 }
 
 // BiRPCv1ProcessEvent processes one event with the right subsystems based on arguments received
-func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	args *V1ProcessEventArgs, rply *V1ProcessEventReply) (err error) {
 	var withErrors bool
 	if args.CGREvent.ID == "" {
@@ -3235,7 +3236,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.RpcClientConnection,
 }
 
 // BiRPCv1SyncSessions will sync sessions on demand
-func (sS *SessionS) BiRPCv1SyncSessions(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCv1SyncSessions(clnt rpcclient.ClientConnector,
 	ignParam string, reply *string) error {
 	sS.syncSessions()
 	*reply = utils.OK
@@ -3243,7 +3244,7 @@ func (sS *SessionS) BiRPCv1SyncSessions(clnt rpcclient.RpcClientConnection,
 }
 
 // BiRPCv1ForceDisconnect will force disconnecting sessions matching sessions
-func (sS *SessionS) BiRPCv1ForceDisconnect(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCv1ForceDisconnect(clnt rpcclient.ClientConnector,
 	args *utils.SessionFilter, reply *string) (err error) {
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
@@ -3277,7 +3278,7 @@ func (sS *SessionS) BiRPCv1ForceDisconnect(clnt rpcclient.RpcClientConnection,
 }
 
 // BiRPCv1RegisterInternalBiJSONConn will register the client for a bidirectional comunication
-func (sS *SessionS) BiRPCv1RegisterInternalBiJSONConn(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCv1RegisterInternalBiJSONConn(clnt rpcclient.ClientConnector,
 	ign string, reply *string) error {
 	sS.RegisterIntBiJConn(clnt)
 	*reply = utils.OK
@@ -3286,7 +3287,7 @@ func (sS *SessionS) BiRPCv1RegisterInternalBiJSONConn(clnt rpcclient.RpcClientCo
 
 // BiRPCv1ActivateSessions is called to activate a list/all sessions
 // returns utils.ErrPartiallyExecuted in case of errors
-func (sS *SessionS) BiRPCv1ActivateSessions(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCv1ActivateSessions(clnt rpcclient.ClientConnector,
 	sIDs []string, reply *string) (err error) {
 	if len(sIDs) == 0 {
 		sS.pSsMux.RLock()
@@ -3312,7 +3313,7 @@ func (sS *SessionS) BiRPCv1ActivateSessions(clnt rpcclient.RpcClientConnection,
 
 // BiRPCv1DeactivateSessions is called to deactivate a list/all active sessios
 // returns utils.ErrPartiallyExecuted in case of errors
-func (sS *SessionS) BiRPCv1DeactivateSessions(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCv1DeactivateSessions(clnt rpcclient.ClientConnector,
 	sIDs []string, reply *string) (err error) {
 	if len(sIDs) == 0 {
 		sS.aSsMux.RLock()
@@ -3421,7 +3422,7 @@ func (sS *SessionS) processAttributes(cgrEv *utils.CGREvent, argDisp *utils.ArgD
 
 // BiRPCV1GetMaxUsage returns the maximum usage as seconds, compatible with OpenSIPS 2.3
 // DEPRECATED, it will be removed in future versions
-func (sS *SessionS) BiRPCV1GetMaxUsage(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCV1GetMaxUsage(clnt rpcclient.ClientConnector,
 	ev engine.MapEvent, maxUsage *float64) (err error) {
 	var rply *V1AuthorizeReply
 	if err = sS.BiRPCv1AuthorizeEvent(
@@ -3444,7 +3445,7 @@ func (sS *SessionS) BiRPCV1GetMaxUsage(clnt rpcclient.RpcClientConnection,
 // BiRPCV1InitiateSession is called on session start, returns the maximum number of seconds the session can last
 // DEPRECATED, it will be removed in future versions
 // Kept for compatibility with OpenSIPS 2.3
-func (sS *SessionS) BiRPCV1InitiateSession(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCV1InitiateSession(clnt rpcclient.ClientConnector,
 	ev engine.MapEvent, maxUsage *float64) (err error) {
 	var rply *V1InitSessionReply
 	if err = sS.BiRPCv1InitiateSession(
@@ -3467,7 +3468,7 @@ func (sS *SessionS) BiRPCV1InitiateSession(clnt rpcclient.RpcClientConnection,
 // BiRPCV1UpdateSession processes interim updates, returns remaining duration from the RALs
 // DEPRECATED, it will be removed in future versions
 // Kept for compatibility with OpenSIPS 2.3
-func (sS *SessionS) BiRPCV1UpdateSession(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCV1UpdateSession(clnt rpcclient.ClientConnector,
 	ev engine.MapEvent, maxUsage *float64) (err error) {
 	var rply *V1UpdateSessionReply
 	if err = sS.BiRPCv1UpdateSession(
@@ -3490,7 +3491,7 @@ func (sS *SessionS) BiRPCV1UpdateSession(clnt rpcclient.RpcClientConnection,
 // BiRPCV1TerminateSession is called on session end, should stop debit loop
 // DEPRECATED, it will be removed in future versions
 // Kept for compatibility with OpenSIPS 2.3
-func (sS *SessionS) BiRPCV1TerminateSession(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCV1TerminateSession(clnt rpcclient.ClientConnector,
 	ev engine.MapEvent, rply *string) (err error) {
 	return sS.BiRPCv1TerminateSession(
 		clnt,
@@ -3508,7 +3509,7 @@ func (sS *SessionS) BiRPCV1TerminateSession(clnt rpcclient.RpcClientConnection,
 // BiRPCV1ProcessCDR should send the CDR to CDRS
 // DEPRECATED, it will be removed in future versions
 // Kept for compatibility with OpenSIPS 2.3
-func (sS *SessionS) BiRPCV1ProcessCDR(clnt rpcclient.RpcClientConnection,
+func (sS *SessionS) BiRPCV1ProcessCDR(clnt rpcclient.ClientConnector,
 	ev engine.MapEvent, rply *string) (err error) {
 	return sS.BiRPCv1ProcessCDR(
 		clnt,
@@ -3524,7 +3525,7 @@ func (sS *SessionS) BiRPCV1ProcessCDR(clnt rpcclient.RpcClientConnection,
 
 // SetAttributeSConnection sets the new connection to the attribute service
 // only used on reload
-func (sS *SessionS) SetAttributeSConnection(attrS rpcclient.RpcClientConnection) {
+func (sS *SessionS) SetAttributeSConnection(attrS rpcclient.ClientConnector) {
 	if attrS != nil && reflect.ValueOf(attrS).IsNil() {
 		attrS = nil
 	}
@@ -3533,7 +3534,7 @@ func (sS *SessionS) SetAttributeSConnection(attrS rpcclient.RpcClientConnection)
 
 // SetThresholSConnection sets the new connection to the threshold service
 // only used on reload
-func (sS *SessionS) SetThresholSConnection(thdS rpcclient.RpcClientConnection) {
+func (sS *SessionS) SetThresholSConnection(thdS rpcclient.ClientConnector) {
 	if thdS != nil && reflect.ValueOf(thdS).IsNil() {
 		thdS = nil
 	}
@@ -3542,7 +3543,7 @@ func (sS *SessionS) SetThresholSConnection(thdS rpcclient.RpcClientConnection) {
 
 // SetStatSConnection sets the new connection to the stat service
 // only used on reload
-func (sS *SessionS) SetStatSConnection(stS rpcclient.RpcClientConnection) {
+func (sS *SessionS) SetStatSConnection(stS rpcclient.ClientConnector) {
 	if stS != nil && reflect.ValueOf(stS).IsNil() {
 		stS = nil
 	}
@@ -3551,7 +3552,7 @@ func (sS *SessionS) SetStatSConnection(stS rpcclient.RpcClientConnection) {
 
 // SetChargerSConnection sets the new connection to the charger service
 // only used on reload
-func (sS *SessionS) SetChargerSConnection(chS rpcclient.RpcClientConnection) {
+func (sS *SessionS) SetChargerSConnection(chS rpcclient.ClientConnector) {
 	if chS != nil && reflect.ValueOf(chS).IsNil() {
 		chS = nil
 	}
@@ -3560,7 +3561,7 @@ func (sS *SessionS) SetChargerSConnection(chS rpcclient.RpcClientConnection) {
 
 // SetRALsConnection sets the new connection to the RAL service
 // only used on reload
-func (sS *SessionS) SetRALsConnection(rls rpcclient.RpcClientConnection) {
+func (sS *SessionS) SetRALsConnection(rls rpcclient.ClientConnector) {
 	if rls != nil && reflect.ValueOf(rls).IsNil() {
 		rls = nil
 	}
@@ -3569,7 +3570,7 @@ func (sS *SessionS) SetRALsConnection(rls rpcclient.RpcClientConnection) {
 
 // SetResourceSConnection sets the new connection to the resource service
 // only used on reload
-func (sS *SessionS) SetResourceSConnection(rS rpcclient.RpcClientConnection) {
+func (sS *SessionS) SetResourceSConnection(rS rpcclient.ClientConnector) {
 	if rS != nil && reflect.ValueOf(rS).IsNil() {
 		rS = nil
 	}
@@ -3578,7 +3579,7 @@ func (sS *SessionS) SetResourceSConnection(rS rpcclient.RpcClientConnection) {
 
 // SetSupplierSConnection sets the new connection to the supplier service
 // only used on reload
-func (sS *SessionS) SetSupplierSConnection(splS rpcclient.RpcClientConnection) {
+func (sS *SessionS) SetSupplierSConnection(splS rpcclient.ClientConnector) {
 	if splS != nil && reflect.ValueOf(splS).IsNil() {
 		splS = nil
 	}
@@ -3587,7 +3588,7 @@ func (sS *SessionS) SetSupplierSConnection(splS rpcclient.RpcClientConnection) {
 
 // SetCDRSConnection sets the new connection to the CDR server
 // only used on reload
-func (sS *SessionS) SetCDRSConnection(cdrS rpcclient.RpcClientConnection) {
+func (sS *SessionS) SetCDRSConnection(cdrS rpcclient.ClientConnector) {
 	if cdrS != nil && reflect.ValueOf(cdrS).IsNil() {
 		cdrS = nil
 	}

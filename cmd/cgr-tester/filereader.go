@@ -29,6 +29,8 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func NewFileReaderTester(fPath, cgrAddr string, parallel, runs int, reqSep []byte) (frt *FileReaderTester, err error) {
@@ -39,7 +41,7 @@ func NewFileReaderTester(fPath, cgrAddr string, parallel, runs int, reqSep []byt
 	if frt.rdr, err = os.Open(fPath); err != nil {
 		return nil, err
 	}
-	if frt.conn, err = net.Dial("tcp", cgrAddr); err != nil {
+	if frt.conn, err = net.Dial(utils.TCP, cgrAddr); err != nil {
 		return nil, err
 	}
 	return

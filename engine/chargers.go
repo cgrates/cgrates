@@ -29,7 +29,7 @@ import (
 )
 
 func NewChargerService(dm *DataManager, filterS *FilterS,
-	attrS rpcclient.RpcClientConnection,
+	attrS rpcclient.ClientConnector,
 	cfg *config.CGRConfig) (*ChargerService, error) {
 	if attrS != nil && reflect.ValueOf(attrS).IsNil() {
 		attrS = nil
@@ -42,7 +42,7 @@ func NewChargerService(dm *DataManager, filterS *FilterS,
 type ChargerService struct {
 	dm      *DataManager
 	filterS *FilterS
-	attrS   rpcclient.RpcClientConnection
+	attrS   rpcclient.ClientConnector
 	cfg     *config.CGRConfig
 }
 
@@ -184,6 +184,6 @@ func (cS *ChargerService) V1GetChargersForEvent(args *utils.CGREventWithArgDispa
 
 // SetAttributeConnection sets the new connection to the attribute service
 // only used on reload
-func (cS *ChargerService) SetAttributeConnection(attrS rpcclient.RpcClientConnection) {
+func (cS *ChargerService) SetAttributeConnection(attrS rpcclient.ClientConnector) {
 	cS.attrS = attrS
 }

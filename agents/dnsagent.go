@@ -33,7 +33,7 @@ import (
 
 // NewDNSAgent is the constructor for DNSAgent
 func NewDNSAgent(cgrCfg *config.CGRConfig, fltrS *engine.FilterS,
-	sS rpcclient.RpcClientConnection) (da *DNSAgent, err error) {
+	sS rpcclient.ClientConnector) (da *DNSAgent, err error) {
 	da = &DNSAgent{cgrCfg: cgrCfg, fltrS: fltrS, sS: sS}
 	err = da.initDNSServer()
 	return
@@ -41,9 +41,9 @@ func NewDNSAgent(cgrCfg *config.CGRConfig, fltrS *engine.FilterS,
 
 // DNSAgent translates DNS requests towards CGRateS infrastructure
 type DNSAgent struct {
-	cgrCfg *config.CGRConfig             // loaded CGRateS configuration
-	fltrS  *engine.FilterS               // connection towards FilterS
-	sS     rpcclient.RpcClientConnection // connection towards CGR-SessionS component
+	cgrCfg *config.CGRConfig         // loaded CGRateS configuration
+	fltrS  *engine.FilterS           // connection towards FilterS
+	sS     rpcclient.ClientConnector // connection towards CGR-SessionS component
 	server *dns.Server
 }
 
@@ -90,7 +90,7 @@ func (da *DNSAgent) Reload() (err error) {
 
 // SetSessionSConnection sets the new connection to the threshold service
 // only used on reload
-func (da *DNSAgent) SetSessionSConnection(sS rpcclient.RpcClientConnection) {
+func (da *DNSAgent) SetSessionSConnection(sS rpcclient.ClientConnector) {
 	da.sS = sS
 }
 

@@ -40,7 +40,7 @@ const (
 
 func NewPartialRecordsCache(ttl time.Duration, expiryAction string, cdrOutDir string, csvSep rune,
 	timezone string, httpSkipTlsCheck bool,
-	cdrs rpcclient.RpcClientConnection, filterS *engine.FilterS) *PartialRecordsCache {
+	cdrs rpcclient.ClientConnector, filterS *engine.FilterS) *PartialRecordsCache {
 	return &PartialRecordsCache{ttl: ttl, expiryAction: expiryAction, cdrOutDir: cdrOutDir,
 		csvSep: csvSep, timezone: timezone,
 		httpSkipTlsCheck: httpSkipTlsCheck, cdrs: cdrs,
@@ -56,7 +56,7 @@ type PartialRecordsCache struct {
 	csvSep           rune
 	timezone         string
 	httpSkipTlsCheck bool
-	cdrs             rpcclient.RpcClientConnection
+	cdrs             rpcclient.ClientConnector
 	partialRecords   map[string]*PartialCDRRecord // [OriginID]*PartialRecord
 	dumpTimers       map[string]*time.Timer       // [OriginID]*time.Timer which can be canceled or reset
 	guard            *guardian.GuardianLocker

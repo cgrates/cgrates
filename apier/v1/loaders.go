@@ -32,7 +32,7 @@ type LoaderSv1 struct {
 	ldrS *loaders.LoaderService
 }
 
-// Call implements rpcclient.RpcClientConnection interface for internal RPC
+// Call implements rpcclient.ClientConnector interface for internal RPC
 func (ldrSv1 *LoaderSv1) Call(serviceMethod string,
 	args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(ldrSv1, serviceMethod, args, reply)

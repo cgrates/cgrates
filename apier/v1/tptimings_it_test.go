@@ -121,7 +121,7 @@ func testTPTimingsStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTPTimingsRpcConn(t *testing.T) {
 	var err error
-	tpTimingRPC, err = jsonrpc.Dial("tcp", tpTimingCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpTimingRPC, err = jsonrpc.Dial(utils.TCP, tpTimingCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

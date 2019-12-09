@@ -151,7 +151,6 @@ const (
 	FILTER_VAL_START             = "("
 	FILTER_VAL_END               = ")"
 	JSON                         = "json"
-	GOB                          = "gob"
 	MSGPACK                      = "msgpack"
 	CSV_LOAD                     = "CSVLOAD"
 	CGRID                        = "CGRID"

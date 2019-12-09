@@ -51,7 +51,7 @@ func TestDataDBReload(t *testing.T) {
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg)
 	srvMngr.AddServices(NewConnManagerService(cfg, nil), NewAttributeService(cfg, db,
-		chS, filterSChan, server, make(chan rpcclient.RpcClientConnection, 1)),
+		chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1)),
 		NewLoaderService(cfg, db, filterSChan, server, nil, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)

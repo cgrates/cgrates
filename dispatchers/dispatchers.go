@@ -34,7 +34,7 @@ import (
 // NewDispatcherService constructs a DispatcherService
 func NewDispatcherService(dm *engine.DataManager,
 	cfg *config.CGRConfig, fltrS *engine.FilterS,
-	attrS *rpcclient.RpcClientPool) (*DispatcherService, error) {
+	attrS *rpcclient.RPCPool) (*DispatcherService, error) {
 	if attrS != nil && reflect.ValueOf(attrS).IsNil() {
 		attrS = nil
 	}
@@ -48,7 +48,7 @@ type DispatcherService struct {
 	dm    *engine.DataManager
 	cfg   *config.CGRConfig
 	fltrS *engine.FilterS
-	attrS *rpcclient.RpcClientPool // used for API auth
+	attrS *rpcclient.RPCPool // used for API auth
 }
 
 // ListenAndServe will initialize the service
@@ -289,7 +289,7 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 
 }
 
-// Call implements rpcclient.RpcClientConnection interface for internal RPC
+// Call implements rpcclient.ClientConnector interface for internal RPC
 func (dS *DispatcherService) Call(serviceMethod string, // all API fuction must be of type: SubsystemMethod
 	args interface{}, reply interface{}) error {
 	methodSplit := strings.Split(serviceMethod, ".")

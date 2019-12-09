@@ -35,7 +35,7 @@ func NewThresholdService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
 	server *utils.Server) servmanager.Service {
 	return &ThresholdService{
-		connChan:    make(chan rpcclient.RpcClientConnection, 1),
+		connChan:    make(chan rpcclient.ClientConnector, 1),
 		cfg:         cfg,
 		dm:          dm,
 		cacheS:      cacheS,
@@ -55,7 +55,7 @@ type ThresholdService struct {
 
 	thrs     *engine.ThresholdService
 	rpc      *v1.ThresholdSv1
-	connChan chan rpcclient.RpcClientConnection
+	connChan chan rpcclient.ClientConnector
 }
 
 // Start should handle the sercive start
@@ -89,7 +89,7 @@ func (thrs *ThresholdService) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (thrs *ThresholdService) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (thrs *ThresholdService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return thrs.connChan
 }
 

@@ -102,8 +102,8 @@ var (
 	err        error
 	dm         *engine.DataManager
 	storDb     engine.LoadStorage
-	cacheS     rpcclient.RpcClientConnection
-	schedulerS rpcclient.RpcClientConnection
+	cacheS     rpcclient.ClientConnector
+	schedulerS rpcclient.ClientConnector
 	loader     engine.LoadReader
 )
 
@@ -243,10 +243,10 @@ func main() {
 		if err != nil {
 			log.Fatalf("Coud not open dataDB connection: %s", err.Error())
 		}
-		var rmtConns, rplConns *rpcclient.RpcClientPool
+		var rmtConns, rplConns *rpcclient.RPCPool
 		if len(ldrCfg.DataDbCfg().RmtConns) != 0 {
 			var err error
-			rmtConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST_POSITIVE, ldrCfg.TlsCfg().ClientKey,
+			rmtConns, err = engine.NewRPCPool(rpcclient.PoolFirstPositive, ldrCfg.TlsCfg().ClientKey,
 				ldrCfg.TlsCfg().ClientCerificate, ldrCfg.TlsCfg().CaCertificate,
 				ldrCfg.GeneralCfg().ConnectAttempts, ldrCfg.GeneralCfg().Reconnects,
 				ldrCfg.GeneralCfg().ConnectTimeout, ldrCfg.GeneralCfg().ReplyTimeout,
@@ -257,7 +257,7 @@ func main() {
 		}
 		if len(ldrCfg.DataDbCfg().RplConns) != 0 {
 			var err error
-			rplConns, err = engine.NewRPCPool(rpcclient.POOL_BROADCAST, ldrCfg.TlsCfg().ClientKey,
+			rplConns, err = engine.NewRPCPool(rpcclient.PoolBroadcast, ldrCfg.TlsCfg().ClientKey,
 				ldrCfg.TlsCfg().ClientCerificate, ldrCfg.TlsCfg().CaCertificate,
 				ldrCfg.GeneralCfg().ConnectAttempts, ldrCfg.GeneralCfg().Reconnects,
 				ldrCfg.GeneralCfg().ConnectTimeout, ldrCfg.GeneralCfg().ReplyTimeout,
@@ -321,12 +321,12 @@ func main() {
 	}
 
 	if len(ldrCfg.LoaderCgrCfg().CachesConns) != 0 { // Init connection to CacheS so we can reload it's data
-		if cacheS, err = rpcclient.NewRpcClient("tcp",
+		if cacheS, err = rpcclient.NewRPCClient(utils.TCP,
 			ldrCfg.LoaderCgrCfg().CachesConns[0].Address,
 			ldrCfg.LoaderCgrCfg().CachesConns[0].TLS, ldrCfg.TlsCfg().ClientKey,
 			ldrCfg.TlsCfg().ClientCerificate, ldrCfg.TlsCfg().CaCertificate, 3, 3,
 			time.Duration(1*time.Second), time.Duration(5*time.Minute),
-			strings.TrimPrefix(ldrCfg.LoaderCgrCfg().CachesConns[0].Transport, utils.Meta),
+			ldrCfg.LoaderCgrCfg().CachesConns[0].Transport,
 			nil, false); err != nil {
 			log.Fatalf("Could not connect to CacheS: %s", err.Error())
 			return
@@ -336,12 +336,12 @@ func main() {
 	}
 
 	if len(ldrCfg.LoaderCgrCfg().SchedulerConns) != 0 { // Init connection to Scheduler so we can reload it's data
-		if schedulerS, err = rpcclient.NewRpcClient("tcp",
+		if schedulerS, err = rpcclient.NewRPCClient(utils.TCP,
 			ldrCfg.LoaderCgrCfg().SchedulerConns[0].Address,
 			ldrCfg.LoaderCgrCfg().SchedulerConns[0].TLS, ldrCfg.TlsCfg().ClientKey,
 			ldrCfg.TlsCfg().ClientCerificate, ldrCfg.TlsCfg().CaCertificate, 3, 3,
 			time.Duration(1*time.Second), time.Duration(5*time.Minute),
-			strings.TrimPrefix(ldrCfg.LoaderCgrCfg().SchedulerConns[0].Transport, utils.Meta),
+			ldrCfg.LoaderCgrCfg().SchedulerConns[0].Transport,
 			nil, false); err != nil {
 			log.Fatalf("Could not connect to Scheduler: %s", err.Error())
 			return

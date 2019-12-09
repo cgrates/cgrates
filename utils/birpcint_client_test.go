@@ -36,7 +36,7 @@ func TestNewBiJSONrpcClient(t *testing.T) {
 		t.Error("Expencting: \"connection refused\", received : nil")
 	}
 
-	l, err := net.Listen("tcp", addr)
+	l, err := net.Listen(TCP, addr)
 	if err != nil {
 		t.Error(err)
 	}
@@ -58,7 +58,7 @@ type testBiRPCServer struct {
 }
 
 func (*testBiRPCServer) Call(string, interface{}, interface{}) error { return nil }
-func (t *testBiRPCServer) CallBiRPC(_ rpcclient.RpcClientConnection, metod string, args interface{}, reply interface{}) error {
+func (t *testBiRPCServer) CallBiRPC(_ rpcclient.ClientConnector, metod string, args interface{}, reply interface{}) error {
 	t.metod = metod
 	t.args = args
 	t.reply = reply

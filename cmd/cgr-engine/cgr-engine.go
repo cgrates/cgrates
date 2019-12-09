@@ -60,7 +60,7 @@ var (
 	cfg *config.CGRConfig
 )
 
-func startCdrcs(internalCdrSChan, internalRaterChan, internalDispatcherSChan chan rpcclient.RpcClientConnection,
+func startCdrcs(internalCdrSChan, internalRaterChan, internalDispatcherSChan chan rpcclient.ClientConnector,
 	filterSChan chan *engine.FilterS, exitChan chan bool) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
@@ -102,14 +102,14 @@ func startCdrcs(internalCdrSChan, internalRaterChan, internalDispatcherSChan cha
 }
 
 // Fires up a cdrc instance
-func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConnection, cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool,
+func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.ClientConnector, cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool,
 	filterSChan chan *engine.FilterS, closeChan chan struct{}, exitChan chan bool) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
 	var err error
-	var cdrsConn rpcclient.RpcClientConnection
+	var cdrsConn rpcclient.ClientConnector
 	cdrcCfg := cdrcCfgs[0]
-	cdrsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.TlsCfg().ClientKey,
+	cdrsConn, err = engine.NewRPCPool(rpcclient.PoolFirst, cfg.TlsCfg().ClientKey,
 		cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 		cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
 		cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
@@ -136,14 +136,14 @@ func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConne
 
 // startFilterService fires up the FilterS
 func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS,
-	internalStatSChan, internalResourceSChan, internalRalSChan chan rpcclient.RpcClientConnection, cfg *config.CGRConfig,
+	internalStatSChan, internalResourceSChan, internalRalSChan chan rpcclient.ClientConnector, cfg *config.CGRConfig,
 	dm *engine.DataManager, exitChan chan bool) {
 	<-cacheS.GetPrecacheChannel(utils.CacheFilters)
 	filterSChan <- engine.NewFilterS(cfg, internalStatSChan, internalResourceSChan, internalRalSChan, dm)
 }
 
 // initCacheS inits the CacheS and starts precaching as well as populating internal channel for RPC conns
-func initCacheS(internalCacheSChan chan rpcclient.RpcClientConnection,
+func initCacheS(internalCacheSChan chan rpcclient.ClientConnector,
 	server *utils.Server, dm *engine.DataManager, exitChan chan bool) (chS *engine.CacheS) {
 	chS = engine.NewCacheS(cfg, dm)
 	go func() {
@@ -161,7 +161,7 @@ func initCacheS(internalCacheSChan chan rpcclient.RpcClientConnection,
 	return
 }
 
-func initGuardianSv1(internalGuardianSChan chan rpcclient.RpcClientConnection, server *utils.Server) {
+func initGuardianSv1(internalGuardianSChan chan rpcclient.ClientConnector, server *utils.Server) {
 	grdSv1 := v1.NewGuardianSv1()
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(grdSv1)
@@ -169,7 +169,7 @@ func initGuardianSv1(internalGuardianSChan chan rpcclient.RpcClientConnection, s
 	internalGuardianSChan <- grdSv1
 }
 
-func initCoreSv1(internalCoreSv1Chan chan rpcclient.RpcClientConnection, server *utils.Server) {
+func initCoreSv1(internalCoreSv1Chan chan rpcclient.ClientConnector, server *utils.Server) {
 	cSv1 := v1.NewCoreSv1(engine.NewCoreService())
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(cSv1)
@@ -177,7 +177,7 @@ func initCoreSv1(internalCoreSv1Chan chan rpcclient.RpcClientConnection, server 
 	internalCoreSv1Chan <- cSv1
 }
 
-func initServiceManagerV1(internalServiceManagerChan chan rpcclient.RpcClientConnection,
+func initServiceManagerV1(internalServiceManagerChan chan rpcclient.ClientConnector,
 	srvMngr *servmanager.ServiceManager, server *utils.Server) {
 	if !cfg.DispatcherSCfg().Enabled {
 		server.RpcRegister(v1.NewServiceManagerV1(srvMngr))
@@ -189,7 +189,7 @@ func startRpc(server *utils.Server, internalRaterChan,
 	internalCdrSChan, internalRsChan, internalStatSChan,
 	internalAttrSChan, internalChargerSChan, internalThdSChan, internalSuplSChan,
 	internalSMGChan, internalAnalyzerSChan, internalDispatcherSChan,
-	internalLoaderSChan, internalRALsv1Chan, internalCacheSChan chan rpcclient.RpcClientConnection,
+	internalLoaderSChan, internalRALsv1Chan, internalCacheSChan chan rpcclient.ClientConnector,
 	exitChan chan bool) {
 	if !cfg.DispatcherSCfg().Enabled {
 		select { // Any of the rpc methods will unlock listening to rpc requests
@@ -310,7 +310,7 @@ func initLogger(cfg *config.CGRConfig) error {
 	return nil
 }
 
-func initConfigSv1(internalConfigChan chan rpcclient.RpcClientConnection,
+func initConfigSv1(internalConfigChan chan rpcclient.ClientConnector,
 	server *utils.Server) {
 	cfgSv1 := v1.NewConfigSv1(cfg)
 	if !cfg.DispatcherSCfg().Enabled {
@@ -483,16 +483,16 @@ func main() {
 	// Define internal connections via channels
 	filterSChan := make(chan *engine.FilterS, 1)
 
-	internalServeManagerChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalConfigChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalCoreSv1Chan := make(chan rpcclient.RpcClientConnection, 1)
-	internalCacheSChan := make(chan rpcclient.RpcClientConnection, 1)
-	internalGuardianSChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalServeManagerChan := make(chan rpcclient.ClientConnector, 1)
+	internalConfigChan := make(chan rpcclient.ClientConnector, 1)
+	internalCoreSv1Chan := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
+	internalGuardianSChan := make(chan rpcclient.ClientConnector, 1)
 
-	internalCDRServerChan := make(chan rpcclient.RpcClientConnection, 1)   // needed to avod cyclic dependency
-	internalAttributeSChan := make(chan rpcclient.RpcClientConnection, 1)  // needed to avod cyclic dependency
-	internalDispatcherSChan := make(chan rpcclient.RpcClientConnection, 1) // needed to avod cyclic dependency
-	internalSessionSChan := make(chan rpcclient.RpcClientConnection, 1)    // needed to avod cyclic dependency
+	internalCDRServerChan := make(chan rpcclient.ClientConnector, 1)   // needed to avod cyclic dependency
+	internalAttributeSChan := make(chan rpcclient.ClientConnector, 1)  // needed to avod cyclic dependency
+	internalDispatcherSChan := make(chan rpcclient.ClientConnector, 1) // needed to avod cyclic dependency
+	internalSessionSChan := make(chan rpcclient.ClientConnector, 1)    // needed to avod cyclic dependency
 
 	// init CacheS
 	cacheS := initCacheS(internalCacheSChan, server, dmService.GetDM(), exitChan)
@@ -535,7 +535,7 @@ func main() {
 	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server, internalCacheSChan, dspS.GetIntenternalChan(), exitChan)
 	anz := services.NewAnalyzerService(cfg, server, exitChan)
 
-	connManager := services.NewConnManagerService(cfg, map[string]chan rpcclient.RpcClientConnection{
+	connManager := services.NewConnManagerService(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.AnalyzerSv1:  anz.GetIntenternalChan(),
 		utils.ApierV1:      rals.GetAPIv1().GetIntenternalChan(),
 		utils.ApierV2:      rals.GetAPIv2().GetIntenternalChan(),

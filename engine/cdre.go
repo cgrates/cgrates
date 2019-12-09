@@ -54,7 +54,7 @@ const (
 
 func NewCDRExporter(cdrs []*CDR, exportTemplate *config.CdreCfg, exportFormat, exportPath, fallbackPath, exportID string,
 	synchronous bool, attempts int, fieldSeparator rune,
-	httpSkipTlsCheck bool, httpPoster *HTTPPoster, attrS rpcclient.RpcClientConnection, filterS *FilterS) (*CDRExporter, error) {
+	httpSkipTlsCheck bool, httpPoster *HTTPPoster, attrS rpcclient.ClientConnector, filterS *FilterS) (*CDRExporter, error) {
 	if len(cdrs) == 0 { // Nothing to export
 		return nil, nil
 	}
@@ -103,7 +103,7 @@ type CDRExporter struct {
 	positiveExports                 []string          // CGRIDs of successfully exported CDRs
 	negativeExports                 map[string]string // CGRIDs of failed exports
 
-	attrS   rpcclient.RpcClientConnection
+	attrS   rpcclient.ClientConnector
 	filterS *FilterS
 }
 

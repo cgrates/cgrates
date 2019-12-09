@@ -35,7 +35,7 @@ type ThresholdSv1 struct {
 	tS *engine.ThresholdService
 }
 
-// Call implements rpcclient.RpcClientConnection interface for internal RPC
+// Call implements rpcclient.ClientConnector interface for internal RPC
 func (tSv1 *ThresholdSv1) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(tSv1, serviceMethod, args, reply)
 }

@@ -34,7 +34,7 @@ import (
 // NewDispatcherService returns the Dispatcher Service
 func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, attrsChan, internalChan chan rpcclient.RpcClientConnection) servmanager.Service {
+	server *utils.Server, attrsChan, internalChan chan rpcclient.ClientConnector) servmanager.Service {
 	return &DispatcherService{
 		connChan:    internalChan,
 		cfg:         cfg,
@@ -54,11 +54,11 @@ type DispatcherService struct {
 	cacheS      *engine.CacheS
 	filterSChan chan *engine.FilterS
 	server      *utils.Server
-	attrsChan   chan rpcclient.RpcClientConnection
+	attrsChan   chan rpcclient.ClientConnector
 
 	dspS     *dispatchers.DispatcherService
 	rpc      *v1.DispatcherSv1
-	connChan chan rpcclient.RpcClientConnection
+	connChan chan rpcclient.ClientConnector
 }
 
 // Start should handle the sercive start
@@ -76,9 +76,9 @@ func (dspS *DispatcherService) Start() (err error) {
 	dspS.Lock()
 	defer dspS.Unlock()
 
-	var attrSConn *rpcclient.RpcClientPool
+	var attrSConn *rpcclient.RPCPool
 	if len(dspS.cfg.DispatcherSCfg().AttributeSConns) != 0 { // AttributeS connection init
-		if attrSConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+		if attrSConn, err = engine.NewRPCPool(rpcclient.PoolFirst,
 			dspS.cfg.TlsCfg().ClientKey,
 			dspS.cfg.TlsCfg().ClientCerificate, dspS.cfg.TlsCfg().CaCertificate,
 			dspS.cfg.GeneralCfg().ConnectAttempts, dspS.cfg.GeneralCfg().Reconnects,
@@ -151,7 +151,7 @@ func (dspS *DispatcherService) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (dspS *DispatcherService) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (dspS *DispatcherService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return dspS.connChan
 }
 

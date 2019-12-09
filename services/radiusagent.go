@@ -32,7 +32,7 @@ import (
 
 // NewRadiusAgent returns the Radius Agent
 func NewRadiusAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	sSChan, dispatcherChan chan rpcclient.RpcClientConnection,
+	sSChan, dispatcherChan chan rpcclient.ClientConnector,
 	exitChan chan bool) servmanager.Service {
 	return &RadiusAgent{
 		cfg:            cfg,
@@ -48,8 +48,8 @@ type RadiusAgent struct {
 	sync.RWMutex
 	cfg            *config.CGRConfig
 	filterSChan    chan *engine.FilterS
-	sSChan         chan rpcclient.RpcClientConnection
-	dispatcherChan chan rpcclient.RpcClientConnection
+	sSChan         chan rpcclient.ClientConnector
+	dispatcherChan chan rpcclient.ClientConnector
 	exitChan       chan bool
 
 	rad *agents.RadiusAgent
@@ -66,7 +66,7 @@ func (rad *RadiusAgent) Start() (err error) {
 
 	rad.Lock()
 	defer rad.Unlock()
-	var smgConn rpcclient.RpcClientConnection
+	var smgConn rpcclient.ClientConnector
 	utils.Logger.Info("Starting Radius agent")
 	if smgConn, err = NewConnection(rad.cfg, rad.sSChan, rad.dispatcherChan, rad.cfg.RadiusAgentCfg().SessionSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
@@ -89,13 +89,13 @@ func (rad *RadiusAgent) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (rad *RadiusAgent) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (rad *RadiusAgent) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return nil
 }
 
 // Reload handles the change of config
 func (rad *RadiusAgent) Reload() (err error) {
-	var smgConn rpcclient.RpcClientConnection
+	var smgConn rpcclient.ClientConnector
 	if smgConn, err = NewConnection(rad.cfg, rad.sSChan, rad.dispatcherChan, rad.cfg.RadiusAgentCfg().SessionSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
 			utils.RadiusAgent, utils.SessionS, err.Error()))

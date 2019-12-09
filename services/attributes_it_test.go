@@ -50,7 +50,7 @@ func TestAttributeSReload(t *testing.T) {
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg)
 	attrS := NewAttributeService(cfg, db,
-		chS, filterSChan, server, make(chan rpcclient.RpcClientConnection, 1),
+		chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1),
 	)
 	srvMngr.AddServices(NewConnManagerService(cfg, nil), attrS,
 		NewLoaderService(cfg, db, filterSChan, server, nil, nil, engineShutdown), db)

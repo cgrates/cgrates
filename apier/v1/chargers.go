@@ -122,7 +122,7 @@ type ChargerSv1 struct {
 	cS *engine.ChargerService
 }
 
-// Call implements rpcclient.RpcClientConnection interface for internal RPC
+// Call implements rpcclient.ClientConnector interface for internal RPC
 func (cSv1 *ChargerSv1) Call(serviceMethod string,
 	args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(cSv1, serviceMethod, args, reply)

@@ -34,9 +34,9 @@ import (
 var (
 	tlsCfgPath       string
 	tlsCfg           *config.CGRConfig
-	tlsRpcClientJson *rpcclient.RpcClient
-	tlsRpcClientGob  *rpcclient.RpcClient
-	tlsHTTPJson      *rpcclient.RpcClient
+	tlsRpcClientJson *rpcclient.RPCClient
+	tlsRpcClientGob  *rpcclient.RPCClient
+	tlsHTTPJson      *rpcclient.RPCClient
 	tlsConfDIR       string //run tests for specific configuration
 	tlsDelay         int
 
@@ -84,23 +84,23 @@ func testTLSStartEngine(t *testing.T) {
 
 func testTLSRpcConn(t *testing.T) {
 	var err error
-	tlsRpcClientJson, err = rpcclient.NewRpcClient("tcp", "localhost:2022", true, tlsCfg.TlsCfg().ClientKey,
+	tlsRpcClientJson, err = rpcclient.NewRPCClient(utils.TCP, "localhost:2022", true, tlsCfg.TlsCfg().ClientKey,
 		tlsCfg.TlsCfg().ClientCerificate, tlsCfg.TlsCfg().CaCertificate, 3, 3,
-		time.Duration(1*time.Second), time.Duration(5*time.Minute), utils.JSON, nil, false)
+		time.Duration(1*time.Second), time.Duration(5*time.Minute), rpcclient.JSONrpc, nil, false)
 	if err != nil {
 		t.Errorf("Error: %s when dialing", err)
 	}
 
-	tlsRpcClientGob, err = rpcclient.NewRpcClient("tcp", "localhost:2023", true, tlsCfg.TlsCfg().ClientKey,
+	tlsRpcClientGob, err = rpcclient.NewRPCClient(utils.TCP, "localhost:2023", true, tlsCfg.TlsCfg().ClientKey,
 		tlsCfg.TlsCfg().ClientCerificate, tlsCfg.TlsCfg().CaCertificate, 3, 3,
-		time.Duration(1*time.Second), time.Duration(5*time.Minute), utils.GOB, nil, false)
+		time.Duration(1*time.Second), time.Duration(5*time.Minute), rpcclient.GOBrpc, nil, false)
 	if err != nil {
 		t.Errorf("Error: %s when dialing", err)
 	}
 
-	tlsHTTPJson, err = rpcclient.NewRpcClient("tcp", "https://localhost:2280/jsonrpc", true, tlsCfg.TlsCfg().ClientKey,
+	tlsHTTPJson, err = rpcclient.NewRPCClient(utils.TCP, "https://localhost:2280/jsonrpc", true, tlsCfg.TlsCfg().ClientKey,
 		tlsCfg.TlsCfg().ClientCerificate, tlsCfg.TlsCfg().CaCertificate, 3, 3,
-		time.Duration(1*time.Second), time.Duration(5*time.Minute), rpcclient.JSON_HTTP, nil, false)
+		time.Duration(1*time.Second), time.Duration(5*time.Minute), rpcclient.HTTPjson, nil, false)
 	if err != nil {
 		t.Errorf("Error: %s when dialing", err)
 	}

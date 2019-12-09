@@ -33,7 +33,7 @@ func NewApierV2Service(apiv1 *ApierV1Service, cfg *config.CGRConfig,
 	server *utils.Server) *ApierV2Service {
 	return &ApierV2Service{
 		apiv1:    apiv1,
-		connChan: make(chan rpcclient.RpcClientConnection, 1),
+		connChan: make(chan rpcclient.ClientConnector, 1),
 		cfg:      cfg,
 		server:   server,
 	}
@@ -47,7 +47,7 @@ type ApierV2Service struct {
 
 	apiv1    *ApierV1Service
 	api      *v2.ApierV2
-	connChan chan rpcclient.RpcClientConnection
+	connChan chan rpcclient.ClientConnector
 }
 
 // Start should handle the sercive start
@@ -76,7 +76,7 @@ func (api *ApierV2Service) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (api *ApierV2Service) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (api *ApierV2Service) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return api.connChan
 }
 

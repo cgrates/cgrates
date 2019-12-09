@@ -33,11 +33,11 @@ import (
 func NewApierV1Service(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, filterSChan chan *engine.FilterS,
 	server *utils.Server, cacheSChan, schedChan, attrsChan,
-	dispatcherChan chan rpcclient.RpcClientConnection,
+	dispatcherChan chan rpcclient.ClientConnector,
 	schedService *SchedulerService,
 	responderService *ResponderService) *ApierV1Service {
 	return &ApierV1Service{
-		connChan:         make(chan rpcclient.RpcClientConnection, 1),
+		connChan:         make(chan rpcclient.ClientConnector, 1),
 		cfg:              cfg,
 		dm:               dm,
 		storDB:           storDB,
@@ -60,15 +60,15 @@ type ApierV1Service struct {
 	storDB           *StorDBService
 	filterSChan      chan *engine.FilterS
 	server           *utils.Server
-	cacheSChan       chan rpcclient.RpcClientConnection
-	schedChan        chan rpcclient.RpcClientConnection
-	attrsChan        chan rpcclient.RpcClientConnection
-	dispatcherChan   chan rpcclient.RpcClientConnection
+	cacheSChan       chan rpcclient.ClientConnector
+	schedChan        chan rpcclient.ClientConnector
+	attrsChan        chan rpcclient.ClientConnector
+	dispatcherChan   chan rpcclient.ClientConnector
 	schedService     *SchedulerService
 	responderService *ResponderService
 
 	api      *v1.ApierV1
-	connChan chan rpcclient.RpcClientConnection
+	connChan chan rpcclient.ClientConnector
 }
 
 // Start should handle the sercive start
@@ -85,7 +85,7 @@ func (api *ApierV1Service) Start() (err error) {
 	defer api.Unlock()
 
 	// create cache connection
-	var cacheSrpc, schedulerSrpc, attributeSrpc rpcclient.RpcClientConnection
+	var cacheSrpc, schedulerSrpc, attributeSrpc rpcclient.ClientConnector
 	if cacheSrpc, err = NewConnection(api.cfg, api.cacheSChan, api.dispatcherChan, api.cfg.ApierCfg().CachesConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
 			utils.ApierV1, utils.CacheS, err.Error()))
@@ -135,13 +135,13 @@ func (api *ApierV1Service) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (api *ApierV1Service) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (api *ApierV1Service) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return api.connChan
 }
 
 // Reload handles the change of config
 func (api *ApierV1Service) Reload() (err error) {
-	var cacheSrpc, schedulerSrpc, attributeSrpc rpcclient.RpcClientConnection
+	var cacheSrpc, schedulerSrpc, attributeSrpc rpcclient.ClientConnector
 	if cacheSrpc, err = NewConnection(api.cfg, api.cacheSChan, api.dispatcherChan, api.cfg.ApierCfg().CachesConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s, error: %s",
 			utils.ApierV1, utils.CacheS, err.Error()))

@@ -69,7 +69,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 
 // NewCDRServer is a constructor for CDRServer
 func NewCDRServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, rater,
-	attrS, thdS, statS, chargerS rpcclient.RpcClientConnection, filterS *FilterS) *CDRServer {
+	attrS, thdS, statS, chargerS rpcclient.ClientConnector, filterS *FilterS) *CDRServer {
 	if rater != nil && reflect.ValueOf(rater).IsNil() {
 		rater = nil
 	}
@@ -104,11 +104,11 @@ type CDRServer struct {
 	cgrCfg     *config.CGRConfig
 	cdrDb      CdrStorage
 	dm         *DataManager
-	rals       rpcclient.RpcClientConnection
-	attrS      rpcclient.RpcClientConnection
-	thdS       rpcclient.RpcClientConnection
-	statS      rpcclient.RpcClientConnection
-	chargerS   rpcclient.RpcClientConnection
+	rals       rpcclient.ClientConnector
+	attrS      rpcclient.ClientConnector
+	thdS       rpcclient.ClientConnector
+	statS      rpcclient.ClientConnector
+	chargerS   rpcclient.ClientConnector
 	guard      *guardian.GuardianLocker
 	httpPoster *HTTPPoster // used for replication
 	filterS    *FilterS
@@ -289,6 +289,9 @@ func (cdrS *CDRServer) rateCDRWithErr(cdr *CDRWithArgDispatcher) (ratedCDRs []*C
 
 // refundEventCost will refund the EventCost using RefundIncrements
 func (cdrS *CDRServer) refundEventCost(ec *EventCost, reqType, tor string) (err error) {
+	if cdrS.rals == nil {
+		return utils.NewErrNotConnected(utils.RALService)
+	}
 	if ec == nil || !utils.AccountableRequestTypes.Has(reqType) {
 		return // non refundable
 	}
@@ -581,7 +584,7 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithArgDispatcher,
 	return
 }
 
-// Call implements the rpcclient.RpcClientConnection interface
+// Call implements the rpcclient.ClientConnector interface
 func (cdrS *CDRServer) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
@@ -754,7 +757,6 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 		chrgS = flgs.GetBool(utils.MetaChargers)
 	}
 	var ralS bool // activate single rating for the CDR
-	fmt.Printf("flags: %s HasKeyRALs: %v\n", utils.ToIJSON(flgs), flgs.GetBool(utils.MetaRALs))
 	if flgs.HasKey(utils.MetaRALs) {
 		ralS = flgs.GetBool(utils.MetaRALs)
 	}
@@ -980,31 +982,31 @@ func (cdrS *CDRServer) V1CountCDRs(args *utils.RPCCDRsFilterWithArgDispatcher, c
 
 // SetAttributeSConnection sets the new connection to the attribute service
 // only used on reload
-func (cdrS *CDRServer) SetAttributeSConnection(attrS rpcclient.RpcClientConnection) {
+func (cdrS *CDRServer) SetAttributeSConnection(attrS rpcclient.ClientConnector) {
 	cdrS.attrS = attrS
 }
 
 // SetThresholSConnection sets the new connection to the threshold service
 // only used on reload
-func (cdrS *CDRServer) SetThresholSConnection(thdS rpcclient.RpcClientConnection) {
+func (cdrS *CDRServer) SetThresholSConnection(thdS rpcclient.ClientConnector) {
 	cdrS.thdS = thdS
 }
 
 // SetStatSConnection sets the new connection to the stat service
 // only used on reload
-func (cdrS *CDRServer) SetStatSConnection(stS rpcclient.RpcClientConnection) {
+func (cdrS *CDRServer) SetStatSConnection(stS rpcclient.ClientConnector) {
 	cdrS.statS = stS
 }
 
 // SetChargerSConnection sets the new connection to the charger service
 // only used on reload
-func (cdrS *CDRServer) SetChargerSConnection(chS rpcclient.RpcClientConnection) {
+func (cdrS *CDRServer) SetChargerSConnection(chS rpcclient.ClientConnector) {
 	cdrS.chargerS = chS
 }
 
 // SetRALsConnection sets the new connection to the RAL service
 // only used on reload
-func (cdrS *CDRServer) SetRALsConnection(rls rpcclient.RpcClientConnection) {
+func (cdrS *CDRServer) SetRALsConnection(rls rpcclient.ClientConnector) {
 	cdrS.rals = rls
 }
 

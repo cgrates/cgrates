@@ -119,7 +119,7 @@ func testTPFilterStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTPFilterRpcConn(t *testing.T) {
 	var err error
-	tpFilterRPC, err = jsonrpc.Dial("tcp", tpFilterCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpFilterRPC, err = jsonrpc.Dial(utils.TCP, tpFilterCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

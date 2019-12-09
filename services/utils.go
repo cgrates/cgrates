@@ -25,8 +25,8 @@ import (
 )
 
 // NewConnection returns a new connection
-func NewConnection(cfg *config.CGRConfig, serviceConnChan, dispatcherSChan chan rpcclient.RpcClientConnection,
-	conns []*config.RemoteHost) (rpcclient.RpcClientConnection, error) {
+func NewConnection(cfg *config.CGRConfig, serviceConnChan, dispatcherSChan chan rpcclient.ClientConnector,
+	conns []*config.RemoteHost) (rpcclient.ClientConnector, error) {
 	if len(conns) == 0 {
 		return nil, nil
 	}
@@ -34,7 +34,7 @@ func NewConnection(cfg *config.CGRConfig, serviceConnChan, dispatcherSChan chan 
 	if cfg.DispatcherSCfg().Enabled {
 		internalChan = dispatcherSChan
 	}
-	return engine.NewRPCPool(rpcclient.POOL_FIRST,
+	return engine.NewRPCPool(rpcclient.PoolFirst,
 		cfg.TlsCfg().ClientKey,
 		cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
 		cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,

@@ -32,7 +32,7 @@ import (
 
 // NewFreeswitchAgent returns the Freeswitch Agent
 func NewFreeswitchAgent(cfg *config.CGRConfig,
-	sSChan, dispatcherChan chan rpcclient.RpcClientConnection,
+	sSChan, dispatcherChan chan rpcclient.ClientConnector,
 	exitChan chan bool) servmanager.Service {
 	return &FreeswitchAgent{
 		cfg:            cfg,
@@ -46,8 +46,8 @@ func NewFreeswitchAgent(cfg *config.CGRConfig,
 type FreeswitchAgent struct {
 	sync.RWMutex
 	cfg            *config.CGRConfig
-	sSChan         chan rpcclient.RpcClientConnection
-	dispatcherChan chan rpcclient.RpcClientConnection
+	sSChan         chan rpcclient.ClientConnector
+	dispatcherChan chan rpcclient.ClientConnector
 	exitChan       chan bool
 
 	fS *agents.FSsessions
@@ -61,7 +61,7 @@ func (fS *FreeswitchAgent) Start() (err error) {
 
 	fS.Lock()
 	defer fS.Unlock()
-	var sS rpcclient.RpcClientConnection
+	var sS rpcclient.ClientConnector
 	var sSInternal bool
 	utils.Logger.Info("Starting FreeSWITCH agent")
 	if !fS.cfg.DispatcherSCfg().Enabled && fS.cfg.FsAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
@@ -99,13 +99,13 @@ func (fS *FreeswitchAgent) Start() (err error) {
 
 // GetIntenternalChan returns the internal connection chanel
 // no chanel for FreeswitchAgent
-func (fS *FreeswitchAgent) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (fS *FreeswitchAgent) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return nil
 }
 
 // Reload handles the change of config
 func (fS *FreeswitchAgent) Reload() (err error) {
-	var sS rpcclient.RpcClientConnection
+	var sS rpcclient.ClientConnector
 	var sSInternal bool
 	if !fS.cfg.DispatcherSCfg().Enabled && fS.cfg.FsAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
 		sSInternal = true

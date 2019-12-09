@@ -33,7 +33,7 @@ import (
 // NewSessionService returns the Session Service
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
 	server *utils.Server, chrsChan, respChan, resChan, thsChan, stsChan,
-	supChan, attrsChan, cdrsChan, dispatcherChan, internalChan chan rpcclient.RpcClientConnection,
+	supChan, attrsChan, cdrsChan, dispatcherChan, internalChan chan rpcclient.ClientConnector,
 	exitChan chan bool) servmanager.Service {
 	return &SessionService{
 		connChan:       internalChan,
@@ -59,21 +59,21 @@ type SessionService struct {
 	cfg            *config.CGRConfig
 	dm             *DataDBService
 	server         *utils.Server
-	chrsChan       chan rpcclient.RpcClientConnection
-	respChan       chan rpcclient.RpcClientConnection
-	resChan        chan rpcclient.RpcClientConnection
-	thsChan        chan rpcclient.RpcClientConnection
-	stsChan        chan rpcclient.RpcClientConnection
-	supChan        chan rpcclient.RpcClientConnection
-	attrsChan      chan rpcclient.RpcClientConnection
-	cdrsChan       chan rpcclient.RpcClientConnection
-	dispatcherChan chan rpcclient.RpcClientConnection
+	chrsChan       chan rpcclient.ClientConnector
+	respChan       chan rpcclient.ClientConnector
+	resChan        chan rpcclient.ClientConnector
+	thsChan        chan rpcclient.ClientConnector
+	stsChan        chan rpcclient.ClientConnector
+	supChan        chan rpcclient.ClientConnector
+	attrsChan      chan rpcclient.ClientConnector
+	cdrsChan       chan rpcclient.ClientConnector
+	dispatcherChan chan rpcclient.ClientConnector
 	exitChan       chan bool
 
 	sm       *sessions.SessionS
 	rpc      *v1.SMGenericV1
 	rpcv1    *v1.SessionSv1
-	connChan chan rpcclient.RpcClientConnection
+	connChan chan rpcclient.ClientConnector
 
 	// in order to stop the bircp server if necesary
 	bircpEnabled bool
@@ -87,7 +87,7 @@ func (smg *SessionService) Start() (err error) {
 
 	smg.Lock()
 	defer smg.Unlock()
-	var ralsConns, resSConns, threshSConns, statSConns, suplSConns, attrConns, cdrsConn, chargerSConn rpcclient.RpcClientConnection
+	var ralsConns, resSConns, threshSConns, statSConns, suplSConns, attrConns, cdrsConn, chargerSConn rpcclient.ClientConnector
 
 	if chargerSConn, err = NewConnection(smg.cfg, smg.chrsChan, smg.dispatcherChan, smg.cfg.SessionSCfg().ChargerSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
@@ -188,13 +188,13 @@ func (smg *SessionService) Start() (err error) {
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (smg *SessionService) GetIntenternalChan() (conn chan rpcclient.RpcClientConnection) {
+func (smg *SessionService) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
 	return smg.connChan
 }
 
 // Reload handles the change of config
 func (smg *SessionService) Reload() (err error) {
-	var ralsConns, resSConns, threshSConns, statSConns, suplSConns, attrConns, cdrsConn, chargerSConn rpcclient.RpcClientConnection
+	var ralsConns, resSConns, threshSConns, statSConns, suplSConns, attrConns, cdrsConn, chargerSConn rpcclient.ClientConnector
 
 	if chargerSConn, err = NewConnection(smg.cfg, smg.chrsChan, smg.dispatcherChan, smg.cfg.SessionSCfg().ChargerSConns); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",

@@ -148,7 +148,7 @@ func (s *Server) ServeJSON(addr string) {
 		return
 	}
 
-	lJSON, e := net.Listen("tcp", addr)
+	lJSON, e := net.Listen(TCP, addr)
 	if e != nil {
 		log.Fatal("ServeJSON listen error:", e)
 	}
@@ -188,7 +188,7 @@ func (s *Server) ServeGOB(addr string) {
 	if !enabled {
 		return
 	}
-	lGOB, e := net.Listen("tcp", addr)
+	lGOB, e := net.Listen(TCP, addr)
 	if e != nil {
 		log.Fatal("ServeGOB listen error:", e)
 	}
@@ -306,7 +306,7 @@ func (s *Server) ServeBiJSON(addr string, onConn func(*rpc2.Client), onDis func(
 		return fmt.Errorf("BiRPCServer should not be nil")
 	}
 	var lBiJSON net.Listener
-	lBiJSON, err = net.Listen("tcp", addr)
+	lBiJSON, err = net.Listen(TCP, addr)
 	if err != nil {
 		log.Fatal("ServeBiJSON listen error:", err)
 		return
@@ -426,7 +426,7 @@ func (s *Server) ServeGOBTLS(addr, serverCrt, serverKey, caCert string,
 	if err != nil {
 		return
 	}
-	listener, err := tls.Listen("tcp", addr, &config)
+	listener, err := tls.Listen(TCP, addr, &config)
 	if err != nil {
 		log.Fatalf("Error: %s when listening", err)
 	}
@@ -467,7 +467,7 @@ func (s *Server) ServeJSONTLS(addr, serverCrt, serverKey, caCert string,
 	if err != nil {
 		return
 	}
-	listener, err := tls.Listen("tcp", addr, &config)
+	listener, err := tls.Listen(TCP, addr, &config)
 	if err != nil {
 		log.Fatalf("Error: %s when listening", err)
 	}

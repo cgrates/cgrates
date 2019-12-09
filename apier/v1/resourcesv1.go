@@ -34,7 +34,7 @@ type ResourceSv1 struct {
 	rls *engine.ResourceService
 }
 
-// Call implements rpcclient.RpcClientConnection interface for internal RPC
+// Call implements rpcclient.ClientConnector interface for internal RPC
 func (rsv1 *ResourceSv1) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(rsv1, serviceMethod, args, reply)
 }

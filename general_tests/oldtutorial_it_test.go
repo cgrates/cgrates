@@ -78,7 +78,7 @@ package general_tests
 // // Connect rpc client to rater
 // func TestTutITRpcConn(t *testing.T) {
 // 	var err error
-// 	tutLocalRpc, err = jsonrpc.Dial("tcp", tutFsLocalCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+// 	tutLocalRpc, err = jsonrpc.Dial(utils.TCP, tutFsLocalCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}
@@ -141,7 +141,7 @@ package general_tests
 // 		t.Fatal(err)
 // 	}
 // 	var err error
-// 	tutLocalRpc, err = jsonrpc.Dial("tcp", tutFsLocalCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+// 	tutLocalRpc, err = jsonrpc.Dial(utils.TCP, tutFsLocalCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}

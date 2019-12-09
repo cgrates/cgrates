@@ -42,7 +42,7 @@ type openedCSVFile struct {
 
 func NewLoader(dm *engine.DataManager, cfg *config.LoaderSCfg,
 	timezone string, exitChan chan bool, filterS *engine.FilterS,
-	internalCacheSChan chan rpcclient.RpcClientConnection) (ldr *Loader) {
+	internalCacheSChan chan rpcclient.ClientConnector) (ldr *Loader) {
 	ldr = &Loader{
 		enabled:       cfg.Enabled,
 		tenant:        cfg.Tenant,
@@ -75,9 +75,9 @@ func NewLoader(dm *engine.DataManager, cfg *config.LoaderSCfg,
 	}
 	var err error
 	//create cache connection
-	var caches *rpcclient.RpcClientPool
+	var caches *rpcclient.RPCPool
 	if len(cfg.CacheSConns) != 0 {
-		caches, err = engine.NewRPCPool(rpcclient.POOL_FIRST,
+		caches, err = engine.NewRPCPool(rpcclient.PoolFirst,
 			config.CgrConfig().TlsCfg().ClientKey,
 			config.CgrConfig().TlsCfg().ClientCerificate, config.CgrConfig().TlsCfg().CaCertificate,
 			config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
@@ -115,7 +115,7 @@ type Loader struct {
 	dm            *engine.DataManager
 	timezone      string
 	filterS       *engine.FilterS
-	cacheS        rpcclient.RpcClientConnection
+	cacheS        rpcclient.ClientConnector
 }
 
 func (ldr *Loader) ListenAndServe(exitChan chan struct{}) (err error) {

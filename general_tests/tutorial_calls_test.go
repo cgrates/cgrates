@@ -243,7 +243,7 @@ func testCallRestartFS(t *testing.T) {
 // Connect rpc client to rater
 func testCallRpcConn(t *testing.T) {
 	var err error
-	tutorialCallsRpc, err = jsonrpc.Dial("tcp", tutorialCallsCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tutorialCallsRpc, err = jsonrpc.Dial(utils.TCP, tutorialCallsCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

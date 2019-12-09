@@ -34,7 +34,7 @@ import (
 )
 
 func NewFSsessions(fsAgentConfig *config.FsAgentCfg,
-	sS rpcclient.RpcClientConnection, timezone string) (fsa *FSsessions) {
+	sS rpcclient.ClientConnector, timezone string) (fsa *FSsessions) {
 	if sS != nil && reflect.ValueOf(sS).IsNil() {
 		sS = nil
 	}
@@ -52,9 +52,9 @@ func NewFSsessions(fsAgentConfig *config.FsAgentCfg,
 // and the active sessions
 type FSsessions struct {
 	cfg         *config.FsAgentCfg
-	conns       []*fsock.FSock                // Keep the list here for connection management purposes
-	senderPools []*fsock.FSockPool            // Keep sender pools here
-	sS          rpcclient.RpcClientConnection // Connection towards CGR-SessionS component
+	conns       []*fsock.FSock            // Keep the list here for connection management purposes
+	senderPools []*fsock.FSockPool        // Keep sender pools here
+	sS          rpcclient.ClientConnector // Connection towards CGR-SessionS component
 	timezone    string
 }
 
@@ -379,7 +379,7 @@ func (sm *FSsessions) Shutdown() (err error) {
 	return
 }
 
-// rpcclient.RpcClientConnection interface
+// rpcclient.ClientConnector interface
 func (sm *FSsessions) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.RPCCall(sm, serviceMethod, args, reply)
 }
@@ -440,7 +440,7 @@ func (fsa *FSsessions) V1GetActiveSessionIDs(ignParam string,
 
 // SetSessionSConnection sets the new connection to the session service
 // only used on reload
-func (sm *FSsessions) SetSessionSConnection(sS rpcclient.RpcClientConnection) {
+func (sm *FSsessions) SetSessionSConnection(sS rpcclient.ClientConnector) {
 	sm.sS = sS
 }
 

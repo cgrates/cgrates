@@ -58,16 +58,16 @@ func TestRalsReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheTimings))
 
 	cfg.ThresholdSCfg().Enabled = true
-	internalChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalChan := make(chan rpcclient.ClientConnector, 1)
 	internalChan <- nil
-	cacheSChan := make(chan rpcclient.RpcClientConnection, 1)
+	cacheSChan := make(chan rpcclient.ClientConnector, 1)
 	cacheSChan <- chS
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg)
 	cfg.StorDbCfg().Type = utils.INTERNAL
 	stordb := NewStorDBService(cfg)
-	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.RpcClientConnection, 1), nil)
+	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil)
 	tS := NewThresholdService(cfg, db, chS, filterSChan, server)
 	ralS := NewRalService(cfg, db, stordb, chS, filterSChan, server,
 		tS.GetIntenternalChan(), internalChan, cacheSChan, internalChan, internalChan,

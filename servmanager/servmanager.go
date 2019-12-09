@@ -370,7 +370,7 @@ type Service interface {
 	// Shutdown stops the service
 	Shutdown() error
 	// GetIntenternalChan returns the internal connection chanel
-	GetIntenternalChan() chan rpcclient.RpcClientConnection
+	GetIntenternalChan() chan rpcclient.ClientConnector
 	// IsRunning returns if the service is running
 	IsRunning() bool
 	// ShouldRun returns if the service should be running

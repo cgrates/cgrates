@@ -116,7 +116,7 @@ func testTPDstRateStartEngine(t *testing.T) {
 // Connect rpc client to rater
 func testTPDstRateRpcConn(t *testing.T) {
 	var err error
-	tpDstRateRPC, err = jsonrpc.Dial("tcp", tpDstRateCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tpDstRateRPC, err = jsonrpc.Dial(utils.TCP, tpDstRateCfg.ListenCfg().RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}

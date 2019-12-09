@@ -111,7 +111,7 @@ func (lps SupplierProfiles) Sort() {
 // NewSupplierService initializes the Supplier Service
 func NewSupplierService(dm *DataManager,
 	filterS *FilterS, cgrcfg *config.CGRConfig, resourceS,
-	statS, attributeS rpcclient.RpcClientConnection) (spS *SupplierService, err error) {
+	statS, attributeS rpcclient.ClientConnector) (spS *SupplierService, err error) {
 	if attributeS != nil && reflect.ValueOf(attributeS).IsNil() { // fix nil value in interface
 		attributeS = nil
 	}
@@ -140,9 +140,9 @@ type SupplierService struct {
 	dm         *DataManager
 	filterS    *FilterS
 	cgrcfg     *config.CGRConfig
-	attributeS rpcclient.RpcClientConnection
-	resourceS  rpcclient.RpcClientConnection
-	statS      rpcclient.RpcClientConnection
+	attributeS rpcclient.ClientConnector
+	resourceS  rpcclient.ClientConnector
+	statS      rpcclient.ClientConnector
 	sorter     SupplierSortDispatcher
 }
 
@@ -638,18 +638,18 @@ func (spS *SupplierService) V1GetSupplierProfilesForEvent(args *utils.CGREventWi
 
 // SetAttributeSConnection sets the new connection to the attribute service
 // only used on reload
-func (spS *SupplierService) SetAttributeSConnection(attrS rpcclient.RpcClientConnection) {
+func (spS *SupplierService) SetAttributeSConnection(attrS rpcclient.ClientConnector) {
 	spS.attributeS = attrS
 }
 
 // SetStatSConnection sets the new connection to the stat service
 // only used on reload
-func (spS *SupplierService) SetStatSConnection(stS rpcclient.RpcClientConnection) {
+func (spS *SupplierService) SetStatSConnection(stS rpcclient.ClientConnector) {
 	spS.statS = stS
 }
 
 // SetResourceSConnection sets the new connection to the resource service
 // only used on reload
-func (spS *SupplierService) SetResourceSConnection(rS rpcclient.RpcClientConnection) {
+func (spS *SupplierService) SetResourceSConnection(rS rpcclient.ClientConnector) {
 	spS.resourceS = rS
 }

@@ -57,9 +57,9 @@ var (
 	cdrStorage              CdrStorage
 	debitPeriod             = 10 * time.Second
 	globalRoundingDecimals  = 6
-	thresholdS              rpcclient.RpcClientConnection // used by RALs to communicate with ThresholdS
-	statS                   rpcclient.RpcClientConnection
-	schedCdrsConns          rpcclient.RpcClientConnection
+	thresholdS              rpcclient.ClientConnector // used by RALs to communicate with ThresholdS
+	statS                   rpcclient.ClientConnector
+	schedCdrsConns          rpcclient.ClientConnector
 	rpSubjectPrefixMatching bool
 )
 
@@ -68,11 +68,11 @@ func SetDataStorage(dm2 *DataManager) {
 	dm = dm2
 }
 
-func SetThresholdS(thdS rpcclient.RpcClientConnection) {
+func SetThresholdS(thdS rpcclient.ClientConnector) {
 	thresholdS = thdS
 }
 
-func SetStatS(stsS rpcclient.RpcClientConnection) {
+func SetStatS(stsS rpcclient.ClientConnector) {
 	statS = stsS
 }
 
@@ -91,7 +91,7 @@ func SetCdrStorage(cStorage CdrStorage) {
 }
 
 // SetSchedCdrsConns sets the connection between action and CDRServer
-func SetSchedCdrsConns(sc rpcclient.RpcClientConnection) {
+func SetSchedCdrsConns(sc rpcclient.ClientConnector) {
 	schedCdrsConns = sc
 	if schedCdrsConns != nil && reflect.ValueOf(schedCdrsConns).IsNil() {
 		schedCdrsConns = nil

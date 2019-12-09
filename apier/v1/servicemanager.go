@@ -50,7 +50,7 @@ func (servManager *ServiceManagerV1) Ping(ign *utils.CGREventWithArgDispatcher, 
 	return nil
 }
 
-// Call implements rpcclient.RpcClientConnection interface for internal RPC
+// Call implements rpcclient.ClientConnector interface for internal RPC
 func (servManager *ServiceManagerV1) Call(serviceMethod string,
 	args interface{}, reply interface{}) error {
 	return utils.APIerRPCCall(servManager, serviceMethod, args, reply)
