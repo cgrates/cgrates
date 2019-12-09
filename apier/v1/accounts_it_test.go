@@ -55,6 +55,7 @@ var (
 		testAccITSetBalanceTimingIds,
 		testAccITAddBalanceWithNegative,
 		testAccITGetDisabledAccounts,
+		testAccITCountAccounts,
 		testAccITStopCgrEngine,
 	}
 )
@@ -479,6 +480,17 @@ func testAccITGetDisabledAccounts(t *testing.T) {
 		t.Error(err)
 	} else if len(acnts) != 3 {
 		t.Errorf("Accounts received: %+v", acnts)
+	}
+}
+func testAccITCountAccounts(t *testing.T) {
+	var reply int
+	args := &utils.TenantArg{
+		Tenant: "cgrates.org",
+	}
+	if err := accRPC.Call(utils.ApierV1CountAccounts, args, &reply); err != nil {
+		t.Error(err)
+	} else if reply != 10 {
+		t.Errorf("Expecting: %v, received: %v", 10, reply)
 	}
 }
 
