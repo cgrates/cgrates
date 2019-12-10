@@ -1,0 +1,44 @@
+{
+// CGRateS Configuration file
+//
+// Used in apier/v1/cdrs_it_test
+
+
+"data_db": {
+	"db_type": "mongo",
+	"db_name": "10",
+	"db_port": 27017,
+},
+
+
+"stor_db": {
+	"db_type": "mongo",
+	"db_name": "cgrates",
+	"db_port": 27017,
+},
+
+"rals": {
+	"enabled": true
+},
+
+
+"scheduler": {
+	"enabled": true
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"rals_conns": [
+		{"address": "127.0.0.1:2012", "transport":"*json"},
+	],
+},
+
+
+"apier": {
+	"scheduler_conns": [					// connections to SchedulerS for reloads
+		{"address": "*internal"},
+	],
+},
+
+}

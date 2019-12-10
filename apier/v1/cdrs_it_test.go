@@ -55,6 +55,27 @@ func TestCDRsITInternal(t *testing.T) {
 	}
 }
 
+func TestCDRsITMongo(t *testing.T) {
+	cdrsConfDIR = "cdrsv1mongo"
+	for _, stest := range sTestsCDRsIT {
+		t.Run(cdrsConfDIR, stest)
+	}
+}
+
+func TestCDRsITMySql(t *testing.T) {
+	cdrsConfDIR = "cdrsv1mysql"
+	for _, stest := range sTestsCDRsIT {
+		t.Run(cdrsConfDIR, stest)
+	}
+}
+
+func TestCDRsITPostgres(t *testing.T) {
+	cdrsConfDIR = "cdrsv1postgres"
+	for _, stest := range sTestsCDRsIT {
+		t.Run(cdrsConfDIR, stest)
+	}
+}
+
 func testV1CDRsInitConfig(t *testing.T) {
 	var err error
 	cdrsCfgPath = path.Join(*dataDir, "conf", "samples", cdrsConfDIR)
