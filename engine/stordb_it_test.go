@@ -32,9 +32,8 @@ import (
 )
 
 var (
-	cfg             *config.CGRConfig
-	storDB          StorDB
-	storDB2ndDBname string
+	cfg    *config.CGRConfig
+	storDB StorDB
 )
 
 // subtests to be executed for each confDIR
@@ -71,7 +70,6 @@ func TestStorDBitMySQL(t *testing.T) {
 		cfg.StorDbCfg().ConnMaxLifetime); err != nil {
 		t.Fatal(err)
 	}
-	storDB2ndDBname = "mysql"
 	for _, stest := range sTestsStorDBit {
 		stestFullName := runtime.FuncForPC(reflect.ValueOf(stest).Pointer()).Name()
 		split := strings.Split(stestFullName, ".")
@@ -91,7 +89,6 @@ func TestStorDBitPostgresSQL(t *testing.T) {
 		cfg.StorDbCfg().MaxIdleConns, cfg.StorDbCfg().ConnMaxLifetime); err != nil {
 		t.Fatal(err)
 	}
-	storDB2ndDBname = "postgres"
 	for _, stest := range sTestsStorDBit {
 		stestFullName := runtime.FuncForPC(reflect.ValueOf(stest).Pointer()).Name()
 		split := strings.Split(stestFullName, ".")
@@ -110,7 +107,6 @@ func TestStorDBitMongo(t *testing.T) {
 		utils.StorDB, cfg.StorDbCfg().StringIndexedFields, false); err != nil {
 		t.Fatal(err)
 	}
-	storDB2ndDBname = "todo"
 	for _, stest := range sTestsStorDBit {
 		stestFullName := runtime.FuncForPC(reflect.ValueOf(stest).Pointer()).Name()
 		split := strings.Split(stestFullName, ".")
@@ -1229,7 +1225,11 @@ func testStorDBitCRUDCDRs(t *testing.T) {
 			t.Error(err)
 		}
 	}
-
+	for _, cdr := range snd {
+		if err := storDB.SetCDR(cdr, false); err == nil || err != utils.ErrExists {
+			t.Error(err) // for mongo will fail because of indexes
+		}
+	}
 	// READ
 	if rcv, _, err := storDB.GetCDRs(&filter, false); err != nil {
 		t.Error(err)

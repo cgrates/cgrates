@@ -931,7 +931,7 @@ func (ms *MongoStorage) RemoveSMCosts(qryFltr *utils.SMCostFilter) error {
 	})
 }
 
-func (ms *MongoStorage) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
+func (ms *MongoStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
 	if cdr.OrderID == 0 {
 		cdr.OrderID = ms.cnter.Next()
 	}
@@ -940,14 +940,13 @@ func (ms *MongoStorage) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 			_, err = ms.getCol(ColCDRs).UpdateOne(sctx,
 				bson.M{CGRIDLow: cdr.CGRID, RunIDLow: cdr.RunID},
 				bson.M{"$set": cdr}, options.Update().SetUpsert(true))
-			// return err
-		} else {
-			_, err = ms.getCol(ColCDRs).InsertOne(sctx, cdr)
-			if err != nil && strings.Contains(err.Error(), "E11000") { // Mongo returns E11000 when key is duplicated
-				err = utils.ErrExists
-			}
+			return
 		}
-		return err
+		_, err = ms.getCol(ColCDRs).InsertOne(sctx, cdr)
+		if err != nil && strings.Contains(err.Error(), "E11000") { // Mongo returns E11000 when key is duplicated
+			err = utils.ErrExists
+		}
+		return
 	})
 }
 
