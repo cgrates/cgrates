@@ -461,7 +461,7 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 	//add a charger
 	chargerProfile := &v1.ChargerWithCache{
 		ChargerProfile: &engine.ChargerProfile{
-			Tenant: "cgrates.com",
+			Tenant: "CustomTenant",
 			ID:     "CustomCharger",
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
@@ -480,7 +480,7 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 	}
 	var reply2 *engine.ChargerProfile
 	if err := cdrsRpc.Call(utils.ApierV1GetChargerProfile,
-		&utils.TenantID{Tenant: "cgrates.com", ID: "CustomCharger"}, &reply2); err != nil {
+		&utils.TenantID{Tenant: "CustomTenant", ID: "CustomCharger"}, &reply2); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, reply2) {
 		t.Errorf("Expecting : %+v, received: %+v", chargerProfile.ChargerProfile, reply2)

@@ -52,6 +52,7 @@ var (
 		testCDRsOnExpStartSlaveEngine,
 		testCDRsOnExpAMQPQueuesCreation,
 		testCDRsOnExpInitMasterRPC,
+		testCDRsOnExpLoadDefaultCharger,
 		testCDRsOnExpDisableOnlineExport,
 		testCDRsOnExpHttpCdrReplication,
 		testCDRsOnExpAMQPReplication,
@@ -85,6 +86,12 @@ func testCDRsOnExpInitConfig(t *testing.T) {
 
 // InitDb so we can rely on count
 func testCDRsOnExpInitCdrDb(t *testing.T) {
+	if err := engine.InitDataDb(cdrsMasterCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitDataDb(cdrsSlaveCfg); err != nil {
+		t.Fatal(err)
+	}
 	if err := engine.InitStorDb(cdrsMasterCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -149,6 +156,23 @@ func testCDRsOnExpInitMasterRPC(t *testing.T) {
 	}
 }
 
+func testCDRsOnExpLoadDefaultCharger(t *testing.T) {
+	// //add a default charger
+	chargerProfile := &engine.ChargerProfile{
+		Tenant:       "cgrates.org",
+		ID:           "Default",
+		RunID:        utils.MetaDefault,
+		AttributeIDs: []string{"*none"},
+		Weight:       20,
+	}
+	var result string
+	if err := cdrsMasterRpc.Call(utils.ApierV1SetChargerProfile, chargerProfile, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+}
+
 // Disable ExportCDR
 func testCDRsOnExpDisableOnlineExport(t *testing.T) {
 	// stop RabbitMQ server so we can test reconnects
@@ -198,20 +222,6 @@ func testCDRsOnExpDisableOnlineExport(t *testing.T) {
 }
 
 func testCDRsOnExpHttpCdrReplication(t *testing.T) {
-	//add a default charger
-	chargerProfile := &engine.ChargerProfile{
-		Tenant:       "cgrates.org",
-		ID:           "Default",
-		RunID:        utils.MetaDefault,
-		AttributeIDs: []string{"*none"},
-		Weight:       20,
-	}
-	var result string
-	if err := cdrsMasterRpc.Call(utils.ApierV1SetChargerProfile, chargerProfile, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
 	testCdr1 := &engine.CDR{
 		CGRID:       utils.Sha1("httpjsonrpc1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
 		ToR:         utils.VOICE,

@@ -2,6 +2,7 @@
 
 "general": {
 	"log_level": 7,
+	"reply_timeout": "10s",									// consider connection down for replies taking longer than this value
 },
 
 "listen": {
