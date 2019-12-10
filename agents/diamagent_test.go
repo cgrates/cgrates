@@ -39,7 +39,6 @@ type testMockSessionConn struct {
 }
 
 func (s *testMockSessionConn) Call(method string, arg interface{}, rply interface{}) error {
-	// fmt.Printf("%s=>%s\n", method, utils.ToJSON(arg))
 	if call, has := s.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {

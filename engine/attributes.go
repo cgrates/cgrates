@@ -251,7 +251,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 		if !utils.IsSliceMember(rply.AlteredFields, attribute.FieldName) {
 			rply.AlteredFields = append(rply.AlteredFields, attribute.FieldName)
 		}
-		if substitute == utils.META_NONE {
+		if substitute == utils.MetaRemove {
 			delete(rply.CGREvent.Event, attribute.FieldName)
 			continue
 		}

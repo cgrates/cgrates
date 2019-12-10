@@ -205,7 +205,10 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 		var rply string
 		// After compute the CDR send it to CDR Server to be processed
 		if err := schedCdrsConns.Call(utils.CDRsV1ProcessEvent,
-			&ArgV1ProcessEvent{CGREvent: *cdr.AsCGREvent()}, &rply); err != nil {
+			&ArgV1ProcessEvent{
+				Flags:    []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}, // do not try to get the chargers for cdrlog
+				CGREvent: *cdr.AsCGREvent(),
+			}, &rply); err != nil {
 			return err
 		}
 	}

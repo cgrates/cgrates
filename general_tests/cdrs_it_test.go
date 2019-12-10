@@ -156,6 +156,7 @@ func testV2CDRsLoadTariffPlanFromFolder(t *testing.T) {
 
 func testV2CDRsProcessCDR(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
+		Flags: []string{utils.MetaRALs},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
@@ -226,7 +227,7 @@ func testV2CDRsGetCdrs(t *testing.T) {
 //Disable Attributes process
 func testV2CDRsProcessCDR2(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
-		Flags: []string{"*attributes:false"},
+		Flags: []string{"*attributes:false", utils.MetaRALs},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
@@ -361,7 +362,7 @@ func testV2CDRsGetCdrs3(t *testing.T) {
 // Enable Attributes process
 func testV2CDRsProcessCDR4(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
-		Flags: []string{"*attributes:true"},
+		Flags: []string{utils.MetaAttributes, utils.MetaRALs},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
@@ -625,11 +626,11 @@ func testV2CDRsProcessCDR6(t *testing.T) {
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
 				utils.OriginID:    "testV2CDRsProcessCDR5",
-				utils.OriginHost:  "192.168.1.1",
-				utils.Source:      "testV2CDRsProcessCDR5",
+				utils.OriginHost:  "192.168.1.2",
+				utils.Source:      "testV2CDRsProcessCDR6",
 				utils.RequestType: utils.META_RATED,
 				utils.Category:    "call",
-				utils.Account:     "testV2CDRsProcessCDR5",
+				utils.Account:     "testV2CDRsProcessCDR6",
 				utils.Subject:     "ANY2CNT",
 				utils.Destination: "+4986517174963",
 				utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
@@ -679,7 +680,7 @@ func testV2CDRsGetThreshold2(t *testing.T) {
 
 func testV2CDRsProcessCDR7(t *testing.T) {
 	args := &engine.ArgV1ProcessEvent{
-		Flags: []string{"*store:true", "*rals:true"},
+		Flags: []string{utils.MetaStore, utils.MetaRALs},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			Event: map[string]interface{}{
@@ -727,7 +728,7 @@ func testV2CDRsGetCdrs7(t *testing.T) {
 	if len(cdrs) != 1 {
 		t.Fatal("Unexpected number of CDRs returned: ", len(cdrs))
 	}
-	if cdrs[0].Cost != 0.0198 {
+	if cdrs[0].Cost != -1 {
 		t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 	}
 	if rply, has := cdrs[0].ExtraFields["PayPalAccount"]; !has || rply != "paypal@cgrates.org" {

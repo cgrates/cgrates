@@ -398,7 +398,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 				}
 				if unratedReqs.HasField( // order additional rating for unrated request types
 					engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RequestType)) {
-					argsProc.Flags = append(argsProc.Flags, fmt.Sprintf("%s:true", utils.MetaRALs))
+					argsProc.Flags = append(argsProc.Flags, utils.MetaRALs)
 				}
 				if err = sS.cdrS.Call(utils.CDRsV1ProcessEvent, argsProc, &reply); err != nil {
 					utils.Logger.Warning(

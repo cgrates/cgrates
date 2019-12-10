@@ -89,12 +89,10 @@ func TestKafkaER(t *testing.T) {
 	)
 
 	w.Close()
-	// tStart := time.Now()
 	select {
 	case err = <-rdrErr:
 		t.Error(err)
 	case ev := <-rdrEvents:
-		// fmt.Printf("It took %s to proccess the message.\n", time.Now().Sub(tStart))
 		if ev.rdrCfg.ID != "kafka" {
 			t.Errorf("Expected 'kakfa' received `%s`", ev.rdrCfg.ID)
 		}

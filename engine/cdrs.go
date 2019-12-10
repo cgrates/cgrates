@@ -187,18 +187,16 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithArgDispatcher) ([]*CDR, error) {
 				cdrsRated = append(cdrsRated, cdrClone)
 			}
 			return cdrsRated, nil
-		} else { //calculate CDR as for pseudoprepaid
-			utils.Logger.Warning(
-				fmt.Sprintf("<Cdrs> WARNING: Could not find CallCostLog for cgrid: %s, source: %s, runid: %s, originID: %s originHost: %s, will recalculate",
-					cdr.CGRID, utils.MetaSessionS, cdr.RunID, cdr.OriginID, cdr.OriginHost))
-			qryCC, err = cdrS.getCostFromRater(cdr)
 		}
-	} else {
-		qryCC, err = cdrS.getCostFromRater(cdr)
+		utils.Logger.Warning(
+			fmt.Sprintf("<Cdrs> WARNING: Could not find CallCostLog for cgrid: %s, source: %s, runid: %s, originID: %s originHost: %s, will recalculate",
+				cdr.CGRID, utils.MetaSessionS, cdr.RunID, cdr.OriginID, cdr.OriginHost))
 	}
+	qryCC, err = cdrS.getCostFromRater(cdr)
 	if err != nil {
 		return nil, err
-	} else if qryCC != nil {
+	}
+	if qryCC != nil {
 		cdr.Cost = qryCC.Cost
 		cdr.CostDetails = NewEventCostFromCallCost(qryCC, cdr.CGRID, cdr.RunID)
 	}
@@ -357,9 +355,6 @@ func (cdrS *CDRServer) chrgrSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher
 	var chrgrs []*ChrgSProcessEventReply
 	if err = cdrS.chargerS.Call(utils.ChargerSv1ProcessEvent,
 		cgrEv, &chrgrs); err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s> error: %s processing CGR event %+v with %s.",
-				utils.CDRs, err.Error(), cgrEv, utils.ChargerS))
 		return
 	}
 	if len(chrgrs) == 0 {
@@ -459,7 +454,7 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithArgDispatcher,
 		if cgrEvs, err = cdrS.chrgrSProcessEvent(ev); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
-					utils.CDRs, err.Error(), ev, utils.ChargerS))
+					utils.CDRs, err.Error(), utils.ToJSON(ev), utils.ChargerS))
 			err = utils.ErrPartiallyExecuted
 			return
 		}
@@ -480,6 +475,12 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithArgDispatcher,
 	// Check if the unique ID was not already processed
 	for _, cgrEv := range cgrEvs {
 		me := MapEvent(cgrEv.CGREvent.Event)
+		if !me.HasField(utils.CGRID) { // try to compute the CGRID if missing
+			me[utils.CGRID] = utils.Sha1(
+				me.GetStringIgnoreErrors(utils.OriginID),
+				me.GetStringIgnoreErrors(utils.OriginHost),
+			)
+		}
 		uID := utils.ConcatenatedKey(
 			me.GetStringIgnoreErrors(utils.CGRID),
 			me.GetStringIgnoreErrors(utils.RunID),
@@ -487,7 +488,7 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithArgDispatcher,
 		if Cache.HasItem(utils.CacheCDRIDs, uID) {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
-					utils.CDRs, err.Error(), cgrEv, utils.CacheS))
+					utils.CDRs, utils.ErrExists, utils.ToJSON(cgrEv), utils.CacheS))
 			return utils.ErrExists
 		}
 		Cache.Set(utils.CacheCDRIDs, uID, true, nil,
