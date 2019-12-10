@@ -114,7 +114,7 @@ func (cdrSv1 *CDRsV1) StoreSessionCost(attr *engine.AttrCDRSStoreSMCost, reply *
 	return cdrSv1.CDRs.V1StoreSessionCost(attr, reply)
 }
 
-func (cdrSv1 *CDRsV1) CountCDRs(args *utils.RPCCDRsFilterWithArgDispatcher, reply *int64) error {
+func (cdrSv1 *CDRsV1) GetCDRsCount(args *utils.RPCCDRsFilterWithArgDispatcher, reply *int64) error {
 	return cdrSv1.CDRs.V1CountCDRs(args, reply)
 }
 

@@ -360,7 +360,7 @@ func testSSv1ItProcessCDRForSessionFromProcessEvent(t *testing.T) {
 func testSSv1ItGetCDRs(t *testing.T) {
 	var cdrCnt int64
 	req := &utils.RPCCDRsFilterWithArgDispatcher{RPCCDRsFilter: &utils.RPCCDRsFilter{}}
-	if err := sSApierRpc.Call(utils.CDRsV1CountCDRs, req, &cdrCnt); err != nil {
+	if err := sSApierRpc.Call(utils.CDRsV1GetCDRsCount, req, &cdrCnt); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if cdrCnt != 3 { // 3 for each CDR
 		t.Error("Unexpected number of CDRs returned: ", cdrCnt)

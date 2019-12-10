@@ -707,8 +707,8 @@ func (dS *DispatcherSCDRsV1) GetCDRs(args utils.RPCCDRsFilterWithArgDispatcher, 
 	return dS.dS.CDRsV1GetCDRs(args, reply)
 }
 
-func (dS *DispatcherSCDRsV1) CountCDRs(args *utils.RPCCDRsFilterWithArgDispatcher, reply *int64) error {
-	return dS.dS.CDRsV1CountCDRs(args, reply)
+func (dS *DispatcherSCDRsV1) GetCDRsCount(args *utils.RPCCDRsFilterWithArgDispatcher, reply *int64) error {
+	return dS.dS.CDRsV1GetCDRsCount(args, reply)
 }
 
 func (dS *DispatcherSCDRsV1) StoreSessionCost(args *engine.AttrCDRSStoreSMCost, reply *string) error {

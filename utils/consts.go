@@ -1000,7 +1000,7 @@ const (
 	ApierV1AddBalance                  = "ApierV1.AddBalance"
 	ApierV1DebitBalance                = "ApierV1.DebitBalance"
 	ApierV1SetAccount                  = "ApierV1.SetAccount"
-	ApierV1CountAccounts               = "ApierV1.CountAccounts"
+	ApierV1GetAccountsCount            = "ApierV1.GetAccountsCount"
 	ApierV1GetDataDBVersions           = "ApierV1.GetDataDBVersions"
 	ApierV1GetStorDBVersions           = "ApierV1.GetStorDBVersions"
 	ApierV1GetCDRs                     = "ApierV1.GetCDRs"
@@ -1354,7 +1354,7 @@ const (
 // Cdrs APIs
 const (
 	CDRsV1                     = "CDRsV1"
-	CDRsV1CountCDRs            = "CDRsV1.CountCDRs"
+	CDRsV1GetCDRsCount         = "CDRsV1.GetCDRsCount"
 	CDRsV1RateCDRs             = "CDRsV1.RateCDRs"
 	CDRsV1GetCDRs              = "CDRsV1.GetCDRs"
 	CDRsV1ProcessCDR           = "CDRsV1.ProcessCDR"

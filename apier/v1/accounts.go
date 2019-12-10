@@ -594,7 +594,7 @@ func (api *ApierV1) RemoveBalances(attr *utils.AttrSetBalance, reply *string) (e
 	return nil
 }
 
-func (api *ApierV1) CountAccounts(attr utils.TenantArg, reply *int) (err error) {
+func (api *ApierV1) GetAccountsCount(attr utils.TenantArg, reply *int) (err error) {
 	if len(attr.Tenant) == 0 {
 		return utils.NewErrMandatoryIeMissing("Tenant")
 	}

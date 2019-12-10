@@ -74,7 +74,7 @@ func (dS *DispatcherService) CDRsV1GetCDRs(args utils.RPCCDRsFilterWithArgDispat
 		utils.CDRsV1GetCDRs, args, reply)
 }
 
-func (dS *DispatcherService) CDRsV1CountCDRs(args *utils.RPCCDRsFilterWithArgDispatcher, reply *int64) (err error) {
+func (dS *DispatcherService) CDRsV1GetCDRsCount(args *utils.RPCCDRsFilterWithArgDispatcher, reply *int64) (err error) {
 	tnt := dS.cfg.GeneralCfg().DefaultTenant
 	if args.TenantArg != nil && args.TenantArg.Tenant != utils.EmptyString {
 		tnt = args.TenantArg.Tenant
@@ -83,7 +83,7 @@ func (dS *DispatcherService) CDRsV1CountCDRs(args *utils.RPCCDRsFilterWithArgDis
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
-		if err = dS.authorize(utils.CDRsV1CountCDRs, tnt,
+		if err = dS.authorize(utils.CDRsV1GetCDRsCount, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
 		}
@@ -93,7 +93,7 @@ func (dS *DispatcherService) CDRsV1CountCDRs(args *utils.RPCCDRsFilterWithArgDis
 		routeID = args.ArgDispatcher.RouteID
 	}
 	return dS.Dispatch(&utils.CGREvent{Tenant: tnt}, utils.MetaCDRs, routeID,
-		utils.CDRsV1CountCDRs, args, reply)
+		utils.CDRsV1GetCDRsCount, args, reply)
 }
 
 func (dS *DispatcherService) CDRsV1StoreSessionCost(args *engine.AttrCDRSStoreSMCost, reply *string) (err error) {

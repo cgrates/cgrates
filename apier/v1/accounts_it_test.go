@@ -487,7 +487,7 @@ func testAccITCountAccounts(t *testing.T) {
 	args := &utils.TenantArg{
 		Tenant: "cgrates.org",
 	}
-	if err := accRPC.Call(utils.ApierV1CountAccounts, args, &reply); err != nil {
+	if err := accRPC.Call(utils.ApierV1GetAccountsCount, args, &reply); err != nil {
 		t.Error(err)
 	} else if reply != 10 {
 		t.Errorf("Expecting: %v, received: %v", 10, reply)
