@@ -37,7 +37,7 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 		{
 			ID:                       utils.META_DEFAULT,
 			Enabled:                  false,
-			CdrsConns:                []*RemoteHost{{Address: utils.MetaInternal}},
+			CdrsConns:                []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 			CdrFormat:                "*file_csv",
 			FieldSeparator:           ',',
 			RunDelay:                 0,
@@ -114,7 +114,7 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 		{
 			ID:                       "CDRC-CSV1",
 			Enabled:                  true,
-			CdrsConns:                []*RemoteHost{{Address: utils.MetaInternal}},
+			CdrsConns:                []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 			CdrFormat:                "*file_csv",
 			FieldSeparator:           ',',
 			RunDelay:                 0,
@@ -191,7 +191,7 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 		{
 			ID:                       "CDRC-CSV2",
 			Enabled:                  true,
-			CdrsConns:                []*RemoteHost{{Address: utils.MetaInternal}},
+			CdrsConns:                []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 			CdrFormat:                "*file_csv",
 			FieldSeparator:           ',',
 			RunDelay:                 1000000000,
@@ -252,7 +252,7 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 		{
 			ID:                       "CDRC-CSV3",
 			Enabled:                  true,
-			CdrsConns:                []*RemoteHost{{Address: utils.MetaInternal}},
+			CdrsConns:                []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 			CdrFormat:                utils.MetaFileCSV,
 			FieldSeparator:           ',',
 			RunDelay:                 0,

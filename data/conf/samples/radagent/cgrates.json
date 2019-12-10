@@ -37,9 +37,7 @@
 
 "cdrs": {
 	"enabled": true,
-	"rals_conns": [
-		{"address": "*internal"}
-	],
+	"rals_conns": ["*internal"],
 },
 
 "resources": {
@@ -60,21 +58,11 @@
 
 "sessions": {
 	"enabled": true,
-	"attributes_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
-	],
-	"cdrs_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
-	],
-	"rals_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
-	],
-	"resources_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
-	],
-	"chargers_conns": [
-		{"address": "*internal"}
-	],
+	"attributes_conns": ["*localhost"],
+	"cdrs_conns": ["*localhost"],
+	"rals_conns": ["*localhost"],
+	"resources_conns": ["*localhost"],
+	"chargers_conns": ["*internal"],
 	"debit_interval": "10s",
 },
 

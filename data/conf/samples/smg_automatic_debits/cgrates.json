@@ -35,15 +35,9 @@
 "sessions": {
 	"enabled": true,
 	"debit_interval": "1ms",					// interval to perform debits on.
-	"rals_conns": [
-		{"address": "*internal"}
-	],
-	"cdrs_conns": [
-		{"address": "*internal"}
-	],
-	"chargers_conns": [
-		{"address": "*internal"}
-	],
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
 },
 
 

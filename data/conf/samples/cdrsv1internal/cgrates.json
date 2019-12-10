@@ -26,9 +26,7 @@
 
 "cdrs": {
 	"enabled": true,
-	"rals_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"},
-	],
+	"rals_conns": ["*localhost"],
 },
 
 

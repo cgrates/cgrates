@@ -27,11 +27,11 @@ type CdrsCfg struct {
 	ExtraFields      []*utils.RSRField // Extra fields to store in CDRs
 	StoreCdrs        bool              // store cdrs in storDb
 	SMCostRetries    int
-	ChargerSConns    []*RemoteHost
-	RaterConns       []*RemoteHost // address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
-	AttributeSConns  []*RemoteHost // address where to reach the users service: <""|internal|x.y.z.y:1234>
-	ThresholdSConns  []*RemoteHost // address where to reach the thresholds service
-	StatSConns       []*RemoteHost
+	ChargerSConns    []string
+	RaterConns       []string
+	AttributeSConns  []string
+	ThresholdSConns  []string
+	StatSConns       []string
 	OnlineCDRExports []string // list of CDRE templates to use for real-time CDR exports
 }
 
@@ -55,38 +55,58 @@ func (cdrscfg *CdrsCfg) loadFromJsonCfg(jsnCdrsCfg *CdrsJsonCfg) (err error) {
 		cdrscfg.SMCostRetries = *jsnCdrsCfg.Session_cost_retries
 	}
 	if jsnCdrsCfg.Chargers_conns != nil {
-		cdrscfg.ChargerSConns = make([]*RemoteHost, len(*jsnCdrsCfg.Chargers_conns))
-		for idx, jsnHaCfg := range *jsnCdrsCfg.Chargers_conns {
-			cdrscfg.ChargerSConns[idx] = NewDfltRemoteHost()
-			cdrscfg.ChargerSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		cdrscfg.ChargerSConns = make([]string, len(*jsnCdrsCfg.Chargers_conns))
+		for idx, connID := range *jsnCdrsCfg.Chargers_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				cdrscfg.ChargerSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)
+			} else {
+				cdrscfg.ChargerSConns[idx] = connID
+			}
 		}
 	}
 	if jsnCdrsCfg.Rals_conns != nil {
-		cdrscfg.RaterConns = make([]*RemoteHost, len(*jsnCdrsCfg.Rals_conns))
-		for idx, jsnHaCfg := range *jsnCdrsCfg.Rals_conns {
-			cdrscfg.RaterConns[idx] = NewDfltRemoteHost()
-			cdrscfg.RaterConns[idx].loadFromJsonCfg(jsnHaCfg)
+		cdrscfg.RaterConns = make([]string, len(*jsnCdrsCfg.Rals_conns))
+		for idx, connID := range *jsnCdrsCfg.Rals_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				cdrscfg.RaterConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)
+			} else {
+				cdrscfg.RaterConns[idx] = connID
+			}
 		}
 	}
 	if jsnCdrsCfg.Attributes_conns != nil {
-		cdrscfg.AttributeSConns = make([]*RemoteHost, len(*jsnCdrsCfg.Attributes_conns))
-		for idx, jsnHaCfg := range *jsnCdrsCfg.Attributes_conns {
-			cdrscfg.AttributeSConns[idx] = NewDfltRemoteHost()
-			cdrscfg.AttributeSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		cdrscfg.AttributeSConns = make([]string, len(*jsnCdrsCfg.Attributes_conns))
+		for idx, connID := range *jsnCdrsCfg.Attributes_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				cdrscfg.AttributeSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
+			} else {
+				cdrscfg.AttributeSConns[idx] = connID
+			}
 		}
 	}
 	if jsnCdrsCfg.Thresholds_conns != nil {
-		cdrscfg.ThresholdSConns = make([]*RemoteHost, len(*jsnCdrsCfg.Thresholds_conns))
-		for idx, jsnHaCfg := range *jsnCdrsCfg.Thresholds_conns {
-			cdrscfg.ThresholdSConns[idx] = NewDfltRemoteHost()
-			cdrscfg.ThresholdSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		cdrscfg.ThresholdSConns = make([]string, len(*jsnCdrsCfg.Thresholds_conns))
+		for idx, connID := range *jsnCdrsCfg.Thresholds_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				cdrscfg.ThresholdSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
+			} else {
+				cdrscfg.ThresholdSConns[idx] = connID
+			}
 		}
 	}
 	if jsnCdrsCfg.Stats_conns != nil {
-		cdrscfg.StatSConns = make([]*RemoteHost, len(*jsnCdrsCfg.Stats_conns))
-		for idx, jsnHaCfg := range *jsnCdrsCfg.Stats_conns {
-			cdrscfg.StatSConns[idx] = NewDfltRemoteHost()
-			cdrscfg.StatSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		cdrscfg.StatSConns = make([]string, len(*jsnCdrsCfg.Stats_conns))
+		for idx, connID := range *jsnCdrsCfg.Stats_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				cdrscfg.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
+			} else {
+				cdrscfg.StatSConns[idx] = connID
+			}
 		}
 	}
 	if jsnCdrsCfg.Online_cdr_exports != nil {

@@ -68,35 +68,19 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // NewCDRServer is a constructor for CDRServer
-func NewCDRServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, rater,
-	attrS, thdS, statS, chargerS rpcclient.ClientConnector, filterS *FilterS) *CDRServer {
-	if rater != nil && reflect.ValueOf(rater).IsNil() {
-		rater = nil
-	}
-	if attrS != nil && reflect.ValueOf(attrS).IsNil() {
-		attrS = nil
-	}
-	if thdS != nil && reflect.ValueOf(thdS).IsNil() {
-		thdS = nil
-	}
-	if statS != nil && reflect.ValueOf(statS).IsNil() {
-		statS = nil
-	}
-	if chargerS != nil && reflect.ValueOf(chargerS).IsNil() {
-		chargerS = nil
-	}
+func NewCDRServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, filterS *FilterS,
+	connMgr *ConnManager) *CDRServer {
+
 	return &CDRServer{
-		cgrCfg:   cgrCfg,
-		cdrDb:    cdrDb,
-		dm:       dm,
-		rals:     rater,
-		attrS:    attrS,
-		statS:    statS,
-		thdS:     thdS,
-		chargerS: chargerS,
-		guard:    guardian.Guardian,
+		cgrCfg: cgrCfg,
+		cdrDb:  cdrDb,
+		dm:     dm,
+		guard:  guardian.Guardian,
 		httpPoster: NewHTTPPoster(cgrCfg.GeneralCfg().HttpSkipTlsVerify,
-			cgrCfg.GeneralCfg().ReplyTimeout), filterS: filterS}
+			cgrCfg.GeneralCfg().ReplyTimeout),
+		filterS: filterS,
+		connMgr: connMgr,
+	}
 }
 
 // CDRServer stores and rates CDRs
@@ -104,14 +88,10 @@ type CDRServer struct {
 	cgrCfg     *config.CGRConfig
 	cdrDb      CdrStorage
 	dm         *DataManager
-	rals       rpcclient.ClientConnector
-	attrS      rpcclient.ClientConnector
-	thdS       rpcclient.ClientConnector
-	statS      rpcclient.ClientConnector
-	chargerS   rpcclient.ClientConnector
 	guard      *guardian.GuardianLocker
 	httpPoster *HTTPPoster // used for replication
 	filterS    *FilterS
+	connMgr    *ConnManager
 }
 
 // RegisterHandlersToServer is called by cgr-engine to register HTTP URL handlers
@@ -231,11 +211,13 @@ func (cdrS *CDRServer) getCostFromRater(cdr *CDRWithArgDispatcher) (*CallCost, e
 		PerformRounding: true,
 	}
 	if reqTypes.Has(cdr.RequestType) { // Prepaid - Cost can be recalculated in case of missing records from SM
-		err = cdrS.rals.Call(utils.ResponderDebit,
+		err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().RaterConns,
+			utils.ResponderDebit,
 			&CallDescriptorWithArgDispatcher{CallDescriptor: cd,
 				ArgDispatcher: cdr.ArgDispatcher}, cc)
 	} else {
-		err = cdrS.rals.Call(utils.ResponderGetCost,
+		err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().RaterConns,
+			utils.ResponderGetCost,
 			&CallDescriptorWithArgDispatcher{CallDescriptor: cd,
 				ArgDispatcher: cdr.ArgDispatcher}, cc)
 	}
@@ -290,7 +272,7 @@ func (cdrS *CDRServer) rateCDRWithErr(cdr *CDRWithArgDispatcher) (ratedCDRs []*C
 
 // refundEventCost will refund the EventCost using RefundIncrements
 func (cdrS *CDRServer) refundEventCost(ec *EventCost, reqType, tor string) (err error) {
-	if cdrS.rals == nil {
+	if len(cdrS.cgrCfg.CdrsCfg().RaterConns) == 0 {
 		return utils.NewErrNotConnected(utils.RALService)
 	}
 	if ec == nil || !utils.AccountableRequestTypes.Has(reqType) {
@@ -301,7 +283,8 @@ func (cdrS *CDRServer) refundEventCost(ec *EventCost, reqType, tor string) (err 
 		return
 	}
 	var acnt Account
-	if err = cdrS.rals.Call(utils.ResponderRefundIncrements,
+	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().RaterConns,
+		utils.ResponderRefundIncrements,
 		&CallDescriptorWithArgDispatcher{CallDescriptor: cd}, &acnt); err != nil {
 		return
 	}
@@ -313,7 +296,8 @@ func (cdrS *CDRServer) refundEventCost(ec *EventCost, reqType, tor string) (err 
 func (cdrS *CDRServer) chrgProcessEvent(cgrEv *utils.CGREventWithArgDispatcher,
 	attrS, store, allowUpdate, export, thdS, statS bool) (err error) {
 	var chrgrs []*ChrgSProcessEventReply
-	if err = cdrS.chargerS.Call(utils.ChargerSv1ProcessEvent,
+	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().ChargerSConns,
+		utils.ChargerSv1ProcessEvent,
 		cgrEv, &chrgrs); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s processing CGR event %+v with %s.",
@@ -356,7 +340,8 @@ func (cdrS *CDRServer) chrgProcessEvent(cgrEv *utils.CGREventWithArgDispatcher,
 // chrgrSProcessEvent forks CGREventWithArgDispatcher into multiples based on matching ChargerS profiles
 func (cdrS *CDRServer) chrgrSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher) (cgrEvs []*utils.CGREventWithArgDispatcher, err error) {
 	var chrgrs []*ChrgSProcessEventReply
-	if err = cdrS.chargerS.Call(utils.ChargerSv1ProcessEvent,
+	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().ChargerSConns,
+		utils.ChargerSv1ProcessEvent,
 		cgrEv, &chrgrs); err != nil {
 		return
 	}
@@ -382,7 +367,8 @@ func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher)
 	if cgrEv.ArgDispatcher != nil {
 		attrArgs.ArgDispatcher = cgrEv.ArgDispatcher
 	}
-	if err = cdrS.attrS.Call(utils.AttributeSv1ProcessEvent,
+	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().AttributeSConns,
+		utils.AttributeSv1ProcessEvent,
 		attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 		cgrEv.CGREvent = rplyEv.CGREvent
 		if tntIface, has := cgrEv.CGREvent.Event[utils.MetaTenant]; has {
@@ -405,7 +391,8 @@ func (cdrS *CDRServer) thdSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher) 
 	if cgrEv.ArgDispatcher != nil {
 		thArgs.ArgDispatcher = cgrEv.ArgDispatcher
 	}
-	if err = cdrS.thdS.Call(utils.ThresholdSv1ProcessEvent,
+	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().ThresholdSConns,
+		utils.ThresholdSv1ProcessEvent,
 		thArgs, &tIDs); err != nil &&
 		err.Error() == utils.ErrNotFound.Error() {
 		err = nil // NotFound is not considered error
@@ -420,7 +407,8 @@ func (cdrS *CDRServer) statSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher)
 	if cgrEv.ArgDispatcher != nil {
 		statArgs.ArgDispatcher = cgrEv.ArgDispatcher
 	}
-	if err = cdrS.statS.Call(utils.StatSv1ProcessEvent,
+	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().StatSConns,
+		utils.StatSv1ProcessEvent,
 		statArgs, &reply); err != nil &&
 		err.Error() == utils.ErrNotFound.Error() {
 		err = nil // NotFound is not considered error
@@ -437,7 +425,7 @@ func (cdrS *CDRServer) exportCDRs(cdrs []*CDR) (err error) {
 			expTpl.ExportPath, cdrS.cgrCfg.GeneralCfg().FailedPostsDir,
 			"CDRSReplication", expTpl.Synchronous, expTpl.Attempts,
 			expTpl.FieldSeparator, cdrS.cgrCfg.GeneralCfg().HttpSkipTlsVerify, cdrS.httpPoster,
-			cdrS.cgrCfg.ApierCfg().AttributeSConns, cdrS.filterS); err != nil { // DON"T FORHERT TO TAKE ATTRIBUTESC FROM CDRS
+			cdrS.cgrCfg.CdrsCfg().AttributeSConns, cdrS.filterS); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<CDRS> Building CDRExporter for online exports got error: <%s>", err.Error()))
 			continue
 		}
@@ -683,7 +671,7 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDRWithArgDispatcher, reply *string) (e
 		ArgDispatcher: cdr.ArgDispatcher,
 	}
 
-	if cdrS.attrS != nil {
+	if len(cdrS.cgrCfg.CdrsCfg().AttributeSConns) != 0 {
 		if err = cdrS.attrSProcessEvent(cgrEv); err != nil {
 			err = utils.NewErrServerError(err)
 			return
@@ -701,16 +689,18 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDRWithArgDispatcher, reply *string) (e
 	if len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0 {
 		cdrS.exportCDRs([]*CDR{cdr.CDR}) // Replicate raw CDR
 	}
-	if cdrS.thdS != nil {
+	if len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0 {
 		go cdrS.thdSProcessEvent(cgrEv)
 	}
-	if cdrS.statS != nil {
+	if len(cdrS.cgrCfg.CdrsCfg().StatSConns) != 0 {
 		go cdrS.statSProcessEvent(cgrEv)
 	}
-	if cdrS.chargerS != nil &&
+	if len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) != 0 &&
 		utils.SliceHasMember([]string{"", utils.MetaRaw}, cdr.RunID) {
-		go cdrS.chrgProcessEvent(cgrEv, cdrS.attrS != nil, cdrS.cgrCfg.CdrsCfg().StoreCdrs, false,
-			len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0, cdrS.thdS != nil, cdrS.statS != nil)
+		go cdrS.chrgProcessEvent(cgrEv, len(cdrS.cgrCfg.CdrsCfg().AttributeSConns) != 0,
+			cdrS.cgrCfg.CdrsCfg().StoreCdrs, false,
+			len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0, len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0,
+			len(cdrS.cgrCfg.CdrsCfg().StatSConns) != 0)
 	}
 	*reply = utils.OK
 
@@ -754,7 +744,7 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	if flgs, err = utils.FlagsWithParamsFromSlice(arg.Flags); err != nil {
 		return
 	}
-	attrS := cdrS.attrS != nil
+	attrS := len(cdrS.cgrCfg.CdrsCfg().AttributeSConns) != 0
 	if flgs.HasKey(utils.MetaAttributes) {
 		attrS = flgs.GetBool(utils.MetaAttributes)
 	}
@@ -766,15 +756,15 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	if flgs.HasKey(utils.MetaExport) {
 		export = flgs.GetBool(utils.MetaExport)
 	}
-	thdS := cdrS.thdS != nil
+	thdS := len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0
 	if flgs.HasKey(utils.MetaThresholds) {
 		thdS = flgs.GetBool(utils.MetaThresholds)
 	}
-	stS := cdrS.statS != nil
+	stS := len(cdrS.cgrCfg.CdrsCfg().StatSConns) != 0
 	if flgs.HasKey(utils.MetaStats) {
 		stS = flgs.GetBool(utils.MetaStats)
 	}
-	chrgS := cdrS.chargerS != nil // activate charging for the Event
+	chrgS := len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) != 0 // activate charging for the Event
 	if flgs.HasKey(utils.MetaChargers) {
 		chrgS = flgs.GetBool(utils.MetaChargers)
 	}
@@ -873,7 +863,8 @@ func (cdrS *CDRServer) V2StoreSessionCost(args *ArgsV2CDRSStoreSMCost, reply *st
 		cd.RunID = args.Cost.RunID
 		cd.Increments = roundIncrements
 		var response float64
-		if err := cdrS.rals.Call(utils.ResponderRefundRounding,
+		if err := cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().RaterConns,
+			utils.ResponderRefundRounding,
 			&CallDescriptorWithArgDispatcher{CallDescriptor: cd},
 			&response); err != nil {
 			utils.Logger.Warning(
@@ -930,16 +921,16 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 	if flgs.HasKey(utils.MetaExport) {
 		export = flgs.GetBool(utils.MetaExport)
 	}
-	thdS := cdrS.thdS != nil
+	thdS := len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0
 	if flgs.HasKey(utils.MetaThresholds) {
 		thdS = flgs.GetBool(utils.MetaThresholds)
 	}
-	statS := cdrS.statS != nil
+	statS := len(cdrS.cgrCfg.CdrsCfg().StatSConns) != 0
 	if flgs.HasKey(utils.MetaStatS) {
 		statS = flgs.GetBool(utils.MetaStatS)
 	}
 	if flgs.GetBool(utils.MetaChargers) {
-		if cdrS.chargerS == nil {
+		if len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ChargerS)
 		}
 		for _, cdr := range cdrs {
@@ -1001,36 +992,6 @@ func (cdrS *CDRServer) V1CountCDRs(args *utils.RPCCDRsFilterWithArgDispatcher, c
 	}
 	*cnt = qryCnt
 	return nil
-}
-
-// SetAttributeSConnection sets the new connection to the attribute service
-// only used on reload
-func (cdrS *CDRServer) SetAttributeSConnection(attrS rpcclient.ClientConnector) {
-	cdrS.attrS = attrS
-}
-
-// SetThresholSConnection sets the new connection to the threshold service
-// only used on reload
-func (cdrS *CDRServer) SetThresholSConnection(thdS rpcclient.ClientConnector) {
-	cdrS.thdS = thdS
-}
-
-// SetStatSConnection sets the new connection to the stat service
-// only used on reload
-func (cdrS *CDRServer) SetStatSConnection(stS rpcclient.ClientConnector) {
-	cdrS.statS = stS
-}
-
-// SetChargerSConnection sets the new connection to the charger service
-// only used on reload
-func (cdrS *CDRServer) SetChargerSConnection(chS rpcclient.ClientConnector) {
-	cdrS.chargerS = chS
-}
-
-// SetRALsConnection sets the new connection to the RAL service
-// only used on reload
-func (cdrS *CDRServer) SetRALsConnection(rls rpcclient.ClientConnector) {
-	cdrS.rals = rls
 }
 
 // SetStorDB sets the new StorDB

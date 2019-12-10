@@ -47,46 +47,31 @@ func TestConfigSanityCDRServer(t *testing.T) {
 	cfg, _ := NewDefaultCGRConfig()
 
 	cfg.cdrsCfg = &CdrsCfg{
-		Enabled: true,
-		ChargerSConns: []*RemoteHost{
-			&RemoteHost{
-				Address: utils.MetaInternal,
-			},
-		},
+		Enabled:       true,
+		ChargerSConns: []string{utils.MetaInternal},
 	}
-	expected := "<Chargers> not enabled but requested by <CDRs> component."
+	expected := "<ChargerS> not enabled but requested by <CDRs> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.chargerSCfg.Enabled = true
 
-	cfg.cdrsCfg.RaterConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
+	cfg.cdrsCfg.RaterConns = []string{utils.MetaInternal}
+
 	expected = "<RALs> not enabled but requested by <CDRs> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.ralsCfg.Enabled = true
 
-	cfg.cdrsCfg.AttributeSConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
+	cfg.cdrsCfg.AttributeSConns = []string{utils.MetaInternal}
 	expected = "<AttributeS> not enabled but requested by <CDRs> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.attributeSCfg.Enabled = true
 
-	cfg.cdrsCfg.StatSConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
+	cfg.cdrsCfg.StatSConns = []string{utils.MetaInternal}
 	expected = "<StatS> not enabled but requested by <CDRs> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -101,12 +86,8 @@ func TestConfigSanityCDRServer(t *testing.T) {
 	}
 	cfg.cdrsCfg.OnlineCDRExports = []string{"stringx"}
 
-	cfg.cdrsCfg.ThresholdSConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
-	expected = "ThresholdS not enabled but requested by CDRs component."
+	cfg.cdrsCfg.ThresholdSConns = []string{utils.MetaInternal}
+	expected = "<ThresholdS> not enabled but requested by <CDRs> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -128,14 +109,13 @@ func TestConfigSanityCDRC(t *testing.T) {
 	cfg.CdrcProfiles = map[string][]*CdrcCfg{
 		"test": []*CdrcCfg{
 			&CdrcCfg{
-				Enabled: true,
-				CdrsConns: []*RemoteHost{
-					&RemoteHost{Address: utils.MetaInternal},
-				},
+				Enabled:   true,
+				ID:        "test",
+				CdrsConns: []string{utils.MetaInternal},
 			},
 		},
 	}
-	expected = "<CDRs> not enabled but referenced from <cdrc>"
+	expected = "<CDRs> not enabled but requested by <test> cdrcProfile"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -143,10 +123,9 @@ func TestConfigSanityCDRC(t *testing.T) {
 	cfg.CdrcProfiles = map[string][]*CdrcCfg{
 		"test": []*CdrcCfg{
 			&CdrcCfg{
-				Enabled: true,
-				CdrsConns: []*RemoteHost{
-					&RemoteHost{Address: utils.MetaInternal},
-				},
+				Enabled:       true,
+				ID:            "test",
+				CdrsConns:     []string{utils.MetaInternal},
 				ContentFields: []*FCTemplate{},
 			},
 		},
@@ -229,89 +208,57 @@ func TestConfigSanitySessionS(t *testing.T) {
 	}
 	cfg.sessionSCfg.TerminateAttempts = 1
 
-	cfg.sessionSCfg.ChargerSConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
-	expected = "<SessionS> ChargerS not enabled"
+	cfg.sessionSCfg.ChargerSConns = []string{utils.MetaInternal}
+	expected = "<ChargerS> not enabled but requested by <SessionS> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.chargerSCfg.Enabled = true
 
-	cfg.sessionSCfg.RALsConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
-	expected = "<SessionS> RALs not enabled but requested by SMGeneric component."
+	cfg.sessionSCfg.RALsConns = []string{utils.MetaInternal}
+	expected = "<RALs> not enabled but requested by <SessionS> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.ralsCfg.Enabled = true
 
-	cfg.sessionSCfg.ResSConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
-	expected = "<SessionS> ResourceS not enabled but requested by SMGeneric component."
+	cfg.sessionSCfg.ResSConns = []string{utils.MetaInternal}
+	expected = "<ResourceS> not enabled but requested by <SessionS> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.resourceSCfg.Enabled = true
 
-	cfg.sessionSCfg.ThreshSConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
-	expected = "<SessionS> ThresholdS not enabled but requested by SMGeneric component."
+	cfg.sessionSCfg.ThreshSConns = []string{utils.MetaInternal}
+	expected = "<ThresholdS> not enabled but requested by <SessionS> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.thresholdSCfg.Enabled = true
 
-	cfg.sessionSCfg.StatSConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
-	expected = "<SessionS> Stats not enabled but requested by SMGeneric component."
+	cfg.sessionSCfg.StatSConns = []string{utils.MetaInternal}
+	expected = "<StatS> not enabled but requested by <SessionS> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.statsCfg.Enabled = true
 
-	cfg.sessionSCfg.SupplSConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
-	expected = "<SessionS> SupplierS not enabled but requested by SMGeneric component."
+	cfg.sessionSCfg.SupplSConns = []string{utils.MetaInternal}
+	expected = "<SupplierS> not enabled but requested by <SessionS> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.supplierSCfg.Enabled = true
 
-	cfg.sessionSCfg.AttrSConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
-	expected = "<SessionS> AttributeS not enabled but requested by SMGeneric component."
+	cfg.sessionSCfg.AttrSConns = []string{utils.MetaInternal}
+	expected = "<AttributeS> not enabled but requested by <SessionS> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.attributeSCfg.Enabled = true
 
-	cfg.sessionSCfg.CDRsConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
-	expected = "<SessionS> CDRS not enabled but referenced by SMGeneric component."
+	cfg.sessionSCfg.CDRsConns = []string{utils.MetaInternal}
+	expected = "<CDRs> not enabled but requested by <SessionS> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}

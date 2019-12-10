@@ -27,7 +27,7 @@ import (
 
 var cdrcCfg = CdrcCfg{
 	ID:                       utils.MetaDefault,
-	CdrsConns:                []*RemoteHost{{Address: utils.MetaInternal}},
+	CdrsConns:                []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 	CdrFormat:                "csv",
 	FieldSeparator:           ',',
 	MaxOpenFiles:             1024,
@@ -78,9 +78,7 @@ func TestCdrcCfgloadFromJsonCfg(t *testing.T) {
 		"id": "*default",								// identifier of the CDRC runner
 		"enabled": false,								// enable CDR client functionality
 		"dry_run": false,								// do not send the CDRs to CDRS, just parse them
-		"cdrs_conns": [
-			{"address": "*internal"}					// address where to reach CDR server. <*internal|x.y.z.y:1234>
-		],
+		"cdrs_conns": ["*internal"],
 		"cdr_format": "csv",							// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore|partial_csv>
 		"field_separator": ",",							// separator used in case of csv files
 		"timezone": "",									// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>

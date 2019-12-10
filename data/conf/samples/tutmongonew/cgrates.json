@@ -42,9 +42,7 @@
 
 "cdrs": {
 	"enabled": true,
-	"chargers_conns":[
-		{"address": "127.0.0.1:2012", "transport":"*json"},
-	],
+	"chargers_conns":["*localhost"],
 },
 
 
@@ -107,15 +105,9 @@
 
 "sessions": {
 	"enabled": true,
-	"rals_conns": [
-		{"address": "*internal"}
-	],
-	"cdrs_conns": [
-		{"address": "*internal"}
-	],
-	"chargers_conns": [
-		{"address": "*internal"}
-	],
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
 },
 
 

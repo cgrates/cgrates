@@ -34,21 +34,11 @@
 
 "cdrs": {
 	"enabled": true,
-	"attributes_conns":[
-		{"address": "*internal"},
-	],
-	"chargers_conns":[
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
-	"rals_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
-	"stats_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],				
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
+	"attributes_conns":["*internal"],
+	"chargers_conns":["conn1"],
+	"rals_conns": ["conn1"],
+	"stats_conns": ["conn1"],
+	"thresholds_conns": ["conn1"],
 },
 
 "attributes": {

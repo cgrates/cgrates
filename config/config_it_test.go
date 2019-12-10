@@ -285,16 +285,11 @@ func TestCGRConfigReloadCDRs(t *testing.T) {
 			utils.NewRSRFieldMustCompile("LCRProfile"),
 			utils.NewRSRFieldMustCompile("ResourceID"),
 		},
-		ChargerSConns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSON,
-			},
-		},
-		RaterConns:      []*RemoteHost{},
-		AttributeSConns: []*RemoteHost{},
-		ThresholdSConns: []*RemoteHost{},
-		StatSConns:      []*RemoteHost{},
+		ChargerSConns:   []string{utils.MetaLocalHost},
+		RaterConns:      []string{},
+		AttributeSConns: []string{},
+		ThresholdSConns: []string{},
+		StatSConns:      []string{},
 		SMCostRetries:   5,
 		StoreCdrs:       true,
 	}
@@ -352,43 +347,16 @@ func TestCGRConfigReloadSessionS(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	expAttr := &SessionSCfg{
-		Enabled:      true,
-		ListenBijson: "127.0.0.1:2014",
-		ChargerSConns: []*RemoteHost{
-			&RemoteHost{
-				Address: utils.MetaInternal,
-			},
-		},
-		RALsConns: []*RemoteHost{
-			&RemoteHost{
-				Address: utils.MetaInternal,
-			},
-		},
-		ResSConns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSON,
-			},
-		},
-		ThreshSConns: []*RemoteHost{},
-		StatSConns:   []*RemoteHost{},
-		SupplSConns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSON,
-			},
-		},
-		AttrSConns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSON,
-			},
-		},
-		CDRsConns: []*RemoteHost{
-			&RemoteHost{
-				Address: utils.MetaInternal,
-			},
-		},
+		Enabled:       true,
+		ListenBijson:  "127.0.0.1:2014",
+		ChargerSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
+		RALsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
+		ResSConns:     []string{utils.MetaLocalHost},
+		ThreshSConns:  []string{},
+		StatSConns:    []string{},
+		SupplSConns:   []string{utils.MetaLocalHost},
+		AttrSConns:    []string{utils.MetaLocalHost},
+		CDRsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 
 		ReplicationConns:  []*RemoteHost{},
 		MaxCallDuration:   3 * time.Hour,

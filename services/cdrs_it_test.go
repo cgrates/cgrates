@@ -69,14 +69,13 @@ func TestCdrsReload(t *testing.T) {
 	cfg.StorDbCfg().Type = utils.INTERNAL
 	stordb := NewStorDBService(cfg)
 	chrS := NewChargerService(cfg, db, chS, filterSChan, server, nil, nil)
-	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.RpcClientConnection, 1), nil)
+	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil)
 	ralS := NewRalService(cfg, db, stordb, chS, filterSChan, server,
-		make(chan rpcclient.RpcClientConnection, 1), make(chan rpcclient.RpcClientConnection, 1), make(chan rpcclient.RpcClientConnection, 1), make(chan rpcclient.RpcClientConnection, 1),
+		make(chan rpcclient.ClientConnector, 1), make(chan rpcclient.ClientConnector, 1), make(chan rpcclient.ClientConnector, 1), make(chan rpcclient.ClientConnector, 1),
 		schS, engineShutdown, nil)
 	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
 		make(chan rpcclient.ClientConnector, 1),
-		chrS.GetIntenternalChan(), ralS.GetResponder().GetIntenternalChan(),
-		nil, nil, nil, nil)
+		nil)
 	srvMngr.AddServices(NewConnManagerService(cfg, nil), cdrS, ralS, schS, chrS, NewLoaderService(cfg, db, filterSChan, server, cacheSChan, nil, engineShutdown), db, stordb)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)

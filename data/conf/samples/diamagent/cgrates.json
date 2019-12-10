@@ -55,18 +55,10 @@
 
 "sessions": {
 	"enabled": true,
-	"attributes_conns": [
-		{"address": "127.0.0.1:2012","transport":"*json"}
-	],
-	"chargers_conns": [
-		{"address": "127.0.0.1:2012","transport":"*json"}
-	],
-	"rals_conns": [
-		{"address": "127.0.0.1:2012","transport":"*json"}
-	],
-	"cdrs_conns": [
-		{"address": "127.0.0.1:2012","transport":"*json"}
-	],
+	"attributes_conns": ["*localhost"],
+	"chargers_conns": ["*localhost"],
+	"rals_conns": ["*localhost"],
+	"cdrs_conns": ["*localhost"],
 },
 
 "diameter_agent": {

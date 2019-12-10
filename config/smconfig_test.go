@@ -77,12 +77,8 @@ func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
 	"enabled": false,						// starts session manager service: <true|false>
 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
 	"chargers_conns": [],					// address where to reach the charger service, empty to disable charger functionality: <""|*internal|x.y.z.y:1234>
-	"rals_conns": [
-		{"address": "*internal"}			// address where to reach the RALs <""|*internal|127.0.0.1:2013>
-	],
-	"cdrs_conns": [
-		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
-	],
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
 	"resources_conns": [],					// address where to reach the ResourceS <""|*internal|127.0.0.1:2013>
 	"thresholds_conns": [],					// address where to reach the ThresholdS <""|*internal|127.0.0.1:2013>
 	"stats_conns": [],						// address where to reach the StatS <""|*internal|127.0.0.1:2013>
@@ -103,14 +99,14 @@ func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
 }`
 	expected = SessionSCfg{
 		ListenBijson:     "127.0.0.1:2014",
-		ChargerSConns:    []*RemoteHost{},
-		RALsConns:        []*RemoteHost{{Address: "*internal"}},
-		ResSConns:        []*RemoteHost{},
-		ThreshSConns:     []*RemoteHost{},
-		StatSConns:       []*RemoteHost{},
-		SupplSConns:      []*RemoteHost{},
-		AttrSConns:       []*RemoteHost{},
-		CDRsConns:        []*RemoteHost{{Address: "*internal"}},
+		ChargerSConns:    []string{},
+		RALsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
+		ResSConns:        []string{},
+		ThreshSConns:     []string{},
+		StatSConns:       []string{},
+		SupplSConns:      []string{},
+		AttrSConns:       []string{},
+		CDRsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 		ReplicationConns: []*RemoteHost{},
 		MaxCallDuration:  time.Duration(3 * time.Hour),
 		SessionIndexes:   map[string]bool{},

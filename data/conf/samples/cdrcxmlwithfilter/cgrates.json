@@ -29,7 +29,7 @@
  		"cdr_in_path": "/tmp/cdrcxmlwithfilters/xmlit1/in",
  		"cdr_out_path": "/tmp/cdrcxmlwithfilters/xmlit1/out",
  		"cdr_root_path": "broadWorksCDR.cdrData",
-    "cdr_source_id": "xmlit1",
+        "cdr_source_id": "xmlit1",
  		"filters": ["*string:~*req.broadWorksCDR.cdrData.basicModule.userNumber:1002","*string:~*req.broadWorksCDR.cdrData.headerModule.type:Normal"],
 		"content_fields":[							// import content_fields template, id will match internally CDR field, in case of .csv value will be represented by index of the field value
 			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},

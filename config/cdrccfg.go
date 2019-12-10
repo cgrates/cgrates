@@ -28,7 +28,7 @@ type CdrcCfg struct {
 	ID                       string              // free-form text identifying this CDRC instance
 	Enabled                  bool                // Enable/Disable the profile
 	DryRun                   bool                // Do not post CDRs to the server
-	CdrsConns                []*RemoteHost       // The address where CDRs can be reached
+	CdrsConns                []string            // The address where CDRs can be reached
 	CdrFormat                string              // The type of CDR file to process <*csv|*opensips_flatstore>
 	FieldSeparator           rune                // The separator to use when reading csvs
 	Timezone                 string              // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
@@ -65,10 +65,14 @@ func (self *CdrcCfg) loadFromJsonCfg(jsnCfg *CdrcJsonCfg, separator string) erro
 		self.DryRun = *jsnCfg.Dry_run
 	}
 	if jsnCfg.Cdrs_conns != nil {
-		self.CdrsConns = make([]*RemoteHost, len(*jsnCfg.Cdrs_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Cdrs_conns {
-			self.CdrsConns[idx] = NewDfltRemoteHost()
-			self.CdrsConns[idx].loadFromJsonCfg(jsnHaCfg)
+		self.CdrsConns = make([]string, len(*jsnCfg.Cdrs_conns))
+		for idx, connID := range *jsnCfg.Cdrs_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				self.CdrsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)
+			} else {
+				self.CdrsConns[idx] = connID
+			}
 		}
 	}
 	if jsnCfg.Cdr_format != nil {
@@ -153,10 +157,9 @@ func (self *CdrcCfg) Clone() *CdrcCfg {
 	clnCdrc.ID = self.ID
 	clnCdrc.Enabled = self.Enabled
 	clnCdrc.DryRun = self.DryRun
-	clnCdrc.CdrsConns = make([]*RemoteHost, len(self.CdrsConns))
-	for idx, cdrConn := range self.CdrsConns {
-		clonedVal := *cdrConn
-		clnCdrc.CdrsConns[idx] = &clonedVal
+	clnCdrc.CdrsConns = make([]string, len(self.CdrsConns))
+	for idx, connID := range self.CdrsConns {
+		clnCdrc.CdrsConns[idx] = connID
 	}
 	clnCdrc.CdrFormat = self.CdrFormat
 	clnCdrc.FieldSeparator = self.FieldSeparator

@@ -55,15 +55,9 @@
 
 "sessions": {
 	"enabled": true,						// starts SessionManager service: <true|false>
-	"rals_conns": [
-		{"address": "*internal"}
-	],
-	"cdrs_conns": [
-		{"address": "*internal"}
-	],
-	"chargers_conns": [
-		{"address": "*internal"}
-	],
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
 },
 
 

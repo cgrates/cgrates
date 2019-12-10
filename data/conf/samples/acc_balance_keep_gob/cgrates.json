@@ -51,9 +51,7 @@
 
 "cdrs": {
 	"enabled": true,
-	"chargers_conns":[
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
+	"chargers_conns":["conn1"],
 },
 
 

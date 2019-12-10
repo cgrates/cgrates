@@ -207,7 +207,7 @@ func TestCgrCfgCDRC(t *testing.T) {
 			ID:                       utils.META_DEFAULT,
 			Enabled:                  true,
 			DryRun:                   false,
-			CdrsConns:                []*RemoteHost{{Address: utils.MetaInternal}},
+			CdrsConns:                []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 			CdrFormat:                utils.MetaFileCSV,
 			FieldSeparator:           rune(','),
 			Timezone:                 "",
@@ -512,7 +512,7 @@ func TestCgrCfgJSONDefaultsScheduler(t *testing.T) {
 }
 
 func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
-	eHaPoolCfg := []*RemoteHost{}
+	emptySlice := []string{}
 	var eCdrExtr []*utils.RSRField
 	if cgrCfg.CdrsCfg().Enabled != false {
 		t.Errorf("Expecting: false , received: %+v", cgrCfg.CdrsCfg().Enabled)
@@ -526,20 +526,20 @@ func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
 	if cgrCfg.CdrsCfg().SMCostRetries != 5 {
 		t.Errorf("Expecting: 5 , received: %+v", cgrCfg.CdrsCfg().SMCostRetries)
 	}
-	if !reflect.DeepEqual(cgrCfg.CdrsCfg().RaterConns, eHaPoolCfg) {
-		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().RaterConns)
+	if !reflect.DeepEqual(cgrCfg.CdrsCfg().RaterConns, emptySlice) {
+		t.Errorf("Expecting: %+v , received: %+v", emptySlice, cgrCfg.CdrsCfg().RaterConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.CdrsCfg().ChargerSConns, eHaPoolCfg) {
-		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().ChargerSConns)
+	if !reflect.DeepEqual(cgrCfg.CdrsCfg().ChargerSConns, emptySlice) {
+		t.Errorf("Expecting: %+v , received: %+v", emptySlice, cgrCfg.CdrsCfg().ChargerSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.CdrsCfg().AttributeSConns, eHaPoolCfg) {
-		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().AttributeSConns)
+	if !reflect.DeepEqual(cgrCfg.CdrsCfg().AttributeSConns, emptySlice) {
+		t.Errorf("Expecting: %+v , received: %+v", emptySlice, cgrCfg.CdrsCfg().AttributeSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.CdrsCfg().ThresholdSConns, eHaPoolCfg) {
-		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().ThresholdSConns)
+	if !reflect.DeepEqual(cgrCfg.CdrsCfg().ThresholdSConns, emptySlice) {
+		t.Errorf("Expecting: %+v , received: %+v", emptySlice, cgrCfg.CdrsCfg().ThresholdSConns)
 	}
-	if !reflect.DeepEqual(cgrCfg.CdrsCfg().StatSConns, eHaPoolCfg) {
-		t.Errorf("Expecting: %+v , received: %+v", eHaPoolCfg, cgrCfg.CdrsCfg().StatSConns)
+	if !reflect.DeepEqual(cgrCfg.CdrsCfg().StatSConns, emptySlice) {
+		t.Errorf("Expecting: %+v , received: %+v", emptySlice, cgrCfg.CdrsCfg().StatSConns)
 	}
 	if cgrCfg.CdrsCfg().OnlineCDRExports != nil {
 		t.Errorf("Expecting: nil , received: %+v", cgrCfg.CdrsCfg().OnlineCDRExports)
@@ -551,12 +551,8 @@ func TestCgrCfgJSONLoadCDRS(t *testing.T) {
 {
 "cdrs": {
 	"enabled": true,
-	"chargers_conns": [
-		{"address": "*internal"}
-	],
-	"rals_conns": [
-		{"address": "*internal"}			// address where to reach the Rater for cost calculation, empty to disable functionality: <""|*internal|x.y.z.y:1234>
-	],
+	"chargers_conns": ["*internal"],
+	"rals_conns": ["*internal"],
 },
 }
 	`
@@ -567,10 +563,11 @@ func TestCgrCfgJSONLoadCDRS(t *testing.T) {
 	if !cgrCfg.CdrsCfg().Enabled {
 		t.Errorf("Expecting: true , received: %+v", cgrCfg.CdrsCfg().Enabled)
 	}
-	expected := []*RemoteHost{{Address: utils.MetaInternal}}
+	expected := []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}
 	if !reflect.DeepEqual(cgrCfg.CdrsCfg().ChargerSConns, expected) {
 		t.Errorf("Expecting: %+v , received: %+v", expected, cgrCfg.CdrsCfg().ChargerSConns)
 	}
+	expected = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)}
 	if !reflect.DeepEqual(cgrCfg.CdrsCfg().RaterConns, expected) {
 		t.Errorf("Expecting: %+v , received: %+v", expected, cgrCfg.CdrsCfg().RaterConns)
 	}
@@ -634,14 +631,14 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 	eSessionSCfg := &SessionSCfg{
 		Enabled:             false,
 		ListenBijson:        "127.0.0.1:2014",
-		ChargerSConns:       []*RemoteHost{},
-		RALsConns:           []*RemoteHost{},
-		CDRsConns:           []*RemoteHost{},
-		ResSConns:           []*RemoteHost{},
-		ThreshSConns:        []*RemoteHost{},
-		StatSConns:          []*RemoteHost{},
-		SupplSConns:         []*RemoteHost{},
-		AttrSConns:          []*RemoteHost{},
+		ChargerSConns:       []string{},
+		RALsConns:           []string{},
+		CDRsConns:           []string{},
+		ResSConns:           []string{},
+		ThreshSConns:        []string{},
+		StatSConns:          []string{},
+		SupplSConns:         []string{},
+		AttrSConns:          []string{},
 		ReplicationConns:    []*RemoteHost{},
 		DebitInterval:       0 * time.Second,
 		StoreSCosts:         false,
@@ -1589,7 +1586,7 @@ func TestCDRCWithDefault(t *testing.T) {
 			ID:                       utils.META_DEFAULT,
 			Enabled:                  false,
 			DryRun:                   false,
-			CdrsConns:                []*RemoteHost{{Address: utils.MetaInternal}},
+			CdrsConns:                []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 			CdrFormat:                utils.MetaFileCSV,
 			FieldSeparator:           rune(','),
 			Timezone:                 "",
@@ -1952,44 +1949,29 @@ func TestCheckConfigSanity(t *testing.T) {
 	// CDRServer checks
 	cfg.thresholdSCfg.Enabled = true
 	cfg.cdrsCfg = &CdrsCfg{
-		Enabled: true,
-		ChargerSConns: []*RemoteHost{
-			&RemoteHost{
-				Address: utils.MetaInternal,
-			},
-		},
+		Enabled:       true,
+		ChargerSConns: []string{utils.MetaInternal},
 	}
-	expected = "<Chargers> not enabled but requested by <CDRs> component."
+	expected = "<ChargerS> not enabled but requested by <CDRs> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.chargerSCfg.Enabled = true
-	cfg.cdrsCfg.RaterConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
+	cfg.cdrsCfg.RaterConns = []string{utils.MetaInternal}
+
 	expected = "<RALs> not enabled but requested by <CDRs> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.ralsCfg.Enabled = true
-	cfg.cdrsCfg.AttributeSConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
+	cfg.cdrsCfg.AttributeSConns = []string{utils.MetaInternal}
 	expected = "<AttributeS> not enabled but requested by <CDRs> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.statsCfg.Enabled = false
 	cfg.attributeSCfg.Enabled = true
-	cfg.cdrsCfg.StatSConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
+	cfg.cdrsCfg.StatSConns = []string{utils.MetaInternal}
 	expected = "<StatS> not enabled but requested by <CDRs> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -2003,12 +1985,8 @@ func TestCheckConfigSanity(t *testing.T) {
 	}
 	cfg.thresholdSCfg.Enabled = false
 	cfg.cdrsCfg.OnlineCDRExports = []string{"stringx"}
-	cfg.cdrsCfg.ThresholdSConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
-	expected = "ThresholdS not enabled but requested by CDRs component."
+	cfg.cdrsCfg.ThresholdSConns = []string{utils.MetaInternal}
+	expected = "<ThresholdS> not enabled but requested by <CDRs> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -2029,14 +2007,13 @@ func TestCheckConfigSanity(t *testing.T) {
 	cfg.CdrcProfiles = map[string][]*CdrcCfg{
 		"test": []*CdrcCfg{
 			&CdrcCfg{
-				Enabled: true,
-				CdrsConns: []*RemoteHost{
-					&RemoteHost{Address: utils.MetaInternal},
-				},
+				Enabled:   true,
+				ID:        "test",
+				CdrsConns: []string{utils.MetaInternal},
 			},
 		},
 	}
-	expected = "<CDRs> not enabled but referenced from <cdrc>"
+	expected = "<CDRs> not enabled but requested by <test> cdrcProfile"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -2044,10 +2021,8 @@ func TestCheckConfigSanity(t *testing.T) {
 	cfg.CdrcProfiles = map[string][]*CdrcCfg{
 		"test": []*CdrcCfg{
 			&CdrcCfg{
-				Enabled: true,
-				CdrsConns: []*RemoteHost{
-					&RemoteHost{Address: utils.MetaInternal},
-				},
+				Enabled:       true,
+				CdrsConns:     []string{utils.MetaInternal},
 				ContentFields: []*FCTemplate{},
 			},
 		},

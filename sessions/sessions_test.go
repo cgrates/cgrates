@@ -60,7 +60,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		"Extra3":  true,
 		"Extra4":  true,
 	}
-	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	sS := NewSessionS(sSCfg, nil, nil, nil)
 	sEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
@@ -382,7 +382,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 
 func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	sS := NewSessionS(sSCfg, nil, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
@@ -603,7 +603,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 
 func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	sS := NewSessionS(sSCfg, nil, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
@@ -1378,7 +1378,7 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 
 func TestSessionStransitSState(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	sS := NewSessionS(sSCfg, nil, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
@@ -1425,7 +1425,7 @@ func TestSessionStransitSState(t *testing.T) {
 
 func TestSessionSrelocateSessionS(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	sS := NewSessionS(sSCfg, nil, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
@@ -1567,7 +1567,7 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher2(t *testing.T) {
 func TestSessionSGetIndexedFilters(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
 	mpStr := engine.NewInternalDB(nil, nil)
-	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil, nil))
+	sS := NewSessionS(sSCfg, nil, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil, nil), nil)
 	expIndx := map[string][]string{}
 	expUindx := []*engine.FilterRule{
 		&engine.FilterRule{
@@ -1585,7 +1585,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	sSCfg.SessionSCfg().SessionIndexes = utils.StringMap{
 		"ToR": true,
 	}
-	sS = NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil, nil))
+	sS = NewSessionS(sSCfg, nil, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil, nil), nil)
 	expIndx = map[string][]string{(utils.DynamicDataPrefix + utils.ToR): []string{utils.VOICE}}
 	expUindx = nil
 	if rplyindx, rplyUnindx := sS.getIndexedFilters("", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
@@ -1602,7 +1602,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 			ExpiryTime:     time.Now().Add(-time.Hour),
 		},
 	})
-	sS = NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil, nil))
+	sS = NewSessionS(sSCfg, nil, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil, nil), nil)
 	expIndx = map[string][]string{}
 	expUindx = nil
 	fltrs = []string{"FLTR1", "FLTR2"}
@@ -1619,7 +1619,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 	sSCfg.SessionSCfg().SessionIndexes = utils.StringMap{
 		"ToR": true,
 	}
-	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	sS := NewSessionS(sSCfg, nil, nil, nil)
 	sEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
@@ -1672,7 +1672,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 		"ToR":    true,
 		"Extra3": true,
 	}
-	sS = NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	sS = NewSessionS(sSCfg, nil, nil, nil)
 	sS.indexSession(session, false)
 	indx = map[string][]string{
 		"~ToR":    []string{utils.VOICE, utils.DATA},
@@ -1706,7 +1706,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 		"ToR":    true,
 		"Extra2": true,
 	}
-	sS = NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	sS = NewSessionS(sSCfg, nil, nil, nil)
 	sS.indexSession(session, true)
 	indx = map[string][]string{
 		"~ToR":    []string{utils.VOICE, utils.DATA},
@@ -1732,22 +1732,9 @@ func (*testRPCClientConnection) Call(string, interface{}, interface{}) error { r
 func TestNewSessionS(t *testing.T) {
 	cgrCGF, _ := config.NewDefaultCGRConfig()
 
-	var rpc rpcclient.ClientConnector
-	var ttest *testRPCClientConnection
-
-	rpc = ttest
 	eOut := &SessionS{
 		cgrCfg:        cgrCGF,
 		dm:            nil,
-		chargerS:      nil,
-		ralS:          nil,
-		resS:          nil,
-		thdS:          nil,
-		statS:         nil,
-		splS:          nil,
-		attrS:         nil,
-		cdrS:          nil,
-		sReplConns:    nil,
 		biJClnts:      make(map[rpcclient.ClientConnector]string),
 		biJIDs:        make(map[string]*biJClient),
 		aSessions:     make(map[string]*Session),
@@ -1757,7 +1744,7 @@ func TestNewSessionS(t *testing.T) {
 		pSessionsIdx:  make(map[string]map[string]map[string]utils.StringMap),
 		pSessionsRIdx: make(map[string][]*riFieldNameVal),
 	}
-	sS := NewSessionS(cgrCGF, rpc, rpc, rpc, rpc, rpc, rpc, rpc, rpc, nil, nil)
+	sS := NewSessionS(cgrCGF, nil, nil, nil)
 	if !reflect.DeepEqual(sS, eOut) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(sS), utils.ToJSON(eOut))
 	}
@@ -1918,7 +1905,7 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 
 func TestSessionSgetSession(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	sS := NewSessionS(sSCfg, nil, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
@@ -1959,106 +1946,4 @@ func TestSessionSgetSession(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", s, rcvS)
 	}
 
-}
-
-func TestSessionsSetConnections(t *testing.T) {
-	sSCfg, _ := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-	var ttest *testRPCClientConnection
-	//normal check AttributeS
-	sS.SetAttributeSConnection(new(testRPCClientConnection))
-	if sS.attrS == nil {
-		t.Errorf("Expecting %+v, received: %+v", new(testRPCClientConnection), sS.attrS)
-	}
-	//empty check AttributeS
-	sS.SetAttributeSConnection(ttest)
-	if sS.attrS != nil {
-		t.Errorf("Expecting nil, received: %+v", sS.attrS)
-	}
-	//normal check ThresholS
-	sS.SetThresholSConnection(new(testRPCClientConnection))
-	if sS.thdS == nil {
-		t.Errorf("Expecting %+v, received: %+v", new(testRPCClientConnection), sS.thdS)
-	}
-	//empty check ThresholS
-	sS.SetThresholSConnection(ttest)
-	if sS.thdS != nil {
-		t.Errorf("Expecting nil, received: %+v", sS.thdS)
-	}
-	//normal check StatS
-	sS.SetStatSConnection(new(testRPCClientConnection))
-	if sS.statS == nil {
-		t.Errorf("Expecting %+v, received: %+v", new(testRPCClientConnection), sS.statS)
-	}
-	//empty check StatS
-	sS.SetStatSConnection(ttest)
-	if sS.statS != nil {
-		t.Errorf("Expecting nil, received: %+v", sS.statS)
-	}
-	//normal check ChargerS
-	sS.SetChargerSConnection(new(testRPCClientConnection))
-	if sS.chargerS == nil {
-		t.Errorf("Expecting %+v, received: %+v", new(testRPCClientConnection), sS.chargerS)
-	}
-	//empty check ChargerS
-	sS.SetChargerSConnection(ttest)
-	if sS.chargerS != nil {
-		t.Errorf("Expecting nil, received: %+v", sS.chargerS)
-	}
-	//normal check RALs
-	sS.SetRALsConnection(new(testRPCClientConnection))
-	if sS.ralS == nil {
-		t.Errorf("Expecting %+v, received: %+v", new(testRPCClientConnection), sS.ralS)
-	}
-	//empty check RALs
-	sS.SetRALsConnection(ttest)
-	if sS.ralS != nil {
-		t.Errorf("Expecting nil, received: %+v", sS.ralS)
-	}
-	//normal check ResourceS
-	sS.SetResourceSConnection(new(testRPCClientConnection))
-	if sS.resS == nil {
-		t.Errorf("Expecting %+v, received: %+v", new(testRPCClientConnection), sS.resS)
-	}
-	//empty check ResourceS
-	sS.SetResourceSConnection(ttest)
-	if sS.resS != nil {
-		t.Errorf("Expecting nil, received: %+v", sS.resS)
-	}
-	//normal check SupplierS
-	sS.SetSupplierSConnection(new(testRPCClientConnection))
-	if sS.splS == nil {
-		t.Errorf("Expecting %+v, received: %+v", new(testRPCClientConnection), sS.splS)
-	}
-	//empty check SupplierS
-	sS.SetSupplierSConnection(ttest)
-	if sS.splS != nil {
-		t.Errorf("Expecting nil, received: %+v", sS.splS)
-	}
-	//normal check CDRS
-	sS.SetCDRSConnection(new(testRPCClientConnection))
-	if sS.cdrS == nil {
-		t.Errorf("Expecting %+v, received: %+v", new(testRPCClientConnection), sS.cdrS)
-	}
-	//empty check CDRS
-	sS.SetCDRSConnection(ttest)
-	if sS.cdrS != nil {
-		t.Errorf("Expecting nil, received: %+v", sS.cdrS)
-	}
-	//normal check Replication
-	sReplConn := []*SReplConn{
-		&SReplConn{
-			Connection:  new(testRPCClientConnection),
-			Synchronous: true,
-		},
-	}
-	sS.SetReplicationConnections(sReplConn)
-	if sS.sReplConns == nil {
-		t.Errorf("Expecting %+v, received: %+v", sReplConn, sS.sReplConns)
-	}
-	//empty check Replication
-	sS.SetReplicationConnections(nil)
-	if sS.sReplConns != nil {
-		t.Errorf("Expecting nil, received: %+v", sS.sReplConns)
-	}
 }

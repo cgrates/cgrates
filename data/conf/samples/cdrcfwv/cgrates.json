@@ -37,9 +37,7 @@
 		"id": "FWV1",
 		"enabled": true,							// enable CDR client functionality
 		"dry_run": false,
-		"cdrs_conns": [
-			{"address": "*internal"}				// address where to reach CDR server. <*internal|x.y.z.y:1234>
-		],
+		"cdrs_conns": ["*internal"],
 		"cdr_format": "*file_fwv",						// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore>
 		"cdr_in_path": "/tmp/cgr_fwv/cdrc/in",		// absolute path towards the directory where the CDRs are stored
 		"cdr_out_path": "/tmp/cgr_fwv/cdrc/out",		// absolute path towards the directory where processed CDRs will be moved

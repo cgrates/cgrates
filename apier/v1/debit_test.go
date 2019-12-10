@@ -37,6 +37,21 @@ var (
 func init() {
 	apierDebitStorage = engine.NewInternalDB(nil, nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	config.SetCgrConfig(cfg)
+	responder := &engine.Responder{MaxComputedUsage: cfg.RalsCfg().MaxComputedUsage}
+	dm = engine.NewDataManager(apierDebitStorage, config.CgrConfig().CacheCfg(), nil, nil)
+	engine.SetDataStorage(dm)
+	apierDebit = &ApierV1{
+		DataManager: dm,
+		Config:      cfg,
+		Responder:   responder,
+	}
+}
+
+func TestDebitUsageWithOptionsSetConfig(t *testing.T) {
+	apierDebitStorage = engine.NewInternalDB(nil, nil)
+	cfg, _ := config.NewDefaultCGRConfig()
+	config.SetCgrConfig(cfg)
 	responder := &engine.Responder{MaxComputedUsage: cfg.RalsCfg().MaxComputedUsage}
 	dm = engine.NewDataManager(apierDebitStorage, config.CgrConfig().CacheCfg(), nil, nil)
 	engine.SetDataStorage(dm)

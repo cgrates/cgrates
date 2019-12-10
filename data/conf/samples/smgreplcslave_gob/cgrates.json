@@ -32,6 +32,13 @@
 	"enabled": true,
 },
 
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:22013", "transport":"*gob"}],
+	},
+},
+
 
 "chargers": {
 	"enabled": true,
@@ -44,15 +51,9 @@
 	"replication_conns": [
 		{"address": "127.0.0.1:2013", "transport": "*gob"},
 	],
-	"rals_conns": [
-		{"address": "127.0.0.1:22013", "transport": "*gob"},
-	],
-	"cdrs_conns": [
-		{"address": "*internal"}
-	],
-	"chargers_conns": [
-		{"address": "*internal"}
-	],
+	"rals_conns": ["conn1"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
 },
 
 "apier": {

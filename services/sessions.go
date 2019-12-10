@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/cgrates/engine"
+
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/servmanager"
@@ -32,43 +34,25 @@ import (
 
 // NewSessionService returns the Session Service
 func NewSessionService(cfg *config.CGRConfig, dm *DataDBService,
-	server *utils.Server, chrsChan, respChan, resChan, thsChan, stsChan,
-	supChan, attrsChan, cdrsChan, dispatcherChan, internalChan chan rpcclient.ClientConnector,
-	exitChan chan bool) servmanager.Service {
+	server *utils.Server, internalChan chan rpcclient.ClientConnector,
+	exitChan chan bool, connMgr *engine.ConnManager) servmanager.Service {
 	return &SessionService{
-		connChan:       internalChan,
-		cfg:            cfg,
-		dm:             dm,
-		server:         server,
-		chrsChan:       chrsChan,
-		respChan:       respChan,
-		resChan:        resChan,
-		thsChan:        thsChan,
-		stsChan:        stsChan,
-		supChan:        supChan,
-		attrsChan:      attrsChan,
-		cdrsChan:       cdrsChan,
-		dispatcherChan: dispatcherChan,
-		exitChan:       exitChan,
+		connChan: internalChan,
+		cfg:      cfg,
+		dm:       dm,
+		server:   server,
+		exitChan: exitChan,
+		connMgr:  connMgr,
 	}
 }
 
 // SessionService implements Service interface
 type SessionService struct {
 	sync.RWMutex
-	cfg            *config.CGRConfig
-	dm             *DataDBService
-	server         *utils.Server
-	chrsChan       chan rpcclient.ClientConnector
-	respChan       chan rpcclient.ClientConnector
-	resChan        chan rpcclient.ClientConnector
-	thsChan        chan rpcclient.ClientConnector
-	stsChan        chan rpcclient.ClientConnector
-	supChan        chan rpcclient.ClientConnector
-	attrsChan      chan rpcclient.ClientConnector
-	cdrsChan       chan rpcclient.ClientConnector
-	dispatcherChan chan rpcclient.ClientConnector
-	exitChan       chan bool
+	cfg      *config.CGRConfig
+	dm       *DataDBService
+	server   *utils.Server
+	exitChan chan bool
 
 	sm       *sessions.SessionS
 	rpc      *v1.SMGenericV1
@@ -77,6 +61,7 @@ type SessionService struct {
 
 	// in order to stop the bircp server if necesary
 	bircpEnabled bool
+	connMgr      *engine.ConnManager
 }
 
 // Start should handle the sercive start
@@ -87,55 +72,6 @@ func (smg *SessionService) Start() (err error) {
 
 	smg.Lock()
 	defer smg.Unlock()
-	var ralsConns, resSConns, threshSConns, statSConns, suplSConns, attrConns, cdrsConn, chargerSConn rpcclient.ClientConnector
-
-	if chargerSConn, err = NewConnection(smg.cfg, smg.chrsChan, smg.dispatcherChan, smg.cfg.SessionSCfg().ChargerSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-			utils.SessionS, utils.ChargerS, err.Error()))
-		return
-	}
-
-	if ralsConns, err = NewConnection(smg.cfg, smg.respChan, smg.dispatcherChan, smg.cfg.SessionSCfg().RALsConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-			utils.SessionS, utils.ResponderS, err.Error()))
-		return
-	}
-
-	if resSConns, err = NewConnection(smg.cfg, smg.resChan, smg.dispatcherChan, smg.cfg.SessionSCfg().ResSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-			utils.SessionS, utils.ResourceS, err.Error()))
-		return
-	}
-
-	if threshSConns, err = NewConnection(smg.cfg, smg.thsChan, smg.dispatcherChan, smg.cfg.SessionSCfg().ThreshSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-			utils.SessionS, utils.ThresholdS, err.Error()))
-		return
-	}
-
-	if statSConns, err = NewConnection(smg.cfg, smg.stsChan, smg.dispatcherChan, smg.cfg.SessionSCfg().StatSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-			utils.SessionS, utils.StatS, err.Error()))
-		return
-	}
-
-	if suplSConns, err = NewConnection(smg.cfg, smg.supChan, smg.dispatcherChan, smg.cfg.SessionSCfg().SupplSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-			utils.SessionS, utils.SupplierS, err.Error()))
-		return
-	}
-
-	if attrConns, err = NewConnection(smg.cfg, smg.attrsChan, smg.dispatcherChan, smg.cfg.SessionSCfg().AttrSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-			utils.SessionS, utils.AttributeS, err.Error()))
-		return
-	}
-
-	if cdrsConn, err = NewConnection(smg.cfg, smg.cdrsChan, smg.dispatcherChan, smg.cfg.SessionSCfg().CDRsConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-			utils.SessionS, utils.CDRServer, err.Error()))
-		return
-	}
 
 	sReplConns, err := sessions.NewSReplConns(smg.cfg.SessionSCfg().ReplicationConns,
 		smg.cfg.GeneralCfg().Reconnects, smg.cfg.GeneralCfg().ConnectTimeout,
@@ -146,9 +82,8 @@ func (smg *SessionService) Start() (err error) {
 		return
 	}
 
-	smg.sm = sessions.NewSessionS(smg.cfg, ralsConns, resSConns, threshSConns,
-		statSConns, suplSConns, attrConns, cdrsConn, chargerSConn,
-		sReplConns, smg.dm.GetDM())
+	smg.sm = sessions.NewSessionS(smg.cfg,
+		sReplConns, smg.dm.GetDM(), smg.connMgr)
 	//start sync session in a separate gorutine
 	go func(sm *sessions.SessionS) {
 		if err = sm.ListenAndServe(smg.exitChan); err != nil {
@@ -194,55 +129,6 @@ func (smg *SessionService) GetIntenternalChan() (conn chan rpcclient.ClientConne
 
 // Reload handles the change of config
 func (smg *SessionService) Reload() (err error) {
-	var ralsConns, resSConns, threshSConns, statSConns, suplSConns, attrConns, cdrsConn, chargerSConn rpcclient.ClientConnector
-
-	if chargerSConn, err = NewConnection(smg.cfg, smg.chrsChan, smg.dispatcherChan, smg.cfg.SessionSCfg().ChargerSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-			utils.SessionS, utils.ChargerS, err.Error()))
-		return
-	}
-
-	if ralsConns, err = NewConnection(smg.cfg, smg.respChan, smg.dispatcherChan, smg.cfg.SessionSCfg().RALsConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-			utils.SessionS, utils.ResponderS, err.Error()))
-		return
-	}
-
-	if resSConns, err = NewConnection(smg.cfg, smg.resChan, smg.dispatcherChan, smg.cfg.SessionSCfg().ResSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-			utils.SessionS, utils.ResourceS, err.Error()))
-		return
-	}
-
-	if threshSConns, err = NewConnection(smg.cfg, smg.thsChan, smg.dispatcherChan, smg.cfg.SessionSCfg().ThreshSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-			utils.SessionS, utils.ThresholdS, err.Error()))
-		return
-	}
-
-	if statSConns, err = NewConnection(smg.cfg, smg.stsChan, smg.dispatcherChan, smg.cfg.SessionSCfg().StatSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-			utils.SessionS, utils.StatS, err.Error()))
-		return
-	}
-
-	if suplSConns, err = NewConnection(smg.cfg, smg.supChan, smg.dispatcherChan, smg.cfg.SessionSCfg().SupplSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-			utils.SessionS, utils.SupplierS, err.Error()))
-		return
-	}
-
-	if attrConns, err = NewConnection(smg.cfg, smg.attrsChan, smg.dispatcherChan, smg.cfg.SessionSCfg().AttrSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-			utils.SessionS, utils.AttributeS, err.Error()))
-		return
-	}
-
-	if cdrsConn, err = NewConnection(smg.cfg, smg.cdrsChan, smg.dispatcherChan, smg.cfg.SessionSCfg().CDRsConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-			utils.SessionS, utils.CDRServer, err.Error()))
-		return
-	}
 
 	sReplConns, err := sessions.NewSReplConns(smg.cfg.SessionSCfg().ReplicationConns,
 		smg.cfg.GeneralCfg().Reconnects, smg.cfg.GeneralCfg().ConnectTimeout,
@@ -253,14 +139,6 @@ func (smg *SessionService) Reload() (err error) {
 		return
 	}
 	smg.Lock()
-	smg.sm.SetAttributeSConnection(attrConns)
-	smg.sm.SetChargerSConnection(chargerSConn)
-	smg.sm.SetRALsConnection(ralsConns)
-	smg.sm.SetResourceSConnection(resSConns)
-	smg.sm.SetThresholSConnection(threshSConns)
-	smg.sm.SetStatSConnection(statSConns)
-	smg.sm.SetSupplierSConnection(suplSConns)
-	smg.sm.SetCDRSConnection(cdrsConn)
 	smg.sm.SetReplicationConnections(sReplConns)
 	smg.Unlock()
 	return

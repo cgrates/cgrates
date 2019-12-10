@@ -28,21 +28,22 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func NewCsvRecordsProcessor(csvReader *csv.Reader, timezone, fileName string,
 	dfltCdrcCfg *config.CdrcCfg, cdrcCfgs []*config.CdrcCfg,
 	httpSkipTlsCheck bool, cacheDumpFields []*config.FCTemplate,
-	filterS *engine.FilterS, cdrs rpcclient.ClientConnector,
-	unp *UnpairedRecordsCache, prt *PartialRecordsCache) *CsvRecordsProcessor {
+	filterS *engine.FilterS,
+	unp *UnpairedRecordsCache, prt *PartialRecordsCache,
+	connMgr *engine.ConnManager) *CsvRecordsProcessor {
 	return &CsvRecordsProcessor{csvReader: csvReader,
 		timezone: timezone, fileName: fileName,
 		dfltCdrcCfg: dfltCdrcCfg, cdrcCfgs: cdrcCfgs,
 		httpSkipTlsCheck:       httpSkipTlsCheck,
 		unpairedRecordsCache:   unp,
 		partialRecordsCache:    prt,
-		partialCacheDumpFields: cacheDumpFields, filterS: filterS}
+		partialCacheDumpFields: cacheDumpFields, filterS: filterS,
+		connMgr: connMgr}
 
 }
 
@@ -58,6 +59,7 @@ type CsvRecordsProcessor struct {
 	partialRecordsCache    *PartialRecordsCache  // Cache records which are of type "Partial"
 	partialCacheDumpFields []*config.FCTemplate
 	filterS                *engine.FilterS
+	connMgr                *engine.ConnManager
 }
 
 func (self *CsvRecordsProcessor) ProcessedRecordsNr() int64 {

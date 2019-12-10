@@ -132,11 +132,11 @@ type CdrsJsonCfg struct {
 	Extra_fields         *[]string
 	Store_cdrs           *bool
 	Session_cost_retries *int
-	Chargers_conns       *[]*RemoteHostJson
-	Rals_conns           *[]*RemoteHostJson
-	Attributes_conns     *[]*RemoteHostJson
-	Thresholds_conns     *[]*RemoteHostJson
-	Stats_conns          *[]*RemoteHostJson
+	Chargers_conns       *[]string
+	Rals_conns           *[]string
+	Attributes_conns     *[]string
+	Thresholds_conns     *[]string
+	Stats_conns          *[]string
 	Online_cdr_exports   *[]string
 }
 
@@ -160,7 +160,7 @@ type CdrcJsonCfg struct {
 	Id                          *string
 	Enabled                     *bool
 	Dry_run                     *bool
-	Cdrs_conns                  *[]*RemoteHostJson
+	Cdrs_conns                  *[]string
 	Cdr_format                  *string
 	Field_separator             *string
 	Timezone                    *string
@@ -212,15 +212,15 @@ type EventReaderJsonCfg struct {
 type SessionSJsonCfg struct {
 	Enabled               *bool
 	Listen_bijson         *string
-	Chargers_conns        *[]*RemoteHostJson
-	Rals_conns            *[]*RemoteHostJson
-	Resources_conns       *[]*RemoteHostJson
-	Thresholds_conns      *[]*RemoteHostJson
-	Stats_conns           *[]*RemoteHostJson
-	Suppliers_conns       *[]*RemoteHostJson
-	Cdrs_conns            *[]*RemoteHostJson
+	Chargers_conns        *[]string
+	Rals_conns            *[]string
+	Resources_conns       *[]string
+	Thresholds_conns      *[]string
+	Stats_conns           *[]string
+	Suppliers_conns       *[]string
+	Cdrs_conns            *[]string
 	Replication_conns     *[]*RemoteHostJson
-	Attributes_conns      *[]*RemoteHostJson
+	Attributes_conns      *[]string
 	Debit_interval        *string
 	Store_session_costs   *bool
 	Min_call_duration     *string

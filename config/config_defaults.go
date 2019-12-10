@@ -275,9 +275,7 @@ const CGRATES_CFG_JSON = `
 		"id": "*default",								// identifier of the CDRC runner
 		"enabled": false,								// enable CDR client functionality
 		"dry_run": false,								// do not send the CDRs to CDRS, just parse them
-		"cdrs_conns": [									// connections to CDRs. <*internal|x.y.z.y:1234>
-			{"address": "*internal"}
-		],
+		"cdrs_conns": ["*internal"],
 		"cdr_format": "*file_csv",						// CDR file format <*file_csv|*freeswitch_csv|*file_fwv|*opensips_flatstore|*partial_csv|*file_xml>
 		"field_separator": ",",							// separator used in case of csv files
 		"timezone": "",									// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>

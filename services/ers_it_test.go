@@ -55,9 +55,7 @@ func TestEventReaderSReload(t *testing.T) {
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg)
-	sS := NewSessionService(cfg, db, server, nil,
-		nil, nil, nil, nil,
-		nil, nil, nil, nil, make(chan rpcclient.ClientConnector, 1), engineShutdown)
+	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), engineShutdown, nil)
 	attrS := NewEventReaderService(cfg, filterSChan, engineShutdown, nil)
 	srvMngr.AddServices(NewConnManagerService(cfg, nil), attrS, sS, NewLoaderService(cfg, db, filterSChan, server, nil, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
