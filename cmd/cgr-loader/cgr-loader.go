@@ -96,8 +96,11 @@ var (
 	storDb engine.LoadStorage
 	loader engine.LoadReader
 
-	fromStorDB = cgrLoaderFlags.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
-	toStorDB   = cgrLoaderFlags.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
+	fromStorDB    = cgrLoaderFlags.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
+	toStorDB      = cgrLoaderFlags.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
+	cacheSAddress = cgrLoaderFlags.String("caches_address", dfltCfg.LoaderCgrCfg().CachesConns[0],
+		"CacheS component to contact for cache reloads, empty to disable automatic cache reloads")
+	schedulerAddress = cgrLoaderFlags.String("scheduler_address", dfltCfg.LoaderCgrCfg().SchedulerConns[0], "")
 )
 
 func main() {
@@ -120,7 +123,8 @@ func main() {
 		}
 		config.SetCgrConfig(ldrCfg)
 	}
-
+	// we initialize connManager here with nil for InternalChannels
+	engine.NewConnManager(ldrCfg, nil)
 	// Data for DataDB
 	if *dataDBType != dfltCfg.DataDbCfg().DataDbType {
 		ldrCfg.DataDbCfg().DataDbType = strings.TrimPrefix(*dataDBType, "*")
@@ -191,30 +195,21 @@ func main() {
 		ldrCfg.LoaderCgrCfg().FieldSeparator = rune((*fieldSep)[0])
 	}
 
-	// DON"T FORGET TO UPDATE CGR_LOADER WITH CACHEID AND SCHEDID
-	//if *cacheSAddress != dfltCfg.LoaderCgrCfg().CachesConns[0].Address {
-	//	ldrCfg.LoaderCgrCfg().CachesConns = make([]*config.RemoteHost, 0)
-	//	if *cacheSAddress != "" {
-	//		ldrCfg.LoaderCgrCfg().CachesConns = append(ldrCfg.LoaderCgrCfg().CachesConns,
-	//			&config.RemoteHost{
-	//				Address:   *cacheSAddress,
-	//				Transport: *rpcEncoding,
-	//			})
-	//	}
-	//}
-	//
-	//if *schedulerAddress != dfltCfg.LoaderCgrCfg().SchedulerConns[0].Address {
-	//	ldrCfg.LoaderCgrCfg().SchedulerConns = make([]*config.RemoteHost, 0)
-	//	if *schedulerAddress != "" {
-	//		ldrCfg.LoaderCgrCfg().SchedulerConns = append(ldrCfg.LoaderCgrCfg().SchedulerConns,
-	//			&config.RemoteHost{Address: *schedulerAddress})
-	//	}
-	//}
-	//
-	//if len(ldrCfg.LoaderCgrCfg().CachesConns) != 0 &&
-	//	*rpcEncoding != dfltCfg.LoaderCgrCfg().CachesConns[0].Transport {
-	//	ldrCfg.LoaderCgrCfg().CachesConns[0].Transport = *rpcEncoding
-	//}
+	if *cacheSAddress != dfltCfg.LoaderCgrCfg().CachesConns[0] {
+		ldrCfg.LoaderCgrCfg().CachesConns = make([]string, 0)
+		if *cacheSAddress != "" {
+			ldrCfg.LoaderCgrCfg().CachesConns = append(ldrCfg.LoaderCgrCfg().CachesConns,
+				*cacheSAddress)
+		}
+	}
+
+	if *schedulerAddress != dfltCfg.LoaderCgrCfg().SchedulerConns[0] {
+		ldrCfg.LoaderCgrCfg().SchedulerConns = make([]string, 0)
+		if *schedulerAddress != "" {
+			ldrCfg.LoaderCgrCfg().SchedulerConns = append(ldrCfg.LoaderCgrCfg().SchedulerConns,
+				*schedulerAddress)
+		}
+	}
 
 	if *importID == "" {
 		*importID = utils.UUIDSha1Prefix()
