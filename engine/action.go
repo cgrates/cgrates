@@ -204,7 +204,7 @@ func cdrLogAction(acc *Account, a *Action, acs Actions, extraData interface{}) (
 		cdrs = append(cdrs, cdr)
 		var rply string
 		// After compute the CDR send it to CDR Server to be processed
-		if err := connMgr.Call(config.CgrConfig().SchedulerCfg().CDRsConns,
+		if err := connMgr.Call(config.CgrConfig().SchedulerCfg().CDRsConns, nil,
 			utils.CDRsV1ProcessEvent,
 			&ArgV1ProcessEvent{
 			Flags:    []string{utils.ConcatenatedKey(utils.MetaChargers, "false")}, // do not try to get the chargers for cdrlog

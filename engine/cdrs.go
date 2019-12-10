@@ -211,12 +211,12 @@ func (cdrS *CDRServer) getCostFromRater(cdr *CDRWithArgDispatcher) (*CallCost, e
 		PerformRounding: true,
 	}
 	if reqTypes.Has(cdr.RequestType) { // Prepaid - Cost can be recalculated in case of missing records from SM
-		err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().RaterConns,
+		err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().RaterConns, nil,
 			utils.ResponderDebit,
 			&CallDescriptorWithArgDispatcher{CallDescriptor: cd,
 				ArgDispatcher: cdr.ArgDispatcher}, cc)
 	} else {
-		err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().RaterConns,
+		err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().RaterConns, nil,
 			utils.ResponderGetCost,
 			&CallDescriptorWithArgDispatcher{CallDescriptor: cd,
 				ArgDispatcher: cdr.ArgDispatcher}, cc)
@@ -283,7 +283,7 @@ func (cdrS *CDRServer) refundEventCost(ec *EventCost, reqType, tor string) (err 
 		return
 	}
 	var acnt Account
-	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().RaterConns,
+	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().RaterConns, nil,
 		utils.ResponderRefundIncrements,
 		&CallDescriptorWithArgDispatcher{CallDescriptor: cd}, &acnt); err != nil {
 		return
@@ -296,7 +296,7 @@ func (cdrS *CDRServer) refundEventCost(ec *EventCost, reqType, tor string) (err 
 func (cdrS *CDRServer) chrgProcessEvent(cgrEv *utils.CGREventWithArgDispatcher,
 	attrS, store, allowUpdate, export, thdS, statS bool) (err error) {
 	var chrgrs []*ChrgSProcessEventReply
-	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().ChargerSConns,
+	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().ChargerSConns, nil,
 		utils.ChargerSv1ProcessEvent,
 		cgrEv, &chrgrs); err != nil {
 		utils.Logger.Warning(
@@ -340,7 +340,7 @@ func (cdrS *CDRServer) chrgProcessEvent(cgrEv *utils.CGREventWithArgDispatcher,
 // chrgrSProcessEvent forks CGREventWithArgDispatcher into multiples based on matching ChargerS profiles
 func (cdrS *CDRServer) chrgrSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher) (cgrEvs []*utils.CGREventWithArgDispatcher, err error) {
 	var chrgrs []*ChrgSProcessEventReply
-	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().ChargerSConns,
+	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().ChargerSConns, nil,
 		utils.ChargerSv1ProcessEvent,
 		cgrEv, &chrgrs); err != nil {
 		return
@@ -367,7 +367,7 @@ func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher)
 	if cgrEv.ArgDispatcher != nil {
 		attrArgs.ArgDispatcher = cgrEv.ArgDispatcher
 	}
-	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().AttributeSConns,
+	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().AttributeSConns, nil,
 		utils.AttributeSv1ProcessEvent,
 		attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 		cgrEv.CGREvent = rplyEv.CGREvent
@@ -391,7 +391,7 @@ func (cdrS *CDRServer) thdSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher) 
 	if cgrEv.ArgDispatcher != nil {
 		thArgs.ArgDispatcher = cgrEv.ArgDispatcher
 	}
-	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().ThresholdSConns,
+	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().ThresholdSConns, nil,
 		utils.ThresholdSv1ProcessEvent,
 		thArgs, &tIDs); err != nil &&
 		err.Error() == utils.ErrNotFound.Error() {
@@ -407,7 +407,7 @@ func (cdrS *CDRServer) statSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher)
 	if cgrEv.ArgDispatcher != nil {
 		statArgs.ArgDispatcher = cgrEv.ArgDispatcher
 	}
-	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().StatSConns,
+	if err = cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().StatSConns, nil,
 		utils.StatSv1ProcessEvent,
 		statArgs, &reply); err != nil &&
 		err.Error() == utils.ErrNotFound.Error() {
@@ -863,7 +863,7 @@ func (cdrS *CDRServer) V2StoreSessionCost(args *ArgsV2CDRSStoreSMCost, reply *st
 		cd.RunID = args.Cost.RunID
 		cd.Increments = roundIncrements
 		var response float64
-		if err := cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().RaterConns,
+		if err := cdrS.connMgr.Call(cdrS.cgrCfg.CdrsCfg().RaterConns, nil,
 			utils.ResponderRefundRounding,
 			&CallDescriptorWithArgDispatcher{CallDescriptor: cd},
 			&response); err != nil {

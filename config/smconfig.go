@@ -249,7 +249,7 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 
 type FsAgentCfg struct {
 	Enabled       bool
-	SessionSConns []*RemoteHost
+	SessionSConns []string
 	SubscribePark bool
 	CreateCdr     bool
 	ExtraFields   RSRParsers
@@ -270,10 +270,14 @@ func (self *FsAgentCfg) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 		self.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Sessions_conns != nil {
-		self.SessionSConns = make([]*RemoteHost, len(*jsnCfg.Sessions_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
-			self.SessionSConns[idx] = NewDfltRemoteHost()
-			self.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		self.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
+		for idx, connID := range *jsnCfg.Sessions_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				self.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+			} else {
+				self.SessionSConns[idx] = connID
+			}
 		}
 	}
 	if jsnCfg.Subscribe_park != nil {

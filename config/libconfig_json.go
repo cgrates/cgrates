@@ -238,7 +238,7 @@ type SessionSJsonCfg struct {
 // FreeSWITCHAgent config section
 type FreeswitchAgentJsonCfg struct {
 	Enabled                *bool
-	Sessions_conns         *[]*RemoteHostJson
+	Sessions_conns         *[]string
 	Subscribe_park         *bool
 	Create_cdr             *bool
 	Extra_fields           *[]string
@@ -465,7 +465,7 @@ type LoaderJsonCfg struct {
 	Dry_run         *bool
 	Run_delay       *int
 	Lock_filename   *string
-	Caches_conns    *[]*RemoteHostJson
+	Caches_conns    *[]string
 	Field_separator *string
 	Tp_in_dir       *string
 	Tp_out_dir      *string

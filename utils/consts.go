@@ -590,6 +590,7 @@ const (
 	MetaSuppliersOffset         = "*suppliers_offset"
 	ApierV                      = "ApierV"
 	MetaApier                   = "*apier"
+	MetaAnalyzer                = "*analyzer"
 	CGREventString              = "CGREvent"
 	MetaTextPlain               = "*text_plain"
 	MetaIgnoreErrors            = "*ignore_errors"
@@ -636,6 +637,7 @@ const (
 	OrderIDEnd                  = "OrderIDEnd"
 	MinCost                     = "MinCost"
 	MaxCost                     = "MaxCost"
+	MetaLoaders                 = "*loaders"
 )
 
 // Migrator Action

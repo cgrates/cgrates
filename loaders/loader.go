@@ -25,13 +25,11 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"reflect"
 	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 type openedCSVFile struct {
@@ -42,7 +40,7 @@ type openedCSVFile struct {
 
 func NewLoader(dm *engine.DataManager, cfg *config.LoaderSCfg,
 	timezone string, exitChan chan bool, filterS *engine.FilterS,
-	internalCacheSChan chan rpcclient.ClientConnector) (ldr *Loader) {
+	connMgr *engine.ConnManager, cacheConns []string) (ldr *Loader) {
 	ldr = &Loader{
 		enabled:       cfg.Enabled,
 		tenant:        cfg.Tenant,
@@ -58,6 +56,8 @@ func NewLoader(dm *engine.DataManager, cfg *config.LoaderSCfg,
 		dm:            dm,
 		timezone:      timezone,
 		filterS:       filterS,
+		connMgr:       connMgr,
+		cacheConns:    cacheConns,
 	}
 	for _, ldrData := range cfg.Data {
 		ldr.dataTpls[ldrData.Type] = ldrData.Fields
@@ -73,28 +73,6 @@ func NewLoader(dm *engine.DataManager, cfg *config.LoaderSCfg,
 			}
 		}
 	}
-	var err error
-	//create cache connection
-	var caches *rpcclient.RPCPool
-	if len(cfg.CacheSConns) != 0 {
-		caches, err = engine.NewRPCPool(rpcclient.PoolFirst,
-			config.CgrConfig().TlsCfg().ClientKey,
-			config.CgrConfig().TlsCfg().ClientCerificate, config.CgrConfig().TlsCfg().CaCertificate,
-			config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
-			config.CgrConfig().GeneralCfg().ConnectTimeout, config.CgrConfig().GeneralCfg().ReplyTimeout,
-			cfg.CacheSConns, internalCacheSChan, false)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<LoaderS> Could not connect to CacheS, error: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-	}
-
-	//add verification in case of nil
-	if caches != nil && reflect.ValueOf(caches).IsNil() {
-		caches = nil
-	}
-	ldr.cacheS = caches
 	return
 }
 
@@ -115,7 +93,8 @@ type Loader struct {
 	dm            *engine.DataManager
 	timezone      string
 	filterS       *engine.FilterS
-	cacheS        rpcclient.ClientConnector
+	connMgr       *engine.ConnManager
+	cacheConns    []string
 }
 
 func (ldr *Loader) ListenAndServe(exitChan chan struct{}) (err error) {
@@ -563,30 +542,34 @@ func (ldr *Loader) storeLoadedData(loaderType string,
 		}
 	}
 
-	if ldr.cacheS != nil {
+	if len(ldr.cacheConns) != 0 {
 		var reply string
 		switch caching {
 		case utils.META_NONE:
 			return
 		case utils.MetaReload:
-			if err = ldr.cacheS.Call(utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
-				AttrReloadCache: cacheArgs}, &reply); err != nil {
+			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+					AttrReloadCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaLoad:
-			if err = ldr.cacheS.Call(utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
-				AttrReloadCache: cacheArgs}, &reply); err != nil {
+			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
+				utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
+					AttrReloadCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaRemove:
-			if err = ldr.cacheS.Call(utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
-				AttrReloadCache: cacheArgs}, &reply); err != nil {
+			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
+				utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
+					AttrReloadCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaClear:
 			cacheArgs.FlushAll = true
-			if err = ldr.cacheS.Call(utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
-				AttrReloadCache: cacheArgs}, &reply); err != nil {
+			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
+				utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
+					AttrReloadCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		}
@@ -690,7 +673,8 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 			tntIDStruct := utils.NewTenantID(tntID)
 			// get IDs so we can reload in cache
 			ids = append(ids, tntID)
-			if err := ldr.dm.RemoveResourceProfile(tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional, true); err != nil {
+			if err := ldr.dm.RemoveResourceProfile(tntIDStruct.Tenant,
+				tntIDStruct.ID, utils.NonTransactional, true); err != nil {
 				return err
 			}
 			if err := ldr.dm.RemoveResource(tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional); err != nil {
@@ -723,7 +707,8 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 			tntIDStruct := utils.NewTenantID(tntID)
 			// get IDs so we can reload in cache
 			ids = append(ids, tntID)
-			if err := ldr.dm.RemoveStatQueueProfile(tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional, true); err != nil {
+			if err := ldr.dm.RemoveStatQueueProfile(tntIDStruct.Tenant,
+				tntIDStruct.ID, utils.NonTransactional, true); err != nil {
 				return err
 			}
 			if err := ldr.dm.RemoveStatQueue(tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional); err != nil {
@@ -741,7 +726,8 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 			tntIDStruct := utils.NewTenantID(tntID)
 			// get IDs so we can reload in cache
 			ids = append(ids, tntID)
-			if err := ldr.dm.RemoveThresholdProfile(tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional, true); err != nil {
+			if err := ldr.dm.RemoveThresholdProfile(tntIDStruct.Tenant,
+				tntIDStruct.ID, utils.NonTransactional, true); err != nil {
 				return err
 			}
 			if err := ldr.dm.RemoveThreshold(tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional); err != nil {
@@ -759,7 +745,8 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 			tntIDStruct := utils.NewTenantID(tntID)
 			// get IDs so we can reload in cache
 			ids = append(ids, tntID)
-			if err := ldr.dm.RemoveSupplierProfile(tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional, true); err != nil {
+			if err := ldr.dm.RemoveSupplierProfile(tntIDStruct.Tenant,
+				tntIDStruct.ID, utils.NonTransactional, true); err != nil {
 				return err
 			}
 			cacheArgs.SupplierProfileIDs = &ids
@@ -773,7 +760,8 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 			tntIDStruct := utils.NewTenantID(tntID)
 			// get IDs so we can reload in cache
 			ids = append(ids, tntID)
-			if err := ldr.dm.RemoveChargerProfile(tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional, true); err != nil {
+			if err := ldr.dm.RemoveChargerProfile(tntIDStruct.Tenant,
+				tntIDStruct.ID, utils.NonTransactional, true); err != nil {
 				return err
 			}
 			cacheArgs.ChargerProfileIDs = &ids
@@ -787,7 +775,8 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 			tntIDStruct := utils.NewTenantID(tntID)
 			// get IDs so we can reload in cache
 			ids = append(ids, tntID)
-			if err := ldr.dm.RemoveDispatcherProfile(tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional, true); err != nil {
+			if err := ldr.dm.RemoveDispatcherProfile(tntIDStruct.Tenant,
+				tntIDStruct.ID, utils.NonTransactional, true); err != nil {
 				return err
 			}
 			cacheArgs.DispatcherProfileIDs = &ids
@@ -801,37 +790,42 @@ func (ldr *Loader) removeLoadedData(loaderType, tntID, caching string) (err erro
 			tntIDStruct := utils.NewTenantID(tntID)
 			// get IDs so we can reload in cache
 			ids = append(ids, tntID)
-			if err := ldr.dm.RemoveDispatcherHost(tntIDStruct.Tenant, tntIDStruct.ID, utils.NonTransactional); err != nil {
+			if err := ldr.dm.RemoveDispatcherHost(tntIDStruct.Tenant,
+				tntIDStruct.ID, utils.NonTransactional); err != nil {
 				return err
 			}
 			cacheArgs.DispatcherHostIDs = &ids
 		}
 	}
 
-	if ldr.cacheS != nil {
+	if len(ldr.cacheConns) != 0 {
 		var reply string
 		switch caching {
 		case utils.META_NONE:
 			return
 		case utils.MetaReload:
-			if err = ldr.cacheS.Call(utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
-				AttrReloadCache: cacheArgs}, &reply); err != nil {
+			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+					AttrReloadCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaLoad:
-			if err = ldr.cacheS.Call(utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
-				AttrReloadCache: cacheArgs}, &reply); err != nil {
+			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
+				utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
+					AttrReloadCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaRemove:
-			if err = ldr.cacheS.Call(utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
-				AttrReloadCache: cacheArgs}, &reply); err != nil {
+			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
+				utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
+					AttrReloadCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		case utils.MetaClear:
 			cacheArgs.FlushAll = true
-			if err = ldr.cacheS.Call(utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
-				AttrReloadCache: cacheArgs}, &reply); err != nil {
+			if err = ldr.connMgr.Call(ldr.cacheConns, nil,
+				utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
+					AttrReloadCache: cacheArgs}, &reply); err != nil {
 				return
 			}
 		}

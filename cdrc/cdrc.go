@@ -217,7 +217,7 @@ func (self *Cdrc) processFile(filePath string) error {
 				utils.Logger.Info(fmt.Sprintf("<Cdrc> DryRun CDR: %+v", storedCdr))
 				continue
 			}
-			if err := self.connMgr.Call(self.dfltCdrcCfg.CdrsConns, utils.CDRsV1ProcessEvent,
+			if err := self.connMgr.Call(self.dfltCdrcCfg.CdrsConns, nil, utils.CDRsV1ProcessEvent,
 				&engine.ArgV1ProcessEvent{CGREvent: *storedCdr.AsCGREvent()}, &reply); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed sending CDR, %+v, error: %s", storedCdr, err.Error()))
 			} else if reply != "OK" {

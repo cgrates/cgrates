@@ -138,9 +138,7 @@ func TestFsAgentCfgloadFromJsonCfg2(t *testing.T) {
 	cfgJSONStr := `{
 "freeswitch_agent": {
 	"enabled": false,						// starts the FreeSWITCH agent: <true|false>
-	"sessions_conns": [
-		{"address": "*internal"}			// connection towards session service: <*internal>
-	],
+	"sessions_conns": ["*internal"],
 	"subscribe_park": true,					// subscribe via fsock to receive park events
 	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
 	"extra_fields": [],						// extra fields to store in auth/CDRs when creating them
@@ -155,7 +153,7 @@ func TestFsAgentCfgloadFromJsonCfg2(t *testing.T) {
 },
 }`
 	expected = FsAgentCfg{
-		SessionSConns:     []*RemoteHost{{Address: "*internal"}},
+		SessionSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		SubscribePark:     true,
 		MaxWaitConnection: time.Duration(2 * time.Second),
 		ExtraFields:       RSRParsers{},

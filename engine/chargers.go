@@ -129,8 +129,8 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithArgDispatcher) (
 			ArgDispatcher: clonedEv.ArgDispatcher,
 		}
 		var evReply AttrSProcessEventReply
-		if err = cS.connMgr.Call(cS.cfg.ChargerSCfg().AttributeSConns, utils.AttributeSv1ProcessEvent,
-			args, &evReply); err != nil {
+		if err = cS.connMgr.Call(cS.cfg.ChargerSCfg().AttributeSConns, nil,
+			utils.AttributeSv1ProcessEvent, args, &evReply); err != nil {
 			return nil, err
 		}
 		rply[i].AttributeSProfiles = evReply.MatchedProfiles

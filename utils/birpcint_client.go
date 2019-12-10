@@ -46,6 +46,11 @@ type BiRPCServer interface {
 	CallBiRPC(rpcclient.ClientConnector, string, interface{}, interface{}) error
 }
 
+type BiRPCClient interface {
+	Call(string, interface{}, interface{}) error // So we can use it also as rpcclient.ClientConnector
+	ID() string
+}
+
 func NewBiRPCInternalClient(serverConn BiRPCServer) *BiRPCInternalClient {
 	return &BiRPCInternalClient{serverConn: serverConn}
 }

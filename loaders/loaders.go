@@ -26,18 +26,17 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 func NewLoaderService(dm *engine.DataManager, ldrsCfg []*config.LoaderSCfg,
 	timezone string, exitChan chan bool, filterS *engine.FilterS,
-	internalCacheSChan chan rpcclient.ClientConnector) (ldrS *LoaderService) {
+	connMgr *engine.ConnManager) (ldrS *LoaderService) {
 	ldrS = &LoaderService{ldrs: make(map[string]*Loader)}
 	for _, ldrCfg := range ldrsCfg {
 		if !ldrCfg.Enabled {
 			continue
 		}
-		ldrS.ldrs[ldrCfg.Id] = NewLoader(dm, ldrCfg, timezone, exitChan, filterS, internalCacheSChan)
+		ldrS.ldrs[ldrCfg.Id] = NewLoader(dm, ldrCfg, timezone, exitChan, filterS, connMgr, ldrCfg.CacheSConns)
 	}
 	return
 }
@@ -147,15 +146,14 @@ func (ldrS *LoaderService) V1Remove(args *ArgsProcessFolder,
 
 // Reload recreates the loaders map thread safe
 func (ldrS *LoaderService) Reload(dm *engine.DataManager, ldrsCfg []*config.LoaderSCfg,
-	timezone string, exitChan chan bool, filterS *engine.FilterS,
-	internalCacheSChan chan rpcclient.ClientConnector) {
+	timezone string, exitChan chan bool, filterS *engine.FilterS, connMgr *engine.ConnManager) {
 	ldrS.Lock()
 	ldrS.ldrs = make(map[string]*Loader)
 	for _, ldrCfg := range ldrsCfg {
 		if !ldrCfg.Enabled {
 			continue
 		}
-		ldrS.ldrs[ldrCfg.Id] = NewLoader(dm, ldrCfg, timezone, exitChan, filterS, internalCacheSChan)
+		ldrS.ldrs[ldrCfg.Id] = NewLoader(dm, ldrCfg, timezone, exitChan, filterS, connMgr, ldrCfg.CacheSConns)
 	}
 	ldrS.Unlock()
 }

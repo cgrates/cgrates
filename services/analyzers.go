@@ -31,9 +31,10 @@ import (
 )
 
 // NewAnalyzerService returns the Analyzer Service
-func NewAnalyzerService(cfg *config.CGRConfig, server *utils.Server, exitChan chan bool) servmanager.Service {
+func NewAnalyzerService(cfg *config.CGRConfig, server *utils.Server, exitChan chan bool,
+	internalAnalyzerSChan chan rpcclient.ClientConnector) servmanager.Service {
 	return &AnalyzerService{
-		connChan: make(chan rpcclient.ClientConnector, 1),
+		connChan: internalAnalyzerSChan,
 		cfg:      cfg,
 		server:   server,
 		exitChan: exitChan,

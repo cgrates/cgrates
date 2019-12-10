@@ -290,7 +290,8 @@ func (sS *StatService) processEvent(args *StatsArgsProcessEvent) (statQueueIDs [
 				thEv.Event[metricID] = metric.GetValue()
 			}
 			var tIDs []string
-			if err := sS.connMgr.Call(sS.cgrcfg.StatSCfg().ThresholdSConns, utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
+			if err := sS.connMgr.Call(sS.cgrcfg.StatSCfg().ThresholdSConns, nil,
+				utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<StatS> error: %s processing event %+v with ThresholdS.", err.Error(), thEv))

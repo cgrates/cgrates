@@ -549,7 +549,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 								utils.BalanceID:   defaultBalance.ID,
 								utils.Units:       defaultBalance.Value}}}
 					var tIDs []string
-					if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns,
+					if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
 						utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 						err.Error() != utils.ErrNotFound.Error() {
 						utils.Logger.Warning(
@@ -1107,7 +1107,7 @@ func (acnt *Account) Publish() {
 	if len(config.CgrConfig().RalsCfg().StatSConns) != 0 {
 		go func() {
 			var reply []string
-			if err := connMgr.Call(config.CgrConfig().RalsCfg().StatSConns,
+			if err := connMgr.Call(config.CgrConfig().RalsCfg().StatSConns, nil,
 				utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{CGREvent: cgrEv}, &reply); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
@@ -1119,7 +1119,7 @@ func (acnt *Account) Publish() {
 	if len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
 		go func() {
 			var tIDs []string
-			if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns,
+			if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
 				utils.ThresholdSv1ProcessEvent,
 				&ArgsProcessEvent{CGREvent: cgrEv}, &tIDs); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {

@@ -20,6 +20,8 @@ package config
 
 import (
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func NewDfltLoaderSCfg() *LoaderSCfg {
@@ -50,7 +52,7 @@ type LoaderSCfg struct {
 	DryRun         bool
 	RunDelay       time.Duration
 	LockFileName   string
-	CacheSConns    []*RemoteHost
+	CacheSConns    []string
 	FieldSeparator string
 	TpInDir        string
 	TpOutDir       string
@@ -114,12 +116,15 @@ func (self *LoaderSCfg) loadFromJsonCfg(jsnCfg *LoaderJsonCfg, separator string)
 		self.LockFileName = *jsnCfg.Lock_filename
 	}
 	if jsnCfg.Caches_conns != nil {
-		cacheConns := make([]*RemoteHost, len(*jsnCfg.Caches_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Caches_conns {
-			cacheConns[idx] = NewDfltRemoteHost()
-			cacheConns[idx].loadFromJsonCfg(jsnHaCfg)
+		self.CacheSConns = make([]string, len(*jsnCfg.Caches_conns))
+		for idx, connID := range *jsnCfg.Caches_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				self.CacheSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
+			} else {
+				self.CacheSConns[idx] = connID
+			}
 		}
-		self.CacheSConns = cacheConns
 	}
 	if jsnCfg.Field_separator != nil {
 		self.FieldSeparator = *jsnCfg.Field_separator
@@ -163,10 +168,9 @@ func (self *LoaderSCfg) Clone() *LoaderSCfg {
 	clnLoader.DryRun = self.DryRun
 	clnLoader.RunDelay = self.RunDelay
 	clnLoader.LockFileName = self.LockFileName
-	clnLoader.CacheSConns = make([]*RemoteHost, len(self.CacheSConns))
-	for idx, cdrConn := range self.CacheSConns {
-		clonedVal := *cdrConn
-		clnLoader.CacheSConns[idx] = &clonedVal
+	clnLoader.CacheSConns = make([]string, len(self.CacheSConns))
+	for idx, connID := range self.CacheSConns {
+		clnLoader.CacheSConns[idx] = connID
 	}
 	clnLoader.FieldSeparator = self.FieldSeparator
 	clnLoader.TpInDir = self.TpInDir

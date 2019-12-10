@@ -1264,25 +1264,25 @@ func (apiv1 *ApierV1) CallCache(cacheOpt string, args utils.ArgsGetCacheItem) (e
 	case utils.META_NONE:
 		return
 	case utils.MetaReload:
-		if err = apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns,
+		if err = apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
 			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
 				AttrReloadCache: composeArgsReload(args)}, &reply); err != nil {
 			return err
 		}
 	case utils.MetaLoad:
-		if err = apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns,
+		if err = apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
 			utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
 				AttrReloadCache: composeArgsReload(args)}, &reply); err != nil {
 			return err
 		}
 	case utils.MetaRemove:
-		if err = apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns,
+		if err = apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
 			utils.CacheSv1RemoveItem,
 			&utils.ArgsGetCacheItemWithArgDispatcher{ArgsGetCacheItem: args}, &reply); err != nil {
 			return err
 		}
 	case utils.MetaClear:
-		if err = apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns,
+		if err = apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
 			utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
 				AttrReloadCache: composeArgsReload(args)}, &reply); err != nil {
 			return err

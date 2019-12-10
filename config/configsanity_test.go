@@ -284,14 +284,10 @@ func TestConfigSanityFreeSWITCHAgent(t *testing.T) {
 	}
 
 	cfg.fsAgentCfg = &FsAgentCfg{
-		Enabled: true,
-		SessionSConns: []*RemoteHost{
-			&RemoteHost{
-				Address: utils.MetaInternal,
-			},
-		},
+		Enabled:       true,
+		SessionSConns: []string{utils.MetaInternal},
 	}
-	expected = "<SessionS> not enabled but referenced by <FreeSWITCHAgent>"
+	expected = "<SessionS> not enabled but requested by <FreeSWITCHAgent> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}

@@ -362,7 +362,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 					engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RequestType)) {
 					argsProc.Flags = append(argsProc.Flags, utils.MetaRALs)
 				}
-				if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns,
+				if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil,
 					utils.CDRsV1ProcessEvent, argsProc, &reply); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf(
@@ -385,7 +385,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 			Units:         1,
 			ArgDispatcher: s.ArgDispatcher,
 		}
-		if err := sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns,
+		if err := sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil,
 			utils.ResourceSv1ReleaseResources,
 			argsRU, &reply); err != nil {
 			utils.Logger.Warning(
@@ -435,7 +435,7 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 	cd := sr.CD.Clone()
 	argDsp := s.ArgDispatcher
 	cc := new(engine.CallCost)
-	if err := sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns,
+	if err := sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil,
 		utils.ResponderMaxDebit,
 		&engine.CallDescriptorWithArgDispatcher{
 			CallDescriptor: cd,
@@ -589,7 +589,7 @@ func (sS *SessionS) refundSession(s *Session, sRunIdx int, rUsage time.Duration)
 		Increments:  incrmts,
 	}
 	var acnt engine.Account
-	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, utils.ResponderRefundIncrements,
+	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil, utils.ResponderRefundIncrements,
 		&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
 			ArgDispatcher: s.ArgDispatcher}, &acnt); err != nil {
 		return
@@ -628,7 +628,7 @@ func (sS *SessionS) storeSCost(s *Session, sRunIdx int) (err error) {
 		},
 	}
 	var reply string
-	if err := sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, utils.CDRsV2StoreSessionCost,
+	if err := sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil, utils.CDRsV2StoreSessionCost,
 		argSmCost, &reply); err != nil {
 		if err == utils.ErrExists {
 			utils.Logger.Warning(
@@ -1058,8 +1058,8 @@ func (sS *SessionS) forkSession(s *Session) (err error) {
 		ArgDispatcher: s.ArgDispatcher,
 	}
 	var chrgrs []*engine.ChrgSProcessEventReply
-	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ChargerSConns, utils.ChargerSv1ProcessEvent,
-		cgrEv, &chrgrs); err != nil {
+	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ChargerSConns, nil,
+		utils.ChargerSv1ProcessEvent, cgrEv, &chrgrs); err != nil {
 		if err.Error() == utils.ErrNotFound.Error() {
 			return utils.ErrNoActiveSession
 		}
@@ -1331,7 +1331,8 @@ func (sS *SessionS) authEvent(tnt string, evStart engine.MapEvent) (maxUsage tim
 		if !authReqs.HasField(
 			sr.Event.GetStringIgnoreErrors(utils.RequestType)) {
 			rplyMaxUsage = eventUsage
-		} else if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, utils.ResponderGetMaxSessionTime,
+		} else if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil,
+			utils.ResponderGetMaxSessionTime,
 			&engine.CallDescriptorWithArgDispatcher{CallDescriptor: sr.CD,
 				ArgDispatcher: s.ArgDispatcher}, &rplyMaxUsage); err != nil {
 			return
@@ -1456,7 +1457,7 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration, aTi
 				sr.CD.TimeEnd = sr.CD.TimeStart.Add(notCharged)
 				sr.CD.DurationIndex += notCharged
 				cc := new(engine.CallCost)
-				if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, utils.ResponderDebit,
+				if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil, utils.ResponderDebit,
 					&engine.CallDescriptorWithArgDispatcher{CallDescriptor: sr.CD,
 						ArgDispatcher: s.ArgDispatcher}, cc); err == nil {
 					sr.EventCost.Merge(
@@ -1879,7 +1880,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 			Units:         1,
 			ArgDispatcher: args.ArgDispatcher,
 		}
-		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, utils.ResourceSv1AuthorizeResources,
+		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1AuthorizeResources,
 			attrRU, &allocMsg); err != nil {
 			return utils.NewErrResourceS(err)
 		}
@@ -2143,7 +2144,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		var allocMessage string
-		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, utils.ResourceSv1AllocateResources,
+		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1AllocateResources,
 			attrRU, &allocMessage); err != nil {
 			return utils.NewErrResourceS(err)
 		}
@@ -2526,7 +2527,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 			Units:         1,
 			ArgDispatcher: args.ArgDispatcher,
 		}
-		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, utils.ResourceSv1ReleaseResources,
+		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1ReleaseResources,
 			argsRU, &reply); err != nil {
 			return utils.NewErrResourceS(err)
 		}
@@ -2605,7 +2606,7 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.ClientConnector,
 		// found in cache
 		s = sIface.(*Session)
 	} else { // no cached session, CDR will be handled by CDRs
-		return sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, utils.CDRsV1ProcessEvent,
+		return sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil, utils.CDRsV1ProcessEvent,
 			&engine.ArgV1ProcessEvent{
 				Flags:         []string{utils.MetaRALs},
 				CGREvent:      *cgrEvWithArgDisp.CGREvent,
@@ -2637,7 +2638,7 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.ClientConnector,
 		if mp := engine.MapEvent(cgrEv.Event); unratedReqs.HasField(mp.GetStringIgnoreErrors(utils.RequestType)) { // order additional rating for unrated request types
 			argsProc.Flags = append(argsProc.Flags, fmt.Sprintf("%s:true", utils.MetaRALs))
 		}
-		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, utils.CDRsV1ProcessEvent,
+		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil, utils.CDRsV1ProcessEvent,
 			argsProc, rply); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error <%s> posting CDR with CGRID: <%s>",
@@ -2850,7 +2851,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		var allocMessage string
-		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, utils.ResourceSv1AllocateResources,
+		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1AllocateResources,
 			attrRU, &allocMessage); err != nil {
 			return utils.NewErrResourceS(err)
 		}
@@ -3043,21 +3044,21 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				return err
 			}
 			if resourceFlagsWithParams.HasKey(utils.MetaAuthorize) {
-				if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, utils.ResourceSv1AuthorizeResources,
+				if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1AuthorizeResources,
 					attrRU, &resMessage); err != nil {
 					return utils.NewErrResourceS(err)
 				}
 				rply.ResourceMessage = &resMessage
 			}
 			if resourceFlagsWithParams.HasKey(utils.MetaAllocate) {
-				if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, utils.ResourceSv1AllocateResources,
+				if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1AllocateResources,
 					attrRU, &resMessage); err != nil {
 					return utils.NewErrResourceS(err)
 				}
 				rply.ResourceMessage = &resMessage
 			}
 			if resourceFlagsWithParams.HasKey(utils.MetaRelease) {
-				if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, utils.ResourceSv1ReleaseResources,
+				if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1ReleaseResources,
 					attrRU, &resMessage); err != nil {
 					return utils.NewErrResourceS(err)
 				}
@@ -3331,7 +3332,7 @@ func (sS *SessionS) processThreshold(cgrEv *utils.CGREvent, argDisp *utils.ArgDi
 	}
 	//initialize the returned variable
 	tIDs = make([]string, 0)
-	err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ThreshSConns, utils.ThresholdSv1ProcessEvent, thEv, &tIDs)
+	err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ThreshSConns, nil, utils.ThresholdSv1ProcessEvent, thEv, &tIDs)
 	return
 }
 
@@ -3351,7 +3352,7 @@ func (sS *SessionS) processStats(cgrEv *utils.CGREvent, argDisp *utils.ArgDispat
 	}
 	//initialize the returned variable
 	sIDs = make([]string, 0)
-	err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().StatSConns, utils.StatSv1ProcessEvent, statArgs, &sIDs)
+	err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().StatSConns, nil, utils.StatSv1ProcessEvent, statArgs, &sIDs)
 	return
 }
 
@@ -3371,7 +3372,7 @@ func (sS *SessionS) getSuppliers(cgrEv *utils.CGREvent, argDisp *utils.ArgDispat
 		IgnoreErrors:  ignoreErrors,
 		MaxCost:       maxCost,
 	}
-	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().SupplSConns, utils.SupplierSv1GetSuppliers,
+	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().SupplSConns, nil, utils.SupplierSv1GetSuppliers,
 		sArgs, &splsReply); err != nil {
 		return splsReply, utils.NewErrSupplierS(err)
 	}
@@ -3392,7 +3393,7 @@ func (sS *SessionS) processAttributes(cgrEv *utils.CGREvent, argDisp *utils.ArgD
 	if len(attrIDs) != 0 {
 		attrArgs.AttributeIDs = attrIDs
 	}
-	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().AttrSConns, utils.AttributeSv1ProcessEvent,
+	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().AttrSConns, nil, utils.AttributeSv1ProcessEvent,
 		attrArgs, &rplyEv); err != nil {
 		return
 	}

@@ -105,7 +105,7 @@ func (prc *PartialRecordsCache) postCDR(originID string) {
 			cdr := prc.partialRecords[originID].MergeCDRs()
 			cdr.Partial = false // force completion
 			var reply string
-			if err := prc.connMgr.Call(prc.cdrsConnIDs, utils.CDRsV1ProcessEvent,
+			if err := prc.connMgr.Call(prc.cdrsConnIDs, nil, utils.CDRsV1ProcessEvent,
 				&engine.ArgV1ProcessEvent{CGREvent: *cdr.AsCGREvent()}, &reply); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed sending CDR  %+v from partial cache, error: %s", cdr, err.Error()))
 			} else if reply != utils.OK {

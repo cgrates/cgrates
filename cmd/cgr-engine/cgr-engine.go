@@ -472,7 +472,7 @@ func main() {
 	internalCoreSv1Chan := make(chan rpcclient.ClientConnector, 1)
 	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
 	internalGuardianSChan := make(chan rpcclient.ClientConnector, 1)
-
+	internalAnalyzerSChan := make(chan rpcclient.ClientConnector, 1)
 	internalCDRServerChan := make(chan rpcclient.ClientConnector, 1)   // needed to avod cyclic dependency
 	internalAttributeSChan := make(chan rpcclient.ClientConnector, 1)  // needed to avod cyclic dependency
 	internalDispatcherSChan := make(chan rpcclient.ClientConnector, 1) // needed to avod cyclic dependency
@@ -487,6 +487,7 @@ func main() {
 	internalResponderChan := make(chan rpcclient.ClientConnector, 1)   // needed to avod cyclic dependency
 	internalAPIerV1Chan := make(chan rpcclient.ClientConnector, 1)     // needed to avod cyclic dependency
 	internalAPIerV2Chan := make(chan rpcclient.ClientConnector, 1)     // needed to avod cyclic dependency
+	internalLoaderSChan := make(chan rpcclient.ClientConnector, 1)
 
 	// init CacheS
 	cacheS := initCacheS(internalCacheSChan, server, dmService.GetDM(), exitChan)
@@ -500,14 +501,14 @@ func main() {
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, exitChan)
 	connManager := services.NewConnManagerService(cfg, map[string]chan rpcclient.ClientConnector{
-		//utils.AnalyzerSv1:  anz.GetIntenternalChan(),
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier):      internalAPIerV1Chan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes): internalAttributeSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):     internalCacheSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs):       internalCDRServerChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):   internalChargerSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaGuardian):   internalGuardianSChan,
-		//utils.LoaderSv1:    ldrs.GetIntenternalChan(),
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAnalyzer):       internalAnalyzerSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier):          internalAPIerV1Chan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes):     internalAttributeSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):         internalCacheSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs):           internalCDRServerChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):       internalChargerSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaGuardian):       internalGuardianSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaLoaders):        internalLoaderSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources):      internalResourceSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder):      internalResponderChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler):      internalSchedulerSChan,
@@ -546,14 +547,15 @@ func main() {
 
 	smg := services.NewSessionService(cfg, dmService, server, internalSessionSChan, exitChan, connManager.GetConnMgr())
 
-	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server, internalCacheSChan, dspS.GetIntenternalChan(), exitChan)
-	anz := services.NewAnalyzerService(cfg, server, exitChan)
+	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server, exitChan,
+		internalLoaderSChan, connManager.GetConnMgr())
+	anz := services.NewAnalyzerService(cfg, server, exitChan, internalAnalyzerSChan)
 
 	srvManager.AddServices(connManager, attrS, chrS, tS, stS, reS, supS, schS, rals,
 		rals.GetResponder(), rals.GetAPIv1(), rals.GetAPIv2(), cdrS, smg,
 		services.NewEventReaderService(cfg, filterSChan, exitChan, connManager.GetConnMgr()),
 		services.NewDNSAgent(cfg, filterSChan, exitChan, connManager.GetConnMgr()),
-		services.NewFreeswitchAgent(cfg, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),
+		services.NewFreeswitchAgent(cfg, exitChan, connManager.GetConnMgr()),
 		services.NewKamailioAgent(cfg, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),
 		services.NewAsteriskAgent(cfg, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),              // partial reload
 		services.NewRadiusAgent(cfg, filterSChan, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),   // partial reload

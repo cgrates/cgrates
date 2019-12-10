@@ -2450,20 +2450,20 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 	case utils.META_NONE:
 		return
 	case utils.MetaReload:
-		if err = connMgr.Call(tpr.cacheConns, utils.CacheSv1ReloadCache, cacheArgs, &reply); err != nil {
+		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1ReloadCache, cacheArgs, &reply); err != nil {
 			return
 		}
 	case utils.MetaLoad:
-		if err = connMgr.Call(tpr.cacheConns, utils.CacheSv1LoadCache, cacheArgs, &reply); err != nil {
+		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1LoadCache, cacheArgs, &reply); err != nil {
 			return
 		}
 	case utils.MetaRemove:
-		if err = connMgr.Call(tpr.cacheConns, utils.CacheSv1FlushCache, cacheArgs, &reply); err != nil {
+		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1FlushCache, cacheArgs, &reply); err != nil {
 			return
 		}
 	case utils.MetaClear:
 		cacheArgs.FlushAll = true
-		if err = connMgr.Call(tpr.cacheConns, utils.CacheSv1FlushCache, cacheArgs, &reply); err != nil {
+		if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1FlushCache, cacheArgs, &reply); err != nil {
 			return
 		}
 	}
@@ -2498,7 +2498,7 @@ func (tpr *TpReader) ReloadCache(caching string, verbose bool, argDispatcher *ut
 		ArgDispatcher: argDispatcher,
 		CacheIDs:      cacheIDs,
 	}
-	if err = connMgr.Call(tpr.cacheConns, utils.CacheSv1Clear, clearArgs, &reply); err != nil {
+	if err = connMgr.Call(tpr.cacheConns, nil, utils.CacheSv1Clear, clearArgs, &reply); err != nil {
 		log.Printf("WARNING: Got error on cache clear: %s\n", err.Error())
 	}
 
@@ -2523,7 +2523,7 @@ func (tpr *TpReader) ReloadScheduler(verbose bool) (err error) {
 		if verbose {
 			log.Print("Reloading scheduler")
 		}
-		if err = connMgr.Call(tpr.schedulerConns, utils.SchedulerSv1Reload,
+		if err = connMgr.Call(tpr.schedulerConns, nil, utils.SchedulerSv1Reload,
 			new(utils.CGREventWithArgDispatcher), &reply); err != nil {
 			log.Printf("WARNING: Got error on scheduler reload: %s\n", err.Error())
 		}

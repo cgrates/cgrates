@@ -218,7 +218,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
 		)
 		rply := new(sessions.V1AuthorizeReply)
-		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns,
+		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
 		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
@@ -237,7 +237,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher)
 		rply := new(sessions.V1InitSessionReply)
-		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns,
+		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1InitiateSession,
 			initArgs, rply)
 		rply.SetMaxUsageNeeded(initArgs.InitSession)
@@ -251,7 +251,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher)
 		rply := new(sessions.V1UpdateSessionReply)
-		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns,
+		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1UpdateSession,
 			updateArgs, rply)
 		rply.SetMaxUsageNeeded(updateArgs.UpdateSession)
@@ -268,7 +268,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
 			cgrEv, cgrArgs.ArgDispatcher)
 		rply := utils.StringPointer("")
-		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns,
+		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1TerminateSession,
 			terminateArgs, rply)
 		if err = agReq.setCGRReply(nil, err); err != nil {
@@ -289,7 +289,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
 		rply := new(sessions.V1ProcessMessageReply) // need it so rpcclient can clone
-		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns,
+		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1ProcessMessage,
 			evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
@@ -312,7 +312,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaInit) ||
 			reqProcessor.Flags.HasKey(utils.MetaUpdate)
 		rply := new(sessions.V1ProcessEventReply)
-		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns,
+		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1ProcessEvent,
 			evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
@@ -330,7 +330,7 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 	if reqProcessor.Flags.HasKey(utils.MetaCDRs) &&
 		!reqProcessor.Flags.HasKey(utils.MetaDryRun) {
 		rplyCDRs := utils.StringPointer("")
-		if err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns,
+		if err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
 			utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher}, &rplyCDRs); err != nil {

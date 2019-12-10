@@ -406,9 +406,7 @@ const CGRATES_CFG_JSON = `
 
 "freeswitch_agent": {
 	"enabled": false,						// starts the FreeSWITCH agent: <true|false>
-	"sessions_conns": [						// connections to SessionS for session management and CDR posting: <*internal>
-		{"address": "*internal"}
-	],
+	"sessions_conns": ["*internal"],
 	"subscribe_park": true,					// subscribe via fsock to receive park events
 	"create_cdr": false,					// creates CDR out of events and sends them to CDRS component
 	"extra_fields": [],						// extra fields to store in auth/CDRs when creating them
@@ -602,9 +600,7 @@ const CGRATES_CFG_JSON = `
 		"dry_run": false,									// do not send the CDRs to CDRS, just parse them
 		"run_delay": 0,										// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
 		"lock_filename": ".cgr.lck",						// Filename containing concurrency lock in case of delayed processing
-		"caches_conns": [									// connections to CacheS for data reload, empty for no reloads  <""|*internal|x.y.z.y:1234>
-			{"address": "*internal"},
-		],
+		"caches_conns": ["*internal"],
 		"field_separator": ",",								// separator used in case of csv files
 		"tp_in_dir": "/var/spool/cgrates/loader/in",		// absolute path towards the directory where the TPs are stored
 		"tp_out_dir": "/var/spool/cgrates/loader/out",		// absolute path towards the directory where processed TPs will be moved

@@ -66,7 +66,8 @@ func (ha *HTTPAgent) Start() (err error) {
 	utils.Logger.Info("Starting HTTP agent")
 	for _, agntCfg := range ha.cfg.HttpAgentCfg() {
 		ha.server.RegisterHttpHandler(agntCfg.Url,
-			agents.NewHTTPAgent(ha.connMgr, agntCfg.SessionSConns, filterS, ha.cfg.GeneralCfg().DefaultTenant, agntCfg.RequestPayload,
+			agents.NewHTTPAgent(ha.connMgr, agntCfg.SessionSConns, filterS,
+				ha.cfg.GeneralCfg().DefaultTenant, agntCfg.RequestPayload,
 				agntCfg.ReplyPayload, agntCfg.RequestProcessors))
 	}
 	return

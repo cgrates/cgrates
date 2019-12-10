@@ -591,11 +591,8 @@ func TestSmgJsonCfg(t *testing.T) {
 
 func TestFsAgentJsonCfg(t *testing.T) {
 	eCfg := &FreeswitchAgentJsonCfg{
-		Enabled: utils.BoolPointer(false),
-		Sessions_conns: &[]*RemoteHostJson{
-			{
-				Address: utils.StringPointer(utils.MetaInternal),
-			}},
+		Enabled:                utils.BoolPointer(false),
+		Sessions_conns:         &[]string{utils.MetaInternal},
 		Subscribe_park:         utils.BoolPointer(true),
 		Create_cdr:             utils.BoolPointer(false),
 		Extra_fields:           &[]string{},
@@ -950,15 +947,13 @@ func TestDfSupplierSJsonCfg(t *testing.T) {
 func TestDfLoaderJsonCfg(t *testing.T) {
 	eCfg := []*LoaderJsonCfg{
 		{
-			ID:            utils.StringPointer(utils.META_DEFAULT),
-			Enabled:       utils.BoolPointer(false),
-			Tenant:        utils.StringPointer(""),
-			Dry_run:       utils.BoolPointer(false),
-			Run_delay:     utils.IntPointer(0),
-			Lock_filename: utils.StringPointer(".cgr.lck"),
-			Caches_conns: &[]*RemoteHostJson{{
-				Address: utils.StringPointer(utils.MetaInternal),
-			}},
+			ID:              utils.StringPointer(utils.META_DEFAULT),
+			Enabled:         utils.BoolPointer(false),
+			Tenant:          utils.StringPointer(""),
+			Dry_run:         utils.BoolPointer(false),
+			Run_delay:       utils.IntPointer(0),
+			Lock_filename:   utils.StringPointer(".cgr.lck"),
+			Caches_conns:    &[]string{utils.MetaInternal},
 			Field_separator: utils.StringPointer(","),
 			Tp_in_dir:       utils.StringPointer("/var/spool/cgrates/loader/in"),
 			Tp_out_dir:      utils.StringPointer("/var/spool/cgrates/loader/out"),

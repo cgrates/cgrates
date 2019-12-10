@@ -309,7 +309,7 @@ func (cdre *CDRExporter) processCDR(cdr *CDR) (err error) {
 			CGREvent: cdr.AsCGREvent(),
 		}
 		var evReply AttrSProcessEventReply
-		if err = connMgr.Call(cdre.attrsConns,
+		if err = connMgr.Call(cdre.attrsConns, nil,
 			utils.AttributeSv1ProcessEvent,
 			args, &evReply); err != nil {
 			return err

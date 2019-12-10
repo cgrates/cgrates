@@ -739,9 +739,8 @@ func TestCgrCfgJSONDefaultsCacheCFG(t *testing.T) {
 
 func TestCgrCfgJSONDefaultsFsAgentConfig(t *testing.T) {
 	eFsAgentCfg := &FsAgentCfg{
-		Enabled: false,
-		SessionSConns: []*RemoteHost{
-			{Address: "*internal"}},
+		Enabled:             false,
+		SessionSConns:       []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		SubscribePark:       true,
 		CreateCdr:           false,
 		ExtraFields:         RSRParsers{},
@@ -1046,16 +1045,12 @@ func TestDbDefaults(t *testing.T) {
 func TestCgrLoaderCfgITDefaults(t *testing.T) {
 	eCfg := LoaderSCfgs{
 		{
-			Id:           utils.META_DEFAULT,
-			Enabled:      false,
-			DryRun:       false,
-			RunDelay:     0,
-			LockFileName: ".cgr.lck",
-			CacheSConns: []*RemoteHost{
-				{
-					Address: utils.MetaInternal,
-				},
-			},
+			Id:             utils.META_DEFAULT,
+			Enabled:        false,
+			DryRun:         false,
+			RunDelay:       0,
+			LockFileName:   ".cgr.lck",
+			CacheSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
 			FieldSeparator: ",",
 			TpInDir:        "/var/spool/cgrates/loader/in",
 			TpOutDir:       "/var/spool/cgrates/loader/out",

@@ -296,7 +296,7 @@ func (spS *SupplierService) statMetrics(statIDs []string, tenant string) (stsMet
 	if len(spS.cgrcfg.SupplierSCfg().StatSConns) != 0 {
 		for _, statID := range statIDs {
 			var metrics map[string]float64
-			if err = spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().StatSConns, utils.StatSv1GetQueueFloatMetrics,
+			if err = spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().StatSConns, nil, utils.StatSv1GetQueueFloatMetrics,
 				&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: tenant, ID: statID}}, &metrics); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
@@ -327,7 +327,7 @@ func (spS *SupplierService) statMetricsForLoadDistribution(statIDs []string, ten
 			// check if we get an ID in the following form (StatID:MetricID)
 			statWithMetric := strings.Split(statID, utils.InInFieldSep)
 			var metrics map[string]float64
-			if err = spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().StatSConns, utils.StatSv1GetQueueFloatMetrics,
+			if err = spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().StatSConns, nil, utils.StatSv1GetQueueFloatMetrics,
 				&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: tenant, ID: statWithMetric[0]}}, &metrics); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
@@ -363,7 +363,7 @@ func (spS *SupplierService) resourceUsage(resIDs []string, tenant string) (tUsag
 	if len(spS.cgrcfg.SupplierSCfg().ResourceSConns) != 0 {
 		for _, resID := range resIDs {
 			var res Resource
-			if err = spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().ResourceSConns, utils.ResourceSv1GetResource,
+			if err = spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().ResourceSConns, nil, utils.ResourceSv1GetResource,
 				&utils.TenantID{Tenant: tenant, ID: resID}, &res); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
@@ -584,8 +584,8 @@ func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *Sorted
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		var rplyEv AttrSProcessEventReply
-		if err := spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().AttributeSConns, utils.AttributeSv1ProcessEvent,
-			attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
+		if err := spS.connMgr.Call(spS.cgrcfg.SupplierSCfg().AttributeSConns, nil,
+			utils.AttributeSv1ProcessEvent, attrArgs, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 			args.CGREvent = rplyEv.CGREvent
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)

@@ -32,11 +32,15 @@ import (
 func NewHTTPAgent(connMgr *engine.ConnManager, sessionConns []string,
 	filterS *engine.FilterS, dfltTenant, reqPayload, rplyPayload string,
 	reqProcessors []*config.RequestProcessor) *HTTPAgent {
-	return &HTTPAgent{connMgr: connMgr, filterS: filterS,
-		dfltTenant: dfltTenant,
-		reqPayload: reqPayload, rplyPayload: rplyPayload,
+	return &HTTPAgent{
+		connMgr:       connMgr,
+		filterS:       filterS,
+		dfltTenant:    dfltTenant,
+		reqPayload:    reqPayload,
+		rplyPayload:   rplyPayload,
 		reqProcessors: reqProcessors,
-		sessionConns:  sessionConns}
+		sessionConns:  sessionConns,
+	}
 }
 
 // HTTPAgent is a handler for HTTP requests
@@ -149,7 +153,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
 		)
 		rply := new(sessions.V1AuthorizeReply)
-		err = ha.connMgr.Call(ha.sessionConns, utils.SessionSv1AuthorizeEvent,
+		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
 		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
 		if err = agReq.setCGRReply(rply, err); err != nil {
@@ -167,7 +171,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher)
 		rply := new(sessions.V1InitSessionReply)
-		err = ha.connMgr.Call(ha.sessionConns, utils.SessionSv1InitiateSession,
+		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1InitiateSession,
 			initArgs, rply)
 		rply.SetMaxUsageNeeded(initArgs.InitSession)
 		if err = agReq.setCGRReply(rply, err); err != nil {
@@ -180,7 +184,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher)
 		rply := new(sessions.V1UpdateSessionReply)
-		err = ha.connMgr.Call(ha.sessionConns, utils.SessionSv1UpdateSession,
+		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
 		rply.SetMaxUsageNeeded(updateArgs.UpdateSession)
 		if err = agReq.setCGRReply(rply, err); err != nil {
@@ -196,7 +200,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
 			cgrEv, cgrArgs.ArgDispatcher)
 		rply := utils.StringPointer("")
-		err = ha.connMgr.Call(ha.sessionConns, utils.SessionSv1TerminateSession,
+		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1TerminateSession,
 			terminateArgs, rply)
 		if err = agReq.setCGRReply(nil, err); err != nil {
 			return
@@ -216,7 +220,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
 		rply := new(sessions.V1ProcessMessageReply)
-		err = ha.connMgr.Call(ha.sessionConns, utils.SessionSv1ProcessMessage,
+		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1ProcessMessage,
 			evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
@@ -238,7 +242,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaInit) ||
 			reqProcessor.Flags.HasKey(utils.MetaUpdate)
 		rply := new(sessions.V1ProcessEventReply)
-		err = ha.connMgr.Call(ha.sessionConns, utils.SessionSv1ProcessEvent,
+		err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1ProcessEvent,
 			evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
@@ -255,7 +259,7 @@ func (ha *HTTPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	if reqProcessor.Flags.HasKey(utils.MetaCDRs) &&
 		!reqProcessor.Flags.HasKey(utils.MetaDryRun) {
 		rplyCDRs := utils.StringPointer("")
-		if err = ha.connMgr.Call(ha.sessionConns, utils.SessionSv1ProcessCDR,
+		if err = ha.connMgr.Call(ha.sessionConns, nil, utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher},
 			rplyCDRs); err != nil {

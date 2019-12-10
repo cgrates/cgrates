@@ -218,13 +218,12 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> no %s connections defined",
 				utils.FreeSWITCHAgent, utils.SessionS)
 		}
-		if !cfg.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
-			!cfg.sessionSCfg.Enabled {
-			for _, connCfg := range cfg.fsAgentCfg.SessionSConns {
-				if connCfg.Address == utils.MetaInternal {
-					return fmt.Errorf("<%s> not enabled but referenced by <%s>",
-						utils.SessionS, utils.FreeSWITCHAgent)
-				}
+		for _, connID := range cfg.fsAgentCfg.SessionSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.SessionS, utils.FreeSWITCHAgent)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.FreeSWITCHAgent, connID)
 			}
 		}
 	}
