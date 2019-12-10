@@ -391,12 +391,8 @@ func TestConfigSanityDNSAgent(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.dnsAgentCfg.SessionSConns = []*RemoteHost{
-		&RemoteHost{
-			Address: utils.MetaInternal,
-		},
-	}
-	expected = "<SessionS> not enabled but referenced by <DNSAgent>"
+	cfg.dnsAgentCfg.SessionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}
+	expected = "<SessionS> not enabled but requested by <DNSAgent> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -404,21 +400,18 @@ func TestConfigSanityDNSAgent(t *testing.T) {
 
 func TestConfigSanityHTTPAgent(t *testing.T) {
 	cfg, _ = NewDefaultCGRConfig()
-	cfg.sessionSCfg.Enabled = true
+	cfg.sessionSCfg.Enabled = false
 	cfg.httpAgentCfg = HttpAgentCfgs{
 		&HttpAgentCfg{
-			SessionSConns: []*RemoteHost{
-				&RemoteHost{
-					Address: utils.MetaInternal,
-				},
-			},
+			ID:            "Test",
+			SessionSConns: []string{utils.MetaInternal},
 		},
 	}
-	expected := "<SessionS> not enabled but referenced by <HTTPAgent> component"
+	expected := "<SessionS> not enabled but requested by <Test> HTTPAgent Template."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.sessionSCfg.Enabled = false
+	cfg.sessionSCfg.Enabled = true
 
 	cfg.httpAgentCfg = HttpAgentCfgs{
 		&HttpAgentCfg{

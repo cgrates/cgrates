@@ -32,27 +32,24 @@ import (
 
 // NewHTTPAgent returns the HTTP Agent
 func NewHTTPAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	sSChan, dispatcherChan chan rpcclient.ClientConnector,
-	server *utils.Server) servmanager.Service {
+	server *utils.Server, connMgr *engine.ConnManager) servmanager.Service {
 	return &HTTPAgent{
-		cfg:            cfg,
-		filterSChan:    filterSChan,
-		sSChan:         sSChan,
-		dispatcherChan: dispatcherChan,
-		server:         server,
+		cfg:         cfg,
+		filterSChan: filterSChan,
+		server:      server,
+		connMgr:     connMgr,
 	}
 }
 
 // HTTPAgent implements Agent interface
 type HTTPAgent struct {
 	sync.RWMutex
-	cfg            *config.CGRConfig
-	filterSChan    chan *engine.FilterS
-	sSChan         chan rpcclient.ClientConnector
-	dispatcherChan chan rpcclient.ClientConnector
-	server         *utils.Server
+	cfg         *config.CGRConfig
+	filterSChan chan *engine.FilterS
+	server      *utils.Server
 
-	ha *agents.HTTPAgent
+	ha      *agents.HTTPAgent
+	connMgr *engine.ConnManager
 }
 
 // Start should handle the sercive start
@@ -68,14 +65,8 @@ func (ha *HTTPAgent) Start() (err error) {
 	defer ha.Unlock()
 	utils.Logger.Info("Starting HTTP agent")
 	for _, agntCfg := range ha.cfg.HttpAgentCfg() {
-		var sS rpcclient.ClientConnector
-		if sS, err = NewConnection(ha.cfg, ha.sSChan, ha.dispatcherChan, agntCfg.SessionSConns); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> could not connect to %s, error: %s",
-				utils.HTTPAgent, utils.SessionS, err.Error()))
-			return
-		}
 		ha.server.RegisterHttpHandler(agntCfg.Url,
-			agents.NewHTTPAgent(sS, filterS, ha.cfg.GeneralCfg().DefaultTenant, agntCfg.RequestPayload,
+			agents.NewHTTPAgent(ha.connMgr, agntCfg.SessionSConns, filterS, ha.cfg.GeneralCfg().DefaultTenant, agntCfg.RequestPayload,
 				agntCfg.ReplyPayload, agntCfg.RequestProcessors))
 	}
 	return

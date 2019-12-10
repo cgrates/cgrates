@@ -824,21 +824,17 @@ func TestHttpAgentJsonCfg(t *testing.T) {
 
 func TestDNSAgentJsonCfg(t *testing.T) {
 	eCfg := &DNSAgentJsonCfg{
-		Enabled:    utils.BoolPointer(false),
-		Listen_net: utils.StringPointer("udp"),
-		Listen:     utils.StringPointer("127.0.0.1:2053"),
-		Sessions_conns: &[]*RemoteHostJson{
-			{
-				Address: utils.StringPointer(utils.MetaInternal),
-			}},
+		Enabled:            utils.BoolPointer(false),
+		Listen_net:         utils.StringPointer("udp"),
+		Listen:             utils.StringPointer("127.0.0.1:2053"),
+		Sessions_conns:     &[]string{utils.ConcatenatedKey(utils.MetaInternal)},
 		Timezone:           utils.StringPointer(""),
 		Request_processors: &[]*ReqProcessorJsnCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.DNSAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		rcv := *cfg.Request_processors
-		t.Errorf("Received: %+v", rcv)
+		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
 

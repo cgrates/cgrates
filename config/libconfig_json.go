@@ -365,7 +365,7 @@ type RadiusAgentJsonCfg struct {
 type HttpAgentJsonCfg struct {
 	Id                 *string
 	Url                *string
-	Sessions_conns     *[]*RemoteHostJson
+	Sessions_conns     *[]string
 	Request_payload    *string
 	Reply_payload      *string
 	Request_processors *[]*ReqProcessorJsnCfg
@@ -376,7 +376,7 @@ type DNSAgentJsonCfg struct {
 	Enabled            *bool
 	Listen             *string
 	Listen_net         *string
-	Sessions_conns     *[]*RemoteHostJson
+	Sessions_conns     *[]string
 	Timezone           *string
 	Request_processors *[]*ReqProcessorJsnCfg
 }

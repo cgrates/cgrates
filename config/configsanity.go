@@ -298,24 +298,24 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> no %s connections defined",
 				utils.DNSAgent, utils.SessionS)
 		}
-		if !cfg.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
-			!cfg.sessionSCfg.Enabled {
-			for _, sSConn := range cfg.dnsAgentCfg.SessionSConns {
-				if sSConn.Address == utils.MetaInternal {
-					return fmt.Errorf("<%s> not enabled but referenced by <%s>", utils.SessionS, utils.DNSAgent)
-				}
+		for _, connID := range cfg.dnsAgentCfg.SessionSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.SessionS, utils.DNSAgent)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.DNSAgent, connID)
 			}
 		}
 	}
 	// HTTPAgent checks
 	for _, httpAgentCfg := range cfg.httpAgentCfg {
 		// httpAgent checks
-		if !cfg.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
-			cfg.sessionSCfg.Enabled {
-			for _, sSConn := range httpAgentCfg.SessionSConns {
-				if sSConn.Address == utils.MetaInternal {
-					return fmt.Errorf("<%s> not enabled but referenced by <%s> component", utils.SessionS, utils.HTTPAgent)
-				}
+		for _, connID := range httpAgentCfg.SessionSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> HTTPAgent Template.", utils.SessionS, httpAgentCfg.ID)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("HTTPAgent Templae with ID <%s> has connection with id: <%s> not defined", httpAgentCfg.ID, connID)
 			}
 		}
 		if !utils.SliceHasMember([]string{utils.MetaUrl, utils.MetaXml}, httpAgentCfg.RequestPayload) {

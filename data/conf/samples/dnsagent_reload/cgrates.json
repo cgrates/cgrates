@@ -62,9 +62,7 @@
     "dns_agent": {
         "enabled": true,
         "listen": ":2053",
-        "sessions_conns": [
-            {"address": "*internal"}
-        ],		
+        "sessions_conns": ["*internal"],
     },
     
     

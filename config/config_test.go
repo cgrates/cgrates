@@ -282,9 +282,7 @@ func TestHttpAgentCfg(t *testing.T) {
 	{
 		"id": "conecto1",
 		"url": "/conecto",					// relative URL for requests coming in
-		"sessions_conns": [
-			{"address": "*internal"}		// connection towards SessionService
-		],
+		"sessions_conns": ["*internal"],
 		"request_payload":	"*url",			// source of input data <*url>
 		"reply_payload":	"*xml",			// type of output data <*xml>
 		"request_processors": [],
@@ -295,12 +293,11 @@ func TestHttpAgentCfg(t *testing.T) {
 	eCgrCfg, _ := NewDefaultCGRConfig()
 	eCgrCfg.httpAgentCfg = []*HttpAgentCfg{
 		{
-			ID:             "conecto1",
-			Url:            "/conecto",
-			RequestPayload: utils.MetaUrl,
-			ReplyPayload:   utils.MetaXml,
-			SessionSConns: []*RemoteHost{
-				{Address: utils.MetaInternal}},
+			ID:                "conecto1",
+			Url:               "/conecto",
+			RequestPayload:    utils.MetaUrl,
+			ReplyPayload:      utils.MetaXml,
+			SessionSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 			RequestProcessors: nil,
 		},
 	}

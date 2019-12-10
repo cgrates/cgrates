@@ -1423,7 +1423,6 @@ func (sS *SessionS) updateSession(s *Session, updtEv engine.MapEvent) (maxUsage 
 // terminateSession will end a session from outside
 // calls endSession thread safe
 func (sS *SessionS) terminateSession(s *Session, tUsage, lastUsage *time.Duration, aTime *time.Time) (err error) {
-	utils.Logger.Debug("Enter in termSessions")
 	s.Lock()
 	err = sS.endSession(s, tUsage, lastUsage, aTime)
 	s.Unlock()
@@ -1435,7 +1434,6 @@ func (sS *SessionS) terminateSession(s *Session, tUsage, lastUsage *time.Duratio
 func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration, aTime *time.Time) (err error) {
 	//check if we have replicate connection and close the session there
 	defer sS.replicateSessions(s.CGRID, true, sS.sReplConns)
-	utils.Logger.Debug("enter in endSessions")
 	sS.unregisterSession(s.CGRID, false)
 	s.stopSTerminator()
 	s.stopDebitLoops()
@@ -2152,7 +2150,6 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 		rply.ResourceAllocation = &allocMessage
 	}
 	if args.InitSession {
-		utils.Logger.Debug(fmt.Sprintf("RLASCONN : %+v", sS.cgrCfg.SessionSCfg().RALsConns))
 		var err error
 		ev := engine.MapEvent(args.CGREvent.Event)
 		dbtItvl := sS.cgrCfg.SessionSCfg().DebitInterval

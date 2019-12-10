@@ -40,9 +40,7 @@
 
 "cdrs": {
 	"enabled": true,
-	"rals_conns": [
-		{"address": "*internal"}
-	],
+	"rals_conns": ["*internal"],
 },
 
 
@@ -64,9 +62,7 @@
 "dns_agent": {
 	"enabled": true,
 	"listen": ":2053",
-	"sessions_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}
-	],		
+	"sessions_conns": ["*localhost"],
 },
 
 

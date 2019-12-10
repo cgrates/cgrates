@@ -20,6 +20,7 @@ package agents
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os/exec"
@@ -201,6 +202,7 @@ func testDiamItApierRpcConn(t *testing.T) {
 	var err error
 	apierRpc, err = newRPCClient(daCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
+		fmt.Println(err)
 		t.Fatal(err)
 	}
 }

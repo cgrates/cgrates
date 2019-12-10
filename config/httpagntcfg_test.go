@@ -41,9 +41,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 	{
 		"id": "conecto1",
 		"url": "/conecto",
-		"sessions_conns": [
-			{"address": "127.0.0.1:2012", "transport": "*json"}
-		],
+		"sessions_conns": ["*localhost"],
 		"request_payload":	"*url",
 		"reply_payload":	"*xml",
 		"request_processors": [
@@ -66,7 +64,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 	expected = HttpAgentCfgs{&HttpAgentCfg{
 		ID:             "conecto1",
 		Url:            "/conecto",
-		SessionSConns:  []*RemoteHost{{Address: "127.0.0.1:2012", Transport: "*json"}},
+		SessionSConns:  []string{utils.MetaLocalHost},
 		RequestPayload: "*url",
 		ReplyPayload:   "*xml",
 		RequestProcessors: []*RequestProcessor{{
@@ -98,9 +96,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 	{
 		"id": "conecto1",
 		"url": "/conecto",
-		"sessions_conns": [
-			{"address": "127.0.0.1:2012", "transport": "*json"}
-		],
+		"sessions_conns": ["*localhost"],
 		"request_payload":	"*url",
 		"reply_payload":	"*xml",
 		"request_processors": [
@@ -124,9 +120,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 	{
 		"id": "conecto_xml",
 		"url": "/conecto_xml",
-		"sessions_conns": [
-			{"address": "127.0.0.1:2012", "transport": "*json"}
-		],
+		"sessions_conns": ["*localhost"],
 		"request_payload":	"*xml",
 		"reply_payload":	"*xml",
 		"request_processors": [
@@ -145,7 +139,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 		&HttpAgentCfg{
 			ID:             "conecto1",
 			Url:            "/conecto",
-			SessionSConns:  []*RemoteHost{{Address: "127.0.0.1:2012", Transport: "*json"}},
+			SessionSConns:  []string{utils.MetaLocalHost},
 			RequestPayload: "*url",
 			ReplyPayload:   "*xml",
 			RequestProcessors: []*RequestProcessor{{
@@ -184,7 +178,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 		}, &HttpAgentCfg{
 			ID:             "conecto_xml",
 			Url:            "/conecto_xml",
-			SessionSConns:  []*RemoteHost{{Address: "127.0.0.1:2012", Transport: "*json"}},
+			SessionSConns:  []string{utils.MetaLocalHost},
 			RequestPayload: "*xml",
 			ReplyPayload:   "*xml",
 			RequestProcessors: []*RequestProcessor{{
@@ -222,7 +216,7 @@ func TestHttpAgentCfgloadFromJsonCfg(t *testing.T) {
 	jsnhttpCfg := &HttpAgentJsonCfg{
 		Id:              utils.StringPointer("conecto1"),
 		Url:             utils.StringPointer("/conecto"),
-		Sessions_conns:  &[]*RemoteHostJson{{Address: utils.StringPointer("127.0.0.1:2012"), Transport: utils.StringPointer("*json")}},
+		Sessions_conns:  &[]string{utils.MetaLocalHost},
 		Request_payload: utils.StringPointer("*url"),
 		Reply_payload:   utils.StringPointer("*xml"),
 		Request_processors: &[]*ReqProcessorJsnCfg{
@@ -239,7 +233,7 @@ func TestHttpAgentCfgloadFromJsonCfg(t *testing.T) {
 	expected = HttpAgentCfg{
 		ID:             "conecto1",
 		Url:            "/conecto",
-		SessionSConns:  []*RemoteHost{{Address: "127.0.0.1:2012", Transport: "*json"}},
+		SessionSConns:  []string{utils.MetaLocalHost},
 		RequestPayload: "*url",
 		ReplyPayload:   "*xml",
 		RequestProcessors: []*RequestProcessor{{
@@ -263,7 +257,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 	initial := &HttpAgentCfg{
 		ID:             "conecto1",
 		Url:            "/conecto",
-		SessionSConns:  []*RemoteHost{{Address: "127.0.0.1:2012", Transport: "*json"}},
+		SessionSConns:  []string{utils.MetaLocalHost},
 		RequestPayload: "*url",
 		ReplyPayload:   "*xml",
 		RequestProcessors: []*RequestProcessor{{
@@ -312,7 +306,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 	expected := &HttpAgentCfg{
 		ID:             "conecto1",
 		Url:            "/conecto",
-		SessionSConns:  []*RemoteHost{{Address: "127.0.0.1:2012", Transport: "*json"}},
+		SessionSConns:  []string{utils.MetaLocalHost},
 		RequestPayload: "*url",
 		ReplyPayload:   "*xml",
 		RequestProcessors: []*RequestProcessor{{

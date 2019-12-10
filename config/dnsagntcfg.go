@@ -26,7 +26,7 @@ type DNSAgentCfg struct {
 	Enabled           bool
 	Listen            string
 	ListenNet         string // udp or tcp
-	SessionSConns     []*RemoteHost
+	SessionSConns     []string
 	Timezone          string
 	RequestProcessors []*RequestProcessor
 }
@@ -48,10 +48,14 @@ func (da *DNSAgentCfg) loadFromJsonCfg(jsnCfg *DNSAgentJsonCfg, sep string) (err
 		da.Timezone = *jsnCfg.Timezone
 	}
 	if jsnCfg.Sessions_conns != nil {
-		da.SessionSConns = make([]*RemoteHost, len(*jsnCfg.Sessions_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
-			da.SessionSConns[idx] = NewDfltRemoteHost()
-			da.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		da.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
+		for idx, connID := range *jsnCfg.Sessions_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				da.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+			} else {
+				da.SessionSConns[idx] = connID
+			}
 		}
 	}
 	if jsnCfg.Request_processors != nil {

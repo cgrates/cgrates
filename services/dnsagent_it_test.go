@@ -52,8 +52,9 @@ func TestDNSAgentReload(t *testing.T) {
 	db := NewDataDBService(cfg)
 	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1),
 		engineShutdown, nil)
-	srv := NewDNSAgent(cfg, filterSChan, sS.GetIntenternalChan(), nil, engineShutdown)
-	srvMngr.AddServices(NewConnManagerService(cfg, nil), srv, sS, NewLoaderService(cfg, db, filterSChan, server, cacheSChan, nil, engineShutdown), db)
+	srv := NewDNSAgent(cfg, nil, engineShutdown, nil)
+	srvMngr.AddServices(NewConnManagerService(cfg, nil), srv, sS,
+		NewLoaderService(cfg, db, filterSChan, server, cacheSChan, nil, engineShutdown), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

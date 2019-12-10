@@ -44,7 +44,9 @@
 
 "dispatchers":{
  	"enabled": true,
- 	"attributes_conns": ["*internal"],
+ 	"attributes_conns": [
+		{"address": "*internal"}
+	],
 },
 
 "diameter_agent": {
