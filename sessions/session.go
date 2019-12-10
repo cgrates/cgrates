@@ -217,19 +217,11 @@ func (s *Session) totalUsage() (tDur time.Duration) {
 }
 
 // AsCGREvents is a  method to return the Session as CGREvents
-// there will be one CGREvent for each SRun plus one *raw for EventStart
 // AsCGREvents is not thread safe since it is supposed to run by the time Session is closed
 func (s *Session) asCGREvents() (cgrEvs []*utils.CGREvent, err error) {
-	cgrEvs = make([]*utils.CGREvent, len(s.SRuns)+1) // so we can gather all cdr info while under lock
-	rawEv := s.EventStart.Clone()
-	rawEv[utils.RunID] = utils.MetaRaw
-	cgrEvs[0] = &utils.CGREvent{
-		Tenant: s.Tenant,
-		ID:     utils.UUIDSha1Prefix(),
-		Event:  rawEv,
-	}
+	cgrEvs = make([]*utils.CGREvent, len(s.SRuns)) // so we can gather all cdr info while under lock
 	for i, sr := range s.SRuns {
-		cgrEvs[i+1] = &utils.CGREvent{
+		cgrEvs[i] = &utils.CGREvent{
 			Tenant: s.Tenant,
 			ID:     utils.UUIDSha1Prefix(),
 			Event:  sr.Event,

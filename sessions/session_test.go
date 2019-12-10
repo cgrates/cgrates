@@ -319,12 +319,8 @@ func TestSessionAsCGREventsRawEvent(t *testing.T) {
 		Tenant:     "cgrates.org",
 		EventStart: engine.NewMapEvent(ev),
 	}
-	if cgrEvs, _ := s.asCGREvents(); len(cgrEvs) != 1 {
+	if cgrEvs, _ := s.asCGREvents(); len(cgrEvs) != 0 {
 		t.Errorf("Expecting: 1, received: %+v", len(cgrEvs))
-	} else if cgrEvs[0].Event[utils.RunID] != utils.MetaRaw {
-		t.Errorf("Expecting: %+v, received: %+v", utils.MetaRaw, cgrEvs[0].Event[utils.RunID])
-	} else if cgrEvs[0].Event[utils.Cost] != 12.12 {
-		t.Errorf("Expecting: %+v, received: %+v", 12.12, cgrEvs[0].Event[utils.Cost])
 	}
 
 }
@@ -376,17 +372,12 @@ func TestSessionAsCGREvents(t *testing.T) {
 	cgrEvs, err := s.asCGREvents()
 	if err != nil {
 		t.Error(err)
-	} else if len(cgrEvs) != 2 {
-		t.Errorf("Expecting: 2, received: %+v", len(cgrEvs))
+	} else if len(cgrEvs) != 1 {
+		t.Errorf("Expecting: 1, received: %+v", len(cgrEvs))
 	}
-	if cgrEvs[0].Event[utils.RunID] != utils.MetaRaw {
-		t.Errorf("Expecting: %+v, received: %+v", utils.MetaRaw, cgrEvs[0].Event[utils.RunID])
-	} else if cgrEvs[0].Event[utils.Cost] != 12.12 {
-		t.Errorf("Expecting: %+v, received: %+v", 12.12, cgrEvs[0].Event[utils.Cost])
-	}
-	if cgrEvs[1].Event[utils.RunID] != utils.MetaDefault {
+	if cgrEvs[0].Event[utils.RunID] != utils.MetaDefault {
 		t.Errorf("Expecting: %+v, received: %+v", utils.MetaRaw, cgrEvs[1].Event[utils.RunID])
-	} else if cgrEvs[1].Event[utils.Cost] != 12.13 {
+	} else if cgrEvs[0].Event[utils.Cost] != 12.13 {
 		t.Errorf("Expecting: %+v, received: %+v", 12.13, cgrEvs[1].Event[utils.Cost])
 	}
 }

@@ -2654,8 +2654,7 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.ClientConnector,
 			CGREvent:      *cgrEv,
 			ArgDispatcher: cgrEvWithArgDisp.ArgDispatcher,
 		}
-		if mp := engine.MapEvent(cgrEv.Event); mp.GetStringIgnoreErrors(utils.RunID) != utils.MetaRaw && // check if is *raw
-			unratedReqs.HasField(mp.GetStringIgnoreErrors(utils.RequestType)) { // order additional rating for unrated request types
+		if mp := engine.MapEvent(cgrEv.Event); unratedReqs.HasField(mp.GetStringIgnoreErrors(utils.RequestType)) { // order additional rating for unrated request types
 			argsProc.Flags = append(argsProc.Flags, fmt.Sprintf("%s:true", utils.MetaRALs))
 		}
 		if err = sS.cdrS.Call(utils.CDRsV1ProcessEvent,
