@@ -54,10 +54,19 @@ type Action struct {
 	balanceValue     float64 // balance value after action execution, used with cdrlog
 }
 
-func (a *Action) Clone() *Action {
-	var clonedAction Action
-	utils.Clone(a, &clonedAction)
-	return &clonedAction
+func (a *Action) Clone() (cln *Action) {
+	if a == nil {
+		return
+	}
+	return &Action{
+		Id:               a.Id,
+		ActionType:       a.ActionType,
+		ExtraParameters:  a.ExtraParameters,
+		Filter:           a.Filter,
+		ExpirationString: a.ExpirationString,
+		Weight:           a.Weight,
+		Balance:          a.Balance.Clone(),
+	}
 }
 
 type actionTypeFunc func(*Account, *Action, Actions, interface{}) error
@@ -868,19 +877,12 @@ func (apl Actions) Sort() {
 }
 
 func (apl Actions) Clone() (interface{}, error) {
-	var cln Actions
-	if err := utils.Clone(apl, &cln); err != nil {
-		return nil, err
+	if apl == nil {
+		return nil, nil
 	}
-	for i, act := range apl { // Fix issues with gob cloning nil pointer towards false value
-		if act.Balance != nil {
-			if act.Balance.Disabled != nil && !*act.Balance.Disabled {
-				cln[i].Balance.Disabled = utils.BoolPointer(*act.Balance.Disabled)
-			}
-			if act.Balance.Blocker != nil && !*act.Balance.Blocker {
-				cln[i].Balance.Blocker = utils.BoolPointer(*act.Balance.Blocker)
-			}
-		}
+	cln := make(Actions, len(apl))
+	for i, action := range apl {
+		cln[i] = action.Clone()
 	}
 	return cln, nil
 }

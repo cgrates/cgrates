@@ -222,9 +222,42 @@ func (cdr *CDR) ParseFieldValue(fieldId, fieldVal, timezone string) error {
 }
 
 func (cdr *CDR) Clone() *CDR {
-	var clnedCDR CDR
-	utils.Clone(cdr, &clnedCDR)
-	return &clnedCDR
+	if cdr == nil {
+		return nil
+	}
+	cln := &CDR{
+		CGRID:       cdr.CGRID,
+		RunID:       cdr.RunID,
+		OrderID:     cdr.OrderID,
+		OriginHost:  cdr.OriginHost,
+		Source:      cdr.Source,
+		OriginID:    cdr.OriginID,
+		ToR:         cdr.ToR,
+		RequestType: cdr.RequestType,
+		Tenant:      cdr.Tenant,
+		Category:    cdr.Category,
+		Account:     cdr.Account,
+		Subject:     cdr.Subject,
+		Destination: cdr.Destination,
+		SetupTime:   cdr.SetupTime,
+		AnswerTime:  cdr.AnswerTime,
+		Usage:       cdr.Usage,
+		ExtraFields: cdr.ExtraFields,
+		ExtraInfo:   cdr.ExtraInfo,
+		Partial:     cdr.Partial,
+		PreRated:    cdr.PreRated,
+		CostSource:  cdr.CostSource,
+		Cost:        cdr.Cost,
+		CostDetails: cdr.CostDetails.Clone(),
+	}
+	if cdr.ExtraFields != nil {
+		cln.ExtraFields = make(map[string]string, len(cdr.ExtraFields))
+		for key, val := range cdr.ExtraFields {
+			cln.ExtraFields[key] = val
+		}
+	}
+
+	return cln
 }
 
 func (cdr *CDR) AsMapStringIface() (mp map[string]interface{}) {

@@ -142,17 +142,13 @@ func (bf *BalanceFilter) Clone() *BalanceFilter {
 		result.ID = new(string)
 		*result.ID = *bf.ID
 	}
-	if bf.Value != nil {
-		result.Value = new(utils.ValueFormula)
-		*result.Value = *bf.Value
-	}
-	if bf.RatingSubject != nil {
-		result.RatingSubject = new(string)
-		*result.RatingSubject = *bf.RatingSubject
-	}
 	if bf.Type != nil {
 		result.Type = new(string)
 		*result.Type = *bf.Type
+	}
+	if bf.Value != nil {
+		result.Value = new(utils.ValueFormula)
+		*result.Value = *bf.Value
 	}
 	if bf.ExpirationDate != nil {
 		result.ExpirationDate = new(time.Time)
@@ -162,20 +158,12 @@ func (bf *BalanceFilter) Clone() *BalanceFilter {
 		result.Weight = new(float64)
 		*result.Weight = *bf.Weight
 	}
-	if bf.Disabled != nil {
-		result.Disabled = new(bool)
-		*result.Disabled = *bf.Disabled
-	}
-	if bf.Blocker != nil {
-		result.Blocker = new(bool)
-		*result.Blocker = *bf.Blocker
-	}
-	if bf.Factor != nil {
-		result.Factor = new(ValueFactor)
-		*result.Factor = *bf.Factor
-	}
 	if bf.DestinationIDs != nil {
 		result.DestinationIDs = utils.StringMapPointer(bf.DestinationIDs.Clone())
+	}
+	if bf.RatingSubject != nil {
+		result.RatingSubject = new(string)
+		*result.RatingSubject = *bf.RatingSubject
 	}
 	if bf.Categories != nil {
 		result.Categories = utils.StringMapPointer(bf.Categories.Clone())
@@ -186,7 +174,24 @@ func (bf *BalanceFilter) Clone() *BalanceFilter {
 	if bf.TimingIDs != nil {
 		result.TimingIDs = utils.StringMapPointer(bf.TimingIDs.Clone())
 	}
-
+	if bf.Timings != nil {
+		result.Timings = make([]*RITiming, len(bf.Timings))
+		for i, rit := range bf.Timings {
+			result.Timings[i] = rit.Clone()
+		}
+	}
+	if bf.Disabled != nil {
+		result.Disabled = new(bool)
+		*result.Disabled = *bf.Disabled
+	}
+	if bf.Factor != nil {
+		result.Factor = new(ValueFactor)
+		*result.Factor = *bf.Factor
+	}
+	if bf.Blocker != nil {
+		result.Blocker = new(bool)
+		*result.Blocker = *bf.Blocker
+	}
 	return result
 }
 

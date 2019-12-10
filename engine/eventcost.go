@@ -192,11 +192,21 @@ func (ec *EventCost) Clone() (cln *EventCost) {
 	if ec.AccountSummary != nil {
 		cln.AccountSummary = ec.AccountSummary.Clone()
 	}
-	cln.Rating = ec.Rating.Clone()
-	cln.Accounting = ec.Accounting.Clone()
-	cln.RatingFilters = ec.RatingFilters.Clone()
-	cln.Rates = ec.Rates.Clone()
-	cln.Timings = ec.Timings.Clone()
+	if  ec.Rating != nil {
+		cln.Rating = ec.Rating.Clone()
+	}
+	if  ec.Accounting != nil {
+		cln.Accounting = ec.Accounting.Clone()
+	}
+	if ec.RatingFilters  != nil {
+		cln.RatingFilters = ec.RatingFilters.Clone()
+	}
+	if ec.Rates != nil {
+		cln.Rates = ec.Rates.Clone()
+	}
+	if ec.Timings != nil {
+		cln.Timings = ec.Timings.Clone()
+	}
 	return
 }
 
