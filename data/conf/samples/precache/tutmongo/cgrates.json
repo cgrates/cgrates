@@ -56,7 +56,7 @@
 	"*charger_filter_indexes" : {"limit": 10000, "ttl":"0s", "precache": true},
 	"*dispatcher_profiles" : {"limit": 10000, "ttl":"0s", "precache": true},
 	"*dispatcher_hosts" : {"limit": 10000, "ttl":"0s", "precache": true},
-	"*dispatcher_routes" : {"limit": 10000, "ttl":"0s", "precache": true},
+	"*dispatcher_routes" : {"limit": 10000, "ttl":"0s", "precache": false},
 },
 
 

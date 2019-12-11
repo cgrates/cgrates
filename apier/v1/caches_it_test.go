@@ -340,40 +340,10 @@ func testCacheSClear(t *testing.T) {
 
 func testCacheSPrecacheStatus(t *testing.T) {
 	var reply map[string]string
-	expected := map[string]string{
-		utils.CacheDestinations:            utils.MetaReady,
-		utils.CacheReverseDestinations:     utils.MetaReady,
-		utils.CacheRatingPlans:             utils.MetaReady,
-		utils.CacheRatingProfiles:          utils.MetaReady,
-		utils.CacheActions:                 utils.MetaReady,
-		utils.CacheActionPlans:             utils.MetaReady,
-		utils.CacheAccountActionPlans:      utils.MetaReady,
-		utils.CacheActionTriggers:          utils.MetaReady,
-		utils.CacheSharedGroups:            utils.MetaReady,
-		utils.CacheResourceProfiles:        utils.MetaReady,
-		utils.CacheResources:               utils.MetaReady,
-		utils.CacheTimings:                 utils.MetaReady,
-		utils.CacheStatQueueProfiles:       utils.MetaReady,
-		utils.CacheStatQueues:              utils.MetaReady,
-		utils.CacheThresholdProfiles:       utils.MetaReady,
-		utils.CacheThresholds:              utils.MetaReady,
-		utils.CacheFilters:                 utils.MetaReady,
-		utils.CacheSupplierProfiles:        utils.MetaReady,
-		utils.CacheAttributeProfiles:       utils.MetaReady,
-		utils.CacheChargerProfiles:         utils.MetaReady,
-		utils.CacheDispatcherProfiles:      utils.MetaReady,
-		utils.CacheDispatcherHosts:         utils.MetaReady,
-		utils.CacheDiameterMessages:        utils.MetaReady,
-		utils.CacheAttributeFilterIndexes:  utils.MetaReady,
-		utils.CacheResourceFilterIndexes:   utils.MetaReady,
-		utils.CacheStatFilterIndexes:       utils.MetaReady,
-		utils.CacheThresholdFilterIndexes:  utils.MetaReady,
-		utils.CacheSupplierFilterIndexes:   utils.MetaReady,
-		utils.CacheChargerFilterIndexes:    utils.MetaReady,
-		utils.CacheDispatcherFilterIndexes: utils.MetaReady,
-		utils.CacheLoadIDs:                 utils.MetaReady,
+	expected := make(map[string]string)
+	for k := range utils.CachePartitions {
+		expected[k] = utils.MetaReady
 	}
-
 	if err := chcRPC.Call(utils.CacheSv1PrecacheStatus, &utils.AttrCacheIDsWithArgDispatcher{}, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, reply) {

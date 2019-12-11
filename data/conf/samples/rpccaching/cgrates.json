@@ -34,6 +34,7 @@
 
 "cdrs": {
 	"enabled": true,
+	"session_cost_retries": 2,				// number of queries to session_costs before recalculating CDR
 },
 
 

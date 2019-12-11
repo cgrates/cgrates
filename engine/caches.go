@@ -28,6 +28,7 @@ import (
 	"github.com/cgrates/ltcache"
 )
 
+// Cache is the global cache used
 var Cache *ltcache.TransCache
 
 func init() {
@@ -60,7 +61,7 @@ type CacheS struct {
 	pcItems map[string]chan struct{} // signal precaching
 }
 
-// GetChannel returns the channel used to signal precaching
+// GetPrecacheChannel returns the channel used to signal precaching
 func (chS *CacheS) GetPrecacheChannel(chID string) chan struct{} {
 	return chS.pcItems[chID]
 }
@@ -81,7 +82,7 @@ func (chS *CacheS) Precache() (err error) {
 				utils.CacheInstanceToPrefix[cacheID], nil,
 				false)
 			if errCache != nil {
-				errChan <- errCache
+				errChan <- fmt.Errorf("precaching cacheID <%s>, got error: %s", cacheID, errCache)
 			}
 			close(chS.pcItems[cacheID])
 			wg.Done()

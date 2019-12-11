@@ -170,7 +170,7 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithArgDispatcher) ([]*CDR, error) {
 			if err == nil && len(smCosts) != 0 {
 				break
 			}
-			if i != 3 {
+			if i <= cdrS.cgrCfg.CdrsCfg().SMCostRetries-1 {
 				time.Sleep(time.Duration(fib()) * time.Second)
 			}
 		}
@@ -486,7 +486,7 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithArgDispatcher,
 			me.GetStringIgnoreErrors(utils.CGRID),
 			me.GetStringIgnoreErrors(utils.RunID),
 		)
-		if Cache.HasItem(utils.CacheCDRIDs, uID) {
+		if Cache.HasItem(utils.CacheCDRIDs, uID) && !reRate {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
 					utils.CDRs, utils.ErrExists, utils.ToJSON(cgrEv), utils.CacheS))

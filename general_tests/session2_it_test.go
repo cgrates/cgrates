@@ -158,8 +158,8 @@ func testSes2ItAsActiveSessions(t *testing.T) {
 		Filters: []string{"*string:~Account:1001"},
 	}, &count); err != nil {
 		t.Fatal(err)
-	} else if count != 1 {
-		t.Errorf("Expeced 1 session received %v session(s)", count)
+	} else if count != 2 { // 2 chargers
+		t.Errorf("Expeced 2 session received %v session(s)", count)
 	}
 	if err := ses2RPC.Call(utils.SessionSv1GetActiveSessionsCount, utils.SessionFilter{
 		Filters: []string{"*string:~Account:1002"},
