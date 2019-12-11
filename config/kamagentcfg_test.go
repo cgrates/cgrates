@@ -39,9 +39,7 @@ func TestKamAgentCfgloadFromJsonCfg(t *testing.T) {
 	cfgJSONStr := `{
 "kamailio_agent": {
 	"enabled": false,						// starts SessionManager service: <true|false>
-	"sessions_conns": [
-		{"address": "*internal"}			// connection towards session service: <*internal>
-	],
+	"sessions_conns": ["*internal"],
 	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
 	"timezone": "",							// timezone of the Kamailio server
 	"evapi_conns":[							// instantiate connections to multiple Kamailio servers
@@ -50,7 +48,7 @@ func TestKamAgentCfgloadFromJsonCfg(t *testing.T) {
 },
 }`
 	expected = KamAgentCfg{
-		SessionSConns: []*RemoteHost{{Address: "*internal"}},
+		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		EvapiConns:    []*KamConnCfg{{Address: "127.0.0.1:8448", Reconnects: 5}},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {

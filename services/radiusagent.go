@@ -32,27 +32,24 @@ import (
 
 // NewRadiusAgent returns the Radius Agent
 func NewRadiusAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	sSChan, dispatcherChan chan rpcclient.ClientConnector,
-	exitChan chan bool) servmanager.Service {
+	exitChan chan bool, connMgr *engine.ConnManager) servmanager.Service {
 	return &RadiusAgent{
-		cfg:            cfg,
-		filterSChan:    filterSChan,
-		sSChan:         sSChan,
-		dispatcherChan: dispatcherChan,
-		exitChan:       exitChan,
+		cfg:         cfg,
+		filterSChan: filterSChan,
+		exitChan:    exitChan,
+		connMgr:     connMgr,
 	}
 }
 
 // RadiusAgent implements Agent interface
 type RadiusAgent struct {
 	sync.RWMutex
-	cfg            *config.CGRConfig
-	filterSChan    chan *engine.FilterS
-	sSChan         chan rpcclient.ClientConnector
-	dispatcherChan chan rpcclient.ClientConnector
-	exitChan       chan bool
+	cfg         *config.CGRConfig
+	filterSChan chan *engine.FilterS
+	exitChan    chan bool
 
-	rad *agents.RadiusAgent
+	rad     *agents.RadiusAgent
+	connMgr *engine.ConnManager
 }
 
 // Start should handle the sercive start
@@ -66,15 +63,8 @@ func (rad *RadiusAgent) Start() (err error) {
 
 	rad.Lock()
 	defer rad.Unlock()
-	var smgConn rpcclient.ClientConnector
-	utils.Logger.Info("Starting Radius agent")
-	if smgConn, err = NewConnection(rad.cfg, rad.sSChan, rad.dispatcherChan, rad.cfg.RadiusAgentCfg().SessionSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-			utils.RadiusAgent, utils.SessionS, err.Error()))
-		return
-	}
 
-	if rad.rad, err = agents.NewRadiusAgent(rad.cfg, filterS, smgConn); err != nil {
+	if rad.rad, err = agents.NewRadiusAgent(rad.cfg, filterS, rad.connMgr); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.RadiusAgent, err.Error()))
 		return
 	}
@@ -95,16 +85,7 @@ func (rad *RadiusAgent) GetIntenternalChan() (conn chan rpcclient.ClientConnecto
 
 // Reload handles the change of config
 func (rad *RadiusAgent) Reload() (err error) {
-	var smgConn rpcclient.ClientConnector
-	if smgConn, err = NewConnection(rad.cfg, rad.sSChan, rad.dispatcherChan, rad.cfg.RadiusAgentCfg().SessionSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-			utils.RadiusAgent, utils.SessionS, err.Error()))
-		return
-	}
-	rad.Lock()
-	rad.rad.SetSessionSConnection(smgConn)
-	rad.Unlock()
-	return // partial reload
+	return
 }
 
 // Shutdown stops the service

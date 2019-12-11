@@ -762,10 +762,9 @@ func TestCgrCfgJSONDefaultsFsAgentConfig(t *testing.T) {
 
 func TestCgrCfgJSONDefaultsKamAgentConfig(t *testing.T) {
 	eKamAgentCfg := &KamAgentCfg{
-		Enabled: false,
-		SessionSConns: []*RemoteHost{
-			{Address: "*internal"}},
-		CreateCdr: false,
+		Enabled:       false,
+		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		CreateCdr:     false,
 		EvapiConns: []*KamConnCfg{{
 			Address:    "127.0.0.1:8448",
 			Reconnects: 5,
@@ -779,10 +778,9 @@ func TestCgrCfgJSONDefaultsKamAgentConfig(t *testing.T) {
 
 func TestCgrCfgJSONDefaultssteriskAgentCfg(t *testing.T) {
 	eAstAgentCfg := &AsteriskAgentCfg{
-		Enabled: false,
-		SessionSConns: []*RemoteHost{
-			{Address: "*internal"}},
-		CreateCDR: false,
+		Enabled:       false,
+		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
+		CreateCDR:     false,
 		AsteriskConns: []*AsteriskConnCfg{
 			{Address: "127.0.0.1:8088",
 				User: "cgrates", Password: "CGRateS.org",
@@ -878,12 +876,11 @@ func TestCgrCfgJSONDefaultSupplierSCfg(t *testing.T) {
 
 func TestCgrCfgJSONDefaultsDiameterAgentCfg(t *testing.T) {
 	testDA := &DiameterAgentCfg{
-		Enabled:          false,
-		Listen:           "127.0.0.1:3868",
-		ListenNet:        utils.TCP,
-		DictionariesPath: "/usr/share/cgrates/diameter/dict/",
-		SessionSConns: []*RemoteHost{
-			{Address: "*internal"}},
+		Enabled:           false,
+		Listen:            "127.0.0.1:3868",
+		ListenNet:         utils.TCP,
+		DictionariesPath:  "/usr/share/cgrates/diameter/dict/",
+		SessionSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		OriginHost:        "CGR-DA",
 		OriginRealm:       "cgrates.org",
 		VendorId:          0,
@@ -1006,7 +1003,7 @@ func TestRadiusAgentCfg(t *testing.T) {
 		ListenAcct:         "127.0.0.1:1813",
 		ClientSecrets:      map[string]string{utils.META_DEFAULT: "CGRateS.org"},
 		ClientDictionaries: map[string]string{utils.META_DEFAULT: "/usr/share/cgrates/radius/dict/"},
-		SessionSConns:      []*RemoteHost{{Address: utils.MetaInternal}},
+		SessionSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		RequestProcessors:  nil,
 	}
 	if !reflect.DeepEqual(cgrCfg.radiusAgentCfg, testRA) {

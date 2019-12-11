@@ -41,9 +41,7 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 	"enabled": false,											// enables the diameter agent: <true|false>
 	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y:1234>
 	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
-	"sessions_conns": [
-		{"address": "*internal"}								// connection towards SessionService
-	],
+	"sessions_conns": ["*internal"],
 	"origin_host": "CGR-DA",									// diameter Origin-Host AVP used in replies
 	"origin_realm": "cgrates.org",								// diameter Origin-Realm AVP used in replies
 	"vendor_id": 0,												// diameter Vendor-Id AVP used in replies
@@ -56,7 +54,7 @@ func TestDiameterAgentCfgloadFromJsonCfg(t *testing.T) {
 	expected = DiameterAgentCfg{
 		Listen:           "127.0.0.1:3868",
 		DictionariesPath: "/usr/share/cgrates/diameter/dict/",
-		SessionSConns:    []*RemoteHost{{Address: "*internal"}},
+		SessionSConns:    []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		OriginHost:       "CGR-DA",
 		OriginRealm:      "cgrates.org",
 		VendorId:         0,

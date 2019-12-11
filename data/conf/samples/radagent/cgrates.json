@@ -68,9 +68,7 @@
 
 "radius_agent": {
 	"enabled": true,
-	"sessions_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"}								// connection towards SMG component for session management
-	],
+	"sessions_conns": ["*localhost"],
 	"request_processors": [
 		{
 			"id": "KamailioAuth",

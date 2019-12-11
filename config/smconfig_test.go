@@ -247,9 +247,7 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 	cfgJSONStr := `{
 "asterisk_agent": {
 	"enabled": true,						// starts the Asterisk agent: <true|false>
-	"sessions_conns": [
-		{"address": "*internal"}			// connection towards session service: <*internal>
-	],
+	"sessions_conns": ["*internal"],
 	"create_cdr": false,					// create CDR out of events and sends it to CDRS component
 	"asterisk_conns":[						// instantiate connections to multiple Asterisk servers
 		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
@@ -258,7 +256,7 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 }`
 	expected = AsteriskAgentCfg{
 		Enabled:       true,
-		SessionSConns: []*RemoteHost{{Address: "*internal"}},
+		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		AsteriskConns: []*AsteriskConnCfg{{
 			Address:         "127.0.0.1:8088",
 			User:            "cgrates",

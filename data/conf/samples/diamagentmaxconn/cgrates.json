@@ -63,9 +63,7 @@
 "diameter_agent": {
 	"enabled": true,
 	"concurrent_requests": 0,
-	"sessions_conns": [
-		{"address": "127.0.0.1:2012","transport":"*json"}
-	],
+	"sessions_conns": ["*localhost"],
 	"request_processors": [
 		{
 			"id": "maxconn",

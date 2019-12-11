@@ -616,12 +616,9 @@ func TestFsAgentJsonCfg(t *testing.T) {
 
 func TestKamAgentJsonCfg(t *testing.T) {
 	eCfg := &KamAgentJsonCfg{
-		Enabled: utils.BoolPointer(false),
-		Sessions_conns: &[]*RemoteHostJson{
-			{
-				Address: utils.StringPointer(utils.MetaInternal),
-			}},
-		Create_cdr: utils.BoolPointer(false),
+		Enabled:        utils.BoolPointer(false),
+		Sessions_conns: &[]string{utils.MetaInternal},
+		Create_cdr:     utils.BoolPointer(false),
 		Evapi_conns: &[]*KamConnJsonCfg{
 			{
 				Address:    utils.StringPointer("127.0.0.1:8448"),
@@ -639,12 +636,9 @@ func TestKamAgentJsonCfg(t *testing.T) {
 
 func TestAsteriskAgentJsonCfg(t *testing.T) {
 	eCfg := &AsteriskAgentJsonCfg{
-		Enabled: utils.BoolPointer(false),
-		Sessions_conns: &[]*RemoteHostJson{
-			{
-				Address: utils.StringPointer(utils.MetaInternal),
-			}},
-		Create_cdr: utils.BoolPointer(false),
+		Enabled:        utils.BoolPointer(false),
+		Sessions_conns: &[]string{utils.MetaInternal},
+		Create_cdr:     utils.BoolPointer(false),
 		Asterisk_conns: &[]*AstConnJsonCfg{
 			{
 				Address:          utils.StringPointer("127.0.0.1:8088"),
@@ -664,14 +658,11 @@ func TestAsteriskAgentJsonCfg(t *testing.T) {
 
 func TestDiameterAgentJsonCfg(t *testing.T) {
 	eCfg := &DiameterAgentJsonCfg{
-		Enabled:           utils.BoolPointer(false),
-		Listen:            utils.StringPointer("127.0.0.1:3868"),
-		Listen_net:        utils.StringPointer(utils.TCP),
-		Dictionaries_path: utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
-		Sessions_conns: &[]*RemoteHostJson{
-			{
-				Address: utils.StringPointer(utils.MetaInternal),
-			}},
+		Enabled:              utils.BoolPointer(false),
+		Listen:               utils.StringPointer("127.0.0.1:3868"),
+		Listen_net:           utils.StringPointer(utils.TCP),
+		Dictionaries_path:    utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
+		Sessions_conns:       &[]string{utils.MetaInternal},
 		Origin_host:          utils.StringPointer("CGR-DA"),
 		Origin_realm:         utils.StringPointer("cgrates.org"),
 		Vendor_id:            utils.IntPointer(0),
@@ -796,10 +787,7 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 		Client_dictionaries: utils.MapStringStringPointer(map[string]string{
 			utils.META_DEFAULT: "/usr/share/cgrates/radius/dict/",
 		}),
-		Sessions_conns: &[]*RemoteHostJson{
-			{
-				Address: utils.StringPointer(utils.MetaInternal),
-			}},
+		Sessions_conns:     &[]string{utils.MetaInternal},
 		Request_processors: &[]*ReqProcessorJsnCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.RadiusAgentJsonCfg(); err != nil {

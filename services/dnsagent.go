@@ -69,17 +69,6 @@ func (dns *DNSAgent) Start() (err error) {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
 		return
 	}
-	// if sSInternal { // bidirectional client backwards connection
-	// 	sS.(*utils.BiRPCInternalClient).SetClientConn(da)
-	// 	var rply string
-	// 	if err := sS.Call(utils.SessionSv1RegisterInternalBiJSONConn,
-	// 		utils.EmptyString, &rply); err != nil {
-	// 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-	// 			utils.DNSAgent, utils.SessionS, err.Error()))
-	// 		exitChan <- true
-	// 		return
-	// 	}
-	// }
 	go func() {
 		if err = dns.dns.ListenAndServe(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))

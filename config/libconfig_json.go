@@ -281,7 +281,7 @@ type AstConnJsonCfg struct {
 
 type AsteriskAgentJsonCfg struct {
 	Enabled        *bool
-	Sessions_conns *[]*RemoteHostJson
+	Sessions_conns *[]string
 	Create_cdr     *bool
 	Asterisk_conns *[]*AstConnJsonCfg
 }
@@ -298,7 +298,7 @@ type CacheJsonCfg map[string]*CacheParamJsonCfg
 // SM-Kamailio config section
 type KamAgentJsonCfg struct {
 	Enabled        *bool
-	Sessions_conns *[]*RemoteHostJson
+	Sessions_conns *[]string
 	Create_cdr     *bool
 	Evapi_conns    *[]*KamConnJsonCfg
 }
@@ -308,20 +308,6 @@ type KamConnJsonCfg struct {
 	Alias      *string
 	Address    *string
 	Reconnects *int
-}
-
-// SM-OpenSIPS config section
-type SmOsipsJsonCfg struct {
-	Enabled                   *bool
-	Listen_udp                *string
-	Rals_conns                *[]*RemoteHostJson
-	Cdrs_conns                *[]*RemoteHostJson
-	Create_cdr                *bool
-	Debit_interval            *string
-	Min_call_duration         *string
-	Max_call_duration         *string
-	Events_subscribe_interval *string
-	Mi_addr                   *string
 }
 
 // Represents one connection instance towards OpenSIPS
@@ -336,7 +322,7 @@ type DiameterAgentJsonCfg struct {
 	Listen               *string
 	Listen_net           *string
 	Dictionaries_path    *string
-	Sessions_conns       *[]*RemoteHostJson
+	Sessions_conns       *[]string
 	Origin_host          *string
 	Origin_realm         *string
 	Vendor_id            *int
@@ -356,7 +342,7 @@ type RadiusAgentJsonCfg struct {
 	Listen_acct         *string
 	Client_secrets      *map[string]string
 	Client_dictionaries *map[string]string
-	Sessions_conns      *[]*RemoteHostJson
+	Sessions_conns      *[]string
 	Timezone            *string
 	Request_processors  *[]*ReqProcessorJsnCfg
 }

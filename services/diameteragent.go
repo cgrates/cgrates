@@ -26,34 +26,30 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
-	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
 // NewDiameterAgent returns the Diameter Agent
 func NewDiameterAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	sSChan, dispatcherChan chan rpcclient.ClientConnector,
-	exitChan chan bool) servmanager.Service {
+	exitChan chan bool, connMgr *engine.ConnManager) servmanager.Service {
 	return &DiameterAgent{
-		cfg:            cfg,
-		filterSChan:    filterSChan,
-		sSChan:         sSChan,
-		dispatcherChan: dispatcherChan,
-		exitChan:       exitChan,
+		cfg:         cfg,
+		filterSChan: filterSChan,
+		exitChan:    exitChan,
+		connMgr:     connMgr,
 	}
 }
 
 // DiameterAgent implements Agent interface
 type DiameterAgent struct {
 	sync.RWMutex
-	cfg            *config.CGRConfig
-	filterSChan    chan *engine.FilterS
-	sSChan         chan rpcclient.ClientConnector
-	dispatcherChan chan rpcclient.ClientConnector
-	exitChan       chan bool
+	cfg         *config.CGRConfig
+	filterSChan chan *engine.FilterS
+	exitChan    chan bool
 
-	da *agents.DiameterAgent
+	da      *agents.DiameterAgent
+	connMgr *engine.ConnManager
 }
 
 // Start should handle the sercive start
@@ -67,38 +63,12 @@ func (da *DiameterAgent) Start() (err error) {
 
 	da.Lock()
 	defer da.Unlock()
-	var sS rpcclient.ClientConnector
-	var sSInternal bool
-	utils.Logger.Info("Starting Diameter agent")
-	if !da.cfg.DispatcherSCfg().Enabled && da.cfg.DiameterAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
-		sSInternal = true
-		sSIntConn := <-da.sSChan
-		da.sSChan <- sSIntConn
-		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
-	} else {
-		if sS, err = NewConnection(da.cfg, da.sSChan, da.dispatcherChan, da.cfg.DiameterAgentCfg().SessionSConns); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.DiameterAgent, utils.SessionS, err.Error()))
-			return
-		}
-	}
-	utils.Logger.Info("Starting CGRateS DiameterAgent service")
 
-	da.da, err = agents.NewDiameterAgent(da.cfg, filterS, sS)
+	da.da, err = agents.NewDiameterAgent(da.cfg, filterS, da.connMgr)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: %s!",
 			utils.DiameterAgent, err))
 		return
-	}
-	if sSInternal { // bidirectional client backwards connection
-		sS.(*utils.BiRPCInternalClient).SetClientConn(da.da)
-		var rply string
-		if err = sS.Call(utils.SessionSv1RegisterInternalBiJSONConn,
-			utils.EmptyString, &rply); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.DiameterAgent, utils.SessionS, err.Error()))
-			return
-		}
 	}
 
 	go func() {
@@ -118,34 +88,7 @@ func (da *DiameterAgent) GetIntenternalChan() (conn chan rpcclient.ClientConnect
 
 // Reload handles the change of config
 func (da *DiameterAgent) Reload() (err error) {
-	var sS rpcclient.ClientConnector
-	var sSInternal bool
-	if !da.cfg.DispatcherSCfg().Enabled && da.cfg.DiameterAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
-		sSInternal = true
-		sSIntConn := <-da.sSChan
-		da.sSChan <- sSIntConn
-		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
-	} else {
-		if sS, err = NewConnection(da.cfg, da.sSChan, da.dispatcherChan, da.cfg.DiameterAgentCfg().SessionSConns); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.DiameterAgent, utils.SessionS, err.Error()))
-			return
-		}
-	}
-	da.Lock()
-	defer da.Unlock()
-	// da.da.SetSessionSConnection(sS)
-	if sSInternal { // bidirectional client backwards connection
-		sS.(*utils.BiRPCInternalClient).SetClientConn(da.da)
-		var rply string
-		if err = sS.Call(utils.SessionSv1RegisterInternalBiJSONConn,
-			utils.EmptyString, &rply); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.DiameterAgent, utils.SessionS, err.Error()))
-			return
-		}
-	}
-	return // partial reload
+	return
 }
 
 // Shutdown stops the service

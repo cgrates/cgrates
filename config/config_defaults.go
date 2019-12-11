@@ -394,9 +394,7 @@ const CGRATES_CFG_JSON = `
 
 "asterisk_agent": {
 	"enabled": false,						// starts the Asterisk agent: <true|false>
-	"sessions_conns": [						// connections to SessionS for session management and CDR posting: <*internal>
-		{"address": "*internal"}
-	],
+	"sessions_conns": ["*internal"],
 	"create_cdr": false,					// create CDR out of events and sends it to CDRS component
 	"asterisk_conns":[						// instantiate connections to multiple Asterisk servers
 		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
@@ -423,9 +421,7 @@ const CGRATES_CFG_JSON = `
 
 "kamailio_agent": {
 	"enabled": false,						// starts Kamailio agent: <true|false>
-	"sessions_conns": [						// connections to SessionS for session management and CDR posting: <*internal>
-		{"address": "*internal"}
-	],
+	"sessions_conns": ["*internal"],
 	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
 	"timezone": "",							// timezone of the Kamailio server
 	"evapi_conns":[							// instantiate connections to multiple Kamailio servers
@@ -439,9 +435,7 @@ const CGRATES_CFG_JSON = `
 	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y/x1.y1.z1.y1:1234>
 	"listen_net": "tcp",										// transport type for diameter <tcp|sctp>
 	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
-	"sessions_conns": [											// connections to SessionS for session management and CDR posting
-		{"address": "*internal"}
-	],
+	"sessions_conns": ["*internal"],
 	"origin_host": "CGR-DA",									// diameter Origin-Host AVP used in replies
 	"origin_realm": "cgrates.org",								// diameter Origin-Realm AVP used in replies
 	"vendor_id": 0,												// diameter Vendor-Id AVP used in replies
@@ -509,9 +503,7 @@ const CGRATES_CFG_JSON = `
 	"client_dictionaries": {									// per client path towards directory holding additional dictionaries to load (extra to RFC)
 		"*default": "/usr/share/cgrates/radius/dict/",			// key represents the client IP or catch-all <*default|$client_ip>
 	},
-	"sessions_conns": [											// connections to SessionS for session management and CDR posting
-		{"address": "*internal"}
-	],
+	"sessions_conns": ["*internal"],
 	"request_processors": [										// request processors to be applied to Radius messages
 	],
 },

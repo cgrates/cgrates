@@ -22,35 +22,33 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/cgrates/engine"
+
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/servmanager"
-	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
 // NewAsteriskAgent returns the Asterisk Agent
-func NewAsteriskAgent(cfg *config.CGRConfig, sSChan,
-	dispatcherChan chan rpcclient.ClientConnector,
-	exitChan chan bool) servmanager.Service {
+func NewAsteriskAgent(cfg *config.CGRConfig,
+	exitChan chan bool, connMgr *engine.ConnManager) servmanager.Service {
 	return &AsteriskAgent{
-		cfg:            cfg,
-		sSChan:         sSChan,
-		dispatcherChan: dispatcherChan,
-		exitChan:       exitChan,
+		cfg:      cfg,
+		exitChan: exitChan,
+		connMgr:  connMgr,
 	}
 }
 
 // AsteriskAgent implements Agent interface
 type AsteriskAgent struct {
 	sync.RWMutex
-	cfg            *config.CGRConfig
-	sSChan         chan rpcclient.ClientConnector
-	dispatcherChan chan rpcclient.ClientConnector
-	exitChan       chan bool
+	cfg      *config.CGRConfig
+	exitChan chan bool
 
-	smas []*agents.AsteriskAgent
+	smas    []*agents.AsteriskAgent
+	connMgr *engine.ConnManager
 }
 
 // Start should handle the sercive start
@@ -61,21 +59,6 @@ func (ast *AsteriskAgent) Start() (err error) {
 
 	ast.Lock()
 	defer ast.Unlock()
-	var sS rpcclient.ClientConnector
-	var sSInternal bool
-	utils.Logger.Info("Starting Asterisk agent")
-	if !ast.cfg.DispatcherSCfg().Enabled && ast.cfg.AsteriskAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
-		sSInternal = true
-		sSIntConn := <-ast.sSChan
-		ast.sSChan <- sSIntConn
-		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
-	} else {
-		if sS, err = NewConnection(ast.cfg, ast.sSChan, ast.dispatcherChan, ast.cfg.AsteriskAgentCfg().SessionSConns); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.AsteriskAgent, utils.SessionS, err.Error()))
-			return
-		}
-	}
 
 	listenAndServe := func(sma *agents.AsteriskAgent, exitChan chan bool) {
 		if err = sma.ListenAndServe(); err != nil {
@@ -85,19 +68,9 @@ func (ast *AsteriskAgent) Start() (err error) {
 	}
 	ast.smas = make([]*agents.AsteriskAgent, len(ast.cfg.AsteriskAgentCfg().AsteriskConns))
 	for connIdx := range ast.cfg.AsteriskAgentCfg().AsteriskConns { // Instantiate connections towards asterisk servers
-		if ast.smas[connIdx], err = agents.NewAsteriskAgent(ast.cfg, connIdx, sS); err != nil {
+		if ast.smas[connIdx], err = agents.NewAsteriskAgent(ast.cfg, connIdx, ast.connMgr); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.AsteriskAgent, err))
 			return
-		}
-		if sSInternal { // bidirectional client backwards connection
-			sS.(*utils.BiRPCInternalClient).SetClientConn(ast.smas[connIdx])
-			var rply string
-			if err = sS.Call(utils.SessionSv1RegisterInternalBiJSONConn,
-				utils.EmptyString, &rply); err != nil {
-				utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-					utils.AsteriskAgent, utils.SessionS, err.Error()))
-				return
-			}
 		}
 		go listenAndServe(ast.smas[connIdx], ast.exitChan)
 	}
@@ -111,36 +84,7 @@ func (ast *AsteriskAgent) GetIntenternalChan() (conn chan rpcclient.ClientConnec
 
 // Reload handles the change of config
 func (ast *AsteriskAgent) Reload() (err error) {
-	var sS rpcclient.ClientConnector
-	var sSInternal bool
-	if !ast.cfg.DispatcherSCfg().Enabled && ast.cfg.AsteriskAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
-		sSInternal = true
-		sSIntConn := <-ast.sSChan
-		ast.sSChan <- sSIntConn
-		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
-	} else {
-		if sS, err = NewConnection(ast.cfg, ast.sSChan, ast.dispatcherChan, ast.cfg.AsteriskAgentCfg().SessionSConns); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.AsteriskAgent, utils.SessionS, err.Error()))
-			return
-		}
-	}
-	ast.Lock()
-	defer ast.Unlock()
-	for _, conn := range ast.smas {
-		conn.SetSessionSConnection(sS)
-		if sSInternal { // bidirectional client backwards connection
-			sS.(*utils.BiRPCInternalClient).SetClientConn(conn)
-			var rply string
-			if err = sS.Call(utils.SessionSv1RegisterInternalBiJSONConn,
-				utils.EmptyString, &rply); err != nil {
-				utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-					utils.AsteriskAgent, utils.SessionS, err.Error()))
-				return
-			}
-		}
-	}
-	return //partial reload
+	return
 }
 
 // Shutdown stops the service

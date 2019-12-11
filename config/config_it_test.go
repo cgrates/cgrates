@@ -462,14 +462,10 @@ func TestCGRConfigReloadDNSAgent(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	expAttr := &DNSAgentCfg{
-		Enabled:   true,
-		Listen:    ":2053",
-		ListenNet: "udp",
-		SessionSConns: []*RemoteHost{
-			&RemoteHost{
-				Address: utils.MetaInternal,
-			},
-		},
+		Enabled:       true,
+		Listen:        ":2053",
+		ListenNet:     "udp",
+		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		// Timezone          string
 		// RequestProcessors []*RequestProcessor
 	}
@@ -494,12 +490,8 @@ func TestCGRConfigReloadFreeswitchAgent(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	expAttr := &FsAgentCfg{
-		Enabled: true,
-		SessionSConns: []*RemoteHost{
-			&RemoteHost{
-				Address: utils.MetaInternal,
-			},
-		},
+		Enabled:           true,
+		SessionSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		SubscribePark:     true,
 		ExtraFields:       RSRParsers{},
 		MaxWaitConnection: 2 * time.Second,

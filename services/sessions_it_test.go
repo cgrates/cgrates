@@ -80,7 +80,8 @@ func TestSessionSReload(t *testing.T) {
 		make(chan rpcclient.ClientConnector, 1),
 		nil)
 	srv := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), engineShutdown, nil)
-	srvMngr.AddServices(NewConnManagerService(cfg, nil), srv, chrS, schS, ralS, cdrS, NewLoaderService(cfg, db, filterSChan, server, cacheSChan, nil, engineShutdown), db, stordb)
+	srvMngr.AddServices(NewConnManagerService(cfg, nil), srv, chrS, schS, ralS, cdrS,
+		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil), db, stordb)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

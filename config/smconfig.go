@@ -322,22 +322,6 @@ func NewDfltKamConnConfig() *KamConnCfg {
 	return &dfltVal
 }
 
-// Represents one connection instance towards OpenSIPS, not in use for now but planned for future
-type OsipsConnConfig struct {
-	MiAddr     string
-	Reconnects int
-}
-
-func (self *OsipsConnConfig) loadFromJsonCfg(jsnCfg *OsipsConnJsonCfg) error {
-	if jsnCfg.Mi_addr != nil {
-		self.MiAddr = *jsnCfg.Mi_addr
-	}
-	if jsnCfg.Reconnects != nil {
-		self.Reconnects = *jsnCfg.Reconnects
-	}
-	return nil
-}
-
 // Uses stored defaults so we can pre-populate by loading from JSON config
 func NewDefaultAsteriskConnCfg() *AsteriskConnCfg {
 	if dfltAstConnCfg == nil {
@@ -383,7 +367,7 @@ func (aConnCfg *AsteriskConnCfg) loadFromJsonCfg(jsnCfg *AstConnJsonCfg) error {
 
 type AsteriskAgentCfg struct {
 	Enabled       bool
-	SessionSConns []*RemoteHost
+	SessionSConns []string
 	CreateCDR     bool
 	AsteriskConns []*AsteriskConnCfg
 }
@@ -396,10 +380,14 @@ func (aCfg *AsteriskAgentCfg) loadFromJsonCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 		aCfg.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Sessions_conns != nil {
-		aCfg.SessionSConns = make([]*RemoteHost, len(*jsnCfg.Sessions_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
-			aCfg.SessionSConns[idx] = NewDfltRemoteHost()
-			aCfg.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		aCfg.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
+		for idx, attrConn := range *jsnCfg.Sessions_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if attrConn == utils.MetaInternal {
+				aCfg.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+			} else {
+				aCfg.SessionSConns[idx] = attrConn
+			}
 		}
 	}
 	if jsnCfg.Create_cdr != nil {

@@ -18,14 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
-	"reflect"
 	"testing"
-	"time"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 
 	"github.com/cgrates/cgrates/sessions"
 )
@@ -34,6 +27,7 @@ func TestDAsSessionSClientIface(t *testing.T) {
 	_ = sessions.BiRPClient(new(DiameterAgent))
 }
 
+/*
 type testMockSessionConn struct {
 	calls map[string]func(arg interface{}, rply interface{}) error
 }
@@ -513,3 +507,4 @@ func TestProcessRequest(t *testing.T) {
 		t.Errorf("Expected the reply to have one value received: %s", rply.String())
 	}
 }
+*/

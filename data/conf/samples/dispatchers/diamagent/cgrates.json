@@ -7,27 +7,27 @@
 "general": {
  	"node_id": "DispatcherS1",
 	"log_level": 7,
- 	"reconnects": 1,	
+ 	"reconnects": 1
 },
 
 "listen": {
 	"rpc_json": ":2012",				// RPC JSON listening address
 	"rpc_gob": ":2013",					// RPC GOB listening address
-	"http": ":2080",					// HTTP listening address
+	"http": ":2080"					// HTTP listening address
 },
 
 "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
 	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
 	"db_port": 27017, 						// the port to reach the stordb
 	"db_name": "datadb",
-	"db_password": "",
+	"db_password": ""
 },
 
 "stor_db": {
 	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
 	"db_port": 27017, 						// the port to reach the stordb
 	"db_name": "stordb",
-	"db_password": "",
+	"db_password": ""
 },
 
 "attributes": {
@@ -35,26 +35,29 @@
 },
 
 "scheduler": {
-	"enabled": true,				
+	"enabled": true
 },
 
 "rals": {
-	"enabled": true,
+	"enabled": true
 },
 
 "dispatchers":{
  	"enabled": true,
  	"attributes_conns": [
 		{"address": "*internal"}
-	],
+	]
 },
+
 
 "diameter_agent": {
 	"enabled": true,
-	"asr_template": "*asr",
+	"sessions_conns": ["*localhost"],
+	"asr_template": "*asr"
 },
 
+
 "apier": {
-	"scheduler_conns": ["*internal"],
-},
+	"scheduler_conns": ["*internal"]
+}
 }

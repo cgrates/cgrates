@@ -233,13 +233,12 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> no %s connections defined",
 				utils.KamailioAgent, utils.SessionS)
 		}
-		if !cfg.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
-			!cfg.sessionSCfg.Enabled {
-			for _, connCfg := range cfg.kamAgentCfg.SessionSConns {
-				if connCfg.Address == utils.MetaInternal {
-					return fmt.Errorf("<%s> not enabled but referenced by <%s>",
-						utils.SessionS, utils.KamailioAgent)
-				}
+		for _, connID := range cfg.kamAgentCfg.SessionSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.SessionS, utils.KamailioAgent)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.KamailioAgent, connID)
 			}
 		}
 	}
@@ -249,13 +248,12 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> no %s connections defined",
 				utils.AsteriskAgent, utils.SessionS)
 		}
-		if !cfg.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
-			!cfg.sessionSCfg.Enabled {
-			for _, smAstSMGConn := range cfg.asteriskAgentCfg.SessionSConns {
-				if smAstSMGConn.Address == utils.MetaInternal {
-					return fmt.Errorf("<%s> not enabled but referenced by <%s>",
-						utils.SessionS, utils.AsteriskAgent)
-				}
+		for _, connID := range cfg.asteriskAgentCfg.SessionSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.SessionS, utils.AsteriskAgent)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.AsteriskAgent, connID)
 			}
 		}
 	}
@@ -265,13 +263,12 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> no %s connections defined",
 				utils.DiameterAgent, utils.SessionS)
 		}
-		if !cfg.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
-			!cfg.sessionSCfg.Enabled {
-			for _, daSMGConn := range cfg.diameterAgentCfg.SessionSConns {
-				if daSMGConn.Address == utils.MetaInternal {
-					return fmt.Errorf("<%s> not enabled but referenced by <%s>",
-						utils.SessionS, utils.DiameterAgent)
-				}
+		for _, connID := range cfg.diameterAgentCfg.SessionSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.SessionS, utils.DiameterAgent)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.DiameterAgent, connID)
 			}
 		}
 	}
@@ -281,13 +278,12 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> no %s connections defined",
 				utils.RadiusAgent, utils.SessionS)
 		}
-		if !cfg.dispatcherSCfg.Enabled && // if dispatcher is enabled all internal connections are managed by it
-			!cfg.sessionSCfg.Enabled {
-			for _, raSMGConn := range cfg.radiusAgentCfg.SessionSConns {
-				if raSMGConn.Address == utils.MetaInternal {
-					return fmt.Errorf("<%s> not enabled but referenced by <%s>",
-						utils.SessionS, utils.RadiusAgent)
-				}
+		for _, connID := range cfg.radiusAgentCfg.SessionSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.sessionSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.SessionS, utils.RadiusAgent)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.RadiusAgent, connID)
 			}
 		}
 	}

@@ -23,35 +23,33 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/cgrates/cgrates/engine"
+
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/servmanager"
-	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
 // NewKamailioAgent returns the Kamailio Agent
-func NewKamailioAgent(cfg *config.CGRConfig, sSChan,
-	dispatcherChan chan rpcclient.ClientConnector,
-	exitChan chan bool) servmanager.Service {
+func NewKamailioAgent(cfg *config.CGRConfig,
+	exitChan chan bool, connMgr *engine.ConnManager) servmanager.Service {
 	return &KamailioAgent{
-		cfg:            cfg,
-		sSChan:         sSChan,
-		dispatcherChan: dispatcherChan,
-		exitChan:       exitChan,
+		cfg:      cfg,
+		exitChan: exitChan,
+		connMgr:  connMgr,
 	}
 }
 
 // KamailioAgent implements Agent interface
 type KamailioAgent struct {
 	sync.RWMutex
-	cfg            *config.CGRConfig
-	sSChan         chan rpcclient.ClientConnector
-	dispatcherChan chan rpcclient.ClientConnector
-	exitChan       chan bool
+	cfg      *config.CGRConfig
+	exitChan chan bool
 
-	kam *agents.KamailioAgent
+	kam     *agents.KamailioAgent
+	connMgr *engine.ConnManager
 }
 
 // Start should handle the sercive start
@@ -62,33 +60,10 @@ func (kam *KamailioAgent) Start() (err error) {
 
 	kam.Lock()
 	defer kam.Unlock()
-	var sS rpcclient.ClientConnector
-	var sSInternal bool
-	utils.Logger.Info("Starting Kamailio agent")
-	if !kam.cfg.DispatcherSCfg().Enabled && kam.cfg.KamAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
-		sSInternal = true
-		sSIntConn := <-kam.sSChan
-		kam.sSChan <- sSIntConn
-		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
-	} else {
-		if sS, err = NewConnection(kam.cfg, kam.sSChan, kam.dispatcherChan, kam.cfg.KamAgentCfg().SessionSConns); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.KamailioAgent, utils.SessionS, err.Error()))
-			return
-		}
-	}
-	kam.kam = agents.NewKamailioAgent(kam.cfg.KamAgentCfg(), sS,
+
+	kam.kam = agents.NewKamailioAgent(kam.cfg.KamAgentCfg(), kam.connMgr,
 		utils.FirstNonEmpty(kam.cfg.KamAgentCfg().Timezone, kam.cfg.GeneralCfg().DefaultTimezone))
-	if sSInternal { // bidirectional client backwards connection
-		sS.(*utils.BiRPCInternalClient).SetClientConn(kam.kam)
-		var rply string
-		if err = sS.Call(utils.SessionSv1RegisterInternalBiJSONConn,
-			utils.EmptyString, &rply); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.KamailioAgent, utils.SessionS, err.Error()))
-			return
-		}
-	}
+
 	go func() {
 		if err = kam.kam.Connect(); err != nil {
 			if strings.Contains(err.Error(), "use of closed network connection") { // if closed by us do not log
@@ -108,37 +83,13 @@ func (kam *KamailioAgent) GetIntenternalChan() (conn chan rpcclient.ClientConnec
 
 // Reload handles the change of config
 func (kam *KamailioAgent) Reload() (err error) {
-	var sS rpcclient.ClientConnector
-	var sSInternal bool
-	if !kam.cfg.DispatcherSCfg().Enabled && kam.cfg.KamAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
-		sSInternal = true
-		sSIntConn := <-kam.sSChan
-		kam.sSChan <- sSIntConn
-		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
-	} else {
-		if sS, err = NewConnection(kam.cfg, kam.sSChan, kam.dispatcherChan, kam.cfg.KamAgentCfg().SessionSConns); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.KamailioAgent, utils.SessionS, err.Error()))
-			return
-		}
-	}
+
 	if err = kam.Shutdown(); err != nil {
 		return
 	}
 	kam.Lock()
 	defer kam.Unlock()
-	kam.kam.SetSessionSConnection(sS)
 	kam.kam.Reload()
-	if sSInternal { // bidirectional client backwards connection
-		sS.(*utils.BiRPCInternalClient).SetClientConn(kam.kam)
-		var rply string
-		if err = sS.Call(utils.SessionSv1RegisterInternalBiJSONConn,
-			utils.EmptyString, &rply); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.KamailioAgent, utils.SessionS, err.Error()))
-			return
-		}
-	}
 	go func() {
 		if err = kam.kam.Connect(); err != nil {
 			if strings.Contains(err.Error(), "use of closed network connection") { // if closed by us do not log

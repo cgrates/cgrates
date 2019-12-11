@@ -556,11 +556,11 @@ func main() {
 		services.NewEventReaderService(cfg, filterSChan, exitChan, connManager.GetConnMgr()),
 		services.NewDNSAgent(cfg, filterSChan, exitChan, connManager.GetConnMgr()),
 		services.NewFreeswitchAgent(cfg, exitChan, connManager.GetConnMgr()),
-		services.NewKamailioAgent(cfg, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),
-		services.NewAsteriskAgent(cfg, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),              // partial reload
-		services.NewRadiusAgent(cfg, filterSChan, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),   // partial reload
-		services.NewDiameterAgent(cfg, filterSChan, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan), // partial reload
-		services.NewHTTPAgent(cfg, filterSChan, server, connManager.GetConnMgr()),                                  // no reload
+		services.NewKamailioAgent(cfg, exitChan, connManager.GetConnMgr()),
+		services.NewAsteriskAgent(cfg, exitChan, connManager.GetConnMgr()),              // partial reload
+		services.NewRadiusAgent(cfg, filterSChan, exitChan, connManager.GetConnMgr()),   // partial reload
+		services.NewDiameterAgent(cfg, filterSChan, exitChan, connManager.GetConnMgr()), // partial reload
+		services.NewHTTPAgent(cfg, filterSChan, server, connManager.GetConnMgr()),       // no reload
 		ldrs, anz, dspS, dmService, storDBService,
 	)
 	srvManager.StartServices()
