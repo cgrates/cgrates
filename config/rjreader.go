@@ -143,7 +143,6 @@ func (rjr *rjReader) consumeComent(pkbit byte) (bool, error) {
 	switch pkbit {
 	case '/':
 		for !rjr.isEndOfFile() {
-			// fmt.Println(rjr.indx, len(rjr.buf))
 			bit := rjr.buf[rjr.indx]
 			rjr.indx++
 			if isNewLine(bit) { //read until newline or EOF

@@ -22,6 +22,7 @@ package dispatchers
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -120,8 +121,8 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 		t.Error(reply)
 	}
 	expStats[utils.CacheActions].Items = 2
-	expStats[utils.CacheAttributeProfiles].Items = 10
-	expStats[utils.CacheChargerProfiles].Items = 1
+	expStats[utils.CacheAttributeProfiles].Items = 11
+	expStats[utils.CacheChargerProfiles].Items = 2
 	expStats[utils.CacheFilters].Items = 7
 	expStats[utils.CacheRatingPlans].Items = 5
 	expStats[utils.CacheRatingProfiles].Items = 4
@@ -175,6 +176,12 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.CacheChargerFilterIndexes:    utils.MetaReady,
 		utils.CacheDispatcherFilterIndexes: utils.MetaReady,
 		utils.CacheLoadIDs:                 utils.MetaReady,
+		utils.CacheCDRIDs:                  utils.MetaReady,
+		utils.CacheClosedSessions:          utils.MetaReady,
+		utils.CacheDispatcherRoutes:        utils.MetaReady,
+		utils.CacheEventResources:          utils.MetaReady,
+		utils.CacheRPCConnections:          utils.MetaReady,
+		utils.CacheRPCResponses:            utils.MetaReady,
 	}
 
 	if err := dispEngine.RPC.Call(utils.CacheSv1PrecacheStatus, utils.AttrCacheIDsWithArgDispatcher{
@@ -193,7 +200,7 @@ func testDspChcPrecacheStatus(t *testing.T) {
 
 func testDspChcGetItemIDs(t *testing.T) {
 	var rcvKeys []string
-	expKeys := []string{"cgrates.org:DEFAULT"}
+	expKeys := []string{"cgrates.org:DEFAULT", "cgrates.org:Raw"}
 	argsAPI := utils.ArgsGetCacheItemIDsWithArgDispatcher{
 		ArgsGetCacheItemIDs: utils.ArgsGetCacheItemIDs{
 			CacheID: utils.CacheChargerProfiles,
@@ -208,6 +215,7 @@ func testDspChcGetItemIDs(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.CacheSv1GetItemIDs, argsAPI, &rcvKeys); err != nil {
 		t.Fatalf("Got error on ApierV1.GetCacheStats: %s ", err.Error())
 	}
+	sort.Strings(rcvKeys)
 	if !reflect.DeepEqual(expKeys, rcvKeys) {
 		t.Errorf("Expected: %+v, received: %+v", expKeys, rcvKeys)
 	}

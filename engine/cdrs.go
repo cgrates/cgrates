@@ -170,7 +170,7 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithArgDispatcher) ([]*CDR, error) {
 			if err == nil && len(smCosts) != 0 {
 				break
 			}
-			if i != 3 {
+			if i <= cdrS.cgrCfg.CdrsCfg().SMCostRetries-1 {
 				time.Sleep(time.Duration(fib()) * time.Second)
 			}
 		}
@@ -187,18 +187,16 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithArgDispatcher) ([]*CDR, error) {
 				cdrsRated = append(cdrsRated, cdrClone)
 			}
 			return cdrsRated, nil
-		} else { //calculate CDR as for pseudoprepaid
-			utils.Logger.Warning(
-				fmt.Sprintf("<Cdrs> WARNING: Could not find CallCostLog for cgrid: %s, source: %s, runid: %s, originID: %s originHost: %s, will recalculate",
-					cdr.CGRID, utils.MetaSessionS, cdr.RunID, cdr.OriginID, cdr.OriginHost))
-			qryCC, err = cdrS.getCostFromRater(cdr)
 		}
-	} else {
-		qryCC, err = cdrS.getCostFromRater(cdr)
+		utils.Logger.Warning(
+			fmt.Sprintf("<Cdrs> WARNING: Could not find CallCostLog for cgrid: %s, source: %s, runid: %s, originID: %s originHost: %s, will recalculate",
+				cdr.CGRID, utils.MetaSessionS, cdr.RunID, cdr.OriginID, cdr.OriginHost))
 	}
+	qryCC, err = cdrS.getCostFromRater(cdr)
 	if err != nil {
 		return nil, err
-	} else if qryCC != nil {
+	}
+	if qryCC != nil {
 		cdr.Cost = qryCC.Cost
 		cdr.CostDetails = NewEventCostFromCallCost(qryCC, cdr.CGRID, cdr.RunID)
 	}
@@ -211,6 +209,9 @@ var reqTypes = utils.NewStringSet([]string{utils.META_PSEUDOPREPAID, utils.META_
 
 // getCostFromRater will retrieve the cost from RALs
 func (cdrS *CDRServer) getCostFromRater(cdr *CDRWithArgDispatcher) (*CallCost, error) {
+	if cdrS.rals == nil {
+		return nil, utils.NewErrNotConnected(utils.RALService)
+	}
 	cc := new(CallCost)
 	var err error
 	timeStart := cdr.AnswerTime
@@ -357,9 +358,6 @@ func (cdrS *CDRServer) chrgrSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher
 	var chrgrs []*ChrgSProcessEventReply
 	if err = cdrS.chargerS.Call(utils.ChargerSv1ProcessEvent,
 		cgrEv, &chrgrs); err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s> error: %s processing CGR event %+v with %s.",
-				utils.CDRs, err.Error(), cgrEv, utils.ChargerS))
 		return
 	}
 	if len(chrgrs) == 0 {
@@ -454,40 +452,44 @@ func (cdrS *CDRServer) exportCDRs(cdrs []*CDR) (err error) {
 // processEvent processes a CGREvent based on arguments
 func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithArgDispatcher,
 	chrgS, attrS, ralS, store, reRate, export, thdS, stS bool) (err error) {
+	if attrS {
+		if err = cdrS.attrSProcessEvent(ev); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
+					utils.CDRs, err.Error(), utils.ToJSON(ev), utils.AttributeS))
+			err = utils.ErrPartiallyExecuted
+			return
+		}
+	}
 	var cgrEvs []*utils.CGREventWithArgDispatcher
 	if chrgS {
 		if cgrEvs, err = cdrS.chrgrSProcessEvent(ev); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
-					utils.CDRs, err.Error(), ev, utils.ChargerS))
+					utils.CDRs, err.Error(), utils.ToJSON(ev), utils.ChargerS))
 			err = utils.ErrPartiallyExecuted
 			return
 		}
 	} else { // ChargerS not requested, charge the original event
 		cgrEvs = []*utils.CGREventWithArgDispatcher{ev}
 	}
-	if attrS {
-		for _, cgrEv := range cgrEvs {
-			if err = cdrS.attrSProcessEvent(cgrEv); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
-						utils.CDRs, err.Error(), cgrEv, utils.AttributeS))
-				err = utils.ErrPartiallyExecuted
-				return
-			}
-		}
-	}
 	// Check if the unique ID was not already processed
 	for _, cgrEv := range cgrEvs {
 		me := MapEvent(cgrEv.CGREvent.Event)
+		if !me.HasField(utils.CGRID) { // try to compute the CGRID if missing
+			me[utils.CGRID] = utils.Sha1(
+				me.GetStringIgnoreErrors(utils.OriginID),
+				me.GetStringIgnoreErrors(utils.OriginHost),
+			)
+		}
 		uID := utils.ConcatenatedKey(
 			me.GetStringIgnoreErrors(utils.CGRID),
 			me.GetStringIgnoreErrors(utils.RunID),
 		)
-		if Cache.HasItem(utils.CacheCDRIDs, uID) {
+		if Cache.HasItem(utils.CacheCDRIDs, uID) && !reRate {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
-					utils.CDRs, err.Error(), cgrEv, utils.CacheS))
+					utils.CDRs, utils.ErrExists, utils.ToJSON(cgrEv), utils.CacheS))
 			return utils.ErrExists
 		}
 		Cache.Set(utils.CacheCDRIDs, uID, true, nil,
@@ -574,7 +576,7 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithArgDispatcher,
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: <%s> exporting CDRs %+v",
 					utils.CDRs, err.Error(), cdrs))
-
+			partiallyExecuted = true
 		}
 	}
 	if thdS {
@@ -583,6 +585,7 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithArgDispatcher,
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
 						utils.CDRs, err.Error(), cgrEv, utils.ThresholdS))
+				partiallyExecuted = true
 			}
 		}
 	}
@@ -592,6 +595,7 @@ func (cdrS *CDRServer) processEvent(ev *utils.CGREventWithArgDispatcher,
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
 						utils.CDRs, err.Error(), cgrEv, utils.StatS))
+				partiallyExecuted = true
 			}
 		}
 	}
@@ -713,13 +717,14 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDRWithArgDispatcher, reply *string) (e
 	return
 }
 
+// ArgV1ProcessEvent is the CGREvent with proccesing Flags
 type ArgV1ProcessEvent struct {
 	Flags []string
 	utils.CGREvent
 	*utils.ArgDispatcher
 }
 
-// V1ProcessCDR will process the CDR out of CGREvent
+// V1ProcessEvent will process the CGREvent
 func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (err error) {
 	if arg.CGREvent.ID == "" {
 		arg.CGREvent.ID = utils.GenUUID()
@@ -800,7 +805,7 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	return nil
 }
 
-// V1StoreSMCost handles storing of the cost into session_costs table
+// V1StoreSessionCost handles storing of the cost into session_costs table
 func (cdrS *CDRServer) V1StoreSessionCost(attr *AttrCDRSStoreSMCost, reply *string) (err error) {
 	if attr.Cost.CGRID == "" {
 		return utils.NewCGRError(utils.CDRSCtx,
@@ -894,6 +899,7 @@ func (cdrS *CDRServer) V2StoreSessionCost(args *ArgsV2CDRSStoreSMCost, reply *st
 
 }
 
+// ArgRateCDRs a cdr with extra flags
 type ArgRateCDRs struct {
 	Flags []string
 	utils.RPCCDRsFilter
@@ -951,7 +957,7 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 	return nil
 }
 
-// Used to process external CDRs
+// V1ProcessExternalCDR is used to process external CDRs
 func (cdrS *CDRServer) V1ProcessExternalCDR(eCDR *ExternalCDRWithArgDispatcher, reply *string) error {
 	cdr, err := NewCDRFromExternalCDR(eCDR.ExternalCDR,
 		cdrS.cgrCfg.GeneralCfg().DefaultTimezone)
@@ -971,11 +977,11 @@ func (cdrS *CDRServer) V1GetCDRs(args utils.RPCCDRsFilterWithArgDispatcher, cdrs
 		}
 		return err
 	}
-	if qryCDRs, _, err := cdrS.cdrDb.GetCDRs(cdrsFltr, false); err != nil {
+	qryCDRs, _, err := cdrS.cdrDb.GetCDRs(cdrsFltr, false)
+	if err != nil {
 		return utils.NewErrServerError(err)
-	} else {
-		*cdrs = qryCDRs
 	}
+	*cdrs = qryCDRs
 	return nil
 }
 
@@ -989,11 +995,11 @@ func (cdrS *CDRServer) V1CountCDRs(args *utils.RPCCDRsFilterWithArgDispatcher, c
 		return err
 	}
 	cdrsFltr.Count = true
-	if _, qryCnt, err := cdrS.cdrDb.GetCDRs(cdrsFltr, false); err != nil {
+	_, qryCnt, err := cdrS.cdrDb.GetCDRs(cdrsFltr, false)
+	if err != nil {
 		return utils.NewErrServerError(err)
-	} else {
-		*cnt = qryCnt
 	}
+	*cnt = qryCnt
 	return nil
 }
 

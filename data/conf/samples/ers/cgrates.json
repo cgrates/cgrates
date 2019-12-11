@@ -5,7 +5,8 @@
 
 
 "general": {
-    "log_level": 7,
+	"log_level": 7,
+	"reply_timeout": "10s",									// consider connection down for replies taking longer than this value
 },
 
 
@@ -57,6 +58,7 @@
 	"rals_conns": [
 		{"address": "*internal"}
 	],
+	"session_cost_retries": 0,				// number of queries to session_costs before recalculating CDR
 },
 
 
@@ -183,7 +185,6 @@
 			"id": "file_reader_with_filters",
 			"run_delay": -1,
 			"type": "*file_csv",
-			"flags": ["*dryrun"],
 			"field_separator": ";",
 			"source_path": "/tmp/ers_with_filters/in",
 			"processed_path": "/tmp/ers_with_filters/out",

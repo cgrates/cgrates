@@ -148,16 +148,20 @@ func NewCallDescriptorFromCGREvent(cgrEv *utils.CGREvent,
 The input stucture that contains call information.
 */
 type CallDescriptor struct {
-	Category                              string
-	Tenant, Subject, Account, Destination string
-	TimeStart, TimeEnd                    time.Time
-	LoopIndex                             float64       // indicates the position of this segment in a cost request loop
-	DurationIndex                         time.Duration // the call duration so far (till TimeEnd)
-	FallbackSubject                       string        // the subject to check for destination if not found on primary subject
-	RatingInfos                           RatingInfos
-	Increments                            Increments
-	TOR                                   string            // used unit balances selector
-	ExtraFields                           map[string]string // Extra fields, mostly used for user profile matching
+	Category        string
+	Tenant          string
+	Subject         string
+	Account         string
+	Destination     string
+	TimeStart       time.Time
+	TimeEnd         time.Time
+	LoopIndex       float64       // indicates the position of this segment in a cost request loop
+	DurationIndex   time.Duration // the call duration so far (till TimeEnd)
+	FallbackSubject string        // the subject to check for destination if not found on primary subject
+	RatingInfos     RatingInfos
+	Increments      Increments
+	TOR             string            // used unit balances selector
+	ExtraFields     map[string]string // Extra fields, mostly used for user profile matching
 	// session limits
 	MaxRate             float64
 	MaxRateUnit         time.Duration

@@ -22,6 +22,8 @@ package dispatchers
 
 import (
 	"reflect"
+	"sort"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/engine"
@@ -125,11 +127,27 @@ func testDspCppGetChtgFailover(t *testing.T) {
 	}
 
 	allEngine2.stopEngine(t)
-
+	*eChargers = append(*eChargers,
+		&engine.ChargerProfile{
+			Tenant:       "cgrates.org",
+			ID:           "Raw",
+			FilterIDs:    []string{},
+			RunID:        utils.MetaRaw,
+			AttributeIDs: []string{"ATTR_RAW_REQ"},
+			Weight:       0,
+		},
+	)
+	if *encoding == utils.MetaGOB {
+		(*eChargers)[1].FilterIDs = nil // empty slice are nil in gob
+	}
 	if err := dispEngine.RPC.Call(utils.ChargerSv1GetChargersForEvent,
 		args, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eChargers, reply) {
+		t.Fatal(err)
+	}
+	sort.Slice(*reply, func(i, j int) bool {
+		return strings.Compare((*reply)[i].ID, (*reply)[j].ID) < 0
+	})
+	if !reflect.DeepEqual(eChargers, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eChargers), utils.ToJSON(reply))
 	}
 
@@ -199,15 +217,28 @@ func testDspCppTestAuthKey2(t *testing.T) {
 			AttributeIDs: []string{"*none"},
 			Weight:       0,
 		},
+		&engine.ChargerProfile{
+			Tenant:       "cgrates.org",
+			ID:           "Raw",
+			FilterIDs:    []string{},
+			RunID:        utils.MetaRaw,
+			AttributeIDs: []string{"ATTR_RAW_REQ"},
+			Weight:       0,
+		},
 	}
 	if *encoding == utils.MetaGOB {
 		(*eChargers)[0].FilterIDs = nil // empty slice are nil in gob
+		(*eChargers)[1].FilterIDs = nil // empty slice are nil in gob
 	}
 	var reply *engine.ChargerProfiles
 	if err := dispEngine.RPC.Call(utils.ChargerSv1GetChargersForEvent,
 		args, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eChargers, reply) {
+		t.Fatal(err)
+	}
+	sort.Slice(*reply, func(i, j int) bool {
+		return strings.Compare((*reply)[i].ID, (*reply)[j].ID) < 0
+	})
+	if !reflect.DeepEqual(eChargers, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eChargers), utils.ToJSON(reply))
 	}
 }
@@ -248,10 +279,27 @@ func testDspCppGetChtgRoundRobin(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eChargers), utils.ToJSON(reply))
 	}
 	// To ALL
+	*eChargers = append(*eChargers,
+		&engine.ChargerProfile{
+			Tenant:       "cgrates.org",
+			ID:           "Raw",
+			FilterIDs:    []string{},
+			RunID:        utils.MetaRaw,
+			AttributeIDs: []string{"ATTR_RAW_REQ"},
+			Weight:       0,
+		},
+	)
+	if *encoding == utils.MetaGOB {
+		(*eChargers)[1].FilterIDs = nil // empty slice are nil in gob
+	}
 	if err := dispEngine.RPC.Call(utils.ChargerSv1GetChargersForEvent,
 		args, &reply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eChargers, reply) {
+		t.Fatal(err)
+	}
+	sort.Slice(*reply, func(i, j int) bool {
+		return strings.Compare((*reply)[i].ID, (*reply)[j].ID) < 0
+	})
+	if !reflect.DeepEqual(eChargers, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(eChargers), utils.ToJSON(reply))
 	}
 

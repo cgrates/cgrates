@@ -130,18 +130,29 @@ func testCDREExportNotFound(t *testing.T) {
 }
 
 func testCDREProcessCdr(t *testing.T) {
-	cdr := &engine.CDR{ToR: utils.VOICE, OriginID: "testCDREProcessCdr", OriginHost: "192.168.1.1",
-		Source: "TestTutITExportCDR", RequestType: utils.META_RATED,
-		Tenant: "cgrates.org", Category: "call", Account: "1001",
-		Subject: "1001", Destination: "1003",
+	cdr := &engine.CDR{
+		ToR:         utils.VOICE,
+		OriginID:    "testCDREProcessCdr",
+		OriginHost:  "192.168.1.1",
+		Source:      "TestTutITExportCDR",
+		RequestType: utils.META_RATED,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "1003",
 		SetupTime:   time.Date(2016, 11, 30, 17, 5, 24, 0, time.UTC),
 		AnswerTime:  time.Date(2016, 11, 30, 17, 6, 4, 0, time.UTC),
 		Usage:       time.Duration(98) * time.Second,
-		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
 	cdr.ComputeCGRID()
 	var reply string
 	if err := cdreRPC.Call(utils.CDRsV1ProcessEvent,
-		&engine.ArgV1ProcessEvent{CGREvent: *cdr.AsCGREvent()}, &reply); err != nil {
+		&engine.ArgV1ProcessEvent{
+			Flags:    []string{utils.ConcatenatedKey(utils.MetaChargers, "false")},
+			CGREvent: *cdr.AsCGREvent(),
+		}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)

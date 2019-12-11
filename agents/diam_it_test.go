@@ -867,10 +867,8 @@ func testDiamItCCRSMS(t *testing.T) {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
-	} else {
-		if cdrs[0].Usage != 1 {
-			t.Errorf("Unexpected Usage CDR: %+v", cdrs[0])
-		}
+	} else if cdrs[0].Usage != 1 {
+		t.Errorf("Unexpected Usage CDR: %+v", cdrs[0])
 	}
 }
 

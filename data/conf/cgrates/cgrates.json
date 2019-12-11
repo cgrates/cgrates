@@ -32,6 +32,9 @@
 // },
 
 
+// "rpc_conns": {},							// rpc connections definitions
+
+
 // "data_db": {								// database used to store runtime data (eg: accounts)
 // 	"db_type": "*redis",					// data_db type: <*redis|*mongo>
 // 	"db_host": "127.0.0.1",					// data_db host address
@@ -141,29 +144,31 @@
 // 	"*timings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// timings caching
 // 	"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control resource profiles caching
 // 	"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control resources caching
-// 	"*event_resources": {"limit": -1, "ttl": "", "static_ttl": false},							// matching resources to events
-// 	"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// statqueue profiles
-// 	"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// statqueues with metrics
-// 	"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control threshold profiles caching
-// 	"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control thresholds caching
+// 	"*event_resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},							// matching resources to events
+// 	"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// statqueue profiles
+// 	"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// statqueues with metrics
+// 	"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// control threshold profiles caching
+// 	"*thresholds": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// control thresholds caching
 // 	"*filters": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control filters caching
 // 	"*supplier_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control supplier profile caching
-// 	"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control attribute profile caching
+// 	"*attribute_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// control attribute profile caching
 // 	"*charger_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control charger profile caching
 // 	"*dispatcher_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// control dispatcher profile caching
 // 	"*dispatcher_hosts": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control dispatcher hosts caching
-// 	"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control resource filter indexes caching
-// 	"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 						// control stat filter indexes caching
+// 	"*resource_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control resource filter indexes caching
+// 	"*stat_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control stat filter indexes caching
 // 	"*threshold_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control threshold filter indexes caching
-// 	"*supplier_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control supplier filter indexes caching
+// 	"*supplier_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control supplier filter indexes caching
 // 	"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control attribute filter indexes caching
 // 	"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control charger filter indexes caching
 // 	"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control dispatcher filter indexes caching
-// 	"*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false}, 						// control dispatcher routes caching
-// 	"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false},						// diameter messages caching
-// 	"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false},							// RPC responses caching
-// 	"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false},						// closed sessions cached for CDRs
+// 	"*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false}, 						// control dispatcher routes caching
+// 	"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false, "precache": false},						// diameter messages caching
+// 	"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false, "precache": false},							// RPC responses caching
+// 	"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false, "precache": false},						// closed sessions cached for CDRs
+// 	"*cdr_ids": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},									// protects CDRs against double-charging
 // 	"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control the load_ids for items
+// 	"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},							// RPC connections caching
 // },
 
 
@@ -204,7 +209,7 @@
 // 	"store_cdrs": true,						// store cdrs in StorDB
 // 	"session_cost_retries": 5,				// number of queries to session_costs before recalculating CDR
 // 	"chargers_conns": [],					// connection to ChargerS for CDR forking, empty to disable billing for CDRs: <""|*internal|x.y.z.y:1234>
-// 	"rals_conns": [],						// connections to RALs for cost calculation: <""|*internal|x.y.z.y:1234>
+// 	"rals_conns": [],							// connections to RALs for cost calculation: <""|*internal|x.y.z.y:1234>
 // 	"attributes_conns": [],					// connection to AttributeS for altering *raw CDRs, empty to disable attributes functionality: <""|*internal|x.y.z.y:1234>
 // 	"thresholds_conns": [],					// connection to ThresholdS for CDR reporting, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
 // 	"stats_conns": [],						// connections to StatS for CDR reporting, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
@@ -269,17 +274,17 @@
 // 		"partial_cache_expiry_action": "*dump_to_file",	// action taken when cache when records in cache are timed-out <*dump_to_file|*post_cdr>
 // 		"header_fields": [],							// template of the import header fields
 // 		"content_fields":[								// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-// 			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "~2", "mandatory": true},
-// 			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~3", "mandatory": true},
-// 			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~4", "mandatory": true},
-// 			{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~6", "mandatory": true},
-// 			{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "~7", "mandatory": true},
-// 			{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~8", "mandatory": true},
-// 			{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~9", "mandatory": true},
-// 			{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~10", "mandatory": true},
-// 			{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~11", "mandatory": true},
-// 			{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~12", "mandatory": true},
-// 			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~13", "mandatory": true},
+// 			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "~*req.2", "mandatory": true},
+// 			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~*req.3", "mandatory": true},
+// 			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~*req.4", "mandatory": true},
+// 			{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~*req.6", "mandatory": true},
+// 			{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "~*req.7", "mandatory": true},
+// 			{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~*req.8", "mandatory": true},
+// 			{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~*req.9", "mandatory": true},
+// 			{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~*req.10", "mandatory": true},
+// 			{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~*req.11", "mandatory": true},
+// 			{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~*req.12", "mandatory": true},
+// 			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~*req.13", "mandatory": true},
 // 		],
 // 		"trailer_fields": [],							// template of the import trailer fields
 // 		"cache_dump_fields": [							// template used when dumping cached CDR, eg: partial CDRs
@@ -304,9 +309,7 @@
 
 // "ers": {									// EventReaderService
 // 	"enabled": false,						// starts the EventReader service: <true|false>
-// 	"sessions_conns": [						// connections to SessionS:  <*internal|127.0.0.1:2012>
-// 		{"address": "*internal"}
-// 	],
+// 	"sessions_conns":["*internal"],			// RPC Connections IDs
 // 	"readers": [
 // 		{
 // 			"id": "*default",									// identifier of the EventReader profile

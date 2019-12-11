@@ -447,7 +447,7 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 				},
 				{
 					FieldName: utils.Subject,
-					Value:     config.NewRSRParsersMustCompile(utils.META_NONE, true, utils.INFIELD_SEP),
+					Value:     config.NewRSRParsersMustCompile(utils.MetaRemove, true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -514,7 +514,7 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 				},
 				{
 					FieldName: utils.Subject,
-					Value:     config.NewRSRParsersMustCompile(utils.META_NONE, true, utils.INFIELD_SEP),
+					Value:     config.NewRSRParsersMustCompile(utils.MetaRemove, true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -593,7 +593,7 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 				{
 					FilterIDs: []string{"*string:~*req.Subject:1008"},
 					FieldName: utils.Subject,
-					Value:     config.NewRSRParsersMustCompile(utils.META_NONE, true, utils.INFIELD_SEP),
+					Value:     config.NewRSRParsersMustCompile(utils.MetaRemove, true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,

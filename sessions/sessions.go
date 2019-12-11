@@ -398,7 +398,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 				}
 				if unratedReqs.HasField( // order additional rating for unrated request types
 					engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RequestType)) {
-					argsProc.Flags = append(argsProc.Flags, fmt.Sprintf("%s:true", utils.MetaRALs))
+					argsProc.Flags = append(argsProc.Flags, utils.MetaRALs)
 				}
 				if err = sS.cdrS.Call(utils.CDRsV1ProcessEvent, argsProc, &reply); err != nil {
 					utils.Logger.Warning(
@@ -762,6 +762,20 @@ func (sS *SessionS) registerSession(s *Session, passive bool) {
 	sMp[s.CGRID] = s
 	sMux.Unlock()
 	sS.indexSession(s, passive)
+}
+
+// isIndexed returns if the session is indexed
+func (sS *SessionS) isIndexed(s *Session, passive bool) (has bool) {
+	sMux := &sS.aSsMux
+	sMp := sS.aSessions
+	if passive {
+		sMux = &sS.pSsMux
+		sMp = sS.pSessions
+	}
+	sMux.Lock()
+	_, has = sMp[s.CGRID]
+	sMux.Unlock()
+	return
 }
 
 // uregisterSession will unregister an active or passive session based on it's CGRID
@@ -1383,6 +1397,9 @@ func (sS *SessionS) initSession(tnt string, evStart engine.MapEvent, clntConnID 
 		ClientConnID:  clntConnID,
 		DebitInterval: dbtItval,
 		ArgDispatcher: argDisp,
+	}
+	if sS.isIndexed(s, false) { // check if already exists
+		return nil, utils.ErrExists
 	}
 	if err = sS.forkSession(s); err != nil {
 		return nil, err

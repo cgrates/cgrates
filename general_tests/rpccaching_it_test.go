@@ -54,7 +54,7 @@ var sTestsRPCMethods = []func(t *testing.T){
 	testRPCMethodsTerminateSession,
 	testRPCMethodsProcessCDR,
 	testRPCMethodsProcessEvent,
-	//reset the storDB and dataDB
+	// reset the storDB and dataDB
 	testRPCMethodsInitDataDb,
 	testRPCMethodsResetStorDb,
 	testRPCMethodsCdrsProcessCDR,
@@ -355,7 +355,7 @@ func testRPCMethodsInitSession(t *testing.T) {
 	time.Sleep(1*time.Second + 500*time.Millisecond)
 
 	if err := rpcRpc.Call(utils.SessionSv1InitiateSession,
-		args, &rply); err == nil || err.Error() != "RALS_ERROR:ACCOUNT_DISABLED" {
+		args, &rply); err == nil || !(err.Error() == "RALS_ERROR:ACCOUNT_DISABLED" || err.Error() == utils.NewErrRALs(utils.ErrExists).Error()) { // ErrExist -> initSession twice
 		t.Error("Unexpected error returned", err)
 	}
 
@@ -693,6 +693,7 @@ func testRPCMethodsCdrsProcessCDR(t *testing.T) {
 		Event: map[string]interface{}{
 			utils.Tenant:      "cgrates.org",
 			utils.ToR:         utils.VOICE,
+			utils.OriginHost:  "host",
 			utils.OriginID:    "testRPCMethodsCdrsProcessCDR",
 			utils.RequestType: utils.META_PREPAID,
 			utils.Account:     "1001",
@@ -738,7 +739,7 @@ func testRPCMethodsCdrsProcessCDR(t *testing.T) {
 	//give time to CGRateS to delete the response from cache
 	time.Sleep(1*time.Second + 500*time.Millisecond)
 	//change originID so CGRID be different
-	args.Event[utils.OriginID] = "testRPCMethodsProcessCDR3"
+	args.Event[utils.OriginID] = "testRPCMethodsProcessCDR4"
 	if err := rpcRpc.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {

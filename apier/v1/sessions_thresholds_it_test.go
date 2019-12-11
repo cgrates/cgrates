@@ -422,7 +422,7 @@ func TestSessionSv1ItInitNotFoundThreshold(t *testing.T) {
 	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := sSv1BiRpc2.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err != nil {
 		t.Error(err)
-	} else if len(aSessions) != 2 {
+	} else if len(aSessions) != 3 {
 		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v", utils.ToJSON(aSessions), len(aSessions))
 	}
 }
@@ -556,7 +556,7 @@ func TestSessionSv1ItInitNotFoundThresholdAndStats(t *testing.T) {
 	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := sSv1BiRpc2.Call(utils.SessionSv1GetActiveSessions, &utils.SessionFilter{}, &aSessions); err != nil {
 		t.Error(err)
-	} else if len(aSessions) != 2 {
+	} else if len(aSessions) != 3 {
 		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v", utils.ToJSON(aSessions), len(aSessions))
 	}
 }

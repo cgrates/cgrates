@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"fmt"
 	"net/rpc"
 	"path"
 	"reflect"
@@ -159,19 +158,16 @@ func testInternalRemoteITRPCConn(t *testing.T) {
 	var err error
 	internalRPC, err = newRPCClient(internalCfg.ListenCfg())
 	if err != nil {
-		fmt.Println(err)
 		t.Fatal(err)
 	}
 	time.Sleep(200 * time.Millisecond)
 	engineOneRPC, err = newRPCClient(engineOneCfg.ListenCfg())
 	if err != nil {
-		fmt.Println(err)
 		t.Fatal(err)
 	}
 	time.Sleep(200 * time.Millisecond)
 	engineTwoRPC, err = newRPCClient(engineTwoCfg.ListenCfg())
 	if err != nil {
-		fmt.Println(err)
 		t.Fatal(err)
 	}
 	time.Sleep(200 * time.Millisecond)

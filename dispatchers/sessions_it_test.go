@@ -309,14 +309,14 @@ func testDspGetSessions(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessionsCount,
 		&filtr, &reply); err != nil {
 		t.Fatal(err)
-	} else if reply != 2 {
-		t.Errorf("Expected 2 active sessions recived %v", reply)
+	} else if reply != 3 {
+		t.Errorf("Expected 3 active sessions recived %v", reply)
 	}
 	var rply []*sessions.ExternalSession
 	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessions,
 		&filtr, &rply); err != nil {
 		t.Fatal(err)
-	} else if len(rply) != 2 {
+	} else if len(rply) != 3 {
 		t.Errorf("Unexpected number of sessions returned %v :%s", len(rply), utils.ToJSON(rply))
 	}
 
@@ -719,8 +719,8 @@ func testDspSessionReplicate(t *testing.T) {
 	if err := allEngine2.RPC.Call(utils.SessionSv1GetPassiveSessionsCount,
 		new(utils.SessionFilter), &repl); err != nil {
 		t.Fatal(err)
-	} else if repl != 2 {
-		t.Errorf("Expected 1 sessions recived %v", repl)
+	} else if repl != 3 {
+		t.Errorf("Expected 3 sessions recived %v", repl)
 	}
 }
 
@@ -745,15 +745,15 @@ func testDspSessionPassive(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessionsCount,
 		filtr, &repl); err != nil {
 		t.Fatal(err)
-	} else if repl != 2 {
-		t.Errorf("Expected 1 active sessions recived %v", repl)
+	} else if repl != 3 {
+		t.Errorf("Expected 3 active sessions recived %v", repl)
 	}
 
 	var rply []*sessions.ExternalSession
 	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessions,
 		&filtr, &rply); err != nil {
 		t.Fatal(err)
-	} else if len(rply) != 2 {
+	} else if len(rply) != 3 {
 		t.Errorf("Unexpected number of sessions returned %v :%s", len(rply), utils.ToJSON(rply))
 	}
 
@@ -847,15 +847,15 @@ func testDspSessionForceDisconect(t *testing.T) {
 	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessionsCount,
 		filtr, &repl); err != nil {
 		t.Fatal(err)
-	} else if repl != 2 {
-		t.Errorf("Expected 1 active sessions recived %v", repl)
+	} else if repl != 3 {
+		t.Errorf("Expected 3 active sessions recived %v", repl)
 	}
 
 	var rply []*sessions.ExternalSession
 	if err := dispEngine.RPC.Call(utils.SessionSv1GetActiveSessions,
 		&filtr, &rply); err != nil {
 		t.Fatal(err)
-	} else if len(rply) != 2 {
+	} else if len(rply) != 3 {
 		t.Errorf("Unexpected number of sessions returned %v :%s", len(rply), utils.ToJSON(rply))
 	}
 
