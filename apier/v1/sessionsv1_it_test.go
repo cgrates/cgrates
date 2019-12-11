@@ -52,7 +52,6 @@ var (
 		testSSv1ItAuth,
 		testSSv1ItAuthWithDigest,
 		testSSv1ItInitiateSession,
-		testSSv1ItInitiateSessionWithDigest,
 		testSSv1ItUpdateSession,
 		testSSv1ItTerminateSession,
 		testSSv1ItProcessCDR,
@@ -61,6 +60,9 @@ var (
 		testSSv1ItForceUpdateSession,
 		testSSv1ItDynamicDebit,
 		testSSv1ItDeactivateSessions,
+
+		testSSv1ItInitiateSessionWithDigest, // no need for session terminate because is the last test
+
 		testSSv1ItStopCgrEngine,
 	}
 )
@@ -388,7 +390,7 @@ func testSSv1ItInitiateSessionWithDigest(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "TestSSv1It1",
+				utils.OriginID:    "TestSSv1It2",
 				utils.RequestType: sSV1RequestType,
 				utils.Account:     "1001",
 				utils.Subject:     "ANY2CNT",
@@ -525,7 +527,7 @@ func testSSv1ItTerminateSession(t *testing.T) {
 	aSessions := make([]*sessions.ExternalSession, 0)
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
-		t.Error(err)
+		t.Errorf("Expected error %s received error %v and reply %s", utils.ErrNotFound, err, utils.ToJSON(aSessions))
 	}
 }
 
@@ -719,7 +721,7 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	eAcntVal := 9.399500
+	eAcntVal := 9.55
 	if err := sSApierRpc.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
@@ -790,7 +792,7 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 		t.Errorf("wrong active ssesions: %s", utils.ToJSON(aSessions))
 	}
 
-	eAcntVal = 9.249500
+	eAcntVal = 9.4
 	if err := sSApierRpc.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {

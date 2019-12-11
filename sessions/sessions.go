@@ -1398,7 +1398,7 @@ func (sS *SessionS) initSession(tnt string, evStart engine.MapEvent, clntConnID 
 		DebitInterval: dbtItval,
 		ArgDispatcher: argDisp,
 	}
-	if sS.isIndexed(s, true) { // check if already exists
+	if sS.isIndexed(s, false) { // check if already exists
 		return nil, utils.ErrExists
 	}
 	if err = sS.forkSession(s); err != nil {
