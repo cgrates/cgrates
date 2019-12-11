@@ -33,13 +33,12 @@ import (
 )
 
 var (
-	stsPathIn    string
-	stsPathOut   string
-	stsCfgIn     *config.CGRConfig
-	stsCfgOut    *config.CGRConfig
-	stsMigrator  *Migrator
-	stsAction    string
-	stsSetupTime time.Time
+	stsPathIn   string
+	stsPathOut  string
+	stsCfgIn    *config.CGRConfig
+	stsCfgOut   *config.CGRConfig
+	stsMigrator *Migrator
+	stsAction   string
 )
 
 var sTestsStsIT = []func(t *testing.T){
@@ -181,14 +180,8 @@ func testStsITMigrateAndMove(t *testing.T) {
 			},
 		},
 	}
-
-	// Here remove extra info from SetupInterval
-	if err := utils.Clone(v1Sts.SetupInterval[0], &stsSetupTime); err != nil {
-		t.Error(err)
-	}
-
 	x, _ := engine.NewFilterRule(utils.MetaGreaterOrEqual,
-		"SetupInterval", []string{stsSetupTime.String()})
+		"SetupInterval", []string{v1Sts.SetupInterval[0].String()})
 	filters = append(filters, x)
 	x, _ = engine.NewFilterRule(utils.MetaGreaterOrEqual,
 		"UsageInterval", []string{v1Sts.UsageInterval[0].String()})

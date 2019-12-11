@@ -399,7 +399,7 @@ func TestDebitRounding(t *testing.T) {
 		TimeStart: t1, TimeEnd: t2, LoopIndex: 0}
 	result, _ := cd.Debit()
 	if result.Cost != 0.30006 || result.GetConnectFee() != 0 { // should be 0.3 :(
-		t.Error("bad cost", utils.ToIJSON(result))
+		t.Error("bad cost", utils.ToJSON(result))
 	}
 }
 

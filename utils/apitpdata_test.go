@@ -111,40 +111,36 @@ func TestNewRateSlot(t *testing.T) {
 	eOut.RateUnit = "a"
 	rcv, err = NewRateSlot(eOut.ConnectFee, eOut.Rate, eOut.RateUnit, eOut.RateIncrement, eOut.GroupIntervalStart)
 	//must receive from time an error: "invalid duration a"
-	if err == nil {
+	if err == nil || err.Error() != "time: invalid duration a" {
 		t.Error(err)
 	}
 }
 
 func TestSetDurations(t *testing.T) {
-	eOut := &RateSlot{
+	rs := &RateSlot{
 		RateUnit:           "1",
 		RateIncrement:      "1",
 		GroupIntervalStart: "1",
 	}
-	err := eOut.SetDurations()
 	//must receive "nil" with
-	if err != nil {
+	if err := rs.SetDurations(); err != nil {
 		t.Error(err)
 	}
-	eOut.RateUnit = "a"
-	err = eOut.SetDurations()
+	rs.RateUnit = "a"
 	//at RateUnit if, must receive from time an error: "invalid duration a"
-	if err == nil {
+	if err := rs.SetDurations(); err == nil || err.Error() != "time: invalid duration a" {
 		t.Error(err)
 	}
-	eOut.RateUnit = "1"
-	eOut.RateIncrement = "a"
-	err = eOut.SetDurations()
+	rs.RateUnit = "1"
+	rs.RateIncrement = "a"
 	//at RateIncrement, must receive from time an error: "invalid duration a"
-	if err == nil {
+	if err := rs.SetDurations(); err == nil || err.Error() != "time: invalid duration a" {
 		t.Error(err)
 	}
-	eOut.RateIncrement = "1"
-	eOut.GroupIntervalStart = "a"
-	err = eOut.SetDurations()
+	rs.RateIncrement = "1"
+	rs.GroupIntervalStart = "a"
 	//at GroupIntervalStart, must receive from time an error: "invalid duration a"
-	if err == nil {
+	if err := rs.SetDurations(); err == nil || err.Error() != "time: invalid duration a" {
 		t.Error(err)
 	}
 }

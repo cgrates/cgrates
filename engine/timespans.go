@@ -282,8 +282,9 @@ func (tss *TimeSpans) Merge() { // Merge whenever possible
 
 func (incr *Increment) Clone() *Increment {
 	nInc := &Increment{
-		Duration: incr.Duration,
-		Cost:     incr.Cost,
+		Duration:       incr.Duration,
+		Cost:           incr.Cost,
+		CompressFactor: incr.CompressFactor,
 	}
 	if incr.BalanceInfo != nil {
 		nInc.BalanceInfo = incr.BalanceInfo.Clone()
@@ -309,6 +310,17 @@ func (incr *Increment) GetCost() float64 {
 }
 
 type Increments []*Increment
+
+func (incs Increments) Clone() (cln Increments) {
+	if incs == nil {
+		return nil
+	}
+	cln = make(Increments, len(incs))
+	for index, increment := range incs {
+		cln[index] = increment.Clone()
+	}
+	return cln
+}
 
 func (incs Increments) Equal(other Increments) bool {
 	if len(other) < len(incs) { // Protect index in case of not being the same size
@@ -349,6 +361,7 @@ func (incs *Increments) Decompress() { // must be pointer receiver
 		cf := cIncr.GetCompressFactor()
 		for i := 0; i < cf; i++ {
 			incr := cIncr.Clone()
+			incr.CompressFactor = 1
 			// set right Values
 			if incr.BalanceInfo != nil {
 				if incr.BalanceInfo.Monetary != nil {
@@ -366,14 +379,8 @@ func (incs *Increments) Decompress() { // must be pointer receiver
 
 // Estimate whether the increments are the same ignoring the CompressFactor
 func (incs Increments) SharingSignature(other Increments) bool {
-	var otherCloned Increments // Clone so we don't affect with decompress the original structure
-	if err := utils.Clone(other, &otherCloned); err != nil {
-		return false
-	}
-	var thisCloned Increments
-	if err := utils.Clone(incs, &thisCloned); err != nil {
-		return false
-	}
+	otherCloned := other.Clone()
+	thisCloned := incs.Clone()
 	otherCloned.Compress()
 	thisCloned.Compress()
 	if len(otherCloned) < len(thisCloned) { // Protect index in case of not being the same size

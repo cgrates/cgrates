@@ -18,13 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestTSRightMargin(t *testing.T) {
+func TestRightMargin(t *testing.T) {
 	i := &RateInterval{
 		Timing: &RITiming{WeekDays: []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday}}}
 	t1 := time.Date(2012, time.February, 3, 23, 45, 0, 0, time.UTC)
@@ -51,7 +52,7 @@ func TestTSRightMargin(t *testing.T) {
 	}
 }
 
-func TestTSSplitMiddle(t *testing.T) {
+func TestSplitMiddle(t *testing.T) {
 	i := &RateInterval{
 		Timing: &RITiming{
 			WeekDays:  utils.WeekDays{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
@@ -74,7 +75,7 @@ func TestTSSplitMiddle(t *testing.T) {
 	}
 }
 
-func TestTSRightHourMargin(t *testing.T) {
+func TestRightHourMargin(t *testing.T) {
 	i := &RateInterval{Timing: &RITiming{WeekDays: []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday}, EndTime: "17:59:00"}}
 	t1 := time.Date(2012, time.February, 3, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 18, 00, 0, 0, time.UTC)
@@ -99,7 +100,7 @@ func TestTSRightHourMargin(t *testing.T) {
 	}
 }
 
-func TestTSLeftMargin(t *testing.T) {
+func TestLeftMargin(t *testing.T) {
 	i := &RateInterval{Timing: &RITiming{WeekDays: []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday}}}
 	t1 := time.Date(2012, time.February, 5, 23, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 6, 0, 10, 0, 0, time.UTC)
@@ -123,7 +124,7 @@ func TestTSLeftMargin(t *testing.T) {
 	}
 }
 
-func TestTSLeftHourMargin(t *testing.T) {
+func TestLeftHourMargin(t *testing.T) {
 	i := &RateInterval{Timing: &RITiming{Months: utils.Months{time.December}, MonthDays: utils.MonthDays{1}, StartTime: "09:00:00"}}
 	t1 := time.Date(2012, time.December, 1, 8, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.December, 1, 9, 20, 0, 0, time.UTC)
@@ -147,7 +148,7 @@ func TestTSLeftHourMargin(t *testing.T) {
 	}
 }
 
-func TestTSEnclosingMargin(t *testing.T) {
+func TestEnclosingMargin(t *testing.T) {
 	i := &RateInterval{Timing: &RITiming{WeekDays: []time.Weekday{time.Sunday}}}
 	t1 := time.Date(2012, time.February, 5, 17, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 5, 18, 10, 0, 0, time.UTC)
@@ -161,7 +162,7 @@ func TestTSEnclosingMargin(t *testing.T) {
 	}
 }
 
-func TestTSOutsideMargin(t *testing.T) {
+func TestOutsideMargin(t *testing.T) {
 	i := &RateInterval{Timing: &RITiming{WeekDays: []time.Weekday{time.Monday}}}
 	t1 := time.Date(2012, time.February, 5, 17, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 5, 18, 10, 0, 0, time.UTC)
@@ -172,7 +173,7 @@ func TestTSOutsideMargin(t *testing.T) {
 	}
 }
 
-func TestTSContains(t *testing.T) {
+func TestContains(t *testing.T) {
 	t1 := time.Date(2012, time.February, 5, 17, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 5, 17, 55, 0, 0, time.UTC)
 	t3 := time.Date(2012, time.February, 5, 17, 50, 0, 0, time.UTC)
@@ -188,7 +189,7 @@ func TestTSContains(t *testing.T) {
 	}
 }
 
-func TestTSSplitByRatingPlan(t *testing.T) {
+func TestSplitByRatingPlan(t *testing.T) {
 	t1 := time.Date(2012, time.February, 5, 17, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 5, 17, 55, 0, 0, time.UTC)
 	t3 := time.Date(2012, time.February, 5, 17, 50, 0, 0, time.UTC)
@@ -209,7 +210,7 @@ func TestTSSplitByRatingPlan(t *testing.T) {
 	}
 }
 
-func TestTSTimespanGetCost(t *testing.T) {
+func TestTimespanGetCost(t *testing.T) {
 	t1 := time.Date(2012, time.February, 5, 17, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 5, 17, 55, 0, 0, time.UTC)
 	ts1 := TimeSpan{TimeStart: t1, TimeEnd: t2}
@@ -232,7 +233,7 @@ func TestTSTimespanGetCost(t *testing.T) {
 	}
 }
 
-func TestTSTimespanGetCostIntervals(t *testing.T) {
+func TestTimespanGetCostIntervals(t *testing.T) {
 	ts := &TimeSpan{}
 	ts.Increments = make(Increments, 11)
 	for i := 0; i < 11; i++ {
@@ -243,7 +244,7 @@ func TestTSTimespanGetCostIntervals(t *testing.T) {
 	}
 }
 
-func TestTSSetRateInterval(t *testing.T) {
+func TestSetRateInterval(t *testing.T) {
 	i1 := &RateInterval{
 		Timing: &RITiming{},
 		Rating: &RIRate{Rates: RateGroups{&Rate{0, 1.0, 1 * time.Second, 1 * time.Second}}},
@@ -266,7 +267,7 @@ func TestTSSetRateInterval(t *testing.T) {
 	}
 }
 
-func TestTSTimespanSplitGroupedRates(t *testing.T) {
+func TestTimespanSplitGroupedRates(t *testing.T) {
 	i := &RateInterval{
 		Timing: &RITiming{
 			EndTime: "17:59:00",
@@ -304,7 +305,7 @@ func TestTSTimespanSplitGroupedRates(t *testing.T) {
 	}
 }
 
-func TestTSTimespanSplitGroupedRatesIncrements(t *testing.T) {
+func TestTimespanSplitGroupedRatesIncrements(t *testing.T) {
 	i := &RateInterval{
 		Timing: &RITiming{
 			EndTime: "17:59:00",
@@ -360,7 +361,7 @@ func TestTSTimespanSplitGroupedRatesIncrements(t *testing.T) {
 	}
 }
 
-func TestTSTimespanSplitRightHourMarginBeforeGroup(t *testing.T) {
+func TestTimespanSplitRightHourMarginBeforeGroup(t *testing.T) {
 	i := &RateInterval{
 		Timing: &RITiming{
 			EndTime: "17:00:30",
@@ -397,7 +398,7 @@ func TestTSTimespanSplitRightHourMarginBeforeGroup(t *testing.T) {
 	}
 }
 
-func TestTSTimespanSplitGroupSecondSplit(t *testing.T) {
+func TestTimespanSplitGroupSecondSplit(t *testing.T) {
 	i := &RateInterval{
 		Timing: &RITiming{
 			EndTime: "17:03:30",
@@ -444,7 +445,7 @@ func TestTSTimespanSplitGroupSecondSplit(t *testing.T) {
 	}
 }
 
-func TestTSTimespanSplitLong(t *testing.T) {
+func TestTimespanSplitLong(t *testing.T) {
 	i := &RateInterval{
 		Timing: &RITiming{
 			StartTime: "18:00:00",
@@ -474,7 +475,7 @@ func TestTSTimespanSplitLong(t *testing.T) {
 	}
 }
 
-func TestTSTimespanSplitMultipleGroup(t *testing.T) {
+func TestTimespanSplitMultipleGroup(t *testing.T) {
 	i := &RateInterval{
 		Timing: &RITiming{
 			EndTime: "17:05:00",
@@ -521,7 +522,7 @@ func TestTSTimespanSplitMultipleGroup(t *testing.T) {
 	}
 }
 
-func TestTSTimespanExpandingPastEnd(t *testing.T) {
+func TestTimespanExpandingPastEnd(t *testing.T) {
 	timespans := []*TimeSpan{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
@@ -545,7 +546,7 @@ func TestTSTimespanExpandingPastEnd(t *testing.T) {
 	}
 }
 
-func TestTSTimespanExpandingDurationIndex(t *testing.T) {
+func TestTimespanExpandingDurationIndex(t *testing.T) {
 	timespans := []*TimeSpan{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
@@ -567,7 +568,7 @@ func TestTSTimespanExpandingDurationIndex(t *testing.T) {
 	}
 }
 
-func TestTSTimespanExpandingRoundingPastEnd(t *testing.T) {
+func TestTimespanExpandingRoundingPastEnd(t *testing.T) {
 	timespans := []*TimeSpan{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
@@ -591,7 +592,7 @@ func TestTSTimespanExpandingRoundingPastEnd(t *testing.T) {
 	}
 }
 
-func TestTSTimespanExpandingPastEndMultiple(t *testing.T) {
+func TestTimespanExpandingPastEndMultiple(t *testing.T) {
 	timespans := []*TimeSpan{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
@@ -619,7 +620,7 @@ func TestTSTimespanExpandingPastEndMultiple(t *testing.T) {
 	}
 }
 
-func TestTSTimespanExpandingPastEndMultipleEqual(t *testing.T) {
+func TestTimespanExpandingPastEndMultipleEqual(t *testing.T) {
 	timespans := []*TimeSpan{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
@@ -647,7 +648,7 @@ func TestTSTimespanExpandingPastEndMultipleEqual(t *testing.T) {
 	}
 }
 
-func TestTSTimespanExpandingBeforeEnd(t *testing.T) {
+func TestTimespanExpandingBeforeEnd(t *testing.T) {
 	timespans := []*TimeSpan{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
@@ -673,7 +674,7 @@ func TestTSTimespanExpandingBeforeEnd(t *testing.T) {
 	}
 }
 
-func TestTSTimespanExpandingBeforeEndMultiple(t *testing.T) {
+func TestTimespanExpandingBeforeEndMultiple(t *testing.T) {
 	timespans := []*TimeSpan{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
@@ -703,7 +704,7 @@ func TestTSTimespanExpandingBeforeEndMultiple(t *testing.T) {
 	}
 }
 
-func TestTSTimespanCreateSecondsSlice(t *testing.T) {
+func TestTimespanCreateSecondsSlice(t *testing.T) {
 	ts := &TimeSpan{
 		TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
 		TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
@@ -720,7 +721,7 @@ func TestTSTimespanCreateSecondsSlice(t *testing.T) {
 	}
 }
 
-func TestTSTimespanCreateIncrements(t *testing.T) {
+func TestTimespanCreateIncrements(t *testing.T) {
 	ts := &TimeSpan{
 		TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
 		TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 100000000, time.UTC),
@@ -746,7 +747,7 @@ func TestTSTimespanCreateIncrements(t *testing.T) {
 	}
 }
 
-func TestTSTimespanSplitByIncrement(t *testing.T) {
+func TestTimespanSplitByIncrement(t *testing.T) {
 	ts := &TimeSpan{
 		TimeStart:     time.Date(2013, 9, 19, 18, 30, 0, 0, time.UTC),
 		TimeEnd:       time.Date(2013, 9, 19, 18, 31, 00, 0, time.UTC),
@@ -781,7 +782,7 @@ func TestTSTimespanSplitByIncrement(t *testing.T) {
 	}
 }
 
-func TestTSTimespanSplitByIncrementStart(t *testing.T) {
+func TestTimespanSplitByIncrementStart(t *testing.T) {
 	ts := &TimeSpan{
 		TimeStart:     time.Date(2013, 9, 19, 18, 30, 0, 0, time.UTC),
 		TimeEnd:       time.Date(2013, 9, 19, 18, 31, 00, 0, time.UTC),
@@ -815,7 +816,7 @@ func TestTSTimespanSplitByIncrementStart(t *testing.T) {
 	}
 }
 
-func TestTSTimespanSplitByIncrementEnd(t *testing.T) {
+func TestTimespanSplitByIncrementEnd(t *testing.T) {
 	ts := &TimeSpan{
 		TimeStart:     time.Date(2013, 9, 19, 18, 30, 0, 0, time.UTC),
 		TimeEnd:       time.Date(2013, 9, 19, 18, 31, 00, 0, time.UTC),
@@ -849,7 +850,7 @@ func TestTSTimespanSplitByIncrementEnd(t *testing.T) {
 	}
 }
 
-func TestTSTimespanSplitByDuration(t *testing.T) {
+func TestTimespanSplitByDuration(t *testing.T) {
 	ts := &TimeSpan{
 		TimeStart:     time.Date(2013, 9, 19, 18, 30, 0, 0, time.UTC),
 		TimeEnd:       time.Date(2013, 9, 19, 18, 31, 00, 0, time.UTC),
@@ -887,7 +888,7 @@ func TestTSTimespanSplitByDuration(t *testing.T) {
 	}
 }
 
-func TestTSRemoveOverlapedFromIndexMiddle(t *testing.T) {
+func TestRemoveOverlapedFromIndexMiddle(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
@@ -918,7 +919,7 @@ func TestTSRemoveOverlapedFromIndexMiddle(t *testing.T) {
 	}
 }
 
-func TestTSRemoveOverlapedFromIndexMiddleNonBounds(t *testing.T) {
+func TestRemoveOverlapedFromIndexMiddleNonBounds(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
@@ -951,7 +952,7 @@ func TestTSRemoveOverlapedFromIndexMiddleNonBounds(t *testing.T) {
 	}
 }
 
-func TestTSRemoveOverlapedFromIndexMiddleNonBoundsOver(t *testing.T) {
+func TestRemoveOverlapedFromIndexMiddleNonBoundsOver(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
@@ -983,7 +984,7 @@ func TestTSRemoveOverlapedFromIndexMiddleNonBoundsOver(t *testing.T) {
 	}
 }
 
-func TestTSRemoveOverlapedFromIndexEnd(t *testing.T) {
+func TestRemoveOverlapedFromIndexEnd(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
@@ -1013,7 +1014,7 @@ func TestTSRemoveOverlapedFromIndexEnd(t *testing.T) {
 	}
 }
 
-func TestTSRemoveOverlapedFromIndexEndPast(t *testing.T) {
+func TestRemoveOverlapedFromIndexEndPast(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
@@ -1043,7 +1044,7 @@ func TestTSRemoveOverlapedFromIndexEndPast(t *testing.T) {
 	}
 }
 
-func TestTSRemoveOverlapedFromIndexAll(t *testing.T) {
+func TestRemoveOverlapedFromIndexAll(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
@@ -1072,7 +1073,7 @@ func TestTSRemoveOverlapedFromIndexAll(t *testing.T) {
 	}
 }
 
-func TestTSRemoveOverlapedFromIndexNone(t *testing.T) {
+func TestRemoveOverlapedFromIndexNone(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
@@ -1104,7 +1105,7 @@ func TestTSRemoveOverlapedFromIndexNone(t *testing.T) {
 	}
 }
 
-func TestTSRemoveOverlapedFromIndexOne(t *testing.T) {
+func TestRemoveOverlapedFromIndexOne(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
@@ -1121,7 +1122,7 @@ func TestTSRemoveOverlapedFromIndexOne(t *testing.T) {
 	}
 }
 
-func TestTSRemoveOverlapedFromIndexTwo(t *testing.T) {
+func TestRemoveOverlapedFromIndexTwo(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
@@ -1142,7 +1143,7 @@ func TestTSRemoveOverlapedFromIndexTwo(t *testing.T) {
 	}
 }
 
-func TestTSOverlapWithTimeSpansMiddleLong(t *testing.T) {
+func TestOverlapWithTimeSpansMiddleLong(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
@@ -1179,7 +1180,7 @@ func TestTSOverlapWithTimeSpansMiddleLong(t *testing.T) {
 	}
 }
 
-func TestTSOverlapWithTimeSpansMiddleMedium(t *testing.T) {
+func TestOverlapWithTimeSpansMiddleMedium(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
@@ -1217,7 +1218,7 @@ func TestTSOverlapWithTimeSpansMiddleMedium(t *testing.T) {
 	}
 }
 
-func TestTSOverlapWithTimeSpansMiddleShort(t *testing.T) {
+func TestOverlapWithTimeSpansMiddleShort(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
@@ -1256,7 +1257,7 @@ func TestTSOverlapWithTimeSpansMiddleShort(t *testing.T) {
 	}
 }
 
-func TestTSOverlapWithTimeSpansStart(t *testing.T) {
+func TestOverlapWithTimeSpansStart(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
@@ -1293,7 +1294,7 @@ func TestTSOverlapWithTimeSpansStart(t *testing.T) {
 	}
 }
 
-func TestTSOverlapWithTimeSpansAlmostEnd(t *testing.T) {
+func TestOverlapWithTimeSpansAlmostEnd(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
@@ -1332,7 +1333,7 @@ func TestTSOverlapWithTimeSpansAlmostEnd(t *testing.T) {
 	}
 }
 
-func TestTSOverlapWithTimeSpansEnd(t *testing.T) {
+func TestOverlapWithTimeSpansEnd(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
@@ -1370,7 +1371,7 @@ func TestTSOverlapWithTimeSpansEnd(t *testing.T) {
 	}
 }
 
-func TestTSOverlapWithTimeSpansPastEnd(t *testing.T) {
+func TestOverlapWithTimeSpansPastEnd(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
@@ -1408,7 +1409,7 @@ func TestTSOverlapWithTimeSpansPastEnd(t *testing.T) {
 	}
 }
 
-func TestTSOverlapWithTimeSpansAll(t *testing.T) {
+func TestOverlapWithTimeSpansAll(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
@@ -1444,7 +1445,7 @@ func TestTSOverlapWithTimeSpansAll(t *testing.T) {
 	}
 }
 
-func TestTSOverlapWithTimeSpansAllPast(t *testing.T) {
+func TestOverlapWithTimeSpansAllPast(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
@@ -1480,7 +1481,7 @@ func TestTSOverlapWithTimeSpansAllPast(t *testing.T) {
 	}
 }
 
-func TestTSOverlapWithTimeSpansOne(t *testing.T) {
+func TestOverlapWithTimeSpansOne(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
@@ -1504,7 +1505,7 @@ func TestTSOverlapWithTimeSpansOne(t *testing.T) {
 	}
 }
 
-func TestTSIncrementsCompressDecompress(t *testing.T) {
+func TestIncrementsCompressDecompress(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			Increments: Increments{
@@ -1561,7 +1562,7 @@ func TestTSIncrementsCompressDecompress(t *testing.T) {
 	}
 }
 
-func TestTSMultipleIncrementsCompressDecompress(t *testing.T) {
+func TestMultipleIncrementsCompressDecompress(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			Increments: Increments{
@@ -1618,7 +1619,7 @@ func TestTSMultipleIncrementsCompressDecompress(t *testing.T) {
 	}
 }
 
-func TestTSBetterIntervalZero(t *testing.T) {
+func TestBetterIntervalZero(t *testing.T) {
 	ts := &TimeSpan{
 		TimeStart:    time.Date(2015, 4, 27, 8, 0, 0, 0, time.UTC),
 		RateInterval: &RateInterval{Timing: &RITiming{StartTime: "08:00:00"}},
@@ -1630,7 +1631,7 @@ func TestTSBetterIntervalZero(t *testing.T) {
 	}
 }
 
-func TestTSBetterIntervalBefore(t *testing.T) {
+func TestBetterIntervalBefore(t *testing.T) {
 	ts := &TimeSpan{
 		TimeStart:    time.Date(2015, 4, 27, 8, 0, 0, 0, time.UTC),
 		RateInterval: &RateInterval{Timing: &RITiming{StartTime: "08:00:00"}},
@@ -1642,7 +1643,7 @@ func TestTSBetterIntervalBefore(t *testing.T) {
 	}
 }
 
-func TestTSBetterIntervalEqual(t *testing.T) {
+func TestBetterIntervalEqual(t *testing.T) {
 	ts := &TimeSpan{
 		TimeStart:    time.Date(2015, 4, 27, 8, 0, 0, 0, time.UTC),
 		RateInterval: &RateInterval{Timing: &RITiming{StartTime: "08:00:00"}},
@@ -1654,7 +1655,7 @@ func TestTSBetterIntervalEqual(t *testing.T) {
 	}
 }
 
-func TestTSBetterIntervalAfter(t *testing.T) {
+func TestBetterIntervalAfter(t *testing.T) {
 	ts := &TimeSpan{
 		TimeStart:    time.Date(2015, 4, 27, 8, 0, 0, 0, time.UTC),
 		RateInterval: &RateInterval{Timing: &RITiming{StartTime: "08:00:00"}},
@@ -1666,7 +1667,7 @@ func TestTSBetterIntervalAfter(t *testing.T) {
 	}
 }
 
-func TestTSBetterIntervalBetter(t *testing.T) {
+func TestBetterIntervalBetter(t *testing.T) {
 	ts := &TimeSpan{
 		TimeStart:    time.Date(2015, 4, 27, 8, 0, 0, 0, time.UTC),
 		RateInterval: &RateInterval{Timing: &RITiming{StartTime: "00:00:00"}},
@@ -1678,7 +1679,7 @@ func TestTSBetterIntervalBetter(t *testing.T) {
 	}
 }
 
-func TestTSBetterIntervalBetterHour(t *testing.T) {
+func TestBetterIntervalBetterHour(t *testing.T) {
 	ts := &TimeSpan{
 		TimeStart:    time.Date(2015, 4, 27, 8, 0, 0, 0, time.UTC),
 		RateInterval: &RateInterval{Timing: &RITiming{StartTime: "00:00:00"}},
@@ -1690,7 +1691,7 @@ func TestTSBetterIntervalBetterHour(t *testing.T) {
 	}
 }
 
-func TestTSBetterIntervalAgainAfter(t *testing.T) {
+func TestBetterIntervalAgainAfter(t *testing.T) {
 	ts := &TimeSpan{
 		TimeStart:    time.Date(2015, 4, 27, 8, 0, 0, 0, time.UTC),
 		RateInterval: &RateInterval{Timing: &RITiming{StartTime: "00:00:00"}},
@@ -1702,7 +1703,7 @@ func TestTSBetterIntervalAgainAfter(t *testing.T) {
 	}
 }
 
-func TestTSCompressDecompress(t *testing.T) {
+func TestCompressDecompress(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			TimeStart:     time.Date(2015, 1, 9, 16, 18, 0, 0, time.UTC),
@@ -1770,7 +1771,7 @@ func TestTSCompressDecompress(t *testing.T) {
 	}
 }
 
-func TestTSDifferentCompressDecompress(t *testing.T) {
+func TestDifferentCompressDecompress(t *testing.T) {
 	tss := TimeSpans{
 		&TimeSpan{
 			TimeStart:     time.Date(2015, 1, 9, 16, 18, 0, 0, time.UTC),
@@ -1849,7 +1850,7 @@ func TestTSDifferentCompressDecompress(t *testing.T) {
 	}
 }
 
-func TestTSMerge(t *testing.T) {
+func TestMerge(t *testing.T) {
 	tss1 := &TimeSpan{
 		TimeStart: time.Date(2015, 1, 9, 16, 18, 0, 0, time.UTC),
 		TimeEnd:   time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC),
@@ -1967,5 +1968,28 @@ func TestTSMerge(t *testing.T) {
 		t.Error("Not merged")
 	} else if !tss1.Equal(eMergedTSS) {
 		t.Errorf("Expecting: %+v, received: %+v", eMergedTSS, tss1)
+	}
+}
+
+func TestIncrementClone(t *testing.T) {
+	incr := &Increment{}
+	eOut := &Increment{}
+	if clone := incr.Clone(); !reflect.DeepEqual(eOut, clone) {
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(clone))
+	}
+	incr = &Increment{
+		Duration:       time.Duration(10),
+		Cost:           0.7,
+		CompressFactor: 10,
+		BalanceInfo:    &DebitInfo{AccountID: "AccountID_test"},
+	}
+	eOut = &Increment{
+		Duration:       time.Duration(10),
+		Cost:           0.7,
+		CompressFactor: 10,
+		BalanceInfo:    &DebitInfo{AccountID: "AccountID_test"},
+	}
+	if clone := incr.Clone(); !reflect.DeepEqual(eOut, clone) {
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(eOut), utils.ToJSON(clone))
 	}
 }

@@ -28,11 +28,7 @@ import (
 )
 
 func TestV1AttributeProfileAsAttributeProfile(t *testing.T) {
-	var cloneExpTime time.Time
-	expTime := time.Now().Add(time.Duration(20 * time.Minute))
-	if err := utils.Clone(expTime, &cloneExpTime); err != nil {
-		t.Error(err)
-	}
+	cloneExpTime := time.Now().Add(time.Duration(20 * time.Minute))
 	mapSubstitutes := make(map[string]map[string]*v1Attribute)
 	mapSubstitutes["FL1"] = make(map[string]*v1Attribute)
 	mapSubstitutes["FL1"]["In1"] = &v1Attribute{

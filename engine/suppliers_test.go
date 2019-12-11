@@ -27,18 +27,17 @@ import (
 )
 
 var (
-	cloneExpTimeSuppliers time.Time
-	expTimeSuppliers      = time.Now().Add(time.Duration(20 * time.Minute))
-	splService            *SupplierService
-	dmSPP                 *DataManager
-	sppTest               = SupplierProfiles{
+	expTimeSuppliers = time.Now().Add(time.Duration(20 * time.Minute))
+	splService       *SupplierService
+	dmSPP            *DataManager
+	sppTest          = SupplierProfiles{
 		&SupplierProfile{
 			Tenant:    "cgrates.org",
 			ID:        "SupplierProfile1",
 			FilterIDs: []string{"FLTR_SUPP_1"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     cloneExpTimeSuppliers,
+				ExpiryTime:     expTimeSuppliers,
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
@@ -63,7 +62,7 @@ var (
 			FilterIDs: []string{"FLTR_SUPP_2"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     cloneExpTimeSuppliers,
+				ExpiryTime:     expTimeSuppliers,
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
@@ -108,7 +107,7 @@ var (
 			FilterIDs: []string{"FLTR_SUPP_3"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     cloneExpTimeSuppliers,
+				ExpiryTime:     expTimeSuppliers,
 			},
 			Sorting:           utils.MetaWeight,
 			SortingParameters: []string{},
@@ -289,10 +288,6 @@ func TestSuppliersSort(t *testing.T) {
 }
 
 func TestSuppliersPopulateSupplierService(t *testing.T) {
-	//Need clone because time.Now adds extra information that DeepEqual doesn't like
-	if err := utils.Clone(expTimeSuppliers, &cloneExpTimeSuppliers); err != nil {
-		t.Error(err)
-	}
 	data := NewInternalDB(nil, nil)
 	dmSPP = NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
 	defaultCfg, err := config.NewDefaultCGRConfig()

@@ -2419,12 +2419,7 @@ func TestActionTopUpZeroNegative(t *testing.T) {
 }
 
 func TestActionSetExpiry(t *testing.T) {
-	var cloneTimeNowPlus24h time.Time
 	timeNowPlus24h := time.Now().Add(time.Duration(24 * time.Hour))
-	//Need clone because time.Now adds extra information that DeepEqual doesn't like
-	if err := utils.Clone(timeNowPlus24h, &cloneTimeNowPlus24h); err != nil {
-		t.Error(err)
-	}
 	account := &Account{
 		ID: "cgrates.org:zeroNegative",
 		BalanceMap: map[string]Balances{
@@ -2454,7 +2449,7 @@ func TestActionSetExpiry(t *testing.T) {
 				Balance: &BalanceFilter{
 					ID:             utils.StringPointer("Bal1"),
 					Type:           utils.StringPointer(utils.MONETARY),
-					ExpirationDate: utils.TimePointer(cloneTimeNowPlus24h),
+					ExpirationDate: utils.TimePointer(timeNowPlus24h),
 				},
 			},
 		},
@@ -2465,8 +2460,8 @@ func TestActionSetExpiry(t *testing.T) {
 		t.Error("Error getting account: ", acc, err)
 	}
 	//Verify ExpirationDate for first balance(Bal1)
-	if !acc.BalanceMap[utils.MONETARY][0].ExpirationDate.Equal(cloneTimeNowPlus24h) {
-		t.Errorf("Expecting: %+v, received: %+v", cloneTimeNowPlus24h, acc.BalanceMap[utils.MONETARY][0].ExpirationDate)
+	if !acc.BalanceMap[utils.MONETARY][0].ExpirationDate.Equal(timeNowPlus24h) {
+		t.Errorf("Expecting: %+v, received: %+v", timeNowPlus24h, acc.BalanceMap[utils.MONETARY][0].ExpirationDate)
 	}
 }
 
@@ -2561,10 +2556,7 @@ func TestClonedAction(t *testing.T) {
 		},
 		Weight: float64(10),
 	}
-
-	clone := a.Clone()
-
-	if !reflect.DeepEqual(a, clone) {
+	if clone := a.Clone(); !reflect.DeepEqual(a, clone) {
 		t.Error("error cloning action: ", utils.ToIJSON(clone))
 	}
 }
@@ -2592,15 +2584,10 @@ func TestClonedActions(t *testing.T) {
 			Weight: float64(20),
 		},
 	}
-
-	clone, err := actions.Clone()
-
-	if err != nil {
+	if clone, err := actions.Clone(); err != nil {
 		t.Error("error cloning actions: ", err)
-	}
-
-	if !reflect.DeepEqual(actions, clone) {
-		t.Error("error cloning actions: ", utils.ToIJSON(clone))
+	} else if !reflect.DeepEqual(actions, clone) {
+		t.Errorf("Expecting %+v, received: %+v", utils.ToIJSON(actions), utils.ToIJSON(clone))
 	}
 
 }
