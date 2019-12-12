@@ -815,34 +815,3 @@
 // },
 
 }
-: "3306",
-// 	"out_stordb_name": "cgrates",
-// 	"out_stordb_user": "cgrates",
-// 	"out_stordb_password": "",
-// 	"users_filters":[],
-// },
-
-
-// "dispatchers":{								// DispatcherS config
-// 	"enabled": false,						// starts DispatcherS service: <true|false>.
-// 	"indexed_selects":true,					// enable profile matching exclusively on indexes
-// 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
-// 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
-// 	"attributes_conns": [],					// connections to AttributeS for API authorization, empty to disable auth functionality: <""|*internal|x.y.z.y:1234>
-// },
-
-
-// "analyzers":{								// AnalyzerS config
-// 	"enabled":false							// starts AnalyzerS service: <true|false>.
-// },
-
-
-// "apier": {
-// 	"caches_conns":[						// connections to CacheS for reloads
-// 		{"address": "*internal"},
-// 	],
-// 	"scheduler_conns": [],					// connections to SchedulerS for reloads
-// 	"attributes_conns": [],					// connections to AttributeS for CDRExporter
-// },
-
-}
