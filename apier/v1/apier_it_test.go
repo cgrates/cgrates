@@ -1358,9 +1358,10 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 	expStats := engine.GetDefaultEmptyCacheStats()
 	expStats[utils.CacheAccountActionPlans].Items = 13
 	expStats[utils.CacheActionPlans].Items = 7
-	expStats[utils.CacheActions].Items = 6
+	expStats[utils.CacheActions].Items = 5
 	expStats[utils.CacheDestinations].Items = 3
 	expStats[utils.CacheLoadIDs].Items = 14
+	expStats[utils.CacheRPCConnections].Items = 2
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithArgDispatcher), &rcvStats); err != nil {
 		t.Error("Got error on CacheSv1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expStats, rcvStats) {
@@ -1403,8 +1404,8 @@ func TestApierGetAccountAfterLoad(t *testing.T) {
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := rater.Call(utils.ApierV2GetAccount, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 11 {
-		t.Errorf("Calling ApierV1.GetBalance expected: 11, received: %v \n\n for:%s", reply.BalanceMap[utils.MONETARY].GetTotalValue(), utils.ToJSON(reply))
+	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 13 {
+		t.Errorf("Calling ApierV1.GetBalance expected: 13, received: %v \n\n for:%s", reply.BalanceMap[utils.MONETARY].GetTotalValue(), utils.ToJSON(reply))
 	}
 }
 
