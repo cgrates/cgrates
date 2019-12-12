@@ -1,86 +1,118 @@
 1. Introduction
 ===============
 
-`CGRateS`_ is a *very fast* and *easily scalable* **(charging, rating, accounting, lcr, mediation, billing, authorization)** *ENGINE* targeted especially for ISPs and Telecom Operators.
+`CGRateS`_ is a *very fast* (**50k+ CPS**) and *easily scalable* (**balancer** + **replication** included) **Real-time Enterprise Billing Suite** *ENGINE* targeted especially for ISPs and Telecom Operators.
 
-It is written in `Go`_ programming language and is accessible from any programming language via JSON RPC.
-The code is well documented (**go doc** compliant `API docs`_) and heavily tested. (also **5000+** tests are part of the test suite).
-
-After testing various databases like `Kyoto Cabinet`_, `Apache Cassandra`_, `Redis`_ and `MongoDB`_,
-the project focused on **Redis** as it delivers the best trade-off between speed, configuration and scalability.
-
-.. important:: `MongoDB`_ **full** support is now added.
-
-Thanks to CGRateS flexibility, connection to any database can be easily integrated by writing a simple adapter.
-
-.. _CGRateS: http://cgrates.org
-.. _Go: http://golang.org
-.. _kyoto cabinet: http://fallabs.com/kyotocabinet
-.. _apache cassandra: http://cassandra.apache.org
-.. _redis: http://redis.io
-.. _mongodb: http://www.mongodb.org
-.. _api docs: https://godoc.org/github.com/cgrates/cgrates/apier
-
-To better understand the CGRateS architecture, below are some logical configurations in which CGRateS can operate:
-
-.. note::  **RALs** - is a CGRateS component and stands for RatingAccountingLCR service.
-
-.. image::  images/Simple.png
-This scenario fits most of the simple installations.
-
-.. image::  images/Normal.png
-While the network grows more **RALs** can be thrown into the stack to offer more requests per seconds workload.
-This implies the usage of the **Balancer** to distribute the requests to the **RALs** running on the *different machines*.
-
-.. image::  images/Normal_ha.png
-Without Balancer using HA (broadcast) ....
-
-.. image::  images/Complicated.png
-Of course more **SessionManagers** can serve *multiple Telecom Switches* and all of them are connected to the same **Balancer**.
-
-.. image::  images/Complicated_ha.png
-Without Balancer using HA (broadcast) ....
-
-.. note:: We are planning to support **multiple** *Balancers* for huge networks if the need arises.
+It is written in `Go`_ programming language and accessible from any programming language via JSON RPC.
+The code is well documented (**go doc** compliant `API docs`_) and heavily tested (**5k+** tests are part of the unit test suite).
 
 
 1.1. CGRateS Features
 ---------------------
 
-- Reliable and Fast ( very fast ;) ). To get an idea about speed, we have benchmarked 13000+ req/sec on a rather modest machine without requiring special tweaks in the kernel.
-   - Using most modern programming concepts like multiprocessor support, asynchronous code execution within microthreads.
-   - Built-in data caching system per call duration.
-   - In-Memory database with persistence over restarts.
-   - Use of Linux enterprise ready tools to assure High-Availability of the Balancer where that is required (*Supervise* for Application level availability and *LinuxHA* for Host level availability).
-   - High-Availability of main components is now part of CGRateS core.
+- Performance oriented. To get an idea about speed, we have benchmarked 50000+ req/sec on comodity hardware without any tweaks in the kernel.
+    - Using most modern programming concepts like multiprocessor support, asynchronous code execution within microthreads, channel based locking.
+    - Built-in data caching system with LRU and TTL support.
+    - Linear performance increase via simple hardware addition.
+    - On demand performance increase via in-process / over network communication between engine services. 
 
-- Modular architecture
-    - Easy to enhance functionality by writing custom session managers or mediators.
-    - Flexible API accessible via both **Gob** (Golang specific, increased performance) or **JSON** (platform independent, universally accessible).
+- Modular architecture.
+    - Plugable into existing infrastructure.
+    - Non-intrusive into existing setups.
+    - Easy to enhance functionality by writing custom components.
+    - Flexible API accessible via both **GOB** (`Go`_ specific, increased performance) or **JSON** (platform independent, universally accessible).
+    - Easy distribution (one binary concept, can run via NFS on all Linux servers without install)
 
-- Prepaid, Postpaid and Pseudo-Prepaid Controller.
-    - Mutiple Primary Balances per Account (eg: MONETARY, SMS, INTERNET_MINUTES, INTERNET_TRAFFIC).
-    - Multiple Auxiliary Balances per Account (eg: Free Minutes per Destination,  Volume Rates, Volume Discounts).
-    - Concurrent sessions per account sharing the same balance with configurable debit interval (starting with 1 second).
-    - Built-in Task-Scheduler supporting both one-time as well as recurrent actions (eg: TOPUP_MINUTES_PER_DESTINATION, DEBIT_MONETARY, RESET_BALANCE).
-    - ActionTriggers (useful for commercial offerings like receive amounts of monetary units if a specified number of minutes was charged in a month).
+- Easy administration.
+    - One binary can run on all Linux servers without additional installation (simple copy).
+    - Can run diskless via NFS.
+    - Virtualization/containerization friendly(runs on Docker_).
+
+- GOCS (Global Online Charging System).
+    - Support for global networks with one master + multi-cache nodes around the globe for low query latency.
+    - Mutiple Balance types per Account (\*monetary, \*voice, \*sms, \*data, \*generic).
+    - Unlimited number of Account Balances with weight based prioritization.
+    - Various Balance filters (ie: per-destination, roaming-only, weekend-only).
+    - Support for Volume based discounts and automatic bonuses (ie: 5 SMS free for every 10 minutes in one hour to specific destination).
+    - Session based charging with support for concurrent sessions per account and per session dynamic debit interval.
+    - Session emulation combined with Derived Charging (separate charging for distributors chaining, customer/supplier parallel calculations).
+    - Balance reservation and refunds.
+    - Event based charging (ie: SMS, MESSAGE).
+    - Built-in Task-Scheduler supporting both one-time as well as recurrent actions (automatic subscriptions management, recurrent \*debit/\*topup, DID charging).
+    - Real-time balance monitors with automatic actions triggered (bonuses or fraud detection).
 
 - Highly configurable Rating.
     - Connect Fees.
     - Priced Units definition.
     - Rate increments.
-    - Millisecond timestaps.
-    - Four decimal currencies.
-    - Multiple TypeOfRecord rating (eg: standard vs. premium calls, SMSes, Internet Traffic).
-    - Rating subject concatenations for combined records (eg: location based rating for same user).
+    - Rate groups (ie. charge first minute in a call as a whole and next ones per second).
+    - Verbose durations(up to nanoseconds billing).
+    - Configurable decimals per destination.
+    - Rating subject categorization (ie. premium/local charges, roaming).
     - Recurrent rates definition (per year, month, day, dayOfWeek, time).
     - Rating Profiles activation times (eg: rates becoming active at specific time in the future).
+    - Rating Profiles fallback (per subject destinations with fallback to server wide pricing).
+    - Verbose charging logs to comply strict rules imposed by some country laws.
 
-- Multi-Tenant for both Prepaid as well as Rating.
+- Multi-Tenant from day one.
+    - Default Tenant configurable for one-tenant systems.
+    - Security enforced for RPC-API on Tenant level.
 
-- Flexible Mediator able to run multiple mediation processes on the same CDR.
+- Online configuration reloads without restart.
+    - Engine configuration from .json folder or remote http server.
+    - Tariff Plans from .csv folder or database storage.
 
-- Verbose action logging in persistent databases (eg: MongoDB/PostgreSQL/MySQL) to cope with country specific law requirements.
+- CDR server.
+    - Optional offline database storage.
+    - Online (rating queues) or offline (via RPC-API) exports with customizable content via .json templates. 
+    - Multiple export interfaces: files, HTTP, AMQP_, SQS_, Kafka_.
+
+- Generic Event Reader.
+    - Process various sources of events and convert them into internal ones which are sent to CDR server for rating.
+    - Conversion rules defined in .json templates.
+    - Supported interfaces: .csv, .xml, fixed width files, Kafka_.
+
+- Events mediation.
+    - Ability to add/change/remove information within *Events* to achieve additional services or correction.
+    - Performance oriented.
+
+- Routing server for VoIP.
+    - Implements strategies like *Least Cost Routing*, *Load Balacer*, *High Availability*.
+    - Implements *Number Portability* service.
+
+- Resource allocation controller.
+    - Generic filters for advanced logic.
+    - In-memory operations for increased performance.
+    - Backup in offline storage.
+
+- Stats service.
+    - Generic stats (\*sum, \*difference, \*multiply, \*divide).
+    - In-memory operations for increased performance.
+    - Backup in offline storage.
+
+- Thresholds monitor.
+    - Particular implementation of *Fraud Detection with automatic mitigation*.
+    - Execute independent actions which can serve various purposes (notifications, accounts disables, bonuses to accounts).
+
+- Multiple RPC interfaces.
+    - Support for *JSON-RPC*, *GOB-PC* over TCP, HTTP, websockets.
+    - Support for HTTP-REST interface.
+
+- Various agents to outside world:
+    - Asterisk_.
+    - FreeSWITCH_.
+    - Kamailio_.
+    - OpenSIPS_.
+    - Diameter.
+    - Radius.
+    - Generic HTTP.
+    - DNS/ENUM.
+
+- Built in High-Availability mechanisms:
+    - Dispatcher with static or dynamic routing.
+    - Server data replication.
+    - Client remote data querying.
+
 
 - Good documentation ( that's me :).
 
@@ -103,4 +135,20 @@ Without Balancer using HA (broadcast) ....
 ------------
 
 `CGRateS`_ is released under the terms of the `[GNU GENERAL PUBLIC LICENSE Version 3] <http://www.gnu.org/licenses/gpl-3.0.en.html>`_. See **LICENSE.txt** file for details.
+
+
+.. _CGRateS: http://cgrates.org
+.. _Go: http://golang.org
+.. _Docker: https://www.docker.com/
+.. _Kafka: https://kafka.apache.org/
+.. _redis: http://redis.io
+.. _mongodb: http://www.mongodb.org
+.. _api docs: https://godoc.org/github.com/cgrates/cgrates/apier
+.. _SQS: https://aws.amazon.com/de/sqs/
+.. _AMQP: https://www.amqp.org/
+.. _Asterisk: https://www.asterisk.org/
+.. _FreeSWITCH: https://freeswitch.com/
+.. _Kamailio: https://www.kamailio.org/w/
+.. _OpenSIPS: https://opensips.org/
+
 
