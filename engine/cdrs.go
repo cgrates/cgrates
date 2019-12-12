@@ -189,7 +189,7 @@ var reqTypes = utils.NewStringSet([]string{utils.META_PSEUDOPREPAID, utils.META_
 
 // getCostFromRater will retrieve the cost from RALs
 func (cdrS *CDRServer) getCostFromRater(cdr *CDRWithArgDispatcher) (*CallCost, error) {
-	if cdrS.rals == nil {
+	if len(cdrS.cgrCfg.CdrsCfg().RaterConns) == 0 {
 		return nil, utils.NewErrNotConnected(utils.RALService)
 	}
 	cc := new(CallCost)
