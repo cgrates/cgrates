@@ -173,27 +173,19 @@ func NewMongoStorage(host, port, db, user, pass, storageType string, cdrsIndexes
 	}
 
 	if err = ms.query(func(sctx mongo.SessionContext) error {
-		col, err := ms.client.Database(dbName).ListCollections(sctx, bson.D{}, options.ListCollections().SetNameOnly(true))
+		cols, err := ms.client.Database(dbName).ListCollectionNames(sctx, bson.D{})
 		if err != nil {
 			return err
 		}
 		empty := true
-		for col.Next(sctx) { // create indexes only if database is empty or only version table is present
-			var elem struct{ Name string }
-			err := col.Decode(&elem)
-			if err != nil {
-				return err
-			}
-			if elem.Name != ColVer {
+		for _, col := range cols { // create indexes only if database is empty or only version table is present
+			if col != ColVer {
 				empty = false
 				break
 			}
 		}
-		col.Close(sctx)
 		if empty {
-			if err = ms.EnsureIndexes(); err != nil {
-				return err
-			}
+			return ms.EnsureIndexes()
 		}
 		return nil
 	}); err != nil {
@@ -236,9 +228,9 @@ func (ms *MongoStorage) enusureIndex(colName string, uniq bool, keys ...string) 
 	return ms.query(func(sctx mongo.SessionContext) error {
 		col := ms.getCol(colName)
 		io := options.Index().SetUnique(uniq)
-		var doc bsonx.Doc
+		doc := make(bson.M)
 		for _, k := range keys {
-			doc = doc.Append(k, bsonx.Int32(1))
+			doc[k] = 1
 		}
 		_, err := col.Indexes().CreateOne(sctx, mongo.IndexModel{
 			Keys:    doc,
@@ -260,6 +252,7 @@ func (ms *MongoStorage) getCol(col string) *mongo.Collection {
 	return ms.client.Database(ms.db).Collection(col)
 }
 
+// GetContext returns the context used for the current DB
 func (ms *MongoStorage) GetContext() context.Context {
 	return ms.ctx
 }
@@ -406,7 +399,10 @@ func (ms *MongoStorage) Close() {
 // Flush drops the datatable
 func (ms *MongoStorage) Flush(ignore string) (err error) {
 	return ms.query(func(sctx mongo.SessionContext) error {
-		return ms.client.Database(ms.db).Drop(sctx)
+		if err = ms.client.Database(ms.db).Drop(sctx); err != nil {
+			return err
+		}
+		return ms.EnsureIndexes() // recreate the indexes
 	})
 }
 
@@ -526,20 +522,23 @@ func (ms *MongoStorage) RemoveReverseForPrefix(prefix string) (err error) {
 // IsDBEmpty implementation
 func (ms *MongoStorage) IsDBEmpty() (resp bool, err error) {
 	err = ms.query(func(sctx mongo.SessionContext) error {
-		col, err := ms.DB().ListCollections(sctx, bson.D{})
+		cols, err := ms.DB().ListCollectionNames(sctx, bson.D{})
 		if err != nil {
 			return err
 		}
-		if resp = !col.Next(sctx); resp {
-			return nil
+		for _, col := range cols {
+			if col == utils.CDRsTBL { // ignore cdrs collection
+				continue
+			}
+			var count int64
+			if count, err = ms.getCol(col).CountDocuments(sctx, bson.D{}, options.Count().SetLimit(1)); err != nil { // check if collection is empty so limit the count to 1
+				return err
+			}
+			if count != 0 {
+				return nil
+			}
 		}
-		elem := bson.D{}
-		err = col.Decode(&elem)
-		if err != nil {
-			return err
-		}
-		resp = (elem.Map()["name"] == "cdrs")
-		col.Close(sctx)
+		resp = true
 		return nil
 	})
 	return resp, err

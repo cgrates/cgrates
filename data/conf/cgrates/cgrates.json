@@ -144,7 +144,7 @@
 // 	"*timings": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// timings caching
 // 	"*resource_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},		// control resource profiles caching
 // 	"*resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control resources caching
-// 	"*event_resources": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},							// matching resources to events
+// 	"*event_resources": {"limit": -1, "ttl": "", "static_ttl": false},							// matching resources to events
 // 	"*statqueue_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// statqueue profiles
 // 	"*statqueues": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// statqueues with metrics
 // 	"*threshold_profiles": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// control threshold profiles caching
@@ -162,13 +162,13 @@
 // 	"*attribute_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control attribute filter indexes caching
 // 	"*charger_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 					// control charger filter indexes caching
 // 	"*dispatcher_filter_indexes" : {"limit": -1, "ttl": "", "static_ttl": false}, 				// control dispatcher filter indexes caching
-// 	"*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false}, 						// control dispatcher routes caching
-// 	"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false, "precache": false},						// diameter messages caching
-// 	"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false, "precache": false},							// RPC responses caching
-// 	"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false, "precache": false},						// closed sessions cached for CDRs
-// 	"*cdr_ids": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},									// protects CDRs against double-charging
+// 	"*dispatcher_routes": {"limit": -1, "ttl": "", "static_ttl": false}, 						// control dispatcher routes caching
+// 	"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false},						// diameter messages caching
+// 	"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false},							// RPC responses caching
+// 	"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false},						// closed sessions cached for CDRs
+// 	"*cdr_ids": {"limit": -1, "ttl": "", "static_ttl": false},									// protects CDRs against double-charging
 // 	"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control the load_ids for items
-// 	"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},							// RPC connections caching
+// 	"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false},							// RPC connections caching
 // },
 
 
