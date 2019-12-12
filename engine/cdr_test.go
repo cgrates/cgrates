@@ -1093,7 +1093,7 @@ func TestCDRAddDefaults(t *testing.T) {
 	eCDR := &CDR{
 		CGRID:       "bf736fb56ce586357ab2f286b777187a1612c6e6",
 		ToR:         utils.VOICE,
-		RunID:       utils.MetaRaw,
+		RunID:       utils.MetaDefault,
 		Subject:     "1001",
 		RequestType: utils.META_RATED,
 		Tenant:      "cgrates.org",

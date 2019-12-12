@@ -180,7 +180,7 @@ func (me MapEvent) AsMapString(ignoredFlds *utils.StringSet) (mp map[string]stri
 	return
 }
 
-// AsCDR exports the SafEvent as CDR
+// AsCDR exports the MapEvent as CDR
 func (me MapEvent) AsCDR(cfg *config.CGRConfig, tnt, tmz string) (cdr *CDR, err error) {
 	cdr = &CDR{Tenant: tnt, Cost: -1.0, ExtraFields: make(map[string]string)}
 	for k, v := range me {

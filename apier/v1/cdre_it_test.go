@@ -214,7 +214,7 @@ func testCDReProcessExternalCdr(t *testing.T) {
 	} else {
 		for _, c := range cdrs {
 			if c.RunID == utils.MetaRaw && c.Cost != -1 {
-				t.Errorf("Expected for *raw cdr cost to be -1, recived: %v", c.Cost)
+				t.Errorf("Expected for %s cdr cost to be -1, recived: %v", utils.MetaRaw, c.Cost)
 			}
 			if c.RunID == utils.MetaDefault && c.Cost != 0.3 {
 				t.Errorf("Expected for *default cdr cost to be 0.3, recived: %v", c.Cost)
