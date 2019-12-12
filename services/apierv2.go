@@ -30,10 +30,11 @@ import (
 
 // NewApierV2Service returns the ApierV2 Service
 func NewApierV2Service(apiv1 *ApierV1Service, cfg *config.CGRConfig,
-	server *utils.Server) *ApierV2Service {
+	server *utils.Server,
+	internalAPIerV1Chan chan rpcclient.ClientConnector) *ApierV2Service {
 	return &ApierV2Service{
 		apiv1:    apiv1,
-		connChan: make(chan rpcclient.ClientConnector, 1),
+		connChan: internalAPIerV1Chan,
 		cfg:      cfg,
 		server:   server,
 	}

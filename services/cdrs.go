@@ -34,43 +34,33 @@ import (
 // NewCDRServer returns the CDR Server
 func NewCDRServer(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, filterSChan chan *engine.FilterS,
-	server *utils.Server, internalCDRServerChan, chrsChan, respChan, attrsChan, thsChan, stsChan,
-	dispatcherChan chan rpcclient.ClientConnector) servmanager.Service {
+	server *utils.Server, internalCDRServerChan chan rpcclient.ClientConnector,
+	connMgr *engine.ConnManager) servmanager.Service {
 	return &CDRServer{
-		connChan:       internalCDRServerChan,
-		cfg:            cfg,
-		dm:             dm,
-		storDB:         storDB,
-		filterSChan:    filterSChan,
-		server:         server,
-		chrsChan:       chrsChan,
-		respChan:       respChan,
-		attrsChan:      attrsChan,
-		thsChan:        thsChan,
-		stsChan:        stsChan,
-		dispatcherChan: dispatcherChan,
+		connChan:    internalCDRServerChan,
+		cfg:         cfg,
+		dm:          dm,
+		storDB:      storDB,
+		filterSChan: filterSChan,
+		server:      server,
+		connMgr:     connMgr,
 	}
 }
 
 // CDRServer implements Service interface
 type CDRServer struct {
 	sync.RWMutex
-	cfg            *config.CGRConfig
-	dm             *DataDBService
-	storDB         *StorDBService
-	filterSChan    chan *engine.FilterS
-	server         *utils.Server
-	chrsChan       chan rpcclient.ClientConnector
-	respChan       chan rpcclient.ClientConnector
-	attrsChan      chan rpcclient.ClientConnector
-	thsChan        chan rpcclient.ClientConnector
-	stsChan        chan rpcclient.ClientConnector
-	dispatcherChan chan rpcclient.ClientConnector
+	cfg         *config.CGRConfig
+	dm          *DataDBService
+	storDB      *StorDBService
+	filterSChan chan *engine.FilterS
+	server      *utils.Server
 
 	cdrS     *engine.CDRServer
 	rpcv1    *v1.CDRsV1
 	rpcv2    *v2.CDRsV2
 	connChan chan rpcclient.ClientConnector
+	connMgr  *engine.ConnManager
 }
 
 // Start should handle the sercive start
@@ -84,42 +74,10 @@ func (cdrS *CDRServer) Start() (err error) {
 	filterS := <-cdrS.filterSChan
 	cdrS.filterSChan <- filterS
 
-	var ralConn, attrSConn, thresholdSConn, statsConn, chargerSConn rpcclient.ClientConnector
-
-	chargerSConn, err = NewConnection(cdrS.cfg, cdrS.chrsChan, cdrS.dispatcherChan, cdrS.cfg.CdrsCfg().ChargerSConns)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
-			utils.ChargerS, err.Error()))
-		return
-	}
-	ralConn, err = NewConnection(cdrS.cfg, cdrS.respChan, cdrS.dispatcherChan, cdrS.cfg.CdrsCfg().RaterConns)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
-			utils.RALService, err.Error()))
-		return
-	}
-	attrSConn, err = NewConnection(cdrS.cfg, cdrS.attrsChan, cdrS.dispatcherChan, cdrS.cfg.CdrsCfg().AttributeSConns)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
-			utils.AttributeS, err.Error()))
-		return
-	}
-	thresholdSConn, err = NewConnection(cdrS.cfg, cdrS.thsChan, cdrS.dispatcherChan, cdrS.cfg.CdrsCfg().ThresholdSConns)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
-			utils.ThresholdS, err.Error()))
-		return
-	}
-	statsConn, err = NewConnection(cdrS.cfg, cdrS.stsChan, cdrS.dispatcherChan, cdrS.cfg.CdrsCfg().StatSConns)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
-			utils.StatS, err.Error()))
-		return
-	}
 	cdrS.Lock()
 	defer cdrS.Unlock()
 	cdrS.cdrS = engine.NewCDRServer(cdrS.cfg, cdrS.storDB.GetDM(), cdrS.dm.GetDM(),
-		ralConn, attrSConn, thresholdSConn, statsConn, chargerSConn, filterS)
+		filterS, cdrS.connMgr)
 	utils.Logger.Info("Registering CDRS HTTP Handlers.")
 	cdrS.cdrS.RegisterHandlersToServer(cdrS.server)
 	utils.Logger.Info("Registering CDRS RPC service.")
@@ -140,47 +98,11 @@ func (cdrS *CDRServer) GetIntenternalChan() (conn chan rpcclient.ClientConnector
 
 // Reload handles the change of config
 func (cdrS *CDRServer) Reload() (err error) {
-	var ralConn, attrSConn, thresholdSConn, statsConn, chargerSConn rpcclient.ClientConnector
 
-	chargerSConn, err = NewConnection(cdrS.cfg, cdrS.chrsChan, cdrS.dispatcherChan, cdrS.cfg.CdrsCfg().ChargerSConns)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
-			utils.ChargerS, err.Error()))
-		return
-	}
-	ralConn, err = NewConnection(cdrS.cfg, cdrS.respChan, cdrS.dispatcherChan, cdrS.cfg.CdrsCfg().RaterConns)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
-			utils.RALService, err.Error()))
-		return
-	}
-	attrSConn, err = NewConnection(cdrS.cfg, cdrS.attrsChan, cdrS.dispatcherChan, cdrS.cfg.CdrsCfg().AttributeSConns)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
-			utils.AttributeS, err.Error()))
-		return
-	}
-	thresholdSConn, err = NewConnection(cdrS.cfg, cdrS.thsChan, cdrS.dispatcherChan, cdrS.cfg.CdrsCfg().ThresholdSConns)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
-			utils.ThresholdS, err.Error()))
-		return
-	}
-	statsConn, err = NewConnection(cdrS.cfg, cdrS.stsChan, cdrS.dispatcherChan, cdrS.cfg.CdrsCfg().StatSConns)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to %s: %s",
-			utils.StatS, err.Error()))
-		return
-	}
 	cdrS.Lock()
 	if cdrS.storDB.WasReconnected() { // rewrite the connection if was changed
 		cdrS.cdrS.SetStorDB(cdrS.storDB.GetDM())
 	}
-	cdrS.cdrS.SetRALsConnection(ralConn)
-	cdrS.cdrS.SetAttributeSConnection(attrSConn)
-	cdrS.cdrS.SetThresholSConnection(thresholdSConn)
-	cdrS.cdrS.SetStatSConnection(statsConn)
-	cdrS.cdrS.SetChargerSConnection(chargerSConn)
 	cdrS.Unlock()
 	return
 }

@@ -26,34 +26,30 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
-	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
 // NewDNSAgent returns the DNS Agent
 func NewDNSAgent(cfg *config.CGRConfig, filterSChan chan *engine.FilterS,
-	sSChan, dispatcherChan chan rpcclient.ClientConnector,
-	exitChan chan bool) servmanager.Service {
+	exitChan chan bool, connMgr *engine.ConnManager) servmanager.Service {
 	return &DNSAgent{
-		cfg:            cfg,
-		filterSChan:    filterSChan,
-		sSChan:         sSChan,
-		dispatcherChan: dispatcherChan,
-		exitChan:       exitChan,
+		cfg:         cfg,
+		filterSChan: filterSChan,
+		exitChan:    exitChan,
+		connMgr:     connMgr,
 	}
 }
 
 // DNSAgent implements Agent interface
 type DNSAgent struct {
 	sync.RWMutex
-	cfg            *config.CGRConfig
-	filterSChan    chan *engine.FilterS
-	sSChan         chan rpcclient.ClientConnector
-	dispatcherChan chan rpcclient.ClientConnector
-	exitChan       chan bool
+	cfg         *config.CGRConfig
+	filterSChan chan *engine.FilterS
+	exitChan    chan bool
 
-	dns *agents.DNSAgent
+	dns     *agents.DNSAgent
+	connMgr *engine.ConnManager
 }
 
 // Start should handle the sercive start
@@ -67,37 +63,12 @@ func (dns *DNSAgent) Start() (err error) {
 
 	dns.Lock()
 	defer dns.Unlock()
-	// var sSInternal bool
-	var sS rpcclient.ClientConnector
-	utils.Logger.Info(fmt.Sprintf("starting %s service", utils.DNSAgent))
-	if !dns.cfg.DispatcherSCfg().Enabled && dns.cfg.DNSAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
-		// sSInternal = true
-		sSIntConn := <-dns.sSChan
-		dns.sSChan <- sSIntConn
-		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
-	} else {
-		if sS, err = NewConnection(dns.cfg, dns.sSChan, dns.dispatcherChan, dns.cfg.DNSAgentCfg().SessionSConns); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.DNSAgent, utils.SessionS, err.Error()))
-			return
-		}
-	}
-	dns.dns, err = agents.NewDNSAgent(dns.cfg, filterS, sS)
+
+	dns.dns, err = agents.NewDNSAgent(dns.cfg, filterS, dns.connMgr)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
 		return
 	}
-	// if sSInternal { // bidirectional client backwards connection
-	// 	sS.(*utils.BiRPCInternalClient).SetClientConn(da)
-	// 	var rply string
-	// 	if err := sS.Call(utils.SessionSv1RegisterInternalBiJSONConn,
-	// 		utils.EmptyString, &rply); err != nil {
-	// 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-	// 			utils.DNSAgent, utils.SessionS, err.Error()))
-	// 		exitChan <- true
-	// 		return
-	// 	}
-	// }
 	go func() {
 		if err = dns.dns.ListenAndServe(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
@@ -115,25 +86,11 @@ func (dns *DNSAgent) GetIntenternalChan() (conn chan rpcclient.ClientConnector) 
 
 // Reload handles the change of config
 func (dns *DNSAgent) Reload() (err error) {
-	var sS rpcclient.ClientConnector
-	if !dns.cfg.DispatcherSCfg().Enabled && dns.cfg.DNSAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
-		// sSInternal = true
-		sSIntConn := <-dns.sSChan
-		dns.sSChan <- sSIntConn
-		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
-	} else {
-		if sS, err = NewConnection(dns.cfg, dns.sSChan, dns.dispatcherChan, dns.cfg.DNSAgentCfg().SessionSConns); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.DNSAgent, utils.SessionS, err.Error()))
-			return
-		}
-	}
 	if err = dns.Shutdown(); err != nil {
 		return
 	}
 	dns.Lock()
 	defer dns.Unlock()
-	dns.dns.SetSessionSConnection(sS)
 	if err = dns.dns.Reload(); err != nil {
 		return
 	}

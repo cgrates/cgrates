@@ -33,7 +33,6 @@ import (
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // SchedulerGeter used to avoid ciclic dependency
@@ -47,13 +46,10 @@ type ApierV1 struct {
 	DataManager      *engine.DataManager
 	Config           *config.CGRConfig
 	Responder        *engine.Responder
-	CDRs             rpcclient.ClientConnector // FixMe: populate it from cgr-engine
-	SchedulerService SchedulerGeter            // Need to have them capitalize so we can export in V2
+	SchedulerService SchedulerGeter // Need to have them capitalize so we can export in V2
 	HTTPPoster       *engine.HTTPPoster
 	FilterS          *engine.FilterS //Used for CDR Exporter
-	CacheS           rpcclient.ClientConnector
-	SchedulerS       rpcclient.ClientConnector
-	AttributeS       rpcclient.ClientConnector
+	ConnMgr          *engine.ConnManager
 }
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
@@ -220,8 +216,8 @@ func (apiv1 *ApierV1) LoadDestination(attrs AttrLoadDestination, reply *string) 
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dbReader, err := engine.NewTpReader(apiv1.DataManager.DataDB(), apiv1.StorDb,
-		attrs.TPid, apiv1.Config.GeneralCfg().DefaultTimezone,
-		apiv1.CacheS, apiv1.SchedulerS)
+		attrs.TPid, apiv1.Config.GeneralCfg().DefaultTimezone, apiv1.Config.ApierCfg().CachesConns,
+		apiv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -249,7 +245,7 @@ func (apiv1 *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) er
 	}
 	dbReader, err := engine.NewTpReader(apiv1.DataManager.DataDB(), apiv1.StorDb,
 		attrs.TPid, apiv1.Config.GeneralCfg().DefaultTimezone,
-		apiv1.CacheS, apiv1.SchedulerS)
+		apiv1.Config.ApierCfg().CachesConns, apiv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -269,7 +265,7 @@ func (apiv1 *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *stri
 	}
 	dbReader, err := engine.NewTpReader(apiv1.DataManager.DataDB(), apiv1.StorDb,
 		attrs.TPid, apiv1.Config.GeneralCfg().DefaultTimezone,
-		apiv1.CacheS, apiv1.SchedulerS)
+		apiv1.Config.ApierCfg().CachesConns, apiv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -292,7 +288,7 @@ func (apiv1 *ApierV1) LoadSharedGroup(attrs AttrLoadSharedGroup, reply *string) 
 	}
 	dbReader, err := engine.NewTpReader(apiv1.DataManager.DataDB(), apiv1.StorDb,
 		attrs.TPid, apiv1.Config.GeneralCfg().DefaultTimezone,
-		apiv1.CacheS, apiv1.SchedulerS)
+		apiv1.Config.ApierCfg().CachesConns, apiv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -318,7 +314,7 @@ func (apiv1 *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply
 	}
 	dbReader, err := engine.NewTpReader(apiv1.DataManager.DataDB(), apiv1.StorDb,
 		attrs.TPid, apiv1.Config.GeneralCfg().DefaultTimezone,
-		apiv1.CacheS, apiv1.SchedulerS)
+		apiv1.Config.ApierCfg().CachesConns, apiv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -348,7 +344,7 @@ func (apiv1 *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply
 	if err := dbReader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if apiv1.SchedulerS != nil {
+	if len(apiv1.Config.ApierCfg().SchedulerConns) != 0 {
 		utils.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading scheduler.")
 		if err := dbReader.ReloadScheduler(true); err != nil {
 			return utils.NewErrServerError(err)
@@ -810,7 +806,7 @@ func (apiv1 *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *st
 	}
 	dbReader, err := engine.NewTpReader(apiv1.DataManager.DataDB(), apiv1.StorDb,
 		attrs.TPid, apiv1.Config.GeneralCfg().DefaultTimezone,
-		apiv1.CacheS, apiv1.SchedulerS)
+		apiv1.Config.ApierCfg().CachesConns, apiv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -848,7 +844,7 @@ func (apiv1 *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder,
 	loader, err := engine.NewTpReader(apiv1.DataManager.DataDB(),
 		engine.NewFileCSVStorage(utils.CSV_SEP, attrs.FolderPath, attrs.Recursive),
 		"", apiv1.Config.GeneralCfg().DefaultTimezone,
-		apiv1.CacheS, apiv1.SchedulerS)
+		apiv1.Config.ApierCfg().CachesConns, apiv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -881,7 +877,7 @@ func (apiv1 *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder,
 	if err := loader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if apiv1.SchedulerS != nil {
+	if len(apiv1.Config.ApierCfg().SchedulerConns) != 0 {
 		utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading scheduler.")
 		if err := loader.ReloadScheduler(true); err != nil {
 			return utils.NewErrServerError(err)
@@ -913,7 +909,7 @@ func (apiv1 *ApierV1) RemoveTPFromFolder(attrs utils.AttrLoadTpFromFolder, reply
 	// create the TpReader
 	loader, err := engine.NewTpReader(apiv1.DataManager.DataDB(),
 		engine.NewFileCSVStorage(utils.CSV_SEP, attrs.FolderPath, attrs.Recursive), "", apiv1.Config.GeneralCfg().DefaultTimezone,
-		apiv1.CacheS, apiv1.SchedulerS)
+		apiv1.Config.ApierCfg().CachesConns, apiv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -946,7 +942,7 @@ func (apiv1 *ApierV1) RemoveTPFromFolder(attrs utils.AttrLoadTpFromFolder, reply
 	if err := loader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if apiv1.SchedulerS != nil {
+	if len(apiv1.Config.ApierCfg().SchedulerConns) != 0 {
 		utils.Logger.Info("ApierV1.RemoveTPFromFolder, reloading scheduler.")
 		if err := loader.ReloadScheduler(true); err != nil {
 			return utils.NewErrServerError(err)
@@ -966,7 +962,7 @@ func (apiv1 *ApierV1) RemoveTPFromStorDB(attrs AttrLoadTpFromStorDb, reply *stri
 	}
 	dbReader, err := engine.NewTpReader(apiv1.DataManager.DataDB(), apiv1.StorDb,
 		attrs.TPid, apiv1.Config.GeneralCfg().DefaultTimezone,
-		apiv1.CacheS, apiv1.SchedulerS)
+		apiv1.Config.ApierCfg().CachesConns, apiv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -997,7 +993,7 @@ func (apiv1 *ApierV1) RemoveTPFromStorDB(attrs AttrLoadTpFromStorDb, reply *stri
 	if err := dbReader.ReloadCache(caching, true, attrs.ArgDispatcher); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if apiv1.SchedulerS != nil {
+	if len(apiv1.Config.ApierCfg().SchedulerConns) != 0 {
 		utils.Logger.Info("ApierV1.RemoveTPFromStorDB, reloading scheduler.")
 		if err := dbReader.ReloadScheduler(true); err != nil {
 			return utils.NewErrServerError(err)
@@ -1268,23 +1264,27 @@ func (apiv1 *ApierV1) CallCache(cacheOpt string, args utils.ArgsGetCacheItem) (e
 	case utils.META_NONE:
 		return
 	case utils.MetaReload:
-		if err = apiv1.CacheS.Call(utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
-			AttrReloadCache: composeArgsReload(args)}, &reply); err != nil {
+		if err = apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
+			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+				AttrReloadCache: composeArgsReload(args)}, &reply); err != nil {
 			return err
 		}
 	case utils.MetaLoad:
-		if err = apiv1.CacheS.Call(utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
-			AttrReloadCache: composeArgsReload(args)}, &reply); err != nil {
+		if err = apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
+			utils.CacheSv1LoadCache, utils.AttrReloadCacheWithArgDispatcher{
+				AttrReloadCache: composeArgsReload(args)}, &reply); err != nil {
 			return err
 		}
 	case utils.MetaRemove:
-		if err = apiv1.CacheS.Call(utils.CacheSv1RemoveItem,
+		if err = apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
+			utils.CacheSv1RemoveItem,
 			&utils.ArgsGetCacheItemWithArgDispatcher{ArgsGetCacheItem: args}, &reply); err != nil {
 			return err
 		}
 	case utils.MetaClear:
-		if err = apiv1.CacheS.Call(utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
-			AttrReloadCache: composeArgsReload(args)}, &reply); err != nil {
+		if err = apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
+			utils.CacheSv1FlushCache, utils.AttrReloadCacheWithArgDispatcher{
+				AttrReloadCache: composeArgsReload(args)}, &reply); err != nil {
 			return err
 		}
 	}
@@ -1371,24 +1371,6 @@ func (apiv1 *ApierV1) GetRatingPlanIDs(args utils.TenantArgWithPaginator, attrPr
 	}
 	*attrPrfIDs = args.PaginateStringSlice(retIDs)
 	return nil
-}
-
-// SetAttributeSConnection sets the new connection to the attribute service
-// only used on reload
-func (apiv1 *ApierV1) SetAttributeSConnection(attrS rpcclient.ClientConnector) {
-	apiv1.AttributeS = attrS
-}
-
-// SetCacheSConnection sets the new connection to the cache service
-// only used on reload
-func (apiv1 *ApierV1) SetCacheSConnection(chS rpcclient.ClientConnector) {
-	apiv1.CacheS = chS
-}
-
-// SetSchedulerSConnection sets the new connection to the scheduler service
-// only used on reload
-func (apiv1 *ApierV1) SetSchedulerSConnection(schS rpcclient.ClientConnector) {
-	apiv1.SchedulerS = schS
 }
 
 // SetStorDB sets the new connection for StorDB

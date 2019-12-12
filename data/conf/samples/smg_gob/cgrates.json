@@ -50,30 +50,20 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": [
-		{"address": "*internal"}
-	],
+	"attributes_conns": ["*internal"],
 },
 
 "sessions": {
 	"enabled": true,
 	"session_ttl": "50ms",
-	"rals_conns": [
-		{"address": "127.0.0.1:2013", "transport": "*gob"}
-	],
-	"cdrs_conns": [
-		{"address": "127.0.0.1:2013", "transport": "*gob"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
-	],
-	"chargers_conns": [
-		{"address": "*internal"}
-	],
+	"rals_conns": ["conn1"],
+	"cdrs_conns": ["conn1"],
+	"chargers_conns": ["*internal"],
 },
 
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 

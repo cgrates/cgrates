@@ -60,16 +60,11 @@ var (
 	cfg *config.CGRConfig
 )
 
-func startCdrcs(internalCdrSChan, internalRaterChan, internalDispatcherSChan chan rpcclient.ClientConnector,
-	filterSChan chan *engine.FilterS, exitChan chan bool) {
+func startCdrcs(filterSChan chan *engine.FilterS, exitChan chan bool, connMgr *engine.ConnManager) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
 	cdrcInitialized := false           // Control whether the cdrc was already initialized (so we don't reload in that case)
 	var cdrcChildrenChan chan struct{} // Will use it to communicate with the children of one fork
-	intCdrSChan := internalCdrSChan
-	if cfg.DispatcherSCfg().Enabled {
-		intCdrSChan = internalDispatcherSChan
-	}
 	for {
 		select {
 		case <-exitChan: // Stop forking CDRCs
@@ -90,9 +85,9 @@ func startCdrcs(internalCdrSChan, internalRaterChan, internalDispatcherSChan cha
 				}
 			}
 			if len(enabledCfgs) != 0 {
-				go startCdrc(intCdrSChan, internalRaterChan, enabledCfgs,
+				go startCdrc(enabledCfgs,
 					cfg.GeneralCfg().HttpSkipTlsVerify, filterSChan,
-					cdrcChildrenChan, exitChan)
+					cdrcChildrenChan, exitChan, connMgr)
 			} else {
 				utils.Logger.Info("<CDRC> No enabled CDRC clients")
 			}
@@ -102,26 +97,15 @@ func startCdrcs(internalCdrSChan, internalRaterChan, internalDispatcherSChan cha
 }
 
 // Fires up a cdrc instance
-func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.ClientConnector, cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool,
-	filterSChan chan *engine.FilterS, closeChan chan struct{}, exitChan chan bool) {
+func startCdrc(cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool,
+	filterSChan chan *engine.FilterS, closeChan chan struct{}, exitChan chan bool, connMgr *engine.ConnManager) {
 	filterS := <-filterSChan
 	filterSChan <- filterS
 	var err error
 	var cdrsConn rpcclient.ClientConnector
-	cdrcCfg := cdrcCfgs[0]
-	cdrsConn, err = engine.NewRPCPool(rpcclient.PoolFirst, cfg.TlsCfg().ClientKey,
-		cfg.TlsCfg().ClientCerificate, cfg.TlsCfg().CaCertificate,
-		cfg.GeneralCfg().ConnectAttempts, cfg.GeneralCfg().Reconnects,
-		cfg.GeneralCfg().ConnectTimeout, cfg.GeneralCfg().ReplyTimeout,
-		cdrcCfg.CdrsConns, internalCdrSChan, false)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<CDRC> Could not connect to CDRS via RPC: %s", err.Error()))
-		exitChan <- true
-		return
-	}
 
 	cdrc, err := cdrc.NewCdrc(cdrcCfgs, httpSkipTlsCheck, cdrsConn, closeChan,
-		cfg.GeneralCfg().DefaultTimezone, filterS)
+		cfg.GeneralCfg().DefaultTimezone, filterS, connMgr)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("Cdrc config parsing error: %s", err.Error()))
 		exitChan <- true
@@ -488,11 +472,22 @@ func main() {
 	internalCoreSv1Chan := make(chan rpcclient.ClientConnector, 1)
 	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
 	internalGuardianSChan := make(chan rpcclient.ClientConnector, 1)
-
+	internalAnalyzerSChan := make(chan rpcclient.ClientConnector, 1)
 	internalCDRServerChan := make(chan rpcclient.ClientConnector, 1)   // needed to avod cyclic dependency
 	internalAttributeSChan := make(chan rpcclient.ClientConnector, 1)  // needed to avod cyclic dependency
 	internalDispatcherSChan := make(chan rpcclient.ClientConnector, 1) // needed to avod cyclic dependency
 	internalSessionSChan := make(chan rpcclient.ClientConnector, 1)    // needed to avod cyclic dependency
+	internalChargerSChan := make(chan rpcclient.ClientConnector, 1)    // needed to avod cyclic dependency
+	internalThresholdSChan := make(chan rpcclient.ClientConnector, 1)  // needed to avod cyclic dependency
+	internalStatSChan := make(chan rpcclient.ClientConnector, 1)       // needed to avod cyclic dependency
+	internalResourceSChan := make(chan rpcclient.ClientConnector, 1)   // needed to avod cyclic dependency
+	internalSupplierSChan := make(chan rpcclient.ClientConnector, 1)   // needed to avod cyclic dependency
+	internalSchedulerSChan := make(chan rpcclient.ClientConnector, 1)  // needed to avod cyclic dependency
+	internalRALsChan := make(chan rpcclient.ClientConnector, 1)        // needed to avod cyclic dependency
+	internalResponderChan := make(chan rpcclient.ClientConnector, 1)   // needed to avod cyclic dependency
+	internalAPIerV1Chan := make(chan rpcclient.ClientConnector, 1)     // needed to avod cyclic dependency
+	internalAPIerV2Chan := make(chan rpcclient.ClientConnector, 1)     // needed to avod cyclic dependency
+	internalLoaderSChan := make(chan rpcclient.ClientConnector, 1)
 
 	// init CacheS
 	cacheS := initCacheS(internalCacheSChan, server, dmService.GetDM(), exitChan)
@@ -505,69 +500,67 @@ func main() {
 
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, exitChan)
+	connManager := services.NewConnManagerService(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAnalyzer):       internalAnalyzerSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier):          internalAPIerV1Chan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes):     internalAttributeSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):         internalCacheSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs):           internalCDRServerChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):       internalChargerSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaGuardian):       internalGuardianSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaLoaders):        internalLoaderSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources):      internalResourceSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder):      internalResponderChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler):      internalSchedulerSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS):       internalSessionSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS):          internalStatSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSuppliers):      internalSupplierSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds):     internalThresholdSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaServiceManager): internalServeManagerChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaConfig):         internalConfigChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCore):           internalCoreSv1Chan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):           internalRALsChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers):    internalDispatcherSChan,
+	})
 
 	attrS := services.NewAttributeService(cfg, dmService, cacheS, filterSChan, server, internalAttributeSChan)
 	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, internalAttributeSChan, internalDispatcherSChan)
 	chrS := services.NewChargerService(cfg, dmService, cacheS, filterSChan, server,
-		attrS.GetIntenternalChan(), dspS.GetIntenternalChan())
-	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan, server)
+		internalChargerSChan, connManager.GetConnMgr())
+	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan, server, internalThresholdSChan)
 	stS := services.NewStatService(cfg, dmService, cacheS, filterSChan, server,
-		tS.GetIntenternalChan(), dspS.GetIntenternalChan())
+		internalStatSChan, connManager.GetConnMgr())
 	reS := services.NewResourceService(cfg, dmService, cacheS, filterSChan, server,
-		tS.GetIntenternalChan(), dspS.GetIntenternalChan())
+		internalResourceSChan, connManager.GetConnMgr())
 	supS := services.NewSupplierService(cfg, dmService, cacheS, filterSChan, server,
-		attrS.GetIntenternalChan(), stS.GetIntenternalChan(),
-		reS.GetIntenternalChan(), dspS.GetIntenternalChan())
-	schS := services.NewSchedulerService(cfg, dmService, cacheS, filterSChan, server, internalCDRServerChan, dspS.GetIntenternalChan())
+		internalSupplierSChan, connManager.GetConnMgr())
+
+	schS := services.NewSchedulerService(cfg, dmService, cacheS, filterSChan,
+		server, internalSchedulerSChan, connManager.GetConnMgr())
+
 	rals := services.NewRalService(cfg, dmService, storDBService, cacheS, filterSChan, server,
-		tS.GetIntenternalChan(), stS.GetIntenternalChan(), internalCacheSChan,
-		schS.GetIntenternalChan(), attrS.GetIntenternalChan(), dspS.GetIntenternalChan(),
-		schS, exitChan)
+		internalRALsChan, internalResponderChan, internalAPIerV1Chan, internalAPIerV2Chan,
+		schS, exitChan, connManager.GetConnMgr())
+
 	cdrS := services.NewCDRServer(cfg, dmService, storDBService, filterSChan, server, internalCDRServerChan,
-		chrS.GetIntenternalChan(), rals.GetResponder().GetIntenternalChan(),
-		attrS.GetIntenternalChan(), tS.GetIntenternalChan(),
-		stS.GetIntenternalChan(), dspS.GetIntenternalChan())
+		connManager.GetConnMgr())
 
-	smg := services.NewSessionService(cfg, dmService, server, chrS.GetIntenternalChan(),
-		rals.GetResponder().GetIntenternalChan(), reS.GetIntenternalChan(),
-		tS.GetIntenternalChan(), stS.GetIntenternalChan(), supS.GetIntenternalChan(),
-		attrS.GetIntenternalChan(), cdrS.GetIntenternalChan(), dspS.GetIntenternalChan(), internalSessionSChan, exitChan)
-	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server, internalCacheSChan, dspS.GetIntenternalChan(), exitChan)
-	anz := services.NewAnalyzerService(cfg, server, exitChan)
+	smg := services.NewSessionService(cfg, dmService, server, internalSessionSChan, exitChan, connManager.GetConnMgr())
 
-	connManager := services.NewConnManagerService(cfg, map[string]chan rpcclient.ClientConnector{
-		utils.AnalyzerSv1:  anz.GetIntenternalChan(),
-		utils.ApierV1:      rals.GetAPIv1().GetIntenternalChan(),
-		utils.ApierV2:      rals.GetAPIv2().GetIntenternalChan(),
-		utils.AttributeSv1: internalAttributeSChan,
-		utils.CacheSv1:     internalCacheSChan,
-		utils.CDRsV1:       cdrS.GetIntenternalChan(),
-		utils.CDRsV2:       cdrS.GetIntenternalChan(),
-		utils.ChargerSv1:   chrS.GetIntenternalChan(),
-		utils.GuardianSv1:  internalGuardianSChan,
-		utils.LoaderSv1:    ldrs.GetIntenternalChan(),
-		utils.ResourceSv1:  reS.GetIntenternalChan(),
-		utils.Responder:    rals.GetResponder().GetIntenternalChan(),
-		utils.SchedulerSv1: schS.GetIntenternalChan(),
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS): internalSessionSChan,
-		utils.StatSv1:          stS.GetIntenternalChan(),
-		utils.SupplierSv1:      supS.GetIntenternalChan(),
-		utils.ThresholdSv1:     tS.GetIntenternalChan(),
-		utils.ServiceManagerV1: internalServeManagerChan,
-		utils.ConfigSv1:        internalConfigChan,
-		utils.CoreSv1:          internalCoreSv1Chan,
-		utils.RALsV1:           rals.GetIntenternalChan(),
-	})
+	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server, exitChan,
+		internalLoaderSChan, connManager.GetConnMgr())
+	anz := services.NewAnalyzerService(cfg, server, exitChan, internalAnalyzerSChan)
+
 	srvManager.AddServices(connManager, attrS, chrS, tS, stS, reS, supS, schS, rals,
 		rals.GetResponder(), rals.GetAPIv1(), rals.GetAPIv2(), cdrS, smg,
 		services.NewEventReaderService(cfg, filterSChan, exitChan, connManager.GetConnMgr()),
-		services.NewDNSAgent(cfg, filterSChan, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),
-		services.NewFreeswitchAgent(cfg, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),
-		services.NewKamailioAgent(cfg, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),
-		services.NewAsteriskAgent(cfg, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),              // partial reload
-		services.NewRadiusAgent(cfg, filterSChan, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan),   // partial reload
-		services.NewDiameterAgent(cfg, filterSChan, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), exitChan), // partial reload
-		services.NewHTTPAgent(cfg, filterSChan, smg.GetIntenternalChan(), dspS.GetIntenternalChan(), server),       // no reload
+		services.NewDNSAgent(cfg, filterSChan, exitChan, connManager.GetConnMgr()),
+		services.NewFreeswitchAgent(cfg, exitChan, connManager.GetConnMgr()),
+		services.NewKamailioAgent(cfg, exitChan, connManager.GetConnMgr()),
+		services.NewAsteriskAgent(cfg, exitChan, connManager.GetConnMgr()),              // partial reload
+		services.NewRadiusAgent(cfg, filterSChan, exitChan, connManager.GetConnMgr()),   // partial reload
+		services.NewDiameterAgent(cfg, filterSChan, exitChan, connManager.GetConnMgr()), // partial reload
+		services.NewHTTPAgent(cfg, filterSChan, server, connManager.GetConnMgr()),       // no reload
 		ldrs, anz, dspS, dmService, storDBService,
 	)
 	srvManager.StartServices()
@@ -607,7 +600,7 @@ func main() {
 	initConfigSv1(internalConfigChan, server)
 
 	// Start CDRC components if necessary
-	go startCdrcs(cdrS.GetIntenternalChan(), rals.GetResponder().GetIntenternalChan(), dspS.GetIntenternalChan(), filterSChan, exitChan)
+	go startCdrcs(filterSChan, exitChan, connManager.GetConnMgr())
 
 	// Serve rpc connections
 	go startRpc(server, rals.GetResponder().GetIntenternalChan(), cdrS.GetIntenternalChan(),

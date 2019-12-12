@@ -14,6 +14,13 @@
 	"http": ":2080",				// HTTP listening address
 },
 
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],
+	},
+},
+
 
 "stor_db": {								// database used to store offline tariff plans and CDRs
 	"db_password": "CGRateS.org",						// password to use when connecting to stordb
@@ -26,16 +33,12 @@
 
 "scheduler": {
 	"enabled": true,						// start Scheduler service: <true|false>
-	"cdrs_conns": [
-		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
-	],
+	"cdrs_conns": ["*internal"],
 },
 
 "cdrs": {
 	"enabled": true,						// start the CDR Server service:  <true|false>
-	"chargers_conns":[
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
+	"chargers_conns":["*conn1"],
 },
 
 "chargers": {
@@ -52,9 +55,7 @@
 },
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 }

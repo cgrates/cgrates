@@ -18,15 +18,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import "github.com/cgrates/cgrates/utils"
+
 // SupplierSCfg is the configuration of supplier service
 type SupplierSCfg struct {
 	Enabled             bool
 	IndexedSelects      bool
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
-	AttributeSConns     []*RemoteHost
-	ResourceSConns      []*RemoteHost
-	StatSConns          []*RemoteHost
+	AttributeSConns     []string
+	ResourceSConns      []string
+	StatSConns          []string
 	DefaultRatio        int
 }
 
@@ -55,24 +57,36 @@ func (spl *SupplierSCfg) loadFromJsonCfg(jsnCfg *SupplierSJsonCfg) (err error) {
 		spl.PrefixIndexedFields = &pif
 	}
 	if jsnCfg.Attributes_conns != nil {
-		spl.AttributeSConns = make([]*RemoteHost, len(*jsnCfg.Attributes_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Attributes_conns {
-			spl.AttributeSConns[idx] = NewDfltRemoteHost()
-			spl.AttributeSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		spl.AttributeSConns = make([]string, len(*jsnCfg.Attributes_conns))
+		for idx, conn := range *jsnCfg.Attributes_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if conn == utils.MetaInternal {
+				spl.AttributeSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
+			} else {
+				spl.AttributeSConns[idx] = conn
+			}
 		}
 	}
 	if jsnCfg.Resources_conns != nil {
-		spl.ResourceSConns = make([]*RemoteHost, len(*jsnCfg.Resources_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Resources_conns {
-			spl.ResourceSConns[idx] = NewDfltRemoteHost()
-			spl.ResourceSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		spl.ResourceSConns = make([]string, len(*jsnCfg.Resources_conns))
+		for idx, conn := range *jsnCfg.Resources_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if conn == utils.MetaInternal {
+				spl.ResourceSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)
+			} else {
+				spl.ResourceSConns[idx] = conn
+			}
 		}
 	}
 	if jsnCfg.Stats_conns != nil {
-		spl.StatSConns = make([]*RemoteHost, len(*jsnCfg.Stats_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Stats_conns {
-			spl.StatSConns[idx] = NewDfltRemoteHost()
-			spl.StatSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		spl.StatSConns = make([]string, len(*jsnCfg.Stats_conns))
+		for idx, conn := range *jsnCfg.Stats_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if conn == utils.MetaInternal {
+				spl.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)
+			} else {
+				spl.StatSConns[idx] = conn
+			}
 		}
 	}
 	if jsnCfg.Default_ratio != nil {

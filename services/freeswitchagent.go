@@ -22,35 +22,33 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/cgrates/cgrates/engine"
+
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/servmanager"
-	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
 // NewFreeswitchAgent returns the Freeswitch Agent
 func NewFreeswitchAgent(cfg *config.CGRConfig,
-	sSChan, dispatcherChan chan rpcclient.ClientConnector,
-	exitChan chan bool) servmanager.Service {
+	exitChan chan bool, connMgr *engine.ConnManager) servmanager.Service {
 	return &FreeswitchAgent{
-		cfg:            cfg,
-		sSChan:         sSChan,
-		dispatcherChan: dispatcherChan,
-		exitChan:       exitChan,
+		cfg:      cfg,
+		exitChan: exitChan,
+		connMgr:  connMgr,
 	}
 }
 
 // FreeswitchAgent implements Agent interface
 type FreeswitchAgent struct {
 	sync.RWMutex
-	cfg            *config.CGRConfig
-	sSChan         chan rpcclient.ClientConnector
-	dispatcherChan chan rpcclient.ClientConnector
-	exitChan       chan bool
+	cfg      *config.CGRConfig
+	exitChan chan bool
 
-	fS *agents.FSsessions
+	fS      *agents.FSsessions
+	connMgr *engine.ConnManager
 }
 
 // Start should handle the sercive start
@@ -61,32 +59,8 @@ func (fS *FreeswitchAgent) Start() (err error) {
 
 	fS.Lock()
 	defer fS.Unlock()
-	var sS rpcclient.ClientConnector
-	var sSInternal bool
-	utils.Logger.Info("Starting FreeSWITCH agent")
-	if !fS.cfg.DispatcherSCfg().Enabled && fS.cfg.FsAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
-		sSInternal = true
-		sSIntConn := <-fS.sSChan
-		fS.sSChan <- sSIntConn
-		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
-	} else {
-		if sS, err = NewConnection(fS.cfg, fS.sSChan, fS.dispatcherChan, fS.cfg.FsAgentCfg().SessionSConns); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.FreeSWITCHAgent, utils.SessionS, err.Error()))
-			return
-		}
-	}
-	fS.fS = agents.NewFSsessions(fS.cfg.FsAgentCfg(), sS, fS.cfg.GeneralCfg().DefaultTimezone)
-	if sSInternal { // bidirectional client backwards connection
-		sS.(*utils.BiRPCInternalClient).SetClientConn(fS.fS)
-		var rply string
-		if err = sS.Call(utils.SessionSv1RegisterInternalBiJSONConn,
-			utils.EmptyString, &rply); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.FreeSWITCHAgent, utils.SessionS, err.Error()))
-			return
-		}
-	}
+
+	fS.fS = agents.NewFSsessions(fS.cfg.FsAgentCfg(), fS.cfg.GeneralCfg().DefaultTimezone, fS.connMgr)
 
 	go func() {
 		if err := fS.fS.Connect(); err != nil {
@@ -105,37 +79,12 @@ func (fS *FreeswitchAgent) GetIntenternalChan() (conn chan rpcclient.ClientConne
 
 // Reload handles the change of config
 func (fS *FreeswitchAgent) Reload() (err error) {
-	var sS rpcclient.ClientConnector
-	var sSInternal bool
-	if !fS.cfg.DispatcherSCfg().Enabled && fS.cfg.FsAgentCfg().SessionSConns[0].Address == utils.MetaInternal {
-		sSInternal = true
-		sSIntConn := <-fS.sSChan
-		fS.sSChan <- sSIntConn
-		sS = utils.NewBiRPCInternalClient(sSIntConn.(*sessions.SessionS))
-	} else {
-		if sS, err = NewConnection(fS.cfg, fS.sSChan, fS.dispatcherChan, fS.cfg.FsAgentCfg().SessionSConns); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.FreeSWITCHAgent, utils.SessionS, err.Error()))
-			return
-		}
-	}
 	if err = fS.Shutdown(); err != nil {
 		return
 	}
 	fS.Lock()
 	defer fS.Unlock()
-	fS.fS.SetSessionSConnection(sS)
 	fS.fS.Reload()
-	if sSInternal { // bidirectional client backwards connection
-		sS.(*utils.BiRPCInternalClient).SetClientConn(fS.fS)
-		var rply string
-		if err = sS.Call(utils.SessionSv1RegisterInternalBiJSONConn,
-			utils.EmptyString, &rply); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.FreeSWITCHAgent, utils.SessionS, err.Error()))
-			return
-		}
-	}
 	go func() {
 		if err := fS.fS.Connect(); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> error: %s!", utils.FreeSWITCHAgent, err))

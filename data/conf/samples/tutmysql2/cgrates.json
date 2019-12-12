@@ -23,29 +23,21 @@
 
 "scheduler": {
 	"enabled": true,
-	"cdrs_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"},
-	],
+	"cdrs_conns": ["*localhost"],
 },
 
 
 "rals": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"},
-	],
-	"stats_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"},
-	],
+	"thresholds_conns": ["*localhost"],
+	"stats_conns": ["*localhost"],
 },
 
 
 "cdrs": {
 	"enabled": true,
 	"extra_fields": ["PayPalAccount", "LCRProfile", "ResourceID"],
-	"chargers_conns":[
-		{"address": "127.0.0.1:2012", "transport":"*json"},
-	],
+	"chargers_conns":["*localhost"],
 	"store_cdrs": true,
 	"online_cdr_exports": []
 },
@@ -70,24 +62,12 @@
 
 "sessions": {
 	"enabled": true,
-	"resources_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"}
-	],
-	"suppliers_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"}
-	],
-	"attributes_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"}
-	],
-	"rals_conns": [
-		{"address": "*internal"}
-	],
-	"cdrs_conns": [
-		{"address": "*internal"}
-	],
-	"chargers_conns": [
-		{"address": "*internal"}
-	],
+	"resources_conns": ["*localhost"],
+	"suppliers_conns": ["*localhost"],
+	"attributes_conns": ["*localhost"],
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
 },
 
 
@@ -99,27 +79,21 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"}
-	],
+	"attributes_conns": ["*localhost"],
 	"string_indexed_fields": ["Account"]
 },
 
 
 "resources": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"}
-	],
+	"thresholds_conns": ["*localhost"],
 	"string_indexed_fields": ["Account"]
 },
 
 
 "stats": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"}
-	],
+	"thresholds_conns": ["*localhost"],
 	"string_indexed_fields": ["Account"]
 },
 
@@ -139,8 +113,6 @@
 
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*localhost"],
 },
 }

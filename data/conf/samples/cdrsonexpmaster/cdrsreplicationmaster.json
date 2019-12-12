@@ -22,12 +22,8 @@
 "cdrs": {
 	"enabled": true,			// start the CDR Server service:  <true|false>
 	"store_cdrs": false,		// store cdrs in storDb
-	"chargers_conns":[
-		{"address": "*internal"}
-	],
-	"rals_conns": [							
-		{"address": "*internal"}
-	],
+	"chargers_conns":["*internal"],
+	"rals_conns": ["*internal"],
 	"online_cdr_exports": ["http_localhost", "amqp_localhost", "http_test_file", "amqp_test_file","aws_test_file","sqs_test_file","kafka_localhost","s3_test_file"],
 },
 

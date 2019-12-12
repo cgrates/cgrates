@@ -43,13 +43,17 @@
 
 "dispatchers":{
  	"enabled": true,
- 	// "attributes_conns": [
-		// {"address": "*internal"},
- 	// ],
 },
+
+"sessions": {
+	"enabled": true,
+	"debit_interval": "10s",
+},
+
 
 "radius_agent": {
 	"enabled": true,
+	"sessions_conns": ["*localhost"],
 	"request_processors": [
 		{
 			"id": "KamailioAuth",
@@ -140,8 +144,6 @@
 },
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 }

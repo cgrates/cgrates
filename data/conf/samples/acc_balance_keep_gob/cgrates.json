@@ -7,6 +7,13 @@
 	"reply_timeout": "30s",
 },
 
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],
+	},
+},
+
 
 "listen": {
 	"rpc_json": ":2012",
@@ -31,26 +38,20 @@
 
 "rals": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "*internal"}
-	],
+	"thresholds_conns": ["*internal"],
 	"remove_expired":false,
 },
 
 
 "scheduler": {
 	"enabled": true,
-	"cdrs_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
+	"cdrs_conns": ["conn1"],
 },
 
 
 "cdrs": {
 	"enabled": true,
-	"chargers_conns":[
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
+	"chargers_conns":["conn1"],
 },
 
 
@@ -76,27 +77,21 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": [
-		{"address": "*internal"}
-	],
+	"attributes_conns": ["*internal"],
 },
 
 
 "resources": {
 	"enabled": true,
 	"store_interval": "1s",
-	"thresholds_conns": [
-		{"address": "*internal"}
-	],
+	"thresholds_conns": ["*internal"]
 },
 
 
 "stats": {
 	"enabled": true,
 	"store_interval": "1s",
-	"thresholds_conns": [
-		{"address": "*internal"}
-	],
+	"thresholds_conns": ["*internal"],
 },
 
 
@@ -108,9 +103,7 @@
 
 "suppliers": {
 	"enabled": true,
-	"stats_conns": [
-		{"address": "*internal"},
-	],
+	"stats_conns": ["*internal"],
 },
 
 
@@ -135,9 +128,7 @@
 
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 

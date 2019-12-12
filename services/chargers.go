@@ -33,29 +33,27 @@ import (
 // NewChargerService returns the Charger Service
 func NewChargerService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS, server *utils.Server,
-	attrsChan, dispatcherChan chan rpcclient.ClientConnector) servmanager.Service {
+	internalChargerSChan chan rpcclient.ClientConnector, connMgr *engine.ConnManager) servmanager.Service {
 	return &ChargerService{
-		connChan:       make(chan rpcclient.ClientConnector, 1),
-		cfg:            cfg,
-		dm:             dm,
-		cacheS:         cacheS,
-		filterSChan:    filterSChan,
-		server:         server,
-		attrsChan:      attrsChan,
-		dispatcherChan: dispatcherChan,
+		connChan:    internalChargerSChan,
+		cfg:         cfg,
+		dm:          dm,
+		cacheS:      cacheS,
+		filterSChan: filterSChan,
+		server:      server,
+		connMgr:     connMgr,
 	}
 }
 
 // ChargerService implements Service interface
 type ChargerService struct {
 	sync.RWMutex
-	cfg            *config.CGRConfig
-	dm             *DataDBService
-	cacheS         *engine.CacheS
-	filterSChan    chan *engine.FilterS
-	server         *utils.Server
-	attrsChan      chan rpcclient.ClientConnector
-	dispatcherChan chan rpcclient.ClientConnector
+	cfg         *config.CGRConfig
+	dm          *DataDBService
+	cacheS      *engine.CacheS
+	filterSChan chan *engine.FilterS
+	server      *utils.Server
+	connMgr     *engine.ConnManager
 
 	chrS     *engine.ChargerService
 	rpc      *v1.ChargerSv1
@@ -74,15 +72,9 @@ func (chrS *ChargerService) Start() (err error) {
 	filterS := <-chrS.filterSChan
 	chrS.filterSChan <- filterS
 
-	var attrSConn rpcclient.ClientConnector
-	if attrSConn, err = NewConnection(chrS.cfg, chrS.attrsChan, chrS.dispatcherChan, chrS.cfg.ChargerSCfg().AttributeSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-			utils.ChargerS, utils.AttributeS, err.Error()))
-		return
-	}
 	chrS.Lock()
 	defer chrS.Unlock()
-	if chrS.chrS, err = engine.NewChargerService(chrS.dm.GetDM(), filterS, attrSConn, chrS.cfg); err != nil {
+	if chrS.chrS, err = engine.NewChargerService(chrS.dm.GetDM(), filterS, chrS.cfg, chrS.connMgr); err != nil {
 		utils.Logger.Crit(
 			fmt.Sprintf("<%s> Could not init, error: %s",
 				utils.ChargerS, err.Error()))
@@ -104,15 +96,6 @@ func (chrS *ChargerService) GetIntenternalChan() (conn chan rpcclient.ClientConn
 
 // Reload handles the change of config
 func (chrS *ChargerService) Reload() (err error) {
-	var attrSConn rpcclient.ClientConnector
-	if attrSConn, err = NewConnection(chrS.cfg, chrS.attrsChan, chrS.dispatcherChan, chrS.cfg.ChargerSCfg().AttributeSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-			utils.ChargerS, utils.AttributeS, err.Error()))
-		return
-	}
-	chrS.Lock()
-	chrS.chrS.SetAttributeConnection(attrSConn)
-	chrS.Unlock()
 	return
 }
 

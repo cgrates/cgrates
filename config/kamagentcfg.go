@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import "github.com/cgrates/cgrates/utils"
+
 // Represents one connection instance towards Kamailio
 type KamConnCfg struct {
 	Alias      string
@@ -44,7 +46,7 @@ func (self *KamConnCfg) loadFromJsonCfg(jsnCfg *KamConnJsonCfg) error {
 // SM-Kamailio config section
 type KamAgentCfg struct {
 	Enabled       bool
-	SessionSConns []*RemoteHost
+	SessionSConns []string
 	CreateCdr     bool
 	EvapiConns    []*KamConnCfg
 	Timezone      string
@@ -58,10 +60,14 @@ func (ka *KamAgentCfg) loadFromJsonCfg(jsnCfg *KamAgentJsonCfg) error {
 		ka.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Sessions_conns != nil {
-		ka.SessionSConns = make([]*RemoteHost, len(*jsnCfg.Sessions_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
-			ka.SessionSConns[idx] = NewDfltRemoteHost()
-			ka.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		ka.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
+		for idx, attrConn := range *jsnCfg.Sessions_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if attrConn == utils.MetaInternal {
+				ka.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+			} else {
+				ka.SessionSConns[idx] = attrConn
+			}
 		}
 	}
 	if jsnCfg.Create_cdr != nil {

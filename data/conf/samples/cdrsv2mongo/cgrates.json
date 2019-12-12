@@ -16,9 +16,7 @@
 
 "rals": {
 	"enabled": true,						// enable Rater service: <true|false>
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"},
-	],
+	"thresholds_conns": ["*localhost"],
 },
 
 "scheduler": {
@@ -27,21 +25,11 @@
 
 "cdrs": {
 	"enabled": true,
-	"attributes_conns":[
-		{"address": "*internal"},
-	],
-	"chargers_conns":[
-		{"address": "127.0.0.1:2012", "transport":"*json"},
-	],
-	"rals_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"},
-	],
-	"stats_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"},
-	],				
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"},
-	],
+	"attributes_conns":["*internal"],
+	"chargers_conns":["*localhost"],
+	"rals_conns": ["*localhost"],
+	"stats_conns": ["*localhost"],
+	"thresholds_conns": ["*localhost"],
 },
 
 "attributes": {
@@ -51,9 +39,7 @@
 "stats": {
 	"enabled": true,
 	"store_interval": "1s",
-	"thresholds_conns": [
-		{"address": "*internal"}
-	],
+	"thresholds_conns": ["*internal"],
 },
 
 "thresholds": {
@@ -63,15 +49,11 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": [
-		{"address": "*internal"},
-	],
+	"attributes_conns": ["*internal"],
 },
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 }

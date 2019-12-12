@@ -275,9 +275,7 @@ const CGRATES_CFG_JSON = `
 		"id": "*default",								// identifier of the CDRC runner
 		"enabled": false,								// enable CDR client functionality
 		"dry_run": false,								// do not send the CDRs to CDRS, just parse them
-		"cdrs_conns": [									// connections to CDRs. <*internal|x.y.z.y:1234>
-			{"address": "*internal"}
-		],
+		"cdrs_conns": ["*internal"],
 		"cdr_format": "*file_csv",						// CDR file format <*file_csv|*freeswitch_csv|*file_fwv|*opensips_flatstore|*partial_csv|*file_xml>
 		"field_separator": ",",							// separator used in case of csv files
 		"timezone": "",									// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
@@ -396,9 +394,7 @@ const CGRATES_CFG_JSON = `
 
 "asterisk_agent": {
 	"enabled": false,						// starts the Asterisk agent: <true|false>
-	"sessions_conns": [						// connections to SessionS for session management and CDR posting: <*internal>
-		{"address": "*internal"}
-	],
+	"sessions_conns": ["*internal"],
 	"create_cdr": false,					// create CDR out of events and sends it to CDRS component
 	"asterisk_conns":[						// instantiate connections to multiple Asterisk servers
 		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
@@ -408,9 +404,7 @@ const CGRATES_CFG_JSON = `
 
 "freeswitch_agent": {
 	"enabled": false,						// starts the FreeSWITCH agent: <true|false>
-	"sessions_conns": [						// connections to SessionS for session management and CDR posting: <*internal>
-		{"address": "*internal"}
-	],
+	"sessions_conns": ["*internal"],
 	"subscribe_park": true,					// subscribe via fsock to receive park events
 	"create_cdr": false,					// creates CDR out of events and sends them to CDRS component
 	"extra_fields": [],						// extra fields to store in auth/CDRs when creating them
@@ -427,9 +421,7 @@ const CGRATES_CFG_JSON = `
 
 "kamailio_agent": {
 	"enabled": false,						// starts Kamailio agent: <true|false>
-	"sessions_conns": [						// connections to SessionS for session management and CDR posting: <*internal>
-		{"address": "*internal"}
-	],
+	"sessions_conns": ["*internal"],
 	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
 	"timezone": "",							// timezone of the Kamailio server
 	"evapi_conns":[							// instantiate connections to multiple Kamailio servers
@@ -443,9 +435,7 @@ const CGRATES_CFG_JSON = `
 	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y/x1.y1.z1.y1:1234>
 	"listen_net": "tcp",										// transport type for diameter <tcp|sctp>
 	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
-	"sessions_conns": [											// connections to SessionS for session management and CDR posting
-		{"address": "*internal"}
-	],
+	"sessions_conns": ["*internal"],
 	"origin_host": "CGR-DA",									// diameter Origin-Host AVP used in replies
 	"origin_realm": "cgrates.org",								// diameter Origin-Realm AVP used in replies
 	"vendor_id": 0,												// diameter Vendor-Id AVP used in replies
@@ -513,9 +503,7 @@ const CGRATES_CFG_JSON = `
 	"client_dictionaries": {									// per client path towards directory holding additional dictionaries to load (extra to RFC)
 		"*default": "/usr/share/cgrates/radius/dict/",			// key represents the client IP or catch-all <*default|$client_ip>
 	},
-	"sessions_conns": [											// connections to SessionS for session management and CDR posting
-		{"address": "*internal"}
-	],
+	"sessions_conns": ["*internal"],
 	"request_processors": [										// request processors to be applied to Radius messages
 	],
 },
@@ -529,9 +517,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,											// enables the DNS agent: <true|false>
 	"listen": "127.0.0.1:2053",									// address where to listen for DNS requests <x.y.z.y:1234>
 	"listen_net": "udp",										// network to listen on <udp|tcp|tcp-tls>
-	"sessions_conns": [											// connections to SessionS for session management and CDR posting
-		{"address": "*internal"}
-	],
+	"sessions_conns": ["*internal"],
 	"timezone": "",												// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
 	"request_processors": [										// request processors to be applied to DNS messages
 	],
@@ -606,9 +592,7 @@ const CGRATES_CFG_JSON = `
 		"dry_run": false,									// do not send the CDRs to CDRS, just parse them
 		"run_delay": 0,										// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
 		"lock_filename": ".cgr.lck",						// Filename containing concurrency lock in case of delayed processing
-		"caches_conns": [									// connections to CacheS for data reload, empty for no reloads  <""|*internal|x.y.z.y:1234>
-			{"address": "*internal"},
-		],
+		"caches_conns": ["*internal"],
 		"field_separator": ",",								// separator used in case of csv files
 		"tp_in_dir": "/var/spool/cgrates/loader/in",		// absolute path towards the directory where the TPs are stored
 		"tp_out_dir": "/var/spool/cgrates/loader/out",		// absolute path towards the directory where processed TPs will be moved
@@ -808,12 +792,8 @@ const CGRATES_CFG_JSON = `
 	"data_path": "./",						// path towards tariff plan files
 	"disable_reverse": false,				// disable reverse computing
 	"field_separator": ",",					// separator used in case of csv files
-	"caches_conns":[						// connections to CacheS for reloads
-		{"address": "127.0.0.1:2012", "transport": "*json"}
-	],
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "127.0.0.1:2012", "transport": "*json"}
-	],
+	"caches_conns":["*localhost"],
+	"scheduler_conns": ["*localhost"],
 },
 
 
@@ -850,9 +830,7 @@ const CGRATES_CFG_JSON = `
 
 
 "apier": {
-	"caches_conns":[						// connections to CacheS for reloads
-		{"address": "*internal"},
-	],
+	"caches_conns":["*internal"],
 	"scheduler_conns": [],					// connections to SchedulerS for reloads
 	"attributes_conns": [],					// connections to AttributeS for CDRExporter
 },

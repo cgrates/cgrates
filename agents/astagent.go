@@ -32,7 +32,6 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 const (
@@ -54,11 +53,11 @@ const (
 )
 
 func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
-	smgConn rpcclient.ClientConnector) (*AsteriskAgent, error) {
+	connMgr *engine.ConnManager) (*AsteriskAgent, error) {
 	sma := &AsteriskAgent{
 		cgrCfg:      cgrCfg,
 		astConnIdx:  astConnIdx,
-		smg:         smgConn,
+		connMgr:     connMgr,
 		eventsCache: make(map[string]*utils.CGREventWithArgDispatcher),
 	}
 	return sma, nil
@@ -66,8 +65,8 @@ func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
 
 type AsteriskAgent struct {
 	cgrCfg      *config.CGRConfig // Separate from smCfg since there can be multiple
+	connMgr     *engine.ConnManager
 	astConnIdx  int
-	smg         rpcclient.ClientConnector
 	astConn     *aringo.ARInGO
 	astEvChan   chan map[string]interface{}
 	astErrChan  chan error
@@ -169,7 +168,8 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 		return
 	}
 	var authReply sessions.V1AuthorizeReply
-	if err := sma.smg.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
+	if err := sma.connMgr.Call(sma.cgrCfg.AsteriskAgentCfg().SessionSConns, sma,
+		utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
 		sma.hangupChannel(ev.ChannelID(),
 			fmt.Sprintf("<%s> error: %s authorizing session for channelID: %s",
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
@@ -263,7 +263,8 @@ func (sma *AsteriskAgent) handleChannelStateChange(ev *SMAsteriskEvent) {
 
 	//initit Session
 	var initReply sessions.V1InitSessionReply
-	if err := sma.smg.Call(utils.SessionSv1InitiateSession,
+	if err := sma.connMgr.Call(sma.cgrCfg.AsteriskAgentCfg().SessionSConns, sma,
+		utils.SessionSv1InitiateSession,
 		initSessionArgs, &initReply); err != nil {
 		sma.hangupChannel(ev.ChannelID(),
 			fmt.Sprintf("<%s> error: %s when attempting to initiate session for channelID: %s",
@@ -301,13 +302,15 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 	}
 
 	var reply string
-	if err := sma.smg.Call(utils.SessionSv1TerminateSession,
+	if err := sma.connMgr.Call(sma.cgrCfg.AsteriskAgentCfg().SessionSConns, sma,
+		utils.SessionSv1TerminateSession,
 		tsArgs, &reply); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to terminate session for channelID: %s",
 			utils.AsteriskAgent, err.Error(), ev.ChannelID()))
 	}
 	if sma.cgrCfg.AsteriskAgentCfg().CreateCDR {
-		if err := sma.smg.Call(utils.SessionSv1ProcessCDR,
+		if err := sma.connMgr.Call(sma.cgrCfg.AsteriskAgentCfg().SessionSConns, sma,
+			utils.SessionSv1ProcessCDR,
 			cgrEvDisp, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Error: %s when attempting to process CDR for channelID: %s",
 				utils.AsteriskAgent, err.Error(), ev.ChannelID()))
@@ -356,10 +359,4 @@ func (sma *AsteriskAgent) V1GetActiveSessionIDs(ignParam string,
 	*sessionIDs = sIDs
 	return nil
 
-}
-
-// SetSessionSConnection sets the new connection to the session service
-// only used on reload
-func (sma *AsteriskAgent) SetSessionSConnection(sS rpcclient.ClientConnector) {
-	sma.smg = sS
 }

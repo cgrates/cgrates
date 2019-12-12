@@ -33,34 +33,32 @@ import (
 // NewResourceService returns the Resource Service
 func NewResourceService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, thrsChan,
-	dispatcherChan chan rpcclient.ClientConnector) servmanager.Service {
+	server *utils.Server, internalResourceSChan chan rpcclient.ClientConnector,
+	connMgr *engine.ConnManager) servmanager.Service {
 	return &ResourceService{
-		connChan:       make(chan rpcclient.ClientConnector, 1),
-		cfg:            cfg,
-		dm:             dm,
-		cacheS:         cacheS,
-		filterSChan:    filterSChan,
-		server:         server,
-		thrsChan:       thrsChan,
-		dispatcherChan: dispatcherChan,
+		connChan:    internalResourceSChan,
+		cfg:         cfg,
+		dm:          dm,
+		cacheS:      cacheS,
+		filterSChan: filterSChan,
+		server:      server,
+		connMgr:     connMgr,
 	}
 }
 
 // ResourceService implements Service interface
 type ResourceService struct {
 	sync.RWMutex
-	cfg            *config.CGRConfig
-	dm             *DataDBService
-	cacheS         *engine.CacheS
-	filterSChan    chan *engine.FilterS
-	server         *utils.Server
-	thrsChan       chan rpcclient.ClientConnector
-	dispatcherChan chan rpcclient.ClientConnector
+	cfg         *config.CGRConfig
+	dm          *DataDBService
+	cacheS      *engine.CacheS
+	filterSChan chan *engine.FilterS
+	server      *utils.Server
 
 	reS      *engine.ResourceService
 	rpc      *v1.ResourceSv1
 	connChan chan rpcclient.ClientConnector
+	connMgr  *engine.ConnManager
 }
 
 // Start should handle the sercive start
@@ -76,15 +74,9 @@ func (reS *ResourceService) Start() (err error) {
 	filterS := <-reS.filterSChan
 	reS.filterSChan <- filterS
 
-	var thdSConn rpcclient.ClientConnector
-	if thdSConn, err = NewConnection(reS.cfg, reS.thrsChan, reS.dispatcherChan, reS.cfg.ResourceSCfg().ThresholdSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.ResourceS, err.Error()))
-		return
-	}
-
 	reS.Lock()
 	defer reS.Unlock()
-	reS.reS, err = engine.NewResourceService(reS.dm.GetDM(), reS.cfg, thdSConn, filterS)
+	reS.reS, err = engine.NewResourceService(reS.dm.GetDM(), reS.cfg, filterS, reS.connMgr)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.ResourceS, err.Error()))
 		return
@@ -106,13 +98,7 @@ func (reS *ResourceService) GetIntenternalChan() (conn chan rpcclient.ClientConn
 
 // Reload handles the change of config
 func (reS *ResourceService) Reload() (err error) {
-	var thdSConn rpcclient.ClientConnector
-	if thdSConn, err = NewConnection(reS.cfg, reS.thrsChan, reS.dispatcherChan, reS.cfg.ResourceSCfg().ThresholdSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.ResourceS, err.Error()))
-		return
-	}
 	reS.Lock()
-	reS.reS.SetThresholdConnection(thdSConn)
 	reS.reS.Reload()
 	reS.Unlock()
 	return

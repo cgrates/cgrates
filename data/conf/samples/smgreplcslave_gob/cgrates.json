@@ -32,12 +32,17 @@
 	"enabled": true,
 },
 
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:22013", "transport":"*gob"}],
+	},
+},
+
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": [
-		{"address": "*internal"}
-	],
+	"attributes_conns": ["*internal"],
 },
 
 "sessions": {
@@ -46,21 +51,13 @@
 	"replication_conns": [
 		{"address": "127.0.0.1:2013", "transport": "*gob"},
 	],
-	"rals_conns": [
-		{"address": "127.0.0.1:22013", "transport": "*gob"},
-	],
-	"cdrs_conns": [
-		{"address": "*internal"}
-	],
-	"chargers_conns": [
-		{"address": "*internal"}
-	],
+	"rals_conns": ["conn1"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
 },
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 }

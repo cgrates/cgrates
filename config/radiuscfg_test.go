@@ -48,9 +48,7 @@ func TestRadiusAgentCfgloadFromJsonCfg(t *testing.T) {
 	"client_dictionaries": {									// per client path towards directory holding additional dictionaries to load (extra to RFC)
 		"*default": "/usr/share/cgrates/radius/dict/",			// key represents the client IP or catch-all <*default|$client_ip>
 	},
-	"sessions_conns": [
-		{"address": "*internal"}								// connection towards SessionService
-	],
+	"sessions_conns": ["*internal"],
 	"request_processors": [],
 },
 }`
@@ -60,7 +58,7 @@ func TestRadiusAgentCfgloadFromJsonCfg(t *testing.T) {
 		ListenAcct:         "127.0.0.1:1813",
 		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
 		ClientDictionaries: map[string]string{utils.MetaDefault: "/usr/share/cgrates/radius/dict/"},
-		SessionSConns:      []*RemoteHost{{Address: "*internal"}},
+		SessionSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)

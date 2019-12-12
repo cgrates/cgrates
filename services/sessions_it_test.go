@@ -70,19 +70,18 @@ func TestSessionSReload(t *testing.T) {
 	db := NewDataDBService(cfg)
 	cfg.StorDbCfg().Type = utils.INTERNAL
 	stordb := NewStorDBService(cfg)
-	chrS := NewChargerService(cfg, db, chS, filterSChan, server, nil, nil)
+	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil)
 	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil)
 	ralS := NewRalService(cfg, db, stordb, chS, filterSChan, server,
-		/*tS*/ internalChan, internalChan, cacheSChan, internalChan, internalChan,
-		internalChan, schS, engineShutdown)
+		make(chan rpcclient.ClientConnector, 1), make(chan rpcclient.ClientConnector, 1),
+		make(chan rpcclient.ClientConnector, 1), make(chan rpcclient.ClientConnector, 1),
+		schS, engineShutdown, nil)
 	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
 		make(chan rpcclient.ClientConnector, 1),
-		chrS.GetIntenternalChan(), ralS.GetResponder().GetIntenternalChan(),
-		nil, nil, nil, nil)
-	srv := NewSessionService(cfg, db, server, chrS.GetIntenternalChan(),
-		ralS.GetResponder().GetIntenternalChan(), nil, nil, nil,
-		nil, nil, cdrS.GetIntenternalChan(), nil, make(chan rpcclient.ClientConnector, 1), engineShutdown)
-	srvMngr.AddServices(NewConnManagerService(cfg, nil), srv, chrS, schS, ralS, cdrS, NewLoaderService(cfg, db, filterSChan, server, cacheSChan, nil, engineShutdown), db, stordb)
+		nil)
+	srv := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1), engineShutdown, nil)
+	srvMngr.AddServices(NewConnManagerService(cfg, nil), srv, chrS, schS, ralS, cdrS,
+		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil), db, stordb)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

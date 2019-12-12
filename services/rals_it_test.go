@@ -68,11 +68,15 @@ func TestRalsReload(t *testing.T) {
 	cfg.StorDbCfg().Type = utils.INTERNAL
 	stordb := NewStorDBService(cfg)
 	schS := NewSchedulerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil)
-	tS := NewThresholdService(cfg, db, chS, filterSChan, server)
+	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1))
 	ralS := NewRalService(cfg, db, stordb, chS, filterSChan, server,
-		tS.GetIntenternalChan(), internalChan, cacheSChan, internalChan, internalChan,
-		internalChan, schS, engineShutdown)
-	srvMngr.AddServices(NewConnManagerService(cfg, nil), ralS, schS, tS, NewLoaderService(cfg, db, filterSChan, server, cacheSChan, nil, engineShutdown), db, stordb)
+		make(chan rpcclient.ClientConnector, 1),
+		make(chan rpcclient.ClientConnector, 1),
+		make(chan rpcclient.ClientConnector, 1),
+		make(chan rpcclient.ClientConnector, 1),
+		schS, engineShutdown, nil)
+	srvMngr.AddServices(NewConnManagerService(cfg, nil), ralS, schS, tS,
+		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil), db, stordb)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

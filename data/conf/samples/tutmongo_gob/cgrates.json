@@ -7,6 +7,13 @@
 	"reply_timeout": "30s",
 },
 
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],
+	},
+},
+
 
 "listen": {
 	"rpc_json": ":2012",
@@ -31,18 +38,14 @@
 
 "rals": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "*internal"}
-	],
+	"thresholds_conns": ["*internal"],
 	"max_increments":3000000,
 },
 
 
 "scheduler": {
 	"enabled": true,
-	"cdrs_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
+	"cdrs_conns": ["conn1"],
 },
 
 
@@ -73,27 +76,21 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": [
-		{"address": "*internal"}
-	],
+	"attributes_conns": ["*internal"],
 },
 
 
 "resources": {
 	"enabled": true,
 	"store_interval": "1s",
-	"thresholds_conns": [
-		{"address": "*internal"}
-	],
+	"thresholds_conns": ["*internal"]
 },
 
 
 "stats": {
 	"enabled": true,
 	"store_interval": "1s",
-	"thresholds_conns": [
-		{"address": "*internal"}
-	],
+	"thresholds_conns": ["*internal"],
 },
 
 
@@ -105,12 +102,8 @@
 
 "suppliers": {
 	"enabled": true,
-	"stats_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
-	"resources_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
+	"stats_conns": ["conn1"],
+	"resources_conns": ["conn1"],
 },
 
 
@@ -121,15 +114,9 @@
 
 "sessions": {
 	"enabled": true,
-	"rals_conns": [
-		{"address": "*internal"}
-	],
-	"cdrs_conns": [
-		{"address": "*internal"}
-	],
-	"chargers_conns": [
-		{"address": "*internal"}
-	],
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
 },
 
 
@@ -145,9 +132,7 @@
 
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 

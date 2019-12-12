@@ -37,9 +37,7 @@
 	{
 		"id": "FLATSTORE",
 		"enabled": true,								// enable CDR client functionality
-		"cdrs_conns": [
-			{"address": "*internal"}				// address where to reach CDR server. <*internal|x.y.z.y:1234>
-		],
+		"cdrs_conns": ["*internal"],
 		"cdr_format": "*opensips_flatstore",				// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore>
 		"field_separator": "|",							// separator used in case of csv files
 		"run_delay": 0,									// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
@@ -69,9 +67,7 @@
 ],
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 }

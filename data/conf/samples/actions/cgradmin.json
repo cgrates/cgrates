@@ -26,16 +26,12 @@
 
 "scheduler": {
 	"enabled": true,						// start Scheduler service: <true|false>
-	"cdrs_conns": [
-		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
-	],
+	"cdrs_conns": ["*internal"],
 },
 
 "cdrs": {
 	"enabled": true,						// start the CDR Server service:  <true|false>
-	"chargers_conns":[
-		{"address": "127.0.0.1:2012", "transport":"*json"},
-	],
+	"chargers_conns":["*localhost"],
 },
 
 "chargers": {
@@ -52,9 +48,7 @@
 },
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 }

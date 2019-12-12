@@ -12,6 +12,14 @@
 	"http": "127.0.0.1:22080",					// HTTP listening address
 },
 
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:22012", "transport":"*json"}],
+	},
+},
+
+
 "stor_db": {								// database used to store offline tariff plans and CDRs
 	"db_password": "CGRateS.org",			// password to use when connecting to stordb
 },
@@ -35,9 +43,7 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": [
-		{"address": "*internal"}
-	],
+	"attributes_conns": ["*internal"],
 },
 
 "sessions": {
@@ -46,21 +52,13 @@
 	"replication_conns": [
 		{"address": "127.0.0.1:2012", "transport": "*json"},
 	],
-	"rals_conns": [
-		{"address": "127.0.0.1:22012", "transport": "*json"},
-	],
-	"cdrs_conns": [
-		{"address": "*internal"}
-	],
-	"chargers_conns": [
-		{"address": "*internal"}
-	],
+	"rals_conns": ["conn1"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
 },
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 }

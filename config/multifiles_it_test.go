@@ -129,7 +129,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 		&HttpAgentCfg{
 			ID:             "conecto1",
 			Url:            "/newConecto",
-			SessionSConns:  []*RemoteHost{{Address: "127.0.0.2:2012", Transport: "*json"}},
+			SessionSConns:  []string{utils.MetaLocalHost},
 			RequestPayload: "*url",
 			ReplyPayload:   "*xml",
 			RequestProcessors: []*RequestProcessor{
@@ -197,7 +197,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 		&HttpAgentCfg{
 			ID:             "conecto_xml",
 			Url:            "/conecto_xml",
-			SessionSConns:  []*RemoteHost{{Address: "127.0.0.1:2012", Transport: "*json"}},
+			SessionSConns:  []string{utils.MetaLocalHost},
 			RequestPayload: "*xml",
 			ReplyPayload:   "*xml",
 			RequestProcessors: []*RequestProcessor{{

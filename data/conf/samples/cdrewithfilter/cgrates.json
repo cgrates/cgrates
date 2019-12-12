@@ -28,9 +28,7 @@
 
 "rals": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "*internal"}
-	],
+	"thresholds_conns": ["*internal"],
 },
 
 
@@ -41,12 +39,8 @@
 
 "cdrs": {
 	"enabled": true,
-	"chargers_conns":[
-		{"address": "*internal"}
-	],
-	"rals_conns": [							
-		{"address": "*internal"}
-	],
+	"chargers_conns":["*internal"],
+	"rals_conns": ["*internal"],
 },
 
 
@@ -78,27 +72,21 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": [
-		{"address": "*internal"}
-	],
+	"attributes_conns": ["*internal"],
 },
 
 
 "resources": {
 	"enabled": true,
 	"store_interval": "1s",
-	"thresholds_conns": [
-		{"address": "*internal"}
-	],
+	"thresholds_conns": ["*internal"]
 },
 
 
 "stats": {
 	"enabled": true,
 	"store_interval": "1s",
-	"thresholds_conns": [
-		{"address": "*internal"}
-	],
+	"thresholds_conns": ["*internal"],
 },
 
 "thresholds": {
@@ -109,32 +97,18 @@
 
 "suppliers": {
 	"enabled": true,
-	"stats_conns": [
-		{"address": "*internal"},
-	],
+	"stats_conns": ["*localhost"],
 },
 
 
 "sessions": {
 	"enabled": true,
-	"suppliers_conns": [
-		{"address": "*internal"}
-	],
-	"resources_conns": [
-		{"address": "*internal"}
-	],
-	"attributes_conns": [
-		{"address": "*internal"}
-	],
-	"rals_conns": [
-		{"address": "*internal"}
-	],
-	"cdrs_conns": [
-		{"address": "*internal"}
-	],
-	"chargers_conns": [
-		{"address": "*internal"}
-	],
+	"suppliers_conns": ["*internal"],
+	"resources_conns": ["*internal"],
+	"attributes_conns": ["*internal"],
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
 },
 
 
@@ -144,9 +118,7 @@
 
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 

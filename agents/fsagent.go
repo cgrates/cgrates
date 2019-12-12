@@ -21,7 +21,6 @@ package agents
 import (
 	"errors"
 	"fmt"
-	"reflect"
 	"strings"
 	"time"
 
@@ -30,32 +29,27 @@ import (
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
-	"github.com/cgrates/rpcclient"
 )
 
 func NewFSsessions(fsAgentConfig *config.FsAgentCfg,
-	sS rpcclient.ClientConnector, timezone string) (fsa *FSsessions) {
-	if sS != nil && reflect.ValueOf(sS).IsNil() {
-		sS = nil
-	}
-	fsa = &FSsessions{
+	timezone string, connMgr *engine.ConnManager) (fsa *FSsessions) {
+	return &FSsessions{
 		cfg:         fsAgentConfig,
 		conns:       make([]*fsock.FSock, len(fsAgentConfig.EventSocketConns)),
 		senderPools: make([]*fsock.FSockPool, len(fsAgentConfig.EventSocketConns)),
-		sS:          sS,
 		timezone:    timezone,
+		connMgr:     connMgr,
 	}
-	return
 }
 
 // The freeswitch session manager type holding a buffer for the network connection
 // and the active sessions
 type FSsessions struct {
 	cfg         *config.FsAgentCfg
-	conns       []*fsock.FSock            // Keep the list here for connection management purposes
-	senderPools []*fsock.FSockPool        // Keep sender pools here
-	sS          rpcclient.ClientConnector // Connection towards CGR-SessionS component
+	conns       []*fsock.FSock     // Keep the list here for connection management purposes
+	senderPools []*fsock.FSockPool // Keep sender pools here
 	timezone    string
+	connMgr     *engine.ConnManager
 }
 
 func (sm *FSsessions) createHandlers() map[string][]func(string, int) {
@@ -151,7 +145,7 @@ func (sm *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 	authArgs := fsev.V1AuthorizeArgs()
 	authArgs.CGREvent.Event[FsConnID] = connIdx // Attach the connection ID
 	var authReply sessions.V1AuthorizeReply
-	if err := sm.sS.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
+	if err := sm.connMgr.Call(sm.cfg.SessionSConns, sm, utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> Could not authorize event %s, error: %s",
 				utils.FreeSWITCHAgent, fsev.GetUUID(), err.Error()))
@@ -240,7 +234,7 @@ func (sm *FSsessions) onChannelAnswer(fsev FSEvent, connIdx int) {
 	initSessionArgs := fsev.V1InitSessionArgs()
 	initSessionArgs.CGREvent.Event[FsConnID] = connIdx // Attach the connection ID so we can properly disconnect later
 	var initReply sessions.V1InitSessionReply
-	if err := sm.sS.Call(utils.SessionSv1InitiateSession,
+	if err := sm.connMgr.Call(sm.cfg.SessionSConns, sm, utils.SessionSv1InitiateSession,
 		initSessionArgs, &initReply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> could not process answer for event %s, error: %s",
@@ -264,7 +258,7 @@ func (sm *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {
 	if fsev[VarAnswerEpoch] != "0" {                                                                             // call was answered
 		terminateSessionArgs := fsev.V1TerminateSessionArgs()
 		terminateSessionArgs.CGREvent.Event[FsConnID] = connIdx // Attach the connection ID in case we need to create a session and disconnect it
-		if err := sm.sS.Call(utils.SessionSv1TerminateSession,
+		if err := sm.connMgr.Call(sm.cfg.SessionSConns, sm, utils.SessionSv1TerminateSession,
 			terminateSessionArgs, &reply); err != nil {
 			utils.Logger.Err(
 				fmt.Sprintf("<%s> Could not terminate session with event %s, error: %s",
@@ -277,7 +271,7 @@ func (sm *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {
 			return
 		}
 		cgrArgs := cgrEv.ExtractArgs(strings.Index(fsev[VarCGRFlags], utils.MetaDispatchers) != -1, false)
-		if err := sm.sS.Call(utils.SessionSv1ProcessCDR,
+		if err := sm.connMgr.Call(sm.cfg.SessionSConns, sm, utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv, ArgDispatcher: cgrArgs.ArgDispatcher}, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<%s> Failed processing CGREvent: %s,  error: <%s>",
 				utils.FreeSWITCHAgent, utils.ToJSON(cgrEv), err.Error()))
@@ -436,12 +430,6 @@ func (fsa *FSsessions) V1GetActiveSessionIDs(ignParam string,
 	}
 	*sessionIDs = sIDs
 	return
-}
-
-// SetSessionSConnection sets the new connection to the session service
-// only used on reload
-func (sm *FSsessions) SetSessionSConnection(sS rpcclient.ClientConnector) {
-	sm.sS = sS
 }
 
 // Reload recreates the connection buffers

@@ -51,16 +51,12 @@
 
 "suppliers": {
 	"enabled": true,
-	"attributes_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"}
-	],
+	"attributes_conns": ["*localhost"],
 },
 
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 }

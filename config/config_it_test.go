@@ -126,12 +126,7 @@ func TestCGRConfigReloadChargerS(t *testing.T) {
 		StringIndexedFields: &[]string{utils.Account},
 		PrefixIndexedFields: &[]string{},
 		IndexedSelects:      true,
-		AttributeSConns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSON,
-			},
-		},
+		AttributeSConns:     []string{"*localhost"},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.ChargerSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.ChargerSCfg()))
@@ -182,9 +177,7 @@ func TestCGRConfigReloadStatS(t *testing.T) {
 		StringIndexedFields: &[]string{utils.Account},
 		PrefixIndexedFields: &[]string{},
 		IndexedSelects:      true,
-		ThresholdSConns: []*RemoteHost{
-			&RemoteHost{Address: "127.0.0.1:2012", Transport: utils.MetaJSON},
-		},
+		ThresholdSConns:     []string{utils.MetaLocalHost},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.StatSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.StatSCfg()))
@@ -210,9 +203,7 @@ func TestCGRConfigReloadResourceS(t *testing.T) {
 		StringIndexedFields: &[]string{utils.Account},
 		PrefixIndexedFields: &[]string{},
 		IndexedSelects:      true,
-		ThresholdSConns: []*RemoteHost{
-			&RemoteHost{Address: "127.0.0.1:2012", Transport: utils.MetaJSON},
-		},
+		ThresholdSConns:     []string{utils.MetaLocalHost},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.ResourceSCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.ResourceSCfg()))
@@ -237,9 +228,9 @@ func TestCGRConfigReloadSupplierS(t *testing.T) {
 		Enabled:             true,
 		StringIndexedFields: &[]string{"LCRProfile"},
 		PrefixIndexedFields: &[]string{utils.Destination},
-		ResourceSConns:      []*RemoteHost{},
-		StatSConns:          []*RemoteHost{},
-		AttributeSConns:     []*RemoteHost{},
+		ResourceSConns:      []string{},
+		StatSConns:          []string{},
+		AttributeSConns:     []string{},
 		IndexedSelects:      true,
 		DefaultRatio:        1,
 	}
@@ -263,14 +254,9 @@ func TestCGRConfigReloadSchedulerS(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	expAttr := &SchedulerCfg{
-		Enabled: true,
-		CDRsConns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSON,
-			},
-		},
-		Filters: []string{},
+		Enabled:   true,
+		CDRsConns: []string{utils.MetaLocalHost},
+		Filters:   []string{},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SchedulerCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SchedulerCfg()))
@@ -299,16 +285,11 @@ func TestCGRConfigReloadCDRs(t *testing.T) {
 			utils.NewRSRFieldMustCompile("LCRProfile"),
 			utils.NewRSRFieldMustCompile("ResourceID"),
 		},
-		ChargerSConns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSON,
-			},
-		},
-		RaterConns:      []*RemoteHost{},
-		AttributeSConns: []*RemoteHost{},
-		ThresholdSConns: []*RemoteHost{},
-		StatSConns:      []*RemoteHost{},
+		ChargerSConns:   []string{utils.MetaLocalHost},
+		RaterConns:      []string{},
+		AttributeSConns: []string{},
+		ThresholdSConns: []string{},
+		StatSConns:      []string{},
 		SMCostRetries:   5,
 		StoreCdrs:       true,
 	}
@@ -339,19 +320,9 @@ func TestCGRConfigReloadRALs(t *testing.T) {
 		RemoveExpired:           true,
 		MaxComputedUsage:        maxComp,
 		BalanceRatingSubject:    blMap,
-		ThresholdSConns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSON,
-			},
-		},
-		StatSConns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSON,
-			},
-		},
-		MaxIncrements: 1000000,
+		ThresholdSConns:         []string{utils.MetaLocalHost},
+		StatSConns:              []string{utils.MetaLocalHost},
+		MaxIncrements:           1000000,
 	}
 	if !reflect.DeepEqual(expAttr, cfg.RalsCfg()) {
 		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.RalsCfg()))
@@ -376,43 +347,16 @@ func TestCGRConfigReloadSessionS(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	expAttr := &SessionSCfg{
-		Enabled:      true,
-		ListenBijson: "127.0.0.1:2014",
-		ChargerSConns: []*RemoteHost{
-			&RemoteHost{
-				Address: utils.MetaInternal,
-			},
-		},
-		RALsConns: []*RemoteHost{
-			&RemoteHost{
-				Address: utils.MetaInternal,
-			},
-		},
-		ResSConns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSON,
-			},
-		},
-		ThreshSConns: []*RemoteHost{},
-		StatSConns:   []*RemoteHost{},
-		SupplSConns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSON,
-			},
-		},
-		AttrSConns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSON,
-			},
-		},
-		CDRsConns: []*RemoteHost{
-			&RemoteHost{
-				Address: utils.MetaInternal,
-			},
-		},
+		Enabled:       true,
+		ListenBijson:  "127.0.0.1:2014",
+		ChargerSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
+		RALsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
+		ResSConns:     []string{utils.MetaLocalHost},
+		ThreshSConns:  []string{},
+		StatSConns:    []string{},
+		SupplSConns:   []string{utils.MetaLocalHost},
+		AttrSConns:    []string{utils.MetaLocalHost},
+		CDRsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 
 		ReplicationConns:  []*RemoteHost{},
 		MaxCallDuration:   3 * time.Hour,
@@ -518,14 +462,10 @@ func TestCGRConfigReloadDNSAgent(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	expAttr := &DNSAgentCfg{
-		Enabled:   true,
-		Listen:    ":2053",
-		ListenNet: "udp",
-		SessionSConns: []*RemoteHost{
-			&RemoteHost{
-				Address: utils.MetaInternal,
-			},
-		},
+		Enabled:       true,
+		Listen:        ":2053",
+		ListenNet:     "udp",
+		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		// Timezone          string
 		// RequestProcessors []*RequestProcessor
 	}
@@ -550,12 +490,8 @@ func TestCGRConfigReloadFreeswitchAgent(t *testing.T) {
 		t.Errorf("Expected OK received: %s", reply)
 	}
 	expAttr := &FsAgentCfg{
-		Enabled: true,
-		SessionSConns: []*RemoteHost{
-			&RemoteHost{
-				Address: utils.MetaInternal,
-			},
-		},
+		Enabled:           true,
+		SessionSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		SubscribePark:     true,
 		ExtraFields:       RSRParsers{},
 		MaxWaitConnection: 2 * time.Second,

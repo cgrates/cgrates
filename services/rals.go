@@ -33,19 +33,21 @@ import (
 // NewRalService returns the Ral Service
 func NewRalService(cfg *config.CGRConfig, dm *DataDBService,
 	storDB *StorDBService, cacheS *engine.CacheS, filterSChan chan *engine.FilterS, server *utils.Server,
-	thsChan, stsChan, cacheSChan, schedChan, attrsChan, dispatcherChan chan rpcclient.ClientConnector,
-	schedulerService *SchedulerService, exitChan chan bool) *RalService {
-	resp := NewResponderService(cfg, server, thsChan, stsChan, dispatcherChan, exitChan)
-	apiv1 := NewApierV1Service(cfg, dm, storDB, filterSChan, server, cacheSChan, schedChan, attrsChan, dispatcherChan, schedulerService, resp)
-	apiv2 := NewApierV2Service(apiv1, cfg, server)
+	internalRALsChan, internalResponderChan, internalAPIerV1Chan, internalAPIerV2Chan chan rpcclient.ClientConnector,
+	schedulerService *SchedulerService, exitChan chan bool,
+	connMgr *engine.ConnManager) *RalService {
+	resp := NewResponderService(cfg, server, internalResponderChan, exitChan)
+	apiv1 := NewApierV1Service(cfg, dm, storDB, filterSChan, server, schedulerService, resp, internalAPIerV1Chan, connMgr)
+	apiv2 := NewApierV2Service(apiv1, cfg, server, internalAPIerV2Chan)
 	return &RalService{
-		connChan:  make(chan rpcclient.ClientConnector, 1),
+		connChan:  internalRALsChan,
 		cfg:       cfg,
 		cacheS:    cacheS,
 		server:    server,
 		apiv1:     apiv1,
 		apiv2:     apiv2,
 		responder: resp,
+		connMgr:   connMgr,
 	}
 }
 
@@ -60,6 +62,7 @@ type RalService struct {
 	apiv2     *ApierV2Service
 	responder *ResponderService
 	connChan  chan rpcclient.ClientConnector
+	connMgr   *engine.ConnManager
 }
 
 // Start should handle the sercive start
@@ -68,7 +71,6 @@ func (rals *RalService) Start() (err error) {
 	if rals.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
-
 	engine.SetRpSubjectPrefixMatching(rals.cfg.RalsCfg().RpSubjectPrefixMatching)
 	rals.Lock()
 	defer rals.Unlock()

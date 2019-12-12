@@ -65,14 +65,14 @@ func (self *FsConnCfg) loadFromJsonCfg(jsnCfg *FsConnJsonCfg) error {
 type SessionSCfg struct {
 	Enabled             bool
 	ListenBijson        string
-	ChargerSConns       []*RemoteHost
-	RALsConns           []*RemoteHost
-	ResSConns           []*RemoteHost
-	ThreshSConns        []*RemoteHost
-	StatSConns          []*RemoteHost
-	SupplSConns         []*RemoteHost
-	AttrSConns          []*RemoteHost
-	CDRsConns           []*RemoteHost
+	ChargerSConns       []string
+	RALsConns           []string
+	ResSConns           []string
+	ThreshSConns        []string
+	StatSConns          []string
+	SupplSConns         []string
+	AttrSConns          []string
+	CDRsConns           []string
 	ReplicationConns    []*RemoteHost
 	DebitInterval       time.Duration
 	StoreSCosts         bool
@@ -99,59 +99,91 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		scfg.ListenBijson = *jsnCfg.Listen_bijson
 	}
 	if jsnCfg.Chargers_conns != nil {
-		scfg.ChargerSConns = make([]*RemoteHost, len(*jsnCfg.Chargers_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Chargers_conns {
-			scfg.ChargerSConns[idx] = NewDfltRemoteHost()
-			scfg.ChargerSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		scfg.ChargerSConns = make([]string, len(*jsnCfg.Chargers_conns))
+		for idx, connID := range *jsnCfg.Chargers_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				scfg.ChargerSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)
+			} else {
+				scfg.ChargerSConns[idx] = connID
+			}
 		}
 	}
 	if jsnCfg.Rals_conns != nil {
-		scfg.RALsConns = make([]*RemoteHost, len(*jsnCfg.Rals_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Rals_conns {
-			scfg.RALsConns[idx] = NewDfltRemoteHost()
-			scfg.RALsConns[idx].loadFromJsonCfg(jsnHaCfg)
+		scfg.RALsConns = make([]string, len(*jsnCfg.Rals_conns))
+		for idx, connID := range *jsnCfg.Rals_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				scfg.RALsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)
+			} else {
+				scfg.RALsConns[idx] = connID
+			}
 		}
 	}
 	if jsnCfg.Resources_conns != nil {
-		scfg.ResSConns = make([]*RemoteHost, len(*jsnCfg.Resources_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Resources_conns {
-			scfg.ResSConns[idx] = NewDfltRemoteHost()
-			scfg.ResSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		scfg.ResSConns = make([]string, len(*jsnCfg.Resources_conns))
+		for idx, connID := range *jsnCfg.Resources_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				scfg.ResSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)
+			} else {
+				scfg.ResSConns[idx] = connID
+			}
 		}
 	}
 	if jsnCfg.Thresholds_conns != nil {
-		scfg.ThreshSConns = make([]*RemoteHost, len(*jsnCfg.Thresholds_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Thresholds_conns {
-			scfg.ThreshSConns[idx] = NewDfltRemoteHost()
-			scfg.ThreshSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		scfg.ThreshSConns = make([]string, len(*jsnCfg.Thresholds_conns))
+		for idx, connID := range *jsnCfg.Thresholds_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				scfg.ThreshSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
+			} else {
+				scfg.ThreshSConns[idx] = connID
+			}
 		}
 	}
 	if jsnCfg.Stats_conns != nil {
-		scfg.StatSConns = make([]*RemoteHost, len(*jsnCfg.Stats_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Stats_conns {
-			scfg.StatSConns[idx] = NewDfltRemoteHost()
-			scfg.StatSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		scfg.StatSConns = make([]string, len(*jsnCfg.Stats_conns))
+		for idx, connID := range *jsnCfg.Stats_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				scfg.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
+			} else {
+				scfg.StatSConns[idx] = connID
+			}
 		}
 	}
 	if jsnCfg.Suppliers_conns != nil {
-		scfg.SupplSConns = make([]*RemoteHost, len(*jsnCfg.Suppliers_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Suppliers_conns {
-			scfg.SupplSConns[idx] = NewDfltRemoteHost()
-			scfg.SupplSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		scfg.SupplSConns = make([]string, len(*jsnCfg.Suppliers_conns))
+		for idx, connID := range *jsnCfg.Suppliers_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				scfg.SupplSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSuppliers)
+			} else {
+				scfg.SupplSConns[idx] = connID
+			}
 		}
 	}
 	if jsnCfg.Attributes_conns != nil {
-		scfg.AttrSConns = make([]*RemoteHost, len(*jsnCfg.Attributes_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Attributes_conns {
-			scfg.AttrSConns[idx] = NewDfltRemoteHost()
-			scfg.AttrSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		scfg.AttrSConns = make([]string, len(*jsnCfg.Attributes_conns))
+		for idx, connID := range *jsnCfg.Attributes_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				scfg.AttrSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
+			} else {
+				scfg.AttrSConns[idx] = connID
+			}
 		}
 	}
 	if jsnCfg.Cdrs_conns != nil {
-		scfg.CDRsConns = make([]*RemoteHost, len(*jsnCfg.Cdrs_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Cdrs_conns {
-			scfg.CDRsConns[idx] = NewDfltRemoteHost()
-			scfg.CDRsConns[idx].loadFromJsonCfg(jsnHaCfg)
+		scfg.CDRsConns = make([]string, len(*jsnCfg.Cdrs_conns))
+		for idx, connID := range *jsnCfg.Cdrs_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				scfg.CDRsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)
+			} else {
+				scfg.CDRsConns[idx] = connID
+			}
 		}
 	}
 	if jsnCfg.Replication_conns != nil {
@@ -217,7 +249,7 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 
 type FsAgentCfg struct {
 	Enabled       bool
-	SessionSConns []*RemoteHost
+	SessionSConns []string
 	SubscribePark bool
 	CreateCdr     bool
 	ExtraFields   RSRParsers
@@ -238,10 +270,14 @@ func (self *FsAgentCfg) loadFromJsonCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 		self.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Sessions_conns != nil {
-		self.SessionSConns = make([]*RemoteHost, len(*jsnCfg.Sessions_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
-			self.SessionSConns[idx] = NewDfltRemoteHost()
-			self.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		self.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
+		for idx, connID := range *jsnCfg.Sessions_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				self.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+			} else {
+				self.SessionSConns[idx] = connID
+			}
 		}
 	}
 	if jsnCfg.Subscribe_park != nil {
@@ -284,22 +320,6 @@ func NewDfltKamConnConfig() *KamConnCfg {
 	}
 	dfltVal := *dfltKamConnConfig
 	return &dfltVal
-}
-
-// Represents one connection instance towards OpenSIPS, not in use for now but planned for future
-type OsipsConnConfig struct {
-	MiAddr     string
-	Reconnects int
-}
-
-func (self *OsipsConnConfig) loadFromJsonCfg(jsnCfg *OsipsConnJsonCfg) error {
-	if jsnCfg.Mi_addr != nil {
-		self.MiAddr = *jsnCfg.Mi_addr
-	}
-	if jsnCfg.Reconnects != nil {
-		self.Reconnects = *jsnCfg.Reconnects
-	}
-	return nil
 }
 
 // Uses stored defaults so we can pre-populate by loading from JSON config
@@ -347,7 +367,7 @@ func (aConnCfg *AsteriskConnCfg) loadFromJsonCfg(jsnCfg *AstConnJsonCfg) error {
 
 type AsteriskAgentCfg struct {
 	Enabled       bool
-	SessionSConns []*RemoteHost
+	SessionSConns []string
 	CreateCDR     bool
 	AsteriskConns []*AsteriskConnCfg
 }
@@ -360,10 +380,14 @@ func (aCfg *AsteriskAgentCfg) loadFromJsonCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 		aCfg.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Sessions_conns != nil {
-		aCfg.SessionSConns = make([]*RemoteHost, len(*jsnCfg.Sessions_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
-			aCfg.SessionSConns[idx] = NewDfltRemoteHost()
-			aCfg.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		aCfg.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
+		for idx, attrConn := range *jsnCfg.Sessions_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if attrConn == utils.MetaInternal {
+				aCfg.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+			} else {
+				aCfg.SessionSConns[idx] = attrConn
+			}
 		}
 	}
 	if jsnCfg.Create_cdr != nil {

@@ -53,7 +53,7 @@ func TestAttributeSReload(t *testing.T) {
 		chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1),
 	)
 	srvMngr.AddServices(NewConnManagerService(cfg, nil), attrS,
-		NewLoaderService(cfg, db, filterSChan, server, nil, nil, engineShutdown), db)
+		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)
 	}

@@ -28,16 +28,12 @@
 
 "cdrs": {
 	"enabled": true,
-	"rals_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"},
-	],
+	"rals_conns": ["*localhost"],
 },
 
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 }

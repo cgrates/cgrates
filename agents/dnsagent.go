@@ -27,24 +27,23 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 	"github.com/miekg/dns"
 )
 
 // NewDNSAgent is the constructor for DNSAgent
 func NewDNSAgent(cgrCfg *config.CGRConfig, fltrS *engine.FilterS,
-	sS rpcclient.ClientConnector) (da *DNSAgent, err error) {
-	da = &DNSAgent{cgrCfg: cgrCfg, fltrS: fltrS, sS: sS}
+	connMgr *engine.ConnManager) (da *DNSAgent, err error) {
+	da = &DNSAgent{cgrCfg: cgrCfg, fltrS: fltrS, connMgr: connMgr}
 	err = da.initDNSServer()
 	return
 }
 
 // DNSAgent translates DNS requests towards CGRateS infrastructure
 type DNSAgent struct {
-	cgrCfg *config.CGRConfig         // loaded CGRateS configuration
-	fltrS  *engine.FilterS           // connection towards FilterS
-	sS     rpcclient.ClientConnector // connection towards CGR-SessionS component
-	server *dns.Server
+	cgrCfg  *config.CGRConfig // loaded CGRateS configuration
+	fltrS   *engine.FilterS   // connection towards FilterS
+	server  *dns.Server
+	connMgr *engine.ConnManager
 }
 
 // initDNSServer instantiates the DNS server
@@ -86,12 +85,6 @@ func (da *DNSAgent) ListenAndServe() (err error) {
 // this is in order to monitor if we receive error on ListenAndServe
 func (da *DNSAgent) Reload() (err error) {
 	return da.initDNSServer()
-}
-
-// SetSessionSConnection sets the new connection to the threshold service
-// only used on reload
-func (da *DNSAgent) SetSessionSConnection(sS rpcclient.ClientConnector) {
-	da.sS = sS
 }
 
 // handleMessage is the entry point of all DNS requests
@@ -225,7 +218,8 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
 		)
 		rply := new(sessions.V1AuthorizeReply)
-		err = da.sS.Call(utils.SessionSv1AuthorizeEvent,
+		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
+			utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
 		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
 		if err = agReq.setCGRReply(rply, err); err != nil {
@@ -243,7 +237,8 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher)
 		rply := new(sessions.V1InitSessionReply)
-		err = da.sS.Call(utils.SessionSv1InitiateSession,
+		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
+			utils.SessionSv1InitiateSession,
 			initArgs, rply)
 		rply.SetMaxUsageNeeded(initArgs.InitSession)
 		if err = agReq.setCGRReply(rply, err); err != nil {
@@ -256,7 +251,8 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher)
 		rply := new(sessions.V1UpdateSessionReply)
-		err = da.sS.Call(utils.SessionSv1UpdateSession,
+		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
+			utils.SessionSv1UpdateSession,
 			updateArgs, rply)
 		rply.SetMaxUsageNeeded(updateArgs.UpdateSession)
 		if err = agReq.setCGRReply(rply, err); err != nil {
@@ -272,7 +268,8 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
 			cgrEv, cgrArgs.ArgDispatcher)
 		rply := utils.StringPointer("")
-		err = da.sS.Call(utils.SessionSv1TerminateSession,
+		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
+			utils.SessionSv1TerminateSession,
 			terminateArgs, rply)
 		if err = agReq.setCGRReply(nil, err); err != nil {
 			return
@@ -292,7 +289,8 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
 		rply := new(sessions.V1ProcessMessageReply) // need it so rpcclient can clone
-		err = da.sS.Call(utils.SessionSv1ProcessMessage,
+		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
+			utils.SessionSv1ProcessMessage,
 			evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
@@ -314,7 +312,8 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaInit) ||
 			reqProcessor.Flags.HasKey(utils.MetaUpdate)
 		rply := new(sessions.V1ProcessEventReply)
-		err = da.sS.Call(utils.SessionSv1ProcessEvent,
+		err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
+			utils.SessionSv1ProcessEvent,
 			evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
@@ -331,7 +330,8 @@ func (da *DNSAgent) processRequest(reqProcessor *config.RequestProcessor,
 	if reqProcessor.Flags.HasKey(utils.MetaCDRs) &&
 		!reqProcessor.Flags.HasKey(utils.MetaDryRun) {
 		rplyCDRs := utils.StringPointer("")
-		if err = da.sS.Call(utils.SessionSv1ProcessCDR,
+		if err = da.connMgr.Call(da.cgrCfg.DNSAgentCfg().SessionSConns, nil,
+			utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher}, &rplyCDRs); err != nil {
 			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)

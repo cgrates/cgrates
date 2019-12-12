@@ -29,7 +29,7 @@ type StatSCfg struct {
 	IndexedSelects         bool
 	StoreInterval          time.Duration // Dump regularly from cache into dataDB
 	StoreUncompressedLimit int
-	ThresholdSConns        []*RemoteHost
+	ThresholdSConns        []string
 	StringIndexedFields    *[]string
 	PrefixIndexedFields    *[]string
 }
@@ -53,10 +53,14 @@ func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
 		st.StoreUncompressedLimit = *jsnCfg.Store_uncompressed_limit
 	}
 	if jsnCfg.Thresholds_conns != nil {
-		st.ThresholdSConns = make([]*RemoteHost, len(*jsnCfg.Thresholds_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Thresholds_conns {
-			st.ThresholdSConns[idx] = NewDfltRemoteHost()
-			st.ThresholdSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		st.ThresholdSConns = make([]string, len(*jsnCfg.Thresholds_conns))
+		for idx, conn := range *jsnCfg.Thresholds_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if conn == utils.MetaInternal {
+				st.ThresholdSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
+			} else {
+				st.ThresholdSConns[idx] = conn
+			}
 		}
 	}
 	if jsnCfg.String_indexed_fields != nil {

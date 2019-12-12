@@ -13,6 +13,14 @@
 	"http": ":2080",					// HTTP listening address
 },
 
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],
+	},
+},
+
+
 "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
 	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
 	"db_port": 27017, 						// the port to reach the stordb
@@ -37,9 +45,7 @@
 
 "cdrs": {
 	"enabled": true,
-	"rals_conns": [
-		{"address": "*internal"}
-	],
+	"rals_conns": ["*internal"],
 },
 
 "resources": {
@@ -60,29 +66,17 @@
 
 "sessions": {
 	"enabled": true,
-	"attributes_conns": [
-		{"address": "127.0.0.1:2013", "transport": "*gob"}
-	],
-	"cdrs_conns": [
-		{"address": "127.0.0.1:2013", "transport": "*gob"}
-	],
-	"rals_conns": [
-		{"address": "127.0.0.1:2013", "transport": "*gob"}
-	],
-	"resources_conns": [
-		{"address": "127.0.0.1:2013", "transport": "*gob"}
-	],
-	"chargers_conns": [
-		{"address": "*internal"}
-	],
+	"attributes_conns": ["conn1"],
+	"cdrs_conns": ["conn1"],
+	"rals_conns": ["conn1"],
+	"resources_conns": ["conn1"],
+	"chargers_conns": ["*internal"],
 	"debit_interval": "10s",
 },
 
 "radius_agent": {
 	"enabled": true,
-	"sessions_conns": [
-		{"address": "127.0.0.1:2013", "transport": "*gob"}								// connection towards SMG component for session management
-	],
+	"sessions_conns": ["conn1"],
 	"request_processors": [
 		{
 			"id": "KamailioAuth",
@@ -170,9 +164,7 @@
 
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 

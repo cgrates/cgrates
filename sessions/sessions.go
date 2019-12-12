@@ -64,45 +64,15 @@ type SReplConn struct {
 }
 
 // NewSessionS constructs  a new SessionS instance
-func NewSessionS(cgrCfg *config.CGRConfig, ralS, resS, thdS,
-	statS, splS, attrS, cdrS, chargerS rpcclient.ClientConnector,
-	sReplConns []*SReplConn, dm *engine.DataManager) *SessionS {
+func NewSessionS(cgrCfg *config.CGRConfig,
+	sReplConns []*SReplConn, dm *engine.DataManager,
+	connMgr *engine.ConnManager) *SessionS {
 	cgrCfg.SessionSCfg().SessionIndexes[utils.OriginID] = true // Make sure we have indexing for OriginID since it is a requirement on prefix searching
-	if chargerS != nil && reflect.ValueOf(chargerS).IsNil() {
-		chargerS = nil
-	}
-	if ralS != nil && reflect.ValueOf(ralS).IsNil() {
-		ralS = nil
-	}
-	if resS != nil && reflect.ValueOf(resS).IsNil() {
-		resS = nil
-	}
-	if thdS != nil && reflect.ValueOf(thdS).IsNil() {
-		thdS = nil
-	}
-	if statS != nil && reflect.ValueOf(statS).IsNil() {
-		statS = nil
-	}
-	if splS != nil && reflect.ValueOf(splS).IsNil() {
-		splS = nil
-	}
-	if attrS != nil && reflect.ValueOf(attrS).IsNil() {
-		attrS = nil
-	}
-	if cdrS != nil && reflect.ValueOf(cdrS).IsNil() {
-		cdrS = nil
-	}
+
 	return &SessionS{
 		cgrCfg:        cgrCfg,
 		dm:            dm,
-		chargerS:      chargerS,
-		ralS:          ralS,
-		resS:          resS,
-		thdS:          thdS,
-		statS:         statS,
-		splS:          splS,
-		attrS:         attrS,
-		cdrS:          cdrS,
+		connMgr:       connMgr,
 		sReplConns:    sReplConns,
 		biJClnts:      make(map[rpcclient.ClientConnector]string),
 		biJIDs:        make(map[string]*biJClient),
@@ -123,17 +93,9 @@ type biJClient struct {
 
 // SessionS represents the session service
 type SessionS struct {
-	cgrCfg *config.CGRConfig // Separate from smCfg since there can be multiple
-	dm     *engine.DataManager
-
-	chargerS rpcclient.ClientConnector
-	ralS     rpcclient.ClientConnector // RALs connections
-	resS     rpcclient.ClientConnector // ResourceS connections
-	thdS     rpcclient.ClientConnector // ThresholdS connections
-	statS    rpcclient.ClientConnector // StatS connections
-	splS     rpcclient.ClientConnector // SupplierS connections
-	attrS    rpcclient.ClientConnector // AttributeS connections
-	cdrS     rpcclient.ClientConnector // CDR server connections
+	cgrCfg  *config.CGRConfig // Separate from smCfg since there can be multiple
+	dm      *engine.DataManager
+	connMgr *engine.ConnManager
 
 	biJMux   sync.RWMutex                         // mux protecting BI-JSON connections
 	biJClnts map[rpcclient.ClientConnector]string // index BiJSONConnection so we can sync them later
@@ -381,7 +343,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 				utils.SessionS, s.cgrID(), err.Error()))
 	}
 	// post the CDRs
-	if sS.cdrS != nil {
+	if len(sS.cgrCfg.SessionSCfg().CDRsConns) != 0 {
 		if cgrEvs, err := s.asCGREvents(); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
@@ -400,7 +362,8 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 					engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RequestType)) {
 					argsProc.Flags = append(argsProc.Flags, utils.MetaRALs)
 				}
-				if err = sS.cdrS.Call(utils.CDRsV1ProcessEvent, argsProc, &reply); err != nil {
+				if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil,
+					utils.CDRsV1ProcessEvent, argsProc, &reply); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf(
 							"<%s> could not post CDR for event %s, err: %s",
@@ -410,7 +373,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 		}
 	}
 	// release the resources for the session
-	if sS.resS != nil && s.ResourceID != "" {
+	if len(sS.cgrCfg.SessionSCfg().ResSConns) != 0 && s.ResourceID != "" {
 		var reply string
 		argsRU := utils.ArgRSv1ResourceUsage{
 			CGREvent: &utils.CGREvent{
@@ -422,7 +385,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 			Units:         1,
 			ArgDispatcher: s.ArgDispatcher,
 		}
-		if err := sS.resS.Call(
+		if err := sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil,
 			utils.ResourceSv1ReleaseResources,
 			argsRU, &reply); err != nil {
 			utils.Logger.Warning(
@@ -472,7 +435,7 @@ func (sS *SessionS) debitSession(s *Session, sRunIdx int, dur time.Duration,
 	cd := sr.CD.Clone()
 	argDsp := s.ArgDispatcher
 	cc := new(engine.CallCost)
-	if err := sS.ralS.Call(
+	if err := sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil,
 		utils.ResponderMaxDebit,
 		&engine.CallDescriptorWithArgDispatcher{
 			CallDescriptor: cd,
@@ -626,7 +589,7 @@ func (sS *SessionS) refundSession(s *Session, sRunIdx int, rUsage time.Duration)
 		Increments:  incrmts,
 	}
 	var acnt engine.Account
-	if err = sS.ralS.Call(utils.ResponderRefundIncrements,
+	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil, utils.ResponderRefundIncrements,
 		&engine.CallDescriptorWithArgDispatcher{CallDescriptor: cd,
 			ArgDispatcher: s.ArgDispatcher}, &acnt); err != nil {
 		return
@@ -665,7 +628,7 @@ func (sS *SessionS) storeSCost(s *Session, sRunIdx int) (err error) {
 		},
 	}
 	var reply string
-	if err := sS.cdrS.Call(utils.CDRsV2StoreSessionCost,
+	if err := sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil, utils.CDRsV2StoreSessionCost,
 		argSmCost, &reply); err != nil {
 		if err == utils.ErrExists {
 			utils.Logger.Warning(
@@ -1080,7 +1043,7 @@ func (sS *SessionS) filterSessionsCount(sf *utils.SessionFilter, psv bool) (coun
 // forSession can only be called once per Session
 // not thread-safe since it should be called in init where there is no concurrency
 func (sS *SessionS) forkSession(s *Session) (err error) {
-	if sS.chargerS == nil {
+	if len(sS.cgrCfg.SessionSCfg().ChargerSConns) == 0 {
 		return errors.New("ChargerS is disabled")
 	}
 	if len(s.SRuns) != 0 {
@@ -1095,8 +1058,8 @@ func (sS *SessionS) forkSession(s *Session) (err error) {
 		ArgDispatcher: s.ArgDispatcher,
 	}
 	var chrgrs []*engine.ChrgSProcessEventReply
-	if err = sS.chargerS.Call(utils.ChargerSv1ProcessEvent,
-		cgrEv, &chrgrs); err != nil {
+	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ChargerSConns, nil,
+		utils.ChargerSv1ProcessEvent, cgrEv, &chrgrs); err != nil {
 		if err.Error() == utils.ErrNotFound.Error() {
 			return utils.ErrNoActiveSession
 		}
@@ -1368,7 +1331,8 @@ func (sS *SessionS) authEvent(tnt string, evStart engine.MapEvent) (maxUsage tim
 		if !authReqs.HasField(
 			sr.Event.GetStringIgnoreErrors(utils.RequestType)) {
 			rplyMaxUsage = eventUsage
-		} else if err = sS.ralS.Call(utils.ResponderGetMaxSessionTime,
+		} else if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil,
+			utils.ResponderGetMaxSessionTime,
 			&engine.CallDescriptorWithArgDispatcher{CallDescriptor: sr.CD,
 				ArgDispatcher: s.ArgDispatcher}, &rplyMaxUsage); err != nil {
 			return
@@ -1493,7 +1457,7 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration, aTi
 				sr.CD.TimeEnd = sr.CD.TimeStart.Add(notCharged)
 				sr.CD.DurationIndex += notCharged
 				cc := new(engine.CallCost)
-				if err = sS.ralS.Call(utils.ResponderDebit,
+				if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil, utils.ResponderDebit,
 					&engine.CallDescriptorWithArgDispatcher{CallDescriptor: sr.CD,
 						ArgDispatcher: s.ArgDispatcher}, cc); err == nil {
 					sr.EventCost.Merge(
@@ -1902,7 +1866,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 		}
 	}
 	if args.AuthorizeResources {
-		if sS.resS == nil {
+		if len(sS.cgrCfg.SessionSCfg().ResSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
 		originID, _ := args.CGREvent.FieldAsString(utils.OriginID)
@@ -1916,7 +1880,7 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 			Units:         1,
 			ArgDispatcher: args.ArgDispatcher,
 		}
-		if err = sS.resS.Call(utils.ResourceSv1AuthorizeResources,
+		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1AuthorizeResources,
 			attrRU, &allocMsg); err != nil {
 			return utils.NewErrResourceS(err)
 		}
@@ -2167,7 +2131,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 		}
 	}
 	if args.AllocateResources {
-		if sS.resS == nil {
+		if len(sS.cgrCfg.SessionSCfg().ResSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
 		if originID == "" {
@@ -2180,7 +2144,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		var allocMessage string
-		if err = sS.resS.Call(utils.ResourceSv1AllocateResources,
+		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1AllocateResources,
 			attrRU, &allocMessage); err != nil {
 			return utils.NewErrResourceS(err)
 		}
@@ -2550,7 +2514,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 		}
 	}
 	if args.ReleaseResources {
-		if sS.resS == nil {
+		if len(sS.cgrCfg.SessionSCfg().ResSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
 		if originID == "" {
@@ -2563,7 +2527,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 			Units:         1,
 			ArgDispatcher: args.ArgDispatcher,
 		}
-		if err = sS.resS.Call(utils.ResourceSv1ReleaseResources,
+		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1ReleaseResources,
 			argsRU, &reply); err != nil {
 			return utils.NewErrResourceS(err)
 		}
@@ -2642,7 +2606,7 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.ClientConnector,
 		// found in cache
 		s = sIface.(*Session)
 	} else { // no cached session, CDR will be handled by CDRs
-		return sS.cdrS.Call(utils.CDRsV1ProcessEvent,
+		return sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil, utils.CDRsV1ProcessEvent,
 			&engine.ArgV1ProcessEvent{
 				Flags:         []string{utils.MetaRALs},
 				CGREvent:      *cgrEvWithArgDisp.CGREvent,
@@ -2674,7 +2638,7 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.ClientConnector,
 		if mp := engine.MapEvent(cgrEv.Event); unratedReqs.HasField(mp.GetStringIgnoreErrors(utils.RequestType)) { // order additional rating for unrated request types
 			argsProc.Flags = append(argsProc.Flags, fmt.Sprintf("%s:true", utils.MetaRALs))
 		}
-		if err = sS.cdrS.Call(utils.CDRsV1ProcessEvent,
+		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().CDRsConns, nil, utils.CDRsV1ProcessEvent,
 			argsProc, rply); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error <%s> posting CDR with CGRID: <%s>",
@@ -2874,7 +2838,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 		}
 	}
 	if args.AllocateResources {
-		if sS.resS == nil {
+		if len(sS.cgrCfg.SessionSCfg().ResSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
 		if originID == "" {
@@ -2887,7 +2851,7 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 			ArgDispatcher: args.ArgDispatcher,
 		}
 		var allocMessage string
-		if err = sS.resS.Call(utils.ResourceSv1AllocateResources,
+		if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1AllocateResources,
 			attrRU, &allocMessage); err != nil {
 			return utils.NewErrResourceS(err)
 		}
@@ -3059,7 +3023,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 	}
 	// check for *resources
 	if argsFlagsWithParams.HasKey(utils.MetaResources) {
-		if sS.resS == nil {
+		if len(sS.cgrCfg.SessionSCfg().ResSConns) == 0 {
 			return utils.NewErrNotConnected(utils.ResourceS)
 		}
 		if originID == "" {
@@ -3080,21 +3044,21 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				return err
 			}
 			if resourceFlagsWithParams.HasKey(utils.MetaAuthorize) {
-				if err = sS.resS.Call(utils.ResourceSv1AuthorizeResources,
+				if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1AuthorizeResources,
 					attrRU, &resMessage); err != nil {
 					return utils.NewErrResourceS(err)
 				}
 				rply.ResourceMessage = &resMessage
 			}
 			if resourceFlagsWithParams.HasKey(utils.MetaAllocate) {
-				if err = sS.resS.Call(utils.ResourceSv1AllocateResources,
+				if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1AllocateResources,
 					attrRU, &resMessage); err != nil {
 					return utils.NewErrResourceS(err)
 				}
 				rply.ResourceMessage = &resMessage
 			}
 			if resourceFlagsWithParams.HasKey(utils.MetaRelease) {
-				if err = sS.resS.Call(utils.ResourceSv1ReleaseResources,
+				if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ResSConns, nil, utils.ResourceSv1ReleaseResources,
 					attrRU, &resMessage); err != nil {
 					return utils.NewErrResourceS(err)
 				}
@@ -3355,7 +3319,7 @@ func (sS *SessionS) BiRPCv1DeactivateSessions(clnt rpcclient.ClientConnector,
 
 // processThreshold will receive the event and send it to ThresholdS to be processed
 func (sS *SessionS) processThreshold(cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher, thIDs []string) (tIDs []string, err error) {
-	if sS.thdS == nil {
+	if len(sS.cgrCfg.SessionSCfg().ThreshSConns) == 0 {
 		return tIDs, utils.NewErrNotConnected(utils.ThresholdS)
 	}
 	thEv := &engine.ArgsProcessEvent{
@@ -3368,13 +3332,13 @@ func (sS *SessionS) processThreshold(cgrEv *utils.CGREvent, argDisp *utils.ArgDi
 	}
 	//initialize the returned variable
 	tIDs = make([]string, 0)
-	err = sS.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs)
+	err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().ThreshSConns, nil, utils.ThresholdSv1ProcessEvent, thEv, &tIDs)
 	return
 }
 
 // processStats will receive the event and send it to StatS to be processed
 func (sS *SessionS) processStats(cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher, stsIDs []string) (sIDs []string, err error) {
-	if sS.statS == nil {
+	if len(sS.cgrCfg.SessionSCfg().StatSConns) == 0 {
 		return sIDs, utils.NewErrNotConnected(utils.StatS)
 	}
 
@@ -3388,14 +3352,14 @@ func (sS *SessionS) processStats(cgrEv *utils.CGREvent, argDisp *utils.ArgDispat
 	}
 	//initialize the returned variable
 	sIDs = make([]string, 0)
-	err = sS.statS.Call(utils.StatSv1ProcessEvent, statArgs, &sIDs)
+	err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().StatSConns, nil, utils.StatSv1ProcessEvent, statArgs, &sIDs)
 	return
 }
 
 // getSuppliers will receive the event and send it to SupplierS to find the suppliers
 func (sS *SessionS) getSuppliers(cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher, pag utils.Paginator,
 	ignoreErrors bool, maxCost string) (splsReply engine.SortedSuppliers, err error) {
-	if sS.splS == nil {
+	if len(sS.cgrCfg.SessionSCfg().SupplSConns) == 0 {
 		return splsReply, utils.NewErrNotConnected(utils.SupplierS)
 	}
 	if acd, has := cgrEv.Event[utils.ACD]; has {
@@ -3408,7 +3372,7 @@ func (sS *SessionS) getSuppliers(cgrEv *utils.CGREvent, argDisp *utils.ArgDispat
 		IgnoreErrors:  ignoreErrors,
 		MaxCost:       maxCost,
 	}
-	if err = sS.splS.Call(utils.SupplierSv1GetSuppliers,
+	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().SupplSConns, nil, utils.SupplierSv1GetSuppliers,
 		sArgs, &splsReply); err != nil {
 		return splsReply, utils.NewErrSupplierS(err)
 	}
@@ -3418,7 +3382,7 @@ func (sS *SessionS) getSuppliers(cgrEv *utils.CGREvent, argDisp *utils.ArgDispat
 // processAttributes will receive the event and send it to AttributeS to be processed
 func (sS *SessionS) processAttributes(cgrEv *utils.CGREvent, argDisp *utils.ArgDispatcher,
 	attrIDs []string) (rplyEv engine.AttrSProcessEventReply, err error) {
-	if sS.attrS == nil {
+	if len(sS.cgrCfg.SessionSCfg().AttrSConns) == 0 {
 		return rplyEv, utils.NewErrNotConnected(utils.AttributeS)
 	}
 	attrArgs := &engine.AttrArgsProcessEvent{
@@ -3429,7 +3393,7 @@ func (sS *SessionS) processAttributes(cgrEv *utils.CGREvent, argDisp *utils.ArgD
 	if len(attrIDs) != 0 {
 		attrArgs.AttributeIDs = attrIDs
 	}
-	if err = sS.attrS.Call(utils.AttributeSv1ProcessEvent,
+	if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().AttrSConns, nil, utils.AttributeSv1ProcessEvent,
 		attrArgs, &rplyEv); err != nil {
 		return
 	}
@@ -3537,78 +3501,6 @@ func (sS *SessionS) BiRPCV1ProcessCDR(clnt rpcclient.ClientConnector,
 				ID:    utils.UUIDSha1Prefix(),
 				Event: ev}},
 		rply)
-}
-
-// SetAttributeSConnection sets the new connection to the attribute service
-// only used on reload
-func (sS *SessionS) SetAttributeSConnection(attrS rpcclient.ClientConnector) {
-	if attrS != nil && reflect.ValueOf(attrS).IsNil() {
-		attrS = nil
-	}
-	sS.attrS = attrS
-}
-
-// SetThresholSConnection sets the new connection to the threshold service
-// only used on reload
-func (sS *SessionS) SetThresholSConnection(thdS rpcclient.ClientConnector) {
-	if thdS != nil && reflect.ValueOf(thdS).IsNil() {
-		thdS = nil
-	}
-	sS.thdS = thdS
-}
-
-// SetStatSConnection sets the new connection to the stat service
-// only used on reload
-func (sS *SessionS) SetStatSConnection(stS rpcclient.ClientConnector) {
-	if stS != nil && reflect.ValueOf(stS).IsNil() {
-		stS = nil
-	}
-	sS.statS = stS
-}
-
-// SetChargerSConnection sets the new connection to the charger service
-// only used on reload
-func (sS *SessionS) SetChargerSConnection(chS rpcclient.ClientConnector) {
-	if chS != nil && reflect.ValueOf(chS).IsNil() {
-		chS = nil
-	}
-	sS.chargerS = chS
-}
-
-// SetRALsConnection sets the new connection to the RAL service
-// only used on reload
-func (sS *SessionS) SetRALsConnection(rls rpcclient.ClientConnector) {
-	if rls != nil && reflect.ValueOf(rls).IsNil() {
-		rls = nil
-	}
-	sS.ralS = rls
-}
-
-// SetResourceSConnection sets the new connection to the resource service
-// only used on reload
-func (sS *SessionS) SetResourceSConnection(rS rpcclient.ClientConnector) {
-	if rS != nil && reflect.ValueOf(rS).IsNil() {
-		rS = nil
-	}
-	sS.resS = rS
-}
-
-// SetSupplierSConnection sets the new connection to the supplier service
-// only used on reload
-func (sS *SessionS) SetSupplierSConnection(splS rpcclient.ClientConnector) {
-	if splS != nil && reflect.ValueOf(splS).IsNil() {
-		splS = nil
-	}
-	sS.splS = splS
-}
-
-// SetCDRSConnection sets the new connection to the CDR server
-// only used on reload
-func (sS *SessionS) SetCDRSConnection(cdrS rpcclient.ClientConnector) {
-	if cdrS != nil && reflect.ValueOf(cdrS).IsNil() {
-		cdrS = nil
-	}
-	sS.cdrS = cdrS
 }
 
 // SetReplicationConnections sets the new connections to the replictes sessions

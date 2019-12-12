@@ -41,9 +41,7 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 	"enabled": false,											// enables the DNS agent: <true|false>
 	"listen": "127.0.0.1:2053",									// address where to listen for DNS requests <x.y.z.y:1234>
 	"listen_net": "udp",										// network to listen on <udp|tcp|tcp-tls>
-	"sessions_conns": [											// connections to SessionS for session management and CDR posting
-		{"address": "*internal"}
-	],
+	"sessions_conns": ["*internal"],
 	"timezone": "UTC",												// timezone of the events if not specified  <UTC|Local|$IANA_TZ_DB>
 	"request_processors": [										// request processors to be applied to DNS messages
 	],
@@ -52,7 +50,7 @@ func TestDNSAgentCfgloadFromJsonCfg(t *testing.T) {
 	expected = DNSAgentCfg{
 		Listen:        "127.0.0.1:2053",
 		ListenNet:     "udp",
-		SessionSConns: []*RemoteHost{{Address: "*internal"}},
+		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		Timezone:      "UTC",
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {

@@ -35,12 +35,8 @@
 
 "cdrs": {
 	"enabled": true,						// start the CDR Server service:  <true|false>
-	"chargers_conns":[
-		{"address": "*internal"}
-	],
-	"rals_conns": [
-		{"address": "*internal"}     // address where to reach the Rater <""|*internal|127.0.0.1:2013>
-	],
+	"chargers_conns":["*internal"],
+	"rals_conns": ["*internal"],
 },
 
 
@@ -82,9 +78,7 @@
 
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 }

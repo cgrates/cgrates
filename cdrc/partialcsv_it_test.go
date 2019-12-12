@@ -102,6 +102,7 @@ func TestPartcsvITStartEngine(t *testing.T) {
 
 // Connect rpc client to rater
 func TestPartcsvITRpcConn(t *testing.T) {
+	time.Sleep(5 * time.Second)
 	var err error
 	partcsvRPC, err = newRPCClient(partcsvCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {

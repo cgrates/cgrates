@@ -21,7 +21,6 @@ package engine
 import (
 	"fmt"
 	"math/rand"
-	"reflect"
 	"sort"
 	"sync"
 	"time"
@@ -298,16 +297,15 @@ func (rs Resources) allocateResource(ru *ResourceUsage, dryRun bool) (alcMessage
 
 // NewResourceService  returns a new ResourceService
 func NewResourceService(dm *DataManager, cgrcfg *config.CGRConfig,
-	thdS rpcclient.ClientConnector, filterS *FilterS) (*ResourceService, error) {
-	if thdS != nil && reflect.ValueOf(thdS).IsNil() {
-		thdS = nil
-	}
-	return &ResourceService{dm: dm, thdS: thdS,
+	filterS *FilterS, connMgr *ConnManager) (*ResourceService, error) {
+	return &ResourceService{dm: dm,
 		storedResources: make(utils.StringMap),
 		cgrcfg:          cgrcfg,
 		filterS:         filterS,
 		loopStoped:      make(chan struct{}),
-		stopBackup:      make(chan struct{})}, nil
+		stopBackup:      make(chan struct{}),
+		connMgr:         connMgr}, nil
+
 }
 
 // ResourceService is the service handling resources
@@ -320,6 +318,7 @@ type ResourceService struct {
 	cgrcfg          *config.CGRConfig
 	stopBackup      chan struct{} // control storing process
 	loopStoped      chan struct{}
+	connMgr         *ConnManager
 }
 
 // Called to start the service
@@ -435,7 +434,8 @@ func (rS *ResourceService) processThresholds(r *Resource, argDispatcher *utils.A
 		ArgDispatcher: argDispatcher,
 	}
 	var tIDs []string
-	if err = rS.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
+	if err = rS.connMgr.Call(rS.cgrcfg.ResourceSCfg().ThresholdSConns, nil,
+		utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s processing event %+v with %s.",

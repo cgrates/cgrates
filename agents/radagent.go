@@ -26,7 +26,6 @@ import (
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/radigo"
-	"github.com/cgrates/rpcclient"
 )
 
 const (
@@ -37,7 +36,7 @@ const (
 )
 
 func NewRadiusAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
-	sessionS rpcclient.ClientConnector) (ra *RadiusAgent, err error) {
+	connMgr *engine.ConnManager) (ra *RadiusAgent, err error) {
 	dts := make(map[string]*radigo.Dictionary, len(cgrCfg.RadiusAgentCfg().ClientDictionaries))
 	for clntID, dictPath := range cgrCfg.RadiusAgentCfg().ClientDictionaries {
 		utils.Logger.Info(
@@ -48,7 +47,7 @@ func NewRadiusAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 		}
 	}
 	dicts := radigo.NewDictionaries(dts)
-	ra = &RadiusAgent{cgrCfg: cgrCfg, filterS: filterS, sessionS: sessionS}
+	ra = &RadiusAgent{cgrCfg: cgrCfg, filterS: filterS, connMgr: connMgr}
 	secrets := radigo.NewSecrets(cgrCfg.RadiusAgentCfg().ClientSecrets)
 	ra.rsAuth = radigo.NewServer(cgrCfg.RadiusAgentCfg().ListenNet,
 		cgrCfg.RadiusAgentCfg().ListenAuth, secrets, dicts,
@@ -62,11 +61,11 @@ func NewRadiusAgent(cgrCfg *config.CGRConfig, filterS *engine.FilterS,
 }
 
 type RadiusAgent struct {
-	cgrCfg   *config.CGRConfig         // reference for future config reloads
-	sessionS rpcclient.ClientConnector // Connection towards CGR-SessionS component
-	filterS  *engine.FilterS
-	rsAuth   *radigo.Server
-	rsAcct   *radigo.Server
+	cgrCfg  *config.CGRConfig // reference for future config reloads
+	connMgr *engine.ConnManager
+	filterS *engine.FilterS
+	rsAuth  *radigo.Server
+	rsAcct  *radigo.Server
 }
 
 // handleAuth handles RADIUS Authorization request
@@ -194,7 +193,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator,
 		)
 		rply := new(sessions.V1AuthorizeReply)
-		err = ra.sessionS.Call(utils.SessionSv1AuthorizeEvent,
+		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1AuthorizeEvent,
 			authArgs, rply)
 		rply.SetMaxUsageNeeded(authArgs.GetMaxUsage)
 		if err = agReq.setCGRReply(rply, err); err != nil {
@@ -212,7 +211,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher)
 		rply := new(sessions.V1InitSessionReply)
-		err = ra.sessionS.Call(utils.SessionSv1InitiateSession,
+		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1InitiateSession,
 			initArgs, rply)
 		rply.SetMaxUsageNeeded(initArgs.InitSession)
 		if err = agReq.setCGRReply(rply, err); err != nil {
@@ -225,7 +224,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaAccounts),
 			cgrEv, cgrArgs.ArgDispatcher)
 		rply := new(sessions.V1UpdateSessionReply)
-		err = ra.sessionS.Call(utils.SessionSv1UpdateSession,
+		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1UpdateSession,
 			updateArgs, rply)
 		rply.SetMaxUsageNeeded(updateArgs.UpdateSession)
 		if err = agReq.setCGRReply(rply, err); err != nil {
@@ -241,7 +240,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.ParamsSlice(utils.MetaStats),
 			cgrEv, cgrArgs.ArgDispatcher)
 		rply := utils.StringPointer("")
-		err = ra.sessionS.Call(utils.SessionSv1TerminateSession,
+		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1TerminateSession,
 			terminateArgs, rply)
 		if err = agReq.setCGRReply(nil, err); err != nil {
 			return
@@ -261,7 +260,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaSuppliersEventCost),
 			cgrEv, cgrArgs.ArgDispatcher, *cgrArgs.SupplierPaginator)
 		rply := new(sessions.V1ProcessMessageReply)
-		err = ra.sessionS.Call(utils.SessionSv1ProcessMessage, evArgs, rply)
+		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1ProcessMessage, evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
 		} else if evArgs.Debit {
@@ -282,7 +281,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 			reqProcessor.Flags.HasKey(utils.MetaInit) ||
 			reqProcessor.Flags.HasKey(utils.MetaUpdate)
 		rply := new(sessions.V1ProcessEventReply)
-		err = ra.sessionS.Call(utils.SessionSv1ProcessEvent,
+		err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1ProcessEvent,
 			evArgs, rply)
 		if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
 			cgrEv.Event[utils.Usage] = 0 // avoid further debits
@@ -298,7 +297,7 @@ func (ra *RadiusAgent) processRequest(reqProcessor *config.RequestProcessor,
 	// separate request so we can capture the Terminate/Event also here
 	if reqProcessor.Flags.HasKey(utils.MetaCDRs) {
 		rplyCDRs := utils.StringPointer("")
-		if err = ra.sessionS.Call(utils.SessionSv1ProcessCDR,
+		if err = ra.connMgr.Call(ra.cgrCfg.RadiusAgentCfg().SessionSConns, nil, utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv,
 				ArgDispatcher: cgrArgs.ArgDispatcher},
 			rplyCDRs); err != nil {
@@ -342,10 +341,4 @@ func (ra *RadiusAgent) ListenAndServe() (err error) {
 	}()
 	err = <-errListen
 	return
-}
-
-// SetSessionSConnection sets the new connection to the session service
-// only used on reload
-func (ra *RadiusAgent) SetSessionSConnection(sS rpcclient.ClientConnector) {
-	ra.sessionS = sS
 }

@@ -31,7 +31,6 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 const (
@@ -40,13 +39,15 @@ const (
 
 func NewPartialRecordsCache(ttl time.Duration, expiryAction string, cdrOutDir string, csvSep rune,
 	timezone string, httpSkipTlsCheck bool,
-	cdrs rpcclient.ClientConnector, filterS *engine.FilterS) *PartialRecordsCache {
+	filterS *engine.FilterS, cdrsConnIDs []string, connMgr *engine.ConnManager) *PartialRecordsCache {
 	return &PartialRecordsCache{ttl: ttl, expiryAction: expiryAction, cdrOutDir: cdrOutDir,
 		csvSep: csvSep, timezone: timezone,
-		httpSkipTlsCheck: httpSkipTlsCheck, cdrs: cdrs,
-		partialRecords: make(map[string]*PartialCDRRecord),
-		dumpTimers:     make(map[string]*time.Timer),
-		guard:          guardian.Guardian, filterS: filterS}
+		httpSkipTlsCheck: httpSkipTlsCheck,
+		partialRecords:   make(map[string]*PartialCDRRecord),
+		dumpTimers:       make(map[string]*time.Timer),
+		guard:            guardian.Guardian, filterS: filterS,
+		connMgr:     connMgr,
+		cdrsConnIDs: cdrsConnIDs}
 }
 
 type PartialRecordsCache struct {
@@ -56,11 +57,12 @@ type PartialRecordsCache struct {
 	csvSep           rune
 	timezone         string
 	httpSkipTlsCheck bool
-	cdrs             rpcclient.ClientConnector
 	partialRecords   map[string]*PartialCDRRecord // [OriginID]*PartialRecord
 	dumpTimers       map[string]*time.Timer       // [OriginID]*time.Timer which can be canceled or reset
 	guard            *guardian.GuardianLocker
 	filterS          *engine.FilterS
+	connMgr          *engine.ConnManager
+	cdrsConnIDs      []string
 }
 
 // Dumps the cache into a .unpaired file in the outdir and cleans cache after
@@ -103,7 +105,7 @@ func (prc *PartialRecordsCache) postCDR(originID string) {
 			cdr := prc.partialRecords[originID].MergeCDRs()
 			cdr.Partial = false // force completion
 			var reply string
-			if err := prc.cdrs.Call(utils.CDRsV1ProcessEvent,
+			if err := prc.connMgr.Call(prc.cdrsConnIDs, nil, utils.CDRsV1ProcessEvent,
 				&engine.ArgV1ProcessEvent{CGREvent: *cdr.AsCGREvent()}, &reply); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed sending CDR  %+v from partial cache, error: %s", cdr, err.Error()))
 			} else if reply != utils.OK {

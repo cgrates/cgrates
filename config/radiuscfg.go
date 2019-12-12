@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import "github.com/cgrates/cgrates/utils"
+
 type RadiusAgentCfg struct {
 	Enabled            bool
 	ListenNet          string // udp or tcp
@@ -25,7 +27,7 @@ type RadiusAgentCfg struct {
 	ListenAcct         string
 	ClientSecrets      map[string]string
 	ClientDictionaries map[string]string
-	SessionSConns      []*RemoteHost
+	SessionSConns      []string
 	RequestProcessors  []*RequestProcessor
 }
 
@@ -62,10 +64,14 @@ func (self *RadiusAgentCfg) loadFromJsonCfg(jsnCfg *RadiusAgentJsonCfg, separato
 		}
 	}
 	if jsnCfg.Sessions_conns != nil {
-		self.SessionSConns = make([]*RemoteHost, len(*jsnCfg.Sessions_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
-			self.SessionSConns[idx] = NewDfltRemoteHost()
-			self.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		self.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
+		for idx, attrConn := range *jsnCfg.Sessions_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if attrConn == utils.MetaInternal {
+				self.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+			} else {
+				self.SessionSConns[idx] = attrConn
+			}
 		}
 	}
 	if jsnCfg.Request_processors != nil {

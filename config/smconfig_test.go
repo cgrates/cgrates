@@ -77,12 +77,8 @@ func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
 	"enabled": false,						// starts session manager service: <true|false>
 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
 	"chargers_conns": [],					// address where to reach the charger service, empty to disable charger functionality: <""|*internal|x.y.z.y:1234>
-	"rals_conns": [
-		{"address": "*internal"}			// address where to reach the RALs <""|*internal|127.0.0.1:2013>
-	],
-	"cdrs_conns": [
-		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
-	],
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
 	"resources_conns": [],					// address where to reach the ResourceS <""|*internal|127.0.0.1:2013>
 	"thresholds_conns": [],					// address where to reach the ThresholdS <""|*internal|127.0.0.1:2013>
 	"stats_conns": [],						// address where to reach the StatS <""|*internal|127.0.0.1:2013>
@@ -103,14 +99,14 @@ func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
 }`
 	expected = SessionSCfg{
 		ListenBijson:     "127.0.0.1:2014",
-		ChargerSConns:    []*RemoteHost{},
-		RALsConns:        []*RemoteHost{{Address: "*internal"}},
-		ResSConns:        []*RemoteHost{},
-		ThreshSConns:     []*RemoteHost{},
-		StatSConns:       []*RemoteHost{},
-		SupplSConns:      []*RemoteHost{},
-		AttrSConns:       []*RemoteHost{},
-		CDRsConns:        []*RemoteHost{{Address: "*internal"}},
+		ChargerSConns:    []string{},
+		RALsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
+		ResSConns:        []string{},
+		ThreshSConns:     []string{},
+		StatSConns:       []string{},
+		SupplSConns:      []string{},
+		AttrSConns:       []string{},
+		CDRsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 		ReplicationConns: []*RemoteHost{},
 		MaxCallDuration:  time.Duration(3 * time.Hour),
 		SessionIndexes:   map[string]bool{},
@@ -142,9 +138,7 @@ func TestFsAgentCfgloadFromJsonCfg2(t *testing.T) {
 	cfgJSONStr := `{
 "freeswitch_agent": {
 	"enabled": false,						// starts the FreeSWITCH agent: <true|false>
-	"sessions_conns": [
-		{"address": "*internal"}			// connection towards session service: <*internal>
-	],
+	"sessions_conns": ["*internal"],
 	"subscribe_park": true,					// subscribe via fsock to receive park events
 	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
 	"extra_fields": [],						// extra fields to store in auth/CDRs when creating them
@@ -159,7 +153,7 @@ func TestFsAgentCfgloadFromJsonCfg2(t *testing.T) {
 },
 }`
 	expected = FsAgentCfg{
-		SessionSConns:     []*RemoteHost{{Address: "*internal"}},
+		SessionSConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		SubscribePark:     true,
 		MaxWaitConnection: time.Duration(2 * time.Second),
 		ExtraFields:       RSRParsers{},
@@ -253,9 +247,7 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 	cfgJSONStr := `{
 "asterisk_agent": {
 	"enabled": true,						// starts the Asterisk agent: <true|false>
-	"sessions_conns": [
-		{"address": "*internal"}			// connection towards session service: <*internal>
-	],
+	"sessions_conns": ["*internal"],
 	"create_cdr": false,					// create CDR out of events and sends it to CDRS component
 	"asterisk_conns":[						// instantiate connections to multiple Asterisk servers
 		{"address": "127.0.0.1:8088", "user": "cgrates", "password": "CGRateS.org", "connect_attempts": 3,"reconnects": 5}
@@ -264,7 +256,7 @@ func TestAsteriskAgentCfgloadFromJsonCfg(t *testing.T) {
 }`
 	expected = AsteriskAgentCfg{
 		Enabled:       true,
-		SessionSConns: []*RemoteHost{{Address: "*internal"}},
+		SessionSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		AsteriskConns: []*AsteriskConnCfg{{
 			Address:         "127.0.0.1:8088",
 			User:            "cgrates",

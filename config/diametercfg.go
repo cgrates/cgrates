@@ -18,12 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import "github.com/cgrates/cgrates/utils"
+
 type DiameterAgentCfg struct {
 	Enabled           bool   // enables the diameter agent: <true|false>
 	ListenNet         string // sctp or tcp
 	Listen            string // address where to listen for diameter requests <x.y.z.y:1234>
 	DictionariesPath  string
-	SessionSConns     []*RemoteHost // connections towards SMG component
+	SessionSConns     []string
 	OriginHost        string
 	OriginRealm       string
 	VendorId          int
@@ -52,10 +54,14 @@ func (da *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg, separa
 		da.DictionariesPath = *jsnCfg.Dictionaries_path
 	}
 	if jsnCfg.Sessions_conns != nil {
-		da.SessionSConns = make([]*RemoteHost, len(*jsnCfg.Sessions_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
-			da.SessionSConns[idx] = NewDfltRemoteHost()
-			da.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		da.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
+		for idx, attrConn := range *jsnCfg.Sessions_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if attrConn == utils.MetaInternal {
+				da.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+			} else {
+				da.SessionSConns[idx] = attrConn
+			}
 		}
 	}
 	if jsnCfg.Origin_host != nil {

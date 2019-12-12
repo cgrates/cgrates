@@ -9,6 +9,14 @@
 },
 
 
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],
+	},
+},
+
+
 "listen": {
 	"rpc_json": ":2012",
 	"rpc_gob": ":2013",
@@ -23,29 +31,21 @@
 
 "scheduler": {
 	"enabled": true,
-	"cdrs_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
+	"cdrs_conns": ["conn1"],
 },
 
 
 "rals": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
-	"stats_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
+	"thresholds_conns": ["conn1"],
+	"stats_conns": ["conn1"],
 },
 
 
 "cdrs": {
 	"enabled": true,
 	"extra_fields": ["PayPalAccount", "LCRProfile", "ResourceID"],
-	"chargers_conns":[
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
+	"chargers_conns":["conn1"],
 	"store_cdrs": true,
 	"online_cdr_exports": []
 },
@@ -70,24 +70,12 @@
 
 "sessions": {
 	"enabled": true,
-	"resources_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"}
-	],
-	"suppliers_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"}
-	],
-	"attributes_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"}
-	],
-	"rals_conns": [
-		{"address": "*internal"}
-	],
-	"cdrs_conns": [
-		{"address": "*internal"}
-	],
-	"chargers_conns": [
-		{"address": "*internal"}
-	],
+	"resources_conns": ["conn1"],
+	"suppliers_conns": ["conn1"],
+	"attributes_conns": ["conn1"],
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
 },
 
 
@@ -99,27 +87,21 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"}
-	],
+	"attributes_conns": ["conn1"],
 	"string_indexed_fields": ["Account"]
 },
 
 
 "resources": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"}
-	],
+	"thresholds_conns": ["conn1"],
 	"string_indexed_fields": ["Account"]
 },
 
 
 "stats": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"}
-	],
+	"thresholds_conns": ["conn1"],
 	"string_indexed_fields": ["Account"]
 },
 
@@ -139,8 +121,6 @@
 
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 }

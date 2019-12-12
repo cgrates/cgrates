@@ -70,9 +70,7 @@
 "resources": {
 	"enabled": true,
 	"store_interval": "-1",
-	"thresholds_conns": [
-		{"address": "*internal"}
-	],
+	"thresholds_conns": ["*internal"],
 },
 
 
@@ -82,9 +80,7 @@
 
 
 "apier": {
-	"scheduler_conns": [
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 }

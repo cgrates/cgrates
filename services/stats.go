@@ -33,30 +33,27 @@ import (
 // NewStatService returns the Stat Service
 func NewStatService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, thrsChan,
-	dispatcherChan chan rpcclient.ClientConnector) servmanager.Service {
+	server *utils.Server, internalStatSChan chan rpcclient.ClientConnector, connMgr *engine.ConnManager) servmanager.Service {
 	return &StatService{
-		connChan:       make(chan rpcclient.ClientConnector, 1),
-		cfg:            cfg,
-		dm:             dm,
-		cacheS:         cacheS,
-		filterSChan:    filterSChan,
-		server:         server,
-		thrsChan:       thrsChan,
-		dispatcherChan: dispatcherChan,
+		connChan:    internalStatSChan,
+		cfg:         cfg,
+		dm:          dm,
+		cacheS:      cacheS,
+		filterSChan: filterSChan,
+		server:      server,
+		connMgr:     connMgr,
 	}
 }
 
 // StatService implements Service interface
 type StatService struct {
 	sync.RWMutex
-	cfg            *config.CGRConfig
-	dm             *DataDBService
-	cacheS         *engine.CacheS
-	filterSChan    chan *engine.FilterS
-	server         *utils.Server
-	thrsChan       chan rpcclient.ClientConnector
-	dispatcherChan chan rpcclient.ClientConnector
+	cfg         *config.CGRConfig
+	dm          *DataDBService
+	cacheS      *engine.CacheS
+	filterSChan chan *engine.FilterS
+	server      *utils.Server
+	connMgr     *engine.ConnManager
 
 	sts      *engine.StatService
 	rpc      *v1.StatSv1
@@ -76,14 +73,9 @@ func (sts *StatService) Start() (err error) {
 	filterS := <-sts.filterSChan
 	sts.filterSChan <- filterS
 
-	var thdSConn rpcclient.ClientConnector
-	if thdSConn, err = NewConnection(sts.cfg, sts.thrsChan, sts.dispatcherChan, sts.cfg.StatSCfg().ThresholdSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.StatS, err.Error()))
-		return
-	}
 	sts.Lock()
 	defer sts.Unlock()
-	sts.sts, err = engine.NewStatService(sts.dm.GetDM(), sts.cfg, thdSConn, filterS)
+	sts.sts, err = engine.NewStatService(sts.dm.GetDM(), sts.cfg, filterS, sts.connMgr)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<StatS> Could not init, error: %s", err.Error()))
 		return
@@ -105,13 +97,7 @@ func (sts *StatService) GetIntenternalChan() (conn chan rpcclient.ClientConnecto
 
 // Reload handles the change of config
 func (sts *StatService) Reload() (err error) {
-	var thdSConn rpcclient.ClientConnector
-	if thdSConn, err = NewConnection(sts.cfg, sts.thrsChan, sts.dispatcherChan, sts.cfg.StatSCfg().ThresholdSConns); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to ThresholdS: %s", utils.StatS, err.Error()))
-		return
-	}
 	sts.Lock()
-	sts.sts.SetThresholdConnection(thdSConn)
 	sts.sts.Reload()
 	sts.Unlock()
 	return

@@ -22,13 +22,11 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"reflect"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 const (
@@ -57,9 +55,7 @@ var (
 	cdrStorage              CdrStorage
 	debitPeriod             = 10 * time.Second
 	globalRoundingDecimals  = 6
-	thresholdS              rpcclient.ClientConnector // used by RALs to communicate with ThresholdS
-	statS                   rpcclient.ClientConnector
-	schedCdrsConns          rpcclient.ClientConnector
+	connMgr                 *ConnManager
 	rpSubjectPrefixMatching bool
 )
 
@@ -68,12 +64,9 @@ func SetDataStorage(dm2 *DataManager) {
 	dm = dm2
 }
 
-func SetThresholdS(thdS rpcclient.ClientConnector) {
-	thresholdS = thdS
-}
-
-func SetStatS(stsS rpcclient.ClientConnector) {
-	statS = stsS
+// SetConnManager is the exported method to set the connectionManager used when operate on an account.
+func SetConnManager(conMgr *ConnManager) {
+	connMgr = conMgr
 }
 
 // SetRoundingDecimals sets the global rounding method and decimal precision for GetCost method
@@ -88,14 +81,6 @@ func SetRpSubjectPrefixMatching(flag bool) {
 // SetCdrStorage sets the database for CDR storing, used by *cdrlog in first place
 func SetCdrStorage(cStorage CdrStorage) {
 	cdrStorage = cStorage
-}
-
-// SetSchedCdrsConns sets the connection between action and CDRServer
-func SetSchedCdrsConns(sc rpcclient.ClientConnector) {
-	schedCdrsConns = sc
-	if schedCdrsConns != nil && reflect.ValueOf(schedCdrsConns).IsNil() {
-		schedCdrsConns = nil
-	}
 }
 
 // NewCallDescriptorFromCGREvent converts a CGREvent into CallDescriptor

@@ -708,8 +708,8 @@ func testCallSyncSessions(t *testing.T) {
 	if err := tutorialCallsRpc.Call(utils.SessionSv1GetActiveSessions,
 		nil, &reply); err != nil {
 		t.Error("Got error on SessionSv1.GetActiveSessions: ", err.Error())
-	} else if len(*reply) != 2 {
-		t.Errorf("expecting 2 active sessions, received: %+v", utils.ToJSON(reply))
+	} else if len(*reply) != 4 { // expect to have 4 sessions ( two for 1001 to 1003 *raw and *default and two from 1001 to 1002 *raw and *default)
+		t.Errorf("expecting 4 active sessions, received: %+v", utils.ToJSON(reply))
 	}
 	//check if resource was allocated for 2 calls(1001->1002;1001->1003)
 	var rs *engine.Resources

@@ -30,9 +30,7 @@
 	{
 		"id": "conecto1",
 		"url": "/conecto",
-		"sessions_conns": [
-			{"address": "127.0.0.1:2012", "transport": "*json"}
-		],
+		"sessions_conns": ["*localhost"],
 		"request_payload":	"*url",
 		"reply_payload":	"*xml",
 		"request_processors": [

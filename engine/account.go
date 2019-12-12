@@ -536,7 +536,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 				defaultBalance := ub.GetDefaultMoneyBalance()
 				defaultBalance.SubstractValue(cost)
 				//send default balance to thresholdS to be processed
-				if thresholdS != nil {
+				if len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
 					acntTnt := utils.NewTenantID(ub.ID)
 					thEv := &ArgsProcessEvent{
 						CGREvent: &utils.CGREvent{
@@ -549,7 +549,8 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 								utils.BalanceID:   defaultBalance.ID,
 								utils.Units:       defaultBalance.Value}}}
 					var tIDs []string
-					if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
+					if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
+						utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 						err.Error() != utils.ErrNotFound.Error() {
 						utils.Logger.Warning(
 							fmt.Sprintf("<AccountS> error: <%s> processing balance event <%+v> with ThresholdS.",
@@ -1103,10 +1104,11 @@ func (acnt *Account) Publish() {
 			utils.Account:       acntTnt.ID,
 			utils.AllowNegative: acnt.AllowNegative,
 			utils.Disabled:      acnt.Disabled}}
-	if statS != nil {
+	if len(config.CgrConfig().RalsCfg().StatSConns) != 0 {
 		go func() {
 			var reply []string
-			if err := statS.Call(utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{CGREvent: cgrEv}, &reply); err != nil &&
+			if err := connMgr.Call(config.CgrConfig().RalsCfg().StatSConns, nil,
+				utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{CGREvent: cgrEv}, &reply); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<AccountS> error: %s processing balance event %+v with StatS.",
@@ -1114,10 +1116,11 @@ func (acnt *Account) Publish() {
 			}
 		}()
 	}
-	if thresholdS != nil {
+	if len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
 		go func() {
 			var tIDs []string
-			if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent,
+			if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
+				utils.ThresholdSv1ProcessEvent,
 				&ArgsProcessEvent{CGREvent: cgrEv}, &tIDs); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(

@@ -26,9 +26,9 @@ import (
 
 // Rater config section
 type RalsCfg struct {
-	Enabled                 bool          // start standalone server (no balancer)
-	ThresholdSConns         []*RemoteHost // address where to reach ThresholdS config
-	StatSConns              []*RemoteHost
+	Enabled                 bool     // start standalone server (no balancer)
+	ThresholdSConns         []string // address where to reach ThresholdS config
+	StatSConns              []string
 	RpSubjectPrefixMatching bool // enables prefix matching for the rating profile subject
 	RemoveExpired           bool
 	MaxComputedUsage        map[string]time.Duration
@@ -45,17 +45,25 @@ func (ralsCfg *RalsCfg) loadFromJsonCfg(jsnRALsCfg *RalsJsonCfg) (err error) {
 		ralsCfg.Enabled = *jsnRALsCfg.Enabled
 	}
 	if jsnRALsCfg.Thresholds_conns != nil {
-		ralsCfg.ThresholdSConns = make([]*RemoteHost, len(*jsnRALsCfg.Thresholds_conns))
-		for idx, jsnHaCfg := range *jsnRALsCfg.Thresholds_conns {
-			ralsCfg.ThresholdSConns[idx] = NewDfltRemoteHost()
-			ralsCfg.ThresholdSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		ralsCfg.ThresholdSConns = make([]string, len(*jsnRALsCfg.Thresholds_conns))
+		for idx, conn := range *jsnRALsCfg.Thresholds_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if conn == utils.MetaInternal {
+				ralsCfg.ThresholdSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
+			} else {
+				ralsCfg.ThresholdSConns[idx] = conn
+			}
 		}
 	}
 	if jsnRALsCfg.Stats_conns != nil {
-		ralsCfg.StatSConns = make([]*RemoteHost, len(*jsnRALsCfg.Stats_conns))
-		for idx, jsnHaCfg := range *jsnRALsCfg.Stats_conns {
-			ralsCfg.StatSConns[idx] = NewDfltRemoteHost()
-			ralsCfg.StatSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		ralsCfg.StatSConns = make([]string, len(*jsnRALsCfg.Stats_conns))
+		for idx, conn := range *jsnRALsCfg.Stats_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if conn == utils.MetaInternal {
+				ralsCfg.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
+			} else {
+				ralsCfg.StatSConns[idx] = conn
+			}
 		}
 	}
 	if jsnRALsCfg.Rp_subject_prefix_matching != nil {

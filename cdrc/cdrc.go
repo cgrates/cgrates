@@ -53,16 +53,16 @@ Parameters specific per config instance:
  * cdrSourceId, cdrFilter, cdrFields
 */
 func NewCdrc(cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool, cdrs rpcclient.ClientConnector,
-	closeChan chan struct{}, dfltTimezone string, filterS *engine.FilterS) (cdrc *Cdrc, err error) {
+	closeChan chan struct{}, dfltTimezone string, filterS *engine.FilterS, connMgr *engine.ConnManager) (cdrc *Cdrc, err error) {
 	cdrcCfg := cdrcCfgs[0]
 	cdrc = &Cdrc{
 		httpSkipTlsCheck: httpSkipTlsCheck,
 		cdrcCfgs:         cdrcCfgs,
 		dfltCdrcCfg:      cdrcCfg,
 		timezone:         utils.FirstNonEmpty(cdrcCfg.Timezone, dfltTimezone),
-		cdrs:             cdrs,
 		closeChan:        closeChan,
 		maxOpenFiles:     make(chan struct{}, cdrcCfg.MaxOpenFiles),
+		connMgr:          connMgr,
 	}
 	// Before processing, make sure in and out folders exist
 	if utils.CDRCFileFormats.Has(cdrcCfg.CdrFormat) {
@@ -81,7 +81,7 @@ func NewCdrc(cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool, cdrs rpcclient.C
 		cdrcCfg.CDROutPath, cdrcCfg.FieldSeparator)
 	cdrc.partialRecordsCache = NewPartialRecordsCache(cdrcCfg.PartialRecordCache,
 		cdrcCfg.PartialCacheExpiryAction, cdrcCfg.CDROutPath,
-		cdrcCfg.FieldSeparator, cdrc.timezone, httpSkipTlsCheck, cdrs, filterS)
+		cdrcCfg.FieldSeparator, cdrc.timezone, httpSkipTlsCheck, filterS, cdrc.dfltCdrcCfg.CdrsConns, cdrc.connMgr)
 	cdrc.filterS = filterS
 	return
 }
@@ -91,12 +91,12 @@ type Cdrc struct {
 	cdrcCfgs             []*config.CdrcCfg // All cdrc config profiles attached to this CDRC (key will be profile instance name)
 	dfltCdrcCfg          *config.CdrcCfg
 	timezone             string
-	cdrs                 rpcclient.ClientConnector
 	closeChan            chan struct{} // Used to signal config reloads when we need to span different CDRC-Client
 	maxOpenFiles         chan struct{} // Maximum number of simultaneous files processed
 	filterS              *engine.FilterS
 	unpairedRecordsCache *UnpairedRecordsCache // Shared between all files in the folder we process
 	partialRecordsCache  *PartialRecordsCache
+	connMgr              *engine.ConnManager
 }
 
 // When called fires up folder monitoring, either automated via inotify or manual by sleeping between processing
@@ -186,8 +186,8 @@ func (self *Cdrc) processFile(filePath string) error {
 		csvReader.Comment = '#'
 		recordsProcessor = NewCsvRecordsProcessor(csvReader, self.timezone, fn, self.dfltCdrcCfg,
 			self.cdrcCfgs, self.httpSkipTlsCheck,
-			self.dfltCdrcCfg.CacheDumpFields, self.filterS, self.cdrs,
-			self.unpairedRecordsCache, self.partialRecordsCache)
+			self.dfltCdrcCfg.CacheDumpFields, self.filterS,
+			self.unpairedRecordsCache, self.partialRecordsCache, self.connMgr)
 	case utils.MetaFileFWV:
 		recordsProcessor = NewFwvRecordsProcessor(file, self.dfltCdrcCfg, self.cdrcCfgs,
 			self.httpSkipTlsCheck, self.timezone, self.filterS)
@@ -217,7 +217,7 @@ func (self *Cdrc) processFile(filePath string) error {
 				utils.Logger.Info(fmt.Sprintf("<Cdrc> DryRun CDR: %+v", storedCdr))
 				continue
 			}
-			if err := self.cdrs.Call(utils.CDRsV1ProcessEvent,
+			if err := self.connMgr.Call(self.dfltCdrcCfg.CdrsConns, nil, utils.CDRsV1ProcessEvent,
 				&engine.ArgV1ProcessEvent{CGREvent: *storedCdr.AsCGREvent()}, &reply); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed sending CDR, %+v, error: %s", storedCdr, err.Error()))
 			} else if reply != "OK" {

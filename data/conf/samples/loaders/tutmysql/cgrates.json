@@ -28,25 +28,19 @@
 
 "rals": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "*internal"},
-	],
+	"thresholds_conns": ["*internal"],
 },
 
 
 "scheduler": {
 	"enabled": true,
-	"cdrs_conns": [
-		{"address": "*internal"},
-	],
+	"cdrs_conns": ["*internal"],
 },
 
 
 "cdrs": {
 	"enabled": true,
-	"chargers_conns":[
-		{"address": "*internal"},
-	],
+	"chargers_conns":["*internal"],
 },
 
 
@@ -77,9 +71,7 @@
 		"tenant": "cgrates.org",
 		"run_delay": 0,										// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
 		"lock_filename": ".cgr.lock",						// Filename containing concurrency lock in case of delayed processing
-		"caches_conns": [
-			{"address": "*internal"},						// address where to reach the CacheS for data reload, empty for no reloads  <""|*internal|x.y.z.y:1234>
-		],
+		"caches_conns": ["*internal"],
 		"field_separator": ",",								// separator used in case of csv files
 		"tp_in_dir": "/tmp/In",		// absolute path towards the directory where the CDRs are stored
 		"tp_out_dir": "/tmp/Out",	// absolute path towards the directory where processed CDRs will be moved
@@ -115,27 +107,21 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": [
-		{"address": "*internal"},
-	],
+	"attributes_conns": ["*internal"],
 },
 
 
 "resources": {
 	"enabled": true,
 	"store_interval": "1s",
-	"thresholds_conns": [
-		{"address": "*internal"}
-	],
+	"thresholds_conns": ["*internal"]
 },
 
 
 "stats": {
 	"enabled": true,
 	"store_interval": "1s",
-	"thresholds_conns": [
-		{"address": "*internal"}
-	],
+	"thresholds_conns": ["*internal"],
 },
 
 "thresholds": {
@@ -147,35 +133,19 @@
 "suppliers": {
 	"enabled": true,
 	"prefix_indexed_fields":["Destination"],
-	"stats_conns": [
-		{"address": "*internal"},
-	],
-	"resources_conns": [
-		{"address": "*internal"},
-	],
+	"stats_conns": ["*internal"],
+	"resources_conns": ["*internal"],
 },
 
 
 "sessions": {
 	"enabled": true,
-	"suppliers_conns": [
-		{"address": "*internal"}
-	],
-	"resources_conns": [
-		{"address": "*internal"}
-	],
-	"attributes_conns": [
-		{"address": "*internal"}
-	],
-	"rals_conns": [
-		{"address": "*internal"},
-	],
-	"cdrs_conns": [
-		{"address": "*internal"}
-	],
-	"chargers_conns": [
-		{"address": "*internal"},
-	],
+	"suppliers_conns": ["*internal"],
+	"resources_conns": ["*internal"],
+	"attributes_conns": ["*internal"],
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
 },
 
 
@@ -186,9 +156,7 @@
 
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 

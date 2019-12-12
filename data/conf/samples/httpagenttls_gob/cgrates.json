@@ -17,6 +17,15 @@
 	"http_tls": "localhost:2280",
 },
 
+
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],
+	},
+},
+
+
 "tls": {
 	"server_certificate" : "/usr/share/cgrates/tls/server.crt",			// path to server certificate(must conatin server.crt + ca.crt)
 	"server_key":"/usr/share/cgrates/tls/server.key",					// path to server key
@@ -44,12 +53,8 @@
 
 "cdrs": {
 	"enabled": true,
-	"chargers_conns": [
-		{"address": "*internal"}
-	],
-	"rals_conns": [
-		{"address": "*internal"}
-	],
+	"chargers_conns": ["*internal"],
+	"rals_conns": ["*internal"],
 },
 
 
@@ -59,35 +64,20 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": [
-		{"address": "*internal"}
-	],
+	"attributes_conns": ["*internal"],
 },
 
 "sessions": {
 	"enabled": true,
-	"attributes_conns": [
-		{"address": "127.0.0.1:2013", "transport": "*gob"}
-	],
-	"cdrs_conns": [
-		{"address": "127.0.0.1:2013", "transport": "*gob"}
-	],
-	"rals_conns": [
-		{"address": "127.0.0.1:2013", "transport": "*gob"}
-	],
-	"cdrs_conns": [
-		{"address": "*internal"}
-	],
-	"chargers_conns": [
-		{"address": "*internal"}
-	],
+	"attributes_conns": ["conn1"],
+	"cdrs_conns": ["conn1"],
+	"rals_conns": ["conn1"],
+	"chargers_conns": ["*internal"],
 },
 
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 

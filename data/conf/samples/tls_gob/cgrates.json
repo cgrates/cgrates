@@ -53,21 +53,25 @@
 },
 
 
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],
+	},
+},
+
+
 "resources": {
 	"enabled": true,
 	"store_interval": "1s",
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2013", "transport": "*gob"}
-	],
+	"thresholds_conns": ["conn1"],
 },
 
 
 "stats": {
 	"enabled": true,
 	"store_interval": "1s",
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2013", "transport": "*gob"}
-	],
+	"thresholds_conns": ["conn1"],
 },
 
 "thresholds": {
@@ -77,15 +81,9 @@
 
 "sessions": {
 	"enabled": true,
-	"rals_conns": [
-		{"address": "127.0.0.1:2013", "transport": "*gob"}
-	],
-	"resources_conns": [
-		{"address": "127.0.0.1:2013", "transport": "*gob"}
-	],
-	"attributes_conns": [
-		{"address": "127.0.0.1:2013", "transport": "*gob"}
-	],
+	"rals_conns": ["conn1"],
+	"resources_conns": ["conn1"],
+	"attributes_conns": ["conn1"],
 },
 
 "attributes": {
@@ -94,16 +92,12 @@
 
 "cdrs": {
 	"enabled": true,
-	"chargers_conns":[
-		{"address": "*internal"}
-	],
+	"chargers_conns":["*internal"],
 },
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": [
-		{"address": "*internal"}
-	],
+	"attributes_conns": ["*internal"],
 },
 
 }

@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import "github.com/cgrates/cgrates/utils"
+
 type HttpAgentCfgs []*HttpAgentCfg
 
 func (hcfgs *HttpAgentCfgs) loadFromJsonCfg(jsnHttpAgntCfg *[]*HttpAgentJsonCfg, separator string) (err error) {
@@ -51,7 +53,7 @@ func (hcfgs *HttpAgentCfgs) loadFromJsonCfg(jsnHttpAgntCfg *[]*HttpAgentJsonCfg,
 type HttpAgentCfg struct {
 	ID                string // identifier for the agent, so we can update it's processors
 	Url               string
-	SessionSConns     []*RemoteHost
+	SessionSConns     []string
 	RequestPayload    string
 	ReplyPayload      string
 	RequestProcessors []*RequestProcessor
@@ -94,10 +96,14 @@ func (ca *HttpAgentCfg) loadFromJsonCfg(jsnCfg *HttpAgentJsonCfg, separator stri
 		ca.Url = *jsnCfg.Url
 	}
 	if jsnCfg.Sessions_conns != nil {
-		ca.SessionSConns = make([]*RemoteHost, len(*jsnCfg.Sessions_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Sessions_conns {
-			ca.SessionSConns[idx] = NewDfltRemoteHost()
-			ca.SessionSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		ca.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
+		for idx, connID := range *jsnCfg.Sessions_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				ca.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
+			} else {
+				ca.SessionSConns[idx] = connID
+			}
 		}
 	}
 	if jsnCfg.Request_payload != nil {

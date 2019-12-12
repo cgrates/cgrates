@@ -34,34 +34,32 @@ import (
 // NewLoaderService returns the Loader Service
 func NewLoaderService(cfg *config.CGRConfig, dm *DataDBService,
 	filterSChan chan *engine.FilterS, server *utils.Server,
-	cacheSChan, dispatcherChan chan rpcclient.ClientConnector,
-	exitChan chan bool) servmanager.Service {
+	exitChan chan bool, internalLoaderSChan chan rpcclient.ClientConnector,
+	connMgr *engine.ConnManager) servmanager.Service {
 	return &LoaderService{
-		connChan:       make(chan rpcclient.ClientConnector, 1),
-		cfg:            cfg,
-		dm:             dm,
-		cacheSChan:     cacheSChan,
-		dispatcherChan: dispatcherChan,
-		filterSChan:    filterSChan,
-		server:         server,
-		exitChan:       exitChan,
+		connChan:    internalLoaderSChan,
+		cfg:         cfg,
+		dm:          dm,
+		filterSChan: filterSChan,
+		server:      server,
+		exitChan:    exitChan,
+		connMgr:     connMgr,
 	}
 }
 
 // LoaderService implements Service interface
 type LoaderService struct {
 	sync.RWMutex
-	cfg            *config.CGRConfig
-	dm             *DataDBService
-	filterSChan    chan *engine.FilterS
-	server         *utils.Server
-	cacheSChan     chan rpcclient.ClientConnector
-	dispatcherChan chan rpcclient.ClientConnector
-	exitChan       chan bool
+	cfg         *config.CGRConfig
+	dm          *DataDBService
+	filterSChan chan *engine.FilterS
+	server      *utils.Server
+	exitChan    chan bool
 
 	ldrs     *loaders.LoaderService
 	rpc      *v1.LoaderSv1
 	connChan chan rpcclient.ClientConnector
+	connMgr  *engine.ConnManager
 }
 
 // Start should handle the sercive start
@@ -72,16 +70,12 @@ func (ldrs *LoaderService) Start() (err error) {
 
 	filterS := <-ldrs.filterSChan
 	ldrs.filterSChan <- filterS
-	internalChan := ldrs.cacheSChan
-	if ldrs.cfg.DispatcherSCfg().Enabled {
-		internalChan = ldrs.dispatcherChan
-	}
 
 	ldrs.Lock()
 	defer ldrs.Unlock()
 
 	ldrs.ldrs = loaders.NewLoaderService(ldrs.dm.GetDM(), ldrs.cfg.LoaderCfg(),
-		ldrs.cfg.GeneralCfg().DefaultTimezone, ldrs.exitChan, filterS, internalChan)
+		ldrs.cfg.GeneralCfg().DefaultTimezone, ldrs.exitChan, filterS, ldrs.connMgr)
 	if !ldrs.ldrs.Enabled() {
 		return
 	}
@@ -101,12 +95,9 @@ func (ldrs *LoaderService) Reload() (err error) {
 	filterS := <-ldrs.filterSChan
 	ldrs.filterSChan <- filterS
 	ldrs.RLock()
-	internalChan := ldrs.cacheSChan
-	if ldrs.cfg.DispatcherSCfg().Enabled {
-		internalChan = ldrs.dispatcherChan
-	}
+
 	ldrs.ldrs.Reload(ldrs.dm.GetDM(), ldrs.cfg.LoaderCfg(), ldrs.cfg.GeneralCfg().DefaultTimezone,
-		ldrs.exitChan, filterS, internalChan)
+		ldrs.exitChan, filterS, ldrs.connMgr)
 	ldrs.RUnlock()
 	return
 }

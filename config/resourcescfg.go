@@ -27,7 +27,7 @@ import (
 type ResourceSConfig struct {
 	Enabled             bool
 	IndexedSelects      bool
-	ThresholdSConns     []*RemoteHost // Connections towards StatS
+	ThresholdSConns     []string
 	StoreInterval       time.Duration // Dump regularly from cache into dataDB
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
@@ -44,10 +44,14 @@ func (rlcfg *ResourceSConfig) loadFromJsonCfg(jsnCfg *ResourceSJsonCfg) (err err
 		rlcfg.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.Thresholds_conns != nil {
-		rlcfg.ThresholdSConns = make([]*RemoteHost, len(*jsnCfg.Thresholds_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Thresholds_conns {
-			rlcfg.ThresholdSConns[idx] = NewDfltRemoteHost()
-			rlcfg.ThresholdSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		rlcfg.ThresholdSConns = make([]string, len(*jsnCfg.Thresholds_conns))
+		for idx, conn := range *jsnCfg.Thresholds_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if conn == utils.MetaInternal {
+				rlcfg.ThresholdSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
+			} else {
+				rlcfg.ThresholdSConns[idx] = conn
+			}
 		}
 	}
 	if jsnCfg.Store_interval != nil {

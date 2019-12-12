@@ -21,25 +21,21 @@ package engine
 import (
 	"fmt"
 	"math/rand"
-	"reflect"
 	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // NewStatService initializes a StatService
 func NewStatService(dm *DataManager, cgrcfg *config.CGRConfig,
-	thdS rpcclient.ClientConnector, filterS *FilterS) (ss *StatService, err error) {
-	if thdS != nil && reflect.ValueOf(thdS).IsNil() { // fix nil value in interface
-		thdS = nil
-	}
+	filterS *FilterS, connMgr *ConnManager) (ss *StatService, err error) {
+
 	return &StatService{
 		dm:               dm,
-		thdS:             thdS,
+		connMgr:          connMgr,
 		filterS:          filterS,
 		cgrcfg:           cgrcfg,
 		storedStatQueues: make(utils.StringMap),
@@ -50,7 +46,7 @@ func NewStatService(dm *DataManager, cgrcfg *config.CGRConfig,
 // StatService builds stats for events
 type StatService struct {
 	dm               *DataManager
-	thdS             rpcclient.ClientConnector // rpc connection towards ThresholdS
+	connMgr          *ConnManager
 	filterS          *FilterS
 	cgrcfg           *config.CGRConfig
 	loopStoped       chan struct{}
@@ -270,7 +266,7 @@ func (sS *StatService) processEvent(args *StatsArgsProcessEvent) (statQueueIDs [
 				sS.ssqMux.Unlock()
 			}
 		}
-		if sS.thdS != nil {
+		if len(sS.cgrcfg.StatSCfg().ThresholdSConns) != 0 {
 			var thIDs []string
 			if len(sq.sqPrfl.ThresholdIDs) != 0 {
 				if len(sq.sqPrfl.ThresholdIDs) == 1 && sq.sqPrfl.ThresholdIDs[0] == utils.META_NONE {
@@ -294,7 +290,8 @@ func (sS *StatService) processEvent(args *StatsArgsProcessEvent) (statQueueIDs [
 				thEv.Event[metricID] = metric.GetValue()
 			}
 			var tIDs []string
-			if err := sS.thdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
+			if err := sS.connMgr.Call(sS.cgrcfg.StatSCfg().ThresholdSConns, nil,
+				utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<StatS> error: %s processing event %+v with ThresholdS.", err.Error(), thEv))
@@ -424,10 +421,4 @@ func (sS *StatService) Reload() {
 // StartLoop starsS the gorutine with the backup loop
 func (sS *StatService) StartLoop() {
 	go sS.runBackup()
-}
-
-// SetThresholdConnection sets the new connection to the threshold service
-// only used on reload
-func (sS *StatService) SetThresholdConnection(thdS rpcclient.ClientConnector) {
-	sS.thdS = thdS
 }

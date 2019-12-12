@@ -42,7 +42,7 @@ func TestSchedulerCfgloadFromJsonCfg(t *testing.T) {
 }`
 	expected = SchedulerCfg{
 		Enabled:   true,
-		CDRsConns: []*RemoteHost{},
+		CDRsConns: []string{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)

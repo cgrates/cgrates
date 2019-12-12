@@ -721,10 +721,11 @@ func (b *Balance) Publish() {
 	if !b.ExpirationDate.IsZero() {
 		cgrEv.Event[utils.ExpiryTime] = b.ExpirationDate.Format(time.RFC3339)
 	}
-	if statS != nil {
+	if len(config.CgrConfig().RalsCfg().StatSConns) != 0 {
 		go func() {
 			var reply []string
-			if err := statS.Call(utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{CGREvent: cgrEv}, &reply); err != nil &&
+			if err := connMgr.Call(config.CgrConfig().RalsCfg().StatSConns, nil,
+				utils.StatSv1ProcessEvent, &StatsArgsProcessEvent{CGREvent: cgrEv}, &reply); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<AccountS> error: %s processing balance event %+v with StatS.",
@@ -732,10 +733,11 @@ func (b *Balance) Publish() {
 			}
 		}()
 	}
-	if thresholdS != nil {
+	if len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
 		go func() {
 			var tIDs []string
-			if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, &ArgsProcessEvent{CGREvent: cgrEv}, &tIDs); err != nil &&
+			if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
+				utils.ThresholdSv1ProcessEvent, &ArgsProcessEvent{CGREvent: cgrEv}, &tIDs); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<AccountS> error: %s processing balance event %+v with ThresholdS.",
@@ -840,9 +842,10 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 			if !b.ExpirationDate.IsZero() {
 				thEv.Event[utils.ExpiryTime] = b.ExpirationDate.Format(time.RFC3339)
 			}
-			if thresholdS != nil {
+			if len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
 				var tIDs []string
-				if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
+				if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
+					utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 					err.Error() != utils.ErrNotFound.Error() {
 					utils.Logger.Warning(
 						fmt.Sprintf("<AccountS> error: %s processing balance event %+v with ThresholdS.",
@@ -855,7 +858,7 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 			savedAccounts[b.account.ID] = b.account
 		}
 	}
-	if len(savedAccounts) != 0 && thresholdS != nil {
+	if len(savedAccounts) != 0 && len(config.CgrConfig().RalsCfg().ThresholdSConns) != 0 {
 		for _, acnt := range savedAccounts {
 			acntTnt := utils.NewTenantID(acnt.ID)
 			thEv := &ArgsProcessEvent{
@@ -869,7 +872,8 @@ func (bc Balances) SaveDirtyBalances(acc *Account) {
 						utils.AllowNegative: acnt.AllowNegative,
 						utils.Disabled:      acnt.Disabled}}}
 			var tIDs []string
-			if err := thresholdS.Call(utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
+			if err := connMgr.Call(config.CgrConfig().RalsCfg().ThresholdSConns, nil,
+				utils.ThresholdSv1ProcessEvent, thEv, &tIDs); err != nil &&
 				err.Error() != utils.ErrNotFound.Error() {
 				utils.Logger.Warning(
 					fmt.Sprintf("<AccountS> error: %s processing account event %+v with ThresholdS.", err.Error(), thEv))

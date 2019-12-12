@@ -29,61 +29,36 @@
 
 "rals": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
-	"stats_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
+	"thresholds_conns": ["*localhost"],
+	"stats_conns": ["*localhost"],
 },
 
 
 "cdrs": {
 	"enabled": true,
-	"stats_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
-	"chargers_conns": [
-    	{"address": "*internal"}
-    ],
+	"stats_conns": ["*localhost"],
+	"chargers_conns": ["*internal"],
+	"rals_conns": ["*localhost"],
 	"sessions_cost_retries": 5,
 },
 
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": [
-		{"address": "*internal"}
-	],
+	"attributes_conns": ["*internal"],
 },
 
 
 "sessions": {
 	"enabled": true,
-	"rals_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
-	"cdrs_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
-	"resources_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
-	"suppliers_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
-	"attributes_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
-	"stats_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
-	"chargers_conns": [
-    	{"address": "*internal"}
-    ],
+	"rals_conns": ["*localhost"],
+	"cdrs_conns": ["*localhost"],
+	"resources_conns": ["*localhost"],
+	"suppliers_conns": ["*localhost"],
+	"attributes_conns": ["*localhost"],
+	"stats_conns": ["*localhost"],
+	"thresholds_conns": ["*localhost"],
+	"chargers_conns": ["*internal"],
 	"store_session_costs": true,
 	"debit_interval": "5s",
 	"channel_sync_interval":"7s",
@@ -96,9 +71,7 @@
 		{"address": "127.0.0.1:8088", "user": "cgrates",
 			"password": "CGRateS.org", "connect_attempts": 3,"reconnects": 10}
 	],
-	"sessions_conns": [
-		{"address": "*internal"},
-	],
+	"sessions_conns": ["*internal"],
 	"create_cdr": true,
 },
 
@@ -129,19 +102,13 @@
 
 "suppliers": {
 	"enabled": true,
-	"resources_conns": [
-		{"address": "*internal"},
-	],
-	"stats_conns": [
-		{"address": "*internal"},	
-	],
+	"resources_conns": ["*internal"],
+	"stats_conns": ["*internal"],
 	"string_indexed_fields": ["Account"],
 },
 
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 }

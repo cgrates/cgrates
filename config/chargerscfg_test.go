@@ -44,7 +44,7 @@ func TestChargerSCfgloadFromJsonCfg(t *testing.T) {
 }`
 	expected = ChargerSCfg{
 		Enabled:             true,
-		AttributeSConns:     []*RemoteHost{},
+		AttributeSConns:     []string{},
 		PrefixIndexedFields: &[]string{"index1", "index2"},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {

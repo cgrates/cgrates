@@ -18,9 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import "github.com/cgrates/cgrates/utils"
+
 type SchedulerCfg struct {
 	Enabled   bool
-	CDRsConns []*RemoteHost
+	CDRsConns []string
 	Filters   []string
 }
 
@@ -32,10 +34,14 @@ func (schdcfg *SchedulerCfg) loadFromJsonCfg(jsnCfg *SchedulerJsonCfg) error {
 		schdcfg.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Cdrs_conns != nil {
-		schdcfg.CDRsConns = make([]*RemoteHost, len(*jsnCfg.Cdrs_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Cdrs_conns {
-			schdcfg.CDRsConns[idx] = NewDfltRemoteHost()
-			schdcfg.CDRsConns[idx].loadFromJsonCfg(jsnHaCfg)
+		schdcfg.CDRsConns = make([]string, len(*jsnCfg.Cdrs_conns))
+		for idx, conn := range *jsnCfg.Cdrs_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if conn == utils.MetaInternal {
+				schdcfg.CDRsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)
+			} else {
+				schdcfg.CDRsConns[idx] = conn
+			}
 		}
 	}
 	if jsnCfg.Filters != nil {

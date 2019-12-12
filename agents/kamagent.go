@@ -27,11 +27,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/engine"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/kamevapi"
-	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -44,10 +45,10 @@ var (
 )
 
 func NewKamailioAgent(kaCfg *config.KamAgentCfg,
-	sessionS rpcclient.ClientConnector, timezone string) (ka *KamailioAgent) {
+	connMgr *engine.ConnManager, timezone string) (ka *KamailioAgent) {
 	ka = &KamailioAgent{
 		cfg:              kaCfg,
-		sessionS:         sessionS,
+		connMgr:          connMgr,
 		timezone:         timezone,
 		conns:            make([]*kamevapi.KamEvapi, len(kaCfg.EvapiConns)),
 		activeSessionIDs: make(chan []*sessions.SessionID),
@@ -57,7 +58,7 @@ func NewKamailioAgent(kaCfg *config.KamAgentCfg,
 
 type KamailioAgent struct {
 	cfg              *config.KamAgentCfg
-	sessionS         rpcclient.ClientConnector
+	connMgr          *engine.ConnManager
 	timezone         string
 	conns            []*kamevapi.KamEvapi
 	activeSessionIDs chan []*sessions.SessionID
@@ -138,7 +139,7 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connIdx int) {
 	}
 	authArgs.CGREvent.Event[EvapiConnID] = connIdx // Attach the connection ID
 	var authReply sessions.V1AuthorizeReply
-	if err = ka.sessionS.Call(utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
+	if err = ka.connMgr.Call(ka.cfg.SessionSConns, ka, utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed to auth event: %s, error: %s",
 			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
 	} else if kar, err := kev.AsKamAuthReply(authArgs, &authReply, err); err != nil {
@@ -180,7 +181,7 @@ func (ka *KamailioAgent) onCallStart(evData []byte, connIdx int) {
 	initSessionArgs.CGREvent.Event[EvapiConnID] = connIdx // Attach the connection ID so we can properly disconnect later
 
 	var initReply sessions.V1InitSessionReply
-	if err := ka.sessionS.Call(utils.SessionSv1InitiateSession,
+	if err := ka.connMgr.Call(ka.cfg.SessionSConns, ka, utils.SessionSv1InitiateSession,
 		initSessionArgs, &initReply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> could not process answer for event %s, error: %s",
@@ -220,7 +221,7 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 	}
 	var reply string
 	tsArgs.CGREvent.Event[EvapiConnID] = connIdx // Attach the connection ID in case we need to create a session and disconnect it
-	if err := ka.sessionS.Call(utils.SessionSv1TerminateSession,
+	if err := ka.connMgr.Call(ka.cfg.SessionSConns, ka, utils.SessionSv1TerminateSession,
 		tsArgs, &reply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> could not terminate session with event %s, error: %s",
@@ -233,7 +234,7 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 			return
 		}
 		cgrArgs := cgrEv.ExtractArgs(strings.Index(kev[utils.CGRFlags], utils.MetaDispatchers) != -1, false)
-		if err := ka.sessionS.Call(utils.SessionSv1ProcessCDR,
+		if err := ka.connMgr.Call(ka.cfg.SessionSConns, ka, utils.SessionSv1ProcessCDR,
 			&utils.CGREventWithArgDispatcher{CGREvent: cgrEv, ArgDispatcher: cgrArgs.ArgDispatcher}, &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("%s> failed processing CGREvent: %s, error: %s",
 				utils.KamailioAgent, utils.ToJSON(cgrEv), err.Error()))
@@ -301,7 +302,7 @@ func (ka *KamailioAgent) onCgrProcessMessage(evData []byte, connIdx int) {
 	procEvArgs.CGREvent.Event[EvapiConnID] = connIdx // Attach the connection ID
 
 	var processReply sessions.V1ProcessMessageReply
-	if err = ka.sessionS.Call(utils.SessionSv1ProcessMessage, procEvArgs, &processReply); err != nil {
+	if err = ka.connMgr.Call(ka.cfg.SessionSConns, ka, utils.SessionSv1ProcessMessage, procEvArgs, &processReply); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed to proccess message: %s, error: %s",
 			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
 	} else if kar, err := kev.AsKamProcessMessageReply(procEvArgs, &processReply, err); err != nil {
@@ -346,7 +347,7 @@ func (ka *KamailioAgent) onCgrProcessCDR(evData []byte, connIdx int) {
 	procCDRArgs.CGREvent.Event[EvapiConnID] = connIdx // Attach the connection ID
 
 	var processReply string
-	if err = ka.sessionS.Call(utils.SessionSv1ProcessCDR, procCDRArgs, &processReply); err != nil {
+	if err = ka.connMgr.Call(ka.cfg.SessionSConns, ka, utils.SessionSv1ProcessCDR, procCDRArgs, &processReply); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed to process CDR for event: %s, error: %s",
 			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
 	} else if kar, err := kev.AsKamProcessCDRReply(procCDRArgs, &processReply, err); err != nil {
@@ -415,12 +416,6 @@ func (ka *KamailioAgent) V1GetActiveSessionIDs(ignParam string, sessionIDs *[]*s
 		}
 	}
 	return
-}
-
-// SetSessionSConnection sets the new connection to the session service
-// only used on reload
-func (ka *KamailioAgent) SetSessionSConnection(sS rpcclient.ClientConnector) {
-	ka.sessionS = sS
 }
 
 // Reload recreates the connection buffers

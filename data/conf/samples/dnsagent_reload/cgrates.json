@@ -19,29 +19,17 @@
     
     "scheduler": {
         "enabled": true,
-        "cdrs_conns": [
-            {"address": "*internal"},
-        ],
+        "cdrs_conns": ["*internal"],
     },
     
     
     "sessions": {
         "enabled": true,
-        "attributes_conns": [
-            {"address": "127.0.0.1:2012", "transport": "*json"}
-        ],
-        "rals_conns": [
-            {"address": "*internal"}
-        ],
-        "cdrs_conns": [
-            {"address": "*internal"}
-        ],
-        "chargers_conns": [
-            {"address": "*internal"}
-        ],
-        "suppliers_conns": [
-            {"address": "127.0.0.1:2012", "transport": "*json"}
-        ],
+        "attributes_conns": ["*localhost"],
+        "rals_conns": ["*internal"],
+        "cdrs_conns": ["*internal"],
+        "chargers_conns": ["*internal"],
+        "suppliers_conns": ["*localhost"],
     },
     
     
@@ -52,9 +40,7 @@
     
     "cdrs": {
         "enabled": true,
-        "rals_conns": [
-            {"address": "*internal"}
-        ],
+        "rals_conns": ["*internal"],
     },
     
     
@@ -76,15 +62,11 @@
     "dns_agent": {
         "enabled": true,
         "listen": ":2053",
-        "sessions_conns": [
-            {"address": "*internal"}
-        ],		
+        "sessions_conns": ["*internal"],
     },
     
     
     "apier": {
-        "scheduler_conns": [					// connections to SchedulerS for reloads
-            {"address": "*internal"},
-        ],
+        "scheduler_conns": ["*internal"],
     },
     }

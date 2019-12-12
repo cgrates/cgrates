@@ -8,6 +8,15 @@
     "log_level": 7,
 },
 
+
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],
+	},
+},
+
+
 "stor_db": {
 	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
 	"db_port": 27017, 						// the port to reach the stordb
@@ -16,9 +25,7 @@
 
 "rals": {
 	"enabled": true,						// enable Rater service: <true|false>
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
+	"thresholds_conns": ["conn1"],
 },
 
 "scheduler": {
@@ -27,21 +34,11 @@
 
 "cdrs": {
 	"enabled": true,
-	"attributes_conns":[
-		{"address": "*internal"},
-	],
-	"chargers_conns":[
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
-	"rals_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
-	"stats_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],				
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
+	"attributes_conns":["*internal"],
+	"chargers_conns":["conn1"],
+	"rals_conns": ["conn1"],
+	"stats_conns": ["conn1"],
+	"thresholds_conns": ["conn1"],
 },
 
 "attributes": {
@@ -51,9 +48,7 @@
 "stats": {
 	"enabled": true,
 	"store_interval": "1s",
-	"thresholds_conns": [
-		{"address": "*internal"}
-	],
+	"thresholds_conns": ["*internal"],
 },
 
 "thresholds": {
@@ -63,15 +58,11 @@
 
 "chargers": {
 	"enabled": true,
-	"attributes_conns": [
-		{"address": "*internal"},
-	],
+	"attributes_conns": ["*internal"],
 },
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 }

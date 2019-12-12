@@ -18,11 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import "github.com/cgrates/cgrates/utils"
+
 // ApierCfg is the configuration of Apier service
 type ApierCfg struct {
-	CachesConns     []*RemoteHost // connections towards Cache
-	SchedulerConns  []*RemoteHost // connections towards Scheduler
-	AttributeSConns []*RemoteHost // connections towards AttributeS
+	CachesConns     []string // connections towards Cache
+	SchedulerConns  []string // connections towards Scheduler
+	AttributeSConns []string // connections towards AttributeS
 }
 
 func (aCfg *ApierCfg) loadFromJsonCfg(jsnCfg *ApierJsonCfg) (err error) {
@@ -30,24 +32,36 @@ func (aCfg *ApierCfg) loadFromJsonCfg(jsnCfg *ApierJsonCfg) (err error) {
 		return
 	}
 	if jsnCfg.Caches_conns != nil {
-		aCfg.CachesConns = make([]*RemoteHost, len(*jsnCfg.Caches_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Caches_conns {
-			aCfg.CachesConns[idx] = NewDfltRemoteHost()
-			aCfg.CachesConns[idx].loadFromJsonCfg(jsnHaCfg)
+		aCfg.CachesConns = make([]string, len(*jsnCfg.Caches_conns))
+		for idx, conn := range *jsnCfg.Caches_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if conn == utils.MetaInternal {
+				aCfg.CachesConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
+			} else {
+				aCfg.CachesConns[idx] = conn
+			}
 		}
 	}
 	if jsnCfg.Scheduler_conns != nil {
-		aCfg.SchedulerConns = make([]*RemoteHost, len(*jsnCfg.Scheduler_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Scheduler_conns {
-			aCfg.SchedulerConns[idx] = NewDfltRemoteHost()
-			aCfg.SchedulerConns[idx].loadFromJsonCfg(jsnHaCfg)
+		aCfg.SchedulerConns = make([]string, len(*jsnCfg.Scheduler_conns))
+		for idx, conn := range *jsnCfg.Scheduler_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if conn == utils.MetaInternal {
+				aCfg.SchedulerConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler)
+			} else {
+				aCfg.SchedulerConns[idx] = conn
+			}
 		}
 	}
 	if jsnCfg.Attributes_conns != nil {
-		aCfg.AttributeSConns = make([]*RemoteHost, len(*jsnCfg.Attributes_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Attributes_conns {
-			aCfg.AttributeSConns[idx] = NewDfltRemoteHost()
-			aCfg.AttributeSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		aCfg.AttributeSConns = make([]string, len(*jsnCfg.Attributes_conns))
+		for idx, conn := range *jsnCfg.Attributes_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if conn == utils.MetaInternal {
+				aCfg.AttributeSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
+			} else {
+				aCfg.AttributeSConns[idx] = conn
+			}
 		}
 	}
 

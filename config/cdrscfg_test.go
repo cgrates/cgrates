@@ -43,9 +43,7 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 	"store_cdrs": true,						// store cdrs in storDb
 	"session_cost_retries": 5,				// number of queries to sessions_costs before recalculating CDR
 	"chargers_conns": [],					// address where to reach the charger service, empty to disable charger functionality: <""|*internal|x.y.z.y:1234>
-	"rals_conns": [
-		{"address": "*internal"}			// address where to reach the Rater for cost calculation, empty to disable functionality: <""|*internal|x.y.z.y:1234>
-	],
+	"rals_conns": ["*internal"],
 	"attributes_conns": [],					// address where to reach the attribute service, empty to disable attributes functionality: <""|*internal|x.y.z.y:1234>
 	"thresholds_conns": [],					// address where to reach the thresholds service, empty to disable thresholds functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
@@ -55,11 +53,11 @@ func TestCdrsCfgloadFromJsonCfg(t *testing.T) {
 	expected = CdrsCfg{
 		StoreCdrs:       true,
 		SMCostRetries:   5,
-		ChargerSConns:   []*RemoteHost{},
-		RaterConns:      []*RemoteHost{{Address: utils.MetaInternal}},
-		AttributeSConns: []*RemoteHost{},
-		ThresholdSConns: []*RemoteHost{},
-		StatSConns:      []*RemoteHost{},
+		ChargerSConns:   []string{},
+		RaterConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
+		AttributeSConns: []string{},
+		ThresholdSConns: []string{},
+		StatSConns:      []string{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)

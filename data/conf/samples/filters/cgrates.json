@@ -30,9 +30,7 @@
 
 "rals": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2012", "transport":"*json"},
-	],
+	"thresholds_conns": ["*localhost"],
 },
 
 "scheduler": {
@@ -73,12 +71,8 @@
 },
 
 "apier": {	
-	"caches_conns":[						// connections to CacheS for reloads
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],		
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],				
+	"caches_conns":["*localhost"],
+	"scheduler_conns": ["*internal"],
 },
 
 
