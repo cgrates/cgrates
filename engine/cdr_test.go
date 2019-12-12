@@ -473,46 +473,46 @@ func TestCDRParseFieldValue(t *testing.T) {
 	}
 }
 
-func TestCdrClone(t * testing.T){
+func TestCdrClone(t *testing.T) {
 	cdr := &CDR{}
 	eOut := &CDR{}
-	if rcv := cdr.Clone(); !reflect.DeepEqual(rcv,eOut) {
-		t.Errorf("Expecting: %+v, received: %+v",eOut,rcv)
+	if rcv := cdr.Clone(); !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
 	cdr = &CDR{
-		CGRID: "CGRID_test",
-		OrderID: 18,
+		CGRID:     "CGRID_test",
+		OrderID:   18,
 		SetupTime: time.Date(2020, time.April, 18, 23, 0, 4, 0, time.UTC),
-		Usage: time.Duration(10),
+		Usage:     time.Duration(10),
 		ExtraFields: map[string]string{
-			"test1":"_test1_",
-			"test2":"_test2_",
+			"test1": "_test1_",
+			"test2": "_test2_",
 		},
 		Partial: true,
-		Cost: 0.74,
+		Cost:    0.74,
 		CostDetails: &EventCost{
 			CGRID: "EventCost_CGRID",
-			Cost: utils.Float64Pointer(0.74),
+			Cost:  utils.Float64Pointer(0.74),
 		},
 	}
 	eOut = &CDR{
-		CGRID: "CGRID_test",
-		OrderID: 18,
+		CGRID:     "CGRID_test",
+		OrderID:   18,
 		SetupTime: time.Date(2020, time.April, 18, 23, 0, 4, 0, time.UTC),
-		Usage: time.Duration(10),
+		Usage:     time.Duration(10),
 		ExtraFields: map[string]string{
-			"test1":"_test1_",
-			"test2":"_test2_",
+			"test1": "_test1_",
+			"test2": "_test2_",
 		},
 		Partial: true,
-		Cost: 0.74,
+		Cost:    0.74,
 		CostDetails: &EventCost{
 			CGRID: "EventCost_CGRID",
-			Cost: utils.Float64Pointer(0.74),
+			Cost:  utils.Float64Pointer(0.74),
 		},
 	}
-	if rcv := cdr.Clone(); !reflect.DeepEqual(rcv,eOut) {
-		t.Errorf("Expecting: %+v,\n received: %+v",eOut,rcv)
+	if rcv := cdr.Clone(); !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expecting: %+v,\n received: %+v", eOut, rcv)
 	}
 
 }
