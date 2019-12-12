@@ -29,20 +29,15 @@
 
 "rals": {
 	"enabled": true,
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
-	"stats_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
+	"thresholds_conns": ["*localhost"],
+	"stats_conns": ["*localhost"],
 },
 
 
 "cdrs": {
 	"enabled": true,
-	"stats_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
+	"stats_conns": ["*localhost"],
+	"rals_conns": ["*localhost"],
 	"sessions_cost_retries": 5,
 },
 
@@ -55,30 +50,14 @@
 
 "sessions": {
 	"enabled": true,
-	"rals_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
-	"cdrs_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
-	"resources_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
-	"suppliers_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
-	"attributes_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
-	"stats_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
-	"thresholds_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
-	"chargers_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
+	"rals_conns": ["*localhost"],
+	"cdrs_conns": ["*localhost"],
+	"resources_conns": ["*localhost"],
+	"suppliers_conns": ["*localhost"],
+	"attributes_conns": ["*localhost"],
+	"stats_conns": ["*localhost"],
+	"thresholds_conns": ["*localhost"],
+	"chargers_conns": ["*localhost"],
 	"store_session_costs": true,
 	"debit_interval": "5s",
 	"channel_sync_interval":"7s", 
@@ -90,9 +69,7 @@
 	"evapi_conns":[
 		{"address": "127.0.0.1:8448", "reconnects": 5}
 	],
-	"sessions_conns": [
-		{"address": "*internal"},
-	],
+	"sessions_conns": ["*internal"],
 	"create_cdr": true,
 },
 
@@ -130,9 +107,7 @@
 
 
 "apier": {
-	"scheduler_conns": [					// connections to SchedulerS for reloads
-		{"address": "*internal"},
-	],
+	"scheduler_conns": ["*internal"],
 },
 
 
