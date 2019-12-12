@@ -93,6 +93,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats[utils.CacheActions].Items = 1
 	expStats[utils.CacheDestinations].Items = 4
 	expStats[utils.CacheLoadIDs].Items = 17
+	expStats[utils.CacheRPCConnections].Items = 2
 	args := utils.AttrCacheIDsWithArgDispatcher{
 		ArgDispatcher: &utils.ArgDispatcher{
 			APIKey: utils.StringPointer("chc12345"),

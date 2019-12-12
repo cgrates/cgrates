@@ -112,7 +112,7 @@ func (cdr *CDR) AddDefaults(cfg *config.CGRConfig) {
 		cdr.ComputeCGRID()
 	}
 	if cdr.RunID == utils.EmptyString {
-		cdr.RunID = utils.MetaRaw
+		cdr.RunID = utils.MetaDefault
 	}
 	if cdr.ToR == utils.EmptyString {
 		cdr.ToR = utils.VOICE

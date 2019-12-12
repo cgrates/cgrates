@@ -525,7 +525,6 @@ func (aefc *AttrExpFileCdrs) AsCDRsFilter(timezone string) (*CDRsFilter, error) 
 	cdrFltr := &CDRsFilter{
 		CGRIDs:              aefc.CgrIds,
 		RunIDs:              aefc.MediationRunIds,
-		NotRunIDs:           []string{MetaRaw}, // In exportv1 automatically filter out *raw CDRs
 		ToRs:                aefc.TORs,
 		OriginHosts:         aefc.CdrHosts,
 		Sources:             aefc.CdrSources,

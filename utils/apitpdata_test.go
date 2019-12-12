@@ -374,7 +374,6 @@ func TestAttrExpFileCdrsAsCDRsFilter(t *testing.T) {
 	eOut := &CDRsFilter{
 		CGRIDs:              attrExpFileCdrs.CgrIds,
 		RunIDs:              attrExpFileCdrs.MediationRunIds,
-		NotRunIDs:           []string{MetaRaw},
 		ToRs:                attrExpFileCdrs.TORs,
 		OriginHosts:         attrExpFileCdrs.CdrHosts,
 		Sources:             attrExpFileCdrs.CdrSources,

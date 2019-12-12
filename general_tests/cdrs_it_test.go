@@ -338,7 +338,7 @@ func testV2CDRsGetCdrs3(t *testing.T) {
 		t.Error("Unexpected number of CDRs returned: ", cdrCnt)
 	}
 	var cdrs []*engine.ExternalCDR
-	args := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}, OriginIDs: []string{"testV2CDRsProcessCDR3"}}
+	args := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, OriginIDs: []string{"testV2CDRsProcessCDR3"}}
 	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
