@@ -1,0 +1,47 @@
+{
+// CGRateS Configuration file
+//
+// Used in apier/v1/cdrs_it_test
+
+
+"data_db":{
+	"db_type": "*internal"
+},
+
+
+"stor_db": {
+	"db_type": "*internal"
+},
+
+"attributes": {								
+	"enabled": true,
+},
+
+"rals": {
+	"enabled": true
+},
+
+
+"scheduler": {
+	"enabled": true
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"rals_conns": [
+		{"address": "127.0.0.1:2012", "transport":"*json"},
+	],
+	"attributes_conns": [
+		{"address": "127.0.0.1:2012", "transport":"*json"},
+	]
+},
+
+
+"apier": {
+	"scheduler_conns": [					// connections to SchedulerS for reloads
+		{"address": "*internal"},
+	],
+},
+
+}
