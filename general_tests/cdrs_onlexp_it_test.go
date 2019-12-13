@@ -195,7 +195,7 @@ func testCDRsOnExpDisableOnlineExport(t *testing.T) {
 		AnswerTime:  time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage:       time.Duration(10) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		RunID:       utils.DEFAULT_RUNID,
+		RunID:       utils.META_DEFAULT,
 		Cost:        1.201,
 		PreRated:    true,
 	}
@@ -238,7 +238,7 @@ func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 		AnswerTime:  time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage:       time.Duration(10) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		RunID:       utils.DEFAULT_RUNID,
+		RunID:       utils.META_DEFAULT,
 		Cost:        1.201,
 		PreRated:    true,
 	}
@@ -366,7 +366,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 		AnswerTime:  time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage:       time.Duration(10) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		RunID:       utils.DEFAULT_RUNID,
+		RunID:       utils.META_DEFAULT,
 		Cost:        1.201,
 		PreRated:    true,
 	}

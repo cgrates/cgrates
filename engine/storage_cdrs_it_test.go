@@ -562,7 +562,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		return fmt.Errorf("testGetCDRs #21, unexpected count of CDRs returned: %d", count)
 	}
 	// Filter on RunID
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RunIDs: []string{utils.DEFAULT_RUNID}}, false); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RunIDs: []string{utils.META_DEFAULT}}, false); err != nil {
 		return fmt.Errorf("testGetCDRs #22 err: %v", err)
 	} else if len(CDRs) != 5 {
 		return fmt.Errorf("testGetCDRs #23, unexpected number of CDRs returned: %+v", CDRs)

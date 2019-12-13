@@ -92,7 +92,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 			&SRun{
 				Event: sEv,
 				CD: &engine.CallDescriptor{
-					RunID: utils.DEFAULT_RUNID,
+					RunID: utils.META_DEFAULT,
 				},
 			},
 		},
@@ -102,27 +102,27 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 	eIndexes := map[string]map[string]map[string]utils.StringMap{
 		"OriginID": map[string]map[string]utils.StringMap{
 			"12345": map[string]utils.StringMap{
-				cgrID: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID: utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 		"Tenant": map[string]map[string]utils.StringMap{
 			"cgrates.org": map[string]utils.StringMap{
-				cgrID: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID: utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 		"Account": map[string]map[string]utils.StringMap{
 			"account1": map[string]utils.StringMap{
-				cgrID: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID: utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 		"Extra3": map[string]map[string]utils.StringMap{
 			utils.MetaEmpty: map[string]utils.StringMap{
-				cgrID: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID: utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 		"Extra4": map[string]map[string]utils.StringMap{
 			utils.NOT_AVAILABLE: map[string]utils.StringMap{
-				cgrID: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID: utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 	}
@@ -162,7 +162,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 			&SRun{
 				Event: sSEv2,
 				CD: &engine.CallDescriptor{
-					RunID: utils.DEFAULT_RUNID,
+					RunID: utils.META_DEFAULT,
 				},
 			},
 		},
@@ -183,7 +183,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 			&SRun{
 				Event: sSEv3,
 				CD: &engine.CallDescriptor{
-					RunID: utils.DEFAULT_RUNID,
+					RunID: utils.META_DEFAULT,
 				},
 			},
 		},
@@ -192,49 +192,49 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 	eIndexes = map[string]map[string]map[string]utils.StringMap{
 		"OriginID": map[string]map[string]utils.StringMap{
 			"12345": map[string]utils.StringMap{
-				cgrID: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID: utils.StringMap{utils.META_DEFAULT: true},
 			},
 			"12346": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID2: utils.StringMap{utils.META_DEFAULT: true},
 			},
 			"12347": map[string]utils.StringMap{
-				cgrID3: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID3: utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 		"Tenant": map[string]map[string]utils.StringMap{
 			"cgrates.org": map[string]utils.StringMap{
-				cgrID:  utils.StringMap{utils.DEFAULT_RUNID: true},
-				cgrID3: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID:  utils.StringMap{utils.META_DEFAULT: true},
+				cgrID3: utils.StringMap{utils.META_DEFAULT: true},
 			},
 			"itsyscom.com": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID2: utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 		"Account": map[string]map[string]utils.StringMap{
 			"account1": map[string]utils.StringMap{
-				cgrID: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID: utils.StringMap{utils.META_DEFAULT: true},
 			},
 			"account2": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
-				cgrID3: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID2: utils.StringMap{utils.META_DEFAULT: true},
+				cgrID3: utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 		"Extra3": map[string]map[string]utils.StringMap{
 			utils.MetaEmpty: map[string]utils.StringMap{
-				cgrID:  utils.StringMap{utils.DEFAULT_RUNID: true},
-				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID:  utils.StringMap{utils.META_DEFAULT: true},
+				cgrID2: utils.StringMap{utils.META_DEFAULT: true},
 			},
 			utils.NOT_AVAILABLE: map[string]utils.StringMap{
-				cgrID3: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID3: utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 		"Extra4": map[string]map[string]utils.StringMap{
 			utils.NOT_AVAILABLE: map[string]utils.StringMap{
-				cgrID:  utils.StringMap{utils.DEFAULT_RUNID: true},
-				cgrID3: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID:  utils.StringMap{utils.META_DEFAULT: true},
+				cgrID3: utils.StringMap{utils.META_DEFAULT: true},
 			},
 			"info2": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID2: utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 	}
@@ -274,40 +274,40 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 	eIndexes = map[string]map[string]map[string]utils.StringMap{
 		"OriginID": map[string]map[string]utils.StringMap{
 			"12346": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID2: utils.StringMap{utils.META_DEFAULT: true},
 			},
 			"12347": map[string]utils.StringMap{
-				cgrID3: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID3: utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 		"Tenant": map[string]map[string]utils.StringMap{
 			"cgrates.org": map[string]utils.StringMap{
-				cgrID3: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID3: utils.StringMap{utils.META_DEFAULT: true},
 			},
 			"itsyscom.com": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID2: utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 		"Account": map[string]map[string]utils.StringMap{
 			"account2": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
-				cgrID3: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID2: utils.StringMap{utils.META_DEFAULT: true},
+				cgrID3: utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 		"Extra3": map[string]map[string]utils.StringMap{
 			utils.MetaEmpty: map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID2: utils.StringMap{utils.META_DEFAULT: true},
 			},
 			utils.NOT_AVAILABLE: map[string]utils.StringMap{
-				cgrID3: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID3: utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 		"Extra4": map[string]map[string]utils.StringMap{
 			"info2": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID2: utils.StringMap{utils.META_DEFAULT: true},
 			},
 			utils.NOT_AVAILABLE: map[string]utils.StringMap{
-				cgrID3: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID3: utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 	}
@@ -338,27 +338,27 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 	eIndexes = map[string]map[string]map[string]utils.StringMap{
 		"OriginID": map[string]map[string]utils.StringMap{
 			"12346": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID2: utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 		"Tenant": map[string]map[string]utils.StringMap{
 			"itsyscom.com": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID2: utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 		"Account": map[string]map[string]utils.StringMap{
 			"account2": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID2: utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 		"Extra3": map[string]map[string]utils.StringMap{
 			utils.MetaEmpty: map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID2: utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 		"Extra4": map[string]map[string]utils.StringMap{
 			"info2": map[string]utils.StringMap{
-				cgrID2: utils.StringMap{utils.DEFAULT_RUNID: true},
+				cgrID2: utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 	}
@@ -409,7 +409,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 			&SRun{
 				Event: sSEv,
 				CD: &engine.CallDescriptor{
-					RunID: utils.DEFAULT_RUNID,
+					RunID: utils.META_DEFAULT,
 				},
 			},
 		},
@@ -426,7 +426,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	eIndexes := map[string]map[string]map[string]utils.StringMap{
 		"OriginID": map[string]map[string]utils.StringMap{
 			"111": map[string]utils.StringMap{
-				"session1": utils.StringMap{utils.DEFAULT_RUNID: true},
+				"session1": utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 	}
@@ -468,7 +468,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 			&SRun{
 				Event: sSEv2,
 				CD: &engine.CallDescriptor{
-					RunID: utils.DEFAULT_RUNID,
+					RunID: utils.META_DEFAULT,
 				},
 			},
 		},
@@ -484,10 +484,10 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	eIndexes = map[string]map[string]map[string]utils.StringMap{
 		"OriginID": map[string]map[string]utils.StringMap{
 			"111": map[string]utils.StringMap{
-				"session1": utils.StringMap{utils.DEFAULT_RUNID: true},
+				"session1": utils.StringMap{utils.META_DEFAULT: true},
 			},
 			"222": map[string]utils.StringMap{
-				"session2": utils.StringMap{utils.DEFAULT_RUNID: true},
+				"session2": utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 	}
@@ -536,7 +536,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 			&SRun{
 				Event: sSEv3,
 				CD: &engine.CallDescriptor{
-					RunID: utils.DEFAULT_RUNID,
+					RunID: utils.META_DEFAULT,
 				},
 			},
 		},
@@ -561,7 +561,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	eIndexes = map[string]map[string]map[string]utils.StringMap{
 		"OriginID": map[string]map[string]utils.StringMap{
 			"222": map[string]utils.StringMap{
-				"session2": utils.StringMap{utils.DEFAULT_RUNID: true},
+				"session2": utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 	}
@@ -630,7 +630,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 			&SRun{
 				Event: sSEv,
 				CD: &engine.CallDescriptor{
-					RunID: utils.DEFAULT_RUNID,
+					RunID: utils.META_DEFAULT,
 				},
 			},
 		},
@@ -647,7 +647,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	eIndexes := map[string]map[string]map[string]utils.StringMap{
 		"OriginID": map[string]map[string]utils.StringMap{
 			"111": map[string]utils.StringMap{
-				"session1": utils.StringMap{utils.DEFAULT_RUNID: true},
+				"session1": utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 	}
@@ -692,7 +692,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 			&SRun{
 				Event: sSEv2,
 				CD: &engine.CallDescriptor{
-					RunID: utils.DEFAULT_RUNID,
+					RunID: utils.META_DEFAULT,
 				},
 			},
 		},
@@ -708,10 +708,10 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	eIndexes = map[string]map[string]map[string]utils.StringMap{
 		"OriginID": map[string]map[string]utils.StringMap{
 			"111": map[string]utils.StringMap{
-				"session1": utils.StringMap{utils.DEFAULT_RUNID: true},
+				"session1": utils.StringMap{utils.META_DEFAULT: true},
 			},
 			"222": map[string]utils.StringMap{
-				"session2": utils.StringMap{utils.DEFAULT_RUNID: true},
+				"session2": utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 	}
@@ -778,7 +778,7 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	eIndexes = map[string]map[string]map[string]utils.StringMap{
 		"OriginID": map[string]map[string]utils.StringMap{
 			"222": map[string]utils.StringMap{
-				"session2": utils.StringMap{utils.DEFAULT_RUNID: true},
+				"session2": utils.StringMap{utils.META_DEFAULT: true},
 			},
 		},
 	}
@@ -1932,7 +1932,7 @@ func TestSessionSgetSession(t *testing.T) {
 			&SRun{
 				Event: sSEv,
 				CD: &engine.CallDescriptor{
-					RunID: utils.DEFAULT_RUNID,
+					RunID: utils.META_DEFAULT,
 				},
 			},
 		},

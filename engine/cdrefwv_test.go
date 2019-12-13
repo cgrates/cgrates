@@ -278,7 +278,7 @@ func TestWriteCdr(t *testing.T) {
 		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Usage:      time.Duration(10) * time.Second,
-		RunID:      utils.DEFAULT_RUNID, Cost: 2.34567,
+		RunID:      utils.META_DEFAULT, Cost: 2.34567,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
 
@@ -343,7 +343,7 @@ func TestWriteCdrs(t *testing.T) {
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1010",
 		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		Usage:      time.Duration(10) * time.Second, RunID: utils.DEFAULT_RUNID, Cost: 2.25,
+		Usage:      time.Duration(10) * time.Second, RunID: utils.META_DEFAULT, Cost: 2.25,
 		ExtraFields: map[string]string{"productnumber": "12341", "fieldextr2": "valextr2"},
 	}
 	cdr2 := &CDR{CGRID: utils.Sha1("aaa2", time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC).String()),
@@ -353,7 +353,7 @@ func TestWriteCdrs(t *testing.T) {
 		SetupTime:  time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 7, 42, 26, 0, time.UTC),
 		Usage:      time.Duration(5) * time.Minute,
-		RunID:      utils.DEFAULT_RUNID, Cost: 1.40001,
+		RunID:      utils.META_DEFAULT, Cost: 1.40001,
 		ExtraFields: map[string]string{"productnumber": "12342", "fieldextr2": "valextr2"},
 	}
 	cdr3 := &CDR{}
@@ -364,7 +364,7 @@ func TestWriteCdrs(t *testing.T) {
 		SetupTime:  time.Date(2013, 11, 7, 9, 42, 18, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 9, 42, 26, 0, time.UTC),
 		Usage:      time.Duration(20) * time.Second,
-		RunID:      utils.DEFAULT_RUNID, Cost: 2.34567,
+		RunID:      utils.META_DEFAULT, Cost: 2.34567,
 		ExtraFields: map[string]string{"productnumber": "12344", "fieldextr2": "valextr2"},
 	}
 	cfg, _ := config.NewDefaultCGRConfig()

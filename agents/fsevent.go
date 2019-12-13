@@ -350,7 +350,7 @@ func (fsev FSEvent) ParseEventValue(rsrFld *config.RSRParser, timezone string) (
 	case utils.DISCONNECT_CAUSE:
 		return rsrFld.ParseValue(fsev.GetDisconnectCause(""))
 	case utils.RunID:
-		return rsrFld.ParseValue(utils.DEFAULT_RUNID)
+		return rsrFld.ParseValue(utils.META_DEFAULT)
 	case utils.Cost:
 		return rsrFld.ParseValue(strconv.FormatFloat(-1, 'f', -1, 64)) // Recommended to use FormatCost
 	default:
