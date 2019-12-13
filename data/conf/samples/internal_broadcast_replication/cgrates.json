@@ -1,0 +1,113 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"log_level": 7,
+	"reply_timeout": "50s",
+},
+
+"rpc_conns": {
+	"broadcast_conn": {
+		"strategy": "*broadcast",
+		"conns": [
+			{"address": "127.0.0.1:2012", "transport":"*json"},
+			{"address": "127.0.0.1:3012", "transport":"*json"},
+		],
+	},
+},
+
+
+"listen": {
+	"rpc_json": ":3012",
+	"rpc_gob": ":3013",
+	"http": ":3080",
+},
+
+
+"data_db": {
+	"db_type": "*internal",	
+},
+
+
+"stor_db": {
+	"db_type": "*internal",	
+},
+
+
+"rals": {
+	"enabled": true,
+	"thresholds_conns": ["broadcast_conn"],
+	"max_increments":3000000,
+},
+
+
+"scheduler": {
+	"enabled": true,
+	"cdrs_conns": ["broadcast_conn"],
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"chargers_conns":["broadcast_conn"],
+},
+
+
+"attributes": {
+	"enabled": true,
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["broadcast_conn"],
+},
+
+
+"resources": {
+	"enabled": true,
+	"store_interval": "-1",
+	"thresholds_conns": ["broadcast_conn"]
+},
+
+
+"stats": {
+	"enabled": true,
+	"store_interval": "-1",
+	"thresholds_conns": ["broadcast_conn"],
+},
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "-1",
+},
+
+
+"suppliers": {
+	"enabled": true,
+	"prefix_indexed_fields":["Destination"],
+	"stats_conns": ["broadcast_conn"],
+	"resources_conns": ["broadcast_conn"],
+},
+
+
+"sessions": {
+	"enabled": true,
+	"listen_bijson": "127.0.0.1:3014",		// address where to listen for bidirectional JSON-RPC requests
+	"suppliers_conns": ["broadcast_conn"],
+	"resources_conns": ["broadcast_conn"],
+	"attributes_conns": ["broadcast_conn"],
+	"rals_conns": ["broadcast_conn"],
+	"cdrs_conns": ["broadcast_conn"],
+	"chargers_conns": ["broadcast_conn"],
+},
+
+
+"apier": {
+	"scheduler_conns": ["broadcast_conn"],
+},
+
+
+}
