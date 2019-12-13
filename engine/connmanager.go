@@ -88,8 +88,12 @@ func (cM *ConnManager) getConn(connID string, biRPCClient rpcclient.ClientConnec
 	return
 }
 
+// Call gets the connection calls the method on it
 func (cM *ConnManager) Call(connIDs []string, biRPCClient rpcclient.ClientConnector,
 	method string, arg, reply interface{}) (err error) {
+	if len(connIDs) == 0 {
+		return utils.ErrMandatoryIeMissing
+	}
 	var conn rpcclient.ClientConnector
 	for _, connID := range connIDs {
 		if conn, err = cM.getConn(connID, biRPCClient); err != nil {
