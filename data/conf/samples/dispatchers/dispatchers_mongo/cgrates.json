@@ -53,12 +53,19 @@
 	"enabled": true,
 },
 
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:2012", "transport":"*json"}],
+	},
+},
 
 "sessions": {
 	"enabled": true,
-	"attributes_conns": ["*internal"],
-	"rals_conns": ["*internal"],
-	"chargers_conns": ["*internal"],
+	"attributes_conns": ["conn1"],
+	"rals_conns": ["conn1"],
+	"resources_conns": ["conn1"],
+	"chargers_conns": ["conn1"],
 	"listen_bijson": ":3014",
 },
 
