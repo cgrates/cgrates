@@ -90,3 +90,87 @@ func TestNewBalanceFilter(t *testing.T) {
 		t.Error("Expecxted error received nil")
 	}
 }
+
+func TestBalanceFilterClone(t *testing.T) {
+	bf := &BalanceFilter{}
+	eOut := &BalanceFilter{}
+	if rcv := bf.Clone(); !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expecting: %+v,\n received: %+v", eOut, rcv)
+	}
+	bf = &BalanceFilter{
+		Uuid: utils.StringPointer("Uuid_test"),
+		ID:   utils.StringPointer("ID_test"),
+		Type: utils.StringPointer("Type_test"),
+		Value: &utils.ValueFormula{
+			Method: "ValueMethod_test",
+		},
+		ExpirationDate: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 4, 0, time.UTC)),
+		Weight:         utils.Float64Pointer(0.7),
+		DestinationIDs: &utils.StringMap{
+			"DestinationIDs_true":  true,
+			"DestinationIDs_false": false,
+		},
+		RatingSubject: utils.StringPointer("RatingSubject_test"),
+		Categories: &utils.StringMap{
+			"Categories_true":  true,
+			"Categories_false": false,
+		},
+		SharedGroups: &utils.StringMap{
+			"SharedGroups_true":  true,
+			"SharedGroups_false": false,
+		},
+		TimingIDs: &utils.StringMap{
+			"TimingIDs_true":  true,
+			"TimingIDs_false": false,
+		},
+		Timings: []*RITiming{
+			&RITiming{Years: utils.Years{2019}},
+			&RITiming{Months: utils.Months{4}},
+		},
+		Disabled: utils.BoolPointer(true),
+		Factor:   &ValueFactor{AccountActionsCSVContent: 0.7},
+		Blocker:  utils.BoolPointer(true),
+	}
+	eOut = &BalanceFilter{
+		Uuid: utils.StringPointer("Uuid_test"),
+		ID:   utils.StringPointer("ID_test"),
+		Type: utils.StringPointer("Type_test"),
+		Value: &utils.ValueFormula{
+			Method: "ValueMethod_test",
+		},
+		ExpirationDate: utils.TimePointer(time.Date(2020, time.April, 18, 23, 0, 4, 0, time.UTC)),
+		Weight:         utils.Float64Pointer(0.7),
+		DestinationIDs: &utils.StringMap{
+			"DestinationIDs_true":  true,
+			"DestinationIDs_false": false,
+		},
+		RatingSubject: utils.StringPointer("RatingSubject_test"),
+		Categories: &utils.StringMap{
+			"Categories_true":  true,
+			"Categories_false": false,
+		},
+		SharedGroups: &utils.StringMap{
+			"SharedGroups_true":  true,
+			"SharedGroups_false": false,
+		},
+		TimingIDs: &utils.StringMap{
+			"TimingIDs_true":  true,
+			"TimingIDs_false": false,
+		},
+		Timings: []*RITiming{
+			&RITiming{Years: utils.Years{2019}},
+			&RITiming{Months: utils.Months{4}},
+		},
+		Disabled: utils.BoolPointer(true),
+		Factor:   &ValueFactor{AccountActionsCSVContent: 0.7},
+		Blocker:  utils.BoolPointer(true),
+	}
+	rcv := bf.Clone()
+	if !reflect.DeepEqual(rcv, eOut) {
+		t.Errorf("Expecting: %+v,\n received: %+v", eOut, rcv)
+	}
+	rcv.Weight = utils.Float64Pointer(0.8)
+	if *bf.Weight != 0.7 {
+		t.Errorf("Expecting: 0.7, received: %+v", *bf.Weight)
+	}
+}

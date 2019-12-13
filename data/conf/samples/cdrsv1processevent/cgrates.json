@@ -1,0 +1,46 @@
+{
+// CGRateS Configuration file
+//
+// Used in apier/v1/cdrs_it_test
+
+
+"data_db":{
+	"db_type": "*internal"
+},
+
+
+"stor_db": {
+	"db_type": "*internal"
+},
+
+"attributes": {								
+	"enabled": true,
+},
+
+"chargers":{
+	"enabled": true,
+},
+
+"rals": {
+	"enabled": true
+},
+
+
+"scheduler": {
+	"enabled": true
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"rals_conns": ["*internal"],
+	"attributes_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
+},
+
+
+"apier": {
+	"scheduler_conns": ["*internal"],
+},
+
+}

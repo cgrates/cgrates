@@ -27,11 +27,10 @@ import (
 )
 
 var (
-	cloneExpTimeAttributes time.Time
-	expTimeAttributes      = time.Now().Add(time.Duration(20 * time.Minute))
-	attrService            *AttributeService
-	dmAtr                  *DataManager
-	attrEvs                = []*AttrArgsProcessEvent{
+	expTimeAttributes = time.Now().Add(time.Duration(20 * time.Minute))
+	attrService       *AttributeService
+	dmAtr             *DataManager
+	attrEvs           = []*AttrArgsProcessEvent{
 		{
 			Context: utils.StringPointer(utils.MetaSessionS),
 			CGREvent: &utils.CGREvent{ //matching AttributeProfile1
@@ -84,7 +83,7 @@ var (
 			FilterIDs: []string{"FLTR_ATTR_1"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     cloneExpTimeAttributes,
+				ExpiryTime:     expTimeAttributes,
 			},
 			Attributes: []*Attribute{
 				{
@@ -101,7 +100,7 @@ var (
 			FilterIDs: []string{"FLTR_ATTR_2"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     cloneExpTimeAttributes,
+				ExpiryTime:     expTimeAttributes,
 			},
 			Attributes: []*Attribute{
 				{
@@ -118,7 +117,7 @@ var (
 			FilterIDs: []string{"FLTR_ATTR_3"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     cloneExpTimeAttributes,
+				ExpiryTime:     expTimeAttributes,
 			},
 			Attributes: []*Attribute{
 				{
@@ -135,7 +134,7 @@ var (
 			FilterIDs: []string{"*gte:~*req.DistinctMatch:20"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-				ExpiryTime:     cloneExpTimeAttributes,
+				ExpiryTime:     expTimeAttributes,
 			},
 			Attributes: []*Attribute{
 				{
@@ -149,10 +148,6 @@ var (
 )
 
 func TestAttributePopulateAttrService(t *testing.T) {
-	//Need clone because time.Now adds extra information that DeepEqual doesn't like
-	if err := utils.Clone(expTimeAttributes, &cloneExpTimeAttributes); err != nil {
-		t.Error(err)
-	}
 	data := NewInternalDB(nil, nil)
 	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
 	defaultCfg, err := config.NewDefaultCGRConfig()
@@ -409,7 +404,7 @@ func TestAttributeIndexer(t *testing.T) {
 		FilterIDs: []string{"*string:~*req.Account:1007"},
 		ActivationInterval: &utils.ActivationInterval{
 			ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			ExpiryTime:     cloneExpTimeAttributes,
+			ExpiryTime:     expTimeAttributes,
 		},
 		Attributes: []*Attribute{
 			{

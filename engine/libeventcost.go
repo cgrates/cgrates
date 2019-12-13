@@ -203,8 +203,13 @@ func (rf RatingMatchedFilters) Equals(oRF RatingMatchedFilters) bool {
 }
 
 func (rf RatingMatchedFilters) Clone() (cln map[string]interface{}) {
+	if rf == nil {
+		return nil
+	}
 	cln = make(map[string]interface{})
-	utils.Clone(rf, &cln)
+	for key, value := range rf {
+		cln[key] = value
+	}
 	return
 }
 
