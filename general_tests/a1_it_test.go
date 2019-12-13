@@ -309,7 +309,7 @@ func testA1itDataSession1(t *testing.T) {
 	time.Sleep(time.Duration(20) * time.Millisecond)
 
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}}
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}}
 	if err := a1rpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {

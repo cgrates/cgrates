@@ -287,7 +287,7 @@ func testRAitAcctStart(t *testing.T) {
 	if err := raRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.META_DEFAULT),
+				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
 				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"),
 			},
 		}, &aSessions); err != nil {
@@ -358,7 +358,7 @@ func testRAitAcctStop(t *testing.T) {
 	if err := raRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.META_DEFAULT),
+				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
 				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"),
 			},
 		}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -366,7 +366,7 @@ func testRAitAcctStop(t *testing.T) {
 	}
 	time.Sleep(150 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
-	args := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, DestinationPrefixes: []string{"1002"}}
+	args := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, DestinationPrefixes: []string{"1002"}}
 	if err := raRPC.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {

@@ -423,7 +423,7 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 			Rounding_decimals: utils.IntPointer(4)},
 	}
 	eCfg := map[string]*CdreJsonCfg{
-		utils.META_DEFAULT: {
+		utils.MetaDefault: {
 			Export_format:      utils.StringPointer(utils.MetaFileCSV),
 			Export_path:        utils.StringPointer("/var/spool/cgrates/cdre"),
 			Synchronous:        utils.BoolPointer(false),
@@ -520,7 +520,7 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 	}
 	eCfg := []*CdrcJsonCfg{
 		{
-			Id:                          utils.StringPointer(utils.META_DEFAULT),
+			Id:                          utils.StringPointer(utils.MetaDefault),
 			Enabled:                     utils.BoolPointer(false),
 			Dry_run:                     utils.BoolPointer(false),
 			Cdrs_conns:                  &[]string{utils.MetaInternal},
@@ -775,10 +775,10 @@ func TestRadiusAgentJsonCfg(t *testing.T) {
 		Listen_auth: utils.StringPointer("127.0.0.1:1812"),
 		Listen_acct: utils.StringPointer("127.0.0.1:1813"),
 		Client_secrets: utils.MapStringStringPointer(map[string]string{
-			utils.META_DEFAULT: "CGRateS.org",
+			utils.MetaDefault: "CGRateS.org",
 		}),
 		Client_dictionaries: utils.MapStringStringPointer(map[string]string{
-			utils.META_DEFAULT: "/usr/share/cgrates/radius/dict/",
+			utils.MetaDefault: "/usr/share/cgrates/radius/dict/",
 		}),
 		Sessions_conns:     &[]string{utils.MetaInternal},
 		Request_processors: &[]*ReqProcessorJsnCfg{},
@@ -928,7 +928,7 @@ func TestDfSupplierSJsonCfg(t *testing.T) {
 func TestDfLoaderJsonCfg(t *testing.T) {
 	eCfg := []*LoaderJsonCfg{
 		{
-			ID:              utils.StringPointer(utils.META_DEFAULT),
+			ID:              utils.StringPointer(utils.MetaDefault),
 			Enabled:         utils.BoolPointer(false),
 			Tenant:          utils.StringPointer(""),
 			Dry_run:         utils.BoolPointer(false),

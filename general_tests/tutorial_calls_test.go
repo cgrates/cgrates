@@ -490,7 +490,7 @@ func testCallAccount1001(t *testing.T) {
 // Make sure account was debited properly
 func testCall1001Cdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}}
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, Accounts: []string{"1001"}}
 	if err := tutorialCallsRpc.Call(utils.ApierV2GetCDRs, req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
@@ -530,7 +530,7 @@ func testCall1001Cdrs(t *testing.T) {
 // Make sure account was debited properly
 func testCall1002Cdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT},
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault},
 		Accounts: []string{"1002"}, DestinationPrefixes: []string{"1001"}}
 	if err := tutorialCallsRpc.Call(utils.ApierV2GetCDRs, req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -556,7 +556,7 @@ func testCall1002Cdrs(t *testing.T) {
 // Make sure account was debited properly
 func testCall1003Cdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT},
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault},
 		Accounts: []string{"1003"}, DestinationPrefixes: []string{"1001"}}
 	if err := tutorialCallsRpc.Call(utils.ApierV2GetCDRs, req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -782,7 +782,7 @@ func testCallSyncSessions(t *testing.T) {
 	req := utils.RPCCDRsFilter{
 		Sources:  []string{sourceForCDR},
 		MaxUsage: "20s",
-		RunIDs:   []string{utils.META_DEFAULT},
+		RunIDs:   []string{utils.MetaDefault},
 		Accounts: []string{"1001"},
 	}
 	if err := tutorialCallsRpc.Call(utils.ApierV2GetCDRs, req, &rplCdrs); err != nil {

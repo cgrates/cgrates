@@ -29,7 +29,7 @@ func (apier *ApierV1) GetEventCost(attrs utils.AttrGetCallCost, reply *engine.Ev
 		return utils.NewErrMandatoryIeMissing("CgrId")
 	}
 	if attrs.RunId == "" {
-		attrs.RunId = utils.META_DEFAULT
+		attrs.RunId = utils.MetaDefault
 	}
 	cdrFltr := &utils.CDRsFilter{
 		CGRIDs: []string{attrs.CgrId},

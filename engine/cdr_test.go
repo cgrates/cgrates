@@ -34,13 +34,13 @@ func TestNewCDRFromExternalCDR(t *testing.T) {
 		OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
 		Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z", RunID: utils.META_DEFAULT,
+		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z", RunID: utils.MetaDefault,
 		Usage: "10", Cost: 1.01, PreRated: true,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
 	eStorCdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
 		OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
-		Source: utils.UNIT_TEST, RequestType: utils.META_RATED, RunID: utils.META_DEFAULT,
+		Source: utils.UNIT_TEST, RequestType: utils.META_RATED, RunID: utils.MetaDefault,
 		Tenant: "cgrates.org", Category: "call", Account: "1001",
 		Subject: "1001", Destination: "1002",
 		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
@@ -62,7 +62,7 @@ func TestCDRClone(t *testing.T) {
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		RunID:      utils.META_DEFAULT, Usage: time.Duration(10),
+		RunID:      utils.MetaDefault, Usage: time.Duration(10),
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		Cost:        1.01, PreRated: true,
 	}
@@ -77,7 +77,7 @@ func TestFieldAsString(t *testing.T) {
 		OriginHost: "192.168.1.1", Source: "test", RequestType: utils.META_RATED,
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001",
 		Destination: "1002", SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.META_DEFAULT,
+		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.MetaDefault,
 		Usage: time.Duration(10) * time.Second, Cost: 1.01,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
@@ -222,7 +222,7 @@ func TestFieldsAsString(t *testing.T) {
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		RunID:      utils.META_DEFAULT, Usage: time.Duration(10) * time.Second,
+		RunID:      utils.MetaDefault, Usage: time.Duration(10) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	eVal := "call_from_1001"
@@ -276,11 +276,11 @@ func TestFieldAsStringForCostDetails(t *testing.T) {
 		Destination: "+4986517174963",
 		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		RunID:       utils.META_DEFAULT,
+		RunID:       utils.MetaDefault,
 		Usage:       time.Duration(10) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		Cost:        1.01,
-		CostDetails: NewEventCostFromCallCost(cc, "TestCDRTestCDRAsMapStringIface2", utils.META_DEFAULT),
+		CostDetails: NewEventCostFromCallCost(cc, "TestCDRTestCDRAsMapStringIface2", utils.MetaDefault),
 	}
 
 	prsr := config.NewRSRParserMustCompile("~CostDetails.CGRID", true)
@@ -333,7 +333,7 @@ func TestCDRAsHttpForm(t *testing.T) {
 	storCdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsaf",
 		OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.META_DEFAULT,
+		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.MetaDefault,
 		Usage: time.Duration(10) * time.Second, Supplier: "SUPPL1",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
@@ -399,14 +399,14 @@ func TestCDRAsExternalCDR(t *testing.T) {
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		RunID:      utils.META_DEFAULT, Usage: time.Duration(10 * time.Second), Cost: 1.01,
+		RunID:      utils.MetaDefault, Usage: time.Duration(10 * time.Second), Cost: 1.01,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
 	expectOutCdr := &ExternalCDR{
 		CGRID:   utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
 		OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
 		Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z", RunID: utils.META_DEFAULT,
+		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z", RunID: utils.MetaDefault,
 		Usage: "10s", Cost: 1.01, CostDetails: "null",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
 	if cdrOut := storCdr.AsExternalCDR(); !reflect.DeepEqual(expectOutCdr, cdrOut) {
@@ -532,7 +532,7 @@ func TestCDRAsMapStringIface(t *testing.T) {
 		Destination: "+4986517174963",
 		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		RunID:       utils.META_DEFAULT,
+		RunID:       utils.MetaDefault,
 		Usage:       time.Duration(10) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		Cost:        1.01,
@@ -542,7 +542,7 @@ func TestCDRAsMapStringIface(t *testing.T) {
 		"field_extr1":     "val_extr1",
 		"fieldextr2":      "valextr2",
 		utils.CGRID:       cdr.CGRID,
-		utils.RunID:       utils.META_DEFAULT,
+		utils.RunID:       utils.MetaDefault,
 		utils.OrderID:     cdr.OrderID,
 		utils.OriginHost:  "192.168.1.1",
 		utils.Source:      utils.UNIT_TEST,
@@ -594,11 +594,11 @@ func TestCDRTestCDRAsMapStringIface2(t *testing.T) {
 		Destination: "+4986517174963",
 		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		RunID:       utils.META_DEFAULT,
+		RunID:       utils.MetaDefault,
 		Usage:       time.Duration(10) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		Cost:        1.01,
-		CostDetails: NewEventCostFromCallCost(cc, "TestCDRTestCDRAsMapStringIface2", utils.META_DEFAULT),
+		CostDetails: NewEventCostFromCallCost(cc, "TestCDRTestCDRAsMapStringIface2", utils.MetaDefault),
 	}
 
 	var result map[string]interface{}
@@ -607,7 +607,7 @@ func TestCDRTestCDRAsMapStringIface2(t *testing.T) {
 		"field_extr1":     "val_extr1",
 		"fieldextr2":      "valextr2",
 		utils.CGRID:       cdr.CGRID,
-		utils.RunID:       utils.META_DEFAULT,
+		utils.RunID:       utils.MetaDefault,
 		utils.OrderID:     cdr.OrderID,
 		utils.OriginHost:  "192.168.1.1",
 		utils.Source:      utils.UNIT_TEST,
@@ -648,7 +648,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 			ID:     "AccountFromAccountSummary",
 		},
 	}
-	eventCost := NewEventCostFromCallCost(cc, "TestCDRTestCDRAsMapStringIface2", utils.META_DEFAULT)
+	eventCost := NewEventCostFromCallCost(cc, "TestCDRTestCDRAsMapStringIface2", utils.MetaDefault)
 	eventCost.RatingFilters = RatingFilters{
 		"3d99c91": RatingMatchedFilters{
 			"DestinationID":     "CustomDestination",
@@ -671,7 +671,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 		SetupTime:   time.Unix(1383813745, 0).UTC(),
 		AnswerTime:  time.Unix(1383813746, 0).UTC(),
 		Usage:       time.Duration(10) * time.Second,
-		RunID:       utils.META_DEFAULT, Cost: 1.01,
+		RunID:       utils.MetaDefault, Cost: 1.01,
 		ExtraFields: map[string]string{"stop_time": "2014-06-11 19:19:00 +0000 UTC", "fieldextr2": "valextr2"},
 		CostDetails: eventCost,
 	}
@@ -795,7 +795,7 @@ func TestCDRAsExportMap(t *testing.T) {
 		Tenant: "cgrates.org", Category: "call", Account: "1001",
 		Subject: "1001", Destination: "+4986517174963",
 		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
-		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.META_DEFAULT,
+		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.MetaDefault,
 		Usage: time.Duration(10) * time.Second, Cost: 1.01,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
@@ -834,7 +834,7 @@ func TestCDRAsCDRsql(t *testing.T) {
 		Destination: "+4986517174963",
 		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		RunID:       utils.META_DEFAULT,
+		RunID:       utils.MetaDefault,
 		Usage:       time.Duration(10) * time.Second,
 		Cost:        1.01,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
@@ -904,7 +904,7 @@ func TestCDRNewCDRFromSQL(t *testing.T) {
 		Destination: "+4986517174963",
 		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		RunID:       utils.META_DEFAULT,
+		RunID:       utils.MetaDefault,
 		Usage:       time.Duration(10) * time.Second,
 		Cost:        1.01,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
@@ -934,7 +934,7 @@ func TestCDRAsCGREvent(t *testing.T) {
 		Destination: "+4986517174963",
 		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		RunID:       utils.META_DEFAULT,
+		RunID:       utils.MetaDefault,
 		Usage:       time.Duration(10) * time.Second,
 		Cost:        1.01,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
@@ -998,7 +998,7 @@ func TestCDRUpdateFromCGREvent(t *testing.T) {
 		Destination: "+4986517174963",
 		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		RunID:       utils.META_DEFAULT,
+		RunID:       utils.MetaDefault,
 		Usage:       time.Duration(10) * time.Second,
 		Cost:        1.01,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
@@ -1049,7 +1049,7 @@ func TestCDRUpdateFromCGREvent(t *testing.T) {
 		Destination: "+4986517174963",
 		SetupTime:   time.Date(2013, 11, 7, 8, 42, 23, 0, time.UTC),
 		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		RunID:       utils.META_DEFAULT,
+		RunID:       utils.MetaDefault,
 		Usage:       time.Duration(13) * time.Second,
 		Cost:        1.01,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
@@ -1124,7 +1124,7 @@ func TestCDRexportFieldValue(t *testing.T) {
 		Destination: "+4986517174963",
 		SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		RunID:       utils.META_DEFAULT,
+		RunID:       utils.MetaDefault,
 		Usage:       time.Duration(10) * time.Second,
 		Cost:        1.01,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},

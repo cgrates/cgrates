@@ -199,7 +199,7 @@ func testCDRsOnExpDisableOnlineExport(t *testing.T) {
 		AnswerTime:  time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage:       time.Duration(10) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		RunID:       utils.META_DEFAULT,
+		RunID:       utils.MetaDefault,
 		Cost:        1.201,
 		PreRated:    true,
 	}
@@ -242,7 +242,7 @@ func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 		AnswerTime:  time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage:       time.Duration(10) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		RunID:       utils.META_DEFAULT,
+		RunID:       utils.MetaDefault,
 		Cost:        1.201,
 		PreRated:    true,
 	}
@@ -263,7 +263,7 @@ func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 	time.Sleep(200 * time.Millisecond)
 	var rcvedCdrs []*engine.ExternalCDR
 	if err := cdrsSlaveRpc.Call(utils.ApierV2GetCDRs,
-		utils.RPCCDRsFilter{CGRIDs: []string{testCdr1.CGRID}, RunIDs: []string{utils.META_DEFAULT}}, &rcvedCdrs); err != nil {
+		utils.RPCCDRsFilter{CGRIDs: []string{testCdr1.CGRID}, RunIDs: []string{utils.MetaDefault}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(rcvedCdrs))
@@ -370,7 +370,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 		AnswerTime:  time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage:       time.Duration(10) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		RunID:       utils.META_DEFAULT,
+		RunID:       utils.MetaDefault,
 		Cost:        1.201,
 		PreRated:    true,
 	}

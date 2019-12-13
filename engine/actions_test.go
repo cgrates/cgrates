@@ -1796,7 +1796,7 @@ func TestActionTransferMonetaryDefault(t *testing.T) {
 				utils.MONETARY: Balances{
 					&Balance{
 						Uuid:  utils.GenUUID(),
-						ID:    utils.META_DEFAULT,
+						ID:    utils.MetaDefault,
 						Value: 10,
 					},
 					&Balance{
@@ -1852,7 +1852,7 @@ func TestActionTransferMonetaryDefaultFilter(t *testing.T) {
 				utils.MONETARY: Balances{
 					&Balance{
 						Uuid:   utils.GenUUID(),
-						ID:     utils.META_DEFAULT,
+						ID:     utils.MetaDefault,
 						Value:  10,
 						Weight: 20,
 					},
@@ -1913,7 +1913,7 @@ func TestActionConditionalTopup(t *testing.T) {
 				utils.MONETARY: Balances{
 					&Balance{
 						Uuid:   utils.GenUUID(),
-						ID:     utils.META_DEFAULT,
+						ID:     utils.MetaDefault,
 						Value:  10,
 						Weight: 20,
 					},
@@ -1977,7 +1977,7 @@ func TestActionConditionalTopupNoMatch(t *testing.T) {
 				utils.MONETARY: Balances{
 					&Balance{
 						Uuid:   utils.GenUUID(),
-						ID:     utils.META_DEFAULT,
+						ID:     utils.MetaDefault,
 						Value:  10,
 						Weight: 20,
 					},

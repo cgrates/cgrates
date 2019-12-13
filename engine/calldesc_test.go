@@ -1841,7 +1841,7 @@ func TestCDDebitBalanceSubjectWithFallback(t *testing.T) {
 		resAcnt.BalanceMap[utils.VOICE][0].Value != 0 {
 		t.Errorf("Account: %v", resAcnt)
 	} else if len(resAcnt.BalanceMap[utils.MONETARY]) == 0 ||
-		resAcnt.BalanceMap[utils.MONETARY][0].ID != utils.META_DEFAULT ||
+		resAcnt.BalanceMap[utils.MONETARY][0].ID != utils.MetaDefault ||
 		resAcnt.BalanceMap[utils.MONETARY][0].Value != -0.600013 { // rounding issue
 		t.Errorf("Account: %s", utils.ToIJSON(resAcnt))
 	}

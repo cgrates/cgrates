@@ -51,7 +51,7 @@ func (self *CmdGetCostDetails) RpcMethod() string {
 
 func (self *CmdGetCostDetails) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.AttrGetCallCost{RunId: utils.META_DEFAULT}
+		self.rpcParams = &utils.AttrGetCallCost{RunId: utils.MetaDefault}
 	}
 	return self.rpcParams
 }

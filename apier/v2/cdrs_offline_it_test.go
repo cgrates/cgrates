@@ -126,7 +126,7 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 		Account:     "test",
 		BalanceType: utils.MONETARY,
 		Balance: map[string]interface{}{
-			utils.ID:     utils.META_DEFAULT,
+			utils.ID:     utils.MetaDefault,
 			utils.Value:  10.0,
 			utils.Weight: 10.0,
 		},

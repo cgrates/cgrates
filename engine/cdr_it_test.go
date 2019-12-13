@@ -39,7 +39,7 @@ func TestHttpJsonPost(t *testing.T) {
 		Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Tenant: "cgrates.org",
 		Category: "call", Account: "account1", Subject: "tgooiscs0014", Destination: "1002",
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String(), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String(),
-		RunID: utils.META_DEFAULT,
+		RunID: utils.MetaDefault,
 		Usage: "0.00000001", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	jsn, _ := json.Marshal(cdrOut)

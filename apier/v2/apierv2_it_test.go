@@ -111,7 +111,7 @@ func TestApierV2itAddBalance(t *testing.T) {
 		Account:     "dan",
 		BalanceType: utils.MONETARY,
 		Balance: map[string]interface{}{
-			utils.ID:     utils.META_DEFAULT,
+			utils.ID:     utils.MetaDefault,
 			utils.Value:  5.0,
 			utils.Weight: 10.0,
 		},
@@ -185,7 +185,7 @@ func TestApierV2itFraudMitigation(t *testing.T) {
 		Account:     "dan",
 		BalanceType: utils.MONETARY,
 		Balance: map[string]interface{}{
-			utils.ID:     utils.META_DEFAULT,
+			utils.ID:     utils.MetaDefault,
 			utils.Value:  60.0,
 			utils.Weight: 10.0,
 		},

@@ -71,7 +71,7 @@ type v1DerivedChargersWithKey struct {
 
 func fieldinfo2Attribute(attr []*engine.Attribute, fieldName, fieldInfo string) (a []*engine.Attribute) {
 	var rp config.RSRParsers
-	if fieldInfo == utils.META_DEFAULT || len(fieldInfo) == 0 {
+	if fieldInfo == utils.MetaDefault || len(fieldInfo) == 0 {
 		return attr
 	}
 	if strings.HasPrefix(fieldInfo, utils.STATIC_VALUE_PREFIX) {

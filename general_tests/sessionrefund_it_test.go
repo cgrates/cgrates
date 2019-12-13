@@ -213,7 +213,7 @@ func testSrItAddMonetaryBalance(t *testing.T) {
 		Account:     sraccount,
 		BalanceType: utils.MONETARY,
 		Balance: map[string]interface{}{
-			utils.ID:    utils.META_DEFAULT,
+			utils.ID:    utils.MetaDefault,
 			utils.Value: 10.65,
 		},
 	}

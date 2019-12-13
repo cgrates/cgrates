@@ -479,7 +479,7 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	time.Sleep(time.Duration(20) * time.Millisecond)
 
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT},
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault},
 		Accounts: []string{acntAttrs.Account}}
 	if err := sDataRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())

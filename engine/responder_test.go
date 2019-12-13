@@ -100,12 +100,12 @@ func TestResponderGobSMCost(t *testing.T) {
 	attr := AttrCDRSStoreSMCost{
 		Cost: &SMCost{
 			CGRID:       "b783a8bcaa356570436983cd8a0e6de4993f9ba6",
-			RunID:       utils.META_DEFAULT,
+			RunID:       utils.MetaDefault,
 			OriginHost:  "",
 			OriginID:    "testdatagrp_grp1",
 			CostSource:  "SMR",
 			Usage:       1536,
-			CostDetails: NewEventCostFromCallCost(cc, "b783a8bcaa356570436983cd8a0e6de4993f9ba6", utils.META_DEFAULT),
+			CostDetails: NewEventCostFromCallCost(cc, "b783a8bcaa356570436983cd8a0e6de4993f9ba6", utils.MetaDefault),
 		},
 		CheckDuplicate: false,
 	}

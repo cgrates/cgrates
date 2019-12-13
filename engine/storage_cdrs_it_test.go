@@ -140,7 +140,7 @@ func testSetCDR(cfg *config.CGRConfig) error {
 	}
 	ratedCDR := &CDR{
 		CGRID:       utils.Sha1("testevent1", time.Date(2015, 12, 12, 14, 52, 0, 0, time.UTC).String()),
-		RunID:       utils.META_DEFAULT,
+		RunID:       utils.MetaDefault,
 		OriginHost:  "127.0.0.1",
 		Source:      "testSetCDRs",
 		OriginID:    "testevent1",
@@ -231,11 +231,11 @@ func testSMCosts(cfg *config.CGRConfig) error {
 		TOR: utils.VOICE,
 	}
 	if err := cdrStorage.SetSMCost(&SMCost{CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41",
-		RunID: utils.META_DEFAULT, OriginHost: "localhost", OriginID: "12345", CostSource: utils.UNIT_TEST,
-		CostDetails: NewEventCostFromCallCost(cc, "164b0422fdc6a5117031b427439482c6a4f90e41", utils.META_DEFAULT)}); err != nil {
+		RunID: utils.MetaDefault, OriginHost: "localhost", OriginID: "12345", CostSource: utils.UNIT_TEST,
+		CostDetails: NewEventCostFromCallCost(cc, "164b0422fdc6a5117031b427439482c6a4f90e41", utils.MetaDefault)}); err != nil {
 		return fmt.Errorf("testSMCosts #3 err: %v", err)
 	}
-	if rcvSMC, err := cdrStorage.GetSMCosts("164b0422fdc6a5117031b427439482c6a4f90e41", utils.META_DEFAULT, "", ""); err != nil {
+	if rcvSMC, err := cdrStorage.GetSMCosts("164b0422fdc6a5117031b427439482c6a4f90e41", utils.MetaDefault, "", ""); err != nil {
 		return fmt.Errorf("testSMCosts #4 err: %v", err)
 	} else if len(rcvSMC) == 0 {
 		return errors.New("testSMCosts #5, no SMCosts received")
@@ -243,13 +243,13 @@ func testSMCosts(cfg *config.CGRConfig) error {
 	// Test query per prefix
 	for i := 0; i < 3; i++ {
 		if err := cdrStorage.SetSMCost(&SMCost{CGRID: "164b0422fdc6a5117031b427439482c6a4f90e5" + strconv.Itoa(i),
-			RunID: utils.META_DEFAULT, OriginHost: "localhost", OriginID: "abc" + strconv.Itoa(i),
+			RunID: utils.MetaDefault, OriginHost: "localhost", OriginID: "abc" + strconv.Itoa(i),
 			CostSource:  utils.UNIT_TEST,
-			CostDetails: NewEventCostFromCallCost(cc, "164b0422fdc6a5117031b427439482c6a4f90e5"+strconv.Itoa(i), utils.META_DEFAULT)}); err != nil {
+			CostDetails: NewEventCostFromCallCost(cc, "164b0422fdc6a5117031b427439482c6a4f90e5"+strconv.Itoa(i), utils.MetaDefault)}); err != nil {
 			return fmt.Errorf("testSMCosts #7 err: %v", err)
 		}
 	}
-	if rcvSMC, err := cdrStorage.GetSMCosts("", utils.META_DEFAULT, "localhost", "abc"); err != nil {
+	if rcvSMC, err := cdrStorage.GetSMCosts("", utils.MetaDefault, "localhost", "abc"); err != nil {
 		return fmt.Errorf("testSMCosts #8 err: %v", err)
 	} else if len(rcvSMC) != 3 {
 		return fmt.Errorf("testSMCosts #9 expecting 3, received: %d", len(rcvSMC))
@@ -307,7 +307,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		},
 		{
 			CGRID:       utils.Sha1("testevent1", time.Date(2015, 12, 12, 14, 52, 0, 0, time.UTC).String()),
-			RunID:       utils.META_DEFAULT,
+			RunID:       utils.MetaDefault,
 			OriginHost:  "127.0.0.1",
 			Source:      "testGetCDRs",
 			OriginID:    "testevent1",
@@ -347,7 +347,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		},
 		{
 			CGRID:       utils.Sha1("testevent2", time.Date(2015, 12, 29, 12, 58, 0, 0, time.UTC).String()),
-			RunID:       utils.META_DEFAULT,
+			RunID:       utils.MetaDefault,
 			OriginHost:  "192.168.1.12",
 			Source:      "testGetCDRs",
 			OriginID:    "testevent2",
@@ -387,7 +387,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		},
 		{
 			CGRID:       utils.Sha1("testevent3", time.Date(2015, 12, 28, 12, 58, 0, 0, time.UTC).String()),
-			RunID:       utils.META_DEFAULT,
+			RunID:       utils.MetaDefault,
 			OriginHost:  "192.168.1.13",
 			Source:      "testGetCDRs3",
 			OriginID:    "testevent3",
@@ -428,7 +428,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		},
 		{
 			CGRID:       utils.Sha1("testevent4", time.Date(2015, 12, 14, 14, 52, 0, 0, time.UTC).String()),
-			RunID:       utils.META_DEFAULT,
+			RunID:       utils.MetaDefault,
 			OriginHost:  "192.168.1.14",
 			Source:      "testGetCDRs",
 			OriginID:    "testevent4",
@@ -468,7 +468,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		},
 		{
 			CGRID:       utils.Sha1("testevent5", time.Date(2015, 12, 15, 18, 22, 0, 0, time.UTC).String()),
-			RunID:       utils.META_DEFAULT,
+			RunID:       utils.MetaDefault,
 			OriginHost:  "127.0.0.1",
 			Source:      "testGetCDRs5",
 			OriginID:    "testevent5",
@@ -562,7 +562,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		return fmt.Errorf("testGetCDRs #21, unexpected count of CDRs returned: %d", count)
 	}
 	// Filter on RunID
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RunIDs: []string{utils.META_DEFAULT}}, false); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RunIDs: []string{utils.MetaDefault}}, false); err != nil {
 		return fmt.Errorf("testGetCDRs #22 err: %v", err)
 	} else if len(CDRs) != 5 {
 		return fmt.Errorf("testGetCDRs #23, unexpected number of CDRs returned: %+v", CDRs)

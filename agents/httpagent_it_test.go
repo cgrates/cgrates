@@ -260,7 +260,7 @@ func testHAitCDRmtcall(t *testing.T) {
 	rply.Body.Close()
 	time.Sleep(50 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}}
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}}
 	if err := haRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -301,7 +301,7 @@ func testHAitCDRmtcall2(t *testing.T) {
 
 	time.Sleep(50 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
-	fltr := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"447700086788"}}
+	fltr := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, Accounts: []string{"447700086788"}}
 	if err := haRPC.Call(utils.ApierV2GetCDRs, fltr, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {

@@ -35,7 +35,7 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 	// Default instance first
 	eCgrCfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"] = []*CdrcCfg{
 		{
-			ID:                       utils.META_DEFAULT,
+			ID:                       utils.MetaDefault,
 			Enabled:                  false,
 			CdrsConns:                []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 			CdrFormat:                "*file_csv",
