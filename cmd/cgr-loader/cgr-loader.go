@@ -101,6 +101,7 @@ var (
 	cacheSAddress = cgrLoaderFlags.String("caches_address", dfltCfg.LoaderCgrCfg().CachesConns[0],
 		"CacheS component to contact for cache reloads, empty to disable automatic cache reloads")
 	schedulerAddress = cgrLoaderFlags.String("scheduler_address", dfltCfg.LoaderCgrCfg().SchedulerConns[0], "")
+	rpcEncoding      = cgrLoaderFlags.String("rpc_encoding", rpcclient.JSONrpc, "RPC encoding used <*gob|*json>")
 )
 
 func main() {
@@ -196,18 +197,36 @@ func main() {
 	}
 
 	if *cacheSAddress != dfltCfg.LoaderCgrCfg().CachesConns[0] {
-		ldrCfg.LoaderCgrCfg().CachesConns = make([]string, 0)
-		if *cacheSAddress != "" {
-			ldrCfg.LoaderCgrCfg().CachesConns = append(ldrCfg.LoaderCgrCfg().CachesConns,
-				*cacheSAddress)
+		if *cacheSAddress == utils.EmptyString {
+			ldrCfg.LoaderCgrCfg().CachesConns = []string{}
+		} else {
+			ldrCfg.LoaderCgrCfg().CachesConns = []string{*cacheSAddress}
+			if _, has := ldrCfg.RPCConns()[*cacheSAddress]; !has {
+				ldrCfg.RPCConns()[*cacheSAddress] = &config.RPCConn{
+					Strategy: rpcclient.PoolFirst,
+					Conns: []*config.RemoteHost{{
+						Address:   *cacheSAddress,
+						Transport: *rpcEncoding,
+					}},
+				}
+			}
 		}
 	}
 
 	if *schedulerAddress != dfltCfg.LoaderCgrCfg().SchedulerConns[0] {
-		ldrCfg.LoaderCgrCfg().SchedulerConns = make([]string, 0)
-		if *schedulerAddress != "" {
-			ldrCfg.LoaderCgrCfg().SchedulerConns = append(ldrCfg.LoaderCgrCfg().SchedulerConns,
-				*schedulerAddress)
+		if *schedulerAddress == utils.EmptyString {
+			ldrCfg.LoaderCgrCfg().SchedulerConns = []string{}
+		} else {
+			ldrCfg.LoaderCgrCfg().SchedulerConns = []string{*schedulerAddress}
+			if _, has := ldrCfg.RPCConns()[*schedulerAddress]; !has {
+				ldrCfg.RPCConns()[*schedulerAddress] = &config.RPCConn{
+					Strategy: rpcclient.PoolFirst,
+					Conns: []*config.RemoteHost{{
+						Address:   *schedulerAddress,
+						Transport: *rpcEncoding,
+					}},
+				}
+			}
 		}
 	}
 
