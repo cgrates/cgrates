@@ -90,7 +90,7 @@ func TestApierLoadConfig(t *testing.T) {
 }
 
 func TestApierCreateDirs(t *testing.T) {
-	for _, pathDir := range []string{cfg.CdreProfiles[utils.META_DEFAULT].ExportPath, "/var/log/cgrates/cdrc/in", "/var/log/cgrates/cdrc/out"} {
+	for _, pathDir := range []string{cfg.CdreProfiles[utils.MetaDefault].ExportPath, "/var/log/cgrates/cdrc/in", "/var/log/cgrates/cdrc/out"} {
 		if err := os.RemoveAll(pathDir); err != nil {
 			t.Fatal("Error removing folder: ", pathDir, err)
 		}
@@ -1508,7 +1508,7 @@ func TestApierITProcessCdr(t *testing.T) {
 		CDR: &engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsaf",
 			OriginHost: "192.168.1.1", Source: "test", RequestType: utils.META_RATED, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001",
 			Destination: "1002",
-			SetupTime:   time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.META_DEFAULT,
+			SetupTime:   time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.MetaDefault,
 			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 		},
 	}
@@ -1556,7 +1556,7 @@ func TestApierGetCallCostLog(t *testing.T) {
 			Destination: "+4986517174963",
 			SetupTime:   tm,
 			AnswerTime:  tm,
-			RunID:       utils.META_DEFAULT,
+			RunID:       utils.MetaDefault,
 			Usage:       time.Duration(0),
 			ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 			Cost:        1.01,

@@ -420,7 +420,7 @@ func TestMapEventAsCDR(t *testing.T) {
 	}
 	ec1 := &EventCost{
 		CGRID:     "164b0422fdc6a5117031b427439482c6a4f90e41",
-		RunID:     utils.META_DEFAULT,
+		RunID:     utils.MetaDefault,
 		StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
 		Charges: []*ChargingInterval{
 			&ChargingInterval{

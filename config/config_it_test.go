@@ -413,7 +413,7 @@ func TestCGRConfigReloadERs(t *testing.T) {
 		SessionSConns: []string{utils.MetaLocalHost},
 		Readers: []*EventReaderCfg{
 			&EventReaderCfg{
-				ID:             utils.META_DEFAULT,
+				ID:             utils.MetaDefault,
 				Type:           utils.MetaFileCSV,
 				FieldSep:       ",",
 				RunDelay:       0,

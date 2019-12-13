@@ -376,7 +376,7 @@ func TestSessionAsCGREvents(t *testing.T) {
 		t.Errorf("Expecting: 1, received: %+v", len(cgrEvs))
 	}
 	if cgrEvs[0].Event[utils.RunID] != utils.MetaDefault {
-		t.Errorf("Expecting: %+v, received: %+v", utils.MetaRaw, cgrEvs[1].Event[utils.RunID])
+		t.Errorf("Expecting: %+v, received: %+v", utils.MetaDefault, cgrEvs[1].Event[utils.RunID])
 	} else if cgrEvs[0].Event[utils.Cost] != 12.13 {
 		t.Errorf("Expecting: %+v, received: %+v", 12.13, cgrEvs[1].Event[utils.Cost])
 	}

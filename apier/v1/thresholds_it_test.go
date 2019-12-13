@@ -60,7 +60,7 @@ var tEvs = []*engine.ArgsProcessEvent{
 			Event: map[string]interface{}{
 				utils.EventType:  utils.BalanceUpdate,
 				utils.Account:    "1002",
-				utils.BalanceID:  utils.META_DEFAULT,
+				utils.BalanceID:  utils.MetaDefault,
 				utils.Units:      12.3,
 				utils.ExpiryTime: time.Date(2009, 11, 10, 23, 00, 0, 0, time.UTC),
 			},

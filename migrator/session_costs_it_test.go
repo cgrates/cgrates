@@ -175,7 +175,7 @@ func testSessionCostITMigrate(t *testing.T) {
 		CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
 		OriginID:    "dsafdsaf",
 		OriginHost:  "192.168.1.1",
-		RunID:       utils.META_DEFAULT,
+		RunID:       utils.MetaDefault,
 		Usage:       time.Duration(10),
 		CostSource:  utils.MetaSessionS,
 		CostDetails: cc,
@@ -200,7 +200,7 @@ func testSessionCostITMigrate(t *testing.T) {
 	if err != nil {
 		t.Error("Error when migrating SessionsCosts ", err.Error())
 	}
-	if rcvCosts, err := sCostMigrator.storDBOut.StorDB().GetSMCosts("", utils.META_DEFAULT, "", ""); err != nil {
+	if rcvCosts, err := sCostMigrator.storDBOut.StorDB().GetSMCosts("", utils.MetaDefault, "", ""); err != nil {
 		t.Error(err)
 	} else if len(rcvCosts) != 1 {
 		t.Errorf("Unexpected number of SessionsCosts returned: %d", len(rcvCosts))

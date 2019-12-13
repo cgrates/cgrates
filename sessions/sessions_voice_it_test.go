@@ -814,7 +814,7 @@ func TestSessionsVoiceSessionTTL(t *testing.T) {
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.META_DEFAULT),
+				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
 				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12360"),
 			},
 		}, &aSessions); err != nil {
@@ -867,7 +867,7 @@ func TestSessionsVoiceSessionTTL(t *testing.T) {
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.META_DEFAULT),
+				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
 				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12360"),
 			},
 		}, &aSessions); err != nil {
@@ -893,7 +893,7 @@ func TestSessionsVoiceSessionTTL(t *testing.T) {
 	}
 
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, DestinationPrefixes: []string{"1008"}}
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, DestinationPrefixes: []string{"1008"}}
 	if err := sessionsRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -975,7 +975,7 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.META_DEFAULT),
+				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
 				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12361"),
 			},
 		}, &aSessions); err != nil {
@@ -1032,7 +1032,7 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.META_DEFAULT),
+				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
 				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12362"),
 			},
 		}, &aSessions); err != nil {
@@ -1061,7 +1061,7 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.META_DEFAULT),
+				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
 				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12362"),
 			},
 		}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
@@ -1069,7 +1069,7 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	}
 	time.Sleep(500 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, DestinationPrefixes: []string{"1009"}}
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, DestinationPrefixes: []string{"1009"}}
 	if err := sessionsRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -1148,7 +1148,7 @@ func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.META_DEFAULT),
+				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
 				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12371"),
 			},
 		}, &aSessions); err != nil {
@@ -1205,7 +1205,7 @@ func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.META_DEFAULT),
+				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
 				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12372-1"),
 			},
 		}, &aSessions); err != nil {
@@ -1255,7 +1255,7 @@ func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.META_DEFAULT),
+				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
 				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12372-1"),
 			},
 		}, &aSessions); err == nil ||
@@ -1278,7 +1278,7 @@ func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	}
 	time.Sleep(100 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT},
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault},
 		DestinationPrefixes: []string{"12371"}}
 	if err := sessionsRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())

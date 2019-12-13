@@ -34,6 +34,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// constants used by AsteriskAgent
 const (
 	CGRAuthAPP               = "cgrates_auth"
 	CGRMaxSessionTime        = "CGRMaxSessionTime"
@@ -52,6 +53,7 @@ const (
 	ARICGRResourceAllocation = "CGRResourceAllocation"
 )
 
+// NewAsteriskAgent constructs a new Asterisk Agent
 func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
 	connMgr *engine.ConnManager) (*AsteriskAgent, error) {
 	sma := &AsteriskAgent{
@@ -63,6 +65,7 @@ func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
 	return sma, nil
 }
 
+// AsteriskAgent used to cominicate with asterisk
 type AsteriskAgent struct {
 	cgrCfg      *config.CGRConfig // Separate from smCfg since there can be multiple
 	connMgr     *engine.ConnManager
@@ -88,7 +91,7 @@ func (sma *AsteriskAgent) connectAsterisk() (err error) {
 	return nil
 }
 
-// Called to start the service
+// ListenAndServe is called to start the service
 func (sma *AsteriskAgent) ListenAndServe() (err error) {
 	if err := sma.connectAsterisk(); err != nil {
 		return err
@@ -112,7 +115,6 @@ func (sma *AsteriskAgent) ListenAndServe() (err error) {
 			}
 		}
 	}
-	panic("<AsteriskAgent> ListenAndServe out of select")
 }
 
 // setChannelVar will set the value of a variable
@@ -319,12 +321,12 @@ func (sma *AsteriskAgent) handleChannelDestroyed(ev *SMAsteriskEvent) {
 
 }
 
-// Called to shutdown the service
+// ServiceShutdown is called to shutdown the service
 func (sma *AsteriskAgent) ServiceShutdown() error {
 	return nil
 }
 
-// Internal method to disconnect session in asterisk
+// V1DisconnectSession is internal method to disconnect session in asterisk
 func (sma *AsteriskAgent) V1DisconnectSession(args utils.AttrDisconnectSession, reply *string) error {
 	channelID := engine.NewMapEvent(args.EventStart).GetStringIgnoreErrors(utils.OriginID)
 	sma.hangupChannel(channelID, "")
@@ -332,11 +334,12 @@ func (sma *AsteriskAgent) V1DisconnectSession(args utils.AttrDisconnectSession, 
 	return nil
 }
 
-// rpcclient.ClientConnector interface
+// Call implements rpcclient.ClientConnector interface
 func (sma *AsteriskAgent) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	return utils.RPCCall(sma, serviceMethod, args, reply)
 }
 
+// V1GetActiveSessionIDs is internal method to  get all active sessions in asterisk
 func (sma *AsteriskAgent) V1GetActiveSessionIDs(ignParam string,
 	sessionIDs *[]*sessions.SessionID) error {
 	var slMpIface []map[string]interface{} // decode the result from ari into a slice of map[string]interface{}

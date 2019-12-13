@@ -30,7 +30,7 @@ import (
 // testEC is used as sample through various tests
 var testEC = &EventCost{
 	CGRID:     "164b0422fdc6a5117031b427439482c6a4f90e41",
-	RunID:     utils.META_DEFAULT,
+	RunID:     utils.MetaDefault,
 	StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
 	Charges: []*ChargingInterval{
 		&ChargingInterval{
@@ -358,7 +358,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 						Cost: 0.1,
 						BalanceInfo: &DebitInfo{
 							Monetary: &MonetaryInfo{UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
-								ID:    utils.META_DEFAULT,
+								ID:    utils.MetaDefault,
 								Value: 9.9},
 							AccountID: "cgrates.org:dan",
 						},
@@ -416,7 +416,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 							},
 							Monetary: &MonetaryInfo{
 								UUID:  "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
-								ID:    utils.META_DEFAULT,
+								ID:    utils.MetaDefault,
 								Value: 9.75},
 							AccountID: "cgrates.org:dan",
 						},
@@ -459,7 +459,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 						Duration: time.Duration(1 * time.Second),
 						BalanceInfo: &DebitInfo{
 							Monetary: &MonetaryInfo{UUID: "8c54a9e9-d610-4c82-bcb5-a315b9a65010",
-								ID:    utils.META_DEFAULT,
+								ID:    utils.MetaDefault,
 								Value: 9.15},
 							AccountID: "cgrates.org:dan",
 						},
@@ -473,7 +473,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 
 	eEC := &EventCost{
 		CGRID:     "164b0422fdc6a5117031b427439482c6a4f90e41",
-		RunID:     utils.META_DEFAULT,
+		RunID:     utils.MetaDefault,
 		StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
 		Cost:      utils.Float64Pointer(0.85),
 		Usage:     utils.DurationPointer(time.Duration(2 * time.Minute)),
@@ -604,7 +604,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 		},
 		AccountSummary: acntSummary,
 	}
-	ec := NewEventCostFromCallCost(cc, "164b0422fdc6a5117031b427439482c6a4f90e41", utils.META_DEFAULT)
+	ec := NewEventCostFromCallCost(cc, "164b0422fdc6a5117031b427439482c6a4f90e41", utils.MetaDefault)
 	if cost := ec.GetCost(); cost != cc.Cost {
 		t.Errorf("Expecting: %f, received: %f", cc.Cost, cost)
 	}
@@ -692,7 +692,7 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 func TestECAsRefundIncrements(t *testing.T) {
 	eCD := &CallDescriptor{
 		CgrID:         "164b0422fdc6a5117031b427439482c6a4f90e41",
-		RunID:         utils.META_DEFAULT,
+		RunID:         utils.MetaDefault,
 		TOR:           utils.VOICE,
 		TimeStart:     time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
 		TimeEnd:       time.Date(2017, 1, 9, 16, 28, 21, 0, time.UTC),
@@ -950,7 +950,7 @@ func TestECAsCallCost(t *testing.T) {
 	}
 	ec := &EventCost{
 		CGRID:     "164b0422fdc6a5117031b427439482c6a4f90e41",
-		RunID:     utils.META_DEFAULT,
+		RunID:     utils.MetaDefault,
 		StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
 		Cost:      utils.Float64Pointer(0.85),
 		Usage:     utils.DurationPointer(time.Duration(2 * time.Minute)),
@@ -1475,7 +1475,7 @@ func TestECMergeGT(t *testing.T) {
 	// InitialEventCost
 	ecGT := &EventCost{
 		CGRID:     "7636f3f1a06dffa038ba7900fb57f52d28830a24",
-		RunID:     utils.META_DEFAULT,
+		RunID:     utils.MetaDefault,
 		StartTime: time.Date(2018, 7, 27, 0, 59, 21, 0, time.UTC),
 		Charges: []*ChargingInterval{
 			&ChargingInterval{
@@ -1533,7 +1533,7 @@ func TestECMergeGT(t *testing.T) {
 	}
 	ecGTUpdt := &EventCost{
 		CGRID:     "7636f3f1a06dffa038ba7900fb57f52d28830a24",
-		RunID:     utils.META_DEFAULT,
+		RunID:     utils.MetaDefault,
 		StartTime: time.Date(2018, 7, 27, 0, 59, 38, 0105472, time.UTC),
 		Charges: []*ChargingInterval{
 			&ChargingInterval{
@@ -1592,7 +1592,7 @@ func TestECMergeGT(t *testing.T) {
 	ecGT.Merge(ecGTUpdt)
 	ecExpct := &EventCost{
 		CGRID:     "7636f3f1a06dffa038ba7900fb57f52d28830a24",
-		RunID:     utils.META_DEFAULT,
+		RunID:     utils.MetaDefault,
 		StartTime: time.Date(2018, 7, 27, 0, 59, 21, 0, time.UTC),
 		Charges: []*ChargingInterval{
 			&ChargingInterval{
@@ -2337,7 +2337,7 @@ func TestECSyncKeys(t *testing.T) {
 
 	eEC := &EventCost{
 		CGRID:     "164b0422fdc6a5117031b427439482c6a4f90e41",
-		RunID:     utils.META_DEFAULT,
+		RunID:     utils.MetaDefault,
 		StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
 		Charges: []*ChargingInterval{
 			&ChargingInterval{
@@ -2526,8 +2526,8 @@ func TestECAsDataProvider(t *testing.T) {
 	ecDP := config.NewObjectDP(testEC, nil)
 	if data, err := ecDP.FieldAsInterface([]string{"RunID"}); err != nil {
 		t.Error(err)
-	} else if data != utils.META_DEFAULT {
-		t.Errorf("Expecting: <%s> \nreceived: <%s>", utils.META_DEFAULT, data)
+	} else if data != utils.MetaDefault {
+		t.Errorf("Expecting: <%s> \nreceived: <%s>", utils.MetaDefault, data)
 	}
 	if data, err := ecDP.FieldAsInterface([]string{"AccountSummary", "ID"}); err != nil {
 		t.Error(err)

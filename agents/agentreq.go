@@ -31,6 +31,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// NewAgentRequest returns a new AgentRequest
 func NewAgentRequest(req config.DataProvider,
 	vars map[string]interface{},
 	cgrRply *config.NavigableMap,
@@ -85,8 +86,8 @@ func (ar *AgentRequest) String() string {
 }
 
 // RemoteHost implements engine.DataProvider
-func (aReq *AgentRequest) RemoteHost() net.Addr {
-	return aReq.Request.RemoteHost()
+func (ar *AgentRequest) RemoteHost() net.Addr {
+	return ar.Request.RemoteHost()
 }
 
 // FieldAsInterface implements engine.DataProvider
@@ -172,8 +173,8 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 	return ar.CGRAReq, nil
 }
 
-// parseField outputs the value based on the template item
-func (aReq *AgentRequest) ParseField(
+// ParseField outputs the value based on the template item
+func (ar *AgentRequest) ParseField(
 	cfgFld *config.FCTemplate) (out interface{}, err error) {
 	var isString bool
 	switch cfgFld.Type {
@@ -189,29 +190,29 @@ func (aReq *AgentRequest) ParseField(
 		out, err = cfgFld.Value.ParseValue(utils.EmptyString)
 		isString = true
 	case utils.MetaRemoteHost:
-		out = aReq.RemoteHost().String()
+		out = ar.RemoteHost().String()
 		isString = true
 	case utils.MetaVariable, utils.META_COMPOSED:
-		out, err = cfgFld.Value.ParseDataProvider(aReq, utils.NestingSep)
+		out, err = cfgFld.Value.ParseDataProvider(ar, utils.NestingSep)
 		isString = true
 	case utils.META_USAGE_DIFFERENCE:
 		if len(cfgFld.Value) != 2 {
 			return nil, fmt.Errorf("invalid arguments <%s> to %s",
 				utils.ToJSON(cfgFld.Value), utils.META_USAGE_DIFFERENCE)
 		}
-		strVal1, err := cfgFld.Value[0].ParseDataProvider(aReq, utils.NestingSep)
+		strVal1, err := cfgFld.Value[0].ParseDataProvider(ar, utils.NestingSep)
 		if err != nil {
 			return "", err
 		}
-		strVal2, err := cfgFld.Value[1].ParseDataProvider(aReq, utils.NestingSep)
+		strVal2, err := cfgFld.Value[1].ParseDataProvider(ar, utils.NestingSep)
 		if err != nil {
 			return "", err
 		}
-		tEnd, err := utils.ParseTimeDetectLayout(strVal1, aReq.Timezone)
+		tEnd, err := utils.ParseTimeDetectLayout(strVal1, ar.Timezone)
 		if err != nil {
 			return "", err
 		}
-		tStart, err := utils.ParseTimeDetectLayout(strVal2, aReq.Timezone)
+		tStart, err := utils.ParseTimeDetectLayout(strVal2, ar.Timezone)
 		if err != nil {
 			return "", err
 		}
@@ -222,7 +223,7 @@ func (aReq *AgentRequest) ParseField(
 			return nil, fmt.Errorf("invalid arguments <%s> to %s",
 				utils.ToJSON(cfgFld.Value), utils.MetaCCUsage)
 		}
-		strVal1, err := cfgFld.Value[0].ParseDataProvider(aReq, utils.NestingSep) // ReqNr
+		strVal1, err := cfgFld.Value[0].ParseDataProvider(ar, utils.NestingSep) // ReqNr
 		if err != nil {
 			return "", err
 		}
@@ -231,7 +232,7 @@ func (aReq *AgentRequest) ParseField(
 			return "", fmt.Errorf("invalid requestNumber <%s> to %s",
 				strVal1, utils.MetaCCUsage)
 		}
-		strVal2, err := cfgFld.Value[1].ParseDataProvider(aReq, utils.NestingSep) // TotalUsage
+		strVal2, err := cfgFld.Value[1].ParseDataProvider(ar, utils.NestingSep) // TotalUsage
 		if err != nil {
 			return "", err
 		}
@@ -240,7 +241,7 @@ func (aReq *AgentRequest) ParseField(
 			return "", fmt.Errorf("invalid usedCCTime <%s> to %s",
 				strVal2, utils.MetaCCUsage)
 		}
-		strVal3, err := cfgFld.Value[2].ParseDataProvider(aReq, utils.NestingSep) // DebitInterval
+		strVal3, err := cfgFld.Value[2].ParseDataProvider(ar, utils.NestingSep) // DebitInterval
 		if err != nil {
 			return "", err
 		}
@@ -257,7 +258,7 @@ func (aReq *AgentRequest) ParseField(
 	case utils.MetaSum:
 		iFaceVals := make([]interface{}, len(cfgFld.Value))
 		for i, val := range cfgFld.Value {
-			strVal, err := val.ParseDataProvider(aReq, utils.NestingSep)
+			strVal, err := val.ParseDataProvider(ar, utils.NestingSep)
 			if err != nil {
 				return "", err
 			}
@@ -267,7 +268,7 @@ func (aReq *AgentRequest) ParseField(
 	case utils.MetaDifference:
 		iFaceVals := make([]interface{}, len(cfgFld.Value))
 		for i, val := range cfgFld.Value {
-			strVal, err := val.ParseDataProvider(aReq, utils.NestingSep)
+			strVal, err := val.ParseDataProvider(ar, utils.NestingSep)
 			if err != nil {
 				return "", err
 			}
@@ -279,7 +280,7 @@ func (aReq *AgentRequest) ParseField(
 			return nil, fmt.Errorf("invalid arguments <%s> to %s",
 				utils.ToJSON(cfgFld.Value), utils.MetaValueExponent)
 		}
-		strVal1, err := cfgFld.Value[0].ParseDataProvider(aReq, utils.NestingSep) // String Value
+		strVal1, err := cfgFld.Value[0].ParseDataProvider(ar, utils.NestingSep) // String Value
 		if err != nil {
 			return "", err
 		}
@@ -288,7 +289,7 @@ func (aReq *AgentRequest) ParseField(
 			return "", fmt.Errorf("invalid value <%s> to %s",
 				strVal1, utils.MetaValueExponent)
 		}
-		strVal2, err := cfgFld.Value[1].ParseDataProvider(aReq, utils.NestingSep) // String Exponent
+		strVal2, err := cfgFld.Value[1].ParseDataProvider(ar, utils.NestingSep) // String Exponent
 		if err != nil {
 			return "", err
 		}
@@ -313,7 +314,7 @@ func (aReq *AgentRequest) ParseField(
 
 // setCGRReply will set the aReq.cgrReply based on reply coming from upstream or error
 // returns error in case of reply not converting to NavigableMap
-func (aReq *AgentRequest) setCGRReply(rply config.NavigableMapper, errRply error) (err error) {
+func (ar *AgentRequest) setCGRReply(rply config.NavigableMapper, errRply error) (err error) {
 	var nm *config.NavigableMap
 	if errRply != nil {
 		nm = config.NewNavigableMap(map[string]interface{}{
@@ -327,6 +328,6 @@ func (aReq *AgentRequest) setCGRReply(rply config.NavigableMapper, errRply error
 		}
 		nm.Set([]string{utils.Error}, "", false, false) // enforce empty error
 	}
-	*aReq.CGRReply = *nm // update value so we can share CGRReply
+	*ar.CGRReply = *nm // update value so we can share CGRReply
 	return
 }

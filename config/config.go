@@ -190,7 +190,7 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 		return
 	}
 
-	cfg.dfltCdreProfile = cfg.CdreProfiles[utils.META_DEFAULT].Clone() // So default will stay unique, will have nil pointer in case of no defaults loaded which is an extra check
+	cfg.dfltCdreProfile = cfg.CdreProfiles[utils.MetaDefault].Clone() // So default will stay unique, will have nil pointer in case of no defaults loaded which is an extra check
 	cfg.dfltCdrcProfile = cfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0].Clone()
 	// populate default ERs reader
 	for _, ersRdr := range cfg.ersCfg.Readers {
@@ -530,7 +530,7 @@ func (cfg *CGRConfig) loadCdreCfg(jsnCfg *CgrJsonCfg) (err error) {
 		for profileName, jsnCdre1Cfg := range jsnCdreCfg {
 			if _, hasProfile := cfg.CdreProfiles[profileName]; !hasProfile { // New profile, create before loading from json
 				cfg.CdreProfiles[profileName] = new(CdreCfg)
-				if profileName != utils.META_DEFAULT {
+				if profileName != utils.MetaDefault {
 					cfg.CdreProfiles[profileName] = cfg.dfltCdreProfile.Clone() // Clone default so we do not inherit pointers
 				}
 			}
@@ -553,7 +553,7 @@ func (cfg *CGRConfig) loadCdrcCfg(jsnCfg *CgrJsonCfg) (err error) {
 			if jsnCrc1Cfg.Id == nil || *jsnCrc1Cfg.Id == "" {
 				return utils.ErrCDRCNoProfileID
 			}
-			if *jsnCrc1Cfg.Id == utils.META_DEFAULT {
+			if *jsnCrc1Cfg.Id == utils.MetaDefault {
 				if cfg.dfltCdrcProfile == nil {
 					cfg.dfltCdrcProfile = new(CdrcCfg)
 				}

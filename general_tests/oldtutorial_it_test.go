@@ -601,9 +601,9 @@ package general_tests
 // 		SetupTime:  time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC).Local().Format(time.RFC3339),
 // 		AnswerTime: time.Date(2014, 8, 4, 13, 0, 7, 0, time.UTC).Local().Format(time.RFC3339), Usage: "2s",
 // 		ExtraFields: map[string]string{"Cli": "+4986517174964", "fieldextr2": "valextr2", "SysUserName": "danb4"},
-// 		RunID:       utils.META_DEFAULT, Cost: 1}
+// 		RunID:       utils.MetaDefault, Cost: 1}
 // 	var cdrs []*engine.ExternalCDR
-// 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT},
+// 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault},
 // 		Accounts: []string{"1004"}, DestinationPrefixes: []string{"1001"}}
 // 	if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
@@ -664,7 +664,7 @@ package general_tests
 // 	}
 // 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 // 	var cdrs []*engine.ExternalCDR
-// 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{cdr.Account}, DestinationPrefixes: []string{cdr.Destination}}
+// 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, Accounts: []string{cdr.Account}, DestinationPrefixes: []string{cdr.Destination}}
 // 	if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
@@ -689,7 +689,7 @@ package general_tests
 // 		t.Error("Unexpected reply received: ", reply)
 // 	}
 // 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for CDR to be processed
-// 	req = utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{cdr2.Account}, DestinationPrefixes: []string{cdr2.Destination}}
+// 	req = utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, Accounts: []string{cdr2.Account}, DestinationPrefixes: []string{cdr2.Destination}}
 // 	if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
@@ -714,7 +714,7 @@ package general_tests
 // 		t.Error("Unexpected reply received: ", reply)
 // 	}
 // 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for CDR to be processed
-// 	req = utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{cdr3.Account}, DestinationPrefixes: []string{cdr3.Destination}}
+// 	req = utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, Accounts: []string{cdr3.Account}, DestinationPrefixes: []string{cdr3.Destination}}
 // 	if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
@@ -1335,7 +1335,7 @@ package general_tests
 // 	cdr := &engine.CDR{CGRID: utils.Sha1("testprepaid1", time.Date(2016, 4, 6, 13, 29, 24, 0, time.UTC).String()),
 // 		ToR: utils.VOICE, OriginID: "testprepaid1", OriginHost: "192.168.1.1",
 // 		Source: "TEST_PREPAID_CDR_SMCOST1", RequestType: utils.META_PREPAID, Tenant: "cgrates.org",
-// 		RunID:    utils.META_DEFAULT,
+// 		RunID:    utils.MetaDefault,
 // 		Category: "call", Account: "1001", Subject: "1001", Destination: "1003",
 // 		SetupTime:   time.Date(2016, 4, 6, 13, 29, 24, 0, time.UTC),
 // 		AnswerTime:  time.Date(2016, 4, 6, 13, 30, 0, 0, time.UTC),
@@ -1366,12 +1366,12 @@ package general_tests
 // 		},
 // 		TOR: utils.VOICE}
 // 	smCost := &engine.SMCost{CGRID: cdr.CGRID,
-// 		RunID:       utils.META_DEFAULT,
+// 		RunID:       utils.MetaDefault,
 // 		OriginHost:  cdr.OriginHost,
 // 		OriginID:    cdr.OriginID,
 // 		CostSource:  "TestTutITPrepaidCDRWithSMCost",
 // 		Usage:       cdr.Usage,
-// 		CostDetails: engine.NewEventCostFromCallCost(cc, cdr.CGRID, utils.META_DEFAULT),
+// 		CostDetails: engine.NewEventCostFromCallCost(cc, cdr.CGRID, utils.MetaDefault),
 // 	}
 // 	var reply string
 // 	if err := tutLocalRpc.Call("CdrsV1.StoreSMCost", &engine.AttrCDRSStoreSMCost{Cost: smCost}, &reply); err != nil {
@@ -1386,7 +1386,7 @@ package general_tests
 // 	}
 // 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for CDR to be processed
 // 	var cdrs []*engine.ExternalCDR
-// 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, CGRIDs: []string{cdr.CGRID}}
+// 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, CGRIDs: []string{cdr.CGRID}}
 // 	if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {
@@ -1418,7 +1418,7 @@ package general_tests
 // 	/*
 // 		time.Sleep(time.Duration(7000) * time.Millisecond) // Give time for CDR to be processed
 // 		var cdrs []*engine.ExternalCDR
-// 		req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, CGRIDs: []string{cdr.CGRID}}
+// 		req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, CGRIDs: []string{cdr.CGRID}}
 // 		if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 // 			t.Error("Unexpected error: ", err.Error())
 // 		} else if len(cdrs) != 1 {
@@ -1449,7 +1449,7 @@ package general_tests
 // 	}
 // 	time.Sleep(time.Duration(50) * time.Millisecond) // Give time for CDR to be processed
 // 	var cdrs []*engine.ExternalCDR
-// 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, CGRIDs: []string{cdr.CGRID}}
+// 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, CGRIDs: []string{cdr.CGRID}}
 // 	if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
 // 	} else if len(cdrs) != 1 {

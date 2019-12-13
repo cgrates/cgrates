@@ -83,7 +83,7 @@ func (ldrS *LoaderService) V1Load(args *ArgsProcessFolder,
 	ldrS.RLock()
 	defer ldrS.RUnlock()
 	if args.LoaderID == "" {
-		args.LoaderID = utils.META_DEFAULT
+		args.LoaderID = utils.MetaDefault
 	}
 	ldr, has := ldrS.ldrs[args.LoaderID]
 	if !has {
@@ -116,7 +116,7 @@ func (ldrS *LoaderService) V1Remove(args *ArgsProcessFolder,
 	ldrS.RLock()
 	defer ldrS.RUnlock()
 	if args.LoaderID == "" {
-		args.LoaderID = utils.META_DEFAULT
+		args.LoaderID = utils.MetaDefault
 	}
 	ldr, has := ldrS.ldrs[args.LoaderID]
 	if !has {

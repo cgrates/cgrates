@@ -469,25 +469,25 @@ func TestParseFsHangup(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	ev := NewFSEvent(hangupEv)
-	setupTime, _ := ev.GetSetupTime(utils.META_DEFAULT, "")
-	answerTime, _ := ev.GetAnswerTime(utils.META_DEFAULT, "")
-	dur, _ := ev.GetDuration(utils.META_DEFAULT)
-	if ev.GetReqType(utils.META_DEFAULT) != utils.META_PREPAID ||
-		ev.GetTenant(utils.META_DEFAULT) != "cgrates.org" ||
-		ev.GetCategory(utils.META_DEFAULT) != "call" ||
-		ev.GetAccount(utils.META_DEFAULT) != "1001" ||
-		ev.GetSubject(utils.META_DEFAULT) != "1001" ||
-		ev.GetDestination(utils.META_DEFAULT) != "1003" ||
+	setupTime, _ := ev.GetSetupTime(utils.MetaDefault, "")
+	answerTime, _ := ev.GetAnswerTime(utils.MetaDefault, "")
+	dur, _ := ev.GetDuration(utils.MetaDefault)
+	if ev.GetReqType(utils.MetaDefault) != utils.META_PREPAID ||
+		ev.GetTenant(utils.MetaDefault) != "cgrates.org" ||
+		ev.GetCategory(utils.MetaDefault) != "call" ||
+		ev.GetAccount(utils.MetaDefault) != "1001" ||
+		ev.GetSubject(utils.MetaDefault) != "1001" ||
+		ev.GetDestination(utils.MetaDefault) != "1003" ||
 		setupTime.UTC() != time.Date(2015, 7, 7, 14, 52, 8, 0, time.UTC) ||
 		answerTime.UTC() != time.Date(2015, 7, 7, 14, 52, 8, 0, time.UTC) ||
 		dur != time.Duration(66)*time.Second {
 		t.Error("Default values not matching",
-			ev.GetReqType(utils.META_DEFAULT) != utils.META_PREPAID,
-			ev.GetTenant(utils.META_DEFAULT) != "cgrates.org",
-			ev.GetCategory(utils.META_DEFAULT) != "call",
-			ev.GetAccount(utils.META_DEFAULT) != "1001",
-			ev.GetSubject(utils.META_DEFAULT) != "1001",
-			ev.GetDestination(utils.META_DEFAULT) != "1003",
+			ev.GetReqType(utils.MetaDefault) != utils.META_PREPAID,
+			ev.GetTenant(utils.MetaDefault) != "cgrates.org",
+			ev.GetCategory(utils.MetaDefault) != "call",
+			ev.GetAccount(utils.MetaDefault) != "1001",
+			ev.GetSubject(utils.MetaDefault) != "1001",
+			ev.GetDestination(utils.MetaDefault) != "1003",
 			setupTime.UTC() != time.Date(2015, 7, 7, 14, 52, 8, 0, time.UTC),
 			answerTime.UTC() != time.Date(2015, 7, 7, 14, 52, 8, 0, time.UTC),
 			dur != time.Duration(66)*time.Second)
@@ -548,7 +548,7 @@ func TestParseEventValue(t *testing.T) {
 	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.SUPPLIER, true), ""); parsed != "supplier1" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.RunID, true), ""); parsed != utils.META_DEFAULT {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.RunID, true), ""); parsed != utils.MetaDefault {
 		t.Error("Unexpected result parsed", parsed)
 	}
 	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.COST, true), ""); parsed != "-1" {
@@ -562,12 +562,12 @@ func TestParseEventValue(t *testing.T) {
 func TestFsEvAsCGREvent(t *testing.T) {
 	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	ev := NewFSEvent(hangupEv)
-	sTime, err := ev.GetSetupTime(utils.META_DEFAULT, timezone)
+	sTime, err := ev.GetSetupTime(utils.MetaDefault, timezone)
 	if err != nil {
 		t.Error(err)
 	}
 	expected := &utils.CGREvent{
-		Tenant: ev.GetTenant(utils.META_DEFAULT),
+		Tenant: ev.GetTenant(utils.MetaDefault),
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   &sTime,
 		Event:  ev.AsMapStringInterface(timezone),
@@ -987,14 +987,14 @@ variable_rtp_audio_rtcp_octet_count: 0`
 func TestFsEvV1AuthorizeArgs(t *testing.T) {
 	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	ev := NewFSEvent(hangupEv)
-	sTime, err := ev.GetSetupTime(utils.META_DEFAULT, timezone)
+	sTime, err := ev.GetSetupTime(utils.MetaDefault, timezone)
 	if err != nil {
 		t.Error(err)
 	}
 	expected := &sessions.V1AuthorizeArgs{
 		GetMaxUsage: true,
 		CGREvent: &utils.CGREvent{
-			Tenant: ev.GetTenant(utils.META_DEFAULT),
+			Tenant: ev.GetTenant(utils.MetaDefault),
 			ID:     utils.UUIDSha1Prefix(),
 			Time:   &sTime,
 			Event:  ev.AsMapStringInterface(timezone),
@@ -1030,14 +1030,14 @@ func TestFsEvV1AuthorizeArgs(t *testing.T) {
 func TestFsEvV1InitSessionArgs(t *testing.T) {
 	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	ev := NewFSEvent(hangupEv)
-	sTime, err := ev.GetSetupTime(utils.META_DEFAULT, timezone)
+	sTime, err := ev.GetSetupTime(utils.MetaDefault, timezone)
 	if err != nil {
 		t.Error(err)
 	}
 	expected := &sessions.V1InitSessionArgs{
 		InitSession: true,
 		CGREvent: &utils.CGREvent{
-			Tenant: ev.GetTenant(utils.META_DEFAULT),
+			Tenant: ev.GetTenant(utils.MetaDefault),
 			ID:     utils.UUIDSha1Prefix(),
 			Time:   &sTime,
 			Event:  ev.AsMapStringInterface(timezone),
@@ -1060,14 +1060,14 @@ func TestFsEvV1InitSessionArgs(t *testing.T) {
 func TestFsEvV1TerminateSessionArgs(t *testing.T) {
 	timezone := config.CgrConfig().GeneralCfg().DefaultTimezone
 	ev := NewFSEvent(hangupEv)
-	sTime, err := ev.GetSetupTime(utils.META_DEFAULT, timezone)
+	sTime, err := ev.GetSetupTime(utils.MetaDefault, timezone)
 	if err != nil {
 		t.Error(err)
 	}
 	expected := &sessions.V1TerminateSessionArgs{
 		TerminateSession: true,
 		CGREvent: &utils.CGREvent{
-			Tenant: ev.GetTenant(utils.META_DEFAULT),
+			Tenant: ev.GetTenant(utils.MetaDefault),
 			ID:     utils.UUIDSha1Prefix(),
 			Time:   &sTime,
 			Event:  ev.AsMapStringInterface(timezone),

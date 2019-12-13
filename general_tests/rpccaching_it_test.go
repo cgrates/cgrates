@@ -768,12 +768,12 @@ func testRPCMethodsCdrsStoreSessionCost(t *testing.T) {
 		CheckDuplicate: true,
 		Cost: &engine.V2SMCost{
 			CGRID:       "testRPCMethodsCdrsStoreSessionCost",
-			RunID:       utils.META_DEFAULT,
+			RunID:       utils.MetaDefault,
 			OriginHost:  "",
 			OriginID:    "testdatagrp_grp1",
 			CostSource:  "SMR",
 			Usage:       1536,
-			CostDetails: engine.NewEventCostFromCallCost(cc, "testRPCMethodsCdrsStoreSessionCost", utils.META_DEFAULT),
+			CostDetails: engine.NewEventCostFromCallCost(cc, "testRPCMethodsCdrsStoreSessionCost", utils.MetaDefault),
 		},
 	}
 

@@ -39,7 +39,7 @@ func TestCsvCdrWriter(t *testing.T) {
 		SetupTime:  time.Unix(1383813745, 0).UTC(),
 		AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage:      time.Duration(10) * time.Second,
-		RunID:      utils.META_DEFAULT, Cost: 1.01,
+		RunID:      utils.MetaDefault, Cost: 1.01,
 		ExtraFields: map[string]string{"extra1": "val_extra1",
 			"extra2": "val_extra2", "extra3": "val_extra3"},
 	}
@@ -77,7 +77,7 @@ func TestAlternativeFieldSeparator(t *testing.T) {
 		SetupTime:  time.Unix(1383813745, 0).UTC(),
 		AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage:      time.Duration(10) * time.Second,
-		RunID:      utils.META_DEFAULT, Cost: 1.01,
+		RunID:      utils.MetaDefault, Cost: 1.01,
 		ExtraFields: map[string]string{"extra1": "val_extra1",
 			"extra2": "val_extra2", "extra3": "val_extra3"},
 	}
@@ -147,7 +147,7 @@ func TestExportVoiceWithConvert(t *testing.T) {
 		SetupTime:  time.Unix(1383813745, 0).UTC(),
 		AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage:      time.Duration(10) * time.Second,
-		RunID:      utils.META_DEFAULT, Cost: 1.01,
+		RunID:      utils.MetaDefault, Cost: 1.01,
 		ExtraFields: map[string]string{"extra1": "val_extra1",
 			"extra2": "val_extra2", "extra3": "val_extra3"},
 	}
@@ -159,7 +159,7 @@ func TestExportVoiceWithConvert(t *testing.T) {
 		SetupTime:  time.Unix(1383813745, 0).UTC(),
 		AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage:      time.Duration(10) * time.Nanosecond,
-		RunID:      utils.META_DEFAULT, Cost: 0.012,
+		RunID:      utils.MetaDefault, Cost: 0.012,
 		ExtraFields: map[string]string{"extra1": "val_extra1",
 			"extra2": "val_extra2", "extra3": "val_extra3"},
 	}
@@ -171,7 +171,7 @@ func TestExportVoiceWithConvert(t *testing.T) {
 		SetupTime:  time.Unix(1383813745, 0).UTC(),
 		AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage:      time.Duration(1),
-		RunID:      utils.META_DEFAULT, Cost: 0.15,
+		RunID:      utils.MetaDefault, Cost: 0.15,
 		ExtraFields: map[string]string{"extra1": "val_extra1",
 			"extra2": "val_extra2", "extra3": "val_extra3"},
 	}
@@ -244,7 +244,7 @@ func TestExportWithFilter(t *testing.T) {
 		SetupTime:  time.Unix(1383813745, 0).UTC(),
 		AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage:      time.Duration(10) * time.Second,
-		RunID:      utils.META_DEFAULT, Cost: 1.01,
+		RunID:      utils.MetaDefault, Cost: 1.01,
 		ExtraFields: map[string]string{"extra1": "val_extra1",
 			"extra2": "val_extra2", "extra3": "val_extra3"},
 	}
@@ -256,7 +256,7 @@ func TestExportWithFilter(t *testing.T) {
 		SetupTime:  time.Unix(1383813745, 0).UTC(),
 		AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage:      time.Duration(10) * time.Nanosecond,
-		RunID:      utils.META_DEFAULT, Cost: 0.012,
+		RunID:      utils.MetaDefault, Cost: 0.012,
 		ExtraFields: map[string]string{"extra1": "val_extra1",
 			"extra2": "val_extra2", "extra3": "val_extra3"},
 	}
@@ -268,7 +268,7 @@ func TestExportWithFilter(t *testing.T) {
 		SetupTime:  time.Unix(1383813745, 0).UTC(),
 		AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage:      time.Duration(1),
-		RunID:      utils.META_DEFAULT, Cost: 0.15,
+		RunID:      utils.MetaDefault, Cost: 0.15,
 		ExtraFields: map[string]string{"extra1": "val_extra1",
 			"extra2": "val_extra2", "extra3": "val_extra3"},
 	}
@@ -340,7 +340,7 @@ func TestExportWithFilter2(t *testing.T) {
 		SetupTime:  time.Unix(1383813745, 0).UTC(),
 		AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage:      time.Duration(10) * time.Second,
-		RunID:      utils.META_DEFAULT, Cost: 1.01,
+		RunID:      utils.MetaDefault, Cost: 1.01,
 		ExtraFields: map[string]string{"extra1": "val_extra1",
 			"extra2": "val_extra2", "extra3": "val_extra3"},
 	}
@@ -352,7 +352,7 @@ func TestExportWithFilter2(t *testing.T) {
 		SetupTime:  time.Unix(1383813745, 0).UTC(),
 		AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage:      time.Duration(10) * time.Nanosecond,
-		RunID:      utils.META_DEFAULT, Cost: 0.012,
+		RunID:      utils.MetaDefault, Cost: 0.012,
 		ExtraFields: map[string]string{"extra1": "val_extra1",
 			"extra2": "val_extra2", "extra3": "val_extra3"},
 	}
@@ -364,7 +364,7 @@ func TestExportWithFilter2(t *testing.T) {
 		SetupTime:  time.Unix(1383813745, 0).UTC(),
 		AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage:      time.Duration(1),
-		RunID:      utils.META_DEFAULT, Cost: 0.15,
+		RunID:      utils.MetaDefault, Cost: 0.15,
 		ExtraFields: map[string]string{"extra1": "val_extra1",
 			"extra2": "val_extra2", "extra3": "val_extra3"},
 	}

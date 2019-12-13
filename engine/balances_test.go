@@ -260,7 +260,7 @@ func TestBalanceIsDefault(t *testing.T) {
 	if b.IsDefault() {
 		t.Errorf("Balance should not be default: %+v", b)
 	}
-	b = &Balance{ID: utils.META_DEFAULT}
+	b = &Balance{ID: utils.MetaDefault}
 	if !b.IsDefault() {
 		t.Errorf("Balance should be default: %+v", b)
 	}

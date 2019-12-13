@@ -117,7 +117,7 @@ func (b *Balance) HardMatchFilter(o *BalanceFilter, skipIds bool) bool {
 
 // the default balance has standard Id
 func (b *Balance) IsDefault() bool {
-	return b.ID == utils.META_DEFAULT
+	return b.ID == utils.MetaDefault
 }
 
 // IsExpiredAt check if ExpirationDate is before time t

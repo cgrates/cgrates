@@ -204,7 +204,7 @@ func TestCgrCfgCDRC(t *testing.T) {
 	eCgrCfg, _ := NewDefaultCGRConfig()
 	eCgrCfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"] = []*CdrcCfg{
 		{
-			ID:                       utils.META_DEFAULT,
+			ID:                       utils.MetaDefault,
 			Enabled:                  true,
 			DryRun:                   false,
 			CdrsConns:                []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
@@ -1001,8 +1001,8 @@ func TestRadiusAgentCfg(t *testing.T) {
 		ListenNet:          "udp",
 		ListenAuth:         "127.0.0.1:1812",
 		ListenAcct:         "127.0.0.1:1813",
-		ClientSecrets:      map[string]string{utils.META_DEFAULT: "CGRateS.org"},
-		ClientDictionaries: map[string]string{utils.META_DEFAULT: "/usr/share/cgrates/radius/dict/"},
+		ClientSecrets:      map[string]string{utils.MetaDefault: "CGRateS.org"},
+		ClientDictionaries: map[string]string{utils.MetaDefault: "/usr/share/cgrates/radius/dict/"},
 		SessionSConns:      []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)},
 		RequestProcessors:  nil,
 	}
@@ -1042,7 +1042,7 @@ func TestDbDefaults(t *testing.T) {
 func TestCgrLoaderCfgITDefaults(t *testing.T) {
 	eCfg := LoaderSCfgs{
 		{
-			Id:             utils.META_DEFAULT,
+			Id:             utils.MetaDefault,
 			Enabled:        false,
 			DryRun:         false,
 			RunDelay:       0,
@@ -1572,7 +1572,7 @@ func TestCDRCWithDefault(t *testing.T) {
 	eCgrCfg, _ := NewDefaultCGRConfig()
 	eCgrCfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"] = []*CdrcCfg{
 		{
-			ID:                       utils.META_DEFAULT,
+			ID:                       utils.MetaDefault,
 			Enabled:                  false,
 			DryRun:                   false,
 			CdrsConns:                []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},

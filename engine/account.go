@@ -141,7 +141,7 @@ func (acc *Account) setBalanceAction(a *Action) error {
 			acc.BalanceMap[*a.Balance.Type] = append(acc.BalanceMap[*a.Balance.Type], balance)
 		}
 	}
-	if a.Balance.ID != nil && *a.Balance.ID == utils.META_DEFAULT { // treat it separately since modifyBalance sets expiry and others parameters, not specific for *default
+	if a.Balance.ID != nil && *a.Balance.ID == utils.MetaDefault { // treat it separately since modifyBalance sets expiry and others parameters, not specific for *default
 		if a.Balance.Value != nil {
 			balance.ID = *a.Balance.ID
 			balance.Value = a.Balance.GetValue()
@@ -218,9 +218,9 @@ func (ub *Account) debitBalanceAction(a *Action, reset, resetIfNegative bool) er
 	if !found {
 		// check if the Id is *default (user trying to create the default balance)
 		// use only it's value value
-		if bClone.ID == utils.META_DEFAULT {
+		if bClone.ID == utils.MetaDefault {
 			bClone = &Balance{
-				ID:    utils.META_DEFAULT,
+				ID:    utils.MetaDefault,
 				Value: -bClone.GetValue(),
 			}
 		} else {
@@ -598,7 +598,7 @@ func (ub *Account) GetDefaultMoneyBalance() *Balance {
 	// create default balance
 	defaultBalance := &Balance{
 		Uuid: utils.GenUUID(),
-		ID:   utils.META_DEFAULT,
+		ID:   utils.MetaDefault,
 	} // minimum weight
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]Balances)

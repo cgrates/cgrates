@@ -231,7 +231,7 @@ func testV1FIdxCaGetThresholdFromTP(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.EventType: utils.BalanceUpdate,
 				utils.Account:   "1001",
-				utils.BalanceID: utils.META_DEFAULT,
+				utils.BalanceID: utils.MetaDefault,
 				utils.Units:     12.3}}}
 	var thIDs []string
 	eIDs := []string{"THD_ACNT_BALANCE_1"}

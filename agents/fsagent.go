@@ -133,7 +133,7 @@ func (sm *FSsessions) unparkCall(uuid string, connIdx int, call_dest_nb, notify 
 }
 
 func (sm *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
-	if fsev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Not for us
+	if fsev.GetReqType(utils.MetaDefault) == utils.META_NONE { // Not for us
 		return
 	}
 	if connIdx >= len(sm.conns) { // protection against index out of range panic
@@ -150,7 +150,7 @@ func (sm *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 			fmt.Sprintf("<%s> Could not authorize event %s, error: %s",
 				utils.FreeSWITCHAgent, fsev.GetUUID(), err.Error()))
 		sm.unparkCall(fsev.GetUUID(), connIdx,
-			fsev.GetCallDestNr(utils.META_DEFAULT), err.Error())
+			fsev.GetCallDestNr(utils.MetaDefault), err.Error())
 		return
 	}
 	if authReply.Attributes != nil {
@@ -165,7 +165,7 @@ func (sm *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 					fmt.Sprintf("<%s> error %s setting channel variabile: %s",
 						utils.FreeSWITCHAgent, err.Error(), fldName))
 				sm.unparkCall(fsev.GetUUID(), connIdx,
-					fsev.GetCallDestNr(utils.META_DEFAULT), err.Error())
+					fsev.GetCallDestNr(utils.MetaDefault), err.Error())
 				return
 			}
 		}
@@ -173,11 +173,11 @@ func (sm *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 	if authArgs.GetMaxUsage {
 		if authReply.MaxUsage == 0 {
 			sm.unparkCall(fsev.GetUUID(), connIdx,
-				fsev.GetCallDestNr(utils.META_DEFAULT), utils.ErrInsufficientCredit.Error())
+				fsev.GetCallDestNr(utils.MetaDefault), utils.ErrInsufficientCredit.Error())
 			return
 		}
 		sm.setMaxCallDuration(fsev.GetUUID(), connIdx,
-			authReply.MaxUsage, fsev.GetCallDestNr(utils.META_DEFAULT))
+			authReply.MaxUsage, fsev.GetCallDestNr(utils.MetaDefault))
 	}
 	if authReply.ResourceAllocation != nil {
 		if _, err := sm.conns[connIdx].SendApiCmd(fmt.Sprintf("uuid_setvar %s %s %s\n\n",
@@ -186,7 +186,7 @@ func (sm *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 				fmt.Sprintf("<%s> error %s setting channel variabile: %s",
 					utils.FreeSWITCHAgent, err.Error(), CGRResourceAllocation))
 			sm.unparkCall(fsev.GetUUID(), connIdx,
-				fsev.GetCallDestNr(utils.META_DEFAULT), err.Error())
+				fsev.GetCallDestNr(utils.MetaDefault), err.Error())
 			return
 		}
 	}
@@ -196,17 +196,17 @@ func (sm *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 			fsev.GetUUID(), utils.CGR_SUPPLIERS, fsArray)); err != nil {
 			utils.Logger.Info(fmt.Sprintf("<%s> error setting suppliers: %s",
 				utils.FreeSWITCHAgent, err.Error()))
-			sm.unparkCall(fsev.GetUUID(), connIdx, fsev.GetCallDestNr(utils.META_DEFAULT), err.Error())
+			sm.unparkCall(fsev.GetUUID(), connIdx, fsev.GetCallDestNr(utils.MetaDefault), err.Error())
 			return
 		}
 	}
 
 	sm.unparkCall(fsev.GetUUID(), connIdx,
-		fsev.GetCallDestNr(utils.META_DEFAULT), AUTH_OK)
+		fsev.GetCallDestNr(utils.MetaDefault), AUTH_OK)
 }
 
 func (sm *FSsessions) onChannelAnswer(fsev FSEvent, connIdx int) {
-	if fsev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
+	if fsev.GetReqType(utils.MetaDefault) == utils.META_NONE { // Do not process this request
 		return
 	}
 	if connIdx >= len(sm.conns) { // protection against index out of range panic
@@ -245,7 +245,7 @@ func (sm *FSsessions) onChannelAnswer(fsev FSEvent, connIdx int) {
 }
 
 func (sm *FSsessions) onChannelHangupComplete(fsev FSEvent, connIdx int) {
-	if fsev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
+	if fsev.GetReqType(utils.MetaDefault) == utils.META_NONE { // Do not process this request
 		return
 	}
 	if connIdx >= len(sm.conns) { // protection against index out of range panic
@@ -314,7 +314,7 @@ func (sm *FSsessions) Connect() error {
 	return err
 }
 
-// fsev.GetCallDestNr(utils.META_DEFAULT)
+// fsev.GetCallDestNr(utils.MetaDefault)
 // Disconnects a session by sending hangup command to freeswitch
 func (sm *FSsessions) disconnectSession(connIdx int, uuid, redirectNr, notify string) error {
 	if _, err := sm.conns[connIdx].SendApiCmd(

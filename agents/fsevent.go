@@ -174,28 +174,28 @@ func (fsev FSEvent) GetReqType(fieldName string) string {
 }
 
 func (fsev FSEvent) MissingParameter(timezone string) string {
-	if strings.TrimSpace(fsev.GetDirection(utils.META_DEFAULT)) == "" {
+	if strings.TrimSpace(fsev.GetDirection(utils.MetaDefault)) == "" {
 		return utils.Direction
 	}
-	if strings.TrimSpace(fsev.GetAccount(utils.META_DEFAULT)) == "" {
+	if strings.TrimSpace(fsev.GetAccount(utils.MetaDefault)) == "" {
 		return utils.Account
 	}
-	if strings.TrimSpace(fsev.GetSubject(utils.META_DEFAULT)) == "" {
+	if strings.TrimSpace(fsev.GetSubject(utils.MetaDefault)) == "" {
 		return utils.Subject
 	}
-	if strings.TrimSpace(fsev.GetDestination(utils.META_DEFAULT)) == "" {
+	if strings.TrimSpace(fsev.GetDestination(utils.MetaDefault)) == "" {
 		return utils.Destination
 	}
-	if strings.TrimSpace(fsev.GetCategory(utils.META_DEFAULT)) == "" {
+	if strings.TrimSpace(fsev.GetCategory(utils.MetaDefault)) == "" {
 		return utils.Category
 	}
 	if strings.TrimSpace(fsev.GetUUID()) == "" {
 		return utils.OriginID
 	}
-	if strings.TrimSpace(fsev.GetTenant(utils.META_DEFAULT)) == "" {
+	if strings.TrimSpace(fsev.GetTenant(utils.MetaDefault)) == "" {
 		return utils.Tenant
 	}
-	if strings.TrimSpace(fsev.GetCallDestNr(utils.META_DEFAULT)) == "" {
+	if strings.TrimSpace(fsev.GetCallDestNr(utils.MetaDefault)) == "" {
 		return CALL_DEST_NR
 	}
 	return ""
@@ -241,7 +241,7 @@ func (fsev FSEvent) GetDuration(fieldName string) (time.Duration, error) {
 
 func (fsev FSEvent) GetPdd(fieldName string) (time.Duration, error) {
 	var PDDStr string
-	if utils.SliceHasMember([]string{utils.META_DEFAULT, utils.PDD}, fieldName) {
+	if utils.SliceHasMember([]string{utils.MetaDefault, utils.PDD}, fieldName) {
 		PDDStr = utils.FirstNonEmpty(fsev[PDD_MEDIA_MS], fsev[PDD_NOMEDIA_MS])
 		if len(PDDStr) != 0 {
 			PDDStr = PDDStr + "ms" // PDD is in milliseconds and CGR expects it in seconds
@@ -256,7 +256,7 @@ func (fsev FSEvent) GetPdd(fieldName string) (time.Duration, error) {
 
 func (fsev FSEvent) GetADC(fieldName string) (time.Duration, error) {
 	var ACDStr string
-	if utils.SliceHasMember([]string{utils.META_DEFAULT, utils.ACD}, fieldName) {
+	if utils.SliceHasMember([]string{utils.MetaDefault, utils.ACD}, fieldName) {
 		ACDStr = utils.FirstNonEmpty(fsev[VarCGRACD])
 		if len(ACDStr) != 0 {
 			ACDStr = ACDStr + "s" //  ACD is in seconds and CGR expects it in seconds
@@ -343,14 +343,14 @@ func (fsev FSEvent) ParseEventValue(rsrFld *config.RSRParser, timezone string) (
 		dur, _ := fsev.GetDuration("")
 		return rsrFld.ParseValue(strconv.FormatInt(dur.Nanoseconds(), 10))
 	case utils.PDD:
-		PDD, _ := fsev.GetPdd(utils.META_DEFAULT)
+		PDD, _ := fsev.GetPdd(utils.MetaDefault)
 		return rsrFld.ParseValue(strconv.FormatFloat(PDD.Seconds(), 'f', -1, 64))
 	case utils.SUPPLIER:
 		return rsrFld.ParseValue(fsev.GetSupplier(""))
 	case utils.DISCONNECT_CAUSE:
 		return rsrFld.ParseValue(fsev.GetDisconnectCause(""))
 	case utils.RunID:
-		return rsrFld.ParseValue(utils.META_DEFAULT)
+		return rsrFld.ParseValue(utils.MetaDefault)
 	case utils.Cost:
 		return rsrFld.ParseValue(strconv.FormatFloat(-1, 'f', -1, 64)) // Recommended to use FormatCost
 	default:
@@ -363,12 +363,12 @@ func (fsev FSEvent) ParseEventValue(rsrFld *config.RSRParser, timezone string) (
 
 // AsCGREvent converts FSEvent into CGREvent
 func (fsev FSEvent) AsCGREvent(timezone string) (cgrEv *utils.CGREvent, err error) {
-	sTime, err := fsev.GetSetupTime(utils.META_DEFAULT, timezone)
+	sTime, err := fsev.GetSetupTime(utils.MetaDefault, timezone)
 	if err != nil {
 		return nil, err
 	}
 	cgrEv = &utils.CGREvent{
-		Tenant: fsev.GetTenant(utils.META_DEFAULT),
+		Tenant: fsev.GetTenant(utils.MetaDefault),
 		ID:     utils.UUIDSha1Prefix(),
 		Time:   &sTime,
 		Event:  fsev.AsMapStringInterface(timezone),
@@ -386,21 +386,21 @@ func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{}
 	mp[utils.OriginID] = fsev.GetUUID()
 	mp[utils.OriginHost] = fsev.GetOriginHost()
 	mp[utils.Source] = "FS_" + fsev.GetName()
-	mp[utils.RequestType] = fsev.GetReqType(utils.META_DEFAULT)
-	mp[utils.Direction] = fsev.GetDirection(utils.META_DEFAULT)
-	mp[utils.Tenant] = fsev.GetTenant(utils.META_DEFAULT)
-	mp[utils.Category] = fsev.GetCategory(utils.META_DEFAULT)
-	mp[utils.Account] = fsev.GetAccount(utils.META_DEFAULT)
-	mp[utils.Subject] = fsev.GetSubject(utils.META_DEFAULT)
-	mp[utils.Destination] = fsev.GetDestination(utils.META_DEFAULT)
-	mp[utils.SetupTime], _ = fsev.GetSetupTime(utils.META_DEFAULT, timezone)
-	mp[utils.AnswerTime], _ = fsev.GetAnswerTime(utils.META_DEFAULT, timezone)
-	mp[utils.Usage], _ = fsev.GetDuration(utils.META_DEFAULT)
-	mp[utils.PDD], _ = fsev.GetPdd(utils.META_DEFAULT)
-	mp[utils.ACD], _ = fsev.GetADC(utils.META_DEFAULT)
+	mp[utils.RequestType] = fsev.GetReqType(utils.MetaDefault)
+	mp[utils.Direction] = fsev.GetDirection(utils.MetaDefault)
+	mp[utils.Tenant] = fsev.GetTenant(utils.MetaDefault)
+	mp[utils.Category] = fsev.GetCategory(utils.MetaDefault)
+	mp[utils.Account] = fsev.GetAccount(utils.MetaDefault)
+	mp[utils.Subject] = fsev.GetSubject(utils.MetaDefault)
+	mp[utils.Destination] = fsev.GetDestination(utils.MetaDefault)
+	mp[utils.SetupTime], _ = fsev.GetSetupTime(utils.MetaDefault, timezone)
+	mp[utils.AnswerTime], _ = fsev.GetAnswerTime(utils.MetaDefault, timezone)
+	mp[utils.Usage], _ = fsev.GetDuration(utils.MetaDefault)
+	mp[utils.PDD], _ = fsev.GetPdd(utils.MetaDefault)
+	mp[utils.ACD], _ = fsev.GetADC(utils.MetaDefault)
 	mp[utils.COST] = -1.0
-	mp[utils.SUPPLIER] = fsev.GetSupplier(utils.META_DEFAULT)
-	mp[utils.DISCONNECT_CAUSE] = fsev.GetDisconnectCause(utils.META_DEFAULT)
+	mp[utils.SUPPLIER] = fsev.GetSupplier(utils.MetaDefault)
+	mp[utils.DISCONNECT_CAUSE] = fsev.GetDisconnectCause(utils.MetaDefault)
 	return mp
 }
 

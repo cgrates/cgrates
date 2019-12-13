@@ -218,7 +218,7 @@ func TestSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	}
 	time.Sleep(100 * time.Millisecond)
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT},
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault},
 		DestinationPrefixes: []string{"1004"}}
 	if err := sessionsRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -336,7 +336,7 @@ func TestSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 	time.Sleep(time.Duration(10) * time.Millisecond)
 
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT},
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault},
 		DestinationPrefixes: []string{"1005"}}
 	if err := sessionsRPC.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())

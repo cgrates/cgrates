@@ -60,7 +60,7 @@ func (alS *AttributeService) Shutdown() (err error) {
 // matchingAttributeProfilesForEvent returns ordered list of matching resources which are active by the time of the call
 func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent) (matchAttrPrfl *AttributeProfile, err error) {
 	var attrIDs []string
-	contextVal := utils.META_DEFAULT
+	contextVal := utils.MetaDefault
 	if args.Context != nil && *args.Context != "" {
 		contextVal = *args.Context
 	}

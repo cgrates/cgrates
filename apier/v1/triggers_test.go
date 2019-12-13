@@ -79,7 +79,7 @@ func TestAttrSetActionTriggerUpdateActionTrigger(t *testing.T) {
 		ExpirationDate: tNow,
 		ActivationDate: tNow,
 		Balance: &engine.BalanceFilter{
-			ID:             utils.StringPointer(utils.META_DEFAULT),
+			ID:             utils.StringPointer(utils.MetaDefault),
 			Type:           utils.StringPointer("*call"),
 			ExpirationDate: utils.TimePointer(tNow),
 			Weight:         utils.Float64Pointer(10),

@@ -93,7 +93,7 @@ func (api *ApierV1) ExportCdrsToZipString(attr utils.AttrExpFileCdrs, reply *str
 
 // Deprecated by AttrExportCDRsToFile
 func (api *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.ExportedFileCdrs) (err error) {
-	exportTemplate := api.Config.CdreProfiles[utils.META_DEFAULT]
+	exportTemplate := api.Config.CdreProfiles[utils.MetaDefault]
 	if attr.ExportTemplate != nil && len(*attr.ExportTemplate) != 0 { // Export template prefered, use it
 		var hasIt bool
 		if exportTemplate, hasIt = api.Config.CdreProfiles[*attr.ExportTemplate]; !hasIt {
@@ -207,7 +207,7 @@ type RplExportedCDRs struct {
 func (api *ApierV1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err error) {
 	cdreReloadStruct := <-api.Config.ConfigReloads[utils.CDRE]                  // Read the content of the channel, locking it
 	defer func() { api.Config.ConfigReloads[utils.CDRE] <- cdreReloadStruct }() // Unlock reloads at exit
-	exportTemplate := api.Config.CdreProfiles[utils.META_DEFAULT]
+	exportTemplate := api.Config.CdreProfiles[utils.MetaDefault]
 	if expTemplate, has := arg.ExportArgs[utils.ExportTemplate]; has {
 		var hasIt bool
 		if exportTemplate, hasIt = api.Config.CdreProfiles[utils.IfaceAsString(expTemplate)]; !hasIt {
