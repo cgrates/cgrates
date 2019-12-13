@@ -223,7 +223,6 @@ const (
 	RATED                        = "rated"
 	Partial                      = "Partial"
 	PreRated                     = "PreRated"
-	DEFAULT_RUNID                = "*default"
 	META_DEFAULT                 = "*default"
 	STATIC_VALUE_PREFIX          = "^"
 	CSV                          = "csv"

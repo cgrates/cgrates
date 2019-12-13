@@ -548,7 +548,7 @@ func TestParseEventValue(t *testing.T) {
 	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.SUPPLIER, true), ""); parsed != "supplier1" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.RunID, true), ""); parsed != utils.DEFAULT_RUNID {
+	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.RunID, true), ""); parsed != utils.META_DEFAULT {
 		t.Error("Unexpected result parsed", parsed)
 	}
 	if parsed, _ := ev.ParseEventValue(config.NewRSRParserMustCompile(utils.REGEXP_PREFIX+utils.COST, true), ""); parsed != "-1" {

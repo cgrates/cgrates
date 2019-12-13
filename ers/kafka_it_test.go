@@ -22,6 +22,7 @@ package ers
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -80,11 +81,11 @@ func TestKafkaER(t *testing.T) {
 		Brokers: []string{"localhost:9092"},
 		Topic:   defaultTopic,
 	})
-
+	randomCGRID := utils.UUIDSha1Prefix()
 	w.WriteMessages(context.Background(),
 		kafka.Message{
-			Key:   []byte("TestKey"), // for the momment we do not proccess the key
-			Value: []byte(`{"CGRID": "RandomCGRID"}`),
+			Key:   []byte(randomCGRID), // for the momment we do not proccess the key
+			Value: []byte(fmt.Sprintf(`{"CGRID": "%s"}`, randomCGRID)),
 		},
 	)
 
@@ -101,14 +102,14 @@ func TestKafkaER(t *testing.T) {
 			ID:     ev.cgrEvent.ID,
 			Time:   ev.cgrEvent.Time,
 			Event: map[string]interface{}{
-				"CGRID": "RandomCGRID",
+				"CGRID": randomCGRID,
 			},
 		}
 		if !reflect.DeepEqual(ev.cgrEvent, expected) {
 			t.Errorf("Expected %s ,received %s", utils.ToJSON(expected), utils.ToJSON(ev.cgrEvent))
 		}
 	case <-time.After(10 * time.Second):
-		t.Errorf("Timeout")
+		t.Fatal("Timeout")
 	}
 	rdrExit <- struct{}{}
 }

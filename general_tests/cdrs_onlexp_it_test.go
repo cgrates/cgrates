@@ -23,6 +23,7 @@ package general_tests
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -44,6 +45,9 @@ var (
 	cdrsMasterCfgPath, cdrsSlaveCfgPath string
 	cdrsMasterCfg, cdrsSlaveCfg         *config.CGRConfig
 	cdrsMasterRpc                       *rpcclient.RPCClient
+	httpCGRID                           = utils.UUIDSha1Prefix()
+	amqpCGRID                           = utils.UUIDSha1Prefix()
+	failoverContent                     = [][]byte{[]byte(fmt.Sprintf(`{"CGRID":"%s"}`, httpCGRID)), []byte(fmt.Sprintf(`{"CGRID":"%s"}`, amqpCGRID))}
 
 	sTestsCDRsOnExp = []func(t *testing.T){
 		testCDRsOnExpInitConfig,
@@ -195,7 +199,7 @@ func testCDRsOnExpDisableOnlineExport(t *testing.T) {
 		AnswerTime:  time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage:       time.Duration(10) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		RunID:       utils.DEFAULT_RUNID,
+		RunID:       utils.META_DEFAULT,
 		Cost:        1.201,
 		PreRated:    true,
 	}
@@ -223,7 +227,7 @@ func testCDRsOnExpDisableOnlineExport(t *testing.T) {
 
 func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 	testCdr1 := &engine.CDR{
-		CGRID:       utils.Sha1("httpjsonrpc1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+		CGRID:       httpCGRID,
 		ToR:         utils.VOICE,
 		OriginID:    "httpjsonrpc1",
 		OriginHost:  "192.168.1.1",
@@ -238,7 +242,7 @@ func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 		AnswerTime:  time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage:       time.Duration(10) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		RunID:       utils.DEFAULT_RUNID,
+		RunID:       utils.META_DEFAULT,
 		Cost:        1.201,
 		PreRated:    true,
 	}
@@ -321,7 +325,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 		if err := json.Unmarshal(d.Body, &rcvCDR); err != nil {
 			t.Error(err)
 		}
-		if rcvCDR[utils.CGRID] != utils.Sha1("httpjsonrpc1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()) {
+		if rcvCDR[utils.CGRID] != httpCGRID {
 			t.Errorf("Unexpected CDR received: %+v", rcvCDR)
 		}
 	case <-time.After(time.Duration(100 * time.Millisecond)):
@@ -337,7 +341,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 		if err := json.Unmarshal(d.Body, &rcvCDR); err != nil {
 			t.Error(err)
 		}
-		if rcvCDR[utils.CGRID] != utils.Sha1("httpjsonrpc1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()) {
+		if rcvCDR[utils.CGRID] != httpCGRID {
 			t.Errorf("Unexpected CDR received: %+v", rcvCDR)
 		}
 	case <-time.After(time.Duration(100 * time.Millisecond)):
@@ -351,7 +355,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 	}
 	time.Sleep(time.Duration(5 * time.Second))
 	testCdr := &engine.CDR{
-		CGRID:       utils.Sha1("amqpreconnect", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+		CGRID:       amqpCGRID,
 		ToR:         utils.VOICE,
 		OriginID:    "amqpreconnect",
 		OriginHost:  "192.168.1.1",
@@ -366,7 +370,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 		AnswerTime:  time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage:       time.Duration(10) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		RunID:       utils.DEFAULT_RUNID,
+		RunID:       utils.META_DEFAULT,
 		Cost:        1.201,
 		PreRated:    true,
 	}
@@ -456,7 +460,6 @@ func testCDRsOnExpHTTPPosterFileFailover(t *testing.T) {
 
 func testCDRsOnExpAMQPPosterFileFailover(t *testing.T) {
 	time.Sleep(time.Duration(5 * time.Second))
-	failoverContent := [][]byte{[]byte(`{"CGRID":"57548d485d61ebcba55afbe5d939c82a8e9ff670"}`), []byte(`{"CGRID":"88ed9c38005f07576a1e1af293063833b60edcc6"}`)}
 	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {
 		t.Fatalf("No files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
@@ -485,7 +488,6 @@ func testCDRsOnExpAMQPPosterFileFailover(t *testing.T) {
 
 func testCDRsOnExpAWSAMQPPosterFileFailover(t *testing.T) {
 	time.Sleep(time.Duration(10 * time.Second))
-	failoverContent := [][]byte{[]byte(`{"CGRID":"57548d485d61ebcba55afbe5d939c82a8e9ff670"}`), []byte(`{"CGRID":"88ed9c38005f07576a1e1af293063833b60edcc6"}`)}
 	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {
 		t.Fatalf("No files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
@@ -513,8 +515,6 @@ func testCDRsOnExpAWSAMQPPosterFileFailover(t *testing.T) {
 }
 
 func testCDRsOnExpKafkaPosterFileFailover(t *testing.T) {
-	failoverContent := [][]byte{[]byte(`{"CGRID":"57548d485d61ebcba55afbe5d939c82a8e9ff670"}`), []byte(`{"CGRID":"88ed9c38005f07576a1e1af293063833b60edcc6"}`)}
-
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers: []string{"localhost:9092"},
 		Topic:   "cgrates_cdrs",
@@ -524,7 +524,7 @@ func testCDRsOnExpKafkaPosterFileFailover(t *testing.T) {
 
 	defer reader.Close()
 
-	for i := 0; i < 4; i++ {
+	for i := 0; i < 2; i++ { // no raw CDR
 		ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 		if m, err := reader.ReadMessage(ctx); err != nil {
 			t.Fatal(err)
@@ -536,7 +536,6 @@ func testCDRsOnExpKafkaPosterFileFailover(t *testing.T) {
 
 func testCDRsOnExpSQSPosterFileFailover(t *testing.T) {
 	time.Sleep(time.Duration(10 * time.Second))
-	failoverContent := [][]byte{[]byte(`{"CGRID":"57548d485d61ebcba55afbe5d939c82a8e9ff670"}`), []byte(`{"CGRID":"88ed9c38005f07576a1e1af293063833b60edcc6"}`)}
 	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {
 		t.Fatalf("No files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
@@ -565,7 +564,6 @@ func testCDRsOnExpSQSPosterFileFailover(t *testing.T) {
 
 func testCDRsOnExpS3PosterFileFailover(t *testing.T) {
 	time.Sleep(time.Duration(10 * time.Second))
-	failoverContent := [][]byte{[]byte(`{"CGRID":"57548d485d61ebcba55afbe5d939c82a8e9ff670"}`), []byte(`{"CGRID":"88ed9c38005f07576a1e1af293063833b60edcc6"}`)}
 	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {
 		t.Fatalf("No files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)

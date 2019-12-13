@@ -601,7 +601,7 @@ package general_tests
 // 		SetupTime:  time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC).Local().Format(time.RFC3339),
 // 		AnswerTime: time.Date(2014, 8, 4, 13, 0, 7, 0, time.UTC).Local().Format(time.RFC3339), Usage: "2s",
 // 		ExtraFields: map[string]string{"Cli": "+4986517174964", "fieldextr2": "valextr2", "SysUserName": "danb4"},
-// 		RunID:       utils.DEFAULT_RUNID, Cost: 1}
+// 		RunID:       utils.META_DEFAULT, Cost: 1}
 // 	var cdrs []*engine.ExternalCDR
 // 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT},
 // 		Accounts: []string{"1004"}, DestinationPrefixes: []string{"1001"}}
