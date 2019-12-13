@@ -23,6 +23,7 @@ import (
 	"net/rpc"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -43,30 +44,31 @@ var sTestsCDRsIT_ProcessEvent = []func(t *testing.T){
 	testV1CDRsStartEngine,
 	testV1CDRsRpcConn,
 	testV1CDRsLoadTariffPlanFromFolder,
-	testV1CDRsProcessEvent,
+	// testV1CDRsProcessEventAttrS,
+	testV1CDRsProcessEventChrgS,
 	testV1CDRsKillEngine,
 }
 
 func TestCDRsITPEInternal(t *testing.T) {
-	pecdrsConfDIR = "cdrsv1preocessevent"
+	pecdrsConfDIR = "cdrsv1processevent"
 	for _, stest := range sTestsCDRsIT_ProcessEvent {
 		t.Run(pecdrsConfDIR, stest)
 	}
 }
 
-// func TestCDRsITPEMongo(t *testing.T) {
-// 	pecdrsConfDIR = "cdrsv1mongo"
-// 	for _, stest := range sTestsCDRsIT_ProcessEvent {
-// 		t.Run(pecdrsConfDIR, stest)
-// 	}
-// }
+func TestCDRsITPEMongo(t *testing.T) {
+	pecdrsConfDIR = "cdrsv1mongo"
+	for _, stest := range sTestsCDRsIT_ProcessEvent {
+		t.Run(pecdrsConfDIR, stest)
+	}
+}
 
-// func TestCDRsITPEMySql(t *testing.T) {
-// 	pecdrsConfDIR = "cdrsv1mysql"
-// 	for _, stest := range sTestsCDRsIT_ProcessEvent {
-// 		t.Run(pecdrsConfDIR, stest)
-// 	}
-// }
+func TestCDRsITPEMySql(t *testing.T) {
+	pecdrsConfDIR = "cdrsv1mysql"
+	for _, stest := range sTestsCDRsIT_ProcessEvent {
+		t.Run(pecdrsConfDIR, stest)
+	}
+}
 
 func testV1CDRsInitConfig(t *testing.T) {
 	var err error
@@ -112,7 +114,7 @@ func testV1CDRsLoadTariffPlanFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 }
 
-func testV1CDRsProcessEvent(t *testing.T) {
+func testV1CDRsProcessEventAttrS(t *testing.T) {
 	var acnt *engine.Account
 	acntAttrs := &utils.AttrGetAccount{
 		Tenant:  "cgrates.org",
@@ -143,9 +145,11 @@ func testV1CDRsProcessEvent(t *testing.T) {
 		Flags: []string{utils.MetaAttributes, utils.MetaStore},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
+			ID:     "test1",
 			Event: map[string]interface{}{
 				utils.RunID:       "testv1",
 				utils.OriginID:    "test1_processEvent",
+				utils.OriginHost:  "OriginHost1",
 				utils.RequestType: utils.META_PSEUDOPREPAID,
 				utils.Account:     "1001",
 				utils.Destination: "+4986517174963",
@@ -166,7 +170,7 @@ func testV1CDRsProcessEvent(t *testing.T) {
 				Value:     config.NewRSRParsersMustCompile("1011", true, utils.INFIELD_SEP),
 			},
 		},
-		Weight: 200,
+		Weight: 20,
 	}
 	alsPrf.Compile()
 	var result string
@@ -189,10 +193,72 @@ func testV1CDRsProcessEvent(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	if err := pecdrsRpc.Call(utils.ApierV1GetCDRs, utils.AttrGetCdrs{}, &cdrs); err != nil {
+	// check if the CDR was correctly processed
+	if err := pecdrsRpc.Call(utils.ApierV1GetCDRs, utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost1"}}, &cdrs); err != nil {
 		t.Fatal("Unexpected error: ", err.Error())
+	} else if !reflect.DeepEqual(argsEv.Event["Account"], cdrs[0].Account) {
+		t.Errorf("Expecting: %+v, received: %+v", argsEv.Event["Account"], cdrs[0].Account)
+	} else if !reflect.DeepEqual("2019-11-27T12:21:26Z", cdrs[0].AnswerTime) {
+		t.Errorf("Expecting: %+v, received: %+v", "2019-11-27T12:21:26Z", cdrs[0].AnswerTime)
+	} else if !reflect.DeepEqual(argsEv.Event["Destination"], cdrs[0].Destination) {
+		t.Errorf("Expecting: %+v, received: %+v", argsEv.Event["Destination"], cdrs[0].Destination)
+	} else if !reflect.DeepEqual(argsEv.Event["OriginID"], cdrs[0].OriginID) {
+		t.Errorf("Expecting: %+v, received: %+v", argsEv.Event["OriginID"], cdrs[0].OriginID)
+	} else if !reflect.DeepEqual(argsEv.Event["RequestType"], cdrs[0].RequestType) {
+		t.Errorf("Expecting: %+v, received: %+v", argsEv.Event["RequestType"], cdrs[0].RequestType)
+	} else if !reflect.DeepEqual(argsEv.Event["RunID"], cdrs[0].RunID) {
+		t.Errorf("Expecting: %+v, received: %+v", argsEv.Event["RunID"], cdrs[0].RunID)
+	} else if !reflect.DeepEqual("2m0s", cdrs[0].Usage) {
+		t.Errorf("Expecting: %+v, received: %+v", "2m0s", cdrs[0].Usage)
+	} else if !reflect.DeepEqual(argsEv.Tenant, cdrs[0].Tenant) {
+		t.Errorf("Expecting: %+v, received: %+v", argsEv.Tenant, cdrs[0].Tenant)
+	} else if !reflect.DeepEqual(alsPrf.Attributes[0].Value[0].Rules, cdrs[0].Subject) {
+		t.Errorf("Expecting: %+v, received: %+v", alsPrf.Attributes[0].Value[0].Rules, cdrs[0].Subject)
 	}
 	return
+}
+
+func testV1CDRsProcessEventChrgS(t *testing.T) {
+
+	argsEv := &engine.ArgV1ProcessEvent{
+		Flags: []string{utils.MetaChargers, "*attributes:false"}, //utils.MetaStore},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "test2",
+			Event: map[string]interface{}{
+				utils.RunID:       "testv1",
+				utils.OriginID:    "test2_processEvent",
+				utils.OriginHost:  "OriginHost2",
+				utils.RequestType: utils.META_PSEUDOPREPAID,
+				utils.Account:     "1001",
+				utils.Destination: "+4986517174963",
+				utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+				utils.Usage:       2 * time.Minute,
+			},
+		},
+	}
+	var reply string
+	if err := pecdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	var cdrs []*engine.ExternalCDR
+	if err := pecdrsRpc.Call(utils.ApierV1GetCDRs, utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost2"}}, &cdrs); err != nil {
+		t.Fatal("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 3 {
+		t.Errorf("Expecting: 3, received: %+v", len(cdrs))
+	} else if cdrs[0].OriginID != "test2_processEvent" || cdrs[1].OriginID != "test2_processEvent" || cdrs[2].OriginID != "test2_processEvent" {
+		t.Errorf("Expecting: test2_processEvent, received: %+v, %+v, %+v ", cdrs[0].OriginID, cdrs[1].OriginID, cdrs[2].OriginID)
+	}
+	sort.Slice(cdrs, func(i, j int) bool { return cdrs[i].RunID < cdrs[j].RunID })
+	if cdrs[0].RunID != "*raw" {
+		t.Errorf("Expecting: %+v, received: %+v", utils.MetaRaw, cdrs[0].RunID)
+	} else if cdrs[1].RunID != "CustomerCharges" {
+		t.Errorf("Expecting: %+v, received: %+v", utils.MetaRaw, cdrs[0].RunID)
+	} else if cdrs[2].RunID != "SupplierCharges" {
+		t.Errorf("Expecting: %+v, received: %+v", utils.MetaRaw, cdrs[0].RunID)
+	}
 }
 
 func testV1CDRsKillEngine(t *testing.T) {
