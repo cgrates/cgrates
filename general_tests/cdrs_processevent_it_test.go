@@ -223,7 +223,6 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 }
 
 func testV1CDRsProcessEventChrgS(t *testing.T) {
-
 	argsEv := &engine.ArgV1ProcessEvent{
 		Flags: []string{utils.MetaChargers, "*attributes:false"},
 		CGREvent: utils.CGREvent{

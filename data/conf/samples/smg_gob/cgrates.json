@@ -14,6 +14,13 @@
 	"http": ":2080",					// HTTP listening address
 },
 
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],
+	},
+},
+
 "stor_db": {								// database used to store offline tariff plans and CDRs
 	"db_password": "CGRateS.org",			// password to use when connecting to stordb
 },
