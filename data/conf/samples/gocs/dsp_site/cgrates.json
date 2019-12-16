@@ -1,0 +1,50 @@
+{
+
+  "general": {
+    "log_level": 7,
+    "node_id": "DISPATCH_SITE",
+    "reconnects": 2,
+    "reply_timeout": "5s",
+  },
+
+
+  "listen": {
+    "rpc_json": ":2012",
+    "rpc_gob": ":2013",
+    "http": ":2080"
+  },
+
+  "data_db": {
+    "db_type": "*redis",
+    "db_port": 6379,
+    "db_name": "13"
+  },
+
+  "cache":{
+    "*dispatcher_routes": {"limit": -1, "ttl": "2s"}
+  },
+
+  "stor_db": {
+    "db_password": "CGRateS.org"
+  },
+
+
+  "rals": {
+    "enabled": true
+  },
+
+
+  "scheduler": {
+    "enabled": true
+  },
+
+  "dispatchers":{
+    "enabled": true
+  },
+
+  "apier": {
+    "scheduler_conns": ["*internal"]
+  }
+
+
+}
