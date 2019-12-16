@@ -44,8 +44,10 @@ var sTestsCDRsIT_ProcessEvent = []func(t *testing.T){
 	testV1CDRsStartEngine,
 	testV1CDRsRpcConn,
 	testV1CDRsLoadTariffPlanFromFolder,
-	// testV1CDRsProcessEventAttrS,
+	testV1CDRsProcessEventAttrS,
 	testV1CDRsProcessEventChrgS,
+	testV1CDRsProcessEventRalS,
+	testV1CDRsProcessEventSts,
 	testV1CDRsKillEngine,
 }
 
@@ -142,7 +144,7 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", expectedVoice, rply)
 	}
 	argsEv := &engine.ArgV1ProcessEvent{
-		Flags: []string{utils.MetaAttributes, utils.MetaStore},
+		Flags: []string{utils.MetaAttributes, utils.MetaStore, "*chargers:false"},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "test1",
@@ -158,7 +160,7 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 			},
 		},
 	}
-	var cdrs []*engine.ExternalCDR
+	var cdrs []*engine.CDR
 	alsPrf := &engine.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ApierTest",
@@ -194,12 +196,14 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	// check if the CDR was correctly processed
-	if err := pecdrsRpc.Call(utils.ApierV1GetCDRs, utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost1"}}, &cdrs); err != nil {
+	if err := pecdrsRpc.Call(utils.CDRsV1GetCDRs, utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost1"}}, &cdrs); err != nil {
 		t.Fatal("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Errorf("Expecting: 1, received: %+v", len(cdrs))
 	} else if !reflect.DeepEqual(argsEv.Event["Account"], cdrs[0].Account) {
 		t.Errorf("Expecting: %+v, received: %+v", argsEv.Event["Account"], cdrs[0].Account)
-	} else if !reflect.DeepEqual("2019-11-27T12:21:26Z", cdrs[0].AnswerTime) {
-		t.Errorf("Expecting: %+v, received: %+v", "2019-11-27T12:21:26Z", cdrs[0].AnswerTime)
+	} else if !reflect.DeepEqual(argsEv.Event["AnswerTime"], cdrs[0].AnswerTime) {
+		t.Errorf("Expecting: %+v, received: %+v", argsEv.Event["AnswerTime"], cdrs[0].AnswerTime)
 	} else if !reflect.DeepEqual(argsEv.Event["Destination"], cdrs[0].Destination) {
 		t.Errorf("Expecting: %+v, received: %+v", argsEv.Event["Destination"], cdrs[0].Destination)
 	} else if !reflect.DeepEqual(argsEv.Event["OriginID"], cdrs[0].OriginID) {
@@ -208,8 +212,8 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", argsEv.Event["RequestType"], cdrs[0].RequestType)
 	} else if !reflect.DeepEqual(argsEv.Event["RunID"], cdrs[0].RunID) {
 		t.Errorf("Expecting: %+v, received: %+v", argsEv.Event["RunID"], cdrs[0].RunID)
-	} else if !reflect.DeepEqual("2m0s", cdrs[0].Usage) {
-		t.Errorf("Expecting: %+v, received: %+v", "2m0s", cdrs[0].Usage)
+	} else if !reflect.DeepEqual(argsEv.Event["Usage"], cdrs[0].Usage) {
+		t.Errorf("Expecting: %+v, received: %+v", argsEv.Event["Usage"], cdrs[0].Usage)
 	} else if !reflect.DeepEqual(argsEv.Tenant, cdrs[0].Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", argsEv.Tenant, cdrs[0].Tenant)
 	} else if !reflect.DeepEqual(alsPrf.Attributes[0].Value[0].Rules, cdrs[0].Subject) {
@@ -221,7 +225,7 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 func testV1CDRsProcessEventChrgS(t *testing.T) {
 
 	argsEv := &engine.ArgV1ProcessEvent{
-		Flags: []string{utils.MetaChargers, "*attributes:false"}, //utils.MetaStore},
+		Flags: []string{utils.MetaChargers, "*attributes:false"},
 		CGREvent: utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "test2",
@@ -243,8 +247,8 @@ func testV1CDRsProcessEventChrgS(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	var cdrs []*engine.ExternalCDR
-	if err := pecdrsRpc.Call(utils.ApierV1GetCDRs, utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost2"}}, &cdrs); err != nil {
+	var cdrs []*engine.CDR
+	if err := pecdrsRpc.Call(utils.CDRsV1GetCDRs, utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost2"}}, &cdrs); err != nil {
 		t.Fatal("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 3 {
 		t.Errorf("Expecting: 3, received: %+v", len(cdrs))
@@ -258,6 +262,122 @@ func testV1CDRsProcessEventChrgS(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.MetaRaw, cdrs[0].RunID)
 	} else if cdrs[2].RunID != "SupplierCharges" {
 		t.Errorf("Expecting: %+v, received: %+v", utils.MetaRaw, cdrs[0].RunID)
+	}
+}
+
+func testV1CDRsProcessEventRalS(t *testing.T) {
+	argsEv := &engine.ArgV1ProcessEvent{
+		Flags: []string{utils.MetaRALs, "*attributes:false", "*chargers:false"},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "test3",
+			Event: map[string]interface{}{
+				utils.RunID:       "testv1",
+				utils.OriginID:    "test3_processEvent",
+				utils.OriginHost:  "OriginHost3",
+				utils.RequestType: utils.META_PSEUDOPREPAID,
+				utils.Account:     "1001",
+				utils.Destination: "+4986517174963",
+				utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+				utils.Usage:       2 * time.Minute,
+			},
+		},
+	}
+	var reply string
+	if err := pecdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	var cdrs []*engine.CDR
+	if err := pecdrsRpc.Call(utils.CDRsV1GetCDRs, utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost3"}}, &cdrs); err != nil {
+		t.Fatal("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Errorf("Expecting: 1, received: %+v", len(cdrs))
+	} else if !reflect.DeepEqual(cdrs[0].Cost, 0.0204) {
+		t.Errorf("\nExpected: %+v,\nreceived: %+v", 0.0204, utils.ToJSON(cdrs[0]))
+	}
+}
+
+func testV1CDRsProcessEventSts(t *testing.T) {
+	argsEv := &engine.ArgV1ProcessEvent{
+		Flags: []string{utils.MetaStatS, "*rals:false", "*attributes:false", "*chargers:false"},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "test4",
+			Event: map[string]interface{}{
+				utils.RunID:       "testv1",
+				utils.CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
+				utils.Tenant:      "cgrates.org",
+				utils.Category:    "call",
+				utils.ToR:         utils.VOICE,
+				utils.OriginID:    "test4_processEvent",
+				utils.OriginHost:  "OriginHost4",
+				utils.RequestType: utils.META_PSEUDOPREPAID,
+				utils.Account:     "1001",
+				utils.Destination: "+4986517174963",
+				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+				utils.Usage:       5 * time.Minute,
+			},
+		},
+	}
+	var reply string
+	if err := pecdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	var cdrs []*engine.CDR
+	eOut := []*engine.CDR{
+		&engine.CDR{
+			CGRID:       "c87609aa1cb6e9529ab1836cfeeebaab7aa7ebaf",
+			RunID:       "testv1",
+			OrderID:     0,
+			OriginHost:  "OriginHost4",
+			Source:      "",
+			OriginID:    "test4_processEvent",
+			ToR:         "*voice",
+			RequestType: "*pseudoprepaid",
+			Tenant:      "cgrates.org",
+			Category:    "call",
+			Account:     "1001",
+			Subject:     "1001",
+			Destination: "+4986517174963",
+			SetupTime:   time.Date(2018, 01, 07, 17, 00, 00, 0, time.UTC),
+			AnswerTime:  time.Date(2018, 01, 07, 17, 00, 10, 0, time.UTC),
+			Usage:       300000000000,
+			ExtraFields: map[string]string{},
+			ExtraInfo:   "",
+			Partial:     false,
+			PreRated:    false,
+			CostSource:  "",
+			Cost:        -1,
+			CostDetails: nil,
+		},
+	}
+	if err := pecdrsRpc.Call(utils.CDRsV1GetCDRs, utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost4"}}, &cdrs); err != nil {
+		t.Fatal("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Errorf("Expecting: 1, received: %+v", len(cdrs))
+	}
+	cdrs[0].OrderID = 0
+	if !reflect.DeepEqual(eOut[0], cdrs[0]) {
+		t.Errorf("\nExpected: %+v,\nreceived: %+v", utils.ToJSON(eOut[0]), utils.ToJSON(cdrs[0]))
+	}
+	var metrics map[string]string
+	statMetrics := map[string]string{
+		utils.MetaACD: "2m30s",
+		utils.MetaASR: "100%",
+		utils.MetaTCD: "15m0s",
+	}
+
+	if err := pecdrsRpc.Call(utils.StatSv1GetQueueStringMetrics,
+		&utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "Stat_1"}}, &metrics); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(statMetrics, metrics) {
+		t.Errorf("expecting: %+v, received: %+v", statMetrics, metrics)
 	}
 }
 

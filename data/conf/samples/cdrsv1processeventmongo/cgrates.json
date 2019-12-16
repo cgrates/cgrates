@@ -1,16 +1,19 @@
 {
 // CGRateS Configuration file
 //
-// Used in apier/v1/cdrs_it_test
+// Used in general_tests
 
-
-"data_db":{
-	"db_type": "*internal"
+"data_db": {
+	"db_type": "mongo",
+	"db_name": "10",
+	"db_port": 27017,
 },
 
 
 "stor_db": {
-	"db_type": "*internal"
+	"db_type": "mongo",
+	"db_name": "cgrates",
+	"db_port": 27017,
 },
 
 "attributes": {								
