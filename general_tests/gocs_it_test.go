@@ -593,13 +593,13 @@ func testGOCSProcessCDR(t *testing.T) {
 
 	if err := auRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2640000000000.0 {
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2340000000000.0 {
 		t.Errorf("Expecting : %+v, received: %+v", 2640000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
 	if err := usRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2640000000000.0 {
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2340000000000.0 {
 		t.Errorf("Expecting : %+v, received: %+v", 2640000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 }
