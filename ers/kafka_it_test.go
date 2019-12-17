@@ -76,7 +76,6 @@ func TestKafkaER(t *testing.T) {
 		rdrErr, new(engine.FilterS), rdrExit); err != nil {
 		t.Fatal(err)
 	}
-	kfk.Serve()
 	w := kafka.NewWriter(kafka.WriterConfig{
 		Brokers: []string{"localhost:9092"},
 		Topic:   defaultTopic,
@@ -90,6 +89,8 @@ func TestKafkaER(t *testing.T) {
 	)
 
 	w.Close()
+	kfk.Serve()
+
 	select {
 	case err = <-rdrErr:
 		t.Error(err)

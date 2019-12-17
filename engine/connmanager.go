@@ -92,7 +92,7 @@ func (cM *ConnManager) getConn(connID string, biRPCClient rpcclient.ClientConnec
 func (cM *ConnManager) Call(connIDs []string, biRPCClient rpcclient.ClientConnector,
 	method string, arg, reply interface{}) (err error) {
 	if len(connIDs) == 0 {
-		return utils.ErrMandatoryIeMissing
+		return utils.NewErrMandatoryIeMissing("connIDs")
 	}
 	var conn rpcclient.ClientConnector
 	for _, connID := range connIDs {

@@ -68,7 +68,7 @@ func testbrodcastItLoadConfig(t *testing.T) {
 		t.Error(err)
 	}
 	brodcastInternalCfgPath = path.Join(*dataDir, "conf", "samples", "tutinternal")
-	if brodcastInternalCfg, err = config.NewCGRConfigFromPath(brodcastCfgPath); err != nil {
+	if brodcastInternalCfg, err = config.NewCGRConfigFromPath(brodcastInternalCfgPath); err != nil {
 		t.Error(err)
 	}
 }
