@@ -184,7 +184,7 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 	var replyAt *engine.AttributeProfile
 	if err := pecdrsRpc.Call(utils.ApierV1GetAttributeProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "ApierTest"}, &replyAt); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	replyAt.Compile()
 	if !reflect.DeepEqual(alsPrf, replyAt) {

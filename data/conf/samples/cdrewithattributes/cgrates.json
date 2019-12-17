@@ -69,11 +69,6 @@
 },
 
 
-"chargers": {
-	"enabled": true,
-	"attributes_conns": ["*internal"],
-},
-
 "apier": {	
 	"caches_conns":["*internal"],
 	"scheduler_conns": ["*internal"],

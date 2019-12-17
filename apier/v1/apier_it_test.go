@@ -1397,6 +1397,25 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 	}
 }
 
+func TestApierSetChargerS(t *testing.T) {
+	//add a default charger
+	chargerProfile := &ChargerWithCache{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant:       "cgrates.org",
+			ID:           "Default",
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{"*none"},
+			Weight:       20,
+		},
+	}
+	var result string
+	if err := rater.Call(utils.ApierV1SetChargerProfile, chargerProfile, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+}
+
 // Make sure balance was topped-up
 // Bug reported by DigiDaz over IRC
 func TestApierGetAccountAfterLoad(t *testing.T) {
@@ -1435,7 +1454,6 @@ func TestApierResponderGetCost(t *testing.T) {
 }
 
 func TestApierMaxDebitInexistentAcnt(t *testing.T) {
-
 	cc := &engine.CallCost{}
 	cd := &engine.CallDescriptorWithArgDispatcher{
 		CallDescriptor: &engine.CallDescriptor{
@@ -1454,7 +1472,6 @@ func TestApierMaxDebitInexistentAcnt(t *testing.T) {
 	if err := rater.Call(utils.ResponderDebit, cd, cc); err == nil {
 		t.Error(err.Error())
 	}
-
 }
 
 func TestApierCdrServer(t *testing.T) {
@@ -1478,7 +1495,7 @@ func TestApierCdrServer(t *testing.T) {
 
 func TestApierITGetCdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
-	req := utils.AttrGetCdrs{MediationRunIds: []string{utils.MetaRaw}}
+	req := utils.AttrGetCdrs{MediationRunIds: []string{utils.MetaDefault}}
 	if err := rater.Call(utils.ApierV1GetCDRs, req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
@@ -1487,22 +1504,6 @@ func TestApierITGetCdrs(t *testing.T) {
 }
 
 func TestApierITProcessCdr(t *testing.T) {
-	//add a default charger
-	chargerProfile := &ChargerWithCache{
-		ChargerProfile: &engine.ChargerProfile{
-			Tenant:       "cgrates.org",
-			ID:           "Default",
-			RunID:        utils.MetaDefault,
-			AttributeIDs: []string{"*none"},
-			Weight:       20,
-		},
-	}
-	var result string
-	if err := rater.Call(utils.ApierV1SetChargerProfile, chargerProfile, &result); err != nil {
-		t.Error(err)
-	} else if result != utils.OK {
-		t.Error("Unexpected reply returned", result)
-	}
 	var reply string
 	cdr := &engine.CDRWithArgDispatcher{
 		CDR: &engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsaf",
@@ -1518,7 +1519,7 @@ func TestApierITProcessCdr(t *testing.T) {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	var cdrs []*engine.ExternalCDR
-	req := utils.AttrGetCdrs{MediationRunIds: []string{utils.MetaRaw}}
+	req := utils.AttrGetCdrs{MediationRunIds: []string{utils.MetaDefault}}
 	if err := rater.Call(utils.ApierV1GetCDRs, req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 3 {
