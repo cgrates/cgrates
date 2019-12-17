@@ -37,7 +37,7 @@ import (
 
 const (
 	dbName         = "db_name"
-	tableName      = "db_name"
+	tableName      = "table_name"
 	sslMode        = "sslmode"
 	defaultSSLMode = "disable"
 	defaultDBName  = "cgrates"
@@ -98,9 +98,8 @@ func (rdr *SQLEventReader) Config() *config.EventReaderCfg {
 
 // Serve will start the gorutines needed to watch the kafka topic
 func (rdr *SQLEventReader) Serve() (err error) {
-	// connectString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'", user, password, host, port, name)
 	var db *gorm.DB
-	if db, err = gorm.Open(strings.TrimPrefix(rdr.connType, utils.Meta), rdr.connString); err != nil {
+	if db, err = gorm.Open(rdr.connType, rdr.connString); err != nil {
 		return
 	}
 	if err = db.DB().Ping(); err != nil {
@@ -165,9 +164,13 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB) {
 						fmt.Sprintf("<%s> processing message %s error: %s",
 							utils.ERs, utils.ToJSON(msg), err.Error()))
 				}
-				db.Delete(msg) // to ensure we don't read it again
+				db = db.Delete(msg) // to ensure we don't read it again
 				if rdr.Config().ProcessedPath != utils.EmptyString {
-					// post it
+					if err = rdr.postCDR(columns); err != nil {
+						utils.Logger.Warning(
+							fmt.Sprintf("<%s> posting message %s error: %s",
+								utils.ERs, utils.ToJSON(msg), err.Error()))
+					}
 				}
 				if rdr.Config().ConcurrentReqs != -1 {
 					rdr.cap <- struct{}{}
@@ -207,21 +210,14 @@ func (rdr *SQLEventReader) processMessage(msg map[string]interface{}) (err error
 }
 
 func (rdr *SQLEventReader) setURL(inURL, outURL string) (err error) {
-	// *dbtype:user:password@host:port?options
-	split := strings.SplitN(inURL, utils.InInFieldSep, 2)
-	if len(split) != 2 {
-		return utils.NewErrMandatoryIeMissing("db_type")
-	}
-	rdr.connType = split[0]
-	inURL = split[1]
-
-	//outhpath if no meta is op[tions only
+	inURL = strings.TrimPrefix(inURL, utils.Meta)
 	var u *url.URL
 	if u, err = url.Parse(inURL); err != nil {
 		return
 	}
 	password, _ := u.User.Password()
 	qry := u.Query()
+	rdr.connType = u.Scheme
 
 	dbname := defaultDBName
 	if vals, has := qry[dbName]; has && len(vals) != 0 {
@@ -236,12 +232,11 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string) (err error) {
 	if vals, has := qry[tableName]; has && len(vals) != 0 {
 		rdr.tableName = vals[0]
 	}
-
 	switch rdr.connType {
-	case utils.MetaMySQL:
+	case utils.MYSQL:
 		rdr.connString = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 			u.User.Username(), password, u.Hostname(), u.Port(), dbname)
-	case utils.MetaPostgres:
+	case utils.POSTGRES:
 		rdr.connString = fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s", u.Hostname(), u.Port(), dbname, u.User.Username(), password, ssl)
 	default:
 		return fmt.Errorf("unknown db_type %s", rdr.connType)
@@ -263,23 +258,17 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string) (err error) {
 			return
 		}
 	} else {
-		split := strings.SplitN(inURL, utils.ConcatenatedKey(), 2)
-		if len(split) != 2 {
-			return utils.NewErrMandatoryIeMissing("db_type")
-		}
-		rdr.expConnType = split[0]
-		inURL = split[1]
-
-		//outhpath if no meta is op[tions only
-		var outURL *url.URL
-		if outURL, err = url.Parse(inURL); err != nil {
+		outURL = strings.TrimPrefix(outURL, utils.Meta)
+		var oURL *url.URL
+		if oURL, err = url.Parse(inURL); err != nil {
 			return
 		}
-		outPassword, _ = outURL.User.Password()
-		outUser = outURL.User.Username()
-		outHost = outURL.Hostname()
-		outPort = outURL.Port()
-		oqry = outURL.Query()
+		rdr.expConnType = oURL.Scheme
+		outPassword, _ = oURL.User.Password()
+		outUser = oURL.User.Username()
+		outHost = oURL.Hostname()
+		outPort = oURL.Port()
+		oqry = oURL.Query()
 	}
 
 	outDBname = defaultDBName
@@ -291,19 +280,45 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string) (err error) {
 		outSSL = vals[0]
 	}
 	rdr.expTableName = utils.CDRsTBL
-	if vals, has := qry[tableName]; has && len(vals) != 0 {
+	if vals, has := oqry[tableName]; has && len(vals) != 0 {
 		rdr.expTableName = vals[0]
 	}
 
-	switch rdr.connType {
-	case utils.MetaMySQL:
+	switch rdr.expConnType {
+	case utils.MYSQL:
 		rdr.expConnString = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 			outUser, outPassword, outHost, outPort, outDBname)
-	case utils.MetaPostgres:
+	case utils.POSTGRES:
 		rdr.expConnString = fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s",
 			outHost, outPort, outDBname, outUser, outPassword, outSSL)
 	default:
-		return fmt.Errorf("unknown db type")
+		return fmt.Errorf("unknown db_type")
 	}
+	return
+}
+
+func (rdr *SQLEventReader) postCDR(in []interface{}) (err error) {
+	sqlValues := make([]string, len(in))
+	for i := range in {
+		sqlValues[i] = "?"
+	}
+	sqlStatement := fmt.Sprintf("INSERT INTO %s VALUES (%s); ", rdr.expTableName, strings.Join(sqlValues, ","))
+	var db *gorm.DB
+	if db, err = gorm.Open(rdr.expConnType, rdr.expConnString); err != nil {
+		return
+	}
+	if err = db.DB().Ping(); err != nil {
+		return
+	}
+	tx := db.Begin()
+	_, err = db.DB().Exec(sqlStatement, in...)
+	if err != nil {
+		tx.Rollback()
+		if strings.Contains(err.Error(), "1062") || strings.Contains(err.Error(), "duplicate key") { // returns 1062/pq when key is duplicated
+			return utils.ErrExists
+		}
+		return
+	}
+	tx.Commit()
 	return
 }

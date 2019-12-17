@@ -41,8 +41,11 @@ var (
 		testSQLInitDB,
 		testSQLReader,
 		testSQLEmptyTable,
+		testSQLPoster,
+
 		testSQLInitDB,
 		testSQLReader2,
+
 		testSQLStop,
 	}
 	cdr = &engine.CDR{
@@ -50,7 +53,7 @@ var (
 		RunID: "RunID",
 	}
 	db           *gorm.DB
-	dbConnString = "cgrates:CGRateS.org@tcp(127.0.0.1:3306)/cgrates?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'"
+	dbConnString = "cgrates:CGRateS.org@tcp(127.0.0.1:3306)/cgrates2?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'"
 )
 
 func TestSQL(t *testing.T) {
@@ -74,8 +77,8 @@ func testSQLInitConfig(t *testing.T) {
 					"type": "*sql",							// reader type <*file_csv>
 					"run_delay": 1,									// sleep interval in seconds between consecutive runs, -1 to use automation via inotify or 0 to disable running all together
 					"concurrent_requests": 1024,						// maximum simultaneous requests/files to process, 0 for unlimited
-					"source_path": "*mysql:cgrates:CGRateS.org@127.0.0.1:3306",					// read data from this path
-					// "processed_path": "/var/spool/cgrates/cdrc/out",	// move processed data here
+					"source_path": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306?db_name=cgrates2",					// read data from this path
+					"processed_path": "db_name=cgrates2&table_name=cdrs2",	// move processed data here
 					"tenant": "cgrates.org",							// tenant used by import
 					"filters": [],										// limit parsing based on the filters
 					"flags": [],										// flags to influence the event processing
@@ -95,9 +98,47 @@ func testSQLInitConfig(t *testing.T) {
 }
 
 func testSQLInitCdrDb(t *testing.T) {
+	rdrsql := sqlCfg.StorDbCfg().Clone()
 	if err := engine.InitStorDb(sqlCfg); err != nil {
 		t.Fatal(err)
 	}
+	sqlCfg.StorDbCfg().Name = "cgrates2"
+	if err := engine.InitStorDb(sqlCfg); err != nil {
+		t.Fatal(err)
+	}
+	*sqlCfg.StorDbCfg() = *rdrsql
+
+}
+
+type testModelSql struct {
+	ID          int64
+	Cgrid       string
+	RunID       string
+	OriginHost  string
+	Source      string
+	OriginID    string
+	TOR         string
+	RequestType string
+	Tenant      string
+	Category    string
+	Account     string
+	Subject     string
+	Destination string
+	SetupTime   time.Time
+	AnswerTime  time.Time
+	Usage       int64
+	ExtraFields string
+	CostSource  string
+	Cost        float64
+	CostDetails string
+	ExtraInfo   string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   *time.Time
+}
+
+func (_ *testModelSql) TableName() string {
+	return "cdrs2"
 }
 
 func testSQLInitDB(t *testing.T) {
@@ -107,8 +148,10 @@ func testSQLInitDB(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if !db.HasTable("cdrs2") {
+		db = db.CreateTable(&testModelSql{})
+	}
 	db = db.Table(utils.CDRsTBL)
-
 	tx := db.Begin()
 	cdrSql := cdr.AsCDRsql()
 	cdrSql.CreatedAt = time.Now()
@@ -154,17 +197,33 @@ func testSQLReader(t *testing.T) {
 }
 
 func testSQLEmptyTable(t *testing.T) {
+	time.Sleep(10 * time.Millisecond)
 	rows, err := db.Table(utils.CDRsTBL).Select("*").Rows()
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
+	}
+	colNames, err := rows.Columns()
+	if err != nil {
+		t.Fatal(err)
 	}
 	for rows.Next() {
-		t.Fatal("Expected empty table")
+		columns := make([]interface{}, len(colNames))
+		columnPointers := make([]interface{}, len(colNames))
+		for i := range columns {
+			columnPointers[i] = &columns[i]
+		}
+		if err = rows.Scan(columnPointers...); err != nil {
+			t.Fatal(err)
+		}
+		msg := make(map[string]interface{})
+		for i, colName := range colNames {
+			msg[colName] = columns[i]
+		}
+		t.Fatal("Expected empty table ", utils.ToJSON(msg))
 	}
 }
 
 func testSQLReader2(t *testing.T) {
-
 	select {
 	case err := <-rdrErr:
 		t.Error(err)
@@ -188,8 +247,38 @@ func testSQLReader2(t *testing.T) {
 	}
 }
 
+func testSQLPoster(t *testing.T) {
+	rows, err := db.Table("cdrs2").Select("*").Rows()
+	if err != nil {
+		t.Fatal(err)
+	}
+	colNames, err := rows.Columns()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for rows.Next() {
+		columns := make([]interface{}, len(colNames))
+		columnPointers := make([]interface{}, len(colNames))
+		for i := range columns {
+			columnPointers[i] = &columns[i]
+		}
+		if err = rows.Scan(columnPointers...); err != nil {
+			t.Fatal(err)
+		}
+		msg := make(map[string]interface{})
+		for i, colName := range colNames {
+			msg[colName] = columns[i]
+		}
+		db.Table("cdrs2").Delete(msg)
+		if cgrid := utils.IfaceAsString(msg["cgrid"]); cgrid != cdr.CGRID {
+			t.Errorf("Expected: %s ,receieved: %s", cgrid, cdr.CGRID)
+		}
+	}
+}
+
 func testSQLStop(t *testing.T) {
 	rdrExit <- struct{}{}
+	db = db.DropTable("cdrs2")
 	if err := db.Close(); err != nil {
 		t.Error(err)
 	}
