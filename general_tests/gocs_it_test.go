@@ -51,9 +51,7 @@ var (
 		testGOCSLoadData,
 		testGOCSAuthSession,
 		testGOCSInitSession,
-		testGOCSKillUSEngine,
 		testGOCSUpdateSession,
-		testGOCSStartUSEngine,
 		testGOCSVerifyAccountsAfterStart,
 		testGOCSUpdateSession2,
 		testGOCSTerminateSession,
@@ -329,13 +327,6 @@ func testGOCSInitSession(t *testing.T) {
 
 }
 
-func testGOCSKillUSEngine(t *testing.T) {
-	if err := usEngine.Process.Kill(); err != nil {
-		t.Error(err)
-	}
-	time.Sleep(10 * time.Millisecond)
-}
-
 func testGOCSUpdateSession(t *testing.T) {
 	reqUsage := 5 * time.Minute
 	args := &sessions.V1UpdateSessionArgs{
@@ -362,7 +353,7 @@ func testGOCSUpdateSession(t *testing.T) {
 
 	// right now dispatcher receive utils.ErrPartiallyExecuted
 	// in case of of engines fails
-	if err := dspRPC.Call(utils.SessionSv1UpdateSession, args, &rply); err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
+	if err := auRPC.Call(utils.SessionSv1UpdateSession, args, &rply); err != nil {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ErrPartiallyExecuted, err)
 	}
 
@@ -391,15 +382,6 @@ func testGOCSUpdateSession(t *testing.T) {
 		t.Errorf("Expecting : %+v, received: %+v", 2940000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
-}
-
-func testGOCSStartUSEngine(t *testing.T) {
-	if usEngine, err = engine.StartEngine(usCfgPath, *waitRater); err != nil {
-		t.Fatal(err)
-	}
-	if usRPC, err = newRPCClient(usCfg.ListenCfg()); err != nil {
-		t.Fatal(err)
-	}
 }
 
 func testGOCSVerifyAccountsAfterStart(t *testing.T) {
@@ -471,7 +453,7 @@ func testGOCSUpdateSession2(t *testing.T) {
 		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v", utils.ToJSON(aSessions), len(aSessions))
 	} else if aSessions[0].NodeID != "US_SITE" {
 		t.Errorf("Expecting : %+v, received: %+v", "US_SITE", aSessions[0].NodeID)
-	} else if aSessions[0].Usage != time.Duration(5*time.Minute) {
+	} else if aSessions[0].Usage != time.Duration(10*time.Minute) {
 		t.Errorf("Expecting : %+v, received: %+v", time.Duration(5*time.Minute), aSessions[0].Usage)
 	}
 
@@ -543,14 +525,14 @@ func testGOCSTerminateSession(t *testing.T) {
 
 	if err := auRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2340000000000.0 {
-		t.Errorf("Expecting : %+v, received: %+v", 2340000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2640000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 2640000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
 	if err := usRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2340000000000.0 {
-		t.Errorf("Expecting : %+v, received: %+v", 2340000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2640000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 2640000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 }
 
@@ -593,13 +575,13 @@ func testGOCSProcessCDR(t *testing.T) {
 
 	if err := auRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2340000000000.0 {
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2640000000000.0 {
 		t.Errorf("Expecting : %+v, received: %+v", 2640000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
 	if err := usRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2340000000000.0 {
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2640000000000.0 {
 		t.Errorf("Expecting : %+v, received: %+v", 2640000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 }
