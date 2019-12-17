@@ -65,13 +65,6 @@
 
   "scheduler": {
     "enabled": true,
-    "cdrs_conns": ["*internal"],
-  },
-
-
-  "cdrs": {
-    "enabled": true,
-    "chargers_conns":["*internal"],
   },
 
 
@@ -82,7 +75,6 @@
   "sessions": {
     "enabled": true,
     "rals_conns": ["*internal"],
-    "cdrs_conns": ["*internal"],
     "chargers_conns": ["*internal"],
   },
 

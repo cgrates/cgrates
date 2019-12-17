@@ -51,6 +51,7 @@ var (
 		testGOCSKillUSEngine,
 		testGOCSUpdateSession,
 		testGOCSStartUSEngine,
+		testGOCSVerifyAccountsAfterStart,
 		testGOCSUpdateSession2,
 		testGOCSTerminateSession,
 		testGOCSProcessCDR,
@@ -94,6 +95,17 @@ func testGOCSResetDB(t *testing.T) {
 	if err := engine.InitDataDb(dspCfg); err != nil {
 		t.Fatal(err)
 	}
+	if err := engine.InitStorDb(auCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDb(usCfg); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitStorDb(dspCfg); err != nil {
+		t.Fatal(err)
+	}
+	// give some time to flush DataDB and StorDB for all 3 engines
+	time.Sleep(100 * time.Millisecond)
 }
 
 // Start CGR Engine
@@ -155,6 +167,33 @@ func testGOCSLoadData(t *testing.T) {
 	case <-time.After(1 * time.Second):
 		t.Errorf("cgr-loader failed: ")
 	}
+	var acnt *engine.Account
+	acntAttrs := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "1001"}
+	attrSetBalance := utils.AttrSetBalance{
+		Tenant:      acntAttrs.Tenant,
+		Account:     acntAttrs.Account,
+		BalanceType: utils.VOICE,
+		Balance: map[string]interface{}{
+			utils.ID:     "BALANCE1",
+			utils.Value:  3540000000000,
+			utils.Weight: 20,
+		},
+	}
+	// add a voice balance of 59 minutes
+	var reply string
+	if err := usRPC.Call(utils.ApierV1SetBalance, attrSetBalance, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("received: %s", reply)
+	}
+	expectedVoice := 3540000000000.0
+	if err := usRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
+		t.Error(err)
+	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != expectedVoice {
+		t.Errorf("Expecting: %v, received: %v", expectedVoice, rply)
+	}
 }
 
 func testGOCSAuthSession(t *testing.T) {
@@ -167,7 +206,7 @@ func testGOCSAuthSession(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "TestSSv1It1",
+				utils.OriginID:    "testGOCS",
 				utils.Category:    "call",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
@@ -197,7 +236,7 @@ func testGOCSInitSession(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "TestSSv1It1",
+				utils.OriginID:    "testGOCS",
 				utils.Category:    "call",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
@@ -227,8 +266,6 @@ func testGOCSInitSession(t *testing.T) {
 		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v", utils.ToJSON(aSessions), len(aSessions))
 	} else if aSessions[0].NodeID != "AU_SITE" {
 		t.Errorf("Expecting : %+v, received: %+v", "AU_SITE", aSessions[0].NodeID)
-	} else if aSessions[0].MaxCostSoFar != 1.0008 {
-		t.Errorf("Expecting : %+v, received: %+v", 1.0008, aSessions[0].MaxCostSoFar)
 	} else if aSessions[0].Usage != time.Duration(5*time.Minute) {
 		t.Errorf("Expecting : %+v, received: %+v", time.Duration(5*time.Minute), aSessions[0].MaxCostSoFar)
 	}
@@ -240,8 +277,6 @@ func testGOCSInitSession(t *testing.T) {
 		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v", utils.ToJSON(aSessions), len(aSessions))
 	} else if aSessions[0].NodeID != "US_SITE" {
 		t.Errorf("Expecting : %+v, received: %+v", "US_SITE", aSessions[0].NodeID)
-	} else if aSessions[0].MaxCostSoFar != 1.0008 {
-		t.Errorf("Expecting : %+v, received: %+v", 1.0008, aSessions[0].MaxCostSoFar)
 	} else if aSessions[0].Usage != time.Duration(5*time.Minute) {
 		t.Errorf("Expecting : %+v, received: %+v", time.Duration(5*time.Minute), aSessions[0].Usage)
 	}
@@ -252,17 +287,17 @@ func testGOCSInitSession(t *testing.T) {
 		Account: "1001",
 	}
 
-	// 10 - 1.0008 = 8.9992
+	// 59 mins - 5 mins = 54 mins
 	if err := auRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 8.9992 {
-		t.Errorf("Expecting : %+v, received: %+v", 8.9992, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 3240000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 3240000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
 	if err := usRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 8.9992 {
-		t.Errorf("Expecting : %+v, received: %+v", 8.9992, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 3240000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 3240000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
 }
@@ -284,7 +319,7 @@ func testGOCSUpdateSession(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "TestSSv1It1",
+				utils.OriginID:    "testGOCS",
 				utils.Category:    "call",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
@@ -311,8 +346,6 @@ func testGOCSUpdateSession(t *testing.T) {
 		t.Errorf("wrong active sessions: %s", utils.ToJSON(aSessions))
 	} else if aSessions[0].NodeID != "AU_SITE" {
 		t.Errorf("Expecting : %+v, received: %+v", "AU_SITE", aSessions[0].NodeID)
-	} else if aSessions[0].MaxCostSoFar != 1.5017999999999998 {
-		t.Errorf("Expecting : %+v, received: %+v", 1.5017999999999998, aSessions[0].MaxCostSoFar)
 	} else if aSessions[0].Usage != time.Duration(10*time.Minute) {
 		t.Errorf("Expecting : %+v, received: %+v", time.Duration(5*time.Minute), aSessions[0].Usage)
 	}
@@ -324,10 +357,11 @@ func testGOCSUpdateSession(t *testing.T) {
 	}
 
 	// balanced changed in AU_SITE
+	// 54 min - 5 mins = 49 min
 	if err := auRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 8.4982 {
-		t.Errorf("Expecting : %+v, received: %+v", 8.4982, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2940000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 2940000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
 }
@@ -341,6 +375,26 @@ func testGOCSStartUSEngine(t *testing.T) {
 	}
 }
 
+func testGOCSVerifyAccountsAfterStart(t *testing.T) {
+	var acnt *engine.Account
+	attrAcc := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "1001",
+	}
+	// because US_SITE was down we should notice a difference between balance from accounts from US_SITE and AU_SITE
+	if err := auRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2940000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 2940000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	}
+
+	if err := usRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 3240000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 3240000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	}
+}
+
 func testGOCSUpdateSession2(t *testing.T) {
 	reqUsage := 5 * time.Minute
 	args := &sessions.V1UpdateSessionArgs{
@@ -351,7 +405,7 @@ func testGOCSUpdateSession2(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "TestSSv1It1",
+				utils.OriginID:    "testGOCS",
 				utils.Category:    "call",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
@@ -364,7 +418,8 @@ func testGOCSUpdateSession2(t *testing.T) {
 		},
 	}
 	var rply sessions.V1UpdateSessionReply
-
+	// Update the session on both US_SITE and AU_SITE
+	// With this update the account should be replicate from US_SITE to AU_SITE and forgot about the update than happens on AU_SITE
 	if err := dspRPC.Call(utils.SessionSv1UpdateSession, args, &rply); err != nil {
 		t.Errorf("Expecting : %+v, received: %+v", nil, err)
 	} else if rply.MaxUsage != reqUsage {
@@ -378,8 +433,6 @@ func testGOCSUpdateSession2(t *testing.T) {
 		t.Errorf("wrong active sessions: %s", utils.ToJSON(aSessions))
 	} else if aSessions[0].NodeID != "AU_SITE" {
 		t.Errorf("Expecting : %+v, received: %+v", "AU_SITE", aSessions[0].NodeID)
-	} else if aSessions[0].MaxCostSoFar != 2.0027999999999997 {
-		t.Errorf("Expecting : %+v, received: %+v", 2.0027999999999997, aSessions[0].MaxCostSoFar)
 	} else if aSessions[0].Usage != time.Duration(15*time.Minute) {
 		t.Errorf("Expecting : %+v, received: %+v", time.Duration(15*time.Minute), aSessions[0].Usage)
 	}
@@ -391,8 +444,6 @@ func testGOCSUpdateSession2(t *testing.T) {
 		t.Errorf("wrong active sessions: %s \n , and len(aSessions) %+v", utils.ToJSON(aSessions), len(aSessions))
 	} else if aSessions[0].NodeID != "US_SITE" {
 		t.Errorf("Expecting : %+v, received: %+v", "US_SITE", aSessions[0].NodeID)
-	} else if aSessions[0].MaxCostSoFar != 1.0008 {
-		t.Errorf("Expecting : %+v, received: %+v", 1.0008, aSessions[0].MaxCostSoFar)
 	} else if aSessions[0].Usage != time.Duration(5*time.Minute) {
 		t.Errorf("Expecting : %+v, received: %+v", time.Duration(5*time.Minute), aSessions[0].Usage)
 	}
@@ -403,19 +454,16 @@ func testGOCSUpdateSession2(t *testing.T) {
 		Account: "1001",
 	}
 
-	// because the session don't exist on US_SITE
-	// this update behaves as an init
-	// 8.9992 - 1.0008 = 7.9984
 	if err := auRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 7.9984 {
-		t.Errorf("Expecting : %+v, received: %+v", 7.9984, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2940000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 2940000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 
 	if err := usRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 7.9984 {
-		t.Errorf("Expecting : %+v, received: %+v", 7.9984, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2940000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 2940000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 }
 
@@ -428,7 +476,7 @@ func testGOCSTerminateSession(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "TestSSv1It1",
+				utils.OriginID:    "testGOCS",
 				utils.Category:    "call",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
@@ -441,6 +489,8 @@ func testGOCSTerminateSession(t *testing.T) {
 		},
 	}
 	var rply string
+	// we send terminate session with the correct usage, but because the US_SITE was down
+	// this lost the previous session operations and will debit more
 	if err := dspRPC.Call(utils.SessionSv1TerminateSession,
 		args, &rply); err != nil {
 		t.Error(err)
@@ -457,6 +507,24 @@ func testGOCSTerminateSession(t *testing.T) {
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error %s received error %v and reply %s", utils.ErrNotFound, err, utils.ToJSON(aSessions))
 	}
+
+	var acnt *engine.Account
+	attrAcc := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "1001",
+	}
+
+	if err := auRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2340000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 2340000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	}
+
+	if err := usRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2340000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 2340000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	}
 }
 
 func testGOCSProcessCDR(t *testing.T) {
@@ -467,7 +535,7 @@ func testGOCSProcessCDR(t *testing.T) {
 			Event: map[string]interface{}{
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
-				utils.OriginID:    "TestSSv1It1",
+				utils.OriginID:    "testGOCS",
 				utils.Category:    "call",
 				utils.RequestType: utils.META_PREPAID,
 				utils.Account:     "1001",
@@ -475,11 +543,13 @@ func testGOCSProcessCDR(t *testing.T) {
 				utils.Destination: "1002",
 				utils.SetupTime:   time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
 				utils.AnswerTime:  time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:       10 * time.Minute,
+				utils.Usage:       15 * time.Minute,
 			},
 		},
 	}
 	var rply string
+	// process cdr should apply the correction because terminate was debited to much
+	// 59 - 15 = 44 minutes
 	if err := usRPC.Call(utils.SessionSv1ProcessCDR,
 		args, &rply); err != nil {
 		t.Error(err)
@@ -488,6 +558,23 @@ func testGOCSProcessCDR(t *testing.T) {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
 	time.Sleep(100 * time.Millisecond)
+	var acnt *engine.Account
+	attrAcc := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "1001",
+	}
+
+	if err := auRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2640000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 2640000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	}
+
+	if err := usRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != 2640000000000.0 {
+		t.Errorf("Expecting : %+v, received: %+v", 2640000000000.0, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	}
 }
 
 func testGOCSStopCgrEngine(t *testing.T) {
