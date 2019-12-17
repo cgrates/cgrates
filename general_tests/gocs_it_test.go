@@ -24,8 +24,11 @@ import (
 	"net/rpc"
 	"os/exec"
 	"path"
+	"reflect"
 	"testing"
 	"time"
+
+	v1 "github.com/cgrates/cgrates/apier/v1"
 
 	"github.com/cgrates/cgrates/sessions"
 
@@ -137,24 +140,47 @@ func testGOCSApierRpcConn(t *testing.T) {
 }
 
 func testGOCSLoadData(t *testing.T) {
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "gocs", "us_site")}
-	var loadInst utils.LoadInstance
-	if err := usRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
-		t.Error(err)
+	chargerProfile := &v1.ChargerWithCache{
+		ChargerProfile: &engine.ChargerProfile{
+			Tenant:       "cgrates.org",
+			ID:           "DEFAULT",
+			RunID:        utils.MetaDefault,
+			AttributeIDs: []string{utils.META_NONE},
+			Weight:       10,
+		},
 	}
-	attrs = &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "gocs", "au_site")}
-	if err := auRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
+	var result string
+	if err := usRPC.Call(utils.ApierV1SetChargerProfile, chargerProfile, &result); err != nil {
 		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups on au_site
-	attrs = &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "gocs", "dsp_site")}
+	var rpl *engine.ChargerProfile
+	if err := usRPC.Call(utils.ApierV1GetChargerProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "DEFAULT"}, &rpl); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, rpl) {
+		t.Errorf("Expecting : %+v, received: %+v", chargerProfile.ChargerProfile, rpl)
+	}
+	if err := usRPC.Call(utils.ApierV1SetChargerProfile, chargerProfile, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := usRPC.Call(utils.ApierV1GetChargerProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "DEFAULT"}, &rpl); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(chargerProfile.ChargerProfile, rpl) {
+		t.Errorf("Expecting : %+v, received: %+v", chargerProfile.ChargerProfile, rpl)
+	}
+
 	wchan := make(chan struct{}, 1)
 	go func() {
 		loaderPath, err := exec.LookPath("cgr-loader")
 		if err != nil {
 			t.Error(err)
 		}
-		loader := exec.Command(loaderPath, "-config_path", dspCfgPath, "-path", attrs.FolderPath)
+		loader := exec.Command(loaderPath, "-config_path", dspCfgPath, "-path", path.Join(*dataDir, "tariffplans", "gocs", "dsp_site"))
 
 		if err := loader.Start(); err != nil {
 			t.Error(err)
@@ -194,6 +220,7 @@ func testGOCSLoadData(t *testing.T) {
 	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != expectedVoice {
 		t.Errorf("Expecting: %v, received: %v", expectedVoice, rply)
 	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups on au_site
 }
 
 func testGOCSAuthSession(t *testing.T) {
