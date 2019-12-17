@@ -687,6 +687,7 @@ func testV2CDRsGetCdrsWithRattingPlan(t *testing.T) {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
 	}
+	cdrs = []*engine.ExternalCDR{} // gob will not update zero value fields
 	args = utils.RPCCDRsFilter{RunIDs: []string{"CustomerCharges"}, Accounts: []string{"testV2CDRsProcessCDR4"}}
 	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -700,6 +701,7 @@ func testV2CDRsGetCdrsWithRattingPlan(t *testing.T) {
 			t.Errorf("Expected ExtraInfo : %s received :%s", "", cdrs[0].ExtraInfo)
 		}
 	}
+	cdrs = []*engine.ExternalCDR{} // gob will not update zero value fields
 	args = utils.RPCCDRsFilter{RunIDs: []string{"SupplierCharges"}, Accounts: []string{"testV2CDRsProcessCDR4"}}
 	if err := cdrsRpc.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())

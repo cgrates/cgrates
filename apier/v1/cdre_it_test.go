@@ -208,7 +208,7 @@ func testCDReProcessExternalCdr(t *testing.T) {
 	args := utils.RPCCDRsFilter{OriginIDs: []string{"testextcdr1"}}
 	if err := cdreRPC.Call(utils.ApierV2GetCDRs, args, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(cdrs) != 2 {
+	} else if len(cdrs) != 1 {
 		t.Errorf("Unexpected number of CDRs returned: %v, cdrs=%s ", len(cdrs), utils.ToJSON(cdrs))
 		return
 	} else {
@@ -322,11 +322,11 @@ func testCDReExportCDRsWithAttributes(t *testing.T) {
 	} else if len(rply.ExportedCGRIDs) != 2 {
 		t.Errorf("Unexpected number of CDR exported: %s ", utils.ToJSON(rply))
 	}
-	fileContent1 := `Cdr3,*raw,test2,OriginCDR3,cgrates.org,ATTR_CATEGORY,1001,ATTR_SUBJECT,+4986517174963,30s,-1.0000
-Cdr2,*raw,test2,OriginCDR2,cgrates.org,ATTR_CATEGORY,1001,ATTR_SUBJECT,+4986517174963,5s,-1.0000
+	fileContent1 := `Cdr3,*default,test2,OriginCDR3,cgrates.org,ATTR_CATEGORY,1001,ATTR_SUBJECT,+4986517174963,30s,-1.0000
+Cdr2,*default,test2,OriginCDR2,cgrates.org,ATTR_CATEGORY,1001,ATTR_SUBJECT,+4986517174963,5s,-1.0000
 `
-	fileContent2 := `Cdr2,*raw,test2,OriginCDR2,cgrates.org,ATTR_CATEGORY,1001,ATTR_SUBJECT,+4986517174963,5s,-1.0000
-Cdr3,*raw,test2,OriginCDR3,cgrates.org,ATTR_CATEGORY,1001,ATTR_SUBJECT,+4986517174963,30s,-1.0000
+	fileContent2 := `Cdr2,*default,test2,OriginCDR2,cgrates.org,ATTR_CATEGORY,1001,ATTR_SUBJECT,+4986517174963,5s,-1.0000
+Cdr3,*default,test2,OriginCDR3,cgrates.org,ATTR_CATEGORY,1001,ATTR_SUBJECT,+4986517174963,30s,-1.0000
 `
 	if outContent1, err := ioutil.ReadFile(rply.ExportedPath); err != nil {
 		t.Error(err)

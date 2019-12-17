@@ -674,54 +674,26 @@ func (cdrS *CDRServer) V1ProcessCDR(cdr *CDRWithArgDispatcher, reply *string) (e
 	if cdr.Subject == utils.EmptyString { // Use account information as rating subject if missing
 		cdr.Subject = cdr.Account
 	}
-	if !cdr.PreRated { // Enforce the RunID if CDR is not rated
-		cdr.RunID = utils.MetaRaw
-	}
-	if utils.SliceHasMember([]string{"", utils.MetaRaw}, cdr.RunID) {
-		cdr.Cost = -1.0
+	if cdr.RunID == utils.EmptyString {
+		cdr.RunID = utils.MetaDefault
 	}
 	cgrEv := &utils.CGREventWithArgDispatcher{
-		CGREvent: &utils.CGREvent{
-			Tenant: cdr.Tenant,
-			ID:     utils.UUIDSha1Prefix(),
-			Event:  cdr.AsMapStringIface(),
-		},
+		CGREvent:      cdr.AsCGREvent(),
 		ArgDispatcher: cdr.ArgDispatcher,
 	}
 
-	if len(cdrS.cgrCfg.CdrsCfg().AttributeSConns) != 0 {
-		if err = cdrS.attrSProcessEvent(cgrEv); err != nil {
-			err = utils.NewErrServerError(err)
-			return
-		}
-	}
-	if cdrS.cgrCfg.CdrsCfg().StoreCdrs { // Store *raw CDR
-		if err = cdrS.cdrDb.SetCDR(cdr.CDR, false); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> storing primary CDR %+v, got error: %s",
-					utils.CDRs, cdr, err.Error()))
-			err = utils.NewErrServerError(err) // Cannot store CDR
-			return
-		}
-	}
-	if len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0 {
-		cdrS.exportCDRs([]*CDR{cdr.CDR}) // Replicate raw CDR
-	}
-	if len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0 {
-		go cdrS.thdSProcessEvent(cgrEv)
-	}
-	if len(cdrS.cgrCfg.CdrsCfg().StatSConns) != 0 {
-		go cdrS.statSProcessEvent(cgrEv)
-	}
-	if len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) != 0 &&
-		utils.SliceHasMember([]string{"", utils.MetaRaw}, cdr.RunID) {
-		go cdrS.chrgProcessEvent(cgrEv, len(cdrS.cgrCfg.CdrsCfg().AttributeSConns) != 0,
-			cdrS.cgrCfg.CdrsCfg().StoreCdrs, false,
-			len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0, len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0,
-			len(cdrS.cgrCfg.CdrsCfg().StatSConns) != 0)
+	if err = cdrS.processEvent(cgrEv,
+		len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) != 0 && !cdr.PreRated,
+		len(cdrS.cgrCfg.CdrsCfg().AttributeSConns) != 0,
+		!cdr.PreRated, // rate the CDR if is not PreRated
+		cdrS.cgrCfg.CdrsCfg().StoreCdrs,
+		false, // no rerate
+		len(cdrS.cgrCfg.CdrsCfg().OnlineCDRExports) != 0,
+		len(cdrS.cgrCfg.CdrsCfg().ThresholdSConns) != 0,
+		len(cdrS.cgrCfg.CdrsCfg().StatSConns) != 0); err != nil {
+		return
 	}
 	*reply = utils.OK
-
 	return
 }
 
@@ -800,10 +772,8 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	// end of processing options
 
 	cgrEv := &utils.CGREventWithArgDispatcher{
-		CGREvent: &arg.CGREvent,
-	}
-	if arg.ArgDispatcher != nil {
-		cgrEv.ArgDispatcher = arg.ArgDispatcher
+		CGREvent:      &arg.CGREvent,
+		ArgDispatcher: arg.ArgDispatcher,
 	}
 	if err = cdrS.processEvent(cgrEv,
 		chrgS, attrS, ralS, store, reRate, export, thdS, stS); err != nil {
@@ -947,23 +917,27 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 	if flgs.HasKey(utils.MetaStatS) {
 		statS = flgs.GetBool(utils.MetaStatS)
 	}
-	if flgs.GetBool(utils.MetaChargers) {
-		if len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) == 0 {
-			return utils.NewErrNotConnected(utils.ChargerS)
+	chrgS := len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) != 0
+	if flgs.HasKey(utils.MetaChargers) {
+		chrgS = flgs.GetBool(utils.MetaChargers)
+	}
+
+	if chrgS && len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) == 0 {
+		return utils.NewErrNotConnected(utils.ChargerS)
+	}
+	for _, cdr := range cdrs {
+		cdr.Cost = -1 // the cost will be recalculated
+		cgrEv := &utils.CGREventWithArgDispatcher{
+			CGREvent:      cdr.AsCGREvent(),
+			ArgDispatcher: arg.ArgDispatcher,
 		}
-		for _, cdr := range cdrs {
-			argCharger := &utils.CGREventWithArgDispatcher{
-				CGREvent:      cdr.AsCGREvent(),
-				ArgDispatcher: arg.ArgDispatcher,
-			}
-			if err = cdrS.chrgProcessEvent(argCharger,
-				false, store, true, export, thdS, statS); err != nil {
-				return utils.NewErrServerError(err)
-			}
+		if err = cdrS.processEvent(cgrEv,
+			chrgS, false, true, store, true, export, thdS, statS); err != nil {
+			return utils.NewErrServerError(err)
 		}
 	}
 	*reply = utils.OK
-	return nil
+	return
 }
 
 // V1ProcessExternalCDR is used to process external CDRs

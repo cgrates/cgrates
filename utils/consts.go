@@ -302,8 +302,6 @@ const (
 	MetaSQSjsonMap               = "*sqs_json_map"
 	MetaKafkajsonMap             = "*kafka_json_map"
 	MetaSQL                      = "*sql"
-	MetaMySQL                    = "*mysql"
-	MetaPostgres                 = "*postgres"
 	MetaS3jsonMap                = "*s3_json_map"
 	CONFIG_PATH                  = "/etc/cgrates/"
 	DISCONNECT_CAUSE             = "DisconnectCause"
