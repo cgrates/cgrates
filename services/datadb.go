@@ -76,7 +76,7 @@ func (db *DataDBService) Start() (err error) {
 			db.cfg.TlsCfg().ClientCerificate, db.cfg.TlsCfg().CaCertificate,
 			db.cfg.GeneralCfg().ConnectAttempts, db.cfg.GeneralCfg().Reconnects,
 			db.cfg.GeneralCfg().ConnectTimeout, db.cfg.GeneralCfg().ReplyTimeout,
-			db.cfg.DataDbCfg().RmtConns, nil, false)
+			db.cfg.DataDbCfg().RmtConns, nil, true)
 		if err != nil {
 			log.Fatalf("Coud not confignure dataDB remote connections: %s", err.Error())
 		}
@@ -87,7 +87,7 @@ func (db *DataDBService) Start() (err error) {
 			db.cfg.TlsCfg().ClientCerificate, db.cfg.TlsCfg().CaCertificate,
 			db.cfg.GeneralCfg().ConnectAttempts, db.cfg.GeneralCfg().Reconnects,
 			db.cfg.GeneralCfg().ConnectTimeout, db.cfg.GeneralCfg().ReplyTimeout,
-			db.cfg.DataDbCfg().RplConns, nil, false)
+			db.cfg.DataDbCfg().RplConns, nil, true)
 		if err != nil {
 			log.Fatalf("Coud not confignure dataDB replication connections: %s", err.Error())
 		}
