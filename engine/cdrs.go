@@ -136,7 +136,7 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithArgDispatcher) ([]*CDR, error) {
 	var cdrsRated []*CDR
 	_, hasLastUsed := cdr.ExtraFields[utils.LastUsed]
 	if utils.SliceHasMember([]string{utils.META_PREPAID, utils.PREPAID}, cdr.RequestType) &&
-		(cdr.Usage != 0 || hasLastUsed) { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
+		(cdr.Usage != 0 || hasLastUsed) && cdr.CostDetails == nil { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
 		// Should be previously calculated and stored in DB
 		fib := utils.Fib()
 		var smCosts []*SMCost
@@ -189,6 +189,18 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithArgDispatcher) ([]*CDR, error) {
 		utils.Logger.Warning(
 			fmt.Sprintf("<Cdrs> WARNING: Could not find CallCostLog for cgrid: %s, source: %s, runid: %s, originID: %s originHost: %s, will recalculate",
 				cdr.CGRID, utils.MetaSessionS, cdr.RunID, cdr.OriginID, cdr.OriginHost))
+	}
+	if cdr.CostDetails != nil {
+		if cdr.Usage == cdr.CostDetails.GetUsage() { // Costs were previously calculated, make sure they cover the full usage
+			cdr.Cost = cdr.CostDetails.GetCost()
+			cdr.CostDetails.Compute()
+			return []*CDR{cdr.CDR}, nil
+		}
+		if err = cdrS.refundEventCost(cdr.CostDetails,
+			cdr.RequestType, cdr.ToR); err != nil {
+			return nil, err
+		}
+		cdr.CostDetails = nil
 	}
 	qryCC, err = cdrS.getCostFromRater(cdr)
 	if err != nil {
