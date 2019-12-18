@@ -316,7 +316,9 @@ func (cdrS *CDRServer) chrgrSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher
 func (cdrS *CDRServer) attrSProcessEvent(cgrEv *utils.CGREventWithArgDispatcher) (err error) {
 	var rplyEv AttrSProcessEventReply
 	attrArgs := &AttrArgsProcessEvent{
-		Context:  utils.StringPointer(utils.MetaCDRs),
+		Context:  utils.StringPointer(utils.FirstNonEmpty(
+			utils.IfaceAsString(cgrEv.CGREvent.Event[utils.Context]),
+			utils.MetaCDRs)),
 		CGREvent: cgrEv.CGREvent}
 	if cgrEv.ArgDispatcher != nil {
 		attrArgs.ArgDispatcher = cgrEv.ArgDispatcher

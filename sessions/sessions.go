@@ -3386,7 +3386,9 @@ func (sS *SessionS) processAttributes(cgrEv *utils.CGREvent, argDisp *utils.ArgD
 		return rplyEv, utils.NewErrNotConnected(utils.AttributeS)
 	}
 	attrArgs := &engine.AttrArgsProcessEvent{
-		Context:       utils.StringPointer(utils.MetaSessionS),
+		Context: utils.StringPointer(utils.FirstNonEmpty(
+			utils.IfaceAsString(cgrEv.Event[utils.Context]),
+			utils.MetaSessionS)),
 		CGREvent:      cgrEv,
 		ArgDispatcher: argDisp,
 	}
