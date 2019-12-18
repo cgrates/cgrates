@@ -44,6 +44,7 @@ var sTestsCDRsIT = []func(t *testing.T){
 	testV1CDRsRpcConn,
 	testV1CDRsLoadTariffPlanFromFolder,
 	testV1CDRsProcessEventWithRefund,
+	testV1CDRsRefundOutOfSessionCost,
 	testV1CDRsKillEngine,
 }
 
@@ -240,6 +241,155 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 		t.Errorf("Balance2 is: %s", utils.ToIJSON(blc2))
 	}
 	return
+}
+
+func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
+	//create a sessionCost and store it into storDB
+	var acnt *engine.Account
+	acntAttrs := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "testV1CDRsRefundOutOfSessionCost"}
+	attrSetBalance := utils.AttrSetBalance{
+		Tenant:      acntAttrs.Tenant,
+		Account:     acntAttrs.Account,
+		BalanceType: utils.MONETARY,
+		Balance: map[string]interface{}{
+			utils.ID:     utils.MetaDefault,
+			utils.Value:  123,
+			utils.Weight: 20,
+		},
+	}
+	var reply string
+	if err := cdrsRpc.Call(utils.ApierV1SetBalance, attrSetBalance, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("received: %s", reply)
+	}
+
+	exp := 123.0
+	if err := cdrsRpc.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
+		t.Error(err)
+	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != exp {
+		t.Errorf("Expecting: %v, received: %v", exp, rply)
+	}
+	balanceUuid := acnt.BalanceMap[utils.MONETARY][0].Uuid
+
+	attr := &engine.AttrCDRSStoreSMCost{
+		Cost: &engine.SMCost{
+			CGRID:      "test1",
+			RunID:      utils.MetaDefault,
+			OriginID:   "testV1CDRsRefundOutOfSessionCost",
+			CostSource: utils.MetaSessionS,
+			Usage:      time.Duration(3 * time.Minute),
+			CostDetails: &engine.EventCost{
+				CGRID:     "test1",
+				RunID:     utils.MetaDefault,
+				StartTime: time.Date(2017, 1, 9, 16, 18, 21, 0, time.UTC),
+				Usage:     utils.DurationPointer(time.Duration(3 * time.Minute)),
+				Cost:      utils.Float64Pointer(2.3),
+				Charges: []*engine.ChargingInterval{
+					&engine.ChargingInterval{
+						RatingID: "c1a5ab9",
+						Increments: []*engine.ChargingIncrement{
+							&engine.ChargingIncrement{
+								Usage:          time.Duration(2 * time.Minute),
+								Cost:           2.0,
+								AccountingID:   "a012888",
+								CompressFactor: 1,
+							},
+							&engine.ChargingIncrement{
+								Usage:          time.Duration(1 * time.Second),
+								Cost:           0.005,
+								AccountingID:   "44d6c02",
+								CompressFactor: 60,
+							},
+						},
+						CompressFactor: 1,
+					},
+				},
+				AccountSummary: &engine.AccountSummary{
+					Tenant: "cgrates.org",
+					ID:     "testV1CDRsRefundOutOfSessionCost",
+					BalanceSummaries: []*engine.BalanceSummary{
+						&engine.BalanceSummary{
+							UUID:  balanceUuid,
+							Type:  utils.MONETARY,
+							Value: 50,
+						},
+					},
+					AllowNegative: false,
+					Disabled:      false,
+				},
+				Rating: engine.Rating{
+					"c1a5ab9": &engine.RatingUnit{
+						ConnectFee:       0.1,
+						RoundingMethod:   "*up",
+						RoundingDecimals: 5,
+						RatesID:          "ec1a177",
+						RatingFiltersID:  "43e77dc",
+					},
+				},
+				Accounting: engine.Accounting{
+					"a012888": &engine.BalanceCharge{
+						AccountID:   "cgrates.org:testV1CDRsRefundOutOfSessionCost",
+						BalanceUUID: balanceUuid,
+						Units:       120.7,
+					},
+					"44d6c02": &engine.BalanceCharge{
+						AccountID:   "cgrates.org:testV1CDRsRefundOutOfSessionCost",
+						BalanceUUID: balanceUuid,
+						Units:       120.7,
+					},
+				},
+				Rates: engine.ChargedRates{
+					"ec1a177": engine.RateGroups{
+						&engine.Rate{
+							GroupIntervalStart: time.Duration(0),
+							Value:              0.01,
+							RateIncrement:      time.Duration(1 * time.Minute),
+							RateUnit:           time.Duration(1 * time.Second)},
+					},
+				},
+			},
+		},
+	}
+	if err := cdrsRpc.Call(utils.CDRsV1StoreSessionCost,
+		attr, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("received: %s", reply)
+	}
+
+	argsEv := &engine.ArgV1ProcessEvent{
+		Flags: []string{utils.MetaRALs},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.CGRID:       "test1",
+				utils.RunID:       utils.MetaDefault,
+				utils.OriginID:    "testV1CDRsRefundOutOfSessionCost",
+				utils.RequestType: utils.META_PREPAID,
+				utils.Account:     "testV1CDRsRefundOutOfSessionCost",
+				utils.Destination: "+4986517174963",
+				utils.AnswerTime:  time.Date(2019, 11, 27, 12, 21, 26, 0, time.UTC),
+				utils.Usage:       time.Duration(123) * time.Minute,
+			},
+		},
+	}
+	if err := cdrsRpc.Call(utils.CDRsV1ProcessEvent, argsEv, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+
+	// Initial the balance was 123.0
+	// after refunc the balance become 123.0+2.3=125.3
+	exp = 124.0454
+	if err := cdrsRpc.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
+		t.Error(err)
+	} else if rply := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); rply != exp {
+		t.Errorf("Expecting: %v, received: %v", exp, rply)
+	}
 }
 
 func testV1CDRsKillEngine(t *testing.T) {
