@@ -358,7 +358,7 @@ func testGOCSUpdateSession(t *testing.T) {
 	}
 
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := auRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
+	if err := auRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("wrong active sessions: %s", utils.ToJSON(aSessions))
@@ -436,7 +436,7 @@ func testGOCSUpdateSession2(t *testing.T) {
 	}
 
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := auRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
+	if err := auRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("wrong active sessions: %s", utils.ToJSON(aSessions))
@@ -508,11 +508,11 @@ func testGOCSTerminateSession(t *testing.T) {
 		t.Errorf("Unexpected reply: %s", rply)
 	}
 	aSessions := make([]*sessions.ExternalSession, 0)
-	if err := auRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
+	if err := auRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error %s received error %v and reply %s", utils.ErrNotFound, err, utils.ToJSON(aSessions))
 	}
-	if err := usRPC.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err == nil ||
+	if err := usRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected error %s received error %v and reply %s", utils.ErrNotFound, err, utils.ToJSON(aSessions))
 	}

@@ -167,7 +167,6 @@ func testV2CDRsProcessCDR(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsGetCdrs(t *testing.T) {
@@ -281,13 +280,12 @@ func testV2CDRsRateCDRs(t *testing.T) {
 
 	if err := cdrsRpc.Call(utils.CDRsV1RateCDRs, &engine.ArgRateCDRs{
 		RPCCDRsFilter: utils.RPCCDRsFilter{NotRunIDs: []string{utils.MetaRaw}},
-		Flags:         []string{"*chargers:true"},
+		Flags:         []string{"*chargers:false"},
 	}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsGetCdrs2(t *testing.T) {
@@ -325,7 +323,7 @@ func testV2CDRsGetCdrs2(t *testing.T) {
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	} else {
-		if cdrs[0].Cost != 0.0198 {
+		if cdrs[0].Cost != 0.0102 {
 			t.Errorf("Unexpected cost for CDR: %f", cdrs[0].Cost)
 		}
 	}
@@ -358,7 +356,6 @@ func testV2CDRsUsageNegative(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 
 	var cdrs []*engine.ExternalCDR
 	args := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}, OriginIDs: []string{"testV2CDRsUsageNegative"}}
@@ -512,7 +509,6 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 	} else if reply3 != utils.OK {
 		t.Error("Unexpected reply received: ", reply3)
 	}
-	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 
 	var cdrs []*engine.ExternalCDR
 	args := utils.RPCCDRsFilter{Tenants: []string{"CustomTenant"}}
@@ -572,7 +568,6 @@ func testV2CDRsProcessCDRNoRattingPlan(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsGetCdrsNoRattingPlan(t *testing.T) {
@@ -665,7 +660,6 @@ func testV2CDRsRateCDRsWithRatingPlan(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsGetCdrsWithRattingPlan(t *testing.T) {
@@ -778,7 +772,7 @@ func testV2CDRsProcessCDRWithThreshold(t *testing.T) {
 				utils.OriginID:    "testV2CDRsProcessCDRWithThreshold",
 				utils.OriginHost:  "192.168.1.1",
 				utils.Source:      "testV2CDRsProcessCDRWithThreshold",
-				utils.RequestType: utils.META_PREPAID,
+				utils.RequestType: utils.META_POSTPAID,
 				utils.Category:    "call",
 				utils.Account:     "1005",
 				utils.Subject:     "ANY2CNT",
@@ -796,7 +790,6 @@ func testV2CDRsProcessCDRWithThreshold(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(150 * time.Millisecond) // Give time for CDR to be rated
 }
 
 func testV2CDRsGetThreshold(t *testing.T) {
