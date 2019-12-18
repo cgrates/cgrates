@@ -24,7 +24,7 @@ import (
 
 const (
 	GENERAL_JSN        = "general"
-	CACHE_JSN          = "cache"
+	CACHE_JSN          = "caches"
 	LISTEN_JSN         = "listen"
 	HTTP_JSN           = "http"
 	DATADB_JSN         = "data_db"

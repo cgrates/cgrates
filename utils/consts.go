@@ -363,7 +363,6 @@ const (
 	NonTransactional            = "" // used in transactional cache mechanism
 	DataDB                      = "data_db"
 	StorDB                      = "stor_db"
-	Cache                       = "cache"
 	NotFoundCaps                = "NOT_FOUND"
 	ServerErrorCaps             = "SERVER_ERROR"
 	MandatoryIEMissingCaps      = "MANDATORY_IE_MISSING"

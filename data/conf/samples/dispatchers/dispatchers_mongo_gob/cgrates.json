@@ -32,7 +32,7 @@
 	"db_port": 27017,
 },
 
-"cache":{
+"caches":{
  	"*dispatcher_routes": {"limit": -1, "ttl": "2s"}
 },
 

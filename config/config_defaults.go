@@ -152,7 +152,7 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"cache":{
+"caches":{
 	"*destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// destination caching
 	"*reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	// reverse destinations index caching
 	"*rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			// rating plans caching
