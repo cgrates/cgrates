@@ -20,7 +20,7 @@
     "db_name": "13"
   },
 
-  "cache":{
+  "caches":{
     "*dispatcher_routes": {"limit": -1, "ttl": "2s"}
   },
 

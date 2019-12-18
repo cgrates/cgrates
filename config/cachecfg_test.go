@@ -61,7 +61,7 @@ func TestCacheCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, cachecfg)
 	}
 	cfgJSONStr := `{
-"cache":{
+"caches":{
 	"*destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},			
 	"*reverse_destinations": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},	
 	"*rating_plans": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},

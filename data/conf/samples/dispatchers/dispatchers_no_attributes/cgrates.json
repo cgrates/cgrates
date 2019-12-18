@@ -23,7 +23,7 @@
 	"db_type":"*internal",
 },
 
-"cache":{
+"caches":{
  	"*dispatcher_routes": {"limit": -1, "ttl": "2s"}
 },
 
