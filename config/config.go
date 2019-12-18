@@ -349,7 +349,7 @@ func (cfg *CGRConfig) loadRPCConns(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnRpcConns, err = jsnCfg.RPCConnJsonCfg(); err != nil {
 		return
 	}
-	// hardoded the *internal and *localhost connections
+	// hardoded the *internal connection
 	cfg.rpcConns[utils.MetaInternal] = &RPCConn{
 		Strategy: rpcclient.PoolFirst,
 		PoolSize: 0,
@@ -359,18 +359,8 @@ func (cfg *CGRConfig) loadRPCConns(jsnCfg *CgrJsonCfg) (err error) {
 			},
 		},
 	}
-	cfg.rpcConns[utils.MetaLocalHost] = &RPCConn{
-		Strategy: rpcclient.PoolFirst,
-		PoolSize: 0,
-		Conns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2012",
-				Transport: utils.MetaJSON,
-			},
-		},
-	}
 	for key, val := range jsnRpcConns {
-		cfg.rpcConns[key] = new(RPCConn)
+		cfg.rpcConns[key] = NewDfltRPCConn()
 		if err = cfg.rpcConns[key].loadFromJsonCfg(val); err != nil {
 			return
 		}

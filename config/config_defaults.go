@@ -53,7 +53,12 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"rpc_conns": {},							// rpc connections definitions
+"rpc_conns": {
+	"*localhost": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:2012", "transport":"*json"}],
+	},
+},							// rpc connections definitions
 
 
 "data_db": {								// database used to store runtime data (eg: accounts)
