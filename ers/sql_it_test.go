@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -37,6 +38,7 @@ var (
 	sqlCfg     *config.CGRConfig
 	sqlTests   = []func(t *testing.T){
 		testSQLInitConfig,
+		testSQLInitDBs,
 		testSQLInitCdrDb,
 		testSQLInitDB,
 		testSQLReader,
@@ -53,7 +55,7 @@ var (
 		RunID: "RunID",
 	}
 	db           *gorm.DB
-	dbConnString = "cgrates:CGRateS.org@tcp(127.0.0.1:3306)/cgrates2?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'"
+	dbConnString = "cgrates:CGRateS.org@tcp(127.0.0.1:3306)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'"
 )
 
 func TestSQL(t *testing.T) {
@@ -98,16 +100,9 @@ func testSQLInitConfig(t *testing.T) {
 }
 
 func testSQLInitCdrDb(t *testing.T) {
-	rdrsql := sqlCfg.StorDbCfg().Clone()
 	if err := engine.InitStorDb(sqlCfg); err != nil {
 		t.Fatal(err)
 	}
-	sqlCfg.StorDbCfg().Name = "cgrates2"
-	if err := engine.InitStorDb(sqlCfg); err != nil {
-		t.Fatal(err)
-	}
-	*sqlCfg.StorDbCfg() = *rdrsql
-
 }
 
 type testModelSql struct {
@@ -141,15 +136,28 @@ func (_ *testModelSql) TableName() string {
 	return "cdrs2"
 }
 
+func testSQLInitDBs(t *testing.T) {
+	var err error
+	if db, err = gorm.Open("mysql", fmt.Sprintf(dbConnString, "cgrates")); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err = db.DB().Exec(`CREATE DATABASE IF NOT EXISTS cgrates2;`); err != nil {
+		t.Fatal(err)
+	}
+}
 func testSQLInitDB(t *testing.T) {
 	cdr.CGRID = utils.UUIDSha1Prefix()
 	var err error
-	db, err = gorm.Open("mysql", dbConnString)
+	db, err = gorm.Open("mysql", fmt.Sprintf(dbConnString, "cgrates2"))
 	if err != nil {
 		t.Fatal(err)
 	}
+	if !db.HasTable("cdrs") {
+		db = db.CreateTable(new(engine.CDRsql))
+	}
 	if !db.HasTable("cdrs2") {
-		db = db.CreateTable(&testModelSql{})
+		db = db.CreateTable(new(testModelSql))
 	}
 	db = db.Table(utils.CDRsTBL)
 	tx := db.Begin()

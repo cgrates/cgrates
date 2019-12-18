@@ -123,7 +123,9 @@ func (pstr *SQSPoster) Post(message []byte, fallbackFileName, _ string) (err err
 		if svc, err = pstr.newPosterSession(); err == nil {
 			break
 		}
-		time.Sleep(time.Duration(fib()) * time.Second)
+		if i+1 < pstr.attempts {
+			time.Sleep(time.Duration(fib()) * time.Second)
+		}
 	}
 	if err != nil {
 		if fallbackFileName != utils.META_NONE {
@@ -141,6 +143,9 @@ func (pstr *SQSPoster) Post(message []byte, fallbackFileName, _ string) (err err
 			},
 		); err == nil {
 			break
+		}
+		if i+1 < pstr.attempts {
+			time.Sleep(time.Duration(fib()) * time.Second)
 		}
 	}
 	if err != nil && fallbackFileName != utils.META_NONE {
