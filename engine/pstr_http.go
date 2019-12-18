@@ -28,6 +28,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -93,19 +94,25 @@ func (poster *HTTPPoster) Post(addr string, contentType string, content interfac
 		}
 		if err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, error: <%s>", addr, err.Error()))
-			time.Sleep(time.Duration(fib()) * time.Second)
+			if i+1 < attempts {
+				time.Sleep(time.Duration(fib()) * time.Second)
+			}
 			continue
 		}
 		defer resp.Body.Close()
 		respBody, err = ioutil.ReadAll(resp.Body)
 		if err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, error: <%s>", addr, err.Error()))
-			time.Sleep(time.Duration(fib()) * time.Second)
+			if i+1 < attempts {
+				time.Sleep(time.Duration(fib()) * time.Second)
+			}
 			continue
 		}
 		if resp.StatusCode > 299 {
 			utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, unexpected status code received: <%d>", addr, resp.StatusCode))
-			time.Sleep(time.Duration(fib()) * time.Second)
+			if i+1 < attempts {
+				time.Sleep(time.Duration(fib()) * time.Second)
+			}
 			continue
 		}
 		return respBody, nil
@@ -120,7 +127,7 @@ func (poster *HTTPPoster) Post(addr string, contentType string, content interfac
 			_, err = fileOut.Write(body)
 			fileOut.Close()
 			return nil, err
-		}, time.Duration(2*time.Second), utils.FileLockPrefix+fallbackFilePath)
+		}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.FileLockPrefix+fallbackFilePath)
 	}
 	return
 }

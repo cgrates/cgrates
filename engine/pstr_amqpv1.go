@@ -74,7 +74,9 @@ func (pstr *AMQPv1Poster) Post(content []byte, fallbackFileName, _ string) (err 
 			pstr.client.Close() // Make shure the connection is closed before reseting it
 		}
 		pstr.client = nil
-		time.Sleep(time.Duration(fib()) * time.Second)
+		if i+1 < pstr.attempts {
+			time.Sleep(time.Duration(fib()) * time.Second)
+		}
 	}
 	if err != nil {
 		if fallbackFileName != utils.META_NONE {
@@ -90,7 +92,9 @@ func (pstr *AMQPv1Poster) Post(content []byte, fallbackFileName, _ string) (err 
 			amqpv1.LinkTargetAddress(pstr.queueID),
 		)
 		if err != nil {
-			time.Sleep(time.Duration(fib()) * time.Second)
+			if i+1 < pstr.attempts {
+				time.Sleep(time.Duration(fib()) * time.Second)
+			}
 			// if pstr.isRecoverableError(err) {
 			// 	s.Close(ctx)
 			// 	pstr.client.Close()
@@ -108,7 +112,9 @@ func (pstr *AMQPv1Poster) Post(content []byte, fallbackFileName, _ string) (err 
 		if err == nil {
 			break
 		}
-		time.Sleep(time.Duration(fib()) * time.Second)
+		if i+1 < pstr.attempts {
+			time.Sleep(time.Duration(fib()) * time.Second)
+		}
 		// if pstr.isRecoverableError(err) {
 		// 	s.Close(ctx)
 		// 	pstr.client.Close()

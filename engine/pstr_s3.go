@@ -91,7 +91,9 @@ func (pstr *S3Poster) Post(message []byte, fallbackFileName, key string) (err er
 		if svc, err = pstr.newPosterSession(); err == nil {
 			break
 		}
-		time.Sleep(time.Duration(fib()) * time.Second)
+		if i+1 < pstr.attempts {
+			time.Sleep(time.Duration(fib()) * time.Second)
+		}
 	}
 	if err != nil {
 		if fallbackFileName != utils.META_NONE {
@@ -117,6 +119,9 @@ func (pstr *S3Poster) Post(message []byte, fallbackFileName, key string) (err er
 			Body: bytes.NewReader(message),
 		}); err == nil {
 			break
+		}
+		if i+1 < pstr.attempts {
+			time.Sleep(time.Duration(fib()) * time.Second)
 		}
 	}
 	if err != nil && fallbackFileName != utils.META_NONE {
