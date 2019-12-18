@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import "github.com/cgrates/rpcclient"
+
 // Returns the first cached default value for a RemoteHost connection
 func NewDfltRemoteHost() *RemoteHost {
 	if dfltRemoteHost == nil {
@@ -25,6 +27,10 @@ func NewDfltRemoteHost() *RemoteHost {
 	}
 	dfltVal := *dfltRemoteHost // Copy the value instead of it's pointer
 	return &dfltVal
+}
+
+func NewDfltRPCConn() *RPCConn {
+	return &RPCConn{Strategy: rpcclient.PoolFirst}
 }
 
 type RPCConn struct {
