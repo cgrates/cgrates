@@ -18,13 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import "github.com/cgrates/cgrates/utils"
+
 // DispatcherSCfg is the configuration of dispatcher service
 type DispatcherSCfg struct {
 	Enabled             bool
 	IndexedSelects      bool
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
-	AttributeSConns     []*RemoteHost
+	AttributeSConns     []string
 }
 
 func (dps *DispatcherSCfg) loadFromJsonCfg(jsnCfg *DispatcherSJsonCfg) (err error) {
@@ -52,10 +54,14 @@ func (dps *DispatcherSCfg) loadFromJsonCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 		dps.PrefixIndexedFields = &pif
 	}
 	if jsnCfg.Attributes_conns != nil {
-		dps.AttributeSConns = make([]*RemoteHost, len(*jsnCfg.Attributes_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Attributes_conns {
-			dps.AttributeSConns[idx] = NewDfltRemoteHost()
-			dps.AttributeSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		dps.AttributeSConns = make([]string, len(*jsnCfg.Attributes_conns))
+		for idx, connID := range *jsnCfg.Attributes_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				dps.AttributeSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
+			} else {
+				dps.AttributeSConns[idx] = connID
+			}
 		}
 	}
 	return nil

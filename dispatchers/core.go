@@ -30,7 +30,7 @@ func (dS *DispatcherService) CoreSv1Status(args *utils.TenantWithArgDispatcher,
 	if args.TenantArg != nil && args.TenantArg.Tenant != utils.EmptyString {
 		tnt = args.TenantArg.Tenant
 	}
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
@@ -52,7 +52,7 @@ func (dS *DispatcherService) CoreSv1Ping(args *utils.CGREventWithArgDispatcher, 
 	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
 		tnt = args.CGREvent.Tenant
 	}
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}

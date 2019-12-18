@@ -28,7 +28,7 @@ func (dS *DispatcherService) ResourceSv1Ping(args *utils.CGREventWithArgDispatch
 		args = utils.NewCGREventWithArgDispatcher()
 	}
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
@@ -51,7 +51,7 @@ func (dS *DispatcherService) ResourceSv1GetResourcesForEvent(args utils.ArgRSv1R
 	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
 		tnt = args.CGREvent.Tenant
 	}
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
@@ -75,7 +75,7 @@ func (dS *DispatcherService) ResourceSv1AuthorizeResources(args utils.ArgRSv1Res
 	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
 		tnt = args.CGREvent.Tenant
 	}
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
@@ -99,7 +99,7 @@ func (dS *DispatcherService) ResourceSv1AllocateResources(args utils.ArgRSv1Reso
 	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
 		tnt = args.CGREvent.Tenant
 	}
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
@@ -123,7 +123,7 @@ func (dS *DispatcherService) ResourceSv1ReleaseResources(args utils.ArgRSv1Resou
 	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
 		tnt = args.CGREvent.Tenant
 	}
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}

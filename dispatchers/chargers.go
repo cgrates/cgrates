@@ -28,7 +28,7 @@ func (dS *DispatcherService) ChargerSv1Ping(args *utils.CGREventWithArgDispatche
 		args = utils.NewCGREventWithArgDispatcher()
 	}
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
@@ -51,7 +51,7 @@ func (dS *DispatcherService) ChargerSv1GetChargersForEvent(args *utils.CGREventW
 	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
 		tnt = args.CGREvent.Tenant
 	}
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
@@ -74,7 +74,7 @@ func (dS *DispatcherService) ChargerSv1ProcessEvent(args *utils.CGREventWithArgD
 	if args.CGREvent != nil && args.CGREvent.Tenant != utils.EmptyString {
 		tnt = args.CGREvent.Tenant
 	}
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}

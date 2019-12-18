@@ -34,7 +34,7 @@ import (
 // NewDispatcherService returns the Dispatcher Service
 func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 	cacheS *engine.CacheS, filterSChan chan *engine.FilterS,
-	server *utils.Server, attrsChan, internalChan chan rpcclient.ClientConnector) servmanager.Service {
+	server *utils.Server, internalChan chan rpcclient.ClientConnector, connMgr *engine.ConnManager) servmanager.Service {
 	return &DispatcherService{
 		connChan:    internalChan,
 		cfg:         cfg,
@@ -42,7 +42,7 @@ func NewDispatcherService(cfg *config.CGRConfig, dm *DataDBService,
 		cacheS:      cacheS,
 		filterSChan: filterSChan,
 		server:      server,
-		attrsChan:   attrsChan,
+		connMgr:     connMgr,
 	}
 }
 
@@ -54,7 +54,7 @@ type DispatcherService struct {
 	cacheS      *engine.CacheS
 	filterSChan chan *engine.FilterS
 	server      *utils.Server
-	attrsChan   chan rpcclient.ClientConnector
+	connMgr     *engine.ConnManager
 
 	dspS     *dispatchers.DispatcherService
 	rpc      *v1.DispatcherSv1
@@ -76,20 +76,7 @@ func (dspS *DispatcherService) Start() (err error) {
 	dspS.Lock()
 	defer dspS.Unlock()
 
-	var attrSConn *rpcclient.RPCPool
-	if len(dspS.cfg.DispatcherSCfg().AttributeSConns) != 0 { // AttributeS connection init
-		if attrSConn, err = engine.NewRPCPool(rpcclient.PoolFirst,
-			dspS.cfg.TlsCfg().ClientKey,
-			dspS.cfg.TlsCfg().ClientCerificate, dspS.cfg.TlsCfg().CaCertificate,
-			dspS.cfg.GeneralCfg().ConnectAttempts, dspS.cfg.GeneralCfg().Reconnects,
-			dspS.cfg.GeneralCfg().ConnectTimeout, dspS.cfg.GeneralCfg().ReplyTimeout,
-			dspS.cfg.DispatcherSCfg().AttributeSConns, dspS.attrsChan, false); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to %s: %s",
-				utils.DispatcherS, utils.AttributeS, err.Error()))
-			return
-		}
-	}
-	if dspS.dspS, err = dispatchers.NewDispatcherService(dspS.dm.GetDM(), dspS.cfg, fltrS, attrSConn); err != nil {
+	if dspS.dspS, err = dispatchers.NewDispatcherService(dspS.dm.GetDM(), dspS.cfg, fltrS, dspS.connMgr); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.DispatcherS, err.Error()))
 		return
 	}

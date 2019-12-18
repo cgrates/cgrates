@@ -34,21 +34,19 @@ import (
 // NewDispatcherService constructs a DispatcherService
 func NewDispatcherService(dm *engine.DataManager,
 	cfg *config.CGRConfig, fltrS *engine.FilterS,
-	attrS *rpcclient.RPCPool) (*DispatcherService, error) {
-	if attrS != nil && reflect.ValueOf(attrS).IsNil() {
-		attrS = nil
-	}
+	connMgr *engine.ConnManager) (*DispatcherService, error) {
+
 	return &DispatcherService{dm: dm, cfg: cfg,
-		fltrS: fltrS, attrS: attrS}, nil
+		fltrS: fltrS, connMgr: connMgr}, nil
 }
 
 // DispatcherService  is the service handling dispatching towards internal components
 // designed to handle automatic partitioning and failover
 type DispatcherService struct {
-	dm    *engine.DataManager
-	cfg   *config.CGRConfig
-	fltrS *engine.FilterS
-	attrS *rpcclient.RPCPool // used for API auth
+	dm      *engine.DataManager
+	cfg     *config.CGRConfig
+	fltrS   *engine.FilterS
+	connMgr *engine.ConnManager
 }
 
 // ListenAndServe will initialize the service
@@ -68,7 +66,8 @@ func (dS *DispatcherService) Shutdown() error {
 
 func (dS *DispatcherService) authorizeEvent(ev *utils.CGREvent,
 	reply *engine.AttrSProcessEventReply) (err error) {
-	if err = dS.attrS.Call(utils.AttributeSv1ProcessEvent,
+	if err = dS.connMgr.Call(dS.cfg.DispatcherSCfg().AttributeSConns, nil,
+		utils.AttributeSv1ProcessEvent,
 		&engine.AttrArgsProcessEvent{
 			Context:  utils.StringPointer(utils.MetaAuth),
 			CGREvent: ev}, reply); err != nil {
@@ -225,7 +224,7 @@ func (dS *DispatcherService) V1Apier(apier interface{}, args *utils.MethodParame
 	}
 
 	tenant := utils.FirstNonEmpty(utils.IfaceAsString(parameters[utils.Tenant]), config.CgrConfig().GeneralCfg().DefaultTenant)
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if argD == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}

@@ -1528,7 +1528,7 @@ func TestDfDispatcherSJsonCfg(t *testing.T) {
 		Indexed_selects:       utils.BoolPointer(true),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
-		Attributes_conns:      &[]*RemoteHostJson{},
+		Attributes_conns:      &[]string{},
 	}
 	if cfg, err := dfCgrJsonCfg.DispatcherSJsonCfg(); err != nil {
 		t.Error(err)

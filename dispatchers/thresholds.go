@@ -33,7 +33,7 @@ func (dS *DispatcherService) ThresholdSv1Ping(args *utils.CGREventWithArgDispatc
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 	}
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ThresholdSv1Ping,
 			args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
@@ -54,7 +54,7 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdsForEvent(args *engine.Args
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 	}
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ThresholdSv1GetThresholdsForEvent,
 			args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
@@ -75,7 +75,7 @@ func (dS *DispatcherService) ThresholdSv1ProcessEvent(args *engine.ArgsProcessEv
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 	}
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ThresholdSv1ProcessEvent,
 			args.CGREvent.Tenant,
 			args.APIKey, args.CGREvent.Time); err != nil {
@@ -98,7 +98,7 @@ func (dS *DispatcherService) ThresholdSv1GetThresholdIDs(args *utils.TenantWithA
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 	}
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ThresholdSv1GetThresholdIDs,
 			tnt, args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return
@@ -120,7 +120,7 @@ func (dS *DispatcherService) ThresholdSv1GetThreshold(args *utils.TenantIDWithAr
 	if args.ArgDispatcher == nil {
 		return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 	}
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if err = dS.authorize(utils.ThresholdSv1GetThreshold, tnt,
 			args.APIKey, utils.TimePointer(time.Now())); err != nil {
 			return

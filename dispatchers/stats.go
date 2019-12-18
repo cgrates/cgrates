@@ -30,7 +30,7 @@ func (dS *DispatcherService) StatSv1Ping(args *utils.CGREventWithArgDispatcher, 
 		args = utils.NewCGREventWithArgDispatcher()
 	}
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
@@ -51,7 +51,7 @@ func (dS *DispatcherService) StatSv1Ping(args *utils.CGREventWithArgDispatcher, 
 func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *engine.StatsArgsProcessEvent,
 	reply *[]string) (err error) {
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
@@ -72,7 +72,7 @@ func (dS *DispatcherService) StatSv1GetStatQueuesForEvent(args *engine.StatsArgs
 func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *utils.TenantIDWithArgDispatcher,
 	reply *map[string]string) (err error) {
 
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
@@ -96,7 +96,7 @@ func (dS *DispatcherService) StatSv1GetQueueStringMetrics(args *utils.TenantIDWi
 func (dS *DispatcherService) StatSv1ProcessEvent(args *engine.StatsArgsProcessEvent,
 	reply *[]string) (err error) {
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
@@ -116,7 +116,7 @@ func (dS *DispatcherService) StatSv1ProcessEvent(args *engine.StatsArgsProcessEv
 
 func (dS *DispatcherService) StatSv1GetQueueFloatMetrics(args *utils.TenantIDWithArgDispatcher,
 	reply *map[string]float64) (err error) {
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
@@ -143,7 +143,7 @@ func (dS *DispatcherService) StatSv1GetQueueIDs(args *utils.TenantWithArgDispatc
 	if args.TenantArg != nil && args.TenantArg.Tenant != utils.EmptyString {
 		tnt = args.TenantArg.Tenant
 	}
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}

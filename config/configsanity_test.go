@@ -578,36 +578,26 @@ func TestConfigSanityStorDB(t *testing.T) {
 func TestConfigSanityDataDB(t *testing.T) {
 	cfg, _ = NewDefaultCGRConfig()
 	cfg.dataDbCfg.DataDbType = utils.INTERNAL
-	cfg.cacheCfg = CacheCfg{
-		utils.CacheDiameterMessages: &CacheParamCfg{
-			Limit: 0,
-		},
-	}
-	expected := "<CacheS> *diameter_messages needs to be != 0 when DataBD is *internal, found 0."
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-
-	cfg.cacheCfg = CacheCfg{
-		utils.CacheDiameterMessages: &CacheParamCfg{
-			Limit: 1,
-		},
-	}
-	if err := cfg.checkConfigSanity(); err != nil {
-		t.Errorf("Expecting: nil  received: %+q", err)
-	}
 
 	cfg.cacheCfg = CacheCfg{
 		"test": &CacheParamCfg{
 			Limit: 1,
 		},
 	}
-	expected = "<CacheS> test needs to be 0 when DataBD is *internal, received : 1"
+	if err := cfg.checkConfigSanity(); err != nil {
+		t.Error(err)
+	}
+
+	cfg.cacheCfg = CacheCfg{
+		utils.CacheAccounts: &CacheParamCfg{
+			Limit: 1,
+		},
+	}
+	expected := "<CacheS> *accounts needs to be 0 when DataBD is *internal, received : 1"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.cacheCfg["test"].Limit = 0
-
+	cfg.cacheCfg[utils.CacheAccounts].Limit = 0
 	cfg.resourceSCfg.Enabled = true
 	expected = "<ResourceS> StoreInterval needs to be -1 when DataBD is *internal, received : 0"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {

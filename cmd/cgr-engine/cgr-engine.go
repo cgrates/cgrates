@@ -524,7 +524,7 @@ func main() {
 	})
 
 	attrS := services.NewAttributeService(cfg, dmService, cacheS, filterSChan, server, internalAttributeSChan)
-	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, internalAttributeSChan, internalDispatcherSChan)
+	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, internalDispatcherSChan, connManager.GetConnMgr())
 	chrS := services.NewChargerService(cfg, dmService, cacheS, filterSChan, server,
 		internalChargerSChan, connManager.GetConnMgr())
 	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan, server, internalThresholdSChan)
