@@ -260,7 +260,7 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string) (err error) {
 	} else {
 		outURL = strings.TrimPrefix(outURL, utils.Meta)
 		var oURL *url.URL
-		if oURL, err = url.Parse(inURL); err != nil {
+		if oURL, err = url.Parse(outURL); err != nil {
 			return
 		}
 		rdr.expConnType = oURL.Scheme
@@ -292,7 +292,7 @@ func (rdr *SQLEventReader) setURL(inURL, outURL string) (err error) {
 		rdr.expConnString = fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s",
 			outHost, outPort, outDBname, outUser, outPassword, outSSL)
 	default:
-		return fmt.Errorf("unknown db_type")
+		return fmt.Errorf("unknown db_type %s", rdr.expConnType)
 	}
 	return
 }

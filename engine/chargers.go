@@ -122,8 +122,10 @@ func (cS *ChargerService) processEvent(cgrEv *utils.CGREventWithArgDispatcher) (
 		}
 
 		args := &AttrArgsProcessEvent{
-			AttributeIDs:  cP.AttributeIDs,
-			Context:       utils.StringPointer(utils.MetaChargers),
+			AttributeIDs: cP.AttributeIDs,
+			Context: utils.StringPointer(utils.FirstNonEmpty(
+				utils.IfaceAsString(clonedEv.CGREvent.Event[utils.Context]),
+				utils.MetaChargers)),
 			ProcessRuns:   nil,
 			CGREvent:      clonedEv.CGREvent,
 			ArgDispatcher: clonedEv.ArgDispatcher,

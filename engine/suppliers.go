@@ -579,7 +579,9 @@ func (spS *SupplierService) V1GetSuppliers(args *ArgsGetSuppliers, reply *Sorted
 	}
 	if len(spS.cgrcfg.SupplierSCfg().AttributeSConns) != 0 {
 		attrArgs := &AttrArgsProcessEvent{
-			Context:       utils.StringPointer(utils.MetaSuppliers),
+			Context: utils.StringPointer(utils.FirstNonEmpty(
+				utils.IfaceAsString(args.CGREvent.Event[utils.Context]),
+				utils.MetaSuppliers)),
 			CGREvent:      args.CGREvent,
 			ArgDispatcher: args.ArgDispatcher,
 		}
