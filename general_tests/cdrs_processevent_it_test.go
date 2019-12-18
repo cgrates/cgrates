@@ -494,7 +494,7 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 				utils.OriginID:    "testV2CDRsProcessCDRWithThreshold",
 				utils.OriginHost:  "OriginHost6",
 				utils.Source:      "testV2CDRsProcessCDRWithThreshold",
-				utils.RequestType: utils.META_PREPAID,
+				utils.RequestType: utils.META_PSEUDOPREPAID,
 				utils.Category:    "call",
 				utils.Account:     "1005",
 				utils.Subject:     "ANY2CNT",
@@ -529,6 +529,7 @@ func testV1CDRsProcessEventThreshold(t *testing.T) {
 	acntAttrs := &utils.AttrGetAccount{
 		Tenant:  "cgrates.org",
 		Account: "1005"}
+	time.Sleep(50 * time.Millisecond)
 	expectedVoice := 10.0
 	if err := pecdrsRpc.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 		t.Error(err)
@@ -560,12 +561,6 @@ func testV1CDRsProcessEventExport(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	// var cdrs []*engine.CDR
-	// if err := pecdrsRpc.Call(utils.CDRsV1GetCDRs, utils.RPCCDRsFilter{OriginHosts: []string{"OriginHost7"}}, &cdrs); err != nil {
-	// 	t.Error("Unexpected error: ", err)
-	// } else if len(cdrs) != 1 {
-	// 	t.Errorf("Expecting: 1, received: %+v", len(cdrs))
-	// }
 }
 func testV1CDRsProcessEventExportCheck(t *testing.T) {
 	failoverContent := []byte(fmt.Sprintf(`{"CGRID":"%s"}`, utils.Sha1("test7_processEvent", "OriginHost7")))
@@ -578,7 +573,7 @@ func testV1CDRsProcessEventExportCheck(t *testing.T) {
 	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
 		fileName = file.Name()
 		filePath := path.Join(pecdrsCfg.GeneralCfg().FailedPostsDir, fileName)
-		if strings.HasPrefix(fileName, "cdr|*amqpv1_json_map") {
+		if strings.HasPrefix(fileName, "cdr|*amqp_json_map") {
 			foundFile = true
 			if readBytes, err := ioutil.ReadFile(filePath); err != nil {
 				t.Error(err)

@@ -5,6 +5,7 @@
 
 "general": {
 	"log_level": 7,
+    "poster_attempts": 1,
 },
 
 "data_db":{
@@ -27,8 +28,10 @@
 
 "cdre":{
 	"aws_test_file": {
-		"export_format": "*amqpv1_json_map",
-		"export_path": "amqps://guest:guest@localhost:25672/?queue_id=cgrates_cdrswrong",
+		"export_format": "*amqp_json_map",
+		"export_path": "amqps://guest:guest@localhost:256733/",
+		"attempts": 1,									// export attempts
+		"synchronous": true,							// block processing until export has a result
 		"content_fields": [
 			{"tag": "CGRID", "type": "*composed", "value": "~CGRID", "field_id": "CGRID"},
 		],

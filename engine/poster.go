@@ -24,8 +24,8 @@ import (
 	"path"
 	"strings"
 	"sync"
-	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -78,7 +78,7 @@ func writeToFile(fileDir, fileName string, content []byte) (err error) {
 		_, err = fileOut.Write(content)
 		fileOut.Close()
 		return nil, err
-	}, time.Duration(2*time.Second), utils.FileLockPrefix+fallbackFilePath)
+	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.FileLockPrefix+fallbackFilePath)
 	return
 }
 

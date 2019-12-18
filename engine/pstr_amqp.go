@@ -95,7 +95,9 @@ func (pstr *AMQPPoster) Post(content []byte, fallbackFileName, _ string) (err er
 		if chn, err = pstr.newPostChannel(); err == nil {
 			break
 		}
-		time.Sleep(time.Duration(fib()) * time.Second)
+		if i+1 < pstr.attempts {
+			time.Sleep(time.Duration(fib()) * time.Second)
+		}
 	}
 	if err != nil {
 		if fallbackFileName != utils.META_NONE {
@@ -117,7 +119,9 @@ func (pstr *AMQPPoster) Post(content []byte, fallbackFileName, _ string) (err er
 			}); err == nil {
 			break
 		}
-		time.Sleep(time.Duration(fib()) * time.Second)
+		if i+1 < pstr.attempts {
+			time.Sleep(time.Duration(fib()) * time.Second)
+		}
 	}
 	if err != nil && fallbackFileName != utils.META_NONE {
 		err = writeToFile(pstr.fallbackFileDir, fallbackFileName, content)
