@@ -1355,21 +1355,19 @@ const (
 
 // Cdrs APIs
 const (
-	CDRsV1                     = "CDRsV1"
-	CDRsV1GetCDRsCount         = "CDRsV1.GetCDRsCount"
-	CDRsV1RateCDRs             = "CDRsV1.RateCDRs"
-	CDRsV1GetCDRs              = "CDRsV1.GetCDRs"
-	CDRsV1ProcessCDR           = "CDRsV1.ProcessCDR"
-	CDRsV1ProcessExternalCDR   = "CDRsV1.ProcessExternalCDR"
-	CDRsV1StoreSessionCost     = "CDRsV1.StoreSessionCost"
-	CDRsV1ProcessEvent         = "CDRsV1.ProcessEvent"
-	CDRsV1Ping                 = "CDRsV1.Ping"
-	CDRsV2                     = "CDRsV2"
-	CDRsV2StoreSessionCost     = "CDRsV2.StoreSessionCost"
-	CdrsV2ProcessExternalCdr   = "CdrsV2.ProcessExternalCdr"
-	CdrsV2ProcessCdr           = "CdrsV2.ProcessCdr"
-	CDRStatsV1GetQueue         = "CDRStatsV1.GetQueue"
-	SMGenericV2InitiateSession = "SMGenericV2.InitiateSession"
+	CDRsV1                   = "CDRsV1"
+	CDRsV1GetCDRsCount       = "CDRsV1.GetCDRsCount"
+	CDRsV1RateCDRs           = "CDRsV1.RateCDRs"
+	CDRsV1GetCDRs            = "CDRsV1.GetCDRs"
+	CDRsV1ProcessCDR         = "CDRsV1.ProcessCDR"
+	CDRsV1ProcessExternalCDR = "CDRsV1.ProcessExternalCDR"
+	CDRsV1StoreSessionCost   = "CDRsV1.StoreSessionCost"
+	CDRsV1ProcessEvent       = "CDRsV1.ProcessEvent"
+	CDRsV1Ping               = "CDRsV1.Ping"
+	CDRsV2                   = "CDRsV2"
+	CDRsV2StoreSessionCost   = "CDRsV2.StoreSessionCost"
+	CdrsV2ProcessExternalCdr = "CdrsV2.ProcessExternalCdr"
+	CdrsV2ProcessCdr         = "CdrsV2.ProcessCdr"
 )
 
 // Scheduler

@@ -797,10 +797,7 @@ func (cdrS *CDRServer) V1ProcessEvent(arg *ArgV1ProcessEvent, reply *string) (er
 	}
 	var refund bool
 	if flgs.HasKey(utils.MetaRefund) {
-		reRate = flgs.GetBool(utils.MetaRefund)
-		if reRate {
-			ralS = true
-		}
+		refund = flgs.GetBool(utils.MetaRefund)
 	}
 	// end of processing options
 
