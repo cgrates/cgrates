@@ -436,13 +436,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	// DataDB sanity checks
 	if cfg.dataDbCfg.DataDbType == utils.INTERNAL {
 		for key, config := range cfg.cacheCfg {
-			if key == utils.CacheDiameterMessages || key == utils.CacheClosedSessions || key == utils.CacheRPCConnections {
-				if config.Limit == 0 {
-					return fmt.Errorf("<%s> %s needs to be != 0 when DataBD is *internal, found 0.", utils.CacheS, key)
-				}
-				continue
-			}
-			if config.Limit != 0 {
+			if utils.CacheDataDBPartitions.Has(key) && config.Limit != 0 {
 				return fmt.Errorf("<%s> %s needs to be 0 when DataBD is *internal, received : %d", utils.CacheS, key, config.Limit)
 			}
 		}

@@ -148,6 +148,15 @@ var (
 
 	// AccountableRequestTypes are the ones handled by Accounting subsystem
 	AccountableRequestTypes = NewStringSet([]string{META_PREPAID, META_POSTPAID, META_PSEUDOPREPAID})
+
+	CacheDataDBPartitions = NewStringSet([]string{CacheDestinations, CacheReverseDestinations,
+		CacheRatingPlans, CacheRatingProfiles, CacheActions,
+		CacheActionPlans, CacheAccountActionPlans, CacheActionTriggers, CacheSharedGroups, CacheResourceProfiles, CacheResources,
+		CacheTimings, CacheStatQueueProfiles, CacheStatQueues, CacheThresholdProfiles, CacheThresholds,
+		CacheFilters, CacheSupplierProfiles, CacheAttributeProfiles, CacheChargerProfiles,
+		CacheDispatcherProfiles, CacheDispatcherHosts, CacheResourceFilterIndexes, CacheStatFilterIndexes,
+		CacheThresholdFilterIndexes, CacheSupplierFilterIndexes, CacheAttributeFilterIndexes,
+		CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs, CacheAccounts})
 )
 
 const (
