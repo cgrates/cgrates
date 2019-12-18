@@ -501,7 +501,7 @@ type DispatcherSJsonCfg struct {
 	Indexed_selects       *bool
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
-	Attributes_conns      *[]*RemoteHostJson
+	Attributes_conns      *[]string
 }
 
 type LoaderCfgJson struct {

@@ -481,5 +481,16 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.ApierV1, connID)
 		}
 	}
+	// Dispatcher sanity check
+	if cfg.dispatcherSCfg.Enabled {
+		for _, connID := range cfg.dispatcherSCfg.AttributeSConns {
+			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.attributeSCfg.Enabled {
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.AttributeS, utils.DispatcherS)
+			}
+			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+				return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.DispatcherS, connID)
+			}
+		}
+	}
 	return nil
 }

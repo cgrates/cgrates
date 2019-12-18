@@ -32,7 +32,7 @@ func (dS *DispatcherService) ResponderPing(args *utils.CGREventWithArgDispatcher
 		args = utils.NewCGREventWithArgDispatcher()
 	}
 	args.CGREvent.Tenant = utils.FirstNonEmpty(args.CGREvent.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
@@ -51,7 +51,7 @@ func (dS *DispatcherService) ResponderPing(args *utils.CGREventWithArgDispatcher
 
 func (dS *DispatcherService) ResponderGetCost(args *engine.CallDescriptorWithArgDispatcher,
 	reply *engine.CallCost) (err error) {
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
@@ -70,7 +70,7 @@ func (dS *DispatcherService) ResponderGetCost(args *engine.CallDescriptorWithArg
 
 func (dS *DispatcherService) ResponderDebit(args *engine.CallDescriptorWithArgDispatcher,
 	reply *engine.CallCost) (err error) {
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
@@ -89,7 +89,7 @@ func (dS *DispatcherService) ResponderDebit(args *engine.CallDescriptorWithArgDi
 
 func (dS *DispatcherService) ResponderMaxDebit(args *engine.CallDescriptorWithArgDispatcher,
 	reply *engine.CallCost) (err error) {
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
@@ -108,7 +108,7 @@ func (dS *DispatcherService) ResponderMaxDebit(args *engine.CallDescriptorWithAr
 
 func (dS *DispatcherService) ResponderRefundIncrements(args *engine.CallDescriptorWithArgDispatcher,
 	reply *engine.Account) (err error) {
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
@@ -127,7 +127,7 @@ func (dS *DispatcherService) ResponderRefundIncrements(args *engine.CallDescript
 
 func (dS *DispatcherService) ResponderRefundRounding(args *engine.CallDescriptorWithArgDispatcher,
 	reply *float64) (err error) {
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
@@ -146,7 +146,7 @@ func (dS *DispatcherService) ResponderRefundRounding(args *engine.CallDescriptor
 
 func (dS *DispatcherService) ResponderGetMaxSessionTime(args *engine.CallDescriptorWithArgDispatcher,
 	reply *time.Duration) (err error) {
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
@@ -166,7 +166,7 @@ func (dS *DispatcherService) ResponderGetMaxSessionTime(args *engine.CallDescrip
 func (dS *DispatcherService) ResponderShutdown(args *utils.TenantWithArgDispatcher,
 	reply *string) (err error) {
 	tnt := utils.FirstNonEmpty(args.Tenant, dS.cfg.GeneralCfg().DefaultTenant)
-	if dS.attrS != nil {
+	if len(dS.cfg.DispatcherSCfg().AttributeSConns) != 0 {
 		if args.ArgDispatcher == nil {
 			return utils.NewErrMandatoryIeMissing(utils.ArgDispatcherField)
 		}
