@@ -33,8 +33,8 @@ Operates with different external databases mentioned below.
    - **stor_db**       - used to store offline tariff plan(s) and CDRs
 
 
-.. figure::  images/cgrates-arch.png
-   :alt: CGRateS Architecture
+.. figure::  images/CGRateSInternalArchitecture.png
+   :alt: CGRateS Internal Architecture
    :align: Center
    :scale: 75 %
 
