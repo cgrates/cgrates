@@ -62,7 +62,7 @@ func (ys Years) Contains(year int) (result bool) {
 // Parse Years elements from string separated by sep.
 func (ys *Years) Parse(input, sep string) {
 	switch input {
-	case META_ANY, "":
+	case META_ANY, EmptyString:
 		*ys = []int{}
 	default:
 		elements := strings.Split(input, sep)
@@ -76,7 +76,7 @@ func (ys *Years) Parse(input, sep string) {
 
 func (ys Years) Serialize(sep string) string {
 	if len(ys) == 0 {
-		return "*any"
+		return META_ANY
 	}
 	var yStr string
 	for idx, yr := range ys {
@@ -135,7 +135,7 @@ func (m Months) Contains(month time.Month) (result bool) {
 // Loades Month elemnents from a string separated by sep.
 func (m *Months) Parse(input, sep string) {
 	switch input {
-	case "*any", "": // Apier cannot receive empty string, hence using meta-tag
+	case META_ANY, EmptyString: // Apier cannot receive empty string, hence using meta-tag
 		*m = []time.Month{}
 	default:
 		elements := strings.Split(input, sep)
@@ -150,7 +150,7 @@ func (m *Months) Parse(input, sep string) {
 // Dumps the months in a serialized string, similar to the one parsed
 func (m Months) Serialize(sep string) string {
 	if len(m) == 0 {
-		return "*any"
+		return META_ANY
 	}
 	var mStr string
 	for idx, mt := range m {
