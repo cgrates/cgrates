@@ -62,7 +62,7 @@ func (ys Years) Contains(year int) (result bool) {
 // Parse Years elements from string separated by sep.
 func (ys *Years) Parse(input, sep string) {
 	switch input {
-	case "*any", "":
+	case META_ANY, "":
 		*ys = []int{}
 	default:
 		elements := strings.Split(input, sep)

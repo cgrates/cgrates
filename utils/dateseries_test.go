@@ -68,6 +68,31 @@ func TestYearsLess(t *testing.T) {
 	}
 }
 
+func TestYearsContains(t *testing.T) {
+	ys := &Years{2019, 2010, 2020, 2005, 2018, 2007}
+	if rcv := ys.Contains(2019); !rcv {
+		t.Errorf("Expecting true received: %+v", rcv)
+	}
+	if rcv := ys.Contains(1989); rcv {
+		t.Errorf("Expecting false received: %+v", rcv)
+	}
+}
+
+func TestYearsParse(t *testing.T) {
+	ys := &Years{}
+	eOut := &Years{}
+	ys.Parse(META_ANY, EmptyString)
+	if !reflect.DeepEqual(eOut, ys) {
+		t.Errorf("Expecting %+v received: %+v", eOut, ys)
+	}
+	ys = &Years{2019, 2010, 2020, 2005, 2018, 2007}
+	eOut = &Years{2019, 2010, 2020, 2005, 2018, 2007, 2010, 2011, 2012, 2013}
+	ys.Parse("2010,2011,2012,2013", ",")
+	if !reflect.DeepEqual(eOut, ys) {
+		t.Errorf("Expecting %+v received: %+v", eOut, ys)
+	}
+}
+
 func TestDateseriesMonthStoreRestoreJson(t *testing.T) {
 	m := Months{5, 6, 7, 8}
 	r, _ := json.Marshal(m)

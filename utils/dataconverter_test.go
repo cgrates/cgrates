@@ -547,9 +547,13 @@ func TestPhoneNumberConverter(t *testing.T) {
 	} else if !reflect.DeepEqual(nil, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", nil, rcv)
 	}
+	eLc := &PhoneNumberConverter{CountryCode: "9786679", Format: phonenumbers.NATIONAL}
+	if _, err := eLc.Convert("8976wedf"); err == nil || err.Error() != "invalid country code" {
+		t.Errorf("Expecting: 'invalid country code', received: %+v", err)
+	}
 
 	// US/National
-	eLc := &PhoneNumberConverter{CountryCode: "US", Format: phonenumbers.NATIONAL}
+	eLc = &PhoneNumberConverter{CountryCode: "US", Format: phonenumbers.NATIONAL}
 	d, err := NewDataConverter("*libphonenumber:US")
 	if err != nil {
 		t.Error(err)
