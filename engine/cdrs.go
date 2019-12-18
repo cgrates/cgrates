@@ -954,6 +954,10 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 	if flgs.HasKey(utils.MetaChargers) {
 		chrgS = flgs.GetBool(utils.MetaChargers)
 	}
+	attrS := len(cdrS.cgrCfg.CdrsCfg().AttributeSConns) != 0
+	if flgs.HasKey(utils.MetaAttributes) {
+		attrS = flgs.GetBool(utils.MetaAttributes)
+	}
 
 	if chrgS && len(cdrS.cgrCfg.CdrsCfg().ChargerSConns) == 0 {
 		return utils.NewErrNotConnected(utils.ChargerS)
@@ -964,7 +968,7 @@ func (cdrS *CDRServer) V1RateCDRs(arg *ArgRateCDRs, reply *string) (err error) {
 			CGREvent:      cdr.AsCGREvent(),
 			ArgDispatcher: arg.ArgDispatcher,
 		}
-		if err = cdrS.processEvent(cgrEv, chrgS, false, false,
+		if err = cdrS.processEvent(cgrEv, chrgS, attrS, false,
 			true, store, true, export, thdS, statS); err != nil {
 			return utils.NewErrServerError(err)
 		}
