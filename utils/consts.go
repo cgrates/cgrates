@@ -380,6 +380,7 @@ const (
 	MetaSessionsCosts           = "*sessions_costs"
 	MetaRALs                    = "*rals"
 	MetaRerate                  = "*rerate"
+	MetaRefund                  = "*refund"
 	MetaStats                   = "*stats"
 	MetaResponder               = "*responder"
 	MetaCore                    = "*core"
