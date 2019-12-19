@@ -31,7 +31,7 @@ const (
 	STORDB_JSN         = "stor_db"
 	FilterSjsn         = "filters"
 	RALS_JSN           = "rals"
-	SCHEDULER_JSN      = "scheduler"
+	SCHEDULER_JSN      = "schedulers"
 	CDRS_JSN           = "cdrs"
 	CDRE_JSN           = "cdre"
 	CDRC_JSN           = "cdrc"

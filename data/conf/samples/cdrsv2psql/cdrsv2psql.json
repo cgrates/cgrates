@@ -19,7 +19,7 @@
 	"thresholds_conns": ["*localhost"],
 },
 
-"scheduler": {
+"schedulers": {
 	"enabled": true,
 },
 

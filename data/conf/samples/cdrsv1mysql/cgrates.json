@@ -19,7 +19,7 @@
 },
 
 
-"scheduler": {
+"schedulers": {
 	"enabled": true
 },
 

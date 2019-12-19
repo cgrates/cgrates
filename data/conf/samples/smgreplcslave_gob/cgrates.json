@@ -24,7 +24,7 @@
 	"enabled": true,					// start the CDR Server service:  <true|false>
 },
 
-"scheduler": {
+"schedulers": {
 	"enabled": true,
 },
 

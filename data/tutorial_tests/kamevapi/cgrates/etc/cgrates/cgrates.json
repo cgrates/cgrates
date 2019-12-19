@@ -22,7 +22,7 @@
 },
 
 
-"scheduler": {
+"schedulers": {
 	"enabled": true,
 },
 

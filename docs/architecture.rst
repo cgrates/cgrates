@@ -107,7 +107,7 @@ Used to execute periodic/scheduled tasks.
    "data_db" - (dataDb)
 
 - Config section in the CGRateS configuration file:
-   - ``"scheduler": {...}``
+   - ``"schedulers": {...}``
 
 2.1.3. SessionManager service
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

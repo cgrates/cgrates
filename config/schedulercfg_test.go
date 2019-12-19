@@ -35,7 +35,7 @@ func TestSchedulerCfgloadFromJsonCfg(t *testing.T) {
 		t.Errorf("Expected: %+v ,recived: %+v", expected, schdcfg)
 	}
 	cfgJSONStr := `{
-"scheduler": {
+"schedulers": {
 	"enabled": true,				// start Scheduler service: <true|false>
 	"cdrs_conns": [],				// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
 	},

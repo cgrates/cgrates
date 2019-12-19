@@ -150,7 +150,7 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"scheduler": {
+"schedulers": {
 	"enabled": false,				// start Scheduler service: <true|false>
 	"cdrs_conns": [],				// connections to CDRs for *cdrlog actions <*internal|x.y.z.y:1234>
 	"filters": [],					// only execute actions matching these filters
