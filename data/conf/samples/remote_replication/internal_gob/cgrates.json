@@ -80,7 +80,7 @@
 },
 
 
-"scheduler": {
+"schedulers": {
 	"enabled": true,
 },
 

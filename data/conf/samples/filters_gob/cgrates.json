@@ -40,7 +40,7 @@
 	"thresholds_conns": ["conn1"],
 },
 
-"scheduler": {
+"schedulers": {
 	"enabled": true,				
 },
 

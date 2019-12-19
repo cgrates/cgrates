@@ -467,6 +467,58 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 	}
 }
 
+func TestSessionSRplActivateSessions(t *testing.T) {
+	var aSessions []*ExternalSession
+	var reply string
+	// Activate first session (with ID: ede927f8e42318a8db02c0f74adc2d9e16770339)
+	args := []string{"ede927f8e42318a8db02c0f74adc2d9e16770339"}
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1ActivateSessions, args, &reply); err != nil {
+		t.Error(err)
+	}
+	// Check the sessions on master engine (at this point should have one active and one passive session)
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetPassiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 1 {
+		t.Errorf("Expecting: 1 session, received: %+v sessions", len(aSessions))
+	}
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 1 {
+		t.Errorf("Expecting: 1 session, received: %+v sessions", len(aSessions))
+	}
+	// Check the sessions on slave engine (at this point should have one active and one passive session)
+	// if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
+	// 	t.Error(err)
+	// } else if len(aSessions) != 1 {
+	// 	t.Errorf("Expecting: 1 session, received: %+v sessions", len(aSessions)) //received 2
+	// }
+	// if err := smgRplcSlvRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
+	// 	t.Error(err) //received not found
+	// } else if len(aSessions) != 1 {
+	// 	t.Errorf("Expecting: 1 session, received: %+v sessions", len(aSessions))
+	// }
+	//activate the second session (with ID: 3b0417028f8cefc0e02ddbd37a6dda6fbef4f5e0)
+	args = []string{"3b0417028f8cefc0e02ddbd37a6dda6fbef4f5e0"}
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1ActivateSessions, args, &reply); err != nil {
+		t.Error(err)
+	}
+	//Check the sessions on master engine (2 active, 0 passive)
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 2 {
+		t.Errorf("Expecting: 2 session, received: %+v sessions", len(aSessions))
+	}
+	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetPassiveSessions, new(utils.SessionFilter), &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	//check the number of passive sessions on slave engine
+	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions, new(utils.SessionFilter), &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 2 {
+		t.Errorf("Expecting: 2 session, received: %+v sessions", len(aSessions))
+	}
+}
+
 func TestSessionSRplStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(1000); err != nil {
 		t.Error(err)

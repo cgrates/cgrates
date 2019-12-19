@@ -10,7 +10,7 @@
 	"enabled": true,					// enable Rater service: <true|false>
 },
 
-"scheduler": {
+"schedulers": {
 	"enabled": true,					// start Scheduler service: <true|false>
 },
 

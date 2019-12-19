@@ -33,7 +33,7 @@
 },
 
 
-"scheduler": {
+"schedulers": {
 	"enabled": true,
 },
 

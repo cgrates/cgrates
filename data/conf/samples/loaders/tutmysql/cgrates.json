@@ -32,7 +32,7 @@
 },
 
 
-"scheduler": {
+"schedulers": {
 	"enabled": true,
 	"cdrs_conns": ["*internal"],
 },

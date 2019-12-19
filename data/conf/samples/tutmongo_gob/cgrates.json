@@ -43,7 +43,7 @@
 },
 
 
-"scheduler": {
+"schedulers": {
 	"enabled": true,
 	"cdrs_conns": ["conn1"],
 },

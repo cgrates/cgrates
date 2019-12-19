@@ -486,5 +486,12 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
+	// Cache partitions check
+	for cacheID := range cfg.cacheCfg {
+		if _, has := utils.CachePartitions[cacheID]; !has {
+			return fmt.Errorf("<%s> partition <%s> not defined", utils.CacheS, cacheID)
+		}
+	}
+
 	return nil
 }

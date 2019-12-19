@@ -32,7 +32,7 @@
 },
 
 
-"scheduler": {
+"schedulers": {
 	"enabled": true,						// start Scheduler service: <true|false>
 },
 
