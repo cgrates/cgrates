@@ -580,8 +580,8 @@ func TestConfigSanityDataDB(t *testing.T) {
 	cfg.dataDbCfg.DataDbType = utils.INTERNAL
 
 	cfg.cacheCfg = CacheCfg{
-		"test": &CacheParamCfg{
-			Limit: 1,
+		utils.CacheTimings: &CacheParamCfg{
+			Limit: 0,
 		},
 	}
 	if err := cfg.checkConfigSanity(); err != nil {
@@ -640,4 +640,17 @@ func TestConfigSanityDataDB(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
+}
+func TestConfigSanityCacheS(t *testing.T) {
+	cfg, _ = NewDefaultCGRConfig()
+
+	cfg.cacheCfg = map[string]*CacheParamCfg{"wrong_partition_name": &CacheParamCfg{Limit: 10}}
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<CacheS> partition <wrong_partition_name> not defined" {
+		t.Error(err)
+	}
+
+	cfg.cacheCfg = map[string]*CacheParamCfg{utils.CacheLoadIDs: &CacheParamCfg{Limit: 9}}
+	if err := cfg.checkConfigSanity(); err != nil {
+		t.Error(err)
+	}
 }

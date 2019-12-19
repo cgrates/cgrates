@@ -216,7 +216,7 @@ func (md MonthDays) Contains(monthDay int) (result bool) {
 // Parse MonthDay elements from string separated by sep.
 func (md *MonthDays) Parse(input, sep string) {
 	switch input {
-	case "*any", "":
+	case META_ANY, EmptyString:
 		*md = []int{}
 	default:
 		elements := strings.Split(input, sep)
