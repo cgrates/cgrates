@@ -273,7 +273,43 @@ func TestMonthDaysLess(t *testing.T) {
 
 }
 
-//
+func TestMonthDaysContains(t *testing.T) {
+	md := MonthDays{24, 25, 26}
+	if !md.Contains(24) {
+		t.Errorf("Expected: true, received: false")
+	} else if md.Contains(23) {
+		t.Errorf("Expected: false, received: true")
+	}
+}
+
+func TestMonthDaysParse(t *testing.T) {
+	md1 := MonthDays{}
+	md1.Parse(META_ANY, EmptyString)
+
+	eOut := MonthDays{24, 25, 26}
+	md1.Parse("24,25,26", ",")
+	if !reflect.DeepEqual(eOut, md1) {
+		t.Errorf("Expected: %+v, received: %+v", eOut, md1)
+	}
+}
+
+func TestMonthDaysSerialize(t *testing.T) {
+	md := &MonthDays{}
+	if rcv := md.Serialize(INFIELD_SEP); !reflect.DeepEqual(META_ANY, rcv) {
+		t.Errorf("Expected: %s, received: %s", META_ANY, rcv)
+	}
+
+	md = &MonthDays{1}
+	if rcv := md.Serialize(INFIELD_SEP); !reflect.DeepEqual("1", rcv) {
+		t.Errorf("Expected: '1', received: %s", rcv)
+	}
+
+	md = &MonthDays{1, 2, 3, 4, 5}
+	if rcv := md.Serialize(INFIELD_SEP); !reflect.DeepEqual("1;2;3;4;5", rcv) {
+		t.Errorf("Expected: '1;2;3;4;5', received: %s", rcv)
+	}
+}
+
 func TestMonthStoreRestoreJson(t *testing.T) {
 	m := Months{time.May, time.June, time.July, time.August}
 	r, _ := json.Marshal(m)
@@ -310,27 +346,6 @@ func TestWeekDayStoreRestoreJson(t *testing.T) {
 	json.Unmarshal(r, &o)
 	if !reflect.DeepEqual(o, wd) {
 		t.Errorf("Expected %v was  %v", wd, o)
-	}
-}
-
-func TestMonthDaysSerialize(t *testing.T) {
-	mds := &MonthDays{}
-	mdsString := mds.Serialize(";")
-	expectString := "*any"
-	if expectString != mdsString {
-		t.Errorf("Expected: %s, got: %s", expectString, mdsString)
-	}
-	mds2 := &MonthDays{1}
-	mdsString2 := mds2.Serialize(";")
-	expectString2 := "1"
-	if expectString2 != mdsString2 {
-		t.Errorf("Expected: %s, got: %s", expectString2, mdsString2)
-	}
-	mds3 := &MonthDays{1, 2, 3, 4, 5}
-	mdsString3 := mds3.Serialize(";")
-	expectString3 := "1;2;3;4;5"
-	if expectString3 != mdsString3 {
-		t.Errorf("Expected: %s, got: %s", expectString3, mdsString3)
 	}
 }
 
@@ -424,33 +439,11 @@ func TestWeekDaysParse(t *testing.T) {
 	}
 }
 
-func TestMonthDaysParse(t *testing.T) {
-	md1 := MonthDays{}
-	md2 := MonthDays{24, 25, 26}
-	in := "24,25,26"
-	if reflect.DeepEqual(md2, md1) != false {
-		t.Errorf("Expected: %+v, received: %+v", MonthDays{}, md1)
-	}
-	md1.Parse(in, ",")
-	if !reflect.DeepEqual(md2, md1) {
-		t.Errorf("Expected: %+v, received: %+v", md2, md1)
-	}
-}
-
 func TestWeekDaysContains(t *testing.T) {
 	wds := WeekDays{time.Monday, time.Tuesday}
 	if wds.Contains(time.Monday) != true {
 		t.Errorf("Expected: true, got: %v", !true)
 	} else if wds.Contains(time.Wednesday) != false {
-		t.Errorf("Expected: false, got: %v", !false)
-	}
-}
-
-func TestMonthDaysContains(t *testing.T) {
-	md := MonthDays{24, 25, 26}
-	if md.Contains(24) != true {
-		t.Errorf("Expected: true, got: %v", !true)
-	} else if md.Contains(23) != false {
 		t.Errorf("Expected: false, got: %v", !false)
 	}
 }

@@ -723,7 +723,7 @@ const (
 	ThresholdsLow  = "thresholds"
 	DispatcherSLow = "dispatchers"
 	AnalyzerSLow   = "analyzers"
-	SchedulerSLow  = "schedulers"
+	SchedulerSLow  = "scheduler"
 	LoaderSLow     = "loaders"
 	RALsLow        = "rals"
 	ReplicatorLow  = "replicator"
