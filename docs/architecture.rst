@@ -39,7 +39,7 @@ Operates with different external databases mentioned below.
    :scale: 75 %
 
 
-   CGRateS high level design
+   Internal Architecture of **cgr-engine**
 
 2.1. cgr-engine
 ---------------
