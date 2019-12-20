@@ -18,28 +18,116 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"reflect"
 	"testing"
 )
+
+func TestNewCGRError(t *testing.T) {
+	eOut := &CGRError{}
+	if rcv := NewCGRError(EmptyString, EmptyString, EmptyString, EmptyString); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected: %+v, received: %+v ", ToJSON(eOut), ToJSON(rcv))
+	}
+	eOut = &CGRError{
+		context:      "context",
+		apiError:     "apiError",
+		shortError:   "shortError",
+		longError:    "longError",
+		errorMessage: "shortError",
+	}
+	if rcv := NewCGRError("context", "apiError", "shortError", "longError"); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected: %+v, received: %+v ", ToJSON(eOut), ToJSON(rcv))
+	}
+}
 
 func TestCGRErrorActivate(t *testing.T) {
 	ctx := "TEST_CONTEXT"
 	apiErr := "TEST_API_ERR"
 	shortErr := "short error"
 	longErr := "long error which is good for debug"
-	err := NewCGRError(ctx, apiErr, shortErr, longErr)
-	if ctxRcv := err.Context(); ctxRcv != ctx {
-		t.Errorf("Context: <%s>", ctxRcv)
+	cgrError := NewCGRError(ctx, apiErr, shortErr, longErr)
+
+	if rcv := cgrError.Context(); !reflect.DeepEqual(rcv, ctx) {
+		t.Errorf("Expected: %+q, received: %+q ", ctx, rcv)
 	}
-	if err.Error() != shortErr {
-		t.Error(err)
+	if rcv := cgrError.Error(); !reflect.DeepEqual(rcv, shortErr) {
+		t.Errorf("Expected: %+q, received: %+q ", shortErr, rcv)
 	}
-	err.ActivateAPIError()
-	if err.Error() != apiErr {
-		t.Error(err)
+	cgrError.ActivateAPIError()
+	if !reflect.DeepEqual(apiErr, cgrError.errorMessage) {
+		t.Errorf("Expected: %+q, received: %+q ", apiErr, cgrError.errorMessage)
 	}
-	err.ActivateLongError()
-	if err.Error() != longErr {
-		t.Error(err)
+	cgrError.ActivateShortError()
+	if !reflect.DeepEqual(shortErr, cgrError.errorMessage) {
+		t.Errorf("Expected: %+q, received: %+q ", shortErr, cgrError.errorMessage)
+	}
+	cgrError.ActivateLongError()
+	if !reflect.DeepEqual(longErr, cgrError.errorMessage) {
+		t.Errorf("Expected: %+q, received: %+q ", longErr, cgrError.errorMessage)
+	}
+}
+
+func TestNewErrMandatoryIeMissing(t *testing.T) {
+	if rcv := NewErrMandatoryIeMissing(EmptyString); rcv.Error() != "MANDATORY_IE_MISSING: []" {
+		t.Errorf("Expecting: MANDATORY_IE_MISSING: [], received: %+v", rcv)
+	}
+	if rcv := NewErrMandatoryIeMissing("string1", "string2"); rcv.Error() != "MANDATORY_IE_MISSING: [string1 string2]" {
+		t.Errorf("Expecting: MANDATORY_IE_MISSING: [string1 string2], received: %+b", rcv)
+	}
+	if rcv := NewErrMandatoryIeMissing("test"); rcv.Error() != "MANDATORY_IE_MISSING: [test]" {
+		t.Errorf("Expecting: MANDATORY_IE_MISSING: [test], received: %+v", rcv)
+	}
+}
+
+func TestNewErrServerError(t *testing.T) {
+	cgrError := NewCGRError("context", "apiError", "shortError", "longError")
+	if rcv := NewErrServerError(cgrError); rcv.Error() != "SERVER_ERROR: shortError" {
+		t.Errorf("Expecting: SERVER_ERROR: shortError, received: %+v", rcv)
+	}
+}
+
+func TestNewErrServiceNotOperational(t *testing.T) {
+	if rcv := NewErrServiceNotOperational("Error"); rcv.Error() != "SERVICE_NOT_OPERATIONAL: Error" {
+		t.Errorf("Expecting: SERVICE_NOT_OPERATIONAL: Error, received: %+v", rcv)
+	}
+}
+
+func TestNewErrNotConnected(t *testing.T) {
+	if rcv := NewErrNotConnected("Error"); rcv.Error() != "NOT_CONNECTED: Error" {
+		t.Errorf("Expecting: NOT_CONNECTED: Error, received: %+v", rcv)
+	}
+}
+
+func TestNewErrRALs(t *testing.T) {
+	cgrError := NewCGRError("context", "apiError", "shortError", "longError")
+	if rcv := NewErrRALs(cgrError); rcv.Error() != "RALS_ERROR:shortError" {
+		t.Errorf("Expecting: RALS_ERROR:shortError, received: %+v", rcv)
+	}
+}
+
+func TestNewErrResourceS(t *testing.T) {
+	cgrError := NewCGRError("context", "apiError", "shortError", "longError")
+	if rcv := NewErrResourceS(cgrError); rcv.Error() != "RESOURCES_ERROR:shortError" {
+		t.Errorf("Expecting: RESOURCES_ERROR:shortError, received: %+v", rcv)
+	}
+}
+
+func TestNewErrSupplierS(t *testing.T) {
+	cgrError := NewCGRError("context", "apiError", "shortError", "longError")
+	if rcv := NewErrSupplierS(cgrError); rcv.Error() != "SUPPLIERS_ERROR:shortError" {
+		t.Errorf("Expecting: SUPPLIERS_ERROR:shortError, received: %+v", rcv)
+	}
+}
+func TestNewErrAttributeS(t *testing.T) {
+	cgrError := NewCGRError("context", "apiError", "shortError", "longError")
+	if rcv := NewErrAttributeS(cgrError); rcv.Error() != "ATTRIBUTES_ERROR:shortError" {
+		t.Errorf("Expecting: ATTRIBUTES_ERROR:shortError, received: %+v", rcv)
+	}
+}
+
+func TestNewErrDispatcherS(t *testing.T) {
+	cgrError := NewCGRError("context", "apiError", "shortError", "longError")
+	if rcv := NewErrDispatcherS(cgrError); rcv.Error() != "DISPATCHER_ERROR:shortError" {
+		t.Errorf("Expecting: DISPATCHER_ERROR:shortError, received: %+v", rcv)
 	}
 }
 
@@ -53,5 +141,51 @@ func TestAPIErrorHandler(t *testing.T) {
 	cgrErr := NewCGRError("TEST_CONTEXT", "TEST_API_ERR", "short error", "long error which is good for debug")
 	if err := APIErrorHandler(cgrErr); err.Error() != cgrErr.apiError {
 		t.Error(err)
+	}
+}
+
+func TestNewErrStringCast(t *testing.T) {
+	if rcv := NewErrStringCast("test"); rcv.Error() != "cannot cast value: test to string" {
+		t.Errorf("Expecting: cannot cast value: test to string, received: %+v", rcv)
+	}
+}
+
+func TestNewErrFldStringCast(t *testing.T) {
+	if rcv := NewErrFldStringCast("test1", "test2"); rcv.Error() != "cannot cast field: test1 with value: test2 to string" {
+		t.Errorf("Expecting: cannot cast field: test1 with value: test2 to string, received: %+v", rcv)
+	}
+}
+
+func TestErrHasPrefix(t *testing.T) {
+	if ErrHasPrefix(nil, EmptyString) {
+		t.Error("Expecting false, received: true")
+	}
+	if !ErrHasPrefix(&CGRError{errorMessage: "test_errorMessage"}, "test") {
+		t.Error("Expecting true, received: false")
+	}
+}
+
+func TestErrPrefix(t *testing.T) {
+	cgrError := NewCGRError("context", "apiError", "shortError", "longError")
+	if rcv := ErrPrefix(cgrError, "notaprefix"); rcv.Error() != "shortError:notaprefix" {
+		t.Errorf("Expecting: shortError:notaprefix, received: %+v", rcv)
+	}
+}
+
+func TestErrPrefixNotFound(t *testing.T) {
+	if rcv := ErrPrefixNotFound("test_string"); rcv.Error() != "NOT_FOUND:test_string" {
+		t.Errorf("Expecting: NOT_FOUND:test_string, received: %+v", rcv)
+	}
+}
+
+func TestErrPrefixNotErrNotImplemented(t *testing.T) {
+	if rcv := ErrPrefixNotErrNotImplemented("test_string"); rcv.Error() != "NOT_IMPLEMENTED:test_string" {
+		t.Errorf("Expecting: NOT_IMPLEMENTED:test_string, received: %+v", rcv)
+	}
+}
+
+func TestErrEnvNotFound(t *testing.T) {
+	if rcv := ErrEnvNotFound("test_string"); rcv.Error() != "NOT_FOUND:ENV_VAR:test_string" {
+		t.Errorf("Expecting: NOT_FOUND:ENV_VAR:test_string, received: %+v", rcv)
 	}
 }

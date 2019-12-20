@@ -46,7 +46,7 @@ func MirrorMap(mapIn map[string]string) map[string]string {
 func MissingMapKeys(inMap map[string]string, requiredKeys []string) []string {
 	missingKeys := []string{}
 	for _, reqKey := range requiredKeys {
-		if val, hasKey := inMap[reqKey]; !hasKey || val == "" {
+		if val, hasKey := inMap[reqKey]; !hasKey || val == EmptyString {
 			missingKeys = append(missingKeys, reqKey)
 		}
 	}
@@ -70,8 +70,8 @@ func NewStringMap(s ...string) StringMap {
 	result := make(StringMap)
 	for _, v := range s {
 		v = strings.TrimSpace(v)
-		if v != "" {
-			if strings.HasPrefix(v, "!") {
+		if v != EmptyString {
+			if strings.HasPrefix(v, NegativePrefix) {
 				result[v[1:]] = false
 			} else {
 				result[v] = true
@@ -135,8 +135,8 @@ func StringMapFromSlice(s []string) StringMap {
 	result := make(StringMap, len(s))
 	for _, v := range s {
 		v = strings.TrimSpace(v)
-		if v != "" {
-			if strings.HasPrefix(v, "!") {
+		if v != EmptyString {
+			if strings.HasPrefix(v, NegativePrefix) {
 				result[v[1:]] = false
 			} else {
 				result[v] = true
@@ -166,7 +166,7 @@ func (sm StringMap) GetOne() string {
 	for key := range sm {
 		return key
 	}
-	return ""
+	return EmptyString
 }
 
 func (sm StringMap) Join(mps ...StringMap) {

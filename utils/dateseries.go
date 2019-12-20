@@ -231,7 +231,7 @@ func (md *MonthDays) Parse(input, sep string) {
 // Dumps the month days in a serialized string, similar to the one parsed
 func (md MonthDays) Serialize(sep string) string {
 	if len(md) == 0 {
-		return "*any"
+		return META_ANY
 	}
 	var mdsStr string
 	for idx, mDay := range md {
@@ -290,7 +290,7 @@ func (wd WeekDays) Contains(weekDay time.Weekday) (result bool) {
 
 func (wd *WeekDays) Parse(input, sep string) {
 	switch input {
-	case "*any", "":
+	case META_ANY, EmptyString:
 		*wd = []time.Weekday{}
 	default:
 		elements := strings.Split(input, sep)
@@ -305,7 +305,7 @@ func (wd *WeekDays) Parse(input, sep string) {
 // Dumps the week days in a serialized string, similar to the one parsed
 func (wd WeekDays) Serialize(sep string) string {
 	if len(wd) == 0 {
-		return "*any"
+		return META_ANY
 	}
 	var wdStr string
 	for idx, d := range wd {
