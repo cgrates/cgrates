@@ -23,32 +23,108 @@ import (
 	"testing"
 )
 
-func TestStringMapParse(t *testing.T) {
-	sm := ParseStringMap("1;2;3;4")
-	if len(sm) != 4 {
-		t.Error("Error pasring map: ", sm)
+func TestConvertMapValStrIf(t *testing.T) {
+	var mapIn map[string]string
+	var mapOut map[string]interface{}
+	if rcv := ConvertMapValStrIf(mapIn); reflect.TypeOf(rcv) != reflect.TypeOf(mapOut) {
+		t.Errorf("Expecting: %+v, received: %+v", reflect.TypeOf(mapOut), reflect.TypeOf(rcv))
+	}
+	mapIn = map[string]string{"test1": "_test1_", "test2": "_test2_"}
+	if rcv := ConvertMapValStrIf(mapIn); reflect.TypeOf(rcv) != reflect.TypeOf(mapOut) {
+		t.Errorf("Expecting: %+v, received: %+v", reflect.TypeOf(mapOut), reflect.TypeOf(rcv))
+	} else if !reflect.DeepEqual(mapIn["test1"], rcv["test1"]) {
+		t.Errorf("Expecting: %+v, received: %+v", mapIn["test1"], rcv["test1"])
+	} else if len(rcv) != len(mapIn) {
+		t.Errorf("Expecting: %+v, received: %+v", len(mapIn), len(rcv))
 	}
 }
 
-func TestStringMapParseNegative(t *testing.T) {
-	sm := ParseStringMap("1;2;!3;4")
-	if len(sm) != 4 {
+func TestMirrorMap(t *testing.T) {
+	var mapIn map[string]string
+	if rcv := MirrorMap(mapIn); reflect.DeepEqual(rcv, mapIn) {
+		t.Errorf("Expecting: %+v, received: %+v", reflect.TypeOf(mapIn), reflect.TypeOf(rcv))
+	} else if len(rcv) != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, len(rcv))
+	}
+	mapIn = map[string]string{"test1": "_test1_", "test2": "_test2_"}
+	eOut := map[string]string{"_test1_": "test1", "_test2_": "test2"}
+	if rcv := MirrorMap(mapIn); reflect.DeepEqual(rcv, mapIn) {
+		t.Errorf("Expecting: %+v, received: %+v", reflect.TypeOf(mapIn), reflect.TypeOf(rcv))
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+}
+
+func TestMissingMapKeys(t *testing.T) {
+	mapIn := map[string]string{}
+	requiredKeys := []string{}
+	if rcv := MissingMapKeys(mapIn, requiredKeys); len(rcv) != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, len(rcv))
+	}
+
+	mapIn = map[string]string{"test1": "_test1_", "test2": "_test2_"}
+	requiredKeys = []string{"test1", "test2"}
+	if rcv := MissingMapKeys(mapIn, requiredKeys); len(rcv) != 0 {
+		t.Errorf("Expecting: %+v, received: %+v", 0, len(rcv))
+	}
+
+	mapIn = map[string]string{"test1": "_test1_", "test2": "_test2_"}
+	requiredKeys = []string{"test2", "test3"}
+	if rcv := MissingMapKeys(mapIn, requiredKeys); len(rcv) != 1 {
+		t.Errorf("Expecting: %+v, received: %+v", 1, len(rcv))
+	} else if !reflect.DeepEqual([]string{"test3"}, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", []string{"test3"}, rcv)
+	}
+
+	requiredKeys = []string{"test3", "test4"}
+	eOut := []string{"test3", "test4"}
+	if rcv := MissingMapKeys(mapIn, requiredKeys); len(rcv) != 2 {
+		t.Errorf("Expecting: %+v, received: %+v", 2, len(rcv))
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+}
+
+func TestMapKeys(t *testing.T) {
+	mapIn := map[string]string{"test1": "_test1_", "test2": "_test2_"}
+	eOut := []string{"test1", "test2"}
+	rcv := MapKeys(mapIn)
+	sort.Slice(rcv, func(i, j int) bool { return rcv[i] < rcv[j] })
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	mapIn = map[string]string{"test1": "_test1_", "test2": "_test2_", "test3": "_test3_", "test4": "_test4_"}
+	eOut = []string{"test1", "test2", "test3", "test4"}
+	rcv = MapKeys(mapIn)
+	sort.Slice(rcv, func(i, j int) bool { return rcv[i] < rcv[j] })
+	if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+}
+
+func MapKeysStringMapParse(t *testing.T) {
+	if sm := ParseStringMap(EmptyString); len(sm) != 0 {
+		t.Errorf("Expecting %+v, received %+v", 0, len(sm))
+	}
+	if sm := ParseStringMap(ZERO); len(sm) != 0 {
+		t.Errorf("Expecting %+v, received %+v", 0, len(sm))
+	}
+	if sm := ParseStringMap("1;2;3;4"); len(sm) != 4 {
 		t.Error("Error pasring map: ", sm)
 	}
-	if sm["3"] != false {
+	if sm := ParseStringMap("1;2;!3;4"); len(sm) != 4 {
+		t.Error("Error pasring map: ", sm)
+	} else if sm["3"] != false {
 		t.Error("Error parsing negative: ", sm)
 	}
-}
-
-func TestStringMapCompare(t *testing.T) {
 	sm := ParseStringMap("1;2;!3;4")
-	if include, found := sm["2"]; include != true && found != true {
+	if include, has := sm["2"]; include != true && has != true {
 		t.Error("Error detecting positive: ", sm)
 	}
-	if include, found := sm["3"]; include != false && found != true {
+	if include, has := sm["3"]; include != false && has != true {
 		t.Error("Error detecting negative: ", sm)
 	}
-	if include, found := sm["5"]; include != false && found != false {
+	if include, has := sm["5"]; include != false && has != false {
 		t.Error("Error detecting missing: ", sm)
 	}
 }

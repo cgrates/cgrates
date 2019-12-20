@@ -207,9 +207,13 @@ func TestMonthsSerialize(t *testing.T) {
 	}
 }
 
-func TestMonthsIsCompleteYes(t *testing.T) {
+func TestMonthsIsComplete(t *testing.T) {
 	months := Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December}
 	if !months.IsComplete() {
+		t.Error("Error months IsComplete: ", months)
+	}
+	months = Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November}
+	if months.IsComplete() {
 		t.Error("Error months IsComplete: ", months)
 	}
 }
@@ -310,6 +314,199 @@ func TestMonthDaysSerialize(t *testing.T) {
 	}
 }
 
+func TestMonthDaysEquals(t *testing.T) {
+	md1 := MonthDays{24, 25, 26}
+	md2 := MonthDays{24, 25, 26}
+	md3 := MonthDays{24, 25, 27}
+	md4 := MonthDays{}
+	if !md1.Equals(md2) {
+		t.Errorf("Expected: true, received: false")
+	} else if md1.Equals(md4) {
+		t.Errorf("Expected: false, received: true")
+	} else if md1.Equals(md3) {
+		t.Errorf("Expected: false, received: true")
+	}
+}
+
+func TestWeekdaysSort(t *testing.T) {
+	wd := &WeekDays{}
+	wd.Sort()
+	if !reflect.DeepEqual(wd, &WeekDays{}) {
+		t.Errorf("Expecting %+v received: %+v", &WeekDays{}, wd)
+	}
+	wd = &WeekDays{time.Thursday, time.Sunday, time.Monday, time.Friday}
+	wdSorted := &WeekDays{time.Sunday, time.Monday, time.Thursday, time.Friday}
+	wd.Sort()
+	if !reflect.DeepEqual(wd, wdSorted) {
+		t.Errorf("Expecting %+v received: %+v", wdSorted, wd)
+	}
+}
+
+func TestWeekDaysLen(t *testing.T) {
+	wd := &WeekDays{}
+	if rcv := wd.Len(); rcv != 0 {
+		t.Errorf("Expecting %+v received: %+v", 0, rcv)
+	}
+	wd = &WeekDays{time.Thursday, time.Sunday, time.Monday, time.Friday}
+	if rcv := wd.Len(); rcv != 4 {
+		t.Errorf("Expecting %+v received: %+v", 4, rcv)
+	}
+}
+
+func TestWeekDaysSwap(t *testing.T) {
+	wd := &WeekDays{time.Thursday, time.Sunday, time.Monday, time.Friday}
+	wd.Swap(0, 1)
+	ysSwapped := &WeekDays{time.Sunday, time.Thursday, time.Monday, time.Friday}
+	if !reflect.DeepEqual(wd, ysSwapped) {
+		t.Errorf("Expecting %+v received: %+v", ysSwapped, wd)
+	}
+}
+
+func TestWeekDaysLess(t *testing.T) {
+	ys := &WeekDays{time.Thursday, time.Sunday, time.Monday, time.Friday}
+	if ys.Less(0, 1) {
+		t.Errorf("Expecting false received: true")
+	}
+	if !ys.Less(1, 2) {
+		t.Errorf("Expecting true received: false")
+	}
+}
+
+func TestWeekDaysContains(t *testing.T) {
+	wds := WeekDays{time.Monday, time.Tuesday}
+	if !wds.Contains(time.Monday) {
+		t.Errorf("Expected: true, received: false")
+	} else if wds.Contains(time.Wednesday) {
+		t.Errorf("Expected: false, received: true")
+	}
+}
+
+func TestWeekDaysParse(t *testing.T) {
+	wd := WeekDays{}
+	wd.Parse(META_ANY, EmptyString)
+	eOut := WeekDays{time.Monday, time.Tuesday, time.Wednesday}
+	wd.Parse("1,2,3", FIELDS_SEP)
+	if !reflect.DeepEqual(eOut, wd) {
+		t.Errorf("Expected: %+v, received: %+v", eOut, wd)
+	}
+}
+
+func TestWeekDaysSerialize(t *testing.T) {
+	wd := &WeekDays{}
+	if rcv := wd.Serialize(INFIELD_SEP); !reflect.DeepEqual(META_ANY, rcv) {
+		t.Errorf("Expected: %s, received: %s", META_ANY, rcv)
+	}
+
+	wd = &WeekDays{time.Monday}
+	if rcv := wd.Serialize(INFIELD_SEP); !reflect.DeepEqual("1", rcv) {
+		t.Errorf("Expected: '1', received: %s", rcv)
+	}
+
+	wd = &WeekDays{time.Monday, time.Saturday, time.Sunday}
+	if rcv := wd.Serialize(INFIELD_SEP); !reflect.DeepEqual("1;6;0", rcv) {
+		t.Errorf("Expected: '1;6;0', received: %s", rcv)
+	}
+}
+
+func TestWeekDaysEquals(t *testing.T) {
+	wd1 := WeekDays{time.Monday, time.Saturday, time.Sunday}
+	wd2 := WeekDays{time.Monday, time.Saturday, time.Sunday}
+	wd3 := WeekDays{time.Monday, time.Saturday, time.Tuesday}
+	wd4 := WeekDays{time.Monday}
+	if !wd1.Equals(wd2) {
+		t.Errorf("Expected: true, received: false")
+	} else if wd1.Equals(wd3) {
+		t.Errorf("Expected: false, received: true")
+	} else if wd1.Equals(wd4) {
+		t.Errorf("Expected: false, received: true")
+	}
+}
+
+func TestDaysInMonth(t *testing.T) {
+	if rcv := DaysInMonth(2016, 4); rcv != 30 {
+		t.Errorf("Expected: %v, received: %v ", 30, rcv)
+	}
+	if rcv := DaysInMonth(2016, 2); rcv != 29 {
+		t.Errorf("Expected: %v, received: %v ", 29, rcv)
+	}
+	if rcv := DaysInMonth(2016, 1); rcv != 31 {
+		t.Errorf("Expected: %v, received: %v ", 31, rcv)
+	}
+	if rcv := DaysInMonth(2016, 12); rcv != 31 {
+		t.Errorf("Expected: %v, received: %v ", 31, rcv)
+	}
+	if rcv := DaysInMonth(2015, 2); rcv != 28 {
+		t.Errorf("Expected: %v, received: %v ", 28, rcv)
+	}
+}
+
+func TestDaysInYear(t *testing.T) {
+	if rcv := DaysInYear(2016); rcv != 366 {
+		t.Errorf("Expected: %v, received: %v ", 366, rcv)
+	}
+	if rcv := DaysInYear(2015); rcv != 365 {
+		t.Errorf("Expected: %v, received: %v ", 265, rcv)
+	}
+}
+
+func TestLocalAddr(t *testing.T) {
+	eOut := &NetAddr{network: Local, ip: Local}
+	if rcv := LocalAddr(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected: %+v, received: %+v ", ToJSON(eOut), ToJSON(rcv))
+	}
+}
+
+func TestNewNetAddr(t *testing.T) {
+	eOut := &NetAddr{}
+	if rcv := NewNetAddr(EmptyString, EmptyString); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected: %+v, received: %+v ", ToJSON(eOut), ToJSON(rcv))
+	}
+	eOut = &NetAddr{network: "network"}
+	if rcv := NewNetAddr("network", EmptyString); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected: %+v, received: %+v ", ToJSON(eOut), ToJSON(rcv))
+	}
+	eOut = &NetAddr{ip: "127.0.0.1", port: 2012}
+	if rcv := NewNetAddr(EmptyString, "127.0.0.1:2012"); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected: %+v, received: %+v ", ToJSON(eOut), ToJSON(rcv))
+	}
+	eOut = &NetAddr{network: "network", ip: "127.0.0.1", port: 2012}
+	if rcv := NewNetAddr("network", "127.0.0.1:2012"); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected: %+v, received: %+v ", ToJSON(eOut), ToJSON(rcv))
+	}
+}
+
+func TestNetAddrNetwork(t *testing.T) {
+	lc := NetAddr{network: "network", ip: "127.0.0.1", port: 2012}
+	if rcv := lc.Network(); !reflect.DeepEqual(rcv, lc.network) {
+		t.Errorf("Expected: %+v, received: %+v ", lc.network, rcv)
+	}
+}
+
+func TestNetAddrString(t *testing.T) {
+	lc := NetAddr{network: "network", ip: "127.0.0.1", port: 2012}
+	if rcv := lc.String(); !reflect.DeepEqual(rcv, lc.ip) {
+		t.Errorf("Expected: %+v, received: %+v ", lc.ip, rcv)
+	}
+}
+
+func TestNetAddrPort(t *testing.T) {
+	lc := NetAddr{network: "network", ip: "127.0.0.1", port: 2012}
+	if rcv := lc.Port(); !reflect.DeepEqual(rcv, lc.port) {
+		t.Errorf("Expected: %+v, received: %+v ", lc.port, rcv)
+	}
+}
+
+func TestNetAddrHost(t *testing.T) {
+	lc := NetAddr{network: "network", ip: "127.0.0.1", port: 2012}
+	if rcv := lc.Host(); !reflect.DeepEqual(rcv, "127.0.0.1:2012") {
+		t.Errorf("Expected: '127.0.0.1:2012', received: %+v ", rcv)
+	}
+	lc = NetAddr{network: "network", ip: Local, port: 2012}
+	if rcv := lc.Host(); !reflect.DeepEqual(rcv, Local) {
+		t.Errorf("Expected: %+v, received: %+v ", Local, rcv)
+	}
+}
+
 func TestMonthStoreRestoreJson(t *testing.T) {
 	m := Months{time.May, time.June, time.July, time.August}
 	r, _ := json.Marshal(m)
@@ -346,104 +543,5 @@ func TestWeekDayStoreRestoreJson(t *testing.T) {
 	json.Unmarshal(r, &o)
 	if !reflect.DeepEqual(o, wd) {
 		t.Errorf("Expected %v was  %v", wd, o)
-	}
-}
-
-func TestWeekDaysSerialize(t *testing.T) {
-	wds := &WeekDays{}
-	wdsString := wds.Serialize(";")
-	expectString := "*any"
-	if expectString != wdsString {
-		t.Errorf("Expected: %s, got: %s", expectString, wdsString)
-	}
-	wds2 := &WeekDays{time.Monday}
-	wdsString2 := wds2.Serialize(";")
-	expectString2 := "1"
-	if expectString2 != wdsString2 {
-		t.Errorf("Expected: %s, got: %s", expectString2, wdsString2)
-	}
-	wds3 := &WeekDays{time.Monday, time.Saturday, time.Sunday}
-	wdsString3 := wds3.Serialize(";")
-	expectString3 := "1;6;0"
-	if expectString3 != wdsString3 {
-		t.Errorf("Expected: %s, got: %s", expectString3, wdsString3)
-	}
-}
-
-func TestMonthsIsCompleteNot(t *testing.T) {
-	months := Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November}
-	if months.IsComplete() {
-		t.Error("Error months IsComplete: ", months)
-	}
-}
-
-func TestDaysInMonth(t *testing.T) {
-	if n := DaysInMonth(2016, 4); n != 30 {
-		t.Error("error calculating days: ", n)
-	}
-	if n := DaysInMonth(2016, 2); n != 29 {
-		t.Error("error calculating days: ", n)
-	}
-	if n := DaysInMonth(2016, 1); n != 31 {
-		t.Error("error calculating days: ", n)
-	}
-	if n := DaysInMonth(2016, 12); n != 31 {
-		t.Error("error calculating days: ", n)
-	}
-	if n := DaysInMonth(2015, 2); n != 28 {
-		t.Error("error calculating days: ", n)
-	}
-}
-
-func TestDaysInYear(t *testing.T) {
-	if n := DaysInYear(2016); n != 366 {
-		t.Error("error calculating days: ", n)
-	}
-	if n := DaysInYear(2015); n != 365 {
-		t.Error("error calculating days: ", n)
-	}
-}
-
-func TestWeekDaysEquals(t *testing.T) {
-	wds1 := WeekDays{time.Monday, time.Saturday, time.Sunday}
-	wds2 := WeekDays{time.Monday, time.Saturday, time.Sunday}
-	wds3 := WeekDays{time.Monday}
-	if wds1.Equals(wds2) != true {
-		t.Errorf("Expected: true, got: %v", !true)
-	} else if wds1.Equals(wds3) != false {
-		t.Errorf("Expected: false, got: %v", !false)
-	}
-}
-
-func TestMonthDaysEquals(t *testing.T) {
-	md1 := MonthDays{24, 25, 26}
-	md2 := MonthDays{24, 25, 26}
-	md3 := MonthDays{}
-	if md1.Equals(md2) != true {
-		t.Errorf("Expected: true, got: %v", !true)
-	} else if md1.Equals(md3) != false {
-		t.Errorf("Expected: false, got: %v", !false)
-	}
-}
-
-func TestWeekDaysParse(t *testing.T) {
-	wds1 := WeekDays{}
-	in := "1,2,3"
-	wds2 := WeekDays{time.Monday, time.Tuesday, time.Wednesday}
-	if reflect.DeepEqual(wds2, wds1) != false {
-		t.Errorf("Expected: %+v, received: %+v", WeekDays{}, wds1)
-	}
-	wds1.Parse(in, ",")
-	if !reflect.DeepEqual(wds2, wds1) {
-		t.Errorf("Expected: %+v, received: %+v", wds2, wds1)
-	}
-}
-
-func TestWeekDaysContains(t *testing.T) {
-	wds := WeekDays{time.Monday, time.Tuesday}
-	if wds.Contains(time.Monday) != true {
-		t.Errorf("Expected: true, got: %v", !true)
-	} else if wds.Contains(time.Wednesday) != false {
-		t.Errorf("Expected: false, got: %v", !false)
 	}
 }
