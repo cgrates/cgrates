@@ -144,7 +144,7 @@ func (sS *SessionS) ListenAndServe(exitChan chan bool) (err error) {
 // Shutdown is called by engine to clear states
 func (sS *SessionS) Shutdown() (err error) {
 	for _, s := range sS.getSessions("", false) { // Force sessions shutdown
-		sS.terminateSession(s, nil, nil, nil)
+		sS.terminateSession(s, nil, nil, nil, false)
 	}
 	return
 }
@@ -336,7 +336,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 		}
 	}
 	// we apply the correction before
-	if err = sS.endSession(s, nil, nil, nil); err != nil {
+	if err = sS.endSession(s, nil, nil, nil, false); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf(
 				"<%s> failed force terminating session with ID <%s>, err: <%s>",
@@ -1351,7 +1351,7 @@ func (sS *SessionS) authEvent(tnt string, evStart engine.MapEvent) (maxUsage tim
 // initSession handles a new session
 // not thread-safe for Session since it is constructed here
 func (sS *SessionS) initSession(tnt string, evStart engine.MapEvent, clntConnID string,
-	resID string, dbtItval time.Duration, argDisp *utils.ArgDispatcher) (s *Session, err error) {
+	resID string, dbtItval time.Duration, argDisp *utils.ArgDispatcher, isMsg bool) (s *Session, err error) {
 	cgrID := GetSetCGRID(evStart)
 	s = &Session{
 		CGRID:         cgrID,
@@ -1362,30 +1362,35 @@ func (sS *SessionS) initSession(tnt string, evStart engine.MapEvent, clntConnID 
 		DebitInterval: dbtItval,
 		ArgDispatcher: argDisp,
 	}
-	if sS.isIndexed(s, false) { // check if already exists
+	if !isMsg && sS.isIndexed(s, false) { // check if already exists
 		return nil, utils.ErrExists
 	}
 	if err = sS.forkSession(s); err != nil {
 		return nil, err
 	}
-	sS.initSessionDebitLoops(s)
-	sS.registerSession(s, false) // make the session available to the rest of the system
+	if !isMsg {
+		sS.initSessionDebitLoops(s)
+		sS.registerSession(s, false) // make the session available to the rest of the system
+	}
 	return
 }
 
 // updateSession will reset terminator, perform debits and replicate sessions
-func (sS *SessionS) updateSession(s *Session, updtEv engine.MapEvent) (maxUsage time.Duration, err error) {
-	defer sS.replicateSessions(s.CGRID, false, sS.sReplConns)
-	s.Lock()
-	defer s.Unlock()
-	// update fields from new event
-	for k, v := range updtEv {
-		if protectedSFlds.HasField(k) {
-			continue
+func (sS *SessionS) updateSession(s *Session, updtEv engine.MapEvent, isMsg bool) (maxUsage time.Duration, err error) {
+	if !isMsg {
+		defer sS.replicateSessions(s.CGRID, false, sS.sReplConns)
+		s.Lock()
+		defer s.Unlock()
+
+		// update fields from new event
+		for k, v := range updtEv {
+			if protectedSFlds.HasField(k) {
+				continue
+			}
+			s.EventStart[k] = v // update previoius field with new one
 		}
-		s.EventStart[k] = v // update previoius field with new one
+		sS.setSTerminator(s) // reset the terminator
 	}
-	sS.setSTerminator(s) // reset the terminator
 	//init has no updtEv
 	if updtEv == nil {
 		updtEv = engine.MapEvent(s.EventStart.Clone())
@@ -1423,21 +1428,25 @@ func (sS *SessionS) updateSession(s *Session, updtEv engine.MapEvent) (maxUsage 
 
 // terminateSession will end a session from outside
 // calls endSession thread safe
-func (sS *SessionS) terminateSession(s *Session, tUsage, lastUsage *time.Duration, aTime *time.Time) (err error) {
+func (sS *SessionS) terminateSession(s *Session, tUsage, lastUsage *time.Duration,
+	aTime *time.Time, isMsg bool) (err error) {
 	s.Lock()
-	err = sS.endSession(s, tUsage, lastUsage, aTime)
+	err = sS.endSession(s, tUsage, lastUsage, aTime, isMsg)
 	s.Unlock()
 	return
 }
 
 // endSession will end a session from outside
 // this function is not thread safe
-func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration, aTime *time.Time) (err error) {
-	//check if we have replicate connection and close the session there
-	defer sS.replicateSessions(s.CGRID, true, sS.sReplConns)
-	sS.unregisterSession(s.CGRID, false)
-	s.stopSTerminator()
-	s.stopDebitLoops()
+func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration,
+	aTime *time.Time, isMsg bool) (err error) {
+	if !isMsg {
+		//check if we have replicate connection and close the session there
+		defer sS.replicateSessions(s.CGRID, true, sS.sReplConns)
+		sS.unregisterSession(s.CGRID, false)
+		s.stopSTerminator()
+		s.stopDebitLoops()
+	}
 	for sRunIdx, sr := range s.SRuns {
 		sUsage := sr.TotalUsage
 		if tUsage != nil {
@@ -1504,11 +1513,12 @@ func (sS *SessionS) chargeEvent(tnt string, ev engine.MapEvent,
 	argDisp *utils.ArgDispatcher) (maxUsage time.Duration, err error) {
 	cgrID := GetSetCGRID(ev)
 	var s *Session
-	if s, err = sS.initSession(tnt, ev, "", "", 0, argDisp); err != nil {
+	if s, err = sS.initSession(tnt, ev, "", "", 0, argDisp, true); err != nil {
 		return
 	}
-	if maxUsage, err = sS.updateSession(s, ev.Clone()); err != nil {
-		if errEnd := sS.terminateSession(s, utils.DurationPointer(time.Duration(0)), nil, nil); errEnd != nil {
+	if maxUsage, err = sS.updateSession(s, nil, true); err != nil {
+		if errEnd := sS.terminateSession(s,
+			utils.DurationPointer(time.Duration(0)), nil, nil, true); errEnd != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error when force-ending charged event: <%s>, err: <%s>",
 					utils.SessionS, cgrID, err.Error()))
@@ -1520,7 +1530,7 @@ func (sS *SessionS) chargeEvent(tnt string, ev engine.MapEvent,
 		usage = ev.GetDurationIgnoreErrors(utils.Usage)
 	}
 	//in case of postpaid and rated maxUsage = usage from event
-	if errEnd := sS.terminateSession(s, utils.DurationPointer(usage), nil, nil); errEnd != nil {
+	if errEnd := sS.terminateSession(s, utils.DurationPointer(usage), nil, nil, true); errEnd != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error when ending charged event: <%s>, err: <%s>",
 				utils.SessionS, cgrID, err.Error()))
@@ -2160,7 +2170,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 			}
 		}
 		s, err := sS.initSession(args.CGREvent.Tenant, ev,
-			sS.biJClntID(clnt), originID, dbtItvl, args.ArgDispatcher)
+			sS.biJClntID(clnt), originID, dbtItvl, args.ArgDispatcher, false)
 		if err != nil {
 			return utils.NewErrRALs(err)
 		}
@@ -2168,7 +2178,7 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 			rply.MaxUsage = sS.cgrCfg.SessionSCfg().MaxCallDuration
 		} else {
 			var maxUsage time.Duration
-			if maxUsage, err = sS.updateSession(s, nil); err != nil {
+			if maxUsage, err = sS.updateSession(s, nil, false); err != nil {
 				return utils.NewErrRALs(err)
 			}
 			rply.MaxUsage = maxUsage
@@ -2370,11 +2380,11 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.ClientConnector,
 			if s, err = sS.initSession(args.CGREvent.Tenant,
 				ev, sS.biJClntID(clnt),
 				ev.GetStringIgnoreErrors(utils.OriginID),
-				dbtItvl, args.ArgDispatcher); err != nil {
+				dbtItvl, args.ArgDispatcher, false); err != nil {
 				return utils.NewErrRALs(err)
 			}
 		}
-		if rply.MaxUsage, err = sS.updateSession(s, ev.Clone()); err != nil {
+		if rply.MaxUsage, err = sS.updateSession(s, ev.Clone(), false); err != nil {
 			return utils.NewErrRALs(err)
 		}
 	}
@@ -2500,7 +2510,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 			if s, err = sS.initSession(args.CGREvent.Tenant,
 				ev, sS.biJClntID(clnt),
 				ev.GetStringIgnoreErrors(utils.OriginID), dbtItvl,
-				args.ArgDispatcher); err != nil {
+				args.ArgDispatcher, false); err != nil {
 				return utils.NewErrRALs(err)
 			}
 
@@ -2509,7 +2519,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 			ev.GetDurationPtrIgnoreErrors(utils.Usage),
 			ev.GetDurationPtrIgnoreErrors(utils.LastUsed),
 			utils.TimePointer(ev.GetTimeIgnoreErrors(utils.AnswerTime,
-				utils.EmptyString))); err != nil {
+				utils.EmptyString)), false); err != nil {
 			return utils.NewErrRALs(err)
 		}
 	}
@@ -3089,7 +3099,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 					}
 				}
 				s, err := sS.initSession(args.CGREvent.Tenant, ev,
-					sS.biJClntID(clnt), originID, dbtItvl, args.ArgDispatcher)
+					sS.biJClntID(clnt), originID, dbtItvl, args.ArgDispatcher, false)
 				if err != nil {
 					return utils.NewErrRALs(err)
 				}
@@ -3097,7 +3107,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 					rply.MaxUsage = sS.cgrCfg.SessionSCfg().MaxCallDuration
 				} else {
 					var maxUsage time.Duration
-					if maxUsage, err = sS.updateSession(s, nil); err != nil {
+					if maxUsage, err = sS.updateSession(s, nil, false); err != nil {
 						return utils.NewErrRALs(err)
 					}
 					rply.MaxUsage = maxUsage
@@ -3118,12 +3128,12 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				if s == nil {
 					if s, err = sS.initSession(args.CGREvent.Tenant,
 						ev, sS.biJClntID(clnt),
-						ev.GetStringIgnoreErrors(utils.OriginID), dbtItvl, args.ArgDispatcher); err != nil {
+						ev.GetStringIgnoreErrors(utils.OriginID), dbtItvl, args.ArgDispatcher, false); err != nil {
 						return utils.NewErrRALs(err)
 					}
 				}
 				var maxUsage time.Duration
-				if maxUsage, err = sS.updateSession(s, ev); err != nil {
+				if maxUsage, err = sS.updateSession(s, ev, false); err != nil {
 					return utils.NewErrRALs(err)
 				}
 				rply.MaxUsage = maxUsage
@@ -3143,7 +3153,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 					if s, err = sS.initSession(args.CGREvent.Tenant,
 						ev, sS.biJClntID(clnt),
 						ev.GetStringIgnoreErrors(utils.OriginID), dbtItvl,
-						args.ArgDispatcher); err != nil {
+						args.ArgDispatcher, false); err != nil {
 						return utils.NewErrRALs(err)
 					}
 				}
@@ -3151,7 +3161,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 					ev.GetDurationPtrIgnoreErrors(utils.Usage),
 					ev.GetDurationPtrIgnoreErrors(utils.LastUsed),
 					utils.TimePointer(
-						ev.GetTimeIgnoreErrors(utils.AnswerTime, utils.EmptyString))); err != nil {
+						ev.GetTimeIgnoreErrors(utils.AnswerTime,
+							utils.EmptyString)), false); err != nil {
 					return utils.NewErrRALs(err)
 				}
 			}
