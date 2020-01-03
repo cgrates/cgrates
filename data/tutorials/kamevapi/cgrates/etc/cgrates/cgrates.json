@@ -37,6 +37,7 @@
 "cdrs": {
 	"enabled": true,
 	"stats_conns": ["*localhost"],
+	"rals_conns": ["*localhost"],
 	"sessions_cost_retries": 5,
 },
 
