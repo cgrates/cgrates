@@ -1370,3 +1370,15 @@ func TestCastRPCErr(t *testing.T) {
 		t.Errorf("Expecting: %+v, received %+v", ErrNoMoreData.Error(), rcv)
 	}
 }
+
+func TestRandomInteger(t *testing.T) {
+	a := RandomInteger(0, 100)
+	b := RandomInteger(0, 100)
+	c := RandomInteger(0, 100)
+	if a == b && b == c {
+		t.Errorf("same result over 3 attempts")
+	}
+	if a == 100 || b == 100 || c == 100 {
+		t.Errorf("one of the numbers equals the max limit")
+	}
+}

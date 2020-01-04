@@ -30,6 +30,7 @@ import (
 	"io"
 	"log"
 	"math"
+	math_rand "math/rand"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -64,6 +65,7 @@ var (
 
 func init() {
 	startCGRateSTime = time.Now()
+	math_rand.Seed(startCGRateSTime.UnixNano())
 }
 
 /*
@@ -957,4 +959,9 @@ func CastRPCErr(err error) error {
 	} else {
 		return err
 	}
+}
+
+// RandomInteger returns a random integer between min and max values
+func RandomInteger(min, max int) int {
+	return math_rand.Intn(max-min+1) + min
 }
