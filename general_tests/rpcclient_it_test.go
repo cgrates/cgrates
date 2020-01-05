@@ -43,7 +43,6 @@ var ( // shared vars
 	rpcRAL1, rpcRAL2               *rpcclient.RPCClient
 	rpcPoolFirst, rpcPoolBroadcast *rpcclient.RPCPool
 	ral1, ral2                     *exec.Cmd
-	err                            error
 	node1                          = "node1"
 	node2                          = "node2"
 )

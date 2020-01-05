@@ -1467,8 +1467,9 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration,
 				sr.CD.DurationIndex += notCharged
 				cc := new(engine.CallCost)
 				if err = sS.connMgr.Call(sS.cgrCfg.SessionSCfg().RALsConns, nil, utils.ResponderDebit,
-					&engine.CallDescriptorWithArgDispatcher{CallDescriptor: sr.CD,
-						ArgDispatcher: s.ArgDispatcher}, cc); err == nil {
+					&engine.CallDescriptorWithArgDispatcher{
+						CallDescriptor: sr.CD,
+						ArgDispatcher:  s.ArgDispatcher}, cc); err == nil {
 					sr.EventCost.Merge(
 						engine.NewEventCostFromCallCost(cc, s.CGRID,
 							sr.Event.GetStringIgnoreErrors(utils.RunID)))
@@ -2518,8 +2519,8 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 		if err = sS.terminateSession(s,
 			ev.GetDurationPtrIgnoreErrors(utils.Usage),
 			ev.GetDurationPtrIgnoreErrors(utils.LastUsed),
-			utils.TimePointer(ev.GetTimeIgnoreErrors(utils.AnswerTime,
-				utils.EmptyString)), false); err != nil {
+			ev.GetTimePtrIgnoreErrors(utils.AnswerTime, utils.EmptyString),
+			false); err != nil {
 			return utils.NewErrRALs(err)
 		}
 	}
@@ -2636,7 +2637,6 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.ClientConnector,
 	if cgrEvs, err = s.asCGREvents(); err != nil {
 		return utils.NewErrServerError(err)
 	}
-
 	var withErrors bool
 	for _, cgrEv := range cgrEvs {
 		argsProc := &engine.ArgV1ProcessEvent{
@@ -3160,9 +3160,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 				if err = sS.terminateSession(s,
 					ev.GetDurationPtrIgnoreErrors(utils.Usage),
 					ev.GetDurationPtrIgnoreErrors(utils.LastUsed),
-					utils.TimePointer(
-						ev.GetTimeIgnoreErrors(utils.AnswerTime,
-							utils.EmptyString)), false); err != nil {
+					ev.GetTimePtrIgnoreErrors(utils.AnswerTime, utils.EmptyString),
+					false); err != nil {
 					return utils.NewErrRALs(err)
 				}
 			}

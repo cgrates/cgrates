@@ -40,8 +40,6 @@ var (
 	rater   *rpc.Client
 
 	testCalls = flag.Bool("calls", false, "Run test calls simulation, not by default.")
-	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
 
 	sTestMCDRC = []func(t *testing.T){
 		testMCDRCLoadConfig,

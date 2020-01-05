@@ -1,0 +1,94 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"log_level": 7,
+	"reply_timeout": "5m",
+},
+
+
+"data_db": {
+	"db_type": "*internal",	
+},
+
+
+"stor_db": {
+	"db_type": "*internal",	
+},
+
+
+"rals": {
+	"enabled": true,
+	"thresholds_conns": ["*localhost"],
+},
+
+
+"schedulers": {
+	"enabled": true,
+	"cdrs_conns": ["*localhost"],
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"chargers_conns":["*localhost"],
+},
+
+
+"attributes": {
+	"enabled": true,
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*localhost"],
+},
+
+
+"resources": {
+	"enabled": true,
+	"store_interval": "-1",
+	"thresholds_conns": ["*localhost"]
+},
+
+
+"stats": {
+	"enabled": true,
+	"store_interval": "-1",
+	"thresholds_conns": ["*localhost"],
+},
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "-1",
+},
+
+
+"suppliers": {
+	"enabled": true,
+	"prefix_indexed_fields":["Destination"],
+	"stats_conns": ["*localhost"],
+	"resources_conns": ["*localhost"],
+},
+
+
+"sessions": {
+	"enabled": true,
+	"suppliers_conns": ["*localhost"],
+	"resources_conns": ["*localhost"],
+	"attributes_conns": ["*localhost"],
+	"rals_conns": ["*localhost"],
+	"cdrs_conns": ["*localhost"],
+	"chargers_conns": ["*localhost"],
+},
+
+
+"apier": {
+	"scheduler_conns": ["*localhost"],
+},
+
+
+}

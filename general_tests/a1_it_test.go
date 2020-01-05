@@ -21,11 +21,8 @@ package general_tests
 
 import (
 	"encoding/json"
-	"errors"
-	"flag"
 	"fmt"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"sync"
 	"testing"
@@ -44,19 +41,7 @@ var (
 	a1CfgPath   string
 	a1Cfg       *config.CGRConfig
 	a1rpc       *rpc.Client
-	encoding    = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
 )
-
-func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
-	switch *encoding {
-	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOB:
-		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
-	default:
-		return nil, errors.New("UNSUPPORTED_RPC")
-	}
-}
 
 var sTestsA1it = []func(t *testing.T){
 	testA1itLoadConfig,

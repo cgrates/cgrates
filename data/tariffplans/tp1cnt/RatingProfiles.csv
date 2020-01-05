@@ -1,0 +1,2 @@
+#Tenant,Category,Subject,ActivationTime,RatingPlanID,FallbackSubject
+cgrates.org,call,*any,2020-01-01T00:00:00Z,RP_1CNT,

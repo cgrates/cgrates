@@ -152,6 +152,21 @@ func (me MapEvent) GetTimeIgnoreErrors(fldName string, tmz string) (t time.Time)
 	return
 }
 
+// GetTimePtr returns a pointer towards time or error
+func (me MapEvent) GetTimePtr(fldName, tmz string) (t *time.Time, err error) {
+	var tm time.Time
+	if tm, err = me.GetTime(fldName, tmz); err != nil {
+		return
+	}
+	return utils.TimePointer(tm), nil
+}
+
+// GetTimePtrIgnoreErrors returns a pointer towards time or nil if errors
+func (me MapEvent) GetTimePtrIgnoreErrors(fldName, tmz string) (t *time.Time) {
+	t, _ = me.GetTimePtr(fldName, tmz)
+	return
+}
+
 // Clone returns the cloned map
 func (me MapEvent) Clone() (mp MapEvent) {
 	if me == nil {
