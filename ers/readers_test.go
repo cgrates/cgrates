@@ -58,7 +58,6 @@ func TestNewCsvReader(t *testing.T) {
 	if rcv, err := NewEventReader(cfg, 1, nil, nil, fltr, nil); err != nil {
 		t.Errorf("Expecting: <nil>, received: <%+v>", err)
 	} else if !reflect.DeepEqual(expected, rcv) {
-
 		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, rcv)
 	}
 }
@@ -75,6 +74,29 @@ func TestNewKafkaReader(t *testing.T) {
 		t.Errorf("Expecting: <2>, received: <%+v>", len(cfg.ERsCfg().Readers))
 	}
 	expected, err := NewKafkaER(cfg, 1, nil, nil, fltr, nil)
+	if err != nil {
+		t.Errorf("Expecting: <nil>, received: <%+v>", err)
+	}
+	if rcv, err := NewEventReader(cfg, 1, nil, nil, fltr, nil); err != nil {
+		t.Errorf("Expecting: <nil>, received: <%+v>", err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expecting: <%+v>, received: <%+v>", expected, rcv)
+	}
+}
+
+func TestNewSQLReader(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	fltr := &engine.FilterS{}
+	reader := cfg.ERsCfg().Readers[0]
+	reader.Type = utils.MetaSQL
+	reader.ID = "file_reader"
+	reader.ConcurrentReqs = -1
+	reader.SourcePath = "*mysql://cgrates:CGRateS.org@127.0.0.1:3306?db_name=cgrates2"
+	cfg.ERsCfg().Readers = append(cfg.ERsCfg().Readers, reader)
+	if len(cfg.ERsCfg().Readers) != 2 {
+		t.Errorf("Expecting: <2>, received: <%+v>", len(cfg.ERsCfg().Readers))
+	}
+	expected, err := NewSQLEventReader(cfg, 1, nil, nil, fltr, nil)
 	if err != nil {
 		t.Errorf("Expecting: <nil>, received: <%+v>", err)
 	}
