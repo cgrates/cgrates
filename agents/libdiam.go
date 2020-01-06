@@ -37,11 +37,11 @@ import (
 	"github.com/fiorix/go-diameter/diam/dict"
 )
 
-func loadDictionaries(dictsDir, componentId string) error {
+func loadDictionaries(dictsDir, componentID string) error {
 	fi, err := os.Stat(dictsDir)
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "no such file or directory") {
-			return fmt.Errorf("<%s> Invalid dictionaries folder: <%s>", componentId, dictsDir)
+			return fmt.Errorf("<%s> Invalid dictionaries folder: <%s>", componentID, dictsDir)
 		}
 		return err
 	} else if !fi.IsDir() { // If config dir defined, needs to exist
@@ -59,7 +59,7 @@ func loadDictionaries(dictsDir, componentId string) error {
 			return nil
 		}
 		for _, filePath := range cfgFiles {
-			utils.Logger.Info(fmt.Sprintf("<%s> Loading dictionary out of file %s", componentId, filePath))
+			utils.Logger.Info(fmt.Sprintf("<%s> Loading dictionary out of file %s", componentID, filePath))
 			if err := dict.Default.LoadFile(filePath); err != nil {
 				return err
 			}
@@ -391,7 +391,7 @@ func (dP *diameterDP) FieldAsInterface(fldPath []string) (data interface{}, err 
 						}
 						continue // filter not passing, not really error
 					} else {
-						selIndxs[k+1] += 1 // filter passing, index it with one higher to cover 0
+						selIndxs[k+1]++ // filter passing, index it with one higher to cover 0
 					}
 				}
 			}
@@ -435,7 +435,7 @@ func updateDiamMsgFromNavMap(m *diam.Message, navMp *config.NavigableMap, tmz st
 			for i, cfgItm := range nmItms {
 				itmPath := strings.Join(cfgItm.Path, utils.NestingSep)
 				if i == 0 { // path is common, increase it only once
-					pathIdx[itmPath] += 1
+					pathIdx[itmPath]++
 				}
 				if i == pathIdx[itmPath]-1 { // revert from multiple items to only one per config path
 					itm = cfgItm
