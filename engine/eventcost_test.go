@@ -1076,6 +1076,7 @@ func TestECAsCallCost(t *testing.T) {
 		},
 	}
 	eCC := &CallCost{
+		TOR:            utils.VOICE,
 		Cost:           0.85,
 		RatedUsage:     120000000000,
 		AccountSummary: acntSummary,
@@ -1214,7 +1215,7 @@ func TestECAsCallCost(t *testing.T) {
 			},
 		},
 	}
-	cc := ec.AsCallCost()
+	cc := ec.AsCallCost(utils.EmptyString)
 	if !reflect.DeepEqual(eCC, cc) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eCC), utils.ToJSON(cc))
 	}

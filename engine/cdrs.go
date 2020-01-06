@@ -798,7 +798,7 @@ func (cdrS *CDRServer) V2StoreSessionCost(args *ArgsV2CDRSStoreSMCost, reply *st
 			nil, true, utils.NonTransactional)
 	}
 	// end of RPC caching
-	cc := args.Cost.CostDetails.AsCallCost()
+	cc := args.Cost.CostDetails.AsCallCost(utils.EmptyString)
 	cc.Round()
 	roundIncrements := cc.GetRoundIncrements()
 	if len(roundIncrements) != 0 {

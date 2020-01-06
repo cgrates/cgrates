@@ -562,7 +562,7 @@ func (sS *SessionS) refundSession(s *Session, sRunIdx int, rUsage time.Duration)
 	} else if srplsEC == nil {
 		return
 	}
-	sCC := srplsEC.AsCallCost()
+	sCC := srplsEC.AsCallCost(sr.CD.TOR)
 	var incrmts engine.Increments
 	for _, tmspn := range sCC.Timespans {
 		for _, incr := range tmspn.Increments {
@@ -585,7 +585,7 @@ func (sS *SessionS) refundSession(s *Session, sRunIdx int, rUsage time.Duration)
 		Subject:     sr.CD.Subject,
 		Account:     sr.CD.Account,
 		Destination: sr.CD.Destination,
-		TOR:         sr.CD.TOR,
+		TOR:         utils.FirstNonEmpty(sr.CD.TOR, utils.VOICE),
 		Increments:  incrmts,
 	}
 	var acnt engine.Account

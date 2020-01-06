@@ -149,29 +149,38 @@ func runSession(acntID string) (err error) {
 	originID := utils.GenUUID() // each test with it's own OriginID
 
 	// topup as much as we know we need for one session
-	topupDur := time.Duration(90) * time.Hour
+	mainTopup := time.Duration(90) * time.Second
 	var addBlcRply string
 	argsAddBalance := &v1.AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     acntID,
 		BalanceType: utils.VOICE,
-		Value:       float64(topupDur.Nanoseconds())}
+		Value:       float64(mainTopup.Nanoseconds()),
+		Balance: map[string]interface{}{
+			utils.ID:     "MAIN",
+			utils.Weight: 10,
+		},
+	}
 	if err = sCncrRPC.Call(utils.ApierV1AddBalance, argsAddBalance, &addBlcRply); err != nil {
 		return
 	} else if addBlcRply != utils.OK {
 		return fmt.Errorf("received: <%s> to ApierV1.AddBalance", addBlcRply)
 	}
-	/*
-		var acnt *engine.Account
-		acntAttrs := &utils.AttrGetAccount{
-			Tenant:  "cgrates.org",
-			Account: acntID}
-		if err = sCncrRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
-			return
-		} else if vcBlnc := acnt.BalanceMap[utils.VOICE].GetTotalValue(); vcBlnc != float64(topupDur.Nanoseconds()) {
-			return fmt.Errorf("unexpected voice balance received: %+v", utils.ToIJSON(acnt))
-		}
-	*/
+	bufferTopup := time.Duration(8760) * time.Hour
+	argsAddBalance = &v1.AttrAddBalance{
+		Tenant:      "cgrates.org",
+		Account:     acntID,
+		BalanceType: utils.VOICE,
+		Value:       float64(bufferTopup.Nanoseconds()),
+		Balance: map[string]interface{}{
+			utils.ID: "BUFFER",
+		},
+	}
+	if err = sCncrRPC.Call(utils.ApierV1AddBalance, argsAddBalance, &addBlcRply); err != nil {
+		return
+	} else if addBlcRply != utils.OK {
+		return fmt.Errorf("received: <%s> to ApierV1.AddBalance", addBlcRply)
+	}
 	time.Sleep(time.Duration(
 		utils.RandomInteger(0, 100)) * time.Millisecond) // randomize between tests
 
@@ -291,19 +300,19 @@ func runSession(acntID string) (err error) {
 	}
 	time.Sleep(time.Duration(
 		utils.RandomInteger(0, 100)) * time.Millisecond)
-	/*
-		// make sure the account was properly refunded
-		var acnt *engine.Account
-		acntAttrs := &utils.AttrGetAccount{
-			Tenant:  "cgrates.org",
-			Account: acntID}
-		if err = sCncrRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
-			return
-		} else if vcBlnc := acnt.BalanceMap[utils.VOICE].GetTotalValue(); vcBlnc != 0 {
-			return fmt.Errorf("unexpected voice balance received: %+v", utils.ToIJSON(acnt))
-		} else if mnBlnc := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); mnBlnc != 0 {
-			return fmt.Errorf("unexpected voice balance received: %+v", utils.ToIJSON(acnt))
-		}
-	*/
+
+	// make sure the account was properly refunded
+	var acnt *engine.Account
+	acntAttrs := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: acntID}
+	if err = sCncrRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
+		return
+	} else if vcBlnc := acnt.BalanceMap[utils.VOICE].GetTotalValue(); float64(bufferTopup.Nanoseconds())-vcBlnc > 100.0 { // eliminate rounding errors
+		return fmt.Errorf("unexpected voice balance received: %+v", utils.ToIJSON(acnt))
+	} else if mnBlnc := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); mnBlnc != 0 {
+		return fmt.Errorf("unexpected voice balance received: %+v", utils.ToIJSON(acnt))
+	}
+
 	return
 }

@@ -323,14 +323,17 @@ func (ec *EventCost) AsRefundIncrements(tor string) (cd *CallDescriptor) {
 }
 
 // AsCallCost converts an EventCost into a CallCost
-func (ec *EventCost) AsCallCost() *CallCost {
+func (ec *EventCost) AsCallCost(tor string) *CallCost {
 	cc := &CallCost{
-		Cost: ec.GetCost(), RatedUsage: float64(ec.GetUsage().Nanoseconds()),
+		TOR:            utils.FirstNonEmpty(tor, utils.VOICE),
+		Cost:           ec.GetCost(),
+		RatedUsage:     float64(ec.GetUsage().Nanoseconds()),
 		AccountSummary: ec.AccountSummary}
 	cc.Timespans = make(TimeSpans, len(ec.Charges))
 	for i, cIl := range ec.Charges {
 		ts := &TimeSpan{Cost: cIl.Cost(),
-			DurationIndex: *cIl.Usage(), CompressFactor: cIl.CompressFactor}
+			DurationIndex:  *cIl.Usage(),
+			CompressFactor: cIl.CompressFactor}
 		if cIl.ecUsageIdx == nil { // index was not populated yet
 			ec.ComputeEventCostUsageIndexes()
 		}
