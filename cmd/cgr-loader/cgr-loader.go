@@ -112,8 +112,6 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 		}
 		config.SetCgrConfig(ldrCfg)
 	}
-	// we initialize connManager here with nil for InternalChannels
-	cM := engine.NewConnManager(ldrCfg, nil)
 	// Data for DataDB
 	if *dataDBType != dfltCfg.DataDbCfg().DataDbType {
 		ldrCfg.DataDbCfg().DataDbType = strings.TrimPrefix(*dataDBType, "*")
@@ -246,6 +244,8 @@ func main() {
 	}
 
 	ldrCfg := loadConfig()
+	// we initialize connManager here with nil for InternalChannels
+	cM := engine.NewConnManager(ldrCfg, nil)
 
 	if !*toStorDB {
 		d, err := engine.NewDataDBConn(ldrCfg.DataDbCfg().DataDbType,

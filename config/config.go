@@ -1219,6 +1219,11 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 			break
 		}
 		fallthrough
+	case RPCConnsJsonName: // nothing to reload
+		if !fall {
+			break
+		}
+		fallthrough
 	case DATADB_JSN:
 		cfg.rldChans[DATADB_JSN] <- struct{}{}
 		time.Sleep(1) // to force the context switch( to be sure we start the DB before a service that needs it)
@@ -1436,15 +1441,6 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 			time.Sleep(1) // to force the context switch( to be sure we start the DB before a service that needs it)
 		}
 		cfg.rldChans[Apier] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case RPCConnsJsonName:
-		cfg.rldChans[RPCConnsJsonName] <- struct{}{}
-		if !fall {
-			break
-		}
 	}
 	return
 }
@@ -1775,7 +1771,7 @@ func (*CGRConfig) loadConfigFromReader(rdr io.Reader, loadFuncs []func(jsnCfg *C
 // Reads all .json files out of a folder/subfolders and loads them up in lexical order
 func (cfg *CGRConfig) loadConfigFromPath(path string, loadFuncs []func(jsnCfg *CgrJsonCfg) error) (err error) {
 	if isUrl(path) {
-		return cfg.loadConfigFromHttp(path, loadFuncs) // prefix protocol
+		return cfg.loadConfigFromHTTP(path, loadFuncs) // prefix protocol
 	}
 	var fi os.FileInfo
 	if fi, err = os.Stat(path); err != nil {
@@ -1831,7 +1827,7 @@ func (cfg *CGRConfig) loadConfigFromFolder(cfgDir string, loadFuncs []func(jsnCf
 	return
 }
 
-func (cfg *CGRConfig) loadConfigFromHttp(urlPaths string, loadFuncs []func(jsnCfg *CgrJsonCfg) error) (err error) {
+func (cfg *CGRConfig) loadConfigFromHTTP(urlPaths string, loadFuncs []func(jsnCfg *CgrJsonCfg) error) (err error) {
 	for _, urlPath := range strings.Split(urlPaths, utils.INFIELD_SEP) {
 		if _, err = url.ParseRequestURI(urlPath); err != nil {
 			return

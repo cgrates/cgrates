@@ -50,7 +50,8 @@ func TestThresholdSReload(t *testing.T) {
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg, nil)
 	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1))
-	srvMngr.AddServices(NewConnManagerService(cfg, nil), tS,
+	engine.NewConnManager(cfg, nil)
+	srvMngr.AddServices(tS,
 		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil), db)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)

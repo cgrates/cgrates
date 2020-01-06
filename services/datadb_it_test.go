@@ -49,8 +49,9 @@ func TestDataDBReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
-	db := NewDataDBService(cfg, nil)
-	srvMngr.AddServices(NewConnManagerService(cfg, nil), NewAttributeService(cfg, db,
+	cM := engine.NewConnManager(cfg, nil)
+	db := NewDataDBService(cfg, cM)
+	srvMngr.AddServices(NewAttributeService(cfg, db,
 		chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1)),
 		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil), db)
 	if err = srvMngr.StartServices(); err != nil {

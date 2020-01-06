@@ -147,7 +147,6 @@ func (srvMngr *ServiceManager) GetConfig() *config.CGRConfig {
 func (srvMngr *ServiceManager) StartServices() (err error) {
 	go srvMngr.handleReload()
 	for serviceName, shouldRun := range map[string]bool{
-		utils.RPCConnS:        true,
 		utils.AttributeS:      srvMngr.GetConfig().AttributeSCfg().Enabled,
 		utils.ChargerS:        srvMngr.GetConfig().ChargerSCfg().Enabled,
 		utils.ThresholdS:      srvMngr.GetConfig().ThresholdSCfg().Enabled,
@@ -303,10 +302,6 @@ func (srvMngr *ServiceManager) handleReload() {
 			}
 		case <-srvMngr.GetConfig().GetReloadChan(config.STORDB_JSN):
 			if err = srvMngr.reloadService(utils.StorDB); err != nil {
-				return
-			}
-		case <-srvMngr.GetConfig().GetReloadChan(config.RPCConnsJsonName):
-			if err = srvMngr.reloadService(utils.RPCConnS); err != nil {
 				return
 			}
 		}
