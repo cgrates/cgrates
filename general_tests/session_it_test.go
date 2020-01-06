@@ -120,9 +120,9 @@ func testSesItAddVoiceBalance(t *testing.T) {
 		Tenant:      sesTenant,
 		Account:     sesAccount,
 		BalanceType: utils.MONETARY,
+		Value:       0,
 		Balance: map[string]interface{}{
 			utils.ID:            "TestDynamicDebitBalance",
-			utils.Value:         0,
 			utils.RatingSubject: "*zero1s",
 		},
 	}

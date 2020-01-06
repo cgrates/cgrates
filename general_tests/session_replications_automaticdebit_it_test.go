@@ -65,9 +65,9 @@ func testSessionSRplAddVoiceBalance(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "1005",
 		BalanceType: utils.VOICE,
+		Value:       5 * float64(time.Second), //value -> 20ms for future
 		Balance: map[string]interface{}{
 			utils.ID:            "TestDynamicDebitBalance",
-			utils.Value:         5 * float64(time.Second), //value -> 20ms for future
 			utils.RatingSubject: "*zero5ms",
 		},
 	}

@@ -122,9 +122,9 @@ func testSrItAddVoiceBalance(t *testing.T) {
 		Tenant:      srtenant,
 		Account:     sraccount,
 		BalanceType: utils.VOICE,
+		Value:       5 * float64(time.Second),
 		Balance: map[string]interface{}{
 			utils.ID:            "TestDynamicDebitBalance",
-			utils.Value:         5 * float64(time.Second),
 			utils.RatingSubject: "*zero5ms",
 		},
 	}
@@ -212,9 +212,9 @@ func testSrItAddMonetaryBalance(t *testing.T) {
 		Tenant:      srtenant,
 		Account:     sraccount,
 		BalanceType: utils.MONETARY,
+		Value:       10.65,
 		Balance: map[string]interface{}{
-			utils.ID:    utils.MetaDefault,
-			utils.Value: 10.65,
+			utils.ID: utils.MetaDefault,
 		},
 	}
 	var reply string

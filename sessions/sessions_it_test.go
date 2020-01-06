@@ -339,10 +339,10 @@ func TestSessionsItEventCostCompressing(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "TestSessionsItEventCostCompressing",
+		Value:       float64(5) * float64(time.Second),
 		BalanceType: utils.VOICE,
 		Balance: map[string]interface{}{
 			utils.ID:            "TestSessionsItEventCostCompressing",
-			utils.Value:         float64(5) * float64(time.Second),
 			utils.RatingSubject: "*zero50ms",
 		},
 	}

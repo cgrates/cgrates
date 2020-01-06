@@ -858,9 +858,9 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "TestDynamicDebit",
 		BalanceType: utils.VOICE,
+		Value:       2 * float64(time.Second),
 		Balance: map[string]interface{}{
 			utils.ID:            "TestDynamicDebitBalance",
-			utils.Value:         2 * float64(time.Second),
 			utils.RatingSubject: "*zero5ms",
 		},
 	}

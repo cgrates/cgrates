@@ -125,9 +125,9 @@ func testV2CDRsOfflineBalanceUpdate(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "test",
 		BalanceType: utils.MONETARY,
+		Value:       10.0,
 		Balance: map[string]interface{}{
 			utils.ID:     utils.MetaDefault,
-			utils.Value:  10.0,
 			utils.Weight: 10.0,
 		},
 	}
@@ -338,9 +338,9 @@ func testV2CDRsBalancesWithSameWeight(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "specialTest",
 		BalanceType: utils.MONETARY,
+		Value:       10.0,
 		Balance: map[string]interface{}{
 			utils.ID:     "SpecialBalance1",
-			utils.Value:  10.0,
 			utils.Weight: 10.0,
 		},
 	}

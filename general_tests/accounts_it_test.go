@@ -268,9 +268,9 @@ func testV1AccSendToThreshold(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "testAccThreshold",
 		BalanceType: "*monetary",
+		Value:       1.5,
 		Balance: map[string]interface{}{
-			utils.ID:    "testAccSetBalance",
-			utils.Value: 1.5,
+			utils.ID: "testAccSetBalance",
 		},
 	}
 	if err := accRpc.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {

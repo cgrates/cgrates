@@ -78,9 +78,9 @@ func addBalance(sBenchRPC *rpc.Client, sraccount string) {
 		Tenant:      "cgrates.org",
 		Account:     sraccount,
 		BalanceType: utils.VOICE,
+		Value:       5 * float64(time.Hour),
 		Balance: map[string]interface{}{
-			utils.ID:    "TestDynamicDebitBalance",
-			utils.Value: 5 * float64(time.Hour),
+			utils.ID: "TestDynamicDebitBalance",
 		},
 	}
 	var reply string

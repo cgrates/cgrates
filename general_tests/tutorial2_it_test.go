@@ -282,9 +282,9 @@ func testTutAccounts(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "1001",
 		BalanceType: utils.MONETARY,
+		Value:       101,
 		Balance: map[string]interface{}{
-			utils.ID:    utils.MetaDefault,
-			utils.Value: 101,
+			utils.ID: utils.MetaDefault,
 		},
 	}
 	var reply string

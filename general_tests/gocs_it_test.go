@@ -199,9 +199,9 @@ func testGOCSLoadData(t *testing.T) {
 		Tenant:      acntAttrs.Tenant,
 		Account:     acntAttrs.Account,
 		BalanceType: utils.VOICE,
+		Value:       3540000000000,
 		Balance: map[string]interface{}{
 			utils.ID:     "BALANCE1",
-			utils.Value:  3540000000000,
 			utils.Weight: 20,
 		},
 	}

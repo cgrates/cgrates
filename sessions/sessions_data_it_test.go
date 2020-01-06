@@ -238,9 +238,9 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant: acntAttrs.Tenant, Account: acntAttrs.Account,
 		BalanceType: utils.DATA,
+		Value:       eAcntVal,
 		Balance: map[string]interface{}{
-			utils.ID:    "TestSessionsDataLastUsedMultipleData",
-			utils.Value: eAcntVal,
+			utils.ID: "TestSessionsDataLastUsedMultipleData",
 		},
 	}
 	var reply string
@@ -500,9 +500,9 @@ func TestSessionsDataTTLExpired(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant: acntAttrs.Tenant, Account: acntAttrs.Account,
 		BalanceType: utils.DATA,
+		Value:       eAcntVal,
 		Balance: map[string]interface{}{
-			utils.ID:    "TestSessionsDataTTLExpired",
-			utils.Value: eAcntVal,
+			utils.ID: "TestSessionsDataTTLExpired",
 		},
 	}
 	var reply string
@@ -577,9 +577,9 @@ func TestSessionsDataTTLExpMultiUpdates(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant: acntAttrs.Tenant, Account: acntAttrs.Account,
 		BalanceType: utils.DATA,
+		Value:       eAcntVal,
 		Balance: map[string]interface{}{
-			utils.ID:    "TestSessionsDataTTLExpMultiUpdates",
-			utils.Value: eAcntVal,
+			utils.ID: "TestSessionsDataTTLExpMultiUpdates",
 		},
 	}
 	var reply string
@@ -703,9 +703,9 @@ func TestSessionsDataMultipleDataNoUsage(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant: acntAttrs.Tenant, Account: acntAttrs.Account,
 		BalanceType: utils.DATA,
+		Value:       eAcntVal,
 		Balance: map[string]interface{}{
-			utils.ID:    "TestSessionsDataTTLExpMultiUpdates",
-			utils.Value: eAcntVal,
+			utils.ID: "TestSessionsDataTTLExpMultiUpdates",
 		},
 	}
 	var reply string
@@ -911,9 +911,9 @@ func TestSessionsDataTTLUsageProtection(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant: acntAttrs.Tenant, Account: acntAttrs.Account,
 		BalanceType: utils.DATA,
+		Value:       eAcntVal,
 		Balance: map[string]interface{}{
-			utils.ID:    "TestSessionsDataTTLUsageProtection",
-			utils.Value: eAcntVal,
+			utils.ID: "TestSessionsDataTTLUsageProtection",
 		},
 	}
 	var reply string

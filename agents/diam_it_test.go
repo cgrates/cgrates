@@ -876,9 +876,9 @@ func testDiamInitWithSessionDisconnect(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org",
 		Account:     "testDiamInitWithSessionDisconnect",
 		BalanceType: utils.VOICE,
+		Value:       float64(time.Second),
 		Balance: map[string]interface{}{
 			utils.ID:            "testDiamInitWithSessionDisconnect",
-			utils.Value:         float64(time.Second),
 			utils.RatingSubject: "*zero1ms",
 		},
 	}
