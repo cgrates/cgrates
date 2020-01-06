@@ -42,7 +42,7 @@ func (s *testMockSessionConn) Call(method string, arg interface{}, rply interfac
 
 func TestProcessRequest(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filters := engine.NewFilterS(config.CgrConfig(), nil, nil, nil, dm) // no need for filterS but stiil try to configure the dm :D
 
 	cgrRplyNM := config.NewNavigableMap(nil)

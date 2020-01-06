@@ -89,22 +89,20 @@ var (
 )
 
 // NewDataManager returns a new DataManager
-func NewDataManager(dataDB DataDB, cacheCfg config.CacheCfg, rmtConns,
-	rplConns *rpcclient.RPCPool) *DataManager {
+func NewDataManager(dataDB DataDB, cacheCfg config.CacheCfg, connMgr *ConnManager) *DataManager {
 	return &DataManager{
 		dataDB:   dataDB,
 		cacheCfg: cacheCfg,
-		rmtConns: rmtConns,
-		rplConns: rplConns,
+		connMgr:  connMgr,
 	}
 }
 
 // DataManager is the data storage manager for CGRateS
 // transparently manages data retrieval, further serialization and caching
 type DataManager struct {
-	dataDB             DataDB
-	cacheCfg           config.CacheCfg
-	rmtConns, rplConns *rpcclient.RPCPool
+	dataDB   DataDB
+	cacheCfg config.CacheCfg
+	connMgr  *ConnManager
 }
 
 // DataDB exports access to dataDB
@@ -319,9 +317,9 @@ func (dm *DataManager) CacheDataFromDB(prfx string, ids []string, mustBeCached b
 func (dm *DataManager) GetDestination(key string, skipCache bool, transactionID string) (dest *Destination, err error) {
 	dest, err = dm.dataDB.GetDestinationDrv(key, skipCache, transactionID)
 	if err != nil {
-		if err == utils.ErrNotFound && dm.rmtConns != nil &&
-			config.CgrConfig().DataDbCfg().Items[utils.MetaDestinations].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetDestination, key, &dest); err == nil {
+		if err == utils.ErrNotFound && config.CgrConfig().DataDbCfg().Items[utils.MetaDestinations].Remote {
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetDestination, key, &dest); err == nil {
 				err = dm.dataDB.SetDestinationDrv(dest, utils.NonTransactional)
 			}
 		}
@@ -339,7 +337,8 @@ func (dm *DataManager) SetDestination(dest *Destination, transactionID string) (
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaDestinations].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetDestination, dest, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetDestination, dest, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -353,7 +352,7 @@ func (dm *DataManager) RemoveDestination(destID string, transactionID string) (e
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaDestinations].Replicate {
 		var reply string
-		dm.rplConns.Call(utils.ReplicatorSv1RemoveDestination,
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1RemoveDestination,
 			destID, &reply)
 	}
 	return
@@ -365,7 +364,8 @@ func (dm *DataManager) SetReverseDestination(dest *Destination, transactionID st
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaReverseDestinations].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetReverseDestination, dest, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetReverseDestination, dest, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -377,9 +377,9 @@ func (dm *DataManager) GetReverseDestination(prefix string,
 	skipCache bool, transactionID string) (ids []string, err error) {
 	ids, err = dm.dataDB.GetReverseDestinationDrv(prefix, skipCache, transactionID)
 	if err != nil {
-		if err == utils.ErrNotFound && dm.rmtConns != nil &&
-			config.CgrConfig().DataDbCfg().Items[utils.MetaReverseDestinations].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetReverseDestination, prefix, &ids); err == nil {
+		if err == utils.ErrNotFound && config.CgrConfig().DataDbCfg().Items[utils.MetaReverseDestinations].Remote {
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetReverseDestination, prefix, &ids); err == nil {
 				// need to discuss
 			}
 		}
@@ -399,9 +399,10 @@ func (dm *DataManager) UpdateReverseDestination(oldDest, newDest *Destination,
 func (dm *DataManager) GetAccount(id string) (acc *Account, err error) {
 	acc, err = dm.dataDB.GetAccountDrv(id)
 	if err != nil {
-		if err == utils.ErrNotFound && dm.rmtConns != nil &&
+		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaAccounts].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetAccount, id, &acc); err == nil {
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetAccount, id, &acc); err == nil {
 				err = dm.dataDB.SetAccountDrv(acc)
 			}
 		}
@@ -419,7 +420,8 @@ func (dm *DataManager) SetAccount(acc *Account) (err error) {
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaAccounts].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1Account, acc, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1Account, acc, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -433,8 +435,8 @@ func (dm *DataManager) RemoveAccount(id string) (err error) {
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaAccounts].Replicate {
 		var reply string
-		dm.rplConns.Call(utils.ReplicatorSv1RemoveAccount,
-			id, &reply)
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveAccount, id, &reply)
 	}
 	return
 }
@@ -454,9 +456,8 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 	}
 	sq, err = dm.dataDB.GetStatQueueDrv(tenant, id)
 	if err != nil {
-		if err == utils.ErrNotFound &&
-			config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetStatQueue,
+		if err == utils.ErrNotFound && config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues].Remote {
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetStatQueue,
 				&utils.TenantID{Tenant: tenant, ID: id}, sq); err == nil {
 				err = dm.dataDB.SetStatQueueDrv(sq)
 			}
@@ -485,7 +486,8 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue) (err error) {
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetStatQueue, sq, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetStatQueue, sq, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -500,8 +502,8 @@ func (dm *DataManager) RemoveStatQueue(tenant, id string, transactionID string) 
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues].Replicate {
 		var reply string
-		dm.rplConns.Call(utils.ReplicatorSv1RemoveStatQueue,
-			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveStatQueue, &utils.TenantID{Tenant: tenant, ID: id}, &reply)
 	}
 	return
 }
@@ -529,7 +531,7 @@ func GetFilter(dm *DataManager, tenant, id string, cacheRead, cacheWrite bool,
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaFilters].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetFilter,
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetFilter,
 				&utils.TenantID{Tenant: tenant, ID: id}, &fltr); err == nil {
 				err = dm.dataDB.SetFilterDrv(fltr)
 			}
@@ -556,7 +558,8 @@ func (dm *DataManager) SetFilter(fltr *Filter) (err error) {
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaFilters].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetFilter, fltr, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetFilter, fltr, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -571,8 +574,8 @@ func (dm *DataManager) RemoveFilter(tenant, id, transactionID string) (err error
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaFilters].Replicate {
 		var reply string
-		dm.rplConns.Call(utils.ReplicatorSv1RemoveFilter,
-			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveFilter, &utils.TenantID{Tenant: tenant, ID: id}, &reply)
 	}
 	return
 }
@@ -592,8 +595,8 @@ func (dm *DataManager) GetThreshold(tenant, id string,
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaThresholds].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetThreshold,
-				&utils.TenantID{Tenant: tenant, ID: id}, &th); err == nil {
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetThreshold, &utils.TenantID{Tenant: tenant, ID: id}, &th); err == nil {
 				err = dm.dataDB.SetThresholdDrv(th)
 			}
 		}
@@ -619,7 +622,8 @@ func (dm *DataManager) SetThreshold(th *Threshold) (err error) {
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaThresholds].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetThreshold, th, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetThreshold, th, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -633,8 +637,8 @@ func (dm *DataManager) RemoveThreshold(tenant, id, transactionID string) (err er
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaThresholds].Replicate {
 		var reply string
-		dm.rplConns.Call(utils.ReplicatorSv1RemoveThreshold,
-			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveThreshold, &utils.TenantID{Tenant: tenant, ID: id}, &reply)
 	}
 	return
 }
@@ -654,7 +658,8 @@ func (dm *DataManager) GetThresholdProfile(tenant, id string, cacheRead, cacheWr
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaThresholdProfiles].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetThresholdProfile,
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetThresholdProfile,
 				&utils.TenantID{Tenant: tenant, ID: id}, &th); err == nil {
 				err = dm.dataDB.SetThresholdProfileDrv(th)
 			}
@@ -706,7 +711,8 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaThresholdProfiles].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetThresholdProfile, th, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetThresholdProfile, th, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -734,7 +740,7 @@ func (dm *DataManager) RemoveThresholdProfile(tenant, id,
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaThresholdProfiles].Replicate {
 		var reply string
-		dm.rplConns.Call(utils.ReplicatorSv1RemoveThresholdProfile,
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1RemoveThresholdProfile,
 			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
 	}
 	return
@@ -755,7 +761,8 @@ func (dm *DataManager) GetStatQueueProfile(tenant, id string, cacheRead, cacheWr
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueueProfiles].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetStatQueueProfile,
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetStatQueueProfile,
 				&utils.TenantID{Tenant: tenant, ID: id}, &sqp); err == nil {
 				err = dm.dataDB.SetStatQueueProfileDrv(sqp)
 			}
@@ -807,7 +814,8 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueueProfiles].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetStatQueueProfile, sqp, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetStatQueueProfile, sqp, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -835,8 +843,8 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id,
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueueProfiles].Replicate {
 		var reply string
-		dm.rplConns.Call(utils.ReplicatorSv1RemoveStatQueueProfile,
-			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveStatQueueProfile, &utils.TenantID{Tenant: tenant, ID: id}, &reply)
 	}
 	return
 }
@@ -855,7 +863,7 @@ func (dm *DataManager) GetTiming(id string, skipCache bool,
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaTimings].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetTiming,
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetTiming,
 				id, &t); err == nil {
 				err = dm.dataDB.SetTimingDrv(t)
 			}
@@ -884,7 +892,8 @@ func (dm *DataManager) SetTiming(t *utils.TPTiming) (err error) {
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaTimings].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetTiming, t, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetTiming, t, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -900,8 +909,8 @@ func (dm *DataManager) RemoveTiming(id, transactionID string) (err error) {
 		cacheCommit(transactionID), transactionID)
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaTimings].Replicate {
 		var reply string
-		dm.rplConns.Call(utils.ReplicatorSv1RemoveTiming,
-			id, &reply)
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveTiming, id, &reply)
 	}
 	return
 }
@@ -921,7 +930,8 @@ func (dm *DataManager) GetResource(tenant, id string, cacheRead, cacheWrite bool
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaResources].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetResource,
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetResource,
 				&utils.TenantID{Tenant: tenant, ID: id}, &rs); err == nil {
 				err = dm.dataDB.SetResourceDrv(rs)
 			}
@@ -949,7 +959,8 @@ func (dm *DataManager) SetResource(rs *Resource) (err error) {
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaResources].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetResource, rs, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetResource, rs, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -963,8 +974,8 @@ func (dm *DataManager) RemoveResource(tenant, id, transactionID string) (err err
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaResources].Replicate {
 		var reply string
-		dm.rplConns.Call(utils.ReplicatorSv1RemoveResource,
-			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveResource, &utils.TenantID{Tenant: tenant, ID: id}, &reply)
 	}
 	return
 }
@@ -984,8 +995,8 @@ func (dm *DataManager) GetResourceProfile(tenant, id string, cacheRead, cacheWri
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaResourceProfile].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetResourceProfile,
-				&utils.TenantID{Tenant: tenant, ID: id}, &rp); err == nil {
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetResourceProfile, &utils.TenantID{Tenant: tenant, ID: id}, &rp); err == nil {
 				err = dm.dataDB.SetResourceProfileDrv(rp)
 			}
 		}
@@ -1036,7 +1047,8 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaResourceProfile].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetResourceProfile, rp, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetResourceProfile, rp, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -1063,8 +1075,8 @@ func (dm *DataManager) RemoveResourceProfile(tenant, id, transactionID string, w
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaResourceProfile].Replicate {
 		var reply string
-		dm.rplConns.Call(utils.ReplicatorSv1RemoveResourceProfile,
-			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveResourceProfile, &utils.TenantID{Tenant: tenant, ID: id}, &reply)
 	}
 	return
 }
@@ -1083,7 +1095,7 @@ func (dm *DataManager) GetActionTriggers(id string, skipCache bool,
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaActionTriggers].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetActionTriggers,
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetActionTriggers,
 				id, attrs); err == nil {
 				err = dm.dataDB.SetActionTriggersDrv(id, attrs)
 			}
@@ -1110,8 +1122,8 @@ func (dm *DataManager) RemoveActionTriggers(id, transactionID string) (err error
 		cacheCommit(transactionID), transactionID)
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaActionTriggers].Replicate {
 		var reply string
-		dm.rplConns.Call(utils.ReplicatorSv1RemoveActionTriggers,
-			id, &reply)
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveActionTriggers, id, &reply)
 	}
 	return
 }
@@ -1132,7 +1144,7 @@ func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers,
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaActionTriggers].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetActionTriggers,
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil, utils.ReplicatorSv1SetActionTriggers,
 			&SetActionTriggersArg{Attrs: attr, Key: key}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
@@ -1155,8 +1167,8 @@ func (dm *DataManager) GetSharedGroup(key string, skipCache bool,
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaSharedGroups].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetShareGroup,
-				key, &sg); err == nil {
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetShareGroup, key, &sg); err == nil {
 				err = dm.dataDB.SetSharedGroupDrv(sg)
 			}
 		}
@@ -1185,7 +1197,8 @@ func (dm *DataManager) SetSharedGroup(sg *SharedGroup,
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaSharedGroups].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetSharedGroup, sg, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetSharedGroup, sg, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -1201,8 +1214,8 @@ func (dm *DataManager) RemoveSharedGroup(id, transactionID string) (err error) {
 		cacheCommit(transactionID), transactionID)
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaSharedGroups].Replicate {
 		var reply string
-		dm.rplConns.Call(utils.ReplicatorSv1RemoveSharedGroup,
-			id, &reply)
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveSharedGroup, id, &reply)
 	}
 	return
 }
@@ -1223,8 +1236,8 @@ func (dm *DataManager) GetActions(key string, skipCache bool, transactionID stri
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaActions].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetActions,
-				key, &as); err == nil {
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetActions, key, &as); err == nil {
 				err = dm.dataDB.SetActionsDrv(key, as)
 			}
 		}
@@ -1257,8 +1270,8 @@ func (dm *DataManager) SetActions(key string, as Actions, transactionID string) 
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaActions].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetActions,
-			&SetActionsArgs{Key: key, Acs: as}, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetActions, &SetActionsArgs{Key: key, Acs: as}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -1274,8 +1287,8 @@ func (dm *DataManager) RemoveActions(key, transactionID string) (err error) {
 		cacheCommit(transactionID), transactionID)
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaActions].Replicate {
 		var reply string
-		dm.rplConns.Call(utils.ReplicatorSv1RemoveActions,
-			key, &reply)
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveActions, key, &reply)
 	}
 	return
 }
@@ -1284,8 +1297,8 @@ func (dm *DataManager) GetActionPlan(key string, skipCache bool, transactionID s
 	ats, err = dm.dataDB.GetActionPlanDrv(key, skipCache, transactionID)
 	if err == utils.ErrNotFound &&
 		config.CgrConfig().DataDbCfg().Items[utils.MetaActionPlans].Remote {
-		if err = dm.rmtConns.Call(utils.ReplicatorSv1GetActionPlan,
-			key, &ats); err == nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+			utils.ReplicatorSv1GetActionPlan, key, &ats); err == nil {
 			err = dm.dataDB.SetActionPlanDrv(key, ats, true, utils.NonTransactional)
 		}
 	}
@@ -1309,11 +1322,12 @@ func (dm *DataManager) SetActionPlan(key string, ats *ActionPlan,
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaActionPlans].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetActionPlan, &SetActionPlanArg{
-			Key:       key,
-			Ats:       ats,
-			Overwrite: overwrite,
-		}, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetActionPlan, &SetActionPlanArg{
+				Key:       key,
+				Ats:       ats,
+				Overwrite: overwrite,
+			}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -1325,7 +1339,8 @@ func (dm *DataManager) GetAllActionPlans() (ats map[string]*ActionPlan, err erro
 	ats, err = dm.dataDB.GetAllActionPlansDrv()
 	if ((err == nil && len(ats) == 0) || err == utils.ErrNotFound) &&
 		config.CgrConfig().DataDbCfg().Items[utils.MetaActionPlans].Remote {
-		err = dm.rmtConns.Call(utils.ReplicatorSv1GetAllActionPlans,
+		err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+			utils.ReplicatorSv1GetAllActionPlans,
 			utils.EmptyString, &ats)
 	}
 	if err != nil {
@@ -1341,8 +1356,8 @@ func (dm *DataManager) RemoveActionPlan(key string, transactionID string) (err e
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaActionPlans].Replicate {
 		var reply string
-		dm.rplConns.Call(utils.ReplicatorSv1RemoveActionPlan,
-			key, &reply)
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveActionPlan, key, &reply)
 	}
 	return
 }
@@ -1351,8 +1366,8 @@ func (dm *DataManager) GetAccountActionPlans(acntID string,
 	apIDs, err = dm.dataDB.GetAccountActionPlansDrv(acntID, skipCache, transactionID)
 	if ((err == nil && len(apIDs) == 0) || err == utils.ErrNotFound) &&
 		config.CgrConfig().DataDbCfg().Items[utils.MetaAccountActionPlans].Remote {
-		if err = dm.rmtConns.Call(utils.ReplicatorSv1GetAccountActionPlans,
-			acntID, &apIDs); err == nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+			utils.ReplicatorSv1GetAccountActionPlans, acntID, &apIDs); err == nil {
 			err = dm.dataDB.SetAccountActionPlansDrv(acntID, apIDs, true)
 		}
 	}
@@ -1375,11 +1390,12 @@ func (dm *DataManager) SetAccountActionPlans(acntID string, aPlIDs []string, ove
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaAccountActionPlans].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetAccountActionPlans, &SetAccountActionPlansArg{
-			AcntID:    acntID,
-			AplIDs:    aPlIDs,
-			Overwrite: overwrite,
-		}, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetAccountActionPlans, &SetAccountActionPlansArg{
+				AcntID:    acntID,
+				AplIDs:    aPlIDs,
+				Overwrite: overwrite,
+			}, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -1398,7 +1414,8 @@ func (dm *DataManager) RemAccountActionPlans(acntID string, apIDs []string) (err
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaAccountActionPlans].Replicate {
 		var reply string
-		dm.rplConns.Call(utils.ReplicatorSv1RemAccountActionPlans,
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemAccountActionPlans,
 			&RemAccountActionPlansArgs{AcntID: acntID, ApIDs: apIDs}, &reply)
 	}
 	return
@@ -1417,7 +1434,8 @@ func (dm *DataManager) GetRatingPlan(key string, skipCache bool,
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaRatingPlans].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetRatingPlan,
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetRatingPlan,
 				key, &rp); err == nil {
 				err = dm.dataDB.SetRatingPlanDrv(rp)
 			}
@@ -1445,7 +1463,8 @@ func (dm *DataManager) SetRatingPlan(rp *RatingPlan, transactionID string) (err 
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaRatingPlans].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetRatingPlan, rp, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetRatingPlan, rp, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -1461,8 +1480,8 @@ func (dm *DataManager) RemoveRatingPlan(key string, transactionID string) (err e
 		cacheCommit(transactionID), transactionID)
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaRatingPlans].Replicate {
 		var reply string
-		dm.rplConns.Call(utils.ReplicatorSv1RemoveRatingPlan,
-			key, &reply)
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveRatingPlan, key, &reply)
 	}
 	return
 }
@@ -1481,7 +1500,8 @@ func (dm *DataManager) GetRatingProfile(key string, skipCache bool,
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaRatingProfiles].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetRatingProfile,
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetRatingProfile,
 				key, &rpf); err == nil {
 				err = dm.dataDB.SetRatingProfileDrv(rpf)
 			}
@@ -1510,7 +1530,8 @@ func (dm *DataManager) SetRatingProfile(rpf *RatingProfile,
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaRatingProfiles].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetRatingProfile, rpf, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetRatingProfile, rpf, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -1527,8 +1548,8 @@ func (dm *DataManager) RemoveRatingProfile(key string,
 		cacheCommit(transactionID), transactionID)
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaRatingProfiles].Replicate {
 		var reply string
-		dm.rplConns.Call(utils.ReplicatorSv1RemoveRatingProfile,
-			key, &reply)
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveRatingProfile, key, &reply)
 	}
 	return
 }
@@ -1542,7 +1563,8 @@ func (dm *DataManager) GetFilterIndexes(cacheID, itemIDPrefix, filterType string
 	if indexes, err = dm.DataDB().GetFilterIndexesDrv(cacheID, itemIDPrefix, filterType, fldNameVal); err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaFilterIndexes].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetFilterIndexes,
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetFilterIndexes,
 				&utils.GetFilterIndexesArg{
 					CacheID:      cacheID,
 					ItemIDPrefix: itemIDPrefix,
@@ -1568,7 +1590,8 @@ func (dm *DataManager) SetFilterIndexes(cacheID, itemIDPrefix string,
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaFilterIndexes].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetFilterIndexes,
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetFilterIndexes,
 			&utils.SetFilterIndexesArg{
 				CacheID:      cacheID,
 				ItemIDPrefix: itemIDPrefix,
@@ -1616,7 +1639,8 @@ func (dm *DataManager) MatchFilterIndex(cacheID, itemIDPrefix,
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaFilterIndexes].Remote {
-			err = dm.rmtConns.Call(utils.ReplicatorSv1MatchFilterIndex,
+			err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1MatchFilterIndex,
 				&utils.MatchFilterIndexArg{
 					CacheID:      cacheID,
 					ItemIDPrefix: itemIDPrefix,
@@ -1655,7 +1679,7 @@ func (dm *DataManager) GetSupplierProfile(tenant, id string, cacheRead, cacheWri
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaSupplierProfiles].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetSupplierProfile,
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetSupplierProfile,
 				&utils.TenantID{Tenant: tenant, ID: id}, &supp); err == nil {
 				err = dm.dataDB.SetSupplierProfileDrv(supp)
 			}
@@ -1711,7 +1735,8 @@ func (dm *DataManager) SetSupplierProfile(supp *SupplierProfile, withIndex bool)
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaSupplierProfiles].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetSupplierProfile, supp, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetSupplierProfile, supp, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -1738,7 +1763,8 @@ func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string, w
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaSupplierProfiles].Replicate {
 		var reply string
-		dm.rplConns.Call(utils.ReplicatorSv1RemoveSupplierProfile,
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveSupplierProfile,
 			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
 	}
 	return
@@ -1759,7 +1785,8 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWr
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaAttributeProfiles].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetAttributeProfile,
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetAttributeProfile,
 				&utils.TenantID{Tenant: tenant, ID: id}, &attrPrfl); err == nil {
 				err = dm.dataDB.SetAttributeProfileDrv(attrPrfl)
 			}
@@ -1822,7 +1849,8 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaAttributeProfiles].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetAttributeProfile, ap, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetAttributeProfile, ap, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -1851,8 +1879,8 @@ func (dm *DataManager) RemoveAttributeProfile(tenant, id string, transactionID s
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaAttributeProfiles].Replicate {
 		var reply string
-		dm.rplConns.Call(utils.ReplicatorSv1RemoveAttributeProfile,
-			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveAttributeProfile, &utils.TenantID{Tenant: tenant, ID: id}, &reply)
 	}
 	return
 }
@@ -1872,7 +1900,8 @@ func (dm *DataManager) GetChargerProfile(tenant, id string, cacheRead, cacheWrit
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaChargerProfiles].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetChargerProfile,
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetChargerProfile,
 				&utils.TenantID{Tenant: tenant, ID: id}, &cpp); err == nil {
 				err = dm.dataDB.SetChargerProfileDrv(cpp)
 			}
@@ -1924,7 +1953,8 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaChargerProfiles].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetChargerProfile, cpp, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetChargerProfile, cpp, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -1952,8 +1982,8 @@ func (dm *DataManager) RemoveChargerProfile(tenant, id string,
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaChargerProfiles].Replicate {
 		var reply string
-		dm.rplConns.Call(utils.ReplicatorSv1RemoveChargerProfile,
-			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveChargerProfile, &utils.TenantID{Tenant: tenant, ID: id}, &reply)
 	}
 	return
 }
@@ -1973,7 +2003,8 @@ func (dm *DataManager) GetDispatcherProfile(tenant, id string, cacheRead, cacheW
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetDispatcherProfile,
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetDispatcherProfile,
 				&utils.TenantID{Tenant: tenant, ID: id}, &dpp); err == nil {
 				err = dm.dataDB.SetDispatcherProfileDrv(dpp)
 			}
@@ -2032,7 +2063,8 @@ func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bo
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetDispatcherProfile, dpp, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetDispatcherProfile, dpp, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -2062,8 +2094,8 @@ func (dm *DataManager) RemoveDispatcherProfile(tenant, id string,
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles].Replicate {
 		var reply string
-		dm.rplConns.Call(utils.ReplicatorSv1RemoveDispatcherProfile,
-			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveDispatcherProfile, &utils.TenantID{Tenant: tenant, ID: id}, &reply)
 	}
 	return
 }
@@ -2083,7 +2115,8 @@ func (dm *DataManager) GetDispatcherHost(tenant, id string, cacheRead, cacheWrit
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherHosts].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetDispatcherHost,
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetDispatcherHost,
 				&utils.TenantID{Tenant: tenant, ID: id}, &dH); err == nil {
 				err = dm.dataDB.SetDispatcherHostDrv(dH)
 			}
@@ -2121,7 +2154,8 @@ func (dm *DataManager) SetDispatcherHost(dpp *DispatcherHost) (err error) {
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherHosts].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetDispatcherHost, dpp, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetDispatcherHost, dpp, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}
@@ -2143,8 +2177,8 @@ func (dm *DataManager) RemoveDispatcherHost(tenant, id string,
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherHosts].Replicate {
 		var reply string
-		dm.rplConns.Call(utils.ReplicatorSv1RemoveDispatcherHost,
-			&utils.TenantID{Tenant: tenant, ID: id}, &reply)
+		dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1RemoveDispatcherHost, &utils.TenantID{Tenant: tenant, ID: id}, &reply)
 	}
 	return
 }
@@ -2154,7 +2188,8 @@ func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loa
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaLoadIDs].Remote {
-			if err = dm.rmtConns.Call(utils.ReplicatorSv1GetItemLoadIDs,
+			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil,
+				utils.ReplicatorSv1GetItemLoadIDs,
 				itemIDPrefix, &loadIDs); err == nil {
 				err = dm.dataDB.SetLoadIDsDrv(loadIDs)
 			}
@@ -2186,7 +2221,8 @@ func (dm *DataManager) SetLoadIDs(loadIDs map[string]int64) (err error) {
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaLoadIDs].Replicate {
 		var reply string
-		if err = dm.rplConns.Call(utils.ReplicatorSv1SetLoadIDs, loadIDs, &reply); err != nil {
+		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
+			utils.ReplicatorSv1SetLoadIDs, loadIDs, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}

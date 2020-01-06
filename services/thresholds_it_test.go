@@ -48,7 +48,7 @@ func TestThresholdSReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheThresholdFilterIndexes))
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
-	db := NewDataDBService(cfg)
+	db := NewDataDBService(cfg, nil)
 	tS := NewThresholdService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1))
 	srvMngr.AddServices(NewConnManagerService(cfg, nil), tS,
 		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil), db)

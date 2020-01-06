@@ -49,7 +49,7 @@ func TestDNSAgentReload(t *testing.T) {
 
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
-	db := NewDataDBService(cfg)
+	db := NewDataDBService(cfg, nil)
 	sS := NewSessionService(cfg, db, server, make(chan rpcclient.ClientConnector, 1),
 		engineShutdown, nil)
 	srv := NewDNSAgent(cfg, filterSChan, engineShutdown, nil)

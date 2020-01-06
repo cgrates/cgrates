@@ -102,7 +102,7 @@ var (
 
 func TestChargerPopulateChargerService(t *testing.T) {
 	data := NewInternalDB(nil, nil)
-	dmCharger = NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
+	dmCharger = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	if err != nil {
 		t.Errorf("Error: %+v", err)

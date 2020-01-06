@@ -20,7 +20,6 @@ package services
 
 import (
 	"fmt"
-	"log"
 	"sync"
 
 	"github.com/cgrates/cgrates/config"
@@ -30,11 +29,11 @@ import (
 )
 
 // NewDataDBService returns the DataDB Service
-func NewDataDBService(cfg *config.CGRConfig) *DataDBService {
+func NewDataDBService(cfg *config.CGRConfig, connMgr *engine.ConnManager) *DataDBService {
 	return &DataDBService{
-		cfg:    cfg,
-		dbchan: make(chan *engine.DataManager, 1),
-		// db:     engine.NewDataManager(nil, cfg.CacheCfg(), nil, nil), // to be removed
+		cfg:     cfg,
+		dbchan:  make(chan *engine.DataManager, 1),
+		connMgr: connMgr,
 	}
 }
 
@@ -43,6 +42,7 @@ type DataDBService struct {
 	sync.RWMutex
 	cfg      *config.CGRConfig
 	oldDBCfg *config.DataDbCfg
+	connMgr  *engine.ConnManager
 
 	db     *engine.DataManager
 	dbchan chan *engine.DataManager
@@ -69,30 +69,8 @@ func (db *DataDBService) Start() (err error) {
 		err = nil // reset the error in case of only SessionS active
 		return
 	}
-	var rmtConns, rplConns *rpcclient.RPCPool
-	if len(db.cfg.DataDbCfg().RmtConns) != 0 {
-		var err error
-		rmtConns, err = engine.NewRPCPool(rpcclient.PoolFirstPositive, db.cfg.TlsCfg().ClientKey,
-			db.cfg.TlsCfg().ClientCerificate, db.cfg.TlsCfg().CaCertificate,
-			db.cfg.GeneralCfg().ConnectAttempts, db.cfg.GeneralCfg().Reconnects,
-			db.cfg.GeneralCfg().ConnectTimeout, db.cfg.GeneralCfg().ReplyTimeout,
-			db.cfg.DataDbCfg().RmtConns, nil, true)
-		if err != nil {
-			log.Fatalf("Coud not confignure dataDB remote connections: %s", err.Error())
-		}
-	}
-	if len(config.CgrConfig().DataDbCfg().RplConns) != 0 {
-		var err error
-		rplConns, err = engine.NewRPCPool(rpcclient.PoolBroadcast, db.cfg.TlsCfg().ClientKey,
-			db.cfg.TlsCfg().ClientCerificate, db.cfg.TlsCfg().CaCertificate,
-			db.cfg.GeneralCfg().ConnectAttempts, db.cfg.GeneralCfg().Reconnects,
-			db.cfg.GeneralCfg().ConnectTimeout, db.cfg.GeneralCfg().ReplyTimeout,
-			db.cfg.DataDbCfg().RplConns, nil, true)
-		if err != nil {
-			log.Fatalf("Coud not confignure dataDB replication connections: %s", err.Error())
-		}
-	}
-	db.db = engine.NewDataManager(d, db.cfg.CacheCfg(), rmtConns, rplConns)
+
+	db.db = engine.NewDataManager(d, db.cfg.CacheCfg(), db.connMgr)
 	engine.SetDataStorage(db.db)
 	if err = engine.CheckVersions(db.db.DataDB()); err != nil {
 		fmt.Println(err)

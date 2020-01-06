@@ -441,7 +441,55 @@ func main() {
 
 	cfg.LazySanityCheck()
 
-	dmService := services.NewDataDBService(cfg)
+	// init the channel here because we need to pass them to connManager
+	internalServeManagerChan := make(chan rpcclient.ClientConnector, 1)
+	internalConfigChan := make(chan rpcclient.ClientConnector, 1)
+	internalCoreSv1Chan := make(chan rpcclient.ClientConnector, 1)
+	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
+	internalGuardianSChan := make(chan rpcclient.ClientConnector, 1)
+	internalAnalyzerSChan := make(chan rpcclient.ClientConnector, 1)
+	internalCDRServerChan := make(chan rpcclient.ClientConnector, 1)
+	internalAttributeSChan := make(chan rpcclient.ClientConnector, 1)
+	internalDispatcherSChan := make(chan rpcclient.ClientConnector, 1)
+	internalSessionSChan := make(chan rpcclient.ClientConnector, 1)
+	internalChargerSChan := make(chan rpcclient.ClientConnector, 1)
+	internalThresholdSChan := make(chan rpcclient.ClientConnector, 1)
+	internalStatSChan := make(chan rpcclient.ClientConnector, 1)
+	internalResourceSChan := make(chan rpcclient.ClientConnector, 1)
+	internalSupplierSChan := make(chan rpcclient.ClientConnector, 1)
+	internalSchedulerSChan := make(chan rpcclient.ClientConnector, 1)
+	internalRALsChan := make(chan rpcclient.ClientConnector, 1)
+	internalResponderChan := make(chan rpcclient.ClientConnector, 1)
+	internalAPIerV1Chan := make(chan rpcclient.ClientConnector, 1)
+	internalAPIerV2Chan := make(chan rpcclient.ClientConnector, 1)
+	internalLoaderSChan := make(chan rpcclient.ClientConnector, 1)
+
+	// initialize the connManager before creating the DMService
+	// because we need to pass the connection to it
+	connManager := services.NewConnManagerService(cfg, map[string]chan rpcclient.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAnalyzer):       internalAnalyzerSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier):          internalAPIerV1Chan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes):     internalAttributeSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):         internalCacheSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs):           internalCDRServerChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):       internalChargerSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaGuardian):       internalGuardianSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaLoaders):        internalLoaderSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources):      internalResourceSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder):      internalResponderChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler):      internalSchedulerSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS):       internalSessionSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS):          internalStatSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSuppliers):      internalSupplierSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds):     internalThresholdSChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaServiceManager): internalServeManagerChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaConfig):         internalConfigChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCore):           internalCoreSv1Chan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):           internalRALsChan,
+		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers):    internalDispatcherSChan,
+	})
+
+	dmService := services.NewDataDBService(cfg, connManager.GetConnMgr())
 	storDBService := services.NewStorDBService(cfg)
 	if dmService.ShouldRun() { // Some services can run without db, ie:  CDRC
 		if err = dmService.Start(); err != nil {
@@ -467,28 +515,6 @@ func main() {
 	// Define internal connections via channels
 	filterSChan := make(chan *engine.FilterS, 1)
 
-	internalServeManagerChan := make(chan rpcclient.ClientConnector, 1)
-	internalConfigChan := make(chan rpcclient.ClientConnector, 1)
-	internalCoreSv1Chan := make(chan rpcclient.ClientConnector, 1)
-	internalCacheSChan := make(chan rpcclient.ClientConnector, 1)
-	internalGuardianSChan := make(chan rpcclient.ClientConnector, 1)
-	internalAnalyzerSChan := make(chan rpcclient.ClientConnector, 1)
-	internalCDRServerChan := make(chan rpcclient.ClientConnector, 1)   // needed to avod cyclic dependency
-	internalAttributeSChan := make(chan rpcclient.ClientConnector, 1)  // needed to avod cyclic dependency
-	internalDispatcherSChan := make(chan rpcclient.ClientConnector, 1) // needed to avod cyclic dependency
-	internalSessionSChan := make(chan rpcclient.ClientConnector, 1)    // needed to avod cyclic dependency
-	internalChargerSChan := make(chan rpcclient.ClientConnector, 1)    // needed to avod cyclic dependency
-	internalThresholdSChan := make(chan rpcclient.ClientConnector, 1)  // needed to avod cyclic dependency
-	internalStatSChan := make(chan rpcclient.ClientConnector, 1)       // needed to avod cyclic dependency
-	internalResourceSChan := make(chan rpcclient.ClientConnector, 1)   // needed to avod cyclic dependency
-	internalSupplierSChan := make(chan rpcclient.ClientConnector, 1)   // needed to avod cyclic dependency
-	internalSchedulerSChan := make(chan rpcclient.ClientConnector, 1)  // needed to avod cyclic dependency
-	internalRALsChan := make(chan rpcclient.ClientConnector, 1)        // needed to avod cyclic dependency
-	internalResponderChan := make(chan rpcclient.ClientConnector, 1)   // needed to avod cyclic dependency
-	internalAPIerV1Chan := make(chan rpcclient.ClientConnector, 1)     // needed to avod cyclic dependency
-	internalAPIerV2Chan := make(chan rpcclient.ClientConnector, 1)     // needed to avod cyclic dependency
-	internalLoaderSChan := make(chan rpcclient.ClientConnector, 1)
-
 	// init CacheS
 	cacheS := initCacheS(internalCacheSChan, server, dmService.GetDM(), exitChan)
 
@@ -500,28 +526,6 @@ func main() {
 
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, exitChan)
-	connManager := services.NewConnManagerService(cfg, map[string]chan rpcclient.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAnalyzer):       internalAnalyzerSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier):          internalAPIerV1Chan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes):     internalAttributeSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches):         internalCacheSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs):           internalCDRServerChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers):       internalChargerSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaGuardian):       internalGuardianSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaLoaders):        internalLoaderSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources):      internalResourceSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder):      internalResponderChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler):      internalSchedulerSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS):       internalSessionSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS):          internalStatSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSuppliers):      internalSupplierSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds):     internalThresholdSChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaServiceManager): internalServeManagerChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaConfig):         internalConfigChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCore):           internalCoreSv1Chan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRALs):           internalRALsChan,
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers):    internalDispatcherSChan,
-	})
 
 	attrS := services.NewAttributeService(cfg, dmService, cacheS, filterSChan, server, internalAttributeSChan)
 	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, internalDispatcherSChan, connManager.GetConnMgr())

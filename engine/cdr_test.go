@@ -706,7 +706,7 @@ func TestCDRAsExportRecord(t *testing.T) {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", "1", expRecord[0])
 	}
 	data := NewInternalDB(nil, nil)
-	dmForCDR := NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
+	dmForCDR := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	if err != nil {
 		t.Errorf("Error: %+v", err)

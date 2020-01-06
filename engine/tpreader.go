@@ -29,7 +29,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/structmatcher"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 type TpReader struct {
@@ -68,33 +67,11 @@ type TpReader struct {
 
 func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
 	cacheConns, schedulerConns []string) (*TpReader, error) {
-	var rmtConns, rplConns *rpcclient.RPCPool
-	if len(config.CgrConfig().DataDbCfg().RmtConns) != 0 {
-		var err error
-		rmtConns, err = NewRPCPool(rpcclient.PoolFirstPositive, config.CgrConfig().TlsCfg().ClientKey,
-			config.CgrConfig().TlsCfg().ClientCerificate, config.CgrConfig().TlsCfg().CaCertificate,
-			config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
-			config.CgrConfig().GeneralCfg().ConnectTimeout, config.CgrConfig().GeneralCfg().ReplyTimeout,
-			config.CgrConfig().DataDbCfg().RmtConns, nil, false)
-		if err != nil {
-			return nil, err
-		}
-	}
-	if len(config.CgrConfig().DataDbCfg().RplConns) != 0 {
-		var err error
-		rplConns, err = NewRPCPool(rpcclient.PoolBroadcast, config.CgrConfig().TlsCfg().ClientKey,
-			config.CgrConfig().TlsCfg().ClientCerificate, config.CgrConfig().TlsCfg().CaCertificate,
-			config.CgrConfig().GeneralCfg().ConnectAttempts, config.CgrConfig().GeneralCfg().Reconnects,
-			config.CgrConfig().GeneralCfg().ConnectTimeout, config.CgrConfig().GeneralCfg().ReplyTimeout,
-			config.CgrConfig().DataDbCfg().RplConns, nil, false)
-		if err != nil {
-			return nil, err
-		}
-	}
+
 	tpr := &TpReader{
 		tpid:           tpid,
 		timezone:       timezone,
-		dm:             NewDataManager(db, config.CgrConfig().CacheCfg(), rmtConns, rplConns), // ToDo: add ChacheCfg as parameter to the NewTpReader
+		dm:             NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr), // ToDo: add ChacheCfg as parameter to the NewTpReader
 		lr:             lr,
 		cacheConns:     cacheConns,
 		schedulerConns: schedulerConns,

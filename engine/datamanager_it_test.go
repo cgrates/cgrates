@@ -48,7 +48,7 @@ func TestDMitRedis(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}
-	dm2 = NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil, nil)
+	dm2 = NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
 	for _, stest := range sTestsDMit {
 		t.Run("TestDMitRedis", stest)
 	}
@@ -67,7 +67,7 @@ func TestDMitMongo(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to Mongo", err.Error())
 	}
-	dm2 = NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil, nil)
+	dm2 = NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
 	for _, stest := range sTestsDMit {
 		t.Run("TestDMitMongo", stest)
 	}

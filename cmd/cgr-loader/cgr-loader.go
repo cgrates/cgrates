@@ -125,7 +125,7 @@ func main() {
 		config.SetCgrConfig(ldrCfg)
 	}
 	// we initialize connManager here with nil for InternalChannels
-	engine.NewConnManager(ldrCfg, nil)
+	cM := engine.NewConnManager(ldrCfg, nil)
 	// Data for DataDB
 	if *dataDBType != dfltCfg.DataDbCfg().DataDbType {
 		ldrCfg.DataDbCfg().DataDbType = strings.TrimPrefix(*dataDBType, "*")
@@ -251,30 +251,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("Coud not open dataDB connection: %s", err.Error())
 		}
-		var rmtConns, rplConns *rpcclient.RPCPool
-		if len(ldrCfg.DataDbCfg().RmtConns) != 0 {
-			var err error
-			rmtConns, err = engine.NewRPCPool(rpcclient.PoolFirstPositive, ldrCfg.TlsCfg().ClientKey,
-				ldrCfg.TlsCfg().ClientCerificate, ldrCfg.TlsCfg().CaCertificate,
-				ldrCfg.GeneralCfg().ConnectAttempts, ldrCfg.GeneralCfg().Reconnects,
-				ldrCfg.GeneralCfg().ConnectTimeout, ldrCfg.GeneralCfg().ReplyTimeout,
-				ldrCfg.DataDbCfg().RmtConns, nil, false)
-			if err != nil {
-				log.Fatalf("Coud not confignure dataDB remote connections: %s", err.Error())
-			}
-		}
-		if len(ldrCfg.DataDbCfg().RplConns) != 0 {
-			var err error
-			rplConns, err = engine.NewRPCPool(rpcclient.PoolBroadcast, ldrCfg.TlsCfg().ClientKey,
-				ldrCfg.TlsCfg().ClientCerificate, ldrCfg.TlsCfg().CaCertificate,
-				ldrCfg.GeneralCfg().ConnectAttempts, ldrCfg.GeneralCfg().Reconnects,
-				ldrCfg.GeneralCfg().ConnectTimeout, ldrCfg.GeneralCfg().ReplyTimeout,
-				ldrCfg.DataDbCfg().RplConns, nil, false)
-			if err != nil {
-				log.Fatalf("Coud not confignure dataDB replication connections: %s", err.Error())
-			}
-		}
-		dm = engine.NewDataManager(d, config.CgrConfig().CacheCfg(), rmtConns, rplConns)
+		dm = engine.NewDataManager(d, config.CgrConfig().CacheCfg(), cM)
 		defer dm.DataDB().Close()
 	}
 
@@ -362,8 +339,6 @@ func main() {
 				log.Fatal("Could not reload scheduler: ", err)
 			}
 		}
-		// release the reader with it's structures
-		tpReader.Init()
 	} else {
 		if err := tpReader.RemoveFromDatabase(*verbose, *disableReverse); err != nil {
 			log.Fatal("Could not delete from database: ", err)

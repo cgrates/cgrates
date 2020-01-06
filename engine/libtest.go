@@ -291,7 +291,7 @@ func InitDataDb(cfg *config.CGRConfig) error {
 	if err != nil {
 		return err
 	}
-	dm := NewDataManager(d, cfg.CacheCfg(), nil, nil)
+	dm := NewDataManager(d, cfg.CacheCfg(), connMgr)
 
 	if err := dm.DataDB().Flush(""); err != nil {
 		return err

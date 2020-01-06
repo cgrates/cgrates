@@ -16,6 +16,10 @@
       "strategy": "*first",
       "conns": [{"address": "127.0.0.1:4012", "transport":"*json"}],
     },
+    "rplConn": {
+      "strategy": "*first",
+      "conns": [{"address": "127.0.0.1:3012", "transport":"*json"}],
+    },
     "*internal": {
       "strategy": "*first",
       "conns": [{"address": "*internal"}],
@@ -26,9 +30,7 @@
     "db_type": "*redis",
     "db_port": 6379,
     "db_name": "11",
-    "replication_conns": [
-      {"address": "127.0.0.1:3012", "transport":"*json"}
-    ],
+    "replication_conns": ["rplConn"],
     "items":{
       "*accounts":{"replicate":true},
       "*reverse_destinations": {"replicate":false},

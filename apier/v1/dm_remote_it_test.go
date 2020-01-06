@@ -785,7 +785,7 @@ func testInternalAccountBalanceOperations(t *testing.T) {
 	if err := internalRPC.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(50 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	var acnt *engine.Account
 	attrAcc := &utils.AttrGetAccount{
 		Tenant:  "cgrates.org",
@@ -895,7 +895,7 @@ func testInternalSetAccount(t *testing.T) {
 		t.Error(err)
 	}
 	// give some time to scheduler to execute the action
-	time.Sleep(50 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 
 	var acnt *engine.Account
 	attrAcc := &utils.AttrGetAccount{

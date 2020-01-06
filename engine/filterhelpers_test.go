@@ -37,7 +37,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	stringFilterID := "stringFilterID"
 	prefixFilterID := "prefixFilterID"
 	data := NewInternalDB(nil, nil)
-	dmMatch = NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
+	dmMatch = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	context := utils.MetaRating
 	x, err := NewFilterRule(utils.MetaString, "~*req.Field", []string{"profile"})
 	if err != nil {

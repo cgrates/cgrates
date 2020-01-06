@@ -289,7 +289,7 @@ func TestSuppliersSort(t *testing.T) {
 
 func TestSuppliersPopulateSupplierService(t *testing.T) {
 	data := NewInternalDB(nil, nil)
-	dmSPP = NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
+	dmSPP = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	if err != nil {
 		t.Errorf("Error: %+v", err)

@@ -322,7 +322,7 @@ func TestXMLRPProcessWithNewFilters(t *testing.T) {
 	xmlRP, err := NewXMLRecordsProcessor(bytes.NewBufferString(cdrXmlBroadsoft),
 		utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}), "UTC", true,
 		cdrcCfgs, engine.NewFilterS(defaultCfg, nil, nil, nil,
-			engine.NewDataManager(data, defaultCfg.CacheCfg(), nil, nil)))
+			engine.NewDataManager(data, defaultCfg.CacheCfg(), nil)))
 	if err != nil {
 		t.Error(err)
 	}
@@ -590,7 +590,7 @@ func TestXMLRPNestingSeparator(t *testing.T) {
 	xmlRP, err := NewXMLRecordsProcessor(bytes.NewBufferString(xmlContent),
 		utils.HierarchyPath([]string{"File", "CDRs", "Call"}), "UTC", true,
 		cdrcCfgs, engine.NewFilterS(defaultCfg, nil, nil, nil,
-			engine.NewDataManager(data, defaultCfg.CacheCfg(), nil, nil)))
+			engine.NewDataManager(data, defaultCfg.CacheCfg(), nil)))
 	if err != nil {
 		t.Error(err)
 	}
