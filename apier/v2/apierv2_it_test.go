@@ -110,9 +110,9 @@ func TestApierV2itAddBalance(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "dan",
 		BalanceType: utils.MONETARY,
+		Value:       5.0,
 		Balance: map[string]interface{}{
 			utils.ID:     utils.MetaDefault,
-			utils.Value:  5.0,
 			utils.Weight: 10.0,
 		},
 	}
@@ -184,9 +184,9 @@ func TestApierV2itFraudMitigation(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "dan",
 		BalanceType: utils.MONETARY,
+		Value:       60.0,
 		Balance: map[string]interface{}{
 			utils.ID:     utils.MetaDefault,
-			utils.Value:  60.0,
 			utils.Weight: 10.0,
 		},
 	}

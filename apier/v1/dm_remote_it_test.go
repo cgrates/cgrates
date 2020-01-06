@@ -777,9 +777,9 @@ func testInternalAccountBalanceOperations(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "testAccount1",
 		BalanceType: utils.MONETARY,
+		Value:       17.4,
 		Balance: map[string]interface{}{
-			utils.ID:    "testAccSetBalance",
-			utils.Value: 17.4,
+			utils.ID: "testAccSetBalance",
 		},
 	}
 	if err := internalRPC.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {

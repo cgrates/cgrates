@@ -133,9 +133,9 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 		Tenant:      acntAttrs.Tenant,
 		Account:     acntAttrs.Account,
 		BalanceType: utils.VOICE,
+		Value:       120000000000,
 		Balance: map[string]interface{}{
 			utils.ID:     "BALANCE1",
-			utils.Value:  120000000000,
 			utils.Weight: 20,
 		},
 	}
@@ -149,9 +149,9 @@ func testV1CDRsProcessEventWithRefund(t *testing.T) {
 		Tenant:      acntAttrs.Tenant,
 		Account:     acntAttrs.Account,
 		BalanceType: utils.VOICE,
+		Value:       180000000000,
 		Balance: map[string]interface{}{
 			utils.ID:     "BALANCE2",
-			utils.Value:  180000000000,
 			utils.Weight: 10,
 		},
 	}
@@ -254,9 +254,9 @@ func testV1CDRsRefundOutOfSessionCost(t *testing.T) {
 		Tenant:      acntAttrs.Tenant,
 		Account:     acntAttrs.Account,
 		BalanceType: utils.MONETARY,
+		Value:       123,
 		Balance: map[string]interface{}{
 			utils.ID:     utils.MetaDefault,
-			utils.Value:  123,
 			utils.Weight: 20,
 		},
 	}
@@ -403,9 +403,9 @@ func testV1CDRsRefundCDR(t *testing.T) {
 		Tenant:      acntAttrs.Tenant,
 		Account:     acntAttrs.Account,
 		BalanceType: utils.MONETARY,
+		Value:       123,
 		Balance: map[string]interface{}{
 			utils.ID:     utils.MetaDefault,
-			utils.Value:  123,
 			utils.Weight: 20,
 		},
 	}

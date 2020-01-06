@@ -941,6 +941,7 @@ type AttrSetBalance struct {
 	Tenant          string
 	Account         string
 	BalanceType     string
+	Value           float64
 	Balance         map[string]interface{}
 	ActionExtraData *map[string]interface{}
 	Cdrlog          bool

@@ -75,7 +75,8 @@ func TestRalsReload(t *testing.T) {
 		make(chan rpcclient.ClientConnector, 1),
 		make(chan rpcclient.ClientConnector, 1),
 		schS, engineShutdown, nil)
-	srvMngr.AddServices(NewConnManagerService(cfg, nil), ralS, schS, tS,
+	engine.NewConnManager(cfg, nil)
+	srvMngr.AddServices(ralS, schS, tS,
 		NewLoaderService(cfg, db, filterSChan, server, engineShutdown, make(chan rpcclient.ClientConnector, 1), nil), db, stordb)
 	if err = srvMngr.StartServices(); err != nil {
 		t.Error(err)

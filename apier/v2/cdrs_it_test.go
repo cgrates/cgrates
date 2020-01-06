@@ -752,9 +752,9 @@ func testV2CDRsSetThreshold(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "1005",
 		BalanceType: utils.MONETARY,
+		Value:       1,
 		Balance: map[string]interface{}{
 			utils.ID:     utils.MetaDefault,
-			utils.Value:  1,
 			utils.Weight: 10.0,
 		},
 	}

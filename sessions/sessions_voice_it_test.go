@@ -913,9 +913,9 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "TestTTLWithRelocate",
 		BalanceType: utils.VOICE,
+		Value:       300 * float64(time.Second),
 		Balance: map[string]interface{}{
 			utils.ID:            "TestTTLWithRelocate",
-			utils.Value:         300 * float64(time.Second),
 			utils.RatingSubject: "*zero50ms",
 		},
 	}
@@ -1086,9 +1086,9 @@ func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "TestRelocateWithOriginIDPrefix",
 		BalanceType: utils.VOICE,
+		Value:       300 * float64(time.Second),
 		Balance: map[string]interface{}{
 			utils.ID:            "TestRelocateWithOriginIDPrefix",
-			utils.Value:         300 * float64(time.Second),
 			utils.RatingSubject: "*zero1s",
 		},
 	}

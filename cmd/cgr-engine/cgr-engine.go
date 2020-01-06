@@ -466,7 +466,7 @@ func main() {
 
 	// initialize the connManager before creating the DMService
 	// because we need to pass the connection to it
-	connManager := services.NewConnManagerService(cfg, map[string]chan rpcclient.ClientConnector{
+	connManager := engine.NewConnManager(cfg, map[string]chan rpcclient.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAnalyzer):       internalAnalyzerSChan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaApier):          internalAPIerV1Chan,
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes):     internalAttributeSChan,
@@ -489,7 +489,7 @@ func main() {
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaDispatchers):    internalDispatcherSChan,
 	})
 
-	dmService := services.NewDataDBService(cfg, connManager.GetConnMgr())
+	dmService := services.NewDataDBService(cfg, connManager)
 	storDBService := services.NewStorDBService(cfg)
 	if dmService.ShouldRun() { // Some services can run without db, ie:  CDRC
 		if err = dmService.Start(); err != nil {
@@ -526,45 +526,44 @@ func main() {
 
 	// Start ServiceManager
 	srvManager := servmanager.NewServiceManager(cfg, exitChan)
-
 	attrS := services.NewAttributeService(cfg, dmService, cacheS, filterSChan, server, internalAttributeSChan)
-	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, internalDispatcherSChan, connManager.GetConnMgr())
+	dspS := services.NewDispatcherService(cfg, dmService, cacheS, filterSChan, server, internalDispatcherSChan, connManager)
 	chrS := services.NewChargerService(cfg, dmService, cacheS, filterSChan, server,
-		internalChargerSChan, connManager.GetConnMgr())
+		internalChargerSChan, connManager)
 	tS := services.NewThresholdService(cfg, dmService, cacheS, filterSChan, server, internalThresholdSChan)
 	stS := services.NewStatService(cfg, dmService, cacheS, filterSChan, server,
-		internalStatSChan, connManager.GetConnMgr())
+		internalStatSChan, connManager)
 	reS := services.NewResourceService(cfg, dmService, cacheS, filterSChan, server,
-		internalResourceSChan, connManager.GetConnMgr())
+		internalResourceSChan, connManager)
 	supS := services.NewSupplierService(cfg, dmService, cacheS, filterSChan, server,
-		internalSupplierSChan, connManager.GetConnMgr())
+		internalSupplierSChan, connManager)
 
 	schS := services.NewSchedulerService(cfg, dmService, cacheS, filterSChan,
-		server, internalSchedulerSChan, connManager.GetConnMgr())
+		server, internalSchedulerSChan, connManager)
 
 	rals := services.NewRalService(cfg, dmService, storDBService, cacheS, filterSChan, server,
 		internalRALsChan, internalResponderChan, internalAPIerV1Chan, internalAPIerV2Chan,
-		schS, exitChan, connManager.GetConnMgr())
+		schS, exitChan, connManager)
 
 	cdrS := services.NewCDRServer(cfg, dmService, storDBService, filterSChan, server, internalCDRServerChan,
-		connManager.GetConnMgr())
+		connManager)
 
-	smg := services.NewSessionService(cfg, dmService, server, internalSessionSChan, exitChan, connManager.GetConnMgr())
+	smg := services.NewSessionService(cfg, dmService, server, internalSessionSChan, exitChan, connManager)
 
 	ldrs := services.NewLoaderService(cfg, dmService, filterSChan, server, exitChan,
-		internalLoaderSChan, connManager.GetConnMgr())
+		internalLoaderSChan, connManager)
 	anz := services.NewAnalyzerService(cfg, server, exitChan, internalAnalyzerSChan)
 
-	srvManager.AddServices(connManager, attrS, chrS, tS, stS, reS, supS, schS, rals,
+	srvManager.AddServices(attrS, chrS, tS, stS, reS, supS, schS, rals,
 		rals.GetResponder(), rals.GetAPIv1(), rals.GetAPIv2(), cdrS, smg,
-		services.NewEventReaderService(cfg, filterSChan, exitChan, connManager.GetConnMgr()),
-		services.NewDNSAgent(cfg, filterSChan, exitChan, connManager.GetConnMgr()),
-		services.NewFreeswitchAgent(cfg, exitChan, connManager.GetConnMgr()),
-		services.NewKamailioAgent(cfg, exitChan, connManager.GetConnMgr()),
-		services.NewAsteriskAgent(cfg, exitChan, connManager.GetConnMgr()),              // partial reload
-		services.NewRadiusAgent(cfg, filterSChan, exitChan, connManager.GetConnMgr()),   // partial reload
-		services.NewDiameterAgent(cfg, filterSChan, exitChan, connManager.GetConnMgr()), // partial reload
-		services.NewHTTPAgent(cfg, filterSChan, server, connManager.GetConnMgr()),       // no reload
+		services.NewEventReaderService(cfg, filterSChan, exitChan, connManager),
+		services.NewDNSAgent(cfg, filterSChan, exitChan, connManager),
+		services.NewFreeswitchAgent(cfg, exitChan, connManager),
+		services.NewKamailioAgent(cfg, exitChan, connManager),
+		services.NewAsteriskAgent(cfg, exitChan, connManager),              // partial reload
+		services.NewRadiusAgent(cfg, filterSChan, exitChan, connManager),   // partial reload
+		services.NewDiameterAgent(cfg, filterSChan, exitChan, connManager), // partial reload
+		services.NewHTTPAgent(cfg, filterSChan, server, connManager),       // no reload
 		ldrs, anz, dspS, dmService, storDBService,
 	)
 	srvManager.StartServices()
@@ -604,7 +603,7 @@ func main() {
 	initConfigSv1(internalConfigChan, server)
 
 	// Start CDRC components if necessary
-	go startCdrcs(filterSChan, exitChan, connManager.GetConnMgr())
+	go startCdrcs(filterSChan, exitChan, connManager)
 
 	// Serve rpc connections
 	go startRpc(server, rals.GetResponder().GetIntenternalChan(), cdrS.GetIntenternalChan(),

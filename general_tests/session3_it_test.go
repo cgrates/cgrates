@@ -254,9 +254,9 @@ func testSes3ItAddVoiceBalance(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "1002",
 		BalanceType: utils.VOICE,
+		Value:       5 * float64(time.Second),
 		Balance: map[string]interface{}{
 			utils.ID:            "TestDynamicDebitBalance",
-			utils.Value:         5 * float64(time.Second),
 			utils.RatingSubject: "*zero5ms",
 		},
 	}

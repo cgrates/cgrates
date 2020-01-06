@@ -83,7 +83,7 @@ func (resp *ResponderService) GetIntenternalChan() (conn chan rpcclient.ClientCo
 // Reload handles the change of config
 func (resp *ResponderService) Reload() (err error) {
 	resp.Lock()
-	resp.resp.MaxComputedUsage = resp.cfg.RalsCfg().MaxComputedUsage // this may cause concurrency problems
+	resp.resp.SetMaxComputedUsage(resp.cfg.RalsCfg().MaxComputedUsage)
 	resp.Unlock()
 	return
 }

@@ -80,9 +80,9 @@ func testDspSessionAddBalacne(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "1001",
 		BalanceType: utils.VOICE,
+		Value:       float64(initUsage),
 		Balance: map[string]interface{}{
 			utils.ID:            "SessionBalance",
-			utils.Value:         float64(initUsage),
 			utils.RatingSubject: "*zero5ms",
 		},
 	}

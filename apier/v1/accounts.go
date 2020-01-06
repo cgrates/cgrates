@@ -390,7 +390,7 @@ func (api *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{}
 	return nil
 }
 
-// Get balance
+// GetAccount returns the account
 func (api *ApierV1) GetAccount(attr *utils.AttrGetAccount, reply *interface{}) error {
 	tag := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	userBalance, err := api.DataManager.GetAccount(tag)
@@ -500,6 +500,7 @@ func (api *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) (err e
 		return
 	}
 	balance.Type = utils.StringPointer(attr.BalanceType)
+	balance.Value = &utils.ValueFormula{Static: math.Abs(attr.Value)}
 	if (balance.ID == nil || *balance.ID == "") &&
 		(balance.Uuid == nil || *balance.Uuid == "") {
 		return utils.NewErrMandatoryIeMissing("BalanceID", "or", "BalanceUUID")

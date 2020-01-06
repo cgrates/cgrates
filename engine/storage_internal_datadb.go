@@ -97,6 +97,7 @@ type InternalDB struct {
 	mu                  sync.RWMutex
 	stringIndexedFields []string
 	prefixIndexedFields []string
+	indexedFieldsMutex  sync.RWMutex   // used for reload
 	cnter               *utils.Counter // used for OrderID for cdr
 }
 
@@ -111,14 +112,18 @@ func NewInternalDB(stringIndexedFields, prefixIndexedFields []string) (iDB *Inte
 	return
 }
 
-// SetStringIndexedFields set the stringIndexedFields, used at StorDB reload
+// SetStringIndexedFields set the stringIndexedFields, used at StorDB reload (is thread safe)
 func (iDB *InternalDB) SetStringIndexedFields(stringIndexedFields []string) {
+	iDB.indexedFieldsMutex.Lock()
 	iDB.stringIndexedFields = stringIndexedFields
+	iDB.indexedFieldsMutex.Unlock()
 }
 
-// SetPrefixIndexedFields set the prefixIndexedFields, used at StorDB reload
+// SetPrefixIndexedFields set the prefixIndexedFields, used at StorDB reload (is thread safe)
 func (iDB *InternalDB) SetPrefixIndexedFields(prefixIndexedFields []string) {
+	iDB.indexedFieldsMutex.Lock()
 	iDB.prefixIndexedFields = prefixIndexedFields
+	iDB.indexedFieldsMutex.Unlock()
 }
 
 func (iDB *InternalDB) Close() {}

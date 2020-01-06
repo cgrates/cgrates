@@ -111,9 +111,9 @@ func TestSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org",
 		Account:     "TestSessionsBiRPCSessionAutomaticDisconnects",
 		BalanceType: utils.VOICE,
+		Value:       0.01 * float64(time.Second),
 		Balance: map[string]interface{}{
 			utils.ID:            "TestSessionsBiRPCSessionAutomaticDisconnects",
-			utils.Value:         0.01 * float64(time.Second),
 			utils.RatingSubject: "*zero1ms",
 		},
 	}
@@ -238,9 +238,9 @@ func TestSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "TestSessionsBiRPCSessionOriginatorTerminate",
 		BalanceType: utils.VOICE,
+		Value:       float64(time.Second),
 		Balance: map[string]interface{}{
 			utils.ID:            "TestSessionsBiRPCSessionOriginatorTerminate",
-			utils.Value:         float64(time.Second),
 			utils.RatingSubject: "*zero1ms",
 		},
 	}

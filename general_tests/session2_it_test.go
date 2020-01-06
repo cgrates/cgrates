@@ -113,9 +113,9 @@ func testSes2ItInitSession(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "1001",
 		BalanceType: utils.VOICE,
+		Value:       float64(time.Hour),
 		Balance: map[string]interface{}{
-			utils.ID:    "TestDynamicDebitBalance",
-			utils.Value: float64(time.Hour),
+			utils.ID: "TestDynamicDebitBalance",
 		},
 	}
 	var reply string

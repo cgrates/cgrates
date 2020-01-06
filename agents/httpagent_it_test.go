@@ -193,9 +193,9 @@ func testHAitAuth1001(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     acnt,
 		BalanceType: utils.VOICE,
+		Value:       float64(maxDuration) * float64(time.Second),
 		Balance: map[string]interface{}{
 			utils.ID:            "TestDynamicDebitBalance",
-			utils.Value:         float64(maxDuration) * float64(time.Second),
 			utils.RatingSubject: "*zero5ms",
 		},
 	}

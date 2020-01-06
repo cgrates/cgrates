@@ -152,9 +152,9 @@ func testAccITAddVoiceBalance(t *testing.T) {
 		Tenant:      accTenant,
 		Account:     accAcount,
 		BalanceType: utils.VOICE,
+		Value:       2 * float64(time.Second),
 		Balance: map[string]interface{}{
 			utils.ID:            accBallID,
-			utils.Value:         2 * float64(time.Second),
 			utils.RatingSubject: "*zero5ms",
 			utils.ExpiryTime:    time.Now().Add(5 * time.Second).Format("2006-01-02 15:04:05"),
 		},
@@ -293,9 +293,9 @@ func testAccITSetBalance(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "testAccSetBalance",
 		BalanceType: "*monetary",
+		Value:       1.5,
 		Balance: map[string]interface{}{
-			utils.ID:    "testAccSetBalance",
-			utils.Value: 1.5,
+			utils.ID: "testAccSetBalance",
 		},
 		Cdrlog: true,
 	}
@@ -325,9 +325,9 @@ func testAccITSetBalanceWithExtraData(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "testAccITSetBalanceWithExtraData",
 		BalanceType: "*monetary",
+		Value:       1.5,
 		Balance: map[string]interface{}{
-			utils.ID:    "testAccITSetBalanceWithExtraData",
-			utils.Value: 1.5,
+			utils.ID: "testAccITSetBalanceWithExtraData",
 		},
 		Cdrlog:          true,
 		ActionExtraData: &extraDataMap,
@@ -360,9 +360,9 @@ func testAccITSetBalanceWithExtraData2(t *testing.T) {
 		Tenant:      "cgrates.org",
 		Account:     "testAccITSetBalanceWithExtraData2",
 		BalanceType: "*monetary",
+		Value:       1.5,
 		Balance: map[string]interface{}{
-			utils.ID:    "testAccITSetBalanceWithExtraData2",
-			utils.Value: 1.5,
+			utils.ID: "testAccITSetBalanceWithExtraData2",
 		},
 		Cdrlog:          true,
 		ActionExtraData: &extraDataMap,

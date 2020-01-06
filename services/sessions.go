@@ -129,7 +129,6 @@ func (smg *SessionService) GetIntenternalChan() (conn chan rpcclient.ClientConne
 
 // Reload handles the change of config
 func (smg *SessionService) Reload() (err error) {
-
 	sReplConns, err := sessions.NewSReplConns(smg.cfg.SessionSCfg().ReplicationConns,
 		smg.cfg.GeneralCfg().Reconnects, smg.cfg.GeneralCfg().ConnectTimeout,
 		smg.cfg.GeneralCfg().ReplyTimeout)

@@ -253,7 +253,7 @@ type TenantRatingSubject struct {
 }
 
 func RatingProfileSubjectPrefixMatching(key string) (rp *RatingProfile, err error) {
-	if !rpSubjectPrefixMatching || strings.HasSuffix(key, utils.ANY) {
+	if !getRpSubjectPrefixMatching() || strings.HasSuffix(key, utils.ANY) {
 		return dm.GetRatingProfile(key, false, utils.NonTransactional)
 	}
 	if rp, err = dm.GetRatingProfile(key, false, utils.NonTransactional); err == nil && rp != nil { // rp nil represents cached no-result

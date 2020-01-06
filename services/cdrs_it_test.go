@@ -79,7 +79,8 @@ func TestCdrsReload(t *testing.T) {
 	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
 		make(chan rpcclient.ClientConnector, 1),
 		nil)
-	srvMngr.AddServices(NewConnManagerService(cfg, nil), cdrS, ralS, schS, chrS,
+	engine.NewConnManager(cfg, nil)
+	srvMngr.AddServices(cdrS, ralS, schS, chrS,
 		NewLoaderService(cfg, db, filterSChan, server, engineShutdown,
 			make(chan rpcclient.ClientConnector, 1), nil), db, stordb)
 	if err = srvMngr.StartServices(); err != nil {
