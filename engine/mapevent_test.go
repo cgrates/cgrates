@@ -240,6 +240,50 @@ func TestMapEventGetTimeIgnoreErrors(t *testing.T) {
 	}
 }
 
+func TestGetTimePtr(t *testing.T) {
+	rcv1, err := mapEv.GetTimePtr("test", utils.EmptyString)
+	if err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected: %+v, received: %+v", utils.ErrNotFound, err)
+	} else if rcv1 != nil {
+		t.Errorf("Expected: nil, received: %+v", rcv1)
+	}
+	expected := time.Date(2009, 11, 10, 23, 0, 0, 0, time.UTC)
+	rcv2, err := mapEv.GetTimePtr("test8", utils.EmptyString)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, *rcv2) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rcv2)
+	}
+	rcv3, err := mapEv.GetTimePtr("test9", utils.EmptyString)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, *rcv3) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rcv3)
+	}
+	if rcv1 == rcv2 || rcv2 == rcv3 || rcv1 == rcv3 {
+		t.Errorf("Expecting to be different adresses")
+	}
+}
+
+func TestGetTimePtrIgnoreErrors(t *testing.T) {
+	rcv1 := mapEv.GetTimePtrIgnoreErrors("test", utils.EmptyString)
+	if rcv1 != nil {
+		t.Errorf("Expected: nil, received: %+v", rcv1)
+	}
+	expected := time.Date(2009, 11, 10, 23, 0, 0, 0, time.UTC)
+	rcv2 := mapEv.GetTimePtrIgnoreErrors("test8", utils.EmptyString)
+	if rcv2 != nil && !reflect.DeepEqual(expected, *rcv2) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rcv2)
+	}
+	rcv3 := mapEv.GetTimePtrIgnoreErrors("test9", utils.EmptyString)
+	if rcv3 != nil && !reflect.DeepEqual(expected, *rcv3) {
+		t.Errorf("Expecting %+v, received: %+v", expected, rcv3)
+	}
+	if rcv1 == rcv2 || rcv2 == rcv3 || rcv1 == rcv3 {
+		t.Errorf("Expecting to be different adresses")
+	}
+}
+
 func TestMapEventClone(t *testing.T) {
 	rply := mapEv.Clone()
 	if !reflect.DeepEqual(mapEv, rply) {

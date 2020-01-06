@@ -2370,6 +2370,25 @@ func TestAccountClone(t *testing.T) {
 
 }
 
+func TestAccountGetBalanceWithID(t *testing.T){
+	account := &Account{
+		BalanceMap: map[string]Balances{
+			"type1" : Balances{&Balance{ID: "test1",Value: 0.7,}},
+			"type2" :Balances{&Balance{ID: "test2",Value: 0.8,}},
+		},
+	}
+	if rcv := account.GetBalanceWithID("type1","test1"); rcv.Value != 0.7{
+		t.Errorf("Expecting: 0.7, received: %+v",rcv)
+	}
+	if rcv := account.GetBalanceWithID("type2","test2"); rcv.Value != 0.8{
+		t.Errorf("Expecting: 0.8, received: %+v",rcv)
+	}
+	if rcv := account.GetBalanceWithID("unknown","unknown"); rcv != nil{
+		t.Errorf("Expecting: nil, received: %+v",rcv)
+	}
+}
+
+
 /*********************************** Benchmarks *******************************/
 
 func BenchmarkGetSecondForPrefix(b *testing.B) {
