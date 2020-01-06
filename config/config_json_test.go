@@ -201,8 +201,8 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 		Db_password:       utils.StringPointer(""),
 		Redis_sentinel:    utils.StringPointer(""),
 		Query_timeout:     utils.StringPointer("10s"),
-		Replication_conns: &[]*RemoteHostJson{},
-		Remote_conns:      &[]*RemoteHostJson{},
+		Replication_conns: &[]string{},
+		Remote_conns:      &[]string{},
 		Items: &map[string]*ItemRmtRplOptJson{
 			utils.MetaAccounts: &ItemRmtRplOptJson{
 				Replicate: utils.BoolPointer(false),

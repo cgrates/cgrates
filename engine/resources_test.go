@@ -364,7 +364,7 @@ func TestRSCacheSetGet(t *testing.T) {
 
 func TestResourcePopulateResourceService(t *testing.T) {
 	data := NewInternalDB(nil, nil)
-	dmRES = NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
+	dmRES = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -726,7 +726,7 @@ func TestResourceCaching(t *testing.T) {
 	Cache.Clear(nil)
 	// start fresh with new dataManager
 	data := NewInternalDB(nil, nil)
-	dmRES = NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
+	dmRES = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	if err != nil {
 		t.Errorf("Error: %+v", err)

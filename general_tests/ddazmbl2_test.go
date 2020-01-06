@@ -31,7 +31,7 @@ var dataDB2 *engine.DataManager
 
 func TestSetStorage2(t *testing.T) {
 	data := engine.NewInternalDB(nil, nil)
-	dataDB2 = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
+	dataDB2 = engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	engine.SetDataStorage(dataDB2)
 }
 

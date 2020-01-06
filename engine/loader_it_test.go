@@ -50,7 +50,7 @@ func TestLoaderITConnDataDbs(t *testing.T) {
 	if err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
-	dataDbCsv = NewDataManager(dbConn, nil, nil, nil)
+	dataDbCsv = NewDataManager(dbConn, nil, nil)
 	dbConn, err = NewDataDBConn(lCfg.DataDbCfg().DataDbType,
 		lCfg.DataDbCfg().DataDbHost, lCfg.DataDbCfg().DataDbPort, "8",
 		lCfg.DataDbCfg().DataDbUser, lCfg.DataDbCfg().DataDbPass,
@@ -58,7 +58,7 @@ func TestLoaderITConnDataDbs(t *testing.T) {
 	if err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
-	dataDbStor = NewDataManager(dbConn, nil, nil, nil)
+	dataDbStor = NewDataManager(dbConn, nil, nil)
 	dbConn, err = NewDataDBConn(lCfg.DataDbCfg().DataDbType,
 		lCfg.DataDbCfg().DataDbHost, lCfg.DataDbCfg().DataDbPort, "9",
 		lCfg.DataDbCfg().DataDbUser, lCfg.DataDbCfg().DataDbPass,
@@ -66,7 +66,7 @@ func TestLoaderITConnDataDbs(t *testing.T) {
 	if err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
-	dataDbApier = NewDataManager(dbConn, nil, nil, nil)
+	dataDbApier = NewDataManager(dbConn, nil, nil)
 	for _, db := range []Storage{dataDbCsv.DataDB(), dataDbStor.DataDB(), dataDbApier.DataDB(),
 		dataDbCsv.DataDB(), dataDbStor.DataDB(), dataDbApier.DataDB()} {
 		if err = db.Flush(""); err != nil {

@@ -73,7 +73,7 @@ func TestFilterIndexerITRedis(t *testing.T) {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}
 	cfgDBName = cfg.DataDbCfg().DataDbName
-	dataManager = NewDataManager(redisDB, config.CgrConfig().CacheCfg(), nil, nil)
+	dataManager = NewDataManager(redisDB, config.CgrConfig().CacheCfg(), nil)
 	for _, stest := range sTests {
 		t.Run("TestITRedis", stest)
 	}
@@ -93,14 +93,14 @@ func TestFilterIndexerITMongo(t *testing.T) {
 		t.Fatal(err)
 	}
 	cfgDBName = mgoITCfg.StorDbCfg().Name
-	dataManager = NewDataManager(mongoDB, config.CgrConfig().CacheCfg(), nil, nil)
+	dataManager = NewDataManager(mongoDB, config.CgrConfig().CacheCfg(), nil)
 	for _, stest := range sTests {
 		t.Run("TestITMongo", stest)
 	}
 }
 
 func TestFilterIndexerITInternal(t *testing.T) {
-	dataManager = NewDataManager(NewInternalDB(nil, nil), config.CgrConfig().CacheCfg(), nil, nil)
+	dataManager = NewDataManager(NewInternalDB(nil, nil), config.CgrConfig().CacheCfg(), nil)
 	for _, stest := range sTests {
 		t.Run("TestITInternal", stest)
 	}

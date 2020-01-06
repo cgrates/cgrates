@@ -50,7 +50,7 @@ func TestChargerSReload(t *testing.T) {
 	filterSChan <- nil
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
-	db := NewDataDBService(cfg)
+	db := NewDataDBService(cfg, nil)
 	attrS := NewAttributeService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1))
 	chrS := NewChargerService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil)
 	srvMngr.AddServices(NewConnManagerService(cfg, nil), attrS, chrS,

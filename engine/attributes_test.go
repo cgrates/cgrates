@@ -149,7 +149,7 @@ var (
 
 func TestAttributePopulateAttrService(t *testing.T) {
 	data := NewInternalDB(nil, nil)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	defaultCfg.AttributeSCfg().StringIndexedFields = nil
@@ -1696,7 +1696,7 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 
 func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 	data := NewInternalDB(nil, nil)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	if err != nil {
@@ -1760,7 +1760,7 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 
 func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 	data := NewInternalDB(nil, nil)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	defaultCfg, err := config.NewDefaultCGRConfig()
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	if err != nil {

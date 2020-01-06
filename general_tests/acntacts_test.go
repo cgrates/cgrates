@@ -30,7 +30,7 @@ var dbAcntActs *engine.DataManager
 
 func TestAcntActsSetStorage(t *testing.T) {
 	dataDB := engine.NewInternalDB(nil, nil)
-	dbAcntActs = engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil, nil)
+	dbAcntActs = engine.NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
 	engine.SetDataStorage(dbAcntActs)
 }
 

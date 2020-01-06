@@ -48,7 +48,7 @@ func TestAttributeSReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheAttributeFilterIndexes))
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
-	db := NewDataDBService(cfg)
+	db := NewDataDBService(cfg, nil)
 	attrS := NewAttributeService(cfg, db,
 		chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1),
 	)

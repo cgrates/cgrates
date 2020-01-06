@@ -51,7 +51,7 @@ func TestSupplierSReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheStatFilterIndexes))
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
-	db := NewDataDBService(cfg)
+	db := NewDataDBService(cfg, nil)
 	sts := NewStatService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil)
 	supS := NewSupplierService(cfg, db, chS, filterSChan, server, make(chan rpcclient.ClientConnector, 1), nil)
 	srvMngr.AddServices(NewConnManagerService(cfg, nil), supS, sts,

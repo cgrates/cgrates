@@ -17,6 +17,10 @@
       "strategy": "*first",
       "conns": [{"address": "127.0.0.1:3012", "transport":"*json"}],
     },
+    "rmtConn": {
+      "strategy": "*first",
+      "conns": [{"address": "127.0.0.1:4012", "transport":"*json"}],
+    },
     "*internal": {
       "strategy": "*first",
       "conns": [{"address": "*internal"}],
@@ -26,9 +30,7 @@
 
   "data_db": {
     "db_type": "*internal",
-    "remote_conns": [
-      {"address": "127.0.0.1:4012", "transport":"*json"}
-    ],
+    "remote_conns": ["rmtConn"],
     "items":{
       "*accounts":{"remote":true},
       "*reverse_destinations": {"remote":true},

@@ -92,7 +92,7 @@ func TestOnStorITRedis(t *testing.T) {
 		t.Fatal("Could not connect to Redis", err.Error())
 	}
 	onStorCfg = cfg.DataDbCfg().DataDbName
-	onStor = NewDataManager(rdsITdb, config.CgrConfig().CacheCfg(), nil, nil)
+	onStor = NewDataManager(rdsITdb, config.CgrConfig().CacheCfg(), nil)
 	for _, stest := range sTestsOnStorIT {
 		t.Run("TestOnStorITRedis", stest)
 	}
@@ -112,7 +112,7 @@ func TestOnStorITMongo(t *testing.T) {
 		t.Fatal(err)
 	}
 	onStorCfg = mgoITCfg.StorDbCfg().Name
-	onStor = NewDataManager(mgoITdb, config.CgrConfig().CacheCfg(), nil, nil)
+	onStor = NewDataManager(mgoITdb, config.CgrConfig().CacheCfg(), nil)
 	for _, stest := range sTestsOnStorIT {
 		t.Run("TestOnStorITMongo", stest)
 	}
@@ -121,7 +121,7 @@ func TestOnStorITMongo(t *testing.T) {
 func TestOnStorITInternal(t *testing.T) {
 	sleepDelay = 10 * time.Millisecond
 	onStor = NewDataManager(NewInternalDB(nil, nil),
-		config.CgrConfig().CacheCfg(), nil, nil)
+		config.CgrConfig().CacheCfg(), nil)
 	for _, stest := range sTestsOnStorIT {
 		t.Run("TestOnStorITInternal", stest)
 	}

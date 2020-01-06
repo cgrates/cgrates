@@ -65,7 +65,7 @@ func TestCdrsReload(t *testing.T) {
 	cacheSChan <- chS
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
-	db := NewDataDBService(cfg)
+	db := NewDataDBService(cfg, nil)
 	cfg.StorDbCfg().Type = utils.INTERNAL
 	stordb := NewStorDBService(cfg)
 	chrS := NewChargerService(cfg, db, chS, filterSChan, server, nil, nil)

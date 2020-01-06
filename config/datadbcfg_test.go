@@ -136,9 +136,7 @@ func TestDataDBRemoteReplication(t *testing.T) {
 	"db_user": "cgrates", 					// username to use when connecting to data_db
 	"db_password": "password",				// password to use when connecting to data_db
 	"redis_sentinel":"sentinel",			// redis_sentinel is the name of sentinel
-	"remote_conns":[
-		{"address": "127.0.0.1:2022","transport":"*json"},
-	],
+	"remote_conns":["Conn1"],
 	}
 }`
 
@@ -150,12 +148,7 @@ func TestDataDBRemoteReplication(t *testing.T) {
 		DataDbUser:         "cgrates",
 		DataDbPass:         "password",
 		DataDbSentinelName: "sentinel",
-		RmtConns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2022",
-				Transport: "*json",
-			},
-		},
+		RmtConns:           []string{"Conn1"},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -170,12 +163,8 @@ func TestDataDBRemoteReplication(t *testing.T) {
 	cfgJSONStr = `{
 "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
 	"db_type": "*internal",					// data_db type: <*redis|*mongo|*internal>
-	"remote_conns":[
-		{"address": "127.0.0.1:2022","transport":"*json"},
-	],
-	"replication_conns":[
-		{"address": "127.0.0.1:2022","transport":"*json"},
-	],
+	"remote_conns":["Conn1"],
+	"replication_conns":["Conn2"],
 	}
 }`
 
@@ -187,18 +176,8 @@ func TestDataDBRemoteReplication(t *testing.T) {
 		DataDbUser:         "cgrates",
 		DataDbPass:         "password",
 		DataDbSentinelName: "sentinel",
-		RmtConns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2022",
-				Transport: "*json",
-			},
-		},
-		RplConns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2022",
-				Transport: "*json",
-			},
-		},
+		RmtConns:           []string{"Conn1"},
+		RplConns:           []string{"Conn2"},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -213,16 +192,8 @@ func TestDataDBRemoteReplication(t *testing.T) {
 	cfgJSONStr = `{
 "data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
 	"db_type": "*internal",					// data_db type: <*redis|*mongo|*internal>
-	"remote_conns":[
-		{"address": "127.0.0.1:2032","transport":"*json"},
-		{"address": "127.0.0.1:2042","transport":"*json"},
-		{"address": "127.0.0.1:2052","transport":"*json"},
-	],
-	"replication_conns":[
-		{"address": "127.0.0.1:2032","transport":"*json"},
-		{"address": "127.0.0.1:2042","transport":"*json"},
-		{"address": "127.0.0.1:2052","transport":"*json"},
-	],
+	"remote_conns":["Conn1","Conn2","Conn3"],
+	"replication_conns":["Conn4","Conn5"],
 	}
 }`
 
@@ -234,34 +205,8 @@ func TestDataDBRemoteReplication(t *testing.T) {
 		DataDbUser:         "cgrates",
 		DataDbPass:         "password",
 		DataDbSentinelName: "sentinel",
-		RmtConns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2032",
-				Transport: "*json",
-			},
-			&RemoteHost{
-				Address:   "127.0.0.1:2042",
-				Transport: "*json",
-			},
-			&RemoteHost{
-				Address:   "127.0.0.1:2052",
-				Transport: "*json",
-			},
-		},
-		RplConns: []*RemoteHost{
-			&RemoteHost{
-				Address:   "127.0.0.1:2032",
-				Transport: "*json",
-			},
-			&RemoteHost{
-				Address:   "127.0.0.1:2042",
-				Transport: "*json",
-			},
-			&RemoteHost{
-				Address:   "127.0.0.1:2052",
-				Transport: "*json",
-			},
-		},
+		RmtConns:           []string{"Conn1", "Conn2", "Conn3"},
+		RplConns:           []string{"Conn4", "Conn5"},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)

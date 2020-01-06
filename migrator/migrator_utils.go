@@ -35,7 +35,7 @@ func NewMigratorDataDB(db_type, host, port, name, user, pass, marshaler string,
 	if err != nil {
 		return nil, err
 	}
-	dm := engine.NewDataManager(dbCon, cacheCfg, nil, nil)
+	dm := engine.NewDataManager(dbCon, cacheCfg, nil)
 	var d MigratorDataDB
 	switch db_type {
 	case utils.REDIS:

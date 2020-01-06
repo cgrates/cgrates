@@ -37,7 +37,7 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
@@ -143,7 +143,7 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContentMultiFiles",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
@@ -221,7 +221,7 @@ func TestLoaderProcessResource(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessResources",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
@@ -339,7 +339,7 @@ func TestLoaderProcessFilters(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessFilters",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
@@ -450,7 +450,7 @@ func TestLoaderProcessThresholds(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
@@ -548,7 +548,7 @@ func TestLoaderProcessStats(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
@@ -670,7 +670,7 @@ func TestLoaderProcessSuppliers(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
@@ -797,7 +797,7 @@ func TestLoaderProcessChargers(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
@@ -875,7 +875,7 @@ func TestLoaderProcessDispatches(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
@@ -1027,7 +1027,7 @@ func TestLoaderProcessDispatcheHosts(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{
@@ -1115,7 +1115,7 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 	ldr := &Loader{
 		ldrID:         "TestLoaderProcessContent",
 		bufLoaderData: make(map[string][]LoaderData),
-		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil, nil),
+		dm:            engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil),
 		timezone:      "UTC",
 	}
 	ldr.dataTpls = map[string][]*config.FCTemplate{

@@ -80,7 +80,7 @@ func durInternalRater(cd *engine.CallDescriptorWithArgDispatcher) (time.Duration
 	if err != nil {
 		return nilDuration, fmt.Errorf("Could not connect to data database: %s", err.Error())
 	}
-	dm := engine.NewDataManager(dbConn, cgrConfig.CacheCfg(), nil, nil) // for the momentn we use here "" for sentinelName
+	dm := engine.NewDataManager(dbConn, cgrConfig.CacheCfg(), nil) // for the momentn we use here "" for sentinelName
 	defer dm.DataDB().Close()
 	engine.SetDataStorage(dm)
 	if err := dm.LoadDataDBCache(nil, nil, nil, nil, nil, nil, nil, nil,

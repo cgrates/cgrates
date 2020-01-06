@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -36,8 +37,8 @@ type DataDbCfg struct {
 	DataDbPass         string // The user's password.
 	DataDbSentinelName string
 	QueryTimeout       time.Duration
-	RmtConns           []*RemoteHost // Remote DataDB  configurations
-	RplConns           []*RemoteHost // Replication conns
+	RmtConns           []string // Remote DataDB  connIDs
+	RplConns           []string // Replication connIDs
 	Items              map[string]*ItemRmtRplOpt
 }
 
@@ -77,19 +78,25 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		}
 	}
 	if jsnDbCfg.Remote_conns != nil {
-		dbcfg.RmtConns = make([]*RemoteHost, len(*jsnDbCfg.Remote_conns))
-		for i, cfg := range *jsnDbCfg.Remote_conns {
-			dbcfg.RmtConns[i] = NewDfltRemoteHost()
-			if err = dbcfg.RmtConns[i].loadFromJsonCfg(cfg); err != nil {
-				return
+		dbcfg.RmtConns = make([]string, len(*jsnDbCfg.Remote_conns))
+		for idx, rmtConn := range *jsnDbCfg.Remote_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if rmtConn == utils.MetaInternal {
+				return fmt.Errorf("Remote connection ID needs to be different than *internal")
+			} else {
+				dbcfg.RmtConns[idx] = rmtConn
 			}
 		}
 	}
 	if jsnDbCfg.Replication_conns != nil {
-		dbcfg.RplConns = make([]*RemoteHost, len(*jsnDbCfg.Replication_conns))
-		for idx, jsnRplCfg := range *jsnDbCfg.Replication_conns {
-			dbcfg.RplConns[idx] = NewDfltRemoteHost()
-			dbcfg.RplConns[idx].loadFromJsonCfg(jsnRplCfg)
+		dbcfg.RplConns = make([]string, len(*jsnDbCfg.Replication_conns))
+		for idx, rplConn := range *jsnDbCfg.Replication_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if rplConn == utils.MetaInternal {
+				return fmt.Errorf("Replication connection ID needs to be different than *internal")
+			} else {
+				dbcfg.RplConns[idx] = rplConn
+			}
 		}
 	}
 	if jsnDbCfg.Items != nil {

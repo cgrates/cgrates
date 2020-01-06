@@ -90,8 +90,8 @@ type DbJsonCfg struct {
 	Redis_sentinel        *string
 	Query_timeout         *string
 	Sslmode               *string // Used only in case of storDb
-	Remote_conns          *[]*RemoteHostJson
-	Replication_conns     *[]*RemoteHostJson
+	Remote_conns          *[]string
+	Replication_conns     *[]string
 	Items                 *map[string]*ItemRmtRplOptJson
 }
 
