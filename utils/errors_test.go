@@ -18,7 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"fmt"
+	"net"
 	"reflect"
+	"syscall"
 	"testing"
 )
 
@@ -187,5 +190,43 @@ func TestErrPrefixNotErrNotImplemented(t *testing.T) {
 func TestErrEnvNotFound(t *testing.T) {
 	if rcv := ErrEnvNotFound("test_string"); rcv.Error() != "NOT_FOUND:ENV_VAR:test_string" {
 		t.Errorf("Expecting: NOT_FOUND:ENV_VAR:test_string, received: %+v", rcv)
+	}
+}
+
+func TestIsNetworkError(t *testing.T) {
+	if IsNetworkError(nil) {
+		t.Errorf("Expecting: false, received: true")
+	}
+	if !IsNetworkError(ErrReqUnsynchronized) {
+		t.Errorf("Expecting: true, received: false")
+	}
+	var err error
+	if IsNetworkError(err) {
+		t.Errorf("Nill error should not be consider a network error")
+	}
+	err = &net.OpError{Err: syscall.ECONNRESET}
+	if !IsNetworkError(err) {
+		t.Errorf("syscall.ECONNRESET should be consider a network error")
+	}
+	err = fmt.Errorf("NOT_FOUND")
+	if IsNetworkError(err) {
+		t.Errorf("%s error should not be consider a network error", err)
+	}
+	err = ErrDisconnected
+	if !IsNetworkError(err) {
+		t.Errorf("%s error should be consider a network error", err)
+	}
+
+}
+
+func TestErrPathNotReachable(t *testing.T) {
+	if rcv := ErrPathNotReachable("test/path"); rcv.Error() != `path:"test/path" is not reachable` {
+		t.Errorf("Expecting: path:'test/path' is not reachable, received: %+v", rcv)
+	}
+}
+
+func TestErrNotConvertibleTF(t *testing.T) {
+	if rcv := ErrNotConvertibleTF("test_type1", "test_type2"); rcv.Error() != `not convertible : from: test_type1 to:test_type2` {
+		t.Errorf("Expecting: not convertible : from: test_type1 to:test_type2, received: %+v", rcv)
 	}
 }
