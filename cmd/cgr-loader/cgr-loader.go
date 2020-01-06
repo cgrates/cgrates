@@ -32,6 +32,11 @@ import (
 )
 
 var (
+	err    error
+	dm     *engine.DataManager
+	storDb engine.LoadStorage
+	loader engine.LoadReader
+
 	cgrLoaderFlags = flag.NewFlagSet("cgr-loader", flag.ContinueOnError)
 	dfltCfg        = config.CgrConfig()
 	cfgPath        = cgrLoaderFlags.String("config_path", "",
@@ -91,11 +96,6 @@ var (
 	apiKey         = cgrLoaderFlags.String("api_key", "", "Api Key used to comosed ArgDispatcher")
 	routeID        = cgrLoaderFlags.String("route_id", "", "RouteID used to comosed ArgDispatcher")
 
-	err    error
-	dm     *engine.DataManager
-	storDb engine.LoadStorage
-	loader engine.LoadReader
-
 	fromStorDB    = cgrLoaderFlags.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
 	toStorDB      = cgrLoaderFlags.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
 	cacheSAddress = cgrLoaderFlags.String("caches_address", dfltCfg.LoaderCgrCfg().CachesConns[0],
@@ -104,20 +104,8 @@ var (
 	rpcEncoding      = cgrLoaderFlags.String("rpc_encoding", rpcclient.JSONrpc, "RPC encoding used <*gob|*json>")
 )
 
-func main() {
-	if err := cgrLoaderFlags.Parse(os.Args[1:]); err != nil {
-		return
-	}
-	if *version {
-		if rcv, err := utils.GetCGRVersion(); err != nil {
-			fmt.Println(err)
-		} else {
-			fmt.Println(rcv)
-		}
-		return
-	}
-
-	ldrCfg := config.CgrConfig()
+func loadConfig() (ldrCfg *config.CGRConfig) {
+	ldrCfg = config.CgrConfig()
 	if *cfgPath != "" {
 		if ldrCfg, err = config.NewCGRConfigFromPath(*cfgPath); err != nil {
 			log.Fatalf("Error loading config file %s", err.Error())
@@ -241,6 +229,23 @@ func main() {
 	if *disableReverse != dfltCfg.LoaderCgrCfg().DisableReverse {
 		ldrCfg.LoaderCgrCfg().DisableReverse = *disableReverse
 	}
+	return
+}
+
+func main() {
+	if err := cgrLoaderFlags.Parse(os.Args[1:]); err != nil {
+		return
+	}
+	if *version {
+		if rcv, err := utils.GetCGRVersion(); err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Println(rcv)
+		}
+		return
+	}
+
+	ldrCfg := loadConfig()
 
 	if !*toStorDB {
 		d, err := engine.NewDataDBConn(ldrCfg.DataDbCfg().DataDbType,
@@ -268,30 +273,27 @@ func main() {
 		defer storDb.Close()
 	}
 
-	if !*dryRun {
-		//tpid_remove
-		if *toStorDB { // Import files from a directory into storDb
-			if ldrCfg.LoaderCgrCfg().TpID == "" {
-				log.Fatal("TPid required.")
-			}
-			if *flushStorDB {
-				if err = storDb.RemTpData("", ldrCfg.LoaderCgrCfg().TpID, map[string]string{}); err != nil {
-					log.Fatal(err)
-				}
-			}
-			csvImporter := engine.TPCSVImporter{
-				TPid:     ldrCfg.LoaderCgrCfg().TpID,
-				StorDb:   storDb,
-				DirPath:  *dataPath,
-				Sep:      ldrCfg.LoaderCgrCfg().FieldSeparator,
-				Verbose:  *verbose,
-				ImportId: *importID,
-			}
-			if errImport := csvImporter.Run(); errImport != nil {
-				log.Fatal(errImport)
-			}
-			return
+	if !*dryRun && *toStorDB { // Import files from a directory into storDb
+		if ldrCfg.LoaderCgrCfg().TpID == "" {
+			log.Fatal("TPid required.")
 		}
+		if *flushStorDB {
+			if err = storDb.RemTpData("", ldrCfg.LoaderCgrCfg().TpID, map[string]string{}); err != nil {
+				log.Fatal(err)
+			}
+		}
+		csvImporter := engine.TPCSVImporter{
+			TPid:     ldrCfg.LoaderCgrCfg().TpID,
+			StorDb:   storDb,
+			DirPath:  *dataPath,
+			Sep:      ldrCfg.LoaderCgrCfg().FieldSeparator,
+			Verbose:  *verbose,
+			ImportId: *importID,
+		}
+		if errImport := csvImporter.Run(); errImport != nil {
+			log.Fatal(errImport)
+		}
+		return
 	}
 
 	if *fromStorDB { // Load Tariff Plan from storDb into dataDb
@@ -318,30 +320,31 @@ func main() {
 		return
 	}
 
-	if !*remove {
-		// write maps to database
-		if err := tpReader.WriteToDatabase(*verbose, *disableReverse); err != nil {
-			log.Fatal("Could not write to database: ", err)
-		}
-		caching := config.CgrConfig().GeneralCfg().DefaultCaching
-		if cachingArg != nil && *cachingArg != utils.EmptyString {
-			caching = *cachingArg
-		}
-		// reload cache
-		if err := tpReader.ReloadCache(caching, *verbose, &utils.ArgDispatcher{
-			APIKey:  apiKey,
-			RouteID: routeID,
-		}); err != nil {
-			log.Fatal("Could not reload cache: ", err)
-		}
-		if len(ldrCfg.LoaderCgrCfg().SchedulerConns) != 0 {
-			if err := tpReader.ReloadScheduler(*verbose); err != nil {
-				log.Fatal("Could not reload scheduler: ", err)
-			}
-		}
-	} else {
+	if *remove {
 		if err := tpReader.RemoveFromDatabase(*verbose, *disableReverse); err != nil {
 			log.Fatal("Could not delete from database: ", err)
+		}
+		return
+	}
+
+	// write maps to database
+	if err := tpReader.WriteToDatabase(*verbose, *disableReverse); err != nil {
+		log.Fatal("Could not write to database: ", err)
+	}
+	caching := config.CgrConfig().GeneralCfg().DefaultCaching
+	if cachingArg != nil && *cachingArg != utils.EmptyString {
+		caching = *cachingArg
+	}
+	// reload cache
+	if err := tpReader.ReloadCache(caching, *verbose, &utils.ArgDispatcher{
+		APIKey:  apiKey,
+		RouteID: routeID,
+	}); err != nil {
+		log.Fatal("Could not reload cache: ", err)
+	}
+	if len(ldrCfg.LoaderCgrCfg().SchedulerConns) != 0 {
+		if err := tpReader.ReloadScheduler(*verbose); err != nil {
+			log.Fatal("Could not reload scheduler: ", err)
 		}
 	}
 }
