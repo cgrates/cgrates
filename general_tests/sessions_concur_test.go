@@ -125,23 +125,59 @@ func testSCncrLoadTP(t *testing.T) {
 }
 
 func testSCncrRunSessions(t *testing.T) {
+	acntIDs := utils.NewStringSet(nil)
+	bufferTopup := time.Duration(8760) * time.Hour
 	var wg sync.WaitGroup
 	for i := 0; i < *sCncrSessions; i++ {
+		acntID := fmt.Sprintf("100%d", utils.RandomInteger(100, 200))
+		if !acntIDs.Has(acntID) {
+			// Special balance BUFFER to cover concurrency on MAIN one
+			argsAddBalance := &v1.AttrAddBalance{
+				Tenant:      "cgrates.org",
+				Account:     acntID,
+				BalanceType: utils.VOICE,
+				Value:       float64(bufferTopup.Nanoseconds()),
+				Balance: map[string]interface{}{
+					utils.ID: "BUFFER",
+				},
+			}
+			var addBlcRply string
+			if err = sCncrRPC.Call(utils.ApierV1AddBalance, argsAddBalance, &addBlcRply); err != nil {
+				t.Error(err)
+			} else if addBlcRply != utils.OK {
+				t.Errorf("received: <%s>", addBlcRply)
+			}
+			acntIDs.Add(acntID)
+		}
 		wg.Add(1)
-		go func(y int) {
+		go func(acntID string) {
 			cpsPool <- struct{}{} // push here up to cps
 			go func() {           // allow more requests after a second
 				time.Sleep(time.Duration(time.Second))
 				<-cpsPool
 			}()
-			err := runSession(fmt.Sprintf("100%d", y))
+			err := runSession(acntID)
 			wg.Done()
 			if err != nil {
 				t.Error(err)
 			}
-		}(utils.RandomInteger(100, 200))
+		}(acntID)
 	}
 	wg.Wait()
+	for _, acntID := range acntIDs.AsSlice() {
+		// make sure the account was properly refunded
+		var acnt *engine.Account
+		acntAttrs := &utils.AttrGetAccount{
+			Tenant:  "cgrates.org",
+			Account: acntID}
+		if err = sCncrRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
+			return
+		} else if vcBlnc := acnt.BalanceMap[utils.VOICE].GetTotalValue(); float64(bufferTopup.Nanoseconds())-vcBlnc > 1000000.0 { // eliminate rounding errors
+			t.Errorf("unexpected voice balance received: %+v", utils.ToIJSON(acnt))
+		} else if mnBlnc := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); mnBlnc != 0 {
+			t.Errorf("unexpected voice balance received: %+v", utils.ToIJSON(acnt))
+		}
+	}
 }
 
 // runSession runs one session
@@ -159,21 +195,6 @@ func runSession(acntID string) (err error) {
 		Balance: map[string]interface{}{
 			utils.ID:     "MAIN",
 			utils.Weight: 10,
-		},
-	}
-	if err = sCncrRPC.Call(utils.ApierV1AddBalance, argsAddBalance, &addBlcRply); err != nil {
-		return
-	} else if addBlcRply != utils.OK {
-		return fmt.Errorf("received: <%s> to ApierV1.AddBalance", addBlcRply)
-	}
-	bufferTopup := time.Duration(8760) * time.Hour
-	argsAddBalance = &v1.AttrAddBalance{
-		Tenant:      "cgrates.org",
-		Account:     acntID,
-		BalanceType: utils.VOICE,
-		Value:       float64(bufferTopup.Nanoseconds()),
-		Balance: map[string]interface{}{
-			utils.ID: "BUFFER",
 		},
 	}
 	if err = sCncrRPC.Call(utils.ApierV1AddBalance, argsAddBalance, &addBlcRply); err != nil {
@@ -300,19 +321,5 @@ func runSession(acntID string) (err error) {
 	}
 	time.Sleep(time.Duration(
 		utils.RandomInteger(0, 100)) * time.Millisecond)
-
-	// make sure the account was properly refunded
-	var acnt *engine.Account
-	acntAttrs := &utils.AttrGetAccount{
-		Tenant:  "cgrates.org",
-		Account: acntID}
-	if err = sCncrRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
-		return
-	} else if vcBlnc := acnt.BalanceMap[utils.VOICE].GetTotalValue(); float64(bufferTopup.Nanoseconds())-vcBlnc > 100.0 { // eliminate rounding errors
-		return fmt.Errorf("unexpected voice balance received: %+v", utils.ToIJSON(acnt))
-	} else if mnBlnc := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); mnBlnc != 0 {
-		return fmt.Errorf("unexpected voice balance received: %+v", utils.ToIJSON(acnt))
-	}
-
 	return
 }
