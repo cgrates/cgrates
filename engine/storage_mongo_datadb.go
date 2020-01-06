@@ -26,6 +26,7 @@ import (
 	"io/ioutil"
 	"reflect"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -43,6 +44,7 @@ import (
 	"go.mongodb.org/mongo-driver/x/bsonx"
 )
 
+// Mongo collections names
 const (
 	ColDst  = "destinations"
 	ColRds  = "reverse_destinations"
@@ -200,6 +202,7 @@ type MongoStorage struct {
 	client      *mongo.Client
 	ctx         context.Context
 	ctxTTL      time.Duration
+	ctxTTLMutex sync.RWMutex // used for TTL reload
 	db          string
 	storageType string // datadb, stordb
 	ms          Marshaler
@@ -209,7 +212,9 @@ type MongoStorage struct {
 }
 
 func (ms *MongoStorage) query(argfunc func(ctx mongo.SessionContext) error) (err error) {
+	ms.ctxTTLMutex.RLock()
 	ctxSession, ctxSessionCancel := context.WithTimeout(ms.ctx, ms.ctxTTL)
+	ms.ctxTTLMutex.RUnlock()
 	defer ctxSessionCancel()
 	return ms.client.UseSession(ctxSession, argfunc)
 }
@@ -219,9 +224,11 @@ func (ms *MongoStorage) IsDataDB() bool {
 	return ms.isDataDB
 }
 
-// SetTTL set the context TTL used for queries
+// SetTTL set the context TTL used for queries (is thread safe)
 func (ms *MongoStorage) SetTTL(ttl time.Duration) {
+	ms.ctxTTLMutex.Lock()
 	ms.ctxTTL = ttl
+	ms.ctxTTLMutex.Unlock()
 }
 
 func (ms *MongoStorage) enusureIndex(colName string, uniq bool, keys ...string) error {

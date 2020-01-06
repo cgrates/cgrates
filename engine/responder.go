@@ -21,6 +21,7 @@ package engine
 import (
 	"reflect"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -29,18 +30,31 @@ import (
 )
 
 type Responder struct {
-	ExitChan         chan bool
-	Timeout          time.Duration
-	Timezone         string
-	MaxComputedUsage map[string]time.Duration
+	ExitChan              chan bool
+	Timeout               time.Duration
+	Timezone              string
+	MaxComputedUsage      map[string]time.Duration
+	maxComputedUsageMutex sync.RWMutex // used for MaxComputedUsage reload
+}
+
+// SetMaxComputedUsage sets MaxComputedUsage, used for config reload (is thread safe)
+func (rs *Responder) SetMaxComputedUsage(mx map[string]time.Duration) {
+	rs.maxComputedUsageMutex.Lock()
+	rs.MaxComputedUsage = make(map[string]time.Duration)
+	for k, v := range mx {
+		rs.MaxComputedUsage[k] = v
+	}
+	rs.maxComputedUsageMutex.Unlock()
 }
 
 // usageAllowed checks requested usage against configured MaxComputedUsage
 func (rs *Responder) usageAllowed(tor string, reqUsage time.Duration) (allowed bool) {
+	rs.maxComputedUsageMutex.RLock()
 	mcu, has := rs.MaxComputedUsage[tor]
 	if !has {
 		mcu = rs.MaxComputedUsage[utils.ANY]
 	}
+	rs.maxComputedUsageMutex.RUnlock()
 	if reqUsage <= mcu {
 		allowed = true
 	}

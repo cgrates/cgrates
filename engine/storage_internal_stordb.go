@@ -849,6 +849,7 @@ func (iDB *InternalDB) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 		}
 	}
 	idxs := utils.NewStringSet(nil)
+	iDB.indexedFieldsMutex.RLock()
 	if len(iDB.stringIndexedFields) == 0 && len(iDB.prefixIndexedFields) == 0 { // add default indexes
 		idxs.Add(utils.ConcatenatedKey(utils.CGRID, cdr.CGRID))
 		idxs.Add(utils.ConcatenatedKey(utils.RunID, cdr.RunID))
@@ -878,6 +879,7 @@ func (iDB *InternalDB) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 			}
 		}
 	}
+	iDB.indexedFieldsMutex.RUnlock()
 
 	iDB.db.Set(utils.CDRsTBL, cdrKey, cdr, idxs.AsSlice(),
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)

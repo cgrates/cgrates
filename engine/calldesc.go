@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -51,12 +52,13 @@ func init() {
 }
 
 var (
-	dm                      *DataManager
-	cdrStorage              CdrStorage
-	debitPeriod             = 10 * time.Second
-	globalRoundingDecimals  = 6
-	connMgr                 *ConnManager
-	rpSubjectPrefixMatching bool
+	dm                           *DataManager
+	cdrStorage                   CdrStorage
+	debitPeriod                  = 10 * time.Second
+	globalRoundingDecimals       = 6
+	connMgr                      *ConnManager
+	rpSubjectPrefixMatching      bool
+	rpSubjectPrefixMatchingMutex sync.RWMutex // used to reload rpSubjectPrefixMatching
 )
 
 // SetDataStorage is the exported method to set the storage getter.
@@ -74,8 +76,19 @@ func SetRoundingDecimals(rd int) {
 	globalRoundingDecimals = rd
 }
 
+// SetRpSubjectPrefixMatching sets rpSubjectPrefixMatching (is thread safe)
 func SetRpSubjectPrefixMatching(flag bool) {
+	rpSubjectPrefixMatchingMutex.Lock()
 	rpSubjectPrefixMatching = flag
+	rpSubjectPrefixMatchingMutex.Unlock()
+}
+
+// getRpSubjectPrefixMatching returns rpSubjectPrefixMatching (is thread safe)
+func getRpSubjectPrefixMatching() (flag bool) {
+	rpSubjectPrefixMatchingMutex.RLock()
+	flag = rpSubjectPrefixMatching
+	rpSubjectPrefixMatchingMutex.RUnlock()
+	return
 }
 
 // SetCdrStorage sets the database for CDR storing, used by *cdrlog in first place
