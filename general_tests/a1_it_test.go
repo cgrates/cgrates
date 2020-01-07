@@ -308,7 +308,7 @@ func testA1itDataSession1(t *testing.T) {
 		if err := json.Unmarshal([]byte(cdrs[0].CostDetails), &ec); err != nil {
 			t.Error(err)
 		}
-		cc = *ec.AsCallCost()
+		cc = *ec.AsCallCost(utils.EmptyString)
 		if len(cc.Timespans) != 1 {
 			t.Errorf("Unexpected number of timespans: %+v, for %+v\n from:%+v", len(cc.Timespans), utils.ToJSON(cc.Timespans), utils.ToJSON(ec))
 		}

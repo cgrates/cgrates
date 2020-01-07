@@ -42,6 +42,7 @@ type GeneralJsonCfg struct {
 	Digest_separator     *string
 	Digest_equal         *string
 	Rsr_separator        *string
+	Max_parralel_conns   *int
 }
 
 // Listen config section
