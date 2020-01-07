@@ -40,7 +40,7 @@ var (
 	sCncrCfg                  *config.CGRConfig
 	sCncrRPC                  *rpc.Client
 
-	sCncrSessions = flag.Int("sessions", 500000, "maximum concurrent sessions created")
+	sCncrSessions = flag.Int("sessions", 100000, "maximum concurrent sessions created")
 	sCncrCps      = flag.Int("cps", 50000, "maximum requests per second sent out")
 
 	cpsPool = make(chan struct{}, *sCncrCps)
@@ -164,7 +164,7 @@ func testSCncrRunSessions(t *testing.T) {
 		}(acntID)
 	}
 	wg.Wait()
-	for _, acntID := range acntIDs.AsSlice() {
+	for acntID := range acntIDs.Data() {
 		// make sure the account was properly refunded
 		var acnt *engine.Account
 		acntAttrs := &utils.AttrGetAccount{
@@ -172,10 +172,10 @@ func testSCncrRunSessions(t *testing.T) {
 			Account: acntID}
 		if err = sCncrRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 			return
-		} else if vcBlnc := acnt.BalanceMap[utils.VOICE].GetTotalValue(); float64(bufferTopup.Nanoseconds())-vcBlnc > 1000000.0 { // eliminate rounding errors
+	} else if vcBlnc := acnt.BalanceMap[utils.VOICE].GetTotalValue(); float64(bufferTopup.Nanoseconds())-vcBlnc > 1000000.0 { // eliminate rounding errors
 			t.Errorf("unexpected voice balance received: %+v", utils.ToIJSON(acnt))
 		} else if mnBlnc := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); mnBlnc != 0 {
-			t.Errorf("unexpected voice balance received: %+v", utils.ToIJSON(acnt))
+			t.Errorf("unexpected monetary balance received: %+v", utils.ToIJSON(acnt))
 		}
 	}
 }
@@ -319,7 +319,15 @@ func runSession(acntID string) (err error) {
 	} else if rplyCDR != utils.OK {
 		return fmt.Errorf("received: <%s> to ProcessCDR", rplyCDR)
 	}
-	time.Sleep(time.Duration(
-		utils.RandomInteger(0, 100)) * time.Millisecond)
+	time.Sleep(time.Duration(20) * time.Millisecond)
+	var cdrs []*engine.ExternalCDR
+	argCDRs := utils.RPCCDRsFilter{OriginIDs: []string{originID}}
+	if err = sCncrRPC.Call(utils.ApierV2GetCDRs, argCDRs, &cdrs); err != nil {
+		return
+	} else if len(cdrs) != 1 {
+		return fmt.Errorf("unexpected number of CDRs returned: %d", len(cdrs))
+	} else if cdrs[0].Usage != "1m30s" {
+		return fmt.Errorf("unexpected usage of CDR: %+v", cdrs[0])
+	}
 	return
 }
