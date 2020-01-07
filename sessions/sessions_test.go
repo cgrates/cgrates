@@ -60,7 +60,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 		"Extra3":  true,
 		"Extra4":  true,
 	}
-	sS := NewSessionS(sSCfg, nil, nil, nil)
+	sS := NewSessionS(sSCfg, nil, nil)
 	sEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
@@ -382,7 +382,7 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 
 func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil, nil)
+	sS := NewSessionS(sSCfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
@@ -603,7 +603,7 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 
 func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil, nil)
+	sS := NewSessionS(sSCfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
@@ -1378,7 +1378,7 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 
 func TestSessionStransitSState(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil, nil)
+	sS := NewSessionS(sSCfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
@@ -1425,7 +1425,7 @@ func TestSessionStransitSState(t *testing.T) {
 
 func TestSessionSrelocateSessionS(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil, nil)
+	sS := NewSessionS(sSCfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",
@@ -1567,7 +1567,7 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher2(t *testing.T) {
 func TestSessionSGetIndexedFilters(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
 	mpStr := engine.NewInternalDB(nil, nil)
-	sS := NewSessionS(sSCfg, nil, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
+	sS := NewSessionS(sSCfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
 	expIndx := map[string][]string{}
 	expUindx := []*engine.FilterRule{
 		&engine.FilterRule{
@@ -1585,7 +1585,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	sSCfg.SessionSCfg().SessionIndexes = utils.StringMap{
 		"ToR": true,
 	}
-	sS = NewSessionS(sSCfg, nil, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
+	sS = NewSessionS(sSCfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
 	expIndx = map[string][]string{(utils.DynamicDataPrefix + utils.ToR): []string{utils.VOICE}}
 	expUindx = nil
 	if rplyindx, rplyUnindx := sS.getIndexedFilters("", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
@@ -1602,7 +1602,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 			ExpiryTime:     time.Now().Add(-time.Hour),
 		},
 	})
-	sS = NewSessionS(sSCfg, nil, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
+	sS = NewSessionS(sSCfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
 	expIndx = map[string][]string{}
 	expUindx = nil
 	fltrs = []string{"FLTR1", "FLTR2"}
@@ -1619,7 +1619,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 	sSCfg.SessionSCfg().SessionIndexes = utils.StringMap{
 		"ToR": true,
 	}
-	sS := NewSessionS(sSCfg, nil, nil, nil)
+	sS := NewSessionS(sSCfg, nil, nil)
 	sEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:       "TEST_EVENT",
 		utils.ToR:              "*voice",
@@ -1672,7 +1672,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 		"ToR":    true,
 		"Extra3": true,
 	}
-	sS = NewSessionS(sSCfg, nil, nil, nil)
+	sS = NewSessionS(sSCfg, nil, nil)
 	sS.indexSession(session, false)
 	indx = map[string][]string{
 		"~ToR":    []string{utils.VOICE, utils.DATA},
@@ -1706,7 +1706,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 		"ToR":    true,
 		"Extra2": true,
 	}
-	sS = NewSessionS(sSCfg, nil, nil, nil)
+	sS = NewSessionS(sSCfg, nil, nil)
 	sS.indexSession(session, true)
 	indx = map[string][]string{
 		"~ToR":    []string{utils.VOICE, utils.DATA},
@@ -1744,7 +1744,7 @@ func TestNewSessionS(t *testing.T) {
 		pSessionsIdx:  make(map[string]map[string]map[string]utils.StringMap),
 		pSessionsRIdx: make(map[string][]*riFieldNameVal),
 	}
-	sS := NewSessionS(cgrCGF, nil, nil, nil)
+	sS := NewSessionS(cgrCGF, nil, nil)
 	if !reflect.DeepEqual(sS, eOut) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(sS), utils.ToJSON(eOut))
 	}
@@ -1905,7 +1905,7 @@ func TestV1ProcessMessageArgsParseFlags(t *testing.T) {
 
 func TestSessionSgetSession(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
-	sS := NewSessionS(sSCfg, nil, nil, nil)
+	sS := NewSessionS(sSCfg, nil, nil)
 	sSEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.ToR:         "*voice",

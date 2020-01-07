@@ -41,31 +41,9 @@ var (
 	ErrForcedDisconnect = errors.New("FORCED_DISCONNECT")
 )
 
-// NewSReplConns initiates the connections configured for session replication
-func NewSReplConns(conns []*config.RemoteHost, reconnects int,
-	connTimeout, replyTimeout time.Duration) (sReplConns []*SReplConn, err error) {
-	sReplConns = make([]*SReplConn, len(conns))
-	for i, replConnCfg := range conns {
-		var replCon *rpcclient.RPCClient
-		if replCon, err = rpcclient.NewRPCClient(utils.TCP, replConnCfg.Address,
-			replConnCfg.TLS, "", "", "", 0, reconnects, connTimeout,
-			replyTimeout, replConnCfg.Transport, nil, true); err != nil {
-			return nil, err
-		}
-		sReplConns[i] = &SReplConn{Connection: replCon, Synchronous: replConnCfg.Synchronous}
-	}
-	return
-}
-
-// SReplConn represents one connection to a passive node where we will replicate session data
-type SReplConn struct {
-	Connection  rpcclient.ClientConnector
-	Synchronous bool
-}
-
 // NewSessionS constructs  a new SessionS instance
 func NewSessionS(cgrCfg *config.CGRConfig,
-	sReplConns []*SReplConn, dm *engine.DataManager,
+	dm *engine.DataManager,
 	connMgr *engine.ConnManager) *SessionS {
 	cgrCfg.SessionSCfg().SessionIndexes[utils.OriginID] = true // Make sure we have indexing for OriginID since it is a requirement on prefix searching
 
@@ -73,7 +51,6 @@ func NewSessionS(cgrCfg *config.CGRConfig,
 		cgrCfg:        cgrCfg,
 		dm:            dm,
 		connMgr:       connMgr,
-		sReplConns:    sReplConns,
 		biJClnts:      make(map[rpcclient.ClientConnector]string),
 		biJIDs:        make(map[string]*biJClient),
 		aSessions:     make(map[string]*Session),
@@ -114,8 +91,6 @@ type SessionS struct {
 	pSIMux        sync.RWMutex                                     // protects pSessionsIdx
 	pSessionsIdx  map[string]map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue][cgrID]utils.StringMap[runID]sID
 	pSessionsRIdx map[string][]*riFieldNameVal                     // reverse indexes for passive sessions, used on remove
-
-	sReplConns []*SReplConn // list of connections where we will replicate our session data
 
 }
 
@@ -393,7 +368,7 @@ func (sS *SessionS) forceSTerminate(s *Session, extraDebit time.Duration, lastUs
 					utils.SessionS, err.Error(), s.ResourceID))
 		}
 	}
-	sS.replicateSessions(s.CGRID, false, sS.sReplConns)
+	sS.replicateSessions(s.CGRID, false, sS.cgrCfg.SessionSCfg().ReplicationConns)
 	if clntConn := sS.biJClnt(s.ClientConnID); clntConn != nil {
 		go func() {
 			var rply string
@@ -512,7 +487,7 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 		debitStop := s.debitStop // avoid concurrency with endSession
 		s.SRuns[sRunIdx].NextAutoDebit = utils.TimePointer(time.Now().Add(dbtIvl))
 		s.Unlock()
-		sS.replicateSessions(s.CGRID, false, sS.sReplConns)
+		sS.replicateSessions(s.CGRID, false, sS.cgrCfg.SessionSCfg().ReplicationConns)
 		if maxDebit < dbtIvl { // disconnect faster
 			select {
 			case <-debitStop: // call was disconnected already
@@ -674,8 +649,8 @@ func (sS *SessionS) disconnectSession(s *Session, rsn string) (err error) {
 }
 
 // replicateSessions will replicate sessions with or without cgrID specified
-func (sS *SessionS) replicateSessions(cgrID string, psv bool, rplConns []*SReplConn) (err error) {
-	if len(rplConns) == 0 {
+func (sS *SessionS) replicateSessions(cgrID string, psv bool, connIDs []string) (err error) {
+	if len(connIDs) == 0 {
 		return
 	}
 	ss := sS.getSessions(cgrID, psv)
@@ -685,29 +660,17 @@ func (sS *SessionS) replicateSessions(cgrID string, psv bool, rplConns []*SReplC
 			&Session{CGRID: cgrID,
 				EventStart: make(engine.MapEvent)}}
 	}
-	var wg sync.WaitGroup
-	for _, rplConn := range rplConns {
-		if rplConn.Synchronous {
-			wg.Add(1)
+	for _, s := range ss {
+		sCln := s.Clone()
+		var rply string
+		if err := sS.connMgr.Call(connIDs, nil,
+			utils.SessionSv1SetPassiveSession,
+			sCln, &rply); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> cannot replicate session with id <%s>, err: %s",
+					utils.SessionS, sCln.CGRID, err.Error()))
 		}
-		go func(conn rpcclient.ClientConnector, sync bool, ss []*Session) {
-			for _, s := range ss {
-				sCln := s.Clone()
-				var rply string
-				if err := conn.Call(
-					utils.SessionSv1SetPassiveSession,
-					sCln, &rply); err != nil {
-					utils.Logger.Warning(
-						fmt.Sprintf("<%s> cannot replicate session with id <%s>, err: %s",
-							utils.SessionS, sCln.CGRID, err.Error()))
-				}
-			}
-			if sync {
-				wg.Done()
-			}
-		}(rplConn.Connection, rplConn.Synchronous, ss)
 	}
-	wg.Wait() // wait for synchronous replication to finish
 	return
 }
 
@@ -1205,7 +1168,7 @@ func (sS *SessionS) relocateSession(initOriginID, originID, originHost string) (
 	}
 	s.Unlock()
 	sS.registerSession(s, false)
-	sS.replicateSessions(initCGRID, false, sS.sReplConns)
+	sS.replicateSessions(initCGRID, false, sS.cgrCfg.SessionSCfg().ReplicationConns)
 	return
 }
 
@@ -1378,7 +1341,7 @@ func (sS *SessionS) initSession(tnt string, evStart engine.MapEvent, clntConnID 
 // updateSession will reset terminator, perform debits and replicate sessions
 func (sS *SessionS) updateSession(s *Session, updtEv engine.MapEvent, isMsg bool) (maxUsage time.Duration, err error) {
 	if !isMsg {
-		defer sS.replicateSessions(s.CGRID, false, sS.sReplConns)
+		defer sS.replicateSessions(s.CGRID, false, sS.cgrCfg.SessionSCfg().ReplicationConns)
 		s.Lock()
 		defer s.Unlock()
 
@@ -1442,7 +1405,7 @@ func (sS *SessionS) endSession(s *Session, tUsage, lastUsage *time.Duration,
 	aTime *time.Time, isMsg bool) (err error) {
 	if !isMsg {
 		//check if we have replicate connection and close the session there
-		defer sS.replicateSessions(s.CGRID, true, sS.sReplConns)
+		defer sS.replicateSessions(s.CGRID, true, sS.cgrCfg.SessionSCfg().ReplicationConns)
 		sS.unregisterSession(s.CGRID, false)
 		s.stopSTerminator()
 		s.stopDebitLoops()
@@ -1659,25 +1622,16 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(clnt rpcclient.ClientConnector,
 
 // ArgsReplicateSessions used to specify wich Session to replicate over the given connections
 type ArgsReplicateSessions struct {
-	CGRID       string
-	Passive     bool
-	Connections []*config.RemoteHost
+	CGRID   string
+	Passive bool
+	ConnIDs []string
 }
 
 // BiRPCv1ReplicateSessions will replicate active sessions to either args.Connections or the internal configured ones
 // args.Filter is used to filter the sessions which are replicated, CGRID is the only one possible for now
 func (sS *SessionS) BiRPCv1ReplicateSessions(clnt rpcclient.ClientConnector,
 	args ArgsReplicateSessions, reply *string) (err error) {
-	sSConns := sS.sReplConns
-	if len(args.Connections) != 0 {
-		if sSConns, err = NewSReplConns(args.Connections,
-			sS.cgrCfg.GeneralCfg().Reconnects,
-			sS.cgrCfg.GeneralCfg().ConnectTimeout,
-			sS.cgrCfg.GeneralCfg().ReplyTimeout); err != nil {
-			return utils.NewErrServerError(err)
-		}
-	}
-	if err = sS.replicateSessions(args.CGRID, args.Passive, sSConns); err != nil {
+	if err = sS.replicateSessions(args.CGRID, args.Passive, args.ConnIDs); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -3513,10 +3467,4 @@ func (sS *SessionS) BiRPCV1ProcessCDR(clnt rpcclient.ClientConnector,
 				ID:    utils.UUIDSha1Prefix(),
 				Event: ev}},
 		rply)
-}
-
-// SetReplicationConnections sets the new connections to the replictes sessions
-// only used on reload
-func (sS *SessionS) SetReplicationConnections(sReplConns []*SReplConn) {
-	sS.sReplConns = sReplConns
 }
