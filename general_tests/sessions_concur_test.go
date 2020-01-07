@@ -28,7 +28,8 @@ import (
 	"testing"
 	"time"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/apier/v1"
+	 "github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -122,6 +123,26 @@ func testSCncrLoadTP(t *testing.T) {
 			*dataDir, "tariffplans", "tp1cnt")}, &loadInst); err != nil {
 		t.Error(err)
 	}
+	attrPrfl := &v2.AttributeWithCache{
+		ExternalAttributeProfile: &engine.ExternalAttributeProfile{
+			Tenant:    "cgrates.org",
+			ID:        "AttrConcurrentSessions",
+			Contexts:  []string{utils.ANY},
+			Attributes: []*engine.ExternalAttribute{
+				{
+					FieldName: "TestType",
+					Value:     "ConcurrentSessions",
+				},
+			},
+			Weight: 20,
+		},
+	}
+	var resAttrSet string
+	if err := sCncrRPC.Call(utils.ApierV2SetAttributeProfile, attrPrfl, &resAttrSet); err != nil {
+		t.Error(err)
+	} else if resAttrSet != utils.OK {
+		t.Errorf("unexpected reply returned: <%s>", resAttrSet)
+	}
 }
 
 func testSCncrRunSessions(t *testing.T) {
@@ -172,7 +193,7 @@ func testSCncrRunSessions(t *testing.T) {
 			Account: acntID}
 		if err = sCncrRPC.Call(utils.ApierV2GetAccount, acntAttrs, &acnt); err != nil {
 			return
-	} else if vcBlnc := acnt.BalanceMap[utils.VOICE].GetTotalValue(); float64(bufferTopup.Nanoseconds())-vcBlnc > 1000000.0 { // eliminate rounding errors
+		} else if vcBlnc := acnt.BalanceMap[utils.VOICE].GetTotalValue(); float64(bufferTopup.Nanoseconds())-vcBlnc > 1000000.0 { // eliminate rounding errors
 			t.Errorf("unexpected voice balance received: %+v", utils.ToIJSON(acnt))
 		} else if mnBlnc := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); mnBlnc != 0 {
 			t.Errorf("unexpected monetary balance received: %+v", utils.ToIJSON(acnt))
@@ -234,6 +255,7 @@ func runSession(acntID string) (err error) {
 	initUsage := 1 * time.Minute
 	initArgs := &sessions.V1InitSessionArgs{
 		InitSession: true,
+		GetAttributes:     true,
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     fmt.Sprintf("TestSCncrInit%s", originID),
@@ -257,16 +279,20 @@ func runSession(acntID string) (err error) {
 	time.Sleep(time.Duration(
 		utils.RandomInteger(0, 100)) * time.Millisecond)
 
-	// Update the session
+	// Update the session with relocate
+	initOriginID := originID
+	originID = utils.GenUUID()
 	updtUsage := 1 * time.Minute
 	updtArgs := &sessions.V1UpdateSessionArgs{
+		GetAttributes: true,
 		UpdateSession: true,
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     fmt.Sprintf("TestSCncrUpdate%s", originID),
 			Event: map[string]interface{}{
-				utils.OriginID: originID,
-				utils.Usage:    updtUsage,
+				utils.OriginID:        originID,
+				utils.InitialOriginID: initOriginID,
+				utils.Usage:           updtUsage,
 			},
 		},
 	}
