@@ -876,3 +876,90 @@ func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
 		}
 	}
 }
+
+func TestCGRConfigReloadSectionsSessionS(t *testing.T) {
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg.RalsCfg().Enabled = true
+	cfg.ChargerSCfg().Enabled = true
+	cfg.CdrsCfg().Enabled = true
+	var reply string
+	if err = cfg.V1ReloadSections(map[string]interface{}{
+		"sessions": map[string]interface{}{
+			"enabled":          true,
+			"resources_conns":  []string{"*localhost"},
+			"suppliers_conns":  []string{"*localhost"},
+			"attributes_conns": []string{"*localhost"},
+			"rals_conns":       []string{"*internal"},
+			"cdrs_conns":       []string{"*internal"},
+			"chargers_conns":   []string{"*internal"},
+		},
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK received: %s", reply)
+	}
+	expAttr := &SessionSCfg{
+		Enabled:       true,
+		ListenBijson:  "127.0.0.1:2014",
+		ChargerSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
+		RALsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
+		ResSConns:     []string{utils.MetaLocalHost},
+		ThreshSConns:  []string{},
+		StatSConns:    []string{},
+		SupplSConns:   []string{utils.MetaLocalHost},
+		AttrSConns:    []string{utils.MetaLocalHost},
+		CDRsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
+
+		ReplicationConns:  []*RemoteHost{},
+		MaxCallDuration:   3 * time.Hour,
+		SessionIndexes:    utils.NewStringMap(),
+		ClientProtocol:    1,
+		TerminateAttempts: 5,
+	}
+	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
+		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))
+	}
+}
+
+func TestCGRConfigReloadAll(t *testing.T) {
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg.RalsCfg().Enabled = true
+	cfg.ChargerSCfg().Enabled = true
+	cfg.CdrsCfg().Enabled = true
+	var reply string
+	if err = cfg.V1ReloadConfig(&ConfigReloadWithArgDispatcher{
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2"),
+		Section: utils.MetaAll,
+	}, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Expected OK received: %s", reply)
+	}
+	expAttr := &SessionSCfg{
+		Enabled:       true,
+		ListenBijson:  "127.0.0.1:2014",
+		ChargerSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)},
+		RALsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)},
+		ResSConns:     []string{utils.MetaLocalHost},
+		ThreshSConns:  []string{},
+		StatSConns:    []string{},
+		SupplSConns:   []string{utils.MetaLocalHost},
+		AttrSConns:    []string{utils.MetaLocalHost},
+		CDRsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
+
+		ReplicationConns:  []*RemoteHost{},
+		MaxCallDuration:   3 * time.Hour,
+		SessionIndexes:    utils.NewStringMap(),
+		ClientProtocol:    1,
+		TerminateAttempts: 5,
+	}
+	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
+		t.Errorf("Expected %s , received: %s ", utils.ToJSON(expAttr), utils.ToJSON(cfg.SessionSCfg()))
+	}
+}

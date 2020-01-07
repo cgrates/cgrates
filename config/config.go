@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -345,8 +346,8 @@ func (cfg *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 
 // loadRPCConns loads the RPCConns section of the configuration
 func (cfg *CGRConfig) loadRPCConns(jsnCfg *CgrJsonCfg) (err error) {
-	var jsnRpcConns map[string]*RPCConnsJson
-	if jsnRpcConns, err = jsnCfg.RPCConnJsonCfg(); err != nil {
+	var jsnRPCConns map[string]*RPCConnsJson
+	if jsnRPCConns, err = jsnCfg.RPCConnJsonCfg(); err != nil {
 		return
 	}
 	// hardoded the *internal connection
@@ -359,7 +360,7 @@ func (cfg *CGRConfig) loadRPCConns(jsnCfg *CgrJsonCfg) (err error) {
 			},
 		},
 	}
-	for key, val := range jsnRpcConns {
+	for key, val := range jsnRPCConns {
 		cfg.rpcConns[key] = NewDfltRPCConn()
 		if err = cfg.rpcConns[key].loadFromJsonCfg(val); err != nil {
 			return
@@ -625,7 +626,7 @@ func (cfg *CGRConfig) loadDiameterAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnDACfg, err = jsnCfg.DiameterAgentJsonCfg(); err != nil {
 		return
 	}
-	return cfg.diameterAgentCfg.loadFromJsonCfg(jsnDACfg, cfg.GeneralCfg().RSRSep)
+	return cfg.diameterAgentCfg.loadFromJsonCfg(jsnDACfg, cfg.generalCfg.RSRSep)
 }
 
 // loadRadiusAgentCfg loads the RadiusAgent section of the configuration
@@ -634,7 +635,7 @@ func (cfg *CGRConfig) loadRadiusAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnRACfg, err = jsnCfg.RadiusAgentJsonCfg(); err != nil {
 		return
 	}
-	return cfg.radiusAgentCfg.loadFromJsonCfg(jsnRACfg, cfg.GeneralCfg().RSRSep)
+	return cfg.radiusAgentCfg.loadFromJsonCfg(jsnRACfg, cfg.generalCfg.RSRSep)
 }
 
 // loadDNSAgentCfg loads the DNSAgent section of the configuration
@@ -643,7 +644,7 @@ func (cfg *CGRConfig) loadDNSAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnDNSCfg, err = jsnCfg.DNSAgentJsonCfg(); err != nil {
 		return
 	}
-	return cfg.dnsAgentCfg.loadFromJsonCfg(jsnDNSCfg, cfg.GeneralCfg().RSRSep)
+	return cfg.dnsAgentCfg.loadFromJsonCfg(jsnDNSCfg, cfg.generalCfg.RSRSep)
 }
 
 // loadHttpAgentCfg loads the HttpAgent section of the configuration
@@ -652,7 +653,7 @@ func (cfg *CGRConfig) loadHttpAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnHttpAgntCfg, err = jsnCfg.HttpAgentJsonCfg(); err != nil {
 		return
 	}
-	return cfg.httpAgentCfg.loadFromJsonCfg(jsnHttpAgntCfg, cfg.GeneralCfg().RSRSep)
+	return cfg.httpAgentCfg.loadFromJsonCfg(jsnHttpAgntCfg, cfg.generalCfg.RSRSep)
 }
 
 // loadAttributeSCfg loads the AttributeS section of the configuration
@@ -719,7 +720,7 @@ func (cfg *CGRConfig) loadLoaderSCfg(jsnCfg *CgrJsonCfg) (err error) {
 		// cfg.loaderCfg = make(LoaderSCfgs, len(jsnLoaderCfg))
 		for _, profile := range jsnLoaderCfg {
 			loadSCfgp := NewDfltLoaderSCfg()
-			loadSCfgp.loadFromJsonCfg(profile, cfg.GeneralCfg().RSRSep)
+			loadSCfgp.loadFromJsonCfg(profile, cfg.generalCfg.RSRSep)
 			cfg.loaderCfg = append(cfg.loaderCfg, loadSCfgp) // use apend so the loaderS profile to be loaded from multiple files
 		}
 	}
@@ -804,7 +805,7 @@ func (cfg *CGRConfig) loadErsCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnERsCfg, err = jsnCfg.ERsJsonCfg(); err != nil {
 		return
 	}
-	return cfg.ersCfg.loadFromJsonCfg(jsnERsCfg, cfg.GeneralCfg().RSRSep, cfg.dfltEvRdr)
+	return cfg.ersCfg.loadFromJsonCfg(jsnERsCfg, cfg.generalCfg.RSRSep, cfg.dfltEvRdr)
 }
 
 // SureTaxCfg use locking to retrieve the configuration, possibility later for runtime reload
@@ -1860,4 +1861,49 @@ func (cfg *CGRConfig) initChanels() {
 		cfg.lks[section] = new(sync.RWMutex)
 		cfg.rldChans[section] = make(chan struct{}, 1)
 	}
+}
+
+// V1ReloadSections reloads the sections of configz
+func (cfg *CGRConfig) V1ReloadSections(args map[string]interface{}, reply *string) (err error) {
+	if len(args) == 0 {
+		*reply = utils.OK
+		return
+	}
+	var b []byte
+	if b, err = json.Marshal(args); err != nil {
+		return
+	}
+	fmt.Println(string(b))
+	//  lock all sections
+	cfg.lockSections()
+	fmt.Println("lock")
+
+	if err = cfg.loadConfigFromReader(bytes.NewBuffer(b), []func(*CgrJsonCfg) error{cfg.loadFromJsonCfg}); err != nil {
+		cfg.unlockSections() // unlock before exiting function
+		return
+	}
+
+	fmt.Println("before checkConfigSanity")
+	err = cfg.checkConfigSanity()
+	fmt.Println("after checkConfigSanity")
+
+	cfg.unlockSections() // unlock before checking the error
+	fmt.Println("after unlock")
+
+	if err != nil {
+		return
+	}
+
+	section := utils.MetaAll
+	if len(args) == 1 {
+		for k := range args {
+			section = k
+			break
+		}
+	}
+	if err = cfg.reloadSection(section); err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
 }

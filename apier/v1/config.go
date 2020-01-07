@@ -23,21 +23,29 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// NewConfigSv1 returns a new ConfigSv1
 func NewConfigSv1(cfg *config.CGRConfig) *ConfigSv1 {
 	return &ConfigSv1{cfg: cfg}
 }
 
-// Exports RPC from ConfigSv1
+// ConfigSv1 exports RPC for config
 type ConfigSv1 struct {
 	cfg *config.CGRConfig
 }
 
+// GetJSONSection will retrieve from CGRConfig a section
 func (cSv1 *ConfigSv1) GetJSONSection(section *config.StringWithArgDispatcher, reply *map[string]interface{}) (err error) {
 	return cSv1.cfg.V1GetConfigSection(section, reply)
 }
 
+// ReloadConfig reloads the configuration
 func (cSv1 *ConfigSv1) ReloadConfig(args *config.ConfigReloadWithArgDispatcher, reply *string) (err error) {
 	return cSv1.cfg.V1ReloadConfig(args, reply)
+}
+
+// ReloadSections reloads the sections of configz
+func (cSv1 *ConfigSv1) ReloadSections(args map[string]interface{}, reply *string) (err error) {
+	return cSv1.cfg.V1ReloadSections(args, reply)
 }
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
