@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -73,7 +74,7 @@ type SessionSCfg struct {
 	SupplSConns         []string
 	AttrSConns          []string
 	CDRsConns           []string
-	ReplicationConns    []*RemoteHost
+	ReplicationConns    []string
 	DebitInterval       time.Duration
 	StoreSCosts         bool
 	MinCallDuration     time.Duration
@@ -187,10 +188,14 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		}
 	}
 	if jsnCfg.Replication_conns != nil {
-		scfg.ReplicationConns = make([]*RemoteHost, len(*jsnCfg.Replication_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Replication_conns {
-			scfg.ReplicationConns[idx] = NewDfltRemoteHost()
-			scfg.ReplicationConns[idx].loadFromJsonCfg(jsnHaCfg)
+		scfg.ReplicationConns = make([]string, len(*jsnCfg.Replication_conns))
+		for idx, connID := range *jsnCfg.Replication_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				return fmt.Errorf("Replication connection ID needs to be different than *internal")
+			} else {
+				scfg.ReplicationConns[idx] = connID
+			}
 		}
 	}
 	if jsnCfg.Debit_interval != nil {

@@ -3,6 +3,7 @@ module github.com/cgrates/cgrates
 go 1.13
 
 // replace github.com/cgrates/radigo => /home/dan/go/src/github.com/cgrates/radigo
+// replace github.com/cgrates/rpcclient => ../rpcclient
 
 require (
 	cloud.google.com/go v0.41.1-0.20190715155837-570ba224802b // indirect
@@ -22,7 +23,7 @@ require (
 	github.com/cgrates/kamevapi v0.0.0-20191001125829-7dbc3ad58817
 	github.com/cgrates/ltcache v0.0.0-20181016092649-92fb7fa77cca
 	github.com/cgrates/radigo v0.0.0-20200102144505-ef98592ff532
-	github.com/cgrates/rpcclient v0.0.0-20200107085551-6be8ad1df845
+	github.com/cgrates/rpcclient v0.0.0-20200107134035-188454eb71b3
 	github.com/creack/pty v1.1.7
 	github.com/fiorix/go-diameter v3.0.3-0.20190716165154-f4823472d0e0+incompatible
 	github.com/fortytw2/leaktest v1.3.0 // indirect

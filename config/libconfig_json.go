@@ -220,7 +220,7 @@ type SessionSJsonCfg struct {
 	Stats_conns           *[]string
 	Suppliers_conns       *[]string
 	Cdrs_conns            *[]string
-	Replication_conns     *[]*RemoteHostJson
+	Replication_conns     *[]string
 	Attributes_conns      *[]string
 	Debit_interval        *string
 	Store_session_costs   *bool

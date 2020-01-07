@@ -107,7 +107,7 @@ func TestSessionSCfgloadFromJsonCfg(t *testing.T) {
 		SupplSConns:      []string{},
 		AttrSConns:       []string{},
 		CDRsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
-		ReplicationConns: []*RemoteHost{},
+		ReplicationConns: []string{},
 		MaxCallDuration:  time.Duration(3 * time.Hour),
 		SessionIndexes:   map[string]bool{},
 		ClientProtocol:   1,

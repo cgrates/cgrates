@@ -565,7 +565,7 @@ func TestSmgJsonCfg(t *testing.T) {
 		Stats_conns:           &[]string{},
 		Suppliers_conns:       &[]string{},
 		Attributes_conns:      &[]string{},
-		Replication_conns:     &[]*RemoteHostJson{},
+		Replication_conns:     &[]string{},
 		Debit_interval:        utils.StringPointer("0s"),
 		Store_session_costs:   utils.BoolPointer(false),
 		Min_call_duration:     utils.StringPointer("0s"),
