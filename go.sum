@@ -77,6 +77,8 @@ github.com/cgrates/rpcclient v0.0.0-20191209100218-70f91dc30ac6 h1:g1LZmbYvqYkGA
 github.com/cgrates/rpcclient v0.0.0-20191209100218-70f91dc30ac6/go.mod h1:xXLqAKVvcdWeDYwHJYwDgAI3ZOg5LZYxzb72kLjsLZU=
 github.com/cgrates/rpcclient v0.0.0-20191212101551-ff9c136f66a7 h1:szJPaMz/49gP0X6M1DhjhImDP3rLN8ul7rio2tzorNc=
 github.com/cgrates/rpcclient v0.0.0-20191212101551-ff9c136f66a7/go.mod h1:xXLqAKVvcdWeDYwHJYwDgAI3ZOg5LZYxzb72kLjsLZU=
+github.com/cgrates/rpcclient v0.0.0-20200107085551-6be8ad1df845 h1:bzvXBBqUqf2q4nW8RAwy+BXwxzlxFSGUAkW8W0TNLk8=
+github.com/cgrates/rpcclient v0.0.0-20200107085551-6be8ad1df845/go.mod h1:xXLqAKVvcdWeDYwHJYwDgAI3ZOg5LZYxzb72kLjsLZU=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/creack/pty v1.1.7 h1:6pwm8kMQKCmgUg0ZHTm5+/YvRK0s3THD/28+T6/kk4A=
 github.com/creack/pty v1.1.7/go.mod h1:lj5s0c3V2DBrqTV7llrYr5NG6My20zk30Fl46Y7DoTY=

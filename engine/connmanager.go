@@ -60,17 +60,8 @@ func (cM *ConnManager) getConn(connID string, biRPCClient rpcclient.ClientConnec
 	} else {
 		connCfg = cM.cfg.RPCConns()[connID]
 	}
-	var conPool *rpcclient.RPCPool
-	if conPool, err = NewRPCPool(connCfg.Strategy,
-		cM.cfg.TlsCfg().ClientKey,
-		cM.cfg.TlsCfg().ClientCerificate, cM.cfg.TlsCfg().CaCertificate,
-		cM.cfg.GeneralCfg().ConnectAttempts, cM.cfg.GeneralCfg().Reconnects,
-		cM.cfg.GeneralCfg().ConnectTimeout, cM.cfg.GeneralCfg().ReplyTimeout,
-		connCfg.Conns, intChan, false); err != nil {
-		return
-	}
-	conn = conPool
-	if biRPCClient != nil && isBiRPCCLient { // special handling for SessionS BiJSONRPCClient
+	switch {
+	case biRPCClient != nil && isBiRPCCLient: // special handling for SessionS BiJSONRPCClient
 		var rply string
 		sSIntConn := <-intChan
 		intChan <- sSIntConn
@@ -82,7 +73,45 @@ func (cM *ConnManager) getConn(connID string, biRPCClient rpcclient.ClientConnec
 				utils.SessionS, err.Error()))
 			return
 		}
+	case connCfg.Strategy == rpcclient.PoolParallel:
+		rpcConnCfg := connCfg.Conns[0] // for parrallel we need only the first connection
+		var conPool *rpcclient.RPCParallelClientPool
+		if rpcConnCfg.Address == utils.MetaInternal {
+			conPool, err = rpcclient.NewRPCParallelClientPool("", "", rpcConnCfg.TLS,
+				cM.cfg.TlsCfg().ClientKey, cM.cfg.TlsCfg().ClientCerificate,
+				cM.cfg.TlsCfg().CaCertificate, cM.cfg.GeneralCfg().ConnectAttempts,
+				cM.cfg.GeneralCfg().Reconnects, cM.cfg.GeneralCfg().ConnectTimeout,
+				cM.cfg.GeneralCfg().ReplyTimeout, rpcclient.InternalRPC, intChan, int64(cM.cfg.GeneralCfg().MaxParralelConns), false)
+		} else if utils.SliceHasMember([]string{utils.EmptyString, utils.MetaGOB, utils.MetaJSON}, rpcConnCfg.Transport) {
+			codec := rpcclient.GOBrpc
+			if rpcConnCfg.Transport != "" {
+				codec = rpcConnCfg.Transport
+			}
+			conPool, err = rpcclient.NewRPCParallelClientPool(utils.TCP, rpcConnCfg.Address, rpcConnCfg.TLS,
+				cM.cfg.TlsCfg().ClientKey, cM.cfg.TlsCfg().ClientCerificate,
+				cM.cfg.TlsCfg().CaCertificate, cM.cfg.GeneralCfg().ConnectAttempts,
+				cM.cfg.GeneralCfg().Reconnects, cM.cfg.GeneralCfg().ConnectTimeout,
+				cM.cfg.GeneralCfg().ReplyTimeout, codec, nil, int64(cM.cfg.GeneralCfg().MaxParralelConns), false)
+		} else {
+			err = fmt.Errorf("Unsupported transport: <%s>", rpcConnCfg.Transport)
+		}
+		if err != nil {
+			return
+		}
+		conn = conPool
+	default:
+		var conPool *rpcclient.RPCPool
+		if conPool, err = NewRPCPool(connCfg.Strategy,
+			cM.cfg.TlsCfg().ClientKey,
+			cM.cfg.TlsCfg().ClientCerificate, cM.cfg.TlsCfg().CaCertificate,
+			cM.cfg.GeneralCfg().ConnectAttempts, cM.cfg.GeneralCfg().Reconnects,
+			cM.cfg.GeneralCfg().ConnectTimeout, cM.cfg.GeneralCfg().ReplyTimeout,
+			connCfg.Conns, intChan, false); err != nil {
+			return
+		}
+		conn = conPool
 	}
+
 	Cache.Set(utils.CacheRPCConnections, connID, conn, nil,
 		true, utils.NonTransactional)
 	return
