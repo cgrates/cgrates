@@ -154,7 +154,8 @@ type RALsV1Interface interface {
 
 type ConfigSv1Interface interface {
 	GetJSONSection(section *config.StringWithArgDispatcher, reply *map[string]interface{}) (err error)
-	ReloadConfig(section *config.ConfigReloadWithArgDispatcher, reply *string) (err error)
+	ReloadConfigFromPath(section *config.ConfigReloadWithArgDispatcher, reply *string) (err error)
+	ReloadConfigFromJSON(args *config.JSONReloadWithArgDispatcher, reply *string) (err error)
 }
 
 type CoreSv1Interface interface {

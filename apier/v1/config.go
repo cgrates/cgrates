@@ -38,14 +38,14 @@ func (cSv1 *ConfigSv1) GetJSONSection(section *config.StringWithArgDispatcher, r
 	return cSv1.cfg.V1GetConfigSection(section, reply)
 }
 
-// ReloadConfig reloads the configuration
-func (cSv1 *ConfigSv1) ReloadConfig(args *config.ConfigReloadWithArgDispatcher, reply *string) (err error) {
-	return cSv1.cfg.V1ReloadConfig(args, reply)
+// ReloadConfigFromPath reloads the configuration
+func (cSv1 *ConfigSv1) ReloadConfigFromPath(args *config.ConfigReloadWithArgDispatcher, reply *string) (err error) {
+	return cSv1.cfg.V1ReloadConfigFromPath(args, reply)
 }
 
-// ReloadSections reloads the sections of configz
-func (cSv1 *ConfigSv1) ReloadSections(args map[string]interface{}, reply *string) (err error) {
-	return cSv1.cfg.V1ReloadSections(args, reply)
+// ReloadConfigFromJSON reloads the sections of configz
+func (cSv1 *ConfigSv1) ReloadConfigFromJSON(args *config.JSONReloadWithArgDispatcher, reply *string) (err error) {
+	return cSv1.cfg.V1ReloadConfigFromJSON(args, reply)
 }
 
 // Call implements rpcclient.ClientConnector interface for internal RPC

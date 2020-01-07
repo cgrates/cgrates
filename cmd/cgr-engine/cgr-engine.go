@@ -361,7 +361,7 @@ func singnalHandler(exitChan chan bool) {
 			//  do it in it's own gorutine in order to not block the signal handler with the reload functionality
 			go func() {
 				var reply string
-				if err := config.CgrConfig().V1ReloadConfig(
+				if err := config.CgrConfig().V1ReloadConfigFromPath(
 					&config.ConfigReloadWithArgDispatcher{
 						Section: utils.EmptyString,
 						Path:    config.CgrConfig().ConfigPath, // use the same path

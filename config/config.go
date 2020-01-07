@@ -1181,8 +1181,8 @@ func (cfg *CGRConfig) unlockSections() {
 	}
 }
 
-// V1ReloadConfig reloads the configuration
-func (cfg *CGRConfig) V1ReloadConfig(args *ConfigReloadWithArgDispatcher, reply *string) (err error) {
+// V1ReloadConfigFromPath reloads the configuration
+func (cfg *CGRConfig) V1ReloadConfigFromPath(args *ConfigReloadWithArgDispatcher, reply *string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{"Path"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -1446,307 +1446,65 @@ func (cfg *CGRConfig) reloadSection(section string) (err error) {
 	return
 }
 
+func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
+	return map[string]func(*CgrJsonCfg) error{
+		GENERAL_JSN:        cfg.loadGeneralCfg,
+		DATADB_JSN:         cfg.loadDataDBCfg,
+		STORDB_JSN:         cfg.loadStorDBCfg,
+		LISTEN_JSN:         cfg.loadListenCfg,
+		TlsCfgJson:         cfg.loadTlsCgrCfg,
+		HTTP_JSN:           cfg.loadHttpCfg,
+		SCHEDULER_JSN:      cfg.loadSchedulerCfg,
+		CACHE_JSN:          cfg.loadCacheCfg,
+		FilterSjsn:         cfg.loadFilterSCfg,
+		RALS_JSN:           cfg.loadRalSCfg,
+		CDRS_JSN:           cfg.loadCdrsCfg,
+		CDRE_JSN:           cfg.loadCdreCfg,
+		CDRC_JSN:           cfg.loadCdrcCfg,
+		ERsJson:            cfg.loadErsCfg,
+		SessionSJson:       cfg.loadSessionSCfg,
+		AsteriskAgentJSN:   cfg.loadAsteriskAgentCfg,
+		FreeSWITCHAgentJSN: cfg.loadFreeswitchAgentCfg,
+		KamailioAgentJSN:   cfg.loadKamAgentCfg,
+		DA_JSN:             cfg.loadDiameterAgentCfg,
+		RA_JSN:             cfg.loadRadiusAgentCfg,
+		HttpAgentJson:      cfg.loadHttpAgentCfg,
+		DNSAgentJson:       cfg.loadDNSAgentCfg,
+		ATTRIBUTE_JSN:      cfg.loadAttributeSCfg,
+		ChargerSCfgJson:    cfg.loadChargerSCfg,
+		RESOURCES_JSON:     cfg.loadResourceSCfg,
+		STATS_JSON:         cfg.loadStatSCfg,
+		THRESHOLDS_JSON:    cfg.loadThresholdSCfg,
+		SupplierSJson:      cfg.loadSupplierSCfg,
+		LoaderJson:         cfg.loadLoaderSCfg,
+		MAILER_JSN:         cfg.loadMailerCfg,
+		SURETAX_JSON:       cfg.loadSureTaxCfg,
+		CgrLoaderCfgJson:   cfg.loadLoaderCgrCfg,
+		CgrMigratorCfgJson: cfg.loadMigratorCgrCfg,
+		DispatcherSJson:    cfg.loadDispatcherSCfg,
+		AnalyzerCfgJson:    cfg.loadAnalyzerCgrCfg,
+		Apier:              cfg.loadApierCfg,
+		RPCConnsJsonName:   cfg.loadRPCConns,
+	}
+}
 func (cfg *CGRConfig) loadConfig(path, section string) (err error) {
 	var loadFuncs []func(*CgrJsonCfg) error
-	var fall bool
-	switch section {
-	default:
+	loadMap := cfg.getLoadFunctions()
+	if section == utils.EmptyString || section == utils.MetaAll {
+		for _, sec := range []string{GENERAL_JSN, RPCConnsJsonName, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN, SCHEDULER_JSN, CACHE_JSN, FilterSjsn, RALS_JSN,
+			CDRS_JSN, CDRE_JSN, CDRC_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN, KamailioAgentJSN,
+			DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
+			SupplierSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson, AnalyzerCfgJson, Apier} {
+			cfg.lks[sec].Lock()
+			defer cfg.lks[sec].Unlock()
+			loadFuncs = append(loadFuncs, loadMap[sec])
+		}
+	} else if fnct, has := loadMap[section]; !has {
 		return fmt.Errorf("Invalid section: <%s>", section)
-	case utils.EmptyString, utils.MetaAll:
-		fall = true
-		fallthrough
-	case GENERAL_JSN:
-		cfg.lks[GENERAL_JSN].Lock()
-		defer cfg.lks[GENERAL_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadGeneralCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case DATADB_JSN:
-		cfg.lks[DATADB_JSN].Lock()
-		defer cfg.lks[DATADB_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadDataDBCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case STORDB_JSN:
-		cfg.lks[STORDB_JSN].Lock()
-		defer cfg.lks[STORDB_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadStorDBCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case LISTEN_JSN:
-		cfg.lks[LISTEN_JSN].Lock()
-		defer cfg.lks[LISTEN_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadListenCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case TlsCfgJson:
-		cfg.lks[TlsCfgJson].Lock()
-		defer cfg.lks[TlsCfgJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadTlsCgrCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case HTTP_JSN:
-		cfg.lks[HTTP_JSN].Lock()
-		defer cfg.lks[HTTP_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadHttpCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case SCHEDULER_JSN:
-		cfg.lks[SCHEDULER_JSN].Lock()
-		defer cfg.lks[SCHEDULER_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadSchedulerCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case CACHE_JSN:
-		cfg.lks[CACHE_JSN].Lock()
-		defer cfg.lks[CACHE_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadCacheCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case FilterSjsn:
-		cfg.lks[FilterSjsn].Lock()
-		defer cfg.lks[FilterSjsn].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadFilterSCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case RALS_JSN:
-		cfg.lks[RALS_JSN].Lock()
-		defer cfg.lks[RALS_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadRalSCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case CDRS_JSN:
-		cfg.lks[CDRS_JSN].Lock()
-		defer cfg.lks[CDRS_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadCdrsCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case CDRE_JSN:
-		cfg.lks[CDRE_JSN].Lock()
-		defer cfg.lks[CDRE_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadCdreCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case CDRC_JSN:
-		cfg.lks[CDRC_JSN].Lock()
-		defer cfg.lks[CDRC_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadCdrcCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case ERsJson:
-		cfg.lks[ERsJson].Lock()
-		defer cfg.lks[ERsJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadErsCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case SessionSJson:
-		cfg.lks[SessionSJson].Lock()
-		defer cfg.lks[SessionSJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadSessionSCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case AsteriskAgentJSN:
-		cfg.lks[AsteriskAgentJSN].Lock()
-		defer cfg.lks[AsteriskAgentJSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadAsteriskAgentCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case FreeSWITCHAgentJSN:
-		cfg.lks[FreeSWITCHAgentJSN].Lock()
-		defer cfg.lks[FreeSWITCHAgentJSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadFreeswitchAgentCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case KamailioAgentJSN:
-		cfg.lks[KamailioAgentJSN].Lock()
-		defer cfg.lks[KamailioAgentJSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadKamAgentCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case DA_JSN:
-		cfg.lks[DA_JSN].Lock()
-		defer cfg.lks[DA_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadDiameterAgentCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case RA_JSN:
-		cfg.lks[RA_JSN].Lock()
-		defer cfg.lks[RA_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadRadiusAgentCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case HttpAgentJson:
-		cfg.lks[HttpAgentJson].Lock()
-		defer cfg.lks[HttpAgentJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadHttpAgentCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case DNSAgentJson:
-		cfg.lks[DNSAgentJson].Lock()
-		defer cfg.lks[DNSAgentJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadDNSAgentCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case ATTRIBUTE_JSN:
-		cfg.lks[ATTRIBUTE_JSN].Lock()
-		defer cfg.lks[ATTRIBUTE_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadAttributeSCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case ChargerSCfgJson:
-		cfg.lks[ChargerSCfgJson].Lock()
-		defer cfg.lks[ChargerSCfgJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadChargerSCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case RESOURCES_JSON:
-		cfg.lks[RESOURCES_JSON].Lock()
-		defer cfg.lks[RESOURCES_JSON].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadResourceSCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case STATS_JSON:
-		cfg.lks[STATS_JSON].Lock()
-		defer cfg.lks[STATS_JSON].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadStatSCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case THRESHOLDS_JSON:
-		cfg.lks[THRESHOLDS_JSON].Lock()
-		defer cfg.lks[THRESHOLDS_JSON].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadThresholdSCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case SupplierSJson:
-		cfg.lks[SupplierSJson].Lock()
-		defer cfg.lks[SupplierSJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadSupplierSCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case LoaderJson:
-		cfg.lks[LoaderJson].Lock()
-		defer cfg.lks[LoaderJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadLoaderSCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case MAILER_JSN:
-		cfg.lks[MAILER_JSN].Lock()
-		defer cfg.lks[MAILER_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadMailerCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case SURETAX_JSON:
-		cfg.lks[SURETAX_JSON].Lock()
-		defer cfg.lks[SURETAX_JSON].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadSureTaxCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case CgrLoaderCfgJson:
-		cfg.lks[CgrLoaderCfgJson].Lock()
-		defer cfg.lks[CgrLoaderCfgJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadLoaderCgrCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case CgrMigratorCfgJson:
-		cfg.lks[CgrMigratorCfgJson].Lock()
-		defer cfg.lks[CgrMigratorCfgJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadMigratorCgrCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case DispatcherSJson:
-		cfg.lks[DispatcherSJson].Lock()
-		defer cfg.lks[DispatcherSJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadDispatcherSCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case AnalyzerCfgJson:
-		cfg.lks[AnalyzerCfgJson].Lock()
-		defer cfg.lks[AnalyzerCfgJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadAnalyzerCgrCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case Apier:
-		cfg.lks[Apier].Lock()
-		defer cfg.lks[Apier].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadApierCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case RPCConnsJsonName:
-		cfg.lks[RPCConnsJsonName].Lock()
-		defer cfg.lks[RPCConnsJsonName].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadRPCConns)
+	} else {
+		cfg.lks[section].Lock()
+		defer cfg.lks[section].Unlock()
+		loadFuncs = append(loadFuncs, fnct)
 	}
 	return cfg.loadConfigFromPath(path, loadFuncs)
 }
@@ -1854,56 +1612,99 @@ func (cfg *CGRConfig) loadConfigFromHTTP(urlPaths string, loadFuncs []func(jsnCf
 func (cfg *CGRConfig) initChanels() {
 	cfg.lks = make(map[string]*sync.RWMutex)
 	cfg.rldChans = make(map[string]chan struct{})
-	for _, section := range []string{GENERAL_JSN, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN, SCHEDULER_JSN, CACHE_JSN, FilterSjsn, RALS_JSN,
+	for _, section := range []string{GENERAL_JSN, RPCConnsJsonName, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN, SCHEDULER_JSN, CACHE_JSN, FilterSjsn, RALS_JSN,
 		CDRS_JSN, CDRE_JSN, CDRC_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN, KamailioAgentJSN,
 		DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
-		SupplierSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson, AnalyzerCfgJson, Apier, RPCConnsJsonName} {
+		SupplierSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson, AnalyzerCfgJson, Apier} {
 		cfg.lks[section] = new(sync.RWMutex)
 		cfg.rldChans[section] = make(chan struct{}, 1)
 	}
 }
 
-// V1ReloadSections reloads the sections of configz
-func (cfg *CGRConfig) V1ReloadSections(args map[string]interface{}, reply *string) (err error) {
-	if len(args) == 0 {
+// JSONReloadWithArgDispatcher the API params for V1ReloadConfigFromJSON
+type JSONReloadWithArgDispatcher struct {
+	*utils.ArgDispatcher
+	utils.TenantArg
+	JSON map[string]interface{}
+}
+
+// V1ReloadConfigFromJSON reloads the sections of configz
+func (cfg *CGRConfig) V1ReloadConfigFromJSON(args *JSONReloadWithArgDispatcher, reply *string) (err error) {
+	if len(args.JSON) == 0 {
 		*reply = utils.OK
 		return
 	}
+	sections := make([]string, 0, len(args.JSON))
+	for section := range args.JSON {
+		sections = append(sections, section)
+	}
+
 	var b []byte
-	if b, err = json.Marshal(args); err != nil {
+	if b, err = json.Marshal(args.JSON); err != nil {
 		return
 	}
-	fmt.Println(string(b))
+
+	if err = cfg.loadConfigFromJSON(bytes.NewBuffer(b), sections); err != nil {
+		return
+	}
+
 	//  lock all sections
-	cfg.lockSections()
-	fmt.Println("lock")
+	cfg.rLockSections()
 
-	if err = cfg.loadConfigFromReader(bytes.NewBuffer(b), []func(*CgrJsonCfg) error{cfg.loadFromJsonCfg}); err != nil {
-		cfg.unlockSections() // unlock before exiting function
-		return
-	}
-
-	fmt.Println("before checkConfigSanity")
 	err = cfg.checkConfigSanity()
-	fmt.Println("after checkConfigSanity")
 
-	cfg.unlockSections() // unlock before checking the error
-	fmt.Println("after unlock")
+	cfg.rUnlockSections() // unlock before checking the error
 
 	if err != nil {
 		return
 	}
 
-	section := utils.MetaAll
-	if len(args) == 1 {
-		for k := range args {
-			section = k
+	subsystemsThatNeedDataDB := utils.NewStringSet([]string{DATADB_JSN, SCHEDULER_JSN,
+		RALS_JSN, CDRS_JSN, SessionSJson, ATTRIBUTE_JSN,
+		ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
+		SupplierSJson, LoaderJson, DispatcherSJson})
+	needsDataDB := false
+	for _, section := range sections {
+		if subsystemsThatNeedDataDB.Has(section) {
+			needsDataDB = true
+			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
 			break
 		}
 	}
-	if err = cfg.reloadSection(section); err != nil {
-		return
+	subsystemsThatNeedStorDB := utils.NewStringSet([]string{STORDB_JSN, RALS_JSN, CDRS_JSN, Apier})
+	needsStorDB := false
+	for _, section := range sections {
+		if subsystemsThatNeedStorDB.Has(section) {
+			needsStorDB = true
+			cfg.rldChans[STORDB_JSN] <- struct{}{} // reload datadb before
+			break
+		}
+	}
+	time.Sleep(1)
+	for _, section := range sections {
+		if needsDataDB && section == DATADB_JSN {
+			continue
+		}
+		if needsStorDB && section == STORDB_JSN {
+			continue
+		}
+		cfg.rldChans[section] <- struct{}{}
 	}
 	*reply = utils.OK
 	return
+}
+
+func (cfg *CGRConfig) loadConfigFromJSON(rdr io.Reader, sections []string) (err error) {
+	var loadFuncs []func(*CgrJsonCfg) error
+	loadMap := cfg.getLoadFunctions()
+	for _, section := range sections {
+		if fnct, has := loadMap[section]; !has {
+			return fmt.Errorf("Invalid section: <%s>", section)
+		} else {
+			cfg.lks[section].Lock()
+			defer cfg.lks[section].Unlock()
+			loadFuncs = append(loadFuncs, fnct)
+		}
+	}
+	return cfg.loadConfigFromReader(rdr, loadFuncs)
 }

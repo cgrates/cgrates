@@ -45,7 +45,7 @@ var (
 		testReloadITStartEngine,
 		testReloadITRpcConn,
 		testReloadVerifyDisabledReaders,
-		testReloadReloadConfig,
+		testReloadReloadConfigFromPath,
 		testReloadVerifyFirstReload,
 		testReloadITKillEngine,
 	}
@@ -126,9 +126,9 @@ func testReloadVerifyDisabledReaders(t *testing.T) {
 	}
 }
 
-func testReloadReloadConfig(t *testing.T) {
+func testReloadReloadConfigFromPath(t *testing.T) {
 	var reply string
-	if err := reloadRPC.Call(utils.ConfigSv1ReloadConfig, &config.ConfigReloadWithArgDispatcher{
+	if err := reloadRPC.Call(utils.ConfigSv1ReloadConfigFromPath, &config.ConfigReloadWithArgDispatcher{
 		Path:    path.Join(*dataDir, "conf", "samples", "ers_reload", "first_reload"),
 		Section: config.ERsJson,
 	}, &reply); err != nil {

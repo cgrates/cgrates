@@ -69,7 +69,7 @@ func TestStatSReload(t *testing.T) {
 		t.Errorf("Expected service to be down")
 	}
 	var reply string
-	if err = cfg.V1ReloadConfig(&config.ConfigReloadWithArgDispatcher{
+	if err = cfg.V1ReloadConfigFromPath(&config.ConfigReloadWithArgDispatcher{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
 		Section: config.STATS_JSON,
 	}, &reply); err != nil {

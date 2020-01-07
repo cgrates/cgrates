@@ -767,8 +767,12 @@ func (dS *DispatcherConfigSv1) GetJSONSection(args *config.StringWithArgDispatch
 	return dS.dS.ConfigSv1GetJSONSection(args, reply)
 }
 
-func (dS *DispatcherConfigSv1) ReloadConfig(args *config.ConfigReloadWithArgDispatcher, reply *string) (err error) {
-	return dS.dS.ConfigSv1ReloadConfig(args, reply)
+func (dS *DispatcherConfigSv1) ReloadConfigFromPath(args *config.ConfigReloadWithArgDispatcher, reply *string) (err error) {
+	return dS.dS.ConfigSv1ReloadConfigFromPath(args, reply)
+}
+
+func (dS *DispatcherConfigSv1) ReloadConfigFromJSON(args *config.JSONReloadWithArgDispatcher, reply *string) (err error) {
+	return dS.dS.ConfigSv1ReloadConfigFromJSON(args, reply)
 }
 
 func NewDispatcherCoreSv1(dps *dispatchers.DispatcherService) *DispatcherCoreSv1 {
