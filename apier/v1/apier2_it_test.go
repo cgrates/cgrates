@@ -35,43 +35,53 @@ import (
 )
 
 var (
-	apierCfgPath   string
-	apierCfg       *config.CGRConfig
-	apierRPC       *rpc.Client
-	apierConfigDIR string //run tests for specific configuration
+	apierCfgPath     string
+	apierCfg         *config.CGRConfig
+	apierRPC         *rpc.Client
+	apierv2ConfigDIR string //run tests for specific configuration
+
+	sTestsAPIer = []func(t *testing.T){
+		testAPIerInitCfg,
+		testAPIerInitDataDb,
+		testAPIerResetStorDb,
+		testAPIerStartEngine,
+		testAPIerRPCConn,
+		testAPIerLoadFromFolder,
+		testAPIerVerifyAttributesAfterLoad,
+		testAPIerRemoveTPFromFolder,
+		testAPIerAfterDelete,
+		testAPIerVerifyAttributesAfterDelete,
+		testAPIerLoadFromFolder,
+		testAPIerGetRatingPlanCost,
+		testAPIerGetRatingPlanCost2,
+		testAPIerGetRatingPlanCost3,
+		testAPIerGetActionPlanIDs,
+		testAPIerGetRatingPlanIDs,
+		testAPIerKillEngine,
+	}
 )
 
-var sTestsAPIer = []func(t *testing.T){
-	testAPIerInitCfg,
-	testAPIerInitDataDb,
-	testAPIerResetStorDb,
-	testAPIerStartEngine,
-	testAPIerRPCConn,
-	testAPIerLoadFromFolder,
-	testAPIerVerifyAttributesAfterLoad,
-	testAPIerRemoveTPFromFolder,
-	testAPIerAfterDelete,
-	testAPIerVerifyAttributesAfterDelete,
-	testAPIerLoadFromFolder,
-	testAPIerGetRatingPlanCost,
-	testAPIerGetRatingPlanCost2,
-	testAPIerGetRatingPlanCost3,
-	testAPIerGetActionPlanIDs,
-	testAPIerGetRatingPlanIDs,
-	testAPIerKillEngine,
-}
-
 //Test start here
-func TestAPIerIT(t *testing.T) {
-	apierConfigDIR = "tutmysql" // no need for a new config with *gob transport in this case
+func TestApierIT2(t *testing.T) {
+	// no need for a new config with *gob transport in this case
+	switch *dbType {
+	case utils.MetaInternal:
+		apierv2ConfigDIR = "tutinternal"
+	case utils.MetaSQL:
+		apierv2ConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		apierv2ConfigDIR = "tutmongo"
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	for _, stest := range sTestsAPIer {
-		t.Run(apierConfigDIR, stest)
+		t.Run(apierv2ConfigDIR, stest)
 	}
 }
 
 func testAPIerInitCfg(t *testing.T) {
 	var err error
-	apierCfgPath = path.Join(costDataDir, "conf", "samples", apierConfigDIR)
+	apierCfgPath = path.Join(costDataDir, "conf", "samples", apierv2ConfigDIR)
 	apierCfg, err = config.NewCGRConfigFromPath(apierCfgPath)
 	if err != nil {
 		t.Error(err)

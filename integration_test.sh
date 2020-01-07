@@ -2,9 +2,18 @@
 go clean --cache
 ./test.sh
 gen=$?
-echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration'
-go test github.com/cgrates/cgrates/apier/v1 -tags=integration
-ap1=$?
+
+# echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*internal'
+# go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*internal
+# ap1_internal=$?
+echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*sql'
+go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*sql
+ap1_sql=$?
+echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*mongo'
+go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*mongo
+ap1_mongo=$?
+
+
 echo 'go test github.com/cgrates/cgrates/apier/v2 -tags=integration'
 go test github.com/cgrates/cgrates/apier/v2 -tags=integration
 ap2=$?
@@ -47,5 +56,5 @@ srv=$?
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=offline'
 go test github.com/cgrates/cgrates/apier/v1 -tags=offline
 offline=$?
-
-exit $gen && $ap1 && $ap2 && $en && $cdrc && $cfg && $utl && $gnr && $agts && $smg && $mgr && $dis && $lds && $ers && $srv && $offline
+# to do: add '&& $ap1_internal' 
+exit $gen && $ap1_sql && $ap1_mongo && $ap2 && $en && $cdrc && $cfg && $utl && $gnr && $agts && $smg && $mgr && $dis && $lds && $ers && $srv && $offline

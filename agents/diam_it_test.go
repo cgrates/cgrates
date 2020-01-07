@@ -42,7 +42,7 @@ var (
 	dataDir      = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 	interations  = flag.Int("iterations", 1, "Number of iterations to do for dry run simulation")
 	replyTimeout = flag.String("reply_timeout", "1s", "Maximum duration to wait for a reply")
-	encoding     = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
+	encoding     = flag.String("rpc", utils.MetaJSON, "what encoding whould be used for rpc comunication")
 
 	daCfgPath, diamConfigDIR string
 	daCfg                    *config.CGRConfig

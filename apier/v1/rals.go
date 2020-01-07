@@ -92,7 +92,7 @@ func (rsv1 *RALsV1) GetRatingPlansCost(arg *utils.RatingPlanCostArg, reply *disp
 			}
 			continue
 		}
-		ec := engine.NewEventCostFromCallCost(cc, "", "")
+		ec := engine.NewEventCostFromCallCost(cc, utils.EmptyString, utils.EmptyString)
 		ec.Compute()
 		*reply = dispatchers.RatingPlanCost{
 			EventCost:    ec,

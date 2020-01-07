@@ -40,70 +40,67 @@ var (
 	alsPrfDataDir   = "/usr/share/cgrates"
 	alsPrf          *AttributeWithCache
 	alsPrfConfigDIR string //run tests for specific configuration
+
+	sTestsAlsPrf = []func(t *testing.T){
+		testAttributeSInitCfg,
+		testAttributeSInitDataDb,
+		testAttributeSResetStorDb,
+		testAttributeSStartEngine,
+		testAttributeSRPCConn,
+		testAttributeSLoadFromFolder,
+		testAttributeSGetAttributeForEvent,
+		testAttributeSGetAttributeForEventNotFound,
+		testAttributeSGetAttributeForEventWithMetaAnyContext,
+		testAttributeSProcessEvent,
+		testAttributeSProcessEventNotFound,
+		testAttributeSProcessEventMissing,
+		testAttributeSProcessEventWithNoneSubstitute,
+		testAttributeSProcessEventWithNoneSubstitute2,
+		testAttributeSProcessEventWithNoneSubstitute3,
+		testAttributeSProcessEventWithHeader,
+		testAttributeSGetAttPrfIDs,
+		testAttributeSGetAlsPrfBeforeSet,
+		testAttributeSSetAlsPrf,
+		testAttributeSUpdateAlsPrf,
+		testAttributeSRemAlsPrf,
+		testAttributeSSetAlsPrf2,
+		testAttributeSSetAlsPrf3,
+		testAttributeSSetAlsPrf4,
+		testAttributeSPing,
+		testAttributeSProcessEventWithSearchAndReplace,
+		testAttributeSProcessWithMultipleRuns,
+		testAttributeSProcessWithMultipleRuns2,
+		testAttributeSKillEngine,
+		//start test for cache options
+		testAttributeSInitCfg,
+		testAttributeSInitDataDb,
+		testAttributeSResetStorDb,
+		testAttributeSStartEngine,
+		testAttributeSRPCConn,
+		testAttributeSCachingMetaNone,
+		testAttributeSCachingMetaLoad,
+		testAttributeSCachingMetaReload1,
+		testAttributeSCachingMetaReload2,
+		testAttributeSCachingMetaRemove,
+		testAttributeSKillEngine,
+	}
 )
 
-var sTestsAlsPrf = []func(t *testing.T){
-	testAttributeSInitCfg,
-	testAttributeSInitDataDb,
-	testAttributeSResetStorDb,
-	testAttributeSStartEngine,
-	testAttributeSRPCConn,
-	testAttributeSLoadFromFolder,
-	testAttributeSGetAttributeForEvent,
-	testAttributeSGetAttributeForEventNotFound,
-	testAttributeSGetAttributeForEventWithMetaAnyContext,
-	testAttributeSProcessEvent,
-	testAttributeSProcessEventNotFound,
-	testAttributeSProcessEventMissing,
-	testAttributeSProcessEventWithNoneSubstitute,
-	testAttributeSProcessEventWithNoneSubstitute2,
-	testAttributeSProcessEventWithNoneSubstitute3,
-	testAttributeSProcessEventWithHeader,
-	testAttributeSGetAttPrfIDs,
-	testAttributeSGetAlsPrfBeforeSet,
-	testAttributeSSetAlsPrf,
-	testAttributeSUpdateAlsPrf,
-	testAttributeSRemAlsPrf,
-	testAttributeSSetAlsPrf2,
-	testAttributeSSetAlsPrf3,
-	testAttributeSSetAlsPrf4,
-	testAttributeSPing,
-	testAttributeSProcessEventWithSearchAndReplace,
-	testAttributeSProcessWithMultipleRuns,
-	testAttributeSProcessWithMultipleRuns2,
-	testAttributeSKillEngine,
-	//start test for cache options
-	testAttributeSInitCfg,
-	testAttributeSInitDataDb,
-	testAttributeSResetStorDb,
-	testAttributeSStartEngine,
-	testAttributeSRPCConn,
-	testAttributeSCachingMetaNone,
-	testAttributeSCachingMetaLoad,
-	testAttributeSCachingMetaReload1,
-	testAttributeSCachingMetaReload2,
-	testAttributeSCachingMetaRemove,
-	testAttributeSKillEngine,
-}
-
 //Test start here
-func TestAttributeSITMySql(t *testing.T) {
-	alsPrfConfigDIR = "tutmysql"
-	for _, stest := range sTestsAlsPrf {
-		t.Run(alsPrfConfigDIR, stest)
+func TestAttributeSIT(t *testing.T) {
+	attrsTests := sTestsAlsPrf
+	switch *dbType {
+	case utils.MetaInternal:
+		attrsTests = sTestsAlsPrf[:29]
+		alsPrfConfigDIR = "tutinternal"
+	case utils.MetaSQL:
+		alsPrfConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		alsPrfConfigDIR = "tutmongo"
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestAttributeSITMongo(t *testing.T) {
-	alsPrfConfigDIR = "tutmongo"
-	for _, stest := range sTestsAlsPrf {
-		t.Run(alsPrfConfigDIR, stest)
-	}
-}
-
-func TestAttributeSITInternal(t *testing.T) {
-	alsPrfConfigDIR = "tutinternal"
-	for _, stest := range sTestsAlsPrf[:29] {
+	for _, stest := range attrsTests {
 		t.Run(alsPrfConfigDIR, stest)
 	}
 }

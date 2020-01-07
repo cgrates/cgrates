@@ -21,13 +21,10 @@ package v1
 
 import (
 	"encoding/json"
-	"errors"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"net/url"
 	"os"
 	"path"
@@ -61,35 +58,114 @@ README:
   * Connect rpc client depending on encoding defined in configuration.
   * Execute remote Apis and test their replies(follow testtp scenario so we can test load in dataDb also).
 */
+var (
+	cfgPath          string
+	cfg              *config.CGRConfig
+	rater            *rpc.Client
+	apierv1ConfigDIR string
 
-var cfgPath string
-var cfg *config.CGRConfig
-var rater *rpc.Client
+	apierTests = []func(t *testing.T){
+		testApierLoadConfig,
+		testApierCreateDirs,
+		testApierInitDataDb,
+		testApierInitStorDb,
+		testApierStartEngine,
+		testApierRpcConn,
+		testApierTPTiming,
+		testApierTPDestination,
+		testApierTPRate,
+		testApierTPDestinationRate,
+		testApierTPRatingPlan,
+		testApierTPRatingProfile,
+		testApierTPActions,
+		testApierTPActionPlan,
+		testApierTPActionTriggers,
+		testApierTPAccountActions,
+		testApierLoadRatingPlan,
+		testApierLoadRatingProfile,
+		testApierLoadAccountActions,
+		testApierReloadScheduler,
+		testApierSetRatingProfile,
+		testApierV1GetRatingProfile,
+		testApierReloadCache,
+		testApierGetDestination,
+		testApierGetRatingPlan,
+		testApierRemoveRatingPlan,
+		testApierAddBalance,
+		testApierExecuteAction,
+		testApierSetActions,
+		testApierGetActions,
+		testApierSetActionPlan,
+		testApierAddTriggeredAction,
+		testApierGetAccountActionTriggers,
+		testApierAddTriggeredAction2,
+		testApierGetAccountActionTriggers2,
+		testApierSetAccountActionTriggers,
+		testApierRemAccountActionTriggers,
+		testApierSetAccount,
+		testApierGetAccountActionPlan,
+		testApierITGetScheduledActionsForAccount,
+		testApierRemUniqueIDActionTiming,
+		testApierGetAccount,
+		testApierTriggersExecute,
+		testApierResetDataBeforeLoadFromFolder,
+		testApierLoadTariffPlanFromFolder,
+		testApierComputeReverse,
+		testApierResetDataAfterLoadFromFolder,
+		testApierSetChargerS,
+		testApierGetAccountAfterLoad,
+		testApierResponderGetCost,
+		testApierMaxDebitInexistentAcnt,
+		testApierCdrServer,
+		testApierITGetCdrs,
+		testApierITProcessCdr,
+		testApierGetCallCostLog,
+		testApierITSetDestination,
+		testApierITGetScheduledActions,
+		testApierITGetDataCost,
+		testApierITGetCost,
+		testApierInitDataDb2,
+		testApierInitStorDb2,
+		testApierReloadCache2,
+		testApierReloadScheduler2,
+		testApierImportTPFromFolderPath,
+		testApierLoadTariffPlanFromStorDbDryRun,
+		testApierGetCacheStats2,
+		testApierLoadTariffPlanFromStorDb,
+		testApierStartStopServiceStatus,
+		testApierReplayFailedPosts,
+		testApierGetDataDBVesions,
+		testApierGetStorDBVesions,
+		testApierStopEngine,
+	}
+)
 
-var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-var waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for rater to start and cache")
-var encoding = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
-
-func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
-	switch *encoding {
-	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOB:
-		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+func TestApierIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		apierv1ConfigDIR = "apier_internal"
+	case utils.MetaSQL:
+		apierv1ConfigDIR = "apier_mysql"
+	case utils.MetaMongo:
+		apierv1ConfigDIR = "apier_mongo"
 	default:
-		return nil, errors.New("UNSUPPORTED_RPC")
+		t.Fatal("Unknown Database type")
+	}
+
+	for _, stest := range apierTests {
+		t.Run(apierv1ConfigDIR, stest)
 	}
 }
 
-func TestApierLoadConfig(t *testing.T) {
+func testApierLoadConfig(t *testing.T) {
 	var err error
-	cfgPath = path.Join(*dataDir, "conf", "samples", "apier") // no need for a new config with *gob transport in this case
+	cfgPath = path.Join(*dataDir, "conf", "samples", apierv1ConfigDIR) // no need for a new config with *gob transport in this case
 	if cfg, err = config.NewCGRConfigFromPath(cfgPath); err != nil {
 		t.Error(err)
 	}
 }
 
-func TestApierCreateDirs(t *testing.T) {
+func testApierCreateDirs(t *testing.T) {
 	for _, pathDir := range []string{cfg.CdreProfiles[utils.MetaDefault].ExportPath, "/var/log/cgrates/cdrc/in", "/var/log/cgrates/cdrc/out"} {
 		if err := os.RemoveAll(pathDir); err != nil {
 			t.Fatal("Error removing folder: ", pathDir, err)
@@ -100,28 +176,28 @@ func TestApierCreateDirs(t *testing.T) {
 	}
 }
 
-func TestApierInitDataDb(t *testing.T) {
+func testApierInitDataDb(t *testing.T) {
 	if err := engine.InitDataDb(cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Empty tables before using them
-func TestApierInitStorDb(t *testing.T) {
+func testApierInitStorDb(t *testing.T) {
 	if err := engine.InitStorDb(cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start engine
-func TestApierStartEngine(t *testing.T) {
+func testApierStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(cfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestApierRpcConn(t *testing.T) {
+func testApierRpcConn(t *testing.T) {
 	var err error
 	rater, err = newRPCClient(cfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -130,14 +206,14 @@ func TestApierRpcConn(t *testing.T) {
 }
 
 // Test here TPTiming APIs
-func TestApierTPTiming(t *testing.T) {
+func testApierTPTiming(t *testing.T) {
 	// ALWAYS,*any,*any,*any,*any,00:00:00
 	tmAlways := &utils.ApierTPTiming{TPid: utils.TEST_SQL,
 		ID:        "ALWAYS",
-		Years:     "*any",
-		Months:    "*any",
-		MonthDays: "*any",
-		WeekDays:  "*any",
+		Years:     utils.META_ANY,
+		Months:    utils.META_ANY,
+		MonthDays: utils.META_ANY,
+		WeekDays:  utils.META_ANY,
 		Time:      "00:00:00",
 	}
 	tmAlways2 := new(utils.ApierTPTiming)
@@ -146,13 +222,13 @@ func TestApierTPTiming(t *testing.T) {
 	tmAsap := &utils.ApierTPTiming{
 		TPid:      utils.TEST_SQL,
 		ID:        "ASAP",
-		Years:     "*any",
-		Months:    "*any",
-		MonthDays: "*any",
-		WeekDays:  "*any",
+		Years:     utils.META_ANY,
+		Months:    utils.META_ANY,
+		MonthDays: utils.META_ANY,
+		WeekDays:  utils.META_ANY,
 		Time:      "*asap",
 	}
-	reply := ""
+	var reply string
 	for _, tm := range []*utils.ApierTPTiming{tmAlways, tmAsap, tmAlways2} {
 		if err := rater.Call(utils.ApierV1SetTPTiming, tm, &reply); err != nil {
 			t.Error("Got error on ApierV1.SetTPTiming: ", err.Error())
@@ -196,8 +272,8 @@ func TestApierTPTiming(t *testing.T) {
 }
 
 // Test here TPTiming APIs
-func TestApierTPDestination(t *testing.T) {
-	reply := ""
+func testApierTPDestination(t *testing.T) {
+	var reply string
 	dstDe := &utils.TPDestination{TPid: utils.TEST_SQL, ID: "GERMANY", Prefixes: []string{"+49"}}
 	dstDeMobile := &utils.TPDestination{TPid: utils.TEST_SQL, ID: "GERMANY_MOBILE", Prefixes: []string{"+4915", "+4916", "+4917"}}
 	dstFs := &utils.TPDestination{TPid: utils.TEST_SQL, ID: "FS_USERS", Prefixes: []string{"10"}}
@@ -247,8 +323,8 @@ func TestApierTPDestination(t *testing.T) {
 }
 
 // Test here TPRate APIs
-func TestApierTPRate(t *testing.T) {
-	reply := ""
+func testApierTPRate(t *testing.T) {
+	var reply string
 	rt := &utils.TPRate{TPid: utils.TEST_SQL, ID: "RT_FS_USERS", RateSlots: []*utils.RateSlot{
 		{ConnectFee: 0, Rate: 0, RateUnit: "60s", RateIncrement: "60s", GroupIntervalStart: "0s"},
 	}}
@@ -298,8 +374,8 @@ func TestApierTPRate(t *testing.T) {
 }
 
 // Test here TPDestinationRate APIs
-func TestApierTPDestinationRate(t *testing.T) {
-	reply := ""
+func testApierTPDestinationRate(t *testing.T) {
+	var reply string
 	dr := &utils.TPDestinationRate{TPid: utils.TEST_SQL, ID: "DR_FREESWITCH_USERS", DestinationRates: []*utils.DestinationRate{
 		{DestinationId: "FS_USERS", RateId: "RT_FS_USERS", RoundingMethod: "*up", RoundingDecimals: 2},
 	}}
@@ -352,8 +428,8 @@ func TestApierTPDestinationRate(t *testing.T) {
 }
 
 // Test here TPRatingPlan APIs
-func TestApierTPRatingPlan(t *testing.T) {
-	reply := ""
+func testApierTPRatingPlan(t *testing.T) {
+	var reply string
 	rp := &utils.TPRatingPlan{TPid: utils.TEST_SQL, ID: "RETAIL1", RatingPlanBindings: []*utils.TPRatingPlanBinding{
 		{DestinationRatesId: "DR_FREESWITCH_USERS", TimingId: "ALWAYS", Weight: 10},
 	}}
@@ -403,12 +479,12 @@ func TestApierTPRatingPlan(t *testing.T) {
 }
 
 // Test here TPRatingPlan APIs
-func TestApierTPRatingProfile(t *testing.T) {
-	reply := ""
+func testApierTPRatingProfile(t *testing.T) {
+	var reply string
 	rpf := &utils.TPRatingProfile{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL,
-		Tenant: "cgrates.org", Category: "call", Subject: "*any",
+		Tenant: "cgrates.org", Category: "call", Subject: utils.META_ANY,
 		RatingPlanActivations: []*utils.TPRatingActivation{
-			{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1", FallbackSubjects: ""},
+			{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1", FallbackSubjects: utils.EmptyString},
 		}}
 	rpfTst := new(utils.TPRatingProfile)
 	*rpfTst = *rpf
@@ -455,13 +531,13 @@ func TestApierTPRatingProfile(t *testing.T) {
 	}
 }
 
-func TestApierTPActions(t *testing.T) {
-	reply := ""
+func testApierTPActions(t *testing.T) {
+	var reply string
 	act := &utils.TPActions{TPid: utils.TEST_SQL,
 		ID: "PREPAID_10", Actions: []*utils.TPAction{
-			{Identifier: "*topup_reset", BalanceType: "*monetary",
+			{Identifier: "*topup_reset", BalanceType: utils.MONETARY,
 				Units: "10", ExpiryTime: "*unlimited",
-				DestinationIds: "*any", BalanceWeight: "10", Weight: 10},
+				DestinationIds: utils.META_ANY, BalanceWeight: "10", Weight: 10},
 		}}
 	actWarn := &utils.TPActions{TPid: utils.TEST_SQL, ID: "WARN_VIA_HTTP", Actions: []*utils.TPAction{
 		{Identifier: "*call_url", ExtraParameters: "http://localhost:8000", Weight: 10},
@@ -514,8 +590,8 @@ func TestApierTPActions(t *testing.T) {
 	}
 }
 
-func TestApierTPActionPlan(t *testing.T) {
-	reply := ""
+func testApierTPActionPlan(t *testing.T) {
+	var reply string
 	at := &utils.TPActionPlan{TPid: utils.TEST_SQL, ID: "PREPAID_10", ActionPlan: []*utils.TPActionTiming{
 		{ActionsId: "PREPAID_10", TimingId: "ASAP", Weight: 10},
 	}}
@@ -564,14 +640,14 @@ func TestApierTPActionPlan(t *testing.T) {
 	}
 }
 
-func TestApierTPActionTriggers(t *testing.T) {
-	reply := ""
+func testApierTPActionTriggers(t *testing.T) {
+	var reply string
 	at := &utils.TPActionTriggers{
 		TPid: utils.TEST_SQL,
 		ID:   "STANDARD_TRIGGERS",
 		ActionTriggers: []*utils.TPActionTrigger{
 			{Id: "STANDARD_TRIGGERS", UniqueID: "MYFIRSTTRIGGER",
-				BalanceType: "*monetary", ThresholdType: "*min_balance",
+				BalanceType: utils.MONETARY, ThresholdType: "*min_balance",
 				ThresholdValue: 2, ActionsId: "LOG_BALANCE", Weight: 10},
 		}}
 	atTst := new(utils.TPActionTriggers)
@@ -621,8 +697,8 @@ func TestApierTPActionTriggers(t *testing.T) {
 }
 
 // Test here TPAccountActions APIs
-func TestApierTPAccountActions(t *testing.T) {
-	reply := ""
+func testApierTPAccountActions(t *testing.T) {
+	var reply string
 	aa1 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org",
 		Account: "1001", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
 	aa2 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org",
@@ -679,8 +755,8 @@ func TestApierTPAccountActions(t *testing.T) {
 }
 
 // Test here LoadRatingPlan
-func TestApierLoadRatingPlan(t *testing.T) {
-	reply := ""
+func testApierLoadRatingPlan(t *testing.T) {
+	var reply string
 	if err := rater.Call(utils.ApierV1LoadRatingPlan, AttrLoadRatingPlan{TPid: utils.TEST_SQL, RatingPlanId: "RETAIL1"}, &reply); err != nil {
 		t.Error("Got error on ApierV1.LoadRatingPlan: ", err.Error())
 	} else if reply != "OK" {
@@ -689,8 +765,8 @@ func TestApierLoadRatingPlan(t *testing.T) {
 }
 
 // Test here LoadRatingProfile
-func TestApierLoadRatingProfile(t *testing.T) {
-	reply := ""
+func testApierLoadRatingProfile(t *testing.T) {
+	var reply string
 	rpf := &utils.TPRatingProfile{
 		TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL,
 		Tenant: "cgrates.org", Category: "call", Subject: "*any"}
@@ -702,7 +778,7 @@ func TestApierLoadRatingProfile(t *testing.T) {
 }
 
 // Test here LoadAccountActions
-func TestApierLoadAccountActions(t *testing.T) {
+func testApierLoadAccountActions(t *testing.T) {
 	var rcvStats map[string]*ltcache.CacheStats
 	expectedStats := engine.GetDefaultEmptyCacheStats() // Make sure nothing in cache so far
 	if err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithArgDispatcher), &rcvStats); err != nil {
@@ -710,7 +786,7 @@ func TestApierLoadAccountActions(t *testing.T) {
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 		t.Errorf("Calling CacheSv1.GetCacheStats expected: %+v, received: %+v", utils.ToJSON(expectedStats), utils.ToJSON(rcvStats))
 	}
-	reply := ""
+	var reply string
 	aa1 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org", Account: "1001"}
 	if err := rater.Call(utils.ApierV1LoadAccountActions, aa1, &reply); err != nil {
 		t.Error("Got error on ApierV1.LoadAccountActions: ", err.Error())
@@ -729,8 +805,8 @@ func TestApierLoadAccountActions(t *testing.T) {
 }
 
 // Test here ReloadScheduler
-func TestApierReloadScheduler(t *testing.T) {
-	reply := ""
+func testApierReloadScheduler(t *testing.T) {
+	var reply string
 	// Simple test that command is executed without errors
 	if err := rater.Call(utils.SchedulerSv1Reload, dispatchers.StringWithApiKey{}, &reply); err != nil {
 		t.Error("Got error on SchedulerSv1.Reload: ", err.Error())
@@ -740,8 +816,8 @@ func TestApierReloadScheduler(t *testing.T) {
 }
 
 // Test here SetRatingProfile
-func TestApierSetRatingProfile(t *testing.T) {
-	reply := ""
+func testApierSetRatingProfile(t *testing.T) {
+	var reply string
 	rpa := &utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1", FallbackSubjects: "dan2"}
 	rpf := &utils.AttrSetRatingProfile{Tenant: "cgrates.org", Category: "call",
 		Subject: "dan", RatingPlanActivations: []*utils.TPRatingActivation{rpa}}
@@ -767,8 +843,8 @@ func TestApierSetRatingProfile(t *testing.T) {
 	}
 	// Make sure rates were loaded for account dan
 	// Test here ResponderGetCost
-	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
-	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:30Z", "")
+	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", utils.EmptyString)
+	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:30Z", utils.EmptyString)
 	cd := &engine.CallDescriptorWithArgDispatcher{
 		CallDescriptor: &engine.CallDescriptor{
 			Category:      "call",
@@ -797,11 +873,11 @@ func TestApierSetRatingProfile(t *testing.T) {
 	}
 }
 
-func TestApierV1GetRatingProfile(t *testing.T) {
+func testApierV1GetRatingProfile(t *testing.T) {
 	var rpl engine.RatingProfile
 	attrGetRatingPlan := &utils.AttrGetRatingProfile{
 		Tenant: "cgrates.org", Category: "call", Subject: "dan"}
-	actTime, err := utils.ParseTimeDetectLayout("2012-01-01T00:00:00Z", "")
+	actTime, err := utils.ParseTimeDetectLayout("2012-01-01T00:00:00Z", utils.EmptyString)
 	if err != nil {
 		t.Error(err)
 	}
@@ -825,7 +901,7 @@ func TestApierV1GetRatingProfile(t *testing.T) {
 	} else if !reflect.DeepEqual(expected, rpl) {
 		t.Errorf("Calling ApierV1.GetRatingProfile expected: %+v, received: %+v", utils.ToJSON(expected), utils.ToJSON(rpl))
 	}
-	attrGetRatingPlan.Subject = ""
+	attrGetRatingPlan.Subject = utils.EmptyString
 	if err := rater.Call(utils.ApierV1GetRatingProfile, attrGetRatingPlan, &rpl); err == nil {
 		t.Errorf("Expected error on ApierV1.GetRatingProfile, recived : %+v", rpl)
 	}
@@ -845,8 +921,8 @@ func TestApierV1GetRatingProfile(t *testing.T) {
 }
 
 // Test here ReloadCache
-func TestApierReloadCache(t *testing.T) {
-	reply := ""
+func testApierReloadCache(t *testing.T) {
+	var reply string
 	arc := new(utils.AttrReloadCache)
 	// Simple test that command is executed without errors
 	if err := rater.Call(utils.CacheSv1ReloadCache, arc, &reply); err != nil {
@@ -871,7 +947,7 @@ func TestApierReloadCache(t *testing.T) {
 }
 
 // Test here GetDestination
-func TestApierGetDestination(t *testing.T) {
+func testApierGetDestination(t *testing.T) {
 	reply := new(engine.Destination)
 	dstId := "GERMANY_MOBILE"
 	expectedReply := &engine.Destination{Id: dstId, Prefixes: []string{"+4915", "+4916", "+4917"}}
@@ -883,7 +959,7 @@ func TestApierGetDestination(t *testing.T) {
 }
 
 // Test here GetRatingPlan
-func TestApierGetRatingPlan(t *testing.T) {
+func testApierGetRatingPlan(t *testing.T) {
 	reply := new(engine.RatingPlan)
 	rplnId := "RETAIL1"
 	if err := rater.Call(utils.ApierV1GetRatingPlan, rplnId, reply); err != nil {
@@ -908,7 +984,7 @@ func TestApierGetRatingPlan(t *testing.T) {
 	}
 }
 
-func TestApierRemoveRatingPlan(t *testing.T) {
+func testApierRemoveRatingPlan(t *testing.T) {
 	rplnId := "RETAIL1"
 	var reply string
 
@@ -928,45 +1004,45 @@ func TestApierRemoveRatingPlan(t *testing.T) {
 }
 
 // Test here AddBalance
-func TestApierAddBalance(t *testing.T) {
-	reply := ""
-	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "1001", BalanceType: "*monetary", Value: 1.5}
+func testApierAddBalance(t *testing.T) {
+	var reply string
+	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "1001", BalanceType: utils.MONETARY, Value: 1.5}
 	if err := rater.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
-	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan", BalanceType: "*monetary", Value: 1.5}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan", BalanceType: utils.MONETARY, Value: 1.5}
 	if err := rater.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
-	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan2", BalanceType: "*monetary", Value: 1.5}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan2", BalanceType: utils.MONETARY, Value: 1.5}
 	if err := rater.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
-	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan3", BalanceType: "*monetary", Value: 1.5}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan3", BalanceType: utils.MONETARY, Value: 1.5}
 	if err := rater.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
-	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan3", BalanceType: "*monetary", Value: 2.1}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan3", BalanceType: utils.MONETARY, Value: 2.1}
 	if err := rater.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
-	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan6", BalanceType: "*monetary", Value: 2.1}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan6", BalanceType: utils.MONETARY, Value: 2.1}
 	if err := rater.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
-	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan6", BalanceType: "*monetary", Value: 1, Overwrite: true}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan6", BalanceType: utils.MONETARY, Value: 1, Overwrite: true}
 	if err := rater.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
@@ -976,8 +1052,8 @@ func TestApierAddBalance(t *testing.T) {
 }
 
 // Test here ExecuteAction
-func TestApierExecuteAction(t *testing.T) {
-	reply := ""
+func testApierExecuteAction(t *testing.T) {
+	var reply string
 	// Add balance to a previously known account
 	attrs := utils.AttrExecuteAction{Tenant: "cgrates.org", Account: "dan2", ActionsId: "PREPAID_10"}
 	if err := rater.Call(utils.ApierV1ExecuteAction, attrs, &reply); err != nil {
@@ -985,7 +1061,7 @@ func TestApierExecuteAction(t *testing.T) {
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
 	}
-	reply2 := ""
+	reply2 := utils.EmptyString
 	// Add balance to an account which does n exist
 	attrs = utils.AttrExecuteAction{Tenant: "cgrates.org", Account: "dan2", ActionsId: "DUMMY_ACTION"}
 	if err := rater.Call(utils.ApierV1ExecuteAction, attrs, &reply2); err == nil || reply2 == "OK" {
@@ -993,10 +1069,10 @@ func TestApierExecuteAction(t *testing.T) {
 	}
 }
 
-func TestApierSetActions(t *testing.T) {
+func testApierSetActions(t *testing.T) {
 	act1 := &V1TPAction{Identifier: utils.TOPUP_RESET, BalanceType: utils.MONETARY, Directions: utils.META_OUT, Units: 75.0, ExpiryTime: utils.UNLIMITED, Weight: 20.0}
 	attrs1 := &V1AttrSetActions{ActionsId: "ACTS_1", Actions: []*V1TPAction{act1}}
-	reply1 := ""
+	reply1 := utils.EmptyString
 	if err := rater.Call(utils.ApierV1SetActions, attrs1, &reply1); err != nil {
 		t.Error("Got error on ApierV1.SetActions: ", err.Error())
 	} else if reply1 != "OK" {
@@ -1008,7 +1084,7 @@ func TestApierSetActions(t *testing.T) {
 	}
 }
 
-func TestApierGetActions(t *testing.T) {
+func testApierGetActions(t *testing.T) {
 	expectActs := []*utils.TPAction{
 		{Identifier: utils.TOPUP_RESET, BalanceType: utils.MONETARY,
 			Units: "75", BalanceWeight: "0", BalanceBlocker: "false",
@@ -1022,10 +1098,10 @@ func TestApierGetActions(t *testing.T) {
 	}
 }
 
-func TestApierSetActionPlan(t *testing.T) {
+func testApierSetActionPlan(t *testing.T) {
 	atm1 := &AttrActionPlan{ActionsId: "ACTS_1", MonthDays: "1", Time: "00:00:00", Weight: 20.0}
 	atms1 := &AttrSetActionPlan{Id: "ATMS_1", ActionPlan: []*AttrActionPlan{atm1}}
-	reply1 := ""
+	reply1 := utils.EmptyString
 	if err := rater.Call(utils.ApierV1SetActionPlan, atms1, &reply1); err != nil {
 		t.Error("Got error on ApierV1.SetActionPlan: ", err.Error())
 	} else if reply1 != "OK" {
@@ -1038,23 +1114,23 @@ func TestApierSetActionPlan(t *testing.T) {
 }
 
 // Test here AddTriggeredAction
-func TestApierAddTriggeredAction(t *testing.T) {
+func testApierAddTriggeredAction(t *testing.T) {
 	var reply string
-	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "dan32", BalanceType: "*monetary", Value: 1.5}
+	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "dan32", BalanceType: utils.MONETARY, Value: 1.5}
 	if err := rater.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
 	// Add balance to a previously known account
-	attrsAddTrigger := &AttrAddActionTrigger{Tenant: "cgrates.org", Account: "dan32", BalanceDirection: "*out", BalanceType: "*monetary",
-		ThresholdType: "*min_balance", ThresholdValue: 2, BalanceDestinationIds: "*any", Weight: 10, ActionsId: "WARN_VIA_HTTP"}
+	attrsAddTrigger := &AttrAddActionTrigger{Tenant: "cgrates.org", Account: "dan32", BalanceDirection: "*out", BalanceType: utils.MONETARY,
+		ThresholdType: "*min_balance", ThresholdValue: 2, BalanceDestinationIds: utils.META_ANY, Weight: 10, ActionsId: "WARN_VIA_HTTP"}
 	if err := rater.Call(utils.ApierV1AddTriggeredAction, attrsAddTrigger, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddTriggeredAction: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddTriggeredAction received: %s", reply)
 	}
-	reply2 := ""
+	reply2 := utils.EmptyString
 	attrs2 := new(AttrAddActionTrigger)
 	*attrs2 = *attrsAddTrigger
 	attrs2.Account = "dan10" // Does not exist so it should error when adding triggers on it
@@ -1065,7 +1141,7 @@ func TestApierAddTriggeredAction(t *testing.T) {
 }
 
 // Test here GetAccountActionTriggers
-func TestApierGetAccountActionTriggers(t *testing.T) {
+func testApierGetAccountActionTriggers(t *testing.T) {
 	var reply engine.ActionTriggers
 	req := utils.TenantAccount{Tenant: "cgrates.org", Account: "dan32"}
 	if err := rater.Call(utils.ApierV1GetAccountActionTriggers, req, &reply); err != nil {
@@ -1075,8 +1151,8 @@ func TestApierGetAccountActionTriggers(t *testing.T) {
 	}
 }
 
-func TestApierAddTriggeredAction2(t *testing.T) {
-	reply := ""
+func testApierAddTriggeredAction2(t *testing.T) {
+	var reply string
 	// Add balance to a previously known account
 	attrs := &AttrAddAccountActionTriggers{ActionTriggerIDs: []string{"STANDARD_TRIGGERS"}, Tenant: "cgrates.org", Account: "dan2"}
 	if err := rater.Call(utils.ApierV1AddAccountActionTriggers, attrs, &reply); err != nil {
@@ -1084,7 +1160,7 @@ func TestApierAddTriggeredAction2(t *testing.T) {
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddAccountActionTriggers received: %s", reply)
 	}
-	reply2 := ""
+	reply2 := utils.EmptyString
 	attrs2 := new(AttrAddAccountActionTriggers)
 	*attrs2 = *attrs
 	attrs2.Account = "dan10" // Does not exist so it should error when adding triggers on it
@@ -1095,7 +1171,7 @@ func TestApierAddTriggeredAction2(t *testing.T) {
 }
 
 // Test here GetAccountActionTriggers
-func TestApierGetAccountActionTriggers2(t *testing.T) {
+func testApierGetAccountActionTriggers2(t *testing.T) {
 	var reply engine.ActionTriggers
 	req := utils.TenantAccount{Tenant: "cgrates.org", Account: "dan2"}
 	if err := rater.Call(utils.ApierV1GetAccountActionTriggers, req, &reply); err != nil {
@@ -1106,7 +1182,7 @@ func TestApierGetAccountActionTriggers2(t *testing.T) {
 }
 
 // Test here SetAccountActionTriggers
-func TestApierSetAccountActionTriggers(t *testing.T) {
+func testApierSetAccountActionTriggers(t *testing.T) {
 	// Test first get so we can steal the id which we need to remove
 	var reply engine.ActionTriggers
 	req := utils.TenantAccount{Tenant: "cgrates.org", Account: "dan2"}
@@ -1147,7 +1223,7 @@ func TestApierSetAccountActionTriggers(t *testing.T) {
 }
 
 // Test here RemAccountActionTriggers
-func TestApierRemAccountActionTriggers(t *testing.T) {
+func testApierRemAccountActionTriggers(t *testing.T) {
 	// Test first get so we can steal the id which we need to remove
 	var reply engine.ActionTriggers
 	req := utils.TenantAccount{Tenant: "cgrates.org", Account: "dan2"}
@@ -1179,15 +1255,15 @@ func TestApierRemAccountActionTriggers(t *testing.T) {
 }
 
 // Test here SetAccount
-func TestApierSetAccount(t *testing.T) {
-	reply := ""
+func testApierSetAccount(t *testing.T) {
+	var reply string
 	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan7", ActionPlanID: "ATMS_1", ReloadScheduler: true}
 	if err := rater.Call(utils.ApierV1SetAccount, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
 	}
-	reply2 := ""
+	reply2 := utils.EmptyString
 	attrs2 := new(utils.AttrSetAccount)
 	*attrs2 = *attrs
 	attrs2.ActionPlanID = "DUMMY_DATA" // Does not exist so it should error when adding triggers on it
@@ -1198,7 +1274,7 @@ func TestApierSetAccount(t *testing.T) {
 }
 
 // Test here GetAccountActionTimings
-func TestApierGetAccountActionPlan(t *testing.T) {
+func testApierGetAccountActionPlan(t *testing.T) {
 	var reply []*AccountActionTiming
 	req := utils.TenantAccount{Tenant: "cgrates.org", Account: "dan7"}
 	if err := rater.Call(utils.ApierV1GetAccountActionPlan, req, &reply); err != nil {
@@ -1213,7 +1289,7 @@ func TestApierGetAccountActionPlan(t *testing.T) {
 }
 
 // Make sure we have scheduled actions
-func TestApierITGetScheduledActionsForAccount(t *testing.T) {
+func testApierITGetScheduledActionsForAccount(t *testing.T) {
 	var rply []*scheduler.ScheduledAction
 	if err := rater.Call(utils.ApierV1GetScheduledActions,
 		scheduler.ArgsGetScheduledActions{
@@ -1226,7 +1302,7 @@ func TestApierITGetScheduledActionsForAccount(t *testing.T) {
 }
 
 // Test here RemoveActionTiming
-func TestApierRemUniqueIDActionTiming(t *testing.T) {
+func testApierRemUniqueIDActionTiming(t *testing.T) {
 	var rmReply string
 	rmReq := AttrRemoveActionTiming{ActionPlanId: "ATMS_1", Tenant: "cgrates.org", Account: "dan4"}
 	if err := rater.Call(utils.ApierV1RemoveActionTiming, rmReq, &rmReply); err != nil {
@@ -1244,7 +1320,7 @@ func TestApierRemUniqueIDActionTiming(t *testing.T) {
 }
 
 // Test here GetAccount
-func TestApierGetAccount(t *testing.T) {
+func testApierGetAccount(t *testing.T) {
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := rater.Call(utils.ApierV2GetAccount, attrs, &reply); err != nil {
@@ -1280,15 +1356,15 @@ func TestApierGetAccount(t *testing.T) {
 }
 
 // Start with initial balance, top-up to test max_balance
-func TestApierTriggersExecute(t *testing.T) {
-	reply := ""
+func testApierTriggersExecute(t *testing.T) {
+	var reply string
 	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan8", ReloadScheduler: true}
 	if err := rater.Call(utils.ApierV1SetAccount, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
 	}
-	attrAddBlnc := &AttrAddBalance{Tenant: "cgrates.org", Account: "1008", BalanceType: "*monetary", Value: 2}
+	attrAddBlnc := &AttrAddBalance{Tenant: "cgrates.org", Account: "1008", BalanceType: utils.MONETARY, Value: 2}
 	if err := rater.Call(utils.ApierV1AddBalance, attrAddBlnc, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
@@ -1297,8 +1373,8 @@ func TestApierTriggersExecute(t *testing.T) {
 }
 
 // Start fresh before loading from folder
-func TestApierResetDataBeforeLoadFromFolder(t *testing.T) {
-	TestApierInitDataDb(t)
+func testApierResetDataBeforeLoadFromFolder(t *testing.T) {
+	testApierInitDataDb(t)
 	var reply string
 	// Simple test that command is executed without errors
 	if err := rater.Call(utils.CacheSv1FlushCache, utils.AttrReloadCache{FlushAll: true}, &reply); err != nil {
@@ -1317,9 +1393,9 @@ func TestApierResetDataBeforeLoadFromFolder(t *testing.T) {
 }
 
 // Test here LoadTariffPlanFromFolder
-func TestApierLoadTariffPlanFromFolder(t *testing.T) {
-	reply := ""
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: ""}
+func testApierLoadTariffPlanFromFolder(t *testing.T) {
+	var reply string
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: utils.EmptyString}
 	if err := rater.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err == nil || !strings.HasPrefix(err.Error(), utils.ErrMandatoryIeMissing.Error()) {
 		t.Error(err)
 	}
@@ -1338,21 +1414,21 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 }
 
 // For now just test that they execute without errors
-func TestApierComputeReverse(t *testing.T) {
+func testApierComputeReverse(t *testing.T) {
 	var reply string
-	if err := rater.Call(utils.ApierV1ComputeReverseDestinations, "", &reply); err != nil {
+	if err := rater.Call(utils.ApierV1ComputeReverseDestinations, utils.EmptyString, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Received: ", reply)
 	}
-	if err := rater.Call(utils.ApierV1ComputeAccountActionPlans, "", &reply); err != nil {
+	if err := rater.Call(utils.ApierV1ComputeAccountActionPlans, utils.EmptyString, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Received: ", reply)
 	}
 }
 
-func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
+func testApierResetDataAfterLoadFromFolder(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 	var rcvStats map[string]*ltcache.CacheStats
 	expStats := engine.GetDefaultEmptyCacheStats()
@@ -1367,7 +1443,7 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 	} else if !reflect.DeepEqual(expStats, rcvStats) {
 		t.Errorf("Expecting: %+v,\n received: %+v", utils.ToJSON(expStats), utils.ToJSON(rcvStats))
 	}
-	reply := ""
+	var reply string
 	// Simple test that command is executed without errors
 	if err := rater.Call(utils.CacheSv1LoadCache, utils.AttrReloadCache{}, &reply); err != nil {
 		t.Error(err)
@@ -1397,7 +1473,7 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 	}
 }
 
-func TestApierSetChargerS(t *testing.T) {
+func testApierSetChargerS(t *testing.T) {
 	//add a default charger
 	chargerProfile := &ChargerWithCache{
 		ChargerProfile: &engine.ChargerProfile{
@@ -1418,7 +1494,7 @@ func TestApierSetChargerS(t *testing.T) {
 
 // Make sure balance was topped-up
 // Bug reported by DigiDaz over IRC
-func TestApierGetAccountAfterLoad(t *testing.T) {
+func testApierGetAccountAfterLoad(t *testing.T) {
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := rater.Call(utils.ApierV2GetAccount, attrs, &reply); err != nil {
@@ -1429,9 +1505,9 @@ func TestApierGetAccountAfterLoad(t *testing.T) {
 }
 
 // Test here ResponderGetCost
-func TestApierResponderGetCost(t *testing.T) {
-	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
-	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:30Z", "")
+func testApierResponderGetCost(t *testing.T) {
+	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", utils.EmptyString)
+	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:30Z", utils.EmptyString)
 	cd := &engine.CallDescriptorWithArgDispatcher{
 		CallDescriptor: &engine.CallDescriptor{
 			Category:      "call",
@@ -1453,7 +1529,7 @@ func TestApierResponderGetCost(t *testing.T) {
 	}
 }
 
-func TestApierMaxDebitInexistentAcnt(t *testing.T) {
+func testApierMaxDebitInexistentAcnt(t *testing.T) {
 	cc := &engine.CallCost{}
 	cd := &engine.CallDescriptorWithArgDispatcher{
 		CallDescriptor: &engine.CallDescriptor{
@@ -1474,7 +1550,7 @@ func TestApierMaxDebitInexistentAcnt(t *testing.T) {
 	}
 }
 
-func TestApierCdrServer(t *testing.T) {
+func testApierCdrServer(t *testing.T) {
 	httpClient := new(http.Client)
 	cdrForm1 := url.Values{utils.OriginID: []string{"dsafdsaf"}, utils.OriginHost: []string{"192.168.1.1"}, utils.RequestType: []string{utils.META_RATED},
 		utils.Tenant: []string{"cgrates.org"}, utils.Category: []string{"call"}, utils.Account: []string{"1001"}, utils.Subject: []string{"1001"}, utils.Destination: []string{"1002"},
@@ -1493,7 +1569,7 @@ func TestApierCdrServer(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 }
 
-func TestApierITGetCdrs(t *testing.T) {
+func testApierITGetCdrs(t *testing.T) {
 	var reply []*engine.ExternalCDR
 	req := utils.AttrGetCdrs{MediationRunIds: []string{utils.MetaDefault}}
 	if err := rater.Call(utils.ApierV1GetCDRs, req, &reply); err != nil {
@@ -1503,7 +1579,7 @@ func TestApierITGetCdrs(t *testing.T) {
 	}
 }
 
-func TestApierITProcessCdr(t *testing.T) {
+func testApierITProcessCdr(t *testing.T) {
 	var reply string
 	cdr := &engine.CDRWithArgDispatcher{
 		CDR: &engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsaf",
@@ -1528,7 +1604,7 @@ func TestApierITProcessCdr(t *testing.T) {
 }
 
 // Test here ResponderGetCost
-func TestApierGetCallCostLog(t *testing.T) {
+func testApierGetCallCostLog(t *testing.T) {
 	var cc engine.EventCost
 	var attrs utils.AttrGetCallCost
 	// Simple test that command is executed without errors
@@ -1577,7 +1653,7 @@ func TestApierGetCallCostLog(t *testing.T) {
 		Usage:     utils.DurationPointer(0),
 		Cost:      utils.Float64Pointer(0),
 		Charges: []*engine.ChargingInterval{{
-			RatingID:       "",
+			RatingID:       utils.EmptyString,
 			Increments:     nil,
 			CompressFactor: 0,
 		}},
@@ -1593,7 +1669,7 @@ func TestApierGetCallCostLog(t *testing.T) {
 		expected.Cost = nil
 	}
 	attrs.CgrId = "Cdr1"
-	attrs.RunId = ""
+	attrs.RunId = utils.EmptyString
 	if err := rater.Call(utils.ApierV1GetEventCost, attrs, &cc); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expected, cc) {
@@ -1601,7 +1677,7 @@ func TestApierGetCallCostLog(t *testing.T) {
 	}
 }
 
-func TestApierITSetDestination(t *testing.T) {
+func testApierITSetDestination(t *testing.T) {
 	attrs := utils.AttrSetDestination{Id: "TEST_SET_DESTINATION", Prefixes: []string{"+4986517174963", "+4986517174960"}}
 	var reply string
 	if err := rater.Call(utils.ApierV1SetDestination, attrs, &reply); err != nil {
@@ -1634,16 +1710,16 @@ func TestApierITSetDestination(t *testing.T) {
 	}
 }
 
-func TestApierITGetScheduledActions(t *testing.T) {
+func testApierITGetScheduledActions(t *testing.T) {
 	var rply []*scheduler.ScheduledAction
 	if err := rater.Call(utils.ApierV1GetScheduledActions, scheduler.ArgsGetScheduledActions{}, &rply); err != nil {
 		t.Error("Unexpected error: ", err)
 	}
 }
 
-func TestApierITGetDataCost(t *testing.T) {
+func testApierITGetDataCost(t *testing.T) {
 	attrs := AttrGetDataCost{Category: "data", Tenant: "cgrates.org",
-		Subject: "1001", AnswerTime: "*now", Usage: 640113}
+		Subject: "1001", AnswerTime: utils.MetaNow, Usage: 640113}
 	var rply *engine.DataCost
 	if err := rater.Call(utils.ApierV1GetDataCost, attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
@@ -1652,9 +1728,9 @@ func TestApierITGetDataCost(t *testing.T) {
 	}
 }
 
-func TestApierITGetCost(t *testing.T) {
+func testApierITGetCost(t *testing.T) {
 	attrs := AttrGetCost{Category: "data", Tenant: "cgrates.org",
-		Subject: "1001", AnswerTime: "*now", Usage: "640113"}
+		Subject: "1001", AnswerTime: utils.MetaNow, Usage: "640113"}
 	var rply *engine.EventCost
 	if err := rater.Call(utils.ApierV1GetCost, attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
@@ -1664,20 +1740,20 @@ func TestApierITGetCost(t *testing.T) {
 }
 
 // Test LoadTPFromStorDb
-func TestApierInitDataDb2(t *testing.T) {
+func testApierInitDataDb2(t *testing.T) {
 	if err := engine.InitDataDb(cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestApierInitStorDb2(t *testing.T) {
+func testApierInitStorDb2(t *testing.T) {
 	if err := engine.InitStorDb(cfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestApierReloadCache2(t *testing.T) {
-	reply := ""
+func testApierReloadCache2(t *testing.T) {
+	var reply string
 	// Simple test that command is executed without errors
 	if err := rater.Call(utils.CacheSv1FlushCache, utils.AttrReloadCache{FlushAll: true}, &reply); err != nil {
 		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
@@ -1686,8 +1762,8 @@ func TestApierReloadCache2(t *testing.T) {
 	}
 }
 
-func TestApierReloadScheduler2(t *testing.T) {
-	reply := ""
+func testApierReloadScheduler2(t *testing.T) {
+	var reply string
 	// Simple test that command is executed without errors
 	if err := rater.Call(utils.SchedulerSv1Reload, dispatchers.StringWithApiKey{}, &reply); err != nil {
 		t.Error("Got error on SchedulerSv1.Reload: ", err.Error())
@@ -1696,7 +1772,7 @@ func TestApierReloadScheduler2(t *testing.T) {
 	}
 }
 
-func TestApierImportTPFromFolderPath(t *testing.T) {
+func testApierImportTPFromFolderPath(t *testing.T) {
 	var reply string
 	if err := rater.Call(utils.ApierV1ImportTariffPlanFromFolder,
 		utils.AttrImportTPFromFolder{TPid: "TEST_TPID2",
@@ -1708,7 +1784,7 @@ func TestApierImportTPFromFolderPath(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 }
 
-func TestApierLoadTariffPlanFromStorDbDryRun(t *testing.T) {
+func testApierLoadTariffPlanFromStorDbDryRun(t *testing.T) {
 	var reply string
 	if err := rater.Call(utils.ApierV1LoadTariffPlanFromStorDb,
 		AttrLoadTpFromStorDb{TPid: "TEST_TPID2", DryRun: true}, &reply); err != nil {
@@ -1718,7 +1794,7 @@ func TestApierLoadTariffPlanFromStorDbDryRun(t *testing.T) {
 	}
 }
 
-func TestApierGetCacheStats2(t *testing.T) {
+func testApierGetCacheStats2(t *testing.T) {
 	var rcvStats map[string]*ltcache.CacheStats
 	expectedStats := engine.GetDefaultEmptyCacheStats()
 	err := rater.Call(utils.CacheSv1GetCacheStats, new(utils.AttrCacheIDsWithArgDispatcher), &rcvStats)
@@ -1729,7 +1805,7 @@ func TestApierGetCacheStats2(t *testing.T) {
 	}
 }
 
-func TestApierLoadTariffPlanFromStorDb(t *testing.T) {
+func testApierLoadTariffPlanFromStorDb(t *testing.T) {
 	var reply string
 	if err := rater.Call(utils.ApierV1LoadTariffPlanFromStorDb,
 		AttrLoadTpFromStorDb{TPid: "TEST_TPID2"}, &reply); err != nil {
@@ -1739,7 +1815,7 @@ func TestApierLoadTariffPlanFromStorDb(t *testing.T) {
 	}
 }
 
-func TestApierStartStopServiceStatus(t *testing.T) {
+func testApierStartStopServiceStatus(t *testing.T) {
 	var reply string
 	if err := rater.Call(utils.ServiceManagerV1ServiceStatus, dispatchers.ArgStartServiceWithApiKey{ArgStartService: servmanager.ArgStartService{ServiceID: utils.MetaScheduler}},
 		&reply); err != nil {
@@ -1782,7 +1858,7 @@ func TestApierStartStopServiceStatus(t *testing.T) {
 	}
 }
 
-func TestApierReplayFailedPosts(t *testing.T) {
+func testApierReplayFailedPosts(t *testing.T) {
 	fileName := "act>*call_url|*http_json|http%3A%2F%2Flocalhost%3A2081|63bed4ea-615e-4096-b1f4-499f64f29b28.json"
 	fileContent := []byte(`{"ID":"cgrates.org:1007","BalanceMap":{"*monetary":[{"Uuid":"367be35a-96ee-40a5-b609-9130661f5f12","ID":"","Value":0,"Directions":{"*out":true},"ExpirationDate":"0001-01-01T00:00:00Z","Weight":10,"DestinationIDs":{},"RatingSubject":"","Categories":{},"SharedGroups":{"SHARED_A":true},"Timings":null,"TimingIDs":{},"Disabled":false,"Factor":null,"Blocker":false}]},"UnitCounters":{"*monetary":[{"CounterType":"*event","Counters":[{"Value":0,"Filter":{"Uuid":null,"ID":"b8531413-10d5-47ad-81ad-2bc272e8f0ca","Type":"*monetary","Value":null,"Directions":{"*out":true},"ExpirationDate":null,"Weight":null,"DestinationIDs":{"FS_USERS":true},"RatingSubject":null,"Categories":null,"SharedGroups":null,"TimingIDs":null,"Timings":null,"Disabled":null,"Factor":null,"Blocker":null}}]}]},"ActionTriggers":[{"ID":"STANDARD_TRIGGERS","UniqueID":"46ac7b8c-685d-4555-bf73-fa6cfbc2fa21","ThresholdType":"*min_balance","ThresholdValue":2,"Recurrent":false,"MinSleep":0,"ExpirationDate":"0001-01-01T00:00:00Z","ActivationDate":"0001-01-01T00:00:00Z","Balance":{"Uuid":null,"ID":null,"Type":"*monetary","Value":null,"Directions":{"*out":true},"ExpirationDate":null,"Weight":null,"DestinationIDs":null,"RatingSubject":null,"Categories":null,"SharedGroups":null,"TimingIDs":null,"Timings":null,"Disabled":null,"Factor":null,"Blocker":null},"Weight":10,"ActionsID":"LOG_WARNING","MinQueuedItems":0,"Executed":true,"LastExecutionTime":"2017-01-31T14:03:57.961651647+01:00"},{"ID":"STANDARD_TRIGGERS","UniqueID":"b8531413-10d5-47ad-81ad-2bc272e8f0ca","ThresholdType":"*max_event_counter","ThresholdValue":5,"Recurrent":false,"MinSleep":0,"ExpirationDate":"0001-01-01T00:00:00Z","ActivationDate":"0001-01-01T00:00:00Z","Balance":{"Uuid":null,"ID":null,"Type":"*monetary","Value":null,"Directions":{"*out":true},"ExpirationDate":null,"Weight":null,"DestinationIDs":{"FS_USERS":true},"RatingSubject":null,"Categories":null,"SharedGroups":null,"TimingIDs":null,"Timings":null,"Disabled":null,"Factor":null,"Blocker":null},"Weight":10,"ActionsID":"LOG_WARNING","MinQueuedItems":0,"Executed":false,"LastExecutionTime":"0001-01-01T00:00:00Z"},{"ID":"STANDARD_TRIGGERS","UniqueID":"8b424186-7a31-4aef-99c5-35e12e6fed41","ThresholdType":"*max_balance","ThresholdValue":20,"Recurrent":false,"MinSleep":0,"ExpirationDate":"0001-01-01T00:00:00Z","ActivationDate":"0001-01-01T00:00:00Z","Balance":{"Uuid":null,"ID":null,"Type":"*monetary","Value":null,"Directions":{"*out":true},"ExpirationDate":null,"Weight":null,"DestinationIDs":null,"RatingSubject":null,"Categories":null,"SharedGroups":null,"TimingIDs":null,"Timings":null,"Disabled":null,"Factor":null,"Blocker":null},"Weight":10,"ActionsID":"LOG_WARNING","MinQueuedItems":0,"Executed":false,"LastExecutionTime":"0001-01-01T00:00:00Z"},{"ID":"STANDARD_TRIGGERS","UniqueID":"28557f3b-139c-4a27-9d17-bda1f54b7c19","ThresholdType":"*max_balance","ThresholdValue":100,"Recurrent":false,"MinSleep":0,"ExpirationDate":"0001-01-01T00:00:00Z","ActivationDate":"0001-01-01T00:00:00Z","Balance":{"Uuid":null,"ID":null,"Type":"*monetary","Value":null,"Directions":{"*out":true},"ExpirationDate":null,"Weight":null,"DestinationIDs":null,"RatingSubject":null,"Categories":null,"SharedGroups":null,"TimingIDs":null,"Timings":null,"Disabled":null,"Factor":null,"Blocker":null},"Weight":10,"ActionsID":"DISABLE_AND_LOG","MinQueuedItems":0,"Executed":false,"LastExecutionTime":"0001-01-01T00:00:00Z"}],"AllowNegative":false,"Disabled":false}"`)
 	args := ArgsReplyFailedPosts{
@@ -1854,7 +1930,7 @@ func TestApierReplayFailedPosts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	msgs, err := ch.Consume(q.Name, "", true, false, false, false, nil)
+	msgs, err := ch.Consume(q.Name, utils.EmptyString, true, false, false, false, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1877,18 +1953,18 @@ func TestApierReplayFailedPosts(t *testing.T) {
 	}
 }
 
-func TestApierGetDataDBVesions(t *testing.T) {
+func testApierGetDataDBVesions(t *testing.T) {
 	var reply *engine.Versions
-	if err := rater.Call(utils.ApierV1GetDataDBVersions, "", &reply); err != nil {
+	if err := rater.Call(utils.ApierV1GetDataDBVersions, utils.EmptyString, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(engine.CurrentDataDBVersions(), *reply) {
 		t.Errorf("Expecting : %+v, received: %+v", engine.CurrentDataDBVersions(), *reply)
 	}
 }
 
-func TestApierGetStorDBVesions(t *testing.T) {
+func testApierGetStorDBVesions(t *testing.T) {
 	var reply *engine.Versions
-	if err := rater.Call(utils.ApierV1GetStorDBVersions, "", &reply); err != nil {
+	if err := rater.Call(utils.ApierV1GetStorDBVersions, utils.EmptyString, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(engine.CurrentStorDBVersions(), *reply) {
 		t.Errorf("Expecting : %+v, received: %+v", engine.CurrentStorDBVersions(), *reply)
@@ -1896,7 +1972,7 @@ func TestApierGetStorDBVesions(t *testing.T) {
 }
 
 // Simply kill the engine after we are done with tests within this file
-func TestApierStopEngine(t *testing.T) {
+func testApierStopEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}

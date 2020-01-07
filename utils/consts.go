@@ -238,6 +238,7 @@ const (
 	MetaPartialCSV               = "*partial_csv"
 	DRYRUN                       = "dry_run"
 	META_COMBIMED                = "*combimed"
+	MetaMongo                    = "*mongo"
 	MetaInternal                 = "*internal"
 	MetaLocalHost                = "*localhost"
 	ZERO_RATING_SUBJECT_PREFIX   = "*zero"
