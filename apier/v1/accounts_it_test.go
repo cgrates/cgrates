@@ -32,13 +32,14 @@ import (
 )
 
 var (
-	accExist   bool
-	accCfgPath string
-	accCfg     *config.CGRConfig
-	accRPC     *rpc.Client
-	accAcount  = "refundAcc"
-	accTenant  = "cgrates.org"
-	accBallID  = "Balance1"
+	accExist       bool
+	accCfgPath     string
+	accCfg         *config.CGRConfig
+	accRPC         *rpc.Client
+	accAcount      = "refundAcc"
+	accTenant      = "cgrates.org"
+	accBallID      = "Balance1"
+	accTestsConfig string //run tests for specific configuration
 
 	accTests = []func(t *testing.T){
 		testAccITLoadConfig,
@@ -61,25 +62,47 @@ var (
 )
 
 func TestAccITWithRemove(t *testing.T) {
-	if *encoding == utils.MetaJSON {
-		accCfgPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
-	} else if *encoding == utils.MetaGOB {
-		accCfgPath = path.Join(*dataDir, "conf", "samples", "tutmongo_gob")
+
+	switch *dbType {
+	case utils.MetaInternal:
+		accTestsConfig = "tutinternal"
+	case utils.MetaSQL:
+		accTestsConfig = "tutmysql"
+	case utils.MetaMongo:
+		accTestsConfig = "tutmongo"
+	default:
+		t.Fatal("Unknown Database type")
 	}
-	for _, test := range accTests {
-		t.Run("TestAccIT", test)
+	if *encoding == utils.MetaGOB {
+		accTestsConfig += "_gob"
+	}
+	accCfgPath = path.Join(*dataDir, "conf", "samples", accTestsConfig)
+
+	for _, stest := range accTests {
+		t.Run(accTestsConfig, stest)
 	}
 }
 
 func TestAccITWithoutRemove(t *testing.T) {
-	if *encoding == utils.MetaJSON {
-		accCfgPath = path.Join(*dataDir, "conf", "samples", "acc_balance_keep")
-	} else if *encoding == utils.MetaGOB {
-		accCfgPath = path.Join(*dataDir, "conf", "samples", "acc_balance_keep_gob")
+
+	switch *dbType {
+	case utils.MetaInternal:
+		accTestsConfig = "acc_balance_keep_internal"
+	case utils.MetaSQL:
+		accTestsConfig = "acc_balance_keep_mysql"
+	case utils.MetaMongo:
+		accTestsConfig = "acc_balance_keep_mongo"
+	default:
+		t.Fatal("Unknown Database type")
 	}
+	if *encoding == utils.MetaGOB {
+		accTestsConfig += "_gob"
+	}
+	accCfgPath = path.Join(*dataDir, "conf", "samples", accTestsConfig)
+
 	accExist = true
-	for _, test := range accTests {
-		t.Run("TestAccIT", test)
+	for _, stest := range accTests {
+		t.Run(accTestsConfig, stest)
 	}
 }
 
@@ -324,7 +347,7 @@ func testAccITSetBalanceWithExtraData(t *testing.T) {
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testAccITSetBalanceWithExtraData",
-		BalanceType: "*monetary",
+		BalanceType: utils.MONETARY,
 		Value:       1.5,
 		Balance: map[string]interface{}{
 			utils.ID: "testAccITSetBalanceWithExtraData",
@@ -359,7 +382,7 @@ func testAccITSetBalanceWithExtraData2(t *testing.T) {
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "testAccITSetBalanceWithExtraData2",
-		BalanceType: "*monetary",
+		BalanceType: utils.MONETARY,
 		Value:       1.5,
 		Balance: map[string]interface{}{
 			utils.ID: "testAccITSetBalanceWithExtraData2",
@@ -403,7 +426,7 @@ func testAccITAddBalanceWithNegative(t *testing.T) {
 	attrs := &AttrAddBalance{
 		Tenant:      "cgrates.org",
 		Account:     "AddBalanceWithNegative",
-		BalanceType: "*monetary",
+		BalanceType: utils.MONETARY,
 		Value:       -3.5,
 	}
 	if err := accRPC.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {

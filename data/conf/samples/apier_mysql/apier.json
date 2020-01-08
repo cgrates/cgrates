@@ -1,0 +1,90 @@
+{
+// CGRateS Configuration file
+//
+// Used in apier_local_tests
+// Starts rater, cdrs and mediator connecting over internal channel
+
+"general": {
+    "log_level": 7,
+    "poster_attempts": 1,
+},
+
+
+"listen": {
+	"rpc_json": ":2012",			// RPC JSON listening address
+	"rpc_gob": ":2013",				// RPC GOB listening address
+	"http": ":2080",				// HTTP listening address
+},
+
+
+"data_db": {								
+	"db_type": "redis",						
+	"db_port": 6379, 						
+	"db_name": "10", 						
+},
+
+"stor_db": {
+	"db_password": "CGRateS.org",
+},
+
+
+"rals": {
+	"enabled": true,						// enable Rater service: <true|false>
+
+},
+
+
+"schedulers": {
+	"enabled": true,						// start Scheduler service: <true|false>
+},
+
+
+"cdrs": {
+	"enabled": true,						// start the CDR Server service:  <true|false>
+	"chargers_conns":["*internal"],
+	"rals_conns": ["*internal"],
+},
+
+
+"attributes": {								// Attribute service
+	"enabled": true,						// starts Attribute service: <true|false>.
+},
+
+
+"resources": {
+	"enabled": true,
+},
+
+
+"stats": {
+	"enabled": true,
+},
+
+
+"thresholds": {
+	"enabled": true,
+},
+
+
+"chargers": {
+	"enabled": true,
+},
+
+
+"suppliers": {
+	"enabled": true,
+},
+
+
+"cdre": {
+	"*default": {
+		"export_path": "/tmp/cgrates/cdr/cdrexport/csv",			// path where the exported CDRs will be placed
+	}
+},
+
+
+"apier": {
+	"scheduler_conns": ["*internal"],
+},
+
+}
