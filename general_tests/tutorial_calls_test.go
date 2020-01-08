@@ -760,20 +760,16 @@ func testCallSyncSessions(t *testing.T) {
 	}
 
 	var sourceForCDR string
-	var numberOfCDR int
+	numberOfCDR = 3
 	switch optConf {
 	case utils.Freeswitch:
 		sourceForCDR = "FS_CHANNEL_ANSWER"
-		numberOfCDR = 2
 	case utils.Kamailio:
 		sourceForCDR = utils.KamailioAgent
-		numberOfCDR = 3
 	case utils.Asterisk:
 		sourceForCDR = utils.AsteriskAgent
-		numberOfCDR = 3
 	case utils.Opensips:
 		sourceForCDR = utils.Opensips
-		numberOfCDR = 3
 	}
 	// verify cdr
 	var rplCdrs []*engine.ExternalCDR
