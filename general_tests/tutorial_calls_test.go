@@ -760,7 +760,7 @@ func testCallSyncSessions(t *testing.T) {
 	}
 
 	var sourceForCDR string
-	numberOfCDR = 3
+	numberOfCDR := 3
 	switch optConf {
 	case utils.Freeswitch:
 		sourceForCDR = "FS_CHANNEL_ANSWER"
