@@ -915,7 +915,7 @@ func TestCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 		AttrSConns:    []string{utils.MetaLocalHost},
 		CDRsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 
-		ReplicationConns:  []*RemoteHost{},
+		ReplicationConns:  []string{},
 		MaxCallDuration:   3 * time.Hour,
 		SessionIndexes:    utils.NewStringMap(),
 		ClientProtocol:    1,
@@ -955,7 +955,7 @@ func TestCGRConfigReloadAll(t *testing.T) {
 		AttrSConns:    []string{utils.MetaLocalHost},
 		CDRsConns:     []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 
-		ReplicationConns:  []*RemoteHost{},
+		ReplicationConns:  []string{},
 		MaxCallDuration:   3 * time.Hour,
 		SessionIndexes:    utils.NewStringMap(),
 		ClientProtocol:    1,

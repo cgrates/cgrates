@@ -1491,10 +1491,7 @@ func (cfg *CGRConfig) loadConfig(path, section string) (err error) {
 	var loadFuncs []func(*CgrJsonCfg) error
 	loadMap := cfg.getLoadFunctions()
 	if section == utils.EmptyString || section == utils.MetaAll {
-		for _, sec := range []string{GENERAL_JSN, RPCConnsJsonName, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN, SCHEDULER_JSN, CACHE_JSN, FilterSjsn, RALS_JSN,
-			CDRS_JSN, CDRE_JSN, CDRC_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN, KamailioAgentJSN,
-			DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
-			SupplierSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson, AnalyzerCfgJson, Apier} {
+		for _, sec := range sortedCfgSections {
 			cfg.lks[sec].Lock()
 			defer cfg.lks[sec].Unlock()
 			loadFuncs = append(loadFuncs, loadMap[sec])
@@ -1612,10 +1609,7 @@ func (cfg *CGRConfig) loadConfigFromHTTP(urlPaths string, loadFuncs []func(jsnCf
 func (cfg *CGRConfig) initChanels() {
 	cfg.lks = make(map[string]*sync.RWMutex)
 	cfg.rldChans = make(map[string]chan struct{})
-	for _, section := range []string{GENERAL_JSN, RPCConnsJsonName, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN, SCHEDULER_JSN, CACHE_JSN, FilterSjsn, RALS_JSN,
-		CDRS_JSN, CDRE_JSN, CDRC_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN, KamailioAgentJSN,
-		DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
-		SupplierSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson, AnalyzerCfgJson, Apier} {
+	for _, section := range sortedCfgSections {
 		cfg.lks[section] = new(sync.RWMutex)
 		cfg.rldChans[section] = make(chan struct{}, 1)
 	}
@@ -1676,13 +1670,13 @@ func (cfg *CGRConfig) V1ReloadConfigFromJSON(args *JSONReloadWithArgDispatcher, 
 	for _, section := range sections {
 		if subsystemsThatNeedStorDB.Has(section) {
 			needsStorDB = true
-			cfg.rldChans[STORDB_JSN] <- struct{}{} // reload datadb before
+			cfg.rldChans[STORDB_JSN] <- struct{}{} // reload stordb before
 			break
 		}
 	}
 	time.Sleep(1)
 	for _, section := range sections {
-		if needsDataDB && section == DATADB_JSN {
+		if needsDataDB && section == DATADB_JSN { // already reloaded
 			continue
 		}
 		if needsStorDB && section == STORDB_JSN {
@@ -1698,13 +1692,13 @@ func (cfg *CGRConfig) loadConfigFromJSON(rdr io.Reader, sections []string) (err 
 	var loadFuncs []func(*CgrJsonCfg) error
 	loadMap := cfg.getLoadFunctions()
 	for _, section := range sections {
-		if fnct, has := loadMap[section]; !has {
+		fnct, has := loadMap[section]
+		if !has {
 			return fmt.Errorf("Invalid section: <%s>", section)
-		} else {
-			cfg.lks[section].Lock()
-			defer cfg.lks[section].Unlock()
-			loadFuncs = append(loadFuncs, fnct)
 		}
+		cfg.lks[section].Lock()
+		defer cfg.lks[section].Unlock()
+		loadFuncs = append(loadFuncs, fnct)
 	}
 	return cfg.loadConfigFromReader(rdr, loadFuncs)
 }
