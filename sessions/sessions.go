@@ -2974,7 +2974,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 		rplyAttr, err := sS.processAttributes(args.CGREvent, args.ArgDispatcher,
 			argsFlagsWithParams.ParamsSlice(utils.MetaAttributes))
 		if err == nil {
-			args.CGREvent = rplyAttr.CGREvent
+			args.CGREvent = rplyAttr.CGREvent.Clone()
 			if tntIface, has := args.CGREvent.Event[utils.MetaTenant]; has {
 				// special case when we want to overwrite the tenant
 				args.CGREvent.Tenant = tntIface.(string)

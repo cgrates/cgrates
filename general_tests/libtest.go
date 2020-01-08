@@ -19,7 +19,7 @@ package general_tests
 
 import (
 	"errors"
-	"flag"
+	//"flag"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 
@@ -28,14 +28,17 @@ import (
 )
 
 var (
-	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
-	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
-	err       error
+	//dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
+	//waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
+	waitRater = 100
+	//encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
+	encoding = utils.MetaJSON
+	err      error
+	dataDir  = "/usr/share/cgrates"
 )
 
 func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
-	switch *encoding {
+	switch encoding {
 	case utils.MetaJSON:
 		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
 	case utils.MetaGOB:
