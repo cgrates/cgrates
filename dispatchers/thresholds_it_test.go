@@ -43,9 +43,9 @@ var sTestsDspTh = []func(t *testing.T){
 //Test start here
 func TestDspThresholdSTMySQL(t *testing.T) {
 	if *encoding == utils.MetaGOB {
-		testDsp(t, sTestsDspTh, "TestDspThresholdS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers_gob")
+		testDsp(t, sTestsDspTh, "TestDspThresholdS", "all", "all2", "dispatchers_mysql", "tutorial", "oldtutorial", "dispatchers_gob")
 	} else {
-		testDsp(t, sTestsDspTh, "TestDspThresholdS", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+		testDsp(t, sTestsDspTh, "TestDspThresholdS", "all", "all2", "dispatchers_mysql", "tutorial", "oldtutorial", "dispatchers")
 	}
 }
 

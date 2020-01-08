@@ -71,6 +71,8 @@ func TestApierIT2(t *testing.T) {
 		apierv2ConfigDIR = "tutmysql"
 	case utils.MetaMongo:
 		apierv2ConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")
 	}

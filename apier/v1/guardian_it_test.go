@@ -34,7 +34,20 @@ import (
 //Test start here
 func TestGuardianSIT(t *testing.T) {
 	var err error
-	guardianCfgPath := path.Join(*dataDir, "conf", "samples", "tutmysql")
+	var guardianConfigDIR string
+	switch *dbType {
+	case utils.MetaInternal:
+		guardianConfigDIR = "tutinternal"
+	case utils.MetaSQL:
+		guardianConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		guardianConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+	guardianCfgPath := path.Join(*dataDir, "conf", "samples", guardianConfigDIR)
 	guardianCfg, err := config.NewCGRConfigFromPath(guardianCfgPath)
 	if err != nil {
 		t.Error(err)

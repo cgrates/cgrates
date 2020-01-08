@@ -37,22 +37,33 @@ var (
 	costRPC       *rpc.Client
 	costConfigDIR string //run tests for specific configuration
 	costDataDir   = "/usr/share/cgrates"
-)
 
-var sTestsCost = []func(t *testing.T){
-	testCostInitCfg,
-	testCostInitDataDb,
-	testCostResetStorDb,
-	testCostStartEngine,
-	testCostRPCConn,
-	testCostLoadFromFolder,
-	testCostGetCost,
-	testCostKillEngine,
-}
+	sTestsCost = []func(t *testing.T){
+		testCostInitCfg,
+		testCostInitDataDb,
+		testCostResetStorDb,
+		testCostStartEngine,
+		testCostRPCConn,
+		testCostLoadFromFolder,
+		testCostGetCost,
+		testCostKillEngine,
+	}
+)
 
 //Test start here
 func TestCostIT(t *testing.T) {
-	costConfigDIR = "tutmysql"
+	switch *dbType {
+	case utils.MetaInternal:
+		costConfigDIR = "tutinternal"
+	case utils.MetaSQL:
+		costConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		costConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	for _, stest := range sTestsCost {
 		t.Run(costConfigDIR, stest)
 	}

@@ -40,47 +40,45 @@ var (
 	dispatcherProfile   *DispatcherWithCache
 	dispatcherHost      *DispatcherHostWithCache
 	dispatcherConfigDIR string //run tests for specific configuration
+
+	sTestsDispatcher = []func(t *testing.T){
+		testDispatcherSInitCfg,
+		testDispatcherSInitDataDb,
+		testDispatcherSResetStorDb,
+		testDispatcherSStartEngine,
+		testDispatcherSRPCConn,
+
+		testDispatcherSSetDispatcherProfile,
+		testDispatcherSGetDispatcherProfileIDs,
+		testDispatcherSUpdateDispatcherProfile,
+		testDispatcherSGetDispatcherProfileCache,
+		testDispatcherSRemDispatcherProfile,
+
+		testDispatcherSSetDispatcherHost,
+		testDispatcherSGetDispatcherHostIDs,
+		testDispatcherSUpdateDispatcherHost,
+		testDispatcherSGetDispatcherHostCache,
+		testDispatcherSRemDispatcherHost,
+
+		testDispatcherSKillEngine,
+	}
 )
 
-var sTestsDispatcher = []func(t *testing.T){
-	testDispatcherSInitCfg,
-	testDispatcherSInitDataDb,
-	testDispatcherSResetStorDb,
-	testDispatcherSStartEngine,
-	testDispatcherSRPCConn,
-
-	testDispatcherSSetDispatcherProfile,
-	testDispatcherSGetDispatcherProfileIDs,
-	testDispatcherSUpdateDispatcherProfile,
-	testDispatcherSGetDispatcherProfileCache,
-	testDispatcherSRemDispatcherProfile,
-
-	testDispatcherSSetDispatcherHost,
-	testDispatcherSGetDispatcherHostIDs,
-	testDispatcherSUpdateDispatcherHost,
-	testDispatcherSGetDispatcherHostCache,
-	testDispatcherSRemDispatcherHost,
-
-	testDispatcherSKillEngine,
-}
-
 //Test start here
-func TestDispatcherSITMySql(t *testing.T) {
-	dispatcherConfigDIR = "tutmysql"
-	for _, stest := range sTestsDispatcher {
-		t.Run(dispatcherConfigDIR, stest)
+func TestDispatcherSIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		dispatcherConfigDIR = "tutinternal"
+	case utils.MetaSQL:
+		dispatcherConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		dispatcherConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
 
-func TestDispatcherSITMongo(t *testing.T) {
-	dispatcherConfigDIR = "tutmongo"
-	for _, stest := range sTestsDispatcher {
-		t.Run(dispatcherConfigDIR, stest)
-	}
-}
-
-func TestDispatcherSITInternal(t *testing.T) {
-	dispatcherConfigDIR = "tutinternal"
 	for _, stest := range sTestsDispatcher {
 		t.Run(dispatcherConfigDIR, stest)
 	}

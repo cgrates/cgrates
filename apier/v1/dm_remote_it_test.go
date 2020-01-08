@@ -34,7 +34,7 @@ import (
 
 var (
 	internalCfgPath    string
-	internalCfgDirPath = "internal"
+	internalCfgDirPath string
 	internalCfg        *config.CGRConfig
 	internalRPC        *rpc.Client
 
@@ -47,63 +47,64 @@ var (
 	engineTwoCfgDirPath string
 	engineTwoCfg        *config.CGRConfig
 	engineTwoRPC        *rpc.Client
+
+	sTestsInternalRemoteIT = []func(t *testing.T){
+		testInternalRemoteITInitCfg,
+		testInternalRemoteITDataFlush,
+		testInternalRemoteITStartEngine,
+		testInternalRemoteITRPCConn,
+		testInternalRemoteLoadDataInEngineTwo,
+		testInternalRemoteITGetAccount,
+		testInternalRemoteITGetAttribute,
+		testInternalRemoteITGetThreshold,
+		testInternalRemoteITGetThresholdProfile,
+		testInternalRemoteITGetResource,
+		testInternalRemoteITGetResourceProfile,
+		testInternalRemoteITGetStatQueueProfile,
+		testInternalRemoteITGetSupplier,
+		testInternalRemoteITGetFilter,
+		testInternalRemoteITGetRatingPlan,
+		testInternalRemoteITGetRatingProfile,
+		testInternalRemoteITGetAction,
+		testInternalRemoteITGetActionPlan,
+		testInternalRemoteITGetAccountActionPlan,
+		testInternalRemoteITGetDestination,
+		testInternalRemoteITGetReverseDestination,
+		testInternalReplicationSetThreshold,
+		testInternalMatchThreshold,
+		testInternalAccountBalanceOperations,
+		testInternalSetAccount,
+		testInternalRemoteITKillEngine,
+	}
 )
 
-var sTestsInternalRemoteIT = []func(t *testing.T){
-	testInternalRemoteITInitCfg,
-	testInternalRemoteITDataFlush,
-	testInternalRemoteITStartEngine,
-	testInternalRemoteITRPCConn,
-	testInternalRemoteLoadDataInEngineTwo,
-	testInternalRemoteITGetAccount,
-	testInternalRemoteITGetAttribute,
-	testInternalRemoteITGetThreshold,
-	testInternalRemoteITGetThresholdProfile,
-	testInternalRemoteITGetResource,
-	testInternalRemoteITGetResourceProfile,
-	testInternalRemoteITGetStatQueueProfile,
-	testInternalRemoteITGetSupplier,
-	testInternalRemoteITGetFilter,
-	testInternalRemoteITGetRatingPlan,
-	testInternalRemoteITGetRatingProfile,
-	testInternalRemoteITGetAction,
-	testInternalRemoteITGetActionPlan,
-	testInternalRemoteITGetAccountActionPlan,
-	testInternalRemoteITGetDestination,
-	testInternalRemoteITGetReverseDestination,
-	testInternalReplicationSetThreshold,
-	testInternalMatchThreshold,
-	testInternalAccountBalanceOperations,
-	testInternalSetAccount,
-	testInternalRemoteITKillEngine,
-}
-
-func TestInternalRemoteITRedis(t *testing.T) {
+func TestInternalRemoteIT(t *testing.T) {
+	internalCfgDirPath = "internal"
+	switch *dbType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaSQL:
+		engineOneCfgDirPath = "engine1_redis"
+		engineTwoCfgDirPath = "engine2_redis"
+	case utils.MetaMongo:
+		engineOneCfgDirPath = "engine1_mongo"
+		engineTwoCfgDirPath = "engine2_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	if *encoding == utils.MetaGOB {
-		internalCfgDirPath = "internal_gob"
+		internalCfgDirPath += "_gob"
 	}
-	engineOneCfgDirPath = "engine1_redis"
-	engineTwoCfgDirPath = "engine2_redis"
 	for _, stest := range sTestsInternalRemoteIT {
-		t.Run("TestInternalRemoteITRedis", stest)
-	}
-}
-
-func TestInternalRemoteITMongo(t *testing.T) {
-	if *encoding == utils.MetaGOB {
-		internalCfgDirPath = "internal_gob"
-	}
-	engineOneCfgDirPath = "engine1_mongo"
-	engineTwoCfgDirPath = "engine2_mongo"
-	for _, stest := range sTestsInternalRemoteIT {
-		t.Run("TestInternalRemoteITMongo", stest)
+		t.Run(*dbType, stest)
 	}
 }
 
 func testInternalRemoteITInitCfg(t *testing.T) {
 	var err error
-	internalCfgPath = path.Join(*dataDir, "conf", "samples",
-		"remote_replication", internalCfgDirPath)
+	internalCfgPath = path.Join(*dataDir, "conf", "samples", "remote_replication", internalCfgDirPath)
 	internalCfg, err = config.NewCGRConfigFromPath(internalCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -156,17 +157,17 @@ func testInternalRemoteITStartEngine(t *testing.T) {
 
 func testInternalRemoteITRPCConn(t *testing.T) {
 	var err error
-	internalRPC, err = newRPCClient(internalCfg.ListenCfg())
-	if err != nil {
-		t.Fatal(err)
-	}
-	time.Sleep(200 * time.Millisecond)
 	engineOneRPC, err = newRPCClient(engineOneCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}
 	time.Sleep(200 * time.Millisecond)
 	engineTwoRPC, err = newRPCClient(engineTwoCfg.ListenCfg())
+	if err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(200 * time.Millisecond)
+	internalRPC, err = newRPCClient(internalCfg.ListenCfg())
 	if err != nil {
 		t.Fatal(err)
 	}

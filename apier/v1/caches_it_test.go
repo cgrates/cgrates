@@ -33,52 +33,56 @@ import (
 )
 
 var (
-	chcCfg     *config.CGRConfig
-	chcRPC     *rpc.Client
-	chcCfgPath string
-	chcCfgDir  string
+	chcCfg         *config.CGRConfig
+	chcRPC         *rpc.Client
+	chcCfgPath     string
+	cacheConfigDIR string
+
+	sTestsCacheSV1 = []func(t *testing.T){
+		testCacheSLoadConfig,
+		testCacheSInitDataDb,
+		testCacheSInitStorDb,
+		testCacheSStartEngine,
+		testCacheSRpcConn,
+		testCacheSLoadTariffPlanFromFolder,
+		testCacheSAfterLoadFromFolder,
+		testCacheSFlush,
+		testCacheSReload,
+		testCacheSGetItemIDs,
+		testCacheSHasItem,
+		testCacheSGetItemExpiryTime,
+		testCacheSReloadCache,
+		testCacheSRemoveItem,
+		testCacheSClear,
+		testCacheSReload,
+		testCacheSPrecacheStatus,
+		testCacheSPing,
+		testCacheSStopEngine,
+	}
 )
 
-var sTestsCacheSV1 = []func(t *testing.T){
-	testCacheSLoadConfig,
-	testCacheSInitDataDb,
-	testCacheSInitStorDb,
-	testCacheSStartEngine,
-	testCacheSRpcConn,
-	testCacheSLoadTariffPlanFromFolder,
-	testCacheSAfterLoadFromFolder,
-	testCacheSFlush,
-	testCacheSReload,
-	testCacheSGetItemIDs,
-	testCacheSHasItem,
-	testCacheSGetItemExpiryTime,
-	testCacheSReloadCache,
-	testCacheSRemoveItem,
-	testCacheSClear,
-	testCacheSReload,
-	testCacheSPrecacheStatus,
-	testCacheSPing,
-	testCacheSStopEngine,
-}
-
 // Test start here
-func TestCacheSv1ITMySQL(t *testing.T) {
-	chcCfgDir = "tutmysql"
-	for _, stest := range sTestsCacheSV1 {
-		t.Run(chcCfgDir, stest)
+func TestCacheSv1IT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaSQL:
+		cacheConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		cacheConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestCacheSv1ITMongo(t *testing.T) {
-	chcCfgDir = "tutmongo"
 	for _, stest := range sTestsCacheSV1 {
-		t.Run(chcCfgDir, stest)
+		t.Run(cacheConfigDIR, stest)
 	}
 }
 
 func testCacheSLoadConfig(t *testing.T) {
 	var err error
-	chcCfgPath = path.Join(*dataDir, "conf", "samples", "precache", chcCfgDir)
+	chcCfgPath = path.Join(*dataDir, "conf", "samples", "precache", cacheConfigDIR)
 	if chcCfg, err = config.NewCGRConfigFromPath(chcCfgPath); err != nil {
 		t.Error(err)
 	}

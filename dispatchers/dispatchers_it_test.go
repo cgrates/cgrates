@@ -41,7 +41,7 @@ var sTestsDspApier = []func(t *testing.T){
 
 //Test start here
 func TestDspApierITMySQL(t *testing.T) {
-	testDsp(t, sTestsDspApier, "TestDspApier", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+	testDsp(t, sTestsDspApier, "TestDspApier", "all", "all2", "dispatchers_mysql", "tutorial", "oldtutorial", "dispatchers")
 }
 
 func TestDspApierITMongo(t *testing.T) {

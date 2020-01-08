@@ -39,24 +39,35 @@ var (
 	cdreRPC       *rpc.Client
 	cdreDataDir   = "/usr/share/cgrates"
 	cdreConfigDIR string //run tests for specific configuration
+
+	sTestsCDRE = []func(t *testing.T){
+		testCDReInitCfg,
+		testCDReInitDataDb,
+		testCDReResetStorDb,
+		testCDReStartEngine,
+		testCDReRPCConn,
+		testCDReAddCDRs,
+		testCDReExportCDRs,
+		testCDReFromFolder,
+		testCDReProcessExternalCdr,
+		testCDReKillEngine,
+	}
 )
 
-var sTestsCDRE = []func(t *testing.T){
-	testCDReInitCfg,
-	testCDReInitDataDb,
-	testCDReResetStorDb,
-	testCDReStartEngine,
-	testCDReRPCConn,
-	testCDReAddCDRs,
-	testCDReExportCDRs,
-	testCDReFromFolder,
-	testCDReProcessExternalCdr,
-	testCDReKillEngine,
-}
-
 //Test start here
-func TestCDRExportMySql(t *testing.T) {
-	cdreConfigDIR = "cdrewithfilter"
+func TestCDRExport(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		cdreConfigDIR = "cdrewithfilter_internal"
+	case utils.MetaSQL:
+		cdreConfigDIR = "cdrewithfilter_mysql"
+	case utils.MetaMongo:
+		cdreConfigDIR = "cdrewithfilter_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	for _, stest := range sTestsCDRE {
 		t.Run(cdreConfigDIR, stest)
 	}
