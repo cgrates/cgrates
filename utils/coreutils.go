@@ -900,14 +900,6 @@ func GetUrlRawArguments(dialURL string) (out map[string]string) {
 	return
 }
 
-type RatingPlanCostArg struct {
-	RatingPlanIDs []string
-	Destination   string
-	SetupTime     string
-	Usage         string
-	*ArgDispatcher
-}
-
 // WarnExecTime is used when we need to meassure the execution of specific functions
 // and warn when the total duration is higher than expected
 // should be usually called with defer, ie: defer WarnExecTime(time.Now(), "MyTestFunc", time.Duration(2*time.Second))
@@ -963,5 +955,5 @@ func CastRPCErr(err error) error {
 
 // RandomInteger returns a random integer between min and max values
 func RandomInteger(min, max int) int {
-	return math_rand.Intn(max-min+1) + min
+	return math_rand.Intn(max-min) + min
 }

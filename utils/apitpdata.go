@@ -1380,3 +1380,11 @@ type ArgDispatcher struct {
 	APIKey  *string
 	RouteID *string
 }
+
+type RatingPlanCostArg struct {
+	RatingPlanIDs []string
+	Destination   string
+	SetupTime     string
+	Usage         string
+	*ArgDispatcher
+}
