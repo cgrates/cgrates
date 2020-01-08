@@ -19,7 +19,7 @@
 		"conns": [{"address": "127.0.0.1:22012", "transport":"*json"}],
 	},
 	"rplConn": {
-		"strategy": "*broadcast_sync",
+		"strategy": "*broadcast",
 		"conns": [{"address": "127.0.0.1:2012", "transport": "*json"}],
 	}
 },

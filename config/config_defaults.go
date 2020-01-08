@@ -56,7 +56,6 @@ const CGRATES_CFG_JSON = `
 
 "rpc_conns": {
 	"*localhost": {
-		"strategy": "*first",
 		"conns": [{"address": "127.0.0.1:2012", "transport":"*json"}],
 	},
 },							// rpc connections definitions

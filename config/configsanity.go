@@ -207,6 +207,11 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.SessionS, connID)
 			}
 		}
+		for _, connID := range cfg.sessionSCfg.ReplicationConns {
+			if _, has := cfg.rpcConns[connID]; !has {
+				return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.SessionS, connID)
+			}
+		}
 		if cfg.cacheCfg[utils.CacheClosedSessions].Limit == 0 {
 			return fmt.Errorf("<%s> %s needs to be != 0, received: %d", utils.CacheS, utils.CacheClosedSessions, cfg.cacheCfg[utils.CacheClosedSessions].Limit)
 		}
