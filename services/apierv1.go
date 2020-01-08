@@ -64,6 +64,9 @@ type ApierV1Service struct {
 
 	api      *v1.ApierV1
 	connChan chan rpcclient.ClientConnector
+
+	syncStop   chan struct{}
+	storDBChan chan engine.StorDB
 }
 
 // Start should handle the sercive start
@@ -79,10 +82,15 @@ func (api *ApierV1Service) Start() (err error) {
 	api.Lock()
 	defer api.Unlock()
 
+	api.storDBChan = make(chan engine.StorDB, 1)
+	api.syncStop = make(chan struct{})
+	api.storDB.RegisterSyncChan(api.storDBChan)
+	stordb := <-api.storDBChan
+
 	api.api = &v1.ApierV1{
 		DataManager:      api.dm.GetDM(),
-		CdrDb:            api.storDB.GetDM(),
-		StorDb:           api.storDB.GetDM(),
+		CdrDb:            stordb,
+		StorDb:           stordb,
 		Config:           api.cfg,
 		Responder:        api.responderService.GetResponder(),
 		SchedulerService: api.schedService,
@@ -102,6 +110,7 @@ func (api *ApierV1Service) Start() (err error) {
 	utils.RegisterRpcParams("", api.api)
 
 	api.connChan <- api.api
+	go api.sync()
 
 	return
 }
@@ -113,20 +122,16 @@ func (api *ApierV1Service) GetIntenternalChan() (conn chan rpcclient.ClientConne
 
 // Reload handles the change of config
 func (api *ApierV1Service) Reload() (err error) {
-	api.Lock()
-	if api.storDB.WasReconnected() { // rewrite the connection if was changed
-		api.api.SetStorDB(api.storDB.GetDM())
-	}
-	api.Unlock()
 	return
 }
 
 // Shutdown stops the service
 func (api *ApierV1Service) Shutdown() (err error) {
 	api.Lock()
-	defer api.Unlock()
+	close(api.syncStop)
 	api.api = nil
 	<-api.connChan
+	api.Unlock()
 	return
 }
 
@@ -152,4 +157,23 @@ func (api *ApierV1Service) GetApierV1() *v1.ApierV1 {
 // ShouldRun returns if the service should be running
 func (api *ApierV1Service) ShouldRun() bool {
 	return api.cfg.RalsCfg().Enabled
+}
+
+// sync handles stordb sync
+func (api *ApierV1Service) sync() {
+	for {
+		select {
+		case <-api.syncStop:
+			return
+		case stordb, ok := <-api.storDBChan:
+			if !ok { // the chanel was closed by the shutdown of stordbService
+				return
+			}
+			api.Lock()
+			if api.api != nil {
+				api.api.SetStorDB(stordb)
+			}
+			api.Unlock()
+		}
+	}
 }

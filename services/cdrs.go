@@ -61,6 +61,9 @@ type CDRServer struct {
 	rpcv2    *v2.CDRsV2
 	connChan chan rpcclient.ClientConnector
 	connMgr  *engine.ConnManager
+
+	syncStop   chan struct{}
+	storDBChan chan engine.StorDB
 }
 
 // Start should handle the sercive start
@@ -76,7 +79,13 @@ func (cdrS *CDRServer) Start() (err error) {
 
 	cdrS.Lock()
 	defer cdrS.Unlock()
-	cdrS.cdrS = engine.NewCDRServer(cdrS.cfg, cdrS.storDB.GetDM(), cdrS.dm.GetDM(),
+
+	cdrS.storDBChan = make(chan engine.StorDB, 1)
+	cdrS.syncStop = make(chan struct{})
+	cdrS.storDB.RegisterSyncChan(cdrS.storDBChan)
+	stordb := <-cdrS.storDBChan
+
+	cdrS.cdrS = engine.NewCDRServer(cdrS.cfg, stordb, cdrS.dm.GetDM(),
 		filterS, cdrS.connMgr)
 	utils.Logger.Info("Registering CDRS HTTP Handlers.")
 	cdrS.cdrS.RegisterHandlersToServer(cdrS.server)
@@ -88,6 +97,7 @@ func (cdrS *CDRServer) Start() (err error) {
 	// Make the cdr server available for internal communication
 	cdrS.server.RpcRegister(cdrS.cdrS) // register CdrServer for internal usage (TODO: refactor this)
 	cdrS.connChan <- cdrS.cdrS         // Signal that cdrS is operational
+	go cdrS.sync()
 	return
 }
 
@@ -98,18 +108,13 @@ func (cdrS *CDRServer) GetIntenternalChan() (conn chan rpcclient.ClientConnector
 
 // Reload handles the change of config
 func (cdrS *CDRServer) Reload() (err error) {
-
-	cdrS.Lock()
-	if cdrS.storDB.WasReconnected() { // rewrite the connection if was changed
-		cdrS.cdrS.SetStorDB(cdrS.storDB.GetDM())
-	}
-	cdrS.Unlock()
 	return
 }
 
 // Shutdown stops the service
 func (cdrS *CDRServer) Shutdown() (err error) {
 	cdrS.Lock()
+	close(cdrS.syncStop)
 	cdrS.cdrS = nil
 	cdrS.rpcv1 = nil
 	cdrS.rpcv2 = nil
@@ -133,4 +138,23 @@ func (cdrS *CDRServer) ServiceName() string {
 // ShouldRun returns if the service should be running
 func (cdrS *CDRServer) ShouldRun() bool {
 	return cdrS.cfg.CdrsCfg().Enabled
+}
+
+// sync handles stordb sync
+func (cdrS *CDRServer) sync() {
+	for {
+		select {
+		case <-cdrS.syncStop:
+			return
+		case stordb, ok := <-cdrS.storDBChan:
+			if !ok { // the chanel was closed by the shutdown of stordbService
+				return
+			}
+			cdrS.Lock()
+			if cdrS.cdrS != nil {
+				cdrS.cdrS.SetStorDB(stordb)
+			}
+			cdrS.Unlock()
+		}
+	}
 }

@@ -496,11 +496,6 @@ func main() {
 			return
 		}
 	}
-	if storDBService.ShouldRun() {
-		if err = storDBService.Start(); err != nil {
-			return
-		}
-	}
 	// Done initing DBs
 	engine.SetRoundingDecimals(cfg.GeneralCfg().RoundingDecimals)
 

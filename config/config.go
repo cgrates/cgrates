@@ -1186,7 +1186,7 @@ func (cfg *CGRConfig) V1ReloadConfigFromPath(args *ConfigReloadWithArgDispatcher
 	if missing := utils.MissingStructFields(args, []string{"Path"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err = cfg.loadConfig(args.Path, args.Section); err != nil {
+	if err = cfg.loadCfgWithLocks(args.Path, args.Section); err != nil {
 		return
 	}
 	//  lock all sections
@@ -1200,249 +1200,15 @@ func (cfg *CGRConfig) V1ReloadConfigFromPath(args *ConfigReloadWithArgDispatcher
 		return
 	}
 
-	if err = cfg.reloadSection(args.Section); err != nil {
+	if args.Section == utils.EmptyString || args.Section == utils.MetaAll {
+		err = cfg.reloadSections(sortedCfgSections...)
+	} else {
+		err = cfg.reloadSections(args.Section)
+	}
+	if err != nil {
 		return
 	}
 	*reply = utils.OK
-	return
-}
-
-func (cfg *CGRConfig) reloadSection(section string) (err error) {
-	var fall bool
-	switch section {
-	default:
-		return fmt.Errorf("Invalid section: <%s>", section)
-	case utils.EmptyString, utils.MetaAll:
-		fall = true
-		fallthrough
-	case GENERAL_JSN: // nothing to reload
-		if !fall {
-			break
-		}
-		fallthrough
-	case RPCConnsJsonName: // nothing to reload
-		if !fall {
-			break
-		}
-		fallthrough
-	case DATADB_JSN:
-		cfg.rldChans[DATADB_JSN] <- struct{}{}
-		time.Sleep(1) // to force the context switch( to be sure we start the DB before a service that needs it)
-		if !fall {
-			break
-		}
-		fallthrough
-	case STORDB_JSN:
-		cfg.rldChans[STORDB_JSN] <- struct{}{}
-		time.Sleep(1) // to force the context switch( to be sure we start the DB before a service that needs it)
-		if !fall {
-			cfg.rldChans[CDRS_JSN] <- struct{}{}
-			cfg.rldChans[Apier] <- struct{}{}
-			break
-		}
-		fallthrough
-	case LISTEN_JSN:
-		if !fall {
-			break
-		}
-		fallthrough
-	case TlsCfgJson: // nothing to reload
-		if !fall {
-			break
-		}
-		fallthrough
-	case HTTP_JSN:
-		if !fall {
-			break
-		}
-		fallthrough
-	case SCHEDULER_JSN:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[SCHEDULER_JSN] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case RALS_JSN:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			cfg.rldChans[STORDB_JSN] <- struct{}{}
-			time.Sleep(1) // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[RALS_JSN] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case CDRS_JSN:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			cfg.rldChans[STORDB_JSN] <- struct{}{}
-			time.Sleep(1) // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[CDRS_JSN] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case CDRC_JSN:
-		if !fall {
-			break
-		}
-		fallthrough
-	case ERsJson:
-		cfg.rldChans[ERsJson] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case SessionSJson:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[SessionSJson] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case AsteriskAgentJSN:
-		cfg.rldChans[AsteriskAgentJSN] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case FreeSWITCHAgentJSN:
-		cfg.rldChans[FreeSWITCHAgentJSN] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case KamailioAgentJSN:
-		cfg.rldChans[KamailioAgentJSN] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case DA_JSN:
-		cfg.rldChans[DA_JSN] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case RA_JSN:
-		cfg.rldChans[RA_JSN] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case HttpAgentJson:
-		cfg.rldChans[HttpAgentJson] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case DNSAgentJson:
-		cfg.rldChans[DNSAgentJson] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case ATTRIBUTE_JSN:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[ATTRIBUTE_JSN] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case ChargerSCfgJson:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[ChargerSCfgJson] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case RESOURCES_JSON:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[RESOURCES_JSON] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case STATS_JSON:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[STATS_JSON] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case THRESHOLDS_JSON:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[THRESHOLDS_JSON] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case SupplierSJson:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[SupplierSJson] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case LoaderJson:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[LoaderJson] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case DispatcherSJson:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[DispatcherSJson] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case AnalyzerCfgJson:
-		if !fall {
-			break
-		}
-		fallthrough
-	case Apier:
-		if !fall {
-			cfg.rldChans[STORDB_JSN] <- struct{}{}
-			time.Sleep(1) // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[Apier] <- struct{}{}
-	}
 	return
 }
 
@@ -1487,7 +1253,8 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		RPCConnsJsonName:   cfg.loadRPCConns,
 	}
 }
-func (cfg *CGRConfig) loadConfig(path, section string) (err error) {
+
+func (cfg *CGRConfig) loadCfgWithLocks(path, section string) (err error) {
 	var loadFuncs []func(*CgrJsonCfg) error
 	loadMap := cfg.getLoadFunctions()
 	if section == utils.EmptyString || section == utils.MetaAll {
@@ -1638,7 +1405,7 @@ func (cfg *CGRConfig) V1ReloadConfigFromJSON(args *JSONReloadWithArgDispatcher, 
 		return
 	}
 
-	if err = cfg.loadConfigFromJSON(bytes.NewBuffer(b), sections); err != nil {
+	if err = cfg.loadCfgFromJSONWithLocks(bytes.NewBuffer(b), sections); err != nil {
 		return
 	}
 
@@ -1649,46 +1416,15 @@ func (cfg *CGRConfig) V1ReloadConfigFromJSON(args *JSONReloadWithArgDispatcher, 
 
 	cfg.rUnlockSections() // unlock before checking the error
 
+	err = cfg.reloadSections(sections...)
 	if err != nil {
 		return
-	}
-
-	subsystemsThatNeedDataDB := utils.NewStringSet([]string{DATADB_JSN, SCHEDULER_JSN,
-		RALS_JSN, CDRS_JSN, SessionSJson, ATTRIBUTE_JSN,
-		ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
-		SupplierSJson, LoaderJson, DispatcherSJson})
-	needsDataDB := false
-	for _, section := range sections {
-		if subsystemsThatNeedDataDB.Has(section) {
-			needsDataDB = true
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			break
-		}
-	}
-	subsystemsThatNeedStorDB := utils.NewStringSet([]string{STORDB_JSN, RALS_JSN, CDRS_JSN, Apier})
-	needsStorDB := false
-	for _, section := range sections {
-		if subsystemsThatNeedStorDB.Has(section) {
-			needsStorDB = true
-			cfg.rldChans[STORDB_JSN] <- struct{}{} // reload stordb before
-			break
-		}
-	}
-	time.Sleep(1)
-	for _, section := range sections {
-		if needsDataDB && section == DATADB_JSN { // already reloaded
-			continue
-		}
-		if needsStorDB && section == STORDB_JSN {
-			continue
-		}
-		cfg.rldChans[section] <- struct{}{}
 	}
 	*reply = utils.OK
 	return
 }
 
-func (cfg *CGRConfig) loadConfigFromJSON(rdr io.Reader, sections []string) (err error) {
+func (cfg *CGRConfig) loadCfgFromJSONWithLocks(rdr io.Reader, sections []string) (err error) {
 	var loadFuncs []func(*CgrJsonCfg) error
 	loadMap := cfg.getLoadFunctions()
 	for _, section := range sections {
@@ -1701,4 +1437,87 @@ func (cfg *CGRConfig) loadConfigFromJSON(rdr io.Reader, sections []string) (err 
 		loadFuncs = append(loadFuncs, fnct)
 	}
 	return cfg.loadConfigFromReader(rdr, loadFuncs)
+}
+
+func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
+	subsystemsThatNeedDataDB := utils.NewStringSet([]string{DATADB_JSN, SCHEDULER_JSN,
+		RALS_JSN, CDRS_JSN, SessionSJson, ATTRIBUTE_JSN,
+		ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
+		SupplierSJson, LoaderJson, DispatcherSJson})
+	subsystemsThatNeedStorDB := utils.NewStringSet([]string{STORDB_JSN, RALS_JSN, CDRS_JSN, Apier})
+	needsDataDB := false
+	needsStorDB := false
+	for _, section := range sections {
+		if !needsDataDB && subsystemsThatNeedDataDB.Has(section) {
+			needsDataDB = true
+			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+		}
+		if !needsStorDB && subsystemsThatNeedStorDB.Has(section) {
+			needsStorDB = true
+			cfg.rldChans[STORDB_JSN] <- struct{}{} // reload stordb before
+		}
+		if needsDataDB && needsStorDB {
+			break
+		}
+	}
+	time.Sleep(1)
+	for _, section := range sections {
+		switch section {
+		default:
+			return fmt.Errorf("Invalid section: <%s>", section)
+		case GENERAL_JSN: // nothing to reload
+		case RPCConnsJsonName: // nothing to reload
+		case DATADB_JSN: // reloaded before
+		case STORDB_JSN: // reloaded before
+		case LISTEN_JSN:
+		case TlsCfgJson: // nothing to reload
+		case HTTP_JSN:
+		case SCHEDULER_JSN:
+			cfg.rldChans[SCHEDULER_JSN] <- struct{}{}
+		case RALS_JSN:
+			cfg.rldChans[RALS_JSN] <- struct{}{}
+		case CDRS_JSN:
+			cfg.rldChans[CDRS_JSN] <- struct{}{}
+		case CDRC_JSN:
+		case ERsJson:
+			cfg.rldChans[ERsJson] <- struct{}{}
+		case SessionSJson:
+			cfg.rldChans[SessionSJson] <- struct{}{}
+		case AsteriskAgentJSN:
+			cfg.rldChans[AsteriskAgentJSN] <- struct{}{}
+		case FreeSWITCHAgentJSN:
+			cfg.rldChans[FreeSWITCHAgentJSN] <- struct{}{}
+		case KamailioAgentJSN:
+			cfg.rldChans[KamailioAgentJSN] <- struct{}{}
+		case DA_JSN:
+			cfg.rldChans[DA_JSN] <- struct{}{}
+		case RA_JSN:
+			cfg.rldChans[RA_JSN] <- struct{}{}
+		case HttpAgentJson:
+			cfg.rldChans[HttpAgentJson] <- struct{}{}
+		case DNSAgentJson:
+			cfg.rldChans[DNSAgentJson] <- struct{}{}
+		case ATTRIBUTE_JSN:
+			cfg.rldChans[ATTRIBUTE_JSN] <- struct{}{}
+		case ChargerSCfgJson:
+			cfg.rldChans[ChargerSCfgJson] <- struct{}{}
+		case RESOURCES_JSON:
+			cfg.rldChans[RESOURCES_JSON] <- struct{}{}
+		case STATS_JSON:
+			cfg.rldChans[STATS_JSON] <- struct{}{}
+		case THRESHOLDS_JSON:
+			cfg.rldChans[THRESHOLDS_JSON] <- struct{}{}
+		case SupplierSJson:
+			cfg.rldChans[SupplierSJson] <- struct{}{}
+		case LoaderJson:
+			cfg.rldChans[LoaderJson] <- struct{}{}
+		case DispatcherSJson:
+			cfg.rldChans[DispatcherSJson] <- struct{}{}
+		case AnalyzerCfgJson:
+		case Apier:
+			cfg.rldChans[Apier] <- struct{}{}
+		}
+		return
+	}
+	return
 }
