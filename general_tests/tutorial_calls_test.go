@@ -40,8 +40,6 @@ import (
 var tutorialCallsCfg *config.CGRConfig
 var tutorialCallsRpc *rpc.Client
 var tutorialCallsPjSuaListener *os.File
-var waitRater = flag.Int("wait_rater", 1000, "Number of miliseconds to wait for rater to start and cache")
-var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 var fsConfig = flag.String("fsConfig", "/usr/share/cgrates/tutorial_tests/fs_evsock", "FreeSwitch tutorial folder")
 var kamConfig = flag.String("kamConfig", "/usr/share/cgrates/tutorial_tests/kamevapi", "Kamailio tutorial folder")
 var oSipsConfig = flag.String("osConfig", "/usr/share/cgrates/tutorial_tests/osips", "OpenSips tutorial folder")
@@ -762,20 +760,16 @@ func testCallSyncSessions(t *testing.T) {
 	}
 
 	var sourceForCDR string
-	var numberOfCDR int
+	numberOfCDR := 3
 	switch optConf {
 	case utils.Freeswitch:
 		sourceForCDR = "FS_CHANNEL_ANSWER"
-		numberOfCDR = 2
 	case utils.Kamailio:
 		sourceForCDR = utils.KamailioAgent
-		numberOfCDR = 3
 	case utils.Asterisk:
 		sourceForCDR = utils.AsteriskAgent
-		numberOfCDR = 3
 	case utils.Opensips:
 		sourceForCDR = utils.Opensips
-		numberOfCDR = 3
 	}
 	// verify cdr
 	var rplCdrs []*engine.ExternalCDR
