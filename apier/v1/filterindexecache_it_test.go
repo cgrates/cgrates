@@ -31,62 +31,67 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var tFIdxCaRpc *rpc.Client
+var (
+	tFIdxCaRpc               *rpc.Client
+	sTestsFilterIndexesSV1Ca = []func(t *testing.T){
+		testV1FIdxCaLoadConfig,
+		testV1FIdxCaInitDataDb,
+		testV1FIdxCaResetStorDb,
+		testV1FIdxCaStartEngine,
+		testV1FIdxCaRpcConn,
 
-var sTestsFilterIndexesSV1Ca = []func(t *testing.T){
-	testV1FIdxCaLoadConfig,
-	testV1FIdxCaInitDataDb,
-	testV1FIdxCaResetStorDb,
-	testV1FIdxCaStartEngine,
-	testV1FIdxCaRpcConn,
+		testV1FIdxCaProcessEventWithNotFound,
+		testV1FIdxCaSetThresholdProfile,
+		testV1FIdxCaFromFolder,
+		testV1FIdxCaGetThresholdFromTP,
+		testV1FIdxCaUpdateThresholdProfile,
+		testV1FIdxCaUpdateThresholdProfileFromTP,
+		testV1FIdxCaRemoveThresholdProfile,
 
-	testV1FIdxCaProcessEventWithNotFound,
-	testV1FIdxCaSetThresholdProfile,
-	testV1FIdxCaFromFolder,
-	testV1FIdxCaGetThresholdFromTP,
-	testV1FIdxCaUpdateThresholdProfile,
-	testV1FIdxCaUpdateThresholdProfileFromTP,
-	testV1FIdxCaRemoveThresholdProfile,
+		testV1FIdxCaInitDataDb,
+		testV1FIdxCaGetStatQueuesWithNotFound,
+		testV1FIdxCaSetStatQueueProfile,
+		testV1FIdxCaFromFolder,
+		testV1FIdxCaGetStatQueuesFromTP,
+		testV1FIdxCaUpdateStatQueueProfile,
+		testV1FIdxCaUpdateStatQueueProfileFromTP,
+		testV1FIdxCaRemoveStatQueueProfile,
 
-	testV1FIdxCaInitDataDb,
-	testV1FIdxCaGetStatQueuesWithNotFound,
-	testV1FIdxCaSetStatQueueProfile,
-	testV1FIdxCaFromFolder,
-	testV1FIdxCaGetStatQueuesFromTP,
-	testV1FIdxCaUpdateStatQueueProfile,
-	testV1FIdxCaUpdateStatQueueProfileFromTP,
-	testV1FIdxCaRemoveStatQueueProfile,
+		testV1FIdxCaInitDataDb,
+		testV1FIdxCaProcessAttributeProfileEventWithNotFound,
+		testV1FIdxCaSetAttributeProfile,
+		testV1FIdxCaFromFolder,
+		testV1FIdxCaGetAttributeProfileFromTP,
+		testV1FIdxCaUpdateAttributeProfile,
+		testV1FIdxCaUpdateAttributeProfileFromTP,
+		testV1FIdxCaRemoveAttributeProfile,
 
-	testV1FIdxCaInitDataDb,
-	testV1FIdxCaProcessAttributeProfileEventWithNotFound,
-	testV1FIdxCaSetAttributeProfile,
-	testV1FIdxCaFromFolder,
-	testV1FIdxCaGetAttributeProfileFromTP,
-	testV1FIdxCaUpdateAttributeProfile,
-	testV1FIdxCaUpdateAttributeProfileFromTP,
-	testV1FIdxCaRemoveAttributeProfile,
-
-	testV1FIdxCaInitDataDb,
-	testV1FIdxCaGetResourceProfileWithNotFound,
-	testV1FIdxCaSetResourceProfile,
-	testV1FIdxCaFromFolder,
-	testV1FIdxCaGetResourceProfileFromTP,
-	testV1FIdxCaUpdateResourceProfile,
-	testV1FIdxCaUpdateResourceProfileFromTP,
-	testV1FIdxCaRemoveResourceProfile,
-	testV1FIdxCaStopEngine,
-}
+		testV1FIdxCaInitDataDb,
+		testV1FIdxCaGetResourceProfileWithNotFound,
+		testV1FIdxCaSetResourceProfile,
+		testV1FIdxCaFromFolder,
+		testV1FIdxCaGetResourceProfileFromTP,
+		testV1FIdxCaUpdateResourceProfile,
+		testV1FIdxCaUpdateResourceProfileFromTP,
+		testV1FIdxCaRemoveResourceProfile,
+		testV1FIdxCaStopEngine,
+	}
+)
 
 // Test start here
-func TestFIdxCaV1ITMySQL(t *testing.T) {
-	tSv1ConfDIR = "tutmysql"
-	for _, stest := range sTestsFilterIndexesSV1Ca {
-		t.Run(tSv1ConfDIR, stest)
+func TestFIdxCaV1IT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaSQL:
+		tSv1ConfDIR = "tutmysql"
+	case utils.MetaMongo:
+		tSv1ConfDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestFIdxCaV1ITMongo(t *testing.T) {
-	tSv1ConfDIR = "tutmongo"
 	for _, stest := range sTestsFilterIndexesSV1Ca {
 		t.Run(tSv1ConfDIR, stest)
 	}

@@ -46,30 +46,37 @@ var (
 		testDspITStartEngine,
 		testDspITRPCConn,
 		testDspITLoadData,
-
 		testDspDspv1GetProfileForEvent,
-
 		testDspITStopCgrEngine,
 	}
 )
 
 //Test start here
-func TestDspDspv1SMySQL(t *testing.T) {
-	dspCfgPath = path.Join(*dataDir, "conf", "samples", "dispatchers", "dispatchers")
-	for _, stest := range sTestsDspDspv1 {
-		t.Run("TestDspDspv1", stest)
-	}
-}
 
-func TestDspDspv1SMongo(t *testing.T) {
-	dspCfgPath = path.Join(*dataDir, "conf", "samples", "dispatchers", "dispatchers_mongo")
+func TestDspDspv1(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaSQL:
+		dispatcherConfigDIR = "dispatchers_mysql"
+	case utils.MetaMongo:
+		dispatcherConfigDIR = "dispatchers_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+	if *encoding == utils.MetaGOB {
+		dispatcherConfigDIR += "_gob"
+	}
 	for _, stest := range sTestsDspDspv1 {
-		t.Run("TestDspDspv1", stest)
+		t.Run(dispatcherConfigDIR, stest)
 	}
 }
 
 func testDspITLoadConfig(t *testing.T) {
 	var err error
+	dspCfgPath = path.Join(*dataDir, "conf", "samples", "dispatchers", dispatcherConfigDIR)
 	if dspCfg, err = config.NewCGRConfigFromPath(dspCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -165,7 +172,7 @@ func testDspDspv1GetProfileForEvent(t *testing.T) {
 	}
 	expected.Hosts.Sort()
 	if err := dspRPC.Call(utils.DispatcherSv1GetProfileForEvent, &arg, &reply); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	reply.Hosts.Sort()
 	if !reflect.DeepEqual(expected, reply) {

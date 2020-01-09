@@ -39,9 +39,9 @@ var sTestsDspRsp = []func(t *testing.T){
 //Test start here
 func TestDspResponderTMySQL(t *testing.T) {
 	if *encoding == utils.MetaGOB {
-		testDsp(t, sTestsDspRsp, "TestDspResponder", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers_gob")
+		testDsp(t, sTestsDspRsp, "TestDspResponder", "all", "all2", "dispatchers_mysql", "tutorial", "oldtutorial", "dispatchers_gob")
 	} else {
-		testDsp(t, sTestsDspRsp, "TestDspResponder", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+		testDsp(t, sTestsDspRsp, "TestDspResponder", "all", "all2", "dispatchers_mysql", "tutorial", "oldtutorial", "dispatchers")
 	}
 }
 

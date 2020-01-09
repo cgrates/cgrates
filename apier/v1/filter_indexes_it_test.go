@@ -32,87 +32,84 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var (
-	tFIdxRpc   *rpc.Client
-	emptySlice = []string{}
-)
-
 const (
 	tenant = "cgrates.org"
 )
 
-var sTestsFilterIndexesSV1 = []func(t *testing.T){
-	testV1FIdxLoadConfig,
-	testV1FIdxdxInitDataDb,
-	testV1FIdxResetStorDb,
-	testV1FIdxStartEngine,
-	testV1FIdxRpcConn,
+var (
+	tFIdxRpc   *rpc.Client
+	emptySlice = []string{}
 
-	testV1FIdxSetThresholdProfile,
-	testV1FIdxComputeThresholdsIndexes,
-	testV1FIdxSetSecondThresholdProfile,
-	testV1FIdxSecondComputeThresholdsIndexes,
-	testV1FIdxThirdComputeThresholdsIndexes,
-	testV1FIdxRemoveThresholdProfile,
+	sTestsFilterIndexesSV1 = []func(t *testing.T){
+		testV1FIdxLoadConfig,
+		testV1FIdxdxInitDataDb,
+		testV1FIdxResetStorDb,
+		testV1FIdxStartEngine,
+		testV1FIdxRpcConn,
 
-	testV1FIdxSetStatQueueProfileIndexes,
-	testV1FIdxComputeStatQueueProfileIndexes,
-	testV1FIdxSetSecondStatQueueProfileIndexes,
-	testV1FIdxSecondComputeStatQueueProfileIndexes,
-	testV1FIdxRemoveStatQueueProfile,
+		testV1FIdxSetThresholdProfile,
+		testV1FIdxComputeThresholdsIndexes,
+		testV1FIdxSetSecondThresholdProfile,
+		testV1FIdxSecondComputeThresholdsIndexes,
+		testV1FIdxThirdComputeThresholdsIndexes,
+		testV1FIdxRemoveThresholdProfile,
 
-	testV1FIdxSetResourceProfileIndexes,
-	testV1FIdxComputeResourceProfileIndexes,
-	testV1FIdxSetSecondResourceProfileIndexes,
-	testV1FIdxSecondComputeResourceProfileIndexes,
-	testV1FIdxRemoveResourceProfile,
+		testV1FIdxSetStatQueueProfileIndexes,
+		testV1FIdxComputeStatQueueProfileIndexes,
+		testV1FIdxSetSecondStatQueueProfileIndexes,
+		testV1FIdxSecondComputeStatQueueProfileIndexes,
+		testV1FIdxRemoveStatQueueProfile,
 
-	testV1FIdxSetSupplierProfileIndexes,
-	testV1FIdxComputeSupplierProfileIndexes,
-	testV1FIdxSetSecondSupplierProfileIndexes,
-	testV1FIdxSecondComputeSupplierProfileIndexes,
-	testV1FIdxRemoveSupplierProfile,
+		testV1FIdxSetResourceProfileIndexes,
+		testV1FIdxComputeResourceProfileIndexes,
+		testV1FIdxSetSecondResourceProfileIndexes,
+		testV1FIdxSecondComputeResourceProfileIndexes,
+		testV1FIdxRemoveResourceProfile,
 
-	testV1FIdxSetAttributeProfileIndexes,
-	testV1FIdxComputeAttributeProfileIndexes,
-	testV1FIdxSetSecondAttributeProfileIndexes,
-	testV1FIdxSecondComputeAttributeProfileIndexes,
-	testV1FIdxComputeWithAnotherContext,
-	testV1FIdxRemoveAttributeProfile,
+		testV1FIdxSetSupplierProfileIndexes,
+		testV1FIdxComputeSupplierProfileIndexes,
+		testV1FIdxSetSecondSupplierProfileIndexes,
+		testV1FIdxSecondComputeSupplierProfileIndexes,
+		testV1FIdxRemoveSupplierProfile,
 
-	testV1FIdxdxInitDataDb,
-	testV1FIdxPopulateDatabase,
-	testV1FIdxGetFilterIndexes1,
-	testV1FIdxGetFilterIndexes2,
-	testV1FIdxGetFilterIndexes3,
-	testV1FIdxGetFilterIndexes4,
+		testV1FIdxSetAttributeProfileIndexes,
+		testV1FIdxComputeAttributeProfileIndexes,
+		testV1FIdxSetSecondAttributeProfileIndexes,
+		testV1FIdxSecondComputeAttributeProfileIndexes,
+		testV1FIdxComputeWithAnotherContext,
+		testV1FIdxRemoveAttributeProfile,
 
-	testV1FIdxdxInitDataDb,
-	testV1FIdxSetDispatcherProfile,
-	testV1FIdxComputeDispatcherProfileIndexes,
-	testV1FIdxSetDispatcherProfile2,
-	testV1FIdxComputeDispatcherProfileIndexes2,
+		testV1FIdxdxInitDataDb,
+		testV1FIdxPopulateDatabase,
+		testV1FIdxGetFilterIndexes1,
+		testV1FIdxGetFilterIndexes2,
+		testV1FIdxGetFilterIndexes3,
+		testV1FIdxGetFilterIndexes4,
 
-	testV1FIdxStopEngine,
-}
+		testV1FIdxdxInitDataDb,
+		testV1FIdxSetDispatcherProfile,
+		testV1FIdxComputeDispatcherProfileIndexes,
+		testV1FIdxSetDispatcherProfile2,
+		testV1FIdxComputeDispatcherProfileIndexes2,
+
+		testV1FIdxStopEngine,
+	}
+)
 
 // Test start here
-func TestFIdxV1ITMySQL(t *testing.T) {
-	tSv1ConfDIR = "tutmysql"
-	for _, stest := range sTestsFilterIndexesSV1 {
-		t.Run(tSv1ConfDIR, stest)
+func TestFIdxV1IT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		tSv1ConfDIR = "tutinternal"
+	case utils.MetaSQL:
+		tSv1ConfDIR = "tutmysql"
+	case utils.MetaMongo:
+		tSv1ConfDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestFIdxV1ITMongo(t *testing.T) {
-	tSv1ConfDIR = "tutmongo"
-	for _, stest := range sTestsFilterIndexesSV1 {
-		t.Run(tSv1ConfDIR, stest)
-	}
-}
-
-func TestFIdxV1ITInternal(t *testing.T) {
-	tSv1ConfDIR = "tutinternal"
 	for _, stest := range sTestsFilterIndexesSV1 {
 		t.Run(tSv1ConfDIR, stest)
 	}

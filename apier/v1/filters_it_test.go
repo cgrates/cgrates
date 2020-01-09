@@ -39,41 +39,38 @@ var (
 	filterDataDir   = "/usr/share/cgrates"
 	filter          *FilterWithCache
 	filterConfigDIR string //run tests for specific configuration
+
+	sTestsFilter = []func(t *testing.T){
+		testFilterInitCfg,
+		testFilterResetDataDB,
+		testFilterStartEngine,
+		testFilterRpcConn,
+		testFilterGetFilterBeforeSet,
+		testFilterSetFilter,
+		testFilterGetFilterAfterSet,
+		testFilterGetFilterIDs,
+		testFilterUpdateFilter,
+		testFilterGetFilterAfterUpdate,
+		testFilterRemoveFilter,
+		testFilterGetFilterAfterRemove,
+		testFilterKillEngine,
+	}
 )
 
-var sTestsFilter = []func(t *testing.T){
-	testFilterInitCfg,
-	testFilterResetDataDB,
-	testFilterStartEngine,
-	testFilterRpcConn,
-	testFilterGetFilterBeforeSet,
-	testFilterSetFilter,
-	testFilterGetFilterAfterSet,
-	testFilterGetFilterIDs,
-	testFilterUpdateFilter,
-	testFilterGetFilterAfterUpdate,
-	testFilterRemoveFilter,
-	testFilterGetFilterAfterRemove,
-	testFilterKillEngine,
-}
-
 //Test start here
-func TestFilterITMySql(t *testing.T) {
-	filterConfigDIR = "tutmysql"
-	for _, stest := range sTestsFilter {
-		t.Run(filterConfigDIR, stest)
+func TestFilterIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		filterConfigDIR = "tutinternal"
+	case utils.MetaSQL:
+		filterConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		filterConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestFilterITMongo(t *testing.T) {
-	filterConfigDIR = "tutmongo"
-	for _, stest := range sTestsFilter {
-		t.Run(filterConfigDIR, stest)
-	}
-}
-
-func TestFilterITInternal(t *testing.T) {
-	filterConfigDIR = "tutinternal"
 	for _, stest := range sTestsFilter {
 		t.Run(filterConfigDIR, stest)
 	}

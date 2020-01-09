@@ -70,7 +70,8 @@ func TestDispatcherSReload(t *testing.T) {
 	}
 	var reply string
 	if err = cfg.V1ReloadConfigFromPath(&config.ConfigReloadWithArgDispatcher{
-		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "dispatchers", "dispatchers"),
+		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "dispatchers", "dispatchers_mysql"),
+
 		Section: config.DispatcherSJson,
 	}, &reply); err != nil {
 		t.Error(err)

@@ -38,50 +38,47 @@ var (
 	rlsV1Rpc     *rpc.Client
 	rlsV1ConfDIR string //run tests for specific configuration
 	rlsConfig    *ResourceWithCache
+
+	sTestsRLSV1 = []func(t *testing.T){
+		testV1RsLoadConfig,
+		testV1RsInitDataDb,
+		testV1RsResetStorDb,
+		testV1RsStartEngine,
+		testV1RsRpcConn,
+		testV1RsFromFolder,
+		testV1RsGetResourcesForEvent,
+		testV1RsTTL0,
+		testV1RsAllocateResource,
+		testV1RsAuthorizeResources,
+		testV1RsReleaseResource,
+		testV1RsDBStore,
+		testV1RsGetResourceProfileBeforeSet,
+		testV1RsSetResourceProfile,
+		testV1RsGetResourceProfileIDs,
+		testV1RsGetResourceProfileAfterSet,
+		testV1RsUpdateResourceProfile,
+		testV1RsGetResourceProfileAfterUpdate,
+		testV1RsRemResourceProfile,
+		testV1RsGetResourceProfileAfterDelete,
+		testV1RsResourcePing,
+		testV1RsStopEngine,
+	}
 )
 
-var sTestsRLSV1 = []func(t *testing.T){
-	testV1RsLoadConfig,
-	testV1RsInitDataDb,
-	testV1RsResetStorDb,
-	testV1RsStartEngine,
-	testV1RsRpcConn,
-	testV1RsFromFolder,
-	testV1RsGetResourcesForEvent,
-	testV1RsTTL0,
-	testV1RsAllocateResource,
-	testV1RsAuthorizeResources,
-	testV1RsReleaseResource,
-	testV1RsDBStore,
-	testV1RsGetResourceProfileBeforeSet,
-	testV1RsSetResourceProfile,
-	testV1RsGetResourceProfileIDs,
-	testV1RsGetResourceProfileAfterSet,
-	testV1RsUpdateResourceProfile,
-	testV1RsGetResourceProfileAfterUpdate,
-	testV1RsRemResourceProfile,
-	testV1RsGetResourceProfileAfterDelete,
-	testV1RsResourcePing,
-	testV1RsStopEngine,
-}
-
 //Test start here
-func TestRsV1ITMySQL(t *testing.T) {
-	rlsV1ConfDIR = "tutmysql"
-	for _, stest := range sTestsRLSV1 {
-		t.Run(rlsV1ConfDIR, stest)
+func TestRsV1IT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		rlsV1ConfDIR = "tutinternal"
+	case utils.MetaSQL:
+		rlsV1ConfDIR = "tutmysql"
+	case utils.MetaMongo:
+		rlsV1ConfDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestRsV1ITMongo(t *testing.T) {
-	rlsV1ConfDIR = "tutmongo"
-	for _, stest := range sTestsRLSV1 {
-		t.Run(rlsV1ConfDIR, stest)
-	}
-}
-
-func TestRsV1ITInternal(t *testing.T) {
-	rlsV1ConfDIR = "tutinternal"
 	for _, stest := range sTestsRLSV1 {
 		t.Run(rlsV1ConfDIR, stest)
 	}

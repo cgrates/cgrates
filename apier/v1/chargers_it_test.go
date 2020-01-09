@@ -38,64 +38,61 @@ var (
 	chargerRPC       *rpc.Client
 	chargerProfile   *ChargerWithCache
 	chargerConfigDIR string //run tests for specific configuration
+
+	chargerEvent = []*utils.CGREventWithArgDispatcher{
+		{
+			CGREvent: &utils.CGREvent{ // matching Charger1
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					utils.Account: "1001",
+				},
+			},
+		},
+		{
+			CGREvent: &utils.CGREvent{ // no matching
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					utils.Account:   "1010",
+					"DistinctMatch": "cgrates",
+				},
+			},
+		},
+	}
+
+	sTestsCharger = []func(t *testing.T){
+		testChargerSInitCfg,
+		testChargerSInitDataDb,
+		testChargerSResetStorDb,
+		testChargerSStartEngine,
+		testChargerSRPCConn,
+		testChargerSLoadAddCharger,
+		testChargerSGetChargersForEvent,
+		testChargerSProcessEvent,
+		testChargerSSetChargerProfile,
+		testChargerSGetChargerProfileIDs,
+		testChargerSUpdateChargerProfile,
+		testChargerSRemChargerProfile,
+		testChargerSPing,
+		testChargerSKillEngine,
+	}
 )
 
-var chargerEvent = []*utils.CGREventWithArgDispatcher{
-	{
-		CGREvent: &utils.CGREvent{ // matching Charger1
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.Account: "1001",
-			},
-		},
-	},
-	{
-		CGREvent: &utils.CGREvent{ // no matching
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.Account:   "1010",
-				"DistinctMatch": "cgrates",
-			},
-		},
-	},
-}
-
-var sTestsCharger = []func(t *testing.T){
-	testChargerSInitCfg,
-	testChargerSInitDataDb,
-	testChargerSResetStorDb,
-	testChargerSStartEngine,
-	testChargerSRPCConn,
-	testChargerSLoadAddCharger,
-	testChargerSGetChargersForEvent,
-	testChargerSProcessEvent,
-	testChargerSSetChargerProfile,
-	testChargerSGetChargerProfileIDs,
-	testChargerSUpdateChargerProfile,
-	testChargerSRemChargerProfile,
-	testChargerSPing,
-	testChargerSKillEngine,
-}
-
 //Test start here
-func TestChargerSITMySql(t *testing.T) {
-	chargerConfigDIR = "tutmysql"
-	for _, stest := range sTestsCharger {
-		t.Run(chargerConfigDIR, stest)
+func TestChargerSIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		chargerConfigDIR = "tutinternal"
+	case utils.MetaSQL:
+		chargerConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		chargerConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestChargerSITMongo(t *testing.T) {
-	chargerConfigDIR = "tutmongo"
-	for _, stest := range sTestsCharger {
-		t.Run(chargerConfigDIR, stest)
-	}
-}
-
-func TestChargerSITInternal(t *testing.T) {
-	chargerConfigDIR = "tutinternal"
 	for _, stest := range sTestsCharger {
 		t.Run(chargerConfigDIR, stest)
 	}

@@ -70,6 +70,8 @@ func TestAccITWithRemove(t *testing.T) {
 		accTestsConfig = "tutmysql"
 	case utils.MetaMongo:
 		accTestsConfig = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")
 	}

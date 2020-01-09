@@ -30,49 +30,40 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var cdrsCfgPath string
-var cdrsCfg *config.CGRConfig
-var cdrsRpc *rpc.Client
-var cdrsConfDIR string // run the tests for specific configuration
+var (
+	cdrsCfgPath string
+	cdrsCfg     *config.CGRConfig
+	cdrsRpc     *rpc.Client
+	cdrsConfDIR string // run the tests for specific configuration
 
-// subtests to be executed
-var sTestsCDRsIT = []func(t *testing.T){
-	testV1CDRsInitConfig,
-	testV1CDRsInitDataDb,
-	testV1CDRsInitCdrDb,
-	testV1CDRsStartEngine,
-	testV1CDRsRpcConn,
-	testV1CDRsLoadTariffPlanFromFolder,
-	testV1CDRsProcessEventWithRefund,
-	testV1CDRsRefundOutOfSessionCost,
-	testV1CDRsRefundCDR,
-	testV1CDRsKillEngine,
-}
-
-// Tests starting here
-func TestCDRsITInternal(t *testing.T) {
-	cdrsConfDIR = "cdrsv1internal"
-	for _, stest := range sTestsCDRsIT {
-		t.Run(cdrsConfDIR, stest)
+	sTestsCDRsIT = []func(t *testing.T){
+		testV1CDRsInitConfig,
+		testV1CDRsInitDataDb,
+		testV1CDRsInitCdrDb,
+		testV1CDRsStartEngine,
+		testV1CDRsRpcConn,
+		testV1CDRsLoadTariffPlanFromFolder,
+		testV1CDRsProcessEventWithRefund,
+		testV1CDRsRefundOutOfSessionCost,
+		testV1CDRsRefundCDR,
+		testV1CDRsKillEngine,
 	}
-}
+)
 
-func TestCDRsITMongo(t *testing.T) {
-	cdrsConfDIR = "cdrsv1mongo"
-	for _, stest := range sTestsCDRsIT {
-		t.Run(cdrsConfDIR, stest)
+func TestCDRsIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		cdrsConfDIR = "cdrsv1internal"
+	case utils.MetaSQL:
+		cdrsConfDIR = "cdrsv1mysql"
+	case utils.MetaMongo:
+		cdrsConfDIR = "cdrsv1mongo"
+	case utils.MetaPostgres:
+		cdrsConfDIR = "cdrsv1postgres"
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
 
-func TestCDRsITMySql(t *testing.T) {
-	cdrsConfDIR = "cdrsv1mysql"
-	for _, stest := range sTestsCDRsIT {
-		t.Run(cdrsConfDIR, stest)
-	}
-}
-
-func TestCDRsITPostgres(t *testing.T) {
-	cdrsConfDIR = "cdrsv1postgres"
 	for _, stest := range sTestsCDRsIT {
 		t.Run(cdrsConfDIR, stest)
 	}

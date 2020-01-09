@@ -97,6 +97,8 @@ func TestAttributeSIT(t *testing.T) {
 		alsPrfConfigDIR = "tutmysql"
 	case utils.MetaMongo:
 		alsPrfConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")
 	}

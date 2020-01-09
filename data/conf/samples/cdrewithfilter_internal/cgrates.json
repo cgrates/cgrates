@@ -1,0 +1,122 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"log_level": 7,
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+"data_db": {
+	"db_type": "*internal",	
+},
+
+
+"stor_db": {
+	"db_type": "*internal",	
+},
+
+
+"rals": {
+	"enabled": true,
+	"thresholds_conns": ["*internal"],
+},
+
+
+"schedulers": {
+	"enabled": true,
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"rals_conns": ["*internal"],
+},
+
+
+"cdre": {
+	"TemplateWithFilter": {
+		"export_format": "*file_csv",
+		"export_path": "/tmp/",
+		"filters" :["*string:~*req.Source:test2"],
+		"content_fields": [
+			{"tag": "CGRID", "type": "*composed", "value": "~*req.CGRID"},
+			{"tag": "RunID", "type": "*composed", "value": "~*req.RunID"},
+			{"tag":"Source", "type": "*composed", "value": "~*req.Source"},
+			{"tag":"OriginID", "type": "*composed", "value": "~*req.OriginID"},
+			{"tag":"Tenant", "type": "*composed", "value": "~*req.Tenant"},
+			{"tag":"Category", "type": "*composed", "value": "~*req.Category"},
+			{"tag":"Account", "type": "*composed", "value": "~*req.Account"},
+			{"tag":"Destination", "type": "*composed", "value": "~*req.Destination"},
+			{"tag":"Usage", "type": "*composed", "value": "~*req.Usage"},
+			{"tag":"Cost", "type": "*composed", "value": "~*req.Cost", "rounding_decimals": 4},
+		],
+	},
+},
+
+
+"attributes": {
+	"enabled": true,
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
+
+
+"resources": {
+	"enabled": true,
+	"store_interval": "-1",
+	"thresholds_conns": ["*internal"]
+},
+
+
+"stats": {
+	"enabled": true,
+	"store_interval": "-1",
+	"thresholds_conns": ["*internal"],
+},
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "-1",
+},
+
+
+"suppliers": {
+	"enabled": true,
+	"stats_conns": ["*localhost"],
+},
+
+
+"sessions": {
+	"enabled": true,
+	"suppliers_conns": ["*internal"],
+	"resources_conns": ["*internal"],
+	"attributes_conns": ["*internal"],
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
+},
+
+
+"migrator":{
+	"out_stordb_password": "CGRateS.org",
+},
+
+
+"apier": {
+	"scheduler_conns": ["*internal"],
+},
+
+
+}

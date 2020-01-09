@@ -55,9 +55,9 @@ var sTestsDspCDRsWithoutAuth = []func(t *testing.T){
 //Test start here
 func TestDspCDRsITMySQL(t *testing.T) {
 	if *encoding == utils.MetaGOB {
-		testDsp(t, sTestsDspCDRs, "TestDspCDRs", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers_gob")
+		testDsp(t, sTestsDspCDRs, "TestDspCDRs", "all", "all2", "dispatchers_mysql", "tutorial", "oldtutorial", "dispatchers_gob")
 	} else {
-		testDsp(t, sTestsDspCDRs, "TestDspCDRs", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+		testDsp(t, sTestsDspCDRs, "TestDspCDRs", "all", "all2", "dispatchers_mysql", "tutorial", "oldtutorial", "dispatchers")
 	}
 }
 

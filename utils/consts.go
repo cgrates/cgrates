@@ -239,6 +239,7 @@ const (
 	DRYRUN                       = "dry_run"
 	META_COMBIMED                = "*combimed"
 	MetaMongo                    = "*mongo"
+	MetaPostgres                 = "*postgres"
 	MetaInternal                 = "*internal"
 	MetaLocalHost                = "*localhost"
 	ZERO_RATING_SUBJECT_PREFIX   = "*zero"

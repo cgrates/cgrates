@@ -39,30 +39,34 @@ var (
 	precacheRPC       *rpc.Client
 	precacheDataDir   = "/usr/share/cgrates"
 	precacheConfigDIR string //run tests for specific configuration
+
+	sTestsPrecache = []func(t *testing.T){
+		testPrecacheInitCfg,
+		testPrecacheResetDataDB,
+		testPrecacheStartEngine,
+		testPrecacheRpcConn,
+		testPrecacheGetCacheStatsBeforeLoad,
+		testPrecacheFromFolder,
+		testPrecacheRestartEngine,
+		testPrecacheGetItemIDs,
+		testPrecacheGetCacheStatsAfterRestart,
+		testPrecacheKillEngine,
+	}
 )
 
-var sTestsPrecache = []func(t *testing.T){
-	testPrecacheInitCfg,
-	testPrecacheResetDataDB,
-	testPrecacheStartEngine,
-	testPrecacheRpcConn,
-	testPrecacheGetCacheStatsBeforeLoad,
-	testPrecacheFromFolder,
-	testPrecacheRestartEngine,
-	testPrecacheGetItemIDs,
-	testPrecacheGetCacheStatsAfterRestart,
-	testPrecacheKillEngine,
-}
-
-func TestPrecacheITMySql(t *testing.T) {
-	precacheConfigDIR = "tutmysql"
-	for _, stest := range sTestsPrecache {
-		t.Run(precacheConfigDIR, stest)
+func TestPrecacheIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaSQL:
+		precacheConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		precacheConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestPrecacheITMongo(t *testing.T) {
-	precacheConfigDIR = "tutmongo"
 	for _, stest := range sTestsPrecache {
 		t.Run(precacheConfigDIR, stest)
 	}

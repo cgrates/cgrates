@@ -33,9 +33,9 @@ var sTestsDspSched = []func(t *testing.T){
 //Test start here
 func TestDspSchedulerSTMySQL(t *testing.T) {
 	if *encoding == utils.MetaGOB {
-		testDsp(t, sTestsDspSched, "TestDspSchedulerSTMySQL", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers_gob")
+		testDsp(t, sTestsDspSched, "TestDspSchedulerSTMySQL", "all", "all2", "dispatchers_mysql", "tutorial", "oldtutorial", "dispatchers_gob")
 	} else {
-		testDsp(t, sTestsDspSched, "TestDspSchedulerSTMySQL", "all", "all2", "dispatchers", "tutorial", "oldtutorial", "dispatchers")
+		testDsp(t, sTestsDspSched, "TestDspSchedulerSTMySQL", "all", "all2", "dispatchers_mysql", "tutorial", "oldtutorial", "dispatchers")
 	}
 }
 
