@@ -44,7 +44,7 @@ func Newlogger(loggertype, id string) (err error) {
 	nodeID = id
 	var l *syslog.Writer
 	if loggertype == MetaSysLog {
-		if l, err = syslog.New(syslog.LOG_INFO, fmt.Sprintf("CGRateS <%s> ", nodeID)); err != nil {
+		if l, err = syslog.New(syslog.LOG_INFO|syslog.LOG_DAEMON, fmt.Sprintf("CGRateS <%s> ", nodeID)); err != nil {
 			return err
 		} else {
 			Logger.SetSyslog(l)
