@@ -59,6 +59,7 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Digest_separator:     utils.StringPointer(","),
 		Digest_equal:         utils.StringPointer(":"),
 		Rsr_separator:        utils.StringPointer(";"),
+		Max_parralel_conns:   utils.IntPointer(100),
 	}
 	if gCfg, err := dfCgrJsonCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
@@ -564,7 +565,7 @@ func TestSmgJsonCfg(t *testing.T) {
 		Stats_conns:           &[]string{},
 		Suppliers_conns:       &[]string{},
 		Attributes_conns:      &[]string{},
-		Replication_conns:     &[]*RemoteHostJson{},
+		Replication_conns:     &[]string{},
 		Debit_interval:        utils.StringPointer("0s"),
 		Store_session_costs:   utils.BoolPointer(false),
 		Min_call_duration:     utils.StringPointer("0s"),
@@ -848,9 +849,9 @@ func TestDfChargerServJsonCfg(t *testing.T) {
 
 func TestDfFilterSJsonCfg(t *testing.T) {
 	eCfg := &FilterSJsonCfg{
-		Stats_conns:     &[]*RemoteHostJson{},
-		Resources_conns: &[]*RemoteHostJson{},
-		Rals_conns:      &[]*RemoteHostJson{},
+		Stats_conns:     &[]string{},
+		Resources_conns: &[]string{},
+		Rals_conns:      &[]string{},
 	}
 	if cfg, err := dfCgrJsonCfg.FilterSJsonCfg(); err != nil {
 		t.Error(err)

@@ -57,3 +57,8 @@ func (s *StringSet) AsSlice() []string {
 	}
 	return result
 }
+
+// Data exports the internal map, so we can benefit for example of key iteration
+func (s *StringSet) Data() map[string]struct{} {
+	return s.data
+}

@@ -71,11 +71,14 @@ func (schS *SchedulerService) Start() (err error) {
 
 	fltrS := <-schS.fltrSChan
 	schS.fltrSChan <- fltrS
+	dbchan := schS.dm.GetDMChan()
+	datadb := <-dbchan
+	dbchan <- datadb
 
 	schS.Lock()
 	defer schS.Unlock()
 	utils.Logger.Info("<ServiceManager> Starting CGRateS Scheduler.")
-	schS.schS = scheduler.NewScheduler(schS.dm.GetDM(), schS.cfg, fltrS)
+	schS.schS = scheduler.NewScheduler(datadb, schS.cfg, fltrS)
 	go schS.schS.Loop()
 
 	schS.rpc = v1.NewSchedulerSv1(schS.cfg)

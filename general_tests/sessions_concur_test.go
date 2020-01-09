@@ -28,7 +28,8 @@ import (
 	"testing"
 	"time"
 
-	v1 "github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -40,17 +41,19 @@ var (
 	sCncrCfg                  *config.CGRConfig
 	sCncrRPC                  *rpc.Client
 
-	sCncrSessions = flag.Int("sessions", 500000, "maximum concurrent sessions created")
+	sCncrSessions = flag.Int("sessions", 100000, "maximum concurrent sessions created")
 	sCncrCps      = flag.Int("cps", 50000, "maximum requests per second sent out")
 
 	cpsPool = make(chan struct{}, *sCncrCps)
+	acntIDs = make(chan string, 1)
+	wg      sync.WaitGroup
 )
 
 // Tests starting here
 func TestSCncrInternal(t *testing.T) {
 	sCncrCfgDIR = "sessinternal"
 	for _, tst := range sTestsSCncrIT {
-		t.Run(sCncrCfgDIR, tst)
+		t.Run("InternalConn", tst)
 	}
 }
 
@@ -58,7 +61,7 @@ func TestSCncrInternal(t *testing.T) {
 func TestSCncrJSON(t *testing.T) {
 	sCncrCfgDIR = "sessintjson"
 	for _, tst := range sTestsSCncrIT {
-		t.Run(sCncrCfgDIR, tst)
+		t.Run("JSONConn", tst)
 	}
 }
 
@@ -75,7 +78,7 @@ var sTestsSCncrIT = []func(t *testing.T){
 }
 
 func testSCncrInitConfig(t *testing.T) {
-	sCncrCfgPath = path.Join(*dataDir, "conf", "samples", sCncrCfgDIR)
+	sCncrCfgPath = path.Join(dataDir, "conf", "samples", sCncrCfgDIR)
 	if sCncrCfg, err = config.NewCGRConfigFromPath(sCncrCfgPath); err != nil {
 		t.Fatal(err)
 	}
@@ -95,7 +98,7 @@ func testSCncrInitStorDB(t *testing.T) {
 }
 
 func testSCncrStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(sCncrCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(sCncrCfgPath, waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -110,7 +113,7 @@ func testSCncrRPCConn(t *testing.T) {
 }
 
 func testSCncrKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(waitRater); err != nil {
 		t.Error(err)
 	}
 }
@@ -119,18 +122,37 @@ func testSCncrLoadTP(t *testing.T) {
 	var loadInst string
 	if err := sCncrRPC.Call(utils.ApierV1LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
-			*dataDir, "tariffplans", "tp1cnt")}, &loadInst); err != nil {
+			dataDir, "tariffplans", "tp1cnt")}, &loadInst); err != nil {
 		t.Error(err)
+	}
+	attrPrfl := &v2.AttributeWithCache{
+		ExternalAttributeProfile: &engine.ExternalAttributeProfile{
+			Tenant:   "cgrates.org",
+			ID:       "AttrConcurrentSessions",
+			Contexts: []string{utils.ANY},
+			Attributes: []*engine.ExternalAttribute{
+				{
+					FieldName: "TestType",
+					Value:     "ConcurrentSessions",
+				},
+			},
+			Weight: 20,
+		},
+	}
+	var resAttrSet string
+	if err := sCncrRPC.Call(utils.ApierV2SetAttributeProfile, attrPrfl, &resAttrSet); err != nil {
+		t.Error(err)
+	} else if resAttrSet != utils.OK {
+		t.Errorf("unexpected reply returned: <%s>", resAttrSet)
 	}
 }
 
 func testSCncrRunSessions(t *testing.T) {
-	acntIDs := utils.NewStringSet(nil)
+	acntIDsSet := utils.NewStringSet(nil)
 	bufferTopup := time.Duration(8760) * time.Hour
-	var wg sync.WaitGroup
 	for i := 0; i < *sCncrSessions; i++ {
 		acntID := fmt.Sprintf("100%d", utils.RandomInteger(100, 200))
-		if !acntIDs.Has(acntID) {
+		if !acntIDsSet.Has(acntID) {
 			// Special balance BUFFER to cover concurrency on MAIN one
 			argsAddBalance := &v1.AttrAddBalance{
 				Tenant:      "cgrates.org",
@@ -147,24 +169,14 @@ func testSCncrRunSessions(t *testing.T) {
 			} else if addBlcRply != utils.OK {
 				t.Errorf("received: <%s>", addBlcRply)
 			}
-			acntIDs.Add(acntID)
+			acntIDsSet.Add(acntID)
 		}
+		acntIDs <- acntID
 		wg.Add(1)
-		go func(acntID string) {
-			cpsPool <- struct{}{} // push here up to cps
-			go func() {           // allow more requests after a second
-				time.Sleep(time.Duration(time.Second))
-				<-cpsPool
-			}()
-			err := runSession(acntID)
-			wg.Done()
-			if err != nil {
-				t.Error(err)
-			}
-		}(acntID)
+		go t.Run(fmt.Sprintf("RunSession#%d", i), testRunSession)
 	}
 	wg.Wait()
-	for _, acntID := range acntIDs.AsSlice() {
+	for acntID := range acntIDsSet.Data() {
 		// make sure the account was properly refunded
 		var acnt *engine.Account
 		acntAttrs := &utils.AttrGetAccount{
@@ -175,15 +187,21 @@ func testSCncrRunSessions(t *testing.T) {
 		} else if vcBlnc := acnt.BalanceMap[utils.VOICE].GetTotalValue(); float64(bufferTopup.Nanoseconds())-vcBlnc > 1000000.0 { // eliminate rounding errors
 			t.Errorf("unexpected voice balance received: %+v", utils.ToIJSON(acnt))
 		} else if mnBlnc := acnt.BalanceMap[utils.MONETARY].GetTotalValue(); mnBlnc != 0 {
-			t.Errorf("unexpected voice balance received: %+v", utils.ToIJSON(acnt))
+			t.Errorf("unexpected monetary balance received: %+v", utils.ToIJSON(acnt))
 		}
 	}
 }
 
 // runSession runs one session
-func runSession(acntID string) (err error) {
+func testRunSession(t *testing.T) {
+	defer wg.Done()       // decrease group counter one out from test
+	cpsPool <- struct{}{} // push here up to cps
+	go func() {           // allow more requests after a second
+		time.Sleep(time.Duration(time.Second))
+		<-cpsPool
+	}()
+	acntID := <-acntIDs
 	originID := utils.GenUUID() // each test with it's own OriginID
-
 	// topup as much as we know we need for one session
 	mainTopup := time.Duration(90) * time.Second
 	var addBlcRply string
@@ -198,9 +216,9 @@ func runSession(acntID string) (err error) {
 		},
 	}
 	if err = sCncrRPC.Call(utils.ApierV1AddBalance, argsAddBalance, &addBlcRply); err != nil {
-		return
+		t.Error(err)
 	} else if addBlcRply != utils.OK {
-		return fmt.Errorf("received: <%s> to ApierV1.AddBalance", addBlcRply)
+		t.Errorf("received: <%s> to ApierV1.AddBalance", addBlcRply)
 	}
 	time.Sleep(time.Duration(
 		utils.RandomInteger(0, 100)) * time.Millisecond) // randomize between tests
@@ -225,7 +243,7 @@ func runSession(acntID string) (err error) {
 	}
 	var rplyAuth sessions.V1AuthorizeReply
 	if err := sCncrRPC.Call(utils.SessionSv1AuthorizeEvent, authArgs, &rplyAuth); err != nil {
-		return err
+		t.Error(err)
 	}
 	time.Sleep(time.Duration(
 		utils.RandomInteger(0, 100)) * time.Millisecond)
@@ -233,7 +251,8 @@ func runSession(acntID string) (err error) {
 	// Init the session
 	initUsage := 1 * time.Minute
 	initArgs := &sessions.V1InitSessionArgs{
-		InitSession: true,
+		InitSession:   true,
+		GetAttributes: true,
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     fmt.Sprintf("TestSCncrInit%s", originID),
@@ -250,32 +269,36 @@ func runSession(acntID string) (err error) {
 	var rplyInit sessions.V1InitSessionReply
 	if err := sCncrRPC.Call(utils.SessionSv1InitiateSession,
 		initArgs, &rplyInit); err != nil {
-		return err
+		t.Error(err)
 	} else if rplyInit.MaxUsage == 0 {
-		return fmt.Errorf("unexpected MaxUsage at init: %v", rplyInit.MaxUsage)
+		t.Errorf("unexpected MaxUsage at init: %v", rplyInit.MaxUsage)
 	}
 	time.Sleep(time.Duration(
 		utils.RandomInteger(0, 100)) * time.Millisecond)
 
-	// Update the session
+	// Update the session with relocate
+	initOriginID := originID
+	originID = utils.GenUUID()
 	updtUsage := 1 * time.Minute
 	updtArgs := &sessions.V1UpdateSessionArgs{
+		GetAttributes: true,
 		UpdateSession: true,
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     fmt.Sprintf("TestSCncrUpdate%s", originID),
 			Event: map[string]interface{}{
-				utils.OriginID: originID,
-				utils.Usage:    updtUsage,
+				utils.OriginID:        originID,
+				utils.InitialOriginID: initOriginID,
+				utils.Usage:           updtUsage,
 			},
 		},
 	}
 	var rplyUpdt sessions.V1UpdateSessionReply
-	if err = sCncrRPC.Call(utils.SessionSv1UpdateSession,
+	if err := sCncrRPC.Call(utils.SessionSv1UpdateSession,
 		updtArgs, &rplyUpdt); err != nil {
-		return
+		t.Error(err)
 	} else if rplyUpdt.MaxUsage == 0 {
-		return fmt.Errorf("unexpected MaxUsage at update: %v", rplyUpdt.MaxUsage)
+		t.Errorf("unexpected MaxUsage at update: %v", rplyUpdt.MaxUsage)
 	}
 	time.Sleep(time.Duration(
 		utils.RandomInteger(0, 100)) * time.Millisecond)
@@ -293,11 +316,11 @@ func runSession(acntID string) (err error) {
 		},
 	}
 	var rplyTrmnt string
-	if err = sCncrRPC.Call(utils.SessionSv1TerminateSession,
+	if err := sCncrRPC.Call(utils.SessionSv1TerminateSession,
 		trmntArgs, &rplyTrmnt); err != nil {
-		return
+		t.Error(err)
 	} else if rplyTrmnt != utils.OK {
-		return fmt.Errorf("received: <%s> to SessionSv1.Terminate", rplyTrmnt)
+		t.Errorf("received: <%s> to SessionSv1.Terminate", rplyTrmnt)
 	}
 	time.Sleep(time.Duration(
 		utils.RandomInteger(0, 100)) * time.Millisecond)
@@ -313,13 +336,20 @@ func runSession(acntID string) (err error) {
 		},
 	}
 	var rplyCDR string
-	if err = sCncrRPC.Call(utils.SessionSv1ProcessCDR,
+	if err := sCncrRPC.Call(utils.SessionSv1ProcessCDR,
 		argsCDR, &rplyCDR); err != nil {
-		return
+		t.Error(err)
 	} else if rplyCDR != utils.OK {
-		return fmt.Errorf("received: <%s> to ProcessCDR", rplyCDR)
+		t.Errorf("received: <%s> to ProcessCDR", rplyCDR)
 	}
-	time.Sleep(time.Duration(
-		utils.RandomInteger(0, 100)) * time.Millisecond)
-	return
+	time.Sleep(time.Duration(20) * time.Millisecond)
+	var cdrs []*engine.ExternalCDR
+	argCDRs := utils.RPCCDRsFilter{OriginIDs: []string{originID}}
+	if err := sCncrRPC.Call(utils.ApierV2GetCDRs, argCDRs, &cdrs); err != nil {
+		t.Error(err)
+	} else if len(cdrs) != 1 {
+		t.Errorf("unexpected number of CDRs returned: %d", len(cdrs))
+	} else if cdrs[0].Usage != "2m30s" {
+		t.Errorf("unexpected usage of CDR: %+v", cdrs[0])
+	}
 }

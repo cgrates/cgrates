@@ -396,12 +396,7 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 		t.Error(err, aSessions)
 	}
 	argsRepl := ArgsReplicateSessions{
-		Connections: []*config.RemoteHost{
-			{
-				Address:     smgRplcSlaveCfg.ListenCfg().RPCJSONListen,
-				Transport:   utils.MetaJSON,
-				Synchronous: true},
-		},
+		ConnIDs: []string{"rplConn"},
 	}
 	//replicate manually the session from master to slave
 	var repply string
@@ -444,12 +439,8 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 	// recover passive sessions from slave
 	argsRepl = ArgsReplicateSessions{
 		Passive: true,
-		Connections: []*config.RemoteHost{
-			{
-				Address:     smgRplcMasterCfg.ListenCfg().RPCJSONListen,
-				Transport:   utils.MetaJSON,
-				Synchronous: true},
-		}}
+		ConnIDs: []string{"rplConn"},
+	}
 	if err := smgRplcSlvRPC.Call(utils.SessionSv1ReplicateSessions, argsRepl, &repply); err != nil {
 		t.Error(err)
 	}

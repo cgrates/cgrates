@@ -42,6 +42,7 @@ type GeneralJsonCfg struct {
 	Digest_separator     *string
 	Digest_equal         *string
 	Rsr_separator        *string
+	Max_parralel_conns   *int
 }
 
 // Listen config section
@@ -102,9 +103,9 @@ type ItemRmtRplOptJson struct {
 
 // Filters config
 type FilterSJsonCfg struct {
-	Stats_conns     *[]*RemoteHostJson
-	Resources_conns *[]*RemoteHostJson
-	Rals_conns      *[]*RemoteHostJson
+	Stats_conns     *[]string
+	Resources_conns *[]string
+	Rals_conns      *[]string
 }
 
 // Rater config section
@@ -219,7 +220,7 @@ type SessionSJsonCfg struct {
 	Stats_conns           *[]string
 	Suppliers_conns       *[]string
 	Cdrs_conns            *[]string
-	Replication_conns     *[]*RemoteHostJson
+	Replication_conns     *[]string
 	Attributes_conns      *[]string
 	Debit_interval        *string
 	Store_session_costs   *bool

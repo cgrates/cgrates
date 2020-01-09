@@ -78,7 +78,7 @@ func TestA1ItInternal(t *testing.T) {
 }
 
 func testA1itLoadConfig(t *testing.T) {
-	a1CfgPath = path.Join(*dataDir, "conf", "samples", a1ConfigDir)
+	a1CfgPath = path.Join(dataDir, "conf", "samples", a1ConfigDir)
 	if a1Cfg, err = config.NewCGRConfigFromPath(a1CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -97,7 +97,7 @@ func testA1itResetStorDb(t *testing.T) {
 }
 
 func testA1itStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(a1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(a1CfgPath, waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -112,7 +112,7 @@ func testA1itRPCConn(t *testing.T) {
 
 func testA1itLoadTPFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "a1")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(dataDir, "tariffplans", "test", "a1")}
 	if err := a1rpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -308,7 +308,7 @@ func testA1itDataSession1(t *testing.T) {
 		if err := json.Unmarshal([]byte(cdrs[0].CostDetails), &ec); err != nil {
 			t.Error(err)
 		}
-		cc = *ec.AsCallCost()
+		cc = *ec.AsCallCost(utils.EmptyString)
 		if len(cc.Timespans) != 1 {
 			t.Errorf("Unexpected number of timespans: %+v, for %+v\n from:%+v", len(cc.Timespans), utils.ToJSON(cc.Timespans), utils.ToJSON(ec))
 		}

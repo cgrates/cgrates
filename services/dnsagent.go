@@ -50,6 +50,8 @@ type DNSAgent struct {
 
 	dns     *agents.DNSAgent
 	connMgr *engine.ConnManager
+
+	oldListen string
 }
 
 // Start should handle the sercive start
@@ -63,7 +65,7 @@ func (dns *DNSAgent) Start() (err error) {
 
 	dns.Lock()
 	defer dns.Unlock()
-
+	dns.oldListen = dns.cfg.DNSAgentCfg().Listen
 	dns.dns, err = agents.NewDNSAgent(dns.cfg, filterS, dns.connMgr)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.DNSAgent, err.Error()))
@@ -86,10 +88,14 @@ func (dns *DNSAgent) GetIntenternalChan() (conn chan rpcclient.ClientConnector) 
 
 // Reload handles the change of config
 func (dns *DNSAgent) Reload() (err error) {
+	if dns.oldListen == dns.cfg.DNSAgentCfg().Listen {
+		return
+	}
 	if err = dns.Shutdown(); err != nil {
 		return
 	}
 	dns.Lock()
+	dns.oldListen = dns.cfg.DNSAgentCfg().Listen
 	defer dns.Unlock()
 	if err = dns.dns.Reload(); err != nil {
 		return

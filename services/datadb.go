@@ -150,7 +150,6 @@ func (db *DataDBService) GetDM() *engine.DataManager {
 
 // needsConnectionReload returns if the DB connection needs to reloaded
 func (db *DataDBService) needsConnectionReload() bool {
-
 	if db.oldDBCfg.DataDbType != db.cfg.DataDbCfg().DataDbType ||
 		db.oldDBCfg.DataDbHost != db.cfg.DataDbCfg().DataDbHost ||
 		db.oldDBCfg.DataDbName != db.cfg.DataDbCfg().DataDbName ||

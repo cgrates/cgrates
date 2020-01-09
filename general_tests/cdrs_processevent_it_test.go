@@ -84,7 +84,7 @@ func TestCDRsITPEMySql(t *testing.T) {
 
 func testV1CDRsInitConfig(t *testing.T) {
 	var err error
-	pecdrsCfgPath = path.Join(*dataDir, "conf", "samples", pecdrsConfDIR)
+	pecdrsCfgPath = path.Join(dataDir, "conf", "samples", pecdrsConfDIR)
 	if pecdrsCfg, err = config.NewCGRConfigFromPath(pecdrsCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
@@ -103,7 +103,7 @@ func testV1CDRsInitCdrDb(t *testing.T) {
 }
 
 func testV1CDRsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(pecdrsCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(pecdrsCfgPath, waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -120,10 +120,10 @@ func testV1CDRsLoadTariffPlanFromFolder(t *testing.T) {
 	var loadInst string
 	if err := pecdrsRpc.Call(utils.ApierV1LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
-			*dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
+			dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(waitRater) * time.Millisecond)
 }
 
 func testV1CDRsProcessEventAttrS(t *testing.T) {
@@ -599,7 +599,7 @@ func testV1CDRsProcessEventExportCheck(t *testing.T) {
 	}
 }
 func testV1CDRsKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(waitRater); err != nil {
 		t.Error(err)
 	}
 }

@@ -207,6 +207,11 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.SessionS, connID)
 			}
 		}
+		for _, connID := range cfg.sessionSCfg.ReplicationConns {
+			if _, has := cfg.rpcConns[connID]; !has {
+				return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.SessionS, connID)
+			}
+		}
 		if cfg.cacheCfg[utils.CacheClosedSessions].Limit == 0 {
 			return fmt.Errorf("<%s> %s needs to be != 0, received: %d", utils.CacheS, utils.CacheClosedSessions, cfg.cacheCfg[utils.CacheClosedSessions].Limit)
 		}
@@ -490,6 +495,31 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	for cacheID := range cfg.cacheCfg {
 		if _, has := utils.CachePartitions[cacheID]; !has {
 			return fmt.Errorf("<%s> partition <%s> not defined", utils.CacheS, cacheID)
+		}
+	}
+	// FilterS sanity check
+	for _, connID := range cfg.filterSCfg.StatSConns {
+		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.statsCfg.Enabled {
+			return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.StatS, utils.FilterS)
+		}
+		if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+			return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.FilterS, connID)
+		}
+	}
+	for _, connID := range cfg.filterSCfg.ResourceSConns {
+		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.resourceSCfg.Enabled {
+			return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.ResourceS, utils.FilterS)
+		}
+		if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+			return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.FilterS, connID)
+		}
+	}
+	for _, connID := range cfg.filterSCfg.RALsConns {
+		if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.ralsCfg.Enabled {
+			return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.RALService, utils.FilterS)
+		}
+		if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
+			return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.FilterS, connID)
 		}
 	}
 

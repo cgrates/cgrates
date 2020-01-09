@@ -1179,9 +1179,10 @@ const (
 )
 
 const (
-	ConfigSv1               = "ConfigSv1"
-	ConfigSv1GetJSONSection = "ConfigSv1.GetJSONSection"
-	ConfigSv1ReloadConfig   = "ConfigSv1.ReloadConfig"
+	ConfigSv1                     = "ConfigSv1"
+	ConfigSv1GetJSONSection       = "ConfigSv1.GetJSONSection"
+	ConfigSv1ReloadConfigFromPath = "ConfigSv1.ReloadConfigFromPath"
+	ConfigSv1ReloadConfigFromJSON = "ConfigSv1.ReloadConfigFromJSON"
 )
 
 const (

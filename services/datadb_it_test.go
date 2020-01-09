@@ -62,7 +62,7 @@ func TestDataDBReload(t *testing.T) {
 	}
 	var reply string
 	cfg.AttributeSCfg().Enabled = true
-	if err := cfg.V1ReloadConfig(&config.ConfigReloadWithArgDispatcher{
+	if err := cfg.V1ReloadConfigFromPath(&config.ConfigReloadWithArgDispatcher{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
 		Section: config.DATADB_JSN,
 	}, &reply); err != nil {

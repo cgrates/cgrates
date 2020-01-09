@@ -37,6 +37,7 @@
 	"enabled": true,
 	"stats_conns": ["*localhost"],
 	"chargers_conns": ["*internal"],
+	"rals_conns": ["*localhost"],
 	"sessions_cost_retries": 5,
 },
 
@@ -69,6 +70,7 @@
 		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": -1,"alias":""}
 	],
 	"sessions_conns": ["*internal"],
+	"create_cdr": true
 },
 
 

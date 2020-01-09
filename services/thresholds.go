@@ -70,10 +70,13 @@ func (thrs *ThresholdService) Start() (err error) {
 
 	filterS := <-thrs.filterSChan
 	thrs.filterSChan <- filterS
+	dbchan := thrs.dm.GetDMChan()
+	datadb := <-dbchan
+	dbchan <- datadb
 
 	thrs.Lock()
 	defer thrs.Unlock()
-	thrs.thrs, err = engine.NewThresholdService(thrs.dm.GetDM(), thrs.cfg, filterS)
+	thrs.thrs, err = engine.NewThresholdService(datadb, thrs.cfg, filterS)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.ThresholdS, err.Error()))
 		return

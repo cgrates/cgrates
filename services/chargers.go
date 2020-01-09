@@ -71,10 +71,13 @@ func (chrS *ChargerService) Start() (err error) {
 
 	filterS := <-chrS.filterSChan
 	chrS.filterSChan <- filterS
+	dbchan := chrS.dm.GetDMChan()
+	datadb := <-dbchan
+	dbchan <- datadb
 
 	chrS.Lock()
 	defer chrS.Unlock()
-	if chrS.chrS, err = engine.NewChargerService(chrS.dm.GetDM(), filterS, chrS.cfg, chrS.connMgr); err != nil {
+	if chrS.chrS, err = engine.NewChargerService(datadb, filterS, chrS.cfg, chrS.connMgr); err != nil {
 		utils.Logger.Crit(
 			fmt.Sprintf("<%s> Could not init, error: %s",
 				utils.ChargerS, err.Error()))

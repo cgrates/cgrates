@@ -119,11 +119,10 @@ func startCdrc(cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool,
 }
 
 // startFilterService fires up the FilterS
-func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS,
-	internalStatSChan, internalResourceSChan, internalRalSChan chan rpcclient.ClientConnector, cfg *config.CGRConfig,
+func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS, connMgr *engine.ConnManager, cfg *config.CGRConfig,
 	dm *engine.DataManager, exitChan chan bool) {
 	<-cacheS.GetPrecacheChannel(utils.CacheFilters)
-	filterSChan <- engine.NewFilterS(cfg, internalStatSChan, internalResourceSChan, internalRalSChan, dm)
+	filterSChan <- engine.NewFilterS(cfg, connMgr, dm)
 }
 
 // initCacheS inits the CacheS and starts precaching as well as populating internal channel for RPC conns
@@ -361,7 +360,7 @@ func singnalHandler(exitChan chan bool) {
 			//  do it in it's own gorutine in order to not block the signal handler with the reload functionality
 			go func() {
 				var reply string
-				if err := config.CgrConfig().V1ReloadConfig(
+				if err := config.CgrConfig().V1ReloadConfigFromPath(
 					&config.ConfigReloadWithArgDispatcher{
 						Section: utils.EmptyString,
 						Path:    config.CgrConfig().ConfigPath, // use the same path
@@ -496,11 +495,6 @@ func main() {
 			return
 		}
 	}
-	if storDBService.ShouldRun() {
-		if err = storDBService.Start(); err != nil {
-			return
-		}
-	}
 	// Done initing DBs
 	engine.SetRoundingDecimals(cfg.GeneralCfg().RoundingDecimals)
 
@@ -568,8 +562,7 @@ func main() {
 	)
 	srvManager.StartServices()
 	// Start FilterS
-	go startFilterService(filterSChan, cacheS, stS.GetIntenternalChan(),
-		reS.GetIntenternalChan(), rals.GetResponder().GetIntenternalChan(),
+	go startFilterService(filterSChan, cacheS, connManager,
 		cfg, dmService.GetDM(), exitChan)
 
 	initServiceManagerV1(internalServeManagerChan, srvManager, server)

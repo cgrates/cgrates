@@ -93,13 +93,13 @@ func testSessionSRplAddVoiceBalance(t *testing.T) {
 
 //Init Config
 func testSessionSRplInitCfg(t *testing.T) {
-	smgRplcMasterCfgPath = path.Join(*dataDir, "conf", "samples", "sessions_replication", "smgreplcmaster")
+	smgRplcMasterCfgPath = path.Join(dataDir, "conf", "samples", "sessions_replication", "smgreplcmaster")
 	if smgRplcMasterCfg, err = config.NewCGRConfigFromPath(smgRplcMasterCfgPath); err != nil {
 		t.Fatal(err)
 	}
-	smgRplcMasterCfg.DataFolderPath = *dataDir
+	smgRplcMasterCfg.DataFolderPath = dataDir
 	config.SetCgrConfig(smgRplcMasterCfg)
-	smgRplcSlaveCfgPath = path.Join(*dataDir, "conf", "samples", "sessions_replication", "smgreplcslave")
+	smgRplcSlaveCfgPath = path.Join(dataDir, "conf", "samples", "sessions_replication", "smgreplcslave")
 	if smgRplcSlaveCfg, err = config.NewCGRConfigFromPath(smgRplcSlaveCfgPath); err != nil {
 		t.Fatal(err)
 	}
@@ -117,10 +117,10 @@ func testSessionSRplResetDB(t *testing.T) {
 
 // Start CGR Engine
 func testSessionSRplStartEngine(t *testing.T) {
-	if _, err = engine.StopStartEngine(smgRplcSlaveCfgPath, *waitRater); err != nil {
+	if _, err = engine.StopStartEngine(smgRplcSlaveCfgPath, waitRater); err != nil {
 		t.Fatal(err)
 	}
-	if masterEngine, err = engine.StartEngine(smgRplcMasterCfgPath, *waitRater); err != nil {
+	if masterEngine, err = engine.StartEngine(smgRplcMasterCfgPath, waitRater); err != nil {
 		t.Fatal(err)
 	}
 
@@ -138,12 +138,12 @@ func testSessionSRplApierRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func testSessionSRplTPFromFolder(t *testing.T) {
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(dataDir, "tariffplans", "oldtutorial")}
 	var loadInst utils.LoadInstance
 	if err := smgRplcMstrRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 func testSessionSRplInitiate(t *testing.T) {
@@ -372,7 +372,7 @@ func testSessionSRplTerminate(t *testing.T) {
 	if err := smgRplcSlvRPC.Call(utils.SessionSv1TerminateSession, args, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Wait for the sessions to be populated
+	time.Sleep(time.Duration(waitRater) * time.Millisecond) // Wait for the sessions to be populated
 	var aSessions []*sessions.ExternalSession
 
 	//check if the session was terminated on slave

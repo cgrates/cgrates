@@ -16,6 +16,15 @@
 	"db_password": "CGRateS.org",			// password to use when connecting to stordb
 },
 
+
+"rpc_conns": {
+	"rplConn": {
+		"strategy": "*broadcast_sync",
+		"conns": [{"address": "127.0.0.1:22012", "transport": "*json"}],
+	},
+},
+
+
 "rals": {
 	"enabled": true,
 },
@@ -40,9 +49,7 @@
 
 "sessions": {
 	"enabled": true,
-	"replication_conns": [
-		{"address": "127.0.0.1:22012", "transport": "*json"},
-	],
+	"replication_conns": ["rplConn"],
 	"rals_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
 	"chargers_conns": ["*internal"],

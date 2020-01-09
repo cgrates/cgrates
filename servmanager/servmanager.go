@@ -147,6 +147,7 @@ func (srvMngr *ServiceManager) GetConfig() *config.CGRConfig {
 func (srvMngr *ServiceManager) StartServices() (err error) {
 	go srvMngr.handleReload()
 	for serviceName, shouldRun := range map[string]bool{
+		utils.StorDB:          srvMngr.GetConfig().RalsCfg().Enabled || srvMngr.GetConfig().CdrsCfg().Enabled,
 		utils.AttributeS:      srvMngr.GetConfig().AttributeSCfg().Enabled,
 		utils.ChargerS:        srvMngr.GetConfig().ChargerSCfg().Enabled,
 		utils.ThresholdS:      srvMngr.GetConfig().ThresholdSCfg().Enabled,
@@ -344,7 +345,7 @@ func (srvMngr *ServiceManager) startService(srviceName string) {
 }
 
 // GetService returns the named service
-func (srvMngr ServiceManager) GetService(subsystem string) (srv Service) {
+func (srvMngr *ServiceManager) GetService(subsystem string) (srv Service) {
 	var has bool
 	srvMngr.RLock()
 	srv, has = srvMngr.subsystems[subsystem]

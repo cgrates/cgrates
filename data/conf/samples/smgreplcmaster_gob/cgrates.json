@@ -12,6 +12,15 @@
 	"http": "127.0.0.1:2080",
 },
 
+
+"rpc_conns": {
+	"rplConn": {
+		"strategy": "*broadcast_sync",
+		"conns": [{"address": "127.0.0.1:22013", "transport": "*gob"}],
+	},
+},
+
+
 "stor_db": {								// database used to store offline tariff plans and CDRs
 	"db_password": "CGRateS.org",			// password to use when connecting to stordb
 },
@@ -40,9 +49,7 @@
 
 "sessions": {
 	"enabled": true,
-	"replication_conns": [
-		{"address": "127.0.0.1:22013", "transport": "*gob"},
-	],
+	"replication_conns": ["rplConn"],
 	"rals_conns": ["*internal"],
 	"cdrs_conns": ["*internal"],
 	"chargers_conns": ["*internal"],

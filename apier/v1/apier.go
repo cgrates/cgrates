@@ -50,6 +50,8 @@ type ApierV1 struct {
 	HTTPPoster       *engine.HTTPPoster
 	FilterS          *engine.FilterS //Used for CDR Exporter
 	ConnMgr          *engine.ConnManager
+
+	StorDBChan chan engine.StorDB
 }
 
 // Call implements rpcclient.ClientConnector interface for internal RPC
@@ -1373,9 +1375,18 @@ func (apiv1 *ApierV1) GetRatingPlanIDs(args utils.TenantArgWithPaginator, attrPr
 	return nil
 }
 
-// SetStorDB sets the new connection for StorDB
-// only used on reload
-func (apiv1 *ApierV1) SetStorDB(storDB engine.StorDB) {
-	apiv1.CdrDb = storDB
-	apiv1.StorDb = storDB
+// ListenAndServe listen for storbd reload
+func (apiv1 *ApierV1) ListenAndServe(stopChan chan struct{}) (err error) {
+	for {
+		select {
+		case <-stopChan:
+			return
+		case stordb, ok := <-apiv1.StorDBChan:
+			if !ok { // the chanel was closed by the shutdown of stordbService
+				return
+			}
+			apiv1.CdrDb = stordb
+			apiv1.StorDb = stordb
+		}
+	}
 }

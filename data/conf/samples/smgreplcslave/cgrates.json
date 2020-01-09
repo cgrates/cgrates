@@ -17,6 +17,10 @@
 		"strategy": "*first",
 		"conns": [{"address": "127.0.0.1:22012", "transport":"*json"}],
 	},
+	"rplConn": {
+		"strategy": "*broadcast_sync",
+		"conns": [{"address": "127.0.0.1:2012", "transport": "*json"}],
+	}
 },
 
 
@@ -49,9 +53,7 @@
 "sessions": {
 	"enabled": true,						// starts SessionManager service: <true|false>
 	"listen_bijson": "127.0.0.1:22014",		// address where to listen for bidirectional JSON-RPC requests
-	"replication_conns": [
-		{"address": "127.0.0.1:2012", "transport": "*json"},
-	],
+	"replication_conns": ["rplConn"],
 	"rals_conns": ["conn1"],
 	"cdrs_conns": ["*internal"],
 	"chargers_conns": ["*internal"],

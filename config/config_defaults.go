@@ -50,12 +50,12 @@ const CGRATES_CFG_JSON = `
 	"digest_separator": ",",								// separator to use in replies containing data digests
 	"digest_equal": ":",									// equal symbol used in case of digests
 	"rsr_separator": ";",									// separator used within RSR fields
+	"max_parralel_conns": 100,								// the maximum number of connection used by the *parallel strategy
 },
 
 
 "rpc_conns": {
 	"*localhost": {
-		"strategy": "*first",
 		"conns": [{"address": "127.0.0.1:2012", "transport":"*json"}],
 	},
 },							// rpc connections definitions

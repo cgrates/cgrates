@@ -69,21 +69,16 @@ func (smg *SessionService) Start() (err error) {
 	if smg.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
-
+	var datadb *engine.DataManager
+	if smg.dm.IsRunning() {
+		dbchan := smg.dm.GetDMChan()
+		datadb = <-dbchan
+		dbchan <- datadb
+	}
 	smg.Lock()
 	defer smg.Unlock()
 
-	sReplConns, err := sessions.NewSReplConns(smg.cfg.SessionSCfg().ReplicationConns,
-		smg.cfg.GeneralCfg().Reconnects, smg.cfg.GeneralCfg().ConnectTimeout,
-		smg.cfg.GeneralCfg().ReplyTimeout)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to SMGReplicationConnection error: <%s>",
-			utils.SessionS, err.Error()))
-		return
-	}
-
-	smg.sm = sessions.NewSessionS(smg.cfg,
-		sReplConns, smg.dm.GetDM(), smg.connMgr)
+	smg.sm = sessions.NewSessionS(smg.cfg, datadb, smg.connMgr)
 	//start sync session in a separate gorutine
 	go func(sm *sessions.SessionS) {
 		if err = sm.ListenAndServe(smg.exitChan); err != nil {
@@ -129,17 +124,6 @@ func (smg *SessionService) GetIntenternalChan() (conn chan rpcclient.ClientConne
 
 // Reload handles the change of config
 func (smg *SessionService) Reload() (err error) {
-	sReplConns, err := sessions.NewSReplConns(smg.cfg.SessionSCfg().ReplicationConns,
-		smg.cfg.GeneralCfg().Reconnects, smg.cfg.GeneralCfg().ConnectTimeout,
-		smg.cfg.GeneralCfg().ReplyTimeout)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<%s> Could not connect to SMGReplicationConnection error: <%s>",
-			utils.SessionS, err.Error()))
-		return
-	}
-	smg.Lock()
-	smg.sm.SetReplicationConnections(sReplConns)
-	smg.Unlock()
 	return
 }
 

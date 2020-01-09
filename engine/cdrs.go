@@ -68,9 +68,9 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // NewCDRServer is a constructor for CDRServer
-func NewCDRServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, filterS *FilterS,
+func NewCDRServer(cgrCfg *config.CGRConfig, storDBChan chan StorDB, dm *DataManager, filterS *FilterS,
 	connMgr *ConnManager) *CDRServer {
-
+	cdrDb := <-storDBChan
 	return &CDRServer{
 		cgrCfg: cgrCfg,
 		cdrDb:  cdrDb,
@@ -78,8 +78,9 @@ func NewCDRServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, dm *DataManager, f
 		guard:  guardian.Guardian,
 		httpPoster: NewHTTPPoster(cgrCfg.GeneralCfg().HttpSkipTlsVerify,
 			cgrCfg.GeneralCfg().ReplyTimeout),
-		filterS: filterS,
-		connMgr: connMgr,
+		filterS:    filterS,
+		connMgr:    connMgr,
+		storDBChan: storDBChan,
 	}
 }
 
@@ -92,6 +93,22 @@ type CDRServer struct {
 	httpPoster *HTTPPoster // used for replication
 	filterS    *FilterS
 	connMgr    *ConnManager
+	storDBChan chan StorDB
+}
+
+// ListenAndServe listen for storbd reload
+func (cdrS *CDRServer) ListenAndServe(stopChan chan struct{}) (err error) {
+	for {
+		select {
+		case <-stopChan:
+			return
+		case stordb, ok := <-cdrS.storDBChan:
+			if !ok { // the chanel was closed by the shutdown of stordbService
+				return
+			}
+			cdrS.cdrDb = stordb
+		}
+	}
 }
 
 // RegisterHandlersToServer is called by cgr-engine to register HTTP URL handlers
@@ -944,10 +961,4 @@ func (cdrS *CDRServer) V1CountCDRs(args *utils.RPCCDRsFilterWithArgDispatcher, c
 	}
 	*cnt = qryCnt
 	return nil
-}
-
-// SetStorDB sets the new StorDB
-// only used on reload
-func (cdrS *CDRServer) SetStorDB(cdrDb CdrStorage) {
-	cdrS.cdrDb = cdrDb
 }

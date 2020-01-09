@@ -636,7 +636,7 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 		StatSConns:          []string{},
 		SupplSConns:         []string{},
 		AttrSConns:          []string{},
-		ReplicationConns:    []*RemoteHost{},
+		ReplicationConns:    []string{},
 		DebitInterval:       0 * time.Second,
 		StoreSCosts:         false,
 		MinCallDuration:     0 * time.Second,
@@ -794,9 +794,9 @@ func TestCgrCfgJSONDefaultssteriskAgentCfg(t *testing.T) {
 
 func TestCgrCfgJSONDefaultFiltersCfg(t *testing.T) {
 	eFiltersCfg := &FilterSCfg{
-		StatSConns:     []*RemoteHost{},
-		ResourceSConns: []*RemoteHost{},
-		RALsConns:      []*RemoteHost{},
+		StatSConns:     []string{},
+		ResourceSConns: []string{},
+		RALsConns:      []string{},
 	}
 	if !reflect.DeepEqual(cgrCfg.filterSCfg, eFiltersCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.filterSCfg, eFiltersCfg)
