@@ -63,11 +63,11 @@ func TestBrodcastRPC(t *testing.T) {
 // test for 0 balance with session terminate with 1s usage
 func testbrodcastItLoadConfig(t *testing.T) {
 	var err error
-	brodcastCfgPath = path.Join(*dataDir, "conf", "samples", "internal_broadcast_replication")
+	brodcastCfgPath = path.Join(dataDir, "conf", "samples", "internal_broadcast_replication")
 	if brodcastCfg, err = config.NewCGRConfigFromPath(brodcastCfgPath); err != nil {
 		t.Error(err)
 	}
-	brodcastInternalCfgPath = path.Join(*dataDir, "conf", "samples", "tutinternal")
+	brodcastInternalCfgPath = path.Join(dataDir, "conf", "samples", "tutinternal")
 	if brodcastInternalCfg, err = config.NewCGRConfigFromPath(brodcastInternalCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -86,10 +86,10 @@ func testbrodcastItLoadConfig(t *testing.T) {
 // }
 
 func testbrodcastItStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(brodcastCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(brodcastCfgPath, waitRater); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := engine.StartEngine(brodcastInternalCfgPath, *waitRater); err != nil {
+	if _, err := engine.StartEngine(brodcastInternalCfgPath, waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -108,7 +108,7 @@ func testbrodcastItRPCConn(t *testing.T) {
 
 func testbrodcastItLoadFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(dataDir, "tariffplans", "tutorial")}
 	if err := brodcastRPC.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}

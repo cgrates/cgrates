@@ -18,10 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import "github.com/cgrates/cgrates/utils"
+
 type FilterSCfg struct {
-	StatSConns     []*RemoteHost
-	ResourceSConns []*RemoteHost
-	RALsConns      []*RemoteHost
+	StatSConns     []string
+	ResourceSConns []string
+	RALsConns      []string
 }
 
 func (fSCfg *FilterSCfg) loadFromJsonCfg(jsnCfg *FilterSJsonCfg) (err error) {
@@ -29,24 +31,36 @@ func (fSCfg *FilterSCfg) loadFromJsonCfg(jsnCfg *FilterSJsonCfg) (err error) {
 		return
 	}
 	if jsnCfg.Stats_conns != nil {
-		fSCfg.StatSConns = make([]*RemoteHost, len(*jsnCfg.Stats_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Stats_conns {
-			fSCfg.StatSConns[idx] = NewDfltRemoteHost()
-			fSCfg.StatSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		fSCfg.StatSConns = make([]string, len(*jsnCfg.Stats_conns))
+		for idx, connID := range *jsnCfg.Stats_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				fSCfg.StatSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStatS)
+			} else {
+				fSCfg.StatSConns[idx] = connID
+			}
 		}
 	}
 	if jsnCfg.Resources_conns != nil {
-		fSCfg.ResourceSConns = make([]*RemoteHost, len(*jsnCfg.Resources_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Resources_conns {
-			fSCfg.ResourceSConns[idx] = NewDfltRemoteHost()
-			fSCfg.ResourceSConns[idx].loadFromJsonCfg(jsnHaCfg)
+		fSCfg.ResourceSConns = make([]string, len(*jsnCfg.Resources_conns))
+		for idx, connID := range *jsnCfg.Resources_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				fSCfg.ResourceSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResources)
+			} else {
+				fSCfg.ResourceSConns[idx] = connID
+			}
 		}
 	}
 	if jsnCfg.Rals_conns != nil {
-		fSCfg.RALsConns = make([]*RemoteHost, len(*jsnCfg.Rals_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Rals_conns {
-			fSCfg.RALsConns[idx] = NewDfltRemoteHost()
-			fSCfg.RALsConns[idx].loadFromJsonCfg(jsnHaCfg)
+		fSCfg.RALsConns = make([]string, len(*jsnCfg.Rals_conns))
+		for idx, connID := range *jsnCfg.Rals_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			if connID == utils.MetaInternal {
+				fSCfg.RALsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaResponder)
+			} else {
+				fSCfg.RALsConns[idx] = connID
+			}
 		}
 	}
 	return

@@ -79,7 +79,7 @@ func TestTutorialMySQL(t *testing.T) {
 
 func testTutorialLoadConfig(t *testing.T) {
 	var err error
-	tutorialCfgPath = path.Join(*dataDir, "conf", "samples", tutorialConfDIR)
+	tutorialCfgPath = path.Join(dataDir, "conf", "samples", tutorialConfDIR)
 	if tutorialCfg, err = config.NewCGRConfigFromPath(tutorialCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -116,7 +116,7 @@ func testTutorialRpcConn(t *testing.T) {
 
 func testTutorialFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(dataDir, "tariffplans", "tutorial")}
 	if err := tutorialRpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}

@@ -71,7 +71,7 @@ func TestSes3ItSessions(t *testing.T) {
 }
 
 func testSes3ItLoadConfig(t *testing.T) {
-	ses3CfgPath = path.Join(*dataDir, "conf", "samples", ses3CfgDir)
+	ses3CfgPath = path.Join(dataDir, "conf", "samples", ses3CfgDir)
 	if ses3Cfg, err = config.NewCGRConfigFromPath(ses3CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -90,7 +90,7 @@ func testSes3ItResetStorDb(t *testing.T) {
 }
 
 func testSes3ItStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(ses3CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(ses3CfgPath, waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -105,7 +105,7 @@ func testSes3ItRPCConn(t *testing.T) {
 
 func testSes3ItLoadFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(dataDir, "tariffplans", "testit")}
 	if err := ses3RPC.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
@@ -174,7 +174,7 @@ func testSes3ItProcessEvent(t *testing.T) {
 			},
 		},
 	}
-	if *encoding == utils.MetaGOB {
+	if encoding == utils.MetaGOB {
 		eAttrs.CGREvent.Event[utils.Usage] = 5 * time.Minute
 		eAttrs.CGREvent.Event[utils.SetupTime], _ = utils.IfaceAsTime("2018-01-07T17:00:00Z", "")
 		eAttrs.CGREvent.Event[utils.AnswerTime], _ = utils.IfaceAsTime("2018-01-07T17:00:10Z", "")

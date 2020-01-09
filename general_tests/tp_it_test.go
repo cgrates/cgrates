@@ -67,14 +67,14 @@ func TestTp(t *testing.T) {
 	}
 }
 func testTpInitCfg(t *testing.T) {
-	tpCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	tpCfgPath = path.Join(dataDir, "conf", "samples", "tutmysql")
 	// Init config first
 	var err error
 	tpCfg, err = config.NewCGRConfigFromPath(tpCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	tpCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	tpCfg.DataFolderPath = dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(tpCfg)
 }
 
@@ -110,11 +110,11 @@ func testTpRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func testTpLoadTariffPlanFromFolder(t *testing.T) {
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(dataDir, "tariffplans", "testtp")}
 	if err := tpRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &tpLoadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 func testTpBalanceCounter(t *testing.T) {

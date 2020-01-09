@@ -66,7 +66,7 @@ func TestSes2ItTutMysql(t *testing.T) {
 }
 
 func testSes2ItLoadConfig(t *testing.T) {
-	ses2CfgPath = path.Join(*dataDir, "conf", "samples", ses2CfgDir)
+	ses2CfgPath = path.Join(dataDir, "conf", "samples", ses2CfgDir)
 	if ses2Cfg, err = config.NewCGRConfigFromPath(ses2CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -85,7 +85,7 @@ func testSes2ItResetStorDb(t *testing.T) {
 }
 
 func testSes2ItStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(ses2CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(ses2CfgPath, waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -100,7 +100,7 @@ func testSes2ItRPCConn(t *testing.T) {
 
 func testSes2ItLoadFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(dataDir, "tariffplans", "tutorial")}
 	if err := ses2RPC.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}

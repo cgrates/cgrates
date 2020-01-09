@@ -64,7 +64,7 @@ func TestMCDRC(t *testing.T) {
 
 func testMCDRCLoadConfig(t *testing.T) {
 	var err error
-	cfgPath = path.Join(*dataDir, "conf", "samples", "multiplecdrc")
+	cfgPath = path.Join(dataDir, "conf", "samples", "multiplecdrc")
 	if cfg, err = config.NewCGRConfigFromPath(cfgPath); err != nil {
 		t.Error(err)
 	}
@@ -98,7 +98,7 @@ func testMCDRCCreateCdrDirs(t *testing.T) {
 	}
 }
 func testMCDRCStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(cfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cfgPath, waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -116,13 +116,13 @@ func testMCDRCRpcConn(t *testing.T) {
 func testMCDRCApierLoadTariffPlanFromFolder(t *testing.T) {
 	reply := ""
 	// Simple test that command is executed without errors
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(dataDir, "tariffplans", "testtp")}
 	if err := rater.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.LoadTariffPlanFromFolder: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 // The default scenario, out of cdrc defined in .cfg file

@@ -849,9 +849,9 @@ func TestDfChargerServJsonCfg(t *testing.T) {
 
 func TestDfFilterSJsonCfg(t *testing.T) {
 	eCfg := &FilterSJsonCfg{
-		Stats_conns:     &[]*RemoteHostJson{},
-		Resources_conns: &[]*RemoteHostJson{},
-		Rals_conns:      &[]*RemoteHostJson{},
+		Stats_conns:     &[]string{},
+		Resources_conns: &[]string{},
+		Rals_conns:      &[]string{},
 	}
 	if cfg, err := dfCgrJsonCfg.FilterSJsonCfg(); err != nil {
 		t.Error(err)

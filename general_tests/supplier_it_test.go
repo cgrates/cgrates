@@ -77,7 +77,7 @@ func TestSuplSV1ITMongo(t *testing.T) {
 
 func testV1SplSLoadConfig(t *testing.T) {
 	var err error
-	splSv1CfgPath = path.Join(*dataDir, "conf", "samples", splSv1ConfDIR)
+	splSv1CfgPath = path.Join(dataDir, "conf", "samples", splSv1ConfDIR)
 	if splSv1Cfg, err = config.NewCGRConfigFromPath(splSv1CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -97,7 +97,7 @@ func testV1SplSResetStorDb(t *testing.T) {
 }
 
 func testV1SplSStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(splSv1CfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(splSv1CfgPath, waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -112,7 +112,7 @@ func testV1SplSRpcConn(t *testing.T) {
 
 func testV1SplSFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(dataDir, "tariffplans", "testit")}
 	if err := splSv1Rpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}

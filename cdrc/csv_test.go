@@ -76,7 +76,7 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 	cdrcConfig := cgrConfig.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0]
 	data := engine.NewInternalDB(nil, nil)
 	dm := engine.NewDataManager(data, cgrConfig.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrConfig, nil, nil, nil, dm)
+	filterS := engine.NewFilterS(cgrConfig, nil, dm)
 	cdrcConfig.CdrSourceId = "TEST_CDRC"
 	cdrcConfig.ContentFields = []*config.FCTemplate{
 		{Tag: "TORField", Type: utils.META_COMPOSED, FieldId: utils.ToR,
@@ -161,7 +161,7 @@ func TestCsvSecondUsage(t *testing.T) {
 	cdrcConfig := cgrConfig.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0]
 	data := engine.NewInternalDB(nil, nil)
 	dm := engine.NewDataManager(data, cgrConfig.CacheCfg(), nil)
-	filterS := engine.NewFilterS(cgrConfig, nil, nil, nil, dm)
+	filterS := engine.NewFilterS(cgrConfig, nil, dm)
 	cdrcConfig.CdrSourceId = "TEST_CDRC"
 	cdrcConfig.ContentFields = []*config.FCTemplate{
 		{Tag: "TORField", Type: utils.META_COMPOSED, FieldId: utils.ToR,
