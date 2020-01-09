@@ -83,7 +83,9 @@ func (ldrs *LoaderService) Start() (err error) {
 		return
 	}
 	ldrs.rpc = v1.NewLoaderSv1(ldrs.ldrs)
-	ldrs.server.RpcRegister(ldrs.rpc)
+	if !ldrs.cfg.DispatcherSCfg().Enabled {
+		ldrs.server.RpcRegister(ldrs.rpc)
+	}
 	ldrs.connChan <- ldrs.rpc
 	return
 }

@@ -72,7 +72,9 @@ func (anz *AnalyzerService) Start() (err error) {
 		return
 	}()
 	anz.rpc = v1.NewAnalyzerSv1(anz.anz)
-	anz.server.RpcRegister(anz.rpc)
+	if !anz.cfg.DispatcherSCfg().Enabled {
+		anz.server.RpcRegister(anz.rpc)
+	}
 	anz.connChan <- anz.rpc
 
 	return
