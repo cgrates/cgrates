@@ -53,7 +53,19 @@ var sTestsSchedFiltered = []func(t *testing.T){
 
 //TestSchedWithoutFilters will execute action for all accounts
 func TestSchedWithoutFilters(t *testing.T) {
-	schedConfDIR = "tutmysql"
+	switch *dbType {
+	case utils.MetaInternal:
+		schedConfDIR = "tutinternal"
+	case utils.MetaSQL:
+		schedConfDIR = "tutmysql"
+	case utils.MetaMongo:
+		schedConfDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+
 	for _, stest := range sTestsSchedFiltered {
 		t.Run(schedConfDIR, stest)
 	}
@@ -61,7 +73,18 @@ func TestSchedWithoutFilters(t *testing.T) {
 
 //TestSchedWithFiltersSingleAccount will execute actions only for account 1001
 func TestSchedWithFiltersSingleAccount(t *testing.T) {
-	schedConfDIR = "filtered_scheduler"
+	switch *dbType {
+	case utils.MetaInternal:
+		schedConfDIR = "filtered_scheduler_internal"
+	case utils.MetaSQL:
+		schedConfDIR = "filtered_scheduler"
+	case utils.MetaMongo:
+		schedConfDIR = "filtered_scheduler_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	for _, stest := range sTestsSchedFiltered {
 		t.Run(schedConfDIR, stest)
 	}
@@ -69,7 +92,18 @@ func TestSchedWithFiltersSingleAccount(t *testing.T) {
 
 //TestSchedWithFilters2 will execute actions for accounts 1002 and 1003 ( 1001 will be skiped )
 func TestSchedWithFilters2(t *testing.T) {
-	schedConfDIR = "filtered_scheduler2"
+	switch *dbType {
+	case utils.MetaInternal:
+		schedConfDIR = "filtered_scheduler2_internal"
+	case utils.MetaSQL:
+		schedConfDIR = "filtered_scheduler2"
+	case utils.MetaMongo:
+		schedConfDIR = "filtered_scheduler2_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	for _, stest := range sTestsSchedFiltered {
 		t.Run(schedConfDIR, stest)
 	}
