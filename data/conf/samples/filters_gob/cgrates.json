@@ -45,15 +45,9 @@
 },
 
 "filters": {								
-	"stats_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],						
-	"resources_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
-	"rals_conns": [
-		{"address": "127.0.0.1:2013", "transport":"*gob"},
-	],
+	"stats_conns": ["conn1"],
+	"resources_conns": ["conn1"],
+	"rals_conns": ["conn1"],
 },
 
 

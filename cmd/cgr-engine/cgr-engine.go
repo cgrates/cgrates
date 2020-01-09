@@ -119,11 +119,10 @@ func startCdrc(cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool,
 }
 
 // startFilterService fires up the FilterS
-func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS,
-	internalStatSChan, internalResourceSChan, internalRalSChan chan rpcclient.ClientConnector, cfg *config.CGRConfig,
+func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS, connMgr *engine.ConnManager, cfg *config.CGRConfig,
 	dm *engine.DataManager, exitChan chan bool) {
 	<-cacheS.GetPrecacheChannel(utils.CacheFilters)
-	filterSChan <- engine.NewFilterS(cfg, internalStatSChan, internalResourceSChan, internalRalSChan, dm)
+	filterSChan <- engine.NewFilterS(cfg, connMgr, dm)
 }
 
 // initCacheS inits the CacheS and starts precaching as well as populating internal channel for RPC conns
@@ -568,8 +567,7 @@ func main() {
 	)
 	srvManager.StartServices()
 	// Start FilterS
-	go startFilterService(filterSChan, cacheS, stS.GetIntenternalChan(),
-		reS.GetIntenternalChan(), rals.GetResponder().GetIntenternalChan(),
+	go startFilterService(filterSChan, cacheS, connManager,
 		cfg, dmService.GetDM(), exitChan)
 
 	initServiceManagerV1(internalServeManagerChan, srvManager, server)

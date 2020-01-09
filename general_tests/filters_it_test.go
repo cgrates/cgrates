@@ -67,9 +67,9 @@ func TestFltrIT(t *testing.T) {
 
 func testV1FltrLoadConfig(t *testing.T) {
 	var err error
-	fltrCfgPath = path.Join(*dataDir, "conf", "samples", fltrConfDIR)
-	if *encoding == utils.MetaGOB {
-		cdrsCfgPath = path.Join(*dataDir, "conf", "samples", fltrConfDIR+"_gob")
+	fltrCfgPath = path.Join(dataDir, "conf", "samples", fltrConfDIR)
+	if encoding == utils.MetaGOB {
+		cdrsCfgPath = path.Join(dataDir, "conf", "samples", fltrConfDIR+"_gob")
 	}
 	if fltrCfg, err = config.NewCGRConfigFromPath(fltrCfgPath); err != nil {
 		t.Error(err)
@@ -105,7 +105,7 @@ func testV1FltrRpcConn(t *testing.T) {
 
 func testV1FltrLoadTarrifPlans(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(dataDir, "tariffplans", "testit")}
 	if err := fltrRpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

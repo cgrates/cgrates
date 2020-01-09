@@ -78,8 +78,8 @@ func TestRPCITLcl(t *testing.T) {
 }
 
 func testRPCITLclInitCfg(t *testing.T) {
-	rpcITCfgPath1 = path.Join(*dataDir, "conf", "samples", "multiral1")
-	rpcITCfgPath2 = path.Join(*dataDir, "conf", "samples", "multiral2")
+	rpcITCfgPath1 = path.Join(dataDir, "conf", "samples", "multiral1")
+	rpcITCfgPath2 = path.Join(dataDir, "conf", "samples", "multiral2")
 	rpcITCfg1, err = config.NewCGRConfigFromPath(rpcITCfgPath1)
 	if err != nil {
 		t.Error(err)
@@ -94,7 +94,7 @@ func testRPCITLclInitCfg(t *testing.T) {
 }
 
 func testRPCITLclStartSecondEngine(t *testing.T) {
-	if ral2, err = engine.StopStartEngine(rpcITCfgPath2, *waitRater); err != nil {
+	if ral2, err = engine.StopStartEngine(rpcITCfgPath2, waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -133,7 +133,7 @@ func testRPCITLclStatusSecondEngine(t *testing.T) {
 
 // Start first engine
 func testRPCITLclStartFirstEngine(t *testing.T) {
-	if ral1, err = engine.StartEngine(rpcITCfgPath1, *waitRater); err != nil {
+	if ral1, err = engine.StartEngine(rpcITCfgPath1, waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -160,7 +160,7 @@ func testRPCITLclStatusFirstFailover(t *testing.T) {
 	if err := ral1.Process.Kill(); err != nil { // Kill the first RAL
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(waitRater) * time.Millisecond)
 	var status map[string]interface{}
 	if err := rpcPoolFirst.Call(utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err != nil {
 		t.Error(err)
@@ -177,7 +177,7 @@ func testRPCITLclStatusFirstFailover(t *testing.T) {
 }
 
 func testRPCITLclStatusFirstFailback(t *testing.T) {
-	if ral1, err = engine.StartEngine(rpcITCfgPath1, *waitRater); err != nil {
+	if ral1, err = engine.StartEngine(rpcITCfgPath1, waitRater); err != nil {
 		t.Fatal(err)
 	}
 	var status map[string]interface{}
@@ -235,7 +235,7 @@ func testRPCITLclBcastStatusNoRals1(t *testing.T) {
 	if err := ral1.Process.Kill(); err != nil { // Kill the first RAL
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(waitRater) * time.Millisecond)
 	var status map[string]interface{}
 	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err != nil {
 		t.Error(err)
@@ -253,7 +253,7 @@ func testRPCITLclBcastStatusBcastNoRals(t *testing.T) {
 	if err := ral2.Process.Kill(); err != nil { // Kill the first RAL
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(waitRater) * time.Millisecond)
 	var status map[string]interface{}
 	if err := rpcPoolBroadcast.Call(utils.CoreSv1Status, utils.TenantWithArgDispatcher{}, &status); err == nil {
 		t.Error("Should get error")
@@ -261,7 +261,7 @@ func testRPCITLclBcastStatusBcastNoRals(t *testing.T) {
 }
 
 func testRPCITLclBcastStatusRALs2Up(t *testing.T) {
-	if ral2, err = engine.StartEngine(rpcITCfgPath2, *waitRater); err != nil {
+	if ral2, err = engine.StartEngine(rpcITCfgPath2, waitRater); err != nil {
 		t.Fatal(err)
 	}
 	var status map[string]interface{}
@@ -278,7 +278,7 @@ func testRPCITLclBcastStatusRALs2Up(t *testing.T) {
 }
 
 func testRPCITLclStatusBcastRALs1Up(t *testing.T) {
-	if ral1, err = engine.StartEngine(rpcITCfgPath1, *waitRater); err != nil {
+	if ral1, err = engine.StartEngine(rpcITCfgPath1, waitRater); err != nil {
 		t.Fatal(err)
 	}
 	var status map[string]interface{}

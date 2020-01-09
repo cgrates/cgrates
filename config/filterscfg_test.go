@@ -38,11 +38,11 @@ func TestFilterSCfgloadFromJsonCfg(t *testing.T) {
 	}
 	cfgJSONStr := `{
 "filters": {								// Filters configuration (*new)
-	"stats_conns": [{"Address":"127.0.0.1","Transport":"","Synchronous":true}],		// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+	"stats_conns": ["*localhost"],		// address where to reach the stat service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
 	},
 }`
 	expected = FilterSCfg{
-		StatSConns: []*RemoteHost{{Address: "127.0.0.1", Transport: "", Synchronous: true}},
+		StatSConns: []string{utils.MetaLocalHost},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)

@@ -95,9 +95,9 @@ func TestCDRsITMongo(t *testing.T) {
 
 func testV2CDRsInitConfig(t *testing.T) {
 	var err error
-	cdrsCfgPath = path.Join(*dataDir, "conf", "samples", cdrsConfDIR)
-	if *encoding == utils.MetaGOB {
-		cdrsCfgPath = path.Join(*dataDir, "conf", "samples", cdrsConfDIR+"_gob")
+	cdrsCfgPath = path.Join(dataDir, "conf", "samples", cdrsConfDIR)
+	if encoding == utils.MetaGOB {
+		cdrsCfgPath = path.Join(dataDir, "conf", "samples", cdrsConfDIR+"_gob")
 	}
 	if cdrsCfg, err = config.NewCGRConfigFromPath(cdrsCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
@@ -118,7 +118,7 @@ func testV2CDRsInitCdrDb(t *testing.T) {
 }
 
 func testV2CDRsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(cdrsCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cdrsCfgPath, waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -135,10 +135,10 @@ func testV2CDRsLoadTariffPlanFromFolder(t *testing.T) {
 	var loadInst utils.LoadInstance
 	if err := cdrsRpc.Call(utils.ApierV2LoadTariffPlanFromFolder,
 		&utils.AttrLoadTpFromFolder{FolderPath: path.Join(
-			*dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
+			dataDir, "tariffplans", "testit")}, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 	var resp string
 	if err := cdrsRpc.Call(utils.ApierV1RemoveChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SupplierCharges"}, &resp); err != nil {
@@ -755,7 +755,7 @@ func testV2CDRsGetCdrs7(t *testing.T) {
 }
 
 func testV2CDRsKillEngine(t *testing.T) {
-	if err := engine.KillEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(waitRater); err != nil {
 		t.Error(err)
 	}
 }

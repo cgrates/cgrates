@@ -103,9 +103,9 @@ type ItemRmtRplOptJson struct {
 
 // Filters config
 type FilterSJsonCfg struct {
-	Stats_conns     *[]*RemoteHostJson
-	Resources_conns *[]*RemoteHostJson
-	Rals_conns      *[]*RemoteHostJson
+	Stats_conns     *[]string
+	Resources_conns *[]string
+	Rals_conns      *[]string
 }
 
 // Rater config section

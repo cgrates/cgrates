@@ -794,9 +794,9 @@ func TestCgrCfgJSONDefaultssteriskAgentCfg(t *testing.T) {
 
 func TestCgrCfgJSONDefaultFiltersCfg(t *testing.T) {
 	eFiltersCfg := &FilterSCfg{
-		StatSConns:     []*RemoteHost{},
-		ResourceSConns: []*RemoteHost{},
-		RALsConns:      []*RemoteHost{},
+		StatSConns:     []string{},
+		ResourceSConns: []string{},
+		RALsConns:      []string{},
 	}
 	if !reflect.DeepEqual(cgrCfg.filterSCfg, eFiltersCfg) {
 		t.Errorf("received: %+v, expecting: %+v", cgrCfg.filterSCfg, eFiltersCfg)

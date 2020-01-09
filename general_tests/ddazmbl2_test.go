@@ -128,7 +128,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 
 func TestExecuteActions2(t *testing.T) {
 	scheduler.NewScheduler(dataDB2, config.CgrConfig(),
-		engine.NewFilterS(config.CgrConfig(), nil, nil, nil, dataDB)).Reload()
+		engine.NewFilterS(config.CgrConfig(), nil, dataDB)).Reload()
 	time.Sleep(10 * time.Millisecond) // Give time to scheduler to topup the account
 	if acnt, err := dataDB2.GetAccount("cgrates.org:12345"); err != nil {
 		t.Error(err)

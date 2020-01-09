@@ -69,17 +69,17 @@ func TestGOCSIT(t *testing.T) {
 
 //Init Config
 func testGOCSInitCfg(t *testing.T) {
-	auCfgPath = path.Join(*dataDir, "conf", "samples", "gocs", "au_site")
+	auCfgPath = path.Join(dataDir, "conf", "samples", "gocs", "au_site")
 	if auCfg, err = config.NewCGRConfigFromPath(auCfgPath); err != nil {
 		t.Fatal(err)
 	}
-	auCfg.DataFolderPath = *dataDir
+	auCfg.DataFolderPath = dataDir
 	config.SetCgrConfig(auCfg)
-	usCfgPath = path.Join(*dataDir, "conf", "samples", "gocs", "us_site")
+	usCfgPath = path.Join(dataDir, "conf", "samples", "gocs", "us_site")
 	if usCfg, err = config.NewCGRConfigFromPath(usCfgPath); err != nil {
 		t.Fatal(err)
 	}
-	dspCfgPath = path.Join(*dataDir, "conf", "samples", "gocs", "dsp_site")
+	dspCfgPath = path.Join(dataDir, "conf", "samples", "gocs", "dsp_site")
 	if dspCfg, err = config.NewCGRConfigFromPath(dspCfgPath); err != nil {
 		t.Fatal(err)
 	}
@@ -111,13 +111,13 @@ func testGOCSResetDB(t *testing.T) {
 
 // Start CGR Engine
 func testGOCSStartEngine(t *testing.T) {
-	if usEngine, err = engine.StopStartEngine(usCfgPath, *waitRater); err != nil {
+	if usEngine, err = engine.StopStartEngine(usCfgPath, waitRater); err != nil {
 		t.Fatal(err)
 	}
-	if auEngine, err = engine.StartEngine(auCfgPath, *waitRater); err != nil {
+	if auEngine, err = engine.StartEngine(auCfgPath, waitRater); err != nil {
 		t.Fatal(err)
 	}
-	if dspEngine, err = engine.StartEngine(dspCfgPath, *waitRater); err != nil {
+	if dspEngine, err = engine.StartEngine(dspCfgPath, waitRater); err != nil {
 		t.Fatal(err)
 	}
 	time.Sleep(10 * time.Millisecond)
@@ -178,7 +178,7 @@ func testGOCSLoadData(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		loader := exec.Command(loaderPath, "-config_path", dspCfgPath, "-path", path.Join(*dataDir, "tariffplans", "gocs", "dsp_site"))
+		loader := exec.Command(loaderPath, "-config_path", dspCfgPath, "-path", path.Join(dataDir, "tariffplans", "gocs", "dsp_site"))
 
 		if err := loader.Start(); err != nil {
 			t.Error(err)
@@ -218,7 +218,7 @@ func testGOCSLoadData(t *testing.T) {
 	} else if rply := acnt.BalanceMap[utils.VOICE].GetTotalValue(); rply != expectedVoice {
 		t.Errorf("Expecting: %v, received: %v", expectedVoice, rply)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups on au_site
+	time.Sleep(time.Duration(waitRater) * time.Millisecond) // Give time for scheduler to execute topups on au_site
 }
 
 func testGOCSAuthSession(t *testing.T) {
