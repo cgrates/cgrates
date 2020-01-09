@@ -94,6 +94,12 @@ func testTutStartEngine(t *testing.T) {
 	}
 }
 
+func testTutStopEngine(t *testing.T) {
+	if err := engine.KillEngine(tutDelay); err != nil {
+		t.Error(err)
+	}
+}
+
 func testTutRpcConn(t *testing.T) {
 	var err error
 	if tutRpc, err = newRPCClient(tutCfg.ListenCfg()); err != nil {
@@ -277,8 +283,30 @@ func testTutAccounts(t *testing.T) {
 		acnt.Disabled {
 		t.Errorf("received account: %s", utils.ToIJSON(acnt))
 	}
+
 	// test ActionTriggers
-	attrs := utils.AttrSetBalance{
+	attrBlc := utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "1001",
+		BalanceType: utils.MONETARY,
+		Value:       1,
+		Balance: map[string]interface{}{
+			utils.ID: utils.MetaDefault,
+		},
+	}
+	var rplySetBlc string
+	if err := tutRpc.Call(utils.ApierV1SetBalance, attrBlc, &rplySetBlc); err != nil {
+		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
+	}
+	if err := tutRpc.Call(utils.ApierV2GetAccount,
+		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"},
+		&acnt); err != nil {
+		t.Error(err)
+	} else if len(acnt.BalanceMap[utils.SMS]) != 2 ||
+		acnt.GetBalanceWithID(utils.SMS, "BONUS_SMSes").Value != 10 {
+		t.Errorf("account: %s", utils.ToIJSON(acnt))
+	}
+	attrBlc = utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "1001",
 		BalanceType: utils.MONETARY,
@@ -287,8 +315,7 @@ func testTutAccounts(t *testing.T) {
 			utils.ID: utils.MetaDefault,
 		},
 	}
-	var reply string
-	if err := tutRpc.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
+	if err := tutRpc.Call(utils.ApierV1SetBalance, attrBlc, &rplySetBlc); err != nil {
 		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
 	}
 	if err := tutRpc.Call(utils.ApierV2GetAccount,
@@ -299,6 +326,7 @@ func testTutAccounts(t *testing.T) {
 		t.Errorf("account: %s", utils.ToIJSON(acnt))
 	}
 	// enable the account again
+	var rplySetAcnt string
 	if err := tutRpc.Call(utils.ApierV2SetAccount,
 		v2.AttrSetAccount{
 			Tenant:  "cgrates.org",
@@ -306,21 +334,15 @@ func testTutAccounts(t *testing.T) {
 			ExtraOptions: map[string]bool{
 				utils.Disabled: false,
 			},
-		}, &reply); err != nil {
+		}, &rplySetAcnt); err != nil {
 		t.Error(err)
 	}
-	acnt = &engine.Account{}
+	acnt = new(engine.Account)
 	if err := tutRpc.Call(utils.ApierV2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"},
 		&acnt); err != nil {
 		t.Error(err)
 	} else if acnt.Disabled {
 		t.Errorf("account: %s", utils.ToJSON(acnt))
-	}
-}
-
-func testTutStopEngine(t *testing.T) {
-	if err := engine.KillEngine(tutDelay); err != nil {
-		t.Error(err)
 	}
 }

@@ -349,7 +349,7 @@ func testRunSession(t *testing.T) {
 		t.Error(err)
 	} else if len(cdrs) != 1 {
 		t.Errorf("unexpected number of CDRs returned: %d", len(cdrs))
-	} else if cdrs[0].Usage != "2m30s" {
+	} else if cdrs[0].Usage != "1m30s" {
 		t.Errorf("unexpected usage of CDR: %+v", cdrs[0])
 	}
 }

@@ -1,0 +1,8 @@
+# Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
+
+# CGR_DEFAULT is the default charger for events
+cgrates.org,CGR_DEFAULT,,,*default,*none,0
+
+# CGR_SUPPLIER1 creates an additional CDR for calculating supplier costs
+# uses ATTR_CRG_SUPPLIER1 to replace Category and RequestType in events
+cgrates.org,CRG_SUPPPLIER1,,,SUPPLIER1,ATTR_CRG_SUPPLIER1,0

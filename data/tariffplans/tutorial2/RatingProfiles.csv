@@ -4,3 +4,4 @@ cgrates.org,call,1001,2019-03-01T00:00:00Z,RP_1001,*any
 cgrates.org,call,RPF_SPECIAL_BLC,2019-03-01T00:00:00Z,RP_SPECIAL_BLC,
 cgrates.org,data,*any,2019-03-01T00:00:00Z,RP_DATA,
 cgrates.org,sms,*any,2019-03-01T00:00:00Z,RP_SMS,
+cgrates.org,supplier1,*any,2019-03-01T00:00:00Z,RP_1CNT,

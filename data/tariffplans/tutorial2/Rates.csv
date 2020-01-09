@@ -1,9 +1,26 @@
 #ID,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
+
+# RT_120C charges 0.20 units as connect fee and 1.2 in 1 minute increment in the first minute and second increments after that
 RT_120C,0.2,1.2,1m,1m,0
 RT_120C,,1.2,1m,1s,1m
+
+# RT_60C charges 0.1 connect fee and 0.01 units each second
 RT_60C,0.1,0.01,1s,1s,0
+
+# RT_0 charges 0 units rounding each call per minute
 RT_0,0,0,1m,1m,0
+
+# RT_10C_CN charges 0.1 units as connect/call fee
 RT_10C_CN,0.1,0,0,1s,0
+
+# RT_1024_1 will be used to charge 1 unit per every 1024 of usage in increments of 1024
 RT_1024_1,0,1,1024,1024,0
+
+# RT_10C1 charges 0.1 units of cost every 1 unit of usage
 RT_10C1,0,0.1,1,1,0
+
+# RT_20C1 charges 0.2 units of cost every 1 unit of usage
 RT_20C1,0,0.2,1,1,0
+
+# RT_1CNT charges 0.01 units of cost for each 1s of usage
+RT_1CNT,0,0.01,1s,1s,0

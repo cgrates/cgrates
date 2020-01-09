@@ -91,7 +91,6 @@ type SessionS struct {
 	pSIMux        sync.RWMutex                                     // protects pSessionsIdx
 	pSessionsIdx  map[string]map[string]map[string]utils.StringMap // map[fieldName]map[fieldValue][cgrID]utils.StringMap[runID]sID
 	pSessionsRIdx map[string][]*riFieldNameVal                     // reverse indexes for passive sessions, used on remove
-
 }
 
 // ListenAndServe starts the service and binds it to the listen loop
