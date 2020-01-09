@@ -32,7 +32,20 @@ import (
 func MatchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldIDs *[]string,
 	dm *DataManager, cacheID, itemIDPrefix string, indexedSelects, nestedFields bool) (itemIDs utils.StringMap, err error) {
 	itemIDs = make(utils.StringMap)
-
+	var allFieldIDs []string
+	navEv := config.NewNavigableMap(ev)
+	if indexedSelects && (stringFldIDs == nil || prefixFldIDs == nil) {
+		if !nestedFields {
+			allFieldIDs = make([]string, len(ev))
+			i := 0
+			for fldID := range ev {
+				allFieldIDs[i] = fldID
+				i++
+			}
+		} else {
+			allFieldIDs = navEv.GetKeys()
+		}
+	}
 	// Guard will protect the function with automatic locking
 	lockID := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
 	guardian.Guardian.Guard(func() (gRes interface{}, gErr error) {
@@ -48,12 +61,6 @@ func MatchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 			itemIDs = utils.StringMapFromSlice(sliceIDs)
 			return
 		}
-		allFieldIDs := make([]string, len(ev))
-		i := 0
-		for fldID := range ev {
-			allFieldIDs[i] = fldID
-			i++
-		}
 		stringFieldVals := map[string]string{utils.ANY: utils.ANY}                               // cache here field string values, start with default one
 		filterIndexTypes := []string{utils.MetaString, utils.MetaPrefix, utils.META_NONE}        // the META_NONE is used for all items that do not have filters
 		for i, fieldIDs := range []*[]string{stringFldIDs, prefixFldIDs, &[]string{utils.ANY}} { // same routine for both string and prefix filter types
@@ -61,8 +68,8 @@ func MatchingItemIDsForEvent(ev map[string]interface{}, stringFldIDs, prefixFldI
 				fieldIDs = &allFieldIDs
 			}
 			for _, fldName := range *fieldIDs {
-				fieldValIf, has := ev[fldName]
-				if !has && filterIndexTypes[i] != utils.META_NONE {
+				fieldValIf, err := navEv.FieldAsInterface(strings.Split(fldName, utils.NestingSep))
+				if err != nil && filterIndexTypes[i] != utils.META_NONE {
 					continue
 				}
 				if _, cached := stringFieldVals[fldName]; !cached {
