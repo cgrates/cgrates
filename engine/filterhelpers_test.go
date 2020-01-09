@@ -82,7 +82,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 		"Field":          "profile",
 	}
 	aPrflIDs, err := MatchingItemIDsForEvent(matchEV, nil, nil,
-		dmMatch, utils.CacheAttributeFilterIndexes, prefix, true)
+		dmMatch, utils.CacheAttributeFilterIndexes, prefix, true, false)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -94,7 +94,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 		"Field": "profilePrefix",
 	}
 	aPrflIDs, err = MatchingItemIDsForEvent(matchEV, nil, nil,
-		dmMatch, utils.CacheAttributeFilterIndexes, prefix, true)
+		dmMatch, utils.CacheAttributeFilterIndexes, prefix, true, false)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
 	}

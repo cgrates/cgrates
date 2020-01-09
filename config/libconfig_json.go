@@ -385,6 +385,7 @@ type AttributeSJsonCfg struct {
 	Indexed_selects       *bool
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
+	Nested_fields         *bool // applies when indexed fields is not defined
 	Process_runs          *int
 }
 
@@ -395,6 +396,7 @@ type ChargerSJsonCfg struct {
 	Attributes_conns      *[]string
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
+	Nested_fields         *bool // applies when indexed fields is not defined
 }
 
 // ResourceLimiter service config section
@@ -405,6 +407,7 @@ type ResourceSJsonCfg struct {
 	Store_interval        *string
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
+	Nested_fields         *bool // applies when indexed fields is not defined
 }
 
 // Stat service config section
@@ -416,6 +419,7 @@ type StatServJsonCfg struct {
 	Thresholds_conns         *[]string
 	String_indexed_fields    *[]string
 	Prefix_indexed_fields    *[]string
+	Nested_fields            *bool // applies when indexed fields is not defined
 }
 
 // Threshold service config section
@@ -425,6 +429,7 @@ type ThresholdSJsonCfg struct {
 	Store_interval        *string
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
+	Nested_fields         *bool // applies when indexed fields is not defined
 }
 
 // Supplier service config section
@@ -433,6 +438,7 @@ type SupplierSJsonCfg struct {
 	Indexed_selects       *bool
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
+	Nested_fields         *bool // applies when indexed fields is not defined
 	Attributes_conns      *[]string
 	Resources_conns       *[]string
 	Stats_conns           *[]string
@@ -502,6 +508,7 @@ type DispatcherSJsonCfg struct {
 	Indexed_selects       *bool
 	String_indexed_fields *[]string
 	Prefix_indexed_fields *[]string
+	Nested_fields         *bool // applies when indexed fields is not defined
 	Attributes_conns      *[]string
 }
 

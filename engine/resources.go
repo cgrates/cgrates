@@ -457,8 +457,13 @@ func (rS *ResourceService) matchingResourcesForEvent(ev *utils.CGREvent,
 		}
 		rIDs = x.(utils.StringMap)
 	} else { // select the resourceIDs out of dataDB
-		rIDs, err = MatchingItemIDsForEvent(ev.Event, rS.cgrcfg.ResourceSCfg().StringIndexedFields, rS.cgrcfg.ResourceSCfg().PrefixIndexedFields,
-			rS.dm, utils.CacheResourceFilterIndexes, ev.Tenant, rS.filterS.cfg.ResourceSCfg().IndexedSelects)
+		rIDs, err = MatchingItemIDsForEvent(ev.Event,
+			rS.cgrcfg.ResourceSCfg().StringIndexedFields,
+			rS.cgrcfg.ResourceSCfg().PrefixIndexedFields,
+			rS.dm, utils.CacheResourceFilterIndexes, ev.Tenant,
+			rS.cgrcfg.ResourceSCfg().IndexedSelects,
+			rS.cgrcfg.ResourceSCfg().NestedFields,
+		)
 	}
 	if err != nil {
 		if err == utils.ErrNotFound {

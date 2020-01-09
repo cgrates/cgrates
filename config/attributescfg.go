@@ -25,6 +25,7 @@ type AttributeSCfg struct {
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 	ProcessRuns         int
+	NestedFields        bool
 }
 
 func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error) {
@@ -53,6 +54,9 @@ func (alS *AttributeSCfg) loadFromJsonCfg(jsnCfg *AttributeSJsonCfg) (err error)
 	}
 	if jsnCfg.Process_runs != nil {
 		alS.ProcessRuns = *jsnCfg.Process_runs
+	}
+	if jsnCfg.Nested_fields != nil {
+		alS.NestedFields = *jsnCfg.Nested_fields
 	}
 	return
 }

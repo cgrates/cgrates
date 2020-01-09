@@ -32,6 +32,7 @@ type StatSCfg struct {
 	ThresholdSConns        []string
 	StringIndexedFields    *[]string
 	PrefixIndexedFields    *[]string
+	NestedFields           bool
 }
 
 func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
@@ -76,6 +77,9 @@ func (st *StatSCfg) loadFromJsonCfg(jsnCfg *StatServJsonCfg) (err error) {
 			pif[i] = fID
 		}
 		st.PrefixIndexedFields = &pif
+	}
+	if jsnCfg.Nested_fields != nil {
+		st.NestedFields = *jsnCfg.Nested_fields
 	}
 	return nil
 }

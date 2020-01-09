@@ -824,11 +824,12 @@ func TestDfAttributeServJsonCfg(t *testing.T) {
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
 		Process_runs:          utils.IntPointer(1),
+		Nested_fields:         utils.BoolPointer(false),
 	}
 	if cfg, err := dfCgrJsonCfg.AttributeServJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
+		t.Error("Received: ", utils.ToJSON(cfg))
 	}
 }
 
@@ -839,11 +840,12 @@ func TestDfChargerServJsonCfg(t *testing.T) {
 		Attributes_conns:      &[]string{},
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
+		Nested_fields:         utils.BoolPointer(false),
 	}
 	if cfg, err := dfCgrJsonCfg.ChargerServJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
+		t.Error("Received: ", utils.ToJSON(cfg))
 	}
 }
 
@@ -868,6 +870,7 @@ func TestDfResourceLimiterSJsonCfg(t *testing.T) {
 		Store_interval:        utils.StringPointer(""),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
+		Nested_fields:         utils.BoolPointer(false),
 	}
 	if cfg, err := dfCgrJsonCfg.ResourceSJsonCfg(); err != nil {
 		t.Error(err)
@@ -885,11 +888,12 @@ func TestDfStatServiceJsonCfg(t *testing.T) {
 		Thresholds_conns:         &[]string{},
 		String_indexed_fields:    nil,
 		Prefix_indexed_fields:    &[]string{},
+		Nested_fields:            utils.BoolPointer(false),
 	}
 	if cfg, err := dfCgrJsonCfg.StatSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
+		t.Error("Received: ", utils.ToJSON(cfg))
 	}
 }
 
@@ -900,6 +904,7 @@ func TestDfThresholdSJsonCfg(t *testing.T) {
 		Store_interval:        utils.StringPointer(""),
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
+		Nested_fields:         utils.BoolPointer(false),
 	}
 	if cfg, err := dfCgrJsonCfg.ThresholdSJsonCfg(); err != nil {
 		t.Error(err)
@@ -918,11 +923,12 @@ func TestDfSupplierSJsonCfg(t *testing.T) {
 		Resources_conns:       &[]string{},
 		Stats_conns:           &[]string{},
 		Default_ratio:         utils.IntPointer(1),
+		Nested_fields:         utils.BoolPointer(false),
 	}
 	if cfg, err := dfCgrJsonCfg.SupplierSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Errorf("expecting: %+v, received: %+v", eCfg, cfg)
+		t.Errorf("expecting: %+v, received: %+v", utils.ToJSON(eCfg), utils.ToJSON(cfg))
 	}
 }
 
@@ -1530,6 +1536,7 @@ func TestDfDispatcherSJsonCfg(t *testing.T) {
 		String_indexed_fields: nil,
 		Prefix_indexed_fields: &[]string{},
 		Attributes_conns:      &[]string{},
+		Nested_fields:         utils.BoolPointer(false),
 	}
 	if cfg, err := dfCgrJsonCfg.DispatcherSJsonCfg(); err != nil {
 		t.Error(err)

@@ -68,16 +68,24 @@ func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent
 	if len(args.AttributeIDs) != 0 {
 		attrIDs = args.AttributeIDs
 	} else {
-		aPrflIDs, err := MatchingItemIDsForEvent(args.Event, alS.cgrcfg.AttributeSCfg().StringIndexedFields, alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
-			alS.dm, utils.CacheAttributeFilterIndexes, attrIdxKey, alS.filterS.cfg.AttributeSCfg().IndexedSelects)
+		aPrflIDs, err := MatchingItemIDsForEvent(args.Event,
+			alS.cgrcfg.AttributeSCfg().StringIndexedFields,
+			alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
+			alS.dm, utils.CacheAttributeFilterIndexes, attrIdxKey,
+			alS.cgrcfg.AttributeSCfg().IndexedSelects,
+			alS.cgrcfg.AttributeSCfg().NestedFields,
+		)
 		if err != nil {
 			if err != utils.ErrNotFound {
 				return nil, err
 			}
-			if aPrflIDs, err = MatchingItemIDsForEvent(args.Event, alS.cgrcfg.AttributeSCfg().StringIndexedFields,
+			if aPrflIDs, err = MatchingItemIDsForEvent(args.Event,
+				alS.cgrcfg.AttributeSCfg().StringIndexedFields,
 				alS.cgrcfg.AttributeSCfg().PrefixIndexedFields,
-				alS.dm, utils.CacheAttributeFilterIndexes, utils.ConcatenatedKey(args.Tenant, utils.META_ANY),
-				alS.filterS.cfg.AttributeSCfg().IndexedSelects); err != nil {
+				alS.dm, utils.CacheAttributeFilterIndexes,
+				utils.ConcatenatedKey(args.Tenant, utils.META_ANY),
+				alS.cgrcfg.AttributeSCfg().IndexedSelects,
+				alS.cgrcfg.AttributeSCfg().NestedFields); err != nil {
 				return nil, err
 			}
 		}

@@ -118,8 +118,10 @@ func (dS *DispatcherService) dispatcherProfileForEvent(ev *utils.CGREvent,
 	prflIDs, err := engine.MatchingItemIDsForEvent(ev.Event,
 		dS.cfg.DispatcherSCfg().StringIndexedFields,
 		dS.cfg.DispatcherSCfg().PrefixIndexedFields,
-		dS.dm, utils.CacheDispatcherFilterIndexes,
-		idxKeyPrfx, dS.cfg.DispatcherSCfg().IndexedSelects)
+		dS.dm, utils.CacheDispatcherFilterIndexes, idxKeyPrfx,
+		dS.cfg.DispatcherSCfg().IndexedSelects,
+		dS.cfg.DispatcherSCfg().NestedFields,
+	)
 	if err != nil {
 		// return nil, err
 		if err != utils.ErrNotFound {
@@ -128,8 +130,10 @@ func (dS *DispatcherService) dispatcherProfileForEvent(ev *utils.CGREvent,
 		prflIDs, err = engine.MatchingItemIDsForEvent(ev.Event,
 			dS.cfg.DispatcherSCfg().StringIndexedFields,
 			dS.cfg.DispatcherSCfg().PrefixIndexedFields,
-			dS.dm, utils.CacheDispatcherFilterIndexes,
-			anyIdxPrfx, dS.cfg.DispatcherSCfg().IndexedSelects)
+			dS.dm, utils.CacheDispatcherFilterIndexes, anyIdxPrfx,
+			dS.cfg.DispatcherSCfg().IndexedSelects,
+			dS.cfg.DispatcherSCfg().NestedFields,
+		)
 		if err != nil {
 			return nil, err
 		}

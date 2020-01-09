@@ -27,6 +27,7 @@ type DispatcherSCfg struct {
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
 	AttributeSConns     []string
+	NestedFields        bool
 }
 
 func (dps *DispatcherSCfg) loadFromJsonCfg(jsnCfg *DispatcherSJsonCfg) (err error) {
@@ -63,6 +64,9 @@ func (dps *DispatcherSCfg) loadFromJsonCfg(jsnCfg *DispatcherSJsonCfg) (err erro
 				dps.AttributeSConns[idx] = connID
 			}
 		}
+	}
+	if jsnCfg.Nested_fields != nil {
+		dps.NestedFields = *jsnCfg.Nested_fields
 	}
 	return nil
 }

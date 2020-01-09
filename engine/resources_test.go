@@ -647,7 +647,7 @@ func TestResourceUsageTTLCase4(t *testing.T) {
 
 func TestResourceMatchWithIndexFalse(t *testing.T) {
 	Cache.Clear(nil)
-	resService.filterS.cfg.ResourceSCfg().IndexedSelects = false
+	resService.cgrcfg.ResourceSCfg().IndexedSelects = false
 	mres, err := resService.matchingResourcesForEvent(resEvs[0],
 		"TestResourceMatchWithIndexFalse1", &timeDurationExample)
 	if err != nil {

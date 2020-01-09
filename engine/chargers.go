@@ -58,8 +58,12 @@ func (cS *ChargerService) Shutdown() (err error) {
 // matchingChargingProfilesForEvent returns ordered list of matching chargers which are active by the time of the function call
 func (cS *ChargerService) matchingChargerProfilesForEvent(cgrEv *utils.CGREventWithArgDispatcher) (cPs ChargerProfiles, err error) {
 	cpIDs, err := MatchingItemIDsForEvent(cgrEv.Event,
-		cS.cfg.ChargerSCfg().StringIndexedFields, cS.cfg.ChargerSCfg().PrefixIndexedFields,
-		cS.dm, utils.CacheChargerFilterIndexes, cgrEv.Tenant, cS.cfg.ChargerSCfg().IndexedSelects)
+		cS.cfg.ChargerSCfg().StringIndexedFields,
+		cS.cfg.ChargerSCfg().PrefixIndexedFields,
+		cS.dm, utils.CacheChargerFilterIndexes, cgrEv.Tenant,
+		cS.cfg.ChargerSCfg().IndexedSelects,
+		cS.cfg.ChargerSCfg().NestedFields,
+	)
 	if err != nil {
 		return nil, err
 	}
