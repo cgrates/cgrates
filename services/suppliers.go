@@ -72,10 +72,13 @@ func (splS *SupplierService) Start() (err error) {
 
 	filterS := <-splS.filterSChan
 	splS.filterSChan <- filterS
+	dbchan := splS.dm.GetDMChan()
+	datadb := <-dbchan
+	dbchan <- datadb
 
 	splS.Lock()
 	defer splS.Unlock()
-	splS.splS, err = engine.NewSupplierService(splS.dm.GetDM(), filterS, splS.cfg,
+	splS.splS, err = engine.NewSupplierService(datadb, filterS, splS.cfg,
 		splS.connMgr)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s",

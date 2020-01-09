@@ -360,7 +360,7 @@ func singnalHandler(exitChan chan bool) {
 			//  do it in it's own gorutine in order to not block the signal handler with the reload functionality
 			go func() {
 				var reply string
-				if err := config.CgrConfig().V1ReloadConfig(
+				if err := config.CgrConfig().V1ReloadConfigFromPath(
 					&config.ConfigReloadWithArgDispatcher{
 						Section: utils.EmptyString,
 						Path:    config.CgrConfig().ConfigPath, // use the same path
@@ -492,11 +492,6 @@ func main() {
 	storDBService := services.NewStorDBService(cfg)
 	if dmService.ShouldRun() { // Some services can run without db, ie:  CDRC
 		if err = dmService.Start(); err != nil {
-			return
-		}
-	}
-	if storDBService.ShouldRun() {
-		if err = storDBService.Start(); err != nil {
 			return
 		}
 	}

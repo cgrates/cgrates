@@ -58,7 +58,6 @@ func TestCdrsReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheTimings))
 
 	cfg.ChargerSCfg().Enabled = true
-	cfg.RalsCfg().Enabled = true
 	internalChan := make(chan rpcclient.ClientConnector, 1)
 	internalChan <- nil
 	cacheSChan := make(chan rpcclient.ClientConnector, 1)
@@ -95,8 +94,9 @@ func TestCdrsReload(t *testing.T) {
 	if stordb.IsRunning() {
 		t.Errorf("Expected service to be down")
 	}
+	cfg.RalsCfg().Enabled = true
 	var reply string
-	if err := cfg.V1ReloadConfig(&config.ConfigReloadWithArgDispatcher{
+	if err := cfg.V1ReloadConfigFromPath(&config.ConfigReloadWithArgDispatcher{
 		Path:    path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo"),
 		Section: config.CDRS_JSN,
 	}, &reply); err != nil {

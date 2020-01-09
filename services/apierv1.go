@@ -21,6 +21,7 @@ package services
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
@@ -64,92 +65,107 @@ type ApierV1Service struct {
 
 	api      *v1.ApierV1
 	connChan chan rpcclient.ClientConnector
+
+	syncStop chan struct{}
 }
 
 // Start should handle the sercive start
 // For this service the start should be called from RAL Service
-func (api *ApierV1Service) Start() (err error) {
-	if api.IsRunning() {
+func (apiService *ApierV1Service) Start() (err error) {
+	if apiService.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
 
-	filterS := <-api.filterSChan
-	api.filterSChan <- filterS
+	filterS := <-apiService.filterSChan
+	apiService.filterSChan <- filterS
+	dbchan := apiService.dm.GetDMChan()
+	datadb := <-dbchan
+	dbchan <- datadb
 
-	api.Lock()
-	defer api.Unlock()
+	apiService.Lock()
+	defer apiService.Unlock()
 
-	api.api = &v1.ApierV1{
-		DataManager:      api.dm.GetDM(),
-		CdrDb:            api.storDB.GetDM(),
-		StorDb:           api.storDB.GetDM(),
-		Config:           api.cfg,
-		Responder:        api.responderService.GetResponder(),
-		SchedulerService: api.schedService,
-		HTTPPoster: engine.NewHTTPPoster(api.cfg.GeneralCfg().HttpSkipTlsVerify,
-			api.cfg.GeneralCfg().ReplyTimeout),
-		FilterS: filterS,
-		ConnMgr: api.connMgr,
+	storDBChan := make(chan engine.StorDB, 1)
+	apiService.syncStop = make(chan struct{})
+	apiService.storDB.RegisterSyncChan(storDBChan)
+	stordb := <-storDBChan
+
+	apiService.api = &v1.ApierV1{
+		DataManager:      datadb,
+		CdrDb:            stordb,
+		StorDb:           stordb,
+		Config:           apiService.cfg,
+		Responder:        apiService.responderService.GetResponder(),
+		SchedulerService: apiService.schedService,
+		HTTPPoster: engine.NewHTTPPoster(apiService.cfg.GeneralCfg().HttpSkipTlsVerify,
+			apiService.cfg.GeneralCfg().ReplyTimeout),
+		FilterS:    filterS,
+		ConnMgr:    apiService.connMgr,
+		StorDBChan: storDBChan,
 	}
 
-	if !api.cfg.DispatcherSCfg().Enabled {
-		api.server.RpcRegister(api.api)
-		api.server.RpcRegister(v1.NewReplicatorSv1(api.dm.GetDM()))
+	go func(api *v1.ApierV1, stopChan chan struct{}) {
+		if err := api.ListenAndServe(stopChan); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> error: <%s>", utils.CDRServer, err.Error()))
+			// erS.exitChan <- true
+		}
+	}(apiService.api, apiService.syncStop)
+	time.Sleep(1)
+
+	if !apiService.cfg.DispatcherSCfg().Enabled {
+		apiService.server.RpcRegister(apiService.api)
+		apiService.server.RpcRegister(v1.NewReplicatorSv1(datadb))
 	}
 
 	utils.RegisterRpcParams("", &v1.CDRsV1{})
 	utils.RegisterRpcParams("", &v1.SMGenericV1{})
-	utils.RegisterRpcParams("", api.api)
+	utils.RegisterRpcParams("", apiService.api)
 
-	api.connChan <- api.api
+	apiService.connChan <- apiService.api
 
 	return
 }
 
 // GetIntenternalChan returns the internal connection chanel
-func (api *ApierV1Service) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
-	return api.connChan
+func (apiService *ApierV1Service) GetIntenternalChan() (conn chan rpcclient.ClientConnector) {
+	return apiService.connChan
 }
 
 // Reload handles the change of config
-func (api *ApierV1Service) Reload() (err error) {
-	api.Lock()
-	if api.storDB.WasReconnected() { // rewrite the connection if was changed
-		api.api.SetStorDB(api.storDB.GetDM())
-	}
-	api.Unlock()
+func (apiService *ApierV1Service) Reload() (err error) {
 	return
 }
 
 // Shutdown stops the service
-func (api *ApierV1Service) Shutdown() (err error) {
-	api.Lock()
-	defer api.Unlock()
-	api.api = nil
-	<-api.connChan
+func (apiService *ApierV1Service) Shutdown() (err error) {
+	apiService.Lock()
+	close(apiService.syncStop)
+	apiService.api = nil
+	<-apiService.connChan
+	apiService.Unlock()
 	return
 }
 
 // IsRunning returns if the service is running
-func (api *ApierV1Service) IsRunning() bool {
-	api.RLock()
-	defer api.RUnlock()
-	return api != nil && api.api != nil
+func (apiService *ApierV1Service) IsRunning() bool {
+	apiService.RLock()
+	defer apiService.RUnlock()
+	return apiService != nil && apiService.api != nil
 }
 
 // ServiceName returns the service name
-func (api *ApierV1Service) ServiceName() string {
+func (apiService *ApierV1Service) ServiceName() string {
 	return utils.ApierV1
 }
 
 // GetApierV1 returns the apierV1
-func (api *ApierV1Service) GetApierV1() *v1.ApierV1 {
-	api.RLock()
-	defer api.RUnlock()
-	return api.api
+func (apiService *ApierV1Service) GetApierV1() *v1.ApierV1 {
+	apiService.RLock()
+	defer apiService.RUnlock()
+	return apiService.api
 }
 
 // ShouldRun returns if the service should be running
-func (api *ApierV1Service) ShouldRun() bool {
-	return api.cfg.RalsCfg().Enabled
+func (apiService *ApierV1Service) ShouldRun() bool {
+	return apiService.cfg.RalsCfg().Enabled
 }

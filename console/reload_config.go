@@ -26,7 +26,7 @@ import (
 func init() {
 	c := &CmdRelaodConfigSection{
 		name:      "reload_config",
-		rpcMethod: utils.ConfigSv1ReloadConfig,
+		rpcMethod: utils.ConfigSv1ReloadConfigFromPath,
 		rpcParams: &config.ConfigReloadWithArgDispatcher{},
 	}
 	commands[c.Name()] = c

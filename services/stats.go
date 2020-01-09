@@ -72,10 +72,13 @@ func (sts *StatService) Start() (err error) {
 
 	filterS := <-sts.filterSChan
 	sts.filterSChan <- filterS
+	dbchan := sts.dm.GetDMChan()
+	datadb := <-dbchan
+	dbchan <- datadb
 
 	sts.Lock()
 	defer sts.Unlock()
-	sts.sts, err = engine.NewStatService(sts.dm.GetDM(), sts.cfg, filterS, sts.connMgr)
+	sts.sts, err = engine.NewStatService(datadb, sts.cfg, filterS, sts.connMgr)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<StatS> Could not init, error: %s", err.Error()))
 		return

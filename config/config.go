@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -345,8 +346,8 @@ func (cfg *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 
 // loadRPCConns loads the RPCConns section of the configuration
 func (cfg *CGRConfig) loadRPCConns(jsnCfg *CgrJsonCfg) (err error) {
-	var jsnRpcConns map[string]*RPCConnsJson
-	if jsnRpcConns, err = jsnCfg.RPCConnJsonCfg(); err != nil {
+	var jsnRPCConns map[string]*RPCConnsJson
+	if jsnRPCConns, err = jsnCfg.RPCConnJsonCfg(); err != nil {
 		return
 	}
 	// hardoded the *internal connection
@@ -359,7 +360,7 @@ func (cfg *CGRConfig) loadRPCConns(jsnCfg *CgrJsonCfg) (err error) {
 			},
 		},
 	}
-	for key, val := range jsnRpcConns {
+	for key, val := range jsnRPCConns {
 		cfg.rpcConns[key] = NewDfltRPCConn()
 		if err = cfg.rpcConns[key].loadFromJsonCfg(val); err != nil {
 			return
@@ -625,7 +626,7 @@ func (cfg *CGRConfig) loadDiameterAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnDACfg, err = jsnCfg.DiameterAgentJsonCfg(); err != nil {
 		return
 	}
-	return cfg.diameterAgentCfg.loadFromJsonCfg(jsnDACfg, cfg.GeneralCfg().RSRSep)
+	return cfg.diameterAgentCfg.loadFromJsonCfg(jsnDACfg, cfg.generalCfg.RSRSep)
 }
 
 // loadRadiusAgentCfg loads the RadiusAgent section of the configuration
@@ -634,7 +635,7 @@ func (cfg *CGRConfig) loadRadiusAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnRACfg, err = jsnCfg.RadiusAgentJsonCfg(); err != nil {
 		return
 	}
-	return cfg.radiusAgentCfg.loadFromJsonCfg(jsnRACfg, cfg.GeneralCfg().RSRSep)
+	return cfg.radiusAgentCfg.loadFromJsonCfg(jsnRACfg, cfg.generalCfg.RSRSep)
 }
 
 // loadDNSAgentCfg loads the DNSAgent section of the configuration
@@ -643,7 +644,7 @@ func (cfg *CGRConfig) loadDNSAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnDNSCfg, err = jsnCfg.DNSAgentJsonCfg(); err != nil {
 		return
 	}
-	return cfg.dnsAgentCfg.loadFromJsonCfg(jsnDNSCfg, cfg.GeneralCfg().RSRSep)
+	return cfg.dnsAgentCfg.loadFromJsonCfg(jsnDNSCfg, cfg.generalCfg.RSRSep)
 }
 
 // loadHttpAgentCfg loads the HttpAgent section of the configuration
@@ -652,7 +653,7 @@ func (cfg *CGRConfig) loadHttpAgentCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnHttpAgntCfg, err = jsnCfg.HttpAgentJsonCfg(); err != nil {
 		return
 	}
-	return cfg.httpAgentCfg.loadFromJsonCfg(jsnHttpAgntCfg, cfg.GeneralCfg().RSRSep)
+	return cfg.httpAgentCfg.loadFromJsonCfg(jsnHttpAgntCfg, cfg.generalCfg.RSRSep)
 }
 
 // loadAttributeSCfg loads the AttributeS section of the configuration
@@ -719,7 +720,7 @@ func (cfg *CGRConfig) loadLoaderSCfg(jsnCfg *CgrJsonCfg) (err error) {
 		// cfg.loaderCfg = make(LoaderSCfgs, len(jsnLoaderCfg))
 		for _, profile := range jsnLoaderCfg {
 			loadSCfgp := NewDfltLoaderSCfg()
-			loadSCfgp.loadFromJsonCfg(profile, cfg.GeneralCfg().RSRSep)
+			loadSCfgp.loadFromJsonCfg(profile, cfg.generalCfg.RSRSep)
 			cfg.loaderCfg = append(cfg.loaderCfg, loadSCfgp) // use apend so the loaderS profile to be loaded from multiple files
 		}
 	}
@@ -804,7 +805,7 @@ func (cfg *CGRConfig) loadErsCfg(jsnCfg *CgrJsonCfg) (err error) {
 	if jsnERsCfg, err = jsnCfg.ERsJsonCfg(); err != nil {
 		return
 	}
-	return cfg.ersCfg.loadFromJsonCfg(jsnERsCfg, cfg.GeneralCfg().RSRSep, cfg.dfltEvRdr)
+	return cfg.ersCfg.loadFromJsonCfg(jsnERsCfg, cfg.generalCfg.RSRSep, cfg.dfltEvRdr)
 }
 
 // SureTaxCfg use locking to retrieve the configuration, possibility later for runtime reload
@@ -1180,12 +1181,12 @@ func (cfg *CGRConfig) unlockSections() {
 	}
 }
 
-// V1ReloadConfig reloads the configuration
-func (cfg *CGRConfig) V1ReloadConfig(args *ConfigReloadWithArgDispatcher, reply *string) (err error) {
+// V1ReloadConfigFromPath reloads the configuration
+func (cfg *CGRConfig) V1ReloadConfigFromPath(args *ConfigReloadWithArgDispatcher, reply *string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{"Path"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err = cfg.loadConfig(args.Path, args.Section); err != nil {
+	if err = cfg.loadCfgWithLocks(args.Path, args.Section); err != nil {
 		return
 	}
 	//  lock all sections
@@ -1199,553 +1200,75 @@ func (cfg *CGRConfig) V1ReloadConfig(args *ConfigReloadWithArgDispatcher, reply 
 		return
 	}
 
-	if err = cfg.reloadSection(args.Section); err != nil {
+	if args.Section == utils.EmptyString || args.Section == utils.MetaAll {
+		err = cfg.reloadSections(sortedCfgSections...)
+	} else {
+		err = cfg.reloadSections(args.Section)
+	}
+	if err != nil {
 		return
 	}
 	*reply = utils.OK
 	return
 }
 
-func (cfg *CGRConfig) reloadSection(section string) (err error) {
-	var fall bool
-	switch section {
-	default:
-		return fmt.Errorf("Invalid section: <%s>", section)
-	case utils.EmptyString, utils.MetaAll:
-		fall = true
-		fallthrough
-	case GENERAL_JSN: // nothing to reload
-		if !fall {
-			break
-		}
-		fallthrough
-	case RPCConnsJsonName: // nothing to reload
-		if !fall {
-			break
-		}
-		fallthrough
-	case DATADB_JSN:
-		cfg.rldChans[DATADB_JSN] <- struct{}{}
-		time.Sleep(1) // to force the context switch( to be sure we start the DB before a service that needs it)
-		if !fall {
-			break
-		}
-		fallthrough
-	case STORDB_JSN:
-		cfg.rldChans[STORDB_JSN] <- struct{}{}
-		time.Sleep(1) // to force the context switch( to be sure we start the DB before a service that needs it)
-		if !fall {
-			cfg.rldChans[CDRS_JSN] <- struct{}{}
-			cfg.rldChans[Apier] <- struct{}{}
-			break
-		}
-		fallthrough
-	case LISTEN_JSN:
-		if !fall {
-			break
-		}
-		fallthrough
-	case TlsCfgJson: // nothing to reload
-		if !fall {
-			break
-		}
-		fallthrough
-	case HTTP_JSN:
-		if !fall {
-			break
-		}
-		fallthrough
-	case SCHEDULER_JSN:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[SCHEDULER_JSN] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case RALS_JSN:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			cfg.rldChans[STORDB_JSN] <- struct{}{}
-			time.Sleep(1) // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[RALS_JSN] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case CDRS_JSN:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			cfg.rldChans[STORDB_JSN] <- struct{}{}
-			time.Sleep(1) // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[CDRS_JSN] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case CDRC_JSN:
-		if !fall {
-			break
-		}
-		fallthrough
-	case ERsJson:
-		cfg.rldChans[ERsJson] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case SessionSJson:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[SessionSJson] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case AsteriskAgentJSN:
-		cfg.rldChans[AsteriskAgentJSN] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case FreeSWITCHAgentJSN:
-		cfg.rldChans[FreeSWITCHAgentJSN] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case KamailioAgentJSN:
-		cfg.rldChans[KamailioAgentJSN] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case DA_JSN:
-		cfg.rldChans[DA_JSN] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case RA_JSN:
-		cfg.rldChans[RA_JSN] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case HttpAgentJson:
-		cfg.rldChans[HttpAgentJson] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case DNSAgentJson:
-		cfg.rldChans[DNSAgentJson] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case ATTRIBUTE_JSN:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[ATTRIBUTE_JSN] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case ChargerSCfgJson:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[ChargerSCfgJson] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case RESOURCES_JSON:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[RESOURCES_JSON] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case STATS_JSON:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[STATS_JSON] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case THRESHOLDS_JSON:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[THRESHOLDS_JSON] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case SupplierSJson:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[SupplierSJson] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case LoaderJson:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[LoaderJson] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case DispatcherSJson:
-		if !fall {
-			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
-			time.Sleep(1)                          // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[DispatcherSJson] <- struct{}{}
-		if !fall {
-			break
-		}
-		fallthrough
-	case AnalyzerCfgJson:
-		if !fall {
-			break
-		}
-		fallthrough
-	case Apier:
-		if !fall {
-			cfg.rldChans[STORDB_JSN] <- struct{}{}
-			time.Sleep(1) // to force the context switch( to be sure we start the DB before a service that needs it)
-		}
-		cfg.rldChans[Apier] <- struct{}{}
+func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
+	return map[string]func(*CgrJsonCfg) error{
+		GENERAL_JSN:        cfg.loadGeneralCfg,
+		DATADB_JSN:         cfg.loadDataDBCfg,
+		STORDB_JSN:         cfg.loadStorDBCfg,
+		LISTEN_JSN:         cfg.loadListenCfg,
+		TlsCfgJson:         cfg.loadTlsCgrCfg,
+		HTTP_JSN:           cfg.loadHttpCfg,
+		SCHEDULER_JSN:      cfg.loadSchedulerCfg,
+		CACHE_JSN:          cfg.loadCacheCfg,
+		FilterSjsn:         cfg.loadFilterSCfg,
+		RALS_JSN:           cfg.loadRalSCfg,
+		CDRS_JSN:           cfg.loadCdrsCfg,
+		CDRE_JSN:           cfg.loadCdreCfg,
+		CDRC_JSN:           cfg.loadCdrcCfg,
+		ERsJson:            cfg.loadErsCfg,
+		SessionSJson:       cfg.loadSessionSCfg,
+		AsteriskAgentJSN:   cfg.loadAsteriskAgentCfg,
+		FreeSWITCHAgentJSN: cfg.loadFreeswitchAgentCfg,
+		KamailioAgentJSN:   cfg.loadKamAgentCfg,
+		DA_JSN:             cfg.loadDiameterAgentCfg,
+		RA_JSN:             cfg.loadRadiusAgentCfg,
+		HttpAgentJson:      cfg.loadHttpAgentCfg,
+		DNSAgentJson:       cfg.loadDNSAgentCfg,
+		ATTRIBUTE_JSN:      cfg.loadAttributeSCfg,
+		ChargerSCfgJson:    cfg.loadChargerSCfg,
+		RESOURCES_JSON:     cfg.loadResourceSCfg,
+		STATS_JSON:         cfg.loadStatSCfg,
+		THRESHOLDS_JSON:    cfg.loadThresholdSCfg,
+		SupplierSJson:      cfg.loadSupplierSCfg,
+		LoaderJson:         cfg.loadLoaderSCfg,
+		MAILER_JSN:         cfg.loadMailerCfg,
+		SURETAX_JSON:       cfg.loadSureTaxCfg,
+		CgrLoaderCfgJson:   cfg.loadLoaderCgrCfg,
+		CgrMigratorCfgJson: cfg.loadMigratorCgrCfg,
+		DispatcherSJson:    cfg.loadDispatcherSCfg,
+		AnalyzerCfgJson:    cfg.loadAnalyzerCgrCfg,
+		Apier:              cfg.loadApierCfg,
+		RPCConnsJsonName:   cfg.loadRPCConns,
 	}
-	return
 }
 
-func (cfg *CGRConfig) loadConfig(path, section string) (err error) {
+func (cfg *CGRConfig) loadCfgWithLocks(path, section string) (err error) {
 	var loadFuncs []func(*CgrJsonCfg) error
-	var fall bool
-	switch section {
-	default:
+	loadMap := cfg.getLoadFunctions()
+	if section == utils.EmptyString || section == utils.MetaAll {
+		for _, sec := range sortedCfgSections {
+			cfg.lks[sec].Lock()
+			defer cfg.lks[sec].Unlock()
+			loadFuncs = append(loadFuncs, loadMap[sec])
+		}
+	} else if fnct, has := loadMap[section]; !has {
 		return fmt.Errorf("Invalid section: <%s>", section)
-	case utils.EmptyString, utils.MetaAll:
-		fall = true
-		fallthrough
-	case GENERAL_JSN:
-		cfg.lks[GENERAL_JSN].Lock()
-		defer cfg.lks[GENERAL_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadGeneralCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case DATADB_JSN:
-		cfg.lks[DATADB_JSN].Lock()
-		defer cfg.lks[DATADB_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadDataDBCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case STORDB_JSN:
-		cfg.lks[STORDB_JSN].Lock()
-		defer cfg.lks[STORDB_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadStorDBCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case LISTEN_JSN:
-		cfg.lks[LISTEN_JSN].Lock()
-		defer cfg.lks[LISTEN_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadListenCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case TlsCfgJson:
-		cfg.lks[TlsCfgJson].Lock()
-		defer cfg.lks[TlsCfgJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadTlsCgrCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case HTTP_JSN:
-		cfg.lks[HTTP_JSN].Lock()
-		defer cfg.lks[HTTP_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadHttpCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case SCHEDULER_JSN:
-		cfg.lks[SCHEDULER_JSN].Lock()
-		defer cfg.lks[SCHEDULER_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadSchedulerCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case CACHE_JSN:
-		cfg.lks[CACHE_JSN].Lock()
-		defer cfg.lks[CACHE_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadCacheCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case FilterSjsn:
-		cfg.lks[FilterSjsn].Lock()
-		defer cfg.lks[FilterSjsn].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadFilterSCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case RALS_JSN:
-		cfg.lks[RALS_JSN].Lock()
-		defer cfg.lks[RALS_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadRalSCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case CDRS_JSN:
-		cfg.lks[CDRS_JSN].Lock()
-		defer cfg.lks[CDRS_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadCdrsCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case CDRE_JSN:
-		cfg.lks[CDRE_JSN].Lock()
-		defer cfg.lks[CDRE_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadCdreCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case CDRC_JSN:
-		cfg.lks[CDRC_JSN].Lock()
-		defer cfg.lks[CDRC_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadCdrcCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case ERsJson:
-		cfg.lks[ERsJson].Lock()
-		defer cfg.lks[ERsJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadErsCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case SessionSJson:
-		cfg.lks[SessionSJson].Lock()
-		defer cfg.lks[SessionSJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadSessionSCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case AsteriskAgentJSN:
-		cfg.lks[AsteriskAgentJSN].Lock()
-		defer cfg.lks[AsteriskAgentJSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadAsteriskAgentCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case FreeSWITCHAgentJSN:
-		cfg.lks[FreeSWITCHAgentJSN].Lock()
-		defer cfg.lks[FreeSWITCHAgentJSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadFreeswitchAgentCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case KamailioAgentJSN:
-		cfg.lks[KamailioAgentJSN].Lock()
-		defer cfg.lks[KamailioAgentJSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadKamAgentCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case DA_JSN:
-		cfg.lks[DA_JSN].Lock()
-		defer cfg.lks[DA_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadDiameterAgentCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case RA_JSN:
-		cfg.lks[RA_JSN].Lock()
-		defer cfg.lks[RA_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadRadiusAgentCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case HttpAgentJson:
-		cfg.lks[HttpAgentJson].Lock()
-		defer cfg.lks[HttpAgentJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadHttpAgentCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case DNSAgentJson:
-		cfg.lks[DNSAgentJson].Lock()
-		defer cfg.lks[DNSAgentJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadDNSAgentCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case ATTRIBUTE_JSN:
-		cfg.lks[ATTRIBUTE_JSN].Lock()
-		defer cfg.lks[ATTRIBUTE_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadAttributeSCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case ChargerSCfgJson:
-		cfg.lks[ChargerSCfgJson].Lock()
-		defer cfg.lks[ChargerSCfgJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadChargerSCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case RESOURCES_JSON:
-		cfg.lks[RESOURCES_JSON].Lock()
-		defer cfg.lks[RESOURCES_JSON].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadResourceSCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case STATS_JSON:
-		cfg.lks[STATS_JSON].Lock()
-		defer cfg.lks[STATS_JSON].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadStatSCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case THRESHOLDS_JSON:
-		cfg.lks[THRESHOLDS_JSON].Lock()
-		defer cfg.lks[THRESHOLDS_JSON].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadThresholdSCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case SupplierSJson:
-		cfg.lks[SupplierSJson].Lock()
-		defer cfg.lks[SupplierSJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadSupplierSCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case LoaderJson:
-		cfg.lks[LoaderJson].Lock()
-		defer cfg.lks[LoaderJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadLoaderSCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case MAILER_JSN:
-		cfg.lks[MAILER_JSN].Lock()
-		defer cfg.lks[MAILER_JSN].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadMailerCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case SURETAX_JSON:
-		cfg.lks[SURETAX_JSON].Lock()
-		defer cfg.lks[SURETAX_JSON].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadSureTaxCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case CgrLoaderCfgJson:
-		cfg.lks[CgrLoaderCfgJson].Lock()
-		defer cfg.lks[CgrLoaderCfgJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadLoaderCgrCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case CgrMigratorCfgJson:
-		cfg.lks[CgrMigratorCfgJson].Lock()
-		defer cfg.lks[CgrMigratorCfgJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadMigratorCgrCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case DispatcherSJson:
-		cfg.lks[DispatcherSJson].Lock()
-		defer cfg.lks[DispatcherSJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadDispatcherSCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case AnalyzerCfgJson:
-		cfg.lks[AnalyzerCfgJson].Lock()
-		defer cfg.lks[AnalyzerCfgJson].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadAnalyzerCgrCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case Apier:
-		cfg.lks[Apier].Lock()
-		defer cfg.lks[Apier].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadApierCfg)
-		if !fall {
-			break
-		}
-		fallthrough
-	case RPCConnsJsonName:
-		cfg.lks[RPCConnsJsonName].Lock()
-		defer cfg.lks[RPCConnsJsonName].Unlock()
-		loadFuncs = append(loadFuncs, cfg.loadRPCConns)
+	} else {
+		cfg.lks[section].Lock()
+		defer cfg.lks[section].Unlock()
+		loadFuncs = append(loadFuncs, fnct)
 	}
 	return cfg.loadConfigFromPath(path, loadFuncs)
 }
@@ -1853,11 +1376,148 @@ func (cfg *CGRConfig) loadConfigFromHTTP(urlPaths string, loadFuncs []func(jsnCf
 func (cfg *CGRConfig) initChanels() {
 	cfg.lks = make(map[string]*sync.RWMutex)
 	cfg.rldChans = make(map[string]chan struct{})
-	for _, section := range []string{GENERAL_JSN, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN, SCHEDULER_JSN, CACHE_JSN, FilterSjsn, RALS_JSN,
-		CDRS_JSN, CDRE_JSN, CDRC_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN, KamailioAgentJSN,
-		DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
-		SupplierSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson, AnalyzerCfgJson, Apier, RPCConnsJsonName} {
+	for _, section := range sortedCfgSections {
 		cfg.lks[section] = new(sync.RWMutex)
 		cfg.rldChans[section] = make(chan struct{}, 1)
 	}
+}
+
+// JSONReloadWithArgDispatcher the API params for V1ReloadConfigFromJSON
+type JSONReloadWithArgDispatcher struct {
+	*utils.ArgDispatcher
+	utils.TenantArg
+	JSON map[string]interface{}
+}
+
+// V1ReloadConfigFromJSON reloads the sections of configz
+func (cfg *CGRConfig) V1ReloadConfigFromJSON(args *JSONReloadWithArgDispatcher, reply *string) (err error) {
+	if len(args.JSON) == 0 {
+		*reply = utils.OK
+		return
+	}
+	sections := make([]string, 0, len(args.JSON))
+	for section := range args.JSON {
+		sections = append(sections, section)
+	}
+
+	var b []byte
+	if b, err = json.Marshal(args.JSON); err != nil {
+		return
+	}
+
+	if err = cfg.loadCfgFromJSONWithLocks(bytes.NewBuffer(b), sections); err != nil {
+		return
+	}
+
+	//  lock all sections
+	cfg.rLockSections()
+
+	err = cfg.checkConfigSanity()
+
+	cfg.rUnlockSections() // unlock before checking the error
+
+	err = cfg.reloadSections(sections...)
+	if err != nil {
+		return
+	}
+	*reply = utils.OK
+	return
+}
+
+func (cfg *CGRConfig) loadCfgFromJSONWithLocks(rdr io.Reader, sections []string) (err error) {
+	var loadFuncs []func(*CgrJsonCfg) error
+	loadMap := cfg.getLoadFunctions()
+	for _, section := range sections {
+		fnct, has := loadMap[section]
+		if !has {
+			return fmt.Errorf("Invalid section: <%s>", section)
+		}
+		cfg.lks[section].Lock()
+		defer cfg.lks[section].Unlock()
+		loadFuncs = append(loadFuncs, fnct)
+	}
+	return cfg.loadConfigFromReader(rdr, loadFuncs)
+}
+
+func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
+	subsystemsThatNeedDataDB := utils.NewStringSet([]string{DATADB_JSN, SCHEDULER_JSN,
+		RALS_JSN, CDRS_JSN, SessionSJson, ATTRIBUTE_JSN,
+		ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
+		SupplierSJson, LoaderJson, DispatcherSJson})
+	subsystemsThatNeedStorDB := utils.NewStringSet([]string{STORDB_JSN, RALS_JSN, CDRS_JSN, Apier})
+	needsDataDB := false
+	needsStorDB := false
+	for _, section := range sections {
+		if !needsDataDB && subsystemsThatNeedDataDB.Has(section) {
+			needsDataDB = true
+			cfg.rldChans[DATADB_JSN] <- struct{}{} // reload datadb before
+		}
+		if !needsStorDB && subsystemsThatNeedStorDB.Has(section) {
+			needsStorDB = true
+			cfg.rldChans[STORDB_JSN] <- struct{}{} // reload stordb before
+		}
+		if needsDataDB && needsStorDB {
+			break
+		}
+	}
+	time.Sleep(1)
+	for _, section := range sections {
+		switch section {
+		default:
+			return fmt.Errorf("Invalid section: <%s>", section)
+		case GENERAL_JSN: // nothing to reload
+		case RPCConnsJsonName: // nothing to reload
+		case DATADB_JSN: // reloaded before
+		case STORDB_JSN: // reloaded before
+		case LISTEN_JSN:
+		case TlsCfgJson: // nothing to reload
+		case HTTP_JSN:
+		case SCHEDULER_JSN:
+			cfg.rldChans[SCHEDULER_JSN] <- struct{}{}
+		case RALS_JSN:
+			cfg.rldChans[RALS_JSN] <- struct{}{}
+		case CDRS_JSN:
+			cfg.rldChans[CDRS_JSN] <- struct{}{}
+		case CDRC_JSN:
+		case ERsJson:
+			cfg.rldChans[ERsJson] <- struct{}{}
+		case SessionSJson:
+			cfg.rldChans[SessionSJson] <- struct{}{}
+		case AsteriskAgentJSN:
+			cfg.rldChans[AsteriskAgentJSN] <- struct{}{}
+		case FreeSWITCHAgentJSN:
+			cfg.rldChans[FreeSWITCHAgentJSN] <- struct{}{}
+		case KamailioAgentJSN:
+			cfg.rldChans[KamailioAgentJSN] <- struct{}{}
+		case DA_JSN:
+			cfg.rldChans[DA_JSN] <- struct{}{}
+		case RA_JSN:
+			cfg.rldChans[RA_JSN] <- struct{}{}
+		case HttpAgentJson:
+			cfg.rldChans[HttpAgentJson] <- struct{}{}
+		case DNSAgentJson:
+			cfg.rldChans[DNSAgentJson] <- struct{}{}
+		case ATTRIBUTE_JSN:
+			cfg.rldChans[ATTRIBUTE_JSN] <- struct{}{}
+		case ChargerSCfgJson:
+			cfg.rldChans[ChargerSCfgJson] <- struct{}{}
+		case RESOURCES_JSON:
+			cfg.rldChans[RESOURCES_JSON] <- struct{}{}
+		case STATS_JSON:
+			cfg.rldChans[STATS_JSON] <- struct{}{}
+		case THRESHOLDS_JSON:
+			cfg.rldChans[THRESHOLDS_JSON] <- struct{}{}
+		case SupplierSJson:
+			cfg.rldChans[SupplierSJson] <- struct{}{}
+		case LoaderJson:
+			cfg.rldChans[LoaderJson] <- struct{}{}
+		case DispatcherSJson:
+			cfg.rldChans[DispatcherSJson] <- struct{}{}
+		case AnalyzerCfgJson:
+		case Apier:
+			cfg.rldChans[Apier] <- struct{}{}
+		}
+		return
+	}
+	return
 }

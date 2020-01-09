@@ -69,10 +69,13 @@ func (attrS *AttributeService) Start() (err error) {
 
 	filterS := <-attrS.filterSChan
 	attrS.filterSChan <- filterS
+	dbchan := attrS.dm.GetDMChan()
+	datadb := <-dbchan
+	dbchan <- datadb
 
 	attrS.Lock()
 	defer attrS.Unlock()
-	attrS.attrS, err = engine.NewAttributeService(attrS.dm.GetDM(), filterS, attrS.cfg)
+	attrS.attrS, err = engine.NewAttributeService(datadb, filterS, attrS.cfg)
 	if err != nil {
 		utils.Logger.Crit(
 			fmt.Sprintf("<%s> Could not init, error: %s",

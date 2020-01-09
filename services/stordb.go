@@ -32,8 +32,7 @@ import (
 // NewStorDBService returns the StorDB Service
 func NewStorDBService(cfg *config.CGRConfig) *StorDBService {
 	return &StorDBService{
-		cfg:    cfg,
-		dbchan: make(chan engine.StorDB, 1),
+		cfg: cfg,
 		// db:     engine.NewInternalDB([]string{}, []string{}), // to be removed
 	}
 }
@@ -44,8 +43,8 @@ type StorDBService struct {
 	cfg      *config.CGRConfig
 	oldDBCfg *config.StorDbCfg
 
-	db     engine.StorDB
-	dbchan chan engine.StorDB
+	db        engine.StorDB
+	syncChans []chan engine.StorDB
 
 	reconnected bool
 }
@@ -73,7 +72,7 @@ func (db *StorDBService) Start() (err error) {
 		fmt.Println(err)
 		return
 	}
-	db.dbchan <- db.db
+	db.sync()
 	return
 }
 
@@ -98,6 +97,7 @@ func (db *StorDBService) Reload() (err error) {
 		db.db.Close()
 		db.db = d
 		db.oldDBCfg = db.cfg.StorDbCfg().Clone()
+		db.sync() // sync only if needed
 		return
 	}
 	if db.cfg.StorDbCfg().Type == utils.MONGO {
@@ -135,6 +135,10 @@ func (db *StorDBService) Shutdown() (err error) {
 	db.db.Close()
 	db.db = nil
 	db.reconnected = false
+	for _, c := range db.syncChans {
+		close(c)
+	}
+	db.syncChans = nil
 	db.Unlock()
 	return
 }
@@ -143,6 +147,11 @@ func (db *StorDBService) Shutdown() (err error) {
 func (db *StorDBService) IsRunning() bool {
 	db.RLock()
 	defer db.RUnlock()
+	return db.isRunning()
+}
+
+// isRunning returns if the service is running (not thread safe)
+func (db *StorDBService) isRunning() bool {
 	return db != nil && db.db != nil
 }
 
@@ -156,11 +165,25 @@ func (db *StorDBService) ShouldRun() bool {
 	return db.cfg.RalsCfg().Enabled || db.cfg.CdrsCfg().Enabled
 }
 
-// GetDM returns the StorDB
-func (db *StorDBService) GetDM() engine.StorDB {
-	db.RLock()
-	defer db.RUnlock()
-	return db.db
+// RegisterSyncChan used by dependent subsystems to register a chanel to reload only the storDB(thread safe)
+func (db *StorDBService) RegisterSyncChan(c chan engine.StorDB) {
+	db.Lock()
+	db.syncChans = append(db.syncChans, c)
+	if db.isRunning() {
+		for _, c := range db.syncChans {
+			c <- db.db
+		}
+	}
+	db.Unlock()
+}
+
+// sync sends the storDB over syncChansv (not thrad safe)
+func (db *StorDBService) sync() {
+	if db.isRunning() {
+		for _, c := range db.syncChans {
+			c <- db.db
+		}
+	}
 }
 
 // needsConnectionReload returns if the DB connection needs to reloaded
@@ -178,18 +201,4 @@ func (db *StorDBService) needsConnectionReload() bool {
 		return true
 	}
 	return false
-}
-
-// GetStorDBchan returns the StorDB chanel
-func (db *StorDBService) GetStorDBchan() chan engine.StorDB {
-	db.RLock()
-	defer db.RUnlock()
-	return db.dbchan
-}
-
-// WasReconnected returns if after reload the DB was recreated
-func (db *StorDBService) WasReconnected() bool {
-	db.RLock()
-	defer db.RUnlock()
-	return db.reconnected
 }
