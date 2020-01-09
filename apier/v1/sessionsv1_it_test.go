@@ -351,7 +351,6 @@ func testSSv1ItInitiateSession(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession",
 			Event: map[string]interface{}{
-				utils.CGRID:       "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.Account:     "1001",
@@ -462,7 +461,6 @@ func testSSv1ItUpdateSession(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]interface{}{
-				utils.CGRID:       "5668666d6b8e44eb949042f25ce0796ec3592ff9",
 				utils.Tenant:      "cgrates.org",
 				utils.ToR:         utils.VOICE,
 				utils.Account:     "1001",
@@ -762,7 +760,6 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
 			Event: map[string]interface{}{
-				utils.CGRID:       "70876773b294f0e1476065f8d18bb9ec6bcb3d5f",
 				utils.Tenant:      "cgrates.org",
 				utils.Category:    "call",
 				utils.ToR:         utils.VOICE,
@@ -918,7 +915,7 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 3 {
-		t.Errorf("wrong active sessions: %s", utils.ToJSON(aSessions))
+		t.Errorf("wrong active sessions: %+v , %s ", len(aSessions), utils.ToJSON(aSessions))
 	}
 	time.Sleep(time.Millisecond)
 	eAcntVal -= float64(time.Millisecond) * 30 * 2 // 2 session
@@ -948,7 +945,7 @@ func testSSv1ItDynamicDebit(t *testing.T) {
 	if err := sSv1BiRpc.Call(utils.SessionSv1GetActiveSessions, nil, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 3 {
-		t.Errorf("wrong active sessions: %s", utils.ToJSON(aSessions))
+		t.Errorf("wrong active sessions: %+v , %s ", len(aSessions), utils.ToJSON(aSessions))
 	}
 
 	var rplyt string
