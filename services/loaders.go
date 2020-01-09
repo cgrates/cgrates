@@ -70,11 +70,14 @@ func (ldrs *LoaderService) Start() (err error) {
 
 	filterS := <-ldrs.filterSChan
 	ldrs.filterSChan <- filterS
+	dbchan := ldrs.dm.GetDMChan()
+	datadb := <-dbchan
+	dbchan <- datadb
 
 	ldrs.Lock()
 	defer ldrs.Unlock()
 
-	ldrs.ldrs = loaders.NewLoaderService(ldrs.dm.GetDM(), ldrs.cfg.LoaderCfg(),
+	ldrs.ldrs = loaders.NewLoaderService(datadb, ldrs.cfg.LoaderCfg(),
 		ldrs.cfg.GeneralCfg().DefaultTimezone, ldrs.exitChan, filterS, ldrs.connMgr)
 	if !ldrs.ldrs.Enabled() {
 		return
@@ -94,9 +97,13 @@ func (ldrs *LoaderService) GetIntenternalChan() (conn chan rpcclient.ClientConne
 func (ldrs *LoaderService) Reload() (err error) {
 	filterS := <-ldrs.filterSChan
 	ldrs.filterSChan <- filterS
+	dbchan := ldrs.dm.GetDMChan()
+	datadb := <-dbchan
+	dbchan <- datadb
+
 	ldrs.RLock()
 
-	ldrs.ldrs.Reload(ldrs.dm.GetDM(), ldrs.cfg.LoaderCfg(), ldrs.cfg.GeneralCfg().DefaultTimezone,
+	ldrs.ldrs.Reload(datadb, ldrs.cfg.LoaderCfg(), ldrs.cfg.GeneralCfg().DefaultTimezone,
 		ldrs.exitChan, filterS, ldrs.connMgr)
 	ldrs.RUnlock()
 	return

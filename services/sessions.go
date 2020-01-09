@@ -69,11 +69,16 @@ func (smg *SessionService) Start() (err error) {
 	if smg.IsRunning() {
 		return fmt.Errorf("service aleady running")
 	}
-
+	var datadb *engine.DataManager
+	if smg.dm.IsRunning() {
+		dbchan := smg.dm.GetDMChan()
+		datadb = <-dbchan
+		dbchan <- datadb
+	}
 	smg.Lock()
 	defer smg.Unlock()
 
-	smg.sm = sessions.NewSessionS(smg.cfg, smg.dm.GetDM(), smg.connMgr)
+	smg.sm = sessions.NewSessionS(smg.cfg, datadb, smg.connMgr)
 	//start sync session in a separate gorutine
 	go func(sm *sessions.SessionS) {
 		if err = sm.ListenAndServe(smg.exitChan); err != nil {

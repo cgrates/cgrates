@@ -73,10 +73,13 @@ func (reS *ResourceService) Start() (err error) {
 
 	filterS := <-reS.filterSChan
 	reS.filterSChan <- filterS
+	dbchan := reS.dm.GetDMChan()
+	datadb := <-dbchan
+	dbchan <- datadb
 
 	reS.Lock()
 	defer reS.Unlock()
-	reS.reS, err = engine.NewResourceService(reS.dm.GetDM(), reS.cfg, filterS, reS.connMgr)
+	reS.reS, err = engine.NewResourceService(datadb, reS.cfg, filterS, reS.connMgr)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.ResourceS, err.Error()))
 		return

@@ -76,6 +76,9 @@ func (cdrS *CDRServer) Start() (err error) {
 
 	filterS := <-cdrS.filterSChan
 	cdrS.filterSChan <- filterS
+	dbchan := cdrS.dm.GetDMChan()
+	datadb := <-dbchan
+	dbchan <- datadb
 
 	cdrS.Lock()
 	defer cdrS.Unlock()
@@ -85,8 +88,7 @@ func (cdrS *CDRServer) Start() (err error) {
 	cdrS.storDB.RegisterSyncChan(cdrS.storDBChan)
 	stordb := <-cdrS.storDBChan
 
-	cdrS.cdrS = engine.NewCDRServer(cdrS.cfg, stordb, cdrS.dm.GetDM(),
-		filterS, cdrS.connMgr)
+	cdrS.cdrS = engine.NewCDRServer(cdrS.cfg, stordb, datadb, filterS, cdrS.connMgr)
 	utils.Logger.Info("Registering CDRS HTTP Handlers.")
 	cdrS.cdrS.RegisterHandlersToServer(cdrS.server)
 	utils.Logger.Info("Registering CDRS RPC service.")

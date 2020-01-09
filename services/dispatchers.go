@@ -72,11 +72,14 @@ func (dspS *DispatcherService) Start() (err error) {
 	<-dspS.cacheS.GetPrecacheChannel(utils.CacheDispatcherProfiles)
 	<-dspS.cacheS.GetPrecacheChannel(utils.CacheDispatcherHosts)
 	<-dspS.cacheS.GetPrecacheChannel(utils.CacheDispatcherFilterIndexes)
+	dbchan := dspS.dm.GetDMChan()
+	datadb := <-dbchan
+	dbchan <- datadb
 
 	dspS.Lock()
 	defer dspS.Unlock()
 
-	if dspS.dspS, err = dispatchers.NewDispatcherService(dspS.dm.GetDM(), dspS.cfg, fltrS, dspS.connMgr); err != nil {
+	if dspS.dspS, err = dispatchers.NewDispatcherService(datadb, dspS.cfg, fltrS, dspS.connMgr); err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<%s> Could not init, error: %s", utils.DispatcherS, err.Error()))
 		return
 	}

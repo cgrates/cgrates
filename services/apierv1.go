@@ -78,6 +78,9 @@ func (api *ApierV1Service) Start() (err error) {
 
 	filterS := <-api.filterSChan
 	api.filterSChan <- filterS
+	dbchan := api.dm.GetDMChan()
+	datadb := <-dbchan
+	dbchan <- datadb
 
 	api.Lock()
 	defer api.Unlock()
@@ -88,7 +91,7 @@ func (api *ApierV1Service) Start() (err error) {
 	stordb := <-api.storDBChan
 
 	api.api = &v1.ApierV1{
-		DataManager:      api.dm.GetDM(),
+		DataManager:      datadb,
 		CdrDb:            stordb,
 		StorDb:           stordb,
 		Config:           api.cfg,
@@ -102,7 +105,7 @@ func (api *ApierV1Service) Start() (err error) {
 
 	if !api.cfg.DispatcherSCfg().Enabled {
 		api.server.RpcRegister(api.api)
-		api.server.RpcRegister(v1.NewReplicatorSv1(api.dm.GetDM()))
+		api.server.RpcRegister(v1.NewReplicatorSv1(datadb))
 	}
 
 	utils.RegisterRpcParams("", &v1.CDRsV1{})
