@@ -742,7 +742,7 @@ func (iDB *InternalDB) SetAccountDrv(acc *Account) (err error) {
 			acc = ac
 		}
 	}
-
+	acc.UpdateTime = time.Now()
 	iDB.db.Set(utils.CacheAccounts, acc.ID, acc, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return

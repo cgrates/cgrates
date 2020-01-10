@@ -42,6 +42,7 @@ type Account struct {
 	ActionTriggers    ActionTriggers
 	AllowNegative     bool
 	Disabled          bool
+	UpdateTime        time.Time
 	executingTriggers bool
 }
 
