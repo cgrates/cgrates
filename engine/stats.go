@@ -156,8 +156,13 @@ func (sS *StatService) matchingStatQueuesForEvent(args *StatsArgsProcessEvent) (
 	if len(args.StatIDs) != 0 {
 		sqIDs = args.StatIDs
 	} else {
-		mapIDs, err := MatchingItemIDsForEvent(args.Event, sS.cgrcfg.StatSCfg().StringIndexedFields, sS.cgrcfg.StatSCfg().PrefixIndexedFields,
-			sS.dm, utils.CacheStatFilterIndexes, args.Tenant, sS.filterS.cfg.StatSCfg().IndexedSelects)
+		mapIDs, err := MatchingItemIDsForEvent(args.Event,
+			sS.cgrcfg.StatSCfg().StringIndexedFields,
+			sS.cgrcfg.StatSCfg().PrefixIndexedFields,
+			sS.dm, utils.CacheStatFilterIndexes, args.Tenant,
+			sS.cgrcfg.StatSCfg().IndexedSelects,
+			sS.cgrcfg.StatSCfg().NestedFields,
+		)
 		if err != nil {
 			return nil, err
 		}

@@ -323,7 +323,7 @@ func TestStatQueuesProcessEvent(t *testing.T) {
 }
 
 func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
-	statService.filterS.cfg.StatSCfg().IndexedSelects = false
+	statService.cgrcfg.StatSCfg().IndexedSelects = false
 	msq, err := statService.matchingStatQueuesForEvent(statsEvs[0])
 	if err != nil {
 		t.Errorf("Error: %+v", err)

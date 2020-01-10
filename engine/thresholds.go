@@ -228,9 +228,13 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 	if len(args.ThresholdIDs) != 0 {
 		tIDs = args.ThresholdIDs
 	} else {
-		tIDsMap, err := MatchingItemIDsForEvent(args.Event, tS.cgrcfg.ThresholdSCfg().StringIndexedFields,
-			tS.cgrcfg.ThresholdSCfg().PrefixIndexedFields, tS.dm, utils.CacheThresholdFilterIndexes,
-			args.Tenant, tS.filterS.cfg.ThresholdSCfg().IndexedSelects)
+		tIDsMap, err := MatchingItemIDsForEvent(args.Event,
+			tS.cgrcfg.ThresholdSCfg().StringIndexedFields,
+			tS.cgrcfg.ThresholdSCfg().PrefixIndexedFields,
+			tS.dm, utils.CacheThresholdFilterIndexes, args.Tenant,
+			tS.cgrcfg.ThresholdSCfg().IndexedSelects,
+			tS.cgrcfg.ThresholdSCfg().NestedFields,
+		)
 		if err != nil {
 			return nil, err
 		}

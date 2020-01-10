@@ -21,6 +21,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 
@@ -1054,5 +1055,59 @@ func TestNavMapFieldAsInterface(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eVal, rplyVal) {
 		t.Errorf("Expected: %s , received: %s", utils.ToJSON(eVal), utils.ToJSON(rplyVal))
+	}
+}
+
+func TestNavMapGetKeys(t *testing.T) {
+	navMp := NewNavigableMap(
+		map[string]interface{}{
+			"FirstLevel": map[string]interface{}{
+				"SecondLevel": map[string]interface{}{
+					"ThirdLevel": map[string]interface{}{
+						"Fld1": 123.123,
+					},
+				},
+			},
+			"FistLever2": map[string]interface{}{
+				"SecondLevel2": map[string]interface{}{
+					"Field2": 123,
+				},
+				"Field3": "Value3",
+				"Field4": &testStruct{
+					Item1: "Ten",
+					Item2: 10,
+				},
+			},
+			"Field5": &testStruct{
+				Item1: "Ten",
+				Item2: 10,
+			},
+			"Field6": []string{"1", "2"},
+		},
+	)
+	expKeys := []string{
+		"FirstLevel",
+		"FirstLevel.SecondLevel",
+		"FirstLevel.SecondLevel.ThirdLevel",
+		"FirstLevel.SecondLevel.ThirdLevel.Fld1",
+		"FistLever2",
+		"FistLever2.SecondLevel2",
+		"FistLever2.SecondLevel2.Field2",
+		"FistLever2.Field3",
+		"FistLever2.Field4",
+		"FistLever2.Field4.Item1",
+		"FistLever2.Field4.Item2",
+		"Field5",
+		"Field5.Item1",
+		"Field5.Item2",
+		"Field6",
+		"Field6[0]",
+		"Field6[1]",
+	}
+	keys := navMp.GetKeys()
+	sort.Strings(expKeys)
+	sort.Strings(keys)
+	if !reflect.DeepEqual(expKeys, keys) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expKeys), utils.ToJSON(keys))
 	}
 }

@@ -89,10 +89,10 @@ func (smg *SessionService) Start() (err error) {
 	smg.connChan <- smg.sm
 	// Register RPC handler
 	smg.rpc = v1.NewSMGenericV1(smg.sm)
-	smg.server.RpcRegister(smg.rpc)
 
 	smg.rpcv1 = v1.NewSessionSv1(smg.sm) // methods with multiple options
 	if !smg.cfg.DispatcherSCfg().Enabled {
+		smg.server.RpcRegister(smg.rpc)
 		smg.server.RpcRegister(smg.rpcv1)
 	}
 	// Register BiRpc handlers

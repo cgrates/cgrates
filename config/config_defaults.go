@@ -534,6 +534,7 @@ const CGRATES_CFG_JSON = `
 	"indexed_selects":true,					// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"nested_fields": false,					// applies when indexed fields is not defined
 	"process_runs": 1,						// number of run loops when processing event
 },
 
@@ -544,6 +545,7 @@ const CGRATES_CFG_JSON = `
 	"indexed_selects":true,					// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"nested_fields": false,					// applies when indexed fields is not defined
 },
 
 
@@ -554,6 +556,7 @@ const CGRATES_CFG_JSON = `
 	"indexed_selects":true,					// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"nested_fields": false,					// applies when indexed fields is not defined
 },
 
 
@@ -565,6 +568,7 @@ const CGRATES_CFG_JSON = `
 	"indexed_selects":true,					// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"nested_fields": false,					// applies when indexed fields is not defined
 },
 
 
@@ -574,6 +578,7 @@ const CGRATES_CFG_JSON = `
 	"indexed_selects":true,					// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"nested_fields": false,					// applies when indexed fields is not defined
 },
 
 
@@ -582,6 +587,7 @@ const CGRATES_CFG_JSON = `
 	"indexed_selects":true,					// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"nested_fields": false,					// applies when indexed fields is not defined
 	"attributes_conns": [],					// connections to AttributeS for altering events before supplier queries: <""|*internal|127.0.0.1:2013>
 	"resources_conns": [],					// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 	"stats_conns": [],						// connections to StatS for *stats sorting, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
@@ -825,6 +831,7 @@ const CGRATES_CFG_JSON = `
 	"indexed_selects":true,					// enable profile matching exclusively on indexes
 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+	"nested_fields": false,					// applies when indexed fields is not defined
 	"attributes_conns": [],					// connections to AttributeS for API authorization, empty to disable auth functionality: <""|*internal|x.y.z.y:1234>
 },
 

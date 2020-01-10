@@ -27,6 +27,7 @@ type ChargerSCfg struct {
 	AttributeSConns     []string
 	StringIndexedFields *[]string
 	PrefixIndexedFields *[]string
+	NestedFields        bool
 }
 
 func (cS *ChargerSCfg) loadFromJsonCfg(jsnCfg *ChargerSJsonCfg) (err error) {
@@ -63,6 +64,9 @@ func (cS *ChargerSCfg) loadFromJsonCfg(jsnCfg *ChargerSJsonCfg) (err error) {
 			pif[i] = fID
 		}
 		cS.PrefixIndexedFields = &pif
+	}
+	if jsnCfg.Nested_fields != nil {
+		cS.NestedFields = *jsnCfg.Nested_fields
 	}
 	return
 }

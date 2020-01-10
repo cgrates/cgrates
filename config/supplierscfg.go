@@ -30,6 +30,7 @@ type SupplierSCfg struct {
 	ResourceSConns      []string
 	StatSConns          []string
 	DefaultRatio        int
+	NestedFields        bool
 }
 
 func (spl *SupplierSCfg) loadFromJsonCfg(jsnCfg *SupplierSJsonCfg) (err error) {
@@ -91,6 +92,9 @@ func (spl *SupplierSCfg) loadFromJsonCfg(jsnCfg *SupplierSJsonCfg) (err error) {
 	}
 	if jsnCfg.Default_ratio != nil {
 		spl.DefaultRatio = *jsnCfg.Default_ratio
+	}
+	if jsnCfg.Nested_fields != nil {
+		spl.NestedFields = *jsnCfg.Nested_fields
 	}
 	return nil
 }

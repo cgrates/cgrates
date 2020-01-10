@@ -309,7 +309,7 @@ func (nM *NavigableMap) Merge(nM2 *NavigableMap) {
 		val, _ := nM2.FieldAsInterface(path)
 		if valItms, isItms := val.([]*NMItem); isItms {
 			pathStr := strings.Join(path, utils.NestingSep)
-			pathIdx[pathStr] += 1
+			pathIdx[pathStr]++
 			if pathIdx[pathStr] > len(valItms) {
 				val = valItms[len(valItms)-1:] // slice with only last element in, so we can set it unlimited
 			} else {
@@ -446,6 +446,81 @@ func (nM *NavigableMap) AsXMLElements() (ents []*XMLElement, err error) {
 				ents = append(ents, newElm)
 			}
 		}
+	}
+	return
+}
+
+func getPathFromValue(in reflect.Value, prefix string) (out []string) {
+	switch in.Kind() {
+	case reflect.Ptr:
+		return getPathFromValue(in.Elem(), prefix)
+	case reflect.Array, reflect.Slice:
+		prefix = strings.TrimSuffix(prefix, ".")
+		for i := 0; i < in.Len(); i++ {
+			pref := fmt.Sprintf("%s[%v]", prefix, i)
+			out = append(out, pref)
+			out = append(out, getPathFromValue(in.Index(i), pref+".")...)
+		}
+	case reflect.Map:
+		iter := reflect.ValueOf(in).MapRange()
+		for iter.Next() {
+			pref := prefix + iter.Key().String()
+			out = append(out, pref)
+			out = append(out, getPathFromValue(iter.Value(), pref+".")...)
+		}
+	case reflect.Struct:
+		inType := in.Type()
+		for i := 0; i < in.NumField(); i++ {
+			pref := prefix + inType.Field(i).Name
+			out = append(out, pref)
+			out = append(out, getPathFromValue(in.Field(i), pref+".")...)
+		}
+	case reflect.Invalid, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128, reflect.String, reflect.Chan, reflect.Func, reflect.UnsafePointer, reflect.Interface:
+	default:
+	}
+	return
+}
+
+func getPathFromInterface(in interface{}, prefix string) (out []string) {
+	switch vin := in.(type) {
+	case map[string]interface{}:
+		for k, val := range vin {
+			pref := prefix + k
+			out = append(out, pref)
+			out = append(out, getPathFromInterface(val, pref+".")...)
+		}
+	case []map[string]interface{}:
+		prefix = strings.TrimSuffix(prefix, ".")
+		for i, val := range vin {
+			pref := fmt.Sprintf("%s[%v]", prefix, i)
+			out = append(out, pref)
+			out = append(out, getPathFromInterface(val, pref+".")...)
+		}
+	case []interface{}:
+		prefix = strings.TrimSuffix(prefix, ".")
+		for i, val := range vin {
+			pref := fmt.Sprintf("%s[%v]", prefix, i)
+			out = append(out, pref)
+			out = append(out, getPathFromInterface(val, pref+".")...)
+		}
+	case []string:
+		prefix = strings.TrimSuffix(prefix, ".")
+		for i := range vin {
+			pref := fmt.Sprintf("%s[%v]", prefix, i)
+			out = append(out, pref)
+		}
+	case nil, int, int32, int64, uint32, uint64, bool, float32, float64, []uint8, time.Duration, time.Time, string: //no path
+	default: //reflect based
+		out = getPathFromValue(reflect.ValueOf(vin), prefix)
+	}
+	return
+}
+
+// GetKeys returns all posibble keys
+func (nM *NavigableMap) GetKeys() (keys []string) {
+	for k, val := range nM.data {
+		keys = append(keys, k)
+		keys = append(keys, getPathFromInterface(val, k+".")...)
 	}
 	return
 }

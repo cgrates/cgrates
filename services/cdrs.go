@@ -101,11 +101,13 @@ func (cdrService *CDRServer) Start() (err error) {
 	utils.Logger.Info("Registering CDRS RPC service.")
 	cdrService.rpcv1 = v1.NewCDRsV1(cdrService.cdrS)
 	cdrService.rpcv2 = &v2.CDRsV2{CDRsV1: *cdrService.rpcv1}
-	cdrService.server.RpcRegister(cdrService.rpcv1)
-	cdrService.server.RpcRegister(cdrService.rpcv2)
-	// Make the cdr server available for internal communication
-	cdrService.server.RpcRegister(cdrService.cdrS) // register CdrServer for internal usage (TODO: refactor this)
-	cdrService.connChan <- cdrService.cdrS         // Signal that cdrS is operational
+	if !cdrService.cfg.DispatcherSCfg().Enabled {
+		cdrService.server.RpcRegister(cdrService.rpcv1)
+		cdrService.server.RpcRegister(cdrService.rpcv2)
+		// Make the cdr server available for internal communication
+		cdrService.server.RpcRegister(cdrService.cdrS) // register CdrServer for internal usage (TODO: refactor this)
+	}
+	cdrService.connChan <- cdrService.cdrS // Signal that cdrS is operational
 	return
 }
 

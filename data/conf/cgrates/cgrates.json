@@ -29,10 +29,15 @@
 // 	"digest_separator": ",",								// separator to use in replies containing data digests
 // 	"digest_equal": ":",									// equal symbol used in case of digests
 // 	"rsr_separator": ";",									// separator used within RSR fields
+// 	"max_parralel_conns": 100,								// the maximum number of connection used by the *parallel strategy
 // },
 
 
-// "rpc_conns": {},							// rpc connections definitions
+// "rpc_conns": {
+// 	"*localhost": {
+// 		"conns": [{"address": "127.0.0.1:2012", "transport":"*json"}],
+// 	},
+// },							// rpc connections definitions
 
 
 // "data_db": {								// database used to store runtime data (eg: accounts)
@@ -508,6 +513,7 @@
 // 	"indexed_selects":true,					// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"nested_fields": false,					// applies when indexed fields is not defined
 // 	"process_runs": 1,						// number of run loops when processing event
 // },
 
@@ -518,6 +524,7 @@
 // 	"indexed_selects":true,					// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"nested_fields": false,					// applies when indexed fields is not defined
 // },
 
 
@@ -528,6 +535,7 @@
 // 	"indexed_selects":true,					// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"nested_fields": false,					// applies when indexed fields is not defined
 // },
 
 
@@ -539,6 +547,7 @@
 // 	"indexed_selects":true,					// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"nested_fields": false,					// applies when indexed fields is not defined
 // },
 
 
@@ -548,6 +557,7 @@
 // 	"indexed_selects":true,					// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"nested_fields": false,					// applies when indexed fields is not defined
 // },
 
 
@@ -556,6 +566,7 @@
 // 	"indexed_selects":true,					// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"nested_fields": false,					// applies when indexed fields is not defined
 // 	"attributes_conns": [],					// connections to AttributeS for altering events before supplier queries: <""|*internal|127.0.0.1:2013>
 // 	"resources_conns": [],					// connections to ResourceS for *res sorting, empty to disable functionality: <""|*internal|x.y.z.y:1234>
 // 	"stats_conns": [],						// connections to StatS for *stats sorting, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
@@ -799,6 +810,7 @@
 // 	"indexed_selects":true,					// enable profile matching exclusively on indexes
 // 	//"string_indexed_fields": [],			// query indexes based on these fields for faster processing
 // 	"prefix_indexed_fields": [],			// query indexes based on these fields for faster processing
+// 	"nested_fields": false,					// applies when indexed fields is not defined
 // 	"attributes_conns": [],					// connections to AttributeS for API authorization, empty to disable auth functionality: <""|*internal|x.y.z.y:1234>
 // },
 
