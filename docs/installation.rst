@@ -33,7 +33,7 @@ Add the repository in apt sources list:
 
 ::
 
-    echo "deb http://apt.cgrates.org/debian/ nightly main" >> /etc/apt/sources.list.d/cgrates.list
+    echo "deb http://apt.cgrates.org/debian/ nightly main" | sudo tee /etc/apt/sources.list.d/cgrates.list
 
 Update & install:
 
