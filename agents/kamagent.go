@@ -139,10 +139,10 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connIdx int) {
 	}
 	authArgs.CGREvent.Event[EvapiConnID] = connIdx // Attach the connection ID
 	var authReply sessions.V1AuthorizeReply
-	if err = ka.connMgr.Call(ka.cfg.SessionSConns, ka, utils.SessionSv1AuthorizeEvent, authArgs, &authReply); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> failed to auth event: %s, error: %s",
-			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
-	} else if kar, err := kev.AsKamAuthReply(authArgs, &authReply, err); err != nil {
+	// take the error after calling SessionSv1.AuthorizeEvent
+	// and send it as parameter to AsKamAuthReply
+	err = ka.connMgr.Call(ka.cfg.SessionSConns, ka, utils.SessionSv1AuthorizeEvent, authArgs, &authReply)
+	if kar, err := kev.AsKamAuthReply(authArgs, &authReply, err); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed building auth reply for event: %s, error: %s",
 			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
 	} else if err = ka.conns[connIdx].Send(kar.String()); err != nil {
@@ -302,10 +302,10 @@ func (ka *KamailioAgent) onCgrProcessMessage(evData []byte, connIdx int) {
 	procEvArgs.CGREvent.Event[EvapiConnID] = connIdx // Attach the connection ID
 
 	var processReply sessions.V1ProcessMessageReply
-	if err = ka.connMgr.Call(ka.cfg.SessionSConns, ka, utils.SessionSv1ProcessMessage, procEvArgs, &processReply); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> failed to proccess message: %s, error: %s",
-			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
-	} else if kar, err := kev.AsKamProcessMessageReply(procEvArgs, &processReply, err); err != nil {
+	err = ka.connMgr.Call(ka.cfg.SessionSConns, ka, utils.SessionSv1ProcessMessage, procEvArgs, &processReply)
+	// take the error after calling SessionSv1.ProcessMessage
+	// and send it as parameter to AsKamProcessMessageReply
+	if kar, err := kev.AsKamProcessMessageReply(procEvArgs, &processReply, err); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed building process session event reply for event: %s, error: %s",
 			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
 	} else if err = ka.conns[connIdx].Send(kar.String()); err != nil {
@@ -347,10 +347,10 @@ func (ka *KamailioAgent) onCgrProcessCDR(evData []byte, connIdx int) {
 	procCDRArgs.CGREvent.Event[EvapiConnID] = connIdx // Attach the connection ID
 
 	var processReply string
-	if err = ka.connMgr.Call(ka.cfg.SessionSConns, ka, utils.SessionSv1ProcessCDR, procCDRArgs, &processReply); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> failed to process CDR for event: %s, error: %s",
-			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
-	} else if kar, err := kev.AsKamProcessCDRReply(procCDRArgs, &processReply, err); err != nil {
+	err = ka.connMgr.Call(ka.cfg.SessionSConns, ka, utils.SessionSv1ProcessCDR, procCDRArgs, &processReply)
+	// take the error after calling SessionSv1.ProcessCDR
+	// and send it as parameter to AsKamProcessCDRReply
+	if kar, err := kev.AsKamProcessCDRReply(procCDRArgs, &processReply, err); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed building process session event reply for event: %s, error: %s",
 			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
 	} else if err = ka.conns[connIdx].Send(kar.String()); err != nil {
