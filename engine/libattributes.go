@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -112,5 +114,31 @@ func (ext *ExternalAttributeProfile) AsAttributeProfile() (attr *AttributeProfil
 	attr.ActivationInterval = ext.ActivationInterval
 	attr.Blocker = ext.Blocker
 	attr.Weight = ext.Weight
+	return
+}
+
+// NewAttributeFromInline parses an inline rule into a compiled AttributeProfile
+func NewAttributeFromInline(tenant, inlnRule string) (attr *AttributeProfile, err error) {
+	ruleSplt := strings.Split(inlnRule, utils.InInFieldSep)
+	if len(ruleSplt) < 3 {
+		return nil, fmt.Errorf("inline parse error for string: <%s>", inlnRule)
+	}
+	var vals config.RSRParsers
+	if vals, err = config.NewRSRParsers(strings.Join(ruleSplt[2:], utils.InInFieldSep), true, utils.INFIELD_SEP); err != nil {
+		return nil, err
+	}
+	attr = &AttributeProfile{
+		Tenant:   tenant,
+		ID:       inlnRule,
+		Contexts: []string{utils.META_ANY},
+		Attributes: []*Attribute{&Attribute{
+			FieldName: ruleSplt[1],
+			Type:      ruleSplt[0],
+			Value:     vals,
+		}},
+	}
+	if err = attr.Compile(); err != nil {
+		return nil, err
+	}
 	return
 }

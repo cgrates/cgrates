@@ -2,4 +2,3 @@
 cgrates.org,ATTR_ACNT_1001,*sessions,FLTR_ACCOUNT_1001,,,OfficeGroup,*constant,Marketing,false,10
 cgrates.org,ATTR_SUPPLIER1,*chargers,,,,Subject,*constant,SUPPLIER1,false,10
 cgrates.org,ATTR_PAYPAL,*cdrs,*string:~*req.Subject:ANY2CNT,,,PayPalAccount,*constant,paypal@cgrates.org,false,10
-cgrates.org,ATTR_RAW_REQ,*any,*string:~*req.RunID:*raw,,,RequestType,*constant,*none,false,10

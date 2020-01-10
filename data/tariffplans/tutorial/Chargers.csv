@@ -1,3 +1,3 @@
 #Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
 cgrates.org,DEFAULT,,,*default,*none,0
-cgrates.org,Raw,,,*raw,ATTR_RAW_REQ,0
+cgrates.org,Raw,,,*raw,*constant:RequestType:*none,0

@@ -122,7 +122,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 		t.Error(reply)
 	}
 	expStats[utils.CacheActions].Items = 2
-	expStats[utils.CacheAttributeProfiles].Items = 11
+	expStats[utils.CacheAttributeProfiles].Items = 10
 	expStats[utils.CacheChargerProfiles].Items = 2
 	expStats[utils.CacheFilters].Items = 7
 	expStats[utils.CacheRatingPlans].Items = 5

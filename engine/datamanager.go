@@ -1781,7 +1781,14 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWr
 			return x.(*AttributeProfile), nil
 		}
 	}
-	attrPrfl, err = dm.dataDB.GetAttributeProfileDrv(tenant, id)
+	if strings.HasPrefix(id, utils.Meta) {
+		attrPrfl, err = NewAttributeFromInline(tenant, id)
+	} else if dm == nil { // in case we want the filter from dataDB but the connection to dataDB a optional (e.g. SessionS)
+		err = utils.ErrNoDatabaseConn
+		return
+	} else {
+		attrPrfl, err = dm.dataDB.GetAttributeProfileDrv(tenant, id)
+	}
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaAttributeProfiles].Remote {
