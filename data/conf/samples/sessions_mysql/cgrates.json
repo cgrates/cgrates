@@ -1,0 +1,99 @@
+{
+// CGRateS Configuration file
+//
+// Used for SessionSv1 integration tests
+
+
+"general": {
+    "log_level": 7,
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"data_db": {								
+	"db_type": "redis",						
+	"db_port": 6379, 						
+	"db_name": "10", 						
+},
+
+"stor_db": {
+	"db_password": "CGRateS.org",
+},
+
+"rals": {
+	"enabled": true,
+},
+
+
+"schedulers": {
+	"enabled": true,
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"chargers_conns":["*internal"],
+	"rals_conns": ["*internal"],
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
+
+
+"resources": {
+	"enabled": true,
+},
+
+
+"attributes": {
+	"enabled": true,
+},
+
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "1s",
+},
+
+
+"stats": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": ["*internal"],
+},
+
+
+"suppliers": {
+	"enabled": true,
+},
+
+
+"sessions": {
+	"enabled": true,
+	"session_ttl": "50ms",
+	"chargers_conns": ["*internal"],
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"resources_conns": ["*internal"],
+	"thresholds_conns": ["*internal"],
+	"stats_conns": ["*internal"],
+	"suppliers_conns": ["*internal"],
+	"attributes_conns": ["*internal"],
+},
+
+
+"apier": {
+	"scheduler_conns": ["*internal"],
+},
+
+
+}
