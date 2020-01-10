@@ -120,3 +120,23 @@ func TestConvertExternalToProfileMissing2(t *testing.T) {
 	}
 
 }
+
+func TestNewAttributeFromInline(t *testing.T) {
+	attrID := "*sum:Field2:10;~NumField;20"
+	expAttrPrf1 := &AttributeProfile{
+		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:       attrID,
+		Contexts: []string{utils.META_ANY},
+		Attributes: []*Attribute{&Attribute{
+			FieldName: "Field2",
+			Type:      utils.MetaSum,
+			Value:     config.NewRSRParsersMustCompile("10;~NumField;20", true, utils.INFIELD_SEP),
+		}},
+	}
+	attr, err := NewAttributeFromInline(config.CgrConfig().GeneralCfg().DefaultTenant, attrID)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expAttrPrf1, attr) {
+		t.Errorf("Expecting %+v, received: %+v", utils.ToJSON(expAttrPrf1), utils.ToJSON(attr))
+	}
+}
