@@ -505,10 +505,9 @@ func getPathFromInterface(in interface{}, prefix string) (out []string) {
 		}
 	case []string:
 		prefix = strings.TrimSuffix(prefix, ".")
-		for i, val := range vin {
+		for i := range vin {
 			pref := fmt.Sprintf("%s[%v]", prefix, i)
 			out = append(out, pref)
-			out = append(out, getPathFromInterface(val, pref+".")...)
 		}
 	case nil, int, int32, int64, uint32, uint64, bool, float32, float64, []uint8, time.Duration, time.Time, string: //no path
 	default: //reflect based
