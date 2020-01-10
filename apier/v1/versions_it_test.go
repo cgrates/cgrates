@@ -38,32 +38,39 @@ var (
 	vrsDelay       int
 	vrsConfigDIR   string //run tests for specific configuration
 	vrsStorageType string
+
+	sTestsVrs = []func(t *testing.T){
+		testVrsInitCfg,
+		testVrsResetStorDb,
+		testVrsStartEngine,
+		testVrsRpcConn,
+		testVrsDataDB,
+		testVrsStorDB,
+		testVrsSetDataDBVrs,
+		testVrsSetStorDBVrs,
+		testVrsKillEngine,
+	}
 )
 
-var sTestsVrs = []func(t *testing.T){
-	testVrsInitCfg,
-	testVrsResetStorDb,
-	testVrsStartEngine,
-	testVrsRpcConn,
-	testVrsDataDB,
-	testVrsStorDB,
-	testVrsSetDataDBVrs,
-	testVrsSetStorDBVrs,
-	testVrsKillEngine,
-}
-
 //Test start here
-func TestVrsITMySql(t *testing.T) {
-	vrsConfigDIR = "tutmysql"
-	vrsStorageType = utils.REDIS
-	for _, stest := range sTestsVrs {
-		t.Run(vrsConfigDIR, stest)
+func TestVrsIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		// vrsConfigDIR = "tutinternal"
+		// vrsStorageType = utils.INTERNAL
+		t.SkipNow() // as is commented below
+	case utils.MetaSQL:
+		vrsConfigDIR = "tutmysql"
+		vrsStorageType = utils.REDIS
+	case utils.MetaMongo:
+		vrsConfigDIR = "tutmongo"
+		vrsStorageType = utils.MONGO
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
 
-func TestVrsITMongo(t *testing.T) {
-	vrsConfigDIR = "tutmongo"
-	vrsStorageType = utils.MONGO
 	for _, stest := range sTestsVrs {
 		t.Run(vrsConfigDIR, stest)
 	}

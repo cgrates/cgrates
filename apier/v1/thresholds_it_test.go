@@ -38,183 +38,181 @@ var (
 	tSv1Rpc     *rpc.Client
 	tPrfl       *engine.ThresholdWithCache
 	tSv1ConfDIR string //run tests for specific configuration
+
+	tEvs = []*engine.ArgsProcessEvent{
+		{
+			CGREvent: &utils.CGREvent{ // hitting THD_ACNT_BALANCE_1
+				Tenant: "cgrates.org",
+				ID:     "event1",
+				Event: map[string]interface{}{
+					utils.EventType:     utils.AccountUpdate,
+					utils.Account:       "1002",
+					utils.AllowNegative: true,
+					utils.Disabled:      false,
+					utils.Units:         12.3},
+			},
+		},
+		{
+			CGREvent: &utils.CGREvent{ // hitting THD_ACNT_BALANCE_1
+				Tenant: "cgrates.org",
+				ID:     "event2",
+				Event: map[string]interface{}{
+					utils.EventType:  utils.BalanceUpdate,
+					utils.Account:    "1002",
+					utils.BalanceID:  utils.MetaDefault,
+					utils.Units:      12.3,
+					utils.ExpiryTime: time.Date(2009, 11, 10, 23, 00, 0, 0, time.UTC),
+				},
+			},
+		},
+		{
+			CGREvent: &utils.CGREvent{ // hitting THD_STATS_1
+				Tenant: "cgrates.org",
+				ID:     "event3",
+				Event: map[string]interface{}{
+					utils.EventType: utils.StatUpdate,
+					utils.StatID:    "Stats1",
+					utils.Account:   "1002",
+					"ASR":           35.0,
+					"ACD":           "2m45s",
+					"TCC":           12.7,
+					"TCD":           "12m15s",
+					"ACC":           0.75,
+					"PDD":           "2s",
+				},
+			},
+		},
+		{
+			CGREvent: &utils.CGREvent{ // hitting THD_STATS_1 and THD_STATS_2
+				Tenant: "cgrates.org",
+				ID:     "event4",
+				Event: map[string]interface{}{
+					utils.EventType: utils.StatUpdate,
+					utils.StatID:    "STATS_HOURLY_DE",
+					utils.Account:   "1002",
+					"ASR":           35.0,
+					"ACD":           "2m45s",
+					"TCD":           "1h",
+				},
+			},
+		},
+		{
+			CGREvent: &utils.CGREvent{ // hitting THD_STATS_3
+				Tenant: "cgrates.org",
+				ID:     "event5",
+				Event: map[string]interface{}{
+					utils.EventType: utils.StatUpdate,
+					utils.StatID:    "STATS_DAILY_DE",
+					utils.Account:   "1002",
+					"ACD":           "2m45s",
+					"TCD":           "3h1s",
+				},
+			},
+		},
+		{
+			CGREvent: &utils.CGREvent{ // hitting THD_RES_1
+				Tenant: "cgrates.org",
+				ID:     "event6",
+				Event: map[string]interface{}{
+					utils.EventType:  utils.ResourceUpdate,
+					utils.Account:    "1002",
+					utils.ResourceID: "RES_GRP_1",
+					utils.Usage:      10.0,
+				},
+			},
+		},
+		{
+			CGREvent: &utils.CGREvent{ // hitting THD_RES_1
+				Tenant: "cgrates.org",
+				ID:     "event6",
+				Event: map[string]interface{}{
+					utils.EventType:  utils.ResourceUpdate,
+					utils.Account:    "1002",
+					utils.ResourceID: "RES_GRP_1",
+					utils.Usage:      10.0,
+				},
+			},
+		},
+		{
+			CGREvent: &utils.CGREvent{ // hitting THD_RES_1
+				Tenant: "cgrates.org",
+				ID:     "event6",
+				Event: map[string]interface{}{
+					utils.EventType:  utils.ResourceUpdate,
+					utils.Account:    "1002",
+					utils.ResourceID: "RES_GRP_1",
+					utils.Usage:      10.0,
+				},
+			},
+		},
+		{
+			CGREvent: &utils.CGREvent{ // hitting THD_CDRS_1
+				Tenant: "cgrates.org",
+				ID:     "cdrev1",
+				Event: map[string]interface{}{
+					utils.EventType:   utils.CDR,
+					"field_extr1":     "val_extr1",
+					"fieldextr2":      "valextr2",
+					utils.CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+					utils.RunID:       utils.MetaRaw,
+					utils.OrderID:     123,
+					utils.OriginHost:  "192.168.1.1",
+					utils.Source:      utils.UNIT_TEST,
+					utils.OriginID:    "dsafdsaf",
+					utils.ToR:         utils.VOICE,
+					utils.RequestType: utils.META_RATED,
+					utils.Direction:   "*out",
+					utils.Tenant:      "cgrates.org",
+					utils.Category:    "call",
+					utils.Account:     "1007",
+					utils.Subject:     "1007",
+					utils.Destination: "+4986517174963",
+					utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
+					utils.PDD:         time.Duration(0) * time.Second,
+					utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+					utils.Usage:       time.Duration(10) * time.Second,
+					utils.SUPPLIER:    "SUPPL1",
+					utils.COST:        -1.0,
+				},
+			},
+		},
+	}
+
+	sTestsThresholdSV1 = []func(t *testing.T){
+		testV1TSLoadConfig,
+		testV1TSInitDataDb,
+		testV1TSResetStorDb,
+		testV1TSStartEngine,
+		testV1TSRpcConn,
+		testV1TSFromFolder,
+		testV1TSGetThresholds,
+		testV1TSProcessEvent,
+		testV1TSGetThresholdsAfterProcess,
+		testV1TSGetThresholdsAfterRestart,
+		testv1TSGetThresholdProfileIDs,
+		testV1TSSetThresholdProfile,
+		testV1TSUpdateThresholdProfile,
+		testV1TSRemoveThresholdProfile,
+		testV1TSMaxHits,
+		testV1TSStopEngine,
+	}
 )
 
-var tEvs = []*engine.ArgsProcessEvent{
-	{
-		CGREvent: &utils.CGREvent{ // hitting THD_ACNT_BALANCE_1
-			Tenant: "cgrates.org",
-			ID:     "event1",
-			Event: map[string]interface{}{
-				utils.EventType:     utils.AccountUpdate,
-				utils.Account:       "1002",
-				utils.AllowNegative: true,
-				utils.Disabled:      false,
-				utils.Units:         12.3},
-		},
-	},
-	{
-		CGREvent: &utils.CGREvent{ // hitting THD_ACNT_BALANCE_1
-			Tenant: "cgrates.org",
-			ID:     "event2",
-			Event: map[string]interface{}{
-				utils.EventType:  utils.BalanceUpdate,
-				utils.Account:    "1002",
-				utils.BalanceID:  utils.MetaDefault,
-				utils.Units:      12.3,
-				utils.ExpiryTime: time.Date(2009, 11, 10, 23, 00, 0, 0, time.UTC),
-			},
-		},
-	},
-	{
-		CGREvent: &utils.CGREvent{ // hitting THD_STATS_1
-			Tenant: "cgrates.org",
-			ID:     "event3",
-			Event: map[string]interface{}{
-				utils.EventType: utils.StatUpdate,
-				utils.StatID:    "Stats1",
-				utils.Account:   "1002",
-				"ASR":           35.0,
-				"ACD":           "2m45s",
-				"TCC":           12.7,
-				"TCD":           "12m15s",
-				"ACC":           0.75,
-				"PDD":           "2s",
-			},
-		},
-	},
-	{
-		CGREvent: &utils.CGREvent{ // hitting THD_STATS_1 and THD_STATS_2
-			Tenant: "cgrates.org",
-			ID:     "event4",
-			Event: map[string]interface{}{
-				utils.EventType: utils.StatUpdate,
-				utils.StatID:    "STATS_HOURLY_DE",
-				utils.Account:   "1002",
-				"ASR":           35.0,
-				"ACD":           "2m45s",
-				"TCD":           "1h",
-			},
-		},
-	},
-	{
-		CGREvent: &utils.CGREvent{ // hitting THD_STATS_3
-			Tenant: "cgrates.org",
-			ID:     "event5",
-			Event: map[string]interface{}{
-				utils.EventType: utils.StatUpdate,
-				utils.StatID:    "STATS_DAILY_DE",
-				utils.Account:   "1002",
-				"ACD":           "2m45s",
-				"TCD":           "3h1s",
-			},
-		},
-	},
-	{
-		CGREvent: &utils.CGREvent{ // hitting THD_RES_1
-			Tenant: "cgrates.org",
-			ID:     "event6",
-			Event: map[string]interface{}{
-				utils.EventType:  utils.ResourceUpdate,
-				utils.Account:    "1002",
-				utils.ResourceID: "RES_GRP_1",
-				utils.Usage:      10.0,
-			},
-		},
-	},
-	{
-		CGREvent: &utils.CGREvent{ // hitting THD_RES_1
-			Tenant: "cgrates.org",
-			ID:     "event6",
-			Event: map[string]interface{}{
-				utils.EventType:  utils.ResourceUpdate,
-				utils.Account:    "1002",
-				utils.ResourceID: "RES_GRP_1",
-				utils.Usage:      10.0,
-			},
-		},
-	},
-	{
-		CGREvent: &utils.CGREvent{ // hitting THD_RES_1
-			Tenant: "cgrates.org",
-			ID:     "event6",
-			Event: map[string]interface{}{
-				utils.EventType:  utils.ResourceUpdate,
-				utils.Account:    "1002",
-				utils.ResourceID: "RES_GRP_1",
-				utils.Usage:      10.0,
-			},
-		},
-	},
-	{
-		CGREvent: &utils.CGREvent{ // hitting THD_CDRS_1
-			Tenant: "cgrates.org",
-			ID:     "cdrev1",
-			Event: map[string]interface{}{
-				utils.EventType:   utils.CDR,
-				"field_extr1":     "val_extr1",
-				"fieldextr2":      "valextr2",
-				utils.CGRID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
-				utils.RunID:       utils.MetaRaw,
-				utils.OrderID:     123,
-				utils.OriginHost:  "192.168.1.1",
-				utils.Source:      utils.UNIT_TEST,
-				utils.OriginID:    "dsafdsaf",
-				utils.ToR:         utils.VOICE,
-				utils.RequestType: utils.META_RATED,
-				utils.Direction:   "*out",
-				utils.Tenant:      "cgrates.org",
-				utils.Category:    "call",
-				utils.Account:     "1007",
-				utils.Subject:     "1007",
-				utils.Destination: "+4986517174963",
-				utils.SetupTime:   time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
-				utils.PDD:         time.Duration(0) * time.Second,
-				utils.AnswerTime:  time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-				utils.Usage:       time.Duration(10) * time.Second,
-				utils.SUPPLIER:    "SUPPL1",
-				utils.COST:        -1.0,
-			},
-		},
-	},
-}
-
-var sTestsThresholdSV1 = []func(t *testing.T){
-	testV1TSLoadConfig,
-	testV1TSInitDataDb,
-	testV1TSResetStorDb,
-	testV1TSStartEngine,
-	testV1TSRpcConn,
-	testV1TSFromFolder,
-	testV1TSGetThresholds,
-	testV1TSProcessEvent,
-	testV1TSGetThresholdsAfterProcess,
-	testV1TSGetThresholdsAfterRestart,
-	testv1TSGetThresholdProfileIDs,
-	testV1TSSetThresholdProfile,
-	testV1TSUpdateThresholdProfile,
-	testV1TSRemoveThresholdProfile,
-	testV1TSMaxHits,
-	testV1TSStopEngine,
-}
-
 // Test start here
-func TestTSV1ITMySQL(t *testing.T) {
-	tSv1ConfDIR = "tutmysql"
-	for _, stest := range sTestsThresholdSV1 {
-		t.Run(tSv1ConfDIR, stest)
+func TestTSV1IT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		tSv1ConfDIR = "tutinternal"
+	case utils.MetaSQL:
+		tSv1ConfDIR = "tutmysql"
+	case utils.MetaMongo:
+		tSv1ConfDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
 
-func TestTSV1ITMongo(t *testing.T) {
-	tSv1ConfDIR = "tutmongo"
-	for _, stest := range sTestsThresholdSV1 {
-		t.Run(tSv1ConfDIR, stest)
-	}
-}
-
-func TestTSV1ITInternal(t *testing.T) {
-	tSv1ConfDIR = "tutinternal"
 	for _, stest := range sTestsThresholdSV1 {
 		t.Run(tSv1ConfDIR, stest)
 	}

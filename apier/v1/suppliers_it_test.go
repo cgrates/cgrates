@@ -38,53 +38,57 @@ var (
 	splSv1Rpc     *rpc.Client
 	splPrf        *SupplierWithCache
 	splSv1ConfDIR string //run tests for specific configuration
+
+	sTestsSupplierSV1 = []func(t *testing.T){
+		testV1SplSLoadConfig,
+		testV1SplSInitDataDb,
+		testV1SplSResetStorDb,
+		testV1SplSStartEngine,
+		testV1SplSRpcConn,
+		testV1SplSFromFolder,
+		testV1SplSGetWeightSuppliers,
+		testV1SplSGetLeastCostSuppliers,
+		testV1SplSGetLeastCostSuppliersWithMaxCost,
+		testV1SplSGetLeastCostSuppliersWithMaxCost2,
+		testV1SplSGetLeastCostSuppliersWithMaxCostNotFound,
+		testV1SplSGetHighestCostSuppliers,
+		testV1SplSGetLeastCostSuppliersErr,
+		testV1SplSPolulateStatsForQOS,
+		testV1SplSGetQOSSuppliers,
+		testV1SplSGetQOSSuppliers2,
+		testV1SplSGetQOSSuppliers3,
+		testV1SplSGetQOSSuppliersFiltred,
+		testV1SplSGetQOSSuppliersFiltred2,
+		testV1SplSGetSupplierWithoutFilter,
+		testV1SplSSetSupplierProfiles,
+		testV1SplSGetSupplierProfileIDs,
+		testV1SplSUpdateSupplierProfiles,
+		testV1SplSRemSupplierProfiles,
+		testV1SplSGetSupplierForEvent,
+		// reset the database and load the TP again
+		// testV1SplSInitDataDb,
+		// testV1SplSFromFolder,
+		// for the moment we decide to comment the tests
+		// testV1SplsOneSupplierWithoutDestination,
+		testV1SplSupplierPing,
+		testV1SplSStopEngine,
+	}
 )
 
-var sTestsSupplierSV1 = []func(t *testing.T){
-	testV1SplSLoadConfig,
-	testV1SplSInitDataDb,
-	testV1SplSResetStorDb,
-	testV1SplSStartEngine,
-	testV1SplSRpcConn,
-	testV1SplSFromFolder,
-	testV1SplSGetWeightSuppliers,
-	testV1SplSGetLeastCostSuppliers,
-	testV1SplSGetLeastCostSuppliersWithMaxCost,
-	testV1SplSGetLeastCostSuppliersWithMaxCost2,
-	testV1SplSGetLeastCostSuppliersWithMaxCostNotFound,
-	testV1SplSGetHighestCostSuppliers,
-	testV1SplSGetLeastCostSuppliersErr,
-	testV1SplSPolulateStatsForQOS,
-	testV1SplSGetQOSSuppliers,
-	testV1SplSGetQOSSuppliers2,
-	testV1SplSGetQOSSuppliers3,
-	testV1SplSGetQOSSuppliersFiltred,
-	testV1SplSGetQOSSuppliersFiltred2,
-	testV1SplSGetSupplierWithoutFilter,
-	testV1SplSSetSupplierProfiles,
-	testV1SplSGetSupplierProfileIDs,
-	testV1SplSUpdateSupplierProfiles,
-	testV1SplSRemSupplierProfiles,
-	testV1SplSGetSupplierForEvent,
-	// reset the database and load the TP again
-	// testV1SplSInitDataDb,
-	// testV1SplSFromFolder,
-	// for the moment we decide to comment the tests
-	// testV1SplsOneSupplierWithoutDestination,
-	testV1SplSupplierPing,
-	testV1SplSStopEngine,
-}
-
 // Test start here
-func TestSuplSV1ITMySQL(t *testing.T) {
-	splSv1ConfDIR = "tutmysql"
-	for _, stest := range sTestsSupplierSV1 {
-		t.Run(splSv1ConfDIR, stest)
+func TestSuplSV1IT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		splSv1ConfDIR = "tutinternal"
+	case utils.MetaSQL:
+		splSv1ConfDIR = "tutmysql"
+	case utils.MetaMongo:
+		splSv1ConfDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestSuplSV1ITMongo(t *testing.T) {
-	splSv1ConfDIR = "tutmongo"
 	for _, stest := range sTestsSupplierSV1 {
 		t.Run(splSv1ConfDIR, stest)
 	}

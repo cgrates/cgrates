@@ -38,74 +38,72 @@ var (
 	stsV1Rpc     *rpc.Client
 	statConfig   *StatQueueWithCache
 	stsV1ConfDIR string //run tests for specific configuration
-)
 
-var evs = []*utils.CGREvent{
-	{
-		Tenant: "cgrates.org",
-		ID:     "event1",
-		Event: map[string]interface{}{
-			utils.Account:    "1001",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(135 * time.Second),
-			utils.COST:       123.0}},
-	{
-		Tenant: "cgrates.org",
-		ID:     "event2",
-		Event: map[string]interface{}{
-			utils.Account:    "1002",
-			utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:      time.Duration(45 * time.Second)}},
-	{
-		Tenant: "cgrates.org",
-		ID:     "event3",
-		Event: map[string]interface{}{
-			utils.Account:   "1002",
-			utils.SetupTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
-			utils.Usage:     0}},
-}
+	evs = []*utils.CGREvent{
+		{
+			Tenant: "cgrates.org",
+			ID:     "event1",
+			Event: map[string]interface{}{
+				utils.Account:    "1001",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(135 * time.Second),
+				utils.COST:       123.0}},
+		{
+			Tenant: "cgrates.org",
+			ID:     "event2",
+			Event: map[string]interface{}{
+				utils.Account:    "1002",
+				utils.AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:      time.Duration(45 * time.Second)}},
+		{
+			Tenant: "cgrates.org",
+			ID:     "event3",
+			Event: map[string]interface{}{
+				utils.Account:   "1002",
+				utils.SetupTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+				utils.Usage:     0}},
+	}
+
+	sTestsStatSV1 = []func(t *testing.T){
+		testV1STSLoadConfig,
+		testV1STSInitDataDb,
+		testV1STSStartEngine,
+		testV1STSRpcConn,
+		testV1STSFromFolder,
+		testV1STSGetStats,
+		testV1STSProcessEvent,
+		testV1STSGetStatsAfterRestart,
+		testV1STSSetStatQueueProfile,
+		testV1STSGetStatQueueProfileIDs,
+		testV1STSUpdateStatQueueProfile,
+		testV1STSRemoveStatQueueProfile,
+		testV1STSStatsPing,
+		testV1STSProcessMetricsWithFilter,
+		testV1STSProcessStaticMetrics,
+		testV1STSProcessStatWithThreshold,
+		testV1STSStopEngine,
+	}
+)
 
 func init() {
 	rand.Seed(time.Now().UnixNano()) // used in benchmarks
 }
 
-var sTestsStatSV1 = []func(t *testing.T){
-	testV1STSLoadConfig,
-	testV1STSInitDataDb,
-	testV1STSStartEngine,
-	testV1STSRpcConn,
-	testV1STSFromFolder,
-	testV1STSGetStats,
-	testV1STSProcessEvent,
-	testV1STSGetStatsAfterRestart,
-	testV1STSSetStatQueueProfile,
-	testV1STSGetStatQueueProfileIDs,
-	testV1STSUpdateStatQueueProfile,
-	testV1STSRemoveStatQueueProfile,
-	testV1STSStatsPing,
-	testV1STSProcessMetricsWithFilter,
-	testV1STSProcessStaticMetrics,
-	testV1STSProcessStatWithThreshold,
-	testV1STSStopEngine,
-}
-
 //Test start here
-func TestSTSV1ITMySQL(t *testing.T) {
-	stsV1ConfDIR = "tutmysql"
-	for _, stest := range sTestsStatSV1 {
-		t.Run(stsV1ConfDIR, stest)
+func TestSTSV1IT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		stsV1ConfDIR = "tutinternal"
+	case utils.MetaSQL:
+		stsV1ConfDIR = "tutmysql"
+	case utils.MetaMongo:
+		stsV1ConfDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
 
-func TestSTSV1ITMongo(t *testing.T) {
-	stsV1ConfDIR = "tutmongo"
-	for _, stest := range sTestsStatSV1 {
-		t.Run(stsV1ConfDIR, stest)
-	}
-}
-
-func TestSTSV1ITInternal(t *testing.T) {
-	stsV1ConfDIR = "tutinternal"
 	for _, stest := range sTestsStatSV1 {
 		t.Run(stsV1ConfDIR, stest)
 	}

@@ -77,7 +77,7 @@ func TestSchedWithFiltersSingleAccount(t *testing.T) {
 	case utils.MetaInternal:
 		schedConfDIR = "filtered_scheduler_internal"
 	case utils.MetaSQL:
-		schedConfDIR = "filtered_scheduler"
+		schedConfDIR = "filtered_scheduler_mysql"
 	case utils.MetaMongo:
 		schedConfDIR = "filtered_scheduler_mongo"
 	case utils.MetaPostgres:
@@ -96,7 +96,7 @@ func TestSchedWithFilters2(t *testing.T) {
 	case utils.MetaInternal:
 		schedConfDIR = "filtered_scheduler2_internal"
 	case utils.MetaSQL:
-		schedConfDIR = "filtered_scheduler2"
+		schedConfDIR = "filtered_scheduler2_mysql"
 	case utils.MetaMongo:
 		schedConfDIR = "filtered_scheduler2_mongo"
 	case utils.MetaPostgres:
@@ -153,7 +153,7 @@ func testSchedFromFolder(t *testing.T) {
 }
 
 func testSchedVeifyAllAccounts(t *testing.T) {
-	if schedConfDIR == "filtered_scheduler" || schedConfDIR == "filtered_scheduler2" {
+	if !(schedConfDIR == "tutinternal" || schedConfDIR == "tutmysql" || schedConfDIR == "tutmongo") {
 		t.SkipNow()
 	}
 
@@ -191,7 +191,7 @@ func testSchedVeifyAllAccounts(t *testing.T) {
 }
 
 func testSchedVeifyAccount1001(t *testing.T) {
-	if schedConfDIR == "tutmysql" || schedConfDIR == "filtered_scheduler2" {
+	if !(schedConfDIR == "filtered_scheduler_internal" || schedConfDIR == "filtered_scheduler_mysql" || schedConfDIR == "filtered_scheduler_mongo") {
 		t.SkipNow()
 	}
 	var acnt *engine.Account
@@ -232,7 +232,7 @@ func testSchedVeifyAccount1001(t *testing.T) {
 }
 
 func testSchedVeifyAccount1002and1003(t *testing.T) {
-	if schedConfDIR == "tutmysql" || schedConfDIR == "filtered_scheduler" {
+	if !(schedConfDIR == "filtered_scheduler2_internal" || schedConfDIR == "filtered_scheduler2_mysql" || schedConfDIR == "filtered_scheduler2_mongo") {
 		t.SkipNow()
 	}
 	var acnt *engine.Account
