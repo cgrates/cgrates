@@ -8,7 +8,6 @@ In these tutorials we exemplify a few cases of integration between FreeSWITCH_ a
    :maxdepth: 2
 
    tut_freeswitch_installs
-   tut_cgrates_installs
    tut_jitsi_installs
    tut_freeswitch_json
    tut_cgrates_usage

@@ -8,7 +8,6 @@ In these tutorials we exemplify a few cases of integration between Asterisk_ and
    :maxdepth: 2
 
    tut_asterisk_installs
-   tut_cgrates_installs
    tut_jitsi_installs
    tut_asterisk_ari
    tut_cgrates_usage

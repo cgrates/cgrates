@@ -3,6 +3,12 @@ Software installation
 
 We have chosen Debian Jessie as operating system, since all the software components we use provide packaging for it.
 
+CGRateS
+--------
+
+**CGRateS** can be installed using the instructions found :ref:`here<installation>`. 
+
+
 OpenSIPS_
 ---------
 

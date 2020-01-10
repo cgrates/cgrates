@@ -3,6 +3,13 @@ Software installation
 
 As operating system we have chosen Debian Jessie, since all the software components we use provide packaging for it.
 
+CGRateS
+--------
+
+**CGRateS** can be installed using the instructions found :ref:`here<installation>`. 
+
+
+
 
 FreeSWITCH_
 -----------

@@ -8,7 +8,6 @@ In these tutorials we exemplify a few cases of integration between Kamailio_ and
    :maxdepth: 2
 
    tut_kamailio_installs
-   tut_cgrates_installs
    tut_jitsi_installs
    tut_kamailio_evapi
    tut_cgrates_usage

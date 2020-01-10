@@ -1,3 +1,5 @@
+.. _installation:
+
 3. Installation
 ===============
 

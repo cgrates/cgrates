@@ -27,7 +27,7 @@ RUN apt-get update && apt-get -y install redis-server mysql-server python-pycurl
 #RUN apt-get update && apt-get -y install cgrates
 
 # CGRateS 
-RUN wget -O /tmp/cgrates.deb http://www.cgrates.org/tmp_pkg/cgrates_0.9.1~rc8_amd64.deb
+RUN wget -O /tmp/cgrates.deb http://pkg.cgrates.org/debian/cgrates_current_amd64.deb
 RUN apt install /tmp/cgrates.deb
 RUN rm /tmp/cgrates.deb
 

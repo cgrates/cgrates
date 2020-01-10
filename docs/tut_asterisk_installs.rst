@@ -3,6 +3,12 @@ Software installation
 
 We have chosen Debian Jessie as operating system.
 
+CGRateS
+--------
+
+**CGRateS** can be installed using the instructions found :ref:`here<installation>`. 
+
+
 Asterisk_
 ---------
 
