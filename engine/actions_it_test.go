@@ -473,6 +473,73 @@ func TestActionsitCDRAccount(t *testing.T) {
 	}
 }
 
+func TestActionsitThresholdCgrRpcAction(t *testing.T) {
+	var thReply *ThresholdProfile
+	var result string
+	var reply string
+
+	attrsAA := &utils.AttrSetActions{ActionsId: "ACT_TH_CGRRPC", Actions: []*utils.TPAction{
+		&utils.TPAction{Identifier: utils.CGR_RPC, ExtraParameters: `{"Address": "127.0.0.1:2012",
+"Transport": "*json",
+"Method": "RALsV1.Ping",
+"Attempts":1,
+"Async" :false,
+"Params": {}}`}}}
+	if err := actsLclRpc.Call(utils.ApierV2SetActions, attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error("Got error on ApierV2.SetActions: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ApierV2.SetActions received: %s", reply)
+	}
+	//make sure that the threshold don't exit
+	if err := actsLclRpc.Call(utils.ApierV1GetThresholdProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TH_CGRRPC"}, &thReply); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err)
+	}
+	tPrfl := &ThresholdWithCache{
+		ThresholdProfile: &ThresholdProfile{
+			Tenant:    "cgrates.org",
+			ID:        "TH_CGRRPC",
+			FilterIDs: []string{"*string:~*req.Method:RALsV1.Ping"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
+			},
+			MaxHits:   -1,
+			MinSleep:  time.Duration(5 * time.Minute),
+			Blocker:   false,
+			Weight:    20.0,
+			ActionIDs: []string{"ACT_TH_CGRRPC"},
+			Async:     false,
+		},
+	}
+	if err := actsLclRpc.Call(utils.ApierV1SetThresholdProfile, tPrfl, &result); err != nil {
+		t.Error(err)
+	} else if result != utils.OK {
+		t.Error("Unexpected reply returned", result)
+	}
+	if err := actsLclRpc.Call(utils.ApierV1GetThresholdProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "TH_CGRRPC"}, &thReply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(tPrfl.ThresholdProfile, thReply) {
+		t.Errorf("Expecting: %+v, received: %+v", tPrfl.ThresholdProfile, thReply)
+	}
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     utils.UUIDSha1Prefix(),
+		Event: map[string]interface{}{
+			"Method": "RALsV1.Ping",
+		},
+	}
+	var ids []string
+	eIDs := []string{"TH_CGRRPC"}
+	if err := actsLclRpc.Call(utils.ThresholdSv1ProcessEvent, &ArgsProcessEvent{CGREvent: ev}, &ids); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ids, eIDs) {
+		t.Errorf("Expecting ids: %s, received: %s", eIDs, ids)
+	}
+
+}
+
 func TestActionsitThresholdPostEvent(t *testing.T) {
 	var thReply *ThresholdProfile
 	var result string

@@ -38,9 +38,6 @@
 	"enabled": true,
 },
 
-"users": {
-	"enabled": true,							// starts users service: <true|false>.
-},
 
 "thresholds": {
 	"enabled": true,
