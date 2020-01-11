@@ -192,6 +192,28 @@
 				{"tag": "HDRExtra1", "field_id": "HDRExtra1", "type": "*composed", "value": "~*req.6", "mandatory": true},
 			],
 		},
+		{
+			"id": "XmlDryRun",
+			"run_delay": -1,
+			"type": "*file_xml",
+			"source_path": "/tmp/xmlErs/in",
+			"flags": ["*cdrs","*log"],
+			"processed_path": "/tmp/xmlErs/out",
+			"xml_root_path": "broadWorksCDR.cdrData",
+			"content_fields":[
+				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*voice", "mandatory": true},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*variable", "value": "~*req.broadWorksCDR.cdrData.basicModule.localCallId", "mandatory": true},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", "value": "*rated", "mandatory": true},
+				{"tag": "Direction", "field_id": "Direction", "type": "*constant", "value": "*out", "mandatory": true},
+				{"tag": "Tenant", "field_id": "Tenant", "type": "*variable", "value": "~*req.broadWorksCDR.cdrData.basicModule.userId:s/.*@(.*)/${1}/", "mandatory": true},
+				{"tag": "Category", "field_id": "Category", "type": "*constant", "value": "call", "mandatory": true},
+				{"tag": "Account", "field_id": "Account", "type": "*variable", "value": "~*req.broadWorksCDR.cdrData.basicModule.userNumber", "mandatory": true},
+				{"tag": "Destination", "field_id": "Destination", "type": "*variable", "value": "~*req.broadWorksCDR.cdrData.basicModule.calledNumber", "mandatory": true},
+				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*variable", "value": "~*req.broadWorksCDR.cdrData.basicModule.startTime", "mandatory": true},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*variable", "value": "~*req.broadWorksCDR.cdrData.basicModule.answerTime", "mandatory": true},
+				{"tag": "Usage", "field_id": "Usage", "type": "*usage_difference", "value": "~*req.broadWorksCDR.cdrData.basicModule.releaseTime;~*req.broadWorksCDR.cdrData.basicModule.answerTime", "mandatory": true}
+			],
+		}
 	],
 },
 

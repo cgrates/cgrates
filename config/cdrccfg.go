@@ -101,7 +101,7 @@ func (self *CdrcCfg) loadFromJsonCfg(jsnCfg *CdrcJsonCfg, separator string) erro
 		self.FailedCallsPrefix = *jsnCfg.Failed_calls_prefix
 	}
 	if jsnCfg.Cdr_root_path != nil {
-		self.CDRRootPath = utils.ParseHierarchyPath(*jsnCfg.Cdr_root_path, "")
+		self.CDRRootPath = utils.ParseHierarchyPath(*jsnCfg.Cdr_root_path, utils.EmptyString)
 	}
 	if jsnCfg.Cdr_source_id != nil {
 		self.CdrSourceId = *jsnCfg.Cdr_source_id

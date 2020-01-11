@@ -106,7 +106,7 @@ type EventReaderCfg struct {
 	ConcurrentReqs int
 	SourcePath     string
 	ProcessedPath  string
-	XmlRootPath    string
+	XmlRootPath    utils.HierarchyPath
 	Tenant         RSRParsers
 	Timezone       string
 	Filters        []string
@@ -142,7 +142,7 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string
 		er.ProcessedPath = *jsnCfg.Processed_path
 	}
 	if jsnCfg.Xml_root_path != nil {
-		er.XmlRootPath = *jsnCfg.Xml_root_path
+		er.XmlRootPath = utils.ParseHierarchyPath(*jsnCfg.Xml_root_path, utils.EmptyString)
 	}
 	if jsnCfg.Tenant != nil {
 		if er.Tenant, err = NewRSRParsers(*jsnCfg.Tenant, true, sep); err != nil {

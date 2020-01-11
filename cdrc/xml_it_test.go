@@ -132,7 +132,6 @@ func TestXmlITAnalyseCDRs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
-
 }
 
 func TestXmlITKillEngine(t *testing.T) {
