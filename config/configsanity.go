@@ -429,7 +429,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				if rdr.RunDelay > 0 {
 					return fmt.Errorf("<%s> RunDelay field can not be bigger than zero for reader with ID: %s", utils.ERs, rdr.ID)
 				}
-			case utils.MetaFileXML:
+			case utils.MetaFileXML, utils.MetaFileFWV:
 				for _, dir := range []string{rdr.ProcessedPath, rdr.SourcePath} {
 					if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
 						return fmt.Errorf("<%s> Nonexistent folder: %s for reader with ID: %s", utils.ERs, dir, rdr.ID)

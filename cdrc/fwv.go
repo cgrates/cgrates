@@ -23,10 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net"
 	"os"
-	"strconv"
-	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -112,7 +109,7 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
 	}
 	self.processedRecordsNr += 1
 	record := string(buf)
-	fwvProvider := newfwvProvider(record)
+	fwvProvider := config.NewFWVProvider(record, utils.MetaReq)
 	for _, cdrcCfg := range self.cdrcCfgs {
 		tenant, err := cdrcCfg.Tenant.ParseDataProvider(fwvProvider, utils.NestingSep) // each profile of cdrc can have different tenant
 		if err != nil {
@@ -145,8 +142,8 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *confi
 	var lazyHttpFields []*config.FCTemplate
 	var cfgFields []*config.FCTemplate
 	var storedCdr *engine.CDR
-	fwvProvider := newfwvProvider(record) // used for filterS and for RSRParsers
-	if self.headerCdr != nil {            // Clone the header CDR so we can use it as base to future processing (inherit fields defined there)
+	fwvProvider := config.NewFWVProvider(record, utils.MetaReq) // used for filterS and for RSRParsers
+	if self.headerCdr != nil {                                  // Clone the header CDR so we can use it as base to future processing (inherit fields defined there)
 		storedCdr = self.headerCdr.Clone()
 	} else {
 		storedCdr = &engine.CDR{OriginHost: "0.0.0.0", ExtraFields: make(map[string]string), Cost: -1}
@@ -247,79 +244,4 @@ func (self *FwvRecordsProcessor) processTrailer() error {
 		return fmt.Errorf("In trailer, line len: %d, have read: %d", self.lineLen, nRead)
 	}
 	return nil
-}
-
-// newfwvProvider constructs a DataProvider
-func newfwvProvider(record string) (dP config.DataProvider) {
-	dP = &fwvProvider{req: record, cache: config.NewNavigableMap(nil)}
-	return
-}
-
-// fwvProvider implements engine.DataProvider so we can pass it to filters
-type fwvProvider struct {
-	req   string
-	cache *config.NavigableMap
-}
-
-// String is part of engine.DataProvider interface
-// when called, it will display the already parsed values out of cache
-func (fP *fwvProvider) String() string {
-	return utils.ToJSON(fP)
-}
-
-// FieldAsInterface is part of engine.DataProvider interface
-func (fP *fwvProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
-	if len(fldPath) == 0 {
-		return
-	}
-	if fldPath[0] != utils.MetaReq || len(fldPath) < 2 {
-		return "", utils.ErrPrefixNotFound(strings.Join(fldPath, utils.NestingSep))
-	}
-	if data, err = fP.cache.FieldAsInterface(fldPath); err == nil ||
-		err != utils.ErrNotFound { // item found in cache
-		return
-	}
-	err = nil // cancel previous err
-	indexes := strings.Split(fldPath[1], "-")
-	if len(indexes) != 2 {
-		return "", fmt.Errorf("Invalid format for index : %+v", fldPath[1])
-	}
-	startIndex, err := strconv.Atoi(indexes[0])
-	if err != nil {
-		return nil, err
-	}
-	if startIndex > len(fP.req) {
-		return "", fmt.Errorf("StartIndex : %+v is greater than : %+v", startIndex, len(fP.req))
-	}
-	finalIndex, err := strconv.Atoi(indexes[1])
-	if err != nil {
-		return nil, err
-	}
-	if finalIndex > len(fP.req) {
-		return "", fmt.Errorf("FinalIndex : %+v is greater than : %+v", finalIndex, len(fP.req))
-	}
-	data = fP.req[startIndex:finalIndex]
-	fP.cache.Set(fldPath, data, false, false)
-	return
-}
-
-// FieldAsString is part of engine.DataProvider interface
-func (fP *fwvProvider) FieldAsString(fldPath []string) (data string, err error) {
-	var valIface interface{}
-	valIface, err = fP.FieldAsInterface(fldPath)
-	if err != nil {
-		return
-	}
-	return utils.IfaceAsString(valIface), nil
-}
-
-// AsNavigableMap is part of engine.DataProvider interface
-func (fP *fwvProvider) AsNavigableMap([]*config.FCTemplate) (
-	nm *config.NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// RemoteHost is part of engine.DataProvider interface
-func (fP *fwvProvider) RemoteHost() net.Addr {
-	return utils.LocalAddr()
 }

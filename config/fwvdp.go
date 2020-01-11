@@ -1,0 +1,109 @@
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
+
+package config
+
+import (
+	"fmt"
+	"net"
+	"strconv"
+	"strings"
+
+	"github.com/cgrates/cgrates/utils"
+)
+
+// NewfwvProvider constructs a DataProvider
+func NewFWVProvider(record, pathPrfx string) (dP DataProvider) {
+	dP = &FWVProvider{req: record, cache: NewNavigableMap(nil), pathPrfx: pathPrfx}
+	return
+}
+
+// fwvProvider implements engine.DataProvider so we can pass it to filters
+type FWVProvider struct {
+	req      string
+	cache    *NavigableMap
+	pathPrfx string // if this comes in path it will be ignored
+	// pathPrfx should be reviewed once the cdrc is removed
+}
+
+// String is part of engine.DataProvider interface
+// when called, it will display the already parsed values out of cache
+func (fP *FWVProvider) String() string {
+	return utils.ToJSON(fP)
+}
+
+// FieldAsInterface is part of engine.DataProvider interface
+func (fP *FWVProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
+	if len(fldPath) == 0 {
+		return
+	}
+	fwvIdx := fldPath[0]
+	if len(fldPath) == 2 {
+		fwvIdx = fldPath[1]
+	}
+	if fP.pathPrfx != utils.EmptyString && (fldPath[0] != fP.pathPrfx || len(fldPath) < 2) {
+		return "", utils.ErrPrefixNotFound(strings.Join(fldPath, utils.NestingSep))
+	}
+	if data, err = fP.cache.FieldAsInterface(fldPath); err == nil ||
+		err != utils.ErrNotFound { // item found in cache
+		return
+	}
+	err = nil // cancel previous err
+	indexes := strings.Split(fwvIdx, "-")
+	if len(indexes) != 2 {
+		return "", fmt.Errorf("Invalid format for index : %+v", fldPath[1])
+	}
+	startIndex, err := strconv.Atoi(indexes[0])
+	if err != nil {
+		return nil, err
+	}
+	if startIndex > len(fP.req) {
+		return "", fmt.Errorf("StartIndex : %+v is greater than : %+v", startIndex, len(fP.req))
+	}
+	finalIndex, err := strconv.Atoi(indexes[1])
+	if err != nil {
+		return nil, err
+	}
+	if finalIndex > len(fP.req) {
+		return "", fmt.Errorf("FinalIndex : %+v is greater than : %+v", finalIndex, len(fP.req))
+	}
+	data = fP.req[startIndex:finalIndex]
+	fP.cache.Set(fldPath, data, false, false)
+	return
+}
+
+// FieldAsString is part of engine.DataProvider interface
+func (fP *FWVProvider) FieldAsString(fldPath []string) (data string, err error) {
+	var valIface interface{}
+	valIface, err = fP.FieldAsInterface(fldPath)
+	if err != nil {
+		return
+	}
+	return utils.IfaceAsString(valIface), nil
+}
+
+// AsNavigableMap is part of engine.DataProvider interface
+func (fP *FWVProvider) AsNavigableMap([]*FCTemplate) (
+	nm *NavigableMap, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+// RemoteHost is part of engine.DataProvider interface
+func (fP *FWVProvider) RemoteHost() net.Addr {
+	return utils.LocalAddr()
+}
