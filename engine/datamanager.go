@@ -1773,6 +1773,7 @@ func (dm *DataManager) RemoveSupplierProfile(tenant, id, transactionID string, w
 	return
 }
 
+// GetAttributeProfile returns the AttributeProfile with the given id
 func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (attrPrfl *AttributeProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
@@ -1786,7 +1787,7 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWr
 	}
 	if strings.HasPrefix(id, utils.Meta) {
 		attrPrfl, err = NewAttributeFromInline(tenant, id)
-	} else if dm == nil { // in case we want the filter from dataDB but the connection to dataDB a optional (e.g. SessionS)
+	} else if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
 	} else {

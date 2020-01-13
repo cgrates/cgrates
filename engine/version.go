@@ -56,6 +56,7 @@ func init() {
 // Versions will keep trac of various item versions
 type Versions map[string]int64 // map[item]versionNr
 
+// CheckVersions returns error if the db needs migration
 func CheckVersions(storage Storage) error {
 	// get current db version
 	storType := storage.GetStorageType()
@@ -104,14 +105,17 @@ func setDBVersions(storage Storage, overwrite bool) (err error) {
 	return
 }
 
+// SetDBVersions sets the version without overwriting them
 func SetDBVersions(storage Storage) (err error) {
 	return setDBVersions(storage, false)
 }
 
+// OverwriteDBVersions sets the version overwriting them
 func OverwriteDBVersions(storage Storage) (err error) {
 	return setDBVersions(storage, true)
 }
 
+// Compare returns the migration message if the versions are not the latest
 func (vers Versions) Compare(curent Versions, storType string, isDataDB bool) string {
 	var message map[string]string
 	switch storType {
@@ -136,6 +140,7 @@ func (vers Versions) Compare(curent Versions, storType string, isDataDB bool) st
 	return ""
 }
 
+// CurrentDataDBVersions returns the needed DataDB versions
 func CurrentDataDBVersions() Versions {
 	return Versions{
 		utils.StatS:               3,
@@ -161,6 +166,7 @@ func CurrentDataDBVersions() Versions {
 	}
 }
 
+// CurrentStorDBVersions returns the needed StorDB versions
 func CurrentStorDBVersions() Versions {
 	return Versions{
 		utils.CostDetails:        2,
@@ -190,6 +196,7 @@ func CurrentStorDBVersions() Versions {
 	}
 }
 
+// CurrentAllDBVersions returns the both DataDB and StorDB versions
 func CurrentAllDBVersions() Versions {
 	dataDbVersions := CurrentDataDBVersions()
 	storDbVersions := CurrentStorDBVersions()
@@ -203,6 +210,7 @@ func CurrentAllDBVersions() Versions {
 	return allVersions
 }
 
+// CurrentDBVersions returns versions based on dbType
 func CurrentDBVersions(storType string, isDataDB bool) Versions {
 	switch storType {
 	case utils.MONGO:

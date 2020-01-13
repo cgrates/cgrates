@@ -27,6 +27,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// NewAttributeService returns a new AttributeService
 func NewAttributeService(dm *DataManager, filterS *FilterS,
 	cgrcfg *config.CGRConfig) (*AttributeService, error) {
 	return &AttributeService{
@@ -36,6 +37,7 @@ func NewAttributeService(dm *DataManager, filterS *FilterS,
 	}, nil
 }
 
+// AttributeService the service for the API
 type AttributeService struct {
 	dm      *DataManager
 	filterS *FilterS
@@ -122,12 +124,7 @@ func (alS *AttributeService) attributeProfileForEvent(args *AttrArgsProcessEvent
 	return
 }
 
-// AttrSFldNameValue is a helper struct for AttrSDigest deserialization
-type AttrSFieldNameValue struct {
-	FieldName  string
-	FieldValue string
-}
-
+// AttrSProcessEventReply reply used for proccess event
 type AttrSProcessEventReply struct {
 	MatchedProfiles []string
 	AlteredFields   []string
@@ -151,6 +148,7 @@ func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
 	return
 }
 
+// AttrArgsProcessEvent arguments used for proccess event
 type AttrArgsProcessEvent struct {
 	AttributeIDs []string
 	Context      *string // attach the event to a context
@@ -272,6 +270,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 	return
 }
 
+// V1GetAttributeForEvent returns the AttributeProfile that matches the event
 func (alS *AttributeService) V1GetAttributeForEvent(args *AttrArgsProcessEvent,
 	attrPrfl *AttributeProfile) (err error) {
 	if args.CGREvent == nil {
@@ -288,6 +287,7 @@ func (alS *AttributeService) V1GetAttributeForEvent(args *AttrArgsProcessEvent,
 	return
 }
 
+// V1ProcessEvent proccess the event and returns the result
 func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 	reply *AttrSProcessEventReply) (err error) {
 	if args.CGREvent == nil {
