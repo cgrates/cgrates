@@ -21,6 +21,7 @@ package ers
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -57,6 +58,7 @@ type FWVFileER struct {
 	cgrCfg        *config.CGRConfig
 	cfgIdx        int // index of config instance within ERsCfg.Readers
 	fltrS         *engine.FilterS
+	headerMap     *config.NavigableMap
 	rdrDir        string
 	rdrEvents     chan *erEvent // channel to dispatch the events created to
 	rdrError      chan error
@@ -134,30 +136,48 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 		cntFld := rdr.Config().ContentFields
 		if rdr.offset == 0 { // First time, set the necessary offsets
 			if err := rdr.setLineLen(file); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<Cdrc> Row 0, error: cannot set lineLen: %s", err.Error()))
+				utils.Logger.Err(fmt.Sprintf("<%s> Row 0, error: cannot set lineLen: %s", utils.ERs, err.Error()))
+				rdr.offset += rdr.lineLen // increase the offset when exit
 				break
 			}
 			if len(rdr.Config().TrailerFields) != 0 {
 				if fi, err := file.Stat(); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<Cdrc> Row 0, error: cannot get file stats: %s", err.Error()))
+					utils.Logger.Err(fmt.Sprintf("<%s> Row 0, error: cannot get file stats: %s", utils.ERs, err.Error()))
+					rdr.offset += rdr.lineLen // increase the offset when exit
 					return err
 				} else {
 					rdr.trailerOffset = fi.Size() - rdr.lineLen
 				}
 			}
 			if len(rdr.Config().HeaderFields) != 0 {
-				buf := make([]byte, rdr.lineLen)
-				if nRead, err := file.Read(buf); err != nil {
-					return err
-				} else if nRead != len(buf) {
-					return fmt.Errorf("In header, line len: %d, have read: %d", rdr.lineLen, nRead)
+				if err = rdr.processHeader(file, rowNr, evsPosted, absPath); err != nil {
+					utils.Logger.Err(fmt.Sprintf("<%s> Row 0, error reading header: %s", utils.ERs, err.Error()))
+					return
 				}
-				cntFld = rdr.Config().HeaderFields
+				continue
 			}
 		}
+		if rdr.trailerOffset != 0 && rdr.offset >= rdr.trailerOffset {
+			if err := rdr.processTrailer(file); err != nil && err != io.EOF {
+				utils.Logger.Err(fmt.Sprintf("<%s> Read trailer error: %s ", utils.ERs, err.Error()))
+			}
+			rdr.offset += rdr.lineLen // increase the offset when exit
+			break
+		}
+		buf := make([]byte, rdr.lineLen)
+		nRead, err := file.Read(buf)
+		if err != nil {
+			rdr.offset += rdr.lineLen // increase the offset when exit
+			return err
+		} else if nRead != len(buf) {
+			utils.Logger.Err(fmt.Sprintf("<%s> Could not read complete line, have instead: %s", utils.ERs, string(buf)))
+			rdr.offset += rdr.lineLen // increase the offset when exit
+			break
+		}
 		rowNr++ // increment the rowNr after checking if it's not the end of file
+		record := string(buf)
 		agReq := agents.NewAgentRequest(
-			config.NewFWVProvider("a", utils.EmptyString), reqVars,
+			config.NewFWVProvider(record, utils.EmptyString), reqVars,
 			nil, nil, rdr.Config().Tenant,
 			rdr.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(rdr.Config().Timezone,
@@ -172,8 +192,14 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to error: <%s>",
 					utils.ERs, absPath, rowNr, err.Error()))
+			rdr.offset += rdr.lineLen // increase the offset when exit
 			continue
 		}
+		//backwards compatible with CDRC
+		if rdr.headerMap != nil {
+			navMp.Merge(rdr.headerMap)
+		}
+		rdr.offset += rdr.lineLen // increase the offset
 		rdr.rdrEvents <- &erEvent{cgrEvent: navMp.AsCGREvent(
 			agReq.Tenant, utils.NestingSep),
 			rdrCfg: rdr.Config()}
@@ -216,4 +242,44 @@ func (rdr *FWVFileER) processTrailer(file *os.File) error {
 		return fmt.Errorf("In trailer, line len: %d, have read: %d", rdr.lineLen, nRead)
 	}
 	return nil
+}
+
+func (rdr *FWVFileER) processHeader(file *os.File, rowNr, evsPosted int, absPath string) error {
+	buf := make([]byte, rdr.lineLen)
+	if nRead, err := file.Read(buf); err != nil {
+		return err
+	} else if nRead != len(buf) {
+		return fmt.Errorf("In header, line len: %d, have read: %d", rdr.lineLen, nRead)
+	}
+	return rdr.createHeaderMap(string(buf), rowNr, evsPosted, absPath)
+}
+
+func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPath string) (err error) {
+	reqVars := make(map[string]interface{})
+	agReq := agents.NewAgentRequest(
+		config.NewFWVProvider(record, utils.EmptyString), reqVars,
+		nil, nil, rdr.Config().Tenant,
+		rdr.cgrCfg.GeneralCfg().DefaultTenant,
+		utils.FirstNonEmpty(rdr.Config().Timezone,
+			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
+		rdr.fltrS) // create an AgentRequest
+	if pass, err := rdr.fltrS.Pass(agReq.Tenant, rdr.Config().Filters,
+		agReq); err != nil || !pass {
+		return nil
+	}
+	navMp, err := agReq.AsNavigableMap(rdr.Config().HeaderFields)
+	if err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to error: <%s>",
+				utils.ERs, absPath, rowNr, err.Error()))
+		rdr.offset += rdr.lineLen // increase the offset when exit
+		return err
+	}
+	rdr.headerMap = navMp
+	rdr.offset += rdr.lineLen // increase the offset
+	rdr.rdrEvents <- &erEvent{cgrEvent: navMp.AsCGREvent(
+		agReq.Tenant, utils.NestingSep),
+		rdrCfg: rdr.Config()}
+	evsPosted++
+	return
 }

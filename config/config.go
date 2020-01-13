@@ -302,7 +302,7 @@ var posibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
 	utils.MetaDispatchers, utils.MetaDispatcherHosts})
 
 var possibleReaderTypes = utils.NewStringSet([]string{utils.MetaFileCSV,
-	utils.MetaKafkajsonMap, utils.MetaFileXML, utils.MetaSQL})
+	utils.MetaKafkajsonMap, utils.MetaFileXML, utils.MetaSQL, utils.MetaFileFWV})
 
 func (cfg *CGRConfig) LazySanityCheck() {
 	for _, cdrePrfl := range cfg.cdrsCfg.OnlineCDRExports {
