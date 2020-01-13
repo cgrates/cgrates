@@ -39,7 +39,7 @@ type DataDbCfg struct {
 	QueryTimeout       time.Duration
 	RmtConns           []string // Remote DataDB  connIDs
 	RplConns           []string // Replication connIDs
-	Items              map[string]*ItemRmtRplOpt
+	Items              map[string]*ItemOpt
 }
 
 //loadFromJsonCfg loads Database config from JsonCfg
@@ -100,9 +100,9 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		}
 	}
 	if jsnDbCfg.Items != nil {
-		dbcfg.Items = make(map[string]*ItemRmtRplOpt)
+		dbcfg.Items = make(map[string]*ItemOpt)
 		for kJsn, vJsn := range *jsnDbCfg.Items {
-			val := new(ItemRmtRplOpt)
+			val := new(ItemOpt)
 			if err := val.loadFromJsonCfg(vJsn); err != nil {
 				return err
 			}
@@ -123,15 +123,17 @@ func (dbcfg *DataDbCfg) Clone() *DataDbCfg {
 		DataDbPass:         dbcfg.DataDbPass,
 		DataDbSentinelName: dbcfg.DataDbSentinelName,
 		QueryTimeout:       dbcfg.QueryTimeout,
+		Items:              dbcfg.Items,
 	}
 }
 
-type ItemRmtRplOpt struct {
+type ItemOpt struct {
 	Remote    bool
 	Replicate bool
+	TTL       time.Duration
 }
 
-func (itm *ItemRmtRplOpt) loadFromJsonCfg(jsonItm *ItemRmtRplOptJson) (err error) {
+func (itm *ItemOpt) loadFromJsonCfg(jsonItm *ItemOptJson) (err error) {
 	if jsonItm == nil {
 		return
 	}
@@ -140,6 +142,11 @@ func (itm *ItemRmtRplOpt) loadFromJsonCfg(jsonItm *ItemRmtRplOptJson) (err error
 	}
 	if jsonItm.Replicate != nil {
 		itm.Replicate = *jsonItm.Replicate
+	}
+	if jsonItm.Ttl != nil {
+		if itm.TTL, err = utils.ParseDurationWithNanosecs(*jsonItm.Ttl); err != nil {
+			return err
+		}
 	}
 	return
 }
