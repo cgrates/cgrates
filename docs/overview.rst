@@ -92,7 +92,7 @@ CGRateS is capable of four charging modes
 - Safe account operations via in-/inter-process locks and on-disk storage
 - Shared balances between multiple accounts (family/company bundles) with per-consumer configurable debit strategy and rates selected.
 - Concurrent sessions per account doing balance reservation in chunks of debit interval and support for refunds and debit sleep when needed
-- Scheduled account operations via predefined actions (eg: **\*topup**, **\*debit**) or notifications (**\*http_call_url**, **\*mail**)
+- Scheduled account operations via predefined actions (eg: **\*topup**, **\*debit**) or notifications (**\*http_post**, **\*mail**)
 - Fraud detection with automatic mitigation via action triggers/thresholds monitoring both balance status as well as combined usage
 
 2.1.3. LCR

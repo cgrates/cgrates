@@ -44,7 +44,7 @@ func TestGeneralCfgloadFromJsonCfg(t *testing.T) {
 	"rounding_decimals": 5,									// system level precision for floats
 	"dbdata_encoding": "msgpack",							// encoding used to store object data in strings: <msgpack|json>
 	"tpexport_dir": "/var/spool/cgrates/tpe",				// path towards export folder for offline Tariff Plans
-	"poster_attempts": 3,									// number of attempts before considering post request failed (eg: *call_url, CDR replication)
+	"poster_attempts": 3,									// number of attempts before considering post request failed (eg: *http_post, CDR replication)
 	"failed_posts_dir": "/var/spool/cgrates/failed_posts",	// directory path where we store failed requests
 	"default_request_type": "*rated",						// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
 	"default_category": "call",								// default category to consider when missing from requests

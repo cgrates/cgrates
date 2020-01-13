@@ -1265,8 +1265,8 @@ func TestFFNNewFallbackFileNameFronString(t *testing.T) {
 	} else if !reflect.DeepEqual(eFFN, ffn) {
 		t.Errorf("Expecting: %+v, received: %+v", eFFN, ffn)
 	}
-	fileName = "act>*call_url|*http_json|http%3A%2F%2Flocalhost%3A2080%2Flog_warning|f52cf23e-da2f-4675-b36b-e8fcc3869270.json"
-	eFFN = &FallbackFileName{Module: "act>*call_url",
+	fileName = "act>*http_post|*http_json|http%3A%2F%2Flocalhost%3A2080%2Flog_warning|f52cf23e-da2f-4675-b36b-e8fcc3869270.json"
+	eFFN = &FallbackFileName{Module: "act>*http_post",
 		Transport:  MetaHTTPjson,
 		Address:    "http://localhost:2080/log_warning",
 		RequestID:  "f52cf23e-da2f-4675-b36b-e8fcc3869270",
@@ -1280,20 +1280,20 @@ func TestFFNNewFallbackFileNameFronString(t *testing.T) {
 	if _, err := NewFallbackFileNameFronString(fileName); err == nil || err.Error() != "unsupported module: ***" {
 		t.Error(err)
 	}
-	fileName = "act>*call_url|***|"
-	if _, err := NewFallbackFileNameFronString(fileName); err == nil || err.Error() != "unsupported transport in fallback file path: act>*call_url|***|" {
+	fileName = "act>*http_post|***|"
+	if _, err := NewFallbackFileNameFronString(fileName); err == nil || err.Error() != "unsupported transport in fallback file path: act>*http_post|***|" {
 		t.Error(err)
 	}
-	fileName = "act>*call_url|*http_json|***"
-	if _, err := NewFallbackFileNameFronString(fileName); err == nil || err.Error() != "cannot find request ID in fallback file path: act>*call_url|*http_json|***" {
+	fileName = "act>*http_post|*http_json|***"
+	if _, err := NewFallbackFileNameFronString(fileName); err == nil || err.Error() != "cannot find request ID in fallback file path: act>*http_post|*http_json|***" {
 		t.Error(err)
 	}
-	fileName = "act>*call_url|*http_json|%|.json"
+	fileName = "act>*http_post|*http_json|%|.json"
 	if _, err := NewFallbackFileNameFronString(fileName); err == nil || err.Error() != `invalid URL escape "%"` {
 		t.Error(err)
 	}
-	fileName = "act>*call_url|*http_json|http%3A%2F%2Flocalhost%3A2080%2Flog_warning|.test"
-	if _, err := NewFallbackFileNameFronString(fileName); err == nil || err.Error() != "unsupported suffix in fallback file path: act>*call_url|*http_json|http%3A%2F%2Flocalhost%3A2080%2Flog_warning|.test" {
+	fileName = "act>*http_post|*http_json|http%3A%2F%2Flocalhost%3A2080%2Flog_warning|.test"
+	if _, err := NewFallbackFileNameFronString(fileName); err == nil || err.Error() != "unsupported suffix in fallback file path: act>*http_post|*http_json|http%3A%2F%2Flocalhost%3A2080%2Flog_warning|.test" {
 		t.Error(err)
 	}
 
