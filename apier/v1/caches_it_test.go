@@ -346,7 +346,7 @@ func testCacheSClear(t *testing.T) {
 func testCacheSPrecacheStatus(t *testing.T) {
 	var reply map[string]string
 	expected := make(map[string]string)
-	for k := range utils.CachePartitions {
+	for k := range utils.CachePartitions.Data() {
 		expected[k] = utils.MetaReady
 	}
 	if err := chcRPC.Call(utils.CacheSv1PrecacheStatus, &utils.AttrCacheIDsWithArgDispatcher{}, &reply); err != nil {

@@ -58,7 +58,7 @@ func (dbcfg *DataDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		if port == "-1" {
 			port = utils.MetaDynamic
 		}
-		dbcfg.DataDbPort = NewDbDefaults().DBPort(dbcfg.DataDbType, port)
+		dbcfg.DataDbPort = dbDefaultsCfg.dbPort(dbcfg.DataDbType, port)
 	}
 	if jsnDbCfg.Db_name != nil {
 		dbcfg.DataDbName = *jsnDbCfg.Db_name

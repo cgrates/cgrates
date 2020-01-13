@@ -1486,14 +1486,17 @@ func (dm *DataManager) RemoveRatingPlan(key string, transactionID string) (err e
 	return
 }
 
+// GetRatingProfile returns the RatingProfile for the key
 func (dm *DataManager) GetRatingProfile(key string, skipCache bool,
 	transactionID string) (rpf *RatingProfile, err error) {
 	if !skipCache {
-		if x, ok := Cache.Get(utils.CacheRatingProfiles, key); ok {
-			if x != nil {
-				return x.(*RatingProfile), nil
+		for _, cacheRP := range []string{utils.CacheRatingProfilesTmp, utils.CacheRatingProfiles} {
+			if x, ok := Cache.Get(cacheRP, key); ok {
+				if x != nil {
+					return x.(*RatingProfile), nil
+				}
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
 		}
 	}
 	rpf, err = dm.DataDB().GetRatingProfileDrv(key)
@@ -1781,7 +1784,14 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWr
 			return x.(*AttributeProfile), nil
 		}
 	}
-	attrPrfl, err = dm.dataDB.GetAttributeProfileDrv(tenant, id)
+	if strings.HasPrefix(id, utils.Meta) {
+		attrPrfl, err = NewAttributeFromInline(tenant, id)
+	} else if dm == nil { // in case we want the filter from dataDB but the connection to dataDB a optional (e.g. SessionS)
+		err = utils.ErrNoDatabaseConn
+		return
+	} else {
+		attrPrfl, err = dm.dataDB.GetAttributeProfileDrv(tenant, id)
+	}
 	if err != nil {
 		if err == utils.ErrNotFound &&
 			config.CgrConfig().DataDbCfg().Items[utils.MetaAttributeProfiles].Remote {

@@ -147,10 +147,10 @@ func (spS *SupplierService) Shutdown() error {
 
 // matchingSupplierProfilesForEvent returns ordered list of matching resources which are active by the time of the call
 func (spS *SupplierService) matchingSupplierProfilesForEvent(ev *utils.CGREvent, singleResult bool) (matchingSLP []*SupplierProfile, err error) {
-	sPrflIDs, err := MatchingItemIDsForEvent(ev.Event, 
-		spS.cgrcfg.SupplierSCfg().StringIndexedFields, 
+	sPrflIDs, err := MatchingItemIDsForEvent(ev.Event,
+		spS.cgrcfg.SupplierSCfg().StringIndexedFields,
 		spS.cgrcfg.SupplierSCfg().PrefixIndexedFields,
-		spS.dm, utils.CacheSupplierFilterIndexes, ev.Tenant, 
+		spS.dm, utils.CacheSupplierFilterIndexes, ev.Tenant,
 		spS.cgrcfg.SupplierSCfg().IndexedSelects,
 		spS.cgrcfg.SupplierSCfg().NestedFields,
 	)
@@ -264,7 +264,7 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 			},
 		}
 		// force cache set so it can be picked by calldescriptor for cost calculation
-		Cache.Set(utils.CacheRatingProfiles, rPrfl.Id, rPrfl, nil,
+		Cache.Set(utils.CacheRatingProfilesTmp, rPrfl.Id, rPrfl, nil,
 			true, utils.NonTransactional)
 		cd := &CallDescriptor{
 			Category:      utils.MetaSuppliers,
@@ -277,7 +277,7 @@ func (spS *SupplierService) costForEvent(ev *utils.CGREvent,
 			DurationIndex: usage,
 		}
 		cc, err := cd.GetCost()
-		Cache.Remove(utils.CacheRatingProfiles, rPrfl.Id,
+		Cache.Remove(utils.CacheRatingProfilesTmp, rPrfl.Id,
 			true, utils.NonTransactional) // Remove here so we don't overload memory
 		if err != nil {
 			if err != utils.ErrNotFound {

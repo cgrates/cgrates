@@ -59,45 +59,17 @@ var (
 		MetaFileFWV:       FWVSuffix,
 	}
 	// CachePartitions enables creation of cache partitions
-	CachePartitions = StringMap{
-		CacheDestinations:            true,
-		CacheReverseDestinations:     true,
-		CacheRatingPlans:             true,
-		CacheRatingProfiles:          true,
-		CacheActions:                 true,
-		CacheActionPlans:             true,
-		CacheAccountActionPlans:      true,
-		CacheActionTriggers:          true,
-		CacheSharedGroups:            true,
-		CacheTimings:                 true,
-		CacheResourceProfiles:        true,
-		CacheResources:               true,
-		CacheEventResources:          true,
-		CacheStatQueueProfiles:       true,
-		CacheStatQueues:              true,
-		CacheThresholdProfiles:       true,
-		CacheThresholds:              true,
-		CacheFilters:                 true,
-		CacheSupplierProfiles:        true,
-		CacheAttributeProfiles:       true,
-		CacheChargerProfiles:         true,
-		CacheDispatcherProfiles:      true,
-		CacheDispatcherHosts:         true,
-		CacheResourceFilterIndexes:   true,
-		CacheStatFilterIndexes:       true,
-		CacheThresholdFilterIndexes:  true,
-		CacheSupplierFilterIndexes:   true,
-		CacheAttributeFilterIndexes:  true,
-		CacheChargerFilterIndexes:    true,
-		CacheDispatcherFilterIndexes: true,
-		CacheDispatcherRoutes:        true,
-		CacheDiameterMessages:        true,
-		CacheRPCResponses:            true,
-		CacheClosedSessions:          true,
-		CacheCDRIDs:                  true,
-		CacheLoadIDs:                 true,
-		CacheRPCConnections:          true,
-	}
+	CachePartitions = NewStringSet([]string{CacheDestinations, CacheReverseDestinations,
+		CacheRatingPlans, CacheRatingProfiles, CacheActions, CacheActionPlans,
+		CacheAccountActionPlans, CacheActionTriggers, CacheSharedGroups, CacheTimings,
+		CacheResourceProfiles, CacheResources, CacheEventResources, CacheStatQueueProfiles,
+		CacheStatQueues, CacheThresholdProfiles, CacheThresholds, CacheFilters,
+		CacheSupplierProfiles, CacheAttributeProfiles, CacheChargerProfiles,
+		CacheDispatcherProfiles, CacheDispatcherHosts, CacheResourceFilterIndexes,
+		CacheStatFilterIndexes, CacheThresholdFilterIndexes, CacheSupplierFilterIndexes,
+		CacheAttributeFilterIndexes, CacheChargerFilterIndexes, CacheDispatcherFilterIndexes,
+		CacheDispatcherRoutes, CacheDiameterMessages, CacheRPCResponses, CacheClosedSessions,
+		CacheCDRIDs, CacheLoadIDs, CacheRPCConnections, CacheRatingProfilesTmp})
 	CacheInstanceToPrefix = map[string]string{
 		CacheDestinations:            DESTINATION_PREFIX,
 		CacheReverseDestinations:     REVERSE_DESTINATION_PREFIX,
@@ -1498,6 +1470,7 @@ const (
 	CacheAccounts                = "*accounts"
 	CacheRPCConnections          = "*rpc_connections"
 	CacheCDRIDs                  = "*cdr_ids"
+	CacheRatingProfilesTmp       = "*tmp_rating_profiles"
 )
 
 // Prefix for indexing

@@ -15,7 +15,7 @@ Full contents:
    introduction
    architecture
    installation
-   configuration   
+   configuration
    administration
    advanced
    tutorials

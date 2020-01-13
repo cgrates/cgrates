@@ -130,8 +130,9 @@ func (s *Session) Clone() (cln *Session) {
 	return
 }
 
-// AsExternalSessions returns the session as a list of ExternalSession using all SRuns
+// AsExternalSessions returns the session as a list of ExternalSession using all SRuns (thread safe)
 func (s *Session) AsExternalSessions(tmz, nodeID string) (aSs []*ExternalSession) {
+	s.RLock()
 	aSs = make([]*ExternalSession, len(s.SRuns))
 	for i, sr := range s.SRuns {
 		aSs[i] = &ExternalSession{
@@ -165,6 +166,7 @@ func (s *Session) AsExternalSessions(tmz, nodeID string) (aSs []*ExternalSession
 			aSs[i].MaxCostSoFar = sr.CD.MaxCostSoFar
 		}
 	}
+	s.RUnlock()
 	return
 }
 

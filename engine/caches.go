@@ -40,6 +40,7 @@ func InitCache(cfg config.CacheCfg) {
 	if cfg == nil {
 		cfg = config.CgrConfig().CacheCfg()
 	}
+	cfg.AddTmpCaches()
 	Cache = ltcache.NewTransCache(cfg.AsTransCacheConfig())
 }
 
@@ -156,9 +157,7 @@ func (chS *CacheS) V1GetCacheStats(args *utils.AttrCacheIDsWithArgDispatcher,
 
 func (chS *CacheS) V1PrecacheStatus(args *utils.AttrCacheIDsWithArgDispatcher, rply *map[string]string) (err error) {
 	if len(args.CacheIDs) == 0 {
-		for cacheID := range utils.CachePartitions {
-			args.CacheIDs = append(args.CacheIDs, cacheID)
-		}
+		args.CacheIDs = utils.CachePartitions.AsSlice()
 	}
 	pCacheStatus := make(map[string]string)
 	for _, cacheID := range args.CacheIDs {
@@ -378,7 +377,7 @@ func flushCache(chID string, IDs *[]string) {
 	}
 }
 
-// FlushCache wipes out cache for a prefix or completely
+// V1FlushCache wipes out cache for a prefix or completely
 func (chS *CacheS) V1FlushCache(args utils.AttrReloadCacheWithArgDispatcher, reply *string) (err error) {
 	if args.FlushAll {
 		Cache.Clear(nil)

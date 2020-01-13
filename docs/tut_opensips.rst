@@ -8,7 +8,6 @@ In these tutorials we exemplify a few cases of integration between OpenSIPS_ and
    :maxdepth: 2
 
    tut_opensips_installs
-   tut_cgrates_installs
    tut_jitsi_installs
    tut_opensips_event
    tut_cgrates_usage

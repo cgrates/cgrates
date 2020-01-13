@@ -22,4 +22,3 @@ cgrates.com,ATTR_TNT_ALIAS,*any,,,,RequestType,*constant,*prepaid,,
 cgrates.com,ATTR_TNT_ALIAS,*any,,,,*tenant,*constant,cgrates.org,,
 cgrates.com,ATTR_TNT_1001,*any,*string:~*req.Account:1001,,,*tenant,*constant,cgrates.org,,
 cgrates.com,ATTR_TNT_DISC,*any,*string:~*req.Account:testDiamInitWithSessionDisconnect,,,*tenant,*constant,cgrates.org,,
-cgrates.org,ATTR_RAW_REQ,*any,*string:~*req.RunID:*raw,,,RequestType,*constant,*none,false,10

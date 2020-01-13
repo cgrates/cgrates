@@ -455,25 +455,25 @@ func getPathFromValue(in reflect.Value, prefix string) (out []string) {
 	case reflect.Ptr:
 		return getPathFromValue(in.Elem(), prefix)
 	case reflect.Array, reflect.Slice:
-		prefix = strings.TrimSuffix(prefix, ".")
+		prefix = strings.TrimSuffix(prefix, utils.NestingSep)
 		for i := 0; i < in.Len(); i++ {
 			pref := fmt.Sprintf("%s[%v]", prefix, i)
 			out = append(out, pref)
-			out = append(out, getPathFromValue(in.Index(i), pref+".")...)
+			out = append(out, getPathFromValue(in.Index(i), pref+utils.NestingSep)...)
 		}
 	case reflect.Map:
 		iter := reflect.ValueOf(in).MapRange()
 		for iter.Next() {
 			pref := prefix + iter.Key().String()
 			out = append(out, pref)
-			out = append(out, getPathFromValue(iter.Value(), pref+".")...)
+			out = append(out, getPathFromValue(iter.Value(), pref+utils.NestingSep)...)
 		}
 	case reflect.Struct:
 		inType := in.Type()
 		for i := 0; i < in.NumField(); i++ {
 			pref := prefix + inType.Field(i).Name
 			out = append(out, pref)
-			out = append(out, getPathFromValue(in.Field(i), pref+".")...)
+			out = append(out, getPathFromValue(in.Field(i), pref+utils.NestingSep)...)
 		}
 	case reflect.Invalid, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128, reflect.String, reflect.Chan, reflect.Func, reflect.UnsafePointer, reflect.Interface:
 	default:
@@ -487,24 +487,24 @@ func getPathFromInterface(in interface{}, prefix string) (out []string) {
 		for k, val := range vin {
 			pref := prefix + k
 			out = append(out, pref)
-			out = append(out, getPathFromInterface(val, pref+".")...)
+			out = append(out, getPathFromInterface(val, pref+utils.NestingSep)...)
 		}
 	case []map[string]interface{}:
-		prefix = strings.TrimSuffix(prefix, ".")
+		prefix = strings.TrimSuffix(prefix, utils.NestingSep)
 		for i, val := range vin {
 			pref := fmt.Sprintf("%s[%v]", prefix, i)
 			out = append(out, pref)
-			out = append(out, getPathFromInterface(val, pref+".")...)
+			out = append(out, getPathFromInterface(val, pref+utils.NestingSep)...)
 		}
 	case []interface{}:
-		prefix = strings.TrimSuffix(prefix, ".")
+		prefix = strings.TrimSuffix(prefix, utils.NestingSep)
 		for i, val := range vin {
 			pref := fmt.Sprintf("%s[%v]", prefix, i)
 			out = append(out, pref)
-			out = append(out, getPathFromInterface(val, pref+".")...)
+			out = append(out, getPathFromInterface(val, pref+utils.NestingSep)...)
 		}
 	case []string:
-		prefix = strings.TrimSuffix(prefix, ".")
+		prefix = strings.TrimSuffix(prefix, utils.NestingSep)
 		for i := range vin {
 			pref := fmt.Sprintf("%s[%v]", prefix, i)
 			out = append(out, pref)
@@ -520,7 +520,7 @@ func getPathFromInterface(in interface{}, prefix string) (out []string) {
 func (nM *NavigableMap) GetKeys() (keys []string) {
 	for k, val := range nM.data {
 		keys = append(keys, k)
-		keys = append(keys, getPathFromInterface(val, k+".")...)
+		keys = append(keys, getPathFromInterface(val, k+utils.NestingSep)...)
 	}
 	return
 }
