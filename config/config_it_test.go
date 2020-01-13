@@ -425,6 +425,7 @@ func TestCGRConfigReloadERs(t *testing.T) {
 				HeaderFields:   []*FCTemplate{},
 				ContentFields:  content,
 				TrailerFields:  []*FCTemplate{},
+				XmlRootPath:    utils.HierarchyPath{utils.EmptyString},
 			},
 			&EventReaderCfg{
 				ID:             "file_reader1",
@@ -438,6 +439,7 @@ func TestCGRConfigReloadERs(t *testing.T) {
 				HeaderFields:   []*FCTemplate{},
 				ContentFields:  content,
 				TrailerFields:  []*FCTemplate{},
+				XmlRootPath:    utils.HierarchyPath{utils.EmptyString},
 			},
 		},
 	}
@@ -824,7 +826,7 @@ func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"Timezone":       "",
 				"TrailerFields":  []interface{}{},
 				"Type":           "*file_csv",
-				"XmlRootPath":    "",
+				"XmlRootPath":    []interface{}{utils.EmptyString},
 			},
 			map[string]interface{}{
 				"ConcurrentReqs": 1024,
@@ -842,7 +844,7 @@ func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
 				"Timezone":      "",
 				"TrailerFields": []interface{}{},
 				"Type":          "*file_csv",
-				"XmlRootPath":   "",
+				"XmlRootPath":   []interface{}{utils.EmptyString},
 				"ContentFields": content,
 			},
 		},

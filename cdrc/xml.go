@@ -23,8 +23,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net"
-	"strconv"
 	"strings"
 	"time"
 
@@ -33,17 +31,6 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
-
-// getElementText will process the node to extract the elementName's text out of it (only first one found)
-// returns utils.ErrNotFound if the element is not found in the node
-func elementText(xmlElement *xmlquery.Node, elmntPath string) (string, error) {
-	elmnt := xmlquery.FindOne(xmlElement, elmntPath)
-	if elmnt == nil {
-		return "", utils.ErrNotFound
-	}
-	return elmnt.InnerText(), nil
-
-}
 
 // handlerUsageDiff will calculate the usage as difference between timeEnd and timeStart
 // Expects the 2 arguments in template separated by |
@@ -57,7 +44,7 @@ func handlerSubstractUsage(xmlElement *xmlquery.Node, argsTpl config.RSRParsers,
 		}
 		absolutePath := utils.ParseHierarchyPath(rsrArg.Rules, "")
 		relPath := utils.HierarchyPath(absolutePath[len(cdrPath)+1:]) // Need relative path to the xmlElmnt
-		argStr, _ := elementText(xmlElement, relPath.AsString("/", false))
+		argStr, _ := config.ElementText(xmlElement, relPath.AsString("/", false))
 		argsStr += argStr
 	}
 	handlerArgs := strings.Split(argsStr, utils.HandlerArgSep)
@@ -116,7 +103,7 @@ func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() (cdrs []*engine.CDR, err
 	cdrs = make([]*engine.CDR, 0)
 	cdrXML := xmlProc.cdrXmlElmts[xmlProc.procItems]
 	xmlProc.procItems += 1
-	xmlProvider := newXmlProvider(cdrXML, xmlProc.cdrPath)
+	xmlProvider := config.NewXmlProvider(cdrXML, xmlProc.cdrPath, utils.MetaReq)
 	for _, cdrcCfg := range xmlProc.cdrcCfgs {
 		tenant, err := cdrcCfg.Tenant.ParseDataProvider(xmlProvider, utils.NestingSep)
 		if err != nil {
@@ -148,7 +135,7 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity *xmlquery.Node, cdrcCf
 	var lazyHttpFields []*config.FCTemplate
 	var err error
 	fldVals := make(map[string]string)
-	xmlProvider := newXmlProvider(xmlEntity, xmlProc.cdrPath)
+	xmlProvider := config.NewXmlProvider(xmlEntity, xmlProc.cdrPath, utils.MetaReq)
 	for _, cdrFldCfg := range cdrcCfg.ContentFields {
 		if len(cdrFldCfg.Filters) != 0 {
 			if pass, err := xmlProc.filterS.Pass(tenant,
@@ -206,81 +193,4 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity *xmlquery.Node, cdrcCf
 		}
 	}
 	return cdr, nil
-}
-
-// newXmlProvider constructs a DataProvider
-func newXmlProvider(req *xmlquery.Node, cdrPath utils.HierarchyPath) (dP config.DataProvider) {
-	dP = &xmlProvider{req: req, cdrPath: cdrPath, cache: config.NewNavigableMap(nil)}
-	return
-}
-
-// xmlProvider implements engine.DataProvider so we can pass it to filters
-type xmlProvider struct {
-	req     *xmlquery.Node
-	cdrPath utils.HierarchyPath //used to compute relative path
-	cache   *config.NavigableMap
-}
-
-// String is part of engine.DataProvider interface
-// when called, it will display the already parsed values out of cache
-func (xP *xmlProvider) String() string {
-	return utils.ToJSON(xP)
-}
-
-// FieldAsInterface is part of engine.DataProvider interface
-func (xP *xmlProvider) FieldAsInterface(fldPath []string) (data interface{}, err error) {
-	if len(fldPath) == 0 {
-		return nil, utils.ErrNotFound
-	}
-	if fldPath[0] != utils.MetaReq {
-		return "", utils.ErrPrefixNotFound(strings.Join(fldPath, utils.NestingSep))
-	}
-	if data, err = xP.cache.FieldAsInterface(fldPath); err == nil ||
-		err != utils.ErrNotFound { // item found in cache
-		return
-	}
-	err = nil                                                   // cancel previous err
-	relPath := utils.HierarchyPath(fldPath[len(xP.cdrPath)+1:]) // Need relative path to the xmlElmnt
-	var slctrStr string
-	for i := range relPath {
-		if sIdx := strings.Index(relPath[i], "["); sIdx != -1 {
-			slctrStr = relPath[i][sIdx:]
-			if slctrStr[len(slctrStr)-1:] != "]" {
-				return nil, fmt.Errorf("filter rule <%s> needs to end in ]", slctrStr)
-			}
-			relPath[i] = relPath[i][:sIdx]
-			if slctrStr[1:2] != "@" {
-				i, err := strconv.Atoi(slctrStr[1 : len(slctrStr)-1])
-				if err != nil {
-					return nil, err
-				}
-				slctrStr = "[" + strconv.Itoa(i+1) + "]"
-			}
-			relPath[i] = relPath[i] + slctrStr
-		}
-	}
-	data, err = elementText(xP.req, relPath.AsString("/", false))
-	xP.cache.Set(fldPath, data, false, false)
-	return
-}
-
-// FieldAsString is part of engine.DataProvider interface
-func (xP *xmlProvider) FieldAsString(fldPath []string) (data string, err error) {
-	var valIface interface{}
-	valIface, err = xP.FieldAsInterface(fldPath)
-	if err != nil {
-		return
-	}
-	return utils.IfaceAsString(valIface), nil
-}
-
-// AsNavigableMap is part of engine.DataProvider interface
-func (xP *xmlProvider) AsNavigableMap([]*config.FCTemplate) (
-	nm *config.NavigableMap, err error) {
-	return nil, utils.ErrNotImplemented
-}
-
-// RemoteHost is part of engine.DataProvider interface
-func (xP *xmlProvider) RemoteHost() net.Addr {
-	return utils.LocalAddr()
 }

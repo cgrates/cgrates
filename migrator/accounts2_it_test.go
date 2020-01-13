@@ -241,8 +241,14 @@ func testAcc2ITMigrate(t *testing.T) {
 	if err != nil {
 		t.Error("Error when getting Accounts ", err.Error())
 	}
-	if !reflect.DeepEqual(testAccount, result) {
-		t.Errorf("Expecting: %+v, received: %+v", testAccount, result)
+	if !reflect.DeepEqual(testAccount.ID, result.ID) {
+		t.Errorf("Expecting: %+v, received: %+v", testAccount.ID, result.ID)
+	} else if !reflect.DeepEqual(testAccount.ActionTriggers, result.ActionTriggers) {
+		t.Errorf("Expecting: %+v, received: %+v", testAccount.ActionTriggers, result.ActionTriggers)
+	} else if !reflect.DeepEqual(testAccount.BalanceMap, result.BalanceMap) {
+		t.Errorf("Expecting: %+v, received: %+v", testAccount.BalanceMap, result.BalanceMap)
+	} else if !reflect.DeepEqual(testAccount.UnitCounters, result.UnitCounters) {
+		t.Errorf("Expecting: %+v, received: %+v", testAccount.UnitCounters, result.UnitCounters)
 	}
 	//check if old account was deleted
 	if _, err = acc2Migrator.dmIN.getv1Account(); err != utils.ErrNoMoreData {

@@ -58,10 +58,6 @@ func TestCdrsReload(t *testing.T) {
 	close(chS.GetPrecacheChannel(utils.CacheTimings))
 
 	cfg.ChargerSCfg().Enabled = true
-	internalChan := make(chan rpcclient.ClientConnector, 1)
-	internalChan <- nil
-	cacheSChan := make(chan rpcclient.ClientConnector, 1)
-	cacheSChan <- chS
 	server := utils.NewServer()
 	srvMngr := servmanager.NewServiceManager(cfg, engineShutdown)
 	db := NewDataDBService(cfg, nil)
@@ -78,7 +74,6 @@ func TestCdrsReload(t *testing.T) {
 	cdrS := NewCDRServer(cfg, db, stordb, filterSChan, server,
 		make(chan rpcclient.ClientConnector, 1),
 		nil)
-	engine.NewConnManager(cfg, nil)
 	srvMngr.AddServices(cdrS, ralS, schS, chrS,
 		NewLoaderService(cfg, db, filterSChan, server, engineShutdown,
 			make(chan rpcclient.ClientConnector, 1), nil), db, stordb)

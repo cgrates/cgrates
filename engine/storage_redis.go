@@ -26,6 +26,7 @@ import (
 	"io/ioutil"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/guardian"
@@ -753,21 +754,22 @@ func (rs *RedisStorage) GetAccountDrv(key string) (*Account, error) {
 	return ub, nil
 }
 
-func (rs *RedisStorage) SetAccountDrv(ub *Account) (err error) {
+func (rs *RedisStorage) SetAccountDrv(acc *Account) (err error) {
 	// never override existing account with an empty one
 	// UPDATE: if all balances expired and were cleaned it makes
 	// sense to write empty balance map
-	if len(ub.BalanceMap) == 0 {
-		if ac, err := rs.GetAccountDrv(ub.ID); err == nil && !ac.allBalancesExpired() {
-			ac.ActionTriggers = ub.ActionTriggers
-			ac.UnitCounters = ub.UnitCounters
-			ac.AllowNegative = ub.AllowNegative
-			ac.Disabled = ub.Disabled
-			ub = ac
+	if len(acc.BalanceMap) == 0 {
+		if ac, err := rs.GetAccountDrv(acc.ID); err == nil && !ac.allBalancesExpired() {
+			ac.ActionTriggers = acc.ActionTriggers
+			ac.UnitCounters = acc.UnitCounters
+			ac.AllowNegative = acc.AllowNegative
+			ac.Disabled = acc.Disabled
+			acc = ac
 		}
 	}
-	result, err := rs.ms.Marshal(ub)
-	err = rs.Cmd(redis_SET, utils.ACCOUNT_PREFIX+ub.ID, result).Err
+	acc.UpdateTime = time.Now()
+	result, err := rs.ms.Marshal(acc)
+	err = rs.Cmd(redis_SET, utils.ACCOUNT_PREFIX+acc.ID, result).Err
 	return
 }
 

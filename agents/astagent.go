@@ -83,7 +83,7 @@ func (sma *AsteriskAgent) connectAsterisk() (err error) {
 	sma.astErrChan = make(chan error)
 	sma.astConn, err = aringo.NewARInGO(fmt.Sprintf("ws://%s/ari/events?api_key=%s:%s&app=%s",
 		connCfg.Address, connCfg.User, connCfg.Password, CGRAuthAPP), "http://cgrates.org",
-		connCfg.User, connCfg.Password, fmt.Sprintf("%s %s", utils.CGRateS, utils.VERSION),
+		connCfg.User, connCfg.Password, fmt.Sprintf("%s@%s", utils.CGRateS, utils.VERSION),
 		sma.astEvChan, sma.astErrChan, connCfg.ConnectAttempts, connCfg.Reconnects)
 	if err != nil {
 		return err

@@ -133,7 +133,7 @@ var (
 
 const (
 	CGRateS                      = "CGRateS"
-	VERSION                      = "0.9.1~rc8"
+	VERSION                      = "v0.9.1~rc8"
 	DIAMETER_FIRMWARE_REVISION   = 918
 	REDIS_MAX_CONNS              = 10
 	CGRATES                      = "cgrates"
@@ -379,10 +379,10 @@ const (
 	UnsupportedMigrationTask    = "unsupported migration task"
 	NoStorDBConnection          = "not connected to StorDB"
 	UndefinedVersion            = "undefined version"
-	UnsupportedDB               = "unsupported database"
 	TxtSuffix                   = ".txt"
 	JSNSuffix                   = ".json"
 	FormSuffix                  = ".form"
+	XMLSuffix                   = ".xml"
 	CSVSuffix                   = ".csv"
 	FWVSuffix                   = ".fwv"
 	CONTENT_JSON                = "json"

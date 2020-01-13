@@ -15,19 +15,15 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package cdrc
+
+package config
 
 import (
-	"bytes"
 	"path"
-	"reflect"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/antchfx/xmlquery"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -166,209 +162,26 @@ var cdrXmlBroadsoft = `<?xml version="1.0" encoding="ISO-8859-1"?>
   </cdrData>
 </broadWorksCDR>`
 
-var xmlMultipleIndex = `<complete-success-notification callid="109870">
-	<createtime>2005-08-26T14:16:42</createtime>
-	<connecttime>2005-08-26T14:16:56</connecttime>
-	<endtime>2005-08-26T14:17:34</endtime>
-	<reference>My Call Reference</reference>
-	<userid>386</userid>
-	<username>sampleusername</username>
-	<customerid>1</customerid>
-	<companyname>Conecto LLC</companyname>
-	<totalcost amount="0.21" currency="USD">US$0.21</totalcost>
-	<hasrecording>yes</hasrecording>
-	<hasvoicemail>no</hasvoicemail>
-	<agenttotalcost amount="0.13" currency="USD">US$0.13</agenttotalcost>
-	<agentid>44</agentid>
-	<callleg calllegid="222146">
-		<number>+441624828505</number>
-		<description>Isle of Man</description>
-		<seconds>38</seconds>
-		<perminuterate amount="0.0200" currency="USD">US$0.0200</perminuterate>
-		<cost amount="0.0140" currency="USD">US$0.0140</cost>
-		<agentperminuterate amount="0.0130" currency="USD">US$0.0130</agentperminuterate>
-		<agentcost amount="0.0082" currency="USD">US$0.0082</agentcost>
-	</callleg>
-	<callleg calllegid="222147">
-		<number>+44 7624 494075</number>
-		<description>Isle of Man</description>
-		<seconds>37</seconds>
-		<perminuterate amount="0.2700" currency="USD">US$0.2700</perminuterate>
-		<cost amount="0.1890" currency="USD">US$0.1890</cost>
-		<agentperminuterate amount="0.1880" currency="USD">US$0.1880</agentperminuterate>
-		<agentcost amount="0.1159" currency="USD">US$0.1159</agentcost>
-	</callleg>
-</complete-success-notification>
-`
-
-func TestXMLHandlerSubstractUsage(t *testing.T) {
+func TestXMLElementText(t *testing.T) {
 	doc, err := xmlquery.Parse(strings.NewReader(cdrXmlBroadsoft))
 	if err != nil {
 		t.Error(err)
 	}
-
 	cdrs := xmlquery.Find(doc, path.Join("/broadWorksCDR/cdrData/"))
-	cdrWithUsage := cdrs[1]
-	if usage, err := handlerSubstractUsage(cdrWithUsage,
-		config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.releaseTime;|;~*req.broadWorksCDR.cdrData.basicModule.answerTime", true, utils.INFIELD_SEP),
-		utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}), "UTC"); err != nil {
-		t.Error(err)
-	} else if usage != time.Duration(13483000000) {
-		t.Errorf("Expected: 13.483s, received: %v", usage)
-	}
-}
-
-func TestXMLRPProcess(t *testing.T) {
-	cdrcCfgs := []*config.CdrcCfg{
-		{
-			ID:          "TestXML",
-			Enabled:     true,
-			CdrFormat:   "xml",
-			CDRRootPath: utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}),
-			CdrSourceId: "TestXML",
-			ContentFields: []*config.FCTemplate{
-				{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.ToR,
-					Value: config.NewRSRParsersMustCompile("*voice", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "OriginID", Type: utils.META_COMPOSED, FieldId: utils.OriginID,
-					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.localCallId", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "RequestType", Type: utils.META_COMPOSED, FieldId: utils.RequestType,
-					Value: config.NewRSRParsersMustCompile("*rated", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "Tenant", Type: utils.META_COMPOSED, FieldId: utils.Tenant,
-					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.userId:s/.*@(.*)/${1}/", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "Category", Type: utils.META_COMPOSED, FieldId: utils.Category,
-					Value: config.NewRSRParsersMustCompile("call", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "Account", Type: utils.META_COMPOSED, FieldId: utils.Account,
-					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.userNumber", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "Destination", Type: utils.META_COMPOSED, FieldId: utils.Destination,
-					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.calledNumber", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "SetupTime", Type: utils.META_COMPOSED, FieldId: utils.SetupTime,
-					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.startTime", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "AnswerTime", Type: utils.META_COMPOSED, FieldId: utils.AnswerTime,
-					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.answerTime", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "Usage", Type: utils.META_HANDLER,
-					FieldId: utils.Usage, HandlerId: utils.HandlerSubstractUsage,
-					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.releaseTime;|;~*req.broadWorksCDR.cdrData.basicModule.answerTime",
-						true, utils.INFIELD_SEP), Mandatory: true},
-			},
-		},
-	}
-	xmlRP, err := NewXMLRecordsProcessor(bytes.NewBufferString(cdrXmlBroadsoft),
-		utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}), "UTC", true, cdrcCfgs, nil)
-	if err != nil {
+	cdrWithoutUserNr := cdrs[0]
+	if _, err := ElementText(cdrWithoutUserNr, "basicModule/userNumber"); err != utils.ErrNotFound {
 		t.Error(err)
 	}
-	var cdrs []*engine.CDR
-	for i := 0; i < 4; i++ {
-		cdrs, err = xmlRP.ProcessNextRecord()
-		if i == 1 { // Take second CDR since the first one cannot be processed
-			break
-		}
-	}
-	if err != nil {
+	cdrWithUser := cdrs[1]
+	if val, err := ElementText(cdrWithUser, "basicModule/userNumber"); err != nil {
 		t.Error(err)
+	} else if val != "1001" {
+		t.Errorf("Expecting: 1001, received: %s", val)
 	}
-	expectedCDRs := []*engine.CDR{
-		{
-			CGRID:       utils.Sha1("25160047719:0", "0.0.0.0"),
-			OriginHost:  "0.0.0.0",
-			Source:      "TestXML",
-			OriginID:    "25160047719:0",
-			ToR:         "*voice",
-			RequestType: "*rated",
-			Tenant:      "cgrates.org",
-			Category:    "call",
-			Account:     "1001",
-			Destination: "+4986517174963",
-			SetupTime:   time.Date(2016, 4, 19, 21, 0, 5, 247000000, time.UTC),
-			AnswerTime:  time.Date(2016, 4, 19, 21, 0, 6, 813000000, time.UTC),
-			Usage:       time.Duration(13483000000),
-			ExtraFields: map[string]string{},
-			Cost:        -1,
-		},
-	}
-	if !reflect.DeepEqual(expectedCDRs, cdrs) {
-		t.Errorf("Expecting: %+v\n, received: %+v\n", expectedCDRs, cdrs)
-	}
-}
-
-func TestXMLRPProcessWithNewFilters(t *testing.T) {
-	cdrcCfgs := []*config.CdrcCfg{
-		{
-			ID:          "XMLWithFilters",
-			Enabled:     true,
-			CdrFormat:   "xml",
-			CDRRootPath: utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}),
-			CdrSourceId: "XMLWithFilters",
-			Filters:     []string{"*string:~*req.broadWorksCDR.cdrData.headerModule.type:Normal"},
-			ContentFields: []*config.FCTemplate{
-				{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.ToR,
-					Value: config.NewRSRParsersMustCompile("*voice", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "OriginID", Type: utils.META_COMPOSED, FieldId: utils.OriginID,
-					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.localCallId", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "RequestType", Type: utils.META_COMPOSED, FieldId: utils.RequestType,
-					Value: config.NewRSRParsersMustCompile("*rated", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "Tenant", Type: utils.META_COMPOSED, FieldId: utils.Tenant,
-					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.userId:s/.*@(.*)/${1}/", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "Category", Type: utils.META_COMPOSED, FieldId: utils.Category,
-					Value: config.NewRSRParsersMustCompile("call", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "Account", Type: utils.META_COMPOSED, FieldId: utils.Account,
-					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.userNumber", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "Destination", Type: utils.META_COMPOSED, FieldId: utils.Destination,
-					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.calledNumber", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "SetupTime", Type: utils.META_COMPOSED, FieldId: utils.SetupTime,
-					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.startTime", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "AnswerTime", Type: utils.META_COMPOSED, FieldId: utils.AnswerTime,
-					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.answerTime", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "Usage", Type: utils.META_HANDLER,
-					FieldId: utils.Usage, HandlerId: utils.HandlerSubstractUsage,
-					Value: config.NewRSRParsersMustCompile("~*req.broadWorksCDR.cdrData.basicModule.releaseTime;|;~*req.broadWorksCDR.cdrData.basicModule.answerTime",
-						true, utils.INFIELD_SEP), Mandatory: true},
-			},
-		},
-	}
-	data := engine.NewInternalDB(nil, nil)
-	defaultCfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	xmlRP, err := NewXMLRecordsProcessor(bytes.NewBufferString(cdrXmlBroadsoft),
-		utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}), "UTC", true,
-		cdrcCfgs, engine.NewFilterS(defaultCfg, nil,
-			engine.NewDataManager(data, defaultCfg.CacheCfg(), nil)))
-	if err != nil {
+	if val, err := ElementText(cdrWithUser, "centrexModule/locationList/locationInformation/locationType"); err != nil {
 		t.Error(err)
-	}
-	var cdrs []*engine.CDR
-	for i := 0; i < 4; i++ {
-		cdrs, err = xmlRP.ProcessNextRecord()
-		if i == 1 { // Take second CDR since the first one cannot be processed
-			break
-		}
-	}
-	if err != nil {
-		t.Error(err)
-	}
-	expectedCDRs := []*engine.CDR{
-		{
-			CGRID:       utils.Sha1("25160047719:0", "0.0.0.0"),
-			OriginHost:  "0.0.0.0",
-			Source:      "XMLWithFilters",
-			OriginID:    "25160047719:0",
-			ToR:         "*voice",
-			RequestType: "*rated",
-			Tenant:      "cgrates.org",
-			Category:    "call",
-			Account:     "1001",
-			Destination: "+4986517174963",
-			SetupTime:   time.Date(2016, 4, 19, 21, 0, 5, 247000000, time.UTC),
-			AnswerTime:  time.Date(2016, 4, 19, 21, 0, 6, 813000000, time.UTC),
-			Usage:       time.Duration(13483000000),
-			ExtraFields: map[string]string{},
-			Cost:        -1,
-		},
-	}
-	if !reflect.DeepEqual(expectedCDRs, cdrs) {
-		t.Errorf("Expecting: %+v\n, received: %+v\n", expectedCDRs, cdrs)
+	} else if val != "Primary Device" {
+		t.Errorf("Expecting: <Primary Device>, received: <%s>", val)
 	}
 }
 
@@ -537,83 +350,91 @@ var xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 </File>
 `
 
-func TestXMLRPNestingSeparator(t *testing.T) {
-	cdrcCfgs := []*config.CdrcCfg{
-		{
-			ID:          "msw_xml",
-			Enabled:     true,
-			CdrFormat:   "xml",
-			CDRRootPath: utils.HierarchyPath([]string{"File", "CDRs", "Call"}),
-			CdrSourceId: "zw_cfs1",
-			Filters:     []string{},
-			ContentFields: []*config.FCTemplate{
-				{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.ToR,
-					Value: config.NewRSRParsersMustCompile("*voice", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "OriginID", Type: utils.META_COMPOSED, FieldId: utils.OriginID,
-					Value: config.NewRSRParsersMustCompile("~*req.File.CDRs.Call.SignalingInfo.PChargingVector.icidvalue", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "RequestType", Type: utils.META_COMPOSED, FieldId: utils.RequestType,
-					Value: config.NewRSRParsersMustCompile("*rated", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "Tenant", Type: utils.META_COMPOSED, FieldId: utils.Tenant,
-					Value: config.NewRSRParsersMustCompile("XX.liquid.tel", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "Category", Type: utils.META_COMPOSED, FieldId: utils.Category,
-					Value: config.NewRSRParsersMustCompile("call", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "Account", Type: utils.META_COMPOSED, FieldId: utils.Account,
-					Value: config.NewRSRParsersMustCompile("~*req.File.CDRs.Call.OrigParty.SubscriberAddr", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "Destination", Type: utils.META_COMPOSED, FieldId: utils.Destination,
-					Value: config.NewRSRParsersMustCompile("~*req.File.CDRs.Call.RoutingInfo.DestAddr", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "SetupTime", Type: utils.META_COMPOSED, FieldId: utils.SetupTime,
-					Value: config.NewRSRParsersMustCompile("~*req.File.CDRs.Call.RingingTime", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "AnswerTime", Type: utils.META_COMPOSED, FieldId: utils.AnswerTime,
-					Value: config.NewRSRParsersMustCompile("~*req.File.CDRs.Call.ConnectTime", true, utils.INFIELD_SEP), Mandatory: true},
-				{Tag: "Usage", Type: utils.META_HANDLER,
-					FieldId: utils.Usage, HandlerId: utils.HandlerSubstractUsage,
-					Value: config.NewRSRParsersMustCompile("~*req.File.CDRs.Call.ReleaseTime;|;~*req.File.CDRs.Call.ConnectTime",
-						true, utils.INFIELD_SEP), Mandatory: true},
-			},
-		},
-	}
-	data := engine.NewInternalDB(nil, nil)
-	defaultCfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-	xmlRP, err := NewXMLRecordsProcessor(bytes.NewBufferString(xmlContent),
-		utils.HierarchyPath([]string{"File", "CDRs", "Call"}), "UTC", true,
-		cdrcCfgs, engine.NewFilterS(defaultCfg, nil,
-			engine.NewDataManager(data, defaultCfg.CacheCfg(), nil)))
+func TestXMLElementText3(t *testing.T) {
+	doc, err := xmlquery.Parse(strings.NewReader(xmlContent))
 	if err != nil {
 		t.Error(err)
 	}
-	var cdrs []*engine.CDR
-	for i := 0; i < 4; i++ {
-		cdrs, err = xmlRP.ProcessNextRecord()
-		if i == 1 { // Take second CDR since the first one cannot be processed
-			break
-		}
+	hPath2 := utils.ParseHierarchyPath("File.CDRs.Call", "")
+	cdrs := xmlquery.Find(doc, hPath2.AsString("/", true))
+	if len(cdrs) != 3 {
+		t.Errorf("Expecting: 3, received: %+v", len(cdrs))
 	}
+	if _, err := ElementText(cdrs[0], "SignalingInfo/PChargingVector/test"); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+
+	if val, err := ElementText(cdrs[1], "SignalingInfo/PChargingVector/icidvalue"); err != nil {
+		t.Error(err)
+	} else if val != "46d7974398c2671016afccc3f2c428c7" {
+		t.Errorf("Expecting: 46d7974398c2671016afccc3f2c428c7, received: %s", val)
+	}
+}
+
+var xmlMultipleIndex = `<complete-success-notification callid="109870">
+	<createtime>2005-08-26T14:16:42</createtime>
+	<connecttime>2005-08-26T14:16:56</connecttime>
+	<endtime>2005-08-26T14:17:34</endtime>
+	<reference>My Call Reference</reference>
+	<userid>386</userid>
+	<username>sampleusername</username>
+	<customerid>1</customerid>
+	<companyname>Conecto LLC</companyname>
+	<totalcost amount="0.21" currency="USD">US$0.21</totalcost>
+	<hasrecording>yes</hasrecording>
+	<hasvoicemail>no</hasvoicemail>
+	<agenttotalcost amount="0.13" currency="USD">US$0.13</agenttotalcost>
+	<agentid>44</agentid>
+	<callleg calllegid="222146">
+		<number>+441624828505</number>
+		<description>Isle of Man</description>
+		<seconds>38</seconds>
+		<perminuterate amount="0.0200" currency="USD">US$0.0200</perminuterate>
+		<cost amount="0.0140" currency="USD">US$0.0140</cost>
+		<agentperminuterate amount="0.0130" currency="USD">US$0.0130</agentperminuterate>
+		<agentcost amount="0.0082" currency="USD">US$0.0082</agentcost>
+	</callleg>
+	<callleg calllegid="222147">
+		<number>+44 7624 494075</number>
+		<description>Isle of Man</description>
+		<seconds>37</seconds>
+		<perminuterate amount="0.2700" currency="USD">US$0.2700</perminuterate>
+		<cost amount="0.1890" currency="USD">US$0.1890</cost>
+		<agentperminuterate amount="0.1880" currency="USD">US$0.1880</agentperminuterate>
+		<agentcost amount="0.1159" currency="USD">US$0.1159</agentcost>
+	</callleg>
+</complete-success-notification>
+`
+
+func TestXMLIndexes(t *testing.T) {
+	doc, err := xmlquery.Parse(strings.NewReader(xmlMultipleIndex))
 	if err != nil {
 		t.Error(err)
 	}
-	expectedCDRs := []*engine.CDR{
-		{
-			CGRID:       utils.Sha1("46d7974398c2671016afccc3f2c428c7", "0.0.0.0"),
-			OriginHost:  "0.0.0.0",
-			Source:      "zw_cfs1",
-			OriginID:    "46d7974398c2671016afccc3f2c428c7",
-			ToR:         "*voice",
-			RequestType: "*rated",
-			Tenant:      "XX.liquid.tel",
-			Category:    "call",
-			Account:     "+27110493421",
-			Destination: "+270843073451",
-			SetupTime:   time.Date(2017, 11, 9, 11, 5, 34, 973000000, time.UTC),
-			AnswerTime:  time.Date(2017, 11, 9, 11, 5, 39, 364000000, time.UTC),
-			Usage:       time.Duration(53737000000),
-			ExtraFields: map[string]string{},
-			Cost:        -1,
-		},
+	dP := NewXmlProvider(doc, utils.HierarchyPath([]string{}), utils.MetaReq)
+	if data, err := dP.FieldAsString([]string{"*req", "complete-success-notification", "userid"}); err != nil {
+		t.Error(err)
+	} else if data != "386" {
+		t.Errorf("expecting: 386, received: <%s>", data)
 	}
-	if !reflect.DeepEqual(expectedCDRs, cdrs) {
-		t.Errorf("Expecting: %+v\n, received: %+v\n", expectedCDRs, cdrs)
+	if data, err := dP.FieldAsString([]string{"*req", "complete-success-notification", "username"}); err != nil {
+		t.Error(err)
+	} else if data != "sampleusername" {
+		t.Errorf("expecting: sampleusername, received: <%s>", data)
+	}
+	if data, err := dP.FieldAsString([]string{"*req", "complete-success-notification", "callleg", "seconds"}); err != nil {
+		t.Error(err)
+	} else if data != "38" {
+		t.Errorf("expecting: 38, received: <%s>", data)
+	}
+	if data, err := dP.FieldAsString([]string{"*req", "complete-success-notification", "callleg[1]", "seconds"}); err != nil {
+		t.Error(err)
+	} else if data != "37" {
+		t.Errorf("expecting: 37, received: <%s>", data)
+	}
+	if data, err := dP.FieldAsString([]string{"*req", "complete-success-notification", "callleg[@calllegid='222147']", "seconds"}); err != nil {
+		t.Error(err)
+	} else if data != "37" {
+		t.Errorf("expecting: 37, received: <%s>", data)
 	}
 }

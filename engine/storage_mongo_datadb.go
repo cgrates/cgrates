@@ -1173,6 +1173,7 @@ func (ms *MongoStorage) SetAccountDrv(acc *Account) error {
 			acc = ac
 		}
 	}
+	acc.UpdateTime = time.Now()
 	return ms.query(func(sctx mongo.SessionContext) (err error) {
 		_, err = ms.getCol(ColAcc).UpdateOne(sctx, bson.M{"id": acc.ID},
 			bson.M{"$set": acc},

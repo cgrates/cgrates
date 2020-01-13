@@ -662,7 +662,7 @@ func CapitalizedMessage(errMessage string) (capStr string) {
 }
 
 func GetCGRVersion() (vers string, err error) {
-	vers = fmt.Sprintf("%s %s", CGRateS, VERSION)
+	vers = fmt.Sprintf("%s@%s", CGRateS, VERSION)
 	if GitLastLog == "" {
 		return vers, nil
 	}
@@ -698,8 +698,8 @@ func GetCGRVersion() (vers string, err error) {
 	if commitHash == "" || commitDate.IsZero() {
 		return vers, fmt.Errorf("Cannot find commitHash or commitDate information")
 	}
-	//CGRateS 0.9.1~rc8 git+73014da (2016-12-30T19:48:09+01:00)
-	return fmt.Sprintf("%s %s git+%s (%s)", CGRateS, VERSION, commitHash[:7], commitDate.Format(time.RFC3339)), nil
+	//CGRateS@v0.9.1~rc8-20200110075344-7572e7b11e00
+	return fmt.Sprintf("%s@%s-%s-%s", CGRateS, VERSION, commitDate.UTC().Format("20060102150405"), commitHash[:12]), nil
 }
 
 func NewTenantID(tntID string) *TenantID {

@@ -112,7 +112,8 @@ func testCsvITCreateCdrDirs(t *testing.T) {
 	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out",
 		"/tmp/ers2/in", "/tmp/ers2/out", "/tmp/init_session/in", "/tmp/init_session/out",
 		"/tmp/terminate_session/in", "/tmp/terminate_session/out", "/tmp/cdrs/in",
-		"/tmp/cdrs/out", "/tmp/ers_with_filters/in", "/tmp/ers_with_filters/out"} {
+		"/tmp/cdrs/out", "/tmp/ers_with_filters/in", "/tmp/ers_with_filters/out",
+		"/tmp/xmlErs/in", "/tmp/xmlErs/out", "/tmp/fwvErs/in", "/tmp/fwvErs/out"} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
 		}
@@ -120,7 +121,6 @@ func testCsvITCreateCdrDirs(t *testing.T) {
 			t.Fatal("Error creating folder: ", dir, err)
 		}
 	}
-	time.Sleep(10 * time.Second)
 }
 
 func testCsvITStartEngine(t *testing.T) {
@@ -335,9 +335,8 @@ func testCsvITProcessedFiles(t *testing.T) {
 
 func testCsvITCleanupFiles(t *testing.T) {
 	for _, dir := range []string{"/tmp/ers",
-		"/tmp/ers2", "/tmp/init_session",
-		"/tmp/terminate_session", "/tmp/cdrs",
-		"/tmp/ers_with_filters"} {
+		"/tmp/ers2", "/tmp/init_session", "/tmp/terminate_session",
+		"/tmp/cdrs", "/tmp/ers_with_filters", "/tmp/xmlErs", "/tmp/fwvErs"} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
 		}
