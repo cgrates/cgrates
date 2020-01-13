@@ -29,6 +29,7 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -587,7 +588,10 @@ func testApierTPActions(t *testing.T) {
 	expectedIds := []string{"LOG_BALANCE", "PREPAID_10", "WARN_VIA_HTTP"}
 	if err := rater.Call(utils.ApierV1GetTPActionIds, AttrGetTPActionIds{TPid: actTst.TPid}, &rplyIds); err != nil {
 		t.Error("Calling ApierV1.GetTPActionIds, got error: ", err.Error())
-	} else if !reflect.DeepEqual(expectedIds, rplyIds) {
+	}
+	sort.Strings(expectedIds)
+	sort.Strings(rplyIds)
+	if !reflect.DeepEqual(expectedIds, rplyIds) {
 		t.Errorf("Calling ApierV1.GetTPActionIds expected: %v, received: %v", expectedIds, rplyIds)
 	}
 }

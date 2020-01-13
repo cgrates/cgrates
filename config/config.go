@@ -38,7 +38,7 @@ import (
 )
 
 var (
-	DBDefaults               DbDefaults
+	dbDefaultsCfg            dbDefaults
 	cgrCfg                   *CGRConfig  // will be shared
 	dfltFsConnConfig         *FsConnCfg  // Default FreeSWITCH Connection configuration, built out of json default configuration
 	dfltKamConnConfig        *KamConnCfg // Default Kamailio Connection configuration
@@ -48,8 +48,8 @@ var (
 	dfltLoaderDataTypeConfig *LoaderDataType
 )
 
-func NewDbDefaults() DbDefaults {
-	deflt := DbDefaults{
+func newDbDefaults() dbDefaults {
+	deflt := dbDefaults{
 		utils.MYSQL: map[string]string{
 			"DbName": "cgrates",
 			"DbPort": "3306",
@@ -79,54 +79,54 @@ func NewDbDefaults() DbDefaults {
 	return deflt
 }
 
-type DbDefaults map[string]map[string]string
+type dbDefaults map[string]map[string]string
 
-func (dbDflt DbDefaults) DBName(dbType string, flagInput string) string {
+func (dbDflt dbDefaults) dbName(dbType string, flagInput string) string {
 	if flagInput != utils.MetaDynamic {
 		return flagInput
 	}
 	return dbDflt[dbType]["DbName"]
 }
 
-func (DbDefaults) DBUser(dbType string, flagInput string) string {
+func (dbDefaults) dbUser(dbType string, flagInput string) string {
 	if flagInput != utils.MetaDynamic {
 		return flagInput
 	}
 	return utils.CGRATES
 }
 
-func (DbDefaults) DBHost(dbType string, flagInput string) string {
+func (dbDefaults) dbHost(dbType string, flagInput string) string {
 	if flagInput != utils.MetaDynamic {
 		return flagInput
 	}
 	return utils.LOCALHOST
 }
 
-func (dbcfg DbDefaults) DBPort(dbType string, flagInput string) string {
+func (dbDflt dbDefaults) dbPort(dbType string, flagInput string) string {
 	if flagInput != utils.MetaDynamic {
 		return flagInput
 	}
-	return dbcfg[dbType]["DbPort"]
+	return dbDflt[dbType]["DbPort"]
 }
 
-func (dbcfg DbDefaults) DBPass(dbType string, flagInput string) string {
+func (dbDflt dbDefaults) dbPass(dbType string, flagInput string) string {
 	if flagInput != utils.MetaDynamic {
 		return flagInput
 	}
-	return dbcfg[dbType]["DbPass"]
+	return dbDflt[dbType]["DbPass"]
 }
 
 func init() {
 	cgrCfg, _ = NewDefaultCGRConfig()
-	DBDefaults = NewDbDefaults()
+	dbDefaultsCfg = newDbDefaults()
 }
 
-// Used to retrieve system configuration from other packages
+// CgrConfig is used to retrieve system configuration from other packages
 func CgrConfig() *CGRConfig {
 	return cgrCfg
 }
 
-// Used to set system configuration from other places
+// SetCgrConfig is used to set system configuration from other places
 func SetCgrConfig(cfg *CGRConfig) {
 	cgrCfg = cfg
 }
@@ -326,7 +326,7 @@ func (cfg *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 	for _, loadFunc := range []func(*CgrJsonCfg) error{
 		cfg.loadRPCConns,
 		cfg.loadGeneralCfg, cfg.loadCacheCfg, cfg.loadListenCfg,
-		cfg.loadHttpCfg, cfg.loadDataDBCfg, cfg.loadStorDBCfg,
+		cfg.loadHTTPCfg, cfg.loadDataDBCfg, cfg.loadStorDBCfg,
 		cfg.loadFilterSCfg, cfg.loadRalSCfg, cfg.loadSchedulerCfg,
 		cfg.loadCdrsCfg, cfg.loadCdreCfg, cfg.loadCdrcCfg,
 		cfg.loadSessionSCfg, cfg.loadFreeswitchAgentCfg, cfg.loadKamAgentCfg,
@@ -396,13 +396,13 @@ func (cfg *CGRConfig) loadListenCfg(jsnCfg *CgrJsonCfg) (err error) {
 	return cfg.listenCfg.loadFromJsonCfg(jsnListenCfg)
 }
 
-// loadHttpCfg loads the Http section of the configuration
-func (cfg *CGRConfig) loadHttpCfg(jsnCfg *CgrJsonCfg) (err error) {
-	var jsnHttpCfg *HTTPJsonCfg
-	if jsnHttpCfg, err = jsnCfg.HttpJsonCfg(); err != nil {
+// loadHTTPCfg loads the Http section of the configuration
+func (cfg *CGRConfig) loadHTTPCfg(jsnCfg *CgrJsonCfg) (err error) {
+	var jsnHTTPCfg *HTTPJsonCfg
+	if jsnHTTPCfg, err = jsnCfg.HttpJsonCfg(); err != nil {
 		return
 	}
-	return cfg.httpCfg.loadFromJsonCfg(jsnHttpCfg)
+	return cfg.httpCfg.loadFromJsonCfg(jsnHTTPCfg)
 }
 
 // loadDataDBCfg loads the DataDB section of the configuration
@@ -1219,7 +1219,7 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		STORDB_JSN:         cfg.loadStorDBCfg,
 		LISTEN_JSN:         cfg.loadListenCfg,
 		TlsCfgJson:         cfg.loadTlsCgrCfg,
-		HTTP_JSN:           cfg.loadHttpCfg,
+		HTTP_JSN:           cfg.loadHTTPCfg,
 		SCHEDULER_JSN:      cfg.loadSchedulerCfg,
 		CACHE_JSN:          cfg.loadCacheCfg,
 		FilterSjsn:         cfg.loadFilterSCfg,

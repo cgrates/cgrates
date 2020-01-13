@@ -1486,14 +1486,17 @@ func (dm *DataManager) RemoveRatingPlan(key string, transactionID string) (err e
 	return
 }
 
+// GetRatingProfile returns the RatingProfile for the key
 func (dm *DataManager) GetRatingProfile(key string, skipCache bool,
 	transactionID string) (rpf *RatingProfile, err error) {
 	if !skipCache {
-		if x, ok := Cache.Get(utils.CacheRatingProfiles, key); ok {
-			if x != nil {
-				return x.(*RatingProfile), nil
+		for _, cacheRP := range []string{utils.CacheRatingProfilesTmp, utils.CacheRatingProfiles} {
+			if x, ok := Cache.Get(cacheRP, key); ok {
+				if x != nil {
+					return x.(*RatingProfile), nil
+				}
+				return nil, utils.ErrNotFound
 			}
-			return nil, utils.ErrNotFound
 		}
 	}
 	rpf, err = dm.DataDB().GetRatingProfileDrv(key)

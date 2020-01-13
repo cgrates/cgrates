@@ -618,5 +618,9 @@ func GetDefaultEmptyCacheStats() map[string]*ltcache.CacheStats {
 			Items:  0,
 			Groups: 0,
 		},
+		utils.CacheRatingProfilesTmp: {
+			Items:  0,
+			Groups: 0,
+		},
 	}
 }

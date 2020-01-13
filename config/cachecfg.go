@@ -25,6 +25,7 @@ import (
 	"github.com/cgrates/ltcache"
 )
 
+// CacheParamCfg represents the config of a single cache partition
 type CacheParamCfg struct {
 	Limit     int
 	TTL       time.Duration
@@ -32,31 +33,32 @@ type CacheParamCfg struct {
 	Precache  bool
 }
 
-func (self *CacheParamCfg) loadFromJsonCfg(jsnCfg *CacheParamJsonCfg) error {
+func (cParam *CacheParamCfg) loadFromJsonCfg(jsnCfg *CacheParamJsonCfg) error {
 	if jsnCfg == nil {
 		return nil
 	}
 	var err error
 	if jsnCfg.Limit != nil {
-		self.Limit = *jsnCfg.Limit
+		cParam.Limit = *jsnCfg.Limit
 	}
 	if jsnCfg.Ttl != nil {
-		if self.TTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.Ttl); err != nil {
+		if cParam.TTL, err = utils.ParseDurationWithNanosecs(*jsnCfg.Ttl); err != nil {
 			return err
 		}
 	}
 	if jsnCfg.Static_ttl != nil {
-		self.StaticTTL = *jsnCfg.Static_ttl
+		cParam.StaticTTL = *jsnCfg.Static_ttl
 	}
 	if jsnCfg.Precache != nil {
-		self.Precache = *jsnCfg.Precache
+		cParam.Precache = *jsnCfg.Precache
 	}
 	return nil
 }
 
+// CacheCfg used to store the cache config
 type CacheCfg map[string]*CacheParamCfg
 
-func (self CacheCfg) loadFromJsonCfg(jsnCfg *CacheJsonCfg) (err error) {
+func (cCfg CacheCfg) loadFromJsonCfg(jsnCfg *CacheJsonCfg) (err error) {
 	if jsnCfg == nil {
 		return
 	}
@@ -65,11 +67,12 @@ func (self CacheCfg) loadFromJsonCfg(jsnCfg *CacheJsonCfg) (err error) {
 		if err := val.loadFromJsonCfg(vJsn); err != nil {
 			return err
 		}
-		self[kJsn] = val
+		cCfg[kJsn] = val
 	}
 	return nil
 }
 
+// AsTransCacheConfig transforms the cache config in ltcache config
 func (cCfg CacheCfg) AsTransCacheConfig() (tcCfg map[string]*ltcache.CacheConfig) {
 	tcCfg = make(map[string]*ltcache.CacheConfig, len(cCfg))
 	for k, cPcfg := range cCfg {
@@ -80,4 +83,12 @@ func (cCfg CacheCfg) AsTransCacheConfig() (tcCfg map[string]*ltcache.CacheConfig
 		}
 	}
 	return
+}
+
+// AddTmpCaches adds all the temotrary caches configuration needed
+func (cCfg CacheCfg) AddTmpCaches() {
+	cCfg[utils.CacheRatingProfilesTmp] = &CacheParamCfg{
+		Limit: -1,
+		TTL:   time.Minute,
+	}
 }

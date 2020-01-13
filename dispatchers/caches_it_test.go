@@ -183,6 +183,7 @@ func testDspChcPrecacheStatus(t *testing.T) {
 		utils.CacheEventResources:          utils.MetaReady,
 		utils.CacheRPCConnections:          utils.MetaReady,
 		utils.CacheRPCResponses:            utils.MetaReady,
+		utils.CacheRatingProfilesTmp:       utils.MetaReady,
 	}
 
 	if err := dispEngine.RPC.Call(utils.CacheSv1PrecacheStatus, utils.AttrCacheIDsWithArgDispatcher{

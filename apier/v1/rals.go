@@ -78,10 +78,10 @@ func (rsv1 *RALsV1) GetRatingPlansCost(arg *utils.RatingPlanCostArg, reply *disp
 			},
 		}
 		// force cache set so it can be picked by calldescriptor for cost calculation
-		engine.Cache.Set(utils.CacheRatingProfiles, rPrfl.Id, rPrfl, nil,
+		engine.Cache.Set(utils.CacheRatingProfilesTmp, rPrfl.Id, rPrfl, nil,
 			true, utils.NonTransactional)
 		cc, err := cd.GetCost()
-		engine.Cache.Remove(utils.CacheRatingProfiles, rPrfl.Id,
+		engine.Cache.Remove(utils.CacheRatingProfilesTmp, rPrfl.Id,
 			true, utils.NonTransactional) // Remove here so we don't overload memory
 		if err != nil {
 			// in case we have UnauthorizedDestination

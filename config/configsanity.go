@@ -484,7 +484,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	if cfg.dispatcherSCfg.Enabled {
 		for _, connID := range cfg.dispatcherSCfg.AttributeSConns {
 			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.attributeSCfg.Enabled {
-				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.AttributeS, utils.DispatcherS)
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.AttributeS, utils.DispatcherS)
 			}
 			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
 				return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.DispatcherS, connID)
@@ -493,7 +493,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	}
 	// Cache partitions check
 	for cacheID := range cfg.cacheCfg {
-		if _, has := utils.CachePartitions[cacheID]; !has {
+		if !utils.CachePartitions.Has(cacheID) {
 			return fmt.Errorf("<%s> partition <%s> not defined", utils.CacheS, cacheID)
 		}
 	}
