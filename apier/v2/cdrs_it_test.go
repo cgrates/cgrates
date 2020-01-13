@@ -32,68 +32,62 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var cdrsCfgPath string
-var cdrsCfg *config.CGRConfig
-var cdrsRpc *rpc.Client
-var cdrsConfDIR string // run the tests for specific configuration
+var (
+	cdrsCfgPath string
+	cdrsCfg     *config.CGRConfig
+	cdrsRpc     *rpc.Client
+	cdrsConfDIR string // run the tests for specific configuration
 
-// subtests to be executed for each confDIR
-var sTestsCDRsIT = []func(t *testing.T){
-	testV2CDRsInitConfig,
-	testV2CDRsInitDataDb,
-	testV2CDRsInitCdrDb,
-	testV2CDRsStartEngine,
-	testV2CDRsRpcConn,
-	testV2CDRsLoadTariffPlanFromFolder,
-	testV2CDRsProcessCDR,
-	testV2CDRsGetCdrs,
-	testV2CDRsRateCDRs,
-	testV2CDRsGetCdrs2,
-	testV2CDRsUsageNegative,
-	testV2CDRsDifferentTenants,
+	// subtests to be executed for each confDIR
+	sTestsCDRsIT = []func(t *testing.T){
+		testV2CDRsInitConfig,
+		testV2CDRsInitDataDb,
+		testV2CDRsInitCdrDb,
+		testV2CDRsStartEngine,
+		testV2CDRsRpcConn,
+		testV2CDRsLoadTariffPlanFromFolder,
+		testV2CDRsProcessCDR,
+		testV2CDRsGetCdrs,
+		testV2CDRsRateCDRs,
+		testV2CDRsGetCdrs2,
+		testV2CDRsUsageNegative,
+		testV2CDRsDifferentTenants,
 
-	testV2CDRsRemoveRatingProfiles,
-	testV2CDRsProcessCDRNoRattingPlan,
-	testV2CDRsGetCdrsNoRattingPlan,
+		testV2CDRsRemoveRatingProfiles,
+		testV2CDRsProcessCDRNoRattingPlan,
+		testV2CDRsGetCdrsNoRattingPlan,
 
-	testV2CDRsRateCDRsWithRatingPlan,
-	testV2CDRsGetCdrsWithRattingPlan,
+		testV2CDRsRateCDRsWithRatingPlan,
+		testV2CDRsGetCdrsWithRattingPlan,
 
-	testV2CDRsSetThreshold,
-	testV2CDRsProcessCDRWithThreshold,
-	testV2CDRsGetThreshold,
+		testV2CDRsSetThreshold,
+		testV2CDRsProcessCDRWithThreshold,
+		testV2CDRsGetThreshold,
 
-	testV2CDRsKillEngine,
-}
+		testV2CDRsKillEngine,
+	}
+)
 
 // Tests starting here
-func TestCDRsITMySQL(t *testing.T) {
-	cdrsConfDIR = "cdrsv2mysql"
+func TestCDRsIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		cdrsConfDIR = "cdrsv2internal"
+	case utils.MetaSQL:
+		cdrsConfDIR = "cdrsv2mysql"
+	case utils.MetaMongo:
+		cdrsConfDIR = "cdrsv2mongo"
+	case utils.MetaPostgres:
+		cdrsConfDIR = "cdrsv2psql"
+	default:
+		t.Fatal("Unknown Database type")
+	}
+
 	for _, stest := range sTestsCDRsIT {
 		t.Run(cdrsConfDIR, stest)
 	}
 }
 
-func TestCDRsITpg(t *testing.T) {
-	cdrsConfDIR = "cdrsv2psql"
-	for _, stest := range sTestsCDRsIT {
-		t.Run(cdrsConfDIR, stest)
-	}
-}
-
-func TestCDRsITMongo(t *testing.T) {
-	cdrsConfDIR = "cdrsv2mongo"
-	for _, stest := range sTestsCDRsIT {
-		t.Run(cdrsConfDIR, stest)
-	}
-}
-
-func TestCDRsITInternal(t *testing.T) {
-	cdrsConfDIR = "cdrsv2internal"
-	for _, stest := range sTestsCDRsIT {
-		t.Run(cdrsConfDIR, stest)
-	}
-}
 func testV2CDRsInitConfig(t *testing.T) {
 	var err error
 	cdrsCfgPath = path.Join(*dataDir, "conf", "samples", cdrsConfDIR)

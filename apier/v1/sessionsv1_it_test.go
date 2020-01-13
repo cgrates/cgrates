@@ -43,6 +43,7 @@ var (
 	sSV1RequestType string
 
 	sTestSessionSv1 = []func(t *testing.T){
+		testSSv1ItInitCfgDir,
 		testSSv1ItInitCfg,
 		testSSv1ItResetDataDb,
 		testSSv1ItResetStorDb,
@@ -68,7 +69,7 @@ var (
 	}
 )
 
-func TestSessionSv1ITtests(t *testing.T) {
+func testSSv1ItInitCfgDir(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
 		sessionsConfDIR = "sessions_internal"
@@ -80,10 +81,6 @@ func TestSessionSv1ITtests(t *testing.T) {
 		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")
-	}
-
-	for _, stest := range sTestSessionSv1 {
-		t.Run(sessionsConfDIR, stest)
 	}
 }
 

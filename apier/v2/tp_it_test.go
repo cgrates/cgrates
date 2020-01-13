@@ -32,47 +32,45 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var tpCfgPath string
-var tpCfg *config.CGRConfig
-var tpRPC *rpc.Client
-var err error
-var delay int
-var configDIR string // relative path towards a config directory under samples prefix
-
 var (
-	testTPid = "V2TestTPit"
-)
+	tpCfgPath string
+	tpCfg     *config.CGRConfig
+	tpRPC     *rpc.Client
+	err       error
+	delay     int
+	configDIR string // relative path towards a config directory under samples prefix
+	testTPid  = "V2TestTPit"
 
-// subtests to be executed for each confDIR
-var sTestsTutIT = []func(t *testing.T){
-	testTPitLoadConfig,
-	testTPitResetDataDb,
-	testTPitResetStorDb,
-	testTPitStartEngine,
-	testTPitRpcConn,
-	testTPitTimings,
-	testTPitDestinations,
-	testTPitKillEngine,
-}
+	// subtests to be executed for each confDIR
+	sTestsTutIT = []func(t *testing.T){
+		testTPitLoadConfig,
+		testTPitResetDataDb,
+		testTPitResetStorDb,
+		testTPitStartEngine,
+		testTPitRpcConn,
+		testTPitTimings,
+		testTPitDestinations,
+		testTPitKillEngine,
+	}
+)
 
 // Tests starting here
 
-func TestITMySQLTutorial(t *testing.T) {
-	configDIR = "tutmysql"
-	for _, stest := range sTestsTutIT {
-		t.Run(configDIR, stest)
-	}
-}
+func TestTPit(t *testing.T) {
 
-func TestITpgTutorial(t *testing.T) {
-	configDIR = "tutpostgres"
-	for _, stest := range sTestsTutIT {
-		t.Run(configDIR, stest)
+	switch *dbType {
+	case utils.MetaInternal:
+		configDIR = "tutinternal"
+	case utils.MetaSQL:
+		configDIR = "tutmysql"
+	case utils.MetaMongo:
+		configDIR = "tutmongo"
+	case utils.MetaPostgres:
+		configDIR = "tutpostgres"
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
 
-func TestITMongoTutorial(t *testing.T) {
-	configDIR = "tutmongo"
 	for _, stest := range sTestsTutIT {
 		t.Run(configDIR, stest)
 	}
