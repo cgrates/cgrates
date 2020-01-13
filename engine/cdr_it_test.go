@@ -21,15 +21,11 @@ package engine
 
 import (
 	"encoding/json"
-	"flag"
 	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
-
-// Arguments received via test command
-var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 
 // Sample HttpJsonPost, more for usage purposes
 func TestHttpJsonPost(t *testing.T) {
