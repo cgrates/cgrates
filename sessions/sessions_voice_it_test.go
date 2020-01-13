@@ -815,6 +815,17 @@ func TestSessionsVoiceSessionTTL(t *testing.T) {
 		utils.SessionFilter{
 			Filters: []string{
 				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
+				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12372-1"),
+				"*string:~no_field:10",
+			},
+		}, &aSessions); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Error(err, aSessions)
+	}
+	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
+		utils.SessionFilter{
+			Filters: []string{
+				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
 				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12360"),
 			},
 		}, &aSessions); err != nil {
