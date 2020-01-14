@@ -196,7 +196,7 @@ func testSessionSRplInitiate(t *testing.T) {
 	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "123451"),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "123451"),
 			},
 		}, &aSessions); err != nil {
 		t.Error(err)
@@ -213,7 +213,7 @@ func testSessionSRplInitiate(t *testing.T) {
 	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "123451"),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "123451"),
 			},
 		}, &pSessions); err != nil {
 		t.Error(err)
@@ -230,7 +230,7 @@ func testSessionSRplInitiate(t *testing.T) {
 	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "123451"),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "123451"),
 			},
 		}, &aSessions); err != nil {
 		t.Error(err)
@@ -245,7 +245,7 @@ func testSessionSRplInitiate(t *testing.T) {
 	if err := smgRplcSlvRPC.Call(utils.SessionSv1GetPassiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "123451"),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "123451"),
 			},
 		}, &pSessions); err != nil {
 		t.Error(err)

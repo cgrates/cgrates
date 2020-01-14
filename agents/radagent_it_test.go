@@ -287,8 +287,8 @@ func testRAitAcctStart(t *testing.T) {
 	if err := raRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
-				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.RunID, utils.MetaDefault),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"),
 			},
 		}, &aSessions); err != nil {
 		t.Error(err)
@@ -358,8 +358,8 @@ func testRAitAcctStop(t *testing.T) {
 	if err := raRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
-				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.RunID, utils.MetaDefault),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "e4921177ab0e3586c37f6a185864b71a@0:0:0:0:0:0:0:0-51585361-75c2f57b"),
 			},
 		}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err)

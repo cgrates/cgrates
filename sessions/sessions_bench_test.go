@@ -164,7 +164,7 @@ func sendInit() {
 func getCount() int {
 	var count int
 	if err := sBenchRPC.Call(utils.SessionSv1GetActiveSessionsCount, utils.SessionFilter{
-		Filters: []string{"*string:~ToR:*voice"},
+		Filters: []string{"*string:~*req.ToR:*voice"},
 	}, &count); err != nil {
 		log.Fatal(err)
 	}
