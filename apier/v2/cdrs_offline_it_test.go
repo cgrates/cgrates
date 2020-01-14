@@ -33,42 +33,41 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var cdrsOfflineCfgPath string
-var cdrsOfflineCfg *config.CGRConfig
-var cdrsOfflineRpc *rpc.Client
-var cdrsOfflineConfDIR string // run the tests for specific configuration
+var (
+	cdrsOfflineCfgPath string
+	cdrsOfflineCfg     *config.CGRConfig
+	cdrsOfflineRpc     *rpc.Client
+	cdrsOfflineConfDIR string // run the tests for specific configuration
 
-// subtests to be executed for each confDIR
-var sTestsCDRsOfflineIT = []func(t *testing.T){
-	testV2CDRsOfflineInitConfig,
-	testV2CDRsOfflineInitDataDb,
-	testV2CDRsOfflineInitCdrDb,
-	testV2CDRsOfflineStartEngine,
-	testV2cdrsOfflineRpcConn,
-	testV2CDRsOfflineLoadData,
-	testV2CDRsOfflineBalanceUpdate,
-	testV2CDRsOfflineExpiryBalance,
-	testV2CDRsBalancesWithSameWeight,
-	testV2CDRsOfflineKillEngine,
-}
+	// subtests to be executed for each confDIR
+	sTestsCDRsOfflineIT = []func(t *testing.T){
+		testV2CDRsOfflineInitConfig,
+		testV2CDRsOfflineInitDataDb,
+		testV2CDRsOfflineInitCdrDb,
+		testV2CDRsOfflineStartEngine,
+		testV2cdrsOfflineRpcConn,
+		testV2CDRsOfflineLoadData,
+		testV2CDRsOfflineBalanceUpdate,
+		testV2CDRsOfflineExpiryBalance,
+		testV2CDRsBalancesWithSameWeight,
+		testV2CDRsOfflineKillEngine,
+	}
+)
 
 // Tests starting here
-func TestCDRsOfflineITMySQL(t *testing.T) {
-	cdrsOfflineConfDIR = "cdrsv2mysql"
-	for _, stest := range sTestsCDRsOfflineIT {
-		t.Run(cdrsOfflineConfDIR, stest)
+func TestCDRsOfflineIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		cdrsOfflineConfDIR = "cdrsv2internal"
+	case utils.MetaSQL:
+		cdrsOfflineConfDIR = "cdrsv2mysql"
+	case utils.MetaMongo:
+		cdrsOfflineConfDIR = "cdrsv2mongo"
+	case utils.MetaPostgres:
+		cdrsOfflineConfDIR = "cdrsv2psql"
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestCDRsOfflineITpg(t *testing.T) {
-	cdrsOfflineConfDIR = "cdrsv2psql"
-	for _, stest := range sTestsCDRsOfflineIT {
-		t.Run(cdrsOfflineConfDIR, stest)
-	}
-}
-
-func TestCDRsOfflineITMongo(t *testing.T) {
-	cdrsOfflineConfDIR = "cdrsv2mongo"
 	for _, stest := range sTestsCDRsOfflineIT {
 		t.Run(cdrsOfflineConfDIR, stest)
 	}

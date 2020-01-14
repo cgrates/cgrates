@@ -20,11 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
-	"errors"
-	"flag"
 	"fmt"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"strconv"
@@ -38,47 +35,72 @@ import (
 )
 
 var (
-	dataDir      = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	waitRater    = flag.Int("wait_rater", 1500, "Number of miliseconds to wait for rater to start and cache")
-	encoding     = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
-	apierCfgPath string
-	apierCfg     *config.CGRConfig
-	apierRPC     *rpc.Client
-	dm           *engine.DataManager // share db connection here so we can check data we set through APIs
+	apierCfgPath   string
+	apierCfg       *config.CGRConfig
+	apierRPC       *rpc.Client
+	dm             *engine.DataManager // share db connection here so we can check data we set through APIs
+	apierv2ConfDIR string
+
+	sTestsv2it = []func(t *testing.T){
+		testApierV2itLoadConfig,
+		testApierV2itResetDataDb,
+		testApierV2itResetStorDb,
+		testApierV2itConnectDataDB,
+		testApierV2itStartEngine,
+		testApierV2itRpcConn,
+		testApierV2itAddBalance,
+		testApierV2itSetAction,
+		testApierV2itSetAccountActionTriggers,
+		testApierV2itFraudMitigation,
+		testApierV2itSetAccountWithAP,
+		testApierV2itSetActionWithCategory,
+		testApierV2itSetActionPlanWithWrongTiming,
+		testApierV2itSetActionPlanWithWrongTiming2,
+		testApierV2itKillEngine,
+	}
 )
 
-func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
-	switch *encoding {
-	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOB:
-		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+func TestV2IT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		apierv2ConfDIR = "tutinternal"
+	case utils.MetaSQL:
+		apierv2ConfDIR = "tutmysql"
+	case utils.MetaMongo:
+		apierv2ConfDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
 	default:
-		return nil, errors.New("UNSUPPORTED_RPC")
+		t.Fatal("Unknown Database type")
+	}
+
+	for _, stest := range sTestsv2it {
+		t.Run(apierv2ConfDIR, stest)
 	}
 }
-func TestApierV2itLoadConfig(t *testing.T) {
-	apierCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
+
+func testApierV2itLoadConfig(t *testing.T) {
+	apierCfgPath = path.Join(*dataDir, "conf", "samples", apierv2ConfDIR)
 	if apierCfg, err = config.NewCGRConfigFromPath(apierCfgPath); err != nil {
 		t.Error(err)
 	}
 }
 
 // Remove data in both rating and accounting db
-func TestApierV2itResetDataDb(t *testing.T) {
+func testApierV2itResetDataDb(t *testing.T) {
 	if err := engine.InitDataDb(apierCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
-func TestApierV2itResetStorDb(t *testing.T) {
+func testApierV2itResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(apierCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestApierV2itConnectDataDB(t *testing.T) {
+func testApierV2itConnectDataDB(t *testing.T) {
 	rdsDb, _ := strconv.Atoi(apierCfg.DataDbCfg().DataDbName)
 	if rdsITdb, err := engine.NewRedisStorage(
 		fmt.Sprintf("%s:%s", apierCfg.DataDbCfg().DataDbHost, apierCfg.DataDbCfg().DataDbPort),
@@ -91,21 +113,21 @@ func TestApierV2itConnectDataDB(t *testing.T) {
 }
 
 // Start CGR Engine
-func TestApierV2itStartEngine(t *testing.T) {
+func testApierV2itStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(apierCfgPath, 200); err != nil { // Mongo requires more time to start
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestApierV2itRpcConn(t *testing.T) {
+func testApierV2itRpcConn(t *testing.T) {
 	apierRPC, err = newRPCClient(apierCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestApierV2itAddBalance(t *testing.T) {
+func testApierV2itAddBalance(t *testing.T) {
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "dan",
@@ -128,7 +150,7 @@ func TestApierV2itAddBalance(t *testing.T) {
 	}
 }
 
-func TestApierV2itSetAction(t *testing.T) {
+func testApierV2itSetAction(t *testing.T) {
 	attrs := utils.AttrSetActions{ActionsId: "DISABLE_ACCOUNT", Actions: []*utils.TPAction{
 		{Identifier: utils.DISABLE_ACCOUNT, Weight: 10.0},
 	}}
@@ -144,7 +166,7 @@ func TestApierV2itSetAction(t *testing.T) {
 	}
 }
 
-func TestApierV2itSetAccountActionTriggers(t *testing.T) {
+func testApierV2itSetAccountActionTriggers(t *testing.T) {
 	attrs := v1.AttrSetAccountActionTriggers{
 		Tenant:  "cgrates.org",
 		Account: "dan",
@@ -179,7 +201,7 @@ func TestApierV2itSetAccountActionTriggers(t *testing.T) {
 	}
 }
 
-func TestApierV2itFraudMitigation(t *testing.T) {
+func testApierV2itFraudMitigation(t *testing.T) {
 	attrs := &utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "dan",
@@ -222,7 +244,7 @@ func TestApierV2itFraudMitigation(t *testing.T) {
 	}
 }
 
-func TestApierV2itSetAccountWithAP(t *testing.T) {
+func testApierV2itSetAccountWithAP(t *testing.T) {
 	argActs1 := utils.AttrSetActions{ActionsId: "TestApierV2itSetAccountWithAP_ACT_1",
 		Actions: []*utils.TPAction{
 			{Identifier: utils.TOPUP_RESET,
@@ -334,7 +356,7 @@ func TestApierV2itSetAccountWithAP(t *testing.T) {
 	}
 }
 
-func TestApierV2itSetActionWithCategory(t *testing.T) {
+func testApierV2itSetActionWithCategory(t *testing.T) {
 	var reply string
 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "TestApierV2itSetActionWithCategory"}
 	if err := apierRPC.Call(utils.ApierV1SetAccount, attrsSetAccount, &reply); err != nil {
@@ -372,7 +394,7 @@ func TestApierV2itSetActionWithCategory(t *testing.T) {
 	}
 }
 
-func TestApierV2itSetActionPlanWithWrongTiming(t *testing.T) {
+func testApierV2itSetActionPlanWithWrongTiming(t *testing.T) {
 	var reply string
 	tNow := time.Now().Add(time.Duration(time.Minute)).String()
 	argAP1 := &v1.AttrSetActionPlan{Id: "TestApierV2itSetAccountWithAPWithWrongTiming",
@@ -391,7 +413,7 @@ func TestApierV2itSetActionPlanWithWrongTiming(t *testing.T) {
 	}
 }
 
-func TestApierV2itSetActionPlanWithWrongTiming2(t *testing.T) {
+func testApierV2itSetActionPlanWithWrongTiming2(t *testing.T) {
 	var reply string
 	argAP1 := &v1.AttrSetActionPlan{Id: "TestApierV2itSetAccountWithAPWithWrongTiming",
 		ActionPlan: []*v1.AttrActionPlan{
@@ -409,7 +431,7 @@ func TestApierV2itSetActionPlanWithWrongTiming2(t *testing.T) {
 	}
 }
 
-func TestApierV2itKillEngine(t *testing.T) {
+func testApierV2itKillEngine(t *testing.T) {
 	if err := engine.KillEngine(delay); err != nil {
 		t.Error(err)
 	}

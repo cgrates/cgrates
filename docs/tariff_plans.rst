@@ -450,8 +450,8 @@ TBD
     The action type. Can have one of the following:
 
     + **\*allow_negative**: Allow to the account to have negative balance
-    + **\*call_url**: Send a http request to the following url
-    + **\*call_url_async**: Send a http request to the following url Asynchronous
+    + **\*http_post**: Send a http request to the following url
+    + **\*http_post_async**: Send a http request to the following url Asynchronous
     + **\*cdrlog**: Log the current action in the storeDB
     + **\*debit**: Debit account balance.
     + **\*deny_negative**: Deny to the account to have negative balance
@@ -471,7 +471,7 @@ TBD
 
 [2] - ExtraParameters:
     In Extra Parameter field you can define an argument for the action. In case
-    of call_url Action, extraParameter will be the url action. In case of
+    of http_post Action, extraParameter will be the url action. In case of
     mail_async the email that you want to receive.
 
 [3] - Filter

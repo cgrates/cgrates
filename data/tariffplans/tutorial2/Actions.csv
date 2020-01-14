@@ -25,4 +25,4 @@ LOG_WARNING,*log,,,,,,,,,,,,,,,10
 DISABLE_ACCOUNT,*disable_account,,,,,,,,,,,,,,,10
 
 # WARN_HTTP_ASYNC will call url asynchronously with the account provided as JSON body
-WARN_HTTP_ASYNC,*call_url_async,http://$path/$to/$warn,,,,,,,,,,,,false,false,10
+WARN_HTTP_ASYNC,*http_post_async,http://$path/$to/$warn,,,,,,,,,,,,false,false,10

@@ -40,7 +40,47 @@ var (
 	sSv1BiRpc2        *rpc2.Client
 	sSApierRpc2       *rpc.Client
 	disconnectEvChan2 = make(chan *utils.AttrDisconnectSession)
+	sessionsConfDIR   string
+
+	sessionsThresholdTests = []func(t *testing.T){
+		testSessionSv1ItInitCfg,
+		testSessionSv1ItResetDataDb,
+		testSessionSv1ItResetStorDb,
+		testSessionSv1ItStartEngine,
+		testSessionSv1ItRpcConn,
+		testSessionSv1ItTPFromFolder,
+		testSessionSv1ItGetThreshold,
+		testSessionSv1ItAuth,
+		testSessionSv1ItInitiateSession,
+		testSessionSv1ItTerminateSession,
+		testSessionSv1ItAuthNotFoundThreshold,
+		testSessionSv1ItInitNotFoundThreshold,
+		testSessionSv1ItTerminateNotFoundThreshold,
+		testSessionSv1ItAuthNotFoundThresholdAndStats,
+		testSessionSv1ItInitNotFoundThresholdAndStats,
+		testSessionSv1ItTerminateNotFoundThresholdAndStats,
+		testSessionSv1ItStopCgrEngine,
+	}
 )
+
+func TestSessionSITtests(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		sessionsConfDIR = "sessions_internal"
+	case utils.MetaSQL:
+		sessionsConfDIR = "sessions_mysql"
+	case utils.MetaMongo:
+		sessionsConfDIR = "sessions_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+
+	for _, stest := range sessionsThresholdTests {
+		t.Run(sessionsConfDIR, stest)
+	}
+}
 
 func handleDisconnectSession2(clnt *rpc2.Client,
 	args *utils.AttrDisconnectSession, reply *string) error {
@@ -49,9 +89,9 @@ func handleDisconnectSession2(clnt *rpc2.Client,
 	return nil
 }
 
-func TestSessionSv1ItInitCfg(t *testing.T) {
+func testSessionSv1ItInitCfg(t *testing.T) {
 	var err error
-	sSv1CfgPath2 = path.Join(*dataDir, "conf", "samples", "sessions")
+	sSv1CfgPath2 = path.Join(*dataDir, "conf", "samples", sessionsConfDIR)
 	// Init config first
 	sSv1Cfg2, err = config.NewCGRConfigFromPath(sSv1CfgPath2)
 	if err != nil {
@@ -61,25 +101,25 @@ func TestSessionSv1ItInitCfg(t *testing.T) {
 	config.SetCgrConfig(sSv1Cfg2)
 }
 
-func TestSessionSv1ItResetDataDb(t *testing.T) {
+func testSessionSv1ItResetDataDb(t *testing.T) {
 	if err := engine.InitDataDb(sSv1Cfg2); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestSessionSv1ItResetStorDb(t *testing.T) {
+func testSessionSv1ItResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(sSv1Cfg2); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestSessionSv1ItStartEngine(t *testing.T) {
+func testSessionSv1ItStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(sSv1CfgPath2, 100); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestSessionSv1ItRpcConn(t *testing.T) {
+func testSessionSv1ItRpcConn(t *testing.T) {
 	dummyClnt, err := utils.NewBiJSONrpcClient(sSv1Cfg2.SessionSCfg().ListenBijson,
 		nil)
 	if err != nil {
@@ -99,18 +139,17 @@ func TestSessionSv1ItRpcConn(t *testing.T) {
 }
 
 // Load the tariff plan, creating accounts and their balances
-func TestSessionSv1ItTPFromFolder(t *testing.T) {
+func testSessionSv1ItTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{
 		FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
 	var loadInst utils.LoadInstance
-	if err := sSApierRpc2.Call(utils.ApierV2LoadTariffPlanFromFolder,
-		attrs, &loadInst); err != nil {
+	if err := sSApierRpc2.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
 	time.Sleep(500 * time.Millisecond)
 }
 
-func TestSessionSv1ItGetThreshold(t *testing.T) {
+func testSessionSv1ItGetThreshold(t *testing.T) {
 	tPrfl := &engine.ThresholdProfile{
 		Tenant:    "cgrates.org",
 		ID:        "THD_ACNT_1001",
@@ -165,7 +204,7 @@ func TestSessionSv1ItGetThreshold(t *testing.T) {
 	}
 }
 
-func TestSessionSv1ItAuth(t *testing.T) {
+func testSessionSv1ItAuth(t *testing.T) {
 	args := &sessions.V1AuthorizeArgs{
 		AuthorizeResources: true,
 		ProcessThresholds:  true,
@@ -224,7 +263,7 @@ func TestSessionSv1ItAuth(t *testing.T) {
 	}
 }
 
-func TestSessionSv1ItInitiateSession(t *testing.T) {
+func testSessionSv1ItInitiateSession(t *testing.T) {
 	initUsage := 5 * time.Minute
 	args := &sessions.V1InitSessionArgs{
 		InitSession:       true,
@@ -287,7 +326,7 @@ func TestSessionSv1ItInitiateSession(t *testing.T) {
 	}
 }
 
-func TestSessionSv1ItTerminateSession(t *testing.T) {
+func testSessionSv1ItTerminateSession(t *testing.T) {
 	args := &sessions.V1TerminateSessionArgs{
 		TerminateSession:  true,
 		ReleaseResources:  true,
@@ -344,7 +383,7 @@ func TestSessionSv1ItTerminateSession(t *testing.T) {
 	}
 }
 
-func TestSessionSv1ItAuthNotFoundThreshold(t *testing.T) {
+func testSessionSv1ItAuthNotFoundThreshold(t *testing.T) {
 	args := &sessions.V1AuthorizeArgs{
 		ProcessStats:      true,
 		GetMaxUsage:       true,
@@ -376,7 +415,7 @@ func TestSessionSv1ItAuthNotFoundThreshold(t *testing.T) {
 	}
 }
 
-func TestSessionSv1ItInitNotFoundThreshold(t *testing.T) {
+func testSessionSv1ItInitNotFoundThreshold(t *testing.T) {
 	initUsage := 1024
 	args := &sessions.V1InitSessionArgs{
 		ProcessStats:      true,
@@ -427,7 +466,7 @@ func TestSessionSv1ItInitNotFoundThreshold(t *testing.T) {
 	}
 }
 
-func TestSessionSv1ItTerminateNotFoundThreshold(t *testing.T) {
+func testSessionSv1ItTerminateNotFoundThreshold(t *testing.T) {
 	initUsage := 1024
 	args := &sessions.V1TerminateSessionArgs{
 		ProcessStats:      true,
@@ -468,7 +507,7 @@ func TestSessionSv1ItTerminateNotFoundThreshold(t *testing.T) {
 	}
 }
 
-func TestSessionSv1ItAuthNotFoundThresholdAndStats(t *testing.T) {
+func testSessionSv1ItAuthNotFoundThresholdAndStats(t *testing.T) {
 	var resp string
 	if err := sSApierRpc2.Call(utils.ApierV1RemoveStatQueueProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "Stat_2"}, &resp); err != nil {
@@ -509,7 +548,7 @@ func TestSessionSv1ItAuthNotFoundThresholdAndStats(t *testing.T) {
 	}
 }
 
-func TestSessionSv1ItInitNotFoundThresholdAndStats(t *testing.T) {
+func testSessionSv1ItInitNotFoundThresholdAndStats(t *testing.T) {
 	initUsage := 1024
 	args := &sessions.V1InitSessionArgs{
 		ProcessStats:      true,
@@ -561,7 +600,7 @@ func TestSessionSv1ItInitNotFoundThresholdAndStats(t *testing.T) {
 	}
 }
 
-func TestSessionSv1ItTerminateNotFoundThresholdAndStats(t *testing.T) {
+func testSessionSv1ItTerminateNotFoundThresholdAndStats(t *testing.T) {
 	initUsage := 1024
 	args := &sessions.V1TerminateSessionArgs{
 		ProcessStats:      true,
@@ -602,7 +641,7 @@ func TestSessionSv1ItTerminateNotFoundThresholdAndStats(t *testing.T) {
 	}
 }
 
-func TestSessionSv1ItStopCgrEngine(t *testing.T) {
+func testSessionSv1ItStopCgrEngine(t *testing.T) {
 	if err := sSv1BiRpc2.Close(); err != nil { // Close the connection so we don't get EOF warnings from client
 		t.Error(err)
 	}

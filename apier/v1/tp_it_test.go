@@ -39,35 +39,33 @@ var (
 	tpRPC       *rpc.Client
 	tpDataDir   = "/usr/share/cgrates"
 	tpConfigDIR string //run tests for specific configuration
+
+	sTestsTP = []func(t *testing.T){
+		testTPInitCfg,
+		testTPResetStorDb,
+		testTPStartEngine,
+		testTPRpcConn,
+		testTPImportTPFromFolderPath,
+		testTPExportTPToFolder,
+		testTPKillEngine,
+	}
 )
 
-var sTestsTP = []func(t *testing.T){
-	testTPInitCfg,
-	testTPResetStorDb,
-	testTPStartEngine,
-	testTPRpcConn,
-	testTPImportTPFromFolderPath,
-	testTPExportTPToFolder,
-	testTPKillEngine,
-}
-
 //Test start here
-func TestTPITMySql(t *testing.T) {
+func TestTPIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		tpConfigDIR = "tutinternal"
+	case utils.MetaSQL:
+		tpConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		tpConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		tpConfigDIR = "tutpostgres"
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	tpConfigDIR = "tutmysql"
-	for _, stest := range sTestsTP {
-		t.Run(tpConfigDIR, stest)
-	}
-}
-
-func TestTPITMongo(t *testing.T) {
-	tpConfigDIR = "tutmongo"
-	for _, stest := range sTestsTP {
-		t.Run(tpConfigDIR, stest)
-	}
-}
-
-func TestTPITPG(t *testing.T) {
-	tpConfigDIR = "tutpostgres"
 	for _, stest := range sTestsTP {
 		t.Run(tpConfigDIR, stest)
 	}

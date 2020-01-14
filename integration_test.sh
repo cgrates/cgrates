@@ -2,21 +2,38 @@
 go clean --cache
 ./test.sh
 gen=$?
+# Internal
+echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*internal'
+go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*internal
+ap1_internal=$?
+echo 'go test github.com/cgrates/cgrates/apier/v2 -tags=integration -dbtype=*internal'
+go test github.com/cgrates/cgrates/apier/v2 -tags=integration -dbtype=*internal
+ap2_internal=$?
 
-# echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*internal'
-# go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*internal
-# ap1_internal=$?
+# SQL
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*sql'
 go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*sql
 ap1_sql=$?
+echo 'go test github.com/cgrates/cgrates/apier/v2 -tags=integration -dbtype=*sql'
+go test github.com/cgrates/cgrates/apier/v2 -tags=integration -dbtype=*sql
+ap2_sql=$?
+
+# Mongo
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*mongo'
 go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*mongo
 ap1_mongo=$?
+echo 'go test github.com/cgrates/cgrates/apier/v2 -tags=integration -dbtype=*mongo'
+go test github.com/cgrates/cgrates/apier/v2 -tags=integration -dbtype=*mongo
+ap2_mongo=$?
 
+# Postgres
+echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*postgres'
+go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*postgres
+ap1_postgres=$?
+echo 'go test github.com/cgrates/cgrates/apier/v2 -tags=integration -dbtype=*postgres'
+go test github.com/cgrates/cgrates/apier/v2 -tags=integration -dbtype=*postgres
+ap2_postgres=$?
 
-echo 'go test github.com/cgrates/cgrates/apier/v2 -tags=integration'
-go test github.com/cgrates/cgrates/apier/v2 -tags=integration
-ap2=$?
 echo 'go test github.com/cgrates/cgrates/engine  -tags=integration'
 go test github.com/cgrates/cgrates/engine -tags=integration
 en=$?

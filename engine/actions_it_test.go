@@ -20,10 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"errors"
-	"flag"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"strconv"
@@ -35,28 +32,54 @@ import (
 )
 
 var (
-	actsLclCfg     *config.CGRConfig
-	actsLclRpc     *rpc.Client
-	actsLclCfgPath = path.Join(*dataDir, "conf", "samples", "actions")
+	actsLclCfg       *config.CGRConfig
+	actsLclRpc       *rpc.Client
+	actsLclCfgPath   = path.Join(*dataDir, "conf", "samples", "actions")
+	actionsConfigDIR string
 
-	waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for rater to start and cache")
-	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
+	sTestsActionsit = []func(t *testing.T){
+		testActionsitInitCfg,
+		testActionsitInitCdrDb,
+		testActionsitStartEngine,
+		testActionsitRpcConn,
+		testActionsitSetCdrlogDebit,
+		testActionsitSetCdrlogTopup,
+		testActionsitCdrlogEmpty,
+		testActionsitCdrlogWithParams,
+		testActionsitThresholdCDrLog,
+		testActionsitCDRAccount,
+		testActionsitThresholdCgrRpcAction,
+		testActionsitThresholdPostEvent,
+		testActionsitStopCgrEngine,
+	}
 )
 
-func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
-	switch *encoding {
-	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOB:
-		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
-	default:
-		return nil, errors.New("UNSUPPORTED_RPC")
+func TestActionsit(t *testing.T) {
+	// switch *dbType {
+	// case utils.MetaInternal:
+	// 	actionsConfigDIR = "tutinternal"
+	// case utils.MetaSQL:
+	// 	actionsConfigDIR = "actions"
+	// case utils.MetaMongo:
+	// 	actionsConfigDIR = "tutmongo"
+	// case utils.MetaPostgres:
+	// 	t.SkipNow()
+	// default:
+	// 	t.Fatal("Unknown Database type")
+	// }
+	// if *encoding == utils.MetaGOB {
+	// 	actionsConfigDIR += "_gob"
+	// }
+	actionsConfigDIR = "actions"
+
+	for _, stest := range sTestsActionsit {
+		t.Run(actionsConfigDIR, stest)
 	}
 }
 
-func TestActionsitInitCfg(t *testing.T) {
+func testActionsitInitCfg(t *testing.T) {
 	if *encoding == utils.MetaGOB {
-		actsLclCfgPath = path.Join(*dataDir, "conf", "samples", "actions_gob")
+		actsLclCfgPath = path.Join(*dataDir, "conf", "samples", actionsConfigDIR)
 	}
 	// Init config first
 	var err error
@@ -68,7 +91,7 @@ func TestActionsitInitCfg(t *testing.T) {
 	config.SetCgrConfig(actsLclCfg)
 }
 
-func TestActionsitInitCdrDb(t *testing.T) {
+func testActionsitInitCdrDb(t *testing.T) {
 	if err := InitDataDb(actsLclCfg); err != nil { // need it for versions
 		t.Fatal(err)
 	}
@@ -78,14 +101,14 @@ func TestActionsitInitCdrDb(t *testing.T) {
 }
 
 // Finds cgr-engine executable and starts it with default configuration
-func TestActionsitStartEngine(t *testing.T) {
+func testActionsitStartEngine(t *testing.T) {
 	if _, err := StopStartEngine(actsLclCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestActionsitRpcConn(t *testing.T) {
+func testActionsitRpcConn(t *testing.T) {
 	var err error
 	// time.Sleep(500 * time.Millisecond)
 	actsLclRpc, err = newRPCClient(actsLclCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
@@ -94,7 +117,7 @@ func TestActionsitRpcConn(t *testing.T) {
 	}
 }
 
-func TestActionsitSetCdrlogDebit(t *testing.T) {
+func testActionsitSetCdrlogDebit(t *testing.T) {
 	var reply string
 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan2904"}
 	if err := actsLclRpc.Call(utils.ApierV1SetAccount, attrsSetAccount, &reply); err != nil {
@@ -137,7 +160,7 @@ func TestActionsitSetCdrlogDebit(t *testing.T) {
 	}
 }
 
-func TestActionsitSetCdrlogTopup(t *testing.T) {
+func testActionsitSetCdrlogTopup(t *testing.T) {
 	var reply string
 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan2905"}
 	if err := actsLclRpc.Call(utils.ApierV1SetAccount, attrsSetAccount, &reply); err != nil {
@@ -180,7 +203,7 @@ func TestActionsitSetCdrlogTopup(t *testing.T) {
 	}
 }
 
-func TestActionsitCdrlogEmpty(t *testing.T) {
+func testActionsitCdrlogEmpty(t *testing.T) {
 	var reply string
 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan2904"}
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACTS_3", Actions: []*utils.TPAction{
@@ -214,7 +237,7 @@ func TestActionsitCdrlogEmpty(t *testing.T) {
 	}
 }
 
-func TestActionsitCdrlogWithParams(t *testing.T) {
+func testActionsitCdrlogWithParams(t *testing.T) {
 	var reply string
 	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan2904"}
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACTS_4",
@@ -253,7 +276,7 @@ func TestActionsitCdrlogWithParams(t *testing.T) {
 	}
 }
 
-func TestActionsitThresholdCDrLog(t *testing.T) {
+func testActionsitThresholdCDrLog(t *testing.T) {
 	var thReply *ThresholdProfile
 	var result string
 	var reply string
@@ -365,7 +388,7 @@ func TestActionsitThresholdCDrLog(t *testing.T) {
 	}
 }
 
-func TestActionsitCDRAccount(t *testing.T) {
+func testActionsitCDRAccount(t *testing.T) {
 	var reply string
 	acnt := "10023456789"
 
@@ -473,7 +496,7 @@ func TestActionsitCDRAccount(t *testing.T) {
 	}
 }
 
-func TestActionsitThresholdCgrRpcAction(t *testing.T) {
+func testActionsitThresholdCgrRpcAction(t *testing.T) {
 	var thReply *ThresholdProfile
 	var result string
 	var reply string
@@ -540,7 +563,7 @@ func TestActionsitThresholdCgrRpcAction(t *testing.T) {
 
 }
 
-func TestActionsitThresholdPostEvent(t *testing.T) {
+func testActionsitThresholdPostEvent(t *testing.T) {
 	var thReply *ThresholdProfile
 	var result string
 	var reply string
@@ -620,7 +643,7 @@ func TestActionsitThresholdPostEvent(t *testing.T) {
 
 }
 
-func TestActionsitStopCgrEngine(t *testing.T) {
+func testActionsitStopCgrEngine(t *testing.T) {
 	if err := KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}

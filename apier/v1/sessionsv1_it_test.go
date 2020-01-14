@@ -41,7 +41,9 @@ var (
 	sSApierRpc      *rpc.Client
 	discEvChan      = make(chan *utils.AttrDisconnectSession, 1)
 	sSV1RequestType string
+
 	sTestSessionSv1 = []func(t *testing.T){
+		testSSv1ItInitCfgDir,
 		testSSv1ItInitCfg,
 		testSSv1ItResetDataDb,
 		testSSv1ItResetStorDb,
@@ -66,6 +68,21 @@ var (
 		testSSv1ItStopCgrEngine,
 	}
 )
+
+func testSSv1ItInitCfgDir(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		sessionsConfDIR = "sessions_internal"
+	case utils.MetaSQL:
+		sessionsConfDIR = "sessions_mysql"
+	case utils.MetaMongo:
+		sessionsConfDIR = "sessions_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+}
 
 func handleDisconnectSession(clnt *rpc2.Client,
 	args *utils.AttrDisconnectSession, reply *string) error {
@@ -107,18 +124,6 @@ func TestSSv1ItWithPseudoPrepaid(t *testing.T) {
 	for _, stest := range sTestSessionSv1 {
 		t.Run(sSV1RequestType, stest)
 	}
-}
-
-func testSSv1ItInitCfg(t *testing.T) {
-	var err error
-	sSv1CfgPath = path.Join(*dataDir, "conf", "samples", "sessions")
-	// Init config first
-	sSv1Cfg, err = config.NewCGRConfigFromPath(sSv1CfgPath)
-	if err != nil {
-		t.Error(err)
-	}
-	sSv1Cfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(sSv1Cfg)
 }
 
 func testSSv1ItResetDataDb(t *testing.T) {

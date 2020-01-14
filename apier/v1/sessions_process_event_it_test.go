@@ -21,10 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"path"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
@@ -51,33 +53,97 @@ var sTestSessionSv1ProcessEvent = []func(t *testing.T){
 }
 
 func TestSSv1ItProcessEventWithPrepaid(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		sessionsConfDIR = "sessions_internal"
+	case utils.MetaSQL:
+		sessionsConfDIR = "sessions_mysql"
+	case utils.MetaMongo:
+		sessionsConfDIR = "sessions_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+
 	sSV1RequestType = utils.META_PREPAID
 	for _, stest := range sTestSessionSv1ProcessEvent {
-		t.Run(sSV1RequestType, stest)
+		t.Run(sessionsConfDIR+utils.EmptyString+sSV1RequestType, stest)
 	}
 }
 
 func TestSSv1ItProcessEventWithPostPaid(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		sessionsConfDIR = "sessions_internal"
+	case utils.MetaSQL:
+		sessionsConfDIR = "sessions_mysql"
+	case utils.MetaMongo:
+		sessionsConfDIR = "sessions_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+
 	sSV1RequestType = utils.META_POSTPAID
 	sTestSessionSv1ProcessEvent = append(sTestSessionSv1ProcessEvent[:len(sTestSessionSv1ProcessEvent)-3], testSSv1ItStopCgrEngine)
 	for _, stest := range sTestSessionSv1ProcessEvent {
-		t.Run(sSV1RequestType, stest)
+		t.Run(sessionsConfDIR+utils.EmptyString+sSV1RequestType, stest)
 	}
 }
 
 func TestSSv1ItProcessEventWithRated(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		sessionsConfDIR = "sessions_internal"
+	case utils.MetaSQL:
+		sessionsConfDIR = "sessions_mysql"
+	case utils.MetaMongo:
+		sessionsConfDIR = "sessions_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+
 	sSV1RequestType = utils.META_RATED
 	sTestSessionSv1ProcessEvent = append(sTestSessionSv1ProcessEvent[:len(sTestSessionSv1ProcessEvent)-3], testSSv1ItStopCgrEngine)
 	for _, stest := range sTestSessionSv1ProcessEvent {
-		t.Run(sSV1RequestType, stest)
+		t.Run(sessionsConfDIR+utils.EmptyString+sSV1RequestType, stest)
 	}
 }
 
 func TestSSv1ItProcessEventWithPseudoPrepaid(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		sessionsConfDIR = "sessions_internal"
+	case utils.MetaSQL:
+		sessionsConfDIR = "sessions_mysql"
+	case utils.MetaMongo:
+		sessionsConfDIR = "sessions_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+
 	sSV1RequestType = utils.META_PSEUDOPREPAID
 	for _, stest := range sTestSessionSv1ProcessEvent {
-		t.Run(sSV1RequestType, stest)
+		t.Run(sessionsConfDIR+utils.EmptyString+sSV1RequestType, stest)
 	}
+}
+
+func testSSv1ItInitCfg(t *testing.T) {
+	var err error
+	sSv1CfgPath = path.Join(*dataDir, "conf", "samples", sessionsConfDIR)
+	// Init config first
+	sSv1Cfg, err = config.NewCGRConfigFromPath(sSv1CfgPath)
+	if err != nil {
+		t.Error(err)
+	}
+	sSv1Cfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	config.SetCgrConfig(sSv1Cfg)
 }
 
 func testSSv1ItProcessEventAuth(t *testing.T) {
@@ -109,7 +175,7 @@ func testSSv1ItProcessEventAuth(t *testing.T) {
 	if rply.MaxUsage != authUsage {
 		t.Errorf("Unexpected MaxUsage: %v", rply.MaxUsage)
 	}
-	if *rply.ResourceMessage == "" {
+	if *rply.ResourceMessage == utils.EmptyString {
 		t.Errorf("Unexpected ResourceMessage: %s", *rply.ResourceMessage)
 	}
 	eSplrs := &engine.SortedSuppliers{
