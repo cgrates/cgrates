@@ -31,56 +31,22 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestITCDRsMySQL(t *testing.T) {
-	cfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "mysql"))
-	if err != nil {
-		t.Error(err)
+func TestITCDRs(t *testing.T) {
+	var cdrsConfigDIR string
+	switch *dbType {
+	case utils.MetaInternal:
+		cdrsConfigDIR = "internal"
+	case utils.MetaSQL:
+		cdrsConfigDIR = "mysql"
+	case utils.MetaMongo:
+		cdrsConfigDIR = "mongo"
+	case utils.MetaPostgres:
+		cdrsConfigDIR = "postgres"
+	default:
+		t.Fatal("Unknown Database type")
 	}
-	if err := testGetCDRs(cfg); err != nil {
-		t.Error(err)
-	}
-	if err := testSetCDR(cfg); err != nil {
-		t.Error(err)
-	}
-	if err := testSMCosts(cfg); err != nil {
-		t.Error(err)
-	}
-}
 
-func TestITCDRsPSQL(t *testing.T) {
-	cfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "postgres"))
-	if err != nil {
-		t.Error(err)
-	}
-	if err := testGetCDRs(cfg); err != nil {
-		t.Error(err)
-	}
-	if err := testSetCDR(cfg); err != nil {
-		t.Error(err)
-	}
-	if err := testSMCosts(cfg); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestITCDRsMongo(t *testing.T) {
-	cfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "mongo"))
-	if err != nil {
-		t.Error(err)
-	}
-	if err := testGetCDRs(cfg); err != nil {
-		t.Error(err)
-	}
-	if err := testSetCDR(cfg); err != nil {
-		t.Error(err)
-	}
-	if err := testSMCosts(cfg); err != nil {
-		t.Error(err)
-	}
-}
-
-func TestITCDRsInternal(t *testing.T) {
-	cfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "internal"))
+	cfg, err := config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", cdrsConfigDIR))
 	if err != nil {
 		t.Error(err)
 	}

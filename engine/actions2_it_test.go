@@ -51,26 +51,31 @@ var sTestsActions = []func(t *testing.T){
 	testActionsKillEngine,
 }
 
-func TestActionsITRemoveSMCostRedis(t *testing.T) {
-	actsCfgDir = "actions"
-	for _, stest := range sTestsActions {
-		t.Run("TestsActionsITRedis", stest)
+func TestActionsITRemoveSMCost(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaSQL:
+		actsCfgDir = "actions_mysql"
+	case utils.MetaMongo:
+		actsCfgDir = "cdrsv2mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
+	if *encoding == utils.MetaGOB {
+		actsCfgDir += "_gob"
+	}
 
-func TestActionsITRemoveSMCostMongo(t *testing.T) {
-	actsCfgDir = "cdrsv2mongo"
 	for _, stest := range sTestsActions {
-		t.Run("TestsActionsITMongo", stest)
+		t.Run(actsCfgDir, stest)
 	}
 }
 
 func testActionsInitCfg(t *testing.T) {
 	var err error
 	actsCfgPath = path.Join(*dataDir, "conf", "samples", actsCfgDir)
-	if *encoding == utils.MetaGOB {
-		actsCfgPath = path.Join(*dataDir, "conf", "samples", actsCfgDir+"_gob")
-	}
 	actsCfg, err = config.NewCGRConfigFromPath(actsCfgPath)
 	if err != nil {
 		t.Error(err)
@@ -78,7 +83,10 @@ func testActionsInitCfg(t *testing.T) {
 }
 
 func testActionsInitCdrsStore(t *testing.T) {
-	if actsCfgDir == "actions" {
+	switch *dbType {
+	case utils.MetaInternal:
+		actsCdrStore = NewInternalDB(actsCfg.StorDbCfg().StringIndexedFields, actsCfg.StorDbCfg().PrefixIndexedFields, true, actsCfg.StorDbCfg().Items)
+	case utils.MetaSQL:
 		if actsCdrStore, err = NewMySQLStorage(actsCfg.StorDbCfg().Host,
 			actsCfg.StorDbCfg().Port, actsCfg.StorDbCfg().Name,
 			actsCfg.StorDbCfg().User, actsCfg.StorDbCfg().Password,
@@ -86,13 +94,17 @@ func testActionsInitCdrsStore(t *testing.T) {
 			actsCfg.StorDbCfg().ConnMaxLifetime); err != nil {
 			t.Fatal("Could not connect to mysql", err.Error())
 		}
-	} else if actsCfgDir == "cdrsv2mongo" {
+	case utils.MetaMongo:
 		if actsCdrStore, err = NewMongoStorage(actsCfg.StorDbCfg().Host,
 			actsCfg.StorDbCfg().Port, actsCfg.StorDbCfg().Name,
 			actsCfg.StorDbCfg().User, actsCfg.StorDbCfg().Password,
 			utils.StorDB, nil, false); err != nil {
 			t.Fatal("Could not connect to mongo", err.Error())
 		}
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
 }
 
@@ -155,7 +167,7 @@ func testActionsSetSMCosts(t *testing.T) {
 		}
 	}
 	// READ
-	if rcv, err := actsCdrStore.GetSMCosts("", "", "", ""); err != nil {
+	if rcv, err := actsCdrStore.GetSMCosts(utils.EmptyString, utils.EmptyString, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Fatal(err)
 	} else if len(rcv) != 3 {
 		t.Errorf("Expected 3 results received %v ", len(rcv))
@@ -188,7 +200,7 @@ func testActionsExecuteRemoveSMCos1(t *testing.T) {
 	}
 
 	// READ
-	if rcv, err := actsCdrStore.GetSMCosts("", "", "", ""); err != nil {
+	if rcv, err := actsCdrStore.GetSMCosts(utils.EmptyString, utils.EmptyString, utils.EmptyString, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if len(rcv) != 2 {
 		t.Errorf("Expected 2 result received %v ", len(rcv))
@@ -221,7 +233,7 @@ func testActionsExecuteRemoveSMCos2(t *testing.T) {
 	}
 
 	// READ
-	if _, err := actsCdrStore.GetSMCosts("", "", "", ""); err != utils.ErrNotFound {
+	if _, err := actsCdrStore.GetSMCosts(utils.EmptyString, utils.EmptyString, utils.EmptyString, utils.EmptyString); err != utils.ErrNotFound {
 		t.Error(err)
 	}
 }

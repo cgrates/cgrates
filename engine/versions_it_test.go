@@ -29,52 +29,45 @@ import (
 )
 
 var (
-	storageDb Storage
-	dm3       *DataManager
-	dbtype    string
+	storageDb         Storage
+	dm3               *DataManager
+	versionsConfigDIR string
+
+	sTestsITVersions = []func(t *testing.T){
+		testInitConfig,
+		testInitDataDB,
+		testVersionsFlush,
+		testVersion,
+		testVersionsFlush,
+	}
 )
 
-var sTestsITVersions = []func(t *testing.T){
-	testVersionsFlush,
-	testVersion,
-	testVersionsFlush,
-}
+func TestVersionsIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaSQL:
+		versionsConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		versionsConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		versionsConfigDIR = "storage/postgres"
+	default:
+		t.Fatal("Unknown Database type")
+	}
 
-func TestVersionsITMongo(t *testing.T) {
-	var err error
-	if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "tutmongo")); err != nil {
-		t.Fatal(err)
-	}
-	dbConn, err := NewDataDBConn(cfg.DataDbCfg().DataDbType,
-		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
-		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
-		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-		"", cfg.DataDbCfg().Items)
-	if err != nil {
-		log.Fatal(err)
-	}
-	dm3 = NewDataManager(dbConn, cfg.CacheCfg(), nil)
-	storageDb, err = NewStorDBConn(cfg.StorDbCfg().Type,
-		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
-		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
-		cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,
-		cfg.StorDbCfg().MaxOpenConns, cfg.StorDbCfg().MaxIdleConns,
-		cfg.StorDbCfg().ConnMaxLifetime, cfg.StorDbCfg().StringIndexedFields,
-		cfg.StorDbCfg().PrefixIndexedFields, cfg.StorDbCfg().Items)
-	if err != nil {
-		log.Fatal(err)
-	}
-	dbtype = utils.MONGO
 	for _, stest := range sTestsITVersions {
-		t.Run("TestVersionsITMongo", stest)
+		t.Run(versionsConfigDIR, stest)
 	}
 }
 
-func TestVersionsITRedisMYSQL(t *testing.T) {
-	var err error
-	if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "tutmysql")); err != nil {
+func testInitConfig(t *testing.T) {
+	if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", versionsConfigDIR)); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func testInitDataDB(t *testing.T) {
 	dbConn, err := NewDataDBConn(cfg.DataDbCfg().DataDbType,
 		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
 		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
@@ -94,41 +87,6 @@ func TestVersionsITRedisMYSQL(t *testing.T) {
 		cfg.StorDbCfg().PrefixIndexedFields, cfg.StorDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
-	}
-	dbtype = utils.REDIS
-	for _, stest := range sTestsITVersions {
-		t.Run("TestVersionsITRedis", stest)
-	}
-}
-
-func TestVersionsITRedisPostgres(t *testing.T) {
-	var err error
-	if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "postgres")); err != nil {
-		t.Fatal(err)
-	}
-	dbConn, err := NewDataDBConn(cfg.DataDbCfg().DataDbType,
-		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
-		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
-		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-		"", cfg.DataDbCfg().Items)
-	if err != nil {
-		log.Fatal(err)
-	}
-	dm3 = NewDataManager(dbConn, cfg.CacheCfg(), nil)
-	storageDb, err = NewStorDBConn(cfg.StorDbCfg().Type,
-		cfg.StorDbCfg().Host, cfg.StorDbCfg().Port,
-		cfg.StorDbCfg().Name, cfg.StorDbCfg().User,
-		cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,
-		cfg.StorDbCfg().MaxOpenConns, cfg.StorDbCfg().MaxIdleConns,
-		cfg.StorDbCfg().ConnMaxLifetime, cfg.StorDbCfg().StringIndexedFields,
-		cfg.StorDbCfg().PrefixIndexedFields, cfg.StorDbCfg().Items)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	dbtype = utils.REDIS
-	for _, stest := range sTestsITVersions {
-		t.Run("TestMigratorITPostgres", stest)
 	}
 }
 

@@ -1,0 +1,65 @@
+{
+// CGRateS Configuration file
+//
+// Used for cgradmin
+// Starts rater, scheduler
+
+"general": {
+    "log_level": 7,
+},
+
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],
+	},
+},
+
+"listen": {
+	"rpc_json": ":2012",			// RPC JSON listening address
+	"rpc_gob": ":2013",			// RPC GOB listening address
+	"http": ":2080",				// HTTP listening address
+},
+
+
+"data_db": {
+	"db_type": "*internal",	
+},
+
+
+"stor_db": {
+	"db_type": "*internal",	
+},
+
+"rals": {
+	"enabled": true,						// enable Rater service: <true|false>
+},
+
+"schedulers": {
+	"enabled": true,						// start Scheduler service: <true|false>
+	"cdrs_conns": ["conn1"],
+},
+
+"cdrs": {
+	"enabled": true,						// start the CDR Server service:  <true|false>
+	"chargers_conns":["conn1"],
+},
+
+"chargers": {
+	"enabled": true,
+},
+
+"users": {
+	"enabled": true,							// starts users service: <true|false>.
+},
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "-1",
+},
+
+"apier": {
+	"scheduler_conns": ["*internal"],
+},
+
+}

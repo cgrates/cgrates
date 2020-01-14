@@ -59,78 +59,57 @@ var sTestsStorDBit = []func(t *testing.T){
 	testStorDBitCRUDSMCosts2,
 }
 
-func TestStorDBitMySQL(t *testing.T) {
-	if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "mysql")); err != nil {
-		t.Fatal(err)
-	}
-	if storDB, err = NewMySQLStorage(cfg.StorDbCfg().Host,
-		cfg.StorDbCfg().Port, cfg.StorDbCfg().Name,
-		cfg.StorDbCfg().User, cfg.StorDbCfg().Password,
-		cfg.StorDbCfg().MaxOpenConns, cfg.StorDbCfg().MaxIdleConns,
-		cfg.StorDbCfg().ConnMaxLifetime); err != nil {
-		t.Fatal(err)
-	}
-	for _, stest := range sTestsStorDBit {
-		stestFullName := runtime.FuncForPC(reflect.ValueOf(stest).Pointer()).Name()
-		split := strings.Split(stestFullName, ".")
-		stestName := split[len(split)-1]
-		t.Run(stestName, stest)
-	}
-}
-
-func TestStorDBitPostgresSQL(t *testing.T) {
-	if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "postgres")); err != nil {
-		t.Fatal(err)
-	}
-	if storDB, err = NewPostgresStorage(cfg.StorDbCfg().Host,
-		cfg.StorDbCfg().Port, cfg.StorDbCfg().Name,
-		cfg.StorDbCfg().User, cfg.StorDbCfg().Password,
-		cfg.StorDbCfg().SSLMode, cfg.StorDbCfg().MaxOpenConns,
-		cfg.StorDbCfg().MaxIdleConns, cfg.StorDbCfg().ConnMaxLifetime); err != nil {
-		t.Fatal(err)
-	}
-	for _, stest := range sTestsStorDBit {
-		stestFullName := runtime.FuncForPC(reflect.ValueOf(stest).Pointer()).Name()
-		split := strings.Split(stestFullName, ".")
-		stestName := split[len(split)-1]
-		t.Run(stestName, stest)
-	}
-}
-
-func TestStorDBitMongo(t *testing.T) {
-	if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "mongo")); err != nil {
-		t.Fatal(err)
-	}
-	if storDB, err = NewMongoStorage(cfg.StorDbCfg().Host,
-		cfg.StorDbCfg().Port, cfg.StorDbCfg().Name,
-		cfg.StorDbCfg().User, cfg.StorDbCfg().Password,
-		utils.StorDB, cfg.StorDbCfg().StringIndexedFields, false); err != nil {
-		t.Fatal(err)
-	}
-	for _, stest := range sTestsStorDBit {
-		stestFullName := runtime.FuncForPC(reflect.ValueOf(stest).Pointer()).Name()
-		split := strings.Split(stestFullName, ".")
-		stestName := split[len(split)-1]
-		// Fixme: Implement mongo needed versions methods
-		if stestName != "testStorDBitCRUDVersions" {
-			stestName := split[len(split)-1]
-			t.Run(stestName, stest)
+func TestStorDBit(t *testing.T) {
+	//var stestName string
+	switch *dbType {
+	case utils.MetaInternal:
+		if cfg, err = config.NewDefaultCGRConfig(); err != nil {
+			t.Error(err)
 		}
+		config.SetCgrConfig(cfg)
+		storDB = NewInternalDB(nil, nil, false, cfg.StorDbCfg().Items)
+	case utils.MetaSQL:
+		if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "mysql")); err != nil {
+			t.Fatal(err)
+		}
+		if storDB, err = NewMySQLStorage(cfg.StorDbCfg().Host,
+			cfg.StorDbCfg().Port, cfg.StorDbCfg().Name,
+			cfg.StorDbCfg().User, cfg.StorDbCfg().Password,
+			cfg.StorDbCfg().MaxOpenConns, cfg.StorDbCfg().MaxIdleConns,
+			cfg.StorDbCfg().ConnMaxLifetime); err != nil {
+			t.Fatal(err)
+		}
+	case utils.MetaMongo:
+		if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "mongo")); err != nil {
+			t.Fatal(err)
+		}
+		if storDB, err = NewMongoStorage(cfg.StorDbCfg().Host,
+			cfg.StorDbCfg().Port, cfg.StorDbCfg().Name,
+			cfg.StorDbCfg().User, cfg.StorDbCfg().Password,
+			utils.StorDB, cfg.StorDbCfg().StringIndexedFields, false); err != nil {
+			t.Fatal(err)
+		}
+	case utils.MetaPostgres:
+		if cfg, err = config.NewCGRConfigFromPath(path.Join(*dataDir, "conf", "samples", "storage", "postgres")); err != nil {
+			t.Fatal(err)
+		}
+		if storDB, err = NewPostgresStorage(cfg.StorDbCfg().Host,
+			cfg.StorDbCfg().Port, cfg.StorDbCfg().Name,
+			cfg.StorDbCfg().User, cfg.StorDbCfg().Password,
+			cfg.StorDbCfg().SSLMode, cfg.StorDbCfg().MaxOpenConns,
+			cfg.StorDbCfg().MaxIdleConns, cfg.StorDbCfg().ConnMaxLifetime); err != nil {
+			t.Fatal(err)
+		}
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
 
-func TestStorDBitInternalDB(t *testing.T) {
-	if cfg, err = config.NewDefaultCGRConfig(); err != nil {
-		t.Error(err)
-	}
-	config.SetCgrConfig(cfg)
-	storDB = NewInternalDB(nil, nil, false, cfg.StorDbCfg().Items)
 	for _, stest := range sTestsStorDBit {
 		stestFullName := runtime.FuncForPC(reflect.ValueOf(stest).Pointer()).Name()
 		split := strings.Split(stestFullName, ".")
 		stestName := split[len(split)-1]
 		// Fixme: Implement mongo needed versions methods
-		if stestName != "testStorDBitCRUDVersions" {
+		if (*dbType == utils.MetaMongo || *dbType == utils.MetaInternal) && stestName != "testStorDBitCRUDVersions" {
 			stestName := split[len(split)-1]
 			t.Run(stestName, stest)
 		}
