@@ -98,7 +98,7 @@ package general_tests
 // 	var reply string
 // 	if err := tutLocalRpc.Call("ApierV1.LoadCache", utils.AttrReloadCache{}, &reply); err != nil {
 // 		t.Error(err)
-// 	} else if reply != "OK" {
+// 	} else if reply != utils.OK {
 // 		t.Error(reply)
 // 	}
 // 	var rcvStats *utils.CacheStats
@@ -1188,7 +1188,7 @@ package general_tests
 // 	attrs := &v2.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", ActionPlanIDs: &[]string{"PACKAGE_10"}, ActionTriggerIDs: &[]string{"STANDARD_TRIGGERS"}, ReloadScheduler: true}
 // 	if err := tutLocalRpc.Call(utils.ApierV2SetAccount, attrs, &reply); err != nil {
 // 		t.Error("Got error on ApierV2.SetAccount: ", err.Error())
-// 	} else if reply != "OK" {
+// 	} else if reply != utils.OK {
 // 		t.Errorf("Calling ApierV2.SetAccount received: %s", reply)
 // 	}
 // 	type AttrGetAccounts struct {
@@ -1227,7 +1227,7 @@ package general_tests
 
 // 	if err := tutLocalRpc.Call(utils.ApierV2SetAccount, attrs, &reply); err != nil {
 // 		t.Error("Got error on ApierV2.SetAccount: ", err.Error())
-// 	} else if reply != "OK" {
+// 	} else if reply != utils.OK {
 // 		t.Errorf("Calling ApierV2.SetAccount received: %s", reply)
 // 	}
 // 	if err := tutLocalRpc.Call("ApierV2.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
@@ -1257,7 +1257,7 @@ package general_tests
 
 // 	if err := tutLocalRpc.Call(utils.ApierV2SetAccount, attrs, &reply); err != nil {
 // 		t.Error("Got error on ApierV2.SetAccount: ", err.Error())
-// 	} else if reply != "OK" {
+// 	} else if reply != utils.OK {
 // 		t.Errorf("Calling ApierV2.SetAccount received: %s", reply)
 // 	}
 // 	time.Sleep(100*time.Millisecond + time.Duration(*waitRater)*time.Millisecond) // Give time for scheduler to execute topups

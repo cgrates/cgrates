@@ -411,7 +411,7 @@ func testActionsitCDRAccount(t *testing.T) {
 	}
 	if err := actsLclRpc.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
-	} else if reply != "OK" {
+	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
 
