@@ -1,37 +1,22 @@
 2. Architecture
 ===============
-The CGRateS suite consists of **five** software applications described below.
+
+The CGRateS framework consists of functionality packed within **five** software applications, described below.
 
 .. hlist::
    :columns: 5
 
-   - cgr-engine
-   - cgr-loader
-   - cgr-console
-   - cgr-tester
-   - cgr-migrator
+   - `cgr-engine`_
+   - `cgr-console`_
+   - `cgr-loader`_
+   - `cgr-migrator`_
+   - `cgr-tester`_
 
 
-CGRateS has an internal cache.
+.. _cgr-engine:
 
-::
-
-   "internal_cache" - cache
-
-Operates with different external databases mentioned below.
-
-::
-
-   "data_db"       - MongoDB, Redis
-   "stor_db"       - MongoDB, MySQL, PostgreSQL
-
-
-.. hlist::
-   :columns: 1
-
-   - **data_db**       - used to store runtime data ( eg: accounts )
-   - **stor_db**       - used to store offline tariff plan(s) and CDRs
-
+2.1. cgr-engine
+---------------
 
 .. figure::  images/CGRateSInternalArchitecture.png
    :alt: CGRateS Internal Architecture
@@ -39,13 +24,9 @@ Operates with different external databases mentioned below.
    :scale: 75 %
 
 
-   Internal Architecture of **cgr-engine**
+   Internal Architecture of **cgr-engine**_.
 
-2.1. cgr-engine
----------------
-Is the most important and complex component.
-Customisable through the use of *json* configuration file(s),
-it will start on demand **one or more** service(s), outlined below.
+Main component, implements most of the CGRateS functionality in form of services customisable through the use of *json* engine_configuration_ or command line arguments.
 
 ::
 
