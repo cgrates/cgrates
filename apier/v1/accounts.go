@@ -429,7 +429,9 @@ func (api *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *str
 		return
 	}
 	balance.Type = utils.StringPointer(attr.BalanceType)
-	balance.Value = &utils.ValueFormula{Static: math.Abs(attr.Value)}
+	if attr.Value != 0 {
+		balance.Value = &utils.ValueFormula{Static: math.Abs(attr.Value)}
+	}
 
 	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	if _, err = api.DataManager.GetAccount(accID); err != nil {
@@ -500,7 +502,9 @@ func (api *ApierV1) SetBalance(attr *utils.AttrSetBalance, reply *string) (err e
 		return
 	}
 	balance.Type = utils.StringPointer(attr.BalanceType)
-	balance.Value = &utils.ValueFormula{Static: math.Abs(attr.Value)}
+	if attr.Value != 0 {
+		balance.Value = &utils.ValueFormula{Static: math.Abs(attr.Value)}
+	}
 	if (balance.ID == nil || *balance.ID == "") &&
 		(balance.Uuid == nil || *balance.Uuid == "") {
 		return utils.NewErrMandatoryIeMissing("BalanceID", "or", "BalanceUUID")

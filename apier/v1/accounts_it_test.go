@@ -50,7 +50,11 @@ var (
 		testAccITAddVoiceBalance,
 		testAccITDebitBalance,
 		testAccITAddBalance,
+		testAccITAddBalanceWithValue0,
+		testAccITAddBalanceWithValueInMap,
 		testAccITSetBalance,
+		testAccITSetBalanceWithVaslue0,
+		testAccITSetBalanceWithVaslueInMap,
 		testAccITSetBalanceWithExtraData,
 		testAccITSetBalanceWithExtraData2,
 		testAccITSetBalanceTimingIds,
@@ -62,7 +66,6 @@ var (
 )
 
 func TestAccITWithRemove(t *testing.T) {
-
 	switch *dbType {
 	case utils.MetaInternal:
 		accTestsConfig = "tutinternal"
@@ -86,7 +89,6 @@ func TestAccITWithRemove(t *testing.T) {
 }
 
 func TestAccITWithoutRemove(t *testing.T) {
-
 	switch *dbType {
 	case utils.MetaInternal:
 		accTestsConfig = "acc_balance_keep_internal"
@@ -522,5 +524,155 @@ func testAccITCountAccounts(t *testing.T) {
 func testAccITStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
+	}
+}
+
+func testAccITSetBalanceWithVaslue0(t *testing.T) {
+	var reply string
+	args := &utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "testAccSetBalance",
+		BalanceType: "*monetary",
+		Balance: map[string]interface{}{
+			utils.ID:     "testAccSetBalance",
+			utils.Weight: 10,
+		},
+	}
+	if err := accRPC.Call(utils.ApierV1SetBalance, args, &reply); err != nil {
+		t.Error("Got error on SetBalance: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling SetBalance received: %s", reply)
+	}
+
+	var acnt engine.Account
+	attrAcc := &utils.AttrGetAccount{
+		Tenant:  accTenant,
+		Account: "testAccSetBalance",
+	}
+	if err := accRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, value := range acnt.BalanceMap[utils.MONETARY] {
+		// check only where balance ID is testBalanceID (SetBalance function call was made with this Balance ID)
+		if value.ID == "testAccSetBalance" {
+			if value.GetValue() != 1.5 {
+				t.Errorf("Expecting %+v, received: %+v", 1.5, value.GetValue())
+			}
+			if value.Weight != 10 {
+				t.Errorf("Expecting %+v, received: %+v", 10, value.Weight)
+			}
+			break
+		}
+	}
+}
+
+func testAccITSetBalanceWithVaslueInMap(t *testing.T) {
+	var reply string
+	args := &utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "testAccSetBalance",
+		BalanceType: "*monetary",
+		Balance: map[string]interface{}{
+			utils.ID:     "testAccSetBalance",
+			utils.Weight: 10,
+			utils.Value:  2,
+		},
+	}
+	if err := accRPC.Call(utils.ApierV1SetBalance, args, &reply); err != nil {
+		t.Error("Got error on SetBalance: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling SetBalance received: %s", reply)
+	}
+
+	var acnt engine.Account
+	attrAcc := &utils.AttrGetAccount{
+		Tenant:  accTenant,
+		Account: "testAccSetBalance",
+	}
+	if err := accRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, value := range acnt.BalanceMap[utils.MONETARY] {
+		// check only where balance ID is testBalanceID (SetBalance function call was made with this Balance ID)
+		if value.ID == "testAccSetBalance" {
+			if value.GetValue() != 2 {
+				t.Errorf("Expecting %+v, received: %+v", 2, value.GetValue())
+			}
+			if value.Weight != 10 {
+				t.Errorf("Expecting %+v, received: %+v", 10, value.Weight)
+			}
+			break
+		}
+	}
+}
+
+func testAccITAddBalanceWithValue0(t *testing.T) {
+	var reply string
+	attrs := &AttrAddBalance{
+		Tenant:      "cgrates.org",
+		Account:     "testAccAddBalance",
+		BalanceType: utils.MONETARY,
+	}
+	if err := accRPC.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
+	}
+
+	var acnt engine.Account
+	attrAcc := &utils.AttrGetAccount{
+		Tenant:  accTenant,
+		Account: "testAccAddBalance",
+	}
+	if err := accRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, value := range acnt.BalanceMap[utils.MONETARY] {
+		// check only where balance ID is testBalanceID (SetBalance function call was made with this Balance ID)
+		if value.ID == "testAccSetBalance" {
+			if value.GetValue() != 1.5 {
+				t.Errorf("Expecting %+v, received: %+v", 1.5, value.GetValue())
+			}
+			break
+		}
+	}
+}
+
+func testAccITAddBalanceWithValueInMap(t *testing.T) {
+	var reply string
+	attrs := &AttrAddBalance{
+		Tenant:      "cgrates.org",
+		Account:     "testAccAddBalance",
+		BalanceType: utils.MONETARY,
+		Balance: map[string]interface{}{
+			utils.Value: 1.5,
+		},
+	}
+	if err := accRPC.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
+	}
+
+	var acnt engine.Account
+	attrAcc := &utils.AttrGetAccount{
+		Tenant:  accTenant,
+		Account: "testAccAddBalance",
+	}
+	if err := accRPC.Call(utils.ApierV2GetAccount, attrAcc, &acnt); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, value := range acnt.BalanceMap[utils.MONETARY] {
+		// check only where balance ID is testBalanceID (SetBalance function call was made with this Balance ID)
+		if value.ID == "testAccSetBalance" {
+			if value.GetValue() != 3 {
+				t.Errorf("Expecting %+v, received: %+v", 3, value.GetValue())
+			}
+			break
+		}
 	}
 }
