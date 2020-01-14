@@ -124,7 +124,7 @@ func TestStorDBitInternalDB(t *testing.T) {
 		t.Error(err)
 	}
 	config.SetCgrConfig(cfg)
-	storDB = NewInternalDB(nil, nil)
+	storDB = NewInternalDB(nil, nil, false, cfg.StorDbCfg().Items)
 	for _, stest := range sTestsStorDBit {
 		stestFullName := runtime.FuncForPC(reflect.ValueOf(stest).Pointer()).Name()
 		split := strings.Split(stestFullName, ".")

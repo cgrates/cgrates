@@ -37,9 +37,9 @@ import (
 )
 
 func TestAgReqAsNavigableMap(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS)
 	// populate request, emulating the way will be done in HTTPAgent
@@ -133,9 +133,9 @@ func TestAgReqAsNavigableMap(t *testing.T) {
 }
 
 func TestAgReqMaxCost(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS)
 	// populate request, emulating the way will be done in HTTPAgent
@@ -177,8 +177,9 @@ func TestAgReqParseFieldDiameter(t *testing.T) {
 		}})
 	//create diameterDataProvider
 	dP := newDADataProvider(nil, m)
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil), config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
 	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS)
@@ -226,9 +227,9 @@ func TestAgReqParseFieldRadius(t *testing.T) {
 	}
 	//create radiusDataProvider
 	dP := newRADataProvider(pkt)
-	data := engine.NewInternalDB(nil, nil)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
 	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS)
@@ -266,9 +267,9 @@ Host: api.cgrates.org
 	}
 	//create radiusDataProvider
 	dP, _ := newHTTPUrlDP(req)
-	data := engine.NewInternalDB(nil, nil)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
 	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS)
@@ -337,8 +338,10 @@ func TestAgReqParseFieldHttpXml(t *testing.T) {
 	}
 	//create radiusDataProvider
 	dP, _ := newHTTPXmlDP(req)
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil), config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+		config.CgrConfig().CacheCfg(), nil)
+
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
 	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS)
@@ -365,9 +368,9 @@ func TestAgReqParseFieldHttpXml(t *testing.T) {
 }
 
 func TestAgReqEmptyFilter(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS)
 	// populate request, emulating the way will be done in HTTPAgent
@@ -408,8 +411,9 @@ func TestAgReqEmptyFilter(t *testing.T) {
 }
 
 func TestAgReqMetaExponent(t *testing.T) {
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil), config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS)
 	agReq.CGRRequest.Set([]string{"Value"}, "2", false, false)
@@ -433,9 +437,9 @@ func TestAgReqMetaExponent(t *testing.T) {
 }
 
 func TestAgReqCGRActiveRequest(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS)
 	// populate request, emulating the way will be done in HTTPAgent
@@ -476,9 +480,9 @@ func TestAgReqCGRActiveRequest(t *testing.T) {
 }
 
 func TestAgReqFieldAsNone(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS)
 	// populate request, emulating the way will be done in HTTPAgent
@@ -513,8 +517,9 @@ func TestAgReqFieldAsNone(t *testing.T) {
 }
 
 func TestAgReqFieldAsNone2(t *testing.T) {
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil), config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS)
 	// populate request, emulating the way will be done in HTTPAgent
@@ -552,9 +557,9 @@ func TestAgReqFieldAsNone2(t *testing.T) {
 }
 
 func TestAgReqAsNavigableMap2(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS)
 	// populate request, emulating the way will be done in HTTPAgent
@@ -609,8 +614,9 @@ func TestAgReqAsNavigableMap2(t *testing.T) {
 }
 
 func TestAgReqFieldAsInterface(t *testing.T) {
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil), config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, "cgrates.org", "", filterS)
 	// populate request, emulating the way will be done in HTTPAgent
@@ -655,9 +661,9 @@ func TestAgReqFieldAsInterface(t *testing.T) {
 }
 
 func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
 	ev := map[string]interface{}{
@@ -705,8 +711,9 @@ func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
 }
 
 func TestAgReqSetCGRReplyWithError(t *testing.T) {
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil), config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
 	ev := map[string]interface{}{
@@ -745,9 +752,9 @@ func (ev myEv) AsNavigableMap(tpl []*config.FCTemplate) (*config.NavigableMap, e
 }
 
 func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
-	data := engine.NewInternalDB(nil, nil)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 
 	ev := map[string]interface{}{
@@ -807,8 +814,9 @@ func TestAgReqParseFieldMetaCCUsage(t *testing.T) {
 		}})
 	//create diameterDataProvider
 	dP := newDADataProvider(nil, m)
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil), config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
 	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS)
@@ -884,8 +892,9 @@ func TestAgReqParseFieldMetaUsageDifference(t *testing.T) {
 		}})
 	//create diameterDataProvider
 	dP := newDADataProvider(nil, m)
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil), config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
 	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS)
@@ -949,9 +958,9 @@ func TestAgReqParseFieldMetaSum(t *testing.T) {
 		}})
 	//create diameterDataProvider
 	dP := newDADataProvider(nil, m)
-	data := engine.NewInternalDB(nil, nil)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
 	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS)
@@ -993,8 +1002,9 @@ func TestAgReqParseFieldMetaDifference(t *testing.T) {
 		}})
 	//create diameterDataProvider
 	dP := newDADataProvider(nil, m)
-	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil), config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	dm := engine.NewDataManager(engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items),
+		config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
 	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS)
@@ -1036,9 +1046,9 @@ func TestAgReqParseFieldMetaValueExponent(t *testing.T) {
 		}})
 	//create diameterDataProvider
 	dP := newDADataProvider(nil, m)
-	data := engine.NewInternalDB(nil, nil)
-	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := engine.NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	//pass the data provider to agent request
 	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS)

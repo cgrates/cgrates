@@ -287,7 +287,7 @@ func InitDataDb(cfg *config.CGRConfig) error {
 		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
 		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
 		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-		cfg.DataDbCfg().DataDbSentinelName)
+		cfg.DataDbCfg().DataDbSentinelName, cfg.DataDbCfg().Items)
 	if err != nil {
 		return err
 	}
@@ -311,7 +311,7 @@ func InitStorDb(cfg *config.CGRConfig) error {
 		cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,
 		cfg.StorDbCfg().MaxOpenConns, cfg.StorDbCfg().MaxIdleConns,
 		cfg.StorDbCfg().ConnMaxLifetime, cfg.StorDbCfg().StringIndexedFields,
-		cfg.StorDbCfg().PrefixIndexedFields)
+		cfg.StorDbCfg().PrefixIndexedFields, cfg.StorDbCfg().Items)
 	if err != nil {
 		return err
 	}

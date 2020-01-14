@@ -46,7 +46,7 @@ func TestLoaderITConnDataDbs(t *testing.T) {
 	dbConn, err := NewDataDBConn(lCfg.DataDbCfg().DataDbType,
 		lCfg.DataDbCfg().DataDbHost, lCfg.DataDbCfg().DataDbPort, "7",
 		lCfg.DataDbCfg().DataDbUser, lCfg.DataDbCfg().DataDbPass,
-		lCfg.GeneralCfg().DBDataEncoding, "")
+		lCfg.GeneralCfg().DBDataEncoding, "", lCfg.DataDbCfg().Items)
 	if err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
@@ -54,7 +54,7 @@ func TestLoaderITConnDataDbs(t *testing.T) {
 	dbConn, err = NewDataDBConn(lCfg.DataDbCfg().DataDbType,
 		lCfg.DataDbCfg().DataDbHost, lCfg.DataDbCfg().DataDbPort, "8",
 		lCfg.DataDbCfg().DataDbUser, lCfg.DataDbCfg().DataDbPass,
-		lCfg.GeneralCfg().DBDataEncoding, "")
+		lCfg.GeneralCfg().DBDataEncoding, "", lCfg.DataDbCfg().Items)
 	if err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
@@ -62,7 +62,7 @@ func TestLoaderITConnDataDbs(t *testing.T) {
 	dbConn, err = NewDataDBConn(lCfg.DataDbCfg().DataDbType,
 		lCfg.DataDbCfg().DataDbHost, lCfg.DataDbCfg().DataDbPort, "9",
 		lCfg.DataDbCfg().DataDbUser, lCfg.DataDbCfg().DataDbPass,
-		lCfg.GeneralCfg().DBDataEncoding, "")
+		lCfg.GeneralCfg().DBDataEncoding, "", lCfg.DataDbCfg().Items)
 	if err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}

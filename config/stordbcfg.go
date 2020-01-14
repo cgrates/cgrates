@@ -95,7 +95,6 @@ func (dbcfg *StorDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 		dbcfg.SSLMode = *jsnDbCfg.Sslmode
 	}
 	if jsnDbCfg.Items != nil {
-		dbcfg.Items = make(map[string]*ItemOpt)
 		for kJsn, vJsn := range *jsnDbCfg.Items {
 			val := new(ItemOpt)
 			if err := val.loadFromJsonCfg(vJsn); err != nil {

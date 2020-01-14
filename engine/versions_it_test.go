@@ -49,7 +49,7 @@ func TestVersionsITMongo(t *testing.T) {
 		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
 		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
 		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-		"")
+		"", cfg.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,7 +60,7 @@ func TestVersionsITMongo(t *testing.T) {
 		cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,
 		cfg.StorDbCfg().MaxOpenConns, cfg.StorDbCfg().MaxIdleConns,
 		cfg.StorDbCfg().ConnMaxLifetime, cfg.StorDbCfg().StringIndexedFields,
-		cfg.StorDbCfg().PrefixIndexedFields)
+		cfg.StorDbCfg().PrefixIndexedFields, cfg.StorDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -79,7 +79,7 @@ func TestVersionsITRedisMYSQL(t *testing.T) {
 		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
 		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
 		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-		"")
+		"", cfg.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -91,7 +91,7 @@ func TestVersionsITRedisMYSQL(t *testing.T) {
 		cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,
 		cfg.StorDbCfg().MaxOpenConns, cfg.StorDbCfg().MaxIdleConns,
 		cfg.StorDbCfg().ConnMaxLifetime, cfg.StorDbCfg().StringIndexedFields,
-		cfg.StorDbCfg().PrefixIndexedFields)
+		cfg.StorDbCfg().PrefixIndexedFields, cfg.StorDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -110,7 +110,7 @@ func TestVersionsITRedisPostgres(t *testing.T) {
 		cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort,
 		cfg.DataDbCfg().DataDbName, cfg.DataDbCfg().DataDbUser,
 		cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-		"")
+		"", cfg.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -121,7 +121,7 @@ func TestVersionsITRedisPostgres(t *testing.T) {
 		cfg.StorDbCfg().Password, cfg.StorDbCfg().SSLMode,
 		cfg.StorDbCfg().MaxOpenConns, cfg.StorDbCfg().MaxIdleConns,
 		cfg.StorDbCfg().ConnMaxLifetime, cfg.StorDbCfg().StringIndexedFields,
-		cfg.StorDbCfg().PrefixIndexedFields)
+		cfg.StorDbCfg().PrefixIndexedFields, cfg.StorDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}

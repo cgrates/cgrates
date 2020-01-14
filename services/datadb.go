@@ -60,7 +60,7 @@ func (db *DataDBService) Start() (err error) {
 		db.cfg.DataDbCfg().DataDbHost, db.cfg.DataDbCfg().DataDbPort,
 		db.cfg.DataDbCfg().DataDbName, db.cfg.DataDbCfg().DataDbUser,
 		db.cfg.DataDbCfg().DataDbPass, db.cfg.GeneralCfg().DBDataEncoding,
-		db.cfg.DataDbCfg().DataDbSentinelName)
+		db.cfg.DataDbCfg().DataDbSentinelName, db.cfg.DataDbCfg().Items)
 	if db.mandatoryDB() && err != nil { // Cannot configure getter database, show stopper
 		utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 		return

@@ -31,223 +31,231 @@ import (
 )
 
 // internalDBCacheCfg indexes the internal DataDB partitions
-var internalDBCacheCfg = map[string]*ltcache.CacheConfig{
-	utils.CacheDestinations: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheDestinations].TTL,
-	},
-	utils.CacheReverseDestinations: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheReverseDestinations].TTL,
-	},
-	utils.CacheActions: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheActions].TTL,
-	},
-	utils.CacheActionPlans: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheActionPlans].TTL,
-	},
-	utils.CacheAccountActionPlans: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheAccountActionPlans].TTL,
-	},
-	utils.CacheActionTriggers: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheActionTriggers].TTL,
-	},
-	utils.CacheRatingPlans: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheRatingPlans].TTL,
-	},
-	utils.CacheRatingProfiles: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheRatingProfiles].TTL,
-	},
-	utils.CacheAccounts: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheAccounts].TTL,
-	},
-	utils.CacheSharedGroups: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheSharedGroups].TTL,
-	},
-	utils.TBLVersions: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.TBLVersions].TTL,
-	},
-	utils.CacheTimings: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheTimings].TTL,
-	},
-	utils.CacheFilters: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheFilters].TTL,
-	},
-	utils.CacheResourceProfiles: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheResourceProfiles].TTL,
-	},
-	utils.CacheResourceFilterIndexes: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.MetaFilterIndexes].TTL,
-	},
-	utils.CacheResources: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheResources].TTL,
-	},
-	utils.CacheStatFilterIndexes: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.MetaFilterIndexes].TTL,
-	},
-	utils.CacheStatQueueProfiles: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheStatQueueProfiles].TTL,
-	},
-	utils.CacheStatQueues: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheStatQueues].TTL,
-	},
-	utils.CacheThresholdFilterIndexes: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.MetaFilterIndexes].TTL,
-	},
-	utils.CacheThresholdProfiles: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheThresholdProfiles].TTL,
-	},
-	utils.CacheThresholds: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheThresholds].TTL,
-	},
-	utils.CacheSupplierFilterIndexes: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.MetaFilterIndexes].TTL,
-	},
-	utils.CacheSupplierProfiles: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheSupplierProfiles].TTL,
-	},
-	utils.CacheChargerFilterIndexes: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.MetaFilterIndexes].TTL,
-	},
-	utils.CacheChargerProfiles: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheChargerProfiles].TTL,
-	},
-	utils.CacheAttributeFilterIndexes: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.MetaFilterIndexes].TTL,
-	},
-	utils.CacheAttributeProfiles: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheAttributeProfiles].TTL,
-	},
-	utils.CacheDispatcherFilterIndexes: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.MetaFilterIndexes].TTL,
-	},
-	utils.CacheDispatcherProfiles: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheDispatcherProfiles].TTL,
-	},
-	utils.CacheDispatcherHosts: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheDispatcherHosts].TTL,
-	},
-	utils.CacheLoadIDs: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().DataDbCfg().Items[utils.CacheLoadIDs].TTL,
-	},
-	utils.TBLTPTimings: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.TBLTPTimings].TTL,
-	},
-	utils.TBLTPDestinations: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.TBLTPDestinations].TTL,
-	},
-	utils.TBLTPRates: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.TBLTPRates].TTL,
-	},
-	utils.TBLTPDestinationRates: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.TBLTPDestinationRates].TTL,
-	},
-	utils.TBLTPRatingPlans: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.TBLTPRatingPlans].TTL,
-	},
-	utils.TBLTPRateProfiles: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.TBLTPRateProfiles].TTL,
-	},
-	utils.TBLTPSharedGroups: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.TBLTPSharedGroups].TTL,
-	},
-	utils.TBLTPActions: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.TBLTPActions].TTL,
-	},
-	utils.TBLTPActionTriggers: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.TBLTPActionTriggers].TTL,
-	},
-	utils.TBLTPAccountActions: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.TBLTPAccountActions].TTL,
-	},
-	utils.TBLTPResources: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.TBLTPResources].TTL,
-	},
-	utils.TBLTPStats: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.TBLTPStats].TTL,
-	},
-	utils.TBLTPThresholds: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.TBLTPThresholds].TTL,
-	},
-	utils.TBLTPFilters: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.TBLTPFilters].TTL,
-	},
-	utils.SessionCostsTBL: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.SessionCostsTBL].TTL,
-	},
-	utils.TBLTPActionPlans: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.TBLTPActionPlans].TTL,
-	},
-	utils.TBLTPSuppliers: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.TBLTPSuppliers].TTL,
-	},
-	utils.TBLTPAttributes: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.TBLTPAttributes].TTL,
-	},
-	utils.TBLTPChargers: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.TBLTPChargers].TTL,
-	},
-	utils.TBLTPDispatchers: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.TBLTPDispatchers].TTL,
-	},
-	utils.TBLTPDispatcherHosts: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.TBLTPDispatcherHosts].TTL,
-	},
-	utils.CDRsTBL: &ltcache.CacheConfig{
-		MaxItems: -1,
-		TTL:      config.CgrConfig().StorDbCfg().Items[utils.CDRsTBL].TTL,
-	},
+func newInternalDBCfg(itemsCacheCfg map[string]*config.ItemOpt, isDataDB bool) map[string]*ltcache.CacheConfig {
+	if isDataDB {
+		return map[string]*ltcache.CacheConfig{
+			utils.CacheDestinations: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheDestinations].TTL,
+			},
+			utils.CacheReverseDestinations: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheReverseDestinations].TTL,
+			},
+			utils.CacheActions: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheActions].TTL,
+			},
+			utils.CacheActionPlans: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheActionPlans].TTL,
+			},
+			utils.CacheAccountActionPlans: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheAccountActionPlans].TTL,
+			},
+			utils.CacheActionTriggers: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheActionTriggers].TTL,
+			},
+			utils.CacheRatingPlans: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheRatingPlans].TTL,
+			},
+			utils.CacheRatingProfiles: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheRatingProfiles].TTL,
+			},
+			utils.CacheAccounts: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheAccounts].TTL,
+			},
+			utils.CacheSharedGroups: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheSharedGroups].TTL,
+			},
+
+			utils.CacheTimings: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheTimings].TTL,
+			},
+			utils.CacheFilters: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheFilters].TTL,
+			},
+			utils.CacheResourceProfiles: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheResourceProfiles].TTL,
+			},
+			utils.CacheResourceFilterIndexes: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.MetaFilterIndexes].TTL,
+			},
+			utils.CacheResources: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheResources].TTL,
+			},
+			utils.CacheStatFilterIndexes: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.MetaFilterIndexes].TTL,
+			},
+			utils.CacheStatQueueProfiles: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheStatQueueProfiles].TTL,
+			},
+			utils.CacheStatQueues: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheStatQueues].TTL,
+			},
+			utils.CacheThresholdFilterIndexes: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.MetaFilterIndexes].TTL,
+			},
+			utils.CacheThresholdProfiles: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheThresholdProfiles].TTL,
+			},
+			utils.CacheThresholds: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheThresholds].TTL,
+			},
+			utils.CacheSupplierFilterIndexes: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.MetaFilterIndexes].TTL,
+			},
+			utils.CacheSupplierProfiles: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheSupplierProfiles].TTL,
+			},
+			utils.CacheChargerFilterIndexes: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.MetaFilterIndexes].TTL,
+			},
+			utils.CacheChargerProfiles: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheChargerProfiles].TTL,
+			},
+			utils.CacheAttributeFilterIndexes: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.MetaFilterIndexes].TTL,
+			},
+			utils.CacheAttributeProfiles: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheAttributeProfiles].TTL,
+			},
+			utils.CacheDispatcherFilterIndexes: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.MetaFilterIndexes].TTL,
+			},
+			utils.CacheDispatcherProfiles: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheDispatcherProfiles].TTL,
+			},
+			utils.CacheDispatcherHosts: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheDispatcherHosts].TTL,
+			},
+			utils.CacheLoadIDs: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CacheLoadIDs].TTL,
+			},
+		}
+	} else {
+		return map[string]*ltcache.CacheConfig{
+			utils.TBLVersions: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.TBLVersions].TTL,
+			},
+			utils.TBLTPTimings: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.TBLTPTimings].TTL,
+			},
+			utils.TBLTPDestinations: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.TBLTPDestinations].TTL,
+			},
+			utils.TBLTPRates: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.TBLTPRates].TTL,
+			},
+			utils.TBLTPDestinationRates: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.TBLTPDestinationRates].TTL,
+			},
+			utils.TBLTPRatingPlans: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.TBLTPRatingPlans].TTL,
+			},
+			utils.TBLTPRateProfiles: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.TBLTPRateProfiles].TTL,
+			},
+			utils.TBLTPSharedGroups: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.TBLTPSharedGroups].TTL,
+			},
+			utils.TBLTPActions: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.TBLTPActions].TTL,
+			},
+			utils.TBLTPActionTriggers: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.TBLTPActionTriggers].TTL,
+			},
+			utils.TBLTPAccountActions: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.TBLTPAccountActions].TTL,
+			},
+			utils.TBLTPResources: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.TBLTPResources].TTL,
+			},
+			utils.TBLTPStats: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.TBLTPStats].TTL,
+			},
+			utils.TBLTPThresholds: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.TBLTPThresholds].TTL,
+			},
+			utils.TBLTPFilters: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.TBLTPFilters].TTL,
+			},
+			utils.SessionCostsTBL: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.SessionCostsTBL].TTL,
+			},
+			utils.TBLTPActionPlans: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.TBLTPActionPlans].TTL,
+			},
+			utils.TBLTPSuppliers: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.TBLTPSuppliers].TTL,
+			},
+			utils.TBLTPAttributes: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.TBLTPAttributes].TTL,
+			},
+			utils.TBLTPChargers: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.TBLTPChargers].TTL,
+			},
+			utils.TBLTPDispatchers: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.TBLTPDispatchers].TTL,
+			},
+			utils.TBLTPDispatcherHosts: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.TBLTPDispatcherHosts].TTL,
+			},
+			utils.CDRsTBL: &ltcache.CacheConfig{
+				MaxItems: -1,
+				TTL:      itemsCacheCfg[utils.CDRsTBL].TTL,
+			},
+		}
+	}
 }
 
 type InternalDB struct {
@@ -261,9 +269,10 @@ type InternalDB struct {
 }
 
 // NewInternalDB constructs an InternalDB
-func NewInternalDB(stringIndexedFields, prefixIndexedFields []string) (iDB *InternalDB) {
+func NewInternalDB(stringIndexedFields, prefixIndexedFields []string,
+	isDataDB bool, itemsCacheCfg map[string]*config.ItemOpt) (iDB *InternalDB) {
 	iDB = &InternalDB{
-		db:                  ltcache.NewTransCache(internalDBCacheCfg),
+		db:                  ltcache.NewTransCache(newInternalDBCfg(itemsCacheCfg, isDataDB)),
 		stringIndexedFields: stringIndexedFields,
 		prefixIndexedFields: prefixIndexedFields,
 		cnter:               utils.NewCounter(time.Now().UnixNano(), 0),
@@ -288,7 +297,7 @@ func (iDB *InternalDB) SetPrefixIndexedFields(prefixIndexedFields []string) {
 func (iDB *InternalDB) Close() {}
 
 func (iDB *InternalDB) Flush(_ string) error {
-	iDB.db = ltcache.NewTransCache(internalDBCacheCfg)
+	iDB.db.Clear(nil)
 	return nil
 }
 

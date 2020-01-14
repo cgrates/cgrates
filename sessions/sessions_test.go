@@ -1569,7 +1569,7 @@ func TestSessionSNewV1AuthorizeArgsWithArgDispatcher2(t *testing.T) {
 
 func TestSessionSGetIndexedFilters(t *testing.T) {
 	sSCfg, _ := config.NewDefaultCGRConfig()
-	mpStr := engine.NewInternalDB(nil, nil)
+	mpStr := engine.NewInternalDB(nil, nil, true, sSCfg.DataDbCfg().Items)
 	sS := NewSessionS(sSCfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
 	expIndx := map[string][]string{}
 	expUindx := []*engine.FilterRule{

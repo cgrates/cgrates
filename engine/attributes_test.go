@@ -148,15 +148,13 @@ var (
 )
 
 func TestAttributePopulateAttrService(t *testing.T) {
-	data := NewInternalDB(nil, nil)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	defaultCfg, err := config.NewDefaultCGRConfig()
+	defaultCfg, _ := config.NewDefaultCGRConfig()
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
 	defaultCfg.AttributeSCfg().StringIndexedFields = nil
 	defaultCfg.AttributeSCfg().PrefixIndexedFields = nil
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
+	defaultCfg.AttributeSCfg().PrefixIndexedFields = nil
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	attrService, err = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -1695,13 +1693,10 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 }
 
 func BenchmarkAttributeProcessEventConstant(b *testing.B) {
-	data := NewInternalDB(nil, nil)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	defaultCfg, err := config.NewDefaultCGRConfig()
+	defaultCfg, _ := config.NewDefaultCGRConfig()
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
-	if err != nil {
-		b.Errorf("Error: %+v", err)
-	}
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	attrService, err = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	if err != nil {
 		b.Errorf("Error: %+v", err)
@@ -1759,13 +1754,10 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 }
 
 func BenchmarkAttributeProcessEventVariable(b *testing.B) {
-	data := NewInternalDB(nil, nil)
-	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	defaultCfg, err := config.NewDefaultCGRConfig()
+	defaultCfg, _ := config.NewDefaultCGRConfig()
 	defaultCfg.AttributeSCfg().ProcessRuns = 1
-	if err != nil {
-		b.Errorf("Error: %+v", err)
-	}
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
+	dmAtr = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	attrService, err = NewAttributeService(dmAtr, &FilterS{dm: dmAtr, cfg: defaultCfg}, defaultCfg)
 	if err != nil {
 		b.Errorf("Error: %+v", err)

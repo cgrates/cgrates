@@ -24,6 +24,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -31,7 +33,8 @@ import (
 
 // NewDataDBConn creates a DataDB connection
 func NewDataDBConn(dbType, host, port, name, user,
-	pass, marshaler, sentinelName string) (d DataDB, err error) {
+	pass, marshaler, sentinelName string,
+	itemsCacheCfg map[string]*config.ItemOpt) (d DataDB, err error) {
 	switch dbType {
 	case utils.REDIS:
 		var dbNo int
@@ -47,7 +50,7 @@ func NewDataDBConn(dbType, host, port, name, user,
 	case utils.MONGO:
 		d, err = NewMongoStorage(host, port, name, user, pass, utils.DataDB, nil, true)
 	case utils.INTERNAL:
-		d = NewInternalDB(nil, nil)
+		d = NewInternalDB(nil, nil, true, itemsCacheCfg)
 	default:
 		err = fmt.Errorf("unsupported db_type <%s>", dbType)
 	}
@@ -57,7 +60,8 @@ func NewDataDBConn(dbType, host, port, name, user,
 // NewStorDBConn returns a StorDB(implements Storage interface) based on dbType
 func NewStorDBConn(dbType, host, port, name, user, pass, sslmode string,
 	maxConn, maxIdleConn, connMaxLifetime int,
-	stringIndexedFields, prefixIndexedFields []string) (db StorDB, err error) {
+	stringIndexedFields, prefixIndexedFields []string,
+	itemsCacheCfg map[string]*config.ItemOpt) (db StorDB, err error) {
 	switch dbType {
 	case utils.MONGO:
 		db, err = NewMongoStorage(host, port, name, user, pass, utils.StorDB, stringIndexedFields, false)
@@ -66,7 +70,7 @@ func NewStorDBConn(dbType, host, port, name, user, pass, sslmode string,
 	case utils.MYSQL:
 		db, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn, connMaxLifetime)
 	case utils.INTERNAL:
-		db = NewInternalDB(stringIndexedFields, prefixIndexedFields)
+		db = NewInternalDB(stringIndexedFields, prefixIndexedFields, false, itemsCacheCfg)
 	default:
 		err = fmt.Errorf("unknown db '%s' valid options are [%s, %s, %s, %s]",
 			dbType, utils.MYSQL, utils.MONGO, utils.POSTGRES, utils.INTERNAL)
