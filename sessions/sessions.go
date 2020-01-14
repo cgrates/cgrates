@@ -811,13 +811,13 @@ func (sS *SessionS) getIndexedFilters(tenant string, fltrs []string) (
 			continue
 		}
 		for _, fltr := range f.Rules {
+			fldName := strings.TrimPrefix(fltr.FieldName, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep) // remove ~req. prefix
 			if fltr.Type != utils.MetaString ||
-				!sS.cgrCfg.SessionSCfg().SessionIndexes.HasKey(
-					strings.TrimPrefix(fltr.FieldName, utils.DynamicDataPrefix)) {
+				!sS.cgrCfg.SessionSCfg().SessionIndexes.HasKey(fldName) {
 				unindexedFltr = append(unindexedFltr, fltr)
 				continue
 			}
-			indexedFltr[fltr.FieldName] = fltr.Values
+			indexedFltr[fldName] = fltr.Values
 		}
 	}
 	return
@@ -838,7 +838,7 @@ func (sS *SessionS) getSessionIDsMatchingIndexes(fltrs map[string][]string,
 	checkNr := 0
 	getMatchingIndexes := func(fltrName string, values []string) (matchingSessionsbyValue map[string]utils.StringMap) {
 		matchingSessionsbyValue = make(map[string]utils.StringMap)
-		fltrName = strings.TrimPrefix(fltrName, utils.DynamicDataPrefix)
+		// fltrName = strings.TrimPrefix(fltrName, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep) //
 		if _, hasFldName := ssIndx[fltrName]; !hasFldName {
 			return
 		}
@@ -907,6 +907,9 @@ func (sS *SessionS) filterSessions(sf *utils.SessionFilter, psv bool) (aSs []*Ex
 	tenant := utils.FirstNonEmpty(sf.Tenant, sS.cgrCfg.GeneralCfg().DefaultTenant)
 	indx, unindx := sS.getIndexedFilters(tenant, sf.Filters)
 	cgrIDs, matchingSRuns := sS.getSessionIDsMatchingIndexes(indx, psv)
+	if len(indx) != 0 && len(cgrIDs) == 0 { // no sessions matched the indexed filters
+		return
+	}
 	ss := sS.getSessionsFromCGRIDs(psv, cgrIDs...)
 	pass := func(filterRules []*engine.FilterRule,
 		me engine.MapEvent) (pass bool) {
@@ -915,7 +918,7 @@ func (sS *SessionS) filterSessions(sf *utils.SessionFilter, psv bool) (aSs []*Ex
 			return
 		}
 		var err error
-		ev := config.NewNavigableMap(me)
+		ev := config.NewNavigableMap(map[string]interface{}{utils.MetaReq: me.Data()})
 		for _, fltr := range filterRules {
 			// we don't know how many values we have so we need to build the fieldValues DataProvider
 			fieldValuesDP := make([]config.DataProvider, len(fltr.Values))
@@ -964,6 +967,9 @@ func (sS *SessionS) filterSessionsCount(sf *utils.SessionFilter, psv bool) (coun
 	tenant := utils.FirstNonEmpty(sf.Tenant, sS.cgrCfg.GeneralCfg().DefaultTenant)
 	indx, unindx := sS.getIndexedFilters(tenant, sf.Filters)
 	cgrIDs, matchingSRuns := sS.getSessionIDsMatchingIndexes(indx, psv)
+	if len(indx) != 0 && len(cgrIDs) == 0 { // no sessions matched the indexed filters
+		return
+	}
 	ss := sS.getSessionsFromCGRIDs(psv, cgrIDs...)
 	pass := func(filterRules []*engine.FilterRule,
 		me engine.MapEvent) (pass bool) {
@@ -972,7 +978,7 @@ func (sS *SessionS) filterSessionsCount(sf *utils.SessionFilter, psv bool) (coun
 			return
 		}
 		var err error
-		ev := config.NewNavigableMap(me)
+		ev := config.NewNavigableMap(map[string]interface{}{utils.MetaReq: me.Data()})
 		for _, fltr := range filterRules {
 			// we don't know how many values we have so we need to build the fieldValues DataProvider
 			fieldValuesDP := make([]config.DataProvider, len(fltr.Values))

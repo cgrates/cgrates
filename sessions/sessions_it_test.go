@@ -284,7 +284,7 @@ func TestSessionsItTerminatePassive(t *testing.T) {
 	if err := sItRPC.Call(utils.SessionSv1GetPassiveSessions,
 		&utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "123789"),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "123789"),
 			},
 		}, &pSessions); err != nil {
 		t.Error(err)
@@ -326,7 +326,7 @@ func TestSessionsItTerminatePassive(t *testing.T) {
 	if err := sItRPC.Call(utils.SessionSv1GetPassiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "123789"),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "123789"),
 			},
 		}, &pSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {

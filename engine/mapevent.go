@@ -274,3 +274,8 @@ func (me MapEvent) AsCDR(cfg *config.CGRConfig, tnt, tmz string) (cdr *CDR, err 
 	}
 	return
 }
+
+// Data returns the MapEvent as a map[string]interface{}
+func (me MapEvent) Data() map[string]interface{} {
+	return me
+}

@@ -19,7 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
+	"fmt"
 	"reflect"
+	"sort"
+	"strings"
 	"testing"
 	"time"
 
@@ -1572,11 +1575,11 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	expUindx := []*engine.FilterRule{
 		&engine.FilterRule{
 			Type:      utils.MetaString,
-			FieldName: utils.DynamicDataPrefix + utils.ToR,
+			FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.ToR,
 			Values:    []string{utils.VOICE},
 		},
 	}
-	fltrs := []string{"*string:~ToR:*voice"}
+	fltrs := []string{"*string:~*req.ToR:*voice"}
 	if rplyindx, rplyUnindx := sS.getIndexedFilters("", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expIndx), utils.ToJSON(rplyindx))
 	} else if !reflect.DeepEqual(expUindx, rplyUnindx) {
@@ -1586,7 +1589,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 		"ToR": true,
 	}
 	sS = NewSessionS(sSCfg, engine.NewDataManager(mpStr, config.CgrConfig().CacheCfg(), nil), nil)
-	expIndx = map[string][]string{(utils.DynamicDataPrefix + utils.ToR): []string{utils.VOICE}}
+	expIndx = map[string][]string{(utils.ToR): []string{utils.VOICE}}
 	expUindx = nil
 	if rplyindx, rplyUnindx := sS.getIndexedFilters("", fltrs); !reflect.DeepEqual(expIndx, rplyindx) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expIndx), utils.ToJSON(rplyindx))
@@ -1658,7 +1661,7 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 	}
 	cgrID := GetSetCGRID(sEv)
 	sS.indexSession(session, false)
-	indx := map[string][]string{"~ToR": []string{utils.VOICE, utils.DATA}}
+	indx := map[string][]string{"ToR": []string{utils.VOICE, utils.DATA}}
 	expCGRIDs := []string{cgrID}
 	expmatchingSRuns := map[string]utils.StringMap{cgrID: utils.StringMap{
 		"RunID": true,
@@ -1675,8 +1678,8 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 	sS = NewSessionS(sSCfg, nil, nil)
 	sS.indexSession(session, false)
 	indx = map[string][]string{
-		"~ToR":    []string{utils.VOICE, utils.DATA},
-		"~Extra2": []string{"55"},
+		"ToR":    []string{utils.VOICE, utils.DATA},
+		"Extra2": []string{"55"},
 	}
 	expCGRIDs = []string{}
 	expmatchingSRuns = map[string]utils.StringMap{}
@@ -1709,8 +1712,8 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 	sS = NewSessionS(sSCfg, nil, nil)
 	sS.indexSession(session, true)
 	indx = map[string][]string{
-		"~ToR":    []string{utils.VOICE, utils.DATA},
-		"~Extra2": []string{"5"},
+		"ToR":    []string{utils.VOICE, utils.DATA},
+		"Extra2": []string{"5"},
 	}
 
 	expCGRIDs = []string{cgrID}
@@ -1722,7 +1725,6 @@ func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
 	} else if !reflect.DeepEqual(expmatchingSRuns, matchingSRuns) {
 		t.Errorf("Expected %s , received: %s", utils.ToJSON(expmatchingSRuns), utils.ToJSON(matchingSRuns))
 	}
-
 }
 
 type testRPCClientConnection struct{}
@@ -1946,4 +1948,282 @@ func TestSessionSgetSession(t *testing.T) {
 		t.Errorf("Expecting %+v, received: %+v", s, rcvS)
 	}
 
+}
+
+func TestSessionSfilterSessions(t *testing.T) {
+	sSCfg, _ := config.NewDefaultCGRConfig()
+	sSCfg.SessionSCfg().SessionIndexes = utils.StringMap{
+		"ToR": true,
+	}
+	sS := NewSessionS(sSCfg, nil, nil)
+	sEv := engine.NewMapEvent(map[string]interface{}{
+		utils.EVENT_NAME:       "TEST_EVENT",
+		utils.ToR:              "*voice",
+		utils.OriginID:         "12345",
+		utils.Direction:        "*out",
+		utils.Account:          "account1",
+		utils.Subject:          "subject1",
+		utils.Destination:      "+4986517174963",
+		utils.Category:         "call",
+		utils.Tenant:           "cgrates.org",
+		utils.RequestType:      "*prepaid",
+		utils.SetupTime:        "2015-11-09 14:21:24",
+		utils.AnswerTime:       "2015-11-09 14:22:02",
+		utils.Usage:            "1m23s",
+		utils.LastUsed:         "21s",
+		utils.PDD:              "300ms",
+		utils.SUPPLIER:         "supplier1",
+		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
+		utils.OriginHost:       "127.0.0.1",
+		"Extra1":               "Value1",
+		"Extra2":               5,
+		"Extra3":               "",
+	})
+	sr2 := sEv.Clone()
+	// Index first session
+	session := &Session{
+		CGRID:      GetSetCGRID(sEv),
+		EventStart: sEv,
+		SRuns: []*SRun{
+			&SRun{
+				Event: sEv,
+				CD: &engine.CallDescriptor{
+					RunID: "RunID",
+				},
+			},
+			&SRun{
+				Event: sr2,
+				CD: &engine.CallDescriptor{
+					RunID: "RunID2",
+				},
+			},
+		},
+	}
+	sr2[utils.ToR] = utils.SMS
+	sr2[utils.Subject] = "subject2"
+	sr2[utils.CGRID] = GetSetCGRID(sEv)
+	sS.registerSession(session, false)
+	st, err := utils.IfaceAsTime("2015-11-09T14:21:24+02:00", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	at, err := utils.IfaceAsTime("2015-11-09T14:22:02+02:00", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	eses1 := &ExternalSession{
+		CGRID:       "cade401f46f046311ed7f62df3dfbb84adb98aad",
+		ToR:         "*voice",
+		OriginID:    "12345",
+		OriginHost:  "127.0.0.1",
+		Source:      "SessionS_TEST_EVENT",
+		RequestType: "*prepaid",
+		Category:    "call",
+		Account:     "account1",
+		Subject:     "subject1",
+		Destination: "+4986517174963",
+		SetupTime:   st,
+		AnswerTime:  at,
+		ExtraFields: map[string]string{
+			"Direction":       "*out",
+			"DisconnectCause": "NORMAL_DISCONNECT",
+			"EventName":       "TEST_EVENT",
+			"Extra1":          "Value1",
+			"Extra2":          "5",
+			"Extra3":          "",
+			"LastUsed":        "21s",
+			"PDD":             "300ms",
+			"Supplier":        "supplier1",
+		},
+		NodeID: sSCfg.GeneralCfg().NodeID,
+	}
+	eses2 := &ExternalSession{
+		CGRID:       "cade401f46f046311ed7f62df3dfbb84adb98aad",
+		ToR:         utils.SMS,
+		OriginID:    "12345",
+		OriginHost:  "127.0.0.1",
+		Source:      "SessionS_TEST_EVENT",
+		RequestType: "*prepaid",
+		Category:    "call",
+		Account:     "account1",
+		Subject:     "subject2",
+		Destination: "+4986517174963",
+		SetupTime:   st,
+		AnswerTime:  at,
+		ExtraFields: map[string]string{
+			"Direction":       "*out",
+			"DisconnectCause": "NORMAL_DISCONNECT",
+			"EventName":       "TEST_EVENT",
+			"Extra1":          "Value1",
+			"Extra2":          "5",
+			"Extra3":          "",
+			"LastUsed":        "21s",
+			"PDD":             "300ms",
+			"Supplier":        "supplier1",
+		},
+		NodeID: sSCfg.GeneralCfg().NodeID,
+	}
+	expSess := []*ExternalSession{
+		eses1,
+	}
+	fltrs := &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s;%s", utils.VOICE, utils.DATA)}}
+	if sess := sS.filterSessions(fltrs, true); len(sess) != 0 {
+		t.Errorf("Expected no session, received: %s", utils.ToJSON(sess))
+	}
+	if sess := sS.filterSessions(fltrs, false); !reflect.DeepEqual(expSess, sess) {
+		t.Errorf("Expected %s , received: %s", utils.ToJSON(expSess), utils.ToJSON(sess))
+	}
+	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.ToR:NoToR", "*string:~*req.Subject:subject1"}}
+	if sess := sS.filterSessions(fltrs, false); len(sess) != 0 {
+		t.Errorf("Expected no session, received: %s", utils.ToJSON(sess))
+	}
+	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.ToR:NoToR"}}
+	if sess := sS.filterSessions(fltrs, false); len(sess) != 0 {
+		t.Errorf("Expected no session, received: %s", utils.ToJSON(sess))
+	}
+	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.ToR:*voice", "*string:~*req.Subject:subject1"}}
+	if sess := sS.filterSessions(fltrs, false); !reflect.DeepEqual(expSess, sess) {
+		t.Errorf("Expected %s , received: %s", utils.ToJSON(expSess), utils.ToJSON(sess))
+	}
+	sSCfg.SessionSCfg().SessionIndexes = utils.StringMap{
+		"ToR":    true,
+		"Extra3": true,
+	}
+	sS = NewSessionS(sSCfg, nil, nil)
+	sS.registerSession(session, false)
+	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.ToR:*voice", "*string:~*req.Subject:subject1"}}
+	if sess := sS.filterSessions(fltrs, false); !reflect.DeepEqual(expSess, sess) {
+		t.Errorf("Expected %s , received: %s", utils.ToJSON(expSess), utils.ToJSON(sess))
+	}
+	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.Subject:subject1"}}
+	if sess := sS.filterSessions(fltrs, false); !reflect.DeepEqual(expSess, sess) {
+		t.Errorf("Expected %s , received: %s", utils.ToJSON(expSess), utils.ToJSON(sess))
+	}
+	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.Subject:subject3"}}
+	if sess := sS.filterSessions(fltrs, false); len(sess) != 0 {
+		t.Errorf("Expected no session, received: %s", utils.ToJSON(sess))
+	}
+	expSess = append(expSess, eses2)
+	sort.Slice(expSess, func(i, j int) bool {
+		return strings.Compare(expSess[i].ToR, expSess[j].ToR) == -1
+	})
+	fltrs = &utils.SessionFilter{Filters: []string{}}
+	sess := sS.filterSessions(fltrs, false)
+	sort.Slice(sess, func(i, j int) bool {
+		return strings.Compare(sess[i].ToR, sess[j].ToR) == -1
+	})
+	if !reflect.DeepEqual(expSess, sess) {
+		t.Errorf("Expected %s , received: %s", utils.ToJSON(expSess), utils.ToJSON(sess))
+	}
+	fltrs = &utils.SessionFilter{Filters: []string{}, Limit: utils.IntPointer(1)}
+	if sess := sS.filterSessions(fltrs, false); len(sess) != 1 {
+		t.Errorf("Expected one session, received: %s", utils.ToJSON(sess))
+	} else if !reflect.DeepEqual(expSess[0], eses1) && !reflect.DeepEqual(expSess[0], eses2) {
+		t.Errorf("Expected %s or %s, received: %s", utils.ToJSON(eses1), utils.ToJSON(eses2), utils.ToJSON(sess[0]))
+	}
+	fltrs = &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s;%s", utils.VOICE, utils.SMS)}, Limit: utils.IntPointer(1)}
+	if sess := sS.filterSessions(fltrs, false); len(sess) != 1 {
+		t.Errorf("Expected one session, received: %s", utils.ToJSON(sess))
+	} else if !reflect.DeepEqual(expSess[0], eses1) && !reflect.DeepEqual(expSess[0], eses2) {
+		t.Errorf("Expected %s or %s, received: %s", utils.ToJSON(eses1), utils.ToJSON(eses2), utils.ToJSON(sess[0]))
+	}
+}
+
+func TestSessionSfilterSessionsCount(t *testing.T) {
+	sSCfg, _ := config.NewDefaultCGRConfig()
+	sSCfg.SessionSCfg().SessionIndexes = utils.StringMap{
+		"ToR": true,
+	}
+	sS := NewSessionS(sSCfg, nil, nil)
+	sEv := engine.NewMapEvent(map[string]interface{}{
+		utils.EVENT_NAME:       "TEST_EVENT",
+		utils.ToR:              "*voice",
+		utils.OriginID:         "12345",
+		utils.Direction:        "*out",
+		utils.Account:          "account1",
+		utils.Subject:          "subject1",
+		utils.Destination:      "+4986517174963",
+		utils.Category:         "call",
+		utils.Tenant:           "cgrates.org",
+		utils.RequestType:      "*prepaid",
+		utils.SetupTime:        "2015-11-09 14:21:24",
+		utils.AnswerTime:       "2015-11-09 14:22:02",
+		utils.Usage:            "1m23s",
+		utils.LastUsed:         "21s",
+		utils.PDD:              "300ms",
+		utils.SUPPLIER:         "supplier1",
+		utils.DISCONNECT_CAUSE: "NORMAL_DISCONNECT",
+		utils.OriginHost:       "127.0.0.1",
+		"Extra1":               "Value1",
+		"Extra2":               5,
+		"Extra3":               "",
+	})
+	sr2 := sEv.Clone()
+	// Index first session
+	session := &Session{
+		CGRID:      GetSetCGRID(sEv),
+		EventStart: sEv,
+		SRuns: []*SRun{
+			&SRun{
+				Event: sEv,
+				CD: &engine.CallDescriptor{
+					RunID: "RunID",
+				},
+			},
+			&SRun{
+				Event: sr2,
+				CD: &engine.CallDescriptor{
+					RunID: "RunID2",
+				},
+			},
+		},
+	}
+	sEv[utils.ToR] = utils.DATA
+	sr2[utils.CGRID] = GetSetCGRID(sEv)
+	sS.registerSession(session, false)
+	fltrs := &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s;%s", utils.VOICE, utils.DATA)}}
+
+	if noSess := sS.filterSessionsCount(fltrs, false); noSess != 2 {
+		t.Errorf("Expected %v , received: %s", 2, utils.ToJSON(noSess))
+	}
+	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.ToR:NoToR", "*string:~*req.Subject:subject1"}}
+	if noSess := sS.filterSessionsCount(fltrs, false); noSess != 0 {
+		t.Errorf("Expected no session, received: %s", utils.ToJSON(noSess))
+	}
+	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.ToR:NoToR"}}
+	if noSess := sS.filterSessionsCount(fltrs, false); noSess != 0 {
+		t.Errorf("Expected no session, received: %s", utils.ToJSON(noSess))
+	}
+	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.ToR:*voice", "*string:~*req.Subject:subject1"}}
+	if noSess := sS.filterSessionsCount(fltrs, false); noSess != 1 {
+		t.Errorf("Expected %v , received: %s", 1, utils.ToJSON(noSess))
+	}
+	sSCfg.SessionSCfg().SessionIndexes = utils.StringMap{
+		"ToR":    true,
+		"Extra3": true,
+	}
+	sS = NewSessionS(sSCfg, nil, nil)
+	sS.registerSession(session, false)
+	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.ToR:*voice", "*string:~*req.Subject:subject1"}}
+	if noSess := sS.filterSessionsCount(fltrs, false); noSess != 1 {
+		t.Errorf("Expected %v , received: %s", 1, utils.ToJSON(noSess))
+	}
+	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.Subject:subject1"}}
+	if noSess := sS.filterSessionsCount(fltrs, false); noSess != 2 {
+		t.Errorf("Expected %v , received: %s", 2, utils.ToJSON(noSess))
+	}
+	fltrs = &utils.SessionFilter{Filters: []string{"*string:~*req.Subject:subject2"}}
+	if noSess := sS.filterSessionsCount(fltrs, false); noSess != 0 {
+		t.Errorf("Expected no session, received: %s", utils.ToJSON(noSess))
+	}
+	fltrs = &utils.SessionFilter{Filters: []string{}}
+	if noSess := sS.filterSessionsCount(fltrs, false); noSess != 2 {
+		t.Errorf("Expected %v , received: %s", 2, utils.ToJSON(noSess))
+	}
+	sS = NewSessionS(sSCfg, nil, nil)
+	sS.registerSession(session, true)
+	fltrs = &utils.SessionFilter{Filters: []string{fmt.Sprintf("*string:~*req.ToR:%s;%s", utils.VOICE, utils.DATA)}}
+	if noSess := sS.filterSessionsCount(fltrs, true); noSess != 2 {
+		t.Errorf("Expected %v , received: %s", 2, utils.ToJSON(noSess))
+	}
 }

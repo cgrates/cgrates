@@ -814,8 +814,8 @@ func TestSessionsVoiceSessionTTL(t *testing.T) {
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
-				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12372-1"),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.RunID, utils.MetaDefault),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "12372-1"),
 				"*string:~no_field:10",
 			},
 		}, &aSessions); err == nil ||
@@ -825,8 +825,8 @@ func TestSessionsVoiceSessionTTL(t *testing.T) {
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
-				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12360"),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.RunID, utils.MetaDefault),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "12360"),
 			},
 		}, &aSessions); err != nil {
 		t.Error(err)
@@ -878,8 +878,8 @@ func TestSessionsVoiceSessionTTL(t *testing.T) {
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
-				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12360"),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.RunID, utils.MetaDefault),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "12360"),
 			},
 		}, &aSessions); err != nil {
 		t.Error(err)
@@ -986,8 +986,8 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
-				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12361"),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.RunID, utils.MetaDefault),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "12361"),
 			},
 		}, &aSessions); err != nil {
 		t.Error(err)
@@ -1043,8 +1043,8 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
-				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12362"),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.RunID, utils.MetaDefault),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "12362"),
 			},
 		}, &aSessions); err != nil {
 		t.Error(err)
@@ -1072,8 +1072,8 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
-				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12362"),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.RunID, utils.MetaDefault),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "12362"),
 			},
 		}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error(err, utils.ToJSON(aSessions))
@@ -1159,8 +1159,8 @@ func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
-				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12371"),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.RunID, utils.MetaDefault),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "12371"),
 			},
 		}, &aSessions); err != nil {
 		t.Error(err)
@@ -1216,8 +1216,8 @@ func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
-				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12372-1"),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.RunID, utils.MetaDefault),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "12372-1"),
 			},
 		}, &aSessions); err != nil {
 		t.Error(err)
@@ -1266,8 +1266,8 @@ func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	if err := sessionsRPC.Call(utils.SessionSv1GetActiveSessions,
 		utils.SessionFilter{
 			Filters: []string{
-				fmt.Sprintf("*string:~%s:%s", utils.RunID, utils.MetaDefault),
-				fmt.Sprintf("*string:~%s:%s", utils.OriginID, "12372-1"),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.RunID, utils.MetaDefault),
+				fmt.Sprintf("*string:~*req.%s:%s", utils.OriginID, "12372-1"),
 			},
 		}, &aSessions); err == nil ||
 		err.Error() != utils.ErrNotFound.Error() {
