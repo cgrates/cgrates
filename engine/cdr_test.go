@@ -705,13 +705,9 @@ func TestCDRAsExportRecord(t *testing.T) {
 	} else if expRecord[0] != "1" {
 		t.Errorf("Expecting:\n%s\nReceived:\n%s", "1", expRecord[0])
 	}
-	data := NewInternalDB(nil, nil)
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
 	dmForCDR := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	defaultCfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
-
 	cfgCdrFld = &config.FCTemplate{Tag: "destination", Type: utils.META_COMPOSED,
 		FieldId: utils.Destination, Value: prsr, Filters: []string{"*string:~*req.Tenant:itsyscom.com"}, Timezone: "UTC"}
 	if rcrd, err := cdr.AsExportRecord([]*config.FCTemplate{cfgCdrFld}, false, nil, &FilterS{dm: dmForCDR, cfg: defaultCfg}); err != nil {

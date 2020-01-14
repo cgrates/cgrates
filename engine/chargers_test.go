@@ -101,12 +101,9 @@ var (
 )
 
 func TestChargerPopulateChargerService(t *testing.T) {
-	data := NewInternalDB(nil, nil)
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
 	dmCharger = NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
-	defaultCfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
 	chargerSrv, err = NewChargerService(dmCharger,
 		&FilterS{dm: dmCharger, cfg: defaultCfg}, defaultCfg, nil)
 	if err != nil {

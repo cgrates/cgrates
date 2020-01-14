@@ -1,0 +1,125 @@
+// +build integration
+
+/*
+Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
+
+package general_tests
+
+import (
+	"net/rpc"
+	"path"
+	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/utils"
+
+	"github.com/cgrates/cgrates/engine"
+
+	"github.com/cgrates/cgrates/config"
+)
+
+var (
+	cdrsIntCfgPath string
+	cdrsIntCfg     *config.CGRConfig
+	cdrsIntRPC     *rpc.Client
+
+	sTestsCdrsInt = []func(t *testing.T){
+		testCdrsIntInitCfg,
+		testCdrsIntStartEngine,
+		testCdrsIntRpcConn,
+		testCdrsIntTestTTL,
+		testCdrsIntStopEngine,
+	}
+)
+
+// This test is valid only for internal
+// to test the ttl for cdrs
+func TestCdrsIntITMySql(t *testing.T) {
+	for _, stest := range sTestsCdrsInt {
+		t.Run("TestCdrsIntITMySql", stest)
+	}
+}
+
+func testCdrsIntInitCfg(t *testing.T) {
+	var err error
+	cdrsIntCfgPath = path.Join(cdreDataDir, "conf", "samples", "internal_ttl")
+	cdrsIntCfg, err = config.NewCGRConfigFromPath(cdrsIntCfgPath)
+	if err != nil {
+		t.Error(err)
+	}
+	cdrsIntCfg.DataFolderPath = cdreDataDir
+}
+
+func testCdrsIntStartEngine(t *testing.T) {
+	if _, err := engine.StopStartEngine(cdrsIntCfgPath, waitRater); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testCdrsIntRpcConn(t *testing.T) {
+	var err error
+	cdrsIntRPC, err = newRPCClient(cdrsIntCfg.ListenCfg())
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func testCdrsIntTestTTL(t *testing.T) {
+	args := &engine.ArgV1ProcessEvent{
+		Flags: []string{"*store:true"},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]interface{}{
+				utils.OriginID:    "testCdrsIntTestTTL",
+				utils.OriginHost:  "192.168.1.1",
+				utils.Source:      "testCdrsIntTestTTL",
+				utils.RequestType: utils.META_NONE,
+				utils.Category:    "call",
+				utils.Account:     "testCdrsIntTestTTL",
+				utils.Subject:     "ANY2CNT2",
+				utils.Destination: "+4986517174963",
+				utils.AnswerTime:  time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+				utils.Usage:       time.Minute,
+			},
+		},
+	}
+
+	var reply string
+	if err := cdrsIntRPC.Call(utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	var cdrs []*engine.ExternalCDR
+	if err := cdrsIntRPC.Call(utils.ApierV2GetCDRs, &utils.RPCCDRsFilter{}, &cdrs); err != nil {
+		t.Fatal("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Errorf("Expected 1 result received %v ", len(cdrs))
+	}
+	time.Sleep(3 * time.Second)
+	if err := cdrsIntRPC.Call(utils.ApierV2GetCDRs, &utils.RPCCDRsFilter{}, &cdrs); err == nil ||
+		err.Error() != utils.ErrNotFound.Error() {
+		t.Fatal("Unexpected error: ", err.Error())
+	}
+}
+
+func testCdrsIntStopEngine(t *testing.T) {
+	if err := engine.KillEngine(waitRater); err != nil {
+		t.Error(err)
+	}
+}

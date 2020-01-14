@@ -41,6 +41,7 @@ type StorDbCfg struct {
 	PrefixIndexedFields []string
 	QueryTimeout        time.Duration
 	SSLMode             string // for PostgresDB used to change default sslmode
+	Items               map[string]*ItemOpt
 }
 
 // loadFromJsonCfg loads StoreDb config from JsonCfg
@@ -93,6 +94,15 @@ func (dbcfg *StorDbCfg) loadFromJsonCfg(jsnDbCfg *DbJsonCfg) (err error) {
 	if jsnDbCfg.Sslmode != nil {
 		dbcfg.SSLMode = *jsnDbCfg.Sslmode
 	}
+	if jsnDbCfg.Items != nil {
+		for kJsn, vJsn := range *jsnDbCfg.Items {
+			val := new(ItemOpt)
+			if err := val.loadFromJsonCfg(vJsn); err != nil {
+				return err
+			}
+			dbcfg.Items[kJsn] = val
+		}
+	}
 	return nil
 }
 
@@ -112,5 +122,6 @@ func (dbcfg *StorDbCfg) Clone() *StorDbCfg {
 		PrefixIndexedFields: dbcfg.PrefixIndexedFields,
 		QueryTimeout:        dbcfg.QueryTimeout,
 		SSLMode:             dbcfg.SSLMode,
+		Items:               dbcfg.Items,
 	}
 }

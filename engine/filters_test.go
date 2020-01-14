@@ -604,9 +604,9 @@ func TestFilterNewRequestFilter(t *testing.T) {
 }
 
 func TestInlineFilterPassFiltersForEvent(t *testing.T) {
-	data := NewInternalDB(nil, nil)
-	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := FilterS{
 		cfg: cfg,
 		dm:  dmFilterPass,
@@ -816,9 +816,9 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 }
 
 func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
-	data := NewInternalDB(nil, nil)
-	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := FilterS{
 		cfg: cfg,
 		dm:  dmFilterPass,
@@ -921,9 +921,9 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 }
 
 func TestPassFilterMaxCost(t *testing.T) {
-	data := NewInternalDB(nil, nil)
-	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := FilterS{
 		cfg: cfg,
 		dm:  dmFilterPass,
@@ -973,9 +973,9 @@ func TestPassFilterMaxCost(t *testing.T) {
 }
 
 func TestPassFilterMissingField(t *testing.T) {
-	data := NewInternalDB(nil, nil)
-	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	cfg, _ := config.NewDefaultCGRConfig()
+	data := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dmFilterPass := NewDataManager(data, config.CgrConfig().CacheCfg(), nil)
 	filterS := FilterS{
 		cfg: cfg,
 		dm:  dmFilterPass,

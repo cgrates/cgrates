@@ -100,7 +100,8 @@ func TestFilterIndexerITMongo(t *testing.T) {
 }
 
 func TestFilterIndexerITInternal(t *testing.T) {
-	dataManager = NewDataManager(NewInternalDB(nil, nil), config.CgrConfig().CacheCfg(), nil)
+	dataManager = NewDataManager(NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items),
+		config.CgrConfig().CacheCfg(), nil)
 	for _, stest := range sTests {
 		t.Run("TestITInternal", stest)
 	}

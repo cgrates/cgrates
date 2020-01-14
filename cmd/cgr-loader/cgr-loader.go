@@ -252,7 +252,7 @@ func main() {
 			ldrCfg.DataDbCfg().DataDbHost, ldrCfg.DataDbCfg().DataDbPort,
 			ldrCfg.DataDbCfg().DataDbName, ldrCfg.DataDbCfg().DataDbUser,
 			ldrCfg.DataDbCfg().DataDbPass, ldrCfg.GeneralCfg().DBDataEncoding,
-			ldrCfg.DataDbCfg().DataDbSentinelName)
+			ldrCfg.DataDbCfg().DataDbSentinelName, ldrCfg.DataDbCfg().Items)
 		if err != nil {
 			log.Fatalf("Coud not open dataDB connection: %s", err.Error())
 		}
@@ -267,7 +267,7 @@ func main() {
 			ldrCfg.StorDbCfg().Password, ldrCfg.StorDbCfg().SSLMode,
 			ldrCfg.StorDbCfg().MaxOpenConns, ldrCfg.StorDbCfg().MaxIdleConns,
 			ldrCfg.StorDbCfg().ConnMaxLifetime, ldrCfg.StorDbCfg().StringIndexedFields,
-			ldrCfg.StorDbCfg().PrefixIndexedFields); err != nil {
+			ldrCfg.StorDbCfg().PrefixIndexedFields, ldrCfg.StorDbCfg().Items); err != nil {
 			log.Fatalf("Coud not open storDB connection: %s", err.Error())
 		}
 		defer storDb.Close()

@@ -61,7 +61,8 @@ func (db *StorDBService) Start() (err error) {
 		db.cfg.StorDbCfg().Port, db.cfg.StorDbCfg().Name, db.cfg.StorDbCfg().User,
 		db.cfg.StorDbCfg().Password, db.cfg.StorDbCfg().SSLMode, db.cfg.StorDbCfg().MaxOpenConns,
 		db.cfg.StorDbCfg().MaxIdleConns, db.cfg.StorDbCfg().ConnMaxLifetime,
-		db.cfg.StorDbCfg().StringIndexedFields, db.cfg.StorDbCfg().PrefixIndexedFields)
+		db.cfg.StorDbCfg().StringIndexedFields, db.cfg.StorDbCfg().PrefixIndexedFields,
+		db.cfg.StorDbCfg().Items)
 	if err != nil { // Cannot configure getter database, show stopper
 		utils.Logger.Crit(fmt.Sprintf("Could not configure storDB: %s exiting!", err))
 		return
@@ -91,7 +92,8 @@ func (db *StorDBService) Reload() (err error) {
 			db.cfg.StorDbCfg().Port, db.cfg.StorDbCfg().Name, db.cfg.StorDbCfg().User,
 			db.cfg.StorDbCfg().Password, db.cfg.StorDbCfg().SSLMode, db.cfg.StorDbCfg().MaxOpenConns,
 			db.cfg.StorDbCfg().MaxIdleConns, db.cfg.StorDbCfg().ConnMaxLifetime,
-			db.cfg.StorDbCfg().StringIndexedFields, db.cfg.StorDbCfg().PrefixIndexedFields); err != nil {
+			db.cfg.StorDbCfg().StringIndexedFields, db.cfg.StorDbCfg().PrefixIndexedFields,
+			db.cfg.StorDbCfg().Items); err != nil {
 			return
 		}
 		db.db.Close()

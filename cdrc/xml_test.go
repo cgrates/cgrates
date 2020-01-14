@@ -326,11 +326,8 @@ func TestXMLRPProcessWithNewFilters(t *testing.T) {
 			},
 		},
 	}
-	data := engine.NewInternalDB(nil, nil)
-	defaultCfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
 	xmlRP, err := NewXMLRecordsProcessor(bytes.NewBufferString(cdrXmlBroadsoft),
 		utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}), "UTC", true,
 		cdrcCfgs, engine.NewFilterS(defaultCfg, nil,
@@ -572,11 +569,8 @@ func TestXMLRPNestingSeparator(t *testing.T) {
 			},
 		},
 	}
-	data := engine.NewInternalDB(nil, nil)
-	defaultCfg, err := config.NewDefaultCGRConfig()
-	if err != nil {
-		t.Errorf("Error: %+v", err)
-	}
+	defaultCfg, _ := config.NewDefaultCGRConfig()
+	data := engine.NewInternalDB(nil, nil, true, defaultCfg.DataDbCfg().Items)
 	xmlRP, err := NewXMLRecordsProcessor(bytes.NewBufferString(xmlContent),
 		utils.HierarchyPath([]string{"File", "CDRs", "Call"}), "UTC", true,
 		cdrcCfgs, engine.NewFilterS(defaultCfg, nil,
