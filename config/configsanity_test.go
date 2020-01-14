@@ -619,8 +619,8 @@ func TestConfigSanityDataDB(t *testing.T) {
 	}
 	cfg.thresholdSCfg.Enabled = false
 
-	cfg.dataDbCfg.Items = map[string]*ItemRmtRplOpt{
-		"test1": &ItemRmtRplOpt{
+	cfg.dataDbCfg.Items = map[string]*ItemOpt{
+		"test1": &ItemOpt{
 			Remote: true,
 		},
 	}
@@ -629,8 +629,8 @@ func TestConfigSanityDataDB(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 
-	cfg.dataDbCfg.Items = map[string]*ItemRmtRplOpt{
-		"test2": &ItemRmtRplOpt{
+	cfg.dataDbCfg.Items = map[string]*ItemOpt{
+		"test2": &ItemOpt{
 			Remote:    false,
 			Replicate: true,
 		},
