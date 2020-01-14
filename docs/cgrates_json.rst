@@ -6,7 +6,7 @@
 
 Organized into configuration sections. All configuration options come with defaults and we have tried our best to choose the best ones for a minimum of efforts necessary when running.
 
-Below is the default configuration file which comes hardcoded into `**cgr-engine**`_.
+Below is the default configuration file which comes hardcoded into `cgr-engine`_.
 
 .. literalinclude:: ../data/conf/cgrates/cgrates.json
    :language: javascript
