@@ -121,16 +121,16 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 
 func TestCsvPairToRecord(t *testing.T) {
 	eRecord := []string{"INVITE", "2daec40c", "548625ac",
-		"dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", "OK", "1436454408",
+		"dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", utils.OK, "1436454408",
 		"*prepaid", "1001", "1002", "", "3401:2069362475", "2"}
 	invPr := &UnpairedRecord{Method: "INVITE",
 		Timestamp: time.Date(2015, 7, 9, 15, 6, 48, 0, time.UTC),
 		Values: []string{"INVITE", "2daec40c", "548625ac",
-			"dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", "OK",
+			"dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", utils.OK,
 			"1436454408", "*prepaid", "1001", "1002", "", "3401:2069362475"}}
 	byePr := &UnpairedRecord{Method: "BYE", Timestamp: time.Date(2015, 7, 9, 15, 6, 50, 0, time.UTC),
 		Values: []string{"BYE", "2daec40c", "548625ac",
-			"dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", "OK",
+			"dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", utils.OK,
 			"1436454410", "", "", "", "", "3401:2069362475"}}
 	if rec, err := pairToRecord(invPr, byePr); err != nil {
 		t.Error(err)
@@ -149,7 +149,7 @@ func TestCsvPairToRecord(t *testing.T) {
 		t.Error(err)
 	}
 	byePr.Values = []string{"BYE", "2daec40c", "548625ac",
-		"dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", "OK",
+		"dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", utils.OK,
 		"1436454410", "", "", "", "3401:2069362475"} // Took one value out
 	if _, err := pairToRecord(invPr, byePr); err == nil || err.Error() != "INCONSISTENT_VALUES_LENGTH" {
 		t.Error(err)

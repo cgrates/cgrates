@@ -113,7 +113,7 @@ func testTutSMGCacheStats(t *testing.T) {
 	var reply string
 	if err := tutSMGRpc.Call(utils.CacheSv1LoadCache, utils.AttrReloadCache{}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != "OK" {
+	} else if reply != utils.OK {
 		t.Error(reply)
 	}
 	// expectedStats := &utils.CacheStats{Destinations: 5, ReverseDestinations: 7, RatingPlans: 4, RatingProfiles: 5,

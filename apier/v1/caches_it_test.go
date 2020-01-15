@@ -143,7 +143,7 @@ func testCacheSAfterLoadFromFolder(t *testing.T) {
 	// Simple test that command is executed without errors
 	if err := chcRPC.Call(utils.CacheSv1LoadCache, utils.AttrReloadCache{}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != "OK" {
+	} else if reply != utils.OK {
 		t.Error(reply)
 	}
 	expStats[utils.CacheActionTriggers].Items = 1
@@ -192,7 +192,7 @@ func testCacheSReload(t *testing.T) {
 	// Simple test that command is executed without errors
 	if err := chcRPC.Call(utils.CacheSv1LoadCache, utils.AttrReloadCache{}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != "OK" {
+	} else if reply != utils.OK {
 		t.Error(reply)
 	}
 	expStats[utils.CacheAccountActionPlans].Items = 13
@@ -298,7 +298,7 @@ func testCacheSReloadCache(t *testing.T) {
 	arc := new(utils.AttrReloadCache)
 	if err := chcRPC.Call(utils.CacheSv1ReloadCache, arc, &reply); err != nil {
 		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
-	} else if reply != "OK" {
+	} else if reply != utils.OK {
 		t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)
 	}
 }

@@ -33,7 +33,7 @@ type TPCSVImporter struct {
 	DirPath  string     // Directory path to import from
 	Sep      rune       // Separator in the csv file
 	Verbose  bool       // If true will print a detailed information instead of silently discarding it
-	ImportId string     // Use this to differentiate between imports (eg: when autogenerating fields like RatingProfileId
+	ImportId string     // Use this to differentiate between imports (eg: when autogenerating fields like RatingProfileID
 	csvr     LoadReader
 }
 

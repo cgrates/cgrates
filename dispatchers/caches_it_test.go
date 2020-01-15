@@ -118,7 +118,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 		},
 	}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != "OK" {
+	} else if reply != utils.OK {
 		t.Error(reply)
 	}
 	expStats[utils.CacheActions].Items = 2
@@ -278,7 +278,7 @@ func testDspChcReloadCache(t *testing.T) {
 		},
 	}, &reply); err != nil {
 		t.Error("Got error on CacheSv1.ReloadCache: ", err.Error())
-	} else if reply != "OK" {
+	} else if reply != utils.OK {
 		t.Error("Calling CacheSv1.ReloadCache got reply: ", reply)
 	}
 }

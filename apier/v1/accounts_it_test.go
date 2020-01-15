@@ -96,8 +96,10 @@ func TestAccITWithoutRemove(t *testing.T) {
 		accTestsConfig = "acc_balance_keep_mysql"
 	case utils.MetaMongo:
 		accTestsConfig = "acc_balance_keep_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
 	default:
-		t.Fatal("Unknown Database type")
+		t.Fatalf("Unknown Database type <%s>", *dbType)
 	}
 	if *encoding == utils.MetaGOB {
 		accTestsConfig += "_gob"
@@ -230,7 +232,7 @@ func testAccITSetBalanceTimingIds(t *testing.T) {
 	}
 	if err := accRPC.Call(utils.ApierV1SetBalance, args, &reply); err != nil {
 		t.Error("Got error on SetBalance: ", err.Error())
-	} else if reply != "OK" {
+	} else if reply != utils.OK {
 		t.Errorf("Calling SetBalance received: %s", reply)
 	}
 
@@ -300,7 +302,7 @@ func testAccITAddBalance(t *testing.T) {
 	}
 	if err := accRPC.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
-	} else if reply != "OK" {
+	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
 	time.Sleep(50 * time.Millisecond)
@@ -328,7 +330,7 @@ func testAccITSetBalance(t *testing.T) {
 	}
 	if err := accRPC.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
-	} else if reply != "OK" {
+	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.SetBalance received: %s", reply)
 	}
 	time.Sleep(50 * time.Millisecond)
@@ -361,7 +363,7 @@ func testAccITSetBalanceWithExtraData(t *testing.T) {
 	}
 	if err := accRPC.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
-	} else if reply != "OK" {
+	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.SetBalance received: %s", reply)
 	}
 	time.Sleep(50 * time.Millisecond)
@@ -396,7 +398,7 @@ func testAccITSetBalanceWithExtraData2(t *testing.T) {
 	}
 	if err := accRPC.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
-	} else if reply != "OK" {
+	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.SetBalance received: %s", reply)
 	}
 	time.Sleep(50 * time.Millisecond)
@@ -435,7 +437,7 @@ func testAccITAddBalanceWithNegative(t *testing.T) {
 	}
 	if err := accRPC.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
-	} else if reply != "OK" {
+	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
 	//give time to create the account and execute the action
@@ -540,7 +542,7 @@ func testAccITSetBalanceWithVaslue0(t *testing.T) {
 	}
 	if err := accRPC.Call(utils.ApierV1SetBalance, args, &reply); err != nil {
 		t.Error("Got error on SetBalance: ", err.Error())
-	} else if reply != "OK" {
+	} else if reply != utils.OK {
 		t.Errorf("Calling SetBalance received: %s", reply)
 	}
 
@@ -581,7 +583,7 @@ func testAccITSetBalanceWithVaslueInMap(t *testing.T) {
 	}
 	if err := accRPC.Call(utils.ApierV1SetBalance, args, &reply); err != nil {
 		t.Error("Got error on SetBalance: ", err.Error())
-	} else if reply != "OK" {
+	} else if reply != utils.OK {
 		t.Errorf("Calling SetBalance received: %s", reply)
 	}
 
@@ -617,7 +619,7 @@ func testAccITAddBalanceWithValue0(t *testing.T) {
 	}
 	if err := accRPC.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
-	} else if reply != "OK" {
+	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
 
@@ -653,7 +655,7 @@ func testAccITAddBalanceWithValueInMap(t *testing.T) {
 	}
 	if err := accRPC.Call(utils.ApierV1AddBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
-	} else if reply != "OK" {
+	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
 

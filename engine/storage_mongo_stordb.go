@@ -88,7 +88,9 @@ func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 		findMap["tpid"] = tpid
 	}
 	for k, v := range filter {
-		findMap[k] = v
+		if k != "" && v != "" {
+			findMap[k] = v
+		}
 	}
 
 	fop := options.Find()

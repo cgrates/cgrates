@@ -119,7 +119,7 @@ func testMCDRCApierLoadTariffPlanFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(dataDir, "tariffplans", "testtp")}
 	if err := rater.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.LoadTariffPlanFromFolder: ", err.Error())
-	} else if reply != "OK" {
+	} else if reply != utils.OK {
 		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
 	}
 	time.Sleep(time.Duration(waitRater) * time.Millisecond) // Give time for scheduler to execute topups

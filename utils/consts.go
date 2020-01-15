@@ -1062,7 +1062,7 @@ const (
 	ApierV1RemoveTPRatingProfile       = "ApierV1.RemoveTPRatingProfile"
 	ApierV1SetTPDestinationRate        = "ApierV1.SetTPDestinationRate"
 	ApierV1GetTPRatingProfileLoadIds   = "ApierV1.GetTPRatingProfileLoadIds"
-	ApierV1GetTPRatingProfilesByLoadId = "ApierV1.GetTPRatingProfilesByLoadId"
+	ApierV1GetTPRatingProfilesByLoadID = "ApierV1.GetTPRatingProfilesByLoadID"
 	ApierV1GetTPRatingProfileIds       = "ApierV1.GetTPRatingProfileIds"
 	ApierV1GetTPDestinationRateIds     = "ApierV1.GetTPDestinationRateIds"
 	ApierV1RemoveTPDestinationRate     = "ApierV1.RemoveTPDestinationRate"

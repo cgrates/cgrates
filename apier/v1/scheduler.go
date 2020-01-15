@@ -105,7 +105,11 @@ func (self *ApierV1) GetScheduledActions(args scheduler.ArgsGetScheduledActions,
 	if sched == nil {
 		return errors.New(utils.SchedulerNotRunningCaps)
 	}
-	*reply = sched.GetScheduledActions(args)
+	rpl := sched.GetScheduledActions(args)
+	if len(rpl) == 0 {
+		return utils.ErrNotFound
+	}
+	*reply = rpl
 	return nil
 }
 

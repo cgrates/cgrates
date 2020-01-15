@@ -253,7 +253,7 @@ func testV2CDRsRateCDRs(t *testing.T) {
 	var reply string
 	if err := cdrsRpc.Call(utils.ApierV1SetRatingProfile, rpf, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetRatingProfile: ", err.Error())
-	} else if reply != "OK" {
+	} else if reply != utils.OK {
 		t.Error("Calling ApierV1.SetRatingProfile got reply: ", reply)
 	}
 
@@ -626,7 +626,7 @@ func testV2CDRsRateCDRsWithRatingPlan(t *testing.T) {
 	var reply string
 	if err := cdrsRpc.Call(utils.ApierV1SetRatingProfile, rpf, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetRatingProfile: ", err.Error())
-	} else if reply != "OK" {
+	} else if reply != utils.OK {
 		t.Error("Calling ApierV1.SetRatingProfile got reply: ", reply)
 	}
 
@@ -642,7 +642,7 @@ func testV2CDRsRateCDRsWithRatingPlan(t *testing.T) {
 	}
 	if err := cdrsRpc.Call(utils.ApierV1SetRatingProfile, rpf, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetRatingProfile: ", err.Error())
-	} else if reply != "OK" {
+	} else if reply != utils.OK {
 		t.Error("Calling ApierV1.SetRatingProfile got reply: ", reply)
 	}
 

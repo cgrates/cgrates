@@ -17,8 +17,13 @@
 },
 
 
-"stor_db": {								// database used to store offline tariff plans and CDRs
-	"db_password": "CGRateS.org",			// password to use when connecting to stordb
+"data_db": {
+	"db_type": "*internal",	
+},
+
+
+"stor_db": {
+	"db_type": "*internal",	
 },
 
 
@@ -47,16 +52,19 @@
 
 "resources": {
 	"enabled": true,
+	"store_interval": "-1",
 },
 
 
 "stats": {
 	"enabled": true,
+	"store_interval": "-1",
 },
 
 
 "thresholds": {
 	"enabled": true,
+	"store_interval": "-1",
 },
 
 

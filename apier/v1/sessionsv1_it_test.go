@@ -99,6 +99,9 @@ func handleGetSessionIDs(clnt *rpc2.Client,
 }
 
 func TestSSv1ItWithPrepaid(t *testing.T) {
+	if *dbType == utils.MetaPostgres {
+		t.SkipNow()
+	}
 	sSV1RequestType = utils.META_PREPAID
 	for _, stest := range sTestSessionSv1 {
 		t.Run(sSV1RequestType, stest)
@@ -106,6 +109,9 @@ func TestSSv1ItWithPrepaid(t *testing.T) {
 }
 
 func TestSSv1ItWithPostPaid(t *testing.T) {
+	if *dbType == utils.MetaPostgres {
+		t.SkipNow()
+	}
 	sSV1RequestType = utils.META_POSTPAID
 	for _, stest := range sTestSessionSv1 {
 		t.Run(sSV1RequestType, stest)
@@ -113,6 +119,9 @@ func TestSSv1ItWithPostPaid(t *testing.T) {
 }
 
 func TestSSv1ItWithRated(t *testing.T) {
+	if *dbType == utils.MetaPostgres {
+		t.SkipNow()
+	}
 	sSV1RequestType = utils.META_RATED
 	for _, stest := range sTestSessionSv1 {
 		t.Run(sSV1RequestType, stest)
@@ -120,6 +129,9 @@ func TestSSv1ItWithRated(t *testing.T) {
 }
 
 func TestSSv1ItWithPseudoPrepaid(t *testing.T) {
+	if *dbType == utils.MetaPostgres {
+		t.SkipNow()
+	}
 	sSV1RequestType = utils.META_PSEUDOPREPAID
 	for _, stest := range sTestSessionSv1 {
 		t.Run(sSV1RequestType, stest)

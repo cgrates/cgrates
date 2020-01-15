@@ -46,7 +46,7 @@ func (apiv2 *ApierV2) Call(serviceMethod string,
 
 type AttrLoadRatingProfile struct {
 	TPid            string
-	RatingProfileId string
+	RatingProfileID string
 }
 
 // Process dependencies and load a specific rating profile from storDb into dataDb.

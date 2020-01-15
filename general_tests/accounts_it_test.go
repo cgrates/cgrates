@@ -275,7 +275,7 @@ func testV1AccSendToThreshold(t *testing.T) {
 	}
 	if err := accRpc.Call(utils.ApierV1SetBalance, attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetBalance: ", err.Error())
-	} else if reply != "OK" {
+	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.SetBalance received: %s", reply)
 	}
 
