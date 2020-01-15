@@ -73,7 +73,7 @@ func testTpActPlnITConnect(t *testing.T) {
 		tpActPlnCfgIn.StorDbCfg().Password, tpActPlnCfgIn.StorDbCfg().SSLMode,
 		tpActPlnCfgIn.StorDbCfg().MaxOpenConns, tpActPlnCfgIn.StorDbCfg().MaxIdleConns,
 		tpActPlnCfgIn.StorDbCfg().ConnMaxLifetime, tpActPlnCfgIn.StorDbCfg().StringIndexedFields,
-		tpActPlnCfgIn.StorDbCfg().PrefixIndexedFields)
+		tpActPlnCfgIn.StorDbCfg().PrefixIndexedFields, tpActPlnCfgIn.StorDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -83,7 +83,7 @@ func testTpActPlnITConnect(t *testing.T) {
 		tpActPlnCfgOut.StorDbCfg().Password, tpActPlnCfgIn.StorDbCfg().SSLMode,
 		tpActPlnCfgIn.StorDbCfg().MaxOpenConns, tpActPlnCfgIn.StorDbCfg().MaxIdleConns,
 		tpActPlnCfgIn.StorDbCfg().ConnMaxLifetime, tpActPlnCfgIn.StorDbCfg().StringIndexedFields,
-		tpActPlnCfgIn.StorDbCfg().PrefixIndexedFields)
+		tpActPlnCfgIn.StorDbCfg().PrefixIndexedFields, tpActPlnCfgOut.StorDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -74,7 +74,7 @@ func testTpSplITConnect(t *testing.T) {
 		tpSplCfgIn.StorDbCfg().Password, tpSplCfgIn.StorDbCfg().SSLMode,
 		tpSplCfgIn.StorDbCfg().MaxOpenConns, tpSplCfgIn.StorDbCfg().MaxIdleConns,
 		tpSplCfgIn.StorDbCfg().ConnMaxLifetime, tpSplCfgIn.StorDbCfg().StringIndexedFields,
-		tpSplCfgIn.StorDbCfg().PrefixIndexedFields)
+		tpSplCfgIn.StorDbCfg().PrefixIndexedFields, tpSplCfgIn.StorDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -84,7 +84,7 @@ func testTpSplITConnect(t *testing.T) {
 		tpSplCfgOut.StorDbCfg().Password, tpSplCfgIn.StorDbCfg().SSLMode,
 		tpSplCfgIn.StorDbCfg().MaxOpenConns, tpSplCfgIn.StorDbCfg().MaxIdleConns,
 		tpSplCfgIn.StorDbCfg().ConnMaxLifetime, tpSplCfgIn.StorDbCfg().StringIndexedFields,
-		tpSplCfgIn.StorDbCfg().PrefixIndexedFields)
+		tpSplCfgIn.StorDbCfg().PrefixIndexedFields, tpSplCfgOut.StorDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -166,7 +166,7 @@ func testAccITConnect(t *testing.T) {
 		accCfgIn.DataDbCfg().DataDbHost, accCfgIn.DataDbCfg().DataDbPort,
 		accCfgIn.DataDbCfg().DataDbName, accCfgIn.DataDbCfg().DataDbUser,
 		accCfgIn.DataDbCfg().DataDbPass, accCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "")
+		config.CgrConfig().CacheCfg(), "", accCfgIn.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -174,7 +174,7 @@ func testAccITConnect(t *testing.T) {
 		accCfgOut.DataDbCfg().DataDbHost, accCfgOut.DataDbCfg().DataDbPort,
 		accCfgOut.DataDbCfg().DataDbName, accCfgOut.DataDbCfg().DataDbUser,
 		accCfgOut.DataDbCfg().DataDbPass, accCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "")
+		config.CgrConfig().CacheCfg(), "", accCfgOut.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}

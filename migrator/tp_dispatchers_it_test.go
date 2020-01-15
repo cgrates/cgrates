@@ -73,7 +73,7 @@ func testTpDispITConnect(t *testing.T) {
 		tpDispCfgIn.StorDbCfg().Password, tpDispCfgIn.StorDbCfg().SSLMode,
 		tpDispCfgIn.StorDbCfg().MaxOpenConns, tpDispCfgIn.StorDbCfg().MaxIdleConns,
 		tpDispCfgIn.StorDbCfg().ConnMaxLifetime, tpDispCfgIn.StorDbCfg().StringIndexedFields,
-		tpDispCfgIn.StorDbCfg().PrefixIndexedFields)
+		tpDispCfgIn.StorDbCfg().PrefixIndexedFields, tpDispCfgIn.StorDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -83,7 +83,7 @@ func testTpDispITConnect(t *testing.T) {
 		tpDispCfgOut.StorDbCfg().Password, tpDispCfgIn.StorDbCfg().SSLMode,
 		tpDispCfgIn.StorDbCfg().MaxOpenConns, tpDispCfgIn.StorDbCfg().MaxIdleConns,
 		tpDispCfgIn.StorDbCfg().ConnMaxLifetime, tpDispCfgIn.StorDbCfg().StringIndexedFields,
-		tpDispCfgIn.StorDbCfg().PrefixIndexedFields)
+		tpDispCfgIn.StorDbCfg().PrefixIndexedFields, tpDispCfgOut.StorDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}

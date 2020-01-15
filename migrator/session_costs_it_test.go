@@ -88,7 +88,7 @@ func testSessionCostITConnect(t *testing.T) {
 		sCostCfgIn.StorDbCfg().Password, sCostCfgIn.StorDbCfg().SSLMode,
 		sCostCfgIn.StorDbCfg().MaxOpenConns, sCostCfgIn.StorDbCfg().MaxIdleConns,
 		sCostCfgIn.StorDbCfg().ConnMaxLifetime, sCostCfgIn.StorDbCfg().StringIndexedFields,
-		sCostCfgIn.StorDbCfg().PrefixIndexedFields)
+		sCostCfgIn.StorDbCfg().PrefixIndexedFields, sCostCfgIn.StorDbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -98,7 +98,7 @@ func testSessionCostITConnect(t *testing.T) {
 		sCostCfgOut.StorDbCfg().Password, sCostCfgIn.StorDbCfg().SSLMode,
 		sCostCfgIn.StorDbCfg().MaxOpenConns, sCostCfgIn.StorDbCfg().MaxIdleConns,
 		sCostCfgIn.StorDbCfg().ConnMaxLifetime, sCostCfgIn.StorDbCfg().StringIndexedFields,
-		sCostCfgIn.StorDbCfg().PrefixIndexedFields)
+		sCostCfgIn.StorDbCfg().PrefixIndexedFields, sCostCfgOut.StorDbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}

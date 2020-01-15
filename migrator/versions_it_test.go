@@ -77,7 +77,7 @@ func testVrsITConnect(t *testing.T) {
 		vrsCfg.DataDbCfg().DataDbHost, vrsCfg.DataDbCfg().DataDbPort,
 		vrsCfg.DataDbCfg().DataDbName, vrsCfg.DataDbCfg().DataDbUser,
 		vrsCfg.DataDbCfg().DataDbPass, vrsCfg.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "")
+		config.CgrConfig().CacheCfg(), "", vrsCfg.DataDbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,7 +88,7 @@ func testVrsITConnect(t *testing.T) {
 		vrsCfg.StorDbCfg().Password, vrsCfg.StorDbCfg().SSLMode,
 		vrsCfg.StorDbCfg().MaxOpenConns, vrsCfg.StorDbCfg().MaxIdleConns,
 		vrsCfg.StorDbCfg().ConnMaxLifetime, vrsCfg.StorDbCfg().StringIndexedFields,
-		vrsCfg.StorDbCfg().PrefixIndexedFields)
+		vrsCfg.StorDbCfg().PrefixIndexedFields, vrsCfg.StorDbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}

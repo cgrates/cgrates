@@ -68,7 +68,7 @@ func testAcc2ITConnect(t *testing.T) {
 		acc2CfgIn.DataDbCfg().DataDbHost, acc2CfgIn.DataDbCfg().DataDbPort,
 		acc2CfgIn.DataDbCfg().DataDbName, acc2CfgIn.DataDbCfg().DataDbUser,
 		acc2CfgIn.DataDbCfg().DataDbPass, acc2CfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "")
+		config.CgrConfig().CacheCfg(), "", acc2CfgIn.DataDbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -76,7 +76,7 @@ func testAcc2ITConnect(t *testing.T) {
 		acc2CfgOut.DataDbCfg().DataDbHost, acc2CfgOut.DataDbCfg().DataDbPort,
 		acc2CfgOut.DataDbCfg().DataDbName, acc2CfgOut.DataDbCfg().DataDbUser,
 		acc2CfgOut.DataDbCfg().DataDbPass, acc2CfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "")
+		config.CgrConfig().CacheCfg(), "", acc2CfgOut.DataDbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -87,7 +87,7 @@ func testAcc2ITConnect(t *testing.T) {
 		acc2CfgIn.StorDbCfg().Password, acc2CfgIn.StorDbCfg().SSLMode,
 		acc2CfgIn.StorDbCfg().MaxOpenConns, acc2CfgIn.StorDbCfg().MaxIdleConns,
 		acc2CfgIn.StorDbCfg().ConnMaxLifetime, acc2CfgIn.StorDbCfg().StringIndexedFields,
-		acc2CfgIn.StorDbCfg().PrefixIndexedFields)
+		acc2CfgIn.StorDbCfg().PrefixIndexedFields, acc2CfgIn.StorDbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -97,7 +97,7 @@ func testAcc2ITConnect(t *testing.T) {
 		acc2CfgOut.StorDbCfg().Password, acc2CfgIn.StorDbCfg().SSLMode,
 		acc2CfgOut.StorDbCfg().MaxOpenConns, acc2CfgOut.StorDbCfg().MaxIdleConns,
 		acc2CfgOut.StorDbCfg().ConnMaxLifetime, acc2CfgOut.StorDbCfg().StringIndexedFields,
-		acc2CfgOut.StorDbCfg().PrefixIndexedFields)
+		acc2CfgOut.StorDbCfg().PrefixIndexedFields, acc2CfgOut.StorDbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}

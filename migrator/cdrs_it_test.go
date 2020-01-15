@@ -78,7 +78,7 @@ func testCdrITConnect(t *testing.T) {
 		cdrCfgIn.StorDbCfg().Password, cdrCfgIn.StorDbCfg().SSLMode,
 		cdrCfgIn.StorDbCfg().MaxOpenConns, cdrCfgIn.StorDbCfg().MaxIdleConns,
 		cdrCfgIn.StorDbCfg().ConnMaxLifetime, cdrCfgIn.StorDbCfg().StringIndexedFields,
-		cdrCfgIn.StorDbCfg().PrefixIndexedFields)
+		cdrCfgIn.StorDbCfg().PrefixIndexedFields, cdrCfgIn.StorDbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -88,7 +88,7 @@ func testCdrITConnect(t *testing.T) {
 		cdrCfgIn.StorDbCfg().Password, cdrCfgIn.StorDbCfg().SSLMode,
 		cdrCfgIn.StorDbCfg().MaxOpenConns, cdrCfgIn.StorDbCfg().MaxIdleConns,
 		cdrCfgIn.StorDbCfg().ConnMaxLifetime, cdrCfgIn.StorDbCfg().StringIndexedFields,
-		cdrCfgIn.StorDbCfg().PrefixIndexedFields)
+		cdrCfgIn.StorDbCfg().PrefixIndexedFields, cdrCfgIn.StorDbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}

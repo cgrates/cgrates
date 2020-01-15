@@ -128,7 +128,7 @@ func testResITConnect(t *testing.T) {
 		resCfgIn.DataDbCfg().DataDbHost, resCfgIn.DataDbCfg().DataDbPort,
 		resCfgIn.DataDbCfg().DataDbName, resCfgIn.DataDbCfg().DataDbUser,
 		resCfgIn.DataDbCfg().DataDbPass, resCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "")
+		config.CgrConfig().CacheCfg(), "", resCfgIn.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -136,7 +136,7 @@ func testResITConnect(t *testing.T) {
 		resCfgOut.DataDbCfg().DataDbHost, resCfgOut.DataDbCfg().DataDbPort,
 		resCfgOut.DataDbCfg().DataDbName, resCfgOut.DataDbCfg().DataDbUser,
 		resCfgOut.DataDbCfg().DataDbPass, resCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "")
+		config.CgrConfig().CacheCfg(), "", resCfgOut.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
