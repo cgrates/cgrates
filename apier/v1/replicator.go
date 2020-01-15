@@ -365,8 +365,8 @@ func (rplSv1 *ReplicatorSv1) SetReverseDestination(dst *engine.Destination, repl
 }
 
 // SetDestination
-func (rplSv1 *ReplicatorSv1) SetStatQueue(sq *engine.StatQueue, reply *string) error {
-	if err := rplSv1.dm.DataDB().SetStatQueueDrv(sq); err != nil {
+func (rplSv1 *ReplicatorSv1) SetStatQueue(ssq *engine.StoredStatQueue, reply *string) error {
+	if err := rplSv1.dm.DataDB().SetStatQueueDrv(ssq, nil); err != nil {
 		return err
 	}
 	*reply = utils.OK

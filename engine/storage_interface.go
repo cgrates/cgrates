@@ -104,7 +104,7 @@ type DataDB interface {
 	SetStatQueueProfileDrv(sq *StatQueueProfile) (err error)
 	RemStatQueueProfileDrv(tenant, id string) (err error)
 	GetStatQueueDrv(tenant, id string) (sq *StatQueue, err error)
-	SetStatQueueDrv(sq *StatQueue) (err error)
+	SetStatQueueDrv(ssq *StoredStatQueue, sq *StatQueue) (err error)
 	RemStatQueueDrv(tenant, id string) (err error)
 	GetThresholdProfileDrv(tenant string, ID string) (tp *ThresholdProfile, err error)
 	SetThresholdProfileDrv(tp *ThresholdProfile) (err error)
