@@ -2,6 +2,7 @@
 go clean --cache
 ./test.sh
 gen=$?
+
 # Internal
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*internal'
 go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*internal
@@ -9,6 +10,12 @@ ap1_internal=$?
 echo 'go test github.com/cgrates/cgrates/apier/v2 -tags=integration -dbtype=*internal'
 go test github.com/cgrates/cgrates/apier/v2 -tags=integration -dbtype=*internal
 ap2_internal=$?
+echo 'go test github.com/cgrates/cgrates/engine  -tags=integration -dbtype=*internal'
+go test github.com/cgrates/cgrates/engine -tags=integration -dbtype=*internal
+en_internal=$?
+echo 'go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*internal'
+go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*internal
+ers_internal=$?
 
 # SQL
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*sql'
@@ -17,6 +24,12 @@ ap1_sql=$?
 echo 'go test github.com/cgrates/cgrates/apier/v2 -tags=integration -dbtype=*sql'
 go test github.com/cgrates/cgrates/apier/v2 -tags=integration -dbtype=*sql
 ap2_sql=$?
+echo 'go test github.com/cgrates/cgrates/engine  -tags=integration -dbtype=*sql'
+go test github.com/cgrates/cgrates/engine -tags=integration -dbtype=*sql
+en_sql=$?
+echo 'go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*sql'
+go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*sql
+ers_sql=$?
 
 # Mongo
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*mongo'
@@ -25,6 +38,12 @@ ap1_mongo=$?
 echo 'go test github.com/cgrates/cgrates/apier/v2 -tags=integration -dbtype=*mongo'
 go test github.com/cgrates/cgrates/apier/v2 -tags=integration -dbtype=*mongo
 ap2_mongo=$?
+echo 'go test github.com/cgrates/cgrates/engine  -tags=integration -dbtype=*mongo'
+go test github.com/cgrates/cgrates/engine -tags=integration -dbtype=*mongo
+en_mongo=$?
+echo 'go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*mongo'
+go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*mongo
+ers_mongo=$?
 
 # Postgres
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*postgres'
@@ -33,22 +52,21 @@ ap1_postgres=$?
 echo 'go test github.com/cgrates/cgrates/apier/v2 -tags=integration -dbtype=*postgres'
 go test github.com/cgrates/cgrates/apier/v2 -tags=integration -dbtype=*postgres
 ap2_postgres=$?
+echo 'go test github.com/cgrates/cgrates/engine  -tags=integration -dbtype=*postgres'
+go test github.com/cgrates/cgrates/engine -tags=integration -dbtype=*postgres
+en_postgres=$?
+echo 'go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*postgres'
+go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*postgres
+ers_postgres=$?
 
-echo 'go test github.com/cgrates/cgrates/engine  -tags=integration'
-go test github.com/cgrates/cgrates/engine -tags=integration
-en=$?
 echo 'go test github.com/cgrates/cgrates/cdrc -tags=integration'
 go test github.com/cgrates/cgrates/cdrc -tags=integration
 cdrc=$?
-echo 'go test github.com/cgrates/cgrates/ers -tags=integration'
-go test github.com/cgrates/cgrates/ers -tags=integration
-ers=$?
 echo 'go test github.com/cgrates/cgrates/config -tags=integration'
 go test github.com/cgrates/cgrates/config -tags=integration
 cfg=$?
-echo 'go test github.com/cgrates/cgrates/utils -tags=integration'
-go test github.com/cgrates/cgrates/utils -tags=integration
-utl=$?
+#All
+
 echo 'go test github.com/cgrates/cgrates/general_tests -tags=integration'
 go test github.com/cgrates/cgrates/general_tests -tags=integration
 gnr=$?

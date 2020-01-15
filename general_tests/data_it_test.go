@@ -69,7 +69,7 @@ func TestDataITMongo(t *testing.T) {
 
 func testV1DataLoadConfig(t *testing.T) {
 	var err error
-	dataCfgPath = path.Join(dataDir, "conf", "samples", dataConfDIR)
+	dataCfgPath = path.Join(*dataDir, "conf", "samples", dataConfDIR)
 	if dataCfg, err = config.NewCGRConfigFromPath(dataCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -113,7 +113,7 @@ func testV1DataGetAccountBeforeSet(t *testing.T) {
 
 func testV1DataLoadTarrifPlans(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(dataDir, "tariffplans", "testData")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testData")}
 	if err := dataRpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {

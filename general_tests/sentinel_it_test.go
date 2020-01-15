@@ -34,11 +34,11 @@ import (
 )
 
 var (
-	node1ConfigPath     = path.Join(dataDir, "redis_sentinel", "node1.conf")
-	node2ConfigPath     = path.Join(dataDir, "redis_sentinel", "node2.conf")
-	sentinel1ConfigPath = path.Join(dataDir, "redis_sentinel", "sentinel1.conf")
-	sentinel2ConfigPath = path.Join(dataDir, "redis_sentinel", "sentinel2.conf")
-	engineConfigPath    = path.Join(dataDir, "conf", "samples", "tutsentinel")
+	node1ConfigPath     = path.Join(*dataDir, "redis_sentinel", "node1.conf")
+	node2ConfigPath     = path.Join(*dataDir, "redis_sentinel", "node2.conf")
+	sentinel1ConfigPath = path.Join(*dataDir, "redis_sentinel", "sentinel1.conf")
+	sentinel2ConfigPath = path.Join(*dataDir, "redis_sentinel", "sentinel2.conf")
+	engineConfigPath    = path.Join(*dataDir, "conf", "samples", "tutsentinel")
 	sentinelConfig      *config.CGRConfig
 	sentinelRPC         *rpc.Client
 	node1Exec, node2Exec,
@@ -97,7 +97,7 @@ func testRedisSentinelInitConfig(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	sentinelConfig.DataFolderPath = dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	sentinelConfig.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(sentinelConfig)
 }
 

@@ -58,14 +58,14 @@ func TestTutSMG(t *testing.T) {
 }
 
 func testTutSMGInitCfg(t *testing.T) {
-	tutSMGCfgPath = path.Join(dataDir, "conf", "samples", "smgeneric")
+	tutSMGCfgPath = path.Join(*dataDir, "conf", "samples", "smgeneric")
 	// Init config first
 	var err error
 	tutSMGCfg, err = config.NewCGRConfigFromPath(tutSMGCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	tutSMGCfg.DataFolderPath = dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	tutSMGCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(tutSMGCfg)
 }
 
@@ -85,7 +85,7 @@ func testTutSMGResetStorDb(t *testing.T) {
 
 // Start CGR Engine
 func testTutSMGStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(tutSMGCfgPath, waitRater); err != nil {
+	if _, err := engine.StopStartEngine(tutSMGCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -101,11 +101,11 @@ func testTutSMGRpcConn(t *testing.T) {
 
 // Load the tariff plan, creating accounts and their balances
 func testTutSMGLoadTariffPlanFromFolder(t *testing.T) {
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(dataDir, "tariffplans", "oldtutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	if err := tutSMGRpc.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &smgLoadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 // Check loaded stats

@@ -17,8 +17,13 @@
 },
 
 
+"data_db": {
+	"db_type": "*internal",	
+},
+
+
 "stor_db": {
-	"db_password": "CGRateS.org",
+	"db_type": "*internal",	
 },
 
 
@@ -40,6 +45,7 @@
 
 "resources": {
 	"enabled": true,
+	"store_interval": "-1",
 },
 
 

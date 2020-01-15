@@ -69,9 +69,9 @@ func TestTutorial2Mongo(t *testing.T) {
 
 func testTutLoadConfig(t *testing.T) {
 	var err error
-	tutCfgPath = path.Join(dataDir, "conf", "samples", tutCfgDir)
-	if encoding == utils.MetaGOB {
-		tutCfgPath = path.Join(dataDir, "conf", "samples", tutCfgDir+"_gob")
+	tutCfgPath = path.Join(*dataDir, "conf", "samples", tutCfgDir)
+	if *encoding == utils.MetaGOB {
+		tutCfgPath = path.Join(*dataDir, "conf", "samples", tutCfgDir+"_gob")
 	}
 	if tutCfg, err = config.NewCGRConfigFromPath(tutCfgPath); err != nil {
 		t.Error(err)
@@ -110,7 +110,7 @@ func testTutRpcConn(t *testing.T) {
 func testTutFromFolder(t *testing.T) {
 	var reply string
 	attrs := &utils.AttrLoadTpFromFolder{
-		FolderPath: path.Join(dataDir, "tariffplans", "tutorial2")}
+		FolderPath: path.Join(*dataDir, "tariffplans", "tutorial2")}
 	if err := tutRpc.Call(utils.ApierV1LoadTariffPlanFromFolder,
 		attrs, &reply); err != nil {
 		t.Error(err)

@@ -43,14 +43,14 @@ package general_tests
 // var loadInst utils.LoadInstance // Share load information between tests
 
 // func TestTutITInitCfg(t *testing.T) {
-// 	tutLocalCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
+// 	tutLocalCfgPath = path.Join(**dataDir, "conf", "samples", "tutmysql")
 // 	// Init config first
 // 	var err error
 // 	tutFsLocalCfg, err = config.NewCGRConfigFromPath(tutLocalCfgPath)
 // 	if err != nil {
 // 		t.Error(err)
 // 	}
-// 	tutFsLocalCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+// 	tutFsLocalCfg.DataFolderPath = **dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 // 	config.SetCgrConfig(tutFsLocalCfg)
 // }
 
@@ -70,7 +70,7 @@ package general_tests
 
 // // Start CGR Engine
 // func TestTutITStartEngine(t *testing.T) {
-// 	if _, err := engine.StopStartEngine(tutLocalCfgPath, *waitRater); err != nil {
+// 	if _, err := engine.StopStartEngine(tutLocalCfgPath, **waitRater); err != nil {
 // 		t.Fatal(err)
 // 	}
 // }
@@ -86,11 +86,11 @@ package general_tests
 
 // // Load the tariff plan, creating accounts and their balances
 // func TestTutITLoadTariffPlanFromFolder(t *testing.T) {
-// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
+// 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(**dataDir, "tariffplans", "oldtutorial")}
 // 	if err := tutLocalRpc.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
 // 		t.Error(err)
 // 	}
-// 	time.Sleep(100*time.Millisecond + time.Duration(*waitRater)*time.Millisecond) // Give time for scheduler to execute topups
+// 	time.Sleep(100*time.Millisecond + time.Duration(**waitRater)*time.Millisecond) // Give time for scheduler to execute topups
 // }
 
 // // Check loaded stats
@@ -593,7 +593,7 @@ package general_tests
 // 	} else if reply != utils.OK {
 // 		t.Error("Unexpected reply received: ", reply)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+// 	time.Sleep(time.Duration(**waitRater) * time.Millisecond)
 // 	eCdr := &engine.ExternalCDR{CGRID: "63a8d2bfeca2cfb790826c3ec461696d6574cfde", OrderID: 2,
 // 		ToR:      utils.VOICE,
 // 		OriginID: "testextcdr2", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
@@ -662,7 +662,7 @@ package general_tests
 // 	} else if reply != utils.OK {
 // 		t.Error("Unexpected reply received: ", reply)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+// 	time.Sleep(time.Duration(**waitRater) * time.Millisecond)
 // 	var cdrs []*engine.ExternalCDR
 // 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, Accounts: []string{cdr.Account}, DestinationPrefixes: []string{cdr.Destination}}
 // 	if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
@@ -688,7 +688,7 @@ package general_tests
 // 	} else if reply != utils.OK {
 // 		t.Error("Unexpected reply received: ", reply)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for CDR to be processed
+// 	time.Sleep(time.Duration(**waitRater) * time.Millisecond) // Give time for CDR to be processed
 // 	req = utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, Accounts: []string{cdr2.Account}, DestinationPrefixes: []string{cdr2.Destination}}
 // 	if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
@@ -713,7 +713,7 @@ package general_tests
 // 	} else if reply != utils.OK {
 // 		t.Error("Unexpected reply received: ", reply)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for CDR to be processed
+// 	time.Sleep(time.Duration(**waitRater) * time.Millisecond) // Give time for CDR to be processed
 // 	req = utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, Accounts: []string{cdr3.Account}, DestinationPrefixes: []string{cdr3.Destination}}
 // 	if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {
 // 		t.Error("Unexpected error: ", err.Error())
@@ -1198,7 +1198,7 @@ package general_tests
 // 		Offset     int // Set the item offset
 // 		Limit      int // Limit number of items retrieved
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+// 	time.Sleep(time.Duration(**waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 // 	var acnts []*engine.Account
 // 	if err := tutLocalRpc.Call("ApierV2.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
 // 		t.Error(err)
@@ -1260,7 +1260,7 @@ package general_tests
 // 	} else if reply != utils.OK {
 // 		t.Errorf("Calling ApierV2.SetAccount received: %s", reply)
 // 	}
-// 	time.Sleep(100*time.Millisecond + time.Duration(*waitRater)*time.Millisecond) // Give time for scheduler to execute topups
+// 	time.Sleep(100*time.Millisecond + time.Duration(**waitRater)*time.Millisecond) // Give time for scheduler to execute topups
 // 	if err := tutLocalRpc.Call("ApierV2.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
 // 		t.Error(err)
 // 	} else if len(acnts) != 1 {
@@ -1384,7 +1384,7 @@ package general_tests
 // 	} else if reply != utils.OK {
 // 		t.Error("Unexpected reply received: ", reply)
 // 	}
-// 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for CDR to be processed
+// 	time.Sleep(time.Duration(**waitRater) * time.Millisecond) // Give time for CDR to be processed
 // 	var cdrs []*engine.ExternalCDR
 // 	req := utils.RPCCDRsFilter{RunIDs: []string{utils.MetaDefault}, CGRIDs: []string{cdr.CGRID}}
 // 	if err := tutLocalRpc.Call(utils.ApierV2GetCDRs, req, &cdrs); err != nil {

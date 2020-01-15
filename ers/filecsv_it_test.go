@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
-	"flag"
 	"io/ioutil"
 	"net/rpc"
 	"os"
@@ -36,10 +35,9 @@ import (
 
 var (
 	csvCfgPath string
+	csvCfgDIR  string
 	csvCfg     *config.CGRConfig
 	csvRPC     *rpc.Client
-	dataDir    = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-	waitRater  = flag.Int("wait_rater", 500, "Number of miliseconds to wait for rater to start and cache")
 
 	fileContent1 = `dbafe9c8614c785a65aabd116dd3959c3c56f7f6,default,*voice,dsafdsaf,*rated,*out,cgrates.org,call,1001,1001,+4986517174963,2013-11-07 08:42:25 +0000 UTC,2013-11-07 08:42:26 +0000 UTC,10s,1.0100,val_extra3,"",val_extra1
 dbafe9c8614c785a65aabd116dd3959c3c56f7f7,default,*voice,dsafdsag,*rated,*out,cgrates.org,call,1001,1001,+4986517174964,2013-11-07 09:42:25 +0000 UTC,2013-11-07 09:42:26 +0000 UTC,20s,1.0100,val_extra3,"",val_extra1
@@ -81,14 +79,28 @@ accid23;*rated;cgrates.org;1001;086517174963;2013-02-03 19:54:00;26;val_extra3;"
 )
 
 func TestCsvReadFile(t *testing.T) {
-	csvCfgPath = path.Join(*dataDir, "conf", "samples", "ers")
+
+	switch *dbType {
+	case utils.MetaInternal:
+		csvCfgDIR = "ers_internal"
+	case utils.MetaSQL:
+		csvCfgDIR = "ers_mysql"
+	case utils.MetaMongo:
+		csvCfgDIR = "ers_mongo"
+	case utils.MetaPostgres:
+		csvCfgDIR = "ers_postgres"
+	default:
+		t.Fatal("Unknown Database type")
+	}
+
 	for _, test := range csvTests {
-		t.Run("TestCsvReadFile", test)
+		t.Run(csvCfgDIR, test)
 	}
 }
 
 func testCsvITInitConfig(t *testing.T) {
 	var err error
+	csvCfgPath = path.Join(*dataDir, "conf", "samples", csvCfgDIR)
 	if csvCfg, err = config.NewCGRConfigFromPath(csvCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}

@@ -36,6 +36,7 @@ import (
 
 var (
 	fwvCfgPath string
+	fwvCfgDIR  string
 	fwvCfg     *config.CGRConfig
 	fwvRPC     *rpc.Client
 
@@ -55,9 +56,21 @@ var (
 )
 
 func TestFWVReadFile(t *testing.T) {
-	fwvCfgPath = path.Join(*dataDir, "conf", "samples", "ers")
+	switch *dbType {
+	case utils.MetaInternal:
+		fwvCfgDIR = "ers_internal"
+	case utils.MetaSQL:
+		fwvCfgDIR = "ers_mysql"
+	case utils.MetaMongo:
+		fwvCfgDIR = "ers_mongo"
+	case utils.MetaPostgres:
+		fwvCfgDIR = "ers_postgres"
+	default:
+		t.Fatal("Unknown Database type")
+	}
+
 	for _, test := range fwvTests {
-		t.Run("TestFWVReadFile", test)
+		t.Run(fwvCfgDIR, test)
 	}
 }
 
@@ -78,6 +91,7 @@ func testFWVITCreateCdrDirs(t *testing.T) {
 
 func testFWVITInitConfig(t *testing.T) {
 	var err error
+	fwvCfgPath = path.Join(*dataDir, "conf", "samples", fwvCfgDIR)
 	if fwvCfg, err = config.NewCGRConfigFromPath(fwvCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}

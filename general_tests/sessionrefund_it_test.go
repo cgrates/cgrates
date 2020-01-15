@@ -62,7 +62,7 @@ func TestSrIt(t *testing.T) {
 }
 
 func testSrItLoadConfig(t *testing.T) {
-	srCfgPath = path.Join(dataDir, "conf", "samples", "tutmongo")
+	srCfgPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
 	if srCfg, err = config.NewCGRConfigFromPath(srCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -81,7 +81,7 @@ func testSrItResetStorDb(t *testing.T) {
 }
 
 func testSrItStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(srCfgPath, waitRater); err != nil {
+	if _, err := engine.StopStartEngine(srCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -96,7 +96,7 @@ func testSrItRPCConn(t *testing.T) {
 
 func testSrItLoadFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(dataDir, "tariffplans", "oldtutorial")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	if err := srrpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	}
