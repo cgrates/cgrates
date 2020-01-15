@@ -1274,13 +1274,13 @@ func TestLoadAttributeProfiles(t *testing.T) {
 			Attributes: []*utils.TPAttribute{
 				&utils.TPAttribute{
 					FilterIDs: []string{"*string:~*req.Field1:Initial"},
-					FieldName: "Field1",
+					FieldName: utils.MetaReq + utils.NestingSep + "Field1",
 					Type:      utils.MetaVariable,
 					Value:     "Sub1",
 				},
 				&utils.TPAttribute{
 					FilterIDs: []string{},
-					FieldName: "Field2",
+					FieldName: utils.MetaReq + utils.NestingSep + "Field2",
 					Type:      utils.MetaVariable,
 					Value:     "Sub2",
 				},

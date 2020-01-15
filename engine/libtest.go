@@ -263,8 +263,8 @@ cgrates.org,SPP_1,,,,,supplier1,,,,ResGroup4,Stat3,10,,,
 `
 	AttributesCSVContent = `
 #Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,FieldName,Type,Value,Blocker,Weight
-cgrates.org,ALS1,con1,*string:~*req.Account:1001,2014-07-29T15:00:00Z,*string:~*req.Field1:Initial,Field1,*variable,Sub1,true,20
-cgrates.org,ALS1,con2;con3,,,,Field2,*variable,Sub2,true,20
+cgrates.org,ALS1,con1,*string:~*req.Account:1001,2014-07-29T15:00:00Z,*string:~*req.Field1:Initial,*req.Field1,*variable,Sub1,true,20
+cgrates.org,ALS1,con2;con3,,,,*req.Field2,*variable,Sub2,true,20
 `
 	ChargersCSVContent = `
 #Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight

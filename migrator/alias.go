@@ -109,7 +109,7 @@ func alias2AtttributeProfile(alias *v1Alias, defaultTenant string) *engine.Attri
 					fieldName = utils.MetaTenant
 				}
 				attr := &engine.Attribute{
-					FieldName: fieldName,
+					FieldName: utils.MetaReq + utils.NestingSep + fieldName,
 					Type:      utils.MetaVariable, //default type for Attribute
 					Value:     config.NewRSRParsersMustCompile(substitute, true, utils.INFIELD_SEP),
 				}

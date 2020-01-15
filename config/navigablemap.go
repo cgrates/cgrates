@@ -524,3 +524,39 @@ func (nM *NavigableMap) GetKeys() (keys []string) {
 	}
 	return
 }
+
+// Remove will remove the items from the given path
+func (nM *NavigableMap) Remove(path []string) {
+	// if ordered {
+	// 	nM.order = append(nM.order, path)
+	// }
+	mp := nM.data
+	for i, spath := range path {
+		oData, has := mp[spath]
+		if !has { // no need to remove
+			return
+		}
+		if i == len(path)-1 { // last path
+			delete(mp, spath)
+			return
+		}
+		defer func(np map[string]interface{}, p string) {
+			o, has := np[p]
+			if !has {
+				return
+			}
+			if o == nil {
+				delete(np, p)
+				return
+			}
+			v, ok := o.(map[string]interface{})
+			if !ok {
+				return
+			}
+			if len(v) == 0 {
+				delete(np, p)
+			}
+		}(mp, spath)
+		mp = oData.(map[string]interface{}) // so we can check further down
+	}
+}

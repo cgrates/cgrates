@@ -1211,7 +1211,7 @@ func TestAPItoAttributeProfile(t *testing.T) {
 		},
 		Attributes: []*utils.TPAttribute{
 			&utils.TPAttribute{
-				FieldName: "FL1",
+				FieldName: utils.MetaReq + utils.NestingSep + "FL1",
 				Value:     "Al1",
 			},
 		},
@@ -1227,7 +1227,7 @@ func TestAPItoAttributeProfile(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			&Attribute{
-				FieldName: "FL1",
+				FieldName: utils.MetaReq + utils.NestingSep + "FL1",
 				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 			},
 		},
@@ -1253,7 +1253,7 @@ func TestAPItoModelTPAttribute(t *testing.T) {
 		},
 		Attributes: []*utils.TPAttribute{
 			&utils.TPAttribute{
-				FieldName: "FL1",
+				FieldName: utils.MetaReq + utils.NestingSep + "FL1",
 				Value:     "Al1",
 			},
 		},
@@ -1266,7 +1266,7 @@ func TestAPItoModelTPAttribute(t *testing.T) {
 			ID:                 "ALS1",
 			Contexts:           "con1",
 			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
-			FieldName:          "FL1",
+			FieldName:          utils.MetaReq + utils.NestingSep + "FL1",
 			Value:              "Al1",
 			ActivationInterval: "2014-07-14T14:35:00Z",
 			Weight:             20,
@@ -1286,7 +1286,7 @@ func TestModelAsTPAttribute(t *testing.T) {
 			ID:                 "ALS1",
 			Contexts:           "con1",
 			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
-			FieldName:          "FL1",
+			FieldName:          utils.MetaReq + utils.NestingSep + "FL1",
 			Value:              "Al1",
 			ActivationInterval: "2014-07-14T14:35:00Z",
 			Weight:             20,
@@ -1305,7 +1305,7 @@ func TestModelAsTPAttribute(t *testing.T) {
 		Attributes: []*utils.TPAttribute{
 			&utils.TPAttribute{
 				FilterIDs: []string{},
-				FieldName: "FL1",
+				FieldName: utils.MetaReq + utils.NestingSep + "FL1",
 				Value:     "Al1",
 			},
 		},
@@ -1324,7 +1324,7 @@ func TestModelAsTPAttribute(t *testing.T) {
 		Attributes: []*utils.TPAttribute{
 			&utils.TPAttribute{
 				FilterIDs: []string{},
-				FieldName: "FL1",
+				FieldName: utils.MetaReq + utils.NestingSep + "FL1",
 				Value:     "Al1",
 			},
 		},

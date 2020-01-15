@@ -1862,7 +1862,7 @@ func testOnStorITAttributeProfile(t *testing.T) {
 		Contexts: []string{"con1"},
 		Attributes: []*Attribute{
 			{
-				FieldName: "FN1",
+				FieldName: utils.MetaReq + utils.NestingSep + "FN1",
 				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 			},
 		},
@@ -1942,7 +1942,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 		Contexts: []string{"con1"},
 		Attributes: []*Attribute{
 			{
-				FieldName: "FN1",
+				FieldName: utils.MetaReq + utils.NestingSep + "FN1",
 				Value:     config.NewRSRParsersMustCompile("Val1", true, utils.INFIELD_SEP),
 			},
 		},
@@ -1964,7 +1964,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	}
 	attrProfile.Attributes = []*Attribute{
 		{
-			FieldName: "FN1",
+			FieldName: utils.MetaReq + utils.NestingSep + "FN1",
 			Value:     config.NewRSRParsersMustCompile("123.123", true, utils.INFIELD_SEP),
 		},
 	}
@@ -1980,7 +1980,7 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	}
 	attrProfile.Attributes = []*Attribute{
 		{
-			FieldName: "FN1",
+			FieldName: utils.MetaReq + utils.NestingSep + "FN1",
 			Value:     config.NewRSRParsersMustCompile("true", true, utils.INFIELD_SEP),
 		},
 	}
