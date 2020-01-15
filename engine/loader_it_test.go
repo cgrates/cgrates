@@ -29,72 +29,99 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Globals used
-var dataDbCsv, dataDbStor, dataDbApier *DataManager // Each dataDb will have it's own sources to collect data
-var storDb LoadStorage
-var lCfg *config.CGRConfig
-var loader *TpReader
+var (
+	// Globals used
+	dataDbCsv       *DataManager // Each dataDb will have it's own sources to collect data
+	storDb          LoadStorage
+	lCfg            *config.CGRConfig
+	loader          *TpReader
+	loaderConfigDIR string
+	loaderCfgPath   string
 
-var tpCsvScenario = flag.String("tp_scenario", "testtp", "Use this scenario folder to import tp csv data from")
+	tpCsvScenario = flag.String("tp_scenario", "testtp", "Use this scenario folder to import tp csv data from")
 
-// Create connection to dataDb
-// Will use 3 different datadbs in order to be able to see differences in data loaded
-func TestLoaderITConnDataDbs(t *testing.T) {
-	lCfg, _ = config.NewDefaultCGRConfig()
-	lCfg.StorDbCfg().Password = "CGRateS.org"
+	loaderTests = []func(t *testing.T){
+		testLoaderITInitConfig,
+		testLoaderITInitDataDB,
+		testLoaderITInitStoreDB,
+		testLoaderITRemoveLoad,
+		testLoaderITLoadFromCSV,
+		testLoaderITWriteToDatabase,
+		testLoaderITImportToStorDb,
+		testLoaderITInitDataDB,
+		testLoaderITLoadFromStorDb,
+		testLoaderITInitDataDB,
+		testLoaderITLoadIndividualProfiles,
+	}
+)
+
+func TestLoaderIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		loaderConfigDIR = "tutinternal"
+	case utils.MetaSQL:
+		loaderConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		loaderConfigDIR = "tutmongo"
+	case utils.MetaPostgres:
+		loaderConfigDIR = "tutpostgres"
+	default:
+		t.Fatal("Unknown Database type")
+	}
+
+	for _, stest := range loaderTests {
+		t.Run(loaderConfigDIR, stest)
+	}
+}
+
+func testLoaderITInitConfig(t *testing.T) {
+	loaderCfgPath = path.Join(*dataDir, "conf", "samples", loaderConfigDIR)
+	lCfg, err = config.NewCGRConfigFromPath(loaderCfgPath)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func testLoaderITInitDataDB(t *testing.T) {
 	var err error
 	dbConn, err := NewDataDBConn(lCfg.DataDbCfg().DataDbType,
-		lCfg.DataDbCfg().DataDbHost, lCfg.DataDbCfg().DataDbPort, "7",
-		lCfg.DataDbCfg().DataDbUser, lCfg.DataDbCfg().DataDbPass,
-		lCfg.GeneralCfg().DBDataEncoding, "", lCfg.DataDbCfg().Items)
+		lCfg.DataDbCfg().DataDbHost, lCfg.DataDbCfg().DataDbPort, lCfg.DataDbCfg().DataDbName,
+		lCfg.DataDbCfg().DataDbUser, lCfg.DataDbCfg().DataDbPass, lCfg.GeneralCfg().DBDataEncoding,
+		lCfg.DataDbCfg().DataDbSentinelName, lCfg.DataDbCfg().Items)
 	if err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
 	dataDbCsv = NewDataManager(dbConn, nil, nil)
-	dbConn, err = NewDataDBConn(lCfg.DataDbCfg().DataDbType,
-		lCfg.DataDbCfg().DataDbHost, lCfg.DataDbCfg().DataDbPort, "8",
-		lCfg.DataDbCfg().DataDbUser, lCfg.DataDbCfg().DataDbPass,
-		lCfg.GeneralCfg().DBDataEncoding, "", lCfg.DataDbCfg().Items)
-	if err != nil {
-		t.Fatal("Error on dataDb connection: ", err.Error())
-	}
-	dataDbStor = NewDataManager(dbConn, nil, nil)
-	dbConn, err = NewDataDBConn(lCfg.DataDbCfg().DataDbType,
-		lCfg.DataDbCfg().DataDbHost, lCfg.DataDbCfg().DataDbPort, "9",
-		lCfg.DataDbCfg().DataDbUser, lCfg.DataDbCfg().DataDbPass,
-		lCfg.GeneralCfg().DBDataEncoding, "", lCfg.DataDbCfg().Items)
-	if err != nil {
-		t.Fatal("Error on dataDb connection: ", err.Error())
-	}
-	dataDbApier = NewDataManager(dbConn, nil, nil)
-	for _, db := range []Storage{dataDbCsv.DataDB(), dataDbStor.DataDB(), dataDbApier.DataDB(),
-		dataDbCsv.DataDB(), dataDbStor.DataDB(), dataDbApier.DataDB()} {
-		if err = db.Flush(""); err != nil {
-			t.Fatal("Error when flushing datadb")
-		}
+	if err = dbConn.Flush(utils.EmptyString); err != nil {
+		t.Fatal("Error when flushing datadb")
 	}
 }
 
 // Create/reset storage tariff plan tables, used as database connectin establishment also
-func TestLoaderITCreateStorTpTables(t *testing.T) {
-	db, err := NewMySQLStorage(lCfg.StorDbCfg().Host,
-		lCfg.StorDbCfg().Port, lCfg.StorDbCfg().Name,
-		lCfg.StorDbCfg().User, lCfg.StorDbCfg().Password,
-		lCfg.StorDbCfg().MaxOpenConns, lCfg.StorDbCfg().MaxIdleConns,
-		lCfg.StorDbCfg().ConnMaxLifetime)
+func testLoaderITInitStoreDB(t *testing.T) {
+	// NewStorDBConn
+	db, err := NewStorDBConn(lCfg.StorDbCfg().Type,
+		lCfg.StorDbCfg().Host, lCfg.StorDbCfg().Port, lCfg.StorDbCfg().Name,
+		lCfg.StorDbCfg().User, lCfg.StorDbCfg().Password, lCfg.StorDbCfg().SSLMode,
+		lCfg.StorDbCfg().MaxOpenConns, lCfg.StorDbCfg().MaxIdleConns, lCfg.StorDbCfg().ConnMaxLifetime,
+		lCfg.StorDbCfg().StringIndexedFields, lCfg.StorDbCfg().PrefixIndexedFields, lCfg.StorDbCfg().Items)
 	if err != nil {
 		t.Error("Error on opening database connection: ", err)
 	}
 	storDb = db
 	// Creating the table serves also as reset since there is a drop prior to create
-	if err := db.CreateTablesFromScript(path.Join(*dataDir, "storage", "mysql", utils.CREATE_TARIFFPLAN_TABLES_SQL)); err != nil {
+	dbdir := "mysql"
+	if *dbType == utils.MetaPostgres {
+		dbdir = "postgres"
+	}
+	if err := db.Flush(path.Join(*dataDir, "storage", dbdir)); err != nil {
 		t.Error("Error on db creation: ", err.Error())
 		return // No point in going further
 	}
 }
 
 // Loads data from csv files in tp scenario to dataDbCsv
-func TestLoaderITRemoveLoad(t *testing.T) {
+func testLoaderITRemoveLoad(t *testing.T) {
 	var err error
 	/*for fn, v := range FileValidators {
 		if err = ValidateCSVData(path.Join(*dataDir, "tariffplans", *tpCsvScenario, fn), v.Rule); err != nil {
@@ -172,7 +199,7 @@ func TestLoaderITRemoveLoad(t *testing.T) {
 }
 
 // Loads data from csv files in tp scenario to dataDbCsv
-func TestLoaderITLoadFromCSV(t *testing.T) {
+func testLoaderITLoadFromCSV(t *testing.T) {
 	var err error
 	/*for fn, v := range FileValidators {
 		if err = ValidateCSVData(path.Join(*dataDir, "tariffplans", *tpCsvScenario, fn), v.Rule); err != nil {
@@ -245,7 +272,7 @@ func TestLoaderITLoadFromCSV(t *testing.T) {
 	}
 }
 
-func TestLoaderITWriteToDatabase(t *testing.T) {
+func testLoaderITWriteToDatabase(t *testing.T) {
 	for k, as := range loader.actions {
 		rcv, err := loader.dm.GetActions(k, true, utils.NonTransactional)
 		if err != nil {
@@ -459,11 +486,10 @@ func TestLoaderITWriteToDatabase(t *testing.T) {
 			t.Errorf("Expecting: %v, received: %v", dp, rcv)
 		}
 	}
-
 }
 
 // Imports data from csv files in tpScenario to storDb
-func TestLoaderITImportToStorDb(t *testing.T) {
+func testLoaderITImportToStorDb(t *testing.T) {
 	csvImporter := TPCSVImporter{
 		TPid:     utils.TEST_SQL,
 		StorDb:   storDb,
@@ -482,8 +508,8 @@ func TestLoaderITImportToStorDb(t *testing.T) {
 }
 
 // Loads data from storDb into dataDb
-func TestLoaderITLoadFromStorDb(t *testing.T) {
-	loader, _ := NewTpReader(dataDbStor.DataDB(), storDb, utils.TEST_SQL, "", nil, nil)
+func testLoaderITLoadFromStorDb(t *testing.T) {
+	loader, _ := NewTpReader(dataDbCsv.DataDB(), storDb, utils.TEST_SQL, "", nil, nil)
 	if err := loader.LoadDestinations(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading destinations: ", err.Error())
 	}
@@ -516,8 +542,8 @@ func TestLoaderITLoadFromStorDb(t *testing.T) {
 	}
 }
 
-func TestLoaderITLoadIndividualProfiles(t *testing.T) {
-	loader, _ := NewTpReader(dataDbApier.DataDB(), storDb, utils.TEST_SQL, "", nil, nil)
+func testLoaderITLoadIndividualProfiles(t *testing.T) {
+	loader, _ := NewTpReader(dataDbCsv.DataDB(), storDb, utils.TEST_SQL, "", nil, nil)
 	// Load ratingPlans. This will also set destination keys
 	if rps, err := storDb.GetTPRatingPlans(utils.TEST_SQL, "", nil); err != nil {
 		t.Fatal("Could not retrieve rating plans")

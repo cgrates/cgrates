@@ -78,11 +78,11 @@ func TestCDRsOnExp(t *testing.T) {
 
 func testCDRsOnExpInitConfig(t *testing.T) {
 	var err error
-	cdrsMasterCfgPath = path.Join(dataDir, "conf", "samples", "cdrsonexpmaster")
+	cdrsMasterCfgPath = path.Join(*dataDir, "conf", "samples", "cdrsonexpmaster")
 	if cdrsMasterCfg, err = config.NewCGRConfigFromPath(cdrsMasterCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
-	cdrsSlaveCfgPath = path.Join(dataDir, "conf", "samples", "cdrsonexpslave")
+	cdrsSlaveCfgPath = path.Join(*dataDir, "conf", "samples", "cdrsonexpslave")
 	if cdrsSlaveCfg, err = config.NewCGRConfigFromPath(cdrsSlaveCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
@@ -113,13 +113,13 @@ func testCDRsOnExpInitCdrDb(t *testing.T) {
 }
 
 func testCDRsOnExpStartMasterEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(cdrsMasterCfgPath, waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cdrsMasterCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func testCDRsOnExpStartSlaveEngine(t *testing.T) {
-	if _, err := engine.StartEngine(cdrsSlaveCfgPath, waitRater); err != nil {
+	if _, err := engine.StartEngine(cdrsSlaveCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -213,7 +213,7 @@ func testCDRsOnExpDisableOnlineExport(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) != 0 {
 		t.Fatalf("Should be no files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
@@ -253,7 +253,7 @@ func testCDRsOnExpHttpCdrReplication(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	cdrsSlaveRpc, err := rpcclient.NewRPCClient(utils.TCP, "127.0.0.1:12012", false, "", "", "", 1, 1,
 		time.Duration(1*time.Second), time.Duration(2*time.Second), rpcclient.JSONrpc, nil, false)
 	if err != nil {
@@ -384,7 +384,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	if conn, err = amqp.Dial("amqp://guest:guest@localhost:5672/"); err != nil {
 		t.Fatal(err)
 	}

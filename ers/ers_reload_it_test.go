@@ -20,10 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
-	"errors"
-	"flag"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os"
 	"path"
 	"testing"
@@ -34,10 +31,12 @@ import (
 )
 
 var (
-	reloadCfgPath string
-	reloadCfg     *config.CGRConfig
-	reloadRPC     *rpc.Client
-	reloadTests   = []func(t *testing.T){
+	reloadCfgPath      string
+	reloadCfg          *config.CGRConfig
+	reloadRPC          *rpc.Client
+	ersReloadConfigDIR string
+
+	reloadTests = []func(t *testing.T){
 		testReloadITCreateCdrDirs,
 		testReloadITInitConfig,
 		testReloadITInitCdrDb,
@@ -49,29 +48,30 @@ var (
 		testReloadVerifyFirstReload,
 		testReloadITKillEngine,
 	}
-	encoding = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
 )
 
-func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
-	switch *encoding {
-	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOB:
-		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
-	default:
-		return nil, errors.New("UNSUPPORTED_RPC")
-	}
-}
-
 func TestERsReload(t *testing.T) {
-	reloadCfgPath = path.Join(*dataDir, "conf", "samples", "ers_reload", "disabled")
-	for _, test := range reloadTests {
-		t.Run("TestERsReload", test)
+	switch *dbType {
+	case utils.MetaInternal:
+		ersReloadConfigDIR = "disabled_internal"
+	case utils.MetaSQL:
+		ersReloadConfigDIR = "disabled_mysql"
+	case utils.MetaMongo:
+		ersReloadConfigDIR = "disabled_mongo"
+	case utils.MetaPostgres:
+		ersReloadConfigDIR = "disabled_postgres"
+	default:
+		t.Fatal("Unknown Database type")
+	}
+
+	for _, stest := range reloadTests {
+		t.Run(ersReloadConfigDIR, stest)
 	}
 }
 
 func testReloadITInitConfig(t *testing.T) {
 	var err error
+	reloadCfgPath = path.Join(*dataDir, "conf", "samples", "ers_reload", ersReloadConfigDIR)
 	if reloadCfg, err = config.NewCGRConfigFromPath(reloadCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}

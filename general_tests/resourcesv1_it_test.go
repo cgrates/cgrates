@@ -67,7 +67,7 @@ func TestRsV1ITMongo(t *testing.T) {
 
 func testV1RsLoadConfig(t *testing.T) {
 	var err error
-	rlsV1CfgPath = path.Join(dataDir, "conf", "samples", rlsV1ConfDIR)
+	rlsV1CfgPath = path.Join(*dataDir, "conf", "samples", rlsV1ConfDIR)
 	if rlsV1Cfg, err = config.NewCGRConfigFromPath(rlsV1CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -87,7 +87,7 @@ func testV1RsResetStorDb(t *testing.T) {
 }
 
 func testV1RsStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(rlsV1CfgPath, waitRater); err != nil {
+	if _, err := engine.StopStartEngine(rlsV1CfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -219,7 +219,7 @@ func testV1RsAuthorize(t *testing.T) {
 }
 
 func testV1RsStopEngine(t *testing.T) {
-	if err := engine.KillEngine(waitRater); err != nil {
+	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}
 }

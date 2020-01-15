@@ -35,6 +35,7 @@ import (
 
 var (
 	xmlCfgPath string
+	xmlCfgDIR  string
 	xmlCfg     *config.CGRConfig
 	xmlRPC     *rpc.Client
 
@@ -54,9 +55,20 @@ var (
 )
 
 func TestXMLReadFile(t *testing.T) {
-	xmlCfgPath = path.Join(*dataDir, "conf", "samples", "ers")
+	switch *dbType {
+	case utils.MetaInternal:
+		xmlCfgDIR = "ers_internal"
+	case utils.MetaSQL:
+		xmlCfgDIR = "ers_mysql"
+	case utils.MetaMongo:
+		xmlCfgDIR = "ers_mongo"
+	case utils.MetaPostgres:
+		xmlCfgDIR = "ers_postgres"
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	for _, test := range xmlTests {
-		t.Run("TestXMLReadFile", test)
+		t.Run(xmlCfgDIR, test)
 	}
 }
 
@@ -77,6 +89,7 @@ func testXMLITCreateCdrDirs(t *testing.T) {
 
 func testXMLITInitConfig(t *testing.T) {
 	var err error
+	xmlCfgPath = path.Join(*dataDir, "conf", "samples", xmlCfgDIR)
 	if xmlCfg, err = config.NewCGRConfigFromPath(xmlCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}

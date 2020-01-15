@@ -66,7 +66,7 @@ func testCdrsIntInitCfg(t *testing.T) {
 }
 
 func testCdrsIntStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(cdrsIntCfgPath, waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cdrsIntCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -119,7 +119,7 @@ func testCdrsIntTestTTL(t *testing.T) {
 }
 
 func testCdrsIntStopEngine(t *testing.T) {
-	if err := engine.KillEngine(waitRater); err != nil {
+	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}
 }

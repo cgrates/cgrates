@@ -30,7 +30,38 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestNewCgrJsonCfgFromHttp(t *testing.T) {
+var (
+	cgrConfigDIR string
+
+	cgrTests = []func(t *testing.T){
+		testNewCgrJsonCfgFromHttp,
+		testNewCGRConfigFromPath,
+		testCGRConfigReloadAttributeS,
+		testCGRConfigReloadChargerS,
+		testCGRConfigReloadThresholdS,
+		testCGRConfigReloadStatS,
+		testCGRConfigReloadResourceS,
+		testCGRConfigReloadSupplierS,
+		testCGRConfigReloadSchedulerS,
+		testCGRConfigReloadCDRs,
+		testCGRConfigReloadRALs,
+		testCGRConfigReloadSessionS,
+		testCGRConfigReloadERs,
+		testCGRConfigReloadDNSAgent,
+		testCGRConfigReloadFreeswitchAgent,
+		testCgrCfgV1ReloadConfigSection,
+		testCGRConfigReloadConfigFromJSONSessionS,
+		testCGRConfigReloadAll,
+	}
+)
+
+func TestCGRConfig(t *testing.T) {
+	for _, test := range cgrTests {
+		t.Run("CGRConfig", test)
+	}
+}
+
+func testNewCgrJsonCfgFromHttp(t *testing.T) {
 	addr := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/tutmongo/cgrates.json"
 	expVal, err := NewDefaultCGRConfig()
 	if err != nil {
@@ -58,7 +89,7 @@ func TestNewCgrJsonCfgFromHttp(t *testing.T) {
 
 }
 
-func TestNewCGRConfigFromPath(t *testing.T) {
+func testNewCGRConfigFromPath(t *testing.T) {
 	for key, val := range map[string]string{"LOGGER": "*syslog", "LOG_LEVEL": "6", "TLS_VERIFY": "false", "ROUND_DEC": "5",
 		"DB_ENCODING": "*msgpack", "TP_EXPORT_DIR": "/var/spool/cgrates/tpe", "FAILED_POSTS_DIR": "/var/spool/cgrates/failed_posts",
 		"DF_TENANT": "cgrates.org", "TIMEZONE": "Local"} {
@@ -81,7 +112,7 @@ func TestNewCGRConfigFromPath(t *testing.T) {
 	}
 
 }
-func TestCGRConfigReloadAttributeS(t *testing.T) {
+func testCGRConfigReloadAttributeS(t *testing.T) {
 	cfg, err := NewDefaultCGRConfig()
 	if err != nil {
 		t.Fatal(err)
@@ -107,7 +138,7 @@ func TestCGRConfigReloadAttributeS(t *testing.T) {
 	}
 }
 
-func TestCGRConfigReloadChargerS(t *testing.T) {
+func testCGRConfigReloadChargerS(t *testing.T) {
 	cfg, err := NewDefaultCGRConfig()
 	if err != nil {
 		t.Fatal(err)
@@ -133,7 +164,7 @@ func TestCGRConfigReloadChargerS(t *testing.T) {
 	}
 }
 
-func TestCGRConfigReloadThresholdS(t *testing.T) {
+func testCGRConfigReloadThresholdS(t *testing.T) {
 	cfg, err := NewDefaultCGRConfig()
 	if err != nil {
 		t.Fatal(err)
@@ -158,7 +189,7 @@ func TestCGRConfigReloadThresholdS(t *testing.T) {
 	}
 }
 
-func TestCGRConfigReloadStatS(t *testing.T) {
+func testCGRConfigReloadStatS(t *testing.T) {
 	cfg, err := NewDefaultCGRConfig()
 	if err != nil {
 		t.Fatal(err)
@@ -184,7 +215,7 @@ func TestCGRConfigReloadStatS(t *testing.T) {
 	}
 }
 
-func TestCGRConfigReloadResourceS(t *testing.T) {
+func testCGRConfigReloadResourceS(t *testing.T) {
 	cfg, err := NewDefaultCGRConfig()
 	if err != nil {
 		t.Fatal(err)
@@ -210,7 +241,7 @@ func TestCGRConfigReloadResourceS(t *testing.T) {
 	}
 }
 
-func TestCGRConfigReloadSupplierS(t *testing.T) {
+func testCGRConfigReloadSupplierS(t *testing.T) {
 	cfg, err := NewDefaultCGRConfig()
 	if err != nil {
 		t.Fatal(err)
@@ -239,7 +270,7 @@ func TestCGRConfigReloadSupplierS(t *testing.T) {
 	}
 }
 
-func TestCGRConfigReloadSchedulerS(t *testing.T) {
+func testCGRConfigReloadSchedulerS(t *testing.T) {
 	cfg, err := NewDefaultCGRConfig()
 	if err != nil {
 		t.Fatal(err)
@@ -263,7 +294,7 @@ func TestCGRConfigReloadSchedulerS(t *testing.T) {
 	}
 }
 
-func TestCGRConfigReloadCDRs(t *testing.T) {
+func testCGRConfigReloadCDRs(t *testing.T) {
 	cfg, err := NewDefaultCGRConfig()
 	if err != nil {
 		t.Fatal(err)
@@ -298,7 +329,7 @@ func TestCGRConfigReloadCDRs(t *testing.T) {
 	}
 }
 
-func TestCGRConfigReloadRALs(t *testing.T) {
+func testCGRConfigReloadRALs(t *testing.T) {
 	cfg, err := NewDefaultCGRConfig()
 	if err != nil {
 		t.Fatal(err)
@@ -329,7 +360,7 @@ func TestCGRConfigReloadRALs(t *testing.T) {
 	}
 }
 
-func TestCGRConfigReloadSessionS(t *testing.T) {
+func testCGRConfigReloadSessionS(t *testing.T) {
 	cfg, err := NewDefaultCGRConfig()
 	if err != nil {
 		t.Fatal(err)
@@ -369,7 +400,7 @@ func TestCGRConfigReloadSessionS(t *testing.T) {
 	}
 }
 
-func TestCGRConfigReloadERs(t *testing.T) {
+func testCGRConfigReloadERs(t *testing.T) {
 	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out"} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
@@ -448,7 +479,7 @@ func TestCGRConfigReloadERs(t *testing.T) {
 	}
 }
 
-func TestCGRConfigReloadDNSAgent(t *testing.T) {
+func testCGRConfigReloadDNSAgent(t *testing.T) {
 	cfg, err := NewDefaultCGRConfig()
 	if err != nil {
 		t.Fatal(err)
@@ -476,7 +507,7 @@ func TestCGRConfigReloadDNSAgent(t *testing.T) {
 	}
 }
 
-func TestCGRConfigReloadFreeswitchAgent(t *testing.T) {
+func testCGRConfigReloadFreeswitchAgent(t *testing.T) {
 	cfg, err := NewDefaultCGRConfig()
 	if err != nil {
 		t.Fatal(err)
@@ -511,7 +542,7 @@ func TestCGRConfigReloadFreeswitchAgent(t *testing.T) {
 	}
 }
 
-func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
+func testCgrCfgV1ReloadConfigSection(t *testing.T) {
 	for _, dir := range []string{"/tmp/ers/in", "/tmp/ers/out"} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
@@ -879,7 +910,7 @@ func TestCgrCfgV1ReloadConfigSection(t *testing.T) {
 	}
 }
 
-func TestCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
+func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 	cfg, err := NewDefaultCGRConfig()
 	if err != nil {
 		t.Fatal(err)
@@ -928,7 +959,7 @@ func TestCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 	}
 }
 
-func TestCGRConfigReloadAll(t *testing.T) {
+func testCGRConfigReloadAll(t *testing.T) {
 	cfg, err := NewDefaultCGRConfig()
 	if err != nil {
 		t.Fatal(err)

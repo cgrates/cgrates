@@ -41,44 +41,42 @@ var (
 	a1CfgPath   string
 	a1Cfg       *config.CGRConfig
 	a1rpc       *rpc.Client
+
+	sTestsA1it = []func(t *testing.T){
+		testA1itLoadConfig,
+		testA1itResetDataDB,
+		testA1itResetStorDb,
+		testA1itStartEngine,
+		testA1itRPCConn,
+		testA1itLoadTPFromFolder,
+		testA1itAddBalance1,
+		testA1itDataSession1,
+		testA1itConcurrentAPs,
+		testA1itStopCgrEngine,
+	}
 )
 
-var sTestsA1it = []func(t *testing.T){
-	testA1itLoadConfig,
-	testA1itResetDataDB,
-	testA1itResetStorDb,
-	testA1itStartEngine,
-	testA1itRPCConn,
-	testA1itLoadTPFromFolder,
-	testA1itAddBalance1,
-	testA1itDataSession1,
-	testA1itConcurrentAPs,
-	testA1itStopCgrEngine,
-}
-
-func TestA1ItMongo(t *testing.T) {
-	a1ConfigDir = "tutmongo"
-	for _, stest := range sTestsA1it {
-		t.Run(a1ConfigDir, stest)
+func TestA1It(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		a1ConfigDir = "tutinternal"
+	case utils.MetaSQL:
+		a1ConfigDir = "tutmysql"
+	case utils.MetaMongo:
+		a1ConfigDir = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
 
-func TestA1ItRedis(t *testing.T) {
-	a1ConfigDir = "tutmysql"
-	for _, stest := range sTestsA1it {
-		t.Run(a1ConfigDir, stest)
-	}
-}
-
-func TestA1ItInternal(t *testing.T) {
-	a1ConfigDir = "tutinternal"
 	for _, stest := range sTestsA1it {
 		t.Run(a1ConfigDir, stest)
 	}
 }
 
 func testA1itLoadConfig(t *testing.T) {
-	a1CfgPath = path.Join(dataDir, "conf", "samples", a1ConfigDir)
+	a1CfgPath = path.Join(*dataDir, "conf", "samples", a1ConfigDir)
 	if a1Cfg, err = config.NewCGRConfigFromPath(a1CfgPath); err != nil {
 		t.Error(err)
 	}
@@ -97,7 +95,7 @@ func testA1itResetStorDb(t *testing.T) {
 }
 
 func testA1itStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(a1CfgPath, waitRater); err != nil {
+	if _, err := engine.StopStartEngine(a1CfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -112,7 +110,7 @@ func testA1itRPCConn(t *testing.T) {
 
 func testA1itLoadTPFromFolder(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(dataDir, "tariffplans", "test", "a1")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "a1")}
 	if err := a1rpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
@@ -184,7 +182,6 @@ func testA1itAddBalance1(t *testing.T) {
 }
 
 func testA1itDataSession1(t *testing.T) {
-
 	usage := time.Duration(10240)
 	initArgs := &sessions.V1InitSessionArgs{
 		InitSession: true,

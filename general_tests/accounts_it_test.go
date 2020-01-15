@@ -61,15 +61,20 @@ var (
 )
 
 // Test start here
-func TestAccITMySQL(t *testing.T) {
-	accConfDIR = "tutmysql"
-	for _, stest := range sTestsAcc {
-		t.Run(accConfDIR, stest)
+func TestAccIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		accConfDIR = "tutinternal"
+	case utils.MetaSQL:
+		accConfDIR = "tutmysql"
+	case utils.MetaMongo:
+		accConfDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
 
-func TestAccITMongo(t *testing.T) {
-	accConfDIR = "tutmongo"
 	for _, stest := range sTestsAcc {
 		t.Run(accConfDIR, stest)
 	}
@@ -77,7 +82,7 @@ func TestAccITMongo(t *testing.T) {
 
 func testV1AccLoadConfig(t *testing.T) {
 	var err error
-	accCfgPath = path.Join(dataDir, "conf", "samples", accConfDIR)
+	accCfgPath = path.Join(*dataDir, "conf", "samples", accConfDIR)
 	if accCfg, err = config.NewCGRConfigFromPath(accCfgPath); err != nil {
 		t.Error(err)
 	}
@@ -121,7 +126,7 @@ func testV1AccGetAccountBeforeSet(t *testing.T) {
 
 func testV1AccLoadTarrifPlans(t *testing.T) {
 	var reply string
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(dataDir, "tariffplans", "testit")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testit")}
 	if err := accRpc.Call(utils.ApierV1LoadTariffPlanFromFolder, attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
