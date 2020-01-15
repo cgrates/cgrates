@@ -34,6 +34,7 @@ var (
 	encoding  = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
 	dbType    = flag.String("dbtype", utils.MetaInternal, "The type of DataBase (Internal/Mongo/mySql)")
 )
+
 func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
 	switch *encoding {
 	case utils.MetaJSON:

@@ -55,22 +55,21 @@ var (
 )
 
 func TestActionsit(t *testing.T) {
-	// switch *dbType {
-	// case utils.MetaInternal:
-	// 	actionsConfigDIR = "tutinternal"
-	// case utils.MetaSQL:
-	// 	actionsConfigDIR = "actions"
-	// case utils.MetaMongo:
-	// 	actionsConfigDIR = "tutmongo"
-	// case utils.MetaPostgres:
-	// 	t.SkipNow()
-	// default:
-	// 	t.Fatal("Unknown Database type")
-	// }
-	// if *encoding == utils.MetaGOB {
-	// 	actionsConfigDIR += "_gob"
-	// }
-	actionsConfigDIR = "actions"
+	switch *dbType {
+	case utils.MetaInternal:
+		actionsConfigDIR = "actions_internal"
+	case utils.MetaSQL:
+		actionsConfigDIR = "actions_mysql"
+	case utils.MetaMongo:
+		actionsConfigDIR = "actions_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+	if *encoding == utils.MetaGOB {
+		actionsConfigDIR += "_gob"
+	}
 
 	for _, stest := range sTestsActionsit {
 		t.Run(actionsConfigDIR, stest)
@@ -78,9 +77,7 @@ func TestActionsit(t *testing.T) {
 }
 
 func testActionsitInitCfg(t *testing.T) {
-	if *encoding == utils.MetaGOB {
-		actsLclCfgPath = path.Join(*dataDir, "conf", "samples", actionsConfigDIR)
-	}
+	actsLclCfgPath = path.Join(*dataDir, "conf", "samples", actionsConfigDIR)
 	// Init config first
 	var err error
 	actsLclCfg, err = config.NewCGRConfigFromPath(actsLclCfgPath)

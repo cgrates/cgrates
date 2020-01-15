@@ -29,7 +29,6 @@ import (
 
 // Sample HttpJsonPost, more for usage purposes
 func TestHttpJsonPost(t *testing.T) {
-
 	cdrOut := &ExternalCDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123,
 		ToR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
 		Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Tenant: "cgrates.org",

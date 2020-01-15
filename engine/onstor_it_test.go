@@ -36,94 +36,92 @@ var (
 	onStor     *DataManager
 	onStorCfg  string
 	sleepDelay time.Duration
+
+	// subtests to be executed for each confDIR
+	sTestsOnStorIT = []func(t *testing.T){
+		testOnStorITFlush,
+		testOnStorITIsDBEmpty,
+		testOnStorITCacheDestinations,
+		testOnStorITCacheReverseDestinations,
+		testOnStorITCacheActionPlan,
+		testOnStorITCacheAccountActionPlans,
+
+		// ToDo: test cache flush for a prefix
+		// ToDo: testOnStorITLoadAccountingCache
+		testOnStorITHasData,
+		testOnStorITPushPop,
+		testOnStorITRatingPlan,
+		testOnStorITRatingProfile,
+		testOnStorITCRUDDestinations,
+		testOnStorITCRUDReverseDestinations,
+		testOnStorITActions,
+		testOnStorITSharedGroup,
+		testOnStorITCRUDActionPlan,
+		testOnStorITCRUDAccountActionPlans,
+		testOnStorITCRUDAccount,
+		testOnStorITResource,
+		testOnStorITResourceProfile,
+		testOnStorITTiming,
+		//testOnStorITCRUDHistory,
+		testOnStorITCRUDStructVersion,
+		testOnStorITStatQueueProfile,
+		testOnStorITStatQueue,
+		testOnStorITThresholdProfile,
+		testOnStorITThreshold,
+		testOnStorITFilter,
+		testOnStorITSupplierProfile,
+		testOnStorITAttributeProfile,
+		testOnStorITFlush,
+		testOnStorITIsDBEmpty,
+		testOnStorITTestAttributeSubstituteIface,
+		testOnStorITChargerProfile,
+		testOnStorITDispatcherProfile,
+
+		//testOnStorITCacheActionTriggers,
+		//testOnStorITCRUDActionTriggers,
+	}
 )
 
-// subtests to be executed for each confDIR
-var sTestsOnStorIT = []func(t *testing.T){
-	testOnStorITFlush,
-	testOnStorITIsDBEmpty,
-	testOnStorITCacheDestinations,
-	testOnStorITCacheReverseDestinations,
-	testOnStorITCacheActionPlan,
-	testOnStorITCacheAccountActionPlans,
-
-	// ToDo: test cache flush for a prefix
-	// ToDo: testOnStorITLoadAccountingCache
-	testOnStorITHasData,
-	testOnStorITPushPop,
-	testOnStorITRatingPlan,
-	testOnStorITRatingProfile,
-	testOnStorITCRUDDestinations,
-	testOnStorITCRUDReverseDestinations,
-	testOnStorITActions,
-	testOnStorITSharedGroup,
-	testOnStorITCRUDActionPlan,
-	testOnStorITCRUDAccountActionPlans,
-	testOnStorITCRUDAccount,
-	testOnStorITResource,
-	testOnStorITResourceProfile,
-	testOnStorITTiming,
-	//testOnStorITCRUDHistory,
-	testOnStorITCRUDStructVersion,
-	testOnStorITStatQueueProfile,
-	testOnStorITStatQueue,
-	testOnStorITThresholdProfile,
-	testOnStorITThreshold,
-	testOnStorITFilter,
-	testOnStorITSupplierProfile,
-	testOnStorITAttributeProfile,
-	testOnStorITFlush,
-	testOnStorITIsDBEmpty,
-	testOnStorITTestAttributeSubstituteIface,
-	testOnStorITChargerProfile,
-	testOnStorITDispatcherProfile,
-
-	//testOnStorITCacheActionTriggers,
-	//testOnStorITCRUDActionTriggers,
-}
-
-func TestOnStorITRedis(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
-	rdsITdb, err = NewRedisStorage(
-		fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
-		4, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-		utils.REDIS_MAX_CONNS, "")
-	if err != nil {
-		t.Fatal("Could not connect to Redis", err.Error())
+func TestOnStorIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		sleepDelay = 10 * time.Millisecond
+		onStor = NewDataManager(NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items),
+			config.CgrConfig().CacheCfg(), nil)
+	case utils.MetaSQL:
+		cfg, _ := config.NewDefaultCGRConfig()
+		rdsITdb, err = NewRedisStorage(
+			fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
+			4, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+			utils.REDIS_MAX_CONNS, "")
+		if err != nil {
+			t.Fatal("Could not connect to Redis", err.Error())
+		}
+		onStorCfg = cfg.DataDbCfg().DataDbName
+		onStor = NewDataManager(rdsITdb, config.CgrConfig().CacheCfg(), nil)
+	case utils.MetaMongo:
+		sleepDelay = 500 * time.Millisecond
+		cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "cdrsv2mongo")
+		mgoITCfg, err := config.NewCGRConfigFromPath(cdrsMongoCfgPath)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if mgoITdb, err = NewMongoStorage(mgoITCfg.StorDbCfg().Host,
+			mgoITCfg.StorDbCfg().Port, mgoITCfg.StorDbCfg().Name,
+			mgoITCfg.StorDbCfg().User, mgoITCfg.StorDbCfg().Password,
+			utils.StorDB, nil, false); err != nil {
+			t.Fatal(err)
+		}
+		onStorCfg = mgoITCfg.StorDbCfg().Name
+		onStor = NewDataManager(mgoITdb, config.CgrConfig().CacheCfg(), nil)
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-	onStorCfg = cfg.DataDbCfg().DataDbName
-	onStor = NewDataManager(rdsITdb, config.CgrConfig().CacheCfg(), nil)
+
 	for _, stest := range sTestsOnStorIT {
-		t.Run("TestOnStorITRedis", stest)
-	}
-}
-
-func TestOnStorITMongo(t *testing.T) {
-	sleepDelay = 500 * time.Millisecond
-	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "cdrsv2mongo")
-	mgoITCfg, err := config.NewCGRConfigFromPath(cdrsMongoCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if mgoITdb, err = NewMongoStorage(mgoITCfg.StorDbCfg().Host,
-		mgoITCfg.StorDbCfg().Port, mgoITCfg.StorDbCfg().Name,
-		mgoITCfg.StorDbCfg().User, mgoITCfg.StorDbCfg().Password,
-		utils.StorDB, nil, false); err != nil {
-		t.Fatal(err)
-	}
-	onStorCfg = mgoITCfg.StorDbCfg().Name
-	onStor = NewDataManager(mgoITdb, config.CgrConfig().CacheCfg(), nil)
-	for _, stest := range sTestsOnStorIT {
-		t.Run("TestOnStorITMongo", stest)
-	}
-}
-
-func TestOnStorITInternal(t *testing.T) {
-	sleepDelay = 10 * time.Millisecond
-	onStor = NewDataManager(NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items),
-		config.CgrConfig().CacheCfg(), nil)
-	for _, stest := range sTestsOnStorIT {
-		t.Run("TestOnStorITInternal", stest)
+		t.Run(*dbType, stest)
 	}
 }
 

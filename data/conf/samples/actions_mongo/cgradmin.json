@@ -1,0 +1,62 @@
+{
+// CGRateS Configuration file
+//
+// Used for cgradmin
+// Starts rater, scheduler
+
+"general": {
+    "log_level": 7,
+},
+
+"listen": {
+	"rpc_json": ":2012",			// RPC JSON listening address
+	"rpc_gob": ":2013",			// RPC GOB listening address
+	"http": ":2080",				// HTTP listening address
+},
+
+
+"data_db": {
+	"db_type": "mongo",
+	"db_name": "10",
+	"db_port": 27017,
+},
+
+
+"stor_db": {
+	"db_type": "mongo",
+	"db_name": "cgrates",
+	"db_port": 27017,
+},
+
+"rals": {
+	"enabled": true,						// enable Rater service: <true|false>
+},
+
+"schedulers": {
+	"enabled": true,						// start Scheduler service: <true|false>
+	"cdrs_conns": ["*internal"],
+},
+
+"cdrs": {
+	"enabled": true,						// start the CDR Server service:  <true|false>
+	"chargers_conns":["*localhost"],
+},
+
+"chargers": {
+	"enabled": true,
+},
+
+"users": {
+	"enabled": true,							// starts users service: <true|false>.
+},
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "1s",
+},
+
+"apier": {
+	"scheduler_conns": ["*internal"],
+},
+
+}

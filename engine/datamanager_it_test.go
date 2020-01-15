@@ -32,49 +32,58 @@ import (
 )
 
 var (
-	dm2 *DataManager
+	dm2              *DataManager
+	dataMngConfigDIR string
+
+	sTestsDMit = []func(t *testing.T){
+		testDMitDataFlush,
+		testDMitCRUDStatQueue,
+	}
 )
 
-var sTestsDMit = []func(t *testing.T){
-	testDMitDataFlush,
-}
-
-func TestDMitRedis(t *testing.T) {
+func TestDMitinitDB(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
-	dataDB, err := NewRedisStorage(
-		fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
-		4, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-		utils.REDIS_MAX_CONNS, "")
-	if err != nil {
-		t.Fatal("Could not connect to Redis", err.Error())
-	}
-	dm2 = NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
-	for _, stest := range sTestsDMit {
-		t.Run("TestDMitRedis", stest)
-	}
-}
+	var dataDB DataDB
+	var err error
 
-func TestDMitMongo(t *testing.T) {
-	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "cdrsv2mongo")
-	mgoITCfg, err := config.NewCGRConfigFromPath(cdrsMongoCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	dataDB, err := NewMongoStorage(mgoITCfg.StorDbCfg().Host,
-		mgoITCfg.StorDbCfg().Port, mgoITCfg.StorDbCfg().Name,
-		mgoITCfg.StorDbCfg().User, mgoITCfg.StorDbCfg().Password,
-		utils.StorDB, nil, false)
-	if err != nil {
-		t.Fatal("Could not connect to Mongo", err.Error())
+	switch *dbType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaSQL:
+		dataDB, err = NewRedisStorage(
+			fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
+			4, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+			utils.REDIS_MAX_CONNS, "")
+		if err != nil {
+			t.Fatal("Could not connect to Redis", err.Error())
+		}
+	case utils.MetaMongo:
+		cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
+		mgoITCfg, err := config.NewCGRConfigFromPath(cdrsMongoCfgPath)
+		if err != nil {
+			t.Fatal(err)
+		}
+		dataDB, err = NewMongoStorage(mgoITCfg.StorDbCfg().Host,
+			mgoITCfg.StorDbCfg().Port, mgoITCfg.StorDbCfg().Name,
+			mgoITCfg.StorDbCfg().User, mgoITCfg.StorDbCfg().Password,
+			utils.StorDB, nil, false)
+		if err != nil {
+			t.Fatal("Could not connect to Mongo", err.Error())
+		}
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
 	dm2 = NewDataManager(dataDB, config.CgrConfig().CacheCfg(), nil)
+
 	for _, stest := range sTestsDMit {
-		t.Run("TestDMitMongo", stest)
+		t.Run(*dbType, stest)
 	}
 }
 
 func testDMitDataFlush(t *testing.T) {
-	if err := dm2.dataDB.Flush(""); err != nil {
+	if err := dm2.dataDB.Flush(utils.EmptyString); err != nil {
 		t.Error(err)
 	}
 	Cache.Clear(nil)
@@ -102,7 +111,7 @@ func testDMitCRUDStatQueue(t *testing.T) {
 			},
 		},
 	}
-	if _, rcvErr := dm2.GetStatQueue(sq.Tenant, sq.ID, true, false, ""); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := dm2.GetStatQueue(sq.Tenant, sq.ID, true, false, utils.EmptyString); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 	if _, ok := Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != false {
@@ -114,7 +123,7 @@ func testDMitCRUDStatQueue(t *testing.T) {
 	if _, ok := Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != false {
 		t.Error("should not be in cache")
 	}
-	if rcv, err := dm2.GetStatQueue(sq.Tenant, sq.ID, true, false, ""); err != nil {
+	if rcv, err := dm2.GetStatQueue(sq.Tenant, sq.ID, true, true, utils.EmptyString); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(sq, rcv) {
 		t.Errorf("expecting: %v, received: %v", sq, rcv)
@@ -122,13 +131,14 @@ func testDMitCRUDStatQueue(t *testing.T) {
 	if _, ok := Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != true {
 		t.Error("should be in cache")
 	}
-	if err := dm2.RemoveStatQueue(sq.Tenant, sq.ID, ""); err != nil {
+	if err := dm2.RemoveStatQueue(sq.Tenant, sq.ID, utils.EmptyString); err != nil {
 		t.Error(err)
 	}
+	Cache.Clear(nil)
 	if _, ok := Cache.Get(utils.CacheStatQueues, sq.TenantID()); ok != false {
 		t.Error("should not be in cache")
 	}
-	if _, rcvErr := dm2.GetStatQueue(sq.Tenant, sq.ID, true, false, ""); rcvErr != utils.ErrNotFound {
+	if _, rcvErr := dm2.GetStatQueue(sq.Tenant, sq.ID, true, false, utils.EmptyString); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
 	}
 }

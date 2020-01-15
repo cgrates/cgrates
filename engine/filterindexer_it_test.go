@@ -63,47 +63,44 @@ var sTests = []func(t *testing.T){
 	testITTestIndexingMetaNot,
 }
 
-func TestFilterIndexerITRedis(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
-	redisDB, err := NewRedisStorage(
-		fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
-		4, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
-		utils.REDIS_MAX_CONNS, "")
-	if err != nil {
-		t.Fatal("Could not connect to Redis", err.Error())
-	}
-	cfgDBName = cfg.DataDbCfg().DataDbName
-	dataManager = NewDataManager(redisDB, config.CgrConfig().CacheCfg(), nil)
-	for _, stest := range sTests {
-		t.Run("TestITRedis", stest)
-	}
-}
-
-func TestFilterIndexerITMongo(t *testing.T) {
-	cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
-	mgoITCfg, err := config.NewCGRConfigFromPath(cdrsMongoCfgPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	mongoDB, err := NewMongoStorage(mgoITCfg.StorDbCfg().Host,
-		mgoITCfg.StorDbCfg().Port, mgoITCfg.StorDbCfg().Name,
-		mgoITCfg.StorDbCfg().User, mgoITCfg.StorDbCfg().Password,
-		utils.StorDB, nil, false)
-	if err != nil {
-		t.Fatal(err)
-	}
-	cfgDBName = mgoITCfg.StorDbCfg().Name
-	dataManager = NewDataManager(mongoDB, config.CgrConfig().CacheCfg(), nil)
-	for _, stest := range sTests {
-		t.Run("TestITMongo", stest)
-	}
-}
-
-func TestFilterIndexerITInternal(t *testing.T) {
-	dataManager = NewDataManager(NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items),
+func TestFilterIndexerIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		dataManager = NewDataManager(NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items),
 		config.CgrConfig().CacheCfg(), nil)
+	case utils.MetaSQL:
+		cfg, _ := config.NewDefaultCGRConfig()
+		redisDB, err := NewRedisStorage(
+			fmt.Sprintf("%s:%s", cfg.DataDbCfg().DataDbHost, cfg.DataDbCfg().DataDbPort),
+			4, cfg.DataDbCfg().DataDbPass, cfg.GeneralCfg().DBDataEncoding,
+			utils.REDIS_MAX_CONNS, "")
+		if err != nil {
+			t.Fatal("Could not connect to Redis", err.Error())
+		}
+		cfgDBName = cfg.DataDbCfg().DataDbName
+		dataManager = NewDataManager(redisDB, config.CgrConfig().CacheCfg(), nil)
+	case utils.MetaMongo:
+		cdrsMongoCfgPath := path.Join(*dataDir, "conf", "samples", "tutmongo")
+		mgoITCfg, err := config.NewCGRConfigFromPath(cdrsMongoCfgPath)
+		if err != nil {
+			t.Fatal(err)
+		}
+		mongoDB, err := NewMongoStorage(mgoITCfg.StorDbCfg().Host,
+			mgoITCfg.StorDbCfg().Port, mgoITCfg.StorDbCfg().Name,
+			mgoITCfg.StorDbCfg().User, mgoITCfg.StorDbCfg().Password,
+			utils.StorDB, nil, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		cfgDBName = mgoITCfg.StorDbCfg().Name
+		dataManager = NewDataManager(mongoDB, config.CgrConfig().CacheCfg(), nil)
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	for _, stest := range sTests {
-		t.Run("TestITInternal", stest)
+		t.Run(*dbType, stest)
 	}
 }
 
