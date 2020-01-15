@@ -73,7 +73,7 @@ func testTpRatesITConnect(t *testing.T) {
 		tpRatesCfgIn.StorDbCfg().Password, tpRatesCfgIn.StorDbCfg().SSLMode,
 		tpRatesCfgIn.StorDbCfg().MaxOpenConns, tpRatesCfgIn.StorDbCfg().MaxIdleConns,
 		tpRatesCfgIn.StorDbCfg().ConnMaxLifetime, tpRatesCfgIn.StorDbCfg().StringIndexedFields,
-		tpRatesCfgIn.StorDbCfg().PrefixIndexedFields)
+		tpRatesCfgIn.StorDbCfg().PrefixIndexedFields, tpRatesCfgIn.StorDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -83,7 +83,7 @@ func testTpRatesITConnect(t *testing.T) {
 		tpRatesCfgOut.StorDbCfg().Password, tpRatesCfgIn.StorDbCfg().SSLMode,
 		tpRatesCfgIn.StorDbCfg().MaxOpenConns, tpRatesCfgIn.StorDbCfg().MaxIdleConns,
 		tpRatesCfgIn.StorDbCfg().ConnMaxLifetime, tpRatesCfgIn.StorDbCfg().StringIndexedFields,
-		tpRatesCfgIn.StorDbCfg().PrefixIndexedFields)
+		tpRatesCfgIn.StorDbCfg().PrefixIndexedFields, tpRatesCfgOut.StorDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}

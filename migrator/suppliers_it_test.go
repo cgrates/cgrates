@@ -127,7 +127,7 @@ func testSupITConnect(t *testing.T) {
 		supCfgIn.DataDbCfg().DataDbHost, supCfgIn.DataDbCfg().DataDbPort,
 		supCfgIn.DataDbCfg().DataDbName, supCfgIn.DataDbCfg().DataDbUser,
 		supCfgIn.DataDbCfg().DataDbPass, supCfgIn.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "")
+		config.CgrConfig().CacheCfg(), "", supCfgIn.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -135,7 +135,7 @@ func testSupITConnect(t *testing.T) {
 		supCfgOut.DataDbCfg().DataDbHost, supCfgOut.DataDbCfg().DataDbPort,
 		supCfgOut.DataDbCfg().DataDbName, supCfgOut.DataDbCfg().DataDbUser,
 		supCfgOut.DataDbCfg().DataDbPass, supCfgOut.GeneralCfg().DBDataEncoding,
-		config.CgrConfig().CacheCfg(), "")
+		config.CgrConfig().CacheCfg(), "", supCfgOut.DataDbCfg().Items)
 	if err != nil {
 		log.Fatal(err)
 	}
