@@ -302,8 +302,8 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) (err error) { // exporte
 			return
 		}
 	case utils.TBLTPRateProfiles:
-		if err = ms.enusureIndex(col, true, "tpid", "direction",
-			"tenant", "category", "subject", "loadid"); err != nil {
+		if err = ms.enusureIndex(col, true, "tpid", "tenant",
+			"category", "subject", "loadid"); err != nil {
 			return
 		}
 	case utils.CDRsTBL:
@@ -637,6 +637,9 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) (result []string, err er
 		case utils.RATING_PLAN_PREFIX:
 			result, err = ms.getField(sctx, ColRpl, utils.RATING_PLAN_PREFIX, subject, "key")
 		case utils.RATING_PROFILE_PREFIX:
+			if strings.HasPrefix(prefix[keyLen:], utils.META_OUT) {
+				subject = fmt.Sprintf("^\\%s", prefix[keyLen:]) // rewrite the id cause it start with * from `*out`
+			}
 			result, err = ms.getField(sctx, ColRpf, utils.RATING_PROFILE_PREFIX, subject, "id")
 		case utils.ACTION_PREFIX:
 			result, err = ms.getField(sctx, ColAct, utils.ACTION_PREFIX, subject, "key")

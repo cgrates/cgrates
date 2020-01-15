@@ -98,7 +98,7 @@ func (iDB *InternalDB) GetTpTableIds(tpid, table string, distinct utils.TPDistin
 			ids = append(ids, buildedID)
 		}
 	}
-
+	ids = utils.NewStringSet(ids).AsSlice()
 	return
 }
 

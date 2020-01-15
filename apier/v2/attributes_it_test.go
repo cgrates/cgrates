@@ -24,6 +24,7 @@ import (
 	"net/rpc"
 	"path"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -225,15 +226,17 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 			Weight: 20,
 		},
 	}
+	sort.Strings(alsPrf.AttributeProfile.Contexts)
 	alsPrf.Compile()
 	var reply *engine.AttributeProfile
 	if err := attrSRPC.Call(utils.ApierV1GetAttributeProfile,
 		utils.TenantIDWithArgDispatcher{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ExternalAttribute"}}, &reply); err != nil {
 		t.Fatal(err)
 	}
+	sort.Strings(reply.Contexts)
 	reply.Compile()
 	if !reflect.DeepEqual(alsPrf.AttributeProfile, reply) {
-		t.Errorf("Expecting : %+v, received: %+v", alsPrf.AttributeProfile, reply)
+		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(alsPrf.AttributeProfile), utils.ToJSON(reply))
 	}
 }
 

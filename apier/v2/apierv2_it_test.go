@@ -24,7 +24,6 @@ import (
 	"net/rpc"
 	"path"
 	"reflect"
-	"strconv"
 	"testing"
 	"time"
 
@@ -63,7 +62,7 @@ var (
 func TestV2IT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		apierv2ConfDIR = "tutinternal"
+		t.Skip()
 	case utils.MetaSQL:
 		apierv2ConfDIR = "tutmysql"
 	case utils.MetaMongo:
@@ -101,15 +100,15 @@ func testApierV2itResetStorDb(t *testing.T) {
 }
 
 func testApierV2itConnectDataDB(t *testing.T) {
-	rdsDb, _ := strconv.Atoi(apierCfg.DataDbCfg().DataDbName)
-	if rdsITdb, err := engine.NewRedisStorage(
-		fmt.Sprintf("%s:%s", apierCfg.DataDbCfg().DataDbHost, apierCfg.DataDbCfg().DataDbPort),
-		rdsDb, apierCfg.DataDbCfg().DataDbPass, apierCfg.GeneralCfg().DBDataEncoding,
-		utils.REDIS_MAX_CONNS, ""); err != nil {
+	rdsITdb, err := engine.NewDataDBConn(apierCfg.DataDbCfg().DataDbType,
+		apierCfg.DataDbCfg().DataDbHost, apierCfg.DataDbCfg().DataDbPort,
+		apierCfg.DataDbCfg().DataDbName, apierCfg.DataDbCfg().DataDbUser,
+		apierCfg.DataDbCfg().DataDbPass, apierCfg.GeneralCfg().DBDataEncoding,
+		apierCfg.DataDbCfg().DataDbSentinelName, apierCfg.DataDbCfg().Items)
+	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())
-	} else {
-		dm = engine.NewDataManager(rdsITdb, config.CgrConfig().CacheCfg(), nil)
 	}
+	dm = engine.NewDataManager(rdsITdb, config.CgrConfig().CacheCfg(), nil)
 }
 
 // Start CGR Engine

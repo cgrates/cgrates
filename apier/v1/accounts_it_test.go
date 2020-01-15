@@ -96,8 +96,10 @@ func TestAccITWithoutRemove(t *testing.T) {
 		accTestsConfig = "acc_balance_keep_mysql"
 	case utils.MetaMongo:
 		accTestsConfig = "acc_balance_keep_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
 	default:
-		t.Fatal("Unknown Database type")
+		t.Fatalf("Unknown Database type <%s>", *dbType)
 	}
 	if *encoding == utils.MetaGOB {
 		accTestsConfig += "_gob"
