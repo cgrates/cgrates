@@ -1803,7 +1803,14 @@ func (dm *DataManager) GetAttributeProfile(tenant, id string, cacheRead, cacheWr
 			return x.(*AttributeProfile), nil
 		}
 	}
-	if strings.HasPrefix(id, utils.Meta) {
+	isInline := false
+	for typeAttr := range utils.AttrInlineTypes.Data() {
+		if strings.HasPrefix(id, typeAttr) {
+			isInline = true
+			break
+		}
+	}
+	if isInline {
 		attrPrfl, err = NewAttributeFromInline(tenant, id)
 	} else if dm == nil {
 		err = utils.ErrNoDatabaseConn
