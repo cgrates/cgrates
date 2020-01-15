@@ -266,16 +266,19 @@ type InternalDB struct {
 	prefixIndexedFields []string
 	indexedFieldsMutex  sync.RWMutex   // used for reload
 	cnter               *utils.Counter // used for OrderID for cdr
+	ms                  Marshaler
 }
 
 // NewInternalDB constructs an InternalDB
 func NewInternalDB(stringIndexedFields, prefixIndexedFields []string,
 	isDataDB bool, itemsCacheCfg map[string]*config.ItemOpt) (iDB *InternalDB) {
+	ms, _ := NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
 	iDB = &InternalDB{
 		db:                  ltcache.NewTransCache(newInternalDBCfg(itemsCacheCfg, isDataDB)),
 		stringIndexedFields: stringIndexedFields,
 		prefixIndexedFields: prefixIndexedFields,
 		cnter:               utils.NewCounter(time.Now().UnixNano(), 0),
+		ms:                  ms,
 	}
 	return
 }
@@ -1120,7 +1123,13 @@ func (iDB *InternalDB) GetStatQueueDrv(tenant, id string) (sq *StatQueue, err er
 	}
 	return x.(*StatQueue), nil
 }
-func (iDB *InternalDB) SetStatQueueDrv(sq *StatQueue) (err error) {
+func (iDB *InternalDB) SetStatQueueDrv(ssq *StoredStatQueue, sq *StatQueue) (err error) {
+	if sq == nil {
+		sq, err = ssq.AsStatQueue(iDB.ms)
+		if err != nil {
+			return
+		}
+	}
 	iDB.db.Set(utils.CacheStatQueues, utils.ConcatenatedKey(sq.Tenant, sq.ID), sq, nil,
 		cacheCommit(utils.NonTransactional), utils.NonTransactional)
 	return

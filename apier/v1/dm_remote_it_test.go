@@ -74,6 +74,7 @@ var (
 		testInternalMatchThreshold,
 		testInternalAccountBalanceOperations,
 		testInternalSetAccount,
+		testInternalReplicateStats,
 		testInternalRemoteITKillEngine,
 	}
 )
@@ -924,6 +925,55 @@ func testInternalSetAccount(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v",
 			10, val)
 	}
+}
+
+func testInternalReplicateStats(t *testing.T) {
+	var reply string
+
+	statConfig = &StatQueueWithCache{
+		StatQueueProfile: &engine.StatQueueProfile{
+			Tenant:    "cgrates.org",
+			ID:        "StatsToReplicate",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			ActivationInterval: &utils.ActivationInterval{
+				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+			},
+			QueueLength: 10,
+			TTL:         time.Duration(10) * time.Second,
+			Metrics: []*engine.MetricWithFilters{
+				&engine.MetricWithFilters{
+					MetricID: "*acd",
+				},
+				&engine.MetricWithFilters{
+					MetricID: "*tcd",
+				},
+			},
+			ThresholdIDs: []string{"*none"},
+			Weight:       20,
+			MinItems:     1,
+		},
+	}
+
+	if err := internalRPC.Call(utils.ApierV1SetStatQueueProfile, statConfig, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	var rcv *engine.StatQueueProfile
+	if err := engineOneRPC.Call(utils.ApierV1GetStatQueueProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "StatsToReplicate"}, &rcv); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(statConfig.StatQueueProfile), utils.ToJSON(rcv))
+	}
+
+	if err := engineTwoRPC.Call(utils.ApierV1GetStatQueueProfile,
+		&utils.TenantID{Tenant: "cgrates.org", ID: "StatsToReplicate"}, &rcv); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(statConfig.StatQueueProfile, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(statConfig.StatQueueProfile), utils.ToJSON(rcv))
+	}
+
 }
 
 func testInternalRemoteITKillEngine(t *testing.T) {

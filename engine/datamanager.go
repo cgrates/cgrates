@@ -90,10 +90,12 @@ var (
 
 // NewDataManager returns a new DataManager
 func NewDataManager(dataDB DataDB, cacheCfg config.CacheCfg, connMgr *ConnManager) *DataManager {
+	ms, _ := NewMarshaler(config.CgrConfig().GeneralCfg().DBDataEncoding)
 	return &DataManager{
 		dataDB:   dataDB,
 		cacheCfg: cacheCfg,
 		connMgr:  connMgr,
+		ms:       ms,
 	}
 }
 
@@ -103,6 +105,7 @@ type DataManager struct {
 	dataDB   DataDB
 	cacheCfg config.CacheCfg
 	connMgr  *ConnManager
+	ms       Marshaler
 }
 
 // DataDB exports access to dataDB
@@ -459,7 +462,14 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 		if err == utils.ErrNotFound && config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues].Remote {
 			if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RmtConns, nil, utils.ReplicatorSv1GetStatQueue,
 				&utils.TenantID{Tenant: tenant, ID: id}, sq); err == nil {
-				err = dm.dataDB.SetStatQueueDrv(sq)
+				var ssq *StoredStatQueue
+				if dm.dataDB.GetStorageType() != utils.MetaInternal {
+					// in case of internal we don't marshal
+					if ssq, err = NewStoredStatQueue(sq, dm.ms); err != nil {
+						return
+					}
+				}
+				err = dm.dataDB.SetStatQueueDrv(ssq, sq)
 			}
 		}
 		if err != nil {
@@ -481,13 +491,21 @@ func (dm *DataManager) GetStatQueue(tenant, id string,
 
 // SetStatQueue converts to StoredStatQueue and stores the result in dataDB
 func (dm *DataManager) SetStatQueue(sq *StatQueue) (err error) {
-	if err = dm.dataDB.SetStatQueueDrv(sq); err != nil {
+	var ssq *StoredStatQueue
+	if dm.dataDB.GetStorageType() != utils.MetaInternal ||
+		config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues].Replicate {
+		// in case of internal we don't marshal
+		if ssq, err = NewStoredStatQueue(sq, dm.ms); err != nil {
+			return
+		}
+	}
+	if err = dm.dataDB.SetStatQueueDrv(ssq, sq); err != nil {
 		return
 	}
 	if config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues].Replicate {
 		var reply string
 		if err = dm.connMgr.Call(config.CgrConfig().DataDbCfg().RplConns, nil,
-			utils.ReplicatorSv1SetStatQueue, sq, &reply); err != nil {
+			utils.ReplicatorSv1SetStatQueue, ssq, &reply); err != nil {
 			err = utils.CastRPCErr(err)
 			return
 		}

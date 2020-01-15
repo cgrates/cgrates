@@ -103,13 +103,9 @@ func NewRedisStorage(address string, db int, pass, mrshlerStr string,
 		return client, nil
 	}
 
-	var mrshler Marshaler
-	if mrshlerStr == utils.MSGPACK {
-		mrshler = NewCodecMsgpackMarshaler()
-	} else if mrshlerStr == utils.JSON {
-		mrshler = new(JSONMarshaler)
-	} else {
-		return nil, fmt.Errorf("Unsupported marshaler: %v", mrshlerStr)
+	ms, err := NewMarshaler(mrshlerStr)
+	if err != nil {
+		return nil, err
 	}
 
 	if sentinelName != "" {
@@ -131,7 +127,7 @@ func NewRedisStorage(address string, db int, pass, mrshlerStr string,
 		}
 		return &RedisStorage{
 			maxConns:      maxConns,
-			ms:            mrshler,
+			ms:            ms,
 			sentinelName:  sentinelName,
 			sentinelInsts: sentinelInsts,
 			db:            db,
@@ -144,7 +140,7 @@ func NewRedisStorage(address string, db int, pass, mrshlerStr string,
 		return &RedisStorage{
 			dbPool:   p,
 			maxConns: maxConns,
-			ms:       mrshler,
+			ms:       ms,
 		}, nil
 	}
 }
@@ -1379,11 +1375,7 @@ func (rs *RedisStorage) GetStatQueueDrv(tenant, id string) (sq *StatQueue, err e
 }
 
 // SetStoredStatQueue stores the metrics for a StatsQueue
-func (rs *RedisStorage) SetStatQueueDrv(sq *StatQueue) (err error) {
-	var ssq *StoredStatQueue
-	if ssq, err = NewStoredStatQueue(sq, rs.ms); err != nil {
-		return
-	}
+func (rs *RedisStorage) SetStatQueueDrv(ssq *StoredStatQueue, sq *StatQueue) (err error) {
 	var result []byte
 	result, err = rs.ms.Marshal(ssq)
 	if err != nil {
