@@ -1,10 +1,11 @@
 .. _cgr-migrator:
-2.4. cgr-migrator
------------------
+
+cgr-migrator
+------------
 
 Command line migration tool.
 
-Configurable via  engine_configuration_ or command line arguments (with higher prio).
+Customisable through the use of *json* :ref:`configuration <engine_configuration>` or command line arguments (higher prio).
 
 ::
 

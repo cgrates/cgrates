@@ -1,6 +1,7 @@
 .. _cgr-loader:
-2.3. cgr-loader
----------------
+
+cgr-loader
+----------
 
 Tool used to load/import TariffPlan data into CGRateS databases.
 
@@ -9,7 +10,8 @@ Can be used to:
  * import TariffPlan data from **csv files** to **StorDB** as offline data. ``-to_stordb -tpid``
  * import TariffPlan data from **StorDB** to **DataDB**. ``-from_stordb -tpid``
 
-Configurable via  engine_configuration_ or command line arguments (with higher prio).
+Customisable through the use of *json* :ref:`configuration <engine_configuration>` or command line arguments (higher prio).
+
 
 ::
 

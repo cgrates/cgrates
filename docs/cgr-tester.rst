@@ -1,6 +1,7 @@
 .. _cgr-tester:
-2.5. cgr-tester
----------------
+
+cgr-tester
+----------
 
 Command line stress testing tool configurable via command line arguments.
 

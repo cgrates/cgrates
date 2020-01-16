@@ -1,7 +1,10 @@
 .. _cgr-console:
-2.2. cgr-console
-----------------
-Command line tool used to interface with the APIs implemented within `cgr-engine`_.
+
+cgr-console
+-----------
+
+Command line tool used to interface via the APIs implemented within :ref:cgr-engine.
+
 Configurable via command line arguments.
 
 ::

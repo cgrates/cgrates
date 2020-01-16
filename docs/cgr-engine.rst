@@ -1,6 +1,7 @@
 .. _cgr-engine:
-2.1. cgr-engine
----------------
+
+cgr-engine
+----------
 
 .. figure::  images/CGRateSInternalArchitecture.png
    :alt: CGRateS Internal Architecture
@@ -10,7 +11,9 @@
 
    Internal Architecture of **cgr-engine**
 
-Groups various services and components, customisable through the use of *json* engine_configuration_ or command line arguments (with higher prio).
+Groups various services and components.
+
+Customisable through the use of *json* :ref:`configuration <engine_configuration>` or command line arguments (higher prio).
 
 ::
 
@@ -44,4 +47,6 @@ Groups various services and components, customisable through the use of *json* e
       Prints the application version.
 
 
-.. hint::  # cgr-engine -config_path=/etc/cgrates
+.. hint:: $ cgr-engine -config_path=/etc/cgrates
+
+.. hint:: $ cgr-engine -config_path=https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/cgrates/cgrates.json
