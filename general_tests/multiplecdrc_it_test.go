@@ -36,6 +36,7 @@ import (
 
 var (
 	cfgPath string
+	cfgDIR  string
 	cfg     *config.CGRConfig
 	rater   *rpc.Client
 
@@ -57,14 +58,26 @@ var (
 )
 
 func TestMCDRC(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		cfgDIR = "multiplecdrc_internal"
+	case utils.MetaSQL:
+		cfgDIR = "multiplecdrc_mysql"
+	case utils.MetaMongo:
+		cfgDIR = "multiplecdrc_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	for _, stest := range sTestMCDRC {
-		t.Run("TestsMCDRC", stest)
+		t.Run(cfgDIR, stest)
 	}
 }
 
 func testMCDRCLoadConfig(t *testing.T) {
 	var err error
-	cfgPath = path.Join(*dataDir, "conf", "samples", "multiplecdrc")
+	cfgPath = path.Join(*dataDir, "conf", "samples", cfgDIR)
 	if cfg, err = config.NewCGRConfigFromPath(cfgPath); err != nil {
 		t.Error(err)
 	}

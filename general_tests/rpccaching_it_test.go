@@ -38,39 +38,51 @@ var (
 	rpcCfg     *config.CGRConfig
 	rpcRpc     *rpc.Client
 	rpcConfDIR string //run tests for specific configuration
-)
 
-var sTestsRPCMethods = []func(t *testing.T){
-	testRPCMethodsLoadConfig,
-	testRPCMethodsInitDataDb,
-	testRPCMethodsResetStorDb,
-	testRPCMethodsStartEngine,
-	testRPCMethodsRpcConn,
-	testRPCMethodsFromFolder,
-	testRPCMethodsAddData,
-	testRPCMethodsAuthorizeSession,
-	testRPCMethodsInitSession,
-	testRPCMethodsUpdateSession,
-	testRPCMethodsTerminateSession,
-	testRPCMethodsProcessCDR,
-	testRPCMethodsProcessEvent,
-	// reset the storDB and dataDB
-	testRPCMethodsInitDataDb,
-	testRPCMethodsResetStorDb,
-	testRPCMethodsCdrsProcessCDR,
-	testRPCMethodsCdrsStoreSessionCost,
-	//reset the storDB and dataDB
-	testRPCMethodsInitDataDb,
-	testRPCMethodsResetStorDb,
-	testRPCMethodsLoadData,
-	testRPCMethodsResponderDebit,
-	testRPCMethodsResponderMaxDebit,
-	testRPCMethodsStopEngine,
-}
+	sTestsRPCMethods = []func(t *testing.T){
+		testRPCMethodsLoadConfig,
+		testRPCMethodsInitDataDb,
+		testRPCMethodsResetStorDb,
+		testRPCMethodsStartEngine,
+		testRPCMethodsRpcConn,
+		testRPCMethodsFromFolder,
+		testRPCMethodsAddData,
+		testRPCMethodsAuthorizeSession,
+		testRPCMethodsInitSession,
+		testRPCMethodsUpdateSession,
+		testRPCMethodsTerminateSession,
+		testRPCMethodsProcessCDR,
+		testRPCMethodsProcessEvent,
+		// reset the storDB and dataDB
+		testRPCMethodsInitDataDb,
+		testRPCMethodsResetStorDb,
+		testRPCMethodsCdrsProcessCDR,
+		testRPCMethodsCdrsStoreSessionCost,
+		//reset the storDB and dataDB
+		testRPCMethodsInitDataDb,
+		testRPCMethodsResetStorDb,
+		testRPCMethodsLoadData,
+		testRPCMethodsResponderDebit,
+		testRPCMethodsResponderMaxDebit,
+		testRPCMethodsStopEngine,
+	}
+)
 
 // Test start here
 func TestRPCMethods(t *testing.T) {
-	rpcConfDIR = "rpccaching"
+	switch *dbType {
+	case utils.MetaInternal:
+		rpcConfDIR = "rpccaching_internal"
+	case utils.MetaSQL:
+		rpcConfDIR = "rpccaching_mysql"
+	case utils.MetaMongo:
+		rpcConfDIR = "rpccaching_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+
 	for _, stest := range sTestsRPCMethods {
 		t.Run(rpcConfDIR, stest)
 	}

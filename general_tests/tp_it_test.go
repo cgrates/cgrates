@@ -35,6 +35,7 @@ import (
 
 var (
 	tpCfgPath  string
+	tpCfgDIR   string
 	tpCfg      *config.CGRConfig
 	tpRPC      *rpc.Client
 	tpLoadInst utils.LoadInstance // Share load information between tests
@@ -62,12 +63,24 @@ var (
 )
 
 func TestTp(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		tpCfgDIR = "tutinternal"
+	case utils.MetaSQL:
+		tpCfgDIR = "tutmysql"
+	case utils.MetaMongo:
+		tpCfgDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	for _, stest := range sTestTp {
-		t.Run("TestTp", stest)
+		t.Run(tpCfgDIR, stest)
 	}
 }
 func testTpInitCfg(t *testing.T) {
-	tpCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql")
+	tpCfgPath = path.Join(*dataDir, "conf", "samples", tpCfgDIR)
 	// Init config first
 	var err error
 	tpCfg, err = config.NewCGRConfigFromPath(tpCfgPath)

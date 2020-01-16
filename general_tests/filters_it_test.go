@@ -59,7 +59,19 @@ var (
 
 // Test start here
 func TestFltrIT(t *testing.T) {
-	fltrConfDIR = "filters"
+	switch *dbType {
+	case utils.MetaInternal:
+		fltrConfDIR = "filters_internal"
+	case utils.MetaSQL:
+		fltrConfDIR = "filters_mysql"
+	case utils.MetaMongo:
+		fltrConfDIR = "filters_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+
 	for _, stest := range sTestsFltr {
 		t.Run(fltrConfDIR, stest)
 	}

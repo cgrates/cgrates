@@ -33,6 +33,7 @@ import (
 
 var (
 	sesCfgPath string
+	sesCfgDIR  string
 	sesCfg     *config.CGRConfig
 	sesRPC     *rpc.Client
 	sesAccount = "refundAcc"
@@ -53,14 +54,26 @@ var (
 )
 
 func TestSesIt(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		sesCfgDIR = "tutinternal"
+	case utils.MetaSQL:
+		sesCfgDIR = "tutmysql_internal"
+	case utils.MetaMongo:
+		sesCfgDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	for _, stest := range sTestSesIt {
-		t.Run("TestSesIT", stest)
+		t.Run(sesCfgDIR, stest)
 	}
 }
 
 // test for 0 balance with session terminate with 1s usage
 func testSesItLoadConfig(t *testing.T) {
-	sesCfgPath = path.Join(*dataDir, "conf", "samples", "tutmysql_internal")
+	sesCfgPath = path.Join(*dataDir, "conf", "samples", sesCfgDIR)
 	if sesCfg, err = config.NewCGRConfigFromPath(sesCfgPath); err != nil {
 		t.Error(err)
 	}

@@ -35,6 +35,7 @@ import (
 
 var (
 	cdrsIntCfgPath string
+	cdrsIntCfgDIR  string
 	cdrsIntCfg     *config.CGRConfig
 	cdrsIntRPC     *rpc.Client
 
@@ -49,20 +50,31 @@ var (
 
 // This test is valid only for internal
 // to test the ttl for cdrs
-func TestCdrsIntITMySql(t *testing.T) {
+func TestCdrsIntIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		cdrsIntCfgDIR = "internal_ttl_internal"
+	case utils.MetaSQL:
+		t.SkipNow()
+	case utils.MetaMongo:
+		t.SkipNow()
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	for _, stest := range sTestsCdrsInt {
-		t.Run("TestCdrsIntITMySql", stest)
+		t.Run(cdrsIntCfgDIR, stest)
 	}
 }
 
 func testCdrsIntInitCfg(t *testing.T) {
 	var err error
-	cdrsIntCfgPath = path.Join(cdreDataDir, "conf", "samples", "internal_ttl")
+	cdrsIntCfgPath = path.Join(*dataDir, "conf", "samples", cdrsIntCfgDIR)
 	cdrsIntCfg, err = config.NewCGRConfigFromPath(cdrsIntCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	cdrsIntCfg.DataFolderPath = cdreDataDir
 }
 
 func testCdrsIntStartEngine(t *testing.T) {

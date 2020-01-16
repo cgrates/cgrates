@@ -38,45 +38,44 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var pecdrsCfgPath string
-var pecdrsCfg *config.CGRConfig
-var pecdrsRpc *rpc.Client
-var pecdrsConfDIR string
+var (
+	pecdrsCfgPath string
+	pecdrsConfDIR string
+	pecdrsCfg     *config.CGRConfig
+	pecdrsRpc     *rpc.Client
 
-var sTestsCDRsIT_ProcessEvent = []func(t *testing.T){
-	testV1CDRsInitConfig,
-	testV1CDRsInitDataDb,
-	testV1CDRsInitCdrDb,
-	testV1CDRsStartEngine,
-	testV1CDRsRpcConn,
-	testV1CDRsLoadTariffPlanFromFolder,
-	testV1CDRsProcessEventExport,
-	testV1CDRsProcessEventAttrS,
-	testV1CDRsProcessEventChrgS,
-	testV1CDRsProcessEventRalS,
-	testV1CDRsProcessEventSts,
-	testV1CDRsProcessEventStore,
-	testV1CDRsProcessEventThreshold,
-	testV1CDRsProcessEventExportCheck,
-	testV1CDRsKillEngine,
-}
-
-func TestCDRsITPEInternal(t *testing.T) {
-	pecdrsConfDIR = "cdrsv1processevent"
-	for _, stest := range sTestsCDRsIT_ProcessEvent {
-		t.Run(pecdrsConfDIR, stest)
+	sTestsCDRsIT_ProcessEvent = []func(t *testing.T){
+		testV1CDRsInitConfig,
+		testV1CDRsInitDataDb,
+		testV1CDRsInitCdrDb,
+		testV1CDRsStartEngine,
+		testV1CDRsRpcConn,
+		testV1CDRsLoadTariffPlanFromFolder,
+		testV1CDRsProcessEventExport,
+		testV1CDRsProcessEventAttrS,
+		testV1CDRsProcessEventChrgS,
+		testV1CDRsProcessEventRalS,
+		testV1CDRsProcessEventSts,
+		testV1CDRsProcessEventStore,
+		testV1CDRsProcessEventThreshold,
+		testV1CDRsProcessEventExportCheck,
+		testV1CDRsKillEngine,
 	}
-}
+)
 
-func TestCDRsITPEMongo(t *testing.T) {
-	pecdrsConfDIR = "cdrsv1processeventmongo"
-	for _, stest := range sTestsCDRsIT_ProcessEvent {
-		t.Run(pecdrsConfDIR, stest)
+func TestCDRsITPE(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		pecdrsConfDIR = "cdrsv1processevent"
+	case utils.MetaSQL:
+		pecdrsConfDIR = "cdrsv1processeventmysql"
+	case utils.MetaMongo:
+		pecdrsConfDIR = "cdrsv1processeventmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestCDRsITPEMySql(t *testing.T) {
-	pecdrsConfDIR = "cdrsv1processeventmysql"
 	for _, stest := range sTestsCDRsIT_ProcessEvent {
 		t.Run(pecdrsConfDIR, stest)
 	}
