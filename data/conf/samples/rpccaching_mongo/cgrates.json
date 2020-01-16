@@ -1,0 +1,82 @@
+{
+
+"general": {
+	"log_level": 7,
+	"reply_timeout": "10s",									// consider connection down for replies taking longer than this value
+},
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"data_db": {
+	"db_type": "mongo",
+	"db_name": "10",
+	"db_port": 27017,
+},
+
+
+"stor_db": {
+	"db_type": "mongo",
+	"db_name": "cgrates",
+	"db_port": 27017,
+},
+
+
+
+"caches":{
+	"*rpc_responses": {"limit": -1, "ttl": "1s"},
+},
+
+
+"rals": {
+	"enabled": true,
+},
+
+
+"schedulers": {
+	"enabled": true,
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"session_cost_retries": 2,				// number of queries to session_costs before recalculating CDR
+},
+
+
+"attributes": {
+	"enabled": true,
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
+
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "1s",
+},
+
+
+"sessions": {
+	"enabled": true,
+	"chargers_conns": ["*internal"],
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"attributes_conns": ["*internal"],
+},
+
+
+"apier": {
+	"scheduler_conns": ["*internal"],
+},
+
+
+}

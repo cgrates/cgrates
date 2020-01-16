@@ -61,15 +61,19 @@ var (
 )
 
 // Test start here
-func TestSuplSV1ITMySQL(t *testing.T) {
-	splSv1ConfDIR = "tutmysql"
-	for _, stest := range sTestsSupplierSV1 {
-		t.Run(splSv1ConfDIR, stest)
+func TestSuplSV1IT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		splSv1ConfDIR = "tutinternal"
+	case utils.MetaSQL:
+		splSv1ConfDIR = "tutmysql"
+	case utils.MetaMongo:
+		splSv1ConfDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestSuplSV1ITMongo(t *testing.T) {
-	splSv1ConfDIR = "tutmongo"
 	for _, stest := range sTestsSupplierSV1 {
 		t.Run(splSv1ConfDIR, stest)
 	}

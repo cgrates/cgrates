@@ -217,7 +217,7 @@ const CGRATES_CFG_JSON = `
 	"*diameter_messages": {"limit": -1, "ttl": "3h", "static_ttl": false},						// diameter messages caching
 	"*rpc_responses": {"limit": 0, "ttl": "2s", "static_ttl": false},							// RPC responses caching
 	"*closed_sessions": {"limit": -1, "ttl": "10s", "static_ttl": false},						// closed sessions cached for CDRs
-	"*cdr_ids": {"limit": -1, "ttl": "", "static_ttl": false},									// protects CDRs against double-charging
+	"*cdr_ids": {"limit": -1, "ttl": "10m", "static_ttl": false},									// protects CDRs against double-charging
 	"*load_ids": {"limit": -1, "ttl": "", "static_ttl": false, "precache": false},				// control the load_ids for items
 	"*rpc_connections": {"limit": -1, "ttl": "", "static_ttl": false},							// RPC connections caching
 },

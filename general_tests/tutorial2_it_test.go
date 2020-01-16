@@ -53,15 +53,20 @@ var sTutTests = []func(t *testing.T){
 }
 
 //Test start here
-func TestTutorial2MySQL(t *testing.T) {
-	tutCfgDir = "tutmysql2"
-	for _, stest := range sTutTests {
-		t.Run(tutCfgDir, stest)
+func TestTutorial2(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		tutCfgDir = "tutinternal"
+	case utils.MetaSQL:
+		tutCfgDir = "tutmysql2"
+	case utils.MetaMongo:
+		tutCfgDir = "tutmongo2"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
 
-func TestTutorial2Mongo(t *testing.T) {
-	tutCfgDir = "tutmongo2"
 	for _, stest := range sTutTests {
 		t.Run(tutCfgDir, stest)
 	}

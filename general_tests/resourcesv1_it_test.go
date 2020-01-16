@@ -36,30 +36,34 @@ var (
 	rlsV1Cfg     *config.CGRConfig
 	rlsV1Rpc     *rpc.Client
 	rlsV1ConfDIR string //run tests for specific configuration
+
+	sTestsRLSV1 = []func(t *testing.T){
+		testV1RsLoadConfig,
+		testV1RsInitDataDb,
+		testV1RsResetStorDb,
+		testV1RsStartEngine,
+		testV1RsRpcConn,
+		testV1RsSetProfile,
+		testV1RsAllocate,
+		testV1RsAuthorize,
+		testV1RsStopEngine,
+	}
 )
 
-var sTestsRLSV1 = []func(t *testing.T){
-	testV1RsLoadConfig,
-	testV1RsInitDataDb,
-	testV1RsResetStorDb,
-	testV1RsStartEngine,
-	testV1RsRpcConn,
-	testV1RsSetProfile,
-	testV1RsAllocate,
-	testV1RsAuthorize,
-	testV1RsStopEngine,
-}
-
 //Test start here
-func TestRsV1ITMySQL(t *testing.T) {
-	rlsV1ConfDIR = "tutmysql"
-	for _, stest := range sTestsRLSV1 {
-		t.Run(rlsV1ConfDIR, stest)
+func TestRsV1IT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		rlsV1ConfDIR = "tutinternal"
+	case utils.MetaSQL:
+		rlsV1ConfDIR = "tutmysql"
+	case utils.MetaMongo:
+		rlsV1ConfDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestRsV1ITMongo(t *testing.T) {
-	rlsV1ConfDIR = "tutmongo"
 	for _, stest := range sTestsRLSV1 {
 		t.Run(rlsV1ConfDIR, stest)
 	}

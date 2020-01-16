@@ -64,9 +64,20 @@ var (
 )
 
 func TestSes3ItSessions(t *testing.T) {
-	ses3CfgDir = "sessions"
+	switch *dbType {
+	case utils.MetaInternal:
+		ses3CfgDir = "sessions_internal"
+	case utils.MetaSQL:
+		ses3CfgDir = "sessions_mysql"
+	case utils.MetaMongo:
+		ses3CfgDir = "sessions_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	for _, stest := range ses3Tests {
-		t.Run("TestSes3ItTutMysql", stest)
+		t.Run(ses3CfgDir, stest)
 	}
 }
 

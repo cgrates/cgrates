@@ -51,17 +51,21 @@ var (
 	}
 )
 
-func TestSes2ItTutMongo(t *testing.T) {
-	ses2CfgDir = "tutmongo"
-	for _, stest := range ses2Tests {
-		t.Run("TestSesItTutMongo", stest)
+func TestSes2It(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		ses2CfgDir = "tutinternal"
+	case utils.MetaSQL:
+		ses2CfgDir = "tutmysql"
+	case utils.MetaMongo:
+		ses2CfgDir = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestSes2ItTutMysql(t *testing.T) {
-	ses2CfgDir = "tutmysql"
 	for _, stest := range ses2Tests {
-		t.Run("TestSesItTutMysql", stest)
+		t.Run(ses2CfgDir, stest)
 	}
 }
 

@@ -45,8 +45,19 @@ var sTestsTutorials2 = []func(t *testing.T){
 	testTutorialStopEngine,
 }
 
-func TestDestinationCombinesMySQL(t *testing.T) {
-	tutorialConfDIR = "tutmysql"
+func TestDestinationCombines(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		tutorialConfDIR = "tutinternal"
+	case utils.MetaSQL:
+		tutorialConfDIR = "tutmysql"
+	case utils.MetaMongo:
+		tutorialConfDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	for _, stest := range sTestsTutorials2 {
 		t.Run(tutorialConfDIR, stest)
 	}

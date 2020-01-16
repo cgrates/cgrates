@@ -33,6 +33,7 @@ import (
 
 var (
 	srCfgPath string
+	srCfgDIR  string
 	srCfg     *config.CGRConfig
 	srrpc     *rpc.Client
 	sraccount = "refundAcc"
@@ -56,13 +57,25 @@ var (
 )
 
 func TestSrIt(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		srCfgDIR = "tutinternal"
+	case utils.MetaSQL:
+		srCfgDIR = "tutmysql_internal"
+	case utils.MetaMongo:
+		srCfgDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	for _, stest := range sTestSrIt {
-		t.Run("sTestSrIt", stest)
+		t.Run(srCfgDIR, stest)
 	}
 }
 
 func testSrItLoadConfig(t *testing.T) {
-	srCfgPath = path.Join(*dataDir, "conf", "samples", "tutmongo")
+	srCfgPath = path.Join(*dataDir, "conf", "samples", srCfgDIR)
 	if srCfg, err = config.NewCGRConfigFromPath(srCfgPath); err != nil {
 		t.Error(err)
 	}

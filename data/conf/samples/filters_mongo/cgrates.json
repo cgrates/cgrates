@@ -1,0 +1,76 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"log_level": 7,
+	"node_id": "CGRFilterS",
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+
+"data_db": {
+	"db_type": "mongo",
+	"db_name": "10",
+	"db_port": 27017,
+},
+
+
+"stor_db": {
+	"db_type": "mongo",
+	"db_name": "cgrates",
+	"db_port": 27017,
+},
+
+
+"rals": {
+	"enabled": true,
+	"thresholds_conns": ["*localhost"],
+},
+
+"schedulers": {
+	"enabled": true,				
+},
+
+"filters": {								
+	"stats_conns": ["*localhost"],
+	"resources_conns": ["*localhost"],
+	"rals_conns": ["*localhost"],
+},
+
+
+"resources": {
+	"enabled": true,
+	"indexed_selects":false,					
+	"store_interval": "1s",
+},
+
+
+"stats": {
+	"enabled": true,
+	"indexed_selects":false,					
+	"store_interval": "1s",
+},
+
+
+"thresholds": {
+	"enabled": true,
+	"indexed_selects":false,					
+	"store_interval": "1s",
+},
+
+"apier": {	
+	"caches_conns":["*localhost"],
+	"scheduler_conns": ["*internal"],
+},
+
+
+}

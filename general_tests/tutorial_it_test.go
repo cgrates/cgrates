@@ -63,15 +63,19 @@ func TestTutorialMongoAtlas(t *testing.T) {
 	}
 }
 
-func TestTutorialMongo(t *testing.T) {
-	tutorialConfDIR = "tutmongo"
-	for _, stest := range sTestsTutorials {
-		t.Run(tutorialConfDIR, stest)
+func TestTutorial(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		tutorialConfDIR = "tutinternal"
+	case utils.MetaSQL:
+		tutorialConfDIR = "tutmysql"
+	case utils.MetaMongo:
+		tutorialConfDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
-
-func TestTutorialMySQL(t *testing.T) {
-	tutorialConfDIR = "tutmysql"
 	for _, stest := range sTestsTutorials {
 		t.Run(tutorialConfDIR, stest)
 	}

@@ -1,0 +1,71 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"log_level": 7,
+	"node_id": "CGRFilterS",
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"data_db": {
+	"db_type": "*internal",	
+},
+
+
+"stor_db": {
+	"db_type": "*internal",	
+},
+
+
+"rals": {
+	"enabled": true,
+	"thresholds_conns": ["*localhost"],
+},
+
+"schedulers": {
+	"enabled": true,				
+},
+
+"filters": {								
+	"stats_conns": ["*localhost"],
+	"resources_conns": ["*localhost"],
+	"rals_conns": ["*localhost"],
+},
+
+
+"resources": {
+	"enabled": true,
+	"indexed_selects":false,					
+	"store_interval": "-1",
+},
+
+
+"stats": {
+	"enabled": true,
+	"indexed_selects":false,					
+	"store_interval": "-1",
+},
+
+
+"thresholds": {
+	"enabled": true,
+	"indexed_selects":false,					
+	"store_interval": "-1",
+},
+
+"apier": {	
+	"caches_conns":["*localhost"],
+	"scheduler_conns": ["*internal"],
+},
+
+
+}

@@ -79,15 +79,20 @@ var (
 )
 
 // Tests starting here
-func TestCDRsITMySQL(t *testing.T) {
-	cdrsConfDIR = "cdrsv2mysql"
-	for _, stest := range sTestsCDRsIT {
-		t.Run(cdrsConfDIR, stest)
+func TestCDRsIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		cdrsConfDIR = "cdrsv2internal"
+	case utils.MetaSQL:
+		cdrsConfDIR = "cdrsv2mysql"
+	case utils.MetaMongo:
+		cdrsConfDIR = "cdrsv2mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
 
-func TestCDRsITMongo(t *testing.T) {
-	cdrsConfDIR = "cdrsv2mongo"
 	for _, stest := range sTestsCDRsIT {
 		t.Run(cdrsConfDIR, stest)
 	}

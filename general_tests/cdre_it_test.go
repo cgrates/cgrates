@@ -33,11 +33,9 @@ import (
 )
 
 var (
-	cdreCfgPath   string
 	cdreCfg       *config.CGRConfig
 	cdreRPC       *rpc.Client
-	cdreDataDir   = "/usr/share/cgrates"
-	cdreDelay     int
+	cdreCfgPath   string
 	cdreConfigDIR string
 
 	sTestsCDRE = []func(t *testing.T){
@@ -54,15 +52,20 @@ var (
 	}
 )
 
-func TestCDREITMySql(t *testing.T) {
-	cdreConfigDIR = "tutmysql"
-	for _, stest := range sTestsCDRE {
-		t.Run(cdreConfigDIR, stest)
+func TestCDREIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		cdreConfigDIR = "tutinternal"
+	case utils.MetaSQL:
+		cdreConfigDIR = "tutmysql"
+	case utils.MetaMongo:
+		cdreConfigDIR = "tutmongonew"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
 
-func TestCDREITMongo(t *testing.T) {
-	cdreConfigDIR = "tutmongonew"
 	for _, stest := range sTestsCDRE {
 		t.Run(cdreConfigDIR, stest)
 	}
@@ -70,13 +73,12 @@ func TestCDREITMongo(t *testing.T) {
 
 func testCDREInitCfg(t *testing.T) {
 	var err error
-	cdreCfgPath = path.Join(cdreDataDir, "conf", "samples", cdreConfigDIR)
+	cdreCfgPath = path.Join(*dataDir, "conf", "samples", cdreConfigDIR)
 	cdreCfg, err = config.NewCGRConfigFromPath(cdreCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
-	cdreCfg.DataFolderPath = cdreDataDir
-	cdreDelay = 1000
+	cdreCfg.DataFolderPath = *dataDir
 }
 
 func testCDREInitDataDb(t *testing.T) {
@@ -92,7 +94,7 @@ func testCDREResetStorDb(t *testing.T) {
 }
 
 func testCDREStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(cdreCfgPath, cdreDelay); err != nil {
+	if _, err := engine.StopStartEngine(cdreCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -182,7 +184,7 @@ func testCDREExport(t *testing.T) {
 }
 
 func testCDREStopEngine(t *testing.T) {
-	if err := engine.KillEngine(cdreDelay); err != nil {
+	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}
 }

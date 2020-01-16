@@ -60,8 +60,19 @@ var (
 )
 
 // Test start here
-func TestDataITMongo(t *testing.T) {
-	dataConfDIR = "tutmongo"
+func TestDataIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		dataConfDIR = "tutinternal"
+	case utils.MetaSQL:
+		dataConfDIR = "tutmysql"
+	case utils.MetaMongo:
+		dataConfDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	for _, stest := range sTestsData {
 		t.Run(dataConfDIR, stest)
 	}
