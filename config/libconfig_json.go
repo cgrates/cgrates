@@ -193,21 +193,24 @@ type ERsJsonCfg struct {
 
 // EventReaderSJsonCfg is the configuration of a single EventReader
 type EventReaderJsonCfg struct {
-	Id                  *string
-	Type                *string
-	Field_separator     *string
-	Run_delay           *int
-	Concurrent_requests *int
-	Source_path         *string
-	Processed_path      *string
-	Xml_root_path       *string
-	Tenant              *string
-	Timezone            *string
-	Filters             *[]string
-	Flags               *[]string
-	Header_fields       *[]*FcTemplateJsonCfg
-	Content_fields      *[]*FcTemplateJsonCfg
-	Trailer_fields      *[]*FcTemplateJsonCfg
+	Id                          *string
+	Type                        *string
+	Field_separator             *string
+	Run_delay                   *int
+	Concurrent_requests         *int
+	Source_path                 *string
+	Processed_path              *string
+	Xml_root_path               *string
+	Tenant                      *string
+	Timezone                    *string
+	Filters                     *[]string
+	Flags                       *[]string
+	Partial_record_cache        *string
+	Partial_cache_expiry_action *string
+	Header_fields               *[]*FcTemplateJsonCfg
+	Content_fields              *[]*FcTemplateJsonCfg
+	Trailer_fields              *[]*FcTemplateJsonCfg
+	Cache_dump_fields           *[]*FcTemplateJsonCfg
 }
 
 // SM-Generic config section

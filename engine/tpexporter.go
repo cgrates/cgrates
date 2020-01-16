@@ -93,9 +93,9 @@ func (self *TPExporter) Run() error {
 		return err
 	}
 	storDataModelTimings := APItoModelTimings(storDataTimings)
-	toExportMap[utils.TIMINGS_CSV] = make([]interface{}, len(storDataTimings))
+	toExportMap[utils.TimingsCsv] = make([]interface{}, len(storDataTimings))
 	for i, sd := range storDataModelTimings {
-		toExportMap[utils.TIMINGS_CSV][i] = sd
+		toExportMap[utils.TimingsCsv][i] = sd
 	}
 
 	storDataDestinations, err := self.storDb.GetTPDestinations(self.tpID, "")
@@ -105,7 +105,7 @@ func (self *TPExporter) Run() error {
 	for _, sd := range storDataDestinations {
 		sdModels := APItoModelDestination(sd)
 		for _, sdModel := range sdModels {
-			toExportMap[utils.DESTINATIONS_CSV] = append(toExportMap[utils.DESTINATIONS_CSV], sdModel)
+			toExportMap[utils.DestinationsCsv] = append(toExportMap[utils.DestinationsCsv], sdModel)
 		}
 	}
 
@@ -116,7 +116,7 @@ func (self *TPExporter) Run() error {
 	for _, sd := range storDataRates {
 		sdModels := APItoModelRate(sd)
 		for _, sdModel := range sdModels {
-			toExportMap[utils.RATES_CSV] = append(toExportMap[utils.RATES_CSV], sdModel)
+			toExportMap[utils.RatesCsv] = append(toExportMap[utils.RatesCsv], sdModel)
 		}
 	}
 
@@ -127,7 +127,7 @@ func (self *TPExporter) Run() error {
 	for _, sd := range storDataDestinationRates {
 		sdModels := APItoModelDestinationRate(sd)
 		for _, sdModel := range sdModels {
-			toExportMap[utils.DESTINATION_RATES_CSV] = append(toExportMap[utils.DESTINATION_RATES_CSV], sdModel)
+			toExportMap[utils.DestinationRatesCsv] = append(toExportMap[utils.DestinationRatesCsv], sdModel)
 		}
 	}
 
@@ -138,7 +138,7 @@ func (self *TPExporter) Run() error {
 	for _, sd := range storDataRatingPlans {
 		sdModels := APItoModelRatingPlan(sd)
 		for _, sdModel := range sdModels {
-			toExportMap[utils.RATING_PLANS_CSV] = append(toExportMap[utils.RATING_PLANS_CSV], sdModel)
+			toExportMap[utils.RatingPlansCsv] = append(toExportMap[utils.RatingPlansCsv], sdModel)
 		}
 	}
 
@@ -149,7 +149,7 @@ func (self *TPExporter) Run() error {
 	for _, sd := range storDataRatingProfiles {
 		sdModels := APItoModelRatingProfile(sd)
 		for _, sdModel := range sdModels {
-			toExportMap[utils.RATING_PROFILES_CSV] = append(toExportMap[utils.RATING_PROFILES_CSV], sdModel)
+			toExportMap[utils.RatingProfilesCsv] = append(toExportMap[utils.RatingProfilesCsv], sdModel)
 		}
 	}
 
@@ -161,7 +161,7 @@ func (self *TPExporter) Run() error {
 	for _, sd := range storDataSharedGroups {
 		sdModels := APItoModelSharedGroup(sd)
 		for _, sdModel := range sdModels {
-			toExportMap[utils.SHARED_GROUPS_CSV] = append(toExportMap[utils.SHARED_GROUPS_CSV], sdModel)
+			toExportMap[utils.SharedGroupsCsv] = append(toExportMap[utils.SharedGroupsCsv], sdModel)
 		}
 	}
 
@@ -172,7 +172,7 @@ func (self *TPExporter) Run() error {
 	for _, sd := range storDataActions {
 		sdModels := APItoModelAction(sd)
 		for _, sdModel := range sdModels {
-			toExportMap[utils.ACTIONS_CSV] = append(toExportMap[utils.ACTIONS_CSV], sdModel)
+			toExportMap[utils.ActionsCsv] = append(toExportMap[utils.ActionsCsv], sdModel)
 		}
 	}
 
@@ -183,7 +183,7 @@ func (self *TPExporter) Run() error {
 	for _, sd := range storDataActionPlans {
 		sdModels := APItoModelActionPlan(sd)
 		for _, sdModel := range sdModels {
-			toExportMap[utils.ACTION_PLANS_CSV] = append(toExportMap[utils.ACTION_PLANS_CSV], sdModel)
+			toExportMap[utils.ActionPlansCsv] = append(toExportMap[utils.ActionPlansCsv], sdModel)
 		}
 	}
 
@@ -194,7 +194,7 @@ func (self *TPExporter) Run() error {
 	for _, sd := range storDataActionTriggers {
 		sdModels := APItoModelActionTrigger(sd)
 		for _, sdModel := range sdModels {
-			toExportMap[utils.ACTION_TRIGGERS_CSV] = append(toExportMap[utils.ACTION_TRIGGERS_CSV], sdModel)
+			toExportMap[utils.ActionTriggersCsv] = append(toExportMap[utils.ActionTriggersCsv], sdModel)
 		}
 	}
 
@@ -204,7 +204,7 @@ func (self *TPExporter) Run() error {
 	}
 	for _, sd := range storDataAccountActions {
 		sdModel := APItoModelAccountAction(sd)
-		toExportMap[utils.ACCOUNT_ACTIONS_CSV] = append(toExportMap[utils.ACCOUNT_ACTIONS_CSV], sdModel)
+		toExportMap[utils.AccountActionsCsv] = append(toExportMap[utils.AccountActionsCsv], sdModel)
 	}
 
 	storDataResources, err := self.storDb.GetTPResources(self.tpID, "", "")

@@ -40,6 +40,8 @@ func NewEventReader(cfg *config.CGRConfig, cfgIdx int,
 		err = fmt.Errorf("unsupported reader type: <%s>", cfg.ERsCfg().Readers[cfgIdx].Type)
 	case utils.MetaFileCSV:
 		return NewCSVFileER(cfg, cfgIdx, rdrEvents, rdrErr, fltrS, rdrExit)
+	case utils.MetaPartialCSV:
+		return NewPartialCSVFileER(cfg, cfgIdx, rdrEvents, rdrErr, fltrS, rdrExit)
 	case utils.MetaFileXML:
 		return NewXMLFileER(cfg, cfgIdx, rdrEvents, rdrErr, fltrS, rdrExit)
 	case utils.MetaFileFWV:
