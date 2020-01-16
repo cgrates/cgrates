@@ -1,7 +1,7 @@
 
-
-2. Architecture
-===============
+************
+Architecture
+************
 
 The CGRateS framework consists of functionality packed within **five** software applications, described below.
 

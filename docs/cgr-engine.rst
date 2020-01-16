@@ -1,19 +1,12 @@
 .. _cgr-engine:
 
 cgr-engine
-----------
-
-.. figure::  images/CGRateSInternalArchitecture.png
-   :alt: CGRateS Internal Architecture
-   :align: Center
-   :scale: 75 %
-
-
-   Internal Architecture of **cgr-engine**
+==========
 
 Groups various services and components.
 
 Customisable through the use of *json* :ref:`configuration <engine_configuration>` or command line arguments (higher prio).
+Able to read the configuration from either a local directory  of *.json* files with an unlimited number of subfolders (ordered alphabetically) or a list of http paths (separated by ";").
 
 ::
 
@@ -49,4 +42,34 @@ Customisable through the use of *json* :ref:`configuration <engine_configuration
 
 .. hint:: $ cgr-engine -config_path=/etc/cgrates
 
-.. hint:: $ cgr-engine -config_path=https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/cgrates/cgrates.json
+.. figure::  images/CGRateSInternalArchitecture.png
+   :alt: CGRateS Internal Architecture
+   :align: Center
+   :scale: 75 %
+
+
+   Internal Architecture of **cgr-engine**
+
+
+Agents
+------
+
+**Agents** are interfaces towards external systems, implementing protocols enforced by the communication channels opened. 
+These can be standard or privately defined.
+
+All of the **Agents** implemented within CGRateS are flexible to be configured with generic parameters configurable for both *request* and *replies*.
+
+Following *Agents* are implemented within CGRateS:
+
+.. toctree::
+   :maxdepth: 2
+
+   diamagent
+   radagent
+   httpagent
+   dnsagent
+   astagent
+   fsagent
+   kamagent
+   ers
+
