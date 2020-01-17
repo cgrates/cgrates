@@ -1,0 +1,66 @@
+{
+
+"dns_agent": {
+	"request_processors": [
+		{
+			"id": "NAPTRSuppliersQuery",
+			"filters": ["*string:~*vars.QueryType:NAPTR", 
+				"*string:~*vars.E164Address:4986517174965"],
+			"flags": ["*message", "*suppliers"],
+			"request_fields":[
+				{"tag": "TOR", "field_id": "Account", "type": "*constant", "value": "1001"}, // so we can match the supplier profile
+			],
+			"reply_fields":[
+				{"tag": "DispatchReply", "type": "*none", 
+					"blocker": true}, // enforces continue_on_success so we can check answer with filters
+			],
+			"continue": true,
+		},
+		{
+			"id": "NAPTRSuppliersOneSupplier",
+			"filters": ["*string:~*vars.QueryType:NAPTR", 
+				"*string:~*vars.E164Address:4986517174965", 
+				"*gte:~*cgrep.Suppliers.Count:1"],
+			"flags": ["*none"], // do not send request to CGRateS
+			"reply_fields":[
+				{"tag": "NAPTROrder", "field_id": "Order", 
+					"type": "*constant", "value": "100"},
+				{"tag": "NAPTRPreference", "field_id": "Preference", 
+					"type": "*constant", "value": "10"},
+				{"tag": "NAPTRFlags", "field_id": "Flags", 
+					"type": "*constant", "value": "U"},
+				{"tag": "NAPTRService", "field_id": "Service", 
+					"type": "*constant", "value": "E2U+SIP"},
+				{"tag": "NAPTRRegexp", "field_id": "Regexp", "type": "*variable", 
+					"value": "~*cgrep.Suppliers.SortedSuppliers[0].SupplierParameters"},
+				{"tag": "NAPTRReplacement", "field_id": "Replacement",
+					"type": "*constant", "value": "."},
+			],
+			"continue": true,
+		},
+		{
+			"id": "NAPTRSuppliersTwoSuppliers",
+			"filters": ["*string:~*vars.QueryType:NAPTR", 
+				"*string:~*vars.E164Address:4986517174965", 
+				"*gte:~*cgrep.Suppliers.Count:2"],
+			"flags": ["*none"],
+			"reply_fields":[
+				{"tag": "NAPTROrder", "type": "*constant", "new_branch": true,
+				 "field_id": "Order", "value": "100"},
+				{"tag": "NAPTRPreference", "field_id": "Preference", 
+					"type": "*constant", "value": "10"},
+				{"tag": "NAPTRFlags", "field_id": "Flags", 
+					"type": "*constant", "value": "U"},
+				{"tag": "NAPTRService", "field_id": "Service", 
+					"type": "*constant", "value": "E2U+SIP"},
+				{"tag": "NAPTRRegexp", "field_id": "Regexp", "type": "*variable", 
+					"value": "~*cgrep.Suppliers.SortedSuppliers[1].SupplierParameters"},
+				{"tag": "NAPTRReplacement", "field_id": "Replacement",
+					"type": "*constant", "value": "."},
+			],
+			"continue": true,
+		},
+	],
+},
+
+}

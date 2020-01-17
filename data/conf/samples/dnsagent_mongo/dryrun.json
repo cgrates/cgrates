@@ -1,0 +1,24 @@
+{
+
+"dns_agent": {
+	"request_processors": [
+		{
+			"id": "DryRunNAPTR",
+			"filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.E164Address:4986517174963"],
+			"flags": ["*dryrun"],
+			"request_fields":[
+				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*sms"},
+			],
+			"reply_fields":[
+				{"tag": "NAPTROrder", "field_id": "Order", "type": "*constant", "value": "100"},
+				{"tag": "NAPTRPreference", "field_id": "Preference", "type": "*constant", "value": "10"},
+				{"tag": "NAPTRFlags", "field_id": "Flags", "type": "*constant", "value": "U"},
+				{"tag": "NAPTRService", "field_id": "Service", "type": "*constant", "value": "E2U+SIP"},
+				{"tag": "NAPTRRegexp", "field_id": "Regexp", "type": "*constant", "value": "!^(.*)$!sip:\\1@172.16.1.10.!"},
+				{"tag": "NAPTRReplacement", "field_id": "Replacement", "type": "*constant", "value": "."},
+			],
+		},
+	],
+},
+
+}

@@ -40,6 +40,7 @@ import (
 
 var (
 	haCfgPath string
+	haCfgDIR  string
 	haCfg     *config.CGRConfig
 	haRPC     *rpc.Client
 	httpC     *http.Client // so we can cache the connection
@@ -48,6 +49,8 @@ var (
 )
 
 var sTestsHA = []func(t *testing.T){
+	testHAitInitCfg,
+	testHAitHttp,
 	testHAitResetDB,
 	testHAitStartEngine,
 	testHAitApierRpcConn,
@@ -60,64 +63,82 @@ var sTestsHA = []func(t *testing.T){
 	testHAitStopEngine,
 }
 
-func TestHAitSimple(t *testing.T) {
-	haCfgPath = path.Join(*dataDir, "conf", "samples", "httpagent")
+func TestHAit(t *testing.T) {
+	var configDir, configDirTls string
+	switch *dbType {
+	case utils.MetaInternal:
+		configDir = "httpagent_internal"
+		configDirTls = "httpagenttls_internal"
+	case utils.MetaSQL:
+		configDir = "httpagent_mysql"
+		configDirTls = "httpagenttls_mysql"
+	case utils.MetaMongo:
+		configDir = "httpagent_mongo"
+		configDirTls = "httpagenttls_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	if *encoding == utils.MetaGOB {
-		haCfgPath = path.Join(*dataDir, "conf", "samples", "httpagent_gob")
+		configDir += "_gob"
+		configDirTls += "_gob"
 	}
-	// Init config first
-	var err error
-	haCfg, err = config.NewCGRConfigFromPath(haCfgPath)
-	if err != nil {
-		t.Error(err)
-	}
-	haCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(haCfg)
-	httpC = new(http.Client)
+
+	//Run the tests without Tls
+	isTls = false
+	haCfgDIR = configDir
 	for _, stest := range sTestsHA {
-		t.Run("httpagent", stest)
+		t.Run(haCfgDIR, stest)
+	}
+	//Run the tests with Tls
+	isTls = true
+	haCfgDIR = configDirTls
+	for _, stest := range sTestsHA {
+		t.Run(haCfgDIR, stest)
 	}
 }
 
-func TestHA2itWithTls(t *testing.T) {
-	haCfgPath = path.Join(*dataDir, "conf", "samples", "httpagenttls")
-	if *encoding == utils.MetaGOB {
-		haCfgPath = path.Join(*dataDir, "conf", "samples", "httpagenttls_gob")
-	}
-	// Init config first
+// Init config first
+func testHAitInitCfg(t *testing.T) {
 	var err error
+	haCfgPath = path.Join(*dataDir, "conf", "samples", haCfgDIR)
 	haCfg, err = config.NewCGRConfigFromPath(haCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
 	haCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(haCfg)
-	//make http client with tls
-	cert, err := tls.LoadX509KeyPair(haCfg.TlsCfg().ClientCerificate, haCfg.TlsCfg().ClientKey)
-	if err != nil {
-		t.Error(err)
-	}
+}
 
-	// Load CA cert
-	caCert, err := ioutil.ReadFile(haCfg.TlsCfg().CaCertificate)
-	if err != nil {
-		t.Error(err)
-	}
-	rootCAs, _ := x509.SystemCertPool()
-	if ok := rootCAs.AppendCertsFromPEM(caCert); !ok {
-		t.Error("Cannot append CA")
-	}
+func testHAitHttp(t *testing.T) {
+	if isTls {
+		// With Tls
+		//make http client with tls
+		cert, err := tls.LoadX509KeyPair(haCfg.TlsCfg().ClientCerificate, haCfg.TlsCfg().ClientKey)
+		if err != nil {
+			t.Error(err)
+		}
+		// Load CA cert
+		caCert, err := ioutil.ReadFile(haCfg.TlsCfg().CaCertificate)
+		if err != nil {
+			t.Error(err)
+		}
+		rootCAs, _ := x509.SystemCertPool()
+		if ok := rootCAs.AppendCertsFromPEM(caCert); !ok {
+			t.Error("Cannot append CA")
+		}
 
-	// Setup HTTPS client
-	tlsConfig := &tls.Config{
-		Certificates: []tls.Certificate{cert},
-		RootCAs:      rootCAs,
-	}
-	transport := &http.Transport{TLSClientConfig: tlsConfig}
-	httpC = &http.Client{Transport: transport}
-	isTls = true
-	for _, stest := range sTestsHA {
-		t.Run("httpagenttls", stest)
+		// Setup HTTPS client
+		tlsConfig := &tls.Config{
+			Certificates: []tls.Certificate{cert},
+			RootCAs:      rootCAs,
+		}
+		transport := &http.Transport{TLSClientConfig: tlsConfig}
+		httpC = &http.Client{Transport: transport}
+	} else {
+		// Without Tls
+		httpC = new(http.Client)
 	}
 }
 

@@ -1,0 +1,31 @@
+{
+
+"dns_agent": {
+	"request_processors": [
+		{
+			"id": "NAPTRAttributes",
+			"filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.E164Address:4986517174964"],
+			"flags": ["*auth", "*attributes"],
+			"request_fields":[
+				{"tag": "E164Address", "field_id": "E164Address", 
+					"type": "*constant", "value": "4986517174964"},
+				{"tag": "NAPTRAddress", "field_id": "NAPTRAddress", 
+					"type": "*constant", "value": "*attributes"}
+			],
+			"reply_fields":[
+				{"tag": "NAPTROrder", "field_id": "Order", 
+					"type": "*constant", "value": "100"},
+				{"tag": "NAPTRPreference", "field_id": "Preference", 
+					"type": "*constant", "value": "10"},
+				{"tag": "NAPTRFlags", "field_id": "Flags", 
+					"type": "*constant", "value": "U"},
+				{"tag": "NAPTRService", "field_id": "Service", 
+					"type": "*constant", "value": "E2U+SIP"},
+				{"tag": "NAPTRRegex", "field_id": "Regexp", 
+					"type": "*variable", "value": "~*cgrep.Attributes.NAPTRAddress"},
+			],
+		},
+	],
+},
+
+}
