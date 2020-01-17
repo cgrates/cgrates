@@ -174,32 +174,47 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 					utils.ERs, absPath, rowNr, err.Error()))
 			continue
 		}
-		safeEv := engine.NewSafEvent(navMp.AsCGREvent(agReq.Tenant, utils.NestingSep).Event)
-		// take OriginID field from NavigableMap
+
+		// take OriginID and OriginHost to compose CGRID
 		orgId, err := navMp.FieldAsString([]string{utils.OriginID})
 		if err == utils.ErrNotFound {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> Missing <OriginID> field for row <%d> , <%s>",
+					utils.ERs, rowNr, record))
 			continue
 		}
-		// take Partial field from NavigableMap
-		partial, err := navMp.FieldAsString([]string{utils.Partial})
+		orgHost, err := navMp.FieldAsString([]string{utils.OriginHost})
 		if err == utils.ErrNotFound {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> Missing <OriginHost> field for row <%d> , <%s>",
+					utils.ERs, rowNr, record))
 			continue
 		}
-
-		if val, has := rdr.cache.Get(orgId); !has {
-			rdr.cache.Set(orgId, navMp, nil)
-			if partial == "false" { // complete CDR remove it from cache
-				rdr.cache.Remove(orgId)
-				rdr.rdrEvents <- &erEvent{cgrEvent: val.(*config.NavigableMap).AsCGREvent(
-					rdr.cgrCfg.GeneralCfg().DefaultTenant, utils.NestingSep),
+		cgrID := utils.Sha1(orgId, orgHost)
+		// take Partial field from NavigableMap
+		partial, _ := navMp.FieldAsString([]string{utils.Partial})
+		if val, has := rdr.cache.Get(cgrID); !has {
+			if utils.IsSliceMember([]string{"false", utils.EmptyString}, partial) { // complete CDR
+				rdr.rdrEvents <- &erEvent{cgrEvent: navMp.AsCGREvent(agReq.Tenant, utils.NestingSep),
 					rdrCfg: rdr.Config()}
 				evsPosted++
+			} else {
+				rdr.cache.Set(cgrID,
+					[]*engine.CGRSafEvent{engine.NewCGRSafEventFromCGREvent(navMp.AsCGREvent(agReq.Tenant, utils.NestingSep))}, nil)
 			}
 		} else {
-			originalNavMp := val.(*config.NavigableMap)
-			originalNavMp.Merge(navMp)
-			// overwrite the cache value with merged NavigableMap
-			rdr.cache.Set(orgId, originalNavMp, nil)
+			origCgrSafEvs := val.([]*engine.CGRSafEvent)
+
+			if utils.IsSliceMember([]string{"false", utils.EmptyString}, partial) { // complete CDR
+				rdr.rdrEvents <- &erEvent{cgrEvent: origCgrSafEv.AsCGREvent(),
+					rdrCfg: rdr.Config()}
+				evsPosted++
+				rdr.cache.Remove(cgrID)
+			} else {
+
+				// overwrite the cache value with merged NavigableMap
+				rdr.cache.Set(cgrID, origCgrSafEv, nil)
+			}
 		}
 
 	}
@@ -222,13 +237,26 @@ const (
 )
 
 func (rdr *PartialCSVFileER) dumpToFile(itmID string, value interface{}) {
-	nM := value.(*config.NavigableMap)
+	cgrSafEv := value.(*engine.CGRSafEvent)
 	// complete CDR are handling in processFile function
-	if partial, err := nM.FieldAsString([]string{utils.Partial}); err == nil && partial == "false" {
+	if partial, _ := cgrSafEv.Event.FieldAsString([]string{utils.Partial}); utils.IsSliceMember([]string{"false", utils.EmptyString}, partial) {
 		return
 	}
-	record := value.(*config.NavigableMap).AsExportedRecord()
-	dumpFilePath := path.Join(rdr.Config().ProcessedPath, fmt.Sprintf("%s.%s.%d", itmID, PartialRecordsSuffix, time.Now().Unix()))
+	cdr, err := cgrSafEv.Event.AsCDR(nil, cgrSafEv.Tenant, rdr.Config().Timezone)
+	if err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> Converting Event : <%s> to cdr , ignoring due to error: <%s>",
+				utils.ERs, utils.ToJSON(cgrSafEv), err.Error()))
+		return
+	}
+	record, err := cdr.AsExportRecord(rdr.Config().CacheDumpFields, false, nil, rdr.fltrS)
+	if err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> Converting CDR with CGRID: <%s> to record , ignoring due to error: <%s>",
+				utils.ERs, cdr.CGRID, err.Error()))
+		return
+	}
+	dumpFilePath := path.Join(rdr.Config().ProcessedPath, fmt.Sprintf("%s.%s.%d", cdr.OriginID, PartialRecordsSuffix, time.Now().Unix()))
 	fileOut, err := os.Create(dumpFilePath)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> Failed creating %s, error: %s", utils.ERs, dumpFilePath, err.Error()))
@@ -245,9 +273,11 @@ func (rdr *PartialCSVFileER) dumpToFile(itmID string, value interface{}) {
 }
 
 func (rdr *PartialCSVFileER) postCDR(itmID string, value interface{}) {
+	cgrSafEv := value.(*engine.CGRSafEvent)
 	// complete CDR are handling in processFile function
-	if partial, err := value.(*config.NavigableMap).FieldAsString([]string{utils.Partial}); err == nil && partial == "false" {
+	if partial, _ := cgrSafEv.Event.FieldAsString([]string{utils.Partial}); utils.IsSliceMember([]string{"false", utils.EmptyString}, partial) {
 		return
 	}
 	// how to post incomplete CDR
+	rdr.rdrEvents <- &erEvent{cgrEvent: cgrSafEv.AsCGREvent(), rdrCfg: rdr.Config()}
 }

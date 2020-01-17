@@ -365,6 +365,32 @@ func (nM *NavigableMap) AsCGREvent(tnt string, pathSep string) (cgrEv *utils.CGR
 	return
 }
 
+// AsMapStringIface builds a linear map[string]interface{} with joined paths
+// treats particular case when the value of map is []*NMItem - used in agents/AgentRequest
+func (nM *NavigableMap) AsMapStringIface(pathSep string) (mp map[string]interface{}) {
+	if nM == nil || len(nM.data) == 0 {
+		return
+	}
+	mp = make(map[string]interface{})
+	if len(nM.order) == 0 {
+		indexMapPaths(nM.data, nil, &nM.order)
+	}
+	for _, branchPath := range nM.order {
+		val, _ := nM.FieldAsInterface(branchPath)
+		if nmItms, isNMItems := val.([]*NMItem); isNMItems { // special case when we have added multiple items inside a key, used in agents
+			for _, nmItm := range nmItms {
+				if nmItm.Config == nil ||
+					nmItm.Config.AttributeID == "" {
+					val = nmItm.Data // first item which is not an attribute will become the value
+					break
+				}
+			}
+		}
+		mp[strings.Join(branchPath, pathSep)] = val
+	}
+	return
+}
+
 // XMLElement is specially crafted to be automatically marshalled by encoding/xml
 type XMLElement struct {
 	XMLName    xml.Name
