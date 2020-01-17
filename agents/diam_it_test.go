@@ -18,10 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
-	"errors"
 	"flag"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os/exec"
 	"path"
 	"strings"
@@ -38,11 +36,8 @@ import (
 )
 
 var (
-	waitRater    = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
-	dataDir      = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 	interations  = flag.Int("iterations", 1, "Number of iterations to do for dry run simulation")
 	replyTimeout = flag.String("reply_timeout", "1s", "Maximum duration to wait for a reply")
-	encoding     = flag.String("rpc", utils.MetaJSON, "what encoding whould be used for rpc comunication")
 
 	daCfgPath, diamConfigDIR string
 	daCfg                    *config.CGRConfig
@@ -69,17 +64,6 @@ var (
 		testDiamItKillEngine,
 	}
 )
-
-func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
-	switch *encoding {
-	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOB:
-		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
-	default:
-		return nil, errors.New("UNSUPPORTED_RPC")
-	}
-}
 
 // Test start here
 func TestDiamItTcp(t *testing.T) {

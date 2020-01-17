@@ -55,7 +55,7 @@ var (
 	singlecpu         = cgrEngineFlags.Bool("singlecpu", false, "Run on single CPU core")
 	syslogger         = cgrEngineFlags.String("logger", "", "logger <*syslog|*stdout>")
 	nodeID            = cgrEngineFlags.String("node_id", "", "The node ID of the engine")
-	logLevel          = cgrEngineFlags.Int("log_level", 6, "Log level (0-emergency to 7-debug)")
+	logLevel          = cgrEngineFlags.Int("log_level", -1, "Log level (0-emergency to 7-debug)")
 
 	cfg *config.CGRConfig
 )

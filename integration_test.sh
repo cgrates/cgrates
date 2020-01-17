@@ -17,6 +17,9 @@ echo 'go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*internal
 go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*internal
 ers_internal=$?
 
+echo 'go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*internal'
+go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*internal
+lds_internal=$?
 # SQL
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*sql'
 go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*sql
@@ -30,7 +33,9 @@ en_sql=$?
 echo 'go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*sql'
 go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*sql
 ers_sql=$?
-
+echo 'go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*sql'
+go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*sql
+lds_sql=$?
 # Mongo
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*mongo'
 go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*mongo
@@ -44,7 +49,9 @@ en_mongo=$?
 echo 'go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*mongo'
 go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*mongo
 ers_mongo=$?
-
+echo 'go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*mongo'
+go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*mongo
+lds_mongo=$?
 # Postgres
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*postgres'
 go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*postgres
@@ -58,6 +65,9 @@ en_postgres=$?
 echo 'go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*postgres'
 go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*postgres
 ers_postgres=$?
+echo 'go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*postgres'
+go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*postgres
+lds_postgres=$?
 
 echo 'go test github.com/cgrates/cgrates/cdrc -tags=integration'
 go test github.com/cgrates/cgrates/cdrc -tags=integration
@@ -82,9 +92,6 @@ mgr=$?
 echo 'go test github.com/cgrates/cgrates/dispatchers -tags=integration'
 go test github.com/cgrates/cgrates/dispatchers -tags=integration
 dis=$?
-echo 'go test github.com/cgrates/cgrates/loaders -tags=integration'
-go test github.com/cgrates/cgrates/loaders -tags=integration
-lds=$?
 echo 'go test github.com/cgrates/cgrates/services -tags=integration'
 go test github.com/cgrates/cgrates/services -tags=integration
 srv=$?

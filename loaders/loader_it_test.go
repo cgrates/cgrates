@@ -20,11 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package loaders
 
 import (
-	"errors"
-	"flag"
 	"io/ioutil"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os"
 	"path"
 	"reflect"
@@ -39,61 +36,54 @@ import (
 
 var (
 	loaderCfgPath               string
+	loaderCfgDIR                string //run tests for specific configuration
 	loaderCfg                   *config.CGRConfig
 	loaderRPC                   *rpc.Client
-	loaderDataDir               = "/usr/share/cgrates"
-	loaderConfigDIR             string //run tests for specific configuration
 	loaderPathIn, loaderPathOut string
-	encoding                    = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
+
+	sTestsLoader = []func(t *testing.T){
+		testLoaderMakeFolders,
+		testLoaderInitCfg,
+		testLoaderResetDataDB,
+		testLoaderStartEngine,
+		testLoaderRPCConn,
+		testLoaderPopulateData,
+		testLoaderLoadAttributes,
+		testLoaderVerifyOutDir,
+		testLoaderCheckAttributes,
+		testLoaderKillEngine,
+	}
 )
 
-func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
-	switch *encoding {
-	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOB:
-		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
-	default:
-		return nil, errors.New("UNSUPPORTED_RPC")
-	}
-}
-
-var sTestsLoader = []func(t *testing.T){
-	testLoaderMakeFolders,
-	testLoaderInitCfg,
-	testLoaderResetDataDB,
-	testLoaderStartEngine,
-	testLoaderRPCConn,
-	testLoaderPopulateData,
-	testLoaderLoadAttributes,
-	testLoaderVerifyOutDir,
-	testLoaderCheckAttributes,
-	testLoaderKillEngine,
-}
-
 //Test start here
-func TestLoaderITMySql(t *testing.T) {
-	loaderConfigDIR = "tutmysql"
-	for _, stest := range sTestsLoader {
-		t.Run(loaderConfigDIR, stest)
+func TestLoaderIT(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		loaderCfgDIR = "tutinternal"
+	case utils.MetaSQL:
+		loaderCfgDIR = "tutmysql"
+	case utils.MetaMongo:
+		loaderCfgDIR = "tutmongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
 
-func TestLoaderITMongo(t *testing.T) {
-	loaderConfigDIR = "tutmongo"
+	loaderCfgDIR = "tutmysql"
 	for _, stest := range sTestsLoader {
-		t.Run(loaderConfigDIR, stest)
+		t.Run(loaderCfgDIR, stest)
 	}
 }
 
 func testLoaderInitCfg(t *testing.T) {
 	var err error
-	loaderCfgPath = path.Join(loaderDataDir, "conf", "samples", "loaders", loaderConfigDIR)
+	loaderCfgPath = path.Join(*dataDir, "conf", "samples", "loaders", loaderCfgDIR)
 	loaderCfg, err = config.NewCGRConfigFromPath(loaderCfgPath)
 	if err != nil {
 		t.Fatal(err)
 	}
-	loaderCfg.DataFolderPath = loaderDataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	loaderCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(loaderCfg)
 }
 
