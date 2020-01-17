@@ -34,36 +34,53 @@ import (
 
 var (
 	dnsCfgPath string
+	dnsCfgDIR  string
 	dnsCfg     *config.CGRConfig
 	dnsRPC     *rpc.Client
 	dnsClnt    *dns.Conn // so we can cache the connection
+
+	sTestsDNS = []func(t *testing.T){
+		testDNSitInitCfg,
+		testDNSitResetDB,
+		testDNSitStartEngine,
+		testDNSitApierRpcConn,
+		testDNSitTPFromFolder,
+		testDNSitClntConn,
+		testDNSitClntNAPTRDryRun,
+		testDNSitClntNAPTRAttributes,
+		testDNSitClntNAPTRSuppliers,
+		testDNSitStopEngine,
+	}
 )
 
-var sTestsDNS = []func(t *testing.T){
-	testDNSitResetDB,
-	testDNSitStartEngine,
-	testDNSitApierRpcConn,
-	testDNSitTPFromFolder,
-	testDNSitClntConn,
-	testDNSitClntNAPTRDryRun,
-	testDNSitClntNAPTRAttributes,
-	testDNSitClntNAPTRSuppliers,
-	testDNSitStopEngine,
+func TestDNSitSimple(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		dnsCfgDIR = "dnsagent_internal"
+	case utils.MetaSQL:
+		dnsCfgDIR = "dnsagent_mysql"
+	case utils.MetaMongo:
+		dnsCfgDIR = "dnsagent_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+	for _, stest := range sTestsDNS {
+		t.Run(dnsCfgDIR, stest)
+	}
 }
 
-func TestDNSitSimple(t *testing.T) {
-	dnsCfgPath = path.Join(*dataDir, "conf", "samples", "dnsagent")
-	// Init config first
+// Init config
+func testDNSitInitCfg(t *testing.T) {
 	var err error
+	dnsCfgPath = path.Join(*dataDir, "conf", "samples", dnsCfgDIR)
 	dnsCfg, err = config.NewCGRConfigFromPath(dnsCfgPath)
 	if err != nil {
 		t.Error(err)
 	}
 	dnsCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(dnsCfg)
-	for _, stest := range sTestsDNS {
-		t.Run("dnsAgent", stest)
-	}
 }
 
 // Remove data in both rating and accounting db

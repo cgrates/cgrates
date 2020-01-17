@@ -1,0 +1,64 @@
+{
+// CGRateS Configuration file
+//
+
+
+"general": {
+	"log_level": 7,
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+"stor_db": {
+	"db_type": "*internal",	
+},
+
+
+"rals": {
+	"enabled": true,
+	"max_increments":3000000,
+},
+
+
+"schedulers": {
+	"enabled": true,
+},
+
+
+"cdrs": {
+	"enabled": true,
+	"chargers_conns": ["*internal"],
+	"rals_conns": ["*internal"],
+},
+
+
+"attributes": {
+	"enabled": true,
+},
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
+
+
+"sessions": {
+	"enabled": true,
+	"attributes_conns": ["*localhost"],
+	"cdrs_conns": ["*localhost"],
+	"rals_conns": ["*localhost"],
+	"chargers_conns": ["*internal"],
+},
+
+
+"apier": {
+	"scheduler_conns": ["*internal"],
+},
+
+
+}
