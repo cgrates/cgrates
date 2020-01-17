@@ -120,14 +120,14 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ExternalAttribute",
 			Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-			FilterIDs: []string{"*string:Account:1001"},
+			FilterIDs: []string{"*string:~*req.Account:1001"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
 			Attributes: []*engine.ExternalAttribute{
 				{
-					FieldName: "Account",
+					FieldName: utils.MetaReq + utils.NestingSep + "Account",
 					Value:     "1001",
 				},
 			},
@@ -146,14 +146,14 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ExternalAttribute",
 			Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-			FilterIDs: []string{"*string:Account:1001"},
+			FilterIDs: []string{"*string:~*req.Account:1001"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Account",
+					FieldName: utils.MetaReq + utils.NestingSep + "Account",
 					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 			},
@@ -178,19 +178,19 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ExternalAttribute",
 			Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-			FilterIDs: []string{"*string:Account:1001"},
+			FilterIDs: []string{"*string:~*req.Account:1001"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
 			Attributes: []*engine.ExternalAttribute{
 				{
-					FieldName: "Account",
+					FieldName: utils.MetaReq + utils.NestingSep + "Account",
 					Value:     "1001",
 				},
 				{
-					FieldName: "Subject",
-					Value:     "~Account",
+					FieldName: utils.MetaReq + utils.NestingSep + "Subject",
+					Value:     "~*req.Account",
 				},
 			},
 			Weight: 20,
@@ -208,19 +208,19 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "ExternalAttribute",
 			Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-			FilterIDs: []string{"*string:Account:1001"},
+			FilterIDs: []string{"*string:~*req.Account:1001"},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 				ExpiryTime:     time.Date(2014, 7, 14, 14, 35, 0, 0, time.UTC),
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Account",
+					FieldName: utils.MetaReq + utils.NestingSep + "Account",
 					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName: "Subject",
-					Value:     config.NewRSRParsersMustCompile("~Account", true, utils.INFIELD_SEP),
+					FieldName: utils.MetaReq + utils.NestingSep + "Subject",
+					Value:     config.NewRSRParsersMustCompile("~*req.Account", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,

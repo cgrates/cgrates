@@ -181,7 +181,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FilterIDs: []string{"*string:~*req.Account:1001"},
-					FieldName: "Account",
+					FieldName: utils.MetaReq + utils.NestingSep + "Account",
 					Type:      utils.MetaVariable,
 					Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 				},
@@ -198,13 +198,13 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FilterIDs: []string{"*string:~*req.Account:1001"},
-					FieldName: "Account",
+					FieldName: utils.MetaReq + utils.NestingSep + "Account",
 					Type:      utils.MetaVariable,
 					Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 				},
 				{
 					FilterIDs: []string{"*string:~*req.Account:1003"},
-					FieldName: "Account",
+					FieldName: utils.MetaReq + utils.NestingSep + "Account",
 					Type:      utils.MetaVariable,
 					Value:     config.NewRSRParsersMustCompile("1004", true, utils.INFIELD_SEP),
 				},
@@ -221,13 +221,13 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FilterIDs: []string{"*string:~*req.Account:1001"},
-					FieldName: "Account",
+					FieldName: utils.MetaReq + utils.NestingSep + "Account",
 					Type:      utils.MetaVariable,
 					Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 				},
 				{
 					FilterIDs: []string{"*string:~*req.Account:1003"},
-					FieldName: "Account",
+					FieldName: utils.MetaReq + utils.NestingSep + "Account",
 					Type:      utils.MetaVariable,
 					Value:     config.NewRSRParsersMustCompile("1004", true, utils.INFIELD_SEP),
 				},
@@ -247,12 +247,12 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Account",
+					FieldName: utils.MetaReq + utils.NestingSep + "Account",
 					Type:      utils.MetaVariable,
 					Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName: "Subject",
+					FieldName: utils.MetaReq + utils.NestingSep + "Subject",
 					Type:      utils.MetaVariable,
 					Value:     config.NewRSRParsersMustCompile("call_1001", true, utils.INFIELD_SEP),
 				},
@@ -272,12 +272,12 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Account",
+					FieldName: utils.MetaReq + utils.NestingSep + "Account",
 					Type:      utils.MetaVariable,
 					Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName: "Category",
+					FieldName: utils.MetaReq + utils.NestingSep + "Category",
 					Type:      utils.MetaVariable,
 					FilterIDs: []string{"*string:~*req.Category:call_1001"},
 					Value:     config.NewRSRParsersMustCompile("call_1002", true, utils.INFIELD_SEP),
@@ -295,7 +295,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: utils.Category,
+					FieldName: utils.MetaReq + utils.NestingSep + utils.Category,
 					Type:      utils.MetaVariable,
 					Value:     config.NewRSRParsersMustCompile("somecateg_roam_fromz4", true, utils.INFIELD_SEP),
 				},

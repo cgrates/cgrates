@@ -151,7 +151,7 @@ func testAPIerVerifyAttributesAfterLoad(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FilterIDs: []string{},
-					FieldName: "Password",
+					FieldName: utils.MetaReq + utils.NestingSep + "Password",
 					Type:      utils.META_CONSTANT,
 					Value:     config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
 				},

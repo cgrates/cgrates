@@ -239,7 +239,7 @@ func testInternalRemoteITGetAttribute(t *testing.T) {
 
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Password",
+					FieldName: utils.MetaReq + utils.NestingSep + "Password",
 					FilterIDs: []string{},
 					Type:      utils.META_CONSTANT,
 					Value:     config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),

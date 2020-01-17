@@ -61,7 +61,7 @@ func testDspApierSetAttributes(t *testing.T) {
 		},
 		"Attributes": []*engine.Attribute{
 			{
-				FieldName: utils.Subject,
+				FieldName: utils.MetaReq + utils.NestingSep + utils.Subject,
 				Value: config.RSRParsers{
 					&config.RSRParser{
 						Rules:           "roam",
@@ -95,7 +95,7 @@ func testDspApierGetAttributes(t *testing.T) {
 		},
 		Attributes: []*engine.Attribute{
 			{
-				FieldName: utils.Subject,
+				FieldName: utils.MetaReq + utils.NestingSep +  utils.Subject,
 				Value: config.RSRParsers{
 					&config.RSRParser{
 						Rules:           "roam",

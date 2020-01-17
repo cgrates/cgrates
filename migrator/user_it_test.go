@@ -130,19 +130,19 @@ func testUsrITMigrateAndMove(t *testing.T) {
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
 			{
-				FieldName: utils.MetaTenant,
-				Type:      utils.META_CONSTANT,
-				Value:     config.NewRSRParsersMustCompile("cgrates.com", true, utils.INFIELD_SEP),
-			},
-			{
-				FieldName: utils.RequestType,
+				FieldName: utils.MetaReq + utils.NestingSep + utils.RequestType,
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("*prepaid", true, utils.INFIELD_SEP),
 			},
 			{
-				FieldName: "msisdn",
+				FieldName: utils.MetaReq + utils.NestingSep + "msisdn",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("123423534646752", true, utils.INFIELD_SEP),
+			},
+			{
+				FieldName: utils.MetaTenant,
+				Type:      utils.META_CONSTANT,
+				Value:     config.NewRSRParsersMustCompile("cgrates.com", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: false,

@@ -63,7 +63,7 @@ func userProfile2attributeProfile(user *v1UserProfile) (attr *engine.AttributePr
 	}
 	if user.Tenant != attr.Tenant {
 		attr.Attributes = append(attr.Attributes, &engine.Attribute{
-			FieldName: utils.MetaReq + utils.NestingSep + utils.MetaTenant,
+			FieldName: utils.MetaTenant,
 			Value:     config.NewRSRParsersMustCompile(user.Tenant, true, utils.INFIELD_SEP),
 			Type:      utils.META_CONSTANT,
 		})
@@ -107,7 +107,7 @@ func (m *Migrator) migrateV1User2AttributeProfile() (err error) {
 		if err := m.dmOut.DataManager().SetAttributeProfile(attr, true); err != nil {
 			return err
 		}
-		m.stats[utils.User] += 1
+		m.stats[utils.User]++
 	}
 	if m.dryRun {
 		return

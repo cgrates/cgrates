@@ -1,4 +1,4 @@
 #Tenant,ID,Context,FilterIDs,ActivationInterval,AttributeFilterIDs,FieldName,Type,Value,Blocker,Weight
-cgrates.org,ATTR_ACNT_1001,*sessions,FLTR_ACCOUNT_1001,,,OfficeGroup,*constant,Marketing,false,10
-cgrates.org,ATTR_SUPPLIER1,*chargers,,,,Subject,*constant,SUPPLIER1,false,10
-cgrates.org,ATTR_PAYPAL,*cdrs,*string:~*req.Subject:ANY2CNT,,,PayPalAccount,*constant,paypal@cgrates.org,false,10
+cgrates.org,ATTR_ACNT_1001,*sessions,FLTR_ACCOUNT_1001,,,*req.OfficeGroup,*constant,Marketing,false,10
+cgrates.org,ATTR_SUPPLIER1,*chargers,,,,*req.Subject,*constant,SUPPLIER1,false,10
+cgrates.org,ATTR_PAYPAL,*cdrs,*string:~*req.Subject:ANY2CNT,,,*req.PayPalAccount,*constant,paypal@cgrates.org,false,10

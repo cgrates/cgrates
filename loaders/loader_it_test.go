@@ -173,13 +173,13 @@ func testLoaderCheckAttributes(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
 				FilterIDs: []string{"*string:~*req.Field1:Initial"},
-				FieldName: "Field1",
+				FieldName: utils.MetaReq + utils.NestingSep + "Field1",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("Sub1", true, utils.INFIELD_SEP),
 			},
 			&engine.Attribute{
 				FilterIDs: []string{},
-				FieldName: "Field2",
+				FieldName: utils.MetaReq + utils.NestingSep + "Field2",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("Sub2", true, utils.INFIELD_SEP),
 			}},

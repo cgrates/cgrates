@@ -133,7 +133,7 @@ func testDspCppGetChtgFailover(t *testing.T) {
 			ID:           "Raw",
 			FilterIDs:    []string{},
 			RunID:        utils.MetaRaw,
-			AttributeIDs: []string{"*constant:RequestType:*none"},
+			AttributeIDs: []string{"*constant:*req.RequestType:*none"},
 			Weight:       0,
 		},
 	)
@@ -222,7 +222,7 @@ func testDspCppTestAuthKey2(t *testing.T) {
 			ID:           "Raw",
 			FilterIDs:    []string{},
 			RunID:        utils.MetaRaw,
-			AttributeIDs: []string{"*constant:RequestType:*none"},
+			AttributeIDs: []string{"*constant:*req.RequestType:*none"},
 			Weight:       0,
 		},
 	}
@@ -285,7 +285,7 @@ func testDspCppGetChtgRoundRobin(t *testing.T) {
 			ID:           "Raw",
 			FilterIDs:    []string{},
 			RunID:        utils.MetaRaw,
-			AttributeIDs: []string{"*constant:RequestType:*none"},
+			AttributeIDs: []string{"*constant:*req.RequestType:*none"},
 			Weight:       0,
 		},
 	)

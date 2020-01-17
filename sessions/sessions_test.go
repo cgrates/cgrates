@@ -34,7 +34,7 @@ import (
 
 var attrs = &engine.AttrSProcessEventReply{
 	MatchedProfiles: []string{"ATTR_ACNT_1001"},
-	AlteredFields:   []string{"OfficeGroup"},
+	AlteredFields:   []string{"*req.OfficeGroup"},
 	CGREvent: &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItAuth",

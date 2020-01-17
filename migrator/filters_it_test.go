@@ -162,7 +162,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:Account:1001"},
-				FieldName: "Account",
+				FieldName: utils.MetaReq + utils.NestingSep + "Account",
 				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 			},
 		},
@@ -177,7 +177,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:~*req.Account:1001"},
-				FieldName: "Account",
+				FieldName: utils.MetaReq + utils.NestingSep + "Account",
 				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 			},
 		},
@@ -329,7 +329,7 @@ func testFltrITMigratev2(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:~Account:1001"},
-				FieldName: "Account",
+				FieldName: utils.MetaReq + utils.NestingSep + "Account",
 				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 			},
 		},
@@ -344,7 +344,7 @@ func testFltrITMigratev2(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:~*req.Account:1001"},
-				FieldName: "Account",
+				FieldName: utils.MetaReq + utils.NestingSep + "Account",
 				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 			},
 		},

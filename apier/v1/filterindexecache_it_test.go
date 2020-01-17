@@ -922,11 +922,11 @@ func testV1FIdxCaSetAttributeProfile(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: utils.Account,
+					FieldName: utils.MetaReq + utils.NestingSep + utils.Account,
 					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName: utils.Subject,
+					FieldName: utils.MetaReq + utils.NestingSep + utils.Subject,
 					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 			},
@@ -1015,11 +1015,11 @@ func testV1FIdxCaUpdateAttributeProfile(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: utils.Account,
+					FieldName: utils.MetaReq + utils.NestingSep + utils.Account,
 					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName: utils.Subject,
+					FieldName: utils.MetaReq + utils.NestingSep + utils.Subject,
 					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 			},

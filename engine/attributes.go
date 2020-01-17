@@ -137,6 +137,7 @@ type AttrSProcessEventReply struct {
 // format fldName1:fldVal1,fldName2:fldVal2
 func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
 	for i, fld := range attrReply.AlteredFields {
+		fld = strings.TrimPrefix(fld, utils.MetaReq+utils.NestingSep)
 		if _, has := attrReply.CGREvent.Event[fld]; !has {
 			continue //maybe removed
 		}
@@ -167,8 +168,13 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 	}
 	rply = &AttrSProcessEventReply{
 		MatchedProfiles: []string{attrPrf.ID},
-		CGREvent:        args.Clone(), // do not need to coppy the event
-		blocker:         attrPrf.Blocker}
+		CGREvent: &utils.CGREvent{
+			Tenant: args.Tenant,
+			ID:     args.ID,
+			Time:   args.Time,
+			Event:  make(map[string]interface{}),
+		},
+		blocker: attrPrf.Blocker}
 	evNm := config.NewNavigableMap(map[string]interface{}{utils.MetaReq: args.Event})
 	for _, attribute := range attrPrf.Attributes {
 		//in case that we have filter for attribute send them to FilterS to be processed
@@ -257,6 +263,14 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 		if !utils.IsSliceMember(rply.AlteredFields, attribute.FieldName) {
 			rply.AlteredFields = append(rply.AlteredFields, attribute.FieldName)
 		}
+		if attribute.FieldName == utils.MetaTenant {
+			if attribute.Type == utils.META_COMPOSED {
+				args.CGREvent.Tenant += substitute
+			} else {
+				args.CGREvent.Tenant = substitute
+			}
+			continue
+		}
 		if substitute == utils.MetaRemove {
 			evNm.Remove(strings.Split(attribute.FieldName, utils.NestingSep))
 			continue
@@ -272,7 +286,6 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 	ev, err = evNm.FieldAsInterface([]string{utils.MetaReq})
 	if err != nil {
 		if err.Error() == utils.ErrNotFound.Error() {
-			rply.CGREvent.Event = make(map[string]interface{})
 			return
 		}
 		return nil, err
@@ -342,10 +355,9 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 		apiRply.MatchedProfiles = append(apiRply.MatchedProfiles, evRply.MatchedProfiles[0])
 		apiRply.CGREvent = evRply.CGREvent
 		for _, fldName := range evRply.AlteredFields {
-			if utils.IsSliceMember(apiRply.AlteredFields, fldName) {
-				continue // only add processed fieldName once
+			if !utils.IsSliceMember(apiRply.AlteredFields, fldName) {
+				apiRply.AlteredFields = append(apiRply.AlteredFields, fldName) // only add processed fieldName once
 			}
-			apiRply.AlteredFields = append(apiRply.AlteredFields, fldName)
 		}
 		if evRply.blocker {
 			break

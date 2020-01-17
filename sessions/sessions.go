@@ -1755,6 +1755,7 @@ func (v1AuthReply *V1AuthorizeReply) AsNavigableMap(
 		if v1AuthReply.Attributes != nil {
 			attrs := make(map[string]interface{})
 			for _, fldName := range v1AuthReply.Attributes.AlteredFields {
+				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 				if v1AuthReply.Attributes.CGREvent.HasField(fldName) {
 					attrs[fldName] = v1AuthReply.Attributes.CGREvent.Event[fldName]
 				}
@@ -1819,11 +1820,6 @@ func (sS *SessionS) BiRPCv1AuthorizeEvent(clnt rpcclient.ClientConnector,
 			args.AttributeIDs)
 		if err == nil {
 			args.CGREvent = rplyAttr.CGREvent
-			if tntIface, has := args.CGREvent.Event[utils.MetaTenant]; has {
-				// special case when we want to overwrite the tenant
-				args.CGREvent.Tenant = tntIface.(string)
-				delete(args.CGREvent.Event, utils.MetaTenant)
-			}
 			authReply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
@@ -2028,6 +2024,7 @@ func (v1Rply *V1InitSessionReply) AsNavigableMap(
 		if v1Rply.Attributes != nil {
 			attrs := make(map[string]interface{})
 			for _, fldName := range v1Rply.Attributes.AlteredFields {
+				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 				if v1Rply.Attributes.CGREvent.HasField(fldName) {
 					attrs[fldName] = v1Rply.Attributes.CGREvent.Event[fldName]
 				}
@@ -2090,11 +2087,6 @@ func (sS *SessionS) BiRPCv1InitiateSession(clnt rpcclient.ClientConnector,
 			args.AttributeIDs)
 		if err == nil {
 			args.CGREvent = rplyAttr.CGREvent.Clone() // avoid concurrency with rply.Attributes
-			if tntIface, has := args.CGREvent.Event[utils.MetaTenant]; has {
-				// special case when we want to overwrite the tenant
-				args.CGREvent.Tenant = tntIface.(string)
-				delete(args.CGREvent.Event, utils.MetaTenant)
-			}
 			rply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
@@ -2262,6 +2254,7 @@ func (v1Rply *V1UpdateSessionReply) AsNavigableMap(
 		if v1Rply.Attributes != nil {
 			attrs := make(map[string]interface{})
 			for _, fldName := range v1Rply.Attributes.AlteredFields {
+				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 				if v1Rply.Attributes.CGREvent.HasField(fldName) {
 					attrs[fldName] = v1Rply.Attributes.CGREvent.Event[fldName]
 				}
@@ -2313,11 +2306,6 @@ func (sS *SessionS) BiRPCv1UpdateSession(clnt rpcclient.ClientConnector,
 			args.AttributeIDs)
 		if err == nil {
 			args.CGREvent = rplyAttr.CGREvent.Clone()
-			if tntIface, has := args.CGREvent.Event[utils.MetaTenant]; has {
-				// special case when we want to overwrite the tenant
-				args.CGREvent.Tenant = tntIface.(string)
-				delete(args.CGREvent.Event, utils.MetaTenant)
-			}
 			rply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
@@ -2738,6 +2726,7 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap(
 		if v1Rply.Attributes != nil {
 			attrs := make(map[string]interface{})
 			for _, fldName := range v1Rply.Attributes.AlteredFields {
+				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 				if v1Rply.Attributes.CGREvent.HasField(fldName) {
 					attrs[fldName] = v1Rply.Attributes.CGREvent.Event[fldName]
 				}
@@ -2796,11 +2785,6 @@ func (sS *SessionS) BiRPCv1ProcessMessage(clnt rpcclient.ClientConnector,
 			args.AttributeIDs)
 		if err == nil {
 			args.CGREvent = rplyAttr.CGREvent
-			if tntIface, has := args.CGREvent.Event[utils.MetaTenant]; has {
-				// special case when we want to overwrite the tenant
-				args.CGREvent.Tenant = tntIface.(string)
-				delete(args.CGREvent.Event, utils.MetaTenant)
-			}
 			rply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)
@@ -2915,6 +2899,7 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap(
 		if v1Rply.Attributes != nil {
 			attrs := make(map[string]interface{})
 			for _, fldName := range v1Rply.Attributes.AlteredFields {
+				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 				if v1Rply.Attributes.CGREvent.HasField(fldName) {
 					attrs[fldName] = v1Rply.Attributes.CGREvent.Event[fldName]
 				}
@@ -2980,11 +2965,6 @@ func (sS *SessionS) BiRPCv1ProcessEvent(clnt rpcclient.ClientConnector,
 			argsFlagsWithParams.ParamsSlice(utils.MetaAttributes))
 		if err == nil {
 			args.CGREvent = rplyAttr.CGREvent.Clone()
-			if tntIface, has := args.CGREvent.Event[utils.MetaTenant]; has {
-				// special case when we want to overwrite the tenant
-				args.CGREvent.Tenant = tntIface.(string)
-				delete(args.CGREvent.Event, utils.MetaTenant)
-			}
 			rply.Attributes = &rplyAttr
 		} else if err.Error() != utils.ErrNotFound.Error() {
 			return utils.NewErrAttributeS(err)

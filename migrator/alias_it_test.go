@@ -144,13 +144,13 @@ func testAlsITMigrateAndMove(t *testing.T) {
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
 			{
-				FieldName: "Account",
+				FieldName: utils.MetaReq + utils.NestingSep + "Account",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 			},
 			{
 				FilterIDs: []string{"*string:~*req.Category:call_1001"},
-				FieldName: "Category",
+				FieldName: utils.MetaReq + utils.NestingSep + "Category",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("call_1002", true, utils.INFIELD_SEP),
 			},

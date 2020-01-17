@@ -188,11 +188,11 @@ func testAttributeSGetAttributeForEvent(t *testing.T) {
 				ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: utils.Account,
+					FieldName: utils.MetaReq + utils.NestingSep + utils.Account,
 					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName: utils.Subject,
+					FieldName: utils.MetaReq + utils.NestingSep + utils.Subject,
 					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 			},
@@ -240,7 +240,7 @@ func testAttributeSGetAttributeForEventNotFound(t *testing.T) {
 				ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: utils.Account,
+					FieldName: utils.MetaReq + utils.NestingSep + utils.Account,
 					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 			},
@@ -292,7 +292,7 @@ func testAttributeSGetAttributeForEventWithMetaAnyContext(t *testing.T) {
 				ActivationTime: time.Date(2014, 1, 14, 0, 0, 0, 0, time.UTC)},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: utils.Account,
+					FieldName: utils.MetaReq + utils.NestingSep + utils.Account,
 					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 			},
@@ -340,7 +340,8 @@ func testAttributeSProcessEvent(t *testing.T) {
 	}
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1"},
-		AlteredFields:   []string{utils.Subject, utils.Account},
+		AlteredFields: []string{utils.MetaReq + utils.NestingSep + utils.Subject,
+			utils.MetaReq + utils.NestingSep + utils.Account},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
@@ -353,7 +354,8 @@ func testAttributeSProcessEvent(t *testing.T) {
 	}
 	eRply2 := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1"},
-		AlteredFields:   []string{utils.Account, utils.Subject},
+		AlteredFields: []string{utils.MetaReq + utils.NestingSep + utils.Account,
+			utils.MetaReq + utils.NestingSep + utils.Subject},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
@@ -441,11 +443,11 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FilterIDs: []string{"*string:~*req.Account:1008"},
-					FieldName: utils.Account,
+					FieldName: utils.MetaReq + utils.NestingSep + utils.Account,
 					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName: utils.Subject,
+					FieldName: utils.MetaReq + utils.NestingSep + utils.Subject,
 					Value:     config.NewRSRParsersMustCompile(utils.MetaRemove, true, utils.INFIELD_SEP),
 				},
 			},
@@ -461,7 +463,8 @@ func testAttributeSProcessEventWithNoneSubstitute(t *testing.T) {
 	}
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
-		AlteredFields:   []string{utils.Account, utils.Subject},
+		AlteredFields: []string{utils.MetaReq + utils.NestingSep + utils.Account,
+			utils.MetaReq + utils.NestingSep + utils.Subject},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSWithNoneSubstitute",
@@ -508,11 +511,11 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FilterIDs: []string{"*string:~*req.Account:1008"},
-					FieldName: utils.Account,
+					FieldName: utils.MetaReq + utils.NestingSep + utils.Account,
 					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName: utils.Subject,
+					FieldName: utils.MetaReq + utils.NestingSep + utils.Subject,
 					Value:     config.NewRSRParsersMustCompile(utils.MetaRemove, true, utils.INFIELD_SEP),
 				},
 			},
@@ -527,7 +530,7 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 	}
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
-		AlteredFields:   []string{"Account", "Subject"},
+		AlteredFields:   []string{"*req.Account", "*req.Subject"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSWithNoneSubstitute",
@@ -539,7 +542,8 @@ func testAttributeSProcessEventWithNoneSubstitute2(t *testing.T) {
 	}
 	eRply2 := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
-		AlteredFields:   []string{utils.Subject, utils.Account},
+		AlteredFields: []string{utils.MetaReq + utils.NestingSep + utils.Subject,
+			utils.MetaReq + utils.NestingSep + utils.Account},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSWithNoneSubstitute",
@@ -586,12 +590,12 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FilterIDs: []string{"*string:~*req.Account:1008"},
-					FieldName: utils.Account,
+					FieldName: utils.MetaReq + utils.NestingSep + utils.Account,
 					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 				{
 					FilterIDs: []string{"*string:~*req.Subject:1008"},
-					FieldName: utils.Subject,
+					FieldName: utils.MetaReq + utils.NestingSep + utils.Subject,
 					Value:     config.NewRSRParsersMustCompile(utils.MetaRemove, true, utils.INFIELD_SEP),
 				},
 			},
@@ -606,7 +610,7 @@ func testAttributeSProcessEventWithNoneSubstitute3(t *testing.T) {
 	}
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"AttributeWithNonSubstitute"},
-		AlteredFields:   []string{"Account"},
+		AlteredFields:   []string{"*req.Account"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSWithNoneSubstitute",
@@ -639,8 +643,8 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Field2",
-					Value:     config.NewRSRParsersMustCompile("~Field1", true, utils.INFIELD_SEP),
+					FieldName: utils.MetaReq + utils.NestingSep + "Field2",
+					Value:     config.NewRSRParsersMustCompile("~*req.Field1", true, utils.INFIELD_SEP),
 				},
 			},
 			Blocker: true,
@@ -666,7 +670,7 @@ func testAttributeSProcessEventWithHeader(t *testing.T) {
 	}
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_Header"},
-		AlteredFields:   []string{"Field2"},
+		AlteredFields:   []string{"*req.Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "HeaderEventForAttribute",
@@ -721,7 +725,7 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "FL1",
+					FieldName: utils.MetaReq + utils.NestingSep + "FL1",
 					Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 				},
 			},
@@ -749,11 +753,11 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 func testAttributeSUpdateAlsPrf(t *testing.T) {
 	alsPrf.Attributes = []*engine.Attribute{
 		{
-			FieldName: "FL1",
+			FieldName: utils.MetaReq + utils.NestingSep + "FL1",
 			Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 		},
 		{
-			FieldName: "FL2",
+			FieldName: utils.MetaReq + utils.NestingSep + "FL2",
 			Value:     config.NewRSRParsersMustCompile("Al2", true, utils.INFIELD_SEP),
 		},
 	}
@@ -814,7 +818,7 @@ func testAttributeSSetAlsPrf2(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: utils.Subject,
+					FieldName: utils.MetaReq + utils.NestingSep + utils.Subject,
 					Value: config.RSRParsers{
 						&config.RSRParser{
 							Rules:           "roam",
@@ -858,7 +862,7 @@ func testAttributeSSetAlsPrf3(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: utils.Subject,
+					FieldName: utils.MetaReq + utils.NestingSep + utils.Subject,
 					Value: config.RSRParsers{
 						&config.RSRParser{
 							Rules: "",
@@ -889,7 +893,7 @@ func testAttributeSSetAlsPrf4(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: utils.Subject,
+					FieldName: utils.MetaReq + utils.NestingSep + utils.Subject,
 					Value: config.RSRParsers{
 						&config.RSRParser{},
 					},
@@ -926,8 +930,8 @@ func testAttributeSProcessEventWithSearchAndReplace(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Category",
-					Value:     config.NewRSRParsersMustCompile("~Category:s/(.*)/${1}_suffix/", true, utils.INFIELD_SEP),
+					FieldName: utils.MetaReq + utils.NestingSep + "Category",
+					Value:     config.NewRSRParsersMustCompile("~*req.Category:s/(.*)/${1}_suffix/", true, utils.INFIELD_SEP),
 				},
 			},
 			Blocker: true,
@@ -953,7 +957,7 @@ func testAttributeSProcessEventWithSearchAndReplace(t *testing.T) {
 	}
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_Search_and_replace"},
-		AlteredFields:   []string{"Category"},
+		AlteredFields:   []string{"*req.Category"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     "HeaderEventForAttribute",
@@ -984,7 +988,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Field1",
+					FieldName: utils.MetaReq + utils.NestingSep + "Field1",
 					Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 				},
 			},
@@ -1002,7 +1006,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Field2",
+					FieldName: utils.MetaReq + utils.NestingSep + "Field2",
 					Value:     config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
 				},
 			},
@@ -1020,7 +1024,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Field3",
+					FieldName: utils.MetaReq + utils.NestingSep + "Field3",
 					Value:     config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
 				},
 			},
@@ -1057,7 +1061,7 @@ func testAttributeSProcessWithMultipleRuns(t *testing.T) {
 	}
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1", "ATTR_2"},
-		AlteredFields:   []string{"Field1", "Field2"},
+		AlteredFields:   []string{"*req.Field1", "*req.Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -1094,7 +1098,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Field1",
+					FieldName: utils.MetaReq + utils.NestingSep + "Field1",
 					Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 				},
 			},
@@ -1112,7 +1116,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Field2",
+					FieldName: utils.MetaReq + utils.NestingSep + "Field2",
 					Value:     config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
 				},
 			},
@@ -1130,7 +1134,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Field3",
+					FieldName: utils.MetaReq + utils.NestingSep + "Field3",
 					Value:     config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
 				},
 			},
@@ -1167,7 +1171,7 @@ func testAttributeSProcessWithMultipleRuns2(t *testing.T) {
 	}
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1", "ATTR_2", "ATTR_3"},
-		AlteredFields:   []string{"Field1", "Field2", "Field3"},
+		AlteredFields:   []string{"*req.Field1", "*req.Field2", "*req.Field3"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -1213,7 +1217,7 @@ func testAttributeSCachingMetaNone(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Field1",
+					FieldName: utils.MetaReq + utils.NestingSep + "Field1",
 					Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 				},
 			},
@@ -1272,7 +1276,7 @@ func testAttributeSCachingMetaLoad(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Field1",
+					FieldName: utils.MetaReq + utils.NestingSep + "Field1",
 					Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 				},
 			},
@@ -1364,7 +1368,7 @@ func testAttributeSCachingMetaReload1(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Field1",
+					FieldName: utils.MetaReq + utils.NestingSep + "Field1",
 					Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 				},
 			},
@@ -1423,7 +1427,7 @@ func testAttributeSCachingMetaReload2(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Field1",
+					FieldName: utils.MetaReq + utils.NestingSep + "Field1",
 					Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 				},
 			},
@@ -1463,7 +1467,7 @@ func testAttributeSCachingMetaReload2(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Field1",
+					FieldName: utils.MetaReq + utils.NestingSep + "Field1",
 					Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 				},
 			},
@@ -1502,7 +1506,7 @@ func testAttributeSCachingMetaRemove(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Field1",
+					FieldName: utils.MetaReq + utils.NestingSep + "Field1",
 					Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 				},
 			},
@@ -1552,7 +1556,7 @@ func testAttributeSCachingMetaRemove(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Field1",
+					FieldName: utils.MetaReq + utils.NestingSep + "Field1",
 					Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 				},
 			},

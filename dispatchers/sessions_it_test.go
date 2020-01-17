@@ -365,7 +365,7 @@ func testDspSessionUpdate(t *testing.T) {
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
-		AlteredFields:   []string{"OfficeGroup"},
+		AlteredFields:   []string{"*req.OfficeGroup"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
@@ -432,7 +432,7 @@ func testDspSessionUpdate2(t *testing.T) {
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1001_SESSIONAUTH"},
-		AlteredFields:   []string{"LCRProfile", "Password", "RequestType", "PaypalAccount"},
+		AlteredFields:   []string{"*req.LCRProfile", "*req.Password", "*req.RequestType", "*req.PaypalAccount"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
@@ -581,7 +581,7 @@ func testDspSessionProcessEvent(t *testing.T) {
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
-		AlteredFields:   []string{"OfficeGroup"},
+		AlteredFields:   []string{"*req.OfficeGroup"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessEvent",
@@ -654,7 +654,7 @@ func testDspSessionProcessEvent2(t *testing.T) {
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
-		AlteredFields:   []string{"Password", "EventName"},
+		AlteredFields:   []string{"*req.Password", "*req.EventName"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessEvent",

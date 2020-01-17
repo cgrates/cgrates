@@ -418,7 +418,7 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 					},
 				},
 				{
-					FieldName: utils.Tenant,
+					FieldName: utils.MetaReq + utils.NestingSep + utils.Tenant,
 					Type:      utils.META_CONSTANT,
 					Value: config.RSRParsers{
 						&config.RSRParser{

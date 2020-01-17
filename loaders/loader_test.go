@@ -111,13 +111,13 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
 				FilterIDs: []string{"*string:~*req.Field1:Initial"},
-				FieldName: "Field1",
+				FieldName: utils.MetaReq + utils.NestingSep + "Field1",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("Sub1", true, utils.INFIELD_SEP),
 			},
 			&engine.Attribute{
 				FilterIDs: []string{},
-				FieldName: "Field2",
+				FieldName: utils.MetaReq + utils.NestingSep + "Field2",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("Sub2", true, utils.INFIELD_SEP),
 			}},
@@ -137,7 +137,7 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 }
 
 func TestLoaderProcessContentMultiFiles(t *testing.T) {
-	file1CSV := `ignored,ignored,ignored,ignored,ignored,,Subject,1001,ignored,ignored`
+	file1CSV := `ignored,ignored,ignored,ignored,ignored,,*req.Subject,1001,ignored,ignored`
 	file2CSV := `ignored,TestLoader2`
 	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	ldr := &Loader{
@@ -198,7 +198,7 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 		Contexts: []string{utils.ANY},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName: "Subject",
+				FieldName: utils.MetaReq + utils.NestingSep + "Subject",
 				FilterIDs: []string{},
 				Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 			}},
@@ -1151,13 +1151,13 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
 				FilterIDs: []string{"*string:~*req.Field1:Initial"},
-				FieldName: "Field1",
+				FieldName: utils.MetaReq + utils.NestingSep + "Field1",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("Sub1", true, utils.INFIELD_SEP),
 			},
 			&engine.Attribute{
 				FilterIDs: []string{},
-				FieldName: "Field2",
+				FieldName: utils.MetaReq + utils.NestingSep + "Field2",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("Sub2", true, utils.INFIELD_SEP),
 			}},

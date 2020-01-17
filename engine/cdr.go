@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -537,6 +538,7 @@ func (cdr *CDR) AsCGREvent() *utils.CGREvent {
 // UpdateFromCGREvent will update CDR with event fields from CGREvent
 func (cdr *CDR) UpdateFromCGREvent(cgrEv *utils.CGREvent, fields []string) (err error) {
 	for _, fldName := range fields {
+		fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 		if _, has := cgrEv.Event[fldName]; !has {
 			continue //maybe removed
 		}

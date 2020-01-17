@@ -126,10 +126,10 @@ func testRedisSentinelSetGetAttribute(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ApierTest",
 		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-		FilterIDs: []string{"*string:Account:1001"},
+		FilterIDs: []string{"*string:~*req.Account:1001"},
 		Attributes: []*engine.Attribute{
 			{
-				FieldName: utils.Subject,
+				FieldName: utils.MetaReq + utils.NestingSep + utils.Subject,
 				Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 			},
 		},
@@ -160,10 +160,10 @@ func testRedisSentinelInsertion(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ApierTest",
 		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-		FilterIDs: []string{"*string:Account:1001"},
+		FilterIDs: []string{"*string:~*reqAccount:1001"},
 		Attributes: []*engine.Attribute{
 			{
-				FieldName: utils.Subject,
+				FieldName: utils.MetaReq + utils.NestingSep + utils.Subject,
 				Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 			},
 		},
@@ -244,10 +244,10 @@ func testRedisSentinelGetAttrAfterFailover(t *testing.T) {
 		Tenant:    "cgrates.org",
 		ID:        "ApierTest",
 		Contexts:  []string{utils.MetaSessionS, utils.MetaCDRs},
-		FilterIDs: []string{"*string:Account:1001"},
+		FilterIDs: []string{"*string:~*req.Account:1001"},
 		Attributes: []*engine.Attribute{
 			{
-				FieldName: utils.Subject,
+				FieldName: utils.MetaReq + utils.NestingSep + utils.Subject,
 				Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 			},
 		},
