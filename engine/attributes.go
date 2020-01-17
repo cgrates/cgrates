@@ -168,14 +168,9 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 	}
 	rply = &AttrSProcessEventReply{
 		MatchedProfiles: []string{attrPrf.ID},
-		CGREvent: &utils.CGREvent{
-			Tenant: args.Tenant,
-			ID:     args.ID,
-			Time:   args.Time,
-			Event:  make(map[string]interface{}),
-		},
-		blocker: attrPrf.Blocker}
-	evNm := config.NewNavigableMap(map[string]interface{}{utils.MetaReq: args.Event})
+		CGREvent:        args.CGREvent,
+		blocker:         attrPrf.Blocker}
+	evNm := config.NewNavigableMap(map[string]interface{}{utils.MetaReq: rply.CGREvent.Event})
 	for _, attribute := range attrPrf.Attributes {
 		//in case that we have filter for attribute send them to FilterS to be processed
 		if len(attribute.FilterIDs) != 0 {
@@ -265,9 +260,9 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 		}
 		if attribute.FieldName == utils.MetaTenant {
 			if attribute.Type == utils.META_COMPOSED {
-				args.CGREvent.Tenant += substitute
+				rply.CGREvent.Tenant += substitute
 			} else {
-				args.CGREvent.Tenant = substitute
+				rply.CGREvent.Tenant = substitute
 			}
 			continue
 		}
@@ -281,18 +276,6 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 			substitute = val + substitute
 		}
 		evNm.Set(strings.Split(attribute.FieldName, utils.NestingSep), substitute, false, false)
-	}
-	var ev interface{}
-	ev, err = evNm.FieldAsInterface([]string{utils.MetaReq})
-	if err != nil {
-		if err.Error() == utils.ErrNotFound.Error() {
-			return
-		}
-		return nil, err
-	}
-	var ok bool
-	if rply.CGREvent.Event, ok = ev.(map[string]interface{}); !ok {
-		return nil, fmt.Errorf("invalid event")
 	}
 	return
 }
@@ -327,6 +310,7 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 		args.ProcessRuns = utils.IntPointer(alS.cgrcfg.AttributeSCfg().ProcessRuns)
 	}
 	var apiRply *AttrSProcessEventReply // aggregate response here
+	args.CGREvent = args.CGREvent.Clone()
 	for i := 0; i < *args.ProcessRuns; i++ {
 		var evRply *AttrSProcessEventReply
 		evRply, err = alS.processEvent(args)
@@ -337,9 +321,6 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 				err = nil
 			}
 			break
-		}
-		if len(evRply.AlteredFields) != 0 {
-			args.CGREvent = evRply.CGREvent // for next loop
 		}
 		if apiRply == nil { // first reply
 			apiRply = evRply

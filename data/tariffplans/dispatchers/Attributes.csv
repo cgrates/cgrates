@@ -1,6 +1,6 @@
 #Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,FieldName,Type,Value,Blocker,Weight
 cgrates.org,ATTR_1001_SIMPLEAUTH,*any,*string:~*req.Account:1001,,,*req.Password,*constant,CGRateS.org,false,20
-cgrates.org,ATTR_1001_SIMPLEAUTH,*any,,,,EventName,*constant,*remove,false,20
+cgrates.org,ATTR_1001_SIMPLEAUTH,*any,,,,*req.EventName,*constant,*remove,false,20
 cgrates.org,ATTR_1003_SIMPLEAUTH,*any,*string:~*req.Account:1003,,,*req.Password,*constant,CGRateS.com,false,20
 cgrates.org,ATTR_API_ATTR_FAKE_AUTH,*auth,*string:~*req.APIKey:12345,,,*req.APIMethods,*constant,,false,20
 cgrates.org,ATTR_API_ATTR_AUTH,*auth,*string:~*req.APIKey:attr12345,,,*req.APIMethods,*constant,AttributeSv1.Ping&AttributeSv1.GetAttributeForEvent&AttributeSv1.ProcessEvent,false,20

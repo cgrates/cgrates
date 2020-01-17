@@ -50,19 +50,13 @@
 		"enabled": true,
 	},
 	
-	"rpc_conns": {
-		"conn1": {
-			"strategy": "*first",
-			"conns": [{"address": "127.0.0.1:2012", "transport":"*json"}],
-		},
-	},
 	
 	"sessions": {
 		"enabled": true,
-		"attributes_conns": ["conn1"],
-		"rals_conns": ["conn1"],
-		"resources_conns": ["conn1"],
-		"chargers_conns": ["conn1"],
+		"attributes_conns": ["*localhost"],
+		"rals_conns": ["*localhost"],
+		"resources_conns": ["*localhost"],
+		"chargers_conns": ["*localhost"],
 		"listen_bijson": ":3014",
 	},
 	
