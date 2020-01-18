@@ -10,7 +10,7 @@ Full contents:
 =============
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 5
    
    introduction
    architecture
