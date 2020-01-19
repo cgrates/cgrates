@@ -6,7 +6,9 @@ DiameterAgent
 =============
 
 **DiameterAgent** translates between Diameter_ and **CGRateS**, sending *RPC* requests towards **SessionS** component and returning replies from it to the *DiameterClient*.
+
 Implements Diameter_ protocol in a standard agnostic manner, giving users the ability to implement own interfaces by defining simple *processor templates* within the :ref:`configuration <engine_configuration>`  files.
+
 Used mostly in modern mobile networks (LTE/xG).
 
 

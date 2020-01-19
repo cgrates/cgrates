@@ -2,7 +2,7 @@
 Introduction
 ************
 
-`CGRateS`_ is a *very fast* (**50k+ CPS**) and *easily scalable* (**load-balancer** + **replication** included) **Real-time Enterprise Billing Suite** *ENGINE* targeted especially for ISPs and Telecom Operators (but not only).
+`CGRateS`_ is a *very fast* (**50k+ CPS**) and *easily scalable* (**load-balancer** + **replication** included) **Real-time Enterprise Billing Suite** targeted especially for ISPs and Telecom Operators (but not only).
 
 Starting as a pure **billing engine**, CGRateS has evolved over the years into a reliable **real-time charging framework**, able to accommodate various business cases in a *generic way*.
 
