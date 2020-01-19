@@ -11,6 +11,11 @@
 .. _FreeSWITCH: https://freeswitch.com/
 .. _Kamailio: https://www.kamailio.org/w/
 .. _OpenSIPS: https://opensips.org/
+.. _Diameter: https://tools.ietf.org/html/rfc6733
+.. _Radius: https://tools.ietf.org/html/rfc2865
+.. _DNS: https://tools.ietf.org/html/rfc1034
+.. _ENUM: https://tools.ietf.org/html/rfc6116
+
 
 
 
@@ -160,10 +165,10 @@ Features
     - FreeSWITCH_
     - Kamailio_
     - OpenSIPS_
-    - Diameter
-    - Radius
+    - Diameter_
+    - Radius_
     - Generic HTTP
-    - DNS/ENUM.
+    - DNS_/ENUM_.
 
 - Built in High-Availability mechanisms:
     - Dispatcher with static or dynamic routing

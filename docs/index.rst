@@ -1,7 +1,7 @@
 .. _CGRateS: http://cgrates.org
 
-Preface
-=======
+CGRateS Documentation
+=====================
 
 Welcome to `CGRateS`_'s documentation!
 
@@ -9,7 +9,7 @@ Welcome to `CGRateS`_'s documentation!
 
 
 .. toctree::
-   :maxdepth: 5
+   :maxdepth: 4
    
    overview
    architecture
