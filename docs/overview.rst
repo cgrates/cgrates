@@ -1,4 +1,17 @@
-.. _cgrates_features:
+.. _CGRateS: http://cgrates.org
+.. _Go: http://golang.org
+.. _Docker: https://www.docker.com/
+.. _Kafka: https://kafka.apache.org/
+.. _redis: http://redis.io
+.. _mongodb: http://www.mongodb.org
+.. _api docs: https://godoc.org/github.com/cgrates/cgrates/apier
+.. _SQS: https://aws.amazon.com/de/sqs/
+.. _AMQP: https://www.amqp.org/
+.. _Asterisk: https://www.asterisk.org/
+.. _FreeSWITCH: https://freeswitch.com/
+.. _Kamailio: https://www.kamailio.org/w/
+.. _OpenSIPS: https://opensips.org/
+
 
 
 Overview
@@ -47,6 +60,9 @@ CGRateS is capable of four charging modes:
    - Special charging mode where there is no accounting interaction (no balances are used) but the primary interest is attaching costs to CDRs.
    - Specific mode for Wholesale business processing high-throughput CDRs
    - Least CPU usage out of the four modes (fastest charging).
+
+
+.. _cgrates_features:
 
 Features
 --------
