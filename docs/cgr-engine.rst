@@ -3,9 +3,10 @@
 cgr-engine
 ==========
 
-Groups various services and components.
+Groups most of functionality from services and components.
 
 Customisable through the use of *json* :ref:`configuration <engine_configuration>` or command line arguments (higher prio).
+
 Able to read the configuration from either a local directory  of *.json* files with an unlimited number of subfolders (ordered alphabetically) or a list of http paths (separated by ";").
 
 ::
@@ -62,7 +63,7 @@ All of the **Agents** implemented within CGRateS are flexible to be configured w
 Following *Agents* are implemented within CGRateS:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    diamagent
    radagent

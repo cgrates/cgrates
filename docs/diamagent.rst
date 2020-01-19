@@ -5,20 +5,23 @@
 DiameterAgent
 =============
 
-**DiameterAgent** translates between Diameter_ and **CGRateS**, sending *RPC* requests towards **SessionS** component and returning replies from it to the *DiameterClient*.
+**DiameterAgent** translates between Diameter_ and **CGRateS**, sending *RPC* requests towards **CGRateS/SessionS** component and returning replies from it to the *DiameterClient*.
 
 Implements Diameter_ protocol in a standard agnostic manner, giving users the ability to implement own interfaces by defining simple *processor templates* within the :ref:`configuration <engine_configuration>`  files.
 
 Used mostly in modern mobile networks (LTE/xG).
 
+The **DiameterAgent** is configured via *diameter_agent* section  within :ref:`configuration <engine_configuration>`.
+
 
 Configuration
 -------------
 
-The **DiameterAgent** is configured via *diameter_agent* section  within :ref:`configuration <engine_configuration>`.
 
+Sample config 
+^^^^^^^^^^^^^
 
-Sample config (explanation in the comments):
+With explanations in the comments:
 
 ::
 
@@ -172,6 +175,16 @@ Sample config (explanation in the comments):
 		
 	],
  },
+
+
+Config params
+^^^^^^^^^^^^^
+
+listen_net
+	The network the *DiameterAgent* will bind to. CGRateS supports both **tcp** and **sctp** specified in Diameter_ standard.
+
+asr_template
+	The template (out of templates config section) used to build the AbortSession message. If not specified the ASR message is never sent out.
 
 
 
