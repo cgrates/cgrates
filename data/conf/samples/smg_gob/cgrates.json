@@ -66,6 +66,7 @@
 	"rals_conns": ["conn1"],
 	"cdrs_conns": ["conn1"],
 	"chargers_conns": ["*internal"],
+	"alterable_fields": ["Extra1"],			
 },
 
 
