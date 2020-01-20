@@ -588,3 +588,36 @@ func (v1ms *mongoMigrator) remV3AttributeProfile(tenant, id string) (err error) 
 	_, err = v1ms.mgoDB.DB().Collection(v1AttributeProfilesCol).DeleteOne(v1ms.mgoDB.GetContext(), bson.M{"tenant": tenant, "id": id})
 	return
 }
+
+//AttributeProfile methods
+//get
+func (v1ms *mongoMigrator) getV4AttributeProfile() (v4attrPrf *v4AttributeProfile, err error) {
+	if v1ms.cursor == nil {
+		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(v1AttributeProfilesCol).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		if err != nil {
+			return nil, err
+		}
+	}
+	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
+		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
+		v1ms.cursor = nil
+		return nil, utils.ErrNoMoreData
+	}
+	v4attrPrf = new(v4AttributeProfile)
+	if err := (*v1ms.cursor).Decode(v4attrPrf); err != nil {
+		return nil, err
+	}
+	return v4attrPrf, nil
+}
+
+//set
+func (v1ms *mongoMigrator) setV4AttributeProfile(x *v4AttributeProfile) (err error) {
+	_, err = v1ms.mgoDB.DB().Collection(v1AttributeProfilesCol).InsertOne(v1ms.mgoDB.GetContext(), x)
+	return
+}
+
+//rem
+func (v1ms *mongoMigrator) remV4AttributeProfile(tenant, id string) (err error) {
+	_, err = v1ms.mgoDB.DB().Collection(v1AttributeProfilesCol).DeleteOne(v1ms.mgoDB.GetContext(), bson.M{"tenant": tenant, "id": id})
+	return
+}

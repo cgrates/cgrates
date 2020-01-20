@@ -62,6 +62,10 @@ type MigratorDataDB interface {
 	setV3AttributeProfile(x *v3AttributeProfile) (err error)
 	remV3AttributeProfile(tenant, id string) (err error)
 
+	getV4AttributeProfile() (v4attrPrf *v4AttributeProfile, err error)
+	setV4AttributeProfile(x *v4AttributeProfile) (err error)
+	remV4AttributeProfile(tenant, id string) (err error)
+
 	DataManager() *engine.DataManager
 	close()
 }
