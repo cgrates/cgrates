@@ -305,3 +305,28 @@ func (sr *SRun) debitReserve(dur time.Duration, lastUsage *time.Duration) (rDur 
 	}
 	return
 }
+
+// updateSRuns updates the SRuns event with the alterable fields (is not thread safe)
+func (s *Session) updateSRuns(updEv engine.MapEvent, alterableFields *utils.StringSet) {
+	if alterableFields.Size() == 0 {
+		return
+	}
+	for k, v := range updEv {
+		if !alterableFields.Has(k) {
+			continue
+		}
+		for _, sr := range s.SRuns {
+			sr.Event[k] = v
+		}
+	}
+}
+
+// UpdateSRuns updates the SRuns event with the alterable fields (is thread safe)
+func (s *Session) UpdateSRuns(updEv engine.MapEvent, alterableFields *utils.StringSet) {
+	if alterableFields.Size() == 0 { // do not lock if we can't update any field
+		return
+	}
+	s.Lock()
+	s.updateSRuns(updEv, alterableFields)
+	s.Unlock()
+}

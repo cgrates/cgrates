@@ -1352,11 +1352,12 @@ func (sS *SessionS) updateSession(s *Session, updtEv engine.MapEvent, isMsg bool
 
 		// update fields from new event
 		for k, v := range updtEv {
-			if protectedSFlds.HasField(k) {
+			if utils.ProtectedSFlds.Has(k) {
 				continue
 			}
 			s.EventStart[k] = v // update previoius field with new one
 		}
+		s.updateSRuns(updtEv, sS.cgrCfg.SessionSCfg().AlterableFields)
 		sS.setSTerminator(s) // reset the terminator
 	}
 	//init has no updtEv
@@ -2475,6 +2476,7 @@ func (sS *SessionS) BiRPCv1TerminateSession(clnt rpcclient.ClientConnector,
 			}
 
 		}
+		s.UpdateSRuns(ev, sS.cgrCfg.SessionSCfg().AlterableFields)
 		if err = sS.terminateSession(s,
 			ev.GetDurationPtrIgnoreErrors(utils.Usage),
 			ev.GetDurationPtrIgnoreErrors(utils.LastUsed),
@@ -2584,14 +2586,8 @@ func (sS *SessionS) BiRPCv1ProcessCDR(clnt rpcclient.ClientConnector,
 	}
 
 	// Use previously stored Session to generate CDRs
-	// update stored event with fields out of CDR
-	for k, v := range ev {
-		if protectedSFlds.HasField(k) {
-			continue
-		}
-		s.EventStart[k] = v // update previoius field with new one
-	}
-	// create one CGREvent for each session run plus *raw one
+	s.updateSRuns(ev, sS.cgrCfg.SessionSCfg().AlterableFields)
+	// create one CGREvent for each session run
 	var cgrEvs []*utils.CGREvent
 	if cgrEvs, err = s.asCGREvents(); err != nil {
 		return utils.NewErrServerError(err)
