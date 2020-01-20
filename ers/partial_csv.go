@@ -26,6 +26,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -200,20 +201,44 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 				evsPosted++
 			} else {
 				rdr.cache.Set(cgrID,
-					[]*engine.CGRSafEvent{engine.NewCGRSafEventFromCGREvent(navMp.AsCGREvent(agReq.Tenant, utils.NestingSep))}, nil)
+					[]*utils.CGREvent{navMp.AsCGREvent(agReq.Tenant, utils.NestingSep)}, nil)
 			}
 		} else {
-			origCgrSafEvs := val.([]*engine.CGRSafEvent)
-
+			origCgrEvs := val.([]*utils.CGREvent)
+			origCgrEvs = append(origCgrEvs, navMp.AsCGREvent(agReq.Tenant, utils.NestingSep))
 			if utils.IsSliceMember([]string{"false", utils.EmptyString}, partial) { // complete CDR
-				rdr.rdrEvents <- &erEvent{cgrEvent: origCgrSafEv.AsCGREvent(),
+				//sort CGREvents based on AnswertTime and SetupTime
+				sort.Slice(origCgrEvs, func(i, j int) bool {
+					aTime, err := origCgrEvs[i].FieldAsTime(utils.AnswerTime, agReq.Timezone)
+					if err != nil && err == utils.ErrNotFound {
+						sTime, _ := origCgrEvs[i].FieldAsTime(utils.SetupTime, agReq.Timezone)
+						sTime2, _ := origCgrEvs[j].FieldAsTime(utils.SetupTime, agReq.Timezone)
+						return sTime.Before(sTime2)
+					} else {
+						aTime2, _ := origCgrEvs[j].FieldAsTime(utils.AnswerTime, agReq.Timezone)
+						return aTime.Before(aTime2)
+					}
+				})
+				// compose the CGREvent from slice
+				cgrEv := new(utils.CGREvent)
+				cgrEv.ID = utils.UUIDSha1Prefix()
+				cgrEv.Time = utils.TimePointer(time.Now())
+				for i, origCgrEv := range origCgrEvs {
+					if i == 0 {
+						cgrEv.Tenant = origCgrEv.Tenant
+					}
+					for key, value := range origCgrEv.Event {
+						cgrEv.Event[key] = value
+					}
+				}
+				rdr.rdrEvents <- &erEvent{cgrEvent: cgrEv,
 					rdrCfg: rdr.Config()}
 				evsPosted++
 				rdr.cache.Remove(cgrID)
 			} else {
 
 				// overwrite the cache value with merged NavigableMap
-				rdr.cache.Set(cgrID, origCgrSafEv, nil)
+				rdr.cache.Set(cgrID, origCgrEvs, nil)
 			}
 		}
 
@@ -237,16 +262,19 @@ const (
 )
 
 func (rdr *PartialCSVFileER) dumpToFile(itmID string, value interface{}) {
-	cgrSafEv := value.(*engine.CGRSafEvent)
-	// complete CDR are handling in processFile function
-	if partial, _ := cgrSafEv.Event.FieldAsString([]string{utils.Partial}); utils.IsSliceMember([]string{"false", utils.EmptyString}, partial) {
-		return
+	origCgrEvs := value.([]*utils.CGREvent)
+	for _, origCgrEv := range origCgrEvs {
+		// complete CDR are handling in processFile function
+		if partial, _ := origCgrEv.FieldAsString(utils.Partial); utils.IsSliceMember([]string{"false", utils.EmptyString}, partial) {
+			return
+		}
 	}
-	cdr, err := cgrSafEv.Event.AsCDR(nil, cgrSafEv.Tenant, rdr.Config().Timezone)
+	// Need to process the first event separate to take the name for the file
+	cdr, err := engine.NewMapEvent(origCgrEvs[0].Event).AsCDR(rdr.cgrCfg, origCgrEvs[0].Tenant, rdr.Config().Timezone)
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> Converting Event : <%s> to cdr , ignoring due to error: <%s>",
-				utils.ERs, utils.ToJSON(cgrSafEv), err.Error()))
+				utils.ERs, utils.ToJSON(origCgrEvs[0].Event), err.Error()))
 		return
 	}
 	record, err := cdr.AsExportRecord(rdr.Config().CacheDumpFields, false, nil, rdr.fltrS)
@@ -256,28 +284,84 @@ func (rdr *PartialCSVFileER) dumpToFile(itmID string, value interface{}) {
 				utils.ERs, cdr.CGRID, err.Error()))
 		return
 	}
-	dumpFilePath := path.Join(rdr.Config().ProcessedPath, fmt.Sprintf("%s.%s.%d", cdr.OriginID, PartialRecordsSuffix, time.Now().Unix()))
+	dumpFilePath := path.Join(rdr.Config().ProcessedPath, fmt.Sprintf("%s.%s.%d",
+		cdr.OriginID, PartialRecordsSuffix, time.Now().Unix()))
 	fileOut, err := os.Create(dumpFilePath)
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> Failed creating %s, error: %s", utils.ERs, dumpFilePath, err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<%s> Failed creating %s, error: %s",
+			utils.ERs, dumpFilePath, err.Error()))
 		return
 	}
 	csvWriter := csv.NewWriter(fileOut)
 	csvWriter.Comma = utils.CSV_SEP
-	if err := csvWriter.Write(record); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> Failed writing partial record %v to file: %s, error: %s", utils.ERs, record, dumpFilePath, err.Error()))
+	if err = csvWriter.Write(record); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> Failed writing partial record %v to file: %s, error: %s",
+			utils.ERs, record, dumpFilePath, err.Error()))
 		return
 	}
-	csvWriter.Flush()
+	if len(origCgrEvs) > 1 {
+		for _, origCgrEv := range origCgrEvs[1:] {
+			// Need to process the first event separate to take the name for the file
+			cdr, err = engine.NewMapEvent(origCgrEv.Event).AsCDR(rdr.cgrCfg, origCgrEv.Tenant, rdr.Config().Timezone)
+			if err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> Converting Event : <%s> to cdr , ignoring due to error: <%s>",
+						utils.ERs, utils.ToJSON(origCgrEv.Event), err.Error()))
+				return
+			}
+			record, err = cdr.AsExportRecord(rdr.Config().CacheDumpFields, false, nil, rdr.fltrS)
+			if err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> Converting CDR with CGRID: <%s> to record , ignoring due to error: <%s>",
+						utils.ERs, cdr.CGRID, err.Error()))
+				return
+			}
+			if err = csvWriter.Write(record); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<%s> Failed writing partial record %v to file: %s, error: %s",
+					utils.ERs, record, dumpFilePath, err.Error()))
+				return
+			}
+		}
+	}
 
+	csvWriter.Flush()
 }
 
 func (rdr *PartialCSVFileER) postCDR(itmID string, value interface{}) {
-	cgrSafEv := value.(*engine.CGRSafEvent)
-	// complete CDR are handling in processFile function
-	if partial, _ := cgrSafEv.Event.FieldAsString([]string{utils.Partial}); utils.IsSliceMember([]string{"false", utils.EmptyString}, partial) {
-		return
+	origCgrEvs := value.([]*utils.CGREvent)
+	for _, origCgrEv := range origCgrEvs {
+		// complete CDR are handling in processFile function
+		if partial, _ := origCgrEv.FieldAsString(utils.Partial); utils.IsSliceMember([]string{"false", utils.EmptyString}, partial) {
+			return
+		}
 	}
+
 	// how to post incomplete CDR
-	rdr.rdrEvents <- &erEvent{cgrEvent: cgrSafEv.AsCGREvent(), rdrCfg: rdr.Config()}
+	//sort CGREvents based on AnswertTime and SetupTime
+	sort.Slice(origCgrEvs, func(i, j int) bool {
+		aTime, err := origCgrEvs[i].FieldAsTime(utils.AnswerTime, rdr.Config().Timezone)
+		if err != nil && err == utils.ErrNotFound {
+			sTime, _ := origCgrEvs[i].FieldAsTime(utils.SetupTime, rdr.Config().Timezone)
+			sTime2, _ := origCgrEvs[j].FieldAsTime(utils.SetupTime, rdr.Config().Timezone)
+			return sTime.Before(sTime2)
+		} else {
+			aTime2, _ := origCgrEvs[j].FieldAsTime(utils.AnswerTime, rdr.Config().Timezone)
+			return aTime.Before(aTime2)
+		}
+	})
+	// compose the CGREvent from slice
+	cgrEv := &utils.CGREvent{
+		ID:    utils.UUIDSha1Prefix(),
+		Time:  utils.TimePointer(time.Now()),
+		Event: make(map[string]interface{}),
+	}
+	for i, origCgrEv := range origCgrEvs {
+		if i == 0 {
+			cgrEv.Tenant = origCgrEv.Tenant
+		}
+		for key, value := range origCgrEv.Event {
+			cgrEv.Event[key] = value
+		}
+	}
+	rdr.rdrEvents <- &erEvent{cgrEvent: cgrEv, rdrCfg: rdr.Config()}
 }

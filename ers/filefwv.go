@@ -133,8 +133,8 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 	reqVars := make(map[string]interface{})
 
 	for {
-		cntFld := rdr.Config().ContentFields
 		if rdr.offset == 0 { // First time, set the necessary offsets
+			fmt.Println("Enter to set offset")
 			if err := rdr.setLineLen(file); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> Row 0, error: cannot set lineLen: %s", utils.ERs, err.Error()))
 				rdr.offset += rdr.lineLen // increase the offset when exit
@@ -146,7 +146,9 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 					rdr.offset += rdr.lineLen // increase the offset when exit
 					return err
 				} else {
+
 					rdr.trailerOffset = fi.Size() - rdr.lineLen
+					fmt.Println("Set Trailer Offset : ", rdr.trailerOffset)
 				}
 			}
 			if len(rdr.Config().HeaderFields) != 0 {
@@ -176,6 +178,7 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 		}
 		rowNr++ // increment the rowNr after checking if it's not the end of file
 		record := string(buf)
+		fmt.Printf("Record : <%s>\n", record)
 		agReq := agents.NewAgentRequest(
 			config.NewFWVProvider(record, utils.EmptyString), reqVars,
 			nil, nil, rdr.Config().Tenant,
@@ -187,7 +190,7 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 			agReq); err != nil || !pass {
 			continue
 		}
-		navMp, err := agReq.AsNavigableMap(cntFld)
+		navMp, err := agReq.AsNavigableMap(rdr.Config().ContentFields)
 		if err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to error: <%s>",
@@ -200,6 +203,7 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 			navMp.Merge(rdr.headerMap)
 		}
 		rdr.offset += rdr.lineLen // increase the offset
+		fmt.Println("rdr.offset : ", rdr.offset)
 		rdr.rdrEvents <- &erEvent{cgrEvent: navMp.AsCGREvent(
 			agReq.Tenant, utils.NestingSep),
 			rdrCfg: rdr.Config()}
@@ -231,6 +235,7 @@ func (rdr *FWVFileER) setLineLen(file *os.File) error {
 	if _, err := file.Seek(0, 0); err != nil {
 		return err
 	}
+	fmt.Println("LineLen: ", rdr.lineLen)
 	return nil
 }
 
@@ -256,6 +261,7 @@ func (rdr *FWVFileER) processHeader(file *os.File, rowNr, evsPosted int, absPath
 
 func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPath string) (err error) {
 	reqVars := make(map[string]interface{})
+	fmt.Println("Header : ", record)
 	agReq := agents.NewAgentRequest(
 		config.NewFWVProvider(record, utils.EmptyString), reqVars,
 		nil, nil, rdr.Config().Tenant,
@@ -277,6 +283,7 @@ func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPa
 	}
 	rdr.headerMap = navMp
 	rdr.offset += rdr.lineLen // increase the offset
+	fmt.Println("rdr.offset : ", rdr.offset)
 	rdr.rdrEvents <- &erEvent{cgrEvent: navMp.AsCGREvent(
 		agReq.Tenant, utils.NestingSep),
 		rdrCfg: rdr.Config()}

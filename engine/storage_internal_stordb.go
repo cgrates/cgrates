@@ -1021,11 +1021,9 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 			}
 		}
 	}
-
 	if cdrMpIDs == nil {
 		cdrMpIDs = utils.StringMapFromSlice(iDB.db.GetItemIDs(utils.CDRsTBL, utils.EmptyString))
 	}
-
 	// check for Not filters
 	for _, fltrSlc := range []struct {
 		key string

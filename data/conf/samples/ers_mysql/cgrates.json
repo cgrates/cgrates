@@ -286,7 +286,6 @@
 				{"tag": "Partial", "field_id": "Partial", "type": "*constant", "value": "true", "filters":["*string:~*req.10:partial"]},
 			],
 			"cache_dump_fields": [
-				{"tag": "CGRID", "type": "*composed", "value": "~CGRID"},
 				{"tag": "OriginID", "type": "*composed", "value": "~OriginID"},
 				{"tag": "OrderID", "type": "*composed", "value": "~OrderID"},
 				{"tag": "RequestType", "type": "*composed", "value": "~RequestType"},

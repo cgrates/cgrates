@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/rpc"
 	"os"
@@ -50,8 +51,8 @@ var (
 		testFWVITLoadTPFromFolder,
 		testFWVITHandleCdr1File,
 		testFWVITAnalyseCDRs,
-		testFWVITCleanupFiles,
-		testFWVITKillEngine,
+		//	testFWVITCleanupFiles,
+		//	testFWVITKillEngine,
 	}
 )
 
@@ -79,7 +80,8 @@ func testFWVITCreateCdrDirs(t *testing.T) {
 		"/tmp/ers2/in", "/tmp/ers2/out", "/tmp/init_session/in", "/tmp/init_session/out",
 		"/tmp/terminate_session/in", "/tmp/terminate_session/out", "/tmp/cdrs/in",
 		"/tmp/cdrs/out", "/tmp/ers_with_filters/in", "/tmp/ers_with_filters/out",
-		"/tmp/xmlErs/in", "/tmp/xmlErs/out", "/tmp/fwvErs/in", "/tmp/fwvErs/out"} {
+		"/tmp/xmlErs/in", "/tmp/xmlErs/out", "/tmp/fwvErs/in", "/tmp/fwvErs/out",
+		"/tmp/partErs1/in", "/tmp/partErs1/out", "/tmp/partErs2/in", "/tmp/partErs2/out"} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
 		}
@@ -112,9 +114,11 @@ func testFWVITResetDataDb(t *testing.T) {
 }
 
 func testFWVITStartEngine(t *testing.T) {
-	if _, err := engine.StopStartEngine(fwvCfgPath, *waitRater); err != nil {
-		t.Fatal(err)
-	}
+	fmt.Println("Start engine")
+	time.Sleep(5 * time.Second)
+	//if _, err := engine.StopStartEngine(fwvCfgPath, *waitRater); err != nil {
+	//	t.Fatal(err)
+	//}
 }
 
 // Connect rpc client to rater
@@ -184,7 +188,7 @@ TRL0001DDB     ABC                                     Some Connect A.B.        
 
 // The default scenario, out of cdrc defined in .cfg file
 func testFWVITHandleCdr1File(t *testing.T) {
-	fileName := "file1.xml"
+	fileName := "file1.fwv"
 	tmpFilePath := path.Join("/tmp", fileName)
 	if err := ioutil.WriteFile(tmpFilePath, []byte(fwvContent), 0644); err != nil {
 		t.Fatal(err.Error())
@@ -192,10 +196,10 @@ func testFWVITHandleCdr1File(t *testing.T) {
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/fwvErs/in", fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
 	}
-	time.Sleep(100 * time.Millisecond)
 }
 
 func testFWVITAnalyseCDRs(t *testing.T) {
+	time.Sleep(500 * time.Millisecond)
 	var reply []*engine.ExternalCDR
 	if err := fwvRPC.Call(utils.ApierV2GetCDRs, utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -212,7 +216,8 @@ func testFWVITAnalyseCDRs(t *testing.T) {
 func testFWVITCleanupFiles(t *testing.T) {
 	for _, dir := range []string{"/tmp/ers",
 		"/tmp/ers2", "/tmp/init_session", "/tmp/terminate_session",
-		"/tmp/cdrs", "/tmp/ers_with_filters", "/tmp/xmlErs", "/tmp/fwvErs"} {
+		"/tmp/cdrs", "/tmp/ers_with_filters", "/tmp/xmlErs", "/tmp/fwvErs",
+		"/tmp/partErs1", "/tmp/partErs2"} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
 		}
