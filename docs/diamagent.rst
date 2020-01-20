@@ -180,11 +180,125 @@ With explanations in the comments:
 Config params
 ^^^^^^^^^^^^^
 
+Most of the parameters are explained in :ref:`configuration <engine_configuration>`, hence we mention here only the ones where additional info is necessary or there will  be particular implementation for *DiameterAgent*.
+
+
 listen_net
 	The network the *DiameterAgent* will bind to. CGRateS supports both **tcp** and **sctp** specified in Diameter_ standard.
 
+concurrent_requests
+	The maximum number of active requests processed at one time by the *DiameterAgent*. When this number is reached, new inbound requests will be rejected with *DiameterError* code until the concurrent number drops bellow again. The default value of *-1* imposes no limits.
+
 asr_template
 	The template (out of templates config section) used to build the AbortSession message. If not specified the ASR message is never sent out.
+
+templates
+	Group fields based on their usability. Can be used in both processor templates as well as hardcoded within CGRateS functionality (ie *\*err* or *\*asr*). The IDs are unique, defining the same id in multiple configuration places/files will result into overwrite.
+
+	*\*err*: is a hardcoded template used when *DiameterAgent* cannot parse the incoming message. Aside from logging the error via internal logger the message defined via *\*err* template will be sent out.
+
+	*\*asr*: can be activated via *asr_template* config key to enable sending of *Diameter* *ASR* message to *DiameterClient*.
+
+	*\*cca*: defined for convenience to follow the standard for the fields used in *Diameter* *CCA* messages.
+
+request_processors
+	List of processor profiles applied on request/replies. 
+
+	Once a request processor will be matched (it's *filters* should match), the *request_fields* will be used to craft a request object and the flags will decide what sort of procesing logic will be applied to the crafted request. 
+
+	After request processing, there will be a second part executed: reply. The reply object will be built based on the *reply_fields* section in the  
+	request processor.
+
+	Once the *reply_fields* are finished, the object converted and returned to the *DiameterClient*, unless *continue* flag is enabled in the processor, which makes the next request processor to be considered.
+
+
+filters
+	Will specify a list of filter rules which need to match in order for the processor to run. These are also available within fields.
+
+	For the dynamic content (prefixed with *~*) following special variables are available:
+
+	* **\*vars**
+		Request related shared variables between processors, populated especially by core functions. The data put inthere is not automatically transfered into requests sent to CGRateS, unless instructed inside templates. 
+
+		Following vars are automatically set by core: 
+
+		* **OriginHost**: agent configured *origin_host*
+		* **OriginRealm**: agent configured *origin_realm*
+		* **ProductName**: agent configured *product_name*
+		* **\*app**: current request application name (out of diameter dictionary)
+		* **\*appid**: current request application id (out of diameter dictionary)
+		* **\*cmd**: current command short naming (out of diameter dictionary) plus *R" as suffix - ie: *CCR*
+	
+	* **\*req**
+		Diameter request as it comes from the *DiameterClient*. 
+
+		Special selector format defined in case of groups *\*req.Path.To.Attribute[$groupIndex]* or *\*req.Absolute.Path.To.Attribute[~AnotherAttributeRelativePath($valueAnotherAttribute)]*. 
+
+		Example 1: *~\*req.Multiple-Services-Credit-Control.Rating-Group[1]* translates to: value of the group attribute at path Multiple-Services-Credit-Control.Rating-Group which is located in the second group (groups start at index 0).
+		Example 2: *~\*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Input-Octets[~Rating-Group(1)]* which translates to: value of the group attribute at path: *Multiple-Services-Credit-Control.Used-Service-Unit.CC-Input-Octets* where Multiple-Services-Credit-Control.Used-Service-Unit.Rating-Group has value of "1".
+
+	* **\*cgreq**
+		Request which was sent to CGRateS (mostly useful in replies).
+
+	* **\*cgrep** 
+		Reply coming from CGRateS.
+
+	* **\*cgrareq**
+		Active request in relation to CGRateS side. It can be used in both *request_fields*, referring to CGRRequest object being built, or in *reply_fields*, referring to CGRReply object.
+
+flags
+	Special tags enforcing the actions/verbs done on a request. There are two types of flags: **main** and **auxiliary**. 
+
+	There can be any number of flags or combination of those specified in the list however the flags have priority one against another and only some simultaneous combinations of *main* flags are possible. 
+
+	The **main** flags will select mostly the action taken on a request.
+
+	The **auxiliary** flags only make sense in combination with **main** ones. 
+
+	Implemented flags are (in order of priority, and not working in simultaneously unless specified):
+
+	* **\*log**
+		Logs the Diameter request/reply. Can be used together with other *main* actions.
+
+	* **\*none**
+		Disable transfering the request from *Diameter* to *CGRateS* side. Used mostly to pasively answer *Diameter* requests or troubleshoot (mostly in combination with *\*log* flag).
+
+	* **\*dryrun**
+		Together with not transfering the request on CGRateS side will also log the *Diameter* request/reply, useful for troubleshooting.
+
+	* **\*auth**
+		Sends the request for authorization on CGRateS.
+
+		Auxiliary flags available: **\*attributes**, **\*thresholds**, **\*stats**, **\*resources**, **\*accounts**, **\*suppliers**, **\*suppliers_ignore_errors**, **\*suppliers_event_cost** which are used to influence the auth behavior on CGRateS side. More info on that can be found on the **SessionS** component APIs behavior.
+
+	* **\*initiate**
+		Initiates a session out of request on CGRateS side.
+
+		Auxiliary flags available: **\*attributes**, **\*thresholds**, **\*stats**, **\*resources**, **\*accounts** which are used to influence the auth behavior on CGRateS side.
+
+	* **\*update**
+		Updates a session with the request on CGRateS side.
+
+		Auxiliary flags available: **\*attributes**, **\*accounts** which are used to influence the auth behavior on CGRateS side.
+
+	* **\*terminate**
+		Terminates a session using the request on CGRateS side.
+
+		Auxiliary flags available: **\*thresholds**, **\*stats**, **\*resources**, **\*accounts** which are used to influence the auth behavior on CGRateS side.
+
+	* **\*message**
+		Process the request as individual message charging on CGRateS side.
+
+		Auxiliary flags available: **\*attributes**, **\*thresholds**, **\*stats**, **\*resources**, **\*accounts**, **\*suppliers**, **\*suppliers_ignore_errors**, **\*suppliers_event_cost** which are used to influence the auth behavior on CGRateS side.
+
+
+	* **\*event**
+		Process the request as generic event on CGRateS side.
+
+		Auxiliary flags available: all flags supported by the "SessionSv1.ProcessEvent" generic API
+
+	* **\*cdrs**
+		Build a CDR out of the request on CGRateS side. Can be used simultaneously with other flags (except *\*dry_run)
 
 
 
