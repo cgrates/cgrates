@@ -331,9 +331,9 @@ func TestFwvit3AddFilters(t *testing.T) {
 			ID:     "FLTR_FWV",
 			Rules: []*engine.FilterRule{
 				{
-					Type:      "*string",
-					FieldName: "0-10",
-					Values:    []string{"CDR0000010"},
+					Type:    utils.MetaString,
+					Element: "0-10",
+					Values:  []string{"CDR0000010"},
 				},
 			},
 		},

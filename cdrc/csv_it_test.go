@@ -517,9 +517,9 @@ func TestCsvIT5AddFilters(t *testing.T) {
 			ID:     "FLTR_CDRC_ACC",
 			Rules: []*engine.FilterRule{
 				{
-					Type:      "*string",
-					FieldName: "~*req.3",
-					Values:    []string{"1002"},
+					Type:    utils.MetaString,
+					Element: "~*req.3",
+					Values:  []string{"1002"},
 				},
 			},
 		},
@@ -536,9 +536,9 @@ func TestCsvIT5AddFilters(t *testing.T) {
 			ID:     "FLTR_CDRC_ACC",
 			Rules: []*engine.FilterRule{
 				{
-					Type:      "*string",
-					FieldName: "~*req.3",
-					Values:    []string{"1001"},
+					Type:    utils.MetaString,
+					Element: "~*req.3",
+					Values:  []string{"1001"},
 				},
 			},
 		},

@@ -87,8 +87,8 @@ var (
 			},
 			Attributes: []*Attribute{
 				{
-					FieldName: utils.MetaReq + utils.NestingSep + utils.Account,
-					Value:     config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Value: config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -104,8 +104,8 @@ var (
 			},
 			Attributes: []*Attribute{
 				{
-					FieldName: utils.MetaReq + utils.NestingSep + utils.Account,
-					Value:     config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Value: config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -121,8 +121,8 @@ var (
 			},
 			Attributes: []*Attribute{
 				{
-					FieldName: utils.MetaReq + utils.NestingSep + utils.Account,
-					Value:     config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Value: config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -138,8 +138,8 @@ var (
 			},
 			Attributes: []*Attribute{
 				{
-					FieldName: utils.MetaReq + utils.NestingSep + utils.Account,
-					Value:     config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Value: config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -167,19 +167,19 @@ func TestAttributeAddFilters(t *testing.T) {
 		ID:     "FLTR_ATTR_1",
 		Rules: []*FilterRule{
 			{
-				Type:      utils.MetaString,
-				FieldName: "~*req.Attribute",
-				Values:    []string{"AttributeProfile1"},
+				Type:    utils.MetaString,
+				Element: "~*req.Attribute",
+				Values:  []string{"AttributeProfile1"},
 			},
 			{
-				Type:      utils.MetaGreaterOrEqual,
-				FieldName: "~*req.UsageInterval",
-				Values:    []string{(1 * time.Second).String()},
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.UsageInterval",
+				Values:  []string{(1 * time.Second).String()},
 			},
 			{
-				Type:      utils.MetaGreaterOrEqual,
-				FieldName: "~*req." + utils.Weight,
-				Values:    []string{"9.0"},
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req." + utils.Weight,
+				Values:  []string{"9.0"},
 			},
 		},
 	}
@@ -189,9 +189,9 @@ func TestAttributeAddFilters(t *testing.T) {
 		ID:     "FLTR_ATTR_2",
 		Rules: []*FilterRule{
 			{
-				Type:      utils.MetaString,
-				FieldName: "~*req.Attribute",
-				Values:    []string{"AttributeProfile2"},
+				Type:    utils.MetaString,
+				Element: "~*req.Attribute",
+				Values:  []string{"AttributeProfile2"},
 			},
 		},
 	}
@@ -201,9 +201,9 @@ func TestAttributeAddFilters(t *testing.T) {
 		ID:     "FLTR_ATTR_3",
 		Rules: []*FilterRule{
 			{
-				Type:      utils.MetaPrefix,
-				FieldName: "~*req.Attribute",
-				Values:    []string{"AttributeProfilePrefix"},
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Attribute",
+				Values:  []string{"AttributeProfilePrefix"},
 			},
 		},
 	}
@@ -213,9 +213,9 @@ func TestAttributeAddFilters(t *testing.T) {
 		ID:     "FLTR_ATTR_4",
 		Rules: []*FilterRule{
 			{
-				Type:      utils.MetaGreaterOrEqual,
-				FieldName: "~*req." + utils.Weight,
-				Values:    []string{"200.00"},
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req." + utils.Weight,
+				Values:  []string{"200.00"},
 			},
 		},
 	}
@@ -406,8 +406,8 @@ func TestAttributeIndexer(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + utils.Account,
-				Value:     config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+				Value: config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -474,8 +474,8 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field1",
-				Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field1",
+				Value: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -490,8 +490,8 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field2",
-				Value:     config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Value: config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -506,8 +506,8 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field3",
-				Value:     config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field3",
+				Value: config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 30,
@@ -586,8 +586,8 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field1",
-				Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field1",
+				Value: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -602,8 +602,8 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field2",
-				Value:     config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Value: config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -618,8 +618,8 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field3",
-				Value:     config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field3",
+				Value: config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 30,
@@ -694,8 +694,8 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field1",
-				Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field1",
+				Value: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -710,8 +710,8 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field2",
-				Value:     config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Value: config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -726,8 +726,8 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field3",
-				Value:     config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field3",
+				Value: config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 30,
@@ -802,8 +802,8 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field1",
-				Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field1",
+				Value: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -818,8 +818,8 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field2",
-				Value:     config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Value: config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -893,8 +893,8 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field1",
-				Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field1",
+				Value: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -909,8 +909,8 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field2",
-				Value:     config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Value: config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -926,8 +926,8 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field3",
-				Value:     config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field3",
+				Value: config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 30,
@@ -1003,8 +1003,8 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field1",
-				Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field1",
+				Value: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1020,8 +1020,8 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field2",
-				Value:     config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Value: config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -1036,8 +1036,8 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field3",
-				Value:     config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field3",
+				Value: config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 30,
@@ -1111,8 +1111,8 @@ func TestAttributeProcessValue(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field2",
-				Value:     config.NewRSRParsersMustCompile("~*req.Field1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Value: config.NewRSRParsersMustCompile("~*req.Field1", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1181,17 +1181,17 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				FilterIDs: []string{"*string:~*req.PassField:Test"},
-				FieldName: utils.MetaReq + utils.NestingSep + "PassField",
+				Path:      utils.MetaReq + utils.NestingSep + "PassField",
 				Value:     config.NewRSRParsersMustCompile("Pass", true, utils.INFIELD_SEP),
 			},
 			{
 				FilterIDs: []string{"*string:~*req.PassField:RandomValue"},
-				FieldName: utils.MetaReq + utils.NestingSep + "NotPassField",
+				Path:      utils.MetaReq + utils.NestingSep + "NotPassField",
 				Value:     config.NewRSRParsersMustCompile("NotPass", true, utils.INFIELD_SEP),
 			},
 			{
 				FilterIDs: []string{"*notexists:~*req.RandomField:"},
-				FieldName: utils.MetaReq + utils.NestingSep + "RandomField",
+				Path:      utils.MetaReq + utils.NestingSep + "RandomField",
 				Value:     config.NewRSRParsersMustCompile("RandomValue", true, utils.INFIELD_SEP),
 			},
 		},
@@ -1261,9 +1261,9 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field2",
-				Type:      utils.META_CONSTANT,
-				Value:     config.NewRSRParsersMustCompile("ConstVal", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.META_CONSTANT,
+				Value: config.NewRSRParsersMustCompile("ConstVal", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1332,14 +1332,14 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field2",
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("~*req.Field1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.MetaVariable,
+				Value: config.NewRSRParsersMustCompile("~*req.Field1", true, utils.INFIELD_SEP),
 			},
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field2",
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("~*req.TheField", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.MetaVariable,
+				Value: config.NewRSRParsersMustCompile("~*req.TheField", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1410,19 +1410,19 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field2",
-				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.Field1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.Field1", true, utils.INFIELD_SEP),
 			},
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field2",
-				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("_", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("_", true, utils.INFIELD_SEP),
 			},
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field2",
-				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~*req.TheField", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.TheField", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1493,9 +1493,9 @@ func TestAttributeProcessEventSum(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field2",
-				Type:      utils.MetaSum,
-				Value:     config.NewRSRParsersMustCompile("10;~*req.NumField;20", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.MetaSum,
+				Value: config.NewRSRParsersMustCompile("10;~*req.NumField;20", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1568,9 +1568,9 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field2",
-				Type:      utils.META_USAGE_DIFFERENCE,
-				Value:     config.NewRSRParsersMustCompile("~*req.UnixTimeStamp;~*req.UnixTimeStamp2", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.META_USAGE_DIFFERENCE,
+				Value: config.NewRSRParsersMustCompile("~*req.UnixTimeStamp;~*req.UnixTimeStamp2", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1645,9 +1645,9 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field2",
-				Type:      utils.MetaValueExponent,
-				Value:     config.NewRSRParsersMustCompile("~*req.Multiplier;~*req.Pow", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.MetaValueExponent,
+				Value: config.NewRSRParsersMustCompile("~*req.Multiplier;~*req.Pow", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1730,9 +1730,9 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field2",
-				Type:      utils.META_CONSTANT,
-				Value:     config.NewRSRParsersMustCompile("ConstVal", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.META_CONSTANT,
+				Value: config.NewRSRParsersMustCompile("ConstVal", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1791,9 +1791,9 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "Field2",
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("~*req.Field1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.MetaVariable,
+				Value: config.NewRSRParsersMustCompile("~*req.Field1", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1840,9 +1840,9 @@ func TestGetAttributeProfileFromInline(t *testing.T) {
 		ID:       attrID,
 		Contexts: []string{utils.META_ANY},
 		Attributes: []*Attribute{&Attribute{
-			FieldName: utils.MetaReq + utils.NestingSep + "Field2",
-			Type:      utils.MetaSum,
-			Value:     config.NewRSRParsersMustCompile("10;~*req.NumField;20", true, utils.INFIELD_SEP),
+			Path:  utils.MetaReq + utils.NestingSep + "Field2",
+			Type:  utils.MetaSum,
+			Value: config.NewRSRParsersMustCompile("10;~*req.NumField;20", true, utils.INFIELD_SEP),
 		}},
 	}
 	attr, err := dm.GetAttributeProfile(config.CgrConfig().GeneralCfg().DefaultTenant, attrID, false, false, "")

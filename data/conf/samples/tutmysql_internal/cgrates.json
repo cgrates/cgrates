@@ -168,9 +168,9 @@
 				"fields": [
 					{"tag": "Tenant", "field_id": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
 					{"tag": "ID", "field_id": "ID", "type": "*variable", "value": "~1", "mandatory": true},
-					{"tag": "FilterType", "field_id": "FilterType", "type": "*variable", "value": "~2"},
-					{"tag": "FilterFieldName", "field_id": "FilterFieldName", "type": "*variable", "value": "~3"},
-					{"tag": "FilterFieldValues", "field_id": "FilterFieldValues", "type": "*variable", "value": "~4"},
+					{"tag": "Type", "field_id": "Type", "type": "*variable", "value": "~2"},
+					{"tag": "Element", "field_id": "Element", "type": "*variable", "value": "~3"},
+					{"tag": "Values", "field_id": "Values", "type": "*variable", "value": "~4"},
 					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*variable", "value": "~5"},
 				],
 			},	

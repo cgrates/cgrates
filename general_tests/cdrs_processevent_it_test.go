@@ -178,8 +178,8 @@ func testV1CDRsProcessEventAttrS(t *testing.T) {
 			FilterIDs: []string{"*string:~*req.Account:1001"},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: utils.MetaReq + utils.NestingSep + utils.Subject,
-					Value:     config.NewRSRParsersMustCompile("1011", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
+					Value: config.NewRSRParsersMustCompile("1011", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,

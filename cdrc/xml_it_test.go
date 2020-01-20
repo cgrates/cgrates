@@ -467,14 +467,14 @@ func TestXmlIT5AddFilters(t *testing.T) {
 			ID:     "FLTR_XML",
 			Rules: []*engine.FilterRule{
 				{
-					Type:      "*string",
-					FieldName: "~*req.broadWorksCDR.cdrData.basicModule.userNumber",
-					Values:    []string{"1002"},
+					Type:    utils.MetaString,
+					Element: "~*req.broadWorksCDR.cdrData.basicModule.userNumber",
+					Values:  []string{"1002"},
 				},
 				{
-					Type:      "*string",
-					FieldName: "~*req.broadWorksCDR.cdrData.headerModule.type",
-					Values:    []string{"Normal"},
+					Type:    utils.MetaString,
+					Element: "~*req.broadWorksCDR.cdrData.headerModule.type",
+					Values:  []string{"Normal"},
 				},
 			},
 		},

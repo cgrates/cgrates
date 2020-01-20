@@ -49,7 +49,7 @@ func (rfi *FilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID st
 		switch fltr.Type {
 		case utils.MetaString:
 			for _, fldVal := range fltr.Values {
-				concatKey := utils.ConcatenatedKey(fltr.Type, fltr.FieldName, fldVal)
+				concatKey := utils.ConcatenatedKey(fltr.Type, fltr.Element, fldVal)
 				if _, hasIt := rfi.indexes[concatKey]; !hasIt {
 					rfi.indexes[concatKey] = make(utils.StringMap)
 				}
@@ -58,7 +58,7 @@ func (rfi *FilterIndexer) IndexTPFilter(tpFltr *utils.TPFilterProfile, itemID st
 			}
 		case utils.MetaPrefix:
 			for _, fldVal := range fltr.Values {
-				concatKey := utils.ConcatenatedKey(fltr.Type, fltr.FieldName, fldVal)
+				concatKey := utils.ConcatenatedKey(fltr.Type, fltr.Element, fldVal)
 				if _, hasIt := rfi.indexes[concatKey]; !hasIt {
 					rfi.indexes[concatKey] = make(utils.StringMap)
 				}
@@ -232,9 +232,9 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(tenant, itemID string, oldFilters 
 				ID:     itemID,
 				Rules: []*FilterRule{
 					{
-						Type:      utils.META_NONE,
-						FieldName: utils.META_ANY,
-						Values:    []string{utils.META_ANY},
+						Type:    utils.META_NONE,
+						Element: utils.META_ANY,
+						Values:  []string{utils.META_ANY},
 					},
 				},
 			}
@@ -250,7 +250,7 @@ func (rfi *FilterIndexer) RemoveItemFromIndex(tenant, itemID string, oldFilters 
 			var fldType, fldName string
 			var fldVals []string
 			if utils.SliceHasMember([]string{utils.META_NONE, utils.MetaPrefix, utils.MetaString}, flt.Type) {
-				fldType, fldName = flt.Type, flt.FieldName
+				fldType, fldName = flt.Type, flt.Element
 				fldVals = flt.Values
 			}
 			for _, fldVal := range fldVals {
@@ -293,9 +293,9 @@ func createAndIndex(itemPrefix, tenant, context, itemID string, filterIDs []stri
 				ID:     itemID,
 				Rules: []*FilterRule{
 					{
-						Type:      utils.META_NONE,
-						FieldName: utils.META_ANY,
-						Values:    []string{utils.META_ANY},
+						Type:    utils.META_NONE,
+						Element: utils.META_ANY,
+						Values:  []string{utils.META_ANY},
 					},
 				},
 			}
@@ -311,7 +311,7 @@ func createAndIndex(itemPrefix, tenant, context, itemID string, filterIDs []stri
 			var fldType, fldName string
 			var fldVals []string
 			if utils.SliceHasMember([]string{utils.META_NONE, utils.MetaPrefix, utils.MetaString}, flt.Type) {
-				fldType, fldName = flt.Type, flt.FieldName
+				fldType, fldName = flt.Type, flt.Element
 				fldVals = flt.Values
 			}
 			for _, fldVal := range fldVals {

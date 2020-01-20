@@ -166,7 +166,7 @@ func testChargerSLoadAddCharger(t *testing.T) {
 			Contexts: []string{"simpleauth"},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: utils.MetaReq + utils.NestingSep + "Password",
+					Path: utils.MetaReq + utils.NestingSep + "Password",
 					Value: config.RSRParsers{
 						&config.RSRParser{
 							Rules:           "CGRateS.org",

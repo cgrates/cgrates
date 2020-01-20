@@ -306,19 +306,19 @@ func TestSuppliersAddFilters(t *testing.T) {
 		ID:     "FLTR_SUPP_1",
 		Rules: []*FilterRule{
 			{
-				Type:      utils.MetaString,
-				FieldName: "~*req.Supplier",
-				Values:    []string{"SupplierProfile1"},
+				Type:    utils.MetaString,
+				Element: "~*req.Supplier",
+				Values:  []string{"SupplierProfile1"},
 			},
 			{
-				Type:      utils.MetaGreaterOrEqual,
-				FieldName: "~*req.UsageInterval",
-				Values:    []string{(1 * time.Second).String()},
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.UsageInterval",
+				Values:  []string{(1 * time.Second).String()},
 			},
 			{
-				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:    []string{"9.0"},
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"9.0"},
 			},
 		},
 	}
@@ -328,19 +328,19 @@ func TestSuppliersAddFilters(t *testing.T) {
 		ID:     "FLTR_SUPP_2",
 		Rules: []*FilterRule{
 			{
-				Type:      utils.MetaString,
-				FieldName: "~*req.Supplier",
-				Values:    []string{"SupplierProfile2"},
+				Type:    utils.MetaString,
+				Element: "~*req.Supplier",
+				Values:  []string{"SupplierProfile2"},
 			},
 			{
-				Type:      utils.MetaGreaterOrEqual,
-				FieldName: "~*req.PddInterval",
-				Values:    []string{(1 * time.Second).String()},
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.PddInterval",
+				Values:  []string{(1 * time.Second).String()},
 			},
 			{
-				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:    []string{"15.0"},
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"15.0"},
 			},
 		},
 	}
@@ -350,9 +350,9 @@ func TestSuppliersAddFilters(t *testing.T) {
 		ID:     "FLTR_SUPP_3",
 		Rules: []*FilterRule{
 			{
-				Type:      utils.MetaPrefix,
-				FieldName: "~*req.Supplier",
-				Values:    []string{"SupplierProfilePrefix"},
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Supplier",
+				Values:  []string{"SupplierProfilePrefix"},
 			},
 		},
 	}

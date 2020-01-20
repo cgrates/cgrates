@@ -1,4 +1,4 @@
-#Tenant[0],ID[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5]
+#Tenant[0],ID[1],Type[2],Element[3],Values[4],ActivationInterval[5]
 cgrates.org,FLTR_RES,*string,~*req.Account,1001;1002;1003,2014-07-29T15:00:00Z
 cgrates.org,FLTR_DST_FS,*string,~*req.Account,1001,2014-07-29T15:00:00Z
 cgrates.org,FLTR_DST_FS,*destinations,~*req.Destination,DST_FS,

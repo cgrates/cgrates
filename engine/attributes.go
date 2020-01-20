@@ -254,11 +254,11 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 		if err != nil {
 			return nil, err
 		}
-		//add only once the FieldName in AlteredFields
-		if !utils.IsSliceMember(rply.AlteredFields, attribute.FieldName) {
-			rply.AlteredFields = append(rply.AlteredFields, attribute.FieldName)
+		//add only once the Path in AlteredFields
+		if !utils.IsSliceMember(rply.AlteredFields, attribute.Path) {
+			rply.AlteredFields = append(rply.AlteredFields, attribute.Path)
 		}
-		if attribute.FieldName == utils.MetaTenant {
+		if attribute.Path == utils.MetaTenant {
 			if attribute.Type == utils.META_COMPOSED {
 				rply.CGREvent.Tenant += substitute
 			} else {
@@ -267,15 +267,15 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 			continue
 		}
 		if substitute == utils.MetaRemove {
-			evNm.Remove(strings.Split(attribute.FieldName, utils.NestingSep))
+			evNm.Remove(strings.Split(attribute.Path, utils.NestingSep))
 			continue
 		}
 		if attribute.Type == utils.META_COMPOSED {
 			var val string
-			val, err = evNm.FieldAsString(strings.Split(attribute.FieldName, utils.NestingSep))
+			val, err = evNm.FieldAsString(strings.Split(attribute.Path, utils.NestingSep))
 			substitute = val + substitute
 		}
-		evNm.Set(strings.Split(attribute.FieldName, utils.NestingSep), substitute, false, false)
+		evNm.Set(strings.Split(attribute.Path, utils.NestingSep), substitute, false, false)
 	}
 	return
 }

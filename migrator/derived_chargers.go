@@ -83,9 +83,9 @@ func fieldinfo2Attribute(attr []*engine.Attribute, fieldName, fieldInfo string) 
 		return attr
 	}
 	return append(attr, &engine.Attribute{
-		FieldName: utils.MetaReq + utils.NestingSep + fieldName,
-		Value:     rp,
-		Type:      utils.MetaVariable,
+		Path:  utils.MetaReq + utils.NestingSep + fieldName,
+		Value: rp,
+		Type:  utils.MetaVariable,
 	})
 }
 

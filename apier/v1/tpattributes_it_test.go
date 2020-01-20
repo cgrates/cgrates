@@ -138,7 +138,7 @@ func testTPAlsPrfSetTPAlsPrf(t *testing.T) {
 		Contexts: []string{"con1"},
 		Attributes: []*utils.TPAttribute{
 			&utils.TPAttribute{
-				FieldName: utils.MetaReq + utils.NestingSep + "FL1",
+				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Value:     "Al1",
 				FilterIDs: []string{},
 			},
@@ -180,12 +180,12 @@ func testTPAlsPrfGetTPAlsPrfIDs(t *testing.T) {
 func testTPAlsPrfUpdateTPAlsPrf(t *testing.T) {
 	tpAlsPrf.Attributes = []*utils.TPAttribute{
 		&utils.TPAttribute{
-			FieldName: utils.MetaReq + utils.NestingSep + "FL1",
+			Path:      utils.MetaReq + utils.NestingSep + "FL1",
 			Value:     "Al1",
 			FilterIDs: []string{},
 		},
 		&utils.TPAttribute{
-			FieldName: utils.MetaReq + utils.NestingSep + "FL2",
+			Path:      utils.MetaReq + utils.NestingSep + "FL2",
 			Value:     "Al2",
 			FilterIDs: []string{},
 		},
@@ -212,12 +212,12 @@ func testTPAlsPrfGetTPAlsPrfAfterUpdate(t *testing.T) {
 		Contexts: []string{"con1"},
 		Attributes: []*utils.TPAttribute{
 			&utils.TPAttribute{
-				FieldName: utils.MetaReq + utils.NestingSep + "FL2",
+				Path:      utils.MetaReq + utils.NestingSep + "FL2",
 				Value:     "Al2",
 				FilterIDs: []string{},
 			},
 			&utils.TPAttribute{
-				FieldName: utils.MetaReq + utils.NestingSep + "FL1",
+				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Value:     "Al1",
 				FilterIDs: []string{},
 			},
@@ -226,7 +226,7 @@ func testTPAlsPrfGetTPAlsPrfAfterUpdate(t *testing.T) {
 	}
 	sort.Strings(revTPAlsPrf.FilterIDs)
 	sort.Slice(revTPAlsPrf.Attributes, func(i, j int) bool {
-		return strings.Compare(revTPAlsPrf.Attributes[i].FieldName, revTPAlsPrf.Attributes[j].FieldName) == -1
+		return strings.Compare(revTPAlsPrf.Attributes[i].Path, revTPAlsPrf.Attributes[j].Path) == -1
 	})
 	if err := tpAlsPrfRPC.Call(utils.ApierV1GetTPAttributeProfile,
 		&utils.TPTntID{TPid: "TP1", Tenant: "cgrates.org", ID: "Attr1"}, &reply); err != nil {
@@ -234,7 +234,7 @@ func testTPAlsPrfGetTPAlsPrfAfterUpdate(t *testing.T) {
 	}
 	sort.Strings(reply.FilterIDs)
 	sort.Slice(reply.Attributes, func(i, j int) bool {
-		return strings.Compare(reply.Attributes[i].FieldName, reply.Attributes[j].FieldName) == -1
+		return strings.Compare(reply.Attributes[i].Path, reply.Attributes[j].Path) == -1
 	})
 	if !reflect.DeepEqual(tpAlsPrf, reply) && !reflect.DeepEqual(revTPAlsPrf, reply) {
 		t.Errorf("Expecting : %+v, \n received: %+v", utils.ToJSON(tpAlsPrf), utils.ToJSON(reply))

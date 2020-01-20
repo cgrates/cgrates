@@ -246,7 +246,7 @@ cgrates.org,Threshold1,*string:~*req.Account:1001;*string:~*req.RunID:*default,2
 `
 
 	FiltersCSVContent = `
-#Tenant[0],ID[1],FilterType[2],FilterFieldName[3],FilterFieldValues[4],ActivationInterval[5]
+#Tenant[0],ID[1],Type[2],Element[3],Values[4],ActivationInterval[5]
 cgrates.org,FLTR_1,*string,~*req.Account,1001;1002,2014-07-29T15:00:00Z
 cgrates.org,FLTR_1,*prefix,~*req.Destination,10;20,2014-07-29T15:00:00Z
 cgrates.org,FLTR_1,*rsr,,~*req.Subject(~^1.*1$);~*req.Destination(1002),
@@ -262,7 +262,7 @@ cgrates.org,SPP_1,,,,,supplier1,FLTR_DST_DE,Account2,RPL_3,ResGroup3,Stat2,10,,,
 cgrates.org,SPP_1,,,,,supplier1,,,,ResGroup4,Stat3,10,,,
 `
 	AttributesCSVContent = `
-#Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,FieldName,Type,Value,Blocker,Weight
+#Tenant,ID,Contexts,FilterIDs,ActivationInterval,AttributeFilterIDs,Path,Type,Value,Blocker,Weight
 cgrates.org,ALS1,con1,*string:~*req.Account:1001,2014-07-29T15:00:00Z,*string:~*req.Field1:Initial,*req.Field1,*variable,Sub1,true,20
 cgrates.org,ALS1,con2;con3,,,,*req.Field2,*variable,Sub2,true,20
 `

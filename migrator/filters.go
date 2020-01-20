@@ -49,7 +49,7 @@ func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 		if err := m.dmOut.DataManager().SetFilter(fl); err != nil {
 			return err
 		}
-		m.stats[utils.RQF] += 1
+		m.stats[utils.RQF]++
 	}
 	return
 }
@@ -59,34 +59,34 @@ var filterTypes = utils.NewStringSet([]string{utils.MetaRSR, utils.MetaStatS, ut
 
 func migrateFilterV1(fl *engine.Filter) *engine.Filter {
 	for i, rule := range fl.Rules {
-		if rule.FieldName == "" ||
-			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix) ||
+		if rule.Element == "" ||
+			strings.HasPrefix(rule.Element, utils.DynamicDataPrefix) ||
 			filterTypes.Has(rule.Type) {
 			continue
 		}
-		fl.Rules[i].FieldName = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + rule.FieldName
+		fl.Rules[i].Element = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + rule.Element
 	}
 	return fl
 }
 
 func migrateFilterV2(fl *engine.Filter) *engine.Filter {
 	for i, rule := range fl.Rules {
-		if (rule.FieldName == "" && rule.Type != utils.MetaRSR) ||
-			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaReq) ||
-			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaVars) ||
-			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaCgreq) ||
-			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaCgrep) ||
-			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaRep) ||
-			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaCGRAReq) ||
-			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaAct) {
+		if (rule.Element == "" && rule.Type != utils.MetaRSR) ||
+			strings.HasPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaReq) ||
+			strings.HasPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaVars) ||
+			strings.HasPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaCgreq) ||
+			strings.HasPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaCgrep) ||
+			strings.HasPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaRep) ||
+			strings.HasPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaCGRAReq) ||
+			strings.HasPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaAct) {
 			continue
 		}
 		if rule.Type != utils.MetaRSR {
 			// in case we found dynamic data prefix we remove it
-			if strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix) {
-				fl.Rules[i].FieldName = fl.Rules[i].FieldName[1:]
+			if strings.HasPrefix(rule.Element, utils.DynamicDataPrefix) {
+				fl.Rules[i].Element = fl.Rules[i].Element[1:]
 			}
-			fl.Rules[i].FieldName = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + rule.FieldName
+			fl.Rules[i].Element = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + rule.Element
 		} else {
 			for idx, val := range rule.Values {
 				if strings.HasPrefix(val, utils.DynamicDataPrefix) {

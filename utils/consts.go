@@ -499,6 +499,7 @@ const (
 	CGR_ACD                     = "cgr_acd"
 	FilterIDs                   = "FilterIDs"
 	FieldName                   = "FieldName"
+	Path                        = "Path"
 	MetaRound                   = "*round"
 	Pong                        = "Pong"
 	MetaEventCost               = "*event_cost"

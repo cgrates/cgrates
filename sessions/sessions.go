@@ -811,7 +811,7 @@ func (sS *SessionS) getIndexedFilters(tenant string, fltrs []string) (
 			continue
 		}
 		for _, fltr := range f.Rules {
-			fldName := strings.TrimPrefix(fltr.FieldName, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep) // remove ~req. prefix
+			fldName := strings.TrimPrefix(fltr.Element, utils.DynamicDataPrefix+utils.MetaReq+utils.NestingSep) // remove ~req. prefix
 			if fltr.Type != utils.MetaString ||
 				!sS.cgrCfg.SessionSCfg().SessionIndexes.HasKey(fldName) {
 				unindexedFltr = append(unindexedFltr, fltr)

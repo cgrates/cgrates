@@ -142,7 +142,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{},
-				FieldName: utils.MetaReq + utils.NestingSep + "Password",
+				Path:      utils.MetaReq + utils.NestingSep + "Password",
 				Type:      utils.META_CONSTANT,
 				Value:     config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
 			},
@@ -332,7 +332,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{},
-				FieldName: utils.MetaReq + utils.NestingSep + "Password",
+				Path:      utils.MetaReq + utils.NestingSep + "Password",
 				Type:      utils.META_CONSTANT,
 				Value:     config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
 			},
@@ -423,7 +423,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{},
-				FieldName: utils.MetaReq + utils.NestingSep + "Password",
+				Path:      utils.MetaReq + utils.NestingSep + "Password",
 				Type:      utils.META_CONSTANT,
 				Value:     config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
 			},

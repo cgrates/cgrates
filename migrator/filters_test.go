@@ -65,9 +65,9 @@ func TestFiltersMigrate(t *testing.T) {
 				ID:     "FLTR_1",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      utils.MetaString,
-						FieldName: "Account",
-						Values:    []string{},
+						Type:    utils.MetaString,
+						Element: "Account",
+						Values:  []string{},
 					},
 				},
 			},
@@ -76,9 +76,9 @@ func TestFiltersMigrate(t *testing.T) {
 				ID:     "FLTR_1",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      utils.MetaString,
-						FieldName: "~*req.Account",
-						Values:    []string{},
+						Type:    utils.MetaString,
+						Element: "~*req.Account",
+						Values:  []string{},
 					},
 				},
 			},
@@ -89,9 +89,9 @@ func TestFiltersMigrate(t *testing.T) {
 				ID:     "FLTR_2",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      utils.MetaPrefix,
-						FieldName: "~Account",
-						Values:    []string{},
+						Type:    utils.MetaPrefix,
+						Element: "~Account",
+						Values:  []string{},
 					},
 				},
 			},
@@ -100,9 +100,9 @@ func TestFiltersMigrate(t *testing.T) {
 				ID:     "FLTR_2",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      utils.MetaPrefix,
-						FieldName: "~Account",
-						Values:    []string{},
+						Type:    utils.MetaPrefix,
+						Element: "~Account",
+						Values:  []string{},
 					},
 				},
 			},
@@ -123,9 +123,9 @@ func TestFiltersMigrateV2(t *testing.T) {
 				ID:     "FLTR_1",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      utils.MetaString,
-						FieldName: "~Account",
-						Values:    []string{},
+						Type:    utils.MetaString,
+						Element: "~Account",
+						Values:  []string{},
 					},
 				},
 			},
@@ -134,9 +134,9 @@ func TestFiltersMigrateV2(t *testing.T) {
 				ID:     "FLTR_1",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      utils.MetaString,
-						FieldName: "~*req.Account",
-						Values:    []string{},
+						Type:    utils.MetaString,
+						Element: "~*req.Account",
+						Values:  []string{},
 					},
 				},
 			},
@@ -147,9 +147,9 @@ func TestFiltersMigrateV2(t *testing.T) {
 				ID:     "FLTR_2",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      utils.MetaPrefix,
-						FieldName: "~*req.Account",
-						Values:    []string{},
+						Type:    utils.MetaPrefix,
+						Element: "~*req.Account",
+						Values:  []string{},
 					},
 				},
 			},
@@ -158,9 +158,9 @@ func TestFiltersMigrateV2(t *testing.T) {
 				ID:     "FLTR_2",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      utils.MetaPrefix,
-						FieldName: "~*req.Account",
-						Values:    []string{},
+						Type:    utils.MetaPrefix,
+						Element: "~*req.Account",
+						Values:  []string{},
 					},
 				},
 			},
@@ -171,9 +171,9 @@ func TestFiltersMigrateV2(t *testing.T) {
 				ID:     "FLTR_3",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      utils.MetaPrefix,
-						FieldName: "~*act.Account",
-						Values:    []string{},
+						Type:    utils.MetaPrefix,
+						Element: "~*act.Account",
+						Values:  []string{},
 					},
 				},
 			},
@@ -182,9 +182,9 @@ func TestFiltersMigrateV2(t *testing.T) {
 				ID:     "FLTR_3",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      utils.MetaPrefix,
-						FieldName: "~*act.Account",
-						Values:    []string{},
+						Type:    utils.MetaPrefix,
+						Element: "~*act.Account",
+						Values:  []string{},
 					},
 				},
 			},
@@ -195,9 +195,9 @@ func TestFiltersMigrateV2(t *testing.T) {
 				ID:     "FLTR_4",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      utils.MetaPrefix,
-						FieldName: "~*act.Account",
-						Values:    []string{},
+						Type:    utils.MetaPrefix,
+						Element: "~*act.Account",
+						Values:  []string{},
 					},
 				},
 			},
@@ -206,9 +206,9 @@ func TestFiltersMigrateV2(t *testing.T) {
 				ID:     "FLTR_4",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      utils.MetaPrefix,
-						FieldName: "~*act.Account",
-						Values:    []string{},
+						Type:    utils.MetaPrefix,
+						Element: "~*act.Account",
+						Values:  []string{},
 					},
 				},
 			},
@@ -219,9 +219,9 @@ func TestFiltersMigrateV2(t *testing.T) {
 				ID:     "FLTR_5",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      utils.MetaPrefix,
-						FieldName: "~*vars.Account",
-						Values:    []string{},
+						Type:    utils.MetaPrefix,
+						Element: "~*vars.Account",
+						Values:  []string{},
 					},
 				},
 			},
@@ -230,9 +230,9 @@ func TestFiltersMigrateV2(t *testing.T) {
 				ID:     "FLTR_5",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      utils.MetaPrefix,
-						FieldName: "~*vars.Account",
-						Values:    []string{},
+						Type:    utils.MetaPrefix,
+						Element: "~*vars.Account",
+						Values:  []string{},
 					},
 				},
 			},

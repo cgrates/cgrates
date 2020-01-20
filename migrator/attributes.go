@@ -257,7 +257,7 @@ func (v1AttrPrf v1AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 			}
 			attrPrf.Attributes = append(attrPrf.Attributes, &engine.Attribute{
 				FilterIDs: filterIDs,
-				FieldName: attr.FieldName,
+				Path:      attr.FieldName,
 				Value:     sbstPrsr,
 				Type:      utils.MetaVariable,
 			})
@@ -308,7 +308,7 @@ func (v2AttrPrf v2AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 		}
 		attrPrf.Attributes = append(attrPrf.Attributes, &engine.Attribute{
 			FilterIDs: filterIDs,
-			FieldName: attr.FieldName,
+			Path:      attr.FieldName,
 			Value:     attr.Substitute,
 			Type:      utils.MetaVariable,
 		})
@@ -344,7 +344,7 @@ func (v3AttrPrf v3AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 	for _, attr := range v3AttrPrf.Attributes {
 		attrPrf.Attributes = append(attrPrf.Attributes, &engine.Attribute{
 			FilterIDs: attr.FilterIDs,
-			FieldName: attr.FieldName,
+			Path:      attr.FieldName,
 			Value:     attr.Substitute,
 			Type:      utils.MetaVariable, //default value for type
 		})

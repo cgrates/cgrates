@@ -323,14 +323,14 @@ CREATE TABLE tp_filters (
   "tpid" varchar(64) NOT NULL,
   "tenant" varchar(64) NOT NULL,
   "id" varchar(64) NOT NULL,
-  "filter_type" varchar(16) NOT NULL,
-  "filter_field_name" varchar(64) NOT NULL,
-  "filter_field_values" varchar(256) NOT NULL,
+  "type" varchar(16) NOT NULL,
+  "element" varchar(64) NOT NULL,
+  "values" varchar(256) NOT NULL,
   "activation_interval" varchar(64) NOT NULL,
   "created_at" TIMESTAMP WITH TIME ZONE
 );
   CREATE INDEX tp_filters_idx ON tp_filters (tpid);
-  CREATE INDEX tp_filters_unique ON tp_filters  ("tpid","tenant", "id", "filter_type", "filter_field_name");
+  CREATE INDEX tp_filters_unique ON tp_filters  ("tpid","tenant", "id", "type", "element");
 
 --
 -- Table structure for table `tp_suppliers`
@@ -377,7 +377,7 @@ CREATE INDEX tp_suppliers_unique ON tp_suppliers  ("tpid",  "tenant", "id",
     "filter_ids" varchar(64) NOT NULL,
     "activation_interval" varchar(64) NOT NULL,
     "attribute_filter_ids" varchar(64) NOT NULL,
-    "field_name" varchar(64) NOT NULL,
+    "path" varchar(64) NOT NULL,
     "type" varchar(64) NOT NULL,
     "value" varchar(64) NOT NULL,
     "blocker" BOOLEAN NOT NULL,
@@ -386,7 +386,7 @@ CREATE INDEX tp_suppliers_unique ON tp_suppliers  ("tpid",  "tenant", "id",
   );
   CREATE INDEX tp_attributes_ids ON tp_attributes (tpid);
   CREATE INDEX tp_attributes_unique ON tp_attributes  ("tpid",  "tenant", "id",
-    "filter_ids","field_name","value");
+    "filter_ids","path","value");
 
   --
   -- Table structure for table `tp_chargers`

@@ -35,7 +35,7 @@ Definition::
 
  type FilterRule struct {
 	Type            string              // Filter type
-	FieldName       string              // Name of the field providing us the Values to check (used in case of some )
+	Element       	string              // Name of the field providing us the Values to check (used in case of some )
 	Values          []string            // Filter definition
  }
 
@@ -44,31 +44,31 @@ The matching logic of each FilterRule is given by it's type.
 
 The following types are implemented:
 
-- *\*string* will match in full the *FieldName* with at least one value defined inside *Values*. Any of the values matching will have the FilterRule as *matched*. 
+- *\*string* will match in full the *Element* with at least one value defined inside *Values*. Any of the values matching will have the FilterRule as *matched*. 
 
 - *\*notstring* is the negation of *\*string*.
 
-- *\*prefix* will match at beginning of *FieldName* one of the values defined inside *Values*.
+- *\*prefix* will match at beginning of *Element* one of the values defined inside *Values*.
 
 - *\*notprefix* is the negation of *\*prefix*.
 
-- *\*suffix* will match at end of *FieldName* one of the values defined inside *Values*.
+- *\*suffix* will match at end of *Element* one of the values defined inside *Values*.
 
 - *\*notsuffix* is the negation of *\*suffix*.
 
-- *\*empty* will make sure that *FieldName* is empty or it does not exist in the event.
+- *\*empty* will make sure that *Element* is empty or it does not exist in the event.
 
 - *\*notempty* is the negation of *\*empty*.
 
-- *\*exists* will make sure that *FieldName* exists in the event.
+- *\*exists* will make sure that *Element* exists in the event.
 
 - *\*notexists* is the negation of *\*exists*.
 
-- *\*timings* will compare the time contained in *FieldName* with one of the TimingIDs defined in Values.
+- *\*timings* will compare the time contained in *Element* with one of the TimingIDs defined in Values.
 
 - *\*nottimings* is the negation of *\*timings*.
 
-- *\*destinations* will make sure that the *FieldName* is a prefix contained inside one of the destination IDs as *Values*.
+- *\*destinations* will make sure that the *Element* is a prefix contained inside one of the destination IDs as *Values*.
 
 - *\*notdestinations* is the negation of *\*destinations*.
 
@@ -76,7 +76,7 @@ The following types are implemented:
 
 - *\*notrsr* is the negation of *\*rsr*.
 
-- *\*lt* (less than), *\*lte* (less than or equal), *\*gt* (greather than), *\*gte* (greather than or equal) are comparison operators and they pass if at least one of the values defined in *Values* are passing for the *FieldName* of event. The operators are able to compare string, float, int, time.Time, time.Duration, however both types need to be the same, otherwise the filter will raise *incomparable* as error.
+- *\*lt* (less than), *\*lte* (less than or equal), *\*gt* (greather than), *\*gte* (greather than or equal) are comparison operators and they pass if at least one of the values defined in *Values* are passing for the *Element* of event. The operators are able to compare string, float, int, time.Time, time.Duration, however both types need to be the same, otherwise the filter will raise *incomparable* as error.
 
 
 Inline Filter 

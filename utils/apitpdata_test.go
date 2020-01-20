@@ -797,7 +797,7 @@ func TestAppendToSMCostFilter(t *testing.T) {
 	expected := &SMCostFilter{
 		CGRIDs: []string{"CGRID1", "CGRID2"},
 	}
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*string", DynamicDataPrefix+CGRID, []string{"CGRID1", "CGRID2"}, ""); err != nil {
+	if smfltr, err = AppendToSMCostFilter(smfltr, MetaString, DynamicDataPrefix+CGRID, []string{"CGRID1", "CGRID2"}, ""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(smfltr, expected) {
 		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
@@ -810,7 +810,7 @@ func TestAppendToSMCostFilter(t *testing.T) {
 	}
 
 	expected.RunIDs = []string{"RunID1", "RunID2"}
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*string", DynamicDataPrefix+RunID, []string{"RunID1", "RunID2"}, ""); err != nil {
+	if smfltr, err = AppendToSMCostFilter(smfltr, MetaString, DynamicDataPrefix+RunID, []string{"RunID1", "RunID2"}, ""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(smfltr, expected) {
 		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
@@ -823,7 +823,7 @@ func TestAppendToSMCostFilter(t *testing.T) {
 	}
 
 	expected.OriginHosts = []string{"OriginHost1", "OriginHost2"}
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*string", DynamicDataPrefix+OriginHost, []string{"OriginHost1", "OriginHost2"}, ""); err != nil {
+	if smfltr, err = AppendToSMCostFilter(smfltr, MetaString, DynamicDataPrefix+OriginHost, []string{"OriginHost1", "OriginHost2"}, ""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(smfltr, expected) {
 		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
@@ -836,7 +836,7 @@ func TestAppendToSMCostFilter(t *testing.T) {
 	}
 
 	expected.OriginIDs = []string{"OriginID1", "OriginID2"}
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*string", DynamicDataPrefix+OriginID, []string{"OriginID1", "OriginID2"}, ""); err != nil {
+	if smfltr, err = AppendToSMCostFilter(smfltr, MetaString, DynamicDataPrefix+OriginID, []string{"OriginID1", "OriginID2"}, ""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(smfltr, expected) {
 		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
@@ -849,7 +849,7 @@ func TestAppendToSMCostFilter(t *testing.T) {
 	}
 
 	expected.CostSources = []string{"CostSource1", "CostSource2"}
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*string", DynamicDataPrefix+CostSource, []string{"CostSource1", "CostSource2"}, ""); err != nil {
+	if smfltr, err = AppendToSMCostFilter(smfltr, MetaString, DynamicDataPrefix+CostSource, []string{"CostSource1", "CostSource2"}, ""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(smfltr, expected) {
 		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
@@ -891,7 +891,7 @@ func TestAppendToSMCostFilter(t *testing.T) {
 	if !reflect.DeepEqual(smfltr, expected) {
 		t.Errorf("Expected: %s ,received: %s ", ToJSON(expected), ToJSON(smfltr))
 	}
-	if smfltr, err = AppendToSMCostFilter(smfltr, "*string", CGRID, []string{"CGRID1", "CGRID2"}, ""); err == nil || err.Error() != "FieldName: \"CGRID\" not supported" {
+	if smfltr, err = AppendToSMCostFilter(smfltr, MetaString, CGRID, []string{"CGRID1", "CGRID2"}, ""); err == nil || err.Error() != "FieldName: \"CGRID\" not supported" {
 		t.Errorf("Expected error: FieldName: \"CGRID\" not supported ,received %v", err)
 	}
 	if !reflect.DeepEqual(smfltr, expected) {

@@ -113,9 +113,9 @@ func alias2AtttributeProfile(alias *v1Alias, defaultTenant string) *engine.Attri
 					fld = utils.MetaReq + utils.NestingSep + fieldName
 				}
 				attr := &engine.Attribute{
-					FieldName: fld,
-					Type:      utils.MetaVariable, //default type for Attribute
-					Value:     config.NewRSRParsersMustCompile(substitute, true, utils.INFIELD_SEP),
+					Path:  fld,
+					Type:  utils.MetaVariable, //default type for Attribute
+					Value: config.NewRSRParsersMustCompile(substitute, true, utils.INFIELD_SEP),
 				}
 				out.Attributes = append(out.Attributes, attr)
 				// Add attribute filters if needed

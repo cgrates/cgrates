@@ -225,9 +225,9 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		ID:     "Filter1",
 		Rules: []*FilterRule{
 			{
-				FieldName: "EventType",
-				Type:      "*string",
-				Values:    []string{"Event1", "Event2"},
+				Element: "EventType",
+				Type:    utils.MetaString,
+				Values:  []string{"Event1", "Event2"},
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
@@ -292,9 +292,9 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		ID:     "Filter2",
 		Rules: []*FilterRule{
 			{
-				FieldName: "Account",
-				Type:      "*string",
-				Values:    []string{"1001", "1002"},
+				Element: "Account",
+				Type:    utils.MetaString,
+				Values:  []string{"1001", "1002"},
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
@@ -339,9 +339,9 @@ func testITTestThresholdFilterIndexes(t *testing.T) {
 		ID:     "Filter3",
 		Rules: []*FilterRule{
 			{
-				FieldName: "Destination",
-				Type:      "*string",
-				Values:    []string{"10", "20"},
+				Element: "Destination",
+				Type:    utils.MetaString,
+				Values:  []string{"10", "20"},
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
@@ -405,9 +405,9 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		ID:     "AttrFilter",
 		Rules: []*FilterRule{
 			{
-				FieldName: "EventType",
-				Type:      "*string",
-				Values:    []string{"Event1", "Event2"},
+				Element: "EventType",
+				Type:    utils.MetaString,
+				Values:  []string{"Event1", "Event2"},
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
@@ -428,8 +428,8 @@ func testITTestAttributeProfileFilterIndexes(t *testing.T) {
 		Contexts: []string{"con1", "con2"},
 		Attributes: []*Attribute{
 			{
-				FieldName: "FN1",
-				Value:     config.NewRSRParsersMustCompile("Val1", true, utils.INFIELD_SEP),
+				Path:  "FN1",
+				Value: config.NewRSRParsersMustCompile("Val1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -505,9 +505,9 @@ func testITTestThresholdInlineFilterIndexing(t *testing.T) {
 		ID:     "Filter1",
 		Rules: []*FilterRule{
 			{
-				FieldName: "EventType",
-				Type:      "*string",
-				Values:    []string{"Event1", "Event2"},
+				Element: "EventType",
+				Type:    utils.MetaString,
+				Values:  []string{"Event1", "Event2"},
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{

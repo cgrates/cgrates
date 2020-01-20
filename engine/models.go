@@ -270,9 +270,9 @@ type TpFilter struct {
 	Tpid               string
 	Tenant             string `index:"0" re:""`
 	ID                 string `index:"1" re:""`
-	FilterType         string `index:"2" re:"^\*[A-Za-z].*"`
-	FilterFieldName    string `index:"3" re:""`
-	FilterFieldValues  string `index:"4" re:""`
+	Type               string `index:"2" re:"^\*[A-Za-z].*"`
+	Element            string `index:"3" re:""`
+	Values             string `index:"4" re:""`
 	ActivationInterval string `index:"5" re:""`
 	CreatedAt          time.Time
 }
@@ -396,7 +396,7 @@ type TPAttribute struct {
 	FilterIDs          string  `index:"3" re:""`
 	ActivationInterval string  `index:"4" re:""`
 	AttributeFilterIDs string  `index:"5" re:""`
-	FieldName          string  `index:"6" re:""`
+	Path               string  `index:"6" re:""`
 	Type               string  `index:"7" re:""`
 	Value              string  `index:"8" re:""`
 	Blocker            bool    `index:"9" re:""`

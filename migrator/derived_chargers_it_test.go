@@ -149,14 +149,14 @@ func testDCITMigrateAndMove(t *testing.T) {
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + utils.Account,
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("1004", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+				Type:  utils.MetaVariable,
+				Value: config.NewRSRParsersMustCompile("1004", true, utils.INFIELD_SEP),
 			},
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + utils.Subject,
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("call_1003", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
+				Type:  utils.MetaVariable,
+				Value: config.NewRSRParsersMustCompile("call_1003", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: false,
@@ -210,7 +210,7 @@ func testDCITMigrateAndMove(t *testing.T) {
 	}
 	result.Compile()
 	sort.Slice(result.Attributes, func(i, j int) bool {
-		return result.Attributes[i].FieldName < result.Attributes[j].FieldName
+		return result.Attributes[i].Path < result.Attributes[j].Path
 	}) // only for test; map returns random keys
 	if !reflect.DeepEqual(*attrProf, *result) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(attrProf), utils.ToJSON(result))

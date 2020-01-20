@@ -130,19 +130,19 @@ func testUsrITMigrateAndMove(t *testing.T) {
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + utils.RequestType,
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("*prepaid", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + utils.RequestType,
+				Type:  utils.MetaVariable,
+				Value: config.NewRSRParsersMustCompile("*prepaid", true, utils.INFIELD_SEP),
 			},
 			{
-				FieldName: utils.MetaReq + utils.NestingSep + "msisdn",
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("123423534646752", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "msisdn",
+				Type:  utils.MetaVariable,
+				Value: config.NewRSRParsersMustCompile("123423534646752", true, utils.INFIELD_SEP),
 			},
 			{
-				FieldName: utils.MetaTenant,
-				Type:      utils.META_CONSTANT,
-				Value:     config.NewRSRParsersMustCompile("cgrates.com", true, utils.INFIELD_SEP),
+				Path:  utils.MetaTenant,
+				Type:  utils.META_CONSTANT,
+				Value: config.NewRSRParsersMustCompile("cgrates.com", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: false,
@@ -183,7 +183,7 @@ func testUsrITMigrateAndMove(t *testing.T) {
 	}
 	result.Compile()
 	sort.Slice(result.Attributes, func(i, j int) bool {
-		return result.Attributes[i].FieldName < result.Attributes[j].FieldName
+		return result.Attributes[i].Path < result.Attributes[j].Path
 	}) // only for test; map returns random keys
 	if !reflect.DeepEqual(*attrProf, *result) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(attrProf), utils.ToJSON(result))

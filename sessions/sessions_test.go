@@ -1574,9 +1574,9 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	expIndx := map[string][]string{}
 	expUindx := []*engine.FilterRule{
 		&engine.FilterRule{
-			Type:      utils.MetaString,
-			FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.ToR,
-			Values:    []string{utils.VOICE},
+			Type:    utils.MetaString,
+			Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.ToR,
+			Values:  []string{utils.VOICE},
 		},
 	}
 	fltrs := []string{"*string:~*req.ToR:*voice"}

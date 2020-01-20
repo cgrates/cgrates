@@ -239,7 +239,7 @@ func testInternalRemoteITGetAttribute(t *testing.T) {
 
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: utils.MetaReq + utils.NestingSep + "Password",
+					Path:      utils.MetaReq + utils.NestingSep + "Password",
 					FilterIDs: []string{},
 					Type:      utils.META_CONSTANT,
 					Value:     config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
@@ -463,9 +463,9 @@ func testInternalRemoteITGetFilter(t *testing.T) {
 		ID:     "FLTR_ACNT_1001",
 		Rules: []*engine.FilterRule{
 			{
-				Type:      "*string",
-				FieldName: "~*req.Account",
-				Values:    []string{"1001"},
+				Type:    utils.MetaString,
+				Element: "~*req.Account",
+				Values:  []string{"1001"},
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{

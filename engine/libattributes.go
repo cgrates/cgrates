@@ -27,13 +27,15 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// Attribute used by AttributeProfile to describe a single attribute
 type Attribute struct {
 	FilterIDs []string
-	FieldName string
+	Path      string
 	Type      string
 	Value     config.RSRParsers
 }
 
+// AttributeProfile the profile definition for the attributes
 type AttributeProfile struct {
 	Tenant             string
 	ID                 string
@@ -59,8 +61,9 @@ func (ap *AttributeProfile) Compile() error {
 	return ap.compileSubstitutes()
 }
 
-func (als *AttributeProfile) TenantID() string {
-	return utils.ConcatenatedKey(als.Tenant, als.ID)
+// TenantID returns the tenant wit the ID
+func (ap *AttributeProfile) TenantID() string {
+	return utils.ConcatenatedKey(ap.Tenant, ap.ID)
 }
 
 // AttributeProfiles is a sortable list of Attribute profiles
@@ -71,13 +74,15 @@ func (aps AttributeProfiles) Sort() {
 	sort.Slice(aps, func(i, j int) bool { return aps[i].Weight > aps[j].Weight })
 }
 
+// ExternalAttribute the attribute for external profile
 type ExternalAttribute struct {
 	FilterIDs []string
-	FieldName string
+	Path      string
 	Type      string
 	Value     string
 }
 
+// ExternalAttributeProfile used by APIs
 type ExternalAttributeProfile struct {
 	Tenant             string
 	ID                 string
@@ -89,6 +94,7 @@ type ExternalAttributeProfile struct {
 	Weight             float64
 }
 
+// AsAttributeProfile converts the external attribute format to the actual AttributeProfile
 func (ext *ExternalAttributeProfile) AsAttributeProfile() (attr *AttributeProfile, err error) {
 	attr = new(AttributeProfile)
 	if len(ext.Attributes) == 0 {
@@ -105,7 +111,7 @@ func (ext *ExternalAttributeProfile) AsAttributeProfile() (attr *AttributeProfil
 		}
 		attr.Attributes[i].Type = extAttr.Type
 		attr.Attributes[i].FilterIDs = extAttr.FilterIDs
-		attr.Attributes[i].FieldName = extAttr.FieldName
+		attr.Attributes[i].Path = extAttr.Path
 	}
 	attr.Tenant = ext.Tenant
 	attr.ID = ext.ID
@@ -132,9 +138,9 @@ func NewAttributeFromInline(tenant, inlnRule string) (attr *AttributeProfile, er
 		ID:       inlnRule,
 		Contexts: []string{utils.META_ANY},
 		Attributes: []*Attribute{&Attribute{
-			FieldName: ruleSplt[1],
-			Type:      ruleSplt[0],
-			Value:     vals,
+			Path:  ruleSplt[1],
+			Type:  ruleSplt[0],
+			Value: vals,
 		}},
 	}
 	if err = attr.Compile(); err != nil {

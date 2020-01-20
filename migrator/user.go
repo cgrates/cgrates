@@ -63,9 +63,9 @@ func userProfile2attributeProfile(user *v1UserProfile) (attr *engine.AttributePr
 	}
 	if user.Tenant != attr.Tenant {
 		attr.Attributes = append(attr.Attributes, &engine.Attribute{
-			FieldName: utils.MetaTenant,
-			Value:     config.NewRSRParsersMustCompile(user.Tenant, true, utils.INFIELD_SEP),
-			Type:      utils.META_CONSTANT,
+			Path:  utils.MetaTenant,
+			Value: config.NewRSRParsersMustCompile(user.Tenant, true, utils.INFIELD_SEP),
+			Type:  utils.META_CONSTANT,
 		})
 	}
 	for fieldName, substitute := range user.Profile {
@@ -77,9 +77,9 @@ func userProfile2attributeProfile(user *v1UserProfile) (attr *engine.AttributePr
 			continue
 		}
 		attr.Attributes = append(attr.Attributes, &engine.Attribute{
-			FieldName: utils.MetaReq + utils.NestingSep + fieldName,
-			Value:     config.NewRSRParsersMustCompile(substitute, true, utils.INFIELD_SEP),
-			Type:      utils.MetaVariable,
+			Path:  utils.MetaReq + utils.NestingSep + fieldName,
+			Value: config.NewRSRParsersMustCompile(substitute, true, utils.INFIELD_SEP),
+			Type:  utils.MetaVariable,
 		})
 	}
 	return

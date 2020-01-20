@@ -127,8 +127,8 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 			},
 			Attributes: []*engine.ExternalAttribute{
 				{
-					FieldName: utils.MetaReq + utils.NestingSep + "Account",
-					Value:     "1001",
+					Path:  utils.MetaReq + utils.NestingSep + "Account",
+					Value: "1001",
 				},
 			},
 			Weight: 20,
@@ -153,8 +153,8 @@ func testAttributeSSetAlsPrf(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: utils.MetaReq + utils.NestingSep + "Account",
-					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + "Account",
+					Value: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -185,12 +185,12 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 			},
 			Attributes: []*engine.ExternalAttribute{
 				{
-					FieldName: utils.MetaReq + utils.NestingSep + "Account",
-					Value:     "1001",
+					Path:  utils.MetaReq + utils.NestingSep + "Account",
+					Value: "1001",
 				},
 				{
-					FieldName: utils.MetaReq + utils.NestingSep + "Subject",
-					Value:     "~*req.Account",
+					Path:  utils.MetaReq + utils.NestingSep + "Subject",
+					Value: "~*req.Account",
 				},
 			},
 			Weight: 20,
@@ -215,12 +215,12 @@ func testAttributeSUpdateAlsPrf(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: utils.MetaReq + utils.NestingSep + "Account",
-					Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + "Account",
+					Value: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName: utils.MetaReq + utils.NestingSep + "Subject",
-					Value:     config.NewRSRParsersMustCompile("~*req.Account", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + "Subject",
+					Value: config.NewRSRParsersMustCompile("~*req.Account", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,

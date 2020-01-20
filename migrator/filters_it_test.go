@@ -135,9 +135,9 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		ID:     "FLTR_2",
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
-				Type:      utils.MetaPrefix,
-				FieldName: "Account",
-				Values:    []string{"1001"},
+				Type:    utils.MetaPrefix,
+				Element: "Account",
+				Values:  []string{"1001"},
 			},
 		},
 	}
@@ -146,9 +146,9 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		ID:     "FLTR_2",
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
-				Type:      utils.MetaPrefix,
-				FieldName: "~*req.Account",
-				Values:    []string{"1001"},
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Account",
+				Values:  []string{"1001"},
 			},
 		},
 	}
@@ -162,7 +162,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:Account:1001"},
-				FieldName: utils.MetaReq + utils.NestingSep + "Account",
+				Path:      utils.MetaReq + utils.NestingSep + "Account",
 				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 			},
 		},
@@ -177,7 +177,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:~*req.Account:1001"},
-				FieldName: utils.MetaReq + utils.NestingSep + "Account",
+				Path:      utils.MetaReq + utils.NestingSep + "Account",
 				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 			},
 		},
@@ -282,19 +282,19 @@ func testFltrITMigratev2(t *testing.T) {
 		ID:     "FLTR_2",
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
-				Type:      utils.MetaString,
-				FieldName: "~Account",
-				Values:    []string{"1001"},
+				Type:    utils.MetaString,
+				Element: "~Account",
+				Values:  []string{"1001"},
 			},
 			&engine.FilterRule{
-				Type:      utils.MetaString,
-				FieldName: "~*req.Subject",
-				Values:    []string{"1001"},
+				Type:    utils.MetaString,
+				Element: "~*req.Subject",
+				Values:  []string{"1001"},
 			},
 			&engine.FilterRule{
-				Type:      utils.MetaRSR,
-				FieldName: utils.EmptyString,
-				Values:    []string{"~Tenant(~^cgr.*\\.org$)"},
+				Type:    utils.MetaRSR,
+				Element: utils.EmptyString,
+				Values:  []string{"~Tenant(~^cgr.*\\.org$)"},
 			},
 		},
 	}
@@ -303,19 +303,19 @@ func testFltrITMigratev2(t *testing.T) {
 		ID:     "FLTR_2",
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
-				Type:      utils.MetaString,
-				FieldName: "~*req.Account",
-				Values:    []string{"1001"},
+				Type:    utils.MetaString,
+				Element: "~*req.Account",
+				Values:  []string{"1001"},
 			},
 			&engine.FilterRule{
-				Type:      utils.MetaString,
-				FieldName: "~*req.Subject",
-				Values:    []string{"1001"},
+				Type:    utils.MetaString,
+				Element: "~*req.Subject",
+				Values:  []string{"1001"},
 			},
 			&engine.FilterRule{
-				Type:      utils.MetaRSR,
-				FieldName: utils.EmptyString,
-				Values:    []string{"~*req.Tenant(~^cgr.*\\.org$)"},
+				Type:    utils.MetaRSR,
+				Element: utils.EmptyString,
+				Values:  []string{"~*req.Tenant(~^cgr.*\\.org$)"},
 			},
 		},
 	}
@@ -329,7 +329,7 @@ func testFltrITMigratev2(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:~Account:1001"},
-				FieldName: utils.MetaReq + utils.NestingSep + "Account",
+				Path:      utils.MetaReq + utils.NestingSep + "Account",
 				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 			},
 		},
@@ -344,7 +344,7 @@ func testFltrITMigratev2(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{"*string:~*req.Account:1001"},
-				FieldName: utils.MetaReq + utils.NestingSep + "Account",
+				Path:      utils.MetaReq + utils.NestingSep + "Account",
 				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 			},
 		},

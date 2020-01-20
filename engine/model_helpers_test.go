@@ -1050,11 +1050,11 @@ func TestAPItoTPThreshold(t *testing.T) {
 func TestTPFilterAsTPFilter(t *testing.T) {
 	tps := []*TpFilter{
 		&TpFilter{
-			Tpid:              "TEST_TPID",
-			ID:                "Filter1",
-			FilterType:        utils.MetaPrefix,
-			FilterFieldName:   "Account",
-			FilterFieldValues: "1001;1002",
+			Tpid:    "TEST_TPID",
+			ID:      "Filter1",
+			Type:    utils.MetaPrefix,
+			Element: "Account",
+			Values:  "1001;1002",
 		},
 	}
 	eTPs := []*utils.TPFilterProfile{
@@ -1063,9 +1063,9 @@ func TestTPFilterAsTPFilter(t *testing.T) {
 			ID:   tps[0].ID,
 			Filters: []*utils.TPFilter{
 				&utils.TPFilter{
-					Type:      utils.MetaPrefix,
-					FieldName: "Account",
-					Values:    []string{"1001", "1002"},
+					Type:    utils.MetaPrefix,
+					Element: "Account",
+					Values:  []string{"1001", "1002"},
 				},
 			},
 		},
@@ -1080,20 +1080,20 @@ func TestTPFilterAsTPFilter(t *testing.T) {
 func TestTPFilterAsTPFilter2(t *testing.T) {
 	tps := []*TpFilter{
 		&TpFilter{
-			Tpid:              "TEST_TPID",
-			Tenant:            "cgrates.org",
-			ID:                "Filter1",
-			FilterType:        utils.MetaPrefix,
-			FilterFieldName:   "Account",
-			FilterFieldValues: "1001;1002",
+			Tpid:    "TEST_TPID",
+			Tenant:  "cgrates.org",
+			ID:      "Filter1",
+			Type:    utils.MetaPrefix,
+			Element: "Account",
+			Values:  "1001;1002",
 		},
 		&TpFilter{
-			Tpid:              "TEST_TPID",
-			Tenant:            "anotherTenant",
-			ID:                "Filter1",
-			FilterType:        utils.MetaPrefix,
-			FilterFieldName:   "Account",
-			FilterFieldValues: "1010",
+			Tpid:    "TEST_TPID",
+			Tenant:  "anotherTenant",
+			ID:      "Filter1",
+			Type:    utils.MetaPrefix,
+			Element: "Account",
+			Values:  "1010",
 		},
 	}
 	eTPs := []*utils.TPFilterProfile{
@@ -1103,9 +1103,9 @@ func TestTPFilterAsTPFilter2(t *testing.T) {
 			ID:     tps[0].ID,
 			Filters: []*utils.TPFilter{
 				&utils.TPFilter{
-					Type:      utils.MetaPrefix,
-					FieldName: "Account",
-					Values:    []string{"1001", "1002"},
+					Type:    utils.MetaPrefix,
+					Element: "Account",
+					Values:  []string{"1001", "1002"},
 				},
 			},
 		},
@@ -1115,9 +1115,9 @@ func TestTPFilterAsTPFilter2(t *testing.T) {
 			ID:     tps[1].ID,
 			Filters: []*utils.TPFilter{
 				&utils.TPFilter{
-					Type:      utils.MetaPrefix,
-					FieldName: "Account",
-					Values:    []string{"1010"},
+					Type:    utils.MetaPrefix,
+					Element: "Account",
+					Values:  []string{"1010"},
 				},
 			},
 		},
@@ -1136,9 +1136,9 @@ func TestAPItoTPFilter(t *testing.T) {
 		ID:     "Filter1",
 		Filters: []*utils.TPFilter{
 			&utils.TPFilter{
-				FieldName: "Account",
-				Type:      utils.MetaString,
-				Values:    []string{"1001", "1002"},
+				Element: "Account",
+				Type:    utils.MetaString,
+				Values:  []string{"1001", "1002"},
 			},
 		},
 	}
@@ -1148,9 +1148,9 @@ func TestAPItoTPFilter(t *testing.T) {
 		ID:     tps.ID,
 		Rules: []*FilterRule{
 			&FilterRule{
-				FieldName: "Account",
-				Type:      utils.MetaString,
-				Values:    []string{"1001", "1002"},
+				Element: "Account",
+				Type:    utils.MetaString,
+				Values:  []string{"1001", "1002"},
 			},
 		},
 	}
@@ -1171,9 +1171,9 @@ func TestFilterToTPFilter(t *testing.T) {
 		},
 		Rules: []*FilterRule{
 			&FilterRule{
-				FieldName: "Account",
-				Type:      utils.MetaString,
-				Values:    []string{"1001", "1002"},
+				Element: "Account",
+				Type:    utils.MetaString,
+				Values:  []string{"1001", "1002"},
 			},
 		},
 	}
@@ -1186,9 +1186,9 @@ func TestFilterToTPFilter(t *testing.T) {
 		},
 		Filters: []*utils.TPFilter{
 			&utils.TPFilter{
-				FieldName: "Account",
-				Type:      utils.MetaString,
-				Values:    []string{"1001", "1002"},
+				Element: "Account",
+				Type:    utils.MetaString,
+				Values:  []string{"1001", "1002"},
 			},
 		},
 	}
@@ -1211,8 +1211,8 @@ func TestAPItoAttributeProfile(t *testing.T) {
 		},
 		Attributes: []*utils.TPAttribute{
 			&utils.TPAttribute{
-				FieldName: utils.MetaReq + utils.NestingSep + "FL1",
-				Value:     "Al1",
+				Path:  utils.MetaReq + utils.NestingSep + "FL1",
+				Value: "Al1",
 			},
 		},
 		Weight: 20,
@@ -1227,8 +1227,8 @@ func TestAPItoAttributeProfile(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			&Attribute{
-				FieldName: utils.MetaReq + utils.NestingSep + "FL1",
-				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "FL1",
+				Value: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -1253,8 +1253,8 @@ func TestAPItoModelTPAttribute(t *testing.T) {
 		},
 		Attributes: []*utils.TPAttribute{
 			&utils.TPAttribute{
-				FieldName: utils.MetaReq + utils.NestingSep + "FL1",
-				Value:     "Al1",
+				Path:  utils.MetaReq + utils.NestingSep + "FL1",
+				Value: "Al1",
 			},
 		},
 		Weight: 20,
@@ -1266,7 +1266,7 @@ func TestAPItoModelTPAttribute(t *testing.T) {
 			ID:                 "ALS1",
 			Contexts:           "con1",
 			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
-			FieldName:          utils.MetaReq + utils.NestingSep + "FL1",
+			Path:               utils.MetaReq + utils.NestingSep + "FL1",
 			Value:              "Al1",
 			ActivationInterval: "2014-07-14T14:35:00Z",
 			Weight:             20,
@@ -1286,7 +1286,7 @@ func TestModelAsTPAttribute(t *testing.T) {
 			ID:                 "ALS1",
 			Contexts:           "con1",
 			FilterIDs:          "FLTR_ACNT_dan;FLTR_DST_DE",
-			FieldName:          utils.MetaReq + utils.NestingSep + "FL1",
+			Path:               utils.MetaReq + utils.NestingSep + "FL1",
 			Value:              "Al1",
 			ActivationInterval: "2014-07-14T14:35:00Z",
 			Weight:             20,
@@ -1305,7 +1305,7 @@ func TestModelAsTPAttribute(t *testing.T) {
 		Attributes: []*utils.TPAttribute{
 			&utils.TPAttribute{
 				FilterIDs: []string{},
-				FieldName: utils.MetaReq + utils.NestingSep + "FL1",
+				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Value:     "Al1",
 			},
 		},
@@ -1324,7 +1324,7 @@ func TestModelAsTPAttribute(t *testing.T) {
 		Attributes: []*utils.TPAttribute{
 			&utils.TPAttribute{
 				FilterIDs: []string{},
-				FieldName: utils.MetaReq + utils.NestingSep + "FL1",
+				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Value:     "Al1",
 			},
 		},

@@ -113,9 +113,9 @@ func testTpFltrITPopulate(t *testing.T) {
 			ID:     "Filter",
 			Filters: []*utils.TPFilter{
 				{
-					Type:      "*string",
-					FieldName: "Account",
-					Values:    []string{"1001", "1002"},
+					Type:    utils.MetaString,
+					Element: "Account",
+					Values:  []string{"1001", "1002"},
 				},
 			},
 			ActivationInterval: &utils.TPActivationInterval{

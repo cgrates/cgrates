@@ -492,9 +492,9 @@ func (api *ApierV1) computeThresholdIndexes(tenant string, thIDs *[]string,
 					ID:     th.ID,
 					Rules: []*engine.FilterRule{
 						{
-							Type:      utils.META_NONE,
-							FieldName: utils.META_ANY,
-							Values:    []string{utils.META_ANY},
+							Type:    utils.META_NONE,
+							Element: utils.META_ANY,
+							Values:  []string{utils.META_ANY},
 						},
 					},
 				}
@@ -562,9 +562,9 @@ func (api *ApierV1) computeAttributeIndexes(tenant, context string, attrIDs *[]s
 					ID:     ap.ID,
 					Rules: []*engine.FilterRule{
 						{
-							Type:      utils.META_NONE,
-							FieldName: utils.META_ANY,
-							Values:    []string{utils.META_ANY},
+							Type:    utils.META_NONE,
+							Element: utils.META_ANY,
+							Values:  []string{utils.META_ANY},
 						},
 					},
 				}
@@ -628,9 +628,9 @@ func (api *ApierV1) computeResourceIndexes(tenant string, rsIDs *[]string,
 					ID:     rp.ID,
 					Rules: []*engine.FilterRule{
 						{
-							Type:      utils.META_NONE,
-							FieldName: utils.META_ANY,
-							Values:    []string{utils.META_ANY},
+							Type:    utils.META_NONE,
+							Element: utils.META_ANY,
+							Values:  []string{utils.META_ANY},
 						},
 					},
 				}
@@ -694,9 +694,9 @@ func (api *ApierV1) computeStatIndexes(tenant string, stIDs *[]string,
 					ID:     sqp.ID,
 					Rules: []*engine.FilterRule{
 						{
-							Type:      utils.META_NONE,
-							FieldName: utils.META_ANY,
-							Values:    []string{utils.META_ANY},
+							Type:    utils.META_NONE,
+							Element: utils.META_ANY,
+							Values:  []string{utils.META_ANY},
 						},
 					},
 				}
@@ -760,9 +760,9 @@ func (api *ApierV1) computeSupplierIndexes(tenant string, sppIDs *[]string,
 					ID:     spp.ID,
 					Rules: []*engine.FilterRule{
 						{
-							Type:      utils.META_NONE,
-							FieldName: utils.META_ANY,
-							Values:    []string{utils.META_ANY},
+							Type:    utils.META_NONE,
+							Element: utils.META_ANY,
+							Values:  []string{utils.META_ANY},
 						},
 					},
 				}
@@ -826,9 +826,9 @@ func (api *ApierV1) computeChargerIndexes(tenant string, cppIDs *[]string,
 					ID:     cpp.ID,
 					Rules: []*engine.FilterRule{
 						{
-							Type:      utils.META_NONE,
-							FieldName: utils.META_ANY,
-							Values:    []string{utils.META_ANY},
+							Type:    utils.META_NONE,
+							Element: utils.META_ANY,
+							Values:  []string{utils.META_ANY},
 						},
 					},
 				}
@@ -896,9 +896,9 @@ func (api *ApierV1) computeDispatcherIndexes(tenant, context string, dspIDs *[]s
 					ID:     dsp.ID,
 					Rules: []*engine.FilterRule{
 						{
-							Type:      utils.META_NONE,
-							FieldName: utils.META_ANY,
-							Values:    []string{utils.META_ANY},
+							Type:    utils.META_NONE,
+							Element: utils.META_ANY,
+							Values:  []string{utils.META_ANY},
 						},
 					},
 				}
