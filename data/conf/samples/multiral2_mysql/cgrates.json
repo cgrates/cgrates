@@ -1,0 +1,43 @@
+{
+// CGRateS Configuration file
+//
+// Used for multiple RAL configuration tests
+// Starts RAL
+
+"general": {
+		"node_id":"node2",
+},
+
+"listen": {
+	"rpc_json": ":12012",
+	"rpc_gob": ":12013",
+	"http": ":12080",
+},
+
+"data_db": {								
+	"db_type": "redis",						
+	"db_port": 6379, 						
+	"db_name": "10", 						
+},
+
+"stor_db": {								// database used to store offline tariff plans and CDRs
+	"db_password": "CGRateS.org",			// password to use when connecting to stordb
+},
+
+"rals": {
+	"enabled": true,
+},
+
+"cdrs": {
+	"enabled": true,
+},
+
+"chargers": {
+	"enabled": true,
+},
+
+"sessions": {
+	"enabled": true,
+},
+
+}

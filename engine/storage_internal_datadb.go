@@ -608,6 +608,9 @@ func (iDB *InternalDB) UpdateReverseDestinationDrv(oldDest, newDest *Destination
 	var mpRevDst utils.StringMap
 	var addedPrefixes []string
 	var found bool
+	if oldDest == nil {
+		oldDest = new(Destination) // so we can process prefixes
+	}
 	for _, oldPrefix := range oldDest.Prefixes {
 		found = false
 		for _, newPrefix := range newDest.Prefixes {

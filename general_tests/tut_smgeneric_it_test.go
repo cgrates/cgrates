@@ -35,6 +35,7 @@ import (
 
 var (
 	tutSMGCfgPath string
+	tutSMGCfgDIR  string
 	tutSMGCfg     *config.CGRConfig
 	tutSMGRpc     *rpc.Client
 	smgLoadInst   utils.LoadInstance // Share load information between tests
@@ -52,13 +53,26 @@ var (
 )
 
 func TestTutSMG(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaSQL:
+		tutSMGCfgDIR = "smgeneric_mysql"
+	case utils.MetaMongo:
+		t.SkipNow()
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+	//mongo and sql tutmongo tutmysql
 	for _, stest := range sTestTutSMG {
-		t.Run("TestTutSMG", stest)
+		t.Run(tutSMGCfgDIR, stest)
 	}
 }
 
 func testTutSMGInitCfg(t *testing.T) {
-	tutSMGCfgPath = path.Join(*dataDir, "conf", "samples", "smgeneric")
+	tutSMGCfgPath = path.Join(*dataDir, "conf", "samples", tutSMGCfgDIR)
 	// Init config first
 	var err error
 	tutSMGCfg, err = config.NewCGRConfigFromPath(tutSMGCfgPath)

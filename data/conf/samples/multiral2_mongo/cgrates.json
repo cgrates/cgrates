@@ -1,0 +1,45 @@
+{
+// CGRateS Configuration file
+//
+// Used for multiple RAL configuration tests
+// Starts RAL
+
+"general": {
+		"node_id":"node2",
+},
+
+"listen": {
+	"rpc_json": ":12012",
+	"rpc_gob": ":12013",
+	"http": ":12080",
+},
+
+"data_db": {
+	"db_type": "mongo",
+	"db_name": "10",
+	"db_port": 27017,
+},
+
+"stor_db": {
+	"db_type": "mongo",
+	"db_name": "cgrates",
+	"db_port": 27017,
+},
+
+"rals": {
+	"enabled": true,
+},
+
+"cdrs": {
+	"enabled": true,
+},
+
+"chargers": {
+	"enabled": true,
+},
+
+"sessions": {
+	"enabled": true,
+},
+
+}

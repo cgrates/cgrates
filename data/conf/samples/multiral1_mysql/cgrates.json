@@ -1,0 +1,31 @@
+{
+// CGRateS Configuration file
+//
+// Used for multiple RAL configuration tests
+// Starts rater, scheduler
+
+"general": {
+		"node_id":"node1",
+},
+
+"listen": {
+	"rpc_json": ":2012",				// RPC JSON listening address
+	"rpc_gob": ":2013",				// RPC GOB listening address
+	"http": ":2080",					// HTTP listening address
+},
+
+"data_db": {								
+	"db_type": "redis",						
+	"db_port": 6379, 						
+	"db_name": "10", 						
+},
+
+"stor_db": {								// database used to store offline tariff plans and CDRs
+	"db_password": "CGRateS.org",			// password to use when connecting to stordb
+},
+
+"rals": {
+	"enabled": true,					// enable Rater service: <true|false>
+},
+
+}

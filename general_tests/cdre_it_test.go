@@ -55,7 +55,7 @@ var (
 func TestCDREIT(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		cdreConfigDIR = "tutinternal"
+		cdreConfigDIR = "tutinternal_new"
 	case utils.MetaSQL:
 		cdreConfigDIR = "tutmysql"
 	case utils.MetaMongo:

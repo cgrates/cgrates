@@ -64,11 +64,22 @@ var (
 // Sentinel1 will be started at port 16381 and will watch Node1
 // Sentinel2 will be started at port 16382 and will watch Node1
 func TestRedisSentinel(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaSQL:
+	case utils.MetaMongo:
+		t.SkipNow()
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	if !*redisSentinel {
 		return
 	}
 	for _, stest := range sTestsRds {
-		t.Run("", stest)
+		t.Run("TestRedisSentinel", stest)
 	}
 }
 

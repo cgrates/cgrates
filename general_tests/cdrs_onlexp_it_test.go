@@ -43,6 +43,7 @@ import (
 
 var (
 	cdrsMasterCfgPath, cdrsSlaveCfgPath string
+	cdrsMasterCfgDIR, cdrsSlaveCfgDIR   string
 	cdrsMasterCfg, cdrsSlaveCfg         *config.CGRConfig
 	cdrsMasterRpc                       *rpcclient.RPCClient
 	httpCGRID                           = utils.UUIDSha1Prefix()
@@ -71,18 +72,33 @@ var (
 )
 
 func TestCDRsOnExp(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaSQL:
+		cdrsMasterCfgDIR = "cdrsonexpmaster_mysql"
+		cdrsSlaveCfgDIR = "cdrsonexpslave_mysql"
+	case utils.MetaMongo:
+		cdrsMasterCfgDIR = "cdrsonexpmaster_mongo"
+		cdrsSlaveCfgDIR = "cdrsonexpslave_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+
 	for _, stest := range sTestsCDRsOnExp {
-		t.Run("TestCDRsOnExp", stest)
+		t.Run(*dbType, stest)
 	}
 }
 
 func testCDRsOnExpInitConfig(t *testing.T) {
 	var err error
-	cdrsMasterCfgPath = path.Join(*dataDir, "conf", "samples", "cdrsonexpmaster")
+	cdrsMasterCfgPath = path.Join(*dataDir, "conf", "samples", cdrsMasterCfgDIR)
 	if cdrsMasterCfg, err = config.NewCGRConfigFromPath(cdrsMasterCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
-	cdrsSlaveCfgPath = path.Join(*dataDir, "conf", "samples", "cdrsonexpslave")
+	cdrsSlaveCfgPath = path.Join(*dataDir, "conf", "samples", cdrsSlaveCfgDIR)
 	if cdrsSlaveCfg, err = config.NewCGRConfigFromPath(cdrsSlaveCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}

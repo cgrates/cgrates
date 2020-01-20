@@ -443,7 +443,7 @@ func testV2CDRsGetCdrs4(t *testing.T) {
 
 func testV2CDRsGetCdrs5(t *testing.T) {
 	var cdrCnt int64
-	req := utils.AttrGetCdrs{Accounts: []string{"testV2CDRsProcessCDR5"}}
+	req := utils.RPCCDRsFilter{Accounts: []string{"testV2CDRsProcessCDR5"}}
 	if err := cdrsRpc.Call(utils.ApierV2CountCDRs, req, &cdrCnt); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if cdrCnt != 0 {

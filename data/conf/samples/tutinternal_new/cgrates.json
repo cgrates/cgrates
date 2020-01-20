@@ -1,0 +1,121 @@
+{
+// CGRateS Configuration file
+//
+// used by gen/cdre_it_test.go
+
+
+"general": {
+	"log_level": 7,
+	"reply_timeout": "50s",
+},
+
+
+"listen": {
+	"rpc_json": ":2012",
+	"rpc_gob": ":2013",
+	"http": ":2080",
+},
+
+
+"data_db": {
+	"db_type": "*internal",	
+},
+
+
+"stor_db": {
+	"db_type": "*internal",	
+},
+
+
+"rals": {
+	"enabled": true,
+	"thresholds_conns": ["*internal"],
+	"max_increments":3000000,
+},
+
+
+"schedulers": {
+	"enabled": true,
+	"cdrs_conns": ["*internal"],
+},
+
+"cdre": {
+	"TestTutITExportCDR": {
+		"content_fields": [
+			{"tag": "CGRID", "type": "*composed", "value": "~CGRID"},
+			{"tag": "RunID", "type": "*composed", "value": "~RunID"},
+			{"tag":"OriginID", "type": "*composed", "value": "~OriginID"},
+			{"tag":"RequestType", "type": "*composed", "value": "~RequestType"},
+			{"tag":"Tenant", "type": "*composed", "value": "~Tenant"},
+			{"tag":"Category", "type": "*composed", "value": "~Category"},
+			{"tag":"Account", "type": "*composed", "value": "~Account"},
+			{"tag":"Destination", "type": "*composed", "value": "~Destination"},
+			{"tag":"AnswerTime", "type": "*composed", "value": "~AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag":"Usage", "type": "*composed", "value": "~Usage"},
+			{"tag":"Cost", "type": "*composed", "value": "~Cost", "rounding_decimals": 4},
+			{"tag":"MatchedDestinationID", "type": "*composed", "value": "~CostDetails:s/\"MatchedDestId\":.*_(\\w{4})/${1}/:s/\"MatchedDestId\":\"INTERNAL\"/ON010/"},
+		],
+	},
+},
+
+"cdrs": {
+	"enabled": true,
+	"chargers_conns":["*internal"],
+},
+
+
+"attributes": {
+	"enabled": true,
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
+
+
+"resources": {
+	"enabled": true,
+	"store_interval": "-1",
+	"thresholds_conns": ["*internal"]
+},
+
+
+"stats": {
+	"enabled": true,
+	"store_interval": "-1",
+	"thresholds_conns": ["*internal"],
+},
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "-1",
+},
+
+
+"suppliers": {
+	"enabled": true,
+	"prefix_indexed_fields":["Destination"],
+	"stats_conns": ["*internal"],
+	"resources_conns": ["*internal"],
+},
+
+
+"sessions": {
+	"enabled": true,
+	"suppliers_conns": ["*internal"],
+	"resources_conns": ["*internal"],
+	"attributes_conns": ["*internal"],
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
+},
+
+
+"apier": {
+	"scheduler_conns": ["*internal"],
+},
+
+
+}
