@@ -59,12 +59,12 @@ func newMongoMigrator(dm *engine.DataManager) (mgoMig *mongoMigrator) {
 	}
 }
 
-func (mgoMig *mongoMigrator) close() {
-	mgoMig.mgoDB.Close()
+func (v1ms *mongoMigrator) close() {
+	v1ms.mgoDB.Close()
 }
 
-func (mgoMig *mongoMigrator) DataManager() *engine.DataManager {
-	return mgoMig.dm
+func (v1ms *mongoMigrator) DataManager() *engine.DataManager {
+	return v1ms.dm
 }
 
 //Account methods
@@ -619,5 +619,38 @@ func (v1ms *mongoMigrator) setV4AttributeProfile(x *v4AttributeProfile) (err err
 //rem
 func (v1ms *mongoMigrator) remV4AttributeProfile(tenant, id string) (err error) {
 	_, err = v1ms.mgoDB.DB().Collection(v1AttributeProfilesCol).DeleteOne(v1ms.mgoDB.GetContext(), bson.M{"tenant": tenant, "id": id})
+	return
+}
+
+// Filter Methods
+//get
+func (v1ms *mongoMigrator) getV1Filter() (v1Fltr *v1Filter, err error) {
+	if v1ms.cursor == nil {
+		v1ms.cursor, err = v1ms.mgoDB.DB().Collection(engine.ColFlt).Find(v1ms.mgoDB.GetContext(), bson.D{})
+		if err != nil {
+			return nil, err
+		}
+	}
+	if !(*v1ms.cursor).Next(v1ms.mgoDB.GetContext()) {
+		(*v1ms.cursor).Close(v1ms.mgoDB.GetContext())
+		v1ms.cursor = nil
+		return nil, utils.ErrNoMoreData
+	}
+	v1Fltr = new(v1Filter)
+	if err := (*v1ms.cursor).Decode(v1Fltr); err != nil {
+		return nil, err
+	}
+	return
+}
+
+//set
+func (v1ms *mongoMigrator) setV1Filter(x *v1Filter) (err error) {
+	_, err = v1ms.mgoDB.DB().Collection(engine.ColFlt).InsertOne(v1ms.mgoDB.GetContext(), x)
+	return
+}
+
+//rem
+func (v1ms *mongoMigrator) remV1Filter(tenant, id string) (err error) {
+	_, err = v1ms.mgoDB.DB().Collection(engine.ColFlt).DeleteOne(v1ms.mgoDB.GetContext(), bson.M{"tenant": tenant, "id": id})
 	return
 }

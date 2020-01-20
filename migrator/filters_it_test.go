@@ -42,7 +42,10 @@ var sTestsFltrIT = []func(t *testing.T){
 	testFltrITConnect,
 	testFltrITFlush,
 	testFltrITMigrateAndMove,
+	testFltrITFlush,
 	testFltrITMigratev2,
+	testFltrITFlush,
+	testFltrITMigratev3,
 }
 
 func TestFiltersMigrateITRedis(t *testing.T) {
@@ -130,14 +133,14 @@ func testFltrITFlush(t *testing.T) {
 }
 
 func testFltrITMigrateAndMove(t *testing.T) {
-	Filters := &engine.Filter{
+	Filters := &v1Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_2",
-		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
-				Type:    utils.MetaPrefix,
-				Element: "Account",
-				Values:  []string{"1001"},
+		Rules: []*v1FilterRule{
+			&v1FilterRule{
+				Type:      utils.MetaPrefix,
+				FieldName: "Account",
+				Values:    []string{"1001"},
 			},
 		},
 	}
@@ -187,7 +190,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 	attrProf.Compile()
 	switch fltrAction {
 	case utils.Migrate:
-		if err := fltrMigrator.dmIN.DataManager().SetFilter(Filters); err != nil {
+		if err := fltrMigrator.dmIN.setV1Filter(Filters); err != nil {
 			t.Error("Error when setting v1 Filters ", err.Error())
 		}
 		if err := fltrMigrator.dmIN.DataManager().SetAttributeProfile(attrProf, false); err != nil {
@@ -212,7 +215,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 		//check if version was updated
 		if vrs, err := fltrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 			t.Error(err)
-		} else if vrs[utils.RQF] != 2 {
+		} else if vrs[utils.RQF] != 4 {
 			t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
 		}
 		//check if Filters was migrate correctly
@@ -243,7 +246,7 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			t.Errorf("Expected %v, recived: %v", utils.ToJSON(expFltrIdx), utils.ToJSON(fltridx))
 		}
 	case utils.Move:
-		if err := fltrMigrator.dmIN.DataManager().SetFilter(Filters); err != nil {
+		if err := fltrMigrator.dmIN.DataManager().SetFilter(expFilters); err != nil {
 			t.Error(err)
 		}
 		currentVersion := engine.CurrentDataDBVersions()
@@ -257,16 +260,16 @@ func testFltrITMigrateAndMove(t *testing.T) {
 			t.Error("Error when fltrMigratorrating Filters ", err.Error())
 		}
 		//check if account was migrate correctly
-		result, err := engine.GetFilter(fltrMigrator.dmOut.DataManager(), Filters.Tenant, Filters.ID, false, false, utils.NonTransactional)
+		result, err := engine.GetFilter(fltrMigrator.dmOut.DataManager(), expFilters.Tenant, expFilters.ID, false, false, utils.NonTransactional)
 		if err != nil {
 			t.Error(err)
 		}
 		result.Compile()
-		if !reflect.DeepEqual(Filters, result) {
-			t.Errorf("Expecting: %+v, received: %+v", Filters, result)
+		if !reflect.DeepEqual(expFilters, result) {
+			t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expFilters), utils.ToJSON(result))
 		}
 		// check if old account was deleted
-		result, err = engine.GetFilter(fltrMigrator.dmIN.DataManager(), Filters.Tenant, Filters.ID, false, false, utils.NonTransactional)
+		result, err = engine.GetFilter(fltrMigrator.dmIN.DataManager(), expFilters.Tenant, expFilters.ID, false, false, utils.NonTransactional)
 		if err != utils.ErrNotFound {
 			t.Error(err)
 		}
@@ -277,24 +280,24 @@ func testFltrITMigratev2(t *testing.T) {
 	if fltrAction != utils.Migrate {
 		t.SkipNow()
 	}
-	filters := &engine.Filter{
+	filters := &v1Filter{
 		Tenant: "cgrates.org",
 		ID:     "FLTR_2",
-		Rules: []*engine.FilterRule{
-			&engine.FilterRule{
-				Type:    utils.MetaString,
-				Element: "~Account",
-				Values:  []string{"1001"},
+		Rules: []*v1FilterRule{
+			&v1FilterRule{
+				Type:      utils.MetaString,
+				FieldName: "~Account",
+				Values:    []string{"1001"},
 			},
-			&engine.FilterRule{
-				Type:    utils.MetaString,
-				Element: "~*req.Subject",
-				Values:  []string{"1001"},
+			&v1FilterRule{
+				Type:      utils.MetaString,
+				FieldName: "~*req.Subject",
+				Values:    []string{"1001"},
 			},
-			&engine.FilterRule{
-				Type:    utils.MetaRSR,
-				Element: utils.EmptyString,
-				Values:  []string{"~Tenant(~^cgr.*\\.org$)"},
+			&v1FilterRule{
+				Type:      utils.MetaRSR,
+				FieldName: utils.EmptyString,
+				Values:    []string{"~Tenant(~^cgr.*\\.org$)"},
 			},
 		},
 	}
@@ -353,7 +356,7 @@ func testFltrITMigratev2(t *testing.T) {
 	expAttrProf.Compile()
 	attrProf.Compile()
 
-	if err := fltrMigrator.dmIN.DataManager().SetFilter(filters); err != nil {
+	if err := fltrMigrator.dmIN.setV1Filter(filters); err != nil {
 		t.Error("Error when setting v1 Filters ", err.Error())
 	}
 	if err := fltrMigrator.dmIN.DataManager().SetAttributeProfile(attrProf, false); err != nil {
@@ -378,7 +381,7 @@ func testFltrITMigratev2(t *testing.T) {
 	//check if version was updated
 	if vrs, err := fltrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
 		t.Error(err)
-	} else if vrs[utils.RQF] != 3 {
+	} else if vrs[utils.RQF] != 4 {
 		t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
 	}
 	//check if Filters was migrate correctly
@@ -400,7 +403,6 @@ func testFltrITMigratev2(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expAttrProf), utils.ToJSON(resultAttr))
 	}
 	expFltrIdx := map[string]utils.StringMap{
-		"*prefix:~*req.Account:1001": utils.StringMap{"ATTR_1": true},
 		"*string:~*req.Account:1001": utils.StringMap{"ATTR_1": true},
 		"*string:~*req.Subject:1001": utils.StringMap{"ATTR_1": true},
 	}
@@ -409,5 +411,89 @@ func testFltrITMigratev2(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expFltrIdx, fltridx) {
 		t.Errorf("Expected %v, recived: %v", utils.ToJSON(expFltrIdx), utils.ToJSON(fltridx))
+	}
+}
+
+func testFltrITMigratev3(t *testing.T) {
+	if fltrAction != utils.Migrate {
+		t.SkipNow()
+	}
+	filters := &v1Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_2",
+		Rules: []*v1FilterRule{
+			&v1FilterRule{
+				Type:      utils.MetaString,
+				FieldName: "~*req.Account",
+				Values:    []string{"1001"},
+			},
+			&v1FilterRule{
+				Type:      utils.MetaString,
+				FieldName: "~*req.Subject",
+				Values:    []string{"1001"},
+			},
+			&v1FilterRule{
+				Type:      utils.MetaRSR,
+				FieldName: utils.EmptyString,
+				Values:    []string{"~*req.Tenant(~^cgr.*\\.org$)"},
+			},
+		},
+	}
+	expFilters := &engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_2",
+		Rules: []*engine.FilterRule{
+			&engine.FilterRule{
+				Type:    utils.MetaString,
+				Element: "~*req.Account",
+				Values:  []string{"1001"},
+			},
+			&engine.FilterRule{
+				Type:    utils.MetaString,
+				Element: "~*req.Subject",
+				Values:  []string{"1001"},
+			},
+			&engine.FilterRule{
+				Type:    utils.MetaRSR,
+				Element: utils.EmptyString,
+				Values:  []string{"~*req.Tenant(~^cgr.*\\.org$)"},
+			},
+		},
+	}
+	expFilters.Compile()
+
+	if err := fltrMigrator.dmIN.setV1Filter(filters); err != nil {
+		t.Error("Error when setting v1 Filters ", err.Error())
+	}
+	currentVersion := engine.Versions{utils.RQF: 3}
+	err := fltrMigrator.dmIN.DataManager().DataDB().SetVersions(currentVersion, false)
+	if err != nil {
+		t.Error("Error when setting version for Filters ", err.Error())
+	}
+	//check if version was set correctly
+	if vrs, err := fltrMigrator.dmIN.DataManager().DataDB().GetVersions(""); err != nil {
+		t.Error(err)
+	} else if vrs[utils.RQF] != 3 {
+		t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
+	}
+	//migrate Filters
+	err, _ = fltrMigrator.Migrate([]string{utils.MetaFilters})
+	if err != nil {
+		t.Error("Error when migrating Filters ", err.Error())
+	}
+	//check if version was updated
+	if vrs, err := fltrMigrator.dmOut.DataManager().DataDB().GetVersions(""); err != nil {
+		t.Error(err)
+	} else if vrs[utils.RQF] != 4 {
+		t.Errorf("Unexpected version returned: %d", vrs[utils.RQF])
+	}
+	//check if Filters was migrate correctly
+	result, err := engine.GetFilter(fltrMigrator.dmOut.DataManager(), filters.Tenant, filters.ID, false, false, utils.NonTransactional)
+	if err != nil {
+		t.Fatalf("Error when getting filters %v", err.Error())
+	}
+	result.Compile()
+	if !reflect.DeepEqual(*expFilters, *result) {
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expFilters), utils.ToJSON(result))
 	}
 }
