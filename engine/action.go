@@ -1000,7 +1000,7 @@ func removeSessionCosts(_ *Account, action *Action, _ Actions, _ interface{}) er
 			continue
 		}
 		for _, rule := range fltr.Rules {
-			smcFilter, err = utils.AppendToSMCostFilter(smcFilter, rule.Type, rule.FieldName, rule.Values, config.CgrConfig().GeneralCfg().DefaultTimezone)
+			smcFilter, err = utils.AppendToSMCostFilter(smcFilter, rule.Type, rule.Element, rule.Values, config.CgrConfig().GeneralCfg().DefaultTimezone)
 			if err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s> %s in action: <%s>", utils.Actions, err.Error(), utils.MetaRemoveSessionCosts))
 			}

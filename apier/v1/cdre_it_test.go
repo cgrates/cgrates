@@ -291,12 +291,12 @@ func testCDReAddAttributes(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: utils.Subject,
-					Value:     config.NewRSRParsersMustCompile("ATTR_SUBJECT", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
+					Value: config.NewRSRParsersMustCompile("ATTR_SUBJECT", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName: utils.Category,
-					Value:     config.NewRSRParsersMustCompile("ATTR_CATEGORY", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + utils.Category,
+					Value: config.NewRSRParsersMustCompile("ATTR_CATEGORY", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,

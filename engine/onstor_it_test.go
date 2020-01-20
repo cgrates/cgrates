@@ -1536,9 +1536,9 @@ func testOnStorITThresholdProfile(t *testing.T) {
 		ID:     "TestFilter2",
 		Rules: []*FilterRule{
 			{
-				FieldName: "Account",
-				Type:      "*string",
-				Values:    []string{"1001", "1002"},
+				Element: "Account",
+				Type:    utils.MetaString,
+				Values:  []string{"1001", "1002"},
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
@@ -1660,9 +1660,9 @@ func testOnStorITFilter(t *testing.T) {
 		ID:     "Filter1",
 		Rules: []*FilterRule{
 			{
-				FieldName: "Account",
-				Type:      "*string",
-				Values:    []string{"1001", "1002"},
+				Element: "Account",
+				Type:    utils.MetaString,
+				Values:  []string{"1001", "1002"},
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
@@ -1700,14 +1700,14 @@ func testOnStorITFilter(t *testing.T) {
 	//update
 	fp.Rules = []*FilterRule{
 		{
-			FieldName: "Account",
-			Type:      "*string",
-			Values:    []string{"1001", "1002"},
+			Element: "Account",
+			Type:    utils.MetaString,
+			Values:  []string{"1001", "1002"},
 		},
 		{
-			FieldName: "Destination",
-			Type:      "*string",
-			Values:    []string{"10", "20"},
+			Element: "Destination",
+			Type:    utils.MetaString,
+			Values:  []string{"10", "20"},
 		},
 	}
 	if err := onStor.SetFilter(fp); err != nil {
@@ -1862,8 +1862,8 @@ func testOnStorITAttributeProfile(t *testing.T) {
 		Contexts: []string{"con1"},
 		Attributes: []*Attribute{
 			{
-				FieldName: "FN1",
-				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "FN1",
+				Value: config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -1942,8 +1942,8 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 		Contexts: []string{"con1"},
 		Attributes: []*Attribute{
 			{
-				FieldName: "FN1",
-				Value:     config.NewRSRParsersMustCompile("Val1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "FN1",
+				Value: config.NewRSRParsersMustCompile("Val1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -1964,8 +1964,8 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	}
 	attrProfile.Attributes = []*Attribute{
 		{
-			FieldName: "FN1",
-			Value:     config.NewRSRParsersMustCompile("123.123", true, utils.INFIELD_SEP),
+			Path:  utils.MetaReq + utils.NestingSep + "FN1",
+			Value: config.NewRSRParsersMustCompile("123.123", true, utils.INFIELD_SEP),
 		},
 	}
 	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {
@@ -1980,8 +1980,8 @@ func testOnStorITTestAttributeSubstituteIface(t *testing.T) {
 	}
 	attrProfile.Attributes = []*Attribute{
 		{
-			FieldName: "FN1",
-			Value:     config.NewRSRParsersMustCompile("true", true, utils.INFIELD_SEP),
+			Path:  utils.MetaReq + utils.NestingSep + "FN1",
+			Value: config.NewRSRParsersMustCompile("true", true, utils.INFIELD_SEP),
 		},
 	}
 	if err := onStor.SetAttributeProfile(attrProfile, false); err != nil {

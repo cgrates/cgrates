@@ -49,7 +49,7 @@ func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 		if err := m.dmOut.DataManager().SetFilter(fl); err != nil {
 			return err
 		}
-		m.stats[utils.RQF] += 1
+		m.stats[utils.RQF]++
 	}
 	return
 }
@@ -57,20 +57,42 @@ func (m *Migrator) migrateCurrentRequestFilter() (err error) {
 var filterTypes = utils.NewStringSet([]string{utils.MetaRSR, utils.MetaStatS, utils.MetaResources,
 	utils.MetaNotRSR, utils.MetaNotStatS, utils.MetaNotResources})
 
-func migrateFilterV1(fl *engine.Filter) *engine.Filter {
+func migrateFilterV1(fl *v1Filter) (fltr *engine.Filter) {
+	fltr = &engine.Filter{
+		Tenant:             fl.Tenant,
+		ID:                 fl.ID,
+		Rules:              make([]*engine.FilterRule, len(fl.Rules)),
+		ActivationInterval: fl.ActivationInterval,
+	}
 	for i, rule := range fl.Rules {
+		fltr.Rules[i] = &engine.FilterRule{
+			Type:    rule.Type,
+			Element: rule.FieldName,
+			Values:  rule.Values,
+		}
 		if rule.FieldName == "" ||
 			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix) ||
 			filterTypes.Has(rule.Type) {
 			continue
 		}
-		fl.Rules[i].FieldName = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + rule.FieldName
+		fltr.Rules[i].Element = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + rule.FieldName
 	}
-	return fl
+	return
 }
 
-func migrateFilterV2(fl *engine.Filter) *engine.Filter {
+func migrateFilterV2(fl *v1Filter) (fltr *engine.Filter) {
+	fltr = &engine.Filter{
+		Tenant:             fl.Tenant,
+		ID:                 fl.ID,
+		Rules:              make([]*engine.FilterRule, len(fl.Rules)),
+		ActivationInterval: fl.ActivationInterval,
+	}
 	for i, rule := range fl.Rules {
+		fltr.Rules[i] = &engine.FilterRule{
+			Type:    rule.Type,
+			Element: rule.FieldName,
+			Values:  rule.Values,
+		}
 		if (rule.FieldName == "" && rule.Type != utils.MetaRSR) ||
 			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaReq) ||
 			strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix+utils.MetaVars) ||
@@ -86,18 +108,35 @@ func migrateFilterV2(fl *engine.Filter) *engine.Filter {
 			if strings.HasPrefix(rule.FieldName, utils.DynamicDataPrefix) {
 				fl.Rules[i].FieldName = fl.Rules[i].FieldName[1:]
 			}
-			fl.Rules[i].FieldName = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + rule.FieldName
+			fltr.Rules[i].Element = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + rule.FieldName
 		} else {
 			for idx, val := range rule.Values {
 				if strings.HasPrefix(val, utils.DynamicDataPrefix) {
 					// remove dynamic data prefix from fieldName
 					val = val[1:]
 				}
-				fl.Rules[i].Values[idx] = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + val
+				fltr.Rules[i].Values[idx] = utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + val
 			}
 		}
 	}
-	return fl
+	return
+}
+
+func migrateFilterV3(fl *v1Filter) (fltr *engine.Filter) {
+	fltr = &engine.Filter{
+		Tenant:             fl.Tenant,
+		ID:                 fl.ID,
+		Rules:              make([]*engine.FilterRule, len(fl.Rules)),
+		ActivationInterval: fl.ActivationInterval,
+	}
+	for i, rule := range fl.Rules {
+		fltr.Rules[i] = &engine.FilterRule{
+			Type:    rule.Type,
+			Element: rule.FieldName,
+			Values:  rule.Values,
+		}
+	}
+	return
 }
 
 func migrateInlineFilter(fl string) string {
@@ -141,28 +180,22 @@ func migrateInlineFilterV2(fl string) string {
 			ruleSplt[1] = ruleSplt[1][1:]
 		}
 		return fmt.Sprintf("%s:~%s:%s", ruleSplt[0], utils.MetaReq+utils.NestingSep+ruleSplt[1], strings.Join(ruleSplt[2:], utils.InInFieldSep))
-	} else { // in case of *rsr filter we need to add the prefix at fieldValue
-		if strings.HasPrefix(ruleSplt[2], utils.DynamicDataPrefix) {
-			// remove dynamic data prefix from fieldName
-			ruleSplt[2] = ruleSplt[2][1:]
-		}
-		return fmt.Sprintf("%s::~%s", ruleSplt[0], utils.MetaReq+utils.NestingSep+strings.Join(ruleSplt[2:], utils.InInFieldSep))
+	} // in case of *rsr filter we need to add the prefix at fieldValue
+	if strings.HasPrefix(ruleSplt[2], utils.DynamicDataPrefix) {
+		// remove dynamic data prefix from fieldName
+		ruleSplt[2] = ruleSplt[2][1:]
 	}
-
+	return fmt.Sprintf("%s::~%s", ruleSplt[0], utils.MetaReq+utils.NestingSep+strings.Join(ruleSplt[2:], utils.InInFieldSep))
 }
 
 func (m *Migrator) migrateRequestFilterV1() (err error) {
-	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.FilterPrefix)
-	if err != nil {
-		return err
-	}
-	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.FilterPrefix+tenant+":")
-		fl, err := engine.GetFilter(m.dmIN.DataManager(), tenant, idg, false, false, utils.NonTransactional)
-		if err != nil {
+	for {
+		fl, err := m.dmIN.getV1Filter()
+		if err != nil && err != utils.ErrNoMoreData {
 			return err
+		}
+		if err == utils.ErrNoMoreData {
+			break
 		}
 		if m.dryRun || fl == nil {
 			continue
@@ -170,7 +203,7 @@ func (m *Migrator) migrateRequestFilterV1() (err error) {
 		if err := m.dmOut.DataManager().SetFilter(migrateFilterV1(fl)); err != nil {
 			return err
 		}
-		m.stats[utils.RQF] += 1
+		m.stats[utils.RQF]++
 	}
 	if err = m.migrateResourceProfileFiltersV1(); err != nil {
 		return err
@@ -193,7 +226,7 @@ func (m *Migrator) migrateRequestFilterV1() (err error) {
 	if err = m.migrateDispatcherProfileFiltersV1(); err != nil {
 		return err
 	}
-	vrs := engine.Versions{utils.RQF: 2}
+	vrs := engine.Versions{utils.RQF: engine.CurrentDataDBVersions()[utils.RQF]}
 	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
 		return utils.NewCGRError(utils.Migrator,
 			utils.ServerErrorCaps,
@@ -204,27 +237,22 @@ func (m *Migrator) migrateRequestFilterV1() (err error) {
 }
 
 func (m *Migrator) migrateRequestFilterV2() (err error) {
-	var ids []string
-	tenant := config.CgrConfig().GeneralCfg().DefaultTenant
-	ids, err = m.dmIN.DataManager().DataDB().GetKeysForPrefix(utils.FilterPrefix)
-	if err != nil {
-		return fmt.Errorf("Error: <%s> when getting filter IDs for migration", err.Error())
-	}
-	for _, id := range ids {
-		idg := strings.TrimPrefix(id, utils.FilterPrefix+tenant+":")
-		fl, err := engine.GetFilter(m.dmIN.DataManager(), tenant, idg, false, false, utils.NonTransactional)
-		if err != nil {
-			return fmt.Errorf("Error: <%s> when getting filter with tenant: <%s> and id: <%s> for migration",
-				err.Error(), tenant, idg)
+	for {
+		fl, err := m.dmIN.getV1Filter()
+		if err != nil && err != utils.ErrNoMoreData {
+			return err
+		}
+		if err == utils.ErrNoMoreData {
+			break
 		}
 		if m.dryRun || fl == nil {
 			continue
 		}
 		if err := m.dmOut.DataManager().SetFilter(migrateFilterV2(fl)); err != nil {
 			return fmt.Errorf("Error: <%s> when setting filter with tenant: <%s> and id: <%s> after migration",
-				err.Error(), tenant, idg)
+				err.Error(), fl.Tenant, fl.ID)
 		}
-		m.stats[utils.RQF] += 1
+		m.stats[utils.RQF]++
 	}
 	if err = m.migrateResourceProfileFiltersV2(); err != nil {
 		return fmt.Errorf("Error: <%s> when trying to migrate filter for ResourceProfiles",
@@ -264,6 +292,34 @@ func (m *Migrator) migrateRequestFilterV2() (err error) {
 	return
 }
 
+func (m *Migrator) migrateRequestFilterV3() (err error) {
+	for {
+		fl, err := m.dmIN.getV1Filter()
+		if err != nil && err != utils.ErrNoMoreData {
+			return err
+		}
+		if err == utils.ErrNoMoreData {
+			break
+		}
+		if m.dryRun || fl == nil {
+			continue
+		}
+		if err := m.dmOut.DataManager().SetFilter(migrateFilterV3(fl)); err != nil {
+			return fmt.Errorf("Error: <%s> when setting filter with tenant: <%s> and id: <%s> after migration",
+				err.Error(), fl.Tenant, fl.ID)
+		}
+		m.stats[utils.RQF]++
+	}
+	vrs := engine.Versions{utils.RQF: engine.CurrentDataDBVersions()[utils.RQF]}
+	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating Filters version into dataDB", err.Error()))
+	}
+	return
+}
+
 func (m *Migrator) migrateFilters() (err error) {
 	var vrs engine.Versions
 	current := engine.CurrentDataDBVersions()
@@ -280,6 +336,10 @@ func (m *Migrator) migrateFilters() (err error) {
 			"version number is not defined for ActionTriggers model")
 	}
 	switch vrs[utils.RQF] {
+	case 3:
+		if err = m.migrateRequestFilterV3(); err != nil {
+			return err
+		}
 	case 2:
 		if err = m.migrateRequestFilterV2(); err != nil {
 			return err
@@ -321,7 +381,7 @@ func (m *Migrator) migrateResourceProfileFiltersV1() (err error) {
 		if err := m.dmOut.DataManager().SetResourceProfile(res, true); err != nil {
 			return err
 		}
-		m.stats[utils.RQF] += 1
+		m.stats[utils.RQF]++
 	}
 	return
 }
@@ -348,7 +408,7 @@ func (m *Migrator) migrateStatQueueProfileFiltersV1() (err error) {
 		if err = m.dmOut.DataManager().SetStatQueueProfile(sgs, true); err != nil {
 			return err
 		}
-		m.stats[utils.RQF] += 1
+		m.stats[utils.RQF]++
 	}
 	return
 }
@@ -375,7 +435,7 @@ func (m *Migrator) migrateThresholdsProfileFiltersV1() (err error) {
 		if err := m.dmOut.DataManager().SetThresholdProfile(ths, true); err != nil {
 			return err
 		}
-		m.stats[utils.RQF] += 1
+		m.stats[utils.RQF]++
 	}
 	return
 }
@@ -402,7 +462,7 @@ func (m *Migrator) migrateSupplierProfileFiltersV1() (err error) {
 		if err := m.dmOut.DataManager().SetSupplierProfile(splp, true); err != nil {
 			return err
 		}
-		m.stats[utils.RQF] += 1
+		m.stats[utils.RQF]++
 	}
 	return
 }
@@ -434,7 +494,7 @@ func (m *Migrator) migrateAttributeProfileFiltersV1() (err error) {
 		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
 			return err
 		}
-		m.stats[utils.RQF] += 1
+		m.stats[utils.RQF]++
 	}
 	return
 }
@@ -461,7 +521,7 @@ func (m *Migrator) migrateChargerProfileFiltersV1() (err error) {
 		if err := m.dmOut.DataManager().SetChargerProfile(cpp, true); err != nil {
 			return err
 		}
-		m.stats[utils.RQF] += 1
+		m.stats[utils.RQF]++
 	}
 	return
 }
@@ -488,7 +548,7 @@ func (m *Migrator) migrateDispatcherProfileFiltersV1() (err error) {
 		if err := m.dmOut.DataManager().SetDispatcherProfile(dpp, true); err != nil {
 			return err
 		}
-		m.stats[utils.RQF] += 1
+		m.stats[utils.RQF]++
 	}
 	return
 }
@@ -518,7 +578,7 @@ func (m *Migrator) migrateResourceProfileFiltersV2() (err error) {
 			return fmt.Errorf("error: <%s> when setting resource profile with tenant: <%s> and id: <%s>",
 				err.Error(), tenant, idg)
 		}
-		m.stats[utils.RQF] += 1
+		m.stats[utils.RQF]++
 	}
 	return
 }
@@ -547,7 +607,7 @@ func (m *Migrator) migrateStatQueueProfileFiltersV2() (err error) {
 			return fmt.Errorf("error: <%s> when setting statQueue profile with tenant: <%s> and id: <%s>",
 				err.Error(), tenant, idg)
 		}
-		m.stats[utils.RQF] += 1
+		m.stats[utils.RQF]++
 	}
 	return
 }
@@ -576,7 +636,7 @@ func (m *Migrator) migrateThresholdsProfileFiltersV2() (err error) {
 			return fmt.Errorf("error: <%s> when setting threshold profile with tenant: <%s> and id: <%s>",
 				err.Error(), tenant, idg)
 		}
-		m.stats[utils.RQF] += 1
+		m.stats[utils.RQF]++
 	}
 	return
 }
@@ -605,7 +665,7 @@ func (m *Migrator) migrateSupplierProfileFiltersV2() (err error) {
 			return fmt.Errorf("error: <%s> when setting supplier profile with tenant: <%s> and id: <%s>",
 				err.Error(), tenant, idg)
 		}
-		m.stats[utils.RQF] += 1
+		m.stats[utils.RQF]++
 	}
 	return
 }
@@ -639,7 +699,7 @@ func (m *Migrator) migrateAttributeProfileFiltersV2() (err error) {
 			return fmt.Errorf("error: <%s> when setting attribute profile with tenant: <%s> and id: <%s>",
 				err.Error(), tenant, idg)
 		}
-		m.stats[utils.RQF] += 1
+		m.stats[utils.RQF]++
 	}
 	return
 }
@@ -668,7 +728,7 @@ func (m *Migrator) migrateChargerProfileFiltersV2() (err error) {
 			return fmt.Errorf("error: <%s> when setting charger profile with tenant: <%s> and id: <%s>",
 				err.Error(), tenant, idg)
 		}
-		m.stats[utils.RQF] += 1
+		m.stats[utils.RQF]++
 	}
 	return
 }
@@ -697,7 +757,22 @@ func (m *Migrator) migrateDispatcherProfileFiltersV2() (err error) {
 			return fmt.Errorf("error: <%s> when setting dispatcher profile with tenant: <%s> and id: <%s>",
 				err.Error(), tenant, idg)
 		}
-		m.stats[utils.RQF] += 1
+		m.stats[utils.RQF]++
 	}
 	return
+}
+
+type v1Filter struct {
+	Tenant             string
+	ID                 string
+	Rules              []*v1FilterRule
+	ActivationInterval *utils.ActivationInterval
+}
+
+type v1FilterRule struct {
+	Type      string            // Filter type (*string, *timing, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
+	FieldName string            // Name of the field providing us the Values to check (used in case of some )
+	Values    []string          // Filter definition
+	rsrFields config.RSRParsers // Cache here the RSRFilter Values
+	negative  *bool
 }

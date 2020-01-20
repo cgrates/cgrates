@@ -329,14 +329,14 @@ CREATE TABLE tp_filters (
   `tpid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `id` varchar(64) NOT NULL,
-  `filter_type` varchar(16) NOT NULL,
-  `filter_field_name` varchar(64) NOT NULL,
-  `filter_field_values` varchar(256) NOT NULL,
+  `type` varchar(16) NOT NULL,
+  `element` varchar(64) NOT NULL,
+  `values` varchar(256) NOT NULL,
   `activation_interval` varchar(64) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_filters` (`tpid`,`tenant`, `id`, `filter_type`, `filter_field_name`)
+  UNIQUE KEY `unique_tp_filters` (`tpid`,`tenant`, `id`, `type`, `element`)
 );
 
 --
@@ -386,7 +386,7 @@ CREATE TABLE tp_attributes (
   `filter_ids` varchar(64) NOT NULL,
   `activation_interval` varchar(64) NOT NULL,
   `attribute_filter_ids` varchar(64) NOT NULL,
-  `field_name` varchar(64) NOT NULL,
+  `path` varchar(64) NOT NULL,
   `type` varchar(64) NOT NULL,
   `value` varchar(64) NOT NULL,
   `blocker` BOOLEAN NOT NULL,
@@ -395,7 +395,7 @@ CREATE TABLE tp_attributes (
   PRIMARY KEY (`pk`),
   KEY `tpid` (`tpid`),
   UNIQUE KEY `unique_tp_attributes` (`tpid`,`tenant`,
-    `id`,`filter_ids`,`field_name`,`value` )
+    `id`,`filter_ids`,`path`,`value` )
 );
 
 --

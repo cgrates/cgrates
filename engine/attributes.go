@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -136,6 +137,7 @@ type AttrSProcessEventReply struct {
 // format fldName1:fldVal1,fldName2:fldVal2
 func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
 	for i, fld := range attrReply.AlteredFields {
+		fld = strings.TrimPrefix(fld, utils.MetaReq+utils.NestingSep)
 		if _, has := attrReply.CGREvent.Event[fld]; !has {
 			continue //maybe removed
 		}
@@ -166,10 +168,9 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 	}
 	rply = &AttrSProcessEventReply{
 		MatchedProfiles: []string{attrPrf.ID},
-		CGREvent:        args.Clone(),
+		CGREvent:        args.CGREvent,
 		blocker:         attrPrf.Blocker}
-	evNm := config.NewNavigableMap(nil)
-	evNm.Set([]string{utils.MetaReq}, args.Event, false, false)
+	evNm := config.NewNavigableMap(map[string]interface{}{utils.MetaReq: rply.CGREvent.Event})
 	for _, attribute := range attrPrf.Attributes {
 		//in case that we have filter for attribute send them to FilterS to be processed
 		if len(attribute.FilterIDs) != 0 {
@@ -186,16 +187,16 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 		case utils.META_CONSTANT:
 			substitute, err = attribute.Value.ParseValue(utils.EmptyString)
 		case utils.MetaVariable, utils.META_COMPOSED:
-			substitute, err = attribute.Value.ParseEvent(args.Event)
+			substitute, err = attribute.Value.ParseDataProvider(evNm, utils.NestingSep)
 		case utils.META_USAGE_DIFFERENCE:
 			if len(attribute.Value) != 2 {
 				return nil, fmt.Errorf("invalid arguments <%s>", utils.ToJSON(attribute.Value))
 			}
-			strVal1, err := attribute.Value[0].ParseEvent(args.Event)
+			strVal1, err := attribute.Value[0].ParseDataProvider(evNm, utils.NestingSep)
 			if err != nil {
 				return nil, err
 			}
-			strVal2, err := attribute.Value[1].ParseEvent(args.Event)
+			strVal2, err := attribute.Value[1].ParseDataProvider(evNm, utils.NestingSep)
 			if err != nil {
 				return nil, err
 			}
@@ -211,7 +212,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 		case utils.MetaSum:
 			iFaceVals := make([]interface{}, len(attribute.Value))
 			for i, val := range attribute.Value {
-				strVal, err := val.ParseEvent(args.Event)
+				strVal, err := val.ParseDataProvider(evNm, utils.NestingSep)
 				if err != nil {
 					return nil, err
 				}
@@ -227,7 +228,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 				return nil, fmt.Errorf("invalid arguments <%s> to %s",
 					utils.ToJSON(attribute.Value), utils.MetaValueExponent)
 			}
-			strVal1, err := attribute.Value[0].ParseEvent(args.Event) // String Value
+			strVal1, err := attribute.Value[0].ParseDataProvider(evNm, utils.NestingSep) // String Value
 			if err != nil {
 				return nil, err
 			}
@@ -236,7 +237,7 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 				return nil, fmt.Errorf("invalid value <%s> to %s",
 					strVal1, utils.MetaValueExponent)
 			}
-			strVal2, err := attribute.Value[1].ParseEvent(args.Event) // String Exponent
+			strVal2, err := attribute.Value[1].ParseDataProvider(evNm, utils.NestingSep) // String Exponent
 			if err != nil {
 				return nil, err
 			}
@@ -247,25 +248,34 @@ func (alS *AttributeService) processEvent(args *AttrArgsProcessEvent) (
 			substitute = strconv.FormatFloat(utils.Round(val*math.Pow10(exp),
 				config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64)
 		default: // backwards compatible in case that Type is empty
-			substitute, err = attribute.Value.ParseEvent(args.Event)
+			substitute, err = attribute.Value.ParseDataProvider(evNm, utils.NestingSep)
 		}
 
 		if err != nil {
 			return nil, err
 		}
-		//add only once the FieldName in AlteredFields
-		if !utils.IsSliceMember(rply.AlteredFields, attribute.FieldName) {
-			rply.AlteredFields = append(rply.AlteredFields, attribute.FieldName)
+		//add only once the Path in AlteredFields
+		if !utils.IsSliceMember(rply.AlteredFields, attribute.Path) {
+			rply.AlteredFields = append(rply.AlteredFields, attribute.Path)
+		}
+		if attribute.Path == utils.MetaTenant {
+			if attribute.Type == utils.META_COMPOSED {
+				rply.CGREvent.Tenant += substitute
+			} else {
+				rply.CGREvent.Tenant = substitute
+			}
+			continue
 		}
 		if substitute == utils.MetaRemove {
-			delete(rply.CGREvent.Event, attribute.FieldName)
+			evNm.Remove(strings.Split(attribute.Path, utils.NestingSep))
 			continue
 		}
 		if attribute.Type == utils.META_COMPOSED {
-			substitute = utils.IfaceAsString(rply.CGREvent.Event[attribute.FieldName]) + substitute
+			var val string
+			val, err = evNm.FieldAsString(strings.Split(attribute.Path, utils.NestingSep))
+			substitute = val + substitute
 		}
-		rply.CGREvent.Event[attribute.FieldName] = substitute
-
+		evNm.Set(strings.Split(attribute.Path, utils.NestingSep), substitute, false, false)
 	}
 	return
 }
@@ -300,6 +310,7 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 		args.ProcessRuns = utils.IntPointer(alS.cgrcfg.AttributeSCfg().ProcessRuns)
 	}
 	var apiRply *AttrSProcessEventReply // aggregate response here
+	args.CGREvent = args.CGREvent.Clone()
 	for i := 0; i < *args.ProcessRuns; i++ {
 		var evRply *AttrSProcessEventReply
 		evRply, err = alS.processEvent(args)
@@ -310,9 +321,6 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 				err = nil
 			}
 			break
-		}
-		if len(evRply.AlteredFields) != 0 {
-			args.CGREvent = evRply.CGREvent // for next loop
 		}
 		if apiRply == nil { // first reply
 			apiRply = evRply
@@ -328,10 +336,9 @@ func (alS *AttributeService) V1ProcessEvent(args *AttrArgsProcessEvent,
 		apiRply.MatchedProfiles = append(apiRply.MatchedProfiles, evRply.MatchedProfiles[0])
 		apiRply.CGREvent = evRply.CGREvent
 		for _, fldName := range evRply.AlteredFields {
-			if utils.IsSliceMember(apiRply.AlteredFields, fldName) {
-				continue // only add processed fieldName once
+			if !utils.IsSliceMember(apiRply.AlteredFields, fldName) {
+				apiRply.AlteredFields = append(apiRply.AlteredFields, fldName) // only add processed fieldName once
 			}
-			apiRply.AlteredFields = append(apiRply.AlteredFields, fldName)
 		}
 		if evRply.blocker {
 			break

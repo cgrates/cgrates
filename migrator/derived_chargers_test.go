@@ -29,74 +29,74 @@ import (
 
 func TestFieldinfo2Attribute(t *testing.T) {
 	type testA struct {
-		FieldName string
+		Path      string
 		FieldInfo string
 		Initial   []*engine.Attribute
 		Expected  []*engine.Attribute
 	}
 	tests := []testA{
 		testA{
-			FieldName: utils.Account,
+			Path:      utils.Account,
 			FieldInfo: utils.MetaDefault,
 			Initial:   make([]*engine.Attribute, 0),
 			Expected:  make([]*engine.Attribute, 0),
 		},
 		testA{
-			FieldName: utils.Account,
+			Path:      utils.Account,
 			FieldInfo: "",
 			Initial:   make([]*engine.Attribute, 0),
 			Expected:  make([]*engine.Attribute, 0),
 		},
 		testA{
-			FieldName: utils.Account,
+			Path:      utils.Account,
 			FieldInfo: "^1003",
 			Initial:   make([]*engine.Attribute, 0),
 			Expected: []*engine.Attribute{
 				&engine.Attribute{
-					FieldName: utils.Account,
-					Type:      utils.MetaVariable,
-					Value:     config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Type:  utils.MetaVariable,
+					Value: config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
 				},
 			},
 		},
 		testA{
-			FieldName: utils.Subject,
+			Path:      utils.Subject,
 			FieldInfo: `~effective_caller_id_number:s/(\d+)/+$1/`,
 			Initial:   make([]*engine.Attribute, 0),
 			Expected: []*engine.Attribute{
 				&engine.Attribute{
-					FieldName: utils.Subject,
-					Type:      utils.MetaVariable,
-					Value:     config.NewRSRParsersMustCompile(`~effective_caller_id_number:s/(\d+)/+$1/`, true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
+					Type:  utils.MetaVariable,
+					Value: config.NewRSRParsersMustCompile(`~effective_caller_id_number:s/(\d+)/+$1/`, true, utils.INFIELD_SEP),
 				},
 			},
 		},
 		testA{
-			FieldName: utils.Subject,
+			Path:      utils.Subject,
 			FieldInfo: "^call_1003",
 			Initial: []*engine.Attribute{
 				&engine.Attribute{
-					FieldName: utils.Account,
-					Type:      utils.MetaVariable,
-					Value:     config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Type:  utils.MetaVariable,
+					Value: config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
 				},
 			},
 			Expected: []*engine.Attribute{
 				&engine.Attribute{
-					FieldName: utils.Account,
-					Type:      utils.MetaVariable,
-					Value:     config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Type:  utils.MetaVariable,
+					Value: config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
 				},
 				&engine.Attribute{
-					FieldName: utils.Subject,
-					Type:      utils.MetaVariable,
-					Value:     config.NewRSRParsersMustCompile("call_1003", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
+					Type:  utils.MetaVariable,
+					Value: config.NewRSRParsersMustCompile("call_1003", true, utils.INFIELD_SEP),
 				},
 			},
 		},
 	}
 	for i, v := range tests {
-		if rply := fieldinfo2Attribute(v.Initial, v.FieldName, v.FieldInfo); !reflect.DeepEqual(v.Expected, rply) {
+		if rply := fieldinfo2Attribute(v.Initial, v.Path, v.FieldInfo); !reflect.DeepEqual(v.Expected, rply) {
 			t.Errorf("For %v expected: %s ,recieved: %s", i, utils.ToJSON(v.Expected), utils.ToJSON(rply))
 		}
 	}
@@ -128,14 +128,14 @@ func TestDerivedChargers2AttributeProfile(t *testing.T) {
 				ActivationInterval: nil,
 				Attributes: []*engine.Attribute{
 					&engine.Attribute{
-						FieldName: utils.Category,
-						Type:      utils.MetaVariable,
-						Value:     config.NewRSRParsersMustCompile("*voice", true, utils.INFIELD_SEP),
+						Path:  utils.MetaReq + utils.NestingSep + utils.Category,
+						Type:  utils.MetaVariable,
+						Value: config.NewRSRParsersMustCompile("*voice", true, utils.INFIELD_SEP),
 					},
 					&engine.Attribute{
-						FieldName: utils.Account,
-						Type:      utils.MetaVariable,
-						Value:     config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
+						Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+						Type:  utils.MetaVariable,
+						Value: config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
 					},
 				},
 				Blocker: false,
@@ -161,24 +161,24 @@ func TestDerivedChargers2AttributeProfile(t *testing.T) {
 				ActivationInterval: nil,
 				Attributes: []*engine.Attribute{
 					&engine.Attribute{
-						FieldName: utils.Category,
-						Type:      utils.MetaVariable,
-						Value:     config.NewRSRParsersMustCompile("*voice", true, utils.INFIELD_SEP),
+						Path:  utils.MetaReq + utils.NestingSep + utils.Category,
+						Type:  utils.MetaVariable,
+						Value: config.NewRSRParsersMustCompile("*voice", true, utils.INFIELD_SEP),
 					},
 					&engine.Attribute{
-						FieldName: utils.Account,
-						Type:      utils.MetaVariable,
-						Value:     config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
+						Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+						Type:  utils.MetaVariable,
+						Value: config.NewRSRParsersMustCompile("1003", true, utils.INFIELD_SEP),
 					},
 					&engine.Attribute{
-						FieldName: utils.Subject,
-						Type:      utils.MetaVariable,
-						Value:     config.NewRSRParsersMustCompile("call_1003_to_1004", true, utils.INFIELD_SEP),
+						Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
+						Type:  utils.MetaVariable,
+						Value: config.NewRSRParsersMustCompile("call_1003_to_1004", true, utils.INFIELD_SEP),
 					},
 					&engine.Attribute{
-						FieldName: utils.Destination,
-						Type:      utils.MetaVariable,
-						Value:     config.NewRSRParsersMustCompile("1004", true, utils.INFIELD_SEP),
+						Path:  utils.MetaReq + utils.NestingSep + utils.Destination,
+						Type:  utils.MetaVariable,
+						Value: config.NewRSRParsersMustCompile("1004", true, utils.INFIELD_SEP),
 					},
 				},
 				Blocker: false,

@@ -67,7 +67,7 @@ func (m *Migrator) migrateCurrentAttributeProfile() (err error) {
 			idg, utils.NonTransactional, false); err != nil {
 			return err
 		}
-		m.stats[utils.Attributes] += 1
+		m.stats[utils.Attributes]++
 	}
 	return
 }
@@ -98,7 +98,7 @@ func (m *Migrator) migrateV1Attributes() (err error) {
 		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
 			return err
 		}
-		m.stats[utils.Attributes] += 1
+		m.stats[utils.Attributes]++
 	}
 	if m.dryRun {
 		return
@@ -137,7 +137,7 @@ func (m *Migrator) migrateV2Attributes() (err error) {
 		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
 			return err
 		}
-		m.stats[utils.Attributes] += 1
+		m.stats[utils.Attributes]++
 	}
 	if m.dryRun {
 		return
@@ -176,7 +176,46 @@ func (m *Migrator) migrateV3Attributes() (err error) {
 		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
 			return err
 		}
-		m.stats[utils.Attributes] += 1
+		m.stats[utils.Attributes]++
+	}
+	if m.dryRun {
+		return
+	}
+	// All done, update version wtih current one
+	vrs := engine.Versions{utils.Attributes: engine.CurrentDataDBVersions()[utils.Attributes]}
+	if err = m.dmOut.DataManager().DataDB().SetVersions(vrs, false); err != nil {
+		return utils.NewCGRError(utils.Migrator,
+			utils.ServerErrorCaps,
+			err.Error(),
+			fmt.Sprintf("error: <%s> when updating Thresholds version into dataDB", err.Error()))
+	}
+	return
+}
+
+func (m *Migrator) migrateV4Attributes() (err error) {
+	var v4Attr *v4AttributeProfile
+	for {
+		v4Attr, err = m.dmIN.getV4AttributeProfile()
+		if err != nil && err != utils.ErrNoMoreData {
+			return err
+		}
+		if err == utils.ErrNoMoreData {
+			break
+		}
+		if v4Attr == nil {
+			continue
+		}
+		attrPrf, err := v4Attr.AsAttributeProfile()
+		if err != nil {
+			return err
+		}
+		if m.dryRun {
+			continue
+		}
+		if err := m.dmOut.DataManager().SetAttributeProfile(attrPrf, true); err != nil {
+			return err
+		}
+		m.stats[utils.Attributes]++
 	}
 	if m.dryRun {
 		return
@@ -227,6 +266,10 @@ func (m *Migrator) migrateAttributeProfile() (err error) {
 		if err = m.migrateV3Attributes(); err != nil {
 			return err
 		}
+	case 4:
+		if err = m.migrateV4Attributes(); err != nil {
+			return err
+		}
 	}
 	return m.ensureIndexesDataDB(engine.ColAttr)
 }
@@ -257,7 +300,7 @@ func (v1AttrPrf v1AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 			}
 			attrPrf.Attributes = append(attrPrf.Attributes, &engine.Attribute{
 				FilterIDs: filterIDs,
-				FieldName: attr.FieldName,
+				Path:      utils.MetaReq + utils.NestingSep + attr.FieldName,
 				Value:     sbstPrsr,
 				Type:      utils.MetaVariable,
 			})
@@ -308,7 +351,7 @@ func (v2AttrPrf v2AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 		}
 		attrPrf.Attributes = append(attrPrf.Attributes, &engine.Attribute{
 			FilterIDs: filterIDs,
-			FieldName: attr.FieldName,
+			Path:      utils.MetaReq + utils.NestingSep + attr.FieldName,
 			Value:     attr.Substitute,
 			Type:      utils.MetaVariable,
 		})
@@ -344,9 +387,47 @@ func (v3AttrPrf v3AttributeProfile) AsAttributeProfile() (attrPrf *engine.Attrib
 	for _, attr := range v3AttrPrf.Attributes {
 		attrPrf.Attributes = append(attrPrf.Attributes, &engine.Attribute{
 			FilterIDs: attr.FilterIDs,
-			FieldName: attr.FieldName,
+			Path:      utils.MetaReq + utils.NestingSep + attr.FieldName,
 			Value:     attr.Substitute,
 			Type:      utils.MetaVariable, //default value for type
+		})
+	}
+	return
+}
+
+type v4Attribute struct {
+	FilterIDs []string
+	FieldName string
+	Type      string
+	Value     config.RSRParsers
+}
+
+type v4AttributeProfile struct {
+	Tenant             string
+	ID                 string
+	Contexts           []string // bind this AttributeProfile to multiple contexts
+	FilterIDs          []string
+	ActivationInterval *utils.ActivationInterval // Activation interval
+	Attributes         []*v4Attribute
+	Blocker            bool // blocker flag to stop processing on multiple runs
+	Weight             float64
+}
+
+func (v4AttrPrf v4AttributeProfile) AsAttributeProfile() (attrPrf *engine.AttributeProfile, err error) {
+	attrPrf = &engine.AttributeProfile{
+		Tenant:             v4AttrPrf.Tenant,
+		ID:                 v4AttrPrf.ID,
+		Contexts:           v4AttrPrf.Contexts,
+		FilterIDs:          v4AttrPrf.FilterIDs,
+		Weight:             v4AttrPrf.Weight,
+		ActivationInterval: v4AttrPrf.ActivationInterval,
+	}
+	for _, attr := range v4AttrPrf.Attributes {
+		attrPrf.Attributes = append(attrPrf.Attributes, &engine.Attribute{
+			FilterIDs: attr.FilterIDs,
+			Path:      utils.MetaReq + utils.NestingSep + attr.FieldName,
+			Value:     attr.Value,
+			Type:      attr.Type,
 		})
 	}
 	return

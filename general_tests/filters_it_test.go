@@ -261,9 +261,9 @@ func testV1FltrPupulateThreshold(t *testing.T) {
 			ID:     "FLTR_TH_Stats1",
 			Rules: []*engine.FilterRule{
 				{
-					Type:      "*gt",
-					FieldName: "~*stats.Stat_1.*acd",
-					Values:    []string{"10.0"},
+					Type:    "*gt",
+					Element: "~*stats.Stat_1.*acd",
+					Values:  []string{"10.0"},
 				},
 			},
 		},
@@ -346,9 +346,9 @@ func testV1FltrGetThresholdForEvent2(t *testing.T) {
 			ID:     "FLTR_TH_Stats1",
 			Rules: []*engine.FilterRule{
 				{
-					Type:      "*lt",
-					FieldName: "~*stats.Stat_1.*acd",
-					Values:    []string{"10.0"},
+					Type:    "*lt",
+					Element: "~*stats.Stat_1.*acd",
+					Values:  []string{"10.0"},
 				},
 			},
 		},
@@ -451,9 +451,9 @@ func testV1FltrPopulateResources(t *testing.T) {
 			ID:     "FLTR_TH_Resource",
 			Rules: []*engine.FilterRule{
 				{
-					Type:      "*gt",
-					FieldName: "~*resources.ResTest.TotalUsage",
-					Values:    []string{"2.0"},
+					Type:    "*gt",
+					Element: "~*resources.ResTest.TotalUsage",
+					Values:  []string{"2.0"},
 				},
 			},
 		},
@@ -515,9 +515,9 @@ func testV1FltrPopulateResources(t *testing.T) {
 		ID:     "FLTR_TH_Resource",
 		Rules: []*engine.FilterRule{
 			{
-				Type:      "*lt",
-				FieldName: "~*resources.ResTest.TotalUsage",
-				Values:    []string{"2.0"},
+				Type:    "*lt",
+				Element: "~*resources.ResTest.TotalUsage",
+				Values:  []string{"2.0"},
 			},
 		},
 	}
@@ -559,9 +559,9 @@ func testV1FltrAccounts(t *testing.T) {
 			ID:     "FLTR_TH_Accounts",
 			Rules: []*engine.FilterRule{
 				{
-					Type:      "*gt",
-					FieldName: "~*accounts.1001.BalanceMap.*monetary[0].Value",
-					Values:    []string{"9"},
+					Type:    "*gt",
+					Element: "~*accounts.1001.BalanceMap.*monetary[0].Value",
+					Values:  []string{"9"},
 				},
 			},
 		},
@@ -633,9 +633,9 @@ func testV1FltrAccounts(t *testing.T) {
 		ID:     "FLTR_TH_Accounts",
 		Rules: []*engine.FilterRule{
 			{
-				Type:      "*gt",
-				FieldName: "~*accounts.1001.BalanceMap.*monetary[0].Value",
-				Values:    []string{"11"},
+				Type:    "*gt",
+				Element: "~*accounts.1001.BalanceMap.*monetary[0].Value",
+				Values:  []string{"11"},
 			},
 		},
 	}

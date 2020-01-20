@@ -254,7 +254,7 @@ func testSSv1ItAuth(t *testing.T) {
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
-		AlteredFields:   []string{"OfficeGroup"},
+		AlteredFields:   []string{"*req.OfficeGroup"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItAuth",
@@ -363,7 +363,7 @@ func testSSv1ItInitiateSession(t *testing.T) {
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
-		AlteredFields:   []string{"OfficeGroup"},
+		AlteredFields:   []string{"*req.OfficeGroup"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItInitiateSession",
@@ -473,7 +473,7 @@ func testSSv1ItUpdateSession(t *testing.T) {
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
-		AlteredFields:   []string{"OfficeGroup"},
+		AlteredFields:   []string{"*req.OfficeGroup"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",
@@ -617,7 +617,7 @@ func testSSv1ItProcessEvent(t *testing.T) {
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
-		AlteredFields:   []string{"OfficeGroup"},
+		AlteredFields:   []string{"*req.OfficeGroup"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItProcessEvent",
@@ -772,7 +772,7 @@ func testSSv1ItForceUpdateSession(t *testing.T) {
 	}
 	eAttrs := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_ACNT_1001"},
-		AlteredFields:   []string{"OfficeGroup"},
+		AlteredFields:   []string{"*req.OfficeGroup"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "TestSSv1ItUpdateSession",

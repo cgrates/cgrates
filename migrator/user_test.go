@@ -104,14 +104,14 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: utils.MetaTenant,
-					Type:      utils.META_CONSTANT,
-					Value:     config.NewRSRParsersMustCompile(usrTenant, true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + "Subject",
+					Type:  utils.MetaVariable,
+					Value: config.NewRSRParsersMustCompile("call_1001", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName: "Subject",
-					Type:      utils.MetaVariable,
-					Value:     config.NewRSRParsersMustCompile("call_1001", true, utils.INFIELD_SEP),
+					Path:  utils.MetaTenant,
+					Type:  utils.META_CONSTANT,
+					Value: config.NewRSRParsersMustCompile(usrTenant, true, utils.INFIELD_SEP),
 				},
 			},
 			Blocker: false,
@@ -127,14 +127,14 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: utils.RequestType,
-					Type:      utils.MetaVariable,
-					Value:     config.NewRSRParsersMustCompile("*prepaid", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + utils.RequestType,
+					Type:  utils.MetaVariable,
+					Value: config.NewRSRParsersMustCompile("*prepaid", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName: "msisdn",
-					Type:      utils.MetaVariable,
-					Value:     config.NewRSRParsersMustCompile("123423534646752", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + "msisdn",
+					Type:  utils.MetaVariable,
+					Value: config.NewRSRParsersMustCompile("123423534646752", true, utils.INFIELD_SEP),
 				},
 			},
 			Blocker: false,
@@ -148,14 +148,14 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: utils.MetaTenant,
-					Type:      utils.META_CONSTANT,
-					Value:     config.NewRSRParsersMustCompile(usrTenant, true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + utils.RequestType,
+					Type:  utils.MetaVariable,
+					Value: config.NewRSRParsersMustCompile("*prepaid", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName: utils.RequestType,
-					Type:      utils.MetaVariable,
-					Value:     config.NewRSRParsersMustCompile("*prepaid", true, utils.INFIELD_SEP),
+					Path:  utils.MetaTenant,
+					Type:  utils.META_CONSTANT,
+					Value: config.NewRSRParsersMustCompile(usrTenant, true, utils.INFIELD_SEP),
 				},
 			},
 			Blocker: false,
@@ -171,29 +171,29 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: utils.MetaTenant,
-					Type:      utils.META_CONSTANT,
-					Value:     config.NewRSRParsersMustCompile(usrTenant, true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + utils.RequestType,
+					Type:  utils.MetaVariable,
+					Value: config.NewRSRParsersMustCompile("*prepaid", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName: utils.RequestType,
-					Type:      utils.MetaVariable,
-					Value:     config.NewRSRParsersMustCompile("*prepaid", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + utils.Subject,
+					Type:  utils.MetaVariable,
+					Value: config.NewRSRParsersMustCompile("acnt63", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName: utils.Subject,
-					Type:      utils.MetaVariable,
-					Value:     config.NewRSRParsersMustCompile("acnt63", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + "imsi",
+					Type:  utils.MetaVariable,
+					Value: config.NewRSRParsersMustCompile("12345", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName: "imsi",
-					Type:      utils.MetaVariable,
-					Value:     config.NewRSRParsersMustCompile("12345", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + "msisdn",
+					Type:  utils.MetaVariable,
+					Value: config.NewRSRParsersMustCompile("12345", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName: "msisdn",
-					Type:      utils.MetaVariable,
-					Value:     config.NewRSRParsersMustCompile("12345", true, utils.INFIELD_SEP),
+					Path:  utils.MetaTenant,
+					Type:  utils.META_CONSTANT,
+					Value: config.NewRSRParsersMustCompile(usrTenant, true, utils.INFIELD_SEP),
 				},
 			},
 			Blocker: false,
@@ -203,13 +203,13 @@ func TestUserProfile2attributeProfile(t *testing.T) {
 	for i := range expected {
 		rply := userProfile2attributeProfile(users[i])
 		sort.Slice(rply.Attributes, func(i, j int) bool {
-			if rply.Attributes[i].FieldName == rply.Attributes[j].FieldName {
+			if rply.Attributes[i].Path == rply.Attributes[j].Path {
 				return rply.Attributes[i].FilterIDs[0] < rply.Attributes[j].FilterIDs[0]
 			}
-			return rply.Attributes[i].FieldName < rply.Attributes[j].FieldName
+			return rply.Attributes[i].Path < rply.Attributes[j].Path
 		}) // only for test; map returns random keys
 		if !reflect.DeepEqual(expected[i], rply) {
-			t.Errorf("For %v expected: %s ,\nreceived: %s ", i, utils.ToIJSON(expected[i]), utils.ToIJSON(rply))
+			t.Errorf("For %v expected: %s ,\nreceived: %s ", i, utils.ToJSON(expected[i]), utils.ToJSON(rply))
 		}
 	}
 }

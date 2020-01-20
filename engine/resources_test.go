@@ -408,24 +408,24 @@ func TestResourceAddFilters(t *testing.T) {
 		ID:     "FLTR_RES_1",
 		Rules: []*FilterRule{
 			{
-				Type:      utils.MetaString,
-				FieldName: "~*req.Resources",
-				Values:    []string{"ResourceProfile1"},
+				Type:    utils.MetaString,
+				Element: "~*req.Resources",
+				Values:  []string{"ResourceProfile1"},
 			},
 			{
-				Type:      utils.MetaGreaterOrEqual,
-				FieldName: "~*req.UsageInterval",
-				Values:    []string{(1 * time.Second).String()},
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.UsageInterval",
+				Values:  []string{(1 * time.Second).String()},
 			},
 			{
-				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:    []string{(1 * time.Second).String()},
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
+				Values:  []string{(1 * time.Second).String()},
 			},
 			{
-				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:    []string{"9.0"},
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"9.0"},
 			},
 		},
 	}
@@ -435,24 +435,24 @@ func TestResourceAddFilters(t *testing.T) {
 		ID:     "FLTR_RES_2",
 		Rules: []*FilterRule{
 			{
-				Type:      utils.MetaString,
-				FieldName: "~*req.Resources",
-				Values:    []string{"ResourceProfile2"},
+				Type:    utils.MetaString,
+				Element: "~*req.Resources",
+				Values:  []string{"ResourceProfile2"},
 			},
 			{
-				Type:      utils.MetaGreaterOrEqual,
-				FieldName: "~*req.PddInterval",
-				Values:    []string{(1 * time.Second).String()},
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.PddInterval",
+				Values:  []string{(1 * time.Second).String()},
 			},
 			{
-				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:    []string{(1 * time.Second).String()},
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
+				Values:  []string{(1 * time.Second).String()},
 			},
 			{
-				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:    []string{"15.0"},
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"15.0"},
 			},
 		},
 	}
@@ -462,9 +462,9 @@ func TestResourceAddFilters(t *testing.T) {
 		ID:     "FLTR_RES_3",
 		Rules: []*FilterRule{
 			{
-				Type:      utils.MetaPrefix,
-				FieldName: "~*req.Resources",
-				Values:    []string{"ResourceProfilePrefix"},
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Resources",
+				Values:  []string{"ResourceProfilePrefix"},
 			},
 		},
 	}

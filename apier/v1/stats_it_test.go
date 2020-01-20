@@ -340,9 +340,9 @@ func testV1STSSetStatQueueProfile(t *testing.T) {
 			ID:     "FLTR_1",
 			Rules: []*engine.FilterRule{
 				{
-					FieldName: "~*req.Account",
-					Type:      "*string",
-					Values:    []string{"1001"},
+					Element: "~*req.Account",
+					Type:    utils.MetaString,
+					Values:  []string{"1001"},
 				},
 			},
 			ActivationInterval: &utils.ActivationInterval{
@@ -420,9 +420,9 @@ func testV1STSUpdateStatQueueProfile(t *testing.T) {
 			ID:     "FLTR_2",
 			Rules: []*engine.FilterRule{
 				{
-					FieldName: "~*req.Account",
-					Type:      "*string",
-					Values:    []string{"1001"},
+					Element: "~*req.Account",
+					Type:    utils.MetaString,
+					Values:  []string{"1001"},
 				},
 			},
 			ActivationInterval: &utils.ActivationInterval{

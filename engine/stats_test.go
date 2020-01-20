@@ -162,24 +162,24 @@ func TestStatQueuesAddFilters(t *testing.T) {
 		ID:     "FLTR_STATS_1",
 		Rules: []*FilterRule{
 			{
-				Type:      utils.MetaString,
-				FieldName: "~*req.Stats",
-				Values:    []string{"StatQueueProfile1"},
+				Type:    utils.MetaString,
+				Element: "~*req.Stats",
+				Values:  []string{"StatQueueProfile1"},
 			},
 			{
-				Type:      utils.MetaGreaterOrEqual,
-				FieldName: "~*req.UsageInterval",
-				Values:    []string{(1 * time.Second).String()},
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.UsageInterval",
+				Values:  []string{(1 * time.Second).String()},
 			},
 			{
-				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:    []string{(1 * time.Second).String()},
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
+				Values:  []string{(1 * time.Second).String()},
 			},
 			{
-				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:    []string{"9.0"},
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"9.0"},
 			},
 		},
 	}
@@ -189,24 +189,24 @@ func TestStatQueuesAddFilters(t *testing.T) {
 		ID:     "FLTR_STATS_2",
 		Rules: []*FilterRule{
 			{
-				Type:      utils.MetaString,
-				FieldName: "~*req.Stats",
-				Values:    []string{"StatQueueProfile2"},
+				Type:    utils.MetaString,
+				Element: "~*req.Stats",
+				Values:  []string{"StatQueueProfile2"},
 			},
 			{
-				Type:      utils.MetaGreaterOrEqual,
-				FieldName: "~*req.PddInterval",
-				Values:    []string{(1 * time.Second).String()},
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.PddInterval",
+				Values:  []string{(1 * time.Second).String()},
 			},
 			{
-				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
-				Values:    []string{(1 * time.Second).String()},
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Usage,
+				Values:  []string{(1 * time.Second).String()},
 			},
 			{
-				Type:      utils.MetaGreaterOrEqual,
-				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
-				Values:    []string{"15.0"},
+				Type:    utils.MetaGreaterOrEqual,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Weight,
+				Values:  []string{"15.0"},
 			},
 		},
 	}
@@ -216,9 +216,9 @@ func TestStatQueuesAddFilters(t *testing.T) {
 		ID:     "FLTR_STATS_3",
 		Rules: []*FilterRule{
 			{
-				Type:      utils.MetaPrefix,
-				FieldName: "~*req.Stats",
-				Values:    []string{"StatQueueProfilePrefix"},
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Stats",
+				Values:  []string{"StatQueueProfilePrefix"},
 			},
 		},
 	}

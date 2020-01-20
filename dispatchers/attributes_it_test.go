@@ -142,7 +142,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{},
-				FieldName: "Password",
+				Path:      utils.MetaReq + utils.NestingSep + "Password",
 				Type:      utils.META_CONSTANT,
 				Value:     config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
 			},
@@ -156,7 +156,7 @@ func testDspAttrGetAttrFailover(t *testing.T) {
 
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1002_SIMPLEAUTH"},
-		AlteredFields:   []string{"Password"},
+		AlteredFields:   []string{"*req.Password"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
@@ -332,7 +332,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{},
-				FieldName: "Password",
+				Path:      utils.MetaReq + utils.NestingSep + "Password",
 				Type:      utils.META_CONSTANT,
 				Value:     config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
 			},
@@ -357,7 +357,7 @@ func testDspAttrTestAuthKey2(t *testing.T) {
 
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
-		AlteredFields:   []string{"Password"},
+		AlteredFields:   []string{"*req.Password"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
@@ -423,7 +423,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			{
 				FilterIDs: []string{},
-				FieldName: "Password",
+				Path:      utils.MetaReq + utils.NestingSep + "Password",
 				Type:      utils.META_CONSTANT,
 				Value:     config.NewRSRParsersMustCompile("CGRateS.org", true, utils.INFIELD_SEP),
 			},
@@ -437,7 +437,7 @@ func testDspAttrGetAttrRoundRobin(t *testing.T) {
 
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1002_SIMPLEAUTH"},
-		AlteredFields:   []string{"Password"},
+		AlteredFields:   []string{"*req.Password"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",
@@ -506,7 +506,7 @@ func testDspAttrGetAttrInternal(t *testing.T) {
 
 	eRply := &engine.AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1003_SIMPLEAUTH"},
-		AlteredFields:   []string{"Password"},
+		AlteredFields:   []string{"*req.Password"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSGetAttributeForEvent",

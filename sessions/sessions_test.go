@@ -34,7 +34,7 @@ import (
 
 var attrs = &engine.AttrSProcessEventReply{
 	MatchedProfiles: []string{"ATTR_ACNT_1001"},
-	AlteredFields:   []string{"OfficeGroup"},
+	AlteredFields:   []string{"*req.OfficeGroup"},
 	CGREvent: &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "TestSSv1ItAuth",
@@ -1574,9 +1574,9 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	expIndx := map[string][]string{}
 	expUindx := []*engine.FilterRule{
 		&engine.FilterRule{
-			Type:      utils.MetaString,
-			FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.ToR,
-			Values:    []string{utils.VOICE},
+			Type:    utils.MetaString,
+			Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.ToR,
+			Values:  []string{utils.VOICE},
 		},
 	}
 	fltrs := []string{"*string:~*req.ToR:*voice"}

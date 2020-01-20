@@ -25,6 +25,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// NewFilterS initializtes the filter service
 func NewFilterS(cfg *config.CGRConfig, connMgr *ConnManager, dm *DataManager) (fS *FilterS) {
 	fS = &FilterS{
 		dm:      dm,
@@ -67,7 +68,7 @@ func (fS *FilterS) Pass(tenant string, filterIDs []string,
 			continue
 		}
 		for _, fltr := range f.Rules {
-			fieldNameDP, err = fS.getFieldNameDataProvider(ev, fltr.FieldName, tenant)
+			fieldNameDP, err = fS.getFieldNameDataProvider(ev, fltr.Element, tenant)
 			if err != nil {
 				return pass, err
 			}
@@ -94,9 +95,9 @@ func NewFilterFromInline(tenant, inlnRule string) (f *Filter, err error) {
 		Tenant: tenant,
 		ID:     inlnRule,
 		Rules: []*FilterRule{{
-			Type:      ruleSplt[0],
-			FieldName: ruleSplt[1],
-			Values:    strings.Split(strings.Join(ruleSplt[2:], utils.InInFieldSep), utils.INFIELD_SEP),
+			Type:    ruleSplt[0],
+			Element: ruleSplt[1],
+			Values:  strings.Split(strings.Join(ruleSplt[2:], utils.InInFieldSep), utils.INFIELD_SEP),
 		}},
 	}
 	if err = f.Compile(); err != nil {
@@ -105,6 +106,7 @@ func NewFilterFromInline(tenant, inlnRule string) (f *Filter, err error) {
 	return
 }
 
+// Filter structure to define a basic filter
 type Filter struct {
 	Tenant             string
 	ID                 string
@@ -112,13 +114,14 @@ type Filter struct {
 	ActivationInterval *utils.ActivationInterval
 }
 
-func (flt *Filter) TenantID() string {
-	return utils.ConcatenatedKey(flt.Tenant, flt.ID)
+// TenantID returns the tenant wit the ID
+func (fltr *Filter) TenantID() string {
+	return utils.ConcatenatedKey(fltr.Tenant, fltr.ID)
 }
 
 // Compile will compile the underlaying request filters where necessary (ie. regexp rules)
-func (f *Filter) Compile() (err error) {
-	for _, rf := range f.Rules {
+func (fltr *Filter) Compile() (err error) {
+	for _, rf := range fltr.Rules {
 		if err = rf.CompileValues(); err != nil {
 			return
 		}
@@ -140,6 +143,7 @@ var needsValues *utils.StringSet = utils.NewStringSet([]string{utils.MetaString,
 	utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual,
 	utils.MetaEqual, utils.MetaNotEqual})
 
+// NewFilterRule returns a new filter
 func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error) {
 	var negative bool
 	rType := rfType
@@ -151,16 +155,16 @@ func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error)
 		return nil, fmt.Errorf("Unsupported filter Type: %s", rfType)
 	}
 	if fieldName == "" && needsFieldName.Has(rType) {
-		return nil, fmt.Errorf("FieldName is mandatory for Type: %s", rfType)
+		return nil, fmt.Errorf("Element is mandatory for Type: %s", rfType)
 	}
 	if len(vals) == 0 && needsValues.Has(rType) {
 		return nil, fmt.Errorf("Values is mandatory for Type: %s", rfType)
 	}
 	rf := &FilterRule{
-		Type:      rfType,
-		FieldName: fieldName,
-		Values:    vals,
-		negative:  utils.BoolPointer(negative),
+		Type:     rfType,
+		Element:  fieldName,
+		Values:   vals,
+		negative: utils.BoolPointer(negative),
 	}
 	if err := rf.CompileValues(); err != nil {
 		return nil, err
@@ -172,17 +176,17 @@ func NewFilterRule(rfType, fieldName string, vals []string) (*FilterRule, error)
 // Pass rule: default negative, one mathing rule should pass the filter
 type FilterRule struct {
 	Type      string            // Filter type (*string, *timing, *rsr_filters, *stats, *lt, *lte, *gt, *gte)
-	FieldName string            // Name of the field providing us the Values to check (used in case of some )
+	Element   string            // Name of the field providing us the Values to check (used in case of some )
 	Values    []string          // Filter definition
 	rsrFields config.RSRParsers // Cache here the RSRFilter Values
 	negative  *bool
 }
 
-// Separate method to compile RSR fields
-func (rf *FilterRule) CompileValues() (err error) {
-	switch rf.Type {
+// CompileValues compiles RSR fields
+func (fltr *FilterRule) CompileValues() (err error) {
+	switch fltr.Type {
 	case utils.MetaRSR, utils.MetaNotRSR:
-		if rf.rsrFields, err = config.NewRSRParsersFromSlice(rf.Values, true); err != nil {
+		if fltr.rsrFields, err = config.NewRSRParsersFromSlice(fltr.Values, true); err != nil {
 			return
 		}
 	}
@@ -227,7 +231,7 @@ func (fltr *FilterRule) Pass(fieldNameDP config.DataProvider,
 }
 
 func (fltr *FilterRule) passString(fielNameDP config.DataProvider, fieldValuesDP []config.DataProvider) (bool, error) {
-	strVal, err := config.DPDynamicString(fltr.FieldName, fielNameDP)
+	strVal, err := config.DPDynamicString(fltr.Element, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -247,7 +251,7 @@ func (fltr *FilterRule) passString(fielNameDP config.DataProvider, fieldValuesDP
 }
 
 func (fltr *FilterRule) passExists(fielNameDP config.DataProvider) (bool, error) {
-	_, err := config.DPDynamicInterface(fltr.FieldName, fielNameDP)
+	_, err := config.DPDynamicInterface(fltr.Element, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -258,7 +262,7 @@ func (fltr *FilterRule) passExists(fielNameDP config.DataProvider) (bool, error)
 }
 
 func (fltr *FilterRule) passEmpty(fielNameDP config.DataProvider) (bool, error) {
-	val, err := config.DPDynamicInterface(fltr.FieldName, fielNameDP)
+	val, err := config.DPDynamicInterface(fltr.Element, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return true, nil
@@ -288,7 +292,7 @@ func (fltr *FilterRule) passEmpty(fielNameDP config.DataProvider) (bool, error) 
 }
 
 func (fltr *FilterRule) passStringPrefix(fielNameDP config.DataProvider, fieldValuesDP []config.DataProvider) (bool, error) {
-	strVal, err := config.DPDynamicString(fltr.FieldName, fielNameDP)
+	strVal, err := config.DPDynamicString(fltr.Element, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -308,7 +312,7 @@ func (fltr *FilterRule) passStringPrefix(fielNameDP config.DataProvider, fieldVa
 }
 
 func (fltr *FilterRule) passStringSuffix(fielNameDP config.DataProvider, fieldValuesDP []config.DataProvider) (bool, error) {
-	strVal, err := config.DPDynamicString(fltr.FieldName, fielNameDP)
+	strVal, err := config.DPDynamicString(fltr.Element, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -333,7 +337,7 @@ func (fltr *FilterRule) passTimings(fielNameDP config.DataProvider, fieldValuesD
 }
 
 func (fltr *FilterRule) passDestinations(fielNameDP config.DataProvider, fieldValuesDP []config.DataProvider) (bool, error) {
-	dst, err := config.DPDynamicString(fltr.FieldName, fielNameDP)
+	dst, err := config.DPDynamicString(fltr.Element, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -370,7 +374,7 @@ func (fltr *FilterRule) passRSR(fieldValuesDP []config.DataProvider) (bool, erro
 }
 
 func (fltr *FilterRule) passGreaterThan(fielNameDP config.DataProvider, fieldValuesDP []config.DataProvider) (bool, error) {
-	fldIf, err := config.DPDynamicInterface(fltr.FieldName, fielNameDP)
+	fldIf, err := config.DPDynamicInterface(fltr.Element, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil
@@ -402,7 +406,7 @@ func (fltr *FilterRule) passGreaterThan(fielNameDP config.DataProvider, fieldVal
 }
 
 func (fltr *FilterRule) passEqualTo(fielNameDP config.DataProvider, fieldValuesDP []config.DataProvider) (bool, error) {
-	fldIf, err := config.DPDynamicInterface(fltr.FieldName, fielNameDP)
+	fldIf, err := config.DPDynamicInterface(fltr.Element, fielNameDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
 			return false, nil

@@ -61,7 +61,7 @@ func TestV1AttributeProfileAsAttributeProfile(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
 				FilterIDs: []string{"*string:FL1:In1"},
-				FieldName: "FL1",
+				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 			},
@@ -108,7 +108,7 @@ func TestV2AttributeProfileAsAttributeProfile(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
 				FilterIDs: []string{"*string:FL1:In1"},
-				FieldName: "FL1",
+				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 			},
@@ -155,7 +155,7 @@ func TestV2AttributeProfileAsAttributeProfile2(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
 				FilterIDs: []string{},
-				FieldName: "FL1",
+				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 			},
@@ -201,7 +201,7 @@ func TestV3AttributeProfileAsAttributeProfile(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
 				FilterIDs: []string{"*string:FL1:In1"},
-				FieldName: "FL1",
+				Path:      utils.MetaReq + utils.NestingSep + "FL1",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 			},

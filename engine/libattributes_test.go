@@ -39,8 +39,8 @@ func TestConvertExternalToProfile(t *testing.T) {
 		},
 		Attributes: []*ExternalAttribute{
 			&ExternalAttribute{
-				FieldName: "Account",
-				Value:     "1001",
+				Path:  utils.MetaReq + utils.NestingSep + "Account",
+				Value: "1001",
 			},
 		},
 		Weight: 20,
@@ -57,8 +57,8 @@ func TestConvertExternalToProfile(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Account",
-				Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Account",
+				Value: config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -108,7 +108,7 @@ func TestConvertExternalToProfileMissing2(t *testing.T) {
 		},
 		Attributes: []*ExternalAttribute{
 			&ExternalAttribute{
-				FieldName: "Account",
+				Path: utils.MetaReq + utils.NestingSep + "Account",
 			},
 		},
 		Weight: 20,
@@ -122,15 +122,15 @@ func TestConvertExternalToProfileMissing2(t *testing.T) {
 }
 
 func TestNewAttributeFromInline(t *testing.T) {
-	attrID := "*sum:Field2:10;~NumField;20"
+	attrID := "*sum:*req.Field2:10;~*req.NumField;20"
 	expAttrPrf1 := &AttributeProfile{
 		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:       attrID,
 		Contexts: []string{utils.META_ANY},
 		Attributes: []*Attribute{&Attribute{
-			FieldName: "Field2",
-			Type:      utils.MetaSum,
-			Value:     config.NewRSRParsersMustCompile("10;~NumField;20", true, utils.INFIELD_SEP),
+			Path:  utils.MetaReq + utils.NestingSep + "Field2",
+			Type:  utils.MetaSum,
+			Value: config.NewRSRParsersMustCompile("10;~*req.NumField;20", true, utils.INFIELD_SEP),
 		}},
 	}
 	attr, err := NewAttributeFromInline(config.CgrConfig().GeneralCfg().DefaultTenant, attrID)

@@ -247,4 +247,36 @@ func (iDBMig *internalMigrator) remV3AttributeProfile(tenant, id string) (err er
 	return utils.ErrNotImplemented
 }
 
+//AttributeProfile methods
+//get
+func (iDBMig *internalMigrator) getV4AttributeProfile() (v4attrPrf *v4AttributeProfile, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+//set
+func (iDBMig *internalMigrator) setV4AttributeProfile(x *v4AttributeProfile) (err error) {
+	return utils.ErrNotImplemented
+}
+
+//rem
+func (iDBMig *internalMigrator) remV4AttributeProfile(tenant, id string) (err error) {
+	return utils.ErrNotImplemented
+}
+
+// Filter Methods
+//get
+func (iDBMig *internalMigrator) getV1Filter() (v1Fltr *v1Filter, err error) {
+	return nil, utils.ErrNotImplemented
+}
+
+//set
+func (iDBMig *internalMigrator) setV1Filter(x *v1Filter) (err error) {
+	return utils.ErrNotImplemented
+}
+
+//rem
+func (iDBMig *internalMigrator) remV1Filter(tenant, id string) (err error) {
+	return utils.ErrNotImplemented
+}
+
 func (iDBMig *internalMigrator) close() {}

@@ -105,13 +105,17 @@ func alias2AtttributeProfile(alias *v1Alias, defaultTenant string) *engine.Attri
 		}
 		for fieldName, vals := range av.Pairs {
 			for initial, substitute := range vals {
+				var fld string
 				if fieldName == utils.Tenant {
 					fieldName = utils.MetaTenant
+					fld = utils.MetaTenant
+				} else {
+					fld = utils.MetaReq + utils.NestingSep + fieldName
 				}
 				attr := &engine.Attribute{
-					FieldName: fieldName,
-					Type:      utils.MetaVariable, //default type for Attribute
-					Value:     config.NewRSRParsersMustCompile(substitute, true, utils.INFIELD_SEP),
+					Path:  fld,
+					Type:  utils.MetaVariable, //default type for Attribute
+					Value: config.NewRSRParsersMustCompile(substitute, true, utils.INFIELD_SEP),
 				}
 				out.Attributes = append(out.Attributes, attr)
 				// Add attribute filters if needed

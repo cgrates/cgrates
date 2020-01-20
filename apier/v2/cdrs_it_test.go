@@ -408,8 +408,8 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: utils.MetaTenant,
-					Type:      utils.META_CONSTANT,
+					Path: utils.MetaTenant,
+					Type: utils.META_CONSTANT,
 					Value: config.RSRParsers{
 						&config.RSRParser{
 							Rules:           "CustomTenant",
@@ -418,8 +418,8 @@ func testV2CDRsDifferentTenants(t *testing.T) {
 					},
 				},
 				{
-					FieldName: utils.Tenant,
-					Type:      utils.META_CONSTANT,
+					Path: utils.MetaReq + utils.NestingSep + utils.Tenant,
+					Type: utils.META_CONSTANT,
 					Value: config.RSRParsers{
 						&config.RSRParser{
 							Rules:           "CustomTenant",

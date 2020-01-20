@@ -155,6 +155,7 @@ func (sm *FSsessions) onChannelPark(fsev FSEvent, connIdx int) {
 	}
 	if authReply.Attributes != nil {
 		for _, fldName := range authReply.Attributes.AlteredFields {
+			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 			if _, has := authReply.Attributes.CGREvent.Event[fldName]; !has {
 				continue //maybe removed
 			}

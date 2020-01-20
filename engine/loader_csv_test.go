@@ -1151,19 +1151,19 @@ func TestLoadFilters(t *testing.T) {
 			ID:     "FLTR_1",
 			Filters: []*utils.TPFilter{
 				&utils.TPFilter{
-					FieldName: "~*req.Account",
-					Type:      utils.MetaString,
-					Values:    []string{"1001", "1002"},
+					Element: "~*req.Account",
+					Type:    utils.MetaString,
+					Values:  []string{"1001", "1002"},
 				},
 				&utils.TPFilter{
-					FieldName: "~*req.Destination",
-					Type:      utils.MetaPrefix,
-					Values:    []string{"10", "20"},
+					Element: "~*req.Destination",
+					Type:    utils.MetaPrefix,
+					Values:  []string{"10", "20"},
 				},
 				&utils.TPFilter{
-					FieldName: "",
-					Type:      utils.MetaRSR,
-					Values:    []string{"~*req.Subject(~^1.*1$)", "~*req.Destination(1002)"},
+					Element: "",
+					Type:    utils.MetaRSR,
+					Values:  []string{"~*req.Subject(~^1.*1$)", "~*req.Destination(1002)"},
 				},
 			},
 			ActivationInterval: &utils.TPActivationInterval{
@@ -1176,9 +1176,9 @@ func TestLoadFilters(t *testing.T) {
 			ID:     "FLTR_ACNT_dan",
 			Filters: []*utils.TPFilter{
 				&utils.TPFilter{
-					FieldName: "~*req.Account",
-					Type:      utils.MetaString,
-					Values:    []string{"dan"},
+					Element: "~*req.Account",
+					Type:    utils.MetaString,
+					Values:  []string{"dan"},
 				},
 			},
 			ActivationInterval: &utils.TPActivationInterval{
@@ -1191,9 +1191,9 @@ func TestLoadFilters(t *testing.T) {
 			ID:     "FLTR_DST_DE",
 			Filters: []*utils.TPFilter{
 				&utils.TPFilter{
-					FieldName: "~*req.Destination",
-					Type:      utils.MetaDestinations,
-					Values:    []string{"DST_DE"},
+					Element: "~*req.Destination",
+					Type:    utils.MetaDestinations,
+					Values:  []string{"DST_DE"},
 				},
 			},
 			ActivationInterval: &utils.TPActivationInterval{
@@ -1206,9 +1206,9 @@ func TestLoadFilters(t *testing.T) {
 			ID:     "FLTR_DST_NL",
 			Filters: []*utils.TPFilter{
 				&utils.TPFilter{
-					FieldName: "~*req.Destination",
-					Type:      utils.MetaDestinations,
-					Values:    []string{"DST_NL"},
+					Element: "~*req.Destination",
+					Type:    utils.MetaDestinations,
+					Values:  []string{"DST_NL"},
 				},
 			},
 			ActivationInterval: &utils.TPActivationInterval{
@@ -1274,13 +1274,13 @@ func TestLoadAttributeProfiles(t *testing.T) {
 			Attributes: []*utils.TPAttribute{
 				&utils.TPAttribute{
 					FilterIDs: []string{"*string:~*req.Field1:Initial"},
-					FieldName: "Field1",
+					Path:      utils.MetaReq + utils.NestingSep + "Field1",
 					Type:      utils.MetaVariable,
 					Value:     "Sub1",
 				},
 				&utils.TPAttribute{
 					FilterIDs: []string{},
-					FieldName: "Field2",
+					Path:      utils.MetaReq + utils.NestingSep + "Field2",
 					Type:      utils.MetaVariable,
 					Value:     "Sub2",
 				},

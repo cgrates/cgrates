@@ -1692,11 +1692,11 @@ func (tps TpFilterS) AsTPFilter() (result []*utils.TPFilterProfile) {
 				th.ActivationInterval.ActivationTime = aiSplt[0]
 			}
 		}
-		if tp.FilterType != "" {
+		if tp.Type != "" {
 			th.Filters = append(th.Filters, &utils.TPFilter{
-				Type:      tp.FilterType,
-				FieldName: tp.FilterFieldName,
-				Values:    strings.Split(tp.FilterFieldValues, utils.INFIELD_SEP)})
+				Type:    tp.Type,
+				Element: tp.Element,
+				Values:  strings.Split(tp.Values, utils.INFIELD_SEP)})
 		}
 		mst[(&utils.TenantID{Tenant: tp.Tenant, ID: tp.ID}).TenantID()] = th
 	}
@@ -1719,8 +1719,8 @@ func APItoModelTPFilter(th *utils.TPFilterProfile) (mdls TpFilterS) {
 			Tenant: th.Tenant,
 			ID:     th.ID,
 		}
-		mdl.FilterType = fltr.Type
-		mdl.FilterFieldName = fltr.FieldName
+		mdl.Type = fltr.Type
+		mdl.Element = fltr.Element
 		if th.ActivationInterval != nil {
 			if th.ActivationInterval.ActivationTime != "" {
 				mdl.ActivationInterval = th.ActivationInterval.ActivationTime
@@ -1731,9 +1731,9 @@ func APItoModelTPFilter(th *utils.TPFilterProfile) (mdls TpFilterS) {
 		}
 		for i, val := range fltr.Values {
 			if i != 0 {
-				mdl.FilterFieldValues += utils.INFIELD_SEP
+				mdl.Values += utils.INFIELD_SEP
 			}
-			mdl.FilterFieldValues += val
+			mdl.Values += val
 		}
 		mdls = append(mdls, mdl)
 	}
@@ -1747,7 +1747,7 @@ func APItoFilter(tpTH *utils.TPFilterProfile, timezone string) (th *Filter, err 
 		Rules:  make([]*FilterRule, len(tpTH.Filters)),
 	}
 	for i, f := range tpTH.Filters {
-		rf := &FilterRule{Type: f.Type, FieldName: f.FieldName, Values: f.Values}
+		rf := &FilterRule{Type: f.Type, Element: f.Element, Values: f.Values}
 		if err := rf.CompileValues(); err != nil {
 			return nil, err
 		}
@@ -1769,9 +1769,9 @@ func FilterToTPFilter(f *Filter) (tpFltr *utils.TPFilterProfile) {
 	}
 	for i, reqFltr := range f.Rules {
 		tpFltr.Filters[i] = &utils.TPFilter{
-			Type:      reqFltr.Type,
-			FieldName: reqFltr.FieldName,
-			Values:    make([]string, len(reqFltr.Values)),
+			Type:    reqFltr.Type,
+			Element: reqFltr.Element,
+			Values:  make([]string, len(reqFltr.Values)),
 		}
 		for j, val := range reqFltr.Values {
 			tpFltr.Filters[i].Values[j] = val
@@ -2051,7 +2051,7 @@ func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 				contextMap[key.TenantID()][context] = true
 			}
 		}
-		if tp.FieldName != "" {
+		if tp.Path != "" {
 			filterIDs := make([]string, 0)
 			if tp.AttributeFilterIDs != "" {
 				filterAttrSplit := strings.Split(tp.AttributeFilterIDs, utils.INFIELD_SEP)
@@ -2062,7 +2062,7 @@ func (tps TPAttributes) AsTPAttributes() (result []*utils.TPAttributeProfile) {
 			th.Attributes = append(th.Attributes, &utils.TPAttribute{
 				FilterIDs: filterIDs,
 				Type:      tp.Type,
-				FieldName: tp.FieldName,
+				Path:      tp.Path,
 				Value:     tp.Value,
 			})
 		}
@@ -2125,7 +2125,7 @@ func APItoModelTPAttribute(th *utils.TPAttributeProfile) (mdls TPAttributes) {
 				mdl.AttributeFilterIDs += val
 			}
 		}
-		mdl.FieldName = reqAttribute.FieldName
+		mdl.Path = reqAttribute.Path
 		mdl.Value = reqAttribute.Value
 		mdl.Type = reqAttribute.Type
 		mdls = append(mdls, mdl)
@@ -2156,7 +2156,7 @@ func APItoAttributeProfile(tpAttr *utils.TPAttributeProfile, timezone string) (a
 		}
 		attrPrf.Attributes[i] = &Attribute{
 			FilterIDs: reqAttr.FilterIDs,
-			FieldName: reqAttr.FieldName,
+			Path:      reqAttr.Path,
 			Type:      reqAttr.Type,
 			Value:     sbstPrsr,
 		}

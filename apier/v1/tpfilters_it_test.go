@@ -141,9 +141,9 @@ func testTPFilterSetTPFilter(t *testing.T) {
 		ID:     "Filter",
 		Filters: []*utils.TPFilter{
 			&utils.TPFilter{
-				Type:      utils.MetaString,
-				FieldName: "Account",
-				Values:    []string{"1001", "1002"},
+				Type:    utils.MetaString,
+				Element: "Account",
+				Values:  []string{"1001", "1002"},
 			},
 		},
 		ActivationInterval: &utils.TPActivationInterval{
@@ -187,20 +187,20 @@ func testTPFilterGetFilterIds(t *testing.T) {
 func testTPFilterUpdateTPFilter(t *testing.T) {
 	tpFilter.Filters = []*utils.TPFilter{
 		&utils.TPFilter{
-			Type:      utils.MetaString,
-			FieldName: "Account",
-			Values:    []string{"1001", "1002"},
+			Type:    utils.MetaString,
+			Element: "Account",
+			Values:  []string{"1001", "1002"},
 		},
 		&utils.TPFilter{
-			Type:      utils.MetaPrefix,
-			FieldName: "Destination",
-			Values:    []string{"10", "20"},
+			Type:    utils.MetaPrefix,
+			Element: "Destination",
+			Values:  []string{"10", "20"},
 		},
 	}
 	sort.Slice(tpFilter.Filters, func(i, j int) bool {
 		sort.Strings(tpFilter.Filters[i].Values)
 		sort.Strings(tpFilter.Filters[j].Values)
-		return strings.Compare(tpFilter.Filters[i].FieldName, tpFilter.Filters[j].FieldName) == -1
+		return strings.Compare(tpFilter.Filters[i].Element, tpFilter.Filters[j].Element) == -1
 	})
 	var result string
 	if err := tpFilterRPC.Call(utils.ApierV1SetTPFilterProfile, tpFilter, &result); err != nil {
@@ -219,7 +219,7 @@ func testTPFilterGetTPFilterAfterUpdate(t *testing.T) {
 	sort.Slice(reply.Filters, func(i, j int) bool {
 		sort.Strings(reply.Filters[i].Values)
 		sort.Strings(reply.Filters[j].Values)
-		return strings.Compare(reply.Filters[i].FieldName, reply.Filters[j].FieldName) == -1
+		return strings.Compare(reply.Filters[i].Element, reply.Filters[j].Element) == -1
 	})
 	if !reflect.DeepEqual(tpFilter, reply) {
 		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(tpFilter), utils.ToJSON(reply))

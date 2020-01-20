@@ -181,7 +181,7 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FilterIDs: []string{"*string:~*req.Account:1001"},
-					FieldName: "Account",
+					Path:      utils.MetaReq + utils.NestingSep + "Account",
 					Type:      utils.MetaVariable,
 					Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 				},
@@ -198,13 +198,13 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FilterIDs: []string{"*string:~*req.Account:1001"},
-					FieldName: "Account",
+					Path:      utils.MetaReq + utils.NestingSep + "Account",
 					Type:      utils.MetaVariable,
 					Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 				},
 				{
 					FilterIDs: []string{"*string:~*req.Account:1003"},
-					FieldName: "Account",
+					Path:      utils.MetaReq + utils.NestingSep + "Account",
 					Type:      utils.MetaVariable,
 					Value:     config.NewRSRParsersMustCompile("1004", true, utils.INFIELD_SEP),
 				},
@@ -221,13 +221,13 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FilterIDs: []string{"*string:~*req.Account:1001"},
-					FieldName: "Account",
+					Path:      utils.MetaReq + utils.NestingSep + "Account",
 					Type:      utils.MetaVariable,
 					Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 				},
 				{
 					FilterIDs: []string{"*string:~*req.Account:1003"},
-					FieldName: "Account",
+					Path:      utils.MetaReq + utils.NestingSep + "Account",
 					Type:      utils.MetaVariable,
 					Value:     config.NewRSRParsersMustCompile("1004", true, utils.INFIELD_SEP),
 				},
@@ -247,14 +247,14 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Account",
-					Type:      utils.MetaVariable,
-					Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + "Account",
+					Type:  utils.MetaVariable,
+					Value: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName: "Subject",
-					Type:      utils.MetaVariable,
-					Value:     config.NewRSRParsersMustCompile("call_1001", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + "Subject",
+					Type:  utils.MetaVariable,
+					Value: config.NewRSRParsersMustCompile("call_1001", true, utils.INFIELD_SEP),
 				},
 			},
 			Blocker: false,
@@ -272,12 +272,12 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			ActivationInterval: nil,
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Account",
-					Type:      utils.MetaVariable,
-					Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + "Account",
+					Type:  utils.MetaVariable,
+					Value: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 				},
 				{
-					FieldName: "Category",
+					Path:      utils.MetaReq + utils.NestingSep + "Category",
 					Type:      utils.MetaVariable,
 					FilterIDs: []string{"*string:~*req.Category:call_1001"},
 					Value:     config.NewRSRParsersMustCompile("call_1002", true, utils.INFIELD_SEP),
@@ -295,9 +295,9 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: utils.Category,
-					Type:      utils.MetaVariable,
-					Value:     config.NewRSRParsersMustCompile("somecateg_roam_fromz4", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + utils.Category,
+					Type:  utils.MetaVariable,
+					Value: config.NewRSRParsersMustCompile("somecateg_roam_fromz4", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -306,10 +306,10 @@ func TestAlias2AtttributeProfile(t *testing.T) {
 	for i := range expected {
 		rply := alias2AtttributeProfile(aliases[i], defaultTenant)
 		sort.Slice(rply.Attributes, func(i, j int) bool {
-			if rply.Attributes[i].FieldName == rply.Attributes[j].FieldName {
+			if rply.Attributes[i].Path == rply.Attributes[j].Path {
 				return rply.Attributes[i].FilterIDs[0] < rply.Attributes[j].FilterIDs[0]
 			}
-			return rply.Attributes[i].FieldName < rply.Attributes[j].FieldName
+			return rply.Attributes[i].Path < rply.Attributes[j].Path
 		}) // only for test; map returns random keys
 		if !reflect.DeepEqual(expected[i], rply) {
 			t.Errorf("For %v expected: %s ,recived: %s ", i, utils.ToJSON(expected[i]), utils.ToJSON(rply))

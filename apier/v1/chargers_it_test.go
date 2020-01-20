@@ -166,7 +166,7 @@ func testChargerSLoadAddCharger(t *testing.T) {
 			Contexts: []string{"simpleauth"},
 			Attributes: []*engine.Attribute{
 				{
-					FieldName: "Password",
+					Path: utils.MetaReq + utils.NestingSep + "Password",
 					Value: config.RSRParsers{
 						&config.RSRParser{
 							Rules:           "CGRateS.org",
@@ -217,7 +217,7 @@ func testChargerSProcessEvent(t *testing.T) {
 		{
 			ChargerSProfile:    "Charger1",
 			AttributeSProfiles: []string{"ATTR_1001_SIMPLEAUTH"},
-			AlteredFields:      []string{"Password"},
+			AlteredFields:      []string{"*req.Password"},
 			CGREvent: &utils.CGREvent{ // matching Charger1
 				Tenant: "cgrates.org",
 				ID:     "event1",

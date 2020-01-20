@@ -1077,11 +1077,11 @@ type TPFilterProfile struct {
 	ActivationInterval *TPActivationInterval // Time when this limit becomes active and expires
 }
 
-// TPFilterProfile is used in TPFilterProfile
+// TPFilter is used in TPFilterProfile
 type TPFilter struct {
-	Type      string   // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
-	FieldName string   // Name of the field providing us the Values to check (used in case of some )
-	Values    []string // Filter definition
+	Type    string   // Filter type (*string, *timing, *rsr_filters, *cdr_stats)
+	Element string   // Name of the field providing us the Values to check (used in case of some )
+	Values  []string // Filter definition
 }
 
 // TPSupplier is used in TPSupplierProfile
@@ -1113,7 +1113,7 @@ type TPSupplierProfile struct {
 // TPAttribute is used in TPAttributeProfile
 type TPAttribute struct {
 	FilterIDs []string
-	FieldName string
+	Path      string
 	Type      string
 	Value     string
 }

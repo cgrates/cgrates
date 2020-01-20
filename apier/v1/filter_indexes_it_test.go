@@ -158,9 +158,9 @@ func testV1FIdxSetThresholdProfile(t *testing.T) {
 			Tenant: tenant,
 			ID:     "TestFilter",
 			Rules: []*engine.FilterRule{{
-				FieldName: "~*req.Account",
-				Type:      utils.MetaString,
-				Values:    []string{"1001"},
+				Element: "~*req.Account",
+				Type:    utils.MetaString,
+				Values:  []string{"1001"},
 			}},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -252,9 +252,9 @@ func testV1FIdxSetSecondThresholdProfile(t *testing.T) {
 			Tenant: tenant,
 			ID:     "TestFilter2",
 			Rules: []*engine.FilterRule{{
-				FieldName: "~*req.Account",
-				Type:      utils.MetaString,
-				Values:    []string{"1002"},
+				Element: "~*req.Account",
+				Type:    utils.MetaString,
+				Values:  []string{"1002"},
 			}},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -417,9 +417,9 @@ func testV1FIdxSetStatQueueProfileIndexes(t *testing.T) {
 			Tenant: tenant,
 			ID:     "FLTR_1",
 			Rules: []*engine.FilterRule{{
-				FieldName: "~*req.Account",
-				Type:      utils.MetaString,
-				Values:    []string{"1001"},
+				Element: "~*req.Account",
+				Type:    utils.MetaString,
+				Values:  []string{"1001"},
 			}},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -520,9 +520,9 @@ func testV1FIdxSetSecondStatQueueProfileIndexes(t *testing.T) {
 			Tenant: tenant,
 			ID:     "FLTR_2",
 			Rules: []*engine.FilterRule{{
-				FieldName: "~*req.Account",
-				Type:      utils.MetaString,
-				Values:    []string{"1001"},
+				Element: "~*req.Account",
+				Type:    utils.MetaString,
+				Values:  []string{"1001"},
 			}},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -666,9 +666,9 @@ func testV1FIdxSetResourceProfileIndexes(t *testing.T) {
 			Tenant: tenant,
 			ID:     "FLTR_RES_RCFG1",
 			Rules: []*engine.FilterRule{{
-				FieldName: "~*req.Account",
-				Type:      utils.MetaString,
-				Values:    []string{"1001"},
+				Element: "~*req.Account",
+				Type:    utils.MetaString,
+				Values:  []string{"1001"},
 			}},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -759,9 +759,9 @@ func testV1FIdxSetSecondResourceProfileIndexes(t *testing.T) {
 			Tenant: tenant,
 			ID:     "FLTR_2",
 			Rules: []*engine.FilterRule{{
-				FieldName: "~*req.Account",
-				Type:      utils.MetaString,
-				Values:    []string{"1001"},
+				Element: "~*req.Account",
+				Type:    utils.MetaString,
+				Values:  []string{"1001"},
 			}},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -895,9 +895,9 @@ func testV1FIdxSetSupplierProfileIndexes(t *testing.T) {
 			ID:     "FLTR_1",
 			Rules: []*engine.FilterRule{
 				{
-					FieldName: "~*req.Account",
-					Type:      utils.MetaString,
-					Values:    []string{"1001"},
+					Element: "~*req.Account",
+					Type:    utils.MetaString,
+					Values:  []string{"1001"},
 				},
 			},
 			ActivationInterval: &utils.ActivationInterval{
@@ -994,9 +994,9 @@ func testV1FIdxSetSecondSupplierProfileIndexes(t *testing.T) {
 			Tenant: tenant,
 			ID:     "FLTR_2",
 			Rules: []*engine.FilterRule{{
-				FieldName: "~*req.Account",
-				Type:      utils.MetaString,
-				Values:    []string{"1001"},
+				Element: "~*req.Account",
+				Type:    utils.MetaString,
+				Values:  []string{"1001"},
 			}},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -1137,9 +1137,9 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 			Tenant: tenant,
 			ID:     "FLTR_1",
 			Rules: []*engine.FilterRule{{
-				FieldName: "~*req.Account",
-				Type:      utils.MetaString,
-				Values:    []string{"1001"},
+				Element: "~*req.Account",
+				Type:    utils.MetaString,
+				Values:  []string{"1001"},
 			}},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -1171,7 +1171,7 @@ func testV1FIdxSetAttributeProfileIndexes(t *testing.T) {
 			Attributes: []*engine.Attribute{
 				{
 					FilterIDs: []string{"*string:~*req.FL1:In1"},
-					FieldName: "FL1",
+					Path:      "FL1",
 					Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 				},
 			},
@@ -1245,9 +1245,9 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 			Tenant: tenant,
 			ID:     "FLTR_2",
 			Rules: []*engine.FilterRule{{
-				FieldName: "~*req.Account",
-				Type:      utils.MetaString,
-				Values:    []string{"1001"},
+				Element: "~*req.Account",
+				Type:    utils.MetaString,
+				Values:  []string{"1001"},
 			}},
 			ActivationInterval: &utils.ActivationInterval{
 				ActivationTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
@@ -1279,7 +1279,7 @@ func testV1FIdxSetSecondAttributeProfileIndexes(t *testing.T) {
 			},
 			Attributes: []*engine.Attribute{{
 				FilterIDs: []string{"*string:~*req.FL1:In1"},
-				FieldName: "FL1",
+				Path:      "FL1",
 				Value:     config.NewRSRParsersMustCompile("Al1", true, utils.INFIELD_SEP),
 			}},
 			Weight: 20,

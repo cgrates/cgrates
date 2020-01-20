@@ -132,8 +132,8 @@ func testSCncrLoadTP(t *testing.T) {
 			Contexts: []string{utils.ANY},
 			Attributes: []*engine.ExternalAttribute{
 				{
-					FieldName: "TestType",
-					Value:     "ConcurrentSessions",
+					Path:  utils.MetaReq + utils.NestingSep + "TestType",
+					Value: "ConcurrentSessions",
 				},
 			},
 			Weight: 20,

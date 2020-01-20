@@ -125,9 +125,9 @@ func testFilterSetFilter(t *testing.T) {
 			ID:     "Filter1",
 			Rules: []*engine.FilterRule{
 				{
-					FieldName: "*string",
-					Type:      "~Account",
-					Values:    []string{"1001", "1002"},
+					Element: utils.MetaString,
+					Type:    "~Account",
+					Values:  []string{"1001", "1002"},
 				},
 			},
 			ActivationInterval: &utils.ActivationInterval{
@@ -167,14 +167,14 @@ func testFilterGetFilterAfterSet(t *testing.T) {
 func testFilterUpdateFilter(t *testing.T) {
 	filter.Rules = []*engine.FilterRule{
 		{
-			FieldName: utils.MetaString,
-			Type:      "~Account",
-			Values:    []string{"1001", "1002"},
+			Element: utils.MetaString,
+			Type:    "~Account",
+			Values:  []string{"1001", "1002"},
 		},
 		{
-			FieldName: utils.MetaPrefix,
-			Type:      "~Destination",
-			Values:    []string{"10", "20"},
+			Element: utils.MetaPrefix,
+			Type:    "~Destination",
+			Values:  []string{"10", "20"},
 		},
 	}
 	var result string

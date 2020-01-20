@@ -144,13 +144,13 @@ func testAlsITMigrateAndMove(t *testing.T) {
 		ActivationInterval: nil,
 		Attributes: []*engine.Attribute{
 			{
-				FieldName: "Account",
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Account",
+				Type:  utils.MetaVariable,
+				Value: config.NewRSRParsersMustCompile("1002", true, utils.INFIELD_SEP),
 			},
 			{
 				FilterIDs: []string{"*string:~*req.Category:call_1001"},
-				FieldName: "Category",
+				Path:      utils.MetaReq + utils.NestingSep + "Category",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("call_1002", true, utils.INFIELD_SEP),
 			},
@@ -193,10 +193,10 @@ func testAlsITMigrateAndMove(t *testing.T) {
 	}
 	result.Compile()
 	sort.Slice(result.Attributes, func(i, j int) bool {
-		if result.Attributes[i].FieldName == result.Attributes[j].FieldName {
+		if result.Attributes[i].Path == result.Attributes[j].Path {
 			return result.Attributes[i].FilterIDs[0] < result.Attributes[j].FilterIDs[0]
 		}
-		return result.Attributes[i].FieldName < result.Attributes[j].FieldName
+		return result.Attributes[i].Path < result.Attributes[j].Path
 	}) // only for test; map returns random keys
 	if !reflect.DeepEqual(*attrProf, *result) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(attrProf), utils.ToJSON(result))

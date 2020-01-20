@@ -87,8 +87,8 @@ var (
 			},
 			Attributes: []*Attribute{
 				{
-					FieldName: utils.Account,
-					Value:     config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Value: config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -104,8 +104,8 @@ var (
 			},
 			Attributes: []*Attribute{
 				{
-					FieldName: utils.Account,
-					Value:     config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Value: config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -121,8 +121,8 @@ var (
 			},
 			Attributes: []*Attribute{
 				{
-					FieldName: utils.Account,
-					Value:     config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Value: config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -138,8 +138,8 @@ var (
 			},
 			Attributes: []*Attribute{
 				{
-					FieldName: utils.Account,
-					Value:     config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
+					Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+					Value: config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
 				},
 			},
 			Weight: 20,
@@ -167,19 +167,19 @@ func TestAttributeAddFilters(t *testing.T) {
 		ID:     "FLTR_ATTR_1",
 		Rules: []*FilterRule{
 			{
-				Type:      utils.MetaString,
-				FieldName: "~*req.Attribute",
-				Values:    []string{"AttributeProfile1"},
+				Type:    utils.MetaString,
+				Element: "~*req.Attribute",
+				Values:  []string{"AttributeProfile1"},
 			},
 			{
-				Type:      utils.MetaGreaterOrEqual,
-				FieldName: "~*req.UsageInterval",
-				Values:    []string{(1 * time.Second).String()},
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req.UsageInterval",
+				Values:  []string{(1 * time.Second).String()},
 			},
 			{
-				Type:      utils.MetaGreaterOrEqual,
-				FieldName: "~*req." + utils.Weight,
-				Values:    []string{"9.0"},
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req." + utils.Weight,
+				Values:  []string{"9.0"},
 			},
 		},
 	}
@@ -189,9 +189,9 @@ func TestAttributeAddFilters(t *testing.T) {
 		ID:     "FLTR_ATTR_2",
 		Rules: []*FilterRule{
 			{
-				Type:      utils.MetaString,
-				FieldName: "~*req.Attribute",
-				Values:    []string{"AttributeProfile2"},
+				Type:    utils.MetaString,
+				Element: "~*req.Attribute",
+				Values:  []string{"AttributeProfile2"},
 			},
 		},
 	}
@@ -201,9 +201,9 @@ func TestAttributeAddFilters(t *testing.T) {
 		ID:     "FLTR_ATTR_3",
 		Rules: []*FilterRule{
 			{
-				Type:      utils.MetaPrefix,
-				FieldName: "~*req.Attribute",
-				Values:    []string{"AttributeProfilePrefix"},
+				Type:    utils.MetaPrefix,
+				Element: "~*req.Attribute",
+				Values:  []string{"AttributeProfilePrefix"},
 			},
 		},
 	}
@@ -213,9 +213,9 @@ func TestAttributeAddFilters(t *testing.T) {
 		ID:     "FLTR_ATTR_4",
 		Rules: []*FilterRule{
 			{
-				Type:      utils.MetaGreaterOrEqual,
-				FieldName: "~*req." + utils.Weight,
-				Values:    []string{"200.00"},
+				Type:    utils.MetaGreaterOrEqual,
+				Element: "~*req." + utils.Weight,
+				Values:  []string{"200.00"},
 			},
 		},
 	}
@@ -269,7 +269,7 @@ func TestAttributeProcessEvent(t *testing.T) {
 	attrEvs[0].CGREvent.Event["Account"] = "1010" //Field added in event after process
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"AttributeProfile1"},
-		AlteredFields:   []string{"Account"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Account"},
 		CGREvent:        attrEvs[0].CGREvent,
 	}
 	atrp, err := attrService.processEvent(attrEvs[0])
@@ -293,7 +293,7 @@ func TestAttributeProcessEventWithIDs(t *testing.T) {
 	attrEvs[3].AttributeIDs = []string{"AttributeIDMatch"}
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"AttributeIDMatch"},
-		AlteredFields:   []string{"Account"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Account"},
 		CGREvent:        attrEvs[3].CGREvent,
 	}
 	if atrp, err := attrService.processEvent(attrEvs[3]); err != nil {
@@ -347,7 +347,7 @@ func TestAttributeEventReplyDigest2(t *testing.T) {
 func TestAttributeEventReplyDigest3(t *testing.T) {
 	eRpl := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1"},
-		AlteredFields:   []string{"Subject"},
+		AlteredFields:   []string{"*req.Subject"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
@@ -368,7 +368,7 @@ func TestAttributeEventReplyDigest3(t *testing.T) {
 func TestAttributeEventReplyDigest4(t *testing.T) {
 	eRpl := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1"},
-		AlteredFields:   []string{"Subject"},
+		AlteredFields:   []string{"*req.Subject"},
 		CGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "testAttributeSProcessEvent",
@@ -406,8 +406,8 @@ func TestAttributeIndexer(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: utils.Account,
-				Value:     config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + utils.Account,
+				Value: config.NewRSRParsersMustCompile("1010", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -474,8 +474,8 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field1",
-				Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field1",
+				Value: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -490,8 +490,8 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field2",
-				Value:     config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Value: config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -506,8 +506,8 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field3",
-				Value:     config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field3",
+				Value: config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 30,
@@ -535,7 +535,11 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 	}
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1", "ATTR_2", "ATTR_3"},
-		AlteredFields:   []string{"Field1", "Field2", "Field3"},
+		AlteredFields: []string{
+			utils.MetaReq + utils.NestingSep + "Field1",
+			utils.MetaReq + utils.NestingSep + "Field2",
+			utils.MetaReq + utils.NestingSep + "Field3",
+		},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -552,7 +556,7 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	if !reflect.DeepEqual(eRply.MatchedProfiles, reply.MatchedProfiles) {
-		t.Errorf("Expecting %+v, received: %+v", eRply.MatchedProfiles, reply.MatchedProfiles)
+		t.Fatalf("Expecting %+v, received: %+v", eRply.MatchedProfiles, reply.MatchedProfiles)
 	}
 	if !reflect.DeepEqual(eRply.AlteredFields, reply.AlteredFields) {
 		t.Errorf("Expecting %+v, received: %+v", eRply.AlteredFields, reply.AlteredFields)
@@ -582,8 +586,8 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field1",
-				Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field1",
+				Value: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -598,8 +602,8 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field2",
-				Value:     config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Value: config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -614,8 +618,8 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field3",
-				Value:     config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field3",
+				Value: config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 30,
@@ -643,7 +647,8 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 	}
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1", "ATTR_2"},
-		AlteredFields:   []string{"Field1", "Field2"},
+		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
+			utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -689,8 +694,8 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field1",
-				Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field1",
+				Value: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -705,8 +710,8 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field2",
-				Value:     config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Value: config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -721,8 +726,8 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field3",
-				Value:     config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field3",
+				Value: config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 30,
@@ -750,7 +755,8 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 	}
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1", "ATTR_2"},
-		AlteredFields:   []string{"Field1", "Field2"},
+		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
+			utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -796,8 +802,8 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field1",
-				Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field1",
+				Value: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -812,8 +818,8 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field2",
-				Value:     config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Value: config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -838,7 +844,8 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 	}
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1", "ATTR_2"},
-		AlteredFields:   []string{"Field1", "Field2"},
+		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
+			utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -886,8 +893,8 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field1",
-				Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field1",
+				Value: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 10,
@@ -902,8 +909,8 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field2",
-				Value:     config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Value: config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -919,8 +926,8 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field3",
-				Value:     config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field3",
+				Value: config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 30,
@@ -948,7 +955,8 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 	}
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1", "ATTR_2"},
-		AlteredFields:   []string{"Field1", "Field2"},
+		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "Field1",
+			utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -995,8 +1003,8 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field1",
-				Value:     config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field1",
+				Value: config.NewRSRParsersMustCompile("Value1", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1012,8 +1020,8 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field2",
-				Value:     config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Value: config.NewRSRParsersMustCompile("Value2", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 20,
@@ -1028,8 +1036,8 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field3",
-				Value:     config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field3",
+				Value: config.NewRSRParsersMustCompile("Value3", true, utils.INFIELD_SEP),
 			},
 		},
 		Weight: 30,
@@ -1057,7 +1065,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 	}
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1"},
-		AlteredFields:   []string{"Field1"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field1"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -1103,8 +1111,8 @@ func TestAttributeProcessValue(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field2",
-				Value:     config.NewRSRParsersMustCompile("~Field1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Value: config.NewRSRParsersMustCompile("~*req.Field1", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1127,7 +1135,7 @@ func TestAttributeProcessValue(t *testing.T) {
 	}
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1"},
-		AlteredFields:   []string{"Field2"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -1173,17 +1181,17 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 		Attributes: []*Attribute{
 			{
 				FilterIDs: []string{"*string:~*req.PassField:Test"},
-				FieldName: "PassField",
+				Path:      utils.MetaReq + utils.NestingSep + "PassField",
 				Value:     config.NewRSRParsersMustCompile("Pass", true, utils.INFIELD_SEP),
 			},
 			{
 				FilterIDs: []string{"*string:~*req.PassField:RandomValue"},
-				FieldName: "NotPassField",
+				Path:      utils.MetaReq + utils.NestingSep + "NotPassField",
 				Value:     config.NewRSRParsersMustCompile("NotPass", true, utils.INFIELD_SEP),
 			},
 			{
 				FilterIDs: []string{"*notexists:~*req.RandomField:"},
-				FieldName: "RandomField",
+				Path:      utils.MetaReq + utils.NestingSep + "RandomField",
 				Value:     config.NewRSRParsersMustCompile("RandomValue", true, utils.INFIELD_SEP),
 			},
 		},
@@ -1206,7 +1214,8 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 	}
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1"},
-		AlteredFields:   []string{"PassField", "RandomField"},
+		AlteredFields: []string{utils.MetaReq + utils.NestingSep + "PassField",
+			utils.MetaReq + utils.NestingSep + "RandomField"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -1252,9 +1261,9 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field2",
-				Type:      utils.META_CONSTANT,
-				Value:     config.NewRSRParsersMustCompile("ConstVal", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.META_CONSTANT,
+				Value: config.NewRSRParsersMustCompile("ConstVal", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1277,7 +1286,7 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 	}
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1"},
-		AlteredFields:   []string{"Field2"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -1323,14 +1332,14 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field2",
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("~Field1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.MetaVariable,
+				Value: config.NewRSRParsersMustCompile("~*req.Field1", true, utils.INFIELD_SEP),
 			},
 			{
-				FieldName: "Field2",
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("~TheField", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.MetaVariable,
+				Value: config.NewRSRParsersMustCompile("~*req.TheField", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1354,7 +1363,7 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 	}
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1"},
-		AlteredFields:   []string{"Field2"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -1401,19 +1410,19 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field2",
-				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~Field1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.Field1", true, utils.INFIELD_SEP),
 			},
 			{
-				FieldName: "Field2",
-				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("_", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("_", true, utils.INFIELD_SEP),
 			},
 			{
-				FieldName: "Field2",
-				Type:      utils.META_COMPOSED,
-				Value:     config.NewRSRParsersMustCompile("~TheField", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.META_COMPOSED,
+				Value: config.NewRSRParsersMustCompile("~*req.TheField", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1437,7 +1446,7 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 	}
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1"},
-		AlteredFields:   []string{"Field2"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -1484,9 +1493,9 @@ func TestAttributeProcessEventSum(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field2",
-				Type:      utils.MetaSum,
-				Value:     config.NewRSRParsersMustCompile("10;~NumField;20", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.MetaSum,
+				Value: config.NewRSRParsersMustCompile("10;~*req.NumField;20", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1511,7 +1520,7 @@ func TestAttributeProcessEventSum(t *testing.T) {
 	}
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1"},
-		AlteredFields:   []string{"Field2"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -1559,9 +1568,9 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field2",
-				Type:      utils.META_USAGE_DIFFERENCE,
-				Value:     config.NewRSRParsersMustCompile("~UnixTimeStamp;~UnixTimeStamp2", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.META_USAGE_DIFFERENCE,
+				Value: config.NewRSRParsersMustCompile("~*req.UnixTimeStamp;~*req.UnixTimeStamp2", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1587,7 +1596,7 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 	}
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1"},
-		AlteredFields:   []string{"Field2"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -1636,9 +1645,9 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field2",
-				Type:      utils.MetaValueExponent,
-				Value:     config.NewRSRParsersMustCompile("~Multiplier;~Pow", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.MetaValueExponent,
+				Value: config.NewRSRParsersMustCompile("~*req.Multiplier;~*req.Pow", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1664,7 +1673,7 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 	}
 	eRply := &AttrSProcessEventReply{
 		MatchedProfiles: []string{"ATTR_1"},
-		AlteredFields:   []string{"Field2"},
+		AlteredFields:   []string{utils.MetaReq + utils.NestingSep + "Field2"},
 		CGREvent: &utils.CGREvent{
 			Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
 			ID:     utils.GenUUID(),
@@ -1721,9 +1730,9 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field2",
-				Type:      utils.META_CONSTANT,
-				Value:     config.NewRSRParsersMustCompile("ConstVal", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.META_CONSTANT,
+				Value: config.NewRSRParsersMustCompile("ConstVal", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1782,9 +1791,9 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 		},
 		Attributes: []*Attribute{
 			{
-				FieldName: "Field2",
-				Type:      utils.MetaVariable,
-				Value:     config.NewRSRParsersMustCompile("~Field1", true, utils.INFIELD_SEP),
+				Path:  utils.MetaReq + utils.NestingSep + "Field2",
+				Type:  utils.MetaVariable,
+				Value: config.NewRSRParsersMustCompile("~*req.Field1", true, utils.INFIELD_SEP),
 			},
 		},
 		Blocker: true,
@@ -1825,15 +1834,15 @@ func TestGetAttributeProfileFromInline(t *testing.T) {
 	} else if test != true {
 		t.Errorf("\nExpecting: true got :%+v", test)
 	}
-	attrID := "*sum:Field2:10;~NumField;20"
+	attrID := "*sum:*req.Field2:10;~*req.NumField;20"
 	expAttrPrf1 := &AttributeProfile{
 		Tenant:   config.CgrConfig().GeneralCfg().DefaultTenant,
 		ID:       attrID,
 		Contexts: []string{utils.META_ANY},
 		Attributes: []*Attribute{&Attribute{
-			FieldName: "Field2",
-			Type:      utils.MetaSum,
-			Value:     config.NewRSRParsersMustCompile("10;~NumField;20", true, utils.INFIELD_SEP),
+			Path:  utils.MetaReq + utils.NestingSep + "Field2",
+			Type:  utils.MetaSum,
+			Value: config.NewRSRParsersMustCompile("10;~*req.NumField;20", true, utils.INFIELD_SEP),
 		}},
 	}
 	attr, err := dm.GetAttributeProfile(config.CgrConfig().GeneralCfg().DefaultTenant, attrID, false, false, "")

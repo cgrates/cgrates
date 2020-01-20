@@ -179,6 +179,7 @@ func (sma *AsteriskAgent) handleStasisStart(ev *SMAsteriskEvent) {
 	}
 	if authReply.Attributes != nil {
 		for _, fldName := range authReply.Attributes.AlteredFields {
+			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 			if _, has := authReply.Attributes.CGREvent.Event[fldName]; !has {
 				continue //maybe removed
 			}

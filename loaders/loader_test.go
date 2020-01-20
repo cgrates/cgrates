@@ -68,8 +68,8 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 				FieldId: "AttributeFilterIDs",
 				Type:    utils.META_COMPOSED,
 				Value:   config.NewRSRParsersMustCompile("~5", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "FieldName",
-				FieldId: "FieldName",
+			&config.FCTemplate{Tag: "Path",
+				FieldId: "Path",
 				Type:    utils.META_COMPOSED,
 				Value:   config.NewRSRParsersMustCompile("~6", true, utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Type",
@@ -111,13 +111,13 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
 				FilterIDs: []string{"*string:~*req.Field1:Initial"},
-				FieldName: "Field1",
+				Path:      utils.MetaReq + utils.NestingSep + "Field1",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("Sub1", true, utils.INFIELD_SEP),
 			},
 			&engine.Attribute{
 				FilterIDs: []string{},
-				FieldName: "Field2",
+				Path:      utils.MetaReq + utils.NestingSep + "Field2",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("Sub2", true, utils.INFIELD_SEP),
 			}},
@@ -137,7 +137,7 @@ func TestLoaderProcessContentSingleFile(t *testing.T) {
 }
 
 func TestLoaderProcessContentMultiFiles(t *testing.T) {
-	file1CSV := `ignored,ignored,ignored,ignored,ignored,,Subject,1001,ignored,ignored`
+	file1CSV := `ignored,ignored,ignored,ignored,ignored,,*req.Subject,1001,ignored,ignored`
 	file2CSV := `ignored,TestLoader2`
 	data := engine.NewInternalDB(nil, nil, true, config.CgrConfig().DataDbCfg().Items)
 	ldr := &Loader{
@@ -162,8 +162,8 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 				FieldId: "Contexts",
 				Type:    utils.MetaString,
 				Value:   config.NewRSRParsersMustCompile("*any", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "FieldName",
-				FieldId: "FieldName",
+			&config.FCTemplate{Tag: "Path",
+				FieldId: "Path",
 				Type:    utils.META_COMPOSED,
 				Value:   config.NewRSRParsersMustCompile("~File1.csv:6", true, utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "Value",
@@ -198,7 +198,7 @@ func TestLoaderProcessContentMultiFiles(t *testing.T) {
 		Contexts: []string{utils.ANY},
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
-				FieldName: "Subject",
+				Path:      utils.MetaReq + utils.NestingSep + "Subject",
 				FilterIDs: []string{},
 				Value:     config.NewRSRParsersMustCompile("1001", true, utils.INFIELD_SEP),
 			}},
@@ -354,16 +354,16 @@ func TestLoaderProcessFilters(t *testing.T) {
 				Type:      utils.META_COMPOSED,
 				Value:     config.NewRSRParsersMustCompile("~1", true, utils.INFIELD_SEP),
 				Mandatory: true},
-			&config.FCTemplate{Tag: "FilterType",
-				FieldId: "FilterType",
+			&config.FCTemplate{Tag: "Type",
+				FieldId: "Type",
 				Type:    utils.META_COMPOSED,
 				Value:   config.NewRSRParsersMustCompile("~2", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "FilterFieldName",
-				FieldId: "FilterFieldName",
+			&config.FCTemplate{Tag: "Element",
+				FieldId: "Element",
 				Type:    utils.META_COMPOSED,
 				Value:   config.NewRSRParsersMustCompile("~3", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "FilterFieldValues",
-				FieldId: "FilterFieldValues",
+			&config.FCTemplate{Tag: "Values",
+				FieldId: "Values",
 				Type:    utils.META_COMPOSED,
 				Value:   config.NewRSRParsersMustCompile("~4", true, utils.INFIELD_SEP)},
 			&config.FCTemplate{Tag: "ActivationInterval",
@@ -388,19 +388,19 @@ func TestLoaderProcessFilters(t *testing.T) {
 		ID:     "FLTR_1",
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
-				Type:      utils.MetaString,
-				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
-				Values:    []string{"1001", "1002"},
+				Type:    utils.MetaString,
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Account,
+				Values:  []string{"1001", "1002"},
 			},
 			&engine.FilterRule{
-				Type:      "*prefix",
-				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
-				Values:    []string{"10", "20"},
+				Type:    "*prefix",
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
+				Values:  []string{"10", "20"},
 			},
 			&engine.FilterRule{
-				Type:      "*rsr",
-				FieldName: "",
-				Values:    []string{"~*req.Subject(~^1.*1$)", "~*req.Destination(1002)"},
+				Type:    "*rsr",
+				Element: "",
+				Values:  []string{"~*req.Subject(~^1.*1$)", "~*req.Destination(1002)"},
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
@@ -416,9 +416,9 @@ func TestLoaderProcessFilters(t *testing.T) {
 		ID:     "FLTR_DST_DE",
 		Rules: []*engine.FilterRule{
 			&engine.FilterRule{
-				Type:      "*destinations",
-				FieldName: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
-				Values:    []string{"DST_DE"},
+				Type:    "*destinations",
+				Element: utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.Destination,
+				Values:  []string{"DST_DE"},
 			},
 		},
 		ActivationInterval: &utils.ActivationInterval{
@@ -1151,13 +1151,13 @@ func TestLoaderRemoveContentSingleFile(t *testing.T) {
 		Attributes: []*engine.Attribute{
 			&engine.Attribute{
 				FilterIDs: []string{"*string:~*req.Field1:Initial"},
-				FieldName: "Field1",
+				Path:      utils.MetaReq + utils.NestingSep + "Field1",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("Sub1", true, utils.INFIELD_SEP),
 			},
 			&engine.Attribute{
 				FilterIDs: []string{},
-				FieldName: "Field2",
+				Path:      utils.MetaReq + utils.NestingSep + "Field2",
 				Type:      utils.MetaVariable,
 				Value:     config.NewRSRParsersMustCompile("Sub2", true, utils.INFIELD_SEP),
 			}},

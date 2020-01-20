@@ -860,13 +860,13 @@ TBD
 [0] - Tag
    TBD
 
-[1] - FilterType
+[1] - Type
    TBD
 
-[2] - FilterFieldName
+[2] - Element
    TBD
 
-[3] - FilterFieldValues
+[3] - Values
    TBD
 
 [4] - ActivationTime

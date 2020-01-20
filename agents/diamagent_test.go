@@ -182,7 +182,7 @@ func TestProcessRequest(t *testing.T) {
 			*prply = sessions.V1InitSessionReply{
 				Attributes: &engine.AttrSProcessEventReply{
 					MatchedProfiles: []string{"ATTR_1001_SESSIONAUTH"},
-					AlteredFields:   []string{"Password", "PaypalAccount", "RequestType", "LCRProfile"},
+					AlteredFields:   []string{"*req.Password", "*req.PaypalAccount", "*req.RequestType", "*req.LCRProfile"},
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "e7d35bf",
@@ -274,7 +274,7 @@ func TestProcessRequest(t *testing.T) {
 			*prply = sessions.V1UpdateSessionReply{
 				Attributes: &engine.AttrSProcessEventReply{
 					MatchedProfiles: []string{"ATTR_1001_SESSIONAUTH"},
-					AlteredFields:   []string{"Password", "PaypalAccount", "RequestType", "LCRProfile"},
+					AlteredFields:   []string{"*req.Password", "*req.PaypalAccount", "*req.RequestType", "*req.LCRProfile"},
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "e7d35bf",
@@ -464,7 +464,7 @@ func TestProcessRequest(t *testing.T) {
 			*prply = sessions.V1ProcessMessageReply{
 				Attributes: &engine.AttrSProcessEventReply{
 					MatchedProfiles: []string{"ATTR_1001_SESSIONAUTH"},
-					AlteredFields:   []string{"Password", "PaypalAccount", "RequestType", "LCRProfile"},
+					AlteredFields:   []string{"*req.Password", "*req.PaypalAccount", "*req.RequestType", "*req.LCRProfile"},
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "e7d35bf",

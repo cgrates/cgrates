@@ -58,13 +58,16 @@ func TestFiltersInlineMigrate(t *testing.T) {
 }
 
 func TestFiltersMigrate(t *testing.T) {
-	data := []struct{ in, exp *engine.Filter }{
+	data := []struct {
+		in  *v1Filter
+		exp *engine.Filter
+	}{
 		{
-			in: &engine.Filter{
+			in: &v1Filter{
 				Tenant: "cgrates.org",
 				ID:     "FLTR_1",
-				Rules: []*engine.FilterRule{
-					&engine.FilterRule{
+				Rules: []*v1FilterRule{
+					&v1FilterRule{
 						Type:      utils.MetaString,
 						FieldName: "Account",
 						Values:    []string{},
@@ -76,19 +79,19 @@ func TestFiltersMigrate(t *testing.T) {
 				ID:     "FLTR_1",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      utils.MetaString,
-						FieldName: "~*req.Account",
-						Values:    []string{},
+						Type:    utils.MetaString,
+						Element: "~*req.Account",
+						Values:  []string{},
 					},
 				},
 			},
 		},
 		{
-			in: &engine.Filter{
+			in: &v1Filter{
 				Tenant: "cgrates.org",
 				ID:     "FLTR_2",
-				Rules: []*engine.FilterRule{
-					&engine.FilterRule{
+				Rules: []*v1FilterRule{
+					&v1FilterRule{
 						Type:      utils.MetaPrefix,
 						FieldName: "~Account",
 						Values:    []string{},
@@ -100,9 +103,9 @@ func TestFiltersMigrate(t *testing.T) {
 				ID:     "FLTR_2",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      utils.MetaPrefix,
-						FieldName: "~Account",
-						Values:    []string{},
+						Type:    utils.MetaPrefix,
+						Element: "~Account",
+						Values:  []string{},
 					},
 				},
 			},
@@ -116,13 +119,16 @@ func TestFiltersMigrate(t *testing.T) {
 }
 
 func TestFiltersMigrateV2(t *testing.T) {
-	data := []struct{ in, exp *engine.Filter }{
+	data := []struct {
+		in  *v1Filter
+		exp *engine.Filter
+	}{
 		{
-			in: &engine.Filter{
+			in: &v1Filter{
 				Tenant: "cgrates.org",
 				ID:     "FLTR_1",
-				Rules: []*engine.FilterRule{
-					&engine.FilterRule{
+				Rules: []*v1FilterRule{
+					&v1FilterRule{
 						Type:      utils.MetaString,
 						FieldName: "~Account",
 						Values:    []string{},
@@ -134,43 +140,43 @@ func TestFiltersMigrateV2(t *testing.T) {
 				ID:     "FLTR_1",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      utils.MetaString,
-						FieldName: "~*req.Account",
-						Values:    []string{},
+						Type:    utils.MetaString,
+						Element: "~*req.Account",
+						Values:  []string{},
 					},
 				},
 			},
 		},
 		{
-			in: &engine.Filter{
+			in: &v1Filter{
+				Tenant: "cgrates.org",
+				ID:     "FLTR_2",
+				Rules: []*v1FilterRule{
+					&v1FilterRule{
+						Type:      utils.MetaPrefix,
+						FieldName: "~*req.Account",
+						Values:    []string{},
+					},
+				},
+			},
+			exp: &engine.Filter{
 				Tenant: "cgrates.org",
 				ID:     "FLTR_2",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      utils.MetaPrefix,
-						FieldName: "~*req.Account",
-						Values:    []string{},
-					},
-				},
-			},
-			exp: &engine.Filter{
-				Tenant: "cgrates.org",
-				ID:     "FLTR_2",
-				Rules: []*engine.FilterRule{
-					&engine.FilterRule{
-						Type:      utils.MetaPrefix,
-						FieldName: "~*req.Account",
-						Values:    []string{},
+						Type:    utils.MetaPrefix,
+						Element: "~*req.Account",
+						Values:  []string{},
 					},
 				},
 			},
 		},
 		{
-			in: &engine.Filter{
+			in: &v1Filter{
 				Tenant: "cgrates.org",
 				ID:     "FLTR_3",
-				Rules: []*engine.FilterRule{
-					&engine.FilterRule{
+				Rules: []*v1FilterRule{
+					&v1FilterRule{
 						Type:      utils.MetaPrefix,
 						FieldName: "~*act.Account",
 						Values:    []string{},
@@ -182,19 +188,19 @@ func TestFiltersMigrateV2(t *testing.T) {
 				ID:     "FLTR_3",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      utils.MetaPrefix,
-						FieldName: "~*act.Account",
-						Values:    []string{},
+						Type:    utils.MetaPrefix,
+						Element: "~*act.Account",
+						Values:  []string{},
 					},
 				},
 			},
 		},
 		{
-			in: &engine.Filter{
+			in: &v1Filter{
 				Tenant: "cgrates.org",
 				ID:     "FLTR_4",
-				Rules: []*engine.FilterRule{
-					&engine.FilterRule{
+				Rules: []*v1FilterRule{
+					&v1FilterRule{
 						Type:      utils.MetaPrefix,
 						FieldName: "~*act.Account",
 						Values:    []string{},
@@ -206,19 +212,19 @@ func TestFiltersMigrateV2(t *testing.T) {
 				ID:     "FLTR_4",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      utils.MetaPrefix,
-						FieldName: "~*act.Account",
-						Values:    []string{},
+						Type:    utils.MetaPrefix,
+						Element: "~*act.Account",
+						Values:  []string{},
 					},
 				},
 			},
 		},
 		{
-			in: &engine.Filter{
+			in: &v1Filter{
 				Tenant: "cgrates.org",
 				ID:     "FLTR_5",
-				Rules: []*engine.FilterRule{
-					&engine.FilterRule{
+				Rules: []*v1FilterRule{
+					&v1FilterRule{
 						Type:      utils.MetaPrefix,
 						FieldName: "~*vars.Account",
 						Values:    []string{},
@@ -230,9 +236,9 @@ func TestFiltersMigrateV2(t *testing.T) {
 				ID:     "FLTR_5",
 				Rules: []*engine.FilterRule{
 					&engine.FilterRule{
-						Type:      utils.MetaPrefix,
-						FieldName: "~*vars.Account",
-						Values:    []string{},
+						Type:    utils.MetaPrefix,
+						Element: "~*vars.Account",
+						Values:  []string{},
 					},
 				},
 			},
