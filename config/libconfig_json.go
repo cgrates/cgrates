@@ -235,6 +235,7 @@ type SessionSJsonCfg struct {
 	Client_protocol       *float64
 	Channel_sync_interval *string
 	Terminate_attempts    *int
+	Alterable_fields      *[]string
 }
 
 // FreeSWITCHAgent config section

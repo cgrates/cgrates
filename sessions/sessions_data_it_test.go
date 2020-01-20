@@ -321,6 +321,7 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
 				utils.Usage:       "8192", // 8 MB
 				utils.LastUsed:    "7168",
+				"Extra1":          "other",
 			},
 		},
 	}
@@ -344,6 +345,8 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	} else if len(aSessions) != 1 ||
 		aSessions[0].Usage != time.Duration(15360) {
 		t.Errorf("wrong active sessions: %v", aSessions[0].Usage)
+	} else if aSessions[0].ExtraFields["Extra1"] != "other" {
+		t.Errorf("Expected: \"other\", received: %v", aSessions[0].ExtraFields["Extra1"])
 	}
 
 	usage = int64(1024)
@@ -366,6 +369,8 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
 				utils.Usage:       "1024", // 8 MB
 				utils.LastUsed:    "5120", // 5 MB
+				"Extra1":          "other2",
+				"Extra2":          "other",
 			},
 		},
 	}
@@ -388,6 +393,10 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	} else if len(aSessions) != 1 ||
 		aSessions[0].Usage != time.Duration(13312) { // 14MB in used, 2MB extra reserved
 		t.Errorf("wrong active sessions: %+v", aSessions[0].Usage)
+	} else if aSessions[0].ExtraFields["Extra1"] != "other2" {
+		t.Errorf("Expected: \"other2\", received: %v", aSessions[0].ExtraFields["Extra1"])
+	} else if _, has := aSessions[0].ExtraFields["Extra"]; has {
+		t.Errorf("Expected: no Extra2, received: %v", aSessions[0].ExtraFields["Extra2"])
 	}
 
 	usage = int64(1024)
@@ -451,6 +460,7 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 				utils.SetupTime:   time.Date(2016, time.January, 5, 18, 30, 49, 0, time.UTC),
 				utils.AnswerTime:  time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
 				utils.LastUsed:    "0", // refund 1024 (extra used) + 1024 (extra reserved)
+				"Extra1":          "done",
 			},
 		},
 	}
@@ -488,6 +498,9 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	} else {
 		if cdrs[0].Usage != "13312" {
 			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
+		}
+		if cdrs[0].ExtraFields["Extra1"] != "done" {
+			t.Errorf("Expected: \"done\", received: %v", cdrs[0].ExtraFields["Extra1"])
 		}
 	}
 }

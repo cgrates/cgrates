@@ -87,6 +87,7 @@ type SessionSCfg struct {
 	ClientProtocol      float64
 	ChannelSyncInterval time.Duration
 	TerminateAttempts   int
+	AlterableFields     *utils.StringSet
 }
 
 func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
@@ -248,6 +249,9 @@ func (scfg *SessionSCfg) loadFromJsonCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	}
 	if jsnCfg.Terminate_attempts != nil {
 		scfg.TerminateAttempts = *jsnCfg.Terminate_attempts
+	}
+	if jsnCfg.Alterable_fields != nil {
+		scfg.AlterableFields = utils.NewStringSet(*jsnCfg.Alterable_fields)
 	}
 	return nil
 }

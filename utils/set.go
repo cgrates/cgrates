@@ -62,3 +62,11 @@ func (s *StringSet) AsSlice() []string {
 func (s *StringSet) Data() map[string]struct{} {
 	return s.data
 }
+
+// Size returns the size of the set
+func (s *StringSet) Size() int {
+	if s == nil || s.data == nil {
+		return 0
+	}
+	return len(s.data)
+}

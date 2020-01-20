@@ -131,6 +131,9 @@ var (
 		CacheDispatcherProfiles, CacheDispatcherHosts, CacheResourceFilterIndexes, CacheStatFilterIndexes,
 		CacheThresholdFilterIndexes, CacheSupplierFilterIndexes, CacheAttributeFilterIndexes,
 		CacheChargerFilterIndexes, CacheDispatcherFilterIndexes, CacheLoadIDs, CacheAccounts})
+
+	// ProtectedSFlds are the fields that sessions should not alter
+	ProtectedSFlds = NewStringSet([]string{CGRID, OriginHost, OriginID, Usage})
 )
 
 const (
