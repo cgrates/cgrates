@@ -72,7 +72,7 @@ var (
 func TestRPCMethods(t *testing.T) {
 	switch *dbType {
 	case utils.MetaInternal:
-		rpcConfDIR = "rpccaching_internal"
+		t.SkipNow()
 	case utils.MetaSQL:
 		rpcConfDIR = "rpccaching_mysql"
 	case utils.MetaMongo:

@@ -66,6 +66,9 @@ func TestTutorial2(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
+	if *encoding == utils.MetaGOB {
+		tutCfgDir += "_gob"
+	}
 
 	for _, stest := range sTutTests {
 		t.Run(tutCfgDir, stest)
@@ -75,9 +78,6 @@ func TestTutorial2(t *testing.T) {
 func testTutLoadConfig(t *testing.T) {
 	var err error
 	tutCfgPath = path.Join(*dataDir, "conf", "samples", tutCfgDir)
-	if *encoding == utils.MetaGOB {
-		tutCfgPath = path.Join(*dataDir, "conf", "samples", tutCfgDir+"_gob")
-	}
 	if tutCfg, err = config.NewCGRConfigFromPath(tutCfgPath); err != nil {
 		t.Error(err)
 	}

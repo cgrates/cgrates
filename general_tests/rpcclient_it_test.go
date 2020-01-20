@@ -39,6 +39,7 @@ var testRemoteRALs = flag.Bool("remote_rals", false, "Perform the tests in integ
 
 var ( // shared vars
 	rpcITCfgPath1, rpcITCfgPath2   string
+	rpcITCfgDIR1, rpcITCfgDIR2     string
 	rpcITCfg1, rpcITCfg2           *config.CGRConfig
 	rpcRAL1, rpcRAL2               *rpcclient.RPCClient
 	rpcPoolFirst, rpcPoolBroadcast *rpcclient.RPCPool
@@ -72,14 +73,29 @@ var sTestRPCITLcl = []func(t *testing.T){
 }
 
 func TestRPCITLcl(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		rpcITCfgDIR1 = "multiral1_internal"
+		rpcITCfgDIR2 = "multiral2_internal"
+	case utils.MetaSQL:
+		rpcITCfgDIR1 = "multiral1_mysql"
+		rpcITCfgDIR2 = "multiral2_mysql"
+	case utils.MetaMongo:
+		rpcITCfgDIR1 = "multiral1_mongo"
+		rpcITCfgDIR2 = "multiral2_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	for _, stest := range sTestRPCITLcl {
-		t.Run("sTestRPCITLcl", stest)
+		t.Run(*dbType, stest)
 	}
 }
 
 func testRPCITLclInitCfg(t *testing.T) {
-	rpcITCfgPath1 = path.Join(*dataDir, "conf", "samples", "multiral1")
-	rpcITCfgPath2 = path.Join(*dataDir, "conf", "samples", "multiral2")
+	rpcITCfgPath1 = path.Join(*dataDir, "conf", "samples", rpcITCfgDIR1)
+	rpcITCfgPath2 = path.Join(*dataDir, "conf", "samples", rpcITCfgDIR2)
 	rpcITCfg1, err = config.NewCGRConfigFromPath(rpcITCfgPath1)
 	if err != nil {
 		t.Error(err)

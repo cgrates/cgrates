@@ -14,9 +14,18 @@
 	"http": ":2080",					// HTTP listening address
 },
 
-"stor_db": {								// database used to store offline tariff plans and CDRs
-	"db_password": "CGRateS.org",			// password to use when connecting to stordb
+"data_db": {
+	"db_type": "mongo",
+	"db_name": "10",
+	"db_port": 27017,
 },
+
+"stor_db": {
+	"db_type": "mongo",
+	"db_name": "cgrates",
+	"db_port": 27017,
+},
+
 
 "rals": {
 	"enabled": true,					// enable Rater service: <true|false>

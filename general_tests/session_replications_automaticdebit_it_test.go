@@ -35,6 +35,7 @@ import (
 
 var (
 	smgRplcMasterCfgPath, smgRplcSlaveCfgPath string
+	smgRplcMasterCfgDIR, smgRplcSlaveCfgDIR   string
 	smgRplcMasterCfg, smgRplcSlaveCfg         *config.CGRConfig
 	smgRplcMstrRPC, smgRplcSlvRPC             *rpc.Client
 	masterEngine                              *exec.Cmd
@@ -54,8 +55,23 @@ var (
 )
 
 func TestSessionSRpl(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaSQL:
+		smgRplcMasterCfgDIR = "smgreplcmaster_mysql"
+		smgRplcSlaveCfgDIR = "smgreplcslave_mysql"
+	case utils.MetaMongo:
+		smgRplcMasterCfgDIR = "smgreplcmaster_mongo"
+		smgRplcSlaveCfgDIR = "smgreplcslave_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+
 	for _, stest := range sTestsSession {
-		t.Run("TestSessionSRpl", stest)
+		t.Run(*dbType, stest)
 	}
 }
 
@@ -93,13 +109,13 @@ func testSessionSRplAddVoiceBalance(t *testing.T) {
 
 //Init Config
 func testSessionSRplInitCfg(t *testing.T) {
-	smgRplcMasterCfgPath = path.Join(*dataDir, "conf", "samples", "sessions_replication", "smgreplcmaster")
+	smgRplcMasterCfgPath = path.Join(*dataDir, "conf", "samples", "sessions_replication", smgRplcMasterCfgDIR)
 	if smgRplcMasterCfg, err = config.NewCGRConfigFromPath(smgRplcMasterCfgPath); err != nil {
 		t.Fatal(err)
 	}
 	smgRplcMasterCfg.DataFolderPath = *dataDir
 	config.SetCgrConfig(smgRplcMasterCfg)
-	smgRplcSlaveCfgPath = path.Join(*dataDir, "conf", "samples", "sessions_replication", "smgreplcslave")
+	smgRplcSlaveCfgPath = path.Join(*dataDir, "conf", "samples", "sessions_replication", smgRplcSlaveCfgDIR)
 	if smgRplcSlaveCfg, err = config.NewCGRConfigFromPath(smgRplcSlaveCfgPath); err != nil {
 		t.Fatal(err)
 	}

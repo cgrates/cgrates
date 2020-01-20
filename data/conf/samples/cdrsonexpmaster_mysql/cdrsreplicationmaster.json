@@ -1,0 +1,132 @@
+{
+// CGRateS Configuration file
+//
+// Used in apier_local_tests
+// Starts rater, cdrs and mediator connecting over internal channel
+
+"general": {
+    "log_level": 7,
+    "poster_attempts": 1,
+},
+
+"data_db": {								
+	"db_type": "redis",						
+	"db_port": 6379, 						
+	"db_name": "10", 						
+},
+
+"stor_db": {								// database used to store offline tariff plans and CDRs
+	"db_password": "CGRateS.org",			// password to use when connecting to stordb
+},
+
+
+"rals": {
+	"enabled": true,						// enable Rater service: <true|false>
+},
+
+"cdrs": {
+	"enabled": true,			// start the CDR Server service:  <true|false>
+	"store_cdrs": false,		// store cdrs in storDb
+	"chargers_conns":["*internal"],
+	"rals_conns": ["*internal"],
+	"online_cdr_exports": ["http_localhost", "amqp_localhost", "http_test_file", "amqp_test_file","aws_test_file","sqs_test_file","kafka_localhost","s3_test_file"],
+},
+
+"chargers": {
+	"enabled": true,
+},
+
+
+"cdre": {
+	"http_localhost": {
+		"export_format": "*http_post",
+		"export_path": "http://127.0.0.1:12080/cdr_http",
+		"content_fields": [								// template of the exported content fields
+			{"tag": "CGRID", "type": "*composed", "value": "~CGRID", "field_id": "CGRID"},
+			{"tag":"RunID", "type": "*composed", "value": "~RunID", "field_id": "RunID"},
+			{"tag":"TOR", "type": "*composed", "value": "~ToR", "field_id": "ToR"},
+			{"tag":"OriginID", "type": "*composed", "value": "~OriginID", "field_id": "OriginID"},
+			{"tag":"OriginHost", "type": "*composed", "value": "~OriginHost", "field_id": "OriginHost"},
+			{"tag":"RequestType", "type": "*composed", "value": "~RequestType", "field_id": "RequestType"},
+			{"tag":"Direction", "type": "*composed", "value": "~Direction", "field_id": "Direction"},
+			{"tag":"Tenant", "type": "*composed", "value": "~Tenant", "field_id": "Tenant"},
+			{"tag":"Category", "type": "*composed", "value": "~Category", "field_id": "Category"},
+			{"tag":"Account", "type": "*composed", "value": "~Account", "field_id": "Account"},
+			{"tag":"Subject", "type": "*composed", "value": "~Subject", "field_id": "Subject"},
+			{"tag":"Destination", "type": "*composed", "value": "~Destination", "field_id": "Destination"},
+			{"tag":"SetupTime", "type": "*composed", "value": "~SetupTime", "layout": "2006-01-02T15:04:05Z07:00", "field_id": "SetupTime"},
+			{"tag":"AnswerTime", "type": "*composed", "value": "~AnswerTime", "layout": "2006-01-02T15:04:05Z07:00", "field_id": "AnswerTime"},
+			{"tag":"Usage", "type": "*composed", "value": "~Usage", "field_id": "Usage"},
+			{"tag":"Cost", "type": "*composed", "value": "~Cost", "field_id": "Cost"},
+		],
+	},
+	"amqp_localhost": {
+		"export_format": "*amqp_json_map",
+		"export_path": "amqp://guest:guest@localhost:5672/?queue_id=cgrates_cdrs&exchange=exchangename&exchange_type=fanout&routing_key=cgr_cdrs",
+		"attempts": 3,
+		"content_fields": [								// template of the exported content fields
+			{"tag": "CGRID", "type": "*composed", "value": "~CGRID", "field_id": "CGRID"},
+			{"tag":"RunID", "type": "*composed", "value": "~RunID", "field_id": "RunID"},
+			{"tag":"TOR", "type": "*composed", "value": "~ToR", "field_id": "ToR"},
+			{"tag":"OriginID", "type": "*composed", "value": "~OriginID", "field_id": "OriginID"},
+			{"tag":"OriginHost", "type": "*composed", "value": "~OriginHost", "field_id": "OriginHost"},
+			{"tag":"RequestType", "type": "*composed", "value": "~RequestType", "field_id": "RequestType"},
+			{"tag":"Direction", "type": "*composed", "value": "~Direction", "field_id": "Direction"},
+			{"tag":"Tenant", "type": "*composed", "value": "~Tenant", "field_id": "Tenant"},
+			{"tag":"Category", "type": "*composed", "value": "~Category", "field_id": "Category"},
+			{"tag":"Account", "type": "*composed", "value": "~Account", "field_id": "Account"},
+			{"tag":"Subject", "type": "*composed", "value": "~Subject", "field_id": "Subject"},
+			{"tag":"Destination", "type": "*composed", "value": "~Destination", "field_id": "Destination"},
+			{"tag":"SetupTime", "type": "*composed", "value": "~SetupTime", "layout": "2006-01-02T15:04:05Z07:00", "field_id": "SetupTime"},
+			{"tag":"AnswerTime", "type": "*composed", "value": "~AnswerTime", "layout": "2006-01-02T15:04:05Z07:00", "field_id": "AnswerTime"},
+			{"tag":"Usage", "type": "*composed", "value": "~Usage", "field_id": "Usage"},
+			{"tag":"Cost", "type": "*composed", "value": "~Cost", "field_id": "Cost"},
+		],
+	},
+	"http_test_file": {
+		"export_format": "*http_post",
+		"export_path": "http://127.0.0.1:12080/invalid",
+		"content_fields": [
+			{"tag": "OriginID", "type": "*composed", "value": "~OriginID", "field_id": "OriginID"},
+		],
+	},
+	"aws_test_file": {
+		"export_format": "*amqpv1_json_map",
+		"export_path": "amqps://guest:guest@localhost:25672/?queue_id=cgrates_cdrs",
+		"content_fields": [
+			{"tag": "CGRID", "type": "*composed", "value": "~CGRID", "field_id": "CGRID"},
+		],
+	},
+	"sqs_test_file": {
+		"export_format": "*sqs_json_map",
+		// export_path for sqs:  "endpoint?aws_region=region&aws_key=IDkey&aws_secret=secret&aws_token=sessionToken&queue_id=cgrates-cdrs"  
+		"export_path": "http://sqs.eu-west-2.amazonaws.com/?aws_region=eu-west-2&aws_key=testkey&aws_secret=testsecret&queue_id=cgrates-cdrs",
+		"content_fields": [
+			{"tag": "CGRID", "type": "*composed", "value": "~CGRID", "field_id": "CGRID"},
+		],
+	},
+	"amqp_test_file": {
+		"export_format": "*amqp_json_map",
+		"export_path": "amqp://guest:guest@localhost:25672/?queue_id=cgrates_cdrs",
+		"content_fields": [
+			{"tag": "CGRID", "type": "*composed", "value": "~CGRID", "field_id": "CGRID"},
+		],
+	},
+	"kafka_localhost": {
+		"export_format": "*kafka_json_map",
+		"export_path": "localhost:9092?topic=cgrates_cdrs",
+		"content_fields": [
+			{"tag": "CGRID", "type": "*composed", "value": "~CGRID", "field_id": "CGRID"},
+		],
+	},
+	"s3_test_file": {
+		"export_format": "*s3_json_map",
+		// export_path for s3:  "endpoint?aws_region=region&aws_key=IDkey&aws_secret=secret&aws_token=sessionToken&queue_id=cgrates-cdrs"  
+		"export_path": "http://s3.us-east-2.amazonaws.com/?aws_region=eu-west-2&aws_key=testkey&aws_secret=testsecret&queue_id=cgrates-cdrs",
+		"content_fields": [
+			{"tag": "CGRID", "type": "*composed", "value": "~CGRID", "field_id": "CGRID"},
+		],
+	},
+},
+
+}

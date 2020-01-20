@@ -16,10 +16,12 @@ en_internal=$?
 echo 'go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*internal'
 go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*internal
 ers_internal=$?
-
 echo 'go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*internal'
 go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*internal
 lds_internal=$?
+echo 'go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*internal'
+go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*internal
+gnr_internal=$?
 # SQL
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*sql'
 go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*sql
@@ -36,6 +38,9 @@ ers_sql=$?
 echo 'go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*sql'
 go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*sql
 lds_sql=$?
+echo 'go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*sql'
+go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*sql
+gnr_sql=$?
 # Mongo
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*mongo'
 go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*mongo
@@ -52,6 +57,9 @@ ers_mongo=$?
 echo 'go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*mongo'
 go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*mongo
 lds_mongo=$?
+echo 'go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*mongo'
+go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*mongo
+gnr_mongo=$?
 # Postgres
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*postgres'
 go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*postgres
@@ -68,6 +76,9 @@ ers_postgres=$?
 echo 'go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*postgres'
 go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*postgres
 lds_postgres=$?
+echo 'go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*postgres'
+go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*postgres
+gnr_postgres=$?
 
 echo 'go test github.com/cgrates/cgrates/cdrc -tags=integration'
 go test github.com/cgrates/cgrates/cdrc -tags=integration
@@ -77,9 +88,7 @@ go test github.com/cgrates/cgrates/config -tags=integration
 cfg=$?
 #All
 
-echo 'go test github.com/cgrates/cgrates/general_tests -tags=integration'
-go test github.com/cgrates/cgrates/general_tests -tags=integration
-gnr=$?
+
 echo 'go test github.com/cgrates/cgrates/agents -tags=integration'
 go test github.com/cgrates/cgrates/agents -tags=integration
 agts=$?
