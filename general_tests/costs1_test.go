@@ -131,7 +131,6 @@ func TestCosts1GetCost2(t *testing.T) {
 	tStart, _ := utils.ParseTimeDetectLayout("2004-06-04T00:00:01Z")
 	tEnd, _ := utils.ParseTimeDetectLayout("2004-06-04T00:01:01Z")
 	cd := &engine.CallDescriptor{
-		Direction:   "*out",
 		Category:    "call",
 		Tenant:      "cgrates.org",
 		Subject:     "1001",

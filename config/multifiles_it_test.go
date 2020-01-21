@@ -64,11 +64,8 @@ func TestMfCdreDefaultInstance(t *testing.T) {
 	if len(mfCgrCfg.CdreProfiles[prfl].HeaderFields) != 0 {
 		t.Error("Default instance has number of header fields: ", len(mfCgrCfg.CdreProfiles[prfl].HeaderFields))
 	}
-	if len(mfCgrCfg.CdreProfiles[prfl].ContentFields) != 12 {
+	if len(mfCgrCfg.CdreProfiles[prfl].ContentFields) != 11 {
 		t.Error("Default instance has number of content fields: ", len(mfCgrCfg.CdreProfiles[prfl].ContentFields))
-	}
-	if mfCgrCfg.CdreProfiles[prfl].ContentFields[2].Tag != "Direction" {
-		t.Error("Unexpected headerField value: ", mfCgrCfg.CdreProfiles[prfl].ContentFields[2].Tag)
 	}
 }
 

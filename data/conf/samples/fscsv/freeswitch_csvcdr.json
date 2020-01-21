@@ -12,7 +12,6 @@
 			{"tag": "tor", "cdr_field_id": "tor", "type": "cdrfield", "value": "^*voice", "mandatory": true},
 			{"tag": "accid", "cdr_field_id": "accid", "type": "cdrfield", "value": "10", "mandatory": true},
 			{"tag": "reqtype", "cdr_field_id": "reqtype", "type": "cdrfield", "value": "^rated", "mandatory": true},
-			{"tag": "direction", "cdr_field_id": "direction", "type": "cdrfield", "value": "^*out", "mandatory": true},
 			{"tag": "tenant", "cdr_field_id": "tenant", "type": "cdrfield", "value": "^cgrates.org", "mandatory": true},
 			{"tag": "category", "cdr_field_id": "category", "type": "cdrfield", "value": "^call", "mandatory": true},
 			{"tag": "account", "cdr_field_id": "account", "type": "cdrfield", "value": "12", "mandatory": true},

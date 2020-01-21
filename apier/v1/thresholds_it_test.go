@@ -161,7 +161,6 @@ var (
 					utils.OriginID:    "dsafdsaf",
 					utils.ToR:         utils.VOICE,
 					utils.RequestType: utils.META_RATED,
-					utils.Direction:   "*out",
 					utils.Tenant:      "cgrates.org",
 					utils.Category:    "call",
 					utils.Account:     "1007",

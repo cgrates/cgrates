@@ -165,7 +165,6 @@ package general_tests
 // // func TestTutITGetMatchingAlias(t *testing.T) {
 // // 	args := engine.AttrMatchingAlias{
 // // 		Destination: "1005",
-// // 		Direction:   "*out",
 // // 		Tenant:      "cgrates.org",
 // // 		Category:    "call",
 // // 		Account:     "1006",
@@ -188,7 +187,6 @@ package general_tests
 // 	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
 // 	tEnd, _ := utils.ParseDate("2014-08-04T13:00:20Z")
 // 	cd := engine.CallDescriptor{
-// 		Direction:     "*out",
 // 		Category:      "call",
 // 		Tenant:        "cgrates.org",
 // 		Subject:       "1001",
@@ -206,7 +204,6 @@ package general_tests
 // 	}
 // 	// Make sure that the same cost is returned via users aliasing
 // 	cd = engine.CallDescriptor{
-// 		Direction:     "*out",
 // 		Category:      "call",
 // 		Tenant:        utils.USERS,
 // 		Subject:       utils.USERS,
@@ -225,7 +222,6 @@ package general_tests
 // 	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
 // 	tEnd, _ = utils.ParseDate("2014-08-04T13:01:25Z")
 // 	cd = engine.CallDescriptor{
-// 		Direction:     "*out",
 // 		Category:      "call",
 // 		Tenant:        "cgrates.org",
 // 		Subject:       "1001",
@@ -243,7 +239,6 @@ package general_tests
 // 	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
 // 	tEnd, _ = utils.ParseDate("2014-08-04T13:00:20Z")
 // 	cd = engine.CallDescriptor{
-// 		Direction:     "*out",
 // 		Category:      "call",
 // 		Tenant:        "cgrates.org",
 // 		Subject:       "1001",
@@ -261,7 +256,6 @@ package general_tests
 // 	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
 // 	tEnd, _ = utils.ParseDate("2014-08-04T13:01:25Z")
 // 	cd = engine.CallDescriptor{
-// 		Direction:     "*out",
 // 		Category:      "call",
 // 		Tenant:        "cgrates.org",
 // 		Subject:       "1001",
@@ -279,7 +273,6 @@ package general_tests
 // 	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
 // 	tEnd, _ = utils.ParseDate("2014-08-04T13:00:20Z")
 // 	cd = engine.CallDescriptor{
-// 		Direction:     "*out",
 // 		Category:      "call",
 // 		Tenant:        "cgrates.org",
 // 		Subject:       "1001",
@@ -297,7 +290,6 @@ package general_tests
 // 	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
 // 	tEnd, _ = utils.ParseDate("2014-08-04T13:01:25Z")
 // 	cd = engine.CallDescriptor{
-// 		Direction:     "*out",
 // 		Category:      "call",
 // 		Tenant:        "cgrates.org",
 // 		Subject:       "1001",
@@ -314,7 +306,6 @@ package general_tests
 // 	}
 // 	tStart = time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC)
 // 	cd = engine.CallDescriptor{
-// 		Direction:   "*out",
 // 		Category:    "call",
 // 		Tenant:      "cgrates.org",
 // 		Subject:     "1001",
@@ -329,7 +320,6 @@ package general_tests
 // 		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
 // 	}
 // 	cd = engine.CallDescriptor{
-// 		Direction:   "*out",
 // 		Category:    "call",
 // 		Tenant:      "cgrates.org",
 // 		Subject:     "1001",
@@ -344,7 +334,6 @@ package general_tests
 // 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 // 	}
 // 	cd = engine.CallDescriptor{
-// 		Direction:   "*out",
 // 		Category:    "call",
 // 		Tenant:      "cgrates.org",
 // 		Subject:     "1002",
@@ -359,7 +348,6 @@ package general_tests
 // 		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
 // 	}
 // 	cd = engine.CallDescriptor{
-// 		Direction:   "*out",
 // 		Category:    "call",
 // 		Tenant:      "cgrates.org",
 // 		Subject:     "1002",
@@ -374,7 +362,6 @@ package general_tests
 // 		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
 // 	}
 // 	cd = engine.CallDescriptor{
-// 		Direction:   "*out",
 // 		Category:    "call",
 // 		Tenant:      "cgrates.org",
 // 		Subject:     "1001",
@@ -389,7 +376,6 @@ package general_tests
 // 		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
 // 	}
 // 	cd = engine.CallDescriptor{
-// 		Direction:   "*out",
 // 		Category:    "call",
 // 		Tenant:      "cgrates.org",
 // 		Subject:     "1001",
@@ -404,7 +390,6 @@ package general_tests
 // 		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
 // 	}
 // 	cd = engine.CallDescriptor{
-// 		Direction:   "*out",
 // 		Category:    "call",
 // 		Tenant:      "cgrates.org",
 // 		Subject:     "1001",
@@ -424,7 +409,6 @@ package general_tests
 // func TestTutITMaxDebit(t *testing.T) {
 // 	tStart := time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC)
 // 	cd := engine.CallDescriptor{
-// 		Direction:     "*out",
 // 		Category:      "call",
 // 		Tenant:        "cgrates.org",
 // 		Subject:       "1001",
@@ -441,7 +425,6 @@ package general_tests
 // 		t.Errorf("Calling Responder.MaxDebit got callcost: %v", cc.GetDuration())
 // 	}
 // 	cd = engine.CallDescriptor{
-// 		Direction:     "*out",
 // 		Category:      "call",
 // 		Tenant:        "cgrates.org",
 // 		Subject:       "1001",
@@ -457,7 +440,6 @@ package general_tests
 // 		t.Errorf("Calling Responder.MaxDebit got duration: %v", cc.GetDuration())
 // 	}
 // 	cd = engine.CallDescriptor{
-// 		Direction:     "*out",
 // 		Category:      "call",
 // 		Tenant:        "cgrates.org",
 // 		Subject:       "1001",
@@ -474,7 +456,6 @@ package general_tests
 // 		t.Errorf("Calling Responder.MaxDebit got callcost: %v", cc.GetDuration())
 // 	}
 // 	cd = engine.CallDescriptor{
-// 		Direction:     "*out",
 // 		Category:      "call",
 // 		Tenant:        "cgrates.org",
 // 		Subject:       "1004",
@@ -744,7 +725,6 @@ package general_tests
 // 	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
 // 	tEnd, _ := utils.ParseDate("2014-08-04T13:01:00Z")
 // 	cd := engine.CallDescriptor{
-// 		Direction:   "*out",
 // 		Category:    "call",
 // 		Tenant:      "cgrates.org",
 // 		Subject:     "1005",
@@ -772,7 +752,6 @@ package general_tests
 // 		t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts, lcr.SupplierCosts)
 // 	}
 // 	cd = engine.CallDescriptor{
-// 		Direction:   "*out",
 // 		Category:    "call",
 // 		Tenant:      "cgrates.org",
 // 		Subject:     "1005",
@@ -811,7 +790,6 @@ package general_tests
 // 	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
 // 	tEnd, _ := utils.ParseDate("2014-08-04T13:01:00Z")
 // 	cd := engine.CallDescriptor{
-// 		Direction:   "*out",
 // 		Category:    "call",
 // 		Tenant:      "cgrates.org",
 // 		Subject:     "1001",
@@ -838,7 +816,6 @@ package general_tests
 // 		t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts[0], lcr.SupplierCosts[0])
 // 	}
 // 	cd = engine.CallDescriptor{
-// 		Direction:   "*out",
 // 		Category:    "call",
 // 		Tenant:      "cgrates.org",
 // 		Subject:     "1001",
@@ -869,7 +846,6 @@ package general_tests
 // 	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
 // 	tEnd, _ := utils.ParseDate("2014-08-04T13:01:00Z")
 // 	cd := engine.CallDescriptor{
-// 		Direction:   "*out",
 // 		Category:    "call",
 // 		Tenant:      "cgrates.org",
 // 		Subject:     "1002",
@@ -895,7 +871,6 @@ package general_tests
 // 	}
 // 	// LCR with Alias
 // 	cd = engine.CallDescriptor{
-// 		Direction:   "*out",
 // 		Category:    "call",
 // 		Tenant:      "cgrates.org",
 // 		Subject:     "1006",
@@ -917,7 +892,6 @@ package general_tests
 // 	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
 // 	tEnd, _ := utils.ParseDate("2014-08-04T13:01:00Z")
 // 	cd := engine.CallDescriptor{
-// 		Direction:   "*out",
 // 		Category:    "call",
 // 		Tenant:      "cgrates.org",
 // 		Subject:     "1002",
@@ -1061,7 +1035,6 @@ package general_tests
 // 	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
 // 	tEnd, _ := utils.ParseDate("2014-08-04T13:01:00Z")
 // 	cd := engine.CallDescriptor{
-// 		Direction:   "*out",
 // 		Category:    "call",
 // 		Tenant:      "cgrates.org",
 // 		Subject:     "1003",
@@ -1117,7 +1090,6 @@ package general_tests
 // 		//	t.Errorf("Expecting: %+v, received: %+v", eLcr.SupplierCosts[0], lcr.SupplierCosts[0])
 // 	}
 // 	cd = engine.CallDescriptor{
-// 		Direction:   "*out",
 // 		Category:    "call",
 // 		Tenant:      "cgrates.org",
 // 		Subject:     "1003",
@@ -1193,7 +1165,6 @@ package general_tests
 // 	}
 // 	type AttrGetAccounts struct {
 // 		Tenant     string
-// 		Direction  string
 // 		AccountIds []string
 // 		Offset     int // Set the item offset
 // 		Limit      int // Limit number of items retrieved
@@ -1347,7 +1318,6 @@ package general_tests
 // 		Account:     "1001",
 // 		Subject:     "1001",
 // 		Tenant:      "cgrates.org",
-// 		Direction:   utils.META_OUT,
 // 		Destination: "1003",
 // 		Timespans: []*engine.TimeSpan{
 // 			&engine.TimeSpan{

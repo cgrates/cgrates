@@ -390,7 +390,7 @@ func (apiv1 *ApierV1) ImportTariffPlanFromFolder(attrs utils.AttrImportTPFromFol
 
 // Sets a specific rating profile working with data directly in the DataDB without involving storDb
 func (apiv1 *ApierV1) SetRatingProfile(attrs utils.AttrSetRatingProfile, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "TOR", "Direction", "Subject", "RatingPlanActivations"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "TOR", "Subject", "RatingPlanActivations"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	for _, rpa := range attrs.RatingPlanActivations {
@@ -462,7 +462,7 @@ func (apiv1 *ApierV1) GetRatingProfileIDs(args utils.TenantArgWithPaginator, rsP
 }
 
 func (apiv1 *ApierV1) GetRatingProfile(attrs utils.AttrGetRatingProfile, reply *engine.RatingProfile) (err error) {
-	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Category", "Direction", "Subject"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Category", "Subject"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if rpPrf, err := apiv1.DataManager.GetRatingProfile(attrs.GetID(),
@@ -491,7 +491,6 @@ type V1TPAction struct {
 	BalanceId       string   // Balance identification string (account scope)
 	BalanceUuid     string   // Balance identification string (global scope)
 	BalanceType     string   // Type of balance the action will operate on
-	Directions      string   // Balance direction
 	Units           float64  // Number of units to add/deduct
 	ExpiryTime      string   // Time when the units will expire
 	Filter          string   // The condition on balances that is checked before the action
@@ -514,7 +513,7 @@ func (apiv1 *ApierV1) SetActions(attrs V1AttrSetActions, reply *string) (err err
 	for _, action := range attrs.Actions {
 		requiredFields := []string{"Identifier", "Weight"}
 		if action.BalanceType != "" { // Add some inter-dependent parameters - if balanceType then we are not talking about simply calling actions
-			requiredFields = append(requiredFields, "Direction", "Units")
+			requiredFields = append(requiredFields, "Units")
 		}
 		if missing := utils.MissingStructFields(action, requiredFields); len(missing) != 0 {
 			return fmt.Errorf("%s:Action:%s:%v", utils.ErrMandatoryIeMissing.Error(), action.Identifier, missing)
@@ -1008,29 +1007,21 @@ func (apiv1 *ApierV1) RemoveTPFromStorDB(attrs AttrLoadTpFromStorDb, reply *stri
 }
 
 type AttrRemoveRatingProfile struct {
-	Direction string
-	Tenant    string
-	Category  string
-	Subject   string
+	Tenant   string
+	Category string
+	Subject  string
 }
 
 func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
-	if arrp.Direction != "" && arrp.Direction != utils.ANY {
-		result += arrp.Direction
-		result += utils.CONCATENATED_KEY_SEP
-	} else {
-		return
-	}
+	result = utils.META_OUT + utils.CONCATENATED_KEY_SEP
 	if arrp.Tenant != "" && arrp.Tenant != utils.ANY {
-		result += arrp.Tenant
-		result += utils.CONCATENATED_KEY_SEP
+		result += arrp.Tenant + utils.CONCATENATED_KEY_SEP
 	} else {
 		return
 	}
 
 	if arrp.Category != "" && arrp.Category != utils.ANY {
-		result += arrp.Category
-		result += utils.CONCATENATED_KEY_SEP
+		result += arrp.Category + utils.CONCATENATED_KEY_SEP
 	} else {
 		return
 	}
@@ -1041,12 +1032,8 @@ func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
 }
 
 func (apiv1 *ApierV1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *string) error {
-	if attr.Direction == "" {
-		attr.Direction = utils.META_OUT
-	}
-	if (attr.Subject != "" && utils.IsSliceMember([]string{attr.Direction, attr.Tenant, attr.Category}, "")) ||
-		(attr.Category != "" && utils.IsSliceMember([]string{attr.Direction, attr.Tenant}, "")) ||
-		attr.Tenant != "" && attr.Direction == "" {
+	if (attr.Subject != "" && utils.IsSliceMember([]string{attr.Tenant, attr.Category}, "")) ||
+		(attr.Category != "" && attr.Tenant == "") {
 		return utils.ErrMandatoryIeMissing
 	}
 	_, err := guardian.Guardian.Guard(func() (interface{}, error) {

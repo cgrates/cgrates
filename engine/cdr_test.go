@@ -331,7 +331,7 @@ func TestFormatCost(t *testing.T) {
 /*
 func TestCDRAsHttpForm(t *testing.T) {
 	storCdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsaf",
-		OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
+		OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.MetaDefault,
 		Usage: time.Duration(10) * time.Second, Supplier: "SUPPL1",
@@ -352,9 +352,6 @@ func TestCDRAsHttpForm(t *testing.T) {
 	}
 	if cdrForm.Get(utils.RequestType) != utils.META_RATED {
 		t.Errorf("Expected: %s, received: %s", utils.META_RATED, cdrForm.Get(utils.RequestType))
-	}
-	if cdrForm.Get(utils.DIRECTION) != "*out" {
-		t.Errorf("Expected: %s, received: %s", "*out", cdrForm.Get(utils.DIRECTION))
 	}
 	if cdrForm.Get(utils.Tenant) != "cgrates.org" {
 		t.Errorf("Expected: %s, received: %s", "cgrates.org", cdrForm.Get(utils.Tenant))

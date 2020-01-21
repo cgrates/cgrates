@@ -30,11 +30,11 @@ func TestCdreCfgClone(t *testing.T) {
 	emptyFields := []*FCTemplate{}
 	initContentFlds := []*FCTemplate{
 		{Tag: "CgrId",
-			Type:    "*composed",
+			Type:    utils.META_COMPOSED,
 			FieldId: "cgrid",
 			Value:   cgrIdRsrs},
 		{Tag: "RunId",
-			Type:    "*composed",
+			Type:    utils.META_COMPOSED,
 			FieldId: "runid",
 			Value:   runIdRsrs},
 	}
@@ -48,11 +48,11 @@ func TestCdreCfgClone(t *testing.T) {
 	}
 	eClnContentFlds := []*FCTemplate{
 		{Tag: "CgrId",
-			Type:    "*composed",
+			Type:    utils.META_COMPOSED,
 			FieldId: "cgrid",
 			Value:   cgrIdRsrs},
 		{Tag: "RunId",
-			Type:    "*composed",
+			Type:    utils.META_COMPOSED,
 			FieldId: "runid",
 			Value:   runIdRsrs},
 	}

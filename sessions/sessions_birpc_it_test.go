@@ -187,7 +187,6 @@ func TestSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 				utils.EVENT_NAME:  "TEST_EVENT",
 				utils.ToR:         utils.VOICE,
 				utils.OriginID:    "123451",
-				utils.Direction:   utils.META_OUT,
 				utils.Account:     attrSetBalance.Account,
 				utils.Subject:     attrSetBalance.Account,
 				utils.Destination: "1004",

@@ -32,7 +32,6 @@ import (
 const (
 	// Freswitch event property names
 	FS_CDR_MAP            = "variables"
-	FS_DIRECTION          = "direction"
 	FS_UUID               = "uuid" // -Unique ID for this call leg
 	FS_CALL_DEST_NR       = "dialed_extension"
 	FS_PARK_TIME          = "start_epoch"

@@ -578,7 +578,6 @@ type AttrGetCdrs struct {
 	CdrHosts            []string // If provided, it will filter cdrhost
 	CdrSources          []string // If provided, it will filter cdrsource
 	ReqTypes            []string // If provided, it will fiter reqtype
-	Directions          []string // If provided, it will fiter direction
 	Tenants             []string // If provided, it will filter tenant
 	Categories          []string // If provided, it will filter çategory
 	Accounts            []string // If provided, it will filter account

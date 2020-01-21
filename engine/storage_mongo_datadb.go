@@ -87,7 +87,6 @@ var (
 	CDRHostLow         = strings.ToLower(utils.OriginHost)
 	CDRSourceLow       = strings.ToLower(utils.Source)
 	RequestTypeLow     = strings.ToLower(utils.RequestType)
-	DirectionLow       = strings.ToLower(utils.Direction)
 	TenantLow          = strings.ToLower(utils.Tenant)
 	CategoryLow        = strings.ToLower(utils.Category)
 	AccountLow         = strings.ToLower(utils.Account)

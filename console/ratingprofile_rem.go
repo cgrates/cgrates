@@ -53,13 +53,13 @@ func (self *CmdRemRatingProfile) RpcMethod() string {
 
 func (self *CmdRemRatingProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.AttrRemoveRatingProfile{Direction: utils.META_OUT}
+		self.rpcParams = &v1.AttrRemoveRatingProfile{}
 	}
 	return self.rpcParams
 }
 
 func (self *CmdRemRatingProfile) PostprocessRpcParams() error {
-	if reflect.DeepEqual(self.rpcParams, &v1.AttrRemoveRatingProfile{Direction: utils.META_OUT}) {
+	if reflect.DeepEqual(self.rpcParams, &v1.AttrRemoveRatingProfile{}) {
 		return utils.ErrMandatoryIeMissing
 	}
 	return nil

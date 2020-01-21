@@ -88,7 +88,6 @@
 				{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~*req.0", "mandatory": true},
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~*req.1", "mandatory": true},
-				{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "*out", "mandatory": true},
 				{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~*req.2", "mandatory": true},
 				{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "call", "mandatory": true},
 				{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~*req.3", "mandatory": true},

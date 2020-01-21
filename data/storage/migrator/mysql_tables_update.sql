@@ -13,7 +13,6 @@ CREATE TABLE cdrs (
   origin_id varchar(64) NOT NULL,
   tor  varchar(16) NOT NULL,
   request_type varchar(24) NOT NULL,
-  direction varchar(8) NOT NULL,
   tenant varchar(64) NOT NULL,
   category varchar(64) NOT NULL,
   account varchar(128) NOT NULL,
