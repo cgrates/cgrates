@@ -255,7 +255,7 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 		if expMp, err = cdr.AsExportMap(cdre.exportTemplate.ContentFields, cdre.httpSkipTLSCheck, nil, cdre.filterS); err != nil {
 			return
 		}
-		var vals url.Values
+		vals := url.Values{}
 		for fld, val := range expMp {
 			vals.Set(fld, val)
 		}
