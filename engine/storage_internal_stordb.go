@@ -1208,7 +1208,7 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 
 		if filter.Paginator.Offset != nil {
 			if paginatorOffsetCounter <= *filter.Paginator.Offset {
-				paginatorOffsetCounter += 1
+				paginatorOffsetCounter++
 				continue
 			}
 		}
