@@ -197,7 +197,9 @@ func (srvMngr *ServiceManager) handleReload() {
 		case ext := <-srvMngr.engineShutdown:
 			srvMngr.engineShutdown <- ext
 			for srviceName, srv := range srvMngr.subsystems { // gracefully stop all running subsystems
-				if !srv.IsRunning() {
+				if !srv.IsRunning() ||
+					srv.ServiceName() == utils.ApierV1 || // apierv1 and apierv2 shutdown is handled by RaLs
+					srv.ServiceName() == utils.ApierV2 { // remove this once aqier is no longer dependent on RaLs
 					continue
 				}
 				if err := srv.Shutdown(); err != nil {

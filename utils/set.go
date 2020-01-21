@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
+// NewStringSet returns a new StringSet
 func NewStringSet(dataSlice []string) (s *StringSet) {
 	s = &StringSet{data: make(map[string]struct{})}
 	s.AddSlice(dataSlice)
@@ -29,25 +30,30 @@ type StringSet struct {
 	data map[string]struct{}
 }
 
+// Add adds a key in set
 func (s *StringSet) Add(val string) {
 	s.data[val] = struct{}{}
 }
 
+// Remove removes a key from set
 func (s *StringSet) Remove(val string) {
 	delete(s.data, val)
 }
 
+// Has returns if the key is in set
 func (s *StringSet) Has(val string) bool {
 	_, has := s.data[val]
 	return has
 }
 
+// AddSlice adds all the element of a slice
 func (s *StringSet) AddSlice(dataSlice []string) {
 	for _, val := range dataSlice {
 		s.Add(val)
 	}
 }
 
+// AsSlice returns the keys as string slice
 func (s *StringSet) AsSlice() []string {
 	result := make([]string, len(s.data))
 	i := 0
@@ -69,4 +75,13 @@ func (s *StringSet) Size() int {
 		return 0
 	}
 	return len(s.data)
+}
+
+// Intersect removes all key s2 do not have
+func (s *StringSet) Intersect(s2 *StringSet) {
+	for k := range s.data {
+		if !s2.Has(k) {
+			s.Remove(k)
+		}
+	}
 }

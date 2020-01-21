@@ -121,7 +121,7 @@ func testVrsRpcConn(t *testing.T) {
 func testVrsDataDB(t *testing.T) {
 	var result engine.Versions
 	expectedVrs := engine.Versions{"ActionTriggers": 2,
-		"Actions": 2, "RQF": 3, "ReverseDestinations": 1, "Attributes": 4, "RatingPlan": 1,
+		"Actions": 2, "RQF": 4, "ReverseDestinations": 1, "Attributes": 5, "RatingPlan": 1,
 		"RatingProfile": 1, "User": 1, "Accounts": 3, "ActionPlans": 3, "Chargers": 1,
 		"Destinations": 1, "LoadIDs": 1, "SharedGroups": 2, "Stats": 2, "Resource": 1,
 		"Subscribers": 1, "Suppliers": 1, "Thresholds": 3, "Timing": 1}
@@ -161,7 +161,7 @@ func testVrsSetDataDBVrs(t *testing.T) {
 
 	var result engine.Versions
 	expectedVrs := engine.Versions{"ActionTriggers": 2,
-		"Actions": 2, "RQF": 3, "ReverseDestinations": 1, "Attributes": 3, "RatingPlan": 1,
+		"Actions": 2, "RQF": 4, "ReverseDestinations": 1, "Attributes": 3, "RatingPlan": 1,
 		"RatingProfile": 1, "User": 1, "Accounts": 3, "ActionPlans": 3, "Chargers": 1,
 		"Destinations": 1, "LoadIDs": 1, "SharedGroups": 2, "Stats": 2, "Resource": 1,
 		"Subscribers": 1, "Suppliers": 1, "Thresholds": 3, "Timing": 1}

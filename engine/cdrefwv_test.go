@@ -45,7 +45,7 @@ var hdrJsnCfgFlds = []*config.FcTemplateJsonCfg{
 	{
 		Tag:     utils.StringPointer("FileSeqNr"),
 		Type:    utils.StringPointer(utils.META_HANDLER),
-		Value:   utils.StringPointer(META_EXPORTID),
+		Value:   utils.StringPointer(metaExportID),
 		Width:   utils.IntPointer(5),
 		Strip:   utils.StringPointer("right"),
 		Padding: utils.StringPointer("zeroleft")},
@@ -53,12 +53,12 @@ var hdrJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Tag:    utils.StringPointer("LastCdr"),
 		Type:   utils.StringPointer(utils.META_HANDLER),
 		Width:  utils.IntPointer(12),
-		Value:  utils.StringPointer(META_LASTCDRATIME),
+		Value:  utils.StringPointer(metaLastCDRAtime),
 		Layout: utils.StringPointer("020106150400")},
 	{
 		Tag:    utils.StringPointer("FileCreationfTime"),
 		Type:   utils.StringPointer(utils.META_HANDLER),
-		Value:  utils.StringPointer(META_TIMENOW),
+		Value:  utils.StringPointer(metaTimeNow),
 		Width:  utils.IntPointer(12),
 		Layout: utils.StringPointer("020106150400")},
 	{
@@ -213,20 +213,20 @@ var trailerJsnCfgFlds = []*config.FcTemplateJsonCfg{
 	{
 		Tag:     utils.StringPointer("FileSeqNr"),
 		Type:    utils.StringPointer(utils.META_HANDLER),
-		Value:   utils.StringPointer(META_EXPORTID),
+		Value:   utils.StringPointer(metaExportID),
 		Width:   utils.IntPointer(5),
 		Strip:   utils.StringPointer("right"),
 		Padding: utils.StringPointer("zeroleft")},
 	{
 		Tag:     utils.StringPointer("NumberOfRecords"),
 		Type:    utils.StringPointer(utils.META_HANDLER),
-		Value:   utils.StringPointer(META_NRCDRS),
+		Value:   utils.StringPointer(metaNrCDRs),
 		Width:   utils.IntPointer(6),
 		Padding: utils.StringPointer("zeroleft")},
 	{
 		Tag:     utils.StringPointer("CdrsDuration"),
 		Type:    utils.StringPointer(utils.META_HANDLER),
-		Value:   utils.StringPointer(META_DURCDRS),
+		Value:   utils.StringPointer(metaDurCDRs),
 		Width:   utils.IntPointer(8),
 		Padding: utils.StringPointer("zeroleft"),
 		Layout:  utils.StringPointer(utils.SECONDS)},
@@ -234,13 +234,13 @@ var trailerJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Tag:    utils.StringPointer("FirstCdrTime"),
 		Type:   utils.StringPointer(utils.META_HANDLER),
 		Width:  utils.IntPointer(12),
-		Value:  utils.StringPointer(META_FIRSTCDRATIME),
+		Value:  utils.StringPointer(metaFirstCDRAtime),
 		Layout: utils.StringPointer("020106150400")},
 	{
 		Tag:    utils.StringPointer("LastCdrTime"),
 		Type:   utils.StringPointer(utils.META_HANDLER),
 		Width:  utils.IntPointer(12),
-		Value:  utils.StringPointer(META_LASTCDRATIME),
+		Value:  utils.StringPointer(metaLastCDRAtime),
 		Layout: utils.StringPointer("020106150400")},
 	{
 		Tag:   utils.StringPointer("Filler2"),
@@ -318,11 +318,11 @@ func TestWriteCdr(t *testing.T) {
 		t.Error("Unexpected total cost in the stats: ", cdre.totalCost)
 	}
 
-	if cdre.FirstOrderId() != 1 {
-		t.Error("Unexpected FirstOrderId", cdre.FirstOrderId())
+	if cdre.FirstOrderID() != 1 {
+		t.Error("Unexpected FirstOrderId", cdre.FirstOrderID())
 	}
-	if cdre.LastOrderId() != 1 {
-		t.Error("Unexpected LastOrderId", cdre.LastOrderId())
+	if cdre.LastOrderID() != 1 {
+		t.Error("Unexpected LastOrderId", cdre.LastOrderID())
 	}
 	if cdre.TotalCost() != utils.Round(cdr.Cost, 5, utils.ROUNDING_MIDDLE) {
 		t.Error("Unexpected TotalCost: ", cdre.TotalCost())
@@ -399,11 +399,11 @@ func TestWriteCdrs(t *testing.T) {
 	if cdre.totalCost != 5.99568 {
 		t.Error("Unexpected total cost in the stats: ", cdre.totalCost)
 	}
-	if cdre.FirstOrderId() != 2 {
-		t.Error("Unexpected FirstOrderId", cdre.FirstOrderId())
+	if cdre.FirstOrderID() != 2 {
+		t.Error("Unexpected FirstOrderId", cdre.FirstOrderID())
 	}
-	if cdre.LastOrderId() != 4 {
-		t.Error("Unexpected LastOrderId", cdre.LastOrderId())
+	if cdre.LastOrderID() != 4 {
+		t.Error("Unexpected LastOrderId", cdre.LastOrderID())
 	}
 	if cdre.TotalCost() != 5.99568 {
 		t.Error("Unexpected TotalCost: ", cdre.TotalCost())

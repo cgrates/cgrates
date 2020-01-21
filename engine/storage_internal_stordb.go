@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -975,82 +976,196 @@ func (iDB *InternalDB) RemoveSMCosts(qryFltr *utils.SMCostFilter) error {
 	return nil
 }
 
+// GetCDRs returns the CDRs from  DB based on given filters
 func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*CDR, count int64, err error) {
-	var cdrMpIDs utils.StringMap
-	// Apply string filter
-	for _, fltrSlc := range []struct {
+	// filterPair used only for GetCDRs for internalDB
+	type filterPair struct {
 		key string
 		ids []string
-	}{
-		{utils.CGRID, filter.CGRIDs},
-		{utils.RunID, filter.RunIDs},
-		{utils.OriginID, filter.OriginIDs},
-		{utils.OriginHost, filter.OriginHosts},
-		{utils.Source, filter.Sources},
-		{utils.ToR, filter.ToRs},
-		{utils.RequestType, filter.RequestTypes},
-		{utils.Tenant, filter.Tenants},
-		{utils.Category, filter.Categories},
-		{utils.Account, filter.Accounts},
-		{utils.Subject, filter.Subjects},
-		{utils.Destination, filter.DestinationPrefixes},
-	} {
+	}
+	var pairSlice []filterPair
+	var notPairSlice []filterPair
+	// get indexed fields
+	if len(iDB.stringIndexedFields) != 0 || len(iDB.prefixIndexedFields) != 0 {
+		for _, cdrIdx := range iDB.stringIndexedFields {
+			switch cdrIdx {
+			case utils.CGRID:
+				pairSlice = append(pairSlice, filterPair{utils.CGRID, filter.CGRIDs})
+				notPairSlice = append(notPairSlice, filterPair{utils.CGRID, filter.NotCGRIDs})
+				filter.NotCGRIDs = nil
+				filter.CGRIDs = nil
+			case utils.RunID:
+				pairSlice = append(pairSlice, filterPair{utils.RunID, filter.RunIDs})
+				notPairSlice = append(notPairSlice, filterPair{utils.RunID, filter.NotRunIDs})
+				filter.NotRunIDs = nil
+				filter.RunIDs = nil
+			case utils.OriginID:
+				pairSlice = append(pairSlice, filterPair{utils.OriginID, filter.OriginIDs})
+				notPairSlice = append(notPairSlice, filterPair{utils.OriginID, filter.NotOriginIDs})
+				filter.NotOriginIDs = nil
+				filter.OriginIDs = nil
+			case utils.OriginHost:
+				pairSlice = append(pairSlice, filterPair{utils.OriginHost, filter.OriginHosts})
+				notPairSlice = append(notPairSlice, filterPair{utils.OriginHost, filter.NotOriginHosts})
+				filter.NotOriginHosts = nil
+				filter.OriginHosts = nil
+			case utils.Source:
+				pairSlice = append(pairSlice, filterPair{utils.Source, filter.Sources})
+				notPairSlice = append(notPairSlice, filterPair{utils.Source, filter.NotSources})
+				filter.NotSources = nil
+				filter.Sources = nil
+			case utils.ToR:
+				pairSlice = append(pairSlice, filterPair{utils.ToR, filter.ToRs})
+				notPairSlice = append(notPairSlice, filterPair{utils.ToR, filter.NotToRs})
+				filter.NotToRs = nil
+				filter.ToRs = nil
+			case utils.RequestType:
+				pairSlice = append(pairSlice, filterPair{utils.RequestType, filter.RequestTypes})
+				notPairSlice = append(notPairSlice, filterPair{utils.RequestType, filter.NotRequestTypes})
+				filter.NotRequestTypes = nil
+				filter.RequestTypes = nil
+			case utils.Tenant:
+				pairSlice = append(pairSlice, filterPair{utils.Tenant, filter.Tenants})
+				notPairSlice = append(notPairSlice, filterPair{utils.Tenant, filter.NotTenants})
+				filter.NotTenants = nil
+				filter.Tenants = nil
+			case utils.Category:
+				pairSlice = append(pairSlice, filterPair{utils.Category, filter.Categories})
+				notPairSlice = append(notPairSlice, filterPair{utils.Category, filter.NotCategories})
+				filter.NotCategories = nil
+				filter.Categories = nil
+			case utils.Account:
+				pairSlice = append(pairSlice, filterPair{utils.Account, filter.Accounts})
+				notPairSlice = append(notPairSlice, filterPair{utils.Account, filter.NotAccounts})
+				filter.NotAccounts = nil
+				filter.Accounts = nil
+			case utils.Subject:
+				pairSlice = append(pairSlice, filterPair{utils.Subject, filter.Subjects})
+				notPairSlice = append(notPairSlice, filterPair{utils.Subject, filter.NotSubjects})
+				filter.NotSubjects = nil
+				filter.Subjects = nil
+			default:
+				if val, has := filter.ExtraFields[cdrIdx]; has && val != utils.MetaExists { // if the filter value is *exist it should not be treated as a indexed field
+					pairSlice = append(pairSlice, filterPair{cdrIdx, []string{val}})
+					delete(filter.ExtraFields, cdrIdx)
+				}
+				if val, has := filter.NotExtraFields[cdrIdx]; has && val != utils.MetaExists { // if the filter value is *exist it should not be treated as a indexed field
+					notPairSlice = append(notPairSlice, filterPair{cdrIdx, []string{val}})
+					delete(filter.NotExtraFields, cdrIdx)
+				}
+			}
+		}
+		for _, cdrIdx := range iDB.prefixIndexedFields {
+			switch cdrIdx {
+			case utils.Destination:
+				pairSlice = append(pairSlice, filterPair{utils.Destination, filter.DestinationPrefixes})
+				notPairSlice = append(notPairSlice, filterPair{utils.Destination, filter.NotDestinationPrefixes})
+				filter.DestinationPrefixes = nil
+				filter.NotDestinationPrefixes = nil
+			default:
+				if val, has := filter.ExtraFields[cdrIdx]; has && val != utils.MetaExists { // if the filter value is *exist it should not be treated as a indexed field
+					pairSlice = append(pairSlice, filterPair{cdrIdx, []string{val}})
+					delete(filter.ExtraFields, cdrIdx)
+				}
+				if val, has := filter.NotExtraFields[cdrIdx]; has && val != utils.MetaExists { // if the filter value is *exist it should not be treated as a indexed field
+					notPairSlice = append(notPairSlice, filterPair{cdrIdx, []string{val}})
+					delete(filter.NotExtraFields, cdrIdx)
+				}
+			}
+		}
+	} else {
+		pairSlice = []filterPair{
+			{utils.CGRID, filter.CGRIDs},
+			{utils.RunID, filter.RunIDs},
+			{utils.OriginID, filter.OriginIDs},
+			{utils.OriginHost, filter.OriginHosts},
+			{utils.Source, filter.Sources},
+			{utils.ToR, filter.ToRs},
+			{utils.RequestType, filter.RequestTypes},
+			{utils.Tenant, filter.Tenants},
+			{utils.Category, filter.Categories},
+			{utils.Account, filter.Accounts},
+			{utils.Subject, filter.Subjects},
+			{utils.Destination, filter.DestinationPrefixes},
+		}
+		notPairSlice = []filterPair{
+			{utils.CGRID, filter.NotCGRIDs},
+			{utils.RunID, filter.NotRunIDs},
+			{utils.OriginID, filter.NotOriginIDs},
+			{utils.OriginHost, filter.NotOriginHosts},
+			{utils.Source, filter.NotSources},
+			{utils.ToR, filter.NotToRs},
+			{utils.RequestType, filter.NotRequestTypes},
+			{utils.Tenant, filter.NotTenants},
+			{utils.Category, filter.NotCategories},
+			{utils.Account, filter.NotAccounts},
+			{utils.Subject, filter.NotSubjects},
+			{utils.Destination, filter.NotDestinationPrefixes},
+		}
+		filter.CGRIDs = nil
+		filter.RunIDs = nil
+		filter.OriginIDs = nil
+		filter.OriginHosts = nil
+		filter.Sources = nil
+		filter.ToRs = nil
+		filter.RequestTypes = nil
+		filter.Tenants = nil
+		filter.Categories = nil
+		filter.Accounts = nil
+		filter.Subjects = nil
+		filter.DestinationPrefixes = nil
+		filter.NotCGRIDs = nil
+		filter.NotRunIDs = nil
+		filter.NotOriginIDs = nil
+		filter.NotOriginHosts = nil
+		filter.NotSources = nil
+		filter.NotToRs = nil
+		filter.NotRequestTypes = nil
+		filter.NotTenants = nil
+		filter.NotCategories = nil
+		filter.NotAccounts = nil
+		filter.NotSubjects = nil
+		filter.NotDestinationPrefixes = nil
+	}
+
+	// find indexed fields
+	var cdrMpIDs *utils.StringSet
+	// Apply string filter
+	for _, fltrSlc := range pairSlice {
 		if len(fltrSlc.ids) == 0 {
 			continue
 		}
-		grpMpIDs := make(utils.StringMap)
+		grpMpIDs := utils.NewStringSet([]string{})
 		for _, id := range fltrSlc.ids {
 			grpIDs := iDB.db.GetGroupItemIDs(utils.CDRsTBL, utils.ConcatenatedKey(fltrSlc.key, id))
-			for _, id := range grpIDs {
-				grpMpIDs[id] = true
-			}
+			grpMpIDs.AddSlice(grpIDs)
 		}
-		if len(grpMpIDs) == 0 {
+		if grpMpIDs.Size() == 0 {
 			return nil, 0, utils.ErrNotFound
 		}
 		if cdrMpIDs == nil {
 			cdrMpIDs = grpMpIDs
 		} else {
-			for id := range cdrMpIDs {
-				if !grpMpIDs.HasKey(id) {
-					delete(cdrMpIDs, id)
-					if len(cdrMpIDs) == 0 {
-						return nil, 0, utils.ErrNotFound
-					}
-				}
+			cdrMpIDs.Intersect(grpMpIDs)
+			if cdrMpIDs.Size() == 0 {
+				return nil, 0, utils.ErrNotFound
 			}
 		}
 	}
 	if cdrMpIDs == nil {
-		cdrMpIDs = utils.StringMapFromSlice(iDB.db.GetItemIDs(utils.CDRsTBL, utils.EmptyString))
+		cdrMpIDs = utils.NewStringSet(iDB.db.GetItemIDs(utils.CDRsTBL, utils.EmptyString))
 	}
 	// check for Not filters
-	for _, fltrSlc := range []struct {
-		key string
-		ids []string
-	}{
-		{utils.CGRID, filter.NotCGRIDs},
-		{utils.RunID, filter.NotRunIDs},
-		{utils.OriginID, filter.NotOriginIDs},
-		{utils.OriginHost, filter.NotOriginHosts},
-		{utils.Source, filter.NotSources},
-		{utils.ToR, filter.NotToRs},
-		{utils.RequestType, filter.NotRequestTypes},
-		{utils.Tenant, filter.NotTenants},
-		{utils.Category, filter.NotCategories},
-		{utils.Account, filter.NotAccounts},
-		{utils.Subject, filter.NotSubjects},
-		{utils.Destination, filter.NotDestinationPrefixes},
-	} {
+	for _, fltrSlc := range notPairSlice {
 		if len(fltrSlc.ids) == 0 {
 			continue
 		}
 		for _, id := range fltrSlc.ids {
 			grpIDs := iDB.db.GetGroupItemIDs(utils.CDRsTBL, utils.ConcatenatedKey(fltrSlc.key, id))
 			for _, id := range grpIDs {
-				if cdrMpIDs.HasKey(id) {
-					delete(cdrMpIDs, id)
-					if len(cdrMpIDs) == 0 {
+				if cdrMpIDs.Has(id) {
+					cdrMpIDs.Remove(id)
+					if cdrMpIDs.Size() == 0 {
 						return nil, 0, utils.ErrNotFound
 					}
 				}
@@ -1058,18 +1173,327 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 		}
 	}
 
-	if len(cdrMpIDs) == 0 {
+	if cdrMpIDs.Size() == 0 {
 		return nil, 0, utils.ErrNotFound
 	}
 
+	// check non indexed fields
+	var minUsage time.Duration
+	var maxUsage time.Duration
+	if len(filter.MinUsage) != 0 {
+		minUsage, err = utils.ParseDurationWithNanosecs(filter.MinUsage)
+		if err != nil {
+			return nil, 0, err
+		}
+	}
+	if len(filter.MaxUsage) != 0 {
+		maxUsage, err = utils.ParseDurationWithNanosecs(filter.MaxUsage)
+		if err != nil {
+			return nil, 0, err
+		}
+	}
+
 	paginatorOffsetCounter := 0
-	for key := range cdrMpIDs {
+	for key := range cdrMpIDs.Data() {
 		x, ok := iDB.db.Get(utils.CDRsTBL, key)
 		if !ok || x == nil {
 			return nil, 0, utils.ErrNotFound
 		}
 		cdr := x.(*CDR)
 
+		// default indexed filters
+
+		if len(filter.CGRIDs) > 0 {
+			matchCGRID := false
+			for _, cgrid := range filter.CGRIDs {
+				if cdr.CGRID == cgrid {
+					matchCGRID = true
+					break
+				}
+			}
+			if !matchCGRID {
+				continue
+			}
+		}
+		if len(filter.RunIDs) > 0 {
+			matchRunID := false
+			for _, runid := range filter.RunIDs {
+				if cdr.RunID == runid {
+					matchRunID = true
+					break
+				}
+			}
+			if !matchRunID {
+				continue
+			}
+		}
+		if len(filter.OriginIDs) > 0 {
+			matchOriginID := false
+			for _, originid := range filter.OriginIDs {
+				if cdr.OriginID == originid {
+					matchOriginID = true
+					break
+				}
+			}
+			if !matchOriginID {
+				continue
+			}
+		}
+		if len(filter.OriginHosts) > 0 {
+			matchOriginHost := false
+			for _, originHost := range filter.OriginHosts {
+				if cdr.OriginHost == originHost {
+					matchOriginHost = true
+					break
+				}
+			}
+			if !matchOriginHost {
+				continue
+			}
+		}
+		if len(filter.Sources) > 0 {
+			matchSource := false
+			for _, source := range filter.Sources {
+				if cdr.Source == source {
+					matchSource = true
+					break
+				}
+			}
+			if !matchSource {
+				continue
+			}
+		}
+		if len(filter.ToRs) > 0 {
+			matchToR := false
+			for _, tor := range filter.ToRs {
+				if cdr.ToR == tor {
+					matchToR = true
+					break
+				}
+			}
+			if !matchToR {
+				continue
+			}
+		}
+		if len(filter.RequestTypes) > 0 {
+			matchRequestType := false
+			for _, req := range filter.RequestTypes {
+				if cdr.RequestType == req {
+					matchRequestType = true
+					break
+				}
+			}
+			if !matchRequestType {
+				continue
+			}
+		}
+		if len(filter.Tenants) > 0 {
+			matchTenant := false
+			for _, tnt := range filter.Tenants {
+				if cdr.Tenant == tnt {
+					matchTenant = true
+					break
+				}
+			}
+			if !matchTenant {
+				continue
+			}
+		}
+		if len(filter.Categories) > 0 {
+			matchCategorie := false
+			for _, cat := range filter.Categories {
+				if cdr.Category == cat {
+					matchCategorie = true
+					break
+				}
+			}
+			if !matchCategorie {
+				continue
+			}
+		}
+		if len(filter.Accounts) > 0 {
+			matchAccount := false
+			for _, acc := range filter.Accounts {
+				if cdr.Account == acc {
+					matchAccount = true
+					break
+				}
+			}
+			if !matchAccount {
+				continue
+			}
+		}
+		if len(filter.Subjects) > 0 {
+			matchSubject := false
+			for _, subject := range filter.Subjects {
+				if cdr.Subject == subject {
+					matchSubject = true
+					break
+				}
+			}
+			if !matchSubject {
+				continue
+			}
+		}
+		if len(filter.DestinationPrefixes) > 0 {
+			matchdst := false
+			for _, dst := range filter.DestinationPrefixes {
+				if strings.HasPrefix(cdr.Destination, dst) {
+					matchdst = true
+					break
+				}
+			}
+			if !matchdst {
+				continue
+			}
+		}
+
+		if len(filter.NotCGRIDs) > 0 {
+			matchCGRID := true
+			for _, cgrid := range filter.NotCGRIDs {
+				if cdr.CGRID == cgrid {
+					matchCGRID = false
+					break
+				}
+			}
+			if !matchCGRID {
+				continue
+			}
+		}
+		if len(filter.NotRunIDs) > 0 {
+			matchRunID := true
+			for _, runid := range filter.NotRunIDs {
+				if cdr.RunID == runid {
+					matchRunID = false
+					break
+				}
+			}
+			if !matchRunID {
+				continue
+			}
+		}
+		if len(filter.NotOriginIDs) > 0 {
+			matchOriginID := true
+			for _, originID := range filter.NotOriginIDs {
+				if cdr.OriginID == originID {
+					matchOriginID = false
+					break
+				}
+			}
+			if !matchOriginID {
+				continue
+			}
+		}
+		if len(filter.NotOriginHosts) > 0 {
+			matchOriginHost := true
+			for _, originHost := range filter.NotOriginHosts {
+				if cdr.OriginHost == originHost {
+					matchOriginHost = false
+					break
+				}
+			}
+			if !matchOriginHost {
+				continue
+			}
+		}
+		if len(filter.NotSources) > 0 {
+			matchSource := true
+			for _, source := range filter.NotSources {
+				if cdr.Source == source {
+					matchSource = false
+					break
+				}
+			}
+			if !matchSource {
+				continue
+			}
+		}
+		if len(filter.NotToRs) > 0 {
+			matchToR := true
+			for _, tor := range filter.NotToRs {
+				if cdr.ToR == tor {
+					matchToR = false
+					break
+				}
+			}
+			if !matchToR {
+				continue
+			}
+		}
+		if len(filter.NotRequestTypes) > 0 {
+			matchRequestType := true
+			for _, req := range filter.NotRequestTypes {
+				if cdr.RequestType == req {
+					matchRequestType = false
+					break
+				}
+			}
+			if !matchRequestType {
+				continue
+			}
+		}
+		if len(filter.NotTenants) > 0 {
+			matchTenant := true
+			for _, tnt := range filter.NotTenants {
+				if cdr.Tenant == tnt {
+					matchTenant = false
+					break
+				}
+			}
+			if !matchTenant {
+				continue
+			}
+		}
+		if len(filter.NotCategories) > 0 {
+			matchCategorie := true
+			for _, cat := range filter.NotCategories {
+				if cdr.Category == cat {
+					matchCategorie = false
+					break
+				}
+			}
+			if !matchCategorie {
+				continue
+			}
+		}
+		if len(filter.NotAccounts) > 0 {
+			matchAccount := true
+			for _, acc := range filter.NotAccounts {
+				if cdr.Account == acc {
+					matchAccount = false
+					break
+				}
+			}
+			if !matchAccount {
+				continue
+			}
+		}
+		if len(filter.NotSubjects) > 0 {
+			matchSubject := true
+			for _, subject := range filter.NotSubjects {
+				if cdr.Subject == subject {
+					matchSubject = false
+					break
+				}
+			}
+			if !matchSubject {
+				continue
+			}
+		}
+		if len(filter.NotDestinationPrefixes) > 0 {
+			matchdst := true
+			for _, dst := range filter.NotDestinationPrefixes {
+				if strings.HasPrefix(cdr.Destination, dst) {
+					matchdst = false
+					break
+				}
+			}
+			if !matchdst {
+				continue
+			}
+		}
+
+		// normal filters
 		if len(filter.Costs) > 0 {
 			matchCost := false
 			for _, cost := range filter.Costs {
@@ -1127,19 +1551,11 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 		}
 
 		if len(filter.MinUsage) != 0 {
-			minUsage, err := utils.ParseDurationWithNanosecs(filter.MinUsage)
-			if err != nil {
-				return nil, 0, err
-			}
 			if cdr.Usage < minUsage {
 				continue
 			}
 		}
 		if len(filter.MaxUsage) != 0 {
-			maxUsage, err := utils.ParseDurationWithNanosecs(filter.MaxUsage)
-			if err != nil {
-				return nil, 0, err
-			}
 			if cdr.Usage > maxUsage {
 				continue
 			}
@@ -1208,7 +1624,7 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 
 		if filter.Paginator.Offset != nil {
 			if paginatorOffsetCounter <= *filter.Paginator.Offset {
-				paginatorOffsetCounter += 1
+				paginatorOffsetCounter++
 				continue
 			}
 		}
