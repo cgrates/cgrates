@@ -76,3 +76,12 @@ func (s *StringSet) Size() int {
 	}
 	return len(s.data)
 }
+
+// Intersect removes all key s2 do not have
+func (s *StringSet) Intersect(s2 *StringSet) {
+	for k := range s.data {
+		if !s2.Has(k) {
+			s.Remove(k)
+		}
+	}
+}
