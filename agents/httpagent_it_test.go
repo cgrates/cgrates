@@ -46,54 +46,65 @@ var (
 	httpC     *http.Client // so we can cache the connection
 	err       error
 	isTls     bool
+
+	sTestsHA = []func(t *testing.T){
+		testHAitInitCfg,
+		testHAitHttp,
+		testHAitResetDB,
+		testHAitStartEngine,
+		testHAitApierRpcConn,
+		testHAitTPFromFolder,
+		testHAitAuthDryRun,
+		testHAitAuth1001,
+		testHAitCDRmtcall,
+		testHAitCDRmtcall2,
+		testHAitTextPlain,
+		testHAitStopEngine,
+	}
 )
 
-var sTestsHA = []func(t *testing.T){
-	testHAitInitCfg,
-	testHAitHttp,
-	testHAitResetDB,
-	testHAitStartEngine,
-	testHAitApierRpcConn,
-	testHAitTPFromFolder,
-	testHAitAuthDryRun,
-	testHAitAuth1001,
-	testHAitCDRmtcall,
-	testHAitCDRmtcall2,
-	testHAitTextPlain,
-	testHAitStopEngine,
-}
-
 func TestHAit(t *testing.T) {
-	var configDir, configDirTls string
 	switch *dbType {
 	case utils.MetaInternal:
-		configDir = "httpagent_internal"
-		configDirTls = "httpagenttls_internal"
+		haCfgDIR = "httpagent_internal"
 	case utils.MetaSQL:
-		configDir = "httpagent_mysql"
-		configDirTls = "httpagenttls_mysql"
+		haCfgDIR = "httpagent_mysql"
 	case utils.MetaMongo:
-		configDir = "httpagent_mongo"
-		configDirTls = "httpagenttls_mongo"
+		haCfgDIR = "httpagent_mongo"
 	case utils.MetaPostgres:
 		t.SkipNow()
 	default:
 		t.Fatal("Unknown Database type")
 	}
 	if *encoding == utils.MetaGOB {
-		configDir += "_gob"
-		configDirTls += "_gob"
+		haCfgDIR += "_gob"
 	}
-
 	//Run the tests without Tls
 	isTls = false
-	haCfgDIR = configDir
 	for _, stest := range sTestsHA {
 		t.Run(haCfgDIR, stest)
 	}
+
+}
+
+func TestHAitTls(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		haCfgDIR = "httpagenttls_internal"
+	case utils.MetaSQL:
+		haCfgDIR = "httpagenttls_mysql"
+	case utils.MetaMongo:
+		haCfgDIR = "httpagenttls_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+	if *encoding == utils.MetaGOB {
+		haCfgDIR += "_gob"
+	}
 	//Run the tests with Tls
 	isTls = true
-	haCfgDIR = configDirTls
 	for _, stest := range sTestsHA {
 		t.Run(haCfgDIR, stest)
 	}
@@ -290,7 +301,7 @@ func testHAitCDRmtcall(t *testing.T) {
 		if cdrs[0].Usage != "3m5s" { // should be 1 but maxUsage returns rounded version
 			t.Errorf("Unexpected CDR Usage received, cdr: %s ", utils.ToJSON(cdrs[0]))
 		}
-		if cdrs[0].Cost != 0.2188 {
+		if utils.Round(cdrs[0].Cost, 4, utils.ROUNDING_MIDDLE) != 0.2188 { // sql have only 4 digits after decimal point
 			t.Errorf("Unexpected CDR Cost received, cdr: %+v ", cdrs[0].Cost)
 		}
 		if cdrs[0].OriginHost != "127.0.0.1" {

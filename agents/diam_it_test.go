@@ -68,7 +68,18 @@ var (
 // Test start here
 func TestDiamItTcp(t *testing.T) {
 	engine.KillEngine(0)
-	diamConfigDIR = "diamagent"
+	switch *dbType {
+	case utils.MetaInternal:
+		diamConfigDIR = "diamagent_internal"
+	case utils.MetaSQL:
+		diamConfigDIR = "diamagent_mysql"
+	case utils.MetaMongo:
+		diamConfigDIR = "diamagent_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	for _, stest := range sTestsDiam {
 		t.Run(diamConfigDIR, stest)
 	}
@@ -93,7 +104,18 @@ func TestDiamItDispatcher(t *testing.T) {
 
 func TestDiamItSctp(t *testing.T) {
 	engine.KillEngine(0)
-	diamConfigDIR = "diamsctpagent"
+	switch *dbType {
+	case utils.MetaInternal:
+		diamConfigDIR = "diamsctpagent_internal"
+	case utils.MetaSQL:
+		diamConfigDIR = "diamsctpagent_mysql"
+	case utils.MetaMongo:
+		diamConfigDIR = "diamsctpagent_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	for _, stest := range sTestsDiam {
 		t.Run(diamConfigDIR, stest)
 	}
@@ -101,7 +123,18 @@ func TestDiamItSctp(t *testing.T) {
 
 func TestDiamItMaxConn(t *testing.T) {
 	engine.KillEngine(0)
-	diamConfigDIR = "diamagentmaxconn"
+	switch *dbType {
+	case utils.MetaInternal:
+		diamConfigDIR = "diamagentmaxconn_internal"
+	case utils.MetaSQL:
+		diamConfigDIR = "diamagentmaxconn_mysql"
+	case utils.MetaMongo:
+		diamConfigDIR = "diamagentmaxconn_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
 	for _, stest := range sTestsDiam[:7] {
 		t.Run(diamConfigDIR, stest)
 	}
@@ -111,7 +144,19 @@ func TestDiamItMaxConn(t *testing.T) {
 
 func TestDiamItSessionDisconnect(t *testing.T) {
 	engine.KillEngine(0)
-	diamConfigDIR = "diamagent"
+	switch *dbType {
+	case utils.MetaInternal:
+		diamConfigDIR = "diamagent_internal"
+	case utils.MetaSQL:
+		diamConfigDIR = "diamagent_mysql"
+	case utils.MetaMongo:
+		diamConfigDIR = "diamagent_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+
 	for _, stest := range sTestsDiam[:7] {
 		t.Run(diamConfigDIR, stest)
 	}

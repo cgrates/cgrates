@@ -1,0 +1,166 @@
+{
+// CGRateS Configuration file
+//
+
+"general": {
+    "log_level": 7,
+},
+
+
+"listen": {
+	"rpc_json": ":2012",				// RPC JSON listening address
+	"rpc_gob": ":2013",					// RPC GOB listening address
+	"http": ":2080",					// HTTP listening address
+},
+
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:2013", "transport":"*gob"}],
+	},
+},
+
+"data_db": {								
+	"db_type": "redis",						
+	"db_port": 6379, 						
+	"db_name": "10", 						
+},
+
+"stor_db": {								// database used to store offline tariff plans and CDRs
+	"db_password": "CGRateS.org",			// password to use when connecting to stordb
+},
+
+"rals": {
+	"enabled": true,
+},
+
+"schedulers": {
+	"enabled": true,
+},
+
+"cdrs": {
+	"enabled": true,
+	"rals_conns": ["*internal"],
+},
+
+"resources": {
+	"enabled": true,
+},
+
+"attributes": {
+	"enabled": true,
+},
+
+"suppliers": {
+	"enabled": true,
+},
+
+"chargers": {
+	"enabled": true,
+},
+
+"sessions": {
+	"enabled": true,
+	"attributes_conns": ["conn1"],
+	"cdrs_conns": ["conn1"],
+	"rals_conns": ["conn1"],
+	"resources_conns": ["conn1"],
+	"chargers_conns": ["*internal"],
+	"debit_interval": "10s",
+},
+
+"radius_agent": {
+	"enabled": true,
+	"sessions_conns": ["conn1"],
+	"request_processors": [
+		{
+			"id": "KamailioAuth",
+			"filters": ["*string:~*vars.*radReqType:*radAuth"],
+			"flags": ["*auth", "*accounts"],
+			"request_fields":[
+				{"tag": "Category", "field_id": "Category", "type": "*constant", "value": "call"},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
+					"value": "*prepaid", "mandatory": true},	
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
+					"value": "~*req.Acct-Session-Id;-;~*req.Sip-From-Tag", "mandatory": true},
+				{"tag": "Account", "field_id": "Account", "type": "*composed", 
+					"value": "~*req.User-Name", "mandatory": true},
+				{"tag": "Subject", "field_id": "Subject", "type": "*variable",
+					"value": "~*req.User-Name", "mandatory": true},
+				{"tag": "Destination", "field_id": "Destination", "type": "*composed", 
+					"value": "~*req.Called-Station-Id", "mandatory": true},
+				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", 
+					"value": "~*req.Event-Timestamp", "mandatory": true},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", 
+					"value": "~*req.Event-Timestamp", "mandatory": true},
+			],
+			"reply_fields":[
+				{"tag": "MaxUsage", "field_id": "SIP-AVP", "type": "*composed", 
+					"value": "session_max_time#;~*cgrep.MaxUsage{*duration_seconds}", "mandatory": true},
+			],
+		},
+		{
+			"id": "KamailioAccountingStart",
+			"filters": ["*string:~*req.Acct-Status-Type:Start"],
+			"flags": ["*initiate", "*attributes", "*resources", "*accounts"],
+			"request_fields":[	
+				{"tag": "Category", "field_id": "Category", "type": "*constant", "value": "call"},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
+					"value": "*prepaid", "mandatory": true},	
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
+					"value": "~*req.Acct-Session-Id;-;~*req.Sip-From-Tag;-;~*req.Sip-To-Tag", "mandatory": true},
+				{"tag": "OriginHost", "field_id": "OriginHost", "type": "*composed", 
+					"value": "~*req.NAS-IP-Address", "mandatory": true},
+				{"tag": "Account", "field_id": "Account", "type": "*composed", 
+					"value": "~*req.User-Name", "mandatory": true},
+				{"tag": "Subject", "field_id": "Subject", "type": "*variable",
+					"value": "~*req.User-Name", "mandatory": true},
+				{"tag": "Destination", "field_id": "Destination", "type": "*composed", 
+					"value": "~*req.Called-Station-Id", "mandatory": true},
+				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", 
+					"value": "~*req.Ascend-User-Acct-Time", "mandatory": true},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", 
+					"value": "~*req.Ascend-User-Acct-Time", "mandatory": true},
+				{"tag": "RemoteAddr" , "field_id": "RemoteAddr", "type": "*remote_host"},
+			],
+			"reply_fields":[],
+		},
+		{
+			"id": "KamailioAccountingStop",
+			"filters": ["*string:~*req.Acct-Status-Type:Stop"],
+			"flags": ["*terminate", "*resources", "*accounts", "*cdrs"],
+			"request_fields":[	
+				{"tag": "Category", "field_id": "Category", "type": "*constant", "value": "call"},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
+					"value": "*prepaid", "mandatory": true},	
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", 
+					"value": "~*req.Acct-Session-Id;-;~*req.Sip-From-Tag;-;~*req.Sip-To-Tag", "mandatory": true},
+				{"tag": "OriginHost", "field_id": "OriginHost", "type": "*composed", 
+					"value": "~*req.NAS-IP-Address", "mandatory": true},
+				{"tag": "Account", "field_id": "Account", "type": "*composed", 
+					"value": "~*req.User-Name", "mandatory": true},
+				{"tag": "Subject", "field_id": "Subject", "type": "*variable",
+					"value": "~*req.User-Name", "mandatory": true},
+				{"tag": "Destination", "field_id": "Destination", "type": "*composed", 
+					"value": "~*req.Called-Station-Id", "mandatory": true},
+				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", 
+					"value": "~*req.Ascend-User-Acct-Time", "mandatory": true},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", 
+					"value": "~*req.Ascend-User-Acct-Time", "mandatory": true},
+				{"tag": "Usage", "field_id": "Usage", "type": "*usage_difference", 
+					"value": "~*req.Event-Timestamp;~*req.Ascend-User-Acct-Time", "mandatory": true},
+				{"tag": "RemoteAddr" , "field_id": "RemoteAddr", "type": "*remote_host"},
+			],
+			"reply_fields":[],
+		},	
+	],
+},
+
+
+
+"apier": {
+	"scheduler_conns": ["*internal"],
+},
+
+
+}

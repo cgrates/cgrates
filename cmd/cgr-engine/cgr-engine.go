@@ -385,7 +385,7 @@ func main() {
 		}
 		return
 	}
-	if *pidFile != "" {
+	if *pidFile != utils.EmptyString {
 		writePid()
 	}
 	if *singlecpu {
@@ -395,16 +395,16 @@ func main() {
 	exitChan := make(chan bool)
 	go singnalHandler(exitChan)
 
-	if *memProfDir != "" {
+	if *memProfDir != utils.EmptyString {
 		go memProfiling(*memProfDir, *memProfInterval, *memProfNrFiles, exitChan)
 	}
 	cpuProfChanStop := make(chan struct{})
 	cpuProfChanDone := make(chan struct{})
-	if *cpuProfDir != "" {
+	if *cpuProfDir != utils.EmptyString {
 		go cpuProfiling(*cpuProfDir, cpuProfChanStop, cpuProfChanDone, exitChan)
 	}
 
-	if *scheduledShutdown != "" {
+	if *scheduledShutdown != utils.EmptyString {
 		shutdownDur, err := utils.ParseDurationWithNanosecs(*scheduledShutdown)
 		if err != nil {
 			log.Fatal(err)
@@ -422,7 +422,7 @@ func main() {
 		log.Fatalf("Could not parse config: <%s>", err.Error())
 		return
 	}
-	if *nodeID != "" {
+	if *nodeID != utils.EmptyString {
 		cfg.GeneralCfg().NodeID = *nodeID
 	}
 	config.SetCgrConfig(cfg) // Share the config object
