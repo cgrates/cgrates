@@ -1045,11 +1045,11 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 				filter.NotSubjects = nil
 				filter.Subjects = nil
 			default:
-				if val, has := filter.ExtraFields[cdrIdx]; has {
+				if val, has := filter.ExtraFields[cdrIdx]; has && val != utils.MetaExists { // if the filter value is *exist it should not be treated as a indexed field
 					pairSlice = append(pairSlice, filterPair{cdrIdx, []string{val}})
 					delete(filter.ExtraFields, cdrIdx)
 				}
-				if val, has := filter.NotExtraFields[cdrIdx]; has {
+				if val, has := filter.NotExtraFields[cdrIdx]; has && val != utils.MetaExists { // if the filter value is *exist it should not be treated as a indexed field
 					notPairSlice = append(notPairSlice, filterPair{cdrIdx, []string{val}})
 					delete(filter.NotExtraFields, cdrIdx)
 				}
@@ -1063,11 +1063,11 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 				filter.DestinationPrefixes = nil
 				filter.NotDestinationPrefixes = nil
 			default:
-				if val, has := filter.ExtraFields[cdrIdx]; has {
+				if val, has := filter.ExtraFields[cdrIdx]; has && val != utils.MetaExists { // if the filter value is *exist it should not be treated as a indexed field
 					pairSlice = append(pairSlice, filterPair{cdrIdx, []string{val}})
 					delete(filter.ExtraFields, cdrIdx)
 				}
-				if val, has := filter.NotExtraFields[cdrIdx]; has {
+				if val, has := filter.NotExtraFields[cdrIdx]; has && val != utils.MetaExists { // if the filter value is *exist it should not be treated as a indexed field
 					notPairSlice = append(notPairSlice, filterPair{cdrIdx, []string{val}})
 					delete(filter.NotExtraFields, cdrIdx)
 				}
