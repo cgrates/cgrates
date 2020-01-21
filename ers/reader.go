@@ -50,6 +50,8 @@ func NewEventReader(cfg *config.CGRConfig, cfgIdx int,
 		return NewKafkaER(cfg, cfgIdx, rdrEvents, rdrErr, fltrS, rdrExit)
 	case utils.MetaSQL:
 		return NewSQLEventReader(cfg, cfgIdx, rdrEvents, rdrErr, fltrS, rdrExit)
+	case utils.MetaKamFlatstore, utils.MetaOsipsFlatstore:
+		return NewFlatstoreER(cfg, cfgIdx, rdrEvents, rdrErr, fltrS, rdrExit)
 	}
 	return
 }

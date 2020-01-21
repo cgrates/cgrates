@@ -96,7 +96,8 @@ func testPartITCreateCdrDirs(t *testing.T) {
 		"/tmp/terminate_session/in", "/tmp/terminate_session/out", "/tmp/cdrs/in",
 		"/tmp/cdrs/out", "/tmp/ers_with_filters/in", "/tmp/ers_with_filters/out",
 		"/tmp/xmlErs/in", "/tmp/xmlErs/out", "/tmp/fwvErs/in", "/tmp/fwvErs/out",
-		"/tmp/partErs1/in", "/tmp/partErs1/out", "/tmp/partErs2/in", "/tmp/partErs2/out"} {
+		"/tmp/partErs1/in", "/tmp/partErs1/out", "/tmp/partErs2/in", "/tmp/partErs2/out",
+		"/tmp/flatstoreErs/in", "/tmp/flatstoreErs/out"} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
 		}
@@ -242,7 +243,7 @@ func testPartITCleanupFiles(t *testing.T) {
 	for _, dir := range []string{"/tmp/ers",
 		"/tmp/ers2", "/tmp/init_session", "/tmp/terminate_session",
 		"/tmp/cdrs", "/tmp/ers_with_filters", "/tmp/xmlErs", "/tmp/fwvErs",
-		"/tmp/partErs1", "/tmp/partErs2"} {
+		"/tmp/partErs1", "/tmp/partErs2", "tmp/flatstoreErs"} {
 		if err := os.RemoveAll(dir); err != nil {
 			t.Fatal("Error removing folder: ", dir, err)
 		}
