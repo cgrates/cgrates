@@ -209,7 +209,7 @@ func TestCgrCfgCDRC(t *testing.T) {
 			DryRun:                   false,
 			CdrsConns:                []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 			CdrFormat:                utils.MetaFileCSV,
-			FieldSeparator:           rune(','),
+			FieldSeparator:           rune(utils.CSV_SEP),
 			Timezone:                 "",
 			RunDelay:                 0,
 			MaxOpenFiles:             1024,
@@ -372,7 +372,7 @@ func TestCgrCfgJSONDefaultsGeneral(t *testing.T) {
 		t.Errorf("Expected: 6, received: %+v", cgrCfg.GeneralCfg().LogLevel)
 	}
 	if cgrCfg.GeneralCfg().DigestSeparator != "," {
-		t.Errorf("Expected: ',' , received: %+v", cgrCfg.GeneralCfg().DigestSeparator)
+		t.Errorf("Expected: utils.CSV_SEP , received: %+v", cgrCfg.GeneralCfg().DigestSeparator)
 	}
 	if cgrCfg.GeneralCfg().DigestEqual != ":" {
 		t.Errorf("Expected: ':' , received: %+v", cgrCfg.GeneralCfg().DigestEqual)
@@ -613,7 +613,7 @@ func TestCgrCfgJSONDefaultsCdreProfiles(t *testing.T) {
 			Synchronous:       false,
 			Attempts:          1,
 			AttributeSContext: "",
-			FieldSeparator:    ',',
+			FieldSeparator:    utils.CSV_SEP,
 			HeaderFields:      eFields,
 			ContentFields:     eContentFlds,
 			TrailerFields:     eFields,
@@ -1539,7 +1539,7 @@ func TestCgrLoaderCfgDefault(t *testing.T) {
 		TpID:           "",
 		DataPath:       "./",
 		DisableReverse: false,
-		FieldSeparator: rune(','),
+		FieldSeparator: rune(utils.CSV_SEP),
 		CachesConns:    []string{utils.MetaLocalHost},
 		SchedulerConns: []string{utils.MetaLocalHost},
 	}
@@ -1578,7 +1578,7 @@ func TestCDRCWithDefault(t *testing.T) {
 			DryRun:                   false,
 			CdrsConns:                []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 			CdrFormat:                utils.MetaFileCSV,
-			FieldSeparator:           rune(','),
+			FieldSeparator:           rune(utils.CSV_SEP),
 			Timezone:                 "",
 			RunDelay:                 0,
 			MaxOpenFiles:             1024,

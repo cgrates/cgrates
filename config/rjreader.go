@@ -112,7 +112,7 @@ func (rjr *rjReader) ReadByte() (bit byte, err error) {
 	if err != nil {
 		return
 	}
-	if bit == ',' {
+	if bit == utils.CSV_SEP {
 		var bit2 byte
 		bit2, err = rjr.PeekByteWC()
 		if err != nil {
@@ -378,8 +378,8 @@ func (rjr *rjReader) getJsonOffsetLine(offset int64) (line, character int64) {
 			line++
 			character = 0
 		}
-		if (b == ']' || b == '}') && lastChar == ',' {
-			i-- //ignore ',' if is followed by ] or }
+		if (b == ']' || b == '}') && lastChar == utils.CSV_SEP {
+			i-- //ignore utils.CSV_SEP if is followed by ] or }
 		}
 		if !isWhiteSpace(b) {
 			i++

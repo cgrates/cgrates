@@ -43,7 +43,7 @@ func TestCdreCfgClone(t *testing.T) {
 		ExportPath:     "/var/spool/cgrates/cdre",
 		Synchronous:    true,
 		Attempts:       2,
-		FieldSeparator: rune(','),
+		FieldSeparator: rune(utils.CSV_SEP),
 		ContentFields:  initContentFlds,
 	}
 	eClnContentFlds := []*FCTemplate{
@@ -62,7 +62,7 @@ func TestCdreCfgClone(t *testing.T) {
 		Synchronous:    true,
 		Attempts:       2,
 		Filters:        []string{},
-		FieldSeparator: rune(','),
+		FieldSeparator: rune(utils.CSV_SEP),
 		HeaderFields:   emptyFields,
 		ContentFields:  eClnContentFlds,
 		TrailerFields:  emptyFields,
@@ -122,7 +122,7 @@ func TestCdreCfgloadFromJsonCfg(t *testing.T) {
 		Filters:        []string{},
 		Tenant:         "cgrates.org",
 		Attempts:       1,
-		FieldSeparator: ',',
+		FieldSeparator: utils.CSV_SEP,
 		HeaderFields:   []*FCTemplate{},
 		ContentFields: []*FCTemplate{{
 			Tag:   "CGRID",

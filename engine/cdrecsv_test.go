@@ -45,7 +45,7 @@ func TestCsvCdrWriter(t *testing.T) {
 	}
 	cdre, err := NewCDRExporter([]*CDR{storedCdr1},
 		cfg.CdreProfiles[utils.MetaDefault], utils.MetaFileCSV, "", "", "firstexport",
-		true, 1, ',', cfg.GeneralCfg().HttpSkipTlsVerify, nil, nil, nil)
+		true, 1, utils.CSV_SEP, cfg.GeneralCfg().HttpSkipTlsVerify, nil, nil, nil)
 	if err != nil {
 		t.Error("Unexpected error received: ", err)
 	}
