@@ -299,6 +299,16 @@ func (ar *AgentRequest) ParseField(
 		}
 		out = strconv.FormatFloat(utils.Round(val*math.Pow10(exp),
 			config.CgrConfig().GeneralCfg().RoundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64)
+	case utils.MetaUnixTimestamp:
+		val, err := cfgFld.Value.ParseDataProvider(ar, utils.NestingSep)
+		if err != nil {
+			return nil, err
+		}
+		t, err := utils.ParseTimeDetectLayout(val, cfgFld.Timezone)
+		if err != nil {
+			return nil, err
+		}
+		out = strconv.Itoa(int(t.Unix()))
 	}
 
 	if err != nil &&

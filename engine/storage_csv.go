@@ -98,17 +98,17 @@ func NewCSVStorage(sep rune,
 }
 
 func NewFileCSVStorage(sep rune, dataPath string, recursive bool) *CSVStorage {
-	destinations_paths := []string{path.Join(dataPath, utils.DESTINATIONS_CSV)}
-	timings_paths := []string{path.Join(dataPath, utils.TIMINGS_CSV)}
-	rates_paths := []string{path.Join(dataPath, utils.RATES_CSV)}
-	destination_rates_paths := []string{path.Join(dataPath, utils.DESTINATION_RATES_CSV)}
-	rating_plans_paths := []string{path.Join(dataPath, utils.RATING_PLANS_CSV)}
-	rating_profiles_paths := []string{path.Join(dataPath, utils.RATING_PROFILES_CSV)}
-	shared_groups_paths := []string{path.Join(dataPath, utils.SHARED_GROUPS_CSV)}
-	actions_paths := []string{path.Join(dataPath, utils.ACTIONS_CSV)}
-	action_plans_paths := []string{path.Join(dataPath, utils.ACTION_PLANS_CSV)}
-	action_triggers_paths := []string{path.Join(dataPath, utils.ACTION_TRIGGERS_CSV)}
-	account_actions_paths := []string{path.Join(dataPath, utils.ACCOUNT_ACTIONS_CSV)}
+	destinations_paths := []string{path.Join(dataPath, utils.DestinationsCsv)}
+	timings_paths := []string{path.Join(dataPath, utils.TimingsCsv)}
+	rates_paths := []string{path.Join(dataPath, utils.RatesCsv)}
+	destination_rates_paths := []string{path.Join(dataPath, utils.DestinationRatesCsv)}
+	rating_plans_paths := []string{path.Join(dataPath, utils.RatingPlansCsv)}
+	rating_profiles_paths := []string{path.Join(dataPath, utils.RatingProfilesCsv)}
+	shared_groups_paths := []string{path.Join(dataPath, utils.SharedGroupsCsv)}
+	actions_paths := []string{path.Join(dataPath, utils.ActionsCsv)}
+	action_plans_paths := []string{path.Join(dataPath, utils.ActionPlansCsv)}
+	action_triggers_paths := []string{path.Join(dataPath, utils.ActionTriggersCsv)}
+	account_actions_paths := []string{path.Join(dataPath, utils.AccountActionsCsv)}
 	resources_paths := []string{path.Join(dataPath, utils.ResourcesCsv)}
 	stats_paths := []string{path.Join(dataPath, utils.StatsCsv)}
 	thresholds_paths := []string{path.Join(dataPath, utils.ThresholdsCsv)}
@@ -124,17 +124,17 @@ func NewFileCSVStorage(sep rune, dataPath string, recursive bool) *CSVStorage {
 		if err != nil {
 			log.Fatal(err)
 		}
-		destinations_paths = appendName(allFoldersPath, utils.DESTINATIONS_CSV)
-		timings_paths = appendName(allFoldersPath, utils.TIMINGS_CSV)
-		rates_paths = appendName(allFoldersPath, utils.RATES_CSV)
-		destination_rates_paths = appendName(allFoldersPath, utils.DESTINATION_RATES_CSV)
-		rating_plans_paths = appendName(allFoldersPath, utils.RATING_PLANS_CSV)
-		rating_profiles_paths = appendName(allFoldersPath, utils.RATING_PROFILES_CSV)
-		shared_groups_paths = appendName(allFoldersPath, utils.SHARED_GROUPS_CSV)
-		actions_paths = appendName(allFoldersPath, utils.ACTIONS_CSV)
-		action_plans_paths = appendName(allFoldersPath, utils.ACTION_PLANS_CSV)
-		action_triggers_paths = appendName(allFoldersPath, utils.ACTION_TRIGGERS_CSV)
-		account_actions_paths = appendName(allFoldersPath, utils.ACCOUNT_ACTIONS_CSV)
+		destinations_paths = appendName(allFoldersPath, utils.DestinationsCsv)
+		timings_paths = appendName(allFoldersPath, utils.TimingsCsv)
+		rates_paths = appendName(allFoldersPath, utils.RatesCsv)
+		destination_rates_paths = appendName(allFoldersPath, utils.DestinationRatesCsv)
+		rating_plans_paths = appendName(allFoldersPath, utils.RatingPlansCsv)
+		rating_profiles_paths = appendName(allFoldersPath, utils.RatingProfilesCsv)
+		shared_groups_paths = appendName(allFoldersPath, utils.SharedGroupsCsv)
+		actions_paths = appendName(allFoldersPath, utils.ActionsCsv)
+		action_plans_paths = appendName(allFoldersPath, utils.ActionPlansCsv)
+		action_triggers_paths = appendName(allFoldersPath, utils.ActionTriggersCsv)
+		account_actions_paths = appendName(allFoldersPath, utils.AccountActionsCsv)
 		resources_paths = appendName(allFoldersPath, utils.ResourcesCsv)
 		stats_paths = appendName(allFoldersPath, utils.StatsCsv)
 		thresholds_paths = appendName(allFoldersPath, utils.ThresholdsCsv)

@@ -421,7 +421,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 
 			switch rdr.Type {
-			case utils.MetaFileCSV:
+			case utils.MetaFileCSV, utils.MetaPartialCSV:
 				for _, dir := range []string{rdr.ProcessedPath, rdr.SourcePath} {
 					if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
 						return fmt.Errorf("<%s> Nonexistent folder: %s for reader with ID: %s", utils.ERs, dir, rdr.ID)

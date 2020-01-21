@@ -99,21 +99,24 @@ func (erS *ERsCfg) Clone() (cln *ERsCfg) {
 }
 
 type EventReaderCfg struct {
-	ID             string
-	Type           string
-	FieldSep       string
-	RunDelay       time.Duration
-	ConcurrentReqs int
-	SourcePath     string
-	ProcessedPath  string
-	XmlRootPath    utils.HierarchyPath
-	Tenant         RSRParsers
-	Timezone       string
-	Filters        []string
-	Flags          utils.FlagsWithParams
-	HeaderFields   []*FCTemplate
-	ContentFields  []*FCTemplate
-	TrailerFields  []*FCTemplate
+	ID                       string
+	Type                     string
+	FieldSep                 string
+	RunDelay                 time.Duration
+	ConcurrentReqs           int
+	SourcePath               string
+	ProcessedPath            string
+	XmlRootPath              utils.HierarchyPath
+	Tenant                   RSRParsers
+	Timezone                 string
+	Filters                  []string
+	Flags                    utils.FlagsWithParams
+	PartialRecordCache       time.Duration // Duration to cache partial records when not pairing
+	PartialCacheExpiryAction string
+	HeaderFields             []*FCTemplate
+	ContentFields            []*FCTemplate
+	TrailerFields            []*FCTemplate
+	CacheDumpFields          []*FCTemplate
 }
 
 func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string) (err error) {
@@ -163,6 +166,14 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string
 			return
 		}
 	}
+	if jsnCfg.Partial_record_cache != nil {
+		if er.PartialRecordCache, err = utils.ParseDurationWithNanosecs(*jsnCfg.Partial_record_cache); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Partial_cache_expiry_action != nil {
+		er.PartialCacheExpiryAction = *jsnCfg.Partial_cache_expiry_action
+	}
 	if jsnCfg.Header_fields != nil {
 		if er.HeaderFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Header_fields, sep); err != nil {
 			return err
@@ -175,6 +186,11 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string
 	}
 	if jsnCfg.Trailer_fields != nil {
 		if er.TrailerFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Trailer_fields, sep); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Cache_dump_fields != nil {
+		if er.CacheDumpFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Cache_dump_fields, sep); err != nil {
 			return err
 		}
 	}

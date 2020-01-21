@@ -136,7 +136,6 @@ func (prc *PartialRecordsCache) cachePartialCDR(pCDR *PartialCDRRecord) (*Partia
 		default:
 			return nil, fmt.Errorf("Unsupported PartialCacheExpiryAction: %s", prc.expiryAction)
 		}
-
 	}
 	if _, hasIt := prc.partialRecords[originID]; !hasIt {
 		prc.partialRecords[originID] = pCDR
