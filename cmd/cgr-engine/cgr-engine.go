@@ -377,15 +377,17 @@ func main() {
 	if err := cgrEngineFlags.Parse(os.Args[1:]); err != nil {
 		return
 	}
-	if *version {
-		if vers, err := utils.GetCGRVersion(); err != nil {
-			fmt.Println(err)
-		} else {
-			fmt.Println(vers)
-		}
+	vers, err := utils.GetCGRVersion()
+	if err != nil {
+		fmt.Println(err)
 		return
 	}
-	if *pidFile != "" {
+	goVers := runtime.Version()
+	if *version {
+		fmt.Println(vers)
+		return
+	}
+	if *pidFile != utils.EmptyString {
 		writePid()
 	}
 	if *singlecpu {
@@ -395,16 +397,16 @@ func main() {
 	exitChan := make(chan bool)
 	go singnalHandler(exitChan)
 
-	if *memProfDir != "" {
+	if *memProfDir != utils.EmptyString {
 		go memProfiling(*memProfDir, *memProfInterval, *memProfNrFiles, exitChan)
 	}
 	cpuProfChanStop := make(chan struct{})
 	cpuProfChanDone := make(chan struct{})
-	if *cpuProfDir != "" {
+	if *cpuProfDir != utils.EmptyString {
 		go cpuProfiling(*cpuProfDir, cpuProfChanStop, cpuProfChanDone, exitChan)
 	}
 
-	if *scheduledShutdown != "" {
+	if *scheduledShutdown != utils.EmptyString {
 		shutdownDur, err := utils.ParseDurationWithNanosecs(*scheduledShutdown)
 		if err != nil {
 			log.Fatal(err)
@@ -415,14 +417,13 @@ func main() {
 			return
 		}()
 	}
-	var err error
 	// Init config
 	cfg, err = config.NewCGRConfigFromPath(*cfgPath)
 	if err != nil {
 		log.Fatalf("Could not parse config: <%s>", err.Error())
 		return
 	}
-	if *nodeID != "" {
+	if *nodeID != utils.EmptyString {
 		cfg.GeneralCfg().NodeID = *nodeID
 	}
 	config.SetCgrConfig(cfg) // Share the config object
@@ -438,6 +439,7 @@ func main() {
 	}
 	utils.Logger.SetLogLevel(lgLevel)
 
+	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, goVers))
 	cfg.LazySanityCheck()
 
 	// init the channel here because we need to pass them to connManager
@@ -618,5 +620,5 @@ func main() {
 			utils.Logger.Warning("Could not remove pid file: " + err.Error())
 		}
 	}
-	utils.Logger.Info("Stopped all components. CGRateS shutdown!")
+	utils.Logger.Info("<CoreS> stopped all components. CGRateS shutdown!")
 }

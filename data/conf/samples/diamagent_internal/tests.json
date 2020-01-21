@@ -1,0 +1,46 @@
+
+{
+
+"diameter_agent": {
+	"request_processors": [
+		{
+			"id": "TestSessionDisconnect",
+			"filters": ["*string:~*vars.*cmd:CCR", "*string:~*req.CC-Request-Type:1",
+				"*prefix:~*req.Service-Context-Id:testSessionDisconnect"],
+			"flags": ["*initiate", "*accounts","*attributes"],
+			"request_fields":[
+				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*voice"},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*variable", 
+					"value": "~*req.Session-Id", "mandatory": true},
+				{"tag": "OriginHost", "field_id": "OriginHost", "type": "*variable", 
+					"value": "~*req.Origin-Host", "mandatory": true},
+				{"tag": "RequestType", "field_id": "RequestType", 
+					"type": "*constant", "value": "*prepaid"},
+				{"tag": "Category", "field_id": "Category", 
+					"type": "*constant", "value": "call"},
+				{"tag": "Account", "field_id": "Account", "type": "*variable",
+					"value": "~*req.Subscription-Id.Subscription-Id-Data", "mandatory": true},
+				{"tag": "Subject", "field_id": "Subject", "type": "*variable",
+					"value": "~*req.Service-Information.IN-Information.Calling-Party-Address", "mandatory": true},
+				{"tag": "Destination", "field_id": "Destination", "type": "*variable", 
+					"value": "~*req.Service-Information.IN-Information.Real-Called-Number", "mandatory": true},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*variable", 
+					"value": "~*req.Event-Timestamp", "mandatory": true},
+				{"tag": "Usage", "field_id": "Usage", "type": "*variable", 
+					"value": "~*req.Requested-Service-Unit.CC-Time:s/(.*)/${1}s/", "mandatory": true},
+				{"tag": "DebitInterval", "field_id": "CGRDebitInterval", 
+					"type": "*constant", "value": "1s"},
+			],
+			"reply_fields":[
+				{"tag": "CCATemplate", "type": "*template", "value": "*cca"},
+				{"tag": "ResultCode",  "filters": ["*notempty:~*cgrep.Error:"], 
+					"field_id": "Result-Code", "type": "*constant", "value": "5030", "blocker": true},
+				{"tag": "GrantedUnits", "field_id": "Granted-Service-Unit.CC-Time",
+					"filters": ["*gte:~*cgrep.MaxUsage:0s"],
+					"type": "*variable", "value": "~*cgrep.MaxUsage{*duration_seconds&*round:0}", "mandatory": true},
+			],
+		},
+	],
+},
+
+}

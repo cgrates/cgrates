@@ -60,9 +60,23 @@ var (
 // Test start here
 func TestRAit(t *testing.T) {
 	engine.KillEngine(0)
-	raonfigDIR = "radagent"
+	switch *dbType {
+	case utils.MetaInternal:
+		raonfigDIR = "radagent_internal"
+	case utils.MetaSQL:
+		raonfigDIR = "radagent_mysql"
+	case utils.MetaMongo:
+		raonfigDIR = "radagent_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+	if *encoding == utils.MetaGOB {
+		raonfigDIR += "_gob"
+	}
 	for _, stest := range sTestsRadius {
-		t.Run(diamConfigDIR, stest)
+		t.Run(raonfigDIR, stest)
 	}
 }
 
@@ -85,9 +99,6 @@ func TestRAitDispatcher(t *testing.T) {
 
 func testRAitInitCfg(t *testing.T) {
 	raCfgPath = path.Join(*dataDir, "conf", "samples", raonfigDIR)
-	if *encoding == utils.MetaGOB {
-		raCfgPath = path.Join(*dataDir, "conf", "samples", raonfigDIR+"_gob")
-	}
 	// Init config first
 	var err error
 	raCfg, err = config.NewCGRConfigFromPath(raCfgPath)
