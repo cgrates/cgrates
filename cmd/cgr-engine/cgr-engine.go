@@ -377,12 +377,14 @@ func main() {
 	if err := cgrEngineFlags.Parse(os.Args[1:]); err != nil {
 		return
 	}
+	vers, err := utils.GetCGRVersion()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	goVers := runtime.Version()
 	if *version {
-		if vers, err := utils.GetCGRVersion(); err != nil {
-			fmt.Println(err)
-		} else {
-			fmt.Println(vers)
-		}
+		fmt.Println(vers)
 		return
 	}
 	if *pidFile != utils.EmptyString {
@@ -415,7 +417,6 @@ func main() {
 			return
 		}()
 	}
-	var err error
 	// Init config
 	cfg, err = config.NewCGRConfigFromPath(*cfgPath)
 	if err != nil {
@@ -438,6 +439,7 @@ func main() {
 	}
 	utils.Logger.SetLogLevel(lgLevel)
 
+	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, goVers))
 	cfg.LazySanityCheck()
 
 	// init the channel here because we need to pass them to connManager
@@ -618,5 +620,5 @@ func main() {
 			utils.Logger.Warning("Could not remove pid file: " + err.Error())
 		}
 	}
-	utils.Logger.Info("Stopped all components. CGRateS shutdown!")
+	utils.Logger.Info("<CoreS> stopped all components. CGRateS shutdown!")
 }
