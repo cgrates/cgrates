@@ -183,16 +183,16 @@ Config params
 Most of the parameters are explained in :ref:`configuration <engine_configuration>`, hence we mention here only the ones where additional info is necessary or there will  be particular implementation for *DiameterAgent*.
 
 
-**listen_net**
+listen_net
 	The network the *DiameterAgent* will bind to. CGRateS supports both **tcp** and **sctp** specified in Diameter_ standard.
 
-**concurrent_requests**
+concurrent_requests
 	The maximum number of active requests processed at one time by the *DiameterAgent*. When this number is reached, new inbound requests will be rejected with *DiameterError* code until the concurrent number drops bellow again. The default value of *-1* imposes no limits.
 
-**asr_template**
+asr_template
 	The template (out of templates config section) used to build the AbortSession message. If not specified the ASR message is never sent out.
 
-**templates**
+templates
 	Group fields based on their usability. Can be used in both processor templates as well as hardcoded within CGRateS functionality (ie *\*err* or *\*asr*). The IDs are unique, defining the same id in multiple configuration places/files will result into overwrite.
 
 	*\*err*: is a hardcoded template used when *DiameterAgent* cannot parse the incoming message. Aside from logging the error via internal logger the message defined via *\*err* template will be sent out.
@@ -201,7 +201,7 @@ Most of the parameters are explained in :ref:`configuration <engine_configuratio
 
 	*\*cca*: defined for convenience to follow the standard for the fields used in *Diameter* *CCA* messages.
 
-**request_processors**
+request_processors
 	List of processor profiles applied on request/replies. 
 
 	Once a request processor will be matched (it's *filters* should match), the *request_fields* will be used to craft a request object and the flags will decide what sort of procesing logic will be applied to the crafted request. 
@@ -212,7 +212,7 @@ Most of the parameters are explained in :ref:`configuration <engine_configuratio
 	Once the *reply_fields* are finished, the object converted and returned to the *DiameterClient*, unless *continue* flag is enabled in the processor, which makes the next request processor to be considered.
 
 
-processor or field **filters**
+filters
 	Will specify a list of filter rules which need to match in order for the processor to run (or field to be applied).
 
 	For the dynamic content (prefixed with *~*) following special variables are available:
@@ -246,8 +246,8 @@ processor or field **filters**
 	* **\*cgrareq**
 		Active request in relation to CGRateS side. It can be used in both *request_fields*, referring to CGRRequest object being built, or in *reply_fields*, referring to CGRReply object.
 
-processor **flags**
-	Special tags enforcing the actions/verbs done on a request. There are two types of flags: **main** and **auxiliary**. 
+flags
+	Found within processors, special tags enforcing the actions/verbs done on a request. There are two types of flags: **main** and **auxiliary**. 
 
 	There can be any number of flags or combination of those specified in the list however the flags have priority one against another and only some simultaneous combinations of *main* flags are possible. 
 
@@ -301,8 +301,8 @@ processor **flags**
 		Build a CDR out of the request on CGRateS side. Can be used simultaneously with other flags (except *\*dry_run)
 
 
-field **path**
-	Specifies the path where the value will be written. Possible values:
+path
+	Defined within field, specifies the path where the value will be written. Possible values:
 
 	* **\*cgreq**
 		Write the value in the request object which will be sent to CGRateS side.
@@ -313,8 +313,8 @@ field **path**
 	* **\*rep**
 		Write the value to reply going out on *Diameter* side.
 
-field **type**
-	Specifies the logic type to be used when writing the value of the field. Possible values:
+type
+	Defined within field, specifies the logic type to be used when writing the value of the field. Possible values:
 
 	* **\*none**
 		Pass
