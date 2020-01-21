@@ -594,9 +594,9 @@ func (cdr *CDR) UpdateFromCGREvent(cgrEv *utils.CGREvent, fields []string) (err 
 				return
 			}
 		default:
-			fldVal, err := cgrEv.FieldAsString(fldName)
-			if err != nil {
-				return err
+			var fldVal string
+			if fldVal, err = cgrEv.FieldAsString(fldName); err != nil {
+				return
 			}
 			cdr.ExtraFields[fldName] = fldVal
 		}

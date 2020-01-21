@@ -37,18 +37,17 @@ import (
 )
 
 const (
-	META_EXPORTID      = "*export_id"
-	META_TIMENOW       = "*time_now"
-	META_FIRSTCDRATIME = "*first_cdr_atime"
-	META_LASTCDRATIME  = "*last_cdr_atime"
-	META_NRCDRS        = "*cdrs_number"
-	META_DURCDRS       = "*cdrs_duration"
-	META_SMSUSAGE      = "*sms_usage"
-	META_MMSUSAGE      = "*mms_usage"
-	META_GENERICUSAGE  = "*generic_usage"
-	META_DATAUSAGE     = "*data_usage"
-	META_COSTCDRS      = "*cdrs_cost"
-	META_FORMATCOST    = "*format_cost"
+	metaExportID      = "*export_id"
+	metaTimeNow       = "*time_now"
+	metaFirstCDRAtime = "*first_cdr_atime"
+	metaLastCDRAtime  = "*last_cdr_atime"
+	metaNrCDRs        = "*cdrs_number"
+	metaDurCDRs       = "*cdrs_duration"
+	metaSMSUsage      = "*sms_usage"
+	metaMMSUsage      = "*mms_usage"
+	metaGenericUsage  = "*generic_usage"
+	metaDataUsage     = "*data_usage"
+	metaCostCDRs      = "*cdrs_cost"
 )
 
 // NewCDRExporter returns a new CDRExporter
@@ -111,32 +110,32 @@ type CDRExporter struct {
 // Handle various meta functions used in header/trailer
 func (cdre *CDRExporter) metaHandler(tag, arg string) (string, error) {
 	switch tag {
-	case META_EXPORTID:
+	case metaExportID:
 		return cdre.exportID, nil
-	case META_TIMENOW:
+	case metaTimeNow:
 		return time.Now().Format(arg), nil
-	case META_FIRSTCDRATIME:
+	case metaFirstCDRAtime:
 		return cdre.firstCdrATime.Format(arg), nil
-	case META_LASTCDRATIME:
+	case metaLastCDRAtime:
 		return cdre.lastCdrATime.Format(arg), nil
-	case META_NRCDRS:
+	case metaNrCDRs:
 		return strconv.Itoa(cdre.numberOfRecords), nil
-	case META_DURCDRS:
+	case metaDurCDRs:
 		cdr := &CDR{ToR: utils.VOICE, Usage: cdre.totalDuration}
 		return cdr.FieldAsString(&config.RSRParser{Rules: "~" + utils.Usage, AllFiltersMatch: true})
-	case META_SMSUSAGE:
+	case metaSMSUsage:
 		cdr := &CDR{ToR: utils.SMS, Usage: cdre.totalDuration}
 		return cdr.FieldAsString(&config.RSRParser{Rules: "~" + utils.Usage, AllFiltersMatch: true})
-	case META_MMSUSAGE:
+	case metaMMSUsage:
 		cdr := &CDR{ToR: utils.MMS, Usage: cdre.totalDuration}
 		return cdr.FieldAsString(&config.RSRParser{Rules: "~" + utils.Usage, AllFiltersMatch: true})
-	case META_GENERICUSAGE:
+	case metaGenericUsage:
 		cdr := &CDR{ToR: utils.GENERIC, Usage: cdre.totalDuration}
 		return cdr.FieldAsString(&config.RSRParser{Rules: "~" + utils.Usage, AllFiltersMatch: true})
-	case META_DATAUSAGE:
+	case metaDataUsage:
 		cdr := &CDR{ToR: utils.DATA, Usage: cdre.totalDuration}
 		return cdr.FieldAsString(&config.RSRParser{Rules: "~" + utils.Usage, AllFiltersMatch: true})
-	case META_COSTCDRS:
+	case metaCostCDRs:
 		return strconv.FormatFloat(utils.Round(cdre.totalCost,
 			globalRoundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
 	default:
@@ -240,36 +239,29 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 	var body interface{}
 	switch cdre.exportFormat {
 	case utils.MetaHTTPjsonCDR, utils.MetaAMQPjsonCDR:
-		jsn, err := json.Marshal(cdr)
-		if err != nil {
-			return err
+		if body, err = json.Marshal(cdr); err != nil {
+			return
 		}
-		body = jsn
 	case utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap, utils.MetaAMQPV1jsonMap, utils.MetaSQSjsonMap, utils.MetaKafkajsonMap, utils.MetaS3jsonMap:
-		expMp, err := cdr.AsExportMap(cdre.exportTemplate.ContentFields, cdre.httpSkipTLSCheck, nil, cdre.filterS)
-		if err != nil {
-			return err
+		var expMp map[string]string
+		if expMp, err = cdr.AsExportMap(cdre.exportTemplate.ContentFields, cdre.httpSkipTLSCheck, nil, cdre.filterS); err != nil {
+			return
 		}
-		jsn, err := json.Marshal(expMp)
-		if err != nil {
-			return err
+		if body, err = json.Marshal(expMp); err != nil {
+			return
 		}
-		body = jsn
 	case utils.META_HTTP_POST:
-		expMp, err := cdr.AsExportMap(cdre.exportTemplate.ContentFields, cdre.httpSkipTLSCheck, nil, cdre.filterS)
-		if err != nil {
-			return err
+		var expMp map[string]string
+		if expMp, err = cdr.AsExportMap(cdre.exportTemplate.ContentFields, cdre.httpSkipTLSCheck, nil, cdre.filterS); err != nil {
+			return
 		}
-		vals := url.Values{}
+		var vals url.Values
 		for fld, val := range expMp {
 			vals.Set(fld, val)
 		}
 		body = vals
 	default:
-		err = fmt.Errorf("unsupported exportFormat: <%s>", cdre.exportFormat)
-	}
-	if err != nil {
-		return
+		return fmt.Errorf("unsupported exportFormat: <%s>", cdre.exportFormat)
 	}
 	// compute fallbackPath
 	fallbackPath := utils.META_NONE
@@ -317,11 +309,11 @@ func (cdre *CDRExporter) processCDR(cdr *CDR) (err error) {
 		if err = connMgr.Call(cdre.attrsConns, nil,
 			utils.AttributeSv1ProcessEvent,
 			args, &evReply); err != nil {
-			return err
+			return
 		}
 		if len(evReply.AlteredFields) != 0 {
-			if err := cdr.UpdateFromCGREvent(evReply.CGREvent, evReply.AlteredFields); err != nil {
-				return err
+			if err = cdr.UpdateFromCGREvent(evReply.CGREvent, evReply.AlteredFields); err != nil {
+				return
 			}
 		}
 	}
@@ -378,7 +370,7 @@ func (cdre *CDRExporter) processCDR(cdr *CDR) (err error) {
 	if cdre.lastExpOrderID < cdr.OrderID {
 		cdre.lastExpOrderID = cdr.OrderID
 	}
-	return nil
+	return
 }
 
 // Builds header, content and trailers
@@ -435,55 +427,55 @@ func (cdre *CDRExporter) processCDRs() (err error) {
 }
 
 // Simple write method
-func (cdre *CDRExporter) writeOut(ioWriter io.Writer) error {
+func (cdre *CDRExporter) writeOut(ioWriter io.Writer) (err error) {
 	cdre.Lock()
 	defer cdre.Unlock()
 	if len(cdre.header) != 0 {
 		for _, fld := range append(cdre.header, "\n") {
-			if _, err := io.WriteString(ioWriter, fld); err != nil {
-				return err
+			if _, err = io.WriteString(ioWriter, fld); err != nil {
+				return
 			}
 		}
 	}
 	for _, cdrContent := range cdre.content {
 		for _, cdrFld := range append(cdrContent, "\n") {
-			if _, err := io.WriteString(ioWriter, cdrFld); err != nil {
-				return err
+			if _, err = io.WriteString(ioWriter, cdrFld); err != nil {
+				return
 			}
 		}
 	}
 	if len(cdre.trailer) != 0 {
 		for _, fld := range append(cdre.trailer, "\n") {
-			if _, err := io.WriteString(ioWriter, fld); err != nil {
-				return err
+			if _, err = io.WriteString(ioWriter, fld); err != nil {
+				return
 			}
 		}
 	}
-	return nil
+	return
 }
 
 // csvWriter specific method
-func (cdre *CDRExporter) writeCsv(csvWriter *csv.Writer) error {
+func (cdre *CDRExporter) writeCsv(csvWriter *csv.Writer) (err error) {
 	csvWriter.Comma = cdre.fieldSeparator
 	cdre.RLock()
 	defer cdre.RUnlock()
 	if len(cdre.header) != 0 {
-		if err := csvWriter.Write(cdre.header); err != nil {
-			return err
+		if err = csvWriter.Write(cdre.header); err != nil {
+			return
 		}
 	}
 	for _, cdrContent := range cdre.content {
-		if err := csvWriter.Write(cdrContent); err != nil {
-			return err
+		if err = csvWriter.Write(cdrContent); err != nil {
+			return
 		}
 	}
 	if len(cdre.trailer) != 0 {
-		if err := csvWriter.Write(cdre.trailer); err != nil {
-			return err
+		if err = csvWriter.Write(cdre.trailer); err != nil {
+			return
 		}
 	}
 	csvWriter.Flush()
-	return nil
+	return
 }
 
 // ExportCDRs exports the given CDRs
@@ -512,9 +504,9 @@ func (cdre *CDRExporter) ExportCDRs() (err error) {
 			fileName := fmt.Sprintf("cdre_%s.%s", utils.UUIDSha1Prefix(), expFormat)
 			expPath = path.Join(expPath, fileName)
 		}
-		fileOut, err := os.Create(expPath)
-		if err != nil {
-			return err
+		var fileOut *os.File
+		if fileOut, err = os.Create(expPath); err != nil {
+			return
 		}
 		defer fileOut.Close()
 		if cdre.exportFormat == utils.MetaFileCSV {
@@ -525,13 +517,13 @@ func (cdre *CDRExporter) ExportCDRs() (err error) {
 	return
 }
 
-// FirstOrderId returns the first exported Cdr OrderId
-func (cdre *CDRExporter) FirstOrderId() int64 {
+// FirstOrderID returns the first exported Cdr OrderId
+func (cdre *CDRExporter) FirstOrderID() int64 {
 	return cdre.firstExpOrderID
 }
 
-// LastOrderId return the last exported Cdr OrderId
-func (cdre *CDRExporter) LastOrderId() int64 {
+// LastOrderID return the last exported Cdr OrderId
+func (cdre *CDRExporter) LastOrderID() int64 {
 	return cdre.lastExpOrderID
 }
 

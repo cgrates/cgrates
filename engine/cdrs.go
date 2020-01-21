@@ -185,15 +185,14 @@ func (cdrS *CDRServer) rateCDR(cdr *CDRWithArgDispatcher) ([]*CDR, error) {
 					cdrClone.CostDetails = nil
 					if qryCC, err = cdrS.getCostFromRater(&CDRWithArgDispatcher{CDR: cdrClone}); err != nil {
 						return nil, err
-					} else {
-						smCost = &SMCost{
-							CGRID:       cdrClone.CGRID,
-							RunID:       cdrClone.RunID,
-							OriginHost:  cdrClone.OriginID,
-							CostSource:  utils.CDRs,
-							Usage:       cdrClone.Usage,
-							CostDetails: NewEventCostFromCallCost(qryCC, cdrClone.CGRID, cdrClone.RunID),
-						}
+					}
+					smCost = &SMCost{
+						CGRID:       cdrClone.CGRID,
+						RunID:       cdrClone.RunID,
+						OriginHost:  cdrClone.OriginID,
+						CostSource:  utils.CDRs,
+						Usage:       cdrClone.Usage,
+						CostDetails: NewEventCostFromCallCost(qryCC, cdrClone.CGRID, cdrClone.RunID),
 					}
 				}
 				cdrClone.Cost = smCost.CostDetails.GetCost()

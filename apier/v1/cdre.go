@@ -161,7 +161,7 @@ func (api *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.Ex
 	}
 	*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath,
 		TotalRecords: len(cdrs), TotalCost: cdrexp.TotalCost(),
-		FirstOrderId: cdrexp.FirstOrderId(), LastOrderId: cdrexp.LastOrderId()}
+		FirstOrderId: cdrexp.FirstOrderID(), LastOrderId: cdrexp.LastOrderID()}
 	if !attr.SuppressCgrIds {
 		reply.ExportedCgrIds = cdrexp.PositiveExports()
 		reply.UnexportedCgrIds = cdrexp.NegativeExports()
@@ -299,7 +299,7 @@ func (api *ApierV1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err e
 		return
 	}
 	*reply = RplExportedCDRs{ExportedPath: filePath, TotalRecords: len(cdrs), TotalCost: cdrexp.TotalCost(),
-		FirstOrderID: cdrexp.FirstOrderId(), LastOrderID: cdrexp.LastOrderId()}
+		FirstOrderID: cdrexp.FirstOrderID(), LastOrderID: cdrexp.LastOrderID()}
 	if arg.Verbose {
 		reply.ExportedCGRIDs = cdrexp.PositiveExports()
 		reply.UnexportedCGRIDs = cdrexp.NegativeExports()
