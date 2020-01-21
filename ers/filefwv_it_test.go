@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package ers
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/rpc"
 	"os"
@@ -51,8 +50,8 @@ var (
 		testFWVITLoadTPFromFolder,
 		testFWVITHandleCdr1File,
 		testFWVITAnalyseCDRs,
-		//	testFWVITCleanupFiles,
-		//	testFWVITKillEngine,
+		testFWVITCleanupFiles,
+		testFWVITKillEngine,
 	}
 )
 
@@ -114,11 +113,9 @@ func testFWVITResetDataDb(t *testing.T) {
 }
 
 func testFWVITStartEngine(t *testing.T) {
-	fmt.Println("Start engine")
-	time.Sleep(5 * time.Second)
-	//if _, err := engine.StopStartEngine(fwvCfgPath, *waitRater); err != nil {
-	//	t.Fatal(err)
-	//}
+	if _, err := engine.StopStartEngine(fwvCfgPath, *waitRater); err != nil {
+		t.Fatal(err)
+	}
 }
 
 // Connect rpc client to rater
@@ -203,7 +200,7 @@ func testFWVITAnalyseCDRs(t *testing.T) {
 	var reply []*engine.ExternalCDR
 	if err := fwvRPC.Call(utils.ApierV2GetCDRs, utils.RPCCDRsFilter{}, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 4 {
+	} else if len(reply) != 34 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
 	if err := fwvRPC.Call(utils.ApierV2GetCDRs, utils.RPCCDRsFilter{OriginIDs: []string{"CDR0000010"}}, &reply); err != nil {
