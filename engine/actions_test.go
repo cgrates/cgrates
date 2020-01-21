@@ -692,7 +692,7 @@ func TestActionTriggerMatchAllFull(t *testing.T) {
 		ThresholdValue: 2,
 	}
 	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)},
-		ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v, "BalanceDirections":"*out"}`,
+		ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v}`,
 			utils.TRIGGER_MAX_BALANCE, 2)}
 	if !at.Match(a) {
 		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)

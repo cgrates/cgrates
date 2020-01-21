@@ -34,7 +34,6 @@ import (
 
 const (
 	// Freswitch event proprities names
-	DIRECTION                = "Call-Direction"
 	SUBJECT                  = "variable_" + utils.CGR_SUBJECT
 	ACCOUNT                  = "variable_" + utils.CGR_ACCOUNT
 	DESTINATION              = "variable_" + utils.CGR_DESTINATION
@@ -93,14 +92,6 @@ func (fsev FSEvent) String() (result string) {
 
 func (fsev FSEvent) GetName() string {
 	return fsev[NAME]
-}
-
-func (fsev FSEvent) GetDirection(fieldName string) string {
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
-	}
-	//TODO: implement direction
-	return utils.META_OUT
 }
 
 // Account calling
@@ -174,9 +165,6 @@ func (fsev FSEvent) GetReqType(fieldName string) string {
 }
 
 func (fsev FSEvent) MissingParameter(timezone string) string {
-	if strings.TrimSpace(fsev.GetDirection(utils.MetaDefault)) == "" {
-		return utils.Direction
-	}
 	if strings.TrimSpace(fsev.GetAccount(utils.MetaDefault)) == "" {
 		return utils.Account
 	}
@@ -321,8 +309,6 @@ func (fsev FSEvent) ParseEventValue(rsrFld *config.RSRParser, timezone string) (
 		return rsrFld.ParseValue("FS_EVENT")
 	case utils.RequestType:
 		return rsrFld.ParseValue(fsev.GetReqType(""))
-	case utils.Direction:
-		return rsrFld.ParseValue(fsev.GetDirection(""))
 	case utils.Tenant:
 		return rsrFld.ParseValue(fsev.GetTenant(""))
 	case utils.Category:
@@ -387,7 +373,6 @@ func (fsev FSEvent) AsMapStringInterface(timezone string) map[string]interface{}
 	mp[utils.OriginHost] = fsev.GetOriginHost()
 	mp[utils.Source] = "FS_" + fsev.GetName()
 	mp[utils.RequestType] = fsev.GetReqType(utils.MetaDefault)
-	mp[utils.Direction] = fsev.GetDirection(utils.MetaDefault)
 	mp[utils.Tenant] = fsev.GetTenant(utils.MetaDefault)
 	mp[utils.Category] = fsev.GetCategory(utils.MetaDefault)
 	mp[utils.Account] = fsev.GetAccount(utils.MetaDefault)

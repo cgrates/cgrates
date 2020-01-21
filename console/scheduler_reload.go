@@ -33,7 +33,7 @@ func init() {
 type CmdReloadScheduler struct {
 	name      string
 	rpcMethod string
-	rpcParams *StringWrapper
+	rpcParams *utils.CGREventWithArgDispatcher
 	*CommandExecuter
 }
 
@@ -47,7 +47,7 @@ func (self *CmdReloadScheduler) RpcMethod() string {
 
 func (self *CmdReloadScheduler) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &StringWrapper{}
+		self.rpcParams = &utils.CGREventWithArgDispatcher{}
 	}
 	return self.rpcParams
 }

@@ -26,13 +26,12 @@ import (
 func TestMissingStructFieldsCorrect(t *testing.T) {
 	var attr = struct {
 		Tenant          string
-		Direction       string
 		Account         string
 		Type            string
 		ActionTimingsID string
-	}{"bevoip.eu", "OUT", "danconns0001", META_PREPAID, "mama"}
+	}{"bevoip.eu", "danconns0001", META_PREPAID, "mama"}
 	if missing := MissingStructFields(&attr,
-		[]string{"Tenant", "Direction", "Account", "Type", "ActionTimingsID"}); len(missing) != 0 {
+		[]string{"Tenant", "Account", "Type", "ActionTimingsID"}); len(missing) != 0 {
 		t.Error("Found missing field on correct struct", missing)
 	}
 }
@@ -280,20 +279,19 @@ func TestToMapMapStringInterface(t *testing.T) {
 func TestMissingMapFields(t *testing.T) {
 	var attr = map[string]interface{}{
 		Tenant:            "cgrates.org",
-		Direction:         "OUT",
 		Account:           "1001",
 		"Type":            META_PREPAID,
 		"ActionTimingsID": "*asap",
 	}
 	if missing := MissingMapFields(attr,
-		[]string{"Tenant", "Direction", "Account", "Type", "ActionTimingsID"}); len(missing) != 0 {
+		[]string{"Tenant", "Account", "Type", "ActionTimingsID"}); len(missing) != 0 {
 		t.Error("Found missing field on correct struct", missing)
 	}
 	attr["ActionTimingsID"] = ""
 	delete(attr, "Type")
 	expected := []string{"ActionTimingsID", "Type"}
 	missing := MissingMapFields(attr,
-		[]string{"Tenant", "Direction", "Account", "Type", "ActionTimingsID"})
+		[]string{"Tenant", "Account", "Type", "ActionTimingsID"})
 	sort.Strings(missing)
 	if !reflect.DeepEqual(expected, missing) {
 		t.Errorf("Expected %s ,received: %s", expected, missing)

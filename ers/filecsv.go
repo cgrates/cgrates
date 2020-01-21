@@ -124,7 +124,7 @@ func (rdr *CSVFileER) processFile(fPath, fName string) (err error) {
 	}
 	defer file.Close()
 	csvReader := csv.NewReader(bufio.NewReader(file))
-	csvReader.Comma = ','
+	csvReader.Comma = utils.CSV_SEP
 	if len(rdr.Config().FieldSep) > 0 {
 		csvReader.Comma = rune(rdr.Config().FieldSep[0])
 	}

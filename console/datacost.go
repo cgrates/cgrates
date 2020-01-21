@@ -28,7 +28,7 @@ func init() {
 	c := &CmdGetDataCost{
 		name:       "datacost",
 		rpcMethod:  utils.ApierV1GetDataCost,
-		clientArgs: []string{"Direction", "Category", "Tenant", "Account", "Subject", "StartTime", "Usage"},
+		clientArgs: []string{"Category", "Tenant", "Account", "Subject", "StartTime", "Usage"},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

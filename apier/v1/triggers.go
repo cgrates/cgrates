@@ -498,7 +498,6 @@ type AttrAddActionTrigger struct {
 	ThresholdValue        float64
 	BalanceId             string
 	BalanceType           string
-	BalanceDirection      string
 	BalanceDestinationIds string
 	BalanceRatingSubject  string
 	BalanceWeight         float64

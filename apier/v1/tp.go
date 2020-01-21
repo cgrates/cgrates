@@ -80,7 +80,7 @@ func (self *ApierV1) ImportTPZipFile(attrs AttrImportTPZipFile, reply *string) e
 				TPid:     attrs.TPid,
 				StorDb:   self.StorDb,
 				DirPath:  path,
-				Sep:      ',',
+				Sep:      utils.CSV_SEP,
 				Verbose:  false,
 				ImportId: "",
 			}

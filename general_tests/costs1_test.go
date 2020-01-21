@@ -52,7 +52,7 @@ RP_SMS1,DR_SMS_1,ALWAYS,10`
 	ratingProfiles := `cgrates.org,call,*any,2012-01-01T00:00:00Z,RP_RETAIL,
 cgrates.org,data,*any,2012-01-01T00:00:00Z,RP_DATA1,
 cgrates.org,sms,*any,2012-01-01T00:00:00Z,RP_SMS1,`
-	csvr, err := engine.NewTpReader(dataDB.DataDB(), engine.NewStringCSVStorage(',', dests, timings, rates, destinationRates, ratingPlans, ratingProfiles,
+	csvr, err := engine.NewTpReader(dataDB.DataDB(), engine.NewStringCSVStorage(utils.CSV_SEP, dests, timings, rates, destinationRates, ratingPlans, ratingProfiles,
 		"", "", "", "", "", "", "", "", "", "", "", "", "", ""), "", "", nil, nil)
 	if err != nil {
 		t.Error(err)
@@ -131,7 +131,6 @@ func TestCosts1GetCost2(t *testing.T) {
 	tStart, _ := utils.ParseTimeDetectLayout("2004-06-04T00:00:01Z")
 	tEnd, _ := utils.ParseTimeDetectLayout("2004-06-04T00:01:01Z")
 	cd := &engine.CallDescriptor{
-		Direction:   "*out",
 		Category:    "call",
 		Tenant:      "cgrates.org",
 		Subject:     "1001",

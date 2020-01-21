@@ -164,7 +164,6 @@ var cdrXmlBroadsoft = `<?xml version="1.0" encoding="ISO-8859-1"?>
     <basicModule>
       <userNumber>1001</userNumber>
       <groupNumber>2001</groupNumber>
-      <direction>Terminating</direction>
       <asCallType>Network</asCallType>
       <callingNumber>1001</callingNumber>
       <callingPresentationIndicator>Public</callingPresentationIndicator>
@@ -218,7 +217,6 @@ var cdrXmlBroadsoft = `<?xml version="1.0" encoding="ISO-8859-1"?>
     <basicModule>
       <userNumber>1002</userNumber>
       <groupNumber>2001</groupNumber>
-      <direction>Terminating</direction>
       <asCallType>Network</asCallType>
       <callingNumber>+4986517174964</callingNumber>
       <callingPresentationIndicator>Public</callingPresentationIndicator>

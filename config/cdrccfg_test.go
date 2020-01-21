@@ -29,7 +29,7 @@ var cdrcCfg = CdrcCfg{
 	ID:                       utils.MetaDefault,
 	CdrsConns:                []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)},
 	CdrFormat:                "csv",
-	FieldSeparator:           ',',
+	FieldSeparator:           utils.CSV_SEP,
 	MaxOpenFiles:             1024,
 	CDRInPath:                "/var/spool/cgrates/cdrc/in",
 	CDROutPath:               "/var/spool/cgrates/cdrc/out",

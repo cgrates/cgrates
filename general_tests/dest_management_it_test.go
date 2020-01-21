@@ -312,7 +312,6 @@ func testDestManagCacheWithGetCost(t *testing.T) {
 
 	var cc engine.CallCost
 	cd := &engine.CallDescriptor{
-		Direction:   "*out",
 		Tenant:      "cgrates.org",
 		Category:    "call",
 		Account:     "test",

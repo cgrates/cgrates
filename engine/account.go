@@ -948,7 +948,6 @@ func (acc *Account) AsOldStructure() interface{} {
 	}
 	type Balances []*Balance
 	type UnitsCounter struct {
-		Direction   string
 		BalanceType string
 		//	Units     float64
 		Balances Balances // first balance is the general one (no destination)
@@ -961,7 +960,6 @@ func (acc *Account) AsOldStructure() interface{} {
 		MinSleep              time.Duration
 		BalanceId             string
 		BalanceType           string
-		BalanceDirection      string
 		BalanceDestinationIds string
 		BalanceWeight         float64
 		BalanceExpirationDate time.Time
@@ -1032,7 +1030,6 @@ func (acc *Account) AsOldStructure() interface{} {
 			MinSleep:              at.MinSleep,
 			BalanceType:           at.Balance.GetType(),
 			BalanceId:             b.ID,
-			BalanceDirection:      utils.META_OUT,
 			BalanceDestinationIds: b.DestinationIDs.String(),
 			BalanceWeight:         b.Weight,
 			BalanceExpirationDate: b.ExpirationDate,

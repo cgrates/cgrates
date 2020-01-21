@@ -12,7 +12,6 @@
 		"content_fields": [								// template of the exported content fields
 			{"tag":"AccId", "cdr_field_id": "accid", "type": "cdrfield", "value": "accid"},
 			{"tag":"ReqType", "cdr_field_id": "reqtype", "type": "cdrfield", "value": "reqtype"},
-			{"tag":"Direction", "cdr_field_id": "direction", "type": "cdrfield", "value": "direction"},
 			{"tag":"Tenant", "cdr_field_id": "tenant", "type": "cdrfield", "value": "tenant"},
 			{"tag":"Category", "cdr_field_id": "category", "type": "cdrfield", "value": "category"},
 			{"tag":"Account", "cdr_field_id": "account", "type": "cdrfield", "value": "account"},

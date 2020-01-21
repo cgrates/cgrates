@@ -31,7 +31,6 @@ var body = []byte(`{
 	"switchname": "FSDev1",
 	"channel_data": {
 		"state": "CS_REPORTING",
-		"direction": "inbound",
 		"state_number": "11",
 		"flags": "0=1;1=1;3=1;20=1;37=1;38=1;40=1;43=1;48=1;53=1;75=1;98=1;112=1;113=1;122=1;134=1",
 		"caps": "1=1;2=1;3=1;4=1;5=1;6=1"
@@ -72,7 +71,6 @@ var body = []byte(`{
 		}
 	},
 	"variables": {
-		"direction": "inbound",
 		"uuid": "3da8bf84-c133-4959-9e24-e72875cb33a1",
 		"session_id": "7",
 		"sip_from_user": "1001",
@@ -482,13 +480,11 @@ func TestFsCdrDDazRSRExtraFields(t *testing.T) {
     "core-uuid": "feef0b51-7fdf-4c4a-878e-aff233752de2",
     "channel_data": {
         "state": "CS_REPORTING",
-        "direction": "inbound",
         "state_number": "11",
         "flags": "0=1;1=1;3=1;36=1;37=1;39=1;42=1;47=1;52=1;73=1;75=1;94=1",
         "caps": "1=1;2=1;3=1;4=1;5=1;6=1"
     },
     "variables": {
-        "direction": "inbound",
         "uuid": "86cfd6e2-dbda-45a3-b59d-f683ec368e8b",
         "session_id": "5",
         "accountcode": "1001",
