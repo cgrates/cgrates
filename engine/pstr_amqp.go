@@ -15,6 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+
 package engine
 
 import (
@@ -28,13 +29,13 @@ import (
 	"github.com/streadway/amqp"
 )
 
-var AMQPQuery = []string{"cacertfile", "certfile", "keyfile", "verify", "server_name_indication", "auth_mechanism", "heartbeat", "connection_timeout", "channel_max"}
+var amqpQuery = []string{"cacertfile", "certfile", "keyfile", "verify", "server_name_indication", "auth_mechanism", "heartbeat", "connection_timeout", "channel_max"}
 
+// NewAMQPPoster creates a new amqp poster
 // "amqp://guest:guest@localhost:5672/?queueID=cgrates_cdrs"
-func NewAMQPPoster(dialURL string, attempts int, fallbackFileDir string) (*AMQPPoster, error) {
+func NewAMQPPoster(dialURL string, attempts int) (*AMQPPoster, error) {
 	amqp := &AMQPPoster{
-		attempts:        attempts,
-		fallbackFileDir: fallbackFileDir,
+		attempts: attempts,
 	}
 	if err := amqp.parseURL(dialURL); err != nil {
 		return nil, err
@@ -42,16 +43,16 @@ func NewAMQPPoster(dialURL string, attempts int, fallbackFileDir string) (*AMQPP
 	return amqp, nil
 }
 
+// AMQPPoster used to post cdrs to amqp
 type AMQPPoster struct {
-	dialURL         string
-	queueID         string // identifier of the CDR queue where we publish
-	exchange        string
-	exchangeType    string
-	routingKey      string
-	attempts        int
-	fallbackFileDir string
-	sync.Mutex      // protect connection
-	conn            *amqp.Connection
+	dialURL      string
+	queueID      string // identifier of the CDR queue where we publish
+	exchange     string
+	exchangeType string
+	routingKey   string
+	attempts     int
+	sync.Mutex   // protect connection
+	conn         *amqp.Connection
 }
 
 func (pstr *AMQPPoster) parseURL(dialURL string) error {
@@ -61,7 +62,7 @@ func (pstr *AMQPPoster) parseURL(dialURL string) error {
 	}
 	qry := u.Query()
 	q := url.Values{}
-	for _, key := range AMQPQuery {
+	for _, key := range amqpQuery {
 		if vals, has := qry[key]; has && len(vals) != 0 {
 			q.Add(key, vals[0])
 		}
@@ -87,7 +88,7 @@ func (pstr *AMQPPoster) parseURL(dialURL string) error {
 
 // Post is the method being called when we need to post anything in the queue
 // the optional chn will permits channel caching
-func (pstr *AMQPPoster) Post(content []byte, fallbackFileName, _ string) (err error) {
+func (pstr *AMQPPoster) Post(content []byte, _ string) (err error) {
 	var chn *amqp.Channel
 	fib := utils.Fib()
 
@@ -100,11 +101,8 @@ func (pstr *AMQPPoster) Post(content []byte, fallbackFileName, _ string) (err er
 		}
 	}
 	if err != nil {
-		if fallbackFileName != utils.META_NONE {
-			utils.Logger.Warning(fmt.Sprintf("<AMQPPoster> creating new post channel, err: %s", err.Error()))
-			err = writeToFile(pstr.fallbackFileDir, fallbackFileName, content)
-		}
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<AMQPPoster> creating new post channel, err: %s", err.Error()))
+		return
 	}
 	for i := 0; i < pstr.attempts; i++ {
 		if err = chn.Publish(
@@ -123,9 +121,8 @@ func (pstr *AMQPPoster) Post(content []byte, fallbackFileName, _ string) (err er
 			time.Sleep(time.Duration(fib()) * time.Second)
 		}
 	}
-	if err != nil && fallbackFileName != utils.META_NONE {
-		err = writeToFile(pstr.fallbackFileDir, fallbackFileName, content)
-		return err
+	if err != nil {
+		return
 	}
 	if chn != nil {
 		chn.Close()
@@ -133,6 +130,7 @@ func (pstr *AMQPPoster) Post(content []byte, fallbackFileName, _ string) (err er
 	return
 }
 
+// Close closes the connections
 func (pstr *AMQPPoster) Close() {
 	pstr.Lock()
 	if pstr.conn != nil {

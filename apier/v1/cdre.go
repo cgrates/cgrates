@@ -147,7 +147,7 @@ func (api *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.Ex
 	cdrexp, err := engine.NewCDRExporter(cdrs, exportTemplate, exportFormat,
 		filePath, utils.META_NONE, exportID, exportTemplate.Synchronous,
 		exportTemplate.Attempts, fieldSep,
-		api.Config.GeneralCfg().HttpSkipTlsVerify, api.HTTPPoster,
+		api.Config.GeneralCfg().HttpSkipTlsVerify,
 		api.Config.ApierCfg().AttributeSConns, api.FilterS)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -292,7 +292,7 @@ func (api *ApierV1) ExportCDRs(arg ArgExportCDRs, reply *RplExportedCDRs) (err e
 		filePath, utils.META_NONE, exportID,
 		synchronous, attempts, fieldSep,
 		api.Config.GeneralCfg().HttpSkipTlsVerify,
-		api.HTTPPoster, api.Config.ApierCfg().AttributeSConns, api.FilterS)
+		api.Config.ApierCfg().AttributeSConns, api.FilterS)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

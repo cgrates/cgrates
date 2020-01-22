@@ -72,12 +72,10 @@ func NewCDRServer(cgrCfg *config.CGRConfig, storDBChan chan StorDB, dm *DataMana
 	connMgr *ConnManager) *CDRServer {
 	cdrDb := <-storDBChan
 	return &CDRServer{
-		cgrCfg: cgrCfg,
-		cdrDb:  cdrDb,
-		dm:     dm,
-		guard:  guardian.Guardian,
-		httpPoster: NewHTTPPoster(cgrCfg.GeneralCfg().HttpSkipTlsVerify,
-			cgrCfg.GeneralCfg().ReplyTimeout),
+		cgrCfg:     cgrCfg,
+		cdrDb:      cdrDb,
+		dm:         dm,
+		guard:      guardian.Guardian,
 		filterS:    filterS,
 		connMgr:    connMgr,
 		storDBChan: storDBChan,
@@ -90,7 +88,6 @@ type CDRServer struct {
 	cdrDb      CdrStorage
 	dm         *DataManager
 	guard      *guardian.GuardianLocker
-	httpPoster *HTTPPoster // used for replication
 	filterS    *FilterS
 	connMgr    *ConnManager
 	storDBChan chan StorDB
@@ -391,7 +388,7 @@ func (cdrS *CDRServer) exportCDRs(cdrs []*CDR) (err error) {
 		if cdre, err = NewCDRExporter(cdrs, expTpl, expTpl.ExportFormat,
 			expTpl.ExportPath, cdrS.cgrCfg.GeneralCfg().FailedPostsDir,
 			"CDRSReplication", expTpl.Synchronous, expTpl.Attempts,
-			expTpl.FieldSeparator, cdrS.cgrCfg.GeneralCfg().HttpSkipTlsVerify, cdrS.httpPoster,
+			expTpl.FieldSeparator, cdrS.cgrCfg.GeneralCfg().HttpSkipTlsVerify,
 			cdrS.cgrCfg.CdrsCfg().AttributeSConns, cdrS.filterS); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<CDRS> Building CDRExporter for online exports got error: <%s>", err.Error()))
 			continue

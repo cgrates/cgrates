@@ -25,109 +25,116 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"os"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Post without automatic failover
-func HttpJsonPost(url string, skipTlsVerify bool, content []byte) ([]byte, error) {
-	tr := &http.Transport{
-		TLSClientConfig:   &tls.Config{InsecureSkipVerify: skipTlsVerify},
-		DisableKeepAlives: true,
+// keep it global in order to reuse it
+var httpPosterTransport *http.Transport
+
+// HttpJsonPost posts without automatic failover
+func HttpJsonPost(url string, skipTLSVerify bool, content []byte) (respBody []byte, err error) {
+	if httpPosterTransport == nil {
+		httpPosterTransport = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: skipTLSVerify},
+		}
 	}
-	client := &http.Client{Transport: tr}
-	resp, err := client.Post(url, "application/json", bytes.NewBuffer(content))
-	if err != nil {
-		return nil, err
+	client := &http.Client{Transport: httpPosterTransport}
+	var resp *http.Response
+	if resp, err = client.Post(url, "application/json", bytes.NewBuffer(content)); err != nil {
+		return
 	}
-	defer resp.Body.Close()
-	respBody, err := ioutil.ReadAll(resp.Body)
+	respBody, err = ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
 	if err != nil {
-		return nil, err
+		return
 	}
 	if resp.StatusCode > 299 {
-		return respBody, fmt.Errorf("Unexpected status code received: %d", resp.StatusCode)
+		err = fmt.Errorf("Unexpected status code received: %d", resp.StatusCode)
 	}
-	return respBody, nil
+	return
 }
 
-func NewHTTPPoster(skipTLSVerify bool, replyTimeout time.Duration) *HTTPPoster {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipTLSVerify},
-	}
-	return &HTTPPoster{httpClient: &http.Client{Transport: tr, Timeout: replyTimeout}}
-}
-
-type HTTPPoster struct {
-	httpClient *http.Client
-}
-
-// Post with built-in failover
-// Returns also reference towards client so we can close it's connections when done
-func (poster *HTTPPoster) Post(addr string, contentType string, content interface{}, attempts int, fallbackFilePath string) (respBody []byte, err error) {
+// NewHTTPPoster return a new HTTP poster
+func NewHTTPPoster(skipTLSVerify bool, replyTimeout time.Duration,
+	addr, contentType string, attempts int) (httposter *HTTPPoster, err error) {
 	if !utils.SliceHasMember([]string{utils.CONTENT_FORM, utils.CONTENT_JSON, utils.CONTENT_TEXT}, contentType) {
 		return nil, fmt.Errorf("unsupported ContentType: %s", contentType)
 	}
+	if httpPosterTransport == nil {
+		httpPosterTransport = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: skipTLSVerify},
+		}
+	}
+	return &HTTPPoster{
+		httpClient:  &http.Client{Transport: httpPosterTransport, Timeout: replyTimeout},
+		addr:        addr,
+		contentType: contentType,
+		attempts:    attempts,
+	}, nil
+}
+
+// HTTPPoster used to post cdrs
+type HTTPPoster struct {
+	httpClient  *http.Client
+	addr        string
+	contentType string
+	attempts    int
+}
+
+// Post will post the event
+func (pstr *HTTPPoster) Post(content interface{}, key string) (err error) {
+	_, err = pstr.GetResponse(content)
+	return
+}
+
+// GetResponse will post the event and return the response
+func (pstr *HTTPPoster) GetResponse(content interface{}) (respBody []byte, err error) {
 	var body []byte        // Used to write in file and send over http
 	var urlVals url.Values // Used when posting form
-	if utils.SliceHasMember([]string{utils.CONTENT_JSON, utils.CONTENT_TEXT}, contentType) {
-		body = content.([]byte)
-	} else if contentType == utils.CONTENT_FORM {
+	if pstr.contentType == utils.CONTENT_FORM {
 		urlVals = content.(url.Values)
 		body = []byte(urlVals.Encode())
+	} else {
+		body = content.([]byte)
 	}
 	fib := utils.Fib()
 	bodyType := "application/x-www-form-urlencoded"
-	if contentType == utils.CONTENT_JSON {
+	if pstr.contentType == utils.CONTENT_JSON {
 		bodyType = "application/json"
 	}
-	for i := 0; i < attempts; i++ {
+	for i := 0; i < pstr.attempts; i++ {
 		var resp *http.Response
-		if utils.SliceHasMember([]string{utils.CONTENT_JSON, utils.CONTENT_TEXT}, contentType) {
-			resp, err = poster.httpClient.Post(addr, bodyType, bytes.NewBuffer(body))
-		} else if contentType == utils.CONTENT_FORM {
-			resp, err = poster.httpClient.PostForm(addr, urlVals)
+		if pstr.contentType == utils.CONTENT_FORM {
+			resp, err = pstr.httpClient.PostForm(pstr.addr, urlVals)
+		} else {
+			resp, err = pstr.httpClient.Post(pstr.addr, bodyType, bytes.NewBuffer(body))
 		}
 		if err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, error: <%s>", addr, err.Error()))
-			if i+1 < attempts {
+			utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, error: <%s>", pstr.addr, err.Error()))
+			if i+1 < pstr.attempts {
 				time.Sleep(time.Duration(fib()) * time.Second)
 			}
 			continue
 		}
-		defer resp.Body.Close()
 		respBody, err = ioutil.ReadAll(resp.Body)
+		resp.Body.Close()
 		if err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, error: <%s>", addr, err.Error()))
-			if i+1 < attempts {
+			utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, error: <%s>", pstr.addr, err.Error()))
+			if i+1 < pstr.attempts {
 				time.Sleep(time.Duration(fib()) * time.Second)
 			}
 			continue
 		}
 		if resp.StatusCode > 299 {
-			utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, unexpected status code received: <%d>", addr, resp.StatusCode))
-			if i+1 < attempts {
+			utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, unexpected status code received: <%d>", pstr.addr, resp.StatusCode))
+			if i+1 < pstr.attempts {
 				time.Sleep(time.Duration(fib()) * time.Second)
 			}
 			continue
 		}
 		return respBody, nil
-	}
-	if fallbackFilePath != utils.META_NONE {
-		// If we got that far, post was not possible, write it on disk
-		_, err = guardian.Guardian.Guard(func() (interface{}, error) {
-			fileOut, err := os.Create(fallbackFilePath)
-			if err != nil {
-				return nil, err
-			}
-			_, err = fileOut.Write(body)
-			fileOut.Close()
-			return nil, err
-		}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.FileLockPrefix+fallbackFilePath)
 	}
 	return
 }

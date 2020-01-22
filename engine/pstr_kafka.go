@@ -27,11 +27,10 @@ import (
 	kafka "github.com/segmentio/kafka-go"
 )
 
-// "amqp://guest:guest@localhost:5672/?topic=cgrates_cdrs"
-func NewKafkaPoster(dialURL string, attempts int, fallbackFileDir string) (*KafkaPoster, error) {
+// NewKafkaPoster creates a kafka poster
+func NewKafkaPoster(dialURL string, attempts int) (*KafkaPoster, error) {
 	amqp := &KafkaPoster{
-		attempts:        attempts,
-		fallbackFileDir: fallbackFileDir,
+		attempts: attempts,
 	}
 	if err := amqp.parseURL(dialURL); err != nil {
 		return nil, err
@@ -39,13 +38,13 @@ func NewKafkaPoster(dialURL string, attempts int, fallbackFileDir string) (*Kafk
 	return amqp, nil
 }
 
+// KafkaPoster is a kafka poster
 type KafkaPoster struct {
-	dialURL         string
-	topic           string // identifier of the CDR queue where we publish
-	attempts        int
-	fallbackFileDir string
-	sync.Mutex      // protect writer
-	writer          *kafka.Writer
+	dialURL    string
+	topic      string // identifier of the CDR queue where we publish
+	attempts   int
+	sync.Mutex // protect writer
+	writer     *kafka.Writer
 }
 
 func (pstr *KafkaPoster) parseURL(dialURL string) error {
@@ -65,7 +64,7 @@ func (pstr *KafkaPoster) parseURL(dialURL string) error {
 
 // Post is the method being called when we need to post anything in the queue
 // the optional chn will permits channel caching
-func (pstr *KafkaPoster) Post(content []byte, fallbackFileName, key string) (err error) {
+func (pstr *KafkaPoster) Post(content []byte, key string) (err error) {
 	pstr.newPostWriter()
 	pstr.Lock()
 	if err = pstr.writer.WriteMessages(context.Background(), kafka.Message{
@@ -76,13 +75,10 @@ func (pstr *KafkaPoster) Post(content []byte, fallbackFileName, key string) (err
 		return
 	}
 	pstr.Unlock()
-	if err != nil && fallbackFileName != utils.META_NONE {
-		err = writeToFile(pstr.fallbackFileDir, fallbackFileName, content)
-		return err
-	}
 	return
 }
 
+// Close closes the kafka writer
 func (pstr *KafkaPoster) Close() {
 	pstr.Lock()
 	if pstr.writer != nil {

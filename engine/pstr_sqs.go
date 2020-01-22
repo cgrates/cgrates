@@ -32,30 +32,31 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewSQSPoster(dialURL string, attempts int, fallbackFileDir string) (Poster, error) {
+// NewSQSPoster creates a poster for sqs
+func NewSQSPoster(dialURL string, attempts int) (Poster, error) {
 	pstr := &SQSPoster{
-		attempts:        attempts,
-		fallbackFileDir: fallbackFileDir,
+		attempts: attempts,
 	}
 	pstr.parseURL(dialURL)
 	return pstr, nil
 }
 
+// SQSPoster is a poster for sqs
 type SQSPoster struct {
 	sync.Mutex
-	dialURL         string
-	awsRegion       string
-	awsID           string
-	awsKey          string
-	awsToken        string
-	attempts        int
-	fallbackFileDir string
-	queueURL        *string
-	queueID         string
+	dialURL   string
+	awsRegion string
+	awsID     string
+	awsKey    string
+	awsToken  string
+	attempts  int
+	queueURL  *string
+	queueID   string
 	// getQueueOnce    sync.Once
 	session *session.Session
 }
 
+// Close for Poster interface
 func (pstr *SQSPoster) Close() {}
 
 func (pstr *SQSPoster) parseURL(dialURL string) {
@@ -115,7 +116,8 @@ func (pstr *SQSPoster) getQueueURL() (err error) {
 	return err
 }
 
-func (pstr *SQSPoster) Post(message []byte, fallbackFileName, _ string) (err error) {
+// Post is the method being called when we need to post anything in the queue
+func (pstr *SQSPoster) Post(message []byte, _ string) (err error) {
 	var svc *sqs.SQS
 	fib := utils.Fib()
 
@@ -128,11 +130,8 @@ func (pstr *SQSPoster) Post(message []byte, fallbackFileName, _ string) (err err
 		}
 	}
 	if err != nil {
-		if fallbackFileName != utils.META_NONE {
-			utils.Logger.Warning(fmt.Sprintf("<SQSPoster> creating new session, err: %s", err.Error()))
-			err = writeToFile(pstr.fallbackFileDir, fallbackFileName, message)
-		}
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<SQSPoster> creating new session, err: %s", err.Error()))
+		return
 	}
 
 	for i := 0; i < pstr.attempts; i++ {
@@ -148,11 +147,10 @@ func (pstr *SQSPoster) Post(message []byte, fallbackFileName, _ string) (err err
 			time.Sleep(time.Duration(fib()) * time.Second)
 		}
 	}
-	if err != nil && fallbackFileName != utils.META_NONE {
+	if err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<SQSPoster> posting new message, err: %s", err.Error()))
-		err = writeToFile(pstr.fallbackFileDir, fallbackFileName, message)
 	}
-	return err
+	return
 }
 
 func (pstr *SQSPoster) newPosterSession() (s *sqs.SQS, err error) {

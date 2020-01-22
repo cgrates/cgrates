@@ -45,7 +45,7 @@ func TestCsvCdrWriter(t *testing.T) {
 	}
 	cdre, err := NewCDRExporter([]*CDR{storedCdr1},
 		cfg.CdreProfiles[utils.MetaDefault], utils.MetaFileCSV, "", "", "firstexport",
-		true, 1, utils.CSV_SEP, cfg.GeneralCfg().HttpSkipTlsVerify, nil, nil, nil)
+		true, 1, utils.CSV_SEP, cfg.GeneralCfg().HttpSkipTlsVerify, nil, nil)
 	if err != nil {
 		t.Error("Unexpected error received: ", err)
 	}
@@ -83,7 +83,7 @@ func TestAlternativeFieldSeparator(t *testing.T) {
 	}
 	cdre, err := NewCDRExporter([]*CDR{storedCdr1}, cfg.CdreProfiles[utils.MetaDefault],
 		utils.MetaFileCSV, "", "", "firstexport", true, 1, '|',
-		cfg.GeneralCfg().HttpSkipTlsVerify, nil, nil, nil)
+		cfg.GeneralCfg().HttpSkipTlsVerify, nil, nil)
 	if err != nil {
 		t.Error("Unexpected error received: ", err)
 	}
@@ -177,7 +177,7 @@ func TestExportVoiceWithConvert(t *testing.T) {
 	}
 	cdre, err := NewCDRExporter([]*CDR{cdrVoice, cdrData, cdrSMS}, cdreCfg,
 		utils.MetaFileCSV, "", "", "firstexport",
-		true, 1, '|', true, nil, nil, &FilterS{cfg: cfg})
+		true, 1, '|', true, nil, &FilterS{cfg: cfg})
 	if err != nil {
 		t.Error("Unexpected error received: ", err)
 	}
@@ -274,7 +274,7 @@ func TestExportWithFilter(t *testing.T) {
 	}
 	cdre, err := NewCDRExporter([]*CDR{cdrVoice, cdrData, cdrSMS}, cdreCfg,
 		utils.MetaFileCSV, "", "", "firstexport",
-		true, 1, '|', true, nil, nil, &FilterS{cfg: cfg})
+		true, 1, '|', true, nil, &FilterS{cfg: cfg})
 	if err != nil {
 		t.Error("Unexpected error received: ", err)
 	}
@@ -370,7 +370,7 @@ func TestExportWithFilter2(t *testing.T) {
 	}
 	cdre, err := NewCDRExporter([]*CDR{cdrVoice, cdrData, cdrSMS}, cdreCfg,
 		utils.MetaFileCSV, "", "", "firstexport",
-		true, 1, '|', true, nil, nil, &FilterS{cfg: cfg})
+		true, 1, '|', true, nil, &FilterS{cfg: cfg})
 	if err != nil {
 		t.Error("Unexpected error received: ", err)
 	}
