@@ -26,7 +26,6 @@ import (
 	"html/template"
 	"net"
 	"net/smtp"
-	"path"
 	"reflect"
 	"sort"
 	"strconv"
@@ -40,9 +39,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-/*
-Structure to be filled for each tariff plan with the bonus value for received calls minutes.
-*/
+// Action will be filled for each tariff plan with the bonus value for received calls minutes.
 type Action struct {
 	Id               string
 	ActionType       string
@@ -54,6 +51,7 @@ type Action struct {
 	balanceValue     float64 // balance value after action execution, used with cdrlog
 }
 
+// Clone returns a clone of the action
 func (a *Action) Clone() (cln *Action) {
 	if a == nil {
 		return
@@ -88,8 +86,8 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		utils.RESET_COUNTERS:            resetCountersAction,
 		utils.ENABLE_ACCOUNT:            enableAccountAction,
 		utils.DISABLE_ACCOUNT:           disableAccountAction,
-		utils.HttpPost:                  callUrl,
-		utils.HttpPostAsync:             callUrlAsync,
+		utils.HttpPost:                  callURL,
+		utils.HttpPostAsync:             callURLAsync,
 		utils.MAIL_ASYNC:                mailAsync,
 		utils.SET_DDESTINATIONS:         setddestinations,
 		utils.REMOVE_ACCOUNT:            removeAccountAction,
@@ -381,17 +379,11 @@ func sendAMQP(ub *Account, a *Action, acs Actions, extraData interface{}) error 
 	if err != nil {
 		return err
 	}
-	cfg := config.CgrConfig()
-	fallbackFileName := (&utils.FallbackFileName{
-		Module:     fmt.Sprintf("%s>%s", utils.ActionsPoster, a.ActionType),
-		Transport:  utils.MetaAMQPjsonMap,
-		Address:    a.ExtraParameters,
-		RequestID:  utils.GenUUID(),
-		FileSuffix: utils.JSNSuffix,
-	}).AsString()
-
-	return PostersCache.PostAMQP(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts,
-		body, utils.CONTENT_JSON, cfg.GeneralCfg().FailedPostsDir, fallbackFileName)
+	err = PostersCache.PostAMQP(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts, body)
+	if err != nil {
+		addFailedPost(a.ExtraParameters, utils.MetaAMQPjsonMap, body)
+	}
+	return err
 }
 
 func sendAWS(ub *Account, a *Action, acs Actions, extraData interface{}) error {
@@ -399,17 +391,11 @@ func sendAWS(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 	if err != nil {
 		return err
 	}
-	cfg := config.CgrConfig()
-	fallbackFileName := (&utils.FallbackFileName{
-		Module:     fmt.Sprintf("%s>%s", utils.ActionsPoster, a.ActionType),
-		Transport:  utils.MetaAMQPV1jsonMap,
-		Address:    a.ExtraParameters,
-		RequestID:  utils.GenUUID(),
-		FileSuffix: utils.JSNSuffix,
-	}).AsString()
-
-	return PostersCache.PostAMQPv1(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts,
-		body, cfg.GeneralCfg().FailedPostsDir, fallbackFileName)
+	err = PostersCache.PostAMQPv1(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts, body)
+	if err != nil {
+		addFailedPost(a.ExtraParameters, utils.MetaAMQPV1jsonMap, body)
+	}
+	return err
 }
 
 func sendSQS(ub *Account, a *Action, acs Actions, extraData interface{}) error {
@@ -417,17 +403,11 @@ func sendSQS(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 	if err != nil {
 		return err
 	}
-	cfg := config.CgrConfig()
-	fallbackFileName := (&utils.FallbackFileName{
-		Module:     fmt.Sprintf("%s>%s", utils.ActionsPoster, a.ActionType),
-		Transport:  utils.MetaSQSjsonMap,
-		Address:    a.ExtraParameters,
-		RequestID:  utils.GenUUID(),
-		FileSuffix: utils.JSNSuffix,
-	}).AsString()
-
-	return PostersCache.PostSQS(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts,
-		body, cfg.GeneralCfg().FailedPostsDir, fallbackFileName)
+	err = PostersCache.PostSQS(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts, body)
+	if err != nil {
+		addFailedPost(a.ExtraParameters, utils.MetaSQSjsonMap, body)
+	}
+	return err
 }
 
 func sendKafka(ub *Account, a *Action, acs Actions, extraData interface{}) error {
@@ -435,17 +415,11 @@ func sendKafka(ub *Account, a *Action, acs Actions, extraData interface{}) error
 	if err != nil {
 		return err
 	}
-	cfg := config.CgrConfig()
-	fallbackFileName := (&utils.FallbackFileName{
-		Module:     fmt.Sprintf("%s>%s", utils.ActionsPoster, a.ActionType),
-		Transport:  utils.MetaKafkajsonMap,
-		Address:    a.ExtraParameters,
-		RequestID:  utils.GenUUID(),
-		FileSuffix: utils.JSNSuffix,
-	}).AsString()
-
-	return PostersCache.PostKafka(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts,
-		body, cfg.GeneralCfg().FailedPostsDir, fallbackFileName, utils.UUIDSha1Prefix())
+	err = PostersCache.PostKafka(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts, body, utils.UUIDSha1Prefix())
+	if err != nil {
+		addFailedPost(a.ExtraParameters, utils.MetaKafkajsonMap, body)
+	}
+	return err
 }
 
 func sendS3(ub *Account, a *Action, acs Actions, extraData interface{}) error {
@@ -453,57 +427,49 @@ func sendS3(ub *Account, a *Action, acs Actions, extraData interface{}) error {
 	if err != nil {
 		return err
 	}
-	cfg := config.CgrConfig()
-	fallbackFileName := (&utils.FallbackFileName{
-		Module:     fmt.Sprintf("%s>%s", utils.ActionsPoster, a.ActionType),
-		Transport:  utils.MetaS3jsonMap,
-		Address:    a.ExtraParameters,
-		RequestID:  utils.GenUUID(),
-		FileSuffix: utils.JSNSuffix,
-	}).AsString()
-
-	return PostersCache.PostS3(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts,
-		body, cfg.GeneralCfg().FailedPostsDir, fallbackFileName, utils.UUIDSha1Prefix())
+	err = PostersCache.PostS3(a.ExtraParameters, config.CgrConfig().GeneralCfg().PosterAttempts, body, utils.UUIDSha1Prefix())
+	if err != nil {
+		addFailedPost(a.ExtraParameters, utils.MetaS3jsonMap, body)
+	}
+	return err
 }
 
-func callUrl(ub *Account, a *Action, acs Actions, extraData interface{}) error {
-	jsn, err := getOneData(ub, extraData)
+func callURL(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+	body, err := getOneData(ub, extraData)
 	if err != nil {
 		return err
 	}
-	cfg := config.CgrConfig()
-	ffn := &utils.FallbackFileName{
-		Module:     fmt.Sprintf("%s>%s", utils.ActionsPoster, a.ActionType),
-		Transport:  utils.MetaHTTPjson,
-		Address:    a.ExtraParameters,
-		RequestID:  utils.GenUUID(),
-		FileSuffix: utils.JSNSuffix,
+	pstr, err := NewHTTPPoster(config.CgrConfig().GeneralCfg().HttpSkipTlsVerify,
+		config.CgrConfig().GeneralCfg().ReplyTimeout, a.ExtraParameters,
+		utils.CONTENT_JSON, config.CgrConfig().GeneralCfg().PosterAttempts)
+	if err != nil {
+		return err
 	}
-	_, err = NewHTTPPoster(config.CgrConfig().GeneralCfg().HttpSkipTlsVerify,
-		config.CgrConfig().GeneralCfg().ReplyTimeout).Post(a.ExtraParameters,
-		utils.CONTENT_JSON, jsn, config.CgrConfig().GeneralCfg().PosterAttempts,
-		path.Join(cfg.GeneralCfg().FailedPostsDir, ffn.AsString()))
+	err = pstr.Post(body, utils.EmptyString)
+	if err != nil {
+		addFailedPost(a.ExtraParameters, utils.MetaHTTPjson, body)
+	}
 	return err
 }
 
 // Does not block for posts, no error reports
-func callUrlAsync(ub *Account, a *Action, acs Actions, extraData interface{}) error {
-	jsn, err := getOneData(ub, extraData)
+func callURLAsync(ub *Account, a *Action, acs Actions, extraData interface{}) error {
+	body, err := getOneData(ub, extraData)
 	if err != nil {
 		return err
 	}
-	cfg := config.CgrConfig()
-	ffn := &utils.FallbackFileName{
-		Module:     fmt.Sprintf("%s>%s", utils.ActionsPoster, a.ActionType),
-		Transport:  utils.MetaHTTPjson,
-		Address:    a.ExtraParameters,
-		RequestID:  utils.GenUUID(),
-		FileSuffix: utils.JSNSuffix,
+	pstr, err := NewHTTPPoster(config.CgrConfig().GeneralCfg().HttpSkipTlsVerify,
+		config.CgrConfig().GeneralCfg().ReplyTimeout, a.ExtraParameters,
+		utils.CONTENT_JSON, config.CgrConfig().GeneralCfg().PosterAttempts)
+	if err != nil {
+		return err
 	}
-	go NewHTTPPoster(config.CgrConfig().GeneralCfg().HttpSkipTlsVerify,
-		config.CgrConfig().GeneralCfg().ReplyTimeout).Post(a.ExtraParameters,
-		utils.CONTENT_JSON, jsn, config.CgrConfig().GeneralCfg().PosterAttempts,
-		path.Join(cfg.GeneralCfg().FailedPostsDir, ffn.AsString()))
+	go func() {
+		err := pstr.Post(body, utils.EmptyString)
+		if err != nil {
+			addFailedPost(a.ExtraParameters, utils.MetaHTTPjson, body)
+		}
+	}()
 	return nil
 }
 
@@ -548,24 +514,24 @@ func mailAsync(ub *Account, a *Action, acs Actions, extraData interface{}) error
 }
 
 func setddestinations(ub *Account, a *Action, acs Actions, extraData interface{}) (err error) {
-	var ddcDestId string
+	var ddcDestID string
 	for _, bchain := range ub.BalanceMap {
 		for _, b := range bchain {
-			for destId := range b.DestinationIDs {
-				if strings.HasPrefix(destId, "*ddc") {
-					ddcDestId = destId
+			for destID := range b.DestinationIDs {
+				if strings.HasPrefix(destID, "*ddc") {
+					ddcDestID = destID
 					break
 				}
 			}
-			if ddcDestId != "" {
+			if ddcDestID != "" {
 				break
 			}
 		}
-		if ddcDestId != "" {
+		if ddcDestID != "" {
 			break
 		}
 	}
-	if ddcDestId != "" {
+	if ddcDestID != "" {
 		// make slice from prefixes
 		// Review here prefixes
 		// prefixes := make([]string, len(sq.Metrics))
@@ -574,8 +540,8 @@ func setddestinations(ub *Account, a *Action, acs Actions, extraData interface{}
 		// 	prefixes[i] = p
 		// 	i++
 		// }
-		newDest := &Destination{Id: ddcDestId}
-		oldDest, err := dm.GetDestination(ddcDestId, false, utils.NonTransactional)
+		newDest := &Destination{Id: ddcDestID}
+		oldDest, err := dm.GetDestination(ddcDestID, false, utils.NonTransactional)
 		if err != nil {
 			return err
 		}
@@ -583,7 +549,7 @@ func setddestinations(ub *Account, a *Action, acs Actions, extraData interface{}
 		if err = dm.SetDestination(newDest, utils.NonTransactional); err != nil {
 			return err
 		}
-		if err = dm.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{ddcDestId}, true); err != nil {
+		if err = dm.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{ddcDestID}, true); err != nil {
 			return err
 		}
 
@@ -673,7 +639,7 @@ func removeBalanceAction(ub *Account, a *Action, acs Actions, extraData interfac
 			// delete without preserving order
 			bChain[i] = bChain[len(bChain)-1]
 			bChain = bChain[:len(bChain)-1]
-			i -= 1
+			i--
 			found = true
 		}
 	}
@@ -714,6 +680,7 @@ func transferMonetaryDefaultAction(ub *Account, a *Action, acs Actions, extraDat
 	return nil
 }
 
+// RPCRequest used by rpc action
 type RPCRequest struct {
 	Address   string
 	Transport string
@@ -859,7 +826,7 @@ func publishBalance(ub *Account, a *Action, acs Actions, extraData interface{}) 
 	return nil
 }
 
-// Structure to store actions according to weight
+// Actions used to store actions according to weight
 type Actions []*Action
 
 func (apl Actions) Len() int {
@@ -875,10 +842,12 @@ func (apl Actions) Less(j, i int) bool {
 	return apl[i].Weight < apl[j].Weight
 }
 
+// Sort used to implement sort interface
 func (apl Actions) Sort() {
 	sort.Sort(apl)
 }
 
+// Clone returns a clone from object
 func (apl Actions) Clone() (interface{}, error) {
 	if apl == nil {
 		return nil, nil
@@ -1023,7 +992,7 @@ func removeExpired(acc *Account, action *Action, _ Actions, extraData interface{
 			// delete without preserving order
 			bChain[i] = bChain[len(bChain)-1]
 			bChain = bChain[:len(bChain)-1]
-			i -= 1
+			i--
 			found = true
 		}
 	}
@@ -1035,22 +1004,20 @@ func removeExpired(acc *Account, action *Action, _ Actions, extraData interface{
 }
 
 func postEvent(ub *Account, a *Action, acs Actions, extraData interface{}) error {
-	jsn, err := json.Marshal(extraData)
+	body, err := json.Marshal(extraData)
 	if err != nil {
 		return err
 	}
-	cfg := config.CgrConfig()
-	ffn := &utils.FallbackFileName{
-		Module:     fmt.Sprintf("%s>%s", utils.ActionsPoster, a.ActionType),
-		Transport:  utils.MetaHTTPjson,
-		Address:    a.ExtraParameters,
-		RequestID:  utils.GenUUID(),
-		FileSuffix: utils.JSNSuffix,
+	pstr, err := NewHTTPPoster(config.CgrConfig().GeneralCfg().HttpSkipTlsVerify,
+		config.CgrConfig().GeneralCfg().ReplyTimeout, a.ExtraParameters,
+		utils.CONTENT_JSON, config.CgrConfig().GeneralCfg().PosterAttempts)
+	if err != nil {
+		return err
 	}
-	_, err = NewHTTPPoster(config.CgrConfig().GeneralCfg().HttpSkipTlsVerify,
-		config.CgrConfig().GeneralCfg().ReplyTimeout).Post(a.ExtraParameters,
-		utils.CONTENT_JSON, jsn, config.CgrConfig().GeneralCfg().PosterAttempts,
-		path.Join(cfg.GeneralCfg().FailedPostsDir, ffn.AsString()))
+	err = pstr.Post(body, utils.EmptyString)
+	if err != nil {
+		addFailedPost(a.ExtraParameters, utils.MetaHTTPjson, body)
+	}
 	return err
 }
 

@@ -29,28 +29,29 @@ import (
 	amqpv1 "pack.ag/amqp"
 )
 
-func NewAMQPv1Poster(dialURL string, attempts int, fallbackFileDir string) (Poster, error) {
+// NewAMQPv1Poster creates a poster for amqpv1
+func NewAMQPv1Poster(dialURL string, attempts int) (Poster, error) {
 	URL, qID, err := parseURL(dialURL)
 	if err != nil {
 		return nil, err
 	}
 	return &AMQPv1Poster{
-		dialURL:         URL,
-		queueID:         "/" + qID,
-		attempts:        attempts,
-		fallbackFileDir: fallbackFileDir,
+		dialURL:  URL,
+		queueID:  "/" + qID,
+		attempts: attempts,
 	}, nil
 }
 
+// AMQPv1Poster a poster for amqpv1
 type AMQPv1Poster struct {
 	sync.Mutex
-	dialURL         string
-	queueID         string // identifier of the CDR queue where we publish
-	attempts        int
-	fallbackFileDir string
-	client          *amqpv1.Client
+	dialURL  string
+	queueID  string // identifier of the CDR queue where we publish
+	attempts int
+	client   *amqpv1.Client
 }
 
+// Close closes the connections
 func (pstr *AMQPv1Poster) Close() {
 	pstr.Lock()
 	if pstr.client != nil {
@@ -60,7 +61,8 @@ func (pstr *AMQPv1Poster) Close() {
 	pstr.Unlock()
 }
 
-func (pstr *AMQPv1Poster) Post(content []byte, fallbackFileName, _ string) (err error) {
+// Post is the method being called when we need to post anything in the queue
+func (pstr *AMQPv1Poster) Post(content []byte, _ string) (err error) {
 	var s *amqpv1.Session
 	fib := utils.Fib()
 
@@ -79,10 +81,7 @@ func (pstr *AMQPv1Poster) Post(content []byte, fallbackFileName, _ string) (err 
 		}
 	}
 	if err != nil {
-		if fallbackFileName != utils.META_NONE {
-			utils.Logger.Warning(fmt.Sprintf("<AMQPv1Poster> creating new post channel, err: %s", err.Error()))
-			err = writeToFile(pstr.fallbackFileDir, fallbackFileName, content)
-		}
+		utils.Logger.Warning(fmt.Sprintf("<AMQPv1Poster> creating new post channel, err: %s", err.Error()))
 		return err
 	}
 
@@ -125,9 +124,8 @@ func (pstr *AMQPv1Poster) Post(content []byte, fallbackFileName, _ string) (err 
 		// 	}
 		// }
 	}
-	if err != nil && fallbackFileName != utils.META_NONE {
-		err = writeToFile(pstr.fallbackFileDir, fallbackFileName, content)
-		return err
+	if err != nil {
+		return
 	}
 	if s != nil {
 		s.Close(ctx)

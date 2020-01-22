@@ -32,29 +32,30 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewS3Poster(dialURL string, attempts int, fallbackFileDir string) (Poster, error) {
+// NewS3Poster creates a s3 poster
+func NewS3Poster(dialURL string, attempts int) (Poster, error) {
 	pstr := &S3Poster{
-		attempts:        attempts,
-		fallbackFileDir: fallbackFileDir,
+		attempts: attempts,
 	}
 	pstr.parseURL(dialURL)
 	return pstr, nil
 }
 
+// S3Poster is a s3 poster
 type S3Poster struct {
 	sync.Mutex
-	dialURL         string
-	awsRegion       string
-	awsID           string
-	awsKey          string
-	awsToken        string
-	attempts        int
-	fallbackFileDir string
-	queueID         string
-	folderPath      string
-	session         *session.Session
+	dialURL    string
+	awsRegion  string
+	awsID      string
+	awsKey     string
+	awsToken   string
+	attempts   int
+	queueID    string
+	folderPath string
+	session    *session.Session
 }
 
+// Close for Poster interface
 func (pstr *S3Poster) Close() {}
 
 func (pstr *S3Poster) parseURL(dialURL string) {
@@ -83,7 +84,8 @@ func (pstr *S3Poster) parseURL(dialURL string) {
 	}
 }
 
-func (pstr *S3Poster) Post(message []byte, fallbackFileName, key string) (err error) {
+// Post is the method being called when we need to post anything in the queue
+func (pstr *S3Poster) Post(message []byte, key string) (err error) {
 	var svc *s3manager.Uploader
 	fib := utils.Fib()
 
@@ -96,11 +98,8 @@ func (pstr *S3Poster) Post(message []byte, fallbackFileName, key string) (err er
 		}
 	}
 	if err != nil {
-		if fallbackFileName != utils.META_NONE {
-			utils.Logger.Warning(fmt.Sprintf("<S3Poster> creating new session, err: %s", err.Error()))
-			err = writeToFile(pstr.fallbackFileDir, fallbackFileName, message)
-		}
-		return err
+		utils.Logger.Warning(fmt.Sprintf("<S3Poster> creating new session, err: %s", err.Error()))
+		return
 	}
 
 	for i := 0; i < pstr.attempts; i++ {
@@ -124,11 +123,10 @@ func (pstr *S3Poster) Post(message []byte, fallbackFileName, key string) (err er
 			time.Sleep(time.Duration(fib()) * time.Second)
 		}
 	}
-	if err != nil && fallbackFileName != utils.META_NONE {
+	if err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<S3Poster> posting new message, err: %s", err.Error()))
-		err = writeToFile(pstr.fallbackFileDir, fallbackFileName, message)
 	}
-	return err
+	return
 }
 
 func (pstr *S3Poster) newPosterSession() (s *s3manager.Uploader, err error) {

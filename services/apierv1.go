@@ -97,11 +97,9 @@ func (apiService *ApierV1Service) Start() (err error) {
 		Config:           apiService.cfg,
 		Responder:        apiService.responderService.GetResponder(),
 		SchedulerService: apiService.schedService,
-		HTTPPoster: engine.NewHTTPPoster(apiService.cfg.GeneralCfg().HttpSkipTlsVerify,
-			apiService.cfg.GeneralCfg().ReplyTimeout),
-		FilterS:    filterS,
-		ConnMgr:    apiService.connMgr,
-		StorDBChan: storDBChan,
+		FilterS:          filterS,
+		ConnMgr:          apiService.connMgr,
+		StorDBChan:       storDBChan,
 	}
 
 	go func(api *v1.ApierV1, stopChan chan struct{}) {

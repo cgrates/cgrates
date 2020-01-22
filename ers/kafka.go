@@ -139,8 +139,7 @@ func (rdr *KafkaER) readLoop(r *kafka.Reader) {
 			}
 			if rdr.Config().ProcessedPath != utils.EmptyString { // post it
 				if err := engine.PostersCache.PostKafka(rdr.Config().ProcessedPath,
-					rdr.cgrCfg.GeneralCfg().PosterAttempts, msg.Value, "",
-					utils.META_NONE, string(msg.Key)); err != nil {
+					rdr.cgrCfg.GeneralCfg().PosterAttempts, msg.Value, string(msg.Key)); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> writing message %s error: %s",
 							utils.ERs, string(msg.Key), err.Error()))

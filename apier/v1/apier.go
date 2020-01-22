@@ -46,8 +46,7 @@ type ApierV1 struct {
 	DataManager      *engine.DataManager
 	Config           *config.CGRConfig
 	Responder        *engine.Responder
-	SchedulerService SchedulerGeter // Need to have them capitalize so we can export in V2
-	HTTPPoster       *engine.HTTPPoster
+	SchedulerService SchedulerGeter  // Need to have them capitalize so we can export in V2
 	FilterS          *engine.FilterS //Used for CDR Exporter
 	ConnMgr          *engine.ConnManager
 
@@ -1222,27 +1221,30 @@ func (apiv1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string
 		}
 		switch ffn.Transport {
 		case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap, utils.MetaHTTPjson, utils.META_HTTP_POST:
-			_, err = engine.NewHTTPPoster(apiv1.Config.GeneralCfg().HttpSkipTlsVerify,
-				apiv1.Config.GeneralCfg().ReplyTimeout).Post(ffn.Address,
-				utils.PosterTransportContentTypes[ffn.Transport], fileContent,
-				apiv1.Config.GeneralCfg().PosterAttempts, failoverPath)
+			var pstr *engine.HTTPPoster
+			pstr, err = engine.NewHTTPPoster(apiv1.Config.GeneralCfg().HttpSkipTlsVerify,
+				apiv1.Config.GeneralCfg().ReplyTimeout, ffn.Address,
+				utils.PosterTransportContentTypes[ffn.Transport],
+				apiv1.Config.GeneralCfg().PosterAttempts)
+			if err != nil {
+				return err
+			}
+			err = pstr.Post(fileContent, utils.EmptyString) //this may cause panics for contentType == utils.CONTENT_FORM
 		case utils.MetaAMQPjsonCDR, utils.MetaAMQPjsonMap:
 			err = engine.PostersCache.PostAMQP(ffn.Address,
-				apiv1.Config.GeneralCfg().PosterAttempts, fileContent,
-				utils.PosterTransportContentTypes[ffn.Transport],
-				failedReqsOutDir, file.Name())
+				apiv1.Config.GeneralCfg().PosterAttempts, fileContent)
 		case utils.MetaAMQPV1jsonMap:
 			err = engine.PostersCache.PostAMQPv1(ffn.Address, apiv1.Config.GeneralCfg().PosterAttempts,
-				fileContent, failedReqsOutDir, file.Name())
+				fileContent)
 		case utils.MetaSQSjsonMap:
 			err = engine.PostersCache.PostSQS(ffn.Address, apiv1.Config.GeneralCfg().PosterAttempts,
-				fileContent, failedReqsOutDir, file.Name())
+				fileContent)
 		case utils.MetaKafkajsonMap:
 			err = engine.PostersCache.PostKafka(ffn.Address, apiv1.Config.GeneralCfg().PosterAttempts,
-				fileContent, failedReqsOutDir, file.Name(), utils.UUIDSha1Prefix())
+				fileContent, utils.UUIDSha1Prefix())
 		case utils.MetaS3jsonMap:
 			err = engine.PostersCache.PostS3(ffn.Address, apiv1.Config.GeneralCfg().PosterAttempts,
-				fileContent, failedReqsOutDir, file.Name(), utils.UUIDSha1Prefix())
+				fileContent, utils.UUIDSha1Prefix())
 		default:
 			err = fmt.Errorf("unsupported replication transport: %s", ffn.Transport)
 		}

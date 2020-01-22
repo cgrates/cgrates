@@ -141,7 +141,7 @@ func (cdr *CDR) ComputeCGRID() {
 	cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.OriginHost)
 }
 
-// Format cost as string on export
+// FormatCost formats the cost as string on export
 func (cdr *CDR) FormatCost(shiftDecimals, roundDecimals int) string {
 	cost := cdr.Cost
 	if shiftDecimals != 0 {
@@ -150,7 +150,7 @@ func (cdr *CDR) FormatCost(shiftDecimals, roundDecimals int) string {
 	return strconv.FormatFloat(cost, 'f', roundDecimals, 64)
 }
 
-// Used to retrieve fields as string, primary fields are const labeled
+// FieldAsString is used to retrieve fields as string, primary fields are const labeled
 func (cdr *CDR) FieldAsString(rsrPrs *config.RSRParser) (parsed string, err error) {
 	parsed, err = rsrPrs.ParseDataProviderWithInterfaces(config.NewNavigableMap(cdr.AsMapStringIface()), utils.NestingSep)
 	if err != nil {
@@ -159,7 +159,7 @@ func (cdr *CDR) FieldAsString(rsrPrs *config.RSRParser) (parsed string, err erro
 	return
 }
 
-// concatenates values of multiple fields defined in template, used eg in CDR templates
+// FieldsAsString concatenates values of multiple fields defined in template, used eg in CDR templates
 func (cdr *CDR) FieldsAsString(rsrFlds config.RSRParsers) string {
 	outVal, err := rsrFlds.ParseDataProviderWithInterfaces(config.NewNavigableMap(cdr.AsMapStringIface()), utils.NestingSep)
 	if err != nil {
@@ -168,7 +168,7 @@ func (cdr *CDR) FieldsAsString(rsrFlds config.RSRParsers) string {
 	return outVal
 }
 
-// Populates the field with id from value; strings are appended to original one
+// ParseFieldValue populates the field with id from value; strings are appended to original one
 func (cdr *CDR) ParseFieldValue(fieldId, fieldVal, timezone string) error {
 	var err error
 	switch fieldId {
@@ -394,7 +394,7 @@ func (cdr *CDR) exportFieldValue(cfgCdrFld *config.FCTemplate, filterS *FilterS)
 	return
 }
 
-func (cdr *CDR) formatField(cfgFld *config.FCTemplate, httpSkipTlsCheck bool,
+func (cdr *CDR) formatField(cfgFld *config.FCTemplate, httpSkipTLSCheck bool,
 	groupedCDRs []*CDR, filterS *FilterS) (outVal string, err error) {
 	switch cfgFld.Type {
 	case utils.META_FILLER:
@@ -427,7 +427,7 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, httpSkipTlsCheck bool,
 		}
 		if len(httpAddr) == 0 {
 			err = fmt.Errorf("Empty http address for field %s type %s", cfgFld.Tag, cfgFld.Type)
-		} else if outValByte, err = HttpJsonPost(httpAddr, httpSkipTlsCheck, jsn); err == nil {
+		} else if outValByte, err = HttpJsonPost(httpAddr, httpSkipTLSCheck, jsn); err == nil {
 			outVal = string(outValByte)
 			if len(outVal) == 0 && cfgFld.Mandatory {
 				err = fmt.Errorf("Empty result for http_post field: %s", cfgFld.Tag)
@@ -451,10 +451,10 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, httpSkipTlsCheck bool,
 	return utils.FmtFieldWidth(cfgFld.Tag, outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory)
 }
 
-// Used in place where we need to export the CDR based on an export template
+// AsExportRecord is used in place where we need to export the CDR based on an export template
 // ExportRecord is a []string to keep it compatible with encoding/csv Writer
 func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
-	httpSkipTlsCheck bool, groupedCDRs []*CDR, filterS *FilterS) (expRecord []string, err error) {
+	httpSkipTLSCheck bool, groupedCDRs []*CDR, filterS *FilterS) (expRecord []string, err error) {
 	nM := config.NewNavigableMap(nil)
 	nM.Set([]string{utils.MetaReq}, cdr.AsMapStringIface(), false, false)
 	for _, cfgFld := range exportFields {
@@ -464,20 +464,20 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
 		} else if !pass {
 			continue
 		}
-		if fmtOut, err := cdr.formatField(cfgFld, httpSkipTlsCheck, groupedCDRs, filterS); err != nil {
+		var fmtOut string
+		if fmtOut, err = cdr.formatField(cfgFld, httpSkipTLSCheck, groupedCDRs, filterS); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<CDR> error: %s exporting field: %s, CDR: %s\n",
 				err.Error(), utils.ToJSON(cfgFld), utils.ToJSON(cdr)))
 			return nil, err
-		} else {
-			expRecord = append(expRecord, fmtOut)
 		}
+		expRecord = append(expRecord, fmtOut)
 	}
 	return expRecord, nil
 }
 
 // AsExportMap converts the CDR into a map[string]string based on export template
 // Used in real-time replication as well as remote exports
-func (cdr *CDR) AsExportMap(exportFields []*config.FCTemplate, httpSkipTlsCheck bool,
+func (cdr *CDR) AsExportMap(exportFields []*config.FCTemplate, httpSkipTLSCheck bool,
 	groupedCDRs []*CDR, filterS *FilterS) (expMap map[string]string, err error) {
 	expMap = make(map[string]string)
 	nM := config.NewNavigableMap(nil)
@@ -489,41 +489,41 @@ func (cdr *CDR) AsExportMap(exportFields []*config.FCTemplate, httpSkipTlsCheck 
 		} else if !pass {
 			continue
 		}
-		if fmtOut, err := cdr.formatField(cfgFld, httpSkipTlsCheck, groupedCDRs, filterS); err != nil {
+		var fmtOut string
+		if fmtOut, err = cdr.formatField(cfgFld, httpSkipTLSCheck, groupedCDRs, filterS); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("<CDR> error: %s exporting field: %s, CDR: %s\n",
 				err.Error(), utils.ToJSON(cfgFld), utils.ToJSON(cdr)))
 			return nil, err
-		} else {
-			expMap[cfgFld.FieldId] += fmtOut
 		}
+		expMap[cfgFld.FieldId] += fmtOut
 	}
 	return
 }
 
-// AsCDRsTBL converts the CDR into the format used for SQL storage
-func (cdr *CDR) AsCDRsql() (cdrSql *CDRsql) {
-	cdrSql = new(CDRsql)
-	cdrSql.Cgrid = cdr.CGRID
-	cdrSql.RunID = cdr.RunID
-	cdrSql.OriginHost = cdr.OriginHost
-	cdrSql.Source = cdr.Source
-	cdrSql.OriginID = cdr.OriginID
-	cdrSql.TOR = cdr.ToR
-	cdrSql.RequestType = cdr.RequestType
-	cdrSql.Tenant = cdr.Tenant
-	cdrSql.Category = cdr.Category
-	cdrSql.Account = cdr.Account
-	cdrSql.Subject = cdr.Subject
-	cdrSql.Destination = cdr.Destination
-	cdrSql.SetupTime = cdr.SetupTime
-	cdrSql.AnswerTime = cdr.AnswerTime
-	cdrSql.Usage = cdr.Usage.Nanoseconds()
-	cdrSql.ExtraFields = utils.ToJSON(cdr.ExtraFields)
-	cdrSql.CostSource = cdr.CostSource
-	cdrSql.Cost = cdr.Cost
-	cdrSql.CostDetails = utils.ToJSON(cdr.CostDetails)
-	cdrSql.ExtraInfo = cdr.ExtraInfo
-	cdrSql.CreatedAt = time.Now()
+// AsCDRsql converts the CDR into the format used for SQL storage
+func (cdr *CDR) AsCDRsql() (cdrSQL *CDRsql) {
+	cdrSQL = new(CDRsql)
+	cdrSQL.Cgrid = cdr.CGRID
+	cdrSQL.RunID = cdr.RunID
+	cdrSQL.OriginHost = cdr.OriginHost
+	cdrSQL.Source = cdr.Source
+	cdrSQL.OriginID = cdr.OriginID
+	cdrSQL.TOR = cdr.ToR
+	cdrSQL.RequestType = cdr.RequestType
+	cdrSQL.Tenant = cdr.Tenant
+	cdrSQL.Category = cdr.Category
+	cdrSQL.Account = cdr.Account
+	cdrSQL.Subject = cdr.Subject
+	cdrSQL.Destination = cdr.Destination
+	cdrSQL.SetupTime = cdr.SetupTime
+	cdrSQL.AnswerTime = cdr.AnswerTime
+	cdrSQL.Usage = cdr.Usage.Nanoseconds()
+	cdrSQL.ExtraFields = utils.ToJSON(cdr.ExtraFields)
+	cdrSQL.CostSource = cdr.CostSource
+	cdrSQL.Cost = cdr.Cost
+	cdrSQL.CostDetails = utils.ToJSON(cdr.CostDetails)
+	cdrSQL.ExtraInfo = cdr.ExtraInfo
+	cdrSQL.CreatedAt = time.Now()
 	return
 }
 
@@ -605,34 +605,34 @@ func (cdr *CDR) UpdateFromCGREvent(cgrEv *utils.CGREvent, fields []string) (err 
 }
 
 // NewCDRFromSQL converts the CDRsql into CDR
-func NewCDRFromSQL(cdrSql *CDRsql) (cdr *CDR, err error) {
+func NewCDRFromSQL(cdrSQL *CDRsql) (cdr *CDR, err error) {
 	cdr = new(CDR)
-	cdr.CGRID = cdrSql.Cgrid
-	cdr.RunID = cdrSql.RunID
-	cdr.OriginHost = cdrSql.OriginHost
-	cdr.Source = cdrSql.Source
-	cdr.OriginID = cdrSql.OriginID
-	cdr.OrderID = cdrSql.ID
-	cdr.ToR = cdrSql.TOR
-	cdr.RequestType = cdrSql.RequestType
-	cdr.Tenant = cdrSql.Tenant
-	cdr.Category = cdrSql.Category
-	cdr.Account = cdrSql.Account
-	cdr.Subject = cdrSql.Subject
-	cdr.Destination = cdrSql.Destination
-	cdr.SetupTime = cdrSql.SetupTime
-	cdr.AnswerTime = cdrSql.AnswerTime
-	cdr.Usage = time.Duration(cdrSql.Usage)
-	cdr.CostSource = cdrSql.CostSource
-	cdr.Cost = cdrSql.Cost
-	cdr.ExtraInfo = cdrSql.ExtraInfo
-	if cdrSql.ExtraFields != "" {
-		if err = json.Unmarshal([]byte(cdrSql.ExtraFields), &cdr.ExtraFields); err != nil {
+	cdr.CGRID = cdrSQL.Cgrid
+	cdr.RunID = cdrSQL.RunID
+	cdr.OriginHost = cdrSQL.OriginHost
+	cdr.Source = cdrSQL.Source
+	cdr.OriginID = cdrSQL.OriginID
+	cdr.OrderID = cdrSQL.ID
+	cdr.ToR = cdrSQL.TOR
+	cdr.RequestType = cdrSQL.RequestType
+	cdr.Tenant = cdrSQL.Tenant
+	cdr.Category = cdrSQL.Category
+	cdr.Account = cdrSQL.Account
+	cdr.Subject = cdrSQL.Subject
+	cdr.Destination = cdrSQL.Destination
+	cdr.SetupTime = cdrSQL.SetupTime
+	cdr.AnswerTime = cdrSQL.AnswerTime
+	cdr.Usage = time.Duration(cdrSQL.Usage)
+	cdr.CostSource = cdrSQL.CostSource
+	cdr.Cost = cdrSQL.Cost
+	cdr.ExtraInfo = cdrSQL.ExtraInfo
+	if cdrSQL.ExtraFields != "" {
+		if err = json.Unmarshal([]byte(cdrSQL.ExtraFields), &cdr.ExtraFields); err != nil {
 			return nil, err
 		}
 	}
-	if cdrSql.CostDetails != "" {
-		if err = json.Unmarshal([]byte(cdrSql.CostDetails), &cdr.CostDetails); err != nil {
+	if cdrSQL.CostDetails != "" {
+		if err = json.Unmarshal([]byte(cdrSQL.CostDetails), &cdr.CostDetails); err != nil {
 			return nil, err
 		}
 	}
@@ -664,7 +664,7 @@ type ExternalCDR struct {
 	PreRated    bool // Mark the CDR as rated so we do not process it during mediation
 }
 
-// Used when authorizing requests from outside, eg ApierV1.GetMaxUsage
+// UsageRecord is used when authorizing requests from outside, eg ApierV1.GetMaxUsage
 type UsageRecord struct {
 	ToR         string
 	RequestType string

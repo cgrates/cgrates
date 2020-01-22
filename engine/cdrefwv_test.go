@@ -283,7 +283,7 @@ func TestWriteCdr(t *testing.T) {
 	}
 
 	cdre, err := NewCDRExporter([]*CDR{cdr}, cdreCfg, utils.MetaFileFWV, "", "", "fwv_1",
-		true, 1, '|', cfg.GeneralCfg().HttpSkipTlsVerify, nil, nil, nil)
+		true, 1, '|', cfg.GeneralCfg().HttpSkipTlsVerify, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -370,7 +370,7 @@ func TestWriteCdrs(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	cdre, err := NewCDRExporter([]*CDR{cdr1, cdr2, cdr3, cdr4}, cdreCfg,
 		utils.MetaFileFWV, "", "", "fwv_1", true, 1, utils.CSV_SEP,
-		cfg.GeneralCfg().HttpSkipTlsVerify, nil, nil, nil)
+		cfg.GeneralCfg().HttpSkipTlsVerify, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
