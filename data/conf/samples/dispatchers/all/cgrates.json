@@ -21,6 +21,10 @@
 	"db_name": "11", 						// data_db database name to connect to
 },
 
+"stor_db": {
+	"db_password": "CGRateS.org",
+},
+
 
 "rpc_conns": {
 	"conn1": {
@@ -31,11 +35,6 @@
 		"strategy": "*broadcast_sync",
 		"conns": [{"address": "127.0.0.1:7012", "transport":"*json"}],
 	}
-},
-
-
-"stor_db": {
-	"db_password": "CGRateS.org",
 },
 
 "attributes": {

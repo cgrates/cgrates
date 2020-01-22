@@ -20,11 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessions
 
 import (
-	"errors"
-	"flag"
 	"fmt"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 	"testing"
 	"time"
@@ -35,31 +32,54 @@ import (
 )
 
 var (
-	waitRater = flag.Int("wait_rater", 150, "Number of miliseconds to wait for rater to start and cache")
-	dataDir   = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-
 	voiceCfgPath string
+	voiceCfgDIR  string
 	voiceCfg     *config.CGRConfig
 	sessionsRPC  *rpc.Client
-	encoding     = flag.String("rpc", utils.MetaJSON, "what encoding whould be uused for rpc comunication")
+
+	sessionsVoiceTests = []func(t *testing.T){
+		testSessionsVoiceInitCfg,
+		testSessionsVoiceResetDataDb,
+		testSessionsVoiceResetStorDb,
+		testSessionsVoiceStartEngine,
+		testSessionsVoiceApierRpcConn,
+		testSessionsVoiceTPFromFolder,
+		testSessionsVoiceMonetaryRefund,
+		testSessionsVoiceVoiceRefund,
+		testSessionsVoiceMixedRefund,
+		testSessionsVoiceLastUsed,
+		testSessionsVoiceLastUsedEnd,
+		testSessionsVoiceLastUsedNotFixed,
+		testSessionsVoiceSessionTTL,
+		testSessionsVoiceSessionTTLWithRelocate,
+		testSessionsVoiceRelocateWithOriginIDPrefix,
+		testSessionsVoiceStopCgrEngine,
+	}
 )
 
-func newRPCClient(cfg *config.ListenCfg) (c *rpc.Client, err error) {
-	switch *encoding {
-	case utils.MetaJSON:
-		return jsonrpc.Dial(utils.TCP, cfg.RPCJSONListen)
-	case utils.MetaGOB:
-		return rpc.Dial(utils.TCP, cfg.RPCGOBListen)
+func TestSessionsVoice(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		voiceCfgDIR = "smg_internal"
+	case utils.MetaSQL:
+		voiceCfgDIR = "smg_mysql"
+	case utils.MetaMongo:
+		voiceCfgDIR = "smg_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
 	default:
-		return nil, errors.New("UNSUPPORTED_RPC")
+		t.Fatal("Unknown Database type")
+	}
+	if *encoding == utils.MetaGOB {
+		voiceCfgDIR += "_gob"
+	}
+	for _, stest := range sessionsVoiceTests {
+		t.Run(voiceCfgDIR, stest)
 	}
 }
 
-func TestSessionsVoiceInitCfg(t *testing.T) {
-	voiceCfgPath = path.Join(*dataDir, "conf", "samples", "smg")
-	if *encoding == utils.MetaGOB {
-		dataCfgPath = path.Join(*dataDir, "conf", "samples", "smg_gob")
-	}
+func testSessionsVoiceInitCfg(t *testing.T) {
+	voiceCfgPath = path.Join(*dataDir, "conf", "samples", voiceCfgDIR)
 	// Init config first
 	var err error
 	voiceCfg, err = config.NewCGRConfigFromPath(voiceCfgPath)
@@ -71,28 +91,28 @@ func TestSessionsVoiceInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func TestSessionsVoiceResetDataDb(t *testing.T) {
+func testSessionsVoiceResetDataDb(t *testing.T) {
 	if err := engine.InitDataDb(voiceCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
-func TestSessionsVoiceResetStorDb(t *testing.T) {
+func testSessionsVoiceResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(voiceCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine
-func TestSessionsVoiceStartEngine(t *testing.T) {
+func testSessionsVoiceStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(voiceCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestSessionsVoiceApierRpcConn(t *testing.T) {
+func testSessionsVoiceApierRpcConn(t *testing.T) {
 	var err error
 	sessionsRPC, err = newRPCClient(voiceCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -101,7 +121,7 @@ func TestSessionsVoiceApierRpcConn(t *testing.T) {
 }
 
 // Load the tariff plan, creating accounts and their balances
-func TestSessionsVoiceTPFromFolder(t *testing.T) {
+func testSessionsVoiceTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	var loadInst utils.LoadInstance
 	if err := sessionsRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
@@ -110,7 +130,7 @@ func TestSessionsVoiceTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func TestSessionsVoiceMonetaryRefund(t *testing.T) {
+func testSessionsVoiceMonetaryRefund(t *testing.T) {
 	usage := time.Duration(1*time.Minute + 30*time.Second)
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
@@ -187,7 +207,7 @@ func TestSessionsVoiceMonetaryRefund(t *testing.T) {
 	}
 }
 
-func TestSessionsVoiceVoiceRefund(t *testing.T) {
+func testSessionsVoiceVoiceRefund(t *testing.T) {
 	usage := time.Duration(1*time.Minute + 30*time.Second)
 	initArgs := &V1InitSessionArgs{
 		InitSession: true,
@@ -266,7 +286,7 @@ func TestSessionsVoiceVoiceRefund(t *testing.T) {
 	}
 }
 
-func TestSessionsVoiceMixedRefund(t *testing.T) {
+func testSessionsVoiceMixedRefund(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := sessionsRPC.Call(utils.ApierV2GetAccount, attrs, &acnt); err != nil {
@@ -360,7 +380,7 @@ func TestSessionsVoiceMixedRefund(t *testing.T) {
 	//t.Logf("After voice: %f", acnt.BalanceMap[utils.VOICE].GetTotalValue())
 }
 
-func TestSessionsVoiceLastUsed(t *testing.T) {
+func testSessionsVoiceLastUsed(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 8.790000
@@ -521,7 +541,7 @@ func TestSessionsVoiceLastUsed(t *testing.T) {
 	}
 }
 
-func TestSessionsVoiceLastUsedEnd(t *testing.T) {
+func testSessionsVoiceLastUsedEnd(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 7.59000
@@ -643,7 +663,7 @@ func TestSessionsVoiceLastUsedEnd(t *testing.T) {
 	}
 }
 
-func TestSessionsVoiceLastUsedNotFixed(t *testing.T) {
+func testSessionsVoiceLastUsedNotFixed(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 6.59000
@@ -765,7 +785,7 @@ func TestSessionsVoiceLastUsedNotFixed(t *testing.T) {
 	}
 }
 
-func TestSessionsVoiceSessionTTL(t *testing.T) {
+func testSessionsVoiceSessionTTL(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 5.590000
@@ -919,7 +939,7 @@ func TestSessionsVoiceSessionTTL(t *testing.T) {
 	}
 }
 
-func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
+func testSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "TestTTLWithRelocate",
@@ -1092,7 +1112,7 @@ func TestSessionsVoiceSessionTTLWithRelocate(t *testing.T) {
 	}
 }
 
-func TestSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
+func testSessionsVoiceRelocateWithOriginIDPrefix(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "TestRelocateWithOriginIDPrefix",
@@ -1346,7 +1366,7 @@ func TestSMGDataDerivedChargingNoCredit(t *testing.T) {
 */
 
 // ToDo: Add test for ChargeEvent with derived charging, one with debit possible and second not so we see refund and error.CreditInsufficient showing up.
-func TestSessionsVoiceStopCgrEngine(t *testing.T) {
+func testSessionsVoiceStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(1000); err != nil {
 		t.Error(err)
 	}

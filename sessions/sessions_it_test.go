@@ -31,16 +31,51 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var sItCfgPath string
-var sItCfg *config.CGRConfig
-var sItRPC *rpc.Client
+var (
+	sItCfgPath string
+	sItCfgDIR  string
+	sItCfg     *config.CGRConfig
+	sItRPC     *rpc.Client
 
-func TestSessionsItInitCfg(t *testing.T) {
-	sItCfgPath = path.Join(*dataDir, "conf", "samples", "smg")
-	if *encoding == utils.MetaGOB {
-		dataCfgPath = path.Join(*dataDir, "conf", "samples", "smg_gob")
+	sessionsITtests = []func(t *testing.T){
+		testSessionsItInitCfg,
+		testSessionsItResetDataDb,
+		testSessionsItResetStorDb,
+		testSessionsItStartEngine,
+		testSessionsItApierRpcConn,
+		testSessionsItTPFromFolder,
+		testSessionsItTerminatUnexist,
+		testSessionsItUpdateUnexist,
+		testSessionsItTerminatePassive,
+		testSessionsItEventCostCompressing,
+		testSessionsItStopCgrEngine,
 	}
-	// Init config first
+)
+
+func TestSessionsIt(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		sItCfgDIR = "smg_internal"
+	case utils.MetaSQL:
+		sItCfgDIR = "smg_mysql"
+	case utils.MetaMongo:
+		sItCfgDIR = "smg_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+	if *encoding == utils.MetaGOB {
+		sItCfgDIR += "_gob"
+	}
+	for _, stest := range sessionsITtests {
+		t.Run(sItCfgDIR, stest)
+	}
+}
+
+// Init config firs
+func testSessionsItInitCfg(t *testing.T) {
+	sItCfgPath = path.Join(*dataDir, "conf", "samples", sItCfgDIR)
 	var err error
 	sItCfg, err = config.NewCGRConfigFromPath(sItCfgPath)
 	if err != nil {
@@ -51,28 +86,28 @@ func TestSessionsItInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func TestSessionsItResetDataDb(t *testing.T) {
+func testSessionsItResetDataDb(t *testing.T) {
 	if err := engine.InitDataDb(sItCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
-func TestSessionsItResetStorDb(t *testing.T) {
+func testSessionsItResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(sItCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine
-func TestSessionsItStartEngine(t *testing.T) {
+func testSessionsItStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(sItCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestSessionsItApierRpcConn(t *testing.T) {
+func testSessionsItApierRpcConn(t *testing.T) {
 	var err error
 	sItRPC, err = newRPCClient(sItCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -81,7 +116,7 @@ func TestSessionsItApierRpcConn(t *testing.T) {
 }
 
 // Load the tariff plan, creating accounts and their balances
-func TestSessionsItTPFromFolder(t *testing.T) {
+func testSessionsItTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	var loadInst utils.LoadInstance
 	if err := sItRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
@@ -90,7 +125,7 @@ func TestSessionsItTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func TestSessionsItTerminatUnexist(t *testing.T) {
+func testSessionsItTerminatUnexist(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 10.0
@@ -163,7 +198,7 @@ func TestSessionsItTerminatUnexist(t *testing.T) {
 
 }
 
-func TestSessionsItUpdateUnexist(t *testing.T) {
+func testSessionsItUpdateUnexist(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 9.299800
@@ -241,7 +276,7 @@ func TestSessionsItUpdateUnexist(t *testing.T) {
 	}
 }
 
-func TestSessionsItTerminatePassive(t *testing.T) {
+func testSessionsItTerminatePassive(t *testing.T) {
 	//create the event for session
 	sEv := engine.NewMapEvent(map[string]interface{}{
 		utils.EVENT_NAME:  "UpdateEvent",
@@ -335,7 +370,7 @@ func TestSessionsItTerminatePassive(t *testing.T) {
 
 }
 
-func TestSessionsItEventCostCompressing(t *testing.T) {
+func testSessionsItEventCostCompressing(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "TestSessionsItEventCostCompressing",
@@ -445,7 +480,7 @@ func TestSessionsItEventCostCompressing(t *testing.T) {
 
 }
 
-func TestSessionsItStopCgrEngine(t *testing.T) {
+func testSessionsItStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}

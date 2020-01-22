@@ -1,0 +1,54 @@
+{
+// CGRateS Configuration file
+//
+// Used in tests
+
+"general": {
+    "log_level": 7,
+},
+
+"data_db": {
+	"db_type": "*internal",	
+},
+
+
+"stor_db": {
+	"db_type": "*internal",	
+},
+
+"rals": {
+	"enabled": true,					// enable Rater service: <true|false>
+},
+
+"schedulers": {
+	"enabled": true,					// start Scheduler service: <true|false>
+},
+
+"cdrs": {
+	"enabled": true,					// start the CDR Server service:  <true|false>
+},
+
+"attributes": {
+	"enabled": true,
+},
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
+
+"sessions": {
+	"enabled": true,
+	"debit_interval": "1ms",					// interval to perform debits on.
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
+},
+
+
+"apier": {
+	"scheduler_conns": ["*internal"],
+},
+
+
+}

@@ -41,20 +41,30 @@ var sTestsDspSts = []func(t *testing.T){
 }
 
 //Test start here
-func TestDspStatSTMySQL(t *testing.T) {
-	if *encoding == utils.MetaGOB {
-		testDsp(t, sTestsDspSts, "TestDspStatS", "all", "all2", "dispatchers_mysql", "tutorial", "oldtutorial", "dispatchers_gob")
-	} else {
-		testDsp(t, sTestsDspSts, "TestDspStatS", "all", "all2", "dispatchers_mysql", "tutorial", "oldtutorial", "dispatchers")
+func TestDspStatS(t *testing.T) {
+	var config1, config2, config3 string
+	switch *dbType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaSQL:
+		config1 = "all_mysql"
+		config2 = "all2_mysql"
+		config3 = "dispatchers_mysql"
+	case utils.MetaMongo:
+		config1 = "all_mongo"
+		config2 = "all2_mongo"
+		config3 = "dispatchers_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
 
-func TestDspStatSMongo(t *testing.T) {
+	dispDIR := "dispatchers"
 	if *encoding == utils.MetaGOB {
-		testDsp(t, sTestsDspSts, "TestDspStatS", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers_gob")
-	} else {
-		testDsp(t, sTestsDspSts, "TestDspStatS", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+		dispDIR += "_gob"
 	}
+	testDsp(t, sTestsDspSts, "TestDspStatS", config1, config2, config3, "tutorial", "oldtutorial", dispDIR)
 }
 
 func testDspStsPingFailover(t *testing.T) {

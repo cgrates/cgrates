@@ -31,31 +31,66 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var smgRplcMasterCfgPath, smgRplcSlaveCfgPath string
-var smgRplcMasterCfg, smgRplcSlaveCfg *config.CGRConfig
-var smgRplcMstrRPC, smgRplcSlvRPC *rpc.Client
+var (
+	smgRplcMasterCfgPath, smgRplcSlaveCfgPath string
+	smgRplcMasterCfgDIR, smgRplcSlaveCfgDIR   string
+	smgRplcMasterCfg, smgRplcSlaveCfg         *config.CGRConfig
+	smgRplcMstrRPC, smgRplcSlvRPC             *rpc.Client
 
-func TestSessionSRplInitCfg(t *testing.T) {
-	smgRplcMasterCfgPath = path.Join(*dataDir, "conf", "samples", "smgreplcmaster")
-	if *encoding == utils.MetaGOB {
-		smgRplcMasterCfgPath = path.Join(*dataDir, "conf", "samples", "smgreplcmaster_gob")
+	SessionsRplTests = []func(t *testing.T){
+		testSessionSRplInitCfg,
+		testSessionSRplResetDB,
+		testSessionSRplStartEngine,
+		testSessionSRplApierRpcConn,
+		testSessionSRplTPFromFolder,
+		testSessionSRplInitiate,
+		testSessionSRplUpdate,
+		testSessionSRplTerminate,
+		testSessionSRplManualReplicate,
+		testSessionSRplActivateSessions,
+		testSessionSRplStopCgrEngine,
 	}
+)
+
+func TestSessionSRpl(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaSQL:
+		smgRplcMasterCfgDIR = "smgreplcmaster_mysql"
+		smgRplcSlaveCfgDIR = "smgreplcslave_mysql"
+	case utils.MetaMongo:
+		smgRplcMasterCfgDIR = "smgreplcmaster_mongo"
+		smgRplcSlaveCfgDIR = "smgreplcslave_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+	if *encoding == utils.MetaGOB {
+		smgRplcMasterCfgDIR += "_gob"
+		smgRplcSlaveCfgDIR += "_gob"
+	}
+	for _, stest := range SessionsRplTests {
+		t.Run(*dbType, stest)
+	}
+}
+
+func testSessionSRplInitCfg(t *testing.T) {
+	smgRplcMasterCfgPath = path.Join(*dataDir, "conf", "samples", smgRplcMasterCfgDIR)
 	if smgRplcMasterCfg, err = config.NewCGRConfigFromPath(smgRplcMasterCfgPath); err != nil {
 		t.Fatal(err)
 	}
 	smgRplcMasterCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(smgRplcMasterCfg)
-	smgRplcSlaveCfgPath = path.Join(*dataDir, "conf", "samples", "smgreplcslave")
-	if *encoding == utils.MetaGOB {
-		smgRplcSlaveCfgPath = path.Join(*dataDir, "conf", "samples", "smgreplcslave_gob")
-	}
+	smgRplcSlaveCfgPath = path.Join(*dataDir, "conf", "samples", smgRplcSlaveCfgDIR)
 	if smgRplcSlaveCfg, err = config.NewCGRConfigFromPath(smgRplcSlaveCfgPath); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Remove data in both rating and accounting db
-func TestSessionSRplResetDB(t *testing.T) {
+func testSessionSRplResetDB(t *testing.T) {
 	if err := engine.InitDataDb(smgRplcMasterCfg); err != nil {
 		t.Fatal(err)
 	}
@@ -65,7 +100,7 @@ func TestSessionSRplResetDB(t *testing.T) {
 }
 
 // Start CGR Engine
-func TestSessionSRplStartEngine(t *testing.T) {
+func testSessionSRplStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(smgRplcSlaveCfgPath, *waitRater); err != nil { // Start slave before master
 		t.Fatal(err)
 	}
@@ -75,7 +110,7 @@ func TestSessionSRplStartEngine(t *testing.T) {
 }
 
 // Connect rpc client to rater
-func TestSessionSRplApierRpcConn(t *testing.T) {
+func testSessionSRplApierRpcConn(t *testing.T) {
 	if smgRplcMstrRPC, err = newRPCClient(smgRplcMasterCfg.ListenCfg()); err != nil {
 		t.Fatal(err)
 	}
@@ -85,7 +120,7 @@ func TestSessionSRplApierRpcConn(t *testing.T) {
 }
 
 // Load the tariff plan, creating accounts and their balances
-func TestSessionSRplTPFromFolder(t *testing.T) {
+func testSessionSRplTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	var loadInst utils.LoadInstance
 	if err := smgRplcMstrRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
@@ -94,7 +129,7 @@ func TestSessionSRplTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func TestSessionSRplInitiate(t *testing.T) {
+func testSessionSRplInitiate(t *testing.T) {
 	var aSessions []*ExternalSession
 	//make sure we don't have active sessions on master and passive on slave
 	if err := smgRplcMstrRPC.Call(utils.SessionSv1GetActiveSessions,
@@ -170,7 +205,7 @@ func TestSessionSRplInitiate(t *testing.T) {
 	}
 }
 
-func TestSessionSRplUpdate(t *testing.T) {
+func testSessionSRplUpdate(t *testing.T) {
 	//update the session on slave so the session should became active
 	usage := time.Duration(1 * time.Minute)
 	argsUpdate := &V1UpdateSessionArgs{
@@ -250,7 +285,7 @@ func TestSessionSRplUpdate(t *testing.T) {
 	}
 }
 
-func TestSessionSRplTerminate(t *testing.T) {
+func testSessionSRplTerminate(t *testing.T) {
 	args := &V1TerminateSessionArgs{
 		TerminateSession: true,
 		CGREvent: &utils.CGREvent{
@@ -305,7 +340,7 @@ func TestSessionSRplTerminate(t *testing.T) {
 	}
 }
 
-func TestSessionSRplManualReplicate(t *testing.T) {
+func testSessionSRplManualReplicate(t *testing.T) {
 	masterProc, err := engine.StopStartEngine(smgRplcMasterCfgPath, *waitRater)
 	if err != nil { // Kill both and start Master
 		t.Fatal(err)
@@ -458,7 +493,7 @@ func TestSessionSRplManualReplicate(t *testing.T) {
 	}
 }
 
-func TestSessionSRplActivateSessions(t *testing.T) {
+func testSessionSRplActivateSessions(t *testing.T) {
 	var aSessions []*ExternalSession
 	var reply string
 	// Activate first session (with ID: ede927f8e42318a8db02c0f74adc2d9e16770339)
@@ -510,7 +545,7 @@ func TestSessionSRplActivateSessions(t *testing.T) {
 	}
 }
 
-func TestSessionSRplStopCgrEngine(t *testing.T) {
+func testSessionSRplStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(1000); err != nil {
 		t.Error(err)
 	}

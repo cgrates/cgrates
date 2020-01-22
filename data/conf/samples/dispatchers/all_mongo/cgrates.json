@@ -4,32 +4,40 @@
 
 
 "general": {
-	"node_id": "ALL2",
+	"node_id": "ALL",
 	"log_level": 7
 },
 
 
 "listen": {
- 	"rpc_json": ":7012",
-	"rpc_gob": ":7013",
-	"http": ":7080",
+ 	"rpc_json": ":6012",
+	"rpc_gob": ":6013",
+	"http": ":6080",
 },
 
-"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
-	"db_type": "redis",						// data_db type: <redis|mongo>
-	"db_port": 6379, 						// data_db port to reach the database
-	"db_name": "12", 						// data_db database name to connect to
+"data_db": {
+	"db_type": "mongo",
+	"db_name": "11",
+	"db_port": 27017,
 },
+
 
 "stor_db": {
-	"db_type":"*internal",
+	"db_type": "mongo",
+	"db_name": "cgrates",
+	"db_port": 27017,
 },
+
 
 "rpc_conns": {
 	"conn1": {
 		"strategy": "*first",
-		"conns": [{"address": "127.0.0.1:7012", "transport":"*json"}],
+		"conns": [{"address": "127.0.0.1:6012", "transport":"*json"}],
 	},
+	"rplConn": {
+		"strategy": "*broadcast_sync",
+		"conns": [{"address": "127.0.0.1:7012", "transport":"*json"}],
+	}
 },
 
 "attributes": {
@@ -66,26 +74,25 @@
 },
 
 "cdrs": {
-	"enabled": true,
+	"enabled": true,	
 	"chargers_conns":["*internal"],
 	"rals_conns": ["*internal"],
 },
 
 "sessions": {
 	"enabled": true,
-	"listen_bijson": ":7014",
+	"listen_bijson": ":6014",
 	"suppliers_conns": ["*internal"],
 	"resources_conns": ["*internal"],
 	"attributes_conns": ["*internal"],
 	"rals_conns": ["*internal"],
-	"cdrs_conns": ["*internal"],
 	"chargers_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
 },
 
 "apier": {	
 	"caches_conns":["conn1"],
 	"scheduler_conns": ["*internal"],
 },
-
 
 }
