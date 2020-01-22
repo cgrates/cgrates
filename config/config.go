@@ -155,7 +155,6 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.schedulerCfg = new(SchedulerCfg)
 	cfg.cdrsCfg = new(CdrsCfg)
 	cfg.CdreProfiles = make(map[string]*CdreCfg)
-	cfg.CdrcProfiles = make(map[string][]*CdrcCfg)
 	cfg.analyzerSCfg = new(AnalyzerSCfg)
 	cfg.sessionSCfg = new(SessionSCfg)
 	cfg.fsAgentCfg = new(FsAgentCfg)
@@ -180,8 +179,6 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	cfg.ersCfg = new(ERsCfg)
 
 	cfg.ConfigReloads = make(map[string]chan struct{})
-	cfg.ConfigReloads[utils.CDRC] = make(chan struct{}, 1)
-	cfg.ConfigReloads[utils.CDRC] <- struct{}{} // Unlock the channel
 	cfg.ConfigReloads[utils.CDRE] = make(chan struct{}, 1)
 	cfg.ConfigReloads[utils.CDRE] <- struct{}{} // Unlock the channel
 
@@ -194,7 +191,6 @@ func NewDefaultCGRConfig() (cfg *CGRConfig, err error) {
 	}
 
 	cfg.dfltCdreProfile = cfg.CdreProfiles[utils.MetaDefault].Clone() // So default will stay unique, will have nil pointer in case of no defaults loaded which is an extra check
-	cfg.dfltCdrcProfile = cfg.CdrcProfiles["/var/spool/cgrates/cdrc/in"][0].Clone()
 	// populate default ERs reader
 	for _, ersRdr := range cfg.ersCfg.Readers {
 		if ersRdr.ID == utils.MetaDefault {
@@ -251,13 +247,11 @@ type CGRConfig struct {
 
 	// Cache defaults loaded from json and needing clones
 	dfltCdreProfile *CdreCfg        // Default cdreConfig profile
-	dfltCdrcProfile *CdrcCfg        // Default cdrcConfig profile
 	dfltEvRdr       *EventReaderCfg // default event reader
 
-	CdreProfiles map[string]*CdreCfg   // Cdre config profiles
-	CdrcProfiles map[string][]*CdrcCfg // Number of CDRC instances running imports, format map[dirPath][]{Configs}
-	loaderCfg    LoaderSCfgs           // LoaderS configs
-	httpAgentCfg HttpAgentCfgs         // HttpAgent configs
+	CdreProfiles map[string]*CdreCfg // Cdre config profiles
+	loaderCfg    LoaderSCfgs         // LoaderS configs
+	httpAgentCfg HttpAgentCfgs       // HttpAgent configs
 
 	ConfigReloads map[string]chan struct{} // Signals to specific entities that a config reload should occur
 	rldChans      map[string]chan struct{} // index here the channels used for reloads
@@ -332,8 +326,8 @@ func (cfg *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadGeneralCfg, cfg.loadCacheCfg, cfg.loadListenCfg,
 		cfg.loadHTTPCfg, cfg.loadDataDBCfg, cfg.loadStorDBCfg,
 		cfg.loadFilterSCfg, cfg.loadRalSCfg, cfg.loadSchedulerCfg,
-		cfg.loadCdrsCfg, cfg.loadCdreCfg, cfg.loadCdrcCfg,
-		cfg.loadSessionSCfg, cfg.loadFreeswitchAgentCfg, cfg.loadKamAgentCfg,
+		cfg.loadCdrsCfg, cfg.loadCdreCfg, cfg.loadSessionSCfg,
+		cfg.loadFreeswitchAgentCfg, cfg.loadKamAgentCfg,
 		cfg.loadAsteriskAgentCfg, cfg.loadDiameterAgentCfg, cfg.loadRadiusAgentCfg,
 		cfg.loadDNSAgentCfg, cfg.loadHttpAgentCfg, cfg.loadAttributeSCfg,
 		cfg.loadChargerSCfg, cfg.loadResourceSCfg, cfg.loadStatSCfg,
@@ -531,57 +525,6 @@ func (cfg *CGRConfig) loadCdreCfg(jsnCfg *CgrJsonCfg) (err error) {
 			}
 			if err = cfg.CdreProfiles[profileName].loadFromJsonCfg(jsnCdre1Cfg, cfg.generalCfg.RSRSep); err != nil { // Update the existing profile with content from json config
 				return
-			}
-		}
-	}
-	return
-}
-
-// loadCdrcCfg loads the Cdrc section of the configuration
-func (cfg *CGRConfig) loadCdrcCfg(jsnCfg *CgrJsonCfg) (err error) {
-	var jsnCdrcCfg []*CdrcJsonCfg
-	if jsnCdrcCfg, err = jsnCfg.CdrcJsonCfg(); err != nil {
-		return
-	}
-	if jsnCdrcCfg != nil {
-		for _, jsnCrc1Cfg := range jsnCdrcCfg {
-			if jsnCrc1Cfg.Id == nil || *jsnCrc1Cfg.Id == "" {
-				return utils.ErrCDRCNoProfileID
-			}
-			if *jsnCrc1Cfg.Id == utils.MetaDefault {
-				if cfg.dfltCdrcProfile == nil {
-					cfg.dfltCdrcProfile = new(CdrcCfg)
-				}
-			}
-			indxFound := -1 // Will be different than -1 if an instance with same id will be found
-			pathFound := "" // Will be populated with the path where slice of cfgs was found
-			var cdrcInstCfg *CdrcCfg
-			for path := range cfg.CdrcProfiles {
-				for i := range cfg.CdrcProfiles[path] {
-					if cfg.CdrcProfiles[path][i].ID == *jsnCrc1Cfg.Id {
-						indxFound = i
-						pathFound = path
-						cdrcInstCfg = cfg.CdrcProfiles[path][i]
-						break
-					}
-				}
-			}
-			if cdrcInstCfg == nil {
-				cdrcInstCfg = cfg.dfltCdrcProfile.Clone()
-			}
-			if err := cdrcInstCfg.loadFromJsonCfg(jsnCrc1Cfg, cfg.generalCfg.RSRSep); err != nil {
-				return err
-			}
-			if cdrcInstCfg.CDRInPath == "" {
-				return utils.ErrCDRCNoInPath
-			}
-			if _, hasDir := cfg.CdrcProfiles[cdrcInstCfg.CDRInPath]; !hasDir {
-				cfg.CdrcProfiles[cdrcInstCfg.CDRInPath] = make([]*CdrcCfg, 0)
-			}
-			if indxFound != -1 { // Replace previous config so we have inheritance
-				cfg.CdrcProfiles[pathFound][indxFound] = cdrcInstCfg
-			} else {
-				cfg.CdrcProfiles[cdrcInstCfg.CDRInPath] = append(cfg.CdrcProfiles[cdrcInstCfg.CDRInPath], cdrcInstCfg)
 			}
 		}
 	}
@@ -1139,8 +1082,6 @@ func (cfg *CGRConfig) V1GetConfigSection(args *StringWithArgDispatcher, reply *m
 		jsonString = utils.ToJSON(cfg.MigratorCgrCfg())
 	case Apier:
 		jsonString = utils.ToJSON(cfg.ApierCfg())
-	case CDRC_JSN:
-		jsonString = utils.ToJSON(cfg.CdrcProfiles)
 	case CDRE_JSN:
 		jsonString = utils.ToJSON(cfg.CdreProfiles)
 	case ERsJson:
@@ -1230,7 +1171,6 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		RALS_JSN:           cfg.loadRalSCfg,
 		CDRS_JSN:           cfg.loadCdrsCfg,
 		CDRE_JSN:           cfg.loadCdreCfg,
-		CDRC_JSN:           cfg.loadCdrcCfg,
 		ERsJson:            cfg.loadErsCfg,
 		SessionSJson:       cfg.loadSessionSCfg,
 		AsteriskAgentJSN:   cfg.loadAsteriskAgentCfg,
@@ -1482,7 +1422,6 @@ func (cfg *CGRConfig) reloadSections(sections ...string) (err error) {
 			cfg.rldChans[RALS_JSN] <- struct{}{}
 		case CDRS_JSN:
 			cfg.rldChans[CDRS_JSN] <- struct{}{}
-		case CDRC_JSN:
 		case ERsJson:
 			cfg.rldChans[ERsJson] <- struct{}{}
 		case SessionSJson:

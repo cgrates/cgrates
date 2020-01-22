@@ -93,50 +93,6 @@ func TestConfigSanityCDRServer(t *testing.T) {
 	}
 }
 
-func TestConfigSanityCDRC(t *testing.T) {
-	cfg, _ = NewDefaultCGRConfig()
-	cfg.CdrcProfiles = map[string][]*CdrcCfg{
-		"test": []*CdrcCfg{
-			&CdrcCfg{
-				Enabled: true,
-			},
-		},
-	}
-	expected := "<cdrc> Instance: , cdrc enabled but no CDRs defined!"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.CdrcProfiles = map[string][]*CdrcCfg{
-		"test": []*CdrcCfg{
-			&CdrcCfg{
-				Enabled:   true,
-				ID:        "test",
-				CdrsConns: []string{utils.MetaInternal},
-			},
-		},
-	}
-	expected = "<CDRs> not enabled but requested by <test> cdrcProfile"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-
-	cfg.CdrcProfiles = map[string][]*CdrcCfg{
-		"test": []*CdrcCfg{
-			&CdrcCfg{
-				Enabled:       true,
-				ID:            "test",
-				CdrsConns:     []string{utils.MetaInternal},
-				ContentFields: []*FCTemplate{},
-			},
-		},
-	}
-	cfg.cdrsCfg.Enabled = true
-	expected = "<cdrc> enabled but no fields to be processed defined!"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-}
-
 func TestConfigSanityLoaders(t *testing.T) {
 	cfg, _ = NewDefaultCGRConfig()
 	cfg.loaderCfg = LoaderSCfgs{

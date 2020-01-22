@@ -92,16 +92,10 @@ echo 'go test github.com/cgrates/cgrates/agents -tags=integration -dbtype=*postg
 go test github.com/cgrates/cgrates/agents -tags=integration -dbtype=*postgres
 agts_postgres=$?
 
-
-echo 'go test github.com/cgrates/cgrates/cdrc -tags=integration'
-go test github.com/cgrates/cgrates/cdrc -tags=integration
-cdrc=$?
 echo 'go test github.com/cgrates/cgrates/config -tags=integration'
 go test github.com/cgrates/cgrates/config -tags=integration
 cfg=$?
 #All
-
-
 
 echo 'go test github.com/cgrates/cgrates/sessions -tags=integration'
 go test github.com/cgrates/cgrates/sessions -tags=integration
@@ -119,4 +113,4 @@ echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=offline'
 go test github.com/cgrates/cgrates/apier/v1 -tags=offline
 offline=$?
 # to do: add '&& $ap1_internal' 
-exit $gen && $ap1_sql && $ap1_mongo && $ap2 && $en && $cdrc && $cfg && $utl && $gnr && $agts && $smg && $mgr && $dis && $lds && $ers && $srv && $offline
+exit $gen && $ap1_sql && $ap1_mongo && $ap2 && $en && $cfg && $utl && $gnr && $agts && $smg && $mgr && $dis && $lds && $ers && $srv && $offline

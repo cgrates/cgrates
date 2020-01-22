@@ -157,33 +157,6 @@ type CdreJsonCfg struct {
 	Trailer_fields     *[]*FcTemplateJsonCfg
 }
 
-// Cdrc config section
-type CdrcJsonCfg struct {
-	Id                          *string
-	Enabled                     *bool
-	Dry_run                     *bool
-	Cdrs_conns                  *[]string
-	Cdr_format                  *string
-	Field_separator             *string
-	Timezone                    *string
-	Run_delay                   *int
-	Cdr_in_path                 *string
-	Cdr_out_path                *string
-	Failed_calls_prefix         *string
-	Cdr_root_path               *string
-	Cdr_source_id               *string
-	Filters                     *[]string
-	Tenant                      *string
-	Continue_on_success         *bool
-	Max_open_files              *int
-	Partial_record_cache        *string
-	Partial_cache_expiry_action *string
-	Header_fields               *[]*FcTemplateJsonCfg
-	Content_fields              *[]*FcTemplateJsonCfg
-	Trailer_fields              *[]*FcTemplateJsonCfg
-	Cache_dump_fields           *[]*FcTemplateJsonCfg
-}
-
 // EventReaderSJsonCfg contains the configuration of EventReaderService
 type ERsJsonCfg struct {
 	Enabled        *bool

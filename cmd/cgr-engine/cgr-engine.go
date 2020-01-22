@@ -32,7 +32,6 @@ import (
 	"time"
 
 	v1 "github.com/cgrates/cgrates/apier/v1"
-	"github.com/cgrates/cgrates/cdrc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/services"
@@ -59,64 +58,6 @@ var (
 
 	cfg *config.CGRConfig
 )
-
-func startCdrcs(filterSChan chan *engine.FilterS, exitChan chan bool, connMgr *engine.ConnManager) {
-	filterS := <-filterSChan
-	filterSChan <- filterS
-	cdrcInitialized := false           // Control whether the cdrc was already initialized (so we don't reload in that case)
-	var cdrcChildrenChan chan struct{} // Will use it to communicate with the children of one fork
-	for {
-		select {
-		case <-exitChan: // Stop forking CDRCs
-			break
-		case <-cfg.ConfigReloads[utils.CDRC]: // Consume the load request and wait for a new one
-			if cdrcInitialized {
-				utils.Logger.Info("<CDRC> Configuration reload")
-				close(cdrcChildrenChan) // Stop all the children of the previous run
-			}
-			cdrcChildrenChan = make(chan struct{})
-		}
-		// Start CDRCs
-		for _, cdrcCfgs := range cfg.CdrcProfiles {
-			var enabledCfgs []*config.CdrcCfg
-			for _, cdrcCfg := range cdrcCfgs { // Take a random config out since they should be the same
-				if cdrcCfg.Enabled {
-					enabledCfgs = append(enabledCfgs, cdrcCfg)
-				}
-			}
-			if len(enabledCfgs) != 0 {
-				go startCdrc(enabledCfgs,
-					cfg.GeneralCfg().HttpSkipTlsVerify, filterSChan,
-					cdrcChildrenChan, exitChan, connMgr)
-			} else {
-				utils.Logger.Info("<CDRC> No enabled CDRC clients")
-			}
-		}
-		cdrcInitialized = true // Initialized
-	}
-}
-
-// Fires up a cdrc instance
-func startCdrc(cdrcCfgs []*config.CdrcCfg, httpSkipTlsCheck bool,
-	filterSChan chan *engine.FilterS, closeChan chan struct{}, exitChan chan bool, connMgr *engine.ConnManager) {
-	filterS := <-filterSChan
-	filterSChan <- filterS
-	var err error
-	var cdrsConn rpcclient.ClientConnector
-
-	cdrc, err := cdrc.NewCdrc(cdrcCfgs, httpSkipTlsCheck, cdrsConn, closeChan,
-		cfg.GeneralCfg().DefaultTimezone, filterS, connMgr)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("Cdrc config parsing error: %s", err.Error()))
-		exitChan <- true
-		return
-	}
-	if err := cdrc.Run(); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("Cdrc run error: %s", err.Error()))
-		exitChan <- true // If run stopped, something is bad, stop the application
-		return
-	}
-}
 
 // startFilterService fires up the FilterS
 func startFilterService(filterSChan chan *engine.FilterS, cacheS *engine.CacheS, connMgr *engine.ConnManager, cfg *config.CGRConfig,
@@ -596,9 +537,6 @@ func main() {
 	}
 
 	initConfigSv1(internalConfigChan, server)
-
-	// Start CDRC components if necessary
-	go startCdrcs(filterSChan, exitChan, connManager)
 
 	// Serve rpc connections
 	go startRpc(server, rals.GetResponder().GetIntenternalChan(), cdrS.GetIntenternalChan(),
