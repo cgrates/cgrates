@@ -169,16 +169,16 @@ func (api *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.Ex
 	return nil
 }
 
-type AttrReloadConfig struct {
-	ConfigDir string
+type ConfigPathArg struct {
+	ConfigPath string
 }
 
 // Reloads CDRE configuration out of folder specified
-func (apier *ApierV1) ReloadCdreConfig(attrs AttrReloadConfig, reply *string) error {
-	if attrs.ConfigDir == "" {
-		attrs.ConfigDir = utils.CONFIG_PATH
+func (apier *ApierV1) ReloadCdreConfig(attrs ConfigPathArg, reply *string) error {
+	if attrs.ConfigPath == "" {
+		attrs.ConfigPath = utils.CONFIG_PATH
 	}
-	newCfg, err := config.NewCGRConfigFromPath(attrs.ConfigDir)
+	newCfg, err := config.NewCGRConfigFromPath(attrs.ConfigPath)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
