@@ -284,8 +284,8 @@ func (rdr *PartialCSVFileER) dumpToFile(itmID string, value interface{}) {
 				utils.ERs, cdr.CGRID, err.Error()))
 		return
 	}
-	dumpFilePath := path.Join(rdr.Config().ProcessedPath, fmt.Sprintf("%s.%s.%d",
-		cdr.OriginID, PartialRecordsSuffix, time.Now().Unix()))
+	dumpFilePath := path.Join(rdr.Config().ProcessedPath, fmt.Sprintf("%s%s.%d",
+		cdr.OriginID, utils.TmpSuffix, time.Now().Unix()))
 	fileOut, err := os.Create(dumpFilePath)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> Failed creating %s, error: %s",
@@ -293,7 +293,7 @@ func (rdr *PartialCSVFileER) dumpToFile(itmID string, value interface{}) {
 		return
 	}
 	csvWriter := csv.NewWriter(fileOut)
-	csvWriter.Comma = utils.CSV_SEP
+	csvWriter.Comma = rune(rdr.Config().FieldSep[0])
 	if err = csvWriter.Write(record); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> Failed writing partial record %v to file: %s, error: %s",
 			utils.ERs, record, dumpFilePath, err.Error()))

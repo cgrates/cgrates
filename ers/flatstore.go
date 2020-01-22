@@ -47,15 +47,18 @@ func NewFlatstoreER(cfg *config.CGRConfig, cfgIdx int,
 	if strings.HasSuffix(srcPath, utils.Slash) {
 		srcPath = srcPath[:len(srcPath)-1]
 	}
-	return &FlatstoreER{
+	flatER := &FlatstoreER{
 		cgrCfg:    cfg,
 		cfgIdx:    cfgIdx,
 		fltrS:     fltrS,
-		cache:     ltcache.NewCache(ltcache.UnlimitedCaching, cfg.ERsCfg().Readers[cfgIdx].PartialRecordCache, false, nil),
 		rdrDir:    srcPath,
 		rdrEvents: rdrEvents,
 		rdrError:  rdrErr,
-		rdrExit:   rdrExit}, nil
+		rdrExit:   rdrExit,
+	}
+	flatER.cache = ltcache.NewCache(ltcache.UnlimitedCaching, cfg.ERsCfg().Readers[cfgIdx].PartialRecordCache, false, flatER.dumpToFile)
+	return flatER, err
+
 }
 
 // FlatstoreER implements EventReader interface for Flatstore CDR
@@ -147,27 +150,35 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 			}
 			return
 		}
-		if strings.HasPrefix(file.Name(), rdr.Config().FailedCallsPrefix) { // Use the first index since they should be the same in all configs
-			record = append(record, "0") // Append duration 0 for failed calls flatstore CDR and do not process it further
-		}
-		pr, err := NewUnpairedRecord(record, rdr.Config().Timezone)
-		if err != nil {
-			fmt.Sprintf("<%s> Converting row : <%s> to unpairedRecord , ignoring due to error: <%s>",
-				utils.ERs, record, err.Error())
-			continue
-		}
-		if val, has := rdr.cache.Get(pr.OriginID); !has {
-			rdr.cache.Set(pr.OriginID, pr, nil)
-			continue
+		if strings.HasPrefix(fName, rdr.Config().FailedCallsPrefix) { // Use the first index since they should be the same in all configs
+			record = append(record, "0") // Append duration 0 for failed calls flatstore CDR
 		} else {
-			pair := val.(*UnpairedRecord)
-			record, err = pairToRecord(pair, pr)
+			pr, err := NewUnpairedRecord(record, rdr.Config().Timezone, fName)
 			if err != nil {
-				fmt.Sprintf("<%s> Merging unpairedRecords : <%s> and <%s> to record , ignoring due to error: <%s>",
-					utils.ERs, utils.ToJSON(pair), utils.ToJSON(pr), err.Error())
+				fmt.Sprintf("<%s> Converting row : <%s> to unpairedRecord , ignoring due to error: <%s>",
+					utils.ERs, record, err.Error())
 				continue
 			}
-			rdr.cache.Remove(pr.OriginID)
+			if val, has := rdr.cache.Get(pr.OriginID); !has {
+				rdr.cache.Set(pr.OriginID, pr, nil)
+				continue
+			} else {
+				pair := val.(*UnpairedRecord)
+				record, err = pairToRecord(pair, pr)
+				if err != nil {
+					fmt.Sprintf("<%s> Merging unpairedRecords : <%s> and <%s> to record , ignoring due to error: <%s>",
+						utils.ERs, utils.ToJSON(pair), utils.ToJSON(pr), err.Error())
+					continue
+				}
+				rdr.cache.Remove(pr.OriginID)
+			}
+		}
+
+		// build Usage from contentFields based on record lenght
+		for i, cntFld := range rdr.Config().ContentFields {
+			if cntFld.FieldId == utils.Usage {
+				rdr.Config().ContentFields[i].Value = config.NewRSRParsersMustCompile("~*req."+strconv.Itoa(len(record)-1), true, utils.INFIELD_SEP) // in case of flatstore, last element will be the duration computed by us
+			}
 		}
 		rowNr++ // increment the rowNr after checking if it's not the end of file
 		agReq := agents.NewAgentRequest(
@@ -180,12 +191,6 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 		if pass, err := rdr.fltrS.Pass(agReq.Tenant, rdr.Config().Filters,
 			agReq); err != nil || !pass {
 			continue
-		}
-		// build Usage from contentFields based on record lenght
-		for i, cntFld := range rdr.Config().ContentFields {
-			if cntFld.FieldId == utils.Usage {
-				rdr.Config().ContentFields[i].Value = config.NewRSRParsersMustCompile("~*req."+strconv.Itoa(len(record)-1), true, utils.INFIELD_SEP) // in case of flatstore, last element will be the duration computed by us
-			}
 		}
 		navMp, err := agReq.AsNavigableMap(rdr.Config().ContentFields)
 		if err != nil {
@@ -214,11 +219,11 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 	return
 }
 
-func NewUnpairedRecord(record []string, timezone string) (*UnpairedRecord, error) {
+func NewUnpairedRecord(record []string, timezone string, fileName string) (*UnpairedRecord, error) {
 	if len(record) < 7 {
 		return nil, errors.New("MISSING_IE")
 	}
-	pr := &UnpairedRecord{Method: record[0], OriginID: record[3] + record[1] + record[2], Values: record}
+	pr := &UnpairedRecord{Method: record[0], OriginID: record[3] + record[1] + record[2], Values: record, FileName: fileName}
 	var err error
 	if pr.Timestamp, err = utils.ParseTimeDetectLayout(record[6], timezone); err != nil {
 		return nil, err
@@ -232,6 +237,7 @@ type UnpairedRecord struct {
 	OriginID  string    // Copute here the OriginID
 	Timestamp time.Time // Timestamp of the event, as written by db_flastore module
 	Values    []string  // Can contain original values or updated via UpdateValues
+	FileName  string
 }
 
 // Pairs INVITE and BYE into final record containing as last element the duration
@@ -270,4 +276,25 @@ func pairToRecord(part1, part2 *UnpairedRecord) ([]string, error) {
 	callDur := bye.Timestamp.Sub(invite.Timestamp)
 	record = append(record, strconv.FormatFloat(callDur.Seconds(), 'f', -1, 64))
 	return record, nil
+}
+
+func (rdr *FlatstoreER) dumpToFile(itmID string, value interface{}) {
+	unpRcd := value.(*UnpairedRecord)
+
+	dumpFilePath := path.Join(rdr.Config().ProcessedPath, unpRcd.FileName+utils.TmpSuffix)
+	fileOut, err := os.Create(dumpFilePath)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> Failed creating %s, error: %s",
+			utils.ERs, dumpFilePath, err.Error()))
+		return
+	}
+	csvWriter := csv.NewWriter(fileOut)
+	csvWriter.Comma = rune(rdr.Config().FieldSep[0])
+	if err = csvWriter.Write(unpRcd.Values); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> Failed writing partial record %v to file: %s, error: %s",
+			utils.ERs, unpRcd.Values, dumpFilePath, err.Error()))
+		return
+	}
+
+	csvWriter.Flush()
 }
