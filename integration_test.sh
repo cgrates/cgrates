@@ -25,6 +25,9 @@ gnr_internal=$?
 echo 'go test github.com/cgrates/cgrates/agents -tags=integration -dbtype=*internal'
 go test github.com/cgrates/cgrates/agents -tags=integration -dbtype=*internal
 agts_internal=$?
+echo 'go test github.com/cgrates/cgrates/sessions -tags=integration -dbtype=*internal'
+go test github.com/cgrates/cgrates/sessions -tags=integration -dbtype=*internal
+smg_internal=$?
 # SQL
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*sql'
 go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*sql
@@ -47,6 +50,9 @@ gnr_sql=$?
 echo 'go test github.com/cgrates/cgrates/agents -tags=integration -dbtype=*sql'
 go test github.com/cgrates/cgrates/agents -tags=integration -dbtype=*sql
 agts_sql=$?
+echo 'go test github.com/cgrates/cgrates/sessions -tags=integration -dbtype=*sql'
+go test github.com/cgrates/cgrates/sessions -tags=integration -dbtype=*sql
+smg_sql=$?
 # Mongo
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*mongo'
 go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*mongo
@@ -69,6 +75,9 @@ gnr_mongo=$?
 echo 'go test github.com/cgrates/cgrates/agents -tags=integration -dbtype=*mongo'
 go test github.com/cgrates/cgrates/agents -tags=integration -dbtype=*mongo
 agts_mongo=$?
+echo 'go test github.com/cgrates/cgrates/sessions -tags=integration -dbtype=*mongo'
+go test github.com/cgrates/cgrates/sessions -tags=integration -dbtype=*mongo
+smg_mongo=$?
 # Postgres
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*postgres'
 go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*postgres
@@ -91,24 +100,24 @@ gnr_postgres=$?
 echo 'go test github.com/cgrates/cgrates/agents -tags=integration -dbtype=*postgres'
 go test github.com/cgrates/cgrates/agents -tags=integration -dbtype=*postgres
 agts_postgres=$?
+echo 'go test github.com/cgrates/cgrates/sessions -tags=integration -dbtype=*postgres'
+go test github.com/cgrates/cgrates/sessions -tags=integration -dbtype=*postgres
+smg_postgres=$?
 
 echo 'go test github.com/cgrates/cgrates/config -tags=integration'
 go test github.com/cgrates/cgrates/config -tags=integration
 cfg=$?
-#All
-
-echo 'go test github.com/cgrates/cgrates/sessions -tags=integration'
-go test github.com/cgrates/cgrates/sessions -tags=integration
-smg=$?
 echo 'go test github.com/cgrates/cgrates/migrator -tags=integration'
 go test github.com/cgrates/cgrates/migrator -tags=integration
 mgr=$?
-echo 'go test github.com/cgrates/cgrates/dispatchers -tags=integration'
-go test github.com/cgrates/cgrates/dispatchers -tags=integration
-dis=$?
 echo 'go test github.com/cgrates/cgrates/services -tags=integration'
 go test github.com/cgrates/cgrates/services -tags=integration
 srv=$?
+#All
+
+echo 'go test github.com/cgrates/cgrates/dispatchers -tags=integration'
+go test github.com/cgrates/cgrates/dispatchers -tags=integration
+dis=$?
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=offline'
 go test github.com/cgrates/cgrates/apier/v1 -tags=offline
 offline=$?

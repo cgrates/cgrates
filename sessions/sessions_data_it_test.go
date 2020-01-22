@@ -30,16 +30,54 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var dataCfgPath string
-var dataCfg *config.CGRConfig
-var sDataRPC *rpc.Client
+var (
+	dataCfgPath string
+	dataCfgDIR  string
+	dataCfg     *config.CGRConfig
+	sDataRPC    *rpc.Client
 
-func TestSessionsDataInitCfg(t *testing.T) {
-	dataCfgPath = path.Join(*dataDir, "conf", "samples", "smg")
-	if *encoding == utils.MetaGOB {
-		dataCfgPath = path.Join(*dataDir, "conf", "samples", "smg_gob")
+	SessionsDataTests = []func(t *testing.T){
+		testSessionsDataInitCfg,
+		testSessionsDataResetDataDb,
+		testSessionsDataResetStorDb,
+		testSessionsDataStartEngine,
+		testSessionsDataApierRpcConn,
+		testSessionsDataTPFromFolder,
+		testSessionsDataLastUsedData,
+		testSessionsDataLastUsedMultipleUpdates,
+		testSessionsDataTTLExpired,
+		testSessionsDataTTLExpMultiUpdates,
+		testSessionsDataMultipleDataNoUsage,
+		testSessionsDataTTLUsageProtection,
+		testSessionsDataTTKillEngine,
 	}
-	// Init config first
+)
+
+// Tests starts here
+func TestSessionsData(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		dataCfgDIR = "smg_internal"
+	case utils.MetaSQL:
+		dataCfgDIR = "smg_mysql"
+	case utils.MetaMongo:
+		dataCfgDIR = "smg_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+	if *encoding == utils.MetaGOB {
+		dataCfgDIR += "_gob"
+	}
+	for _, stest := range SessionsDataTests {
+		t.Run(dataCfgDIR, stest)
+	}
+}
+
+// Init config first
+func testSessionsDataInitCfg(t *testing.T) {
+	dataCfgPath = path.Join(*dataDir, "conf", "samples", dataCfgDIR)
 	var err error
 	dataCfg, err = config.NewCGRConfigFromPath(dataCfgPath)
 	if err != nil {
@@ -50,28 +88,28 @@ func TestSessionsDataInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func TestSessionsDataResetDataDb(t *testing.T) {
+func testSessionsDataResetDataDb(t *testing.T) {
 	if err := engine.InitDataDb(dataCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
-func TestSessionsDataResetStorDb(t *testing.T) {
+func testSessionsDataResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(dataCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine
-func TestSessionsDataStartEngine(t *testing.T) {
+func testSessionsDataStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(dataCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestSessionsDataApierRpcConn(t *testing.T) {
+func testSessionsDataApierRpcConn(t *testing.T) {
 	var err error
 	sDataRPC, err = newRPCClient(dataCfg.ListenCfg()) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -80,7 +118,7 @@ func TestSessionsDataApierRpcConn(t *testing.T) {
 }
 
 // Load the tariff plan, creating accounts and their balances
-func TestSessionsDataTPFromFolder(t *testing.T) {
+func testSessionsDataTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	var loadInst utils.LoadInstance
 	if err := sDataRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
@@ -89,7 +127,7 @@ func TestSessionsDataTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func TestSessionsDataLastUsedData(t *testing.T) {
+func testSessionsDataLastUsedData(t *testing.T) {
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 102400.0
@@ -230,7 +268,7 @@ func TestSessionsDataLastUsedData(t *testing.T) {
 	}
 }
 
-func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
+func testSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	var acnt *engine.Account
 	acntAttrs := &utils.AttrGetAccount{Tenant: "cgrates.org",
 		Account: "TestSessionsDataLastUsedMultipleData"}
@@ -505,7 +543,7 @@ func TestSessionsDataLastUsedMultipleUpdates(t *testing.T) {
 	}
 }
 
-func TestSessionsDataTTLExpired(t *testing.T) {
+func testSessionsDataTTLExpired(t *testing.T) {
 	var acnt *engine.Account
 	acntAttrs := &utils.AttrGetAccount{Tenant: "cgrates.org",
 		Account: "TestSessionsDataTTLExpired"}
@@ -579,7 +617,7 @@ func TestSessionsDataTTLExpired(t *testing.T) {
 	}
 }
 
-func TestSessionsDataTTLExpMultiUpdates(t *testing.T) {
+func testSessionsDataTTLExpMultiUpdates(t *testing.T) {
 
 	var acnt *engine.Account
 	acntAttrs := &utils.AttrGetAccount{
@@ -708,7 +746,7 @@ func TestSessionsDataTTLExpMultiUpdates(t *testing.T) {
 	}
 }
 
-func TestSessionsDataMultipleDataNoUsage(t *testing.T) {
+func testSessionsDataMultipleDataNoUsage(t *testing.T) {
 	var acnt *engine.Account
 	acntAttrs := &utils.AttrGetAccount{Tenant: "cgrates.org",
 		Account: "TestSessionsDataTTLExpMultiUpdates"}
@@ -916,7 +954,7 @@ func TestSessionsDataMultipleDataNoUsage(t *testing.T) {
 
 // TestSessionsDataTTLUsageProtection makes sure that original TTL (50ms)
 // limits the additional debit without overloading memory
-func TestSessionsDataTTLUsageProtection(t *testing.T) {
+func testSessionsDataTTLUsageProtection(t *testing.T) {
 	var acnt *engine.Account
 	acntAttrs := &utils.AttrGetAccount{Tenant: "cgrates.org",
 		Account: "TestSessionsDataTTLUsageProtection"}
@@ -993,7 +1031,7 @@ func TestSessionsDataTTLUsageProtection(t *testing.T) {
 	}
 }
 
-func TestSessionsDataTTKillEngine(t *testing.T) {
+func testSessionsDataTTKillEngine(t *testing.T) {
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}

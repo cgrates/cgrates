@@ -33,11 +33,42 @@ import (
 
 var (
 	sessionsBiRPCCfgPath string
+	sessionsBiRPCCfgDIR  string
 	sessionsBiRPCCfg     *config.CGRConfig
 	sessionsBiRPC        *rpc2.Client
 	disconnectEvChan     = make(chan *utils.AttrDisconnectSession, 1)
 	err                  error
+	sessionsTests        = []func(t *testing.T){
+		testSessionsBiRPCInitCfg,
+		testSessionsBiRPCResetDataDb,
+		testSessionsBiRPCResetStorDb,
+		testSessionsBiRPCStartEngine,
+		testSessionsBiRPCApierRpcConn,
+		testSessionsBiRPCTPFromFolder,
+		testSessionsBiRPCSessionAutomaticDisconnects,
+		testSessionsBiRPCSessionOriginatorTerminate,
+		testSessionsBiRPCStopCgrEngine,
+	}
 )
+
+// Tests starts here
+func TestSessionsBiRPC(t *testing.T) {
+	switch *dbType {
+	case utils.MetaInternal:
+		sessionsBiRPCCfgDIR = "smg_automatic_debits_internal"
+	case utils.MetaSQL:
+		sessionsBiRPCCfgDIR = "smg_automatic_debits_mysql"
+	case utils.MetaMongo:
+		sessionsBiRPCCfgDIR = "smg_automatic_debits_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+	for _, stest := range sessionsTests {
+		t.Run(sessionsBiRPCCfgDIR, stest)
+	}
+}
 
 func handleDisconnectSession(clnt *rpc2.Client,
 	args *utils.AttrDisconnectSession, reply *string) error {
@@ -46,8 +77,8 @@ func handleDisconnectSession(clnt *rpc2.Client,
 	return nil
 }
 
-func TestSessionsBiRPCInitCfg(t *testing.T) {
-	sessionsBiRPCCfgPath = path.Join(*dataDir, "conf", "samples", "smg_automatic_debits")
+func testSessionsBiRPCInitCfg(t *testing.T) {
+	sessionsBiRPCCfgPath = path.Join(*dataDir, "conf", "samples", sessionsBiRPCCfgDIR)
 	// Init config first
 	sessionsBiRPCCfg, err = config.NewCGRConfigFromPath(sessionsBiRPCCfgPath)
 	if err != nil {
@@ -58,28 +89,28 @@ func TestSessionsBiRPCInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func TestSessionsBiRPCResetDataDb(t *testing.T) {
+func testSessionsBiRPCResetDataDb(t *testing.T) {
 	if err := engine.InitDataDb(sessionsBiRPCCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
-func TestSessionsBiRPCResetStorDb(t *testing.T) {
+func testSessionsBiRPCResetStorDb(t *testing.T) {
 	if err := engine.InitStorDb(sessionsBiRPCCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine
-func TestSessionsBiRPCStartEngine(t *testing.T) {
+func testSessionsBiRPCStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(sessionsBiRPCCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestSessionsBiRPCApierRpcConn(t *testing.T) {
+func testSessionsBiRPCApierRpcConn(t *testing.T) {
 	clntHandlers := map[string]interface{}{utils.SessionSv1DisconnectSession: handleDisconnectSession}
 	dummyClnt, err := utils.NewBiJSONrpcClient(sessionsBiRPCCfg.SessionSCfg().ListenBijson,
 		clntHandlers)
@@ -97,7 +128,7 @@ func TestSessionsBiRPCApierRpcConn(t *testing.T) {
 }
 
 // Load the tariff plan, creating accounts and their balances
-func TestSessionsBiRPCTPFromFolder(t *testing.T) {
+func testSessionsBiRPCTPFromFolder(t *testing.T) {
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "oldtutorial")}
 	var loadInst utils.LoadInstance
 	if err := sessionsRPC.Call(utils.ApierV2LoadTariffPlanFromFolder, attrs, &loadInst); err != nil {
@@ -106,7 +137,7 @@ func TestSessionsBiRPCTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func TestSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
+func testSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	// Create a balance with 1 second inside and rating increments of 1ms (to be compatible with debit interval)
 	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org",
 		Account:     "TestSessionsBiRPCSessionAutomaticDisconnects",
@@ -232,7 +263,7 @@ func TestSessionsBiRPCSessionAutomaticDisconnects(t *testing.T) {
 	}
 }
 
-func TestSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
+func testSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 	attrSetBalance := utils.AttrSetBalance{
 		Tenant:      "cgrates.org",
 		Account:     "TestSessionsBiRPCSessionOriginatorTerminate",
@@ -350,7 +381,7 @@ func TestSessionsBiRPCSessionOriginatorTerminate(t *testing.T) {
 	}
 }
 
-func TestSessionsBiRPCStopCgrEngine(t *testing.T) {
+func testSessionsBiRPCStopCgrEngine(t *testing.T) {
 	if err := sessionsBiRPC.Close(); err != nil { // Close the connection so we don't get EOF warnings from client
 		t.Error(err)
 	}

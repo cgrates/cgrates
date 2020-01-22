@@ -1,0 +1,76 @@
+{
+// Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+// Copyright (C) ITsysCOM GmbH
+"general": {
+	"log_level": 7,
+	"node_id":"SlaveReplication",
+},
+
+"listen": {
+	"rpc_json": "127.0.0.1:22012",				// RPC JSON listening address
+	"rpc_gob": "127.0.0.1:22013",					// RPC GOB listening address
+	"http": "127.0.0.1:22080",					// HTTP listening address
+},
+
+"rpc_conns": {
+	"conn1": {
+		"strategy": "*first",
+		"conns": [{"address": "127.0.0.1:22012", "transport":"*json"}],
+	},
+	"rplConn": {
+		"strategy": "*broadcast_sync",
+		"conns": [{"address": "127.0.0.1:2012", "transport": "*json"}],
+	}
+},
+
+
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
+	"db_port": 27017, 						// the port to reach the stordb
+	"db_name": "datadb",
+	"db_password": "",
+},
+
+"stor_db": {
+	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
+	"db_port": 27017, 						// the port to reach the stordb
+	"db_name": "stordb",
+	"db_password": "",
+},
+
+"rals": {
+	"enabled": true,					// enable Rater service: <true|false>
+},
+
+"cdrs": {
+	"enabled": true,					// start the CDR Server service:  <true|false>
+},
+
+"schedulers": {
+	"enabled": true,
+},
+
+"attributes": {
+	"enabled": true,
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
+
+"sessions": {
+	"enabled": true,						// starts SessionManager service: <true|false>
+	"listen_bijson": "127.0.0.1:22014",		// address where to listen for bidirectional JSON-RPC requests
+	"replication_conns": ["rplConn"],
+	"rals_conns": ["conn1"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
+},
+
+"apier": {
+	"scheduler_conns": ["*internal"],
+},
+
+}

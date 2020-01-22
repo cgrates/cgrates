@@ -41,13 +41,13 @@ var (
 	accMigrator *Migrator
 	accAction   string
 	dataDir     = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
+ 
+	sTestsAccIT = []func(t *testing.T){
+		testAccITConnect,
+		testAccITFlush,
+		testAccITMigrateAndMove,
+	}
 )
-
-var sTestsAccIT = []func(t *testing.T){
-	testAccITConnect,
-	testAccITFlush,
-	testAccITMigrateAndMove,
-}
 
 func TestAccountMigrateITRedis(t *testing.T) {
 	var err error

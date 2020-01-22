@@ -1,0 +1,71 @@
+{
+// Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
+// Copyright (C) ITsysCOM GmbH
+"general": {
+	"log_level": 7,
+	"node_id":"MasterReplication",
+},
+
+"listen": {
+	"rpc_json": "127.0.0.1:2012",
+	"rpc_gob": "127.0.0.1:2013",
+	"http": "127.0.0.1:2080",
+},
+
+
+"rpc_conns": {
+	"rplConn": {
+		"strategy": "*broadcast_sync",
+		"conns": [{"address": "127.0.0.1:22013", "transport": "*gob"}],
+	},
+},
+
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
+	"db_port": 27017, 						// the port to reach the stordb
+	"db_name": "datadb",
+	"db_password": "",
+},
+
+"stor_db": {
+	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
+	"db_port": 27017, 						// the port to reach the stordb
+	"db_name": "stordb",
+	"db_password": "",
+},
+
+"rals": {
+	"enabled": true,
+},
+
+"schedulers": {
+	"enabled": true,
+},
+
+"cdrs": {
+	"enabled": true,
+},
+
+"attributes": {
+	"enabled": true,
+},
+
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
+
+"sessions": {
+	"enabled": true,
+	"replication_conns": ["rplConn"],
+	"rals_conns": ["*internal"],
+	"cdrs_conns": ["*internal"],
+	"chargers_conns": ["*internal"],
+},
+
+"apier": {
+	"scheduler_conns": ["*internal"],
+},
+
+}

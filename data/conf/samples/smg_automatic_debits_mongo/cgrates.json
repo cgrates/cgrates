@@ -7,8 +7,18 @@
     "log_level": 7,
 },
 
-"stor_db": {								// database used to store offline tariff plans and CDRs
-	"db_password": "CGRateS.org",			// password to use when connecting to stordb
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
+	"db_port": 27017, 						// the port to reach the stordb
+	"db_name": "datadb",
+	"db_password": "",
+},
+
+"stor_db": {
+	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
+	"db_port": 27017, 						// the port to reach the stordb
+	"db_name": "stordb",
+	"db_password": "",
 },
 
 "rals": {
