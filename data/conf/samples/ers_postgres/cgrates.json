@@ -326,7 +326,7 @@
 			"id": "FlatstoreOsips",
 			"enabled": true,
 			"run_delay": -1,
-			"type": "*opensips_flatstore",
+			"type": "*flatstore",
 			"field_separator": "|",
 			"source_path": "/tmp/flatstoreErs/in",
 			"processed_path": "/tmp/flatstoreErs/out",

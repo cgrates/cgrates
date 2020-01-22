@@ -25,8 +25,6 @@ var (
 	MainCDRFields = NewStringSet([]string{CGRID, Source, OriginHost, OriginID, ToR, RequestType, Tenant, Category,
 		Account, Subject, Destination, SetupTime, AnswerTime, Usage, COST, RATED, Partial, RunID,
 		PreRated, CostSource, CostDetails, ExtraInfo, OrderID})
-	CDRCFileFormats = NewStringSet([]string{MetaFileCSV, MetaFScsv,
-		MetaKamFlatstore, MetaOsipsFlatstore, MetaPartialCSV, MetaFileFWV, MetaFileXML})
 	PostPaidRatedSlice = []string{META_POSTPAID, META_RATED}
 	ItemList           = NewStringSet([]string{MetaAccounts, MetaAttributes, MetaChargers, MetaDispatchers, MetaDispatcherHosts,
 		MetaFilters, MetaResources, MetaStats, MetaThresholds, MetaSuppliers,
@@ -258,9 +256,7 @@ const (
 	ThresholdPrefix              = "thd_"
 	TimingsPrefix                = "tmg_"
 	FilterPrefix                 = "ftr_"
-	FilterIndex                  = "fti_"
 	CDR_STATS_PREFIX             = "cst_"
-	LOG_CALL_COST_PREFIX         = "cco_"
 	VERSION_PREFIX               = "ver_"
 	StatQueueProfilePrefix       = "sqp_"
 	SupplierProfilePrefix        = "spp_"
@@ -281,7 +277,6 @@ const (
 	META_HTTP_POST               = "*http_post"
 	MetaHTTPjson                 = "*http_json"
 	MetaHTTPjsonCDR              = "*http_json_cdr"
-	META_HTTP_JSONRPC            = "*http_jsonrpc"
 	MetaHTTPjsonMap              = "*http_json_map"
 	MetaAMQPjsonCDR              = "*amqp_json_cdr"
 	MetaAMQPjsonMap              = "*amqp_json_map"
@@ -292,8 +287,7 @@ const (
 	MetaS3jsonMap                = "*s3_json_map"
 	CONFIG_PATH                  = "/etc/cgrates/"
 	DISCONNECT_CAUSE             = "DisconnectCause"
-	MetaKamFlatstore             = "*kamailio_flatstore"
-	MetaOsipsFlatstore           = "*opensips_flatstore"
+	MetaFlatstore                = "*flatstore"
 	MetaRating                   = "*rating"
 	NOT_AVAILABLE                = "N/A"
 	CALL                         = "call"
