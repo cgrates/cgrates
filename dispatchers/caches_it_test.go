@@ -45,20 +45,30 @@ var sTestsDspChc = []func(t *testing.T){
 }
 
 //Test start here
-func TestDspCacheSv1TMySQL(t *testing.T) {
-	if *encoding == utils.MetaGOB {
-		testDsp(t, sTestsDspChc, "TestDspCacheSv1", "all", "all2", "dispatchers_mysql", "tutorial", "oldtutorial", "dispatchers_gob")
-	} else {
-		testDsp(t, sTestsDspChc, "TestDspCacheSv1", "all", "all2", "dispatchers_mysql", "tutorial", "oldtutorial", "dispatchers")
+func TestDspCacheSv1(t *testing.T) {
+	var config1, config2, config3 string
+	switch *dbType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaSQL:
+		config1 = "all_mysql"
+		config2 = "all2_mysql"
+		config3 = "dispatchers_mysql"
+	case utils.MetaMongo:
+		config1 = "all_mongo"
+		config2 = "all2_mongo"
+		config3 = "dispatchers_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
 
-func TestDspCacheSv1Mongo(t *testing.T) {
+	dispDIR := "dispatchers"
 	if *encoding == utils.MetaGOB {
-		testDsp(t, sTestsDspChc, "TestDspCacheSv1", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers_gob")
-	} else {
-		testDsp(t, sTestsDspChc, "TestDspCacheSv1", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+		dispDIR += "_gob"
 	}
+	testDsp(t, sTestsDspChc, "TestDspCacheSv1", config1, config2, config3, "tutorial", "oldtutorial", dispDIR)
 }
 
 func testDspChcPing(t *testing.T) {

@@ -57,20 +57,31 @@ var sTestsDspSession = []func(t *testing.T){
 }
 
 //Test start here
-func TestDspSessionSTMySQL(t *testing.T) {
-	if *encoding == utils.MetaGOB {
-		testDsp(t, sTestsDspSession, "TestDspSessionS", "all", "all2", "dispatchers_mysql_gob", "testit", "tutorial", "dispatchers_gob")
-	} else {
-		testDsp(t, sTestsDspSession, "TestDspSessionS", "all", "all2", "dispatchers_mysql", "testit", "tutorial", "dispatchers")
+func TestDspSessionS(t *testing.T) {
+	var config1, config2, config3 string
+	switch *dbType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaSQL:
+		config1 = "all_mysql"
+		config2 = "all2_mysql"
+		config3 = "dispatchers_mysql"
+	case utils.MetaMongo:
+		config1 = "all_mongo"
+		config2 = "all2_mongo"
+		config3 = "dispatchers_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
-}
 
-func TestDspSessionSMongo(t *testing.T) {
+	dispDIR := "dispatchers"
 	if *encoding == utils.MetaGOB {
-		testDsp(t, sTestsDspSession, "TestDspSessionS", "all", "all2", "dispatchers_mongo_gob", "testit", "tutorial", "dispatchers_gob")
-	} else {
-		testDsp(t, sTestsDspSession, "TestDspSessionS", "all", "all2", "dispatchers_mongo", "testit", "tutorial", "dispatchers")
+		dispDIR += "_gob"
+		config3 += "_gob"
 	}
+	testDsp(t, sTestsDspSession, "TestDspSessionS", config1, config2, config3, "testit", "tutorial", dispDIR)
 }
 
 func testDspSessionAddBalacne(t *testing.T) {

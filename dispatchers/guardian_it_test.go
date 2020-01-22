@@ -34,12 +34,30 @@ var sTestsDspGrd = []func(t *testing.T){
 }
 
 //Test start here
-func TestDspGuardianSTMySQL(t *testing.T) {
-	if *encoding == utils.MetaGOB {
-		testDsp(t, sTestsDspGrd, "TestDspGuardianS", "all", "all2", "dispatchers_mysql", "tutorial", "oldtutorial", "dispatchers_gob")
-	} else {
-		testDsp(t, sTestsDspGrd, "TestDspGuardianS", "all", "all2", "dispatchers_mysql", "tutorial", "oldtutorial", "dispatchers")
+func TestDspGuardianST(t *testing.T) {
+	var config1, config2, config3 string
+	switch *dbType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaSQL:
+		config1 = "all_mysql"
+		config2 = "all2_mysql"
+		config3 = "dispatchers_mysql"
+	case utils.MetaMongo:
+		config1 = "all_mongo"
+		config2 = "all2_mongo"
+		config3 = "dispatchers_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
+
+	dispDIR := "dispatchers"
+	if *encoding == utils.MetaGOB {
+		dispDIR += "_gob"
+	}
+	testDsp(t, sTestsDspGrd, "TestDspGuardianS", config1, config2, config3, "tutorial", "oldtutorial", dispDIR)
 }
 
 func testDspGrdPing(t *testing.T) {

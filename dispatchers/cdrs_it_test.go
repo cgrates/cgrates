@@ -28,52 +28,67 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var sTestsDspCDRs = []func(t *testing.T){
-	testDspCDRsPing,
-	testDspCDRsProcessEvent,
-	testDspCDRsCountCDR,
-	testDspCDRsGetCDR,
-	testDspCDRsGetCDRWithoutTenant,
-	testDspCDRsProcessCDR,
-	testDspCDRsGetCDR2,
-	testDspCDRsProcessExternalCDR,
-	testDspCDRsGetCDR3,
-}
+var (
+	sTestsDspCDRs = []func(t *testing.T){
+		testDspCDRsPing,
+		testDspCDRsProcessEvent,
+		testDspCDRsCountCDR,
+		testDspCDRsGetCDR,
+		testDspCDRsGetCDRWithoutTenant,
+		testDspCDRsProcessCDR,
+		testDspCDRsGetCDR2,
+		testDspCDRsProcessExternalCDR,
+		testDspCDRsGetCDR3,
+	}
 
-var sTestsDspCDRsWithoutAuth = []func(t *testing.T){
-	testDspCDRsPingNoAuth,
-	testDspCDRsProcessEventNoAuth,
-	testDspCDRsCountCDRNoAuth,
-	testDspCDRsGetCDRNoAuth,
-	testDspCDRsGetCDRNoAuthWithoutTenant,
-	testDspCDRsProcessCDRNoAuth,
-	testDspCDRsGetCDR2NoAuth,
-	testDspCDRsProcessExternalCDRNoAuth,
-	testDspCDRsGetCDR3NoAuth,
-}
+	sTestsDspCDRsWithoutAuth = []func(t *testing.T){
+		testDspCDRsPingNoAuth,
+		testDspCDRsProcessEventNoAuth,
+		testDspCDRsCountCDRNoAuth,
+		testDspCDRsGetCDRNoAuth,
+		testDspCDRsGetCDRNoAuthWithoutTenant,
+		testDspCDRsProcessCDRNoAuth,
+		testDspCDRsGetCDR2NoAuth,
+		testDspCDRsProcessExternalCDRNoAuth,
+		testDspCDRsGetCDR3NoAuth,
+	}
+)
 
 //Test start here
-func TestDspCDRsITMySQL(t *testing.T) {
-	if *encoding == utils.MetaGOB {
-		testDsp(t, sTestsDspCDRs, "TestDspCDRs", "all", "all2", "dispatchers_mysql", "tutorial", "oldtutorial", "dispatchers_gob")
-	} else {
-		testDsp(t, sTestsDspCDRs, "TestDspCDRs", "all", "all2", "dispatchers_mysql", "tutorial", "oldtutorial", "dispatchers")
+func TestDspCDRsIT(t *testing.T) {
+	var config1, config2, config3 string
+	switch *dbType {
+	case utils.MetaInternal:
+		t.SkipNow()
+	case utils.MetaSQL:
+		config1 = "all_mysql"
+		config2 = "all2_mysql"
+		config3 = "dispatchers_mysql"
+	case utils.MetaMongo:
+		config1 = "all_mongo"
+		config2 = "all2_mongo"
+		config3 = "dispatchers_mongo"
+	case utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
 	}
+
+	dispDIR := "dispatchers"
+	if *encoding == utils.MetaGOB {
+		dispDIR += "_gob"
+	}
+	testDsp(t, sTestsDspCDRs, "TestDspCDRs", config1, config2, config3, "tutorial", "oldtutorial", dispDIR)
 }
 
 func TestDspCDRsITMySQLWithoutAuth(t *testing.T) {
-	if *encoding == utils.MetaGOB {
-		testDsp(t, sTestsDspCDRsWithoutAuth, "TestDspCDRsWithoutAuth", "all", "all2", "dispatchers_no_attributes", "tutorial", "oldtutorial", "dispatchers_gob")
-	} else {
-		testDsp(t, sTestsDspCDRsWithoutAuth, "TestDspCDRsWithoutAuth", "all", "all2", "dispatchers_no_attributes", "tutorial", "oldtutorial", "dispatchers")
+	if *dbType != utils.MetaSQL {
+		t.SkipNow()
 	}
-}
-
-func TestDspCDRsITMongo(t *testing.T) {
 	if *encoding == utils.MetaGOB {
-		testDsp(t, sTestsDspCDRs, "TestDspCDRs", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers_gob")
+		testDsp(t, sTestsDspCDRsWithoutAuth, "TestDspCDRsWithoutAuth", "all_mysql", "all2_mysql", "dispatchers_no_attributes", "tutorial", "oldtutorial", "dispatchers_gob")
 	} else {
-		testDsp(t, sTestsDspCDRs, "TestDspCDRs", "all", "all2", "dispatchers_mongo", "tutorial", "oldtutorial", "dispatchers")
+		testDsp(t, sTestsDspCDRsWithoutAuth, "TestDspCDRsWithoutAuth", "all_mysql", "all2_mysql", "dispatchers_no_attributes", "tutorial", "oldtutorial", "dispatchers")
 	}
 }
 
