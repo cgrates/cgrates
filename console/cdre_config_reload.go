@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/apier/v1"
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -36,7 +36,7 @@ func init() {
 type CmdCdreConfigReload struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.AttrReloadConfig
+	rpcParams *v1.ConfigPathArg
 	*CommandExecuter
 }
 
@@ -50,7 +50,7 @@ func (self *CmdCdreConfigReload) RpcMethod() string {
 
 func (self *CmdCdreConfigReload) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(v1.AttrReloadConfig)
+		self.rpcParams = new(v1.ConfigPathArg)
 	}
 	return self.rpcParams
 }
