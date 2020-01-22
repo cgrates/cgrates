@@ -205,6 +205,7 @@ type EventReaderJsonCfg struct {
 	Timezone                    *string
 	Filters                     *[]string
 	Flags                       *[]string
+	Failed_calls_prefix         *string
 	Partial_record_cache        *string
 	Partial_cache_expiry_action *string
 	Header_fields               *[]*FcTemplateJsonCfg

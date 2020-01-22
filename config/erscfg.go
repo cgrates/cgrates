@@ -111,6 +111,7 @@ type EventReaderCfg struct {
 	Timezone                 string
 	Filters                  []string
 	Flags                    utils.FlagsWithParams
+	FailedCallsPrefix        string        // Used in case of flatstore CDRs to avoid searching for BYE records
 	PartialRecordCache       time.Duration // Duration to cache partial records when not pairing
 	PartialCacheExpiryAction string
 	HeaderFields             []*FCTemplate
@@ -165,6 +166,9 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string
 		if er.Flags, err = utils.FlagsWithParamsFromSlice(*jsnCfg.Flags); err != nil {
 			return
 		}
+	}
+	if jsnCfg.Failed_calls_prefix != nil {
+		er.FailedCallsPrefix = *jsnCfg.Failed_calls_prefix
 	}
 	if jsnCfg.Partial_record_cache != nil {
 		if er.PartialRecordCache, err = utils.ParseDurationWithNanosecs(*jsnCfg.Partial_record_cache); err != nil {
@@ -223,6 +227,7 @@ func (er *EventReaderCfg) Clone() (cln *EventReaderCfg) {
 		}
 	}
 	cln.Flags = er.Flags
+	cln.FailedCallsPrefix = er.FailedCallsPrefix
 	cln.HeaderFields = make([]*FCTemplate, len(er.HeaderFields))
 	for idx, fld := range er.HeaderFields {
 		cln.HeaderFields[idx] = fld.Clone()

@@ -327,6 +327,33 @@
 				{"tag": "Usage", "field_id": "Usage", "type": "*variable", "value": "~*req.6:s/^(\\d+)$/${1}s/", "mandatory": true},
 				{"tag": "Partial", "field_id": "Partial", "type": "*constant", "value": "true", "filters":["*string:~*req.10:partial"]}
 			],
+		},
+		{
+			"id": "FlatstoreOsips",
+			"enabled": true,
+			"run_delay": -1,
+			"type": "*opensips_flatstore",
+			"field_separator": "|",
+			"source_path": "/tmp/flatstoreErs/in",
+			"processed_path": "/tmp/flatstoreErs/out",
+			"failed_calls_prefix": "missed_calls",
+			"flags": ["*cdrs"],
+			"partial_record_cache": "2s",
+			"content_fields":[
+				{"tag": "Tor", "field_id": "ToR", "type": "*constant", "value": "*voice", "mandatory": true},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed","value":"~*req.3;~*req.1;~*req.2", "mandatory": true},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*variable", "value": "~*req.7", "mandatory": true},
+				{"tag": "Tenant", "field_id": "Tenant", "type": "*constant", "value": "cgrates.org", "mandatory": true},
+				{"tag": "Category", "field_id": "Category", "type": "*constant", "value": "call", "mandatory": true},
+				{"tag": "Account", "field_id": "Account", "type": "*variable", "value": "~*req.8", "mandatory": true},
+				{"tag": "Subject", "field_id": "Subject", "type": "*variable", "value": "~*req.8", "mandatory": true},
+				{"tag": "Destination", "field_id": "Destination", "type": "*variable", "value": "~*req.9", "mandatory": true},
+				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*variable", "value": "~*req.6", "mandatory": true},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*variable", "value": "~*req.6", "mandatory": true},
+				{"tag": "Usage", "field_id": "Usage", "type": "*variable", "mandatory": true}, // Value for Usage is composed based on record
+				{"tag": "DisconnectCause", "field_id": "DisconnectCause", "type": "*composed", "value": "~*req.4; ;~*req.5", "mandatory": true},
+				{"tag": "DialogId", "field_id": "DialogId", "type": "*variable", "value": "~*req.11"}
+			],
 		}
 	],
 },
