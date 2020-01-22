@@ -34,7 +34,6 @@ const (
 	SCHEDULER_JSN      = "schedulers"
 	CDRS_JSN           = "cdrs"
 	CDRE_JSN           = "cdre"
-	CDRC_JSN           = "cdrc"
 	SessionSJson       = "sessions"
 	FreeSWITCHAgentJSN = "freeswitch_agent"
 	KamailioAgentJSN   = "kamailio_agent"
@@ -64,7 +63,7 @@ const (
 
 var (
 	sortedCfgSections = []string{GENERAL_JSN, RPCConnsJsonName, DATADB_JSN, STORDB_JSN, LISTEN_JSN, TlsCfgJson, HTTP_JSN, SCHEDULER_JSN, CACHE_JSN, FilterSjsn, RALS_JSN,
-		CDRS_JSN, CDRE_JSN, CDRC_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN, KamailioAgentJSN,
+		CDRS_JSN, CDRE_JSN, ERsJson, SessionSJson, AsteriskAgentJSN, FreeSWITCHAgentJSN, KamailioAgentJSN,
 		DA_JSN, RA_JSN, HttpAgentJson, DNSAgentJson, ATTRIBUTE_JSN, ChargerSCfgJson, RESOURCES_JSON, STATS_JSON, THRESHOLDS_JSON,
 		SupplierSJson, LoaderJson, MAILER_JSN, SURETAX_JSON, CgrLoaderCfgJson, CgrMigratorCfgJson, DispatcherSJson, AnalyzerCfgJson, Apier}
 )
@@ -205,18 +204,6 @@ func (self CgrJsonCfg) CdreJsonCfgs() (map[string]*CdreJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := make(map[string]*CdreJsonCfg)
-	if err := json.Unmarshal(*rawCfg, &cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (self CgrJsonCfg) CdrcJsonCfg() ([]*CdrcJsonCfg, error) {
-	rawCfg, hasKey := self[CDRC_JSN]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := make([]*CdrcJsonCfg, 0)
 	if err := json.Unmarshal(*rawCfg, &cfg); err != nil {
 		return nil, err
 	}

@@ -223,7 +223,6 @@ const (
 	OK                           = "OK"
 	MetaFileXML                  = "*file_xml"
 	CDRE                         = "cdre"
-	CDRC                         = "cdrc"
 	MASK_CHAR                    = "*"
 	CONCATENATED_KEY_SEP         = ":"
 	UNIT_TEST                    = "UNIT_TEST"

@@ -11,9 +11,6 @@ ap2=$?
 echo 'go test github.com/cgrates/cgrates/engine  -tags=integration -rpc=*gob'
 go test github.com/cgrates/cgrates/engine -tags=integration -rpc=*gob
 en=$?
-echo 'go test github.com/cgrates/cgrates/cdrc -tags=integration -rpc=*gob'
-go test github.com/cgrates/cgrates/cdrc -tags=integration -rpc=*gob
-cdrc=$?
 echo 'go test github.com/cgrates/cgrates/ers -tags=integration -rpc=*gob'
 go test github.com/cgrates/cgrates/ers -tags=integration -rpc=*gob
 ers=$?
@@ -33,4 +30,4 @@ echo 'go test github.com/cgrates/cgrates/loaders -tags=integration -rpc=*gob'
 go test github.com/cgrates/cgrates/loaders -tags=integration -rpc=*gob
 lds=$?
 
-exit $gen && $ap1 && $ap2 && $en && $cdrc && $gnr && $agts && $smg && $dis && $lds && $ers 
+exit $gen && $ap1 && $ap2 && $en && $gnr && $agts && $smg && $dis && $lds && $ers

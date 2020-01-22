@@ -169,6 +169,10 @@ func (api *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.Ex
 	return nil
 }
 
+type AttrReloadConfig struct {
+	ConfigDir string
+}
+
 // Reloads CDRE configuration out of folder specified
 func (apier *ApierV1) ReloadCdreConfig(attrs AttrReloadConfig, reply *string) error {
 	if attrs.ConfigDir == "" {

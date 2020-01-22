@@ -94,28 +94,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
-	// CDRC sanity checks
-	for _, cdrcCfgs := range cfg.CdrcProfiles {
-		for _, cdrcInst := range cdrcCfgs {
-			if !cdrcInst.Enabled {
-				continue
-			}
-			if len(cdrcInst.CdrsConns) == 0 {
-				return fmt.Errorf("<%s> Instance: %s, %s enabled but no %s defined!", utils.CDRC, cdrcInst.ID, utils.CDRC, utils.CDRs)
-			}
-			for _, connID := range cdrcInst.CdrsConns {
-				if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.cdrsCfg.Enabled {
-					return fmt.Errorf("<%s> not enabled but requested by <%s> cdrcProfile", utils.CDRs, cdrcInst.ID)
-				}
-				if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
-					return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.CDRs, connID)
-				}
-			}
-			if len(cdrcInst.ContentFields) == 0 {
-				return fmt.Errorf("<%s> enabled but no fields to be processed defined!", utils.CDRC)
-			}
-		}
-	}
 	// Loaders sanity checks
 	for _, ldrSCfg := range cfg.loaderCfg {
 		if !ldrSCfg.Enabled {
