@@ -28,17 +28,15 @@ import (
 )
 
 // NewfwvProvider constructs a DataProvider
-func NewFWVProvider(record, pathPrfx string) (dP DataProvider) {
-	dP = &FWVProvider{req: record, cache: NewNavigableMap(nil), pathPrfx: pathPrfx}
+func NewFWVProvider(record string) (dP DataProvider) {
+	dP = &FWVProvider{req: record, cache: NewNavigableMap(nil)}
 	return
 }
 
 // fwvProvider implements engine.DataProvider so we can pass it to filters
 type FWVProvider struct {
-	req      string
-	cache    *NavigableMap
-	pathPrfx string // if this comes in path it will be ignored
-	// pathPrfx should be reviewed once the cdrc is removed
+	req   string
+	cache *NavigableMap
 }
 
 // String is part of engine.DataProvider interface
@@ -53,12 +51,6 @@ func (fP *FWVProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 		return
 	}
 	fwvIdx := fldPath[0]
-	if len(fldPath) == 2 {
-		fwvIdx = fldPath[1]
-	}
-	if fP.pathPrfx != utils.EmptyString && (fldPath[0] != fP.pathPrfx || len(fldPath) < 2) {
-		return "", utils.ErrPrefixNotFound(strings.Join(fldPath, utils.NestingSep))
-	}
 	if data, err = fP.cache.FieldAsInterface(fldPath); err == nil ||
 		err != utils.ErrNotFound { // item found in cache
 		return

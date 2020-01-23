@@ -169,7 +169,7 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 		rowNr++ // increment the rowNr after checking if it's not the end of file
 		record := string(buf)
 		agReq := agents.NewAgentRequest(
-			config.NewFWVProvider(record, utils.EmptyString), reqVars,
+			config.NewFWVProvider(record), reqVars,
 			nil, nil, rdr.Config().Tenant,
 			rdr.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(rdr.Config().Timezone,
@@ -251,7 +251,7 @@ func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPat
 	record := string(buf)
 	reqVars := make(map[string]interface{})
 	agReq := agents.NewAgentRequest(
-		config.NewFWVProvider(record, utils.EmptyString), reqVars,
+		config.NewFWVProvider(record), reqVars,
 		nil, nil, rdr.Config().Tenant,
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
@@ -288,7 +288,7 @@ func (rdr *FWVFileER) processHeader(file *os.File, rowNr, evsPosted int, absPath
 func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPath string) (err error) {
 	reqVars := make(map[string]interface{})
 	agReq := agents.NewAgentRequest(
-		config.NewFWVProvider(record, utils.EmptyString), reqVars,
+		config.NewFWVProvider(record), reqVars,
 		nil, nil, rdr.Config().Tenant,
 		rdr.cgrCfg.GeneralCfg().DefaultTenant,
 		utils.FirstNonEmpty(rdr.Config().Timezone,
