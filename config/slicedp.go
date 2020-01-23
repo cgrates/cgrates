@@ -22,23 +22,20 @@ import (
 	"fmt"
 	"net"
 	"strconv"
-	"strings"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
 // NewSliceDP constructs a DataProvider
-func NewSliceDP(record []string, pathPrfx string) (dP DataProvider) {
-	dP = &SliceDP{req: record, cache: NewNavigableMap(nil), pathPrfx: pathPrfx}
+func NewSliceDP(record []string) (dP DataProvider) {
+	dP = &SliceDP{req: record, cache: NewNavigableMap(nil)}
 	return
 }
 
 // SliceDP implements engine.DataProvider so we can pass it to filters
 type SliceDP struct {
-	req      []string
-	cache    *NavigableMap
-	pathPrfx string // if this comes in path it will be ignored
-	// pathPrfx should be reviewed once the cdrc is removed
+	req   []string
+	cache *NavigableMap
 }
 
 // String is part of engine.DataProvider interface
@@ -52,13 +49,10 @@ func (cP *SliceDP) FieldAsInterface(fldPath []string) (data interface{}, err err
 	if len(fldPath) == 0 {
 		return
 	}
+	if len(fldPath) != 1 {
+		return nil, fmt.Errorf("Invalid fieldPath %+v", fldPath)
+	}
 	idx := fldPath[0]
-	if len(fldPath) == 2 {
-		idx = fldPath[1]
-	}
-	if cP.pathPrfx != utils.EmptyString && (fldPath[0] != cP.pathPrfx || len(fldPath) < 2) {
-		return "", utils.ErrPrefixNotFound(strings.Join(fldPath, utils.NestingSep))
-	}
 	if data, err = cP.cache.FieldAsInterface(fldPath); err == nil ||
 		err != utils.ErrNotFound { // item found in cache
 		return
