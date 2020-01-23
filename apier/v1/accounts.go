@@ -355,10 +355,13 @@ func (api *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) (
 		err.Error() != utils.ErrNotFound.Error() {
 		return err
 	}
-	if err = api.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix,
-		[]string{accID}, true); err != nil &&
-		err.Error() != utils.ErrNotFound.Error() {
-		return err
+	if err = api.ConnMgr.Call(api.Config.ApierCfg().CachesConns, nil,
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+			AttrReloadCache: utils.AttrReloadCache{
+				ArgsCache: utils.ArgsCache{AccountActionPlanIDs: &[]string{accID}},
+			},
+		}, reply); err != nil {
+		return
 	}
 	*reply = utils.OK
 	return nil
