@@ -228,8 +228,13 @@ func (apiv1 *ApierV1) LoadDestination(attrs AttrLoadDestination, reply *string) 
 	} else if !loaded {
 		return utils.ErrNotFound
 	}
-	if err := apiv1.DataManager.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{attrs.ID}, true); err != nil {
-		return utils.NewErrServerError(err)
+	if err := apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+			AttrReloadCache: utils.AttrReloadCache{
+				ArgsCache: utils.ArgsCache{DestinationIDs: &[]string{attrs.ID}},
+			},
+		}, reply); err != nil {
+		return err
 	}
 	*reply = utils.OK
 	return nil
