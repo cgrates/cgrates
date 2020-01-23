@@ -44,6 +44,7 @@ var (
 	cgrEngineFlags    = flag.NewFlagSet("cgr-engine", flag.ContinueOnError)
 	cfgPath           = cgrEngineFlags.String("config_path", utils.CONFIG_PATH, "Configuration directory path.")
 	version           = cgrEngineFlags.Bool("version", false, "Prints the application version.")
+	checkConfig       = cgrEngineFlags.Bool("check_config", false, "Verify the config without starting the engine")
 	pidFile           = cgrEngineFlags.String("pid", "", "Write pid file")
 	httpPprofPath     = cgrEngineFlags.String("httprof_path", "", "http address used for program profiling")
 	cpuProfDir        = cgrEngineFlags.String("cpuprof_dir", "", "write cpu profile to files")
@@ -366,6 +367,12 @@ func main() {
 	}
 	if *nodeID != utils.EmptyString {
 		cfg.GeneralCfg().NodeID = *nodeID
+	}
+	if *checkConfig {
+		if err := cfg.CheckConfigSanity(); err != nil {
+			fmt.Println(err)
+		}
+		return
 	}
 	config.SetCgrConfig(cfg) // Share the config object
 
