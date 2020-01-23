@@ -26,6 +26,11 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// Exported in cgr-engine
+func (cfg *CGRConfig) CheckConfigSanity() error {
+	return cfg.checkConfigSanity()
+}
+
 func (cfg *CGRConfig) checkConfigSanity() error {
 	// Rater checks
 	if cfg.ralsCfg.Enabled {
@@ -298,7 +303,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 				return fmt.Errorf("<%s> not enabled but requested by <%s> HTTPAgent Template.", utils.SessionS, httpAgentCfg.ID)
 			}
 			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
-				return fmt.Errorf("HTTPAgent Templae with ID <%s> has connection with id: <%s> not defined", httpAgentCfg.ID, connID)
+				return fmt.Errorf("<%s> Template with ID <%s> has connection with id: <%s> not defined", utils.HTTPAgent, httpAgentCfg.ID, connID)
 			}
 		}
 		if !utils.SliceHasMember([]string{utils.MetaUrl, utils.MetaXml}, httpAgentCfg.RequestPayload) {
@@ -475,7 +480,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 	if cfg.dispatcherSCfg.Enabled {
 		for _, connID := range cfg.dispatcherSCfg.AttributeSConns {
 			if strings.HasPrefix(connID, utils.MetaInternal) && !cfg.attributeSCfg.Enabled {
-				return fmt.Errorf("<%s> not enabled but requested by <%s> component", utils.AttributeS, utils.DispatcherS)
+				return fmt.Errorf("<%s> not enabled but requested by <%s> component.", utils.AttributeS, utils.DispatcherS)
 			}
 			if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
 				return fmt.Errorf("<%s> Connection with id: <%s> not defined", utils.DispatcherS, connID)
