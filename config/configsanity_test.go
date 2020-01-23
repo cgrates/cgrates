@@ -34,10 +34,19 @@ func TestConfigSanityRater(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.statsCfg.Enabled = true
-
+	cfg.ralsCfg.StatSConns = []string{"test"}
+	expected = "<RALs> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.ralsCfg.StatSConns = []string{}
 	cfg.ralsCfg.ThresholdSConns = []string{utils.MetaInternal}
 	expected = "<ThresholdS> not enabled but requested by <RALs> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.ralsCfg.ThresholdSConns = []string{"test"}
+	expected = "<RALs> Connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -54,7 +63,12 @@ func TestConfigSanityCDRServer(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.chargerSCfg.Enabled = true
+	cfg.cdrsCfg.ChargerSConns = []string{"test"}
+	expected = "<CDRs> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.cdrsCfg.ChargerSConns = []string{}
 
 	cfg.cdrsCfg.RaterConns = []string{utils.MetaInternal}
 
@@ -62,21 +76,36 @@ func TestConfigSanityCDRServer(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.ralsCfg.Enabled = true
+	cfg.cdrsCfg.RaterConns = []string{"test"}
+	expected = "<CDRs> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.cdrsCfg.RaterConns = []string{}
 
 	cfg.cdrsCfg.AttributeSConns = []string{utils.MetaInternal}
 	expected = "<AttributeS> not enabled but requested by <CDRs> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.attributeSCfg.Enabled = true
+	cfg.cdrsCfg.AttributeSConns = []string{"test"}
+	expected = "<CDRs> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.cdrsCfg.AttributeSConns = []string{}
 
 	cfg.cdrsCfg.StatSConns = []string{utils.MetaInternal}
 	expected = "<StatS> not enabled but requested by <CDRs> component."
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.statsCfg.Enabled = true
+	cfg.cdrsCfg.StatSConns = []string{"test"}
+	expected = "<CDRs> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.cdrsCfg.StatSConns = []string{}
 
 	cfg.cdrsCfg.OnlineCDRExports = []string{"stringy"}
 	cfg.CdreProfiles = map[string]*CdreCfg{"stringx": &CdreCfg{}}
@@ -84,7 +113,12 @@ func TestConfigSanityCDRServer(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.cdrsCfg.OnlineCDRExports = []string{"stringx"}
+	cfg.cdrsCfg.ThresholdSConns = []string{"test"}
+	expected = "<CDRs> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.cdrsCfg.ThresholdSConns = []string{}
 
 	cfg.cdrsCfg.ThresholdSConns = []string{utils.MetaInternal}
 	expected = "<ThresholdS> not enabled but requested by <CDRs> component."
@@ -169,6 +203,12 @@ func TestConfigSanitySessionS(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+	cfg.sessionSCfg.ChargerSConns = []string{"test"}
+	expected = "<SessionS> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.sessionSCfg.ChargerSConns = []string{}
 	cfg.chargerSCfg.Enabled = true
 
 	cfg.sessionSCfg.RALsConns = []string{utils.MetaInternal}
@@ -176,6 +216,12 @@ func TestConfigSanitySessionS(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+	cfg.sessionSCfg.RALsConns = []string{"test"}
+	expected = "<SessionS> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.sessionSCfg.RALsConns = []string{}
 	cfg.ralsCfg.Enabled = true
 
 	cfg.sessionSCfg.ResSConns = []string{utils.MetaInternal}
@@ -183,6 +229,12 @@ func TestConfigSanitySessionS(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+	cfg.sessionSCfg.ResSConns = []string{"test"}
+	expected = "<SessionS> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.sessionSCfg.ResSConns = []string{}
 	cfg.resourceSCfg.Enabled = true
 
 	cfg.sessionSCfg.ThreshSConns = []string{utils.MetaInternal}
@@ -190,6 +242,12 @@ func TestConfigSanitySessionS(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+	cfg.sessionSCfg.ThreshSConns = []string{"test"}
+	expected = "<SessionS> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.sessionSCfg.ThreshSConns = []string{}
 	cfg.thresholdSCfg.Enabled = true
 
 	cfg.sessionSCfg.StatSConns = []string{utils.MetaInternal}
@@ -197,6 +255,12 @@ func TestConfigSanitySessionS(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+	cfg.sessionSCfg.StatSConns = []string{"test"}
+	expected = "<SessionS> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.sessionSCfg.StatSConns = []string{}
 	cfg.statsCfg.Enabled = true
 
 	cfg.sessionSCfg.SupplSConns = []string{utils.MetaInternal}
@@ -204,6 +268,12 @@ func TestConfigSanitySessionS(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+	cfg.sessionSCfg.SupplSConns = []string{"test"}
+	expected = "<SessionS> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.sessionSCfg.SupplSConns = []string{}
 	cfg.supplierSCfg.Enabled = true
 
 	cfg.sessionSCfg.AttrSConns = []string{utils.MetaInternal}
@@ -211,6 +281,12 @@ func TestConfigSanitySessionS(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+	cfg.sessionSCfg.AttrSConns = []string{"test"}
+	expected = "<SessionS> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.sessionSCfg.AttrSConns = []string{}
 	cfg.attributeSCfg.Enabled = true
 
 	cfg.sessionSCfg.CDRsConns = []string{utils.MetaInternal}
@@ -218,14 +294,31 @@ func TestConfigSanitySessionS(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+	cfg.sessionSCfg.CDRsConns = []string{"test"}
+	expected = "<SessionS> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.sessionSCfg.CDRsConns = []string{}
 	cfg.cdrsCfg.Enabled = true
+	cfg.sessionSCfg.ReplicationConns = []string{"test"}
+	expected = "<SessionS> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.sessionSCfg.ReplicationConns = []string{}
 
 	cfg.cacheCfg[utils.CacheClosedSessions].Limit = 0
 	expected = "<CacheS> *closed_sessions needs to be != 0, received: 0"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-
+	cfg.cacheCfg[utils.CacheClosedSessions].Limit = 1
+	expected = "<SessionS> The following protected field can't be altered by session: <CGRID>"
+	cfg.sessionSCfg.AlterableFields = utils.NewStringSet([]string{utils.CGRID})
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
 }
 
 func TestConfigSanityFreeSWITCHAgent(t *testing.T) {
@@ -247,6 +340,11 @@ func TestConfigSanityFreeSWITCHAgent(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+	cfg.fsAgentCfg.SessionSConns = []string{"test"}
+	expected = "<FreeSWITCHAgent> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
 }
 
 func TestConfigSanityKamailioAgent(t *testing.T) {
@@ -261,6 +359,11 @@ func TestConfigSanityKamailioAgent(t *testing.T) {
 
 	cfg.kamAgentCfg.SessionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}
 	expected = "<SessionS> not enabled but requested by <KamailioAgent> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.kamAgentCfg.SessionSConns = []string{"test"}
+	expected = "<KamailioAgent> Connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -281,6 +384,11 @@ func TestConfigSanityAsteriskAgent(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+	cfg.asteriskAgentCfg.SessionSConns = []string{"test"}
+	expected = "<AsteriskAgent> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
 }
 
 func TestConfigSanityDAgent(t *testing.T) {
@@ -295,6 +403,11 @@ func TestConfigSanityDAgent(t *testing.T) {
 
 	cfg.diameterAgentCfg.SessionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}
 	expected = "<SessionS> not enabled but requested by <DiameterAgent> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.diameterAgentCfg.SessionSConns = []string{"test"}
+	expected = "<DiameterAgent> Connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -315,6 +428,11 @@ func TestConfigSanityRadiusAgent(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+	cfg.radiusAgentCfg.SessionSConns = []string{"test"}
+	expected = "<RadiusAgent> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
 }
 
 func TestConfigSanityDNSAgent(t *testing.T) {
@@ -329,6 +447,11 @@ func TestConfigSanityDNSAgent(t *testing.T) {
 
 	cfg.dnsAgentCfg.SessionSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}
 	expected = "<SessionS> not enabled but requested by <DNSAgent> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.dnsAgentCfg.SessionSConns = []string{"test"}
+	expected = "<DNSAgent> Connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -347,6 +470,12 @@ func TestConfigSanityHTTPAgent(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+	cfg.httpAgentCfg[0].SessionSConns = []string{"test"}
+	expected = "<HTTPAgent> Template with ID <Test> has connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.httpAgentCfg[0].SessionSConns = []string{}
 	cfg.sessionSCfg.Enabled = true
 
 	cfg.httpAgentCfg = HttpAgentCfgs{
@@ -383,8 +512,13 @@ func TestConfigSanityHTTPAgent(t *testing.T) {
 		ProcessRuns: 1,
 		Enabled:     false,
 	}
-
 	cfg.chargerSCfg.Enabled = true
+	cfg.attributeSCfg.Enabled = false
+	cfg.chargerSCfg.AttributeSConns = []string{utils.MetaInternal}
+	expected = "<AttributeS> not enabled but requested by <ChargerS> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
 	cfg.chargerSCfg.AttributeSConns = []string{"Invalid"}
 
 	expected = "<ChargerS> Connection with id: <Invalid> not defined"
@@ -403,6 +537,11 @@ func TestConfigSanityResourceLimiter(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+	cfg.resourceSCfg.ThresholdSConns = []string{"test"}
+	expected = "<ResourceS> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
 }
 
 func TestConfigSanityStatS(t *testing.T) {
@@ -412,6 +551,11 @@ func TestConfigSanityStatS(t *testing.T) {
 		ThresholdSConns: []string{utils.MetaInternal},
 	}
 	expected := "<ThresholdS> not enabled but requested by <Stats> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.statsCfg.ThresholdSConns = []string{"test"}
+	expected = "<Stats> Connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -427,6 +571,12 @@ func TestConfigSanitySupplierS(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+	cfg.supplierSCfg.ResourceSConns = []string{"test"}
+	expected = "<SupplierS> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.supplierSCfg.ResourceSConns = []string{utils.MetaInternal}
 	cfg.resourceSCfg.Enabled = true
 
 	cfg.supplierSCfg.StatSConns = []string{utils.MetaInternal}
@@ -434,10 +584,21 @@ func TestConfigSanitySupplierS(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
+	cfg.supplierSCfg.StatSConns = []string{"test"}
+	expected = "<SupplierS> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.supplierSCfg.StatSConns = []string{utils.MetaInternal}
 	cfg.statsCfg.Enabled = true
 
 	cfg.supplierSCfg.AttributeSConns = []string{utils.MetaInternal}
 	expected = "<AttributeS> not enabled but requested by <SupplierS> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.supplierSCfg.AttributeSConns = []string{"test"}
+	expected = "<SupplierS> Connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -450,6 +611,11 @@ func TestConfigSanityScheduler(t *testing.T) {
 		CDRsConns: []string{utils.MetaInternal},
 	}
 	expected := "<CDRs> not enabled but requested by <SchedulerS> component."
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.schedulerCfg.CDRsConns = []string{"test"}
+	expected = "<SchedulerS> Connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -508,12 +674,38 @@ func TestConfigSanityEventReader(t *testing.T) {
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
-	cfg.ersCfg.Readers[0].FieldSep = utils.InInFieldSep
-
-	cfg.ersCfg.Readers[0].ID = "test4"
-	cfg.ersCfg.Readers[0].Type = utils.MetaKafkajsonMap
-	cfg.ersCfg.Readers[0].RunDelay = 1
+	cfg.ersCfg.Readers[0] = &EventReaderCfg{
+		ID:       "test4",
+		Type:     utils.MetaKafkajsonMap,
+		RunDelay: 1,
+		FieldSep: utils.InInFieldSep,
+	}
 	expected = "<ERs> RunDelay field can not be bigger than zero for reader with ID: test4"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.ersCfg.Readers[0] = &EventReaderCfg{
+		ID:            "test5",
+		Type:          utils.MetaFileXML,
+		RunDelay:      0,
+		FieldSep:      utils.InInFieldSep,
+		ProcessedPath: "not/a/path",
+		SourcePath:    "not/a/path",
+	}
+	expected = "<ERs> Nonexistent folder: not/a/path for reader with ID: test5"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+
+	cfg.ersCfg.Readers[0] = &EventReaderCfg{
+		ID:            "test5",
+		Type:          utils.MetaFileFWV,
+		RunDelay:      0,
+		FieldSep:      utils.InInFieldSep,
+		ProcessedPath: "not/a/path",
+		SourcePath:    "not/a/path",
+	}
+	expected = "<ERs> Nonexistent folder: not/a/path for reader with ID: test5"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -597,6 +789,49 @@ func TestConfigSanityDataDB(t *testing.T) {
 	}
 
 }
+
+func TestConfigSanityAPIer(t *testing.T) {
+	cfg, _ = NewDefaultCGRConfig()
+	cfg.apier.AttributeSConns = []string{utils.MetaInternal}
+
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<AttributeS> not enabled but requested by <ApierV1> component." {
+		t.Error(err)
+	}
+	cfg.apier.AttributeSConns = []string{"test"}
+	expected := "<ApierV1> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.apier.AttributeSConns = []string{utils.MetaInternal}
+	cfg.attributeSCfg.Enabled = true
+	cfg.apier.SchedulerConns = []string{utils.MetaInternal}
+
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<SchedulerS> not enabled but requested by <ApierV1> component." {
+		t.Error(err)
+	}
+	cfg.apier.SchedulerConns = []string{"test"}
+	expected = "<ApierV1> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+}
+
+func TestConfigSanityDispatcher(t *testing.T) {
+	cfg, _ = NewDefaultCGRConfig()
+	cfg.dispatcherSCfg = &DispatcherSCfg{
+		Enabled:         true,
+		AttributeSConns: []string{utils.MetaInternal},
+	}
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<AttributeS> not enabled but requested by <DispatcherS> component." {
+		t.Error(err)
+	}
+	cfg.dispatcherSCfg.AttributeSConns = []string{"test"}
+	expected := "<DispatcherS> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+}
+
 func TestConfigSanityCacheS(t *testing.T) {
 	cfg, _ = NewDefaultCGRConfig()
 
@@ -608,5 +843,43 @@ func TestConfigSanityCacheS(t *testing.T) {
 	cfg.cacheCfg = map[string]*CacheParamCfg{utils.CacheLoadIDs: &CacheParamCfg{Limit: 9}}
 	if err := cfg.checkConfigSanity(); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestConfigSanityFilterS(t *testing.T) {
+	cfg, _ = NewDefaultCGRConfig()
+	cfg.filterSCfg.StatSConns = []string{utils.MetaInternal}
+
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<Stats> not enabled but requested by <FilterS> component." {
+		t.Error(err)
+	}
+	cfg.filterSCfg.StatSConns = []string{"test"}
+	expected := "<FilterS> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.filterSCfg.StatSConns = []string{}
+
+	cfg.filterSCfg.ResourceSConns = []string{utils.MetaInternal}
+
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<ResourceS> not enabled but requested by <FilterS> component." {
+		t.Error(err)
+	}
+	cfg.filterSCfg.ResourceSConns = []string{"test"}
+	expected = "<FilterS> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
+	}
+	cfg.filterSCfg.ResourceSConns = []string{}
+
+	cfg.filterSCfg.RALsConns = []string{utils.MetaInternal}
+
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != "<RALs> not enabled but requested by <FilterS> component." {
+		t.Error(err)
+	}
+	cfg.filterSCfg.RALsConns = []string{"test"}
+	expected = "<FilterS> Connection with id: <test> not defined"
+	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
+		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 }
