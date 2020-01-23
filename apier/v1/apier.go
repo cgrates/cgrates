@@ -687,8 +687,13 @@ func (apiv1 *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err
 		if err := apiv1.DataManager.SetActionPlan(ap.Id, ap, true, utils.NonTransactional); err != nil {
 			return 0, utils.NewErrServerError(err)
 		}
-		if err = apiv1.DataManager.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{ap.Id}, true); err != nil {
-			return 0, utils.NewErrServerError(err)
+		if err := apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
+			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+				AttrReloadCache: utils.AttrReloadCache{
+					ArgsCache: utils.ArgsCache{ActionPlanIDs: &[]string{ap.Id}},
+				},
+			}, reply); err != nil {
+			return 0, err
 		}
 		for acntID := range prevAccountIDs {
 			if err := apiv1.DataManager.RemAccountActionPlans(acntID, []string{attrs.Id}); err != nil {
@@ -696,9 +701,14 @@ func (apiv1 *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) (err
 			}
 		}
 		if len(prevAccountIDs) != 0 {
-			if err = apiv1.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, prevAccountIDs.Slice(), true); err != nil &&
-				err.Error() != utils.ErrNotFound.Error() {
-				return 0, utils.NewErrServerError(err)
+			sl := prevAccountIDs.Slice()
+			if err := apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+					AttrReloadCache: utils.AttrReloadCache{
+						ArgsCache: utils.ArgsCache{AccountActionPlanIDs: &sl},
+					},
+				}, reply); err != nil {
+				return 0, err
 			}
 		}
 		return 0, nil
@@ -792,9 +802,14 @@ func (apiv1 *ApierV1) RemoveActionPlan(attr AttrGetActionPlan, reply *string) (e
 			}
 		}
 		if len(prevAccountIDs) != 0 {
-			if err = apiv1.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, prevAccountIDs.Slice(), true); err != nil &&
-				err.Error() != utils.ErrNotFound.Error() {
-				return 0, utils.NewErrServerError(err)
+			sl := prevAccountIDs.Slice()
+			if err := apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+					AttrReloadCache: utils.AttrReloadCache{
+						ArgsCache: utils.ArgsCache{AccountActionPlanIDs: &sl},
+					},
+				}, reply); err != nil {
+				return 0, err
 			}
 		}
 		return 0, nil
