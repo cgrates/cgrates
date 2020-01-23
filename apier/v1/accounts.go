@@ -135,7 +135,12 @@ func (api *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *stri
 		if err != nil {
 			return 0, err
 		}
-		if err = api.DataManager.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, []string{attrs.ActionPlanId}, true); err != nil {
+		if err := api.ConnMgr.Call(api.Config.ApierCfg().CachesConns, nil,
+			utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+				AttrReloadCache: utils.AttrReloadCache{
+					ArgsCache: utils.ArgsCache{ActionPlanIDs: &[]string{attrs.ActionPlanId}},
+				},
+			}, reply); err != nil {
 			return 0, err
 		}
 		for _, acntID := range remAcntAPids {
@@ -144,8 +149,13 @@ func (api *ApierV1) RemoveActionTiming(attrs AttrRemoveActionTiming, reply *stri
 			}
 		}
 		if len(remAcntAPids) != 0 {
-			if err = api.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, remAcntAPids, true); err != nil {
-				return 0, nil
+			if err := api.ConnMgr.Call(api.Config.ApierCfg().CachesConns, nil,
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+					AttrReloadCache: utils.AttrReloadCache{
+						ArgsCache: utils.ArgsCache{AccountActionPlanIDs: &remAcntAPids},
+					},
+				}, reply); err != nil {
+				return 0, err
 			}
 		}
 		return 0, nil
@@ -236,13 +246,23 @@ func (api *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err er
 					apIDs[i] = actionPlanID
 					i++
 				}
-				if err := api.DataManager.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, apIDs, true); err != nil {
+				if err := api.ConnMgr.Call(api.Config.ApierCfg().CachesConns, nil,
+					utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+						AttrReloadCache: utils.AttrReloadCache{
+							ArgsCache: utils.ArgsCache{ActionPlanIDs: &apIDs},
+						},
+					}, reply); err != nil {
 					return 0, err
 				}
 				if err := api.DataManager.SetAccountActionPlans(accID, acntAPids, true); err != nil {
 					return 0, err
 				}
-				if err = api.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true); err != nil {
+				if err := api.ConnMgr.Call(api.Config.ApierCfg().CachesConns, nil,
+					utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+						AttrReloadCache: utils.AttrReloadCache{
+							ArgsCache: utils.ArgsCache{AccountActionPlanIDs: &[]string{accID}},
+						},
+					}, reply); err != nil {
 					return 0, err
 				}
 				return 0, nil
