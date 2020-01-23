@@ -180,7 +180,7 @@ With explanations in the comments:
 Config params
 ^^^^^^^^^^^^^
 
-Most of the parameters are explained in :ref:`configuration <engine_configuration>`, hence we mention here only the ones where additional info is necessary or there will  be particular implementation for *DiameterAgent*.
+Most of the parameters are explained in :ref:`configuration <engine_configuration>`, hence we mention here only the ones where additional info is necessary or there will be particular implementation for *DiameterAgent*.
 
 
 listen_net
@@ -348,3 +348,6 @@ type
 
 	* **\*value_exponent**
 		Calculates the exponent of a value. It requires two values: *$val;$exp*
+
+	* **\*template**
+		Specifies a template of fields to be injected here. Value should be one of the template ids defined.
