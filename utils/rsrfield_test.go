@@ -23,7 +23,13 @@ import (
 	"testing"
 )
 
-func TestNewRSRField1(t *testing.T) {
+func TestNewRSRField(t *testing.T) {
+	// Empty case
+	if rcv, err := NewRSRField(EmptyString); err != nil {
+		t.Error(err)
+	} else if rcv != nil {
+		t.Error("Expecting nill, received: ", rcv)
+	}
 	// Normal case
 	rulesStr := `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/(someval)`
 	filter, _ := NewRSRFilter("someval")
@@ -79,6 +85,18 @@ func TestNewRSRField1(t *testing.T) {
 		t.Error("Unexpected error: ", err.Error())
 	} else if !reflect.DeepEqual(expRSRField3, rsrField) {
 		t.Errorf("Expecting: %v, received: %v", expRSRField3, rsrField)
+	}
+	if _, err := NewRSRField("(test)"); err == nil || err.Error() != "Invalid FilterStartValue in string: (test)" {
+		t.Error(err)
+	}
+	if _, err := NewRSRField("{*test"); err == nil || err.Error() != "Invalid converter value in string: {*test, err: invalid converter terminator" {
+		t.Error(err)
+	}
+	if _, err := NewRSRField("^t::e::s::t::"); err == nil || err.Error() != "Invalid RSRField string: ^t::e::s::t::" {
+		t.Error(err)
+	}
+	if _, err := NewRSRField("~-1"); err == nil || err.Error() != "Invalid Split of Search&Replace field rule. ~-1" {
+		t.Error(err)
 	}
 }
 
