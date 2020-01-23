@@ -29,18 +29,16 @@ import (
 )
 
 // NewXmlProvider constructs a DataProvider
-func NewXmlProvider(req *xmlquery.Node, cdrPath utils.HierarchyPath, pathPrfx string) (dP DataProvider) {
-	dP = &XmlProvider{req: req, cdrPath: cdrPath, cache: NewNavigableMap(nil), pathPrfx: pathPrfx}
+func NewXmlProvider(req *xmlquery.Node, cdrPath utils.HierarchyPath) (dP DataProvider) {
+	dP = &XmlProvider{req: req, cdrPath: cdrPath, cache: NewNavigableMap(nil)}
 	return
 }
 
 // XmlProvider implements engine.DataProvider so we can pass it to filters
 type XmlProvider struct {
-	req      *xmlquery.Node
-	cdrPath  utils.HierarchyPath //used to compute relative path
-	cache    *NavigableMap
-	pathPrfx string // if this comes in path it will be ignored
-	// pathPrfx should be reviewed once the cdrc is removed
+	req     *xmlquery.Node
+	cdrPath utils.HierarchyPath //used to compute relative path
+	cache   *NavigableMap
 }
 
 // String is part of engine.DataProvider interface
@@ -54,18 +52,12 @@ func (xP *XmlProvider) FieldAsInterface(fldPath []string) (data interface{}, err
 	if len(fldPath) == 0 {
 		return nil, utils.ErrNotFound
 	}
-	if xP.pathPrfx != utils.EmptyString && fldPath[0] != xP.pathPrfx {
-		return "", utils.ErrPrefixNotFound(strings.Join(fldPath, utils.NestingSep))
-	}
 	if data, err = xP.cache.FieldAsInterface(fldPath); err == nil ||
 		err != utils.ErrNotFound { // item found in cache
 		return
 	}
-	err = nil                                                   // cancel previous err
-	relPath := utils.HierarchyPath(fldPath[len(xP.cdrPath)+1:]) // Need relative path to the xmlElmnt
-	if xP.pathPrfx == utils.EmptyString {                       // temporary fix untile re remove cdrc
-		relPath = utils.HierarchyPath(fldPath[len(xP.cdrPath):])
-	}
+	err = nil // cancel previous err
+	relPath := utils.HierarchyPath(fldPath[len(xP.cdrPath):])
 	var slctrStr string
 	for i := range relPath {
 		if sIdx := strings.Index(relPath[i], "["); sIdx != -1 {
