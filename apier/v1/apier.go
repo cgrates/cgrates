@@ -151,14 +151,24 @@ func (apiv1 *ApierV1) SetDestination(attrs utils.AttrSetDestination, reply *stri
 	if err := apiv1.DataManager.SetDestination(dest, utils.NonTransactional); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err = apiv1.DataManager.CacheDataFromDB(utils.DESTINATION_PREFIX, []string{attrs.Id}, true); err != nil {
-		return
+	if err := apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+			AttrReloadCache: utils.AttrReloadCache{
+				ArgsCache: utils.ArgsCache{DestinationIDs: &[]string{attrs.Id}},
+			},
+		}, reply); err != nil {
+		return err
 	}
 	if err = apiv1.DataManager.UpdateReverseDestination(oldDest, dest, utils.NonTransactional); err != nil {
 		return
 	}
-	if err = apiv1.DataManager.CacheDataFromDB(utils.REVERSE_DESTINATION_PREFIX, dest.Prefixes, true); err != nil {
-		return
+	if err := apiv1.ConnMgr.Call(apiv1.Config.ApierCfg().CachesConns, nil,
+		utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+			AttrReloadCache: utils.AttrReloadCache{
+				ArgsCache: utils.ArgsCache{ReverseDestinationIDs: &dest.Prefixes},
+			},
+		}, reply); err != nil {
+		return err
 	}
 	*reply = utils.OK
 	return nil
