@@ -246,21 +246,13 @@ func (api *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) (err er
 					apIDs[i] = actionPlanID
 					i++
 				}
-				if err := api.ConnMgr.Call(api.Config.ApierCfg().CachesConns, nil,
-					utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
-						AttrReloadCache: utils.AttrReloadCache{
-							ArgsCache: utils.ArgsCache{ActionPlanIDs: &apIDs},
-						},
-					}, reply); err != nil {
-					return 0, err
-				}
 				if err := api.DataManager.SetAccountActionPlans(accID, acntAPids, true); err != nil {
 					return 0, err
 				}
 				if err := api.ConnMgr.Call(api.Config.ApierCfg().CachesConns, nil,
 					utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
 						AttrReloadCache: utils.AttrReloadCache{
-							ArgsCache: utils.ArgsCache{AccountActionPlanIDs: &[]string{accID}},
+							ArgsCache: utils.ArgsCache{AccountActionPlanIDs: &[]string{accID}, ActionPlanIDs: &apIDs},
 						},
 					}, reply); err != nil {
 					return 0, err
