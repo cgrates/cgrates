@@ -409,28 +409,28 @@ func TestXMLIndexes(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	dP := NewXmlProvider(doc, utils.HierarchyPath([]string{}), utils.MetaReq)
-	if data, err := dP.FieldAsString([]string{"*req", "complete-success-notification", "userid"}); err != nil {
+	dP := NewXmlProvider(doc, utils.HierarchyPath([]string{}))
+	if data, err := dP.FieldAsString([]string{"complete-success-notification", "userid"}); err != nil {
 		t.Error(err)
 	} else if data != "386" {
 		t.Errorf("expecting: 386, received: <%s>", data)
 	}
-	if data, err := dP.FieldAsString([]string{"*req", "complete-success-notification", "username"}); err != nil {
+	if data, err := dP.FieldAsString([]string{"complete-success-notification", "username"}); err != nil {
 		t.Error(err)
 	} else if data != "sampleusername" {
 		t.Errorf("expecting: sampleusername, received: <%s>", data)
 	}
-	if data, err := dP.FieldAsString([]string{"*req", "complete-success-notification", "callleg", "seconds"}); err != nil {
+	if data, err := dP.FieldAsString([]string{"complete-success-notification", "callleg", "seconds"}); err != nil {
 		t.Error(err)
 	} else if data != "38" {
 		t.Errorf("expecting: 38, received: <%s>", data)
 	}
-	if data, err := dP.FieldAsString([]string{"*req", "complete-success-notification", "callleg[1]", "seconds"}); err != nil {
+	if data, err := dP.FieldAsString([]string{"complete-success-notification", "callleg[1]", "seconds"}); err != nil {
 		t.Error(err)
 	} else if data != "37" {
 		t.Errorf("expecting: 37, received: <%s>", data)
 	}
-	if data, err := dP.FieldAsString([]string{"*req", "complete-success-notification", "callleg[@calllegid='222147']", "seconds"}); err != nil {
+	if data, err := dP.FieldAsString([]string{"complete-success-notification", "callleg[@calllegid='222147']", "seconds"}); err != nil {
 		t.Error(err)
 	} else if data != "37" {
 		t.Errorf("expecting: 37, received: <%s>", data)

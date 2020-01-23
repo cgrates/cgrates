@@ -158,7 +158,7 @@ func (rdr *PartialCSVFileER) processFile(fPath, fName string) (err error) {
 		}
 		rowNr++ // increment the rowNr after checking if it's not the end of file
 		agReq := agents.NewAgentRequest(
-			config.NewSliceDP(record, utils.EmptyString), reqVars,
+			config.NewSliceDP(record), reqVars,
 			nil, nil, rdr.Config().Tenant,
 			rdr.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(rdr.Config().Timezone,
