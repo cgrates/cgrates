@@ -186,13 +186,23 @@ func (apiv2 *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 				apIDs[i] = actionPlanID
 				i++
 			}
-			if err := apiv2.DataManager.CacheDataFromDB(utils.ACTION_PLAN_PREFIX, apIDs, true); err != nil {
+			if err := apiv2.ConnMgr.Call(apiv2.Config.ApierCfg().CachesConns, nil,
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+					AttrReloadCache: utils.AttrReloadCache{
+						ArgsCache: utils.ArgsCache{ActionPlanIDs: &apIDs},
+					},
+				}, reply); err != nil {
 				return 0, err
 			}
 			if err := apiv2.DataManager.SetAccountActionPlans(accID, acntAPids, true); err != nil {
 				return 0, err
 			}
-			return 0, apiv2.DataManager.CacheDataFromDB(utils.AccountActionPlansPrefix, []string{accID}, true)
+			return 0, apiv2.ConnMgr.Call(apiv2.Config.ApierCfg().CachesConns, nil,
+				utils.CacheSv1ReloadCache, utils.AttrReloadCacheWithArgDispatcher{
+					AttrReloadCache: utils.AttrReloadCache{
+						ArgsCache: utils.ArgsCache{AccountActionPlanIDs: &[]string{accID}},
+					},
+				}, reply)
 		}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.ACTION_PLAN_PREFIX)
 		if err != nil {
 			return 0, err
