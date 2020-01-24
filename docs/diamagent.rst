@@ -11,11 +11,11 @@ Implements Diameter_ protocol in a standard agnostic manner, giving users the ab
 
 Used mostly in modern mobile networks (LTE/xG).
 
-The **DiameterAgent** is configured via *diameter_agent* section  within :ref:`configuration <engine_configuration>`.
-
 
 Configuration
 -------------
+
+The **DiameterAgent** is configured within *diameter_agent* section from :ref:`JSON configuration <engine_configuration>`.
 
 
 Sample config 
@@ -26,147 +26,235 @@ With explanations in the comments:
 ::
 
  "diameter_agent": {
-	"enabled": false,											// enables the diameter agent: <true|false>
-	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y/x1.y1.z1.y1:1234>
-	"listen_net": "tcp",										// transport type for diameter <tcp|sctp>
-	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
-	"sessions_conns": ["*internal"],
-	"origin_host": "CGR-DA",									// diameter Origin-Host AVP used in replies
-	"origin_realm": "cgrates.org",								// diameter Origin-Realm AVP used in replies
-	"vendor_id": 0,												// diameter Vendor-Id AVP used in replies
-	"product_name": "CGRateS",									// diameter Product-Name AVP used in replies
-	"concurrent_requests": -1,									// limit the number of active requests processed by the server <-1|0-n>
-	"synced_conn_requests": false,								// process one request at the time per connection
-	"asr_template": "*asr",										// enable AbortSession message being sent to client 
-																// forcing session disconnection from CGRateS side
+	"enabled": false,					// enables the diameter agent: <true|false>
+	"listen": "127.0.0.1:3868",			// address where to listen for diameter requests <x.y.z.y/x1.y1.z1.y1:1234>
+	"listen_net": "tcp",				// transport type for diameter <tcp|sctp>
+	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	// path towards directory
+										//   holding additional dictionaries to load
+	"sessions_conns": ["*internal"],	// connection towards SessionS
+	"origin_host": "CGR-DA",			// diameter Origin-Host AVP used in replies
+	"origin_realm": "cgrates.org",		// diameter Origin-Realm AVP used in replies
+	"vendor_id": 0,						// diameter Vendor-Id AVP used in replies
+	"product_name": "CGRateS",			// diameter Product-Name AVP used in replies
+	"concurrent_requests": -1,			// limit the number of active requests processed by the server <-1|0-n>
+	"synced_conn_requests": false,		// process one request at the time per connection
+	"asr_template": "*asr",				// enable AbortSession message being sent to client 
+										// forcing session disconnection from CGRateS side
 
-	"templates":{												// message templates which can be injected within request/replies
-		"*err": [
-				{"tag": "SessionId", "field_id": "Session-Id", "type": "*composed",
-					"value": "~*req.Session-Id", "mandatory": true},
-				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*composed",
-					"value": "~*vars.OriginHost", "mandatory": true},
-				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*composed",
-					"value": "~*vars.OriginRealm", "mandatory": true},
+	"templates":{						// message templates which can be injected within request/replies
+		"*err": [						// *err is used mostly in automatic diameter replies with errors
+				{
+					"tag": "SessionId", "field_id": "Session-Id",
+					"type": "*variable", "mandatory": true,
+					"value": "~*req.Session-Id"
+				},
+				{
+					"tag": "OriginHost", "field_id": "Origin-Host",
+					"type": "*variable", "mandatory": true,
+					"value": "~*vars.OriginHost"
+				},
+				{
+					"tag": "OriginRealm", "field_id": "Origin-Realm",
+					"type": "*variable", "mandatory": true,
+					"value": "~*vars.OriginRealm"
+				},
 		],
-		"*cca": [
-				{"tag": "SessionId", "field_id": "Session-Id", "type": "*composed",
-					"value": "~*req.Session-Id", "mandatory": true},
-				{"tag": "ResultCode", "field_id": "Result-Code", "type": "*constant",
-					"value": "2001"},
-				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*composed",
-					"value": "~*vars.OriginHost", "mandatory": true},
-				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*composed",
-					"value": "~*vars.OriginRealm", "mandatory": true},
-				{"tag": "AuthApplicationId", "field_id": "Auth-Application-Id", "type": "*composed",
-					 "value": "~*vars.*appid", "mandatory": true},
-				{"tag": "CCRequestType", "field_id": "CC-Request-Type", "type": "*composed",
-					"value": "~*req.CC-Request-Type", "mandatory": true},
-				{"tag": "CCRequestNumber", "field_id": "CC-Request-Number", "type": "*composed",
-					"value": "~*req.CC-Request-Number", "mandatory": true},
+		"*cca": [		// *cca is used into CallControlAnswer messages
+				{
+					"tag": "SessionId", "field_id": "Session-Id",
+					"type": "*composed", "mandatory": true,
+					"value": "~*req.Session-Id"
+				},
+				{
+					"tag": "ResultCode", "field_id": "Result-Code",
+					"type": "*constant", "value": "2001"},
+				{
+					"tag": "OriginHost", "field_id": "Origin-Host",
+					"type": "*variable", "mandatory": true,
+					"value": "~*vars.OriginHost"
+				},
+				{
+					"tag": "OriginRealm", "field_id": "Origin-Realm",
+					"type": "*variable", "mandatory": true,
+					"value": "~*vars.OriginRealm"
+				},
+				{
+					"tag": "AuthApplicationId",
+					"field_id": "Auth-Application-Id",
+					"type": "*variable", "mandatory": true,
+					 "value": "~*vars.*appid"
+				},
+				{
+					"tag": "CCRequestType",
+					"field_id": "CC-Request-Type",
+					"type": "*variable", "mandatory": true,
+					"value": "~*req.CC-Request-Type"
+				},
+				{
+					"tag": "CCRequestNumber",
+					"field_id": "CC-Request-Number",
+					"type": "*variable", "mandatory": true,
+					"value": "~*req.CC-Request-Number"
+				},
 		],
-		"*asr": [
-				{"tag": "SessionId", "field_id": "Session-Id", "type": "*variable",
-					"value": "~*req.Session-Id", "mandatory": true},
-				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*variable",
-					"value": "~*req.Destination-Host", "mandatory": true},
-				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*variable",
-					"value": "~*req.Destination-Realm", "mandatory": true},
-				{"tag": "DestinationRealm", "field_id": "Destination-Realm", "type": "*variable",
-					"value": "~*req.Origin-Realm", "mandatory": true},
-				{"tag": "DestinationHost", "field_id": "Destination-Host", "type": "*variable",
-					"value": "~*req.Origin-Host", "mandatory": true},
-				{"tag": "AuthApplicationId", "field_id": "Auth-Application-Id", "type": "*variable",
-					 "value": "~*vars.*appid", "mandatory": true},
-				{"tag": "UserName", "field_id": "User-Name", "type": "*variable",
-					"value": "~*req.User-Name", "mandatory": true},
-				{"tag": "OriginStateID", "field_id": "Origin-State-Id", "type": "*constant",
-					"value": "1"},
+		"*asr": [	// *asr is used to build AbortSessionRequest
+				{
+					"tag": "SessionId", "field_id": "Session-Id",
+					"type": "*variable", "mandatory": true,
+					"value": "~*req.Session-Id"
+				},
+				{
+					"tag": "OriginHost", "field_id": "Origin-Host",
+					"type": "*variable", "mandatory": true,
+					"value": "~*req.Destination-Host"
+				},
+				{
+					"tag": "OriginRealm", "field_id": "Origin-Realm",
+					"type": "*variable", "mandatory": true,
+					"value": "~*req.Destination-Realm"
+				},
+				{
+					"tag": "DestinationRealm",
+					"field_id": "Destination-Realm",
+					"type": "*variable", "mandatory": true,
+					"value": "~*req.Origin-Realm"
+				},
+				{
+					"tag": "DestinationHost", 
+					"field_id": "Destination-Host",
+					"type": "*variable", "mandatory": true,
+					"value": "~*req.Origin-Host"
+				},
+				{
+					"tag": "AuthApplicationId", 
+					"field_id": "Auth-Application-Id",
+					"type": "*variable", "mandatory": true,
+					 "value": "~*vars.*appid"
+				},
+				{
+					"tag": "UserName", "field_id": "User-Name",
+					"type": "*variable", "mandatory": true,
+					"value": "~*req.User-Name"
+				},
+				{
+					"tag": "OriginStateID", "field_id": "Origin-State-Id",
+					"type": "*constant", "value": "1"
+				}
 		]
 	},
-	"request_processors": [ 									// decision logic for message processing
+	"request_processors": [		// decision logic for message processing
 		{
-			"id": "SMSes", 										// id is used for debug in logs (ie: using *log flag)
-			"filters": [										// list of filters to be applied on message for this processor to run
+			"id": "SMSes",		// id is used for debug in logs (ie: using *log flag)
+			"filters": [		// list of filters to be applied on message for this processor to run
 				"*string:~*vars.*cmd:CCR",
 				"*string:~*req.CC-Request-Type:4",
 				"*string:~*req.Service-Context-Id:LPP"
 			],
-			"flags": ["*event", "*accounts", "*cdrs"],			// influence processing logic within CGRateS workflow
-			"request_fields":[									// data exchanged between Diameter and CGRateS
+			"flags": ["*event", "*accounts", "*cdrs"],	// influence processing logic within CGRateS workflow
+			"request_fields":[							// data exchanged between Diameter and CGRateS
 				{
-					"tag": "TOR", "field_id": "ToR", 			// tag is used in debug, field_id is the field on CGRateS side
-					"type": "*constant", "value": "*sms"}		// type defines the method to provide the value
+					"tag": "TOR",			// tag is used in debug, 
+					"field_id": "ToR",		// field_id is the field on CGRateS side
+					"type": "*constant",	// type defines the method to provide the value
+					"value": "*sms"}		
 				{
-					"tag": "OriginID", "field_id": "OriginID",	// OriginID will identify uniquely the session on CGRateS side
-					"type": "*variable", "mandatory": true,		// it's value will be taken from Diameter AVP:
-					"value": "~*req.Multiple-Services-Credit-Control.Service-Identifier"// Multiple-Services-Credit-Control.Service-Identifier 
+					"tag": "OriginID",		// OriginID will identify uniquely 
+					"field_id": "OriginID",	// the session on CGRateS side
+					"type": "*variable",	// it's value will be taken from Diameter AVP:
+					"mandatory": true,		// Multiple-Services-Credit-Control.Service-Identifier
+					"value": "~*req.Multiple-Services-Credit-Control.Service-Identifier"
 				},
 				{
-					"tag": "OriginHost", "field_id": "OriginHost",	// OriginHost combined with OriginID is used by CGRateS to build the CGRID
-					"mandatory": true, "type": "*constant", "value": "0.0.0.0"
+					"tag": "OriginHost",		// OriginHost combined with OriginID 
+					"field_id": "OriginHost",	// is used by CGRateS to build the CGRID
+					"mandatory": true,
+					"type": "*variable",		// have the value out of special variable: *vars
+					"value": "*vars.OriginHost"
 				},
 				{
-					"tag": "RequestType", "field_id": "RequestType",// RequestType tells SessionS which charging type to apply for the event
-					"type": "*constant", "value": "*prepaid"
+					"tag": "RequestType",		// RequestType instructs SessionS 
+					"field_id": "RequestType",	//  about charging type to apply for the event
+					"type": "*constant",
+					"value": "*prepaid"
 				},
 				{
-					"tag": "Category", "field_id": "Category",		// Category serves for ataching Account and RatingProfile to the request
-					"type": "*constant", "value": "sms"
+					"tag": "Category",			// Category serves for ataching Account
+					"field_id": "Category",		//   and RatingProfile to the request
+					"type": "*constant",
+					"value": "sms"
 				},
 				{
-					"tag": "Account", "field_id": "Account",		// Account serves for ataching Account and RatingProfile to the request
-					"type": "*variable", "mandatory": true,			// value is taken from a groupped AVP (
-					"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]" // where Subscription-Id-Type is 0)
+					"tag": "Account",			// Account is required by charging
+					"field_id": "Account",
+					"type": "*variable",		// value is taken dynamically from a group AVP
+					"mandatory": true,			//   where Subscription-Id-Type is 0
+					"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]" 
 				},
 				{
-					"tag": "Destination", "field_id": "Destination",	// Destination is used for charging
-					"type": "*variable", "mandatory": true,				// value from Diameter will be mediated before sent to CGRateS
+					"tag": "Destination",		// Destination is used for charging
+					"field_id": "Destination",	// value from Diameter will be mediated before sent to CGRateS
+					"type": "*variable",
+					"mandatory": true,
 					"value": "~*req.Service-Information.SMS-Information.Recipient-Info.Recipient-Address.Address-Data:s/^\\+49(\\d+)/int${1}/:s/^0049(\\d+)/int${1}/:s/^49(\\d+)/int${1}/:s/^00(\\d+)/+${1}/:s/^[\\+]?(\\d+)/int${1}/:s/int(\\d+)/+49${1}/"
 				},
 				{
-					"tag": "Destination", "field_id": "Destination",	// Second Destination will overwrite the first in specific cases
-					"filters":[											// Only overwrite when filters are matching
+					"tag": "Destination",		// Second Destination will overwrite the first if filter matches
+					"field_id": "Destination",
+					"filters":[					// Only overwrite when filters are matching
 						"*notprefix:~*req.Service-Information.SMS-Information.Recipient-Info.Recipient-Address.Address-Data:49",
-						"*notprefix:~*req.Service-Information.SMS-Information.Recipient-Info.Recipient-Address.Address-Data:3958"
+						"*notprefix:~*req.Service-Information.SMS-Information.Recipient-Info.Recipient-Address.Address-Data:3312"
 					],
-					"type": "*variable", "mandatory": true,
-					"value": "~*req.Service-Information.SMS-Information.Recipient-Info.Recipient-Address.Address-Data:s/^[\\+]?(\\d+)/int${1}/:s/int(\\d+)/+00${1}/"},
+					"type": "*variable", 
+					"mandatory": true,
+					"value": "~*req.Service-Information.SMS-Information.Recipient-Info.Recipient-Address.Address-Data:s/^[\\+]?(\\d+)/int${1}/:s/int(\\d+)/+00${1}/"
+				},
 				{
-					"tag": "SetupTime", "field_id": "SetupTime",		// SetupTime is used by charging
+					"tag": "SetupTime",			// SetupTime is used by charging
+					"field_id": "SetupTime",
 					"type": "*variable",
-					"value": "~*req.Event-Timestamp", "mandatory": true
+					"value": "~*req.Event-Timestamp",
+					"mandatory": true
 				},
 				{
-					"tag": "AnswerTime", "field_id": "AnswerTime",		// AnswerTime is used by charging
-					"type": "*variable", , "mandatory": true, "value": "~*req.Event-Timestamp"
+					"tag": "AnswerTime",		// AnswerTime is used by charging
+					"field_id": "AnswerTime",
+					"type": "*variable",
+					"mandatory": true,
+					"value": "~*req.Event-Timestamp"
 				},
 				{
-					"tag": "Usage", "field_id": "Usage",				// Usage is used by charging
-					"type": "*variable", "mandatory": true,
+					"tag": "Usage",			// Usage is used by charging
+					"field_id": "Usage",				
+					"type": "*variable",
+					"mandatory": true,
 					"value": "~*req.Multiple-Services-Credit-Control.Requested-Service-Unit.CC-Service-Specific-Units"
 				},
 				{
 					"tag": "Originator-SCCP-Address",		// Originator-SCCP-Address is an extra field which we want in CDR
 					"field_id": "Originator-SCCP-Address",	// not used by CGRateS
-					"type": "*variable", "mandatory": true, 
+					"type": "*variable", "mandatory": true,
 					"value": "~*req.Service-Information.SMS-Information.Originator-SCCP-Address"
 				},
 			],
 			"reply_fields":[			// fields which are sent back to DiameterClient
 				{
-					"tag": "CCATemplate", 					// inject complete Template defined as *cca above
-					"type": "*template", "value": "*cca"
+					"tag": "CCATemplate",	// inject complete Template defined as *cca above
+					"type": "*template",
+					"value": "*cca"
 				},
 				{
-					"tag": "ResultCode",  						// Change the ResultCode if the reply received from CGRateS contains a 0 MaxUsage
+					"tag": "ResultCode",  	// Change the ResultCode if the reply received from CGRateS contains a 0 MaxUsage
 					"filters": ["*eq:~*cgrep.MaxUsage:0"],
-					"field_id": "Result-Code", "blocker": true,	// do not consider further fields if this one is processed
-					"type": "*constant", "value": "4012"},
-				{"tag": "ResultCode",							// Change the ResultCode AVP if there was an error received from CGRateS
+					"field_id": "Result-Code", 
+					"blocker": true,		// do not consider further fields if this one is processed
+					"type": "*constant",
+					"value": "4012"},
+				{"tag": "ResultCode",		// Change the ResultCode AVP if there was an error received from CGRateS
 					"filters": ["*notempty:~*cgrep.Error:"],
-					"field_id": "Result-Code", "blocker": true,
-					"type": "*constant", "value": "5030"}
+					"field_id": "Result-Code",
+					"blocker": true,
+					"type": "*constant",
+					"value": "5030"}
 			]
 		}
 
@@ -255,7 +343,7 @@ flags
 
 	The **auxiliary** flags only make sense in combination with **main** ones. 
 
-	Implemented flags are (in order of priority, and not working in simultaneously unless specified):
+	Implemented flags are (in order of priority, and not working simultaneously unless specified):
 
 	* **\*log**
 		Logs the Diameter request/reply. Can be used together with other *main* actions.
