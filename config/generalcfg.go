@@ -27,19 +27,20 @@ import (
 
 // General config section
 type GeneralCfg struct {
-	NodeID            string // Identifier for this engine instance
-	Logger            string // dictates the way logs are displayed/stored
-	LogLevel          int    // system wide log level, nothing higher than this will be logged
-	HttpSkipTlsVerify bool   // If enabled Http Client will accept any TLS certificate
-	RoundingDecimals  int    // Number of decimals to round end prices at
-	DBDataEncoding    string // The encoding used to store object data in strings: <msgpack|json>
-	TpExportPath      string // Path towards export folder for offline Tariff Plans
-	PosterAttempts    int    //
-	FailedPostsDir    string // Directory path where we store failed http requests
-	DefaultReqType    string // Use this request type if not defined on top
-	DefaultCategory   string // set default type of record
-	DefaultTenant     string // set default tenant
-	DefaultTimezone   string // default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	NodeID            string        // Identifier for this engine instance
+	Logger            string        // dictates the way logs are displayed/stored
+	LogLevel          int           // system wide log level, nothing higher than this will be logged
+	HttpSkipTlsVerify bool          // If enabled Http Client will accept any TLS certificate
+	RoundingDecimals  int           // Number of decimals to round end prices at
+	DBDataEncoding    string        // The encoding used to store object data in strings: <msgpack|json>
+	TpExportPath      string        // Path towards export folder for offline Tariff Plans
+	PosterAttempts    int           // Time to wait before writing the failed posts in a single file
+	FailedPostsDir    string        // Directory path where we store failed http requests
+	FailedPostsTTL    time.Duration // Directory path where we store failed http requests
+	DefaultReqType    string        // Use this request type if not defined on top
+	DefaultCategory   string        // set default type of record
+	DefaultTenant     string        // set default tenant
+	DefaultTimezone   string        // default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 	DefaultCaching    string
 	ConnectAttempts   int           // number of initial connection attempts before giving up
 	Reconnects        int           // number of recconect attempts in case of connection lost <-1 for infinite | nb>
@@ -109,6 +110,11 @@ func (gencfg *GeneralCfg) loadFromJsonCfg(jsnGeneralCfg *GeneralJsonCfg) (err er
 	}
 	if jsnGeneralCfg.Failed_posts_dir != nil {
 		gencfg.FailedPostsDir = *jsnGeneralCfg.Failed_posts_dir
+	}
+	if jsnGeneralCfg.Failed_posts_ttl != nil {
+		if gencfg.FailedPostsTTL, err = utils.ParseDurationWithNanosecs(*jsnGeneralCfg.Failed_posts_ttl); err != nil {
+			return err
+		}
 	}
 	if jsnGeneralCfg.Default_timezone != nil {
 		gencfg.DefaultTimezone = *jsnGeneralCfg.Default_timezone

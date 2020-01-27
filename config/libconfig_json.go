@@ -29,6 +29,7 @@ type GeneralJsonCfg struct {
 	Tpexport_dir         *string
 	Poster_attempts      *int
 	Failed_posts_dir     *string
+	Failed_posts_ttl     *string
 	Default_request_type *string
 	Default_category     *string
 	Default_tenant       *string

@@ -415,7 +415,7 @@ func (cdr *CDR) formatField(cfgFld *config.FCTemplate, httpSkipTLSCheck bool,
 			}
 			outVal = dtFld.Format(cfgFld.Layout)
 		}
-	case utils.META_HTTP_POST:
+	case utils.MetaHTTPPost:
 		var outValByte []byte
 		httpAddr, err := cfgFld.Value.ParseValue(utils.EmptyString)
 		if err != nil {

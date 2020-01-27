@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/rpc"
-	"os"
 	"path"
 	"reflect"
 	"sort"
@@ -579,16 +578,17 @@ func testV1CDRsProcessEventExportCheck(t *testing.T) {
 	var fileName string
 	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
 		fileName = file.Name()
-		filePath := path.Join(pecdrsCfg.GeneralCfg().FailedPostsDir, fileName)
-		if strings.HasPrefix(fileName, "cdr|*amqp_json_map") {
+		if strings.HasPrefix(fileName, "cdr|") {
 			foundFile = true
-			if readBytes, err := ioutil.ReadFile(filePath); err != nil {
-				t.Error(err)
-			} else if !reflect.DeepEqual(failoverContent, readBytes) { // Checking just the prefix should do since some content is dynamic
-				t.Errorf("Expecting: %v , received: %v", string(failoverContent), string(readBytes))
+			filePath := path.Join(pecdrsCfg.GeneralCfg().FailedPostsDir, fileName)
+			ev, err := engine.NewExportEventsFromFile(filePath)
+			if err != nil {
+				t.Fatal(err)
+			} else if len(ev.Events) == 0 {
+				t.Fatal("Expected at least one event")
 			}
-			if err := os.Remove(filePath); err != nil {
-				t.Error("Failed removing file: ", filePath)
+			if !reflect.DeepEqual(failoverContent, ev.Events[0]) {
+				t.Errorf("Expecting: %q, received: %q", string(failoverContent), ev.Events[0])
 			}
 		}
 	}

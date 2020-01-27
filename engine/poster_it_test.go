@@ -21,12 +21,12 @@ package engine
 
 import (
 	"encoding/json"
-	"io/ioutil"
-	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -36,38 +36,65 @@ type TestContent struct {
 }
 
 func TestHttpJsonPoster(t *testing.T) {
-
+	SetFailedPostCacheTTL(1)
+	config.CgrConfig().GeneralCfg().FailedPostsDir = "/tmp"
 	content := &TestContent{Var1: "Val1", Var2: "Val2"}
 	jsn, _ := json.Marshal(content)
-	filePath := "/tmp/cgr_test_http_poster.json"
-	if _, err := NewHTTPPoster(true, time.Duration(2*time.Second)).Post("http://localhost:8080/invalid", utils.CONTENT_JSON, jsn, 3, filePath); err != nil {
+	pstr, err := NewHTTPPoster(true, time.Duration(2*time.Second), "http://localhost:8080/invalid", utils.CONTENT_JSON, 3)
+	if err != nil {
 		t.Error(err)
 	}
-	if readBytes, err := ioutil.ReadFile(filePath); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(jsn, readBytes) {
-		t.Errorf("Expecting: %q, received: %q", string(jsn), string(readBytes))
+	if err = pstr.Post(jsn, utils.EmptyString); err == nil {
+		t.Error("Expected error")
 	}
-	if err := os.Remove(filePath); err != nil {
-		t.Error("Failed removing file: ", filePath)
+	addFailedPost("http://localhost:8080/invalid", utils.CONTENT_JSON, "test1", jsn)
+	time.Sleep(2)
+	fs, err := filepath.Glob("/tmp/test1*")
+	if err != nil {
+		t.Fatal(err)
+	} else if len(fs) == 0 {
+		t.Fatal("Expected at least one file")
+	}
+
+	ev, err := NewExportEventsFromFile(fs[0])
+	if err != nil {
+		t.Fatal(err)
+	} else if len(ev.Events) == 0 {
+		t.Fatal("Expected at least one event")
+	}
+	if !reflect.DeepEqual(jsn, ev.Events[0]) {
+		t.Errorf("Expecting: %q, received: %q", string(jsn), ev.Events[0])
 	}
 }
 
 func TestHttpBytesPoster(t *testing.T) {
-
+	SetFailedPostCacheTTL(1)
+	config.CgrConfig().GeneralCfg().FailedPostsDir = "/tmp"
 	content := []byte(`Test
 		Test2
 		`)
-	filePath := "/tmp/test_http_poster.http"
-	if _, err := NewHTTPPoster(true, time.Duration(2*time.Second)).Post("http://localhost:8080/invalid", utils.CONTENT_TEXT, content, 3, filePath); err != nil {
+	pstr, err := NewHTTPPoster(true, time.Duration(2*time.Second), "http://localhost:8080/invalid", utils.CONTENT_TEXT, 3)
+	if err != nil {
 		t.Error(err)
 	}
-	if readBytes, err := ioutil.ReadFile(filePath); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(content, readBytes) {
-		t.Errorf("Expecting: %q, received: %q", string(content), string(readBytes))
+	if err = pstr.Post(content, utils.EmptyString); err == nil {
+		t.Error("Expected error")
 	}
-	if err := os.Remove(filePath); err != nil {
-		t.Error("Failed removing file: ", filePath)
+	addFailedPost("http://localhost:8080/invalid", utils.CONTENT_JSON, "test2", content)
+	time.Sleep(2)
+	fs, err := filepath.Glob("/tmp/test2*")
+	if err != nil {
+		t.Fatal(err)
+	} else if len(fs) == 0 {
+		t.Fatal("Expected at least one file")
+	}
+	ev, err := NewExportEventsFromFile(fs[0])
+	if err != nil {
+		t.Fatal(err)
+	} else if len(ev.Events) == 0 {
+		t.Fatal("Expected at least one event")
+	}
+	if !reflect.DeepEqual(content, ev.Events[0]) {
+		t.Errorf("Expecting: %q, received: %q", string(content), ev.Events[0])
 	}
 }

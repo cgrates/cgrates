@@ -113,6 +113,7 @@ func TestMfEnvReaderITRead(t *testing.T) {
 		DigestEqual:       ":",
 		RSRSep:            ";",
 		MaxParralelConns:  100,
+		FailedPostsTTL:    5 * time.Second,
 	}
 	if !reflect.DeepEqual(expected, *mfCgrCfg.generalCfg) {
 		t.Errorf("Expected: %+v\n, recived: %+v", utils.ToJSON(expected), utils.ToJSON(*mfCgrCfg.generalCfg))

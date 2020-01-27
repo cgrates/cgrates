@@ -1256,7 +1256,7 @@ func TestFFNNewFallbackFileNameFronString(t *testing.T) {
 	}
 	fileName = "cdr|*http_post|http%3A%2F%2F127.0.0.1%3A12080%2Finvalid|70c53d6d-dbd7-452e-a5bd-36bab59bb9ff.form"
 	eFFN = &FallbackFileName{Module: "cdr",
-		Transport:  META_HTTP_POST,
+		Transport:  MetaHTTPPost,
 		Address:    "http://127.0.0.1:12080/invalid",
 		RequestID:  "70c53d6d-dbd7-452e-a5bd-36bab59bb9ff",
 		FileSuffix: FormSuffix}

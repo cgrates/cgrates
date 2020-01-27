@@ -32,6 +32,7 @@ import (
 	"net/http/pprof"
 	"net/rpc"
 	"net/rpc/jsonrpc"
+	"net/url"
 	"reflect"
 	"strings"
 	"sync"
@@ -47,6 +48,7 @@ func init() {
 	gob.Register([]interface{}{})
 	gob.Register(time.Duration(0))
 	gob.Register(time.Time{})
+	gob.Register(url.Values{})
 }
 func NewServer() (s *Server) {
 	s = new(Server)
