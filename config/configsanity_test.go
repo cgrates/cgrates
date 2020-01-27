@@ -35,7 +35,7 @@ func TestConfigSanityRater(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.ralsCfg.StatSConns = []string{"test"}
-	expected = "<RALs> Connection with id: <test> not defined"
+	expected = "<RALs> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -46,7 +46,7 @@ func TestConfigSanityRater(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.ralsCfg.ThresholdSConns = []string{"test"}
-	expected = "<RALs> Connection with id: <test> not defined"
+	expected = "<RALs> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -64,7 +64,7 @@ func TestConfigSanityCDRServer(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.cdrsCfg.ChargerSConns = []string{"test"}
-	expected = "<CDRs> Connection with id: <test> not defined"
+	expected = "<CDRs> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -77,7 +77,7 @@ func TestConfigSanityCDRServer(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.cdrsCfg.RaterConns = []string{"test"}
-	expected = "<CDRs> Connection with id: <test> not defined"
+	expected = "<CDRs> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -89,7 +89,7 @@ func TestConfigSanityCDRServer(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.cdrsCfg.AttributeSConns = []string{"test"}
-	expected = "<CDRs> Connection with id: <test> not defined"
+	expected = "<CDRs> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -101,7 +101,7 @@ func TestConfigSanityCDRServer(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.cdrsCfg.StatSConns = []string{"test"}
-	expected = "<CDRs> Connection with id: <test> not defined"
+	expected = "<CDRs> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -109,12 +109,12 @@ func TestConfigSanityCDRServer(t *testing.T) {
 
 	cfg.cdrsCfg.OnlineCDRExports = []string{"stringy"}
 	cfg.CdreProfiles = map[string]*CdreCfg{"stringx": &CdreCfg{}}
-	expected = "<CDRs> Cannot find CDR export template with ID: <stringy>"
+	expected = "<CDRs> cannot find CDR export template with ID: <stringy>"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.cdrsCfg.ThresholdSConns = []string{"test"}
-	expected = "<CDRs> Connection with id: <test> not defined"
+	expected = "<CDRs> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -140,7 +140,7 @@ func TestConfigSanityLoaders(t *testing.T) {
 			},
 		},
 	}
-	expected := "<LoaderS> Nonexistent folder: /not/exist"
+	expected := "<LoaderS> nonexistent folder: /not/exist"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -204,7 +204,7 @@ func TestConfigSanitySessionS(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.sessionSCfg.ChargerSConns = []string{"test"}
-	expected = "<SessionS> Connection with id: <test> not defined"
+	expected = "<SessionS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -217,7 +217,7 @@ func TestConfigSanitySessionS(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.sessionSCfg.RALsConns = []string{"test"}
-	expected = "<SessionS> Connection with id: <test> not defined"
+	expected = "<SessionS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -230,7 +230,7 @@ func TestConfigSanitySessionS(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.sessionSCfg.ResSConns = []string{"test"}
-	expected = "<SessionS> Connection with id: <test> not defined"
+	expected = "<SessionS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -243,7 +243,7 @@ func TestConfigSanitySessionS(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.sessionSCfg.ThreshSConns = []string{"test"}
-	expected = "<SessionS> Connection with id: <test> not defined"
+	expected = "<SessionS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -256,7 +256,7 @@ func TestConfigSanitySessionS(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.sessionSCfg.StatSConns = []string{"test"}
-	expected = "<SessionS> Connection with id: <test> not defined"
+	expected = "<SessionS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -269,7 +269,7 @@ func TestConfigSanitySessionS(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.sessionSCfg.SupplSConns = []string{"test"}
-	expected = "<SessionS> Connection with id: <test> not defined"
+	expected = "<SessionS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -282,7 +282,7 @@ func TestConfigSanitySessionS(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.sessionSCfg.AttrSConns = []string{"test"}
-	expected = "<SessionS> Connection with id: <test> not defined"
+	expected = "<SessionS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -295,14 +295,14 @@ func TestConfigSanitySessionS(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.sessionSCfg.CDRsConns = []string{"test"}
-	expected = "<SessionS> Connection with id: <test> not defined"
+	expected = "<SessionS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.sessionSCfg.CDRsConns = []string{}
 	cfg.cdrsCfg.Enabled = true
 	cfg.sessionSCfg.ReplicationConns = []string{"test"}
-	expected = "<SessionS> Connection with id: <test> not defined"
+	expected = "<SessionS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -314,7 +314,7 @@ func TestConfigSanitySessionS(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.cacheCfg[utils.CacheClosedSessions].Limit = 1
-	expected = "<SessionS> The following protected field can't be altered by session: <CGRID>"
+	expected = "<SessionS> the following protected field can't be altered by session: <CGRID>"
 	cfg.sessionSCfg.AlterableFields = utils.NewStringSet([]string{utils.CGRID})
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
@@ -341,7 +341,7 @@ func TestConfigSanityFreeSWITCHAgent(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.fsAgentCfg.SessionSConns = []string{"test"}
-	expected = "<FreeSWITCHAgent> Connection with id: <test> not defined"
+	expected = "<FreeSWITCHAgent> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -363,7 +363,7 @@ func TestConfigSanityKamailioAgent(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.kamAgentCfg.SessionSConns = []string{"test"}
-	expected = "<KamailioAgent> Connection with id: <test> not defined"
+	expected = "<KamailioAgent> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -385,7 +385,7 @@ func TestConfigSanityAsteriskAgent(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.asteriskAgentCfg.SessionSConns = []string{"test"}
-	expected = "<AsteriskAgent> Connection with id: <test> not defined"
+	expected = "<AsteriskAgent> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -407,7 +407,7 @@ func TestConfigSanityDAgent(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.diameterAgentCfg.SessionSConns = []string{"test"}
-	expected = "<DiameterAgent> Connection with id: <test> not defined"
+	expected = "<DiameterAgent> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -429,7 +429,7 @@ func TestConfigSanityRadiusAgent(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.radiusAgentCfg.SessionSConns = []string{"test"}
-	expected = "<RadiusAgent> Connection with id: <test> not defined"
+	expected = "<RadiusAgent> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -451,7 +451,7 @@ func TestConfigSanityDNSAgent(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.dnsAgentCfg.SessionSConns = []string{"test"}
-	expected = "<DNSAgent> Connection with id: <test> not defined"
+	expected = "<DNSAgent> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -471,7 +471,7 @@ func TestConfigSanityHTTPAgent(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.httpAgentCfg[0].SessionSConns = []string{"test"}
-	expected = "<HTTPAgent> Template with ID <Test> has connection with id: <test> not defined"
+	expected = "<HTTPAgent> template with ID <Test> has connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -521,7 +521,7 @@ func TestConfigSanityHTTPAgent(t *testing.T) {
 	}
 	cfg.chargerSCfg.AttributeSConns = []string{"Invalid"}
 
-	expected = "<ChargerS> Connection with id: <Invalid> not defined"
+	expected = "<ChargerS> connection with id: <Invalid> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -538,7 +538,7 @@ func TestConfigSanityResourceLimiter(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.resourceSCfg.ThresholdSConns = []string{"test"}
-	expected = "<ResourceS> Connection with id: <test> not defined"
+	expected = "<ResourceS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -555,7 +555,7 @@ func TestConfigSanityStatS(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.statsCfg.ThresholdSConns = []string{"test"}
-	expected = "<Stats> Connection with id: <test> not defined"
+	expected = "<Stats> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -572,7 +572,7 @@ func TestConfigSanitySupplierS(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.supplierSCfg.ResourceSConns = []string{"test"}
-	expected = "<SupplierS> Connection with id: <test> not defined"
+	expected = "<SupplierS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -585,7 +585,7 @@ func TestConfigSanitySupplierS(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.supplierSCfg.StatSConns = []string{"test"}
-	expected = "<SupplierS> Connection with id: <test> not defined"
+	expected = "<SupplierS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -598,7 +598,7 @@ func TestConfigSanitySupplierS(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.supplierSCfg.AttributeSConns = []string{"test"}
-	expected = "<SupplierS> Connection with id: <test> not defined"
+	expected = "<SupplierS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -615,7 +615,7 @@ func TestConfigSanityScheduler(t *testing.T) {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.schedulerCfg.CDRsConns = []string{"test"}
-	expected = "<SchedulerS> Connection with id: <test> not defined"
+	expected = "<SchedulerS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -628,7 +628,7 @@ func TestConfigSanityEventReader(t *testing.T) {
 		Enabled:       true,
 		SessionSConns: []string{"unexistedConn"},
 	}
-	expected := "<ERs> Connection with id: <unexistedConn> not defined"
+	expected := "<ERs> connection with id: <unexistedConn> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -656,7 +656,7 @@ func TestConfigSanityEventReader(t *testing.T) {
 			ProcessedPath: "not/a/path",
 		},
 	}
-	expected = "<ERs> Nonexistent folder: not/a/path for reader with ID: test2"
+	expected = "<ERs> nonexistent folder: not/a/path for reader with ID: test2"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -680,7 +680,7 @@ func TestConfigSanityEventReader(t *testing.T) {
 		RunDelay: 1,
 		FieldSep: utils.InInFieldSep,
 	}
-	expected = "<ERs> RunDelay field can not be bigger than zero for reader with ID: test4"
+	expected = "<ERs> the RunDelay field can not be bigger than zero for reader with ID: test4"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -692,7 +692,7 @@ func TestConfigSanityEventReader(t *testing.T) {
 		ProcessedPath: "not/a/path",
 		SourcePath:    "not/a/path",
 	}
-	expected = "<ERs> Nonexistent folder: not/a/path for reader with ID: test5"
+	expected = "<ERs> nonexistent folder: not/a/path for reader with ID: test5"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -705,7 +705,7 @@ func TestConfigSanityEventReader(t *testing.T) {
 		ProcessedPath: "not/a/path",
 		SourcePath:    "not/a/path",
 	}
-	expected = "<ERs> Nonexistent folder: not/a/path for reader with ID: test5"
+	expected = "<ERs> nonexistent folder: not/a/path for reader with ID: test5"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -717,7 +717,7 @@ func TestConfigSanityStorDB(t *testing.T) {
 		Type:    utils.POSTGRES,
 		SSLMode: "wrongSSLMode",
 	}
-	expected := "<stor_db> Unsuported sslmode for storDB"
+	expected := "<stor_db> unsuported sslmode for storDB"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -747,21 +747,21 @@ func TestConfigSanityDataDB(t *testing.T) {
 	}
 	cfg.cacheCfg[utils.CacheAccounts].Limit = 0
 	cfg.resourceSCfg.Enabled = true
-	expected = "<ResourceS> StoreInterval needs to be -1 when DataBD is *internal, received : 0"
+	expected = "<ResourceS> the StoreInterval field needs to be -1 when DataBD is *internal, received : 0"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.resourceSCfg.Enabled = false
 
 	cfg.statsCfg.Enabled = true
-	expected = "<Stats> StoreInterval needs to be -1 when DataBD is *internal, received : 0"
+	expected = "<Stats> the StoreInterval field needs to be -1 when DataBD is *internal, received : 0"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
 	cfg.statsCfg.Enabled = false
 
 	cfg.thresholdSCfg.Enabled = true
-	expected = "<ThresholdS> StoreInterval needs to be -1 when DataBD is *internal, received : 0"
+	expected = "<ThresholdS> the StoreInterval field needs to be -1 when DataBD is *internal, received : 0"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -772,7 +772,7 @@ func TestConfigSanityDataDB(t *testing.T) {
 			Remote: true,
 		},
 	}
-	expected = "Remote connections required by: <test1>"
+	expected = "remote connections required by: <test1>"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -783,7 +783,7 @@ func TestConfigSanityDataDB(t *testing.T) {
 			Replicate: true,
 		},
 	}
-	expected = "Replicate connections required by: <test2>"
+	expected = "replicate connections required by: <test2>"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -798,7 +798,7 @@ func TestConfigSanityAPIer(t *testing.T) {
 		t.Error(err)
 	}
 	cfg.apier.AttributeSConns = []string{"test"}
-	expected := "<ApierV1> Connection with id: <test> not defined"
+	expected := "<ApierV1> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -810,7 +810,7 @@ func TestConfigSanityAPIer(t *testing.T) {
 		t.Error(err)
 	}
 	cfg.apier.SchedulerConns = []string{"test"}
-	expected = "<ApierV1> Connection with id: <test> not defined"
+	expected = "<ApierV1> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -826,7 +826,7 @@ func TestConfigSanityDispatcher(t *testing.T) {
 		t.Error(err)
 	}
 	cfg.dispatcherSCfg.AttributeSConns = []string{"test"}
-	expected := "<DispatcherS> Connection with id: <test> not defined"
+	expected := "<DispatcherS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -854,7 +854,7 @@ func TestConfigSanityFilterS(t *testing.T) {
 		t.Error(err)
 	}
 	cfg.filterSCfg.StatSConns = []string{"test"}
-	expected := "<FilterS> Connection with id: <test> not defined"
+	expected := "<FilterS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -866,7 +866,7 @@ func TestConfigSanityFilterS(t *testing.T) {
 		t.Error(err)
 	}
 	cfg.filterSCfg.ResourceSConns = []string{"test"}
-	expected = "<FilterS> Connection with id: <test> not defined"
+	expected = "<FilterS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
@@ -878,7 +878,7 @@ func TestConfigSanityFilterS(t *testing.T) {
 		t.Error(err)
 	}
 	cfg.filterSCfg.RALsConns = []string{"test"}
-	expected = "<FilterS> Connection with id: <test> not defined"
+	expected = "<FilterS> connection with id: <test> not defined"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
 		t.Errorf("Expecting: %+q  received: %+q", expected, err)
 	}
