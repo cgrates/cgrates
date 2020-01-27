@@ -43,6 +43,11 @@ func NewCSVFileER(cfg *config.CGRConfig, cfgIdx int,
 	if strings.HasSuffix(srcPath, utils.Slash) {
 		srcPath = srcPath[:len(srcPath)-1]
 	}
+	concurrentReqs := make(chan struct{}, cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs)
+	var processFile struct{}
+	for i := 0; i < cfg.ERsCfg().Readers[cfgIdx].ConcurrentReqs; i++ {
+		concurrentReqs <- processFile // Empty initiate so we do not need to wait later when we pop
+	}
 	return &CSVFileER{
 		cgrCfg:    cfg,
 		cfgIdx:    cfgIdx,
@@ -50,7 +55,8 @@ func NewCSVFileER(cfg *config.CGRConfig, cfgIdx int,
 		rdrDir:    srcPath,
 		rdrEvents: rdrEvents,
 		rdrError:  rdrErr,
-		rdrExit:   rdrExit}, nil
+		rdrExit:   rdrExit,
+		conReqs:   concurrentReqs}, nil
 }
 
 // CSVFileER implements EventReader interface for .csv files
