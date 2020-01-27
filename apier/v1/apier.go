@@ -1167,7 +1167,6 @@ type ArgsReplyFailedPosts struct {
 	FailedRequestsInDir  *string  // if defined it will be our source of requests to be replayed
 	FailedRequestsOutDir *string  // if defined it will become our destination for files failing to be replayed, *none to be discarded
 	Modules              []string // list of modules for which replay the requests, nil for all
-	Transports           []string // list of transports
 }
 
 // ReplayFailedPosts will repost failed requests found in the FailedRequestsInDir
@@ -1185,15 +1184,10 @@ func (apiv1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string
 		return utils.ErrNotFound
 	}
 	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
-		filePath := path.Join(failedReqsInDir, file.Name())
-		ffn, err := utils.NewFallbackFileNameFronString(file.Name())
-		if err != nil {
-			return utils.NewErrServerError(err)
-		}
 		if len(args.Modules) != 0 {
 			var allowedModule bool
 			for _, mod := range args.Modules {
-				if strings.HasPrefix(ffn.Module, mod) {
+				if strings.HasPrefix(file.Name(), mod) {
 					allowedModule = true
 					break
 				}
@@ -1202,69 +1196,24 @@ func (apiv1 *ApierV1) ReplayFailedPosts(args ArgsReplyFailedPosts, reply *string
 				continue // this file is not to be processed due to Modules ACL
 			}
 		}
-		if len(args.Transports) != 0 && !utils.IsSliceMember(args.Transports, ffn.Transport) {
-			continue // this file is not to be processed due to Transports ACL
-		}
-		var fileContent []byte
-		_, err = guardian.Guardian.Guard(func() (interface{}, error) {
-			if fileContent, err = ioutil.ReadFile(filePath); err != nil {
-				return 0, err
-			}
-			return 0, os.Remove(filePath)
-		}, apiv1.Config.GeneralCfg().LockingTimeout, utils.FileLockPrefix+filePath)
+		filePath := path.Join(failedReqsInDir, file.Name())
+		expEv, err := engine.NewExportEventsFromFile(filePath)
 		if err != nil {
 			return utils.NewErrServerError(err)
 		}
+
 		failoverPath := utils.META_NONE
 		if failedReqsOutDir != utils.META_NONE {
 			failoverPath = path.Join(failedReqsOutDir, file.Name())
 		}
-		switch ffn.Transport {
-		case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap, utils.MetaHTTPjson, utils.META_HTTP_POST:
-			var pstr *engine.HTTPPoster
-			pstr, err = engine.NewHTTPPoster(apiv1.Config.GeneralCfg().HttpSkipTlsVerify,
-				apiv1.Config.GeneralCfg().ReplyTimeout, ffn.Address,
-				utils.PosterTransportContentTypes[ffn.Transport],
-				apiv1.Config.GeneralCfg().PosterAttempts)
-			if err != nil {
-				return err
-			}
-			err = pstr.Post(fileContent, utils.EmptyString) //this may cause panics for contentType == utils.CONTENT_FORM
-		case utils.MetaAMQPjsonCDR, utils.MetaAMQPjsonMap:
-			err = engine.PostersCache.PostAMQP(ffn.Address,
-				apiv1.Config.GeneralCfg().PosterAttempts, fileContent)
-		case utils.MetaAMQPV1jsonMap:
-			err = engine.PostersCache.PostAMQPv1(ffn.Address, apiv1.Config.GeneralCfg().PosterAttempts,
-				fileContent)
-		case utils.MetaSQSjsonMap:
-			err = engine.PostersCache.PostSQS(ffn.Address, apiv1.Config.GeneralCfg().PosterAttempts,
-				fileContent)
-		case utils.MetaKafkajsonMap:
-			err = engine.PostersCache.PostKafka(ffn.Address, apiv1.Config.GeneralCfg().PosterAttempts,
-				fileContent, utils.UUIDSha1Prefix())
-		case utils.MetaS3jsonMap:
-			err = engine.PostersCache.PostS3(ffn.Address, apiv1.Config.GeneralCfg().PosterAttempts,
-				fileContent, utils.UUIDSha1Prefix())
-		default:
-			err = fmt.Errorf("unsupported replication transport: %s", ffn.Transport)
-		}
+
+		failedPosts, err := expEv.ReplayFailedPosts(apiv1.Config.GeneralCfg().PosterAttempts)
 		if err != nil && failedReqsOutDir != utils.META_NONE { // Got error from HTTPPoster could be that content was not written, we need to write it ourselves
-			_, err := guardian.Guardian.Guard(func() (interface{}, error) {
-				if _, err := os.Stat(failoverPath); err == nil || !os.IsNotExist(err) {
-					return 0, err
-				}
-				fileOut, err := os.Create(failoverPath)
-				if err != nil {
-					return 0, err
-				}
-				_, err = fileOut.Write(fileContent)
-				fileOut.Close()
-				return 0, err
-			}, apiv1.Config.GeneralCfg().LockingTimeout, utils.FileLockPrefix+failoverPath)
-			if err != nil {
+			if err = failedPosts.WriteToFile(failoverPath); err != nil {
 				return utils.NewErrServerError(err)
 			}
 		}
+
 	}
 	*reply = utils.OK
 	return nil

@@ -129,6 +129,7 @@ func (pstr *HTTPPoster) GetResponse(content interface{}) (respBody []byte, err e
 		}
 		if resp.StatusCode > 299 {
 			utils.Logger.Warning(fmt.Sprintf("<HTTPPoster> Posting to : <%s>, unexpected status code received: <%d>", pstr.addr, resp.StatusCode))
+			err = utils.ErrServerError
 			if i+1 < pstr.attempts {
 				time.Sleep(time.Duration(fib()) * time.Second)
 			}

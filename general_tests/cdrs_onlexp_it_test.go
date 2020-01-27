@@ -25,11 +25,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"os/exec"
 	"path"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -48,7 +48,7 @@ var (
 	cdrsMasterRpc                       *rpcclient.RPCClient
 	httpCGRID                           = utils.UUIDSha1Prefix()
 	amqpCGRID                           = utils.UUIDSha1Prefix()
-	failoverContent                     = [][]byte{[]byte(fmt.Sprintf(`{"CGRID":"%s"}`, httpCGRID)), []byte(fmt.Sprintf(`{"CGRID":"%s"}`, amqpCGRID))}
+	failoverContent                     = []interface{}{[]byte(fmt.Sprintf(`{"CGRID":"%s"}`, httpCGRID)), []byte(fmt.Sprintf(`{"CGRID":"%s"}`, amqpCGRID))}
 
 	sTestsCDRsOnExp = []func(t *testing.T){
 		testCDRsOnExpInitConfig,
@@ -61,12 +61,8 @@ var (
 		testCDRsOnExpDisableOnlineExport,
 		testCDRsOnExpHttpCdrReplication,
 		testCDRsOnExpAMQPReplication,
-		testCDRsOnExpHTTPPosterFileFailover,
-		testCDRsOnExpAMQPPosterFileFailover,
-		testCDRsOnExpAWSAMQPPosterFileFailover,
+		testCDRsOnExpFileFailover,
 		testCDRsOnExpKafkaPosterFileFailover,
-		testCDRsOnExpSQSPosterFileFailover,
-		testCDRsOnExpS3PosterFileFailover,
 		testCDRsOnExpStopEngine,
 	}
 )
@@ -445,88 +441,69 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 
 }
 
-func testCDRsOnExpHTTPPosterFileFailover(t *testing.T) {
-	time.Sleep(time.Duration(5 * time.Second))
-	failoverContent := [][]byte{[]byte(`OriginID=httpjsonrpc1`), []byte(`OriginID=amqpreconnect`)}
-	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
-	if len(filesInDir) == 0 {
-		t.Fatalf("No files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
-	}
-	var foundFile bool
-	var fileName string
-	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
-		fileName = file.Name()
-		if strings.Index(fileName, utils.FormSuffix) != -1 {
-			foundFile = true
-			filePath := path.Join(cdrsMasterCfg.GeneralCfg().FailedPostsDir, fileName)
-			if readBytes, err := ioutil.ReadFile(filePath); err != nil {
-				t.Error(err)
-			} else if !reflect.DeepEqual(failoverContent[0], readBytes) && !reflect.DeepEqual(failoverContent[1], readBytes) { // Checking just the prefix should do since some content is dynamic
-				t.Errorf("Expecting: %q or %q, received: %q", string(failoverContent[0]), string(failoverContent[1]), string(readBytes))
-			}
-			if err := os.Remove(filePath); err != nil {
-				t.Error("Failed removing file: ", filePath)
+func checkContent(ev *engine.ExportEvents, content []interface{}) error {
+	match := false
+	for _, bev := range ev.Events {
+		for _, con := range content {
+			if reflect.DeepEqual(bev, con) {
+				match = true
+				break
 			}
 		}
+		if match {
+			break
+		}
 	}
-	if !foundFile {
-		t.Fatal("Could not find the file in folder")
+	if !match {
+		exp := make([]string, len(content))
+		for i, con := range content {
+			exp[i] = utils.IfaceAsString(con)
+		}
+		recv := make([]string, len(ev.Events))
+		for i, con := range ev.Events {
+			recv[i] = utils.IfaceAsString(con)
+		}
+		return fmt.Errorf("Expecting: one of %q, received: %q", utils.ToJSON(exp), utils.ToJSON(recv))
 	}
+	return nil
 }
-
-func testCDRsOnExpAMQPPosterFileFailover(t *testing.T) {
-	time.Sleep(time.Duration(5 * time.Second))
+func testCDRsOnExpFileFailover(t *testing.T) {
+	time.Sleep(time.Duration(20 * time.Second))
+	v1 := url.Values{}
+	v2 := url.Values{}
+	v1.Set("OriginID", "httpjsonrpc1")
+	v2.Set("OriginID", "amqpreconnect")
+	httpContent := []interface{}{v1, v2}
 	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	if len(filesInDir) == 0 {
 		t.Fatalf("No files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
 	}
-	var foundFile bool
-	var fileName string
+	expectedFormats := utils.NewStringSet([]string{utils.MetaHTTPPost, utils.MetaAMQPjsonMap,
+		utils.MetaAMQPV1jsonMap, utils.MetaSQSjsonMap, utils.MetaS3jsonMap})
+	rcvFormats := utils.NewStringSet([]string{})
 	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
-		fileName = file.Name()
-		if strings.HasPrefix(fileName, "cdr|*amqp_json_map") {
-			foundFile = true
-			filePath := path.Join(cdrsMasterCfg.GeneralCfg().FailedPostsDir, fileName)
-			if readBytes, err := ioutil.ReadFile(filePath); err != nil {
-				t.Error(err)
-			} else if !reflect.DeepEqual(failoverContent[0], readBytes) && !reflect.DeepEqual(failoverContent[1], readBytes) { // Checking just the prefix should do since some content is dynamic
-				t.Errorf("Expecting: %v or %v, received: %v", string(failoverContent[0]), string(failoverContent[1]), string(readBytes))
-			}
-			if err := os.Remove(filePath); err != nil {
-				t.Error("Failed removing file: ", filePath)
-			}
-		}
-	}
-	if !foundFile {
-		t.Fatal("Could not find the file in folder")
-	}
-}
+		fileName := file.Name()
+		filePath := path.Join(cdrsMasterCfg.GeneralCfg().FailedPostsDir, fileName)
 
-func testCDRsOnExpAWSAMQPPosterFileFailover(t *testing.T) {
-	time.Sleep(time.Duration(10 * time.Second))
-	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
-	if len(filesInDir) == 0 {
-		t.Fatalf("No files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
-	}
-	var foundFile bool
-	var fileName string
-	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
-		fileName = file.Name()
-		if strings.HasPrefix(fileName, "cdr|*amqpv1_json_map") {
-			foundFile = true
-			filePath := path.Join(cdrsMasterCfg.GeneralCfg().FailedPostsDir, fileName)
-			if readBytes, err := ioutil.ReadFile(filePath); err != nil {
-				t.Error(err)
-			} else if !reflect.DeepEqual(failoverContent[0], readBytes) && !reflect.DeepEqual(failoverContent[1], readBytes) { // Checking just the prefix should do since some content is dynamic
-				t.Errorf("Expecting: %v or %v, received: %v", string(failoverContent[0]), string(failoverContent[1]), string(readBytes))
-			}
-			if err := os.Remove(filePath); err != nil {
-				t.Error("Failed removing file: ", filePath)
-			}
+		ev, err := engine.NewExportEventsFromFile(filePath)
+		if err != nil {
+			t.Errorf("<%s> for file <%s>", err, fileName)
+			continue
+		} else if len(ev.Events) == 0 {
+			t.Error("Expected at least one event")
+			continue
+		}
+		rcvFormats.Add(ev.Format)
+		content := failoverContent
+		if ev.Format == utils.MetaHTTPPost {
+			content = httpContent
+		}
+		if err := checkContent(ev, content); err != nil {
+			t.Errorf("For file <%s> and event <%s> receved %s", filePath, utils.ToJSON(ev), err)
 		}
 	}
-	if !foundFile {
-		t.Fatal("Could not find the file in folder")
+	if !reflect.DeepEqual(expectedFormats.Data(), rcvFormats.Data()) {
+		t.Errorf("Missing format expecting: %s received: %s", utils.ToJSON(expectedFormats.Data()), utils.ToJSON(rcvFormats.Data()))
 	}
 }
 
@@ -544,65 +521,9 @@ func testCDRsOnExpKafkaPosterFileFailover(t *testing.T) {
 		ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 		if m, err := reader.ReadMessage(ctx); err != nil {
 			t.Fatal(err)
-		} else if !reflect.DeepEqual(failoverContent[0], m.Value) && !reflect.DeepEqual(failoverContent[1], m.Value) { // Checking just the prefix should do since some content is dynamic
-			t.Errorf("Expecting: %v or %v, received: %v", string(failoverContent[0]), string(failoverContent[1]), string(m.Value))
+		} else if !reflect.DeepEqual(failoverContent[0].([]byte), m.Value) && !reflect.DeepEqual(failoverContent[1].([]byte), m.Value) { // Checking just the prefix should do since some content is dynamic
+			t.Errorf("Expecting: %v or %v, received: %v", utils.IfaceAsString(failoverContent[0]), utils.IfaceAsString(failoverContent[1]), string(m.Value))
 		}
-	}
-}
-
-func testCDRsOnExpSQSPosterFileFailover(t *testing.T) {
-	time.Sleep(time.Duration(10 * time.Second))
-	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
-	if len(filesInDir) == 0 {
-		t.Fatalf("No files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
-	}
-	var foundFile bool
-	var fileName string
-	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
-		fileName = file.Name()
-		if strings.HasPrefix(fileName, "cdr|*sqs_json_map") {
-			foundFile = true
-			filePath := path.Join(cdrsMasterCfg.GeneralCfg().FailedPostsDir, fileName)
-			if readBytes, err := ioutil.ReadFile(filePath); err != nil {
-				t.Error(err)
-			} else if !reflect.DeepEqual(failoverContent[0], readBytes) && !reflect.DeepEqual(failoverContent[1], readBytes) { // Checking just the prefix should do since some content is dynamic
-				t.Errorf("Expecting: %v or %v, received: %v", string(failoverContent[0]), string(failoverContent[1]), string(readBytes))
-			}
-			if err := os.Remove(filePath); err != nil {
-				t.Error("Failed removing file: ", filePath)
-			}
-		}
-	}
-	if !foundFile {
-		t.Fatal("Could not find the file in folder")
-	}
-}
-
-func testCDRsOnExpS3PosterFileFailover(t *testing.T) {
-	time.Sleep(time.Duration(10 * time.Second))
-	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.GeneralCfg().FailedPostsDir)
-	if len(filesInDir) == 0 {
-		t.Fatalf("No files in directory: %s", cdrsMasterCfg.GeneralCfg().FailedPostsDir)
-	}
-	var foundFile bool
-	var fileName string
-	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
-		fileName = file.Name()
-		if strings.HasPrefix(fileName, "cdr|*s3_json_map") {
-			foundFile = true
-			filePath := path.Join(cdrsMasterCfg.GeneralCfg().FailedPostsDir, fileName)
-			if readBytes, err := ioutil.ReadFile(filePath); err != nil {
-				t.Error(err)
-			} else if !reflect.DeepEqual(failoverContent[0], readBytes) && !reflect.DeepEqual(failoverContent[1], readBytes) { // Checking just the prefix should do since some content is dynamic
-				t.Errorf("Expecting: %v or %v, received: %v", string(failoverContent[0]), string(failoverContent[1]), string(readBytes))
-			}
-			if err := os.Remove(filePath); err != nil {
-				t.Error("Failed removing file: ", filePath)
-			}
-		}
-	}
-	if !foundFile {
-		t.Fatal("Could not find the file in folder")
 	}
 }
 

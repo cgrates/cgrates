@@ -151,7 +151,7 @@ func testV2CDRsLoadTariffPlanFromFolder(t *testing.T) {
 	} else if resp != utils.OK {
 		t.Error("Unexpected reply returned", resp)
 	}
-	var reply *engine.AttributeProfile
+	var reply *engine.ChargerProfile
 	if err := cdrsRpc.Call(utils.ApierV1GetChargerProfile,
 		&utils.TenantID{Tenant: "cgrates.org", ID: "SupplierCharges"},
 		&reply); err == nil || err.Error() != utils.ErrNotFound.Error() {

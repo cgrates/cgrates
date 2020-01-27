@@ -46,6 +46,7 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Tpexport_dir:         utils.StringPointer("/var/spool/cgrates/tpe"),
 		Poster_attempts:      utils.IntPointer(3),
 		Failed_posts_dir:     utils.StringPointer("/var/spool/cgrates/failed_posts"),
+		Failed_posts_ttl:     utils.StringPointer("5s"),
 		Default_request_type: utils.StringPointer(utils.META_RATED),
 		Default_category:     utils.StringPointer("call"),
 		Default_tenant:       utils.StringPointer("cgrates.org"),

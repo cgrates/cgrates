@@ -20,7 +20,7 @@ package utils
 
 var (
 	CDRExportFormats = NewStringSet([]string{DRYRUN, MetaFileCSV, MetaFileFWV, MetaHTTPjsonCDR, MetaHTTPjsonMap,
-		MetaHTTPjson, META_HTTP_POST, MetaAMQPjsonCDR, MetaAMQPjsonMap, MetaAMQPV1jsonMap, MetaSQSjsonMap,
+		MetaHTTPjson, MetaHTTPPost, MetaAMQPjsonCDR, MetaAMQPjsonMap, MetaAMQPV1jsonMap, MetaSQSjsonMap,
 		MetaKafkajsonMap, MetaS3jsonMap})
 	MainCDRFields = NewStringSet([]string{CGRID, Source, OriginHost, OriginID, ToR, RequestType, Tenant, Category,
 		Account, Subject, Destination, SetupTime, AnswerTime, Usage, COST, RATED, Partial, RunID,
@@ -37,7 +37,7 @@ var (
 		MetaHTTPjsonCDR:   CONTENT_JSON,
 		MetaHTTPjsonMap:   CONTENT_JSON,
 		MetaHTTPjson:      CONTENT_JSON,
-		META_HTTP_POST:    CONTENT_FORM,
+		MetaHTTPPost:      CONTENT_FORM,
 		MetaAMQPjsonCDR:   CONTENT_JSON,
 		MetaAMQPjsonMap:   CONTENT_JSON,
 		MetaAMQPV1jsonMap: CONTENT_JSON,
@@ -54,7 +54,7 @@ var (
 		MetaSQSjsonMap:    JSNSuffix,
 		MetaKafkajsonMap:  JSNSuffix,
 		MetaS3jsonMap:     JSNSuffix,
-		META_HTTP_POST:    FormSuffix,
+		MetaHTTPPost:      FormSuffix,
 		MetaFileCSV:       CSVSuffix,
 		MetaFileFWV:       FWVSuffix,
 	}
@@ -274,7 +274,7 @@ const (
 	META_CONSTANT                = "*constant"
 	META_FILLER                  = "*filler"
 	META_HANDLER                 = "*handler"
-	META_HTTP_POST               = "*http_post"
+	MetaHTTPPost                 = "*http_post"
 	MetaHTTPjson                 = "*http_json"
 	MetaHTTPjsonCDR              = "*http_json_cdr"
 	MetaHTTPjsonMap              = "*http_json_map"
@@ -379,6 +379,7 @@ const (
 	UndefinedVersion            = "undefined version"
 	TxtSuffix                   = ".txt"
 	JSNSuffix                   = ".json"
+	GOBSuffix                   = ".gob"
 	FormSuffix                  = ".form"
 	XMLSuffix                   = ".xml"
 	CSVSuffix                   = ".csv"

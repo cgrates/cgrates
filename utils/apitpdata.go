@@ -290,7 +290,7 @@ func FallbackSubjKeys(tenant, tor, fallbackSubjects string) []string {
 	return sslice
 }
 
-type AttrSetDestination struct { //ToDo
+type AttrSetDestination struct {
 	Id        string
 	Prefixes  []string
 	Overwrite bool

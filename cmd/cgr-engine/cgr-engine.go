@@ -447,6 +447,7 @@ func main() {
 	}
 	// Done initing DBs
 	engine.SetRoundingDecimals(cfg.GeneralCfg().RoundingDecimals)
+	engine.SetFailedPostCacheTTL(cfg.GeneralCfg().FailedPostsTTL)
 
 	// Rpc/http server
 	server := utils.NewServer()

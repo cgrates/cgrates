@@ -37,6 +37,7 @@ const CGRATES_CFG_JSON = `
 	"tpexport_dir": "/var/spool/cgrates/tpe",				// path towards export folder for offline TariffPlans
 	"poster_attempts": 3,									// number of attempts before considering post request failed (eg: *http_post, CDR exports)
 	"failed_posts_dir": "/var/spool/cgrates/failed_posts",	// directory path where we store failed requests
+	"failed_posts_ttl": "5s",								// time to wait before writing the failed posts in a single file
 	"default_request_type": "*rated",						// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
 	"default_category": "call",								// default category to consider when missing from requests
 	"default_tenant": "cgrates.org",						// default tenant to consider when missing from requests

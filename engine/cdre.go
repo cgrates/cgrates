@@ -33,9 +33,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/ltcache"
 )
 
 const (
@@ -51,41 +49,6 @@ const (
 	metaDataUsage     = "*data_usage"
 	metaCostCDRs      = "*cdrs_cost"
 )
-
-var failedPostCache *ltcache.Cache
-
-func init() {
-	failedPostCache = ltcache.NewCache(-1, 5*time.Second, false, writeFailedPosts)
-}
-
-func writeFailedPosts(itmID string, value interface{}) {
-	expEv, canConvert := value.(*ExportEvents)
-	if !canConvert {
-		return
-	}
-	filePath := path.Join(config.CgrConfig().GeneralCfg().FailedPostsDir, expEv.FileName(utils.CDRSCtx))
-	if err := expEv.WriteToFile(filePath); err != nil {
-		utils.Logger.Warning(fmt.Sprintf("<%s> Failed to write file <%s> because <%s>",
-			utils.CDRs, filePath, err))
-	}
-	return
-}
-func addFailedPost(expPath, format string, ev []byte) {
-	var failedPost *ExportEvents
-	if x, ok := failedPostCache.Get(utils.ConcatenatedKey(expPath, format)); ok {
-		if x != nil {
-			failedPost = x.(*ExportEvents)
-		}
-	}
-	if failedPost == nil {
-		failedPost = &ExportEvents{
-			Path:   expPath,
-			Format: format,
-		}
-	}
-	failedPost.AddEvent(ev)
-	failedPostCache.Set(failedPost.ID(), failedPost, nil)
-}
 
 // NewCDRExporter returns a new CDRExporter
 func NewCDRExporter(cdrs []*CDR, exportTemplate *config.CdreCfg, exportFormat, exportPath, fallbackPath, exportID string,
@@ -285,7 +248,7 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 		if body, err = json.Marshal(expMp); err != nil {
 			return
 		}
-	case utils.META_HTTP_POST:
+	case utils.MetaHTTPPost:
 		var expMp map[string]string
 		if expMp, err = cdr.AsExportMap(cdre.exportTemplate.ContentFields, cdre.httpSkipTLSCheck, nil, cdre.filterS); err != nil {
 			return
@@ -299,7 +262,7 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 		return fmt.Errorf("unsupported exportFormat: <%s>", cdre.exportFormat)
 	}
 	switch cdre.exportFormat {
-	case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap, utils.MetaHTTPjson, utils.META_HTTP_POST:
+	case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap, utils.MetaHTTPjson, utils.MetaHTTPPost:
 		var pstr *HTTPPoster
 		pstr, err = NewHTTPPoster(config.CgrConfig().GeneralCfg().HttpSkipTlsVerify,
 			config.CgrConfig().GeneralCfg().ReplyTimeout, cdre.exportPath,
@@ -320,7 +283,7 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 		err = PostersCache.PostS3(cdre.exportPath, cdre.attempts, body.([]byte), utils.ConcatenatedKey(cdr.CGRID, cdr.RunID))
 	}
 	if err != nil && cdre.fallbackPath != utils.META_NONE {
-		addFailedPost(cdre.exportPath, cdre.exportFormat, body.([]byte))
+		addFailedPost(cdre.exportPath, cdre.exportFormat, utils.CDRPoster, body)
 	}
 	return
 }
@@ -585,117 +548,4 @@ func (cdre *CDRExporter) NegativeExports() map[string]string {
 	cdre.RLock()
 	defer cdre.RUnlock()
 	return cdre.negativeExports
-}
-
-// ExportEvents used to save the failed post to file
-type ExportEvents struct {
-	lk     sync.RWMutex
-	Path   string
-	Format string
-	Zip    bool
-	Events [][]byte
-}
-
-// ID returns the id for cache
-func (expEv *ExportEvents) ID() string {
-	return utils.ConcatenatedKey(expEv.Path, expEv.Format)
-}
-
-// FileName returns the file name it should use for saving the failed events
-func (expEv *ExportEvents) FileName(module string) string {
-	fileSuffix := utils.CDREFileSuffixes[expEv.Format]
-	// instead of using fmt.Sprintf we use "+" as binary operator (small optimization)
-	return module + utils.HandlerArgSep + expEv.Format + utils.HandlerArgSep + utils.GenUUID() + fileSuffix
-}
-
-// WriteToFile writes the events to file
-func (expEv *ExportEvents) WriteToFile(filePath string) (err error) {
-	var content []byte
-	content, err = json.Marshal(expEv)
-	if err != nil {
-		return
-	}
-	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
-		fileOut, err := os.Create(filePath)
-		if err != nil {
-			return nil, err
-		}
-		_, err = fileOut.Write(content)
-		fileOut.Close()
-		return nil, err
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.FileLockPrefix+filePath)
-	return
-}
-
-// AddEvent adds one event
-func (expEv *ExportEvents) AddEvent(ev []byte) {
-	expEv.lk.Lock()
-	expEv.Events = append(expEv.Events, ev)
-	expEv.lk.Unlock()
-}
-
-// ReplayFailedPosts tryies to post cdrs again
-func (expEv *ExportEvents) ReplayFailedPosts(attempts int, key string) (failedEvents *ExportEvents, err error) {
-	failedEvents = &ExportEvents{
-		Path:   expEv.Path,
-		Format: expEv.Format,
-		Zip:    expEv.Zip,
-	}
-	switch expEv.Format {
-	case utils.MetaHTTPjsonCDR, utils.MetaHTTPjsonMap, utils.MetaHTTPjson, utils.META_HTTP_POST:
-		var pstr *HTTPPoster
-		pstr, err = NewHTTPPoster(config.CgrConfig().GeneralCfg().HttpSkipTlsVerify,
-			config.CgrConfig().GeneralCfg().ReplyTimeout, expEv.Path,
-			expEv.Format, config.CgrConfig().GeneralCfg().PosterAttempts)
-		if err != nil {
-			return expEv, err
-		}
-		for _, ev := range expEv.Events {
-			err = pstr.Post(ev, utils.EmptyString)
-			if err != nil {
-				failedEvents.AddEvent(ev)
-			}
-		}
-	case utils.MetaAMQPjsonCDR, utils.MetaAMQPjsonMap:
-		for _, ev := range expEv.Events {
-			err = PostersCache.PostAMQP(expEv.Path, attempts, ev)
-			if err != nil {
-				failedEvents.AddEvent(ev)
-			}
-		}
-	case utils.MetaAMQPV1jsonMap:
-		for _, ev := range expEv.Events {
-			err = PostersCache.PostAMQPv1(expEv.Path, attempts, ev)
-			if err != nil {
-				failedEvents.AddEvent(ev)
-			}
-		}
-	case utils.MetaSQSjsonMap:
-		for _, ev := range expEv.Events {
-			err = PostersCache.PostSQS(expEv.Path, attempts, ev)
-			if err != nil {
-				failedEvents.AddEvent(ev)
-			}
-		}
-	case utils.MetaKafkajsonMap:
-		for _, ev := range expEv.Events {
-			err = PostersCache.PostKafka(expEv.Path, attempts, ev, key)
-			if err != nil {
-				failedEvents.AddEvent(ev)
-			}
-		}
-	case utils.MetaS3jsonMap:
-		for _, ev := range expEv.Events {
-			err = PostersCache.PostS3(expEv.Path, attempts, ev, key)
-			if err != nil {
-				failedEvents.AddEvent(ev)
-			}
-		}
-	}
-	if len(failedEvents.Events) > 0 {
-		err = utils.ErrPartiallyExecuted
-	} else {
-		failedEvents = nil
-	}
-	return
 }
