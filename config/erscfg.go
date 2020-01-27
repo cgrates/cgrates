@@ -134,7 +134,7 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string
 		er.FieldSep = *jsnCfg.Field_separator
 	}
 	if jsnCfg.Run_delay != nil {
-		er.RunDelay = time.Duration(*jsnCfg.Run_delay) * time.Second
+		er.RunDelay = utils.ParseDurationWithSecs(*jsnCfg.Run_delay)
 	}
 	if jsnCfg.Concurrent_requests != nil {
 		er.ConcurrentReqs = *jsnCfg.Concurrent_requests
