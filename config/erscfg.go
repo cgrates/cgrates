@@ -20,7 +20,6 @@ package config
 
 import (
 	"time"
-	"strconv"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -135,7 +134,9 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string
 		er.FieldSep = *jsnCfg.Field_separator
 	}
 	if jsnCfg.Run_delay != nil {
-		er.RunDelay, _ = utils.ParseDurationWithSecs(strconv.Itoa(*jsnCfg.Run_delay))
+		if er.RunDelay, err = utils.ParseDurationWithSecs(*jsnCfg.Run_delay); err != nil {
+			return err
+		}
 	}
 	if jsnCfg.Concurrent_requests != nil {
 		er.ConcurrentReqs = *jsnCfg.Concurrent_requests
