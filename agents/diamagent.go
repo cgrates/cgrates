@@ -150,6 +150,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 		utils.MetaApp:     dApp.Name,
 		utils.MetaAppID:   dApp.ID,
 		utils.MetaCmd:     dCmd.Short + "R",
+		utils.RemoteHost:  c.RemoteAddr().String(),
 	}
 	// build the negative error answer
 	diamErr, err := diamErr(m, diam.UnableToComply, reqVars,

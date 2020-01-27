@@ -70,6 +70,7 @@ type RadiusAgent struct {
 
 // handleAuth handles RADIUS Authorization request
 func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err error) {
+	reqVars := make(map[string]interface{})
 	req.SetAVPValues()             // populate string values in AVPs
 	dcdr := newRADataProvider(req) // dcdr will provide information from request
 	rpl = req.Reply()
@@ -77,8 +78,9 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 	cgrRplyNM := config.NewNavigableMap(nil)
 	rplyNM := config.NewNavigableMap(nil)
 	var processed bool
+	reqVars[utils.RemoteHost] = req.RemoteAddr().String()
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
-		agReq := NewAgentRequest(dcdr, nil, cgrRplyNM, rplyNM,
+		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM,
 			reqProcessor.Tenant, ra.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
@@ -107,6 +109,7 @@ func (ra *RadiusAgent) handleAuth(req *radigo.Packet) (rpl *radigo.Packet, err e
 // handleAcct handles RADIUS Accounting request
 // supports: Acct-Status-Type = Start, Interim-Update, Stop
 func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err error) {
+	reqVars := make(map[string]interface{})
 	req.SetAVPValues()             // populate string values in AVPs
 	dcdr := newRADataProvider(req) // dcdr will provide information from request
 	rpl = req.Reply()
@@ -114,8 +117,9 @@ func (ra *RadiusAgent) handleAcct(req *radigo.Packet) (rpl *radigo.Packet, err e
 	cgrRplyNM := config.NewNavigableMap(nil)
 	rplyNM := config.NewNavigableMap(nil)
 	var processed bool
+	reqVars[utils.RemoteHost] = req.RemoteAddr().String()
 	for _, reqProcessor := range ra.cgrCfg.RadiusAgentCfg().RequestProcessors {
-		agReq := NewAgentRequest(dcdr, nil, cgrRplyNM, rplyNM,
+		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM,
 			reqProcessor.Tenant, ra.cgrCfg.GeneralCfg().DefaultTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
