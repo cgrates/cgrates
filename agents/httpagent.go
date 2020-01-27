@@ -56,6 +56,7 @@ type HTTPAgent struct {
 
 // ServeHTTP implements http.Handler interface
 func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	reqVars := make(map[string]interface{})
 	dcdr, err := newHADataProvider(ha.reqPayload, req) // dcdr will provide information from request
 	if err != nil {
 		utils.Logger.Warning(
@@ -65,8 +66,9 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	cgrRplyNM := config.NewNavigableMap(nil)
 	rplyNM := config.NewNavigableMap(nil)
+	reqVars[utils.RemoteHost] = req.RemoteAddr
 	for _, reqProcessor := range ha.reqProcessors {
-		agReq := NewAgentRequest(dcdr, nil, cgrRplyNM, rplyNM,
+		agReq := NewAgentRequest(dcdr, reqVars, cgrRplyNM, rplyNM,
 			reqProcessor.Tenant, ha.dfltTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),

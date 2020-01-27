@@ -543,6 +543,7 @@ const (
 	IdxEnd                      = "]"
 	MetaLog                     = "*log"
 	MetaRemoteHost              = "*remote_host"
+	RemoteHost                  = "RemoteHost"
 	Local                       = "local"
 	TCP                         = "tcp"
 	CGRDebitInterval            = "CGRDebitInterval"

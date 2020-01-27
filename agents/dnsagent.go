@@ -111,6 +111,7 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 		reqVars[E164Address] = e164
 		reqVars[DomainName] = domainNameFromNAPTR(req.Question[0].Name)
 	}
+	reqVars[utils.RemoteHost] = w.RemoteAddr().String()
 	cgrRplyNM := config.NewNavigableMap(nil)
 	rplyNM := config.NewNavigableMap(nil) // share it among different processors
 	var processed bool
