@@ -228,12 +228,10 @@
 			"source_path": "/tmp/fwvErs/in",
 			"flags": ["*cdrs"],
 			"processed_path": "/tmp/fwvErs/out",
-			"header_fields": [
-				{"tag": "FileName", "field_id": "CdrFileName", "type": "*composed", "value": "~*req.95-135", "padding":"right"},
-				{"tag": "FileSeqNr", "field_id": "FileSeqNr", "type": "*composed", "value": "~*req.135-141", "padding":"zeroleft"},
-				{"tag": "AccId1", "field_id": "AccId1", "type": "*composed", "value": "~*req.135-141",  "padding":"zeroleft"},
-			],
-			"content_fields": [
+			"fields": [
+				{"tag": "FileName", "field_id": "CdrFileName", "type": "*variable", "value": "~*hdr.95-135", "padding":"right"},
+				{"tag": "FileSeqNr", "field_id": "FileSeqNr", "type": "*variable", "value": "~*hdr.135-141", "padding":"zeroleft"},
+				{"tag": "AccId1", "field_id": "AccId1", "type": "*variable", "value": "~*hdr.135-141",  "padding":"zeroleft"},
 				{"tag": "Tor", "field_id": "ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", "value": "rated", "mandatory": true},
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*variable", "value": "~*req.0-10", "padding":"right", "mandatory": true},
@@ -251,10 +249,8 @@
 				{"tag": "WholesaleAmount", "field_id": "RetailAmount", "type": "*variable", "value": "~*req.115-123", "padding":"zeroleft"},
 				{"tag": "AccId1", "field_id": "AccId1", "type": "*variable", "value": "~*req.3-6", "padding":"zeroleft", "mandatory": true},
 				{"tag": "AccId2", "field_id": "AccId2", "type": "*variable", "value": "~*req.14-30",  "padding":"right", "mandatory": true},
-			],
-			"trailer_fields": [
-				{"tag": "NrOfCdrs", "type": "metatag", "metatag_id":"total_cdrs", "value": "~*req.142-150"},
-				{"tag": "TotalDuration", "type": "metatag", "metatag_id":"total_duration", "value": "~*req.150-162"},
+				{"tag": "NrOfCdrs", "type": "*variable", "field_id":"NrOfCdrs", "value": "~*trl.142-150"},
+				{"tag": "TotalDuration", "type": "*variable", "field_id":"TotalDuration", "value": "~*trl.150-162"}
 			],
 		},
 		{
