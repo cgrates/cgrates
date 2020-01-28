@@ -11,43 +11,43 @@
 			],
 			"flags": ["*auth", "*accounts"],
 			"request_fields":[
-				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*voice"},
+				{"tag": "TOR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
 				{
-					"tag": "OriginID", "field_id": "OriginID", 
+					"tag": "OriginID", "path": "*cgreq.OriginID",
 					"type": "*variable", "mandatory": true, 
 					"value": "~*req.Service-Information.IMS-Information.User-Session-Id"
 				},
 				{
-					"tag": "OriginHost", "field_id": "OriginHost", 
+					"tag": "OriginHost", "path": "*cgreq.OriginHost",
 					"type": "*variable", "mandatory": true, 
 					"value": "~*vars.OriginHost"
 				},
 				{
-					"tag": "Source", "field_id": "Source", 
+					"tag": "Source", "path": "*cgreq.Source",
 					"type": "*constant", "value": "DiameterAgent"
 				},
 				{
-					"tag": "RequestType", "field_id": "RequestType", 
+					"tag": "RequestType", "path": "*cgreq.RequestType",
 					"type": "*constant", "value": "*prepaid"
 				},
 				{
-					"tag": "Account", "field_id": "Account", 
+					"tag": "Account", "path": "*cgreq.Account",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Service-Information.IMS-Information.Calling-Party-Address[0]:s/tel:\\+(\\d+)/${1}/"
 				},
 				{
-					"tag": "Account", "field_id": "Account", 
+					"tag": "Account", "path": "*cgreq.Account",
 					"filters":["*string:~*req.Service-Information.IMS-Information.Role-Of-Node:2"],
 					"type": "*variable", "mandatory": true,  
 					"value": "~*req.Service-Information.IMS-Information.Requested-Party-Address:s/tel:(\\+?\\d+)/${1}/:s/sip:(\\+?\\d+)/${1}/:s/^\\+49(\\d+)/int${1}/:s/^0049(\\d+)/int${1}/:s/^49(\\d+)/int${1}/:s/^00(\\d+)/+${1}/:s/^[\\+]?(\\d+)/int${1}/:s/int(\\d+)/49${1}/"
 				},
 				{
-					"tag": "Destination", "field_id": "Destination", 
+					"tag": "Destination", "path": "*cgreq.Destination",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Service-Information.IMS-Information.Called-Party-Address:s/tel:(\\+?\\d+)/${1}/:s/^\\+49(\\d+)/int${1}/:s/^0049(\\d+)/int${1}/:s/^49(\\d+)/int${1}/:s/^00(\\d+)/+${1}/:s/^[\\+]?(\\d+)/int${1}/:s/int(\\d+)/+49${1}/"
 				},
 				{
-					"tag": "Destination", "field_id": "Destination", 
+					"tag": "Destination", "path": "*cgreq.Destination",
 					"filters": [
 						"*prefix:~*req.Service-Information.IMS-Information.Called-Party-Address:tel:+",
 						"*notprefix:~*req.Service-Information.IMS-Information.Called-Party-Address:tel:+49"
@@ -56,23 +56,23 @@
 					"value": "~*req.Service-Information.IMS-Information.Called-Party-Address:s/tel:(\\+?\\d+)/${1}/:s/^\\+(\\d+)/int${1}/:s/^[\\+]?(\\d+)/int${1}/:s/int(\\d+)/+00${1}/"
 				},
 				{
-					"tag": "SetupTime", "field_id": "SetupTime", 
+					"tag": "SetupTime", "path": "*cgreq.SetupTime",
 					"type": "*variable", "mandatory": true, 
 					"value": "~*req.Event-Timestamp"
 				},
 				{
-					"tag": "SetupTime", "field_id": "SetupTime", 
+					"tag": "SetupTime", "path": "*cgreq.SetupTime",
 					"type": "*variable", "mandatory": true,
 					"filters": ["*exists:~*req.Service-Information.IMS-Information.Time-Stamps.SIP-Request-Timestamp:"],
 					"value": "~*req.Service-Information.IMS-Information.Time-Stamps.SIP-Request-Timestamp"
 				},
 				{
-					"tag": "Usage", "field_id": "Usage", 
+					"tag": "Usage", "path": "*cgreq.Usage",
 					"type": "*constant", "mandatory": true, 
 					"value": "10s"
 				},
 				{
-					"tag": "IMSI", "field_id": "IMSI", 
+					"tag": "IMSI", "path": "*cgreq.IMSI",
 					"type": "*variable", "value": "~*req.User-Name"
 				}
 			],
@@ -80,18 +80,18 @@
 				{"tag": "CCATemplate", "type": "*template", "value": "*cca"},
 				{
 					"tag": "GrantedUnitsError",  
-					"field_id": "Granted-Service-Unit.CC-Time",
+					"path": "*rep.Granted-Service-Unit.CC-Time",
 					"filters": ["*notempty:~*cgrep.Error:"],
 					"type": "*constant", "blocker": true,
 					"value": "0"
 				},
 				{
 					"tag": "GrantedUnitsUnlimited",
-					"field_id": "Granted-Service-Unit.CC-Time",
+					"path": "*rep.Granted-Service-Unit.CC-Time",
 						"filters": ["*eq:~*cgrep.MaxUsage:-1"],
 						"blocker": true,
 					"type": "*constant", "value": "10"},
-				{"tag": "GrantedUnits", "field_id": "Granted-Service-Unit.CC-Time", 
+				{"tag": "GrantedUnits", "path": "*rep.Granted-Service-Unit.CC-Time",
 					"type": "*variable", "mandatory": true,
 					"value": "~*cgrep.MaxUsage{*duration_seconds}"}
 			]
@@ -107,39 +107,39 @@
 			"flags": ["*initiate", "*accounts"],
 			"request_fields":[
 				{
-					"tag": "OriginID", "field_id": "OriginID",
+					"tag": "OriginID", "path": "*cgreq.OriginID",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Service-Information.IMS-Information.User-Session-Id"},
 				{
-					"tag": "OriginHost", "field_id": "OriginHost", 
+					"tag": "OriginHost", "path": "*cgreq.OriginHost",
 					"type": "*variable", "value": "~*vars.OriginHost"
 				},
 				{
-					"tag": "Source", "field_id": "Source", 
+					"tag": "Source", "path": "*cgreq.Source",
 					"type": "*constant","value": "DiameterAgent"
 				},
 				{
-					"tag": "RequestType", "field_id": "RequestType",
+					"tag": "RequestType", "path": "*cgreq.RequestType",
 					"type": "*constant", "value": "*prepaid"
 				},
 				{
-					"tag": "Account", "field_id": "Account", 
+					"tag": "Account", "path": "*cgreq.Account",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Service-Information.IMS-Information.Calling-Party-Address[0]:s/tel:\\+(\\d+)/${1}/"
 				},
 				{
-					"tag": "Account", "field_id": "Account", 
+					"tag": "Account", "path": "*cgreq.Account",
 					"filters":["*string:~*req.Service-Information.IMS-Information.Role-Of-Node:2"],
 					"type": "*variable", "mandatory": true,  
 					"value": "~*req.Service-Information.IMS-Information.Requested-Party-Address:s/tel:(\\+?\\d+)/${1}/:s/sip:(\\+?\\d+)/${1}/:s/^\\+49(\\d+)/int${1}/:s/^0049(\\d+)/int${1}/:s/^49(\\d+)/int${1}/:s/^00(\\d+)/+${1}/:s/^[\\+]?(\\d+)/int${1}/:s/int(\\d+)/49${1}/"
 				},
 				{
-					"tag": "Destination", "field_id": "Destination", 
+					"tag": "Destination", "path": "*cgreq.Destination",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Service-Information.IMS-Information.Called-Party-Address:s/tel:(\\+?\\d+)/${1}/:s/^\\+49(\\d+)/int${1}/:s/^0049(\\d+)/int${1}/:s/^49(\\d+)/int${1}/:s/^00(\\d+)/+${1}/:s/^[\\+]?(\\d+)/int${1}/:s/int(\\d+)/+49${1}/"
 				},
 				{
-					"tag": "Destination", "field_id": "Destination", 
+					"tag": "Destination", "path": "*cgreq.Destination",
 					"filters": [
 						"*prefix:~*req.Service-Information.IMS-Information.Called-Party-Address:tel:+",
 						"*notprefix:~*req.Service-Information.IMS-Information.Called-Party-Address:tel:+49"
@@ -148,22 +148,22 @@
 					"value": "~*req.Service-Information.IMS-Information.Called-Party-Address:s/tel:(\\+?\\d+)/${1}/:s/^\\+(\\d+)/int${1}/:s/^[\\+]?(\\d+)/int${1}/:s/int(\\d+)/+00${1}/"
 				},
 				{
-					"tag": "SetupTime", "field_id": "SetupTime",
+					"tag": "SetupTime", "path": "*cgreq.SetupTime",
 					"filters": ["*exists:~*req.Service-Information.IMS-Information.Time-Stamps.SIP-Request-Timestamp:"],
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Service-Information.IMS-Information.Time-Stamps.SIP-Request-Timestamp"
 				},
 				{
-					"tag": "AnswerTime", "field_id": "AnswerTime", 
+					"tag": "AnswerTime", "path": "*cgreq.AnswerTime",
 					"type": "*variable", "mandatory": true, 
 					"value": "~*req.Event-Timestamp"
 				},
 				{
-					"tag": "Usage", "field_id": "Usage", 
+					"tag": "Usage", "path": "*cgreq.Usage",
 					"type": "*constant", "value": "10s"
 				},
 				{
-					"tag": "IMSI", "field_id": "IMSI", 
+					"tag": "IMSI", "path": "*cgreq.IMSI",
 					"type": "*variable", "mandatory": true, 
 					"value": "~*req.User-Name"
 				}
@@ -173,17 +173,17 @@
 				{
 					"tag": "GrantedUnitsError",
 					"filters": ["*notempty:~*cgrep.Error:"],
-					"field_id": "Granted-Service-Unit.CC-Time", "blocker": true,
+					"path": "*rep.Granted-Service-Unit.CC-Time", "blocker": true,
 					"type": "*constant", "value": "0"
 				},
 				{
 					"tag": "GrantedUnitsUnlimited",  
 					"filters": ["*eq:~*cgrep.MaxUsage:-1"],
-					"field_id": "Granted-Service-Unit.CC-Time", "blocker": true,
+					"path": "*rep.Granted-Service-Unit.CC-Time", "blocker": true,
 					"type": "*constant", "value": "10"
 				},
 				{
-					"tag": "GrantedUnits", "field_id": "Granted-Service-Unit.CC-Time",
+					"tag": "GrantedUnits", "path": "*rep.Granted-Service-Unit.CC-Time",
 					"type": "*variable", "mandatory": true,
 					"value": "~*cgrep.MaxUsage{*duration_seconds}"
 				}
@@ -200,16 +200,16 @@
 			"flags": ["*update", "*accounts"],
 			"request_fields":[
 				{
-					"tag": "OriginID", "field_id": "OriginID", 
+					"tag": "OriginID", "path": "*cgreq.OriginID",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Service-Information.IMS-Information.User-Session-Id"
 				},
 				{
-					"tag": "OriginHost", "field_id": "OriginHost", 
+					"tag": "OriginHost", "path": "*cgreq.OriginHost",
 					"type": "*variable", "value": "~*vars.OriginHost"
 				},
 				{
-					"tag": "Usage", "field_id": "Usage",
+					"tag": "Usage", "path": "*cgreq.Usage",
 					"type": "*constant", "value": "10s"
 				},
 			],
@@ -218,17 +218,17 @@
 				{
 					"tag": "GrantedUnitsOnError", 
 					"filters": ["*notempty:~*cgrep.Error:"],
-					"field_id": "Granted-Service-Unit.CC-Time", "blocker": true,
+					"path": "*rep.Granted-Service-Unit.CC-Time", "blocker": true,
 					"type": "*constant", "value": "0"
 				},
 				{
 					"tag": "GrantedUnitsUnlimited",  
 					"filters": ["*eq:~*cgrep.MaxUsage:-1"],
-					"field_id": "Granted-Service-Unit.CC-Time", "blocker": true,
+					"path": "*rep.Granted-Service-Unit.CC-Time", "blocker": true,
 					"type": "*constant", "value": "10"
 				},
 				{
-					"tag": "GrantedUnits", "field_id": "Granted-Service-Unit.CC-Time",
+					"tag": "GrantedUnits", "path": "*rep.Granted-Service-Unit.CC-Time",
 					"type": "*variable", "mandatory": true,
 					"value": "~*cgrep.MaxUsage{*duration_seconds}"
 				}
@@ -244,21 +244,21 @@
 			"flags": ["*terminate", "*accounts", "*cdrs"],
 			"request_fields":[
 				{
-					"tag": "OriginID", "field_id": "OriginID", 
+					"tag": "OriginID", "path": "*cgreq.OriginID",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Service-Information.IMS-Information.User-Session-Id"
 				},
 				{
-					"tag": "OriginHost", "field_id": "OriginHost", 
+					"tag": "OriginHost", "path": "*cgreq.OriginHost",
 					"type": "*variable", "value": "~*vars.OriginHost"
 				},
 				{
-					"tag": "Usage", "field_id": "Usage",
+					"tag": "Usage", "path": "*cgreq.Usage",
 					"filters": ["*exists:~*req.Service-Information.IMS-Information.Time-Stamps.SIP-Response-Timestamp:"],
 					"type": "*usage_difference", "mandatory": true,
 					"value": "~*req.Event-Timestamp;~*req.Service-Information.IMS-Information.Time-Stamps.SIP-Response-Timestamp"},
 				{
-					"tag": "Usage", "field_id": "Usage",
+					"tag": "Usage", "path": "*cgreq.Usage",
 					"filters": ["*notexists:~*req.Service-Information.IMS-Information.Time-Stamps.SIP-Response-Timestamp:"],
 					"type": "*constant", "value": "0s"
 				},
@@ -266,9 +266,9 @@
 			"reply_fields":[
 				{"tag": "CCATemplate", "type": "*template", "value": "*cca"},
 				{"tag": "ResultCode",  "filters": ["*notempty:~*cgrep.Error:"],
-					"field_id": "Result-Code", "blocker": true,
+					"path": "*rep.Result-Code", "blocker": true,
 					"type": "*constant", "value": "5030"},
-				{"tag": "ResultCode", "field_id": "Result-Code",
+				{"tag": "ResultCode", "path": "*rep.Result-Code",
 					"type": "*constant", "value": "2001"}
 			]
 		},

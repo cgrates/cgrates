@@ -33,6 +33,9 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg, separator str
 	if jsnCfg.Field_id != nil {
 		fcTmp.FieldId = *jsnCfg.Field_id
 	}
+	if jsnCfg.Path != nil {
+		fcTmp.Path = *jsnCfg.Path
+	}
 	fcTmp.Tag = fcTmp.FieldId
 	if jsnCfg.Tag != nil {
 		fcTmp.Tag = *jsnCfg.Tag
@@ -100,6 +103,7 @@ type FCTemplate struct {
 	Tag              string
 	Type             string   // Type of field
 	FieldId          string   // Field identifier
+	Path             string   // will replace FieldID
 	Filters          []string // list of filter profiles
 	Value            RSRParsers
 	Width            int

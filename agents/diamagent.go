@@ -243,13 +243,15 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 
 func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 	agReq *AgentRequest) (processed bool, err error) {
+	agReq.CGRRequest = config.NewNavigableMap(nil)
 	if pass, err := da.filterS.Pass(agReq.Tenant,
 		reqProcessor.Filters, agReq); err != nil || !pass {
 		return pass, err
 	}
-	if agReq.CGRRequest, err = agReq.AsNavigableMap(reqProcessor.RequestFields); err != nil {
+	if err = agReq.SetFields(reqProcessor.RequestFields); err != nil {
 		return
 	}
+	// build the CGREvent out of CGRRequest
 	cgrEv := agReq.CGRRequest.AsCGREvent(agReq.Tenant, utils.NestingSep)
 	var reqType string
 	for _, typ := range []string{
@@ -405,10 +407,8 @@ func (da *DiameterAgent) processRequest(reqProcessor *config.RequestProcessor,
 			agReq.CGRReply.Set([]string{utils.Error}, err.Error(), false, false)
 		}
 	}
-	if nM, err := agReq.AsNavigableMap(reqProcessor.ReplyFields); err != nil {
+	if err = agReq.SetFields(reqProcessor.ReplyFields); err != nil {
 		return false, err
-	} else {
-		agReq.Reply.Merge(nM)
 	}
 	if reqProcessor.Flags.HasKey(utils.MetaLog) {
 		utils.Logger.Info(
@@ -453,15 +453,14 @@ func (da *DiameterAgent) V1DisconnectSession(args utils.AttrDisconnectSession, r
 		nil,
 		da.cgrCfg.GeneralCfg().DefaultTenant,
 		da.cgrCfg.GeneralCfg().DefaultTimezone, da.filterS)
-	nM, err := aReq.AsNavigableMap(da.cgrCfg.DiameterAgentCfg().Templates[da.cgrCfg.DiameterAgentCfg().ASRTemplate])
-	if err != nil {
+	if err = aReq.SetFields(da.cgrCfg.DiameterAgentCfg().Templates[da.cgrCfg.DiameterAgentCfg().ASRTemplate]); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> cannot disconnect session with OriginID: <%s>, err: %s",
 				utils.DiameterAgent, ssID, err.Error()))
 		return utils.ErrServerError
 	}
 	m := diam.NewRequest(dmd.m.Header.CommandCode, dmd.m.Header.ApplicationID, dmd.m.Dictionary())
-	if err = updateDiamMsgFromNavMap(m, nM, da.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
+	if err = updateDiamMsgFromNavMap(m, aReq.diamreq, da.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> cannot disconnect session with OriginID: <%s>, err: %s",
 				utils.DiameterAgent, ssID, err.Error()))

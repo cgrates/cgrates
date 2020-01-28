@@ -117,6 +117,7 @@ type EventReaderCfg struct {
 	HeaderFields             []*FCTemplate
 	ContentFields            []*FCTemplate
 	TrailerFields            []*FCTemplate
+	Fields                   []*FCTemplate
 	CacheDumpFields          []*FCTemplate
 }
 
