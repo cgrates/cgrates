@@ -319,18 +319,18 @@ const CGRATES_CFG_JSON = `
 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 			"filters": [],										// limit parsing based on the filters
 			"flags": [],										// flags to influence the event processing
-			"fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-				{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "~*req.2", "mandatory": true},
-				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~*req.3", "mandatory": true},
-				{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~*req.4", "mandatory": true},
-				{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~*req.6", "mandatory": true},
-				{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "~*req.7", "mandatory": true},
-				{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~*req.8", "mandatory": true},
-				{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~*req.9", "mandatory": true},
-				{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~*req.10", "mandatory": true},
-				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~*req.11", "mandatory": true},
-				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~*req.12", "mandatory": true},
-				{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~*req.13", "mandatory": true},
+			"fields":[									        // import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+				{"tag": "TOR", "field_id": "ToR", "type": "*variable", "value": "~*req.2", "mandatory": true},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*variable", "value": "~*req.3", "mandatory": true},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*variable", "value": "~*req.4", "mandatory": true},
+				{"tag": "Tenant", "field_id": "Tenant", "type": "*variable", "value": "~*req.6", "mandatory": true},
+				{"tag": "Category", "field_id": "Category", "type": "*variable", "value": "~*req.7", "mandatory": true},
+				{"tag": "Account", "field_id": "Account", "type": "*variable", "value": "~*req.8", "mandatory": true},
+				{"tag": "Subject", "field_id": "Subject", "type": "*variable", "value": "~*req.9", "mandatory": true},
+				{"tag": "Destination", "field_id": "Destination", "type": "*variable", "value": "~*req.10", "mandatory": true},
+				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*variable", "value": "~*req.11", "mandatory": true},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*variable", "value": "~*req.12", "mandatory": true},
+				{"tag": "Usage", "field_id": "Usage", "type": "*variable", "value": "~*req.13", "mandatory": true},
 			],
 			"continue": false,									// continue to the next template if executed
 		},
@@ -419,27 +419,27 @@ const CGRATES_CFG_JSON = `
 	"asr_template": "",											// enable AbortSession message being sent to client on DisconnectSession
 	"templates":{												// default message templates
 		"*err": [
-				{"tag": "SessionId", "field_id": "Session-Id", "type": "*composed",
+				{"tag": "SessionId", "field_id": "Session-Id", "type": "*variable",
 					"value": "~*req.Session-Id", "mandatory": true},
-				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*composed",
+				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*variable",
 					"value": "~*vars.OriginHost", "mandatory": true},
-				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*composed",
+				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*variable",
 					"value": "~*vars.OriginRealm", "mandatory": true},
 		],
 		"*cca": [
-				{"tag": "SessionId", "field_id": "Session-Id", "type": "*composed",
+				{"tag": "SessionId", "field_id": "Session-Id", "type": "*variable",
 					"value": "~*req.Session-Id", "mandatory": true},
 				{"tag": "ResultCode", "field_id": "Result-Code", "type": "*constant",
 					"value": "2001"},
-				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*composed",
+				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*variable",
 					"value": "~*vars.OriginHost", "mandatory": true},
-				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*composed",
+				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*variable",
 					"value": "~*vars.OriginRealm", "mandatory": true},
-				{"tag": "AuthApplicationId", "field_id": "Auth-Application-Id", "type": "*composed",
+				{"tag": "AuthApplicationId", "field_id": "Auth-Application-Id", "type": "*variable",
 					 "value": "~*vars.*appid", "mandatory": true},
-				{"tag": "CCRequestType", "field_id": "CC-Request-Type", "type": "*composed",
+				{"tag": "CCRequestType", "field_id": "CC-Request-Type", "type": "*variable",
 					"value": "~*req.CC-Request-Type", "mandatory": true},
-				{"tag": "CCRequestNumber", "field_id": "CC-Request-Number", "type": "*composed",
+				{"tag": "CCRequestNumber", "field_id": "CC-Request-Number", "type": "*variable",
 					"value": "~*req.CC-Request-Number", "mandatory": true},
 		],
 		"*asr": [

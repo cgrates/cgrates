@@ -279,62 +279,6 @@
 // },
 
 
-// "cdrc": [												// CDRc config
-// 	{
-// 		"id": "*default",								// identifier of the CDRC runner
-// 		"enabled": false,								// enable CDR client functionality
-// 		"dry_run": false,								// do not send the CDRs to CDRS, just parse them
-// 		"cdrs_conns": ["*internal"],
-// 		"cdr_format": "*file_csv",						// CDR file format <*file_csv|*freeswitch_csv|*file_fwv|*opensips_flatstore|*partial_csv|*file_xml>
-// 		"field_separator": ",",							// separator used in case of csv files
-// 		"timezone": "",									// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-// 		"run_delay": 0,									// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
-// 		"max_open_files": 1024,							// maximum simultaneous files to process, 0 for unlimited
-// 		"cdr_in_path": "/var/spool/cgrates/cdrc/in",	// absolute path towards the directory where the CDRs are stored
-// 		"cdr_out_path": "/var/spool/cgrates/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
-// 		"failed_calls_prefix": "missed_calls",			// used in case of flatstore CDRs to avoid searching for BYE records
-// 		"cdr_root_path": "",							// path towards one CDR element in case of XML CDRs
-// 		"cdr_source_id": "cdrc_csv",					// free form field, tag identifying the source of the CDRs within CDRS database
-// 		"filters" :[],									// limit parsing based on the filters
-// 		"tenant": "",									// tenant used by import
-// 		"continue_on_success": false,					// continue to the next template if executed
-// 		"partial_record_cache": "10s",					// duration to cache partial records when not pairing
-// 		"partial_cache_expiry_action": "*dump_to_file",	// action taken when cache when records in cache are timed-out <*dump_to_file|*post_cdr>
-// 		"header_fields": [],							// template of the import header fields
-// 		"content_fields":[								// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-// 			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "~*req.2", "mandatory": true},
-// 			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~*req.3", "mandatory": true},
-// 			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~*req.4", "mandatory": true},
-// 			{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~*req.6", "mandatory": true},
-// 			{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "~*req.7", "mandatory": true},
-// 			{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~*req.8", "mandatory": true},
-// 			{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~*req.9", "mandatory": true},
-// 			{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~*req.10", "mandatory": true},
-// 			{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~*req.11", "mandatory": true},
-// 			{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~*req.12", "mandatory": true},
-// 			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~*req.13", "mandatory": true},
-// 		],
-// 		"trailer_fields": [],							// template of the import trailer fields
-// 		"cache_dump_fields": [							// template used when dumping cached CDR, eg: partial CDRs
-// 			{"tag": "CGRID", "type": "*composed", "value": "~CGRID"},
-// 			{"tag": "RunID", "type": "*composed", "value": "~RunID"},
-// 			{"tag": "TOR", "type": "*composed", "value": "~ToR"},
-// 			{"tag": "OriginID", "type": "*composed", "value": "~OriginID"},
-// 			{"tag": "RequestType", "type": "*composed", "value": "~RequestType"},
-// 			{"tag": "Tenant", "type": "*composed", "value": "~Tenant"},
-// 			{"tag": "Category", "type": "*composed", "value": "~Category"},
-// 			{"tag": "Account", "type": "*composed", "value": "~Account"},
-// 			{"tag": "Subject", "type": "*composed", "value": "~Subject"},
-// 			{"tag": "Destination", "type": "*composed", "value": "~Destination"},
-// 			{"tag": "SetupTime", "type": "*composed", "value": "~SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
-// 			{"tag": "AnswerTime", "type": "*composed", "value": "~AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
-// 			{"tag": "Usage", "type": "*composed", "value": "~Usage"},
-// 			{"tag": "Cost", "type": "*composed", "value": "~Cost"},
-// 		],
-// 	},
-// ],
-
-
 // "ers": {									// EventReaderService
 // 	"enabled": false,						// starts the EventReader service: <true|false>
 // 	"sessions_conns":["*internal"],			// RPC Connections IDs
@@ -355,17 +299,17 @@
 // 			"flags": [],										// flags to influence the event processing
 // 			"header_fields": [],								// template of the import header fields
 // 			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-// 				{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "~*req.2", "mandatory": true},
-// 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~*req.3", "mandatory": true},
-// 				{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~*req.4", "mandatory": true},
-// 				{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "~*req.6", "mandatory": true},
-// 				{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "~*req.7", "mandatory": true},
-// 				{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "~*req.8", "mandatory": true},
-// 				{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "~*req.9", "mandatory": true},
-// 				{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~*req.10", "mandatory": true},
-// 				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "~*req.11", "mandatory": true},
-// 				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~*req.12", "mandatory": true},
-// 				{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~*req.13", "mandatory": true},
+// 				{"tag": "TOR", "field_id": "ToR", "type": "*variable", "value": "~*req.2", "mandatory": true},
+// 				{"tag": "OriginID", "field_id": "OriginID", "type": "*variable", "value": "~*req.3", "mandatory": true},
+// 				{"tag": "RequestType", "field_id": "RequestType", "type": "*variable", "value": "~*req.4", "mandatory": true},
+// 				{"tag": "Tenant", "field_id": "Tenant", "type": "*variable", "value": "~*req.6", "mandatory": true},
+// 				{"tag": "Category", "field_id": "Category", "type": "*variable", "value": "~*req.7", "mandatory": true},
+// 				{"tag": "Account", "field_id": "Account", "type": "*variable", "value": "~*req.8", "mandatory": true},
+// 				{"tag": "Subject", "field_id": "Subject", "type": "*variable", "value": "~*req.9", "mandatory": true},
+// 				{"tag": "Destination", "field_id": "Destination", "type": "*variable", "value": "~*req.10", "mandatory": true},
+// 				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*variable", "value": "~*req.11", "mandatory": true},
+// 				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*variable", "value": "~*req.12", "mandatory": true},
+// 				{"tag": "Usage", "field_id": "Usage", "type": "*variable", "value": "~*req.13", "mandatory": true},
 // 			],
 // 			"trailer_fields": [],								// template of the import trailer fields
 // 			"continue": false,									// continue to the next template if executed
@@ -455,27 +399,27 @@
 // 	"asr_template": "",											// enable AbortSession message being sent to client on DisconnectSession
 // 	"templates":{												// default message templates
 // 		"*err": [
-// 				{"tag": "SessionId", "field_id": "Session-Id", "type": "*composed",
+// 				{"tag": "SessionId", "field_id": "Session-Id", "type": "*variable",
 // 					"value": "~*req.Session-Id", "mandatory": true},
-// 				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*composed",
+// 				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*variable",
 // 					"value": "~*vars.OriginHost", "mandatory": true},
-// 				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*composed",
+// 				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*variable",
 // 					"value": "~*vars.OriginRealm", "mandatory": true},
 // 		],
 // 		"*cca": [
-// 				{"tag": "SessionId", "field_id": "Session-Id", "type": "*composed",
+// 				{"tag": "SessionId", "field_id": "Session-Id", "type": "*variable",
 // 					"value": "~*req.Session-Id", "mandatory": true},
 // 				{"tag": "ResultCode", "field_id": "Result-Code", "type": "*constant",
 // 					"value": "2001"},
-// 				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*composed",
+// 				{"tag": "OriginHost", "field_id": "Origin-Host", "type": "*variable",
 // 					"value": "~*vars.OriginHost", "mandatory": true},
-// 				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*composed",
+// 				{"tag": "OriginRealm", "field_id": "Origin-Realm", "type": "*variable",
 // 					"value": "~*vars.OriginRealm", "mandatory": true},
-// 				{"tag": "AuthApplicationId", "field_id": "Auth-Application-Id", "type": "*composed",
+// 				{"tag": "AuthApplicationId", "field_id": "Auth-Application-Id", "type": "*variable",
 // 					 "value": "~*vars.*appid", "mandatory": true},
-// 				{"tag": "CCRequestType", "field_id": "CC-Request-Type", "type": "*composed",
+// 				{"tag": "CCRequestType", "field_id": "CC-Request-Type", "type": "*variable",
 // 					"value": "~*req.CC-Request-Type", "mandatory": true},
-// 				{"tag": "CCRequestNumber", "field_id": "CC-Request-Number", "type": "*composed",
+// 				{"tag": "CCRequestNumber", "field_id": "CC-Request-Number", "type": "*variable",
 // 					"value": "~*req.CC-Request-Number", "mandatory": true},
 // 		],
 // 		"*asr": [
