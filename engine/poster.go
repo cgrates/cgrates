@@ -20,14 +20,8 @@ package engine
 
 import (
 	"net/url"
-	"os"
-	"path"
 	"strings"
 	"sync"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/guardian"
-	"github.com/cgrates/cgrates/utils"
 )
 
 const (
@@ -66,20 +60,6 @@ type PosterCache struct {
 type Poster interface {
 	Post(body []byte, key string) error
 	Close()
-}
-
-func writeToFile(fileDir, fileName string, content []byte) (err error) {
-	fallbackFilePath := path.Join(fileDir, fileName)
-	_, err = guardian.Guardian.Guard(func() (interface{}, error) {
-		fileOut, err := os.Create(fallbackFilePath)
-		if err != nil {
-			return nil, err
-		}
-		_, err = fileOut.Write(content)
-		fileOut.Close()
-		return nil, err
-	}, config.CgrConfig().GeneralCfg().LockingTimeout, utils.FileLockPrefix+fallbackFilePath)
-	return
 }
 
 func parseURL(dialURL string) (URL string, qID string, err error) {

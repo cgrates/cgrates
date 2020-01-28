@@ -1,0 +1,72 @@
+{
+// CGRateS Configuration file
+//
+// Used in apier_local_tests
+// Starts rater, cdrs and mediator connecting over internal channel
+
+"general": {
+    "log_level": 7,
+	"poster_attempts": 1,									// number of attempts before considering post request failed (eg: *http_post, CDR exports)
+	"failed_posts_ttl": "1s",				// time to wait before writing the failed posts in a single file
+},
+
+"stor_db": {
+	"db_type": "*internal",					// stor database type to use: <mysql|postgres>
+},
+
+
+"rals": {
+	"enabled": true,						// enable Rater service: <true|false>
+	"thresholds_conns": ["*localhost"],
+},
+
+"schedulers": {
+	"enabled": true,
+},
+
+"cdrs": {
+	"enabled": true,
+	"attributes_conns":["*internal"],
+	"chargers_conns":["*localhost"],
+	"rals_conns": ["*localhost"],
+	"stats_conns": ["*localhost"],
+	"thresholds_conns": ["*localhost"],
+	"online_cdr_exports": ["s3_test_file"],
+},
+
+"attributes": {
+	"enabled": true,
+},
+
+"stats": {
+	"enabled": true,
+	"store_interval": "1s",
+	"thresholds_conns": ["*internal"],
+},
+
+"thresholds": {
+	"enabled": true,
+	"store_interval": "1s",
+},
+
+"chargers": {
+	"enabled": true,
+	"attributes_conns": ["*internal"],
+},
+
+"apier": {
+	"scheduler_conns": ["*internal"],
+},
+
+"cdre": {
+	"s3_test_file": {
+		"export_format": "*s3_json_map",
+		// export_path for s3:  "endpoint?aws_region=region&aws_key=IDkey&aws_secret=secret&aws_token=sessionToken&queue_id=cgrates-cdrs"  
+		"export_path": "http://s3.us-east-2.amazonaws.com/?aws_region=eu-west-2&aws_key=testkey&aws_secret=testsecret&queue_id=cgrates-cdrs",
+		"content_fields": [
+			{"tag": "CGRID", "type": "*composed", "value": "~CGRID", "field_id": "CGRID"},
+		],
+	},
+},
+
+}

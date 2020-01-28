@@ -467,8 +467,9 @@ func checkContent(ev *engine.ExportEvents, content []interface{}) error {
 	}
 	return nil
 }
+
 func testCDRsOnExpFileFailover(t *testing.T) {
-	time.Sleep(time.Duration(20 * time.Second))
+	time.Sleep(time.Duration(5 * time.Second))
 	v1 := url.Values{}
 	v2 := url.Values{}
 	v1.Set("OriginID", "httpjsonrpc1")
@@ -518,12 +519,13 @@ func testCDRsOnExpKafkaPosterFileFailover(t *testing.T) {
 	defer reader.Close()
 
 	for i := 0; i < 2; i++ { // no raw CDR
-		ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		if m, err := reader.ReadMessage(ctx); err != nil {
 			t.Fatal(err)
 		} else if !reflect.DeepEqual(failoverContent[0].([]byte), m.Value) && !reflect.DeepEqual(failoverContent[1].([]byte), m.Value) { // Checking just the prefix should do since some content is dynamic
 			t.Errorf("Expecting: %v or %v, received: %v", utils.IfaceAsString(failoverContent[0]), utils.IfaceAsString(failoverContent[1]), string(m.Value))
 		}
+		cancel()
 	}
 }
 
