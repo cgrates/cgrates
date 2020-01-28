@@ -114,9 +114,7 @@ type EventReaderCfg struct {
 	FailedCallsPrefix        string        // Used in case of flatstore CDRs to avoid searching for BYE records
 	PartialRecordCache       time.Duration // Duration to cache partial records when not pairing
 	PartialCacheExpiryAction string
-	HeaderFields             []*FCTemplate
-	ContentFields            []*FCTemplate
-	TrailerFields            []*FCTemplate
+	Fields                   []*FCTemplate
 	CacheDumpFields          []*FCTemplate
 }
 
@@ -178,18 +176,8 @@ func (er *EventReaderCfg) loadFromJsonCfg(jsnCfg *EventReaderJsonCfg, sep string
 	if jsnCfg.Partial_cache_expiry_action != nil {
 		er.PartialCacheExpiryAction = *jsnCfg.Partial_cache_expiry_action
 	}
-	if jsnCfg.Header_fields != nil {
-		if er.HeaderFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Header_fields, sep); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Content_fields != nil {
-		if er.ContentFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Content_fields, sep); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Trailer_fields != nil {
-		if er.TrailerFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Trailer_fields, sep); err != nil {
+	if jsnCfg.Fields != nil {
+		if er.Fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Fields, sep); err != nil {
 			return err
 		}
 	}
@@ -228,17 +216,13 @@ func (er *EventReaderCfg) Clone() (cln *EventReaderCfg) {
 	}
 	cln.Flags = er.Flags
 	cln.FailedCallsPrefix = er.FailedCallsPrefix
-	cln.HeaderFields = make([]*FCTemplate, len(er.HeaderFields))
-	for idx, fld := range er.HeaderFields {
-		cln.HeaderFields[idx] = fld.Clone()
+	cln.Fields = make([]*FCTemplate, len(er.Fields))
+	for idx, fld := range er.Fields {
+		cln.Fields[idx] = fld.Clone()
 	}
-	cln.ContentFields = make([]*FCTemplate, len(er.ContentFields))
-	for idx, fld := range er.ContentFields {
-		cln.ContentFields[idx] = fld.Clone()
-	}
-	cln.TrailerFields = make([]*FCTemplate, len(er.TrailerFields))
-	for idx, fld := range er.TrailerFields {
-		cln.TrailerFields[idx] = fld.Clone()
+	cln.CacheDumpFields = make([]*FCTemplate, len(er.CacheDumpFields))
+	for idx, fld := range er.CacheDumpFields {
+		cln.CacheDumpFields[idx] = fld.Clone()
 	}
 	return
 }

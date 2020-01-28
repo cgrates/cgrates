@@ -27,13 +27,12 @@ import (
 
 func TestEventRedearClone(t *testing.T) {
 	orig := &EventReaderCfg{
-		ID:           utils.MetaDefault,
-		Type:         "RandomType",
-		FieldSep:     ",",
-		Filters:      []string{"Filter1", "Filter2"},
-		Tenant:       NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
-		HeaderFields: []*FCTemplate{},
-		ContentFields: []*FCTemplate{
+		ID:       utils.MetaDefault,
+		Type:     "RandomType",
+		FieldSep: ",",
+		Filters:  []string{"Filter1", "Filter2"},
+		Tenant:   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
+		Fields: []*FCTemplate{
 			{
 				Tag:       "TOR",
 				FieldId:   "ToR",
@@ -49,20 +48,19 @@ func TestEventRedearClone(t *testing.T) {
 				Mandatory: true,
 			},
 		},
-		TrailerFields: []*FCTemplate{},
+		CacheDumpFields: make([]*FCTemplate, 0),
 	}
 	cloned := orig.Clone()
 	if !reflect.DeepEqual(cloned, orig) {
 		t.Errorf("expected: %s \n,received: %s", utils.ToJSON(orig), utils.ToJSON(cloned))
 	}
 	initialOrig := &EventReaderCfg{
-		ID:           utils.MetaDefault,
-		Type:         "RandomType",
-		FieldSep:     ",",
-		Filters:      []string{"Filter1", "Filter2"},
-		Tenant:       NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
-		HeaderFields: []*FCTemplate{},
-		ContentFields: []*FCTemplate{
+		ID:       utils.MetaDefault,
+		Type:     "RandomType",
+		FieldSep: ",",
+		Filters:  []string{"Filter1", "Filter2"},
+		Tenant:   NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
+		Fields: []*FCTemplate{
 			{
 				Tag:       "TOR",
 				FieldId:   "ToR",
@@ -78,10 +76,10 @@ func TestEventRedearClone(t *testing.T) {
 				Mandatory: true,
 			},
 		},
-		TrailerFields: []*FCTemplate{},
+		CacheDumpFields: make([]*FCTemplate, 0),
 	}
 	orig.Filters = []string{"SingleFilter"}
-	orig.ContentFields = []*FCTemplate{
+	orig.Fields = []*FCTemplate{
 		{
 			Tag:       "TOR",
 			FieldId:   "ToR",
@@ -113,8 +111,7 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 				Timezone:       utils.EmptyString,
 				Filters:        []string{},
 				Flags:          utils.FlagsWithParams{},
-				HeaderFields:   make([]*FCTemplate, 0),
-				ContentFields: []*FCTemplate{
+				Fields: []*FCTemplate{
 					{Tag: "TOR", FieldId: "ToR", Type: utils.META_COMPOSED,
 						Value: NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP), Mandatory: true},
 					{Tag: "OriginID", FieldId: "OriginID", Type: utils.META_COMPOSED,
@@ -138,7 +135,6 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 					{Tag: "Usage", FieldId: "Usage", Type: utils.META_COMPOSED,
 						Value: NewRSRParsersMustCompile("~*req.13", true, utils.INFIELD_SEP), Mandatory: true},
 				},
-				TrailerFields: make([]*FCTemplate, 0),
 			},
 			&EventReaderCfg{
 				ID:             "file_reader1",
@@ -153,8 +149,7 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 				Timezone:       utils.EmptyString,
 				Filters:        nil,
 				Flags:          utils.FlagsWithParams{},
-				HeaderFields:   make([]*FCTemplate, 0),
-				ContentFields: []*FCTemplate{
+				Fields: []*FCTemplate{
 					{Tag: "TOR", FieldId: "ToR", Type: utils.META_COMPOSED,
 						Value: NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP), Mandatory: true},
 					{Tag: "OriginID", FieldId: "OriginID", Type: utils.META_COMPOSED,
@@ -178,7 +173,7 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 					{Tag: "Usage", FieldId: "Usage", Type: utils.META_COMPOSED,
 						Value: NewRSRParsersMustCompile("~*req.13", true, utils.INFIELD_SEP), Mandatory: true},
 				},
-				TrailerFields: make([]*FCTemplate, 0),
+				CacheDumpFields: make([]*FCTemplate, 0),
 			},
 		},
 	}

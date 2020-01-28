@@ -315,13 +315,11 @@ const CGRATES_CFG_JSON = `
 			"source_path": "/var/spool/cgrates/cdrc/in",		// read data from this path
 			"processed_path": "/var/spool/cgrates/cdrc/out",	// move processed data here
 			"xml_root_path": "",								// path towards one event in case of XML CDRs
-			"source_id": "ers_csv",								// free form field, tag identifying the source of the CDRs within CDRS database
 			"tenant": "",										// tenant used by import
 			"timezone": "",										// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 			"filters": [],										// limit parsing based on the filters
 			"flags": [],										// flags to influence the event processing
-			"header_fields": [],								// template of the import header fields
-			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			"fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "~*req.2", "mandatory": true},
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~*req.3", "mandatory": true},
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~*req.4", "mandatory": true},
@@ -334,7 +332,6 @@ const CGRATES_CFG_JSON = `
 				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "~*req.12", "mandatory": true},
 				{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "~*req.13", "mandatory": true},
 			],
-			"trailer_fields": [],								// template of the import trailer fields
 			"continue": false,									// continue to the next template if executed
 		},
 	],

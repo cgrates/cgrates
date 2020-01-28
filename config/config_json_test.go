@@ -1638,9 +1638,7 @@ func TestDfEventReaderCfg(t *testing.T) {
 				Timezone:            utils.StringPointer(utils.EmptyString),
 				Filters:             &[]string{},
 				Flags:               &[]string{},
-				Header_fields:       &[]*FcTemplateJsonCfg{},
-				Content_fields:      &cdrFields,
-				Trailer_fields:      &[]*FcTemplateJsonCfg{},
+				Fields:              &cdrFields,
 			},
 		},
 	}

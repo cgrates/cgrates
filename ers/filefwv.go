@@ -95,7 +95,7 @@ func (rdr *FWVFileER) Serve() (err error) {
 				}
 				filesInDir, _ := ioutil.ReadDir(rdr.rdrDir)
 				for _, file := range filesInDir {
-					if !strings.HasSuffix(file.Name(), utils.XMLSuffix) { // hardcoded file extension for xml event reader
+					if !strings.HasSuffix(file.Name(), utils.FWVSuffix) { // hardcoded file extension for xml event reader
 						continue // used in order to filter the files from directory
 					}
 					go func(fileName string) {
@@ -134,12 +134,15 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 	reqVars := make(map[string]interface{})
 
 	for {
+		var hasHeader, hasTrailer bool
+		var headerFields, trailerFields []*config.FCTemplate
 		if rdr.offset == 0 { // First time, set the necessary offsets
-			if err := rdr.setLineLen(file); err != nil {
+			rdr.preProcessFIelds(hasHeader, hasTrailer, headerFields, trailerFields)
+			if err := rdr.setLineLen(file, hasHeader); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<%s> Row 0, error: cannot set lineLen: %s", utils.ERs, err.Error()))
 				break
 			}
-			if len(rdr.Config().TrailerFields) != 0 {
+			if hasTrailer {
 				if fi, err := file.Stat(); err != nil {
 					utils.Logger.Err(fmt.Sprintf("<%s> Row 0, error: cannot get file stats: %s", utils.ERs, err.Error()))
 					return err
@@ -147,8 +150,8 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 					rdr.trailerOffset = fi.Size() - rdr.lineLen
 				}
 			}
-			if len(rdr.Config().HeaderFields) != 0 {
-				if err = rdr.processHeader(file, rowNr, evsPosted, absPath); err != nil {
+			if hasHeader {
+				if err = rdr.processHeader(file, rowNr, evsPosted, absPath, headerFields); err != nil {
 					utils.Logger.Err(fmt.Sprintf("<%s> Row 0, error reading header: %s", utils.ERs, err.Error()))
 					return
 				}
@@ -179,7 +182,7 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 			agReq); err != nil || !pass {
 			continue
 		}
-		navMp, err := agReq.AsNavigableMap(rdr.Config().ContentFields)
+		navMp, err := agReq.AsNavigableMap(rdr.Config().Fields)
 		if err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to error: <%s>",
@@ -197,7 +200,7 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 			rdrCfg: rdr.Config()}
 		evsPosted++
 		if rdr.trailerOffset != 0 && rdr.offset >= rdr.trailerOffset {
-			if err := rdr.processTrailer(file, rowNr, evsPosted, absPath); err != nil && err != io.EOF {
+			if err := rdr.processTrailer(file, rowNr, evsPosted, absPath, trailerFields); err != nil && err != io.EOF {
 				utils.Logger.Err(fmt.Sprintf("<%s> Read trailer error: %s ", utils.ERs, err.Error()))
 			}
 			break
@@ -219,10 +222,10 @@ func (rdr *FWVFileER) processFile(fPath, fName string) (err error) {
 }
 
 // Sets the line length based on first line, sets offset back to initial after reading
-func (rdr *FWVFileER) setLineLen(file *os.File) error {
+func (rdr *FWVFileER) setLineLen(file *os.File, hasHeader bool) error {
 	buff := bufio.NewReader(file)
 	// in case we have header we take the length of first line and add it as headerOffset
-	if len(rdr.Config().HeaderFields) != 0 {
+	if hasHeader {
 		readBytes, err := buff.ReadBytes('\n')
 		if err != nil {
 			return err
@@ -241,7 +244,7 @@ func (rdr *FWVFileER) setLineLen(file *os.File) error {
 	return nil
 }
 
-func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPath string) (err error) {
+func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPath string, trailerFields []*config.FCTemplate) (err error) {
 	buf := make([]byte, rdr.trailerOffset)
 	if nRead, err := file.ReadAt(buf, rdr.trailerOffset); err != nil {
 		return err
@@ -261,7 +264,7 @@ func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPat
 		agReq); err != nil || !pass {
 		return nil
 	}
-	navMp, err := agReq.AsNavigableMap(rdr.Config().TrailerFields)
+	navMp, err := agReq.AsNavigableMap(trailerFields)
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to error: <%s>",
@@ -275,17 +278,17 @@ func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPat
 	return
 }
 
-func (rdr *FWVFileER) processHeader(file *os.File, rowNr, evsPosted int, absPath string) error {
+func (rdr *FWVFileER) processHeader(file *os.File, rowNr, evsPosted int, absPath string, hdrFields []*config.FCTemplate) error {
 	buf := make([]byte, rdr.headerOffset)
 	if nRead, err := file.Read(buf); err != nil {
 		return err
 	} else if nRead != len(buf) {
 		return fmt.Errorf("In header, line len: %d, have read: %d", rdr.headerOffset, nRead)
 	}
-	return rdr.createHeaderMap(string(buf), rowNr, evsPosted, absPath)
+	return rdr.createHeaderMap(string(buf), rowNr, evsPosted, absPath, hdrFields)
 }
 
-func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPath string) (err error) {
+func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPath string, hdrFields []*config.FCTemplate) (err error) {
 	reqVars := make(map[string]interface{})
 	agReq := agents.NewAgentRequest(
 		config.NewFWVProvider(record), reqVars,
@@ -298,7 +301,7 @@ func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPa
 		agReq); err != nil || !pass {
 		return nil
 	}
-	navMp, err := agReq.AsNavigableMap(rdr.Config().HeaderFields)
+	navMp, err := agReq.AsNavigableMap(hdrFields)
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to error: <%s>",
@@ -313,4 +316,17 @@ func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPa
 		rdrCfg: rdr.Config()}
 	evsPosted++
 	return
+}
+
+func (rdr *FWVFileER) preProcessFIelds(hasHeader, hasTrailer bool, headerFields, trailerFields []*config.FCTemplate) {
+	for _, fld := range rdr.Config().Fields {
+		if fld.Value[0].Rules == utils.DynamicDataPrefix+utils.MetaHdr {
+			hasHeader = true
+			headerFields = append(headerFields, fld)
+		}
+		if fld.Value[0].Rules == utils.DynamicDataPrefix+utils.MetaTrl {
+			hasTrailer = true
+			trailerFields = append(trailerFields, fld)
+		}
+	}
 }

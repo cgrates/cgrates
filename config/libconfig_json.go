@@ -183,9 +183,7 @@ type EventReaderJsonCfg struct {
 	Failed_calls_prefix         *string
 	Partial_record_cache        *string
 	Partial_cache_expiry_action *string
-	Header_fields               *[]*FcTemplateJsonCfg
-	Content_fields              *[]*FcTemplateJsonCfg
-	Trailer_fields              *[]*FcTemplateJsonCfg
+	Fields                      *[]*FcTemplateJsonCfg
 	Cache_dump_fields           *[]*FcTemplateJsonCfg
 }
 
@@ -524,6 +522,7 @@ type FcTemplateJsonCfg struct {
 	Tag                  *string
 	Type                 *string
 	Field_id             *string
+	Path                 *string
 	Attribute_id         *string
 	Filters              *[]string
 	Value                *string

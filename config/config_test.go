@@ -1627,8 +1627,7 @@ func TestCgrCdfEventReader(t *testing.T) {
 				Timezone:       utils.EmptyString,
 				Filters:        []string{},
 				Flags:          utils.FlagsWithParams{},
-				HeaderFields:   make([]*FCTemplate, 0),
-				ContentFields: []*FCTemplate{
+				Fields: []*FCTemplate{
 					{Tag: "TOR", FieldId: "ToR", Type: utils.META_COMPOSED,
 						Value: NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP), Mandatory: true},
 					{Tag: "OriginID", FieldId: "OriginID", Type: utils.META_COMPOSED,
@@ -1652,7 +1651,6 @@ func TestCgrCdfEventReader(t *testing.T) {
 					{Tag: "Usage", FieldId: "Usage", Type: utils.META_COMPOSED,
 						Value: NewRSRParsersMustCompile("~*req.13", true, utils.INFIELD_SEP), Mandatory: true},
 				},
-				TrailerFields: make([]*FCTemplate, 0),
 			},
 		},
 	}
@@ -1675,8 +1673,7 @@ func TestCgrCfgEventReaderDefault(t *testing.T) {
 		Timezone:       utils.EmptyString,
 		Filters:        nil,
 		Flags:          utils.FlagsWithParams{},
-		HeaderFields:   make([]*FCTemplate, 0),
-		ContentFields: []*FCTemplate{
+		Fields: []*FCTemplate{
 			{Tag: "TOR", FieldId: "ToR", Type: utils.META_COMPOSED,
 				Value: NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP), Mandatory: true},
 			{Tag: "OriginID", FieldId: "OriginID", Type: utils.META_COMPOSED,
@@ -1700,7 +1697,7 @@ func TestCgrCfgEventReaderDefault(t *testing.T) {
 			{Tag: "Usage", FieldId: "Usage", Type: utils.META_COMPOSED,
 				Value: NewRSRParsersMustCompile("~*req.13", true, utils.INFIELD_SEP), Mandatory: true},
 		},
-		TrailerFields: make([]*FCTemplate, 0),
+		CacheDumpFields: make([]*FCTemplate, 0),
 	}
 	if !reflect.DeepEqual(cgrCfg.dfltEvRdr, eCfg) {
 		t.Errorf("received: %+v,\n expecting: %+v", utils.ToJSON(cgrCfg.dfltEvRdr), utils.ToJSON(eCfg))

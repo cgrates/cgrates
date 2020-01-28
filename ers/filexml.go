@@ -145,7 +145,7 @@ func (rdr *XMLFileER) processFile(fPath, fName string) (err error) {
 			agReq); err != nil || !pass {
 			continue
 		}
-		navMp, err := agReq.AsNavigableMap(rdr.Config().ContentFields)
+		navMp, err := agReq.AsNavigableMap(rdr.Config().Fields)
 		if err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to error: <%s>",
