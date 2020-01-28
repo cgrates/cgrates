@@ -156,15 +156,14 @@ func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 				}
 			} else {
 				var isNMItems bool
-				if valSet, isNMItems = nMFields.([]*config.NMItem); !isNMItems { // start from previous stored fields
-					// here should be add the case of rewriting
+				if valSet, isNMItems = nMFields.([]*config.NMItem); isNMItems { // start from previous stored fields
+					if tplFld.Type == utils.META_COMPOSED {
+						prevNMItem := valSet[len(valSet)-1] // could be we need nil protection here
+						*nMItm = *prevNMItem                // inherit the particularities, ie AttributeName
+						nMItm.Data = utils.IfaceAsString(prevNMItem.Data) + utils.IfaceAsString(out)
+					}
+					valSet = valSet[:len(valSet)-1] // discard the last item
 				}
-				if tplFld.Type == utils.META_COMPOSED {
-					prevNMItem := valSet[len(valSet)-1] // could be we need nil protection here
-					*nMItm = *prevNMItem                // inherit the particularities, ie AttributeName
-					nMItm.Data = utils.IfaceAsString(prevNMItem.Data) + utils.IfaceAsString(out)
-				}
-				valSet = valSet[:len(valSet)-1] // discard the last item
 			}
 			valSet = append(valSet, nMItm)
 			switch fldPath[0] {
