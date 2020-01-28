@@ -89,7 +89,7 @@
 			"source_path": "/tmp/ers2/in",
 			"flags": ["*dryrun"],
 			"processed_path": "/tmp/ers2/out",
-			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			"fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~*req.0", "mandatory": true},
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~*req.1", "mandatory": true},
@@ -114,7 +114,7 @@
 			"source_path": "/tmp/init_session/in",
 			"flags": ["*initiate","*accounts","*resources","*attributes","*log"],
 			"processed_path": "/tmp/init_session/out",
-			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			"fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "Tenant", "field_id": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*variable", "value": "~*req.2", "mandatory": true},
@@ -136,7 +136,7 @@
 			"source_path": "/tmp/terminate_session/in",
 			"flags": ["*terminate","*accounts","*resources","*log"],
 			"processed_path": "/tmp/terminate_session/out",
-			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			"fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "Tenant", "field_id": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*variable", "value": "~*req.2", "mandatory": true},
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*variable", "value": "~*req.3", "mandatory": true},
@@ -151,7 +151,7 @@
 			"source_path": "/tmp/cdrs/in",
 			"flags": ["*cdrs","*log"],
 			"processed_path": "/tmp/cdrs/out",
-			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			"fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "Tenant", "field_id": "Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*variable", "value": "~*req.2", "mandatory": true},
@@ -176,7 +176,7 @@
 			"processed_path": "/tmp/ers_with_filters/out",
 			"flags": ["*cdrs","*log"],
 			"filters":["*string:~*req.3:1002"],
-			"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			"fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "~*req.0", "mandatory": true},
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "~*req.1", "mandatory": true},
@@ -202,7 +202,7 @@
 			"flags": ["*cdrs","*log"],
 			"processed_path": "/tmp/xmlErs/out",
 			"xml_root_path": "broadWorksCDR.cdrData",
-			"content_fields":[
+			"fields":[
 				{"tag": "TOR", "field_id": "ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*variable", "value": "~*req.broadWorksCDR.cdrData.basicModule.localCallId", "mandatory": true},
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", "value": "*rated", "mandatory": true},
@@ -261,7 +261,7 @@
 			"processed_path": "/tmp/partErs1/out",
 			"partial_record_cache": "2s",
 			"partial_cache_expiry_action": "*dump_to_file",
-			"content_fields":[
+			"fields":[
 				{"tag": "ToR", "field_id": "ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "AccId1", "field_id": "OriginID", "type": "*composed", "value": "~*req.0"},
 				{"tag": "AccId2", "field_id": "OriginID", "type": "*composed", "value": "_"},
@@ -302,7 +302,7 @@
 			"flags": ["*cdrs"],
 			"partial_record_cache": "1s",
 			"partial_cache_expiry_action": "*post_cdr",
-			"content_fields":[
+			"fields":[
 				{"tag": "ToR", "field_id": "ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "AccId1", "field_id": "OriginID", "type": "*composed", "value": "~*req.0"},
 				{"tag": "AccId2", "field_id": "OriginID", "type": "*composed", "value": "_"},
@@ -333,7 +333,7 @@
 			"failed_calls_prefix": "missed_calls",
 			"flags": ["*cdrs"],
 			"partial_record_cache": "2s",
-			"content_fields":[
+			"fields":[
 				{"tag": "Tor", "field_id": "ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed","value":"~*req.3;~*req.1;~*req.2", "mandatory": true},
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*variable", "value": "~*req.7", "mandatory": true},

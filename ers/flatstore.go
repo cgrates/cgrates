@@ -175,9 +175,9 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 		}
 
 		// build Usage from contentFields based on record lenght
-		for i, cntFld := range rdr.Config().ContentFields {
+		for i, cntFld := range rdr.Config().Fields {
 			if cntFld.FieldId == utils.Usage {
-				rdr.Config().ContentFields[i].Value = config.NewRSRParsersMustCompile("~*req."+strconv.Itoa(len(record)-1), true, utils.INFIELD_SEP) // in case of flatstore, last element will be the duration computed by us
+				rdr.Config().Fields[i].Value = config.NewRSRParsersMustCompile("~*req."+strconv.Itoa(len(record)-1), true, utils.INFIELD_SEP) // in case of flatstore, last element will be the duration computed by us
 			}
 		}
 		rowNr++ // increment the rowNr after checking if it's not the end of file
@@ -192,7 +192,7 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 			agReq); err != nil || !pass {
 			continue
 		}
-		navMp, err := agReq.AsNavigableMap(rdr.Config().ContentFields)
+		navMp, err := agReq.AsNavigableMap(rdr.Config().Fields)
 		if err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to error: <%s>",

@@ -199,7 +199,7 @@ func (rdr *SQLEventReader) processMessage(msg map[string]interface{}) (err error
 		return
 	}
 	var navMp *config.NavigableMap
-	if navMp, err = agReq.AsNavigableMap(rdr.Config().ContentFields); err != nil {
+	if navMp, err = agReq.AsNavigableMap(rdr.Config().Fields); err != nil {
 		return
 	}
 	rdr.rdrEvents <- &erEvent{
