@@ -55,7 +55,6 @@ var (
 
 		testSes3ItAddVoiceBalance,
 		testSes3ItTerminatWithoutInit,
-		// testSes3ItInitAfterTerminate,
 		testSes3ItBalance,
 		testSes3ItCDRs,
 
