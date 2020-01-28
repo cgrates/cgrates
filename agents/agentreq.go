@@ -46,13 +46,12 @@ func NewAgentRequest(req config.DataProvider,
 		rply = config.NewNavigableMap(nil)
 	}
 	ar = &AgentRequest{
-		Request:    req,
-		Vars:       config.NewNavigableMap(vars),
-		CGRRequest: config.NewNavigableMap(nil),
-		CGRReply:   cgrRply,
-		Reply:      rply,
-		Timezone:   timezone,
-		filterS:    filterS,
+		Request:  req,
+		Vars:     config.NewNavigableMap(vars),
+		CGRReply: cgrRply,
+		Reply:    rply,
+		Timezone: timezone,
+		filterS:  filterS,
 	}
 	// populate tenant
 	if tntIf, err := ar.ParseField(
@@ -73,11 +72,11 @@ type AgentRequest struct {
 	Vars       *config.NavigableMap // shared data
 	CGRRequest *config.NavigableMap // Used in reply to access the request that was send
 	CGRReply   *config.NavigableMap
-	CGRAReq    *config.NavigableMap // Used to access live build in request; both available as active request and active reply
 	Reply      *config.NavigableMap
 	Tenant,
 	Timezone string
 	filterS *engine.FilterS
+	diamreq *config.NavigableMap // used in case of DisconnectSession to build the Request for Diameter
 }
 
 // String implements engine.DataProvider
@@ -105,8 +104,6 @@ func (ar *AgentRequest) FieldAsInterface(fldPath []string) (val interface{}, err
 		val, err = ar.CGRReply.FieldAsInterface(fldPath[1:])
 	case utils.MetaRep:
 		val, err = ar.Reply.FieldAsInterface(fldPath[1:])
-	case utils.MetaCGRAReq:
-		val, err = ar.CGRAReq.FieldAsInterface(fldPath[1:])
 	}
 	if nmItems, isNMItems := val.([]*config.NMItem); isNMItems { // special handling of NMItems, take the last value out of it
 		val = nmItems[len(nmItems)-1].Data // could be we need nil protection here
@@ -126,11 +123,15 @@ func (ar *AgentRequest) FieldAsString(fldPath []string) (val string, err error) 
 // AsNavigableMap implements engine.DataProvider
 func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 	nM *config.NavigableMap, err error) {
-	ar.CGRAReq = config.NewNavigableMap(nil)
+	return nil, utils.ErrNotImplemented
+}
+
+//SetFields will populate fields of AgentRequest out of templates
+func (ar *AgentRequest) SetFields(tplFlds []*config.FCTemplate) (err error) {
 	for _, tplFld := range tplFlds {
 		if pass, err := ar.filterS.Pass(ar.Tenant,
 			tplFld.Filters, ar); err != nil {
-			return nil, err
+			return err
 		} else if !pass {
 			continue
 		}
@@ -144,18 +145,20 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 					}
 					err = utils.ErrPrefixNotFound(tplFld.Tag)
 				}
-				return nil, err
+				return err
 			}
 			var valSet []*config.NMItem
-			fldPath := strings.Split(tplFld.FieldId, utils.NestingSep)
-
-			nMItm := &config.NMItem{Data: out, Path: fldPath, Config: tplFld}
-			if nMFields, err := ar.CGRAReq.FieldAsInterface(fldPath); err != nil {
+			fldPath := strings.Split(tplFld.Path, utils.NestingSep)
+			nMItm := &config.NMItem{Data: out, Path: fldPath[1:], Config: tplFld}
+			if nMFields, err := ar.FieldAsInterface(fldPath); err != nil {
 				if err != utils.ErrNotFound {
-					return nil, err
+					return err
 				}
 			} else {
-				valSet = nMFields.([]*config.NMItem) // start from previous stored fields
+				var isNMItems bool
+				if valSet, isNMItems = nMFields.([]*config.NMItem); !isNMItems { // start from previous stored fields
+					// here should be add the case of rewriting
+				}
 				if tplFld.Type == utils.META_COMPOSED {
 					prevNMItem := valSet[len(valSet)-1] // could be we need nil protection here
 					*nMItm = *prevNMItem                // inherit the particularities, ie AttributeName
@@ -164,13 +167,29 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 				valSet = valSet[:len(valSet)-1] // discard the last item
 			}
 			valSet = append(valSet, nMItm)
-			ar.CGRAReq.Set(fldPath, valSet, false, true)
+			switch fldPath[0] {
+			default:
+				return fmt.Errorf("unsupported field prefix: <%s> when set fields", fldPath[0])
+			case utils.MetaVars:
+				ar.Vars.Set(fldPath[1:], valSet, false, true)
+			case utils.MetaCgreq:
+				ar.CGRRequest.Set(fldPath[1:], valSet, false, true)
+			case utils.MetaCgrep:
+				ar.CGRReply.Set(fldPath[1:], valSet, false, true)
+			case utils.MetaRep:
+				ar.Reply.Set(fldPath[1:], valSet, false, true)
+			case utils.MetaDiamReq:
+				if ar.diamreq == nil {
+					ar.diamreq = config.NewNavigableMap(nil) // special case when CGRateS is building the request
+				}
+				ar.diamreq.Set(fldPath[1:], valSet, false, true)
+			}
 		}
 		if tplFld.Blocker { // useful in case of processing errors first
 			break
 		}
 	}
-	return ar.CGRAReq, nil
+	return
 }
 
 // ParseField outputs the value based on the template item

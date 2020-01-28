@@ -512,6 +512,7 @@ const (
 	MetaXml                     = "*xml"
 	ApiKey                      = "apikey"
 	MetaReq                     = "*req"
+	MetaDiamReq                 = "*diamreq"
 	MetaVars                    = "*vars"
 	MetaRep                     = "*rep"
 	CGROriginHost               = "cgr_originhost"

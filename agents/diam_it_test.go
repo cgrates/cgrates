@@ -19,6 +19,7 @@ package agents
 
 import (
 	"flag"
+	"fmt"
 	"net/rpc"
 	"os/exec"
 	"path"
@@ -37,7 +38,7 @@ import (
 
 var (
 	interations  = flag.Int("iterations", 1, "Number of iterations to do for dry run simulation")
-	replyTimeout = flag.String("reply_timeout", "1s", "Maximum duration to wait for a reply")
+	replyTimeout = flag.String("reply_timeout", "2s", "Maximum duration to wait for a reply")
 
 	daCfgPath, diamConfigDIR string
 	daCfg                    *config.CGRConfig
@@ -57,10 +58,10 @@ var (
 		testDiamItApierRpcConn,
 		testDiamItTPFromFolder,
 		testDiamItDryRun,
-		testDiamItCCRInit,
-		testDiamItCCRUpdate,
-		testDiamItCCRTerminate,
-		testDiamItCCRSMS,
+		//testDiamItCCRInit,
+		//testDiamItCCRUpdate,
+		//testDiamItCCRTerminate,
+		//testDiamItCCRSMS,
 		testDiamItKillEngine,
 	}
 )
@@ -170,6 +171,7 @@ func testDiamItInitCfg(t *testing.T) {
 	var err error
 	daCfg, err = config.NewCGRConfigFromPath(daCfgPath)
 	if err != nil {
+		fmt.Println(err)
 		t.Fatal(err)
 	}
 	daCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
