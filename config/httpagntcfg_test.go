@@ -53,7 +53,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 				"request_fields":[
 				],
 				"reply_fields":[
-					{"tag": "Allow", "field_id": "response.Allow", "type": "*constant", 
+					{"tag": "Allow", "path": "response.Allow", "type": "*constant", 
 						"value": "1", "mandatory": true},
 				],
 			},
@@ -75,7 +75,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 			RequestFields: []*FCTemplate{},
 			ReplyFields: []*FCTemplate{{
 				Tag:       "Allow",
-				FieldId:   "response.Allow",
+				Path:      "response.Allow",
 				Type:      "*constant",
 				Value:     NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP),
 				Mandatory: true,
@@ -106,11 +106,11 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 				"tenant": "cgrates.org",
 				"flags": ["*cdrs"],
 				"request_fields":[
-					{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
+					{"tag": "RequestType", "path": "RequestType", "type": "*constant", 
 						"value": "*pseudoprepaid", "mandatory": true},	
 				],
 				"reply_fields":[
-					{"tag": "CDR_ID", "field_id": "CDR_RESPONSE.CDR_ID", "type": "*composed", 
+					{"tag": "CDR_ID", "path": "CDR_RESPONSE.CDR_ID", "type": "*composed", 
 						"value": "~*req.CDR_ID", "mandatory": true},
 				],
 			
@@ -150,7 +150,7 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 				RequestFields: []*FCTemplate{},
 				ReplyFields: []*FCTemplate{{
 					Tag:       "Allow",
-					FieldId:   "response.Allow",
+					Path:      "response.Allow",
 					Type:      "*constant",
 					Value:     NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP),
 					Mandatory: true,
@@ -162,14 +162,14 @@ func TestHttpAgentCfgsloadFromJsonCfg(t *testing.T) {
 					Flags:   utils.FlagsWithParams{"*cdrs": []string{}},
 					RequestFields: []*FCTemplate{{
 						Tag:       "RequestType",
-						FieldId:   "RequestType",
+						Path:      "RequestType",
 						Type:      "*constant",
 						Value:     NewRSRParsersMustCompile("*pseudoprepaid", true, utils.INFIELD_SEP),
 						Mandatory: true,
 					}},
 					ReplyFields: []*FCTemplate{{
 						Tag:       "CDR_ID",
-						FieldId:   "CDR_RESPONSE.CDR_ID",
+						Path:      "CDR_RESPONSE.CDR_ID",
 						Type:      "*composed",
 						Value:     NewRSRParsersMustCompile("~*req.CDR_ID", true, utils.INFIELD_SEP),
 						Mandatory: true,
@@ -268,7 +268,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 			RequestFields: []*FCTemplate{},
 			ReplyFields: []*FCTemplate{{
 				Tag:       "Allow",
-				FieldId:   "response.Allow",
+				Path:      "response.Allow",
 				Type:      "*constant",
 				Value:     NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP),
 				Mandatory: true,
@@ -283,7 +283,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 		Request_fields: &[]*FcTemplateJsonCfg{},
 		Reply_fields: &[]*FcTemplateJsonCfg{{
 			Tag:       utils.StringPointer("Allow"),
-			Field_id:  utils.StringPointer("response.Allow"),
+			Path:      utils.StringPointer("response.Allow"),
 			Type:      utils.StringPointer("*constant"),
 			Value:     utils.StringPointer("1"),
 			Mandatory: utils.BoolPointer(true),
@@ -296,7 +296,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 		Request_fields: &[]*FcTemplateJsonCfg{},
 		Reply_fields: &[]*FcTemplateJsonCfg{{
 			Tag:       utils.StringPointer("Allow"),
-			Field_id:  utils.StringPointer("response.Allow"),
+			Path:      utils.StringPointer("response.Allow"),
 			Type:      utils.StringPointer("*constant"),
 			Value:     utils.StringPointer("1"),
 			Mandatory: utils.BoolPointer(false),
@@ -317,7 +317,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 			RequestFields: []*FCTemplate{},
 			ReplyFields: []*FCTemplate{{
 				Tag:       "Allow",
-				FieldId:   "response.Allow",
+				Path:      "response.Allow",
 				Type:      "*constant",
 				Value:     NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP),
 				Mandatory: false,
@@ -330,7 +330,7 @@ func TestHttpAgentCfgappendHttpAgntProcCfgs(t *testing.T) {
 			RequestFields: []*FCTemplate{},
 			ReplyFields: []*FCTemplate{{
 				Tag:       "Allow",
-				FieldId:   "response.Allow",
+				Path:      "response.Allow",
 				Type:      "*constant",
 				Value:     NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP),
 				Mandatory: true,

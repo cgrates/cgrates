@@ -175,9 +175,9 @@ func (rdr *FlatstoreER) processFile(fPath, fName string) (err error) {
 		}
 
 		// build Usage from contentFields based on record lenght
-		for i, cntFld := range rdr.Config().Fields {
-			if cntFld.FieldId == utils.Usage {
-				rdr.Config().Fields[i].Value = config.NewRSRParsersMustCompile("~*req."+strconv.Itoa(len(record)-1), true, utils.INFIELD_SEP) // in case of flatstore, last element will be the duration computed by us
+		for i, cntFld := range rdr.Config().ContentFields {
+			if cntFld.Path == utils.Usage {
+				rdr.Config().ContentFields[i].Value = config.NewRSRParsersMustCompile("~*req."+strconv.Itoa(len(record)-1), true, utils.INFIELD_SEP) // in case of flatstore, last element will be the duration computed by us
 			}
 		}
 		rowNr++ // increment the rowNr after checking if it's not the end of file

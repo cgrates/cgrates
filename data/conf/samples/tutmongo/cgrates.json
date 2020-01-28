@@ -49,7 +49,7 @@
 
 "cdre": {
 	"TestTutITExportCDR": {
-		"content_fields": [
+		"fields": [
 			{"tag": "CGRID", "type": "*composed", "value": "~CGRID"},
 			{"tag": "RunID", "type": "*composed", "value": "~RunID"},
 			{"tag":"OriginID", "type": "*composed", "value": "~OriginID"},

@@ -65,43 +65,43 @@ func TestAgReqAsNavigableMap(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Tenant",
-			FieldId: utils.Tenant, Type: utils.META_COMPOSED,
+			Path: utils.Tenant, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Account",
-			FieldId: utils.Account, Type: utils.META_COMPOSED,
+			Path: utils.Account, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Destination",
-			FieldId: utils.Destination, Type: utils.META_COMPOSED,
+			Path: utils.Destination, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
 
 		&config.FCTemplate{Tag: "RequestedUsageVoice",
-			FieldId: "RequestedUsage", Type: utils.META_COMPOSED,
+			Path: "RequestedUsage", Type: utils.META_COMPOSED,
 			Filters: []string{"*string:~*cgreq.ToR:*voice"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgreq.Usage{*duration_seconds}", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "RequestedUsageData",
-			FieldId: "RequestedUsage", Type: utils.META_COMPOSED,
+			Path: "RequestedUsage", Type: utils.META_COMPOSED,
 			Filters: []string{"*string:~*cgreq.ToR:*data"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgreq.Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "RequestedUsageSMS",
-			FieldId: "RequestedUsage", Type: utils.META_COMPOSED,
+			Path: "RequestedUsage", Type: utils.META_COMPOSED,
 			Filters: []string{"*string:~*cgreq.ToR:*sms"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgreq.Usage{*duration_nanoseconds}", true, utils.INFIELD_SEP)},
 
 		&config.FCTemplate{Tag: "AttrPaypalAccount",
-			FieldId: "PaypalAccount", Type: utils.META_COMPOSED,
+			Path: "PaypalAccount", Type: utils.META_COMPOSED,
 			Filters: []string{"*string:~*cgrep.Error:"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgrep.Attributes.PaypalAccount", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "MaxUsage",
-			FieldId: "MaxUsage", Type: utils.META_COMPOSED,
+			Path: "MaxUsage", Type: utils.META_COMPOSED,
 			Filters: []string{"*string:~*cgrep.Error:"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Error",
-			FieldId: "Error", Type: utils.META_COMPOSED,
+			Path: "Error", Type: utils.META_COMPOSED,
 			Filters: []string{"*rsr::~*cgrep.Error(!^$)"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgrep.Error", true, utils.INFIELD_SEP)},
@@ -148,7 +148,7 @@ func TestAgReqMaxCost(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "MaxUsage",
-			FieldId: "MaxUsage", Type: utils.META_COMPOSED,
+			Path: "MaxUsage", Type: utils.META_COMPOSED,
 			Filters: []string{"*rsr::~*cgrep.MaxUsage(>0s)"},
 			Value: config.NewRSRParsersMustCompile(
 				"~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP)},
@@ -186,15 +186,15 @@ func TestAgReqParseFieldDiameter(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "MandatoryFalse",
-			FieldId: "MandatoryFalse", Type: utils.META_COMPOSED,
+			Path: "MandatoryFalse", Type: utils.META_COMPOSED,
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", true, utils.INFIELD_SEP),
 			Mandatory: false},
 		&config.FCTemplate{Tag: "MandatoryTrue",
-			FieldId: "MandatoryTrue", Type: utils.META_COMPOSED,
+			Path: "MandatoryTrue", Type: utils.META_COMPOSED,
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", true, utils.INFIELD_SEP),
 			Mandatory: true},
 		&config.FCTemplate{Tag: "Session-Id", Filters: []string{},
-			FieldId: "Session-Id", Type: utils.META_COMPOSED,
+			Path: "Session-Id", Type: utils.META_COMPOSED,
 			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -235,11 +235,11 @@ func TestAgReqParseFieldRadius(t *testing.T) {
 	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "MandatoryFalse",
-			FieldId: "MandatoryFalse", Type: utils.META_COMPOSED,
+			Path: "MandatoryFalse", Type: utils.META_COMPOSED,
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", true, utils.INFIELD_SEP),
 			Mandatory: false},
 		&config.FCTemplate{Tag: "MandatoryTrue",
-			FieldId: "MandatoryTrue", Type: utils.META_COMPOSED,
+			Path: "MandatoryTrue", Type: utils.META_COMPOSED,
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -275,11 +275,11 @@ Host: api.cgrates.org
 	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "MandatoryFalse",
-			FieldId: "MandatoryFalse", Type: utils.META_COMPOSED,
+			Path: "MandatoryFalse", Type: utils.META_COMPOSED,
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", true, utils.INFIELD_SEP),
 			Mandatory: false},
 		&config.FCTemplate{Tag: "MandatoryTrue",
-			FieldId: "MandatoryTrue", Type: utils.META_COMPOSED,
+			Path: "MandatoryTrue", Type: utils.META_COMPOSED,
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -347,11 +347,11 @@ func TestAgReqParseFieldHttpXml(t *testing.T) {
 	agReq := NewAgentRequest(dP, nil, nil, nil, nil, "cgrates.org", "", filterS, nil, nil)
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "MandatoryFalse",
-			FieldId: "MandatoryFalse", Type: utils.META_COMPOSED,
+			Path: "MandatoryFalse", Type: utils.META_COMPOSED,
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryFalse", true, utils.INFIELD_SEP),
 			Mandatory: false},
 		&config.FCTemplate{Tag: "MandatoryTrue",
-			FieldId: "MandatoryTrue", Type: utils.META_COMPOSED,
+			Path: "MandatoryTrue", Type: utils.META_COMPOSED,
 			Value:     config.NewRSRParsersMustCompile("~*req.MandatoryTrue", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -382,14 +382,14 @@ func TestAgReqEmptyFilter(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Tenant", Filters: []string{},
-			FieldId: utils.Tenant, Type: utils.META_COMPOSED,
+			Path: utils.Tenant, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
 
 		&config.FCTemplate{Tag: "Account", Filters: []string{},
-			FieldId: utils.Account, Type: utils.META_COMPOSED,
+			Path: utils.Account, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Destination", Filters: []string{},
-			FieldId: utils.Destination, Type: utils.META_COMPOSED,
+			Path: utils.Destination, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
 	}
 	eMp := config.NewNavigableMap(nil)
@@ -421,7 +421,7 @@ func TestAgReqMetaExponent(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "TestExpo", Filters: []string{},
-			FieldId: "TestExpo", Type: utils.MetaValueExponent,
+			Path: "TestExpo", Type: utils.MetaValueExponent,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Value;~*cgreq.Exponent", true, utils.INFIELD_SEP)},
 	}
 	eMp := config.NewNavigableMap(nil)
@@ -446,16 +446,16 @@ func TestAgReqCGRActiveRequest(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Value1", Filters: []string{},
-			FieldId: "Value1", Type: utils.META_CONSTANT,
+			Path: "Value1", Type: utils.META_CONSTANT,
 			Value: config.NewRSRParsersMustCompile("12", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Value2", Filters: []string{},
-			FieldId: "Value2", Type: utils.META_CONSTANT,
+			Path: "Value2", Type: utils.META_CONSTANT,
 			Value: config.NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Value3", Filters: []string{},
-			FieldId: "Value3", Type: utils.META_CONSTANT,
+			Path: "Value3", Type: utils.META_CONSTANT,
 			Value: config.NewRSRParsersMustCompile("2", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Diff", Filters: []string{},
-			FieldId: "Diff", Type: utils.MetaDifference,
+			Path: "Diff", Type: utils.MetaDifference,
 			Value: config.NewRSRParsersMustCompile("~*cgrareq.Value1;~*cgrareq.Value2;~*cgrareq.Value3", true, utils.INFIELD_SEP)},
 	}
 	eMp := config.NewNavigableMap(nil)
@@ -492,14 +492,14 @@ func TestAgReqFieldAsNone(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Tenant",
-			FieldId: utils.Tenant, Type: utils.META_COMPOSED,
+			Path: utils.Tenant, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Account",
-			FieldId: utils.Account, Type: utils.META_COMPOSED,
+			Path: utils.Account, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Type: utils.META_NONE, Blocker: true},
 		&config.FCTemplate{Tag: "Destination",
-			FieldId: utils.Destination, Type: utils.META_COMPOSED,
+			Path: utils.Destination, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
 	}
 	eMp := config.NewNavigableMap(nil)
@@ -529,14 +529,14 @@ func TestAgReqFieldAsNone2(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Tenant",
-			FieldId: utils.Tenant, Type: utils.META_COMPOSED,
+			Path: utils.Tenant, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Account",
-			FieldId: utils.Account, Type: utils.META_COMPOSED,
+			Path: utils.Account, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Type: utils.META_NONE},
 		&config.FCTemplate{Tag: "Destination",
-			FieldId: utils.Destination, Type: utils.META_COMPOSED,
+			Path: utils.Destination, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
 	}
 	eMp := config.NewNavigableMap(nil)
@@ -574,19 +574,19 @@ func TestAgReqAsNavigableMap2(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Tenant",
-			FieldId: utils.Tenant, Type: utils.META_COMPOSED,
+			Path: utils.Tenant, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Account",
-			FieldId: utils.Account, Type: utils.META_COMPOSED,
+			Path: utils.Account, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Account", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Destination",
-			FieldId: utils.Destination, Type: utils.META_COMPOSED,
+			Path: utils.Destination, Type: utils.META_COMPOSED,
 			Value: config.NewRSRParsersMustCompile("~*cgreq.Destination", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Usage",
-			FieldId: utils.Usage, Type: utils.MetaVariable,
+			Path: utils.Usage, Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("30s", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "CalculatedUsage",
-			FieldId: "CalculatedUsage", Filters: []string{"*gt:~*cgrareq.Usage:0"},
+			Path: "CalculatedUsage", Filters: []string{"*gt:~*cgrareq.Usage:0"},
 			Type: "*difference", Value: config.NewRSRParsersMustCompile("~*cgreq.AnswerTime;~*cgrareq.Usage", true, utils.INFIELD_SEP),
 		},
 	}
@@ -688,10 +688,10 @@ func TestAgReqNewARWithCGRRplyAndRply(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Fld1",
-			FieldId: "Fld1", Type: utils.MetaVariable,
+			Path: "Fld1", Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*rep.FirstLevel.SecondLevel.Fld1", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Fld2",
-			FieldId: "Fld2", Type: utils.MetaVariable,
+			Path: "Fld2", Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgrep.Attributes.PaypalAccount", true, utils.INFIELD_SEP)},
 	}
 
@@ -731,10 +731,10 @@ func TestAgReqSetCGRReplyWithError(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Fld1",
-			FieldId: "Fld1", Type: utils.MetaVariable,
+			Path: "Fld1", Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*rep.FirstLevel.SecondLevel.Fld1", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Fld2",
-			FieldId: "Fld2", Type: utils.MetaVariable,
+			Path: "Fld2", Type: utils.MetaVariable,
 			Value:     config.NewRSRParsersMustCompile("~*cgrep.Attributes.PaypalAccount", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -780,10 +780,10 @@ func TestAgReqSetCGRReplyWithoutError(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Fld1",
-			FieldId: "Fld1", Type: utils.MetaVariable,
+			Path: "Fld1", Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*rep.FirstLevel.SecondLevel.Fld1", true, utils.INFIELD_SEP)},
 		&config.FCTemplate{Tag: "Fld2",
-			FieldId: "Fld2", Type: utils.MetaVariable,
+			Path: "Fld2", Type: utils.MetaVariable,
 			Value: config.NewRSRParsersMustCompile("~*cgrep.Attributes.PaypalAccount", true, utils.INFIELD_SEP)},
 	}
 
@@ -823,7 +823,7 @@ func TestAgReqParseFieldMetaCCUsage(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "CCUsage", Filters: []string{},
-			FieldId: "CCUsage", Type: utils.MetaCCUsage,
+			Path: "CCUsage", Type: utils.MetaCCUsage,
 			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -834,7 +834,7 @@ func TestAgReqParseFieldMetaCCUsage(t *testing.T) {
 
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "CCUsage", Filters: []string{},
-			FieldId: "CCUsage", Type: utils.MetaCCUsage,
+			Path: "CCUsage", Type: utils.MetaCCUsage,
 			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id;12s;12s", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -845,7 +845,7 @@ func TestAgReqParseFieldMetaCCUsage(t *testing.T) {
 
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "CCUsage", Filters: []string{},
-			FieldId: "CCUsage", Type: utils.MetaCCUsage,
+			Path: "CCUsage", Type: utils.MetaCCUsage,
 			Value:     config.NewRSRParsersMustCompile("10;~*req.Session-Id;12s", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -856,7 +856,7 @@ func TestAgReqParseFieldMetaCCUsage(t *testing.T) {
 
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "CCUsage", Filters: []string{},
-			FieldId: "CCUsage", Type: utils.MetaCCUsage,
+			Path: "CCUsage", Type: utils.MetaCCUsage,
 			Value:     config.NewRSRParsersMustCompile("10;12s;~*req.Session-Id", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -867,7 +867,7 @@ func TestAgReqParseFieldMetaCCUsage(t *testing.T) {
 
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "CCUsage", Filters: []string{},
-			FieldId: "CCUsage", Type: utils.MetaCCUsage,
+			Path: "CCUsage", Type: utils.MetaCCUsage,
 			Value:     config.NewRSRParsersMustCompile("3;10s;5s", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -901,7 +901,7 @@ func TestAgReqParseFieldMetaUsageDifference(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Usage", Filters: []string{},
-			FieldId: "Usage", Type: utils.META_USAGE_DIFFERENCE,
+			Path: "Usage", Type: utils.META_USAGE_DIFFERENCE,
 			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -912,7 +912,7 @@ func TestAgReqParseFieldMetaUsageDifference(t *testing.T) {
 
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Usage", Filters: []string{},
-			FieldId: "Usage", Type: utils.META_USAGE_DIFFERENCE,
+			Path: "Usage", Type: utils.META_USAGE_DIFFERENCE,
 			Value:     config.NewRSRParsersMustCompile("1560325161;~*req.Session-Id", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -923,7 +923,7 @@ func TestAgReqParseFieldMetaUsageDifference(t *testing.T) {
 
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Usage", Filters: []string{},
-			FieldId: "Usage", Type: utils.META_USAGE_DIFFERENCE,
+			Path: "Usage", Type: utils.META_USAGE_DIFFERENCE,
 			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id;1560325161", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -934,7 +934,7 @@ func TestAgReqParseFieldMetaUsageDifference(t *testing.T) {
 
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Usage", Filters: []string{},
-			FieldId: "Usage", Type: utils.META_USAGE_DIFFERENCE,
+			Path: "Usage", Type: utils.META_USAGE_DIFFERENCE,
 			Value:     config.NewRSRParsersMustCompile("1560325161;1560325151", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -967,7 +967,7 @@ func TestAgReqParseFieldMetaSum(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Sum", Filters: []string{},
-			FieldId: "Sum", Type: utils.MetaSum,
+			Path: "Sum", Type: utils.MetaSum,
 			Value:     config.NewRSRParsersMustCompile("15;~*req.Session-Id", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -978,7 +978,7 @@ func TestAgReqParseFieldMetaSum(t *testing.T) {
 
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Sum", Filters: []string{},
-			FieldId: "Sum", Type: utils.MetaSum,
+			Path: "Sum", Type: utils.MetaSum,
 			Value:     config.NewRSRParsersMustCompile("15;15", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1011,7 +1011,7 @@ func TestAgReqParseFieldMetaDifference(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Diff", Filters: []string{},
-			FieldId: "Diff", Type: utils.MetaDifference,
+			Path: "Diff", Type: utils.MetaDifference,
 			Value:     config.NewRSRParsersMustCompile("15;~*req.Session-Id", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1022,7 +1022,7 @@ func TestAgReqParseFieldMetaDifference(t *testing.T) {
 
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "Diff", Filters: []string{},
-			FieldId: "Diff", Type: utils.MetaDifference,
+			Path: "Diff", Type: utils.MetaDifference,
 			Value:     config.NewRSRParsersMustCompile("15;12;2", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1055,7 +1055,7 @@ func TestAgReqParseFieldMetaValueExponent(t *testing.T) {
 
 	tplFlds := []*config.FCTemplate{
 		&config.FCTemplate{Tag: "ValExp", Filters: []string{},
-			FieldId: "ValExp", Type: utils.MetaValueExponent,
+			Path: "ValExp", Type: utils.MetaValueExponent,
 			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1066,7 +1066,7 @@ func TestAgReqParseFieldMetaValueExponent(t *testing.T) {
 
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "ValExp", Filters: []string{},
-			FieldId: "ValExp", Type: utils.MetaValueExponent,
+			Path: "ValExp", Type: utils.MetaValueExponent,
 			Value:     config.NewRSRParsersMustCompile("15;~*req.Session-Id", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1077,7 +1077,7 @@ func TestAgReqParseFieldMetaValueExponent(t *testing.T) {
 
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "ValExp", Filters: []string{},
-			FieldId: "ValExp", Type: utils.MetaValueExponent,
+			Path: "ValExp", Type: utils.MetaValueExponent,
 			Value:     config.NewRSRParsersMustCompile("~*req.Session-Id;15", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}
@@ -1087,7 +1087,7 @@ func TestAgReqParseFieldMetaValueExponent(t *testing.T) {
 	}
 	tplFlds = []*config.FCTemplate{
 		&config.FCTemplate{Tag: "ValExp", Filters: []string{},
-			FieldId: "ValExp", Type: utils.MetaValueExponent,
+			Path: "ValExp", Type: utils.MetaValueExponent,
 			Value:     config.NewRSRParsersMustCompile("2;3", true, utils.INFIELD_SEP),
 			Mandatory: true},
 	}

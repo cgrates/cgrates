@@ -54,7 +54,7 @@ func TestLoaderSCfgloadFromJsonCfg(t *testing.T) {
 				"type": "*attributes",						// data source type
 				"file_name": "Attributes.csv",				// file name in the tp_in_dir
 				"fields": [
-					{"tag": "TenantID", "field_id": "Tenant", "type": "*composed", "value": "~0", "mandatory": true},
+					{"tag": "TenantID", "path": "Tenant", "type": "*composed", "value": "~0", "mandatory": true},
 				],
 			},]
 		}
@@ -83,7 +83,7 @@ func TestLoaderSCfgloadFromJsonCfg(t *testing.T) {
 				Fields: []*FCTemplate{
 					{
 						Tag:       "TenantID",
-						FieldId:   "Tenant",
+						Path:      "Tenant",
 						Type:      "*composed",
 						Value:     val,
 						Mandatory: true,

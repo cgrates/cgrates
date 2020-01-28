@@ -27,23 +27,27 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var hdrJsnCfgFlds = []*config.FcTemplateJsonCfg{
+var contentJsnCfgFlds = []*config.FcTemplateJsonCfg{
 	{
 		Tag:   utils.StringPointer("TypeOfRecord"),
+		Path:  utils.StringPointer("*hdr.TypeOfRecord"),
 		Type:  utils.StringPointer(utils.META_CONSTANT),
 		Value: utils.StringPointer("10"),
 		Width: utils.IntPointer(2)},
 	{
 		Tag:   utils.StringPointer("Filler1"),
+		Path:  utils.StringPointer("*hdr.Filler1"),
 		Type:  utils.StringPointer(utils.META_FILLER),
 		Width: utils.IntPointer(3)},
 	{
 		Tag:   utils.StringPointer("DistributorCode"),
+		Path:  utils.StringPointer("*hdr.DistributorCode"),
 		Type:  utils.StringPointer(utils.META_CONSTANT),
 		Value: utils.StringPointer("VOI"),
 		Width: utils.IntPointer(3)},
 	{
 		Tag:     utils.StringPointer("FileSeqNr"),
+		Path:    utils.StringPointer("*hdr.FileSeqNr"),
 		Type:    utils.StringPointer(utils.META_HANDLER),
 		Value:   utils.StringPointer(metaExportID),
 		Width:   utils.IntPointer(5),
@@ -51,35 +55,38 @@ var hdrJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Padding: utils.StringPointer("zeroleft")},
 	{
 		Tag:    utils.StringPointer("LastCdr"),
+		Path:   utils.StringPointer("*hdr.LastCdr"),
 		Type:   utils.StringPointer(utils.META_HANDLER),
 		Width:  utils.IntPointer(12),
 		Value:  utils.StringPointer(metaLastCDRAtime),
 		Layout: utils.StringPointer("020106150400")},
 	{
 		Tag:    utils.StringPointer("FileCreationfTime"),
+		Path:   utils.StringPointer("*hdr.FileCreationfTime"),
 		Type:   utils.StringPointer(utils.META_HANDLER),
 		Value:  utils.StringPointer(metaTimeNow),
 		Width:  utils.IntPointer(12),
 		Layout: utils.StringPointer("020106150400")},
 	{
 		Tag:   utils.StringPointer("FileVersion"),
+		Path:  utils.StringPointer("*hdr.FileVersion"),
 		Type:  utils.StringPointer(utils.META_CONSTANT),
 		Value: utils.StringPointer("01"),
 		Width: utils.IntPointer(2)},
 	{
 		Tag:   utils.StringPointer("Filler2"),
+		Path:  utils.StringPointer("*hdr.Filler2"),
 		Type:  utils.StringPointer(utils.META_FILLER),
 		Width: utils.IntPointer(105)},
-}
-
-var contentJsnCfgFlds = []*config.FcTemplateJsonCfg{
 	{
 		Tag:   utils.StringPointer("TypeOfRecord"),
+		Path:  utils.StringPointer("*exp.TypeOfRecord"),
 		Type:  utils.StringPointer(utils.META_CONSTANT),
 		Value: utils.StringPointer("20"),
 		Width: utils.IntPointer(2)},
 	{
 		Tag:     utils.StringPointer("Account"),
+		Path:    utils.StringPointer("*exp.Account"),
 		Type:    utils.StringPointer(utils.META_COMPOSED),
 		Value:   utils.StringPointer("~" + utils.Account),
 		Width:   utils.IntPointer(12),
@@ -87,6 +94,7 @@ var contentJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Padding: utils.StringPointer("right")},
 	{
 		Tag:     utils.StringPointer("Subject"),
+		Path:    utils.StringPointer("*exp.Subject"),
 		Type:    utils.StringPointer(utils.META_COMPOSED),
 		Value:   utils.StringPointer("~" + utils.Subject),
 		Width:   utils.IntPointer(5),
@@ -94,6 +102,7 @@ var contentJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Padding: utils.StringPointer("right")},
 	{
 		Tag:     utils.StringPointer("CLI"),
+		Path:    utils.StringPointer("*exp.CLI"),
 		Type:    utils.StringPointer(utils.META_COMPOSED),
 		Width:   utils.IntPointer(15),
 		Value:   utils.StringPointer("cli"),
@@ -101,6 +110,7 @@ var contentJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Padding: utils.StringPointer("right")},
 	{
 		Tag:     utils.StringPointer("Destination"),
+		Path:    utils.StringPointer("*exp.Destination"),
 		Type:    utils.StringPointer(utils.META_COMPOSED),
 		Value:   utils.StringPointer("~" + utils.Destination),
 		Width:   utils.IntPointer(24),
@@ -108,17 +118,20 @@ var contentJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Padding: utils.StringPointer("right")},
 	{
 		Tag:   utils.StringPointer("ToR"),
+		Path:  utils.StringPointer("*exp.ToR"),
 		Type:  utils.StringPointer(utils.META_CONSTANT),
 		Value: utils.StringPointer("02"),
 		Width: utils.IntPointer(2)},
 	{
 		Tag:     utils.StringPointer("SubtypeTOR"),
+		Path:    utils.StringPointer("*exp.SubtypeTOR"),
 		Type:    utils.StringPointer(utils.META_CONSTANT),
 		Value:   utils.StringPointer("11"),
 		Padding: utils.StringPointer("right"),
 		Width:   utils.IntPointer(4)},
 	{
 		Tag:     utils.StringPointer("SetupTime"),
+		Path:    utils.StringPointer("*exp.SetupTime"),
 		Type:    utils.StringPointer(utils.META_COMPOSED),
 		Value:   utils.StringPointer("~" + utils.SetupTime),
 		Width:   utils.IntPointer(12),
@@ -127,6 +140,7 @@ var contentJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Layout:  utils.StringPointer("020106150400")},
 	{
 		Tag:     utils.StringPointer("Duration"),
+		Path:    utils.StringPointer("*exp.Duration"),
 		Type:    utils.StringPointer(utils.META_COMPOSED),
 		Value:   utils.StringPointer("~" + utils.Usage),
 		Width:   utils.IntPointer(6),
@@ -135,15 +149,18 @@ var contentJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Layout:  utils.StringPointer(utils.SECONDS)},
 	{
 		Tag:   utils.StringPointer("DataVolume"),
+		Path:  utils.StringPointer("*exp.DataVolume"),
 		Type:  utils.StringPointer(utils.META_FILLER),
 		Width: utils.IntPointer(6)},
 	{
 		Tag:   utils.StringPointer("TaxCode"),
+		Path:  utils.StringPointer("*exp.TaxCode"),
 		Type:  utils.StringPointer(utils.META_CONSTANT),
 		Value: utils.StringPointer("1"),
 		Width: utils.IntPointer(1)},
 	{
 		Tag:     utils.StringPointer("OperatorCode"),
+		Path:    utils.StringPointer("*exp.OperatorCode"),
 		Type:    utils.StringPointer(utils.META_COMPOSED),
 		Value:   utils.StringPointer("opercode"),
 		Width:   utils.IntPointer(2),
@@ -151,6 +168,7 @@ var contentJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Padding: utils.StringPointer("right")},
 	{
 		Tag:     utils.StringPointer("ProductId"),
+		Path:    utils.StringPointer("*exp.ProductId"),
 		Type:    utils.StringPointer(utils.META_COMPOSED),
 		Value:   utils.StringPointer("~productid"),
 		Width:   utils.IntPointer(5),
@@ -158,25 +176,30 @@ var contentJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Padding: utils.StringPointer("right")},
 	{
 		Tag:   utils.StringPointer("NetworkId"),
+		Path:  utils.StringPointer("*exp.NetworkId"),
 		Type:  utils.StringPointer(utils.META_CONSTANT),
 		Value: utils.StringPointer("3"),
 		Width: utils.IntPointer(1)},
 	{
 		Tag:     utils.StringPointer("CallId"),
+		Path:    utils.StringPointer("*exp.CallId"),
 		Type:    utils.StringPointer(utils.META_COMPOSED),
 		Value:   utils.StringPointer("~" + utils.OriginID),
 		Width:   utils.IntPointer(16),
 		Padding: utils.StringPointer("right")},
 	{
 		Tag:   utils.StringPointer("Filler"),
+		Path:  utils.StringPointer("*exp.Filler"),
 		Type:  utils.StringPointer(utils.META_FILLER),
 		Width: utils.IntPointer(8)},
 	{
 		Tag:   utils.StringPointer("Filler"),
+		Path:  utils.StringPointer("*exp.Filler"),
 		Type:  utils.StringPointer(utils.META_FILLER),
 		Width: utils.IntPointer(8)},
 	{
 		Tag:     utils.StringPointer("TerminationCode"),
+		Path:    utils.StringPointer("*exp.TerminationCode"),
 		Type:    utils.StringPointer(utils.META_COMPOSED),
 		Value:   utils.StringPointer("~operator;~product"),
 		Width:   utils.IntPointer(5),
@@ -184,6 +207,7 @@ var contentJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Padding: utils.StringPointer("right")},
 	{
 		Tag:               utils.StringPointer("Cost"),
+		Path:              utils.StringPointer("*exp.Cost"),
 		Type:              utils.StringPointer(utils.META_COMPOSED),
 		Width:             utils.IntPointer(9),
 		Value:             utils.StringPointer("~" + utils.COST),
@@ -191,27 +215,29 @@ var contentJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Rounding_decimals: utils.IntPointer(5)},
 	{
 		Tag:   utils.StringPointer("DestinationPrivacy"),
+		Path:  utils.StringPointer("*exp.DestinationPrivacy"),
 		Type:  utils.StringPointer(utils.MetaMaskedDestination),
 		Width: utils.IntPointer(1)},
-}
-
-var trailerJsnCfgFlds = []*config.FcTemplateJsonCfg{
 	{
 		Tag:   utils.StringPointer("TypeOfRecord"),
+		Path:  utils.StringPointer("*trl.TypeOfRecord"),
 		Type:  utils.StringPointer(utils.META_CONSTANT),
 		Value: utils.StringPointer("90"),
 		Width: utils.IntPointer(2)},
 	{
 		Tag:   utils.StringPointer("Filler1"),
+		Path:  utils.StringPointer("*trl.Filler1"),
 		Type:  utils.StringPointer(utils.META_FILLER),
 		Width: utils.IntPointer(3)},
 	{
 		Tag:   utils.StringPointer("DistributorCode"),
+		Path:  utils.StringPointer("*trl.DistributorCode"),
 		Type:  utils.StringPointer(utils.META_CONSTANT),
 		Value: utils.StringPointer("VOI"),
 		Width: utils.IntPointer(3)},
 	{
 		Tag:     utils.StringPointer("FileSeqNr"),
+		Path:    utils.StringPointer("*trl.FileSeqNr"),
 		Type:    utils.StringPointer(utils.META_HANDLER),
 		Value:   utils.StringPointer(metaExportID),
 		Width:   utils.IntPointer(5),
@@ -219,12 +245,14 @@ var trailerJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Padding: utils.StringPointer("zeroleft")},
 	{
 		Tag:     utils.StringPointer("NumberOfRecords"),
+		Path:    utils.StringPointer("*trl.NumberOfRecords"),
 		Type:    utils.StringPointer(utils.META_HANDLER),
 		Value:   utils.StringPointer(metaNrCDRs),
 		Width:   utils.IntPointer(6),
 		Padding: utils.StringPointer("zeroleft")},
 	{
 		Tag:     utils.StringPointer("CdrsDuration"),
+		Path:    utils.StringPointer("*trl.CdrsDuration"),
 		Type:    utils.StringPointer(utils.META_HANDLER),
 		Value:   utils.StringPointer(metaDurCDRs),
 		Width:   utils.IntPointer(8),
@@ -232,43 +260,38 @@ var trailerJsnCfgFlds = []*config.FcTemplateJsonCfg{
 		Layout:  utils.StringPointer(utils.SECONDS)},
 	{
 		Tag:    utils.StringPointer("FirstCdrTime"),
+		Path:   utils.StringPointer("*trl.FirstCdrTime"),
 		Type:   utils.StringPointer(utils.META_HANDLER),
 		Width:  utils.IntPointer(12),
 		Value:  utils.StringPointer(metaFirstCDRAtime),
 		Layout: utils.StringPointer("020106150400")},
 	{
 		Tag:    utils.StringPointer("LastCdrTime"),
+		Path:   utils.StringPointer("*trl.LastCdrTime"),
 		Type:   utils.StringPointer(utils.META_HANDLER),
 		Width:  utils.IntPointer(12),
 		Value:  utils.StringPointer(metaLastCDRAtime),
 		Layout: utils.StringPointer("020106150400")},
 	{
 		Tag:   utils.StringPointer("Filler2"),
+		Path:  utils.StringPointer("*trl.Filler2"),
 		Type:  utils.StringPointer(utils.META_FILLER),
 		Width: utils.IntPointer(93)},
 }
 
-var hdrCfgFlds, contentCfgFlds, trailerCfgFlds []*config.FCTemplate
+var contentCfgFlds []*config.FCTemplate
 
 // Write one CDR and test it's results only for content buffer
 func TestWriteCdr(t *testing.T) {
 	var err error
 	wrBuf := &bytes.Buffer{}
 	cfg, _ := config.NewDefaultCGRConfig()
-	if hdrCfgFlds, err = config.FCTemplatesFromFCTemplatesJsonCfg(hdrJsnCfgFlds, utils.INFIELD_SEP); err != nil {
-		t.Error(err)
-	}
 	if contentCfgFlds, err = config.FCTemplatesFromFCTemplatesJsonCfg(contentJsnCfgFlds, utils.INFIELD_SEP); err != nil {
 		t.Error(err)
 	}
-	if trailerCfgFlds, err = config.FCTemplatesFromFCTemplatesJsonCfg(trailerJsnCfgFlds, utils.INFIELD_SEP); err != nil {
-		t.Error(err)
-	}
 	cdreCfg := &config.CdreCfg{
-		ExportFormat:  utils.MetaFileFWV,
-		HeaderFields:  hdrCfgFlds,
-		ContentFields: contentCfgFlds,
-		TrailerFields: trailerCfgFlds,
+		ExportFormat: utils.MetaFileFWV,
+		Fields:       contentCfgFlds,
 	}
 	cdr := &CDR{
 		CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
@@ -288,6 +311,12 @@ func TestWriteCdr(t *testing.T) {
 		t.Error(err)
 	}
 	if err = cdre.processCDRs(); err != nil {
+		t.Error(err)
+	}
+	if err = cdre.composeHeader(); err != nil {
+		t.Error(err)
+	}
+	if err = cdre.composeTrailer(); err != nil {
 		t.Error(err)
 	}
 	eHeader := "10   VOIfwv_107111308420018011511340001                                                                                                         \n"
@@ -332,10 +361,8 @@ func TestWriteCdr(t *testing.T) {
 func TestWriteCdrs(t *testing.T) {
 	wrBuf := &bytes.Buffer{}
 	cdreCfg := &config.CdreCfg{
-		ExportFormat:  utils.MetaFileFWV,
-		HeaderFields:  hdrCfgFlds,
-		ContentFields: contentCfgFlds,
-		TrailerFields: trailerCfgFlds,
+		ExportFormat: utils.MetaFileFWV,
+		Fields:       contentCfgFlds,
 	}
 	cdr1 := &CDR{CGRID: utils.Sha1("aaa1", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
 		ToR: utils.VOICE, OrderID: 2, OriginID: "aaa1", OriginHost: "192.168.1.1",

@@ -48,63 +48,63 @@ With explanations in the comments:
 			"content_fields":[					// mapping definition between line index in the file and CGRateS field 
 				{
 					"tag": "OriginID",			// OriginID together with OriginHost will 
-					"field_id": "OriginID",		//   uniquely identify the session on CGRateS side
+					"path": "OriginID",		//   uniquely identify the session on CGRateS side
 					"type": "*variable",
 					"value": "~*req.0",q		// take the content from line index 0
 					"mandatory": true			//   in the request file
 				},
 				{
 					"tag": "RequestType",		// RequestType instructs SessionS
-					"field_id": "RequestType",	//   about charging type to apply for the event
+					"path": "RequestType",	//   about charging type to apply for the event
 					"type": "*variable",
 					"value": "~*req.1",
 					"mandatory": true
 				},
 				{
 					"tag": "Category",			// Category serves for ataching Account
-					"field_id": "Category",		//   and RatingProfile to the request
+					"path": "Category",		//   and RatingProfile to the request
 					"type": "*constant",
 					"value": "call",
 					"mandatory": true
 				},
 				{
 					"tag": "Account",			// Account is required by charging
-					"field_id": "Account",
+					"path": "Account",
 					"type": "*variable",
 					"value": "~*req.3",
 					"mandatory": true
 				},
 				{
 					"tag": "Subject",			// Subject is required by charging
-					"field_id": "Subject",
+					"path": "Subject",
 					"type": "*variable",
 					"value": "~*req.3",
 					"mandatory": true
 				},
 				{
 					"tag": "Destination",		// Destination is required by charging
-					"field_id": "Destination",
+					"path": "Destination",
 					"type": "*variable",
 					"value": "~*req.4:s/0([1-9]\\d+)/+49${1}/",
 					"mandatory": true			// Additional mediation is performed on number format
 				},
 				{
 					"tag": "AnswerTime",		// AnswerTime is required by charging
-					"field_id": "AnswerTime",
+					"path": "AnswerTime",
 					"type": "*variable",
 					"value": "~*req.5",
 					"mandatory": true
 				},
 				{
 					"tag": "Usage",				// Usage is required by charging
-					"field_id": "Usage",
+					"path": "Usage",
 					"type": "*variable",
 					"value": "~*req.6",
 					"mandatory": true
 				},
 				{
 					"tag": "HDRExtra1",			// HDRExtra1 is transparently stored into CDR
-					"field_id": "HDRExtra1",	//   as extra field not used by CGRateS
+					"path": "HDRExtra1",	//   as extra field not used by CGRateS
 					"type": "*composed",
 					"value": "~*req.6",
 					"mandatory": true

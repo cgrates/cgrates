@@ -47,19 +47,19 @@
 
 "cdre": {
 	"TestTutITExportCDR": {
-		"content_fields": [
-			{"tag": "CGRID", "type": "*composed", "value": "~CGRID"},
-			{"tag": "RunID", "type": "*composed", "value": "~RunID"},
-			{"tag":"OriginID", "type": "*composed", "value": "~OriginID"},
-			{"tag":"RequestType", "type": "*composed", "value": "~RequestType"},
-			{"tag":"Tenant", "type": "*composed", "value": "~Tenant"},
-			{"tag":"Category", "type": "*composed", "value": "~Category"},
-			{"tag":"Account", "type": "*composed", "value": "~Account"},
-			{"tag":"Destination", "type": "*composed", "value": "~Destination"},
-			{"tag":"AnswerTime", "type": "*composed", "value": "~AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
-			{"tag":"Usage", "type": "*composed", "value": "~Usage"},
-			{"tag":"Cost", "type": "*composed", "value": "~Cost", "rounding_decimals": 4},
-			{"tag":"MatchedDestinationID", "type": "*composed", "value": "~CostDetails:s/\"MatchedDestId\":.*_(\\w{4})/${1}/:s/\"MatchedDestId\":\"INTERNAL\"/ON010/"},
+		"fields": [
+			{"path": "*exp.CGRID", "type": "*composed", "value": "~CGRID"},
+			{"path": "*exp.RunID", "type": "*composed", "value": "~RunID"},
+			{"path": "*exp.OriginID", "type": "*composed", "value": "~OriginID"},
+			{"path": "*exp.RequestType", "type": "*composed", "value": "~RequestType"},
+			{"path": "*exp.Tenant", "type": "*composed", "value": "~Tenant"},
+			{"path": "*exp.Category", "type": "*composed", "value": "~Category"},
+			{"path": "*exp.Account", "type": "*composed", "value": "~Account"},
+			{"path": "*exp.Destination", "type": "*composed", "value": "~Destination"},
+			{"path": "*exp.AnswerTime", "type": "*composed", "value": "~AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"path": "*exp.Usage", "type": "*composed", "value": "~Usage"},
+			{"path": "*exp.Cost", "type": "*composed", "value": "~Cost", "rounding_decimals": 4},
+			{"path": "*exp.MatchedDestinationID", "type": "*composed", "value": "~CostDetails:s/\"MatchedDestId\":.*_(\\w{4})/${1}/:s/\"MatchedDestId\":\"INTERNAL\"/ON010/"},
 		],
 	},
 },

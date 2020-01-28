@@ -6,7 +6,7 @@
 "cdre": {
 	"export1": {
 		"cost_rounding_decimals": 3,					// rounding decimals for Cost values. -1 to disable rounding
-		"content_fields": [								// template of the exported content fields
+		"fields": [								// template of the exported content fields
 			{"tag":"Tenant", "cdr_field_id": "tenant", "type": "cdrfield", "value": "tenant"},
 			{"tag":"Category", "cdr_field_id": "category", "type": "cdrfield", "value": "category"},
 			{"tag":"Account", "cdr_field_id": "account", "type": "cdrfield", "value": "account"},
@@ -33,7 +33,7 @@
 				"tenant": "cgrates.org",
 				"flags": ["*cdrs"],
 				"request_fields":[
-					{"tag": "TOR", "field_id": "ToR", "type": "*constant",
+					{"tag": "TOR", "path": "ToR", "type": "*constant",
 					 "value": "*data", "mandatory": true},
 				],
 				"reply_fields":[],

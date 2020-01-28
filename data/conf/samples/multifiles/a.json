@@ -9,7 +9,7 @@
 
 "cdre": {
 	"*default": {
-		"content_fields": [								// template of the exported content fields
+		"fields": [								// template of the exported content fields
 			{"tag":"AccId", "cdr_field_id": "accid", "type": "cdrfield", "value": "accid"},
 			{"tag":"ReqType", "cdr_field_id": "reqtype", "type": "cdrfield", "value": "reqtype"},
 			{"tag":"Tenant", "cdr_field_id": "tenant", "type": "cdrfield", "value": "tenant"},
@@ -41,7 +41,7 @@
 				"request_fields":[
 				],
 				"reply_fields":[
-					{"tag": "Allow", "field_id": "response.Allow", "type": "*constant", 
+					{"tag": "Allow", "path": "response.Allow", "type": "*constant", 
 						"value": "1", "mandatory": true},
 				],
 			},
@@ -51,11 +51,11 @@
 				"tenant": "cgrates.org",
 				"flags": ["*auth", "*accounts", "*attributes"],
 				"request_fields":[
-					{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
+					{"tag": "RequestType", "path": "RequestType", "type": "*constant", 
 						"value": "*pseudoprepaid", "mandatory": true},	
 				],
 				"reply_fields":[
-					{"tag": "Allow", "field_id": "response.Allow", "type": "*constant", 
+					{"tag": "Allow", "path": "response.Allow", "type": "*constant", 
 						"value": "1", "mandatory": true},
 				],
 			},

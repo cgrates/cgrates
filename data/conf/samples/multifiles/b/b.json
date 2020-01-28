@@ -12,7 +12,7 @@
 		"export_path": "/tmp/cgrates/cdre",			// path where the exported CDRs will be placed
 	},
 	"export1": {
-		"header_fields": [
+		"fields": [
 			{"tag": "CgrId", "cdr_field_id": "cgrid", "type": "cdrfield", "value": "cgrid"},
 			{"tag":"RunId", "cdr_field_id": "mediation_runid", "type": "cdrfield", "value": "mediation_runid"},
 		],							// template of the exported header fields
@@ -33,11 +33,11 @@
 				"tenant": "cgrates.org",
 				"flags": ["*cdrs"],
 				"request_fields":[
-					{"tag": "RequestType", "field_id": "RequestType", "type": "*constant", 
+					{"tag": "RequestType", "path": "RequestType", "type": "*constant", 
 						"value": "*pseudoprepaid", "mandatory": true},	
 				],
 				"reply_fields":[
-					{"tag": "CDR_ID", "field_id": "CDR_RESPONSE.CDR_ID", "type": "*composed", 
+					{"tag": "CDR_ID", "path": "CDR_RESPONSE.CDR_ID", "type": "*composed", 
 						"value": "~*req.CDR_ID", "mandatory": true},
 				],
 			}
