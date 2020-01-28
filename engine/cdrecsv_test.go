@@ -52,6 +52,12 @@ func TestCsvCdrWriter(t *testing.T) {
 	if err = cdre.processCDRs(); err != nil {
 		t.Error(err)
 	}
+	if err = cdre.composeHeader(); err != nil {
+		t.Error(err)
+	}
+	if err = cdre.composeTrailer(); err != nil {
+		t.Error(err)
+	}
 	csvWriter := csv.NewWriter(writer)
 	if err := cdre.writeCsv(csvWriter); err != nil {
 		t.Error("Unexpected error: ", err)
@@ -90,6 +96,12 @@ func TestAlternativeFieldSeparator(t *testing.T) {
 	if err = cdre.processCDRs(); err != nil {
 		t.Error(err)
 	}
+	if err = cdre.composeHeader(); err != nil {
+		t.Error(err)
+	}
+	if err = cdre.composeTrailer(); err != nil {
+		t.Error(err)
+	}
 	csvWriter := csv.NewWriter(writer)
 	if err := cdre.writeCsv(csvWriter); err != nil {
 		t.Error("Unexpected error: ", err)
@@ -108,7 +120,7 @@ func TestExportVoiceWithConvert(t *testing.T) {
 	writer := &bytes.Buffer{}
 	cfg, _ := config.NewDefaultCGRConfig()
 	cdreCfg := cfg.CdreProfiles[utils.MetaDefault]
-	cdreCfg.ContentFields = []*config.FCTemplate{
+	cdreCfg.Fields = []*config.FCTemplate{
 		{Tag: "ToR", Type: "*composed",
 			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"ToR", true, utils.INFIELD_SEP)},
 		{Tag: "OriginID", Type: "*composed",
@@ -205,7 +217,7 @@ func TestExportWithFilter(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	cdreCfg := cfg.CdreProfiles[utils.MetaDefault]
 	cdreCfg.Filters = []string{"*string:~*req.Tenant:cgrates.org"}
-	cdreCfg.ContentFields = []*config.FCTemplate{
+	cdreCfg.Fields = []*config.FCTemplate{
 		{Tag: "ToR", Type: "*composed",
 			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"ToR", true, utils.INFIELD_SEP)},
 		{Tag: "OriginID", Type: "*composed",
@@ -301,7 +313,7 @@ func TestExportWithFilter2(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	cdreCfg := cfg.CdreProfiles[utils.MetaDefault]
 	cdreCfg.Filters = []string{"*string:~*req.Tenant:cgrates.org", "*lte:~*req.Cost:0.5"}
-	cdreCfg.ContentFields = []*config.FCTemplate{
+	cdreCfg.Fields = []*config.FCTemplate{
 		{Tag: "ToR", Type: "*composed",
 			Value: config.NewRSRParsersMustCompile(utils.DynamicDataPrefix+"ToR", true, utils.INFIELD_SEP)},
 		{Tag: "OriginID", Type: "*composed",

@@ -25,18 +25,17 @@ import (
 )
 
 func TestCdreCfgClone(t *testing.T) {
-	cgrIdRsrs := NewRSRParsersMustCompile("cgrid", true, utils.INFIELD_SEP)
-	runIdRsrs := NewRSRParsersMustCompile("runid", true, utils.INFIELD_SEP)
-	emptyFields := []*FCTemplate{}
+	cgrIDRsrs := NewRSRParsersMustCompile("cgrid", true, utils.INFIELD_SEP)
+	runIDRsrs := NewRSRParsersMustCompile("runid", true, utils.INFIELD_SEP)
 	initContentFlds := []*FCTemplate{
 		{Tag: "CgrId",
-			Type:    utils.META_COMPOSED,
-			FieldId: "cgrid",
-			Value:   cgrIdRsrs},
+			Type:  utils.META_COMPOSED,
+			Path:  "cgrid",
+			Value: cgrIDRsrs},
 		{Tag: "RunId",
-			Type:    utils.META_COMPOSED,
-			FieldId: "runid",
-			Value:   runIdRsrs},
+			Type:  utils.META_COMPOSED,
+			Path:  "runid",
+			Value: runIDRsrs},
 	}
 	initCdreCfg := &CdreCfg{
 		ExportFormat:   utils.MetaFileCSV,
@@ -44,17 +43,17 @@ func TestCdreCfgClone(t *testing.T) {
 		Synchronous:    true,
 		Attempts:       2,
 		FieldSeparator: rune(utils.CSV_SEP),
-		ContentFields:  initContentFlds,
+		Fields:         initContentFlds,
 	}
 	eClnContentFlds := []*FCTemplate{
 		{Tag: "CgrId",
-			Type:    utils.META_COMPOSED,
-			FieldId: "cgrid",
-			Value:   cgrIdRsrs},
+			Type:  utils.META_COMPOSED,
+			Path:  "cgrid",
+			Value: cgrIDRsrs},
 		{Tag: "RunId",
-			Type:    utils.META_COMPOSED,
-			FieldId: "runid",
-			Value:   runIdRsrs},
+			Type:  utils.META_COMPOSED,
+			Path:  "runid",
+			Value: runIDRsrs},
 	}
 	eClnCdreCfg := &CdreCfg{
 		ExportFormat:   utils.MetaFileCSV,
@@ -63,9 +62,7 @@ func TestCdreCfgClone(t *testing.T) {
 		Attempts:       2,
 		Filters:        []string{},
 		FieldSeparator: rune(utils.CSV_SEP),
-		HeaderFields:   emptyFields,
-		ContentFields:  eClnContentFlds,
-		TrailerFields:  emptyFields,
+		Fields:         eClnContentFlds,
 	}
 	clnCdreCfg := initCdreCfg.Clone()
 	if !reflect.DeepEqual(eClnCdreCfg, clnCdreCfg) {
@@ -75,9 +72,9 @@ func TestCdreCfgClone(t *testing.T) {
 	if !reflect.DeepEqual(eClnCdreCfg, clnCdreCfg) { // MOdifying a field after clone should not affect cloned instance
 		t.Errorf("Cloned result: %+v", clnCdreCfg)
 	}
-	clnCdreCfg.ContentFields[0].FieldId = "destination"
-	if initCdreCfg.ContentFields[0].FieldId != "cgrid" {
-		t.Error("Unexpected change of FieldId: ", initCdreCfg.ContentFields[0].FieldId)
+	clnCdreCfg.Fields[0].Path = "destination"
+	if initCdreCfg.Fields[0].Path != "cgrid" {
+		t.Error("Unexpected change of Path: ", initCdreCfg.Fields[0].Path)
 	}
 
 }
@@ -104,11 +101,9 @@ func TestCdreCfgloadFromJsonCfg(t *testing.T) {
 		"synchronous": false,							// block processing until export has a result
 		"attempts": 1,									// Number of attempts if not success
 		"field_separator": ",",							// used field separator in some export formats, eg: *file_csv
-		"header_fields": [],							// template of the exported header fields
-		"content_fields": [								// template of the exported content fields
-			{"tag": "CGRID", "type": "*composed", "value": "~CGRID"},
+		"fields": [								// template of the exported content fields
+			{"path": "*exp.CGRID", "type": "*composed", "value": "~CGRID"},
 		],
-		"trailer_fields": [],							// template of the exported trailer fields
 	},
 },
 }`
@@ -123,13 +118,12 @@ func TestCdreCfgloadFromJsonCfg(t *testing.T) {
 		Tenant:         "cgrates.org",
 		Attempts:       1,
 		FieldSeparator: utils.CSV_SEP,
-		HeaderFields:   []*FCTemplate{},
-		ContentFields: []*FCTemplate{{
-			Tag:   "CGRID",
+		Fields: []*FCTemplate{{
+			Path:  "*exp.CGRID",
+			Tag:   "*exp.CGRID",
 			Type:  "*composed",
 			Value: val,
 		}},
-		TrailerFields: []*FCTemplate{},
 	}
 	if jsnCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)

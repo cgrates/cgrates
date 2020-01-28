@@ -28,9 +28,7 @@ type CdreCfg struct {
 	Synchronous       bool
 	Attempts          int
 	FieldSeparator    rune
-	HeaderFields      []*FCTemplate
-	ContentFields     []*FCTemplate
-	TrailerFields     []*FCTemplate
+	Fields            []*FCTemplate
 }
 
 func (self *CdreCfg) loadFromJsonCfg(jsnCfg *CdreJsonCfg, separator string) (err error) {
@@ -65,18 +63,8 @@ func (self *CdreCfg) loadFromJsonCfg(jsnCfg *CdreJsonCfg, separator string) (err
 		sepStr := *jsnCfg.Field_separator
 		self.FieldSeparator = rune(sepStr[0])
 	}
-	if jsnCfg.Header_fields != nil {
-		if self.HeaderFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Header_fields, separator); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Content_fields != nil {
-		if self.ContentFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Content_fields, separator); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Trailer_fields != nil {
-		if self.TrailerFields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Trailer_fields, separator); err != nil {
+	if jsnCfg.Fields != nil {
+		if self.Fields, err = FCTemplatesFromFCTemplatesJsonCfg(*jsnCfg.Fields, separator); err != nil {
 			return err
 		}
 	}
@@ -96,17 +84,9 @@ func (self *CdreCfg) Clone() *CdreCfg {
 	for i, fltr := range self.Filters {
 		clnCdre.Filters[i] = fltr
 	}
-	clnCdre.HeaderFields = make([]*FCTemplate, len(self.HeaderFields))
-	for idx, fld := range self.HeaderFields {
-		clnCdre.HeaderFields[idx] = fld.Clone()
-	}
-	clnCdre.ContentFields = make([]*FCTemplate, len(self.ContentFields))
-	for idx, fld := range self.ContentFields {
-		clnCdre.ContentFields[idx] = fld.Clone()
-	}
-	clnCdre.TrailerFields = make([]*FCTemplate, len(self.TrailerFields))
-	for idx, fld := range self.TrailerFields {
-		clnCdre.TrailerFields[idx] = fld.Clone()
+	clnCdre.Fields = make([]*FCTemplate, len(self.Fields))
+	for idx, fld := range self.Fields {
+		clnCdre.Fields[idx] = fld.Clone()
 	}
 	return clnCdre
 }

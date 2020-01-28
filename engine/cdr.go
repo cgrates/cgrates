@@ -458,6 +458,9 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
 	nM := config.NewNavigableMap(nil)
 	nM.Set([]string{utils.MetaReq}, cdr.AsMapStringIface(), false, false)
 	for _, cfgFld := range exportFields {
+		if !strings.HasPrefix(cfgFld.Path, utils.MetaExp) {
+			continue
+		}
 		if pass, err := filterS.Pass(cdr.Tenant,
 			cfgFld.Filters, nM); err != nil {
 			return []string{}, err
@@ -495,7 +498,7 @@ func (cdr *CDR) AsExportMap(exportFields []*config.FCTemplate, httpSkipTLSCheck 
 				err.Error(), utils.ToJSON(cfgFld), utils.ToJSON(cdr)))
 			return nil, err
 		}
-		expMap[cfgFld.FieldId] += fmtOut
+		expMap[cfgFld.Path] += fmtOut
 	}
 	return
 }

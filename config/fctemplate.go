@@ -30,13 +30,10 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg, separator str
 	if jsnCfg.Type != nil {
 		fcTmp.Type = *jsnCfg.Type
 	}
-	if jsnCfg.Field_id != nil {
-		fcTmp.FieldId = *jsnCfg.Field_id
-	}
 	if jsnCfg.Path != nil {
 		fcTmp.Path = *jsnCfg.Path
 	}
-	fcTmp.Tag = fcTmp.FieldId
+	fcTmp.Tag = fcTmp.Path
 	if jsnCfg.Tag != nil {
 		fcTmp.Tag = *jsnCfg.Tag
 	}
@@ -78,9 +75,6 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg, separator str
 	if jsnCfg.Break_on_success != nil {
 		fcTmp.BreakOnSuccess = *jsnCfg.Break_on_success
 	}
-	if jsnCfg.Handler_id != nil {
-		fcTmp.HandlerId = *jsnCfg.Handler_id
-	}
 	if jsnCfg.Layout != nil {
 		fcTmp.Layout = *jsnCfg.Layout
 	}
@@ -101,9 +95,8 @@ func NewFCTemplateFromFCTemplateJsonCfg(jsnCfg *FcTemplateJsonCfg, separator str
 
 type FCTemplate struct {
 	Tag              string
-	Type             string // Type of field
-	FieldId          string // Field identifier
-	Path             string
+	Type             string   // Type of field
+	Path             string   // Field identifier
 	Filters          []string // list of filter profiles
 	Value            RSRParsers
 	Width            int
@@ -115,7 +108,6 @@ type FCTemplate struct {
 	Timezone         string
 	Blocker          bool
 	BreakOnSuccess   bool
-	HandlerId        string // used by XML in CDRC
 	Layout           string // time format
 	CostShiftDigits  int    // Used for CDR
 	RoundingDecimals int
@@ -170,7 +162,7 @@ func (self *FCTemplate) Clone() *FCTemplate {
 	cln := new(FCTemplate)
 	cln.Tag = self.Tag
 	cln.Type = self.Type
-	cln.FieldId = self.FieldId
+	cln.Path = self.Path
 	if len(self.Filters) != 0 {
 		cln.Filters = make([]string, len(self.Filters))
 		for idx, val := range self.Filters {
@@ -191,7 +183,6 @@ func (self *FCTemplate) Clone() *FCTemplate {
 	cln.Timezone = self.Timezone
 	cln.Blocker = self.Blocker
 	cln.BreakOnSuccess = self.BreakOnSuccess
-	cln.HandlerId = self.HandlerId
 	cln.Layout = self.Layout
 	cln.CostShiftDigits = self.CostShiftDigits
 	cln.RoundingDecimals = self.RoundingDecimals

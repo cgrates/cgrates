@@ -33,8 +33,8 @@
 		"export_path": "amqps://guest:guest@localhost:256733/",
 		"attempts": 1,									// export attempts
 		"synchronous": true,							// block processing until export has a result
-		"content_fields": [
-			{"tag": "CGRID", "type": "*composed", "value": "~CGRID", "field_id": "CGRID"},
+		"fields": [
+			{"tag": "CGRID", "type": "*composed", "value": "~CGRID", "path": "CGRID"},
 		],
 	},
 },

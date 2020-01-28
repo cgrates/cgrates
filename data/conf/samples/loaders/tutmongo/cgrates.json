@@ -48,7 +48,7 @@
 
 "cdre": {
 	"TestTutITExportCDR": {
-		"content_fields": [
+		"fields": [
 			{"tag": "CGRID", "type": "*composed", "value": "~CGRID"},
 			{"tag": "RunID", "type": "*composed", "value": "~RunID"},
 			{"tag":"OriginID", "type": "*composed", "value": "~OriginID"},
@@ -120,17 +120,17 @@
 				"type": "*attributes",						// data source type
 				"file_name": "Attributes.csv",				// file name in the tp_in_dir
 				"fields": [
-					{"tag": "TenantID", "field_id": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
-					{"tag": "ProfileID", "field_id": "ID", "type": "*variable", "value": "~1", "mandatory": true},
-					{"tag": "Contexts", "field_id": "Contexts", "type": "*variable", "value": "~2"},
-					{"tag": "FilterIDs", "field_id": "FilterIDs", "type": "*variable", "value": "~3"},
-					{"tag": "ActivationInterval", "field_id": "ActivationInterval", "type": "*variable", "value": "~4"},
-					{"tag": "AttributeFilterIDs", "field_id": "AttributeFilterIDs", "type": "*variable", "value": "~5"},
-					{"tag": "Path", "field_id": "Path", "type": "*variable", "value": "~6"},
-					{"tag": "Type", "field_id": "Type", "type": "*variable", "value": "~7"},
-					{"tag": "Value", "field_id": "Value", "type": "*variable", "value": "~8"},
-					{"tag": "Blocker", "field_id": "Blocker", "type": "*variable", "value": "~9"},
-					{"tag": "Weight", "field_id": "Weight", "type": "*variable", "value": "~10"},
+					{"tag": "TenantID", "path": "Tenant", "type": "*variable", "value": "~0", "mandatory": true},
+					{"tag": "ProfileID", "path": "ID", "type": "*variable", "value": "~1", "mandatory": true},
+					{"tag": "Contexts", "path": "Contexts", "type": "*variable", "value": "~2"},
+					{"tag": "FilterIDs", "path": "FilterIDs", "type": "*variable", "value": "~3"},
+					{"tag": "ActivationInterval", "path": "ActivationInterval", "type": "*variable", "value": "~4"},
+					{"tag": "AttributeFilterIDs", "path": "AttributeFilterIDs", "type": "*variable", "value": "~5"},
+					{"tag": "Path", "path": "Path", "type": "*variable", "value": "~6"},
+					{"tag": "Type", "path": "Type", "type": "*variable", "value": "~7"},
+					{"tag": "Value", "path": "Value", "type": "*variable", "value": "~8"},
+					{"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~9"},
+					{"tag": "Weight", "path": "Weight", "type": "*variable", "value": "~10"},
 				],
 			},
 		],

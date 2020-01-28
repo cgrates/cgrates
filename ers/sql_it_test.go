@@ -84,11 +84,9 @@ func testSQLInitConfig(t *testing.T) {
 					"tenant": "cgrates.org",							// tenant used by import
 					"filters": [],										// limit parsing based on the filters
 					"flags": [],										// flags to influence the event processing
-					// "header_fields": [],								// template of the import header fields
 					"content_fields":[									// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-						{"tag": "CGRID", "type": "*composed", "value": "~*req.cgrid", "field_id": "CGRID"},
+						{"tag": "CGRID", "type": "*composed", "value": "~*req.cgrid", "path": "CGRID"},
 					],
-					// "trailer_fields": [],								// template of the import trailer fields
 				},
 			],
 		},

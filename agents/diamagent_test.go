@@ -58,17 +58,17 @@ func TestProcessRequest(t *testing.T) {
 		Tenant:  config.NewRSRParsersMustCompile("cgrates.org", true, utils.INFIELD_SEP),
 		Filters: []string{}, // empty for momment
 		RequestFields: []*config.FCTemplate{
-			&config.FCTemplate{Tag: utils.ToR, Type: utils.META_CONSTANT, FieldId: utils.ToR, Value: config.NewRSRParsersMustCompile(utils.VOICE, true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: utils.OriginID, Type: utils.META_COMPOSED, FieldId: utils.OriginID, Value: config.NewRSRParsersMustCompile("~*req.SessionId", true, utils.INFIELD_SEP), Mandatory: true},
-			&config.FCTemplate{Tag: utils.OriginHost, Type: utils.MetaRemoteHost, FieldId: utils.OriginHost, Mandatory: true},
-			&config.FCTemplate{Tag: utils.Category, Type: utils.META_CONSTANT, FieldId: utils.Category, Value: config.NewRSRParsersMustCompile(utils.CALL, true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: utils.Account, Type: utils.META_COMPOSED, FieldId: utils.Account, Value: config.NewRSRParsersMustCompile("~*req.Account", true, utils.INFIELD_SEP), Mandatory: true},
-			&config.FCTemplate{Tag: utils.Destination, Type: utils.META_COMPOSED, FieldId: utils.Destination, Value: config.NewRSRParsersMustCompile("~*req.Destination", true, utils.INFIELD_SEP), Mandatory: true},
-			&config.FCTemplate{Tag: utils.Usage, Type: utils.META_COMPOSED, FieldId: utils.Usage, Value: config.NewRSRParsersMustCompile("~*req.Usage", true, utils.INFIELD_SEP), Mandatory: true},
+			&config.FCTemplate{Tag: utils.ToR, Type: utils.META_CONSTANT, Path: utils.ToR, Value: config.NewRSRParsersMustCompile(utils.VOICE, true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: utils.OriginID, Type: utils.META_COMPOSED, Path: utils.OriginID, Value: config.NewRSRParsersMustCompile("~*req.SessionId", true, utils.INFIELD_SEP), Mandatory: true},
+			&config.FCTemplate{Tag: utils.OriginHost, Type: utils.MetaRemoteHost, Path: utils.OriginHost, Mandatory: true},
+			&config.FCTemplate{Tag: utils.Category, Type: utils.META_CONSTANT, Path: utils.Category, Value: config.NewRSRParsersMustCompile(utils.CALL, true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: utils.Account, Type: utils.META_COMPOSED, Path: utils.Account, Value: config.NewRSRParsersMustCompile("~*req.Account", true, utils.INFIELD_SEP), Mandatory: true},
+			&config.FCTemplate{Tag: utils.Destination, Type: utils.META_COMPOSED, Path: utils.Destination, Value: config.NewRSRParsersMustCompile("~*req.Destination", true, utils.INFIELD_SEP), Mandatory: true},
+			&config.FCTemplate{Tag: utils.Usage, Type: utils.META_COMPOSED, Path: utils.Usage, Value: config.NewRSRParsersMustCompile("~*req.Usage", true, utils.INFIELD_SEP), Mandatory: true},
 		},
 		ReplyFields: []*config.FCTemplate{
-			&config.FCTemplate{Tag: "ResultCode", Type: utils.META_CONSTANT, FieldId: "ResultCode", Value: config.NewRSRParsersMustCompile("2001", true, utils.INFIELD_SEP)},
-			&config.FCTemplate{Tag: "GrantedUnits", Type: utils.META_COMPOSED, FieldId: "GrantedUnits", Value: config.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP), Mandatory: true},
+			&config.FCTemplate{Tag: "ResultCode", Type: utils.META_CONSTANT, Path: "ResultCode", Value: config.NewRSRParsersMustCompile("2001", true, utils.INFIELD_SEP)},
+			&config.FCTemplate{Tag: "GrantedUnits", Type: utils.META_COMPOSED, Path: "GrantedUnits", Value: config.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*duration_seconds}", true, utils.INFIELD_SEP), Mandatory: true},
 		},
 	}
 	reqVars := map[string]interface{}{
@@ -318,7 +318,7 @@ func TestProcessRequest(t *testing.T) {
 	}
 
 	reqProcessor.Flags, _ = utils.FlagsWithParamsFromSlice([]string{utils.MetaTerminate, utils.MetaAccounts, utils.MetaAttributes, utils.MetaCDRs})
-	reqProcessor.ReplyFields = []*config.FCTemplate{&config.FCTemplate{Tag: "ResultCode", Type: utils.META_CONSTANT, FieldId: "ResultCode", Value: config.NewRSRParsersMustCompile("2001", true, utils.INFIELD_SEP)}}
+	reqProcessor.ReplyFields = []*config.FCTemplate{&config.FCTemplate{Tag: "ResultCode", Type: utils.META_CONSTANT, Path: "ResultCode", Value: config.NewRSRParsersMustCompile("2001", true, utils.INFIELD_SEP)}}
 	cgrRplyNM = config.NewNavigableMap(nil)
 	rply = config.NewNavigableMap(nil)
 

@@ -29,6 +29,7 @@ import (
 	"path"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -143,7 +144,10 @@ func (cdre *CDRExporter) metaHandler(tag, arg string) (string, error) {
 
 // Compose and cache the header
 func (cdre *CDRExporter) composeHeader() (err error) {
-	for _, cfgFld := range cdre.exportTemplate.HeaderFields {
+	for _, cfgFld := range cdre.exportTemplate.Fields {
+		if !strings.HasPrefix(cfgFld.Path, utils.MetaHdr) {
+			continue
+		}
 		if len(cfgFld.Filters) != 0 {
 			//check filter if pass
 		}
@@ -189,7 +193,10 @@ func (cdre *CDRExporter) composeHeader() (err error) {
 
 // Compose and cache the trailer
 func (cdre *CDRExporter) composeTrailer() (err error) {
-	for _, cfgFld := range cdre.exportTemplate.TrailerFields {
+	for _, cfgFld := range cdre.exportTemplate.Fields {
+		if !strings.HasPrefix(cfgFld.Path, utils.MetaTrl) {
+			continue
+		}
 		if len(cfgFld.Filters) != 0 {
 			//check filter if pass
 		}
@@ -242,7 +249,7 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 		}
 	case utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap, utils.MetaAMQPV1jsonMap, utils.MetaSQSjsonMap, utils.MetaKafkajsonMap, utils.MetaS3jsonMap:
 		var expMp map[string]string
-		if expMp, err = cdr.AsExportMap(cdre.exportTemplate.ContentFields, cdre.httpSkipTLSCheck, nil, cdre.filterS); err != nil {
+		if expMp, err = cdr.AsExportMap(cdre.exportTemplate.Fields, cdre.httpSkipTLSCheck, nil, cdre.filterS); err != nil {
 			return
 		}
 		if body, err = json.Marshal(expMp); err != nil {
@@ -250,7 +257,7 @@ func (cdre *CDRExporter) postCdr(cdr *CDR) (err error) {
 		}
 	case utils.MetaHTTPPost:
 		var expMp map[string]string
-		if expMp, err = cdr.AsExportMap(cdre.exportTemplate.ContentFields, cdre.httpSkipTLSCheck, nil, cdre.filterS); err != nil {
+		if expMp, err = cdr.AsExportMap(cdre.exportTemplate.Fields, cdre.httpSkipTLSCheck, nil, cdre.filterS); err != nil {
 			return
 		}
 		vals := url.Values{}
@@ -321,7 +328,7 @@ func (cdre *CDRExporter) processCDR(cdr *CDR) (err error) {
 	switch cdre.exportFormat {
 	case utils.MetaFileFWV, utils.MetaFileCSV:
 		var cdrRow []string
-		cdrRow, err = cdr.AsExportRecord(cdre.exportTemplate.ContentFields, cdre.httpSkipTLSCheck, cdre.cdrs, cdre.filterS)
+		cdrRow, err = cdr.AsExportRecord(cdre.exportTemplate.Fields, cdre.httpSkipTLSCheck, cdre.cdrs, cdre.filterS)
 		if len(cdrRow) == 0 && err == nil { // No CDR data, most likely no configuration fields defined
 			return
 		}
@@ -373,25 +380,23 @@ func (cdre *CDRExporter) processCDR(cdr *CDR) (err error) {
 	return
 }
 
-// Builds header, content and trailers
+// processCDRs proccess every cdr
 func (cdre *CDRExporter) processCDRs() (err error) {
 	var wg sync.WaitGroup
+	isSync := cdre.exportTemplate.Synchronous ||
+		utils.SliceHasMember([]string{utils.MetaFileCSV, utils.MetaFileFWV}, cdre.exportTemplate.ExportFormat)
 	for _, cdr := range cdre.cdrs {
 		if cdr == nil || len(cdr.CGRID) == 0 { // CDR needs to exist and it's CGRID needs to be populated
 			continue
 		}
 		if len(cdre.exportTemplate.Filters) != 0 {
-			if cdre.exportTemplate.Tenant == "" {
-				cdre.exportTemplate.Tenant = config.CgrConfig().GeneralCfg().DefaultTenant
-			}
 			cgrDp := config.NewNavigableMap(map[string]interface{}{utils.MetaReq: cdr.AsMapStringIface()})
 			if pass, err := cdre.filterS.Pass(cdre.exportTemplate.Tenant,
 				cdre.exportTemplate.Filters, cgrDp); err != nil || !pass {
 				continue // Not passes filters, ignore this CDR
 			}
 		}
-		if cdre.synchronous ||
-			utils.SliceHasMember([]string{utils.MetaFileCSV, utils.MetaFileFWV}, cdre.exportFormat) {
+		if isSync {
 			wg.Add(1) // wait for synchronous or file ones since these need to be done before continuing
 		}
 		go func(cdre *CDRExporter, cdr *CDR) {
@@ -404,24 +409,12 @@ func (cdre *CDRExporter) processCDRs() (err error) {
 				cdre.positiveExports = append(cdre.positiveExports, cdr.CGRID)
 				cdre.Unlock()
 			}
-			if cdre.synchronous ||
-				utils.SliceHasMember([]string{utils.MetaFileCSV, utils.MetaFileFWV}, cdre.exportFormat) {
+			if isSync {
 				wg.Done()
 			}
 		}(cdre, cdr)
 	}
 	wg.Wait()
-	// Process header and trailer after processing cdrs since the metatag functions can access stats out of built cdrs
-	if cdre.exportTemplate.HeaderFields != nil {
-		if err = cdre.composeHeader(); err != nil {
-			return
-		}
-	}
-	if cdre.exportTemplate.TrailerFields != nil {
-		if err = cdre.composeTrailer(); err != nil {
-			return
-		}
-	}
 	return
 }
 
@@ -487,6 +480,12 @@ func (cdre *CDRExporter) ExportCDRs() (err error) {
 		contLen := len(cdre.content)
 		cdre.RUnlock()
 		if contLen == 0 {
+			return
+		}
+		if err = cdre.composeHeader(); err != nil {
+			return
+		}
+		if err = cdre.composeTrailer(); err != nil {
 			return
 		}
 		var expFormat string

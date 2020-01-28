@@ -100,13 +100,13 @@ func radReplyAppendAttributes(reply *radigo.Packet, agReq *AgentRequest,
 		if err != nil {
 			return err
 		}
-		if cfgFld.FieldId == MetaRadReplyCode { // Special case used to control the reply code of RADIUS reply
+		if cfgFld.Path == MetaRadReplyCode { // Special case used to control the reply code of RADIUS reply
 			if err = reply.SetCodeWithName(fmtOut); err != nil {
 				return err
 			}
 			continue
 		}
-		attrName, vendorName := attrVendorFromPath(cfgFld.FieldId)
+		attrName, vendorName := attrVendorFromPath(cfgFld.Path)
 		if err = reply.AddAVPWithName(attrName, fmtOut, vendorName); err != nil {
 			return err
 		}

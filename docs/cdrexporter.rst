@@ -18,7 +18,7 @@ CGR-RSR Regexp Rule
 Format:
 ::
 
- ~field_id:s/regexp_search_and_capture_rule/output_teplate/
+ ~path:s/regexp_search_and_capture_rule/output_teplate/
 
 Example of usage:
 ::
@@ -41,7 +41,7 @@ CGR-RSR Static Rule
 Format:
 ::
 
- ^field_id:static_value
+ ^path:static_value
 
 Example of usage:
 ::

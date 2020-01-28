@@ -156,7 +156,7 @@ func (ar *AgentRequest) AsNavigableMap(tplFlds []*config.FCTemplate) (
 				return nil, err
 			}
 			var valSet []*config.NMItem
-			fldPath := strings.Split(tplFld.FieldId, utils.NestingSep)
+			fldPath := strings.Split(tplFld.Path, utils.NestingSep)
 
 			nMItm := &config.NMItem{Data: out, Path: fldPath, Config: tplFld}
 			if nMFields, err := ar.CGRAReq.FieldAsInterface(fldPath); err != nil {

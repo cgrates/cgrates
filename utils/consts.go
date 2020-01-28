@@ -517,6 +517,7 @@ const (
 	MetaReq                     = "*req"
 	MetaVars                    = "*vars"
 	MetaRep                     = "*rep"
+	MetaExp                     = "*exp"
 	MetaHdr                     = "*hdr"
 	MetaTrl                     = "*trl"
 	CGROriginHost               = "cgr_originhost"

@@ -13,58 +13,58 @@
 			"flags": ["*event", "*accounts", "*cdrs"],
 			"request_fields":[
 				{
-					"tag": "TOR", "field_id": "ToR", 
+					"tag": "TOR", "path": "ToR", 
 					"type": "*constant", "value": "*sms"
 				},
 				{
-					"tag": "OriginID", "field_id": "OriginID", 
+					"tag": "OriginID", "path": "OriginID", 
 					"type": "*variable", "mandatory": true, 
 					"value": "~*req.Multiple-Services-Credit-Control.Service-Identifier"
 				},
 				{
-					"tag": "OriginHost", "field_id": "OriginHost", 
+					"tag": "OriginHost", "path": "OriginHost", 
 					"type": "*variable",  "value": "~*vars.OriginHost"
 				},
 				{
-					"tag": "Source", "field_id": "Source", 
+					"tag": "Source", "path": "Source", 
 					"type": "*constant", "mandatory": true, 
 					"value": "DiameterAgent"
 				},
 				{
-					"tag": "RequestType", "field_id": "RequestType",
+					"tag": "RequestType", "path": "RequestType",
 					"type": "*constant", "value": "*prepaid"
 				},
 				{
-					"tag": "Category", "field_id": "Category",
+					"tag": "Category", "path": "Category",
 					"type": "*constant", "value": "sms"
 				},
 				{
-					"tag": "Account", "field_id": "Account", 
+					"tag": "Account", "path": "Account", 
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]"
 				},
 				{
-					"tag": "Destination", "field_id": "Destination", 
+					"tag": "Destination", "path": "Destination", 
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Service-Information.SMS-Information.Recipient-Info.Recipient-Address.Address-Data:s/^\\+49(\\d+)/int${1}/:s/^0049(\\d+)/int${1}/:s/^49(\\d+)/int${1}/:s/^00(\\d+)/+${1}/:s/^[\\+]?(\\d+)/int${1}/:s/int(\\d+)/+49${1}/"
 				},
 				{
-					"tag": "SetupTime", "field_id": "SetupTime", 
+					"tag": "SetupTime", "path": "SetupTime", 
 					"type": "*variable", "mandatory": true, 
 					"value": "~*req.Event-Timestamp"
 				},
 				{
-					"tag": "AnswerTime", "field_id": "AnswerTime", 
+					"tag": "AnswerTime", "path": "AnswerTime", 
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Event-Timestamp"
 				},
 				{
-					"tag": "Usage", "field_id": "Usage",
+					"tag": "Usage", "path": "Usage",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Multiple-Services-Credit-Control.Requested-Service-Unit.CC-Service-Specific-Units"
 				},
 				{
-					"tag": "Originator-SCCP-Address", "field_id": "Originator-SCCP-Address",
+					"tag": "Originator-SCCP-Address", "path": "Originator-SCCP-Address",
 					"type": "*variable", "mandatory": true, 
 					"value": "~*req.Service-Information.SMS-Information.Originator-SCCP-Address"
 				},
@@ -72,13 +72,13 @@
 			"reply_fields":[
 				{"tag": "CCATemplate", "type": "*template", "value": "*cca"},
 				{
-					"tag": "ResultCode","field_id": "Result-Code",  
+					"tag": "ResultCode","path": "Result-Code",  
 					"filters": ["*eq:~*cgrep.MaxUsage:0"],
 					"type": "*constant", "value": "4012",
 					"blocker": true
 				},
 				{
-					"tag": "ResultCode", "field_id": "Result-Code",
+					"tag": "ResultCode", "path": "Result-Code",
 					"filters": ["*notempty:~*cgrep.Error:"],
 					"type": "*constant", "value": "5030",
 					"blocker": true

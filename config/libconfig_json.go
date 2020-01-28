@@ -154,9 +154,7 @@ type CdreJsonCfg struct {
 	Synchronous        *bool
 	Attempts           *int
 	Field_separator    *string
-	Header_fields      *[]*FcTemplateJsonCfg
-	Content_fields     *[]*FcTemplateJsonCfg
-	Trailer_fields     *[]*FcTemplateJsonCfg
+	Fields             *[]*FcTemplateJsonCfg
 }
 
 // EventReaderSJsonCfg contains the configuration of EventReaderService
@@ -521,7 +519,6 @@ type MigratorCfgJson struct {
 type FcTemplateJsonCfg struct {
 	Tag                  *string
 	Type                 *string
-	Field_id             *string
 	Path                 *string
 	Attribute_id         *string
 	Filters              *[]string

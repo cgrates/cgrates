@@ -61,11 +61,8 @@ func TestMfCdreDefaultInstance(t *testing.T) {
 	if mfCgrCfg.CdreProfiles[prfl].ExportFormat != utils.MetaFileCSV {
 		t.Error("Default instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].ExportFormat)
 	}
-	if len(mfCgrCfg.CdreProfiles[prfl].HeaderFields) != 0 {
-		t.Error("Default instance has number of header fields: ", len(mfCgrCfg.CdreProfiles[prfl].HeaderFields))
-	}
-	if len(mfCgrCfg.CdreProfiles[prfl].ContentFields) != 11 {
-		t.Error("Default instance has number of content fields: ", len(mfCgrCfg.CdreProfiles[prfl].ContentFields))
+	if len(mfCgrCfg.CdreProfiles[prfl].Fields) != 11 {
+		t.Error("Default instance has number of content fields: ", len(mfCgrCfg.CdreProfiles[prfl].Fields))
 	}
 }
 
@@ -74,17 +71,11 @@ func TestMfCdreExport1Instance(t *testing.T) {
 	if mfCgrCfg.CdreProfiles[prfl].ExportFormat != utils.MetaFileCSV {
 		t.Error("Export1 instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].ExportFormat)
 	}
-	if len(mfCgrCfg.CdreProfiles[prfl].HeaderFields) != 2 {
-		t.Error("Export1 instance has number of header fields: ", len(mfCgrCfg.CdreProfiles[prfl].HeaderFields))
+	if len(mfCgrCfg.CdreProfiles[prfl].Fields) != 9 {
+		t.Error("Export1 instance has number of content fields: ", len(mfCgrCfg.CdreProfiles[prfl].Fields))
 	}
-	if mfCgrCfg.CdreProfiles[prfl].HeaderFields[1].Tag != "RunId" {
-		t.Error("Unexpected headerField value: ", mfCgrCfg.CdreProfiles[prfl].HeaderFields[1].Tag)
-	}
-	if len(mfCgrCfg.CdreProfiles[prfl].ContentFields) != 9 {
-		t.Error("Export1 instance has number of content fields: ", len(mfCgrCfg.CdreProfiles[prfl].ContentFields))
-	}
-	if mfCgrCfg.CdreProfiles[prfl].ContentFields[2].Tag != "Account" {
-		t.Error("Unexpected headerField value: ", mfCgrCfg.CdreProfiles[prfl].ContentFields[2].Tag)
+	if mfCgrCfg.CdreProfiles[prfl].Fields[2].Tag != "Account" {
+		t.Error("Unexpected headerField value: ", mfCgrCfg.CdreProfiles[prfl].Fields[2].Tag)
 	}
 }
 
@@ -140,7 +131,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					RequestFields: []*FCTemplate{},
 					ReplyFields: []*FCTemplate{{
 						Tag:       "Allow",
-						FieldId:   "response.Allow",
+						Path:      "response.Allow",
 						Type:      "*constant",
 						Value:     NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP),
 						Mandatory: true,
@@ -155,7 +146,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					RequestFields: []*FCTemplate{
 						{
 							Tag:       "RequestType",
-							FieldId:   "RequestType",
+							Path:      "RequestType",
 							Type:      "*constant",
 							Value:     NewRSRParsersMustCompile("*pseudoprepaid", true, utils.INFIELD_SEP),
 							Mandatory: true,
@@ -164,7 +155,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					ReplyFields: []*FCTemplate{
 						{
 							Tag:       "Allow",
-							FieldId:   "response.Allow",
+							Path:      "response.Allow",
 							Type:      "*constant",
 							Value:     NewRSRParsersMustCompile("1", true, utils.INFIELD_SEP),
 							Mandatory: true,
@@ -178,14 +169,14 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 					Flags:   utils.FlagsWithParams{"*cdrs": []string{}},
 					RequestFields: []*FCTemplate{{
 						Tag:       "RequestType",
-						FieldId:   "RequestType",
+						Path:      "RequestType",
 						Type:      "*constant",
 						Value:     NewRSRParsersMustCompile("*pseudoprepaid", true, utils.INFIELD_SEP),
 						Mandatory: true,
 					}},
 					ReplyFields: []*FCTemplate{{
 						Tag:       "CDR_ID",
-						FieldId:   "CDR_RESPONSE.CDR_ID",
+						Path:      "CDR_RESPONSE.CDR_ID",
 						Type:      "*composed",
 						Value:     NewRSRParsersMustCompile("~*req.CDR_ID", true, utils.INFIELD_SEP),
 						Mandatory: true,
@@ -206,7 +197,7 @@ func TestMfHttpAgentMultipleFields(t *testing.T) {
 				RequestFields: []*FCTemplate{
 					{
 						Tag:       "TOR",
-						FieldId:   "ToR",
+						Path:      "ToR",
 						Type:      "*constant",
 						Value:     NewRSRParsersMustCompile("*data", true, utils.INFIELD_SEP),
 						Mandatory: true,

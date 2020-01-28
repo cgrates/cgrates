@@ -44,100 +44,100 @@ With explanations in the comments:
 	"templates":{						// message templates which can be injected within request/replies
 		"*err": [						// *err is used mostly in automatic diameter replies with errors
 				{
-					"tag": "SessionId", "field_id": "Session-Id",
+					"tag": "SessionId", "path": "Session-Id",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Session-Id"
 				},
 				{
-					"tag": "OriginHost", "field_id": "Origin-Host",
+					"tag": "OriginHost", "path": "Origin-Host",
 					"type": "*variable", "mandatory": true,
 					"value": "~*vars.OriginHost"
 				},
 				{
-					"tag": "OriginRealm", "field_id": "Origin-Realm",
+					"tag": "OriginRealm", "path": "Origin-Realm",
 					"type": "*variable", "mandatory": true,
 					"value": "~*vars.OriginRealm"
 				},
 		],
 		"*cca": [		// *cca is used into CallControlAnswer messages
 				{
-					"tag": "SessionId", "field_id": "Session-Id",
+					"tag": "SessionId", "path": "Session-Id",
 					"type": "*composed", "mandatory": true,
 					"value": "~*req.Session-Id"
 				},
 				{
-					"tag": "ResultCode", "field_id": "Result-Code",
+					"tag": "ResultCode", "path": "Result-Code",
 					"type": "*constant", "value": "2001"},
 				{
-					"tag": "OriginHost", "field_id": "Origin-Host",
+					"tag": "OriginHost", "path": "Origin-Host",
 					"type": "*variable", "mandatory": true,
 					"value": "~*vars.OriginHost"
 				},
 				{
-					"tag": "OriginRealm", "field_id": "Origin-Realm",
+					"tag": "OriginRealm", "path": "Origin-Realm",
 					"type": "*variable", "mandatory": true,
 					"value": "~*vars.OriginRealm"
 				},
 				{
 					"tag": "AuthApplicationId",
-					"field_id": "Auth-Application-Id",
+					"path": "Auth-Application-Id",
 					"type": "*variable", "mandatory": true,
 					 "value": "~*vars.*appid"
 				},
 				{
 					"tag": "CCRequestType",
-					"field_id": "CC-Request-Type",
+					"path": "CC-Request-Type",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.CC-Request-Type"
 				},
 				{
 					"tag": "CCRequestNumber",
-					"field_id": "CC-Request-Number",
+					"path": "CC-Request-Number",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.CC-Request-Number"
 				},
 		],
 		"*asr": [	// *asr is used to build AbortSessionRequest
 				{
-					"tag": "SessionId", "field_id": "Session-Id",
+					"tag": "SessionId", "path": "Session-Id",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Session-Id"
 				},
 				{
-					"tag": "OriginHost", "field_id": "Origin-Host",
+					"tag": "OriginHost", "path": "Origin-Host",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Destination-Host"
 				},
 				{
-					"tag": "OriginRealm", "field_id": "Origin-Realm",
+					"tag": "OriginRealm", "path": "Origin-Realm",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Destination-Realm"
 				},
 				{
 					"tag": "DestinationRealm",
-					"field_id": "Destination-Realm",
+					"path": "Destination-Realm",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Origin-Realm"
 				},
 				{
 					"tag": "DestinationHost", 
-					"field_id": "Destination-Host",
+					"path": "Destination-Host",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Origin-Host"
 				},
 				{
 					"tag": "AuthApplicationId", 
-					"field_id": "Auth-Application-Id",
+					"path": "Auth-Application-Id",
 					"type": "*variable", "mandatory": true,
 					 "value": "~*vars.*appid"
 				},
 				{
-					"tag": "UserName", "field_id": "User-Name",
+					"tag": "UserName", "path": "User-Name",
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.User-Name"
 				},
 				{
-					"tag": "OriginStateID", "field_id": "Origin-State-Id",
+					"tag": "OriginStateID", "path": "Origin-State-Id",
 					"type": "*constant", "value": "1"
 				}
 		]
@@ -154,52 +154,52 @@ With explanations in the comments:
 			"request_fields":[							// data exchanged between Diameter and CGRateS
 				{
 					"tag": "TOR",			// tag is used in debug, 
-					"field_id": "ToR",		// field_id is the field on CGRateS side
+					"path": "ToR",		// path is the field on CGRateS side
 					"type": "*constant",	// type defines the method to provide the value
 					"value": "*sms"}		
 				{
 					"tag": "OriginID",		// OriginID will identify uniquely 
-					"field_id": "OriginID",	// the session on CGRateS side
+					"path": "OriginID",	// the session on CGRateS side
 					"type": "*variable",	// it's value will be taken from Diameter AVP:
 					"mandatory": true,		// Multiple-Services-Credit-Control.Service-Identifier
 					"value": "~*req.Multiple-Services-Credit-Control.Service-Identifier"
 				},
 				{
 					"tag": "OriginHost",		// OriginHost combined with OriginID 
-					"field_id": "OriginHost",	// is used by CGRateS to build the CGRID
+					"path": "OriginHost",	// is used by CGRateS to build the CGRID
 					"mandatory": true,
 					"type": "*variable",		// have the value out of special variable: *vars
 					"value": "*vars.OriginHost"
 				},
 				{
 					"tag": "RequestType",		// RequestType instructs SessionS 
-					"field_id": "RequestType",	//  about charging type to apply for the event
+					"path": "RequestType",	//  about charging type to apply for the event
 					"type": "*constant",
 					"value": "*prepaid"
 				},
 				{
 					"tag": "Category",			// Category serves for ataching Account
-					"field_id": "Category",		//   and RatingProfile to the request
+					"path": "Category",		//   and RatingProfile to the request
 					"type": "*constant",
 					"value": "sms"
 				},
 				{
 					"tag": "Account",			// Account is required by charging
-					"field_id": "Account",
+					"path": "Account",
 					"type": "*variable",		// value is taken dynamically from a group AVP
 					"mandatory": true,			//   where Subscription-Id-Type is 0
 					"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]" 
 				},
 				{
 					"tag": "Destination",		// Destination is used for charging
-					"field_id": "Destination",	// value from Diameter will be mediated before sent to CGRateS
+					"path": "Destination",	// value from Diameter will be mediated before sent to CGRateS
 					"type": "*variable",
 					"mandatory": true,
 					"value": "~*req.Service-Information.SMS-Information.Recipient-Info.Recipient-Address.Address-Data:s/^\\+49(\\d+)/int${1}/:s/^0049(\\d+)/int${1}/:s/^49(\\d+)/int${1}/:s/^00(\\d+)/+${1}/:s/^[\\+]?(\\d+)/int${1}/:s/int(\\d+)/+49${1}/"
 				},
 				{
 					"tag": "Destination",		// Second Destination will overwrite the first if filter matches
-					"field_id": "Destination",
+					"path": "Destination",
 					"filters":[					// Only overwrite when filters are matching
 						"*notprefix:~*req.Service-Information.SMS-Information.Recipient-Info.Recipient-Address.Address-Data:49",
 						"*notprefix:~*req.Service-Information.SMS-Information.Recipient-Info.Recipient-Address.Address-Data:3312"
@@ -210,28 +210,28 @@ With explanations in the comments:
 				},
 				{
 					"tag": "SetupTime",			// SetupTime is used by charging
-					"field_id": "SetupTime",
+					"path": "SetupTime",
 					"type": "*variable",
 					"value": "~*req.Event-Timestamp",
 					"mandatory": true
 				},
 				{
 					"tag": "AnswerTime",		// AnswerTime is used by charging
-					"field_id": "AnswerTime",
+					"path": "AnswerTime",
 					"type": "*variable",
 					"mandatory": true,
 					"value": "~*req.Event-Timestamp"
 				},
 				{
 					"tag": "Usage",			// Usage is used by charging
-					"field_id": "Usage",				
+					"path": "Usage",				
 					"type": "*variable",
 					"mandatory": true,
 					"value": "~*req.Multiple-Services-Credit-Control.Requested-Service-Unit.CC-Service-Specific-Units"
 				},
 				{
 					"tag": "Originator-SCCP-Address",		// Originator-SCCP-Address is an extra field which we want in CDR
-					"field_id": "Originator-SCCP-Address",	// not used by CGRateS
+					"path": "Originator-SCCP-Address",	// not used by CGRateS
 					"type": "*variable", "mandatory": true,
 					"value": "~*req.Service-Information.SMS-Information.Originator-SCCP-Address"
 				},
@@ -245,13 +245,13 @@ With explanations in the comments:
 				{
 					"tag": "ResultCode",  	// Change the ResultCode if the reply received from CGRateS contains a 0 MaxUsage
 					"filters": ["*eq:~*cgrep.MaxUsage:0"],
-					"field_id": "Result-Code", 
+					"path": "Result-Code", 
 					"blocker": true,		// do not consider further fields if this one is processed
 					"type": "*constant",
 					"value": "4012"},
 				{"tag": "ResultCode",		// Change the ResultCode AVP if there was an error received from CGRateS
 					"filters": ["*notempty:~*cgrep.Error:"],
-					"field_id": "Result-Code",
+					"path": "Result-Code",
 					"blocker": true,
 					"type": "*constant",
 					"value": "5030"}
