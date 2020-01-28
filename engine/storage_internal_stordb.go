@@ -1141,6 +1141,9 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 			grpMpIDs.AddSlice(grpIDs)
 		}
 		if grpMpIDs.Size() == 0 {
+			if filter.Count {
+				return nil, 0, nil
+			}
 			return nil, 0, utils.ErrNotFound
 		}
 		if cdrMpIDs == nil {
@@ -1148,6 +1151,9 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 		} else {
 			cdrMpIDs.Intersect(grpMpIDs)
 			if cdrMpIDs.Size() == 0 {
+				if filter.Count {
+					return nil, 0, nil
+				}
 				return nil, 0, utils.ErrNotFound
 			}
 		}
@@ -1166,6 +1172,9 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 				if cdrMpIDs.Has(id) {
 					cdrMpIDs.Remove(id)
 					if cdrMpIDs.Size() == 0 {
+						if filter.Count {
+							return nil, 0, nil
+						}
 						return nil, 0, utils.ErrNotFound
 					}
 				}
@@ -1174,6 +1183,9 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 	}
 
 	if cdrMpIDs.Size() == 0 {
+		if filter.Count {
+			return nil, 0, nil
+		}
 		return nil, 0, utils.ErrNotFound
 	}
 
@@ -1711,7 +1723,6 @@ func (iDB *InternalDB) GetCDRs(filter *utils.CDRsFilter, remove bool) (cdrs []*C
 		default:
 			return nil, 0, fmt.Errorf("Invalid value : %s", separateVals[0])
 		}
-
 	}
 	return
 }
