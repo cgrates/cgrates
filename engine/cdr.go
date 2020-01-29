@@ -162,65 +162,12 @@ func (cdr *CDR) FieldAsString(rsrPrs *config.RSRParser) (parsed string, err erro
 
 // FieldsAsString concatenates values of multiple fields defined in template, used eg in CDR templates
 func (cdr *CDR) FieldsAsString(rsrFlds config.RSRParsers) string {
-	outVal, err := rsrFlds.ParseDataProviderWithInterfaces(config.NewNavigableMap(cdr.AsMapStringIface()), utils.NestingSep)
+	outVal, err := rsrFlds.ParseDataProviderWithInterfaces(
+		config.NewNavigableMap(map[string]interface{}{utils.MetaReq: cdr.AsMapStringIface()}), utils.NestingSep)
 	if err != nil {
 		return ""
 	}
 	return outVal
-}
-
-// ParseFieldValue populates the field with id from value; strings are appended to original one
-func (cdr *CDR) ParseFieldValue(fieldId, fieldVal, timezone string) error {
-	var err error
-	switch fieldId {
-	case utils.OrderID:
-		if cdr.OrderID, err = strconv.ParseInt(fieldVal, 10, 64); err != nil {
-			return err
-		}
-	case utils.OriginHost: // overwrite if originHost is given from template
-		cdr.OriginHost = fieldVal
-	case utils.ToR:
-		cdr.ToR = fieldVal
-	case utils.RunID:
-		cdr.RunID = fieldVal
-	case utils.OriginID:
-		cdr.OriginID = fieldVal
-	case utils.RequestType:
-		cdr.RequestType = fieldVal
-	case utils.Tenant:
-		cdr.Tenant = fieldVal
-	case utils.Category:
-		cdr.Category = fieldVal
-	case utils.Account:
-		cdr.Account = fieldVal
-	case utils.Subject:
-		cdr.Subject = fieldVal
-	case utils.Destination:
-		cdr.Destination = fieldVal
-	case utils.PreRated:
-		cdr.PreRated, _ = strconv.ParseBool(fieldVal)
-	case utils.SetupTime:
-		if cdr.SetupTime, err = utils.ParseTimeDetectLayout(fieldVal, timezone); err != nil {
-			return fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
-		}
-	case utils.AnswerTime:
-		if cdr.AnswerTime, err = utils.ParseTimeDetectLayout(fieldVal, timezone); err != nil {
-			return fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
-		}
-	case utils.Usage:
-		if cdr.Usage, err = utils.ParseDurationWithNanosecs(fieldVal); err != nil {
-			return fmt.Errorf("Cannot parse duration field with value: %s, err: %s", fieldVal, err.Error())
-		}
-	case utils.COST:
-		if cdr.Cost, err = strconv.ParseFloat(fieldVal, 64); err != nil {
-			return fmt.Errorf("Cannot parse cost field with value: %s, err: %s", fieldVal, err.Error())
-		}
-	case utils.Partial:
-		cdr.Partial, _ = strconv.ParseBool(fieldVal)
-	default: // Extra fields will not match predefined so they all show up here
-		cdr.ExtraFields[fieldId] = fieldVal
-	}
-	return nil
 }
 
 func (cdr *CDR) Clone() *CDR {
@@ -483,8 +430,7 @@ func (cdr *CDR) AsExportRecord(exportFields []*config.FCTemplate,
 func (cdr *CDR) AsExportMap(exportFields []*config.FCTemplate, httpSkipTLSCheck bool,
 	groupedCDRs []*CDR, filterS *FilterS) (expMap map[string]string, err error) {
 	expMap = make(map[string]string)
-	nM := config.NewNavigableMap(nil)
-	nM.Set([]string{utils.MetaReq}, cdr.AsMapStringIface(), false, false)
+	nM := config.NewNavigableMap(map[string]interface{}{utils.MetaReq: cdr.AsMapStringIface()})
 	for _, cfgFld := range exportFields {
 		if !strings.HasPrefix(cfgFld.Path, utils.MetaExp+utils.NestingSep) {
 			continue

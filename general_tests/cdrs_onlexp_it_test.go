@@ -365,7 +365,7 @@ func testCDRsOnExpAMQPReplication(t *testing.T) {
 	if err := exec.Command("service", "rabbitmq-server", "restart").Run(); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(5 * time.Second))
+	time.Sleep(5 * time.Second)
 	testCdr := &engine.CDR{
 		CGRID:       amqpCGRID,
 		ToR:         utils.VOICE,
@@ -469,7 +469,7 @@ func checkContent(ev *engine.ExportEvents, content []interface{}) error {
 }
 
 func testCDRsOnExpFileFailover(t *testing.T) {
-	time.Sleep(time.Duration(5 * time.Second))
+	time.Sleep(5 * time.Second)
 	v1 := url.Values{}
 	v2 := url.Values{}
 	v1.Set("OriginID", "httpjsonrpc1")
