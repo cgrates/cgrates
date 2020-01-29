@@ -32,33 +32,33 @@ echo 'go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*
 go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*internal
 dis_internal=$?
 # SQL
-echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*sql'
-go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*sql
-ap1_sql=$?
-echo 'go test github.com/cgrates/cgrates/apier/v2 -tags=integration -dbtype=*sql'
-go test github.com/cgrates/cgrates/apier/v2 -tags=integration -dbtype=*sql
-ap2_sql=$?
-echo 'go test github.com/cgrates/cgrates/engine  -tags=integration -dbtype=*sql'
-go test github.com/cgrates/cgrates/engine -tags=integration -dbtype=*sql
-en_sql=$?
-echo 'go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*sql'
-go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*sql
-ers_sql=$?
-echo 'go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*sql'
-go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*sql
-lds_sql=$?
-echo 'go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*sql'
-go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*sql
-gnr_sql=$?
-echo 'go test github.com/cgrates/cgrates/agents -tags=integration -dbtype=*sql'
-go test github.com/cgrates/cgrates/agents -tags=integration -dbtype=*sql
-agts_sql=$?
-echo 'go test github.com/cgrates/cgrates/sessions -tags=integration -dbtype=*sql'
-go test github.com/cgrates/cgrates/sessions -tags=integration -dbtype=*sql
-smg_sql=$?
-echo 'go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*sql'
-go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*sql
-dis_sql=$?
+echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*mysql'
+go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*mysql
+ap1_mysql=$?
+echo 'go test github.com/cgrates/cgrates/apier/v2 -tags=integration -dbtype=*mysql'
+go test github.com/cgrates/cgrates/apier/v2 -tags=integration -dbtype=*mysql
+ap2_mysql=$?
+echo 'go test github.com/cgrates/cgrates/engine  -tags=integration -dbtype=*mysql'
+go test github.com/cgrates/cgrates/engine -tags=integration -dbtype=*mysql
+en_mysql=$?
+echo 'go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*mysql'
+go test github.com/cgrates/cgrates/ers -tags=integration -dbtype=*mysql
+ers_mysql=$?
+echo 'go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*mysql'
+go test github.com/cgrates/cgrates/loaders -tags=integration -dbtype=*mysql
+lds_mysql=$?
+echo 'go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*mysql'
+go test github.com/cgrates/cgrates/general_tests -tags=integration -dbtype=*mysql
+gnr_mysql=$?
+echo 'go test github.com/cgrates/cgrates/agents -tags=integration -dbtype=*mysql'
+go test github.com/cgrates/cgrates/agents -tags=integration -dbtype=*mysql
+agts_mysql=$?
+echo 'go test github.com/cgrates/cgrates/sessions -tags=integration -dbtype=*mysql'
+go test github.com/cgrates/cgrates/sessions -tags=integration -dbtype=*mysql
+smg_mysql=$?
+echo 'go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*mysql'
+go test github.com/cgrates/cgrates/dispatchers -tags=integration -dbtype=*mysql
+dis_mysql=$?
 # Mongo
 echo 'go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*mongo'
 go test github.com/cgrates/cgrates/apier/v1 -tags=integration -dbtype=*mongo
