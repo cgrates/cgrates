@@ -38,7 +38,7 @@ var sureTaxClient *http.Client // Cache the client here if in use
 // Init a new request to be sent out to SureTax
 func NewSureTaxRequest(cdr *CDR, stCfg *config.SureTaxCfg) (*SureTaxRequest, error) {
 	if stCfg == nil {
-		return nil, errors.New("Invalid SureTax config.")
+		return nil, errors.New("invalid SureTax config")
 	}
 	aTimeLoc := cdr.AnswerTime.In(stCfg.Timezone)
 	revenue := utils.Round(cdr.Cost, 4, utils.ROUNDING_MIDDLE)

@@ -227,8 +227,8 @@ func TestFieldsAsString(t *testing.T) {
 	}
 	eVal := "call_from_1001"
 	if val := cdr.FieldsAsString(
-		config.NewRSRParsersMustCompile("~Category;_from_;~Account", true, utils.INFIELD_SEP)); val != eVal {
-		t.Errorf("Expecting : %s, received: %s", eVal, val)
+		config.NewRSRParsersMustCompile("~*req.Category;_from_;~*req.Account", true, utils.INFIELD_SEP)); val != eVal {
+		t.Errorf("Expecting : %s, received: %q", eVal, val)
 	}
 }
 
@@ -448,25 +448,6 @@ func TestUsageReqAsCD(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCD, cd) {
 		t.Errorf("Expected: %+v, received: %+v", eCD, cd)
-	}
-}
-
-func TestCDRParseFieldValue(t *testing.T) {
-	cdr := new(CDR)
-	if err := cdr.ParseFieldValue(utils.Partial, "true", ""); err != nil {
-		t.Error(err)
-	} else if !cdr.Partial {
-		t.Errorf("Received cdr: %+v", cdr)
-	}
-	if err := cdr.ParseFieldValue(utils.OrderID, "5", ""); err != nil {
-		t.Error(err)
-	} else if cdr.OrderID != 5 {
-		t.Errorf("Received cdr: %+v", cdr)
-	}
-	if err := cdr.ParseFieldValue(utils.RunID, utils.MetaDefault, ""); err != nil {
-		t.Error(err)
-	} else if cdr.RunID != utils.MetaDefault {
-		t.Errorf("Received cdr: %+v", cdr)
 	}
 }
 
@@ -1106,25 +1087,6 @@ func TestCDRUpdateFromCGREvent(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(cdr, eCDR) {
 		t.Errorf("Expecting: %+v, received: %+v", cdr, eCDR)
-	}
-}
-
-func TestCDRParseFieldValue2(t *testing.T) {
-	cdr := new(CDR)
-	if err := cdr.ParseFieldValue(utils.RunID, utils.MetaDefault, ""); err != nil {
-		t.Error(err)
-	} else if cdr.RunID != utils.MetaDefault {
-		t.Errorf("Received cdr: %+v", cdr)
-	}
-	if err := cdr.ParseFieldValue(utils.OriginID, "FirstID", ""); err != nil {
-		t.Error(err)
-	} else if cdr.OriginID != "FirstID" {
-		t.Errorf("Received cdr: %+v", cdr)
-	}
-	if err := cdr.ParseFieldValue(utils.OriginID, "SecondID", ""); err != nil {
-		t.Error(err)
-	} else if cdr.OriginID != "SecondID" {
-		t.Errorf("Received cdr: %+v", cdr)
 	}
 }
 
