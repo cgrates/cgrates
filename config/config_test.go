@@ -1705,6 +1705,7 @@ func TestCgrCdfEventReader(t *testing.T) {
 					{Tag: "Usage", Path: "Usage", Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.13", true, utils.INFIELD_SEP), Mandatory: true},
 				},
+				CacheDumpFields: []*FCTemplate{},
 			},
 		},
 	}

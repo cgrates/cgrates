@@ -135,6 +135,7 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 					{Tag: "Usage", Path: "Usage", Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.13", true, utils.INFIELD_SEP), Mandatory: true},
 				},
+				CacheDumpFields: make([]*FCTemplate, 0),
 			},
 			&EventReaderCfg{
 				ID:             "file_reader1",
@@ -189,6 +190,7 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 			"type": "*file_csv",
 			"source_path": "/tmp/ers/in",
 			"processed_path": "/tmp/ers/out",
+			"cache_dump_fields": [],
 		},
 	],
 }
