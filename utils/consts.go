@@ -202,6 +202,7 @@ const (
 	PDD                          = "PDD"
 	SUPPLIER                     = "Supplier"
 	RunID                        = "RunID"
+	MetaReqRunID                 = "*req.RunID"
 	COST                         = "Cost"
 	CostDetails                  = "CostDetails"
 	RATED                        = "rated"
