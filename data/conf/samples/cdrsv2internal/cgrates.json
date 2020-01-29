@@ -51,7 +51,8 @@
 	"attributes_conns": ["*internal"],
 },
 
-"apier": {
+"apiers": {
+	"enabled": true,
 	"scheduler_conns": ["*internal"],
 },
 

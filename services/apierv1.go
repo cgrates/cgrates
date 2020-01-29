@@ -48,6 +48,7 @@ func NewApierV1Service(cfg *config.CGRConfig, dm *DataDBService,
 		schedService:     schedService,
 		responderService: responderService,
 		connMgr:          connMgr,
+		apierV1Chan:      make(chan *v1.ApierV1, 1),
 	}
 }
 
@@ -67,6 +68,8 @@ type ApierV1Service struct {
 	connChan chan rpcclient.ClientConnector
 
 	syncStop chan struct{}
+
+	apierV1Chan chan *v1.ApierV1
 }
 
 // Start should handle the sercive start
@@ -121,6 +124,7 @@ func (apiService *ApierV1Service) Start() (err error) {
 
 	apiService.connChan <- apiService.api
 
+	apiService.apierV1Chan <- apiService.api
 	return
 }
 
@@ -166,4 +170,11 @@ func (apiService *ApierV1Service) GetApierV1() *v1.ApierV1 {
 // ShouldRun returns if the service should be running
 func (apiService *ApierV1Service) ShouldRun() bool {
 	return apiService.cfg.RalsCfg().Enabled
+}
+
+// GetDMChan returns the DataManager chanel
+func (apiService *ApierV1Service) GetApierV1Chan() chan *v1.ApierV1 {
+	apiService.RLock()
+	defer apiService.RUnlock()
+	return apiService.apierV1Chan
 }

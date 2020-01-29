@@ -1338,6 +1338,7 @@ func (apiv1 *ApierV1) GetRatingPlanIDs(args utils.TenantArgWithPaginator, attrPr
 
 // ListenAndServe listen for storbd reload
 func (apiv1 *ApierV1) ListenAndServe(stopChan chan struct{}) (err error) {
+	utils.Logger.Info(fmt.Sprintf("<%s> starting <%s> subsystem", utils.CoreS, utils.ApierS))
 	for {
 		select {
 		case <-stopChan:
@@ -1350,4 +1351,10 @@ func (apiv1 *ApierV1) ListenAndServe(stopChan chan struct{}) (err error) {
 			apiv1.StorDb = stordb
 		}
 	}
+}
+
+// Ping return pong if the service is active
+func (apiv1 *ApierV1) Ping(ign *utils.CGREvent, reply *string) error {
+	*reply = utils.Pong
+	return nil
 }

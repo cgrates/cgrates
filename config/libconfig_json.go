@@ -548,6 +548,7 @@ type AnalyzerSJsonCfg struct {
 }
 
 type ApierJsonCfg struct {
+	Enabled          *bool
 	Caches_conns     *[]string
 	Scheduler_conns  *[]string
 	Attributes_conns *[]string

@@ -64,7 +64,8 @@
 	"asr_template": "*asr",
 },
 
-"apier": {
+"apiers": {
+	"enabled": true,
 	"scheduler_conns": ["*internal"],
 },
 

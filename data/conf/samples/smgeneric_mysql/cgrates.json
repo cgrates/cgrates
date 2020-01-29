@@ -65,7 +65,8 @@
 	"enabled": true,							// starts User service: <true|false>.
 },
 
-"apier": {	
+"apiers": {
+	"enabled": true,
 	"caches_conns":["conn1"],
 	"scheduler_conns": ["*internal"],
 },

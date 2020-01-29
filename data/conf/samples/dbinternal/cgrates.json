@@ -80,7 +80,8 @@
 	"out_stordb_type": "internal",
 },
 
-"apier": {
+"apiers": {
+	"enabled": true,
 	"scheduler_conns": ["*internal"],
 },
 

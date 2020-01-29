@@ -62,7 +62,8 @@
 	"sessions_conns": ["*localhost"],
 },
 
-"apier": {
+"apiers": {
+	"enabled": true,
 	"scheduler_conns": ["*internal"],
 },
 

@@ -31,10 +31,10 @@ import (
 // NewApierV2Service returns the ApierV2 Service
 func NewApierV2Service(apiv1 *ApierV1Service, cfg *config.CGRConfig,
 	server *utils.Server,
-	internalAPIerV1Chan chan rpcclient.ClientConnector) *ApierV2Service {
+	internalAPIerV2Chan chan rpcclient.ClientConnector) *ApierV2Service {
 	return &ApierV2Service{
 		apiv1:    apiv1,
-		connChan: internalAPIerV1Chan,
+		connChan: internalAPIerV2Chan,
 		cfg:      cfg,
 		server:   server,
 	}
@@ -58,11 +58,15 @@ func (api *ApierV2Service) Start() (err error) {
 		return fmt.Errorf("service aleady running")
 	}
 
+	apiV1Chan := api.apiv1.GetApierV1Chan()
+	apiV1 := <-apiV1Chan
+	apiV1Chan <- apiV1
+
 	api.Lock()
 	defer api.Unlock()
 
 	api.api = &v2.ApierV2{
-		ApierV1: *api.apiv1.GetApierV1(),
+		ApierV1: *apiV1,
 	}
 
 	if !api.cfg.DispatcherSCfg().Enabled {
