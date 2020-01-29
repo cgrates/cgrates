@@ -65,7 +65,7 @@ func NewAgentRequest(req config.DataProvider,
 	} else {
 		ar.Tenant = dfltTenant
 	}
-
+	ar.Vars.Set([]string{utils.NodeID}, config.CgrConfig().GeneralCfg().NodeID, false, true)
 	return
 }
 
