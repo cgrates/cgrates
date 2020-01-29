@@ -70,7 +70,7 @@ func (ha *HTTPAgent) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			reqProcessor.Tenant, ha.dfltTenant,
 			utils.FirstNonEmpty(reqProcessor.Timezone,
 				config.CgrConfig().GeneralCfg().DefaultTimezone),
-			ha.filterS)
+			ha.filterS, nil, nil)
 		lclProcessed, err := ha.processRequest(reqProcessor, agReq)
 		if err != nil {
 			utils.Logger.Warning(

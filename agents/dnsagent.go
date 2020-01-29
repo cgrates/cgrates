@@ -125,7 +125,7 @@ func (da *DNSAgent) handleMessage(w dns.ResponseWriter, req *dns.Msg) {
 				da.cgrCfg.GeneralCfg().DefaultTenant,
 				utils.FirstNonEmpty(da.cgrCfg.DNSAgentCfg().Timezone,
 					da.cgrCfg.GeneralCfg().DefaultTimezone),
-				da.fltrS))
+				da.fltrS, nil, nil))
 		if lclProcessed {
 			processed = lclProcessed
 		}
