@@ -149,7 +149,8 @@ func TestEventReaderLoadFromJSON(t *testing.T) {
 				Timezone:       utils.EmptyString,
 				Filters:        nil,
 				Flags:          utils.FlagsWithParams{},
-
+				Fields: []*FCTemplate{
+					{Tag: "TOR", FieldId: "ToR", Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.2", true, utils.INFIELD_SEP), Mandatory: true},
 					{Tag: "OriginID", FieldId: "OriginID", Type: utils.MetaVariable,
 						Value: NewRSRParsersMustCompile("~*req.3", true, utils.INFIELD_SEP), Mandatory: true},
